@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="no.nav.etterlatte.prosess.EtterlatteFordelerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2021-11-11T09:32:35" hostname="DESKTOP-KN0TI6V" time="0.054">
+  <properties/>
+  <testcase name="test1()" classname="no.nav.etterlatte.prosess.EtterlatteFordelerTest" time="0.054"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

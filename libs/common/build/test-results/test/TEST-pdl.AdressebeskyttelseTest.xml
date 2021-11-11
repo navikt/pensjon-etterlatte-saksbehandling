@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="pdl.AdressebeskyttelseTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2021-11-11T09:00:01" hostname="DESKTOP-KN0TI6V" time="9.133">
+  <properties/>
+  <testcase name="Sjekk serde av AdressebeskyttelseResponse()" classname="pdl.AdressebeskyttelseTest" time="8.939"/>
+  <testcase name="Verifiser at gradering har korrekt rekkefoelge()" classname="pdl.AdressebeskyttelseTest" time="0.003"/>
+  <testcase name="Verifiser prioritering av gradering()" classname="pdl.AdressebeskyttelseTest" time="0.006"/>
+  <testcase name="Sjekk at valueOf paa gradering fungerer som forventet()" classname="pdl.AdressebeskyttelseTest" time="0.051"/>
+  <testcase name="Sjekk at serde av gradering fungerer som forventet()" classname="pdl.AdressebeskyttelseTest" time="0.086"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

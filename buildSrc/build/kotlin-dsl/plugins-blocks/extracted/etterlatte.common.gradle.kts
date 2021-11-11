@@ -1,0 +1,6 @@
+                                                        
+
+plugins {
+    kotlin("jvm")
+    application
+}

@@ -1,0 +1,17 @@
+{
+  "@journalpost_Info": {
+    "tittel": "tittel",
+    "avsenderMottaker": {
+      "id": "123456789",
+      "navn": "avsentermottagernavn",
+      "idType": "FNR"
+    },
+    "bruker": {
+      "id": "9876532",
+      "navn": "Brukernavn",
+      "idType": "FNR"
+    },
+    "journlanfoerendeEnhet": "4817"
+  }
+}
+

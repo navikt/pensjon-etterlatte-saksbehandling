@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="person.FoedselsnummerTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2021-11-11T09:00:10" hostname="DESKTOP-KN0TI6V" time="0.997">
+  <properties/>
+  <testcase name="Sjekk diverse ugyldige tekst verdier()" classname="person.FoedselsnummerTest" time="0.648"/>
+  <testcase name="Foedselsnummer sin toString anonymiserer()" classname="person.FoedselsnummerTest" time="0.008"/>
+  <testcase name="Sjekk diverse gyldige test fnr()" classname="person.FoedselsnummerTest" time="0.131"/>
+  <testcase name="Sjekk diverse gyldige test fnr med mellomrom eller bindestrek()" classname="person.FoedselsnummerTest" time="0.168"/>
+  <testcase name="Sjekk diverse ugyldige numeriske verdier()" classname="person.FoedselsnummerTest" time="0.037"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

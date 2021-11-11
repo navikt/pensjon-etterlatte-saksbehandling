@@ -1,0 +1,99 @@
+{
+  "@event_name": "soeknad_innsendt",
+  "@skjema_info": {
+    "stoenadType": {
+      "valgteYtelser": {
+        "hovedytelse": "etterlatte",
+        "barnepensjon": "Ja"
+      },
+      "fraDato": "2021-06-08T22:00:00.000Z"
+    },
+    "opplysningerOmSoekeren": {
+      "bostedsadresseBekreftet": "Ja",
+      "kontaktinfo": {
+        "telefonnummer": "345678",
+        "epost": "me@home.no"
+      },
+      "oppholderSegINorge": "Ja",
+      "kontonummer": "12345678909",
+      "forholdTilAvdoed": {
+        "forholdTilAvdoede": "Gjenlevende ektefelle",
+        "datoForInngaattPartnerskap": "2021-05-11T22:00:00.000Z",
+        "mottokBidragFraAvdoede": "Nei"
+      },
+      "nySivilstatus": {
+        "nySivilstatusEtterDoedsfallet": "ingen"
+      }
+    },
+    "opplysningerOmDenAvdoede": {
+      "fornavn": "dau",
+      "etternavn": "sviske",
+      "foedselsnummer": "26117512737",
+      "doedsdato": "2021-03-28T22:00:00.000Z",
+      "statsborgerskap": "Birger",
+      "bosetning": "Ja",
+      "doedsfallAarsak": "Ja",
+      "boddEllerJobbetUtland": "Nei",
+      "haddePensjonsgivendeInntekt": "Nei",
+      "haddePensjonAndreLand": "Nei",
+      "harAvtjentMilitaerTjeneste": "Ja",
+      "avtjentMilitaerTjenesteSvar": "3453"
+    },
+    "opplysningerOmBarn": [
+      {
+        "fornavn": "liten",
+        "etternavn": "fisk",
+        "foedselsnummer": "26104500284",
+        "foreldre": "Fellesbarn m/avdøde",
+        "bosattUtland": "Nei"
+      }
+    ],
+    "naavaerendeArbeidsforhold": {
+      "yrke": "influencer",
+      "stilling": "den beste",
+      "startDato": "2021-05-30T22:00:00.000Z",
+      "sluttDato": "2021-06-09T22:00:00.000Z",
+      "ansettelsesforhold": "Sesongarbeid",
+      "heltidDeltid": "Heltid",
+      "arbeidsgiver": {
+        "navn": "Mr Cool Face",
+        "adresse": "samme "
+      },
+      "inntekt": {
+        "bruttoArbeidsinntektPrMd": "1000",
+        "personinntektFraNaeringPrAr": "4"
+      }
+    },
+    "andreYtelser": {
+      "mottarAndreYtelser": "Nei",
+      "kravOmAnnenStonad": {
+        "svar": "Nei"
+      },
+      "mottarPensjonUtland": {
+        "svar": "Nei"
+      }
+    }
+  },
+  "@lagret_soeknad_id": 12,
+  "@template": "soeknad",
+  "@fnr_soeker": "11057523044",
+  "@hendelse_gyldig_til": "2021-06-02T11:45:15.063486Z",
+  "system_read_count": 2,
+  "system_participating_services": [
+    {
+      "service": "sjekk-adressebeskyttelse",
+      "instance": "sjekk-adressebeskyttelse-58c546dd4f-xw9rs",
+      "time": "2021-06-02T13:15:15.709885"
+    },
+    {
+      "service": "sjekk-adressebeskyttelse",
+      "instance": "sjekk-adressebeskyttelse-58c546dd4f-xw9rs",
+      "time": "2021-06-02T13:15:16.093344"
+    }
+  ],
+  "@fnr_liste": [
+    "26117512737",
+    "26104500284"
+  ],
+  "@adressebeskyttelse": "INGEN_BESKYTTELSE"
+}

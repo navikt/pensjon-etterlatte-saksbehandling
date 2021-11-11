@@ -1,0 +1,18 @@
+{
+  "@skjema_info": {
+    "søknadInnhold": {
+      "forNav": {
+        "saksnummer": 123,
+        "søknadsId": 321,
+        "søknadOpprettet": "En eller annen gang"
+      },
+      "personopplysninger": {
+        "navn": {
+          "fornavn": "Dolly",
+          "mellomnavn": "D.",
+          "etternavn": "Duck"
+        }
+      }
+    }
+  }
+}

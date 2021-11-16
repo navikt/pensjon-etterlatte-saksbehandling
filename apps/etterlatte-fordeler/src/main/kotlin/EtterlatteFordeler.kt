@@ -21,7 +21,10 @@ internal class EtterlatteFordeler(
     private val klokke: Clock = Clock.systemUTC()
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
-
+    val kriterier = listOf(
+        Kriterie("Ikke vært i norge hele livet") { bosattNorgeHeleLivet() },
+        Kriterie("Barn er for gammelt") { barnForGammel() }
+    )
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "soeknad_innsendt") }
@@ -59,11 +62,31 @@ internal class EtterlatteFordeler(
         }
     }
 
-    private fun fordel(packet: JsonMessage): JsonNode {
-        val soknadId = packet["@lagret_soeknad_id"].asText()
-        //val skjemaInfo = objectMapper.writeValueAsBytes(packet["@skjema_info"])
-        val soeknadType = SoeknadType.valueOf(packet["@skjema_info"].get("soeknadsType").asText())
 
-        return packet["@lagret_soeknad_id"]
+    private fun barnForGammel(): Boolean {
+        //TODO
+        return true
+    }
+
+    private fun bosattNorgeHeleLivet(): Boolean {
+        //TODO
+        return true
+
+    }
+    data class fordelrespons (
+        val kandidat: Boolean,
+        val forklaring: List<String>
+    )
+
+    class Kriterie(val forklaring: String, private val sjekk: Sjekk) {
+        fun blirOppfyltAv(message: JsonMessage):Boolean = sjekk(message)
+    }
+
+    private fun fordel(packet: JsonMessage){
+        return kriterier
+            .filter{it.blirOppfyltAv(packet)}
+            .map { it.forklaring }
+            .let { fordelrespons(it.isEmpty(), it) }
     }
 }
+typealias Sjekk = (JsonMessage)->Boolean

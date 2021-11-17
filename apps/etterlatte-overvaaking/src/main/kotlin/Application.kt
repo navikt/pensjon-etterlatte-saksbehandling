@@ -15,9 +15,9 @@ import kotlinx.html.*
 import no.nav.helse.rapids_rivers.*
 import no.nav.security.token.support.ktor.TokenValidationContextPrincipal
 import no.nav.security.token.support.ktor.tokenValidationSupport
+import java.time.LocalDateTime
 
-var appEvents = emptyList<String>()
-
+val appMap: MutableMap<String, MutableMap<String, Pair<AppEvent?, PongEvent?>>> = mutableMapOf()
 fun main() {
     ventPaaNettverk()
 
@@ -39,19 +39,31 @@ fun main() {
                             call.respondHtml {
                                 this.head {
                                     title {
-                                        +"Overvåking Etterlatte. Logget inn som ${navIdentFraToken()}"
+                                        +"Overvåking Etterlatte"
                                     }
                                 }
                                 body {
                                     h1 {
-                                        +"Hello"
+                                        +"Hello, ${navIdentFraToken()}"
                                     }
-                                    ul {
-                                        appEvents.forEach {
-                                            li {
-                                                +it
-                                            }
+                                    appMap.forEach {
+                                        h2 {
+                                            +it.key
                                         }
+
+                                        ul {
+
+                                            it.value.forEach {
+                                                li {
+                                                    +("${it.key}: " + (it.value.first?.let { """Reported ${it.type} at ${it.opprettet}. """ }?:"") + (it.value.second?.let { """Responded to ping at ${it.opprettet}.""" }?:"") )
+                                                }
+                                            }
+
+                                        }
+
+
+
+
                                     }
                                 }
                             }
@@ -62,7 +74,10 @@ fun main() {
                 }
             }
             .build()
-            .also { AppEventRiver(it) }
+            .also {
+                AppEventRiver(it)
+                PongListener(it)
+            }
             .start()
     }
 }
@@ -87,6 +102,60 @@ internal class AppEventRiver(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        appEvents = appEvents.plus("""${packet["@opprettet"]}: Instance ${packet["instance_id"]} of app ${packet["app_name"]} reporting:  ${packet["@event_name"]}""").let { if(it.size > 50) it.drop(it.size -50) else it }
+        AppEvent(
+            packet["@event_name"].asText(),
+            packet["instance_id"].asText(),
+            packet["app_name"].asText(),
+            LocalDateTime.parse(packet["@opprettet"].asText())
+        ).also {
+            appMap.computeIfAbsent(it.app){ mutableMapOf()}.compute(it.appinstance){ _, current:Pair<AppEvent?, PongEvent?>? -> Pair(it, current?.second) }
+        }
     }
 }
+
+internal class PongListener(
+    rapidsConnection: RapidsConnection,
+) : River.PacketListener {
+    init {
+        River(rapidsConnection).apply {
+            validate { it.demandValue("@event_name", "pong") }
+            validate { it.interestedIn("@id","@ping_time","@pong_time", "app_name", "instance_id") }
+        }.register(this)
+    }
+
+    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+       PongEvent(
+           packet["instance_id"].asText(),
+           packet["app_name"].asText(),
+           LocalDateTime.parse(packet["@pong_time"].asText()),
+           packet["@id"].asText() ,
+           LocalDateTime.parse(packet["@ping_time"].asText())
+       ).also {
+           appMap.computeIfAbsent(it.app){ mutableMapOf()}.compute(it.appinstance){ _, current:Pair<AppEvent?, PongEvent?>? -> Pair(current?.first, it) }
+       }
+    }
+}
+
+interface Event {
+    val type: String
+    val appinstance: String
+    val app: String
+    val opprettet: LocalDateTime
+}
+class AppEvent(
+    override val type: String,
+    override val appinstance: String,
+    override val app: String,
+    override val opprettet: LocalDateTime
+    ): Event{
+    override fun toString(): String {
+        return """$opprettet: Instance $appinstance of app $app reporting: $type"""
+    }
+}
+class PongEvent(
+    override val appinstance: String,
+    override val app: String,
+    override val opprettet: LocalDateTime,
+    val pingId: String,
+    val pingOpprettet:LocalDateTime
+    ): Event by AppEvent("pong",appinstance,app,opprettet)

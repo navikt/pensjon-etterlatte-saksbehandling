@@ -1,0 +1,66 @@
+name: etterlatte-overvaaking
+
+env:
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
+  APP_NAME: ${{ github.workflow }}
+
+on:
+  workflow_dispatch: # Allow manually triggered workflow run
+    inputs:
+      deploy-prod:
+        description: 'Deploy til produksjon'
+        required: false
+        default: 'false'
+  push:
+    branches:
+      - main
+    paths:
+      - apps/etterlatte-overvaaking/**
+
+jobs:
+  build-and-publish:
+    name: Build, test, and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Java v16.x
+        uses: actions/setup-java@v1
+        with:
+          java-version: '16.x'
+      - name: Gradle test and build
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :apps:${APP_NAME}:test :apps:${APP_NAME}:build
+      - name: Build and publish docker image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          docker build --tag ${IMAGE} apps/${APP_NAME}
+          docker push ${IMAGE}
+
+  deploy-to-dev-gcp:
+    name: Deploy to dev-gcp
+    needs: build-and-publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: apps/${{ env.APP_NAME }}/.nais/dev.yaml
+
+  deploy-to-prod-gcp:
+    name: Deploy to prod-gcp
+    if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
+    needs: deploy-to-dev-gcp
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: apps/${{ env.APP_NAME }}/.nais/prod.yaml

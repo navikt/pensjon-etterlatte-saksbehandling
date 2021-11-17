@@ -119,7 +119,7 @@ internal class PongListener(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "pong") }
-            validate { it.interestedIn("@id","@ping_time","@pong_time", "app_name", "instance_id") }
+            validate { it.interestedIn("@id","ping_time","pong_time", "app_name", "instance_id") }
         }.register(this)
     }
 
@@ -127,9 +127,9 @@ internal class PongListener(
        PongEvent(
            packet["instance_id"].asText(),
            packet["app_name"].asText(),
-           LocalDateTime.parse(packet["@pong_time"].asText()),
+           LocalDateTime.parse(packet["pong_time"].asText()),
            packet["@id"].asText() ,
-           LocalDateTime.parse(packet["@ping_time"].asText())
+           LocalDateTime.parse(packet["ping_time"].asText())
        ).also {
            appMap.computeIfAbsent(it.app){ mutableMapOf()}.compute(it.appinstance){ _, current:Pair<AppEvent?, PongEvent?>? -> Pair(current?.first, it) }
        }

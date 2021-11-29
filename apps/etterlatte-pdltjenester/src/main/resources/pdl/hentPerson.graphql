@@ -1,0 +1,86 @@
+query($ident: ID!) {
+    hentPerson(ident: $ident) {
+        adressebeskyttelse(historikk: false) {
+            gradering
+        }
+        bostedsadresse {
+            vegadresse {
+                ...vegadresseDetails
+            }
+            utenlandskAdresse {
+                ...utenlandskAdresseDetails
+            }
+            gyldigFraOgMed
+            gyldigTilOgMed
+            metadata {
+                ...metadataDetails
+            }
+        }
+        navn {
+            fornavn
+            mellomnavn
+            etternavn
+            forkortetNavn
+            metadata {
+                ...metadataDetails
+            }
+        }
+        statsborgerskap {
+            land
+            gyldigFraOgMed
+            gyldigTilOgMed
+            metadata {
+                ...metadataDetails
+            }
+        }
+        foedsel {
+            foedselsdato
+            foedeland
+            foedested
+            foedselsaar
+            metadata {
+                ...metadataDetails
+            }
+        }
+        sivilstand {
+            type
+            gyldigFraOgMed
+            relatertVedSivilstand
+            metadata {
+                ...metadataDetails
+            }
+        }
+    }
+}
+
+fragment metadataDetails on Metadata {
+    endringer {
+        kilde
+        registrert
+        registrertAv
+        systemkilde
+        type
+    }
+    master
+    opplysningsId
+    historisk
+}
+
+fragment vegadresseDetails on Vegadresse {
+    husbokstav
+    husnummer
+    adressenavn
+    postnummer
+    kommunenummer
+    bydelsnummer
+}
+
+fragment utenlandskAdresseDetails on UtenlandskAdresse {
+    adressenavnNummer
+    bygningEtasjeLeilighet
+    postboksNummerNavn
+    postkode
+    bySted
+    regionDistriktOmraade
+    landkode
+}

@@ -1,0 +1,17 @@
+{
+  "name": "PDL",
+  "schemaPath": "schema.graphql",
+  "extensions": {
+    "endpoints": {
+      "Default GraphQL Endpoint": {
+        "url": "http://localhost:8089/graphql",
+        "headers": {
+          "Tema": "PEN",
+          "Nav-Consumer-Token": "Bearer ",
+          "Authorization": "Bearer "
+        },
+        "introspect": false
+      }
+    }
+  }
+}

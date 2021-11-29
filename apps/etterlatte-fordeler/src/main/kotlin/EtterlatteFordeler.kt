@@ -62,6 +62,15 @@ internal class EtterlatteFordeler(
         }
     }
 
+    private fun sjekkAdressebeskyttelse(): Boolean {
+        //TODO
+        return true
+    }
+
+    private fun hentPersonTest(): Boolean {
+        //TODO
+        return true
+    }
 
     private fun barnForGammel(): Boolean {
         //TODO

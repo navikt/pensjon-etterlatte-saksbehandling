@@ -1,65 +1,95 @@
 import NAVSPA from "@navikt/navspa";
+import { useContext } from "react";
+import { AppContext } from "../../store/AppContext";
 
-interface DecoratorProps {
+export interface DecoratorProps {
     appname: string; // Navn på applikasjon
-    fnr: string | undefined | null; // Fødselsnummer på bruker i context. NB, endring av denne medfører oppdatering av context
-    enhet: string | undefined | null; // Enhetsnummer på enhet i context. NB, endring av denne medfører oppdatering av context
-    toggles: Toggles; // Konfigurasjon av hvile elementer som skal vises i dekoratøren
+    fnr?: FnrContextvalue; // Konfigurasjon av fødselsnummer-kontekst
+    enhet?: EnhetContextvalue; // Konfigurasjon av enhet-kontekst
+    toggles?: TogglesConfig; // Konfigurasjon av hvilke elementer som skal vises i dekoratøren
     markup?: Markup; // Ekstra innhold i dekoratøren, kan brukes om man trenger å legge en knapp innenfor dekoratøren
 
-    onSok(fnr: string): void; // Callback-funksjon for når man skal bytte bruker (blir kalt etter bekreftelse-modal, eller ved direkte søk i søkefeltet)
-
-    onEnhetChange(enhet: string): void; // Callback-funksjon for når man skal bytte enhet (blir kalt etter beksreftelse-modal, eller ved direkte endring i enhets-dropdown)
-    contextholder?: true | Contextholder; // Konfigurasjn av tilkobling til contextholder. true; use default. Om man sender inn objekt så kan man overstyre url og om enhet skal generere bekreftelsemodal. Om den ikke settes vil man ikke bruke contextholder.
-    urler?: {
-        aktoerregister?: string; // Konfigurasjon av url til aktoerregisteret om man har behov for å sende via en proxy eller ligende. Default-verdien tar hensyn til miljø og kaller direkte mot app.adeo.no/aktoerregister
-    };
+    useProxy?: boolean | string; // Manuell overstyring av urlene til BFFs. Gjør alle kall til relativt path hvis true, og bruker verdien som domene om satt til en string. Default: false
+    accessToken?: string; // Manuell innsending av JWT, settes som Authorization-header. Om null sendes cookies vha credentials: 'include'
 }
 
-interface Toggles {
-    visVeilder: boolean;
-    visSokefelt: boolean;
-    visEnhetVelger: boolean;
-    visEnhet: boolean;
+export interface TogglesConfig {
+    visVeileder?: boolean; // Styrer om man skal vise informasjon om innlogget veileder
 }
 
-interface Contextholder {
-    url?: string;
-    promptBeforeEnhetChange?: boolean; // Kan settes om man ikke ønsker bekreftelse-modal ved enhets-endringer
+export interface Markup {
+    etterSokefelt?: string; // Gir muligheten for sende inn egen html som blir en del av dekoratøren
 }
 
-interface Markup {
-    etterSokefelt?: string;
+// Fnr/Enhet-konfiguration støttet både `Controlled` og `Uncontrolled` operasjon.
+// Ved bruk av `Controlled` må konsument-applikasjonen selv ta ansvar for oppdatering av `value` etter enhver `onChange`
+// Dette er i motsetning til `Uncontrolled`, hvor dette håndteres av dekoratøren. Og alt konsument-applikasjonen trenger å gjøre er å følge med på `onChange`.
+export interface ControlledContextvalue<T> extends BaseContextvalue<T> {
+    value: string | null;
+}
+export interface UncontrolledContextvalue<T> extends BaseContextvalue<T> {
+    initialValue: string | null;
 }
 
-export interface Saksbehandler {
-    ident: string;
-    fornavn: string;
-    etternavn: string;
-    navn: string;
-    enheter: Array<Enhet>;
+export interface BaseContextvalue<T> {
+    display: T;
+    onChange(value: string | null): void;
+    skipModal?: boolean;
+    ignoreWsEvents?: boolean;
 }
 
-interface Enhet {
-    enhetId: string;
-    navn: string;
+export type Contextvalue<T> = ControlledContextvalue<T> | UncontrolledContextvalue<T>;
+
+export enum EnhetDisplay {
+    ENHET = "ENHET",
+    ENHET_VALG = "ENHET_VALG",
 }
 
-const InternflateDecorator = NAVSPA.importer<any>("internarbeidsflatefs");
+export enum FnrDisplay {
+    SOKEFELT = "SOKEFELT",
+}
 
-const decoratorConfig: any = {
-    appname: "Etterlatte Saksbehandling",
-    fnr: "",
-    toggles: {
-      visSokefelt: true,
-      visVeileder: true
-    }
-};
+export type EnhetContextvalue = Contextvalue<EnhetDisplay>;
+export type FnrContextvalue = Contextvalue<FnrDisplay>;
+
+const RESET_VALUE = '\u0000';
+const InternflateDecorator = NAVSPA.importer<DecoratorProps>("internarbeidsflatefs");
+
+
 
 export const Decorator = () => {
+
+    const config = {
+        appname: 'Etterlatte',
+        useProxy: "http://localhost:4000", 
+        fnr: {
+            initialValue: RESET_VALUE,
+            display: FnrDisplay.SOKEFELT,
+            ignoreWsEvents: true,
+            onChange: (value: any) => {
+                if (value) {
+                    console.log(value)
+                    //window.location.pathname = `test/${value}`;
+                }
+            }
+        },
+        toggles: {
+            visVeileder: true
+        },
+        enhet: {
+            initialValue: "0315",
+            display: EnhetDisplay.ENHET_VALG,
+            onChange: (value: any) => {
+                if (value) {
+                    //settValgtEnhet(value);
+                }
+            }
+        }
+    };
+
     return (
         <div>
-            <InternflateDecorator {...decoratorConfig} />
+            <InternflateDecorator {...config} />
         </div>
     );
 };

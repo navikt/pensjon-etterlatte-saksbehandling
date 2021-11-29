@@ -2,10 +2,12 @@ import { IAction } from "../AppContext";
 
 export interface IUserReducer {
   loggedIn: boolean;
+  fnr: string;
 }
 
 export const userReducerInitialState: IUserReducer = {
   loggedIn: false,
+  fnr: ""
 };
 
 export const userReducer = (state: IUserReducer, action: IAction) => {

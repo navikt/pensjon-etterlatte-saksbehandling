@@ -1,6 +1,8 @@
 import express from "express";
+import { authMiddleware } from "./middleware/auth";
 import { healthRouter } from "./routers/health";
 import { modiaRouter } from "./routers/modia";
+import { proxy } from "./routers/proxy";
 
 const app = express();
 
@@ -13,9 +15,10 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.use("/health", healthRouter);
+app.use("/modiacontextholder/api/", modiaRouter);
 
-app.use(healthRouter);
-app.use(modiaRouter);
+app.use("/proxy", authMiddleware, proxy)
 
 app.listen(4000, () => {
     console.log("Mock-server kjører på port 4000");

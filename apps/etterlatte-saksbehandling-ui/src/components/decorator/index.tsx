@@ -88,7 +88,7 @@ export const Decorator = () => {
     };
 
     return (
-        <div>
+        <div id="fullbredde">
             <InternflateDecorator {...config} />
         </div>
     );

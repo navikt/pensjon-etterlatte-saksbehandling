@@ -4,7 +4,7 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven("https://kotlin.bintray.com/ktor")
+    //maven("https://kotlin.bintray.com/ktor")
     maven("https://packages.confluent.io/maven/")
 }
 

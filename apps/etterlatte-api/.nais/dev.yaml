@@ -1,0 +1,36 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-api
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  ingresses:
+    - "https://etterlatte-api.dev.intern.nav.no"
+  liveness:
+    initialDelay: 5
+    path: /isalive
+  readiness:
+    initialDelay: 5
+    path: /isready
+  kafka:
+    pool: nav-dev
+  azure:
+    application:
+      enabled: true
+      tenant: nav.no
+      claims:
+        groups:
+          - id: 650684ff-8107-4ae4-98fc-e18b5cf3188b # Required for authorization
+        extra:
+          - NAVident
+    sidecar:
+      enabled: true
+      autoLogin: true
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1

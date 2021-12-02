@@ -15,26 +15,25 @@ import org.slf4j.LoggerFactory
 
 interface Pdl {
     suspend fun finnAdressebeskyttelseForFnr(fnrListe: List<Foedselsnummer>): AdressebeskyttelseResponse
-    suspend fun hentPerson(fnrListe: List<Foedselsnummer>): PersonResponse
+    suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse
 }
 
 class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pdl {
     private val logger = LoggerFactory.getLogger(PdlKlient::class.java)
 
     /**
-     * Henter personer og tilknyttet adressebeskyttelse fra PDL.
-     * Dersom en person ikke har adressebeskyttelse vil personobjektet inneholde en tom liste adressebeskyttelse.
+     * Henter personer fra PDL.
      *
-     * @param fnrListe: Liste over fødselsnummer.
+     * @param fnr: fødselsnummer.
      *
-     * @return [AdressebeskyttelseResponse]: Responsobjekt fra PDL.
+     * @return [PersonResponse]: Responsobjekt fra PDL.
      */
-    override suspend fun hentPerson(fnrListe: List<Foedselsnummer>): PersonResponse {
+    override suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse {
         val response = client.post<PersonResponse>(apiUrl) {
             header("Tema", "PEN")
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
-            body = fnrListe
+            body = fnr
         }
 
         // Logge feil dersom det finnes noen

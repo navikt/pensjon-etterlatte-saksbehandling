@@ -18,17 +18,14 @@ class PersonService(private val klient: Pdl) {
      *  Gir verdi [Gradering.UGRADERT] dersom ingenting er funnet.
      */
     suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse {
-        val personer = klient.finnAdressebeskyttelseForFnr(fnrListe).data?.hentPersonBolk?.mapNotNull { it.person }
+        val person = klient.hentPerson(fnr) ?: throw Exception("Fant ingen personer i PDL")
 
-        if (personer.isNullOrEmpty()) {
-            throw Exception("Fant ingen personer i PDL")
-        }
-
-        return hentPrioritertGradering(personer)
+        return person
             .also { logger.info("Gradering vurdert til $it") }
     }
-    suspend fun hentAlderForPerson(fnrListe: List<Foedselsnummer>): Int {
-        val foedselsAar = klient.hentPerson(fnrListe).data?.hentPerson?.foedsel?.mapNotNull  { it.foedselsaar }
+    suspend fun hentAlderForPerson(fnr: Foedselsnummer): Int {
+        val foedselsAar = klient.hentPerson(fnr).data?.hentPerson?.foedsel?.mapNotNull  { it.foedselsaar }
+        //TODO
         //definere år på en smart måte og støtte for å sjekke liste evt
         //også må vi håndtere null
         return 2021 - foedselsAar?.get(0)!!

@@ -6,6 +6,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.pdl.PersonService
@@ -24,8 +25,7 @@ internal class EtterlatteFordeler(
     private val klokke: Clock = Clock.systemUTC()
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
-    var barn: PersonResponse
-
+    private lateinit var barn: PersonResponse
     val kriterier = listOf(
         Kriterie("Ikke vært i norge hele livet") { bosattNorgeHeleLivet() },
         Kriterie("Barn er for gammelt") { barnForGammel() }
@@ -50,6 +50,7 @@ internal class EtterlatteFordeler(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val gyldigTilDato = OffsetDateTime.parse(packet["@hendelse_gyldig_til"].asText())
+        //val barnFnr = packet["@fnr_soeker"]
 
         if (gyldigTilDato.isBefore(OffsetDateTime.now(klokke))) {
             logger.error("Avbrutt fordeling da hendelsen ikke er gyldig lengre")
@@ -58,8 +59,9 @@ internal class EtterlatteFordeler(
         //TODO
         // Hente ut person her, med @fnr_soeker
         // Lagres i et personResponse-objekt
-        barn = personService.hentPerson(packet["@fnr_soeker"].asText())
-
+        runBlocking {
+             barn = personService.hentPerson( Foedselsnummer.of(packet["@fnr_soeker"].asText()))
+        }
         try {
             val fordelResponse = fordel(packet)
             packet["@soeknad_fordelt"] = fordelResponse

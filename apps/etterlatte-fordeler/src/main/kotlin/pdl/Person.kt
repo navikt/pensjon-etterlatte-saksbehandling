@@ -11,6 +11,18 @@ data class PersonResponse(
     val data: PersonResponseData? = null,
     val errors: List<ResponseError>? = null
 )
+{
+    fun alder (): Int {
+        //TODO
+        // håndtere dager
+        // håndtere flere fødselsdatoer (parallelle sannheter)
+        // håndtere nullverdier (ikke bruke ?. .!! så mye...)
+        val aar: Int?
+        val dagensDato = LocalDate.now()
+        aar =  dagensDato.year - data!!.hentPerson!!.foedsel[0].foedselsdato?.year!!
+        return aar
+    }
+}
 
 data class PersonResponseData(
     val hentPerson: HentPerson? = null

@@ -3,6 +3,7 @@ package no.nav.etterlatte.pdl
 import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelsePerson
 import no.nav.etterlatte.libs.common.pdl.Gradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.prosess.pdl.PersonResponse
 import org.slf4j.LoggerFactory
 
 class PersonService(private val klient: Pdl) {
@@ -16,7 +17,7 @@ class PersonService(private val klient: Pdl) {
      * @return Gyldig gradering av PDL-typen [Gradering].
      *  Gir verdi [Gradering.UGRADERT] dersom ingenting er funnet.
      */
-    suspend fun hentPerson(fnrListe: List<Foedselsnummer>): Gradering {
+    suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse {
         val personer = klient.finnAdressebeskyttelseForFnr(fnrListe).data?.hentPersonBolk?.mapNotNull { it.person }
 
         if (personer.isNullOrEmpty()) {

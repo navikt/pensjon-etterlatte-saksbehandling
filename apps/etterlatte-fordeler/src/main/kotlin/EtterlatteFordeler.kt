@@ -9,6 +9,7 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.pdl.PersonService
+import no.nav.etterlatte.prosess.pdl.PersonResponse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -23,13 +24,17 @@ internal class EtterlatteFordeler(
     private val klokke: Clock = Clock.systemUTC()
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
+    var barn: PersonResponse
+
     val kriterier = listOf(
         Kriterie("Ikke vært i norge hele livet") { bosattNorgeHeleLivet() },
-        Kriterie("Barn er for gammelt") { barnForGammel(List<Foedselsnummer>) }
+        Kriterie("Barn er for gammelt") { barnForGammel() }
     )
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "soeknad_innsendt") }
+            //TODO valideringen under funkerer ikke og må fikses.
+            // validate { it.demandValue("@skjema_info"."@soeknad_type", "barnepensjon") }
             validate { it.requireKey("@skjema_info") }
             validate { it.requireKey("@template") }
             validate { it.requireKey("@journalpostInfo") }
@@ -50,6 +55,10 @@ internal class EtterlatteFordeler(
             logger.error("Avbrutt fordeling da hendelsen ikke er gyldig lengre")
             return
         }
+        //TODO
+        // Hente ut person her, med @fnr_soeker
+        // Lagres i et personResponse-objekt
+        barn = personService.hentPerson(packet["@fnr_soeker"].asText())
 
         try {
             val fordelResponse = fordel(packet)
@@ -74,9 +83,9 @@ internal class EtterlatteFordeler(
         return true
     }
 
-    private fun barnForGammel(fnr: List<Foedselsnummer>): Boolean {
+    private fun barnForGammel(): Boolean {
         //TODO
-        return true
+        return barn.alder() > 15
     }
 
     private fun bosattNorgeHeleLivet(): Boolean {

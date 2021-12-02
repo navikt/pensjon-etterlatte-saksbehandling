@@ -13,7 +13,7 @@ spec:
     max: 1
     cpuThresholdPercentage: 90
   ingresses:
-    - https://etterlatte-api.dev.intern.nav.no
+    - https://etterlatte-saksbehandling.dev.intern.nav.no
   liveness:
     path: /health/isAlive
     initialDelay: 10

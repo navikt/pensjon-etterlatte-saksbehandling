@@ -59,7 +59,7 @@ export const Decorator = () => {
 
     const config = {
         appname: 'Etterlatte',
-        useProxy: isDev ? "http://localhost:8080" : "https://etterlatte-api.dev.intern.nav.no", 
+        useProxy: isDev ? "http://localhost:8080" : "https://etterlatte-saksbehandling.dev.intern.nav.no", 
         fnr: {
             initialValue: RESET_VALUE,
             display: FnrDisplay.SOKEFELT,

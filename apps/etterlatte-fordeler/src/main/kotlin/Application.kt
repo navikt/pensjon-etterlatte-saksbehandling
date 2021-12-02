@@ -7,9 +7,9 @@ fun main() {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }.also { env ->
         AppBuilder(env).also { appBuilder ->
-            RapidApplication.create(env).apply {
-                EtterlatteFordeler(this)
-            }.start()
+            RapidApplication.create(env)
+                .also {EtterlatteFordeler(it, AppBuilder(env).createPersonService()) }
+                .start()
         }
     }
 }

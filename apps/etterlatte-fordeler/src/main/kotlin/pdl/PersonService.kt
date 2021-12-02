@@ -26,6 +26,12 @@ class PersonService(private val klient: Pdl) {
         return hentPrioritertGradering(personer)
             .also { logger.info("Gradering vurdert til $it") }
     }
+    suspend fun hentAlderForPerson(fnrListe: List<Foedselsnummer>): Int {
+        val foedselsAar = klient.hentPerson(fnrListe).data?.hentPerson?.foedsel?.mapNotNull  { it.foedselsaar }
+        //definere år på en smart måte og støtte for å sjekke liste evt
+        //også må vi håndtere null
+        return 2021 - foedselsAar?.get(0)!!
+    }
 
     /**
      * Henter ut alle graderinger fra liste over personer og deretter henter prioritert [Gradering]

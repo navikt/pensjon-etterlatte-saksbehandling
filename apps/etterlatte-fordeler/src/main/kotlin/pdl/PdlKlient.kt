@@ -10,10 +10,12 @@ import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
 import no.nav.etterlatte.libs.common.pdl.GraphqlRequest
 import no.nav.etterlatte.libs.common.pdl.Variables
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.prosess.pdl.PersonResponse
 import org.slf4j.LoggerFactory
 
 interface Pdl {
     suspend fun finnAdressebeskyttelseForFnr(fnrListe: List<Foedselsnummer>): AdressebeskyttelseResponse
+    suspend fun hentPerson(fnrListe: List<Foedselsnummer>): PersonResponse
 }
 
 class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pdl {
@@ -27,19 +29,27 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
      *
      * @return [AdressebeskyttelseResponse]: Responsobjekt fra PDL.
      */
-    override suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse {
-        // TODO
+    override suspend fun hentPerson(fnrListe: List<Foedselsnummer>): PersonResponse {
+        val response = client.post<PersonResponse>(apiUrl) {
+            header("Tema", "PEN")
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            body = fnrListe
+        }
+
+        // Logge feil dersom det finnes noen
+        response.errors?.forEach { error ->
+            logger.error("Feil ved uthenting av adressebeskyttelse", error.toString())
+        }
+        return response
     }
     override suspend fun finnAdressebeskyttelseForFnr(fnrListe: List<Foedselsnummer>): AdressebeskyttelseResponse {
-        val query = hentQuery()
-
-        val request = GraphqlRequest(query, Variables(identer = fnrListe.map { it.value }))
 
         val response = client.post<AdressebeskyttelseResponse>(apiUrl) {
             header("Tema", "PEN")
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
-            body = request
+            body = fnrListe
         }
 
         // Logge feil dersom det finnes noen
@@ -49,8 +59,4 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
 
         return response
     }
-
-    private fun hentQuery(): String = javaClass.getResource("/hentAdressebeskyttelse.graphql")!!
-        .readText()
-        .replace(System.lineSeparator(), "")
 }

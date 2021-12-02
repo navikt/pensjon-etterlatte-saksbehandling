@@ -1,13 +1,14 @@
 package no.nav.etterlatte.prosess
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.features.ResponseException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.journalpost.JournalpostInfo
-import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.soeknad.SoeknadType
+import io.ktor.client.request.accept
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.pdl.PersonService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -18,12 +19,13 @@ import java.time.OffsetDateTime
 
 internal class EtterlatteFordeler(
     rapidsConnection: RapidsConnection,
+    private val personService : PersonService,
     private val klokke: Clock = Clock.systemUTC()
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
     val kriterier = listOf(
         Kriterie("Ikke vært i norge hele livet") { bosattNorgeHeleLivet() },
-        Kriterie("Barn er for gammelt") { barnForGammel() }
+        Kriterie("Barn er for gammelt") { barnForGammel(List<Foedselsnummer>) }
     )
     init {
         River(rapidsConnection).apply {
@@ -72,7 +74,7 @@ internal class EtterlatteFordeler(
         return true
     }
 
-    private fun barnForGammel(): Boolean {
+    private fun barnForGammel(fnr: List<Foedselsnummer>): Boolean {
         //TODO
         return true
     }

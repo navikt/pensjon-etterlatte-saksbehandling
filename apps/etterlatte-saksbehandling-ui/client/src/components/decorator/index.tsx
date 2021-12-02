@@ -55,13 +55,13 @@ export type FnrContextvalue = Contextvalue<FnrDisplay>;
 const RESET_VALUE = '\u0000';
 const InternflateDecorator = NAVSPA.importer<DecoratorProps>("internarbeidsflatefs");
 
-
+const isDev = process.env.NODE_ENV === "development"
 
 export const Decorator = () => {
 
     const config = {
         appname: 'Etterlatte',
-        useProxy: "http://localhost:4000", 
+        useProxy: isDev ? "http://localhost:8080" : "https://etterlatte-api.dev.intern.nav.no", 
         fnr: {
             initialValue: RESET_VALUE,
             display: FnrDisplay.SOKEFELT,

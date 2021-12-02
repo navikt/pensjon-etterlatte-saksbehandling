@@ -1,0 +1,62 @@
+name: etterlatte-saksbehandling-ui
+
+env:
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
+  APP_NAME: ${{ github.workflow }}
+
+on:
+  workflow_dispatch: # Allow manually triggered workflow run
+    inputs:
+      deploy-prod:
+        description: 'Deploy til produksjon'
+        required: false
+        default: 'false'
+  push:
+    branches:
+      - main
+    paths:
+      - apps/etterlatte-saksbehandling-ui/**
+
+jobs:
+  build-and-publish:
+    name: Build, test and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Node 16
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+      - name: Install and build
+        working-directory: apps/${{ env.APP_NAME }}
+        run: |
+          yarn --cwd client install && yarn --cwd client build
+          yarn --cwd server install && yarn --cwd server build
+      - name: Run tests
+        working-directory: apps/${{ env.APP_NAME }}/client
+        run: |
+          CI=true yarn test
+      - name: Start application
+        working-directory: apps/${{ env.APP_NAME }}/client
+        run: |
+          yarn start & npx wait-on http://localhost:3000
+      - name: Build and publish Docker image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          docker build --tag ${IMAGE} apps/${APP_NAME}
+          docker push ${IMAGE}
+
+  deploy-to-dev-gcp:
+    name: Deploy to dev-gcp
+    needs: build-and-publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: apps/${{ env.APP_NAME }}/.nais/dev.yaml

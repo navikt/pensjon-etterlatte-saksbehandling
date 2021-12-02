@@ -1,10 +1,16 @@
 import express from "express";
+import path from "path";
 import { authMiddleware } from "./middleware/auth";
 import { healthRouter } from "./routers/health";
 import { modiaRouter } from "./routers/modia";
 import { proxy } from "./routers/proxy";
 
 const app = express();
+
+const clientPath = path.resolve(__dirname, "../client");
+
+app.set("trust proxy", 1);
+app.use("/", express.static(clientPath));
 
 app.use(express.json());
 app.use(function (req, res, next) {
@@ -18,8 +24,8 @@ app.use(function (req, res, next) {
 app.use("/health", healthRouter);
 app.use("/modiacontextholder/api/", modiaRouter);
 
-app.use("/proxy", authMiddleware, proxy)
+app.use("/proxy", authMiddleware, proxy);
 
-app.listen(4000, () => {
-    console.log("Mock-server kjører på port 4000");
+app.listen(8080, () => {
+    console.log("Mock-server kjører på port 8080");
 });

@@ -1,0 +1,36 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-behandling
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_12
+        name: etterlatte-behandling
+        databases:
+          - name: behandlinger
+            envVarPrefix: DB
+  startup:
+    initialDelay: 7
+    failureThreshold: 10
+    periodSeconds: 5
+    path: /started
+  liveness:
+    initialDelay: 5
+    path: /isalive
+  readiness:
+    initialDelay: 5
+    path: /isready
+  azure:
+    application:
+      enabled: true
+      tenant: nav.no
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1

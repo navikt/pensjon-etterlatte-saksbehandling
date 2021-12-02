@@ -1,6 +1,4 @@
 import NAVSPA from "@navikt/navspa";
-import { useContext } from "react";
-import { AppContext } from "../../store/AppContext";
 
 export interface DecoratorProps {
     appname: string; // Navn på applikasjon

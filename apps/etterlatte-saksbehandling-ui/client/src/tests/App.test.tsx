@@ -1,7 +1,7 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import App from "../App";
-import { AppContext, ContextProvider } from "../store/AppContext";
+import { ContextProvider } from "../store/AppContext";
 
 const TestEnv = (props: { children: any }) => <ContextProvider>{props.children}</ContextProvider>;
 

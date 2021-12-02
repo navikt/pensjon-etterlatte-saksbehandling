@@ -3,7 +3,7 @@ import { Grid, Cell } from "@navikt/ds-react";
 import "@navikt/ds-css";
 import "./App.css";
 import { AppContext, IAppContext } from "./store/AppContext";
-import { login } from "./shared/api/user";
+//import { login } from "./shared/api/user";
 import { Decorator } from "./components/decorator";
 import { ws } from "./mocks/wsmock";
 
@@ -17,7 +17,7 @@ function App() {
             //console.log(res);
             ctx.dispatch({type: "login", data: {loggedIn: true, fnr: "09038829766"} })
         })();
-    }, []);
+    }, [ctx]);
 
 
     return (

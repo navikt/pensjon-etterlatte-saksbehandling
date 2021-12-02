@@ -7,11 +7,6 @@ body{
   padding: 0;
 }
 
-.container {
-  max-width: 60em;
-  margin: 0 auto;
-}
-
 #fullbredde .dekorator__container {
   max-width: 100%;
   margin: 0 2rem;

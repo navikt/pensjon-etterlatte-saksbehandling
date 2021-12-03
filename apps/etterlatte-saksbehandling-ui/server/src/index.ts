@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import { appConf } from "./config/config";
 import { authMiddleware } from "./middleware/auth";
 import { healthRouter } from "./routers/health";
 import { modiaRouter } from "./routers/modia";
@@ -26,6 +27,6 @@ app.use("/modiacontextholder/api/", modiaRouter);
 
 app.use("/proxy", authMiddleware, proxy);
 
-app.listen(8080, () => {
-    console.log("Mock-server kjører på port 8080");
+app.listen(appConf.port, () => {
+    console.log(`Server kjører på port ${appConf.port}`);
 });

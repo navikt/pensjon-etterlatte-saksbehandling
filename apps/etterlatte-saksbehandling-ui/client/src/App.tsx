@@ -4,9 +4,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "@navikt/ds-css";
 import "./App.css";
 import { AppContext, IAppContext } from "./store/AppContext";
-//import { login } from "./shared/api/user";
 import { Decorator } from "./components/decorator";
 import { ws } from "./mocks/wsmock";
+import Oppgavebenken from "./components/oppgavebenken/Oppgavebenken";
 import { Container } from "./shared/styled";
 import { Modal } from "./shared/modal/modal";
 
@@ -33,6 +33,7 @@ function App() {
                             </Container>
                         }
                     />
+                    <Route path="/oppgavebenken" element={<Oppgavebenken />} />
                     <Route
                         path="/testside"
                         element={

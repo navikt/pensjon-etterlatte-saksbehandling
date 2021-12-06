@@ -1,4 +1,4 @@
-import React, { ReactNode, Reducer } from "react";
+import React, { ReactNode, Reducer, createContext, useReducer } from "react";
 import { combineReducers } from "./combineReducers";
 import { IMenuReducer, menuReducer, menuReducerInitialState } from "./reducers/MenuReducer";
 import { IUserReducer, userReducerInitialState, userReducer } from "./reducers/UserReducer";
@@ -25,10 +25,10 @@ export const initialState: IAppState = {
 
 const reducer = combineReducers({ menuReducer, userReducer });
 
-export const AppContext = React.createContext<IAppContext>({state: initialState, dispatch: () => {}});
+export const AppContext = createContext<IAppContext>({state: initialState, dispatch: () => {}});
 
 export const ContextProvider = (props: {children: ReactNode}) => {
-  const [state, dispatch] = React.useReducer<Reducer<IAppState, IAction>>(reducer, initialState);
+  const [state, dispatch] = useReducer<Reducer<IAppState, IAction>>(reducer, initialState);
 
   return (
     <AppContext.Provider value={{state, dispatch}}>

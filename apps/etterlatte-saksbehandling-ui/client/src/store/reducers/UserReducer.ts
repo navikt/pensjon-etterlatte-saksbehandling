@@ -11,7 +11,6 @@ export const userReducerInitialState: IUserReducer = {
 };
 
 export const userReducer = (state: IUserReducer, action: IAction) => {
-  console.log('her')
   switch (action.type) {
     case "login":
       console.log(action.data)

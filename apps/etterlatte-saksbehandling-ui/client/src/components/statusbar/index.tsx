@@ -1,22 +1,7 @@
 import styled from "styled-components";
-import CopyToClipboard from "react-copy-to-clipboard";
-import { CopyIcon } from "../../shared/icons/copyIcon";
 import { GenderIcon, GenderList } from "../../shared/icons/genderIcon";
+import { Fnr } from "./fnr";
 
-const Fnr = (props: { value: string; copy?: boolean }) => {
-    return (
-        <div>
-            {props.value}{" "}
-            {props.copy && (
-                <CopyToClipboard text={props.value}>
-                    <span style={{verticalAlign: 'text-top', cursor: "pointer" }} aria-label="kopier fødselsnummer">
-                        <CopyIcon />
-                    </span>
-                </CopyToClipboard>
-            )}
-        </div>
-    );
-};
 
 enum PersonStatus {
     DØD = "død",

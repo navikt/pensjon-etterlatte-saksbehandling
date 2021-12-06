@@ -10,6 +10,7 @@ import Oppgavebenken from "./components/oppgavebenken/Oppgavebenken";
 import { Container } from "./shared/styled";
 import { Modal } from "./shared/modal/modal";
 import { StatusBar } from "./components/statusbar";
+import { Behandling } from "./components/behandling";
 
 ws();
 
@@ -39,6 +40,7 @@ function App() {
                         }
                     />
                     <Route path="/oppgavebenken" element={<Oppgavebenken />} />
+                    <Route path="/behandling" element={<Behandling />} />
                     <Route
                         path="/testside"
                         element={

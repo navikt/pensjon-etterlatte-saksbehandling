@@ -9,6 +9,7 @@ import { ws } from "./mocks/wsmock";
 import Oppgavebenken from "./components/oppgavebenken/Oppgavebenken";
 import { Container } from "./shared/styled";
 import { Modal } from "./shared/modal/modal";
+import { StatusBar } from "./components/statusbar";
 
 ws();
 
@@ -24,13 +25,17 @@ function App() {
                         path="/"
                         element={
                             // dras ut i egen component
-                            <Container>
-                                <Grid>
-                                    <Cell className={"navds-story-cell"} xs={12} sm={6} lg={4}>
-                                        <h1>De etterlatte</h1>
-                                    </Cell>
-                                </Grid>
-                            </Container>
+                            <>
+                                <StatusBar />
+
+                                <Container>
+                                    <Grid>
+                                        <Cell className={"navds-story-cell"} xs={12} sm={6} lg={4}>
+                                            <h1>De etterlatte</h1>
+                                        </Cell>
+                                    </Grid>
+                                </Container>
+                            </>
                         }
                     />
                     <Route path="/oppgavebenken" element={<Oppgavebenken />} />

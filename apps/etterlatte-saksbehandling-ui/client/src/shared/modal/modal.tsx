@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import styled from "styled-components";
-import { CloseIcon } from "../closeIcon";
+import { CloseIcon } from "../icons/closeIcon";
 import { Portal } from "../portal";
 
 export const Modal = (props: { onClose: any; children: ReactNode }) => {

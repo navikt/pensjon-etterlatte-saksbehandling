@@ -28,7 +28,6 @@ function App() {
                             // dras ut i egen component
                             <>
                                 <StatusBar />
-
                                 <Container>
                                     <Grid>
                                         <Cell className={"navds-story-cell"} xs={12} sm={6} lg={4}>

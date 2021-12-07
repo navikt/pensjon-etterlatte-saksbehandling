@@ -7,7 +7,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
 
     //pseudokode
     try {
-        const response = await fetch("https://login.microsoftonline.com/common/oauth2/v2.0/token", {
+        const response = await fetch("https://login.microsoftonline.com/nav/oauth2/v2.0/token", {
             body: JSON.stringify({
                 client_id: "",
                 scope: "",
@@ -30,3 +30,26 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     }
     return next();
 };
+
+
+export const authenticateUser = (req: Request, res: Response, next: NextFunction) => {
+    // 1. Validate the Authorization header
+    console.log(req.headers);
+    const auth = req.headers.authorization;
+    if(!auth) {
+        return res.redirect("/oauth2/login");
+    }
+    console.log(auth);
+
+    /*
+        Token Validation
+        Your application should also validate the claims and signature for the Azure AD JWT access_token attached by the sidecar.
+
+        That is, validate the standard claims such as iss, iat, exp, and aud.
+
+        aud must be equal to your application's client ID in Azure AD.
+    */
+    
+    return next();
+
+}

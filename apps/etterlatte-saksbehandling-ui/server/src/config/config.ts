@@ -6,7 +6,7 @@ export const appConf: IAppConf = {
 };
 
 
-interface IOBOConf {
+interface IOBORequest {
   client_id: string | undefined;
   scope: string;
   redirect_uri: string;
@@ -15,11 +15,16 @@ interface IOBOConf {
   code: string;
 }
 
-export const azureConf: IOBOConf = {
+export const azureOboRequest: IOBORequest = {
   client_id: process.env.clientID,
   redirect_uri: "",
   scope: "",
   grant_type: "",
   client_secret: "",
   code: ""
+}
+
+export const AdConfig = {
+  audience: "",
+  issuer: ""
 }

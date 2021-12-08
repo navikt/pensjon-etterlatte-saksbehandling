@@ -5,6 +5,7 @@ import { authMiddleware, authenticateUser } from "./middleware/auth";
 import { healthRouter } from "./routers/health";
 import { modiaRouter } from "./routers/modia";
 import { proxy } from "./routers/proxy";
+import { parseJwt } from "./utils/parsejwt";
 
 const app = express();
 
@@ -12,7 +13,6 @@ const clientPath = path.resolve(__dirname, "../client");
 
 app.set("trust proxy", 1);
 
-console.log(process.env)
 /*if(process.env.TS_NODE_DEV !== "true") {
     app.use(authenticateUser);
 }*/
@@ -34,7 +34,7 @@ app.use("/proxy", authMiddleware, proxy);
 app.get("/logintest", authenticateUser, (req: any, res: any) => {
     console.log(req.headers);
     res.json("ok");
-})
+});
 
 app.listen(appConf.port, () => {
     console.log(`Server kjører på port ${appConf.port}`);

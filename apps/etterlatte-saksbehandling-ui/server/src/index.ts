@@ -5,7 +5,6 @@ import { authMiddleware, authenticateUser } from "./middleware/auth";
 import { healthRouter } from "./routers/health";
 import { modiaRouter } from "./routers/modia";
 import { proxy } from "./routers/proxy";
-import { parseJwt } from "./utils/parsejwt";
 
 const app = express();
 
@@ -13,9 +12,7 @@ const clientPath = path.resolve(__dirname, "../client");
 
 app.set("trust proxy", 1);
 
-/*if(process.env.TS_NODE_DEV !== "true") {
-    app.use(authenticateUser);
-}*/
+
 app.use("/", express.static(clientPath));
 
 app.use(express.json());
@@ -28,7 +25,10 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.use("/health", healthRouter);
+app.use("/health", healthRouter); // åpen rute
+if(process.env.DEVELOPMENT !== "true") { 
+    app.use(authenticateUser); // Alle ruter etter denne er authenticated
+}
 app.use("/modiacontextholder/api/", modiaRouter);
 app.use("/proxy", authMiddleware, proxy);
 app.get("/logintest", authenticateUser, (req: any, res: any) => {

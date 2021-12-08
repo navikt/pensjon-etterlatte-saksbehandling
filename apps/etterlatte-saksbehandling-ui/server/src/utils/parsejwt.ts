@@ -1,5 +1,7 @@
 
-interface Token {
+export interface Token {
+  name: string;
+  NAVident: string;
   aud: string;
   iss: string;
   exp: number;

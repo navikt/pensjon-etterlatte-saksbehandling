@@ -20,7 +20,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node-dev ./src/index.ts",
+    "dev": "DEVELOPMENT=true ts-node-dev ./src/index.ts",
     "test": "mocha -r ts-node/register './src/tests/**/*.test.ts'"
   }
 }

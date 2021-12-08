@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import fetch from "node-fetch";
 import { AdConfig } from "../config/config";
-import { epochToUTC, utcSecondsSinceEpoch } from "../utils/date";
+import { utcSecondsSinceEpoch } from "../utils/date";
 import { parseJwt } from "../utils/parsejwt";
 import { getOboToken } from "./getOboToken";
 

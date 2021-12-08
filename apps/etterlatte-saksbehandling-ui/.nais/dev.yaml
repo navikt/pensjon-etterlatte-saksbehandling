@@ -25,7 +25,7 @@ spec:
           - NAVident
     sidecar:
       enabled: true
-      autoLogin: false # sett til true etterhvert
+      autoLogin: true
   liveness:
     path: /health/isAlive
     initialDelay: 10

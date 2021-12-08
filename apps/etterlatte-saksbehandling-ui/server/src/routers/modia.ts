@@ -16,6 +16,7 @@ interface ISaksbehandler {
 }
 const getSaksbehandler = (req: Request): ISaksbehandler | null => {
     if (process.env.DEVELOPMENT === "true") {
+      /* mulig det bør gjøre kall mot https://modiacontextholder.nais.adeo.no/modiacontextholder/api/decorator */
         return {
             ident: "Z81549300",
             navn: "Truls Veileder",

@@ -33,6 +33,7 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
     const bearerToken = auth.split(" ")[1];
     const parsedToken = parseJwt(bearerToken);
 
+    /*
     try {
         if (parsedToken.aud !== AdConfig.audience) {
             throw new Error("Ugyldig audience");
@@ -50,6 +51,7 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
         console.log(e);
         return res.redirect("/oauth2/login");
     }
+    */
 
     return next();
 };

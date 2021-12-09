@@ -9,7 +9,7 @@ import { ws } from "./mocks/wsmock";
 import Oppgavebenken from "./components/oppgavebenken/Oppgavebenken";
 import { Container } from "./shared/styled";
 import { Modal } from "./shared/modal/modal";
-import { StatusBar } from "./components/statusbar";
+import { StatusBar, StatusBarTheme } from "./components/statusbar";
 import { Behandling } from "./components/behandling";
 import { Link } from "react-router-dom";
 
@@ -44,7 +44,7 @@ function App() {
                         path="/behandling/*"
                         element={
                             <>
-                                <StatusBar />
+                                <StatusBar theme={StatusBarTheme.gray} />
                                 <Behandling />
                             </>
                         }

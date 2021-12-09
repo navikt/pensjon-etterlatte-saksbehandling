@@ -1,7 +1,8 @@
 import { NavLink, Routes, Route } from "react-router-dom";
 import styled from "styled-components";
 import { Column, GridContainer } from "../../shared/styled";
-import { StatusBar } from "../statusbar";
+import { Inngangsvilkaar } from "./inngangsvilkaar";
+import { Personopplysninger } from "./personopplysninger";
 
 export const Behandling = () => {
     return (
@@ -29,25 +30,16 @@ export const Behandling = () => {
                         <NavLink to="brev">Brev</NavLink>
                     </li>
                 </StegMeny>
-                <StatusBar />
 
                 {/* Subroutes for stegmeny feks */}
                 <Routes>
                     <Route
                         path="personopplysninger"
-                        element={
-                            <div>
-                                <h1>Personopplysninger</h1>
-                            </div>
-                        }
+                        element={<Personopplysninger />}
                     />
                     <Route
                         path="inngangsvilkaar"
-                        element={
-                            <div>
-                                <h1>inngangsvilkaar</h1>
-                            </div>
-                        }
+                        element={<Inngangsvilkaar />}
                     />
                     <Route
                         path="beregne"
@@ -83,7 +75,7 @@ export const Behandling = () => {
                     />
                 </Routes>
             </Column>
-            <Column>noe annet?</Column>
+            <Column>Historikk</Column>
         </GridContainer>
     );
 };
@@ -104,11 +96,9 @@ const StegMeny = styled.ul`
             color: #78706a;
             text-decoration: none;
             border-bottom: 3px solid transparent;
-            &:hover {
-                border-bottom: 3px solid blue;
-            }
-            &.active {
-                border-bottom: 3px solid blue;
+            &:hover,&.active {
+                color: #0067C5;
+                border-bottom: 3px solid #0067C5;
             }
         }
     }

@@ -18,9 +18,14 @@ const Status = (props: { value: IStatus }) => {
     return <div>{props.value.status}</div>;
 };
 
-export const StatusBar = () => {
+export enum StatusBarTheme {
+    gray = "gray",    
+    white = "white"
+}
+
+export const StatusBar = (props: {theme?: StatusBarTheme}) => {
     return (
-        <StatusBarWrapper>
+        <StatusBarWrapper theme={props.theme}>
             <UserInfo>
                 <GenderIcon gender={GenderList.female} />
                 <Name>Lille My</Name>
@@ -31,12 +36,12 @@ export const StatusBar = () => {
     );
 };
 
-const StatusBarWrapper = styled.div`
-    background-color: #fff;
+const StatusBarWrapper = styled.div<{theme: StatusBarTheme}>`
+    background-color: ${props => props.theme === StatusBarTheme.gray ? "#F8F8F8": "#fff"};
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 1em;
+    padding: 0.6em 1em;
     line-height: 30px;
 `;
 

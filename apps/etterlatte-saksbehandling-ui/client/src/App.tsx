@@ -11,6 +11,7 @@ import { Container } from "./shared/styled";
 import { Modal } from "./shared/modal/modal";
 import { StatusBar } from "./components/statusbar";
 import { Behandling } from "./components/behandling";
+import { Link } from "react-router-dom";
 
 ws();
 
@@ -27,11 +28,11 @@ function App() {
                         element={
                             // dras ut i egen component
                             <>
-                                <StatusBar />
                                 <Container>
                                     <Grid>
                                         <Cell className={"navds-story-cell"} xs={12} sm={6} lg={4}>
                                             <h1>De etterlatte</h1>
+                                            <Link to="/behandling/personopplysninger">Gå til behandling</Link>
                                         </Cell>
                                     </Grid>
                                 </Container>
@@ -39,7 +40,15 @@ function App() {
                         }
                     />
                     <Route path="/oppgavebenken" element={<Oppgavebenken />} />
-                    <Route path="/behandling" element={<Behandling />} />
+                    <Route
+                        path="/behandling/*"
+                        element={
+                            <>
+                                <StatusBar />
+                                <Behandling />
+                            </>
+                        }
+                    />
                     <Route
                         path="/testside"
                         element={

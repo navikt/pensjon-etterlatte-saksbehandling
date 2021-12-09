@@ -1,19 +1,22 @@
-
-*{
-  box-sizing: border-box;
+* {
+    box-sizing: border-box;
 }
-body{
-  margin: 0;
-  padding: 0;
+body {
+    margin: 0;
+    padding: 0;
 }
 
 #fullbredde .dekorator__container {
-  max-width: 100%;
-  margin: 0 2rem;
+    max-width: 100%;
+    margin: 0 2rem;
 }
 
-
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+ul,
+li {
+    margin: 0;
+    padding: 0;
 }

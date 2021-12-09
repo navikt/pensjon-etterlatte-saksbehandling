@@ -15,14 +15,14 @@ interface IStatus {
 }
 
 const Status = (props: { value: IStatus }) => {
-    return <div></div>;
+    return <div>{props.value.status}</div>;
 };
 
 export const StatusBar = () => {
     return (
         <StatusBarWrapper>
             <UserInfo>
-                <GenderIcon gender={GenderList.male} />
+                <GenderIcon gender={GenderList.female} />
                 <Name>Lille My</Name>
                 <Fnr copy value={"815493 00134"} />
                 <Status value={{ status: PersonStatus.DØD, dato: "19.05.2011" }} />
@@ -33,7 +33,6 @@ export const StatusBar = () => {
 
 const StatusBarWrapper = styled.div`
     background-color: #fff;
-    border-bottom: 1px solid #c6c2bf;
     display: flex;
     flex-direction: row;
     justify-content: space-between;

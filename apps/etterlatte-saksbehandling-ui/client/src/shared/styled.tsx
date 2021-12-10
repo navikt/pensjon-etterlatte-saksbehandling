@@ -13,8 +13,9 @@ export const GridContainer = styled.div`
     height: 100vh;
 `;
 
+
+
 export const Column = styled.div`
-    border-top: 1px solid #c6c2bf;
     &:nth-child(2) {
         border-right: 1px solid #c6c2bf;
         border-left: 1px solid #c6c2bf;

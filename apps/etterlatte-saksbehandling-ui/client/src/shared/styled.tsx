@@ -23,3 +23,12 @@ export const Column = styled.div`
         border-right: none;
     }
 `;
+
+export const Content = styled.div`
+    margin: 0;
+    padding: 0;
+`;
+
+export const ContentHeader = styled.div`
+    padding: 1em;
+`;

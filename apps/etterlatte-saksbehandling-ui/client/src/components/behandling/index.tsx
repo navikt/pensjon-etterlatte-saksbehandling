@@ -1,8 +1,12 @@
 import { NavLink, Routes, Route } from "react-router-dom";
 import styled from "styled-components";
 import { Column, GridContainer } from "../../shared/styled";
+import { Beregne } from "./beregne";
+import { Brev } from "./brev";
 import { Inngangsvilkaar } from "./inngangsvilkaar";
 import { Personopplysninger } from "./personopplysninger";
+import { Utbetalingsoversikt } from "./utbetalingsoversikt";
+import { Vedtak } from "./vedtak";
 
 export const Behandling = () => {
     return (
@@ -43,35 +47,19 @@ export const Behandling = () => {
                     />
                     <Route
                         path="beregne"
-                        element={
-                            <div>
-                                <h1>Beregne</h1>
-                            </div>
-                        }
+                        element={<Beregne />}
                     />
                     <Route
                         path="vedtak"
-                        element={
-                            <div>
-                                <h1>Beregne</h1>
-                            </div>
-                        }
+                        element={<Vedtak />}
                     />
                     <Route
                         path="utbetalingsoversikt"
-                        element={
-                            <div>
-                                <h1>Beregne</h1>
-                            </div>
-                        }
+                        element={<Utbetalingsoversikt />}
                     />
                     <Route
                         path="brev"
-                        element={
-                            <div>
-                                <h1>Beregne</h1>
-                            </div>
-                        }
+                        element={<Brev />}
                     />
                 </Routes>
             </Column>

@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { GenderIcon, GenderList } from "../../shared/icons/genderIcon";
+import { upperCaseFirst } from "../../utils";
 import { Fnr } from "./fnr";
 
 
@@ -15,7 +16,7 @@ interface IStatus {
 }
 
 const Status = (props: { value: IStatus }) => {
-    return <div>{props.value.status}</div>;
+    return <div>{upperCaseFirst(props.value.status)}</div>;
 };
 
 export enum StatusBarTheme {
@@ -30,7 +31,7 @@ export const StatusBar = (props: {theme?: StatusBarTheme}) => {
                 <GenderIcon gender={GenderList.female} />
                 <Name>Lille My</Name>
                 <Fnr copy value={"815493 00134"} />
-                <Status value={{ status: PersonStatus.DØD, dato: "19.05.2011" }} />
+                <Status value={{ status: PersonStatus.ETTERLATT, dato: "19.05.2011" }} />
             </UserInfo>
         </StatusBarWrapper>
     );

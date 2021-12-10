@@ -1,10 +1,10 @@
 import { Content, ContentHeader } from "../../../shared/styled";
 
-export const Personopplysninger = () => {
+export const Vedtak = () => {
     return (
         <Content>
             <ContentHeader>
-                <h1>Personopplysninger</h1>
+                <h1>Vedtak</h1>
             </ContentHeader>
         </Content>
     );

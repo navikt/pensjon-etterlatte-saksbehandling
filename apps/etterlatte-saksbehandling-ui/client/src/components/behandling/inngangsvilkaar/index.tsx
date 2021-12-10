@@ -1,20 +1,20 @@
-import styled from "styled-components";
+import { Content, ContentHeader } from "../../../shared/styled";
 import { Vilkaar } from "./vilkaar";
 
 export const Inngangsvilkaar = () => {
     return (
-        <VilkaarContainer>
-            <h1>inngangsvilkaar</h1>
-            <Vilkaar />
-            <Vilkaar />
-            <Vilkaar />
-            <Vilkaar />
-            <Vilkaar />
-        </VilkaarContainer>
+        <Content>
+            <ContentHeader>
+                <h1>inngangsvilkaar</h1>
+            </ContentHeader>
+            <div>
+                <Vilkaar />
+                <Vilkaar />
+                <Vilkaar />
+                <Vilkaar />
+                <Vilkaar />
+            </div>
+        </Content>
     );
 };
 
-const VilkaarContainer = styled.div`
-    margin: 0;
-    padding: 0;
-`;

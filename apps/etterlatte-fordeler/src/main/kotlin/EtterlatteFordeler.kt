@@ -50,7 +50,6 @@ internal class EtterlatteFordeler(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val gyldigTilDato = OffsetDateTime.parse(packet["@hendelse_gyldig_til"].asText())
-        //val barnFnr = packet["@fnr_soeker"]
 
         if (gyldigTilDato.isBefore(OffsetDateTime.now(klokke))) {
             logger.error("Avbrutt fordeling da hendelsen ikke er gyldig lengre")

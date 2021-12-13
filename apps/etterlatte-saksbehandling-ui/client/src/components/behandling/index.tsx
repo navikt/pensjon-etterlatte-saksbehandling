@@ -132,6 +132,7 @@ const IconButton = styled.div`
 const StegMeny = styled.ul`
     height: 100px;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: flex-end;
     list-style: none;

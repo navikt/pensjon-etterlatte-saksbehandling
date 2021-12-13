@@ -1,6 +1,6 @@
-export const epochToUTC = (parsedToken: any): Date => {
+export const epochToUTC = (epochDate: number): Date => {
     const date = new Date(0);
-    date.setUTCSeconds(parsedToken.exp);
+    date.setUTCSeconds(epochDate);
     return date;
 };
 

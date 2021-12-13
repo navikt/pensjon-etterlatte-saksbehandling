@@ -1,30 +1,15 @@
 import styled from "styled-components";
 import { GenderIcon, GenderList } from "../../shared/icons/genderIcon";
-import { upperCaseFirst } from "../../utils";
 import { Fnr } from "./fnr";
+import { PersonStatus, Status } from "./status";
 
-
-enum PersonStatus {
-    DØD = "død",
-    LEVENDE = "levende",
-    ETTERLATT = "etterlatt",
-}
-
-interface IStatus {
-    status: PersonStatus;
-    dato: String;
-}
-
-const Status = (props: { value: IStatus }) => {
-    return <div>{upperCaseFirst(props.value.status)}</div>;
-};
 
 export enum StatusBarTheme {
-    gray = "gray",    
-    white = "white"
+    gray = "gray",
+    white = "white",
 }
 
-export const StatusBar = (props: {theme?: StatusBarTheme}) => {
+export const StatusBar = (props: { theme?: StatusBarTheme }) => {
     return (
         <StatusBarWrapper theme={props.theme}>
             <UserInfo>
@@ -37,11 +22,8 @@ export const StatusBar = (props: {theme?: StatusBarTheme}) => {
     );
 };
 
-const StatusBarWrapper = styled.div<{theme: StatusBarTheme}>`
-    background-color: ${props => props.theme === StatusBarTheme.gray ? "#F8F8F8": "#fff"};
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+const StatusBarWrapper = styled.div<{ theme: StatusBarTheme }>`
+    background-color: ${(props) => (props.theme === StatusBarTheme.gray ? "#F8F8F8" : "#fff")};
     padding: 0.6em 1em;
     line-height: 30px;
 `;
@@ -50,7 +32,8 @@ const UserInfo = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    width: 300px;
+    align-items: baseline;
+    width: 400px;
 `;
 
 const Name = styled.div`

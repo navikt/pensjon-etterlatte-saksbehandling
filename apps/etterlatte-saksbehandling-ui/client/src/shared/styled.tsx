@@ -8,15 +8,14 @@ export const Container = styled.div`
 `;
 
 export const GridContainer = styled.div`
-    display: grid;
-    grid-template-columns: 1fr 3fr 1fr;
+    display: flex;
     height: 100vh;
 `;
 
-
-
 export const Column = styled.div`
+    min-width: 300px;
     &:nth-child(2) {
+        flex-grow: 1;
         border-right: 1px solid #c6c2bf;
         border-left: 1px solid #c6c2bf;
     }

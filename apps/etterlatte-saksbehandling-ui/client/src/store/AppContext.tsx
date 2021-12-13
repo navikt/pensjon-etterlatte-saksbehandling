@@ -23,7 +23,7 @@ export const initialState: IAppState = {
   userReducer: userReducerInitialState
 };
 
-const reducer = combineReducers({ menuReducer, userReducer });
+export const reducer = combineReducers({ menuReducer, userReducer });
 
 export const AppContext = createContext<IAppContext>({state: initialState, dispatch: () => {}});
 

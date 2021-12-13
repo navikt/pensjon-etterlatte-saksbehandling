@@ -10,6 +10,7 @@ export const menuReducerInitialState: IMenuReducer = {
 
 export const menuReducer = (state: IMenuReducer, action: IAction) => {
   switch (action.type) {
+   
     case "toggle":
       return {
         ...state,

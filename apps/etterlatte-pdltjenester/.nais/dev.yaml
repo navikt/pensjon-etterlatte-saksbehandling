@@ -37,8 +37,6 @@ spec:
       value: "INFO"
     - name: NAV_CONSUMER_ID
       value: "srvbarnepensjon"
-  ingresses:
-    - "https://etterlatte-pdltjenester.dev.adeo.no"
   accessPolicy:
     outbound:
       rules:

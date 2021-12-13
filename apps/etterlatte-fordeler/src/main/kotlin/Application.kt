@@ -1,4 +1,4 @@
-package no.nav.etterlatte.prosess
+package no.nav.etterlatte
 
 import no.nav.helse.rapids_rivers.RapidApplication
 
@@ -8,7 +8,7 @@ fun main() {
     }.also { env ->
         AppBuilder(env).also { appBuilder ->
             RapidApplication.create(env)
-                .also {EtterlatteFordeler(it, AppBuilder(env).createPersonService()) }
+                .also { EtterlatteFordeler(it, AppBuilder(env).createPersonService()) }
                 .start()
         }
     }

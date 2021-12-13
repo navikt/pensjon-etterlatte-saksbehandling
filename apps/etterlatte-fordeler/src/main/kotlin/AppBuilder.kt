@@ -1,4 +1,4 @@
-package no.nav.etterlatte.prosess
+package no.nav.etterlatte
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp

@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: selvbetjening-api
+  name: etterlatte-pdltjenester
   namespace: etterlatte
   labels:
     team: etterlatte

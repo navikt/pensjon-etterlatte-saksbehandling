@@ -1,4 +1,4 @@
-package no.nav.etterlatte.prosess
+package no.nav.etterlatte
 
 import io.ktor.client.features.ResponseException
 import io.ktor.client.request.accept

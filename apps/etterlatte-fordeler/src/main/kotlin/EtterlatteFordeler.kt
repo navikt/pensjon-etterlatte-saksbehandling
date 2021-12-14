@@ -27,14 +27,12 @@ internal class EtterlatteFordeler(
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
     private lateinit var barn: PersonResponse
     val kriterier = listOf(
-        Kriterie("Ikke vært i norge hele livet") { bosattNorgeHeleLivet() },
+        Kriterie("Bosatt Utland") { bosattUtland() },
         Kriterie("Barn er for gammelt") { barnForGammel() }
     )
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "soeknad_innsendt") }
-            //TODO valideringen under funkerer ikke og må fikses.
-            // validate { it.demandValue("@skjema_info"."@soeknad_type", "barnepensjon") }
             validate { it.requireKey("@skjema_info") }
             validate { it.requireKey("@template") }
             validate { it.requireKey("@journalpostInfo") }
@@ -55,18 +53,28 @@ internal class EtterlatteFordeler(
             logger.error("Avbrutt fordeling da hendelsen ikke er gyldig lengre")
             return
         }
-        //TODO
-        // Hente ut person her, med @fnr_soeker
-        // Lagres i et personResponse-objekt
+
+        if(packet["@skjema_info"]["soeknad_type"].asText() != "barnepensjon")
+        {
+            logger.info("Avbrutt fordeling da søknad ikke er barnepensjon")
+            return
+        }
         runBlocking {
              barn = personService.hentPerson( Foedselsnummer.of(packet["@fnr_soeker"].asText()))
         }
         try {
-            val fordelResponse = fordel(packet)
-            packet["@soeknad_fordelt"] = fordelResponse
-            packet["@event_name"] = "ey_fordelt"
-            logger.info("Fant en sak til Saksbehandling POC")
-            context.publish(packet.toJson())
+            val aktuelleSaker = fordel(packet)
+            if(aktuelleSaker.kandidat) {
+                packet["@soeknad_fordelt"] = aktuelleSaker.kandidat
+                packet["@event_name"] = "ey_fordelt"
+                logger.info("Fant en sak til Saksbehandling POC")
+                context.publish(packet.toJson())
+            }
+            else
+            {
+                logger.info("Avbrutt fordeling, kriterier: " + aktuelleSaker.forklaring.toString())
+                return
+            }
         } catch (err: ResponseException) {
             logger.error("duplikat: ", err)
             logger.error(packet["@soeknad_fordelt"].asText())
@@ -80,22 +88,17 @@ internal class EtterlatteFordeler(
         return true
     }
 
-    private fun hentPersonTest(): Boolean {
-        //TODO
-        return true
-    }
-
     private fun barnForGammel(): Boolean {
-        //TODO
         return barn.alder() > 15
     }
 
-    private fun bosattNorgeHeleLivet(): Boolean {
+    private fun bosattUtland(): Boolean {
         //TODO
-        return true
+        // bytte ut sjekk av statsborgerskap med sjekk av utlandsopphold
+        return barn.data!!.hentPerson!!.statsborgerskap[0].land.uppercase() != "NORGE"
 
     }
-    data class fordelrespons (
+    data class FordelRespons (
         val kandidat: Boolean,
         val forklaring: List<String>
     )
@@ -104,11 +107,11 @@ internal class EtterlatteFordeler(
         fun blirOppfyltAv(message: JsonMessage):Boolean = sjekk(message)
     }
 
-    private fun fordel(packet: JsonMessage){
+    private fun fordel(packet: JsonMessage): FordelRespons{
         return kriterier
             .filter{it.blirOppfyltAv(packet)}
             .map { it.forklaring }
-            .let { fordelrespons(it.isEmpty(), it) }
+            .let { FordelRespons(it.isEmpty(), it) }
     }
 }
 typealias Sjekk = (JsonMessage)->Boolean

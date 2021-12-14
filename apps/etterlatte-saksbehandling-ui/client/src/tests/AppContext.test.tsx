@@ -21,6 +21,5 @@ describe("test appcontext", () => {
 
         const newState = reducer(result.current.state, {type: "toggle"});
         expect(newState.menuReducer.open).toBe(true);
-
     });
 });

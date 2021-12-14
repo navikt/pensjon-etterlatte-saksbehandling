@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { Checkmark } from "../../../shared/icons/checkmark";
+import { Status, StatusIcon } from "../../../shared/icons/statusIcon";
 import { WorkerIcon } from "../../../shared/icons/workerIcon";
 import { upperCaseFirst } from "../../../utils";
 
@@ -9,20 +9,23 @@ export enum VilkaarStatus {
     IKKE_OPPFYLT = "ikke oppfylt",
 }
 export interface IVilkaarProps {
-    vilkaarType: string;
-    vilkaarStatus: VilkaarStatus;
+    vilkaar: {
+        vilkaarDone: Status;
+        vilkaarType: string;
+        vilkaarStatus: VilkaarStatus;
+    };
 }
 
 export const Vilkaar = (props: IVilkaarProps) => {
     return (
         <VilkaarWrapper>
             <div className="flex-width">
-                <Checkmark />
-                <div className="padding">{props.vilkaarType}</div>
+                <StatusIcon status={props.vilkaar.vilkaarDone} />
+                <div className="padding">{props.vilkaar.vilkaarType}</div>
             </div>
             <div className="flex-width">
                 <WorkerIcon />
-                <div className="padding">{upperCaseFirst(props.vilkaarStatus)}</div>
+                <div className="padding">{upperCaseFirst(props.vilkaar.vilkaarStatus)}</div>
             </div>
             <div>
                 <Link to="/rediger">Rediger</Link>

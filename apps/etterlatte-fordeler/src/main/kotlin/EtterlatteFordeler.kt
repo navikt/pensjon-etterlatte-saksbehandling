@@ -65,6 +65,7 @@ internal class EtterlatteFordeler(
             val fordelResponse = fordel(packet)
             packet["@soeknad_fordelt"] = fordelResponse
             packet["@event_name"] = "ey_fordelt"
+            logger.info("Fant en sak til Saksbehandling POC")
             context.publish(packet.toJson())
         } catch (err: ResponseException) {
             logger.error("duplikat: ", err)

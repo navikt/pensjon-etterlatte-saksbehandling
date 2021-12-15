@@ -1,6 +1,13 @@
+@import "~nav-frontend-skjema-style/dist/main.css";
+@import "~nav-frontend-typografi-style/dist/main.css";
+@import "~nav-frontend-core/dist/main.css";
+@import "~@navikt/ds-css";
+
+
 * {
     box-sizing: border-box;
 }
+
 body {
     margin: 0;
     padding: 0;

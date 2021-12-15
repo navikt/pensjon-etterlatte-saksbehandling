@@ -1524,6 +1524,11 @@
     react-popper "^2.2.5"
     uuid "^8.3.2"
 
+"@navikt/fnrvalidator@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.npmjs.org/@navikt/fnrvalidator/-/fnrvalidator-1.1.4.tgz"
+  integrity sha512-IroYFqa8PpzVxtIk6ifeEQBFzsI2QJX/FSIQyBtJvpp2D8Cb5Z9+hGNFppCILWR+QYbY8Dkk48la7K5fPGXeWQ==
+
 "@navikt/navspa@^4.0.0":
   version "4.0.0"
   resolved "https://registry.npmjs.org/@navikt/navspa/-/navspa-4.0.0.tgz"
@@ -7389,6 +7394,11 @@ lodash.templatesettings@^4.0.0:
   dependencies:
     lodash._reinterpolate "^3.0.0"
 
+lodash.throttle@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.npmjs.org/lodash.throttle/-/lodash.throttle-4.1.1.tgz"
+  integrity sha1-wj6RtxAkKscMN/HhzaknTMOb8vQ=
+
 lodash.uniq@^4.5.0:
   version "4.5.0"
   resolved "https://registry.npmjs.org/lodash.uniq/-/lodash.uniq-4.5.0.tgz"
@@ -7797,6 +7807,55 @@ natural-compare@^1.4.0:
   version "1.4.0"
   resolved "https://registry.npmjs.org/natural-compare/-/natural-compare-1.4.0.tgz"
   integrity sha1-Sr6/7tdUHywnrPspvbvRXI1bpPc=
+
+nav-frontend-core@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.npmjs.org/nav-frontend-core/-/nav-frontend-core-6.0.1.tgz"
+  integrity sha512-zFAPRXgmS3Nhu5SyafsTnCFg2/PEbrUF+g1xGo+pKIxGfJgCeLi47gPSe7Kjeh3IwIo0ex3cA7tfbUIWOY65dQ==
+
+nav-frontend-js-utils@^1.0.20:
+  version "1.0.20"
+  resolved "https://registry.npmjs.org/nav-frontend-js-utils/-/nav-frontend-js-utils-1.0.20.tgz"
+  integrity sha512-rCEbgtLmk/95TJeke3Njgm0lBJuBa0N8p8h5Oqhxjov529UjTT2Vx4XJzjQd7/ApgeCkdc5DB9GW5jGTEFoYTA==
+  dependencies:
+    lodash.throttle "^4.1.1"
+
+nav-frontend-lenker-style@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/nav-frontend-lenker-style/-/nav-frontend-lenker-style-2.0.1.tgz"
+  integrity sha512-F9UVJpN2i9tepmp/61UvEN5U7O2eHGIYBcVJdUp678BtokXH4SNt7G32y+fqOxW87vWaG1FKR1zXpWf5saw02g==
+
+nav-frontend-lenker@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/nav-frontend-lenker/-/nav-frontend-lenker-2.0.1.tgz"
+  integrity sha512-OYHNKMZE6W2T1DvBdfeR7m6EWKYb27s013RhrmDT9P2j3paC6b0e/6nYuepftHyE4ydxv2GJUKTr6byRvVlmzg==
+
+nav-frontend-paneler-style@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/nav-frontend-paneler-style/-/nav-frontend-paneler-style-2.0.1.tgz"
+  integrity sha512-ggVdcEmaLJn4xNlnApcyVrK8Mz4SsG1iGYdEMgrvm/Nijwsk431tseizvXoUqdsg3+yhqSYvC55/Qix6w3npuQ==
+
+nav-frontend-skjema-style@3.0.1:
+  version "3.0.1"
+  resolved "https://registry.npmjs.org/nav-frontend-skjema-style/-/nav-frontend-skjema-style-3.0.1.tgz"
+  integrity sha512-RUJ1rfsDX1I6JChWyVPF70vTrVijISnOSjvH+8fA8HCNygZ16cG4FzO8SRzARqkJuzlND4zaqJkqNTENOLDBaQ==
+
+nav-frontend-skjema@4.0.1:
+  version "4.0.1"
+  resolved "https://registry.npmjs.org/nav-frontend-skjema/-/nav-frontend-skjema-4.0.1.tgz"
+  integrity sha512-fTQP0l21aR6tYYp5Sgof3TnUH73js1MJ//20ElRHWgXtzkINzAbZDMvCm8llxNCOJQfekm+pRGoDj6fiSsPBPQ==
+
+nav-frontend-typografi-style@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/nav-frontend-typografi-style/-/nav-frontend-typografi-style-2.0.1.tgz"
+  integrity sha512-9vb94WbB4+w30ZNg3/AqgK/fsduU5eqlkY5kXTPGcRcvHpf9l8/nfQI3aD0xSETw8q8zVOwHT00XPc4jkPK9WA==
+  dependencies:
+    nav-frontend-core "^6.0.1"
+
+nav-frontend-typografi@4.0.1:
+  version "4.0.1"
+  resolved "https://registry.npmjs.org/nav-frontend-typografi/-/nav-frontend-typografi-4.0.1.tgz"
+  integrity sha512-zJrvysIWqZm0HSJqqgc1G5Lqr8bLO16B9Pg/FW7+mJQGGz/iqPhX5vvIFTXqAlXVo95qImoZ72uiWiHHRdGhPQ==
 
 negotiator@0.6.2:
   version "0.6.2"
@@ -9175,6 +9234,11 @@ prepend-http@^1.0.0:
   version "1.0.4"
   resolved "https://registry.npmjs.org/prepend-http/-/prepend-http-1.0.4.tgz"
   integrity sha1-1PRWKwzjaW5BrFLQ4ALlemNdxtw=
+
+prettier@^2.5.1:
+  version "2.5.1"
+  resolved "https://registry.npmjs.org/prettier/-/prettier-2.5.1.tgz"
+  integrity sha512-vBZcPRUR5MZJwoyi3ZoyQlc1rXeEck8KgeC9AwwOn+exuxLxq5toTRDTSaVrXHxelDMHy9zlicw8u66yxoSUFg==
 
 pretty-bytes@^5.3.0:
   version "5.6.0"

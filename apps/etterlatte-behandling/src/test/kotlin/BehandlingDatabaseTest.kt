@@ -16,7 +16,7 @@ import javax.sql.DataSource
 internal class BehandlingDaoIntegrationTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
-
+    
 
     private lateinit var dataSource: DataSource
 

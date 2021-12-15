@@ -84,7 +84,7 @@ internal class RealBehandlingServiceTest {
         Kontekst.set(Context(Self("test"), mockk()))
         val sut = RealBehandlingService(behandlingerMock, mockk())
         val id = UUID.randomUUID()
-        val vilkårsprøvd_behandling = Behandling(id, "1", emptyList(), objectMapper.createObjectNode(), null, false)
+        val vilkårsprøvd_behandling = Behandling(id, "1", emptyList(), Vilkårsprøving(emptyList(), VilkårsPrøvingResultat.INNVILGET, ""), null, false)
         every { behandlingerMock.hent(id) } returns vilkårsprøvd_behandling
 
         Assertions.assertThrows(IllegalArgumentException::class.java){sut.leggTilGrunnlag(id, objectMapper.createObjectNode(), "trygdetid", Opplysning.Saksbehandler("S01"))}

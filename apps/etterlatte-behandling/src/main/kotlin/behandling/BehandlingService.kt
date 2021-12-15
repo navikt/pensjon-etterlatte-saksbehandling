@@ -14,8 +14,8 @@ interface BehandlingService {
     fun hentBehandlinger(): List<Behandling>
     fun startBehandling(sak: String): Behandling
     fun leggTilGrunnlag(behandling: UUID, data: ObjectNode, type: String, kilde: Opplysning.Kilde? = null): UUID
-    fun vilkårsprøv(behandling: UUID, vilkårsprøving: ObjectNode)
-    fun beregn(behandling: UUID, beregning: ObjectNode)
+    fun vilkårsprøv(behandling: UUID, vilkårsprøving: Vilkårsprøving)
+    fun beregn(behandling: UUID, beregning: Beregning)
     fun ferdigstill(behandling: UUID)
 }
 
@@ -39,18 +39,16 @@ class RealBehandlingService(private val behandlinger: BehandlingDao, private val
             ?: throw IllegalStateException("forsøker å lagre vilkårsprøving på behandling som ikke eksisterer")
         require(lagretBehandling.vilkårsprøving == null)
 
-
-
         val opplysning = Opplysning(UUID.randomUUID(), kildeFraRequestContekst(kilde), type, objectMapper.createObjectNode(), data)
         opplysninger.nyOpplysning(opplysning)
         opplysninger.leggOpplysningTilBehandling(lagretBehandling.id, opplysning.id)
         return opplysning.id
     }
 
-    override fun vilkårsprøv(behandling: UUID, vilkårsprøving: ObjectNode) {
+    override fun vilkårsprøv(behandling: UUID, vilkårsprøving: Vilkårsprøving) {
         val lagretBehandling = behandlinger.hent(behandling)?: throw IllegalStateException("forsøker å lagre vilkårsprøving på behandling som ikke eksisterer")
         require(lagretBehandling.vilkårsprøving == null)
-        behandlinger.lagreVilkarsproving(lagretBehandling.copy(vilkårsprøving = vilkårsprøving.put("ansvarlig", Kontekst.get().AppUser.name())))
+        behandlinger.lagreVilkarsproving(lagretBehandling.copy(vilkårsprøving = vilkårsprøving.copy(ansvarlig = Kontekst.get().AppUser.name())))
 
     }
 
@@ -61,11 +59,13 @@ class RealBehandlingService(private val behandlinger: BehandlingDao, private val
             is Self -> requireNotNull(oppgittKilde)
             else -> throw IllegalArgumentException()
         }
-
     }
 
-    override fun beregn(behandling: UUID, beregning: ObjectNode) {
-        TODO("Not yet implemented")
+    override fun beregn(behandling: UUID, beregning: Beregning) {
+        val lagretBehandling = requireNotNull(behandlinger.hent(behandling))
+        require(!lagretBehandling.fastsatt)
+        requireNotNull(lagretBehandling.vilkårsprøving)
+        behandlinger.lagreBeregning(lagretBehandling.copy(beregning = beregning))
     }
 
     override fun ferdigstill(behandling: UUID) {

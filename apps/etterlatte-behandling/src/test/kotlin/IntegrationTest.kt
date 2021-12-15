@@ -68,12 +68,32 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.OK, it.response.status())
             }
 
+
+            handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/vilkaarsproeving"){
+                addAuth()
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(objectMapper.writeValueAsString(Vilkårsprøving(emptyList(), VilkårsPrøvingResultat.INNVILGET, "Johan")))
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.response.status())
+            }
+
+            handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/beregning"){
+                addAuth()
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(objectMapper.writeValueAsString(Beregning(emptyList(), 123)))
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.response.status())
+            }
+
+
+
             handleRequest(HttpMethod.Get, "/behandlinger/$behandlingId"){
                 addAuth()
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {
                 assertEquals(HttpStatusCode.OK, it.response.status())
-                println(it.response.content)
+                println(it.response.content?.let { objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(
+                    objectMapper.readTree(it)) })
                 val behandling: Behandling = (objectMapper.readValue(it.response.content!!))
                 assertEquals("trygdetid",behandling.grunnlag[0].opplysningType)
                 assertEquals(22,behandling.grunnlag[0].opplysning["tt_anv"].numberValue().toInt())

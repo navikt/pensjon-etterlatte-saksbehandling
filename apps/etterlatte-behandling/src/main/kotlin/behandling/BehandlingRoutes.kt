@@ -13,7 +13,7 @@ import java.util.*
 
 fun Route.behandlingRoutes(service: BehandlingService){
     get("/behandlinger") {
-        call.respond(inTransaction { service.hentBehandlinger()})
+        call.respond(inTransaction { service.hentBehandlinger().map { BehandlingSammendrag(it.id, it.sak, it.status) }.let { BehandlingSammendragListe(it) }})
     }
 
     post("/behandlinger") { //Søk
@@ -22,16 +22,16 @@ fun Route.behandlingRoutes(service: BehandlingService){
     }
     route("/behandlinger/{behandlingsid}") {
         get {
-            call.respond(inTransaction { service.hentBehandling(behandlingsId)}?: HttpStatusCode.NotFound)
+            call.respond(inTransaction { service.hentBehandling(behandlingsId)}?.let { DetaljertBehandling(it.id, it.sak, it.grunnlag, it.vilkårsprøving, it.beregning, it.fastsatt) }?: HttpStatusCode.NotFound)
         }
         post("vilkaarsproeving") {
-            val body = call.receive<ObjectNode>()
+            val body = call.receive<Vilkårsprøving>()
             inTransaction { service.vilkårsprøv(behandlingsId, body) }
             call.respond(HttpStatusCode.OK)
 
         }
         post("beregning") {
-            val body = call.receive<ObjectNode>()
+            val body = call.receive<Beregning>()
             inTransaction { service.beregn(behandlingsId, body) }
             call.respond(HttpStatusCode.OK)
 

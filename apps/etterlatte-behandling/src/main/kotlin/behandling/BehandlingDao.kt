@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.database.singleOrNull
 import no.nav.etterlatte.database.toList
 
@@ -18,8 +19,8 @@ class BehandlingDao(private val connection: ()->Connection) {
                 getObject(1) as UUID,
                 getLong(2).toString(),
                 emptyList(),
-                getString(3).deSerialize(),
-                getString(4).deSerialize()
+                getString(3)?.let { objectMapper.readValue(it) },
+                getString(4)?.let { objectMapper.readValue(it) }
             ) }
     }
 
@@ -30,8 +31,8 @@ class BehandlingDao(private val connection: ()->Connection) {
                 getObject(1) as UUID,
                 getLong(2).toString(),
                 emptyList<Opplysning>(),
-                getString(3).deSerialize(),
-                getString(4).deSerialize()
+                objectMapper.readValue(getString(3)),
+                objectMapper.readValue(getString(4))
             ) }
     }
     fun opprett(behandling: Behandling){
@@ -42,14 +43,14 @@ class BehandlingDao(private val connection: ()->Connection) {
     }
     fun lagreBeregning(behandling: Behandling){
         val stmt = connection().prepareStatement("UPDATE behandling SET beregning = ? WHERE id = ?")
-        stmt.setObject(1, behandling.beregning.serialize())
+        stmt.setObject(1, objectMapper.writeValueAsString(behandling.beregning))
         stmt.setObject(2, behandling.id)
         require(stmt.executeUpdate() == 1)
     }
 
     fun lagreVilkarsproving(behandling: Behandling){
         val stmt = connection().prepareStatement("UPDATE behandling SET vilkaarsproving = ? WHERE id = ?")
-        stmt.setObject(1, behandling.vilkårsprøving.serialize())
+        stmt.setObject(1, objectMapper.writeValueAsString(behandling.vilkårsprøving))
         stmt.setObject(2, behandling.id)
         require(stmt.executeUpdate() == 1)
     }

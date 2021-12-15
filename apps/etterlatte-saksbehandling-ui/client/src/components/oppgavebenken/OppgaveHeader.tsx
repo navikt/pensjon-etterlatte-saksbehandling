@@ -62,7 +62,9 @@ const ColumnFilters: React.FC<Props> = ({ oppgaveFelter, settOppgaveFelter, sett
                   oppgaveFelter={oppgaveFelter}
                   settOppgaveFelter={settOppgaveFelter}
                 />
-              )
+              );
+            default: 
+                return <div />
           }
         })}
     </FilterWrapper>

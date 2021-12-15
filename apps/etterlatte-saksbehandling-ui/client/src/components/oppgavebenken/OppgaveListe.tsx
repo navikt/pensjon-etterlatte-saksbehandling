@@ -18,6 +18,7 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter }) => {
 
   useEffect(() => {
     setGlobalFilter(globalFilter)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [globalFilter])
 
   return (

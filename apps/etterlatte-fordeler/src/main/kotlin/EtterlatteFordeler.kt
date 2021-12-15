@@ -6,6 +6,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.util.toUpperCasePreservingASCIIRules
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -53,8 +54,9 @@ internal class EtterlatteFordeler(
             logger.error("Avbrutt fordeling da hendelsen ikke er gyldig lengre")
             return
         }
-
-        if(packet["@skjema_info"]["soeknad_type"].asText() != "barnepensjon")
+        //TODO denne må skrives om til å håndtere manglende soeknads_type
+        //TODO løfte opp konstant
+        if(packet["@skjema_info"]["soeknadsType"].asText() != "Barnepensjon")
         {
             logger.info("Avbrutt fordeling da søknad ikke er barnepensjon")
             return
@@ -95,7 +97,7 @@ internal class EtterlatteFordeler(
     private fun bosattUtland(): Boolean {
         //TODO
         // bytte ut sjekk av statsborgerskap med sjekk av utlandsopphold
-        return barn.data!!.hentPerson!!.statsborgerskap[0].land.uppercase() != "NORGE"
+        return barn.data!!.hentPerson!!.statsborgerskap[0].land.uppercase() != "NOR"
 
     }
     data class FordelRespons (

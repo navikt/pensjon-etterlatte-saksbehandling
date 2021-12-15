@@ -16,9 +16,12 @@
     "journlanfoerendeEnhet": null
   },
   "@lagret_soeknad_id":"12",
-  "@hendelse_gyldig_til":"2022-08-27T10:51:33.661+02:00",
+  "@hendelse_gyldig_til":"2025-08-27T10:51:33.661+02:00",
+  "@journalpostInfo": "tull",
+  "@adressebeskyttelse": "tull",
+  "@fnr_soeker": "11057523044",
   "@skjema_info": {
-    "soeknadsType": "Gjenlevendepensjon",
+    "soeknadsType": "Barnepensjon",
     "søknadInnhold": {
       "forNav": {
         "saksnummer": 123,

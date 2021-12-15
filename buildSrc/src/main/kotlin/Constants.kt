@@ -1,4 +1,5 @@
 import org.codehaus.groovy.tools.shell.util.Logger.io
+import org.jetbrains.kotlin.com.google.gson.Gson
 
 object NavFelles {
     const val RapidAndRivers = "com.github.navikt:rapids-and-rivers:20210617121814-3e67e4d"
@@ -50,6 +51,7 @@ object Jackson {
     const val DatatypeJdk8 = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$version"
     const val ModuleKotlin = "com.fasterxml.jackson.module:jackson-module-kotlin:$version"
 }
+
 
 object Jupiter {
     private const val version = "5.7.2"

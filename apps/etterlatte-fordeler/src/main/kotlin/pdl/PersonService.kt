@@ -18,11 +18,13 @@ class PersonService(private val klient: Pdl) {
      *  Gir verdi [Gradering.UGRADERT] dersom ingenting er funnet.
      */
     suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse {
+        //TODO exception håndteringen virker ikke
         val person = klient.hentPerson(fnr) ?: throw Exception("Fant ingen personer i PDL")
 
         return person
-            .also { logger.info("Gradering vurdert til $it") }
+            .also { logger.info("Person funnet") }
     }
+    //TODO Fjerne?
     suspend fun hentAlderForPerson(fnr: Foedselsnummer): Int {
         val foedselsAar = klient.hentPerson(fnr).data?.hentPerson?.foedsel?.mapNotNull  { it.foedselsaar }
         //TODO

@@ -1,7 +1,7 @@
 import styled from "styled-components";
-import { Status } from "../../../shared/icons/statusIcon";
 import { Content } from "../../../shared/styled";
-import { Vilkaar, VilkaarStatus } from "./vilkaar";
+import { Status, VilkaarStatus } from "./types";
+import { Vilkaar } from "./vilkaar";
 
 export const Inngangsvilkaar = () => {
     return (
@@ -11,7 +11,7 @@ export const Inngangsvilkaar = () => {
                     vilkaar={{
                         vilkaarDone: Status.DONE,
                         vilkaarType: "Dødsfall",
-                        vilkaarStatus: VilkaarStatus.IKKE_OPPFYLT,
+                        vilkaarStatus: VilkaarStatus.OPPFYLT,
                     }}
                 />
                 <Vilkaar
@@ -25,7 +25,7 @@ export const Inngangsvilkaar = () => {
                     vilkaar={{
                         vilkaarDone: Status.DONE,
                         vilkaarType: "Foreldreansvar",
-                        vilkaarStatus: VilkaarStatus.IKKE_OPPFYLT,
+                        vilkaarStatus: VilkaarStatus.OPPFYLT,
                     }}
                 />
                 <Vilkaar
@@ -53,7 +53,7 @@ export const Inngangsvilkaar = () => {
                     vilkaar={{
                         vilkaarDone: Status.DONE,
                         vilkaarType: "Medlemsskap",
-                        vilkaarStatus: VilkaarStatus.IKKE_OPPFYLT,
+                        vilkaarStatus: VilkaarStatus.OPPFYLT,
                     }}
                 />
             </VilkaarListe>

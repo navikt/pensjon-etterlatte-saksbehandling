@@ -1,9 +1,6 @@
 import styled from "styled-components";
+import { Status } from "../../components/behandling/inngangsvilkaar/types";
 
-export enum Status {
-    DONE = "done",
-    NOT_DONE = "not done",
-}
 
 export const StatusIcon = (props: { status: Status }) => {
     return (

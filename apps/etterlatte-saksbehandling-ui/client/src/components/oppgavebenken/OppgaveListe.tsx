@@ -1,20 +1,25 @@
 import React, { useEffect } from 'react'
 import 'react-table'
 import { useTable, Column, useFilters, useGlobalFilter } from 'react-table'
-import { IOppgave } from '../../typer/oppgavebenken'
+import { FilterPar, IOppgave } from '../../typer/oppgavebenken'
 
 type Props = {
   columns: ReadonlyArray<Column<IOppgave>>
   data: ReadonlyArray<IOppgave>
   globalFilter: string
+  filterPar: Array<FilterPar>
 }
 
-const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter }) => {
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow, setGlobalFilter } = useTable(
+const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar }) => {
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow, setGlobalFilter, setAllFilters } = useTable(
     { columns, data },
     useFilters,
     useGlobalFilter
   )
+
+  useEffect(() => {
+    setAllFilters(filterPar)
+  }, [filterPar])
 
   useEffect(() => {
     setGlobalFilter(globalFilter)

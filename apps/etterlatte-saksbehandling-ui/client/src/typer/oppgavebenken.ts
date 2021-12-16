@@ -58,6 +58,11 @@ export interface SelectFilter {
   filter: EnhetFilter | StatusFilter | PrioritetFilter
 }
 
+export interface FilterPar {
+  id: string
+  value: string | undefined
+}
+
 export interface IPar {
   id: string
   navn: string

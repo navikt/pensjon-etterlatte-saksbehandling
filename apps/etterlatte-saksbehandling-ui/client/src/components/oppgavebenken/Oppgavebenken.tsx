@@ -3,7 +3,7 @@ import OppgaveHeader from './OppgaveHeader'
 import OppgaveListe from './OppgaveListe'
 
 import styled from 'styled-components'
-import { IOppgave } from '../../typer/oppgavebenken'
+import { FilterPar, IOppgave } from '../../typer/oppgavebenken'
 import { Column } from 'react-table'
 import { kolonner } from './OppgaveUtils'
 import { initialOppgaveFelter, IOppgaveFelter } from './oppgavefelter'
@@ -18,12 +18,24 @@ const OppgavebenkContainer = styled.div`
 const Oppgavebenken = () => {
   const [lasterOppgaver, settLasterOppgaver] = useState(true)
   const [oppgaver, settOppgaver] = useState<ReadonlyArray<IOppgave>>([])
-
   const [oppgaveFelter, settOppgaveFelter] = useState<IOppgaveFelter>(initialOppgaveFelter())
-
-  //const [oppgaveFilter, settOppgaveFilter] = useState<IOppgaveFelter>()
-
   const [globalFilter, settGlobalFilter] = useState<string>('')
+  const [filterPar, settFilterPar] = useState<Array<FilterPar>>([])
+
+  useEffect(() => {
+    const filterPar = hentFilterFraOppgaveObject(oppgaveFelter)
+    console.log(filterPar)
+    settFilterPar(filterPar)
+  }, [oppgaveFelter])
+
+  const hentFilterFraOppgaveObject = (oppgaveFelter: IOppgaveFelter): Array<FilterPar> => {
+    const setValue = (value: string | undefined) => {
+      return value === 'VELG' || value === '' ? undefined : value
+    }
+    return Object.values(oppgaveFelter)
+      .filter((felt) => felt.filter)
+      .map((felt) => ({ id: felt.noekkel, value: setValue(felt.filter?.selectedValue) }))
+  }
 
   useEffect(() => {
     hentOppgaver()
@@ -51,7 +63,7 @@ const Oppgavebenken = () => {
             settOppgaveFelter={settOppgaveFelter}
             settGlobalFilter={settGlobalFilter}
           />
-          <OppgaveListe columns={columns} data={data} globalFilter={globalFilter} />
+          <OppgaveListe columns={columns} data={data} globalFilter={globalFilter} filterPar={filterPar} />
         </>
       )}
     </OppgavebenkContainer>

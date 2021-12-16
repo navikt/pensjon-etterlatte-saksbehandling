@@ -6,6 +6,7 @@ include(
     "apps:etterlatte-pdltjenester",
     "apps:etterlatte-api",
     "apps:etterlatte-behandling",
+    "apps:etterlatte-vilkaar",
     "libs:ktorclient-auth-clientcredentials",
     "libs:common"
 )

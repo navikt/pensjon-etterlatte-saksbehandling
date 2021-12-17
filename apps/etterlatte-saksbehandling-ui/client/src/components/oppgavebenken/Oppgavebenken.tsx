@@ -16,16 +16,15 @@ const OppgavebenkContainer = styled.div`
 `
 
 const Oppgavebenken = () => {
-  const [lasterOppgaver, settLasterOppgaver] = useState(true)
-  const [oppgaver, settOppgaver] = useState<ReadonlyArray<IOppgave>>([])
-  const [oppgaveFelter, settOppgaveFelter] = useState<IOppgaveFelter>(initialOppgaveFelter())
-  const [globalFilter, settGlobalFilter] = useState<string>('')
-  const [filterPar, settFilterPar] = useState<Array<FilterPar>>([])
+  const [lasterOppgaver, setLasterOppgaver] = useState(true)
+  const [oppgaver, setOppgaver] = useState<ReadonlyArray<IOppgave>>([])
+  const [oppgaveFelter, setOppgaveFelter] = useState<IOppgaveFelter>(initialOppgaveFelter())
+  const [globalFilter, setGlobalFilter] = useState<string | undefined>('')
+  const [filterPar, setFilterPar] = useState<Array<FilterPar>>([])
 
   useEffect(() => {
     const filterPar = hentFilterFraOppgaveObject(oppgaveFelter)
-    console.log(filterPar)
-    settFilterPar(filterPar)
+    setFilterPar(filterPar)
   }, [oppgaveFelter])
 
   const hentFilterFraOppgaveObject = (oppgaveFelter: IOppgaveFelter): Array<FilterPar> => {
@@ -40,14 +39,14 @@ const Oppgavebenken = () => {
   useEffect(() => {
     hentOppgaver()
       .then((oppgaver: ReadonlyArray<IOppgave>) => {
-        settOppgaver(oppgaver)
-        settLasterOppgaver(false)
+        setOppgaver(oppgaver)
+        setLasterOppgaver(false)
       })
       .catch(() => {
-        settLasterOppgaver(false)
+        setLasterOppgaver(false)
         //todo: error håndtering her
       })
-      .finally(() => settLasterOppgaver(false))
+      .finally(() => setLasterOppgaver(false))
   }, [])
 
   const data: ReadonlyArray<IOppgave> = React.useMemo(() => oppgaver, [oppgaver])
@@ -60,8 +59,8 @@ const Oppgavebenken = () => {
         <>
           <OppgaveHeader
             oppgaveFelter={oppgaveFelter}
-            settOppgaveFelter={settOppgaveFelter}
-            settGlobalFilter={settGlobalFilter}
+            setOppgaveFelter={setOppgaveFelter}
+            setGlobalFilter={setGlobalFilter}
           />
           <OppgaveListe columns={columns} data={data} globalFilter={globalFilter} filterPar={filterPar} />
         </>

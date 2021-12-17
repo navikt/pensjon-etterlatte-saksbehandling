@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import { Heading } from '@navikt/ds-react'
-import { IOppgaveFelt, IOppgaveFelter } from './oppgavefelter'
+import React, { useEffect, useState } from 'react'
+import { Button, Heading } from '@navikt/ds-react'
+import { initialOppgaveFelter, IOppgaveFelt, IOppgaveFelter } from './oppgavefelter'
 import { useAsyncDebounce } from 'react-table'
 import { Input, Select } from 'nav-frontend-skjema'
 import { IPar } from '../../typer/oppgavebenken'
@@ -9,43 +9,56 @@ import styled from 'styled-components'
 
 type Props = {
   oppgaveFelter: IOppgaveFelter
-  settOppgaveFelter: (oppgaveFelter: IOppgaveFelter) => void
-  settGlobalFilter: (value: string) => void
+  setOppgaveFelter: (oppgaveFelter: IOppgaveFelter) => void
+  setGlobalFilter: (value: string | undefined) => void
 }
 
 const FilterElement = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
+  justify-items: flex-start;
   justify-items: flex-start;
   width: 200px;
+  margin-right: 1rem;
 `
 
 const FilterWrapper = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 1rem;
 `
 
-const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, settOppgaveFelter, settGlobalFilter }) => {
+const BurronWrapper = styled.div`
+  margin-bottom: 1rem;
+`
+
+const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGlobalFilter }) => {
+  const [resetGlobalInput, setResetGlobalInput] = useState<boolean>(false)
+
   return (
     <>
       <Heading size={'medium'} spacing>
         Oppgavebenken
       </Heading>
-      <GlobalFilter settGlobalFilter={settGlobalFilter} />
-      <br />
-      <ColumnFilters
-        oppgaveFelter={oppgaveFelter}
-        settOppgaveFelter={settOppgaveFelter}
-        settGlobalFilter={settGlobalFilter}
-      />
-
-      <br />
+      <FilterWrapper>
+        <GlobalFilter setGlobalFilter={setGlobalFilter} resetGlobalInput={resetGlobalInput} />
+      </FilterWrapper>
+      <ColumnFilters oppgaveFelter={oppgaveFelter} setOppgaveFelter={setOppgaveFelter} />
+      <BurronWrapper>
+        <Button
+          onClick={() => {
+            setOppgaveFelter(initialOppgaveFelter())
+            setResetGlobalInput(true)
+          }}
+          variant={'secondary'}
+        >
+          Tilbakestill alle filtre
+        </Button>
+      </BurronWrapper>
     </>
   )
 }
 
-const ColumnFilters: React.FC<Props> = ({ oppgaveFelter, settOppgaveFelter, settGlobalFilter }) => {
+const ColumnFilters: React.FC<Omit<Props, 'setGlobalFilter'>> = ({ oppgaveFelter, setOppgaveFelter }) => {
   return (
     <FilterWrapper>
       {Object.values(oppgaveFelter)
@@ -60,22 +73,35 @@ const ColumnFilters: React.FC<Props> = ({ oppgaveFelter, settOppgaveFelter, sett
                   oppgaveFelt={oppgaveFelt}
                   liste={oppgaveFelt.filter?.nedtrekksliste}
                   oppgaveFelter={oppgaveFelter}
-                  settOppgaveFelter={settOppgaveFelter}
+                  setOppgaveFelter={setOppgaveFelter}
                 />
-              );
-            default: 
-                return <div />
+              )
+            default:
+              return <div />
           }
         })}
     </FilterWrapper>
   )
 }
 
-const GlobalFilter = ({ settGlobalFilter }: { settGlobalFilter: (value: string) => void }) => {
+const GlobalFilter = ({
+  setGlobalFilter,
+  resetGlobalInput,
+}: {
+  setGlobalFilter: (value: string | undefined) => void
+  resetGlobalInput: boolean
+}) => {
   const [value, setValue] = useState('')
   const onChange = useAsyncDebounce((value) => {
-    settGlobalFilter(value || undefined)
+    setGlobalFilter(value || undefined)
   }, 200)
+
+  useEffect(() => {
+    if (resetGlobalInput) {
+      setValue('')
+      setGlobalFilter(undefined)
+    }
+  }, [resetGlobalInput, setGlobalFilter])
 
   return (
     <FilterElement>
@@ -97,12 +123,12 @@ export function SelectColumnFilter({
   oppgaveFelt,
   liste,
   oppgaveFelter,
-  settOppgaveFelter,
+  setOppgaveFelter,
 }: {
   oppgaveFelt: IOppgaveFelt
   liste: Record<any, IPar> | undefined
   oppgaveFelter: IOppgaveFelter
-  settOppgaveFelter: (oppgaver: IOppgaveFelter) => void
+  setOppgaveFelter: (oppgaver: IOppgaveFelter) => void
 }) {
   const options = Object.values(liste ? liste : '')
 
@@ -113,7 +139,7 @@ export function SelectColumnFilter({
         value={oppgaveFelt.filter?.selectedValue}
         key={oppgaveFelt.noekkel}
         onChange={(e) => {
-          settFilterVerdi(oppgaveFelt, e.target.value, oppgaveFelter, settOppgaveFelter)
+          settFilterVerdi(oppgaveFelt, e.target.value, oppgaveFelter, setOppgaveFelter)
         }}
       >
         {options.map((par: IPar) => {
@@ -132,7 +158,7 @@ const settFilterVerdi = (
   oppgaveFelt: IOppgaveFelt,
   nyVerdi: string,
   oppgaveFelter: IOppgaveFelter,
-  settOppgaveFelter: (oppgaver: IOppgaveFelter) => void
+  setOppgaveFelter: (oppgaver: IOppgaveFelter) => void
 ) => {
   if (oppgaveFelt.filter) {
     const oppdaterteOppgaveFelter = {
@@ -146,7 +172,7 @@ const settFilterVerdi = (
       },
     }
 
-    settOppgaveFelter(oppdaterteOppgaveFelter)
+    setOppgaveFelter(oppdaterteOppgaveFelter)
   }
 }
 

@@ -6,7 +6,7 @@ import { FilterPar, IOppgave } from '../../typer/oppgavebenken'
 type Props = {
   columns: ReadonlyArray<Column<IOppgave>>
   data: ReadonlyArray<IOppgave>
-  globalFilter: string
+  globalFilter: string | undefined
   filterPar: Array<FilterPar>
 }
 
@@ -19,12 +19,11 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar 
 
   useEffect(() => {
     setAllFilters(filterPar)
-  }, [filterPar])
+  }, [filterPar, setAllFilters])
 
   useEffect(() => {
     setGlobalFilter(globalFilter)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [globalFilter])
+  }, [globalFilter, setGlobalFilter])
 
   return (
     <>

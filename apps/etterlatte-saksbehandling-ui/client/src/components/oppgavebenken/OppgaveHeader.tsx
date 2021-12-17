@@ -40,7 +40,11 @@ const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGl
         Oppgavebenken
       </Heading>
       <FilterWrapper>
-        <GlobalFilter setGlobalFilter={setGlobalFilter} resetGlobalInput={resetGlobalInput} />
+        <GlobalFilter
+          setGlobalFilter={setGlobalFilter}
+          resetGlobalInput={resetGlobalInput}
+          setResetGlobalInput={setResetGlobalInput}
+        />
       </FilterWrapper>
       <ColumnFilters oppgaveFelter={oppgaveFelter} setOppgaveFelter={setOppgaveFelter} />
       <BurronWrapper>
@@ -87,8 +91,10 @@ const ColumnFilters: React.FC<Omit<Props, 'setGlobalFilter'>> = ({ oppgaveFelter
 const GlobalFilter = ({
   setGlobalFilter,
   resetGlobalInput,
+  setResetGlobalInput,
 }: {
   setGlobalFilter: (value: string | undefined) => void
+  setResetGlobalInput: (valuse: boolean) => void
   resetGlobalInput: boolean
 }) => {
   const [value, setValue] = useState('')
@@ -101,6 +107,7 @@ const GlobalFilter = ({
       setValue('')
       setGlobalFilter(undefined)
     }
+    return setResetGlobalInput(false)
   }, [resetGlobalInput, setGlobalFilter])
 
   return (

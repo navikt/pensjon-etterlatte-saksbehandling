@@ -9,7 +9,6 @@ import {
 } from '../../typer/oppgavebenken'
 
 export interface IOppgaveFilter {
-  initialValue?: string
   selectedValue: string
   type: 'dato' | 'select' | 'string'
   nedtrekksliste?: Record<any, IPar>
@@ -43,7 +42,6 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
       label: 'Reg. dato',
       filter: {
         type: 'dato',
-        initialValue: '',
         selectedValue: '',
       },
     },
@@ -52,7 +50,6 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
       label: 'Prioritet',
       filter: {
         type: 'select',
-        initialValue: PrioritetFilter.VELG,
         selectedValue: PrioritetFilter.VELG,
         nedtrekksliste: prioritetFilter,
       },
@@ -70,7 +67,6 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
       label: 'Status',
       filter: {
         type: 'select',
-        initialValue: StatusFilter.VELG,
         selectedValue: StatusFilter.VELG,
         nedtrekksliste: statusFilter,
       },
@@ -80,7 +76,6 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
       label: 'Enhet',
       filter: {
         type: 'select',
-        initialValue: EnhetFilter.VELG,
         selectedValue: EnhetFilter.VELG,
         nedtrekksliste: enhetFilter,
       },

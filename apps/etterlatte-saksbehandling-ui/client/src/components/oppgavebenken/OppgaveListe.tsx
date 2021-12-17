@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react'
 import 'react-table'
-import { useTable, Column, useFilters, useGlobalFilter } from 'react-table'
+import { useTable, Column, useFilters, useGlobalFilter, useSortBy, ColumnInstance } from 'react-table'
 import { FilterPar, IOppgave } from '../../typer/oppgavebenken'
+import { ariaSortMap, FeltSortOrder } from './oppgavefelter'
+import { CollapseFilled, ExpandFilled } from '@navikt/ds-icons'
 
 type Props = {
   columns: ReadonlyArray<Column<IOppgave>>
@@ -12,9 +14,21 @@ type Props = {
 
 const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar }) => {
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow, setGlobalFilter, setAllFilters } = useTable(
-    { columns, data },
+    {
+      columns,
+      data,
+      initialState: {
+        sortBy: [
+          {
+            id: 'id',
+            desc: false,
+          },
+        ],
+      },
+    },
     useFilters,
-    useGlobalFilter
+    useGlobalFilter,
+    useSortBy
   )
 
   useEffect(() => {
@@ -33,12 +47,22 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar 
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map((column) => (
                 <th
-                  {...column.getHeaderProps()}
-                  style={{
-                    color: 'black',
-                  }}
+                  role="columnheader"
+                  aria-sort={getAriaSort(column)}
+                  {...column.getHeaderProps(column.getSortByToggleProps())}
                 >
                   {column.render('Header')}
+                  <span>
+                    {column.isSorted ? (
+                      column.isSortedDesc ? (
+                        <ExpandFilled color={'var(--navds-button-color-secondary-text)'} />
+                      ) : (
+                        <CollapseFilled color={'var(--navds-button-color-secondary-text)'} />
+                      )
+                    ) : (
+                      ''
+                    )}
+                  </span>
                 </th>
               ))}
             </tr>
@@ -68,6 +92,16 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar 
       </table>
     </>
   )
+}
+
+export const getAriaSort = (column: ColumnInstance<IOppgave>): 'none' | 'descending' | 'ascending' | undefined => {
+  if (column.isSortedDesc === true) {
+    return ariaSortMap.get(FeltSortOrder.DESCENDANT)
+  }
+  if (column.isSortedDesc === false) {
+    return ariaSortMap.get(FeltSortOrder.ASCENDANT)
+  }
+  return ariaSortMap.get(FeltSortOrder.NONE)
 }
 
 export default OppgaveListe

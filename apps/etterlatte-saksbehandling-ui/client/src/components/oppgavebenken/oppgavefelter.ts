@@ -31,6 +31,18 @@ export interface IOppgaveFelter {
   enhet: IOppgaveFelt
 }
 
+export enum FeltSortOrder {
+  NONE = 'NONE',
+  ASCENDANT = 'ASCENDANT',
+  DESCENDANT = 'DESCENDANT',
+}
+
+export const ariaSortMap = new Map<FeltSortOrder, 'none' | 'descending' | 'ascending'>([
+  [FeltSortOrder.NONE, 'none'],
+  [FeltSortOrder.DESCENDANT, 'descending'],
+  [FeltSortOrder.ASCENDANT, 'ascending'],
+])
+
 export const initialOppgaveFelter = (): IOppgaveFelter => {
   return {
     id: {

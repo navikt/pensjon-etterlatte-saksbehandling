@@ -1,16 +1,24 @@
 # Etterlatte-saksbehandling-ui
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+Appen består av en statisk frontend og en backend-for-frontends i NodeJS.
 
 
-### `yarn start`
+## Kjøring lokalt
+### Client
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+**`yarn start`**
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Starter frontend-appen på localhost:3000
 
-### `yarn mock`
+### Server
+**`yarn dev`**
 
-Starter mock-server i nodejs
+Kjører opp app serveren på port 8080 eller den porten som er angitt via `process.env.PORT`
+
+
+
+## Bygg og deploy
+Bygg og deploy kjøres via github workflows i roten på prosjektet
+og kjører bygg av både client og server folder. \
+Se Dockerfile for oppsett av container-image

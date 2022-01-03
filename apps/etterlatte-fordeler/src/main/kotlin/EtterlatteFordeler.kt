@@ -36,7 +36,7 @@ internal class EtterlatteFordeler(
             validate { it.demandValue("@event_name", "soeknad_innsendt") }
             validate { it.requireKey("@skjema_info") }
             validate { it.requireKey("@template") }
-            validate { it.requireKey("@journalpostInfo") }
+         //   validate { it.requireKey("@journalpostInfo") }
             validate { it.requireKey("@lagret_soeknad_id") }
             validate { it.requireKey("@hendelse_gyldig_til") }
             validate { it.requireKey("@adressebeskyttelse") }
@@ -56,7 +56,7 @@ internal class EtterlatteFordeler(
         }
         //TODO denne må skrives om til å håndtere manglende soeknads_type
         //TODO løfte opp konstant
-        if(packet["@skjema_info"]["soeknadsType"].asText() != "Barnepensjon")
+        if(packet["@skjema_info"]["type"].asText() != "BARNEPENSJON")
         {
             logger.info("Avbrutt fordeling da søknad ikke er barnepensjon")
             return

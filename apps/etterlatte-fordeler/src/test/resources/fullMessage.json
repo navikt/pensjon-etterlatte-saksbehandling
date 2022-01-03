@@ -1,27 +1,12 @@
 {
   "@event_name": "soeknad_innsendt",
   "@template": "trenger jeg denne",
-  "@journalpostInfo": {
-    "tittel": "tittel",
-    "avsenderMottaker": {
-      "id": "123456789",
-      "navn": "avsentermottagernavn",
-      "idType": "FNR"
-    },
-    "bruker": {
-      "id": "9876532",
-      "navn": "Brukernavn",
-      "idType": "FNR"
-    },
-    "journlanfoerendeEnhet": null
-  },
   "@lagret_soeknad_id":"12",
   "@hendelse_gyldig_til":"2025-08-27T10:51:33.661+02:00",
-  "@journalpostInfo": "tull",
   "@adressebeskyttelse": "tull",
   "@fnr_soeker": "11057523044",
   "@skjema_info": {
-    "soeknadsType": "Barnepensjon",
+    "type": "Barnepensjon",
     "søknadInnhold": {
       "forNav": {
         "saksnummer": 123,

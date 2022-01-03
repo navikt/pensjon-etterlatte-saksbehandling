@@ -44,8 +44,8 @@ internal class EtterlatteFordelerTest {
     private val klientMock = mockk<PdlKlient>()
     private val service = PersonService(klientMock)
 
-    //TODO trenger å endre fullMessage
-    private val hendelseJson = javaClass.getResource("/fullMessage.json")!!.readText()
+
+    private val hendelseJson = javaClass.getResource("/fullMessage2.json")!!.readText()
     private val pdlResponseJson = javaClass.getResource("/personResponse.json")!!.readText()
     private val barn = PersonResponse(mapJsonToAny(pdlResponseJson, false))
 

@@ -37,10 +37,7 @@ spec:
     - name: PDL_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
 
-  #accessPolicy:
-
-  #  outbound:
-  #    rules:
-  #      - application: ey-pdfgen
-  #    external:
-  #      - host: dokarkiv.dev-fss-pub.nais.io
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-pdltjenester

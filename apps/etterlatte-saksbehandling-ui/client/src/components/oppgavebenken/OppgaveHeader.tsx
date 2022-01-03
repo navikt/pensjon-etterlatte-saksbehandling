@@ -27,8 +27,8 @@ const FilterWrapper = styled.div`
   flex-wrap: wrap;
 `
 
-const BurronWrapper = styled.div`
-  margin-bottom: 1rem;
+const ButtonWrapper = styled.div`
+  margin-bottom: 3rem;
 `
 
 const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGlobalFilter }) => {
@@ -47,7 +47,7 @@ const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGl
         />
       </FilterWrapper>
       <ColumnFilters oppgaveFelter={oppgaveFelter} setOppgaveFelter={setOppgaveFelter} />
-      <BurronWrapper>
+      <ButtonWrapper>
         <Button
           onClick={() => {
             setOppgaveFelter(initialOppgaveFelter())
@@ -57,7 +57,7 @@ const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGl
         >
           Tilbakestill alle filtre
         </Button>
-      </BurronWrapper>
+      </ButtonWrapper>
     </>
   )
 }
@@ -70,10 +70,11 @@ const ColumnFilters: React.FC<Omit<Props, 'setGlobalFilter'>> = ({ oppgaveFelter
         .map((oppgaveFelt: IOppgaveFelt) => {
           switch (oppgaveFelt.filter?.type) {
             case 'string':
-              return <div />
+              return <div key={oppgaveFelt.noekkel} />
             case 'select':
               return (
                 <SelectColumnFilter
+                  key={oppgaveFelt.noekkel}
                   oppgaveFelt={oppgaveFelt}
                   liste={oppgaveFelt.filter?.nedtrekksliste}
                   oppgaveFelter={oppgaveFelter}
@@ -81,7 +82,7 @@ const ColumnFilters: React.FC<Omit<Props, 'setGlobalFilter'>> = ({ oppgaveFelter
                 />
               )
             default:
-              return <div />
+              return <div key={oppgaveFelt.noekkel} />
           }
         })}
     </FilterWrapper>

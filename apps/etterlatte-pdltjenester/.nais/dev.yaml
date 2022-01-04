@@ -36,7 +36,7 @@ spec:
       value: http://etterlatte-pdl-proxy/pdl
     - name: PDL_AUDIENCE
       value: "dev-gcp:etterlatte:etterlatte-pdl-proxy"
-    - name: PDL_SCOPE
+    - name: PDL_OUTBOUND_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdl-proxy/.default
     - name: ROOT_LOGLEVEL
       value: "INFO"

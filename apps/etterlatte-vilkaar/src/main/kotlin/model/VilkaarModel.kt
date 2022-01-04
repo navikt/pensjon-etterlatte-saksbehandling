@@ -1,5 +1,6 @@
-package no.nav.etterlatte.vilkaar
+package no.nav.etterlatte.vilkaar.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -8,7 +9,8 @@ import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import no.nav.etterlatte.libs.common.objectMapper
+import com.fasterxml.jackson.module.kotlin.treeToValue
+import java.time.LocalDate
 
 val objectMapper: ObjectMapper = JsonMapper.builder()
     .addModule(JavaTimeModule())
@@ -19,41 +21,9 @@ val objectMapper: ObjectMapper = JsonMapper.builder()
     .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
     .enable(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS)
     .build()
+
 typealias Opplysning = ObjectNode
-/*
-interface Opplysning<T> {
-    val navn: String
-    val verdi: T
-}
-*/
-
-enum class VilkaarVurderingsResultat { OPPFYLT, IKKE_OPPFYLT, KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING }
-
-class VurdertVilkaar(
-    val resultat: VilkaarVurderingsResultat,
-    val basertPaaOpplysninger: List<Opplysning>
-)
-
-interface VilkaarVisitor{
-    fun visit(vilkaar: Vilkaar)
-}
-
-class VilkaarSomBrukerOpplysningVisitor(val opplysningstype: String): VilkaarVisitor{
-    val vilkaarSomBrukerOpplysning = mutableListOf<String>()
-
-    override fun visit(vilkaar: Vilkaar) {
-        if(vilkaar.opplysningsbehov().contains(opplysningstype)) vilkaarSomBrukerOpplysning.add(vilkaar.navn)
-    }
-
-}
-
-interface Vilkaar {
-    val navn: String
-    fun vurder(opplysninger: List<Opplysning>): VurdertVilkaar
-    fun accept(visitor: VilkaarVisitor) = visitor.visit(this)
-    fun opplysningsbehov():List<String>
-}
-
+val OPPLYSNING_NAVN = "_navn"
 
 infix fun Vilkaar.og(other: Vilkaar) = AlleVilkaarOppfylt(listOf(this, other))
 infix fun Vilkaar.eller(other: Vilkaar) = MinstEttVilkaarOppfylt(listOf(this, other))
@@ -72,10 +42,14 @@ class AlleVilkaarOppfylt(val vilkaar: List<Vilkaar>) : Vilkaar {
     override fun vurder(opplysninger: List<Opplysning>): VurdertVilkaar {
         return vilkaar
             .map { it.vurder(opplysninger)}
-            .let { VurdertVilkaar(
-                if(it.all { it.resultat == VilkaarVurderingsResultat.OPPFYLT}) VilkaarVurderingsResultat.OPPFYLT
-                else VilkaarVurderingsResultat.IKKE_OPPFYLT
-                , it.map { objectMapper.valueToTree(it) }) }
+            .let {
+                val ny_tidslinje = it.map { it.resultat }
+                    .reduce{ acc, cur ->
+                        (acc + cur).map {_, it ->
+                            (it.first?: VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) * (it.second?: VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING)
+                        }
+                    }.normaliser()
+                VurdertVilkaar(ny_tidslinje  , it.map { objectMapper.valueToTree(it.serialize()) }, navn) }
     }
 }
 
@@ -91,29 +65,35 @@ class MinstEttVilkaarOppfylt(val vilkaar: List<Vilkaar>) : Vilkaar {
     override fun vurder(opplysninger: List<Opplysning>): VurdertVilkaar {
         return vilkaar
             .map { it.vurder(opplysninger)}
-            .let { VurdertVilkaar(
-                if(it.any { it.resultat == VilkaarVurderingsResultat.OPPFYLT}) VilkaarVurderingsResultat.OPPFYLT
-                else VilkaarVurderingsResultat.IKKE_OPPFYLT
-                , it.map { objectMapper.valueToTree(it) }) }
+            .let {
+                val ny_tidslinje = it.map { it.resultat }
+                    .reduce{ acc, cur ->
+                        (acc + cur).map {_, it ->
+                            (it.first?: VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) + (it.second?: VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING)
+                        }
+                    }.normaliser()
+
+                VurdertVilkaar(
+                ny_tidslinje
+                , it.map { objectMapper.valueToTree(it.serialize()) }, navn) }
     }
 }
 
-class EnkelSjekkAvOpplysning(vilkaarsnavn: String, val opplysningNavn: String, val test: Opplysning.() -> VilkaarVurderingsResultat) :
+class EnkelSjekkAvOpplysning(vilkaarsnavn: String, val opplysningNavn: String, @get:JsonIgnore val test: Opplysning.() -> Tidslinje<VilkaarVurderingsResultat>) :
     Vilkaar {
     override fun opplysningsbehov(): List<String> {
         return listOf(opplysningNavn)
     }
     override val navn = vilkaarsnavn
-    override fun vurder(opplysninger: List<Opplysning>) =opplysninger.find { it["navn"].textValue() == opplysningNavn }?.let {
-        VurdertVilkaar(it.test(), listOf(it)) }?: VurdertVilkaar(VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, emptyList())
+    override fun vurder(opplysninger: List<Opplysning>) = opplysninger.find { it[OPPLYSNING_NAVN].textValue() == opplysningNavn }?.let {
+        VurdertVilkaar(it.test(), listOf(it), navn) }?: VurdertVilkaar(Tidslinje(LocalDate.MIN to  VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING), emptyList(), navn)
 }
 
+inline fun <reified T> enkelVurderingAvOpplysning(vilkarsNavn:String, opplysningsNavn: String, crossinline test: T.() -> Tidslinje<VilkaarVurderingsResultat>): Vilkaar = EnkelSjekkAvOpplysning(vilkarsNavn, opplysningsNavn){
+    val grunnlag = objectMapper.treeToValue<T>(this)!!
+    grunnlag.test()
+}
 
-
-
-
-
-
-
-
-
+interface OpplysningType<T>{
+    val opplysningsNavn: String
+}

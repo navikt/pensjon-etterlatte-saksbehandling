@@ -36,7 +36,6 @@ spec:
       value: http://etterlatte-pdltjenester/person
     - name: PDL_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
-
   accessPolicy:
     outbound:
       rules:

@@ -45,7 +45,7 @@ internal class EtterlatteFordelerTest {
     private val service = PersonService(klientMock)
 
 
-    private val hendelseJson = javaClass.getResource("/fullMessage.json")!!.readText()
+    private val hendelseJson = javaClass.getResource("/fullMessage2.json")!!.readText()
     private val pdlResponseJson = javaClass.getResource("/personResponse.json")!!.readText()
     private val barn = PersonResponse(mapJsonToAny(pdlResponseJson, false))
 

@@ -61,9 +61,9 @@ internal class EtterlatteFordeler(
             logger.info("Avbrutt fordeling da søknad ikke er barnepensjon")
             return
         }
+        val barnFnr = Foedselsnummer.of(packet["@fnr_soeker"].asText())
         runBlocking {
-             barn = personService.hentPerson( Foedselsnummer.of(packet["@fnr_soeker"].textValue()))
-            println("tjohoho")
+             barn = personService.hentPerson(barnFnr)
         }
         try {
             val aktuelleSaker = fordel(packet)

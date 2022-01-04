@@ -33,7 +33,7 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
             header("Tema", "PEN")
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
-            body = fnr
+            body = fnr.value
         }
 
         // Logge feil dersom det finnes noen

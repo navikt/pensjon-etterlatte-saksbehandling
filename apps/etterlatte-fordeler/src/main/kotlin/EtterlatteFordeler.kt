@@ -62,7 +62,8 @@ internal class EtterlatteFordeler(
             return
         }
         runBlocking {
-             barn = personService.hentPerson( Foedselsnummer.of(packet["@fnr_soeker"].asText()))
+             barn = personService.hentPerson( Foedselsnummer.of(packet["@fnr_soeker"].textValue()))
+            println("tjohoho")
         }
         try {
             val aktuelleSaker = fordel(packet)

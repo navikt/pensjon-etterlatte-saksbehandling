@@ -6,6 +6,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import no.nav.etterlatte.common.toJson
 import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
 import no.nav.etterlatte.libs.common.pdl.GraphqlRequest
 import no.nav.etterlatte.libs.common.pdl.Variables
@@ -29,11 +30,12 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
      * @return [PersonResponse]: Responsobjekt fra PDL.
      */
     override suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse {
-        val response = client.post<PersonResponse>(apiUrl) {
+        val response = client.post<PersonResponse>(apiUrl + "/hentperson") {
             header("Tema", "PEN")
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             body = fnr.value
+
         }
 
         // Logge feil dersom det finnes noen

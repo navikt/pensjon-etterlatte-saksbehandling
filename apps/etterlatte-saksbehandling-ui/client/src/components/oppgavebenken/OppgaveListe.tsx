@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-key */
 import React, { useEffect } from 'react'
 import 'react-table'
 import { useTable, Column, useFilters, useGlobalFilter, useSortBy, ColumnInstance, usePagination } from 'react-table'
@@ -86,11 +87,11 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar 
 
   useEffect(() => {
     setAllFilters(filterPar)
-  }, [filterPar, setAllFilters])
+  }, [filterPar])
 
   useEffect(() => {
     setGlobalFilter(globalFilter)
-  }, [globalFilter, setGlobalFilter])
+  }, [globalFilter])
 
   return (
     <Styles>

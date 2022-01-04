@@ -109,7 +109,7 @@ const GlobalFilter = ({
       setGlobalFilter(undefined)
     }
     return setResetGlobalInput(false)
-  }, [resetGlobalInput, setGlobalFilter, setResetGlobalInput])
+  }, [resetGlobalInput])
 
   return (
     <FilterElement>

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vilkaar
+package no.nav.etterlatte
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.*

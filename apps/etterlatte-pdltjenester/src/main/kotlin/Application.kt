@@ -75,6 +75,9 @@ class ApplicationContext(configLocation: String? = null) {
                 config = env
             }
         }
+        defaultRequest {
+            url.takeFrom(aad.getString("url") + url.encodedPath)
+        }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 }
 

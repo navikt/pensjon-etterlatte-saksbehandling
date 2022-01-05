@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 data class Person(
     val fornavn: String,
     val etternavn: String,
-    private val foedselsnummer: String,
+    val foedselsnummer: Foedselsnummer,
     val foedselsaar: Int?,
     val foedselsdato: String?,
     val adressebeskyttelse: Boolean,
@@ -16,5 +16,5 @@ data class Person(
     val poststed: String?,
     val statsborgerskap: String?,
     val sivilstatus: String?,
-    val fnr: Foedselsnummer = Foedselsnummer.of(foedselsnummer)
+    //val fnr: Foedselsnummer = Foedselsnummer.of(foedselsnummer)
 )

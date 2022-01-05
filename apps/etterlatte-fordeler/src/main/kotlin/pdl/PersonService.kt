@@ -17,7 +17,7 @@ class PersonService(private val klient: Pdl) {
      * @return Gyldig gradering av PDL-typen [Gradering].
      *  Gir verdi [Gradering.UGRADERT] dersom ingenting er funnet.
      */
-    suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse {
+    suspend fun hentPerson(fnr: Foedselsnummer): Person {
         //TODO exception håndteringen virker ikke
         val person = klient.hentPerson(fnr) ?: throw Exception("Fant ingen personer i PDL")
 
@@ -25,13 +25,13 @@ class PersonService(private val klient: Pdl) {
             .also { logger.info("Person funnet") }
     }
     //TODO Fjerne?
-    suspend fun hentAlderForPerson(fnr: Foedselsnummer): Int {
-        val foedselsAar = klient.hentPerson(fnr).data?.hentPerson?.foedsel?.mapNotNull  { it.foedselsaar }
+    //suspend fun hentAlderForPerson(fnr: Foedselsnummer): Int {
+     //   val foedselsAar = klient.hentPerson(fnr).data?.hentPerson?.foedsel?.mapNotNull  { it.foedselsaar }
         //TODO
         //definere år på en smart måte og støtte for å sjekke liste evt
         //også må vi håndtere null
-        return 2021 - foedselsAar?.get(0)!!
-    }
+     //   return 2021 - foedselsAar?.get(0)!!
+    //}
 
     /**
      * Henter ut alle graderinger fra liste over personer og deretter henter prioritert [Gradering]

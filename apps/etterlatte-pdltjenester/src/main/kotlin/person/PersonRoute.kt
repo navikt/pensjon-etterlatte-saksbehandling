@@ -2,6 +2,7 @@ package no.nav.etterlatte.person
 
 import io.ktor.application.call
 import io.ktor.request.receive
+import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.Route
 import io.ktor.routing.get
@@ -32,7 +33,7 @@ fun Route.personApi(service: PersonService) {
             logger.info("Fnr: $fnr")
             val person = service.hentPerson(fnr)
             logger.info(person.toJson())
-            call.respondText(person.toJson())
+            call.respond(person)
         }
     }
 }

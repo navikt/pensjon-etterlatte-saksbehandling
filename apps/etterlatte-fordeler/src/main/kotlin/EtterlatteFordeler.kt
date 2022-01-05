@@ -30,14 +30,14 @@ internal class EtterlatteFordeler(
     private lateinit var barn: Person
     val kriterier = listOf(
         Kriterie("Bosatt Utland") { bosattUtland() },
-        Kriterie("Barn er for gammelt") { barnForGammel() }
+        Kriterie("Barn er for gammelt") { barnForGammel() },
+        Kriterie("Barn har adressebeskyttelse") { harAdressebeskyttelse() }
     )
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "soeknad_innsendt") }
             validate { it.requireKey("@skjema_info") }
             validate { it.requireKey("@template") }
-         //   validate { it.requireKey("@journalpostInfo") }
             validate { it.requireKey("@lagret_soeknad_id") }
             validate { it.requireKey("@hendelse_gyldig_til") }
             validate { it.requireKey("@adressebeskyttelse") }
@@ -87,21 +87,19 @@ internal class EtterlatteFordeler(
         }
     }
 
-    private fun sjekkAdressebeskyttelse(): Boolean {
-        //TODO
-        return true
+    private fun harAdressebeskyttelse(): Boolean {
+        return barn.adressebeskyttelse
     }
 
     private fun barnForGammel(): Boolean {
         //TODO endre logikk
-        return barn.foedselsaar!! > 2000
+        return barn.foedselsaar!! < 2006
     }
 
     private fun bosattUtland(): Boolean {
         //TODO
         // bytte ut sjekk av statsborgerskap med sjekk av utlandsopphold
-        //får nullpointer på denne
-        return barn.statsborgerskap != "NOR"
+        return barn.statsborgerskap != "uvisst" || barn.statsborgerskap != "NOR"
 
     }
     data class FordelRespons (

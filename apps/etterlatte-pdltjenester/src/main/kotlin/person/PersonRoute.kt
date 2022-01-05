@@ -10,6 +10,9 @@ import io.ktor.routing.route
 import no.nav.etterlatte.common.innloggetBrukerFnr
 import no.nav.etterlatte.common.toJson
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import org.slf4j.LoggerFactory
+
+private val logger = LoggerFactory.getLogger(PersonService::class.java)
 
 /**
  * Endepunkter for uthenting av person
@@ -28,7 +31,7 @@ fun Route.personApi(service: PersonService) {
             val fnr = Foedselsnummer.of(call.receive<String>().toString())
 
             val person = service.hentPerson(fnr)
-
+            logger.info(person.toJson())
             call.respondText(person.toJson())
         }
     }

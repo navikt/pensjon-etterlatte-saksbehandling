@@ -10,6 +10,7 @@ import io.ktor.util.toUpperCasePreservingASCIIRules
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.pdl.Person
 import no.nav.etterlatte.pdl.PersonService
 import no.nav.etterlatte.prosess.pdl.PersonResponse
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -26,7 +27,7 @@ internal class EtterlatteFordeler(
     private val klokke: Clock = Clock.systemUTC()
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
-    private lateinit var barn: PersonResponse
+    private lateinit var barn: Person
     val kriterier = listOf(
         Kriterie("Bosatt Utland") { bosattUtland() },
         Kriterie("Barn er for gammelt") { barnForGammel() }
@@ -92,13 +93,15 @@ internal class EtterlatteFordeler(
     }
 
     private fun barnForGammel(): Boolean {
-        return barn.alder() > 15
+        //TODO endre logikk
+        return barn.foedselsaar!! > 2000
     }
 
     private fun bosattUtland(): Boolean {
         //TODO
         // bytte ut sjekk av statsborgerskap med sjekk av utlandsopphold
-        return barn.data!!.hentPerson!!.statsborgerskap[0].land.uppercase() != "NOR"
+        //får nullpointer på denne
+        return barn.statsborgerskap != "NOR"
 
     }
     data class FordelRespons (

@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.pdl.ResponseError
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+//TODO flytte denne til pdl-tjenester?
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PersonResponse(
     val data: PersonResponseData? = null,

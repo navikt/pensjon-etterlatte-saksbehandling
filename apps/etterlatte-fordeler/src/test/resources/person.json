@@ -1,0 +1,15 @@
+{
+  "fornavn": "Jens",
+  "etternavn": "Johnsen",
+  "foedselsnummer": "11057523044",
+  "foedselsaar": 2010,
+  "foedselsdato": "2010-04-19",
+  "adressebeskyttelse": false,
+  "adresse": "Hjemmeveien",
+  "husnummer": "4",
+  "husbokstav": "a",
+  "postnummer": "1234",
+  "poststed": "Oslo",
+  "statsborgerskap": "NOR",
+  "sivilstatus": "singel"
+}

@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
 import no.nav.etterlatte.libs.common.pdl.Gradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.pdl.PdlKlient
+import no.nav.etterlatte.pdl.Person
 import no.nav.etterlatte.pdl.PersonService
 import no.nav.etterlatte.prosess.pdl.PersonResponse
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -44,10 +45,10 @@ internal class EtterlatteFordelerTest {
     private val klientMock = mockk<PdlKlient>()
     private val service = PersonService(klientMock)
 
-
     private val hendelseJson = javaClass.getResource("/fullMessage2.json")!!.readText()
-    private val pdlResponseJson = javaClass.getResource("/personResponse.json")!!.readText()
-    private val barn = PersonResponse(mapJsonToAny(pdlResponseJson, false))
+    private val barnJson = javaClass.getResource("/person.json")!!.readText()
+    private val barn = mapJsonToAny<Person>(barnJson, false)
+
 
     @AfterEach
     fun afterEach() {

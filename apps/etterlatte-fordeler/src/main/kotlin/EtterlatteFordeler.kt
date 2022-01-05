@@ -99,7 +99,8 @@ internal class EtterlatteFordeler(
     private fun bosattUtland(): Boolean {
         //TODO
         // bytte ut sjekk av statsborgerskap med sjekk av utlandsopphold
-        return barn.statsborgerskap != "uvisst" || barn.statsborgerskap != "NOR"
+
+        return barn.statsborgerskap != "uvisst" && barn.statsborgerskap != "NOR"
 
     }
     data class FordelRespons (

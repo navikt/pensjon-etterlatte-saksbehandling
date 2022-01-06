@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import '@navikt/ds-css'
 import './App.css'
 import { AppContext, IAppContext } from './store/AppContext'
-import { Decorator } from './components/decorator'
+//import { Decorator } from './components/decorator'
 import { ws } from './mocks/wsmock'
 import Oppgavebenken from './components/oppgavebenken/Oppgavebenken'
 import { Container } from './shared/styled'
@@ -11,6 +11,7 @@ import { Modal } from './shared/modal/modal'
 import { StatusBar, StatusBarTheme } from './components/statusbar'
 import { Behandling } from './components/behandling'
 import { Link } from 'react-router-dom'
+import { Header } from './shared/header'
 
 ws()
 
@@ -19,7 +20,7 @@ function App() {
   console.log(ctx)
   return (
     <div className="app">
-      <Decorator />
+      <Header />
       <BrowserRouter>
         <Routes>
           <Route

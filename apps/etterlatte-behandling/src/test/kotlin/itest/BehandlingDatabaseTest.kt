@@ -1,4 +1,4 @@
-package soeknad
+package no.nav.etterlatte.itest
 
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.behandling.*

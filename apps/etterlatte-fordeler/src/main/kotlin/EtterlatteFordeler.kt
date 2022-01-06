@@ -4,6 +4,7 @@ import io.ktor.client.features.ResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.soeknad.SoeknadType
 import no.nav.etterlatte.pdl.PersonService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -18,6 +19,7 @@ internal class EtterlatteFordeler(
     private val personService : PersonService,
     private val klokke: Clock = Clock.systemUTC()
 ) : River.PacketListener {
+
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
     private lateinit var barn: Person
     val kriterier = listOf(
@@ -47,11 +49,10 @@ internal class EtterlatteFordeler(
             logger.error("Avbrutt fordeling da hendelsen ikke er gyldig lengre")
             return
         }
-        //TODO denne må skrives om til å håndtere manglende soeknads_type
-        //TODO løfte opp konstant
-        if(packet["@skjema_info"]["type"].asText() != "BARNEPENSJON")
+        //TODO må denne skrives om til å håndtere manglende soeknads_type?
+        if(packet["@skjema_info"]["type"].asText() != SoeknadType.Barnepensjon.name)
         {
-            logger.info("Avbrutt fordeling da søknad ikke er barnepensjon")
+            logger.info("Avbrutt fordeling da søknad ikke er " + SoeknadType.Barnepensjon.name)
             return
         }
         val barnFnr = Foedselsnummer.of(packet["@fnr_soeker"].asText())
@@ -91,8 +92,7 @@ internal class EtterlatteFordeler(
     private fun bosattUtland(): Boolean {
         //TODO
         // bytte ut sjekk av statsborgerskap med sjekk av utlandsopphold
-        // må sjekke hvorfor statsborgerskap for barn er uvisst 90% av gangene
-        return barn.statsborgerskap != "uvisst" && barn.statsborgerskap != "NOR"
+        return barn.statsborgerskap != "NOR"
 
     }
     data class FordelRespons (

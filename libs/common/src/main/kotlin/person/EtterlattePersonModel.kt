@@ -1,6 +1,6 @@
 package no.nav.etterlatte.libs.common.person
 
-
+//TODO endre til logiske personer? barn/forelder/avdoed/etterlatt
 data class Person(
     val fornavn: String,
     val etternavn: String,

@@ -1,4 +1,4 @@
-package soeknad
+package no.nav.etterlatte.itest
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.auth.*
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import no.nav.etterlatte.*
 import no.nav.etterlatte.behandling.*
 import no.nav.etterlatte.sak.Sak
-import soeknad.sikkerhet.tokenTestSupportAcceptsAllTokens
+import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import java.util.*

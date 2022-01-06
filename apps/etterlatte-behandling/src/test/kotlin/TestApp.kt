@@ -1,12 +1,10 @@
-package soeknad
+package no.nav.etterlatte
 
 import io.ktor.auth.*
-import no.nav.etterlatte.CommonFactory
-import no.nav.etterlatte.DataSourceBuilder
-import no.nav.etterlatte.appFromBeanfactory
+
 import no.nav.etterlatte.behandling.KtorVilkarClient
 import no.nav.etterlatte.behandling.VilkaarKlient
-import soeknad.sikkerhet.tokenTestSupportAcceptsAllTokens
+import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
 import org.testcontainers.containers.PostgreSQLContainer
 
 fun main(){

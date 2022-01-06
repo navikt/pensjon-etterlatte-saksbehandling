@@ -36,8 +36,6 @@ open class Opplysning(
                 "privatperson" -> Privatperson(node["fnr"].textValue(), objectMapper.treeToValue(node["mottatDato"])!!)
                 else -> throw IllegalArgumentException()
             }
-
-
         }
     }
 

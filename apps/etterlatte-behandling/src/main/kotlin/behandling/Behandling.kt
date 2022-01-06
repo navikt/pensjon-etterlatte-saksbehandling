@@ -4,7 +4,7 @@ import java.util.*
 
 data class Behandling (
     val id: UUID,
-    val sak: String,
+    val sak: Long,
     val grunnlag: List<Opplysning>,
     val vilkårsprøving: Vilkårsprøving?,
     val beregning: Beregning?,

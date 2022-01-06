@@ -5,6 +5,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.EtterlatteFordeler
 import no.nav.etterlatte.common.mapJsonToAny
+import no.nav.etterlatte.libs.common.pdl.Gradering
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PersonService
@@ -42,13 +43,8 @@ internal class EtterlatteFordelerTest {
             .apply { sendTestMessage(hendelseJson) }
             .inspektør
 
-        println("gah")
-        assertEquals(
-            //TODO våre egne assertions
-            "bah","bah"
-            //Gradering.STRENGT_FORTROLIG.name,
-            //inspector.message(0).get("@adressebeskyttelse").asText()
-        )
+        assertEquals(Gradering.STRENGT_FORTROLIG_UTLAND.name, inspector.message(0).get("@adressebeskyttelse").asText())
+        assertEquals("ey_fordelt", inspector.message(0).get("@event_name").asText())
     }
 }
 /*

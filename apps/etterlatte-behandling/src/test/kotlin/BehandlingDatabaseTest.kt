@@ -42,7 +42,7 @@ internal class BehandlingDaoIntegrationTest {
         val connection = dataSource.connection
         val sakrepo = SakDao{connection}
         val db = BehandlingDao { connection }
-        val nybehandling = Behandling(UUID.randomUUID(), sakrepo.opprettSak("", "BP").id.toString(), emptyList(), null, null, false)
+        val nybehandling = Behandling(UUID.randomUUID(), sakrepo.opprettSak("", "BP").id, emptyList(), null, null, false)
         db.opprett(nybehandling)
         println(db.hent(nybehandling.id))
 

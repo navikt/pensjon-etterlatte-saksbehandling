@@ -29,8 +29,12 @@ spec:
   azure:
     application:
       enabled: true
-      tenant: nav.no
+      tenant: trygdeetaten.no
   replicas:
     cpuThresholdPercentage: 90
     max: 1
     min: 1
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-vilkaar

@@ -50,7 +50,7 @@ internal class EtterlatteFordeler(
             return
         }
         //TODO må denne skrives om til å håndtere manglende soeknads_type?
-        if(packet["@skjema_info"]["type"].asText() != SoeknadType.Barnepensjon.name)
+        if(packet["@skjema_info"]["type"].asText() != SoeknadType.Barnepensjon.name.uppercase())
         {
             logger.info("Avbrutt fordeling da søknad ikke er " + SoeknadType.Barnepensjon.name)
             return

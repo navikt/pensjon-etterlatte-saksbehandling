@@ -1,17 +1,17 @@
 package no.nav.etterlatte.person
 
-//import com.sun.tools.javac.jvm.ByteCodes.land
 import io.ktor.features.NotFoundException
 import no.nav.etterlatte.libs.common.pdl.Gradering
 
 import no.nav.etterlatte.libs.common.pdl.ResponseError
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.person.pdl.HentPerson
 import org.slf4j.LoggerFactory
 
 class PersonService(
     private val klient: PersonKlient
-    //private val kodeverkService: KodeverkService
+
 ) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
     private val adressebeskyttet = listOf(Gradering.FORTROLIG, Gradering.STRENGT_FORTROLIG,
@@ -70,8 +70,9 @@ class PersonService(
             husnummer = bostedsadresse?.vegadresse?.husnummer,
             husbokstav = bostedsadresse?.vegadresse?.husbokstav,
             postnummer = bostedsadresse?.vegadresse?.postnummer,
-            poststed = "hjemme",
-            statsborgerskap = "uvisst",
+            //TODO introdusere kodeverk igjen?
+            poststed = bostedsadresse?.vegadresse?.postnummer,
+            statsborgerskap = statsborgerskap?.land,
             sivilstatus = sivilstand?.type?.name
         )
     }

@@ -1,16 +1,9 @@
 package no.nav.etterlatte
 
 import io.ktor.client.features.ResponseException
-import io.ktor.client.request.accept
-import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import io.ktor.util.toUpperCasePreservingASCIIRules
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.pdl.Person
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.pdl.PersonService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -98,7 +91,7 @@ internal class EtterlatteFordeler(
     private fun bosattUtland(): Boolean {
         //TODO
         // bytte ut sjekk av statsborgerskap med sjekk av utlandsopphold
-
+        // må sjekke hvorfor statsborgerskap for barn er uvisst 90% av gangene
         return barn.statsborgerskap != "uvisst" && barn.statsborgerskap != "NOR"
 
     }

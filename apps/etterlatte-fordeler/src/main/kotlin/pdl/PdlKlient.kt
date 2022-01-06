@@ -6,11 +6,9 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import no.nav.etterlatte.common.toJson
 import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
-import no.nav.etterlatte.libs.common.pdl.GraphqlRequest
-import no.nav.etterlatte.libs.common.pdl.Variables
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
 import org.slf4j.LoggerFactory
 
 interface Pdl {

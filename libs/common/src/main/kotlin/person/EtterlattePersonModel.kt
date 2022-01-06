@@ -1,6 +1,5 @@
-package no.nav.etterlatte.pdl
+package no.nav.etterlatte.libs.common.person
 
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 
 data class Person(
     val fornavn: String,
@@ -16,5 +15,4 @@ data class Person(
     val poststed: String?,
     val statsborgerskap: String?,
     val sivilstatus: String?,
-    //val fnr: Foedselsnummer = Foedselsnummer.of(foedselsnummer)
 )

@@ -5,8 +5,8 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.EtterlatteFordeler
 import no.nav.etterlatte.common.mapJsonToAny
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.pdl.PdlKlient
-import no.nav.etterlatte.pdl.Person
 import no.nav.etterlatte.pdl.PersonService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach

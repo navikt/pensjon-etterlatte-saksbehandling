@@ -16,7 +16,7 @@ class DataSourceBuilder(private val env: Map<String, String>) {
 
         env["DB_USERNAME"]?.let { this.username = it }
         env["DB_PASSWORD"]?.let { this.password = it }
-        //setTransactionIsolation("TRANSACTION_SERIALIZABLE")
+        setTransactionIsolation("TRANSACTION_SERIALIZABLE")
 
     }
 

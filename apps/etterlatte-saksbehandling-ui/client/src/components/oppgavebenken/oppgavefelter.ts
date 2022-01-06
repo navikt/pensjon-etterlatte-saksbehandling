@@ -9,7 +9,7 @@ import {
 } from '../../typer/oppgavebenken'
 
 export interface IOppgaveFilter {
-  selectedValue: string
+  selectedValue: any
   type: 'dato' | 'select' | 'string'
   nedtrekksliste?: Record<any, IPar>
 }

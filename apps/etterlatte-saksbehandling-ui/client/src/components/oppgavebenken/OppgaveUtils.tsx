@@ -8,6 +8,8 @@ import {
   statusFilter,
   StatusFilter,
 } from '../../typer/oppgavebenken'
+import moment from 'moment'
+moment.defaultFormat = 'DD.MM.YYYY'
 
 export const kolonner: ReadonlyArray<Column<IOppgave>> = [
   {
@@ -17,6 +19,10 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
   {
     Header: 'Reg. dato',
     accessor: 'regdato',
+    Cell: ({ value: dato }) => {
+      return moment(dato).format()
+    },
+    sortType: 'datetime',
   },
   {
     Header: 'Prioritet',
@@ -56,7 +62,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
 export const mockdata: ReadonlyArray<IOppgave> = [
   {
     id: '1',
-    regdato: '12.03.20',
+    regdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
     beskrivelse: 'test 1',
@@ -65,7 +71,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     id: '2',
-    regdato: '12.03.20',
+    regdato: new Date(2020, 3, 12),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
     beskrivelse: 'test 2',
@@ -74,7 +80,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     id: '3',
-    regdato: '13.03.20',
+    regdato: new Date(2020, 3, 23),
     prioritet: PrioritetFilter.LAV,
     bruker: '123456789',
     beskrivelse: 'test 3',
@@ -83,7 +89,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     id: '4',
-    regdato: '14.03.20',
+    regdato: new Date(2020, 3, 22),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
     beskrivelse: 'test 4',
@@ -92,7 +98,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     id: '5',
-    regdato: '15.03.20',
+    regdato: new Date(2020, 3, 12),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
     beskrivelse: 'test 5',
@@ -101,7 +107,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     id: '6',
-    regdato: '12.03.20',
+    regdato: new Date(2022, 3, 16),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
     beskrivelse: 'test 1',
@@ -110,7 +116,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     id: '7',
-    regdato: '12.03.20',
+    regdato: new Date(2020, 3, 15),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
     beskrivelse: 'test 2',
@@ -119,7 +125,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     id: '8',
-    regdato: '13.03.20',
+    regdato: new Date(2020, 3, 14),
     prioritet: PrioritetFilter.LAV,
     bruker: '123456789',
     beskrivelse: 'test 3',
@@ -128,7 +134,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     id: '9',
-    regdato: '14.03.20',
+    regdato: new Date(2020, 3, 13),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
     beskrivelse: 'test 4',
@@ -137,7 +143,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     id: '10',
-    regdato: '15.03.20',
+    regdato: new Date(2020, 3, 12),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
     beskrivelse: 'test 5',
@@ -146,7 +152,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     id: '11',
-    regdato: '12.03.20',
+    regdato: new Date(2020, 6, 12),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
     beskrivelse: 'test 1',
@@ -155,7 +161,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     id: '12',
-    regdato: '12.03.20',
+    regdato: new Date(2020, 5, 12),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
     beskrivelse: 'test 2',
@@ -164,7 +170,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     id: '13',
-    regdato: '13.03.20',
+    regdato: new Date(2020, 4, 12),
     prioritet: PrioritetFilter.LAV,
     bruker: '123456789',
     beskrivelse: 'test 3',
@@ -173,7 +179,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     id: '14',
-    regdato: '14.03.20',
+    regdato: new Date(2021, 3, 12),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
     beskrivelse: 'test 4',
@@ -182,7 +188,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     id: '15',
-    regdato: '15.03.20',
+    regdato: new Date(2022, 3, 12),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
     beskrivelse: 'test 5',

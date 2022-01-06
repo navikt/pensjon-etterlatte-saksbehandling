@@ -10,12 +10,13 @@ import io.ktor.util.pipeline.*
 import no.nav.etterlatte.Kontekst
 import java.util.*
 
-
 fun Route.behandlingRoutes(service: BehandlingService){
     get("/behandlinger") {
         call.respond(inTransaction { service.hentBehandlinger().map { BehandlingSammendrag(it.id, it.sak, it.status) }.let { BehandlingSammendragListe(it) }})
     }
-
+    get("/sak/{sakid}/behandlinger") {
+        call.respond(inTransaction { service.hentBehandlingerISak(sakId).map { BehandlingSammendrag(it.id, it.sak, it.status) }.let { BehandlingSammendragListe(it) }})
+    }
     post("/behandlinger") { //Søk
         val behandlingsBehov = call.receive<BehandlingsBehov>()
         inTransaction { service.startBehandling(behandlingsBehov.sak) }.also { call.respond(it.id) }
@@ -25,8 +26,7 @@ fun Route.behandlingRoutes(service: BehandlingService){
             call.respond(inTransaction { service.hentBehandling(behandlingsId)}?.let { DetaljertBehandling(it.id, it.sak, it.grunnlag, it.vilkårsprøving, it.beregning, it.fastsatt) }?: HttpStatusCode.NotFound)
         }
         post("vilkaarsproeving") {
-            val body = call.receive<Vilkårsprøving>()
-            inTransaction { service.vilkårsprøv(behandlingsId, body) }
+            inTransaction { service.vilkårsprøv(behandlingsId) }
             call.respond(HttpStatusCode.OK)
 
         }
@@ -45,11 +45,10 @@ fun Route.behandlingRoutes(service: BehandlingService){
 }
 
 
-data class BehandlingsBehov(val sak: String)
-
 private fun <T> inTransaction(block:()->T): T = Kontekst.get().databasecontxt.inTransaction {
     block()
 }
 
 inline val PipelineContext<*, ApplicationCall>.behandlingsId get() = requireNotNull(call.parameters["behandlingsid"]).let { UUID.fromString(it) }
+inline val PipelineContext<*, ApplicationCall>.sakId get() = requireNotNull(call.parameters["sakid"]).toLong()
 

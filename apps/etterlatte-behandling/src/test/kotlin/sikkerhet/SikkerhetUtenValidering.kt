@@ -1,4 +1,4 @@
-package no.nav.etterlatte.sikkerhet
+package soeknad.sikkerhet
 
 import io.ktor.application.*
 import io.ktor.auth.*

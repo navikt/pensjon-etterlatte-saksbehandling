@@ -17,7 +17,7 @@ class BehandlingDao(private val connection: ()->Connection) {
         return stmt.executeQuery().singleOrNull {
             Behandling(
                 getObject(1) as UUID,
-                getLong(2).toString(),
+                getLong(2),
                 emptyList(),
                 getString(3)?.let { objectMapper.readValue(it) },
                 getString(4)?.let { objectMapper.readValue(it) }
@@ -29,16 +29,29 @@ class BehandlingDao(private val connection: ()->Connection) {
         return stmt.executeQuery().toList {
             Behandling(
                 getObject(1) as UUID,
-                getLong(2).toString(),
+                getLong(2),
                 emptyList<Opplysning>(),
                 objectMapper.readValue(getString(3)),
                 objectMapper.readValue(getString(4))
             ) }
     }
+    fun alleISak(sakid: Long): List<Behandling> {
+        val stmt = connection().prepareStatement("SELECT id, sak_id, vilkaarsproving, beregning FROM behandling WHERE sak_id = ?")
+        stmt.setLong(1, sakid)
+        return stmt.executeQuery().toList {
+            Behandling(
+                getObject(1) as UUID,
+                getLong(2),
+                emptyList(),
+                getString(3)?.let{objectMapper.readValue(it)},
+                getString(4)?.let{objectMapper.readValue(it)}
+            ) }
+    }
+
     fun opprett(behandling: Behandling){
         val stmt = connection().prepareStatement("INSERT INTO behandling(id, sak_id) VALUES(?, ?)")
         stmt.setObject(1, behandling.id)
-        stmt.setLong(2, behandling.sak.toLong())
+        stmt.setLong(2, behandling.sak)
         stmt.executeUpdate()
     }
     fun lagreBeregning(behandling: Behandling){

@@ -2,7 +2,7 @@ package no.nav.etterlatte.person
 
 import io.ktor.application.call
 import io.ktor.request.receive
-import io.ktor.response.respondText
+import io.ktor.response.*
 import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post

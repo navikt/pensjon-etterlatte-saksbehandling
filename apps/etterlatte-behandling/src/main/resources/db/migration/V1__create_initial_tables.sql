@@ -14,19 +14,18 @@ CREATE TABLE behandling
     sak_id BIGINT NOT NULL
         CONSTRAINT behandling_sak_id_fk
             REFERENCES sak (id),
-    vilkaarsproving VARCHAR,
-    beregning VARCHAR,
+    vilkaarsproving TEXT,
+    beregning TEXT,
     fastsatt boolean
 );
 
 CREATE TABLE opplysning
 (
-    id UUID
-        PRIMARY KEY,
-    data VARCHAR,
-    meta VARCHAR,
-    kilde VARCHAR,
-    type VARCHAR
+    id UUID PRIMARY KEY,
+    data TEXT,
+    meta TEXT,
+    kilde TEXT,
+    type TEXT
 );
 
 CREATE TABLE opplysning_i_behandling

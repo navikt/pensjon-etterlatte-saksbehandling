@@ -14,7 +14,7 @@ const clientPath = path.resolve(__dirname, "../client");
 app.set("trust proxy", 1);
 
 
-app.use("/", express.static(clientPath, {index: false}));
+app.use("/", express.static(clientPath));
 
 // requestlogger-middleware
 app.use((req, res, next) => {

@@ -6,7 +6,7 @@ export const epochToUTC = (epochDate: number): Date => {
 
 export const utcSecondsSinceEpoch = (): number => {
     const now = new Date();
-    const utcMilllisecondsSinceEpoch = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
+    const utcMilllisecondsSinceEpoch = now.getTime();
     const utcSecondsSinceEpoch = Math.round(utcMilllisecondsSinceEpoch / 1000);
     return utcSecondsSinceEpoch;
 };

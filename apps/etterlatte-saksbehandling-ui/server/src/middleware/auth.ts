@@ -15,8 +15,8 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     return next();
 };
 
-const hasBeenIssued = (issuedAtTime: number) => issuedAtTime > utcSecondsSinceEpoch();
-const hasExpired = (expires: number) => expires < utcSecondsSinceEpoch();
+export const hasBeenIssued = (issuedAtTime: number) => issuedAtTime < utcSecondsSinceEpoch(); // sjekker at issued-date har vært
+export const hasExpired = (expires: number) => expires < utcSecondsSinceEpoch();
 
 export const authenticateUser = (req: Request, res: Response, next: NextFunction) => {
     /* NAIS notes

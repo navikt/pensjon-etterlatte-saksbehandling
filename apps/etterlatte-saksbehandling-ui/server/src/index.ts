@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-import { loggers } from "winston";
 import { appConf } from "./config/config";
 import { authMiddleware, authenticateUser } from "./middleware/auth";
 import { healthRouter } from "./routers/health";
@@ -14,7 +13,8 @@ const clientPath = path.resolve(__dirname, "../client");
 
 app.set("trust proxy", 1);
 
-app.use("/", express.static(clientPath));
+
+app.use("/", express.static(clientPath, {index: false}));
 
 // requestlogger-middleware
 app.use((req, res, next) => {
@@ -39,10 +39,6 @@ if (process.env.DEVELOPMENT !== "true") {
 }
 app.use("/modiacontextholder/api/", modiaRouter);
 app.use("/proxy", authMiddleware, proxy);
-app.get("/logintest", authenticateUser, (req: any, res: any) => {
-    logger.info("Headers", { ...req.headers });
-    res.json("ok");
-});
 
 app.listen(appConf.port, () => {
     console.log(`Server kjører på port ${appConf.port}`);

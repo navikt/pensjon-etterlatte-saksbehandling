@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
 import no.nav.etterlatte.libs.common.pdl.GraphqlRequest
 import no.nav.etterlatte.libs.common.pdl.Variables
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.prosess.pdl.PersonResponse
 import org.slf4j.LoggerFactory
 
 interface Pdl {

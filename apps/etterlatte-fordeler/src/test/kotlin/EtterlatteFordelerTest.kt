@@ -1,44 +1,17 @@
 package no.nav.etterlatte.prosess
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.content.TextContent
-import io.ktor.http.ContentType
-import io.ktor.http.fullPath
-import io.ktor.http.headersOf
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.EtterlatteFordeler
 import no.nav.etterlatte.common.mapJsonToAny
-import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
-import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
-import no.nav.etterlatte.libs.common.pdl.Gradering
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.Person
 import no.nav.etterlatte.pdl.PersonService
-import no.nav.etterlatte.prosess.pdl.PersonResponse
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import no.nav.security.token.support.client.core.jwk.JwkFactory.fromJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.nio.file.Paths
-import java.time.Clock
-import java.time.LocalDateTime
-import java.time.Month
-import java.time.ZoneId
-import java.time.ZoneOffset
 
 internal class EtterlatteFordelerTest {
 

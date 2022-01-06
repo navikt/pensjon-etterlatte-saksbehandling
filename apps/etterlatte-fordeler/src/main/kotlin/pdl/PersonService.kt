@@ -3,7 +3,6 @@ package no.nav.etterlatte.pdl
 import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelsePerson
 import no.nav.etterlatte.libs.common.pdl.Gradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.prosess.pdl.PersonResponse
 import org.slf4j.LoggerFactory
 
 class PersonService(private val klient: Pdl) {

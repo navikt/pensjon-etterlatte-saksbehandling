@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.pdl.Person
 import no.nav.etterlatte.pdl.PersonService
-import no.nav.etterlatte.prosess.pdl.PersonResponse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection

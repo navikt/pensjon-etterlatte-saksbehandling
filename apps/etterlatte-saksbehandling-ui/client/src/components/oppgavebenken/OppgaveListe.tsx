@@ -15,39 +15,6 @@ type Props = {
   filterPar: Array<FilterPar>
 }
 
-const Styles = styled.div`
-  table {
-    border-spacing: 0;
-
-    th {
-      padding: 1rem;
-      border-bottom: 1px solid black;
-      text-align: left;
-    }
-
-    tr,
-    td {
-      margin: 0;
-      padding: 1rem;
-      border-bottom: 1px solid grey;
-      min-width: 170px;
-    }
-  }
-
-  .pagination {
-    padding-top: 1rem;
-
-    button {
-      padding: 0 0.5rem 0 0.5rem;
-      margin: 0 1px 0 1px;
-    }
-
-    span {
-      margin: 0 1rem 0 1rem;
-    }
-  }
-`
-
 const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar }) => {
   const {
     getTableProps,
@@ -73,8 +40,8 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar 
       initialState: {
         sortBy: [
           {
-            id: 'id',
-            desc: false,
+            id: 'regdato',
+            desc: true,
           },
         ],
       },
@@ -183,5 +150,38 @@ export const getAriaSort = (column: ColumnInstance<IOppgave>): 'none' | 'descend
   }
   return ariaSortMap.get(FeltSortOrder.NONE)
 }
+
+const Styles = styled.div`
+  table {
+    border-spacing: 0;
+
+    th {
+      padding: 1rem;
+      border-bottom: 1px solid black;
+      text-align: left;
+    }
+
+    tr,
+    td {
+      margin: 0;
+      padding: 1rem;
+      border-bottom: 1px solid grey;
+      min-width: 170px;
+    }
+  }
+
+  .pagination {
+    padding-top: 1rem;
+
+    button {
+      padding: 0 0.5rem 0 0.5rem;
+      margin: 0 1px 0 1px;
+    }
+
+    span {
+      margin: 0 1rem 0 1rem;
+    }
+  }
+`
 
 export default OppgaveListe

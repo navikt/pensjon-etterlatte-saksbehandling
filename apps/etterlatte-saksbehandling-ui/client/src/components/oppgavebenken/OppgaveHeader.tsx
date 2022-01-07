@@ -32,7 +32,11 @@ const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGl
       />
       <ColumnFilters oppgaveFelter={oppgaveFelter} setOppgaveFelter={setOppgaveFelter} />
       <ButtonWrapper>
+        <Button size={'small'} onClick={() => {}} variant={'primary'}>
+          Hent
+        </Button>
         <Button
+          size={'small'}
           onClick={() => {
             setOppgaveFelter(initialOppgaveFelter())
             setResetGlobalInput(true)
@@ -48,6 +52,12 @@ const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGl
 
 const ButtonWrapper = styled.div`
   margin-bottom: 3rem;
+  display: flex;
+  flex-direction: row;
+
+  button {
+    margin-right: 1rem;
+  }
 `
 
 export default OppgaveHeader

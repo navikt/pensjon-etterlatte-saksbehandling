@@ -26,7 +26,6 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar 
     setAllFilters,
     canPreviousPage,
     canNextPage,
-    pageOptions,
     pageCount,
     gotoPage,
     nextPage,

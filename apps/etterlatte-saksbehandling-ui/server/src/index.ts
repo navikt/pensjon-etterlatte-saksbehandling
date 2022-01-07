@@ -38,7 +38,7 @@ if (process.env.DEVELOPMENT !== "true") {
     app.use(authenticateUser); // Alle ruter etter denne er authenticated
 }
 app.use("/modiacontextholder/api/", modiaRouter);
-app.use("/proxy", authMiddleware, proxy);
+app.use("/", /*authMiddleware,*/ proxy);
 
 app.listen(appConf.port, () => {
     console.log(`Server kjører på port ${appConf.port}`);

@@ -1,8 +1,4 @@
-
-interface IApiResponse<T> {
-  status: number;
-  data?: T
-}
+import { IApiResponse } from "./types";
 
 const isDev = process.env.NODE_ENV === "development"
 const path = isDev ? "http://localhost:8080" : "https://etterlatte-saksbehandling.dev.intern.nav.no";
@@ -22,7 +18,6 @@ export const login = async (): Promise<IApiResponse<any>> => {
 }
 
 export const getZUser = async (): Promise<IApiResponse<any>> => {
-
   try{
     const result: Response = await fetch(`${path}/modiacontextholder/api/decorator`)
     return {

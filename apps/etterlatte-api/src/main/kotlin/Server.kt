@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import io.ktor.application.install
+import io.ktor.auth.Authentication
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
@@ -21,8 +22,13 @@ class Server(applicationContext: ApplicationContext) {
                 filter { call -> !call.request.path().startsWith("/internal") }
             }
 
+            install(Authentication) {
+
+            }
+
             routing {
                 healthApi()
+                behandlingRoute()
                 testRoute()
             }
         }

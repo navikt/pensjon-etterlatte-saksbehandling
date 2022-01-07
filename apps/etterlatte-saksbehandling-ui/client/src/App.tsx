@@ -12,6 +12,7 @@ import { StatusBar, StatusBarTheme } from './components/statusbar'
 import { Behandling } from './components/behandling'
 import { Link } from 'react-router-dom'
 import { Header } from './shared/header'
+import { Person } from './components/person'
 
 ws()
 
@@ -20,8 +21,9 @@ function App() {
   console.log(ctx)
   return (
     <div className="app">
-      <Header />
       <BrowserRouter>
+        <Header />
+
         <Routes>
           <Route
             path="/"
@@ -34,6 +36,7 @@ function App() {
             }
           />
           <Route path="/oppgavebenken" element={<Oppgavebenken />} />
+          <Route path="/person/:fnr" element={<Person />} />
           <Route
             path="/behandling/*"
             element={

@@ -32,6 +32,7 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar 
     nextPage,
     previousPage,
     setPageSize,
+    filteredRows,
     state: { pageIndex, pageSize },
   } = useTable(
     {
@@ -119,10 +120,8 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar 
           {'>>'}
         </button>
         <span>
-          Side{' '}
-          <strong>
-            {pageIndex + 1} av {pageOptions.length}
-          </strong>
+          Viser {pageIndex * pageSize + 1} - {pageIndex * pageSize + page.length} av {filteredRows.length} oppgaver
+          (totalt {data.length} oppgaver)
         </span>
         <select
           value={pageSize}

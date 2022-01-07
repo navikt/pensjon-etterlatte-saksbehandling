@@ -22,8 +22,8 @@ export interface IOppgaveFelt {
 
 export interface IOppgaveFelter {
   [key: string]: IOppgaveFelt
-  id: IOppgaveFelt
   regdato: IOppgaveFelt
+  fristdato: IOppgaveFelt
   prioritet: IOppgaveFelt
   bruker: IOppgaveFelt
   beskrivelse: IOppgaveFelt
@@ -45,13 +45,17 @@ export const ariaSortMap = new Map<FeltSortOrder, 'none' | 'descending' | 'ascen
 
 export const initialOppgaveFelter = (): IOppgaveFelter => {
   return {
-    id: {
-      noekkel: 'id',
-      label: 'ID initiell test',
-    },
     regdato: {
       noekkel: 'regdato',
       label: 'Reg. dato',
+      filter: {
+        type: 'dato',
+        selectedValue: '',
+      },
+    },
+    fristdato: {
+      noekkel: 'fristdato',
+      label: 'Frist',
       filter: {
         type: 'dato',
         selectedValue: '',
@@ -69,10 +73,18 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
     bruker: {
       noekkel: 'bruker',
       label: 'Bruker',
+      filter: {
+        type: 'string',
+        selectedValue: '',
+      },
     },
     beskrivelse: {
       noekkel: 'beskrivelse',
       label: 'Beskrivelse',
+      filter: {
+        type: 'string',
+        selectedValue: '',
+      },
     },
     status: {
       noekkel: 'status',

@@ -1,6 +1,6 @@
 export interface IOppgave {
-  id: string
   regdato: Date
+  fristdato: Date
   prioritet: PrioritetFilter
   bruker: string //todo endre til fnr senere
   beskrivelse: string

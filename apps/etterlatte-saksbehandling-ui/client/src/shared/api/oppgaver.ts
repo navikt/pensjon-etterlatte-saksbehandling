@@ -1,4 +1,4 @@
-import { mockdata } from '../../components/oppgavebenken/OppgaveUtils'
+import { mockdata } from '../../components/oppgavebenken/OppgaveKolonner'
 
 export const hentOppgaver = async () => {
   try {

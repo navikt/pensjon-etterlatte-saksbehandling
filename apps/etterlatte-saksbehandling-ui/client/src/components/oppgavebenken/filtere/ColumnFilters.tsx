@@ -3,6 +3,7 @@ import { IOppgaveFelt, IOppgaveFelter } from '../oppgavefelter'
 import DateColumnFilter from './DateColumnFilter'
 import DropdownColumnFilter from './DropdownColumnFilter'
 import { FilterWrapper } from '../styled'
+import StringColumnFilter from './StringColumnFilter'
 
 type Props = {
   oppgaveFelter: IOppgaveFelter
@@ -26,7 +27,14 @@ const ColumnFilters: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter }) => 
                 />
               )
             case 'string':
-              return <div key={oppgaveFelt.noekkel} />
+              return (
+                <StringColumnFilter
+                  key={oppgaveFelt.noekkel}
+                  oppgaveFelt={oppgaveFelt}
+                  oppgaveFelter={oppgaveFelter}
+                  setOppgaveFelter={setOppgaveFelter}
+                />
+              )
             case 'select':
               return (
                 <DropdownColumnFilter

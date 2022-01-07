@@ -13,12 +13,16 @@ moment.defaultFormat = 'DD.MM.YYYY'
 
 export const kolonner: ReadonlyArray<Column<IOppgave>> = [
   {
-    Header: 'ID',
-    accessor: 'id',
-  },
-  {
     Header: 'Reg. dato',
     accessor: 'regdato',
+    Cell: ({ value: dato }) => {
+      return moment(dato).format()
+    },
+    sortType: 'datetime',
+  },
+  {
+    Header: 'Frist',
+    accessor: 'fristdato',
     Cell: ({ value: dato }) => {
       return moment(dato).format()
     },
@@ -61,8 +65,8 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
 
 export const mockdata: ReadonlyArray<IOppgave> = [
   {
-    id: '1',
     regdato: new Date(2022, 1, 6),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
     beskrivelse: 'test 1',
@@ -70,8 +74,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     enhet: EnhetFilter.E4820,
   },
   {
-    id: '2',
     regdato: new Date(2020, 3, 12),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
     beskrivelse: 'test 2',
@@ -79,8 +83,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     enhet: EnhetFilter.E4820,
   },
   {
-    id: '3',
     regdato: new Date(2020, 3, 23),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.LAV,
     bruker: '123456789',
     beskrivelse: 'test 3',
@@ -88,8 +92,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     enhet: EnhetFilter.E4806,
   },
   {
-    id: '4',
     regdato: new Date(2020, 3, 22),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
     beskrivelse: 'test 4',
@@ -97,8 +101,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     enhet: EnhetFilter.E4806,
   },
   {
-    id: '5',
     regdato: new Date(2020, 3, 12),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
     beskrivelse: 'test 5',
@@ -106,8 +110,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     enhet: EnhetFilter.E4806,
   },
   {
-    id: '6',
     regdato: new Date(2022, 3, 16),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
     beskrivelse: 'test 1',
@@ -115,8 +119,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     enhet: EnhetFilter.E4820,
   },
   {
-    id: '7',
     regdato: new Date(2020, 3, 15),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
     beskrivelse: 'test 2',
@@ -124,8 +128,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     enhet: EnhetFilter.E4820,
   },
   {
-    id: '8',
     regdato: new Date(2020, 3, 14),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.LAV,
     bruker: '123456789',
     beskrivelse: 'test 3',
@@ -133,8 +137,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     enhet: EnhetFilter.E4806,
   },
   {
-    id: '9',
     regdato: new Date(2020, 3, 13),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
     beskrivelse: 'test 4',
@@ -142,8 +146,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     enhet: EnhetFilter.E4806,
   },
   {
-    id: '10',
     regdato: new Date(2020, 3, 12),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
     beskrivelse: 'test 5',
@@ -151,8 +155,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     enhet: EnhetFilter.E4806,
   },
   {
-    id: '11',
     regdato: new Date(2020, 6, 12),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
     beskrivelse: 'test 1',
@@ -160,8 +164,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     enhet: EnhetFilter.E4820,
   },
   {
-    id: '12',
     regdato: new Date(2020, 5, 12),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
     beskrivelse: 'test 2',
@@ -169,8 +173,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     enhet: EnhetFilter.E4820,
   },
   {
-    id: '13',
     regdato: new Date(2020, 4, 12),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.LAV,
     bruker: '123456789',
     beskrivelse: 'test 3',
@@ -178,8 +182,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     enhet: EnhetFilter.E4806,
   },
   {
-    id: '14',
     regdato: new Date(2021, 3, 12),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
     beskrivelse: 'test 4',
@@ -187,8 +191,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     enhet: EnhetFilter.E4806,
   },
   {
-    id: '15',
     regdato: new Date(2022, 3, 12),
+    fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
     beskrivelse: 'test 5',

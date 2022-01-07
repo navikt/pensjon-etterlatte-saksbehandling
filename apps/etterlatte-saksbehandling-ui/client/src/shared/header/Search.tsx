@@ -1,8 +1,16 @@
 import { SearchField } from '@navikt/ds-react'
 import { useState } from 'react'
+import { SearchIcon } from '../icons/searchIcon'
 
 export const Search = () => {
   const [searchInput, setSearchInput] = useState('')
+
+  /*
+  useEffect(() => {
+    alert("du søkte på")
+
+  }, [searchInput])
+  */
 
   const onChange = (e: any) => {
     setSearchInput(e.target.value)
@@ -20,8 +28,10 @@ export const Search = () => {
 
   return (
     <SearchField label="" style={{ paddingBottom: '8px' }}>
-      <SearchField.Input type="tel" placeholder="123456 12345" onKeyUp={onEnter} onChange={onChange} />
-      <SearchField.Button onClick={submit}>?</SearchField.Button>
+      <SearchField.Input type="tel" placeholder="Fødselsnummer" onKeyUp={onEnter} onChange={onChange} />
+      <SearchField.Button onClick={submit}>
+        <SearchIcon />
+      </SearchField.Button>
     </SearchField>
   )
 }

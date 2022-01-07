@@ -122,7 +122,7 @@ const Tabs = styled.div`
 `;
 const IconButton = styled.div`
     cursor: pointer;
-    padding: 1em 1em 1.5em;
+    padding: 1em 1em 1.8em;
 
     &.active {
         border-bottom: 3px solid #0067c5;

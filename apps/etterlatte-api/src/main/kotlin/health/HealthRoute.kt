@@ -8,7 +8,7 @@ import io.ktor.routing.get
 import io.ktor.routing.route
 
 fun Route.healthApi() {
-    route("internal") {
+    route("health") {
         get("isalive") {
             call.respond(HttpStatusCode.OK)
         }

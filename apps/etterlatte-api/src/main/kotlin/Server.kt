@@ -28,7 +28,7 @@ class Server(applicationContext: ApplicationContext) {
 
             routing {
                 healthApi()
-                behandlingRoute()
+                behandlingRoute(applicationContext.behandlingService)
                 testRoute()
             }
         }

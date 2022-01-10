@@ -10,4 +10,4 @@ RUN cd ./server && npm install --production
 
 EXPOSE 4000
 
-CMD ["npm", "start"]
+CMD ["NODE_ENV=production", "node", "./server/index.js"]

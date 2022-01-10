@@ -53,7 +53,7 @@ export type FnrContextvalue = Contextvalue<FnrDisplay>;
 const RESET_VALUE = '\u0000';
 const InternflateDecorator = NAVSPA.importer<DecoratorProps>("internarbeidsflatefs");
 
-const isDev = process.env.NODE_ENV === "development"
+const isDev = process.env.NODE_ENV !== "production"
 
 export const Decorator = () => {
 

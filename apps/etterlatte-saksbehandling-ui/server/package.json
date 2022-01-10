@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@types/express-http-proxy": "^1.6.3",
     "express": "^4.17.1",
     "express-http-proxy": "^1.6.3",
     "node-fetch": "^2.6.6",

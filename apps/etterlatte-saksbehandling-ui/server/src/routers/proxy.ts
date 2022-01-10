@@ -1,8 +1,33 @@
 import express, { Request, Response } from "express";
+import proxy from 'express-http-proxy';
+import { logger } from "../utils/logger";
 
-export const proxy = express.Router();
 
-proxy.use((req: Request, res: Response) => {
-    console.log(process.env);
-    return res.status(405).send("Ok");
+const options: any = () => ({
+    parseReqBody: false,
+    /*
+    proxyReqOptDecorator: (options: any, req: any) => {
+        logger.info(`${req.protocol?.toUpperCase()} ${req.method} ${req.path}`);
+
+        return new Promise((resolve, reject) => {
+            return exchangeToken(req.session.tokens.access_token).then(
+                (accessToken) => {
+                    options.headers.Authorization = `Bearer ${accessToken}`;
+                    resolve(options);
+                },
+                (error) => {
+                    logger.error("Error occured while changing request headers: ", error);
+                    reject(error);
+                }
+            );
+        });
+    },
+    */
+    // proxyReqPathResolver: (req: any) => req.originalUrl.replace(`${config.app.basePath}/api`, ''),
+    proxyErrorHandler: (err: any, res: any, next: any) => {
+        logger.error("Proxy error: ", err)
+        next(err);
+    }
 });
+
+export const expressProxy = proxy('http://etterlatte-api', options());

@@ -1,6 +1,6 @@
 import { IApiResponse } from "./types";
 
-const isDev = process.env.NODE_ENV === "development"
+const isDev = process.env.NODE_ENV !== "production"
 const path = isDev ? "http://localhost:8080" : "https://etterlatte-saksbehandling.dev.intern.nav.no";
 
 export const login = async (): Promise<IApiResponse<any>> => {

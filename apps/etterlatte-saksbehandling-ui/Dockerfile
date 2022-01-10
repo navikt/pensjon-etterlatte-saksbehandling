@@ -8,7 +8,7 @@ COPY ./server/package.json ./server
 
 RUN cd ./server && npm install --production
 
-ENV NODE_ENV=production
+ENV NODE_ENV="production"
 
 EXPOSE 4000
 

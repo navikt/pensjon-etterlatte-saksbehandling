@@ -1,21 +1,64 @@
 /* eslint-disable react/jsx-key */
 import React, { useEffect } from 'react'
 import 'react-table'
-import { useTable, Column, useFilters, useGlobalFilter, useSortBy, ColumnInstance, usePagination } from 'react-table'
-import { FilterPar, IOppgave } from '../../typer/oppgavebenken'
+import {
+  useTable,
+  Column,
+  useFilters,
+  useGlobalFilter,
+  useSortBy,
+  ColumnInstance,
+  usePagination,
+  IdType,
+  Row,
+} from 'react-table'
+import {
+  EnhetFilter,
+  enhetFilter,
+  FilterPar,
+  IOppgave,
+  PrioritetFilter,
+  prioritetFilter,
+  StatusFilter,
+  statusFilter,
+} from '../../typer/oppgavebenken'
 import { ariaSortMap, FeltSortOrder } from './oppgavefelter'
 import { CollapseFilled, ExpandFilled } from '@navikt/ds-icons'
 import styled from 'styled-components'
 import { Heading } from '@navikt/ds-react'
+import moment from 'moment'
 
 type Props = {
   columns: ReadonlyArray<Column<IOppgave>>
   data: ReadonlyArray<IOppgave>
-  globalFilter: string | undefined
+  globalFilterValue: string | undefined
   filterPar: Array<FilterPar>
 }
 
-const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar }) => {
+const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilterValue, filterPar }) => {
+  const filterTypes = React.useMemo(
+    () => ({
+      globalFilter: globalFilterFunction,
+    }),
+    []
+  )
+
+  function globalFilterFunction(rows: Row<IOppgave>[], columnIds: IdType<IOppgave>[], filterValue: string) {
+    return rows.filter((row) => {
+      return columnIds.some((id) => {
+        const rowValue = row.values[id]
+
+        if (id === 'regdato' || id === 'fristdato') {
+          return moment(rowValue).format('DD.MM.YYYY').toString() === filterValue
+        } else if (id === 'enhet' || id === 'status' || id === 'prioritet') {
+          return getContainsSelectFilter(id, rowValue, filterValue)
+        }
+
+        return String(rowValue).toLowerCase().includes(String(filterValue).toLowerCase())
+      })
+    })
+  }
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -37,6 +80,8 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar 
     {
       columns,
       data,
+      globalFilter: globalFilterFunction,
+      filterTypes: filterTypes,
       initialState: {
         sortBy: [
           {
@@ -57,8 +102,8 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar 
   }, [filterPar])
 
   useEffect(() => {
-    setGlobalFilter(globalFilter)
-  }, [globalFilter])
+    setGlobalFilter(globalFilterValue)
+  }, [globalFilterValue])
 
   return (
     <Styles>
@@ -137,6 +182,19 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilter, filterPar 
       </div>
     </Styles>
   )
+}
+
+export function getContainsSelectFilter(id: string, rowValue: string, filterValue: string) {
+  let navn = ''
+  if (id === 'enhet') {
+    navn = enhetFilter[rowValue as EnhetFilter]?.navn.toLowerCase()
+  } else if (id === 'status') {
+    navn = statusFilter[rowValue as StatusFilter]?.navn.toLowerCase()
+  } else if (id === 'prioritet') {
+    navn = prioritetFilter[rowValue as PrioritetFilter]?.navn.toLowerCase()
+  }
+
+  return navn.includes(String(filterValue).toLowerCase())
 }
 
 export const getAriaSort = (column: ColumnInstance<IOppgave>): 'none' | 'descending' | 'ascending' | undefined => {

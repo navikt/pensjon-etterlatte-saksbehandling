@@ -77,7 +77,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     regdato: new Date(2020, 3, 12),
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.HOEY,
-    bruker: '123456789',
+    bruker: '123451111',
     beskrivelse: 'test 2',
     status: StatusFilter.FERDIG,
     enhet: EnhetFilter.E4820,

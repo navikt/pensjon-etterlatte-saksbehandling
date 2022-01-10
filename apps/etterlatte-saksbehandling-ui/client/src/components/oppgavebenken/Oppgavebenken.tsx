@@ -62,7 +62,7 @@ const Oppgavebenken = () => {
             setOppgaveFelter={setOppgaveFelter}
             setGlobalFilter={setGlobalFilter}
           />
-          <OppgaveListe columns={columns} data={data} globalFilter={globalFilter} filterPar={filterPar} />
+          <OppgaveListe columns={columns} data={data} globalFilterValue={globalFilter} filterPar={filterPar} />
         </>
       )}
     </OppgavebenkContainer>

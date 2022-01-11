@@ -24,7 +24,7 @@ const options: any = () => ({
     },
     */
     proxyReqPathResolver: (req: any) => {
-        console.log(req.originalUrl);
+        console.log(req.originalUrl, `${process.env.API_URL}${req.originalUrl}`);
         return req.originalUrl.replace(`https://etterlatte-saksbehandling.dev.intern.nav.no`, '')
     },
     proxyErrorHandler: (err: any, res: any, next: any) => {

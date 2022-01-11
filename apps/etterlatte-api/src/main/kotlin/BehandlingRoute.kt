@@ -10,7 +10,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 
 fun Route.behandlingRoute (service: BehandlingService) {
     route("/api/personer/{fnr}") {
-        get("") {
+        get {
             val fnr = call.parameters["fnr"]
             if(fnr == null) {
                 call.response.status(HttpStatusCode(400, "Bad request"))

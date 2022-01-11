@@ -38,3 +38,6 @@ spec:
     outbound:
       rules:
         - application: etterlatte-vilkaar
+    inbound:
+      rules:
+        - application: etterlatte-api

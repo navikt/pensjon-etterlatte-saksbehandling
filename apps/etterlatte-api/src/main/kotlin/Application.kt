@@ -25,7 +25,7 @@ class ApplicationContext(configLocation: String? = null) {
     }
 
     private fun endpoint(endpointConfig: Config) = HttpClient(CIO) {
-
+        println(endpointConfig.getString("url"))
         defaultRequest {
             url.takeFrom(endpointConfig.getString("url") + url.encodedPath)
         }

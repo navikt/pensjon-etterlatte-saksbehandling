@@ -3,7 +3,7 @@ import OppgaveHeader from './OppgaveHeader'
 import OppgaveListe from './OppgaveListe'
 
 import styled from 'styled-components'
-import { FilterPar, IOppgave } from '../../typer/oppgavebenken'
+import { FilterPar, IOppgave } from './typer/oppgavebenken'
 import { Column } from 'react-table'
 import { kolonner } from './OppgaveKolonner'
 import { initialOppgaveFelter, IOppgaveFelter } from './oppgavefelter'

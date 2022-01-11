@@ -1,5 +1,5 @@
 import { IOppgaveFelt, IOppgaveFelter } from '../oppgavefelter'
-import { IPar } from '../../../typer/oppgavebenken'
+import { IPar } from '../typer/oppgavebenken'
 import { Select } from 'nav-frontend-skjema'
 import React from 'react'
 import { FilterElement } from '../styled'

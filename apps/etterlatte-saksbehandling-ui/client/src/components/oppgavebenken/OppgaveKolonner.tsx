@@ -3,12 +3,18 @@ import {
   enhetFilter,
   EnhetFilter,
   IOppgave,
+  oppgavetypeFilter,
+  OppgavetypeFilter,
   prioritetFilter,
   PrioritetFilter,
+  SoeknadstypeFilter,
+  soeknadstypeFilter,
   statusFilter,
   StatusFilter,
-} from '../../typer/oppgavebenken'
+} from './typer/oppgavebenken'
 import moment from 'moment'
+import { ColorTag } from './styled'
+
 moment.defaultFormat = 'DD.MM.YYYY'
 
 export const kolonner: ReadonlyArray<Column<IOppgave>> = [
@@ -19,6 +25,22 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
       return moment(dato).format()
     },
     sortType: 'datetime',
+  },
+  {
+    Header: 'Oppgavetype',
+    accessor: 'oppgavetype',
+    filter: 'exact',
+    Cell: ({ value: oppgavetype }) => {
+      return <ColorTag type={oppgavetype} label={oppgavetypeFilter[oppgavetype as OppgavetypeFilter]?.navn} />
+    },
+  },
+  {
+    Header: 'Søknadstype',
+    accessor: 'soeknadstype',
+    filter: 'exact',
+    Cell: ({ value: soeknadstype }) => {
+      return <ColorTag type={soeknadstype} label={soeknadstypeFilter[soeknadstype as SoeknadstypeFilter]?.navn} />
+    },
   },
   {
     Header: 'Frist',
@@ -66,6 +88,8 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
 export const mockdata: ReadonlyArray<IOppgave> = [
   {
     regdato: new Date(2022, 1, 6),
+    soeknadstype: SoeknadstypeFilter.BARNEPENSJON,
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
@@ -75,6 +99,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     regdato: new Date(2020, 3, 12),
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
+    soeknadstype: SoeknadstypeFilter.GJENLEVENDEPENSJON,
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123451111',
@@ -84,6 +110,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     regdato: new Date(2020, 3, 23),
+    soeknadstype: SoeknadstypeFilter.BARNEPENSJON,
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.LAV,
     bruker: '123456789',
@@ -93,6 +121,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     regdato: new Date(2020, 3, 22),
+    soeknadstype: SoeknadstypeFilter.GJENLEVENDEPENSJON,
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
@@ -102,6 +132,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     regdato: new Date(2020, 3, 12),
+    soeknadstype: SoeknadstypeFilter.BARNEPENSJON,
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
@@ -111,6 +143,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     regdato: new Date(2022, 3, 16),
+    soeknadstype: SoeknadstypeFilter.BARNEPENSJON,
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
@@ -120,6 +154,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     regdato: new Date(2020, 3, 15),
+    soeknadstype: SoeknadstypeFilter.BARNEPENSJON,
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
@@ -129,6 +165,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     regdato: new Date(2020, 3, 14),
+    soeknadstype: SoeknadstypeFilter.BARNEPENSJON,
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.LAV,
     bruker: '123456789',
@@ -138,6 +176,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     regdato: new Date(2020, 3, 13),
+    soeknadstype: SoeknadstypeFilter.GJENLEVENDEPENSJON,
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
@@ -148,6 +188,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   {
     regdato: new Date(2020, 3, 12),
     fristdato: new Date(2022, 1, 6),
+    soeknadstype: SoeknadstypeFilter.GJENLEVENDEPENSJON,
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
     beskrivelse: 'test 5',
@@ -156,6 +198,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     regdato: new Date(2020, 6, 12),
+    soeknadstype: SoeknadstypeFilter.GJENLEVENDEPENSJON,
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
@@ -165,6 +209,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     regdato: new Date(2020, 5, 12),
+    soeknadstype: SoeknadstypeFilter.GJENLEVENDEPENSJON,
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.HOEY,
     bruker: '123456789',
@@ -174,6 +220,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     regdato: new Date(2020, 4, 12),
+    soeknadstype: SoeknadstypeFilter.GJENLEVENDEPENSJON,
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.LAV,
     bruker: '123456789',
@@ -183,6 +231,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     regdato: new Date(2021, 3, 12),
+    soeknadstype: SoeknadstypeFilter.GJENLEVENDEPENSJON,
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',
@@ -192,6 +242,8 @@ export const mockdata: ReadonlyArray<IOppgave> = [
   },
   {
     regdato: new Date(2022, 3, 12),
+    soeknadstype: SoeknadstypeFilter.GJENLEVENDEPENSJON,
+    oppgavetype: OppgavetypeFilter.FOERSTEGANGSBEHANDLING,
     fristdato: new Date(2022, 1, 6),
     prioritet: PrioritetFilter.NORMAL,
     bruker: '123456789',

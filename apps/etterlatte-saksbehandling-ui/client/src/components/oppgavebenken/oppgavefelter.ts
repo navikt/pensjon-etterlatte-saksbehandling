@@ -2,11 +2,15 @@ import {
   enhetFilter,
   EnhetFilter,
   IPar,
+  oppgavetypeFilter,
+  OppgavetypeFilter,
   prioritetFilter,
   PrioritetFilter,
+  soeknadstypeFilter,
+  SoeknadstypeFilter,
   statusFilter,
   StatusFilter,
-} from '../../typer/oppgavebenken'
+} from './typer/oppgavebenken'
 
 export interface IOppgaveFilter {
   selectedValue: any
@@ -23,6 +27,8 @@ export interface IOppgaveFelt {
 export interface IOppgaveFelter {
   [key: string]: IOppgaveFelt
   regdato: IOppgaveFelt
+  oppgavetype: IOppgaveFelt
+  soeknadstype: IOppgaveFelt
   fristdato: IOppgaveFelt
   prioritet: IOppgaveFelt
   bruker: IOppgaveFelt
@@ -51,6 +57,24 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
       filter: {
         type: 'dato',
         selectedValue: '',
+      },
+    },
+    oppgavetype: {
+      noekkel: 'oppgavetype',
+      label: 'Oppgavetype',
+      filter: {
+        type: 'select',
+        selectedValue: OppgavetypeFilter.VELG,
+        nedtrekksliste: oppgavetypeFilter,
+      },
+    },
+    soeknadstype: {
+      noekkel: 'soeknadstype',
+      label: 'Søknadstype',
+      filter: {
+        type: 'select',
+        selectedValue: SoeknadstypeFilter.VELG,
+        nedtrekksliste: soeknadstypeFilter,
       },
     },
     fristdato: {

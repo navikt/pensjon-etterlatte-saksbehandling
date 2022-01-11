@@ -1,5 +1,7 @@
 export interface IOppgave {
   regdato: Date
+  soeknadstype: SoeknadstypeFilter
+  oppgavetype: OppgavetypeFilter
   fristdato: Date
   prioritet: PrioritetFilter
   bruker: string //todo endre til fnr senere
@@ -20,6 +22,28 @@ export const prioritetFilter: Record<PrioritetFilter, IPar> = {
   LAV: { id: 'LAV', navn: 'Lav' },
   NORMAL: { id: 'NORMAL', navn: 'Normal' },
   HOEY: { id: 'HOEY', navn: 'Høy' },
+}
+
+export enum OppgavetypeFilter {
+  VELG = 'VELG',
+  FOERSTEGANGSBEHANDLING = 'FOERSTEGANGSBEHANDLING',
+}
+
+export const oppgavetypeFilter: Record<OppgavetypeFilter, IPar> = {
+  VELG: { id: 'VELG', navn: 'Velg' },
+  FOERSTEGANGSBEHANDLING: { id: 'FOERSTEGANGSBEHANDLING', navn: 'Førstegangsbehandling' },
+}
+
+export enum SoeknadstypeFilter {
+  VELG = 'VELG',
+  BARNEPENSJON = 'BARNEPENSJON',
+  GJENLEVENDEPENSJON = 'GJENLEVENDEPENSJON',
+}
+
+export const soeknadstypeFilter: Record<SoeknadstypeFilter, IPar> = {
+  VELG: { id: 'VELG', navn: 'Velg' },
+  BARNEPENSJON: { id: 'BARNEPENSJON', navn: 'Barnepensjon' },
+  GJENLEVENDEPENSJON: { id: 'GJENLEVENDEPENSJON', navn: 'Gjenlevendepensjon' },
 }
 
 export enum StatusFilter {

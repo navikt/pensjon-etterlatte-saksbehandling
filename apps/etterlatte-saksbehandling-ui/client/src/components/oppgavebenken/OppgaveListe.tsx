@@ -21,7 +21,7 @@ import {
   prioritetFilter,
   StatusFilter,
   statusFilter,
-} from '../../typer/oppgavebenken'
+} from './typer/oppgavebenken'
 import { ariaSortMap, FeltSortOrder } from './oppgavefelter'
 import { CollapseFilled, ExpandFilled } from '@navikt/ds-icons'
 import styled from 'styled-components'

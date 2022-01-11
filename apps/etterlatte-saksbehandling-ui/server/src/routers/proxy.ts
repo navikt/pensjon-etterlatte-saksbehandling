@@ -23,11 +23,14 @@ const options: any = () => ({
         });
     },
     */
-    // proxyReqPathResolver: (req: any) => req.originalUrl.replace(`${config.app.basePath}/api`, ''),
+    proxyReqPathResolver: (req: any) => {
+        console.log(req.originalUrl);
+        return req.originalUrl.replace(`https://etterlatte-saksbehandling.dev.intern.nav.no`, '')
+    },
     proxyErrorHandler: (err: any, res: any, next: any) => {
         logger.error("Proxy error: ", err)
         next(err);
     }
 });
 
-export const expressProxy = proxy('http://etterlatte-api', options());
+export const expressProxy = proxy(`${process.env.API_URL}`, options());

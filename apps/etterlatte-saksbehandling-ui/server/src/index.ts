@@ -10,7 +10,9 @@ import { logger } from './utils/logger'
 const app = express()
 
 const clientPath = path.resolve(__dirname, '../client')
-const isDev = process.env.NODE_ENV !== "production"
+const isDev = process.env.NODE_ENV !== 'production'
+
+logger.info(`environment: ${isDev}`)
 
 app.set('trust proxy', 1)
 
@@ -41,11 +43,11 @@ if (process.env.DEVELOPMENT !== 'true') {
 app.use('/modiacontextholder/api/', modiaRouter)
 
 if (isDev) {
-    app.use("/api", (req:any, res: any) => {
-        res.status(204).send("mock-endpoint")
-    })
+  app.use('/api', (req: any, res: any) => {
+    res.status(204).send('mock-endpoint')
+  })
 } else {
-    logger.info("Proxy-kall")
+  logger.info('Proxy-kall')
   app.use('/api', /*authMiddleware,*/ expressProxy)
 }
 

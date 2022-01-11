@@ -45,6 +45,7 @@ if (isDev) {
         res.status(204).send("mock-endpoint")
     })
 } else {
+    logger.info("Proxy-kall")
   app.use('/api', /*authMiddleware,*/ expressProxy)
 }
 

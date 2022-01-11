@@ -23,3 +23,10 @@ spec:
   env:
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-behandling
+    inbound:
+      rules:
+        - application: etterlatte-saksbehandling-ui

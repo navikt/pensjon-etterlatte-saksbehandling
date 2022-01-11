@@ -46,7 +46,7 @@ spec:
       memory: 256Mi
   env:
     - name: API_URL
-      value: http://ikke-spesifisert
+      value: http://etterlatte-api
   accessPolicy:
     outbound:
       external:

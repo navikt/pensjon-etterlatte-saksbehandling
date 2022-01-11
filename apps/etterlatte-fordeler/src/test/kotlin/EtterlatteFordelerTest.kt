@@ -12,6 +12,7 @@ import no.nav.etterlatte.pdl.PersonService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class EtterlatteFordelerTest {
@@ -19,7 +20,11 @@ internal class EtterlatteFordelerTest {
     private val klientMock = mockk<PdlKlient>()
     private val service = PersonService(klientMock)
 
-    private val hendelseJson = javaClass.getResource("/fullMessage2.json")!!.readText()
+    //TODO flytte ned til relevant test
+    private val hendelseJson = javaClass.getResource("/barnePensjon.json")!!.readText()
+    private val hendelseIkkeBarnePensjonJson = javaClass.getResource("/ikkeBarnePensjon.json")!!.readText()
+    private val hendelseIkkeGyldig = javaClass.getResource("/hendelseUgyldig.json")!!.readText()
+    private val ugyldigFnr = javaClass.getResource("/ugyldigFnr.json")!!.readText()
     private val barnJson = javaClass.getResource("/person.json")!!.readText()
     private val barn = mapJsonToAny<Person>(barnJson, false)
 
@@ -30,8 +35,6 @@ internal class EtterlatteFordelerTest {
     }
 
     //TODO flere tester
-    //hendelsegyldig til
-    //ikke barnepensjonsøknad
     //test ugyldig fnr
 
     @Test
@@ -45,6 +48,39 @@ internal class EtterlatteFordelerTest {
 
         assertEquals(Gradering.STRENGT_FORTROLIG_UTLAND.name, inspector.message(0).get("@adressebeskyttelse").asText())
         assertEquals("ey_fordelt", inspector.message(0).get("@event_name").asText())
+    }
+    @Test
+    fun ikkeBarnepensjonSoeknad() {
+        coEvery { klientMock.hentPerson(any()) } returns barn
+        val inspector = TestRapid()
+            .apply { EtterlatteFordeler(this, service) }
+            .apply { sendTestMessage(hendelseIkkeBarnePensjonJson) }
+            .inspektør
+
+        assertTrue(inspector.size == 0)
+
+    }
+    @Test
+    fun hendelseIkkeGyldigLengre() {
+        coEvery { klientMock.hentPerson(any()) } returns barn
+        val inspector = TestRapid()
+            .apply { EtterlatteFordeler(this, service) }
+            .apply { sendTestMessage(hendelseIkkeGyldig) }
+            .inspektør
+
+        assertTrue(inspector.size == 0)
+
+    }
+    @Test
+    fun ugyldigFnrISoeknad() {
+        coEvery { klientMock.hentPerson(any()) } returns barn
+        val inspector = TestRapid()
+            .apply { EtterlatteFordeler(this, service) }
+            .apply { sendTestMessage(ugyldigFnr) }
+            .inspektør
+
+        assertEquals("ugyldigFnr", inspector.message(0).get("@event_name").asText())
+
     }
 }
 /*

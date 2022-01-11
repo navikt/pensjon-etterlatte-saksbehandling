@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import io.ktor.client.features.ResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.SoeknadType
 import no.nav.etterlatte.pdl.PersonService
@@ -55,28 +56,34 @@ internal class EtterlatteFordeler(
             logger.info("Avbrutt fordeling da søknad ikke er " + SoeknadType.Barnepensjon.name)
             return
         }
-        val barnFnr = Foedselsnummer.of(packet["@fnr_soeker"].asText())
+
         runBlocking {
-             barn = personService.hentPerson(barnFnr)
-        }
-        try {
-            val aktuelleSaker = fordel(packet)
-            if(aktuelleSaker.kandidat) {
-                packet["@soeknad_fordelt"] = aktuelleSaker.kandidat
-                packet["@event_name"] = "ey_fordelt"
-                logger.info("Fant en sak til Saksbehandling POC")
+
+            try {
+                val barnFnr = Foedselsnummer.of(packet["@fnr_soeker"].asText())
+                barn = personService.hentPerson(barnFnr)
+                val aktuelleSaker = fordel(packet)
+                if (aktuelleSaker.kandidat) {
+                    packet["@soeknad_fordelt"] = aktuelleSaker.kandidat
+                    packet["@event_name"] = "ey_fordelt"
+                    logger.info("Fant en sak til Saksbehandling POC")
+                    context.publish(packet.toJson())
+                } else {
+                    logger.info("Avbrutt fordeling, kriterier: " + aktuelleSaker.forklaring.toString())
+                    return@runBlocking
+                }
+            } catch (err: ResponseException) {
+                logger.error("duplikat: ", err)
+                logger.error(packet["@soeknad_fordelt"].asText())
+            } catch (err: InvalidFoedselsnummer) {
+
+                packet["@event_name"] = "ugyldigFnr"
+                logger.info(err.message)
                 context.publish(packet.toJson())
+
+            } catch (err: Exception) {
+                logger.error("Uhaandtert feilsituasjon: ", err)
             }
-            else
-            {
-                logger.info("Avbrutt fordeling, kriterier: " + aktuelleSaker.forklaring.toString())
-                return
-            }
-        } catch (err: ResponseException) {
-            logger.error("duplikat: ", err)
-            logger.error(packet["@soeknad_fordelt"].asText())
-        } catch (err: Exception) {
-            logger.error("Uhaandtert feilsituasjon: ", err)
         }
     }
 

@@ -9,14 +9,16 @@ import io.ktor.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
 
 fun Route.behandlingRoute (service: BehandlingService) {
-    route("/api/personer/{fnr}") {
+    route("api/personer/{fnr}") {
         get {
+            println(call.parameters["fnr"])
             val fnr = call.parameters["fnr"]
             if(fnr == null) {
                 call.response.status(HttpStatusCode(400, "Bad request"))
                 call.respond("Fødselsnummer mangler")
             } else {
-                service.hentPerson(fnr)
+                val list = service.hentPerson(fnr)
+                call.respond(list)
             }
         }
     }

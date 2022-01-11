@@ -17,7 +17,6 @@ class Server(applicationContext: ApplicationContext) {
     private val engine = embeddedServer(CIO, environment = applicationEngineEnvironment {
         module {
             install(ContentNegotiation) { jackson() }
-
             install(CallLogging) {
                 filter { call -> !call.request.path().startsWith("/internal") }
             }

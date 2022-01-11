@@ -9,7 +9,7 @@ import io.ktor.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
 
 fun Route.behandlingRoute (service: BehandlingService) {
-    route("/api/behandling/{fnr}") {
+    route("/api/personer/{fnr}") {
         get("") {
             val fnr = call.parameters["fnr"]
             if(fnr == null) {

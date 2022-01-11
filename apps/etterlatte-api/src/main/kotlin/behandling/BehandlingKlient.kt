@@ -16,7 +16,7 @@ class BehandlingKlient(private val httpClient: HttpClient): EtterlatteBehandling
     override suspend fun hentPerson(fnr: String): List<Sak> =
         try {
             logger.info("Henter saker fra behandling")
-            httpClient.get("/personer/{fnr}/saker") {
+            httpClient.get("personer/{fnr}/saker") {
                 accept(ContentType.Application.Json)
             }
         } catch (e: Exception) {

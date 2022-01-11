@@ -5,6 +5,11 @@ import no.nav.etterlatte.libs.common.pdl.Gradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import org.slf4j.LoggerFactory
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
+
 
 class PersonService(private val klient: Pdl) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
@@ -24,14 +29,12 @@ class PersonService(private val klient: Pdl) {
         return person
             .also { logger.info("Person funnet") }
     }
-    //TODO Fjerne?
-    //suspend fun hentAlderForPerson(fnr: Foedselsnummer): Int {
-     //   val foedselsAar = klient.hentPerson(fnr).data?.hentPerson?.foedsel?.mapNotNull  { it.foedselsaar }
-        //TODO
-        //definere år på en smart måte og støtte for å sjekke liste evt
-        //også må vi håndtere null
-     //   return 2021 - foedselsAar?.get(0)!!
-    //}
+    //TODO denne logikken må sjekkes
+    fun beregnAlderForPerson(person: Person): Int {
+        var alder = LocalDateTime.now().year - person.foedselsaar!!
+        if (LocalDateTime.now().dayOfYear >= LocalDate.parse(person.foedselsdato).dayOfYear) alder++
+        return alder
+    }
 
     /**
      * Henter ut alle graderinger fra liste over personer og deretter henter prioritert [Gradering]

@@ -25,8 +25,8 @@ internal class EtterlatteFordelerTest {
     private val hendelseIkkeBarnePensjonJson = javaClass.getResource("/ikkeBarnepensjon.json")!!.readText()
     private val hendelseIkkeGyldig = javaClass.getResource("/hendelseUgyldig.json")!!.readText()
     private val ugyldigFnr = javaClass.getResource("/ugyldigFnr.json")!!.readText()
-    private val barnJson = javaClass.getResource("/person.json")!!.readText()
-    private val barn = mapJsonToAny<Person>(barnJson, false)
+    private val barnGammel = mapJsonToAny<Person>(javaClass.getResource("/personGammel.json")!!.readText(), false)
+    private val barn = mapJsonToAny<Person>(javaClass.getResource("/person.json")!!.readText(), false)
 
 
     @AfterEach
@@ -35,7 +35,6 @@ internal class EtterlatteFordelerTest {
     }
 
     //TODO flere tester
-    //test ugyldig fnr
 
     @Test
     fun testFeltMapping() {
@@ -55,6 +54,17 @@ internal class EtterlatteFordelerTest {
         val inspector = TestRapid()
             .apply { EtterlatteFordeler(this, service) }
             .apply { sendTestMessage(hendelseIkkeBarnePensjonJson) }
+            .inspektør
+
+        assertTrue(inspector.size == 0)
+
+    }
+    @Test
+    fun barnForGammel() {
+        coEvery { klientMock.hentPerson(any()) } returns barnGammel
+        val inspector = TestRapid()
+            .apply { EtterlatteFordeler(this, service) }
+            .apply { sendTestMessage(hendelseJson) }
             .inspektør
 
         assertTrue(inspector.size == 0)

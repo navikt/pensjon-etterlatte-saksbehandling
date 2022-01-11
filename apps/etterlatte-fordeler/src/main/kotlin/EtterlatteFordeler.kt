@@ -92,8 +92,8 @@ internal class EtterlatteFordeler(
     }
 
     private fun barnForGammel(): Boolean {
-        //TODO endre logikk
-        return barn.foedselsaar!! < 2006
+
+        return personService.beregnAlderForPerson(barn) > 15
     }
 
     private fun bosattUtland(): Boolean {

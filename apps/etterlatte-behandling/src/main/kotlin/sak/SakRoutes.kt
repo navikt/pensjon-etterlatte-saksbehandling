@@ -20,9 +20,6 @@ fun Route.sakRoutes(sakService: SakService){
 
         route("saker/{type}"){
             get {
-                call.respond( inTransaction { sakService.finnSak(requireNotNull(call.parameters["id"]), requireNotNull(call.parameters["type"]))}?: HttpStatusCode.NotFound)
-            }
-            post {
                 val ident = requireNotNull(call.parameters["id"])
                 val type = requireNotNull(call.parameters["type"])
                 call.respond(inTransaction { sakService.finnEllerOpprettSak(ident, type) })

@@ -12,5 +12,8 @@ data class DetaljertBehandling(    val id: UUID,
                                    val beregning: Beregning?,
                                    val fastsatt: Boolean = false)
 
-data class BehandlingsBehov(val sak: Long)
+data class BehandlingsBehov(
+    val sak: Long,
+    val opplysninger:List<Opplysning>?
+    )
 

@@ -32,7 +32,7 @@ class ApplicationTest {
             }.apply {
                 assertEquals(HttpStatusCode.NotFound, response.status())
             }
-            val sak:Sak = handleRequest(HttpMethod.Post, "/personer/$fnr/saker/BP"){
+            val sak:Sak = handleRequest(HttpMethod.Get, "/personer/$fnr/saker/BP"){
                 addAuth()
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())

@@ -28,18 +28,21 @@ export const getOboToken = async (auth: any): Promise<string> => {
     console.log('token', bearerToken)
 
 
-    const response = await fetch(tokenEndpoint, {
-      method: 'post',
-      body: JSON.stringify({
+    const body: any = {
         client_id: process.env.AZURE_APP_CLIENT_ID,
         client_secret: process.env.AZURE_APP_CLIENT_SECRET,
         scope: 'api://783cea60-43b5-459c-bdd3-de3325bd716a/.default',
         grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
         assertion: bearerToken,
         requested_token_use: 'on_behalf_of',
-      }),
+      };
+    
+
+    const response = await fetch(tokenEndpoint, {
+      method: 'post',
+      body: Object.keys(body).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(body[key])).join('&'),
       headers: {
-        'content-type': 'application/json',
+        'content-type': 'application/x-www-form-urlencoded',
       },
     })
     console.log('response: ', response)

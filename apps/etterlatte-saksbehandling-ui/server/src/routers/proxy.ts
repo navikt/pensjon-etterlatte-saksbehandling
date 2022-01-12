@@ -1,4 +1,3 @@
-import express, { Request, Response } from "express";
 import proxy from 'express-http-proxy';
 import { getOboToken } from "../middleware/getOboToken";
 import { logger } from "../utils/logger";
@@ -7,13 +6,10 @@ import { logger } from "../utils/logger";
 const options: any = () => ({
     parseReqBody: false,
     
-    proxyReqOptDecorator: async (options: any, req: any) => {
-        
-        console.log(process.env)
-        /*
-        const oboToken = await getOboToken(req.headers.authorization)
+    proxyReqOptDecorator: async (options: any, req: any) => {        
+        const oboToken = await getOboToken(req.headers.authorization);
+        console.log(oboToken)
         options.headers.Authorization = `Bearer ${oboToken}`;
-        */
 
         /*
         logger.info(`${req.protocol?.toUpperCase()} ${req.method} ${req.path}`);

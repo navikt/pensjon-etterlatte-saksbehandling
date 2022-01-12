@@ -20,12 +20,13 @@ export const getOboToken = async (auth: any) => {
     }
     const bearerToken = auth.split(" ")[1];
     //const parsedToken = parseJwt(bearerToken);
+    const tokenEndpoint = process.env.AZURE_OPENID_CONFIG_TOKEN_ENDPOINT || "";
     try {
-        const response = await fetch("https://login.microsoftonline.com/nav/oauth2/v2.0/token", {
+        const response = await fetch(tokenEndpoint, {
             body: JSON.stringify({
                 client_id: process.env.AZURE_APP_CLIENT_ID,
-                client_secret: "...",
-                scope: "scopet til tjenesten vi kaller",
+                client_secret: process.env.AZURE_APP_CLIENT_SECRET,
+                scope: "api://dev-gcp.etterlatte.etterlatte-api",
                 redirect_uri: "",
                 grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
                 assertion: bearerToken,

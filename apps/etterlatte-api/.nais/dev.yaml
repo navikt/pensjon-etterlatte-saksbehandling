@@ -16,6 +16,10 @@ spec:
   readiness:
     initialDelay: 5
     path: /health/isready
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
   replicas:
     cpuThresholdPercentage: 90
     max: 1

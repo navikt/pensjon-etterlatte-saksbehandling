@@ -19,11 +19,11 @@ export const getOboToken = async (auth: any) => {
         throw new Error("Ikke autentisert");
     }
     const bearerToken = auth.split(" ")[1];
-    const parsedToken = parseJwt(bearerToken);
+    //const parsedToken = parseJwt(bearerToken);
     try {
         const response = await fetch("https://login.microsoftonline.com/nav/oauth2/v2.0/token", {
             body: JSON.stringify({
-                client_id: "app-id i azure", //62366534-1ec3-4962-8869-9b5535279d0b
+                client_id: process.env.AZURE_APP_CLIENT_ID,
                 client_secret: "...",
                 scope: "scopet til tjenesten vi kaller",
                 redirect_uri: "",

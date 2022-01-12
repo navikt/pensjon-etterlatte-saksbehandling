@@ -1,7 +1,10 @@
 package no.nav.etterlatte
 
+import com.typesafe.config.ConfigFactory
 import io.ktor.application.install
 import io.ktor.auth.Authentication
+import io.ktor.auth.authenticate
+import io.ktor.config.HoconApplicationConfig
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
@@ -12,6 +15,7 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import no.nav.etterlatte.health.healthApi
+import no.nav.security.token.support.ktor.tokenValidationSupport
 
 class Server(applicationContext: ApplicationContext) {
     private val engine = embeddedServer(CIO, environment = applicationEngineEnvironment {
@@ -22,13 +26,15 @@ class Server(applicationContext: ApplicationContext) {
             }
 
             install(Authentication) {
-
+                tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
             }
 
             routing {
                 healthApi()
-                behandlingRoute(applicationContext.behandlingService)
-                testRoute()
+                authenticate {
+                    behandlingRoute(applicationContext.behandlingService)
+                    testRoute()
+                }
             }
         }
         connector { port = 8080 }

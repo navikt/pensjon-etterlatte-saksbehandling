@@ -24,17 +24,21 @@ export const getOboToken = async (auth: any): Promise<string> => {
     //const parsedToken = parseJwt(bearerToken);
     const tokenEndpoint = process.env.AZURE_OPENID_CONFIG_TOKEN_ENDPOINT || ''
     console.log('token-endpoint: ', tokenEndpoint)
+    console.log('token', bearerToken)
 
     const response = await fetch(tokenEndpoint, {
+      method: 'post',
       body: JSON.stringify({
         client_id: process.env.AZURE_APP_CLIENT_ID,
         client_secret: process.env.AZURE_APP_CLIENT_SECRET,
         scope: 'api://dev-gcp.etterlatte.etterlatte-api',
-        redirect_uri: '',
         grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
         assertion: bearerToken,
         requested_token_use: 'on_behalf_of',
       }),
+      headers: {
+        'content-type': 'application/json',
+      },
     })
     console.log('response: ', response)
     if (response.status >= 400) {
@@ -44,7 +48,7 @@ export const getOboToken = async (auth: any): Promise<string> => {
     console.log('token?', json)
     return json.access_token
   } catch (e) {
-    logger.error(e)
+    console.log('error:', e)
     throw new Error('Det skjedde en feil ved henting av obo-token')
   }
 }

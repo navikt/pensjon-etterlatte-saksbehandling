@@ -51,5 +51,6 @@ spec:
     outbound:
       external:
         - host: navikt.github.io
+        - host: https://login.microsoftonline.com
       rules:
         - application: etterlatte-api

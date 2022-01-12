@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { logger } from '../utils/logger';
 import { parseJwt } from "../utils/parsejwt";
 
 /*
@@ -39,6 +40,7 @@ export const getOboToken = async (auth: any) => {
         const json = response.json();
         console.log(json);
     } catch (e) {
+        logger.error(e);
         throw new Error("Det skjedde en feil ved henting av obo-token");
     }
 };

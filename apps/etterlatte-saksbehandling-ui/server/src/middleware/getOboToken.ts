@@ -23,11 +23,7 @@ export const getOboToken = async (auth: any): Promise<string> => {
     const bearerToken = auth.split(' ')[1]
     //const parsedToken = parseJwt(bearerToken);
     const tokenEndpoint = process.env.AZURE_OPENID_CONFIG_TOKEN_ENDPOINT || ''
-    console.log(process.env);
-    console.log('token-endpoint: ', tokenEndpoint)
-    console.log('token', bearerToken)
-
-
+    
     const body: any = {
         client_id: process.env.AZURE_APP_CLIENT_ID,
         client_secret: process.env.AZURE_APP_CLIENT_SECRET,
@@ -45,12 +41,11 @@ export const getOboToken = async (auth: any): Promise<string> => {
         'content-type': 'application/x-www-form-urlencoded',
       },
     })
-    console.log('response: ', response)
     if (response.status >= 400) {
       throw new Error('Token-kall feilet')
     }
     const json = await response.json()
-    console.log('token?', json)
+    console.log('token?', json.access_token)
     return json.access_token
   } catch (e) {
     console.log('error:', e)

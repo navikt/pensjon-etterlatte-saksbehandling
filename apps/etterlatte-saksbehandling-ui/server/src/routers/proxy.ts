@@ -11,7 +11,7 @@ const options: any = () => ({
         const oboToken = await getOboToken(req.headers.authorization);
         console.log(oboToken)
         options.headers.Authorization = `Bearer ${oboToken}`;
-
+        return options;
         /*
         logger.info(`${req.protocol?.toUpperCase()} ${req.method} ${req.path}`);
 

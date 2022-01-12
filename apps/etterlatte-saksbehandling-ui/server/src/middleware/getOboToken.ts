@@ -1,6 +1,6 @@
-import fetch from 'node-fetch';
-import { logger } from '../utils/logger';
-import { parseJwt } from "../utils/parsejwt";
+import fetch from 'node-fetch'
+import { logger } from '../utils/logger'
+import { parseJwt } from '../utils/parsejwt'
 
 /*
     POST /oauth2/v2.0/token HTTP/1.1
@@ -15,32 +15,36 @@ import { parseJwt } from "../utils/parsejwt";
     &requested_token_use=on_behalf_of
     */
 
-export const getOboToken = async (auth: any) => {
+export const getOboToken = async (auth: any): Promise<string> => {
+  try {
     if (!auth) {
-        throw new Error("Ikke autentisert");
+      throw new Error('Ikke autentisert')
     }
-    const bearerToken = auth.split(" ")[1];
+    const bearerToken = auth.split(' ')[1]
     //const parsedToken = parseJwt(bearerToken);
-    const tokenEndpoint = process.env.AZURE_OPENID_CONFIG_TOKEN_ENDPOINT || "";
-    try {
-        const response = await fetch(tokenEndpoint, {
-            body: JSON.stringify({
-                client_id: process.env.AZURE_APP_CLIENT_ID,
-                client_secret: process.env.AZURE_APP_CLIENT_SECRET,
-                scope: "api://dev-gcp.etterlatte.etterlatte-api",
-                redirect_uri: "",
-                grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-                assertion: bearerToken,
-                requested_token_use: "on_behalf_of",
-            }),
-        });
-        if (response.status >= 400) {
-            throw new Error("Token-kall feilet");
-        }
-        const json = response.json();
-        console.log(json);
-    } catch (e) {
-        logger.error(e);
-        throw new Error("Det skjedde en feil ved henting av obo-token");
+    const tokenEndpoint = process.env.AZURE_OPENID_CONFIG_TOKEN_ENDPOINT || ''
+    console.log('token-endpoint: ', tokenEndpoint)
+
+    const response = await fetch(tokenEndpoint, {
+      body: JSON.stringify({
+        client_id: process.env.AZURE_APP_CLIENT_ID,
+        client_secret: process.env.AZURE_APP_CLIENT_SECRET,
+        scope: 'api://dev-gcp.etterlatte.etterlatte-api',
+        redirect_uri: '',
+        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        assertion: bearerToken,
+        requested_token_use: 'on_behalf_of',
+      }),
+    })
+    console.log('response: ', response)
+    if (response.status >= 400) {
+      throw new Error('Token-kall feilet')
     }
-};
+    const json = await response.json()
+    console.log('token?', json)
+    return json.access_token
+  } catch (e) {
+    logger.error(e)
+    throw new Error('Det skjedde en feil ved henting av obo-token')
+  }
+}

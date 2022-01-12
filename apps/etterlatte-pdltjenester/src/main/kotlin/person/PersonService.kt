@@ -70,9 +70,10 @@ class PersonService(
             husnummer = bostedsadresse?.vegadresse?.husnummer,
             husbokstav = bostedsadresse?.vegadresse?.husbokstav,
             postnummer = bostedsadresse?.vegadresse?.postnummer,
-            //TODO introdusere kodeverk igjen?
+            //TODO introdusere kodeverk igjen
             poststed = bostedsadresse?.vegadresse?.postnummer,
             statsborgerskap = statsborgerskap?.land,
+            foedeland = foedsel?.foedeland,
             sivilstatus = sivilstand?.type?.name
         )
     }

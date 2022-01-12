@@ -22,18 +22,13 @@ class PersonService(private val klient: Pdl) {
      * @return Gyldig gradering av PDL-typen [Gradering].
      *  Gir verdi [Gradering.UGRADERT] dersom ingenting er funnet.
      */
+    //TODO vurdere å skrive om til hent Barn/Etterlatt/Gjennlevende etc?
     suspend fun hentPerson(fnr: Foedselsnummer): Person {
         //TODO exception håndteringen virker ikke
         val person = klient.hentPerson(fnr) ?: throw Exception("Fant ingen personer i PDL")
 
         return person
             .also { logger.info("Person funnet") }
-    }
-    //TODO denne logikken må sjekkes
-    fun beregnAlderForPerson(person: Person): Int {
-        var alder = LocalDateTime.now().year - person.foedselsaar!!
-        if (LocalDateTime.now().dayOfYear >= LocalDate.parse(person.foedselsdato).dayOfYear) alder++
-        return alder
     }
 
     /**

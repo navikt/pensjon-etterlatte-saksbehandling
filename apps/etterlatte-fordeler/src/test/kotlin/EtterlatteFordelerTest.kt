@@ -20,7 +20,7 @@ internal class EtterlatteFordelerTest {
     private val klientMock = mockk<PdlKlient>()
     private val service = PersonService(klientMock)
 
-    //TODO flytte ned til relevant test
+    //TODO flytte ned til relevant test?
     private val hendelseJson = javaClass.getResource("/barnePensjon.json")!!.readText()
     private val hendelseIkkeBarnePensjonJson = javaClass.getResource("/ikkeBarnepensjon.json")!!.readText()
     private val hendelseIkkeGyldig = javaClass.getResource("/hendelseUgyldig.json")!!.readText()
@@ -59,6 +59,7 @@ internal class EtterlatteFordelerTest {
         assertTrue(inspector.size == 0)
 
     }
+    //TODO gjøre om på hvordan testen forholder seg til tid.
     @Test
     fun barnForGammel() {
         coEvery { klientMock.hentPerson(any()) } returns barnGammel

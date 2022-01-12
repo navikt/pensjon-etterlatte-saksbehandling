@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.alder
 import no.nav.etterlatte.libs.common.soeknad.SoeknadType
 import no.nav.etterlatte.pdl.PersonService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -23,10 +24,33 @@ internal class EtterlatteFordeler(
 
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
     private lateinit var barn: Person
+    //TODO mangler kriterier
+
+    //Avdød:
+    //Bodd i Norge hele livet
+    //Helst ikke ha en annen ytelse i forkant - f.eks ufør og alderspensjon. (Da er det allerede gjort en trygdetidsvurdering)
+    //Ikke huket av for yrkesskade/yrkessykdom
+    //Dødsfallet må ha skjedd i Norge og være registrert. Må få en dødsdato fra PDL (ikke være noe som er uavklart rundt dette)
+
+    //Barn:
+    //Født og oppvokst i Norge
+    // (v) Alder: under 15 år (slik at vi har nok tid til det blir en eventuell omberegning når barnet er 18 år)
+    //Muligens ikke ta hensyn til barn som "er på vei" - enda ikke født
+    //Ett barn, ingen søsken
+    //Må vi ta høyde for flere søsken
+    //Kan vi tenke på kun fellesbarn i første versjon?
+
+    //Innsender av søknad:
+    //Gjenlevende forelder
+    //Hva gjør vi med verge? Høre med Randi Aasen om tanker og hva som er gjort tidligere med vergemål/fullmaktløsning.
+    //Mulighet for å se fra PDL foreldreansvar og om det er oppnevnt verge 
+
     val kriterier = listOf(
-        Kriterie("Bosatt Utland") { bosattUtland() },
+        Kriterie("Barn er ikke norsk statsborger") { sjekkStatsborgerskapBarn() },
         Kriterie("Barn er for gammelt") { barnForGammel() },
-        Kriterie("Barn har adressebeskyttelse") { harAdressebeskyttelse() }
+        Kriterie("Barn har adressebeskyttelse") { barnHarAdressebeskyttelse() },
+        Kriterie("Barn ikke fodt i Norge") { barnFoedtUtland() },
+        Kriterie("Barn har utvandring") { barnHarUtvandring() }
     )
     init {
         River(rapidsConnection).apply {
@@ -87,21 +111,26 @@ internal class EtterlatteFordeler(
         }
     }
 
-    private fun harAdressebeskyttelse(): Boolean {
+    private fun barnHarAdressebeskyttelse(): Boolean {
         return barn.adressebeskyttelse
     }
 
     private fun barnForGammel(): Boolean {
-
-        return personService.beregnAlderForPerson(barn) > 15
+        return barn.alder() > 15
     }
 
-    private fun bosattUtland(): Boolean {
-        //TODO
-        // bytte ut sjekk av statsborgerskap med sjekk av utlandsopphold
+    private fun sjekkStatsborgerskapBarn(): Boolean {
         return barn.statsborgerskap != "NOR"
-
     }
+    private fun barnFoedtUtland(): Boolean {
+        println(barn.foedeland)
+        return barn.foedeland != "NOR"
+    }
+    private fun barnHarUtvandring(): Boolean {
+        //TODO endre til sjekk av utvandring
+        return barn.foedeland != "NOR"
+    }
+
     data class FordelRespons (
         val kandidat: Boolean,
         val forklaring: List<String>

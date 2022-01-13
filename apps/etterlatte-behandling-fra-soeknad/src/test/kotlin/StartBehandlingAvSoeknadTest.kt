@@ -1,7 +1,6 @@
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.Behandling
-import no.nav.etterlatte.Sak
 import no.nav.etterlatte.StartBehandlingAvSoeknad
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.*
@@ -13,12 +12,11 @@ internal class StartBehandlingAvSoeknadTest{
     @Test
     fun test(){
         val rapid = TestRapid()
-        val sakservice = mockk<Sak>()
         val behandlingservice = mockk<Behandling>()
 
-        every { sakservice.skaffSak("20110875720", "BARNEPENSJON") } returns 1
+        every { behandlingservice.skaffSak("20110875720", "BARNEPENSJON") } returns 1
         every { behandlingservice.initierBehandling(1L, any(), any()) } returns UUID.randomUUID()
-        StartBehandlingAvSoeknad(rapid, sakservice, behandlingservice)
+        StartBehandlingAvSoeknad(rapid, behandlingservice)
         val hendelseJson = javaClass.getResource("/fullMessage2.json")!!.readText()
 
         rapid.sendTestMessage(hendelseJson)

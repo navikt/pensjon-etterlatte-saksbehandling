@@ -31,8 +31,8 @@ class BehandlingDao(private val connection: ()->Connection) {
                 getObject(1) as UUID,
                 getLong(2),
                 emptyList<Opplysning>(),
-                objectMapper.readValue(getString(3)),
-                objectMapper.readValue(getString(4))
+                getString(3)?.let { objectMapper.readValue(it) },
+                getString(4)?.let { objectMapper.readValue(it) }
             ) }
     }
     fun alleISak(sakid: Long): List<Behandling> {

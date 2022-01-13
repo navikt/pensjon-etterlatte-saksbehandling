@@ -16,35 +16,14 @@ import java.util.*
 
 class AppBuilder(private val props: Map<String, String>) {
 
-    private val behandling_app = behadnlingHttpClient()
+    private val behandling_app = behandlingHttpClient()
 
-
-    fun createSakService(): Sak {
-        return object :Sak {
-            override fun skaffSak(person: String, saktype: String): Long {
-                return runBlocking {
-                    behandling_app.get<ObjectNode>("http://etterlatte-behandling/personer/$person/saker/$saktype")["id"].longValue()
-                }
-            }
-
-        }
-    }
 
     fun createBehandlingService(): Behandling {
-        return object :Behandling {
-            override fun initierBehandling(sak: Long, jsonNode: JsonNode, jsonNode1: Long): UUID {
-                return runBlocking {
-                    behandling_app.post<String>("http://etterlatte-behandling/behandlinger"){
-                        contentType(ContentType.Application.Json)
-                        body = objectMapper.createObjectNode().put("sak", sak).also { it.putArray("opplysninger") }
-                    }
-                }.let { UUID.fromString(it) }
-            }
-
-        }
+        return BehandlingsService(behandling_app, "http://etterlatte-behandling")
     }
 
-    private fun behadnlingHttpClient() = HttpClient(OkHttp) {
+    private fun behandlingHttpClient() = HttpClient(OkHttp) {
         install(JsonFeature) { serializer = JacksonSerializer() }
         install(Auth) {
             clientCredential {
@@ -56,3 +35,24 @@ class AppBuilder(private val props: Map<String, String>) {
 
 
 }
+
+
+class BehandlingsService(val behandling_app: HttpClient, val url: String) : Behandling {
+    override fun initierBehandling(sak: Long, jsonNode: JsonNode, jsonNode1: Long): UUID {
+        return runBlocking {
+            behandling_app.post<String>("$url/behandlinger") {
+                contentType(ContentType.Application.Json)
+                body = objectMapper.createObjectNode().put("sak", sak).also { it.putArray("opplysninger") }
+            }
+        }.let {
+            UUID.fromString(it)
+        }
+    }
+
+    override fun skaffSak(person: String, saktype: String): Long {
+        return runBlocking {
+            behandling_app.get<ObjectNode>("$url/personer/$person/saker/$saktype")["id"].longValue()
+        }
+    }
+}
+

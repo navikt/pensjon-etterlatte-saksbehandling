@@ -5,12 +5,10 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class StartBehandlingAvSoeknad(
     rapidsConnection: RapidsConnection,
-    private val saker:Sak,
     private val behandlinger: Behandling
 ) : River.PacketListener {
 
@@ -28,7 +26,7 @@ internal class StartBehandlingAvSoeknad(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val sak = saker.skaffSak(packet["@fnr_soeker"].asText(), packet["@skjema_info"]["type"].asText())
+        val sak = behandlinger.skaffSak(packet["@fnr_soeker"].asText(), packet["@skjema_info"]["type"].asText())
         behandlinger.initierBehandling(sak, packet["@skjema_info"], packet["@lagret_soeknad_id"].longValue())
 
         packet["@sak_id"] = sak
@@ -39,9 +37,7 @@ internal class StartBehandlingAvSoeknad(
     }
 }
 
-interface Sak {
-    fun skaffSak(person:String, saktype:String): Long
-}
 interface Behandling {
     fun initierBehandling(sak: Long, jsonNode: JsonNode, jsonNode1: Long): UUID
+    fun skaffSak(person:String, saktype:String): Long
 }

@@ -8,7 +8,7 @@ fun main() {
     }.also { env ->
         AppBuilder(env).also { ab ->
             RapidApplication.create(env)
-                .also { StartBehandlingAvSoeknad(it, ab.createSakService(), ab.createBehandlingService()) }
+                .also { StartBehandlingAvSoeknad(it, ab.createBehandlingService()) }
                 .start()
         }
     }

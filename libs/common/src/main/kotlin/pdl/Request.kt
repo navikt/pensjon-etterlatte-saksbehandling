@@ -17,5 +17,6 @@ data class GraphqlRequest(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Variables(
     val ident: String? = null,
-    val identer: List<String>? = null
+    val identer: List<String>? = null,
+    val historikk: Boolean = false
 )

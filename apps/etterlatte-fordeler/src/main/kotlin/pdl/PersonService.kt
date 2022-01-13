@@ -30,6 +30,13 @@ class PersonService(private val klient: Pdl) {
         return person
             .also { logger.info("Person funnet") }
     }
+    suspend fun hentUtland(fnr: Foedselsnummer): Boolean {
+        //TODO exception håndteringen virker ikke
+        val person = klient.hentUtland(fnr) ?: throw Exception("Fant ingen personer i PDL")
+
+        return person
+            .also { logger.info("Sjekket noe utland, men returnerte Boolean") }
+    }
 
     /**
      * Henter ut alle graderinger fra liste over personer og deretter henter prioritert [Gradering]

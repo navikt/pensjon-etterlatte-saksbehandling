@@ -32,6 +32,22 @@ class PersonService(
 
         return opprettPerson(fnr, hentPerson)
     }
+    //TODO hva skal returneres
+    suspend fun hentUtland(fnr: Foedselsnummer): Boolean {
+        logger.info("Henter person fra PDL")
+
+        val response = klient.hentPerson(fnr)
+
+        val hentPerson = response.data?.hentPerson
+
+        if (hentPerson == null) {
+            loggfoerFeilmeldinger(response.errors)
+            throw NotFoundException()
+        }
+        println(hentPerson.toString())
+
+        return true
+    }
 
     private suspend fun opprettPerson(
         fnr: Foedselsnummer,

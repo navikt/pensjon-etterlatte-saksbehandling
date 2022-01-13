@@ -41,6 +41,7 @@ internal class EtterlatteFordelerTest {
     @Test
     fun testFeltMapping() {
         coEvery { klientMock.hentPerson(any()) } returns barn
+        coEvery { klientMock.hentUtland(any()) } returns true
 
         val inspector = TestRapid()
             .apply { EtterlatteFordeler(this, service) }

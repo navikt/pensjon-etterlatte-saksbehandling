@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory
 
 interface Pdl {
     suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse
+    suspend fun hentUtland(fnr: Foedselsnummer): PersonResponse
 }
 
 class PersonKlient(private val httpClient: HttpClient) : Pdl {
@@ -33,6 +34,28 @@ class PersonKlient(private val httpClient: HttpClient) : Pdl {
             .replace(Regex("[\n\t]"), "")
 
         val request = GraphqlRequest(query, Variables(ident = fnr.value)).toJson()
+
+        val responseNode = unsafeRetry {
+            httpClient.post<ObjectNode> {
+                header("Tema", TEMA)
+                accept(Json)
+                body = TextContent(request, Json)
+            }
+        }
+
+        return try {
+            mapJsonToAny(responseNode!!.toJson())
+        } catch (e: Exception) {
+            logger.error("Error under deserialisering av pdl person", e)
+            throw e
+        }
+    }
+    override suspend fun hentUtland(fnr: Foedselsnummer): PersonResponse {
+        val query = javaClass.getResource("/pdl/hentUtland.graphql")!!
+            .readText()
+            .replace(Regex("[\n\t]"), "")
+
+        val request = GraphqlRequest(query, Variables(ident = fnr.value, historikk = false)).toJson()
 
         val responseNode = unsafeRetry {
             httpClient.post<ObjectNode> {

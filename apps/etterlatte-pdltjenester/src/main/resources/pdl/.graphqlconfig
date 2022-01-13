@@ -1,14 +1,12 @@
 {
-  "name": "PDL",
-  "schemaPath": "schema.graphql",
+  "name": "pdl-api",
+  "schemaPath": "pdl-api-schema.graphql",
   "extensions": {
     "endpoints": {
-      "Default GraphQL Endpoint": {
-        "url": "http://localhost:8089/graphql",
+      "PDL GraphQL Endpoint": {
+        "url": "https://pdl-api.dev.intern.nav.no/graphql",
         "headers": {
-          "Tema": "PEN",
-          "Nav-Consumer-Token": "Bearer ",
-          "Authorization": "Bearer "
+          "user-agent": "etterlatte-pdltjenester"
         },
         "introspect": false
       }

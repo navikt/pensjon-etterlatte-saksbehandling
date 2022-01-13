@@ -1,0 +1,58 @@
+query($ident: ID!, $historikk: Boolean!) {
+    hentPerson(ident: $ident) {
+
+        statsborgerskap(historikk: $historikk) {
+            land
+            gyldigFraOgMed
+            gyldigTilOgMed
+            metadata {
+                opplysningsId
+                master
+                endringer {
+                    type
+                    registrert
+                }
+            }
+        }
+        folkeregisterpersonstatus(historikk: $historikk) {
+            metadata {
+                opplysningsId
+            }
+        }
+        utflyttingFraNorge {
+            tilflyttingsland
+            tilflyttingsstedIUtlandet
+            utflyttingsdato
+            folkeregistermetadata {
+                ...folkeregistermetadata
+            }
+            metadata {
+                ...metadata
+            }
+        }
+
+    }
+}
+
+
+fragment metadata on Metadata {
+    master
+    historisk
+    opplysningsId
+    endringer {
+        kilde
+        registrert
+        registrertAv
+        systemkilde
+        type
+    }
+}
+
+fragment folkeregistermetadata on Folkeregistermetadata {
+    ajourholdstidspunkt
+    gyldighetstidspunkt
+    opphoerstidspunkt
+    kilde
+    aarsak
+    sekvens
+}

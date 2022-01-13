@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory
 interface Pdl {
     suspend fun finnAdressebeskyttelseForFnr(fnrListe: List<Foedselsnummer>): AdressebeskyttelseResponse
     suspend fun hentPerson(fnr: Foedselsnummer): Person
+    suspend fun hentUtland(fnr: Foedselsnummer): Boolean
 }
 
 class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pdl {
@@ -40,6 +41,22 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
         //response.errors?.forEach { error ->
          //   logger.error("Feil ved uthenting av adressebeskyttelse", error.toString())
        // }
+        return response
+    }
+    override suspend fun hentUtland(fnr: Foedselsnummer): Boolean {
+        val response = client.post<Boolean>(apiUrl + "/hentperson") {
+            header("Tema", "PEN")
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            body = fnr.value
+
+        }
+
+        //TODO ordne feilhåndtering
+        // Logge feil dersom det finnes noen
+        //response.errors?.forEach { error ->
+        //   logger.error("Feil ved uthenting av adressebeskyttelse", error.toString())
+        // }
         return response
     }
     override suspend fun finnAdressebeskyttelseForFnr(fnrListe: List<Foedselsnummer>): AdressebeskyttelseResponse {

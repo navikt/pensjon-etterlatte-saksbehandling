@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.features.ResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -12,6 +13,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import org.apache.kafka.common.protocol.types.Field
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.OffsetDateTime
@@ -46,11 +48,13 @@ internal class EtterlatteFordeler(
     //Mulighet for å se fra PDL foreldreansvar og om det er oppnevnt verge 
 
     val kriterier = listOf(
-        Kriterie("Barn er ikke norsk statsborger") { sjekkStatsborgerskapBarn() },
-        Kriterie("Barn er for gammelt") { barnForGammel() },
-        Kriterie("Barn har adressebeskyttelse") { barnHarAdressebeskyttelse() },
-        Kriterie("Barn ikke fodt i Norge") { barnFoedtUtland() },
-        Kriterie("Barn har utvandring") { barnHarUtvandring() }
+        Kriterie("Barn er ikke norsk statsborger") { sjekkStatsborgerskap(barn) },
+        Kriterie("Barn er for gammelt") { forGammel(barn, 15) },
+        Kriterie("Barn har adressebeskyttelse") { harAdressebeskyttelse(barn) },
+        Kriterie("Barn ikke fodt i Norge") { foedtUtland(barn) },
+        Kriterie("Barn har utvandring") { harUtvandring(barn) },
+        Kriterie("Avdød har yrkesskade") { harYrkesskade(soeknad) },
+        Kriterie("Søker er ikke forelder") { soekerIkkeForelder(soeknad) },
     )
     init {
         River(rapidsConnection).apply {
@@ -69,6 +73,7 @@ internal class EtterlatteFordeler(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val gyldigTilDato = OffsetDateTime.parse(packet["@hendelse_gyldig_til"].asText())
+        soeknad = packet
 
         if (gyldigTilDato.isBefore(OffsetDateTime.now(klokke))) {
             logger.error("Avbrutt fordeling da hendelsen ikke er gyldig lengre")
@@ -111,25 +116,43 @@ internal class EtterlatteFordeler(
         }
     }
 
-    private fun barnHarAdressebeskyttelse(): Boolean {
-        return barn.adressebeskyttelse
+    private fun harAdressebeskyttelse(person: Person): Boolean {
+        return person.adressebeskyttelse
     }
 
-    private fun barnForGammel(): Boolean {
-        return barn.alder() > 15
+    private fun forGammel(person: Person, alder: Int): Boolean {
+        return person.alder() > alder
     }
 
-    private fun sjekkStatsborgerskapBarn(): Boolean {
-        return barn.statsborgerskap != "NOR"
+    private fun sjekkStatsborgerskap(person: Person): Boolean {
+        return person.statsborgerskap != "NOR"
     }
     private fun barnFoedtUtland(): Boolean {
         println(barn.foedeland)
         return barn.foedeland != "NOR"
     }
-    private fun barnHarUtvandring(): Boolean {
+
+    private fun harUtvandring(person: Person): Boolean {
         //TODO endre til sjekk av utvandring
-        return barn.foedeland != "NOR"
+        return person.foedeland != "NOR"
     }
+
+    private fun harYrkesskade(sok: JsonMessage): Boolean {
+        return sok["@skjema_info"]["foreldre"]
+            .filter { it["type"].asText() == "AVDOED" }
+            .filter { it["doedsaarsakSkyldesYrkesskadeEllerYrkessykdom"]["svar"].asText() == "JA" }
+            .isNotEmpty()
+    }
+
+    private fun soekerIkkeForelder(sok: JsonMessage): Boolean {
+        val soekerFnr = sok["@skjema_info"]["innsender"]["foedselsnummer"].asText()
+        val gjenlevende = sok["@skjema_info"]["foreldre"]
+            .filter { it["type"].asText() == "GJENLEVENDE_FORELDER" }
+            .map { it["foedselsnummer"].asText() }
+           return soekerFnr !in gjenlevende
+
+    }
+
 
     data class FordelRespons (
         val kandidat: Boolean,

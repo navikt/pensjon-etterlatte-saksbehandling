@@ -20,18 +20,18 @@ import java.time.OffsetDateTime
 
 internal class EtterlatteFordeler(
     rapidsConnection: RapidsConnection,
-    private val personService : PersonService,
+    private val personService: PersonService,
     private val klokke: Clock = Clock.systemUTC()
 ) : River.PacketListener {
 
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
     private lateinit var barn: Person
-    //TODO mangler kriterier
+    private lateinit var soeknad: JsonMessage
+
 
     //Avdød:
-    //Bodd i Norge hele livet
-    //Helst ikke ha en annen ytelse i forkant - f.eks ufør og alderspensjon. (Da er det allerede gjort en trygdetidsvurdering)
-    //Ikke huket av for yrkesskade/yrkessykdom
+    //Ingen ut. og innvandringsdatoer
+    // (v) Ikke huket av for yrkesskade/yrkessykdom
     //Dødsfallet må ha skjedd i Norge og være registrert. Må få en dødsdato fra PDL (ikke være noe som er uavklart rundt dette)
 
     //Barn:
@@ -56,6 +56,7 @@ internal class EtterlatteFordeler(
         Kriterie("Avdød har yrkesskade") { harYrkesskade(soeknad) },
         Kriterie("Søker er ikke forelder") { soekerIkkeForelder(soeknad) },
     )
+
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "soeknad_innsendt") }
@@ -80,8 +81,7 @@ internal class EtterlatteFordeler(
             return
         }
         //TODO må denne skrives om til å håndtere manglende soeknads_type?
-        if(packet["@skjema_info"]["type"].asText() != SoeknadType.Barnepensjon.name.uppercase())
-        {
+        if (packet["@skjema_info"]["type"].asText() != SoeknadType.Barnepensjon.name.uppercase()) {
             logger.info("Avbrutt fordeling da søknad ikke er " + SoeknadType.Barnepensjon.name)
             return
         }
@@ -127,9 +127,9 @@ internal class EtterlatteFordeler(
     private fun sjekkStatsborgerskap(person: Person): Boolean {
         return person.statsborgerskap != "NOR"
     }
-    private fun barnFoedtUtland(): Boolean {
-        println(barn.foedeland)
-        return barn.foedeland != "NOR"
+
+    private fun foedtUtland(person: Person): Boolean {
+        return person.foedeland != "NOR"
     }
 
     private fun harUtvandring(person: Person): Boolean {
@@ -154,20 +154,20 @@ internal class EtterlatteFordeler(
     }
 
 
-    data class FordelRespons (
-        val kandidat: Boolean,
-        val forklaring: List<String>
-    )
+        data class FordelRespons(
+            val kandidat: Boolean,
+            val forklaring: List<String>
+        )
 
-    class Kriterie(val forklaring: String, private val sjekk: Sjekk) {
-        fun blirOppfyltAv(message: JsonMessage):Boolean = sjekk(message)
-    }
+        class Kriterie(val forklaring: String, private val sjekk: Sjekk) {
+            fun blirOppfyltAv(message: JsonMessage): Boolean = sjekk(message)
+        }
 
-    private fun fordel(packet: JsonMessage): FordelRespons{
-        return kriterier
-            .filter{it.blirOppfyltAv(packet)}
-            .map { it.forklaring }
-            .let { FordelRespons(it.isEmpty(), it) }
+        private fun fordel(packet: JsonMessage): FordelRespons {
+            return kriterier
+                .filter { it.blirOppfyltAv(packet) }
+                .map { it.forklaring }
+                .let { FordelRespons(it.isEmpty(), it) }
+        }
     }
-}
-typealias Sjekk = (JsonMessage)->Boolean
+    typealias Sjekk = (JsonMessage) -> Boolean

@@ -25,6 +25,8 @@ internal class EtterlatteFordelerTest {
     private val hendelseIkkeBarnePensjonJson = javaClass.getResource("/ikkeBarnepensjon.json")!!.readText()
     private val hendelseIkkeGyldig = javaClass.getResource("/hendelseUgyldig.json")!!.readText()
     private val ugyldigFnr = javaClass.getResource("/ugyldigFnr.json")!!.readText()
+    private val yrkesskade = javaClass.getResource("/yrkesskade.json")!!.readText()
+    private val InnsenderIkkeGjenlevende = javaClass.getResource("/gjenlevende.json")!!.readText()
     private val barnGammel = mapJsonToAny<Person>(javaClass.getResource("/personGammel.json")!!.readText(), false)
     private val barn = mapJsonToAny<Person>(javaClass.getResource("/person.json")!!.readText(), false)
 
@@ -93,6 +95,29 @@ internal class EtterlatteFordelerTest {
         assertEquals("ugyldigFnr", inspector.message(0).get("@event_name").asText())
 
     }
+    @Test
+    fun avdoedHarYrkesskade() {
+        coEvery { klientMock.hentPerson(any()) } returns barn
+        val inspector = TestRapid()
+            .apply { EtterlatteFordeler(this, service) }
+            .apply { sendTestMessage(yrkesskade) }
+            .inspektør
+
+        assertTrue(inspector.size == 0)
+
+    }
+    @Test
+    fun innsenderErIkkeGjennlevende() {
+        coEvery { klientMock.hentPerson(any()) } returns barn
+        val inspector = TestRapid()
+            .apply { EtterlatteFordeler(this, service) }
+            .apply { sendTestMessage(InnsenderIkkeGjenlevende) }
+            .inspektør
+
+        assertTrue(inspector.size == 0)
+
+    }
+
 }
 /*
 

@@ -6,11 +6,15 @@ import {
   OppgavetypeFilter,
   prioritetFilter,
   PrioritetFilter,
+  saksbehandlerFilter,
+  SaksbehandlerFilter,
   soeknadstypeFilter,
   SoeknadstypeFilter,
   statusFilter,
   StatusFilter,
 } from './typer/oppgavebenken'
+import { useContext } from 'react'
+import { AppContext, IAppContext } from '../../store/AppContext'
 
 export interface IOppgaveFilter {
   selectedValue: any
@@ -35,6 +39,7 @@ export interface IOppgaveFelter {
   beskrivelse: IOppgaveFelt
   status: IOppgaveFelt
   enhet: IOppgaveFelt
+  saksbehandler: IOppgaveFelt
 }
 
 export enum FeltSortOrder {
@@ -50,6 +55,8 @@ export const ariaSortMap = new Map<FeltSortOrder, 'none' | 'descending' | 'ascen
 ])
 
 export const initialOppgaveFelter = (): IOppgaveFelter => {
+  const saksbehandlerNavn = useContext<IAppContext>(AppContext).state.saksbehandlerReducer.navn
+
   return {
     regdato: {
       noekkel: 'regdato',
@@ -126,6 +133,15 @@ export const initialOppgaveFelter = (): IOppgaveFelter => {
         type: 'select',
         selectedValue: EnhetFilter.VELG,
         nedtrekksliste: enhetFilter,
+      },
+    },
+    saksbehandler: {
+      noekkel: 'saksbehandler',
+      label: 'Saksbehandler',
+      filter: {
+        type: 'select',
+        selectedValue: SaksbehandlerFilter.ALLE,
+        nedtrekksliste: saksbehandlerFilter(saksbehandlerNavn),
       },
     },
   }

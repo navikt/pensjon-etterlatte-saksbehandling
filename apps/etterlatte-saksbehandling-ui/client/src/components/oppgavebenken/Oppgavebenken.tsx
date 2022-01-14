@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import OppgaveHeader from './OppgaveHeader'
 import OppgaveListe from './OppgaveListe'
-
 import styled from 'styled-components'
 import { FilterPar, IOppgave } from './typer/oppgavebenken'
 import { Column } from 'react-table'
@@ -29,7 +28,7 @@ const Oppgavebenken = () => {
 
   const hentFilterFraOppgaveObject = (oppgaveFelter: IOppgaveFelter): Array<FilterPar> => {
     const setValue = (value: string | undefined) => {
-      return value === 'VELG' || value === '' ? undefined : value
+      return value === 'VELG' || value === '' || value === 'ALLE' ? undefined : value
     }
     return Object.values(oppgaveFelter)
       .filter((felt) => felt.filter)

@@ -8,6 +8,7 @@ export interface IOppgave {
   beskrivelse: string
   status: StatusFilter
   enhet: EnhetFilter
+  saksbehandler: SaksbehandlerFilter
 }
 
 export enum PrioritetFilter {
@@ -76,6 +77,22 @@ export const enhetFilter: Record<EnhetFilter, IPar> = {
   E4833: { id: 'E4833', navn: '4833 Oslo' },
   E4842: { id: 'E4842', navn: '4842 Stord' },
   E4817: { id: 'E4817', navn: '4817 Steinkjer' },
+}
+
+export enum SaksbehandlerFilter {
+  INNLOGGET = 'INNLOGGET',
+  ALLE = 'ALLE',
+  FORDELTE = 'FORDELTE',
+  UFORDELTE = 'UFORDELTE',
+}
+
+export const saksbehandlerFilter = (innloggetSaksbehandler: string): Record<SaksbehandlerFilter, IPar> => {
+  return {
+    INNLOGGET: { id: 'INNLOGGET', navn: innloggetSaksbehandler },
+    ALLE: { id: 'ALLE', navn: 'Alle' },
+    FORDELTE: { id: 'FORDELTE', navn: 'Fordelte' },
+    UFORDELTE: { id: 'UFORDELTE', navn: 'Ufordelte' },
+  }
 }
 
 export interface SelectFilter {

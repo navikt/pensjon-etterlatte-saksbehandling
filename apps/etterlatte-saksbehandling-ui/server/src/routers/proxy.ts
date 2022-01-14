@@ -14,7 +14,6 @@ const options: any = () => ({
         return options;
         /*
         logger.info(`${req.protocol?.toUpperCase()} ${req.method} ${req.path}`);
-
         return new Promise((resolve, reject) => {
             return exchangeToken(req.session.tokens.access_token).then(
                 (accessToken) => {

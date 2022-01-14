@@ -3,7 +3,8 @@ plugins {
 }
 
 dependencies {
-   // implementation(project(":libs:common"))
+    implementation(project(":libs:common"))
+    implementation(project(":libs:ktorclient-onbehalfof"))
 
     implementation(Ktor.ServerCore)
     implementation(Ktor.ServerCio)
@@ -15,6 +16,7 @@ dependencies {
     implementation(Ktor.MetricsMicrometer)
     implementation(Ktor.Jackson)
     implementation(Ktor.Auth)
+    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.14")
 
     implementation(Micrometer.Prometheus)
     implementation(Jackson.DatatypeJsr310)

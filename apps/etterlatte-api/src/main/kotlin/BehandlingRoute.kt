@@ -1,7 +1,10 @@
 package no.nav.etterlatte
 
 import io.ktor.application.call
+import io.ktor.auth.parseAuthorizationHeader
+import io.ktor.client.request.request
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.auth.HttpAuthHeader
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
@@ -17,8 +20,17 @@ fun Route.behandlingRoute (service: BehandlingService) {
                 call.response.status(HttpStatusCode(400, "Bad request"))
                 call.respond("Fødselsnummer mangler")
             } else {
-                val list = service.hentPerson(fnr)
+
+                val authHeader = call.request.parseAuthorizationHeader()
+                val accessToken = when {
+                    authHeader is HttpAuthHeader.Single && authHeader.authScheme.lowercase() in listOf("bearer") -> authHeader.authScheme.lowercase()
+                    else -> null
+                } ?: throw Error("Access-token mangler")
+
+                val list = service.hentPerson(fnr, accessToken)
                 call.respond(list)
+
+
             }
         }
     }

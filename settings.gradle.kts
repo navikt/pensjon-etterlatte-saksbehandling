@@ -8,5 +8,7 @@ include(
     "apps:etterlatte-behandling",
     "apps:etterlatte-vilkaar",
     "libs:ktorclient-auth-clientcredentials",
-    "libs:common"
+    "libs:common",
+    "libs:ktorclient-onbehalfof"
+
 )

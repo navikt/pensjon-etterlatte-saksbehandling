@@ -20,19 +20,20 @@ fun Route.behandlingRoute (service: BehandlingService) {
                 call.respond("Fødselsnummer mangler")
             } else {
 
+                // Bør kunne gjenbrukes
                 val authHeader = call.request.parseAuthorizationHeader()
+                if (!(authHeader == null
+                            || authHeader !is HttpAuthHeader.Single
+                            || authHeader.authScheme != "Bearer")) {
+                    try {
+                        println(authHeader.blob)
+                        val list = service.hentPerson(fnr, authHeader.blob)
+                        call.respond(list)
+                    } catch (e: Exception) {
+                        // ignore invalid token
 
-                val accessToken = when {
-                    authHeader is HttpAuthHeader.Single && authHeader.authScheme.lowercase() in listOf("bearer") -> authHeader.authScheme.lowercase()
-                    else -> null
-                } ?: throw Error("Access-token mangler")
-
-                println(authHeader)
-
-                val list = service.hentPerson(fnr, accessToken)
-                call.respond(list)
-
-
+                    }
+                }
             }
         }
     }

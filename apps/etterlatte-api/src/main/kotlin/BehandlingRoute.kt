@@ -21,12 +21,13 @@ fun Route.behandlingRoute (service: BehandlingService) {
             } else {
 
                 val authHeader = call.request.parseAuthorizationHeader()
+
                 val accessToken = when {
                     authHeader is HttpAuthHeader.Single && authHeader.authScheme.lowercase() in listOf("bearer") -> authHeader.authScheme.lowercase()
                     else -> null
                 } ?: throw Error("Access-token mangler")
 
-                println(accessToken)
+                println(authHeader)
 
                 val list = service.hentPerson(fnr, accessToken)
                 call.respond(list)

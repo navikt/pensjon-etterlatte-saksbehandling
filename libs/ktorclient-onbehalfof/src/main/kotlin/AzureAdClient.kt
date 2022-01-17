@@ -8,6 +8,7 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
+import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.features.ResponseException
 import io.ktor.client.features.json.JacksonSerializer
@@ -18,6 +19,7 @@ import io.ktor.client.request.header
 import io.ktor.client.statement.readText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Parameters
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.net.ProxySelector
 
@@ -35,15 +37,29 @@ internal val defaultHttpClient = HttpClient() {
     }*/
 }
 
+data class AzureAdOpenIdConfiguration(
+    @JsonProperty("jwks_uri")
+    val jwksUri: String,
+    @JsonProperty("issuer")
+    val issuer: String,
+    @JsonProperty("token_endpoint")
+    val tokenEndpoint: String,
+    @JsonProperty("authorization_endpoint")
+    val authorizationEndpoint: String
+)
+
 class AzureAdClient(
-    private val config: Configuration.AzureAd,
+    private val config: Config,
     private val httpClient: HttpClient = defaultHttpClient
 ) {
+    val openIdConfiguration: AzureAdOpenIdConfiguration = runBlocking {
+        defaultHttpClient.get(config.getString("azure.app.well.known.url"))
+    }
 
     private suspend inline fun fetchAccessToken(formParameters: Parameters): Result<AccessToken, ThrowableErrorMessage> =
         runCatching {
             httpClient.submitForm<AccessToken>(
-                url = config.openIdConfiguration.tokenEndpoint,
+                url = openIdConfiguration.tokenEndpoint,
                 formParameters = formParameters
             )
         }.fold(
@@ -75,8 +91,8 @@ class AzureAdClient(
     suspend fun getAccessTokenForResource(scopes: List<String>): Result<AccessToken, ThrowableErrorMessage> =
         fetchAccessToken(
             Parameters.build {
-                append("client_id", config.clientId)
-                append("client_secret", config.clientSecret)
+                append("client_id", config.getString("azure.app.client.id"))
+                append("client_secret", config.getString("azure.app.client.secret"))
                 append("scope", scopes.joinToString(separator = " "))
                 append("grant_type", "client_credentials")
             }
@@ -86,8 +102,8 @@ class AzureAdClient(
     suspend fun getOnBehalfOfAccessTokenForResource(scopes: List<String>, accessToken: String): Result<AccessToken, ThrowableErrorMessage> =
         fetchAccessToken(
             Parameters.build {
-                append("client_id", config.clientId)
-                append("client_secret", config.clientSecret)
+                append("client_id", config.getString("azure.app.client.id"))
+                append("client_secret", config.getString("azure.app.client.secret"))
                 append("scope", scopes.joinToString(separator = " "))
                 append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
                 append("requested_token_use", "on_behalf_of")

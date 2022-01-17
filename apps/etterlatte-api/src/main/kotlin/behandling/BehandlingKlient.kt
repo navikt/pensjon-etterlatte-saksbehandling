@@ -29,7 +29,7 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
             logger.info("Access-token: $accessToken")
 
             return downstreamResourceClient
-                .get(Resource(conf.getString("behandling.client.id"), "personer/{fnr}/saker"), accessToken).mapBoth(
+                .get(Resource(conf.getString("behandling.client.id"), conf.getString("behandling.resource.url")+"/personer/{fnr}/saker"), accessToken).mapBoth(
                     success = { json -> json },
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response as List<Sak>

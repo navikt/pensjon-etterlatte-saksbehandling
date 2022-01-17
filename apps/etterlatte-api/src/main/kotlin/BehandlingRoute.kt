@@ -19,14 +19,12 @@ fun Route.behandlingRoute (service: BehandlingService) {
                 call.response.status(HttpStatusCode(400, "Bad request"))
                 call.respond("Fødselsnummer mangler")
             } else {
-
                 // Bør kunne gjenbrukes
                 val authHeader = call.request.parseAuthorizationHeader()
                 if (!(authHeader == null
                             || authHeader !is HttpAuthHeader.Single
                             || authHeader.authScheme != "Bearer")) {
                     try {
-                        println(authHeader.blob)
                         val list = service.hentPerson(fnr, authHeader.blob)
                         call.respond(list)
                     } catch (e: Exception) {

@@ -10,6 +10,7 @@ import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.Opplysning
 
 interface VilkaarKlient {
     fun vurderVilkaar(vilkaar: String, opplysninger: List<Opplysning>): ObjectNode

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import no.nav.etterlatte.libs.common.behandling.Opplysning
 import java.util.*
 
 data class Behandling (

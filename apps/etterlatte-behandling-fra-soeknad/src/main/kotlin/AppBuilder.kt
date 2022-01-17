@@ -11,7 +11,9 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.common.objectMapper
+import no.nav.etterlatte.libs.common.behandling.Opplysning
 import no.nav.etterlatte.security.ktor.clientCredential
+import java.time.Instant
 import java.util.*
 
 class AppBuilder(private val props: Map<String, String>) {
@@ -39,10 +41,19 @@ class AppBuilder(private val props: Map<String, String>) {
 
 class BehandlingsService(val behandling_app: HttpClient, val url: String) : Behandling {
     override fun initierBehandling(sak: Long, jsonNode: JsonNode, jsonNode1: Long): UUID {
+        val opplysning = Opplysning(
+            UUID.randomUUID(), Opplysning.Privatperson(
+                "09018701453", Instant.parse("2022-01-03T13:44:25.88888840Z")
+            ), "opplysningstype", jsonNode.deepCopy(), jsonNode.deepCopy(), null
+        )
+
         return runBlocking {
             behandling_app.post<String>("$url/behandlinger") {
                 contentType(ContentType.Application.Json)
-                body = objectMapper.createObjectNode().put("sak", sak).also { it.putArray("opplysninger") }
+                body = objectMapper.createObjectNode().put("sak", sak).also {
+                    it.putArray("opplysninger").add(objectMapper.valueToTree(opplysning) as JsonNode)
+                }
+
             }
         }.let {
             UUID.fromString(it)

@@ -56,7 +56,7 @@ class ApplicationTest {
 }""")
             }.let {
                 assertEquals(HttpStatusCode.OK, it.response.status())
-                UUID.fromString(objectMapper.readValue(it.response.content!!))
+                UUID.fromString(it.response.content)
             }
 
             handleRequest(HttpMethod.Get, "/sak/1/behandlinger"){

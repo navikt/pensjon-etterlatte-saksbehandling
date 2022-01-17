@@ -13,7 +13,6 @@ dependencies {
     implementation(project(":libs:ktorclient-auth-clientcredentials"))
     implementation(project(":libs:common"))
 
-
     testImplementation(Ktor.ClientMock)
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)

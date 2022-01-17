@@ -1,10 +1,12 @@
-package no.nav.etterlatte.behandling
+package no.nav.etterlatte.libs.common.behandling
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import java.lang.IllegalArgumentException
@@ -33,7 +35,7 @@ open class Opplysning(
             val node: ObjectNode = p.codec.readTree(p)
             return when (node["type"].asText()) {
                 "saksbehandler" -> Saksbehandler(node["ident"].textValue())
-                "privatperson" -> Privatperson(node["fnr"].textValue(), objectMapper.treeToValue(node["mottatDato"])!!)
+                "privatperson" -> Privatperson(node["fnr"].textValue(), objectMapperKilde.treeToValue(node["mottatDato"])!!)
                 else -> throw IllegalArgumentException()
             }
         }
@@ -42,7 +44,7 @@ open class Opplysning(
     @JsonDeserialize(using = KildeDeserializer::class)
     sealed class Kilde(val type: String) {
         open fun attributes(): Map<String, String?> = emptyMap()
-        fun toJson() = objectMapper.writeValueAsString(mapOf("type" to type) + attributes())
+        fun toJson() = objectMapperKilde.writeValueAsString(mapOf("type" to type) + attributes())
     }
     class Saksbehandler(val ident: String) : Kilde("saksbehandler"){
         override fun attributes() = mapOf("ident" to ident)
@@ -69,3 +71,6 @@ open class Opplysning(
         }
     }
 }
+val objectMapperKilde = jacksonObjectMapper().registerModule(JavaTimeModule())
+fun ObjectNode?.serialize() = this?.let { objectMapperKilde.writeValueAsString(it) }
+fun String?.deSerialize() = this?.let { objectMapperKilde.readValue(this, ObjectNode::class.java) }

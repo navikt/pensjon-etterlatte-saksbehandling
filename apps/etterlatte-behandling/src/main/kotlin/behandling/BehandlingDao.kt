@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.database.singleOrNull
 import no.nav.etterlatte.database.toList
+import no.nav.etterlatte.libs.common.behandling.Opplysning
 
 import java.sql.Connection
 import java.util.*
@@ -63,8 +64,8 @@ class BehandlingDao(private val connection: ()->Connection) {
 
     fun lagreVilkarsproving(behandling: Behandling){
         val stmt = connection().prepareStatement("UPDATE behandling SET vilkaarsproving = ? WHERE id = ?")
-        stmt.setObject(1, objectMapper.writeValueAsString(behandling.vilkårsprøving))
-        stmt.setObject(2, behandling.id)
+    stmt.setObject(1, objectMapper.writeValueAsString(behandling.vilkårsprøving))
+    stmt.setObject(2, behandling.id)
         require(stmt.executeUpdate() == 1)
     }
 

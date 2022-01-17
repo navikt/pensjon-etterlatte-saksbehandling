@@ -28,9 +28,7 @@ internal class BehandlingAvSoeknadReelleData {
 
         StartBehandlingAvSoeknad(rapid, behandlingservice)
         val hendelseJson = javaClass.getResource("/fullMessage2.json")!!.readText()
-
         rapid.sendTestMessage(hendelseJson)
-
         Assertions.assertEquals(1, rapid.inspektør.size)
         Assertions.assertEquals(1, rapid.inspektør.message(0)["@sak_id"].longValue())
 

@@ -7,6 +7,7 @@ import io.mockk.slot
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
+import no.nav.etterlatte.libs.common.behandling.Opplysning
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

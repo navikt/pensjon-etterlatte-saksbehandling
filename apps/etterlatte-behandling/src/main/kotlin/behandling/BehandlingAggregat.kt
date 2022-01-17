@@ -5,6 +5,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Kunde
 import no.nav.etterlatte.Saksbehandler
 import no.nav.etterlatte.Self
+import no.nav.etterlatte.libs.common.behandling.Opplysning
 import java.time.Instant
 import java.util.*
 

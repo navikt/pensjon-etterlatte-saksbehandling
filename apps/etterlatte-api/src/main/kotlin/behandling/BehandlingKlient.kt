@@ -26,6 +26,8 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
         try {
             logger.info("Henter saker fra behandling")
 
+            logger.info("Access-token: $accessToken")
+
             return downstreamResourceClient
                 .get(Resource(conf.getString("behandling.client.id"), "personer/{fnr}/saker"), accessToken).mapBoth(
                     success = { json -> json },

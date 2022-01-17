@@ -14,7 +14,6 @@ import no.nav.etterlatte.behandling.BehandlingService
 fun Route.behandlingRoute (service: BehandlingService) {
     route("api/personer/{fnr}") {
         get {
-            println(call.parameters["fnr"])
             val fnr = call.parameters["fnr"]
             if(fnr == null) {
                 call.response.status(HttpStatusCode(400, "Bad request"))
@@ -26,6 +25,8 @@ fun Route.behandlingRoute (service: BehandlingService) {
                     authHeader is HttpAuthHeader.Single && authHeader.authScheme.lowercase() in listOf("bearer") -> authHeader.authScheme.lowercase()
                     else -> null
                 } ?: throw Error("Access-token mangler")
+
+                println(accessToken)
 
                 val list = service.hentPerson(fnr, accessToken)
                 call.respond(list)

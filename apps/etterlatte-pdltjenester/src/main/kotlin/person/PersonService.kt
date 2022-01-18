@@ -6,15 +6,20 @@ import no.nav.etterlatte.libs.common.pdl.Gradering
 import no.nav.etterlatte.libs.common.pdl.ResponseError
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
+import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.person.pdl.HentPerson
 import org.slf4j.LoggerFactory
+import person.pdl.InnflyttingTilNorge
+import person.pdl.UtlandResponse
 
 class PersonService(
     private val klient: PersonKlient
 
 ) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
-    private val adressebeskyttet = listOf(Gradering.FORTROLIG, Gradering.STRENGT_FORTROLIG,
+    private val adressebeskyttet = listOf(
+        Gradering.FORTROLIG, Gradering.STRENGT_FORTROLIG,
         Gradering.STRENGT_FORTROLIG_UTLAND
     )
 
@@ -32,9 +37,9 @@ class PersonService(
 
         return opprettPerson(fnr, hentPerson)
     }
-    //TODO hva skal returneres
-    suspend fun hentUtland(fnr: Foedselsnummer): Boolean {
-        logger.info("Henter person fra PDL")
+
+    suspend fun hentUtland(fnr: Foedselsnummer): Utland {
+        logger.info("Henter utland fra PDL")
 
         val response = klient.hentPerson(fnr)
 
@@ -44,9 +49,8 @@ class PersonService(
             loggfoerFeilmeldinger(response.errors)
             throw NotFoundException()
         }
-        println(hentPerson.toString())
 
-        return true
+        return opprettUtland(hentUtland)
     }
 
     private suspend fun opprettPerson(
@@ -94,6 +98,29 @@ class PersonService(
             //TODO endre disse til noe fornuftig
             utland = null,
             rolle = null
+        )
+    }
+
+    private fun opprettUtland(
+        utland: UtlandResponse,
+    ): Utland {
+        return Utland(
+            utflyttingFraNorge = utland.data.hentPerson.utflyttingFraNorge.map { (mapUtflytting(it)) },
+            innflyttingTilNorge = utland.data.hentPerson.innflyttingTilNorge.map { (mapInnflytting(it)) }
+        )
+    }
+
+    private fun mapUtflytting(utflytting: person.pdl.UtflyttingFraNorge): UtflyttingFraNorge {
+        return UtflyttingFraNorge(
+            tilflyttingsland = utflytting.tilflyttingsland,
+            dato = utflytting.folkeregistermetadata.gyldighetstidspunkt
+        )
+    }
+
+    private fun mapInnflytting(innflytting: person.pdl.InnflyttingTilNorge): no.nav.etterlatte.libs.common.person.InnflyttingTilNorge {
+        return no.nav.etterlatte.libs.common.person.InnflyttingTilNorge(
+            fraflyttingsland = innflytting.fraflyttingsland,
+            dato = innflytting.folkeregistermetadata.gyldighetstidspunkt
         )
     }
 

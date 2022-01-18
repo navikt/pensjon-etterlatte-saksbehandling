@@ -1,9 +1,13 @@
 package person.pdl
 
-data class Utland(
-    val `data`: Data
+import no.nav.etterlatte.libs.common.pdl.ResponseError
+
+data class UtlandResponse(
+    val `data`: Data,
+    val errors: List<ResponseError>? = null
 )
 data class Data(
+
     val hentPerson: HentPerson
 )
 

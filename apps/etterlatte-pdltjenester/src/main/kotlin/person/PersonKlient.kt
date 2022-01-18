@@ -13,12 +13,14 @@ import no.nav.etterlatte.common.unsafeRetry
 import no.nav.etterlatte.libs.common.pdl.GraphqlRequest
 import no.nav.etterlatte.libs.common.pdl.Variables
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.person.pdl.PersonResponse
 import org.slf4j.LoggerFactory
+import person.pdl.UtlandResponse
 
 interface Pdl {
     suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse
-    suspend fun hentUtland(fnr: Foedselsnummer): PersonResponse
+    suspend fun hentUtland(fnr: Foedselsnummer): UtlandResponse
 }
 
 class PersonKlient(private val httpClient: HttpClient) : Pdl {
@@ -50,7 +52,7 @@ class PersonKlient(private val httpClient: HttpClient) : Pdl {
             throw e
         }
     }
-    override suspend fun hentUtland(fnr: Foedselsnummer): PersonResponse {
+    override suspend fun hentUtland(fnr: Foedselsnummer): UtlandResponse {
         val query = javaClass.getResource("/pdl/hentUtland.graphql")!!
             .readText()
             .replace(Regex("[\n\t]"), "")

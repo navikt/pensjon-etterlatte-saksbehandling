@@ -1,7 +1,7 @@
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.Behandling
-import no.nav.etterlatte.StartBehandlingAvSoeknad
+import no.nav.etterlatte.behandlingfrasoknad.Behandling
+import no.nav.etterlatte.behandlingfrasoknad.StartBehandlingAvSoeknad
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

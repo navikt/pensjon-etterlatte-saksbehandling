@@ -4,8 +4,8 @@ import io.ktor.client.features.auth.providers.BearerTokens
 import io.ktor.client.features.auth.providers.bearer
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
-import no.nav.etterlatte.BehandlingsService
-import no.nav.etterlatte.StartBehandlingAvSoeknad
+import no.nav.etterlatte.behandlingfrasoknad.BehandlingsService
+import no.nav.etterlatte.behandlingfrasoknad.StartBehandlingAvSoeknad
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -31,6 +31,10 @@ internal class BehandlingAvSoeknadReelleData {
         rapid.sendTestMessage(hendelseJson)
         Assertions.assertEquals(1, rapid.inspektør.size)
         Assertions.assertEquals(1, rapid.inspektør.message(0)["@sak_id"].longValue())
+        Assertions.assertEquals(36, rapid.inspektør.message(0)["@behandling_id"].textValue().length)
+
+
+
 
     }
 }

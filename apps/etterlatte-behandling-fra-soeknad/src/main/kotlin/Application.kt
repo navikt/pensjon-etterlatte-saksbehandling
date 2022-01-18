@@ -1,5 +1,7 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.behandlingfrasoknad.AppBuilder
+import no.nav.etterlatte.behandlingfrasoknad.StartBehandlingAvSoeknad
 import no.nav.helse.rapids_rivers.RapidApplication
 
 fun main() {

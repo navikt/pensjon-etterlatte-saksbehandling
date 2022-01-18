@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.behandlingfrasoknad
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -27,10 +27,10 @@ internal class StartBehandlingAvSoeknad(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val sak = behandlinger.skaffSak(packet["@fnr_soeker"].asText(), packet["@skjema_info"]["type"].asText())
-        behandlinger.initierBehandling(sak, packet["@skjema_info"], packet["@lagret_soeknad_id"].longValue())
+        val behandlingsid = behandlinger.initierBehandling(sak, packet["@skjema_info"], packet["@lagret_soeknad_id"].longValue())
 
         packet["@sak_id"] = sak
-        //packet["@behandling_id"] = behandlingid
+        packet["@behandling_id"] = behandlingsid
 
         context.publish(packet.toJson())
 

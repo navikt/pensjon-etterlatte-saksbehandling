@@ -14,15 +14,22 @@ query($ident: ID!, $historikk: Boolean!) {
                 }
             }
         }
-        folkeregisterpersonstatus(historikk: $historikk) {
-            metadata {
-                opplysningsId
-            }
-        }
+
         utflyttingFraNorge {
             tilflyttingsland
             tilflyttingsstedIUtlandet
             utflyttingsdato
+            folkeregistermetadata {
+                ...folkeregistermetadata
+            }
+            metadata {
+                ...metadata
+            }
+        }
+
+        innflyttingTilNorge {
+            fraflyttingsland
+            fraflyttingsstedIUtlandet
             folkeregistermetadata {
                 ...folkeregistermetadata
             }

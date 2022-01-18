@@ -13,43 +13,10 @@ import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.behandling.BehandlingService
 
 class ApplicationContext(configLocation: String? = null) {
-    private val closables = mutableListOf<() -> Unit>()
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
 
-    val behandlingService: BehandlingService
+    val behandlingService: BehandlingService = BehandlingService(BehandlingKlient(config))
 
-    init {
-
-        behandlingService = BehandlingService(BehandlingKlient(config))
-        /*
-        behandlingService = endpoint(config.getConfig("no.nav.etterlatte.tjenester.behandling")).also {
-            closables.add(it::close)
-        }.let {
-            BehandlingService(BehandlingKlient(it))
-        }
-
-         */
-
-
-
-    }
-
-
-    /*
-        På vegne av innlogget sluttbruker
-     */
-    private fun endpoint(endpointConfig: Config) = HttpClient(CIO) {
-
-        install(Auth) {
-            bearer {
-
-            }
-        }
-
-        defaultRequest {
-            url.takeFrom(endpointConfig.getString("url") + url.encodedPath)
-        }
-    }
 
 }
 

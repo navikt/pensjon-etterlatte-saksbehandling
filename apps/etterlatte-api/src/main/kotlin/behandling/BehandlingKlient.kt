@@ -10,28 +10,32 @@ import org.slf4j.LoggerFactory
 
 
 interface EtterlatteBehandling {
-    suspend fun hentPerson(fnr: String, accessToken: String): Any?
+    suspend fun hentSakerForPerson(fnr: String, accessToken: String): BehandlingPersonResult
+    suspend fun opprettSakForPerson(fnr: String, sakType: String, accessToken: String): Boolean
 }
 
 data class BehandlingPersonResult (val saker: List<Sak>)
 
 class BehandlingKlient(config: Config) : EtterlatteBehandling {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
+    private val objectMapper = jacksonObjectMapper()
 
-    private val conf = config
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient)
 
+    private val clientId = config.getString("behandling.client.id")
+    private val resourceUrl = config.getString("behandling.resource.url")
+
+
     @Suppress("UNCHECKED_CAST")
-    override suspend fun hentPerson(fnr: String, accessToken: String): BehandlingPersonResult {
-        val objectMapper = jacksonObjectMapper()
+    override suspend fun hentSakerForPerson(fnr: String, accessToken: String): BehandlingPersonResult {
         try {
             logger.info("Henter saker fra behandling")
             val json = downstreamResourceClient
                 .get(
                     Resource(
-                        conf.getString("behandling.client.id"),
-                        conf.getString("behandling.resource.url") + "/personer/{fnr}/saker"
+                        clientId,
+                        "$resourceUrl/personer/$fnr/saker"
                     ), accessToken
                 ).mapBoth(
                     success = { json -> json },
@@ -44,5 +48,31 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
             throw e
         }
     }
+
+    override suspend fun opprettSakForPerson(fnr: String, sakType: String, accessToken: String): Boolean {
+        try {
+            logger.info("Oppretter sak i behandling")
+            val json = downstreamResourceClient
+                .get(
+                    Resource(
+                        clientId,
+                        "$resourceUrl/personer/$fnr/saker/$sakType"
+                    ), accessToken
+                ).mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
+
+            // val result = objectMapper.readValue(json.toString(), BehandlingPersonResult::class.java)
+            println(json)
+            return true
+
+        } catch (e: Exception) {
+            logger.error("Oppretting av sak feilet", e)
+            throw e
+        }
+    }
+
+
 }
 

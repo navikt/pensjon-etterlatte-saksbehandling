@@ -41,11 +41,11 @@ class PersonService(
     suspend fun hentUtland(fnr: Foedselsnummer): Utland {
         logger.info("Henter utland fra PDL")
 
-        val response = klient.hentPerson(fnr)
+        val response = klient.hentUtland(fnr)
 
-        val hentPerson = response.data?.hentPerson
+        val hentUtland: UtlandResponse = response
 
-        if (hentPerson == null) {
+        if (hentUtland == null) {
             loggfoerFeilmeldinger(response.errors)
             throw NotFoundException()
         }

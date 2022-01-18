@@ -27,6 +27,8 @@ spec:
   env:
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_CLIENT_ID
+      value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
   accessPolicy:
     outbound:
       rules:

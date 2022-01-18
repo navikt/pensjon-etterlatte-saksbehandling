@@ -17,7 +17,7 @@ data class Statsborgerskap(
 data class HentPerson(
     val innflyttingTilNorge: List<InnflyttingTilNorge>,
     val statsborgerskap: List<Statsborgerskap>,
-    val utflyttingFraNorge: List<Any>
+    val utflyttingFraNorge: List<UtflyttingFraNorge>
 )
 
 data class InnflyttingTilNorge(

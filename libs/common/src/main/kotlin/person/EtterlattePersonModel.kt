@@ -26,7 +26,18 @@ data class Person(
 )
 
 data class Utland(
-    val utenlandsgreie: String?
+    val innflyttingTilNorge: List<InnflyttingTilNorge>,
+    val utflyttingFraNorge: List<UtflyttingFraNorge>
+)
+data class InnflyttingTilNorge(
+    val fraflyttingsland: String,
+    val dato: String,
+
+)
+
+data class UtflyttingFraNorge(
+    val tilflyttingsland: String,
+    val dato: String,
 )
 
 enum class Rolle {

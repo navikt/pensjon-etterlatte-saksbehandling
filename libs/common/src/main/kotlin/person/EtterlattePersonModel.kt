@@ -19,9 +19,22 @@ data class Person(
     val statsborgerskap: String?,
     val foedeland: String?,
     val sivilstatus: String?,
+    val utland: Utland?,
+    val rolle: Rolle?
 
 
 )
+
+data class Utland(
+    val utenlandsgreie: String?
+)
+
+enum class Rolle {
+    BARN,
+    AVDOED,
+    ETTERLATT;
+}
+
 fun Person.alder(): Int {
     var alder = LocalDateTime.now().year - foedselsaar!!
     if (LocalDateTime.now().dayOfYear >= LocalDate.parse(foedselsdato).dayOfYear) alder++

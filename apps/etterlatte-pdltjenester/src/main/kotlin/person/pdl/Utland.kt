@@ -27,6 +27,14 @@ data class InnflyttingTilNorge(
     val metadata: Metadata
 )
 
+data class UtflyttingFraNorge(
+    val folkeregistermetadata: Folkeregistermetadata,
+    val tilflyttingsland: String,
+    val tilflyttingsstedIUtlandet: Any,
+    val utflyttingsdato: Any,
+    val metadata: Metadata
+)
+
 data class Folkeregistermetadata(
     val aarsak: Any,
     val ajourholdstidspunkt: String,

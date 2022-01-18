@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import OppgaveHeader from './OppgaveHeader'
 import OppgaveListe from './OppgaveListe'
 import styled from 'styled-components'
@@ -8,6 +8,7 @@ import { kolonner } from './OppgaveKolonner'
 import { initialOppgaveFelter, IOppgaveFelter } from './oppgavefelter'
 import { hentOppgaver } from '../../shared/api/oppgaver'
 import Spinner from '../../shared/Spinner'
+import { AppContext, IAppContext } from '../../store/AppContext'
 
 const OppgavebenkContainer = styled.div`
   max-width: 60em;
@@ -15,9 +16,10 @@ const OppgavebenkContainer = styled.div`
 `
 
 const Oppgavebenken = () => {
+  const saksbehandlerNavn = useContext<IAppContext>(AppContext).state.saksbehandlerReducer.navn
   const [lasterOppgaver, setLasterOppgaver] = useState(true)
   const [oppgaver, setOppgaver] = useState<ReadonlyArray<IOppgave>>([])
-  const [oppgaveFelter, setOppgaveFelter] = useState<IOppgaveFelter>(initialOppgaveFelter())
+  const [oppgaveFelter, setOppgaveFelter] = useState<IOppgaveFelter>(initialOppgaveFelter(saksbehandlerNavn))
   const [globalFilter, setGlobalFilter] = useState<string | undefined>('')
   const [filterPar, setFilterPar] = useState<Array<FilterPar>>([])
 

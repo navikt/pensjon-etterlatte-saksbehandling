@@ -1,16 +1,16 @@
 /* eslint-disable react/jsx-key */
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import 'react-table'
 import {
-  useTable,
   Column,
-  useFilters,
-  useGlobalFilter,
-  useSortBy,
   ColumnInstance,
-  usePagination,
   IdType,
   Row,
+  useFilters,
+  useGlobalFilter,
+  usePagination,
+  useSortBy,
+  useTable,
 } from 'react-table'
 import {
   EnhetFilter,
@@ -26,7 +26,8 @@ import { ariaSortMap, FeltSortOrder } from './oppgavefelter'
 import { CollapseFilled, ExpandFilled } from '@navikt/ds-icons'
 import styled from 'styled-components'
 import { Heading } from '@navikt/ds-react'
-import moment from 'moment'
+import { globalFilterFunction, tildeltFilterFunction } from './filtere/oppgaveListeFiltere'
+import { AppContext } from '../../store/AppContext'
 
 type Props = {
   columns: ReadonlyArray<Column<IOppgave>>
@@ -36,28 +37,16 @@ type Props = {
 }
 
 const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilterValue, filterPar }) => {
+  const saksbehandlerNavn = useContext(AppContext).state.saksbehandlerReducer.navn
+
   const filterTypes = React.useMemo(
     () => ({
       globalFilter: globalFilterFunction,
+      tildeltFilter: (rows: Row<IOppgave>[], columnIds: IdType<IOppgave>[], filterValue: string) =>
+        tildeltFilterFunction(rows, columnIds, filterValue, saksbehandlerNavn),
     }),
-    []
+    [globalFilterValue, filterPar]
   )
-
-  function globalFilterFunction(rows: Row<IOppgave>[], columnIds: IdType<IOppgave>[], filterValue: string) {
-    return rows.filter((row) => {
-      return columnIds.some((id) => {
-        const rowValue = row.values[id]
-
-        if (id === 'regdato' || id === 'fristdato') {
-          return moment(rowValue).format('DD.MM.YYYY').toString() === filterValue
-        } else if (id === 'enhet' || id === 'status' || id === 'prioritet') {
-          return getContainsSelectFilter(id, rowValue, filterValue)
-        }
-
-        return String(rowValue).toLowerCase().includes(String(filterValue).toLowerCase())
-      })
-    })
-  }
 
   const {
     getTableProps,
@@ -80,8 +69,8 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilterValue, filte
     {
       columns,
       data,
-      globalFilter: globalFilterFunction,
-      filterTypes: filterTypes,
+      filterTypes,
+      globalFilter: filterTypes.globalFilter,
       initialState: {
         sortBy: [
           {

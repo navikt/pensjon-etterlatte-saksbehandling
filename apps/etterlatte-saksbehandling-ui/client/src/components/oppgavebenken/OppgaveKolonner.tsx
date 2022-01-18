@@ -7,7 +7,6 @@ import {
   OppgavetypeFilter,
   prioritetFilter,
   PrioritetFilter,
-  SaksbehandlerFilter,
   SoeknadstypeFilter,
   soeknadstypeFilter,
   statusFilter,
@@ -89,7 +88,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
   {
     Header: 'Saksbehandler',
     accessor: 'saksbehandler',
-    filter: 'exact',
+    filter: 'tildeltFilter',
     Cell: ({ value: saksbehandler }) => {
       return <SaksbehandlerFilterListe value={saksbehandler} />
     },
@@ -107,7 +106,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 1',
     status: StatusFilter.FERDIG,
     enhet: EnhetFilter.E4820,
-    saksbehandler: SaksbehandlerFilter.INNLOGGET,
+    saksbehandler: 'Truls Veileder',
   },
   {
     regdato: new Date(2020, 3, 12),
@@ -119,7 +118,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 2',
     status: StatusFilter.FERDIG,
     enhet: EnhetFilter.E4820,
-    saksbehandler: SaksbehandlerFilter.FORDELTE,
+    saksbehandler: 'Test Testulfsen',
   },
   {
     regdato: new Date(2020, 3, 23),
@@ -131,7 +130,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 3',
     status: StatusFilter.NY,
     enhet: EnhetFilter.E4806,
-    saksbehandler: SaksbehandlerFilter.UFORDELTE,
+    saksbehandler: 'Truls Veileder',
   },
   {
     regdato: new Date(2020, 3, 22),
@@ -143,7 +142,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 4',
     status: StatusFilter.NY,
     enhet: EnhetFilter.E4806,
-    saksbehandler: SaksbehandlerFilter.INNLOGGET,
+    saksbehandler: '',
   },
   {
     regdato: new Date(2020, 3, 12),
@@ -155,7 +154,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 5',
     status: StatusFilter.UNDER_BEHANDLING,
     enhet: EnhetFilter.E4806,
-    saksbehandler: SaksbehandlerFilter.INNLOGGET,
+    saksbehandler: '',
   },
   {
     regdato: new Date(2022, 3, 16),
@@ -167,7 +166,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 1',
     status: StatusFilter.FERDIG,
     enhet: EnhetFilter.E4820,
-    saksbehandler: SaksbehandlerFilter.UFORDELTE,
+    saksbehandler: 'Truls Veileder',
   },
   {
     regdato: new Date(2020, 3, 15),
@@ -179,7 +178,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 2',
     status: StatusFilter.FERDIG,
     enhet: EnhetFilter.E4820,
-    saksbehandler: SaksbehandlerFilter.UFORDELTE,
+    saksbehandler: 'Truls Veileder2',
   },
   {
     regdato: new Date(2020, 3, 14),
@@ -191,7 +190,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 3',
     status: StatusFilter.NY,
     enhet: EnhetFilter.E4806,
-    saksbehandler: SaksbehandlerFilter.UFORDELTE,
+    saksbehandler: '',
   },
   {
     regdato: new Date(2020, 3, 13),
@@ -203,7 +202,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 4',
     status: StatusFilter.NY,
     enhet: EnhetFilter.E4806,
-    saksbehandler: SaksbehandlerFilter.UFORDELTE,
+    saksbehandler: 'Truls Veileder',
   },
   {
     regdato: new Date(2020, 3, 12),
@@ -215,7 +214,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 5',
     status: StatusFilter.UNDER_BEHANDLING,
     enhet: EnhetFilter.E4806,
-    saksbehandler: SaksbehandlerFilter.UFORDELTE,
+    saksbehandler: 'Truls Veileder2',
   },
   {
     regdato: new Date(2020, 6, 12),
@@ -227,7 +226,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 1',
     status: StatusFilter.FERDIG,
     enhet: EnhetFilter.E4820,
-    saksbehandler: SaksbehandlerFilter.UFORDELTE,
+    saksbehandler: 'Truls Veileder',
   },
   {
     regdato: new Date(2020, 5, 12),
@@ -239,7 +238,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 2',
     status: StatusFilter.FERDIG,
     enhet: EnhetFilter.E4820,
-    saksbehandler: SaksbehandlerFilter.UFORDELTE,
+    saksbehandler: '',
   },
   {
     regdato: new Date(2020, 4, 12),
@@ -251,7 +250,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 3',
     status: StatusFilter.NY,
     enhet: EnhetFilter.E4806,
-    saksbehandler: SaksbehandlerFilter.FORDELTE,
+    saksbehandler: '',
   },
   {
     regdato: new Date(2021, 3, 12),
@@ -263,7 +262,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 4',
     status: StatusFilter.NY,
     enhet: EnhetFilter.E4806,
-    saksbehandler: SaksbehandlerFilter.FORDELTE,
+    saksbehandler: '',
   },
   {
     regdato: new Date(2022, 3, 12),
@@ -275,6 +274,6 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     beskrivelse: 'test 5',
     status: StatusFilter.UNDER_BEHANDLING,
     enhet: EnhetFilter.E4806,
-    saksbehandler: SaksbehandlerFilter.FORDELTE,
+    saksbehandler: '',
   },
 ]

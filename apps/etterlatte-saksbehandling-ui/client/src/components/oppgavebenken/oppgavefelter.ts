@@ -13,8 +13,6 @@ import {
   statusFilter,
   StatusFilter,
 } from './typer/oppgavebenken'
-import { useContext } from 'react'
-import { AppContext, IAppContext } from '../../store/AppContext'
 
 export interface IOppgaveFilter {
   selectedValue: any
@@ -54,9 +52,7 @@ export const ariaSortMap = new Map<FeltSortOrder, 'none' | 'descending' | 'ascen
   [FeltSortOrder.ASCENDANT, 'ascending'],
 ])
 
-export const initialOppgaveFelter = (): IOppgaveFelter => {
-  const saksbehandlerNavn = useContext<IAppContext>(AppContext).state.saksbehandlerReducer.navn
-
+export const initialOppgaveFelter = (saksbehandlerNavn: string): IOppgaveFelter => {
   return {
     regdato: {
       noekkel: 'regdato',

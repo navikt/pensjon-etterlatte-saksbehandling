@@ -8,7 +8,7 @@ export interface IOppgave {
   beskrivelse: string
   status: StatusFilter
   enhet: EnhetFilter
-  saksbehandler: SaksbehandlerFilter
+  saksbehandler: string
 }
 
 export enum PrioritetFilter {

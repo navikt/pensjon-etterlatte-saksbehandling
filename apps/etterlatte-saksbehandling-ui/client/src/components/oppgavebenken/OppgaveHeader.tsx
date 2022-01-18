@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Button, Heading } from '@navikt/ds-react'
 import { initialOppgaveFelter, IOppgaveFelter } from './oppgavefelter'
 import '../../App.css'
@@ -8,6 +8,7 @@ import '../../index.css'
 import moment from 'moment'
 import { GlobalFilter } from './filtere/GlobalFilter'
 import ColumnFilters from './filtere/ColumnFilters'
+import { AppContext, IAppContext } from '../../store/AppContext'
 
 moment.defaultFormat = 'DD.MM.YYYY'
 
@@ -19,6 +20,7 @@ type Props = {
 
 const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGlobalFilter }) => {
   const [resetGlobalInput, setResetGlobalInput] = useState<boolean>(false)
+  const saksbehandlerNavn = useContext<IAppContext>(AppContext).state.saksbehandlerReducer.navn
 
   return (
     <>
@@ -38,7 +40,7 @@ const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGl
         <Button
           size={'small'}
           onClick={() => {
-            setOppgaveFelter(initialOppgaveFelter())
+            setOppgaveFelter(initialOppgaveFelter(saksbehandlerNavn))
             setResetGlobalInput(true)
           }}
           variant={'secondary'}

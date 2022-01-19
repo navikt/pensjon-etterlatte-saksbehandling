@@ -1,5 +1,7 @@
 package person.pdl
 
+
+//TODO må gå igjennom denne for å sjekke verdier og nullable
 import no.nav.etterlatte.libs.common.pdl.ResponseError
 import java.util.*
 

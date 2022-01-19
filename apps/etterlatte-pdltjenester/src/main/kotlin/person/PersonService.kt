@@ -106,22 +106,22 @@ class PersonService(
         utland: UtlandResponse,
     ): eyUtland {
         return eyUtland(
-            utflyttingFraNorge = utland.data.hentPerson.utflyttingFraNorge.map { (mapUtflytting(it)) },
-            innflyttingTilNorge = utland.data.hentPerson.innflyttingTilNorge.map { (mapInnflytting(it)) }
+            utflyttingFraNorge = utland.data.hentPerson?.utflyttingFraNorge?.map { (mapUtflytting(it)) },
+            innflyttingTilNorge = utland.data.hentPerson?.innflyttingTilNorge?.map { (mapInnflytting(it)) }
         )
     }
 
     private fun mapUtflytting(utflytting: UtflyttingFraNorge): eyUtflyttingFraNorge {
         return eyUtflyttingFraNorge(
             tilflyttingsland = utflytting.tilflyttingsland,
-            dato = utflytting.folkeregistermetadata.gyldighetstidspunkt
+            dato = utflytting.folkeregistermetadata?.gyldighetstidspunkt
         )
     }
 
     private fun mapInnflytting(innflytting: InnflyttingTilNorge): eyInnflyttingTilNorge {
         return eyInnflyttingTilNorge(
             fraflyttingsland = innflytting.fraflyttingsland,
-            dato = innflytting.folkeregistermetadata.gyldighetstidspunkt
+            dato = innflytting.folkeregistermetadata?.gyldighetstidspunkt
         )
     }
 

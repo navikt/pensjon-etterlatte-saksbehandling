@@ -1,4 +1,4 @@
-name: etterlatte-behandling
+name: etterlatte-behandling-fra-soeknad
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}

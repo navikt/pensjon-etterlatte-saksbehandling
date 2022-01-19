@@ -34,7 +34,7 @@ class PdltjenesterKlient(config: Config) : EtterlattePdl {
                 .post(
                     Resource(
                         clientId,
-                        "$resourceUrl/personer/hentperson"
+                        "$resourceUrl/person/hentperson"
                     ), accessToken, fnr
                 ).mapBoth(
                     success = { json -> json },

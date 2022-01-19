@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandlingfrasoknad
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.auth.Auth
@@ -17,7 +18,7 @@ class AppBuilder(private val props: Map<String, String>) {
     }
 
     private fun behandlingHttpClient() = HttpClient(OkHttp) {
-        install(JsonFeature) { serializer = JacksonSerializer() }
+        install(JsonFeature) { serializer = JacksonSerializer{registerModule(JavaTimeModule())} }
         install(Auth) {
             clientCredential {
                 config = props.toMutableMap()

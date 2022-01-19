@@ -33,7 +33,6 @@ internal class StartBehandlingAvSoeknad(
         packet["@behandling_id"] = behandlingsid
 
         context.publish(packet.toJson())
-
     }
 }
 

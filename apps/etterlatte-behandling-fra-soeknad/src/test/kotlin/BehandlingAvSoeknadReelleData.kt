@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
 import io.ktor.client.features.auth.Auth
 import io.ktor.client.features.auth.providers.BearerTokens
@@ -8,14 +9,15 @@ import no.nav.etterlatte.behandlingfrasoknad.BehandlingsService
 import no.nav.etterlatte.behandlingfrasoknad.StartBehandlingAvSoeknad
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class BehandlingAvSoeknadReelleData {
-    @Test
+    @Disabled @Test
     fun test(){
         val rapid = TestRapid()
         val behandlingservice = BehandlingsService(HttpClient {
-            install(JsonFeature) { serializer = JacksonSerializer() }
+            install(JsonFeature) { serializer = JacksonSerializer{registerModule(JavaTimeModule())}}
             install(Auth) {
                 bearer {
                     loadTokens {
@@ -32,9 +34,5 @@ internal class BehandlingAvSoeknadReelleData {
         Assertions.assertEquals(1, rapid.inspektør.size)
         Assertions.assertEquals(1, rapid.inspektør.message(0)["@sak_id"].longValue())
         Assertions.assertEquals(36, rapid.inspektør.message(0)["@behandling_id"].textValue().length)
-
-
-
-
     }
 }

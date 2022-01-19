@@ -13,7 +13,7 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun lagSkjemaInfoOpplysning() {
-        val hendelseJson = objectMapper.readTree(javaClass.getResource("/fullMessage2.json")!!.readText())
+        val hendelseJson = objectMapper.readTree(javaClass.getResource("/fullMessage2.json")!!.readText())!!
         val opplysningsuthenter = Opplysningsuthenter()
         val opplysning = opplysningsuthenter.lagSkjemaInfoOpplysning(hendelseJson["@skjema_info"])
 
@@ -24,6 +24,7 @@ internal class OpplysningsuthenterTest {
                 ZoneOffset.UTC
             ).toInstant().epochSecond
         )
-
+        assertEquals(opplysning.opplysningType, "innsendt soeknad")
+        assertEquals(opplysning.opplysning, hendelseJson["@skjema_info"])
     }
 }

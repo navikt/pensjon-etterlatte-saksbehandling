@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelsePerson
 import no.nav.etterlatte.libs.common.pdl.Gradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.eyUtland
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.LocalDate
@@ -30,12 +31,12 @@ class PersonService(private val klient: Pdl) {
         return person
             .also { logger.info("Person funnet") }
     }
-    suspend fun hentUtland(fnr: Foedselsnummer): Boolean {
+    suspend fun hentUtland(fnr: Foedselsnummer): eyUtland {
         //TODO exception håndteringen virker ikke
         val person = klient.hentUtland(fnr) ?: throw Exception("Fant ingen personer i PDL")
 
         return person
-            .also { logger.info("Sjekket noe utland, men returnerte Boolean") }
+            .also { logger.info("Hentet utlandsinfo for Person") }
     }
 
     /**

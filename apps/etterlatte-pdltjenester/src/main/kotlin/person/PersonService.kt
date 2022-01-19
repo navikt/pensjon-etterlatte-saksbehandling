@@ -53,6 +53,7 @@ class PersonService(
         return opprettUtland(hentUtland)
     }
 
+    //TODO suspend her trengs når vi skal reintrodusere kodeverk
     private suspend fun opprettPerson(
         fnr: Foedselsnummer,
         hentPerson: HentPerson

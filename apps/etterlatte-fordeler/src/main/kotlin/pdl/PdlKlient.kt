@@ -9,12 +9,13 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.eyUtland
 import org.slf4j.LoggerFactory
 
 interface Pdl {
     suspend fun finnAdressebeskyttelseForFnr(fnrListe: List<Foedselsnummer>): AdressebeskyttelseResponse
     suspend fun hentPerson(fnr: Foedselsnummer): Person
-    suspend fun hentUtland(fnr: Foedselsnummer): Boolean
+    suspend fun hentUtland(fnr: Foedselsnummer): eyUtland
 }
 
 class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pdl {
@@ -43,15 +44,14 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
        // }
         return response
     }
-    override suspend fun hentUtland(fnr: Foedselsnummer): Boolean {
-        val response = client.post<Boolean>(apiUrl + "/hentperson") {
+    override suspend fun hentUtland(fnr: Foedselsnummer): eyUtland {
+        val response = client.post<eyUtland>(apiUrl + "/hentperson") {
             header("Tema", "PEN")
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             body = fnr.value
 
         }
-
         //TODO ordne feilhåndtering
         // Logge feil dersom det finnes noen
         //response.errors?.forEach { error ->

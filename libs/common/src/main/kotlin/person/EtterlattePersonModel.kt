@@ -19,7 +19,7 @@ data class Person(
     val statsborgerskap: String?,
     val foedeland: String?,
     val sivilstatus: String?,
-    val utland: eyUtland?,
+    var utland: eyUtland?,
     val rolle: Rolle?
 
 

@@ -1,3 +1,22 @@
 {
-  "Utland":true
+  "innflyttingTilNorge": [
+    {
+      "fraflyttingsland": "SWE",
+      "dato": "2021-12-26"
+    },
+    {
+      "fraflyttingsland": "SWE",
+      "dato": "2021-12-26"
+    }
+  ],
+  "utflyttingFraNorge": [
+    {
+      "tilflyttingsland": "SWE",
+      "dato": "2021-12-26"
+    },
+    {
+      "tilflyttingsland": "SWE",
+      "dato": "2021-12-26"
+    }
+  ]
 }

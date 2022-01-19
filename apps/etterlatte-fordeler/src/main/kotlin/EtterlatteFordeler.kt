@@ -26,6 +26,7 @@ internal class EtterlatteFordeler(
 
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
     private lateinit var barn: Person
+    private lateinit var avdoed: Person
     private var barnUtland = false
     private lateinit var soeknad: JsonMessage
 
@@ -52,7 +53,8 @@ internal class EtterlatteFordeler(
         Kriterie("Barn er for gammelt") { forGammel(barn, 15) },
         Kriterie("Barn har adressebeskyttelse") { harAdressebeskyttelse(barn) },
         Kriterie("Barn ikke fodt i Norge") { foedtUtland(barn) },
-        Kriterie("Barn har utvandring") { harUtvandring(barnUtland) },
+        Kriterie("Barn har utvandring") { harUtvandring(barn) },
+        Kriterie("Avdoed har utvandring") { harUtvandring(barn) },
         Kriterie("Avdød har yrkesskade") { harYrkesskade(soeknad) },
         Kriterie("Søker er ikke forelder") { soekerIkkeForelder(soeknad) },
     )
@@ -90,9 +92,11 @@ internal class EtterlatteFordeler(
 
             try {
                 val barnFnr = Foedselsnummer.of(packet["@fnr_soeker"].asText())
+                val avdoedFnr = Foedselsnummer.of(finnAvdoedFnr( packet))
                 barn = personService.hentPerson(barnFnr)
-                //TODO skrive om dette
-                val barnUtland = personService.hentUtland(barnFnr)
+                avdoed = personService.hentPerson(avdoedFnr)
+                barn.utland = personService.hentUtland(barnFnr)
+
 
                 val aktuelleSaker = fordel(packet)
                 if (aktuelleSaker.kandidat) {
@@ -135,9 +139,9 @@ internal class EtterlatteFordeler(
         return person.foedeland != "NOR"
     }
 
-    private fun harUtvandring(utland: Boolean): Boolean {
-        //TODO endre til sjekk av utvandring
-        return utland
+    private fun harUtvandring(person: Person): Boolean {
+        return (person.utland?.innflyttingTilNorge?.isNotEmpty() == true || person.utland?.utflyttingFraNorge?.isNotEmpty() == true)
+
     }
 
     private fun harYrkesskade(sok: JsonMessage): Boolean {
@@ -145,6 +149,13 @@ internal class EtterlatteFordeler(
             .filter { it["type"].asText() == "AVDOED" }
             .filter { it["doedsaarsakSkyldesYrkesskadeEllerYrkessykdom"]["svar"].asText() == "JA" }
             .isNotEmpty()
+    }
+
+    private fun finnAvdoedFnr(sok: JsonMessage): String {
+        return sok["@skjema_info"]["foreldre"]
+            .filter { it["type"].asText() == "AVDOED" }
+            .map { it["foedselsnummer"]}
+            .first().asText()
     }
 
     private fun soekerIkkeForelder(sok: JsonMessage): Boolean {

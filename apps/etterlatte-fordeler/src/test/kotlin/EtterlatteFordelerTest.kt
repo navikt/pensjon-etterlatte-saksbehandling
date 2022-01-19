@@ -7,6 +7,7 @@ import no.nav.etterlatte.EtterlatteFordeler
 import no.nav.etterlatte.common.mapJsonToAny
 import no.nav.etterlatte.libs.common.pdl.Gradering
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.eyUtland
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PersonService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -29,6 +30,8 @@ internal class EtterlatteFordelerTest {
     private val InnsenderIkkeGjenlevende = javaClass.getResource("/gjenlevende.json")!!.readText()
     private val barnGammel = mapJsonToAny<Person>(javaClass.getResource("/personGammel.json")!!.readText(), false)
     private val barn = mapJsonToAny<Person>(javaClass.getResource("/person.json")!!.readText(), false)
+    private val utland = mapJsonToAny<eyUtland>(javaClass.getResource("/utland.json")!!.readText(), false)
+    private val ikkeUtland = mapJsonToAny<eyUtland>(javaClass.getResource("/ikkeUtland.json")!!.readText(), false)
 
 
     @AfterEach
@@ -41,7 +44,7 @@ internal class EtterlatteFordelerTest {
     @Test
     fun testFeltMapping() {
         coEvery { klientMock.hentPerson(any()) } returns barn
-        coEvery { klientMock.hentUtland(any()) } returns true
+        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
 
         val inspector = TestRapid()
             .apply { EtterlatteFordeler(this, service) }
@@ -117,6 +120,30 @@ internal class EtterlatteFordelerTest {
 
         assertTrue(inspector.size == 0)
 
+    }
+    @Test
+    fun HarUtlandsopphold() {
+        coEvery { klientMock.hentPerson(any()) } returns barn
+        coEvery { klientMock.hentUtland(any()) } returns utland
+        val inspector = TestRapid()
+            .apply { EtterlatteFordeler(this, service) }
+            .apply { sendTestMessage(hendelseJson) }
+            .inspektør
+
+        assertTrue(inspector.size == 0)
+
+    }
+    @Test
+    fun HarIkkeUtlandsopphold() {
+        coEvery { klientMock.hentPerson(any()) } returns barn
+        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
+        val inspector = TestRapid()
+            .apply { EtterlatteFordeler(this, service) }
+            .apply { sendTestMessage(hendelseJson) }
+            .inspektør
+
+        assertEquals("ey_fordelt", inspector.message(0).get("@event_name").asText())
+        assertEquals("true", inspector.message(0).get("@soeknad_fordelt").asText())
     }
 
 }

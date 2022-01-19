@@ -31,7 +31,7 @@ spec:
       value: etterlatte.dodsmelding
     - name: KAFKA_RESET_POLICY
       #sette tilbake til none senere
-      value: latest
+      value: earliest
     - name: BEHANDLING_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
   accessPolicy:

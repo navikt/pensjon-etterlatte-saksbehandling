@@ -4,13 +4,11 @@ import io.ktor.features.NotFoundException
 import no.nav.etterlatte.libs.common.pdl.Gradering
 
 import no.nav.etterlatte.libs.common.pdl.ResponseError
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
-import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.person.pdl.HentPerson
 import org.slf4j.LoggerFactory
 import person.pdl.InnflyttingTilNorge
+import person.pdl.UtflyttingFraNorge
 import person.pdl.UtlandResponse
 
 class PersonService(
@@ -30,6 +28,7 @@ class PersonService(
 
         val hentPerson = response.data?.hentPerson
 
+        //TODO fikse feilhåndtering
         if (hentPerson == null) {
             loggfoerFeilmeldinger(response.errors)
             throw NotFoundException()
@@ -38,14 +37,15 @@ class PersonService(
         return opprettPerson(fnr, hentPerson)
     }
 
-    suspend fun hentUtland(fnr: Foedselsnummer): Utland {
+    suspend fun hentUtland(fnr: Foedselsnummer): eyUtland {
         logger.info("Henter utland fra PDL")
 
         val response = klient.hentUtland(fnr)
 
         val hentUtland: UtlandResponse = response
 
-        if (hentUtland == null) {
+        //TODO fikse feilhåndtering
+        if (response.errors?.isNotEmpty()!!) {
             loggfoerFeilmeldinger(response.errors)
             throw NotFoundException()
         }
@@ -103,22 +103,22 @@ class PersonService(
 
     private fun opprettUtland(
         utland: UtlandResponse,
-    ): Utland {
-        return Utland(
+    ): eyUtland {
+        return eyUtland(
             utflyttingFraNorge = utland.data.hentPerson.utflyttingFraNorge.map { (mapUtflytting(it)) },
             innflyttingTilNorge = utland.data.hentPerson.innflyttingTilNorge.map { (mapInnflytting(it)) }
         )
     }
 
-    private fun mapUtflytting(utflytting: person.pdl.UtflyttingFraNorge): UtflyttingFraNorge {
-        return UtflyttingFraNorge(
+    private fun mapUtflytting(utflytting: UtflyttingFraNorge): eyUtflyttingFraNorge {
+        return eyUtflyttingFraNorge(
             tilflyttingsland = utflytting.tilflyttingsland,
             dato = utflytting.folkeregistermetadata.gyldighetstidspunkt
         )
     }
 
-    private fun mapInnflytting(innflytting: person.pdl.InnflyttingTilNorge): no.nav.etterlatte.libs.common.person.InnflyttingTilNorge {
-        return no.nav.etterlatte.libs.common.person.InnflyttingTilNorge(
+    private fun mapInnflytting(innflytting: InnflyttingTilNorge): eyInnflyttingTilNorge {
+        return eyInnflyttingTilNorge(
             fraflyttingsland = innflytting.fraflyttingsland,
             dato = innflytting.folkeregistermetadata.gyldighetstidspunkt
         )

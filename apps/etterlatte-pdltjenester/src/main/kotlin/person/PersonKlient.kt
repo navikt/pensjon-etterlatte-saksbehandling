@@ -13,7 +13,6 @@ import no.nav.etterlatte.common.unsafeRetry
 import no.nav.etterlatte.libs.common.pdl.GraphqlRequest
 import no.nav.etterlatte.libs.common.pdl.Variables
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.person.pdl.PersonResponse
 import org.slf4j.LoggerFactory
 import person.pdl.UtlandResponse

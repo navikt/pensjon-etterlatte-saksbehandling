@@ -19,23 +19,23 @@ data class Person(
     val statsborgerskap: String?,
     val foedeland: String?,
     val sivilstatus: String?,
-    val utland: Utland?,
+    val utland: eyUtland?,
     val rolle: Rolle?
 
 
 )
 
-data class Utland(
-    val innflyttingTilNorge: List<InnflyttingTilNorge>,
-    val utflyttingFraNorge: List<UtflyttingFraNorge>
+data class eyUtland(
+    val innflyttingTilNorge: List<eyInnflyttingTilNorge>,
+    val utflyttingFraNorge: List<eyUtflyttingFraNorge>
 )
-data class InnflyttingTilNorge(
+data class eyInnflyttingTilNorge(
     val fraflyttingsland: String,
     val dato: String,
 
 )
 
-data class UtflyttingFraNorge(
+data class eyUtflyttingFraNorge(
     val tilflyttingsland: String,
     val dato: String,
 )

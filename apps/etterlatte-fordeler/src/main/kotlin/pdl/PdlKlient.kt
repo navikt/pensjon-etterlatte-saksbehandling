@@ -45,7 +45,7 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
         return response
     }
     override suspend fun hentUtland(fnr: Foedselsnummer): eyUtland {
-        val response = client.post<eyUtland>(apiUrl + "/hentperson") {
+        val response = client.post<eyUtland>(apiUrl + "/hentutland") {
             header("Tema", "PEN")
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)

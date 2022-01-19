@@ -29,10 +29,15 @@ spec:
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
+    - name: ETTERLATTE_PDL_CLIENT_ID
+      value: 8a5e70a5-2ba8-4951-8a7f-1ee2b442fb0c
+    - name: ETTERLATTE_PDL_URL
+      value: http://etterlatte-pdltjenester
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-behandling
+        - application: etterlatte-pdltjenester
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui

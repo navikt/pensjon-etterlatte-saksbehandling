@@ -18,3 +18,16 @@ export const getPerson = async (fnr: string): Promise<IApiResponse<any>> => {
     return {status: 500};
   }
 }
+
+export const opprettSakPaaPerson = async (fnr: string): Promise<IApiResponse<any>> => {
+  try{
+    const result: Response = await fetch(`${path}/api/personer/${fnr}/saker`)
+    return {
+      status: result.status,
+      data: await result.json()
+    }
+  } catch(e) {
+    console.log(e);
+    return {status: 500};
+  }
+}

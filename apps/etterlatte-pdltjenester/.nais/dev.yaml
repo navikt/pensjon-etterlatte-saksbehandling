@@ -49,3 +49,4 @@ spec:
     inbound:
       rules:
         - application: etterlatte-fordeler
+        - application: etterlatte-api

@@ -45,6 +45,11 @@ fun Route.behandlingRoute (service: BehandlingService) {
         }
     }
 
+    /*
+    Hente alle saker med metadata om saken
+     */
+
+    // Opprette saker på en person
     route("api/personer/{fnr}/saker") {
         post {
             val fnr = call.parameters["fnr"]

@@ -12,21 +12,6 @@ const options: any = () => ({
         console.log(oboToken)
         options.headers.Authorization = `Bearer ${oboToken}`;
         return options;
-        /*
-        logger.info(`${req.protocol?.toUpperCase()} ${req.method} ${req.path}`);
-        return new Promise((resolve, reject) => {
-            return exchangeToken(req.session.tokens.access_token).then(
-                (accessToken) => {
-                    options.headers.Authorization = `Bearer ${accessToken}`;
-                    resolve(options);
-                },
-                (error) => {
-                    logger.error("Error occured while changing request headers: ", error);
-                    reject(error);
-                }
-            );
-        });
-        */
     },
     
     proxyReqPathResolver: (req: any) => {

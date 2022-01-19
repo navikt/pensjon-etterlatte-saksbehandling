@@ -11,11 +11,12 @@ import io.ktor.client.features.defaultRequest
 import io.ktor.http.takeFrom
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.PdltjenesterKlient
 
 class ApplicationContext(configLocation: String? = null) {
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
 
-    val behandlingService: BehandlingService = BehandlingService(BehandlingKlient(config))
+    val behandlingService: BehandlingService = BehandlingService(BehandlingKlient(config), PdltjenesterKlient(config))
 
 
 }

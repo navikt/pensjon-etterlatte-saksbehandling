@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
-import { getPerson } from '../../shared/api/person'
+import { getPerson, opprettSakPaaPerson } from '../../shared/api/person'
 
 export const Person = () => {
   const [personData, setPersonData] = useState({})
@@ -16,5 +16,13 @@ export const Person = () => {
     })();
   }, [])
 
-  return <div>Personinfo</div>
+  const opprettSak = () => {
+    if(match.fnr) {
+      opprettSakPaaPerson(match.fnr)
+    }
+  }
+
+  return <div>Personinfo
+    <button onClick={opprettSak}>Opprett/hent sak</button>
+  </div>
 }

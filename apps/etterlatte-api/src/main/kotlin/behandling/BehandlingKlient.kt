@@ -7,15 +7,20 @@ import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
+import java.util.*
+
+
+data class BehandlingSakResult(val saker: List<Sak>)
+data class BehandlingSammendrag(val id: UUID, val sak: Long, val status: String)
+data class Behandlinger(val behandlinger: List<BehandlingSammendrag>)
 
 
 interface EtterlatteBehandling {
-    suspend fun hentSakerForPerson(fnr: String, accessToken: String): BehandlingSakerResult
+    suspend fun hentSakerForPerson(fnr: String, accessToken: String): BehandlingSakResult
     suspend fun opprettSakForPerson(fnr: String, sakType: String, accessToken: String): Sak
-    suspend fun hentSaker(accessToken: String): BehandlingSakerResult
+    suspend fun hentSaker(accessToken: String): BehandlingSakResult
+    suspend fun hentBehandlinger(sakId: Int, accessToken: String): Behandlinger
 }
-
-data class BehandlingSakerResult (val saker: List<Sak>)
 
 class BehandlingKlient(config: Config) : EtterlatteBehandling {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
@@ -29,7 +34,7 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
 
 
     @Suppress("UNCHECKED_CAST")
-    override suspend fun hentSakerForPerson(fnr: String, accessToken: String): BehandlingSakerResult {
+    override suspend fun hentSakerForPerson(fnr: String, accessToken: String): BehandlingSakResult {
         try {
             logger.info("Henter saker fra behandling")
             val json = downstreamResourceClient
@@ -43,7 +48,7 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
 
-            return objectMapper.readValue(json.toString(), BehandlingSakerResult::class.java)
+            return objectMapper.readValue(json.toString(), BehandlingSakResult::class.java)
         } catch (e: Exception) {
             logger.error("Henting av person fra behandling feilet", e)
             throw e
@@ -72,26 +77,43 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
         }
     }
 
-    override suspend fun hentSaker(accessToken: String): BehandlingSakerResult {
+    override suspend fun hentSaker(accessToken: String): BehandlingSakResult {
         try {
-            logger.info("Henter alle saker i behandling")
+            logger.info("Henter alle saker")
             val json = downstreamResourceClient
                 .get(
                     Resource(
                         clientId,
                         "$resourceUrl/saker"
                     ), accessToken
-                ).mapBoth(
-                    success = { json -> json },
+                ).mapBoth(success = { json -> json },
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
 
-            return objectMapper.readValue(json.toString(), BehandlingSakerResult::class.java)
+            return objectMapper.readValue(json.toString(), BehandlingSakResult::class.java)
+        } catch (e: Exception) {
+            logger.error("Henting av behandlinger feilet")
+            throw e
+        }
+    }
+
+    override suspend fun hentBehandlinger(sakId: Int, accessToken: String): Behandlinger {
+        logger.info("Henter alle behandlinger i en sak")
+
+        try {
+            val json =
+                downstreamResourceClient.get(Resource(clientId, "$resourceUrl/saker/$sakId"), accessToken)
+                    .mapBoth(success = { json -> json },
+                        failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                    ).response
+
+            return objectMapper.readValue(json.toString(), Behandlinger::class.java)
         } catch (e: Exception) {
             logger.error("Henting av saker fra behandling feilet", e)
             throw e
         }
     }
+
 
 }
 

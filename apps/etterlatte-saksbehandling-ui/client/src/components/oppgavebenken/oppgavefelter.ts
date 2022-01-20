@@ -99,7 +99,7 @@ export const initialOppgaveFelter = (saksbehandlerNavn: string): IOppgaveFelter 
     },
     bruker: {
       noekkel: 'bruker',
-      label: 'Bruker',
+      label: 'Fødselsnummer',
       filter: {
         type: 'string',
         selectedValue: '',
@@ -108,10 +108,6 @@ export const initialOppgaveFelter = (saksbehandlerNavn: string): IOppgaveFelter 
     beskrivelse: {
       noekkel: 'beskrivelse',
       label: 'Beskrivelse',
-      filter: {
-        type: 'string',
-        selectedValue: '',
-      },
     },
     status: {
       noekkel: 'status',

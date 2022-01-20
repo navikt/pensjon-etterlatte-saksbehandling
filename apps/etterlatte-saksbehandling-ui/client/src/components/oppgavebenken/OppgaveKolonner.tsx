@@ -63,7 +63,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     },
   },
   {
-    Header: 'Bruker',
+    Header: 'Fødselsnummer',
     accessor: 'bruker',
   },
   {

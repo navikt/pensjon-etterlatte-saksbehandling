@@ -2,6 +2,7 @@ import { Column } from 'react-table'
 import {
   enhetFilter,
   EnhetFilter,
+  Handlinger,
   IOppgave,
   oppgavetypeFilter,
   OppgavetypeFilter,
@@ -16,6 +17,7 @@ import moment from 'moment'
 import { ColorTag } from './styled'
 import React from 'react'
 import SaksbehandlerFilterListe from './filtere/SaksbehandlerFilterListe'
+import { Button } from '@navikt/ds-react'
 
 moment.defaultFormat = 'DD.MM.YYYY'
 
@@ -93,6 +95,17 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
       return <SaksbehandlerFilterListe value={saksbehandler} />
     },
   },
+  {
+    Header: 'Handlinger',
+    accessor: 'handlinger',
+    Cell: ({ value: handling }) => {
+      return (
+        <Button size={'small'} onClick={() => {}} variant={'secondary'}>
+          {handling.toString()}
+        </Button>
+      )
+    },
+  },
 ]
 
 export const mockdata: ReadonlyArray<IOppgave> = [
@@ -107,6 +120,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.FERDIG,
     enhet: EnhetFilter.E4820,
     saksbehandler: 'Truls Veileder',
+    handlinger: Handlinger.START,
   },
   {
     regdato: new Date(2020, 3, 12),
@@ -119,6 +133,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.FERDIG,
     enhet: EnhetFilter.E4820,
     saksbehandler: 'Test Testulfsen',
+    handlinger: Handlinger.START,
   },
   {
     regdato: new Date(2020, 3, 23),
@@ -131,6 +146,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.NY,
     enhet: EnhetFilter.E4806,
     saksbehandler: 'Truls Veileder',
+    handlinger: Handlinger.START,
   },
   {
     regdato: new Date(2020, 3, 22),
@@ -143,6 +159,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.NY,
     enhet: EnhetFilter.E4806,
     saksbehandler: '',
+    handlinger: Handlinger.START,
   },
   {
     regdato: new Date(2020, 3, 12),
@@ -155,6 +172,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.UNDER_BEHANDLING,
     enhet: EnhetFilter.E4806,
     saksbehandler: '',
+    handlinger: Handlinger.START,
   },
   {
     regdato: new Date(2022, 3, 16),
@@ -167,6 +185,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.FERDIG,
     enhet: EnhetFilter.E4820,
     saksbehandler: 'Truls Veileder',
+    handlinger: Handlinger.START,
   },
   {
     regdato: new Date(2020, 3, 15),
@@ -179,6 +198,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.FERDIG,
     enhet: EnhetFilter.E4820,
     saksbehandler: 'Truls Veileder2',
+    handlinger: Handlinger.START,
   },
   {
     regdato: new Date(2020, 3, 14),
@@ -191,6 +211,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.NY,
     enhet: EnhetFilter.E4806,
     saksbehandler: '',
+    handlinger: Handlinger.START,
   },
   {
     regdato: new Date(2020, 3, 13),
@@ -203,6 +224,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.NY,
     enhet: EnhetFilter.E4806,
     saksbehandler: 'Truls Veileder',
+    handlinger: Handlinger.START,
   },
   {
     regdato: new Date(2020, 3, 12),
@@ -215,6 +237,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.UNDER_BEHANDLING,
     enhet: EnhetFilter.E4806,
     saksbehandler: 'Truls Veileder2',
+    handlinger: Handlinger.START,
   },
   {
     regdato: new Date(2020, 6, 12),
@@ -227,6 +250,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.FERDIG,
     enhet: EnhetFilter.E4820,
     saksbehandler: 'Truls Veileder',
+    handlinger: Handlinger.START,
   },
   {
     regdato: new Date(2020, 5, 12),
@@ -239,6 +263,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.FERDIG,
     enhet: EnhetFilter.E4820,
     saksbehandler: '',
+    handlinger: Handlinger.START,
   },
   {
     regdato: new Date(2020, 4, 12),
@@ -251,6 +276,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.NY,
     enhet: EnhetFilter.E4806,
     saksbehandler: '',
+    handlinger: Handlinger.START,
   },
   {
     regdato: new Date(2021, 3, 12),
@@ -263,6 +289,7 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.NY,
     enhet: EnhetFilter.E4806,
     saksbehandler: '',
+    handlinger: Handlinger.START,
   },
   {
     regdato: new Date(2022, 3, 12),
@@ -275,5 +302,6 @@ export const mockdata: ReadonlyArray<IOppgave> = [
     status: StatusFilter.UNDER_BEHANDLING,
     enhet: EnhetFilter.E4806,
     saksbehandler: '',
+    handlinger: Handlinger.START,
   },
 ]

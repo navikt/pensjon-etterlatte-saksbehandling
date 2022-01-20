@@ -9,6 +9,11 @@ export interface IOppgave {
   status: StatusFilter
   enhet: EnhetFilter
   saksbehandler: string
+  handlinger: Handlinger
+}
+
+export enum Handlinger {
+  START = 'Behandle sak',
 }
 
 export enum PrioritetFilter {

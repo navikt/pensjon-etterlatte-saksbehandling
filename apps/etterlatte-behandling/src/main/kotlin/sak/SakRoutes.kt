@@ -9,7 +9,7 @@ import no.nav.etterlatte.Kontekst
 
 fun Route.sakRoutes(sakService: SakService){
     get("/saker") {
-        call.respond(inTransaction { sakService.hentSaker() })
+        call.respond(Person(inTransaction { sakService.hentSaker() }))
     }
 
     get("/saker/{id}") {

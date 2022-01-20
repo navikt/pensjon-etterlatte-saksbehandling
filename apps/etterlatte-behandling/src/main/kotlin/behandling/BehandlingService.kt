@@ -8,7 +8,7 @@ interface BehandlingService {
     fun hentBehandling(behandling: UUID): Behandling?
     fun hentBehandlinger(): List<Behandling>
     fun hentBehandlingerISak(sakid: Long): List<Behandling>
-    fun startBehandling(sak: Long): Behandling
+    fun startBehandling(sak: Long, nyeOpplysninger: List<Opplysning>): Behandling
     fun leggTilGrunnlag(behandling: UUID, data: ObjectNode, type: String, kilde: Opplysning.Kilde? = null): UUID
     fun vilkårsprøv(behandling: UUID)
     fun beregn(behandling: UUID, beregning: Beregning)
@@ -28,8 +28,15 @@ class RealBehandlingService(private val behandlinger: BehandlingDao, private val
         return behandlinger.alleISak(sakid)
     }
 
-    override fun startBehandling(sak: Long): Behandling {
-        return BehandlingAggregat.opprett(sak, behandlinger, opplysninger, vilkaarKlient).serialiserbarUtgave() }
+    override  fun startBehandling(sak: Long, nyeOpplysninger: List<Opplysning>): Behandling {
+        return BehandlingAggregat.opprett(sak, behandlinger, opplysninger, vilkaarKlient)
+            .also { behandling->
+
+                nyeOpplysninger.forEach{
+                    behandling.leggTilGrunnlag(it.opplysning, it.opplysningType, it.kilde)
+                }
+            }
+            .serialiserbarUtgave() }
 
     override fun leggTilGrunnlag(behandling: UUID, data: ObjectNode, type: String, kilde: Opplysning.Kilde?): UUID {
         return BehandlingAggregat(behandling, behandlinger, opplysninger, vilkaarKlient).leggTilGrunnlag(data, type, kilde)

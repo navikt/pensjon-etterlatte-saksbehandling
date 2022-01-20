@@ -19,7 +19,7 @@ fun Route.behandlingRoutes(service: BehandlingService){
     }
     post("/behandlinger") { //Søk
         val behandlingsBehov = call.receive<BehandlingsBehov>()
-        inTransaction { service.startBehandling(behandlingsBehov.sak) }.also { call.respondText(it.id.toString()) }
+        inTransaction { service.startBehandling(behandlingsBehov.sak, behandlingsBehov.opplysninger?: emptyList()) }.also { call.respondText(it.id.toString()) }
     }
     route("/behandlinger/{behandlingsid}") {
         get {

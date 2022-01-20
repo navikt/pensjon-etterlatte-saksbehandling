@@ -51,7 +51,7 @@ internal class RealBehandlingServiceTest {
         every { behandlingerMock.hent(capture(behandlingHentes)) } returns opprettetBehandling
         every { opplysningerMock.finnOpplysningerIBehandling(capture(opplysningerHentes)) } returns emptyList()
 
-        val resultat = sut.startBehandling(1)
+        val resultat = sut.startBehandling(1, emptyList())
 
         Assertions.assertEquals(opprettetBehandling,  resultat)
         Assertions.assertEquals(1, behandlingOpprettes.captured.sak)

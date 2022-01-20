@@ -1,10 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Kunde
-import no.nav.etterlatte.Saksbehandler
-import no.nav.etterlatte.Self
+import no.nav.etterlatte.*
 import no.nav.etterlatte.libs.common.behandling.Opplysning
 import java.time.Instant
 import java.util.*
@@ -45,6 +42,7 @@ class BehandlingAggregat(id: UUID, private val behandlinger: BehandlingDao, priv
             is Saksbehandler -> if(oppgittKilde == null) Opplysning.Saksbehandler(Kontekst.get().AppUser.name()) else throw IllegalArgumentException()
             is Kunde -> if(oppgittKilde == null) Opplysning.Privatperson(Kontekst.get().AppUser.name(), Instant.now()) else throw IllegalArgumentException()
             is Self -> requireNotNull(oppgittKilde)
+            is SystemUser -> requireNotNull(oppgittKilde)
             else -> throw IllegalArgumentException()
         }
     }

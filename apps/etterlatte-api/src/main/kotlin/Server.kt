@@ -9,6 +9,7 @@ import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.request.path
+import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.applicationEngineEnvironment
@@ -32,8 +33,9 @@ class Server(applicationContext: ApplicationContext) {
             routing {
                 healthApi()
                 authenticate {
-                    behandlingRoute(applicationContext.behandlingService)
-                    testRoute()
+                    route("api") {
+                        behandlingRoute(applicationContext.behandlingService)
+                    }
                 }
             }
         }

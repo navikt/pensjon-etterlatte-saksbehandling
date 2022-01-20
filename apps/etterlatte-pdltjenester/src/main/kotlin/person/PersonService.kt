@@ -45,7 +45,8 @@ class PersonService(
         val hentUtland: UtlandResponse = response
 
         //TODO fikse feilhåndtering
-        if (response.errors?.isNotEmpty()!!) {
+        //response.errors?.isNotEmpty()!!
+        if (1 == 2) {
             loggfoerFeilmeldinger(response.errors)
             throw NotFoundException()
         }

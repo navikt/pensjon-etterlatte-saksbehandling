@@ -28,9 +28,17 @@ fun Route.behandlingRoute(service: BehandlingService) {
 
     route("saker") {
         //hent alle saker
-        get() {
 
+        get {
+            try {
+                val accessToken = getAccessToken(call)
+                val list = service.hentSaker(accessToken)
+                call.respond(list)
+            } catch (e: Exception) {
+                throw e
+            }
         }
+
         // hent spesifikk sak (alle behandlinger?)
         get("/{sakId}") {
 
@@ -49,7 +57,6 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 call.respond("Fødselsnummer mangler")
             } else {
                 try {
-
                     val accessToken = getAccessToken(call)
                     val list = service.hentPerson(fnr, accessToken)
                     call.respond(list)

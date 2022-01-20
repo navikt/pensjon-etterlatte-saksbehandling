@@ -1,6 +1,7 @@
 package no.nav.etterlatte.sak
 
 interface SakService {
+    fun hentSaker(): List<Sak>
     fun finnSaker(person: String): List<Sak>
     fun finnEllerOpprettSak(person: String, type: String): Sak
     fun finnSak(person: String, type: String): Sak?
@@ -9,6 +10,10 @@ interface SakService {
 }
 
 class RealSakService(private val dao: SakDao) :SakService{
+    override fun hentSaker(): List<Sak> {
+        return dao.hentSaker()
+    }
+
     override fun finnSaker(person: String): List<Sak> {
         return dao.finnSaker(person)
     }

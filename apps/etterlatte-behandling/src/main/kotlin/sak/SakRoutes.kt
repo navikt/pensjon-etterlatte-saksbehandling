@@ -8,6 +8,10 @@ import no.nav.etterlatte.Kontekst
 
 
 fun Route.sakRoutes(sakService: SakService){
+    get("/saker") {
+        call.respond(inTransaction { sakService.hentSaker() })
+    }
+
     get("/saker/{id}") {
         call.respond(inTransaction { sakService.finnSak(requireNotNull(call.parameters["id"]).toLong()) } ?: HttpStatusCode.NotFound)
     }

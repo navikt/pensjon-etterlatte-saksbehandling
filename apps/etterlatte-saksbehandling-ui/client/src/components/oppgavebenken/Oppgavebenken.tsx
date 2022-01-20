@@ -6,7 +6,7 @@ import { FilterPar, IOppgave } from './typer/oppgavebenken'
 import { Column } from 'react-table'
 import { kolonner } from './OppgaveKolonner'
 import { initialOppgaveFelter, IOppgaveFelter } from './oppgavefelter'
-import { hentOppgaver } from '../../shared/api/oppgaver'
+import { hentMockOppgaver } from '../../shared/api/oppgaver'
 import Spinner from '../../shared/Spinner'
 import { AppContext, IAppContext } from '../../store/AppContext'
 
@@ -38,7 +38,7 @@ const Oppgavebenken = () => {
   }
 
   useEffect(() => {
-    hentOppgaver()
+    hentMockOppgaver()
       .then((oppgaver: ReadonlyArray<IOppgave>) => {
         setOppgaver(oppgaver)
         setLasterOppgaver(false)

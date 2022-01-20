@@ -21,7 +21,10 @@ export const getPerson = async (fnr: string): Promise<IApiResponse<any>> => {
 
 export const opprettSakPaaPerson = async (fnr: string): Promise<IApiResponse<any>> => {
   try{
-    const result: Response = await fetch(`${path}/api/personer/${fnr}/saker`)
+    const result: Response = await fetch(`${path}/api/personer/${fnr}/saker`, {
+      method: "post"
+    });
+    
     return {
       status: result.status,
       data: await result.json()

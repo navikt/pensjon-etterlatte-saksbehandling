@@ -92,7 +92,7 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
 
             return objectMapper.readValue(json.toString(), BehandlingSakResult::class.java)
         } catch (e: Exception) {
-            logger.error("Henting av behandlinger feilet")
+            logger.error("Henting av saker fra behandling feilet", e)
             throw e
         }
     }
@@ -107,9 +107,10 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
                         failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                     ).response
 
+            println(json)
             return objectMapper.readValue(json.toString(), Behandlinger::class.java)
         } catch (e: Exception) {
-            logger.error("Henting av saker fra behandling feilet", e)
+            logger.error("Henting av behandlinger feilet")
             throw e
         }
     }

@@ -86,7 +86,8 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
                         clientId,
                         "$resourceUrl/saker"
                     ), accessToken
-                ).mapBoth(success = { json -> json },
+                ).mapBoth(
+                    success = { json -> json },
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
 
@@ -102,15 +103,16 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
 
         try {
             val json =
-                downstreamResourceClient.get(Resource(clientId, "$resourceUrl/saker/$sakId"), accessToken)
-                    .mapBoth(success = { json -> json },
+                downstreamResourceClient.get(Resource(clientId, "$resourceUrl/sak/$sakId/behandlinger/"), accessToken)
+                    .mapBoth(
+                        success = { json -> json },
                         failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                     ).response
 
             println(json)
             return objectMapper.readValue(json.toString(), Behandlinger::class.java)
         } catch (e: Exception) {
-            logger.error("Henting av behandlinger feilet")
+            logger.error("Henting av behandlinger feilet", e)
             throw e
         }
     }

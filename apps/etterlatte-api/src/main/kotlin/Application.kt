@@ -18,7 +18,6 @@ class ApplicationContext(configLocation: String? = null) {
 
     val behandlingService: BehandlingService = BehandlingService(BehandlingKlient(config), PdltjenesterKlient(config))
 
-
 }
 
 

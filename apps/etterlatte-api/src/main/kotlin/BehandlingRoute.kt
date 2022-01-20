@@ -26,25 +26,35 @@ fun getAccessToken(call: ApplicationCall): String {
 // /api
 fun Route.behandlingRoute(service: BehandlingService) {
 
+    route("saker") {
+        //hent alle saker
+        get() {
+
+        }
+        // hent spesifikk sak (alle behandlinger?)
+        get("/{sakId}") {
+
+        }
+    }
 
     /*
     Skal hente persondata og sakene for denne personen?
      */
     route("personer") {
-        route("{fnr}") {
-            get {
-                val fnr = call.parameters["fnr"]
-                if (fnr == null) {
-                    call.response.status(HttpStatusCode(400, "Bad request"))
-                    call.respond("Fødselsnummer mangler")
-                } else {
-                    try {
-                        val accessToken = getAccessToken(call)
-                        val list = service.hentPerson(fnr, accessToken)
-                        call.respond(list)
-                    } catch (e: Exception) {
-                        throw e
-                    }
+        get("{fnr}") {
+
+            val fnr = call.parameters["fnr"]
+            if (fnr == null) {
+                call.response.status(HttpStatusCode(400, "Bad request"))
+                call.respond("Fødselsnummer mangler")
+            } else {
+                try {
+
+                    val accessToken = getAccessToken(call)
+                    val list = service.hentPerson(fnr, accessToken)
+                    call.respond(list)
+                } catch (e: Exception) {
+                    throw e
                 }
             }
         }
@@ -53,20 +63,18 @@ fun Route.behandlingRoute(service: BehandlingService) {
         Hente alle saker med metadata om saken
          */
         // Opprette saker på en person
-        route("{fnr}/saker") {
-            post {
-                val fnr = call.parameters["fnr"]
-                if (fnr == null) {
-                    call.response.status(HttpStatusCode(400, "Bad request"))
-                    call.respond("Fødselsnummer mangler")
-                } else {
-                    try {
-                        val accessToken = getAccessToken(call)
-                        service.opprettSak(fnr, "barnepensjon", accessToken) // sakType blir nok en enum etter hvert
-                        call.respond("Ok");
-                    } catch (e: Exception) {
-                        throw e
-                    }
+        post("{fnr}/saker") {
+            val fnr = call.parameters["fnr"]
+            if (fnr == null) {
+                call.response.status(HttpStatusCode(400, "Bad request"))
+                call.respond("Fødselsnummer mangler")
+            } else {
+                try {
+                    val accessToken = getAccessToken(call)
+                    service.opprettSak(fnr, "barnepensjon", accessToken) // sakType blir nok en enum etter hvert
+                    call.respond("Ok");
+                } catch (e: Exception) {
+                    throw e
                 }
             }
         }

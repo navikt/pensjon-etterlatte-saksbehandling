@@ -103,7 +103,7 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
 
         try {
             val json =
-                downstreamResourceClient.get(Resource(clientId, "$resourceUrl/sak/$sakId/behandlinger/"), accessToken)
+                downstreamResourceClient.get(Resource(clientId, "$resourceUrl/sak/$sakId/behandlinger"), accessToken)
                     .mapBoth(
                         success = { json -> json },
                         failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }

@@ -12,17 +12,8 @@ import {
   useSortBy,
   useTable,
 } from 'react-table'
-import {
-  EnhetFilter,
-  enhetFilter,
-  FilterPar,
-  IOppgave,
-  PrioritetFilter,
-  prioritetFilter,
-  StatusFilter,
-  statusFilter,
-} from './typer/oppgavebenken'
-import { ariaSortMap, FeltSortOrder } from './oppgavefelter'
+import { FilterPar, IOppgave, StatusFilter, statusFilter } from './typer/oppgavebenken'
+import { ariaSortMap, FeltSortOrder } from './typer/oppgavefelter'
 import { CollapseFilled, ExpandFilled } from '@navikt/ds-icons'
 import styled from 'styled-components'
 import { Heading } from '@navikt/ds-react'
@@ -175,12 +166,8 @@ const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilterValue, filte
 
 export function getContainsSelectFilter(id: string, rowValue: string, filterValue: string) {
   let navn = ''
-  if (id === 'enhet') {
-    navn = enhetFilter[rowValue as EnhetFilter]?.navn.toLowerCase()
-  } else if (id === 'status') {
+  if (id === 'status') {
     navn = statusFilter[rowValue as StatusFilter]?.navn.toLowerCase()
-  } else if (id === 'prioritet') {
-    navn = prioritetFilter[rowValue as PrioritetFilter]?.navn.toLowerCase()
   }
 
   return navn.includes(String(filterValue).toLowerCase())

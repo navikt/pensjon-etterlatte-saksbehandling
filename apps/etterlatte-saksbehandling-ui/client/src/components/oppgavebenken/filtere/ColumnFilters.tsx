@@ -1,5 +1,5 @@
 import React from 'react'
-import { IOppgaveFelt, IOppgaveFelter } from '../oppgavefelter'
+import { IOppgaveFelt, IOppgaveFelter } from '../typer/oppgavefelter'
 import DateColumnFilter from './DateColumnFilter'
 import DropdownColumnFilter from './DropdownColumnFilter'
 import { FilterWrapper } from '../styled'

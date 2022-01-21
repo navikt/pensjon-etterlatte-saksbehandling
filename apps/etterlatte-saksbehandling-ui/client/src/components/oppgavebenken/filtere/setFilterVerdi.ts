@@ -1,4 +1,4 @@
-import { IOppgaveFelt, IOppgaveFelter } from '../oppgavefelter'
+import { IOppgaveFelt, IOppgaveFelter } from '../typer/oppgavefelter'
 
 export const settFilterVerdi = (
   oppgaveFelt: IOppgaveFelt,

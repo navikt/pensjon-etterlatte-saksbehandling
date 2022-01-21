@@ -1,4 +1,4 @@
-import { IOppgaveFelt, IOppgaveFelter } from '../oppgavefelter'
+import { IOppgaveFelt, IOppgaveFelter } from '../typer/oppgavefelter'
 import { IPar } from '../typer/oppgavebenken'
 import { Select } from 'nav-frontend-skjema'
 import React from 'react'

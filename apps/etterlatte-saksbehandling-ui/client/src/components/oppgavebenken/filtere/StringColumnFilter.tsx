@@ -1,7 +1,7 @@
 import { FilterElement, FilterWrapper } from '../styled'
 import { Input } from 'nav-frontend-skjema'
 import React from 'react'
-import { IOppgaveFelt, IOppgaveFelter } from '../oppgavefelter'
+import { IOppgaveFelt, IOppgaveFelter } from '../typer/oppgavefelter'
 import { settFilterVerdi } from './setFilterVerdi'
 
 type Props = {

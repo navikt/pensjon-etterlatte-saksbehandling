@@ -1,4 +1,4 @@
-import { IOppgaveFelt, IOppgaveFelter } from '../oppgavefelter'
+import { IOppgaveFelt, IOppgaveFelter } from '../typer/oppgavefelter'
 import React, { useRef } from 'react'
 import { Label } from 'nav-frontend-skjema'
 import DatePicker from 'react-datepicker'

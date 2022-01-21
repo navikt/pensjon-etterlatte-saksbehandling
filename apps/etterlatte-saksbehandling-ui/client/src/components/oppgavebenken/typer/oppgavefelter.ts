@@ -1,18 +1,14 @@
 import {
-  enhetFilter,
-  EnhetFilter,
   IPar,
   oppgavetypeFilter,
   OppgavetypeFilter,
-  prioritetFilter,
-  PrioritetFilter,
   saksbehandlerFilter,
   SaksbehandlerFilter,
   soeknadstypeFilter,
   SoeknadstypeFilter,
   statusFilter,
   StatusFilter,
-} from './typer/oppgavebenken'
+} from './oppgavebenken'
 
 export interface IOppgaveFilter {
   selectedValue: any
@@ -32,11 +28,9 @@ export interface IOppgaveFelter {
   oppgavetype: IOppgaveFelt
   soeknadstype: IOppgaveFelt
   fristdato: IOppgaveFelt
-  prioritet: IOppgaveFelt
   bruker: IOppgaveFelt
   beskrivelse: IOppgaveFelt
   status: IOppgaveFelt
-  enhet: IOppgaveFelt
   saksbehandler: IOppgaveFelt
 }
 
@@ -88,15 +82,6 @@ export const initialOppgaveFelter = (saksbehandlerNavn: string): IOppgaveFelter 
         selectedValue: '',
       },
     },
-    prioritet: {
-      noekkel: 'prioritet',
-      label: 'Prioritet',
-      filter: {
-        type: 'select',
-        selectedValue: PrioritetFilter.VELG,
-        nedtrekksliste: prioritetFilter,
-      },
-    },
     bruker: {
       noekkel: 'bruker',
       label: 'Fødselsnummer',
@@ -116,15 +101,6 @@ export const initialOppgaveFelter = (saksbehandlerNavn: string): IOppgaveFelter 
         type: 'select',
         selectedValue: StatusFilter.VELG,
         nedtrekksliste: statusFilter,
-      },
-    },
-    enhet: {
-      noekkel: 'enhet',
-      label: 'Enhet',
-      filter: {
-        type: 'select',
-        selectedValue: EnhetFilter.VELG,
-        nedtrekksliste: enhetFilter,
       },
     },
     saksbehandler: {

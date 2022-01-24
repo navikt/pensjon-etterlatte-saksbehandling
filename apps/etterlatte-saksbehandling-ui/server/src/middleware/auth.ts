@@ -41,7 +41,7 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
         if (parsedToken.iss !== AdConfig.issuer) {
             throw new Error("Ugyldig issuer");
         }
-        if (hasBeenIssued(parsedToken.iat)) {
+        if (!hasBeenIssued(parsedToken.iat)) {
             throw new Error(`Ugyldig iat: ${parsedToken.iat}`);
         }
         if (hasExpired(parsedToken.exp)) {

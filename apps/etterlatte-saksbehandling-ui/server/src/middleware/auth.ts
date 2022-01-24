@@ -48,7 +48,8 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
             throw new Error("Token expired");
         }
     } catch (e) {
-        logger.error(e);
+        console.log('feil', e);
+        logger.error("Feil ved validering av token", e);
         return res.redirect("/oauth2/login");
     }
     

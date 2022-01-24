@@ -52,7 +52,7 @@ class BehandlingDao(private val connection: ()->Connection) {
     fun opprett(behandling: Behandling){
         val stmt = connection().prepareStatement("INSERT INTO behandling(id, sak_id) VALUES(?, ?)")
         stmt.setObject(1, behandling.id)
-        stmt.setLong(2, behandling.sakId)
+        stmt.setLong(2, behandling.sak)
         stmt.executeUpdate()
     }
     fun lagreBeregning(behandling: Behandling){

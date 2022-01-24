@@ -54,7 +54,7 @@ internal class RealBehandlingServiceTest {
         val resultat = sut.startBehandling(1, emptyList())
 
         Assertions.assertEquals(opprettetBehandling,  resultat)
-        Assertions.assertEquals(1, behandlingOpprettes.captured.sakId)
+        Assertions.assertEquals(1, behandlingOpprettes.captured.sak)
         Assertions.assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
         Assertions.assertEquals(opplysningerHentes.captured, behandlingOpprettes.captured.id)
     }

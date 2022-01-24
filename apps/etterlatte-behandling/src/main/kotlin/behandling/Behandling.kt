@@ -6,7 +6,7 @@ import java.util.*
 
 data class Behandling (
     val id: UUID,
-    val sakId: Long,
+    val sak: Long,
     val grunnlag: List<Opplysning>,
     val vilkårsprøving: Vilkårsprøving?,
     val beregning: Beregning?,

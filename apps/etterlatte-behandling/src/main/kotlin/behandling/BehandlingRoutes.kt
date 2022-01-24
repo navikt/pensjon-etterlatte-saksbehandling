@@ -12,10 +12,10 @@ import java.util.*
 
 fun Route.behandlingRoutes(service: BehandlingService){
     get("/behandlinger") {
-        call.respond(inTransaction { service.hentBehandlinger().map { BehandlingSammendrag(it.id, it.sakId, it.status) }.let { BehandlingSammendragListe(it) }})
+        call.respond(inTransaction { service.hentBehandlinger().map { BehandlingSammendrag(it.id, it.sak, it.status) }.let { BehandlingSammendragListe(it) }})
     }
     get("/sak/{sakid}/behandlinger") {
-        call.respond(inTransaction { service.hentBehandlingerISak(sakId).map { BehandlingSammendrag(it.id, it.sakId, it.status) }.let { BehandlingSammendragListe(it) }})
+        call.respond(inTransaction { service.hentBehandlingerISak(sakId).map { BehandlingSammendrag(it.id, it.sak, it.status) }.let { BehandlingSammendragListe(it) }})
     }
     post("/behandlinger") { //Søk
         val behandlingsBehov = call.receive<BehandlingsBehov>()
@@ -23,7 +23,7 @@ fun Route.behandlingRoutes(service: BehandlingService){
     }
     route("/behandlinger/{behandlingsid}") {
         get {
-            call.respond(inTransaction { service.hentBehandling(behandlingsId)}?.let { DetaljertBehandling(it.id, it.sakId, it.grunnlag, it.vilkårsprøving, it.beregning, it.fastsatt) }?: HttpStatusCode.NotFound)
+            call.respond(inTransaction { service.hentBehandling(behandlingsId)}?.let { DetaljertBehandling(it.id, it.sak, it.grunnlag, it.vilkårsprøving, it.beregning, it.fastsatt) }?: HttpStatusCode.NotFound)
         }
         post("vilkaarsproeving") {
             inTransaction { service.vilkårsprøv(behandlingsId) }

@@ -145,6 +145,7 @@ internal class EtterlatteFordelerTest {
     @Test
     fun HarIkkeUtlandsopphold() {
         coEvery { klientMock.hentPerson(any()) } returns barn
+        coEvery { klientMock.hentPerson(Foedselsnummer.of("13087307551"))} returns avdoed
         coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
         val inspector = TestRapid()
             .apply { EtterlatteFordeler(this, service) }

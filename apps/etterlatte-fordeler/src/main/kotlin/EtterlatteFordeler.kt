@@ -33,7 +33,7 @@ internal class EtterlatteFordeler(
     //Avdød:
     // (v) Ingen ut. og innvandringsdatoer
     // (v) Ikke huket av for yrkesskade/yrkessykdom
-    //Dødsfallet må ha skjedd i Norge og være registrert. Må få en dødsdato fra PDL (ikke være noe som er uavklart rundt dette)
+    // (v) Dødsfallet må ha skjedd i Norge og være registrert. Må få en dødsdato fra PDL (ikke være noe som er uavklart rundt dette)
 
     //Barn:
     //Født og oppvokst i Norge

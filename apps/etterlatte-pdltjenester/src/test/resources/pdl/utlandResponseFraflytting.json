@@ -1,0 +1,53 @@
+{
+  "data": {
+    "hentPerson": {
+      "statsborgerskap": [
+        {
+          "land": "NOR",
+          "gyldigFraOgMed": "1976-10-11",
+          "gyldigTilOgMed": null,
+          "metadata": {
+            "opplysningsId": "0d88edcf-b1d2-47b8-bc98-3adbede4cc22",
+            "master": "FREG",
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2022-01-24T14:10:50"
+              }
+            ]
+          }
+        }
+      ],
+      "utflyttingFraNorge": [
+        {
+          "tilflyttingsland": "FRA",
+          "tilflyttingsstedIUtlandet": "Paris",
+          "utflyttingsdato": "2021-07-01",
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2022-01-24T14:10:52",
+            "gyldighetstidspunkt": "2022-01-24T14:10:52",
+            "opphoerstidspunkt": null,
+            "kilde": "Dolly",
+            "aarsak": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "opplysningsId": "77e42dd2-0d74-46e3-9a73-2a0fe8104e4a",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2022-01-24T14:10:52",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "innflyttingTilNorge": []
+    }
+  }
+}

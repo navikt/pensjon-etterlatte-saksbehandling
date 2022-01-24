@@ -114,15 +114,14 @@ class PersonService(
     private fun mapUtflytting(utflytting: UtflyttingFraNorge): eyUtflyttingFraNorge {
         return eyUtflyttingFraNorge(
             tilflyttingsland = utflytting.tilflyttingsland,
-            //TODO sjekke hva vi skal mappe her
-            dato = utflytting.folkeregistermetadata?.gyldighetstidspunkt
+            dato = utflytting.utflyttingsdato.toString()
         )
     }
 
     private fun mapInnflytting(innflytting: InnflyttingTilNorge): eyInnflyttingTilNorge {
         return eyInnflyttingTilNorge(
             fraflyttingsland = innflytting.fraflyttingsland,
-            //TODO sjekke hva vi skal mappe her
+            //TODO her må vi heller sjekke mot gyldighetsdato på bostedsadresse
             dato = innflytting.folkeregistermetadata?.gyldighetstidspunkt
         )
     }

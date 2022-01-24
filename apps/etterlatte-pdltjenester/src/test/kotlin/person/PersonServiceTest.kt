@@ -7,7 +7,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import io.ktor.features.NotFoundException
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 //import no.nav.etterlatte.kodeverk.KodeverkService
@@ -20,7 +19,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.runners.model.MultipleFailureException.assertEmpty
 
 internal class PersonServiceTest {
 
@@ -115,8 +113,8 @@ internal class PersonServiceTest {
     }
 
     @Test
-    fun `Hent utland mappes korrekt`() {
-        coEvery { personKlient.hentUtland(any()) } returns opprettResponse("/pdl/utlandResponse.json")
+    fun `Hent utland med innflytting mappes korrekt`() {
+        coEvery { personKlient.hentUtland(any()) } returns opprettResponse("/pdl/utlandResponseInnflytting.json")
 
         val person = runBlocking {
             service.hentUtland(Foedselsnummer.of(TRIVIELL_MIDTPUNKT))
@@ -127,6 +125,22 @@ internal class PersonServiceTest {
         assertEquals("ESP", person.innflyttingTilNorge?.get(0)?.fraflyttingsland)
         assertEquals("1970-06-06T00:00", person.innflyttingTilNorge?.get(0)?.dato)
         assertTrue(person.utflyttingFraNorge?.isEmpty()!!)
+
+
+    }
+    @Test
+    fun `Hent utland med utflytting mappes korrekt`() {
+        coEvery { personKlient.hentUtland(any()) } returns opprettResponse("/pdl/utlandResponseFraflytting.json")
+
+        val person = runBlocking {
+            service.hentUtland(Foedselsnummer.of(TRIVIELL_MIDTPUNKT))
+        }
+
+
+        assertEquals(1, person.utflyttingFraNorge?.size)
+        assertEquals("FRA", person.utflyttingFraNorge?.get(0)?.tilflyttingsland)
+        assertEquals("2021-07-01", person.utflyttingFraNorge?.get(0)?.dato)
+        assertTrue(person.innflyttingTilNorge?.isEmpty()!!)
 
 
     }

@@ -3,6 +3,7 @@ package person.pdl
 
 //TODO må gå igjennom denne for å sjekke verdier og nullabled
 import no.nav.etterlatte.libs.common.pdl.ResponseError
+import java.util.*
 
 data class UtlandResponse(
     val data: UtlandResponseData?,
@@ -32,7 +33,7 @@ data class InnflyttingTilNorge(
     val fraflyttingsstedIUtlandet: String?,
     val metadata: Metadata
 )
-//bruke date?
+//TODO endre til Date?
 data class UtflyttingFraNorge(
     val folkeregistermetadata: Folkeregistermetadata?,
     val tilflyttingsland: String?,

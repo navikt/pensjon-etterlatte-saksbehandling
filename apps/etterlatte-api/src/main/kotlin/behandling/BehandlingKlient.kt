@@ -22,6 +22,7 @@ interface EtterlatteBehandling {
     suspend fun hentBehandlinger(sakId: Int, accessToken: String): Behandlinger
 }
 
+
 class BehandlingKlient(config: Config) : EtterlatteBehandling {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
     private val objectMapper = jacksonObjectMapper()
@@ -100,7 +101,6 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
 
     override suspend fun hentBehandlinger(sakId: Int, accessToken: String): Behandlinger {
         logger.info("Henter alle behandlinger i en sak")
-
         try {
             val json =
                 downstreamResourceClient.get(Resource(clientId, "$resourceUrl/sak/$sakId/behandlinger"), accessToken)
@@ -108,8 +108,6 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
                         success = { json -> json },
                         failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                     ).response
-
-            println(json)
             return objectMapper.readValue(json.toString(), Behandlinger::class.java)
         } catch (e: Exception) {
             logger.error("Henting av behandlinger feilet", e)

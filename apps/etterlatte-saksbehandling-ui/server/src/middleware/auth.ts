@@ -33,6 +33,7 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
     const bearerToken = auth.split(" ")[1];
     const parsedToken = parseJwt(bearerToken);
 
+    console.log(process.env)
     /*
     try {
         if (parsedToken.aud !== AdConfig.audience) {

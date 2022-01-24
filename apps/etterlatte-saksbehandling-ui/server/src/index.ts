@@ -40,7 +40,7 @@ if (process.env.DEVELOPMENT !== 'true') {
   app.use(authenticateUser) // Alle ruter etter denne er authenticated
 }
 
-app.use('/modiacontextholder/api/', modiaRouter)
+app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
 
 if (isDev) {
   app.use('/api', (req: any, res: any) => {

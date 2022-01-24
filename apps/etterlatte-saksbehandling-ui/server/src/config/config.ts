@@ -25,6 +25,6 @@ export const azureOboRequest: IOBORequest = {
 }
 
 export const AdConfig = {
-  audience: process.env.AD_AUDIENCE,
-  issuer: process.env.AD_ISSUER
+  audience: process.env.AZURE_APP_CLIENT_ID,
+  issuer: process.env.AZURE_OPENID_CONFIG_ISSUER
 }

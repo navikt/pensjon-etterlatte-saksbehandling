@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { AdConfig } from "../config/config";
 import { utcSecondsSinceEpoch } from "../utils/date";
+import { logger } from "../utils/logger";
 import { parseJwt } from "../utils/parsejwt";
 import { getOboToken } from "./getOboToken";
 
@@ -32,9 +33,7 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
     }
     const bearerToken = auth.split(" ")[1];
     const parsedToken = parseJwt(bearerToken);
-
-    console.log(process.env)
-    /*
+    
     try {
         if (parsedToken.aud !== AdConfig.audience) {
             throw new Error("Ugyldig audience");
@@ -49,10 +48,10 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
             throw new Error("Token expired");
         }
     } catch (e) {
-        console.log(e);
+        logger.error(e);
         return res.redirect("/oauth2/login");
     }
-    */
+    
 
     return next();
 };

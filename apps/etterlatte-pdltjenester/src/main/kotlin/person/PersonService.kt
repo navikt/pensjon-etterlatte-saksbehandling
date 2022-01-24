@@ -45,8 +45,7 @@ class PersonService(
         val hentUtland: UtlandResponse = response
 
         //TODO fikse feilhåndtering
-        //response.errors?.isNotEmpty()!!
-        if (1 == 2) {
+        if (!response.errors.isNullOrEmpty()) {
             loggfoerFeilmeldinger(response.errors)
             throw NotFoundException()
         }
@@ -115,6 +114,7 @@ class PersonService(
     private fun mapUtflytting(utflytting: UtflyttingFraNorge): eyUtflyttingFraNorge {
         return eyUtflyttingFraNorge(
             tilflyttingsland = utflytting.tilflyttingsland,
+            //TODO sjekke hva vi skal mappe her
             dato = utflytting.folkeregistermetadata?.gyldighetstidspunkt
         )
     }
@@ -122,6 +122,7 @@ class PersonService(
     private fun mapInnflytting(innflytting: InnflyttingTilNorge): eyInnflyttingTilNorge {
         return eyInnflyttingTilNorge(
             fraflyttingsland = innflytting.fraflyttingsland,
+            //TODO sjekke hva vi skal mappe her
             dato = innflytting.folkeregistermetadata?.gyldighetstidspunkt
         )
     }

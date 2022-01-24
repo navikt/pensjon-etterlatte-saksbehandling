@@ -1,0 +1,80 @@
+{
+  "data" : {
+    "hentPerson" : {
+      "adressebeskyttelse" : [ {
+        "gradering" : "STRENGT_FORTROLIG"
+      } ],
+      "bostedsadresse" : [ ],
+      "navn" : [ {
+        "fornavn" : "GRØNN",
+        "mellomnavn" : null,
+        "etternavn" : "TRANE",
+        "forkortetNavn" : "TRANE GRØNN",
+        "metadata" : {
+          "endringer" : [ {
+            "kilde" : "Dolly",
+            "registrert" : "2021-10-15T13:53:58",
+            "registrertAv" : "Folkeregisteret",
+            "systemkilde" : "FREG",
+            "type" : "OPPRETT"
+          } ],
+          "master" : "FREG",
+          "opplysningsId" : "2533ded6-c339-4932-9034-faba780b3b3f",
+          "historisk" : false
+        }
+      } ],
+      "statsborgerskap" : [ {
+        "land" : "NOR",
+        "gyldigFraOgMed" : "1981-10-14",
+        "gyldigTilOgMed" : null,
+        "metadata" : {
+          "endringer" : [ {
+            "kilde" : "Dolly",
+            "registrert" : "2021-10-15T13:53:59",
+            "registrertAv" : "Folkeregisteret",
+            "systemkilde" : "FREG",
+            "type" : "OPPRETT"
+          } ],
+          "master" : "FREG",
+          "opplysningsId" : "7b710db2-730b-4da5-a52a-f9b5c040c5f7",
+          "historisk" : false
+        }
+      } ],
+      "foedsel" : [ {
+        "foedselsdato" : "1981-10-14",
+        "foedeland" : "NOR",
+        "foedested" : "Fødested i/på NORGE",
+        "foedselsaar" : 1981,
+        "metadata" : {
+          "endringer" : [ {
+            "kilde" : "Dolly",
+            "registrert" : "2021-10-15T13:53:58",
+            "registrertAv" : "Folkeregisteret",
+            "systemkilde" : "FREG",
+            "type" : "OPPRETT"
+          } ],
+          "master" : "FREG",
+          "opplysningsId" : "001c6303-8ab5-46c1-a04c-710af982ed7b",
+          "historisk" : false
+        }
+      } ],
+      "sivilstand" : [ {
+        "type" : "GIFT",
+        "gyldigFraOgMed" : "2006-01-12",
+        "relatertVedSivilstand" : "06098119386",
+        "metadata" : {
+          "endringer" : [ {
+            "kilde" : "Dolly",
+            "registrert" : "2021-10-15T13:53:59",
+            "registrertAv" : "Folkeregisteret",
+            "systemkilde" : "FREG",
+            "type" : "OPPRETT"
+          } ],
+          "master" : "FREG",
+          "opplysningsId" : "238bc7f3-5a77-4e95-a6a8-9adfe7e314d9",
+          "historisk" : false
+        }
+      } ]
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "data": {
+    "hentPerson": {
+      "statsborgerskap": [
+        {
+          "land": "NOR",
+          "gyldigFraOgMed": "1975-05-11",
+          "gyldigTilOgMed": null,
+          "metadata": {
+            "opplysningsId": "9e8bdc94-faab-4943-81c6-5a4be694df49",
+            "master": "FREG",
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-08-05T15:10:57"
+              }
+            ]
+          }
+        },
+        {
+          "land": "NOR",
+          "gyldigFraOgMed": "1975-05-11",
+          "gyldigTilOgMed": null,
+          "metadata": {
+            "opplysningsId": "d338e716-3572-41b2-b4e7-7ee222b39c4a",
+            "master": "FREG",
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-08-05T15:11"
+              }
+            ]
+          }
+        }
+      ],
+      "utflyttingFraNorge": [],
+      "innflyttingTilNorge": [
+        {
+          "fraflyttingsland": "ESP",
+          "fraflyttingsstedIUtlandet": null,
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2021-08-05T15:10:57",
+            "gyldighetstidspunkt": "1970-06-06T00:00",
+            "opphoerstidspunkt": null,
+            "kilde": "Dolly",
+            "aarsak": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "opplysningsId": "4fe2d3ac-b468-4abc-90ce-1587e7554d22",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-08-05T15:10:57",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        },
+        {
+          "fraflyttingsland": "ESP",
+          "fraflyttingsstedIUtlandet": null,
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2021-08-05T15:11",
+            "gyldighetstidspunkt": "1970-06-06T00:00",
+            "opphoerstidspunkt": null,
+            "kilde": "Dolly",
+            "aarsak": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "opplysningsId": "520e2723-f7ff-4bfa-9546-8a41434f72f7",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-08-05T15:11",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

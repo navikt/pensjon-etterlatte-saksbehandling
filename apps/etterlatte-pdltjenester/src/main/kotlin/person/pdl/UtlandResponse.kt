@@ -1,15 +1,14 @@
 package person.pdl
 
 
-//TODO må gå igjennom denne for å sjekke verdier og nullable
+//TODO må gå igjennom denne for å sjekke verdier og nullabled
 import no.nav.etterlatte.libs.common.pdl.ResponseError
-import java.util.*
 
 data class UtlandResponse(
-    val `data`: Data,
+    val data: UtlandResponseData?,
     val errors: List<ResponseError>? = null
 )
-data class Data(
+data class UtlandResponseData(
 
     val hentPerson: HentPerson?
 )

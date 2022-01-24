@@ -107,8 +107,8 @@ class PersonService(
         utland: UtlandResponse,
     ): eyUtland {
         return eyUtland(
-            utflyttingFraNorge = utland.data.hentPerson?.utflyttingFraNorge?.map { (mapUtflytting(it)) },
-            innflyttingTilNorge = utland.data.hentPerson?.innflyttingTilNorge?.map { (mapInnflytting(it)) }
+            utflyttingFraNorge = utland.data?.hentPerson?.utflyttingFraNorge?.map { (mapUtflytting(it)) },
+            innflyttingTilNorge = utland.data?.hentPerson?.innflyttingTilNorge?.map { (mapInnflytting(it)) }
         )
     }
 

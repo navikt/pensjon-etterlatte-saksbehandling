@@ -3,6 +3,7 @@ import path from 'path'
 import { appConf } from './config/config'
 import { authMiddleware, authenticateUser } from './middleware/auth'
 import { healthRouter } from './routers/health'
+import { mockRouter } from './routers/mockRouter'
 import { modiaRouter } from './routers/modia'
 import { expressProxy } from './routers/proxy'
 import { logger } from './utils/logger'
@@ -43,9 +44,7 @@ if (process.env.DEVELOPMENT !== 'true') {
 app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
 
 if (isDev) {
-  app.use('/api', (req: any, res: any) => {
-    res.status(204).send('mock-endpoint')
-  })
+  app.use('/api', mockRouter)
 } else {
   logger.info('Proxy-kall')
   app.use('/api', /*authMiddleware,*/ expressProxy)

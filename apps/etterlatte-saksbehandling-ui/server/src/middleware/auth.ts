@@ -48,7 +48,6 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
             throw new Error("Token expired");
         }
     } catch (e) {
-        console.log('feil', e);
         logger.error("Feil ved validering av token", e);
         return res.status(401).send("ugyldig token");
     }

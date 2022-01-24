@@ -1,3 +1,5 @@
 package no.nav.etterlatte.behandling
 
-data class Sak(val ident: String, val sakType: String, val id:Long)
+import no.nav.etterlatte.libs.common.soeknad.SoeknadType
+
+data class Sak(val ident: String, val sakType: SoeknadType, val sakId:Long)

@@ -34,7 +34,8 @@ class Server(applicationContext: ApplicationContext) {
                 healthApi()
                 authenticate {
                     route("api") {
-                        behandlingRoute(applicationContext.behandlingService)
+                        behandlingRoute(applicationContext.behandlingService);
+                        oppgaveRoute(applicationContext.oppgaveService)
                     }
                 }
             }

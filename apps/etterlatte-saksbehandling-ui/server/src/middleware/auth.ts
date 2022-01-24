@@ -41,18 +41,17 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
         if (parsedToken.iss !== AdConfig.issuer) {
             throw new Error("Ugyldig issuer");
         }
-        /*if (hasBeenIssued(parsedToken.iat)) {  "ugyldig iat"
-            throw new Error("Ugyldig iat");
-        }*/
+        if (hasBeenIssued(parsedToken.iat)) {
+            throw new Error(`Ugyldig iat: ${parsedToken.iat}`);
+        }
         if (hasExpired(parsedToken.exp)) {
             throw new Error("Token expired");
         }
     } catch (e) {
         console.log('feil', e);
         logger.error("Feil ved validering av token", e);
-        return res.redirect("/oauth2/login");
+        return res.status(401).send("ugyldig token");
     }
-    
 
     return next();
 };

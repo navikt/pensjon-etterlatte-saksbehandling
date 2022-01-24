@@ -9,7 +9,7 @@ export const Container = styled.div`
 
 export const GridContainer = styled.div`
     display: flex;
-    height: 100vh;
+    height: 100%;
 `;
 
 export const Column = styled.div`

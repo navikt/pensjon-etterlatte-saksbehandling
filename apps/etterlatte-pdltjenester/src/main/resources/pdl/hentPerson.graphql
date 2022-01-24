@@ -13,7 +13,7 @@ query($ident: ID!) {
             gyldigFraOgMed
             gyldigTilOgMed
             metadata {
-                ...metadataDetails
+                ...metadata
             }
         }
         navn {
@@ -22,7 +22,7 @@ query($ident: ID!) {
             etternavn
             forkortetNavn
             metadata {
-                ...metadataDetails
+                ...metadata
             }
         }
         statsborgerskap {
@@ -30,7 +30,7 @@ query($ident: ID!) {
             gyldigFraOgMed
             gyldigTilOgMed
             metadata {
-                ...metadataDetails
+                ...metadata
             }
         }
         foedsel {
@@ -39,7 +39,7 @@ query($ident: ID!) {
             foedested
             foedselsaar
             metadata {
-                ...metadataDetails
+                ...metadata
             }
         }
         sivilstand {
@@ -47,40 +47,17 @@ query($ident: ID!) {
             gyldigFraOgMed
             relatertVedSivilstand
             metadata {
-                ...metadataDetails
+                ...metadata
+            }
+        }
+        doedsfall {
+            doedsdato
+            folkeregistermetadata {
+                ...folkeregistermetadata
+            }
+            metadata {
+                ...metadata
             }
         }
     }
-}
-
-fragment metadataDetails on Metadata {
-    endringer {
-        kilde
-        registrert
-        registrertAv
-        systemkilde
-        type
-    }
-    master
-    opplysningsId
-    historisk
-}
-
-fragment vegadresseDetails on Vegadresse {
-    husbokstav
-    husnummer
-    adressenavn
-    postnummer
-    kommunenummer
-    bydelsnummer
-}
-
-fragment utenlandskAdresseDetails on UtenlandskAdresse {
-    adressenavnNummer
-    bygningEtasjeLeilighet
-    postboksNummerNavn
-    postkode
-    bySted
-    regionDistriktOmraade
-    landkode
 }

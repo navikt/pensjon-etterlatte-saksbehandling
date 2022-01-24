@@ -27,7 +27,6 @@ internal class EtterlatteFordeler(
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
     private lateinit var barn: Person
     private lateinit var avdoed: Person
-    private var barnUtland = false
     private lateinit var soeknad: JsonMessage
 
 
@@ -57,6 +56,7 @@ internal class EtterlatteFordeler(
         Kriterie("Avdoed har utvandring") { harUtvandring(barn) },
         Kriterie("Avdød har yrkesskade") { harYrkesskade(soeknad) },
         Kriterie("Søker er ikke forelder") { soekerIkkeForelder(soeknad) },
+        Kriterie("Avdød er ikke død") { personErIkkeDoed(avdoed) }
     )
 
     init {
@@ -151,6 +151,7 @@ internal class EtterlatteFordeler(
             .isNotEmpty()
     }
 
+    //TODO bør vel endres til PDL familierelasjon
     private fun finnAvdoedFnr(sok: JsonMessage): String {
         return sok["@skjema_info"]["foreldre"]
             .filter { it["type"].asText() == "AVDOED" }
@@ -163,6 +164,10 @@ internal class EtterlatteFordeler(
             .filter { it["type"].asText() == "GJENLEVENDE_FORELDER" }
             .map { it["foedselsnummer"].asText() }
 
+    }
+
+    private fun personErIkkeDoed(person: Person): Boolean {
+        return person.doedsdato.isNullOrEmpty()
     }
 
 

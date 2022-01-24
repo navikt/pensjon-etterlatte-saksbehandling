@@ -22,7 +22,8 @@ data class HentPerson(
     val navn: List<Navn>,
     val statsborgerskap: List<Statsborgerskap>,
     val foedsel: List<Foedsel>,
-    val sivilstand: List<Sivilstand>
+    val sivilstand: List<Sivilstand>,
+    val doedsfall: List<Doedsfall>
 )
 
 data class Navn(
@@ -97,5 +98,11 @@ data class Sivilstand(
     val type: Sivilstandstype,
     val gyldigFraOgMed: LocalDate? = null,
     val relatertVedSivilstand: String? = null,
+    val metadata: Metadata
+)
+
+data class Doedsfall(
+    val doedsdato: LocalDate?,
+    val folkeregistermetadata: Folkeregistermetadata?,
     val metadata: Metadata
 )

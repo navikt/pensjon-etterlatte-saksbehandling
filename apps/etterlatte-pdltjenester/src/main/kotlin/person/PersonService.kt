@@ -76,6 +76,9 @@ class PersonService(
         val foedsel = hentPerson.foedsel
             .maxByOrNull { it.metadata.sisteRegistrertDato() }
 
+        val doedsfall = hentPerson.doedsfall
+            .maxByOrNull { it.metadata.sisteRegistrertDato() }
+
         //val poststed = kodeverkService.hentPoststed(bostedsadresse?.vegadresse?.postnummer)
 
         //val land = kodeverkService.hentLand(statsborgerskap?.land)
@@ -86,6 +89,7 @@ class PersonService(
             foedselsnummer = fnr,
             foedselsdato = foedsel?.foedselsdato?.toString(),
             foedselsaar = foedsel?.foedselsaar,
+            doedsdato = doedsfall?.doedsdato.toString(),
             adressebeskyttelse = adressebeskyttelse,
             adresse = bostedsadresse?.vegadresse?.adressenavn,
             husnummer = bostedsadresse?.vegadresse?.husnummer,

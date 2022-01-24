@@ -41,25 +41,3 @@ query($ident: ID!, $historikk: Boolean!) {
     }
 }
 
-
-fragment metadata on Metadata {
-    master
-    historisk
-    opplysningsId
-    endringer {
-        kilde
-        registrert
-        registrertAv
-        systemkilde
-        type
-    }
-}
-
-fragment folkeregistermetadata on Folkeregistermetadata {
-    ajourholdstidspunkt
-    gyldighetstidspunkt
-    opphoerstidspunkt
-    kilde
-    aarsak
-    sekvens
-}

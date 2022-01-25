@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.soeknad.SoeknadType
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -17,7 +18,7 @@ data class BehandlingerSammendrag(val behandlinger: List<BehandlingSammendrag>)
 
 interface EtterlatteBehandling {
     suspend fun hentSakerForPerson(fnr: String, accessToken: String): SakerResult
-    suspend fun opprettSakForPerson(fnr: String, sakType: String, accessToken: String): Sak
+    suspend fun opprettSakForPerson(fnr: String, sakType: SoeknadType, accessToken: String): Sak
     suspend fun hentSaker(accessToken: String): SakerResult
     suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingerSammendrag
     suspend fun hentAlleBehandlinger(accessToken: String): BehandlingerSammendrag
@@ -56,7 +57,7 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
         }
     }
 
-    override suspend fun opprettSakForPerson(fnr: String, sakType: String, accessToken: String): Sak {
+    override suspend fun opprettSakForPerson(fnr: String, sakType: SoeknadType, accessToken: String): Sak {
         try {
             logger.info("Oppretter sak i behandling")
             val json = downstreamResourceClient

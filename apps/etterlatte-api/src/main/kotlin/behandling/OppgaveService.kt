@@ -10,7 +10,7 @@ data class Oppgave(
     val behandlingsId: UUID,
     val sakId: Long,
     val status: BehandlingStatus,
-    val soeknadType: SoeknadType,
+    val soeknadType: String,
     val behandlingType: BehandlingType,
     val regdato: Date,
     val fristdato: Date,

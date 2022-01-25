@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.soeknad.SoeknadType
 import org.slf4j.LoggerFactory
 
 
@@ -18,7 +19,7 @@ class BehandlingService(private val behandlingKlient: BehandlingKlient, private 
         return PersonSakerResult(person, saker)
     }
 
-    suspend fun opprettSak(fnr: String, sakType: String, accessToken: String): Sak {
+    suspend fun opprettSak(fnr: String, sakType: SoeknadType, accessToken: String): Sak {
         logger.info("Oppretter sak for en person")
         return behandlingKlient.opprettSakForPerson(fnr, sakType, accessToken)
     }

@@ -72,7 +72,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
             } else {
                 try {
                     val accessToken = getAccessToken(call)
-                    service.opprettSak(fnr, "Barnepensjon", accessToken) // sakType blir nok en enum etter hvert
+                    service.opprettSak(fnr, SoeknadType.Gjenlevendepensjon, accessToken) // sakType blir nok en enum etter hvert
                     call.respond("Ok");
                 } catch (e: Exception) {
                     throw e

@@ -43,7 +43,7 @@ class PersonService(
         logger.info("Henter utland fra PDL")
 
         val response = klient.hentUtland(fnr)
-
+        println(response.toString())
         val hentUtland: UtlandResponse = response
 
         //TODO fikse feilhåndtering

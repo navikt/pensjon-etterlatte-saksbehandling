@@ -52,7 +52,6 @@ class PersonKlient(val httpClient: HttpClient) : Pdl {
         }
 
         return try {
-            println("tjohoho" +responseNode.toString())
             mapJsonToAny(responseNode!!.toJson())
         } catch (e: Exception) {
             logger.error("Error under deserialisering av respons", e)

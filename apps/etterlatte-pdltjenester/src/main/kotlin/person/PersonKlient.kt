@@ -33,13 +33,13 @@ class PersonKlient(val httpClient: HttpClient) : Pdl {
     override suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse {
         val query = getQuery("/pdl/hentPerson.graphql")
         val request = GraphqlRequest(query, Variables(ident = fnr.value)).toJson()
-        return PersonResponse(safeCall(request))
+        return safeCall(request)
     }
 
     override suspend fun hentUtland(fnr: Foedselsnummer): UtlandResponse {
         val query = getQuery("/pdl/hentUtland.graphql")
         val request = GraphqlRequest(query, Variables(ident = fnr.value, historikk = false)).toJson()
-        return UtlandResponse(safeCall(request))
+        return safeCall(request)
     }
 
     private suspend inline fun <reified T> safeCall(request: String): T {

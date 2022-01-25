@@ -30,7 +30,7 @@ class PersonService(
 
         //TODO fikse feilhåndtering
         if (hentPerson == null) {
-            println("XXX Response: " + response.data?.toString())
+            println("XXX Response: " + response.toString())
             logger.info("XXX Response: " + response.data?.toString())
             loggfoerFeilmeldinger(response.errors)
             throw NotFoundException()

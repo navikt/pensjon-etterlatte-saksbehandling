@@ -1,3 +1,35 @@
+fragment vegadresseDetails on Vegadresse {
+    husbokstav
+    husnummer
+    adressenavn
+    postnummer
+    kommunenummer
+    bydelsnummer
+}
+
+fragment utenlandskAdresseDetails on UtenlandskAdresse {
+    adressenavnNummer
+    bygningEtasjeLeilighet
+    postboksNummerNavn
+    postkode
+    bySted
+    regionDistriktOmraade
+    landkode
+}
+
+fragment metadata on Metadata {
+    master
+    historisk
+    opplysningsId
+    endringer {
+        kilde
+        registrert
+        registrertAv
+        systemkilde
+        type
+    }
+}
+
 query($ident: ID!) {
     hentPerson(ident: $ident) {
         adressebeskyttelse(historikk: false) {

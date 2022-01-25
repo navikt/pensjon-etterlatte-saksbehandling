@@ -1,3 +1,26 @@
+fragment folkeregistermetadata on Folkeregistermetadata {
+    ajourholdstidspunkt
+    gyldighetstidspunkt
+    opphoerstidspunkt
+    kilde
+    aarsak
+    sekvens
+
+}
+
+fragment metadata on Metadata {
+    master
+    historisk
+    opplysningsId
+    endringer {
+        kilde
+        registrert
+        registrertAv
+        systemkilde
+        type
+    }
+}
+
 query($ident: ID!, $historikk: Boolean!) {
     hentPerson(ident: $ident) {
 

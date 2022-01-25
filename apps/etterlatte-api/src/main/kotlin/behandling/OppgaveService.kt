@@ -39,7 +39,7 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient) {
         val sakerMedBehandling: List<SakMedBehandling> = saker.flatMap {
             mapBehandlingerTilSak(
                 it,
-                behandlingKlient.hentBehandlingerForSak(it.sakId.toInt(), accessToken)
+                behandlingKlient.hentBehandlingerForSak(it.id.toInt(), accessToken)
             )
         }
 
@@ -55,7 +55,7 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient) {
         fun mapTilOppgave(sakMedBehandling: SakMedBehandling): Oppgave {
             return Oppgave(
                 behandlingsId = sakMedBehandling.behandling.id,
-                sakId = sakMedBehandling.sak.sakId,
+                sakId = sakMedBehandling.sak.id,
                 status = sakMedBehandling.behandling.status,
                 soeknadType = sakMedBehandling.sak.sakType,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, //må hentes ut etterhvert

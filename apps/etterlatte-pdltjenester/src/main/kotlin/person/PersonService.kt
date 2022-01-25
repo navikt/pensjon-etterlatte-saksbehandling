@@ -49,7 +49,7 @@ class PersonService(
         //TODO fikse feilhåndtering
         if (!response.errors.isNullOrEmpty()) {
             loggfoerFeilmeldinger(response.errors)
-            throw NotFoundException()
+            //throw NotFoundException()
         }
 
         return opprettUtland(hentUtland)

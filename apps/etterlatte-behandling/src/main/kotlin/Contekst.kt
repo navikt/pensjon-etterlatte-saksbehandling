@@ -13,15 +13,20 @@ class Context(
 
 interface User{
     fun name():String
+    fun kanSetteKilde():Boolean = false
 }
 abstract class ExternalUser(val identifiedBy: TokenValidationContext): User
 
 class Self(val prosess: String): User{
     override fun name() = prosess
+    override fun kanSetteKilde() = true
 }
 class SystemUser(identifiedBy: TokenValidationContext): ExternalUser(identifiedBy) {
     override fun name(): String {
-        return identifiedBy.getJwtToken("azure").jwtTokenClaims.getStringClaim("")
+        throw IllegalArgumentException("Støtter ikke navn på systembruker")
+    }
+    override fun kanSetteKilde(): Boolean{
+        return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim("roles", "kan-sette-kilde")
     }
 }
 

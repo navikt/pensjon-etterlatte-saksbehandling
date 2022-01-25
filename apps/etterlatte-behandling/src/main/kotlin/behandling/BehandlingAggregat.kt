@@ -38,11 +38,9 @@ class BehandlingAggregat(id: UUID, private val behandlinger: BehandlingDao, priv
     }
 
     private fun kildeFraRequestContekst(oppgittKilde: Opplysning.Kilde?): Opplysning.Kilde {
-        return when (Kontekst.get().AppUser) {
+        return if(Kontekst.get().AppUser.kanSetteKilde() && oppgittKilde != null) oppgittKilde else when (Kontekst.get().AppUser) {
             is Saksbehandler -> if(oppgittKilde == null) Opplysning.Saksbehandler(Kontekst.get().AppUser.name()) else throw IllegalArgumentException()
             is Kunde -> if(oppgittKilde == null) Opplysning.Privatperson(Kontekst.get().AppUser.name(), Instant.now()) else throw IllegalArgumentException()
-            is Self -> requireNotNull(oppgittKilde)
-            is SystemUser -> requireNotNull(oppgittKilde)
             else -> throw IllegalArgumentException()
         }
     }

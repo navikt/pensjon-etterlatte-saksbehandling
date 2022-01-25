@@ -42,3 +42,6 @@ spec:
       rules:
         - application: etterlatte-api
         - application: etterlatte-behandling-fra-soeknad
+          permissions:
+            roles:
+              - "kan-sette-kilde"

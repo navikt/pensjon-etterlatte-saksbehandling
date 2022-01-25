@@ -8,7 +8,13 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BehandlingsBehov
+import no.nav.etterlatte.libs.common.behandling.Opplysning
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.soeknad.SoeknadType
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.*
 
 
 // /api
@@ -27,17 +33,38 @@ fun Route.behandlingRoute(service: BehandlingService) {
             }
         }
 
-        // hent spesifikk sak (alle behandlinger?)
-        get("/{sakId}") {
-            val sakId = call.parameters["sakId"]?.toInt()
-            if(sakId == null) {
-                call.response.status(HttpStatusCode(400, "Bad request"))
-                call.respond("SakId mangler")
-            } else {
-                call.respond(service.hentBehandlingerForSak(sakId, getAccessToken(call)))
+        route("{sakId}") {
+            // hent spesifikk sak (alle behandlinger?)
+            get{
+                val sakId = call.parameters["sakId"]?.toInt()
+                if (sakId == null) {
+                    call.response.status(HttpStatusCode(400, "Bad request"))
+                    call.respond("SakId mangler")
+                } else {
+                    call.respond(service.hentBehandlingerForSak(sakId, getAccessToken(call)))
+                }
+            }
+
+            post("{sakId}") {
+                val sakId = call.parameters["sakId"]?.toLong()
+                if (sakId == null) {
+                    call.response.status(HttpStatusCode(400, "Bad request"))
+                    call.respond("SakId mangler")
+                } else {
+                    val testOpplysning = Opplysning(
+                        UUID.randomUUID(), Opplysning.Privatperson(
+                            "11057523044",
+                            LocalDateTime.now().toInstant(ZoneOffset.UTC)
+
+                        ), "innsendt soeknad", objectMapper.createObjectNode(), objectMapper.createObjectNode()
+                    )
+                    val behandlingsBehov = BehandlingsBehov(sakId, listOf(testOpplysning))
+                    call.respond(service.opprettBehandling(behandlingsBehov, getAccessToken(call)))
+                }
             }
         }
     }
+
 
     /*
     Skal hente persondata og sakene for denne personen?

@@ -1,11 +1,17 @@
 package no.nav.etterlatte.behandling
 
+import no.nav.etterlatte.libs.common.behandling.Opplysning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.SoeknadType
 import org.slf4j.LoggerFactory
 
 
 data class PersonSakerResult (val person: Person, val saker: SakerResult)
+
+data class BehandlingsBehov(
+    val sak: Long,
+    val opplysninger: List<Opplysning>?
+)
 
 class BehandlingService(private val behandlingKlient: BehandlingKlient, private val pdlKlient: PdltjenesterKlient) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
@@ -32,6 +38,11 @@ class BehandlingService(private val behandlingKlient: BehandlingKlient, private 
     suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingerSammendrag {
         logger.info("Henter behandlinger for sak $sakId")
         return behandlingKlient.hentBehandlingerForSak(sakId, accessToken)
+    }
+
+    suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag {
+        logger.info("Opprett en behandling på en sak")
+        return behandlingKlient.opprettBehandling(behandlingsBehov, accessToken)
     }
 
 }

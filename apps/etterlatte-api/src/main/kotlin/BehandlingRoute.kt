@@ -45,7 +45,8 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 }
             }
 
-            post("{sakId}") {
+            // Opprett behandling på sak
+            post("{sakId}/behandlinger") {
                 val sakId = call.parameters["sakId"]?.toLong()
                 if (sakId == null) {
                     call.response.status(HttpStatusCode(400, "Bad request"))
@@ -56,7 +57,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
                             "11057523044",
                             LocalDateTime.now().toInstant(ZoneOffset.UTC)
 
-                        ), "innsendt soeknad", objectMapper.createObjectNode(), objectMapper.createObjectNode()
+                        ), "testopplysning", objectMapper.createObjectNode(), objectMapper.createObjectNode()
                     )
                     val behandlingsBehov = BehandlingsBehov(sakId, listOf(testOpplysning))
                     call.respond(service.opprettBehandling(behandlingsBehov, getAccessToken(call)))

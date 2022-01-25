@@ -25,6 +25,7 @@ internal class PersonServiceTest {
     private companion object {
         private const val TREIG_FLOSKEL = "04096222195"
         private const val TRIVIELL_MIDTPUNKT = "19040550081"
+        private const val STOR_SNERK = "11057523044"
     }
 
     private val mapper = jacksonObjectMapper()
@@ -144,6 +145,28 @@ internal class PersonServiceTest {
 
 
     }
+    @Test
+    fun `Faktisk respons fra PDL kan hentes opp`() {
+        coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personResponseFullPDL.json")
+
+        val person = runBlocking {
+            service.hentPerson(Foedselsnummer.of(STOR_SNERK))
+        }
+
+        assertEquals("STOR", person.fornavn)
+    }
+
+    @Test
+    fun `Finner ikke person i PDL`() {
+        coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personResponseIkkeFunnet.json")
+
+        val person = runBlocking {
+            assertThrows<NotFoundException> {
+                service.hentPerson(Foedselsnummer.of(STOR_SNERK))
+            }
+        }
+    }
+
 
     private inline fun <reified T> opprettResponse(fil: String): T {
         val json = javaClass.getResource(fil)!!.readText()

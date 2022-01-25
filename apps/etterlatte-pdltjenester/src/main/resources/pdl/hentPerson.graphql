@@ -30,6 +30,16 @@ fragment metadata on Metadata {
     }
 }
 
+fragment folkeregistermetadata on Folkeregistermetadata {
+    ajourholdstidspunkt
+    gyldighetstidspunkt
+    opphoerstidspunkt
+    kilde
+    aarsak
+    sekvens
+
+}
+
 query($ident: ID!) {
     hentPerson(ident: $ident) {
         adressebeskyttelse(historikk: false) {

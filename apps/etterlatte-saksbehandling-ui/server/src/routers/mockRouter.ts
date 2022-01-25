@@ -7,6 +7,7 @@ mockRouter.get("/personer/:fnr", (req: Request, res: Response) => {
   res.json({
     fornavn: "Mocket",
     etternavn: "Bruker",
-    ident: "11057523044"
+    ident: "11057523044",
+    saker: {behandlinger: []}
   });
 })

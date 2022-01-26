@@ -154,7 +154,7 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
         val postBody = serialize(behandlingsBehov)
         try {
             val json =
-                downstreamResourceClient.post(Resource(clientId, "$resourceUrl/behandlinger", ""), accessToken, postBody)
+                downstreamResourceClient.post(Resource(clientId, "$resourceUrl/behandlinger"), accessToken, postBody)
                     .mapBoth(
                         success = { json -> json },
                         failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }

@@ -19,7 +19,15 @@ export const getPerson = async (fnr: string): Promise<IApiResponse<any>> => {
   }
 }
 
-export const opprettSakPaaPerson = async (fnr: string): Promise<IApiResponse<any>> => {
+export interface IPerson {
+  person: {
+    fornavn: string;
+    etternavn: string;
+    ident: string;
+  }
+}
+
+export const opprettSakPaaPerson = async (fnr: string): Promise<IApiResponse<IPerson>> => {
   try{
     const result: Response = await fetch(`${path}/api/personer/${fnr}/saker`, {
       method: "post"

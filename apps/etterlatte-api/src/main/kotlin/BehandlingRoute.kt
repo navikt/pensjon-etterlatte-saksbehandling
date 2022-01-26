@@ -46,7 +46,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
             }
 
             // Opprett behandling på sak
-            post("{sakId}/behandlinger") {
+            post("behandlinger") {
                 val sakId = call.parameters["sakId"]?.toLong()
                 if (sakId == null) {
                     call.response.status(HttpStatusCode(400, "Bad request"))

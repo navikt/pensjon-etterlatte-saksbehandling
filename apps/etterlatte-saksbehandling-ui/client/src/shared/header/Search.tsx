@@ -3,13 +3,9 @@ import { SearchField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { SearchIcon } from '../icons/searchIcon'
 import { useNavigate } from 'react-router-dom'
-import { getPerson } from '../api/person'
+import { getPerson, IPerson } from '../api/person'
 
-interface IPerson {
-  fornavn: string;
-  etternavn: string;
-  ident: string;
-}
+
 
 export const Search = () => {
   const [searchInput, setSearchInput] = useState('')
@@ -52,7 +48,7 @@ export const Search = () => {
       {searchResult && (
         <Dropdown>
           <div onClick={goToPerson}>
-            <div>{searchResult.fornavn} {searchResult.etternavn} ({searchResult.ident})</div>
+            <div>{searchResult.person.fornavn} {searchResult.person.etternavn} ({searchResult.person.ident})</div>
             <div>Ingen fagsak. Trykk for å opprette {'->'}</div>
           </div>
         </Dropdown>

@@ -38,13 +38,15 @@ internal class EtterlatteFordeler(
     //Barn:
     // (v) Født og oppvokst i Norge
     // (v) Alder: under 15 år (slik at vi har nok tid til det blir en eventuell omberegning når barnet er 18 år)
-    //Muligens ikke ta hensyn til barn som "er på vei" - enda ikke født
+    // Muligens ikke ta hensyn til barn som "er på vei" - enda ikke født
+    //   => Denne får vi ikke sjekket siden feltet uregistrertEllerVenterBarn ikke blir med i søknad om BP
     //Ett barn, ingen søsken
     //Må vi ta høyde for flere søsken
     //Kan vi tenke på kun fellesbarn i første versjon?
 
-    //Innsender av søknad:
-    // (v) Gjenlevende forelder
+    //Ikke verge:
+    // (v) Gjenlevende forelder er innsender av søknad
+    // (v) Sjekke at det ikke er huket av for verge i søknaden
 
 
     val kriterier = listOf(
@@ -57,6 +59,9 @@ internal class EtterlatteFordeler(
         Kriterie("Avdød har yrkesskade") { harYrkesskade(soeknad) },
         Kriterie("Søker er ikke forelder") { soekerIkkeForelder(soeknad) },
         Kriterie("Avdød er ikke død") { personErIkkeDoed(avdoed) }
+        //Kriterie("Barn har verge") {harVerge(soeknad)}
+        //Kriterie("Søker venter barn") {soekerForventerBarn(soeknad)
+        //Søker venter barn ligger pt. ikke i søknaden, derfor kommentert ut
     )
 
     init {
@@ -106,6 +111,7 @@ internal class EtterlatteFordeler(
                     context.publish(packet.toJson())
                 } else {
                     logger.info("Avbrutt fordeling, kriterier: " + aktuelleSaker.forklaring.toString())
+                    //println("Avbrutt fordeling, kriterier: " + aktuelleSaker.forklaring.toString())
                     return@runBlocking
                 }
             } catch (err: ResponseException) {
@@ -170,6 +176,19 @@ internal class EtterlatteFordeler(
         return person.doedsdato.isNullOrEmpty()
     }
 
+    private fun soekerForventerBarn(sok: JsonMessage): Boolean {
+        //TODO Feltet uregistrertEllerVenterBarn er pt. ikke med i søknad om BP
+        return sok["@skjema_info"]["soeker"]
+            .filter { it["uregistrertEllerVenterBarn"].asText() == "JA" }
+            .isNotEmpty()
+    }
+
+    private fun harVerge(sok: JsonMessage): Boolean {
+        return sok["@skjema_info"]["soeker"]
+            .filter { it["type"].asText() == "BARN" }
+            .filter { it["verge"]["svar"].asText() == "JA" }
+            .isNotEmpty()
+    }
 
     data class FordelRespons(
         val kandidat: Boolean,

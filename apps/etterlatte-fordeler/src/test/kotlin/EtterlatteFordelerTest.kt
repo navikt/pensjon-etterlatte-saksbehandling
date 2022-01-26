@@ -34,7 +34,7 @@ internal class EtterlatteFordelerTest {
     private val avdoed = mapJsonToAny<Person>(javaClass.getResource("/persondoed.json")!!.readText(), false)
     private val utland = mapJsonToAny<eyUtland>(javaClass.getResource("/utland.json")!!.readText(), false)
     private val ikkeUtland = mapJsonToAny<eyUtland>(javaClass.getResource("/ikkeUtland.json")!!.readText(), false)
-
+    private val verge = javaClass.getResource("/verge.json")!!.readText()
 
     @AfterEach
     fun afterEach() {
@@ -182,6 +182,18 @@ internal class EtterlatteFordelerTest {
         assertEquals("ey_fordelt", inspector.message(0).get("@event_name").asText())
 
     }
+    @Test
+    fun harVerge() {
+        coEvery { klientMock.hentPerson(any()) } returns barn
+        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
+        val inspector = TestRapid()
+            .apply { EtterlatteFordeler(this, service) }
+            .apply { sendTestMessage(verge) }
+            .inspektør
+        assertTrue(inspector.size == 0)
+
+    }
+
 
 }
 /*

@@ -36,7 +36,7 @@ internal class EtterlatteFordeler(
     // (v) Dødsfallet må ha skjedd i Norge og være registrert. Må få en dødsdato fra PDL (ikke være noe som er uavklart rundt dette)
 
     //Barn:
-    //Født og oppvokst i Norge
+    // (v) Født og oppvokst i Norge
     // (v) Alder: under 15 år (slik at vi har nok tid til det blir en eventuell omberegning når barnet er 18 år)
     //Muligens ikke ta hensyn til barn som "er på vei" - enda ikke født
     //Ett barn, ingen søsken

@@ -42,7 +42,7 @@ class PersonKlient(val httpClient: HttpClient) : Pdl {
         return safeCall(request)
     }
 
-    private suspend inline fun <reified T> safeCall(request: String): T {
+    suspend inline fun <reified T> safeCall(request: String): T {
         val responseNode = unsafeRetry {
             httpClient.post<ObjectNode> {
                 header("Tema", TEMA)

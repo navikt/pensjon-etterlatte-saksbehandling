@@ -64,11 +64,21 @@ internal class PersonKlientTest {
 
     }
     @Test
-    fun `hentUtland returnerer gyldig UtlandResponse objekt`() {
+    fun `hentUtland returnerer gyldig UtlandResponse objekt for utflytting`() {
         setup("/pdl/utlandResponseFraflytting.json")
         runBlocking {
             val testPerson = personKlient.hentUtland(Foedselsnummer.of(STOR_SNERK))
             assertEquals("2021-07-01", testPerson.data?.hentPerson?.utflyttingFraNorge?.get(0)?.utflyttingsdato)
+            //TODO her kan vi evt teste flere felter
+        }
+
+    }
+    @Test
+    fun `hentUtland returnerer gyldig UtlandResponse objekt for innflytting`() {
+        setup("/pdl/utlandResponseInnflytting.json")
+        runBlocking {
+            val testPerson = personKlient.hentUtland(Foedselsnummer.of(STOR_SNERK))
+            assertEquals("ESP", testPerson.data?.hentPerson?.innflyttingTilNorge?.get(0)?.fraflyttingsland)
             //TODO her kan vi evt teste flere felter
         }
 

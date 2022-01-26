@@ -30,8 +30,8 @@ internal class PersonKlientTest {
     }
     private lateinit var personKlient: Pdl
 
-    @BeforeAll
-    fun setup() {
+
+    fun setup(jsonUrl: String) {
         val httpClient = HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
@@ -39,7 +39,7 @@ internal class PersonKlientTest {
                         "/" -> {
                             val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
-                            val json = javaClass.getResource("/pdl/personResponse.json")!!.readText()
+                            val json = javaClass.getResource(jsonUrl)!!.readText()
 
                             respond(json, headers = headers)
                         }
@@ -55,10 +55,21 @@ internal class PersonKlientTest {
 
     @Test
     fun `hentPerson returnerer gyldig PersonResponse objekt`() {
+        setup("/pdl/personResponse.json")
         runBlocking {
             val testPerson = personKlient.hentPerson(Foedselsnummer.of(STOR_SNERK))
-            assertEquals("TRIVIELL", testPerson.data?.hentPerson?.navn?.maxByOrNull { it.metadata.sisteRegistrertDato() }?.fornavn)
+            assertEquals("TRIVIELL", testPerson.data?.hentPerson?.navn?.get(0)?.fornavn)
+            //TODO her kan vi evt teste flere felter
+        }
 
+    }
+    @Test
+    fun `hentUtland returnerer gyldig UtlandResponse objekt`() {
+        setup("/pdl/utlandResponseFraflytting.json")
+        runBlocking {
+            val testPerson = personKlient.hentUtland(Foedselsnummer.of(STOR_SNERK))
+            assertEquals("2021-07-01", testPerson.data?.hentPerson?.utflyttingFraNorge?.get(0)?.utflyttingsdato)
+            //TODO her kan vi evt teste flere felter
         }
 
     }

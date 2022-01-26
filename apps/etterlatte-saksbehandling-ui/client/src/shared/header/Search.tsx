@@ -3,13 +3,13 @@ import { SearchField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { SearchIcon } from '../icons/searchIcon'
 import { useNavigate } from 'react-router-dom'
-import { getPerson, IPerson } from '../api/person'
+import { getPerson, IPersonResult } from '../api/person'
 
 
 
 export const Search = () => {
   const [searchInput, setSearchInput] = useState('')
-  const [searchResult, setSearchResult] = useState<IPerson | null>(null)
+  const [searchResult, setSearchResult] = useState<IPersonResult | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -49,7 +49,11 @@ export const Search = () => {
         <Dropdown>
           <div onClick={goToPerson}>
             <div>{searchResult.person.fornavn} {searchResult.person.etternavn} ({searchResult.person.ident})</div>
-            <div>Ingen fagsak. Trykk for å opprette {'->'}</div>
+            {searchResult.saker.saker.length === 0 ? (
+              <div>Ingen fagsak. Trykk for å opprette {'->'}</div>
+            ): (
+              <div>Sak {console.log(searchResult.saker)} {searchResult.saker.saker[0].sakType}</div>
+            )}
           </div>
         </Dropdown>
       )}

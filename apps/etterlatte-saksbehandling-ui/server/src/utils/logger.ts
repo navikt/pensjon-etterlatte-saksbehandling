@@ -6,9 +6,6 @@ export const logger = winston.createLogger({
     defaultMeta: { service: "etterlatte-saksbehandling-ui" }
 });
 
-
-//if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
     format: winston.format.simple(),
   }));
-//}

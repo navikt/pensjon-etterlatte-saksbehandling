@@ -21,9 +21,4 @@ describe("Token test", () => {
         expect(date.toUTCString()).to.equal("Tue, 07 Dec 2021 12:16:57 GMT");
     });
 
-    xit("should match date", () => {
-      const parsed = parseJwt(token);
-      console.log(parsed);
-      //console.log(utcSecondsSinceEpoch())
-    })
 });

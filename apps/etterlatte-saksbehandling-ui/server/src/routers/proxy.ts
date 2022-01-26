@@ -4,18 +4,13 @@ import { logger } from "../utils/logger";
 
 
 const options: any = () => ({
-    parseReqBody: false,
-    
+    parseReqBody: false,    
     proxyReqOptDecorator: async (options: any, req: any) => {
-        console.log('headers', req.headers);   
         const oboToken = await getOboToken(req.headers.authorization);
-        console.log(oboToken)
         options.headers.Authorization = `Bearer ${oboToken}`;
         return options;
     },
-    
     proxyReqPathResolver: (req: any) => {
-        console.log(req.originalUrl, `${process.env.API_URL}${req.originalUrl}`);
         return req.originalUrl.replace(`https://etterlatte-saksbehandling.dev.intern.nav.no`, '')
     },
     proxyErrorHandler: (err: any, res: any, next: any) => {

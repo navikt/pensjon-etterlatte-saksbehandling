@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import '@navikt/ds-css'
 import './App.css'
 import { AppContext, IAppContext } from './store/AppContext'
-import { ws } from './mocks/wsmock'
 import Oppgavebenken from './components/oppgavebenken/Oppgavebenken'
 import { StatusBar, StatusBarTheme } from './components/statusbar'
 import { Behandling } from './components/behandling'
@@ -12,7 +11,6 @@ import { Header } from './shared/header'
 import { Person } from './components/person'
 import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
 
-ws()
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()

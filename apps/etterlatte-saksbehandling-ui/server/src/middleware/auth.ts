@@ -3,18 +3,6 @@ import { AdConfig } from "../config/config";
 import { utcSecondsSinceEpoch } from "../utils/date";
 import { logger } from "../utils/logger";
 import { parseJwt } from "../utils/parsejwt";
-import { getOboToken } from "./getOboToken";
-
-export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-    //pseudokode
-    try {
-        const token = await getOboToken(req.headers.authorization);
-    } catch (e) {
-        console.log(e); //TODO:  lage en logger (winston)
-        return res.status(500).send("Det skjedde en feil");
-    }
-    return next();
-};
 
 export const hasBeenIssued = (issuedAtTime: number) => issuedAtTime < utcSecondsSinceEpoch(); // sjekker at issued-date har vært
 export const hasExpired = (expires: number) => expires < utcSecondsSinceEpoch();

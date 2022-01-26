@@ -1,7 +1,7 @@
 import express from 'express'
 import path from 'path'
 import { appConf } from './config/config'
-import { authMiddleware, authenticateUser } from './middleware/auth'
+import { authenticateUser } from './middleware/auth'
 import { healthRouter } from './routers/health'
 import { mockRouter } from './routers/mockRouter'
 import { modiaRouter } from './routers/modia'
@@ -13,7 +13,7 @@ const app = express()
 const clientPath = path.resolve(__dirname, '../client')
 const isDev = process.env.NODE_ENV !== 'production'
 
-logger.info(`environment: ${isDev}`)
+logger.info(`environment: ${process.env.NODE_ENV}`)
 
 app.set('trust proxy', 1)
 
@@ -47,9 +47,9 @@ if (isDev) {
   app.use('/api', mockRouter)
 } else {
   logger.info('Proxy-kall')
-  app.use('/api', /*authMiddleware,*/ expressProxy)
+  app.use('/api', expressProxy)
 }
 
 app.listen(appConf.port, () => {
-  console.log(`Server kjører på port ${appConf.port}`)
+  logger.info(`Server running on port ${appConf.port}`)
 })

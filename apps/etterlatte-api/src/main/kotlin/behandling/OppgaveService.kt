@@ -12,8 +12,8 @@ data class Oppgave(
     val status: BehandlingStatus,
     val soeknadType: String,
     val behandlingType: BehandlingType,
-    val regdato: LocalDateTime,
-    val fristdato: LocalDateTime,
+    val regdato: String,
+    val fristdato: String,
     val fnr: String,
     val beskrivelse: String,
     val saksbehandler: String,
@@ -59,8 +59,8 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient) {
                 status = sakMedBehandling.behandling.status,
                 soeknadType = sakMedBehandling.sak.sakType,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, //må hentes ut etterhvert
-                regdato = LocalDateTime.now(),
-                fristdato = LocalDateTime.now().plusDays(10), //pluss intervall
+                regdato = LocalDateTime.now().toString(),
+                fristdato = LocalDateTime.now().plusDays(10).toString(), //pluss intervall
                 fnr = sakMedBehandling.sak.ident,
                 beskrivelse = "",
                 saksbehandler = "",

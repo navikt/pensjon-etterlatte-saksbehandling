@@ -35,6 +35,8 @@ internal class EtterlatteFordelerTest {
     private val utland = mapJsonToAny<eyUtland>(javaClass.getResource("/utland.json")!!.readText(), false)
     private val ikkeUtland = mapJsonToAny<eyUtland>(javaClass.getResource("/ikkeUtland.json")!!.readText(), false)
     private val verge = javaClass.getResource("/verge.json")!!.readText()
+    private val huketAvForUtlandJson = javaClass.getResource("/huketAvForUtland.json")!!.readText()
+
 
     @AfterEach
     fun afterEach() {
@@ -190,6 +192,18 @@ internal class EtterlatteFordelerTest {
         val inspector = TestRapid()
             .apply { EtterlatteFordeler(this, service) }
             .apply { sendTestMessage(verge) }
+            .inspektør
+        assertTrue(inspector.size == 0)
+
+    }
+    @Test
+    fun harHuketAvForUtenlandsoppholdForAvdoed() {
+        coEvery { klientMock.hentPerson(any()) } returns barn
+        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
+        coEvery { klientMock.hentPerson(Foedselsnummer.of("13087307551"))} returns avdoed
+        val inspector = TestRapid()
+            .apply { EtterlatteFordeler(this, service) }
+            .apply { sendTestMessage(huketAvForUtlandJson) }
             .inspektør
         assertTrue(inspector.size == 0)
 

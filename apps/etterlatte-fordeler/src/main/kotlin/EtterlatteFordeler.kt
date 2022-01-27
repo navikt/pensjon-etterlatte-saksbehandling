@@ -34,19 +34,36 @@ internal class EtterlatteFordeler(
     // (v) Ingen ut. og innvandringsdatoer
     // (v) Ikke huket av for yrkesskade/yrkessykdom
     // (v) Dødsfallet må ha skjedd i Norge og være registrert. Må få en dødsdato fra PDL (ikke være noe som er uavklart rundt dette)
+    // ikke oppgitt utenlandsopphold
+
 
     //Barn:
     // (v) Født og oppvokst i Norge
     // (v) Alder: under 15 år (slik at vi har nok tid til det blir en eventuell omberegning når barnet er 18 år)
-    // Muligens ikke ta hensyn til barn som "er på vei" - enda ikke født
-    //   => Denne får vi ikke sjekket siden feltet uregistrertEllerVenterBarn ikke blir med i søknad om BP
     //Ett barn, ingen søsken
     //Må vi ta høyde for flere søsken
     //Kan vi tenke på kun fellesbarn i første versjon?
 
+    //soeker
+    //Bosatt i Norge
+    //Ikke huket av for uregistrertEllerVenterBarn
+
     //Ikke verge:
     // (v) Gjenlevende forelder er innsender av søknad
     // (v) Sjekke at det ikke er huket av for verge i søknaden
+
+    /*
+    *Dødsfallet er registrert
+    *Alder - barn under 15 år
+    Enebarn
+    -Verge og foreldreansvar - ikke sjekket foreldreansvar. Kun sjekket verge fra søknad og at søker er forelder i søknaden
+    *Ingen barn på vei
+    *Yrkesskade
+    *Avdød- ingen ut- og innvandringsdatoer
+    *Avdød - Ikke oppgitt utenlandsopphold
+    Gjenlevende ektefelle/samboer - bosatt i Norge
+    -Barnet - bosatt i Norge + ingen ut- og innvandringsdatoe -ikke sjekket bostedsadresse
+     */
 
 
     val kriterier = listOf(
@@ -59,7 +76,8 @@ internal class EtterlatteFordeler(
         Kriterie("Avdød har yrkesskade") { harYrkesskade(soeknad) },
         Kriterie("Søker er ikke forelder") { soekerIkkeForelder(soeknad) },
         Kriterie("Avdød er ikke død") { personErIkkeDoed(avdoed) },
-        Kriterie("Barn har verge") {harVerge(soeknad)}
+        Kriterie("Barn har verge") {harVerge(soeknad)},
+        Kriterie("Det er huket av for utenlandsopphold for avdøde") {harHuketAvForUtenlandsopphold(soeknad)}
         //Kriterie("Søker venter barn") {soekerForventerBarn(soeknad)
         //Søker venter barn ligger pt. ikke i søknaden, derfor kommentert ut
     )
@@ -185,6 +203,13 @@ internal class EtterlatteFordeler(
 
     private fun harVerge(sok: JsonMessage): Boolean {
         return sok["@skjema_info"]["soeker"]["verge"]["svar"].asText()  == "JA"
+    }
+
+    private fun harHuketAvForUtenlandsopphold(sok: JsonMessage): Boolean {
+        return sok["@skjema_info"]["foreldre"]
+            .filter { it["type"].asText() == "AVDOED" }
+            .filter { it["utenlandsopphold"]["svar"].asText() == "JA" }
+            .isNotEmpty()
     }
 
     data class FordelRespons(

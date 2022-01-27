@@ -58,8 +58,8 @@ internal class EtterlatteFordeler(
         Kriterie("Avdoed har utvandring") { harUtvandring(barn) },
         Kriterie("Avdød har yrkesskade") { harYrkesskade(soeknad) },
         Kriterie("Søker er ikke forelder") { soekerIkkeForelder(soeknad) },
-        Kriterie("Avdød er ikke død") { personErIkkeDoed(avdoed) }
-        //Kriterie("Barn har verge") {harVerge(soeknad)}
+        Kriterie("Avdød er ikke død") { personErIkkeDoed(avdoed) },
+        Kriterie("Barn har verge") {harVerge(soeknad)}
         //Kriterie("Søker venter barn") {soekerForventerBarn(soeknad)
         //Søker venter barn ligger pt. ikke i søknaden, derfor kommentert ut
     )
@@ -184,10 +184,7 @@ internal class EtterlatteFordeler(
     }
 
     private fun harVerge(sok: JsonMessage): Boolean {
-        return sok["@skjema_info"]["soeker"]
-            .filter { it["type"].asText() == "BARN" }
-            .filter { it["verge"]["svar"].asText() == "JA" }
-            .isNotEmpty()
+        return sok["@skjema_info"]["soeker"]["verge"]["svar"].asText()  == "JA"
     }
 
     data class FordelRespons(

@@ -186,6 +186,7 @@ internal class EtterlatteFordelerTest {
     fun harVerge() {
         coEvery { klientMock.hentPerson(any()) } returns barn
         coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
+        coEvery { klientMock.hentPerson(Foedselsnummer.of("13087307551"))} returns avdoed
         val inspector = TestRapid()
             .apply { EtterlatteFordeler(this, service) }
             .apply { sendTestMessage(verge) }

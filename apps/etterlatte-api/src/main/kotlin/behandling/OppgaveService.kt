@@ -2,10 +2,8 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.soeknad.SoeknadType
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.time.LocalDateTime.now
 import java.util.*
 
 data class Oppgave(
@@ -14,8 +12,8 @@ data class Oppgave(
     val status: BehandlingStatus,
     val soeknadType: String,
     val behandlingType: BehandlingType,
-    val regdato: Date,
-    val fristdato: Date,
+    val regdato: LocalDateTime,
+    val fristdato: LocalDateTime,
     val fnr: String,
     val beskrivelse: String,
     val saksbehandler: String,
@@ -54,8 +52,6 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient) {
             return behandlinger.behandlinger.map { SakMedBehandling(sak, it) }
         }
 
-        val test = LocalDateTime.now()
-
         fun mapTilOppgave(sakMedBehandling: SakMedBehandling): Oppgave {
             return Oppgave(
                 behandlingsId = sakMedBehandling.behandling.id,
@@ -63,8 +59,8 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient) {
                 status = sakMedBehandling.behandling.status,
                 soeknadType = sakMedBehandling.sak.sakType,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, //må hentes ut etterhvert
-                regdato = Date(),
-                fristdato = Date(), //pluss intervall
+                regdato = LocalDateTime.now(),
+                fristdato = LocalDateTime.now().plusDays(10), //pluss intervall
                 fnr = sakMedBehandling.sak.ident,
                 beskrivelse = "",
                 saksbehandler = "",

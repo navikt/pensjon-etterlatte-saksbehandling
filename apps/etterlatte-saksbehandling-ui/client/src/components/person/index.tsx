@@ -5,6 +5,84 @@ import styled from 'styled-components'
 import { getPerson, opprettBehandlingPaaSak, opprettSakPaaPerson } from '../../shared/api/person'
 import { StatusBar, StatusBarTheme } from '../statusbar'
 import { Container } from '../../shared/styled'
+import { Saksliste, SakslisteProps } from './saksliste'
+
+const testdata: SakslisteProps = {
+    saker: [
+      {
+        verdi: [
+          {
+            col: 'Opprettet',
+            value: '12.01.2021',
+          },
+          {
+            col: 'Type',
+            value: 'Barnepensjon',
+          },
+          {
+            col: 'Status',
+            value: 'Opprettet',
+          },
+          {
+            col: 'Vedtaksdato',
+            value: '18.01.2021',
+          },
+          {
+            col: 'Resultat',
+            value: 'Vedtatt',
+          },
+        ],
+      },
+      {
+        verdi: [
+          {
+            col: 'Opprettet',
+            value: '12.01.2021',
+          },
+          {
+            col: 'Type',
+            value: 'Barnepensjon',
+          },
+          {
+            col: 'Status',
+            value: 'Opprettet',
+          },
+          {
+            col: 'Vedtaksdato',
+            value: '18.01.2021',
+          },
+          {
+            col: 'Resultat',
+            value: 'Vedtatt',
+          },
+        ],
+      },
+      {
+        verdi: [
+          {
+            col: 'Opprettet',
+            value: '12.01.2021',
+          },
+          {
+            col: 'Type',
+            value: 'Barnepensjon',
+          },
+          {
+            col: 'Status',
+            value: 'Opprettet',
+          },
+          {
+            col: 'Vedtaksdato',
+            value: '18.01.2021',
+          },
+          {
+            col: 'Resultat',
+            value: 'Vedtatt',
+          },
+        ],
+      },
+    ],
+}
 
 export const Person = () => {
   const [personData, setPersonData] = useState({})
@@ -51,7 +129,7 @@ export const Person = () => {
           </Tlist>
 
           <TabPanel>
-            <h2>Any content 1</h2>
+            <Saksliste {...testdata} />
           </TabPanel>
           <TabPanel>
             <h2>Any content 2</h2>
@@ -85,7 +163,7 @@ const Tlist = styled(TabList)`
   list-style-type: none;
   margin: 1em 0 0;
   justify-content: space-between;
-  li{
+  li {
     color: var(--nav-blue);
     cursor: pointer;
   }

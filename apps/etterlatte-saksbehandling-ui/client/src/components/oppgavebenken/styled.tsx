@@ -17,7 +17,7 @@ export const FilterWrapper = styled.div`
 
 const colors = {
   [BehandlingTypeFilter.VELG]: '#ffffff',
-  [BehandlingTypeFilter.FOERSTEGANGSBEHANDLING]: '#826ba1',
+  [BehandlingTypeFilter.FØRSTEGANGSBEHANDLING]: '#826ba1',
   [SoeknadTypeFilter.VELG]: '#ffffff',
   [SoeknadTypeFilter.GJENLEVENDEPENSJON]: '#337885',
   [SoeknadTypeFilter.BARNEPENSJON]: '#5da499',

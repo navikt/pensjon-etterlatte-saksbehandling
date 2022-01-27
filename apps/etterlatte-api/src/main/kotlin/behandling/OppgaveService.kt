@@ -4,6 +4,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.soeknad.SoeknadType
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
+import java.time.LocalDateTime.now
 import java.util.*
 
 data class Oppgave(
@@ -51,6 +53,8 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient) {
         fun mapBehandlingerTilSak(sak: Sak, behandlinger: BehandlingerSammendrag): List<SakMedBehandling> {
             return behandlinger.behandlinger.map { SakMedBehandling(sak, it) }
         }
+
+        val test = LocalDateTime.now()
 
         fun mapTilOppgave(sakMedBehandling: SakMedBehandling): Oppgave {
             return Oppgave(

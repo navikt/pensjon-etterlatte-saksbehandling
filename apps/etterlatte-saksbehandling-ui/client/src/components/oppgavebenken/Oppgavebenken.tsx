@@ -2,13 +2,22 @@ import React, { useContext, useEffect, useState } from 'react'
 import OppgaveHeader from './OppgaveHeader'
 import OppgaveListe from './OppgaveListe'
 import styled from 'styled-components'
-import { FilterPar, IOppgave } from './typer/oppgavebenken'
+import {
+  BehandlingTypeFilter,
+  FilterPar,
+  Handlinger,
+  IOppgave,
+  SoeknadTypeFilter,
+  StatusFilter,
+} from './typer/oppgavebenken'
 import { Column } from 'react-table'
 import { kolonner } from './OppgaveKolonner'
 import { initialOppgaveFelter, IOppgaveFelter } from './typer/oppgavefelter'
-import { hentMockOppgaver } from '../../shared/api/oppgaver'
+import { hentOppgaver } from '../../shared/api/oppgaver'
 import Spinner from '../../shared/Spinner'
 import { AppContext, IAppContext } from '../../store/AppContext'
+import { IApiResponse } from '../../shared/api/types'
+import moment from 'moment'
 
 const OppgavebenkContainer = styled.div`
   max-width: 60em;
@@ -38,14 +47,14 @@ const Oppgavebenken = () => {
   }
 
   useEffect(() => {
-    hentMockOppgaver()
-      .then((oppgaver: ReadonlyArray<IOppgave>) => {
-        setOppgaver(oppgaver)
+    hentOppgaver()
+      .then((response: IApiResponse<any>) => {
+        const mappedResponse = response.data.map((oppgave: any) => mapOppgaveResponse(oppgave))
+        setOppgaver(mappedResponse)
         setLasterOppgaver(false)
       })
       .catch(() => {
         setLasterOppgaver(false)
-        //todo: error håndtering her
       })
       .finally(() => setLasterOppgaver(false))
   }, [])
@@ -68,6 +77,23 @@ const Oppgavebenken = () => {
       )}
     </OppgavebenkContainer>
   )
+}
+
+export function mapOppgaveResponse(data: any): IOppgave {
+  const oppgave: IOppgave = {
+    sakId: data.sakId,
+    behandlingsId: data.sakId,
+    regdato: moment(data.regdato, 'YYYY-MM-DD').toDate(),
+    soeknadType: data.soeknadType.toUpperCase() as SoeknadTypeFilter,
+    behandlingType: data.behandlingType.toUpperCase() as BehandlingTypeFilter,
+    fristdato: moment(data.fristdato, 'YYYY-MM-DD').toDate(),
+    fnr: data.fnr,
+    beskrivelse: data.beskrivelse,
+    status: data.status.toUpperCase() as StatusFilter,
+    saksbehandler: data.saksbehandler,
+    handling: data.handling.toUpperCase() as Handlinger,
+  }
+  return oppgave
 }
 
 export default Oppgavebenken

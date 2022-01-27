@@ -1,4 +1,6 @@
 export interface IOppgave {
+  sakId: number
+  behandlingsId: string
   regdato: Date
   soeknadType: SoeknadTypeFilter
   behandlingType: BehandlingTypeFilter
@@ -11,17 +13,17 @@ export interface IOppgave {
 }
 
 export enum Handlinger {
-  START = 'Behandle sak',
+  BEHANDLE = 'Behandle sak',
 }
 
 export enum BehandlingTypeFilter {
   VELG = 'VELG',
-  FOERSTEGANGSBEHANDLING = 'FOERSTEGANGSBEHANDLING',
+  FØRSTEGANGSBEHANDLING = 'FØRSTEGANGSBEHANDLING',
 }
 
 export const behandlingTypeFilter: Record<BehandlingTypeFilter, IPar> = {
   VELG: { id: 'VELG', navn: 'Velg' },
-  FOERSTEGANGSBEHANDLING: { id: 'FOERSTEGANGSBEHANDLING', navn: 'Førstegangsbehandling' },
+  FØRSTEGANGSBEHANDLING: { id: 'FØRSTEGANGSBEHANDLING', navn: 'Førstegangsbehandling' },
 }
 
 export enum SoeknadTypeFilter {
@@ -39,6 +41,7 @@ export const soeknadTypeFilter: Record<SoeknadTypeFilter, IPar> = {
 export enum StatusFilter {
   VELG = 'VELG',
   NY = 'NY',
+  OPPRETTET = 'OPPRETTET',
   UNDER_BEHANDLING = 'UNDER_BEHANDLING',
   FERDIG = 'FERDIG',
 }
@@ -46,6 +49,7 @@ export enum StatusFilter {
 export const statusFilter: Record<StatusFilter, IPar> = {
   VELG: { id: 'VELG', navn: 'Velg' },
   NY: { id: 'NY', navn: 'Ny' },
+  OPPRETTET: { id: 'OPPRETTET', navn: 'Opprettet' },
   UNDER_BEHANDLING: { id: 'UNDER_BEHANDLING', navn: 'Under behandling' },
   FERDIG: { id: 'FERDIG', navn: 'Ferdig' },
 }

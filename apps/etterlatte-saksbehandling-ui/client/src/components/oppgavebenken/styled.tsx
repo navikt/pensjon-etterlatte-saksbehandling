@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { OppgavetypeFilter, SoeknadstypeFilter } from './typer/oppgavebenken'
+import { BehandlingTypeFilter, SoeknadTypeFilter } from './typer/oppgavebenken'
 
 export const FilterElement = styled.div`
   margin-bottom: 2rem;
@@ -16,21 +16,21 @@ export const FilterWrapper = styled.div`
 `
 
 const colors = {
-  [OppgavetypeFilter.VELG]: '#ffffff',
-  [OppgavetypeFilter.FOERSTEGANGSBEHANDLING]: '#826ba1',
-  [SoeknadstypeFilter.VELG]: '#ffffff',
-  [SoeknadstypeFilter.GJENLEVENDEPENSJON]: '#337885',
-  [SoeknadstypeFilter.BARNEPENSJON]: '#5da499',
+  [BehandlingTypeFilter.VELG]: '#ffffff',
+  [BehandlingTypeFilter.FOERSTEGANGSBEHANDLING]: '#826ba1',
+  [SoeknadTypeFilter.VELG]: '#ffffff',
+  [SoeknadTypeFilter.GJENLEVENDEPENSJON]: '#337885',
+  [SoeknadTypeFilter.BARNEPENSJON]: '#5da499',
 }
 
-export const ColorTag: React.FC<{ type: OppgavetypeFilter | SoeknadstypeFilter; label: string }> = ({
+export const ColorTag: React.FC<{ type: BehandlingTypeFilter | SoeknadTypeFilter; label: string }> = ({
   type,
   label,
 }) => {
   return <ColorTagWrap type={type}>{label}</ColorTagWrap>
 }
 
-const ColorTagWrap = styled.div<{ type: OppgavetypeFilter | SoeknadstypeFilter }>`
+const ColorTagWrap = styled.div<{ type: BehandlingTypeFilter | SoeknadTypeFilter }>`
   background-color: ${(props) => colors[props.type]};
   padding: 0.2em 1em;
   color: #fff;

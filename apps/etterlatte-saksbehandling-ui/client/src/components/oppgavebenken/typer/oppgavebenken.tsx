@@ -1,36 +1,36 @@
 export interface IOppgave {
   regdato: Date
-  soeknadstype: SoeknadstypeFilter
-  oppgavetype: OppgavetypeFilter
+  soeknadType: SoeknadTypeFilter
+  behandlingType: BehandlingTypeFilter
   fristdato: Date
-  bruker: string
+  fnr: string
   beskrivelse: string
   status: StatusFilter
   saksbehandler: string
-  handlinger: Handlinger
+  handling: Handlinger
 }
 
 export enum Handlinger {
   START = 'Behandle sak',
 }
 
-export enum OppgavetypeFilter {
+export enum BehandlingTypeFilter {
   VELG = 'VELG',
   FOERSTEGANGSBEHANDLING = 'FOERSTEGANGSBEHANDLING',
 }
 
-export const oppgavetypeFilter: Record<OppgavetypeFilter, IPar> = {
+export const behandlingTypeFilter: Record<BehandlingTypeFilter, IPar> = {
   VELG: { id: 'VELG', navn: 'Velg' },
   FOERSTEGANGSBEHANDLING: { id: 'FOERSTEGANGSBEHANDLING', navn: 'Førstegangsbehandling' },
 }
 
-export enum SoeknadstypeFilter {
+export enum SoeknadTypeFilter {
   VELG = 'VELG',
   BARNEPENSJON = 'BARNEPENSJON',
   GJENLEVENDEPENSJON = 'GJENLEVENDEPENSJON',
 }
 
-export const soeknadstypeFilter: Record<SoeknadstypeFilter, IPar> = {
+export const soeknadTypeFilter: Record<SoeknadTypeFilter, IPar> = {
   VELG: { id: 'VELG', navn: 'Velg' },
   BARNEPENSJON: { id: 'BARNEPENSJON', navn: 'Barnepensjon' },
   GJENLEVENDEPENSJON: { id: 'GJENLEVENDEPENSJON', navn: 'Gjenlevendepensjon' },

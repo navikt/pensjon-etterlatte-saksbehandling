@@ -1,0 +1,29 @@
+
+[
+  {
+    "behandlingsId": "353711d2-6858-4c55-83fa-3919e7c439a4",
+    "sakId": 3,
+    "status": "OPPRETTET",
+    "soeknadType": "Barnepensjon",
+    "behandlingType": "FØRSTEGANGSBEHANDLING",
+    "regdato": 1643102786086,
+    "fristdato": 1643102786086,
+    "fnr": "29081276127",
+    "beskrivelse": "",
+    "saksbehandler": "",
+    "handling": "BEHANDLE"
+  },
+  {
+    "behandlingsId": "353711d2-6858-4c55-83fa-3919e7c439a5",
+    "sakId": 2,
+    "status": "OPPRETTET",
+    "soeknadType": "Gjenlevendepensjon",
+    "behandlingType": "FØRSTEGANGSBEHANDLING",
+    "regdato": 1643102786086,
+    "fristdato": 1643102786086,
+    "fnr": "29081276127",
+    "beskrivelse": "",
+    "saksbehandler": "",
+    "handling": "BEHANDLE"
+  }
+]

@@ -1,11 +1,11 @@
 import {
   IPar,
-  oppgavetypeFilter,
-  OppgavetypeFilter,
+  behandlingTypeFilter,
+  BehandlingTypeFilter,
   saksbehandlerFilter,
   SaksbehandlerFilter,
-  soeknadstypeFilter,
-  SoeknadstypeFilter,
+  soeknadTypeFilter,
+  SoeknadTypeFilter,
   statusFilter,
   StatusFilter,
 } from './oppgavebenken'
@@ -25,10 +25,10 @@ export interface IOppgaveFelt {
 export interface IOppgaveFelter {
   [key: string]: IOppgaveFelt
   regdato: IOppgaveFelt
-  oppgavetype: IOppgaveFelt
-  soeknadstype: IOppgaveFelt
+  behandlingType: IOppgaveFelt
+  soeknadType: IOppgaveFelt
   fristdato: IOppgaveFelt
-  bruker: IOppgaveFelt
+  fnr: IOppgaveFelt
   beskrivelse: IOppgaveFelt
   status: IOppgaveFelt
   saksbehandler: IOppgaveFelt
@@ -56,22 +56,22 @@ export const initialOppgaveFelter = (saksbehandlerNavn: string): IOppgaveFelter 
         selectedValue: '',
       },
     },
-    oppgavetype: {
-      noekkel: 'oppgavetype',
-      label: 'Oppgavetype',
+    behandlingType: {
+      noekkel: 'behandlingType',
+      label: 'Behandlingstype',
       filter: {
         type: 'select',
-        selectedValue: OppgavetypeFilter.VELG,
-        nedtrekksliste: oppgavetypeFilter,
+        selectedValue: BehandlingTypeFilter.VELG,
+        nedtrekksliste: behandlingTypeFilter,
       },
     },
-    soeknadstype: {
-      noekkel: 'soeknadstype',
+    soeknadType: {
+      noekkel: 'soeknadType',
       label: 'Søknadstype',
       filter: {
         type: 'select',
-        selectedValue: SoeknadstypeFilter.VELG,
-        nedtrekksliste: soeknadstypeFilter,
+        selectedValue: SoeknadTypeFilter.VELG,
+        nedtrekksliste: soeknadTypeFilter,
       },
     },
     fristdato: {
@@ -82,8 +82,8 @@ export const initialOppgaveFelter = (saksbehandlerNavn: string): IOppgaveFelter 
         selectedValue: '',
       },
     },
-    bruker: {
-      noekkel: 'bruker',
+    fnr: {
+      noekkel: 'fnr',
       label: 'Fødselsnummer',
       filter: {
         type: 'string',

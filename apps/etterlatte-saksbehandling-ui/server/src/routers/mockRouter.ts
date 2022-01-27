@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express'
+import '../mockdata/oppgaverMockData.json'
 import personsok from '../mockdata/personsok.json';
 import personsokUtenSak from '../mockdata/personsokUtenSak.json';
 
@@ -12,3 +13,7 @@ mockRouter.get("/personer/:fnr", (req: Request, res: Response) => {
   return res.json(personsok);
 })
 
+mockRouter.get('/oppgaver', (req: Request, res: Response) => {
+  let oppgaver = require('../mockdata/oppgaverMockData.json')
+  res.json({ oppgaver })
+})

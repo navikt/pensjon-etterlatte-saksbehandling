@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { StatusBar } from '../../statusbar'
 import { ContentWrapper } from './styled'
 import { Detail, BodyShort, Label } from '@navikt/ds-react'
 import { InfoWrapper, DetailWrapper } from './styled'

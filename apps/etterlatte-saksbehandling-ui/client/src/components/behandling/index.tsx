@@ -56,14 +56,14 @@ export const Behandling = () => {
                     </Routes>
                 </Column>
                 <Column>
-                    <TabTest />
+                    <Tab />
                 </Column>
             </GridContainer>
         </>
     );
 };
 
-const TabTest = () => {
+const Tab = () => {
     const [selected, setSelected] = useState("1");
 
     const select = (e: any) => {

@@ -31,7 +31,8 @@ rules: {
   '@typescript-eslint/no-extra-non-null-assertion': 'off',
   '@typescript-eslint/ban-types': 'off',
   '@typescript-eslint/no-non-null-assertion': 'off',
-  'react-hooks/exhaustive-deps': 'off'
+  'react-hooks/exhaustive-deps': 'off',
+  '@typescript-eslint/no-extra-semi': 'off'
 }
 globals:
   'process': true

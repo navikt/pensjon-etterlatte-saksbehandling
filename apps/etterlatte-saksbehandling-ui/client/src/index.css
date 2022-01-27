@@ -8,6 +8,14 @@
     box-sizing: border-box;
 }
 
+/**
+    Felles-variabler
+**/
+:root {
+    /* Colors */
+    --nav-blue: #0067C5;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -27,3 +35,4 @@ li {
     margin: 0;
     padding: 0;
 }
+

@@ -16,36 +16,35 @@ import { Vedtak } from "./vedtak";
 export const Behandling = () => {
     return (
         <>
-            <GridContainer style={{ marginTop: "100px" }}>
+            <GridContainer>
                 <Column>
                     <MenuHead>
                         <BehandlingsStatus status={IBehandlingsStatus.FORSTEGANG} />
                     </MenuHead>
-                </Column>
-                <Column>
                     {/* stegmeny */}
                     <StegMeny>
                         <li>
-                            <NavLink to="personopplysninger">Personopplysninger</NavLink>
+                            <NavLink to="personopplysninger"><span>1.</span> Personopplysninger</NavLink>
                         </li>
                         <li>
-                            <NavLink to="inngangsvilkaar">Inngangsvilkår</NavLink>
+                            <NavLink to="inngangsvilkaar"><span>2.</span> Inngangsvilkår</NavLink>
                         </li>
                         <li>
-                            <NavLink to="beregne">Beregne</NavLink>
+                            <NavLink to="beregne"><span>3.</span> Beregne</NavLink>
                         </li>
                         <li>
-                            <NavLink to="vedtak">Vedtak</NavLink>
+                            <NavLink to="vedtak"><span>4.</span> Vedtak</NavLink>
                         </li>
                         <li>
-                            <NavLink to="utbetalingsoversikt">Utbetalingsoversikt</NavLink>
+                            <NavLink to="utbetalingsoversikt"><span>5.</span> Utbetalingsoversikt</NavLink>
                         </li>
                         <li>
-                            <NavLink to="brev">Brev</NavLink>
+                            <NavLink to="brev"><span>6.</span> Brev</NavLink>
                         </li>
                     </StegMeny>
-
                     {/* Subroutes for stegmeny feks */}
+                </Column>
+                <Column>
                     <Routes>
                         <Route path="personopplysninger" element={<Personopplysninger />} />
                         <Route path="inngangsvilkaar" element={<Inngangsvilkaar />} />
@@ -131,25 +130,28 @@ const IconButton = styled.div`
 
 const StegMeny = styled.ul`
     height: 100px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: flex-end;
     list-style: none;
-    border-bottom: 1px solid #c6c2bf;
-    padding: 1em 1em 0;
+    padding: 1em 0em 0;
 
     li {
         a {
+            * {
+                font-weight: bold;
+                padding-right: 1em;
+                padding-left: 1em;
+            }
             display: block;
-            padding: 1em 1em 2em;
+            padding: 0.5em 1em 0.5em;
             color: #78706a;
             text-decoration: none;
             border-bottom: 3px solid transparent;
-            &:hover,
+            border-left: 6px solid transparent;
+            &:hover {
+                text-decoration: underline;
+            }
             &.active {
-                color: #0067c5;
-                border-bottom: 3px solid #0067c5;
+                border-left: 6px solid #0067c5;
+                background-color: #E7E9E9;
             }
         }
     }

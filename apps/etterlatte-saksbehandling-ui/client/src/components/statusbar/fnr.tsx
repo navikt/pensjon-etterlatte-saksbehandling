@@ -8,7 +8,7 @@ export const Fnr = (props: { value: string; copy?: boolean }) => {
           {props.value}{" "}
           {props.copy && (
               <CopyToClipboard text={props.value}>
-                  <span style={{verticalAlign: 'text-top', cursor: "pointer" }} aria-label="kopier fødselsnummer">
+                  <span style={{verticalAlign: 'text-top', cursor: "pointer", marginLeft: "1em", marginRight: "1em" }} aria-label="kopier fødselsnummer">
                       <CopyIcon />
                   </span>
               </CopyToClipboard>

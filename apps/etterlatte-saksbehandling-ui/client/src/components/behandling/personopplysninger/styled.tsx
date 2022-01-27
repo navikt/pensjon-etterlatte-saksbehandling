@@ -22,10 +22,6 @@ export const TableWrapper = styled.div`
   }
 `
 
-export const ContentHeader = styled.div`
-  padding: 5em;
-`
-
 export const InfoWrapper = styled.div`
   display: flex;
   justify-content: space-between;

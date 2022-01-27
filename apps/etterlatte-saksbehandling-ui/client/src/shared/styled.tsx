@@ -10,6 +10,7 @@ export const Container = styled.div`
 export const GridContainer = styled.div`
     display: flex;
     height: 100%;
+    min-height: 100vh;
 `;
 
 export const Column = styled.div`
@@ -30,5 +31,5 @@ export const Content = styled.div`
 `;
 
 export const ContentHeader = styled.div`
-    padding: 1em;
+    padding: 1em 5em;
 `;

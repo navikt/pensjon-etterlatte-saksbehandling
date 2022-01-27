@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 import { StatusBar } from '../../statusbar'
 import { ContentWrapper } from './styled'
 import { Detail, BodyShort, Label } from '@navikt/ds-react'
-import { InfoWrapper, DetailWrapper, ContentHeader } from './styled'
+import { InfoWrapper, DetailWrapper } from './styled'
 import { IOpplysningProps } from './types'
 import { hentPersonopplysninger } from '../../../shared/api/personopplysninger'
 import { formatterDato, formatterTidspunkt } from '../../../utils/index'
-import { Content } from '../../../shared/styled'
+import { Content, ContentHeader } from '../../../shared/styled'
 import { Oppholdstillatelse } from './oppholdstillatelse'
 import { Statsborgerskap } from './statsborgerskap'
 import { Bostedsadresse } from './bostedsadresse'
@@ -23,9 +23,9 @@ export const Personopplysninger = () => {
 
   return (
     <Content>
-      <StatusBar />
       {personopplysninger && (
         <ContentHeader>
+          <h1>Personopplynsinger</h1>
           <DetailWrapper>
             <BodyShort size="medium" spacing>
               Registeropplysninger

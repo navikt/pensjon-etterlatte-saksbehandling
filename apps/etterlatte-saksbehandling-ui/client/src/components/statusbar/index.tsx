@@ -15,6 +15,7 @@ export const StatusBar = (props: { theme?: StatusBarTheme }) => {
             <UserInfo>
                 <GenderIcon gender={GenderList.female} />
                 <Name>Lille My</Name>
+                <Skilletegn>/</Skilletegn>
                 <Fnr copy value={"815493 00134"} />
                 <Status value={{ status: PersonStatus.ETTERLATT, dato: "19.05.2011" }} />
             </UserInfo>
@@ -26,6 +27,8 @@ const StatusBarWrapper = styled.div<{ theme: StatusBarTheme }>`
     background-color: ${(props) => (props.theme === StatusBarTheme.gray ? "#F8F8F8" : "#fff")};
     padding: 0.6em 1em;
     line-height: 30px;
+    border-bottom: 1px solid #C6C2BF;
+
 `;
 
 const UserInfo = styled.div`
@@ -33,8 +36,13 @@ const UserInfo = styled.div`
     flex-direction: row;
     justify-content: space-between;
     align-items: baseline;
-    width: 400px;
+    width: 450px;
+    margin-left: 1em;
 `;
+
+const Skilletegn = styled.div`
+    margin-right: 1em;
+`; 
 
 const Name = styled.div`
     font-weight: 600;

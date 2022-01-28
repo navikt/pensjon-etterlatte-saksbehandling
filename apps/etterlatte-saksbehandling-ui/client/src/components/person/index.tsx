@@ -8,80 +8,90 @@ import { Container } from '../../shared/styled'
 import { Saksliste, SakslisteProps } from './saksliste'
 
 const testdata: SakslisteProps = {
-    saker: [
-      {
-        verdi: [
-          {
-            col: 'Opprettet',
-            value: '12.01.2021',
-          },
-          {
-            col: 'Type',
-            value: 'Barnepensjon',
-          },
-          {
-            col: 'Status',
-            value: 'Opprettet',
-          },
-          {
-            col: 'Vedtaksdato',
-            value: '18.01.2021',
-          },
-          {
-            col: 'Resultat',
-            value: 'Vedtatt',
-          },
-        ],
-      },
-      {
-        verdi: [
-          {
-            col: 'Opprettet',
-            value: '12.01.2021',
-          },
-          {
-            col: 'Type',
-            value: 'Barnepensjon',
-          },
-          {
-            col: 'Status',
-            value: 'Opprettet',
-          },
-          {
-            col: 'Vedtaksdato',
-            value: '18.01.2021',
-          },
-          {
-            col: 'Resultat',
-            value: 'Vedtatt',
-          },
-        ],
-      },
-      {
-        verdi: [
-          {
-            col: 'Opprettet',
-            value: '12.01.2021',
-          },
-          {
-            col: 'Type',
-            value: 'Barnepensjon',
-          },
-          {
-            col: 'Status',
-            value: 'Opprettet',
-          },
-          {
-            col: 'Vedtaksdato',
-            value: '18.01.2021',
-          },
-          {
-            col: 'Resultat',
-            value: 'Vedtatt',
-          },
-        ],
-      },
-    ],
+  saker: [
+    {
+      name: 'Fagsak 1',
+      behandlinger: [
+        {
+          kolonner: [
+            {
+              col: 'Opprettet',
+              value: '12.01.2021',
+            },
+            {
+              col: 'Type',
+              value: 'Barnepensjon',
+            },
+            {
+              col: 'Status',
+              value: 'Opprettet',
+            },
+            {
+              col: 'Vedtaksdato',
+              value: '18.01.2021',
+            },
+            {
+              col: 'Resultat',
+              value: 'Vedtatt',
+            },
+          ],
+        },
+        {
+          kolonner: [
+            {
+              col: 'Opprettet',
+              value: '12.01.2021',
+            },
+            {
+              col: 'Type',
+              value: 'Barnepensjon',
+            },
+            {
+              col: 'Status',
+              value: 'Opprettet',
+            },
+            {
+              col: 'Vedtaksdato',
+              value: '18.01.2021',
+            },
+            {
+              col: 'Resultat',
+              value: 'Vedtatt',
+            },
+          ],
+        }
+      ],
+    },
+    {
+      name: 'Fagsak 2',
+      behandlinger: [
+        {
+          kolonner: [
+            {
+              col: 'Opprettet',
+              value: '12.01.2021',
+            },
+            {
+              col: 'Type',
+              value: 'Barnepensjon',
+            },
+            {
+              col: 'Status',
+              value: 'Opprettet',
+            },
+            {
+              col: 'Vedtaksdato',
+              value: '18.01.2021',
+            },
+            {
+              col: 'Resultat',
+              value: 'Vedtatt',
+            },
+          ],
+        }
+      ],
+    },
+  ],
 }
 
 export const Person = () => {
@@ -129,10 +139,10 @@ export const Person = () => {
           </Tlist>
 
           <TabPanel>
-            <Saksliste {...testdata} />
+            <h2>Innhold</h2>
           </TabPanel>
           <TabPanel>
-            <h2>Any content 2</h2>
+            <Saksliste {...testdata} />
           </TabPanel>
           <TabPanel>
             <h2>Any content 3</h2>
@@ -166,5 +176,14 @@ const Tlist = styled(TabList)`
   li {
     color: var(--nav-blue);
     cursor: pointer;
+    padding: 10px 10px 5px;
+
+    &.react-tabs__tab--selected {
+      border-top: 1px solid var(--nav-dark-gray);
+      border-left: 1px solid var(--nav-dark-gray);
+      border-right: 1px solid var(--nav-dark-gray);
+      color: var(--nav-dark-gray);
+      border-radius: 5px 5px 0 0;
+    }
   }
 `

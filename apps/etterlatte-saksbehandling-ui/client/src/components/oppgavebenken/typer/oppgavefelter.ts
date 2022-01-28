@@ -67,7 +67,7 @@ export const initialOppgaveFelter = (saksbehandlerNavn: string): IOppgaveFelter 
     },
     soeknadType: {
       noekkel: 'soeknadType',
-      label: 'Søknadstype',
+      label: 'Ytelse',
       filter: {
         type: 'select',
         selectedValue: SoeknadTypeFilter.VELG,

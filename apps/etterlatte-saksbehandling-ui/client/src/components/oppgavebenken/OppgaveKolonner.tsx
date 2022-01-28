@@ -26,7 +26,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     sortType: 'datetime',
   },
   {
-    Header: 'Oppgavetype',
+    Header: 'Behandlingstype',
     accessor: 'behandlingType',
     filter: 'exact',
     Cell: ({ value: oppgavetype }) => {
@@ -34,7 +34,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     },
   },
   {
-    Header: 'Søknadstype',
+    Header: 'Ytelse',
     accessor: 'soeknadType',
     filter: 'exact',
     Cell: ({ value: soeknadstype }) => {

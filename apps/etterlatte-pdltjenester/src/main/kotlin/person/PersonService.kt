@@ -1,7 +1,6 @@
 package no.nav.etterlatte.person
 
 import io.ktor.features.NotFoundException
-import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.pdl.Gradering
 
 import no.nav.etterlatte.libs.common.pdl.ResponseError
@@ -13,9 +12,7 @@ import person.pdl.UtflyttingFraNorge
 import person.pdl.UtlandResponse
 
 class PersonService(
-    private val klient: PersonKlient,
-    private val kodeverkService: KodeverkService
-
+    private val klient: PersonKlient
 ) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
     private val adressebeskyttet = listOf(
@@ -95,9 +92,9 @@ class PersonService(
             husnummer = bostedsadresse?.vegadresse?.husnummer,
             husbokstav = bostedsadresse?.vegadresse?.husbokstav,
             postnummer = bostedsadresse?.vegadresse?.postnummer,
-            poststed = kodeverkService.hentPoststed(bostedsadresse?.vegadresse?.postnummer),
-            statsborgerskap = eyLand(statsborgerskap?.land, kodeverkService.hentLand(statsborgerskap?.land)),
-            foedeland = eyLand(foedsel?.foedeland, kodeverkService.hentLand(foedsel?.foedeland)),
+            //poststed = kodeverkService.hentPoststed(bostedsadresse?.vegadresse?.postnummer),
+            statsborgerskap = statsborgerskap?.land,
+            foedeland = foedsel?.foedeland,
             sivilstatus = sivilstand?.type?.name,
             //TODO endre disse til noe fornuftig
             utland = null,

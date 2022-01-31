@@ -72,7 +72,7 @@ internal class EtterlatteFordeler(
         Kriterie("Barn har adressebeskyttelse") { harAdressebeskyttelse(barn) },
         Kriterie("Barn ikke fodt i Norge") { foedtUtland(barn) },
         Kriterie("Barn har utvandring") { harUtvandring(barn) },
-        Kriterie("Avdoed har utvandring") { harUtvandring(barn) },
+        Kriterie("Avdoed har utvandring") { harUtvandring(avdoed) },
         Kriterie("Avdød har yrkesskade") { harYrkesskade(soeknad) },
         Kriterie("Søker er ikke forelder") { soekerIkkeForelder(soeknad) },
         Kriterie("Avdød er ikke død") { personErIkkeDoed(avdoed) },
@@ -119,7 +119,7 @@ internal class EtterlatteFordeler(
                 barn = personService.hentPerson(barnFnr)
                 avdoed = personService.hentPerson(avdoedFnr)
                 barn.utland = personService.hentUtland(barnFnr)
-
+                avdoed.utland = personService.hentUtland(avdoedFnr)
 
                 val aktuelleSaker = fordel(packet)
                 if (aktuelleSaker.kandidat) {
@@ -156,11 +156,11 @@ internal class EtterlatteFordeler(
     }
 
     private fun sjekkStatsborgerskap(person: Person): Boolean {
-        return person.statsborgerskap?.landKode != "NOR"
+        return person.statsborgerskap != "NOR"
     }
 
     private fun foedtUtland(person: Person): Boolean {
-        return person.foedeland?.landKode != "NOR"
+        return person.foedeland != "NOR"
     }
 
     private fun harUtvandring(person: Person): Boolean {

@@ -9,9 +9,6 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.kodeverk.KodeverkKlient
-import no.nav.etterlatte.kodeverk.KodeverkService
-//import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.person.PersonKlient
 import no.nav.etterlatte.person.PersonService
@@ -37,15 +34,8 @@ internal class PersonServiceTest {
 
     private val personKlient = mockk<PersonKlient>()
 
-    private val kodeverkService = mockk<KodeverkService> {
-        coEvery { hentPoststed(any())} returns "Boble"
-        coEvery { hentPoststed("0380") } returns "Skåla"
-        coEvery { hentPoststed(null) } returns null
-        coEvery { hentLand(any()) } returns "Norge"
-    }
-
     //TODO legge tilbake kodeverkService
-    private val service = PersonService(personKlient, kodeverkService)
+    private val service = PersonService(personKlient)
 
     @AfterEach
     fun afterEach() {
@@ -71,10 +61,7 @@ internal class PersonServiceTest {
         assertEquals("30", person.husnummer)
         assertNull(person.husbokstav)
         assertEquals("0380", person.postnummer)
-        //TODO endre tilbake til Skåla med Kodeverk
-        assertEquals("Skåla", person.poststed)
-        //TODO endre tilbake til Norge
-        assertEquals("Norge", person.statsborgerskap?.landDekode)
+        assertEquals("NOR", person.statsborgerskap)
         assertEquals(false, person.adressebeskyttelse)
         assertNull(person.sivilstatus)
     }
@@ -103,7 +90,6 @@ internal class PersonServiceTest {
         assertNull(person.husbokstav)
         assertNull(person.husnummer)
         assertNull(person.postnummer)
-        assertNull(person.poststed)
     }
 
     @Test

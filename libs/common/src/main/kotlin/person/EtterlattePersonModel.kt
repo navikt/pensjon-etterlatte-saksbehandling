@@ -17,13 +17,18 @@ data class Person(
     val husbokstav: String?,
     val postnummer: String?,
     val poststed: String?,
-    val statsborgerskap: String?,
-    val foedeland: String?,
+    val statsborgerskap: eyLand?,
+    val foedeland: eyLand?,
     val sivilstatus: String?,
     var utland: eyUtland?,
     val rolle: Rolle?
 
 
+)
+
+data class eyLand(
+    val landKode: String?,
+    val landDekode: String?
 )
 
 data class eyUtland(

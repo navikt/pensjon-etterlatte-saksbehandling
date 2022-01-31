@@ -10,6 +10,6 @@
   "husbokstav": "a",
   "postnummer": "1234",
   "poststed": "Oslo",
-  "statsborgerskap": "NOR",
+  "statsborgerskap": {"landKode": "NOR", "landDekode": "Norge"},
   "sivilstatus": "singel"
 }

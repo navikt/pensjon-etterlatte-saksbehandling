@@ -156,11 +156,11 @@ internal class EtterlatteFordeler(
     }
 
     private fun sjekkStatsborgerskap(person: Person): Boolean {
-        return person.statsborgerskap != "NOR"
+        return person.statsborgerskap?.landKode != "NOR"
     }
 
     private fun foedtUtland(person: Person): Boolean {
-        return person.foedeland != "NOR"
+        return person.foedeland?.landKode != "NOR"
     }
 
     private fun harUtvandring(person: Person): Boolean {

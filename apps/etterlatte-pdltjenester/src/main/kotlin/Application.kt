@@ -13,6 +13,8 @@ import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.http.takeFrom
+import no.nav.etterlatte.kodeverk.KodeverkKlient
+import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediatorFactory
 import no.nav.etterlatte.ktortokenexchange.bearerToken
 import no.nav.etterlatte.person.PersonKlient
@@ -28,19 +30,25 @@ class ApplicationContext(configLocation: String? = null) {
         closables.forEach { it() }
     }
 
-    val personService: PersonService
+    //val personService: PersonService
     val securityMediator = SecurityContextMediatorFactory.from(config)
     val personServiceAad: PersonService
+    val kodeverkService: KodeverkService
 
 
     //TODO fikse noe ift AAD støtte her
     init {
-        personService = tokenSecuredEndpoint(config.getConfig("no.nav.etterlatte.tjenester.pdl"))
+       /* personService = tokenSecuredEndpoint(config.getConfig("no.nav.etterlatte.tjenester.pdl"))
             .also { closables.add(it::close) }
             .let { PersonService(PersonKlient(it)) }
+
+        */
+        kodeverkService = tokenSecuredEndpoint(config.getConfig("no.nav.etterlatte.tjenester.kodeverk"))
+            .also { closables.add(it::close) }
+            .let { KodeverkService(KodeverkKlient(it)) }
         personServiceAad = pdlhttpclient(config.getConfig("no.nav.etterlatte.tjenester.pdl.aad"))
             .also { closables.add(it::close) }
-            .let { PersonService(PersonKlient(it)) }
+            .let { PersonService(PersonKlient(it), kodeverkService) }
     }
 
     private fun tokenSecuredEndpoint(endpointConfig:Config) = HttpClient(CIO) {

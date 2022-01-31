@@ -1,6 +1,7 @@
 package no.nav.etterlatte.person
 
 import io.ktor.features.NotFoundException
+import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.pdl.Gradering
 
 import no.nav.etterlatte.libs.common.pdl.ResponseError
@@ -12,7 +13,8 @@ import person.pdl.UtflyttingFraNorge
 import person.pdl.UtlandResponse
 
 class PersonService(
-    private val klient: PersonKlient
+    private val klient: PersonKlient,
+    private val kodeverkService: KodeverkService
 
 ) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
@@ -81,10 +83,6 @@ class PersonService(
         val doedsfall = hentPerson.doedsfall
             .maxByOrNull { it.metadata.sisteRegistrertDato() }
 
-        //val poststed = kodeverkService.hentPoststed(bostedsadresse?.vegadresse?.postnummer)
-
-        //val land = kodeverkService.hentLand(statsborgerskap?.land)
-
         return Person(
             fornavn = navn.fornavn,
             etternavn = navn.etternavn,
@@ -97,10 +95,9 @@ class PersonService(
             husnummer = bostedsadresse?.vegadresse?.husnummer,
             husbokstav = bostedsadresse?.vegadresse?.husbokstav,
             postnummer = bostedsadresse?.vegadresse?.postnummer,
-            //TODO introdusere kodeverk igjen
-            poststed = bostedsadresse?.vegadresse?.postnummer,
-            statsborgerskap = statsborgerskap?.land,
-            foedeland = foedsel?.foedeland,
+            poststed = kodeverkService.hentPoststed(bostedsadresse?.vegadresse?.postnummer),
+            statsborgerskap = eyLand(statsborgerskap?.land, kodeverkService.hentLand(statsborgerskap?.land)),
+            foedeland = eyLand(foedsel?.foedeland, kodeverkService.hentLand(foedsel?.foedeland)),
             sivilstatus = sivilstand?.type?.name,
             //TODO endre disse til noe fornuftig
             utland = null,

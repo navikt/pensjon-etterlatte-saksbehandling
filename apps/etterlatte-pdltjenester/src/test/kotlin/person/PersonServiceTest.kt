@@ -9,6 +9,8 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.kodeverk.KodeverkKlient
+import no.nav.etterlatte.kodeverk.KodeverkService
 //import no.nav.etterlatte.kodeverk.KodeverkService
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.person.PersonKlient
@@ -34,14 +36,16 @@ internal class PersonServiceTest {
         .registerModule(JavaTimeModule())
 
     private val personKlient = mockk<PersonKlient>()
-    //private val kodeverkService = mockk<KodeverkService> {
-     //   coEvery { hentPoststed("0380") } returns "Skåla"
-     //   coEvery { hentPoststed(null) } returns null
-     //   coEvery { hentLand(any()) } returns "Norge"
-    //}
+
+    private val kodeverkService = mockk<KodeverkService> {
+        coEvery { hentPoststed(any())} returns "Boble"
+        coEvery { hentPoststed("0380") } returns "Skåla"
+        coEvery { hentPoststed(null) } returns null
+        coEvery { hentLand(any()) } returns "Norge"
+    }
 
     //TODO legge tilbake kodeverkService
-    private val service = PersonService(personKlient)
+    private val service = PersonService(personKlient, kodeverkService)
 
     @AfterEach
     fun afterEach() {
@@ -68,9 +72,9 @@ internal class PersonServiceTest {
         assertNull(person.husbokstav)
         assertEquals("0380", person.postnummer)
         //TODO endre tilbake til Skåla med Kodeverk
-        assertEquals("0380", person.poststed)
+        assertEquals("Skåla", person.poststed)
         //TODO endre tilbake til Norge
-        assertEquals("NOR", person.statsborgerskap)
+        assertEquals("Norge", person.statsborgerskap?.landDekode)
         assertEquals(false, person.adressebeskyttelse)
         assertNull(person.sivilstatus)
     }
@@ -160,7 +164,7 @@ internal class PersonServiceTest {
     fun `Finner ikke person i PDL`() {
         coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personResponseIkkeFunnet.json")
 
-        val person = runBlocking {
+        runBlocking {
             assertThrows<NotFoundException> {
                 service.hentPerson(Foedselsnummer.of(STOR_SNERK))
             }

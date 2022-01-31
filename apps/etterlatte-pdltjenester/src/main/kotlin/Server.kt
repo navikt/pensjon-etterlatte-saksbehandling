@@ -16,7 +16,7 @@ import no.nav.etterlatte.ktortokenexchange.secureRoutUsing
 import no.nav.etterlatte.person.personApi
 
 class Server(applicationContext: ApplicationContext) {
-    private val personService = applicationContext.personService
+    //private val personService = applicationContext.personService
     private val personServiceAad = applicationContext.personServiceAad
     private val securityContext = applicationContext.securityMediator
 

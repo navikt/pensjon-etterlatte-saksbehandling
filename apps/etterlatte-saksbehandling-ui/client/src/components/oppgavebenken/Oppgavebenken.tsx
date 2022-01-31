@@ -50,6 +50,7 @@ const Oppgavebenken = () => {
   useEffect(() => {
     hentOppgaver()
       .then((response: IApiResponse<any>) => {
+        setLasterOppgaver(true)
         const mappedResponse = response.data.map((oppgave: any) => mapOppgaveResponse(oppgave))
         setOppgaver(mappedResponse)
         setLasterOppgaver(false)
@@ -75,7 +76,7 @@ const Oppgavebenken = () => {
           setGlobalFilter={setGlobalFilter}
           henterOppgaver={() => setHentOppgaverKlikket(true)}
         />
-        <Spinner visible={lasterOppgaver} label={'Laster saker'} />
+        <Spinner visible={lasterOppgaver} label={'Laster oppgaver'} />
         {!lasterOppgaver && (
           <OppgaveListe columns={columns} data={data} globalFilterValue={globalFilter} filterPar={filterPar} />
         )}

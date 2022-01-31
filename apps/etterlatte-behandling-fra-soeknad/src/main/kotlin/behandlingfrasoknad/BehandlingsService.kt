@@ -6,10 +6,14 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.behandling.Opplysning
+import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import java.util.*
 
-class BehandlingsService(private val behandling_app: HttpClient, private val url: String, private val opplysningsuthenter: Opplysningsuthenter = Opplysningsuthenter()) : Behandling {
+class BehandlingsService(
+    private val behandling_app: HttpClient,
+    private val url: String,
+    private val opplysningsuthenter: Opplysningsuthenter = Opplysningsuthenter()
+) : Behandling {
     override fun initierBehandling(sak: Long, jsonNode: JsonNode, jsonNode1: Long): UUID {
         return runBlocking {
             behandling_app.post<String>("$url/behandlinger") {
@@ -30,6 +34,6 @@ class BehandlingsService(private val behandling_app: HttpClient, private val url
 
 data class NyBehandlingRequest(
     val sak: Long,
-    val opplysninger: List<Opplysning>
+    val opplysninger: List<Behandlingsopplysning>
 )
 

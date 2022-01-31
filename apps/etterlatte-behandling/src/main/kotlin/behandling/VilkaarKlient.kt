@@ -10,16 +10,16 @@ import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.behandling.Opplysning
+import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 
 interface VilkaarKlient {
-    fun vurderVilkaar(vilkaar: String, opplysninger: List<Opplysning>): ObjectNode
+    fun vurderVilkaar(vilkaar: String, opplysninger: List<Behandlingsopplysning>): ObjectNode
 }
 
-class KtorVilkarClient(private val url: String): VilkaarKlient{
-    override fun vurderVilkaar(vilkaar: String, opplysninger: List<Opplysning>): ObjectNode {
+class KtorVilkarClient(private val url: String) : VilkaarKlient {
+    override fun vurderVilkaar(vilkaar: String, opplysninger: List<Behandlingsopplysning>): ObjectNode {
         return runBlocking {
-            HttpClient(CIO){
+            HttpClient(CIO) {
                 install(JsonFeature) {
                     serializer = JacksonSerializer {
                         configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -27,13 +27,16 @@ class KtorVilkarClient(private val url: String): VilkaarKlient{
                         registerModule(JavaTimeModule())
                     }
                 }
-            }.post(url){
+            }.post(url) {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
-                body = RequestDto("barnepensjon:brukerungnok", opplysninger.map { it.opplysning.put("_navn", it.opplysningType) })
+                body = RequestDto(
+                    "barnepensjon:brukerungnok",
+                    opplysninger.map { it.opplysning.put("_navn", it.opplysningType) })
             }
         }
 
     }
 }
-data class RequestDto(val vilkaar: String, val opplysninger:List<Any>)
+
+data class RequestDto(val vilkaar: String, val opplysninger: List<Any>)

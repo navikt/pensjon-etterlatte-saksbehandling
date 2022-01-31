@@ -9,7 +9,7 @@ import io.ktor.routing.post
 import io.ktor.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingsBehov
-import no.nav.etterlatte.libs.common.behandling.Opplysning
+import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.soeknad.SoeknadType
 import java.time.LocalDateTime
@@ -35,7 +35,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
 
         route("{sakId}") {
             // hent spesifikk sak (alle behandlinger?)
-            get{
+            get {
                 val sakId = call.parameters["sakId"]?.toInt()
                 if (sakId == null) {
                     call.response.status(HttpStatusCode(400, "Bad request"))
@@ -52,14 +52,14 @@ fun Route.behandlingRoute(service: BehandlingService) {
                     call.response.status(HttpStatusCode(400, "Bad request"))
                     call.respond("SakId mangler")
                 } else {
-                    val testOpplysning = Opplysning(
-                        UUID.randomUUID(), Opplysning.Privatperson(
+                    val testBehandlingsopplysning = Behandlingsopplysning(
+                        UUID.randomUUID(), Behandlingsopplysning.Privatperson(
                             "11057523044",
                             LocalDateTime.now().toInstant(ZoneOffset.UTC)
 
                         ), "testopplysning", objectMapper.createObjectNode(), objectMapper.createObjectNode()
                     )
-                    val behandlingsBehov = BehandlingsBehov(sakId, listOf(testOpplysning))
+                    val behandlingsBehov = BehandlingsBehov(sakId, listOf(testBehandlingsopplysning))
                     call.respond(service.opprettBehandling(behandlingsBehov, getAccessToken(call)))
                 }
             }
@@ -100,7 +100,11 @@ fun Route.behandlingRoute(service: BehandlingService) {
             } else {
                 try {
                     val accessToken = getAccessToken(call)
-                    service.opprettSak(fnr, SoeknadType.Gjenlevendepensjon, accessToken) // sakType blir nok en enum etter hvert
+                    service.opprettSak(
+                        fnr,
+                        SoeknadType.Gjenlevendepensjon,
+                        accessToken
+                    ) // sakType blir nok en enum etter hvert
                     call.respond("Ok");
                 } catch (e: Exception) {
                     throw e

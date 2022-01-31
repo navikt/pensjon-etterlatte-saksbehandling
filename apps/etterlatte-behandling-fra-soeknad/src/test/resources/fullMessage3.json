@@ -1,0 +1,348 @@
+{
+  "@event_name": "ey_fordelt",
+  "@soeknad_fordelt": true,
+  "@skjema_info": {
+    "imageTag": "aee3a2bc97ccba0d34d5985111c150f63a891508",
+    "innsender": {
+      "fornavn": "STOR",
+      "etternavn": "SNERK",
+      "foedselsnummer": "11057523044",
+      "type": "INNSENDER"
+    },
+    "harSamtykket": {
+      "svar": true,
+      "spoersmaal": ""
+    },
+    "utbetalingsInformasjon": {
+      "svar": "NORSK",
+      "spoersmaal": "Ønsker du å motta utbetalingen på norsk eller utenlandsk bankkonto?",
+      "opplysning": {
+        "kontonummer": {
+          "svar": "9999.99.99999",
+          "spoersmaal": "Oppgi norsk kontonummer for utbetaling av barnepensjon"
+        },
+        "utenlandskBankNavn": null,
+        "utenlandskBankAdresse": null,
+        "iban": null,
+        "swift": null,
+        "skattetrekk": {
+          "svar": "JA",
+          "spoersmaal": "Ønsker du at vi legger inn et skattetrekk for barnepensjonen?",
+          "opplysning": {
+            "svar": "20%",
+            "spoersmaal": "Oppgi ønsket skattetrekk"
+          }
+        }
+      }
+    },
+    "soeker": {
+      "fornavn": "Gustaf",
+      "etternavn": "Raymondsen",
+      "foedselsnummer": "29081276127",
+      "statsborgerskap": {
+        "svar": "Norge",
+        "spoersmaal": "Statsborgerskap"
+      },
+      "utenlandsAdresse": {
+        "svar": "JA",
+        "spoersmaal": "Bor barnet i et annet land enn Norge?",
+        "opplysning": {
+          "land": {
+            "svar": "Oman",
+            "spoersmaal": "Land"
+          },
+          "adresse": {
+            "svar": "Oman 1, 9999 Oman",
+            "spoersmaal": "Adresse i utlandet"
+          }
+        }
+      },
+      "foreldre": [
+        {
+          "fornavn": "STOR",
+          "etternavn": "SNERK",
+          "foedselsnummer": "11057523044",
+          "type": "FORELDER"
+        },
+        {
+          "fornavn": "Reidar",
+          "etternavn": "Reidarsen",
+          "foedselsnummer": "19078504903",
+          "type": "FORELDER"
+        }
+      ],
+      "verge": {
+        "svar": "JA",
+        "spoersmaal": "Er det oppnevnt en verge for barnet?",
+        "opplysning": {
+          "fornavn": "Verge",
+          "etternavn": "Vergesen",
+          "foedselsnummer": "19078504903",
+          "type": "VERGE"
+        }
+      },
+      "dagligOmsorg": null,
+      "type": "BARN"
+    },
+    "foreldre": [
+      {
+        "fornavn": "STOR",
+        "etternavn": "SNERK",
+        "foedselsnummer": "11057523044",
+        "adresse": {
+          "svar": "BØLERLIA 99, 0689 Oslo",
+          "spoersmaal": "Bostedsadresse"
+        },
+        "statsborgerskap": {
+          "svar": "Norge",
+          "spoersmaal": "Statsborgerskap"
+        },
+        "kontaktinfo": {
+          "epost": {
+            "svar": "epost@epost.no",
+            "spoersmaal": "E-post (valgfri)"
+          },
+          "telefonnummer": {
+            "svar": "969 69 696",
+            "spoersmaal": "Telefonnummer"
+          }
+        },
+        "type": "GJENLEVENDE_FORELDER"
+      },
+      {
+        "fornavn": "Reidar",
+        "etternavn": "Reidarsen",
+        "foedselsnummer": "19078504903",
+        "datoForDoedsfallet": {
+          "svar": "2022-01-05",
+          "spoersmaal": "Når skjedde dødsfallet?"
+        },
+        "statsborgerskap": {
+          "svar": "Norge",
+          "spoersmaal": "Statsborgerskap"
+        },
+        "utenlandsopphold": {
+          "svar": "JA",
+          "spoersmaal": "Bodde eller arbeidet han eller hun i et annet land enn Norge etter fylte 16 år?",
+          "opplysning": [
+            {
+              "land": {
+                "svar": "Antigua og barbuda",
+                "spoersmaal": "Land"
+              },
+              "fraDato": {
+                "svar": "2000-01-01",
+                "spoersmaal": "Fra dato (valgfri)"
+              },
+              "tilDato": {
+                "svar": "2002-01-01",
+                "spoersmaal": "Til dato (valgfri)"
+              },
+              "oppholdsType": {
+                "svar": [
+                  "BODD"
+                ],
+                "spoersmaal": "Bodd og/eller arbeidet?"
+              },
+              "medlemFolketrygd": {
+                "svar": "JA",
+                "spoersmaal": "Var han eller hun medlem av folketrygden under oppholdet?"
+              },
+              "pensjonsutbetaling": {
+                "svar": "-",
+                "spoersmaal": "Oppgi eventuell pensjon han eller hun mottok fra dette landet (valgfri)"
+              }
+            },
+            {
+              "land": {
+                "svar": "Bahamas",
+                "spoersmaal": "Land"
+              },
+              "fraDato": {
+                "svar": "2002-02-02",
+                "spoersmaal": "Fra dato (valgfri)"
+              },
+              "tilDato": {
+                "svar": "2003-02-02",
+                "spoersmaal": "Til dato (valgfri)"
+              },
+              "oppholdsType": {
+                "svar": [
+                  "ARBEIDET"
+                ],
+                "spoersmaal": "Bodd og/eller arbeidet?"
+              },
+              "medlemFolketrygd": {
+                "svar": "NEI",
+                "spoersmaal": "Var han eller hun medlem av folketrygden under oppholdet?"
+              },
+              "pensjonsutbetaling": {
+                "svar": "4738",
+                "spoersmaal": "Oppgi eventuell pensjon han eller hun mottok fra dette landet (valgfri)"
+              }
+            },
+            {
+              "land": {
+                "svar": "Canada",
+                "spoersmaal": "Land"
+              },
+              "fraDato": {
+                "svar": "1998-02-02",
+                "spoersmaal": "Fra dato (valgfri)"
+              },
+              "tilDato": {
+                "svar": "1999-02-02",
+                "spoersmaal": "Til dato (valgfri)"
+              },
+              "oppholdsType": {
+                "svar": [
+                  "BODD",
+                  "ARBEIDET"
+                ],
+                "spoersmaal": "Bodd og/eller arbeidet?"
+              },
+              "medlemFolketrygd": {
+                "svar": "VET_IKKE",
+                "spoersmaal": "Var han eller hun medlem av folketrygden under oppholdet?"
+              },
+              "pensjonsutbetaling": {
+                "svar": "3929",
+                "spoersmaal": "Oppgi eventuell pensjon han eller hun mottok fra dette landet (valgfri)"
+              }
+            }
+          ]
+        },
+        "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": {
+          "svar": "JA",
+          "spoersmaal": "Skyldes dødsfallet yrkesskade eller yrkessykdom?"
+        },
+        "naeringsInntekt": {
+          "svar": "JA",
+          "spoersmaal": "Var han eller hun selvstendig næringsdrivende?",
+          "opplysning": {
+            "naeringsinntektPrAarFoerDoedsfall": {
+              "svar": "83920",
+              "spoersmaal": "Oppgi næringsinntekt fra kalenderåret før dødsfallet (valgfri)"
+            },
+            "naeringsinntektVedDoedsfall": {
+              "svar": "JA",
+              "spoersmaal": "Hadde han eller hun næringsinntekt når dødsfallet skjedde?"
+            }
+          }
+        },
+        "militaertjeneste": {
+          "svar": "JA",
+          "spoersmaal": "Har han eller hun gjennomført militær eller sivil førstegangstjeneste som varte minst 30 dager?",
+          "opplysning": {
+            "svar": "1992",
+            "spoersmaal": "Hvilke(-t) år? (valgfri)"
+          }
+        },
+        "type": "AVDOED"
+      }
+    ],
+    "soesken": [
+      {
+        "fornavn": "Josef",
+        "etternavn": "Josefsen",
+        "foedselsnummer": "19078504903",
+        "statsborgerskap": {
+          "svar": "Papua ny-guinea",
+          "spoersmaal": "Statsborgerskap"
+        },
+        "utenlandsAdresse": {
+          "svar": "NEI",
+          "spoersmaal": "Bor barnet i et annet land enn Norge?",
+          "opplysning": null
+        },
+        "foreldre": [
+          {
+            "fornavn": "Reidar",
+            "etternavn": "Reidarsen",
+            "foedselsnummer": "19078504903",
+            "type": "FORELDER"
+          }
+        ],
+        "verge": null,
+        "dagligOmsorg": {
+          "svar": "GJENLEVENDE",
+          "spoersmaal": "Har du daglig omsorg for dette barnet?"
+        },
+        "type": "BARN"
+      },
+      {
+        "fornavn": "Reidun",
+        "etternavn": "Gustafsen",
+        "foedselsnummer": "20060976385",
+        "statsborgerskap": {
+          "svar": "Norge",
+          "spoersmaal": "Statsborgerskap"
+        },
+        "utenlandsAdresse": {
+          "svar": "NEI",
+          "spoersmaal": "Bor barnet i et annet land enn Norge?",
+          "opplysning": null
+        },
+        "foreldre": [
+          {
+            "fornavn": "STOR",
+            "etternavn": "SNERK",
+            "foedselsnummer": "11057523044",
+            "type": "FORELDER"
+          },
+          {
+            "fornavn": "Reidar",
+            "etternavn": "Reidarsen",
+            "foedselsnummer": "19078504903",
+            "type": "FORELDER"
+          }
+        ],
+        "verge": {
+          "svar": "NEI",
+          "spoersmaal": "Er det oppnevnt en verge for barnet?",
+          "opplysning": null
+        },
+        "dagligOmsorg": null,
+        "type": "BARN"
+      }
+    ],
+    "versjon": "1",
+    "type": "BARNEPENSJON",
+    "mottattDato": "2022-01-25T15:29:34.621087004",
+    "template": "barnepensjon_v1"
+  },
+  "@lagret_soeknad_id": 540,
+  "@template": "soeknad",
+  "@fnr_soeker": "29081276127",
+  "@hendelse_gyldig_til": "2022-01-25T15:01:49.849395989Z",
+  "system_read_count": 2,
+  "system_participating_services": [
+    {
+      "service": "innsendt-soeknad",
+      "instance": "innsendt-soeknad-68c7c7cbd8-qg8kw",
+      "time": "2022-01-25T15:31:49.849674873"
+    },
+    {
+      "service": "sjekk-adressebeskyttelse",
+      "instance": "sjekk-adressebeskyttelse-78d65c56bd-b9xw6",
+      "time": "2022-01-25T15:31:50.241911992"
+    },
+    {
+      "service": "journalfoer-soeknad",
+      "instance": "journalfoer-soeknad-6b9bcd59fb-8bltd",
+      "time": "2022-01-25T15:31:52.263231343"
+    }
+  ],
+  "@adressebeskyttelse": "UGRADERT",
+  "@dokarkivRetur": {
+    "journalpostId": "524274744",
+    "journalpoststatus": null,
+    "melding": null,
+    "journalpostferdigstilt": false,
+    "dokumenter": [
+      {
+        "dokumentInfoId": "548467244"
+      }
+    ]
+  }
+}

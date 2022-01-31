@@ -18,24 +18,29 @@ val vilkaarMap = mapOf("barnepensjon:brukerungnok" to brukerErUngNok)
 
 fun main() {
     embeddedServer(CIO, applicationEngineEnvironment {
-        modules.add{ module() }
+        modules.add { module() }
         connector { port = 8080 }
     }).start(true)
 }
 
-fun Application.module(){
+fun Application.module() {
     install(ContentNegotiation) {
-        jackson{
+        jackson {
             registerModule(JavaTimeModule())
         }
     }
     routing {
-        get("/isalive"){ call.respondText("ALIVE", ContentType.Text.Plain) }
-        get("/isready"){ call.respondText("READY", ContentType.Text.Plain) }
-        get("/"){ call.respond(brukerErUngNok) }
-        post("/") { call.respond(objectMapper.valueToTree(call.receive<RequestDto>().let{vilkaarMap[it.vilkaar]?.vurder(it.opplysninger)?.serialize() }))}
+        get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
+        get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
+        get("/") { call.respond(brukerErUngNok) }
+        post("/") {
+            call.respond(
+                objectMapper.valueToTree(
+                    call.receive<RequestDto>().let { vilkaarMap[it.vilkaar]?.vurder(it.opplysninger)?.serialize() })
+            )
+        }
     }
 
 }
 
-data class RequestDto(val vilkaar: String, val opplysninger:List<Opplysning>)
+data class RequestDto(val vilkaar: String, val opplysninger: List<Opplysning>)

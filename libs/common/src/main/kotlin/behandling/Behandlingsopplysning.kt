@@ -14,7 +14,7 @@ import java.time.Instant
 import java.util.*
 
 
-open class Opplysning(
+open class Behandlingsopplysning(
     val id: UUID,
     val kilde: Kilde,
     val opplysningType: String,

@@ -1,16 +1,16 @@
 package no.nav.etterlatte.behandling
 
-import no.nav.etterlatte.libs.common.behandling.Opplysning
+import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.SoeknadType
 import org.slf4j.LoggerFactory
 
 
-data class PersonSakerResult (val person: Person, val saker: SakerResult)
+data class PersonSakerResult(val person: Person, val saker: SakerResult)
 
 data class BehandlingsBehov(
     val sak: Long,
-    val opplysninger: List<Opplysning>?
+    val opplysninger: List<Behandlingsopplysning>?
 )
 
 class BehandlingService(private val behandlingKlient: BehandlingKlient, private val pdlKlient: PdltjenesterKlient) {

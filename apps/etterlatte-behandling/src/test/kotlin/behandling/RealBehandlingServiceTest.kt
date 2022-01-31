@@ -7,7 +7,7 @@ import io.mockk.slot
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
-import no.nav.etterlatte.libs.common.behandling.Opplysning
+import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -25,14 +25,26 @@ internal class RealBehandlingServiceTest {
 
         val id = UUID.randomUUID()
 
-        val opplysninger = listOf(
-            Opplysning(UUID.randomUUID(), Opplysning.Saksbehandler("S01"), "trygdetid", objectMapper.createObjectNode(), objectMapper.createObjectNode()),
-            Opplysning(UUID.randomUUID(), Opplysning.Saksbehandler("S01"), "medlemskap", objectMapper.createObjectNode(), objectMapper.createObjectNode()),
+        val opplysningers = listOf(
+            Behandlingsopplysning(
+                UUID.randomUUID(),
+                Behandlingsopplysning.Saksbehandler("S01"),
+                "trygdetid",
+                objectMapper.createObjectNode(),
+                objectMapper.createObjectNode()
+            ),
+            Behandlingsopplysning(
+                UUID.randomUUID(),
+                Behandlingsopplysning.Saksbehandler("S01"),
+                "medlemskap",
+                objectMapper.createObjectNode(),
+                objectMapper.createObjectNode()
+            ),
         )
 
         every { behandlingerMock.hent(id) } returns Behandling(id, 1, emptyList(), null, null, false)
-        every { opplysningerMock.finnOpplysningerIBehandling(id) } returns opplysninger
-        Assertions.assertEquals(2,  sut.hentBehandling(id).grunnlag.size)
+        every { opplysningerMock.finnOpplysningerIBehandling(id) } returns opplysningers
+        Assertions.assertEquals(2, sut.hentBehandling(id).grunnlag.size)
     }
 
     @Test
@@ -53,7 +65,7 @@ internal class RealBehandlingServiceTest {
 
         val resultat = sut.startBehandling(1, emptyList())
 
-        Assertions.assertEquals(opprettetBehandling,  resultat)
+        Assertions.assertEquals(opprettetBehandling, resultat)
         Assertions.assertEquals(1, behandlingOpprettes.captured.sak)
         Assertions.assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
         Assertions.assertEquals(opplysningerHentes.captured, behandlingOpprettes.captured.id)
@@ -63,7 +75,7 @@ internal class RealBehandlingServiceTest {
     fun leggTilGrunnlagPåBehandlingUtenVilkårsprøving() {
         val behandlingerMock = mockk<BehandlingDao>()
         val opplysningerMock = mockk<OpplysningDao>()
-        val opplysningSomLagres = slot<Opplysning>()
+        val behandlingsopplysningSomLagres = slot<Behandlingsopplysning>()
 
         Kontekst.set(Context(Self("test"), mockk()))
 
@@ -74,14 +86,19 @@ internal class RealBehandlingServiceTest {
 
         every { behandlingerMock.hent(id) } returns Behandling(id, 1, emptyList(), null, null, false)
         every { opplysningerMock.finnOpplysningerIBehandling(id) } returns emptyList()
-        every { opplysningerMock.nyOpplysning(capture(opplysningSomLagres)) } returns Unit
+        every { opplysningerMock.nyOpplysning(capture(behandlingsopplysningSomLagres)) } returns Unit
         every { opplysningerMock.leggOpplysningTilBehandling(id, any()) } returns Unit
 
-        val result = sut.leggTilGrunnlag(id, objectMapper.createObjectNode(), "trygdetid", Opplysning.Saksbehandler("S01"))
+        val result = sut.leggTilGrunnlag(
+            id,
+            objectMapper.createObjectNode(),
+            "trygdetid",
+            Behandlingsopplysning.Saksbehandler("S01")
+        )
 
-        Assertions.assertEquals(opplysningSomLagres.captured.id, result)
-        Assertions.assertEquals("trygdetid", opplysningSomLagres.captured.opplysningType)
-        Assertions.assertTrue(opplysningSomLagres.captured.kilde is Opplysning.Saksbehandler)
+        Assertions.assertEquals(behandlingsopplysningSomLagres.captured.id, result)
+        Assertions.assertEquals("trygdetid", behandlingsopplysningSomLagres.captured.opplysningType)
+        Assertions.assertTrue(behandlingsopplysningSomLagres.captured.kilde is Behandlingsopplysning.Saksbehandler)
 
     }
 
@@ -93,17 +110,31 @@ internal class RealBehandlingServiceTest {
         Kontekst.set(Context(Self("test"), mockk()))
         val sut = RealBehandlingService(behandlingerMock, opplysningerMock, NoOpVilkaarKlient())
         val id = UUID.randomUUID()
-        val vilkårsprøvd_behandling = Behandling(id, 1, emptyList(), Vilkårsprøving(emptyList(), objectMapper.createObjectNode(), ""), null, false)
+        val vilkårsprøvd_behandling = Behandling(
+            id,
+            1,
+            emptyList(),
+            Vilkårsprøving(emptyList(), objectMapper.createObjectNode(), ""),
+            null,
+            false
+        )
         every { behandlingerMock.hent(id) } returns vilkårsprøvd_behandling
         every { opplysningerMock.finnOpplysningerIBehandling(id) } returns emptyList()
 
 
-        Assertions.assertThrows(IllegalArgumentException::class.java){sut.leggTilGrunnlag(id, objectMapper.createObjectNode(), "trygdetid", Opplysning.Saksbehandler("S01"))}
+        Assertions.assertThrows(IllegalArgumentException::class.java) {
+            sut.leggTilGrunnlag(
+                id,
+                objectMapper.createObjectNode(),
+                "trygdetid",
+                Behandlingsopplysning.Saksbehandler("S01")
+            )
+        }
     }
 }
 
-class NoOpVilkaarKlient: VilkaarKlient{
-    override fun vurderVilkaar(vilkaar: String, opplysninger: List<Opplysning>): ObjectNode {
+class NoOpVilkaarKlient : VilkaarKlient {
+    override fun vurderVilkaar(vilkaar: String, opplysninger: List<Behandlingsopplysning>): ObjectNode {
         return objectMapper.createObjectNode()
     }
 }

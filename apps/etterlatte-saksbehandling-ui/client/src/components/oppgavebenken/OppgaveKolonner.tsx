@@ -12,7 +12,6 @@ import moment from 'moment'
 import { ColorTag } from './styled'
 import React from 'react'
 import SaksbehandlerFilterListe from './filtere/SaksbehandlerFilterListe'
-import { Button } from '@navikt/ds-react'
 import HandlingerFilterListe from './filtere/HandlingerFilterListe'
 
 moment.defaultFormat = 'DD.MM.YYYY'

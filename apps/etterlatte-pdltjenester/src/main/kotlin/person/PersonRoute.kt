@@ -32,14 +32,12 @@ fun Route.personApi(service: PersonService) {
             val fnr = Foedselsnummer.of(call.receive<String>().toString())
             logger.info("Fnr: $fnr")
             val person = service.hentPerson(fnr)
-            //logger.info(person.toJson())
             call.respond(person)
         }
         post("hentutland") {
             val fnr = Foedselsnummer.of(call.receive<String>().toString())
             logger.info("Fnr: $fnr")
             val utland = service.hentUtland(fnr)
-            //logger.info(utland.toJson())
             call.respond(utland)
         }
     }

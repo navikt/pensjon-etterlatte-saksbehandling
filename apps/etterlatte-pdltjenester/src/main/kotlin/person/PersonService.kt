@@ -48,14 +48,13 @@ class PersonService(
         //TODO fikse feilhåndtering
         if (!response.errors.isNullOrEmpty()) {
             loggfoerFeilmeldinger(response.errors)
-            //throw NotFoundException()
+            throw NotFoundException()
         }
 
         return opprettUtland(hentUtland)
     }
 
-    //TODO suspend her trengs når vi skal reintrodusere kodeverk
-    private suspend fun opprettPerson(
+    private fun opprettPerson(
         fnr: Foedselsnummer,
         hentPerson: HentPerson
     ): Person {
@@ -92,7 +91,6 @@ class PersonService(
             husnummer = bostedsadresse?.vegadresse?.husnummer,
             husbokstav = bostedsadresse?.vegadresse?.husbokstav,
             postnummer = bostedsadresse?.vegadresse?.postnummer,
-            //poststed = kodeverkService.hentPoststed(bostedsadresse?.vegadresse?.postnummer),
             statsborgerskap = statsborgerskap?.land,
             foedeland = foedsel?.foedeland,
             sivilstatus = sivilstand?.type?.name,

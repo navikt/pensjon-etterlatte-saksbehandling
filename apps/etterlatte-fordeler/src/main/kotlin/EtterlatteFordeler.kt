@@ -1,6 +1,6 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.databind.JsonNode
+
 import io.ktor.client.features.ResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -13,7 +13,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import org.apache.kafka.common.protocol.types.Field
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.OffsetDateTime
@@ -28,29 +27,6 @@ internal class EtterlatteFordeler(
     private lateinit var barn: Person
     private lateinit var avdoed: Person
     private lateinit var soeknad: JsonMessage
-
-
-    //Avdød:
-    // (v) Ingen ut. og innvandringsdatoer
-    // (v) Ikke huket av for yrkesskade/yrkessykdom
-    // (v) Dødsfallet må ha skjedd i Norge og være registrert. Må få en dødsdato fra PDL (ikke være noe som er uavklart rundt dette)
-    // ikke oppgitt utenlandsopphold
-
-
-    //Barn:
-    // (v) Født og oppvokst i Norge
-    // (v) Alder: under 15 år (slik at vi har nok tid til det blir en eventuell omberegning når barnet er 18 år)
-    //Ett barn, ingen søsken
-    //Må vi ta høyde for flere søsken
-    //Kan vi tenke på kun fellesbarn i første versjon?
-
-    //soeker
-    //Bosatt i Norge
-    //Ikke huket av for uregistrertEllerVenterBarn
-
-    //Ikke verge:
-    // (v) Gjenlevende forelder er innsender av søknad
-    // (v) Sjekke at det ikke er huket av for verge i søknaden
 
     /*
     *Dødsfallet er registrert
@@ -79,7 +55,7 @@ internal class EtterlatteFordeler(
         Kriterie("Barn har verge") {harVerge(soeknad)},
         Kriterie("Det er huket av for utenlandsopphold for avdøde") {harHuketAvForUtenlandsopphold(soeknad)}
         //Kriterie("Søker venter barn") {soekerForventerBarn(soeknad)
-        //Søker venter barn ligger pt. ikke i søknaden, derfor kommentert ut
+        //TODO Søker venter barn ligger pt. ikke i søknaden, derfor kommentert ut
     )
 
     init {
@@ -129,7 +105,6 @@ internal class EtterlatteFordeler(
                     context.publish(packet.toJson())
                 } else {
                     logger.info("Avbrutt fordeling, kriterier: " + aktuelleSaker.forklaring.toString())
-                    //println("Avbrutt fordeling, kriterier: " + aktuelleSaker.forklaring.toString())
                     return@runBlocking
                 }
             } catch (err: ResponseException) {

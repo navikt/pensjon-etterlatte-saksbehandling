@@ -3,12 +3,12 @@ import { Button } from '@navikt/ds-react'
 
 const SaksbehandlerFilterListe: React.FC<{ value: string }> = ({ value }) => {
   //const saksbehandlerReducer = useContext(AppContext).state.saksbehandlerReducer.navn
-
+  // todo onclick skal lagre navnet på saksbehandler på en sak
   const verdi = value ? (
     value
   ) : (
     <Button size={'small'} onClick={() => {}} variant={'secondary'}>
-      Plukk
+      Tildel meg
     </Button>
   )
 

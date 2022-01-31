@@ -24,9 +24,7 @@ interface OppgaveResponse {
 export const hentOppgaver = async (): Promise<IApiResponse<any>> => {
   try {
     const result: Response = await fetch(`${path}/api/oppgaver`)
-    console.log('RESPSONSE', result)
     const data: OppgaveResponse = await result.json()
-    console.log('DATA', data)
     return {
       status: result.status,
       data: data.oppgaver,

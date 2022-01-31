@@ -13,6 +13,7 @@ import { ColorTag } from './styled'
 import React from 'react'
 import SaksbehandlerFilterListe from './filtere/SaksbehandlerFilterListe'
 import { Button } from '@navikt/ds-react'
+import HandlingerFilterListe from './filtere/HandlingerFilterListe'
 
 moment.defaultFormat = 'DD.MM.YYYY'
 
@@ -24,6 +25,18 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
       return moment(dato).format()
     },
     sortType: 'datetime',
+  },
+  {
+    Header: 'Frist',
+    accessor: 'fristdato',
+    Cell: ({ value: dato }) => {
+      return moment(dato).format()
+    },
+    sortType: 'datetime',
+  },
+  {
+    Header: 'Fødselsnummer',
+    accessor: 'fnr',
   },
   {
     Header: 'Behandlingstype',
@@ -41,18 +54,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
       return <ColorTag type={soeknadstype} label={soeknadTypeFilter[soeknadstype as SoeknadTypeFilter]?.navn} />
     },
   },
-  {
-    Header: 'Frist',
-    accessor: 'fristdato',
-    Cell: ({ value: dato }) => {
-      return moment(dato).format()
-    },
-    sortType: 'datetime',
-  },
-  {
-    Header: 'Fødselsnummer',
-    accessor: 'fnr',
-  },
+
   {
     Header: 'Beskrivelse',
     accessor: 'beskrivelse',
@@ -77,12 +79,8 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
   {
     Header: 'Handlinger',
     accessor: 'handling',
-    Cell: ({ value: handling }) => {
-      return (
-        <Button size={'small'} onClick={() => {}} variant={'secondary'}>
-          {handling.toString()}
-        </Button>
-      )
+    Cell: ({ row, value: handling }) => {
+      return <HandlingerFilterListe saksbehandler={row.original.saksbehandler} handling={handling} />
     },
   },
 ]

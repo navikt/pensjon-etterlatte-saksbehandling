@@ -27,6 +27,7 @@ const OppgavebenkContainer = styled.div`
 const Oppgavebenken = () => {
   const saksbehandlerNavn = useContext<IAppContext>(AppContext).state.saksbehandlerReducer.navn
   const [lasterOppgaver, setLasterOppgaver] = useState(true)
+  const [hentOppgaverKlikket, setHentOppgaverKlikket] = useState(false)
   const [oppgaver, setOppgaver] = useState<ReadonlyArray<IOppgave>>([])
   const [oppgaveFelter, setOppgaveFelter] = useState<IOppgaveFelter>(initialOppgaveFelter(saksbehandlerNavn))
   const [globalFilter, setGlobalFilter] = useState<string | undefined>('')
@@ -56,30 +57,34 @@ const Oppgavebenken = () => {
       .catch(() => {
         setLasterOppgaver(false)
       })
-      .finally(() => setLasterOppgaver(false))
-  }, [])
+      .finally(() => {
+        setLasterOppgaver(false)
+        setHentOppgaverKlikket(false)
+      })
+  }, [hentOppgaverKlikket])
 
   const data: ReadonlyArray<IOppgave> = React.useMemo(() => oppgaver, [oppgaver])
   const columns: ReadonlyArray<Column<IOppgave>> = React.useMemo(() => kolonner, [])
 
   return (
     <OppgavebenkContainer>
-      <Spinner visible={lasterOppgaver} label={'Laster saker'} />
-      {!lasterOppgaver && (
-        <>
-          <OppgaveHeader
-            oppgaveFelter={oppgaveFelter}
-            setOppgaveFelter={setOppgaveFelter}
-            setGlobalFilter={setGlobalFilter}
-          />
+      <>
+        <OppgaveHeader
+          oppgaveFelter={oppgaveFelter}
+          setOppgaveFelter={setOppgaveFelter}
+          setGlobalFilter={setGlobalFilter}
+          henterOppgaver={() => setHentOppgaverKlikket(true)}
+        />
+        <Spinner visible={lasterOppgaver} label={'Laster saker'} />
+        {!lasterOppgaver && (
           <OppgaveListe columns={columns} data={data} globalFilterValue={globalFilter} filterPar={filterPar} />
-        </>
-      )}
+        )}
+      </>
     </OppgavebenkContainer>
   )
 }
 
-export function mapOppgaveResponse(data: any): IOppgave {
+function mapOppgaveResponse(data: any): IOppgave {
   const oppgave: IOppgave = {
     sakId: data.sakId,
     behandlingsId: data.sakId,
@@ -89,11 +94,19 @@ export function mapOppgaveResponse(data: any): IOppgave {
     fristdato: moment(data.fristdato, 'YYYY-MM-DD').toDate(),
     fnr: data.fnr,
     beskrivelse: data.beskrivelse,
-    status: data.status.toUpperCase() as StatusFilter,
+    status: mapStatus(data.status.toUpperCase()),
     saksbehandler: data.saksbehandler,
     handling: data.handling.toUpperCase() as Handlinger,
   }
   return oppgave
+}
+
+function mapStatus(status: string): StatusFilter {
+  if (status === 'OPPRETTET') {
+    return StatusFilter.NY
+  } else {
+    return StatusFilter.UNDER_BEHANDLING
+  }
 }
 
 export default Oppgavebenken

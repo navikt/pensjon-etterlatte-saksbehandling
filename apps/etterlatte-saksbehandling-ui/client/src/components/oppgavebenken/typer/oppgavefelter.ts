@@ -25,10 +25,10 @@ export interface IOppgaveFelt {
 export interface IOppgaveFelter {
   [key: string]: IOppgaveFelt
   regdato: IOppgaveFelt
-  behandlingType: IOppgaveFelt
-  soeknadType: IOppgaveFelt
   fristdato: IOppgaveFelt
   fnr: IOppgaveFelt
+  behandlingType: IOppgaveFelt
+  soeknadType: IOppgaveFelt
   beskrivelse: IOppgaveFelt
   status: IOppgaveFelt
   saksbehandler: IOppgaveFelt
@@ -56,6 +56,23 @@ export const initialOppgaveFelter = (saksbehandlerNavn: string): IOppgaveFelter 
         selectedValue: '',
       },
     },
+    fristdato: {
+      noekkel: 'fristdato',
+      label: 'Frist',
+      filter: {
+        type: 'dato',
+        selectedValue: '',
+      },
+    },
+    fnr: {
+      noekkel: 'fnr',
+      label: 'Fødselsnummer',
+      filter: {
+        type: 'string',
+        selectedValue: '',
+      },
+    },
+
     behandlingType: {
       noekkel: 'behandlingType',
       label: 'Behandlingstype',
@@ -72,22 +89,6 @@ export const initialOppgaveFelter = (saksbehandlerNavn: string): IOppgaveFelter 
         type: 'select',
         selectedValue: SoeknadTypeFilter.VELG,
         nedtrekksliste: soeknadTypeFilter,
-      },
-    },
-    fristdato: {
-      noekkel: 'fristdato',
-      label: 'Frist',
-      filter: {
-        type: 'dato',
-        selectedValue: '',
-      },
-    },
-    fnr: {
-      noekkel: 'fnr',
-      label: 'Fødselsnummer',
-      filter: {
-        type: 'string',
-        selectedValue: '',
       },
     },
     beskrivelse: {

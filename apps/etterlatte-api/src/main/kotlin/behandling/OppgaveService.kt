@@ -60,7 +60,7 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient) {
                 soeknadType = sakMedBehandling.sak.sakType,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, //må hentes ut etterhvert
                 regdato = LocalDateTime.now().toString(),
-                fristdato = LocalDateTime.now().plusDays(10).toString(), //pluss intervall
+                fristdato = LocalDateTime.now().plusMonths(1).toString(), //pluss intervall
                 fnr = sakMedBehandling.sak.ident,
                 beskrivelse = "",
                 saksbehandler = "",

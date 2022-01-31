@@ -16,9 +16,10 @@ type Props = {
   oppgaveFelter: IOppgaveFelter
   setOppgaveFelter: (oppgaveFelter: IOppgaveFelter) => void
   setGlobalFilter: (value: string | undefined) => void
+  henterOppgaver: () => void
 }
 
-const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGlobalFilter }) => {
+const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGlobalFilter, henterOppgaver }) => {
   const [resetGlobalInput, setResetGlobalInput] = useState<boolean>(false)
   const saksbehandlerNavn = useContext<IAppContext>(AppContext).state.saksbehandlerReducer.navn
 
@@ -34,7 +35,7 @@ const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGl
       />
       <ColumnFilters oppgaveFelter={oppgaveFelter} setOppgaveFelter={setOppgaveFelter} />
       <ButtonWrapper>
-        <Button size={'small'} onClick={() => {}} variant={'primary'}>
+        <Button size={'small'} onClick={henterOppgaver} variant={'primary'}>
           Hent
         </Button>
         <Button

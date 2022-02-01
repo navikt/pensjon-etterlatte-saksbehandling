@@ -98,5 +98,16 @@ query($ident: ID!) {
             utenlandskAdresseIFrittFormat{...utenlandskAdresseIFrittFormatDetails}
             vegadresse{...vegadresseDetails}
         }
+        oppholdsadresse {
+            coAdressenavn
+            folkeregistermetadata {...folkeregistermetadata}
+            gyldigFraOgMed
+            gyldigTilOgMed
+            matrikkeladresse {...MatrikkeladresseDetails}
+            metadata{...metadata}
+            oppholdAnnetSted
+            utenlandskAdresse{...utenlandskAdresseDetails}
+            vegadresse{...vegadresseDetails}
+        }
     }
 }

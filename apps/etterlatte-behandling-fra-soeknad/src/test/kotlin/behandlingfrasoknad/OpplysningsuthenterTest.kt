@@ -28,23 +28,91 @@ internal class OpplysningsuthenterTest {
         )
 
         assertEquals("innsender", opplysninger[0].opplysningType)
-        assertEquals("samtykke", opplysninger[1].opplysningType)
-        assertEquals("utbetalingsinformasjon", opplysninger[2].opplysningType)
-        assertEquals("soeker_personinfo", opplysninger[3].opplysningType)
-        assertEquals("soeker_statsborgerskap", opplysninger[4].opplysningType)
-        assertEquals("soeker_utenlandsadresse", opplysninger[5].opplysningType)
-        assertEquals("soeker_verge", opplysninger[6].opplysningType)
-        assertEquals("soeker_daglig_omsorg", opplysninger[7].opplysningType)
-        assertEquals("forelder_gjenlevende_personinfo", opplysninger[8].opplysningType)
-        assertEquals("forelder_avdoed_personinfo", opplysninger[9].opplysningType)
-        assertEquals("forelder_avdoed_doedsfallinformasjon", opplysninger[10].opplysningType)
-        assertEquals("forelder_avdoed_utenlandsopphold", opplysninger[11].opplysningType)
-        assertEquals("forelder_avdoed_naeringsinntekt", opplysninger[12].opplysningType)
-        assertEquals("forelder_avdoed_militaertjeneste", opplysninger[13].opplysningType)
-        assertEquals("soesken", opplysninger[14].opplysningType)
-        assertEquals("soeknad_mottatt_dato", opplysninger[15].opplysningType)
+        assertEquals(
+            """{"fornavn":"STOR","etternavn":"SNERK","foedselsnummer":"11057523044","type":"INNSENDER"}""",
+            opplysninger[0].opplysning.toString()
+        )
 
-        // bør inneholdet i objektene over testes på noen måte?
+        assertEquals("samtykke", opplysninger[1].opplysningType)
+        assertEquals("""{"svar":true,"spoersmaal":""}""", opplysninger[1].opplysning.toString())
+
+        assertEquals("utbetalingsinformasjon", opplysninger[2].opplysningType)
+        assertEquals(
+            """{"svar":"NORSK","spoersmaal":"Ønsker du å motta utbetalingen på norsk eller utenlandsk bankkonto?","opplysning":{"kontonummer":{"svar":"9999.99.99999","spoersmaal":"Oppgi norsk kontonummer for utbetaling av barnepensjon"},"utenlandskBankNavn":null,"utenlandskBankAdresse":null,"iban":null,"swift":null,"skattetrekk":{"svar":"JA","spoersmaal":"Ønsker du at vi legger inn et skattetrekk for barnepensjonen?","opplysning":{"svar":"20%","spoersmaal":"Oppgi ønsket skattetrekk"}}}}""",
+            opplysninger[2].opplysning.toString()
+        )
+
+        assertEquals("soeker_personinfo", opplysninger[3].opplysningType)
+        assertEquals(
+            """{"fornavn":"Gustaf","etternavn":"Raymondsen","foedselsnummer":"29081276127","type":"BARN"}""",
+            opplysninger[3].opplysning.toString()
+        )
+
+        assertEquals("soeker_statsborgerskap", opplysninger[4].opplysningType)
+        assertEquals("""{"svar":"Norge","spoersmaal":"Statsborgerskap"}""", opplysninger[4].opplysning.toString())
+
+        assertEquals("soeker_utenlandsadresse", opplysninger[5].opplysningType)
+        assertEquals(
+            """{"svar":"JA","spoersmaal":"Bor barnet i et annet land enn Norge?","opplysning":{"land":{"svar":"Oman","spoersmaal":"Land"},"adresse":{"svar":"Oman 1, 9999 Oman","spoersmaal":"Adresse i utlandet"}}}""",
+            opplysninger[5].opplysning.toString()
+        )
+
+        assertEquals("soeker_verge", opplysninger[6].opplysningType)
+        assertEquals(
+            """{"svar":"JA","spoersmaal":"Er det oppnevnt en verge for barnet?","opplysning":{"fornavn":"Verge","etternavn":"Vergesen","foedselsnummer":"19078504903","type":"VERGE"}}""",
+            opplysninger[6].opplysning.toString()
+        )
+
+        assertEquals("soeker_daglig_omsorg", opplysninger[7].opplysningType)
+        assertEquals("""{}""", opplysninger[7].opplysning.toString())
+
+        assertEquals("forelder_gjenlevende_personinfo", opplysninger[8].opplysningType)
+        assertEquals(
+            """{"fornavn":"STOR","etternavn":"SNERK","foedselsnummer":"11057523044","adresse":{"svar":"BØLERLIA 99, 0689 Oslo","spoersmaal":"Bostedsadresse"},"statsborgerskap":{"svar":"Norge","spoersmaal":"Statsborgerskap"},"kontaktinfo":{"epost":{"svar":"epost@epost.no","spoersmaal":"E-post (valgfri)"},"telefonnummer":{"svar":"969 69 696","spoersmaal":"Telefonnummer"}},"type":"GJENLEVENDE_FORELDER"}""",
+            opplysninger[8].opplysning.toString()
+        )
+
+        assertEquals("forelder_avdoed_personinfo", opplysninger[9].opplysningType)
+        assertEquals(
+            """{"fornavn":"Reidar","etternavn":"Reidarsen","foedselsnummer":"19078504903","type":"AVDOED"}""",
+            opplysninger[9].opplysning.toString()
+        )
+
+        assertEquals("forelder_avdoed_doedsfallinformasjon", opplysninger[10].opplysningType)
+        assertEquals(
+            """{"datoForDoedsfallet":{"svar":"2022-01-05","spoersmaal":"Når skjedde dødsfallet?"},"doedsaarsakSkyldesYrkesskadeEllerYrkessykdom":{"svar":"JA","spoersmaal":"Skyldes dødsfallet yrkesskade eller yrkessykdom?"}}""",
+            opplysninger[10].opplysning.toString()
+        )
+
+        assertEquals("forelder_avdoed_utenlandsopphold", opplysninger[11].opplysningType)
+        assertEquals(
+            """{"svar":"JA","spoersmaal":"Bodde eller arbeidet han eller hun i et annet land enn Norge etter fylte 16 år?","opplysning":[{"land":{"svar":"Antigua og barbuda","spoersmaal":"Land"},"fraDato":{"svar":"2000-01-01","spoersmaal":"Fra dato (valgfri)"},"tilDato":{"svar":"2002-01-01","spoersmaal":"Til dato (valgfri)"},"oppholdsType":{"svar":["BODD"],"spoersmaal":"Bodd og/eller arbeidet?"},"medlemFolketrygd":{"svar":"JA","spoersmaal":"Var han eller hun medlem av folketrygden under oppholdet?"},"pensjonsutbetaling":{"svar":"-","spoersmaal":"Oppgi eventuell pensjon han eller hun mottok fra dette landet (valgfri)"}},{"land":{"svar":"Bahamas","spoersmaal":"Land"},"fraDato":{"svar":"2002-02-02","spoersmaal":"Fra dato (valgfri)"},"tilDato":{"svar":"2003-02-02","spoersmaal":"Til dato (valgfri)"},"oppholdsType":{"svar":["ARBEIDET"],"spoersmaal":"Bodd og/eller arbeidet?"},"medlemFolketrygd":{"svar":"NEI","spoersmaal":"Var han eller hun medlem av folketrygden under oppholdet?"},"pensjonsutbetaling":{"svar":"4738","spoersmaal":"Oppgi eventuell pensjon han eller hun mottok fra dette landet (valgfri)"}},{"land":{"svar":"Canada","spoersmaal":"Land"},"fraDato":{"svar":"1998-02-02","spoersmaal":"Fra dato (valgfri)"},"tilDato":{"svar":"1999-02-02","spoersmaal":"Til dato (valgfri)"},"oppholdsType":{"svar":["BODD","ARBEIDET"],"spoersmaal":"Bodd og/eller arbeidet?"},"medlemFolketrygd":{"svar":"VET_IKKE","spoersmaal":"Var han eller hun medlem av folketrygden under oppholdet?"},"pensjonsutbetaling":{"svar":"3929","spoersmaal":"Oppgi eventuell pensjon han eller hun mottok fra dette landet (valgfri)"}}]}""",
+            opplysninger[11].opplysning.toString()
+        )
+
+        assertEquals("forelder_avdoed_naeringsinntekt", opplysninger[12].opplysningType)
+        assertEquals(
+            """{"svar":"JA","spoersmaal":"Var han eller hun selvstendig næringsdrivende?","opplysning":{"naeringsinntektPrAarFoerDoedsfall":{"svar":"83920","spoersmaal":"Oppgi næringsinntekt fra kalenderåret før dødsfallet (valgfri)"},"naeringsinntektVedDoedsfall":{"svar":"JA","spoersmaal":"Hadde han eller hun næringsinntekt når dødsfallet skjedde?"}}}""",
+            opplysninger[12].opplysning.toString()
+        )
+
+        assertEquals("forelder_avdoed_militaertjeneste", opplysninger[13].opplysningType)
+        assertEquals(
+            """{"svar":"JA","spoersmaal":"Har han eller hun gjennomført militær eller sivil førstegangstjeneste som varte minst 30 dager?","opplysning":{"svar":"1992","spoersmaal":"Hvilke(-t) år? (valgfri)"}}""",
+            opplysninger[13].opplysning.toString()
+        )
+
+        assertEquals("soesken", opplysninger[14].opplysningType)
+        assertEquals(
+            """{"soesken":[{"fornavn":"Josef","etternavn":"Josefsen","foedselsnummer":"19078504903","statsborgerskap":{"svar":"Papua ny-guinea","spoersmaal":"Statsborgerskap"},"utenlandsAdresse":{"svar":"NEI","spoersmaal":"Bor barnet i et annet land enn Norge?","opplysning":null},"foreldre":[{"fornavn":"Reidar","etternavn":"Reidarsen","foedselsnummer":"19078504903","type":"FORELDER"}],"verge":null,"dagligOmsorg":{"svar":"GJENLEVENDE","spoersmaal":"Har du daglig omsorg for dette barnet?"},"type":"BARN"},{"fornavn":"Reidun","etternavn":"Gustafsen","foedselsnummer":"20060976385","statsborgerskap":{"svar":"Norge","spoersmaal":"Statsborgerskap"},"utenlandsAdresse":{"svar":"NEI","spoersmaal":"Bor barnet i et annet land enn Norge?","opplysning":null},"foreldre":[{"fornavn":"STOR","etternavn":"SNERK","foedselsnummer":"11057523044","type":"FORELDER"},{"fornavn":"Reidar","etternavn":"Reidarsen","foedselsnummer":"19078504903","type":"FORELDER"}],"verge":{"svar":"NEI","spoersmaal":"Er det oppnevnt en verge for barnet?","opplysning":null},"dagligOmsorg":null,"type":"BARN"}]}""",
+            opplysninger[14].opplysning.toString()
+        )
+
+        assertEquals("soeknad_mottatt_dato", opplysninger[15].opplysningType)
+        assertEquals(
+            """{"mottattDato":"2022-01-25T15:29:34.621087004"}""",
+            opplysninger[15].opplysning.toString()
+        )
 
     }
 }

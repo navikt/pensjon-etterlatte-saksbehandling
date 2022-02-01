@@ -1,7 +1,6 @@
 import { IApiResponse } from './types'
 
-const isDev = process.env.NODE_ENV !== 'production'
-const path = isDev ? 'http://localhost:8080' : 'https://etterlatte-saksbehandling.dev.intern.nav.no'
+const path = process.env.REACT_APP_VEDTAK_URL;
 
 //ikke sikkert vi trenger denne etter mapping til oppgaver, lar stå enn så lenge
 export const hentSaker = async (): Promise<IApiResponse<any>> => {

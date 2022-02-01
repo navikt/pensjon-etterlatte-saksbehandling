@@ -2,6 +2,10 @@ package no.nav.etterlatte.person.pdl
 
 import java.time.LocalDateTime
 
+data class AdresseResponse(
+    val bostedsadresse: List<Bostedsadresse>
+
+)
 data class Bostedsadresse(
         val gyldigFraOgMed: LocalDateTime? = null,
         val gyldigTilOgMed: LocalDateTime? = null,

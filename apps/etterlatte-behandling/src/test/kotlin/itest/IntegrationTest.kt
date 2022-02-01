@@ -27,7 +27,6 @@ class ApplicationTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-
         withTestApplication({
             module(TestBeanFactory(postgreSQLContainer.jdbcUrl))
         }) {

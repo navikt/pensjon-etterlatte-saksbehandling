@@ -1,6 +1,8 @@
 package no.nav.etterlatte.behandling
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.database.singleOrNull
@@ -86,7 +88,7 @@ class BehandlingDao(private val connection: () -> Connection) {
 
 }
 
-val objectMapper = jacksonObjectMapper()
+val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 fun ObjectNode?.serialize() = this?.let { objectMapper.writeValueAsString(it) }
 fun String?.deSerialize() = this?.let { objectMapper.readValue(this, ObjectNode::class.java) }
 

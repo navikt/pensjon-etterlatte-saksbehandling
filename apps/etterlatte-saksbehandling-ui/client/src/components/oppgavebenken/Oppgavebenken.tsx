@@ -27,7 +27,7 @@ const OppgavebenkContainer = styled.div`
 const Oppgavebenken = () => {
   const saksbehandlerNavn = useContext<IAppContext>(AppContext).state.saksbehandlerReducer.navn
   const [lasterOppgaver, setLasterOppgaver] = useState(true)
-  const [hentOppgaverKlikket, setHentOppgaverKlikket] = useState(false)
+  const [toggleHentOppgaver, setToggleHentOppgaver] = useState(false)
   const [oppgaver, setOppgaver] = useState<ReadonlyArray<IOppgave>>([])
   const [oppgaveFelter, setOppgaveFelter] = useState<IOppgaveFelter>(initialOppgaveFelter(saksbehandlerNavn))
   const [globalFilter, setGlobalFilter] = useState<string | undefined>('')
@@ -48,9 +48,10 @@ const Oppgavebenken = () => {
   }
 
   useEffect(() => {
+    setLasterOppgaver(true)
+
     hentOppgaver()
       .then((response: IApiResponse<any>) => {
-        setLasterOppgaver(true)
         const mappedResponse = response.data.map((oppgave: any) => mapOppgaveResponse(oppgave))
         setOppgaver(mappedResponse)
         setLasterOppgaver(false)
@@ -58,11 +59,7 @@ const Oppgavebenken = () => {
       .catch(() => {
         setLasterOppgaver(false)
       })
-      .finally(() => {
-        setLasterOppgaver(false)
-        setHentOppgaverKlikket(false)
-      })
-  }, [hentOppgaverKlikket])
+  }, [toggleHentOppgaver])
 
   const data: ReadonlyArray<IOppgave> = React.useMemo(() => oppgaver, [oppgaver])
   const columns: ReadonlyArray<Column<IOppgave>> = React.useMemo(() => kolonner, [])
@@ -74,7 +71,7 @@ const Oppgavebenken = () => {
           oppgaveFelter={oppgaveFelter}
           setOppgaveFelter={setOppgaveFelter}
           setGlobalFilter={setGlobalFilter}
-          henterOppgaver={() => setHentOppgaverKlikket(true)}
+          henterOppgaver={() => setToggleHentOppgaver(!toggleHentOppgaver)}
         />
         <Spinner visible={lasterOppgaver} label={'Laster oppgaver'} />
         {!lasterOppgaver && (

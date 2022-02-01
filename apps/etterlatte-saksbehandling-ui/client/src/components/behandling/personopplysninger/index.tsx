@@ -1,62 +1,79 @@
 import { useEffect, useState } from 'react'
-import { ContentWrapper } from './styled'
-import { Detail, BodyShort, Label } from '@navikt/ds-react'
-import { InfoWrapper, DetailWrapper } from './styled'
-import { IOpplysningProps } from './types'
-import { hentPersonopplysninger } from '../../../shared/api/personopplysninger'
-import { formatterDato, formatterTidspunkt } from '../../../utils/index'
+import { Detail, Heading } from '@navikt/ds-react'
+import { InfoWrapper, DetailWrapper, HeadingWrapper } from './styled'
+import { IPersonFraSak } from './types'
+import { hentPersonerMedRelasjon } from '../../../shared/api/personopplysninger'
 import { Content, ContentHeader } from '../../../shared/styled'
-import { Oppholdstillatelse } from './oppholdstillatelse'
-import { Statsborgerskap } from './statsborgerskap'
-import { Bostedsadresse } from './bostedsadresse'
-import { Sivilstatus } from './sivilstatus'
+import { BehandlingsStatusSmall, IBehandlingsStatus } from '../behandlings-status'
+import { BehandlingsTypeSmall, IBehandlingsType } from '../behandlings-type'
+import { PersonInfo } from './PersonInfo'
 
 export const Personopplysninger = () => {
-  const [personopplysninger, setPersonopplysninger] = useState<IOpplysningProps>()
+  const [personer, setPersoner] = useState<{ person: IPersonFraSak; foreldre: IPersonFraSak[] }>()
 
   useEffect(() => {
-    hentPersonopplysninger().then((opplysninger: IOpplysningProps) => {
-      setPersonopplysninger(opplysninger)
-    })
+    //TODO: Henter info om barn og foreldre fra PDL, type IPersonFraRegister er det som trengs per dags dato fra sketchene.
+    hentPersonerMedRelasjon().then(
+      (personer: { person: IPersonFraSak; foreldre: IPersonFraSak[]}) => {
+        setPersoner(personer)
+      }
+    )
   }, [])
 
   return (
     <Content>
-      {personopplysninger && (
-        <ContentHeader>
-          <h1>Personopplynsinger</h1>
+      <ContentHeader>
+        <h1>Søknadsoversikt</h1>
+        <HeadingWrapper>
+          <Heading spacing size="small" level="5">
+            Om søknaden
+          </Heading>
+          <div className="details">
+            <BehandlingsStatusSmall status={IBehandlingsStatus.FORSTEGANG} />
+            <BehandlingsTypeSmall type={IBehandlingsType.BARNEPENSJON} />
+          </div>
+        </HeadingWrapper>
+
+        <InfoWrapper>
           <DetailWrapper>
-            <BodyShort size="medium" spacing>
-              Registeropplysninger
-            </BodyShort>
-            <Detail size="small">
-              sist oppdatert i Folkeregisteret {formatterDato(personopplysninger.sistEndringIFolkeregister)}{' '}
-              {formatterTidspunkt(personopplysninger.sistEndringIFolkeregister)}
-            </Detail>
+            <Detail size="small">Mottaker</Detail>
+            <Detail size="medium" className="detail">Lille My</Detail>
           </DetailWrapper>
-
           <DetailWrapper>
-            <InfoWrapper>
-              <BodyShort size="small">Statsborgerskap</BodyShort>
-              <Label size="small">NO</Label>
-            </InfoWrapper>
-
-            <InfoWrapper>
-              <BodyShort size="small">Personstatus</BodyShort>
-              <Label size="small">Bosatt</Label>
-            </InfoWrapper>
+            <Detail size="small">Søknad mottatt</Detail>
+            <Detail size="medium" className="detail">21.12.21</Detail>
           </DetailWrapper>
+          <DetailWrapper>
+            <Detail size="small">Dato for dødsfall</Detail>
+            <Detail size="medium" className="detail">21.12.21</Detail>
+          </DetailWrapper>
+          <DetailWrapper>
+            <Detail size="small">Avdøde</Detail>
+            <Detail size="medium" className="detail">Ola Nordman (far)</Detail>
+          </DetailWrapper>
+          <DetailWrapper>
+            <Detail size="small">Søknad fremsatt av</Detail>
+            <Detail size="medium" className="detail">Gjenlevende mor</Detail>
+          </DetailWrapper>
+          <DetailWrapper>
+            <Detail size="small">Foreldreansvar</Detail>
+            <Detail size="medium" className="detail">Gjenlevende mor</Detail>
+          </DetailWrapper>
+        </InfoWrapper>
 
-          <ContentWrapper>
-            <Sivilstatus innhold={personopplysninger.sivilstand} />
-            {personopplysninger.oppholdstillatelse && (
-              <Oppholdstillatelse innhold={personopplysninger?.oppholdstillatelse} />
-            )}
-            <Statsborgerskap innhold={personopplysninger.statsborgerskap} />
-            <Bostedsadresse innhold={personopplysninger.bostedsadresse} />
-          </ContentWrapper>
-        </ContentHeader>
-      )}
+        <Heading spacing size="small" level="5">
+          Familieforhold
+        </Heading>
+        {personer && (
+          <>
+            <PersonInfo person={personer.person} />
+            {personer.foreldre.map((foreldre, key) => (
+              <PersonInfo key={key} person={foreldre} />
+            ))}      
+          </>
+        )}
+      
+      </ContentHeader>
     </Content>
   )
 }

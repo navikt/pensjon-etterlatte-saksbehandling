@@ -1,51 +1,39 @@
-export interface IOpplysningProps {
-  sistEndringIFolkeregister: Date
-  bostedsadresse: Array<IBostedsadresse>
-  oppholdstillatelse?: Array<IOppholdstillatelse>
-  statsborgerskap: Array<IStatsborgerskap>
-  sivilstand: Array<ISivilstand>
-}
-
-export interface IBostedsadresse {
-  adressenavn: string
-  postnummer: string
-  gyldigFraOgMed: Date
-  gyldigTilOgMed?: Date
-}
-
-export interface IOppholdstillatelse {
-  oppholdFra: Date
-  oppholdTil?: Date
-  type: OppholdstillatelseType
-}
-
 export interface IStatsborgerskap {
   land: string
   gyldigFraOgMed: Date
   gyldigTilOgMed?: Date
 }
 
-export interface ISivilstand {
-  sivilstandType: SivilstandType
-  gyldigFraOgMed: Date
-  gyldigTilOgMed?: Date
+//Data som må hentes utenom saken fra register
+export interface IPersonFraRegister {
+  navn?: string
+  personStatus: PersonStatus // for barn og foreldre
+  rolle: RelatertPersonsRolle // for barn og foreldre
+  datoForDoedsfall?: Date
+  fnr: string // for barn og foreldre
+  adressenavn: string // for barn og foreldre
 }
 
-export enum OppholdstillatelseType {
-  MIDLERTIDIG = 'Midlertidig',
-  OPPLYSNING_MANGLER = 'Opplysning mangler',
-  PERMANENT = 'Permanent',
+export interface IPersonFraSak {
+  navn?: string
+  personStatus: PersonStatus
+  rolle: RelatertPersonsRolle
+  fnr: string
+  adressenavn: string
+  alderEtterlatt?: string
+  statsborgerskap: IStatsborgerskap
+  datoForDoedsfall?: Date
 }
 
-export enum SivilstandType {
-  UOPPGITT = 'Uoppgitt',
-  UGIFT = 'Ugift',
-  GIFT = 'Gift',
-  ENKE_ELLER_ENKEMANN = 'Enke eller enkemann',
-  SKILT = 'Skilt',
-  SEPARERT = 'Separert',
-  REGISTRERT_PARTNER = 'Registrert partner',
-  SEPARERT_PARTNER = 'Separert partner',
-  SKILT_PARTNER = 'Skilt partner',
-  GJENLEVENDE_PARTNER = 'Gjenlevende partner',
+export enum RelatertPersonsRolle {
+  MOR = 'mor',
+  FAR = 'far',
+  MEDMOR = 'medmor',
+  BARN = 'barn',
+}
+
+export enum PersonStatus {
+  DØD = 'Avdød',
+  LEVENDE = 'Gjenlevende',
+  ETTERLATT = 'Etterlatt',
 }

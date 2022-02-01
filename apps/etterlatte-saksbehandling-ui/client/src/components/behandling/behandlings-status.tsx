@@ -6,8 +6,8 @@ export enum IBehandlingsStatus {
 }
 
 const colors = {
-  [IBehandlingsStatus.FORSTEGANG]: "#826ba1",
-  [IBehandlingsStatus.REVURDERING]: "red"
+  [IBehandlingsStatus.FORSTEGANG]: '#A18DBB',
+  [IBehandlingsStatus.REVURDERING]: 'red',
 }
 
 
@@ -23,4 +23,19 @@ const BehandlingsStatusWrap = styled.div<{status: IBehandlingsStatus}>`
     border-radius: 15px;
     text-transform: uppercase;
     font-size: 0.8em;
+`;
+
+export const BehandlingsStatusSmall: React.FC<{ status: IBehandlingsStatus }> = ({ status }) => {
+    return <BehandlingsStatusWrapSmall status={status}>{status}</BehandlingsStatusWrapSmall>;
+};
+
+export const BehandlingsStatusWrapSmall = styled.div<{status: IBehandlingsStatus}>`
+  background-color: ${props => colors[props.status]};
+  padding: 0.1em 0.5em;
+  text-align: center;
+  border-radius: 15px;
+  font-size: 14px;
+  text-transform: capitalize;
+
+  float: right;
 `;

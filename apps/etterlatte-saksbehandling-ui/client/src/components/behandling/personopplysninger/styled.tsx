@@ -22,19 +22,74 @@ export const TableWrapper = styled.div`
   }
 `
 
-export const InfoWrapper = styled.div`
-  display: flex;
+export const PersonDetailWrapper = styled.div`
+  display: inline-flex;
+  width: 600px;
+  padding-top: 0.5em;
+  padding-left: 1em;
   justify-content: space-between;
-  max-width: 200px;
+
+  .bodyShort {
+    width: 200px;
+  }
+  .detail {
+    width: 200px;
+
+    color: #707070;
+  }
 `
 
 export const DetailWrapper = styled.div`
+  display: inline-flex;
+  width: 700px;
+  padding-top: 0.5em;
+  padding-left: 1em;
+  justify-content: space-between;
+
+  .detail {
+    width: 450px;
+  }
+`
+
+export const InfoWrapper = styled.div`
   margin-bottom: 50px;
+  border: 1px solid #b0b0b0;
+  padding: 1.2em 1em 2em 1em;
+  width: 800px;
+`
+
+export const Text = styled.div`
+  font-weight: bold;
+  font-size: 16px;
+`
+
+export const PersonInfoWrapper = styled.div`
+  margin-bottom: 20px;
+  border-radius: 4px;
+  background-color: #f7f7f7;
+  border: 1px solid #b0b0b0;
+  padding: 1.2em 1em 2em 1em;
+  width: 800px;
+`
+
+export const PersonInfoHeader = styled.div`
+  display: inline;
+  font-weight: bold;
+  padding-left: 0.5em;
 `
 
 export const ContentWrapper = styled.div`
-  * {
-    margin-bottom: 30px;
+  .text {
+    //todo
+  }
+`
+
+export const HeadingWrapper = styled.div`
+  display: inline-flex;
+  .details{
+    justify-content: center;
+    align-item: center;
+    padding: 0.2em;
   }
 `
 

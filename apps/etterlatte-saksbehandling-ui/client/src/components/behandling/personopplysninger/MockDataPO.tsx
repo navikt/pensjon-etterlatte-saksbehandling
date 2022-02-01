@@ -1,45 +1,69 @@
-import { IOpplysningProps, OppholdstillatelseType, SivilstandType } from './types'
+import { IPersonFraSak, RelatertPersonsRolle, PersonStatus, IPersonFraRegister } from './types'
 
-export const mockdata: IOpplysningProps = {
-  sistEndringIFolkeregister: new Date(2015, 1, 6),
-  bostedsadresse: [
-    {
-      adressenavn: 'Osloveien 12',
-      postnummer: '0125 Oslo',
-      gyldigFraOgMed: new Date(2015, 1, 6),
-    },
-    {
-      adressenavn: 'Adresse-mock 2',
-      postnummer: '0000 Oslo',
-      gyldigFraOgMed: new Date(2010, 1, 6),
-      gyldigTilOgMed: new Date(2015, 1, 5),
-    },
-  ],
-  oppholdstillatelse: [
-    {
-      oppholdFra: new Date(2015, 1, 6),
-      type: OppholdstillatelseType.PERMANENT,
-    },
-  ],
-  statsborgerskap: [
-    {
+export const mockDataSoesken: IPersonFraSak[] = [
+  {
+    navn: 'Snorkefrøken',
+    personStatus: PersonStatus.ETTERLATT,
+    alderEtterlatt: '15',
+    rolle: RelatertPersonsRolle.BARN,
+    fnr: '13243546765',
+    adressenavn: 'Fyrstikkalléen 1',
+    statsborgerskap: {
       land: 'Norsk',
-      gyldigFraOgMed: new Date(1974, 3, 12),
+      gyldigFraOgMed: new Date(2005, 3, 12),
     },
-    {
-      land: 'Sverige',
-      gyldigFraOgMed: new Date(2020, 3, 12),
+  },
+  {
+    navn: 'Mummitrollet',
+    personStatus: PersonStatus.ETTERLATT,
+    alderEtterlatt: '15',
+    rolle: RelatertPersonsRolle.BARN,
+    fnr: '13243546765',
+    adressenavn: 'Fyrstikkalléen 1',
+    statsborgerskap: {
+      land: 'Norsk',
+      gyldigFraOgMed: new Date(2005, 3, 12),
     },
-  ],
-  sivilstand: [
-    {
-      sivilstandType: SivilstandType.UGIFT,
-      gyldigFraOgMed: new Date(2015, 5, 15),
-    },
-    {
-      sivilstandType: SivilstandType.GIFT,
-      gyldigFraOgMed: new Date(1995, 5, 15),
-      gyldigTilOgMed: new Date(2015, 5, 15),
-    },
-  ],
+  },
+]
+
+export const mockDataPerson1: IPersonFraSak = {
+  navn: 'Lille My',
+  personStatus: PersonStatus.ETTERLATT,
+  alderEtterlatt: '15',
+  rolle: RelatertPersonsRolle.BARN,
+  fnr: '13243546765',
+  adressenavn: 'Fyrstikkalléen 1',
+  statsborgerskap: {
+    land: 'Norsk',
+    gyldigFraOgMed: new Date(2005, 3, 12),
+  },
 }
+
+export const mockDataPerson2: IPersonFraSak = {
+  personStatus: PersonStatus.LEVENDE,
+  rolle: RelatertPersonsRolle.FAR,
+  fnr: '98765432123',
+  adressenavn: 'Fyrstikkalléen 1',
+  statsborgerskap: {
+    land: 'Norsk',
+    gyldigFraOgMed: new Date(2005, 3, 12),
+  },
+}
+
+export const mockDataPerson3: IPersonFraSak = {
+  personStatus: PersonStatus.DØD,
+  datoForDoedsfall: new Date(2021, 5, 12),
+  rolle: RelatertPersonsRolle.MOR,
+  fnr: '12345678912',
+  adressenavn: 'Fyrstikkalléen 1',
+  alderEtterlatt: '15',
+  statsborgerskap: {
+    land: 'Norsk',
+    gyldigFraOgMed: new Date(2005, 3, 12),
+  },
+}
+
+export const mockDataPersoner: { person: IPersonFraSak; foreldre: IPersonFraSak[] } = {
+  person: mockDataPerson1,
+  foreldre: [mockDataPerson2, mockDataPerson3]}

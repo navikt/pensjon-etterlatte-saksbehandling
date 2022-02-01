@@ -1,9 +1,8 @@
 import { IApiResponse } from "./types";
 
 
+const path = process.env.REACT_APP_VEDTAK_URL;
 
-const isDev = process.env.NODE_ENV !== "production"
-const path = isDev ? "http://localhost:8080" : "https://etterlatte-saksbehandling.dev.intern.nav.no";
 
 
 export const getPerson = async (fnr: string): Promise<IApiResponse<any>> => {

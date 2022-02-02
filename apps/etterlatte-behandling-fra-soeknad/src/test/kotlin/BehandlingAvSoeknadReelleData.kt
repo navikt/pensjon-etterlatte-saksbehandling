@@ -33,7 +33,7 @@ internal class BehandlingAvSoeknadReelleData {
         val hendelseJson = javaClass.getResource("/fullMessage3.json")!!.readText()
         rapid.sendTestMessage(hendelseJson)
         Assertions.assertEquals(1, rapid.inspektør.size)
-        //Assertions.assertEquals(1, rapid.inspektør.message(0)["@sak_id"].longValue())
-        //Assertions.assertEquals(36, rapid.inspektør.message(0)["@behandling_id"].textValue().length)
+        Assertions.assertEquals(1, rapid.inspektør.message(0)["@sak_id"].longValue())
+        Assertions.assertEquals(36, rapid.inspektør.message(0)["@behandling_id"].textValue().length)
     }
 }

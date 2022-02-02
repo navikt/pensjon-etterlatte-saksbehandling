@@ -79,7 +79,11 @@ data class Metadata(
         val historisk: Boolean,
         val master: String,
         val opplysningsId: String?
-)
+){
+        fun sisteRegistrertDato(): LocalDateTime {
+                return endringer.maxByOrNull { it.registrert }?.registrert!!
+        }
+}
 data class UtenlandskAdresseIFrittFormat (
         val adresselinje1: String?,
         val adresselinje2: String?,

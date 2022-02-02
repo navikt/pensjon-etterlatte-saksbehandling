@@ -1,10 +1,7 @@
-package no.nav.etterlatte.behandling
+package no.nav.etterlatte.libs.common.behandling
 
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import java.util.*
 
-/*
 data class BehandlingSammendragListe(val behandlinger: List<BehandlingSammendrag>)
 data class BehandlingSammendrag(val id: UUID, val sak: Long, val status: BehandlingStatus)
 data class DetaljertBehandling(
@@ -14,11 +11,4 @@ data class DetaljertBehandling(
     val vilkårsprøving: Vilkårsprøving?,
     val beregning: Beregning?,
     val fastsatt: Boolean = false
-)*/
-
-
-data class BehandlingsBehov(
-    val sak: Long,
-    val opplysninger: List<Behandlingsopplysning>?
 )
-

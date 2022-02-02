@@ -2,6 +2,8 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.Beregning
+import no.nav.etterlatte.libs.common.behandling.Vilkårsprøving
 import java.util.*
 
 data class Behandling(

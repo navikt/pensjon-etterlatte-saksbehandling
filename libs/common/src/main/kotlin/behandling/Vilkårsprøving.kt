@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling
+package no.nav.etterlatte.libs.common.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 

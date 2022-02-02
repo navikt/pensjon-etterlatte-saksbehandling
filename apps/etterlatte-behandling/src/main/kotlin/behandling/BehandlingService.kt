@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.Beregning
 import java.util.*
 
 interface BehandlingService {

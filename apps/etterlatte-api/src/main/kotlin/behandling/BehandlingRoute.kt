@@ -66,6 +66,12 @@ fun Route.behandlingRoute(service: BehandlingService) {
         }
     }
 
+    route("behandling") {
+        get {
+
+        }
+    }
+
 
     /*
     Skal hente persondata og sakene for denne personen?

@@ -8,7 +8,9 @@ import io.ktor.server.testing.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import no.nav.etterlatte.*
 import no.nav.etterlatte.behandling.*
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.Beregning
 import no.nav.etterlatte.sak.Sak
 import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
 import org.junit.jupiter.api.Assertions.assertNotNull

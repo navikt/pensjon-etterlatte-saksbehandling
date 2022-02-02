@@ -41,6 +41,11 @@ class BehandlingService(private val behandlingKlient: BehandlingKlient, private 
         return behandlingKlient.hentBehandlingerForSak(sakId, accessToken)
     }
 
+    suspend fun hentBehandling(behandlingId: String, accessToken: String): Any {
+        logger.info("Henter behandling")
+        return behandlingKlient.hentBehandling(behandlingId, accessToken)
+    }
+
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag {
         logger.info("Opprett en behandling på en sak")
         return behandlingKlient.opprettBehandling(behandlingsBehov, accessToken)

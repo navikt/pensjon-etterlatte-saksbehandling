@@ -8,6 +8,10 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
+import no.nav.etterlatte.libs.common.behandling.Beregning
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import java.util.*
 
 fun Route.behandlingRoutes(service: BehandlingService){

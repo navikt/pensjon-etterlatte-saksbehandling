@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.soeknad.SoeknadType
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -16,12 +17,14 @@ data class SakerResult(val saker: List<Sak>)
 data class BehandlingSammendrag(val id: UUID, val sak: Long, val status: BehandlingStatus)
 data class BehandlingerSammendrag(val behandlinger: List<BehandlingSammendrag>)
 
+
 interface EtterlatteBehandling {
     suspend fun hentSakerForPerson(fnr: String, accessToken: String): SakerResult
     suspend fun opprettSakForPerson(fnr: String, sakType: SoeknadType, accessToken: String): Sak
     suspend fun hentSaker(accessToken: String): SakerResult
     suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingerSammendrag
     suspend fun hentAlleBehandlinger(accessToken: String): BehandlingerSammendrag
+    suspend fun hentBehandling(behandlingId: String, accessToken: String): Any
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag
 }
 
@@ -146,7 +149,23 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
         }
     }
 
+    override suspend fun hentBehandling(behandlingId: String, accessToken: String): DetaljertBehandling {
+        logger.info("Henter behandling")
+        try {
+            val json =
+                downstreamResourceClient.get(Resource(clientId, "$resourceUrl/behandlinger/$behandlingId"), accessToken)
+                    .mapBoth(
+                        success = { json -> json },
+                        failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                    ).response
 
+            println(json)
+            return objectMapper.readValue(json.toString(), DetaljertBehandling::class.java)
+        } catch (e: Exception) {
+            logger.error("Henting av behandlinger feilet", e)
+            throw e
+        }
+    }
 
     override suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag {
         logger.info("Oppretter behandling på en sak")

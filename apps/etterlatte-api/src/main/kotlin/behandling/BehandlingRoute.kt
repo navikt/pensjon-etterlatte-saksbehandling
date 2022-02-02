@@ -66,9 +66,15 @@ fun Route.behandlingRoute(service: BehandlingService) {
         }
     }
 
-    route("behandling") {
+    route("behandling/{behandlingId}") {
         get {
-
+            val behandlingId = call.parameters["behandlingId"]?.toString()
+            if (behandlingId == null) {
+                call.response.status(HttpStatusCode(400, "Bad request"))
+                call.respond("SakId mangler")
+            } else {
+                call.respond(service.hentBehandling(behandlingId, getAccessToken(call)))
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.SoeknadType
 
@@ -41,7 +42,7 @@ class BehandlingService(private val behandlingKlient: BehandlingKlient, private 
         return behandlingKlient.hentBehandlingerForSak(sakId, accessToken)
     }
 
-    suspend fun hentBehandling(behandlingId: String, accessToken: String): Any {
+    suspend fun hentBehandling(behandlingId: String, accessToken: String): DetaljertBehandling {
         logger.info("Henter behandling")
         return behandlingKlient.hentBehandling(behandlingId, accessToken)
     }

@@ -11,12 +11,12 @@ import java.time.Instant
 import java.util.*
 
 
-open class Behandlingsopplysning(
+open class Behandlingsopplysning<T>(
     val id: UUID,
     val kilde: Kilde,
     val opplysningType: String,
     val meta: ObjectNode,
-    val opplysning: ObjectNode,
+    val opplysning: T,
     val attestering: Kilde? = null
 ) {
     override fun toString(): String {

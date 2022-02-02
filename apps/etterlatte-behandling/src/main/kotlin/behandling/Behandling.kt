@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.Beregning
@@ -9,7 +10,7 @@ import java.util.*
 data class Behandling(
     val id: UUID,
     val sak: Long,
-    val grunnlag: List<Behandlingsopplysning>,
+    val grunnlag: List<Behandlingsopplysning<ObjectNode>>,
     val vilkårsprøving: Vilkårsprøving?,
     val beregning: Beregning?,
     val fastsatt: Boolean = false

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.*
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.Vilkårsprøving
+import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
 
@@ -14,6 +15,8 @@ class BehandlingAggregat(
     private val vilkaarKlient: VilkaarKlient
 ) {
     companion object {
+        private val logger = LoggerFactory.getLogger(BehandlingAggregat::class.java)
+
         fun opprett(
             sak: Long,
             behandlinger: BehandlingDao,
@@ -21,7 +24,10 @@ class BehandlingAggregat(
             vilkaarKlient: VilkaarKlient
         ): BehandlingAggregat {
             return Behandling(UUID.randomUUID(), sak, emptyList(), null, null)
-                .also { behandlinger.opprett(it) }
+                .also {
+                    behandlinger.opprett(it)
+                    logger.info("Opprettet behandling ${it.id} i sak ${it.sak}")
+                }
                 .let { BehandlingAggregat(it.id, behandlinger, opplysninger, vilkaarKlient) }
         }
     }
@@ -42,6 +48,7 @@ class BehandlingAggregat(
         opplysninger.nyOpplysning(behandlingsopplysning)
         opplysninger.leggOpplysningTilBehandling(lagretBehandling.id, behandlingsopplysning.id)
         lagredeOpplysninger += behandlingsopplysning
+        logger.info("La til opplysning $type i behandling ${lagretBehandling.id}")
         return behandlingsopplysning.id
     }
 

@@ -9,10 +9,11 @@ import no.nav.etterlatte.behandlingfrasoknad.BehandlingsService
 import no.nav.etterlatte.behandlingfrasoknad.StartBehandlingAvSoeknad
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class BehandlingAvSoeknadReelleData {
-    @Test
+    @Test @Disabled
     fun test() {
         val rapid = TestRapid()
         val behandlingservice = BehandlingsService(HttpClient {

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.database.singleOrNull
 import no.nav.etterlatte.database.toList
@@ -10,13 +11,13 @@ import java.util.*
 
 class OpplysningDao(private val connection: () -> Connection) {
 
-    fun hent(id: UUID): Behandlingsopplysning? {
+    fun hent(id: UUID): Behandlingsopplysning<ObjectNode>? {
         return connection().prepareStatement("SELECT o.id, o.kilde,  o.type, o.meta, o.data  FROM opplysning o where id = ?")
             .apply {
                 setObject(1, id)
             }.executeQuery().singleOrNull{ asBehandlingOpplysning() }
     }
-    fun ResultSet.asBehandlingOpplysning(): Behandlingsopplysning {
+    fun ResultSet.asBehandlingOpplysning(): Behandlingsopplysning<ObjectNode> {
         return Behandlingsopplysning(
             getObject(1) as UUID,
             objectMapper.readValue(getString(2)),
@@ -26,7 +27,7 @@ class OpplysningDao(private val connection: () -> Connection) {
         )
 
     }
-    fun finnOpplysningerIBehandling(behandling: UUID): List<Behandlingsopplysning> {
+    fun finnOpplysningerIBehandling(behandling: UUID): List<Behandlingsopplysning<ObjectNode>> {
         return connection().prepareStatement("SELECT o.id, o.kilde,  o.type, o.meta, o.data  FROM opplysning o inner join opplysning_i_behandling oib on o.id = oib.opplysning_id and oib.behandling_id = ?")
             .apply {
                 setObject(1, behandling)
@@ -34,7 +35,7 @@ class OpplysningDao(private val connection: () -> Connection) {
 
     }
 
-    fun nyOpplysning(behandlingsopplysning: Behandlingsopplysning) {
+    fun nyOpplysning(behandlingsopplysning: Behandlingsopplysning<ObjectNode>) {
         connection().prepareStatement("INSERT INTO opplysning(id, data, kilde, type, meta) VALUES(?, ?, ?, ?, ?)")
             .apply {
                 setObject(1, behandlingsopplysning.id)

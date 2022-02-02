@@ -76,7 +76,7 @@ internal class RealBehandlingServiceTest {
     fun leggTilGrunnlagPåBehandlingUtenVilkårsprøving() {
         val behandlingerMock = mockk<BehandlingDao>()
         val opplysningerMock = mockk<OpplysningDao>()
-        val behandlingsopplysningSomLagres = slot<Behandlingsopplysning>()
+        val behandlingsopplysningSomLagres = slot<Behandlingsopplysning<ObjectNode>>()
 
         Kontekst.set(Context(Self("test"), mockk()))
 
@@ -135,7 +135,7 @@ internal class RealBehandlingServiceTest {
 }
 
 class NoOpVilkaarKlient : VilkaarKlient {
-    override fun vurderVilkaar(vilkaar: String, opplysninger: List<Behandlingsopplysning>): ObjectNode {
+    override fun vurderVilkaar(vilkaar: String, opplysninger: List<Behandlingsopplysning<ObjectNode>>): ObjectNode {
         return objectMapper.createObjectNode()
     }
 }

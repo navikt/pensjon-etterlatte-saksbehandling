@@ -35,7 +35,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             Behandling(
                 getObject(1) as UUID,
                 getLong(2),
-                emptyList<Behandlingsopplysning>(),
+                emptyList<Behandlingsopplysning<ObjectNode>>(),
                 getString(3)?.let { objectMapper.readValue(it) },
                 getString(4)?.let { objectMapper.readValue(it) }
             )

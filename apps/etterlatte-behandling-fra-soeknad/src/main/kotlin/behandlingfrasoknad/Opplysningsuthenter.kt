@@ -8,12 +8,7 @@ import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.GjenlevendeForelder
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Opplysning
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Person
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Svar
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -21,7 +16,7 @@ import java.util.*
 
 class Opplysningsuthenter {
 
-    fun lagOpplysningsListe(jsonNode: JsonNode): List<Behandlingsopplysning> {
+    fun lagOpplysningsListe(jsonNode: JsonNode): List<Behandlingsopplysning<Any>> {
 
         val barnepensjonssoknad = objectMapper.treeToValue<Barnepensjon>(jsonNode)!!
         val tomNode = objectMapper.createObjectNode()
@@ -47,122 +42,84 @@ class Opplysningsuthenter {
             forelder_avdoed_militaertjeneste(barnepensjonssoknad),
             soesken(barnepensjonssoknad),
             soeknad_mottatt_dato(barnepensjonssoknad)
-        ).map { Behandlingsopplysning(UUID.randomUUID(), kilde, it.first, tomNode, it.second) }
+        ).filter{it.second != null}.map { Behandlingsopplysning(UUID.randomUUID(), kilde, it.first, tomNode, it.second!!) }
     }
 
     fun innsender(barnepensjon: Barnepensjon) =
-        "innsender" to objectMapper.valueToTree<ObjectNode>(barnepensjon.innsender)
+        "innsender" to barnepensjon.innsender
 
     fun samtykke(barnepensjon: Barnepensjon) =
-        "samtykke" to objectMapper.valueToTree<ObjectNode>(barnepensjon.harSamtykket)
+        "samtykke" to barnepensjon.harSamtykket
 
     fun utbetalingsinformasjon(barnepensjon: Barnepensjon) =
-        "utbetalingsinformasjon" to objectMapper.valueToTree<ObjectNode>(barnepensjon.utbetalingsInformasjon)
+        "utbetalingsinformasjon" to barnepensjon.utbetalingsInformasjon
 
     fun soeker_personinfo(barnepensjon: Barnepensjon) =
-        "soeker_personinfo" to objectMapper.valueToTree<ObjectNode>(
+        "soeker_personinfo" to
             PersonInfo(
                 barnepensjon.soeker.fornavn,
                 barnepensjon.soeker.etternavn,
                 barnepensjon.soeker.foedselsnummer,
                 PersonType.BARN
             )
-        )
+
 
     fun soeker_statsborgerskap(barnepensjon: Barnepensjon) =
-        "soeker_statsborgerskap" to objectMapper.valueToTree<ObjectNode>(barnepensjon.soeker.statsborgerskap)
+        "soeker_statsborgerskap" to barnepensjon.soeker.statsborgerskap
 
     fun soeker_utenlandsadresse(barnepensjon: Barnepensjon) =
-        "soeker_utenlandsadresse" to objectMapper.valueToTree<ObjectNode>(barnepensjon.soeker.utenlandsAdresse)
+        "soeker_utenlandsadresse" to barnepensjon.soeker.utenlandsAdresse
 
     fun soeker_verge(barnepensjon: Barnepensjon) =
-        "soeker_verge" to objectMapper.valueToTree<ObjectNode>(barnepensjon.soeker.verge)
+        "soeker_verge" to barnepensjon.soeker.verge
 
     fun soeker_daglig_omsorg(barnepensjon: Barnepensjon) =
-        if (barnepensjon.soeker.dagligOmsorg != null) {
-            "soeker_daglig_omsorg" to objectMapper.valueToTree(barnepensjon.soeker.dagligOmsorg)
-        } else {
-            "soeker_daglig_omsorg" to objectMapper.createObjectNode()
-        }
+        "soeker_daglig_omsorg" to barnepensjon.soeker.dagligOmsorg
 
 
-    fun forelder_gjenlevende_personinfo(barnepensjon: Barnepensjon): Pair<String, ObjectNode> {
-        barnepensjon.foreldre.forEach {
-            if (it.type == PersonType.GJENLEVENDE_FORELDER) {
-                return "forelder_gjenlevende_personinfo" to objectMapper.valueToTree(it as GjenlevendeForelder)
-            }
-        }
-        return "forelder_gjenlevende_personinfo" to objectMapper.createObjectNode()
-    }
 
-    fun forelder_avdoed_personinfo(barnepensjon: Barnepensjon): Pair<String, ObjectNode> {
-        barnepensjon.foreldre.forEach {
-            if (it.type == PersonType.AVDOED) {
-                val avdoed = it as Avdoed
-                return "forelder_avdoed_personinfo" to objectMapper.valueToTree(
-                    PersonInfo(
-                        avdoed.fornavn,
-                        avdoed.etternavn,
-                        avdoed.foedselsnummer,
-                        PersonType.AVDOED
-                    )
+    fun forelder_gjenlevende_personinfo(barnepensjon: Barnepensjon) =
+        "forelder_gjenlevende_personinfo" to barnepensjon.foreldre.find { it.type == PersonType.GJENLEVENDE_FORELDER }
+
+    fun forelder_avdoed_personinfo(barnepensjon: Barnepensjon): Pair<String, PersonInfo?> {
+        return "forelder_avdoed_personinfo" to barnepensjon.foreldre
+            .find { it.type == PersonType.AVDOED }
+            ?.let {
+                PersonInfo(
+                    it.fornavn,
+                    it.etternavn,
+                    it.foedselsnummer,
+                    PersonType.AVDOED
                 )
             }
-        }
-        return "forelder_avdoed_personinfo" to objectMapper.createObjectNode()
     }
 
-    fun forelder_avdoed_doedsfallinformasjon(barnepensjon: Barnepensjon): Pair<String, ObjectNode> {
-        barnepensjon.foreldre.forEach {
-            if (it.type == PersonType.AVDOED) {
+    fun forelder_avdoed_doedsfallinformasjon(barnepensjon: Barnepensjon): Pair<String, DoedsfallInformasjon?> {
+        return "forelder_avdoed_doedsfallinformasjon" to  barnepensjon.foreldre.find { it.type == PersonType.AVDOED}
+            ?.let{
                 val avdoed = it as Avdoed
-                return "forelder_avdoed_doedsfallinformasjon" to objectMapper.valueToTree(
-                    DoedsfallInformasjon(avdoed.datoForDoedsfallet, avdoed.doedsaarsakSkyldesYrkesskadeEllerYrkessykdom)
-                )
+                DoedsfallInformasjon(avdoed.datoForDoedsfallet, avdoed.doedsaarsakSkyldesYrkesskadeEllerYrkessykdom)
             }
-        }
-        return "forelder_avdoed_doedsfallinformasjon" to objectMapper.createObjectNode()
     }
 
-    fun forelder_avdoed_utenlandsopphold(barnepensjon: Barnepensjon): Pair<String, ObjectNode> {
-        barnepensjon.foreldre.forEach {
-            if (it.type == PersonType.AVDOED) {
-                val avdoed = it as Avdoed
-                return "forelder_avdoed_utenlandsopphold" to objectMapper.valueToTree(
-                    avdoed.utenlandsopphold
-                )
-            }
-        }
-        return "forelder_avdoed_utenlandsopphold" to objectMapper.createObjectNode()
+    fun forelder_avdoed_utenlandsopphold(barnepensjon: Barnepensjon): Pair<String, BetingetOpplysning<Svar, List<Utenlandsopphold>>?> {
+        return "forelder_avdoed_utenlandsopphold" to  barnepensjon.foreldre
+            .find { it.type == PersonType.AVDOED }
+            ?.let { (it as Avdoed).utenlandsopphold }
     }
 
-    fun forelder_avdoed_naeringsinntekt(barnepensjon: Barnepensjon): Pair<String, ObjectNode> {
-        barnepensjon.foreldre.forEach {
-            if (it.type == PersonType.AVDOED) {
-                val avdoed = it as Avdoed
-                return "forelder_avdoed_naeringsinntekt" to objectMapper.valueToTree(
-                    avdoed.naeringsInntekt
-                )
-            }
-        }
-        return "forelder_avdoed_naeringsinntekt" to objectMapper.createObjectNode()
+    fun forelder_avdoed_naeringsinntekt(barnepensjon: Barnepensjon): Pair<String, BetingetOpplysning<Svar, Naeringsinntekt?>?> {
+        return "forelder_avdoed_naeringsinntekt" to barnepensjon.foreldre.find { it.type == PersonType.AVDOED}
+            ?.let{ (it as Avdoed).naeringsInntekt }
     }
 
-    fun forelder_avdoed_militaertjeneste(barnepensjon: Barnepensjon): Pair<String, ObjectNode> {
-        barnepensjon.foreldre.forEach {
-            if (it.type == PersonType.AVDOED) {
-                val avdoed = it as Avdoed
-                return "forelder_avdoed_militaertjeneste" to objectMapper.valueToTree(
-                    avdoed.militaertjeneste
-                )
-            }
-        }
-        return "forelder_avdoed_militaertjeneste" to objectMapper.createObjectNode()
+    fun forelder_avdoed_militaertjeneste(barnepensjon: Barnepensjon): Pair<String,  BetingetOpplysning<Svar, Opplysning<AarstallForMilitaerTjeneste>?>?> {
+        return "forelder_avdoed_militaertjeneste" to barnepensjon.foreldre.find { (it.type == PersonType.AVDOED)}
+            ?.let { (it as Avdoed).militaertjeneste }
     }
 
     fun soesken(barnepensjon: Barnepensjon) =
-        "soesken" to objectMapper.createObjectNode()
-            .set<ObjectNode>("soesken", objectMapper.valueToTree<ArrayNode>(barnepensjon.soesken))
+        "soesken" to objectMapper.createObjectNode().set<ObjectNode>("soesken", objectMapper.valueToTree<ArrayNode>(barnepensjon.soesken))
 
     fun soeknad_mottatt_dato(barnepensjon: Barnepensjon) =
         "soeknad_mottatt_dato" to objectMapper.valueToTree<ObjectNode>(MottattDato(barnepensjon.mottattDato))

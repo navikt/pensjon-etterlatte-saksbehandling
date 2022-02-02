@@ -1,8 +1,7 @@
 package no.nav.etterlatte.behandling
 
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import java.util.*
 
 /*
 data class BehandlingSammendragListe(val behandlinger: List<BehandlingSammendrag>)
@@ -19,6 +18,6 @@ data class DetaljertBehandling(
 
 data class BehandlingsBehov(
     val sak: Long,
-    val opplysninger: List<Behandlingsopplysning>?
+    val opplysninger: List<Behandlingsopplysning<ObjectNode>>?
 )
 

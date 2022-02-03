@@ -25,6 +25,7 @@ internal class PersonServiceTest {
         private const val TREIG_FLOSKEL = "04096222195"
         private const val TRIVIELL_MIDTPUNKT = "19040550081"
         private const val STOR_SNERK = "11057523044"
+        private const val DOLL_KOPP = "31017123133"
     }
 
     private val mapper = jacksonObjectMapper()
@@ -155,6 +156,32 @@ internal class PersonServiceTest {
                 service.hentPerson(Foedselsnummer.of(STOR_SNERK))
             }
         }
+    }
+
+    @Test
+    fun `Hent adresse med vegadresse mappes korrekt`() {
+        coEvery { personKlient.hentAdresse(any(), true) } returns opprettResponse("/pdl/adresseResponseVegadresse.json")
+
+        val adresse = runBlocking {
+            service.hentAdresse(Foedselsnummer.of(DOLL_KOPP), true)
+        }
+
+
+        assertEquals("Slettvikveien", adresse.bostedsadresse?.vegadresse?.adressenavn)
+        assertEquals("34", adresse.bostedsadresse?.vegadresse?.husnummer)
+        assertEquals(null, adresse.bostedsadresse?.vegadresse?.husbokstav)
+        assertEquals("7318", adresse.bostedsadresse?.vegadresse?.postnummer)
+
+        assertEquals("Tunnelveien", adresse.kontaktadresse?.vegadresse?.adressenavn)
+        assertEquals("36", adresse.kontaktadresse?.vegadresse?.husnummer)
+        assertEquals(null, adresse.kontaktadresse?.vegadresse?.husbokstav)
+        assertEquals("3085", adresse.kontaktadresse?.vegadresse?.postnummer)
+
+        assertEquals("Tjordal", adresse.oppholdsadresse?.vegadresse?.adressenavn)
+        assertEquals("24", adresse.oppholdsadresse?.vegadresse?.husnummer)
+        assertEquals(null, adresse.oppholdsadresse?.vegadresse?.husbokstav)
+        assertEquals("5570", adresse.oppholdsadresse?.vegadresse?.postnummer)
+
     }
 
 

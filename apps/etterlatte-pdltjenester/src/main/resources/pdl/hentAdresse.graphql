@@ -71,12 +71,12 @@ fragment utenlandskAdresseIFrittFormatDetails on UtenlandskAdresseIFrittFormat{
     postkode
 }
 
-query($ident: ID!) {
+query($ident: ID!, $historikk: Boolean) {
     hentPerson(ident: $ident) {
         adressebeskyttelse(historikk: false) {
             gradering
         }
-        bostedsadresse {
+        bostedsadresse(historikk: $historikk) {
             vegadresse {...vegadresseDetails}
             utenlandskAdresse {...utenlandskAdresseDetails}
             matrikkeladresse {...MatrikkeladresseDetails}
@@ -85,7 +85,7 @@ query($ident: ID!) {
             gyldigTilOgMed
             metadata {...metadata}
         }
-        kontaktadresse {
+        kontaktadresse(historikk: $historikk) {
             coAdressenavn
             folkeregistermetadata {...folkeregistermetadata}
             gyldigFraOgMed
@@ -98,7 +98,7 @@ query($ident: ID!) {
             utenlandskAdresseIFrittFormat{...utenlandskAdresseIFrittFormatDetails}
             vegadresse{...vegadresseDetails}
         }
-        oppholdsadresse {
+        oppholdsadresse(historikk: $historikk) {
             coAdressenavn
             folkeregistermetadata {...folkeregistermetadata}
             gyldigFraOgMed

@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.pdl.ResponseError
 import java.time.LocalDateTime
 
 data class AdresseResponse(
-        val `data`: AdresseResponseData,
+        val data: AdresseResponseData,
         val errors: List<ResponseError>? = null
 )
 

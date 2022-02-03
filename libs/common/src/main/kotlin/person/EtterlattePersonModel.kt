@@ -50,3 +50,29 @@ fun Person.alder(): Int {
     if (LocalDateTime.now().dayOfYear >= LocalDate.parse(foedselsdato).dayOfYear) alder++
     return alder
 }
+
+//TODO diskutere med FAG, hva trenger vi egentlig fra 'Adresse'?
+data class eyAdresse(
+val bostedsadresse: eyBostedsadresse?,
+val kontaktadresse: eyKontaktadresse?,
+val oppholdsadresse: eyOppholdsadresse?
+//TODO tenke på noe som gjør det lettere for resten å finne rett adresse
+//String representasjon med adresselinjer?
+)fun aktivadresse(): String{
+    return "BostedsAdresse"
+}
+data class eyBostedsadresse(
+    val vegadresse: eyVegadresse
+)
+data class eyKontaktadresse(
+    val vegadresse: eyVegadresse
+)
+data class eyOppholdsadresse(
+    val vegadresse: eyVegadresse
+)
+data class eyVegadresse(
+    val adressenavn: String?,
+    val husnummer: String?,
+    val husbokstav: String?,
+    val postnummer: String?
+)

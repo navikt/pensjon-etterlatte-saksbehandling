@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory
 import person.pdl.InnflyttingTilNorge
 import person.pdl.UtflyttingFraNorge
 import person.pdl.UtlandResponse
+import person.pdl.adresse.AdresseResponse
 
+//TODO vurdere å refaktorere til ulike serviceklasser
 class PersonService(
     private val klient: PersonKlient
 ) {
@@ -53,6 +55,21 @@ class PersonService(
 
         return opprettUtland(hentUtland)
     }
+    suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): eyAdresse {
+        logger.info("Henter adresse fra PDL")
+
+        val response = klient.hentAdresse(fnr, historikk)
+        println(response.toString())
+        val hentAdresse: AdresseResponse = response
+
+        //TODO fikse feilhåndtering
+        if (!response.errors.isNullOrEmpty()) {
+            loggfoerFeilmeldinger(response.errors)
+            throw NotFoundException()
+        }
+
+        return opprettAdresse(hentAdresse)
+    }
 
     private fun opprettPerson(
         fnr: Foedselsnummer,
@@ -87,6 +104,7 @@ class PersonService(
             foedselsaar = foedsel?.foedselsaar,
             doedsdato = doedsfall?.doedsdato.toString(),
             adressebeskyttelse = adressebeskyttelse,
+            //TODO fjerne adresse fra Person
             adresse = bostedsadresse?.vegadresse?.adressenavn,
             husnummer = bostedsadresse?.vegadresse?.husnummer,
             husbokstav = bostedsadresse?.vegadresse?.husbokstav,
@@ -99,10 +117,43 @@ class PersonService(
             rolle = null
         )
     }
+    private fun opprettAdresse(adresse: AdresseResponse): eyAdresse {
 
-    private fun opprettUtland(
-        utland: UtlandResponse,
-    ): eyUtland {
+        //TODO endre logikk for 'paralelle sannheter'
+        val bostedsadresse = adresse.data.hentPerson.bostedsadresse
+            .maxByOrNull { it.metadata.sisteRegistrertDato() }
+        val kontaktsadresse = adresse.data.hentPerson.kontaktadresse
+            .maxByOrNull { it.metadata.sisteRegistrertDato() }
+        val oppholdssadresse = adresse.data.hentPerson.oppholdsadresse
+            .maxByOrNull { it.metadata.sisteRegistrertDato() }
+
+        return eyAdresse(
+            bostedsadresse = eyBostedsadresse(
+                eyVegadresse(
+                    adressenavn = bostedsadresse?.vegadresse?.adressenavn,
+                    husnummer = bostedsadresse?.vegadresse?.husnummer,
+                    husbokstav = bostedsadresse?.vegadresse?.husbokstav,
+                    postnummer = bostedsadresse?.vegadresse?.postnummer,
+            )),
+            kontaktadresse =  eyKontaktadresse(
+                eyVegadresse(
+                    adressenavn = kontaktsadresse?.vegadresse?.adressenavn,
+                    husnummer = kontaktsadresse?.vegadresse?.husnummer,
+                    husbokstav = kontaktsadresse?.vegadresse?.husbokstav,
+                    postnummer = kontaktsadresse?.vegadresse?.postnummer,
+                )),
+            oppholdsadresse =  eyOppholdsadresse(
+                eyVegadresse(
+                    adressenavn = oppholdssadresse?.vegadresse?.adressenavn,
+                    husnummer = oppholdssadresse?.vegadresse?.husnummer,
+                    husbokstav = oppholdssadresse?.vegadresse?.husbokstav,
+                    postnummer = oppholdssadresse?.vegadresse?.postnummer,
+                )),
+        )
+    }
+
+
+    private fun opprettUtland(utland: UtlandResponse): eyUtland {
         return eyUtland(
             utflyttingFraNorge = utland.data?.hentPerson?.utflyttingFraNorge?.map { (mapUtflytting(it)) },
             innflyttingTilNorge = utland.data?.hentPerson?.innflyttingTilNorge?.map { (mapInnflytting(it)) }

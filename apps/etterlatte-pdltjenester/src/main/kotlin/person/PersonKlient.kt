@@ -17,10 +17,12 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.person.pdl.PersonResponse
 import org.slf4j.LoggerFactory
 import person.pdl.UtlandResponse
+import person.pdl.adresse.AdresseResponse
 
 interface Pdl {
     suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse
     suspend fun hentUtland(fnr: Foedselsnummer): UtlandResponse
+    suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): AdresseResponse
 }
 
 class PersonKlient(val httpClient: HttpClient) : Pdl {
@@ -39,6 +41,12 @@ class PersonKlient(val httpClient: HttpClient) : Pdl {
     override suspend fun hentUtland(fnr: Foedselsnummer): UtlandResponse {
         val query = getQuery("/pdl/hentUtland.graphql")
         val request = GraphqlRequest(query, Variables(ident = fnr.value, historikk = false)).toJson()
+        return safeCall(request)
+    }
+
+    override suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): AdresseResponse {
+        val query = getQuery("/pdl/hentAdresse.graphql")
+        val request = GraphqlRequest(query, Variables(ident = fnr.value, historikk = historikk)).toJson()
         return safeCall(request)
     }
 

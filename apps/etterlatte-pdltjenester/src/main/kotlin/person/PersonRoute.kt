@@ -1,7 +1,7 @@
 package no.nav.etterlatte.person
 
 import io.ktor.application.call
-import io.ktor.request.receive
+import io.ktor.request.*
 import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.Route
@@ -39,6 +39,14 @@ fun Route.personApi(service: PersonService) {
             logger.info("Fnr: $fnr")
             val utland = service.hentUtland(fnr)
             call.respond(utland)
+        }
+        post("hentadresse") {
+            val fnr = Foedselsnummer.of(call.receive<String>().toString())
+            //TODO litt usikker på om dette er beste måten å gjøre dette på
+            val historikk = (call.request.header("historikk")).toBoolean()
+            logger.info("Fnr: $fnr")
+            val person = service.hentAdresse(fnr, historikk)
+            call.respond(person)
         }
     }
 }

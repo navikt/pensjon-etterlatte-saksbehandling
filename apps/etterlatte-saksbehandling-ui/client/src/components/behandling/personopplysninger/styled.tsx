@@ -22,45 +22,25 @@ export const TableWrapper = styled.div`
   }
 `
 
-export const PersonDetailWrapper = styled.div`
-  display: inline-flex;
-  width: 600px;
-  padding-top: 0.5em;
-  padding-left: 1em;
-  justify-content: space-between;
-
-  .bodyShort {
-    width: 200px;
-  }
-  .detail {
-    width: 200px;
-
-    color: #707070;
-  }
+export const InfoWrapper = styled.div`
+  margin-bottom: 30px;
+  border: 1px solid #b0b0b0;
+  padding: 1.2em 1em 2em 1em;
+  width: 80%;
+  max-width: 800px;
 `
 
 export const DetailWrapper = styled.div`
-  display: inline-flex;
-  width: 700px;
+  display: flex;
+  flex-wrap: wrap;  
   padding-top: 0.5em;
   padding-left: 1em;
   justify-content: space-between;
+  max-width: 500px;
 
   .detail {
-    width: 450px;
+    width: 200px;
   }
-`
-
-export const InfoWrapper = styled.div`
-  margin-bottom: 50px;
-  border: 1px solid #b0b0b0;
-  padding: 1.2em 1em 2em 1em;
-  width: 800px;
-`
-
-export const Text = styled.div`
-  font-weight: bold;
-  font-size: 16px;
 `
 
 export const PersonInfoWrapper = styled.div`
@@ -69,7 +49,44 @@ export const PersonInfoWrapper = styled.div`
   background-color: #f7f7f7;
   border: 1px solid #b0b0b0;
   padding: 1.2em 1em 2em 1em;
-  width: 800px;
+  width: 80%;
+  max-width: 800px;
+
+`
+export const PersonDetailWrapper = styled.div`
+  display: flex;
+  flex-wrap: wrap;  
+  padding-top: 0.5em;
+  padding-left: 1em;
+  justify-content: space-between;
+  max-width: 500px;
+
+  .bodyShort {
+    width: 200px;
+  }
+  .detail {
+    width: 200px;
+    color: #707070;
+  }
+
+`
+
+export const RadioGroupWrapper = styled.div`
+  margin-top: 5em;
+  max-width: 400px;
+
+  .link{
+    font-weight: bold;
+    margin-top: 1em;
+    margin-left: 1.5em;
+  }
+  .radioGroup{
+    margin-bottom: 1em;
+  }
+  .button {
+    margin-top: 1.5em;
+    padding: 0.5em 3em;
+  }
 `
 
 export const PersonInfoHeader = styled.div`
@@ -78,14 +95,9 @@ export const PersonInfoHeader = styled.div`
   padding-left: 0.5em;
 `
 
-export const ContentWrapper = styled.div`
-  .text {
-    //todo
-  }
-`
-
 export const HeadingWrapper = styled.div`
   display: inline-flex;
+  
   .details{
     justify-content: center;
     align-item: center;

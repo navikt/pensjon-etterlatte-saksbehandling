@@ -1,4 +1,4 @@
-import { PersonInfoWrapper, PersonDetailWrapper, ContentWrapper, PersonInfoHeader } from './styled'
+import { PersonInfoWrapper, PersonDetailWrapper, PersonInfoHeader } from './styled'
 import { Detail, BodyShort } from '@navikt/ds-react'
 import { formatterDato } from '../../../utils/index'
 import { ChildIcon } from '../../../shared/icons/childIcon'
@@ -45,31 +45,25 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
   return (
     <PersonInfoWrapper>
       {getIcon()}
-      <ContentWrapper>
         <PersonDetailWrapper>
-          <Detail size="small" className="detail">{' '}</Detail>
+          <Detail size="small">{' '}</Detail>
           <Detail size="small" className="detail">Fra søknad</Detail>
-          <Detail size="small" className="detail">Fra Register</Detail>
         </PersonDetailWrapper>
         <PersonDetailWrapper>
-          <BodyShort size="small" className="bodyShort">Fødselsnummer</BodyShort>
-          <BodyShort size="small" className="bodyShort">{person.fnr}</BodyShort>
+          <BodyShort size="small">Fødselsnummer</BodyShort>
           <BodyShort size="small" className="bodyShort">{person.fnr}</BodyShort>
         </PersonDetailWrapper>
         <PersonDetailWrapper>
-          <BodyShort size="small" className="bodyShort">Adresse</BodyShort>
-          <BodyShort size="small" className="bodyShort">{person.adressenavn}</BodyShort>
+          <BodyShort size="small">Adresse</BodyShort>
           <BodyShort size="small" className="bodyShort">{person.adressenavn}</BodyShort>
         </PersonDetailWrapper>
 
         {person.personStatus == PersonStatus.DØD && person.datoForDoedsfall && (
           <PersonDetailWrapper>
-            <BodyShort size="small" className="bodyShort">Dato for dødsfall</BodyShort>
-            <BodyShort size="small" className="bodyShort">{formatterDato(person.datoForDoedsfall)}</BodyShort>
+            <BodyShort size="small">Dato for dødsfall</BodyShort>
             <BodyShort size="small" className="bodyShort">{formatterDato(person.datoForDoedsfall)}</BodyShort>
           </PersonDetailWrapper>
         )}
-      </ContentWrapper>
     </PersonInfoWrapper>
   )
 }

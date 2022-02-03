@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Detail, Heading } from '@navikt/ds-react'
-import { InfoWrapper, DetailWrapper, HeadingWrapper } from './styled'
+import { Detail, Heading, RadioGroup, Radio, Textarea, Button, Link } from '@navikt/ds-react'
+import { InfoWrapper, DetailWrapper, HeadingWrapper, RadioGroupWrapper } from './styled'
 import { IPersonFraSak } from './types'
 import { hentPersonerMedRelasjon } from '../../../shared/api/personopplysninger'
 import { Content, ContentHeader } from '../../../shared/styled'
@@ -10,6 +10,7 @@ import { PersonInfo } from './PersonInfo'
 
 export const Personopplysninger = () => {
   const [personer, setPersoner] = useState<{ person: IPersonFraSak; foreldre: IPersonFraSak[] }>()
+  const [soeknadGyldigBegrunnelse, setSoeknadGyldigBegrunnelse] = useState("")
 
   useEffect(() => {
     //TODO: Henter info om barn og foreldre fra PDL, type IPersonFraRegister er det som trengs per dags dato fra sketchene.
@@ -72,7 +73,24 @@ export const Personopplysninger = () => {
             ))}      
           </>
         )}
-      
+        <RadioGroupWrapper>
+        <RadioGroup legend="Er søknaden gyldig fremsatt?" size="small" className="radioGroup">
+          <Radio value="10">Ja</Radio>
+          <Radio value="20">Nei</Radio>
+        </RadioGroup>
+        <Textarea
+          label="Begrunnelse (hvis aktuelt)"
+          value={soeknadGyldigBegrunnelse}
+          onChange={(e) => setSoeknadGyldigBegrunnelse(e.target.value)}
+          minRows={2}
+          maxLength={400}
+          size="small"
+        />
+        <Button variant="primary" size="medium" className="button">
+          Bekreft og gå videre
+        </Button>
+        <Link href="#" className="link">Avbryt og behandle i pesys</Link>
+        </RadioGroupWrapper>
       </ContentHeader>
     </Content>
   )

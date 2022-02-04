@@ -5,11 +5,7 @@
   "foedselsaar": 2006,
   "foedselsdato": "2006-01-11",
   "adressebeskyttelse": false,
-  "adresse": "Hjemmeveien",
-  "husnummer": "4",
-  "husbokstav": "a",
-  "postnummer": "1234",
-  "poststed": "Oslo",
+  "adresse": null,
   "statsborgerskap": "NOR",
   "sivilstatus": "singel"
 }

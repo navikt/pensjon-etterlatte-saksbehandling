@@ -5,12 +5,14 @@ import { hentBehandling } from '../../shared/api/behandling'
 import { ClockIcon } from '../../shared/icons/clockIcon'
 import { DialogIcon } from '../../shared/icons/dialogIcon'
 import { FolderIcon } from '../../shared/icons/folderIcon'
+import { StatusIcon } from '../../shared/icons/statusIcon'
 import { Column, GridContainer } from '../../shared/styled'
 import { AppContext } from '../../store/AppContext'
 import { BehandlingsStatus, IBehandlingsStatus } from './behandlings-status'
 import { Beregne } from './beregne'
 import { Brev } from './brev'
 import { Inngangsvilkaar } from './inngangsvilkaar'
+import { Status } from './inngangsvilkaar/types'
 import { Personopplysninger } from './personopplysninger'
 import { Utbetalingsoversikt } from './utbetalingsoversikt'
 import { Vedtak } from './vedtak'
@@ -50,10 +52,17 @@ export const Behandling = () => {
               <NavLink to="inngangsvilkaar">
                 <span>2.</span> Inngangsvilkår
               </NavLink>
+              <CheckedMenu>
+                <li><StatusIcon status={Status.DONE} />Dødsfall</li>
+                <li className="selected"><StatusIcon status={Status.DONE} />Alder</li>
+                <li><StatusIcon status={Status.DONE} />Bostedsadresse</li>
+                <li><StatusIcon status={Status.DONE} />Medlemsskap</li>
+                <li><StatusIcon status={Status.NOT_DONE} />Yrkesskade</li>
+              </CheckedMenu>
             </li>
             <li>
               <NavLink to="beregne">
-                <span>3.</span> Beregne
+                <span>3.</span> Beregne 
               </NavLink>
             </li>
             <li>
@@ -192,3 +201,29 @@ const MenuHead = styled.div`
   height: 100px;
   border-bottom: 1px solid #ccc;
 `
+
+
+const CheckedMenu = styled.ul`
+margin: 1em 0 0;
+li{
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0 4em;
+    opacity: 0.4;
+    &:after{
+        height: 25px;
+        width: 100%;
+        content: "";
+        border-left: 1px solid #000;
+        margin: 5px 0 8px 10px;
+    }
+    &:last-child:after{
+        border:none;
+        height: 0;
+    }
+
+    &.selected{
+        opacity: 1;
+    }
+}
+`;

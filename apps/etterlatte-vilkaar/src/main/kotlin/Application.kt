@@ -14,7 +14,7 @@ import no.nav.etterlatte.vilkaar.barnepensjon.brukerErUngNok
 import no.nav.etterlatte.vilkaar.model.Opplysning
 import no.nav.etterlatte.vilkaar.model.objectMapper
 
-val vilkaarMap = mapOf("barnepensjon:brukerungnok" to brukerErUngNok)
+val vilkaarMap = mapOf("barnepensjon:forstegangsbehandling" to brukerErUngNok)
 
 fun main() {
     embeddedServer(CIO, applicationEngineEnvironment {

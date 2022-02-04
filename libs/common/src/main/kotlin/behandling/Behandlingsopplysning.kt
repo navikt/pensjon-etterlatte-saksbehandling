@@ -62,5 +62,6 @@ open class Behandlingsopplysning<T>(
         }
     }
 }
+
 val objectMapperKilde = jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 

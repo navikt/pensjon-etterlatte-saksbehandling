@@ -89,8 +89,22 @@ class EnkelSjekkAvOpplysning(vilkaarsnavn: String, val opplysningNavn: String, @
         VurdertVilkaar(it.test(), listOf(it), navn) }?: VurdertVilkaar(Tidslinje(LocalDate.MIN to  VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING), emptyList(), navn)
 }
 
+class EnkelSammenligningAvOpplysninger(vilkaarsnavn: String, val opplysningNavn: List<String>, @get:JsonIgnore val test: List<Opplysning>.() -> Tidslinje<VilkaarVurderingsResultat>) :
+    Vilkaar {
+    override fun opplysningsbehov(): List<String> {
+        return opplysningNavn
+    }
+    override val navn = vilkaarsnavn
+    override fun vurder(opplysninger: List<Opplysning>) = opplysninger.filter { it[OPPLYSNING_NAVN].textValue() in opplysningNavn }?.let {
+        VurdertVilkaar(it.test(), it, navn) }?: VurdertVilkaar(Tidslinje(LocalDate.MIN to  VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING), emptyList(), navn)
+}
+
 inline fun <reified T> enkelVurderingAvOpplysning(vilkarsNavn:String, opplysningsNavn: String, crossinline test: T.() -> Tidslinje<VilkaarVurderingsResultat>): Vilkaar = EnkelSjekkAvOpplysning(vilkarsNavn, opplysningsNavn){
     val grunnlag = objectMapper.treeToValue<T>(this)!!
+    grunnlag.test()
+}
+inline fun <reified T> enkelSammenligningAvOpplysninger(vilkarsNavn:String, opplysningsNavn: String, crossinline test: List<T>.() -> Tidslinje<VilkaarVurderingsResultat>): Vilkaar = EnkelSammenligningAvOpplysninger(vilkarsNavn, listOf(opplysningsNavn)){
+    val grunnlag = map{objectMapper.treeToValue<T>(it)!!}
     grunnlag.test()
 }
 

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.*
@@ -16,7 +17,7 @@ import java.util.*
 
 class Opplysningsuthenter {
 
-    fun lagOpplysningsListe(jsonNode: JsonNode): List<Behandlingsopplysning<Any>> {
+    fun lagOpplysningsListe(jsonNode: JsonNode): List<Behandlingsopplysning<out Any>> {
 
         val barnepensjonssoknad = objectMapper.treeToValue<Barnepensjon>(jsonNode)!!
         val tomNode = objectMapper.createObjectNode()
@@ -42,7 +43,11 @@ class Opplysningsuthenter {
             forelder_avdoed_militaertjeneste(barnepensjonssoknad),
             soesken(barnepensjonssoknad),
             soeknad_mottatt_dato(barnepensjonssoknad)
-        ).filter{it.second != null}.map { Behandlingsopplysning(UUID.randomUUID(), kilde, it.first, tomNode, it.second!!) }
+        ).filter{it.second != null}
+            .map { Behandlingsopplysning(UUID.randomUUID(), kilde, it.first, tomNode, it.second!!) } +
+                listOf<Behandlingsopplysning<out Any>?>(
+                    doedsdatoForAvdoed(barnepensjonssoknad)
+                ).filterNotNull()
     }
 
     fun innsender(barnepensjon: Barnepensjon) =
@@ -99,6 +104,22 @@ class Opplysningsuthenter {
             ?.let{
                 val avdoed = it as Avdoed
                 DoedsfallInformasjon(avdoed.datoForDoedsfallet, avdoed.doedsaarsakSkyldesYrkesskadeEllerYrkessykdom)
+            }
+    }
+
+    fun doedsdatoForAvdoed(barnepensjon: Barnepensjon): Behandlingsopplysning<Doedsdato>? {
+        return barnepensjon.foreldre.find { it.type == PersonType.AVDOED}
+            ?.let{
+                val avdoed = it as Avdoed
+                Behandlingsopplysning(UUID.randomUUID(),Behandlingsopplysning.Privatperson(
+                    barnepensjon.innsender.foedselsnummer.value,
+                    barnepensjon.mottattDato.toInstant(ZoneOffset.UTC)
+                ),"doedsfall:v1", objectMapper.createObjectNode() ,
+                    Doedsdato(
+                        avdoed.datoForDoedsfallet.svar,
+                        avdoed.foedselsnummer.value
+                    )
+                )
             }
     }
 

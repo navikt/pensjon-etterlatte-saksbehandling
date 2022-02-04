@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaar.barnepensjon
 
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato as DoedsDatoModell
 import no.nav.etterlatte.vilkaar.model.*
 import java.time.LocalDate
 
@@ -27,10 +28,13 @@ val brukerErUnder20aarIUtdanningOgForeldreloes = BrukerErUnder20 og BrukerErIUtd
 
 val brukerErUngNok = BrukerErUnder18 eller brukerErUnder20aarIUtdanningOgForeldreloes
 
-
+val sammenligningAvOpplysninger = Doedsdato.enkelSammenligning("sammenlign dødsdato"){
+    Tidslinje(LocalDate.MIN to (groupBy{it.doedsdato}.size.takeIf { it < 2 }?.let { VilkaarVurderingsResultat.OPPFYLT } ?: VilkaarVurderingsResultat.IKKE_OPPFYLT))
+}
 
 
 inline fun <reified T>OpplysningType<T>.enkelVurdering(vilkarsNavn:String, crossinline test: T.() -> Tidslinje<VilkaarVurderingsResultat>) = enkelVurderingAvOpplysning(vilkarsNavn, opplysningsNavn, test)
+inline fun <reified T>OpplysningType<T>.enkelSammenligning(vilkarsNavn:String, crossinline test: List<T>.() -> Tidslinje<VilkaarVurderingsResultat>) = enkelSammenligningAvOpplysninger(vilkarsNavn, opplysningsNavn, test)
 
 data class Utdanningsgrunnlag(val status: Boolean){
     companion object: OpplysningType<Utdanningsgrunnlag> {
@@ -54,4 +58,10 @@ data class BrukersAlder(
             get() = "brukers_alder"
 
     }
+}
+
+object Doedsdato:OpplysningType<DoedsDatoModell>{
+    override val opplysningsNavn: String
+        get() = "doedsfall:v1"
+
 }

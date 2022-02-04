@@ -31,7 +31,7 @@ class KtorVilkarClient(private val url: String) : VilkaarKlient {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 body = RequestDto(
-                    "barnepensjon:brukerungnok",
+                    "barnepensjon:forstegangsbehandling",
                     opplysninger.map { it.opplysning.put("_navn", it.opplysningType) })
             }
         }

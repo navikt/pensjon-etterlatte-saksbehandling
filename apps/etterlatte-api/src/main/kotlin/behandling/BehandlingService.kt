@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.person.Person
@@ -12,7 +13,7 @@ data class PersonSakerResult(val person: Person, val saker: SakerResult)
 
 data class BehandlingsBehov(
     val sak: Long,
-    val opplysninger: List<Behandlingsopplysning>?
+    val opplysninger: List<Behandlingsopplysning<ObjectNode>>?
 )
 
 class BehandlingService(private val behandlingKlient: BehandlingKlient, private val pdlKlient: PdltjenesterKlient) {

@@ -14,6 +14,7 @@ import no.nav.etterlatte.common.unsafeRetry
 import no.nav.etterlatte.libs.common.pdl.GraphqlRequest
 import no.nav.etterlatte.libs.common.pdl.Variables
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.person.pdl.FamilieRelasjonResponse
 import no.nav.etterlatte.person.pdl.PersonResponse
 import org.slf4j.LoggerFactory
 import person.pdl.UtlandResponse
@@ -23,6 +24,7 @@ interface Pdl {
     suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse
     suspend fun hentUtland(fnr: Foedselsnummer): UtlandResponse
     suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): AdresseResponse
+    suspend fun hentFamilieRelasjon(fnr: Foedselsnummer): FamilieRelasjonResponse
 }
 
 class PersonKlient(val httpClient: HttpClient) : Pdl {
@@ -47,6 +49,12 @@ class PersonKlient(val httpClient: HttpClient) : Pdl {
     override suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): AdresseResponse {
         val query = getQuery("/pdl/hentAdresse.graphql")
         val request = GraphqlRequest(query, Variables(ident = fnr.value, historikk = historikk)).toJson()
+        return safeCall(request)
+    }
+
+    override suspend fun hentFamilieRelasjon(fnr: Foedselsnummer): FamilieRelasjonResponse {
+        val query = getQuery("/pdl/familieForhold.graphql")
+        val request = GraphqlRequest(query, Variables(ident = fnr.value)).toJson()
         return safeCall(request)
     }
 

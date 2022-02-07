@@ -10,6 +10,7 @@ import io.ktor.routing.post
 import io.ktor.routing.route
 import no.nav.etterlatte.common.innloggetBrukerFnr
 import no.nav.etterlatte.common.toJson
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.slf4j.LoggerFactory
 
@@ -47,6 +48,11 @@ fun Route.personApi(service: PersonService) {
             logger.info("Fnr: $fnr")
             val person = service.hentAdresse(fnr, historikk)
             call.respond(person)
+        }
+        post("hentfamilierelasjon") {
+            val fnr = Foedselsnummer.of(call.receive<String>().toString())
+            //val familieRelasjon = service.hentFamilieRelasjon(fnr)
+            call.respond(FamilieRelasjon("todo"))
         }
     }
 }

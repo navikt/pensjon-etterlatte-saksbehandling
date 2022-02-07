@@ -34,6 +34,6 @@ class BehandlingsService(
 
 data class NyBehandlingRequest(
     val sak: Long,
-    val opplysninger: List<Behandlingsopplysning<Any>>
+    val opplysninger: List<Behandlingsopplysning<out Any>>
 )
 

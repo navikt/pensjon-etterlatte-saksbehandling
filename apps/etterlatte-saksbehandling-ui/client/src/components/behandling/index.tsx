@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
-import { NavLink, Routes, Route } from 'react-router-dom'
+import { NavLink, Link, Routes, Route, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import { hentBehandling } from '../../shared/api/behandling'
 import { ClockIcon } from '../../shared/icons/clockIcon'
@@ -21,6 +21,7 @@ const addBehandlingAction = (data: any) => ({ type: 'add_behandling', data })
 
 export const Behandling = () => {
   const ctx = useContext(AppContext)
+  const location = useLocation()
 
   useEffect(() => {
     ;(async () => {
@@ -33,7 +34,13 @@ export const Behandling = () => {
     })()
   }, [])
 
-  console.log(ctx.state.behandlingReducer)
+  const active = (hash: string) => {
+    if(location.hash === hash) {
+        return "active"
+    }
+    return ""
+  }
+
   return (
     <>
       <GridContainer>
@@ -49,20 +56,46 @@ export const Behandling = () => {
               </NavLink>
             </li>
             <li>
+              {/** Innholdet her dras ut i egen komponent og vil være dynamisk basert på hvilke vilkår som faktisk eksisterer */}
               <NavLink to="inngangsvilkaar">
                 <span>2.</span> Inngangsvilkår
               </NavLink>
               <CheckedMenu>
-                <li><StatusIcon status={Status.DONE} />Dødsfall</li>
-                <li className="selected"><StatusIcon status={Status.DONE} />Alder</li>
-                <li><StatusIcon status={Status.DONE} />Bostedsadresse</li>
-                <li><StatusIcon status={Status.DONE} />Medlemsskap</li>
-                <li><StatusIcon status={Status.NOT_DONE} />Yrkesskade</li>
+                <li>
+                  <Link to="#dodsfall" className={active("#dodsfall")}>
+                    <StatusIcon status={Status.DONE} />
+                    <span>Dødsfall</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="#alder" className={active("#alder")}>
+                    <StatusIcon status={Status.DONE} />
+                    <span>Alder</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="#bostedsadresse" className={active("#bostedsadresse")}>
+                    <StatusIcon status={Status.DONE} />
+                    <span>Bostedsadresse</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="#medlemskap" className={active("#medlemskap")}>
+                    <StatusIcon status={Status.DONE} />
+                    <span>Medlemsskap</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="#yrkesskade" className={active("#yrkesskade")}>
+                    <StatusIcon status={Status.NOT_DONE} />
+                    <span>Yrkesskade</span>
+                  </Link>
+                </li>
               </CheckedMenu>
             </li>
             <li>
               <NavLink to="beregne">
-                <span>3.</span> Beregne 
+                <span>3.</span> Beregne
               </NavLink>
             </li>
             <li>
@@ -174,11 +207,6 @@ const StegMeny = styled.ul`
 
   li {
     a {
-      * {
-        font-weight: bold;
-        padding-right: 1em;
-        padding-left: 1em;
-      }
       display: block;
       padding: 0.5em 1em 0.5em;
       color: #78706a;
@@ -202,28 +230,44 @@ const MenuHead = styled.div`
   border-bottom: 1px solid #ccc;
 `
 
-
 const CheckedMenu = styled.ul`
-margin: 1em 0 0;
-li{
+  margin: 1em 0 0;
+
+  li {
     display: flex;
     flex-wrap: wrap;
     padding: 0 4em;
-    opacity: 0.4;
-    &:after{
-        height: 25px;
-        width: 100%;
-        content: "";
-        border-left: 1px solid #000;
-        margin: 5px 0 8px 10px;
+    &:after {
+      height: 25px;
+      width: 100%;
+      content: '';
+      border-left: 1px solid #000;
+      margin: 5px 0 8px 10px;
     }
-    &:last-child:after{
-        border:none;
-        height: 0;
+    &:last-child:after {
+      border: none;
+      height: 0;
     }
 
-    &.selected{
-        opacity: 1;
+    &.selected {
+      opacity: 1;
     }
-}
-`;
+
+    a {
+      opacity: 0.4;
+      border: none !important;
+      display: inherit;
+      font-weight: inherit;
+      color: inherit;
+      padding: 0;
+      &.active {
+        background: none;
+        opacity: 1;
+      }
+    }
+
+    span {
+      padding: 0 0.5em;
+    }
+  }
+`

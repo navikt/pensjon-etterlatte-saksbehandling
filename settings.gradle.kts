@@ -8,6 +8,7 @@ include(
     "apps:etterlatte-behandling",
     "apps:etterlatte-vilkaar",
     "apps:etterlatte-behandling-fra-soeknad",
+    "apps:etterlatte-opplysninger-fra-pdl",
     "libs:ktorclient-auth-clientcredentials",
     "libs:common",
     "libs:ktorclient-onbehalfof"

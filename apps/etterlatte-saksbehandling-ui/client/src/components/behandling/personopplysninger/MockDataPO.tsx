@@ -1,4 +1,4 @@
-import { IPersonFraSak, RelatertPersonsRolle, PersonStatus, IPersonFraRegister } from './types'
+import { IPersonFraSak, RelatertPersonsRolle, PersonStatus } from './types'
 
 export const mockDataSoesken: IPersonFraSak[] = [
   {

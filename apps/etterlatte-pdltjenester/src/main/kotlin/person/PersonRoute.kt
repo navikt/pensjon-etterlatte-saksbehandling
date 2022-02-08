@@ -12,6 +12,7 @@ import no.nav.etterlatte.common.innloggetBrukerFnr
 import no.nav.etterlatte.common.toJson
 import no.nav.etterlatte.libs.common.pdl.Variables
 import no.nav.etterlatte.libs.common.person.eyFamilieRelasjon
+import no.nav.etterlatte.libs.common.pdl.EyHentAdresseRequest
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.slf4j.LoggerFactory
 
@@ -49,6 +50,7 @@ fun Route.personApi(service: PersonService) {
             //val historikk = (call.request.header("historikk")).toBoolean()
             //logger.info("Fnr: $fnr")
             val person = service.hentAdresse(Foedselsnummer.of(variables.ident), variables.historikk)
+
             call.respond(person)
         }
         post("hentfamilierelasjon") {

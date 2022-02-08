@@ -1,9 +1,11 @@
 package no.nav.etterlatte.pdl
 
 import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelsePerson
+import no.nav.etterlatte.libs.common.pdl.EyHentAdresseRequest
 import no.nav.etterlatte.libs.common.pdl.Gradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.eyAdresse
 import no.nav.etterlatte.libs.common.person.eyUtland
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -36,6 +38,13 @@ class PersonService(private val klient: Pdl) {
 
         return person
             .also { logger.info("Hentet utlandsinfo for Person") }
+    }
+    suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): eyAdresse {
+        //TODO exception håndteringen virker ikke
+        val person = klient.hentAdresse(fnr, historikk = historikk) ?: throw Exception("Fant ingen personer i PDL")
+
+        return person
+            .also { logger.info("Hentet adresse for Person") }
     }
 
     /**

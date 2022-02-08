@@ -23,9 +23,11 @@ internal class EtterlatteFordeler(
     private val klokke: Clock = Clock.systemUTC()
 ) : River.PacketListener {
 
+    //TODO flytte disse ned til onPacket for å sikre trådhåntering
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
     private lateinit var barn: Person
     private lateinit var avdoed: Person
+    private lateinit var gjenLevende: Person
     private lateinit var soeknad: JsonMessage
 
     /*
@@ -37,8 +39,8 @@ internal class EtterlatteFordeler(
     *Yrkesskade
     *Avdød- ingen ut- og innvandringsdatoer
     *Avdød - Ikke oppgitt utenlandsopphold
-    Gjenlevende ektefelle/samboer - bosatt i Norge
-    -Barnet - bosatt i Norge + ingen ut- og innvandringsdatoe -ikke sjekket bostedsadresse
+    *Gjenlevende ektefelle/samboer - bosatt i Norge
+    *Barnet - bosatt i Norge + ingen ut- og innvandringsdatoe
      */
 
 
@@ -52,10 +54,11 @@ internal class EtterlatteFordeler(
         Kriterie("Avdød har yrkesskade") { harYrkesskade(soeknad) },
         Kriterie("Søker er ikke forelder") { soekerIkkeForelder(soeknad) },
         Kriterie("Avdød er ikke død") { personErIkkeDoed(avdoed) },
-        Kriterie("Barn har verge") {harVerge(soeknad)},
-        Kriterie("Det er huket av for utenlandsopphold for avdøde") {harHuketAvForUtenlandsopphold(soeknad)}
-        //Kriterie("Søker venter barn") {soekerForventerBarn(soeknad)
-        //TODO Søker venter barn ligger pt. ikke i søknaden, derfor kommentert ut
+        Kriterie("Barn har verge") { harVerge(soeknad) },
+        Kriterie("Det er huket av for utenlandsopphold for avdøde") { harHuketAvForUtenlandsopphold(soeknad) },
+        Kriterie("Barn er ikke bosatt i Norge") { ikkeGyldigBostedsAdresseINorge(barn) },
+        Kriterie("Avdød er ikke bosatt i Norge") { ikkeGyldigBostedsAdresseINorge(avdoed) },
+        Kriterie("Gjenlevende er ikke bosatt i Norge") { ikkeGyldigBostedsAdresseINorge(gjenLevende) },
     )
 
     init {
@@ -74,6 +77,7 @@ internal class EtterlatteFordeler(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
+
         val gyldigTilDato = OffsetDateTime.parse(packet["@hendelse_gyldig_til"].asText())
         soeknad = packet
 
@@ -91,11 +95,16 @@ internal class EtterlatteFordeler(
 
             try {
                 val barnFnr = Foedselsnummer.of(packet["@fnr_soeker"].asText())
-                val avdoedFnr = Foedselsnummer.of(finnAvdoedFnr( packet))
+                val gjenlevendeFnr = Foedselsnummer.of(finnGjennlevendeFnr(packet))
+                val avdoedFnr = Foedselsnummer.of(finnAvdoedFnr(packet))
                 barn = personService.hentPerson(barnFnr)
                 avdoed = personService.hentPerson(avdoedFnr)
+                gjenLevende = personService.hentPerson(gjenlevendeFnr)
                 barn.utland = personService.hentUtland(barnFnr)
                 avdoed.utland = personService.hentUtland(avdoedFnr)
+                barn.adresse = personService.hentAdresse(barnFnr, false)
+                avdoed.adresse = personService.hentAdresse(avdoedFnr, false)
+                gjenLevende.adresse = personService.hentAdresse(gjenlevendeFnr, false)
 
                 val aktuelleSaker = fordel(packet)
                 if (aktuelleSaker.kandidat) {
@@ -140,7 +149,6 @@ internal class EtterlatteFordeler(
 
     private fun harUtvandring(person: Person): Boolean {
         return (person.utland?.innflyttingTilNorge?.isNotEmpty() == true || person.utland?.utflyttingFraNorge?.isNotEmpty() == true)
-
     }
 
     private fun harYrkesskade(sok: JsonMessage): Boolean {
@@ -154,7 +162,14 @@ internal class EtterlatteFordeler(
     private fun finnAvdoedFnr(sok: JsonMessage): String {
         return sok["@skjema_info"]["foreldre"]
             .filter { it["type"].asText() == "AVDOED" }
-            .map { it["foedselsnummer"]}
+            .map { it["foedselsnummer"] }
+            .first().asText()
+    }
+
+    private fun finnGjennlevendeFnr(sok: JsonMessage): String {
+        return sok["@skjema_info"]["foreldre"]
+            .filter { it["type"].asText() == "GJENLEVENDE_FORELDER" }
+            .map { it["foedselsnummer"] }
             .first().asText()
     }
 
@@ -162,22 +177,14 @@ internal class EtterlatteFordeler(
         return sok["@skjema_info"]["innsender"]["foedselsnummer"].asText() !in sok["@skjema_info"]["foreldre"]
             .filter { it["type"].asText() == "GJENLEVENDE_FORELDER" }
             .map { it["foedselsnummer"].asText() }
-
     }
 
     private fun personErIkkeDoed(person: Person): Boolean {
         return person.doedsdato.isNullOrEmpty()
     }
 
-    private fun soekerForventerBarn(sok: JsonMessage): Boolean {
-        //TODO Feltet uregistrertEllerVenterBarn er pt. ikke med i søknad om BP
-        return sok["@skjema_info"]["soeker"]
-            .filter { it["uregistrertEllerVenterBarn"].asText() == "JA" }
-            .isNotEmpty()
-    }
-
     private fun harVerge(sok: JsonMessage): Boolean {
-        return sok["@skjema_info"]["soeker"]["verge"]["svar"].asText()  == "JA"
+        return sok["@skjema_info"]["soeker"]["verge"]["svar"].asText() == "JA"
     }
 
     private fun harHuketAvForUtenlandsopphold(sok: JsonMessage): Boolean {
@@ -185,6 +192,11 @@ internal class EtterlatteFordeler(
             .filter { it["type"].asText() == "AVDOED" }
             .filter { it["utenlandsopphold"]["svar"].asText() == "JA" }
             .isNotEmpty()
+    }
+
+    //TODO tenke litt mer på dette kriteriet
+    private fun ikkeGyldigBostedsAdresseINorge(person: Person): Boolean {
+        return person.adresse?.bostedsadresse?.vegadresse?.adressenavn == null
     }
 
     data class FordelRespons(

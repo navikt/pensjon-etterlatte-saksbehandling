@@ -1,6 +1,7 @@
 package no.nav.etterlatte.person
 
 import io.ktor.features.NotFoundException
+import no.nav.etterlatte.libs.common.pdl.EyHentAdresseRequest
 import no.nav.etterlatte.libs.common.pdl.Gradering
 
 import no.nav.etterlatte.libs.common.pdl.ResponseError
@@ -56,10 +57,10 @@ class PersonService(
 
         return opprettUtland(hentUtland)
     }
-    suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): eyAdresse {
+    suspend fun hentAdresse(adresseRequest: EyHentAdresseRequest): eyAdresse {
         logger.info("Henter adresse fra PDL")
 
-        val response = klient.hentAdresse(fnr, historikk)
+        val response = klient.hentAdresse(Foedselsnummer.of(adresseRequest.fnr), adresseRequest.historikk)
         println(response.toString())
         val hentAdresse: AdresseResponse = response
 
@@ -106,10 +107,7 @@ class PersonService(
             doedsdato = doedsfall?.doedsdato.toString(),
             adressebeskyttelse = adressebeskyttelse,
             //TODO fjerne adresse fra Person
-            adresse = bostedsadresse?.vegadresse?.adressenavn,
-            husnummer = bostedsadresse?.vegadresse?.husnummer,
-            husbokstav = bostedsadresse?.vegadresse?.husbokstav,
-            postnummer = bostedsadresse?.vegadresse?.postnummer,
+            adresse = null,
             statsborgerskap = statsborgerskap?.land,
             foedeland = foedsel?.foedeland,
             sivilstatus = sivilstand?.type?.name,

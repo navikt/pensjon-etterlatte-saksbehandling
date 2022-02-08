@@ -12,6 +12,8 @@ import no.nav.etterlatte.libs.common.pdl.Variables
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.eyFamilieRelasjon
+import no.nav.etterlatte.libs.common.person.eyAdresse
+
 import no.nav.etterlatte.libs.common.person.eyUtland
 import org.slf4j.LoggerFactory
 
@@ -20,6 +22,7 @@ interface Pdl {
     suspend fun hentPerson(fnr: Foedselsnummer): Person
     suspend fun hentUtland(fnr: Foedselsnummer): eyUtland
     suspend fun hentFamilieRelasjon(fnr: Foedselsnummer): eyFamilieRelasjon
+    suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): eyAdresse
 }
 
 class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pdl {
@@ -64,6 +67,7 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
         return response
     }
 
+
     override suspend fun hentFamilieRelasjon(fnr: Foedselsnummer): eyFamilieRelasjon {
         val response = client.post<eyFamilieRelasjon>(apiUrl + "/hentfamilierelasjon") {
             header("Tema", "PEN")
@@ -72,6 +76,24 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
             body = fnr.value
 
         }
+
+
+    override suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): eyAdresse {
+        val response = client.post<eyAdresse>(apiUrl + "/hentAdresse") {
+            header("Tema", "PEN")
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            body = EyHentAdresseRequest(
+                fnr = fnr.value,
+                historikk = historikk
+            )
+
+        }
+        //TODO ordne feilhåndtering
+        // Logge feil dersom det finnes noen
+        //response.errors?.forEach { error ->
+        //   logger.error("Feil ved uthenting av adressebeskyttelse", error.toString())
+        // }
 
         return response
     }

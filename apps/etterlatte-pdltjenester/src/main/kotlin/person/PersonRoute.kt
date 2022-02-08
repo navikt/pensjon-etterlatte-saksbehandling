@@ -10,6 +10,8 @@ import io.ktor.routing.post
 import io.ktor.routing.route
 import no.nav.etterlatte.common.innloggetBrukerFnr
 import no.nav.etterlatte.common.toJson
+import no.nav.etterlatte.libs.common.pdl.Variables
+import no.nav.etterlatte.libs.common.person.eyFamilieRelasjon
 import no.nav.etterlatte.libs.common.pdl.EyHentAdresseRequest
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.slf4j.LoggerFactory
@@ -42,8 +44,19 @@ fun Route.personApi(service: PersonService) {
             call.respond(utland)
         }
         post("hentadresse") {
-            val person = service.hentAdresse(call.receive())
+            //val fnr = Foedselsnummer.of(call.receive<String>().toString())
+            val variables = Variables(call.receive<String>().toString())
+            //TODO litt usikker på om dette er beste måten å gjøre dette på
+            //val historikk = (call.request.header("historikk")).toBoolean()
+            //logger.info("Fnr: $fnr")
+            val person = service.hentAdresse(Foedselsnummer.of(variables.ident), variables.historikk)
+
             call.respond(person)
+        }
+        post("hentfamilierelasjon") {
+            val fnr = Foedselsnummer.of(call.receive<String>().toString())
+            //val familieRelasjon = service.hentFamilieRelasjon(fnr)
+            call.respond(eyFamilieRelasjon("todo"))
         }
     }
 }

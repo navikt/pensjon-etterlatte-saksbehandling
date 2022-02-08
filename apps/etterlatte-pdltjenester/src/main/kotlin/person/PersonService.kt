@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.pdl.Gradering
 
 import no.nav.etterlatte.libs.common.pdl.ResponseError
 import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.person.pdl.FamilieRelasjonResponse
 import no.nav.etterlatte.person.pdl.HentPerson
 import org.slf4j.LoggerFactory
 import person.pdl.InnflyttingTilNorge
@@ -181,4 +182,11 @@ class PersonService(
             println(it.message)
         }
     }
+
+    /*
+    suspend fun hentFamilieRelasjon(fnr: Foedselsnummer): FamilieRelasjon {
+        val response = klient.hentFamilieRelasjon(fnr)
+
+    }
+    */
 }

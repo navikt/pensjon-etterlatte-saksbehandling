@@ -47,5 +47,12 @@ query($ident: ID!) {
             folkeregistermetadata{...folkeregistermetadata}
             metadata{...metadata}
         }
+        forelderBarnRelasjon {
+            folkeregistermetadata{...folkeregistermetadata}
+            metadata{...metadata}
+            minRolleForPerson
+            relatertPersonsIdent
+            relatertPersonsRolle
+        }
     }
 }

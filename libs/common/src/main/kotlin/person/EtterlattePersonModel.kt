@@ -73,3 +73,7 @@ data class eyVegadresse(
     val husbokstav: String?,
     val postnummer: String?
 )
+
+data class eyFamilieRelasjon(
+    val todo: String,
+)

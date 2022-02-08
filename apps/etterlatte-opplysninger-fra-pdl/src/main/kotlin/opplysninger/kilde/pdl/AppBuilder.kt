@@ -11,7 +11,7 @@ import no.nav.etterlatte.security.ktor.clientCredential
 class AppBuilder(private val props: Map<String, String>) {
 
     private val behandling_app = behandlingHttpClient()
-    private val pdlTjenester = behandlingHttpClient()
+    private val pdlTjenester = pdlTjenesterHttpClient()
 
 
     fun createBehandlingService(): Behandling {
@@ -19,7 +19,7 @@ class AppBuilder(private val props: Map<String, String>) {
     }
 
     fun createPdlService(): Pdl {
-        return null as Pdl
+        return PdlService(pdlTjenester, "http://etterlatte-pdltjenester")
     }
 
     fun createOpplysningsbygger(): OpplysningsBygger {

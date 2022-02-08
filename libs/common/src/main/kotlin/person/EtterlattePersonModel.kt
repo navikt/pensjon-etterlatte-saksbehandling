@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.person
 
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Barn
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -50,30 +51,37 @@ fun Person.alder(): Int {
 
 //TODO diskutere med FAG, hva trenger vi egentlig fra 'Adresse'?
 data class eyAdresse(
-val bostedsadresse: eyBostedsadresse?,
-val kontaktadresse: eyKontaktadresse?,
-val oppholdsadresse: eyOppholdsadresse?
+val bostedsadresse: EyBostedsadresse?,
+val kontaktadresse: EyKontaktadresse?,
+val oppholdsadresse: EyOppholdsadresse?
 //TODO tenke på noe som gjør det lettere for resten å finne rett adresse
 //String representasjon med adresselinjer?
 )fun aktivadresse(): String{
     return "BostedsAdresse"
 }
-data class eyBostedsadresse(
-    val vegadresse: eyVegadresse
+data class EyBostedsadresse(
+    val vegadresse: EyVegadresse
 )
-data class eyKontaktadresse(
-    val vegadresse: eyVegadresse
+data class EyKontaktadresse(
+    val vegadresse: EyVegadresse
 )
-data class eyOppholdsadresse(
-    val vegadresse: eyVegadresse
+data class EyOppholdsadresse(
+    val vegadresse: EyVegadresse
 )
-data class eyVegadresse(
+data class EyVegadresse(
     val adressenavn: String?,
     val husnummer: String?,
     val husbokstav: String?,
     val postnummer: String?
 )
 
-data class eyFamilieRelasjon(
-    val todo: String,
+//TODO hva kaller vi noen med foreldreansvar
+data class EyFamilieRelasjon(
+    val ansvarligeForeldre: List<EyForeldreAnsvar>?,
+    val foreldre: List<EyForeldre>?,
+    val barn: List<EyBarn>?
 )
+
+data class EyForeldreAnsvar(val ident: Foedselsnummer)
+data class EyForeldre(val ident: Foedselsnummer)
+data class EyBarn (val ident: Foedselsnummer)

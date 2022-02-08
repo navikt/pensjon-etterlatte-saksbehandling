@@ -2,11 +2,14 @@ package no.nav.etterlatte.person
 
 import io.ktor.features.NotFoundException
 import no.nav.etterlatte.libs.common.pdl.EyHentAdresseRequest
+import no.nav.etterlatte.libs.common.pdl.EyHentFamilieRelasjonRequest
 import no.nav.etterlatte.libs.common.pdl.Gradering
 
 import no.nav.etterlatte.libs.common.pdl.ResponseError
 import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.person.pdl.FamilieRelasjonResponse
+import no.nav.etterlatte.person.pdl.ForelderAnsvar
+import no.nav.etterlatte.person.pdl.ForelderBarnRelasjonRolle
 import no.nav.etterlatte.person.pdl.HentPerson
 import org.slf4j.LoggerFactory
 import person.pdl.InnflyttingTilNorge
@@ -57,6 +60,7 @@ class PersonService(
 
         return opprettUtland(hentUtland)
     }
+
     suspend fun hentAdresse(adresseRequest: EyHentAdresseRequest): eyAdresse {
         logger.info("Henter adresse fra PDL")
 
@@ -72,6 +76,48 @@ class PersonService(
 
         return opprettAdresse(hentAdresse)
     }
+
+    suspend fun hentFamilieRelasjon(familieRelasjonRequest: EyHentFamilieRelasjonRequest): EyFamilieRelasjon {
+        logger.info("Henter adresse fra PDL")
+
+        val response = klient.hentFamilieRelasjon(familieRelasjonRequest.fnr, familieRelasjonRequest.historikk)
+        println(response.toString())
+        val hentFamileRelasjon: FamilieRelasjonResponse = response
+
+        //TODO fikse feilhåndtering
+        if (!response.errors.isNullOrEmpty()) {
+            loggfoerFeilmeldinger(response.errors)
+            throw NotFoundException()
+        }
+
+        return opprettFamilieRelasjon(hentFamileRelasjon)
+    }
+
+    private fun opprettFamilieRelasjon(familieRelasjon: FamilieRelasjonResponse): EyFamilieRelasjon {
+
+        return EyFamilieRelasjon(
+            ansvarligeForeldre = familieRelasjon.data?.hentPerson?.foreldreAnsvar?.map {
+                EyForeldreAnsvar(
+                    Foedselsnummer.of(
+                        it.ansvarlig
+                    )
+                )
+            },
+            foreldre = familieRelasjon.data?.hentPerson?.forelderBarnRelasjon?.filter { it.minRolleForPerson != ForelderBarnRelasjonRolle.BARN }
+                ?.map {
+                    EyForeldre(
+                        Foedselsnummer.of(it.relatertPersonsIdent)
+                    )
+                },
+            barn = familieRelasjon.data?.hentPerson?.forelderBarnRelasjon?.filter { it.minRolleForPerson == ForelderBarnRelasjonRolle.BARN }
+                ?.map {
+                    EyBarn(
+                        Foedselsnummer.of(it.relatertPersonsIdent)
+                    )
+                }
+        )
+    }
+
 
     private fun opprettPerson(
         fnr: Foedselsnummer,
@@ -116,6 +162,7 @@ class PersonService(
             rolle = null
         )
     }
+
     private fun opprettAdresse(adresse: AdresseResponse): eyAdresse {
 
         //TODO endre logikk for 'paralelle sannheter'
@@ -127,27 +174,30 @@ class PersonService(
             .maxByOrNull { it.metadata.sisteRegistrertDato() }
 
         return eyAdresse(
-            bostedsadresse = eyBostedsadresse(
-                eyVegadresse(
+            bostedsadresse = EyBostedsadresse(
+                EyVegadresse(
                     adressenavn = bostedsadresse?.vegadresse?.adressenavn,
                     husnummer = bostedsadresse?.vegadresse?.husnummer,
                     husbokstav = bostedsadresse?.vegadresse?.husbokstav,
                     postnummer = bostedsadresse?.vegadresse?.postnummer,
-            )),
-            kontaktadresse =  eyKontaktadresse(
-                eyVegadresse(
+                )
+            ),
+            kontaktadresse = EyKontaktadresse(
+                EyVegadresse(
                     adressenavn = kontaktsadresse?.vegadresse?.adressenavn,
                     husnummer = kontaktsadresse?.vegadresse?.husnummer,
                     husbokstav = kontaktsadresse?.vegadresse?.husbokstav,
                     postnummer = kontaktsadresse?.vegadresse?.postnummer,
-                )),
-            oppholdsadresse =  eyOppholdsadresse(
-                eyVegadresse(
+                )
+            ),
+            oppholdsadresse = EyOppholdsadresse(
+                EyVegadresse(
                     adressenavn = oppholdssadresse?.vegadresse?.adressenavn,
                     husnummer = oppholdssadresse?.vegadresse?.husnummer,
                     husbokstav = oppholdssadresse?.vegadresse?.husbokstav,
                     postnummer = oppholdssadresse?.vegadresse?.postnummer,
-                )),
+                )
+            ),
         )
     }
 

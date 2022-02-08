@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class FamilieRelasjonResponse(
-    val data: PersonResponseData? = null,
+    val data: FamilieRelasjonResponseData? = null,
     val errors: List<ResponseError>? = null
 )
 

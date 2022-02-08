@@ -11,8 +11,9 @@ import io.ktor.routing.route
 import no.nav.etterlatte.common.innloggetBrukerFnr
 import no.nav.etterlatte.common.toJson
 import no.nav.etterlatte.libs.common.pdl.Variables
-import no.nav.etterlatte.libs.common.person.eyFamilieRelasjon
+import no.nav.etterlatte.libs.common.person.EyFamilieRelasjon
 import no.nav.etterlatte.libs.common.pdl.EyHentAdresseRequest
+import no.nav.etterlatte.libs.common.pdl.EyHentFamilieRelasjonRequest
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.slf4j.LoggerFactory
 
@@ -54,9 +55,9 @@ fun Route.personApi(service: PersonService) {
             call.respond(person)
         }
         post("hentfamilierelasjon") {
-            val fnr = Foedselsnummer.of(call.receive<String>().toString())
-            //val familieRelasjon = service.hentFamilieRelasjon(fnr)
-            call.respond(eyFamilieRelasjon("todo"))
+            val variables = Variables(call.receive<String>().toString())
+            val familieRelasjon = service.hentFamilieRelasjon(EyHentFamilieRelasjonRequest(Foedselsnummer.of(variables.ident), variables.historikk))
+            call.respond(familieRelasjon)
         }
     }
 }

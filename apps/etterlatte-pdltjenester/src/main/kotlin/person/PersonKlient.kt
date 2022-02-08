@@ -24,7 +24,7 @@ interface Pdl {
     suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse
     suspend fun hentUtland(fnr: Foedselsnummer): UtlandResponse
     suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): AdresseResponse
-    suspend fun hentFamilieRelasjon(fnr: Foedselsnummer): FamilieRelasjonResponse
+    suspend fun hentFamilieRelasjon(fnr: Foedselsnummer, historikk: Boolean): FamilieRelasjonResponse
 }
 
 class PersonKlient(val httpClient: HttpClient) : Pdl {
@@ -52,7 +52,7 @@ class PersonKlient(val httpClient: HttpClient) : Pdl {
         return safeCall(request)
     }
 
-    override suspend fun hentFamilieRelasjon(fnr: Foedselsnummer): FamilieRelasjonResponse {
+    override suspend fun hentFamilieRelasjon(fnr: Foedselsnummer, historikk: Boolean): FamilieRelasjonResponse {
         val query = getQuery("/pdl/familieForhold.graphql")
         val request = GraphqlRequest(query, Variables(ident = fnr.value)).toJson()
         return safeCall(request)

@@ -10,19 +10,15 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
 import no.nav.etterlatte.libs.common.pdl.EyHentAdresseRequest
 import no.nav.etterlatte.libs.common.pdl.Variables
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.eyFamilieRelasjon
-import no.nav.etterlatte.libs.common.person.eyAdresse
+import no.nav.etterlatte.libs.common.person.*
 
-import no.nav.etterlatte.libs.common.person.eyUtland
 import org.slf4j.LoggerFactory
 
 interface Pdl {
     suspend fun finnAdressebeskyttelseForFnr(fnrListe: List<Foedselsnummer>): AdressebeskyttelseResponse
     suspend fun hentPerson(fnr: Foedselsnummer): Person
     suspend fun hentUtland(fnr: Foedselsnummer): eyUtland
-    suspend fun hentFamilieRelasjon(fnr: Foedselsnummer): eyFamilieRelasjon
+    suspend fun hentFamilieRelasjon(fnr: Foedselsnummer): EyFamilieRelasjon
     suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): eyAdresse
 }
 
@@ -69,8 +65,8 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
     }
 
 
-    override suspend fun hentFamilieRelasjon(fnr: Foedselsnummer): eyFamilieRelasjon {
-        val response = client.post<eyFamilieRelasjon>(apiUrl + "/hentfamilierelasjon") {
+    override suspend fun hentFamilieRelasjon(fnr: Foedselsnummer): EyFamilieRelasjon {
+        val response = client.post<EyFamilieRelasjon>(apiUrl + "/hentfamilierelasjon") {
             header("Tema", "PEN")
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)

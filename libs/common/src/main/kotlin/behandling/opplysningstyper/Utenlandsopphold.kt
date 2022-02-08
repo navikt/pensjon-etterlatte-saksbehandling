@@ -7,7 +7,7 @@ import java.time.LocalDate
 data class Utenlandsopphold(
     val harHattUtenlandsopphold: Svar,
     val opphold: List<UtenlandsoppholdOpplysninger>?,
-    val fnr: String
+    val foedselsnummer: String
 )
 
 data class UtenlandsoppholdOpplysninger(

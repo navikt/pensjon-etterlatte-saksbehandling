@@ -4,5 +4,5 @@ import java.time.LocalDate
 
 data class Doedsdato(
     val doedsdato: LocalDate,
-    val fnr: String
+    val foedselsnummer: String
 )

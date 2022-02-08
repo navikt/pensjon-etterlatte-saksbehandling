@@ -5,8 +5,8 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 
 data class PersonInfo(
-    override val fornavn: String,
-    override val etternavn: String,
-    override val foedselsnummer: Foedselsnummer,
-    override val type: PersonType,
-) : Person
+    val fornavn: String,
+    val etternavn: String,
+    val foedselsnummer: Foedselsnummer,
+    val type: PersonType,
+)

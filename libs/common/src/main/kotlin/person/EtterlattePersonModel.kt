@@ -77,6 +77,6 @@ data class eyVegadresse(
     val postnummer: String?
 )
 
-data class FamilieRelasjon(
+data class eyFamilieRelasjon(
     val todo: String,
 )

@@ -49,7 +49,7 @@ fun Route.personApi(service: PersonService) {
             //TODO litt usikker på om dette er beste måten å gjøre dette på
             //val historikk = (call.request.header("historikk")).toBoolean()
             //logger.info("Fnr: $fnr")
-            val person = service.hentAdresse(Foedselsnummer.of(variables.ident), variables.historikk)
+            val person = service.hentAdresse(EyHentAdresseRequest(Foedselsnummer.of(variables.ident), variables.historikk))
 
             call.respond(person)
         }

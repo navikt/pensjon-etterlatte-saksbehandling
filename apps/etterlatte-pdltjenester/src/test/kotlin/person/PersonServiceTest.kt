@@ -164,7 +164,7 @@ internal class PersonServiceTest {
         coEvery { personKlient.hentAdresse(any(), true) } returns opprettResponse("/pdl/adresseResponseVegadresse.json")
 
         val adresse = runBlocking {
-            service.hentAdresse(EyHentAdresseRequest( DOLL_KOPP, true))
+            service.hentAdresse(EyHentAdresseRequest( Foedselsnummer.of(DOLL_KOPP), true))
         }
 
 

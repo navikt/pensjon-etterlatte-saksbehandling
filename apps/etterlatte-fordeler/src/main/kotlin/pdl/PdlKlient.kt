@@ -8,6 +8,7 @@ import io.ktor.client.utils.EmptyContent.contentType
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
+import no.nav.etterlatte.libs.common.pdl.EyHentAdresseRequest
 import no.nav.etterlatte.libs.common.pdl.Variables
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
@@ -76,6 +77,8 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
             body = fnr.value
 
         }
+        return response
+    }
 
 
     override suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): eyAdresse {
@@ -84,7 +87,7 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             body = EyHentAdresseRequest(
-                fnr = fnr.value,
+                fnr = Foedselsnummer.of(fnr.value),
                 historikk = historikk
             )
 

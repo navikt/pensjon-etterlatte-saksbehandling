@@ -60,7 +60,7 @@ class PersonService(
     suspend fun hentAdresse(adresseRequest: EyHentAdresseRequest): eyAdresse {
         logger.info("Henter adresse fra PDL")
 
-        val response = klient.hentAdresse(Foedselsnummer.of(adresseRequest.fnr), adresseRequest.historikk)
+        val response = klient.hentAdresse(adresseRequest.fnr, adresseRequest.historikk)
         println(response.toString())
         val hentAdresse: AdresseResponse = response
 

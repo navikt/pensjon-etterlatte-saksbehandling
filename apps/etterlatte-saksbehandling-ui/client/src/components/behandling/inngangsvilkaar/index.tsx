@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { Content } from "../../../shared/styled";
-import { Status, VilkaarStatus } from "./types";
+import { Status, VilkaarStatus, VilkaarType } from "./types";
 import { Vilkaar } from "./vilkaar";
 
 export const Inngangsvilkaar = () => {
@@ -10,50 +10,15 @@ export const Inngangsvilkaar = () => {
                 <Vilkaar
                     vilkaar={{
                         vilkaarDone: Status.DONE,
-                        vilkaarType: "Dødsfall",
+                        vilkaarType: VilkaarType.doedsdato,
                         vilkaarStatus: VilkaarStatus.OPPFYLT,
                     }}
                 />
                 <Vilkaar
                     vilkaar={{
                         vilkaarDone: Status.NOT_DONE,
-                        vilkaarType: "Alder",
+                        vilkaarType: VilkaarType.alderBarn,
                         vilkaarStatus: VilkaarStatus.IKKE_OPPFYLT,
-                    }}
-                />
-                <Vilkaar
-                    vilkaar={{
-                        vilkaarDone: Status.DONE,
-                        vilkaarType: "Foreldreansvar",
-                        vilkaarStatus: VilkaarStatus.OPPFYLT,
-                    }}
-                />
-                <Vilkaar
-                    vilkaar={{
-                        vilkaarDone: Status.DONE,
-                        vilkaarType: "Familieforhold",
-                        vilkaarStatus: VilkaarStatus.IKKE_OPPFYLT,
-                    }}
-                />
-                <Vilkaar
-                    vilkaar={{
-                        vilkaarDone: Status.NOT_DONE,
-                        vilkaarType: "Bostedsadresse",
-                        vilkaarStatus: VilkaarStatus.IKKE_OPPFYLT,
-                    }}
-                />
-                <Vilkaar
-                    vilkaar={{
-                        vilkaarDone: Status.DONE,
-                        vilkaarType: "Yrkesskade",
-                        vilkaarStatus: VilkaarStatus.IKKE_OPPFYLT,
-                    }}
-                />
-                <Vilkaar
-                    vilkaar={{
-                        vilkaarDone: Status.DONE,
-                        vilkaarType: "Medlemsskap",
-                        vilkaarStatus: VilkaarStatus.OPPFYLT,
                     }}
                 />
             </VilkaarListe>

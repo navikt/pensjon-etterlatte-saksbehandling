@@ -1,7 +1,10 @@
 package no.nav.etterlatte.opplysninger.kilde.pdl
 
+import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -29,7 +32,8 @@ internal class LeggTilOpplysnignerFraPdl(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        behandlinger.leggTilOpplysninger(UUID.fromString(packet["@behandling_id"].asText()), opplysningsBygger.byggOpplysninger(pdl.hentPdlModell()))
+        val barnePensjon = objectMapper.readValue(packet.toJson(), Barnepensjon::class.java)
+        behandlinger.leggTilOpplysninger(UUID.fromString(packet["@behandling_id"].asText()), opplysningsBygger.byggOpplysninger(barnePensjon, pdl))
     }
 }
 
@@ -38,9 +42,9 @@ interface Behandling {
 }
 
 interface Pdl {
-    fun hentPdlModell(): Person
+    fun hentPdlModell(foedselsnummer: String): Person
 }
 
 interface OpplysningsBygger {
-    fun byggOpplysninger(pdldata: Person):List<Behandlingsopplysning<out Any>>
+    fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl):List<Behandlingsopplysning<out Any>>
 }

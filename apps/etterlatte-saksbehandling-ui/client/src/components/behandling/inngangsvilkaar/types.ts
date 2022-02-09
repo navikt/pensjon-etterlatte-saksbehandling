@@ -8,10 +8,17 @@ export enum Status {
     NOT_DONE = "not done",
 }
 
+export enum VilkaarType{
+    doedsfall = "doedsfall",
+    doedsdato = "doedsdato",
+    alderBarn = "alder_barn"
+}
+
 export interface IVilkaarProps {
     vilkaar: {
         vilkaarDone: Status;
-        vilkaarType: string;
+        vilkaarType: VilkaarType;
         vilkaarStatus: VilkaarStatus;
+        description?: string;
     };
 }

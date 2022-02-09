@@ -72,7 +72,7 @@ internal class OpplysningsuthenterTest {
             objectMapper.valueToTree<ObjectNode>(opplysninger[8].opplysning).toString()
         )
 
-        assertEquals("forelder_avdoed_personinfo:v1", opplysninger[9].opplysningType)
+        assertEquals("avdoed_personinfo:v1", opplysninger[9].opplysningType)
         assertEquals(
             """{"fornavn":"Reidar","etternavn":"Reidarsen","foedselsnummer":"19078504903","type":"AVDOED"}""",
             objectMapper.valueToTree<ObjectNode>(opplysninger[9].opplysning).toString()

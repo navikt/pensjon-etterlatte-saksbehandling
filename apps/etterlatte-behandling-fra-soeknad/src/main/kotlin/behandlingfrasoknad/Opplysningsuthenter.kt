@@ -169,7 +169,7 @@ class Opplysningsuthenter {
     fun avdoedForelderPersoninfo(barnepensjon: Barnepensjon): Behandlingsopplysning<out PersonInfo>? {
         return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
             setBehandlingsopplysninger(
-                barnepensjon, "forelder_avdoed_personinfo:v1",
+                barnepensjon, "avdoed_personinfo:v1",
                 PersonInfo(
                     avdoed.fornavn,
                     avdoed.etternavn,

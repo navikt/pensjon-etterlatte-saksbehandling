@@ -1,6 +1,7 @@
 package no.nav.etterlatte.opplysninger.kilde.pdl
 
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -37,9 +38,9 @@ interface Behandling {
 }
 
 interface Pdl {
-    fun hentPdlModell():Any
+    fun hentPdlModell(): Person
 }
 
 interface OpplysningsBygger {
-    fun byggOpplysninger(pdldata:Any):List<Behandlingsopplysning<out Any>>
+    fun byggOpplysninger(pdldata: Person):List<Behandlingsopplysning<out Any>>
 }

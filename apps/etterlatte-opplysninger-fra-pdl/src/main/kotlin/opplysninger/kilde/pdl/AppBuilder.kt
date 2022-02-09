@@ -23,7 +23,7 @@ class AppBuilder(private val props: Map<String, String>) {
     }
 
     fun createOpplysningsbygger(): OpplysningsBygger {
-        return null as OpplysningsBygger
+        return OpplysningsByggerService()
     }
 
     private fun behandlingHttpClient() = HttpClient(OkHttp) {

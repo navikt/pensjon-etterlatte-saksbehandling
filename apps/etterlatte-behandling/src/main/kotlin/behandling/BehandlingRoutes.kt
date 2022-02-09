@@ -10,6 +10,7 @@ import io.ktor.util.pipeline.*
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
+import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.Beregning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import java.util.*
@@ -29,6 +30,14 @@ fun Route.behandlingRoutes(service: BehandlingService){
         get {
             call.respond(inTransaction { service.hentBehandling(behandlingsId)}?.let { DetaljertBehandling(it.id, it.sak, it.grunnlag, it.vilkårsprøving, it.beregning, it.fastsatt) }?: HttpStatusCode.NotFound)
         }
+
+        //TODO: Vil dette fungere??
+        post {
+            val body = call.receive<List<Behandlingsopplysning<ObjectNode>>>()
+            inTransaction { service.leggTilGrunnlagFraRegister(behandlingsId, body) }
+            call.respond(HttpStatusCode.OK)
+        }
+
         post("vilkaarsproeving") {
             inTransaction { service.vilkårsprøv(behandlingsId) }
             call.respond(HttpStatusCode.OK)
@@ -42,7 +51,7 @@ fun Route.behandlingRoutes(service: BehandlingService){
         }
         post("grunnlag/{type}") {
             val body = call.receive<ObjectNode>()
-            inTransaction { service.leggTilGrunnlag(behandlingsId, body ,call.parameters["type"]!!) }
+            inTransaction { service.leggTilGrunnlagFraSoknad(behandlingsId, body ,call.parameters["type"]!!) }
             call.respond(HttpStatusCode.OK)
         }
     }

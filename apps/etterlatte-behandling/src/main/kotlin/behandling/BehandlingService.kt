@@ -10,7 +10,8 @@ interface BehandlingService {
     fun hentBehandlinger(): List<Behandling>
     fun hentBehandlingerISak(sakid: Long): List<Behandling>
     fun startBehandling(sak: Long, nyeOpplysninger: List<Behandlingsopplysning<ObjectNode>>): Behandling
-    fun leggTilGrunnlag(
+    fun leggTilGrunnlagFraRegister(behandling: UUID, opplysninger: List<Behandlingsopplysning<ObjectNode>>): Behandling
+    fun leggTilGrunnlagFraSoknad(
         behandling: UUID,
         data: ObjectNode,
         type: String,
@@ -50,7 +51,22 @@ class RealBehandlingService(
             .serialiserbarUtgave()
     }
 
-    override fun leggTilGrunnlag(
+    override fun leggTilGrunnlagFraRegister(
+        behandlingsId: UUID,
+        opplysninger: List<Behandlingsopplysning<ObjectNode>>
+    ): Behandling {
+       val behandling = hentBehandling(behandlingsId)
+        opplysninger.forEach {
+            BehandlingAggregat(behandling.id, behandlinger, this.opplysninger, vilkaarKlient).leggTilGrunnlag(
+                it.opplysning,
+                it.opplysningType,
+                it.kilde
+            )
+        }
+        return behandling
+    }
+
+    override fun leggTilGrunnlagFraSoknad(
         behandling: UUID,
         data: ObjectNode,
         type: String,

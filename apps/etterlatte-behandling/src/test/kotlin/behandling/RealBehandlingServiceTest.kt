@@ -90,7 +90,7 @@ internal class RealBehandlingServiceTest {
         every { opplysningerMock.nyOpplysning(capture(behandlingsopplysningSomLagres)) } returns Unit
         every { opplysningerMock.leggOpplysningTilBehandling(id, any()) } returns Unit
 
-        val result = sut.leggTilGrunnlag(
+        val result = sut.leggTilGrunnlagFraSoknad(
             id,
             objectMapper.createObjectNode(),
             "trygdetid",
@@ -124,7 +124,7 @@ internal class RealBehandlingServiceTest {
 
 
         Assertions.assertThrows(IllegalArgumentException::class.java) {
-            sut.leggTilGrunnlag(
+            sut.leggTilGrunnlagFraSoknad(
                 id,
                 objectMapper.createObjectNode(),
                 "trygdetid",

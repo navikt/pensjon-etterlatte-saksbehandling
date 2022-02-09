@@ -11,6 +11,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 
 interface VilkaarKlient {
     fun vurderVilkaar(vilkaar: String, opplysninger: List<Behandlingsopplysning<ObjectNode>>): ObjectNode
@@ -32,11 +33,20 @@ class KtorVilkarClient(private val url: String) : VilkaarKlient {
                 contentType(ContentType.Application.Json)
                 body = RequestDto(
                     "barnepensjon:forstegangsbehandling",
-                    opplysninger.map { it.opplysning.put("_navn", it.opplysningType) })
+                    // opplysninger.map { it.opplysning.put("_navn", it.opplysningType) })
+                    opplysninger.map { VilkaarOpplysning(it.opplysningType, it.kilde, it.opplysning)  })
             }
         }
 
     }
 }
 
-data class RequestDto(val vilkaar: String, val opplysninger: List<Any>)
+fun <T> mapTilVilkaarsOpplysning(opplysning: Behandlingsopplysning<T>): VilkaarOpplysning<T>  {
+    return VilkaarOpplysning(
+        opplysning.opplysningType,
+        opplysning.kilde,
+        opplysning.opplysning
+    )
+}
+
+data class RequestDto(val vilkaar: String, val opplysninger: List<VilkaarOpplysning<Any>>)

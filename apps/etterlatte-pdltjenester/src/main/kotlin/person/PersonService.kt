@@ -110,7 +110,7 @@ class PersonService(
     private fun opprettFamilieRelasjon(familieRelasjon: FamilieRelasjonResponse): EyFamilieRelasjon {
 
         return EyFamilieRelasjon(
-            ansvarligeForeldre = familieRelasjon.data?.hentPerson?.foreldreAnsvar?.map {
+            ansvarligeForeldre = familieRelasjon.data?.hentPerson?.foreldreansvar?.map {
                 EyForeldreAnsvar(
                     Foedselsnummer.of(
                         it.ansvarlig

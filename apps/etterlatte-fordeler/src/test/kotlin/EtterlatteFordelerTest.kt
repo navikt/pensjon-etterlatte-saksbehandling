@@ -14,14 +14,17 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 
 internal class EtterlatteFordelerTest {
 
     private val klientMock = mockk<PdlKlient>()
     private val service = PersonService(klientMock)
+    private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
 
     //TODO flytte ned til relevant test?
     private val hendelseJson = javaClass.getResource("/barnePensjon.json")!!.readText()
+    private val nyhendelseJson = javaClass.getResource("/NyBarnePensjon.json")!!.readText()
     private val hendelseIkkeBarnePensjonJson = javaClass.getResource("/ikkeBarnepensjon.json")!!.readText()
     private val hendelseIkkeGyldig = javaClass.getResource("/hendelseUgyldig.json")!!.readText()
     private val ugyldigFnr = javaClass.getResource("/ugyldigFnr.json")!!.readText()
@@ -60,7 +63,6 @@ internal class EtterlatteFordelerTest {
             .apply { EtterlatteFordeler(this, service) }
             .apply { sendTestMessage(hendelseJson) }
             .inspektør
-
         assertEquals(Gradering.STRENGT_FORTROLIG_UTLAND.name, inspector.message(0).get("@adressebeskyttelse").asText())
         assertEquals("ey_fordelt", inspector.message(0).get("@event_name").asText())
     }

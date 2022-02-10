@@ -1,11 +1,8 @@
 package no.nav.etterlatte.person
 
 import io.ktor.features.NotFoundException
-import no.nav.etterlatte.libs.common.pdl.EyHentAdresseRequest
-import no.nav.etterlatte.libs.common.pdl.EyHentFamilieRelasjonRequest
-import no.nav.etterlatte.libs.common.pdl.Gradering
+import no.nav.etterlatte.libs.common.pdl.*
 
-import no.nav.etterlatte.libs.common.pdl.ResponseError
 import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.person.pdl.FamilieRelasjonResponse
 import no.nav.etterlatte.person.pdl.ForelderAnsvar
@@ -43,6 +40,23 @@ class PersonService(
         }
 
         return opprettPerson(fnr, hentPerson)
+    }
+    suspend fun hentUtvidetPerson(variables: EyHentUtvidetPersonRequest): Person {
+        logger.info("Henter person fra PDL")
+
+        val response = klient.hentPerson(Foedselsnummer.of(variables.foedselsnummer))
+
+        val hentPerson = response.data?.hentPerson
+
+        //TODO fikse feilhåndtering
+        if (hentPerson == null) {
+            println("XXX Response: " + response.toString())
+            logger.info("XXX Response: " + response.data?.toString())
+            loggfoerFeilmeldinger(response.errors)
+            throw NotFoundException()
+        }
+
+        return opprettPerson(Foedselsnummer.of(variables.foedselsnummer), hentPerson)
     }
 
     suspend fun hentUtland(fnr: Foedselsnummer): eyUtland {
@@ -234,11 +248,4 @@ class PersonService(
             println(it.message)
         }
     }
-
-    /*
-    suspend fun hentFamilieRelasjon(fnr: Foedselsnummer): FamilieRelasjon {
-        val response = klient.hentFamilieRelasjon(fnr)
-
-    }
-    */
 }

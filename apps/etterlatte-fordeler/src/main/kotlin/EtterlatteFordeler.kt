@@ -61,7 +61,7 @@ internal class EtterlatteFordeler(
         Kriterie("Avdød er ikke bosatt i Norge") { ikkeGyldigBostedsAdresseINorge(avdoed) },
         Kriterie("Gjenlevende er ikke bosatt i Norge") { ikkeGyldigBostedsAdresseINorge(gjenlevende) },
         Kriterie("Gjenlevende søker har ikke foreldreanvar") { gjenlevendeHarIkkeForeldreansvar(barn, gjenlevende) },
-        Kriterie("Søker er ikke alenebarn") {soekerErIkkeAlenebarn(avdoed,gjenlevende, barn)}
+        //Kriterie("Søker er ikke alenebarn") {soekerErIkkeAlenebarn(avdoed,gjenlevende, barn)}
     )
 
     init {
@@ -100,12 +100,11 @@ internal class EtterlatteFordeler(
                 val barnFnr = Foedselsnummer.of(packet["@fnr_soeker"].asText())
                 val gjenlevendeFnr = Foedselsnummer.of(finnGjennlevendeFnr(packet))
                 val avdoedFnr = Foedselsnummer.of(finnAvdoedFnr(packet))
+
+
                 barn = personService.hentPerson(barnFnr)
                 avdoed = personService.hentPerson(avdoedFnr)
                 gjenlevende = personService.hentPerson(gjenlevendeFnr)
-                println(barn.foedselsnummer)
-                println(avdoed.foedselsnummer)
-                println(gjenlevende.foedselsnummer)
                 barn.utland = personService.hentUtland(barn.foedselsnummer)
                 avdoed.utland = personService.hentUtland(avdoed.foedselsnummer)
                 barn.adresse = personService.hentAdresse(barn.foedselsnummer, false)
@@ -168,17 +167,21 @@ internal class EtterlatteFordeler(
 
     //TODO bør vel endres til PDL familierelasjon
     private fun finnAvdoedFnr(sok: JsonMessage): String {
+        println("avdoed" + sok["@skjema_info"]["foreldre"]
+            .filter { it["type"].asText() == "AVDOED" }
+            .map { it["foedselsnummer"].first()}[0].asText())
         return sok["@skjema_info"]["foreldre"]
             .filter { it["type"].asText() == "AVDOED" }
-            .map { it["foedselsnummer"] }
-            .first().asText()
+            .map { it["foedselsnummer"].first()}[0].asText()
     }
 
     private fun finnGjennlevendeFnr(sok: JsonMessage): String {
+        println("hoho" + sok["@skjema_info"]["foreldre"]
+            .filter { it["type"].asText() == "GJENLEVENDE_FORELDER" }
+            .map { it["foedselsnummer"].first()}[0].asText())
         return sok["@skjema_info"]["foreldre"]
             .filter { it["type"].asText() == "GJENLEVENDE_FORELDER" }
-            .map { it["foedselsnummer"] }
-            .first().asText()
+            .map { it["foedselsnummer"].first()}[0].asText()
     }
 
     private fun soekerIkkeForelder(sok: JsonMessage): Boolean {
@@ -206,7 +209,7 @@ internal class EtterlatteFordeler(
     }
     private fun soekerErIkkeAlenebarn(avdoed: Person,gjenlevende: Person, barn: Person): Boolean {
         val barnFnr = barn.foedselsnummer
-        val ret =
+
 
         return false
     }

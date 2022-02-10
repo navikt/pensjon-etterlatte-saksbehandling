@@ -73,9 +73,9 @@ type Doedsfall {
 " Endring som har blitt utført på opplysningen. F.eks: Opprett -> Korriger -> Korriger"
 type Endring {
     """
-    
+
     Opphavet til informasjonen. I NAV blir dette satt i forbindelse med registrering (f.eks: Sykehuskassan).
-     Fra Folkeregisteret får vi opphaven til dems opplysning, altså NAV, UDI, Politiet, Skatteetaten o.l.. Fra Folkeregisteret kan det også være tekniske navn som: DSF_MIGRERING, m.m..
+    Fra Folkeregisteret får vi opphaven til dems opplysning, altså NAV, UDI, Politiet, Skatteetaten o.l.. Fra Folkeregisteret kan det også være tekniske navn som: DSF_MIGRERING, m.m..
     """
     kilde: String!
     " Tidspunktet for registrering."
@@ -370,26 +370,26 @@ type MatrikkeladresseResult {
 
 type Metadata {
     """
-    
+
     En liste over alle endringer som har blitt utført over tid.
-     Vær obs på at denne kan endre seg og man burde takle at det finnes flere korrigeringer i listen, så dersom man ønsker å kun vise den siste, så må man selv filtrere ut dette.
-     Det kan også ved svært få tilfeller skje at opprett blir fjernet. F.eks ved splitt tilfeller av identer. Dette skal skje i svært få tilfeller. Dersom man ønsker å presentere opprettet tidspunktet, så blir det tidspunktet på den første endringen.
+    Vær obs på at denne kan endre seg og man burde takle at det finnes flere korrigeringer i listen, så dersom man ønsker å kun vise den siste, så må man selv filtrere ut dette.
+    Det kan også ved svært få tilfeller skje at opprett blir fjernet. F.eks ved splitt tilfeller av identer. Dette skal skje i svært få tilfeller. Dersom man ønsker å presentere opprettet tidspunktet, så blir det tidspunktet på den første endringen.
     """
     endringer: [Endring!]!
     """
-    
+
     Feltet betegner hvorvidt dette er en funksjonelt historisk opplysning, for eksempel en tidligere fraflyttet adresse eller et foreldreansvar som er utløpt fordi barnet har fylt 18 år.
-     I de fleste tilfeller kan dette utledes ved å se på de andre feltene i opplysningen. Dette er imidlertid ikke alltid tilfellet, blant annet for foreldreansvar.
-     Feltet bør brukes av konsumenter som henter informasjon fra GraphQL med historikk, men som også trenger å utlede gjeldende informasjon.
+    I de fleste tilfeller kan dette utledes ved å se på de andre feltene i opplysningen. Dette er imidlertid ikke alltid tilfellet, blant annet for foreldreansvar.
+    Feltet bør brukes av konsumenter som henter informasjon fra GraphQL med historikk, men som også trenger å utlede gjeldende informasjon.
     """
     historisk: Boolean!
     " Master refererer til hvem som eier opplysningen, f.eks så har PDL en kopi av Folkeregisteret, da vil master være FREG og eventuelle endringer på dette må gå via Folkeregisteret (API mot dem eller andre rutiner)."
     master: String!
     """
-    
+
     I PDL så får alle forekomster av en opplysning en ID som representerer dens unike forekomst.
-     F.eks, så vil en Opprett ha ID X, korriger ID Y (der hvor den spesifiserer at den korrigerer X).
-     Dersom en opplysning ikke er lagret i PDL, så vil denne verdien ikke være utfylt.
+    F.eks, så vil en Opprett ha ID X, korriger ID Y (der hvor den spesifiserer at den korrigerer X).
+    Dersom en opplysning ikke er lagret i PDL, så vil denne verdien ikke være utfylt.
     """
     opplysningsId: String
 }
@@ -466,21 +466,21 @@ type PersonSearchHighlight {
     " Forteller hvorvidt opplysningen som ga treff er markert som historisk."
     historisk: Boolean
     """
-    
+
     liste med feltene og verdiene som ga treff.
-     Merk at for fritekst søk så vil disse kunne referere til hjelpe felter som ikke er synelig i resultatene.
+    Merk at for fritekst søk så vil disse kunne referere til hjelpe felter som ikke er synelig i resultatene.
     """
     matches: [SearchMatch]
     """
-    
+
     Navn/Sti til opplysningen som ga treff. Merk at dette ikke er feltet som ga treff men opplysningen.
-     F.eks. hvis du søker på person.navn.fornavn så vil opplysingen være person.navn.
+    F.eks. hvis du søker på person.navn.fornavn så vil opplysingen være person.navn.
     """
     opplysning: String
     """
-    
+
     Gitt att opplysningen som ga treff har en opplysningsId så vil den returneres her.
-     alle søk under person skal ha opplysningsId, men søk i identer vil kunne returnere treff uten opplysningsId.
+    alle søk under person skal ha opplysningsId, men søk i identer vil kunne returnere treff uten opplysningsId.
     """
     opplysningsId: String
 }
@@ -801,11 +801,11 @@ input Criterion {
     " Feltnavn ikludert sti til ønsket felt (Eksempel: person.navn.fornavn)"
     fieldName: String!
     """
-    
+
     Søk i historiske data
-     true = søker kun i historiske data.
-     false = søker kun i gjeldende data.
-     null = søke i både historiske og gjeldende data.
+    true = søker kun i historiske data.
+    false = søker kun i gjeldende data.
+    null = søke i både historiske og gjeldende data.
     """
     searchHistorical: Boolean
     searchRule: SearchRule!
@@ -817,9 +817,9 @@ input Paging {
     " antall treff per side (maks 100)"
     resultsPerPage: Int = 10
     """
-    
+
     Liste over felter man ønsker resultatene sortert etter
-     Standard er "score". Score er poengsummen Elasticsearch tildeler hvert resultat.
+    Standard er "score". Score er poengsummen Elasticsearch tildeler hvert resultat.
     """
     sortBy: [SearchSorting]
 }
@@ -842,15 +842,15 @@ input SearchRule {
     " Sjekker om feltet finnes / at det ikke har en null verdi."
     exists: String
     """
-    
+
     Søk fra og med (se fromExcluding for bare fra men ikke med)
-     kan benyttes på tall og dato
+    kan benyttes på tall og dato
     """
     from: String
     """
-    
+
     Søk fra men ikke med oppgitt verdi
-     kan benyttes på tall og dato
+    kan benyttes på tall og dato
     """
     fromExcluding: String
     " Søk som gir treff også for små variasjoner i skrivemåte"
@@ -868,15 +868,15 @@ input SearchRule {
     " Gir treff når opgitt feltstarter med opgitt verdi."
     startsWith: String
     """
-    
+
     Søk til og med (se toExcluding for bare til men ikke med)
-     kan benyttes på tall og dato
+    kan benyttes på tall og dato
     """
     to: String
     """
-    
+
     Søk til men ikke med oppgitt verdi
-     kan benyttes på tall og dato
+    kan benyttes på tall og dato
     """
     toExcluding: String
     " Bruk \"?\" som wildcard for enkelt tegn, og \"*\" som wildcard for 0 eller flere tegn."

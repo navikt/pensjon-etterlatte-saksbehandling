@@ -159,7 +159,9 @@ class PersonService(
             sivilstatus = sivilstand?.type?.name,
             //TODO endre disse til noe fornuftig
             utland = null,
-            rolle = null
+            rolle = null,
+            familieRelasjon = null
+
         )
     }
 

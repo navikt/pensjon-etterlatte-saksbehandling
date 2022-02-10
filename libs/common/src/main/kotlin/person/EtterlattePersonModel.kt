@@ -18,6 +18,7 @@ data class Person(
     val foedeland: String?,
     val sivilstatus: String?,
     var utland: eyUtland?,
+    var familieRelasjon: EyFamilieRelasjon?,
     val rolle: Rolle?
 )
 

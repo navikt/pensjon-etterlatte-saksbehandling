@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.alder
 import no.nav.etterlatte.libs.common.soeknad.SoeknadType
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.pdl.PersonService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -27,14 +28,14 @@ internal class EtterlatteFordeler(
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
     private lateinit var barn: Person
     private lateinit var avdoed: Person
-    private lateinit var gjenLevende: Person
+    private lateinit var gjenlevende: Person
     private lateinit var soeknad: JsonMessage
 
     /*
     *Dødsfallet er registrert
     *Alder - barn under 15 år
     Enebarn
-    -Verge og foreldreansvar - ikke sjekket foreldreansvar. Kun sjekket verge fra søknad og at søker er forelder i søknaden
+    -Verge og foreldreansvar  -trenger vi eksplisitt sjekk på verge?
     *Ingen barn på vei
     *Yrkesskade
     *Avdød- ingen ut- og innvandringsdatoer
@@ -51,14 +52,16 @@ internal class EtterlatteFordeler(
         Kriterie("Barn ikke fodt i Norge") { foedtUtland(barn) },
         Kriterie("Barn har utvandring") { harUtvandring(barn) },
         Kriterie("Avdoed har utvandring") { harUtvandring(avdoed) },
-        Kriterie("Avdød har yrkesskade") { harYrkesskade(soeknad) },
-        Kriterie("Søker er ikke forelder") { soekerIkkeForelder(soeknad) },
+        Kriterie("Avdød er market med yrkesskade i søknaden") { harYrkesskade(soeknad) },
+        Kriterie("Søker er ikke markert som forelder i søknaden") { soekerIkkeForelder(soeknad) },
         Kriterie("Avdød er ikke død") { personErIkkeDoed(avdoed) },
-        Kriterie("Barn har verge") { harVerge(soeknad) },
-        Kriterie("Det er huket av for utenlandsopphold for avdøde") { harHuketAvForUtenlandsopphold(soeknad) },
+        Kriterie("Barn er market med verge i søknaden") { harVerge(soeknad) },
+        Kriterie("Det er huket av for utenlandsopphold for avdøde i søknaden") { harHuketAvForUtenlandsopphold(soeknad) },
         Kriterie("Barn er ikke bosatt i Norge") { ikkeGyldigBostedsAdresseINorge(barn) },
         Kriterie("Avdød er ikke bosatt i Norge") { ikkeGyldigBostedsAdresseINorge(avdoed) },
-        Kriterie("Gjenlevende er ikke bosatt i Norge") { ikkeGyldigBostedsAdresseINorge(gjenLevende) },
+        Kriterie("Gjenlevende er ikke bosatt i Norge") { ikkeGyldigBostedsAdresseINorge(gjenlevende) },
+        Kriterie("Gjenlevende søker har ikke foreldreanvar") { gjenlevendeHarIkkeForeldreansvar(barn, gjenlevende) },
+        Kriterie("Søker er ikke alenebarn") {soekerErIkkeAlenebarn(avdoed,gjenlevende, barn)}
     )
 
     init {
@@ -99,12 +102,14 @@ internal class EtterlatteFordeler(
                 val avdoedFnr = Foedselsnummer.of(finnAvdoedFnr(packet))
                 barn = personService.hentPerson(barnFnr)
                 avdoed = personService.hentPerson(avdoedFnr)
-                gjenLevende = personService.hentPerson(gjenlevendeFnr)
-                barn.utland = personService.hentUtland(barnFnr)
-                avdoed.utland = personService.hentUtland(avdoedFnr)
-                barn.adresse = personService.hentAdresse(barnFnr, false)
-                avdoed.adresse = personService.hentAdresse(avdoedFnr, false)
-                gjenLevende.adresse = personService.hentAdresse(gjenlevendeFnr, false)
+                gjenlevende = personService.hentPerson(gjenlevendeFnr)
+                barn.utland = personService.hentUtland(barn.foedselsnummer)
+                avdoed.utland = personService.hentUtland(avdoed.foedselsnummer)
+                barn.adresse = personService.hentAdresse(barn.foedselsnummer, false)
+                avdoed.adresse = personService.hentAdresse(avdoed.foedselsnummer, false)
+                gjenlevende.adresse = personService.hentAdresse(gjenlevende.foedselsnummer, false)
+                barn.familieRelasjon = personService.hentFamilieForhold(barn.foedselsnummer)
+                gjenlevende.familieRelasjon = personService.hentFamilieForhold(gjenlevende.foedselsnummer)
 
                 val aktuelleSaker = fordel(packet)
                 if (aktuelleSaker.kandidat) {
@@ -192,6 +197,15 @@ internal class EtterlatteFordeler(
             .filter { it["type"].asText() == "AVDOED" }
             .filter { it["utenlandsopphold"]["svar"].asText() == "JA" }
             .isNotEmpty()
+    }
+    private fun gjenlevendeHarIkkeForeldreansvar(barn: Person, gjenlevende: Person): Boolean {
+        return barn.familieRelasjon?.ansvarligeForeldre?.filter { it.ident == gjenlevende.foedselsnummer }.isNullOrEmpty()
+    }
+    private fun soekerErIkkeAlenebarn(avdoed: Person,gjenlevende: Person, barn: Person): Boolean {
+        val barnFnr = barn.foedselsnummer
+        val ret =
+
+        return false
     }
 
     //TODO tenke litt mer på dette kriteriet

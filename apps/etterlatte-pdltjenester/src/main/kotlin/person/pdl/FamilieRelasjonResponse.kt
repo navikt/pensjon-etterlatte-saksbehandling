@@ -15,7 +15,7 @@ data class FamilieRelasjonResponseData(
 )
 
 data class HentFamilieRelasjon(
-    val foreldreAnsvar: List<ForelderAnsvar>,
+    val foreldreansvar: List<ForelderAnsvar>,
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>
 )
 

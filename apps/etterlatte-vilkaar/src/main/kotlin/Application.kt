@@ -1,5 +1,7 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.*
 import io.ktor.features.*
@@ -10,9 +12,12 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.vilkaar.barnepensjon.brukerErUngNok
-import no.nav.etterlatte.vilkaar.model.Opplysning
-import no.nav.etterlatte.vilkaar.model.objectMapper
+
 
 val vilkaarMap = mapOf("barnepensjon:forstegangsbehandling" to brukerErUngNok)
 
@@ -33,14 +38,58 @@ fun Application.module() {
         get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
         get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
         get("/") { call.respond(brukerErUngNok) }
+        /*
         post("/") {
             call.respond(
                 objectMapper.valueToTree(
                     call.receive<RequestDto>().let { vilkaarMap[it.vilkaar]?.vurder(it.opplysninger)?.serialize() })
             )
         }
+         */
+        post("/") {
+
+            call.receive<RequestDto>().let {
+                mapToVilkaarOpplysning(it.opplysninger)
+            }
+        }
     }
 
 }
 
-data class RequestDto(val vilkaar: String, val opplysninger: List<Opplysning>)
+
+fun mapToVilkaarOpplysning(opplysning: List<VilkaarOpplysning<ObjectNode>>): List<VilkaarOpplysning<out Any>> {
+    val liste = ArrayList<VilkaarOpplysning<out Any>>()
+    opplysning.forEach {
+        when(it.opplysingType) {
+            Opplysningstyper.AVDOED_DOEDSFALL_V1.value -> liste.add(mapToVikaaropplysning<Doedsdato>(it))
+            Opplysningstyper.AVDOED_PERSONINFO_V1.value -> liste.add(mapToVikaaropplysning<PersonInfo>(it))
+            Opplysningstyper.SOEKER_PERSONINFO_V1.value -> liste.add(mapToVikaaropplysning<PersonInfo>(it))
+            Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value -> liste.add(mapToVikaaropplysning<Foedselsdato>(it))
+        }
+    }
+
+    return liste
+}
+
+inline fun <reified T> mapToVikaaropplysning(opplysning: VilkaarOpplysning<ObjectNode>): VilkaarOpplysning<T> {
+    return VilkaarOpplysning(
+        opplysning.opplysingType,
+        opplysning.kilde,
+        objectMapper.readValue(opplysning.opplysning.toString()))
+}
+
+
+/*
+inline fun <reified T> test2(opplysning: VilkaarOpplysning<ObjectNode>): VilkaarOpplysning<T> {
+    return VilkaarOpplysning<T>(
+        opplysning.opplysingType,
+        opplysning.kilde,
+        objectMapper.readValue(opplysning.opplysning.toString(), object : TypeReference<T>(){}))
+}
+ */
+
+
+
+
+
+data class RequestDto(val vilkaar: String, val opplysninger: List<VilkaarOpplysning<ObjectNode>>)

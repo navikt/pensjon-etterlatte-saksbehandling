@@ -33,20 +33,10 @@ class KtorVilkarClient(private val url: String) : VilkaarKlient {
                 contentType(ContentType.Application.Json)
                 body = RequestDto(
                     "barnepensjon:forstegangsbehandling",
-                    // opplysninger.map { it.opplysning.put("_navn", it.opplysningType) })
                     opplysninger.map { VilkaarOpplysning(it.opplysningType, it.kilde, it.opplysning)  })
             }
         }
-
     }
 }
 
-fun <T> mapTilVilkaarsOpplysning(opplysning: Behandlingsopplysning<T>): VilkaarOpplysning<T>  {
-    return VilkaarOpplysning(
-        opplysning.opplysningType,
-        opplysning.kilde,
-        opplysning.opplysning
-    )
-}
-
-data class RequestDto(val vilkaar: String, val opplysninger: List<VilkaarOpplysning<Any>>)
+data class RequestDto(val vilkaar: String, val opplysninger: List<VilkaarOpplysning<ObjectNode>>)

@@ -4,6 +4,8 @@ import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foreldre
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.PersonInfo
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
@@ -14,8 +16,6 @@ import java.util.*
 
 class OpplysningsByggerService : OpplysningsBygger {
 
-
-
     override fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl): List<Behandlingsopplysning<out Any>> {
 
         val soekersFnr = barnepensjon.soeker.foedselsnummer.value
@@ -25,10 +25,11 @@ class OpplysningsByggerService : OpplysningsBygger {
         val avdoedPdl = pdl.hentPdlModell(avdoedFnr)
 
         return listOf(
-            personOpplysning(soekerPdl, "soeker_personinfo:v1", PersonType.BARN),
-            personOpplysning(avdoedPdl, "avdoed_personinfo:v1", PersonType.AVDOED),
-            avdoedDodsdato(avdoedPdl, "avdoed_doedsfall:v1"),
-            soekerFoedselsdato(soekerPdl, "soeker_foedselsdato:v1")
+            personOpplysning(soekerPdl, Opplysningstyper.SOEKER_PERSONINFO_V1.value, PersonType.BARN),
+            soekerFoedselsdato(soekerPdl, Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value),
+            personOpplysning(avdoedPdl, Opplysningstyper.AVDOED_PERSONINFO_V1.value, PersonType.AVDOED),
+            avdoedDodsdato(avdoedPdl, Opplysningstyper.AVDOED_DOEDSFALL_V1.value),
+            soekerRelasjonForeldre(soekerPdl, Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1.value,  pdl)
         )
     }
 
@@ -43,7 +44,12 @@ class OpplysningsByggerService : OpplysningsBygger {
 
     fun soekerFoedselsdato(soekerPdl: Person, opplysningsType: String): Behandlingsopplysning<Foedselsdato> {
         return lagOpplysning(opplysningsType, Foedselsdato(LocalDate.parse(soekerPdl.foedselsdato), soekerPdl.foedselsnummer.value))
+    }
 
+    fun soekerRelasjonForeldre(soekerPdl: Person, opplysningsType: String,  pdl: Pdl) : Behandlingsopplysning<Foreldre> {
+        val foreldreFraPdl = soekerPdl.familieRelasjon?.foreldre?.map { it.ident.value }?.map {pdl.hentPdlModell(it)}
+        val foreldrePersonInfo = foreldreFraPdl?.map { PersonInfo(it.fornavn, it.etternavn, it.foedselsnummer, PersonType.FORELDER ) }
+        return  lagOpplysning(opplysningsType, Foreldre(foreldrePersonInfo))
     }
 
     fun hentAvdoedFnr(barnepensjon: Barnepensjon): String {

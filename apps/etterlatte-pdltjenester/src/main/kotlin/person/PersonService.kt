@@ -1,13 +1,30 @@
 package no.nav.etterlatte.person
 
 import io.ktor.features.NotFoundException
-import no.nav.etterlatte.libs.common.pdl.*
-
-import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.libs.common.pdl.EyHentAdresseRequest
+import no.nav.etterlatte.libs.common.pdl.EyHentFamilieRelasjonRequest
+import no.nav.etterlatte.libs.common.pdl.EyHentUtvidetPersonRequest
+import no.nav.etterlatte.libs.common.pdl.Gradering
+import no.nav.etterlatte.libs.common.pdl.ResponseError
+import no.nav.etterlatte.libs.common.pdl.Variables
+import no.nav.etterlatte.libs.common.person.EyBarn
+import no.nav.etterlatte.libs.common.person.EyBostedsadresse
+import no.nav.etterlatte.libs.common.person.EyFamilieRelasjon
+import no.nav.etterlatte.libs.common.person.EyForeldre
+import no.nav.etterlatte.libs.common.person.EyForeldreAnsvar
+import no.nav.etterlatte.libs.common.person.EyKontaktadresse
+import no.nav.etterlatte.libs.common.person.EyOppholdsadresse
+import no.nav.etterlatte.libs.common.person.EyVegadresse
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.eyAdresse
+import no.nav.etterlatte.libs.common.person.eyInnflyttingTilNorge
+import no.nav.etterlatte.libs.common.person.eyUtflyttingFraNorge
+import no.nav.etterlatte.libs.common.person.eyUtland
 import no.nav.etterlatte.person.pdl.FamilieRelasjonResponse
-import no.nav.etterlatte.person.pdl.ForelderAnsvar
 import no.nav.etterlatte.person.pdl.ForelderBarnRelasjonRolle
 import no.nav.etterlatte.person.pdl.HentPerson
+import no.nav.etterlatte.person.pdl.utvidetperson.HentUtvidetPerson
 import org.slf4j.LoggerFactory
 import person.pdl.InnflyttingTilNorge
 import person.pdl.UtflyttingFraNorge
@@ -44,7 +61,15 @@ class PersonService(
     suspend fun hentUtvidetPerson(variables: EyHentUtvidetPersonRequest): Person {
         logger.info("Henter person fra PDL")
 
-        val response = klient.hentPerson(Foedselsnummer.of(variables.foedselsnummer))
+        val response = klient.hentUtvidetPerson(
+            Variables(
+            ident = variables.foedselsnummer,
+            historikk = variables.historikk,
+            adresse = variables.adresse,
+            utland = variables.utland,
+            familieRelasjon = variables.familieRelasjon
+        )
+        )
 
         val hentPerson = response.data?.hentPerson
 
@@ -56,7 +81,7 @@ class PersonService(
             throw NotFoundException()
         }
 
-        return opprettPerson(Foedselsnummer.of(variables.foedselsnummer), hentPerson)
+        return opprettUtvidetPerson(Foedselsnummer.of(variables.foedselsnummer), hentPerson)
     }
 
     suspend fun hentUtland(fnr: Foedselsnummer): eyUtland {
@@ -176,6 +201,84 @@ class PersonService(
             rolle = null,
             familieRelasjon = null
 
+        )
+    }
+
+    private fun opprettUtvidetPerson(
+        fnr: Foedselsnummer,
+        hentPerson: HentUtvidetPerson
+    ): Person {
+        val navn = hentPerson.navn
+            .maxByOrNull { it.metadata.sisteRegistrertDato() }!!
+
+        val adressebeskyttelse = hentPerson.adressebeskyttelse
+            .any { it.gradering in adressebeskyttet }
+
+        val statsborgerskap = hentPerson.statsborgerskap
+            ?.maxByOrNull { it.metadata.sisteRegistrertDato() }
+
+        val sivilstand = hentPerson.sivilstand
+            .maxByOrNull { it.metadata.sisteRegistrertDato() }
+
+        val foedsel = hentPerson.foedsel
+            .maxByOrNull { it.metadata.sisteRegistrertDato() }
+
+        val doedsfall = hentPerson.doedsfall
+            .maxByOrNull { it.metadata.sisteRegistrertDato() }
+
+        return Person(
+            fornavn = navn.fornavn,
+            etternavn = navn.etternavn,
+            foedselsnummer = fnr,
+            foedselsdato = foedsel?.foedselsdato?.toString(),
+            foedselsaar = foedsel?.foedselsaar,
+            doedsdato = doedsfall?.doedsdato.toString(),
+            adressebeskyttelse = adressebeskyttelse,
+            adresse = opprettAdresse(hentPerson),
+            statsborgerskap = statsborgerskap?.land,
+            foedeland = foedsel?.foedeland,
+            sivilstatus = sivilstand?.type?.name,
+            //TODO endre disse til noe fornuftig
+            utland = null,
+            rolle = null,
+            familieRelasjon = null
+
+        )
+    }
+
+    private fun opprettAdresse(hentPerson: HentUtvidetPerson): eyAdresse {
+        val bostedsadresse = hentPerson.bostedsadresse
+            ?.maxByOrNull { it.metadata.sisteRegistrertDato() }
+        val kontaktsadresse = hentPerson.kontaktadresse
+            ?.maxByOrNull { it.metadata.sisteRegistrertDato() }
+        val oppholdssadresse = hentPerson.oppholdsadresse
+            ?.maxByOrNull { it.metadata.sisteRegistrertDato() }
+
+        return eyAdresse(
+            bostedsadresse = EyBostedsadresse(
+                EyVegadresse(
+                    adressenavn = bostedsadresse?.vegadresse?.adressenavn,
+                    husnummer = bostedsadresse?.vegadresse?.husnummer,
+                    husbokstav = bostedsadresse?.vegadresse?.husbokstav,
+                    postnummer = bostedsadresse?.vegadresse?.postnummer,
+                )
+            ),
+            kontaktadresse = EyKontaktadresse(
+                EyVegadresse(
+                    adressenavn = kontaktsadresse?.vegadresse?.adressenavn,
+                    husnummer = kontaktsadresse?.vegadresse?.husnummer,
+                    husbokstav = kontaktsadresse?.vegadresse?.husbokstav,
+                    postnummer = kontaktsadresse?.vegadresse?.postnummer,
+                )
+            ),
+            oppholdsadresse = EyOppholdsadresse(
+                EyVegadresse(
+                    adressenavn = oppholdssadresse?.vegadresse?.adressenavn,
+                    husnummer = oppholdssadresse?.vegadresse?.husnummer,
+                    husbokstav = oppholdssadresse?.vegadresse?.husbokstav,
+                    postnummer = oppholdssadresse?.vegadresse?.postnummer,
+                )
+            ),
         )
     }
 

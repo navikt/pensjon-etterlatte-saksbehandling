@@ -50,6 +50,13 @@ class PersonService(private val klient: Pdl) {
         return person
             .also { logger.info("Hentet familierelasjon for Person") }
     }
+    suspend fun hentUtvidetPerson(fnr: Foedselsnummer): Person {
+        //TODO exception håndteringen virker ikke
+        val person = klient.hentUtvidetPerson(fnr) ?: throw Exception("Fant ingen personer i PDL")
+
+        return person
+            .also { logger.info("Person funnet") }
+    }
 
     /**
      * Henter ut alle graderinger fra liste over personer og deretter henter prioritert [Gradering]

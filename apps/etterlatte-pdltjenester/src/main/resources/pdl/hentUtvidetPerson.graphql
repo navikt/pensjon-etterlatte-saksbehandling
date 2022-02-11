@@ -1,0 +1,219 @@
+fragment vegadresseDetails on Vegadresse {
+    husbokstav
+    husnummer
+    adressenavn
+    postnummer
+    kommunenummer
+    bydelsnummer
+}
+
+fragment utenlandskAdresseDetails on UtenlandskAdresse {
+    adressenavnNummer
+    bygningEtasjeLeilighet
+    postboksNummerNavn
+    postkode
+    bySted
+    regionDistriktOmraade
+    landkode
+}
+fragment MatrikkeladresseDetails on Matrikkeladresse {
+    bruksenhetsnummer
+    kommunenummer
+    matrikkelId
+    postnummer
+    tilleggsnavn
+}
+
+fragment metadata on Metadata {
+    master
+    historisk
+    opplysningsId
+    endringer {
+        kilde
+        registrert
+        registrertAv
+        systemkilde
+        type
+    }
+}
+fragment ukjentBostedDetails on UkjentBosted {
+    bostedskommune
+}
+fragment postAdresseIFrittFormatDetails on PostadresseIFrittFormat {
+    adresselinje1
+    adresselinje2
+    adresselinje3
+    postnummer
+}
+
+fragment postboksadresseDetails on Postboksadresse {
+    postboks
+    postbokseier
+    postnummer
+}
+
+fragment folkeregistermetadata on Folkeregistermetadata {
+    ajourholdstidspunkt
+    gyldighetstidspunkt
+    opphoerstidspunkt
+    kilde
+    aarsak
+    sekvens
+
+}
+
+fragment utenlandskAdresseIFrittFormatDetails on UtenlandskAdresseIFrittFormat{
+    adresselinje1
+    adresselinje2
+    adresselinje3
+    byEllerStedsnavn
+    landkode
+    postkode
+}
+
+fragment personnavn on Personnavn {
+    etternavn
+    fornavn
+    mellomnavn
+}
+fragment relatertbiperson on RelatertBiPerson {
+    foedselsdato
+    kjoenn
+    navn {...personnavn}
+    statsborgerskap
+}
+
+query(
+    $ident: ID!,
+    $historikk: Boolean!,
+    $utland: Boolean!,
+    $adresse: Boolean!,
+    $familieRelasjon: Boolean!,
+) {
+    hentPerson(ident: $ident) {
+        adressebeskyttelse(historikk: $historikk) {
+            gradering
+        }
+        navn {
+            fornavn
+            mellomnavn
+            etternavn
+            forkortetNavn
+            metadata {
+                ...metadata
+            }
+        }
+        foedsel {
+            foedselsdato
+            foedeland
+            foedested
+            foedselsaar
+            metadata {
+                ...metadata
+            }
+        }
+        sivilstand {
+            type
+            gyldigFraOgMed
+            relatertVedSivilstand
+            metadata {
+                ...metadata
+            }
+        }
+        doedsfall {
+            doedsdato
+            folkeregistermetadata {
+                ...folkeregistermetadata
+            }
+            metadata {
+                ...metadata
+            }
+        }
+        bostedsadresse(historikk: $historikk) @include(if: $adresse) {
+            vegadresse {...vegadresseDetails}
+            utenlandskAdresse {...utenlandskAdresseDetails}
+            matrikkeladresse {...MatrikkeladresseDetails}
+            ukjentBosted {...ukjentBostedDetails}
+            gyldigFraOgMed
+            gyldigTilOgMed
+            metadata {...metadata}
+        }
+        kontaktadresse(historikk: $historikk) @include(if: $adresse) {
+            coAdressenavn
+            folkeregistermetadata {...folkeregistermetadata}
+            gyldigFraOgMed
+            gyldigTilOgMed
+            metadata{...metadata}
+            postadresseIFrittFormat{...postAdresseIFrittFormatDetails}
+            postboksadresse{...postboksadresseDetails}
+            type
+            utenlandskAdresse{...utenlandskAdresseDetails}
+            utenlandskAdresseIFrittFormat{...utenlandskAdresseIFrittFormatDetails}
+            vegadresse{...vegadresseDetails}
+        }
+        oppholdsadresse(historikk: $historikk) @include(if: $adresse) {
+            coAdressenavn
+            folkeregistermetadata {...folkeregistermetadata}
+            gyldigFraOgMed
+            gyldigTilOgMed
+            matrikkeladresse {...MatrikkeladresseDetails}
+            metadata{...metadata}
+            oppholdAnnetSted
+            utenlandskAdresse{...utenlandskAdresseDetails}
+            vegadresse{...vegadresseDetails}
+        }
+
+        foreldreansvar @include(if: $familieRelasjon) {
+            ansvar
+            ansvarlig
+            ansvarligUtenIdentifikator{...relatertbiperson}
+            ansvarssubjekt
+            folkeregistermetadata{...folkeregistermetadata}
+            metadata{...metadata}
+        }
+        forelderBarnRelasjon @include(if: $familieRelasjon) {
+            folkeregistermetadata{...folkeregistermetadata}
+            metadata{...metadata}
+            minRolleForPerson
+            relatertPersonsIdent
+            relatertPersonsRolle
+        }
+
+        statsborgerskap(historikk: $historikk) @include(if: $utland) {
+            land
+            gyldigFraOgMed
+            gyldigTilOgMed
+            metadata {
+                opplysningsId
+                master
+                endringer {
+                    type
+                    registrert
+                }
+            }
+        }
+
+        utflyttingFraNorge @include(if: $utland) {
+            tilflyttingsland
+            tilflyttingsstedIUtlandet
+            utflyttingsdato
+            folkeregistermetadata {
+                ...folkeregistermetadata
+            }
+            metadata {
+                ...metadata
+            }
+        }
+
+        innflyttingTilNorge @include(if: $utland) {
+            fraflyttingsland
+            fraflyttingsstedIUtlandet
+            folkeregistermetadata {
+                ...folkeregistermetadata
+            }
+            metadata {
+                ...metadata
+            }
+        }
+    }
+}

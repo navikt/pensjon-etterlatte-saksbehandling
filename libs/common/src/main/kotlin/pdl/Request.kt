@@ -18,5 +18,8 @@ data class GraphqlRequest(
 data class Variables(
     val ident: String? = null,
     val identer: List<String>? = null,
-    val historikk: Boolean = false
+    val historikk: Boolean = false,
+    val adresse: Boolean = false,
+    val utland: Boolean = false,
+    val familieRelasjon: Boolean = false
 )

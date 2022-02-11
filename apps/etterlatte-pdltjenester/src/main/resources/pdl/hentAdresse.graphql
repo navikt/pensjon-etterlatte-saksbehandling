@@ -40,16 +40,16 @@ fragment ukjentBostedDetails on UkjentBosted {
     bostedskommune
 }
 fragment postAdresseIFrittFormatDetails on PostadresseIFrittFormat {
-adresselinje1
-adresselinje2
-adresselinje3
-postnummer
+    adresselinje1
+    adresselinje2
+    adresselinje3
+    postnummer
 }
 
 fragment postboksadresseDetails on Postboksadresse {
-postboks
-postbokseier
-postnummer
+    postboks
+    postbokseier
+    postnummer
 }
 
 fragment folkeregistermetadata on Folkeregistermetadata {

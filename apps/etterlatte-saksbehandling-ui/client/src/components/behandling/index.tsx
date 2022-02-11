@@ -16,6 +16,8 @@ import { Status } from './inngangsvilkaar/types'
 import { Personopplysninger } from './personopplysninger'
 import { Utbetalingsoversikt } from './utbetalingsoversikt'
 import { Vedtak } from './vedtak'
+import { IApiResponse } from '../../shared/api/types'
+import { IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
 
 const addBehandlingAction = (data: any) => ({ type: 'add_behandling', data })
 
@@ -23,113 +25,121 @@ export const Behandling = () => {
   const ctx = useContext(AppContext)
   const location = useLocation()
 
+  const [loaded, setLoaded] = useState<boolean>(false)
+
   useEffect(() => {
-    ;(async () => {
+    hentBehandling('10').then((response: IApiResponse<IDetaljertBehandling>) => {
+      ctx.dispatch(addBehandlingAction(response.data))
+      setLoaded(true)
+    })
+    /*    ;(async () => {
       try {
         const response = await hentBehandling('10')
-        ctx.dispatch(addBehandlingAction(response.data))
+        ctx.dispatch(addBehandlingAction(response.data.behandling))
       } catch (e) {
         console.log(e)
       }
-    })()
+    })()*/
   }, [])
 
   const active = (hash: string) => {
-    if(location.hash === hash) {
-        return "active"
+    if (location.hash === hash) {
+      return 'active'
     }
-    return ""
+    return ''
   }
 
   return (
     <>
-      <GridContainer>
-        <Column>
-          <MenuHead>
-            <BehandlingsStatus status={IBehandlingsStatus.FORSTEGANG} />
-          </MenuHead>
-          {/* stegmeny */}
-          <StegMeny>
-            <li>
-              <NavLink to="personopplysninger">
-                <span>1.</span> Personopplysninger
-              </NavLink>
-            </li>
-            <li>
-              {/** Innholdet her dras ut i egen komponent og vil være dynamisk basert på hvilke vilkår som faktisk eksisterer */}
-              <NavLink to="inngangsvilkaar">
-                <span>2.</span> Inngangsvilkår
-              </NavLink>
-              <CheckedMenu>
-                <li>
-                  <Link to="#dodsfall" className={active("#dodsfall")}>
-                    <StatusIcon status={Status.DONE} />
-                    <span>Dødsfall</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="#alder" className={active("#alder")}>
-                    <StatusIcon status={Status.DONE} />
-                    <span>Alder</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="#bostedsadresse" className={active("#bostedsadresse")}>
-                    <StatusIcon status={Status.DONE} />
-                    <span>Bostedsadresse</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="#medlemskap" className={active("#medlemskap")}>
-                    <StatusIcon status={Status.DONE} />
-                    <span>Medlemsskap</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="#yrkesskade" className={active("#yrkesskade")}>
-                    <StatusIcon status={Status.NOT_DONE} />
-                    <span>Yrkesskade</span>
-                  </Link>
-                </li>
-              </CheckedMenu>
-            </li>
-            <li>
-              <NavLink to="beregne">
-                <span>3.</span> Beregne
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="vedtak">
-                <span>4.</span> Vedtak
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="utbetalingsoversikt">
-                <span>5.</span> Utbetalingsoversikt
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="brev">
-                <span>6.</span> Brev
-              </NavLink>
-            </li>
-          </StegMeny>
-          {/* Subroutes for stegmeny feks */}
-        </Column>
-        <Column>
-          <Routes>
-            <Route path="personopplysninger" element={<Personopplysninger />} />
-            <Route path="inngangsvilkaar" element={<Inngangsvilkaar />} />
-            <Route path="beregne" element={<Beregne />} />
-            <Route path="vedtak" element={<Vedtak />} />
-            <Route path="utbetalingsoversikt" element={<Utbetalingsoversikt />} />
-            <Route path="brev" element={<Brev />} />
-          </Routes>
-        </Column>
-        <Column>
-          <Tab />
-        </Column>
-      </GridContainer>
+      {loaded && (
+        <GridContainer>
+          <Column>
+            <MenuHead>
+              <BehandlingsStatus status={IBehandlingsStatus.FORSTEGANG} />
+            </MenuHead>
+            {/* stegmeny */}
+            <StegMeny>
+              <li>
+                <NavLink to="personopplysninger">
+                  <span>1.</span> Personopplysninger
+                </NavLink>
+              </li>
+              <li>
+                {/** Innholdet her dras ut i egen komponent og vil være dynamisk basert på hvilke vilkår som faktisk eksisterer */}
+                <NavLink to="inngangsvilkaar">
+                  <span>2.</span> Inngangsvilkår
+                </NavLink>
+                <CheckedMenu>
+                  <li>
+                    <Link to="#dodsfall" className={active('#dodsfall')}>
+                      <StatusIcon status={Status.DONE} />
+                      <span>Dødsfall</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="#alder" className={active('#alder')}>
+                      <StatusIcon status={Status.DONE} />
+                      <span>Alder</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="#bostedsadresse" className={active('#bostedsadresse')}>
+                      <StatusIcon status={Status.DONE} />
+                      <span>Bostedsadresse</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="#medlemskap" className={active('#medlemskap')}>
+                      <StatusIcon status={Status.DONE} />
+                      <span>Medlemsskap</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="#yrkesskade" className={active('#yrkesskade')}>
+                      <StatusIcon status={Status.NOT_DONE} />
+                      <span>Yrkesskade</span>
+                    </Link>
+                  </li>
+                </CheckedMenu>
+              </li>
+              <li>
+                <NavLink to="beregne">
+                  <span>3.</span> Beregne
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="vedtak">
+                  <span>4.</span> Vedtak
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="utbetalingsoversikt">
+                  <span>5.</span> Utbetalingsoversikt
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="brev">
+                  <span>6.</span> Brev
+                </NavLink>
+              </li>
+            </StegMeny>
+            {/* Subroutes for stegmeny feks */}
+          </Column>
+          <Column>
+            <Routes>
+              <Route path="personopplysninger" element={<Personopplysninger />} />
+              <Route path="inngangsvilkaar" element={<Inngangsvilkaar />} />
+              <Route path="beregne" element={<Beregne />} />
+              <Route path="vedtak" element={<Vedtak />} />
+              <Route path="utbetalingsoversikt" element={<Utbetalingsoversikt />} />
+              <Route path="brev" element={<Brev />} />
+            </Routes>
+          </Column>
+          <Column>
+            <Tab />
+          </Column>
+        </GridContainer>
+      )}
     </>
   )
 }

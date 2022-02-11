@@ -18,12 +18,8 @@ mockRouter.get('/oppgaver', (req: Request, res: Response) => {
 })
 
 mockRouter.get(`/behandling/:id`, (req: Request, res: Response) => {
+  let behandling = require('../mockdata/detaljertBehandling.json')
   res.json({
-    id: 100,
-    sak: 400,
-    grunnlag: [],
-    vilkaarsproving: undefined,
-    beregning: undefined,
-    fastsatt: false,
+    behandling,
   })
 })

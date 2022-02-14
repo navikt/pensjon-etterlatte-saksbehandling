@@ -83,7 +83,10 @@ internal class EtterlatteFordeler(
             logger.error("Avbrutt fordeling da hendelsen ikke er gyldig lengre")
             return
         }
-        //TODO må denne skrives om til å håndtere manglende soeknads_type?
+        if(packet["@skjema_info"]["type"] == null){
+            logger.info("Feil under lesing av søknaden: Type ikke funnet")
+            return
+        }
         if (packet["@skjema_info"]["type"].asText() != SoeknadType.Barnepensjon.name.uppercase()) {
             logger.info("Avbrutt fordeling da søknad ikke er " + SoeknadType.Barnepensjon.name)
             return

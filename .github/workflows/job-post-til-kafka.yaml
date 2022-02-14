@@ -1,0 +1,38 @@
+name: post-til-kafka
+
+env:
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
+  JOB_NAME: ${{ github.workflow }}
+
+on:
+  push:
+    branches:
+      - main
+      - release/*
+      - feature/*
+      - fix/*
+    paths:
+      - jobs/test-fordeling/**
+
+jobs:
+  build-and-publish:
+    name: Build, test, and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Java v16.x
+        uses: actions/setup-java@v1
+        with:
+          java-version: '16.x'
+      - name: Gradle test and build
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :jobs:${JOB_NAME}:test :jobs:${JOB_NAME}:build
+      - name: Build and publish docker image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          docker build --tag ${IMAGE} jobs/${JOB_NAME}
+          docker push ${IMAGE}

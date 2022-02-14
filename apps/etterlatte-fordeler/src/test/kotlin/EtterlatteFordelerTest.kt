@@ -57,7 +57,8 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
         coEvery { klientMock.hentAdresse(any(), false) } returns gyldigadresse
         coEvery { klientMock.hentFamilieRelasjon(any()) } returns familieRelasjon
-
+        //TODO endre denne til å mocke spesifikke personer
+        coEvery { klientMock.hentUtvidetPerson(any(),any(),any(),any(),any()) } returns barn
 
         val inspector = TestRapid()
             .apply { EtterlatteFordeler(this, service) }
@@ -158,6 +159,8 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
         coEvery { klientMock.hentAdresse(any(), false) } returns gyldigadresse
         coEvery { klientMock.hentFamilieRelasjon(any()) } returns familieRelasjon
+        //TODO endre denne til å mocke spesifikke personer
+        coEvery { klientMock.hentUtvidetPerson(any(),any(),any(),any(),any()) } returns barn
 
 
         val inspector = TestRapid()
@@ -189,6 +192,8 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
         coEvery { klientMock.hentAdresse(any(), false) } returns gyldigadresse
         coEvery { klientMock.hentFamilieRelasjon(any()) } returns familieRelasjon
+        //TODO endre denne til å mocke spesifikke personer
+        coEvery { klientMock.hentUtvidetPerson(any(),any(),any(),any(),any()) } returns barn
 
 
 

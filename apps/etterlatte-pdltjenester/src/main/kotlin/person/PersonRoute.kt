@@ -49,6 +49,29 @@ fun Route.personApi(service: PersonService) {
             }
             call.respond(person)
         }
+        get("utvidetperson") {
+            val variables = EyHentUtvidetPersonRequest(
+                foedselsnummer = call.request.headers["foedselsnummer"],
+                historikk = call.request.queryParameters["historikk"]?.toBoolean() ?: false,
+                adresse = call.request.queryParameters["adresse"]?.toBoolean() ?: false,
+                utland = call.request.queryParameters["utland"]?.toBoolean() ?: false,
+                familieRelasjon = call.request.queryParameters["familieRelasjon"]?.toBoolean() ?: false
+            )
+
+            logger.info("Fnr: " + variables.foedselsnummer)
+            val person = service.hentPerson(Foedselsnummer.of(variables.foedselsnummer))
+            if (variables.utland) {
+                person.utland = service.hentUtland(person.foedselsnummer)
+            }
+            if (variables.adresse) {
+                person.adresse = service.hentAdresse(EyHentAdresseRequest(person.foedselsnummer, variables.historikk))
+            }
+            if (variables.familieRelasjon) {
+                person.familieRelasjon =
+                    service.hentFamilieRelasjon(EyHentFamilieRelasjonRequest(person.foedselsnummer))
+            }
+            call.respond(person)
+        }
         post("hentutland") {
             val fnr = Foedselsnummer.of(call.receive<String>().toString())
             logger.info("Fnr: $fnr")

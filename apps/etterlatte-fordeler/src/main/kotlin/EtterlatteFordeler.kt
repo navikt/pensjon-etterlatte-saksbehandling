@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.alder
 import no.nav.etterlatte.libs.common.soeknad.SoeknadType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.pdl.PersonService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -26,10 +25,6 @@ internal class EtterlatteFordeler(
 
     //TODO flytte disse ned til onPacket for å sikre trådhåntering
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
-    private lateinit var barn: Person
-    private lateinit var avdoed: Person
-    private lateinit var gjenlevende: Person
-    private lateinit var soeknad: JsonMessage
 
     /*
     *Dødsfallet er registrert
@@ -42,10 +37,11 @@ internal class EtterlatteFordeler(
     *Avdød - Ikke oppgitt utenlandsopphold
     *Gjenlevende ektefelle/samboer - bosatt i Norge
     *Barnet - bosatt i Norge + ingen ut- og innvandringsdatoe
+    Avdød er biologisk forelder til søker
      */
 
 
-    val kriterier = listOf(
+    fun kriterier(barn: Person, avdoed: Person, gjenlevende: Person, soeknad: JsonMessage) = listOf(
         Kriterie("Barn er ikke norsk statsborger") { sjekkStatsborgerskap(barn) },
         Kriterie("Barn er for gammelt") { forGammel(barn, 15) },
         Kriterie("Barn har adressebeskyttelse") { harAdressebeskyttelse(barn) },
@@ -82,7 +78,6 @@ internal class EtterlatteFordeler(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
 
         val gyldigTilDato = OffsetDateTime.parse(packet["@hendelse_gyldig_til"].asText())
-        soeknad = packet
 
         if (gyldigTilDato.isBefore(OffsetDateTime.now(klokke))) {
             logger.error("Avbrutt fordeling da hendelsen ikke er gyldig lengre")
@@ -101,10 +96,10 @@ internal class EtterlatteFordeler(
                 val gjenlevendeFnr = Foedselsnummer.of(finnGjennlevendeFnr(packet))
                 val avdoedFnr = Foedselsnummer.of(finnAvdoedFnr(packet))
 
-
-                barn = personService.hentPerson(barnFnr)
-                avdoed = personService.hentPerson(avdoedFnr)
-                gjenlevende = personService.hentPerson(gjenlevendeFnr)
+                val barn = personService.hentPerson(barnFnr)
+                val utvidetBarn = personService.hentUtvidetPerson(barnFnr, historikk = false, adresse = true, utland = false, familieRelasjon = true)
+                val avdoed = personService.hentPerson(avdoedFnr)
+                val gjenlevende = personService.hentPerson(gjenlevendeFnr)
                 barn.utland = personService.hentUtland(barn.foedselsnummer)
                 avdoed.utland = personService.hentUtland(avdoed.foedselsnummer)
                 barn.adresse = personService.hentAdresse(barn.foedselsnummer, false)
@@ -113,7 +108,7 @@ internal class EtterlatteFordeler(
                 barn.familieRelasjon = personService.hentFamilieForhold(barn.foedselsnummer)
                 gjenlevende.familieRelasjon = personService.hentFamilieForhold(gjenlevende.foedselsnummer)
 
-                val aktuelleSaker = fordel(packet)
+                val aktuelleSaker = fordel(barn, avdoed, gjenlevende, packet)
                 if (aktuelleSaker.kandidat) {
                     packet["@soeknad_fordelt"] = aktuelleSaker.kandidat
                     packet["@event_name"] = "ey_fordelt"
@@ -228,8 +223,8 @@ internal class EtterlatteFordeler(
         fun blirOppfyltAv(message: JsonMessage): Boolean = sjekk(message)
     }
 
-    private fun fordel(packet: JsonMessage): FordelRespons {
-        return kriterier
+    private fun fordel(barn: Person, avdoed: Person, gjenlevende: Person, packet: JsonMessage): FordelRespons {
+        return kriterier(barn, avdoed, gjenlevende, packet)
             .filter { it.blirOppfyltAv(packet) }
             .map { it.forklaring }
             .let { FordelRespons(it.isEmpty(), it) }

@@ -4,19 +4,19 @@ fun payload(fnr: String) = """
 {
   "@event_name": "soeknad_innsendt",
   "@skjema_info": {
-    "imageTag": "ce3542f9645d280bfff9936bdd0e7efc32424de2",
+    "imageTag": "9f1f95b2472742227b37d19dd2d735ac9001995e",
     "spraak": "nb",
     "innsender": {
       "fornavn": {
-        "svar": "STOR",
+        "svar": "GØYAL",
         "spoersmaal": "Fornavn"
       },
       "etternavn": {
-        "svar": "SNERK",
+        "svar": "HØYSTAKK",
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "03108718357",
+        "svar": "24107321582",
         "spoersmaal": "Fødselsnummer"
       },
       "type": "INNSENDER"
@@ -34,7 +34,7 @@ fun payload(fnr: String) = """
       "opplysning": {
         "kontonummer": {
           "svar": {
-            "innhold": "1351.35.13513"
+            "innhold": "6848.64.44444"
           },
           "spoersmaal": "Oppgi norsk kontonummer for utbetaling"
         },
@@ -42,36 +42,24 @@ fun payload(fnr: String) = """
         "utenlandskBankAdresse": null,
         "iban": null,
         "swift": null,
-        "skattetrekk": {
-          "svar": {
-            "verdi": "JA",
-            "innhold": "Ja"
-          },
-          "spoersmaal": "Ønsker du at vi legger inn et skattetrekk for barnepensjonen?",
-          "opplysning": {
-            "svar": {
-              "innhold": "21%"
-            },
-            "spoersmaal": "Oppgi ønsket skattetrekk"
-          }
-        }
+        "skattetrekk": null
       }
     },
     "soeker": {
       "fornavn": {
-        "svar": "Lunken",
+        "svar": "kirsten",
         "spoersmaal": "Fornavn"
       },
       "etternavn": {
-        "svar": "Floskel",
+        "svar": "jakobsen",
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "12101376212",
+        "svar": "07081177656",
         "spoersmaal": "Barnets fødselsnummer / d-nummer"
       },
       "statsborgerskap": {
-        "svar": "Norsk",
+        "svar": "Norge",
         "spoersmaal": "Statsborgerskap"
       },
       "utenlandsAdresse": {
@@ -85,30 +73,30 @@ fun payload(fnr: String) = """
       "foreldre": [
         {
           "fornavn": {
-            "svar": "STOR",
+            "svar": "GØYAL",
             "spoersmaal": "Fornavn"
           },
           "etternavn": {
-            "svar": "SNERK",
+            "svar": "HØYSTAKK",
             "spoersmaal": "Etternavn"
           },
           "foedselsnummer": {
-            "svar": "03108718357",
+            "svar": "24107321582",
             "spoersmaal": "Fødselsnummer"
           },
           "type": "FORELDER"
         },
         {
           "fornavn": {
-            "svar": "Død",
+            "svar": "fe",
             "spoersmaal": "Fornavn"
           },
           "etternavn": {
-            "svar": "Testperson",
+            "svar": "fe",
             "spoersmaal": "Etternavn"
           },
           "foedselsnummer": {
-            "svar": "22128202440",
+            "svar": "09116224442",
             "spoersmaal": "Fødselsnummer"
           },
           "type": "FORELDER"
@@ -128,19 +116,19 @@ fun payload(fnr: String) = """
     "foreldre": [
       {
         "fornavn": {
-          "svar": "STOR",
+          "svar": "GØYAL",
           "spoersmaal": "Fornavn"
         },
         "etternavn": {
-          "svar": "SNERK",
+          "svar": "HØYSTAKK",
           "spoersmaal": "Etternavn"
         },
         "foedselsnummer": {
-          "svar": "03108718357",
+          "svar": "24107321582",
           "spoersmaal": "Fødselsnummer"
         },
         "adresse": {
-          "svar": "BØLERLIA 99, 0689 Oslo",
+          "svar": "Sannergata 6C, 0557 Oslo",
           "spoersmaal": "Bostedsadresse"
         },
         "statsborgerskap": {
@@ -159,125 +147,59 @@ fun payload(fnr: String) = """
       },
       {
         "fornavn": {
-          "svar": "Død",
+          "svar": "fe",
           "spoersmaal": "Fornavn"
         },
         "etternavn": {
-          "svar": "Testperson",
+          "svar": "fe",
           "spoersmaal": "Etternavn"
         },
         "foedselsnummer": {
-          "svar": "22128202440",
+          "svar": "09116224442",
           "spoersmaal": "Fødselsnummer / d-nummer"
         },
         "datoForDoedsfallet": {
           "svar": {
-            "innhold": "2021-07-27"
+            "innhold": "2022-01-01"
           },
           "spoersmaal": "Når skjedde dødsfallet?"
         },
         "statsborgerskap": {
           "svar": {
-            "innhold": "Norsk"
+            "innhold": "Norge"
           },
           "spoersmaal": "Statsborgerskap"
         },
         "utenlandsopphold": {
           "svar": {
             "verdi": "NEI",
-            "innhold": "nei"
+            "innhold": "Nei"
           },
           "spoersmaal": "Bodde eller arbeidet han eller hun i et annet land enn Norge etter fylte 16 år?",
-          "opplysning": [
-            {
-              "land": {
-                "svar": {
-                  "innhold": "Kongo"
-                },
-                "spoersmaal": "Land"
-              },
-              "fraDato": {
-                "svar": {
-                  "innhold": "2002-08-11"
-                },
-                "spoersmaal": "Fra dato (valgfri)"
-              },
-              "tilDato": {
-                "svar": {
-                  "innhold": "2003-08-11"
-                },
-                "spoersmaal": "Til dato (valgfri)"
-              },
-              "oppholdsType": {
-                "svar": [
-                  {
-                    "verdi": "BODD",
-                    "innhold": "Bodd"
-                  },
-                  {
-                    "verdi": "ARBEIDET",
-                    "innhold": "Arbeidet"
-                  }
-                ],
-                "spoersmaal": "Bodd og/eller arbeidet?"
-              },
-              "medlemFolketrygd": {
-                "svar": {
-                  "verdi": "JA",
-                  "innhold": "Ja"
-                },
-                "spoersmaal": "Var han eller hun medlem av folketrygden under oppholdet?"
-              },
-              "pensjonsutbetaling": {
-                "svar": {
-                  "innhold": "150.000"
-                },
-                "spoersmaal": "Oppgi eventuell pensjon han eller hun mottok fra dette landet (valgfri)"
-              }
-            }
-          ]
+          "opplysning": null
         },
         "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": {
           "svar": {
-            "verdi": "JA",
-            "innhold": "Ja"
+            "verdi": "NEI",
+            "innhold": "Nei"
           },
           "spoersmaal": "Skyldes dødsfallet yrkesskade eller yrkessykdom?"
         },
         "naeringsInntekt": {
           "svar": {
-            "verdi": "JA",
-            "innhold": "Ja"
+            "verdi": "NEI",
+            "innhold": "Nei"
           },
           "spoersmaal": "Var han eller hun selvstendig næringsdrivende?",
-          "opplysning": {
-            "naeringsinntektPrAarFoerDoedsfall": {
-              "svar": {
-                "innhold": "150 000"
-              },
-              "spoersmaal": "Oppgi næringsinntekt fra kalenderåret før dødsfallet (valgfri)"
-            },
-            "naeringsinntektVedDoedsfall": {
-              "svar": {
-                "verdi": "NEI",
-                "innhold": "Nei"
-              },
-              "spoersmaal": "Hadde han eller hun næringsinntekt når dødsfallet skjedde?"
-            }
-          }
+          "opplysning": null
         },
         "militaertjeneste": {
           "svar": {
-            "verdi": "JA",
-            "innhold": "Ja"
+            "verdi": "NEI",
+            "innhold": "Nei"
           },
           "spoersmaal": "Har han eller hun gjennomført militær eller sivil førstegangstjeneste som varte minst 30 dager?",
-          "opplysning": {
-            "svar": {
-              "innhold": "1984"
-            },
-            "spoersmaal": "Hvilke(-t) år? (valgfri)"
-          }
+          "opplysning": null
         },
         "type": "AVDOED"
       }
@@ -285,31 +207,42 @@ fun payload(fnr: String) = """
     "soesken": [],
     "versjon": "2",
     "type": "BARNEPENSJON",
-    "mottattDato": "2022-02-10T10:51:12.298943803",
+    "mottattDato": "2022-02-14T14:37:24.573612786",
     "template": "barnepensjon_v2"
   },
-  "@lagret_soeknad_id": 621,
+  "@lagret_soeknad_id": 900,
   "@template": "soeknad",
-  "@fnr_soeker": "07010776133",
-  "@hendelse_gyldig_til": "2023-02-10T10:23:30.808950460Z",
+  "@fnr_soeker": "07081177656",
+  "@hendelse_gyldig_til": "2023-02-14T14:09:20.684508951Z",
   "system_read_count": 2,
   "system_participating_services": [
     {
       "service": "innsendt-soeknad",
-      "instance": "innsendt-soeknad-9c8466574-k8rsg",
-      "time": "2022-02-10T10:53:30.809646217"
+      "instance": "innsendt-soeknad-57b4b88446-bh5b5",
+      "time": "2022-02-14T14:39:20.684818363"
     },
     {
       "service": "sjekk-adressebeskyttelse",
-      "instance": "sjekk-adressebeskyttelse-696bcbb647-g59xj",
-      "time": "2022-02-10T10:53:30.817628111"
+      "instance": "sjekk-adressebeskyttelse-6cf4bd7b5d-8sqdh",
+      "time": "2022-02-14T14:39:20.690640305"
     },
     {
       "service": "journalfoer-soeknad",
-      "instance": "journalfoer-soeknad-86c4676f6f-twptd",
-      "time": "2022-02-10T10:53:31.194624485"
+      "instance": "journalfoer-soeknad-76c4c68cfb-k57r8",
+      "time": "2022-02-14T14:39:21.044308399"
     }
   ],
-  "@adressebeskyttelse": "UGRADERT"
+  "@adressebeskyttelse": "UGRADERT",
+  "@dokarkivRetur": {
+    "journalpostId": "524975071",
+    "journalpoststatus": null,
+    "melding": null,
+    "journalpostferdigstilt": false,
+    "dokumenter": [
+      {
+        "dokumentInfoId": "549167948"
+      }
+    ]
+  }
 }
 """.trimIndent()

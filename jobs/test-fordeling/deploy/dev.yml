@@ -1,0 +1,14 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  labels:
+    team: etterlatte
+  name: post-til-kafka
+  namespace: etterlatte
+spec:
+  image: docker.pkg.github.com/navikt/pensjon-etterlatte/post-til-kafka:<versjon>
+  kafka:
+    pool: nav-dev
+  env:
+    - name: KAFKA_TARGET_TOPIC
+      value: etterlatte.dodsmelding

@@ -1,9 +1,7 @@
 package no.nav.etterlatte.pdl
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.accept
-import io.ktor.client.request.header
-import io.ktor.client.request.post
+import io.ktor.client.request.*
 import io.ktor.client.utils.EmptyContent.contentType
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
@@ -17,6 +15,7 @@ import org.slf4j.LoggerFactory
 interface Pdl {
     suspend fun finnAdressebeskyttelseForFnr(fnrListe: List<Foedselsnummer>): AdressebeskyttelseResponse
     suspend fun hentPerson(fnr: Foedselsnummer): Person
+    suspend fun hentUtvidetPerson(fnr: Foedselsnummer, historikk: Boolean, adresse: Boolean, utland: Boolean, familieRelasjon: Boolean): Person
     suspend fun hentUtland(fnr: Foedselsnummer): eyUtland
     suspend fun hentFamilieRelasjon(fnr: Foedselsnummer): EyFamilieRelasjon
     suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): eyAdresse
@@ -46,6 +45,23 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
         //response.errors?.forEach { error ->
          //   logger.error("Feil ved uthenting av adressebeskyttelse", error.toString())
        // }
+        return response
+    }
+    override suspend fun hentUtvidetPerson(fnr: Foedselsnummer, historikk: Boolean, adresse: Boolean, utland: Boolean, familieRelasjon: Boolean): Person {
+        val response = client.get<Person>(apiUrl + "/utvidetperson?historikk=$historikk&adresse=$adresse&utland=$utland&familieRelasjon=$familieRelasjon") {
+            header("Tema", "PEN")
+            header("foedselsnummer", fnr)
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            body = fnr.value
+
+        }
+
+        //TODO ordne feilhåndtering
+        // Logge feil dersom det finnes noen
+        //response.errors?.forEach { error ->
+        //   logger.error("Feil ved uthenting av adressebeskyttelse", error.toString())
+        // }
         return response
     }
     override suspend fun hentUtland(fnr: Foedselsnummer): eyUtland {

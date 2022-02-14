@@ -37,6 +37,7 @@ internal class EtterlatteFordeler(
     *Avdød - Ikke oppgitt utenlandsopphold
     *Gjenlevende ektefelle/samboer - bosatt i Norge
     *Barnet - bosatt i Norge + ingen ut- og innvandringsdatoe
+    Avdød er biologisk forelder til søker
      */
 
 
@@ -96,6 +97,7 @@ internal class EtterlatteFordeler(
                 val avdoedFnr = Foedselsnummer.of(finnAvdoedFnr(packet))
 
                 val barn = personService.hentPerson(barnFnr)
+                val utvidetBarn = personService.hentUtvidetPerson(barnFnr, historikk = false, adresse = true, utland = false, familieRelasjon = true)
                 val avdoed = personService.hentPerson(avdoedFnr)
                 val gjenlevende = personService.hentPerson(gjenlevendeFnr)
                 barn.utland = personService.hentUtland(barn.foedselsnummer)

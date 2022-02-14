@@ -1,4 +1,4 @@
-name: test-fordeling
+name: test-fordeler
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
@@ -12,7 +12,7 @@ on:
       - feature/*
       - fix/*
     paths:
-      - jobs/test-fordeling/**
+      - jobs/test-fordeler/**
 
 jobs:
   build-and-publish:

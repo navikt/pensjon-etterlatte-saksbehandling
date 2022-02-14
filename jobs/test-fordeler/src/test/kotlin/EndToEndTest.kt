@@ -68,7 +68,7 @@ class EndToEndTest {
             Assertions.assertEquals(1, it.count())
         }.forEach{
             Assertions.assertEquals("0", it.key())
-            Assertions.assertTrue(it.value().contains(""""type":"GJENLEVENDEPENSJON""""))
+            Assertions.assertTrue(it.value().contains(""""type":"BARNEPENSJON""""))
         }
     }
 

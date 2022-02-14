@@ -1,5 +1,6 @@
 package model
 
+import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.vilkaar.model.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -14,7 +15,7 @@ internal class AlleVilkaarOppfyltTest{
             override val navn: String
                 get() = "alltid oppfyllt"
 
-            override fun vurder(opplysninger: List<Opplysning>): VurdertVilkaar {
+            override fun vurder(opplysninger: List<VilkaarOpplysning<out Any>>): VurdertVilkaar {
                 return VurdertVilkaar(Tidslinje(LocalDate.MIN to VilkaarVurderingsResultat.OPPFYLT), emptyList(), navn)
             }
 
@@ -28,7 +29,7 @@ internal class AlleVilkaarOppfyltTest{
             override val navn: String
                 get() = "ikke alltid oppfyllt"
 
-            override fun vurder(opplysninger: List<Opplysning>): VurdertVilkaar {
+            override fun vurder(opplysninger: List<VilkaarOpplysning<out Any>>): VurdertVilkaar {
                 return VurdertVilkaar(
                     Tidslinje(
                         LocalDate.MIN to VilkaarVurderingsResultat.OPPFYLT,

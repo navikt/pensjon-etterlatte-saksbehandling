@@ -1,6 +1,6 @@
 package no.nav.etterlatte.vilkaar.model
 
-import java.time.LocalDate
+import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 
 
 enum class VilkaarVurderingsResultat {
@@ -27,24 +27,9 @@ enum class VilkaarVurderingsResultat {
     }
 }
 
-class VurdertVilkaar(
-    val resultat: Tidslinje<VilkaarVurderingsResultat>,
-    val basertPaaOpplysninger: List<Opplysning>,
-    val navn: String
-){
-    fun serialize(): VurdertVilkaarJson{
-        return VurdertVilkaarJson(resultat.knekkpunkt.map { TidslinjePeriodeJson(it.first, it.second) }, basertPaaOpplysninger, navn)
-    }
-
-}
-
-data class TidslinjePeriodeJson(
-    val fom:LocalDate,
-    val resultat: Any
+data class VurdertVilkaar(
+    val navn: String,
+    val resultat: VilkaarVurderingsResultat,
+    val basertPaaOpplysninger: List<VilkaarOpplysning<out Any>>,
 )
 
-data class VurdertVilkaarJson(
-    val tidslinje: List<TidslinjePeriodeJson>,
-    val basertPaaOpplysninger: List<Opplysning>,
-    val navn: String
-)

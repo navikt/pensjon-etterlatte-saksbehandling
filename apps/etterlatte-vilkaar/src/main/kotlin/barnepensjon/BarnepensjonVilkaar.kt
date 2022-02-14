@@ -1,36 +1,33 @@
 package no.nav.etterlatte.vilkaar.barnepensjon
 
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato as DoedsDatoModell
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foreldre
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.vilkaar.model.*
 import java.time.LocalDate
 
-val BrukerErUnder18 = BrukersAlder.enkelVurdering("Bruker er under 18 år") {
-    Tidslinje(foedselsdato to VilkaarVurderingsResultat.OPPFYLT, foedselsdato.plusYears(18) to VilkaarVurderingsResultat.IKKE_OPPFYLT)
+
+fun brukerErUnder20(opplysninger: List<VilkaarOpplysning<Foedselsdato>>): VurdertVilkaar {
+    val opplysningPdl = opplysninger.find { it.kilde.type == "pdl" }
+        ?: return VurdertVilkaar(Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value, VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, opplysninger)
+
+    return if (opplysningPdl.opplysning.foedselsdato.plusYears(20) < LocalDate.now()) {
+        VurdertVilkaar(opplysningPdl.opplysingType, VilkaarVurderingsResultat.OPPFYLT, opplysninger )
+    } else {
+        VurdertVilkaar(opplysningPdl.opplysingType, VilkaarVurderingsResultat.IKKE_OPPFYLT, opplysninger, )
+    }
+
 }
 
-val BrukerErUnder20 = BrukersAlder.enkelVurdering("Bruker er under 20 år",) {
-    Tidslinje(foedselsdato to VilkaarVurderingsResultat.OPPFYLT, foedselsdato.plusYears(20) to VilkaarVurderingsResultat.IKKE_OPPFYLT)
+
+fun doedsfallErRegistrert(doedsdato: List<VilkaarOpplysning<Doedsdato>>, foreldre: List<VilkaarOpplysning<Foreldre>> ): VurdertVilkaar {
+    val doedsdatoPdl = doedsdato.find {it.kilde.type == "pdl"}
+        ?: return VurdertVilkaar(Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1.value, VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, List(doedsdato, foreldre))
+
 }
 
-val BrukerErIUtdanning = Utdanningsgrunnlag.enkelVurdering("Bruker er i utdanning") {
-    val vurdering = if(status) VilkaarVurderingsResultat.OPPFYLT else VilkaarVurderingsResultat.IKKE_OPPFYLT
-    Tidslinje(LocalDate.MIN to vurdering)
-}
-val BrukerErForeldreloes = ForeldreloesGrunnlag.enkelVurdering("Bruker er foreldreløs") {
-    val vurdering = status
-        .takeIf { it }?.let { VilkaarVurderingsResultat.OPPFYLT }
-        ?: VilkaarVurderingsResultat.IKKE_OPPFYLT
-
-    Tidslinje(LocalDate.MIN to vurdering)
-}
-
-val brukerErUnder20aarIUtdanningOgForeldreloes = BrukerErUnder20 og BrukerErIUtdanning og BrukerErForeldreloes
-
-val brukerErUngNok = BrukerErUnder18 eller brukerErUnder20aarIUtdanningOgForeldreloes
-
-val sammenligningAvOpplysninger = Doedsdato.enkelSammenligning("sammenlign dødsdato"){
-    Tidslinje(LocalDate.MIN to (groupBy{it.doedsdato}.size.takeIf { it < 2 }?.let { VilkaarVurderingsResultat.OPPFYLT } ?: VilkaarVurderingsResultat.IKKE_OPPFYLT))
-}
 
 
 inline fun <reified T>OpplysningType<T>.enkelVurdering(vilkarsNavn:String, crossinline test: T.() -> Tidslinje<VilkaarVurderingsResultat>) = enkelVurderingAvOpplysning(vilkarsNavn, opplysningsNavn, test)

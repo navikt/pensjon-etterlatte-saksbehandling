@@ -1,5 +1,7 @@
 package no.nav.etterlatte.vilkaar.model
 
+import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
+
 interface VilkaarVisitor{
     fun visit(vilkaar: Vilkaar)
 }
@@ -14,7 +16,7 @@ class VilkaarSomBrukerOpplysningVisitor(val opplysningstype: String): VilkaarVis
 
 interface Vilkaar {
     val navn: String
-    fun vurder(opplysninger: List<Opplysning>): VurdertVilkaar
+    fun vurder(opplysninger: List<VilkaarOpplysning<out Any>>): VurdertVilkaar
     fun accept(visitor: VilkaarVisitor) = visitor.visit(this)
     fun opplysningsbehov():List<String>
 }

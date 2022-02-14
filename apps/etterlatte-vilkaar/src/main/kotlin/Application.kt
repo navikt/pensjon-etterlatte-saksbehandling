@@ -12,14 +12,10 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.vilkaar.barnepensjon.brukerErUngNok
 
 
-val vilkaarMap = mapOf("barnepensjon:forstegangsbehandling" to brukerErUngNok)
 
 fun main() {
     embeddedServer(CIO, applicationEngineEnvironment {
@@ -37,7 +33,7 @@ fun Application.module() {
     routing {
         get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
         get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
-        get("/") { call.respond(brukerErUngNok) }
+        //get("/") { call.respond(brukerErUngNok) }
         /*
         post("/") {
             call.respond(
@@ -49,47 +45,10 @@ fun Application.module() {
         post("/") {
 
             call.receive<RequestDto>().let {
-                mapToVilkaarOpplysning(it.opplysninger)
+                vilkaarService.mapVilkaar(it.opplysninger)
             }
         }
     }
-
 }
 
-
-fun mapToVilkaarOpplysning(opplysning: List<VilkaarOpplysning<ObjectNode>>): List<VilkaarOpplysning<out Any>> {
-    val liste = ArrayList<VilkaarOpplysning<out Any>>()
-    opplysning.forEach {
-        when(it.opplysingType) {
-            Opplysningstyper.AVDOED_DOEDSFALL_V1.value -> liste.add(mapToVikaaropplysning<Doedsdato>(it))
-            Opplysningstyper.AVDOED_PERSONINFO_V1.value -> liste.add(mapToVikaaropplysning<PersonInfo>(it))
-            Opplysningstyper.SOEKER_PERSONINFO_V1.value -> liste.add(mapToVikaaropplysning<PersonInfo>(it))
-            Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value -> liste.add(mapToVikaaropplysning<Foedselsdato>(it))
-        }
-    }
-
-    return liste
-}
-
-inline fun <reified T> mapToVikaaropplysning(opplysning: VilkaarOpplysning<ObjectNode>): VilkaarOpplysning<T> {
-    return VilkaarOpplysning(
-        opplysning.opplysingType,
-        opplysning.kilde,
-        objectMapper.readValue(opplysning.opplysning.toString()))
-}
-
-
-/*
-inline fun <reified T> test2(opplysning: VilkaarOpplysning<ObjectNode>): VilkaarOpplysning<T> {
-    return VilkaarOpplysning<T>(
-        opplysning.opplysingType,
-        opplysning.kilde,
-        objectMapper.readValue(opplysning.opplysning.toString(), object : TypeReference<T>(){}))
-}
- */
-
-
-
-
-
-data class RequestDto(val vilkaar: String, val opplysninger: List<VilkaarOpplysning<ObjectNode>>)
+data class RequestDto(val opplysninger: List<VilkaarOpplysning<ObjectNode>>)

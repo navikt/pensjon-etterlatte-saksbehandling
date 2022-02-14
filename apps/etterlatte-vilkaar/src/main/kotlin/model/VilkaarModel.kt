@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import java.time.LocalDate
 
 val objectMapper: ObjectMapper = JsonMapper.builder()
@@ -21,9 +22,6 @@ val objectMapper: ObjectMapper = JsonMapper.builder()
     .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
     .enable(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS)
     .build()
-
-typealias Opplysning = ObjectNode
-val OPPLYSNING_NAVN = "_navn"
 
 infix fun Vilkaar.og(other: Vilkaar) = AlleVilkaarOppfylt(listOf(this, other))
 infix fun Vilkaar.eller(other: Vilkaar) = MinstEttVilkaarOppfylt(listOf(this, other))
@@ -62,7 +60,7 @@ class MinstEttVilkaarOppfylt(val vilkaar: List<Vilkaar>) : Vilkaar {
 
     override val navn: String
         get() = vilkaar.joinToString(separator = " eller ") { it.navn }
-    override fun vurder(opplysninger: List<Opplysning>): VurdertVilkaar {
+    override fun vurder(opplysninger: List<VilkaarOpplysning<out Any>>): VurdertVilkaar {
         return vilkaar
             .map { it.vurder(opplysninger)}
             .let {
@@ -79,23 +77,23 @@ class MinstEttVilkaarOppfylt(val vilkaar: List<Vilkaar>) : Vilkaar {
     }
 }
 
-class EnkelSjekkAvOpplysning(vilkaarsnavn: String, val opplysningNavn: String, @get:JsonIgnore val test: Opplysning.() -> Tidslinje<VilkaarVurderingsResultat>) :
+class EnkelSjekkAvOpplysning(vilkaarsnavn: String, val opplysningNavn: String, @get:JsonIgnore val test: VilkaarOpplysning<out Any>.() -> Tidslinje<VilkaarVurderingsResultat>) :
     Vilkaar {
     override fun opplysningsbehov(): List<String> {
         return listOf(opplysningNavn)
     }
     override val navn = vilkaarsnavn
-    override fun vurder(opplysninger: List<Opplysning>) = opplysninger.find { it[OPPLYSNING_NAVN].textValue() == opplysningNavn }?.let {
+    override fun vurder(opplysninger: List<VilkaarOpplysning<out Any>>) = opplysninger.find { it.opplysingType == opplysningNavn }?.let {
         VurdertVilkaar(it.test(), listOf(it), navn) }?: VurdertVilkaar(Tidslinje(LocalDate.MIN to  VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING), emptyList(), navn)
 }
 
-class EnkelSammenligningAvOpplysninger(vilkaarsnavn: String, val opplysningNavn: List<String>, @get:JsonIgnore val test: List<Opplysning>.() -> Tidslinje<VilkaarVurderingsResultat>) :
+class EnkelSammenligningAvOpplysninger(vilkaarsnavn: String, val opplysningNavn: List<String>, @get:JsonIgnore val test: List<VilkaarOpplysning<out Any>>.() -> Tidslinje<VilkaarVurderingsResultat>) :
     Vilkaar {
     override fun opplysningsbehov(): List<String> {
         return opplysningNavn
     }
     override val navn = vilkaarsnavn
-    override fun vurder(opplysninger: List<Opplysning>) = opplysninger.filter { it[OPPLYSNING_NAVN].textValue() in opplysningNavn }?.let {
+    override fun vurder(opplysninger: List<VilkaarOpplysning<out Any>>) = opplysninger.filter { it.opplysingType in opplysningNavn }?.let {
         VurdertVilkaar(it.test(), it, navn) }?: VurdertVilkaar(Tidslinje(LocalDate.MIN to  VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING), emptyList(), navn)
 }
 
@@ -103,6 +101,7 @@ inline fun <reified T> enkelVurderingAvOpplysning(vilkarsNavn:String, opplysning
     val grunnlag = objectMapper.treeToValue<T>(this)!!
     grunnlag.test()
 }
+
 inline fun <reified T> enkelSammenligningAvOpplysninger(vilkarsNavn:String, opplysningsNavn: String, crossinline test: List<T>.() -> Tidslinje<VilkaarVurderingsResultat>): Vilkaar = EnkelSammenligningAvOpplysninger(vilkarsNavn, listOf(opplysningsNavn)){
     val grunnlag = map{objectMapper.treeToValue<T>(it)!!}
     grunnlag.test()

@@ -1,4 +1,4 @@
-# post-til-kafka
+# test-fordeling
 ___
 [Naisjob](https://doc.nais.io/naisjob/) for å poste en melding (søknad) til kafka. Benyttes ifm. integrasjonstesting av søknadsflyten.
 

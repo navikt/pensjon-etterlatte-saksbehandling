@@ -1,4 +1,4 @@
-name: post-til-kafka
+name: test-fordeling
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}

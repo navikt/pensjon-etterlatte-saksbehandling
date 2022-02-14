@@ -97,7 +97,8 @@ internal class EtterlatteFordeler(
                 val avdoedFnr = Foedselsnummer.of(finnAvdoedFnr(packet))
 
                 val barn = personService.hentPerson(barnFnr)
-                val utvidetBarn = personService.hentUtvidetPerson(barnFnr, historikk = false, adresse = true, utland = false, familieRelasjon = true)
+                //TODO kommentert ut enn så lenge for å få testet 'test-appen'
+                //val utvidetBarn = personService.hentUtvidetPerson(barnFnr, historikk = false, adresse = true, utland = false, familieRelasjon = true)
                 val avdoed = personService.hentPerson(avdoedFnr)
                 val gjenlevende = personService.hentPerson(gjenlevendeFnr)
                 barn.utland = personService.hentUtland(barn.foedselsnummer)

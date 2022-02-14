@@ -11,6 +11,6 @@ include(
     "apps:etterlatte-opplysninger-fra-pdl",
     "libs:ktorclient-auth-clientcredentials",
     "libs:common",
-    "libs:ktorclient-onbehalfof"
-
+    "libs:ktorclient-onbehalfof",
+    "jobs:test-fordeler"
 )

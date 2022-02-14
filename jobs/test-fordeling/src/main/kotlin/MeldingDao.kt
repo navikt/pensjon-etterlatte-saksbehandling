@@ -184,8 +184,8 @@ fun payload(fnr: String) = """
         },
         "utenlandsopphold": {
           "svar": {
-            "verdi": "JA",
-            "innhold": "Ja"
+            "verdi": "NEI",
+            "innhold": "nei"
           },
           "spoersmaal": "Bodde eller arbeidet han eller hun i et annet land enn Norge etter fylte 16 år?",
           "opplysning": [

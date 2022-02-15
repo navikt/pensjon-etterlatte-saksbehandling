@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.vilkaar.barnepensjon.brukerErUnder20
+import no.nav.etterlatte.vilkaar.barnepensjon.doedsfallErRegistrert
 
 
 class VilkaarService {
@@ -15,18 +16,20 @@ class VilkaarService {
         val soekerFoedselsdato =
             opplysninger.filter { it.opplysingType == Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value }
                 .map { setOpplysningType<Foedselsdato>(it) }
-        val avdoedDoedsfall = opplysninger.filter { it.opplysingType == Opplysningstyper.AVDOED_DOEDSFALL_V1.value }
+
+        val avdoedDoedsdato = opplysninger.filter { it.opplysingType == Opplysningstyper.AVDOED_DOEDSFALL_V1.value }
             .map { setOpplysningType<Doedsdato>(it) }
 
-        brukerErUnder20(soekerFoedselsdato)
+        val soekerRelasjonForeldre =
+            opplysninger.filter { it.opplysingType == Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1.value }
+                .map { setOpplysningType<Foreldre>(it) }
 
-
+        brukerErUnder20(soekerFoedselsdato, avdoedDoedsdato)
+        doedsfallErRegistrert(avdoedDoedsdato, soekerRelasjonForeldre)
 
     }
 
-
     companion object {
-
         inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<out Any>): VilkaarOpplysning<T> {
             return VilkaarOpplysning(
                 opplysning.opplysingType,
@@ -35,6 +38,4 @@ class VilkaarService {
             )
         }
     }
-
-
 }

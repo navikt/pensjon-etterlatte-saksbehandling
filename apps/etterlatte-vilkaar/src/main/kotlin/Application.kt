@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.*
@@ -26,26 +27,22 @@ fun Application.module() {
     install(ContentNegotiation) {
         jackson {
             registerModule(JavaTimeModule())
+            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         }
     }
     routing {
         get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
         get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
-        //get("/") { call.respond(brukerErUngNok) }
-        /*
-        post("/") {
-            call.respond(
-                objectMapper.valueToTree(
-                    call.receive<RequestDto>().let { vilkaarMap[it.vilkaar]?.vurder(it.opplysninger)?.serialize() })
-            )
-        }
-         */
+
         post("/") {
             val vilkaarService = VilkaarService()
-            call.receive<RequestDto>().let {
-                vilkaarService.mapVilkaar(it.opplysninger)
-            }
+            call.respond(
+                call.receive<RequestDto>().let {
+                    vilkaarService.mapVilkaar(it.opplysninger)
+                }
+            )
         }
+
     }
 }
 

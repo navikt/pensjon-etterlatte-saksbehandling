@@ -10,13 +10,7 @@ interface BehandlingService {
     fun hentBehandlinger(): List<Behandling>
     fun hentBehandlingerISak(sakid: Long): List<Behandling>
     fun startBehandling(sak: Long, nyeOpplysninger: List<Behandlingsopplysning<ObjectNode>>): Behandling
-    fun leggTilGrunnlagFraRegister(behandling: UUID, opplysninger: List<Behandlingsopplysning<ObjectNode>>): Behandling
-    fun leggTilGrunnlagFraSoknad(
-        behandling: UUID,
-        data: ObjectNode,
-        type: String,
-        kilde: Behandlingsopplysning.Kilde? = null
-    ): UUID
+    fun leggTilGrunnlagFraRegister(behandling: UUID, opplysninger: List<Behandlingsopplysning<ObjectNode>>)
 
     fun vilkårsprøv(behandling: UUID)
     fun beregn(behandling: UUID, beregning: Beregning)
@@ -43,10 +37,7 @@ class RealBehandlingService(
     override fun startBehandling(sak: Long, nyeOpplysninger: List<Behandlingsopplysning<ObjectNode>>): Behandling {
         return BehandlingAggregat.opprett(sak, behandlinger, opplysninger, vilkaarKlient)
             .also { behandling ->
-
-                nyeOpplysninger.forEach {
-                    behandling.leggTilGrunnlag(it.opplysning, it.opplysningType, it.kilde)
-                }
+                behandling.leggTilGrunnlagListe(nyeOpplysninger)
             }
             .serialiserbarUtgave()
     }
@@ -54,29 +45,8 @@ class RealBehandlingService(
     override fun leggTilGrunnlagFraRegister(
         behandlingsId: UUID,
         opplysninger: List<Behandlingsopplysning<ObjectNode>>
-    ): Behandling {
-       val behandling = hentBehandling(behandlingsId)
-        opplysninger.forEach {
-            BehandlingAggregat(behandling.id, behandlinger, this.opplysninger, vilkaarKlient).leggTilGrunnlag(
-                it.opplysning,
-                it.opplysningType,
-                it.kilde
-            )
-        }
-        return behandling
-    }
-
-    override fun leggTilGrunnlagFraSoknad(
-        behandling: UUID,
-        data: ObjectNode,
-        type: String,
-        kilde: Behandlingsopplysning.Kilde?
-    ): UUID {
-        return BehandlingAggregat(behandling, behandlinger, opplysninger, vilkaarKlient).leggTilGrunnlag(
-            data,
-            type,
-            kilde
-        )
+    ) {
+        BehandlingAggregat(behandlingsId, behandlinger, this.opplysninger, vilkaarKlient).leggTilGrunnlagListe(opplysninger)
     }
 
     override fun vilkårsprøv(behandling: UUID) {

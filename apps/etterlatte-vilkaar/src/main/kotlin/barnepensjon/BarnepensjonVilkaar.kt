@@ -1,67 +1,62 @@
 package no.nav.etterlatte.vilkaar.barnepensjon
 
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato as DoedsDatoModell
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foreldre
+import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.vilkaar.model.*
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 
-val BrukerErUnder18 = BrukersAlder.enkelVurdering("Bruker er under 18 år") {
-    Tidslinje(foedselsdato to VilkaarVurderingsResultat.OPPFYLT, foedselsdato.plusYears(18) to VilkaarVurderingsResultat.IKKE_OPPFYLT)
+
+fun brukerErUnder20(
+    foedselsdato: List<VilkaarOpplysning<Foedselsdato>>,
+    doedsdato: List<VilkaarOpplysning<Doedsdato>>,
+): VurdertVilkaar {
+    return VurdertVilkaar(
+        "brukerErUnder20",
+        vurderOpplysning { hentSoekerFoedselsdato(foedselsdato).plusYears(20) < hentVirkningsdato(doedsdato) },
+        listOf(foedselsdato, doedsdato).flatten()
+    )
 }
 
-val BrukerErUnder20 = BrukersAlder.enkelVurdering("Bruker er under 20 år",) {
-    Tidslinje(foedselsdato to VilkaarVurderingsResultat.OPPFYLT, foedselsdato.plusYears(20) to VilkaarVurderingsResultat.IKKE_OPPFYLT)
+fun doedsfallErRegistrert(
+    doedsdato: List<VilkaarOpplysning<Doedsdato>>,
+    foreldre: List<VilkaarOpplysning<Foreldre>>,
+): VurdertVilkaar {
+    return VurdertVilkaar("doedsdatoErRegistrert",
+        vurderOpplysning { hentFnrForeldre(foreldre).contains(hentDoedsdato(doedsdato).foedselsnummer)} ,
+        listOf(doedsdato, foreldre).flatten())
 }
 
-val BrukerErIUtdanning = Utdanningsgrunnlag.enkelVurdering("Bruker er i utdanning") {
-    val vurdering = if(status) VilkaarVurderingsResultat.OPPFYLT else VilkaarVurderingsResultat.IKKE_OPPFYLT
-    Tidslinje(LocalDate.MIN to vurdering)
-}
-val BrukerErForeldreloes = ForeldreloesGrunnlag.enkelVurdering("Bruker er foreldreløs") {
-    val vurdering = status
-        .takeIf { it }?.let { VilkaarVurderingsResultat.OPPFYLT }
-        ?: VilkaarVurderingsResultat.IKKE_OPPFYLT
-
-    Tidslinje(LocalDate.MIN to vurdering)
+fun vurderOpplysning(vurdering: () -> Boolean) = try {
+    if (vurdering()) VilkaarVurderingsResultat.OPPFYLT else VilkaarVurderingsResultat.IKKE_OPPFYLT
+} catch (ex: KanIkkeVurderePgaManglendeOpplysning) {
+    VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
 }
 
-val brukerErUnder20aarIUtdanningOgForeldreloes = BrukerErUnder20 og BrukerErIUtdanning og BrukerErForeldreloes
-
-val brukerErUngNok = BrukerErUnder18 eller brukerErUnder20aarIUtdanningOgForeldreloes
-
-val sammenligningAvOpplysninger = Doedsdato.enkelSammenligning("sammenlign dødsdato"){
-    Tidslinje(LocalDate.MIN to (groupBy{it.doedsdato}.size.takeIf { it < 2 }?.let { VilkaarVurderingsResultat.OPPFYLT } ?: VilkaarVurderingsResultat.IKKE_OPPFYLT))
+fun hentFnrForeldre(foreldre: List<VilkaarOpplysning<Foreldre>>): List<String> {
+    return foreldre.find { it.kilde.type == "pdl" }?.opplysning?.foreldre?.map { it.foedselsnummer.value }
+        ?: throw KanIkkeVurderePgaManglendeOpplysning()
 }
 
-
-inline fun <reified T>OpplysningType<T>.enkelVurdering(vilkarsNavn:String, crossinline test: T.() -> Tidslinje<VilkaarVurderingsResultat>) = enkelVurderingAvOpplysning(vilkarsNavn, opplysningsNavn, test)
-inline fun <reified T>OpplysningType<T>.enkelSammenligning(vilkarsNavn:String, crossinline test: List<T>.() -> Tidslinje<VilkaarVurderingsResultat>) = enkelSammenligningAvOpplysninger(vilkarsNavn, opplysningsNavn, test)
-
-data class Utdanningsgrunnlag(val status: Boolean){
-    companion object: OpplysningType<Utdanningsgrunnlag> {
-        override val opplysningsNavn: String
-            get() = "utdanningsstatus"
-    }
+fun hentSoekerFoedselsdato(foedselsdato: List<VilkaarOpplysning<Foedselsdato>>): LocalDate {
+    return foedselsdato.find { it.kilde.type == "pdl" }?.opplysning?.foedselsdato
+        ?: throw KanIkkeVurderePgaManglendeOpplysning()
 }
 
-data class ForeldreloesGrunnlag(val status: Boolean){
-    companion object: OpplysningType<ForeldreloesGrunnlag> {
-        override val opplysningsNavn: String
-            get() = "foreldreloesstatus"
-    }
+fun hentDoedsdato(doedsdato: List<VilkaarOpplysning<Doedsdato>>): Doedsdato {
+    return doedsdato.find { it.kilde.type == "pdl" }?.opplysning
+        ?: throw KanIkkeVurderePgaManglendeOpplysning()
 }
 
-data class BrukersAlder(
-    val foedselsdato: LocalDate
-    ){
-    companion object:OpplysningType<BrukersAlder>{
-        override val opplysningsNavn: String
-            get() = "brukers_alder"
-
-    }
+fun hentVirkningsdato(doedsdato: List<VilkaarOpplysning<Doedsdato>>): LocalDate {
+    val doedsdato = doedsdato.find { it.kilde.type == "pdl" }?.opplysning?.doedsdato
+    return doedsdato?.with(TemporalAdjusters.firstDayOfNextMonth()) ?: throw KanIkkeVurderePgaManglendeOpplysning()
 }
 
-object Doedsdato:OpplysningType<DoedsDatoModell>{
-    override val opplysningsNavn: String
-        get() = "doedsfall:v1"
+class KanIkkeVurderePgaManglendeOpplysning : IllegalStateException()
 
-}
+
+
+

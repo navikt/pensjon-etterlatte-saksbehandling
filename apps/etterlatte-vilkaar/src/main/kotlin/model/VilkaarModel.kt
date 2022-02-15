@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.treeToValue
@@ -37,7 +36,7 @@ class AlleVilkaarOppfylt(val vilkaar: List<Vilkaar>) : Vilkaar {
 
     override val navn: String
         get() = vilkaar.joinToString(separator = " og ") { it.navn }
-    override fun vurder(opplysninger: List<Opplysning>): VurdertVilkaar {
+    override fun vurder(opplysninger: List<VilkaarOpplysning<out Any>>): VurdertVilkaar {
         return vilkaar
             .map { it.vurder(opplysninger)}
             .let {

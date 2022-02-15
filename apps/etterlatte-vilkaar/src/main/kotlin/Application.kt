@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.*
@@ -13,8 +12,7 @@ import io.ktor.routing.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import no.nav.etterlatte.vilkaar.barnepensjon.brukerErUngNok
-
+import no.nav.etterlatte.model.VilkaarService
 
 
 fun main() {
@@ -43,7 +41,7 @@ fun Application.module() {
         }
          */
         post("/") {
-
+            val vilkaarService = VilkaarService()
             call.receive<RequestDto>().let {
                 vilkaarService.mapVilkaar(it.opplysninger)
             }

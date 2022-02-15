@@ -83,6 +83,6 @@ data class EyFamilieRelasjon(
     val barn: List<EyBarn>?
 )
 
-data class EyForeldreAnsvar(val ident: Foedselsnummer)
-data class EyForeldre(val ident: Foedselsnummer)
-data class EyBarn (val ident: Foedselsnummer)
+data class EyForeldreAnsvar(val foedselsnummer: Foedselsnummer)
+data class EyForeldre(val foedselsnummer: Foedselsnummer)
+data class EyBarn (val foedselsnummer: Foedselsnummer)

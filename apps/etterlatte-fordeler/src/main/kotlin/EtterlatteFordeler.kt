@@ -23,7 +23,6 @@ internal class EtterlatteFordeler(
     private val klokke: Clock = Clock.systemUTC()
 ) : River.PacketListener {
 
-    //TODO flytte disse ned til onPacket for å sikre trådhåntering
     private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
 
     /*
@@ -40,7 +39,7 @@ internal class EtterlatteFordeler(
     Avdød er biologisk forelder til søker
      */
 
-
+    //TODO refaktorere kriteriesjekk ut i en Service
     fun kriterier(barn: Person, avdoed: Person, gjenlevende: Person, soeknad: JsonMessage) = listOf(
         Kriterie("Barn er ikke norsk statsborger") { sjekkStatsborgerskap(barn) },
         Kriterie("Barn er for gammelt") { forGammel(barn, 15) },
@@ -204,7 +203,7 @@ internal class EtterlatteFordeler(
             .isNotEmpty()
     }
     private fun gjenlevendeHarIkkeForeldreansvar(barn: Person, gjenlevende: Person): Boolean {
-        return barn.familieRelasjon?.ansvarligeForeldre?.filter { it.ident == gjenlevende.foedselsnummer }.isNullOrEmpty()
+        return barn.familieRelasjon?.ansvarligeForeldre?.filter { it.foedselsnummer == gjenlevende.foedselsnummer }?.isNotEmpty() == true
     }
     private fun soekerErIkkeAlenebarn(avdoed: Person,gjenlevende: Person, barn: Person): Boolean {
         val barnFnr = barn.foedselsnummer

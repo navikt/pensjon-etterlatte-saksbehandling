@@ -1,14 +1,14 @@
 {
   "ansvarligeForeldre": [
-    {"ident": "04096222195"},
-    {"ident": "11057523044"}
+    {"foedselsnummer": "04096222195"},
+    {"foedselsnummer": "19040550081"}
   ],
   "foreldre": [
-    {"ident": "04096222195"},
-    {"ident": "19040550081"}
+    {"foedselsnummer": "04096222195"},
+    {"foedselsnummer": "19040550081"}
   ],
   "barn": [
-    {"ident": "11057523044"},
-    {"ident": "31017123133"}
+    {"foedselsnummer": "11057523044"},
+    {"foedselsnummer": "31017123133"}
   ]
 }

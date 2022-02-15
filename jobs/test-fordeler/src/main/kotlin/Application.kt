@@ -23,8 +23,7 @@ val objectMapper: ObjectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-//Dette er fnr for "Aremark Testperson" som er en syntetisk bruker som finnes i produksjon
-val aremark_person = "10108000398"
+val aremark_person = "12101376212"
 val logger:Logger = LoggerFactory.getLogger("BEY001")
 
 fun main() {

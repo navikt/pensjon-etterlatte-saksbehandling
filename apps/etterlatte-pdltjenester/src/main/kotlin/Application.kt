@@ -19,6 +19,7 @@ import no.nav.etterlatte.person.PersonKlient
 import no.nav.etterlatte.person.PersonService
 import no.nav.etterlatte.security.ktor.clientCredential
 
+
 class ApplicationContext(configLocation: String? = null) {
     private val closables = mutableListOf<() -> Unit>()
 

@@ -1,0 +1,21 @@
+{
+  "id": "353711d2-6858-4c55-83fa-3919e7c439a4",
+  "sak": 3,
+  "grunnlag": [
+    {
+      "id": "UUUID",
+      "kilde": "pdl",
+      "opplysningsType": "avdoed_doedsfall:v1",
+      "meta": "",
+      "opplysning":
+        {
+          "doedsdato": "2019-01-21",
+          "foedselsnummer": "29081276127"
+        },
+      "attestering": null
+    }
+  ],
+  "vilkårsprøving": null,
+  "beregning": null,
+  "fastsatt": false
+}

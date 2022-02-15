@@ -1,15 +1,22 @@
-import { IAction } from "../AppContext"
-
+import { IAction } from '../AppContext'
 
 export interface IDetaljertBehandling {
-  id: number;
-  sak: number;
-  grunnlag: [],
-  vilkaarsproving: any;
-  beregning: any;
-  fastsatt: boolean;
+  id: number
+  sak: number
+  grunnlag: IBehandlingsopplysning[]
+  vilkaarsproving: any
+  beregning: any
+  fastsatt: boolean
 }
 
+export interface IBehandlingsopplysning {
+  id: string
+  kilde: string
+  opplysningsType: string
+  meta: any
+  opplysning: any
+  attestering: any
+}
 
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: 0,
@@ -17,19 +24,17 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   grunnlag: [],
   vilkaarsproving: undefined,
   beregning: undefined,
-  fastsatt: false
+  fastsatt: false,
 }
 
-
 export const behandlingReducer = (state = detaljertBehandlingInitialState, action: IAction): any => {
-
-  switch(action.type) {
-    case "add_behandling": 
+  switch (action.type) {
+    case 'add_behandling':
       return {
         ...state,
-        ...action.data
+        ...action.data,
       }
-      default: state
+    default:
+      state
   }
-
 }

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.person
 
 import io.ktor.application.call
+import io.ktor.features.BadRequestException
 import io.ktor.request.*
 import io.ktor.response.respond
 import io.ktor.response.respondText
@@ -48,6 +49,23 @@ fun Route.personApi(service: PersonService) {
                     service.hentFamilieRelasjon(EyHentFamilieRelasjonRequest(person.foedselsnummer))
             }
             call.respond(person)
+        }
+        get("utvidetperson") {
+            val queryParams = call.request.queryParameters
+            val headers = call.request.headers
+
+            val variables = EyHentUtvidetPersonRequest(
+                foedselsnummer = headers["foedselsnummer"]
+                    ?: throw BadRequestException("foedselsnummer is a required header"),
+                historikk = queryParams["historikk"]?.toBoolean() ?: false,
+                adresse = queryParams["adresse"]?.toBoolean() ?: false,
+                utland = queryParams["utland"]?.toBoolean() ?: false,
+                familieRelasjon = queryParams["familieRelasjon"]?.toBoolean() ?: false
+            )
+
+            logger.info("Henter person med fnr=${variables.foedselsnummer}")
+            service.hentUtvidetPerson(variables)
+                .let { call.respond(it) }
         }
         post("hentutland") {
             val fnr = Foedselsnummer.of(call.receive<String>().toString())

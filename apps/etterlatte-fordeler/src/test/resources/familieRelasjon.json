@@ -1,14 +1,13 @@
 {
   "ansvarligeForeldre": [
-    {"foedselsnummer": "04096222195"},
+    {"foedselsnummer": "11057523044"},
     {"foedselsnummer": "19040550081"}
   ],
   "foreldre": [
-    {"foedselsnummer": "04096222195"},
+    {"foedselsnummer": "11057523044"},
     {"foedselsnummer": "19040550081"}
   ],
   "barn": [
-    {"foedselsnummer": "11057523044"},
     {"foedselsnummer": "31017123133"}
   ]
 }

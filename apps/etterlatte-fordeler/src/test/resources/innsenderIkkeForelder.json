@@ -5,15 +5,15 @@
     "spraak": "nb",
     "innsender": {
       "fornavn": {
-        "svar": "STOR",
+        "svar": "OLA",
         "spoersmaal": "Fornavn"
       },
       "etternavn": {
-        "svar": "SNERK",
+        "svar": "NORDMANN",
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "11057523044",
+        "svar": "09018701453",
         "spoersmaal": "Fødselsnummer"
       },
       "type": "INNSENDER"

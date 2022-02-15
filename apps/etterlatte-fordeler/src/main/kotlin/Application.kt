@@ -9,7 +9,7 @@ fun main() {
     }.also { env ->
         AppBuilder(env).also {
             RapidApplication.create(env)
-                .also { EtterlatteFordeler(it, AppBuilder(env).createPersonService()) }
+                .also { EtterlatteFordeler(it, AppBuilder(env).createPersonService(), FordelerKriterierService()) }
                 .start()
         }
     }

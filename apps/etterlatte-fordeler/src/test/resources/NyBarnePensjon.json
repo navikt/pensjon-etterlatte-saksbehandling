@@ -181,8 +181,8 @@
         },
         "utenlandsopphold": {
           "svar": {
-            "verdi": "JA",
-            "innhold": "Ja"
+            "verdi": "NEI",
+            "innhold": "Nei"
           },
           "spoersmaal": "Bodde eller arbeidet han eller hun i et annet land enn Norge etter fylte 16 år?",
           "opplysning": [
@@ -236,8 +236,8 @@
         },
         "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": {
           "svar": {
-            "verdi": "JA",
-            "innhold": "Ja"
+            "verdi": "NEI",
+            "innhold": "Nei"
           },
           "spoersmaal": "Skyldes dødsfallet yrkesskade eller yrkessykdom?"
         },

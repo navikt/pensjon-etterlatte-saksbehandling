@@ -4,8 +4,8 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.EtterlatteFordeler
+import no.nav.etterlatte.FordelerKriterierService
 import no.nav.etterlatte.common.mapJsonToAny
-import no.nav.etterlatte.libs.common.pdl.Gradering
 import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PersonService
@@ -61,7 +61,7 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentUtvidetPerson(any(),any(),any(),any(),any()) } returns barn
 
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service) }
+            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
             .apply { sendTestMessage(nyhendelseJson) }
             .inspektør
         //assertEquals(Gradering.STRENGT_FORTROLIG_UTLAND.name, inspector.message(0).get("@adressebeskyttelse").asText())
@@ -72,7 +72,7 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentPerson(any()) } returns barn
         coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service) }
+            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
             .apply { sendTestMessage(hendelseIkkeBarnePensjonJson) }
             .inspektør
 
@@ -85,7 +85,7 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentPerson(any()) } returns barnGammel
         coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service) }
+            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
             .apply { sendTestMessage(hendelseJson) }
             .inspektør
 
@@ -97,7 +97,7 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentPerson(any()) } returns barn
         coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service) }
+            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
             .apply { sendTestMessage(hendelseIkkeGyldig) }
             .inspektør
 
@@ -109,7 +109,7 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentPerson(any()) } returns barn
         coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service) }
+            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
             .apply { sendTestMessage(ugyldigFnr) }
             .inspektør
 
@@ -121,7 +121,7 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentPerson(any()) } returns barn
         coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service) }
+            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
             .apply { sendTestMessage(yrkesskade) }
             .inspektør
 
@@ -133,7 +133,7 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentPerson(any()) } returns barn
         coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service) }
+            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
             .apply { sendTestMessage(InnsenderIkkeGjenlevende) }
             .inspektør
 
@@ -145,7 +145,7 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentPerson(any()) } returns barn
         coEvery { klientMock.hentUtland(any()) } returns utland
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service) }
+            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
             .apply { sendTestMessage(hendelseJson) }
             .inspektør
 
@@ -164,7 +164,7 @@ internal class EtterlatteFordelerTest {
 
 
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service) }
+            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
             .apply { sendTestMessage(nyhendelseJson) }
             .inspektør
 
@@ -178,7 +178,7 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
 
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service) }
+            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
             .apply { sendTestMessage(hendelseJson) }
             .inspektør
 
@@ -198,19 +198,19 @@ internal class EtterlatteFordelerTest {
 
 
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service) }
+            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
             .apply { sendTestMessage(nyhendelseJson) }
             .inspektør
         assertEquals("ey_fordelt", inspector.message(0).get("@event_name").asText())
-
     }
+
     @Test
     fun harVerge() {
         coEvery { klientMock.hentPerson(any()) } returns barn
         coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
         coEvery { klientMock.hentPerson(Foedselsnummer.of("13087307551"))} returns avdoed
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service) }
+            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
             .apply { sendTestMessage(verge) }
             .inspektør
         assertTrue(inspector.size == 0)
@@ -222,7 +222,7 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
         coEvery { klientMock.hentPerson(Foedselsnummer.of("13087307551"))} returns avdoed
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service) }
+            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
             .apply { sendTestMessage(huketAvForUtlandJson) }
             .inspektør
         assertTrue(inspector.size == 0)
@@ -237,12 +237,14 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentFamilieRelasjon(any()) } returns familieRelasjonIkkeAnsvarlig
 
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service) }
+            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
             .apply { sendTestMessage(nyhendelseJson) }
             .inspektør
         assertTrue(inspector.size == 0)
 
     }
+
+
 
 
 }

@@ -13,6 +13,18 @@
           "foedselsnummer": "29081276127"
         },
       "attestering": null
+    },
+    {
+      "id": "UUUID",
+      "kilde": "pdl",
+      "opplysningsType": "soeker_foedselsdato:v1",
+      "meta": "",
+      "opplysning":
+        {
+          "foedselsdato": "1944-04-10",
+          "foedselsnummer": "29081276127"
+        },
+      "attestering": null
     }
   ],
   "vilkårsprøving": null,

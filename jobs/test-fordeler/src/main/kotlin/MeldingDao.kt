@@ -14,7 +14,7 @@ fun payload(fnr: String) = """
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "24107321582",
+        "svar": "03108718357",
         "spoersmaal": "Fødselsnummer"
       },
       "type": "INNSENDER"
@@ -53,7 +53,7 @@ fun payload(fnr: String) = """
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "07081177656",
+        "svar": "12101376212",
         "spoersmaal": "Barnets fødselsnummer / d-nummer"
       },
       "statsborgerskap": {
@@ -79,7 +79,7 @@ fun payload(fnr: String) = """
             "spoersmaal": "Etternavn"
           },
           "foedselsnummer": {
-            "svar": "24107321582",
+            "svar": "12101376212",
             "spoersmaal": "Fødselsnummer"
           },
           "type": "FORELDER"
@@ -94,7 +94,7 @@ fun payload(fnr: String) = """
             "spoersmaal": "Etternavn"
           },
           "foedselsnummer": {
-            "svar": "09116224442",
+            "svar": "22128202440",
             "spoersmaal": "Fødselsnummer"
           },
           "type": "FORELDER"
@@ -122,7 +122,7 @@ fun payload(fnr: String) = """
           "spoersmaal": "Etternavn"
         },
         "foedselsnummer": {
-          "svar": "24107321582",
+          "svar": "03108718357",
           "spoersmaal": "Fødselsnummer"
         },
         "adresse": {
@@ -153,7 +153,7 @@ fun payload(fnr: String) = """
           "spoersmaal": "Etternavn"
         },
         "foedselsnummer": {
-          "svar": "09116224442",
+          "svar": "22128202440",
           "spoersmaal": "Fødselsnummer / d-nummer"
         },
         "datoForDoedsfallet": {

@@ -23,7 +23,7 @@ val objectMapper: ObjectMapper = jacksonObjectMapper()
     .registerModule(JavaTimeModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-val aremark_person = "03108718357"
+val aremark_person = "12101376212"
 val logger:Logger = LoggerFactory.getLogger("BEY001")
 
 fun main() {

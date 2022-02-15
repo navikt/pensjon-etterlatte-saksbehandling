@@ -15,11 +15,11 @@ data class FamilieRelasjonResponseData(
 )
 
 data class HentFamilieRelasjon(
-    val foreldreansvar: List<ForelderAnsvar>,
+    val foreldreansvar: List<ForeldreAnsvar>,
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>
 )
 
-data class ForelderAnsvar(
+data class ForeldreAnsvar(
     val ansvar: String? = null,
     val ansvarlig: String? = null,
     val ansvarligUtenIdentifikator: RelatertBiPerson? = null,

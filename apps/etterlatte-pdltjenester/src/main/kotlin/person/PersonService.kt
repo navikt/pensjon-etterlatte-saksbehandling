@@ -58,17 +58,18 @@ class PersonService(
 
         return opprettPerson(fnr, hentPerson)
     }
+
     suspend fun hentUtvidetPerson(variables: EyHentUtvidetPersonRequest): Person {
         logger.info("Henter person fra PDL")
 
         val response = klient.hentUtvidetPerson(
             Variables(
-            ident = variables.foedselsnummer,
-            historikk = variables.historikk,
-            adresse = variables.adresse,
-            utland = variables.utland,
-            familieRelasjon = variables.familieRelasjon
-        )
+                ident = variables.foedselsnummer,
+                historikk = variables.historikk,
+                adresse = variables.adresse,
+                utland = variables.utland,
+                familieRelasjon = variables.familieRelasjon
+            )
         )
 
         val hentPerson = response.data?.hentPerson
@@ -134,21 +135,27 @@ class PersonService(
 
     private fun opprettFamilieRelasjon(familieRelasjon: FamilieRelasjonResponse): EyFamilieRelasjon {
 
+
+        //TODO tar kun med foreldreAnsvar med fnr nå
         return EyFamilieRelasjon(
-            ansvarligeForeldre = familieRelasjon.data?.hentPerson?.foreldreansvar?.map {
+            ansvarligeForeldre = familieRelasjon.data?.hentPerson?.foreldreansvar?.filter { it.ansvarlig != null }?.map {
+
                 EyForeldreAnsvar(
                     Foedselsnummer.of(
                         it.ansvarlig
                     )
                 )
+
             },
-            foreldre = familieRelasjon.data?.hentPerson?.forelderBarnRelasjon?.filter { it.minRolleForPerson != ForelderBarnRelasjonRolle.BARN }
+            foreldre =
+            familieRelasjon.data?.hentPerson?.forelderBarnRelasjon?.filter { it.minRolleForPerson != ForelderBarnRelasjonRolle.BARN }
                 ?.map {
                     EyForeldre(
                         Foedselsnummer.of(it.relatertPersonsIdent)
                     )
                 },
-            barn = familieRelasjon.data?.hentPerson?.forelderBarnRelasjon?.filter { it.minRolleForPerson == ForelderBarnRelasjonRolle.BARN }
+            barn =
+            familieRelasjon.data?.hentPerson?.forelderBarnRelasjon?.filter { it.minRolleForPerson == ForelderBarnRelasjonRolle.BARN }
                 ?.map {
                     EyBarn(
                         Foedselsnummer.of(it.relatertPersonsIdent)

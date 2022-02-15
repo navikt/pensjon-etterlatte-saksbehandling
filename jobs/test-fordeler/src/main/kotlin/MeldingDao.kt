@@ -1,9 +1,7 @@
 package no.nav.etterlatte.batch
 
 fun payload(fnr: String) = """
-{
-  "@event_name": "soeknad_innsendt",
-  "@skjema_info": {
+ {
     "imageTag": "9f1f95b2472742227b37d19dd2d735ac9001995e",
     "spraak": "nb",
     "innsender": {
@@ -209,40 +207,5 @@ fun payload(fnr: String) = """
     "type": "BARNEPENSJON",
     "mottattDato": "2022-02-14T14:37:24.573612786",
     "template": "barnepensjon_v2"
-  },
-  "@lagret_soeknad_id": 900,
-  "@template": "soeknad",
-  "@fnr_soeker": "07081177656",
-  "@hendelse_gyldig_til": "2023-02-14T14:09:20.684508951Z",
-  "system_read_count": 2,
-  "system_participating_services": [
-    {
-      "service": "innsendt-soeknad",
-      "instance": "innsendt-soeknad-57b4b88446-bh5b5",
-      "time": "2022-02-14T14:39:20.684818363"
-    },
-    {
-      "service": "sjekk-adressebeskyttelse",
-      "instance": "sjekk-adressebeskyttelse-6cf4bd7b5d-8sqdh",
-      "time": "2022-02-14T14:39:20.690640305"
-    },
-    {
-      "service": "journalfoer-soeknad",
-      "instance": "journalfoer-soeknad-76c4c68cfb-k57r8",
-      "time": "2022-02-14T14:39:21.044308399"
-    }
-  ],
-  "@adressebeskyttelse": "UGRADERT",
-  "@dokarkivRetur": {
-    "journalpostId": "524975071",
-    "journalpoststatus": null,
-    "melding": null,
-    "journalpostferdigstilt": false,
-    "dokumenter": [
-      {
-        "dokumentInfoId": "549167948"
-      }
-    ]
   }
-}
 """.trimIndent()

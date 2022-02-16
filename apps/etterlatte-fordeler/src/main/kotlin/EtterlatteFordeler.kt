@@ -47,34 +47,21 @@ internal class EtterlatteFordeler(
             logger.error("Avbrutt fordeling da hendelsen ikke er gyldig lengre")
             return
         }
-        if(packet["@skjema_info"]["type"] == null){
-            logger.info("Feil under lesing av søknaden: Type ikke funnet")
-            return
-        }
-        if (packet["@skjema_info"]["type"].asText() != SoeknadType.Barnepensjon.name.uppercase()) {
+
+        if (packet["@skjema_info"]["type"] == null || packet["@skjema_info"]["type"].asText() != SoeknadType.Barnepensjon.name.uppercase()) {
             logger.info("Avbrutt fordeling da søknad ikke er " + SoeknadType.Barnepensjon.name)
             return
         }
 
         runBlocking {
-
             try {
                 val barnFnr = Foedselsnummer.of(packet["@fnr_soeker"].asText())
                 val gjenlevendeFnr = Foedselsnummer.of(finnGjennlevendeFnr(packet))
                 val avdoedFnr = Foedselsnummer.of(finnAvdoedFnr(packet))
 
-                val barn = personService.hentPerson(barnFnr)
-                //TODO kommentert ut enn så lenge for å få testet 'test-appen'
-                //val utvidetBarn = personService.hentUtvidetPerson(barnFnr, historikk = false, adresse = true, utland = false, familieRelasjon = true)
-                val avdoed = personService.hentPerson(avdoedFnr)
-                val gjenlevende = personService.hentPerson(gjenlevendeFnr)
-                barn.utland = personService.hentUtland(barn.foedselsnummer)
-                avdoed.utland = personService.hentUtland(avdoed.foedselsnummer)
-                barn.adresse = personService.hentAdresse(barn.foedselsnummer, false)
-                avdoed.adresse = personService.hentAdresse(avdoed.foedselsnummer, false)
-                gjenlevende.adresse = personService.hentAdresse(gjenlevende.foedselsnummer, false)
-                barn.familieRelasjon = personService.hentFamilieForhold(barn.foedselsnummer)
-                gjenlevende.familieRelasjon = personService.hentFamilieForhold(gjenlevende.foedselsnummer)
+                val barn = personService.hentUtvidetPerson(barnFnr, adresse = true, familieRelasjon = true)
+                val avdoed = personService.hentUtvidetPerson(avdoedFnr, utland = true, adresse = true)
+                val gjenlevende = personService.hentUtvidetPerson(gjenlevendeFnr, adresse = true, familieRelasjon = true)
 
                 val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(
                     barn = barn,
@@ -92,22 +79,15 @@ internal class EtterlatteFordeler(
                     logger.info("Avbrutt fordeling, kriterier: " + fordelerResultat.forklaring.toString())
                     return@runBlocking
                 }
-            } catch (err: ResponseException) {
-                logger.error("duplikat: ", err)
-                logger.error(packet["@soeknad_fordelt"].asText())
+
             } catch (err: InvalidFoedselsnummer) {
-
-                packet["@event_name"] = "ugyldigFnr"
-                logger.info(err.message)
-                context.publish(packet.toJson())
-
+                logger.error("Ugyldig fødselsnummer: ${err.message}", err)
             } catch (err: Exception) {
-                logger.error("Uhaandtert feilsituasjon: ", err)
+                logger.error("Uhaandtert feilsituasjon: ${err.message}", err)
             }
         }
     }
 
-    //TODO bør vel endres til PDL familierelasjon
     private fun finnAvdoedFnr(sok: JsonMessage): String {
         return sok["@skjema_info"]["foreldre"]
             .filter { it["type"].asText() == "AVDOED" }

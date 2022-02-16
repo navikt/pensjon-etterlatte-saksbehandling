@@ -253,50 +253,6 @@ class FordelerKriterieServiceTest {
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.GJENLEVENDE_HAR_IKKE_FORELDREANSVAR))
     }
 
-    private fun mockPerson(
-        rolle: Rolle,
-        fnr: String = "11057523044",
-        foedselsaar: Int = 2010,
-        foedselsdato: String? = "2010-04-19",
-        doedsdato: String? = null,
-        adressebeskyttelse: Boolean = false,
-        statsborgerskap: String = "NOR",
-        foedeland: String = "NOR",
-        sivilstatus: String = "ugift",
-        utland: eyUtland? = null,
-        adresse: eyAdresse? = null,
-        familieRelasjon: EyFamilieRelasjon? = null,
-    ) = Person(
-        fornavn = "Ola",
-        etternavn = "Nordmann",
-        foedselsnummer = Foedselsnummer.of(fnr),
-        foedselsaar = foedselsaar,
-        foedselsdato = foedselsdato,
-        doedsdato = doedsdato,
-        adressebeskyttelse = adressebeskyttelse,
-        adresse = adresse,
-        statsborgerskap = statsborgerskap,
-        foedeland = foedeland,
-        sivilstatus = sivilstatus,
-        utland = utland,
-        familieRelasjon = familieRelasjon,
-        rolle = rolle
-    )
-
-    private fun mockNorskAdresse() = eyAdresse(
-        bostedsadresse = EyBostedsadresse(
-            vegadresse = EyVegadresse("Testveien", "4", null, "1234")
-        ),
-        kontaktadresse = null,
-        oppholdsadresse = null,
-    )
-
-    private fun mockUgyldigNorskAdresse() = eyAdresse(
-        bostedsadresse = null,
-        kontaktadresse = null,
-        oppholdsadresse = null,
-    )
-
     companion object {
         val BARNEPENSJON_SOKNAD = readSoknad("/NyBarnePensjon.json")
         val BARNEPENSJON_SOKNAD_YRKESSKADE = readSoknad("/yrkesskade.json")

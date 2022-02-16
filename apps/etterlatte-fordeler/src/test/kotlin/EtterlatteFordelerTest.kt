@@ -19,152 +19,51 @@ import org.slf4j.LoggerFactory
 internal class EtterlatteFordelerTest {
 
     private val klientMock = mockk<PdlKlient>()
-    private val service = PersonService(klientMock)
-    private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
+    private val personService = PersonService(klientMock)
 
-    //TODO flytte ned til relevant test?
-    private val hendelseJson = javaClass.getResource("/barnePensjon.json")!!.readText()
     private val nyhendelseJson = javaClass.getResource("/NyBarnePensjon.json")!!.readText()
     private val hendelseIkkeBarnePensjonJson = javaClass.getResource("/ikkeBarnepensjon.json")!!.readText()
     private val hendelseIkkeGyldig = javaClass.getResource("/hendelseUgyldig.json")!!.readText()
-    private val ugyldigFnr = javaClass.getResource("/ugyldigFnr.json")!!.readText()
-    private val yrkesskade = javaClass.getResource("/yrkesskade.json")!!.readText()
-    private val InnsenderIkkeGjenlevende = javaClass.getResource("/gjenlevende.json")!!.readText()
-    private val barnGammel = mapJsonToAny<Person>(javaClass.getResource("/personGammel.json")!!.readText(), false)
-    private val barn = mapJsonToAny<Person>(javaClass.getResource("/person.json")!!.readText(), false)
-    private val avdoed = mapJsonToAny<Person>(javaClass.getResource("/persondoed.json")!!.readText(), false)
-    private val utland = mapJsonToAny<eyUtland>(javaClass.getResource("/utland.json")!!.readText(), false)
-    private val ikkeUtland = mapJsonToAny<eyUtland>(javaClass.getResource("/ikkeUtland.json")!!.readText(), false)
-    private val verge = javaClass.getResource("/verge.json")!!.readText()
-    private val huketAvForUtlandJson = javaClass.getResource("/huketAvForUtland.json")!!.readText()
-    private val gyldigadresse = mapJsonToAny<eyAdresse>(javaClass.getResource("/gyldigAdresseResponse.json")!!.readText(), false)
-    private val familieRelasjon = mapJsonToAny<EyFamilieRelasjon>(javaClass.getResource("/familieRelasjon.json")!!.readText(), false)
-    private val familieRelasjonIkkeAnsvarlig = mapJsonToAny<EyFamilieRelasjon>(javaClass.getResource("/familieRelasjonIkkeAnsvarlig.json")!!.readText(), false)
-
 
     @AfterEach
     fun afterEach() {
         clearAllMocks()
     }
 
-    //TODO flere tester
-    //TODO skrive tester for Adresse
-
     @Test
-    fun testFeltMapping() {
-        coEvery { klientMock.hentPerson(any()) } returns barn
-        coEvery { klientMock.hentPerson(Foedselsnummer.of("24014021406")) } returns avdoed
-        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
-        coEvery { klientMock.hentAdresse(any(), false) } returns gyldigadresse
-        coEvery { klientMock.hentFamilieRelasjon(any()) } returns familieRelasjon
-        //TODO endre denne til å mocke spesifikke personer
-        coEvery { klientMock.hentUtvidetPerson(any(),any(),any(),any(),any()) } returns barn
+    fun `gyldig soknad til vedtakslosning`() {
+        val barnFnr = Foedselsnummer.of("07010776133")
+        val avdoedFnr = Foedselsnummer.of("24014021406")
+        val etterlattFnr = Foedselsnummer.of("11057523044")
+
+        coEvery { klientMock.hentUtvidetPerson(barnFnr, any(), any(), any(), any()) } returns mockPerson(
+            rolle = Rolle.BARN,
+            adresse = mockNorskAdresse(),
+            familieRelasjon = EyFamilieRelasjon(
+                ansvarligeForeldre = listOf(EyForeldreAnsvar(etterlattFnr)),
+                foreldre = null,
+                barn = null,
+            )
+        )
+
+        coEvery { klientMock.hentUtvidetPerson(avdoedFnr, any(), any(), any(), any()) } returns mockPerson(
+            rolle = Rolle.AVDOED,
+            doedsdato = "2022-01-01",
+            adresse = mockNorskAdresse()
+        )
+
+        coEvery { klientMock.hentUtvidetPerson(etterlattFnr, any(), any(), any(), any()) } returns mockPerson(
+            rolle = Rolle.ETTERLATT,
+            adresse = mockNorskAdresse(),
+            familieRelasjon = EyFamilieRelasjon(
+                ansvarligeForeldre = listOf(EyForeldreAnsvar(Foedselsnummer.of("11057523044"))),
+                foreldre = null,
+                barn = listOf(EyBarn(Foedselsnummer.of("07010776133"))),
+            )
+        )
 
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
-            .apply { sendTestMessage(nyhendelseJson) }
-            .inspektør
-        //assertEquals(Gradering.STRENGT_FORTROLIG_UTLAND.name, inspector.message(0).get("@adressebeskyttelse").asText())
-        assertEquals("ey_fordelt", inspector.message(0).get("@event_name").asText())
-    }
-    @Test
-    fun ikkeBarnepensjonSoeknad() {
-        coEvery { klientMock.hentPerson(any()) } returns barn
-        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
-        val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
-            .apply { sendTestMessage(hendelseIkkeBarnePensjonJson) }
-            .inspektør
-
-        assertTrue(inspector.size == 0)
-
-    }
-    //TODO gjøre om på hvordan testen forholder seg til tid.
-    @Test
-    fun barnForGammel() {
-        coEvery { klientMock.hentPerson(any()) } returns barnGammel
-        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
-        val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
-            .apply { sendTestMessage(hendelseJson) }
-            .inspektør
-
-        assertTrue(inspector.size == 0)
-
-    }
-    @Test
-    fun hendelseIkkeGyldigLengre() {
-        coEvery { klientMock.hentPerson(any()) } returns barn
-        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
-        val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
-            .apply { sendTestMessage(hendelseIkkeGyldig) }
-            .inspektør
-
-        assertTrue(inspector.size == 0)
-
-    }
-    @Test
-    fun ugyldigFnrISoeknad() {
-        coEvery { klientMock.hentPerson(any()) } returns barn
-        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
-        val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
-            .apply { sendTestMessage(ugyldigFnr) }
-            .inspektør
-
-        assertEquals("ugyldigFnr", inspector.message(0).get("@event_name").asText())
-
-    }
-    @Test
-    fun avdoedHarYrkesskade() {
-        coEvery { klientMock.hentPerson(any()) } returns barn
-        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
-        val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
-            .apply { sendTestMessage(yrkesskade) }
-            .inspektør
-
-        assertTrue(inspector.size == 0)
-
-    }
-    @Test
-    fun innsenderErIkkeGjennlevende() {
-        coEvery { klientMock.hentPerson(any()) } returns barn
-        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
-        val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
-            .apply { sendTestMessage(InnsenderIkkeGjenlevende) }
-            .inspektør
-
-        assertTrue(inspector.size == 0)
-
-    }
-    @Test
-    fun HarUtlandsopphold() {
-        coEvery { klientMock.hentPerson(any()) } returns barn
-        coEvery { klientMock.hentUtland(any()) } returns utland
-        val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
-            .apply { sendTestMessage(hendelseJson) }
-            .inspektør
-
-        assertTrue(inspector.size == 0)
-
-    }
-    @Test
-    fun HarIkkeUtlandsopphold() {
-        coEvery { klientMock.hentPerson(any()) } returns barn
-        coEvery { klientMock.hentPerson(Foedselsnummer.of("24014021406"))} returns avdoed
-        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
-        coEvery { klientMock.hentAdresse(any(), false) } returns gyldigadresse
-        coEvery { klientMock.hentFamilieRelasjon(any()) } returns familieRelasjon
-        //TODO endre denne til å mocke spesifikke personer
-        coEvery { klientMock.hentUtvidetPerson(any(),any(),any(),any(),any()) } returns barn
-
-
-        val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
+            .apply { EtterlatteFordeler(this, personService, FordelerKriterierService()) }
             .apply { sendTestMessage(nyhendelseJson) }
             .inspektør
 
@@ -173,78 +72,74 @@ internal class EtterlatteFordelerTest {
     }
 
     @Test
-    fun AvdoedErIkkeDoed() {
-        coEvery { klientMock.hentPerson(any())} returns barn
-        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
+    fun `soknad med avdoed som ikke er registrert som doed skal ikke fordeles`() {
+        val barnFnr = Foedselsnummer.of("07010776133")
+        val avdoedFnr = Foedselsnummer.of("24014021406")
+        val etterlattFnr = Foedselsnummer.of("11057523044")
+
+        coEvery { klientMock.hentUtvidetPerson(barnFnr, any(), any(), any(), any()) } returns mockPerson(
+            rolle = Rolle.BARN,
+            adresse = mockNorskAdresse(),
+            familieRelasjon = EyFamilieRelasjon(
+                ansvarligeForeldre = listOf(EyForeldreAnsvar(etterlattFnr)),
+                foreldre = null,
+                barn = null,
+            )
+        )
+
+        coEvery { klientMock.hentUtvidetPerson(avdoedFnr, any(), any(), any(), any()) } returns mockPerson(
+            rolle = Rolle.AVDOED,
+            adresse = mockNorskAdresse()
+        )
+
+        coEvery { klientMock.hentUtvidetPerson(etterlattFnr, any(), any(), any(), any()) } returns mockPerson(
+            rolle = Rolle.ETTERLATT,
+            adresse = mockNorskAdresse(),
+            familieRelasjon = EyFamilieRelasjon(
+                ansvarligeForeldre = listOf(EyForeldreAnsvar(Foedselsnummer.of("11057523044"))),
+                foreldre = null,
+                barn = listOf(EyBarn(Foedselsnummer.of("07010776133"))),
+            )
+        )
 
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
-            .apply { sendTestMessage(hendelseJson) }
-            .inspektør
-
-        assertTrue(inspector.size == 0)
-    }
-
-    @Test
-    fun AvdoedErDoed() {
-        coEvery { klientMock.hentPerson(any())} returns barn
-        coEvery { klientMock.hentPerson(Foedselsnummer.of("24014021406"))} returns avdoed
-        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
-        coEvery { klientMock.hentAdresse(any(), false) } returns gyldigadresse
-        coEvery { klientMock.hentFamilieRelasjon(any()) } returns familieRelasjon
-        //TODO endre denne til å mocke spesifikke personer
-        coEvery { klientMock.hentUtvidetPerson(any(),any(),any(),any(),any()) } returns barn
-
-
-
-        val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
+            .apply { EtterlatteFordeler(this, personService, FordelerKriterierService()) }
             .apply { sendTestMessage(nyhendelseJson) }
             .inspektør
-        assertEquals("ey_fordelt", inspector.message(0).get("@event_name").asText())
-    }
 
-    @Test
-    fun harVerge() {
-        coEvery { klientMock.hentPerson(any()) } returns barn
-        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
-        coEvery { klientMock.hentPerson(Foedselsnummer.of("13087307551"))} returns avdoed
-        val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
-            .apply { sendTestMessage(verge) }
-            .inspektør
         assertTrue(inspector.size == 0)
-
     }
+
     @Test
-    fun harHuketAvForUtenlandsoppholdForAvdoed() {
-        coEvery { klientMock.hentPerson(any()) } returns barn
-        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
-        coEvery { klientMock.hentPerson(Foedselsnummer.of("13087307551"))} returns avdoed
+    fun hendelseIkkeGyldigLengre() {
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
-            .apply { sendTestMessage(huketAvForUtlandJson) }
+            .apply { EtterlatteFordeler(this, personService, FordelerKriterierService()) }
+            .apply { sendTestMessage(hendelseIkkeGyldig) }
             .inspektør
-        assertTrue(inspector.size == 0)
 
+        assertTrue(inspector.size == 0)
     }
+
     @Test
-    fun `gjenlevende har ikke foreldreansvar`() {
-        coEvery { klientMock.hentPerson(any())} returns barn
-        coEvery { klientMock.hentPerson(Foedselsnummer.of("24014021406"))} returns avdoed
-        coEvery { klientMock.hentUtland(any()) } returns ikkeUtland
-        coEvery { klientMock.hentAdresse(any(), false) } returns gyldigadresse
-        coEvery { klientMock.hentFamilieRelasjon(any()) } returns familieRelasjonIkkeAnsvarlig
+    fun ikkeBarnepensjonSoeknad() {
+        val inspector = TestRapid()
+            .apply { EtterlatteFordeler(this, personService, FordelerKriterierService()) }
+            .apply { sendTestMessage(hendelseIkkeBarnePensjonJson) }
+            .inspektør
+
+        assertTrue(inspector.size == 0)
+    }
+
+    @Test
+    fun `skal feile og logge dersom kall mot pdltjenester feiler`() {
+        coEvery { klientMock.hentUtvidetPerson(any(), any(), any(), any(), any()) } throws RuntimeException("Noe feilet")
 
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, service, FordelerKriterierService()) }
+            .apply { EtterlatteFordeler(this, personService, FordelerKriterierService()) }
             .apply { sendTestMessage(nyhendelseJson) }
             .inspektør
+
         assertTrue(inspector.size == 0)
-
     }
-
-
-
 
 }

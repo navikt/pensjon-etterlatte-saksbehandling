@@ -6,9 +6,10 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
+import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import no.nav.etterlatte.vilkaar.barnepensjon.brukerErUnder20
 import no.nav.etterlatte.vilkaar.barnepensjon.doedsfallErRegistrert
-import no.nav.etterlatte.vilkaar.model.VurdertVilkaar
 
 
 class VilkaarService {
@@ -26,8 +27,8 @@ class VilkaarService {
                 .map { setOpplysningType<Foreldre>(it) }
 
         return listOf(
-            brukerErUnder20(soekerFoedselsdato, avdoedDoedsdato),
-            doedsfallErRegistrert(avdoedDoedsdato, soekerRelasjonForeldre)
+            brukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20.value, soekerFoedselsdato, avdoedDoedsdato),
+            doedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT.value, avdoedDoedsdato, soekerRelasjonForeldre)
         )
 
     }

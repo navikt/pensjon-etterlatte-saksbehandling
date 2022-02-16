@@ -4,27 +4,30 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foreldre
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import no.nav.etterlatte.vilkaar.model.*
+import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
+import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 
 
 fun brukerErUnder20(
+    vilkaartype: String,
     foedselsdato: List<VilkaarOpplysning<Foedselsdato>>,
     doedsdato: List<VilkaarOpplysning<Doedsdato>>,
 ): VurdertVilkaar {
     return VurdertVilkaar(
-        "brukerErUnder20",
+        vilkaartype,
         vurderOpplysning { hentSoekerFoedselsdato(foedselsdato).plusYears(20) < hentVirkningsdato(doedsdato) },
         listOf(foedselsdato, doedsdato).flatten()
     )
 }
 
 fun doedsfallErRegistrert(
+    vilkaartype: String,
     doedsdato: List<VilkaarOpplysning<Doedsdato>>,
     foreldre: List<VilkaarOpplysning<Foreldre>>,
 ): VurdertVilkaar {
-    return VurdertVilkaar("doedsdatoErRegistrert",
+    return VurdertVilkaar(vilkaartype,
         vurderOpplysning { hentFnrForeldre(foreldre).contains(hentDoedsdato(doedsdato).foedselsnummer)} ,
         listOf(doedsdato, foreldre).flatten())
 }

@@ -12,13 +12,14 @@ import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
+import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 
 interface VilkaarKlient {
-    fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): ObjectNode
+    fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): List<VurdertVilkaar>
 }
 
 class KtorVilkarClient(private val url: String) : VilkaarKlient {
-    override fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): ObjectNode {
+    override fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): List<VurdertVilkaar> {
         return runBlocking {
             HttpClient(CIO) {
                 install(JsonFeature) {

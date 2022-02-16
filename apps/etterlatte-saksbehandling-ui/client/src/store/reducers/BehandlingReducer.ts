@@ -4,7 +4,7 @@ export interface IDetaljertBehandling {
   id: number
   sak: number
   grunnlag: IBehandlingsopplysning[]
-  vilkaarsproving: any
+  vilkaarsproving: IVilkaarsproving[]
   beregning: any
   fastsatt: boolean
 }
@@ -18,11 +18,23 @@ export interface IBehandlingsopplysning {
   attestering: any
 }
 
+export interface IVilkaarsproving {
+  navn: string
+  resultat: VilkaarVurderingsResultat
+  basertPaaOpplysninger: IBehandlingsopplysning[]
+}
+
+export enum VilkaarVurderingsResultat {
+  OPPFYLT = 'OPPFYLT',
+  IKKE_OPPFYLT = 'IKKE_OPPFYLT',
+  KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING = 'KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING',
+}
+
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: 0,
   sak: 0,
   grunnlag: [],
-  vilkaarsproving: undefined,
+  vilkaarsproving: [],
   beregning: undefined,
   fastsatt: false,
 }

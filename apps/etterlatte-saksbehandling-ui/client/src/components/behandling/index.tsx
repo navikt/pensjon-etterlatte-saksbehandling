@@ -32,14 +32,6 @@ export const Behandling = () => {
       ctx.dispatch(addBehandlingAction(response.data))
       setLoaded(true)
     })
-    /*    ;(async () => {
-      try {
-        const response = await hentBehandling('10')
-        ctx.dispatch(addBehandlingAction(response.data.behandling))
-      } catch (e) {
-        console.log(e)
-      }
-    })()*/
   }, [])
 
   const active = (hash: string) => {

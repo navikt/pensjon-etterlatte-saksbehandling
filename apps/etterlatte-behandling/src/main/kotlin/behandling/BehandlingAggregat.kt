@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.*
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.Vilkårsprøving
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
@@ -63,9 +62,7 @@ class BehandlingAggregat(
         vilkaarKlient
             .vurderVilkaar(lagredeOpplysninger).also {
                 lagretBehandling = lagretBehandling.copy(
-                    vilkårsprøving = Vilkårsprøving(
-                        resultat = it
-                    )
+                    vilkårsprøving = it
                 )
                 behandlinger.lagreVilkarsproving(lagretBehandling)
             }

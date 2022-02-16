@@ -79,7 +79,13 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     Header: 'Handlinger',
     accessor: 'handling',
     Cell: ({ row, value: handling }) => {
-      return <HandlingerFilterListe saksbehandler={row.original.saksbehandler} handling={handling} />
+      return (
+        <HandlingerFilterListe
+          saksbehandler={row.original.saksbehandler}
+          handling={handling}
+          behandlingsId={row.original.behandlingsId}
+        />
+      )
     },
   },
 ]

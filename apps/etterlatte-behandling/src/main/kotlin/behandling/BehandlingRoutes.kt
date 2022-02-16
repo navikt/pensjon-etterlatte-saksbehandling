@@ -31,8 +31,7 @@ fun Route.behandlingRoutes(service: BehandlingService){
             call.respond(inTransaction { service.hentBehandling(behandlingsId)}?.let { DetaljertBehandling(it.id, it.sak, it.grunnlag, it.vilkårsprøving, it.beregning, it.fastsatt) }?: HttpStatusCode.NotFound)
         }
 
-        //TODO: Vil dette fungere??
-        post {
+        post("grunnlag") {
             val body = call.receive<List<Behandlingsopplysning<ObjectNode>>>()
             inTransaction { service.leggTilGrunnlagFraRegister(behandlingsId, body) }
             call.respond(HttpStatusCode.OK)
@@ -48,11 +47,6 @@ fun Route.behandlingRoutes(service: BehandlingService){
             inTransaction { service.beregn(behandlingsId, body) }
             call.respond(HttpStatusCode.OK)
 
-        }
-        post("grunnlag/{type}") {
-            val body = call.receive<ObjectNode>()
-            inTransaction { service.leggTilGrunnlagFraSoknad(behandlingsId, body ,call.parameters["type"]!!) }
-            call.respond(HttpStatusCode.OK)
         }
     }
 }

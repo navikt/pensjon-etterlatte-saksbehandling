@@ -11,12 +11,15 @@ import no.nav.etterlatte.behandling.*
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.Beregning
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
 import no.nav.etterlatte.sak.Sak
 import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import java.time.Instant
+import java.time.LocalDate
+import java.time.Month
 import java.util.*
 
 
@@ -63,9 +66,9 @@ class ApplicationTest {
                                 Behandlingsopplysning(
                                     UUID.randomUUID(),
                                     Behandlingsopplysning.Privatperson("1234", Instant.now()),
-                                    "dato_mottatt",
+                                    "soeker_foedselsdato:v1",
                                     objectMapper.createObjectNode(),
-                                    objectMapper.readTree("""{"dato": "2022-05-14"}""") as ObjectNode
+                                    objectMapper.valueToTree(Foedselsdato(LocalDate.of(1986, Month.FEBRUARY, 6), "12345678910")) as ObjectNode
                                 )
                             )
                         )
@@ -85,19 +88,6 @@ class ApplicationTest {
             }.also {
                 assertEquals(1, it.behandlinger.size)
             }
-
-            handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/grunnlag/trygdetid") {
-                addAuthSaksbehandler()
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    """{
-    "tt_anv": 22
-}"""
-                )
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.response.status())
-            }
-
 
             handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/vilkaarsproeving") {
                 addAuthSaksbehandler()
@@ -125,11 +115,10 @@ class ApplicationTest {
                     )
                 })
                 val behandling: Behandling = (objectMapper.readValue(it.response.content!!))
-                assertNotNull(behandling.grunnlag.find { it.opplysningType == "dato_mottatt" })
+                assertNotNull(behandling.grunnlag.find { it.opplysningType == "soeker_foedselsdato:v1" })
                 assertEquals(
-                    22,
-                    behandling.grunnlag.find { it.opplysningType == "trygdetid" }!!.opplysning["tt_anv"].numberValue()
-                        .toInt()
+                    LocalDate.of(1986, 2, 6),
+                    behandling.grunnlag.find { it.opplysningType == "soeker_foedselsdato:v1" }!!.opplysning["foedselsdato"].textValue().let { LocalDate.parse(it) }
                 )
 
             }

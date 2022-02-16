@@ -13,11 +13,13 @@ export enum VilkaarType {
   soeker_foedselsdato = 'soeker_foedselsdato:v1',
 }
 
+
 export interface IVilkaarProps {
   vilkaar: {
     vilkaarDone: Status
     vilkaarType: VilkaarType
     vilkaarStatus: VilkaarStatus
+    grunnlag: any;
     description?: string
   }
 }

@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.*
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.Vilkårsprøving
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
@@ -35,9 +34,15 @@ class BehandlingAggregat(
     private var lagretBehandling = requireNotNull(behandlinger.hent(id))
     private var lagredeOpplysninger = opplysninger.finnOpplysningerIBehandling(id)
 
-    fun leggTilGrunnlag(data: ObjectNode, type: String, kilde: Behandlingsopplysning.Kilde?): UUID {
-        require(lagretBehandling.vilkårsprøving == null)
+    fun leggTilGrunnlagListe(nyeOpplysninger: List<Behandlingsopplysning<ObjectNode>>) {
+        if (nyeOpplysninger.isEmpty()) return
+        for (opplysning in nyeOpplysninger) {
+            leggTilGrunnlagUtenVilkårsprøving(opplysning.opplysning, opplysning.opplysningType, opplysning.kilde)
+        }
+        vilkårsprøv()
+    }
 
+    fun leggTilGrunnlagUtenVilkårsprøving(data: ObjectNode, type: String, kilde: Behandlingsopplysning.Kilde?): UUID {
         val behandlingsopplysning = Behandlingsopplysning(
             UUID.randomUUID(),
             kildeFraRequestContekst(kilde),
@@ -49,18 +54,15 @@ class BehandlingAggregat(
         opplysninger.leggOpplysningTilBehandling(lagretBehandling.id, behandlingsopplysning.id)
         lagredeOpplysninger += behandlingsopplysning
         logger.info("La til opplysning $type i behandling ${lagretBehandling.id}")
+        vilkårsprøv()
         return behandlingsopplysning.id
     }
 
     fun vilkårsprøv() {
         vilkaarKlient
-            .vurderVilkaar("barnepensjon:brukerungnok", lagredeOpplysninger).also {
+            .vurderVilkaar(lagredeOpplysninger).also {
                 lagretBehandling = lagretBehandling.copy(
-                    vilkårsprøving = Vilkårsprøving(
-                        resultat = it,
-                        opplysninger = lagredeOpplysninger.map { it.id.toString() },
-                        ansvarlig = Kontekst.get().AppUser.name()
-                    )
+                    vilkårsprøving = it
                 )
                 behandlinger.lagreVilkarsproving(lagretBehandling)
             }

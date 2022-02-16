@@ -4,11 +4,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Self
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.Vilkårsprøving
+import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -63,6 +60,7 @@ internal class RealBehandlingServiceTest {
         every { behandlingerMock.opprett(capture(behandlingOpprettes)) } returns Unit
         every { behandlingerMock.hent(capture(behandlingHentes)) } returns opprettetBehandling
         every { opplysningerMock.finnOpplysningerIBehandling(capture(opplysningerHentes)) } returns emptyList()
+        every { behandlingerMock.lagreVilkarsproving(any()) } returns Unit
 
         val resultat = sut.startBehandling(1, emptyList())
 
@@ -72,70 +70,11 @@ internal class RealBehandlingServiceTest {
         Assertions.assertEquals(opplysningerHentes.captured, behandlingOpprettes.captured.id)
     }
 
-    @Test
-    fun leggTilGrunnlagPåBehandlingUtenVilkårsprøving() {
-        val behandlingerMock = mockk<BehandlingDao>()
-        val opplysningerMock = mockk<OpplysningDao>()
-        val behandlingsopplysningSomLagres = slot<Behandlingsopplysning<ObjectNode>>()
 
-        Kontekst.set(Context(Self("test"), mockk()))
-
-
-        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, NoOpVilkaarKlient())
-
-        val id = UUID.randomUUID()
-
-        every { behandlingerMock.hent(id) } returns Behandling(id, 1, emptyList(), null, null, false)
-        every { opplysningerMock.finnOpplysningerIBehandling(id) } returns emptyList()
-        every { opplysningerMock.nyOpplysning(capture(behandlingsopplysningSomLagres)) } returns Unit
-        every { opplysningerMock.leggOpplysningTilBehandling(id, any()) } returns Unit
-
-        val result = sut.leggTilGrunnlagFraSoknad(
-            id,
-            objectMapper.createObjectNode(),
-            "trygdetid",
-            Behandlingsopplysning.Saksbehandler("S01")
-        )
-
-        Assertions.assertEquals(behandlingsopplysningSomLagres.captured.id, result)
-        Assertions.assertEquals("trygdetid", behandlingsopplysningSomLagres.captured.opplysningType)
-        Assertions.assertTrue(behandlingsopplysningSomLagres.captured.kilde is Behandlingsopplysning.Saksbehandler)
-
-    }
-
-    @Test
-    fun leggTilGrunnlagPåBehandlingMedVilkårsprøving() {
-        val behandlingerMock = mockk<BehandlingDao>()
-        val opplysningerMock = mockk<OpplysningDao>()
-
-        Kontekst.set(Context(Self("test"), mockk()))
-        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, NoOpVilkaarKlient())
-        val id = UUID.randomUUID()
-        val vilkårsprøvd_behandling = Behandling(
-            id,
-            1,
-            emptyList(),
-            Vilkårsprøving(emptyList(), objectMapper.createObjectNode(), ""),
-            null,
-            false
-        )
-        every { behandlingerMock.hent(id) } returns vilkårsprøvd_behandling
-        every { opplysningerMock.finnOpplysningerIBehandling(id) } returns emptyList()
-
-
-        Assertions.assertThrows(IllegalArgumentException::class.java) {
-            sut.leggTilGrunnlagFraSoknad(
-                id,
-                objectMapper.createObjectNode(),
-                "trygdetid",
-                Behandlingsopplysning.Saksbehandler("S01")
-            )
-        }
-    }
 }
 
 class NoOpVilkaarKlient : VilkaarKlient {
-    override fun vurderVilkaar(vilkaar: String, opplysninger: List<Behandlingsopplysning<ObjectNode>>): ObjectNode {
-        return objectMapper.createObjectNode()
+    override fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): List<VurdertVilkaar> {
+        return listOf()
     }
 }

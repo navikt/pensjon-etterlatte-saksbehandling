@@ -1,28 +1,28 @@
-import styled from 'styled-components'
-import { StatusIcon } from '../../../shared/icons/statusIcon'
-import { IVilkaarProps } from './types'
+import { Title, VilkaarWrapper } from './styled'
+import { IVilkaarProps, VilkaarType } from './types'
+import { AlderBarn } from './vilkaar/AlderBarn'
+import { DoedsFallForelder } from './vilkaar/DoedsfallForelder'
 
 export const Vilkaar = (props: IVilkaarProps) => {
+  if (!props.vilkaar.grunnlag) {
+    return (
+      <div style={{ borderBottom: '1px solid #ccc' }}>
+        <VilkaarWrapper>
+          <Title>Mangler grunnlag</Title>
+        </VilkaarWrapper>
+      </div>
+    )
+  }
+
   return (
     <div style={{ borderBottom: '1px solid #ccc' }}>
       <VilkaarWrapper>
-        <Title>
-          <StatusIcon status={props.vilkaar.vilkaarDone} /> Dødsfall
-        </Title>
+        {props.vilkaar.vilkaarType === VilkaarType.doedsdato && <DoedsFallForelder vilkaar={props.vilkaar} />}
+        {props.vilkaar.vilkaarType === VilkaarType.soeker_foedselsdato && (
+          <AlderBarn vilkaar={props.vilkaar} />
+        )}
       </VilkaarWrapper>
     </div>
   )
 }
 
-const VilkaarWrapper = styled.div`
-  height: 100px;
-  padding: 1em 1em 1em 0;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-`
-
-const Title = styled.div`
-  display: flex;
-`

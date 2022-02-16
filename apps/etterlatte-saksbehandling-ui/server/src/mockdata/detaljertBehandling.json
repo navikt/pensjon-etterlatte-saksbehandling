@@ -13,9 +13,59 @@
           "foedselsnummer": "29081276127"
         },
       "attestering": null
+    },
+    {
+      "id": "UUUID",
+      "kilde": "pdl",
+      "opplysningsType": "soeker_foedselsdato:v1",
+      "meta": "",
+      "opplysning":
+        {
+          "foedselsdato": "1944-04-10",
+          "foedselsnummer": "29081276127"
+        },
+      "attestering": null
     }
   ],
-  "vilkårsprøving": null,
+  "vilkårsprøving": [
+    {
+      "navn": "doedsdato_er_registrert",
+      "resultat": "OPPFYLT",
+      "basertPaaOpplysninger": [
+        {
+          "id": "UUUID",
+          "kilde": "pdl",
+          "opplysningsType": "avdoed_doedsfall:v1",
+          "meta": "",
+          "opplysning":
+          {
+            "doedsdato": "2019-01-21",
+            "foedselsnummer": "29081276127"
+          },
+          "attestering": null
+        }
+      ]
+    },
+    {
+      "navn": "soeker_er_under_20",
+      "resultat": "IKKE_OPPFYLT",
+      "basertPaaOpplysninger": [
+        {
+          "id": "UUUID",
+          "kilde": "pdl",
+          "opplysningsType": "soeker_foedselsdato:v1",
+          "meta": "",
+          "opplysning":
+          {
+            "foedselsdato": "1944-04-10",
+            "foedselsnummer": "29081276127"
+          },
+          "attestering": null
+        }
+      ]
+    }
+
+  ],
   "beregning": null,
   "fastsatt": false
 }

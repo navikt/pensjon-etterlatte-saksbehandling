@@ -12,13 +12,14 @@ import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
+import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 
 interface VilkaarKlient {
-    fun vurderVilkaar(vilkaar: String, opplysninger: List<Behandlingsopplysning<ObjectNode>>): ObjectNode
+    fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): List<VurdertVilkaar>
 }
 
 class KtorVilkarClient(private val url: String) : VilkaarKlient {
-    override fun vurderVilkaar(vilkaar: String, opplysninger: List<Behandlingsopplysning<ObjectNode>>): ObjectNode {
+    override fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): List<VurdertVilkaar> {
         return runBlocking {
             HttpClient(CIO) {
                 install(JsonFeature) {
@@ -32,21 +33,10 @@ class KtorVilkarClient(private val url: String) : VilkaarKlient {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 body = RequestDto(
-                    "barnepensjon:forstegangsbehandling",
-                    // opplysninger.map { it.opplysning.put("_navn", it.opplysningType) })
                     opplysninger.map { VilkaarOpplysning(it.opplysningType, it.kilde, it.opplysning)  })
             }
         }
-
     }
 }
 
-fun <T> mapTilVilkaarsOpplysning(opplysning: Behandlingsopplysning<T>): VilkaarOpplysning<T>  {
-    return VilkaarOpplysning(
-        opplysning.opplysningType,
-        opplysning.kilde,
-        opplysning.opplysning
-    )
-}
-
-data class RequestDto(val vilkaar: String, val opplysninger: List<VilkaarOpplysning<Any>>)
+data class RequestDto(val opplysninger: List<VilkaarOpplysning<ObjectNode>>)

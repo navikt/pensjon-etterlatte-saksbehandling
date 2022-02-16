@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -73,7 +74,7 @@ internal class RealBehandlingServiceTest {
 }
 
 class NoOpVilkaarKlient : VilkaarKlient {
-    override fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): ObjectNode {
-        return objectMapper.createObjectNode()
+    override fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): List<VurdertVilkaar> {
+        return listOf()
     }
 }

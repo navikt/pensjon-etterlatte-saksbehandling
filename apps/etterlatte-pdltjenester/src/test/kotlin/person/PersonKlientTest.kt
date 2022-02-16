@@ -10,6 +10,7 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.mockk.coEvery
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.pdl.Variables
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.person.Pdl
@@ -51,6 +52,16 @@ internal class PersonKlientTest {
         }
 
         personKlient = PersonKlient(httpClient)
+    }
+
+    @Test
+    fun `hentUtvidetPerson returnerer gyldig UtvidetPersonResponse objekt`() {
+        setup("/pdl/personUtvidetResponse.json")
+        runBlocking {
+            val testPerson = personKlient.hentUtvidetPerson(Variables(STOR_SNERK))
+            assertEquals("LITEN", testPerson.data?.hentPerson?.navn?.get(0)?.fornavn)
+            //TODO her kan vi evt teste flere felter
+        }
     }
 
     @Test

@@ -74,10 +74,10 @@ data class Metadata(
 }
 
 data class Endring(
-    val kilde: String,
+    val kilde: String?,
     val registrert: LocalDateTime,
-    val registrertAv: String,
-    val systemkilde: String,
+    val registrertAv: String?,
+    val systemkilde: String?,
     val type: Endringstype
 )
 

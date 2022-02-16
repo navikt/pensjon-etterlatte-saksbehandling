@@ -3,7 +3,7 @@ import { Button } from '@navikt/ds-react'
 import { AppContext } from '../../../store/AppContext'
 import { handlinger, Handlinger } from '../typer/oppgavebenken'
 
-const HandlingerFilterListe: React.FC<{ saksbehandler: string; handling: Handlinger; behandlingsId: string }> = ({
+const HandlingerKnapp: React.FC<{ saksbehandler: string; handling: Handlinger; behandlingsId: string }> = ({
   saksbehandler,
   handling,
   behandlingsId,
@@ -20,4 +20,4 @@ const HandlingerFilterListe: React.FC<{ saksbehandler: string; handling: Handlin
   )
 }
 
-export default HandlingerFilterListe
+export default HandlingerKnapp

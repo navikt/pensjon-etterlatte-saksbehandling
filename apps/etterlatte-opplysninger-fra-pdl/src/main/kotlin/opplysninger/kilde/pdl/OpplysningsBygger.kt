@@ -66,7 +66,7 @@ class OpplysningsByggerService : OpplysningsBygger {
 fun <T> lagOpplysning(opplysningsType: String, opplysning: T): Behandlingsopplysning<T> {
     return Behandlingsopplysning(
         UUID.randomUUID(),
-        Behandlingsopplysning.Register("pdl", Instant.now(), null),
+        Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
         opplysningsType,
         objectMapper.createObjectNode(),
         opplysning

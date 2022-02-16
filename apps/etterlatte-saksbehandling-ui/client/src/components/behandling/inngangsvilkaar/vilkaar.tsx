@@ -13,9 +13,8 @@ export const Vilkaar = (props: IVilkaarProps) => {
       </div>
     )
   }
-
   return (
-    <div style={{ borderBottom: '1px solid #ccc' }}>
+    <div style={{ borderBottom: '1px solid #ccc', padding: "1em 0" }}>
       <VilkaarWrapper>
         {props.vilkaar.vilkaarType === VilkaarType.doedsdato && <DoedsFallForelder vilkaar={props.vilkaar} />}
         {props.vilkaar.vilkaarType === VilkaarType.soeker_foedselsdato && (

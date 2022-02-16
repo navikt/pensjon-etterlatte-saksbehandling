@@ -29,7 +29,7 @@ function App() {
                 path="/"
                 element={
                   <>
-                    <Link to="/behandling/personopplysninger">Gå til behandling</Link>
+                    <Link to="/behandling/815-493-00/personopplysninger">Gå til behandling</Link>
                     <Oppgavebenken />
                   </>
                 }
@@ -37,7 +37,7 @@ function App() {
               <Route path="/oppgavebenken" element={<Oppgavebenken />} />
               <Route path="/person/:fnr" element={<Person />} />
               <Route
-                path="/behandling/*"
+                path="/behandling/:behandlingId/*"
                 element={
                   <>
                     <StatusBar theme={StatusBarTheme.gray} />

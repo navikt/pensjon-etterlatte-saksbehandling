@@ -1,9 +1,11 @@
 import { StatusIcon } from "../../../../shared/icons/statusIcon"
 import { Title, VilkaarColumn } from "../styled"
-import { IVilkaarProps } from "../types"
 
 
-export const DoedsFallForelder = (props: IVilkaarProps) => {
+export const DoedsFallForelder = (props: any) => {
+  const grunnlag = props.vilkaar.grunnlag;
+
+  console.log('hei', grunnlag)
   return (
     <>
       <VilkaarColumn>
@@ -15,7 +17,7 @@ export const DoedsFallForelder = (props: IVilkaarProps) => {
       </VilkaarColumn>
       <VilkaarColumn>
         <div>Dødsdato</div>
-        <div>30.10.2021</div>
+        <div>{grunnlag.opplysning.doedsdato}</div>
       </VilkaarColumn>
       <VilkaarColumn>
         <div>Avdød forelder</div>

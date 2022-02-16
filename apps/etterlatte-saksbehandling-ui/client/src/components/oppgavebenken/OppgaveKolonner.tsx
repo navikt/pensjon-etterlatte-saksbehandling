@@ -10,7 +10,6 @@ import {
 } from './typer/oppgavebenken'
 import moment from 'moment'
 import { ColorTag } from './styled'
-import React from 'react'
 import SaksbehandlerTildelKnapp from './filtere/SaksbehandlerTildelKnapp'
 import HandlingerKnapp from './filtere/HandlingerKnapp'
 

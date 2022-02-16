@@ -3,9 +3,10 @@ import { Button } from '@navikt/ds-react'
 import { AppContext } from '../../../store/AppContext'
 import { handlinger, Handlinger } from '../typer/oppgavebenken'
 
-const HandlingerFilterListe: React.FC<{ saksbehandler: string; handling: Handlinger }> = ({
+const HandlingerFilterListe: React.FC<{ saksbehandler: string; handling: Handlinger; behandlingsId: string }> = ({
   saksbehandler,
   handling,
+  behandlingsId,
 }) => {
   const innloggetSaksbehandler = useContext(AppContext).state.saksbehandlerReducer.navn
   const sakErTildeltInnloggetSaksbehandler = innloggetSaksbehandler === saksbehandler

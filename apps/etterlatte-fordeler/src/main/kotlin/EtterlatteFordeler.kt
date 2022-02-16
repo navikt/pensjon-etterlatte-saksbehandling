@@ -59,7 +59,7 @@ internal class EtterlatteFordeler(
                 val gjenlevendeFnr = Foedselsnummer.of(finnGjennlevendeFnr(packet))
                 val avdoedFnr = Foedselsnummer.of(finnAvdoedFnr(packet))
 
-                val barn = personService.hentUtvidetPerson(barnFnr, adresse = true, familieRelasjon = true)
+                val barn = personService.hentUtvidetPerson(barnFnr, adresse = true, familieRelasjon = true, utland = true)
                 val avdoed = personService.hentUtvidetPerson(avdoedFnr, utland = true, adresse = true)
                 val gjenlevende = personService.hentUtvidetPerson(gjenlevendeFnr, adresse = true, familieRelasjon = true)
 

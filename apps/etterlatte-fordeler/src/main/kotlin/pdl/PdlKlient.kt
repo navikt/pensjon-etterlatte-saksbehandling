@@ -50,11 +50,9 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
     override suspend fun hentUtvidetPerson(fnr: Foedselsnummer, historikk: Boolean, adresse: Boolean, utland: Boolean, familieRelasjon: Boolean): Person {
         val response = client.get<Person>(apiUrl + "/utvidetperson?historikk=$historikk&adresse=$adresse&utland=$utland&familieRelasjon=$familieRelasjon") {
             header("Tema", "PEN")
-            header("foedselsnummer", fnr)
+            header("foedselsnummer", fnr.value)
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
-            body = fnr.value
-
         }
 
         //TODO ordne feilhåndtering

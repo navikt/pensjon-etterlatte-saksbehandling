@@ -11,8 +11,8 @@ import {
 import moment from 'moment'
 import { ColorTag } from './styled'
 import React from 'react'
-import SaksbehandlerFilterListe from './filtere/SaksbehandlerFilterListe'
-import HandlingerFilterListe from './filtere/HandlingerFilterListe'
+import SaksbehandlerTildelKnapp from './filtere/SaksbehandlerTildelKnapp'
+import HandlingerKnapp from './filtere/HandlingerKnapp'
 
 moment.defaultFormat = 'DD.MM.YYYY'
 
@@ -72,7 +72,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     accessor: 'saksbehandler',
     filter: 'tildeltFilter',
     Cell: ({ value: saksbehandler }) => {
-      return <SaksbehandlerFilterListe value={saksbehandler} />
+      return <SaksbehandlerTildelKnapp value={saksbehandler} />
     },
   },
   {
@@ -80,7 +80,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     accessor: 'handling',
     Cell: ({ row, value: handling }) => {
       return (
-        <HandlingerFilterListe
+        <HandlingerKnapp
           saksbehandler={row.original.saksbehandler}
           handling={handling}
           behandlingsId={row.original.behandlingsId}

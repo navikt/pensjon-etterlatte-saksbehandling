@@ -36,7 +36,7 @@ open class Behandlingsopplysning<T>(
     @JsonSubTypes(
         JsonSubTypes.Type(value = Saksbehandler::class, name = "saksbehandler"),
         JsonSubTypes.Type(value = Privatperson::class, name = "privatperson"),
-        JsonSubTypes.Type(value = Register::class, name = "register"),
+        JsonSubTypes.Type(value = Pdl::class, name = "pdl"),
         JsonSubTypes.Type(value = RegelKilde::class, name = "regel"),
     )
     sealed class Kilde(val type: String) {
@@ -50,7 +50,7 @@ open class Behandlingsopplysning<T>(
     class Privatperson(val fnr: String, val mottatDato: Instant) : Kilde("privatperson") {
     }
 
-    class Register(val navn: String, val tidspunktForInnhenting: Instant, val registersReferanse: String?) : Kilde("register") {
+    class Pdl(val navn: String, val tidspunktForInnhenting: Instant, val registersReferanse: String?) : Kilde("pdl") {
         override fun toString(): String {
             return navn
         }

@@ -17,7 +17,7 @@ fun brukerErUnder20(
 ): VurdertVilkaar {
     return VurdertVilkaar(
         vilkaartype,
-        vurderOpplysning { hentSoekerFoedselsdato(foedselsdato).plusYears(20) < hentVirkningsdato(doedsdato) },
+        vurderOpplysning { hentSoekerFoedselsdato(foedselsdato).plusYears(20) > hentVirkningsdato(doedsdato) },
         listOf(foedselsdato, doedsdato).flatten()
     )
 }
@@ -27,38 +27,49 @@ fun doedsfallErRegistrert(
     doedsdato: List<VilkaarOpplysning<Doedsdato>>,
     foreldre: List<VilkaarOpplysning<Foreldre>>,
 ): VurdertVilkaar {
+    try {
+        hentDoedsdato(doedsdato)
+    } catch (ex: OpplysningKanIkkeHentesUt) {
+        return VurdertVilkaar(
+            vilkaartype,
+            VilkaarVurderingsResultat.IKKE_OPPFYLT,
+            listOf(doedsdato, foreldre).flatten()
+        )
+    }
+
     return VurdertVilkaar(vilkaartype,
-        vurderOpplysning { hentFnrForeldre(foreldre).contains(hentDoedsdato(doedsdato).foedselsnummer)} ,
+        vurderOpplysning { hentFnrForeldre(foreldre).contains(hentDoedsdato(doedsdato).foedselsnummer) },
         listOf(doedsdato, foreldre).flatten())
 }
 
-fun vurderOpplysning(vurdering: () -> Boolean) = try {
+
+fun vurderOpplysning(vurdering: () -> Boolean): VilkaarVurderingsResultat = try {
     if (vurdering()) VilkaarVurderingsResultat.OPPFYLT else VilkaarVurderingsResultat.IKKE_OPPFYLT
-} catch (ex: KanIkkeVurderePgaManglendeOpplysning) {
+} catch (ex: OpplysningKanIkkeHentesUt) {
     VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
 }
 
 fun hentFnrForeldre(foreldre: List<VilkaarOpplysning<Foreldre>>): List<String> {
     return foreldre.find { it.kilde.type == "pdl" }?.opplysning?.foreldre?.map { it.foedselsnummer.value }
-        ?: throw KanIkkeVurderePgaManglendeOpplysning()
+        ?: throw OpplysningKanIkkeHentesUt()
 }
 
 fun hentSoekerFoedselsdato(foedselsdato: List<VilkaarOpplysning<Foedselsdato>>): LocalDate {
     return foedselsdato.find { it.kilde.type == "pdl" }?.opplysning?.foedselsdato
-        ?: throw KanIkkeVurderePgaManglendeOpplysning()
+        ?: throw OpplysningKanIkkeHentesUt()
 }
 
 fun hentDoedsdato(doedsdato: List<VilkaarOpplysning<Doedsdato>>): Doedsdato {
     return doedsdato.find { it.kilde.type == "pdl" }?.opplysning
-        ?: throw KanIkkeVurderePgaManglendeOpplysning()
+        ?: throw OpplysningKanIkkeHentesUt()
 }
 
 fun hentVirkningsdato(doedsdato: List<VilkaarOpplysning<Doedsdato>>): LocalDate {
     val doedsdato = doedsdato.find { it.kilde.type == "pdl" }?.opplysning?.doedsdato
-    return doedsdato?.with(TemporalAdjusters.firstDayOfNextMonth()) ?: throw KanIkkeVurderePgaManglendeOpplysning()
+    return doedsdato?.with(TemporalAdjusters.firstDayOfNextMonth()) ?: throw OpplysningKanIkkeHentesUt()
 }
 
-class KanIkkeVurderePgaManglendeOpplysning : IllegalStateException()
+class OpplysningKanIkkeHentesUt : IllegalStateException()
 
 
 

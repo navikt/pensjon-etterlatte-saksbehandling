@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button } from '@navikt/ds-react'
 
-const SaksbehandlerFilterListe: React.FC<{ value: string }> = ({ value }) => {
+const SaksbehandlerTildelKnapp: React.FC<{ value: string }> = ({ value }) => {
   //const saksbehandlerReducer = useContext(AppContext).state.saksbehandlerReducer.navn
   // todo onclick skal lagre navnet på saksbehandler på en sak
   const verdi = value ? (
@@ -15,4 +15,4 @@ const SaksbehandlerFilterListe: React.FC<{ value: string }> = ({ value }) => {
   return <div>{verdi}</div>
 }
 
-export default SaksbehandlerFilterListe
+export default SaksbehandlerTildelKnapp

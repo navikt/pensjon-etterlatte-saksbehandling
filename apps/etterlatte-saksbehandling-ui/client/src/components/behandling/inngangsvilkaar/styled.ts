@@ -1,5 +1,4 @@
-import styled from "styled-components"
-
+import styled from 'styled-components'
 
 export const VilkaarWrapper = styled.div`
   height: 100px;
@@ -7,7 +6,7 @@ export const VilkaarWrapper = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  align-items: center;
+  align-items: top;
 `
 
 export const Title = styled.div`

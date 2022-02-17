@@ -80,14 +80,67 @@ fun main() {
 
                 authenticate {
                     get("/") {
+                        call.respondHtml {
+                            this.head {
+                                title { +"Post melding til Kafka" }
+                            }
+                            body {
+                                h2 {
+                                    +"Post meldinger til Kafka"
+                                }
+                                p {
+                                    +"Meny"
+                                }
+                                ul {
+                                    li {
+                                        a {
+                                            href = "/postmelding"
+                                            +"Post egendefinert melding"
+                                        }
+                                    }
+                                    li {
+                                        a {
+                                            href = "/sendMelding"
+                                            +"Post standardmelding"
+                                        }
+                                    }
+                                }
+                                br {}
+                                p {
+                                    +"Innlogget som ${navIdentFraToken() ?: "Anonym"}"
+                                }
+                            }
+                        }
                         call.respondText(navIdentFraToken() ?: "Anonym", ContentType.Text.Plain)
                     }
                     get("/sendMelding") {
-                        sendMelding(
+                        val offset = sendMelding(
                             payload(aremark_person),
-                            producer
+                            producer,
+                            call
                         )
-                        call.respondText("READY", ContentType.Text.Plain)
+
+                        call.respondHtml {
+                            this.head {
+                                title { +"Post melding til Kafka" }
+                            }
+                            body {
+                                h3 {
+                                    +"Standardmelding postet!"
+                                }
+                                p { +"Partisjon: ${offset.first} Offset: ${offset.second}" }
+                                br {}
+                                a {
+                                    href = "/postmelding"
+                                    +"Post ny melding"
+                                }
+                                br {}
+                                a {
+                                    href = "/"
+                                    +"Tilbake til hovedmeny"
+                                }
+                            }
+                        }
                     }
                     get("/postmelding") {
                         call.respondHtml {
@@ -137,17 +190,13 @@ fun main() {
                             }
                             body {
                                 h3 {
-                                    +"Melding postet"
+                                    +"Melding postet!"
                                 }
                                 p { +"Partisjon: ${offset.first} Offset: ${offset.second}" }
                                 br {}
                                 a {
-                                    href = "/postmelding"
-                                    +"Post ny melding"
-                                }
-                                br {}
-                                a {
-                                    href = "/" + "Tilbake til hovedmeny"
+                                    href = "/"
+                                    +"Tilbake til hovedmeny"
                                 }
                             }
                         }
@@ -167,16 +216,22 @@ fun main() {
     }).start(true)
 }
 
-internal fun sendMelding(
+internal suspend fun sendMelding(
     melding: String,
-    producer: KafkaProdusent<String, String>
-) {
+    producer: KafkaProdusent<String, String>,
+    call: ApplicationCall
+): Pair<Int, Long> {
     val startMillis = System.currentTimeMillis()
     logger.info("Publiserer melding")
 
-    createRecord(melding).also { producer.publiser(it.first, it.second) }
+    val offset = createRecord(melding).let { record ->
+        call.receiveParameters().let {
+            producer.publiser(record.first, record.second)
+        }
+    }
 
     logger.info("melding publisert på ${(System.currentTimeMillis() - startMillis) / 1000}s")
+    return offset
 }
 
 private fun createRecord(input: String): Pair<String, String> {

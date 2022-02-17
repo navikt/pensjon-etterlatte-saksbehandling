@@ -1,0 +1,74 @@
+{
+  "fornavn": "Jens",
+  "etternavn": "Johnsen",
+  "foedselsnummer": "11057523044",
+  "foedselsaar": 2010,
+  "foedselsdato": "2010-04-19",
+  "doedsdato": "",
+  "adressebeskyttelse": false,
+  "adresse": {
+    "bostedsadresse": {
+      "vegadresse": {
+        "adressenavn": "tull",
+        "husnummer": "3",
+        "husbokstav": "A",
+        "postnummer": "1234"
+      }
+    },
+    "kontaktadresse": {
+      "vegadresse": {
+        "adressenavn": "tull",
+        "husnummer": "3",
+        "husbokstav": "A",
+        "postnummer": "1234"
+      }
+    },
+    "oppholdsadresse": {
+      "vegadresse": {
+        "adressenavn": "tull",
+        "husnummer": "3",
+        "husbokstav": "A",
+        "postnummer": "1234"
+      }
+    }
+  },
+  "statsborgerskap": "NOR",
+  "foedeland": "NOR",
+  "sivilstatus": "singel",
+  "utland": {
+    "innflyttingTilNorge": [
+      {
+        "fraflyttingsland": "SWE",
+        "dato": "2021-12-26"
+      },
+      {
+        "fraflyttingsland": "SWE",
+        "dato": "2021-12-26"
+      }
+    ],
+    "utflyttingFraNorge": [
+      {
+        "tilflyttingsland": "SWE",
+        "dato": "2021-12-26"
+      },
+      {
+        "tilflyttingsland": "SWE",
+        "dato": "2021-12-26"
+      }
+    ]
+  },
+  "familieRelasjon": {
+    "ansvarligeForeldre": [
+      {"foedselsnummer": "04096222195"},
+      {"foedselsnummer": "19040550081"}
+    ],
+    "foreldre": [
+      {"foedselsnummer": "04096222195"},
+      {"foedselsnummer": "19040550081"}
+    ],
+    "barn": [
+      {"foedselsnummer": "11057523044"},
+      {"foedselsnummer": "31017123133"}
+    ]
+  }
+}

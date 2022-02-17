@@ -5,7 +5,6 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.EtterlatteFordeler
 import no.nav.etterlatte.FordelerKriterierService
-import no.nav.etterlatte.common.mapJsonToAny
 import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PersonService
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
 
 internal class EtterlatteFordelerTest {
 
@@ -36,7 +34,7 @@ internal class EtterlatteFordelerTest {
         val avdoedFnr = Foedselsnummer.of("24014021406")
         val etterlattFnr = Foedselsnummer.of("11057523044")
 
-        coEvery { klientMock.hentUtvidetPerson(barnFnr, any(), any(), any(), any()) } returns mockPerson(
+        coEvery { klientMock.hentPerson(barnFnr, any(), any(), any(), any()) } returns mockPerson(
             rolle = Rolle.BARN,
             adresse = mockNorskAdresse(),
             familieRelasjon = EyFamilieRelasjon(
@@ -46,13 +44,13 @@ internal class EtterlatteFordelerTest {
             )
         )
 
-        coEvery { klientMock.hentUtvidetPerson(avdoedFnr, any(), any(), any(), any()) } returns mockPerson(
+        coEvery { klientMock.hentPerson(avdoedFnr, any(), any(), any(), any()) } returns mockPerson(
             rolle = Rolle.AVDOED,
             doedsdato = "2022-01-01",
             adresse = mockNorskAdresse()
         )
 
-        coEvery { klientMock.hentUtvidetPerson(etterlattFnr, any(), any(), any(), any()) } returns mockPerson(
+        coEvery { klientMock.hentPerson(etterlattFnr, any(), any(), any(), any()) } returns mockPerson(
             rolle = Rolle.ETTERLATT,
             adresse = mockNorskAdresse(),
             familieRelasjon = EyFamilieRelasjon(
@@ -77,7 +75,7 @@ internal class EtterlatteFordelerTest {
         val avdoedFnr = Foedselsnummer.of("24014021406")
         val etterlattFnr = Foedselsnummer.of("11057523044")
 
-        coEvery { klientMock.hentUtvidetPerson(barnFnr, any(), any(), any(), any()) } returns mockPerson(
+        coEvery { klientMock.hentPerson(barnFnr, any(), any(), any(), any()) } returns mockPerson(
             rolle = Rolle.BARN,
             adresse = mockNorskAdresse(),
             familieRelasjon = EyFamilieRelasjon(
@@ -87,12 +85,12 @@ internal class EtterlatteFordelerTest {
             )
         )
 
-        coEvery { klientMock.hentUtvidetPerson(avdoedFnr, any(), any(), any(), any()) } returns mockPerson(
+        coEvery { klientMock.hentPerson(avdoedFnr, any(), any(), any(), any()) } returns mockPerson(
             rolle = Rolle.AVDOED,
             adresse = mockNorskAdresse()
         )
 
-        coEvery { klientMock.hentUtvidetPerson(etterlattFnr, any(), any(), any(), any()) } returns mockPerson(
+        coEvery { klientMock.hentPerson(etterlattFnr, any(), any(), any(), any()) } returns mockPerson(
             rolle = Rolle.ETTERLATT,
             adresse = mockNorskAdresse(),
             familieRelasjon = EyFamilieRelasjon(
@@ -132,7 +130,7 @@ internal class EtterlatteFordelerTest {
 
     @Test
     fun `skal feile og logge dersom kall mot pdltjenester feiler`() {
-        coEvery { klientMock.hentUtvidetPerson(any(), any(), any(), any(), any()) } throws RuntimeException("Noe feilet")
+        coEvery { klientMock.hentPerson(any(), any(), any(), any(), any()) } throws RuntimeException("Noe feilet")
 
         val inspector = TestRapid()
             .apply { EtterlatteFordeler(this, personService, FordelerKriterierService()) }

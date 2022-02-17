@@ -1,7 +1,6 @@
 package no.nav.etterlatte
 
 
-import io.ktor.client.features.ResponseException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
@@ -59,9 +58,9 @@ internal class EtterlatteFordeler(
                 val gjenlevendeFnr = Foedselsnummer.of(finnGjennlevendeFnr(packet))
                 val avdoedFnr = Foedselsnummer.of(finnAvdoedFnr(packet))
 
-                val barn = personService.hentUtvidetPerson(barnFnr, adresse = true, familieRelasjon = true)
-                val avdoed = personService.hentUtvidetPerson(avdoedFnr, utland = true, adresse = true)
-                val gjenlevende = personService.hentUtvidetPerson(gjenlevendeFnr, adresse = true, familieRelasjon = true)
+                val barn = personService.hentPerson(barnFnr, adresse = true, familieRelasjon = true)
+                val avdoed = personService.hentPerson(avdoedFnr, utland = true, adresse = true)
+                val gjenlevende = personService.hentPerson(gjenlevendeFnr, adresse = true, familieRelasjon = true)
 
                 val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(
                     barn = barn,

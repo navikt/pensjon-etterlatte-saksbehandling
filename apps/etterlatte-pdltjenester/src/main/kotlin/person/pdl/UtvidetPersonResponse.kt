@@ -1,4 +1,4 @@
-package no.nav.etterlatte.person.pdl.utvidetperson
+package no.nav.etterlatte.person.pdl
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.libs.common.pdl.Adressebeskyttelse
@@ -114,18 +114,18 @@ data class Doedsfall(
 )
 
 data class InnflyttingTilNorge(
-    val folkeregistermetadata: person.pdl.Folkeregistermetadata?,
+    val folkeregistermetadata: Folkeregistermetadata?,
     val fraflyttingsland: String?,
     val fraflyttingsstedIUtlandet: String?,
-    val metadata: person.pdl.Metadata
+    val metadata: Metadata
 )
 //TODO endre til Date?
 data class UtflyttingFraNorge(
-    val folkeregistermetadata: person.pdl.Folkeregistermetadata?,
+    val folkeregistermetadata: Folkeregistermetadata?,
     val tilflyttingsland: String?,
     val tilflyttingsstedIUtlandet: String?,
     val utflyttingsdato: String?,
-    val metadata: person.pdl.Metadata
+    val metadata: Metadata
 )
 
 data class Bostedsadresse(

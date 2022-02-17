@@ -73,55 +73,7 @@ fun main() {
             routing {
                 get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
                 get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
-                get("/postmelding"){
-                    call.respondHtml {
-                        this.head{
-                            title { +"Post melding til Kafka" }
-                        }
-                        body {
-                            form(action = "/postmelding", method = FormMethod.post) {
-                                label {
-                                    htmlFor = "key"
-                                    +"Nøkkel:"
-                                }
-                                br {  }
-                                textInput {
-                                    name = "key"
-                                    id = "key"
-                                }
-                                br {  }
-                                label {
-                                    htmlFor = "json"
-                                    +"Melding:"
-                                }
-                                br {  }
-                                textArea{
-                                    name = "json"
-                                    id = "json"
-                                }
-                                br {  }
-                                submitInput()
-                            }
-                        }
-                    }
-                }
-                post("/postmelding"){
 
-                    val offset = call.receiveParameters().let {
-                       producer.publiser(requireNotNull( it["key"]),  JsonMessage(requireNotNull(it["json"])).toJson())
-
-                    }
-
-                    call.respondHtml {
-                        this.head{
-                            title { +"Post melding til Kafka" }
-                        }
-                        body {
-                            p { +"Partisjon:${offset.first} offset: ${offset.second}" }
-                        }
-                    }
-
-                }
 
                 authenticate {
                     get("/"){
@@ -132,6 +84,58 @@ fun main() {
                             producer
                         )
                         call.respondText("READY", ContentType.Text.Plain)
+                    }
+                    get("/postmelding"){
+                        call.respondHtml {
+                            this.head{
+                                title { +"Post melding til Kafka" }
+                            }
+                            body {
+                                form(action = "/postmelding", method = FormMethod.post) {
+                                    label {
+                                        htmlFor = "key"
+                                        +"Nøkkel:"
+                                    }
+                                    br {  }
+                                    textInput {
+                                        name = "key"
+                                        id = "key"
+                                    }
+                                    br {  }
+                                    label {
+                                        htmlFor = "json"
+                                        +"Melding:"
+                                    }
+                                    br {  }
+                                    textArea{
+                                        name = "json"
+                                        id = "json"
+                                    }
+                                    br {  }
+                                    submitInput()
+                                }
+                            }
+                        }
+                    }
+                    post("/postmelding"){
+
+                        val offset = call.receiveParameters().let {
+                            producer.publiser(
+                                requireNotNull( it["key"]),
+                                JsonMessage(requireNotNull(it["json"])).toJson(),
+                                mapOf("NavIdent" to (navIdentFraToken()!!.toByteArray()))
+                            )
+                        }
+
+                        call.respondHtml {
+                            this.head{
+                                title { +"Post melding til Kafka" }
+                            }
+                            body {
+                                p { +"Partisjon:${offset.first} offset: ${offset.second}" }
+                            }
+                        }
+
                     }
 
 

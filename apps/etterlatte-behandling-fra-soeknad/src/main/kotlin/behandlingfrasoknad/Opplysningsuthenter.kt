@@ -50,7 +50,7 @@ class Opplysningsuthenter {
     ): Behandlingsopplysning<T> {
         return Behandlingsopplysning(
             UUID.randomUUID(), Behandlingsopplysning.Privatperson(
-                barnepensjon.innsender.foedselsnummer.svar.value,
+                barnepensjon.innsender.foedselsnummer.value,
                 barnepensjon.mottattDato.toInstant(ZoneOffset.UTC)
             ), opplysningsType, objectMapper.createObjectNode(),
             data
@@ -70,9 +70,9 @@ class Opplysningsuthenter {
         return setBehandlingsopplysninger(
             barnepensjon, "innsender_personinfo:v1",
             PersonInfo(
-                barnepensjon.innsender.fornavn.svar,
-                barnepensjon.innsender.etternavn.svar,
-                barnepensjon.innsender.foedselsnummer.svar,
+                barnepensjon.innsender.fornavn,
+                barnepensjon.innsender.etternavn,
+                barnepensjon.innsender.foedselsnummer,
                 PersonType.INNSENDER
             )
         )
@@ -87,14 +87,14 @@ class Opplysningsuthenter {
             setBehandlingsopplysninger(
                 barnepensjon, "utbetalingsinformasjon:v1",
                 Utbetalingsinformasjon(
-                    it.svar.verdi,
-                    it.opplysning?.kontonummer?.svar?.innhold,
-                    it.opplysning?.utenlandskBankNavn?.svar?.innhold,
-                    it.opplysning?.utenlandskBankAdresse?.svar?.innhold,
-                    it.opplysning?.iban?.svar?.innhold,
-                    it.opplysning?.swift?.svar?.innhold,
+                    it.svar,
+                    it.opplysning?.kontonummer?.svar,
+                    it.opplysning?.utenlandskBankNavn?.svar,
+                    it.opplysning?.utenlandskBankAdresse?.svar,
+                    it.opplysning?.iban?.svar,
+                    it.opplysning?.swift?.svar,
                     it.opplysning?.skattetrekk?.svar,
-                    it.opplysning?.skattetrekk?.opplysning?.svar?.innhold
+                    it.opplysning?.skattetrekk?.opplysning?.svar
                 )
             )
         }
@@ -104,9 +104,9 @@ class Opplysningsuthenter {
         return setBehandlingsopplysninger(
             barnepensjon, opplysningsType,
             PersonInfo(
-                barnepensjon.soeker.fornavn.svar,
-                barnepensjon.soeker.etternavn.svar,
-                barnepensjon.soeker.foedselsnummer.svar,
+                barnepensjon.soeker.fornavn,
+                barnepensjon.soeker.etternavn,
+                barnepensjon.soeker.foedselsnummer,
                 PersonType.BARN
             )
         )
@@ -115,7 +115,7 @@ class Opplysningsuthenter {
     fun soekerStatsborgerskap(barnepensjon: Barnepensjon): Behandlingsopplysning<out Statsborgerskap> {
         return setBehandlingsopplysninger(
             barnepensjon, "soeker_statsborgerskap:v1",
-            Statsborgerskap(barnepensjon.soeker.statsborgerskap.svar, barnepensjon.soeker.foedselsnummer.svar.value)
+            Statsborgerskap(barnepensjon.soeker.statsborgerskap.svar, barnepensjon.soeker.foedselsnummer.value)
         )
     }
 
@@ -125,9 +125,9 @@ class Opplysningsuthenter {
             barnepensjon, "soeker_utenlandsadresse:v1",
             Utenlandsadresse(
                 adresse?.svar,
-                adresse?.opplysning?.land?.svar?.innhold,
-                adresse?.opplysning?.adresse?.svar?.innhold,
-                barnepensjon.soeker.foedselsnummer.svar.value
+                adresse?.opplysning?.land?.svar,
+                adresse?.opplysning?.adresse?.svar,
+                barnepensjon.soeker.foedselsnummer.value
             )
         )
     }
@@ -138,9 +138,9 @@ class Opplysningsuthenter {
             barnepensjon, "soeker_verge:v1",
             Verge(
                 verge?.svar,
-                verge?.opplysning?.fornavn?.svar,
-                verge?.opplysning?.etternavn?.svar,
-                verge?.opplysning?.foedselsnummer?.svar?.value
+                verge?.opplysning?.fornavn,
+                verge?.opplysning?.etternavn,
+                verge?.opplysning?.foedselsnummer?.value
             )
         )
     }
@@ -148,7 +148,7 @@ class Opplysningsuthenter {
     fun soekerDagligOmsorg(barnepensjon: Barnepensjon): Behandlingsopplysning<out DagligOmsorg>? {
         return setBehandlingsopplysninger(
             barnepensjon, "soker_daglig_omsorg:v1",
-            DagligOmsorg(barnepensjon.soeker.dagligOmsorg?.svar?.verdi)
+            DagligOmsorg(barnepensjon.soeker.dagligOmsorg?.svar)
         )
     }
 
@@ -157,9 +157,9 @@ class Opplysningsuthenter {
             setBehandlingsopplysninger(
                 barnepensjon, opplysningsType,
                 PersonInfo(
-                    forelder.fornavn.svar,
-                    forelder.etternavn.svar,
-                    forelder.foedselsnummer.svar,
+                    forelder.fornavn,
+                    forelder.etternavn,
+                    forelder.foedselsnummer,
                     PersonType.GJENLEVENDE_FORELDER
                 )
             )
@@ -171,9 +171,9 @@ class Opplysningsuthenter {
             setBehandlingsopplysninger(
                 barnepensjon, opplysningsType,
                 PersonInfo(
-                    avdoed.fornavn.svar,
-                    avdoed.etternavn.svar,
-                    avdoed.foedselsnummer.svar,
+                    avdoed.fornavn,
+                    avdoed.etternavn,
+                    avdoed.foedselsnummer,
                     PersonType.AVDOED
                 )
             )
@@ -185,8 +185,8 @@ class Opplysningsuthenter {
             setBehandlingsopplysninger(
                 barnepensjon, opplysningsType,
                 Doedsdato(
-                    avdoed.datoForDoedsfallet.svar.innhold,
-                    avdoed.foedselsnummer.svar.value
+                    avdoed.datoForDoedsfallet.svar,
+                    avdoed.foedselsnummer.value
                 )
             )
         }
@@ -198,7 +198,7 @@ class Opplysningsuthenter {
                 barnepensjon, opplysningsType,
                 Doedsaarsak(
                     avdoed.doedsaarsakSkyldesYrkesskadeEllerYrkessykdom.svar,
-                    avdoed.foedselsnummer.svar.value
+                    avdoed.foedselsnummer.value
                 )
             )
         }
@@ -213,15 +213,15 @@ class Opplysningsuthenter {
                     avdoed.utenlandsopphold.svar,
                     avdoed.utenlandsopphold.opplysning?.map { opphold ->
                         UtenlandsoppholdOpplysninger(
-                            opphold.land.svar.innhold,
-                            opphold.fraDato?.svar?.innhold,
-                            opphold.tilDato?.svar?.innhold,
-                            opphold.oppholdsType.svar.map {it.verdi},
+                            opphold.land.svar,
+                            opphold.fraDato?.svar,
+                            opphold.tilDato?.svar,
+                            opphold.oppholdsType.svar,
                             opphold.medlemFolketrygd.svar,
-                            opphold.pensjonsutbetaling?.svar?.innhold
+                            opphold.pensjonsutbetaling?.svar
                         )
                     },
-                    avdoed.foedselsnummer.svar.value
+                    avdoed.foedselsnummer.value
                 )
             )
         }
@@ -234,8 +234,8 @@ class Opplysningsuthenter {
                 Naeringsinntekt(
                     avdoed.naeringsInntekt?.svar,
                     avdoed.naeringsInntekt?.opplysning?.naeringsinntektVedDoedsfall?.svar,
-                    avdoed.naeringsInntekt?.opplysning?.naeringsinntektPrAarFoerDoedsfall?.svar?.innhold,
-                    avdoed.foedselsnummer.svar.value
+                    avdoed.naeringsInntekt?.opplysning?.naeringsinntektPrAarFoerDoedsfall?.svar,
+                    avdoed.foedselsnummer.value
                 )
             )
         }
@@ -247,8 +247,8 @@ class Opplysningsuthenter {
                 barnepensjon, "avdoed_militaertjeneste:v1",
                 Militaertjeneste(
                     avdoed.militaertjeneste?.svar,
-                    avdoed.militaertjeneste?.opplysning?.svar?.innhold,
-                    avdoed.foedselsnummer.svar.value
+                    avdoed.militaertjeneste?.opplysning?.svar,
+                    avdoed.foedselsnummer.value
                 )
             )
         }
@@ -257,9 +257,9 @@ class Opplysningsuthenter {
     fun soesken(barnepensjon: Barnepensjon, opplysningsType: String): Behandlingsopplysning<out Soesken> {
         val soeskenPersonInfo = barnepensjon.soesken.map { barn ->
             PersonInfo(
-                barn.fornavn.svar,
-                barn.etternavn.svar,
-                barn.foedselsnummer.svar,
+                barn.fornavn,
+                barn.etternavn,
+                barn.foedselsnummer,
                 PersonType.BARN
             )
         }

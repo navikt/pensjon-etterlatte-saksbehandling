@@ -8,13 +8,11 @@ import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 internal class OpplysningsuthenterTest {
-//TODO: skrur av denne enn så lenge, må tenkes litt mer gjennom ved endringer i søknadsstrukturen
-    @Disabled
+
     @Test
     fun lagSkjemaInfoOpplysningsListe() {
         val hendelseJson = objectMapper.readTree(javaClass.getResource("/fullMessage3.json")!!.readText())!!

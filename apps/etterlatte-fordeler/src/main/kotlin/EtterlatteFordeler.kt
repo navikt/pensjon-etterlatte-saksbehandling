@@ -4,7 +4,7 @@ package no.nav.etterlatte
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
+import no.nav.etterlatte.libs.common.soeknad.SoeknadType
 import no.nav.etterlatte.pdl.PersonService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -47,8 +47,8 @@ internal class EtterlatteFordeler(
             return
         }
 
-        if (packet["@skjema_info"]["type"] == null || packet["@skjema_info"]["type"].asText() != SoeknadType.BARNEPENSJON.name.uppercase()) {
-            logger.info("Avbrutt fordeling da søknad ikke er " + SoeknadType.BARNEPENSJON.name)
+        if (packet["@skjema_info"]["type"] == null || packet["@skjema_info"]["type"].asText() != SoeknadType.Barnepensjon.name.uppercase()) {
+            logger.info("Avbrutt fordeling da søknad ikke er " + SoeknadType.Barnepensjon.name)
             return
         }
 

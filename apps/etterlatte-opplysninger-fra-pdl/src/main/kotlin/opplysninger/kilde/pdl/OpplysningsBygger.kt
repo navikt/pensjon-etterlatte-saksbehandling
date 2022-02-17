@@ -18,7 +18,7 @@ class OpplysningsByggerService : OpplysningsBygger {
 
     override fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl): List<Behandlingsopplysning<out Any>> {
 
-        val soekersFnr = barnepensjon.soeker.foedselsnummer.value
+        val soekersFnr = barnepensjon.soeker.foedselsnummer.svar.value
         val avdoedFnr = hentAvdoedFnr(barnepensjon)
 
         val soekerPdl = pdl.hentPdlModell(soekersFnr)
@@ -53,13 +53,12 @@ class OpplysningsByggerService : OpplysningsBygger {
     }
 
     fun hentAvdoedFnr(barnepensjon: Barnepensjon): String {
-        val fnr = barnepensjon.foreldre.find { it.type === PersonType.AVDOED }?.foedselsnummer?.value
+        val fnr = barnepensjon.foreldre.find { it.type === PersonType.AVDOED }?.foedselsnummer?.svar?.value
         if(fnr != null) {
             return fnr
         }
         throw Exception("Mangler fødselsnummer")
     }
-
 
 }
 

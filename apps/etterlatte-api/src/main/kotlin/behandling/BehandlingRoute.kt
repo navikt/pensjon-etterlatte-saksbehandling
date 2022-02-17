@@ -11,7 +11,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.soeknad.SoeknadType
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -114,7 +114,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
                     val accessToken = getAccessToken(call)
                     service.opprettSak(
                         fnr,
-                        SoeknadType.Gjenlevendepensjon,
+                        SoeknadType.GJENLEVENDEPENSJON,
                         accessToken
                     ) // sakType blir nok en enum etter hvert
                     call.respond("Ok");

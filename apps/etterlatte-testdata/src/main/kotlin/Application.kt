@@ -39,7 +39,7 @@ val objectMapper: ObjectMapper = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 val aremark_person = "12101376212"
-val logger:Logger = LoggerFactory.getLogger("BEY001")
+val logger: Logger = LoggerFactory.getLogger("BEY001")
 
 fun main() {
 
@@ -55,7 +55,10 @@ fun main() {
     val topic = env.getValue("KAFKA_TARGET_TOPIC")
     logger.info("Konfig lest, oppretter kafka-produsent")
 
-    val producer = KafkaProdusent<String, String>(KafkaProducer(config.producerConfig(), StringSerializer(), StringSerializer()), topic)
+    val producer = KafkaProdusent<String, String>(
+        KafkaProducer(config.producerConfig(), StringSerializer(), StringSerializer()),
+        topic
+    )
 
 
 
@@ -76,8 +79,9 @@ fun main() {
 
 
                 authenticate {
-                    get("/"){
-                        call.respondText (navIdentFraToken()?: "Anonym", ContentType.Text.Plain )                    }
+                    get("/") {
+                        call.respondText(navIdentFraToken() ?: "Anonym", ContentType.Text.Plain)
+                    }
                     get("/sendMelding") {
                         sendMelding(
                             payload(aremark_person),
@@ -85,9 +89,9 @@ fun main() {
                         )
                         call.respondText("READY", ContentType.Text.Plain)
                     }
-                    get("/postmelding"){
+                    get("/postmelding") {
                         call.respondHtml {
-                            this.head{
+                            this.head {
                                 title { +"Post melding til Kafka" }
                             }
                             body {
@@ -96,43 +100,55 @@ fun main() {
                                         htmlFor = "key"
                                         +"Nøkkel:"
                                     }
-                                    br {  }
+                                    br { }
                                     textInput {
                                         name = "key"
                                         id = "key"
                                     }
-                                    br {  }
+                                    br { }
                                     label {
                                         htmlFor = "json"
                                         +"Melding:"
                                     }
-                                    br {  }
-                                    textArea{
+                                    br { }
+                                    textArea {
                                         name = "json"
                                         id = "json"
                                     }
-                                    br {  }
+                                    br { }
                                     submitInput()
                                 }
                             }
                         }
                     }
-                    post("/postmelding"){
+                    post("/postmelding") {
 
                         val offset = call.receiveParameters().let {
                             producer.publiser(
-                                requireNotNull( it["key"]),
+                                requireNotNull(it["key"]),
                                 JsonMessage(requireNotNull(it["json"])).toJson(),
                                 mapOf("NavIdent" to (navIdentFraToken()!!.toByteArray()))
                             )
                         }
 
                         call.respondHtml {
-                            this.head{
+                            this.head {
                                 title { +"Post melding til Kafka" }
                             }
                             body {
-                                p { +"Partisjon:${offset.first} offset: ${offset.second}" }
+                                h3 {
+                                    +"Melding postet"
+                                }
+                                p { +"Partisjon: ${offset.first} Offset: ${offset.second}" }
+                                br {}
+                                a {
+                                    href = "/postmelding"
+                                    +"Post ny melding"
+                                }
+                                br {}
+                                a {
+                                    href = "/" + "Tilbake til hovedmeny"
+                                }
                             }
                         }
 
@@ -140,14 +156,14 @@ fun main() {
 
 
                     post("/kafka") {
-                        producer.publiser( "0", objectMapper.writeValueAsString(call.receive<ObjectNode>()))
+                        producer.publiser("0", objectMapper.writeValueAsString(call.receive<ObjectNode>()))
                         call.respondText("Record lagt på kafka", ContentType.Text.Plain)
                     }
 
                 }
             }
         }
-        connector { port=8080 }
+        connector { port = 8080 }
     }).start(true)
 }
 
@@ -164,15 +180,18 @@ internal fun sendMelding(
 }
 
 private fun createRecord(input: String): Pair<String, String> {
-    val message = JsonMessage.newMessage(mapOf(
-        "@event_name" to "soeknad_innsendt",
-        "@skjema_info" to objectMapper.readValue<ObjectNode>(input),
-        "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
-        "@template" to "soeknad",
-        "@fnr_soeker" to aremark_person,
-        "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L).toString()
-    ))
-    return  "0" to  message.toJson()
+    val message = JsonMessage.newMessage(
+        mapOf(
+            "@event_name" to "soeknad_innsendt",
+            "@skjema_info" to objectMapper.readValue<ObjectNode>(input),
+            "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
+            "@template" to "soeknad",
+            "@fnr_soeker" to aremark_person,
+            "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L).toString()
+        )
+    )
+    return "0" to message.toJson()
 }
+
 fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<TokenValidationContextPrincipal>()
     ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("NAVident")?.toString()

@@ -196,7 +196,7 @@ fun main() {
                                 br {}
                                 a {
                                     href = "/"
-                                    +"Tilbake til hovedmeny"
+                                    +"Tilbake til hovedmeny "
                                 }
                             }
                         }

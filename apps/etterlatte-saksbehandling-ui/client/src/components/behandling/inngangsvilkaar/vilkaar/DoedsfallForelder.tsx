@@ -5,7 +5,6 @@ import { Title, VilkaarColumn } from "../styled"
 export const DoedsFallForelder = (props: any) => {
   const grunnlag = props.vilkaar.grunnlag;
 
-  console.log('hei', grunnlag)
   return (
     <>
       <VilkaarColumn>

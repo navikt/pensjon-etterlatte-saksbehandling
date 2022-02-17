@@ -1,12 +1,12 @@
 import styled from 'styled-components'
 
 export const VilkaarWrapper = styled.div`
-  height: 100px;
   padding: 1em 1em 1em 0;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: top;
+  flex-wrap: wrap;
 `
 
 export const Title = styled.div`
@@ -17,4 +17,5 @@ export const Title = styled.div`
 
 export const VilkaarColumn = styled.div`
   flex-basis: 300px;
+  flex: 1;
 `

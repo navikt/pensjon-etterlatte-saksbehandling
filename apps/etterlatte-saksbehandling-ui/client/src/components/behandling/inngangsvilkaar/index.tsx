@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { Content } from '../../../shared/styled'
-import { Status, VilkaarStatus, VilkaarType } from './types'
+import { Status, VilkaarStatus, OpplysningsType } from './types'
 import { Vilkaar } from './vilkaar'
 import { useContext } from 'react'
 import { AppContext } from '../../../store/AppContext'
@@ -15,17 +15,25 @@ export const Inngangsvilkaar = () => {
         <Vilkaar
           vilkaar={{
             vilkaarDone: Status.DONE,
-            vilkaarType: VilkaarType.doedsdato,
+            vilkaarType: OpplysningsType.doedsdato,
             vilkaarStatus: VilkaarStatus.OPPFYLT,
-            grunnlag: opplysninger.find(opplysning => opplysning.opplysningsType === VilkaarType.doedsdato)
+            grunnlag: opplysninger.find(opplysning => opplysning.opplysningsType === OpplysningsType.doedsdato)
           }}
         />
         <Vilkaar
           vilkaar={{
             vilkaarDone: Status.NOT_DONE,
-            vilkaarType: VilkaarType.soeker_foedselsdato,
+            vilkaarType: OpplysningsType.soeker_foedselsdato,
             vilkaarStatus: VilkaarStatus.IKKE_OPPFYLT,
-            grunnlag: opplysninger.find(opplysning => opplysning.opplysningsType === VilkaarType.soeker_foedselsdato)
+            grunnlag: opplysninger.find(opplysning => opplysning.opplysningsType === OpplysningsType.soeker_foedselsdato)
+          }}
+        />
+        <Vilkaar
+          vilkaar={{
+            vilkaarDone: Status.NOT_DONE,
+            vilkaarType: OpplysningsType.avdoedes_forutgaaende_medlemsskap,
+            vilkaarStatus: VilkaarStatus.IKKE_OPPFYLT,
+            grunnlag: opplysninger.find(opplysning => opplysning.opplysningsType === OpplysningsType.avdoedes_forutgaaende_medlemsskap)
           }}
         />
       </VilkaarListe>

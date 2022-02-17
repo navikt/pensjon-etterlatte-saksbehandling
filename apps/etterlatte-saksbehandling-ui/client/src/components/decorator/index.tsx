@@ -66,7 +66,6 @@ export const Decorator = () => {
             ignoreWsEvents: true,
             onChange: (value: any) => {
                 if (value) {
-                    console.log(value)
                     //window.location.pathname = `test/${value}`;
                 }
             }

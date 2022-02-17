@@ -95,12 +95,12 @@ const testdata: SakslisteProps = {
 }
 
 export const Person = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [personData, setPersonData] = useState({})
   const match = useParams<{ fnr: string }>()
 
   const sakIdInput = useRef() as React.MutableRefObject<HTMLInputElement>
 
-  console.log(personData)
   useEffect(() => {
     ;(async () => {
       if (match.fnr) {
@@ -118,7 +118,6 @@ export const Person = () => {
 
   const opprettBehandling = () => {
     if (sakIdInput.current.value) {
-      console.log(sakIdInput.current.value)
       opprettBehandlingPaaSak(Number(sakIdInput.current.value))
     }
   }

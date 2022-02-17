@@ -13,7 +13,8 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 internal class OpplysningsuthenterTest {
-
+//TODO: skrur av denne enn så lenge, må tenkes litt mer gjennom ved endringer i søknadsstrukturen
+    @Disabled
     @Test
     @Disabled
     fun lagSkjemaInfoOpplysningsListe() {

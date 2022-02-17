@@ -11,8 +11,8 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
-import no.nav.etterlatte.vilkaar.barnepensjon.brukerErUnder20
-import no.nav.etterlatte.vilkaar.barnepensjon.doedsfallErRegistrert
+import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBrukerErUnder20
+import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarDoedsfallErRegistrert
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
@@ -22,9 +22,9 @@ internal class BarnepensjonVilkaarTest {
 
     @Test
     fun vurderAlderErUnder20() {
-        val vurderingBarnOver20 = brukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20.value, listOf(foedselsdatoBarnOver20), listOf(doedsdatoForelderPdl))
-        val vurderingBarnUnder20 = brukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20.value, listOf(foedselsdatoBarnUnder20), listOf(doedsdatoForelderPdl))
-        val vurderingBarnUnder20UtenDoedsdato = brukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20.value, listOf(foedselsdatoBarnUnder20), listOf(doedsdatoForelderSoeknad))
+        val vurderingBarnOver20 = vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, listOf(foedselsdatoBarnOver20), listOf(doedsdatoForelderPdl))
+        val vurderingBarnUnder20 = vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, listOf(foedselsdatoBarnUnder20), listOf(doedsdatoForelderPdl))
+        val vurderingBarnUnder20UtenDoedsdato = vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, listOf(foedselsdatoBarnUnder20), listOf(doedsdatoForelderSoeknad))
 
         assertEquals(vurderingBarnOver20.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
         assertEquals(vurderingBarnUnder20.resultat, VilkaarVurderingsResultat.OPPFYLT)
@@ -35,18 +35,17 @@ internal class BarnepensjonVilkaarTest {
     @Test
     fun vurderDoedsdatoErRegistrert() {
         val doedsdatoIkkeIPdl =
-            doedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT.value, listOf(doedsdatoForelderSoeknad), listOf(foreldre))
+            vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, listOf(doedsdatoForelderSoeknad), listOf(foreldre))
 
         val avdoedErForelder =
-            doedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT.value, listOf(doedsdatoForelderPdl), listOf(foreldre))
+            vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, listOf(doedsdatoForelderPdl), listOf(foreldre))
 
         val avdoedIkkeForelder =
-            doedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT.value, listOf(doedsdatoIkkeForelderPdl), listOf(foreldre))
+            vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, listOf(doedsdatoIkkeForelderPdl), listOf(foreldre))
 
         assertEquals(doedsdatoIkkeIPdl.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
         assertEquals(avdoedErForelder.resultat, VilkaarVurderingsResultat.OPPFYLT)
         assertEquals(avdoedIkkeForelder.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
-        assertEquals(avdoedErForelder.basertPaaOpplysninger[0].opplysning, doedsdatoForelderPdl.opplysning)
 
     }
 

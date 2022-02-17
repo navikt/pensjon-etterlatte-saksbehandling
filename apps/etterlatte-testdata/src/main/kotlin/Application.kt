@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import KafkaProdusent
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -11,6 +12,7 @@ import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.config.*
 import io.ktor.features.*
+import io.ktor.html.*
 import io.ktor.http.*
 import io.ktor.jackson.*
 import io.ktor.request.*
@@ -19,14 +21,13 @@ import io.ktor.routing.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import io.ktor.util.pipeline.*
+import kotlinx.html.*
 import no.nav.etterlatte.batch.JsonMessage
 import no.nav.etterlatte.batch.KafkaConfig
 import no.nav.etterlatte.batch.payload
 import no.nav.security.token.support.ktor.TokenValidationContextPrincipal
 import no.nav.security.token.support.ktor.tokenValidationSupport
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.Producer
-import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -42,7 +43,6 @@ val logger:Logger = LoggerFactory.getLogger("BEY001")
 
 fun main() {
 
-    logger.info("Batch startet")
     val env = System.getenv()
 
     val config = KafkaConfig(
@@ -55,7 +55,9 @@ fun main() {
     val topic = env.getValue("KAFKA_TARGET_TOPIC")
     logger.info("Konfig lest, oppretter kafka-produsent")
 
-    val producer = KafkaProducer(config.producerConfig(), StringSerializer(), StringSerializer())
+    val producer = KafkaProdusent<String, String>(KafkaProducer(config.producerConfig(), StringSerializer(), StringSerializer()), topic)
+
+
 
     embeddedServer(CIO, applicationEngineEnvironment {
         module {
@@ -71,20 +73,70 @@ fun main() {
             routing {
                 get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
                 get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
+                get("/postmelding"){
+                    call.respondHtml {
+                        this.head{
+                            title { +"Post melding til Kafka" }
+                        }
+                        body {
+                            form(action = "/postmelding", method = FormMethod.post) {
+                                label {
+                                    htmlFor = "key"
+                                    +"Nøkkel:"
+                                }
+                                br {  }
+                                textInput {
+                                    name = "key"
+                                    id = "key"
+                                }
+                                br {  }
+                                label {
+                                    htmlFor = "json"
+                                    +"Melding:"
+                                }
+                                br {  }
+                                textArea{
+                                    name = "json"
+                                    id = "json"
+                                }
+                                br {  }
+                                submitInput()
+                            }
+                        }
+                    }
+                }
+                post("/postmelding"){
+
+                    val offset = call.receiveParameters().let {
+                       producer.publiser(requireNotNull( it["key"]),  JsonMessage(requireNotNull(it["json"])).toJson())
+
+                    }
+
+                    call.respondHtml {
+                        this.head{
+                            title { +"Post melding til Kafka" }
+                        }
+                        body {
+                            p { +"Partisjon:${offset.first} offset: ${offset.second}" }
+                        }
+                    }
+
+                }
+
                 authenticate {
                     get("/"){
                         call.respondText (navIdentFraToken()?: "Anonym", ContentType.Text.Plain )                    }
                     get("/sendMelding") {
                         sendMelding(
                             payload(aremark_person),
-                            producer,
-                            topic
+                            producer
                         )
                         call.respondText("READY", ContentType.Text.Plain)
                     }
 
+
                     post("/kafka") {
-                        producer.send(ProducerRecord(topic, "0", objectMapper.writeValueAsString(call.receive<ObjectNode>())))
+                        producer.publiser( "0", objectMapper.writeValueAsString(call.receive<ObjectNode>()))
                         call.respondText("Record lagt på kafka", ContentType.Text.Plain)
                     }
 
@@ -97,22 +149,17 @@ fun main() {
 
 internal fun sendMelding(
     melding: String,
-    producer: Producer<String, String>,
-    topic: String
+    producer: KafkaProdusent<String, String>
 ) {
     val startMillis = System.currentTimeMillis()
     logger.info("Publiserer melding")
 
-    producer.send(createRecord(melding, topic)).get()
-
-
-    producer.flush()
-    producer.close()
+    createRecord(melding).also { producer.publiser(it.first, it.second) }
 
     logger.info("melding publisert på ${(System.currentTimeMillis() - startMillis) / 1000}s")
 }
 
-private fun createRecord(input: String, topic: String): ProducerRecord<String, String> {
+private fun createRecord(input: String): Pair<String, String> {
     val message = JsonMessage.newMessage(mapOf(
         "@event_name" to "soeknad_innsendt",
         "@skjema_info" to objectMapper.readValue<ObjectNode>(input),
@@ -121,7 +168,7 @@ private fun createRecord(input: String, topic: String): ProducerRecord<String, S
         "@fnr_soeker" to aremark_person,
         "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L).toString()
     ))
-    return ProducerRecord(topic, "0", message.toJson())
+    return  "0" to  message.toJson()
 }
 fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<TokenValidationContextPrincipal>()
     ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("NAVident")?.toString()

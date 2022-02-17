@@ -1,5 +1,6 @@
 package no.nav.etterlatte.batch
 
+import KafkaProdusent
 import no.nav.common.KafkaEnvironment
 import no.nav.etterlatte.aremark_person
 import no.nav.etterlatte.sendMelding
@@ -40,7 +41,7 @@ class EndToEndTest {
     }
     @Test
     fun `sender meldinger på rapid`() {
-        val producer = KafkaProducer(
+        val producer = KafkaProdusent<String, String>(KafkaProducer(
             mapOf(
                 CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG to embeddedKafkaEnvironment.brokersURL.substringAfterLast("/"),
                 ProducerConfig.ACKS_CONFIG to "1",
@@ -49,10 +50,10 @@ class EndToEndTest {
                 ProducerConfig.RETRIES_CONFIG to 5.toString(),
                 ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION to "1"
             ).toProperties(), StringSerializer(), StringSerializer()
-        )
+        ), topicname)
 
 
-        sendMelding(payload(aremark_person),producer, topicname)
+        sendMelding(payload(aremark_person),producer)
 
         val consumer = KafkaConsumer(
             mapOf(

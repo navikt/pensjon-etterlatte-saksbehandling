@@ -15,6 +15,7 @@ dependencies {
     implementation(Ktor.MetricsMicrometer)
     implementation(Ktor.Jackson)
     implementation(Ktor.Auth)
+    implementation("io.ktor:ktor-html-builder:1.6.1")
 
     implementation(Micrometer.Prometheus)
     implementation(Jackson.DatatypeJsr310)

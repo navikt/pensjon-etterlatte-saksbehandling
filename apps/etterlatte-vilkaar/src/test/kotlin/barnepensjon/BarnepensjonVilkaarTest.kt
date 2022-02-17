@@ -8,9 +8,12 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.PersonInfo
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
+import no.nav.etterlatte.libs.common.vikaar.Kriterie
+import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
+import no.nav.etterlatte.vilkaar.barnepensjon.setVikaarVurderingsResultat
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarDoedsfallErRegistrert
 import org.junit.jupiter.api.Test
@@ -22,32 +25,82 @@ internal class BarnepensjonVilkaarTest {
 
     @Test
     fun vurderAlderErUnder20() {
-        val vurderingBarnOver20 = vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, listOf(foedselsdatoBarnOver20), listOf(doedsdatoForelderPdl))
-        val vurderingBarnUnder20 = vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, listOf(foedselsdatoBarnUnder20), listOf(doedsdatoForelderPdl))
-        val vurderingBarnUnder20UtenDoedsdato = vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, listOf(foedselsdatoBarnUnder20), listOf(doedsdatoForelderSoeknad))
+        val vurderingBarnOver20 = vilkaarBrukerErUnder20(
+            Vilkaartyper.SOEKER_ER_UNDER_20,
+            listOf(foedselsdatoBarnOver20),
+            listOf(doedsdatoForelderPdl)
+        )
+        val vurderingBarnUnder20 = vilkaarBrukerErUnder20(
+            Vilkaartyper.SOEKER_ER_UNDER_20,
+            listOf(foedselsdatoBarnUnder20),
+            listOf(doedsdatoForelderPdl)
+        )
+        val vurderingBarnUnder20UtenDoedsdato = vilkaarBrukerErUnder20(
+            Vilkaartyper.SOEKER_ER_UNDER_20,
+            listOf(foedselsdatoBarnUnder20),
+            listOf(doedsdatoForelderSoeknad)
+        )
 
         assertEquals(vurderingBarnOver20.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
         assertEquals(vurderingBarnUnder20.resultat, VilkaarVurderingsResultat.OPPFYLT)
-        assertEquals(vurderingBarnUnder20UtenDoedsdato.resultat, VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING)
+        assertEquals(
+            vurderingBarnUnder20UtenDoedsdato.resultat,
+            VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        )
 
     }
 
     @Test
     fun vurderDoedsdatoErRegistrert() {
         val doedsdatoIkkeIPdl =
-            vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, listOf(doedsdatoForelderSoeknad), listOf(foreldre))
+            vilkaarDoedsfallErRegistrert(
+                Vilkaartyper.DOEDSFALL_ER_REGISTRERT,
+                listOf(doedsdatoForelderSoeknad),
+                listOf(foreldre)
+            )
 
         val avdoedErForelder =
-            vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, listOf(doedsdatoForelderPdl), listOf(foreldre))
+            vilkaarDoedsfallErRegistrert(
+                Vilkaartyper.DOEDSFALL_ER_REGISTRERT,
+                listOf(doedsdatoForelderPdl),
+                listOf(foreldre)
+            )
 
         val avdoedIkkeForelder =
-            vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, listOf(doedsdatoIkkeForelderPdl), listOf(foreldre))
+            vilkaarDoedsfallErRegistrert(
+                Vilkaartyper.DOEDSFALL_ER_REGISTRERT,
+                listOf(doedsdatoIkkeForelderPdl),
+                listOf(foreldre)
+            )
 
         assertEquals(doedsdatoIkkeIPdl.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
         assertEquals(avdoedErForelder.resultat, VilkaarVurderingsResultat.OPPFYLT)
         assertEquals(avdoedIkkeForelder.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
 
     }
+
+    @Test
+    fun vurderVilkaarsVurdering() {
+        val oppfylt = setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieOppfylt))
+        val enIkkeOppfylt = setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieIkkeOppfylt, kriterieKanIkkeVurdere))
+        val oppfyltOgKanIkkeHentesUt = setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieKanIkkeVurdere, kriterieOppfylt))
+
+        assertEquals(VilkaarVurderingsResultat.OPPFYLT, oppfylt)
+        assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, enIkkeOppfylt)
+        assertEquals(VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, oppfyltOgKanIkkeHentesUt)
+
+    }
+
+    val kriterieOppfylt =
+        Kriterie(Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, VilkaarVurderingsResultat.OPPFYLT, listOf())
+    val kriterieIkkeOppfylt =
+        Kriterie(Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, VilkaarVurderingsResultat.IKKE_OPPFYLT, listOf())
+    val kriterieKanIkkeVurdere = Kriterie(
+        Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
+        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+        listOf()
+    )
+
 
     val foedselsdatoBarnOver20 = VilkaarOpplysning(
         opplysingType = Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value,

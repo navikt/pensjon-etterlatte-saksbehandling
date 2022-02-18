@@ -1,5 +1,7 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.typesafe.config.ConfigFactory
 import io.ktor.application.install
 import io.ktor.auth.Authentication
@@ -21,7 +23,12 @@ import no.nav.security.token.support.ktor.tokenValidationSupport
 class Server(applicationContext: ApplicationContext) {
     private val engine = embeddedServer(CIO, environment = applicationEngineEnvironment {
         module {
-            install(ContentNegotiation) { jackson() }
+            install(ContentNegotiation) {
+                jackson{
+                    registerModule(JavaTimeModule())
+                    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                }
+            }
             install(CallLogging) {
                 filter { call -> !call.request.path().startsWith("/internal") }
             }

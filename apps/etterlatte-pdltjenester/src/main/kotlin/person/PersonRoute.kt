@@ -34,7 +34,7 @@ fun Route.personApi(service: PersonService) {
             val person = service.hentPerson(EyHentUtvidetPersonRequest(fnr.value))
             call.respond(person)
         }
-        get("person") {
+        get("") {
             val queryParams = call.request.queryParameters
             val headers = call.request.headers
 

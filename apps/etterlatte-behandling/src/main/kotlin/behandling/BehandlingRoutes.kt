@@ -32,8 +32,8 @@ fun Route.behandlingRoutes(service: BehandlingService){
         }
 
         post("grunnlag") {
-            val body = call.receive<List<Behandlingsopplysning<ObjectNode>>>()
-            inTransaction { service.leggTilGrunnlagFraRegister(behandlingsId, body) }
+            val body = call.receive<LeggTilOpplysningerRequest>()
+            inTransaction { service.leggTilGrunnlagFraRegister(behandlingsId, body.opplysninger) }
             call.respond(HttpStatusCode.OK)
         }
 

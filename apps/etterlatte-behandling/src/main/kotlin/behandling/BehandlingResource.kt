@@ -8,3 +8,6 @@ data class BehandlingsBehov(
     val opplysninger: List<Behandlingsopplysning<ObjectNode>>?
 )
 
+data class LeggTilOpplysningerRequest(
+    val opplysninger: List<Behandlingsopplysning<ObjectNode>>
+)

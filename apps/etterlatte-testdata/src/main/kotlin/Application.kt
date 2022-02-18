@@ -110,25 +110,12 @@ fun main() {
                                 }
                             }
                         }
-                        //call.respondText(navIdentFraToken() ?: "Anonym", ContentType.Text.Plain)
                     }
                     get("/sendMelding") {
-
-                        val offset = call.receiveParameters().let {
-                            createRecord(payload(aremark_person)).let {
-                                producer.publiser(it.first, it.second)
-                            }
-                        }
-
-                        logger.info("Publiserer melding med partisjon: ${offset.first} offset: ${offset.second}")
-
-                        /*
                         sendMelding(
                             payload(aremark_person),
                             producer
                         )
-                        call.respondText("READY", ContentType.Text.Plain)
-                         */
 
                         call.respondHtml {
                             this.head {
@@ -138,7 +125,6 @@ fun main() {
                                 h3 {
                                     +"Standardmelding postet!"
                                 }
-                                p { +"Partisjon: ${offset.first} Offset: ${offset.second}" }
                                 br {}
                                 ul {
                                     li {

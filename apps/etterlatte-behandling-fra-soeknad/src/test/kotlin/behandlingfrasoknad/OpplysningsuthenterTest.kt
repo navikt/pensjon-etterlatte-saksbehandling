@@ -16,7 +16,6 @@ internal class OpplysningsuthenterTest {
 //TODO: skrur av denne enn så lenge, må tenkes litt mer gjennom ved endringer i søknadsstrukturen
     @Disabled
     @Test
-    @Disabled
     fun lagSkjemaInfoOpplysningsListe() {
         val hendelseJson = objectMapper.readTree(javaClass.getResource("/fullMessage3.json")!!.readText())!!
         val opplysningsuthenter = Opplysningsuthenter()

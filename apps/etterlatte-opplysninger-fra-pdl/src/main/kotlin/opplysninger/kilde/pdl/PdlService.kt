@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.person.Person
 class PdlService(private val pdl: HttpClient, private val url: String) : Pdl {
     override fun hentPdlModell(foedselsnummer: String): Person {
         val response = runBlocking {
-            pdl.post<Person>("$url/person") {
+            pdl.post<Person>("$url/person/hentperson") {
                 contentType(ContentType.Application.Json)
                 body = foedselsnummer
             }

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
-import { NavLink, Link, Routes, Route, useLocation } from 'react-router-dom'
+import { NavLink, Link, Routes, Route, useLocation, useMatch } from 'react-router-dom'
 import styled from 'styled-components'
 import { hentBehandling } from '../../shared/api/behandling'
 import { ClockIcon } from '../../shared/icons/clockIcon'
@@ -23,16 +23,19 @@ const addBehandlingAction = (data: any) => ({ type: 'add_behandling', data })
 
 export const Behandling = () => {
   const ctx = useContext(AppContext)
+  const match = useMatch('/behandling/:behandlingId/*')
   const location = useLocation()
 
   const [loaded, setLoaded] = useState<boolean>(false)
 
   useEffect(() => {
-    hentBehandling('10').then((response: IApiResponse<IDetaljertBehandling>) => {
-      ctx.dispatch(addBehandlingAction(response.data))
-      setLoaded(true)
-    })
-  }, [])
+    if (match?.params.behandlingId) {
+      hentBehandling(match.params.behandlingId).then((response: IApiResponse<IDetaljertBehandling>) => {
+        ctx.dispatch(addBehandlingAction(response.data))
+        setLoaded(true)
+      })
+    }
+  }, [match?.params.behandlingId])
 
   const active = (hash: string) => {
     if (location.hash === hash) {

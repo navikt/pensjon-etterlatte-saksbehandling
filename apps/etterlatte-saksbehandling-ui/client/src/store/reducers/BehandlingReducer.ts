@@ -1,7 +1,7 @@
 import { IAction } from '../AppContext'
 
 export interface IDetaljertBehandling {
-  id: number
+  id: string
   sak: number
   grunnlag: IBehandlingsopplysning[]
   vilkaarsproving: IVilkaarsproving[]
@@ -31,7 +31,7 @@ export enum VilkaarVurderingsResultat {
 }
 
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {
-  id: 0,
+  id: "",
   sak: 0,
   grunnlag: [],
   vilkaarsproving: [],

@@ -27,29 +27,31 @@ private val logger = LoggerFactory.getLogger(PersonService::class.java)
 fun Route.personApi(service: PersonService) {
     route("person") {
 
+        //TODO Depricated: slette etterhvert
         post("hentperson") {
             val fnr = Foedselsnummer.of(call.receive<String>().toString())
             logger.info("Fnr: $fnr")
-            val person = service.hentPerson(fnr)
+            val person = service.hentPerson(EyHentUtvidetPersonRequest(fnr.value))
             call.respond(person)
         }
-        post("hentUtvidetperson") {
-            val variables = EyHentUtvidetPersonRequest(call.receive<String>())
+        get("") {
+            val queryParams = call.request.queryParameters
+            val headers = call.request.headers
 
-            logger.info("Fnr: " + variables.foedselsnummer)
-            val person = service.hentPerson(Foedselsnummer.of(variables.foedselsnummer))
-            if (variables.utland) {
-                person.utland = service.hentUtland(person.foedselsnummer)
-            }
-            if (variables.adresse) {
-                person.adresse = service.hentAdresse(EyHentAdresseRequest(person.foedselsnummer, variables.historikk))
-            }
-            if (variables.familieRelasjon) {
-                person.familieRelasjon =
-                    service.hentFamilieRelasjon(EyHentFamilieRelasjonRequest(person.foedselsnummer))
-            }
-            call.respond(person)
+            val variables = EyHentUtvidetPersonRequest(
+                foedselsnummer = headers["foedselsnummer"]
+                    ?: throw BadRequestException("foedselsnummer is a required header"),
+                historikk = queryParams["historikk"]?.toBoolean() ?: false,
+                adresse = queryParams["adresse"]?.toBoolean() ?: false,
+                utland = queryParams["utland"]?.toBoolean() ?: false,
+                familieRelasjon = queryParams["familieRelasjon"]?.toBoolean() ?: false
+            )
+
+            logger.info("Henter person med fnr=${variables.foedselsnummer}")
+            service.hentPerson(variables)
+                .let { call.respond(it) }
         }
+        //TODO Depricated: slette etterhvert
         get("utvidetperson") {
             val queryParams = call.request.queryParameters
             val headers = call.request.headers
@@ -64,35 +66,8 @@ fun Route.personApi(service: PersonService) {
             )
 
             logger.info("Henter person med fnr=${variables.foedselsnummer}")
-            service.hentUtvidetPerson(variables)
+            service.hentPerson(variables)
                 .let { call.respond(it) }
-        }
-        post("hentutland") {
-            val fnr = Foedselsnummer.of(call.receive<String>().toString())
-            logger.info("Fnr: $fnr")
-            val utland = service.hentUtland(fnr)
-            call.respond(utland)
-        }
-        post("hentadresse") {
-            //val fnr = Foedselsnummer.of(call.receive<String>().toString())
-            val variables = Variables(call.receive<String>().toString())
-            //TODO litt usikker på om dette er beste måten å gjøre dette på
-            //val historikk = (call.request.header("historikk")).toBoolean()
-            //logger.info("Fnr: $fnr")
-            val person =
-                service.hentAdresse(EyHentAdresseRequest(Foedselsnummer.of(variables.ident), variables.historikk))
-
-            call.respond(person)
-        }
-        post("hentfamilierelasjon") {
-            val variables = Variables(call.receive<String>().toString())
-            val familieRelasjon = service.hentFamilieRelasjon(
-                EyHentFamilieRelasjonRequest(
-                    Foedselsnummer.of(variables.ident),
-                    variables.historikk
-                )
-            )
-            call.respond(familieRelasjon)
         }
     }
 }

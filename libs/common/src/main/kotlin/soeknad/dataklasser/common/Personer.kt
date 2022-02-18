@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Gjenlevende
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.GjenlevendeForelder
-import java.time.LocalDate
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -24,9 +23,9 @@ import java.time.LocalDate
 )
 interface Person {
     val type: PersonType
-    val fornavn: String
-    val etternavn: String
-    val foedselsnummer: Foedselsnummer
+    val fornavn: Opplysning<String>
+    val etternavn: Opplysning<String>
+    val foedselsnummer: Opplysning<Foedselsnummer>
 }
 
 enum class PersonType {
@@ -41,67 +40,67 @@ enum class PersonType {
 }
 
 data class Innsender(
-    override val fornavn: String,
-    override val etternavn: String,
-    override val foedselsnummer: Foedselsnummer
+    override val fornavn: Opplysning<String>,
+    override val etternavn: Opplysning<String>,
+    override val foedselsnummer: Opplysning<Foedselsnummer>
 ) : Person {
     override val type: PersonType = PersonType.INNSENDER
 }
 
 data class Forelder(
-    override val fornavn: String,
-    override val etternavn: String,
-    override val foedselsnummer: Foedselsnummer
+    override val fornavn: Opplysning<String>,
+    override val etternavn: Opplysning<String>,
+    override val foedselsnummer: Opplysning<Foedselsnummer>
 ) : Person {
     override val type: PersonType = PersonType.FORELDER
 }
 
 data class Barn(
-    override val fornavn: String,
-    override val etternavn: String,
-    override val foedselsnummer: Foedselsnummer,
+    override val fornavn: Opplysning<String>,
+    override val etternavn: Opplysning<String>,
+    override val foedselsnummer: Opplysning<Foedselsnummer>,
 
     val statsborgerskap: Opplysning<String>,
-    val utenlandsAdresse: BetingetOpplysning<Svar, Utenlandsadresse?>?,
+    val utenlandsAdresse: BetingetOpplysning<EnumSvar<JaNeiVetIkke>, Utenlandsadresse?>?,
     val foreldre: List<Forelder>,
-    val verge: BetingetOpplysning<Svar, Verge>?,
-    val dagligOmsorg: Opplysning<OmsorgspersonType>?
+    val verge: BetingetOpplysning<EnumSvar<JaNeiVetIkke>, Verge>?,
+    val dagligOmsorg: Opplysning<EnumSvar<OmsorgspersonType>>?
 ) : Person {
     override val type = PersonType.BARN
 }
 
 data class Avdoed(
-    override val fornavn: String,
-    override val etternavn: String,
-    override val foedselsnummer: Foedselsnummer,
+    override val fornavn: Opplysning<String>,
+    override val etternavn: Opplysning<String>,
+    override val foedselsnummer: Opplysning<Foedselsnummer>,
 
-    val datoForDoedsfallet: Opplysning<LocalDate>,
-    val statsborgerskap: Opplysning<String>,
-    val utenlandsopphold: BetingetOpplysning<Svar, List<Utenlandsopphold>>,
-    val doedsaarsakSkyldesYrkesskadeEllerYrkessykdom: Opplysning<Svar>,
+    val datoForDoedsfallet: Opplysning<DatoSvar>,
+    val statsborgerskap: Opplysning<FritekstSvar>,
+    val utenlandsopphold: BetingetOpplysning<EnumSvar<JaNeiVetIkke>, List<Utenlandsopphold>>,
+    val doedsaarsakSkyldesYrkesskadeEllerYrkessykdom: Opplysning<EnumSvar<JaNeiVetIkke>>,
 
     // Næringsinntekt og militærtjeneste er kun relevant dersom begge foreldrene er døde.
-    val naeringsInntekt: BetingetOpplysning<Svar, Naeringsinntekt?>?,
-    val militaertjeneste: BetingetOpplysning<Svar, Opplysning<AarstallForMilitaerTjeneste>?>?
+    val naeringsInntekt: BetingetOpplysning<EnumSvar<JaNeiVetIkke>, Naeringsinntekt?>?,
+    val militaertjeneste: BetingetOpplysning<EnumSvar<JaNeiVetIkke>, Opplysning<AarstallForMilitaerTjeneste>?>?
 ) : Person {
     override val type = PersonType.AVDOED
 }
 
 data class Verge(
-    override val fornavn: String,
-    override val etternavn: String,
-    override val foedselsnummer: Foedselsnummer,
+    override val fornavn: Opplysning<String>,
+    override val etternavn: Opplysning<String>,
+    override val foedselsnummer: Opplysning<Foedselsnummer>,
 ) : Person {
     override val type = PersonType.VERGE
 }
 
 data class Samboer(
-    override val fornavn: String,
-    override val etternavn: String,
-    override val foedselsnummer: Foedselsnummer,
+    override val fornavn: Opplysning<String>,
+    override val etternavn: Opplysning<String>,
+    override val foedselsnummer: Opplysning<Foedselsnummer>,
 
-    val fellesBarnEllertidligereGift: Opplysning<Svar>,
-    val inntekt: BetingetOpplysning<Svar, SamboerInntekt?>?,
+    val fellesBarnEllertidligereGift: Opplysning<EnumSvar<JaNeiVetIkke>>,
+    val inntekt: BetingetOpplysning<EnumSvar<JaNeiVetIkke>, SamboerInntekt?>?,
 ) : Person {
     override val type = PersonType.SAMBOER
 }

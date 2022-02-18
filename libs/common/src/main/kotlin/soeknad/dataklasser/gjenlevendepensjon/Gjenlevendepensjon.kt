@@ -8,37 +8,40 @@ import java.time.LocalDateTime
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Gjenlevendepensjon(
     override val imageTag: ImageTag,
+    override val spraak: Spraak,
     override val innsender: Innsender,
     override val soeker: Gjenlevende,
     override val harSamtykket: Opplysning<Boolean>,
-    override val utbetalingsInformasjon: BetingetOpplysning<BankkontoType, UtbetalingsInformasjon>?,
+    override val utbetalingsInformasjon: BetingetOpplysning<EnumSvar<BankkontoType>, UtbetalingsInformasjon>?,
 
     val avdoed: Avdoed,
     val barn: List<Barn>
 ) : InnsendtSoeknad {
-    override val versjon = "1"
+    override val versjon = "2"
     override val type: SoeknadType = SoeknadType.GJENLEVENDEPENSJON
     override val mottattDato: LocalDateTime = LocalDateTime.now()
 }
 
 data class Gjenlevende(
-    override val fornavn: String,
-    override val etternavn: String,
-    override val foedselsnummer: Foedselsnummer,
+    override val fornavn: Opplysning<String>,
+    override val etternavn: Opplysning<String>,
+    override val foedselsnummer: Opplysning<Foedselsnummer>,
 
-    val statsborgerskap: String,
-    val sivilstatus: String,
+    val statsborgerskap: Opplysning<String>,
+    val sivilstatus: Opplysning<String>,
     val adresse: Opplysning<String>?,
-    val bostedsAdresse: BetingetOpplysning<Svar, Opplysning<String>?>?,
+    val bostedsAdresse: BetingetOpplysning<EnumSvar<JaNeiVetIkke>, Opplysning<FritekstSvar>?>?,
     val kontaktinfo: Kontaktinfo,
-    val flyktning: Opplysning<Svar>?,
-    val oppholdUtland: BetingetOpplysning<Svar, OppholdUtland?>?,
-    val nySivilstatus: BetingetOpplysning<SivilstatusType, Samboer?>,
+    val flyktning: Opplysning<EnumSvar<JaNeiVetIkke>>?,
+    val oppholdUtland: BetingetOpplysning<EnumSvar<JaNeiVetIkke>, OppholdUtland?>?,
+    val nySivilstatus: BetingetOpplysning<EnumSvar<SivilstatusType>, Samboer?>,
     val arbeidOgUtdanning: ArbeidOgUtdanning?,
-    val fullfoertUtdanning: BetingetOpplysning<HoeyesteUtdanning, Opplysning<AnnenUtdanning>?>?,
+    val fullfoertUtdanning: BetingetOpplysning<EnumSvar<HoeyesteUtdanning>, Opplysning<AnnenUtdanning>?>?,
     val andreYtelser: AndreYtelser,
-    val uregistrertEllerVenterBarn: Opplysning<Svar>,
+    val uregistrertEllerVenterBarn: Opplysning<EnumSvar<JaNeiVetIkke>>,
     val forholdTilAvdoede: ForholdTilAvdoede,
 ) : Person {
     override val type = PersonType.GJENLEVENDE
 }
+
+

@@ -85,7 +85,7 @@ const Oppgavebenken = () => {
 function mapOppgaveResponse(data: any): IOppgave {
   const oppgave: IOppgave = {
     sakId: data.sakId,
-    behandlingsId: data.sakId,
+    behandlingsId: data.behandlingsId,
     regdato: moment(data.regdato, 'YYYY-MM-DD').toDate(),
     soeknadType: data.soeknadType.toUpperCase() as SoeknadTypeFilter,
     behandlingType: data.behandlingType.toUpperCase() as BehandlingTypeFilter,

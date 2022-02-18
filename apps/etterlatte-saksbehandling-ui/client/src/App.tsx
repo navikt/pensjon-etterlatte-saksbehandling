@@ -22,7 +22,7 @@ function App() {
     <>
       {innloggetbrukerHentet && (
         <div className="app">
-          <BrowserRouter>
+          <BrowserRouter basename='/'>
             <Header />
             <Routes>
               <Route

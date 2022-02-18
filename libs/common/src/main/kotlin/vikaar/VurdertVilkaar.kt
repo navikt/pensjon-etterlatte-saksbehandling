@@ -5,8 +5,8 @@ enum class VilkaarVurderingsResultat {
 }
 
 data class VurdertVilkaar(
-    val navn: String,
+    val navn: Vilkaartyper,
     val resultat: VilkaarVurderingsResultat,
-    val basertPaaOpplysninger: List<VilkaarOpplysning<out Any>>,
+    val kriterier: List<Kriterie>,
 )
 

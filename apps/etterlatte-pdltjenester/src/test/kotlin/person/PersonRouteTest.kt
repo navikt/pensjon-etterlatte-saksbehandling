@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test
 class PersonRouteTest {
 
     private val personService = mockk<PersonService>().apply {
-        coEvery { hentUtvidetPerson(any()) } returns mockk(relaxed = true)
+        coEvery { hentPerson(any()) } returns mockk(relaxed = true)
     }
 
     companion object {
@@ -70,7 +70,7 @@ class PersonRouteTest {
 
     @Test
     fun `skal returnere person uten noe utvidet informasjon`() {
-        coEvery { personService.hentUtvidetPerson(EyHentUtvidetPersonRequest(
+        coEvery { personService.hentPerson(EyHentUtvidetPersonRequest(
             foedselsnummer = GYLDIG_FNR,
         )) } returns mockPerson()
 
@@ -80,7 +80,7 @@ class PersonRouteTest {
                 addHeader("foedselsnummer", GYLDIG_FNR)
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                coVerify { personService.hentUtvidetPerson(any()) }
+                coVerify { personService.hentPerson(any()) }
                 confirmVerified(personService)
             }
         }
@@ -88,7 +88,7 @@ class PersonRouteTest {
 
     @Test
     fun `skal returnere person med utvidet informasjon om utland`() {
-        coEvery { personService.hentUtvidetPerson(EyHentUtvidetPersonRequest(
+        coEvery { personService.hentPerson(EyHentUtvidetPersonRequest(
             foedselsnummer = GYLDIG_FNR,
             historikk = true,
             utland = true
@@ -100,7 +100,7 @@ class PersonRouteTest {
                 addHeader("foedselsnummer", GYLDIG_FNR)
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                coVerify { personService.hentUtvidetPerson(any()) }
+                coVerify { personService.hentPerson(any()) }
                 confirmVerified(personService)
             }
         }

@@ -5,7 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.common.correlationId
 import no.nav.etterlatte.common.withLogContext
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.soeknad.SoeknadType
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.pdl.PersonService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -96,7 +96,7 @@ internal class EtterlatteFordeler(
         }
 
     private fun soknadIkkeBarnepensjon(packet: JsonMessage) =
-        packet.soknadType() != SoeknadType.Barnepensjon.name.uppercase()
+        packet.soknadType() != SoeknadType.BARNEPENSJON.name
 
     private fun JsonMessage.soknadType() =
         this["@skjema_info"]["type"]?.textValue()

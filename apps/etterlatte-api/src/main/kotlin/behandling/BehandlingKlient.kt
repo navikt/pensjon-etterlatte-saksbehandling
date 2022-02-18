@@ -167,7 +167,10 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
         }
     }
 
-    override suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag {
+    override suspend fun opprettBehandling(
+        behandlingsBehov: BehandlingsBehov,
+        accessToken: String
+    ): BehandlingSammendrag {
         logger.info("Oppretter behandling på en sak")
 
         val postBody = serialize(behandlingsBehov)
@@ -186,7 +189,6 @@ class BehandlingKlient(config: Config) : EtterlatteBehandling {
             throw e
         }
     }
-
 
 
 }

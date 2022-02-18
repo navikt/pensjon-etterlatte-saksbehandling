@@ -9,7 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 
-val objectMapper: ObjectMapper = JsonMapper.builder()
+public val objectMapper: ObjectMapper = JsonMapper.builder()
     .addModule(JavaTimeModule())
     .addModule(KotlinModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

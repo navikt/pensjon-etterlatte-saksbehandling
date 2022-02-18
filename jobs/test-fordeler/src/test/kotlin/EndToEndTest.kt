@@ -38,6 +38,7 @@ class EndToEndTest {
     internal fun setupAll() {
         embeddedKafkaEnvironment.start()
     }
+    /*
     @Test
     fun `sender meldinger på rapid`() {
         val producer = KafkaProducer(
@@ -71,6 +72,8 @@ class EndToEndTest {
             Assertions.assertTrue(it.value().contains(""""type":"BARNEPENSJON""""))
         }
     }
+
+     */
 
     @AfterAll
     fun tearDown() {

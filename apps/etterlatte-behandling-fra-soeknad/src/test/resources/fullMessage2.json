@@ -2,11 +2,21 @@
   "@event_name": "ey_fordelt",
   "@soeknad_fordelt": true,
   "@skjema_info": {
-    "imageTag": "1aa6348ecb39336245537af6be6b894bb19bbfc4",
+    "imageTag": "9f1f95b2472742227b37d19dd2d735ac9001995e",
+    "spraak": "nb",
     "innsender": {
-      "fornavn": "ABSURD",
-      "etternavn": "GAPAHUK",
-      "foedselsnummer": "09018701453",
+      "fornavn": {
+        "svar": "GØYAL",
+        "spoersmaal": "Fornavn"
+      },
+      "etternavn": {
+        "svar": "HØYSTAKK",
+        "spoersmaal": "Etternavn"
+      },
+      "foedselsnummer": {
+        "svar": "03108718357",
+        "spoersmaal": "Fødselsnummer"
+      },
       "type": "INNSENDER"
     },
     "harSamtykket": {
@@ -14,11 +24,16 @@
       "spoersmaal": ""
     },
     "utbetalingsInformasjon": {
-      "svar": "NORSK",
+      "svar": {
+        "verdi": "NORSK",
+        "innhold": "Norsk"
+      },
       "spoersmaal": "Ønsker du å motta utbetalingen på norsk eller utenlandsk bankkonto?",
       "opplysning": {
         "kontonummer": {
-          "svar": "3123.12.31231",
+          "svar": {
+            "innhold": "6848.64.44444"
+          },
           "spoersmaal": "Oppgi norsk kontonummer for utbetaling"
         },
         "utenlandskBankNavn": null,
@@ -29,34 +44,67 @@
       }
     },
     "soeker": {
-      "fornavn": "kraftig",
-      "etternavn": "mygg",
-      "foedselsnummer": "20110875720",
+      "fornavn": {
+        "svar": "kirsten",
+        "spoersmaal": "Fornavn"
+      },
+      "etternavn": {
+        "svar": "jakobsen",
+        "spoersmaal": "Etternavn"
+      },
+      "foedselsnummer": {
+        "svar": "12101376212",
+        "spoersmaal": "Barnets fødselsnummer / d-nummer"
+      },
       "statsborgerskap": {
         "svar": "Norge",
         "spoersmaal": "Statsborgerskap"
       },
       "utenlandsAdresse": {
-        "svar": "NEI",
+        "svar": {
+          "verdi": "NEI",
+          "innhold": "Nei"
+        },
         "spoersmaal": "Bor barnet i et annet land enn Norge?",
         "opplysning": null
       },
       "foreldre": [
         {
-          "fornavn": "ABSURD",
-          "etternavn": "GAPAHUK",
-          "foedselsnummer": "09018701453",
+          "fornavn": {
+            "svar": "GØYAL",
+            "spoersmaal": "Fornavn"
+          },
+          "etternavn": {
+            "svar": "HØYSTAKK",
+            "spoersmaal": "Etternavn"
+          },
+          "foedselsnummer": {
+            "svar": "12101376212",
+            "spoersmaal": "Fødselsnummer"
+          },
           "type": "FORELDER"
         },
         {
-          "fornavn": "birgitt",
-          "etternavn": "bamse",
-          "foedselsnummer": "13087307551",
+          "fornavn": {
+            "svar": "fe",
+            "spoersmaal": "Fornavn"
+          },
+          "etternavn": {
+            "svar": "fe",
+            "spoersmaal": "Etternavn"
+          },
+          "foedselsnummer": {
+            "svar": "22128202440",
+            "spoersmaal": "Fødselsnummer"
+          },
           "type": "FORELDER"
         }
       ],
       "verge": {
-        "svar": "NEI",
+        "svar": {
+          "verdi": "NEI",
+          "innhold": "Nei"
+        },
         "spoersmaal": "Er det oppnevnt en verge for barnet?",
         "opplysning": null
       },
@@ -65,11 +113,20 @@
     },
     "foreldre": [
       {
-        "fornavn": "ABSURD",
-        "etternavn": "GAPAHUK",
-        "foedselsnummer": "09018701453",
+        "fornavn": {
+          "svar": "GØYAL",
+          "spoersmaal": "Fornavn"
+        },
+        "etternavn": {
+          "svar": "HØYSTAKK",
+          "spoersmaal": "Etternavn"
+        },
+        "foedselsnummer": {
+          "svar": "03108718357",
+          "spoersmaal": "Fødselsnummer"
+        },
         "adresse": {
-          "svar": "Sannergata",
+          "svar": "Sannergata 6C, 0557 Oslo",
           "spoersmaal": "Bostedsadresse"
         },
         "statsborgerskap": {
@@ -77,45 +134,68 @@
           "spoersmaal": "Statsborgerskap"
         },
         "kontaktinfo": {
-          "epost": {
-            "svar": "me@home.no",
-            "spoersmaal": "E-post"
-          },
           "telefonnummer": {
-            "svar": "898 98 989",
+            "svar": {
+              "innhold": "11111111"
+            },
             "spoersmaal": "Telefonnummer"
           }
         },
         "type": "GJENLEVENDE_FORELDER"
       },
       {
-        "fornavn": "birgitt",
-        "etternavn": "bamse",
-        "foedselsnummer": "13087307551",
+        "fornavn": {
+          "svar": "fe",
+          "spoersmaal": "Fornavn"
+        },
+        "etternavn": {
+          "svar": "fe",
+          "spoersmaal": "Etternavn"
+        },
+        "foedselsnummer": {
+          "svar": "22128202440",
+          "spoersmaal": "Fødselsnummer / d-nummer"
+        },
         "datoForDoedsfallet": {
-          "svar": "2021-12-26",
+          "svar": {
+            "innhold": "2022-01-01"
+          },
           "spoersmaal": "Når skjedde dødsfallet?"
         },
         "statsborgerskap": {
-          "svar": "Norge",
+          "svar": {
+            "innhold": "Norge"
+          },
           "spoersmaal": "Statsborgerskap"
         },
         "utenlandsopphold": {
-          "svar": "NEI",
+          "svar": {
+            "verdi": "NEI",
+            "innhold": "Nei"
+          },
           "spoersmaal": "Bodde eller arbeidet han eller hun i et annet land enn Norge etter fylte 16 år?",
           "opplysning": null
         },
         "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": {
-          "svar": "NEI",
+          "svar": {
+            "verdi": "NEI",
+            "innhold": "Nei"
+          },
           "spoersmaal": "Skyldes dødsfallet yrkesskade eller yrkessykdom?"
         },
         "naeringsInntekt": {
-          "svar": "NEI",
+          "svar": {
+            "verdi": "NEI",
+            "innhold": "Nei"
+          },
           "spoersmaal": "Var han eller hun selvstendig næringsdrivende?",
           "opplysning": null
         },
         "militaertjeneste": {
-          "svar": "NEI",
+          "svar": {
+            "verdi": "NEI",
+            "innhold": "Nei"
+          },
           "spoersmaal": "Har han eller hun gjennomført militær eller sivil førstegangstjeneste som varte minst 30 dager?",
           "opplysning": null
         },
@@ -123,10 +203,10 @@
       }
     ],
     "soesken": [],
-    "versjon": "1",
+    "versjon": "2",
     "type": "BARNEPENSJON",
-    "mottattDato": "2022-01-03T13:44:25.888888401",
-    "template": "barnepensjon_v1"
+    "mottattDato": "2022-02-14T14:37:24.573612786",
+    "template": "barnepensjon_v2"
   },
   "@lagret_soeknad_id": 360,
   "@template": "soeknad",

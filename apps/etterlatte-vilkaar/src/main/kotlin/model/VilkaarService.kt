@@ -10,11 +10,16 @@ import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarDoedsfallErRegistrert
+import org.slf4j.LoggerFactory
 
 
 class VilkaarService {
+    private val logger = LoggerFactory.getLogger(VilkaarService::class.java)
 
     fun mapVilkaar(opplysninger: List<VilkaarOpplysning<ObjectNode>>): List<VurdertVilkaar> {
+        logger.info("Map vilkaar")
+        println(opplysninger)
+
         val soekerFoedselsdato =
             opplysninger.filter { it.opplysingType == Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value }
                 .map { setOpplysningType<Foedselsdato>(it) }

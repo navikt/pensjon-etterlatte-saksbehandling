@@ -24,6 +24,7 @@ fun main() {
 }
 
 fun Application.module() {
+
     install(ContentNegotiation) {
         jackson {
             registerModule(JavaTimeModule())

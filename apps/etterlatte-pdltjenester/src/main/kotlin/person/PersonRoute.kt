@@ -4,16 +4,13 @@ import io.ktor.application.ApplicationCall
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.call
 import io.ktor.features.BadRequestException
-import io.ktor.features.CallId.Feature.phase
-import io.ktor.request.*
+import io.ktor.request.receive
 import io.ktor.response.respond
-import io.ktor.response.respondText
 import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.logging.withLogContextCo
 import no.nav.etterlatte.libs.common.pdl.EyHentUtvidetPersonRequest
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -29,7 +26,8 @@ private val logger = LoggerFactory.getLogger(PersonService::class.java)
 fun Route.personApi(service: PersonService) {
     route("person") {
 
-        intercept(ApplicationCallPipeline.Monitoring) {
+        intercept(ApplicationCallPipeline.Setup) {
+            logger.info("CorrelationId: ${call.correlationId()}")
             withLogContextCo(call.correlationId()) {
                 proceed()
             }

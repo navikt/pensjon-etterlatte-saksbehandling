@@ -9,10 +9,8 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
 
-    <root level="${ROOT_LOGLEVEL:-WARN}">
+    <root level="INFO">
         <appender-ref ref="STDOUT_JSON"/>
     </root>
-
-    <logger name="Application" level="INFO"/>
 
 </configuration>

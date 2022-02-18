@@ -3,7 +3,7 @@ package no.nav.etterlatte.libs.common.logging
 import org.slf4j.MDC
 import java.util.*
 
-const val CORRELATION_ID: String = "correlation-id"
+const val CORRELATION_ID: String = "correlation_id"
 
 suspend fun <T> withLogContextCo(correlationId: String?, kv: Map<String, String> = emptyMap(), block: suspend () -> T): T =
     coInnerLogContext(correlationId, kv, block)

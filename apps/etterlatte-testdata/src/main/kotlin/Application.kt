@@ -89,6 +89,9 @@ fun main() {
                                     +"Post meldinger til Kafka"
                                 }
                                 p {
+                                    +"Innlogget som ${navIdentFraToken() ?: "Anonym"}"
+                                }
+                                h4 {
                                     +"Meny"
                                 }
                                 ul {
@@ -105,13 +108,9 @@ fun main() {
                                         }
                                     }
                                 }
-                                br {}
-                                p {
-                                    +"Innlogget som ${navIdentFraToken() ?: "Anonym"}"
-                                }
                             }
                         }
-                        call.respondText(navIdentFraToken() ?: "Anonym", ContentType.Text.Plain)
+                        //call.respondText(navIdentFraToken() ?: "Anonym", ContentType.Text.Plain)
                     }
                     get("/sendMelding") {
                         val offset = sendMelding(
@@ -194,9 +193,19 @@ fun main() {
                                 }
                                 p { +"Partisjon: ${offset.first} Offset: ${offset.second}" }
                                 br {}
-                                a {
-                                    href = "/"
-                                    +"Tilbake til hovedmeny "
+                                ul {
+                                    li {
+                                        a {
+                                            href = "/postmelding"
+                                            +"Post ny melding"
+                                        }
+                                    }
+                                    li {
+                                        a {
+                                            href = "/"
+                                            +"Tilbake til hovedmeny"
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -230,7 +239,7 @@ internal suspend fun sendMelding(
         }
     }
 
-    logger.info("melding publisert på ${(System.currentTimeMillis() - startMillis) / 1000}s")
+    logger.info("melding publisert på ${(System.currentTimeMillis() - startMillis) / 1000}s - Partisjon: ${offset.first} - Offset: ${offset.second}")
     return offset
 }
 

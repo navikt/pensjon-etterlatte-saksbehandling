@@ -22,6 +22,7 @@ internal class LeggTilOpplysnignerFraPdl(
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "ey_fordelt") }
             validate { it.requireKey("@skjema_info") }
+            validate { it.requireValue("@skjema_info.versjon", "2") }
             validate { it.requireKey("@lagret_soeknad_id") }
             validate { it.requireKey("@fnr_soeker") }
             validate { it.requireValue("@soeknad_fordelt", true) }
@@ -32,7 +33,7 @@ internal class LeggTilOpplysnignerFraPdl(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val barnePensjon = objectMapper.readValue(packet.toJson(), Barnepensjon::class.java)
+        val barnePensjon = objectMapper.treeToValue(packet["@skjema_info"], Barnepensjon::class.java)!!
         behandlinger.leggTilOpplysninger(UUID.fromString(packet["@behandling_id"].asText()), opplysningsBygger.byggOpplysninger(barnePensjon, pdl))
     }
 }

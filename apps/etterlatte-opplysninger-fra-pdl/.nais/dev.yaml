@@ -40,3 +40,4 @@ spec:
     outbound:
       rules:
         - application: etterlatte-behandling
+        - application: etterlatte-pdltjenester

@@ -1,11 +1,15 @@
 package no.nav.etterlatte.database
 
 import no.nav.etterlatte.DatabaseKontekst
+import org.slf4j.LoggerFactory
 import java.sql.Connection
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.sql.DataSource
 
 class DatabaseContext (private val ds: DataSource ): DatabaseKontekst {
+    companion object{
+        val logger = LoggerFactory.getLogger(DatabaseContext::class.java)
+    }
     private val transaktionOpen = AtomicBoolean(false)
 
     private var transactionalConnection: Connection? = null
@@ -28,7 +32,7 @@ class DatabaseContext (private val ds: DataSource ): DatabaseKontekst {
         }catch (ex:Throwable){
             c.rollback()
             println("rolled back")
-
+            logger.warn("Reason for rollback", ex)
             throw ex
         }finally {
             transactionalConnection = null

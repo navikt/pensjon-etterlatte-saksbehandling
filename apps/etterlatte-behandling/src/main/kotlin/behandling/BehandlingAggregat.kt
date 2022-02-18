@@ -54,7 +54,6 @@ class BehandlingAggregat(
         opplysninger.leggOpplysningTilBehandling(lagretBehandling.id, behandlingsopplysning.id)
         lagredeOpplysninger += behandlingsopplysning
         logger.info("La til opplysning $type i behandling ${lagretBehandling.id}")
-        vilkårsprøv()
         return behandlingsopplysning.id
     }
 

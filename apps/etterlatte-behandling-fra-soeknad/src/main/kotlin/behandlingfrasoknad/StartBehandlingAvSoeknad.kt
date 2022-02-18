@@ -16,6 +16,7 @@ internal class StartBehandlingAvSoeknad(
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "ey_fordelt") }
             validate { it.requireKey("@skjema_info") }
+            validate { it.requireValue("@skjema_info.versjon", "2") }
             validate { it.requireKey("@lagret_soeknad_id") }
             validate { it.requireKey("@fnr_soeker") }
             validate { it.requireValue("@soeknad_fordelt", true) }

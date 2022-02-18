@@ -50,3 +50,4 @@ spec:
       rules:
         - application: etterlatte-fordeler
         - application: etterlatte-api
+        - application: etterlatte-opplysninger-fra-pdl

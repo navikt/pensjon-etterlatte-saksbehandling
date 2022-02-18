@@ -13,6 +13,7 @@ data class GraphqlRequest(
  *
  * Ident kan være i form av FOLKEREGISTERIDENT (fødselsnummer), AKTORID eller NPID.
  */
+//TODO burde ident vært Foedselsnummer?
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Variables(

@@ -14,11 +14,11 @@ export const AlderBarn = (props: IVilkaarProps) => {
         <div>Barnet er under 20 år</div>
       </VilkaarColumn>
       <VilkaarColumn>
-        <div>Barnets fødselsdato</div>
+        <div><strong>Barnets fødselsdato</strong></div>
         <div>{grunnlag.opplysning.foedselsdato}</div>
       </VilkaarColumn>
       <VilkaarColumn>
-        <div>Alder ved dødsfall</div>
+        <div><strong>Alder ved dødsfall</strong></div>
         <div>9 år</div>
       </VilkaarColumn>
       <VilkaarColumn>

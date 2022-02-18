@@ -113,11 +113,22 @@ fun main() {
                         //call.respondText(navIdentFraToken() ?: "Anonym", ContentType.Text.Plain)
                     }
                     get("/sendMelding") {
-                        val offset = sendMelding(
+
+                        val offset = call.receiveParameters().let {
+                            createRecord(payload(aremark_person)).let {
+                                producer.publiser(it.first, it.second)
+                            }
+                        }
+
+                        logger.info("Publiserer melding med partisjon: ${offset.first} offset: ${offset.second}")
+
+                        /*
+                        sendMelding(
                             payload(aremark_person),
-                            producer,
-                            call
+                            producer
                         )
+                        call.respondText("READY", ContentType.Text.Plain)
+                         */
 
                         call.respondHtml {
                             this.head {
@@ -129,14 +140,13 @@ fun main() {
                                 }
                                 p { +"Partisjon: ${offset.first} Offset: ${offset.second}" }
                                 br {}
-                                a {
-                                    href = "/postmelding"
-                                    +"Post ny melding"
-                                }
-                                br {}
-                                a {
-                                    href = "/"
-                                    +"Tilbake til hovedmeny"
+                                ul {
+                                    li {
+                                        a {
+                                            href = "/"
+                                            +"Tilbake til hovedmeny"
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -170,6 +180,14 @@ fun main() {
                                     br { }
                                     submitInput()
                                 }
+                                ul {
+                                    li {
+                                        a {
+                                            href = "/"
+                                            +"Tilbake til hovedmeny"
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -182,6 +200,7 @@ fun main() {
                                 mapOf("NavIdent" to (navIdentFraToken()!!.toByteArray()))
                             )
                         }
+                        logger.info("Publiserer melding med partisjon: ${offset.first} offset: ${offset.second}")
 
                         call.respondHtml {
                             this.head {
@@ -225,22 +244,16 @@ fun main() {
     }).start(true)
 }
 
-internal suspend fun sendMelding(
+internal fun sendMelding(
     melding: String,
     producer: KafkaProdusent<String, String>,
-    call: ApplicationCall
-): Pair<Int, Long> {
+) {
     val startMillis = System.currentTimeMillis()
     logger.info("Publiserer melding")
 
-    val offset = createRecord(melding).let { record ->
-        call.receiveParameters().let {
-            producer.publiser(record.first, record.second)
-        }
-    }
+    createRecord(melding).also { producer.publiser(it.first, it.second) }
 
-    logger.info("melding publisert på ${(System.currentTimeMillis() - startMillis) / 1000}s - Partisjon: ${offset.first} - Offset: ${offset.second}")
-    return offset
+    logger.info("melding publisert på ${(System.currentTimeMillis() - startMillis) / 1000}s ")
 }
 
 private fun createRecord(input: String): Pair<String, String> {

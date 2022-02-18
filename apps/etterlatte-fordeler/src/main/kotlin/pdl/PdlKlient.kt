@@ -1,13 +1,15 @@
 package no.nav.etterlatte.pdl
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.*
+import io.ktor.client.request.accept
+import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import no.nav.etterlatte.common.CORRELATION_ID
-import no.nav.etterlatte.common.correlationId
-import no.nav.etterlatte.libs.common.person.*
-
+import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
 import org.slf4j.LoggerFactory
 
 interface Pdl {
@@ -34,7 +36,7 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
         val response = client.get<Person>(
             "$apiUrl/utvidetperson?historikk=$historikk&adresse=$adresse&utland=$utland&familieRelasjon=$familieRelasjon") {
             header("foedselsnummer", fnr.value)
-            header(CORRELATION_ID, correlationId())
+            header(CORRELATION_ID, getCorrelationId())
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
         }

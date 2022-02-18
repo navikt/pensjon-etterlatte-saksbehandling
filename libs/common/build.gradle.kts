@@ -1,3 +1,4 @@
+import Logging.Slf4jApi
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -17,6 +18,8 @@ dependencies {
     api(Jackson.DatatypeJsr310)
     api(Jackson.DatatypeJdk8)
     api(Jackson.ModuleKotlin)
+
+    compileOnly(Slf4jApi)
 
     testImplementation(Jupiter.Api)
     testImplementation(Jupiter.Params)

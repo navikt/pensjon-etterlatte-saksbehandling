@@ -1,7 +1,10 @@
 package no.nav.etterlatte.person
 
+import io.ktor.application.ApplicationCall
+import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.call
 import io.ktor.features.BadRequestException
+import io.ktor.features.CallId.Feature.phase
 import io.ktor.request.*
 import io.ktor.response.respond
 import io.ktor.response.respondText
@@ -9,23 +12,28 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
-import no.nav.etterlatte.common.innloggetBrukerFnr
-import no.nav.etterlatte.common.toJson
-import no.nav.etterlatte.libs.common.pdl.Variables
-import no.nav.etterlatte.libs.common.person.EyFamilieRelasjon
-import no.nav.etterlatte.libs.common.pdl.EyHentAdresseRequest
-import no.nav.etterlatte.libs.common.pdl.EyHentFamilieRelasjonRequest
+import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.logging.withLogContextCo
 import no.nav.etterlatte.libs.common.pdl.EyHentUtvidetPersonRequest
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(PersonService::class.java)
 
+
 /**
  * Endepunkter for uthenting av person
  */
+
 fun Route.personApi(service: PersonService) {
     route("person") {
+
+        intercept(ApplicationCallPipeline.Monitoring) {
+            withLogContextCo(call.correlationId()) {
+                proceed()
+            }
+        }
 
         //TODO Depricated: slette etterhvert
         post("hentperson") {
@@ -34,6 +42,7 @@ fun Route.personApi(service: PersonService) {
             val person = service.hentPerson(EyHentUtvidetPersonRequest(fnr.value))
             call.respond(person)
         }
+
         get("") {
             val queryParams = call.request.queryParameters
             val headers = call.request.headers
@@ -51,6 +60,7 @@ fun Route.personApi(service: PersonService) {
             service.hentPerson(variables)
                 .let { call.respond(it) }
         }
+
         //TODO Depricated: slette etterhvert
         get("utvidetperson") {
             val queryParams = call.request.queryParameters
@@ -68,6 +78,10 @@ fun Route.personApi(service: PersonService) {
             logger.info("Henter person med fnr=${variables.foedselsnummer}")
             service.hentPerson(variables)
                 .let { call.respond(it) }
+
         }
     }
 }
+
+fun ApplicationCall.correlationId(): String? = this.request.headers[CORRELATION_ID]
+

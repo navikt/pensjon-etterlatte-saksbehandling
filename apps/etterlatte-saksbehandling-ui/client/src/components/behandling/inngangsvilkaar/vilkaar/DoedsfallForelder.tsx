@@ -1,5 +1,6 @@
 import { StatusIcon } from "../../../../shared/icons/statusIcon"
 import { Title, VilkaarColumn } from "../styled"
+import { IVilkaarProps } from "../types";
 
 
 export const DoedsFallForelder = (props: any) => {

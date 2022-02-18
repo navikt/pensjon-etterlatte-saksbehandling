@@ -4,7 +4,7 @@ export interface IDetaljertBehandling {
   id: string
   sak: number
   grunnlag: IBehandlingsopplysning[]
-  vilkaarsproving: IVilkaarsproving[]
+  vilkårsprøving: IVilkaarsproving[]
   beregning: any
   fastsatt: boolean
 }
@@ -34,7 +34,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: "",
   sak: 0,
   grunnlag: [],
-  vilkaarsproving: [],
+  vilkårsprøving: [],
   beregning: undefined,
   fastsatt: false,
 }

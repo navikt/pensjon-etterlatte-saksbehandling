@@ -17,10 +17,8 @@ export enum OpplysningsType {
 
 export interface IVilkaarProps {
   vilkaar: {
-    vilkaarDone: Status
-    vilkaarType: OpplysningsType
-    vilkaarStatus: VilkaarStatus
-    grunnlag: any;
-    description?: string
+    navn: any;
+    resultat: any;
+    kriterier: any;
   }
 }

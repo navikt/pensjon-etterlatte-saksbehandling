@@ -10,6 +10,7 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
+import kotlinx.coroutines.withContext
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.withLogContextCo
 import no.nav.etterlatte.libs.common.pdl.EyHentUtvidetPersonRequest
@@ -27,12 +28,12 @@ private val logger = LoggerFactory.getLogger(PersonService::class.java)
 fun Route.personApi(service: PersonService) {
     route("person") {
 
-        intercept(ApplicationCallPipeline.Setup) {
+        /*intercept(ApplicationCallPipeline.Setup) {
             logger.info("CorrelationId: ${call.correlationId()}")
             withLogContextCo(call.correlationId()) {
                 proceed()
             }
-        }
+        }*/
 
         //TODO Depricated: slette etterhvert
         post("hentperson") {
@@ -62,7 +63,7 @@ fun Route.personApi(service: PersonService) {
 
         //TODO Depricated: slette etterhvert
         get("utvidetperson") {
-            MDC.put("test_mdc", "test")
+            logger.info("MDC:${MDC.get(CORRELATION_ID)}")
             val queryParams = call.request.queryParameters
             val headers = call.request.headers
 

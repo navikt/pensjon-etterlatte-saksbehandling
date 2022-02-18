@@ -21,7 +21,6 @@ class DownstreamResourceClient(
     private val httpClient: HttpClient = defaultHttpClient
 ) {
     suspend fun
-
             get(
         resource: Resource,
         accessToken: String

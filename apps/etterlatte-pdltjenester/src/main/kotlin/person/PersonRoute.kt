@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContextCo
 import no.nav.etterlatte.libs.common.pdl.EyHentUtvidetPersonRequest
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 
 private val logger = LoggerFactory.getLogger(PersonService::class.java)
 
@@ -61,6 +62,7 @@ fun Route.personApi(service: PersonService) {
 
         //TODO Depricated: slette etterhvert
         get("utvidetperson") {
+            MDC.put("test_mdc", "test")
             val queryParams = call.request.queryParameters
             val headers = call.request.headers
 

@@ -10,6 +10,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.pdl.PdlKlient
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,7 +30,7 @@ class PdlKlientTest {
             engine {
                 addHandler { request ->
                     val path = "/person/utvidetperson?historikk=true&adresse=true&utland=true&familieRelasjon=true"
-                    if (request.url.fullPath == path && request.method == HttpMethod.Get) {
+                    if (request.url.fullPath == path && request.method == HttpMethod.Get && request.headers[CORRELATION_ID] != null) {
                         val headers = headersOf(
                             "Content-Type" to listOf(ContentType.Application.Json.toString()),
                             "foedselsnummer" to listOf(fnr),

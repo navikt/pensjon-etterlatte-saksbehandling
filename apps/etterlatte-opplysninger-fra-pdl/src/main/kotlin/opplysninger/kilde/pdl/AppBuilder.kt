@@ -1,5 +1,6 @@
 package no.nav.etterlatte.opplysninger.kilde.pdl
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -27,7 +28,10 @@ class AppBuilder(private val props: Map<String, String>) {
     }
 
     private fun behandlingHttpClient() = HttpClient(OkHttp) {
-        install(JsonFeature) { serializer = JacksonSerializer{registerModule(JavaTimeModule())} }
+        install(JsonFeature) { serializer = JacksonSerializer{
+            registerModule(JavaTimeModule())
+            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        } }
         install(Auth) {
             clientCredential {
                 config = props.toMutableMap()
@@ -37,7 +41,10 @@ class AppBuilder(private val props: Map<String, String>) {
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 
     private fun pdlTjenesterHttpClient() = HttpClient(OkHttp) {
-        install(JsonFeature) { serializer = JacksonSerializer{registerModule(JavaTimeModule())} }
+        install(JsonFeature) { serializer = JacksonSerializer{
+            registerModule(JavaTimeModule())
+            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        } }
         install(Auth) {
             clientCredential {
                 config = props.toMutableMap()

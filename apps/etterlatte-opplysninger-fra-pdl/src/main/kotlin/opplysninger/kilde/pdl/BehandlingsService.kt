@@ -12,7 +12,7 @@ class BehandlingsService(
 ) : Behandling {
     override fun leggTilOpplysninger(behandling: UUID, opplysninger: List<Behandlingsopplysning<out Any>>) {
          runBlocking {
-            behandling_app.post<String>("$url/behandlinger/$behandling") {
+            behandling_app.post<String>("$url/behandlinger/$behandling/grunnlag") {
                 contentType(ContentType.Application.Json)
                 body = LeggTilOpplysningerRequest(opplysninger)
             }

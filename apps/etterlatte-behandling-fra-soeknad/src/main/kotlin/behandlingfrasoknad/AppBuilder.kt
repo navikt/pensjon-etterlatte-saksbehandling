@@ -1,12 +1,15 @@
 package no.nav.etterlatte.behandlingfrasoknad
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.auth.Auth
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import no.nav.etterlatte.security.ktor.clientCredential
+import java.time.LocalDate
 
 class AppBuilder(private val props: Map<String, String>) {
 
@@ -18,7 +21,12 @@ class AppBuilder(private val props: Map<String, String>) {
     }
 
     private fun behandlingHttpClient() = HttpClient(OkHttp) {
-        install(JsonFeature) { serializer = JacksonSerializer{registerModule(JavaTimeModule())} }
+        install(JsonFeature) {
+            serializer = JacksonSerializer{
+                registerModule(JavaTimeModule())
+                disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            }
+        }
         install(Auth) {
             clientCredential {
                 config = props.toMutableMap()
@@ -29,5 +37,3 @@ class AppBuilder(private val props: Map<String, String>) {
 
 
 }
-
-

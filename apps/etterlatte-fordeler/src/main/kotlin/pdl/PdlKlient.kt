@@ -6,7 +6,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
@@ -34,9 +34,8 @@ class PdlKlient(private val client: HttpClient, private val apiUrl: String) : Pd
         familieRelasjon: Boolean,
     ): Person {
         val response = client.get<Person>(
-            "$apiUrl/utvidetperson?historikk=$historikk&adresse=$adresse&utland=$utland&familieRelasjon=$familieRelasjon") {
+            "$apiUrl?historikk=$historikk&adresse=$adresse&utland=$utland&familieRelasjon=$familieRelasjon") {
             header("foedselsnummer", fnr.value)
-            header(CORRELATION_ID, getCorrelationId())
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
         }

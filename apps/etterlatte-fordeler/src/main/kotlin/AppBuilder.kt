@@ -3,11 +3,16 @@ package no.nav.etterlatte
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.features.auth.Auth
+import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.request.header
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PersonService
 import no.nav.etterlatte.security.ktor.clientCredential
+import org.slf4j.MDC
 
 class AppBuilder(private val props: Map<String, String>) {
     companion object {
@@ -21,6 +26,9 @@ class AppBuilder(private val props: Map<String, String>) {
     }
 
     private fun pdlHttpClient() = HttpClient(OkHttp) {
+        defaultRequest {
+            header(X_CORRELATION_ID, getCorrelationId())
+        }
         install(JsonFeature) { serializer = JacksonSerializer() }
         install(Auth) {
             clientCredential {

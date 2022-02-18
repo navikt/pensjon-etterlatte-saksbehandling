@@ -120,5 +120,5 @@ internal class EtterlatteFordeler(
             this["@correlation_id"] = getCorrelationId()
         }
 
-    fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
+    private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 }

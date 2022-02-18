@@ -17,6 +17,7 @@ import no.nav.etterlatte.health.healthApi
 import no.nav.etterlatte.ktortokenexchange.installAuthUsing
 import no.nav.etterlatte.ktortokenexchange.secureRoutUsing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.person.PersonKlient
 import no.nav.etterlatte.person.PersonService
 import no.nav.etterlatte.person.personApi
@@ -33,7 +34,7 @@ class Server(applicationContext: ApplicationContext) {
             installAuthUsing(securityContext)
 
             install(CallLogging) {
-                mdc(CORRELATION_ID) { call -> call.request.header(CORRELATION_ID) ?: UUID.randomUUID().toString() }
+                mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
                 filter { call -> !call.request.path().startsWith("/internal") }
             }
 

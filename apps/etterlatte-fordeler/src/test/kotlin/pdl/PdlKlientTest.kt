@@ -3,14 +3,18 @@ package no.nav.etterlatte.prosess.pdl
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.pdl.PdlKlient
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,8 +33,9 @@ class PdlKlientTest {
         val httpClient = HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
-                    val path = "/person/utvidetperson?historikk=true&adresse=true&utland=true&familieRelasjon=true"
-                    if (request.url.fullPath == path && request.method == HttpMethod.Get && request.headers[CORRELATION_ID] != null) {
+                    val path = "/person?historikk=true&adresse=true&utland=true&familieRelasjon=true"
+                    if (request.url.fullPath == path && request.method == HttpMethod.Get
+                    ) {
                         val headers = headersOf(
                             "Content-Type" to listOf(ContentType.Application.Json.toString()),
                             "foedselsnummer" to listOf(fnr),

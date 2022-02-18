@@ -40,7 +40,7 @@ class PersonRouteTest {
     }
 
     companion object {
-        const val PERSON_ENDEPUNKT = "/person/utvidetperson"
+        const val PERSON_ENDEPUNKT = "/person"
         const val GYLDIG_FNR = "07081177656"
     }
 

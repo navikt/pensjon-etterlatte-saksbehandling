@@ -1,18 +1,19 @@
 import styled from 'styled-components'
 import { Content } from '../../../shared/styled'
-// import { Status, VilkaarStatus, OpplysningsType } from './types'
 import { useContext } from 'react'
 import { AppContext } from '../../../store/AppContext'
 import { AlderBarn } from './vilkaar/AlderBarn'
+import { DoedsFallForelder } from './vilkaar/DoedsfallForelder'
 
 export const Inngangsvilkaar = () => {
   const ctx = useContext(AppContext)
-  const vilkaar = ctx.state.behandlingReducer.vilkårsprøving;
+  const vilkaar = ctx.state.behandlingReducer.vilkårsprøving
 
   return (
     <Content>
       <VilkaarListe>
-        <AlderBarn vilkaar={vilkaar.find(vilkaar => vilkaar.navn==="SOEKER_ER_UNDER_20")} />
+        <AlderBarn vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === 'SOEKER_ER_UNDER_20')} />
+        <DoedsFallForelder vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === 'DOEDSFALL_ER_REGISTRERT')} />
         {/*
         <Vilkaar
           vilkaar={}
@@ -26,7 +27,6 @@ export const Inngangsvilkaar = () => {
           }}
         />
         */}
-        
       </VilkaarListe>
     </Content>
   )

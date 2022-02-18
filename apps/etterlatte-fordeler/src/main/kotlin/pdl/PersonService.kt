@@ -16,10 +16,8 @@ class PersonService(private val klient: Pdl) {
         familieRelasjon: Boolean = false
     ): Person {
         //TODO exception håndteringen virker ikke
-        val person = klient.hentPerson(fnr,historikk,adresse,utland,familieRelasjon) ?: throw Exception("Fant ingen personer i PDL")
-
-        return person
-            .also { logger.info("Person funnet") }
+        logger.info("Henter $fnr fra pdltjenester")
+        return klient.hentPerson(fnr,historikk,adresse,utland,familieRelasjon) ?: throw Exception("Fant ingen personer i PDL")
     }
 
 }

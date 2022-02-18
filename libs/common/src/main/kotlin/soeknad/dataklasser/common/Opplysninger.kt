@@ -17,7 +17,6 @@ data class UtbetalingsInformasjon(
 )
 
 data class Kontaktinfo(
-    val epost: Opplysning<String>,
     val telefonnummer: Opplysning<FritekstSvar>
 )
 

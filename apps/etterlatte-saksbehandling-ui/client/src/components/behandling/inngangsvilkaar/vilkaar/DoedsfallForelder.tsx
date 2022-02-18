@@ -15,11 +15,11 @@ export const DoedsFallForelder = (props: any) => {
         <div>En eller begge foreldrene døde</div>
       </VilkaarColumn>
       <VilkaarColumn>
-        <div>Dødsdato</div>
+        <div><strong>Dødsdato</strong></div>
         <div>{grunnlag.opplysning.doedsdato}</div>
       </VilkaarColumn>
       <VilkaarColumn>
-        <div>Avdød forelder</div>
+        <div><strong>Avdød forelder</strong></div>
         <div>Ola Nilsen Normann</div>
         <div>090248 54688</div>
       </VilkaarColumn>

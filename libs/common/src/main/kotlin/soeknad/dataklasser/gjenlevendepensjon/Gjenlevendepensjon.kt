@@ -44,4 +44,3 @@ data class Gjenlevende(
     override val type = PersonType.GJENLEVENDE
 }
 
-

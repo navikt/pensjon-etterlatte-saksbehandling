@@ -50,6 +50,10 @@ if (isDev) {
   app.use('/api', expressProxy)
 }
 
+app.use(/^(?!.*\/(internal|static)\/).*$/, (req: any, res: any) => {
+  return res.sendFile(`${clientPath}/index.html`);
+});
+
 app.listen(appConf.port, () => {
   logger.info(`Server running on port ${appConf.port}`)
 })

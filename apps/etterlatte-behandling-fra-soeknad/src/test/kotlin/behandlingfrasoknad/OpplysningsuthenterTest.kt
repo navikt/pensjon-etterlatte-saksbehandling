@@ -37,7 +37,10 @@ internal class OpplysningsuthenterTest {
         )
 
         assertEquals("samtykke", opplysninger[1].opplysningType)
-        assertEquals("""{"harSamtykket":true}""", objectMapper.valueToTree<ObjectNode>(opplysninger[1].opplysning).toString())
+        assertEquals(
+            """{"harSamtykket":true}""",
+            objectMapper.valueToTree<ObjectNode>(opplysninger[1].opplysning).toString()
+        )
 
         assertEquals("utbetalingsinformasjon:v1", opplysninger[2].opplysningType)
         assertEquals(
@@ -52,7 +55,10 @@ internal class OpplysningsuthenterTest {
         )
 
         assertEquals("soeker_statsborgerskap:v1", opplysninger[4].opplysningType)
-        assertEquals("""{"statsborgerskap":"Norge","foedselsnummer":"29081276127"}""", objectMapper.valueToTree<ObjectNode>(opplysninger[4].opplysning).toString())
+        assertEquals(
+            """{"statsborgerskap":"Norge","foedselsnummer":"29081276127"}""",
+            objectMapper.valueToTree<ObjectNode>(opplysninger[4].opplysning).toString()
+        )
 
         assertEquals("soeker_utenlandsadresse:v1", opplysninger[5].opplysningType)
         assertEquals(
@@ -66,7 +72,7 @@ internal class OpplysningsuthenterTest {
             objectMapper.valueToTree<ObjectNode>(opplysninger[6].opplysning).toString()
         )
 
-        assertFalse(opplysninger.any { it.opplysningType ==  "soeker_daglig_omsorg:v1"})
+        assertFalse(opplysninger.any { it.opplysningType == "soeker_daglig_omsorg:v1" })
 
         assertEquals("forelder_gjenlevende_personinfo:v1", opplysninger[8].opplysningType)
         assertEquals(

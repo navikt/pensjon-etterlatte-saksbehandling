@@ -33,7 +33,7 @@ internal class LeggTilOpplysnignerFraPdl(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val barnePensjon = objectMapper.readValue(packet.toJson(), Barnepensjon::class.java)
+        val barnePensjon = objectMapper.treeToValue(packet["@skjema_info"], Barnepensjon::class.java)!!
         behandlinger.leggTilOpplysninger(UUID.fromString(packet["@behandling_id"].asText()), opplysningsBygger.byggOpplysninger(barnePensjon, pdl))
     }
 }

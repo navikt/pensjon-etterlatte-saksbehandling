@@ -12,20 +12,15 @@ import no.nav.etterlatte.common.toJson
 import no.nav.etterlatte.common.unsafeRetry
 import no.nav.etterlatte.libs.common.pdl.GraphqlRequest
 import no.nav.etterlatte.libs.common.pdl.Variables
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.person.pdl.FamilieRelasjonResponse
-import no.nav.etterlatte.person.pdl.PersonResponse
-import no.nav.etterlatte.person.pdl.utvidetperson.UtvidetPersonResponse
+
+import no.nav.etterlatte.person.pdl.UtvidetPersonResponse
+
 import org.slf4j.LoggerFactory
-import person.pdl.UtlandResponse
-import person.pdl.adresse.AdresseResponse
+
 
 interface Pdl {
-    suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse
-    suspend fun hentUtvidetPerson(variables: Variables): UtvidetPersonResponse
-    suspend fun hentUtland(fnr: Foedselsnummer): UtlandResponse
-    suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): AdresseResponse
-    suspend fun hentFamilieRelasjon(fnr: Foedselsnummer, historikk: Boolean): FamilieRelasjonResponse
+    suspend fun hentPerson(variables: Variables): UtvidetPersonResponse
+
 }
 
 class PersonKlient(val httpClient: HttpClient) : Pdl {
@@ -35,35 +30,12 @@ class PersonKlient(val httpClient: HttpClient) : Pdl {
         const val TEMA = "PEN"
     }
 
-    override suspend fun hentPerson(fnr: Foedselsnummer): PersonResponse {
-        val query = getQuery("/pdl/hentPerson.graphql")
-        val request = GraphqlRequest(query, Variables(ident = fnr.value)).toJson()
-        return safeCall(request)
-    }
-
-    override suspend fun hentUtvidetPerson(variables: Variables): UtvidetPersonResponse {
+    override suspend fun hentPerson(variables: Variables): UtvidetPersonResponse {
         val query = getQuery("/pdl/hentUtvidetPerson.graphql")
         val request = GraphqlRequest(query, variables).toJson()
         return safeCall(request)
     }
 
-    override suspend fun hentUtland(fnr: Foedselsnummer): UtlandResponse {
-        val query = getQuery("/pdl/hentUtland.graphql")
-        val request = GraphqlRequest(query, Variables(ident = fnr.value, historikk = false)).toJson()
-        return safeCall(request)
-    }
-
-    override suspend fun hentAdresse(fnr: Foedselsnummer, historikk: Boolean): AdresseResponse {
-        val query = getQuery("/pdl/hentAdresse.graphql")
-        val request = GraphqlRequest(query, Variables(ident = fnr.value, historikk = historikk)).toJson()
-        return safeCall(request)
-    }
-
-    override suspend fun hentFamilieRelasjon(fnr: Foedselsnummer, historikk: Boolean): FamilieRelasjonResponse {
-        val query = getQuery("/pdl/familieForhold.graphql")
-        val request = GraphqlRequest(query, Variables(ident = fnr.value)).toJson()
-        return safeCall(request)
-    }
 
     suspend inline fun <reified T> safeCall(request: String): T {
         val responseNode = unsafeRetry {

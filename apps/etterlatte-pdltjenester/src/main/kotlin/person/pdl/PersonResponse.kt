@@ -8,15 +8,15 @@ import java.time.LocalDateTime
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UtvidetPersonResponse(
-    val data: UtvidetPersonResponseData? = null,
+    val data: PersonResponseData? = null,
     val errors: List<ResponseError>? = null
 )
 
-data class UtvidetPersonResponseData(
-    val hentPerson: HentUtvidetPerson? = null
+data class PersonResponseData(
+    val hentPerson: HentPerson? = null
 )
 
-data class HentUtvidetPerson(
+data class HentPerson(
     val adressebeskyttelse: List<Adressebeskyttelse>,
     val navn: List<Navn>,
     val foedsel: List<Foedsel>,
@@ -25,9 +25,9 @@ data class HentUtvidetPerson(
     val bostedsadresse: List<Bostedsadresse>?,
     val kontaktadresse: List<Kontaktadresse>?,
     val oppholdsadresse: List<Oppholdsadresse>?,
-    val innflyttingTilNorge: List<InnflyttingTilNorge>?,
+    val innflyttingTilNorge: List<PdlInnflyttingTilNorge>?,
     val statsborgerskap: List<Statsborgerskap>?,
-    val utflyttingFraNorge: List<UtflyttingFraNorge>?,
+    val utflyttingFraNorge: List<PdlUtflyttingFraNorge>?,
     val foreldreansvar: List<ForelderAnsvar>?,
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>?
 )
@@ -113,14 +113,14 @@ data class Doedsfall(
     val metadata: Metadata
 )
 
-data class InnflyttingTilNorge(
+data class PdlInnflyttingTilNorge(
     val folkeregistermetadata: Folkeregistermetadata?,
     val fraflyttingsland: String?,
     val fraflyttingsstedIUtlandet: String?,
     val metadata: Metadata
 )
 //TODO endre til Date?
-data class UtflyttingFraNorge(
+data class PdlUtflyttingFraNorge(
     val folkeregistermetadata: Folkeregistermetadata?,
     val tilflyttingsland: String?,
     val tilflyttingsstedIUtlandet: String?,

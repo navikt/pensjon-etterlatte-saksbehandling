@@ -1,16 +1,15 @@
 package no.nav.etterlatte.person
 
 import io.ktor.features.NotFoundException
-import no.nav.etterlatte.libs.common.pdl.EyHentUtvidetPersonRequest
+import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.pdl.Gradering
 import no.nav.etterlatte.libs.common.pdl.ResponseError
-import no.nav.etterlatte.libs.common.pdl.Variables
 import no.nav.etterlatte.libs.common.person.*
-import no.nav.etterlatte.person.pdl.ForelderBarnRelasjonRolle
-
-import no.nav.etterlatte.person.pdl.HentUtvidetPerson
-import no.nav.etterlatte.person.pdl.InnflyttingTilNorge
-import no.nav.etterlatte.person.pdl.UtflyttingFraNorge
+import no.nav.etterlatte.libs.common.person.Bostedsadresse
+import no.nav.etterlatte.libs.common.person.Kontaktadresse
+import no.nav.etterlatte.libs.common.person.Oppholdsadresse
+import no.nav.etterlatte.libs.common.person.Vegadresse
+import no.nav.etterlatte.person.pdl.*
 
 import org.slf4j.LoggerFactory
 
@@ -26,16 +25,16 @@ class PersonService(
     )
 
 
-    suspend fun hentPerson(variables: EyHentUtvidetPersonRequest): Person {
+    suspend fun hentPerson(hentPersonRequest: HentPersonRequest): Person {
         logger.info("Henter person fra PDL")
 
         val response = klient.hentPerson(
-            Variables(
-                ident = variables.foedselsnummer,
-                historikk = variables.historikk,
-                adresse = variables.adresse,
-                utland = variables.utland,
-                familieRelasjon = variables.familieRelasjon
+            PdlVariables(
+                ident = hentPersonRequest.foedselsnummer?.value,
+                historikk = hentPersonRequest.historikk,
+                adresse = hentPersonRequest.adresse,
+                utland = hentPersonRequest.utland,
+                familieRelasjon = hentPersonRequest.familieRelasjon
             )
         )
 
@@ -49,12 +48,12 @@ class PersonService(
             throw NotFoundException()
         }
 
-        return opprettUtvidetPerson(Foedselsnummer.of(variables.foedselsnummer), hentPerson)
+        return opprettUtvidetPerson(hentPersonRequest.foedselsnummer!!, hentPerson)
     }
 
     private fun opprettUtvidetPerson(
         fnr: Foedselsnummer,
-        hentPerson: HentUtvidetPerson
+        hentPerson: HentPerson
     ): Person {
         val navn = hentPerson.navn
             .maxByOrNull { it.metadata.sisteRegistrertDato() }!!
@@ -88,14 +87,14 @@ class PersonService(
             sivilstatus = sivilstand?.type?.name,
 
             utland = opprettUtland(hentPerson),
-            //TODO rolle disse til noe fornuftig
+            //TODO hva gjør vi med rolle?
             rolle = null,
             familieRelasjon = opprettFamilieRelasjon(hentPerson)
 
         )
     }
 
-    private fun opprettAdresse(hentPerson: HentUtvidetPerson): eyAdresse {
+    private fun opprettAdresse(hentPerson: HentPerson): Adresse {
         val bostedsadresse = hentPerson.bostedsadresse
             ?.maxByOrNull { it.metadata.sisteRegistrertDato() }
         val kontaktsadresse = hentPerson.kontaktadresse
@@ -103,25 +102,25 @@ class PersonService(
         val oppholdssadresse = hentPerson.oppholdsadresse
             ?.maxByOrNull { it.metadata.sisteRegistrertDato() }
 
-        return eyAdresse(
-            bostedsadresse = EyBostedsadresse(
-                EyVegadresse(
+        return Adresse(
+            bostedsadresse = Bostedsadresse(
+                Vegadresse(
                     adressenavn = bostedsadresse?.vegadresse?.adressenavn,
                     husnummer = bostedsadresse?.vegadresse?.husnummer,
                     husbokstav = bostedsadresse?.vegadresse?.husbokstav,
                     postnummer = bostedsadresse?.vegadresse?.postnummer,
                 )
             ),
-            kontaktadresse = EyKontaktadresse(
-                EyVegadresse(
+            kontaktadresse = Kontaktadresse(
+                Vegadresse(
                     adressenavn = kontaktsadresse?.vegadresse?.adressenavn,
                     husnummer = kontaktsadresse?.vegadresse?.husnummer,
                     husbokstav = kontaktsadresse?.vegadresse?.husbokstav,
                     postnummer = kontaktsadresse?.vegadresse?.postnummer,
                 )
             ),
-            oppholdsadresse = EyOppholdsadresse(
-                EyVegadresse(
+            oppholdsadresse = Oppholdsadresse(
+                Vegadresse(
                     adressenavn = oppholdssadresse?.vegadresse?.adressenavn,
                     husnummer = oppholdssadresse?.vegadresse?.husnummer,
                     husbokstav = oppholdssadresse?.vegadresse?.husbokstav,
@@ -134,36 +133,36 @@ class PersonService(
 
 
 
-    private fun opprettUtland(hentPerson: HentUtvidetPerson): eyUtland {
-        return eyUtland(
+    private fun opprettUtland(hentPerson: HentPerson): Utland {
+        return Utland(
             utflyttingFraNorge = hentPerson?.utflyttingFraNorge?.map { (mapUtflytting(it)) },
             innflyttingTilNorge = hentPerson?.innflyttingTilNorge?.map { (mapInnflytting(it)) }
         )
     }
 
-    private fun mapUtflytting(utflytting: UtflyttingFraNorge): eyUtflyttingFraNorge {
-        return eyUtflyttingFraNorge(
+    private fun mapUtflytting(utflytting: PdlUtflyttingFraNorge): UtflyttingFraNorge {
+        return UtflyttingFraNorge(
             tilflyttingsland = utflytting.tilflyttingsland,
             dato = utflytting.utflyttingsdato.toString()
         )
     }
 
-    private fun mapInnflytting(innflytting: InnflyttingTilNorge): eyInnflyttingTilNorge {
-        return eyInnflyttingTilNorge(
+    private fun mapInnflytting(innflytting: PdlInnflyttingTilNorge): InnflyttingTilNorge {
+        return InnflyttingTilNorge(
             fraflyttingsland = innflytting.fraflyttingsland,
             //TODO her må vi heller sjekke mot gyldighetsdato på bostedsadresse
             //TODO skal ikke være tostring her
             dato = innflytting.folkeregistermetadata?.gyldighetstidspunkt.toString()
         )
     }
-    private fun opprettFamilieRelasjon(hentPerson: HentUtvidetPerson): EyFamilieRelasjon {
+    private fun opprettFamilieRelasjon(hentPerson: HentPerson): FamilieRelasjon {
 
 
         //TODO tar kun med foreldreAnsvar med fnr nå
-        return EyFamilieRelasjon(
+        return FamilieRelasjon(
             ansvarligeForeldre = hentPerson?.foreldreansvar?.filter { it.ansvarlig != null }?.map {
 
-                EyForeldreAnsvar(
+                ForeldreAnsvar(
                     Foedselsnummer.of(
                         it.ansvarlig
                     )
@@ -173,14 +172,14 @@ class PersonService(
             foreldre =
             hentPerson?.forelderBarnRelasjon?.filter { it.minRolleForPerson != ForelderBarnRelasjonRolle.BARN }
                 ?.map {
-                    EyForeldre(
+                    Foreldre(
                         Foedselsnummer.of(it.relatertPersonsIdent)
                     )
                 },
             barn =
             hentPerson?.forelderBarnRelasjon?.filter { it.minRolleForPerson == ForelderBarnRelasjonRolle.BARN }
                 ?.map {
-                    EyBarn(
+                    Barn(
                         Foedselsnummer.of(it.relatertPersonsIdent)
                     )
                 }

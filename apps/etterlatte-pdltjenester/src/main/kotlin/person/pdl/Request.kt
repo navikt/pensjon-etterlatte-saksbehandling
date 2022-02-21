@@ -1,21 +1,26 @@
-package no.nav.etterlatte.libs.common.pdl
+package no.nav.etterlatte.person.pdl
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+
+data class GraphqlRequest(
+    val query: String,
+    val variables: PdlVariables
+)
 
 /**
  * Tar imot ident(er) som variabel til et [GraphqlRequest].
  *
  * Ident kan være i form av FOLKEREGISTERIDENT (fødselsnummer), AKTORID eller NPID.
  */
+//TODO burde ident vært Foedselsnummer?
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class EyHentUtvidetPersonRequest(
-    val foedselsnummer: String?= null,
-    val foedselsnummerListe: List<String>? = null,
+data class PdlVariables(
+    val ident: String? = null,
+    val identer: List<String>? = null,
     val historikk: Boolean = false,
-    val utland: Boolean = false,
     val adresse: Boolean = false,
+    val utland: Boolean = false,
     val familieRelasjon: Boolean = false
 )

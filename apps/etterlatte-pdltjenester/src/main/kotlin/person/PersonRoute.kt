@@ -1,14 +1,13 @@
 package no.nav.etterlatte.person
 
 import io.ktor.application.call
-import io.ktor.features.BadRequestException
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
-import no.nav.etterlatte.libs.common.pdl.EyHentUtvidetPersonRequest
+import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.slf4j.LoggerFactory
 
@@ -22,11 +21,11 @@ private val logger = LoggerFactory.getLogger(PersonService::class.java)
 fun Route.personApi(service: PersonService) {
     route("person") {
 
-        //TODO Depricated: slette etterhvert
+        //TODO skrive om så den kan ta imot EyHentUtvidetPErsonRequest input
         post("hentperson") {
             val fnr = Foedselsnummer.of(call.receive<String>().toString())
             logger.info("Henter person med fnr=$fnr")
-            service.hentPerson(EyHentUtvidetPersonRequest(fnr.value))
+            service.hentPerson(HentPersonRequest(fnr))
                 .let { call.respond(it) }
         }
 
@@ -34,17 +33,23 @@ fun Route.personApi(service: PersonService) {
             val queryParams = call.request.queryParameters
             val headers = call.request.headers
 
-            val variables = EyHentUtvidetPersonRequest(
-                foedselsnummer = headers["foedselsnummer"]
-                    ?: throw BadRequestException("foedselsnummer is a required header"),
+            val variables = HentPersonRequest(
+                foedselsnummer = Foedselsnummer.of(headers["foedselsnummer"]),
                 historikk = queryParams["historikk"]?.toBoolean() ?: false,
                 adresse = queryParams["adresse"]?.toBoolean() ?: false,
                 utland = queryParams["utland"]?.toBoolean() ?: false,
                 familieRelasjon = queryParams["familieRelasjon"]?.toBoolean() ?: false
             )
 
-            logger.info("Henter person med fnr=${Foedselsnummer.of(variables.foedselsnummer)}")
+            logger.info("Henter person med fnr=${variables.foedselsnummer}")
             service.hentPerson(variables)
+                .let { call.respond(it) }
+        }
+
+        post {
+            val hentPersonRequest = call.receive<HentPersonRequest>()
+            logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
+            service.hentPerson(hentPersonRequest)
                 .let { call.respond(it) }
         }
     }

@@ -1,25 +1,21 @@
 package no.nav.etterlatte.person
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import io.ktor.client.HttpClient
-import io.ktor.client.request.accept
-import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.content.TextContent
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.content.*
 import io.ktor.http.ContentType.Application.Json
 import no.nav.etterlatte.common.mapJsonToAny
 import no.nav.etterlatte.common.toJson
 import no.nav.etterlatte.common.unsafeRetry
-import no.nav.etterlatte.libs.common.pdl.GraphqlRequest
-import no.nav.etterlatte.libs.common.pdl.Variables
-
+import no.nav.etterlatte.person.pdl.GraphqlRequest
+import no.nav.etterlatte.person.pdl.PdlVariables
 import no.nav.etterlatte.person.pdl.UtvidetPersonResponse
-
 import org.slf4j.LoggerFactory
 
 
 interface Pdl {
-    suspend fun hentPerson(variables: Variables): UtvidetPersonResponse
+    suspend fun hentPerson(variables: PdlVariables): UtvidetPersonResponse
 
 }
 
@@ -30,7 +26,7 @@ class PersonKlient(val httpClient: HttpClient) : Pdl {
         const val TEMA = "PEN"
     }
 
-    override suspend fun hentPerson(variables: Variables): UtvidetPersonResponse {
+    override suspend fun hentPerson(variables: PdlVariables): UtvidetPersonResponse {
         val query = getQuery("/pdl/hentUtvidetPerson.graphql")
         val request = GraphqlRequest(query, variables).toJson()
         return safeCall(request)

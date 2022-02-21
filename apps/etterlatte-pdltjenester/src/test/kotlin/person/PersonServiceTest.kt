@@ -9,7 +9,8 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.pdl.EyHentUtvidetPersonRequest
+import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.person.PersonKlient
 import no.nav.etterlatte.person.PersonService
 
@@ -51,7 +52,7 @@ internal class PersonServiceTest {
         coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personResponse.json")
 
         val person = runBlocking {
-            service.hentPerson(EyHentUtvidetPersonRequest(TRIVIELL_MIDTPUNKT))
+            service.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
         }
 
         assertEquals("TRIVIELL", person.fornavn)
@@ -74,7 +75,7 @@ internal class PersonServiceTest {
         coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/endretSivilstand.json")
 
         val person = runBlocking {
-            service.hentPerson(EyHentUtvidetPersonRequest(TRIVIELL_MIDTPUNKT))
+            service.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
         }
 
         assertEquals(Sivilstandstype.ENKE_ELLER_ENKEMANN.name, person.sivilstatus)
@@ -85,7 +86,7 @@ internal class PersonServiceTest {
         coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/adressebeskyttetPerson.json")
 
         val person = runBlocking {
-            service.hentPerson(EyHentUtvidetPersonRequest(TRIVIELL_MIDTPUNKT))
+            service.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
         }
 
         assertEquals(true, person.adressebeskyttelse)
@@ -99,7 +100,7 @@ internal class PersonServiceTest {
 
         assertThrows<NotFoundException> {
             runBlocking {
-                service.hentPerson(EyHentUtvidetPersonRequest(TRIVIELL_MIDTPUNKT))
+                service.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
             }
         }
     }
@@ -146,7 +147,7 @@ internal class PersonServiceTest {
         coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personResponseFullPDL.json")
 
         val person = runBlocking {
-            service.hentPerson(EyHentUtvidetPersonRequest(STOR_SNERK))
+            service.hentPerson(HentPersonRequest(Foedselsnummer.of(STOR_SNERK)))
         }
 
         assertEquals("STOR", person.fornavn)
@@ -158,7 +159,7 @@ internal class PersonServiceTest {
 
         runBlocking {
             assertThrows<NotFoundException> {
-                service.hentPerson(EyHentUtvidetPersonRequest(STOR_SNERK))
+                service.hentPerson(HentPersonRequest(Foedselsnummer.of(STOR_SNERK)))
             }
         }
     }

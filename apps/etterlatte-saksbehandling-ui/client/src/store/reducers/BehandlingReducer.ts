@@ -28,6 +28,7 @@ export interface IVilkaarsproving {
 export enum VilkaarsType {
   SOEKER_ER_UNDER_20 = 'SOEKER_ER_UNDER_20',
   DOEDSFALL_ER_REGISTRERT = 'DOEDSFALL_ER_REGISTRERT',
+  AVDOEDES_FORUTGAAENDE_MELDLEMSKAP = 'AVDOEDES_FORUTGAAENDE_MELDLEMSKAP',
 }
 
 export enum VilkaarVurderingsResultat {
@@ -39,7 +40,13 @@ export enum VilkaarVurderingsResultat {
 export interface IKriterie {
   navn: Kriterietype
   resultat: VilkaarVurderingsResultat
-  basertPaaOpplysninger: IBehandlingsopplysning[]
+  basertPaaOpplysninger: IVilkaaropplysing[]
+}
+
+export interface IVilkaaropplysing {
+  opplysningsType: OpplysningsType
+  kilde: string
+  opplysing: any
 }
 
 export enum Kriterietype {

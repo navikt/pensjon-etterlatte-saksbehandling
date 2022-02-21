@@ -3,7 +3,7 @@ import { VilkaarVurderingsResultat } from '../../../../store/reducers/Behandling
 import { Title, VilkaarColumn } from '../styled'
 
 export const AvdoedesForutMedlemskap = (props: any) => {
-  const grunnlag = props.vilkaar.grunnlag
+  const vilkaar = props.vilkaar
 
   return (
     <>
@@ -16,7 +16,7 @@ export const AvdoedesForutMedlemskap = (props: any) => {
       </VilkaarColumn>
       <VilkaarColumn>
         <Title>Bosted</Title>
-        <div>{grunnlag.opplysning.doedsdato}</div>
+        <div>{vilkaar.opplysning.doedsdato}</div>
         <div>
           <strong>Bostedsardresse</strong>
         </div>

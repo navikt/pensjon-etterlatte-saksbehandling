@@ -21,14 +21,14 @@ class VilkaarService {
         println(opplysninger)
 
         val soekerFoedselsdato =
-            opplysninger.filter { it.opplysingType == Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value }
+            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value }
                 .map { setOpplysningType<Foedselsdato>(it) }
 
-        val avdoedDoedsdato = opplysninger.filter { it.opplysingType == Opplysningstyper.AVDOED_DOEDSFALL_V1.value }
+        val avdoedDoedsdato = opplysninger.filter { it.opplysningsType == Opplysningstyper.AVDOED_DOEDSFALL_V1.value }
             .map { setOpplysningType<Doedsdato>(it) }
 
         val soekerRelasjonForeldre =
-            opplysninger.filter { it.opplysingType == Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1.value }
+            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1.value }
                 .map { setOpplysningType<Foreldre>(it) }
 
         return listOf(
@@ -41,7 +41,7 @@ class VilkaarService {
     companion object {
         inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<out Any>): VilkaarOpplysning<T> {
             return VilkaarOpplysning(
-                opplysning.opplysingType,
+                opplysning.opplysningsType,
                 opplysning.kilde,
                 objectMapper.readValue(opplysning.opplysning.toString())
             )

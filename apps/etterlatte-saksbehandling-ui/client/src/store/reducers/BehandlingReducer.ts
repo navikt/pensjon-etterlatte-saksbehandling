@@ -19,9 +19,14 @@ export interface IBehandlingsopplysning {
 }
 
 export interface IVilkaarsproving {
-  navn: string
+  navn: VilkaarsType
   resultat: VilkaarVurderingsResultat
-  basertPaaOpplysninger: IBehandlingsopplysning[]
+  basertPaaOpplysninger: IKriterie
+}
+
+export enum VilkaarsType {
+  SOEKER_ER_UNDER_20 = 'SOEKER_ER_UNDER_20',
+  DOEDSFALL_ER_REGISTRERT = 'DOEDSFALL_ER_REGISTRERT',
 }
 
 export enum VilkaarVurderingsResultat {
@@ -30,8 +35,20 @@ export enum VilkaarVurderingsResultat {
   KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING = 'KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING',
 }
 
+export interface IKriterie {
+  navn: Kriterietype
+  resultat: VilkaarVurderingsResultat
+  basertPaaOpplysninger: IBehandlingsopplysning[]
+}
+
+export enum Kriterietype {
+  AVDOED_ER_FORELDER = 'AVDOED_ER_FORELDER',
+  DOEDSFALL_ER_REGISTRERT_I_PDL = 'DOEDSFALL_ER_REGISTRERT_I_PDL',
+  SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO = 'SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO',
+}
+
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {
-  id: "",
+  id: '',
   sak: 0,
   grunnlag: [],
   vilkårsprøving: [],

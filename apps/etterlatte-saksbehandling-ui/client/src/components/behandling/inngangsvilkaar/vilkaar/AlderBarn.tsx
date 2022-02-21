@@ -40,7 +40,7 @@ export const AlderBarn = (props: any) => {
           <div>
             <strong>Alder ved dødsfall</strong>
           </div>
-          <div>{barnetsAlder ? `${barnetsAlder} år` : 'mangler info'}</div>
+          <div>{barnetsAlder ? `${barnetsAlder} år` : 'mangler'}</div>
         </VilkaarColumn>
         <VilkaarColumn>
           <Title>Vilkår er {props.vilkaar.resultat}</Title>

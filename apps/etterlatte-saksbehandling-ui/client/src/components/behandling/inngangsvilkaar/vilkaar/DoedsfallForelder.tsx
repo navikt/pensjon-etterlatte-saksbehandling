@@ -34,7 +34,7 @@ export const DoedsFallForelder = (props: any) => {
           <div>
             <strong>Avdød forelder</strong>
           </div>
-          <div>{forelder.opplysning.foreldre ? forelder.opplysning.foreldre : "mangler info"}</div>
+          <div>{forelder.opplysning.foreldre ? forelder.opplysning.foreldre : "mangler"}</div>
           <div>{avdoedDoedsdato.opplysning.foedselsnummer}</div>
         </VilkaarColumn>
         <VilkaarColumn>

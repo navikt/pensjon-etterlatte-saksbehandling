@@ -40,6 +40,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
 }
 
 export const behandlingReducer = (state = detaljertBehandlingInitialState, action: IAction): any => {
+  console.log('state', action.data)
   switch (action.type) {
     case 'add_behandling':
       return {

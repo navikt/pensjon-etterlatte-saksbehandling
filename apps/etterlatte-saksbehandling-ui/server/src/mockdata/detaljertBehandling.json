@@ -259,7 +259,7 @@
           "resultat": "OPPFYLT",
           "basertPaaOpplysninger": [
             {
-              "opplysingType": "soeker_foedselsdato:v1",
+              "opplysningsType": "soeker_foedselsdato:v1",
               "kilde": {
                 "navn": "pdl",
                 "tidspunktForInnhenting": "2022-02-18T12:01:57.271744258Z",
@@ -269,7 +269,7 @@
               "opplysning": { "foedselsdato": "2013-10-12", "foedselsnummer": "12101376212" }
             },
             {
-              "opplysingType": "avdoed_doedsfall:v1",
+              "opplysningsType": "avdoed_doedsfall:v1",
               "kilde": {
                 "navn": "pdl",
                 "tidspunktForInnhenting": "2022-02-18T12:01:57.271787415Z",
@@ -286,13 +286,25 @@
       "navn": "DOEDSFALL_ER_REGISTRERT",
       "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
       "kriterier": [
-        { "navn": "DOEDSFALL_ER_REGISTRERT_I_PDL", "resultat": "OPPFYLT", "basertPaaOpplysninger": [] },
+        { "navn": "DOEDSFALL_ER_REGISTRERT_I_PDL", "resultat": "OPPFYLT",
+          "basertPaaOpplysninger": [
+            {
+              "opplysningsType": "avdoed_doedsfall:v1",
+              "kilde": {
+                "navn": "pdl",
+                "tidspunktForInnhenting": "2022-02-18T12:01:57.271787415Z",
+                "registersReferanse": null,
+                "type": "pdl"
+              },
+              "opplysning": { "doedsdato": "2022-02-10", "foedselsnummer": "22128202440" }
+            }
+          ] },
         {
           "navn": "AVDOED_ER_FORELDER",
           "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
           "basertPaaOpplysninger": [
             {
-              "opplysingType": "soeker_relasjon_foreldre:v1",
+              "opplysningsType": "soeker_relasjon_foreldre:v1",
               "kilde": {
                 "navn": "pdl",
                 "tidspunktForInnhenting": "2022-02-18T12:01:57.271795651Z",
@@ -302,7 +314,7 @@
               "opplysning": { "foreldre": null }
             },
             {
-              "opplysingType": "avdoed_doedsfall:v1",
+              "opplysningsType": "avdoed_doedsfall:v1",
               "kilde": {
                 "navn": "pdl",
                 "tidspunktForInnhenting": "2022-02-18T12:01:57.271787415Z",

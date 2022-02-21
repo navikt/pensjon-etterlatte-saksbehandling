@@ -1,4 +1,5 @@
 import { IAction } from '../AppContext'
+import { OpplysningsType } from '../../components/behandling/inngangsvilkaar/types'
 
 export interface IDetaljertBehandling {
   id: string
@@ -12,7 +13,7 @@ export interface IDetaljertBehandling {
 export interface IBehandlingsopplysning {
   id: string
   kilde: string
-  opplysningsType: string
+  opplysningsType: OpplysningsType
   meta: any
   opplysning: any
   attestering: any
@@ -21,7 +22,7 @@ export interface IBehandlingsopplysning {
 export interface IVilkaarsproving {
   navn: VilkaarsType
   resultat: VilkaarVurderingsResultat
-  basertPaaOpplysninger: IKriterie
+  basertPaaOpplysninger: IKriterie[]
 }
 
 export enum VilkaarsType {

@@ -3,18 +3,24 @@ import differenceInYears from 'date-fns/differenceInYears'
 import format from 'date-fns/format'
 import { Title, VilkaarColumn, VilkaarWrapper } from '../styled'
 import { OpplysningsType } from '../types'
+import { IBehandlingsopplysning, IKriterie, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
 import { VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+
 
 export const AlderBarn = (props: any) => {
   const vilkaar = props.vilkaar
 
   const barnetsFoedselsdato = vilkaar.kriterier
-    .find((krit: any) => krit.navn === 'SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO')
-    .basertPaaOpplysninger.find((opplysning: any) => opplysning.opplysingType === OpplysningsType.soeker_foedselsdato)
+    .find((krit: IKriterie) => krit.navn === Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO)
+    .basertPaaOpplysninger.find(
+      (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.soeker_foedselsdato
+    )
 
   const avdoedDoedsdato = vilkaar.kriterier
-    .find((krit: any) => krit.navn === 'SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO')
-    .basertPaaOpplysninger.find((opplysning: any) => opplysning.opplysingType === OpplysningsType.doedsdato)
+    .find((krit: IKriterie) => krit.navn === Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO)
+    .basertPaaOpplysninger.find(
+      (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.doedsdato
+    )
 
   const barnetsAlder = differenceInYears(
     new Date(avdoedDoedsdato.opplysning.doedsdato),

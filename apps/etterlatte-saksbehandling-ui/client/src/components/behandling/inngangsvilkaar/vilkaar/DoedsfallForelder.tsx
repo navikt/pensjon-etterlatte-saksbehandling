@@ -46,7 +46,7 @@ export const DoedsFallForelder = (props: any) => {
         </VilkaarColumn>
         <VilkaarColumn>
           <Title>Vilkår er {props.vilkaar.resultat === VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ? <> ikke oppfyllt</> : <> oppfyllt</>}</Title>
-          <VilkaarIkkeOppfylt />
+          <VilkaarIkkeOppfylt status={props.vilkaar.resultat} errorText='Vi har bla bla bla fått bla bla bla som sier at bla'/>
         </VilkaarColumn>
       </VilkaarWrapper>
     </div>

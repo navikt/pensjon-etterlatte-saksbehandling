@@ -1,5 +1,10 @@
 
-export const CloseIcon = () => {
+interface CloseProps {
+    color?: string;
+}
+
+export const CloseIcon = (props: CloseProps) => {
+    const color = props.color || '#0067C5';
     return (
         <svg
             width="24"
@@ -14,7 +19,7 @@ export const CloseIcon = () => {
                 fillRule="evenodd"
                 clipRule="evenodd"
                 d="M21 4.385L13.385 12 21 19.615 19.615 21 12 13.385 4.385 21 3 19.615 10.615 12 3 4.385 4.385 3 12 10.615 19.615 3 21 4.385z"
-                fill="#0067C5"
+                fill={color}
             ></path>
         </svg>
     );

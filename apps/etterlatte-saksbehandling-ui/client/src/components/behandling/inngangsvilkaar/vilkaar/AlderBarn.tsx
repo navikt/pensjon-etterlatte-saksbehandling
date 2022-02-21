@@ -5,6 +5,7 @@ import { Title, VilkaarColumn, VilkaarWrapper } from '../styled'
 import { OpplysningsType } from '../types'
 import { IBehandlingsopplysning, IKriterie, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
 import { VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { VilkaarIkkeOppfylt } from './VilkaarIkkeOppfylt'
 
 
 export const AlderBarn = (props: any) => {
@@ -57,6 +58,7 @@ export const AlderBarn = (props: any) => {
               <> oppfyllt</>
             )}
           </Title>
+          <VilkaarIkkeOppfylt status={props.vilkaar.resultat} errorText='Vi har bla bla bla fått bla bla bla som sier at bla'/>
         </VilkaarColumn>
       </VilkaarWrapper>
     </div>

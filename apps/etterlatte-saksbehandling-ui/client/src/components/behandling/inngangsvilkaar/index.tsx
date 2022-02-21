@@ -8,6 +8,10 @@ import { DoedsFallForelder } from './vilkaar/DoedsfallForelder'
 export const Inngangsvilkaar = () => {
   const ctx = useContext(AppContext)
   const vilkaar = ctx.state.behandlingReducer.vilkårsprøving
+  
+  if(vilkaar.length === 0) {
+    return <div>Mangler vilkår</div>;
+  }
 
   return (
     <Content>

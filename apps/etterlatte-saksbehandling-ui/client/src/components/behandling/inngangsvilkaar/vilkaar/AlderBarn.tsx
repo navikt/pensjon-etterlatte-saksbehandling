@@ -7,7 +7,6 @@ import { IBehandlingsopplysning, IKriterie, Kriterietype } from '../../../../sto
 import { VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import { VilkaarIkkeOppfylt } from './VilkaarIkkeOppfylt'
 
-
 export const AlderBarn = (props: any) => {
   const vilkaar = props.vilkaar
 
@@ -20,7 +19,7 @@ export const AlderBarn = (props: any) => {
   const avdoedDoedsdato = vilkaar.kriterier
     .find((krit: IKriterie) => krit.navn === Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO)
     .basertPaaOpplysninger.find(
-      (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.doedsdato
+      (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsdato
     )
 
   const barnetsAlder = differenceInYears(

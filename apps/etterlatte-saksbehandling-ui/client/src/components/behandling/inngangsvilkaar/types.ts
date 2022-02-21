@@ -9,8 +9,8 @@ export enum Status {
 }
 
 export enum OpplysningsType {
-  doedsdato = 'avdoed_doedsfall:v1',
+  avdoed_doedsdato = 'avdoed_doedsfall:v1',
   soeker_foedselsdato = 'soeker_foedselsdato:v1',
-  avdoedes_forutgaaende_medlemsskap = "avdoedes_forutgaaende_medlemsskap:v1",
-  relasjon_foreldre = "soeker_relasjon_foreldre:v1"
+  avdoedes_forutgaaende_medlemsskap = 'avdoedes_forutgaaende_medlemsskap:v1',
+  relasjon_foreldre = 'soeker_relasjon_foreldre:v1',
 }

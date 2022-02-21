@@ -1,7 +1,9 @@
 import format from 'date-fns/format';
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
+import { VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer';
 import { Title, VilkaarColumn, VilkaarWrapper } from '../styled'
-import { OpplysningsType, Status } from '../types'
+import { OpplysningsType } from '../types'
+import { VilkaarIkkeOppfylt } from './VilkaarIkkeOppfylt';
 
 export const DoedsFallForelder = (props: any) => {
   const vilkaar = props.vilkaar;
@@ -19,7 +21,7 @@ export const DoedsFallForelder = (props: any) => {
       <VilkaarWrapper>
         <VilkaarColumn>
           <Title>
-            <StatusIcon status={Status.NOT_DONE} /> Dødsfall forelder
+            <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} /> Dødsfall forelder
           </Title>
           <div>§ 18-5</div>
           <div>En eller begge foreldrene døde</div>
@@ -34,11 +36,12 @@ export const DoedsFallForelder = (props: any) => {
           <div>
             <strong>Avdød forelder</strong>
           </div>
-          <div>{forelder.opplysning.foreldre ? forelder.opplysning.foreldre : "mangler"}</div>
+          <div>{forelder.opplysning.foreldre ? forelder.opplysning.foreldre : <span className="missing">mangler</span>}</div>
           <div>{avdoedDoedsdato.opplysning.foedselsnummer}</div>
         </VilkaarColumn>
         <VilkaarColumn>
-          <Title>Vilkår er {props.vilkaar.resultat}</Title>
+          <Title>Vilkår er {props.vilkaar.resultat === VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ? <> ikke oppfyllt</> : <> oppfyllt</>}</Title>
+          <VilkaarIkkeOppfylt />
         </VilkaarColumn>
       </VilkaarWrapper>
     </div>

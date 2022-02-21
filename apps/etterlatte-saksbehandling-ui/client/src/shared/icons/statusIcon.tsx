@@ -1,10 +1,10 @@
 import styled from 'styled-components'
-import { Status } from '../../components/behandling/inngangsvilkaar/types'
+import { VilkaarVurderingsResultat } from '../../store/reducers/BehandlingReducer'
 
-export const StatusIcon = (props: { status: Status }) => {
+export const StatusIcon = (props: { status: VilkaarVurderingsResultat }) => {
   return (
     <Circle status={props.status}>
-      {props.status === Status.DONE ? (
+      {props.status === VilkaarVurderingsResultat.OPPFYLT ? (
         <svg
           width="15px"
           height="15px"
@@ -28,8 +28,8 @@ export const StatusIcon = (props: { status: Status }) => {
   )
 }
 
-const Circle = styled.div<{ status: Status }>`
-  background-color: ${(props) => (props.status === Status.DONE ? '#1c6937' : '#FFAA33')};
+const Circle = styled.div<{ status: VilkaarVurderingsResultat }>`
+  background-color: ${(props) => (props.status === VilkaarVurderingsResultat.OPPFYLT ? '#1c6937' : '#FFAA33')};
   border-radius: 100%;
   height: 20px;
   width: 20px;

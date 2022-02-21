@@ -12,12 +12,11 @@ import { BehandlingsStatus, IBehandlingsStatus } from './behandlings-status'
 import { Beregne } from './beregne'
 import { Brev } from './brev'
 import { Inngangsvilkaar } from './inngangsvilkaar'
-import { Status } from './inngangsvilkaar/types'
 import { Personopplysninger } from './personopplysninger'
 import { Utbetalingsoversikt } from './utbetalingsoversikt'
 import { Vedtak } from './vedtak'
 import { IApiResponse } from '../../shared/api/types'
-import { IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
+import { IDetaljertBehandling, VilkaarVurderingsResultat } from '../../store/reducers/BehandlingReducer'
 
 const addBehandlingAction = (data: any) => ({ type: 'add_behandling', data })
 
@@ -67,31 +66,31 @@ export const Behandling = () => {
                 <CheckedMenu>
                   <li>
                     <Link to="#dodsfall" className={active('#dodsfall')}>
-                      <StatusIcon status={Status.DONE} />
+                      <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} />
                       <span>Dødsfall</span>
                     </Link>
                   </li>
                   <li>
                     <Link to="#alder" className={active('#alder')}>
-                      <StatusIcon status={Status.DONE} />
+                      <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} />
                       <span>Alder</span>
                     </Link>
                   </li>
                   <li>
                     <Link to="#bostedsadresse" className={active('#bostedsadresse')}>
-                      <StatusIcon status={Status.DONE} />
+                      <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} />
                       <span>Bostedsadresse</span>
                     </Link>
                   </li>
                   <li>
                     <Link to="#medlemskap" className={active('#medlemskap')}>
-                      <StatusIcon status={Status.DONE} />
+                      <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} />
                       <span>Medlemsskap</span>
                     </Link>
                   </li>
                   <li>
                     <Link to="#yrkesskade" className={active('#yrkesskade')}>
-                      <StatusIcon status={Status.NOT_DONE} />
+                      <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} />
                       <span>Yrkesskade</span>
                     </Link>
                   </li>

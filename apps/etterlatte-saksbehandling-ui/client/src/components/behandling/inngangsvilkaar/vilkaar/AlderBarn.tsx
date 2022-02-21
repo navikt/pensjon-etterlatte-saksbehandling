@@ -2,7 +2,8 @@ import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import differenceInYears from 'date-fns/differenceInYears'
 import format from 'date-fns/format'
 import { Title, VilkaarColumn, VilkaarWrapper } from '../styled'
-import { OpplysningsType, Status } from '../types'
+import { OpplysningsType } from '../types'
+import { VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 
 export const AlderBarn = (props: any) => {
   const vilkaar = props.vilkaar
@@ -25,7 +26,7 @@ export const AlderBarn = (props: any) => {
       <VilkaarWrapper>
         <VilkaarColumn>
           <Title>
-            <StatusIcon status={props.vilkaar.resultat === 'OPPFYLT' ? Status.DONE : Status.NOT_DONE} /> Alder barn
+            <StatusIcon status={props.vilkaar.resultat} /> Alder barn
           </Title>
           <div>§ 18-5</div>
           <div>Barnet er under 20 år</div>
@@ -40,10 +41,16 @@ export const AlderBarn = (props: any) => {
           <div>
             <strong>Alder ved dødsfall</strong>
           </div>
-          <div>{barnetsAlder ? `${barnetsAlder} år` : 'mangler'}</div>
+          <div>{barnetsAlder ? `${barnetsAlder} år` : <span className="missing">mangler</span>}</div>
         </VilkaarColumn>
         <VilkaarColumn>
-          <Title>Vilkår er {props.vilkaar.resultat}</Title>
+          <Title>
+            Vilkår er {props.vilkaar.resultat === VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ? (
+              <> ikke oppfyllt</>
+            ) : (
+              <> oppfyllt</>
+            )}
+          </Title>
         </VilkaarColumn>
       </VilkaarWrapper>
     </div>

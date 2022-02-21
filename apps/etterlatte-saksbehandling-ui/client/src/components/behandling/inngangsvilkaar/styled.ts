@@ -18,4 +18,8 @@ export const Title = styled.div`
 export const VilkaarColumn = styled.div`
   flex-basis: 300px;
   flex: 1;
+
+  .missing{
+    color: red;
+  }
 `

@@ -10,12 +10,12 @@ import no.nav.etterlatte.common.toJson
 import no.nav.etterlatte.common.unsafeRetry
 import no.nav.etterlatte.person.pdl.GraphqlRequest
 import no.nav.etterlatte.person.pdl.PdlVariables
-import no.nav.etterlatte.person.pdl.UtvidetPersonResponse
+import no.nav.etterlatte.person.pdl.PersonResponse
 import org.slf4j.LoggerFactory
 
 
 interface Pdl {
-    suspend fun hentPerson(variables: PdlVariables): UtvidetPersonResponse
+    suspend fun hentPerson(variables: PdlVariables): PersonResponse
 
 }
 
@@ -26,7 +26,7 @@ class PersonKlient(val httpClient: HttpClient) : Pdl {
         const val TEMA = "PEN"
     }
 
-    override suspend fun hentPerson(variables: PdlVariables): UtvidetPersonResponse {
+    override suspend fun hentPerson(variables: PdlVariables): PersonResponse {
         val query = getQuery("/pdl/hentUtvidetPerson.graphql")
         val request = GraphqlRequest(query, variables).toJson()
         return safeCall(request)

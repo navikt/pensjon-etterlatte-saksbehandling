@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class UtvidetPersonResponse(
+data class PersonResponse(
     val data: PersonResponseData? = null,
     val errors: List<ResponseError>? = null
 )
@@ -231,8 +231,8 @@ data class ForelderAnsvar(
     val ansvarlig: String? = null,
     val ansvarligUtenIdentifikator: RelatertBiPerson? = null,
     val ansvarssubjekt: String? = null,
-    val folkeregistermetadata: no.nav.etterlatte.person.pdl.Folkeregistermetadata? = null,
-    val metadata: no.nav.etterlatte.person.pdl.Metadata,
+    val folkeregistermetadata: Folkeregistermetadata? = null,
+    val metadata: Metadata,
 )
 
 data class RelatertBiPerson(
@@ -249,8 +249,8 @@ data class Personnavn(
 )
 
 data class ForelderBarnRelasjon(
-    val folkeregistermetadata: no.nav.etterlatte.person.pdl.Folkeregistermetadata? = null,
-    val metadata: no.nav.etterlatte.person.pdl.Metadata,
+    val folkeregistermetadata: Folkeregistermetadata? = null,
+    val metadata: Metadata,
     val minRolleForPerson: ForelderBarnRelasjonRolle? = null,
     val relatertPersonsIdent: String,
     val relatertPersonsRolle: ForelderBarnRelasjonRolle

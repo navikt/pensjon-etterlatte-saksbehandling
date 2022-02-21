@@ -1,18 +1,29 @@
 package no.nav.etterlatte.person
 
-import io.ktor.features.NotFoundException
-import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.pdl.Gradering
-import no.nav.etterlatte.libs.common.pdl.ResponseError
-import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.Barn
 import no.nav.etterlatte.libs.common.person.Bostedsadresse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Foreldre
+import no.nav.etterlatte.libs.common.person.ForeldreAnsvar
+import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
 import no.nav.etterlatte.libs.common.person.Kontaktadresse
 import no.nav.etterlatte.libs.common.person.Oppholdsadresse
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
+import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.Vegadresse
-import no.nav.etterlatte.person.pdl.*
-
+import no.nav.etterlatte.person.pdl.ForelderBarnRelasjonRolle
+import no.nav.etterlatte.person.pdl.HentPerson
+import no.nav.etterlatte.person.pdl.PdlInnflyttingTilNorge
+import no.nav.etterlatte.person.pdl.PdlUtflyttingFraNorge
+import no.nav.etterlatte.person.pdl.PdlVariables
 import org.slf4j.LoggerFactory
 
+class PdlForesporselFeilet(message: String) : RuntimeException(message)
 
 //TODO vurdere å refaktorere til ulike serviceklasser
 class PersonService(
@@ -24,34 +35,30 @@ class PersonService(
         Gradering.STRENGT_FORTROLIG_UTLAND
     )
 
-
     suspend fun hentPerson(hentPersonRequest: HentPersonRequest): Person {
-        logger.info("Henter person fra PDL")
+        logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer} fra PDL")
 
-        val response = klient.hentPerson(
-            PdlVariables(
-                ident = hentPersonRequest.foedselsnummer?.value,
-                historikk = hentPersonRequest.historikk,
-                adresse = hentPersonRequest.adresse,
-                utland = hentPersonRequest.utland,
-                familieRelasjon = hentPersonRequest.familieRelasjon
-            )
-        )
-
-        val hentPerson = response.data?.hentPerson
-
-        //TODO fikse feilhåndtering
-        if (hentPerson == null) {
-            println("XXX Response: " + response.toString())
-            logger.info("XXX Response: " + response.data?.toString())
-            loggfoerFeilmeldinger(response.errors)
-            throw NotFoundException()
+        return klient.hentPerson(hentPersonRequest.toPdlVariables()).let {
+            if (it.data?.hentPerson == null) {
+                val pdlFeil = it.errors?.joinToString(", ")
+                throw PdlForesporselFeilet(
+                    "Kunne ikke hente person med fnr=${hentPersonRequest.foedselsnummer} fra PDL: $pdlFeil"
+                )
+            } else {
+                opprettPerson(hentPersonRequest.foedselsnummer, it.data.hentPerson)
+            }
         }
-
-        return opprettUtvidetPerson(hentPersonRequest.foedselsnummer!!, hentPerson)
     }
 
-    private fun opprettUtvidetPerson(
+    private fun HentPersonRequest.toPdlVariables() = PdlVariables(
+        ident = foedselsnummer.value,
+        historikk = historikk,
+        adresse = adresse,
+        utland = utland,
+        familieRelasjon = familieRelasjon
+    )
+
+    private fun opprettPerson(
         fnr: Foedselsnummer,
         hentPerson: HentPerson
     ): Person {
@@ -90,7 +97,6 @@ class PersonService(
             //TODO hva gjør vi med rolle?
             rolle = null,
             familieRelasjon = opprettFamilieRelasjon(hentPerson)
-
         )
     }
 
@@ -130,13 +136,10 @@ class PersonService(
         )
     }
 
-
-
-
     private fun opprettUtland(hentPerson: HentPerson): Utland {
         return Utland(
-            utflyttingFraNorge = hentPerson?.utflyttingFraNorge?.map { (mapUtflytting(it)) },
-            innflyttingTilNorge = hentPerson?.innflyttingTilNorge?.map { (mapInnflytting(it)) }
+            utflyttingFraNorge = hentPerson.utflyttingFraNorge?.map { (mapUtflytting(it)) },
+            innflyttingTilNorge = hentPerson.innflyttingTilNorge?.map { (mapInnflytting(it)) }
         )
     }
 
@@ -155,43 +158,34 @@ class PersonService(
             dato = innflytting.folkeregistermetadata?.gyldighetstidspunkt.toString()
         )
     }
+
     private fun opprettFamilieRelasjon(hentPerson: HentPerson): FamilieRelasjon {
-
-
         //TODO tar kun med foreldreAnsvar med fnr nå
         return FamilieRelasjon(
-            ansvarligeForeldre = hentPerson?.foreldreansvar?.filter { it.ansvarlig != null }?.map {
-
-                ForeldreAnsvar(
-                    Foedselsnummer.of(
-                        it.ansvarlig
-                    )
-                )
-
-            },
-            foreldre =
-            hentPerson?.forelderBarnRelasjon?.filter { it.minRolleForPerson != ForelderBarnRelasjonRolle.BARN }
+            ansvarligeForeldre = hentPerson.foreldreansvar
+                ?.filter { it.ansvarlig != null }
+                ?.groupBy { it.ansvarlig }
+                ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
                 ?.map {
-                    Foreldre(
-                        Foedselsnummer.of(it.relatertPersonsIdent)
-                    )
+                    ForeldreAnsvar(Foedselsnummer.of(it.value?.ansvarlig))
                 },
-            barn =
-            hentPerson?.forelderBarnRelasjon?.filter { it.minRolleForPerson == ForelderBarnRelasjonRolle.BARN }
+
+            foreldre = hentPerson.forelderBarnRelasjon
+                ?.filter { it.relatertPersonsRolle != ForelderBarnRelasjonRolle.BARN }
+                ?.groupBy { it.relatertPersonsIdent }
+                ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
                 ?.map {
-                    Barn(
-                        Foedselsnummer.of(it.relatertPersonsIdent)
-                    )
+                    Foreldre(Foedselsnummer.of(it.value?.relatertPersonsIdent))
+                },
+
+            barn = hentPerson.forelderBarnRelasjon
+                ?.filter { it.relatertPersonsRolle == ForelderBarnRelasjonRolle.BARN }
+                ?.groupBy { it.relatertPersonsIdent }
+                ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
+                ?.map {
+                    Barn(Foedselsnummer.of(it.value?.relatertPersonsIdent))
                 }
         )
     }
 
-    private fun loggfoerFeilmeldinger(errors: List<ResponseError>?) {
-        logger.error("Kunne ikke hente person fra PDL")
-
-        errors?.forEach {
-            logger.error(it.message)
-            println(it.message)
-        }
-    }
 }

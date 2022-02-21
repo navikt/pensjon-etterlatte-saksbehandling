@@ -4,21 +4,22 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import io.ktor.features.NotFoundException
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.person.PdlForesporselFeilet
 import no.nav.etterlatte.person.PersonKlient
 import no.nav.etterlatte.person.PersonService
 
 import no.nav.etterlatte.person.pdl.Sivilstandstype
-import no.nav.etterlatte.person.pdl.UtvidetPersonResponse
+import no.nav.etterlatte.person.pdl.PersonResponse
 
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -71,6 +72,55 @@ internal class PersonServiceTest {
     }
 
     @Test
+    fun`skal mappe person som inkluderer familierelasjon (foreldre)`() {
+        coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personUtvidetResponse.json")
+
+        val person = runBlocking {
+            service.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
+        }
+
+        val expectedForeldreFnr = listOf("26117512737", "14097030880")
+
+        assertNotNull(person.familieRelasjon?.foreldre)
+        assertEquals(2, person.familieRelasjon?.foreldre?.size)
+        assertTrue(person.familieRelasjon?.foreldre?.get(0)?.foedselsnummer?.value in expectedForeldreFnr)
+        assertTrue(person.familieRelasjon?.foreldre?.get(1)?.foedselsnummer?.value in expectedForeldreFnr)
+    }
+
+    @Test
+    fun`skal mappe person som inkluderer familierelasjon (ansvarlige foreldre)`() {
+        coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personUtvidetResponse.json")
+
+        val person = runBlocking {
+            service.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
+        }
+
+        val expectedForeldreFnr = listOf("26117512737", "14097030880")
+
+        assertNotNull(person.familieRelasjon?.ansvarligeForeldre)
+        assertEquals(2, person.familieRelasjon?.ansvarligeForeldre?.size)
+        assertTrue(person.familieRelasjon?.foreldre?.get(0)?.foedselsnummer?.value in expectedForeldreFnr)
+        assertTrue(person.familieRelasjon?.foreldre?.get(1)?.foedselsnummer?.value in expectedForeldreFnr)
+    }
+
+    @Test
+    @Disabled("TODO - få inn datagrunnlag for denne")
+    fun`skal mappe person som inkluderer familierelasjon (barn)`() {
+        coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personUtvidetResponse.json")
+
+        val person = runBlocking {
+            service.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
+        }
+
+        val foreldreFnr = listOf("26117512737", "14097030880")
+
+        assertNotNull(person.familieRelasjon?.barn)
+        assertEquals(2, person.familieRelasjon?.barn?.size)
+        assertTrue(person.familieRelasjon?.barn?.get(0)?.foedselsnummer?.value in foreldreFnr)
+        assertTrue(person.familieRelasjon?.barn?.get(1)?.foedselsnummer?.value in foreldreFnr)
+    }
+
+    @Test
     fun `Person med sivilstand-historikk mappes korrekt`() {
         coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/endretSivilstand.json")
 
@@ -96,9 +146,9 @@ internal class PersonServiceTest {
 
     @Test
     fun `Person ikke finnes kaster exception`() {
-        coEvery { personKlient.hentPerson(any()) } returns UtvidetPersonResponse(data = null, errors = emptyList())
+        coEvery { personKlient.hentPerson(any()) } returns PersonResponse(data = null, errors = emptyList())
 
-        assertThrows<NotFoundException> {
+        assertThrows<PdlForesporselFeilet> {
             runBlocking {
                 service.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
             }
@@ -158,7 +208,7 @@ internal class PersonServiceTest {
         coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personResponseIkkeFunnet.json")
 
         runBlocking {
-            assertThrows<NotFoundException> {
+            assertThrows<PdlForesporselFeilet> {
                 service.hentPerson(HentPersonRequest(Foedselsnummer.of(STOR_SNERK)))
             }
         }

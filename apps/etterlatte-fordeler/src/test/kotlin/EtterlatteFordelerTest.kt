@@ -37,8 +37,8 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentPerson(barnFnr, any(), any(), any(), any()) } returns mockPerson(
             rolle = Rolle.BARN,
             adresse = mockNorskAdresse(),
-            familieRelasjon = EyFamilieRelasjon(
-                ansvarligeForeldre = listOf(EyForeldreAnsvar(etterlattFnr)),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(ForeldreAnsvar(etterlattFnr)),
                 foreldre = null,
                 barn = null,
             )
@@ -53,10 +53,10 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentPerson(etterlattFnr, any(), any(), any(), any()) } returns mockPerson(
             rolle = Rolle.ETTERLATT,
             adresse = mockNorskAdresse(),
-            familieRelasjon = EyFamilieRelasjon(
-                ansvarligeForeldre = listOf(EyForeldreAnsvar(Foedselsnummer.of("11057523044"))),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(ForeldreAnsvar(Foedselsnummer.of("11057523044"))),
                 foreldre = null,
-                barn = listOf(EyBarn(Foedselsnummer.of("07010776133"))),
+                barn = listOf(Barn(Foedselsnummer.of("07010776133"))),
             )
         )
 
@@ -78,8 +78,8 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentPerson(barnFnr, any(), any(), any(), any()) } returns mockPerson(
             rolle = Rolle.BARN,
             adresse = mockNorskAdresse(),
-            familieRelasjon = EyFamilieRelasjon(
-                ansvarligeForeldre = listOf(EyForeldreAnsvar(etterlattFnr)),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(ForeldreAnsvar(etterlattFnr)),
                 foreldre = null,
                 barn = null,
             )
@@ -93,10 +93,10 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentPerson(etterlattFnr, any(), any(), any(), any()) } returns mockPerson(
             rolle = Rolle.ETTERLATT,
             adresse = mockNorskAdresse(),
-            familieRelasjon = EyFamilieRelasjon(
-                ansvarligeForeldre = listOf(EyForeldreAnsvar(Foedselsnummer.of("11057523044"))),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(ForeldreAnsvar(Foedselsnummer.of("11057523044"))),
                 foreldre = null,
-                barn = listOf(EyBarn(Foedselsnummer.of("07010776133"))),
+                barn = listOf(Barn(Foedselsnummer.of("07010776133"))),
             )
         )
 

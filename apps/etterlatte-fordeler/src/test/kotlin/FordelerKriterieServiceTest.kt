@@ -3,16 +3,7 @@ package no.nav.etterlatte.prosess
 import no.nav.etterlatte.FordelerKriterie
 import no.nav.etterlatte.FordelerKriterierService
 import no.nav.etterlatte.common.objectMapper
-import no.nav.etterlatte.libs.common.person.EyBostedsadresse
-import no.nav.etterlatte.libs.common.person.EyFamilieRelasjon
-import no.nav.etterlatte.libs.common.person.EyForeldreAnsvar
-import no.nav.etterlatte.libs.common.person.EyVegadresse
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.Rolle
-import no.nav.etterlatte.libs.common.person.eyAdresse
-import no.nav.etterlatte.libs.common.person.eyUtflyttingFraNorge
-import no.nav.etterlatte.libs.common.person.eyUtland
+import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -99,11 +90,13 @@ class FordelerKriterieServiceTest {
     fun `barn som har utvandret er ikke en gyldig kandidat`() {
         val barn = mockPerson(
             rolle = Rolle.BARN,
-            utland = eyUtland(
-                utflyttingFraNorge = listOf(eyUtflyttingFraNorge(
+            utland = Utland(
+                utflyttingFraNorge = listOf(
+                    UtflyttingFraNorge(
                     tilflyttingsland = "SWE",
                     dato = "2010-01-01"
-                )),
+                )
+                ),
                 innflyttingTilNorge = null
             )
         )
@@ -145,8 +138,8 @@ class FordelerKriterieServiceTest {
         val barn = mockPerson(Rolle.BARN)
         val avdoed = mockPerson(
             rolle = Rolle.AVDOED,
-            utland = eyUtland(
-                utflyttingFraNorge = listOf(eyUtflyttingFraNorge(
+            utland = Utland(
+                utflyttingFraNorge = listOf(UtflyttingFraNorge(
                     tilflyttingsland = "SWE",
                     dato = "2010-01-01"
                 )),
@@ -239,8 +232,8 @@ class FordelerKriterieServiceTest {
     fun `gjenlevende uten foreldreansvar er ikke en gyldig kandidat`() {
         val barn = mockPerson(
             rolle = Rolle.BARN,
-            familieRelasjon = EyFamilieRelasjon(
-                ansvarligeForeldre = listOf(EyForeldreAnsvar(Foedselsnummer.of("09018701453"))),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(ForeldreAnsvar(Foedselsnummer.of("09018701453"))),
                 foreldre = null,
                 barn = null,
             )

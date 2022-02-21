@@ -9,10 +9,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.pdl.Variables
 
 import no.nav.etterlatte.person.Pdl
 import no.nav.etterlatte.person.PersonKlient
+import no.nav.etterlatte.person.pdl.PdlVariables
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
@@ -55,7 +55,7 @@ internal class PersonKlientTest {
     fun `hentUtvidetPerson returnerer gyldig UtvidetPersonResponse objekt`() {
         setup("/pdl/personUtvidetResponse.json")
         runBlocking {
-            val testPerson = personKlient.hentPerson(Variables(STOR_SNERK))
+            val testPerson = personKlient.hentPerson(PdlVariables(STOR_SNERK))
             assertEquals("LITEN", testPerson.data?.hentPerson?.navn?.get(0)?.fornavn)
             //TODO her kan vi evt teste flere felter
         }
@@ -65,7 +65,7 @@ internal class PersonKlientTest {
     fun `hentPerson returnerer gyldig PersonResponse objekt`() {
         setup("/pdl/personResponse.json")
         runBlocking {
-            val testPerson = personKlient.hentPerson(Variables(STOR_SNERK))
+            val testPerson = personKlient.hentPerson(PdlVariables(STOR_SNERK))
             assertEquals("TRIVIELL", testPerson.data?.hentPerson?.navn?.get(0)?.fornavn)
             //TODO her kan vi evt teste flere felter
         }

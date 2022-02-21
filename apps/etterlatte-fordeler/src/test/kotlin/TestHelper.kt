@@ -1,13 +1,7 @@
 package no.nav.etterlatte.prosess
 
-import no.nav.etterlatte.libs.common.person.EyBostedsadresse
-import no.nav.etterlatte.libs.common.person.EyFamilieRelasjon
-import no.nav.etterlatte.libs.common.person.EyVegadresse
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.Rolle
-import no.nav.etterlatte.libs.common.person.eyAdresse
-import no.nav.etterlatte.libs.common.person.eyUtland
+
+import no.nav.etterlatte.libs.common.person.*
 
 fun mockPerson(
     rolle: Rolle,
@@ -19,9 +13,9 @@ fun mockPerson(
     statsborgerskap: String = "NOR",
     foedeland: String = "NOR",
     sivilstatus: String = "ugift",
-    utland: eyUtland? = null,
-    adresse: eyAdresse? = null,
-    familieRelasjon: EyFamilieRelasjon? = null,
+    utland: Utland? = null,
+    adresse: Adresse? = null,
+    familieRelasjon: FamilieRelasjon? = null,
 ) = Person(
     fornavn = "Ola",
     etternavn = "Nordmann",
@@ -39,15 +33,15 @@ fun mockPerson(
     rolle = rolle
 )
 
-fun mockNorskAdresse() = eyAdresse(
-    bostedsadresse = EyBostedsadresse(
-        vegadresse = EyVegadresse("Testveien", "4", null, "1234")
+fun mockNorskAdresse() = Adresse(
+    bostedsadresse = Bostedsadresse(
+        vegadresse = Vegadresse("Testveien", "4", null, "1234")
     ),
     kontaktadresse = null,
     oppholdsadresse = null,
 )
 
-fun mockUgyldigNorskAdresse() = eyAdresse(
+fun mockUgyldigNorskAdresse() = Adresse(
     bostedsadresse = null,
     kontaktadresse = null,
     oppholdsadresse = null,

@@ -8,5 +8,6 @@ enum class Opplysningstyper(val value: String) {
     AVDOED_DOEDSAARSAK_V1("avdoed_doedsaarsak:v1"),
     SOEKER_FOEDSELSDATO_V1("soeker_foedselsdato:v1"),
     SOEKER_RELASJON_FORELDRE_V1("soeker_relasjon_foreldre:v1"),
-    SOEKER_RELASJON_SOESKEN_V1("soeker_relasjon_soesken:v1")
+    SOEKER_RELASJON_SOESKEN_V1("soeker_relasjon_soesken:v1"),
+    SOEKNAD_MOTTATT_DATO("soeknad_mottatt_dato")
 }

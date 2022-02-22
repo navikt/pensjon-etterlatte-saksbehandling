@@ -39,7 +39,7 @@ class Opplysningsuthenter {
             avdoedNaeringsinntekt(barnepensjonssoknad),
             avdoedMilitaertjeneste(barnepensjonssoknad),
             soesken(barnepensjonssoknad, Opplysningstyper.SOEKER_RELASJON_SOESKEN_V1.value),
-            soeknadMottattDato(barnepensjonssoknad)
+            soeknadMottattDato(barnepensjonssoknad, Opplysningstyper.SOEKNAD_MOTTATT_DATO.value)
         ).filterNotNull()
     }
 
@@ -269,9 +269,9 @@ class Opplysningsuthenter {
         )
     }
 
-    fun soeknadMottattDato(barnepensjon: Barnepensjon): Behandlingsopplysning<out SoeknadMottattDato> {
+    fun soeknadMottattDato(barnepensjon: Barnepensjon, opplysningsType: String): Behandlingsopplysning<out SoeknadMottattDato> {
         return setBehandlingsopplysninger(
-            barnepensjon, "soeknad_mottatt_dato",
+            barnepensjon, opplysningsType,
             SoeknadMottattDato(barnepensjon.mottattDato)
         )
     }

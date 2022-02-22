@@ -22,6 +22,8 @@ export const AlderBarn = (props: any) => {
       (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsdato
     )
 
+
+  console.log('test', avdoedDoedsdato, vilkaar.kriterier);
   const barnetsAlder = differenceInYears(
     new Date(avdoedDoedsdato.opplysning.doedsdato),
     new Date(barnetsFoedselsdato.opplysning.foedselsdato)

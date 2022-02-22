@@ -19,11 +19,9 @@ export const AlderBarn = (props: any) => {
   const avdoedDoedsdato = vilkaar.kriterier
     .find((krit: IKriterie) => krit.navn === Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO)
     .basertPaaOpplysninger.find(
-      (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsdato
+      (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsfall
     )
 
-
-  console.log('test', avdoedDoedsdato, vilkaar.kriterier);
   const barnetsAlder = differenceInYears(
     new Date(avdoedDoedsdato.opplysning.doedsdato),
     new Date(barnetsFoedselsdato.opplysning.foedselsdato)

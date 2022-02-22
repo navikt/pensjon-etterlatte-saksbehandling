@@ -17,6 +17,8 @@ import { Utbetalingsoversikt } from './utbetalingsoversikt'
 import { Vedtak } from './vedtak'
 import { IApiResponse } from '../../shared/api/types'
 import { IDetaljertBehandling, VilkaarVurderingsResultat } from '../../store/reducers/BehandlingReducer'
+import { Loader } from '@navikt/ds-react'
+import Spinner from '../../shared/Spinner'
 
 const addBehandlingAction = (data: any) => ({ type: 'add_behandling', data })
 
@@ -45,6 +47,7 @@ export const Behandling = () => {
 
   return (
     <>
+      <Spinner visible={!loaded} label='Laster' />
       {loaded && (
         <GridContainer>
           <Column>

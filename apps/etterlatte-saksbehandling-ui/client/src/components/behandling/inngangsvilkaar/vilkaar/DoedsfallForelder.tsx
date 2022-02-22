@@ -12,7 +12,7 @@ export const DoedsFallForelder = (props: any) => {
   const avdoedDoedsdato = vilkaar.kriterier
     .find((krit: IKriterie) => krit.navn === Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL)
     .basertPaaOpplysninger.find(
-      (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsdato
+      (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsfall
     )
 
   const forelder = vilkaar.kriterier

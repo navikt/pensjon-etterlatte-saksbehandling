@@ -1,6 +1,8 @@
 package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.person.Person
@@ -38,7 +40,7 @@ class BehandlingService(private val behandlingKlient: BehandlingKlient, private 
         return behandlingKlient.hentSaker(accessToken)
     }
 
-    suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingerSammendrag {
+    suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingSammendragListe {
         logger.info("Henter behandlinger for sak $sakId")
         return behandlingKlient.hentBehandlingerForSak(sakId, accessToken)
     }
@@ -51,6 +53,10 @@ class BehandlingService(private val behandlingKlient: BehandlingKlient, private 
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag {
         logger.info("Opprett en behandling på en sak")
         return behandlingKlient.opprettBehandling(behandlingsBehov, accessToken)
+    }
+
+    suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean {
+        return behandlingKlient.slettBehandlinger(sakId, accessToken)
     }
 
 }

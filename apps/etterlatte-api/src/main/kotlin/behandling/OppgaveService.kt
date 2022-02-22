@@ -1,9 +1,10 @@
 package no.nav.etterlatte.behandling
 
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.*
 
 data class Oppgave(
@@ -48,7 +49,7 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient) {
     }
 
     companion object Utils {
-        fun mapBehandlingerTilSak(sak: Sak, behandlinger: BehandlingerSammendrag): List<SakMedBehandling> {
+        fun mapBehandlingerTilSak(sak: Sak, behandlinger: BehandlingSammendragListe): List<SakMedBehandling> {
             return behandlinger.behandlinger.map { SakMedBehandling(sak, it) }
         }
 
@@ -59,8 +60,8 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient) {
                 status = sakMedBehandling.behandling.status,
                 soeknadType = sakMedBehandling.sak.sakType,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, //må hentes ut etterhvert
-                regdato = LocalDateTime.now().toString(),
-                fristdato = LocalDateTime.now().plusMonths(1).toString(), //pluss intervall
+                regdato = sakMedBehandling.behandling.mottattDato.toString(),
+                fristdato = sakMedBehandling.behandling.mottattDato?.plusMonths(1).toString(), //pluss intervall
                 fnr = sakMedBehandling.sak.ident,
                 beskrivelse = "",
                 saksbehandler = "",

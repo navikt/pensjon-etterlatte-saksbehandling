@@ -15,6 +15,8 @@ interface BehandlingService {
     fun vilkårsprøv(behandling: UUID)
     fun beregn(behandling: UUID, beregning: Beregning)
     fun ferdigstill(behandling: UUID)
+
+    fun slettBehandlingerISak(sak: Long)
 }
 
 class RealBehandlingService(
@@ -63,5 +65,12 @@ class RealBehandlingService(
     override fun ferdigstill(behandling: UUID) {
         TODO("Not yet implemented")
     }
+
+    override fun slettBehandlingerISak(sak: Long) {
+        println("Sletter alle behandlinger i sak: $sak")
+        opplysninger.slettOpplysningerISak(sak)
+        behandlinger.slettBehandlingerISak(sak)
+    }
+
 
 }

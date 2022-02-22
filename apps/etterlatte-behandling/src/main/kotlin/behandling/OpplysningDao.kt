@@ -56,4 +56,16 @@ class OpplysningDao(private val connection: () -> Connection) {
             }
 
     }
+
+    fun slettOpplysningerISak(id: Long){
+        val statement = connection().prepareStatement("DELETE from opplysning_i_behandling where behandling_id in (select b.id from behandling b where sak_id = ?)")
+        statement.setLong(1, id)
+        statement.executeUpdate()
+        prune()
+    }
+
+    private fun prune(){
+        connection().prepareStatement("DELETE from opplysning where id not in (select opplysning_id from opplysning_i_behandling)").executeUpdate()
+
+    }
 }

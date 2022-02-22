@@ -14,10 +14,14 @@ mockRouter.get('/personer/:fnr', (req: Request, res: Response) => {
 
 mockRouter.get('/oppgaver', (req: Request, res: Response) => {
   let oppgaver = require('../mockdata/oppgaverMockData.json')
-  res.json({ oppgaver })
+  setTimeout(() => {
+    res.json({ oppgaver })
+  }, 3000)
 })
 
 mockRouter.get(`/behandling/:id`, (req: Request, res: Response) => {
   let behandling = require('../mockdata/detaljertBehandling.json')
-  res.json(behandling)
+  setTimeout(() => {
+    res.json(behandling)
+  }, 3000)
 })

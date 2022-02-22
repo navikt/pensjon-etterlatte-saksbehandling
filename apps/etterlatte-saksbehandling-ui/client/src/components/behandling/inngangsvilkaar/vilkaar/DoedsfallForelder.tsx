@@ -12,7 +12,7 @@ export const DoedsFallForelder = (props: any) => {
   const avdoedDoedsdato = vilkaar.kriterier
     .find((krit: IKriterie) => krit.navn === Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL)
     .basertPaaOpplysninger.find(
-      (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsdato
+      (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsfall
     )
 
   const forelder = vilkaar.kriterier
@@ -35,16 +35,16 @@ export const DoedsFallForelder = (props: any) => {
           <div>
             <strong>Dødsdato</strong>
           </div>
-          <div>{format(new Date(avdoedDoedsdato.opplysning.doedsdato), 'dd.MM.yyyy')}</div>
+          <div>{avdoedDoedsdato?.opplysning?.doedsdato ? format(new Date(avdoedDoedsdato.opplysning.doedsdato), 'dd.MM.yyyy') : <span className="missing">mangler</span>}</div>
         </VilkaarColumn>
         <VilkaarColumn>
           <div>
             <strong>Avdød forelder</strong>
           </div>
           <div>
-            {forelder.opplysning.foreldre ? forelder.opplysning.foreldre : <span className="missing">mangler</span>}
+            {forelder?.opplysning?.foreldre ? forelder.opplysning.foreldre : <span className="missing">mangler</span>}
           </div>
-          <div>{avdoedDoedsdato.opplysning.foedselsnummer}</div>
+          <div>{avdoedDoedsdato?.opplysning?.foedselsnummer ? avdoedDoedsdato.opplysning.foedselsnummer : <span className="missing">mangler</span>}</div>
         </VilkaarColumn>
         <VilkaarColumn>
           <Title>

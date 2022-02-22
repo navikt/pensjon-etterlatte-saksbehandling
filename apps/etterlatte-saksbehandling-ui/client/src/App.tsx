@@ -6,10 +6,10 @@ import { AppContext, IAppContext } from './store/AppContext'
 import Oppgavebenken from './components/oppgavebenken/Oppgavebenken'
 import { StatusBar, StatusBarTheme } from './components/statusbar'
 import { Behandling } from './components/behandling'
-import { Link } from 'react-router-dom'
 import { Header } from './shared/header'
 import { Person } from './components/person'
 import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
+import { Testside } from './components/testside'
 
 
 function App() {
@@ -27,12 +27,7 @@ function App() {
             <Routes>
               <Route
                 path="/"
-                element={
-                  <>
-                    <Link to="/behandling/815-493-00/personopplysninger">Gå til behandling</Link>
-                    <Oppgavebenken />
-                  </>
-                }
+                element={<Oppgavebenken />}
               />
               <Route path="/oppgavebenken" element={<Oppgavebenken />} />
               <Route path="/person/:fnr" element={<Person />} />
@@ -45,6 +40,7 @@ function App() {
                   </>
                 }
               />
+              <Route path="/test" element={<Testside />} />
             </Routes>
           </BrowserRouter>
         </div>

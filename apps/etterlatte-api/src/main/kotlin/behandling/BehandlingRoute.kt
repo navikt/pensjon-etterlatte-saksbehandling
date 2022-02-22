@@ -4,6 +4,7 @@ import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.Route
+import io.ktor.routing.delete
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
@@ -63,6 +64,20 @@ fun Route.behandlingRoute(service: BehandlingService) {
                     call.respond(service.opprettBehandling(behandlingsBehov, getAccessToken(call)))
                 }
             }
+
+            // Slett alle behandlinger på en sak
+            delete("behandlinger") {
+                val sakId = call.parameters["sakId"]?.toInt()
+                if (sakId == null) {
+                    call.response.status(HttpStatusCode(400, "Bad request"))
+                    call.respond("SakId mangler");
+                }
+                else {
+                   if(service.slettBehandlinger(sakId, getAccessToken(call))){
+                        call.respond(HttpStatusCode.OK)
+                    }
+                }
+            }
         }
     }
 
@@ -76,6 +91,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 call.respond(service.hentBehandling(behandlingId, getAccessToken(call)))
             }
         }
+
     }
 
 

@@ -35,14 +35,14 @@ export const DoedsFallForelder = (props: any) => {
           <div>
             <strong>Dødsdato</strong>
           </div>
-          <div>{format(new Date(avdoedDoedsdato.opplysning.doedsdato), 'dd.MM.yyyy')}</div>
+          <div>{avdoedDoedsdato?.opplysning?.doedsdato ? format(new Date(avdoedDoedsdato.opplysning.doedsdato), 'dd.MM.yyyy') : <span className="missing">mangler</span>}</div>
         </VilkaarColumn>
         <VilkaarColumn>
           <div>
             <strong>Avdød forelder</strong>
           </div>
           <div>
-            {forelder.opplysning.foreldre ? forelder.opplysning.foreldre : <span className="missing">mangler</span>}
+            {forelder?.opplysning?.foreldre ? forelder.opplysning.foreldre : <span className="missing">mangler</span>}
           </div>
           <div>{avdoedDoedsdato.opplysning.foedselsnummer}</div>
         </VilkaarColumn>

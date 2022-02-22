@@ -85,6 +85,13 @@ class BehandlingDao(private val connection: () -> Connection) {
         require(stmt.executeUpdate() == 1)
     }
 
+    fun slettBehandlingerISak(id: Long){
+        val statement = connection().prepareStatement("DELETE from behandling where sak_id = ?")
+        statement.setLong(1, id)
+        statement.executeUpdate()
+    }
+
+
 }
 
 val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

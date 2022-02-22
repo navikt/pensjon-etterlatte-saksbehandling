@@ -30,6 +30,12 @@ fun Route.behandlingRoutes(service: BehandlingService) {
                 .let { BehandlingSammendragListe(it) }
         })
     }
+
+    delete ("/sak/{sakid}/behandlinger") {
+        inTransaction { service.slettBehandlingerISak(sakId) }
+        call.respond(HttpStatusCode.OK)
+    }
+
     post("/behandlinger") { //Søk
         val behandlingsBehov = call.receive<BehandlingsBehov>()
         inTransaction {

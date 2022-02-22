@@ -15,7 +15,8 @@ import io.ktor.client.features.json.JsonFeature
 import io.ktor.http.takeFrom
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediatorFactory
 import no.nav.etterlatte.ktortokenexchange.bearerToken
-import no.nav.etterlatte.person.PersonKlient
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.person.PdlKlient
 import no.nav.etterlatte.person.PersonService
 import no.nav.etterlatte.security.ktor.clientCredential
 
@@ -39,7 +40,7 @@ class ApplicationContext(configLocation: String? = null) {
 
         personServiceAad = pdlhttpclient(config.getConfig("no.nav.etterlatte.tjenester.pdl.aad"))
             .also { closables.add(it::close) }
-            .let { PersonService(PersonKlient(it)) }
+            .let { PersonService(PdlKlient(it)) }
     }
 
     private fun tokenSecuredEndpoint(endpointConfig:Config) = HttpClient(CIO) {
@@ -68,7 +69,7 @@ class ApplicationContext(configLocation: String? = null) {
             "AZURE_APP_OUTBOUND_SCOPE" to aad.getString("outbound"),
             "AZURE_APP_JWK" to aad.getString("client_jwk")
         )
-        install(JsonFeature) { serializer = JacksonSerializer() }
+        install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
         install(Auth) {
             clientCredential {
                 config = env

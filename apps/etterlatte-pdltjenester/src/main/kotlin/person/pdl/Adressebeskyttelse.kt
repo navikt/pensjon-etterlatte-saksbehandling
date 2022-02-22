@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.pdl
+package no.nav.etterlatte.person.pdl
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties

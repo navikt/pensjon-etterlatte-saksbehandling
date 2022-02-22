@@ -2,12 +2,12 @@ package pdl
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import no.nav.etterlatte.libs.common.pdl.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseBolkPerson
-import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelsePerson
-import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseResponse
-import no.nav.etterlatte.libs.common.pdl.Gradering
-import no.nav.etterlatte.libs.common.pdl.HentAdressebeskyttelse
+import no.nav.etterlatte.person.pdl.Adressebeskyttelse
+import no.nav.etterlatte.person.pdl.AdressebeskyttelseBolkPerson
+import no.nav.etterlatte.person.pdl.AdressebeskyttelsePerson
+import no.nav.etterlatte.person.pdl.AdressebeskyttelseResponse
+import no.nav.etterlatte.person.pdl.Gradering
+import no.nav.etterlatte.person.pdl.HentAdressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue

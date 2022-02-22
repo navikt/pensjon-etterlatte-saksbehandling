@@ -9,9 +9,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.common.objectMapper
 
 import no.nav.etterlatte.person.Pdl
-import no.nav.etterlatte.person.PersonKlient
+import no.nav.etterlatte.person.PdlKlient
 import no.nav.etterlatte.person.pdl.PdlVariables
 
 import org.junit.jupiter.api.Test
@@ -19,14 +20,14 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class PersonKlientTest {
+internal class PdlKlientTest {
 
     private companion object {
         private const val TREIG_FLOSKEL = "04096222195"
         private const val TRIVIELL_MIDTPUNKT = "19040550081"
         private const val STOR_SNERK = "11057523044"
     }
-    private lateinit var personKlient: Pdl
+    private lateinit var pdlKlient: Pdl
 
 
     fun setup(jsonUrl: String) {
@@ -45,17 +46,17 @@ internal class PersonKlientTest {
                     }
                 }
             }
-            install(JsonFeature) { serializer = JacksonSerializer() }
+            install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
         }
 
-        personKlient = PersonKlient(httpClient)
+        pdlKlient = PdlKlient(httpClient)
     }
 
     @Test
     fun `hentUtvidetPerson returnerer gyldig UtvidetPersonResponse objekt`() {
         setup("/pdl/personUtvidetResponse.json")
         runBlocking {
-            val testPerson = personKlient.hentPerson(PdlVariables(STOR_SNERK))
+            val testPerson = pdlKlient.hentPerson(PdlVariables(STOR_SNERK))
             assertEquals("LITEN", testPerson.data?.hentPerson?.navn?.get(0)?.fornavn)
             //TODO her kan vi evt teste flere felter
         }
@@ -65,7 +66,7 @@ internal class PersonKlientTest {
     fun `hentPerson returnerer gyldig PersonResponse objekt`() {
         setup("/pdl/personResponse.json")
         runBlocking {
-            val testPerson = personKlient.hentPerson(PdlVariables(STOR_SNERK))
+            val testPerson = pdlKlient.hentPerson(PdlVariables(STOR_SNERK))
             assertEquals("TRIVIELL", testPerson.data?.hentPerson?.navn?.get(0)?.fornavn)
             //TODO her kan vi evt teste flere felter
         }

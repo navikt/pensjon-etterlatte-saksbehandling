@@ -1,8 +1,6 @@
 package no.nav.etterlatte.person.pdl
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import no.nav.etterlatte.libs.common.pdl.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.pdl.ResponseError
 import java.time.LocalDate
 import java.time.LocalDateTime
 

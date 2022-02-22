@@ -51,10 +51,12 @@ fun Route.personApi(service: PersonService) {
             try {
                 val hentPersonRequest = call.receive<HentPersonRequest>()
                 logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
+
                 service.hentPerson(hentPersonRequest)
                     .let { call.respond(it) }
+
             } catch (t: Throwable) {
-                logger.error("En feil oppstod ved uthenting av person mot PDL: ${t.message}", t)
+                logger.error("En feil oppstod ved uthenting av person fra PDL: ${t.message}", t)
                 call.respond(
                     status = HttpStatusCode.InternalServerError,
                     message = "En feil oppstod ved uthenting av person mot PDL"

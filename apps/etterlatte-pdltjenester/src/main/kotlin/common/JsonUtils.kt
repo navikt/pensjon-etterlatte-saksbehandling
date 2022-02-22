@@ -11,7 +11,7 @@ val objectMapper: ObjectMapper = jacksonObjectMapper()
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     .registerModule(JavaTimeModule())
 
-fun Any.toJson(): String = jacksonObjectMapper().writeValueAsString(this)
+fun Any.toJson(): String = objectMapper.writeValueAsString(this)
 
 inline fun <reified T : Any> mapJsonToAny(json: String, failonunknown: Boolean = false): T {
     return objectMapper.let {

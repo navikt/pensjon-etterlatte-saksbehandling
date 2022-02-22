@@ -11,7 +11,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.person.PdlForesporselFeilet
-import no.nav.etterlatte.person.PersonKlient
+import no.nav.etterlatte.person.PdlKlient
 import no.nav.etterlatte.person.PersonService
 
 import no.nav.etterlatte.person.pdl.Sivilstandstype
@@ -37,10 +37,10 @@ internal class PersonServiceTest {
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .registerModule(JavaTimeModule())
 
-    private val personKlient = mockk<PersonKlient>()
+    private val pdlKlient = mockk<PdlKlient>()
 
     //TODO legge tilbake kodeverkService
-    private val service = PersonService(personKlient)
+    private val service = PersonService(pdlKlient)
 
     @AfterEach
     fun afterEach() {
@@ -50,7 +50,7 @@ internal class PersonServiceTest {
 
     @Test
     fun `Komplett person mappes korrekt`() {
-        coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personResponse.json")
+        coEvery { pdlKlient.hentPerson(any()) } returns opprettResponse("/pdl/personResponse.json")
 
         val person = runBlocking {
             service.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
@@ -73,7 +73,7 @@ internal class PersonServiceTest {
 
     @Test
     fun`skal mappe person som inkluderer familierelasjon (foreldre)`() {
-        coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personUtvidetResponse.json")
+        coEvery { pdlKlient.hentPerson(any()) } returns opprettResponse("/pdl/personUtvidetResponse.json")
 
         val person = runBlocking {
             service.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
@@ -89,7 +89,7 @@ internal class PersonServiceTest {
 
     @Test
     fun`skal mappe person som inkluderer familierelasjon (ansvarlige foreldre)`() {
-        coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personUtvidetResponse.json")
+        coEvery { pdlKlient.hentPerson(any()) } returns opprettResponse("/pdl/personUtvidetResponse.json")
 
         val person = runBlocking {
             service.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
@@ -106,7 +106,7 @@ internal class PersonServiceTest {
     @Test
     @Disabled("TODO - få inn datagrunnlag for denne")
     fun`skal mappe person som inkluderer familierelasjon (barn)`() {
-        coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personUtvidetResponse.json")
+        coEvery { pdlKlient.hentPerson(any()) } returns opprettResponse("/pdl/personUtvidetResponse.json")
 
         val person = runBlocking {
             service.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
@@ -122,7 +122,7 @@ internal class PersonServiceTest {
 
     @Test
     fun `Person med sivilstand-historikk mappes korrekt`() {
-        coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/endretSivilstand.json")
+        coEvery { pdlKlient.hentPerson(any()) } returns opprettResponse("/pdl/endretSivilstand.json")
 
         val person = runBlocking {
             service.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
@@ -133,7 +133,7 @@ internal class PersonServiceTest {
 
     @Test
     fun `Person med adressebeskyttelse mappes korrekt`() {
-        coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/adressebeskyttetPerson.json")
+        coEvery { pdlKlient.hentPerson(any()) } returns opprettResponse("/pdl/adressebeskyttetPerson.json")
 
         val person = runBlocking {
             service.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
@@ -146,7 +146,7 @@ internal class PersonServiceTest {
 
     @Test
     fun `Person ikke finnes kaster exception`() {
-        coEvery { personKlient.hentPerson(any()) } returns PersonResponse(data = null, errors = emptyList())
+        coEvery { pdlKlient.hentPerson(any()) } returns PersonResponse(data = null, errors = emptyList())
 
         assertThrows<PdlForesporselFeilet> {
             runBlocking {
@@ -194,7 +194,7 @@ internal class PersonServiceTest {
      */
     @Test
     fun `Faktisk respons fra PDL kan hentes opp`() {
-        coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personResponseFullPDL.json")
+        coEvery { pdlKlient.hentPerson(any()) } returns opprettResponse("/pdl/personResponseFullPDL.json")
 
         val person = runBlocking {
             service.hentPerson(HentPersonRequest(Foedselsnummer.of(STOR_SNERK)))
@@ -205,7 +205,7 @@ internal class PersonServiceTest {
 
     @Test
     fun `Finner ikke person i PDL`() {
-        coEvery { personKlient.hentPerson(any()) } returns opprettResponse("/pdl/personResponseIkkeFunnet.json")
+        coEvery { pdlKlient.hentPerson(any()) } returns opprettResponse("/pdl/personResponseIkkeFunnet.json")
 
         runBlocking {
             assertThrows<PdlForesporselFeilet> {

@@ -14,13 +14,16 @@ import io.ktor.jackson.jackson
 import io.ktor.routing.Route
 import io.ktor.routing.routing
 import io.ktor.server.testing.handleRequest
+import io.ktor.server.testing.setBody
 import io.ktor.server.testing.withTestApplication
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import no.nav.etterlatte.common.toJson
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.person.PdlForesporselFeilet
 import no.nav.etterlatte.person.PersonService
 import no.nav.etterlatte.person.personApi
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -102,6 +105,46 @@ class PersonRouteTest {
                 addHeader("foedselsnummer", GYLDIG_FNR)
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
+                coVerify { personService.hentPerson(any()) }
+                confirmVerified(personService)
+            }
+        }
+    }
+
+    @Test
+    fun `skal returnere person`() {
+        val hentPersonRequest = HentPersonRequest(
+            foedselsnummer = Foedselsnummer.of(GYLDIG_FNR),
+        )
+
+        coEvery { personService.hentPerson(hentPersonRequest) } returns mockPerson()
+
+        withTestApplication({ testModule { personApi(personService) } }) {
+            handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT) {
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(hentPersonRequest.toJson())
+            }.apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+                coVerify { personService.hentPerson(any()) }
+                confirmVerified(personService)
+            }
+        }
+    }
+
+    @Test
+    fun `skal returne 500 naar kall mot service feiler`() {
+        val hentPersonRequest = HentPersonRequest(
+            foedselsnummer = Foedselsnummer.of(GYLDIG_FNR),
+        )
+
+        coEvery { personService.hentPerson(hentPersonRequest) } throws PdlForesporselFeilet("Noe feilet")
+
+        withTestApplication({ testModule { personApi(personService) } }) {
+            handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT) {
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(hentPersonRequest.toJson())
+            }.apply {
+                assertEquals(HttpStatusCode.InternalServerError, response.status())
                 coVerify { personService.hentPerson(any()) }
                 confirmVerified(personService)
             }

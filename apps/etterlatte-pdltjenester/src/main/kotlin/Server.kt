@@ -1,8 +1,6 @@
 package no.nav.etterlatte
 
 import io.ktor.application.install
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
@@ -18,8 +16,6 @@ import no.nav.etterlatte.ktortokenexchange.installAuthUsing
 import no.nav.etterlatte.ktortokenexchange.secureRoutUsing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.etterlatte.person.PersonKlient
-import no.nav.etterlatte.person.PersonService
 import no.nav.etterlatte.person.personApi
 import java.util.*
 

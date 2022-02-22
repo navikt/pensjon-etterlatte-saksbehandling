@@ -1,6 +1,5 @@
 package no.nav.etterlatte.person
 
-import no.nav.etterlatte.libs.common.pdl.Gradering
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Barn
 import no.nav.etterlatte.libs.common.person.Bostedsadresse
@@ -17,6 +16,7 @@ import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.Vegadresse
 import no.nav.etterlatte.person.pdl.ForelderBarnRelasjonRolle
+import no.nav.etterlatte.person.pdl.Gradering
 import no.nav.etterlatte.person.pdl.HentPerson
 import no.nav.etterlatte.person.pdl.PdlInnflyttingTilNorge
 import no.nav.etterlatte.person.pdl.PdlUtflyttingFraNorge
@@ -25,9 +25,8 @@ import org.slf4j.LoggerFactory
 
 class PdlForesporselFeilet(message: String) : RuntimeException(message)
 
-//TODO vurdere å refaktorere til ulike serviceklasser
 class PersonService(
-    private val klient: PersonKlient
+    private val pdlKlient: PdlKlient
 ) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
     private val adressebeskyttet = listOf(
@@ -38,7 +37,7 @@ class PersonService(
     suspend fun hentPerson(hentPersonRequest: HentPersonRequest): Person {
         logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer} fra PDL")
 
-        return klient.hentPerson(hentPersonRequest.toPdlVariables()).let {
+        return pdlKlient.hentPerson(hentPersonRequest.toPdlVariables()).let {
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.joinToString(", ")
                 throw PdlForesporselFeilet(
@@ -161,11 +160,12 @@ class PersonService(
 
     private fun opprettFamilieRelasjon(hentPerson: HentPerson): FamilieRelasjon {
         //TODO tar kun med foreldreAnsvar med fnr nå
+        //TODO finn ut om det er riktig å hente ut basert på sisteRegistrertDato
         return FamilieRelasjon(
             ansvarligeForeldre = hentPerson.foreldreansvar
                 ?.filter { it.ansvarlig != null }
                 ?.groupBy { it.ansvarlig }
-                ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
+                ?.mapValues { it.value.maxByOrNull { fa -> fa.metadata.sisteRegistrertDato() } }
                 ?.map {
                     ForeldreAnsvar(Foedselsnummer.of(it.value?.ansvarlig))
                 },

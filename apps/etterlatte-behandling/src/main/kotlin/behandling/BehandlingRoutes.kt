@@ -76,6 +76,7 @@ fun Route.behandlingRoutes(service: BehandlingService) {
 private fun mapDate(behandling: Behandling): LocalDateTime {
     val dato =
         SoeknadMottattDato(LocalDateTime.parse(behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKNAD_MOTTATT_DATO.value }?.opplysning.toString()))
+    println(dato)
     return dato.mottattDato
 }
 

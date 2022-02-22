@@ -44,7 +44,7 @@ export const DoedsFallForelder = (props: any) => {
           <div>
             {forelder?.opplysning?.foreldre ? forelder.opplysning.foreldre : <span className="missing">mangler</span>}
           </div>
-          <div>{avdoedDoedsdato.opplysning.foedselsnummer ? avdoedDoedsdato.opplysning.foedselsnummer : <span className="missing">mangler</span>}</div>
+          <div>{avdoedDoedsdato?.opplysning?.foedselsnummer ? avdoedDoedsdato.opplysning.foedselsnummer : <span className="missing">mangler</span>}</div>
         </VilkaarColumn>
         <VilkaarColumn>
           <Title>

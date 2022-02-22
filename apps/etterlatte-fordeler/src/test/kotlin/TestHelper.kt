@@ -9,7 +9,7 @@ fun mockPerson(
     foedselsaar: Int = 2010,
     foedselsdato: String? = "2010-04-19",
     doedsdato: String? = null,
-    adressebeskyttelse: Boolean = false,
+    adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.UGRADERT,
     statsborgerskap: String = "NOR",
     foedeland: String = "NOR",
     sivilstatus: String = "ugift",

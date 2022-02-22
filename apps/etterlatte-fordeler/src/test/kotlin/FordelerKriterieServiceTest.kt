@@ -66,7 +66,7 @@ class FordelerKriterieServiceTest {
 
     @Test
     fun `barn som har adressebeskyttelse er ikke en gyldig kandidat`() {
-        val barn = mockPerson(Rolle.BARN, adressebeskyttelse = true)
+        val barn = mockPerson(Rolle.BARN, adressebeskyttelse = Adressebeskyttelse.STRENGT_FORTROLIG)
         val avdoed = mockPerson(Rolle.AVDOED)
         val gjenlevende = mockPerson(Rolle.ETTERLATT)
 

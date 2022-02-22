@@ -5,7 +5,7 @@
   "foedselsaar": 2010,
   "foedselsdato": "2010-04-19",
   "doedsdato": "",
-  "adressebeskyttelse": false,
+  "adressebeskyttelse": "UGRADERT",
   "adresse": {
     "bostedsadresse": {
       "vegadresse": {

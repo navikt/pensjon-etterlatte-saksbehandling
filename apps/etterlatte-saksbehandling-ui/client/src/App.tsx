@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom'
 import { Header } from './shared/header'
 import { Person } from './components/person'
 import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
+import { Testside } from './components/testside'
 
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
                   </>
                 }
               />
+              <Route path="/test" element={<Testside />} />
             </Routes>
           </BrowserRouter>
         </div>

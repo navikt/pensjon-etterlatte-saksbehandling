@@ -55,4 +55,8 @@ class BehandlingService(private val behandlingKlient: BehandlingKlient, private 
         return behandlingKlient.opprettBehandling(behandlingsBehov, accessToken)
     }
 
+    suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean {
+        return behandlingKlient.slettBehandlinger(sakId, accessToken)
+    }
+
 }

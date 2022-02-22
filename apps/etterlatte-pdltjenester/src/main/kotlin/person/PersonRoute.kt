@@ -22,29 +22,22 @@ private val logger = LoggerFactory.getLogger(PersonService::class.java)
 fun Route.personApi(service: PersonService) {
     route("person") {
 
-        //TODO skrive om så den kan ta imot EyHentUtvidetPErsonRequest input
+        // TODO fjernes
         post("hentperson") {
-            val fnr = Foedselsnummer.of(call.receive<String>().toString())
-            logger.info("Henter person med fnr=$fnr")
-            service.hentPerson(HentPersonRequest(fnr))
-                .let { call.respond(it) }
-        }
+            try {
+                val fnr = Foedselsnummer.of(call.receive<String>().toString())
+                logger.info("Henter person med fnr=${fnr}")
 
-        get {
-            val queryParams = call.request.queryParameters
-            val headers = call.request.headers
+                service.hentPerson(HentPersonRequest(fnr))
+                    .let { call.respond(it) }
 
-            val variables = HentPersonRequest(
-                foedselsnummer = Foedselsnummer.of(headers["foedselsnummer"]),
-                historikk = queryParams["historikk"]?.toBoolean() ?: false,
-                adresse = queryParams["adresse"]?.toBoolean() ?: false,
-                utland = queryParams["utland"]?.toBoolean() ?: false,
-                familieRelasjon = queryParams["familieRelasjon"]?.toBoolean() ?: false
-            )
-
-            logger.info("Henter person med fnr=${variables.foedselsnummer}")
-            service.hentPerson(variables)
-                .let { call.respond(it) }
+            } catch (t: Throwable) {
+                logger.error("En feil oppstod ved uthenting av person fra PDL: ${t.message}", t)
+                call.respond(
+                    status = HttpStatusCode.InternalServerError,
+                    message = "En feil oppstod ved uthenting av person mot PDL"
+                )
+            }
         }
 
         post {

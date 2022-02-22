@@ -300,6 +300,7 @@
           "metadata": {
             "opplysningsId": "ccbeb7f8-b935-4003-9ca3-5f67a41a309b",
             "master": "FREG",
+            "historisk": false,
             "endringer": [
               {
                 "type": "OPPRETT",
@@ -315,6 +316,7 @@
           "metadata": {
             "opplysningsId": "5bee13c3-e6ad-4487-b66e-65c9dcac6017",
             "master": "FREG",
+            "historisk": false,
             "endringer": [
               {
                 "type": "OPPRETT",

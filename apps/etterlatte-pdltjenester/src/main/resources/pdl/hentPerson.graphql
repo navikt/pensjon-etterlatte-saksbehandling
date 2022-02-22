@@ -183,14 +183,7 @@ query(
             land
             gyldigFraOgMed
             gyldigTilOgMed
-            metadata {
-                opplysningsId
-                master
-                endringer {
-                    type
-                    registrert
-                }
-            }
+            metadata{...metadata}
         }
 
         utflyttingFraNorge @include(if: $utland) {

@@ -61,7 +61,7 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient) {
                 soeknadType = sakMedBehandling.sak.sakType,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, //må hentes ut etterhvert
                 regdato = sakMedBehandling.behandling.mottattDato.toString(),
-                fristdato = sakMedBehandling.behandling.mottattDato.plusMonths(1).toString(), //pluss intervall
+                fristdato = sakMedBehandling.behandling.mottattDato?.plusMonths(1).toString(), //pluss intervall
                 fnr = sakMedBehandling.sak.ident,
                 beskrivelse = "",
                 saksbehandler = "",

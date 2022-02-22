@@ -73,7 +73,10 @@ fun Route.behandlingRoutes(service: BehandlingService) {
     }
 }
 
-private fun mapDate(behandling: Behandling): LocalDateTime {
+private fun mapDate(behandling: Behandling): LocalDateTime? {
+    if (behandling.grunnlag.isEmpty()) {
+        return null
+    }
     val dato =
         SoeknadMottattDato(LocalDateTime.parse(behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKNAD_MOTTATT_DATO.value }?.opplysning.toString()))
     println(dato)

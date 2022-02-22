@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 data class BehandlingSammendragListe(val behandlinger: List<BehandlingSammendrag>)
-data class BehandlingSammendrag(val id: UUID, val sak: Long, val status: BehandlingStatus, val mottattDato: LocalDateTime)
+data class BehandlingSammendrag(val id: UUID, val sak: Long, val status: BehandlingStatus, val mottattDato: LocalDateTime?)
 data class DetaljertBehandling(
     val id: UUID,
     val sak: Long,

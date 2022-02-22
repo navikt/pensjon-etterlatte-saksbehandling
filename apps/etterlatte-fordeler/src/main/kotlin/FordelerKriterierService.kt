@@ -15,6 +15,7 @@ import no.nav.etterlatte.FordelerKriterie.BARN_HAR_VERGE
 import no.nav.etterlatte.FordelerKriterie.GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE
 import no.nav.etterlatte.FordelerKriterie.GJENLEVENDE_HAR_IKKE_FORELDREANSVAR
 import no.nav.etterlatte.FordelerKriterie.INNSENDER_ER_IKKE_FORELDER
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.alder
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -80,7 +81,7 @@ class FordelerKriterierService {
     )
 
     private fun harAdressebeskyttelse(person: Person): Boolean {
-        return person.adressebeskyttelse
+        return person.adressebeskyttelse != Adressebeskyttelse.UGRADERT
     }
 
     private fun forGammel(person: Person, alder: Int): Boolean {

@@ -11,7 +11,7 @@ data class Person(
     val foedselsaar: Int?,
     val foedselsdato: String?,
     val doedsdato: String?,
-    val adressebeskyttelse: Boolean,
+    val adressebeskyttelse: Adressebeskyttelse,
     var adresse: Adresse?,
     val statsborgerskap: String?,
     val foedeland: String?,
@@ -21,6 +21,12 @@ data class Person(
     val rolle: Rolle?
 )
 
+enum class Adressebeskyttelse {
+    STRENGT_FORTROLIG_UTLAND,
+    STRENGT_FORTROLIG,
+    FORTROLIG,
+    UGRADERT;
+}
 
 data class Utland(
     val innflyttingTilNorge: List<InnflyttingTilNorge>?,

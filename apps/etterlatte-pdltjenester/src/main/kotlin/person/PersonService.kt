@@ -1,6 +1,8 @@
 package no.nav.etterlatte.person
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.Barn
 import no.nav.etterlatte.libs.common.person.Bostedsadresse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
@@ -15,18 +17,27 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.Vegadresse
+import no.nav.etterlatte.person.pdl.Avklaring
+import no.nav.etterlatte.person.pdl.Doedsfall
+import no.nav.etterlatte.person.pdl.Foedsel
 import no.nav.etterlatte.person.pdl.ForelderBarnRelasjonRolle
 import no.nav.etterlatte.person.pdl.Gradering
 import no.nav.etterlatte.person.pdl.HentPerson
+import no.nav.etterlatte.person.pdl.Navn
+import no.nav.etterlatte.person.pdl.ParallelleSannheterKlient
+import no.nav.etterlatte.person.pdl.PdlAdressebeskyttelse
 import no.nav.etterlatte.person.pdl.PdlInnflyttingTilNorge
 import no.nav.etterlatte.person.pdl.PdlUtflyttingFraNorge
 import no.nav.etterlatte.person.pdl.PdlVariables
+import no.nav.etterlatte.person.pdl.Sivilstand
+import no.nav.etterlatte.person.pdl.Statsborgerskap
 import org.slf4j.LoggerFactory
 
 class PdlForesporselFeilet(message: String) : RuntimeException(message)
 
 class PersonService(
-    private val pdlKlient: PdlKlient
+    private val pdlKlient: PdlKlient,
+    private val ppsKlient: ParallelleSannheterKlient
 ) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
     private val adressebeskyttet = listOf(
@@ -60,44 +71,35 @@ class PersonService(
     private fun opprettPerson(
         fnr: Foedselsnummer,
         hentPerson: HentPerson
-    ): Person {
-        val navn = hentPerson.navn
-            .maxByOrNull { it.metadata.sisteRegistrertDato() }!!
+    ): Person = runBlocking {
+            val navn = ppsKlient.avklarNavn(hentPerson)
+            val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson)
+            val statsborgerskap = ppsKlient.avklarStatsborgerskap(hentPerson)
+            val sivilstand = ppsKlient.avklarSivilstand(hentPerson)
+            val foedsel = ppsKlient.avklarFoedsel(hentPerson)
+            val doedsfall = ppsKlient.avklarDoedsfall(hentPerson)
 
-        val adressebeskyttelse = hentPerson.adressebeskyttelse
-            .any { it.gradering in adressebeskyttet }
+            Person(
+                fornavn = navn.fornavn,
+                etternavn = navn.etternavn,
+                foedselsnummer = fnr,
+                foedselsdato = foedsel?.foedselsdato?.toString(),
+                foedselsaar = foedsel?.foedselsaar,
+                doedsdato = doedsfall?.doedsdato.toString(),
+                adressebeskyttelse = adressebeskyttelse?.let {
+                    Adressebeskyttelse.valueOf(it.gradering.toString())
+                } ?: Adressebeskyttelse.UGRADERT,
+                adresse = opprettAdresse(hentPerson),
+                statsborgerskap = statsborgerskap?.land,
+                foedeland = foedsel?.foedeland,
+                sivilstatus = sivilstand?.type?.name,
 
-        val statsborgerskap = hentPerson.statsborgerskap
-            ?.maxByOrNull { it.metadata.sisteRegistrertDato() }
-
-        val sivilstand = hentPerson.sivilstand
-            .maxByOrNull { it.metadata.sisteRegistrertDato() }
-
-        val foedsel = hentPerson.foedsel
-            .maxByOrNull { it.metadata.sisteRegistrertDato() }
-
-        val doedsfall = hentPerson.doedsfall
-            .maxByOrNull { it.metadata.sisteRegistrertDato() }
-
-        return Person(
-            fornavn = navn.fornavn,
-            etternavn = navn.etternavn,
-            foedselsnummer = fnr,
-            foedselsdato = foedsel?.foedselsdato?.toString(),
-            foedselsaar = foedsel?.foedselsaar,
-            doedsdato = doedsfall?.doedsdato.toString(),
-            adressebeskyttelse = adressebeskyttelse,
-            adresse = opprettAdresse(hentPerson),
-            statsborgerskap = statsborgerskap?.land,
-            foedeland = foedsel?.foedeland,
-            sivilstatus = sivilstand?.type?.name,
-
-            utland = opprettUtland(hentPerson),
-            //TODO hva gjør vi med rolle?
-            rolle = null,
-            familieRelasjon = opprettFamilieRelasjon(hentPerson)
-        )
-    }
+                utland = opprettUtland(hentPerson),
+                //TODO hva gjør vi med rolle?
+                rolle = null,
+                familieRelasjon = opprettFamilieRelasjon(hentPerson)
+            )
+        }
 
     private fun opprettAdresse(hentPerson: HentPerson): Adresse {
         val bostedsadresse = hentPerson.bostedsadresse

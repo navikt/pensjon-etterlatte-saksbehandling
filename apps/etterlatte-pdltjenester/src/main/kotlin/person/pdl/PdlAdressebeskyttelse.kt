@@ -37,10 +37,10 @@ data class AdressebeskyttelseBolkPerson(
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class AdressebeskyttelsePerson(
-    val adressebeskyttelse: List<Adressebeskyttelse>
+    val adressebeskyttelse: List<PdlAdressebeskyttelse>
 )
 
-data class Adressebeskyttelse(
+data class PdlAdressebeskyttelse(
     val gradering: Gradering?
 )
 

@@ -18,6 +18,7 @@ import no.nav.etterlatte.ktortokenexchange.bearerToken
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.person.PdlKlient
 import no.nav.etterlatte.person.PersonService
+import no.nav.etterlatte.person.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.security.ktor.clientCredential
 
 
@@ -38,9 +39,14 @@ class ApplicationContext(configLocation: String? = null) {
     //TODO fikse noe ift AAD støtte her
     init {
 
-        personServiceAad = pdlhttpclient(config.getConfig("no.nav.etterlatte.tjenester.pdl.aad"))
-            .also { closables.add(it::close) }
-            .let { PersonService(PdlKlient(it)) }
+        val ppsUrl = config.getString("no.nav.etterlatte.tjenester.pps.url")
+        val pdlHttpClient = pdlhttpclient(config.getConfig("no.nav.etterlatte.tjenester.pdl.aad"))
+        val ppsHttpClient = ppsHttpClient()
+
+        closables.add(pdlHttpClient::close)
+        closables.add(ppsHttpClient::close)
+
+        personServiceAad = PersonService(PdlKlient(pdlHttpClient), ParallelleSannheterKlient(ppsHttpClient(), ppsUrl))
     }
 
     private fun tokenSecuredEndpoint(endpointConfig:Config) = HttpClient(CIO) {
@@ -79,7 +85,13 @@ class ApplicationContext(configLocation: String? = null) {
             url.takeFrom(aad.getString("url") + url.encodedPath)
         }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
+
+    private fun ppsHttpClient() = HttpClient(OkHttp) {
+        install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
+    }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 }
+
+
 
 fun main() {
     ApplicationContext()

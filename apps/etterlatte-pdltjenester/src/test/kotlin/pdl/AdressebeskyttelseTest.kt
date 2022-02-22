@@ -2,7 +2,7 @@ package pdl
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import no.nav.etterlatte.person.pdl.Adressebeskyttelse
+import no.nav.etterlatte.person.pdl.PdlAdressebeskyttelse
 import no.nav.etterlatte.person.pdl.AdressebeskyttelseBolkPerson
 import no.nav.etterlatte.person.pdl.AdressebeskyttelsePerson
 import no.nav.etterlatte.person.pdl.AdressebeskyttelseResponse
@@ -107,7 +107,7 @@ internal class AdressebeskyttelseTest {
     private fun mockPerson(vararg gradering: Gradering?) =
         AdressebeskyttelseBolkPerson(
             AdressebeskyttelsePerson(
-                gradering.filterNotNull().map { Adressebeskyttelse(it) }
+                gradering.filterNotNull().map { PdlAdressebeskyttelse(it) }
             )
         )
 

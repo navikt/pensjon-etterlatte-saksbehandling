@@ -15,7 +15,7 @@ data class PersonResponseData(
 )
 
 data class HentPerson(
-    val adressebeskyttelse: List<Adressebeskyttelse>,
+    val adressebeskyttelse: List<PdlAdressebeskyttelse>,
     val navn: List<Navn>,
     val foedsel: List<Foedsel>,
     val sivilstand: List<Sivilstand>,

@@ -38,6 +38,8 @@ spec:
       value: "dev-gcp:etterlatte:etterlatte-pdl-proxy"
     - name: PDL_OUTBOUND_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdl-proxy/.default
+    - name: PPS_URL
+      value: https://pensjon-parallelle-sannheter.dev.intern.nav.no
     - name: ROOT_LOGLEVEL
       value: "INFO"
     - name: NAV_CONSUMER_ID

@@ -94,7 +94,7 @@ class PersonRouteTest {
             foedselsaar = 2000,
             foedselsdato = "",
             doedsdato = null,
-            adressebeskyttelse = false,
+            adressebeskyttelse = Adressebeskyttelse.UGRADERT,
             adresse = adresse,
             statsborgerskap = "Norsk",
             foedeland = "Norge",

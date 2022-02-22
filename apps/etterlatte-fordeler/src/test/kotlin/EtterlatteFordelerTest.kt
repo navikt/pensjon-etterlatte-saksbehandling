@@ -34,7 +34,7 @@ internal class EtterlatteFordelerTest {
         val avdoedFnr = Foedselsnummer.of("24014021406")
         val etterlattFnr = Foedselsnummer.of("11057523044")
 
-        coEvery { klientMock.hentPerson(barnFnr, any(), any(), any(), any()) } returns mockPerson(
+        coEvery { klientMock.hentPerson(match { it.foedselsnummer == barnFnr } ) } returns mockPerson(
             rolle = Rolle.BARN,
             adresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
@@ -44,13 +44,13 @@ internal class EtterlatteFordelerTest {
             )
         )
 
-        coEvery { klientMock.hentPerson(avdoedFnr, any(), any(), any(), any()) } returns mockPerson(
+        coEvery { klientMock.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
             rolle = Rolle.AVDOED,
             doedsdato = "2022-01-01",
             adresse = mockNorskAdresse()
         )
 
-        coEvery { klientMock.hentPerson(etterlattFnr, any(), any(), any(), any()) } returns mockPerson(
+        coEvery { klientMock.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
             rolle = Rolle.ETTERLATT,
             adresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
@@ -75,7 +75,7 @@ internal class EtterlatteFordelerTest {
         val avdoedFnr = Foedselsnummer.of("24014021406")
         val etterlattFnr = Foedselsnummer.of("11057523044")
 
-        coEvery { klientMock.hentPerson(barnFnr, any(), any(), any(), any()) } returns mockPerson(
+        coEvery { klientMock.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
             rolle = Rolle.BARN,
             adresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
@@ -85,12 +85,12 @@ internal class EtterlatteFordelerTest {
             )
         )
 
-        coEvery { klientMock.hentPerson(avdoedFnr, any(), any(), any(), any()) } returns mockPerson(
+        coEvery { klientMock.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
             rolle = Rolle.AVDOED,
             adresse = mockNorskAdresse()
         )
 
-        coEvery { klientMock.hentPerson(etterlattFnr, any(), any(), any(), any()) } returns mockPerson(
+        coEvery { klientMock.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
             rolle = Rolle.ETTERLATT,
             adresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
@@ -130,7 +130,7 @@ internal class EtterlatteFordelerTest {
 
     @Test
     fun `skal feile og logge dersom kall mot pdltjenester feiler`() {
-        coEvery { klientMock.hentPerson(any(), any(), any(), any(), any()) } throws RuntimeException("Noe feilet")
+        coEvery { klientMock.hentPerson(any()) } throws RuntimeException("Noe feilet")
 
         val inspector = TestRapid()
             .apply { EtterlatteFordeler(this, personService, FordelerKriterierService()) }

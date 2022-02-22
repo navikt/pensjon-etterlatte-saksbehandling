@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.pdl.PdlKlient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -33,12 +34,11 @@ class PdlKlientTest {
         val httpClient = HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
-                    val path = "/person?historikk=true&adresse=true&utland=true&familieRelasjon=true"
-                    if (request.url.fullPath == path && request.method == HttpMethod.Get
+                    val path = "/person"
+                    if (request.url.fullPath == path && request.method == HttpMethod.Post
                     ) {
                         val headers = headersOf(
                             "Content-Type" to listOf(ContentType.Application.Json.toString()),
-                            "foedselsnummer" to listOf(fnr),
                         )
                         val payload = javaClass.getResource(file)!!.readText()
                         respond(payload, headers = headers)
@@ -58,13 +58,13 @@ class PdlKlientTest {
         mockEndpoint("/pdl/person.json", TESTUSER_FNR)
 
         val person = runBlocking {
-            pdlKlient.hentPerson(
-                fnr = Foedselsnummer.of(TESTUSER_FNR),
+            pdlKlient.hentPerson(HentPersonRequest(
+                foedselsnummer = Foedselsnummer.of(TESTUSER_FNR),
                 historikk = true,
                 adresse = true,
                 utland = true,
                 familieRelasjon = true
-            )
+            ))
         }
 
         assertNotNull(person)

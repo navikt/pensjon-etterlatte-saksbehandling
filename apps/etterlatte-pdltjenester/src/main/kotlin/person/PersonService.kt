@@ -17,20 +17,13 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.Vegadresse
-import no.nav.etterlatte.person.pdl.Avklaring
-import no.nav.etterlatte.person.pdl.Doedsfall
-import no.nav.etterlatte.person.pdl.Foedsel
 import no.nav.etterlatte.person.pdl.ForelderBarnRelasjonRolle
 import no.nav.etterlatte.person.pdl.Gradering
 import no.nav.etterlatte.person.pdl.HentPerson
-import no.nav.etterlatte.person.pdl.Navn
 import no.nav.etterlatte.person.pdl.ParallelleSannheterKlient
-import no.nav.etterlatte.person.pdl.PdlAdressebeskyttelse
 import no.nav.etterlatte.person.pdl.PdlInnflyttingTilNorge
 import no.nav.etterlatte.person.pdl.PdlUtflyttingFraNorge
 import no.nav.etterlatte.person.pdl.PdlVariables
-import no.nav.etterlatte.person.pdl.Sivilstand
-import no.nav.etterlatte.person.pdl.Statsborgerskap
 import org.slf4j.LoggerFactory
 
 class PdlForesporselFeilet(message: String) : RuntimeException(message)
@@ -72,12 +65,12 @@ class PersonService(
         fnr: Foedselsnummer,
         hentPerson: HentPerson
     ): Person = runBlocking {
-            val navn = ppsKlient.avklarNavn(hentPerson)
-            val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson)
-            val statsborgerskap = ppsKlient.avklarStatsborgerskap(hentPerson)
-            val sivilstand = ppsKlient.avklarSivilstand(hentPerson)
-            val foedsel = ppsKlient.avklarFoedsel(hentPerson)
-            val doedsfall = ppsKlient.avklarDoedsfall(hentPerson)
+            val navn = ppsKlient.avklarNavn(hentPerson.navn)
+            val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson.adressebeskyttelse)
+            val statsborgerskap = hentPerson.statsborgerskap?.let { ppsKlient.avklarStatsborgerskap(it) }
+            val sivilstand = ppsKlient.avklarSivilstand(hentPerson.sivilstand)
+            val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
+            val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
 
             Person(
                 fornavn = navn.fornavn,

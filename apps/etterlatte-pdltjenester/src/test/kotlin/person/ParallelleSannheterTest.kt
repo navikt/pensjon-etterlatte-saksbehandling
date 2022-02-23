@@ -1,56 +1,81 @@
 package person
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.http.ContentType
+import io.ktor.http.fullPath
+import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.common.toJson
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.person.pdl.Metadata
+import no.nav.etterlatte.person.pdl.Navn
 import no.nav.etterlatte.person.pdl.ParallelleSannheterKlient
-import no.nav.etterlatte.person.pdl.PdlAdressebeskyttelse
-import no.nav.etterlatte.person.pdl.PersonResponse
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class ParallelleSannheterTest {
 
     private val parallelleSannheterKlient = ParallelleSannheterKlient(
-        httpClient = HttpClient(CIO) {
-            install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
-        },
-        apiUrl = "https://pensjon-parallelle-sannheter.dev.intern.nav.no"
+        httpClient = setupHttpClient(),
+        apiUrl = "url"
     )
 
-    // TODO flere tester
+    companion object {
+        const val PDL = "PDL"
+        const val FREG = "FREG"
+    }
 
-    @Test
-    @Disabled("TODO")
-    fun `test navn`() {
-        val json = javaClass.getResource("/pdl/personToNavn.json")!!.readText()
-        val personResponse = objectMapper.readValue(json, PersonResponse::class.java)
+    private fun setupHttpClient() = HttpClient(MockEngine) {
+        engine {
+            addHandler { request ->
+                val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
-        val avklartNavn = runBlocking {
-            parallelleSannheterKlient.avklarNavn(personResponse.data?.hentPerson!!)
+                when (request.url.fullPath) {
+                    "/url/api/navn" -> {
+                        respond(mockResponse("navn", mockNavn(FREG)), headers = headers)
+                    }
+                    else -> error(request.url.fullPath)
+                }
+            }
         }
-
-        assertNotNull(avklartNavn)
-
+        install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
     }
 
     @Test
-    @Disabled("TODO")
-    fun `test adressebeskyttelse`() {
-        val json = javaClass.getResource("/pdl/personToNavn.json")!!.readText()
-        val personResponse = objectMapper.readValue(json, PersonResponse::class.java)
+    fun `skal returnere kun ett navn fra parallelle sannheter`() {
+        val navn = listOf(mockNavn(FREG), mockNavn(PDL))
 
-        val avklartAdressebeskyttelse: PdlAdressebeskyttelse? = runBlocking {
-            parallelleSannheterKlient.avklarAdressebeskyttelse(personResponse.data?.hentPerson!!)
+        val avklartNavn = runBlocking {
+            parallelleSannheterKlient.avklarNavn(navn)
         }
 
-        assertNull(avklartAdressebeskyttelse)
+        assertNotNull(avklartNavn)
+        assertEquals(FREG, avklartNavn.metadata.master)
+    }
 
+    private fun <T> mockResponse(feltnavn: String, verdi: T): String {
+        return objectMapper.createObjectNode()
+            .set<JsonNode?>(feltnavn, objectMapper.readValue(listOf(verdi).toJson(), JsonNode::class.java))
+            .toJson()
+    }
+
+    private fun mockNavn(master: String): Navn {
+        return Navn(
+            fornavn = "Ola",
+            etternavn = "Nordmann",
+            metadata = Metadata(
+                endringer = emptyList(),
+                historisk = false,
+                master = master,
+                opplysningsId = "1"
+            )
+        )
     }
 
 }

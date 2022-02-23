@@ -17,8 +17,8 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.Vegadresse
-import no.nav.etterlatte.person.pdl.ForelderBarnRelasjonRolle
-import no.nav.etterlatte.person.pdl.HentPerson
+import no.nav.etterlatte.person.pdl.PdlForelderBarnRelasjonRolle
+import no.nav.etterlatte.person.pdl.PdlHentPerson
 import no.nav.etterlatte.person.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.person.pdl.PdlInnflyttingTilNorge
 import no.nav.etterlatte.person.pdl.PdlUtflyttingFraNorge
@@ -59,7 +59,7 @@ class PersonService(
 
     private fun opprettPerson(
         fnr: Foedselsnummer,
-        hentPerson: HentPerson
+        hentPerson: PdlHentPerson
     ): Person = runBlocking {
         val navn = ppsKlient.avklarNavn(hentPerson.navn)
         val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson.adressebeskyttelse)
@@ -88,7 +88,7 @@ class PersonService(
     }
 
     private fun opprettAdresse(
-        hentPerson: HentPerson
+        hentPerson: PdlHentPerson
     ): Adresse = runBlocking {
         val bostedsadresse =hentPerson.bostedsadresse?.let { ppsKlient.avklarBostedsadresse(it) }
         val kontaktsadresse = hentPerson.kontaktadresse?.let { ppsKlient.avklarKontaktadresse(it) }
@@ -122,7 +122,7 @@ class PersonService(
         )
     }
 
-    private fun opprettUtland(hentPerson: HentPerson): Utland {
+    private fun opprettUtland(hentPerson: PdlHentPerson): Utland {
         return Utland(
             utflyttingFraNorge = hentPerson.utflyttingFraNorge?.map { (mapUtflytting(it)) },
             innflyttingTilNorge = hentPerson.innflyttingTilNorge?.map { (mapInnflytting(it)) }
@@ -145,7 +145,7 @@ class PersonService(
         )
     }
 
-    private fun opprettFamilieRelasjon(hentPerson: HentPerson): FamilieRelasjon {
+    private fun opprettFamilieRelasjon(hentPerson: PdlHentPerson): FamilieRelasjon {
         //TODO tar kun med foreldreAnsvar med fnr nå
         //TODO finn ut om det er riktig å hente ut basert på sisteRegistrertDato
         return FamilieRelasjon(
@@ -158,7 +158,7 @@ class PersonService(
                 },
 
             foreldre = hentPerson.forelderBarnRelasjon
-                ?.filter { it.relatertPersonsRolle != ForelderBarnRelasjonRolle.BARN }
+                ?.filter { it.relatertPersonsRolle != PdlForelderBarnRelasjonRolle.BARN }
                 ?.groupBy { it.relatertPersonsIdent }
                 ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
                 ?.map {
@@ -166,7 +166,7 @@ class PersonService(
                 },
 
             barn = hentPerson.forelderBarnRelasjon
-                ?.filter { it.relatertPersonsRolle == ForelderBarnRelasjonRolle.BARN }
+                ?.filter { it.relatertPersonsRolle == PdlForelderBarnRelasjonRolle.BARN }
                 ?.groupBy { it.relatertPersonsIdent }
                 ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
                 ?.map {

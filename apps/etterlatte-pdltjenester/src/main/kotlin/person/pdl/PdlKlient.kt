@@ -7,13 +7,13 @@ import io.ktor.client.request.post
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType.Application.Json
 import no.nav.etterlatte.common.toJson
-import no.nav.etterlatte.person.pdl.GraphqlRequest
+import no.nav.etterlatte.person.pdl.PdlGraphqlRequest
 import no.nav.etterlatte.person.pdl.PdlVariables
-import no.nav.etterlatte.person.pdl.PersonResponse
+import no.nav.etterlatte.person.pdl.PdlPersonResponse
 
 
 interface Pdl {
-    suspend fun hentPerson(variables: PdlVariables): PersonResponse
+    suspend fun hentPerson(variables: PdlVariables): PdlPersonResponse
 }
 
 class PdlKlient(val httpClient: HttpClient) : Pdl {
@@ -22,8 +22,8 @@ class PdlKlient(val httpClient: HttpClient) : Pdl {
         const val TEMA = "PEN"
     }
 
-    override suspend fun hentPerson(variables: PdlVariables): PersonResponse {
-        val request = GraphqlRequest(
+    override suspend fun hentPerson(variables: PdlVariables): PdlPersonResponse {
+        val request = PdlGraphqlRequest(
             query = getQuery("/pdl/hentPerson.graphql"),
             variables = variables
         )

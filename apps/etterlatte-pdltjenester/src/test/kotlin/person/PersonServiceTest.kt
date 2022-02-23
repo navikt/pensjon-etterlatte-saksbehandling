@@ -11,9 +11,9 @@ import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.person.PdlForesporselFeilet
 import no.nav.etterlatte.person.PdlKlient
 import no.nav.etterlatte.person.PersonService
-import no.nav.etterlatte.person.pdl.HentPerson
+import no.nav.etterlatte.person.pdl.PdlHentPerson
 import no.nav.etterlatte.person.pdl.ParallelleSannheterKlient
-import no.nav.etterlatte.person.pdl.PersonResponse
+import no.nav.etterlatte.person.pdl.PdlPersonResponse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -36,8 +36,8 @@ internal class PersonServiceTest {
 
     @BeforeEach
     fun beforeEach() {
-        val personResponse: PersonResponse = opprettResponse("/pdl/personUtvidetResponse.json")
-        val hentPerson: HentPerson = personResponse.data?.hentPerson!!
+        val personResponse: PdlPersonResponse = opprettResponse("/pdl/personUtvidetResponse.json")
+        val hentPerson: PdlHentPerson = personResponse.data?.hentPerson!!
 
         coEvery { pdlKlient.hentPerson(any()) } returns personResponse
         coEvery { ppsKlient.avklarNavn(any()) } returns hentPerson.navn.first()
@@ -98,7 +98,7 @@ internal class PersonServiceTest {
 
     @Test
     fun `Person ikke finnes kaster exception`() {
-        coEvery { pdlKlient.hentPerson(any()) } returns PersonResponse(data = null, errors = emptyList())
+        coEvery { pdlKlient.hentPerson(any()) } returns PdlPersonResponse(data = null, errors = emptyList())
 
         assertThrows<PdlForesporselFeilet> {
             runBlocking {

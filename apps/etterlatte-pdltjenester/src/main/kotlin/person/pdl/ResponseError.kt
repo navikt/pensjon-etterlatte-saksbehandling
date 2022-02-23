@@ -8,25 +8,25 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
  * @see: <a href="https://navikt.github.io/pdl/#_graphql_feilh%C3%A5ndtering_ved_konsumering_av_pdl_api">Appendix D: GraphQL: Feilhåndtering ved konsumering av Pdl-Api</a>
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class ResponseError(
+data class PdlResponseError(
     val message: String?,
-    val locations: List<ErrorLocation>? = null,
+    val locations: List<PdlErrorLocation>? = null,
     val path: List<String>? = null,
-    val extensions: ErrorExtension? = null
+    val extensions: PdlErrorExtension? = null
 )
 
-data class ErrorLocation(
+data class PdlErrorLocation(
     val line: String?,
     val column: String?
 )
 
-data class ErrorExtension(
+data class PdlErrorExtension(
     val code: String?,
-    val details: ErrorDetails?,
+    val details: PdlErrorDetails?,
     val classification: String?
 )
 
-data class ErrorDetails(
+data class PdlErrorDetails(
     val type: String? = null,
     val cause: String? = null,
     val policy: String? = null

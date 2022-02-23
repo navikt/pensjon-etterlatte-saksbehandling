@@ -12,8 +12,8 @@ import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.common.toJson
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.person.pdl.Metadata
-import no.nav.etterlatte.person.pdl.Navn
+import no.nav.etterlatte.person.pdl.PdlMetadata
+import no.nav.etterlatte.person.pdl.PdlNavn
 import no.nav.etterlatte.person.pdl.ParallelleSannheterKlient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -65,11 +65,11 @@ internal class ParallelleSannheterTest {
             .toJson()
     }
 
-    private fun mockNavn(master: String): Navn {
-        return Navn(
+    private fun mockNavn(master: String): PdlNavn {
+        return PdlNavn(
             fornavn = "Ola",
             etternavn = "Nordmann",
-            metadata = Metadata(
+            metadata = PdlMetadata(
                 endringer = emptyList(),
                 historisk = false,
                 master = master,

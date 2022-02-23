@@ -3,13 +3,13 @@ package no.nav.etterlatte.person.pdl
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 
-data class GraphqlRequest(
+data class PdlGraphqlRequest(
     val query: String,
     val variables: PdlVariables
 )
 
 /**
- * Tar imot ident(er) som variabel til et [GraphqlRequest].
+ * Tar imot ident(er) som variabel til et [PdlGraphqlRequest].
  *
  * Ident kan være i form av FOLKEREGISTERIDENT (fødselsnummer), AKTORID eller NPID.
  */

@@ -1,81 +1,80 @@
 package no.nav.etterlatte.person.pdl
 
-import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class PersonResponse(
-    val data: PersonResponseData? = null,
-    val errors: List<ResponseError>? = null
+data class PdlPersonResponse(
+    val data: PdlPersonResponseData? = null,
+    val errors: List<PdlResponseError>? = null
 )
 
-data class PersonResponseData(
-    val hentPerson: HentPerson? = null
+data class PdlPersonResponseData(
+    val hentPerson: PdlHentPerson? = null
 )
 
-data class HentPerson(
+data class PdlHentPerson(
     val adressebeskyttelse: List<PdlAdressebeskyttelse>,
-    val navn: List<Navn>,
-    val foedsel: List<Foedsel>,
-    val sivilstand: List<Sivilstand>,
-    val doedsfall: List<Doedsfall>,
-    val bostedsadresse: List<Bostedsadresse>?,
-    val kontaktadresse: List<Kontaktadresse>?,
-    val oppholdsadresse: List<Oppholdsadresse>?,
+    val navn: List<PdlNavn>,
+    val foedsel: List<PdlFoedsel>,
+    val sivilstand: List<PdlSivilstand>,
+    val doedsfall: List<PdlDoedsfall>,
+    val bostedsadresse: List<PdlBostedsadresse>?,
+    val kontaktadresse: List<PdlKontaktadresse>?,
+    val oppholdsadresse: List<PdlOppholdsadresse>?,
     val innflyttingTilNorge: List<PdlInnflyttingTilNorge>?,
-    val statsborgerskap: List<Statsborgerskap>?,
+    val statsborgerskap: List<PdlStatsborgerskap>?,
     val utflyttingFraNorge: List<PdlUtflyttingFraNorge>?,
-    val foreldreansvar: List<ForelderAnsvar>?,
-    val forelderBarnRelasjon: List<ForelderBarnRelasjon>?
+    val foreldreansvar: List<PdlForelderAnsvar>?,
+    val forelderBarnRelasjon: List<PdlForelderBarnRelasjon>?
 )
 
 data class PdlAdressebeskyttelse(
-    val gradering: Gradering?,
-    val folkeregistermetadata: Folkeregistermetadata? = null,
-    val metadata: Metadata
+    val gradering: PdlGradering?,
+    val folkeregistermetadata: PdlFolkeregistermetadata? = null,
+    val metadata: PdlMetadata
 )
 
-enum class Gradering {
+enum class PdlGradering {
     STRENGT_FORTROLIG_UTLAND,
     STRENGT_FORTROLIG,
     FORTROLIG,
     UGRADERT;
 }
 
-data class Navn(
+data class PdlNavn(
     val fornavn: String,
     val mellomnavn: String? = null,
     val etternavn: String,
     val forkortetNavn: String? = null,
     val gyldigFraOgMed: LocalDate? = null,
-    val folkeregistermetadata: Folkeregistermetadata? = null,
-    val metadata: Metadata
+    val folkeregistermetadata: PdlFolkeregistermetadata? = null,
+    val metadata: PdlMetadata
 )
 
-data class Statsborgerskap(
+data class PdlStatsborgerskap(
     val land: String,
     val gyldigFraOgMed: LocalDate? = null,
     val gyldigTilOgMed: LocalDate? = null,
-    val metadata: Metadata
+    val metadata: PdlMetadata
 )
 
-data class Foedsel(
+data class PdlFoedsel(
     val foedselsdato: LocalDate? = null,
     val foedeland: String? = null,
     val foedested: String? = null,
     val foedselsaar: Int? = null,
-    val folkeregistermetadata: Folkeregistermetadata? = null,
-    val metadata: Metadata
+    val folkeregistermetadata: PdlFolkeregistermetadata? = null,
+    val metadata: PdlMetadata
 )
 
-data class Folkeregistermetadata(
+data class PdlFolkeregistermetadata(
     val gyldighetstidspunkt: LocalDateTime? = null
 )
 
-data class Metadata(
-    val endringer: List<Endring>,
+data class PdlMetadata(
+    val endringer: List<PdlEndring>,
     val historisk: Boolean,
     val master: String,
     val opplysningsId: String
@@ -85,21 +84,21 @@ data class Metadata(
     }
 }
 
-data class Endring(
+data class PdlEndring(
     val kilde: String?,
     val registrert: LocalDateTime,
     val registrertAv: String?,
     val systemkilde: String?,
-    val type: Endringstype
+    val type: PdlEndringstype
 )
 
-enum class Endringstype {
+enum class PdlEndringstype {
     KORRIGER,
     OPPHOER,
     OPPRETT;
 }
 
-enum class Sivilstandstype {
+enum class PdlSivilstandstype {
     UOPPGITT,
     UGIFT,
     GIFT,
@@ -112,77 +111,77 @@ enum class Sivilstandstype {
     GJENLEVENDE_PARTNER;
 }
 
-data class Sivilstand(
-    val type: Sivilstandstype,
+data class PdlSivilstand(
+    val type: PdlSivilstandstype,
     val gyldigFraOgMed: LocalDate? = null,
     val relatertVedSivilstand: String? = null,
-    val metadata: Metadata
+    val metadata: PdlMetadata
 )
 
-data class Doedsfall(
+data class PdlDoedsfall(
     val doedsdato: LocalDate?,
-    val folkeregistermetadata: Folkeregistermetadata?,
-    val metadata: Metadata
+    val folkeregistermetadata: PdlFolkeregistermetadata?,
+    val metadata: PdlMetadata
 )
 
 data class PdlInnflyttingTilNorge(
-    val folkeregistermetadata: Folkeregistermetadata?,
+    val folkeregistermetadata: PdlFolkeregistermetadata?,
     val fraflyttingsland: String?,
     val fraflyttingsstedIUtlandet: String?,
-    val metadata: Metadata
+    val metadata: PdlMetadata
 )
-//TODO endre til Date?
+
 data class PdlUtflyttingFraNorge(
-    val folkeregistermetadata: Folkeregistermetadata?,
+    val folkeregistermetadata: PdlFolkeregistermetadata?,
     val tilflyttingsland: String?,
     val tilflyttingsstedIUtlandet: String?,
     val utflyttingsdato: String?,
-    val metadata: Metadata
+    val metadata: PdlMetadata
 )
 
-data class Bostedsadresse(
+data class PdlBostedsadresse(
     val gyldigFraOgMed: LocalDateTime? = null,
     val gyldigTilOgMed: LocalDateTime? = null,
-    val matrikkeladresse: Matrikkeladresse?,
-    val metadata: Metadata,
-    val ukjentBosted: UkjentBosted?,
-    val utenlandskAdresse: UtenlandskAdresse?,
-    val vegadresse: Vegadresse?
+    val matrikkeladresse: PdlMatrikkeladresse?,
+    val metadata: PdlMetadata,
+    val ukjentBosted: PdlUkjentBosted?,
+    val utenlandskAdresse: PdlUtenlandskAdresse?,
+    val vegadresse: PdlVegadresse?
 )
 
-data class Kontaktadresse(
+data class PdlKontaktadresse(
     val coAdressenavn: String?,
-    val folkeregistermetadata: Folkeregistermetadata?,
+    val folkeregistermetadata: PdlFolkeregistermetadata?,
     val gyldigFraOgMed: LocalDateTime? = null,
     val gyldigTilOgMed: LocalDateTime? = null,
-    val metadata: Metadata,
-    val postadresseIFrittFormat: PostadresseIFrittFormat?,
-    val postboksadresse: Postboksadresse?,
+    val metadata: PdlMetadata,
+    val postadresseIFrittFormat: PdlPostadresseIFrittFormat?,
+    val postboksadresse: PdlPostboksadresse?,
     val type: String,
-    val utenlandskAdresse: UtenlandskAdresse?,
-    val utenlandskAdresseIFrittFormat: UtenlandskAdresseIFrittFormat?,
-    val vegadresse: Vegadresse?
+    val utenlandskAdresse: PdlUtenlandskAdresse?,
+    val utenlandskAdresseIFrittFormat: PdlUtenlandskAdresseIFrittFormat?,
+    val vegadresse: PdlVegadresse?
 )
 
-data class Oppholdsadresse(
+data class PdlOppholdsadresse(
     val coAdressenavn: String?,
-    val folkeregistermetadata: Folkeregistermetadata?,
+    val folkeregistermetadata: PdlFolkeregistermetadata?,
     val gyldigFraOgMed: LocalDateTime? = null,
     val gyldigTilOgMed: LocalDateTime? = null,
-    val matrikkeladresse: Matrikkeladresse?,
-    val metadata: Metadata,
+    val matrikkeladresse: PdlMatrikkeladresse?,
+    val metadata: PdlMetadata,
     val oppholdAnnetSted: String?,
-    val utenlandskAdresse: UtenlandskAdresse?,
-    val vegadresse: Vegadresse?
+    val utenlandskAdresse: PdlUtenlandskAdresse?,
+    val vegadresse: PdlVegadresse?
 )
 
-data class Postboksadresse (
+data class PdlPostboksadresse (
     val postboks: String,
     val postbokseier: String?,
     val postnummer: String?
 )
 
-data class UtenlandskAdresseIFrittFormat (
+data class PdlUtenlandskAdresseIFrittFormat (
     val adresselinje1: String?,
     val adresselinje2: String?,
     val adresselinje3: String?,
@@ -190,38 +189,41 @@ data class UtenlandskAdresseIFrittFormat (
     val landkode: String,
     val postkode: String?,
 )
-data class PostadresseIFrittFormat (
+
+data class PdlPostadresseIFrittFormat (
     val adresselinje1: String?,
     val adresselinje2: String?,
     val adresselinje3: String?,
     val postnummer: String?
 )
 
-data class Vegadresse (
+data class PdlVegadresse (
     val adressenavn: String?,
     val bruksenhetsnummer: String?,
     val bydelsnummer: String?,
     val husbokstav: String?,
     val husnummer: String?,
     val kommunenummer: String?,
-    val koordinater: Koordinater?,
+    val koordinater: PdlKoordinater?,
     val matrikkelId: Long?,
     val postnummer: String?,
     val tilleggsnavn: String?,
 )
-data class UkjentBosted (
+
+data class PdlUkjentBosted (
     val bostedskommune: String?
 )
-data class Matrikkeladresse (
+
+data class PdlMatrikkeladresse (
     val bruksenhetsnummer: String?,
     val kommunenummer: String?,
-    val koordinater: Koordinater?,
+    val koordinater: PdlKoordinater?,
     val matrikkelId: Long?,
     val postnummer: String?,
     val tilleggsnavn: String?
 )
 
-data class UtenlandskAdresse (
+data class PdlUtenlandskAdresse (
     val adressenavnNummer: String?,
     val bySted: String?,
     val bygningEtasjeLeilighet: String?,
@@ -231,44 +233,44 @@ data class UtenlandskAdresse (
     val regionDistriktOmraade: String?
 )
 
-data class Koordinater (
+data class PdlKoordinater (
     val kvalitet: Int?,
     val x: Float?,
     val y: Float?,
     val z: Float?
 )
 
-data class ForelderAnsvar(
+data class PdlForelderAnsvar(
     val ansvar: String? = null,
     val ansvarlig: String? = null,
-    val ansvarligUtenIdentifikator: RelatertBiPerson? = null,
+    val ansvarligUtenIdentifikator: PdlRelatertBiPerson? = null,
     val ansvarssubjekt: String? = null,
-    val folkeregistermetadata: Folkeregistermetadata? = null,
-    val metadata: Metadata,
+    val folkeregistermetadata: PdlFolkeregistermetadata? = null,
+    val metadata: PdlMetadata,
 )
 
-data class RelatertBiPerson(
+data class PdlRelatertBiPerson(
     val foedselsdato: LocalDate? = null,
     val kjoenn: String? = null,
-    val navn: Personnavn? = null,
+    val navn: PdlPersonnavn? = null,
     val statsborgerskap: String? = null
 )
 
-data class Personnavn(
+data class PdlPersonnavn(
     val etternavn: String,
     val fornavn: String,
     val mellomnavn: String? = null
 )
 
-data class ForelderBarnRelasjon(
-    val folkeregistermetadata: Folkeregistermetadata? = null,
-    val metadata: Metadata,
-    val minRolleForPerson: ForelderBarnRelasjonRolle? = null,
+data class PdlForelderBarnRelasjon(
+    val folkeregistermetadata: PdlFolkeregistermetadata? = null,
+    val metadata: PdlMetadata,
+    val minRolleForPerson: PdlForelderBarnRelasjonRolle? = null,
     val relatertPersonsIdent: String,
-    val relatertPersonsRolle: ForelderBarnRelasjonRolle
+    val relatertPersonsRolle: PdlForelderBarnRelasjonRolle
 )
 
-enum class ForelderBarnRelasjonRolle {
+enum class PdlForelderBarnRelasjonRolle {
     BARN,
     FAR,
     MEDMOR,

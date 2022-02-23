@@ -21,17 +21,17 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
         val logger: Logger = LoggerFactory.getLogger(ParallelleSannheterKlient::class.java)
     }
 
-    suspend fun avklarNavn(navn: List<Navn>) = avklar(navn, Avklaring.NAVN)
+    suspend fun avklarNavn(pdlNavn: List<PdlNavn>) = avklar(pdlNavn, Avklaring.NAVN)
     suspend fun avklarAdressebeskyttelse(adressebeskyttelse: List<PdlAdressebeskyttelse>) =
         avklarNullable(adressebeskyttelse, Avklaring.ADRESSEBESKYTTELSE)
-    suspend fun avklarStatsborgerskap(statsborgerskap: List<Statsborgerskap>) =
-        avklarNullable(statsborgerskap, Avklaring.STATSBORGERSKAP)
-    suspend fun avklarSivilstand(sivilstand: List<Sivilstand>) = avklarNullable(sivilstand, Avklaring.SIVILSTAND)
-    suspend fun avklarFoedsel(foedsel: List<Foedsel>) = avklarNullable(foedsel, Avklaring.FOEDSEL)
-    suspend fun avklarDoedsfall(doedsfall: List<Doedsfall>) = avklarNullable(doedsfall, Avklaring.DOEDSFALL)
-    suspend fun avklarBostedsadresse(bostedsadresse: List<Bostedsadresse>) = avklarNullable(bostedsadresse, Avklaring.BOSTEDSADRESSE)
-    suspend fun avklarKontaktadresse(kontaktadresse: List<Kontaktadresse>) = avklarNullable(kontaktadresse, Avklaring.KONTAKTADRESSE)
-    suspend fun avklarOppholdsadresse(oppholdsadresse: List<Oppholdsadresse>) = avklarNullable(oppholdsadresse, Avklaring.OPPHOLDSADRESSE)
+    suspend fun avklarStatsborgerskap(pdlStatsborgerskap: List<PdlStatsborgerskap>) =
+        avklarNullable(pdlStatsborgerskap, Avklaring.STATSBORGERSKAP)
+    suspend fun avklarSivilstand(pdlSivilstand: List<PdlSivilstand>) = avklarNullable(pdlSivilstand, Avklaring.SIVILSTAND)
+    suspend fun avklarFoedsel(pdlFoedsel: List<PdlFoedsel>) = avklarNullable(pdlFoedsel, Avklaring.FOEDSEL)
+    suspend fun avklarDoedsfall(pdlDoedsfall: List<PdlDoedsfall>) = avklarNullable(pdlDoedsfall, Avklaring.DOEDSFALL)
+    suspend fun avklarBostedsadresse(pdlBostedsadresse: List<PdlBostedsadresse>) = avklarNullable(pdlBostedsadresse, Avklaring.BOSTEDSADRESSE)
+    suspend fun avklarKontaktadresse(pdlKontaktadresse: List<PdlKontaktadresse>) = avklarNullable(pdlKontaktadresse, Avklaring.KONTAKTADRESSE)
+    suspend fun avklarOppholdsadresse(pdlOppholdsadresse: List<PdlOppholdsadresse>) = avklarNullable(pdlOppholdsadresse, Avklaring.OPPHOLDSADRESSE)
 
     private suspend inline fun <reified T> avklar(list: List<T>, avklaring: Avklaring): T {
         return avklarNullable(list, avklaring)

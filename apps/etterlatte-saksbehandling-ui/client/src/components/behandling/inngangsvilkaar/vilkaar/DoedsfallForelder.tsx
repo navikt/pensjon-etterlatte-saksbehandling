@@ -26,7 +26,7 @@ export const DoedsFallForelder = (props: any) => {
       <VilkaarWrapper>
         <VilkaarColumn>
           <Title>
-            <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} /> Dødsfall forelder
+            <StatusIcon status={props.vilkaar.resultat} /> Dødsfall forelder
           </Title>
           <div>§ 18-5</div>
           <div>En eller begge foreldrene døde</div>

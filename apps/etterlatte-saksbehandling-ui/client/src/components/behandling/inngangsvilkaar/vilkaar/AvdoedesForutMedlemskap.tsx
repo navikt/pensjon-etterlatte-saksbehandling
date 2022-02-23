@@ -1,24 +1,29 @@
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import { VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import { Title, VilkaarColumn, VilkaarWrapper } from '../styled'
+import { TidslinjeMedlemskap } from './TidslinjeMedlemskap'
 
 export const AvdoedesForutMedlemskap = (props: any) => {
   const vilkaar = props.vilkaar
+  console.log(vilkaar)
 
   return (
     <div style={{ borderBottom: '1px solid #ccc', padding: '1em 0' }}>
+      <Title>
+        <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} /> Avdødes forutgående medlemskap
+      </Title>
+      <TidslinjeMedlemskap />
+
       <VilkaarWrapper>
         <VilkaarColumn>
-          <Title>
-            <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} /> Dødsfall forelder
-          </Title>
           <div>§ 18-5</div>
           <div>Den avdøde var medlem av trygden eller mottok pensjon/uføretrygd de siste 5 årene før dødsfallet</div>
         </VilkaarColumn>
 
+        {/*
         <VilkaarColumn>
           <Title>Bosted</Title>
-          <div>{vilkaar.opplysning.doedsdato}</div>
+          <div></div>
           <div>
             <strong>Bostedsardresse</strong>
           </div>
@@ -55,17 +60,9 @@ export const AvdoedesForutMedlemskap = (props: any) => {
             <strong>Mottok pensjon/uføretrygd</strong>
           </div>
           <div>Ja (1994 til 1996)</div>
-        </VilkaarColumn>
+        </VilkaarColumn>*/}
         <VilkaarColumn>
-          <Title>
-            Vilkår er{' '}
-            {props.vilkaar.resultat === VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ? (
-              <> ikke oppfyllt</>
-            ) : (
-              <> oppfyllt</>
-            )}
-          </Title>
-          */
+          <Title>Vilkår er ikke oppfyllt</Title>
         </VilkaarColumn>
       </VilkaarWrapper>
     </div>

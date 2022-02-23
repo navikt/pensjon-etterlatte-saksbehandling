@@ -145,11 +145,11 @@
       },
       {
         "fornavn": {
-          "svar": "fe",
+          "svar": "fn",
           "spoersmaal": "Fornavn"
         },
         "etternavn": {
-          "svar": "fe",
+          "svar": "en",
           "spoersmaal": "Etternavn"
         },
         "foedselsnummer": {

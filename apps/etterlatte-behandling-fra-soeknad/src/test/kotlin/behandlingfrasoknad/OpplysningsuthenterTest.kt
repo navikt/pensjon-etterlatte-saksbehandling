@@ -1,132 +1,203 @@
 package behandlingfrasoknad
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.behandlingfrasoknad.Opplysningsuthenter
 import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BankkontoType
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 import java.time.ZoneOffset
+import java.util.concurrent.atomic.AtomicBoolean
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OpplysningsuthenterTest {
-//TODO: skrur av denne enn så lenge, må tenkes litt mer gjennom ved endringer i søknadsstrukturen
-    @Disabled
-    @Test
-    fun lagSkjemaInfoOpplysningsListe() {
-        val hendelseJson = objectMapper.readTree(javaClass.getResource("/fullMessage3.json")!!.readText())!!
-        val opplysningsuthenter = Opplysningsuthenter()
-        val opplysninger =
-            opplysningsuthenter.lagOpplysningsListe(objectMapper.treeToValue(hendelseJson["@skjema_info"])!!)
 
-        assertEquals((opplysninger[0].kilde as Behandlingsopplysning.Privatperson).fnr, "11057523044")
-        assertEquals(
-            (opplysninger[0].kilde as Behandlingsopplysning.Privatperson).mottatDato.epochSecond,
-            LocalDateTime.parse("2022-01-25T15:29:34.621087004").atOffset(
-                ZoneOffset.UTC
-            ).toInstant().epochSecond
-        )
 
-        assertEquals("innsender_personinfo:v1", opplysninger[0].opplysningType)
-        assertEquals(
-            """{"fornavn":"STOR","etternavn":"SNERK","foedselsnummer":"11057523044","type":"INNSENDER"}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[0].opplysning).toString()
-        )
 
-        assertEquals("samtykke", opplysninger[1].opplysningType)
-        assertEquals(
-            """{"harSamtykket":true}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[1].opplysning).toString()
-        )
-
-        assertEquals("utbetalingsinformasjon:v1", opplysninger[2].opplysningType)
-        assertEquals(
-            """{"bankkontoType":"NORSK","kontonummer":"9999.99.99999","utenlandskBankNavn":null,"utenlandskBankAdresse":null,"iban":null,"swift":null,"oenskerSkattetrekk":"JA","oensketSkattetrekkProsent":"20%"}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[2].opplysning).toString()
-        )
-
-        assertEquals("soeker_personinfo:v1", opplysninger[3].opplysningType)
-        assertEquals(
-            """{"fornavn":"Gustaf","etternavn":"Raymondsen","foedselsnummer":"29081276127","type":"BARN"}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[3].opplysning).toString()
-        )
-
-        assertEquals("soeker_statsborgerskap:v1", opplysninger[4].opplysningType)
-        assertEquals(
-            """{"statsborgerskap":"Norge","foedselsnummer":"29081276127"}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[4].opplysning).toString()
-        )
-
-        assertEquals("soeker_utenlandsadresse:v1", opplysninger[5].opplysningType)
-        assertEquals(
-            """{"adresseIUtlandet":"JA","land":"Oman","adresse":"Oman 1, 9999 Oman","foedselsnummer":"29081276127"}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[5].opplysning).toString()
-        )
-
-        assertEquals("soeker_verge:v1", opplysninger[6].opplysningType)
-        assertEquals(
-            """{"barnHarVerge":"JA","fornavn":"Verge","etternavn":"Vergesen","foedselsnummer":"19078504903"}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[6].opplysning).toString()
-        )
-
-        assertFalse(opplysninger.any { it.opplysningType == "soeker_daglig_omsorg:v1" })
-
-        assertEquals("forelder_gjenlevende_personinfo:v1", opplysninger[8].opplysningType)
-        assertEquals(
-            """{"fornavn":"STOR","etternavn":"SNERK","foedselsnummer":"11057523044","type":"GJENLEVENDE_FORELDER"}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[8].opplysning).toString()
-        )
-
-        assertEquals("avdoed_personinfo:v1", opplysninger[9].opplysningType)
-        assertEquals(
-            """{"fornavn":"Reidar","etternavn":"Reidarsen","foedselsnummer":"19078504903","type":"AVDOED"}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[9].opplysning).toString()
-        )
-
-        assertEquals("avdoed_doedsfall:v1", opplysninger[10].opplysningType)
-        assertEquals(
-            """{"doedsdato":"2022-01-05","foedselsnummer":"19078504903"}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[10].opplysning).toString()
-        )
-
-        assertEquals("avdoed_doedsaarsak:v1", opplysninger[11].opplysningType)
-        assertEquals(
-            """{"doedsaarsakSkyldesYrkesskadeEllerYrkessykdom":"JA","foedselsnummer":"19078504903"}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[11].opplysning).toString()
-        )
-
-        assertEquals("avdoed_utenlandsopphold:v1", opplysninger[12].opplysningType)
-        assertEquals(
-            """{"harHattUtenlandsopphold":"JA","opphold":[{"land":"Antigua og barbuda","fraDato":"2000-01-01","tilDato":"2002-01-01","oppholdsType":["BODD"],"medlemFolketrygd":"JA","pensjonsutbetaling":"-"},{"land":"Bahamas","fraDato":"2002-02-02","tilDato":"2003-02-02","oppholdsType":["ARBEIDET"],"medlemFolketrygd":"NEI","pensjonsutbetaling":"4738"},{"land":"Canada","fraDato":"1998-02-02","tilDato":"1999-02-02","oppholdsType":["BODD","ARBEIDET"],"medlemFolketrygd":"VET_IKKE","pensjonsutbetaling":"3929"}],"foedselsnummer":"19078504903"}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[12].opplysning).toString()
-        )
-
-        assertEquals("avdoed_naeringsinntekt:v1", opplysninger[13].opplysningType)
-        assertEquals(
-            """{"selvstendigNaeringsdrivende":"JA","haddeNaeringsinntektVedDoedsfall":"JA","naeringsinntektAarFoerDoedsfall":"83920","foedselsnummer":"19078504903"}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[13].opplysning).toString()
-        )
-
-        assertEquals("avdoed_militaertjeneste:v1", opplysninger[14].opplysningType)
-        assertEquals(
-            """{"harHattMilitaertjeneste":"JA","aarstallForMilitaerTjeneste":"1992","foedselsnummer":"19078504903"}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[14].opplysning).toString()
-        )
-
-        assertEquals("soeker_soesken:v1", opplysninger[15].opplysningType)
-        assertEquals(
-            """{"soesken":[{"fornavn":"Josef","etternavn":"Josefsen","foedselsnummer":"19078504903","type":"BARN"},{"fornavn":"Reidun","etternavn":"Gustafsen","foedselsnummer":"20060976385","type":"BARN"}]}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[15].opplysning).toString()
-        )
-
-        assertEquals("soeknad_mottatt_dato", opplysninger[16].opplysningType)
-        assertEquals(
-            """{"mottattDato":"2022-01-25T15:29:34.621087004"}""",
-            objectMapper.valueToTree<ObjectNode>(opplysninger[16].opplysning).toString()
-        )
-
+    companion object{
+        val opplysninger = Opplysningsuthenter().lagOpplysningsListe(objectMapper.treeToValue(objectMapper.readTree(javaClass.getResource("/fullMessage2.json")!!.readText())!!["@skjema_info"])!!)
     }
+
+    @Test
+    fun `alle opplysninger skal ha innsender som kilde`(){
+        val kilde = Behandlingsopplysning.Privatperson("03108718357", LocalDateTime.parse("2022-02-14T14:37:24.573612786").toInstant(
+            ZoneOffset.UTC))
+        opplysninger.forEach {
+            assertEquals(kilde.fnr, (it.kilde as Behandlingsopplysning.Privatperson).fnr)
+            assertEquals(kilde.mottatDato, (it.kilde as Behandlingsopplysning.Privatperson).mottatDato)
+        }
+    }
+
+    @Test
+    fun `skal hente opplysning om innsenders personinfo`(){
+        consumeSingle<PersonInfo>("innsender_personinfo:v1")
+            .apply {
+                assertEquals("GØYAL", fornavn)
+                assertEquals("HØYSTAKK", etternavn)
+                assertEquals("03108718357", foedselsnummer.value)
+                assertEquals(PersonType.INNSENDER, type)
+            }
+    }
+    @Test
+    fun `skal hente opplysning om søkers personinfo`(){
+        consumeSingle<PersonInfo>("soeker_personinfo:v1")
+            .apply {
+                assertEquals("kirsten", fornavn)
+                assertEquals("jakobsen", etternavn)
+                assertEquals("12101376212", foedselsnummer.value)
+                assertEquals(PersonType.BARN, type)
+            }
+    }
+
+    @Test
+    fun `skal hente opplysning om gjenlevende forelders personinfo`(){
+        consumeSingle<PersonInfo>("gjenlevende_forelder_personinfo:v1")
+            .apply {
+                assertEquals("GØYAL", fornavn)
+                assertEquals("HØYSTAKK", etternavn)
+                assertEquals("03108718357", foedselsnummer.value)
+                assertEquals(PersonType.GJENLEVENDE_FORELDER, type)
+            }
+    }
+
+    @Test
+    fun `skal hente opplysning om samtykke`(){
+        consumeSingle<Samtykke>("samtykke")
+            .apply {
+                assertEquals(true, harSamtykket)
+            }
+    }
+
+    @Test
+    fun `skal hente opplysning om utbetalingsinformasjon`(){
+        consumeSingle<Utbetalingsinformasjon>("utbetalingsinformasjon:v1")
+            .apply {
+                assertEquals(BankkontoType.NORSK, bankkontoType)
+                assertEquals("6848.64.44444", kontonummer)
+                assertNull( utenlandskBankNavn)
+                assertNull(utenlandskBankAdresse)
+                assertNull(iban)
+                assertNull(swift)
+                assertNull(oenskerSkattetrekk)
+                assertNull(oensketSkattetrekkProsent)
+            }
+    }
+
+    @Test
+    fun `skal hente opplysning om søkers statsborkerskap`(){
+        consumeSingle<Statsborgerskap>("soeker_statsborgerskap:v1")
+            .apply {
+                assertEquals("Norge", statsborgerskap)
+                assertEquals("12101376212", foedselsnummer)
+            }
+    }
+
+    @Test @Disabled
+    fun `skal hente opplysning om søkers adresse`(){
+        consumeSingle<Utenlandsadresse>("soeker_utenlandsadresse:v1")
+            .apply {
+                println(this)
+            }
+    }
+
+    @Test
+    fun `skal hente opplysning om søkers verge`(){
+        consumeSingle<Verge>("soeker_verge:v1")
+            .apply {
+                assertEquals("Nei", barnHarVerge?.innhold)
+            }
+    }
+
+    @Test
+    fun `skal hente opplysning om daglig omsorg`(){
+        consumeSingle<DagligOmsorg>("soker_daglig_omsorg:v1" )
+            .apply {
+                assertNull(omsorgPerson)
+            }
+    }
+
+    @Test
+    fun `skal hente opplysning om avdøde`(){
+        consumeSingle<PersonInfo>("avdoed_personinfo:v1" )
+            .apply {
+                assertEquals("fn", fornavn)
+                assertEquals("en", etternavn)
+                assertEquals(PersonType.AVDOED, type)
+                assertEquals("22128202440", foedselsnummer.value)
+            }
+    }
+
+    @Test
+    fun `skal hente opplysning om avdødes dødsfall`(){
+        consumeSingle<Doedsdato>("avdoed_doedsfall:v1")
+            .apply {
+                assertEquals(LocalDate.of(2022, Month.JANUARY, 1), doedsdato)
+                assertEquals("22128202440", foedselsnummer)
+            }
+    }
+
+    @Test @Disabled
+    fun `skal hente opplysning om dødsårsak`(){
+        consumeSingle<Doedsaarsak>("avdoed_doedsaarsak:v1")
+            .apply {
+                println(this)
+            }
+    }
+
+    @Test
+    fun `skal hente opplysning om avdødes utenlandsopphold`(){
+        consumeSingle<Utenlandsopphold>("avdoed_utenlandsopphold:v1")
+            .apply {
+                assertEquals("Nei", harHattUtenlandsopphold.innhold)
+            }
+    }
+
+    @Test @Disabled
+    fun `skal hente opplysning om avdødes næringsinntekt`(){
+        consumeSingle<Naeringsinntekt>("avdoed_naeringsinntekt:v1")
+            .apply {
+                println(this)
+            }
+    }
+
+    @Test @Disabled
+    fun `skal hente opplysning om avdødes militærtjeneste`(){
+        consumeSingle<Militaertjeneste>("avdoed_militaertjeneste:v1")
+            .apply {
+                println(this)
+            }
+    }
+
+    @Test
+    fun `skal hente opplysning om søsken`(){
+        consumeSingle<Soesken>("soeker_relasjon_soesken:v1")
+            .apply {
+                assertTrue(soesken!!.isEmpty())
+            }
+    }
+
+    @Test
+    fun `skal hente opplysning om mottatt dato`(){
+        consumeSingle<SoeknadMottattDato>("soeknad_mottatt_dato")
+            .apply {
+                assertEquals(LocalDateTime.parse("2022-02-14T14:37:24.573612786"), mottattDato)
+            }
+    }
+
+
+    inline fun <reified T> consumeSingle(opplysningType: String) = opplysninger.filter { it.opplysningType == opplysningType }
+        .also { assertEquals(1, it.size) }
+        .first()
+        .let {
+            it.opplysning as T
+        }
 }

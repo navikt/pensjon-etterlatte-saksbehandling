@@ -100,8 +100,7 @@ class PersonRouteTest {
             foedeland = "Norge",
             sivilstatus = null,
             utland = utland,
-            familieRelasjon = familieRelasjon,
-            rolle = Rolle.BARN
+            familieRelasjon = familieRelasjon
         )
 
 }

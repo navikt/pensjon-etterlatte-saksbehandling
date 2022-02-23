@@ -35,7 +35,6 @@ internal class EtterlatteFordelerTest {
         val etterlattFnr = Foedselsnummer.of("11057523044")
 
         coEvery { klientMock.hentPerson(match { it.foedselsnummer == barnFnr } ) } returns mockPerson(
-            rolle = Rolle.BARN,
             adresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(ForeldreAnsvar(etterlattFnr)),
@@ -45,13 +44,11 @@ internal class EtterlatteFordelerTest {
         )
 
         coEvery { klientMock.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
-            rolle = Rolle.AVDOED,
             doedsdato = "2022-01-01",
             adresse = mockNorskAdresse()
         )
 
         coEvery { klientMock.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
-            rolle = Rolle.ETTERLATT,
             adresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(ForeldreAnsvar(Foedselsnummer.of("11057523044"))),
@@ -76,7 +73,6 @@ internal class EtterlatteFordelerTest {
         val etterlattFnr = Foedselsnummer.of("11057523044")
 
         coEvery { klientMock.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
-            rolle = Rolle.BARN,
             adresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(ForeldreAnsvar(etterlattFnr)),
@@ -86,12 +82,10 @@ internal class EtterlatteFordelerTest {
         )
 
         coEvery { klientMock.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
-            rolle = Rolle.AVDOED,
             adresse = mockNorskAdresse()
         )
 
         coEvery { klientMock.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
-            rolle = Rolle.ETTERLATT,
             adresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(ForeldreAnsvar(Foedselsnummer.of("11057523044"))),

@@ -4,7 +4,6 @@ package no.nav.etterlatte.prosess
 import no.nav.etterlatte.libs.common.person.*
 
 fun mockPerson(
-    rolle: Rolle,
     fnr: String = "11057523044",
     foedselsaar: Int = 2010,
     foedselsdato: String? = "2010-04-19",
@@ -29,8 +28,7 @@ fun mockPerson(
     foedeland = foedeland,
     sivilstatus = sivilstatus,
     utland = utland,
-    familieRelasjon = familieRelasjon,
-    rolle = rolle
+    familieRelasjon = familieRelasjon
 )
 
 fun mockNorskAdresse() = Adresse(

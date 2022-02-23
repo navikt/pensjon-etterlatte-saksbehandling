@@ -82,10 +82,7 @@ class PersonService(
             statsborgerskap = statsborgerskap?.land,
             foedeland = foedsel?.foedeland,
             sivilstatus = sivilstand?.type?.name,
-
             utland = opprettUtland(hentPerson),
-            //TODO hva gjør vi med rolle?
-            rolle = null,
             familieRelasjon = opprettFamilieRelasjon(hentPerson)
         )
     }

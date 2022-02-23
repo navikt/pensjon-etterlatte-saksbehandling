@@ -30,7 +30,7 @@ class PdlKlientTest {
         const val TESTUSER_FNR = "11057523044"
     }
 
-    fun mockEndpoint(file: String, fnr: String) {
+    fun mockEndpoint(file: String) {
         val httpClient = HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
@@ -55,7 +55,7 @@ class PdlKlientTest {
 
     @Test
     fun `skal hente person og mappe riktig til datamodell`() {
-        mockEndpoint("/pdl/person.json", TESTUSER_FNR)
+        mockEndpoint("/pdl/person.json")
 
         val person = runBlocking {
             pdlKlient.hentPerson(HentPersonRequest(

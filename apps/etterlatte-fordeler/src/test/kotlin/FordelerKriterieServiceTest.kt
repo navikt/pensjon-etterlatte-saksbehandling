@@ -20,16 +20,13 @@ class FordelerKriterieServiceTest {
     @Test
     fun `soeknad er en gyldig kandidat for fordeling`() {
         val barn = mockPerson(
-            rolle = Rolle.BARN,
             adresse = mockNorskAdresse()
         )
         val avdoed = mockPerson(
-            rolle = Rolle.AVDOED,
             doedsdato = "2022-01-01",
             adresse = mockNorskAdresse()
         )
         val gjenlevende = mockPerson(
-            rolle = Rolle.ETTERLATT,
             adresse = mockNorskAdresse()
         )
 
@@ -41,12 +38,11 @@ class FordelerKriterieServiceTest {
     @Test
     fun `barn som er for gammelt er ikke en gyldig kandidat`() {
         val barn = mockPerson(
-            rolle = Rolle.BARN,
             foedselsaar = now().year - 15,
             foedselsdato = now().minusYears(15).format(DateTimeFormatter.ISO_LOCAL_DATE)
         )
-        val avdoed = mockPerson(Rolle.AVDOED)
-        val gjenlevende = mockPerson(Rolle.ETTERLATT)
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
@@ -55,9 +51,9 @@ class FordelerKriterieServiceTest {
 
     @Test
     fun `barn som ikke er norsk statsborger er ikke en gyldig kandidat`() {
-        val barn = mockPerson(Rolle.BARN, statsborgerskap = "SWE")
-        val avdoed = mockPerson(Rolle.AVDOED)
-        val gjenlevende = mockPerson(Rolle.ETTERLATT)
+        val barn = mockPerson(statsborgerskap = "SWE")
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
@@ -66,9 +62,9 @@ class FordelerKriterieServiceTest {
 
     @Test
     fun `barn som har adressebeskyttelse er ikke en gyldig kandidat`() {
-        val barn = mockPerson(Rolle.BARN, adressebeskyttelse = Adressebeskyttelse.STRENGT_FORTROLIG)
-        val avdoed = mockPerson(Rolle.AVDOED)
-        val gjenlevende = mockPerson(Rolle.ETTERLATT)
+        val barn = mockPerson(adressebeskyttelse = Adressebeskyttelse.STRENGT_FORTROLIG)
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
@@ -77,9 +73,9 @@ class FordelerKriterieServiceTest {
 
     @Test
     fun `barn som ikke er fodt i Norge er ikke en gyldig kandidat`() {
-        val barn = mockPerson(Rolle.BARN, foedeland = "SWE")
-        val avdoed = mockPerson(Rolle.AVDOED)
-        val gjenlevende = mockPerson(Rolle.ETTERLATT)
+        val barn = mockPerson(foedeland = "SWE")
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
@@ -89,7 +85,6 @@ class FordelerKriterieServiceTest {
     @Test
     fun `barn som har utvandret er ikke en gyldig kandidat`() {
         val barn = mockPerson(
-            rolle = Rolle.BARN,
             utland = Utland(
                 utflyttingFraNorge = listOf(
                     UtflyttingFraNorge(
@@ -100,8 +95,8 @@ class FordelerKriterieServiceTest {
                 innflyttingTilNorge = null
             )
         )
-        val avdoed = mockPerson(Rolle.AVDOED)
-        val gjenlevende = mockPerson(Rolle.ETTERLATT)
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
@@ -110,9 +105,9 @@ class FordelerKriterieServiceTest {
 
     @Test
     fun `barn som har verge er ikke en gyldig kandidat`() {
-        val barn = mockPerson(Rolle.BARN)
-        val avdoed = mockPerson(Rolle.AVDOED)
-        val gjenlevende = mockPerson(Rolle.ETTERLATT)
+        val barn = mockPerson()
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_VERGE)
 
@@ -122,11 +117,10 @@ class FordelerKriterieServiceTest {
     @Test
     fun `barn uten bostedsadresse i Norge er ikke en gyldig kandidat`() {
         val barn = mockPerson(
-            rolle = Rolle.BARN,
             adresse = mockUgyldigNorskAdresse()
         )
-        val avdoed = mockPerson(Rolle.AVDOED)
-        val gjenlevende = mockPerson(Rolle.ETTERLATT)
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
@@ -135,9 +129,8 @@ class FordelerKriterieServiceTest {
 
     @Test
     fun `avdod som har utvandret er ikke en gyldig kandidat`() {
-        val barn = mockPerson(Rolle.BARN)
+        val barn = mockPerson()
         val avdoed = mockPerson(
-            rolle = Rolle.AVDOED,
             utland = Utland(
                 utflyttingFraNorge = listOf(UtflyttingFraNorge(
                     tilflyttingsland = "SWE",
@@ -146,7 +139,7 @@ class FordelerKriterieServiceTest {
                 innflyttingTilNorge = null
             )
         )
-        val gjenlevende = mockPerson(Rolle.ETTERLATT)
+        val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
@@ -155,9 +148,9 @@ class FordelerKriterieServiceTest {
 
     @Test
     fun `avdod som har yrkesskade i soknad er ikke en gyldig kandidat`() {
-        val barn = mockPerson(Rolle.BARN)
-        val avdoed = mockPerson(Rolle.AVDOED)
-        val gjenlevende = mockPerson(Rolle.ETTERLATT)
+        val barn = mockPerson()
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_YRKESSKADE)
 
@@ -166,12 +159,11 @@ class FordelerKriterieServiceTest {
 
     @Test
     fun `avdod som ikke er registrert som dod er ikke en gyldig kandidat`() {
-        val barn = mockPerson(Rolle.BARN)
+        val barn = mockPerson()
         val avdoed = mockPerson(
-            rolle = Rolle.AVDOED,
             doedsdato = null,
         )
-        val gjenlevende = mockPerson(Rolle.ETTERLATT)
+        val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
@@ -180,9 +172,9 @@ class FordelerKriterieServiceTest {
 
     @Test
     fun `avdod hvor det er huket av for utlandsopphold er ikke en gyldig kandidat`() {
-        val barn = mockPerson(Rolle.BARN)
-        val avdoed = mockPerson(Rolle.AVDOED)
-        val gjenlevende = mockPerson(Rolle.ETTERLATT)
+        val barn = mockPerson()
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_HUKET_AV_UTLAND)
 
@@ -191,12 +183,11 @@ class FordelerKriterieServiceTest {
 
     @Test
     fun `avdod uten bostedsadresse i Norge er ikke en gyldig kandidat`() {
-        val barn = mockPerson(Rolle.BARN)
+        val barn = mockPerson()
         val avdoed = mockPerson(
-            rolle = Rolle.AVDOED,
             adresse = mockUgyldigNorskAdresse()
         )
-        val gjenlevende = mockPerson(Rolle.ETTERLATT)
+        val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
@@ -205,9 +196,9 @@ class FordelerKriterieServiceTest {
 
     @Test
     fun `innsender som ikke er forelder er ikke en gyldig kandidat`() {
-        val barn = mockPerson(Rolle.BARN)
-        val avdoed = mockPerson(Rolle.AVDOED)
-        val gjenlevende = mockPerson(Rolle.ETTERLATT)
+        val barn = mockPerson()
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_INNSENDER_IKKE_FORELDER)
 
@@ -216,10 +207,9 @@ class FordelerKriterieServiceTest {
 
     @Test
     fun `gjenlevende uten bostedsadresse i Norge er ikke en gyldig kandidat`() {
-        val barn = mockPerson(Rolle.BARN)
-        val avdoed = mockPerson(Rolle.AVDOED)
+        val barn = mockPerson()
+        val avdoed = mockPerson()
         val gjenlevende = mockPerson(
-            rolle = Rolle.ETTERLATT,
             adresse = mockUgyldigNorskAdresse()
         )
 
@@ -231,15 +221,14 @@ class FordelerKriterieServiceTest {
     @Test
     fun `gjenlevende uten foreldreansvar er ikke en gyldig kandidat`() {
         val barn = mockPerson(
-            rolle = Rolle.BARN,
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(ForeldreAnsvar(Foedselsnummer.of("09018701453"))),
                 foreldre = null,
                 barn = null,
             )
         )
-        val avdoed = mockPerson(Rolle.AVDOED)
-        val gjenlevende = mockPerson(Rolle.ETTERLATT)
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 

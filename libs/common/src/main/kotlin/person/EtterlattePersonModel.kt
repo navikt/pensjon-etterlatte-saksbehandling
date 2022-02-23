@@ -17,8 +17,7 @@ data class Person(
     val foedeland: String?,
     val sivilstatus: String?,
     var utland: Utland?,
-    var familieRelasjon: FamilieRelasjon?,
-    val rolle: Rolle?
+    var familieRelasjon: FamilieRelasjon?
 )
 
 enum class Adressebeskyttelse {
@@ -57,12 +56,14 @@ fun Person.alder(): Int {
 
 //TODO diskutere med FAG, hva trenger vi egentlig fra 'Adresse'?
 data class Adresse(
-val bostedsadresse: Bostedsadresse?,
-val kontaktadresse: Kontaktadresse?,
-val oppholdsadresse: Oppholdsadresse?
+    val bostedsadresse: Bostedsadresse?,
+    val kontaktadresse: Kontaktadresse?,
+    val oppholdsadresse: Oppholdsadresse?
 //TODO tenke på noe som gjør det lettere for resten å finne rett adresse
 //String representasjon med adresselinjer?
-)fun aktivadresse(): String{
+)
+
+fun aktivadresse(): String{
     return "BostedsAdresse"
 }
 data class Bostedsadresse(

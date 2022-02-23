@@ -8,7 +8,7 @@ fun main() {
     }.also { env ->
         AppBuilder(env).also {
             RapidApplication.create(env)
-                .also { EtterlatteFordeler(it, AppBuilder(env).createPersonService(), FordelerKriterierService()) }
+                .also { EtterlatteFordeler(it, AppBuilder(env).createPdlKlient(), FordelerKriterierService()) }
                 .start()
         }
     }

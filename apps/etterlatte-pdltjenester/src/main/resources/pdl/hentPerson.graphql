@@ -92,7 +92,13 @@ query(
 ) {
     hentPerson(ident: $ident) {
         adressebeskyttelse(historikk: $historikk) {
+            folkeregistermetadata {
+                ...folkeregistermetadata
+            }
             gradering
+            metadata {
+                ...metadata
+            }
         }
         navn {
             fornavn

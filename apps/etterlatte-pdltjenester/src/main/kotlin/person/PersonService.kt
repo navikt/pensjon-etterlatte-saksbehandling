@@ -93,10 +93,9 @@ class PersonService(
     private fun opprettAdresse(
         hentPerson: HentPerson
     ): Adresse = runBlocking {
-        val bostedsadresse =hentPerson.bostedsadresse?.let {ppsKlient.avklarBostedsadresse(it)}
+        val bostedsadresse =hentPerson.bostedsadresse?.let { ppsKlient.avklarBostedsadresse(it) }
         val kontaktsadresse = hentPerson.kontaktadresse?.let { ppsKlient.avklarKontaktadresse(it) }
-        val oppholdssadresse = hentPerson.oppholdsadresse?.let{ppsKlient.avklarOppholdsadresse(it)}
-
+        val oppholdssadresse = hentPerson.oppholdsadresse?.let { ppsKlient.avklarOppholdsadresse(it) }
 
         Adresse(
             bostedsadresse = bostedsadresse?.let { Bostedsadresse(

@@ -65,68 +65,68 @@ class PersonService(
         fnr: Foedselsnummer,
         hentPerson: HentPerson
     ): Person = runBlocking {
-            val navn = ppsKlient.avklarNavn(hentPerson.navn)
-            val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson.adressebeskyttelse)
-            val statsborgerskap = hentPerson.statsborgerskap?.let { ppsKlient.avklarStatsborgerskap(it) }
-            val sivilstand = ppsKlient.avklarSivilstand(hentPerson.sivilstand)
-            val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
-            val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
+        val navn = ppsKlient.avklarNavn(hentPerson.navn)
+        val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson.adressebeskyttelse)
+        val statsborgerskap = hentPerson.statsborgerskap?.let { ppsKlient.avklarStatsborgerskap(it) }
+        val sivilstand = ppsKlient.avklarSivilstand(hentPerson.sivilstand)
+        val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
+        val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
 
-            Person(
-                fornavn = navn.fornavn,
-                etternavn = navn.etternavn,
-                foedselsnummer = fnr,
-                foedselsdato = foedsel?.foedselsdato?.toString(),
-                foedselsaar = foedsel?.foedselsaar,
-                doedsdato = doedsfall?.doedsdato.toString(),
-                adressebeskyttelse = adressebeskyttelse?.let {
-                    Adressebeskyttelse.valueOf(it.gradering.toString())
-                } ?: Adressebeskyttelse.UGRADERT,
-                adresse = opprettAdresse(hentPerson),
-                statsborgerskap = statsborgerskap?.land,
-                foedeland = foedsel?.foedeland,
-                sivilstatus = sivilstand?.type?.name,
+        Person(
+            fornavn = navn.fornavn,
+            etternavn = navn.etternavn,
+            foedselsnummer = fnr,
+            foedselsdato = foedsel?.foedselsdato?.toString(),
+            foedselsaar = foedsel?.foedselsaar,
+            doedsdato = doedsfall?.doedsdato.toString(),
+            adressebeskyttelse = adressebeskyttelse?.let {
+                Adressebeskyttelse.valueOf(it.gradering.toString())
+            } ?: Adressebeskyttelse.UGRADERT,
+            adresse = opprettAdresse(hentPerson),
+            statsborgerskap = statsborgerskap?.land,
+            foedeland = foedsel?.foedeland,
+            sivilstatus = sivilstand?.type?.name,
 
-                utland = opprettUtland(hentPerson),
-                //TODO hva gjør vi med rolle?
-                rolle = null,
-                familieRelasjon = opprettFamilieRelasjon(hentPerson)
-            )
-        }
+            utland = opprettUtland(hentPerson),
+            //TODO hva gjør vi med rolle?
+            rolle = null,
+            familieRelasjon = opprettFamilieRelasjon(hentPerson)
+        )
+    }
 
-    private fun opprettAdresse(hentPerson: HentPerson): Adresse {
-        val bostedsadresse = hentPerson.bostedsadresse
-            ?.maxByOrNull { it.metadata.sisteRegistrertDato() }
-        val kontaktsadresse = hentPerson.kontaktadresse
-            ?.maxByOrNull { it.metadata.sisteRegistrertDato() }
-        val oppholdssadresse = hentPerson.oppholdsadresse
-            ?.maxByOrNull { it.metadata.sisteRegistrertDato() }
+    private fun opprettAdresse(
+        hentPerson: HentPerson
+    ): Adresse = runBlocking {
+        val bostedsadresse =hentPerson.bostedsadresse?.let {ppsKlient.avklarBostedsadresse(it)}
+        val kontaktsadresse = hentPerson.kontaktadresse?.let { ppsKlient.avklarKontaktadresse(it) }
+        val oppholdssadresse = hentPerson.oppholdsadresse?.let{ppsKlient.avklarOppholdsadresse(it)}
 
-        return Adresse(
-            bostedsadresse = Bostedsadresse(
+
+        Adresse(
+            bostedsadresse = bostedsadresse?.let { Bostedsadresse(
                 Vegadresse(
-                    adressenavn = bostedsadresse?.vegadresse?.adressenavn,
-                    husnummer = bostedsadresse?.vegadresse?.husnummer,
-                    husbokstav = bostedsadresse?.vegadresse?.husbokstav,
-                    postnummer = bostedsadresse?.vegadresse?.postnummer,
+                    adressenavn = it.vegadresse?.adressenavn,
+                    husnummer = it.vegadresse?.husnummer,
+                    husbokstav = it.vegadresse?.husbokstav,
+                    postnummer = it.vegadresse?.postnummer,
                 )
-            ),
-            kontaktadresse = Kontaktadresse(
+            )},
+            kontaktadresse = kontaktsadresse?.let { Kontaktadresse(
                 Vegadresse(
-                    adressenavn = kontaktsadresse?.vegadresse?.adressenavn,
-                    husnummer = kontaktsadresse?.vegadresse?.husnummer,
-                    husbokstav = kontaktsadresse?.vegadresse?.husbokstav,
-                    postnummer = kontaktsadresse?.vegadresse?.postnummer,
+                    adressenavn = it.vegadresse?.adressenavn,
+                    husnummer = it.vegadresse?.husnummer,
+                    husbokstav = it.vegadresse?.husbokstav,
+                    postnummer = it.vegadresse?.postnummer,
                 )
-            ),
-            oppholdsadresse = Oppholdsadresse(
+            )},
+            oppholdsadresse = oppholdssadresse?.let { Oppholdsadresse(
                 Vegadresse(
-                    adressenavn = oppholdssadresse?.vegadresse?.adressenavn,
-                    husnummer = oppholdssadresse?.vegadresse?.husnummer,
-                    husbokstav = oppholdssadresse?.vegadresse?.husbokstav,
-                    postnummer = oppholdssadresse?.vegadresse?.postnummer,
+                    adressenavn = it.vegadresse?.adressenavn,
+                    husnummer = it.vegadresse?.husnummer,
+                    husbokstav = it.vegadresse?.husbokstav,
+                    postnummer = it.vegadresse?.postnummer,
                 )
-            ),
+            )},
         )
     }
 

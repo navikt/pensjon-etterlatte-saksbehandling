@@ -29,6 +29,9 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
     suspend fun avklarSivilstand(sivilstand: List<Sivilstand>) = avklarNullable(sivilstand, Avklaring.SIVILSTAND)
     suspend fun avklarFoedsel(foedsel: List<Foedsel>) = avklarNullable(foedsel, Avklaring.FOEDSEL)
     suspend fun avklarDoedsfall(doedsfall: List<Doedsfall>) = avklarNullable(doedsfall, Avklaring.DOEDSFALL)
+    suspend fun avklarBostedsadresse(bostedsadresse: List<Bostedsadresse>) = avklarNullable(bostedsadresse, Avklaring.BOSTEDSADRESSE)
+    suspend fun avklarKontaktadresse(kontaktadresse: List<Kontaktadresse>) = avklarNullable(kontaktadresse, Avklaring.KONTAKTADRESSE)
+    suspend fun avklarOppholdsadresse(oppholdsadresse: List<Oppholdsadresse>) = avklarNullable(oppholdsadresse, Avklaring.OPPHOLDSADRESSE)
 
     private suspend inline fun <reified T> avklar(list: List<T>, avklaring: Avklaring): T {
         return avklarNullable(list, avklaring)
@@ -42,7 +45,7 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
             0 -> null
             1 -> list.first()
             else -> {
-                logger.info("Felt av typen ${avklaring.feltnavn} har flere elementer, sjekker mot PPS")
+                logger.info("Felt av typen ${avklaring.feltnavn} har ${list.size} elementer, sjekker mot PPS")
                 val responseAsJsonNode = httpClient.post<JsonNode>("$apiUrl/api/${avklaring.feltnavn}") {
                     accept(Json)
                     body = TextContent(nodeWithFieldName.toJson(), Json)
@@ -64,6 +67,9 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
         SIVILSTAND("sivilstand"),
         FOEDSEL("foedsel"),
         DOEDSFALL("doedsfall"),
+        BOSTEDSADRESSE("bostedsadresse"),
+        KONTAKTADRESSE("kontaktadresse"),
+        OPPHOLDSADRESSE("oppholdsadresse")
     }
 
 }

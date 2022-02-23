@@ -1,4 +1,3 @@
-import styled from 'styled-components'
 import { Content } from '../../../shared/styled'
 import { useContext } from 'react'
 import { AppContext } from '../../../store/AppContext'
@@ -18,17 +17,11 @@ export const Inngangsvilkaar = () => {
 
   return (
     <Content>
-      <VilkaarListe>
-        <AlderBarn vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.SOEKER_ER_UNDER_20)} />
-        <DoedsFallForelder vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.DOEDSFALL_ER_REGISTRERT)} />
-        <AvdoedesForutMedlemskap
-          vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.AVDOEDES_FORUTGAAENDE_MELDLEMSKAP)}
-        />
-      </VilkaarListe>
+      <AlderBarn vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.SOEKER_ER_UNDER_20)} />
+      <DoedsFallForelder vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.DOEDSFALL_ER_REGISTRERT)} />
+      <AvdoedesForutMedlemskap
+        vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.AVDOEDES_FORUTGAAENDE_MELDLEMSKAP)}
+      />
     </Content>
   )
 }
-
-const VilkaarListe = styled.div`
-  padding: 0 2em;
-`

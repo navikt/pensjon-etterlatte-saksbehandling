@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import moment from 'moment'
-import { aarIProsent } from './utilities'
+import { aarIProsent, tidsperiodeProsent, startdatoOffsetProsent } from './utils'
 
 export const TidslinjeMedlemskap = () => {
   const doedsdato = moment('2022-06-01', 'YYYY-MM-DD').format('DD.MM.YYYY').toString()
@@ -8,10 +8,40 @@ export const TidslinjeMedlemskap = () => {
 
   const navnOgProsentPaaDatoer = aarIProsent(femAarTidligere, doedsdato)
 
+  const mockdata = [
+    {
+      periodeType: 'jobb',
+      innhold: {
+        fraDato: '01.02.2019',
+        tilDato: '01.11.2021',
+        adresse: 'Plogveien 54, 0458 Oslo',
+        kilde: 'Folkeregisteret 11.11.2021',
+      },
+    },
+    {
+      periodeType: 'jobb',
+      innhold: {
+        fraDato: '01.02.2016',
+        tilDato: '01.03.2021',
+        adresse: 'Plogveien 54, 0458 Oslo',
+        kilde: 'Folkeregisteret 11.11.2021',
+      },
+    },
+    {
+      periodeType: 'jobb',
+      innhold: {
+        fraDato: '01.02.2020',
+        tilDato: '01.03.2023',
+        adresse: 'Plogveien 54, 0458 Oslo',
+        kilde: 'Folkeregisteret 11.11.2021',
+      },
+    },
+  ]
+
   return (
     <Tidslinje>
       <Grid>
-        <GridUnderline style={{ top: '10px' }}>&nbsp;</GridUnderline>
+        <GridBorder style={{ top: '10px' }}>&nbsp;</GridBorder>
         <GridDatoer leftmargin={'0px'}>{femAarTidligere}</GridDatoer>
         {navnOgProsentPaaDatoer.map((aar) => (
           <GridDatoerWrapper prosent={aar[1]} key={aar[1].toString()}>
@@ -22,26 +52,47 @@ export const TidslinjeMedlemskap = () => {
         <GridDoedsdato>
           <GridDatoer leftmargin={'-150px'}>dødsdato: {doedsdato}</GridDatoer>
         </GridDoedsdato>
-        <GridUnderline style={{ bottom: '-30px' }}>&nbsp;</GridUnderline>
+        <GridBorder style={{ bottom: '-30px' }}>&nbsp;</GridBorder>
       </Grid>
-      <div style={{ paddingTop: '60px' }}>
-        <Rad style={{ position: 'relative', left: '10%', width: '70%', marginBottom: '10px' }}>
-          <DatoFraTil>jan. 2019 - okt. 2021</DatoFraTil>
-          <Adresse>Plogveien 54, 0458 Oslo</Adresse>
-          <Kilde>Folkeregisteret 11.11.2021</Kilde>
-        </Rad>
-        <Rad style={{ position: 'relative', left: '3%', width: '50%', marginBottom: '10px' }}>
-          <DatoFraTil>jan. 2019 - okt. 2021</DatoFraTil>
-          <Adresse>Plogveien 54, 0458 Oslo</Adresse>
-          <Kilde>Folkeregisteret 11.11.2021</Kilde>
-        </Rad>
-        <Rad style={{ position: 'relative', left: '60%', width: '40%', marginBottom: '10px' }}>
-          <DatoFraTil>jan. 2019 - okt. 2021</DatoFraTil>
-          <Adresse>Plogveien 54, 0458 Oslo</Adresse>
-          <Kilde>Folkeregisteret 11.11.2021</Kilde>
-        </Rad>
+      <div>
+        {mockdata.map((periode, index) => (
+          <PeriodeTidslinje
+            key={index}
+            doedsdato={doedsdato}
+            femAarTidligere={femAarTidligere}
+            periode={periode}
+            index={index}
+          />
+        ))}
       </div>
     </Tidslinje>
+  )
+}
+
+const PeriodeTidslinje = ({
+  doedsdato,
+  femAarTidligere,
+  periode,
+  index,
+}: {
+  doedsdato: string
+  femAarTidligere: string
+  periode: any
+  index: number
+}) => {
+  const lengdePeriode = tidsperiodeProsent(periode.innhold.fraDato, periode.innhold.tilDato, doedsdato, femAarTidligere)
+  const startDatoOffset = startdatoOffsetProsent(periode.innhold.fraDato, femAarTidligere)
+
+  const colors = ['#a6cbdc', '#a5a5d7', '#c4adde', '#d7a9c6']
+
+  return (
+    <Rad style={{ left: startDatoOffset, width: lengdePeriode, backgroundColor: colors[index % colors.length] }}>
+      <InnholdDatoFraTil>
+        {periode.innhold.fraDato} - {periode.innhold.tilDato}
+      </InnholdDatoFraTil>
+      <InnholdAdresse>{periode.innhold.adresse}</InnholdAdresse>
+      <InnholdKilde>{periode.innhold.kilde}</InnholdKilde>
+    </Rad>
   )
 }
 
@@ -54,22 +105,21 @@ export const Tidslinje = styled.div`
 
 export const Rad = styled.div`
   position: relative;
-  width: 70%;
-  left: 10%;
-  background-color: #88c3de;
-  border-radius: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  padding-bottom: 10px;
 `
 
-export const DatoFraTil = styled.div`
+export const InnholdDatoFraTil = styled.div`
   padding-top: 10px;
   padding-left: 20px;
   font-weight: bold;
 `
-export const Adresse = styled.div`
+export const InnholdAdresse = styled.div`
   padding-left: 20px;
 `
 
-export const Kilde = styled.div`
+export const InnholdKilde = styled.div`
   padding-left: 20px;
   color: #676363;
 `
@@ -85,6 +135,7 @@ export const GridGraaSirkel = styled.div`
 export const Grid = styled.div`
   width: 100%;
   font-weight: bold;
+  margin-bottom: 40px;
 `
 
 const GridDatoerWrapper = styled.div<{ prosent: string }>`
@@ -107,7 +158,7 @@ const GridDoedsdato = styled.div`
   bottom: 0;
 `
 
-const GridUnderline = styled.div`
+const GridBorder = styled.div`
   position: absolute;
   left: 0;
   right: 0;

@@ -1,5 +1,12 @@
 import styled from 'styled-components'
 
+export const VilkaarBorder = styled.div`
+  padding: 1em 0;
+  border-bottom: 1px solid #ccc;
+  left: 0;
+  right: 0;
+`
+
 export const VilkaarWrapper = styled.div`
   padding: 1em 1em 1em 0;
   display: flex;
@@ -19,7 +26,11 @@ export const VilkaarColumn = styled.div`
   flex-basis: 300px;
   flex: 1;
 
-  .missing{
+  .missing {
     color: red;
   }
+`
+
+export const Innhold = styled.div`
+  padding: 0 2em;
 `

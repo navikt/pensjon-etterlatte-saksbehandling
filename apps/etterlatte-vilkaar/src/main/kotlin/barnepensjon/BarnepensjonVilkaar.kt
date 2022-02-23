@@ -68,7 +68,7 @@ fun kriterieDoedsdatoRegistrertIPdl(doedsdato: List<VilkaarOpplysning<Doedsdato>
         VilkaarVurderingsResultat.IKKE_OPPFYLT
     }
 
-    return Kriterie(Kriterietyper.DOEDSFALL_ER_REGISTRERT_I_PDL, resultat, listOf())
+    return Kriterie(Kriterietyper.DOEDSFALL_ER_REGISTRERT_I_PDL, resultat, listOf(doedsdato).flatten().filter { it.kilde.type == "pdl" })
 }
 
 fun kriterieAvdoedErForelder(

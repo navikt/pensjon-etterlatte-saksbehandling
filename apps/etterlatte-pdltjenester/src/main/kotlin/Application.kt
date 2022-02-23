@@ -18,7 +18,7 @@ import no.nav.etterlatte.ktortokenexchange.bearerToken
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.person.PdlKlient
 import no.nav.etterlatte.person.PersonService
-import no.nav.etterlatte.person.pdl.ParallelleSannheterKlient
+import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.security.ktor.clientCredential
 
 

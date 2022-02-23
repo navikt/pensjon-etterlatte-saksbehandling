@@ -17,12 +17,12 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.Vegadresse
-import no.nav.etterlatte.person.pdl.PdlForelderBarnRelasjonRolle
-import no.nav.etterlatte.person.pdl.PdlHentPerson
-import no.nav.etterlatte.person.pdl.ParallelleSannheterKlient
-import no.nav.etterlatte.person.pdl.PdlInnflyttingTilNorge
-import no.nav.etterlatte.person.pdl.PdlUtflyttingFraNorge
-import no.nav.etterlatte.person.pdl.PdlVariables
+import no.nav.etterlatte.pdl.PdlForelderBarnRelasjonRolle
+import no.nav.etterlatte.pdl.PdlHentPerson
+import no.nav.etterlatte.pdl.ParallelleSannheterKlient
+import no.nav.etterlatte.pdl.PdlInnflyttingTilNorge
+import no.nav.etterlatte.pdl.PdlUtflyttingFraNorge
+import no.nav.etterlatte.pdl.PdlVariables
 import org.slf4j.LoggerFactory
 
 class PdlForesporselFeilet(message: String) : RuntimeException(message)

@@ -11,9 +11,9 @@ import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.person.PdlForesporselFeilet
 import no.nav.etterlatte.person.PdlKlient
 import no.nav.etterlatte.person.PersonService
-import no.nav.etterlatte.person.pdl.PdlHentPerson
-import no.nav.etterlatte.person.pdl.ParallelleSannheterKlient
-import no.nav.etterlatte.person.pdl.PdlPersonResponse
+import no.nav.etterlatte.pdl.PdlHentPerson
+import no.nav.etterlatte.pdl.ParallelleSannheterKlient
+import no.nav.etterlatte.pdl.PdlPersonResponse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

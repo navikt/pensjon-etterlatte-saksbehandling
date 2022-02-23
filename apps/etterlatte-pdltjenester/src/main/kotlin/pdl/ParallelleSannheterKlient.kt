@@ -1,4 +1,4 @@
-package no.nav.etterlatte.person.pdl
+package no.nav.etterlatte.pdl
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
@@ -26,12 +26,20 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
         avklarNullable(adressebeskyttelse, Avklaring.ADRESSEBESKYTTELSE)
     suspend fun avklarStatsborgerskap(pdlStatsborgerskap: List<PdlStatsborgerskap>) =
         avklarNullable(pdlStatsborgerskap, Avklaring.STATSBORGERSKAP)
-    suspend fun avklarSivilstand(pdlSivilstand: List<PdlSivilstand>) = avklarNullable(pdlSivilstand, Avklaring.SIVILSTAND)
+    suspend fun avklarSivilstand(pdlSivilstand: List<PdlSivilstand>) = avklarNullable(pdlSivilstand,
+        Avklaring.SIVILSTAND
+    )
     suspend fun avklarFoedsel(pdlFoedsel: List<PdlFoedsel>) = avklarNullable(pdlFoedsel, Avklaring.FOEDSEL)
     suspend fun avklarDoedsfall(pdlDoedsfall: List<PdlDoedsfall>) = avklarNullable(pdlDoedsfall, Avklaring.DOEDSFALL)
-    suspend fun avklarBostedsadresse(pdlBostedsadresse: List<PdlBostedsadresse>) = avklarNullable(pdlBostedsadresse, Avklaring.BOSTEDSADRESSE)
-    suspend fun avklarKontaktadresse(pdlKontaktadresse: List<PdlKontaktadresse>) = avklarNullable(pdlKontaktadresse, Avklaring.KONTAKTADRESSE)
-    suspend fun avklarOppholdsadresse(pdlOppholdsadresse: List<PdlOppholdsadresse>) = avklarNullable(pdlOppholdsadresse, Avklaring.OPPHOLDSADRESSE)
+    suspend fun avklarBostedsadresse(pdlBostedsadresse: List<PdlBostedsadresse>) = avklarNullable(pdlBostedsadresse,
+        Avklaring.BOSTEDSADRESSE
+    )
+    suspend fun avklarKontaktadresse(pdlKontaktadresse: List<PdlKontaktadresse>) = avklarNullable(pdlKontaktadresse,
+        Avklaring.KONTAKTADRESSE
+    )
+    suspend fun avklarOppholdsadresse(pdlOppholdsadresse: List<PdlOppholdsadresse>) = avklarNullable(pdlOppholdsadresse,
+        Avklaring.OPPHOLDSADRESSE
+    )
 
     private suspend inline fun <reified T> avklar(list: List<T>, avklaring: Avklaring): T {
         return avklarNullable(list, avklaring)

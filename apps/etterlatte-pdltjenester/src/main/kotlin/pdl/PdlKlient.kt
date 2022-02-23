@@ -7,9 +7,9 @@ import io.ktor.client.request.post
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType.Application.Json
 import no.nav.etterlatte.common.toJson
-import no.nav.etterlatte.person.pdl.PdlGraphqlRequest
-import no.nav.etterlatte.person.pdl.PdlVariables
-import no.nav.etterlatte.person.pdl.PdlPersonResponse
+import no.nav.etterlatte.pdl.PdlGraphqlRequest
+import no.nav.etterlatte.pdl.PdlVariables
+import no.nav.etterlatte.pdl.PdlPersonResponse
 
 
 interface Pdl {

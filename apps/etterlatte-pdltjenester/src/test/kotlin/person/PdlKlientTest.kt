@@ -12,7 +12,7 @@ import kotlinx.coroutines.runBlocking
 
 import no.nav.etterlatte.person.Pdl
 import no.nav.etterlatte.person.PdlKlient
-import no.nav.etterlatte.person.pdl.PdlVariables
+import no.nav.etterlatte.pdl.PdlVariables
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*

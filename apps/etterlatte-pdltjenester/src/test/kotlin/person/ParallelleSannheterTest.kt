@@ -12,9 +12,9 @@ import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.common.toJson
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.person.pdl.PdlMetadata
-import no.nav.etterlatte.person.pdl.PdlNavn
-import no.nav.etterlatte.person.pdl.ParallelleSannheterKlient
+import no.nav.etterlatte.pdl.PdlMetadata
+import no.nav.etterlatte.pdl.PdlNavn
+import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test

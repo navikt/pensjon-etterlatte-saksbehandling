@@ -2,7 +2,7 @@ package pdl
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import no.nav.etterlatte.person.pdl.PdlGradering
+import no.nav.etterlatte.pdl.PdlGradering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.person.pdl
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -29,6 +30,19 @@ data class HentPerson(
     val foreldreansvar: List<ForelderAnsvar>?,
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>?
 )
+
+data class PdlAdressebeskyttelse(
+    val gradering: Gradering?,
+    val folkeregistermetadata: Folkeregistermetadata? = null,
+    val metadata: Metadata
+)
+
+enum class Gradering {
+    STRENGT_FORTROLIG_UTLAND,
+    STRENGT_FORTROLIG,
+    FORTROLIG,
+    UGRADERT;
+}
 
 data class Navn(
     val fornavn: String,

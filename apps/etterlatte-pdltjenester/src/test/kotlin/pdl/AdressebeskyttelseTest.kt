@@ -3,11 +3,7 @@ package pdl
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import no.nav.etterlatte.person.pdl.PdlAdressebeskyttelse
-import no.nav.etterlatte.person.pdl.AdressebeskyttelseBolkPerson
-import no.nav.etterlatte.person.pdl.AdressebeskyttelsePerson
-import no.nav.etterlatte.person.pdl.AdressebeskyttelseResponse
 import no.nav.etterlatte.person.pdl.Gradering
-import no.nav.etterlatte.person.pdl.HentAdressebeskyttelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -77,38 +73,4 @@ internal class AdressebeskyttelseTest {
         val reSerialized = mapper.writeValueAsString(deserialized)
         assertEquals(serialized, reSerialized)
     }
-
-    @Test
-    fun `Sjekk serde av AdressebeskyttelseResponse`() {
-        val response = AdressebeskyttelseResponse(
-            HentAdressebeskyttelse(
-                listOfNotNull(
-                    mockPerson(Gradering.FORTROLIG),
-                    mockPerson(Gradering.STRENGT_FORTROLIG_UTLAND, Gradering.STRENGT_FORTROLIG)
-                )
-            )
-        )
-
-        val serialized = mapper.writeValueAsString(response)
-
-        assertTrue(serialized.contains(Gradering.FORTROLIG.name))
-        assertTrue(serialized.contains(Gradering.STRENGT_FORTROLIG_UTLAND.name))
-        assertTrue(serialized.contains(Gradering.STRENGT_FORTROLIG.name))
-
-        val deserialized = mapper.readValue(serialized, jacksonTypeRef<AdressebeskyttelseResponse>())
-
-        val personBolk = deserialized.data!!.hentPersonBolk!!
-        assertEquals(2, personBolk.size)
-
-        val adressebeskyttelseListe = personBolk.flatMap { it.person!!.adressebeskyttelse }
-        assertEquals(3, adressebeskyttelseListe.size)
-    }
-
-    private fun mockPerson(vararg gradering: Gradering?) =
-        AdressebeskyttelseBolkPerson(
-            AdressebeskyttelsePerson(
-                gradering.filterNotNull().map { PdlAdressebeskyttelse(it) }
-            )
-        )
-
 }

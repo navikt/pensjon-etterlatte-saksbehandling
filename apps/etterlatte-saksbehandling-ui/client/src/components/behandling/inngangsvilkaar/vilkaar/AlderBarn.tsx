@@ -22,9 +22,14 @@ export const AlderBarn = (props: any) => {
       (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsfall
     )
 
-  const barnetsAlder = differenceInYears(
+  const barnetsAlderVedDoedsfall = differenceInYears(
     new Date(avdoedDoedsdato.opplysning.doedsdato),
     new Date(barnetsFoedselsdato.opplysning.foedselsdato)
+  );
+
+  const barnetsAlder = differenceInYears(
+    new Date(),
+    new Date(barnetsFoedselsdato.opplysning.foedselsdato),
   )
 
   return (
@@ -41,13 +46,13 @@ export const AlderBarn = (props: any) => {
           <div>
             <strong>Barnets fødselsdato</strong>
           </div>
-          <div>{format(new Date(barnetsFoedselsdato.opplysning.foedselsdato), 'dd.MM.yyyy')}</div>
+          <div>{format(new Date(barnetsFoedselsdato.opplysning.foedselsdato), 'dd.MM.yyyy')} {barnetsAlder && <span>({barnetsAlder} år)</span>}</div>
         </VilkaarColumn>
         <VilkaarColumn>
           <div>
             <strong>Alder ved dødsfall</strong>
           </div>
-          <div>{barnetsAlder ? `${barnetsAlder} år` : <span className="missing">mangler</span>}</div>
+          <div>{barnetsAlderVedDoedsfall ? `${barnetsAlderVedDoedsfall} år` : <span className="missing">mangler</span>}</div>
         </VilkaarColumn>
         <VilkaarColumn>
           <Title>

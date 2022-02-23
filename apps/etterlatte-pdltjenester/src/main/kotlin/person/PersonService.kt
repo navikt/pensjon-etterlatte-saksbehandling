@@ -18,7 +18,6 @@ import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.Vegadresse
 import no.nav.etterlatte.person.pdl.ForelderBarnRelasjonRolle
-import no.nav.etterlatte.person.pdl.Gradering
 import no.nav.etterlatte.person.pdl.HentPerson
 import no.nav.etterlatte.person.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.person.pdl.PdlInnflyttingTilNorge
@@ -33,10 +32,7 @@ class PersonService(
     private val ppsKlient: ParallelleSannheterKlient
 ) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
-    private val adressebeskyttet = listOf(
-        Gradering.FORTROLIG, Gradering.STRENGT_FORTROLIG,
-        Gradering.STRENGT_FORTROLIG_UTLAND
-    )
+
 
     suspend fun hentPerson(hentPersonRequest: HentPersonRequest): Person {
         logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer} fra PDL")

@@ -5,8 +5,9 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
-import no.nav.etterlatte.pdl.PersonService
+import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -23,7 +24,7 @@ class FordelingAvbruttException(message: String, val severity: Level) : RuntimeE
 
 internal class EtterlatteFordeler(
     rapidsConnection: RapidsConnection,
-    private val personService: PersonService,
+    private val pdlKlient: PdlKlient,
     private val fordelerKriterierService: FordelerKriterierService,
     private val klokke: Clock = Clock.systemUTC()
 ) : River.PacketListener {
@@ -63,9 +64,9 @@ internal class EtterlatteFordeler(
                     )
 
                 runBlocking {
-                    val barn = personService.hentPerson(packet.soekerFnr(), adresse = true, familieRelasjon = true, utland = true)
-                    val avdoed = personService.hentPerson(packet.avdoedFnr(), utland = true, adresse = true)
-                    val gjenlevende = personService.hentPerson(packet.gjenlevendeFnr(), adresse = true, familieRelasjon = true)
+                    val barn = pdlKlient.hentPerson(HentPersonRequest(packet.soekerFnr(), adresse = true, familieRelasjon = true, utland = true))
+                    val avdoed = pdlKlient.hentPerson(HentPersonRequest(packet.avdoedFnr(), utland = true, adresse = true))
+                    val gjenlevende = pdlKlient.hentPerson(HentPersonRequest(packet.gjenlevendeFnr(), adresse = true, familieRelasjon = true))
 
                     fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, packet).let {
                         if (it.kandidat) {

@@ -7,7 +7,6 @@ import no.nav.etterlatte.EtterlatteFordeler
 import no.nav.etterlatte.FordelerKriterierService
 import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.pdl.PdlKlient
-import no.nav.etterlatte.pdl.PersonService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.Test
 internal class EtterlatteFordelerTest {
 
     private val klientMock = mockk<PdlKlient>()
-    private val personService = PersonService(klientMock)
 
     private val nyhendelseJson = javaClass.getResource("/NyBarnePensjon.json")!!.readText()
     private val hendelseIkkeBarnePensjonJson = javaClass.getResource("/ikkeBarnepensjon.json")!!.readText()
@@ -58,7 +56,7 @@ internal class EtterlatteFordelerTest {
         )
 
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, personService, FordelerKriterierService()) }
+            .apply { EtterlatteFordeler(this, klientMock, FordelerKriterierService()) }
             .apply { sendTestMessage(nyhendelseJson) }
             .inspektør
 
@@ -95,7 +93,7 @@ internal class EtterlatteFordelerTest {
         )
 
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, personService, FordelerKriterierService()) }
+            .apply { EtterlatteFordeler(this, klientMock, FordelerKriterierService()) }
             .apply { sendTestMessage(nyhendelseJson) }
             .inspektør
 
@@ -105,7 +103,7 @@ internal class EtterlatteFordelerTest {
     @Test
     fun hendelseIkkeGyldigLengre() {
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, personService, FordelerKriterierService()) }
+            .apply { EtterlatteFordeler(this, klientMock, FordelerKriterierService()) }
             .apply { sendTestMessage(hendelseIkkeGyldig) }
             .inspektør
 
@@ -115,7 +113,7 @@ internal class EtterlatteFordelerTest {
     @Test
     fun ikkeBarnepensjonSoeknad() {
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, personService, FordelerKriterierService()) }
+            .apply { EtterlatteFordeler(this, klientMock, FordelerKriterierService()) }
             .apply { sendTestMessage(hendelseIkkeBarnePensjonJson) }
             .inspektør
 
@@ -127,7 +125,7 @@ internal class EtterlatteFordelerTest {
         coEvery { klientMock.hentPerson(any()) } throws RuntimeException("Noe feilet")
 
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, personService, FordelerKriterierService()) }
+            .apply { EtterlatteFordeler(this, klientMock, FordelerKriterierService()) }
             .apply { sendTestMessage(nyhendelseJson) }
             .inspektør
 

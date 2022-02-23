@@ -10,19 +10,17 @@ import io.ktor.client.request.header
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.pdl.PdlKlient
-import no.nav.etterlatte.pdl.PersonService
 import no.nav.etterlatte.security.ktor.clientCredential
-import org.slf4j.MDC
 
 class AppBuilder(private val props: Map<String, String>) {
     companion object {
         const val CONFIG_PDL_URL = "PDL_URL"
     }
 
-    fun createPersonService(): PersonService {
-        val pdlKlient = PdlKlient(pdlHttpClient(), props[CONFIG_PDL_URL]!!)
+    fun createPdlKlient(): PdlKlient {
+        return PdlKlient(pdlHttpClient(), props[CONFIG_PDL_URL]!!)
 
-        return PersonService(pdlKlient)
+        //return PersonService(pdlKlient)
     }
 
     private fun pdlHttpClient() = HttpClient(OkHttp) {

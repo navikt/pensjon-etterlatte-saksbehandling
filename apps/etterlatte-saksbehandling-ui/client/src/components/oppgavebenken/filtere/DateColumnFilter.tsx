@@ -35,7 +35,7 @@ const DateColumnFilter: React.FC<Props> = ({ oppgaveFelt, oppgaveFelter, setOppg
             onChange={(date) => settFilterVerdi(oppgaveFelt, date ? date : '', oppgaveFelter, setOppgaveFelter)}
             autoComplete="off"
             preventOpenOnFocus={true}
-            className={'skjemaelement__input test'}
+            className={'skjemaelement__input'}
           />
 
           <KalenderIkon

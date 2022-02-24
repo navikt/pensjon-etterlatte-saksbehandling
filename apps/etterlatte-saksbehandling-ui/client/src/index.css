@@ -38,12 +38,3 @@ li {
     margin: 0;
     padding: 0;
 }
-
-.test {
-    position: absolute;
-    background-color: #88c3de;
-    width: 100%;
-    font-weight: bold;
-    color: #676363;
-    min-width: 500px;
-}

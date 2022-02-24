@@ -1,11 +1,11 @@
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import differenceInYears from 'date-fns/differenceInYears'
 import format from 'date-fns/format'
-import { Title, VilkaarColumn, VilkaarWrapper, VilkaarBorder, Innhold } from '../styled'
+import { Title, VilkaarColumn, VilkaarVurderingColumn, VilkaarWrapper, VilkaarBorder, Innhold } from '../styled'
 import { OpplysningsType } from '../types'
-import { IBehandlingsopplysning, IKriterie, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
-import { VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
-import { VilkaarIkkeOppfylt } from './VilkaarIkkeOppfylt'
+import { IKriterie, IVilkaaropplysing, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
+import { vilkaarErOppfylt } from './utils'
+import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 
 export const AlderBarn = (props: any) => {
   const vilkaar = props.vilkaar
@@ -13,13 +13,13 @@ export const AlderBarn = (props: any) => {
   const barnetsFoedselsdato = vilkaar.kriterier
     .find((krit: IKriterie) => krit.navn === Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO)
     .basertPaaOpplysninger.find(
-      (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.soeker_foedselsdato
+      (opplysning: IVilkaaropplysing) => opplysning.opplysningsType === OpplysningsType.soeker_foedselsdato
     )
 
   const avdoedDoedsdato = vilkaar.kriterier
     .find((krit: IKriterie) => krit.navn === Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO)
     .basertPaaOpplysninger.find(
-      (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsfall
+      (opplysning: IVilkaaropplysing) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsfall
     )
 
   const barnetsAlderVedDoedsfall = differenceInYears(
@@ -57,20 +57,10 @@ export const AlderBarn = (props: any) => {
               {barnetsAlderVedDoedsfall ? `${barnetsAlderVedDoedsfall} år` : <span className="missing">mangler</span>}
             </div>
           </VilkaarColumn>
-          <VilkaarColumn>
-            <Title>
-              Vilkår er{' '}
-              {props.vilkaar.resultat === VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ? (
-                <> ikke oppfyllt</>
-              ) : (
-                <> oppfyllt</>
-              )}
-            </Title>
-            <VilkaarIkkeOppfylt
-              status={props.vilkaar.resultat}
-              errorText="Vi har bla bla bla fått bla bla bla som sier at bla"
-            />
-          </VilkaarColumn>
+          <VilkaarVurderingColumn>
+            <Title>{vilkaarErOppfylt(vilkaar.resultat)}</Title>
+            <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
+          </VilkaarVurderingColumn>
         </VilkaarWrapper>
       </Innhold>
     </VilkaarBorder>

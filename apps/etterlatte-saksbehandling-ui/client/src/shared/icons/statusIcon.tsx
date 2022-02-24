@@ -33,7 +33,7 @@ const Circle = styled.div<{ status: VilkaarVurderingsResultat }>`
   border-radius: 100%;
   height: 20px;
   width: 20px;
-  display: flex;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
   margin-right: 10px;

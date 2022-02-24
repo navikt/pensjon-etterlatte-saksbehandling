@@ -1,10 +1,10 @@
 import format from 'date-fns/format'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
-import { VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
-import { Title, VilkaarColumn, VilkaarWrapper, VilkaarBorder, Innhold } from '../styled'
+import { IKriterie, IVilkaaropplysing, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
+import { Innhold, Title, VilkaarBorder, VilkaarVurderingColumn, VilkaarColumn, VilkaarWrapper } from '../styled'
 import { OpplysningsType } from '../types'
-import { IBehandlingsopplysning, IKriterie, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
-import { VilkaarIkkeOppfylt } from './VilkaarIkkeOppfylt'
+import { vilkaarErOppfylt } from './utils'
+import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 
 export const DoedsFallForelder = (props: any) => {
   const vilkaar = props.vilkaar
@@ -12,13 +12,13 @@ export const DoedsFallForelder = (props: any) => {
   const avdoedDoedsdato = vilkaar.kriterier
     .find((krit: IKriterie) => krit.navn === Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL)
     .basertPaaOpplysninger.find(
-      (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsfall
+      (opplysning: IVilkaaropplysing) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsfall
     )
 
   const forelder = vilkaar.kriterier
     .find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER)
     .basertPaaOpplysninger.find(
-      (opplysning: IBehandlingsopplysning) => opplysning.opplysningsType === OpplysningsType.relasjon_foreldre
+      (opplysning: IVilkaaropplysing) => opplysning.opplysningsType === OpplysningsType.relasjon_foreldre
     )
 
   return (
@@ -59,20 +59,10 @@ export const DoedsFallForelder = (props: any) => {
               )}
             </div>
           </VilkaarColumn>
-          <VilkaarColumn>
-            <Title>
-              Vilkår er{' '}
-              {props.vilkaar.resultat === VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ? (
-                <> ikke oppfyllt</>
-              ) : (
-                <> oppfyllt</>
-              )}
-            </Title>
-            <VilkaarIkkeOppfylt
-              status={props.vilkaar.resultat}
-              errorText="Vi har bla bla bla fått bla bla bla som sier at bla"
-            />
-          </VilkaarColumn>
+          <VilkaarVurderingColumn>
+            <Title>{vilkaarErOppfylt(props.vilkaar.resultat)}</Title>
+            <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
+          </VilkaarVurderingColumn>
         </VilkaarWrapper>
       </Innhold>
     </VilkaarBorder>

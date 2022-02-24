@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import moment from 'moment'
-import { aarIProsent, tidsperiodeProsent, startdatoOffsetProsent } from './utils'
+import { aarIProsent, tidsperiodeProsent, startdatoOffsetProsent } from './tidslinjeUtils'
 import { HomeIcon } from '../../../../shared/icons/homeIcon'
 import { OfficeIcon } from '../../../../shared/icons/officeIcon'
 

@@ -14,6 +14,7 @@ export const VilkaarWrapper = styled.div`
   justify-content: space-between;
   align-items: top;
   flex-wrap: wrap;
+  gap: 20px;
 `
 
 export const Title = styled.div`
@@ -29,6 +30,11 @@ export const VilkaarColumn = styled.div`
   .missing {
     color: red;
   }
+`
+
+export const VilkaarVurderingColumn = styled.div`
+  flex: 1;
+  min-width: 250px;
 `
 
 export const Innhold = styled.div`

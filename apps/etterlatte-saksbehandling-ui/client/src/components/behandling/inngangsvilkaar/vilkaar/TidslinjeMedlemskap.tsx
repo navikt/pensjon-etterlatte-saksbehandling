@@ -1,6 +1,8 @@
 import styled from 'styled-components'
 import moment from 'moment'
 import { aarIProsent, tidsperiodeProsent, startdatoOffsetProsent } from './utils'
+import { HomeIcon } from '../../../../shared/icons/homeIcon'
+import { OfficeIcon } from '../../../../shared/icons/officeIcon'
 
 export const TidslinjeMedlemskap = () => {
   const doedsdato = moment('2022-06-01', 'YYYY-MM-DD').format('DD.MM.YYYY').toString()
@@ -14,25 +16,25 @@ export const TidslinjeMedlemskap = () => {
       innhold: {
         fraDato: '01.02.2019',
         tilDato: '01.11.2021',
-        adresse: 'Plogveien 54, 0458 Oslo',
+        beskrivelse: 'Tonsenhagenskole, 100% stilling',
         kilde: 'Folkeregisteret 11.11.2021',
       },
     },
     {
-      periodeType: 'jobb',
+      periodeType: 'bosted',
       innhold: {
         fraDato: '01.02.2016',
         tilDato: '01.03.2021',
-        adresse: 'Plogveien 54, 0458 Oslo',
+        beskrivelse: 'Plogveien 54, 0458 Oslo',
         kilde: 'Folkeregisteret 11.11.2021',
       },
     },
     {
-      periodeType: 'jobb',
+      periodeType: 'bosted',
       innhold: {
         fraDato: '01.02.2020',
         tilDato: '01.03.2023',
-        adresse: 'Plogveien 54, 0458 Oslo',
+        beskrivelse: 'Plogveien 54, 0458 Oslo',
         kilde: 'Folkeregisteret 11.11.2021',
       },
     },
@@ -56,7 +58,7 @@ export const TidslinjeMedlemskap = () => {
       </Grid>
       <div>
         {mockdata.map((periode, index) => (
-          <PeriodeTidslinje
+          <Periode
             key={index}
             doedsdato={doedsdato}
             femAarTidligere={femAarTidligere}
@@ -69,7 +71,7 @@ export const TidslinjeMedlemskap = () => {
   )
 }
 
-const PeriodeTidslinje = ({
+const Periode = ({
   doedsdato,
   femAarTidligere,
   periode,
@@ -87,14 +89,35 @@ const PeriodeTidslinje = ({
 
   return (
     <Rad style={{ left: startDatoOffset, width: lengdePeriode, backgroundColor: colors[index % colors.length] }}>
-      <InnholdDatoFraTil>
-        {periode.innhold.fraDato} - {periode.innhold.tilDato}
-      </InnholdDatoFraTil>
-      <InnholdAdresse>{periode.innhold.adresse}</InnholdAdresse>
-      <InnholdKilde>{periode.innhold.kilde}</InnholdKilde>
+      <InnholdWrapper>
+        <Ikon>{periode.periodeType === 'jobb' ? <OfficeIcon /> : <HomeIcon />}</Ikon>
+        <div>
+          <InnholdDatoFraTil>
+            {periode.innhold.fraDato} - {periode.innhold.tilDato}
+          </InnholdDatoFraTil>
+          <InnholdBeskrivelse>{periode.innhold.beskrivelse}</InnholdBeskrivelse>
+          <InnholdKilde>{periode.innhold.kilde}</InnholdKilde>
+        </div>
+      </InnholdWrapper>
     </Rad>
   )
 }
+
+export const Ikon = styled.div`
+  display: flex;
+  justify-content: left;
+  padding: 10px;
+
+  svg {
+    width: 1.8em;
+    height: 1.8em;
+  }
+`
+
+export const InnholdWrapper = styled.div`
+  display: flex;
+  justify-content: left;
+`
 
 export const Tidslinje = styled.div`
   margin-top: 40px;
@@ -111,16 +134,16 @@ export const Rad = styled.div`
 `
 
 export const InnholdDatoFraTil = styled.div`
-  padding-top: 10px;
-  padding-left: 20px;
+  padding-top: 5px;
+  padding-left: 10px;
   font-weight: bold;
 `
-export const InnholdAdresse = styled.div`
-  padding-left: 20px;
+export const InnholdBeskrivelse = styled.div`
+  padding-left: 5px;
 `
 
 export const InnholdKilde = styled.div`
-  padding-left: 20px;
+  padding-left: 5px;
   color: #676363;
 `
 

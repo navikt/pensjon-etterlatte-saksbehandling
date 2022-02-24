@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.fordeler.Fordeler
 import no.nav.helse.rapids_rivers.RapidApplication
 
 fun main() {
@@ -8,7 +9,7 @@ fun main() {
     }.also { env ->
         AppBuilder(env).also {
             RapidApplication.create(env)
-                .also { EtterlatteFordeler(it, AppBuilder(env).createPdlKlient(), FordelerKriterierService()) }
+                .also { Fordeler(it, AppBuilder(env).createPdlTjenesterKlient(), FordelerKriterierService()) }
                 .start()
         }
     }

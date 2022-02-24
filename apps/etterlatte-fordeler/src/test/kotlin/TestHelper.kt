@@ -1,4 +1,4 @@
-package no.nav.etterlatte.prosess
+package no.nav.etterlatte
 
 
 import no.nav.etterlatte.libs.common.person.*

@@ -1,21 +1,25 @@
-package no.nav.etterlatte.prosess
+package no.nav.etterlatte.fordeler
 
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
-import no.nav.etterlatte.EtterlatteFordeler
 import no.nav.etterlatte.FordelerKriterierService
-import no.nav.etterlatte.libs.common.person.*
-import no.nav.etterlatte.pdl.PdlKlient
+import no.nav.etterlatte.libs.common.person.Barn
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.ForeldreAnsvar
+import no.nav.etterlatte.mockNorskAdresse
+import no.nav.etterlatte.mockPerson
+import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class EtterlatteFordelerTest {
+internal class FordelerTest {
 
-    private val klientMock = mockk<PdlKlient>()
+    private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
 
     private val nyhendelseJson = javaClass.getResource("/NyBarnePensjon.json")!!.readText()
     private val hendelseIkkeBarnePensjonJson = javaClass.getResource("/ikkeBarnepensjon.json")!!.readText()
@@ -32,7 +36,7 @@ internal class EtterlatteFordelerTest {
         val avdoedFnr = Foedselsnummer.of("24014021406")
         val etterlattFnr = Foedselsnummer.of("11057523044")
 
-        coEvery { klientMock.hentPerson(match { it.foedselsnummer == barnFnr } ) } returns mockPerson(
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr } ) } returns mockPerson(
             adresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(ForeldreAnsvar(etterlattFnr)),
@@ -41,12 +45,12 @@ internal class EtterlatteFordelerTest {
             )
         )
 
-        coEvery { klientMock.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
             doedsdato = "2022-01-01",
             adresse = mockNorskAdresse()
         )
 
-        coEvery { klientMock.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
             adresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(ForeldreAnsvar(Foedselsnummer.of("11057523044"))),
@@ -56,7 +60,7 @@ internal class EtterlatteFordelerTest {
         )
 
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, klientMock, FordelerKriterierService()) }
+            .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
             .apply { sendTestMessage(nyhendelseJson) }
             .inspektør
 
@@ -70,7 +74,7 @@ internal class EtterlatteFordelerTest {
         val avdoedFnr = Foedselsnummer.of("24014021406")
         val etterlattFnr = Foedselsnummer.of("11057523044")
 
-        coEvery { klientMock.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
             adresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(ForeldreAnsvar(etterlattFnr)),
@@ -79,11 +83,11 @@ internal class EtterlatteFordelerTest {
             )
         )
 
-        coEvery { klientMock.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
             adresse = mockNorskAdresse()
         )
 
-        coEvery { klientMock.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
             adresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(ForeldreAnsvar(Foedselsnummer.of("11057523044"))),
@@ -93,7 +97,7 @@ internal class EtterlatteFordelerTest {
         )
 
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, klientMock, FordelerKriterierService()) }
+            .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
             .apply { sendTestMessage(nyhendelseJson) }
             .inspektør
 
@@ -103,7 +107,7 @@ internal class EtterlatteFordelerTest {
     @Test
     fun hendelseIkkeGyldigLengre() {
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, klientMock, FordelerKriterierService()) }
+            .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
             .apply { sendTestMessage(hendelseIkkeGyldig) }
             .inspektør
 
@@ -113,7 +117,7 @@ internal class EtterlatteFordelerTest {
     @Test
     fun ikkeBarnepensjonSoeknad() {
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, klientMock, FordelerKriterierService()) }
+            .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
             .apply { sendTestMessage(hendelseIkkeBarnePensjonJson) }
             .inspektør
 
@@ -122,10 +126,10 @@ internal class EtterlatteFordelerTest {
 
     @Test
     fun `skal feile og logge dersom kall mot pdltjenester feiler`() {
-        coEvery { klientMock.hentPerson(any()) } throws RuntimeException("Noe feilet")
+        coEvery { pdlTjenesterKlient.hentPerson(any()) } throws RuntimeException("Noe feilet")
 
         val inspector = TestRapid()
-            .apply { EtterlatteFordeler(this, klientMock, FordelerKriterierService()) }
+            .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
             .apply { sendTestMessage(nyhendelseJson) }
             .inspektør
 

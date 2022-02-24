@@ -3,24 +3,24 @@ package no.nav.etterlatte.common
 import no.nav.etterlatte.common.RetryResult.Failure
 import no.nav.etterlatte.common.RetryResult.Success
 
-sealed class RetryResult() {
-    data class Success(val content: Any? = null, val previousExceptions: List<Exception> = emptyList()) : RetryResult()
+sealed class RetryResult<T> {
+    data class Success<T>(val content: T, val previousExceptions: List<Exception> =emptyList()) : RetryResult<T>()
 
-    data class Failure(val exceptions: List<Exception> = emptyList()) : RetryResult() {
+    data class Failure<T>(val exceptions: List<Exception> =emptyList()) : RetryResult<T>() {
         fun lastError() = exceptions.lastOrNull()
     }
 }
 
-suspend fun <T> unsafeRetry(times: Int = 2, block: suspend () -> T) = retry(times, block).let {
+suspend fun <T> unsafeRetry(times: Int = 2, block: suspend () -> T) = retry(times, block).let{
     when (it) {
         is Success -> it.content
         is Failure -> throw it.exceptions.last()
     }
 }
 
-suspend fun <T> retry(times: Int = 2, block: suspend () -> T) = retryInner(times, emptyList(), block)
+suspend fun <T> retry(times: Int = 2, block: suspend () -> T) = retryInner(times,emptyList(), block)
 
-private suspend fun <T> retryInner(times: Int, exceptions: List<Exception>, block: suspend () -> T): RetryResult {
+private suspend fun <T> retryInner(times: Int, exceptions: List<Exception>, block: suspend () -> T): RetryResult<T> {
     return try {
         Success(block(), exceptions)
     } catch (ex: Exception) {

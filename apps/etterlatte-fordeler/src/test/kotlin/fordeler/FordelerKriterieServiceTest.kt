@@ -1,10 +1,18 @@
-package no.nav.etterlatte.prosess
+package no.nav.etterlatte.fordeler
 
 import no.nav.etterlatte.FordelerKriterie
 import no.nav.etterlatte.FordelerKriterierService
-import no.nav.etterlatte.common.objectMapper
-import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.ForeldreAnsvar
+import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
+import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
+import no.nav.etterlatte.mockPerson
+import no.nav.etterlatte.mockNorskAdresse
+import no.nav.etterlatte.mockUgyldigNorskAdresse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import org.junit.jupiter.api.Assertions.assertTrue

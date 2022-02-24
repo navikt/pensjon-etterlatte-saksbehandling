@@ -9,7 +9,7 @@ import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.header
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
-import no.nav.etterlatte.pdl.PdlKlient
+import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.etterlatte.security.ktor.clientCredential
 
 class AppBuilder(private val props: Map<String, String>) {
@@ -17,13 +17,11 @@ class AppBuilder(private val props: Map<String, String>) {
         const val CONFIG_PDL_URL = "PDL_URL"
     }
 
-    fun createPdlKlient(): PdlKlient {
-        return PdlKlient(pdlHttpClient(), props[CONFIG_PDL_URL]!!)
-
-        //return PersonService(pdlKlient)
+    fun createPdlTjenesterKlient(): PdlTjenesterKlient {
+        return PdlTjenesterKlient(pdlTjenesterHttpClient(), props[CONFIG_PDL_URL]!!)
     }
 
-    private fun pdlHttpClient() = HttpClient(OkHttp) {
+    private fun pdlTjenesterHttpClient() = HttpClient(OkHttp) {
         defaultRequest {
             header(X_CORRELATION_ID, getCorrelationId())
         }
@@ -36,32 +34,4 @@ class AppBuilder(private val props: Map<String, String>) {
         }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 
-/*
-
-    fun fordel() = JournalfoeringService(opprettJournalfoeringKlient())
-
-    private fun opprettJournalfoeringKlient() = HttpClient(OkHttp) {
-        install(JsonFeature) { serializer = JacksonSerializer() }
-        install(Auth) {
-            clientCredential {
-                config = System.getenv().toMutableMap().apply {
-                    // put("AZURE_APP_OUTBOUND_SCOPE", "api://dev-fss.etterlatte.etterlatte-proxy/.default")
-                    put("AZURE_APP_OUTBOUND_SCOPE", props[CONFIG_AZURE_DOKARKIV_SCOPE])
-                }
-            }
-        }
-    }.also {
-        Runtime.getRuntime().addShutdownHook(Thread { it.close() })
-    }.let {
-        DokarkivKlient(it, props[CONFIG_DOKARKIV_URL]!!)
-    }
-
-    private fun pdfhttpclient() = HttpClient(OkHttp) {
-        install(JsonFeature) { serializer = JacksonSerializer() }
-
-    }.also {
-        Runtime.getRuntime().addShutdownHook(Thread { it.close() })
-    }
-
- */
 }

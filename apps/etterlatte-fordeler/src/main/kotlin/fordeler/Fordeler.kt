@@ -1,13 +1,14 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.fordeler
 
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.FordelerKriterierService
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
-import no.nav.etterlatte.pdl.PdlKlient
+import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -22,14 +23,14 @@ import java.time.format.DateTimeFormatter
 
 class FordelingAvbruttException(message: String, val severity: Level) : RuntimeException(message)
 
-internal class EtterlatteFordeler(
+internal class Fordeler(
     rapidsConnection: RapidsConnection,
-    private val pdlKlient: PdlKlient,
+    private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val fordelerKriterierService: FordelerKriterierService,
     private val klokke: Clock = Clock.systemUTC()
 ) : River.PacketListener {
 
-    private val logger = LoggerFactory.getLogger(EtterlatteFordeler::class.java)
+    private val logger = LoggerFactory.getLogger(Fordeler::class.java)
 
     init {
         River(rapidsConnection).apply {
@@ -64,9 +65,9 @@ internal class EtterlatteFordeler(
                     )
 
                 runBlocking {
-                    val barn = pdlKlient.hentPerson(HentPersonRequest(packet.soekerFnr(), adresse = true, familieRelasjon = true, utland = true))
-                    val avdoed = pdlKlient.hentPerson(HentPersonRequest(packet.avdoedFnr(), utland = true, adresse = true))
-                    val gjenlevende = pdlKlient.hentPerson(HentPersonRequest(packet.gjenlevendeFnr(), adresse = true, familieRelasjon = true))
+                    val barn = pdlTjenesterKlient.hentPerson(HentPersonRequest(packet.soekerFnr(), adresse = true, familieRelasjon = true, utland = true))
+                    val avdoed = pdlTjenesterKlient.hentPerson(HentPersonRequest(packet.avdoedFnr(), utland = true, adresse = true))
+                    val gjenlevende = pdlTjenesterKlient.hentPerson(HentPersonRequest(packet.gjenlevendeFnr(), adresse = true, familieRelasjon = true))
 
                     fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, packet).let {
                         if (it.kandidat) {

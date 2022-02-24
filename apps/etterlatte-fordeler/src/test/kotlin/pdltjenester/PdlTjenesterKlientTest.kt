@@ -1,30 +1,25 @@
-package no.nav.etterlatte.prosess.pdl
+package no.nav.etterlatte.prosess.pdltjenester
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
-import no.nav.etterlatte.pdl.PdlKlient
+import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
-class PdlKlientTest {
+class PdlTjenesterKlientTest {
 
-    private lateinit var pdlKlient: PdlKlient
+    private lateinit var pdlTjenesterKlient: PdlTjenesterKlient
 
     private companion object {
         const val TESTUSER_FNR = "11057523044"
@@ -50,15 +45,15 @@ class PdlKlientTest {
             install(JsonFeature) { serializer = JacksonSerializer() }
         }
 
-        pdlKlient = PdlKlient(httpClient, "/person")
+        pdlTjenesterKlient = PdlTjenesterKlient(httpClient, "/person")
     }
 
     @Test
     fun `skal hente person og mappe riktig til datamodell`() {
-        mockEndpoint("/pdl/person.json")
+        mockEndpoint("/pdltjenester/person.json")
 
         val person = runBlocking {
-            pdlKlient.hentPerson(HentPersonRequest(
+            pdlTjenesterKlient.hentPerson(HentPersonRequest(
                 foedselsnummer = Foedselsnummer.of(TESTUSER_FNR),
                 historikk = true,
                 adresse = true,

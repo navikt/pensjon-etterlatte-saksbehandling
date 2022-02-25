@@ -2,7 +2,6 @@ package no.nav.etterlatte.fordeler
 
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.FordelerKriterierService
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -65,9 +64,9 @@ internal class Fordeler(
                     )
 
                 runBlocking {
-                    val barn = pdlTjenesterKlient.hentPerson(HentPersonRequest(packet.soekerFnr(), adresse = true, familieRelasjon = true, utland = true))
-                    val avdoed = pdlTjenesterKlient.hentPerson(HentPersonRequest(packet.avdoedFnr(), utland = true, adresse = true))
-                    val gjenlevende = pdlTjenesterKlient.hentPerson(HentPersonRequest(packet.gjenlevendeFnr(), adresse = true, familieRelasjon = true))
+                    val barn = pdlTjenesterKlient.hentPerson(hentBarnRequest(packet))
+                    val avdoed = pdlTjenesterKlient.hentPerson(hentAvdoedRequest(packet))
+                    val gjenlevende = pdlTjenesterKlient.hentPerson(hentGjenlevendeRequest(packet))
 
                     fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, packet).let {
                         if (it.kandidat) {
@@ -88,6 +87,15 @@ internal class Fordeler(
                 logger.error("Uhaandtert feilsituasjon: ${err.message}", err)
             }
         }
+
+    private fun hentGjenlevendeRequest(packet: JsonMessage) =
+        HentPersonRequest(packet.gjenlevendeFnr(), adresse = true, familieRelasjon = true)
+
+    private fun hentAvdoedRequest(packet: JsonMessage) =
+        HentPersonRequest(packet.avdoedFnr(), utland = true, adresse = true)
+
+    private fun hentBarnRequest(packet: JsonMessage) =
+        HentPersonRequest(packet.soekerFnr(), adresse = true, familieRelasjon = true, utland = true)
 
     private fun JsonMessage.soknadId() = this["@lagret_soeknad_id"]
 

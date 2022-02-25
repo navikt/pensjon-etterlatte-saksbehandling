@@ -5,10 +5,10 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.post
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.contentType
-import no.nav.etterlatte.common.RetryResult
-import no.nav.etterlatte.common.retry
+import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.retry
 import org.slf4j.LoggerFactory
 
 class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: String) {
@@ -25,7 +25,7 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
             }
         }.let{
             when (it) {
-                is RetryResult.Success ->it.content
+                is RetryResult.Success -> it.content
                 is RetryResult.Failure -> throw it.exceptions.last()
             }
         }

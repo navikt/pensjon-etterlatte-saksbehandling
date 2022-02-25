@@ -3,7 +3,6 @@ package no.nav.etterlatte.fordeler
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
-import no.nav.etterlatte.FordelerKriterierService
 import no.nav.etterlatte.libs.common.person.Barn
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -21,9 +20,9 @@ internal class FordelerTest {
 
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
 
-    private val nyhendelseJson = javaClass.getResource("/NyBarnePensjon.json")!!.readText()
-    private val hendelseIkkeBarnePensjonJson = javaClass.getResource("/ikkeBarnepensjon.json")!!.readText()
-    private val hendelseIkkeGyldig = javaClass.getResource("/hendelseUgyldig.json")!!.readText()
+    private val nyhendelseJson = javaClass.getResource("/fordeler/NyBarnePensjon.json")!!.readText()
+    private val hendelseIkkeBarnePensjonJson = javaClass.getResource("/fordeler/ikkeBarnepensjon.json")!!.readText()
+    private val hendelseIkkeGyldig = javaClass.getResource("/fordeler/hendelseUgyldig.json")!!.readText()
 
     @AfterEach
     fun afterEach() {

@@ -1,7 +1,5 @@
 package no.nav.etterlatte.fordeler
 
-import no.nav.etterlatte.FordelerKriterie
-import no.nav.etterlatte.FordelerKriterierService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
@@ -244,11 +242,11 @@ class FordelerKriterieServiceTest {
     }
 
     companion object {
-        val BARNEPENSJON_SOKNAD = readSoknad("/NyBarnePensjon.json")
-        val BARNEPENSJON_SOKNAD_YRKESSKADE = readSoknad("/yrkesskade.json")
-        val BARNEPENSJON_SOKNAD_VERGE = readSoknad("/verge.json")
-        val BARNEPENSJON_SOKNAD_HUKET_AV_UTLAND = readSoknad("/huketAvForUtland.json")
-        val BARNEPENSJON_SOKNAD_INNSENDER_IKKE_FORELDER = readSoknad("/innsenderIkkeForelder.json")
+        val BARNEPENSJON_SOKNAD = readSoknad("/fordeler/NyBarnePensjon.json")
+        val BARNEPENSJON_SOKNAD_YRKESSKADE = readSoknad("/fordeler/yrkesskade.json")
+        val BARNEPENSJON_SOKNAD_VERGE = readSoknad("/fordeler/verge.json")
+        val BARNEPENSJON_SOKNAD_HUKET_AV_UTLAND = readSoknad("/fordeler/huketAvForUtland.json")
+        val BARNEPENSJON_SOKNAD_INNSENDER_IKKE_FORELDER = readSoknad("/fordeler/innsenderIkkeForelder.json")
 
         private fun readSoknad(file: String) =
             JsonMessage(readFile(file), MessageProblems("")).apply { requireKey("@skjema_info") }

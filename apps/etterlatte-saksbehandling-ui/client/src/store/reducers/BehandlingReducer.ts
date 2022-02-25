@@ -12,11 +12,19 @@ export interface IDetaljertBehandling {
 
 export interface IBehandlingsopplysning {
   id: string
-  kilde: string
+  kilde: {
+    type: KildeType
+  }
   opplysningsType: OpplysningsType
+  opplysningType?: any
   meta: any
   opplysning: any
   attestering: any
+}
+
+export enum KildeType {
+  pdl = "pdl",
+  privatperson = "privatperson"
 }
 
 export interface IVilkaarsproving {
@@ -65,7 +73,6 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
 }
 
 export const behandlingReducer = (state = detaljertBehandlingInitialState, action: IAction): any => {
-  console.log('state', action.data)
   switch (action.type) {
     case 'add_behandling':
       return {

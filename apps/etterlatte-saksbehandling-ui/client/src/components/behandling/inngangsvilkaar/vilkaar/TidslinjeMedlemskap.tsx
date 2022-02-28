@@ -1,12 +1,12 @@
 import styled from 'styled-components'
-import moment from 'moment'
+import moment, { Moment } from 'moment'
 import { aarIProsent, tidsperiodeProsent, startdatoOffsetProsent } from './tidslinjeUtils'
 import { HomeIcon } from '../../../../shared/icons/homeIcon'
 import { OfficeIcon } from '../../../../shared/icons/officeIcon'
 
 export const TidslinjeMedlemskap = () => {
-  const doedsdato = moment('2022-06-01', 'YYYY-MM-DD').format('DD.MM.YYYY').toString()
-  const femAarTidligere = moment('2022-06-01', 'YYYY-MM-DD').subtract(5, 'years').format('DD.MM.YYYY').toString()
+  const doedsdato = moment('2022-06-01', 'YYYY-MM-DD')
+  const femAarTidligere = moment('2022-06-01', 'YYYY-MM-DD').subtract(5, 'years')
 
   const navnOgProsentPaaDatoer = aarIProsent(femAarTidligere, doedsdato)
 
@@ -14,8 +14,8 @@ export const TidslinjeMedlemskap = () => {
     {
       periodeType: 'jobb',
       innhold: {
-        fraDato: '01.02.2019',
-        tilDato: '01.11.2021',
+        fraDato: '2019-02-01',
+        tilDato: '2021-01-11',
         beskrivelse: 'Tonsenhagenskole, 100% stilling',
         kilde: 'Folkeregisteret 11.11.2021',
       },
@@ -23,8 +23,8 @@ export const TidslinjeMedlemskap = () => {
     {
       periodeType: 'bosted',
       innhold: {
-        fraDato: '01.02.2016',
-        tilDato: '01.03.2021',
+        fraDato: '2016-02-01',
+        tilDato: '2021-03-01',
         beskrivelse: 'Plogveien 54, 0458 Oslo',
         kilde: 'Folkeregisteret 11.11.2021',
       },
@@ -32,8 +32,8 @@ export const TidslinjeMedlemskap = () => {
     {
       periodeType: 'bosted',
       innhold: {
-        fraDato: '01.02.2020',
-        tilDato: '01.03.2023',
+        fraDato: '2020-02-01',
+        tilDato: '2023-03-01',
         beskrivelse: 'Plogveien 54, 0458 Oslo',
         kilde: 'Folkeregisteret 11.11.2021',
       },
@@ -44,7 +44,7 @@ export const TidslinjeMedlemskap = () => {
     <Tidslinje>
       <Grid>
         <GridBorder style={{ top: '10px' }}>&nbsp;</GridBorder>
-        <GridDatoer leftmargin={'0px'}>{femAarTidligere}</GridDatoer>
+        <GridDatoer leftmargin={'0px'}>{moment(femAarTidligere).format('DD.MM.YYYY')}</GridDatoer>
         {navnOgProsentPaaDatoer.map((aar) => (
           <GridDatoerWrapper prosent={aar[1]} key={aar[1].toString()}>
             <GridDatoer leftmargin={'-16px'}>{aar[0]}</GridDatoer>
@@ -52,7 +52,7 @@ export const TidslinjeMedlemskap = () => {
           </GridDatoerWrapper>
         ))}
         <GridDoedsdato>
-          <GridDatoer leftmargin={'-150px'}>dødsdato: {doedsdato}</GridDatoer>
+          <GridDatoer leftmargin={'-150px'}>dødsdato: {moment(doedsdato).format('DD.MM.YYYY')}</GridDatoer>
         </GridDoedsdato>
         <GridBorder style={{ bottom: '-30px' }}>&nbsp;</GridBorder>
       </Grid>
@@ -77,8 +77,8 @@ const Periode = ({
   periode,
   index,
 }: {
-  doedsdato: string
-  femAarTidligere: string
+  doedsdato: Moment
+  femAarTidligere: Moment
   periode: any
   index: number
 }) => {

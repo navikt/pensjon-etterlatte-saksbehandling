@@ -1,7 +1,7 @@
-import moment from 'moment'
+import moment, { Moment } from 'moment'
 
-export function aarIProsent(femAarTidligere: string, doedsdato: string): string[][] {
-  const antallDagerMellomDatoer = moment.duration(moment(doedsdato).diff(moment(femAarTidligere))).asDays()
+export function aarIProsent(femAarTidligere: Moment, doedsdato: Moment): string[][] {
+  const antallDagerMellomDatoer = moment.duration(doedsdato.diff(femAarTidligere)).asDays()
   const antallAar = [1, 2, 3, 4]
 
   const aarstallMellomDatoerNavn = antallAar.map((aar) =>
@@ -22,14 +22,13 @@ export function aarIProsent(femAarTidligere: string, doedsdato: string): string[
 export function tidsperiodeProsent(
   fraDato: string,
   tilDato: string,
-  doedsdato: string,
-  femAarTidligere: string
+  doedsdato: Moment,
+  femAarTidligere: Moment
 ): string {
-  const maxDate = moment(doedsdato, 'DD.MM.YYYY').diff(moment(tilDato, 'DD.MM.YYYY')) < 0 ? doedsdato : tilDato
-  const miDate =
-    moment(femAarTidligere, 'DD.MM.YYYY').diff(moment(fraDato, 'DD.MM.YYYY')) > 0 ? femAarTidligere : fraDato
+  const maxDate = moment(doedsdato).diff(moment(tilDato)) < 0 ? doedsdato : tilDato
+  const minDate = moment(femAarTidligere).diff(moment(fraDato)) > 0 ? femAarTidligere : fraDato
 
-  const periode = moment.duration(moment(maxDate, 'DD.MM.YYYY').diff(moment(miDate, 'DD.MM.YYYY'))).asDays()
+  const periode = moment.duration(moment(maxDate).diff(moment(minDate))).asDays()
 
   if (periode > moment.duration(5, 'years').asDays()) {
     return '100%'
@@ -38,13 +37,11 @@ export function tidsperiodeProsent(
   }
 }
 
-export function startdatoOffsetProsent(fraDato: string, femAarTidligere: string) {
-  if (moment(fraDato, 'DD.MM.YYYY').diff(moment(femAarTidligere, 'DD.MM.YYYY')) < 0) {
+export function startdatoOffsetProsent(fraDato: string, femAarTidligere: Moment) {
+  if (moment(fraDato).diff(moment(femAarTidligere)) < 0) {
     return '0%'
   } else {
-    return prosentAvFemAar(
-      moment.duration(moment(fraDato, 'DD.MM.YYYY').diff(moment(femAarTidligere, 'DD.MM.YYYY'))).asDays()
-    )
+    return prosentAvFemAar(moment.duration(moment(fraDato).diff(femAarTidligere)).asDays())
   }
 }
 

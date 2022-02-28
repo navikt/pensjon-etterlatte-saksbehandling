@@ -1,14 +1,16 @@
 package no.nav.etterlatte.pdl
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
 import io.ktor.client.request.post
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.content.TextContent
-import no.nav.etterlatte.common.mapJsonToAny
-import no.nav.etterlatte.common.toJson
+import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -54,16 +56,23 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
             1 -> list.first()
             else -> {
                 logger.info("Felt av typen ${avklaring.feltnavn} har ${list.size} elementer, sjekker mot PPS")
-                val responseAsJsonNode = httpClient.post<JsonNode>("$apiUrl/api/${avklaring.feltnavn}") {
-                    accept(Json)
-                    body = TextContent(nodeWithFieldName.toJson(), Json)
+                val responseAsJsonNode = retry {
+                    httpClient.post<JsonNode>("$apiUrl/api/${avklaring.feltnavn}") {
+                        accept(Json)
+                        body = TextContent(nodeWithFieldName.toJson(), Json)
+                    }
+                }.let{
+                    when (it) {
+                        is RetryResult.Success -> it.content
+                        is RetryResult.Failure -> throw it.exceptions.last()
+                    }
                 }
 
                 // Svar fra parallelle sannheter skal kun inneholde ett element
                 if (responseAsJsonNode.size() != 1)
                     logger.warn("Parallelle sannheter returnerte mer enn et element for felt ${avklaring.feltnavn}")
 
-                mapJsonToAny(responseAsJsonNode.get(avklaring.feltnavn).first().toJson())
+                objectMapper.readValue(responseAsJsonNode.get(avklaring.feltnavn).first().toJson())
             }
         }
     }

@@ -1,15 +1,14 @@
-package pdl
+package no.nav.etterlatte.pdl
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import no.nav.etterlatte.pdl.PdlGradering
+import no.nav.etterlatte.libs.common.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class AdressebeskyttelseTest {
-    private val mapper = jacksonObjectMapper()
+    private val mapper = objectMapper
 
     @Test
     fun `Verifiser at gradering har korrekt rekkefoelge`() {

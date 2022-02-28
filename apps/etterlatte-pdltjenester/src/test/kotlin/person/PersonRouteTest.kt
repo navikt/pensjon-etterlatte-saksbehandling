@@ -1,4 +1,4 @@
-package person
+package no.nav.etterlatte.person
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -20,14 +20,15 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
-import no.nav.etterlatte.common.toJson
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
-import no.nav.etterlatte.libs.common.person.*
-import no.nav.etterlatte.person.PdlForesporselFeilet
-import no.nav.etterlatte.person.PersonService
-import no.nav.etterlatte.person.personApi
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 

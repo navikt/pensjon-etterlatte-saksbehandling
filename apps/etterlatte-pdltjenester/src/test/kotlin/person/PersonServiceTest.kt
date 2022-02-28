@@ -1,4 +1,4 @@
-package person
+package no.nav.etterlatte.person
 
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import io.mockk.clearAllMocks
@@ -8,11 +8,9 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
-import no.nav.etterlatte.person.PdlForesporselFeilet
-import no.nav.etterlatte.person.PdlKlient
-import no.nav.etterlatte.person.PersonService
-import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
+import no.nav.etterlatte.pdl.PdlHentPerson
+import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlPersonResponse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -46,6 +44,9 @@ internal class PersonServiceTest {
         coEvery { ppsKlient.avklarSivilstand(any()) } returns null
         coEvery { ppsKlient.avklarFoedsel(any()) } returns hentPerson.foedsel.first()
         coEvery { ppsKlient.avklarDoedsfall(any()) } returns null
+        coEvery { ppsKlient.avklarBostedsadresse(any()) } returns hentPerson.bostedsadresse?.first()
+        coEvery { ppsKlient.avklarKontaktadresse(any()) } returns hentPerson.kontaktadresse?.first()
+        coEvery { ppsKlient.avklarOppholdsadresse(any()) } returns hentPerson.oppholdsadresse?.first()
     }
 
     @AfterEach
@@ -161,36 +162,5 @@ internal class PersonServiceTest {
     }
 
      */
-
-/*
-    @Test
-    fun `Hent adresse med vegadresse mappes korrekt`() {
-        coEvery { personKlient.hentAdresse(any(), true) } returns opprettResponse("/pdl/adresseResponseVegadresse.json")
-
-        val adresse = runBlocking {
-            service.hentAdresse(EyHentAdresseRequest( Foedselsnummer.of(DOLL_KOPP), true))
-        }
-
-
-        assertEquals("Slettvikveien", adresse.bostedsadresse?.vegadresse?.adressenavn)
-        assertEquals("34", adresse.bostedsadresse?.vegadresse?.husnummer)
-        assertEquals(null, adresse.bostedsadresse?.vegadresse?.husbokstav)
-        assertEquals("7318", adresse.bostedsadresse?.vegadresse?.postnummer)
-
-        assertEquals("Tunnelveien", adresse.kontaktadresse?.vegadresse?.adressenavn)
-        assertEquals("36", adresse.kontaktadresse?.vegadresse?.husnummer)
-        assertEquals(null, adresse.kontaktadresse?.vegadresse?.husbokstav)
-        assertEquals("3085", adresse.kontaktadresse?.vegadresse?.postnummer)
-
-        assertEquals("Tjordal", adresse.oppholdsadresse?.vegadresse?.adressenavn)
-        assertEquals("24", adresse.oppholdsadresse?.vegadresse?.husnummer)
-        assertEquals(null, adresse.oppholdsadresse?.vegadresse?.husbokstav)
-        assertEquals("5570", adresse.oppholdsadresse?.vegadresse?.postnummer)
-
-    }
-
-
-
- */
 
 }

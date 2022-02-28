@@ -9,7 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 
-public val objectMapper: ObjectMapper = JsonMapper.builder()
+val objectMapper: ObjectMapper = JsonMapper.builder()
     .addModule(JavaTimeModule())
     .addModule(KotlinModule())
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -31,3 +31,5 @@ inline fun <reified K, reified V> ObjectMapper.readMap(value: String): Map<K, V>
 fun serialize(value: Any): String = objectMapper.writeValueAsString(value)
 
 inline fun <reified T> deserialize(value: String): T = objectMapper.readValue(value)
+
+fun Any.toJson(): String = objectMapper.writeValueAsString(this)

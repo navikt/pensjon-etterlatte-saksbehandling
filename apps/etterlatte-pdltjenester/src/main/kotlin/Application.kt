@@ -16,9 +16,9 @@ import io.ktor.http.takeFrom
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediatorFactory
 import no.nav.etterlatte.ktortokenexchange.bearerToken
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.person.PdlKlient
 import no.nav.etterlatte.person.PersonService
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
+import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.security.ktor.clientCredential
 
 
@@ -33,7 +33,7 @@ class ApplicationContext(configLocation: String? = null) {
 
     //val personService: PersonService
     val securityMediator = SecurityContextMediatorFactory.from(config)
-    val personServiceAad: PersonService
+    val personService: PersonService
 
 
     //TODO fikse noe ift AAD støtte her
@@ -46,7 +46,7 @@ class ApplicationContext(configLocation: String? = null) {
         closables.add(pdlHttpClient::close)
         closables.add(ppsHttpClient::close)
 
-        personServiceAad = PersonService(PdlKlient(pdlHttpClient), ParallelleSannheterKlient(ppsHttpClient(), ppsUrl))
+        personService = PersonService(PdlKlient(pdlHttpClient), ParallelleSannheterKlient(ppsHttpClient(), ppsUrl))
     }
 
     private fun tokenSecuredEndpoint(endpointConfig:Config) = HttpClient(CIO) {

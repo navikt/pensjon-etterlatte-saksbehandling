@@ -1,4 +1,4 @@
-package no.nav.etterlatte.person
+package no.nav.etterlatte.pdl
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
@@ -6,10 +6,9 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType.Application.Json
-import no.nav.etterlatte.common.toJson
-import no.nav.etterlatte.pdl.PdlGraphqlRequest
-import no.nav.etterlatte.pdl.PdlVariables
-import no.nav.etterlatte.pdl.PdlPersonResponse
+import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.toJson
 
 
 interface Pdl {
@@ -28,11 +27,18 @@ class PdlKlient(val httpClient: HttpClient) : Pdl {
             variables = variables
         )
 
-        return httpClient.post {
+        return retry<PdlPersonResponse> {
+            httpClient.post {
                 header("Tema", TEMA)
                 accept(Json)
                 body = TextContent(request.toJson(), Json)
             }
+        }.let{
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> throw it.exceptions.last()
+            }
+        }
     }
 
     private fun getQuery(name: String): String {

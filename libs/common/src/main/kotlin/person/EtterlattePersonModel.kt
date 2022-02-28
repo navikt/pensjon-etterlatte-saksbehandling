@@ -75,6 +75,9 @@ data class Adresse(
 
 enum class AdresseType {
     VEGADRESSE,
+    MATRIKKELADRESSE,
+    UKJENT_BOSTED,
+    UTENLANDSKADRESSE,
     IKKE_STOETTET,
 }
 
@@ -84,6 +87,7 @@ data class Adresse2(
     val adresseLinje1: String?,
     val adresseLinje2: String?,
     val postnr: String?,
+    val poststed: String?,
     val kilde: String, // er dette nødvendig? Alltid fnr?
     val gyldigFraOgMed: LocalDateTime?,
     val gyldigTilOgMed: LocalDateTime?,

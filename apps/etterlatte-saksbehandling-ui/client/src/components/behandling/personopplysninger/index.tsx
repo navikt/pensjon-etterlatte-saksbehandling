@@ -29,6 +29,8 @@ export const Personopplysninger = () => {
   const mottattDato = grunnlag.find((g) => g.opplysningType === OpplysningsType.soeknad_mottatt)
   const sosken = grunnlag.find((g) => g.opplysningType === OpplysningsType.relasjon_soksken)
   const dodsfall = grunnlag.find((g) => g.opplysningType === OpplysningsType.avdoed_doedsfall)
+  const innsender = grunnlag.find((g) => g.opplysningType === OpplysningsType.innsender)
+  const foreldreAnsvar = grunnlag.find((g) => g.opplysningType === OpplysningsType.foreldreansvar)
   // const omsorg = grunnlag.find(g => g.opplysningType === OpplysningsType.omsorg);
 
   useEffect(() => {
@@ -38,8 +40,8 @@ export const Personopplysninger = () => {
     })
   }, [])
 
-  // console.log(grunnlag);
-  console.log('her', sosken)
+  console.log(grunnlag);
+  console.log('her', innsender)
   const soskenListe: IPersonFraSak[] = sosken?.opplysning.soesken.map((opplysning: any) => {
     return {
       navn: `${opplysning.fornavn} ${opplysning.etternavn}`,
@@ -92,13 +94,13 @@ export const Personopplysninger = () => {
           <DetailWrapper>
             <Detail size="small">Søknad fremsatt av</Detail>
             <Detail size="medium" className="detail">
-              Gjenlevende mor
+              {innsender?.opplysning.fornavn} {innsender?.opplysning.etternavn}
             </Detail>
           </DetailWrapper>
           <DetailWrapper>
             <Detail size="small">Foreldreansvar</Detail>
             <Detail size="medium" className="detail">
-              Gjenlevende mor
+              {foreldreAnsvar?.opplysning.fornavn} {foreldreAnsvar?.opplysning.etternavn}
             </Detail>
           </DetailWrapper>
         </InfoWrapper>

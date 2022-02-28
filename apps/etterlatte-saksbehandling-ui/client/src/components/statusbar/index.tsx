@@ -1,8 +1,9 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../../shared/icons/genderIcon'
 import { PersonInfo } from '../behandling/personopplysninger/PersonInfo'
+import { PersonStatus } from '../behandling/personopplysninger/types'
 import { Fnr } from './fnr'
-import { PersonStatus, Status } from './status'
+import { Status } from './status'
 
 export enum StatusBarTheme {
   gray = 'gray',

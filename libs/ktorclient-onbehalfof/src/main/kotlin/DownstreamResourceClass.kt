@@ -41,7 +41,7 @@ class DownstreamResourceClient(
             post(
         resource: Resource,
         accessToken: String,
-        postBody: String
+        postBody: Any
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return azureAdClient
@@ -98,7 +98,7 @@ class DownstreamResourceClient(
     private suspend fun postToDownstreamApi(
         resource: Resource,
         oboAccessToken: AccessToken,
-        postBody: String
+        postBody: Any
     ): Result<JsonNode, ThrowableErrorMessage> =
 
         runCatching {

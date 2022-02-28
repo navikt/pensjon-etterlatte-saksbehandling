@@ -13,12 +13,22 @@ data class Person(
     val doedsdato: String?,
     val adressebeskyttelse: Adressebeskyttelse,
     var adresse: Adresse?,
+
+    // nye adressefelter
+    var bostedsadresse: List<Adresse2>? = null,
+    var deltBostedsadresse: List<Adresse2>? = null,
+    var kontaktadresse: List<Adresse2>? = null,
+    var oppholdsadresse: List<Adresse2>? = null,
+
     val statsborgerskap: String?,
     val foedeland: String?,
     val sivilstatus: String?,
     var utland: Utland?,
     var familieRelasjon: FamilieRelasjon?
 )
+
+fun List<Adresse2>.gjeldende(): Adresse2? = firstOrNull { it.aktiv }
+
 
 enum class Adressebeskyttelse {
     STRENGT_FORTROLIG_UTLAND,
@@ -63,9 +73,26 @@ data class Adresse(
 //String representasjon med adresselinjer?
 )
 
+enum class AdresseType {
+    VEGADRESSE,
+    IKKE_STOETTET,
+}
+
+data class Adresse2(
+    val type: AdresseType,
+    val aktiv: Boolean,
+    val adresseLinje1: String?,
+    val adresseLinje2: String?,
+    val postnr: String?,
+    val kilde: String, // er dette nødvendig? Alltid fnr?
+    val gyldigFraOgMed: LocalDateTime?,
+    val gyldigTilOgMed: LocalDateTime?,
+)
+
 fun aktivadresse(): String{
     return "BostedsAdresse"
 }
+
 data class Bostedsadresse(
     val vegadresse: Vegadresse
 )

@@ -136,6 +136,7 @@ query(
             }
         }
         bostedsadresse(historikk: $historikk) @include(if: $adresse) {
+            coAdressenavn
             vegadresse {...vegadresseDetails}
             utenlandskAdresse {...utenlandskAdresseDetails}
             matrikkeladresse {...MatrikkeladresseDetails}

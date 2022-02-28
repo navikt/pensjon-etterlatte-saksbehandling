@@ -187,6 +187,7 @@ data class PdlUtflyttingFraNorge(
 )
 
 data class PdlBostedsadresse(
+    val coAdressenavn: String?,
     val gyldigFraOgMed: LocalDateTime? = null,
     val gyldigTilOgMed: LocalDateTime? = null,
     val matrikkeladresse: PdlMatrikkeladresse?,

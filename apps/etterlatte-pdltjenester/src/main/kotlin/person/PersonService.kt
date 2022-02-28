@@ -33,7 +33,6 @@ class PersonService(
 ) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
 
-
     suspend fun hentPerson(hentPersonRequest: HentPersonRequest): Person {
         logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer} fra PDL")
 

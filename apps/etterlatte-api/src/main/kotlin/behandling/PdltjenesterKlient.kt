@@ -37,7 +37,7 @@ class PdltjenesterKlient(config: Config) : EtterlattePdl {
                     Resource(
                         clientId,
                         "$resourceUrl/person"
-                    ), accessToken, objectMapper.writeValueAsString(hentPersonRequest)
+                    ), accessToken, hentPersonRequest
                 ).mapBoth(
                     success = { json -> json },
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }

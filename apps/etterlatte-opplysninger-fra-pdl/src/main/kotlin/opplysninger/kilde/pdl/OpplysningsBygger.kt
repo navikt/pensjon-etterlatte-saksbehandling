@@ -29,7 +29,7 @@ class OpplysningsByggerService : OpplysningsBygger {
             soekerFoedselsdato(soekerPdl, Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value),
             personOpplysning(avdoedPdl, Opplysningstyper.AVDOED_PERSONINFO_V1.value, PersonType.AVDOED),
             avdoedDodsdato(avdoedPdl, Opplysningstyper.AVDOED_DOEDSFALL_V1.value),
-            soekerRelasjonForeldre(soekerPdl, Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1.value,  pdl)
+            soekerRelasjonForeldre(soekerPdl, Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1.value, pdl)
         )
     }
 
@@ -48,8 +48,10 @@ class OpplysningsByggerService : OpplysningsBygger {
 
     fun soekerRelasjonForeldre(soekerPdl: Person, opplysningsType: String,  pdl: Pdl) : Behandlingsopplysning<Foreldre> {
         val foreldreFraPdl = soekerPdl.familieRelasjon?.foreldre?.map { it.foedselsnummer.value }?.map {pdl.hentPdlModell(it)}
+        println(foreldreFraPdl)
         val foreldrePersonInfo = foreldreFraPdl?.map { PersonInfo(it.fornavn, it.etternavn, it.foedselsnummer, PersonType.FORELDER ) }
-        return  lagOpplysning(opplysningsType, Foreldre(foreldrePersonInfo))
+
+        return lagOpplysning(opplysningsType, Foreldre(foreldrePersonInfo))
     }
 
     fun hentAvdoedFnr(barnepensjon: Barnepensjon): String {

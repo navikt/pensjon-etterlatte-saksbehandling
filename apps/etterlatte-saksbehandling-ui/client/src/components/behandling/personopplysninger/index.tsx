@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react'
 import { Detail, Heading, RadioGroup, Radio, Textarea, Button, Link } from '@navikt/ds-react'
 import { InfoWrapper, DetailWrapper, HeadingWrapper, RadioGroupWrapper } from './styled'
-import { IPersonFraSak } from './types'
+import { IPersonFraSak, PersonStatus, RelatertPersonsRolle } from './types'
 import { hentPersonerMedRelasjon } from '../../../shared/api/personopplysninger'
 import { Content, ContentHeader } from '../../../shared/styled'
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../behandlings-status'
@@ -29,7 +29,7 @@ export const Personopplysninger = () => {
   const sosken = grunnlag.find(g => g.opplysningType === OpplysningsType.relasjon_soksken);
   const dodsfall = grunnlag.find(g => g.opplysningType === OpplysningsType.avdoed_doedsfall);
   // const omsorg = grunnlag.find(g => g.opplysningType === OpplysningsType.omsorg);
-  
+    
   useEffect(() => {
     //TODO: Henter info om barn og foreldre fra PDL, type IPersonFraRegister er det som trengs per dags dato fra sketchene.
     hentPersonerMedRelasjon().then(
@@ -40,8 +40,18 @@ export const Personopplysninger = () => {
   }, [])
   
 
-  console.log(grunnlag);
-  console.log(sosken);
+  // console.log(grunnlag);
+  console.log('her', sosken);
+  const soskenListe: IPersonFraSak[] = sosken?.opplysning.soesken.map((opplysning: any, i: number) => {
+    return {
+      navn: `${opplysning.fornavn} ${opplysning.etternavn}`,
+      personStatus: PersonStatus.ETTERLATT,
+      rolle: RelatertPersonsRolle.BARN,
+      adressenavn: "annet",
+      fnr: "332"
+    };
+  })
+
   return (
     <Content>
       <ContentHeader>
@@ -93,7 +103,10 @@ export const Personopplysninger = () => {
               <PersonInfo key={key} person={foreldre} />
             ))}      
           </>
-        )}
+            )}
+        {soskenListe?.map((person) => (
+            <PersonInfo key={`soesken_`} person={person} />
+        ))}
         <RadioGroupWrapper>
         <RadioGroup legend="Er søknaden gyldig fremsatt?" size="small" className="radioGroup">
           <Radio value="10">Ja</Radio>

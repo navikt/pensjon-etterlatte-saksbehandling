@@ -1,11 +1,6 @@
 import styled from "styled-components";
 import { upperCaseFirst } from "../../utils";
-
-export enum PersonStatus {
-    DØD = "død",
-    LEVENDE = "levende",
-    ETTERLATT = "etterlatt",
-}
+import { PersonStatus } from "../behandling/personopplysninger/types";
 
 export interface IStatus {
     status: PersonStatus;

@@ -4,7 +4,6 @@ import '@navikt/ds-css'
 import './App.css'
 import { AppContext, IAppContext } from './store/AppContext'
 import Oppgavebenken from './components/oppgavebenken/Oppgavebenken'
-import { StatusBar, StatusBarTheme } from './components/statusbar'
 import { Behandling } from './components/behandling'
 import { Header } from './shared/header'
 import { Person } from './components/person'
@@ -35,7 +34,6 @@ function App() {
                 path="/behandling/:behandlingId/*"
                 element={
                   <>
-                    <StatusBar theme={StatusBarTheme.gray} />
                     <Behandling />
                   </>
                 }

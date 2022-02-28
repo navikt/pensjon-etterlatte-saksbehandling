@@ -1,13 +1,13 @@
 import styled from 'styled-components'
 import { VilkaarVurderingsResultat } from '../../store/reducers/BehandlingReducer'
 
-export const StatusIcon = (props: { status: VilkaarVurderingsResultat }) => {
+export const StatusIcon = (props: { status: VilkaarVurderingsResultat; large?: boolean }) => {
   return (
-    <Circle status={props.status}>
+    <Circle status={props.status} large={props.large}>
       {props.status === VilkaarVurderingsResultat.OPPFYLT ? (
         <svg
-          width="15px"
-          height="15px"
+          width={props.large ? '20px' : '15px'}
+          height={props.large ? '20px' : '15px'}
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -28,11 +28,11 @@ export const StatusIcon = (props: { status: VilkaarVurderingsResultat }) => {
   )
 }
 
-const Circle = styled.div<{ status: VilkaarVurderingsResultat }>`
+const Circle = styled.div<{ status: VilkaarVurderingsResultat; large?: boolean }>`
   background-color: ${(props) => (props.status === VilkaarVurderingsResultat.OPPFYLT ? '#1c6937' : '#FFAA33')};
   border-radius: 100%;
-  height: 20px;
-  width: 20px;
+  height: ${(props) => (props.large ? '25px' : '20px')};
+  width: ${(props) => (props.large ? '25px' : '20px')};
   display: inline-flex;
   justify-content: center;
   align-items: center;

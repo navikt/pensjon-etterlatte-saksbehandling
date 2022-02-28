@@ -3,6 +3,8 @@ package no.nav.etterlatte.behandling
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
@@ -29,18 +31,18 @@ class PdltjenesterKlient(config: Config) : EtterlattePdl {
 
         try {
             logger.info("Henter persondata fra pdl")
+            val hentPersonRequest = HentPersonRequest(Foedselsnummer.of(fnr))
             val json = downstreamResourceClient
                 .post(
                     Resource(
                         clientId,
-                        "$resourceUrl/person/hentperson"
-                    ), accessToken, fnr
+                        "$resourceUrl/person"
+                    ), accessToken, objectMapper.writeValueAsString(hentPersonRequest)
                 ).mapBoth(
                     success = { json -> json },
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
 
-            println(json)
             return objectMapper.readValue(json.toString(), Person::class.java)
         } catch (e: Exception) {
             logger.error("Henting av person fra pdl feilet", e)

@@ -16,8 +16,10 @@ import { Personopplysninger } from './personopplysninger'
 import { Utbetalingsoversikt } from './utbetalingsoversikt'
 import { Vedtak } from './vedtak'
 import { IApiResponse } from '../../shared/api/types'
-import { IDetaljertBehandling, VilkaarVurderingsResultat } from '../../store/reducers/BehandlingReducer'
+import { IDetaljertBehandling, KildeType, VilkaarVurderingsResultat } from '../../store/reducers/BehandlingReducer'
 import Spinner from '../../shared/Spinner'
+import { StatusBar, StatusBarTheme } from '../statusbar'
+import { OpplysningsType } from './inngangsvilkaar/types'
 
 const addBehandlingAction = (data: any) => ({ type: 'add_behandling', data })
 
@@ -37,6 +39,7 @@ export const Behandling = () => {
     }
   }, [match?.params.behandlingId])
 
+  
   const active = (hash: string) => {
     if (location.hash === hash) {
       return 'active'
@@ -44,8 +47,12 @@ export const Behandling = () => {
     return ''
   }
 
+  const person: any = ctx.state.behandlingReducer?.grunnlag.find(g => g.opplysningType === OpplysningsType.soeker_personinfo && g.kilde.type === KildeType.pdl)?.opplysning;
+
+
   return (
     <>
+      <StatusBar theme={StatusBarTheme.gray} personInfo={person} />
       <Spinner visible={!loaded} label='Laster' />
       {loaded && (
         <GridContainer>

@@ -5,14 +5,17 @@ import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
 
 class PdlService(private val pdl: HttpClient, private val url: String) : Pdl {
     override fun hentPdlModell(foedselsnummer: String): Person {
+        val personRequest = HentPersonRequest(Foedselsnummer.of(foedselsnummer), historikk = true, utland = true, adresse = true)
         val response = runBlocking {
-            pdl.post<Person>("$url/person/hentperson") {
+            pdl.post<Person>("$url/person") {
                 contentType(ContentType.Application.Json)
-                body = foedselsnummer
+                body = personRequest
             }
         }
         return response

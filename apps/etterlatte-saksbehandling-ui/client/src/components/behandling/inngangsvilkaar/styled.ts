@@ -13,11 +13,19 @@ export const VilkaarWrapper = styled.div`
   flex-direction: row;
   justify-content: space-between;
   align-items: top;
-  flex-wrap: wrap;
   gap: 20px;
+
+  @media (max-width: 1200px) {
+    flex-wrap: wrap;
+  }
 `
 
 export const Title = styled.div`
+  display: flex;
+  font-size: 1.2em;
+  font-weight: bold;
+`
+export const VilkaarlisteTitle = styled.div`
   display: flex;
   font-size: 1.1em;
   font-weight: bold;
@@ -26,10 +34,18 @@ export const Title = styled.div`
 export const VilkaarColumn = styled.div`
   flex-basis: 300px;
   flex: 1;
+  min-width: 150px;
 
   .missing {
     color: red;
   }
+`
+
+export const VilkaarInfobokser = styled.div`
+  display: flex;
+  flex-grow: 1;
+  flex-wrap: wrap;
+  gap: 20px;
 `
 
 export const VilkaarVurderingColumn = styled.div`

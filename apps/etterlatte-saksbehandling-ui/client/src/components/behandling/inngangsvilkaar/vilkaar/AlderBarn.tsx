@@ -1,7 +1,16 @@
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import differenceInYears from 'date-fns/differenceInYears'
 import format from 'date-fns/format'
-import { Title, VilkaarColumn, VilkaarVurderingColumn, VilkaarWrapper, VilkaarBorder, Innhold } from '../styled'
+import {
+  Title,
+  VilkaarColumn,
+  VilkaarVurderingColumn,
+  VilkaarWrapper,
+  VilkaarBorder,
+  Innhold,
+  VilkaarlisteTitle,
+  VilkaarInfobokser,
+} from '../styled'
 import { OpplysningsType } from '../types'
 import { IKriterie, IVilkaaropplysing, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
 import { vilkaarErOppfylt } from './utils'
@@ -32,33 +41,35 @@ export const AlderBarn = (props: any) => {
   return (
     <VilkaarBorder>
       <Innhold>
+        <Title>
+          <StatusIcon status={props.vilkaar.resultat} large={true} /> Alder barn
+        </Title>
         <VilkaarWrapper>
-          <VilkaarColumn>
-            <Title>
-              <StatusIcon status={props.vilkaar.resultat} /> Alder barn
-            </Title>
-            <div>§ 18-5</div>
-            <div>Barnet er under 20 år</div>
-          </VilkaarColumn>
-          <VilkaarColumn>
-            <div>
-              <strong>Barnets fødselsdato</strong>
-            </div>
-            <div>
-              {format(new Date(barnetsFoedselsdato.opplysning.foedselsdato), 'dd.MM.yyyy')}{' '}
-              {barnetsAlder && <span>({barnetsAlder} år)</span>}
-            </div>
-          </VilkaarColumn>
-          <VilkaarColumn>
-            <div>
-              <strong>Alder ved dødsfall</strong>
-            </div>
-            <div>
-              {barnetsAlderVedDoedsfall ? `${barnetsAlderVedDoedsfall} år` : <span className="missing">mangler</span>}
-            </div>
-          </VilkaarColumn>
+          <VilkaarInfobokser>
+            <VilkaarColumn>
+              <div>§ 18-5</div>
+              <div>Barnet er under 20 år</div>
+            </VilkaarColumn>
+            <VilkaarColumn>
+              <div>
+                <strong>Barnets fødselsdato</strong>
+              </div>
+              <div>
+                {format(new Date(barnetsFoedselsdato.opplysning.foedselsdato), 'dd.MM.yyyy')}{' '}
+                {barnetsAlder && <span>({barnetsAlder} år)</span>}
+              </div>
+            </VilkaarColumn>
+            <VilkaarColumn>
+              <div>
+                <strong>Alder ved dødsfall</strong>
+              </div>
+              <div>
+                {barnetsAlderVedDoedsfall ? `${barnetsAlderVedDoedsfall} år` : <span className="missing">mangler</span>}
+              </div>
+            </VilkaarColumn>
+          </VilkaarInfobokser>
           <VilkaarVurderingColumn>
-            <Title>{vilkaarErOppfylt(vilkaar.resultat)}</Title>
+            <VilkaarlisteTitle>{vilkaarErOppfylt(vilkaar.resultat)}</VilkaarlisteTitle>
             <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
           </VilkaarVurderingColumn>
         </VilkaarWrapper>

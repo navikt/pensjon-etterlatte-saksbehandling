@@ -1,7 +1,16 @@
 import format from 'date-fns/format'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import { IKriterie, IVilkaaropplysing, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
-import { Innhold, Title, VilkaarBorder, VilkaarVurderingColumn, VilkaarColumn, VilkaarWrapper } from '../styled'
+import {
+  Innhold,
+  Title,
+  VilkaarBorder,
+  VilkaarVurderingColumn,
+  VilkaarColumn,
+  VilkaarWrapper,
+  VilkaarInfobokser,
+  VilkaarlisteTitle,
+} from '../styled'
 import { OpplysningsType } from '../types'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
@@ -24,43 +33,49 @@ export const DoedsFallForelder = (props: any) => {
   return (
     <VilkaarBorder>
       <Innhold>
+        <Title>
+          <StatusIcon status={props.vilkaar.resultat} large={true} /> Dødsfall forelder
+        </Title>
         <VilkaarWrapper>
-          <VilkaarColumn>
-            <Title>
-              <StatusIcon status={props.vilkaar.resultat} /> Dødsfall forelder
-            </Title>
-            <div>§ 18-5</div>
-            <div>En eller begge foreldrene døde</div>
-          </VilkaarColumn>
-          <VilkaarColumn>
-            <div>
-              <strong>Dødsdato</strong>
-            </div>
-            <div>
-              {avdoedDoedsdato?.opplysning?.doedsdato ? (
-                format(new Date(avdoedDoedsdato.opplysning.doedsdato), 'dd.MM.yyyy')
-              ) : (
-                <span className="missing">mangler</span>
-              )}
-            </div>
-          </VilkaarColumn>
-          <VilkaarColumn>
-            <div>
-              <strong>Avdød forelder</strong>
-            </div>
-            <div>
-              {forelder?.opplysning?.foreldre ? forelder.opplysning.foreldre : <span className="missing">mangler</span>}
-            </div>
-            <div>
-              {avdoedDoedsdato?.opplysning?.foedselsnummer ? (
-                avdoedDoedsdato.opplysning.foedselsnummer
-              ) : (
-                <span className="missing">mangler</span>
-              )}
-            </div>
-          </VilkaarColumn>
+          <VilkaarInfobokser>
+            <VilkaarColumn>
+              <div>§ 18-5</div>
+              <div>En eller begge foreldrene døde</div>
+            </VilkaarColumn>
+            <VilkaarColumn>
+              <div>
+                <strong>Dødsdato</strong>
+              </div>
+              <div>
+                {avdoedDoedsdato?.opplysning?.doedsdato ? (
+                  format(new Date(avdoedDoedsdato.opplysning.doedsdato), 'dd.MM.yyyy')
+                ) : (
+                  <span className="missing">mangler</span>
+                )}
+              </div>
+            </VilkaarColumn>
+            <VilkaarColumn>
+              <div>
+                <strong>Avdød forelder</strong>
+              </div>
+              <div>
+                {forelder?.opplysning?.foreldre ? (
+                  forelder.opplysning.foreldre
+                ) : (
+                  <span className="missing">mangler</span>
+                )}
+              </div>
+              <div>
+                {avdoedDoedsdato?.opplysning?.foedselsnummer ? (
+                  avdoedDoedsdato.opplysning.foedselsnummer
+                ) : (
+                  <span className="missing">mangler</span>
+                )}
+              </div>
+            </VilkaarColumn>
+          </VilkaarInfobokser>
           <VilkaarVurderingColumn>
-            <Title>{vilkaarErOppfylt(props.vilkaar.resultat)}</Title>
+            <VilkaarlisteTitle>{vilkaarErOppfylt(props.vilkaar.resultat)}</VilkaarlisteTitle>
             <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
           </VilkaarVurderingColumn>
         </VilkaarWrapper>

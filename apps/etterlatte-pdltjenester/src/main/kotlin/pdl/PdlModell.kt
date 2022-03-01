@@ -5,6 +5,33 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+data class PdlGraphqlRequest(
+    val query: String,
+    val variables: PdlVariables
+)
+
+/**
+ * Tar imot ident(er) som variabel til et [PdlGraphqlRequest].
+ *
+ * Ident kan være i form av FOLKEREGISTERIDENT (fødselsnummer), AKTORID eller NPID.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class PdlVariables(
+    val ident: String? = null,
+    val identer: List<String>? = null,
+    val historikk: Boolean = false,
+    val adresse: Boolean = false,
+    val utland: Boolean = false,
+    val familieRelasjon: Boolean = false
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class PdlPersonResponse(
+    val data: PdlPersonResponseData? = null,
+    val errors: List<PdlResponseError>? = null
+)
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlResponseError(
     val message: String?,
@@ -28,33 +55,6 @@ data class PdlErrorDetails(
     val type: String? = null,
     val cause: String? = null,
     val policy: String? = null
-)
-
-
-data class PdlGraphqlRequest(
-    val query: String,
-    val variables: PdlVariables
-)
-
-/**
- * Tar imot ident(er) som variabel til et [PdlGraphqlRequest].
- *
- * Ident kan være i form av FOLKEREGISTERIDENT (fødselsnummer), AKTORID eller NPID.
- */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class PdlVariables(
-    val ident: String? = null,
-    val identer: List<String>? = null,
-    val historikk: Boolean = false,
-    val adresse: Boolean = false,
-    val utland: Boolean = false,
-    val familieRelasjon: Boolean = false
-)
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class PdlPersonResponse(
-    val data: PdlPersonResponseData? = null,
-    val errors: List<PdlResponseError>? = null
 )
 
 data class PdlPersonResponseData(

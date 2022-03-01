@@ -48,6 +48,7 @@ object PersonMapper {
             } ?: Adressebeskyttelse.UGRADERT,
             adresse = opprettAdresse(ppsKlient, hentPerson),
             bostedsadresse = hentPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) },
+            oppholdsadresse = hentPerson.oppholdsadresse?.let { AdresseMapper.mapOppholdsadresse(ppsKlient, it) },
             statsborgerskap = statsborgerskap?.land,
             foedeland = foedsel?.foedeland,
             sivilstatus = sivilstand?.type?.name,

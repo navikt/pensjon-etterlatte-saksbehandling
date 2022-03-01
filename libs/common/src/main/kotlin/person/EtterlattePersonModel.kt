@@ -76,9 +76,10 @@ data class Adresse(
 enum class AdresseType {
     VEGADRESSE,
     MATRIKKELADRESSE,
-    UKJENT_BOSTED,
     UTENLANDSKADRESSE,
-    IKKE_STOETTET,
+    OPPHOLD_ANNET_STED,
+    UKJENT_BOSTED,
+    UKJENT,
 }
 
 data class Adresse2(

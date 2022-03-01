@@ -1,8 +1,7 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import { Detail, Heading, RadioGroup, Radio, Textarea, Button, Link } from '@navikt/ds-react'
 import { InfoWrapper, DetailWrapper, HeadingWrapper, RadioGroupWrapper } from './styled'
 import { IPersonFraSak, PersonStatus, RelatertPersonsRolle } from './types'
-import { hentPersonerMedRelasjon } from '../../../shared/api/personopplysninger'
 import { Content, ContentHeader } from '../../../shared/styled'
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../behandlings-status'
 import { BehandlingsTypeSmall, IBehandlingsType } from '../behandlings-type'
@@ -14,34 +13,29 @@ import { format } from 'date-fns'
 
 export const Personopplysninger = () => {
   const ctx = useContext(AppContext)
-  const [personer, setPersoner] = useState<{ person: IPersonFraSak; foreldre: IPersonFraSak[] }>()
   const [soeknadGyldigBegrunnelse, setSoeknadGyldigBegrunnelse] = useState('')
 
-  const grunnlag = ctx.state.behandlingReducer.grunnlag
+  const grunnlag = ctx.state.behandlingReducer.grunnlag;
 
   const soekerPdl: any = grunnlag.find(
     (g) => g.opplysningType === OpplysningsType.soeker_personinfo && g.kilde.type === KildeType.pdl
   )
+  /*
   const soekerSoknad: any = grunnlag.find(
     (g) => g.opplysningType === OpplysningsType.soeker_personinfo && g.kilde.type === KildeType.privatperson
   )
-  const avdodPerson: any = grunnlag.find((g) => g.opplysningType === OpplysningsType.avdoed_personinfo)
+  */
+  const avdodPersonPdl: any = grunnlag.find((g) => g.opplysningType === OpplysningsType.avdoed_personinfo && g.kilde.type === KildeType.pdl);
+  const avdodPersonSoknad: any = grunnlag.find((g) => g.opplysningType === OpplysningsType.avdoed_personinfo && g.kilde.type === KildeType.privatperson);
   const mottattDato = grunnlag.find((g) => g.opplysningType === OpplysningsType.soeknad_mottatt)
   const sosken = grunnlag.find((g) => g.opplysningType === OpplysningsType.relasjon_soksken)
   const dodsfall = grunnlag.find((g) => g.opplysningType === OpplysningsType.avdoed_doedsfall)
   const innsender = grunnlag.find((g) => g.opplysningType === OpplysningsType.innsender)
-  const gjenlevende = grunnlag.find((g) => g.opplysningType === OpplysningsType.gjenlevende_forelder_personinfo)
+  const gjenlevendePdl = grunnlag.find((g) => g.opplysningType === OpplysningsType.gjenlevende_forelder_personinfo && g.kilde.type === KildeType.pdl)
+  const gjenlevendeSoknad = grunnlag.find((g) => g.opplysningType === OpplysningsType.gjenlevende_forelder_personinfo && g.kilde.type === KildeType.privatperson)
   // const omsorg = grunnlag.find(g => g.opplysningType === OpplysningsType.omsorg);
 
-  useEffect(() => {
-    //TODO: Henter info om barn og foreldre fra PDL, type IPersonFraRegister er det som trengs per dags dato fra sketchene.
-    hentPersonerMedRelasjon().then((personer: { person: IPersonFraSak; foreldre: IPersonFraSak[] }) => {
-      setPersoner(personer)
-    })
-  }, [])
-
   console.log(grunnlag);
-  console.log('her', innsender)
   const soskenListe: IPersonFraSak[] = sosken?.opplysning.soesken.map((opplysning: any) => {
     return {
       navn: `${opplysning.fornavn} ${opplysning.etternavn}`,
@@ -88,7 +82,8 @@ export const Personopplysninger = () => {
           <DetailWrapper>
             <Detail size="small">Avdøde</Detail>
             <Detail size="medium" className="detail">
-              {avdodPerson?.opplysning.fornavn} {avdodPerson?.opplysning.etternavn}
+              {avdodPersonPdl?.opplysning.fornavn} {avdodPersonPdl?.opplysning.etternavn}{" "}
+              ({avdodPersonSoknad?.opplysning.fornavn} {avdodPersonSoknad?.opplysning.etternavn})
             </Detail>
           </DetailWrapper>
           <DetailWrapper>
@@ -100,7 +95,7 @@ export const Personopplysninger = () => {
           <DetailWrapper>
             <Detail size="small">Foreldreansvar</Detail>
             <Detail size="medium" className="detail">
-              {gjenlevende?.opplysning.fornavn} {gjenlevende?.opplysning.etternavn}
+              {gjenlevendePdl?.opplysning.fornavn} {gjenlevendePdl?.opplysning.etternavn} ({gjenlevendeSoknad?.opplysning.fornavn} {gjenlevendeSoknad?.opplysning.etternavn})
             </Detail>
           </DetailWrapper>
         </InfoWrapper>
@@ -109,35 +104,26 @@ export const Personopplysninger = () => {
           Familieforhold
         </Heading>
         <PersonInfo person={{
-          navn: `${gjenlevende?.opplysning.fornavn} ${gjenlevende?.opplysning.etternavn}`,
-          personStatus: PersonStatus.DØD,
+          navn: `${soekerPdl?.opplysning.fornavn} ${soekerPdl?.opplysning.etternavn}`,
+          personStatus: PersonStatus.ETTERLATT,
           rolle: RelatertPersonsRolle.BARN,
           adressenavn: 'annet',
-          fnr: gjenlevende?.opplysning.foedselsnummer,
+          fnr: soekerPdl?.opplysning.foedselsnummer,
         }} />
         <PersonInfo person={{
-          navn: `${gjenlevende?.opplysning.fornavn} ${gjenlevende?.opplysning.etternavn}`,
-          personStatus: PersonStatus.DØD,
-          rolle: RelatertPersonsRolle.BARN,
+          navn: `${gjenlevendePdl?.opplysning.fornavn} ${gjenlevendePdl?.opplysning.etternavn}`,
+          personStatus: PersonStatus.LEVENDE,
+          rolle: RelatertPersonsRolle.FAR,
           adressenavn: 'annet',
-          fnr: gjenlevende?.opplysning.foedselsnummer,
+          fnr: gjenlevendePdl?.opplysning.foedselsnummer,
         }} />
         <PersonInfo person={{
-          navn: `${avdodPerson?.opplysning.fornavn} ${avdodPerson?.opplysning.etternavn}`,
+          navn: `${avdodPersonPdl?.opplysning.fornavn} ${avdodPersonPdl?.opplysning.etternavn} (${avdodPersonSoknad?.opplysning.fornavn} ${avdodPersonSoknad?.opplysning.etternavn})`,
           personStatus: PersonStatus.DØD,
-          rolle: RelatertPersonsRolle.BARN,
+          rolle: RelatertPersonsRolle.FAR,
           adressenavn: 'annet',
-          fnr: '332',
+          fnr: `${avdodPersonPdl?.opplysning.foedselsnummer} (${avdodPersonSoknad?.opplysning.foedselsnummer})`,
         }} />
-
-        {/*personer && (
-          <>
-            <PersonInfo person={personer.person} />
-            {personer.foreldre.map((foreldre, key) => (
-              <PersonInfo key={key} person={foreldre} />
-            ))}
-          </>
-            )*/}
         {soskenListe?.map((person) => (
           <PersonInfo key={`soesken_`} person={person} />
         ))}

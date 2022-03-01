@@ -6,13 +6,18 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foreldre
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.PersonInfo
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
+import no.nav.etterlatte.vilkaar.barnepensjon.hentDoedsdato
+import no.nav.etterlatte.vilkaar.barnepensjon.kriterieIngenUtenlandsopphold
 import no.nav.etterlatte.vilkaar.barnepensjon.setVikaarVurderingsResultat
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarDoedsfallErRegistrert
@@ -80,26 +85,46 @@ internal class BarnepensjonVilkaarTest {
     }
 
     @Test
-    fun vurderVilkaarsVurdering() {
-        val oppfylt = setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieOppfylt))
-        val enIkkeOppfylt = setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieIkkeOppfylt, kriterieKanIkkeVurdere))
-        val oppfyltOgKanIkkeHentesUt = setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieKanIkkeVurdere, kriterieOppfylt))
+    fun vurderAvdoedesForutgaaendeMeldemskap() {
+        val utenlandsopphold = kriterieIngenUtenlandsopphold(listOf(utenlandsopphold), listOf(doedsdatoForelderPdl))
+        val ingenUtenlandsopphold = kriterieIngenUtenlandsopphold(listOf(ingenUtenlandsopphold), listOf(doedsdatoForelderPdl))
 
-        assertEquals(VilkaarVurderingsResultat.OPPFYLT, oppfylt)
-        assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, enIkkeOppfylt)
-        assertEquals(VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, oppfyltOgKanIkkeHentesUt)
+        assertEquals(utenlandsopphold.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
+        assertEquals(ingenUtenlandsopphold.resultat, VilkaarVurderingsResultat.OPPFYLT)
 
     }
 
-    val kriterieOppfylt =
-        Kriterie(Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, VilkaarVurderingsResultat.OPPFYLT, listOf())
-    val kriterieIkkeOppfylt =
-        Kriterie(Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, VilkaarVurderingsResultat.IKKE_OPPFYLT, listOf())
-    val kriterieKanIkkeVurdere = Kriterie(
-        Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
-        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
-        listOf()
-    )
+    @Test
+    fun vurderVilkaarsVurdering() {
+
+        val kriterieOppfylt =
+            Kriterie(Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, VilkaarVurderingsResultat.OPPFYLT, listOf())
+        val kriterieIkkeOppfylt =
+            Kriterie(
+                Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
+                VilkaarVurderingsResultat.IKKE_OPPFYLT,
+                listOf()
+            )
+        val kriterieKanIkkeVurdere = Kriterie(
+            Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
+            VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            listOf()
+        )
+
+        val vilkaarKriterierOppfylt = setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieOppfylt))
+        val vilkaarEtKriterieIkkeOppfylt =
+            setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieIkkeOppfylt, kriterieKanIkkeVurdere))
+        val vilkaarKriterierOppfyltOgKanIkkeHentesUt =
+            setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieKanIkkeVurdere, kriterieOppfylt))
+
+        assertEquals(VilkaarVurderingsResultat.OPPFYLT, vilkaarKriterierOppfylt)
+        assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, vilkaarEtKriterieIkkeOppfylt)
+        assertEquals(
+            VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            vilkaarKriterierOppfyltOgKanIkkeHentesUt
+        )
+
+    }
 
 
     val foedselsdatoBarnOver20 = VilkaarOpplysning(
@@ -146,6 +171,45 @@ internal class BarnepensjonVilkaarTest {
                 )
             )
         )
+    )
+
+    val utenlandsopphold = VilkaarOpplysning(
+        opplysningsType = Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1.value,
+        kilde = Behandlingsopplysning.Privatperson("19078504903", Instant.now()),
+        opplysning = Utenlandsopphold(
+            "JA",
+            listOf(
+                UtenlandsoppholdOpplysninger(
+                    "Danmark",
+                    LocalDate.parse("2010-01-25"),
+                    LocalDate.parse("2022-01-25"),
+                    listOf(OppholdUtlandType.ARBEIDET),
+                    "JA",
+                    null
+                ),
+                UtenlandsoppholdOpplysninger(
+                    "Costa Rica",
+                    LocalDate.parse("2000-01-25"),
+                    LocalDate.parse("2007-01-25"),
+                    listOf(OppholdUtlandType.ARBEIDET),
+                    "NEI",
+                    null
+                ),
+
+                ),
+            "19078504903"
+        )
+    )
+
+    val ingenUtenlandsopphold = VilkaarOpplysning(
+        opplysningsType = Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1.value,
+        kilde = Behandlingsopplysning.Privatperson("19078504903", Instant.now()),
+        opplysning = Utenlandsopphold(
+            "NEI",
+            listOf(),
+            "19078504903"
+        )
+
     )
 
 }

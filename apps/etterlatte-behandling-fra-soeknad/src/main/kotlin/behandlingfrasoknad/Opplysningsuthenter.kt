@@ -35,7 +35,7 @@ class Opplysningsuthenter {
             avdoedForelderPersoninfo(barnepensjonssoknad, Opplysningstyper.AVDOED_PERSONINFO_V1.value),
             avdoedDoedsdato(barnepensjonssoknad, Opplysningstyper.AVDOED_DOEDSFALL_V1.value),
             avdoedDoedsaarsak(barnepensjonssoknad, Opplysningstyper.AVDOED_DOEDSAARSAK_V1.value),
-            avdoedUtenlandsopphold(barnepensjonssoknad),
+            avdoedUtenlandsopphold(barnepensjonssoknad, Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1.value),
             avdoedNaeringsinntekt(barnepensjonssoknad),
             avdoedMilitaertjeneste(barnepensjonssoknad),
             soesken(barnepensjonssoknad, Opplysningstyper.SOEKER_RELASJON_SOESKEN_V1.value),
@@ -209,19 +209,19 @@ class Opplysningsuthenter {
     }
 
 
-    fun avdoedUtenlandsopphold(barnepensjon: Barnepensjon): Behandlingsopplysning<out Utenlandsopphold>? {
+    fun avdoedUtenlandsopphold(barnepensjon: Barnepensjon, opplysningsType: String): Behandlingsopplysning<out Utenlandsopphold>? {
         return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
             setBehandlingsopplysninger(
-                barnepensjon, "avdoed_utenlandsopphold:v1",
+                barnepensjon, opplysningsType,
                 Utenlandsopphold(
-                    avdoed.utenlandsopphold.svar,
+                    avdoed.utenlandsopphold.svar.innhold,
                     avdoed.utenlandsopphold.opplysning?.map { opphold ->
                         UtenlandsoppholdOpplysninger(
                             opphold.land.svar.innhold,
                             opphold.fraDato?.svar?.innhold,
                             opphold.tilDato?.svar?.innhold,
                             opphold.oppholdsType.svar.map {it.verdi},
-                            opphold.medlemFolketrygd.svar,
+                            opphold.medlemFolketrygd.svar.innhold,
                             opphold.pensjonsutbetaling?.svar?.innhold
                         )
                     },

@@ -26,7 +26,7 @@ class Server(applicationContext: ApplicationContext) {
 
     private val engine = embeddedServer(CIO, environment = applicationEngineEnvironment {
         module {
-            install(ContentNegotiation) { jackson() }
+            install(ContentNegotiation) { jackson{ objectMapper } }
             installAuthUsing(securityContext)
             install(CallLogging) {
                 mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }

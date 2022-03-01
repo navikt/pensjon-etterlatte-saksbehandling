@@ -1,8 +1,7 @@
 import styled from 'styled-components'
-import moment, { Moment } from 'moment'
-import { aarIProsent, tidsperiodeProsent, startdatoOffsetProsent } from './tidslinjeUtils'
-import { HomeIcon } from '../../../../shared/icons/homeIcon'
-import { OfficeIcon } from '../../../../shared/icons/officeIcon'
+import moment from 'moment'
+import { aarIProsent } from './tidslinjeUtils'
+import { Tidsperiode } from './Tidsperiode'
 
 export const TidslinjeMedlemskap = () => {
   const doedsdato = moment('2022-06-01', 'YYYY-MM-DD')
@@ -58,7 +57,7 @@ export const TidslinjeMedlemskap = () => {
       </Grid>
       <div>
         {mockdata.map((periode, index) => (
-          <Periode
+          <Tidsperiode
             key={index}
             doedsdato={doedsdato}
             femAarTidligere={femAarTidligere}
@@ -71,80 +70,11 @@ export const TidslinjeMedlemskap = () => {
   )
 }
 
-const Periode = ({
-  doedsdato,
-  femAarTidligere,
-  periode,
-  index,
-}: {
-  doedsdato: Moment
-  femAarTidligere: Moment
-  periode: any
-  index: number
-}) => {
-  const lengdePeriode = tidsperiodeProsent(periode.innhold.fraDato, periode.innhold.tilDato, doedsdato, femAarTidligere)
-  const startDatoOffset = startdatoOffsetProsent(periode.innhold.fraDato, femAarTidligere)
-
-  const colors = ['#a6cbdc', '#a5a5d7', '#c4adde', '#d7a9c6']
-
-  return (
-    <Rad style={{ left: startDatoOffset, width: lengdePeriode, backgroundColor: colors[index % colors.length] }}>
-      <InnholdWrapper>
-        <Ikon>{periode.periodeType === 'jobb' ? <OfficeIcon /> : <HomeIcon />}</Ikon>
-        <div>
-          <InnholdDatoFraTil>
-            {periode.innhold.fraDato} - {periode.innhold.tilDato}
-          </InnholdDatoFraTil>
-          <InnholdBeskrivelse>{periode.innhold.beskrivelse}</InnholdBeskrivelse>
-          <InnholdKilde>{periode.innhold.kilde}</InnholdKilde>
-        </div>
-      </InnholdWrapper>
-    </Rad>
-  )
-}
-
-export const Ikon = styled.div`
-  display: flex;
-  justify-content: left;
-  padding: 10px;
-
-  svg {
-    width: 1.8em;
-    height: 1.8em;
-  }
-`
-
-export const InnholdWrapper = styled.div`
-  display: flex;
-  justify-content: left;
-`
-
 export const Tidslinje = styled.div`
   margin-top: 40px;
   width: 100%;
   position: relative;
   margin-bottom: 30px;
-`
-
-export const Rad = styled.div`
-  position: relative;
-  margin-bottom: 10px;
-  border-radius: 4px;
-  padding-bottom: 10px;
-`
-
-export const InnholdDatoFraTil = styled.div`
-  padding-top: 5px;
-  padding-left: 10px;
-  font-weight: bold;
-`
-export const InnholdBeskrivelse = styled.div`
-  padding-left: 5px;
-`
-
-export const InnholdKilde = styled.div`
-  padding-left: 5px;
-  color: #676363;
 `
 
 export const GridGraaSirkel = styled.div`

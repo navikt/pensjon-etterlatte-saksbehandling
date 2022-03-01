@@ -20,6 +20,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
@@ -109,12 +110,7 @@ class PersonRouteTest {
 
 fun Application.testModule(routes: Route.() -> Unit) {
     install(ContentNegotiation) {
-        jackson {
-            enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL)
-            disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            registerModule(JavaTimeModule())
-        }
+        jackson { objectMapper }
     }
 
     routing {

@@ -8,8 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
-import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBrukerErUnder20
-import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarDoedsfallErRegistrert
+import no.nav.etterlatte.vilkaar.barnepensjon.*
 import org.slf4j.LoggerFactory
 
 
@@ -31,9 +30,14 @@ class VilkaarService {
             opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1.value }
                 .map { setOpplysningType<Foreldre>(it) }
 
+        val avdoedUtenlandsopphold =
+            opplysninger.filter { it. opplysningsType == Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1.value}
+                .map { setOpplysningType<Utenlandsopphold>(it)}
+
         return listOf(
             vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, soekerFoedselsdato, avdoedDoedsdato),
-            vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, avdoedDoedsdato, soekerRelasjonForeldre)
+            vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, avdoedDoedsdato, soekerRelasjonForeldre),
+            vilkaarAvdoedesMedlemskap(Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP, avdoedUtenlandsopphold, avdoedDoedsdato)
         )
 
     }

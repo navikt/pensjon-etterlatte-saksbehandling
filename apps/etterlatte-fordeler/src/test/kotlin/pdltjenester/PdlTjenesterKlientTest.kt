@@ -10,6 +10,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
@@ -42,7 +43,7 @@ class PdlTjenesterKlientTest {
                     }
                 }
             }
-            install(JsonFeature) { serializer = JacksonSerializer() }
+            install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
         }
 
         pdlTjenesterKlient = PdlTjenesterKlient(httpClient, "/person")

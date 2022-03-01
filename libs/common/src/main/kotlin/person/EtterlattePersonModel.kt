@@ -8,26 +8,25 @@ data class Person(
     val fornavn: String,
     val etternavn: String,
     val foedselsnummer: Foedselsnummer,
-    val foedselsaar: Int?,
-    val foedselsdato: String?,
-    val doedsdato: String?,
+    val foedselsdato: LocalDate?,
+    val foedselsaar: Int,
+    val foedeland: String?,
+    val doedsdato: LocalDate?,
     val adressebeskyttelse: Adressebeskyttelse,
-    var adresse: Adresse?,
-
-    // nye adressefelter
     var bostedsadresse: List<Adresse2>? = null,
     var deltBostedsadresse: List<Adresse2>? = null,
     var kontaktadresse: List<Adresse2>? = null,
     var oppholdsadresse: List<Adresse2>? = null,
-
+    val sivilstatus: Sivilstatus?,
     val statsborgerskap: String?,
-    val foedeland: String?,
-    val sivilstatus: String?,
     var utland: Utland?,
-    var familieRelasjon: FamilieRelasjon?
+    var familieRelasjon: FamilieRelasjon?,
+
+    @Deprecated("Skal fjernes")
+    var adresse: Adresse?,
 )
 
-fun List<Adresse2>.gjeldende(): Adresse2? = firstOrNull { it.aktiv }
+fun List<Adresse2>.aktiv(): Adresse2? = firstOrNull { it.aktiv }
 
 
 enum class Adressebeskyttelse {
@@ -58,19 +57,30 @@ enum class Rolle {
     ETTERLATT;
 }
 
+enum class Sivilstatus {
+    UOPPGITT,
+    UGIFT,
+    GIFT,
+    ENKE_ELLER_ENKEMANN,
+    SKILT,
+    SEPARERT,
+    REGISTRERT_PARTNER,
+    SEPARERT_PARTNER,
+    SKILT_PARTNER,
+    GJENLEVENDE_PARTNER;
+}
+
+// TODO - denne bør fikses
 fun Person.alder(): Int {
-    var alder = LocalDateTime.now().year - foedselsaar!!
-    if (LocalDateTime.now().dayOfYear >= LocalDate.parse(foedselsdato).dayOfYear) alder++
+    var alder = LocalDateTime.now().year - foedselsaar
+    if (LocalDateTime.now().dayOfYear >= foedselsdato?.dayOfYear!!) alder++
     return alder
 }
 
-//TODO diskutere med FAG, hva trenger vi egentlig fra 'Adresse'?
 data class Adresse(
     val bostedsadresse: Bostedsadresse?,
     val kontaktadresse: Kontaktadresse?,
     val oppholdsadresse: Oppholdsadresse?
-//TODO tenke på noe som gjør det lettere for resten å finne rett adresse
-//String representasjon med adresselinjer?
 )
 
 enum class AdresseType {
@@ -89,7 +99,7 @@ data class Adresse2(
     val adresseLinje2: String?,
     val postnr: String?,
     val poststed: String?,
-    val kilde: String, // er dette nødvendig? Alltid fnr?
+    val kilde: String,
     val gyldigFraOgMed: LocalDateTime?,
     val gyldigTilOgMed: LocalDateTime?,
 )

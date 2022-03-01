@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import java.time.Instant
-import java.time.LocalDate
 import java.util.*
 
 class OpplysningsByggerService : OpplysningsBygger {
@@ -39,11 +38,11 @@ class OpplysningsByggerService : OpplysningsBygger {
     }
 
     fun avdoedDodsdato(avdoedPdl: Person, opplysningsType: String): Behandlingsopplysning<Doedsdato> {
-        return lagOpplysning(opplysningsType, Doedsdato(LocalDate.parse(avdoedPdl.doedsdato), avdoedPdl.foedselsnummer.value))
+        return lagOpplysning(opplysningsType, Doedsdato(avdoedPdl.doedsdato!!, avdoedPdl.foedselsnummer.value)) // TODO
     }
 
     fun soekerFoedselsdato(soekerPdl: Person, opplysningsType: String): Behandlingsopplysning<Foedselsdato> {
-        return lagOpplysning(opplysningsType, Foedselsdato(LocalDate.parse(soekerPdl.foedselsdato), soekerPdl.foedselsnummer.value))
+        return lagOpplysning(opplysningsType, Foedselsdato(soekerPdl.foedselsdato!!, soekerPdl.foedselsnummer.value)) // TODO
     }
 
     fun soekerRelasjonForeldre(soekerPdl: Person, opplysningsType: String,  pdl: Pdl) : Behandlingsopplysning<Foreldre> {

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 internal class FordelerTest {
 
@@ -45,7 +46,7 @@ internal class FordelerTest {
         )
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
-            doedsdato = "2022-01-01",
+            doedsdato = LocalDate.parse("2022-01-01"),
             adresse = mockNorskAdresse()
         )
 

@@ -31,7 +31,7 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
     suspend fun avklarSivilstand(pdlSivilstand: List<PdlSivilstand>) = avklarNullable(pdlSivilstand,
         Avklaring.SIVILSTAND
     )
-    suspend fun avklarFoedsel(pdlFoedsel: List<PdlFoedsel>) = avklarNullable(pdlFoedsel, Avklaring.FOEDSEL)
+    suspend fun avklarFoedsel(pdlFoedsel: List<PdlFoedsel>) = avklar(pdlFoedsel, Avklaring.FOEDSEL)
     suspend fun avklarDoedsfall(pdlDoedsfall: List<PdlDoedsfall>) = avklarNullable(pdlDoedsfall, Avklaring.DOEDSFALL)
     suspend fun avklarBostedsadresse(pdlBostedsadresse: List<PdlBostedsadresse>) = avklarNullable(pdlBostedsadresse,
         Avklaring.BOSTEDSADRESSE

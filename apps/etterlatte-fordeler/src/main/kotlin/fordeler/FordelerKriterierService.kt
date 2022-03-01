@@ -102,7 +102,7 @@ class FordelerKriterierService {
     }
 
     private fun personErIkkeDoed(person: Person): Boolean {
-        return person.doedsdato.isNullOrEmpty()
+        return person.doedsdato == null
     }
 
     private fun gjenlevendeHarIkkeForeldreansvar(barn: Person, gjenlevende: Person): Boolean {

@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 
 class PersonRouteTest {
@@ -93,7 +94,7 @@ class PersonRouteTest {
             etternavn = "Nordmann",
             foedselsnummer = Foedselsnummer.of(GYLDIG_FNR),
             foedselsaar = 2000,
-            foedselsdato = "",
+            foedselsdato = LocalDate.now().minusYears(20),
             doedsdato = null,
             adressebeskyttelse = Adressebeskyttelse.UGRADERT,
             adresse = adresse,

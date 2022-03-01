@@ -16,6 +16,7 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
+import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.format.DateTimeFormatter
 
@@ -29,7 +30,7 @@ class FordelerKriterieServiceTest {
             adresse = mockNorskAdresse()
         )
         val avdoed = mockPerson(
-            doedsdato = "2022-01-01",
+            doedsdato = LocalDate.parse("2022-01-01"),
             adresse = mockNorskAdresse()
         )
         val gjenlevende = mockPerson(
@@ -44,8 +45,8 @@ class FordelerKriterieServiceTest {
     @Test
     fun `barn som er for gammelt er ikke en gyldig kandidat`() {
         val barn = mockPerson(
-            foedselsaar = now().year - 15,
-            foedselsdato = now().minusYears(15).format(DateTimeFormatter.ISO_LOCAL_DATE)
+            foedselsaar = now().year - 16,
+            foedselsdato = now().minusYears(16)
         )
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()

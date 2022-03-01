@@ -2,16 +2,17 @@ package no.nav.etterlatte
 
 
 import no.nav.etterlatte.libs.common.person.*
+import java.time.LocalDate
 
 fun mockPerson(
     fnr: String = "11057523044",
     foedselsaar: Int = 2010,
-    foedselsdato: String? = "2010-04-19",
-    doedsdato: String? = null,
+    foedselsdato: LocalDate? = LocalDate.parse("2010-04-19"),
+    doedsdato: LocalDate? = null,
     adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.UGRADERT,
     statsborgerskap: String = "NOR",
     foedeland: String = "NOR",
-    sivilstatus: String = "ugift",
+    sivilstatus: Sivilstatus = Sivilstatus.UGIFT,
     utland: Utland? = null,
     adresse: Adresse? = null,
     familieRelasjon: FamilieRelasjon? = null,

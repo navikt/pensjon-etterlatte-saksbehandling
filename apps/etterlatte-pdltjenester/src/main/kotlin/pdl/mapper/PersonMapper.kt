@@ -3,24 +3,15 @@ package no.nav.etterlatte.pdl.mapper
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.Barn
 import no.nav.etterlatte.libs.common.person.Bostedsadresse
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.Foreldre
-import no.nav.etterlatte.libs.common.person.ForeldreAnsvar
-import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
 import no.nav.etterlatte.libs.common.person.Kontaktadresse
 import no.nav.etterlatte.libs.common.person.Oppholdsadresse
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
-import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Vegadresse
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
-import no.nav.etterlatte.pdl.PdlForelderBarnRelasjonRolle
 import no.nav.etterlatte.pdl.PdlHentPerson
-import no.nav.etterlatte.pdl.PdlInnflyttingTilNorge
-import no.nav.etterlatte.pdl.PdlUtflyttingFraNorge
 
 object PersonMapper {
 
@@ -40,20 +31,20 @@ object PersonMapper {
             fornavn = navn.fornavn,
             etternavn = navn.etternavn,
             foedselsnummer = fnr,
-            foedselsdato = foedsel?.foedselsdato?.toString(),
-            foedselsaar = foedsel?.foedselsaar,
-            doedsdato = doedsfall?.doedsdato.toString(),
+            foedselsdato = foedsel.foedselsdato,
+            foedselsaar = foedsel.foedselsaar,
+            doedsdato = doedsfall?.doedsdato,
+            foedeland = foedsel.foedeland,
             adressebeskyttelse = adressebeskyttelse?.let {
                 Adressebeskyttelse.valueOf(it.gradering.toString())
             } ?: Adressebeskyttelse.UGRADERT,
-            adresse = opprettAdresse(ppsKlient, hentPerson),
             bostedsadresse = hentPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) },
             oppholdsadresse = hentPerson.oppholdsadresse?.let { AdresseMapper.mapOppholdsadresse(ppsKlient, it) },
             statsborgerskap = statsborgerskap?.land,
-            foedeland = foedsel?.foedeland,
-            sivilstatus = sivilstand?.type?.name,
+            sivilstatus = sivilstand?.let { Sivilstatus.valueOf(it.type.name) } ?: Sivilstatus.UOPPGITT,
             utland = UtlandMapper.mapUtland(hentPerson),
-            familieRelasjon = FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson)
+            familieRelasjon = FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson),
+            adresse = opprettAdresse(ppsKlient, hentPerson),
         )
     }
 

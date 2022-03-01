@@ -1,8 +1,5 @@
 package no.nav.etterlatte.person
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
@@ -10,7 +7,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.jackson
+import io.ktor.jackson.*
 import io.ktor.routing.Route
 import io.ktor.routing.routing
 import io.ktor.server.testing.handleRequest
@@ -98,6 +95,10 @@ class PersonRouteTest {
             foedselsdato = LocalDate.now().minusYears(20),
             doedsdato = null,
             adressebeskyttelse = Adressebeskyttelse.UGRADERT,
+            bostedsadresse = emptyList(),
+            deltBostedsadresse = emptyList(),
+            oppholdsadresse = emptyList(),
+            kontaktadresse = emptyList(),
             adresse = adresse,
             statsborgerskap = "Norsk",
             foedeland = "Norge",
@@ -110,7 +111,8 @@ class PersonRouteTest {
 
 fun Application.testModule(routes: Route.() -> Unit) {
     install(ContentNegotiation) {
-        jackson { objectMapper }
+        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+
     }
 
     routing {

@@ -8,8 +8,8 @@ import no.nav.etterlatte.libs.common.person.ForeldreAnsvar
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
-import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.mockNorskAdresse
+import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.mockUgyldigNorskAdresse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 import java.time.LocalDate
 import java.time.LocalDate.now
-import java.time.format.DateTimeFormatter
 
 class FordelerKriterieServiceTest {
 
@@ -96,7 +95,7 @@ class FordelerKriterieServiceTest {
                 utflyttingFraNorge = listOf(
                     UtflyttingFraNorge(
                     tilflyttingsland = "SWE",
-                    dato = "2010-01-01"
+                    dato = LocalDate.parse("2010-01-01")
                 )
                 ),
                 innflyttingTilNorge = null
@@ -141,7 +140,7 @@ class FordelerKriterieServiceTest {
             utland = Utland(
                 utflyttingFraNorge = listOf(UtflyttingFraNorge(
                     tilflyttingsland = "SWE",
-                    dato = "2010-01-01"
+                    dato = LocalDate.parse("2010-01-01")
                 )),
                 innflyttingTilNorge = null
             )

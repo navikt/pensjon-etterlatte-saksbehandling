@@ -35,11 +35,12 @@ object PersonMapper {
             foedselsaar = foedsel.foedselsaar,
             doedsdato = doedsfall?.doedsdato,
             foedeland = foedsel.foedeland,
-            adressebeskyttelse = adressebeskyttelse?.let {
-                Adressebeskyttelse.valueOf(it.gradering.toString())
-            } ?: Adressebeskyttelse.UGRADERT,
+            adressebeskyttelse = adressebeskyttelse?.let { Adressebeskyttelse.valueOf(it.gradering.toString()) }
+                ?: Adressebeskyttelse.UGRADERT,
             bostedsadresse = hentPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) },
             oppholdsadresse = hentPerson.oppholdsadresse?.let { AdresseMapper.mapOppholdsadresse(ppsKlient, it) },
+            deltBostedsadresse = null, // TODO
+            kontaktadresse = null, // TODO
             statsborgerskap = statsborgerskap?.land,
             sivilstatus = sivilstand?.let { Sivilstatus.valueOf(it.type.name) } ?: Sivilstatus.UOPPGITT,
             utland = UtlandMapper.mapUtland(hentPerson),

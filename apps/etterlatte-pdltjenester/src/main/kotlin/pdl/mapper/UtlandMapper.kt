@@ -19,7 +19,7 @@ object UtlandMapper {
     private fun mapUtflytting(utflytting: PdlUtflyttingFraNorge): UtflyttingFraNorge {
         return UtflyttingFraNorge(
             tilflyttingsland = utflytting.tilflyttingsland,
-            dato = utflytting.utflyttingsdato.toString()
+            dato = utflytting.utflyttingsdato
         )
     }
 
@@ -28,7 +28,7 @@ object UtlandMapper {
             fraflyttingsland = innflytting.fraflyttingsland,
             //TODO her må vi heller sjekke mot gyldighetsdato på bostedsadresse
             //TODO skal ikke være tostring her
-            dato = innflytting.folkeregistermetadata?.gyldighetstidspunkt.toString()
+            dato = innflytting.folkeregistermetadata?.gyldighetstidspunkt?.toLocalDate()
         )
     }
 

@@ -13,10 +13,10 @@ data class Person(
     val foedeland: String?,
     val doedsdato: LocalDate?,
     val adressebeskyttelse: Adressebeskyttelse,
-    var bostedsadresse: List<Adresse2>? = null,
-    var deltBostedsadresse: List<Adresse2>? = null,
-    var kontaktadresse: List<Adresse2>? = null,
-    var oppholdsadresse: List<Adresse2>? = null,
+    var bostedsadresse: List<Adresse2>?,
+    var deltBostedsadresse: List<Adresse2>?,
+    var kontaktadresse: List<Adresse2>?,
+    var oppholdsadresse: List<Adresse2>?,
     val sivilstatus: Sivilstatus?,
     val statsborgerskap: String?,
     var utland: Utland?,
@@ -27,7 +27,6 @@ data class Person(
 )
 
 fun List<Adresse2>.aktiv(): Adresse2? = firstOrNull { it.aktiv }
-
 
 enum class Adressebeskyttelse {
     STRENGT_FORTROLIG_UTLAND,
@@ -40,15 +39,16 @@ data class Utland(
     val innflyttingTilNorge: List<InnflyttingTilNorge>?,
     val utflyttingFraNorge: List<UtflyttingFraNorge>?
 )
+
 data class InnflyttingTilNorge(
     val fraflyttingsland: String?,
-    val dato: String?,
+    val dato: LocalDate?,
 
 )
 
 data class UtflyttingFraNorge(
     val tilflyttingsland: String?,
-    val dato: String?,
+    val dato: LocalDate?,
 )
 
 enum class Rolle {
@@ -104,19 +104,18 @@ data class Adresse2(
     val gyldigTilOgMed: LocalDateTime?,
 )
 
-fun aktivadresse(): String{
-    return "BostedsAdresse"
-}
-
 data class Bostedsadresse(
     val vegadresse: Vegadresse
 )
+
 data class Kontaktadresse(
     val vegadresse: Vegadresse
 )
+
 data class Oppholdsadresse(
     val vegadresse: Vegadresse
 )
+
 data class Vegadresse(
     val adressenavn: String?,
     val husnummer: String?,
@@ -132,5 +131,7 @@ data class FamilieRelasjon(
 )
 
 data class ForeldreAnsvar(val foedselsnummer: Foedselsnummer)
+
 data class Foreldre(val foedselsnummer: Foedselsnummer)
+
 data class Barn (val foedselsnummer: Foedselsnummer)

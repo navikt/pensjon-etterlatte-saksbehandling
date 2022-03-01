@@ -183,7 +183,7 @@ data class PdlUtflyttingFraNorge(
     val folkeregistermetadata: PdlFolkeregistermetadata?,
     val tilflyttingsland: String?,
     val tilflyttingsstedIUtlandet: String?,
-    val utflyttingsdato: String?,
+    val utflyttingsdato: LocalDate?,
     val metadata: PdlMetadata
 )
 

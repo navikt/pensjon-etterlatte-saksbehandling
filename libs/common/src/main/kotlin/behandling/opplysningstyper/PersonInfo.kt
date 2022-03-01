@@ -7,5 +7,6 @@ data class PersonInfo(
     val fornavn: String,
     val etternavn: String,
     val foedselsnummer: Foedselsnummer,
+    val adresse: String?,
     val type: PersonType,
 )

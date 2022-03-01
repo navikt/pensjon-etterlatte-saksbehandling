@@ -19,5 +19,5 @@ export enum OpplysningsType {
   relasjon_soksken = 'soeker_relasjon_soesken:v1',
   omsorg = 'soker_daglig_omsorg:v1',
   innsender = 'innsender_personinfo:v1',
-  foreldreansvar = 'gjenlevende_forelder_personinfo:v1'
+  gjenlevende_forelder_personinfo = 'gjenlevende_forelder_personinfo:v1'
 }

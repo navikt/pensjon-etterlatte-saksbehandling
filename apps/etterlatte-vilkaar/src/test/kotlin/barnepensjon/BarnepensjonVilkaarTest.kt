@@ -141,6 +141,7 @@ internal class BarnepensjonVilkaarTest {
                     "Test",
                     "Testulfsen",
                     Foedselsnummer.of("19078504903"),
+                    "Adresse",
                     PersonType.FORELDER
                 )
             )

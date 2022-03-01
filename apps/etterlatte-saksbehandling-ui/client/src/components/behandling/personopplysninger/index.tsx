@@ -19,10 +19,10 @@ export const Personopplysninger = () => {
 
   const grunnlag = ctx.state.behandlingReducer.grunnlag
 
-  const pdlPerson: any = grunnlag.find(
+  const soekerPdl: any = grunnlag.find(
     (g) => g.opplysningType === OpplysningsType.soeker_personinfo && g.kilde.type === KildeType.pdl
   )
-  const privatPerson: any = grunnlag.find(
+  const soekerSoknad: any = grunnlag.find(
     (g) => g.opplysningType === OpplysningsType.soeker_personinfo && g.kilde.type === KildeType.privatperson
   )
   const avdodPerson: any = grunnlag.find((g) => g.opplysningType === OpplysningsType.avdoed_personinfo)
@@ -30,7 +30,7 @@ export const Personopplysninger = () => {
   const sosken = grunnlag.find((g) => g.opplysningType === OpplysningsType.relasjon_soksken)
   const dodsfall = grunnlag.find((g) => g.opplysningType === OpplysningsType.avdoed_doedsfall)
   const innsender = grunnlag.find((g) => g.opplysningType === OpplysningsType.innsender)
-  const foreldreAnsvar = grunnlag.find((g) => g.opplysningType === OpplysningsType.foreldreansvar)
+  const gjenlevende = grunnlag.find((g) => g.opplysningType === OpplysningsType.gjenlevende_forelder_personinfo)
   // const omsorg = grunnlag.find(g => g.opplysningType === OpplysningsType.omsorg);
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export const Personopplysninger = () => {
           <DetailWrapper>
             <Detail size="small">Mottaker</Detail>
             <Detail size="medium" className="detail">
-              {privatPerson.opplysning.fornavn} {privatPerson.opplysning.etternavn} ({pdlPerson?.opplysning.fornavn} {})
+              {soekerPdl.opplysning.fornavn} {soekerPdl.opplysning.etternavn} ({soekerPdl?.opplysning.fornavn} {})
             </Detail>
           </DetailWrapper>
           <DetailWrapper>
@@ -100,7 +100,7 @@ export const Personopplysninger = () => {
           <DetailWrapper>
             <Detail size="small">Foreldreansvar</Detail>
             <Detail size="medium" className="detail">
-              {foreldreAnsvar?.opplysning.fornavn} {foreldreAnsvar?.opplysning.etternavn}
+              {gjenlevende?.opplysning.fornavn} {gjenlevende?.opplysning.etternavn}
             </Detail>
           </DetailWrapper>
         </InfoWrapper>
@@ -108,14 +108,36 @@ export const Personopplysninger = () => {
         <Heading spacing size="small" level="5">
           Familieforhold
         </Heading>
-        {personer && (
+        <PersonInfo person={{
+          navn: `${gjenlevende?.opplysning.fornavn} ${gjenlevende?.opplysning.etternavn}`,
+          personStatus: PersonStatus.DØD,
+          rolle: RelatertPersonsRolle.BARN,
+          adressenavn: 'annet',
+          fnr: gjenlevende?.opplysning.foedselsnummer,
+        }} />
+        <PersonInfo person={{
+          navn: `${gjenlevende?.opplysning.fornavn} ${gjenlevende?.opplysning.etternavn}`,
+          personStatus: PersonStatus.DØD,
+          rolle: RelatertPersonsRolle.BARN,
+          adressenavn: 'annet',
+          fnr: gjenlevende?.opplysning.foedselsnummer,
+        }} />
+        <PersonInfo person={{
+          navn: `${avdodPerson?.opplysning.fornavn} ${avdodPerson?.opplysning.etternavn}`,
+          personStatus: PersonStatus.DØD,
+          rolle: RelatertPersonsRolle.BARN,
+          adressenavn: 'annet',
+          fnr: '332',
+        }} />
+
+        {/*personer && (
           <>
             <PersonInfo person={personer.person} />
             {personer.foreldre.map((foreldre, key) => (
               <PersonInfo key={key} person={foreldre} />
             ))}
           </>
-        )}
+            )*/}
         {soskenListe?.map((person) => (
           <PersonInfo key={`soesken_`} person={person} />
         ))}

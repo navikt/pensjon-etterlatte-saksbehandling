@@ -16,6 +16,7 @@ import no.nav.etterlatte.ktortokenexchange.installAuthUsing
 import no.nav.etterlatte.ktortokenexchange.secureRoutUsing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.person.personApi
 import java.util.*
 
@@ -25,7 +26,7 @@ class Server(applicationContext: ApplicationContext) {
 
     private val engine = embeddedServer(CIO, environment = applicationEngineEnvironment {
         module {
-            install(ContentNegotiation) { jackson() }
+            install(ContentNegotiation) { jackson{ objectMapper } }
             installAuthUsing(securityContext)
             install(CallLogging) {
                 mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }

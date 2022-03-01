@@ -20,17 +20,25 @@ class OpplysningsByggerService : OpplysningsBygger {
 
         val soekersFnr = barnepensjon.soeker.foedselsnummer.svar.value
         val avdoedFnr = hentAvdoedFnr(barnepensjon)
+        val gjenlevendeForelderFnr = hentGjenlevendeForelderFnr(barnepensjon)
 
         val soekerPdl = pdl.hentPdlModell(soekersFnr)
         val avdoedPdl = pdl.hentPdlModell(avdoedFnr)
+        val gjenlevendeForelderPdl = pdl.hentPdlModell(gjenlevendeForelderFnr)
 
         return listOf(
             personOpplysning(soekerPdl, Opplysningstyper.SOEKER_PERSONINFO_V1.value, PersonType.BARN),
             soekerFoedselsdato(soekerPdl, Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value),
             personOpplysning(avdoedPdl, Opplysningstyper.AVDOED_PERSONINFO_V1.value, PersonType.AVDOED),
             avdoedDodsdato(avdoedPdl, Opplysningstyper.AVDOED_DOEDSFALL_V1.value),
-            soekerRelasjonForeldre(soekerPdl, Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1.value, pdl)
+            soekerRelasjonForeldre(soekerPdl, Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1.value, pdl),
+            gjenlevendeForelderOpplysning(gjenlevendeForelderPdl, Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1.value)
         )
+    }
+
+    fun gjenlevendeForelderOpplysning(gjenlevendePdl: Person, opplysningsType: String): Behandlingsopplysning<PersonInfo> {
+        val gjenlevendePersonInfo = PersonInfo(gjenlevendePdl.fornavn, gjenlevendePdl.etternavn, gjenlevendePdl.foedselsnummer, "adresse tba", PersonType.GJENLEVENDE_FORELDER)
+        return lagOpplysning(opplysningsType, gjenlevendePersonInfo);
     }
 
     fun personOpplysning(soekerPdl: Person, opplysningsType: String, personType: PersonType): Behandlingsopplysning<PersonInfo> {
@@ -60,6 +68,14 @@ class OpplysningsByggerService : OpplysningsBygger {
             return fnr
         }
         throw Exception("Mangler fødselsnummer")
+    }
+
+    fun hentGjenlevendeForelderFnr(barnepensjon: Barnepensjon): String {
+        val fnr = barnepensjon.foreldre.find { it.type === PersonType.GJENLEVENDE_FORELDER }?.foedselsnummer?.svar?.value
+        if(fnr != null) {
+            return fnr
+        }
+        throw Exception("Mangler fødselsnummer på gjenlevende forelder")
     }
 
 }

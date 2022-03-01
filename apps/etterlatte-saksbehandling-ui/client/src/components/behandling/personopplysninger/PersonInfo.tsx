@@ -11,12 +11,13 @@ type Props = {
 }
 
 export const PersonInfo: React.FC<Props> = ({ person }) => {
+  
   const getIcon = () => {
     switch (person.rolle) {
       case RelatertPersonsRolle.BARN:
         return (
           <PersonInfoHeader>
-            <ChildIcon /> {person.navn}
+            <ChildIcon /> {person.navn} {person.rolle}
           </PersonInfoHeader>
         )
       case RelatertPersonsRolle.MOR:
@@ -24,24 +25,25 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
           <PersonInfoHeader>
             <Female />
             <span>
-              {person.personStatus.toString()} {person.rolle.toString()}
+              {person.personStatus} {person.rolle}
             </span>
           </PersonInfoHeader>
         )
       case RelatertPersonsRolle.MEDMOR:
         return (
           <PersonInfoHeader>
-            <Female /> {person.personStatus.toString()} {person.rolle.toString()}
+            <Female /> {person.personStatus} {person.rolle}
           </PersonInfoHeader>
         )
       case RelatertPersonsRolle.FAR:
         return (
           <PersonInfoHeader>
-            <Male /> {person.personStatus.toString()} {person.rolle.toString()}
+            <Male /> {person.personStatus} {person.rolle}
           </PersonInfoHeader>
         )
     }
   }
+
   return (
     <PersonInfoWrapper>
       {getIcon()}

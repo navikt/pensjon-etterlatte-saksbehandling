@@ -1,8 +1,7 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useState } from 'react'
 import { Detail, Heading, RadioGroup, Radio, Textarea, Button, Link } from '@navikt/ds-react'
 import { InfoWrapper, DetailWrapper, HeadingWrapper, RadioGroupWrapper } from './styled'
 import { IPersonFraSak, PersonStatus, RelatertPersonsRolle } from './types'
-import { hentPersonerMedRelasjon } from '../../../shared/api/personopplysninger'
 import { Content, ContentHeader } from '../../../shared/styled'
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../behandlings-status'
 import { BehandlingsTypeSmall, IBehandlingsType } from '../behandlings-type'
@@ -14,7 +13,7 @@ import { format } from 'date-fns'
 
 export const Personopplysninger = () => {
   const ctx = useContext(AppContext)
-  const [personer, setPersoner] = useState<{ person: IPersonFraSak; foreldre: IPersonFraSak[] }>()
+  // const [personer, setPersoner] = useState<{ person: IPersonFraSak; foreldre: IPersonFraSak[] }>()
   const [soeknadGyldigBegrunnelse, setSoeknadGyldigBegrunnelse] = useState('')
 
   const grunnlag = ctx.state.behandlingReducer.grunnlag
@@ -22,9 +21,11 @@ export const Personopplysninger = () => {
   const soekerPdl: any = grunnlag.find(
     (g) => g.opplysningType === OpplysningsType.soeker_personinfo && g.kilde.type === KildeType.pdl
   )
+  /*
   const soekerSoknad: any = grunnlag.find(
     (g) => g.opplysningType === OpplysningsType.soeker_personinfo && g.kilde.type === KildeType.privatperson
   )
+  */
   const avdodPerson: any = grunnlag.find((g) => g.opplysningType === OpplysningsType.avdoed_personinfo)
   const mottattDato = grunnlag.find((g) => g.opplysningType === OpplysningsType.soeknad_mottatt)
   const sosken = grunnlag.find((g) => g.opplysningType === OpplysningsType.relasjon_soksken)
@@ -33,12 +34,15 @@ export const Personopplysninger = () => {
   const gjenlevende = grunnlag.find((g) => g.opplysningType === OpplysningsType.gjenlevende_forelder_personinfo)
   // const omsorg = grunnlag.find(g => g.opplysningType === OpplysningsType.omsorg);
 
+  /*
   useEffect(() => {
     //TODO: Henter info om barn og foreldre fra PDL, type IPersonFraRegister er det som trengs per dags dato fra sketchene.
     hentPersonerMedRelasjon().then((personer: { person: IPersonFraSak; foreldre: IPersonFraSak[] }) => {
       setPersoner(personer)
     })
+    
   }, [])
+  */
 
   console.log(grunnlag);
   console.log('her', innsender)

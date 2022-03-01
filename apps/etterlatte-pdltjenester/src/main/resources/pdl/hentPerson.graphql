@@ -145,6 +145,16 @@ query(
             gyldigTilOgMed
             metadata {...metadata}
         }
+        deltBosted(historikk: $historikk) @include(if: $adresse) {
+            coAdressenavn
+            vegadresse {...vegadresseDetails}
+            utenlandskAdresse {...utenlandskAdresseDetails}
+            matrikkeladresse {...MatrikkeladresseDetails}
+            ukjentBosted {...ukjentBostedDetails}
+            startdatoForKontrakt
+            sluttdatoForKontrakt
+            metadata {...metadata}
+        }
         kontaktadresse(historikk: $historikk) @include(if: $adresse) {
             coAdressenavn
             folkeregistermetadata {...folkeregistermetadata}

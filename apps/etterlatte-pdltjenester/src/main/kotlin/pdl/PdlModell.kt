@@ -68,6 +68,7 @@ data class PdlHentPerson(
     val sivilstand: List<PdlSivilstand>,
     val doedsfall: List<PdlDoedsfall>,
     val bostedsadresse: List<PdlBostedsadresse>?,
+    val deltBostedsadresse: List<PdlDeltBostedsadresse>?,
     val kontaktadresse: List<PdlKontaktadresse>?,
     val oppholdsadresse: List<PdlOppholdsadresse>?,
     val innflyttingTilNorge: List<PdlInnflyttingTilNorge>?,
@@ -190,6 +191,17 @@ data class PdlBostedsadresse(
     val coAdressenavn: String?,
     val gyldigFraOgMed: LocalDateTime? = null,
     val gyldigTilOgMed: LocalDateTime? = null,
+    val matrikkeladresse: PdlMatrikkeladresse?,
+    val metadata: PdlMetadata,
+    val ukjentBosted: PdlUkjentBosted?,
+    val utenlandskAdresse: PdlUtenlandskAdresse?,
+    val vegadresse: PdlVegadresse?
+)
+
+data class PdlDeltBostedsadresse(
+    val coAdressenavn: String?,
+    val startdatoForKontrakt: LocalDateTime? = null,
+    val sluttdatoForKontrakt: LocalDateTime? = null,
     val matrikkeladresse: PdlMatrikkeladresse?,
     val metadata: PdlMetadata,
     val ukjentBosted: PdlUkjentBosted?,

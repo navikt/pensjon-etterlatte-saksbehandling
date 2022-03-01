@@ -31,7 +31,6 @@ class ApplicationContext(configLocation: String? = null) {
         closables.forEach { it() }
     }
 
-    //val personService: PersonService
     val securityMediator = SecurityContextMediatorFactory.from(config)
     val personService: PersonService
 

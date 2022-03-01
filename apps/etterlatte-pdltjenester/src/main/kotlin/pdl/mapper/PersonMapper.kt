@@ -52,11 +52,12 @@ object PersonMapper {
             statsborgerskap = statsborgerskap?.land,
             foedeland = foedsel?.foedeland,
             sivilstatus = sivilstand?.type?.name,
-            utland = opprettUtland(hentPerson),
-            familieRelasjon = opprettFamilieRelasjon(hentPerson)
+            utland = UtlandMapper.mapUtland(hentPerson),
+            familieRelasjon = FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson)
         )
     }
 
+    @Deprecated("Ny adressemodell skal ta over for dette")
     private fun opprettAdresse(
         ppsKlient: ParallelleSannheterKlient,
         hentPerson: PdlHentPerson
@@ -93,59 +94,6 @@ object PersonMapper {
                 )
             )
             },
-        )
-    }
-
-    private fun opprettUtland(hentPerson: PdlHentPerson): Utland {
-        return Utland(
-            utflyttingFraNorge = hentPerson.utflyttingFraNorge?.map { (mapUtflytting(it)) },
-            innflyttingTilNorge = hentPerson.innflyttingTilNorge?.map { (mapInnflytting(it)) }
-        )
-    }
-
-    private fun mapUtflytting(utflytting: PdlUtflyttingFraNorge): UtflyttingFraNorge {
-        return UtflyttingFraNorge(
-            tilflyttingsland = utflytting.tilflyttingsland,
-            dato = utflytting.utflyttingsdato.toString()
-        )
-    }
-
-    private fun mapInnflytting(innflytting: PdlInnflyttingTilNorge): InnflyttingTilNorge {
-        return InnflyttingTilNorge(
-            fraflyttingsland = innflytting.fraflyttingsland,
-            //TODO her må vi heller sjekke mot gyldighetsdato på bostedsadresse
-            //TODO skal ikke være tostring her
-            dato = innflytting.folkeregistermetadata?.gyldighetstidspunkt.toString()
-        )
-    }
-
-    private fun opprettFamilieRelasjon(hentPerson: PdlHentPerson): FamilieRelasjon {
-        //TODO tar kun med foreldreAnsvar med fnr nå
-        //TODO finn ut om det er riktig å hente ut basert på sisteRegistrertDato
-        return FamilieRelasjon(
-            ansvarligeForeldre = hentPerson.foreldreansvar
-                ?.filter { it.ansvarlig != null }
-                ?.groupBy { it.ansvarlig }
-                ?.mapValues { it.value.maxByOrNull { fa -> fa.metadata.sisteRegistrertDato() } }
-                ?.map {
-                    ForeldreAnsvar(Foedselsnummer.of(it.value?.ansvarlig))
-                },
-
-            foreldre = hentPerson.forelderBarnRelasjon
-                ?.filter { it.relatertPersonsRolle != PdlForelderBarnRelasjonRolle.BARN }
-                ?.groupBy { it.relatertPersonsIdent }
-                ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
-                ?.map {
-                    Foreldre(Foedselsnummer.of(it.value?.relatertPersonsIdent))
-                },
-
-            barn = hentPerson.forelderBarnRelasjon
-                ?.filter { it.relatertPersonsRolle == PdlForelderBarnRelasjonRolle.BARN }
-                ?.groupBy { it.relatertPersonsIdent }
-                ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
-                ?.map {
-                    Barn(Foedselsnummer.of(it.value?.relatertPersonsIdent))
-                }
         )
     }
 

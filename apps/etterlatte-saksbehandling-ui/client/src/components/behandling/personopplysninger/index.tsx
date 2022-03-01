@@ -95,7 +95,7 @@ export const Personopplysninger = () => {
           <DetailWrapper>
             <Detail size="small">Foreldreansvar</Detail>
             <Detail size="medium" className="detail">
-              {gjenlevendePdl?.opplysning.fornavn} {gjenlevendePdl?.opplysning.etternavn}
+              {gjenlevendePdl?.opplysning.fornavn} {gjenlevendePdl?.opplysning.etternavn} ({gjenlevendeSoknad?.opplysning.fornavn} {gjenlevendeSoknad?.opplysning.etternavn})
             </Detail>
           </DetailWrapper>
         </InfoWrapper>

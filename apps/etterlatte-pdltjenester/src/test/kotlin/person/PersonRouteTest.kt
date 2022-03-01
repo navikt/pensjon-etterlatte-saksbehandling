@@ -1,6 +1,7 @@
 package no.nav.etterlatte.person
 
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.Application
@@ -10,7 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.jackson
+import io.ktor.jackson.*
 import io.ktor.routing.Route
 import io.ktor.routing.routing
 import io.ktor.server.testing.handleRequest
@@ -29,6 +30,7 @@ import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.security.mock.oauth2.http.OAuth2HttpRouter.Companion.routes
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -109,7 +111,8 @@ class PersonRouteTest {
 
 fun Application.testModule(routes: Route.() -> Unit) {
     install(ContentNegotiation) {
-        jackson { objectMapper }
+        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+
     }
 
     routing {

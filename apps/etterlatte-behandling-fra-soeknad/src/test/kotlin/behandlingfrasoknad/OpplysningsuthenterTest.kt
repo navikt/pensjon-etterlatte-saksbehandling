@@ -157,7 +157,7 @@ internal class OpplysningsuthenterTest {
     fun `skal hente opplysning om avdødes utenlandsopphold`(){
         consumeSingle<Utenlandsopphold>("avdoed_utenlandsopphold:v1")
             .apply {
-                assertEquals("Nei", harHattUtenlandsopphold.innhold)
+                assertEquals("Nei", harHattUtenlandsopphold)
             }
     }
 

@@ -34,7 +34,7 @@ class OpplysningsByggerService : OpplysningsBygger {
     }
 
     fun personOpplysning(soekerPdl: Person, opplysningsType: String, personType: PersonType): Behandlingsopplysning<PersonInfo> {
-        val soekerPersonInfo = PersonInfo(soekerPdl.fornavn, soekerPdl.etternavn, soekerPdl.foedselsnummer, personType)
+        val soekerPersonInfo = PersonInfo(soekerPdl.fornavn, soekerPdl.etternavn, soekerPdl.foedselsnummer, "Adresse", personType)
         return lagOpplysning(opplysningsType, soekerPersonInfo)
     }
 
@@ -49,7 +49,7 @@ class OpplysningsByggerService : OpplysningsBygger {
     fun soekerRelasjonForeldre(soekerPdl: Person, opplysningsType: String,  pdl: Pdl) : Behandlingsopplysning<Foreldre> {
         val foreldreFraPdl = soekerPdl.familieRelasjon?.foreldre?.map { it.foedselsnummer.value }?.map {pdl.hentPdlModell(it)}
         println(foreldreFraPdl)
-        val foreldrePersonInfo = foreldreFraPdl?.map { PersonInfo(it.fornavn, it.etternavn, it.foedselsnummer, PersonType.FORELDER ) }
+        val foreldrePersonInfo = foreldreFraPdl?.map { PersonInfo(it.fornavn, it.etternavn, it.foedselsnummer, "Adresse", PersonType.FORELDER ) }
 
         return lagOpplysning(opplysningsType, Foreldre(foreldrePersonInfo))
     }

@@ -38,15 +38,21 @@ enum class AdresseType {
     OPPHOLD_ANNET_STED,
     UKJENT_BOSTED,
     UKJENT,
+    POSTBOKSADRESSE,
+    POSTADRESSEFRITTFORMAT,
+    UTENLANDSKADRESSEFRITTFORMAT,
 }
 
 data class Adresse(
     val type: AdresseType,
     val aktiv: Boolean,
+    val coAdresseNavn: String?,
     val adresseLinje1: String?,
     val adresseLinje2: String?,
+    val adresseLinje3: String?,
     val postnr: String?,
     val poststed: String?,
+    val land: String?,
     val kilde: String,
     val gyldigFraOgMed: LocalDateTime?,
     val gyldigTilOgMed: LocalDateTime?,

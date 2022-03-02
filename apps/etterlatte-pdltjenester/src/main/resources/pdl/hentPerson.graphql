@@ -85,14 +85,17 @@ fragment relatertbiperson on RelatertBiPerson {
 
 query(
     $ident: ID!,
-    $historikk: Boolean!,
+    $bostedsadresse: Boolean!,
+    $bostedsadresseHistorikk: Boolean!,
+    $deltBostedsadresse: Boolean!,
+    $oppholdsadresse: Boolean!,
+    $kontaktadresse: Boolean!,
     $utland: Boolean!,
-    $adresse: Boolean!,
     $sivilstand: Boolean!,
     $familieRelasjon: Boolean!,
 ) {
     hentPerson(ident: $ident) {
-        adressebeskyttelse(historikk: $historikk) {
+        adressebeskyttelse(historikk: false) {
             folkeregistermetadata {
                 ...folkeregistermetadata
             }
@@ -136,7 +139,7 @@ query(
                 ...metadata
             }
         }
-        bostedsadresse(historikk: $historikk) @include(if: $adresse) {
+        bostedsadresse(historikk: $bostedsadresseHistorikk) @include(if: $bostedsadresse) {
             coAdressenavn
             vegadresse {...vegadresseDetails}
             utenlandskAdresse {...utenlandskAdresseDetails}
@@ -147,7 +150,7 @@ query(
             metadata {...metadata}
             folkeregistermetadata{...folkeregistermetadata}
         }
-        deltBosted(historikk: $historikk) @include(if: $adresse) {
+        deltBosted(historikk: false) @include(if: $deltBostedsadresse) {
             coAdressenavn
             vegadresse {...vegadresseDetails}
             utenlandskAdresse {...utenlandskAdresseDetails}
@@ -158,7 +161,7 @@ query(
             metadata {...metadata}
             folkeregistermetadata{...folkeregistermetadata}
         }
-        kontaktadresse(historikk: $historikk) @include(if: $adresse) {
+        kontaktadresse(historikk: false) @include(if: $kontaktadresse) {
             coAdressenavn
             folkeregistermetadata {...folkeregistermetadata}
             gyldigFraOgMed
@@ -172,7 +175,7 @@ query(
             utenlandskAdresseIFrittFormat{...utenlandskAdresseIFrittFormatDetails}
             vegadresse{...vegadresseDetails}
         }
-        oppholdsadresse(historikk: $historikk) @include(if: $adresse) {
+        oppholdsadresse(historikk: false) @include(if: $oppholdsadresse) {
             coAdressenavn
             folkeregistermetadata {...folkeregistermetadata}
             gyldigFraOgMed
@@ -201,7 +204,7 @@ query(
             relatertPersonsRolle
         }
 
-        statsborgerskap(historikk: $historikk) @include(if: $utland) {
+        statsborgerskap(historikk: false) @include(if: $utland) {
             land
             gyldigFraOgMed
             gyldigTilOgMed

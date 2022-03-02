@@ -16,7 +16,7 @@ object PersonMapper {
         val navn = ppsKlient.avklarNavn(hentPerson.navn)
         val adressebeskyttelse = ppsKlient.avklarAdressebeskyttelse(hentPerson.adressebeskyttelse)
         val statsborgerskap = hentPerson.statsborgerskap?.let { ppsKlient.avklarStatsborgerskap(it) }
-        val sivilstand = ppsKlient.avklarSivilstand(hentPerson.sivilstand)
+        val sivilstand = hentPerson.sivilstand?.let { ppsKlient.avklarSivilstand(it) }
         val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
         val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
 

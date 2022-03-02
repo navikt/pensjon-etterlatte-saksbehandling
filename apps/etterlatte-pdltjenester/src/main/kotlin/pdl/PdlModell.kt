@@ -68,7 +68,7 @@ data class PdlHentPerson(
     val adressebeskyttelse: List<PdlAdressebeskyttelse>,
     val navn: List<PdlNavn>,
     val foedsel: List<PdlFoedsel>,
-    val sivilstand: List<PdlSivilstand>,
+    val sivilstand: List<PdlSivilstand>?,
     val doedsfall: List<PdlDoedsfall>,
     val bostedsadresse: List<PdlBostedsadresse>?,
     val deltBostedsadresse: List<PdlDeltBostedsadresse>?,

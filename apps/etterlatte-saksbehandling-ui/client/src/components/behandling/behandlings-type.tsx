@@ -6,8 +6,8 @@ export enum IBehandlingsType {
 }
 
 const colors = {
-  [IBehandlingsType.BARNEPENSJON]: '#66A3C4',
-  [IBehandlingsType.GJENLEVENDEPENSJON]: 'red',
+  [IBehandlingsType.BARNEPENSJON]:'#CCE1FF',
+  [IBehandlingsType.GJENLEVENDEPENSJON]: '66A3C4'
 }
 
 export const BehandlingsTypeSmall: React.FC<{ type: IBehandlingsType }> = ({ type }) => {

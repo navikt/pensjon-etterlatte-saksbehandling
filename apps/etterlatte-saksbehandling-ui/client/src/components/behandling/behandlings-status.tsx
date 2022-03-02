@@ -6,8 +6,8 @@ export enum IBehandlingsStatus {
 }
 
 const colors = {
-  [IBehandlingsStatus.FORSTEGANG]: '#A18DBB',
-  [IBehandlingsStatus.REVURDERING]: 'red',
+  [IBehandlingsStatus.FORSTEGANG]: '#99DEAD',
+  [IBehandlingsStatus.REVURDERING]: '#A18DBB'
 }
 
 

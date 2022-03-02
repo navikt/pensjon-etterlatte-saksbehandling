@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Detail, Heading, RadioGroup, Radio, Textarea, Button, Link } from '@navikt/ds-react'
-import { InfoWrapper, DetailWrapper, HeadingWrapper, RadioGroupWrapper } from './styled'
+import { InfoWrapper, DetailWrapper, HeadingWrapper, RadioGroupWrapper, Border } from './styled'
 import { IPersonFraSak, PersonStatus, RelatertPersonsRolle } from './types'
 import { Content, ContentHeader } from '../../../shared/styled'
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../behandlings-status'
@@ -50,41 +50,40 @@ export const Personopplysninger = () => {
 
         <InfoWrapper>
           <DetailWrapper>
-            <Detail size="small">Mottaker</Detail>
-            <Detail size="medium" className="detail">
+            <Detail size="medium">Mottaker</Detail>
+            <Detail size="small" className="detail">
               {soekerPdl.opplysning.fornavn} {soekerPdl.opplysning.etternavn} ({soekerPdl?.opplysning.fornavn} {})
             </Detail>
           </DetailWrapper>
           <DetailWrapper>
-            <Detail size="small">Søknad mottatt</Detail>
-            <Detail size="medium" className="detail">
-              {format(new Date(mottattDato?.opplysning.mottattDato), 'dd.MM.yyyy')}
-            </Detail>
-          </DetailWrapper>
-          <DetailWrapper>
-            <Detail size="small">Dato for dødsfall</Detail>
-            <Detail size="medium" className="detail">
-              {format(new Date(dodsfall?.opplysning.doedsdato), 'dd.MM.yyyy')}
-            </Detail>
-          </DetailWrapper>
-          <DetailWrapper>
-            <Detail size="small">Avdøde</Detail>
-            <Detail size="medium" className="detail">
+            <Detail size="medium">Avdød forelder</Detail>
+            <Detail size="small" className="detail">
               {avdodPersonPdl?.opplysning.fornavn} {avdodPersonPdl?.opplysning.etternavn} (
               {avdodPersonSoknad?.opplysning.fornavn} {avdodPersonSoknad?.opplysning.etternavn})
             </Detail>
           </DetailWrapper>
           <DetailWrapper>
-            <Detail size="small">Søknad fremsatt av</Detail>
-            <Detail size="medium" className="detail">
+            <Detail size="medium">Søknad fremsatt av</Detail>
+            <Detail size="small" className="detail">
               {innsender?.opplysning.fornavn} {innsender?.opplysning.etternavn}
             </Detail>
           </DetailWrapper>
           <DetailWrapper>
-            <Detail size="small">Foreldreansvar</Detail>
-            <Detail size="medium" className="detail">
-              {gjenlevendePdl?.opplysning.fornavn} {gjenlevendePdl?.opplysning.etternavn} (
-              {gjenlevendeSoknad?.opplysning.fornavn} {gjenlevendeSoknad?.opplysning.etternavn})
+            <Detail size="medium">Søknad mottatt</Detail>
+            <Detail size="small" className="detail">
+              {format(new Date(mottattDato?.opplysning.mottattDato), 'dd.MM.yyyy')}
+            </Detail>
+          </DetailWrapper>
+          <DetailWrapper>
+            <Detail size="medium">Dato for dødsfall</Detail>
+            <Detail size="small" className="detail">
+              {format(new Date(dodsfall?.opplysning.doedsdato), 'dd.MM.yyyy')}
+            </Detail>
+          </DetailWrapper>
+          <DetailWrapper>
+            <Detail size="medium">Første mulig virkningstidspunkt</Detail>
+            <Detail size="small" className="detail">
+              01.01.22
             </Detail>
           </DetailWrapper>
         </InfoWrapper>
@@ -92,6 +91,7 @@ export const Personopplysninger = () => {
         <Heading spacing size="small" level="5">
           Familieforhold
         </Heading>
+        <Border />
         <PersonInfo
           person={{
             navn: `${soekerPdl?.opplysning.fornavn} ${soekerPdl?.opplysning.etternavn}`,
@@ -99,6 +99,8 @@ export const Personopplysninger = () => {
             rolle: RelatertPersonsRolle.BARN,
             adressenavn: 'annet',
             fnr: soekerPdl?.opplysning.foedselsnummer,
+            statsborgerskap: 'NO',
+            alderEtterlatt: '15',
           }}
         />
         <PersonInfo
@@ -108,6 +110,7 @@ export const Personopplysninger = () => {
             rolle: RelatertPersonsRolle.FAR,
             adressenavn: 'annet',
             fnr: gjenlevendePdl?.opplysning.foedselsnummer,
+            statsborgerskap: 'NO',
           }}
         />
         <PersonInfo
@@ -117,6 +120,7 @@ export const Personopplysninger = () => {
             rolle: RelatertPersonsRolle.FAR,
             adressenavn: 'annet',
             fnr: `${avdodPersonPdl?.opplysning.foedselsnummer} (${avdodPersonSoknad?.opplysning.foedselsnummer})`,
+            statsborgerskap: 'NO',
           }}
         />
         {soskenListe?.map((person) => (

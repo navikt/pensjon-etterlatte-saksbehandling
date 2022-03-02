@@ -1,44 +1,49 @@
-import { PersonInfoWrapper, PersonDetailWrapper, PersonInfoHeader } from './styled'
-import { Detail, BodyShort } from '@navikt/ds-react'
-import { formatterDato } from '../../../utils/index'
+import {
+  PersonInfoWrapper,
+  PersonDetailWrapper,
+  PersonInfoHeader,
+  StatsborgerskapWrap,
+  AlderEtterlattWrap,
+} from './styled'
+import { BodyShort } from '@navikt/ds-react'
 import { ChildIcon } from '../../../shared/icons/childIcon'
-import { Female } from '@navikt/ds-icons'
-import { Male } from '@navikt/ds-icons'
-import { RelatertPersonsRolle, IPersonFraSak, PersonStatus } from './types'
+import { ManIcon } from '../../../shared/icons/manIcon'
+import { WomanIcon } from '../../../shared/icons/womanIcon'
+import { RelatertPersonsRolle, IPersonFraSak } from './types'
 
 type Props = {
   person: IPersonFraSak
 }
 
 export const PersonInfo: React.FC<Props> = ({ person }) => {
-  
-  const getIcon = () => {
+  const hentIconOgRolle = () => {
     switch (person.rolle) {
       case RelatertPersonsRolle.BARN:
         return (
           <PersonInfoHeader>
-            <ChildIcon /> {person.navn} {person.rolle}
-          </PersonInfoHeader>
-        )
-      case RelatertPersonsRolle.MOR:
-        return (
-          <PersonInfoHeader>
-            <Female />
-            <span>
-              {person.personStatus} {person.rolle}
-            </span>
-          </PersonInfoHeader>
-        )
-      case RelatertPersonsRolle.MEDMOR:
-        return (
-          <PersonInfoHeader>
-            <Female /> {person.personStatus} {person.rolle}
+            <ChildIcon /> {person.navn} <span className="personRolle">({person.rolle})</span>
+            <AlderEtterlattWrap>{person.alderEtterlatt} år</AlderEtterlattWrap>
+            <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
           </PersonInfoHeader>
         )
       case RelatertPersonsRolle.FAR:
         return (
           <PersonInfoHeader>
-            <Male /> {person.personStatus} {person.rolle}
+            <ManIcon /> {person.navn}
+            <span className="personRolle">
+              ({person.personStatus} {person.rolle})
+            </span>
+            <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
+          </PersonInfoHeader>
+        )
+      default:
+        return (
+          <PersonInfoHeader>
+            <WomanIcon /> {person.navn}
+            <span className="personRolle">
+              ({person.personStatus} {person.rolle})
+            </span>
+            <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
           </PersonInfoHeader>
         )
     }
@@ -46,26 +51,21 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
 
   return (
     <PersonInfoWrapper>
-      {getIcon()}
+      {hentIconOgRolle()}
+      <div className="personWrapper">
         <PersonDetailWrapper>
-          <Detail size="small">{' '}</Detail>
-          <Detail size="small" className="detail">Fra søknad</Detail>
+          <BodyShort size="small" className="bodyShortHeading">
+            Fødselsnummer
+          </BodyShort>
+          <BodyShort size="small">{person.fnr}</BodyShort>
         </PersonDetailWrapper>
         <PersonDetailWrapper>
-          <BodyShort size="small">Fødselsnummer</BodyShort>
-          <BodyShort size="small" className="bodyShort">{person.fnr}</BodyShort>
+          <BodyShort size="small" className="bodyShortHeading">
+            Adresse
+          </BodyShort>
+          <BodyShort size="small">{person.adressenavn}</BodyShort>
         </PersonDetailWrapper>
-        <PersonDetailWrapper>
-          <BodyShort size="small">Adresse</BodyShort>
-          <BodyShort size="small" className="bodyShort">{person.adressenavn}</BodyShort>
-        </PersonDetailWrapper>
-
-        {person.personStatus == PersonStatus.DØD && person.datoForDoedsfall && (
-          <PersonDetailWrapper>
-            <BodyShort size="small">Dato for dødsfall</BodyShort>
-            <BodyShort size="small" className="bodyShort">{formatterDato(person.datoForDoedsfall)}</BodyShort>
-          </PersonDetailWrapper>
-        )}
+      </div>
     </PersonInfoWrapper>
   )
 }

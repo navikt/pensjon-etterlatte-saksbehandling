@@ -1,104 +1,58 @@
 import styled from 'styled-components'
 
-export const TableWrapper = styled.div`
+export const InfoWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
-  max-width: 600px;
-
-  .table {
-    max-width: 500px;
-    margin-bottom: 1em;
-
-    .text {
-      float: right;
-    }
-
-    .tableCell {
-      max-width: 100px;
-    }
-  }
-  .icon {
-    margin-top: 15px;
-  }
-`
-
-export const InfoWrapper = styled.div`
   margin-bottom: 30px;
-  border: 1px solid #b0b0b0;
+  border-top: 1px solid #b0b0b0;
   padding: 1.2em 1em 2em 1em;
-  width: 80%;
-  max-width: 800px;
+  width: 100%;
 `
 
 export const DetailWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;  
   padding-top: 0.5em;
-  padding-left: 1em;
-  justify-content: space-between;
-  max-width: 500px;
+  margin-bottom: 2em;
+  width: 33%;
+`
 
-  .detail {
-    width: 200px;
-  }
+export const Border = styled.div`
+  border-top: 1px solid #b0b0b0;
 `
 
 export const PersonInfoWrapper = styled.div`
-  margin-bottom: 20px;
-  border-radius: 4px;
-  background-color: #f7f7f7;
-  border: 1px solid #b0b0b0;
-  padding: 1.2em 1em 2em 1em;
-  width: 80%;
-  max-width: 800px;
+  border-bottom: 1px solid #b0b0b0;
+  padding: 1.2em 1em 2em 0em;
+  width: 100%;
 
+  .personWrapper {
+    display: flex;
+    padding-top: 1em;
+  }
 `
 export const PersonDetailWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;  
   padding-top: 0.5em;
   padding-left: 1em;
-  justify-content: space-between;
-  max-width: 500px;
+  width: 250px;
 
-  .bodyShort {
-    width: 200px;
-  }
-  .detail {
-    width: 200px;
-    color: #707070;
-  }
-
-`
-
-export const RadioGroupWrapper = styled.div`
-  margin-top: 5em;
-  max-width: 400px;
-
-  .link{
+  .bodyShortHeading {
     font-weight: bold;
-    margin-top: 1em;
-    margin-left: 1.5em;
-  }
-  .radioGroup{
-    margin-bottom: 1em;
-  }
-  .button {
-    margin-top: 1.5em;
-    padding: 0.5em 3em;
   }
 `
 
 export const PersonInfoHeader = styled.div`
-  display: inline;
+  display: inline-flex;
   font-weight: bold;
-  padding-left: 0.5em;
+
+  .personRolle {
+    font-weight: normal;
+    margin-left: 0.5em;
+  }
 `
 
 export const HeadingWrapper = styled.div`
   display: inline-flex;
-  
-  .details{
+
+  .details {
     justify-content: center;
     align-item: center;
     padding: 0.2em;
@@ -126,4 +80,43 @@ margin-bottom: 0;
  
   }
 }
+`
+
+export const StatsborgerskapWrap = styled.div`
+  background-color: #ffeccc;
+  border: 1px solid #ffc166;
+  padding: 0.1em 0.5em;
+  border-radius: 4px;
+  font-weight: normal;
+  font-size: 14px;
+  margin-left: 0.7em;
+  margin-right: 0.5em;
+`
+export const AlderEtterlattWrap = styled.div`
+  background-color: #ccf1d6;
+  border: 1px solid #33aa5f;
+  padding: 0.1em 0.5em;
+  border-radius: 4px;
+  font-weight: normal;
+  font-size: 14px;
+  margin-left: 0.7em;
+  margin-right: 0.5em;
+`
+
+export const RadioGroupWrapper = styled.div`
+  margin-top: 5em;
+  max-width: 400px;
+
+  .link {
+    font-weight: bold;
+    margin-top: 1em;
+    margin-left: 1.5em;
+  }
+  .radioGroup {
+    margin-bottom: 1em;
+  }
+  .button {
+    margin-top: 1.5em;
+    padding: 0.5em 3em;
+  }
 `

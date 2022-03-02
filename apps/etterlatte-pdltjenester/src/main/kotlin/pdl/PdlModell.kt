@@ -193,6 +193,7 @@ data class PdlBostedsadresse(
     val gyldigTilOgMed: LocalDateTime? = null,
     val matrikkeladresse: PdlMatrikkeladresse?,
     val metadata: PdlMetadata,
+    val folkeregistermetadata: PdlFolkeregistermetadata?,
     val ukjentBosted: PdlUkjentBosted?,
     val utenlandskAdresse: PdlUtenlandskAdresse?,
     val vegadresse: PdlVegadresse?
@@ -204,6 +205,7 @@ data class PdlDeltBostedsadresse(
     val sluttdatoForKontrakt: LocalDateTime? = null,
     val matrikkeladresse: PdlMatrikkeladresse?,
     val metadata: PdlMetadata,
+    val folkeregistermetadata: PdlFolkeregistermetadata?,
     val ukjentBosted: PdlUkjentBosted?,
     val utenlandskAdresse: PdlUtenlandskAdresse?,
     val vegadresse: PdlVegadresse?

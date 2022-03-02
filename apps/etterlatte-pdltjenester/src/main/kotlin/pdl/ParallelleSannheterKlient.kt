@@ -36,6 +36,11 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
     suspend fun avklarBostedsadresse(pdlBostedsadresse: List<PdlBostedsadresse>) = avklarNullable(pdlBostedsadresse,
         Avklaring.BOSTEDSADRESSE
     )
+    //TODO be PPS om å implementere delt bostedsadresse
+    fun avklarDeltBostedsadresse(pdlDeltBostedsadresse: List<PdlDeltBostedsadresse>) =
+        //avklarNullable(pdlDeltBostedsadresse, Avklaring.DELTBOSTEDSADRESSE
+        pdlDeltBostedsadresse.sortedByDescending { it.folkeregistermetadata?.gyldighetstidspunkt}.firstOrNull()
+
     suspend fun avklarKontaktadresse(pdlKontaktadresse: List<PdlKontaktadresse>) = avklarNullable(pdlKontaktadresse,
         Avklaring.KONTAKTADRESSE
     )
@@ -85,6 +90,7 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
         FOEDSEL("foedsel"),
         DOEDSFALL("doedsfall"),
         BOSTEDSADRESSE("bostedsadresse"),
+        DELTBOSTEDSADRESSE("deltbostedsadresse"),
         KONTAKTADRESSE("kontaktadresse"),
         OPPHOLDSADRESSE("oppholdsadresse")
     }

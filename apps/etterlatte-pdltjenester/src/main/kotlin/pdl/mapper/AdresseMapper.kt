@@ -87,6 +87,86 @@ object AdresseMapper {
         }
     }
 
+    fun mapDeltBostedsadresse(
+        ppsKlient: ParallelleSannheterKlient,
+        deltbostedsadresse: List<PdlDeltBostedsadresse>
+    ): List<Adresse> = runBlocking {
+
+        val aktivBostedsadresse = deltbostedsadresse
+            .filterNot { it.metadata.historisk }
+            .let { ppsKlient.avklarDeltBostedsadresse(it) }
+
+        deltbostedsadresse.map {
+
+            fun toAdresse(
+                type: AdresseType,
+                adresseLinje1: String? = null,
+                adresseLinje2: String? = null,
+                adresseLinje3: String? = null,
+                postnr: String? = null,
+                poststed: String? = null,
+                land: String? = null
+            ) = Adresse(
+                aktiv = it == aktivBostedsadresse,
+                type = type,
+                coAdresseNavn = it.coAdressenavn,
+                adresseLinje1 = adresseLinje1,
+                adresseLinje2 = adresseLinje2,
+                adresseLinje3 = adresseLinje3,
+                postnr = postnr,
+                poststed = poststed,
+                land = land,
+                kilde = it.metadata.master,
+                gyldigFraOgMed = it.startdatoForKontrakt,
+                gyldigTilOgMed = it.sluttdatoForKontrakt,
+            )
+
+            when {
+                it.vegadresse != null -> {
+                    toAdresse(
+                        type = AdresseType.VEGADRESSE,
+                        adresseLinje1 =  vegAdresseAsAdresseLinje(it.vegadresse),
+                        postnr = it.vegadresse.postnummer,
+                    )
+                }
+
+                it.utenlandskAdresse != null -> {
+                    toAdresse(
+                        type = AdresseType.UTENLANDSKADRESSE,
+                        adresseLinje1 =  it.utenlandskAdresse.adressenavnNummer,
+                        adresseLinje2 = listOfNotNull(
+                            it.utenlandskAdresse.bygningEtasjeLeilighet,
+                            it.utenlandskAdresse.postboksNummerNavn
+                        ).joinToString(" "),
+                        postnr = it.utenlandskAdresse.postkode,
+                        poststed = it.utenlandskAdresse.bySted,
+                        land = it.utenlandskAdresse.landkode
+                    )
+                }
+
+                it.ukjentBosted != null -> {
+                    toAdresse(
+                        type = AdresseType.UKJENT_BOSTED,
+                        adresseLinje1 = it.ukjentBosted.bostedskommune,
+                    )
+                }
+
+                it.matrikkeladresse != null -> {
+                    toAdresse(
+                        type = AdresseType.MATRIKKELADRESSE,
+                        postnr = it.matrikkeladresse.postnummer,
+                    )
+                }
+
+                else -> {
+                    toAdresse(
+                        type = AdresseType.UKJENT,
+                    )
+                }
+            }
+        }
+    }
+
     fun mapOppholdsadresse(
         ppsKlient: ParallelleSannheterKlient,
         oppholdsadresse: List<PdlOppholdsadresse>

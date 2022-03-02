@@ -100,10 +100,13 @@ class PersonRouteTest {
                 Adresse(
                     type = AdresseType.VEGADRESSE,
                     aktiv = true,
+                    coAdresseNavn = "Hos Geir",
                     adresseLinje1 = "Testveien 4",
                     adresseLinje2 = null,
+                    adresseLinje3 = null,
                     postnr = "1234",
                     poststed = null,
+                    land = "NOR",
                     kilde = "FREG",
                     gyldigFraOgMed = LocalDateTime.now().minusYears(1),
                     gyldigTilOgMed = null

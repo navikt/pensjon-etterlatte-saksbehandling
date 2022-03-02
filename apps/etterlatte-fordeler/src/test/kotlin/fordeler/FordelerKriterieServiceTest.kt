@@ -242,11 +242,11 @@ class FordelerKriterieServiceTest {
     }
 
     companion object {
-        val BARNEPENSJON_SOKNAD = readSoknad("/fordeler/NyBarnePensjon.json")
-        val BARNEPENSJON_SOKNAD_YRKESSKADE = readSoknad("/fordeler/yrkesskade.json")
-        val BARNEPENSJON_SOKNAD_VERGE = readSoknad("/fordeler/verge.json")
-        val BARNEPENSJON_SOKNAD_HUKET_AV_UTLAND = readSoknad("/fordeler/huketAvForUtland.json")
-        val BARNEPENSJON_SOKNAD_INNSENDER_IKKE_FORELDER = readSoknad("/fordeler/innsenderIkkeForelder.json")
+        val BARNEPENSJON_SOKNAD = readSoknad("/fordeler/soknad_barnepensjon.json")
+        val BARNEPENSJON_SOKNAD_YRKESSKADE = readSoknad("/fordeler/soknad_har_yrkesskade.json")
+        val BARNEPENSJON_SOKNAD_VERGE = readSoknad("/fordeler/soknad_har_verge.json")
+        val BARNEPENSJON_SOKNAD_HUKET_AV_UTLAND = readSoknad("/fordeler/soknad_huket_av_utland.json")
+        val BARNEPENSJON_SOKNAD_INNSENDER_IKKE_FORELDER = readSoknad("/fordeler/soknad_innsender_ikke_forelder.json")
 
         private fun readSoknad(file: String) =
             JsonMessage(readFile(file), MessageProblems("")).apply { requireKey("@skjema_info") }

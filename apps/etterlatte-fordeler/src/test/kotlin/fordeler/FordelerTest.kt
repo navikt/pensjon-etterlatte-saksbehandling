@@ -21,9 +21,9 @@ internal class FordelerTest {
 
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
 
-    private val nyhendelseJson = javaClass.getResource("/fordeler/NyBarnePensjon.json")!!.readText()
-    private val hendelseIkkeBarnePensjonJson = javaClass.getResource("/fordeler/ikkeBarnepensjon.json")!!.readText()
-    private val hendelseIkkeGyldig = javaClass.getResource("/fordeler/hendelseUgyldig.json")!!.readText()
+    private val nyhendelseJson = javaClass.getResource("/fordeler/soknad_barnepensjon.json")!!.readText()
+    private val hendelseIkkeBarnePensjonJson = javaClass.getResource("/fordeler/soknad_ikke_barnepensjon.json")!!.readText()
+    private val hendelseIkkeGyldig = javaClass.getResource("/fordeler/soknad_utgaatt_hendelse.json")!!.readText()
 
     @AfterEach
     fun afterEach() {

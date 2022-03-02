@@ -11,12 +11,12 @@ import {
   VilkaarlisteTitle,
   VilkaarInfobokser,
 } from '../styled'
-import { OpplysningsType } from '../types'
+import { OpplysningsType, VilkaarProps } from '../types'
 import { IKriterie, IVilkaaropplysing, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 
-export const AlderBarn = (props: any) => {
+export const AlderBarn = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
 
   const barnetsFoedselsdato = vilkaar.kriterier
@@ -39,7 +39,7 @@ export const AlderBarn = (props: any) => {
   const barnetsAlder = differenceInYears(new Date(), new Date(barnetsFoedselsdato.opplysning.foedselsdato))
 
   return (
-    <VilkaarBorder>
+    <VilkaarBorder id={props.id}>
       <Innhold>
         <Title>
           <StatusIcon status={props.vilkaar.resultat} large={true} /> Alder barn

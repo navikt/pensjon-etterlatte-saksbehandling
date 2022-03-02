@@ -74,15 +74,21 @@ export const Behandling = () => {
                 </NavLink>
                 <CheckedMenu>
                   <li>
-                    <Link to="#dodsfall" className={active('#dodsfall')}>
+                    <Link to="#alderbarn" className={active('#alderbarn')}>
+                      <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} />
+                      <span>Alder</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="#dodsfallforelder" className={active('#dodsfallforelder')}>
                       <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} />
                       <span>Dødsfall</span>
                     </Link>
                   </li>
                   <li>
-                    <Link to="#alder" className={active('#alder')}>
+                    <Link to="#avdodesmedlemskap" className={active('#avdodesmedlemskap')}>
                       <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} />
-                      <span>Alder</span>
+                      <span>Medlemsskap</span>
                     </Link>
                   </li>
                   <li>
@@ -91,12 +97,7 @@ export const Behandling = () => {
                       <span>Bostedsadresse</span>
                     </Link>
                   </li>
-                  <li>
-                    <Link to="#medlemskap" className={active('#medlemskap')}>
-                      <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} />
-                      <span>Medlemsskap</span>
-                    </Link>
-                  </li>
+                  
                   <li>
                     <Link to="#yrkesskade" className={active('#yrkesskade')}>
                       <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} />

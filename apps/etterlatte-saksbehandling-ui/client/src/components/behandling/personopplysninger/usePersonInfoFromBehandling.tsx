@@ -16,11 +16,9 @@ export const usePersonInfoFromBehandling = () => {
   const soekerPdl: any = grunnlag.find(
     (g) => g.opplysningType === OpplysningsType.soeker_personinfo && g.kilde.type === KildeType.pdl
   )
-  /*
   const soekerSoknad: any = grunnlag.find(
     (g) => g.opplysningType === OpplysningsType.soeker_personinfo && g.kilde.type === KildeType.privatperson
   )
-  */
   const avdodPersonPdl: any = grunnlag.find(
     (g) => g.opplysningType === OpplysningsType.avdoed_personinfo && g.kilde.type === KildeType.pdl
   )
@@ -40,6 +38,7 @@ export const usePersonInfoFromBehandling = () => {
   )
 
   return {
+    soekerSoknad,
     soekerPdl,
     avdodPersonPdl,
     avdodPersonSoknad,

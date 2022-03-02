@@ -11,11 +11,11 @@ import {
   VilkaarInfobokser,
   VilkaarlisteTitle,
 } from '../styled'
-import { OpplysningsType } from '../types'
+import { OpplysningsType, VilkaarProps } from '../types'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 
-export const DoedsFallForelder = (props: any) => {
+export const DoedsFallForelder = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
 
   const avdoedDoedsdato = vilkaar.kriterier
@@ -31,7 +31,7 @@ export const DoedsFallForelder = (props: any) => {
     )
 
   return (
-    <VilkaarBorder>
+    <VilkaarBorder id={props.id}>
       <Innhold>
         <Title>
           <StatusIcon status={props.vilkaar.resultat} large={true} /> Dødsfall forelder

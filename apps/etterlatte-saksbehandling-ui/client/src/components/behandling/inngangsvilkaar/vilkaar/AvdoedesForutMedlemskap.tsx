@@ -9,14 +9,15 @@ import {
   VilkaarWrapper,
   VilkaarColumn,
 } from '../styled'
+import { VilkaarProps } from '../types'
 import { TidslinjeMedlemskap } from './TidslinjeMedlemskap'
 
-export const AvdoedesForutMedlemskap = (props: any) => {
+export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
   console.log(vilkaar)
 
   return (
-    <VilkaarBorder>
+    <VilkaarBorder id={props.id}>
       <Innhold>
         <Title>
           <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} large={true} /> Avdødes forutgående medlemskap

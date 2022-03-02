@@ -21,3 +21,9 @@ export enum OpplysningsType {
   innsender = 'innsender_personinfo:v1',
   gjenlevende_forelder_personinfo = 'gjenlevende_forelder_personinfo:v1'
 }
+
+export interface VilkaarProps {
+  id: string;
+  vilkaar: any;
+
+}

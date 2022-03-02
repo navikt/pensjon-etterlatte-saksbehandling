@@ -9,8 +9,8 @@ export const StatusIcon = (props: { status: VilkaarVurderingsResultat; large?: b
       case VilkaarVurderingsResultat.OPPFYLT:
         return (
           <svg
-            width={props.large ? '19px' : '15px'}
-            height={props.large ? '19px' : '15px'}
+            width={props.large ? '26px' : '20px'}
+            height={props.large ? '26px' : '20px'}
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -20,8 +20,8 @@ export const StatusIcon = (props: { status: VilkaarVurderingsResultat; large?: b
             <path
               fillRule="evenodd"
               clipRule="evenodd"
-              d="M8.028 16L20.5 4 22 5.5 8.028 19 2 13l1.5-1.5L8.028 16z"
-              fill="#fff"
+              d="M12 0c6.627 0 12 5.373 12 12s-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0zm5.047 7.671l1.399 1.43-8.728 8.398L6 14.02l1.395-1.434 2.319 2.118 7.333-7.032z"
+              fill={colors[props.status]}
             ></path>
           </svg>
         )
@@ -29,8 +29,8 @@ export const StatusIcon = (props: { status: VilkaarVurderingsResultat; large?: b
       case VilkaarVurderingsResultat.IKKE_OPPFYLT:
         return (
           <svg
-            width={props.large ? '19px' : '15px'}
-            height={props.large ? '19px' : '15px'}
+            width={props.large ? '26px' : '20px'}
+            height={props.large ? '26px' : '20px'}
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -40,51 +40,50 @@ export const StatusIcon = (props: { status: VilkaarVurderingsResultat; large?: b
             <path
               fillRule="evenodd"
               clipRule="evenodd"
-              d="M21 4.385L13.385 12 21 19.615 19.615 21 12 13.385 4.385 21 3 19.615 10.615 12 3 4.385 4.385 3 12 10.615 19.615 3 21 4.385z"
-              fill="#fff"
+              d="M12 0c6.627 0 12 5.373 12 12s-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0zm3.571 7L17 8.429 13.428 12 17 15.571 15.571 17 12 13.428 8.429 17 7 15.571 10.572 12 7 8.429 8.429 7 12 10.572 15.571 7z"
+              fill={colors[props.status]}
             ></path>
           </svg>
         )
       case VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING:
         return (
-          <svg
-            width={props.large ? '19px' : '15px'}
-            height={props.large ? '19px' : '15px'}
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            focusable="false"
-            role="img"
-          >
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M10.5 2 L10.5 16 L13.5 16 L13.5 2 Z M10.5 19 L10.5 22 L13.5 22 L13.5 19 Z"
-              fill="#fff"
-            ></path>
-          </svg>
+          <>
+            <svg
+              width={props.large ? '26px' : '20px'}
+              height={props.large ? '26px' : '20px'}
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              focusable="false"
+              role="img"
+            >
+              <circle cx="50%" cy="50%" r="10" fill="black" />
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M12 0c6.627 0 12 5.373 12 12s-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0zm0 16a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm1-11v9h-2V5h2z"
+                fill={colors[props.status]}
+              ></path>
+            </svg>
+          </>
         )
     }
   }
 
   return (
-    <Circle status={props.status} large={props.large}>
+    <SvgWrapper status={props.status} large={props.large}>
       {symbol}
-    </Circle>
+    </SvgWrapper>
   )
 }
 
 const colors = {
-  [VilkaarVurderingsResultat.OPPFYLT]: '#1c6937',
-  [VilkaarVurderingsResultat.IKKE_OPPFYLT]: '#f34040',
-  [VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING]: '#FFAA33',
+  [VilkaarVurderingsResultat.OPPFYLT]: '#06893a',
+  [VilkaarVurderingsResultat.IKKE_OPPFYLT]: '#ba3a26',
+  [VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING]: '#FF9100',
 }
 
-const Circle = styled.div<{ status: VilkaarVurderingsResultat; large?: boolean }>`
-  background-color: ${(props) => colors[props.status]};
-  border-radius: 100%;
-  height: ${(props) => (props.large ? '26px' : '20px')};
-  width: ${(props) => (props.large ? '26px' : '20px')};
+const SvgWrapper = styled.div<{ status: VilkaarVurderingsResultat; large?: boolean }>`
   display: inline-flex;
   justify-content: center;
   align-items: center;

@@ -2,17 +2,17 @@ import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import differenceInYears from 'date-fns/differenceInYears'
 import format from 'date-fns/format'
 import {
+  Innhold,
   Title,
+  VilkaarBorder,
   VilkaarColumn,
+  VilkaarInfobokser,
+  VilkaarlisteTitle,
   VilkaarVurderingColumn,
   VilkaarWrapper,
-  VilkaarBorder,
-  Innhold,
-  VilkaarlisteTitle,
-  VilkaarInfobokser,
 } from '../styled'
 import { OpplysningsType, VilkaarProps } from '../types'
-import { IKriterie, IVilkaaropplysing, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
+import { IKriterie, IVilkaaropplysing, Kriterietype,VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 
@@ -42,7 +42,7 @@ export const AlderBarn = (props: VilkaarProps) => {
     <VilkaarBorder id={props.id}>
       <Innhold>
         <Title>
-          <StatusIcon status={props.vilkaar.resultat} large={true} /> Alder barn
+          <StatusIcon status={VilkaarVurderingsResultat.IKKE_OPPFYLT} large={true} /> Alder barn
         </Title>
         <VilkaarWrapper>
           <VilkaarInfobokser>

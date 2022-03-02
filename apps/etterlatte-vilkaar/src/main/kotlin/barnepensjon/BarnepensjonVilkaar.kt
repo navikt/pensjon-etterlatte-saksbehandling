@@ -61,7 +61,7 @@ fun vilkaarAvdoedesMedlemskap(
     return VurdertVilkaar(
         vilkaartype,
         VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, //endre når vi får inn flere opplysninger
-        listOf()
+        listOf(utenlandsoppholdSisteFemAarene)
     )
 }
 
@@ -74,7 +74,9 @@ fun kriterieIngenUtenlandsopphold(
     val oppholdUtlandetSisteFemAar = try {
         val femAarFoerDoedsdato = hentDoedsdato(doedsdato).doedsdato.minusYears(5)
         val utenlandsoppholdSoeknad = hentUtenlandsopphold(utenlandsopphold, "privatperson")
-        if (utenlandsoppholdSoeknad.opphold?.map { (it.tilDato?.isAfter(femAarFoerDoedsdato)) }?.contains(true)!!) {
+        val oppholdSisteFemAAr = utenlandsoppholdSoeknad.opphold?.map { it.tilDato?.isAfter(femAarFoerDoedsdato) }
+
+        if (oppholdSisteFemAAr != null && oppholdSisteFemAAr.contains(true)) {
             VilkaarVurderingsResultat.IKKE_OPPFYLT
         } else {
             VilkaarVurderingsResultat.OPPFYLT

@@ -22,15 +22,23 @@ import java.util.concurrent.atomic.AtomicBoolean
 internal class OpplysningsuthenterTest {
 
 
-
-    companion object{
-        val opplysninger = Opplysningsuthenter().lagOpplysningsListe(objectMapper.treeToValue(objectMapper.readTree(javaClass.getResource("/fullMessage2.json")!!.readText())!!["@skjema_info"])!!)
+    companion object {
+        val opplysninger = Opplysningsuthenter().lagOpplysningsListe(
+            objectMapper.treeToValue(
+                objectMapper.readTree(
+                    javaClass.getResource("/fullMessage2.json")!!.readText()
+                )!!["@skjema_info"]
+            )!!
+        )
     }
 
     @Test
-    fun `alle opplysninger skal ha innsender som kilde`(){
-        val kilde = Behandlingsopplysning.Privatperson("03108718357", LocalDateTime.parse("2022-02-14T14:37:24.573612786").toInstant(
-            ZoneOffset.UTC))
+    fun `alle opplysninger skal ha innsender som kilde`() {
+        val kilde = Behandlingsopplysning.Privatperson(
+            "03108718357", LocalDateTime.parse("2022-02-14T14:37:24.573612786").toInstant(
+                ZoneOffset.UTC
+            )
+        )
         opplysninger.forEach {
             assertEquals(kilde.fnr, (it.kilde as Behandlingsopplysning.Privatperson).fnr)
             assertEquals(kilde.mottatDato, (it.kilde as Behandlingsopplysning.Privatperson).mottatDato)
@@ -38,7 +46,7 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om innsenders personinfo`(){
+    fun `skal hente opplysning om innsenders personinfo`() {
         consumeSingle<PersonInfo>("innsender_personinfo:v1")
             .apply {
                 assertEquals("GØYAL", fornavn)
@@ -47,8 +55,9 @@ internal class OpplysningsuthenterTest {
                 assertEquals(PersonType.INNSENDER, type)
             }
     }
+
     @Test
-    fun `skal hente opplysning om søkers personinfo`(){
+    fun `skal hente opplysning om søkers personinfo`() {
         consumeSingle<PersonInfo>("soeker_personinfo:v1")
             .apply {
                 assertEquals("kirsten", fornavn)
@@ -59,7 +68,7 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om gjenlevende forelders personinfo`(){
+    fun `skal hente opplysning om gjenlevende forelders personinfo`() {
         consumeSingle<PersonInfo>("gjenlevende_forelder_personinfo:v1")
             .apply {
                 assertEquals("GØYAL", fornavn)
@@ -70,7 +79,7 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om samtykke`(){
+    fun `skal hente opplysning om samtykke`() {
         consumeSingle<Samtykke>("samtykke")
             .apply {
                 assertEquals(true, harSamtykket)
@@ -78,12 +87,12 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om utbetalingsinformasjon`(){
+    fun `skal hente opplysning om utbetalingsinformasjon`() {
         consumeSingle<Utbetalingsinformasjon>("utbetalingsinformasjon:v1")
             .apply {
                 assertEquals(BankkontoType.NORSK, bankkontoType)
                 assertEquals("6848.64.44444", kontonummer)
-                assertNull( utenlandskBankNavn)
+                assertNull(utenlandskBankNavn)
                 assertNull(utenlandskBankAdresse)
                 assertNull(iban)
                 assertNull(swift)
@@ -93,7 +102,7 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om søkers statsborkerskap`(){
+    fun `skal hente opplysning om søkers statsborkerskap`() {
         consumeSingle<Statsborgerskap>("soeker_statsborgerskap:v1")
             .apply {
                 assertEquals("Norge", statsborgerskap)
@@ -101,8 +110,9 @@ internal class OpplysningsuthenterTest {
             }
     }
 
-    @Test @Disabled
-    fun `skal hente opplysning om søkers adresse`(){
+    @Test
+    @Disabled
+    fun `skal hente opplysning om søkers adresse`() {
         consumeSingle<Utenlandsadresse>("soeker_utenlandsadresse:v1")
             .apply {
                 println(this)
@@ -110,7 +120,7 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om søkers verge`(){
+    fun `skal hente opplysning om søkers verge`() {
         consumeSingle<Verge>("soeker_verge:v1")
             .apply {
                 assertEquals("Nei", barnHarVerge?.innhold)
@@ -118,16 +128,16 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om daglig omsorg`(){
-        consumeSingle<DagligOmsorg>("soker_daglig_omsorg:v1" )
+    fun `skal hente opplysning om daglig omsorg`() {
+        consumeSingle<DagligOmsorg>("soker_daglig_omsorg:v1")
             .apply {
                 assertNull(omsorgPerson)
             }
     }
 
     @Test
-    fun `skal hente opplysning om avdøde`(){
-        consumeSingle<PersonInfo>("avdoed_personinfo:v1" )
+    fun `skal hente opplysning om avdøde`() {
+        consumeSingle<PersonInfo>("avdoed_personinfo:v1")
             .apply {
                 assertEquals("fn", fornavn)
                 assertEquals("en", etternavn)
@@ -137,7 +147,7 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om avdødes dødsfall`(){
+    fun `skal hente opplysning om avdødes dødsfall`() {
         consumeSingle<Doedsdato>("avdoed_doedsfall:v1")
             .apply {
                 assertEquals(LocalDate.of(2022, Month.JANUARY, 1), doedsdato)
@@ -145,8 +155,9 @@ internal class OpplysningsuthenterTest {
             }
     }
 
-    @Test @Disabled
-    fun `skal hente opplysning om dødsårsak`(){
+    @Test
+    @Disabled
+    fun `skal hente opplysning om dødsårsak`() {
         consumeSingle<Doedsaarsak>("avdoed_doedsaarsak:v1")
             .apply {
                 println(this)
@@ -154,23 +165,25 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om avdødes utenlandsopphold`(){
+    fun `skal hente opplysning om avdødes utenlandsopphold`() {
         consumeSingle<Utenlandsopphold>("avdoed_utenlandsopphold:v1")
             .apply {
                 assertEquals("Nei", harHattUtenlandsopphold)
             }
     }
 
-    @Test @Disabled
-    fun `skal hente opplysning om avdødes næringsinntekt`(){
+    @Test
+    @Disabled
+    fun `skal hente opplysning om avdødes næringsinntekt`() {
         consumeSingle<Naeringsinntekt>("avdoed_naeringsinntekt:v1")
             .apply {
                 println(this)
             }
     }
 
-    @Test @Disabled
-    fun `skal hente opplysning om avdødes militærtjeneste`(){
+    @Test
+    @Disabled
+    fun `skal hente opplysning om avdødes militærtjeneste`() {
         consumeSingle<Militaertjeneste>("avdoed_militaertjeneste:v1")
             .apply {
                 println(this)
@@ -178,7 +191,7 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om søsken`(){
+    fun `skal hente opplysning om søsken`() {
         consumeSingle<Soesken>("soeker_relasjon_soesken:v1")
             .apply {
                 assertTrue(soesken!!.isEmpty())
@@ -186,7 +199,7 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om mottatt dato`(){
+    fun `skal hente opplysning om mottatt dato`() {
         consumeSingle<SoeknadMottattDato>("soeknad_mottatt_dato")
             .apply {
                 assertEquals(LocalDateTime.parse("2022-02-14T14:37:24.573612786"), mottattDato)
@@ -194,10 +207,11 @@ internal class OpplysningsuthenterTest {
     }
 
 
-    inline fun <reified T> consumeSingle(opplysningType: String) = opplysninger.filter { it.opplysningType == opplysningType }
-        .also { assertEquals(1, it.size) }
-        .first()
-        .let {
-            it.opplysning as T
-        }
+    inline fun <reified T> consumeSingle(opplysningType: String) =
+        opplysninger.filter { it.opplysningType == opplysningType }
+            .also { assertEquals(1, it.size) }
+            .first()
+            .let {
+                it.opplysning as T
+            }
 }

@@ -15,7 +15,7 @@ function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
 
   const ctx = useContext<IAppContext>(AppContext)
-  console.log(ctx)
+  console.log("state", ctx.state)
 
   return (
     <>

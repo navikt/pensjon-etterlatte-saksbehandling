@@ -37,7 +37,7 @@ internal class FordelerTest {
         val etterlattFnr = Foedselsnummer.of("11057523044")
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr } ) } returns mockPerson(
-            adresse = mockNorskAdresse(),
+            bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(ForeldreAnsvar(etterlattFnr)),
                 foreldre = null,
@@ -47,11 +47,11 @@ internal class FordelerTest {
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
             doedsdato = LocalDate.parse("2022-01-01"),
-            adresse = mockNorskAdresse()
+            bostedsadresse = mockNorskAdresse()
         )
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
-            adresse = mockNorskAdresse(),
+            bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(ForeldreAnsvar(Foedselsnummer.of("11057523044"))),
                 foreldre = null,
@@ -75,7 +75,7 @@ internal class FordelerTest {
         val etterlattFnr = Foedselsnummer.of("11057523044")
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
-            adresse = mockNorskAdresse(),
+            bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(ForeldreAnsvar(etterlattFnr)),
                 foreldre = null,
@@ -84,11 +84,11 @@ internal class FordelerTest {
         )
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
-            adresse = mockNorskAdresse()
+            bostedsadresse = mockNorskAdresse()
         )
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
-            adresse = mockNorskAdresse(),
+            bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(ForeldreAnsvar(Foedselsnummer.of("11057523044"))),
                 foreldre = null,

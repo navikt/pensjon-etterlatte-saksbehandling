@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
-import no.nav.etterlatte.mockUgyldigNorskAdresse
+import no.nav.etterlatte.mockUgyldigAdresse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageProblems
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -26,14 +26,14 @@ class FordelerKriterieServiceTest {
     @Test
     fun `soeknad er en gyldig kandidat for fordeling`() {
         val barn = mockPerson(
-            adresse = mockNorskAdresse()
+            bostedsadresse = mockNorskAdresse()
         )
         val avdoed = mockPerson(
             doedsdato = LocalDate.parse("2022-01-01"),
-            adresse = mockNorskAdresse()
+            bostedsadresse = mockNorskAdresse()
         )
         val gjenlevende = mockPerson(
-            adresse = mockNorskAdresse()
+            bostedsadresse = mockNorskAdresse()
         )
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
@@ -123,7 +123,7 @@ class FordelerKriterieServiceTest {
     @Test
     fun `barn uten bostedsadresse i Norge er ikke en gyldig kandidat`() {
         val barn = mockPerson(
-            adresse = mockUgyldigNorskAdresse()
+            bostedsadresse = mockUgyldigAdresse()
         )
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
@@ -191,7 +191,7 @@ class FordelerKriterieServiceTest {
     fun `avdod uten bostedsadresse i Norge er ikke en gyldig kandidat`() {
         val barn = mockPerson()
         val avdoed = mockPerson(
-            adresse = mockUgyldigNorskAdresse()
+            bostedsadresse = mockUgyldigAdresse()
         )
         val gjenlevende = mockPerson()
 
@@ -216,7 +216,7 @@ class FordelerKriterieServiceTest {
         val barn = mockPerson()
         val avdoed = mockPerson()
         val gjenlevende = mockPerson(
-            adresse = mockUgyldigNorskAdresse()
+            bostedsadresse = mockUgyldigAdresse()
         )
 
         val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)

@@ -18,7 +18,6 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -83,7 +82,6 @@ class PersonRouteTest {
     }
 
     fun mockPerson(
-        adresse: Adresse? = null,
         utland: Utland? = null,
         familieRelasjon: FamilieRelasjon? = null) =
 
@@ -99,7 +97,6 @@ class PersonRouteTest {
             deltBostedsadresse = emptyList(),
             oppholdsadresse = emptyList(),
             kontaktadresse = emptyList(),
-            adresse = adresse,
             statsborgerskap = "Norsk",
             foedeland = "Norge",
             sivilstatus = null,

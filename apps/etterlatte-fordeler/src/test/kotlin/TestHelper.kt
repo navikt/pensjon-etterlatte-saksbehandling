@@ -3,6 +3,7 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.person.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 fun mockPerson(
     fnr: String = "11057523044",
@@ -14,7 +15,7 @@ fun mockPerson(
     foedeland: String = "NOR",
     sivilstatus: Sivilstatus = Sivilstatus.UGIFT,
     utland: Utland? = null,
-    adresse: Adresse? = null,
+    bostedsadresse: Adresse? = null,
     familieRelasjon: FamilieRelasjon? = null,
 ) = Person(
     fornavn = "Ola",
@@ -24,11 +25,10 @@ fun mockPerson(
     foedselsdato = foedselsdato,
     doedsdato = doedsdato,
     adressebeskyttelse = adressebeskyttelse,
-    bostedsadresse = emptyList(),
+    bostedsadresse = bostedsadresse?.let { listOf(bostedsadresse) } ?: emptyList(),
     deltBostedsadresse = emptyList(),
     oppholdsadresse = emptyList(),
     kontaktadresse = emptyList(),
-    adresse = adresse,
     statsborgerskap = statsborgerskap,
     foedeland = foedeland,
     sivilstatus = sivilstatus,
@@ -37,15 +37,25 @@ fun mockPerson(
 )
 
 fun mockNorskAdresse() = Adresse(
-    bostedsadresse = Bostedsadresse(
-        vegadresse = Vegadresse("Testveien", "4", null, "1234")
-    ),
-    kontaktadresse = null,
-    oppholdsadresse = null,
+    type = AdresseType.VEGADRESSE,
+    aktiv = true,
+    adresseLinje1 = "Testveien 4",
+    adresseLinje2 = null,
+    postnr = "1234",
+    poststed = null,
+    kilde = "FREG",
+    gyldigFraOgMed = LocalDateTime.now().minusYears(1),
+    gyldigTilOgMed = null
 )
 
-fun mockUgyldigNorskAdresse() = Adresse(
-    bostedsadresse = null,
-    kontaktadresse = null,
-    oppholdsadresse = null,
+fun mockUgyldigAdresse() = Adresse(
+    type = AdresseType.UKJENT_BOSTED,
+    aktiv = true,
+    adresseLinje1 = "Tull",
+    adresseLinje2 = null,
+    postnr = null,
+    poststed = null,
+    kilde = "FREG",
+    gyldigFraOgMed = LocalDateTime.now().minusYears(1),
+    gyldigTilOgMed = null
 )

@@ -1,7 +1,7 @@
 package no.nav.etterlatte.pdl.mapper
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.person.Adresse2
+import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlBostedsadresse
@@ -13,7 +13,7 @@ object AdresseMapper {
     fun mapBostedsadresse(
         ppsKlient: ParallelleSannheterKlient,
         bostedsadresse: List<PdlBostedsadresse>
-    ): List<Adresse2> = runBlocking {
+    ): List<Adresse> = runBlocking {
 
         val aktivBostedsadresse = bostedsadresse
             .filterNot { it.metadata.historisk }
@@ -27,7 +27,7 @@ object AdresseMapper {
                 adresseLinje2: String? = null,
                 postnr: String? = null,
                 poststed: String? = null
-            ) = Adresse2(
+            ) = Adresse(
                     aktiv = it == aktivBostedsadresse,
                     type = type,
                     adresseLinje1 = adresseLinje1,
@@ -92,7 +92,7 @@ object AdresseMapper {
     fun mapOppholdsadresse(
         ppsKlient: ParallelleSannheterKlient,
         oppholdsadresse: List<PdlOppholdsadresse>
-    ): List<Adresse2> = runBlocking {
+    ): List<Adresse> = runBlocking {
 
         val aktivOppholdsadresse = oppholdsadresse
             .filterNot { it.metadata.historisk }
@@ -106,7 +106,7 @@ object AdresseMapper {
                 adresseLinje2: String? = null,
                 postnr: String? = null,
                 poststed: String? = null
-            ) = Adresse2(
+            ) = Adresse(
                 aktiv = it == aktivOppholdsadresse,
                 type = type,
                 adresseLinje1 = adresseLinje1,

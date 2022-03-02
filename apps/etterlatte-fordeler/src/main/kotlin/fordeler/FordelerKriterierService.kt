@@ -15,8 +15,10 @@ import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_HAR_VERGE
 import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE
 import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_HAR_IKKE_FORELDREANSVAR
 import no.nav.etterlatte.fordeler.FordelerKriterie.INNSENDER_ER_IKKE_FORELDER
+import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.aktiv
 import no.nav.etterlatte.libs.common.person.alder
 import no.nav.helse.rapids_rivers.JsonMessage
 
@@ -84,8 +86,9 @@ class FordelerKriterierService {
         return person.adressebeskyttelse != Adressebeskyttelse.UGRADERT
     }
 
+    // TODO denne må vi se på - kanskje ha en feil dersom alder ikke finnes?
     private fun forGammel(person: Person, alder: Int): Boolean {
-        return person.alder() > alder
+        return person.alder()?.let { it > alder } ?: true
     }
 
     private fun sjekkStatsborgerskap(person: Person): Boolean {
@@ -112,7 +115,7 @@ class FordelerKriterierService {
 
     //TODO tenke litt mer på dette kriteriet
     private fun ikkeGyldigBostedsAdresseINorge(person: Person): Boolean {
-        return person.adresse?.bostedsadresse?.vegadresse?.adressenavn == null
+        return person.bostedsadresse?.aktiv()?.type != AdresseType.VEGADRESSE
     }
 
     private fun soekerErIkkeAlenebarn(avdoed: Person, gjenlevende: Person, barn: Person): Boolean {

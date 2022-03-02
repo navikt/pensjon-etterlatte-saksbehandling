@@ -18,6 +18,8 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -28,6 +30,7 @@ import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 
 class PersonRouteTest {
@@ -93,7 +96,19 @@ class PersonRouteTest {
             foedselsdato = LocalDate.now().minusYears(20),
             doedsdato = null,
             adressebeskyttelse = Adressebeskyttelse.UGRADERT,
-            bostedsadresse = emptyList(),
+            bostedsadresse = listOf(
+                Adresse(
+                    type = AdresseType.VEGADRESSE,
+                    aktiv = true,
+                    adresseLinje1 = "Testveien 4",
+                    adresseLinje2 = null,
+                    postnr = "1234",
+                    poststed = null,
+                    kilde = "FREG",
+                    gyldigFraOgMed = LocalDateTime.now().minusYears(1),
+                    gyldigTilOgMed = null
+                )
+            ),
             deltBostedsadresse = emptyList(),
             oppholdsadresse = emptyList(),
             kontaktadresse = emptyList(),

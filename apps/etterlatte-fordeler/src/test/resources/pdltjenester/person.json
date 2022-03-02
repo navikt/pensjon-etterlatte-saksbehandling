@@ -4,34 +4,24 @@
   "foedselsnummer": "11057523044",
   "foedselsaar": 2010,
   "foedselsdato": "2010-04-19",
-  "doedsdato": "",
+  "doedsdato": null,
   "adressebeskyttelse": "UGRADERT",
-  "adresse": {
-    "bostedsadresse": {
-      "vegadresse": {
-        "adressenavn": "tull",
-        "husnummer": "3",
-        "husbokstav": "A",
-        "postnummer": "1234"
-      }
-    },
-    "kontaktadresse": {
-      "vegadresse": {
-        "adressenavn": "tull",
-        "husnummer": "3",
-        "husbokstav": "A",
-        "postnummer": "1234"
-      }
-    },
-    "oppholdsadresse": {
-      "vegadresse": {
-        "adressenavn": "tull",
-        "husnummer": "3",
-        "husbokstav": "A",
-        "postnummer": "1234"
-      }
+  "bostedsadresse": [
+    {
+      "type": "VEGADRESSE",
+      "aktiv": true,
+      "adresseLinje1": "Testveien 4",
+      "adresseLinje2": null,
+      "postnr": "1234",
+      "poststed": null,
+      "kilde": "FREG",
+      "gyldigFraOgMed": "2021-03-02T10:00:05.391419",
+      "gyldigTilOgMed": null
     }
-  },
+  ],
+  "deltBostedsadresse": [],
+  "kontaktadresse": [],
+  "oppholdsadresse": [],
   "statsborgerskap": "NOR",
   "foedeland": "NOR",
   "sivilstatus": "UGIFT",

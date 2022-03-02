@@ -1,10 +1,7 @@
 package no.nav.etterlatte.pdl.mapper
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlHentPerson
 
@@ -13,6 +10,7 @@ object PersonMapper {
     fun mapPerson(
         ppsKlient: ParallelleSannheterKlient,
         fnr: Foedselsnummer,
+        personRolle: PersonRolle,
         hentPerson: PdlHentPerson
     ): Person = runBlocking {
         val navn = ppsKlient.avklarNavn(hentPerson.navn)
@@ -39,7 +37,7 @@ object PersonMapper {
             statsborgerskap = statsborgerskap?.land,
             sivilstatus = sivilstand?.let { Sivilstatus.valueOf(it.type.name) } ?: Sivilstatus.UOPPGITT,
             utland = UtlandMapper.mapUtland(hentPerson),
-            familieRelasjon = FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson),
+            familieRelasjon = FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, personRolle),
         )
     }
 

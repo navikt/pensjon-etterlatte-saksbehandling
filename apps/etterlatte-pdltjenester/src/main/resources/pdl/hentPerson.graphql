@@ -88,6 +88,7 @@ query(
     $historikk: Boolean!,
     $utland: Boolean!,
     $adresse: Boolean!,
+    $sivilstand: Boolean!,
     $familieRelasjon: Boolean!,
 ) {
     hentPerson(ident: $ident) {
@@ -118,7 +119,7 @@ query(
                 ...metadata
             }
         }
-        sivilstand {
+        sivilstand @include(if: $sivilstand){
             type
             gyldigFraOgMed
             relatertVedSivilstand

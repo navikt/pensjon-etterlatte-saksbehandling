@@ -13,6 +13,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -56,10 +57,7 @@ class PdlTjenesterKlientTest {
         val person = runBlocking {
             pdlTjenesterKlient.hentPerson(HentPersonRequest(
                 foedselsnummer = Foedselsnummer.of(TESTUSER_FNR),
-                historikk = true,
-                adresse = true,
-                utland = true,
-                familieRelasjon = true
+                rolle = PersonRolle.BARN
             ))
         }
 

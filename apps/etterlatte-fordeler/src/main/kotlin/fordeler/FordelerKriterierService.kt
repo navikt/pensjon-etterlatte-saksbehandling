@@ -110,7 +110,7 @@ class FordelerKriterierService {
 
     private fun gjenlevendeHarIkkeForeldreansvar(barn: Person, gjenlevende: Person): Boolean {
         return barn.familieRelasjon?.ansvarligeForeldre
-            ?.none { it.foedselsnummer == gjenlevende.foedselsnummer } == true
+            ?.none { it == gjenlevende.foedselsnummer } == true
     }
 
     //TODO tenke litt mer på dette kriteriet

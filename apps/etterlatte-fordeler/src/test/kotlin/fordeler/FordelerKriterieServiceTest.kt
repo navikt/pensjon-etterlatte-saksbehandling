@@ -1,12 +1,7 @@
 package no.nav.etterlatte.fordeler
 
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.ForeldreAnsvar
-import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
-import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
@@ -228,7 +223,7 @@ class FordelerKriterieServiceTest {
     fun `gjenlevende uten foreldreansvar er ikke en gyldig kandidat`() {
         val barn = mockPerson(
             familieRelasjon = FamilieRelasjon(
-                ansvarligeForeldre = listOf(ForeldreAnsvar(Foedselsnummer.of("09018701453"))),
+                ansvarligeForeldre = listOf(Foedselsnummer.of("09018701453")),
                 foreldre = null,
                 barn = null,
             )

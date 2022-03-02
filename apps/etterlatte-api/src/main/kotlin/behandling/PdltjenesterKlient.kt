@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -31,7 +32,7 @@ class PdltjenesterKlient(config: Config) : EtterlattePdl {
 
         try {
             logger.info("Henter persondata fra pdl")
-            val hentPersonRequest = HentPersonRequest(Foedselsnummer.of(fnr))
+            val hentPersonRequest = HentPersonRequest(Foedselsnummer.of(fnr), PersonRolle.BARN) // TODO rolle må kanskje sendes med fra api-kallet?
             val json = downstreamResourceClient
                 .post(
                     Resource(

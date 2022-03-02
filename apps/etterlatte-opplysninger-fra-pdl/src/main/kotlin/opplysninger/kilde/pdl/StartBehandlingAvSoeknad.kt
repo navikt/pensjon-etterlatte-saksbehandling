@@ -4,6 +4,7 @@ import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -43,7 +44,7 @@ interface Behandling {
 }
 
 interface Pdl {
-    fun hentPdlModell(foedselsnummer: String): Person
+    fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): Person
 }
 
 interface OpplysningsBygger {

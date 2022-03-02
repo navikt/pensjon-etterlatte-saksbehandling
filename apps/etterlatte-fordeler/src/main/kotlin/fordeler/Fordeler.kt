@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -89,13 +90,13 @@ internal class Fordeler(
         }
 
     private fun hentGjenlevendeRequest(packet: JsonMessage) =
-        HentPersonRequest(packet.gjenlevendeFnr(), adresse = true, familieRelasjon = true)
+        HentPersonRequest(packet.gjenlevendeFnr(), PersonRolle.GJENLEVENDE)
 
     private fun hentAvdoedRequest(packet: JsonMessage) =
-        HentPersonRequest(packet.avdoedFnr(), utland = true, adresse = true)
+        HentPersonRequest(packet.avdoedFnr(), PersonRolle.AVDOED)
 
     private fun hentBarnRequest(packet: JsonMessage) =
-        HentPersonRequest(packet.soekerFnr(), adresse = true, familieRelasjon = true, utland = true)
+        HentPersonRequest(packet.soekerFnr(), PersonRolle.BARN)
 
     private fun JsonMessage.soknadId() = this["@lagret_soeknad_id"]
 

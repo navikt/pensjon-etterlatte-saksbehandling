@@ -88,16 +88,11 @@ data class UtflyttingFraNorge(
 )
 
 data class FamilieRelasjon(
-    val ansvarligeForeldre: List<ForeldreAnsvar>?,
-    val foreldre: List<Foreldre>?,
-    val barn: List<Barn>?
+    val ansvarligeForeldre: List<Foedselsnummer>?,
+    val foreldre: List<Foedselsnummer>?,
+    val barn: List<Foedselsnummer>?
 )
 
-data class ForeldreAnsvar(val foedselsnummer: Foedselsnummer)
-
-data class Foreldre(val foedselsnummer: Foedselsnummer)
-
-data class Barn (val foedselsnummer: Foedselsnummer)
 
 fun Person.alder(): Int? {
     return foedselsdato?.let { Period.between(foedselsdato, LocalDate.now()).years }

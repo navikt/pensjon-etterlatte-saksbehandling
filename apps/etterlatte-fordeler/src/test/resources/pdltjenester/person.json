@@ -49,16 +49,16 @@
   },
   "familieRelasjon": {
     "ansvarligeForeldre": [
-      {"foedselsnummer": "04096222195"},
-      {"foedselsnummer": "19040550081"}
+      "04096222195",
+      "19040550081"
     ],
     "foreldre": [
-      {"foedselsnummer": "04096222195"},
-      {"foedselsnummer": "19040550081"}
+      "04096222195",
+      "19040550081"
     ],
     "barn": [
-      {"foedselsnummer": "11057523044"},
-      {"foedselsnummer": "31017123133"}
+      "11057523044",
+      "31017123133"
     ]
   }
 }

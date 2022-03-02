@@ -2,6 +2,7 @@ package no.nav.etterlatte.person
 
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle.*
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlVariables
@@ -26,17 +27,54 @@ class PersonService(
                     "Kunne ikke hente person med fnr=${hentPersonRequest.foedselsnummer} fra PDL: $pdlFeil"
                 )
             } else {
-                PersonMapper.mapPerson(ppsKlient, hentPersonRequest.foedselsnummer, it.data.hentPerson)
+                PersonMapper.mapPerson(
+                    ppsKlient = ppsKlient,
+                    fnr = hentPersonRequest.foedselsnummer,
+                    personRolle = hentPersonRequest.rolle,
+                    hentPerson = it.data.hentPerson
+                )
             }
         }
     }
 
-    private fun HentPersonRequest.toPdlVariables() = PdlVariables(
-        ident = foedselsnummer.value,
-        historikk = historikk,
-        adresse = adresse,
-        utland = utland,
-        familieRelasjon = familieRelasjon
-    )
+    private fun HentPersonRequest.toPdlVariables() =
+        when (rolle) {
+            BARN ->
+                PdlVariables(
+                    ident = foedselsnummer.value,
+                    bostedsadresse = true,
+                    bostedsadresseHistorikk = true,
+                    deltBostedsadresse = true,
+                    kontaktadresse = true,
+                    oppholdsadresse = true,
+                    utland = true,
+                    sivilstand = false,
+                    familieRelasjon = true
+                )
+            GJENLEVENDE ->
+                PdlVariables(
+                    ident = foedselsnummer.value,
+                    bostedsadresse = true,
+                    bostedsadresseHistorikk = true,
+                    deltBostedsadresse = false,
+                    kontaktadresse = false,
+                    oppholdsadresse = true,
+                    utland = true,
+                    sivilstand = true,
+                    familieRelasjon = true
+                )
+            AVDOED ->
+                PdlVariables(
+                    ident = foedselsnummer.value,
+                    bostedsadresse = true,
+                    bostedsadresseHistorikk = true,
+                    deltBostedsadresse = false,
+                    kontaktadresse = true,
+                    oppholdsadresse = true,
+                    utland = true,
+                    sivilstand = true,
+                    familieRelasjon = true
+                )
+    }
 
 }

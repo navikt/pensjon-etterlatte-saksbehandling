@@ -64,8 +64,8 @@ internal class PersonServiceTest {
 
         assertNotNull(person.familieRelasjon?.foreldre)
         assertEquals(2, person.familieRelasjon?.foreldre?.size)
-        assertTrue(person.familieRelasjon?.foreldre?.get(0)?.foedselsnummer?.value in expectedForeldreFnr)
-        assertTrue(person.familieRelasjon?.foreldre?.get(1)?.foedselsnummer?.value in expectedForeldreFnr)
+        assertTrue(person.familieRelasjon?.foreldre?.get(0)?.value in expectedForeldreFnr)
+        assertTrue(person.familieRelasjon?.foreldre?.get(1)?.value in expectedForeldreFnr)
     }
 
     @Test
@@ -78,8 +78,8 @@ internal class PersonServiceTest {
 
         assertNotNull(person.familieRelasjon?.ansvarligeForeldre)
         assertEquals(2, person.familieRelasjon?.ansvarligeForeldre?.size)
-        assertTrue(person.familieRelasjon?.foreldre?.get(0)?.foedselsnummer?.value in expectedForeldreFnr)
-        assertTrue(person.familieRelasjon?.foreldre?.get(1)?.foedselsnummer?.value in expectedForeldreFnr)
+        assertTrue(person.familieRelasjon?.foreldre?.get(0)?.value in expectedForeldreFnr)
+        assertTrue(person.familieRelasjon?.foreldre?.get(1)?.value in expectedForeldreFnr)
     }
 
     @Test
@@ -93,8 +93,8 @@ internal class PersonServiceTest {
 
         assertNotNull(person.familieRelasjon?.barn)
         assertEquals(2, person.familieRelasjon?.barn?.size)
-        assertTrue(person.familieRelasjon?.barn?.get(0)?.foedselsnummer?.value in foreldreFnr)
-        assertTrue(person.familieRelasjon?.barn?.get(1)?.foedselsnummer?.value in foreldreFnr)
+        assertTrue(person.familieRelasjon?.barn?.get(0)?.value in foreldreFnr)
+        assertTrue(person.familieRelasjon?.barn?.get(1)?.value in foreldreFnr)
     }
 
     @Test

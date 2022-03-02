@@ -33,7 +33,6 @@ fun Route.personApi(service: PersonService) {
                 )
             }
         }
-
     }
 }
 

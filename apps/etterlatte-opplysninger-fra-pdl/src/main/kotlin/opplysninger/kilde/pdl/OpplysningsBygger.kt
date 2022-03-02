@@ -2,12 +2,9 @@ package no.nav.etterlatte.opplysninger.kilde.pdl
 
 import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foreldre
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.PersonInfo
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import java.time.Instant
@@ -21,9 +18,9 @@ class OpplysningsByggerService : OpplysningsBygger {
         val avdoedFnr = hentAvdoedFnr(barnepensjon)
         val gjenlevendeForelderFnr = hentGjenlevendeForelderFnr(barnepensjon)
 
-        val soekerPdl = pdl.hentPdlModell(soekersFnr)
-        val avdoedPdl = pdl.hentPdlModell(avdoedFnr)
-        val gjenlevendeForelderPdl = pdl.hentPdlModell(gjenlevendeForelderFnr)
+        val soekerPdl = pdl.hentPdlModell(soekersFnr, PersonRolle.BARN)
+        val avdoedPdl = pdl.hentPdlModell(avdoedFnr, PersonRolle.AVDOED)
+        val gjenlevendeForelderPdl = pdl.hentPdlModell(gjenlevendeForelderFnr, PersonRolle.GJENLEVENDE)
 
         return listOf(
             personOpplysning(soekerPdl, Opplysningstyper.SOEKER_PERSONINFO_V1.value, PersonType.BARN),
@@ -75,7 +72,7 @@ class OpplysningsByggerService : OpplysningsBygger {
 
     fun soekerRelasjonForeldre(soekerPdl: Person, opplysningsType: String, pdl: Pdl): Behandlingsopplysning<Foreldre> {
         val foreldreFraPdl =
-            soekerPdl.familieRelasjon?.foreldre?.map { it.foedselsnummer.value }?.map { pdl.hentPdlModell(it) }
+            soekerPdl.familieRelasjon?.foreldre?.map { it.value }?.map { pdl.hentPdlModell(it, PersonRolle.GJENLEVENDE) } // TODO hva er riktig rolle her?
         println(foreldreFraPdl)
         val foreldrePersonInfo = foreldreFraPdl?.map {
             PersonInfo(

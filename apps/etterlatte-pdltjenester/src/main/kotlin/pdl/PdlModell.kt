@@ -18,12 +18,15 @@ data class PdlGraphqlRequest(
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlVariables(
-    val ident: String? = null,
-    val identer: List<String>? = null,
-    val historikk: Boolean = false,
-    val adresse: Boolean = false,
-    val utland: Boolean = false,
-    val familieRelasjon: Boolean = false
+    val ident: String,
+    val bostedsadresse: Boolean,
+    val bostedsadresseHistorikk: Boolean,
+    val deltBostedsadresse: Boolean,
+    val oppholdsadresse: Boolean,
+    val kontaktadresse: Boolean,
+    val utland: Boolean,
+    val sivilstand: Boolean,
+    val familieRelasjon: Boolean
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

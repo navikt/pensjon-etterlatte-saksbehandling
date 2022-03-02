@@ -46,7 +46,7 @@ internal class PdlKlientTest {
     fun `hentUtvidetPerson returnerer gyldig UtvidetPersonResponse objekt`() {
         setup("/pdl/personUtvidetResponse.json")
         runBlocking {
-            val testPerson = pdlKlient.hentPerson(PdlVariables(STOR_SNERK))
+            val testPerson = pdlKlient.hentPerson(pdlVariables())
             assertEquals("LITEN", testPerson.data?.hentPerson?.navn?.get(0)?.fornavn)
             //TODO her kan vi evt teste flere felter
         }
@@ -56,12 +56,24 @@ internal class PdlKlientTest {
     fun `hentPerson returnerer gyldig PersonResponse objekt`() {
         setup("/pdl/personResponse.json")
         runBlocking {
-            val testPerson = pdlKlient.hentPerson(PdlVariables(STOR_SNERK))
+            val testPerson = pdlKlient.hentPerson(pdlVariables())
             assertEquals("TRIVIELL", testPerson.data?.hentPerson?.navn?.get(0)?.fornavn)
             //TODO her kan vi evt teste flere felter
         }
-
     }
+
+    private fun pdlVariables() =
+        PdlVariables(
+            ident = STOR_SNERK,
+            bostedsadresse = true,
+            bostedsadresseHistorikk = true,
+            deltBostedsadresse = true,
+            kontaktadresse = true,
+            oppholdsadresse = true,
+            utland = true,
+            sivilstand = false,
+            familieRelasjon = true
+        )
 
 
 }

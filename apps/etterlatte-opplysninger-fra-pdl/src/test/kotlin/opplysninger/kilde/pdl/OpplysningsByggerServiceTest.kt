@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.PersonInfo
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -26,6 +27,7 @@ import java.io.FileNotFoundException
 import java.time.Instant
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OpplysningsByggerServiceTest {
@@ -72,14 +74,17 @@ internal class OpplysningsByggerServiceTest {
             utland = utland,
             familieRelasjon = familieRelasjon)
 
-        /*
+
         fun mockNorskAdresse() = Adresse(
             type = AdresseType.VEGADRESSE,
             aktiv = true,
+            coAdresseNavn = null,
             adresseLinje1 = "Testveien 4",
             adresseLinje2 = null,
+            adresseLinje3 = null,
             postnr = "1234",
             poststed = null,
+            land = null,
             kilde = "FREG",
             gyldigFraOgMed = LocalDateTime.now().minusYears(1),
             gyldigTilOgMed = null
@@ -88,17 +93,17 @@ internal class OpplysningsByggerServiceTest {
         fun mockUgyldigAdresse() = Adresse(
             type = AdresseType.UKJENT_BOSTED,
             aktiv = true,
+            coAdresseNavn = null,
             adresseLinje1 = "Tull",
             adresseLinje2 = null,
+            adresseLinje3 = null,
             postnr = null,
             poststed = null,
+            land = null,
             kilde = "FREG",
             gyldigFraOgMed = LocalDateTime.now().minusYears(1),
             gyldigTilOgMed = null
         )
-
-         */
-
 
         fun readSoknadAsBarnepensjon(file: String): Barnepensjon {
             val skjemaInfo = objectMapper.writeValueAsString(
@@ -145,6 +150,7 @@ internal class OpplysningsByggerServiceTest {
             assertEquals(gjenlevendeForelderPdlMock.fornavn, opplysning.fornavn)
             assertEquals(gjenlevendeForelderPdlMock.etternavn, opplysning.etternavn)
             assertEquals(Foedselsnummer.of(GYLDIG_FNR_GJENLEVENDE_FORELDER), opplysning.foedselsnummer)
+            // TODO SKriv test for adresse når adresseformat er på plass
             //assertEquals(gjenlevendeForelderPdlMock.adresse, opplysning.adresse)
             assertEquals(PersonType.GJENLEVENDE_FORELDER, opplysning.type)
         }
@@ -164,13 +170,14 @@ internal class OpplysningsByggerServiceTest {
             assertEquals(avdoedPdlMock.fornavn, opplysning.fornavn)
             assertEquals(avdoedPdlMock.etternavn, opplysning.etternavn)
             assertEquals(Foedselsnummer.of(GYLDIG_FNR_AVDOED), opplysning.foedselsnummer)
+            // TODO SKriv test for adresse når adresseformat er på plass
             //assertEquals(gjenlevendeForelderPdlMock.adresse, opplysning.adresse)
             assertEquals(PersonType.AVDOED, opplysning.type)
         }
     }
 
     @Test
-    fun `skal lage personopplysning med rett persontype for søker`() {
+    fun `skal lage personopplysning med persontype BARN for søker`() {
         val personopplysningSoeker =
             opplysningsByggerService.personOpplysning(
                 soekerPdlMock, Opplysningstyper.SOEKER_PERSONINFO_V1.value, PersonType.BARN
@@ -182,17 +189,20 @@ internal class OpplysningsByggerServiceTest {
 
     @Test
     @Disabled
+    //TODO avklare om metode er klar for testing
     fun avdoedDodsdato() {
         val avdoedDoedsdato =
             opplysningsByggerService.avdoedDodsdato(avdoedPdlMock, Opplysningstyper.AVDOED_DOEDSFALL_V1.value)
 
     }
 
+    //TODO avklare om metode er klar for testing
     @Test
     fun soekerFoedselsdato() {
     }
 
 
+    //TODO avklare om metode er klar for testing
     @Test
     fun soekerRelasjonForeldre() {
 

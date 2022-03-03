@@ -22,7 +22,7 @@ class OpplysningDao(private val connection: () -> Connection) {
         return Behandlingsopplysning(
             getObject(1) as UUID,
             objectMapper.readValue(getString(2)),
-            objectMapper.readValue(getString(3)),
+            getObject(3) as Opplysningstyper,
             getString(4).deSerialize()!!,
             getString(5).deSerialize()!!,
         )

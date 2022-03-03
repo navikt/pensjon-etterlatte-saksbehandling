@@ -20,8 +20,7 @@ export const Personopplysninger = () => {
     avdodPersonPdl,
     avdodPersonSoknad,
     innsender,
-    gjenlevendePdl,
-    gjenlevendeSoknad,
+    gjenlevendePdl
   } = usePersonInfoFromBehandling()
 
   const soskenListe: IPersonFraSak[] = sosken?.opplysning.soesken.map((opplysning: any) => {

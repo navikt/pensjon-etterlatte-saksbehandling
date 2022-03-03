@@ -1,18 +1,31 @@
 package no.nav.etterlatte
 
 
+import no.nav.etterlatte.fordeler.FordelerServiceTest
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
+import java.io.FileNotFoundException
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+const val FNR_1 = "07010776133"
+const val FNR_2 = "24014021406"
+const val FNR_3 = "11057523044"
+const val FNR_4 = "24014021406"
+const val FNR_5 = "09018701453"
+
+const val SVERIGE = "SWE"
+const val NORGE = "NOR"
+
 fun mockPerson(
-    fnr: String = "11057523044",
+    fnr: String = FNR_3,
     foedselsaar: Int = 2010,
     foedselsdato: LocalDate? = LocalDate.parse("2010-04-19"),
     doedsdato: LocalDate? = null,
     adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.UGRADERT,
-    statsborgerskap: String = "NOR",
-    foedeland: String = "NOR",
+    statsborgerskap: String = NORGE,
+    foedeland: String = NORGE,
     sivilstatus: Sivilstatus = Sivilstatus.UGIFT,
     utland: Utland? = null,
     bostedsadresse: Adresse? = null,
@@ -65,3 +78,11 @@ fun mockUgyldigAdresse() = Adresse(
     gyldigFraOgMed = LocalDateTime.now().minusYears(1),
     gyldigTilOgMed = null
 )
+
+fun readSoknad(file: String): Barnepensjon {
+    val skjemaInfo = objectMapper.writeValueAsString(objectMapper.readTree(readFile(file)).get("@skjema_info"))
+    return objectMapper.readValue(skjemaInfo, Barnepensjon::class.java)
+}
+
+fun readFile(file: String) = FordelerServiceTest::class.java.getResource(file)?.readText()
+    ?: throw FileNotFoundException("Fant ikke filen $file")

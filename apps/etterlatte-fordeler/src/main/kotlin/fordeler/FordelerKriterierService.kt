@@ -15,6 +15,7 @@ import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_HAR_VERGE
 import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE
 import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_HAR_IKKE_FORELDREANSVAR
 import no.nav.etterlatte.fordeler.FordelerKriterie.INNSENDER_ER_IKKE_FORELDER
+import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_IKKE_ALENEBARN
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.Person
@@ -25,7 +26,9 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 
-typealias Sjekk = (Barnepensjon) -> Boolean
+private const val NORGE = "NOR"
+
+private typealias Sjekk = (Barnepensjon) -> Boolean
 
 enum class FordelerKriterie(val forklaring: String) {
     BARN_ER_IKKE_NORSK_STATSBORGER("Barn er ikke norsk statsborger"),
@@ -43,7 +46,7 @@ enum class FordelerKriterie(val forklaring: String) {
     GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE("Gjenlevende er ikke bosatt i Norge"),
     GJENLEVENDE_HAR_IKKE_FORELDREANSVAR("Gjenlevende søker har ikke foreldreanvar"),
     INNSENDER_ER_IKKE_FORELDER("Søker er ikke markert som forelder i søknaden"),
-    SOEKER_ER_IKKE_ALENEBARN("Søker er ikke alenebarn"),
+    BARN_ER_IKKE_ALENEBARN("Søker er ikke alenebarn"),
 }
 
 class FordelerKriterierService {
@@ -67,39 +70,41 @@ class FordelerKriterierService {
         gjenlevende: Person,
         soeknad : Barnepensjon
     ) = listOf(
-        Kriterie(BARN_ER_IKKE_NORSK_STATSBORGER) { sjekkStatsborgerskap(barn) },
-        Kriterie(BARN_ER_FOR_GAMMELT) { forGammel(barn, 15) },
+        // Barn / søker
+        Kriterie(BARN_ER_FOR_GAMMELT) { forGammel(barn) },
+        Kriterie(BARN_ER_IKKE_NORSK_STATSBORGER) { ikkeNorskStatsborger(barn) },
         Kriterie(BARN_ER_IKKE_FOEDT_I_NORGE) { foedtUtland(barn) },
         Kriterie(BARN_ER_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorge(barn) },
-        Kriterie(BARN_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(barn) },
         Kriterie(BARN_HAR_UTVANDRING) { harUtvandring(barn) },
-        Kriterie(BARN_HAR_VERGE) { harVerge(soeknad) },
-        Kriterie(AVDOED_ER_IKKE_REGISTRERT_SOM_DOED) { personErIkkeDoed(avdoed) },
+        Kriterie(BARN_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(barn) },
+        Kriterie(BARN_HAR_VERGE) { harHuketAvForVerge(soeknad) },
+        Kriterie(BARN_ER_IKKE_ALENEBARN) { barnErIkkeAlenebarn(avdoed, barn) },
+
+        // Avdød
+        Kriterie(AVDOED_ER_IKKE_REGISTRERT_SOM_DOED) { personErIkkeRegistrertDoed(avdoed) },
         Kriterie(AVDOED_VAR_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorge(avdoed) },
         Kriterie(AVDOED_HAR_UTVANDRING) { harUtvandring(avdoed) },
-        Kriterie(AVDOED_HAR_YRKESSKADE) { harYrkesskade(soeknad) },
         Kriterie(AVDOED_HAR_HATT_UTLANDSOPPHOLD) { harHuketAvForUtenlandsopphold(soeknad) },
+        Kriterie(AVDOED_HAR_YRKESSKADE) { harHuketAvForYrkesskade(soeknad) },
+
+        // Gjenlevende
         Kriterie(GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorge(gjenlevende) },
         Kriterie(GJENLEVENDE_HAR_IKKE_FORELDREANSVAR) { gjenlevendeHarIkkeForeldreansvar(barn, gjenlevende) },
-        Kriterie(INNSENDER_ER_IKKE_FORELDER) { soekerIkkeForelder(soeknad) },
-        Kriterie(SOEKER_ER_IKKE_ALENEBARN) { soekerErIkkeAlenebarn(avdoed,gjenlevende, barn) }
+
+        // Innsender
+        Kriterie(INNSENDER_ER_IKKE_FORELDER) { innsenderIkkeForelder(soeknad) },
     )
 
     private fun harAdressebeskyttelse(person: Person): Boolean {
         return person.adressebeskyttelse != Adressebeskyttelse.UGRADERT
     }
 
-    // TODO denne må vi se på - kanskje ha en feil dersom alder ikke finnes?
-    private fun forGammel(person: Person, alder: Int): Boolean {
-        return person.alder()?.let { it > alder } ?: true
-    }
-
-    private fun sjekkStatsborgerskap(person: Person): Boolean {
-        return person.statsborgerskap != "NOR"
+    private fun ikkeNorskStatsborger(person: Person): Boolean {
+        return person.statsborgerskap != NORGE
     }
 
     private fun foedtUtland(person: Person): Boolean {
-        return person.foedeland != "NOR"
+        return person.foedeland != NORGE
     }
 
     private fun harUtvandring(person: Person): Boolean {
@@ -107,7 +112,7 @@ class FordelerKriterierService {
                 || person.utland?.utflyttingFraNorge?.isNotEmpty() == true)
     }
 
-    private fun personErIkkeDoed(person: Person): Boolean {
+    private fun personErIkkeRegistrertDoed(person: Person): Boolean {
         return person.doedsdato == null
     }
 
@@ -118,28 +123,30 @@ class FordelerKriterierService {
 
     //TODO tenke litt mer på dette kriteriet
     private fun ikkeGyldigBostedsAdresseINorge(person: Person): Boolean {
-        return person.bostedsadresse?.aktiv()?.type != AdresseType.VEGADRESSE
+        return person.bostedsadresse?.aktiv()?.type !in listOf(AdresseType.VEGADRESSE, AdresseType.MATRIKKELADRESSE)
     }
 
-    private fun soekerErIkkeAlenebarn(avdoed: Person, gjenlevende: Person, barn: Person): Boolean {
-
-        val barnFnr = barn.foedselsnummer
-        return false
+    private fun forGammel(person: Person, alder: Int = 15): Boolean {
+        return person.alder()?.let { it > alder } ?: true
     }
 
-    private fun harYrkesskade(barnepensjon: Barnepensjon): Boolean {
+    private fun barnErIkkeAlenebarn(avdoed: Person, barn: Person): Boolean {
+        return avdoed.familieRelasjon?.barn?.minus(barn.foedselsnummer)?.isNotEmpty() ?: false
+    }
+
+    private fun harHuketAvForYrkesskade(barnepensjon: Barnepensjon): Boolean {
         return barnepensjon.foreldre
             .filter { it.type == PersonType.AVDOED }
             .any { it is Avdoed && it.doedsaarsakSkyldesYrkesskadeEllerYrkessykdom.svar.verdi == JaNeiVetIkke.JA }
     }
 
-    private fun soekerIkkeForelder(barnepensjon: Barnepensjon): Boolean {
+    private fun innsenderIkkeForelder(barnepensjon: Barnepensjon): Boolean {
         return barnepensjon.innsender.foedselsnummer !in barnepensjon.foreldre
             .filter { it.type == PersonType.GJENLEVENDE_FORELDER }
             .map { it.foedselsnummer }
     }
 
-    private fun harVerge(barnepensjon: Barnepensjon): Boolean {
+    private fun harHuketAvForVerge(barnepensjon: Barnepensjon): Boolean {
         return barnepensjon.soeker.verge?.svar?.verdi == JaNeiVetIkke.JA
     }
 

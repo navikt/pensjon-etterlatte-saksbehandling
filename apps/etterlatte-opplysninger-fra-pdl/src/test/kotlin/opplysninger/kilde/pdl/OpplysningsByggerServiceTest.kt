@@ -1,9 +1,11 @@
 package opplysninger.kilde.pdl
 
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foreldre
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.PersonInfo
 import no.nav.etterlatte.libs.common.objectMapper
@@ -13,11 +15,13 @@ import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.opplysninger.kilde.pdl.OpplysningsByggerService
+import no.nav.etterlatte.opplysninger.kilde.pdl.PdlService
 import no.nav.etterlatte.opplysninger.kilde.pdl.lagOpplysning
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -39,7 +43,9 @@ internal class OpplysningsByggerServiceTest {
         const val GYLDIG_FNR_AVDOED = "01018100157"
         const val GYLDIG_FNR_GJENLEVENDE_FORELDER = "07081177656"
         const val KILDE_PDL = "pdl"
-        val soekerPdlMock = mockPerson(GYLDIG_FNR_SOEKER)
+        val mockedFamilierelasjon =
+            FamilieRelasjon(null, listOf(Foedselsnummer.of("01018100157"), Foedselsnummer.of("07081177656")), null)
+        val soekerPdlMock = mockPerson(GYLDIG_FNR_SOEKER, familieRelasjon = mockedFamilierelasjon)
         val avdoedPdlMock = mockPerson(GYLDIG_FNR_AVDOED, doedsdato = LocalDate.parse("2022-01-02"))
         val gjenlevendeForelderPdlMock = mockPerson(GYLDIG_FNR_GJENLEVENDE_FORELDER)
         val opplysningsByggerService = OpplysningsByggerService()
@@ -204,7 +210,6 @@ internal class OpplysningsByggerServiceTest {
 
     }
 
-    //TODO avklare om metode er klar for testing
     @Test
     fun `skal lage opplysning med soekers foedselsdato`() {
         val soekerFoedselsdato =
@@ -219,10 +224,49 @@ internal class OpplysningsByggerServiceTest {
     }
 
 
-    //TODO avklare om metode er klar for testing
     @Test
-    fun soekerRelasjonForeldre() {
+    fun `skal lage behandlingsopplysning med foreldre`() {
 
+        val pdlMock = mockk<PdlService>()
+        every {
+            pdlMock.hentPdlModell(
+                "01018100157",
+                PersonRolle.GJENLEVENDE
+            )
+        } returns mockPerson("01018100157")
+
+        every {
+            pdlMock.hentPdlModell(
+                "07081177656",
+                PersonRolle.GJENLEVENDE
+            )
+        } returns mockPerson("07081177656")
+
+        println("test av hentPdlModell:")
+        println(
+            pdlMock.hentPdlModell(
+                "07081177656",
+                PersonRolle.GJENLEVENDE
+            )
+        )
+
+        val foreldreopplysning = opplysningsByggerService.soekerRelasjonForeldre(
+            soekerPdlMock,
+            Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1, pdlMock
+        )
+        // forelder 1
+        assertEquals(Foreldre::class.java, foreldreopplysning.opplysning.javaClass)
+        foreldreopplysning.opplysning.foreldre?.get(0)!!.apply {
+            assertEquals(PersonInfo::class.java, javaClass)
+            //TODO sjekke elementer i PersonInfo()
+            //assertEquals(it.fornavn)
+        }
+        // forelder 2
+        foreldreopplysning.opplysning.foreldre?.get(1)!!.apply {
+            assertEquals(PersonInfo::class.java, javaClass)
+            //TODO sjekke elementer i PersonInfo()
+            //assertEquals(it.fornavn)
+        }
     }
 
     @Test

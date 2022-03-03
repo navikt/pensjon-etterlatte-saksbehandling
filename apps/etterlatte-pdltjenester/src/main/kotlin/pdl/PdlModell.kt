@@ -1,7 +1,5 @@
 package no.nav.etterlatte.pdl
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonInclude
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -10,32 +8,25 @@ data class PdlGraphqlRequest(
     val variables: PdlVariables
 )
 
-/**
- * Tar imot ident(er) som variabel til et [PdlGraphqlRequest].
- *
- * Ident kan være i form av FOLKEREGISTERIDENT (fødselsnummer), AKTORID eller NPID.
- */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlVariables(
     val ident: String,
     val bostedsadresse: Boolean,
     val bostedsadresseHistorikk: Boolean,
     val deltBostedsadresse: Boolean,
     val oppholdsadresse: Boolean,
+    val oppholdsadresseHistorikk: Boolean,
     val kontaktadresse: Boolean,
+    val kontaktadresseHistorikk: Boolean,
     val utland: Boolean,
     val sivilstand: Boolean,
     val familieRelasjon: Boolean
 )
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlPersonResponse(
     val data: PdlPersonResponseData? = null,
     val errors: List<PdlResponseError>? = null
 )
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlResponseError(
     val message: String?,
     val locations: List<PdlErrorLocation>? = null,

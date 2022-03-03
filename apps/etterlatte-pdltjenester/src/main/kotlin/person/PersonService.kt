@@ -46,7 +46,9 @@ class PersonService(
                     bostedsadresseHistorikk = true,
                     deltBostedsadresse = true,
                     kontaktadresse = true,
+                    kontaktadresseHistorikk = true,
                     oppholdsadresse = true,
+                    oppholdsadresseHistorikk = true,
                     utland = true,
                     sivilstand = false,
                     familieRelasjon = true
@@ -58,7 +60,9 @@ class PersonService(
                     bostedsadresseHistorikk = true,
                     deltBostedsadresse = false,
                     kontaktadresse = false,
+                    kontaktadresseHistorikk = false,
                     oppholdsadresse = true,
+                    oppholdsadresseHistorikk = false,
                     utland = true,
                     sivilstand = true,
                     familieRelasjon = true
@@ -70,7 +74,9 @@ class PersonService(
                     bostedsadresseHistorikk = true,
                     deltBostedsadresse = false,
                     kontaktadresse = true,
+                    kontaktadresseHistorikk = true,
                     oppholdsadresse = true,
+                    oppholdsadresseHistorikk = true,
                     utland = true,
                     sivilstand = true,
                     familieRelasjon = true

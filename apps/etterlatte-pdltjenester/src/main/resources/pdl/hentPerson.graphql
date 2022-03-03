@@ -89,7 +89,9 @@ query(
     $bostedsadresseHistorikk: Boolean!,
     $deltBostedsadresse: Boolean!,
     $oppholdsadresse: Boolean!,
+    $oppholdsadresseHistorikk: Boolean!,
     $kontaktadresse: Boolean!,
+    $kontaktadresseHistorikk: Boolean!,
     $utland: Boolean!,
     $sivilstand: Boolean!,
     $familieRelasjon: Boolean!,
@@ -161,7 +163,7 @@ query(
             metadata {...metadata}
             folkeregistermetadata{...folkeregistermetadata}
         }
-        kontaktadresse(historikk: false) @include(if: $kontaktadresse) {
+        kontaktadresse(historikk: $kontaktadresseHistorikk) @include(if: $kontaktadresse) {
             coAdressenavn
             folkeregistermetadata {...folkeregistermetadata}
             gyldigFraOgMed
@@ -175,7 +177,7 @@ query(
             utenlandskAdresseIFrittFormat{...utenlandskAdresseIFrittFormatDetails}
             vegadresse{...vegadresseDetails}
         }
-        oppholdsadresse(historikk: false) @include(if: $oppholdsadresse) {
+        oppholdsadresse(historikk: $oppholdsadresseHistorikk) @include(if: $oppholdsadresse) {
             coAdressenavn
             folkeregistermetadata {...folkeregistermetadata}
             gyldigFraOgMed

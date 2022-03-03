@@ -1,12 +1,15 @@
 package no.nav.etterlatte.fordeler
 
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -22,6 +25,12 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 class FordelingAvbruttException(message: String, val severity: Level) : RuntimeException(message)
+
+private data class FordelerEvent(
+    val soeknad: Barnepensjon,
+    val soeknadId: String,
+    val hendelseGyldigTil: OffsetDateTime,
+)
 
 internal class Fordeler(
     rapidsConnection: RapidsConnection,
@@ -50,29 +59,32 @@ internal class Fordeler(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             try {
-                logger.info("Sjekker om soknad (${packet.soknadId()}) er gyldig for fordeling")
+                val event: FordelerEvent = packet.toFordelerEvent()
+                val soeknad: Barnepensjon = event.soeknad
 
-                if (packet.hendelseUtgaatt())
+                logger.info("Sjekker om soknad (${event.soeknadId}) er gyldig for fordeling")
+
+                if (ugyldigHendelse(event))
                     throw FordelingAvbruttException(
-                        "Avbrutt fordeling: Hendelsen er ikke lenger gyldig (${packet.hendelseGyldigTil()})",
+                        "Avbrutt fordeling: Hendelsen er ikke lenger gyldig (${hendelseGyldigTil(event)})",
                         severity = ERROR
                     )
 
-                if (packet.soknadIkkeBarnepensjon())
+                if (ugyldigSoeknadstype(soeknad))
                     throw FordelingAvbruttException(
-                        "Avbrutt fordeling: Søknad er ikke barnepensjon (${packet.soknadType()})",
+                        "Avbrutt fordeling: Søknad er ikke barnepensjon (${soeknad.type})",
                         severity = INFO
                     )
 
                 runBlocking {
-                    val barn = pdlTjenesterKlient.hentPerson(hentBarnRequest(packet))
-                    val avdoed = pdlTjenesterKlient.hentPerson(hentAvdoedRequest(packet))
-                    val gjenlevende = pdlTjenesterKlient.hentPerson(hentGjenlevendeRequest(packet))
+                    val barn = pdlTjenesterKlient.hentPerson(hentBarnRequest(soeknad))
+                    val avdoed = pdlTjenesterKlient.hentPerson(hentAvdoedRequest(soeknad))
+                    val gjenlevende = pdlTjenesterKlient.hentPerson(hentGjenlevendeRequest(soeknad))
 
-                    fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, packet).let {
+                    fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad).let {
                         if (it.kandidat) {
-                            logger.info("Soknad ${packet.soknadId()} er gyldig for fordeling")
-                            context.publish(packet.oppdaterTilFordelt().toJson())
+                            logger.info("Soknad ${event.soeknadId} er gyldig for fordeling")
+                            context.publish(packet.toFordeltEvent().toJson())
                         } else {
                             throw FordelingAvbruttException("Avbrutt fordeling: ${it.forklaring}", severity = INFO)
                         }
@@ -89,47 +101,46 @@ internal class Fordeler(
             }
         }
 
-    private fun hentGjenlevendeRequest(packet: JsonMessage) =
-        HentPersonRequest(packet.gjenlevendeFnr(), PersonRolle.GJENLEVENDE)
+    private fun ugyldigSoeknadstype(soeknad: Barnepensjon) =
+        soeknad.type != SoeknadType.BARNEPENSJON
 
-    private fun hentAvdoedRequest(packet: JsonMessage) =
-        HentPersonRequest(packet.avdoedFnr(), PersonRolle.AVDOED)
+    private fun ugyldigHendelse(event: FordelerEvent) =
+        event.hendelseGyldigTil.isBefore(OffsetDateTime.now(klokke))
 
-    private fun hentBarnRequest(packet: JsonMessage) =
-        HentPersonRequest(packet.soekerFnr(), PersonRolle.BARN)
+    private fun hendelseGyldigTil(event: FordelerEvent) =
+        event.hendelseGyldigTil.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
-    private fun JsonMessage.soknadId() = this["@lagret_soeknad_id"]
+    private fun hentGjenlevendeRequest(soeknad: Barnepensjon) =
+        HentPersonRequest(
+            foedselsnummer = soeknad.foreldre.first { it.type == PersonType.GJENLEVENDE_FORELDER }.foedselsnummer.svar,
+            rolle = PersonRolle.GJENLEVENDE
+        )
 
-    private fun JsonMessage.soknadType() = this["@skjema_info"]["type"]?.textValue()
+    private fun hentAvdoedRequest(soeknad: Barnepensjon) =
+        HentPersonRequest(
+            foedselsnummer = soeknad.foreldre.first { it.type == PersonType.AVDOED }.foedselsnummer.svar,
+            rolle = PersonRolle.AVDOED
+        )
 
-    private fun JsonMessage.soknadIkkeBarnepensjon() = this.soknadType() != SoeknadType.BARNEPENSJON.name
+    private fun hentBarnRequest(soeknad: Barnepensjon) =
+        HentPersonRequest(
+            foedselsnummer = soeknad.soeker.foedselsnummer.svar,
+            rolle = PersonRolle.BARN
+        )
 
-    private fun JsonMessage.hendelseGyldigTil() =
-        OffsetDateTime.parse(this["@hendelse_gyldig_til"].asText())?.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-
-    private fun JsonMessage.hendelseUtgaatt() =
-        OffsetDateTime.parse(this["@hendelse_gyldig_til"].asText())?.isBefore(OffsetDateTime.now(klokke)) ?: true
-
-    private fun JsonMessage.soekerFnr() = this["@fnr_soeker"].asText().let { Foedselsnummer.of(it) }
-
-    private fun JsonMessage.avdoedFnr(): Foedselsnummer =
-        this["@skjema_info"]["foreldre"]
-            .filter { it["type"].asText() == "AVDOED" }
-            .map { it["foedselsnummer"].first()}[0].asText()
-            .let { Foedselsnummer.of(it) }
-
-    private fun JsonMessage.gjenlevendeFnr() =
-        this["@skjema_info"]["foreldre"]
-            .filter { it["type"].asText() == "GJENLEVENDE_FORELDER" }
-            .map { it["foedselsnummer"].first()}[0].asText()
-            .let { Foedselsnummer.of(it) }
-
-    private fun JsonMessage.oppdaterTilFordelt() =
+    private fun JsonMessage.toFordeltEvent() =
         apply {
             this["@soeknad_fordelt"] = true
             this["@event_name"] = "ey_fordelt"
             this["@correlation_id"] = getCorrelationId()
         }
+
+    private fun JsonMessage.toFordelerEvent() =
+        FordelerEvent(
+            soeknad = get("@skjema_info").textValue().let(objectMapper::readValue),
+            soeknadId = get("@lagret_soeknad_id").textValue(),
+            hendelseGyldigTil = get("@hendelse_gyldig_til").textValue().let(OffsetDateTime::parse)
+        )
 
     private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 }

@@ -19,8 +19,8 @@ internal class FordelerTest {
 
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
 
-    private val nyhendelseJson = javaClass.getResource("/fordeler/soknad_barnepensjon.json")!!.readText()
-    private val hendelseIkkeBarnePensjonJson = javaClass.getResource("/fordeler/soknad_ikke_barnepensjon.json")!!.readText()
+    private val soeknadBarnepensjon = javaClass.getResource("/fordeler/soknad_barnepensjon.json")!!.readText()
+    private val soeknadIkkeBarnepensjon = javaClass.getResource("/fordeler/soknad_ikke_barnepensjon.json")!!.readText()
     private val hendelseIkkeGyldig = javaClass.getResource("/fordeler/soknad_utgaatt_hendelse.json")!!.readText()
 
     @AfterEach
@@ -29,7 +29,7 @@ internal class FordelerTest {
     }
 
     @Test
-    fun `gyldig soknad til vedtakslosning`() {
+    fun `skal fordele gyldig soknad til vedtakslosning`() {
         val barnFnr = Foedselsnummer.of("07010776133")
         val avdoedFnr = Foedselsnummer.of("24014021406")
         val etterlattFnr = Foedselsnummer.of("11057523044")
@@ -59,7 +59,7 @@ internal class FordelerTest {
 
         val inspector = TestRapid()
             .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
-            .apply { sendTestMessage(nyhendelseJson) }
+            .apply { sendTestMessage(soeknadBarnepensjon) }
             .inspektør
 
         assertEquals("ey_fordelt", inspector.message(0).get("@event_name").asText())
@@ -96,14 +96,14 @@ internal class FordelerTest {
 
         val inspector = TestRapid()
             .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
-            .apply { sendTestMessage(nyhendelseJson) }
+            .apply { sendTestMessage(soeknadBarnepensjon) }
             .inspektør
 
         assertTrue(inspector.size == 0)
     }
 
     @Test
-    fun hendelseIkkeGyldigLengre() {
+    fun `skal ikke fordele hendelse som ikke lenger er gyldig`() {
         val inspector = TestRapid()
             .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
             .apply { sendTestMessage(hendelseIkkeGyldig) }
@@ -113,10 +113,10 @@ internal class FordelerTest {
     }
 
     @Test
-    fun ikkeBarnepensjonSoeknad() {
+    fun `skal ikke fordele soknad som ikke er av typen barnepensjon`() {
         val inspector = TestRapid()
             .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
-            .apply { sendTestMessage(hendelseIkkeBarnePensjonJson) }
+            .apply { sendTestMessage(soeknadIkkeBarnepensjon) }
             .inspektør
 
         assertTrue(inspector.size == 0)
@@ -128,7 +128,7 @@ internal class FordelerTest {
 
         val inspector = TestRapid()
             .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
-            .apply { sendTestMessage(nyhendelseJson) }
+            .apply { sendTestMessage(soeknadBarnepensjon) }
             .inspektør
 
         assertTrue(inspector.size == 0)

@@ -1,20 +1,22 @@
 package no.nav.etterlatte.fordeler
 
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
+import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.mockUgyldigAdresse
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 import java.time.LocalDate
 import java.time.LocalDate.now
 
-class FordelerKriterieServiceTest {
+internal class FordelerKriterieServiceTest {
 
     private val fordelerKriterierService = FordelerKriterierService()
 
@@ -243,10 +245,7 @@ class FordelerKriterieServiceTest {
         val BARNEPENSJON_SOKNAD_HUKET_AV_UTLAND = readSoknad("/fordeler/soknad_huket_av_utland.json")
         val BARNEPENSJON_SOKNAD_INNSENDER_IKKE_FORELDER = readSoknad("/fordeler/soknad_innsender_ikke_forelder.json")
 
-        private fun readSoknad(file: String) =
-            JsonMessage(readFile(file), MessageProblems("")).apply { requireKey("@skjema_info") }
-
-        private fun readSoknadAsBarnepensjon(file: String): Barnepensjon {
+        private fun readSoknad(file: String): Barnepensjon {
             val skjemaInfo = objectMapper.writeValueAsString(objectMapper.readTree(readFile(file)).get("@skjema_info"))
             return objectMapper.readValue(skjemaInfo, Barnepensjon::class.java)
         }

@@ -20,9 +20,12 @@ import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.aktiv
 import no.nav.etterlatte.libs.common.person.alder
-import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 
-typealias Sjekk = (JsonMessage) -> Boolean
+typealias Sjekk = (Barnepensjon) -> Boolean
 
 enum class FordelerKriterie(val forklaring: String) {
     BARN_ER_IKKE_NORSK_STATSBORGER("Barn er ikke norsk statsborger"),
@@ -62,7 +65,7 @@ class FordelerKriterierService {
         barn: Person,
         avdoed: Person,
         gjenlevende: Person,
-        soeknad: JsonMessage,
+        soeknad : Barnepensjon
     ) = listOf(
         Kriterie(BARN_ER_IKKE_NORSK_STATSBORGER) { sjekkStatsborgerskap(barn) },
         Kriterie(BARN_ER_FOR_GAMMELT) { forGammel(barn, 15) },
@@ -79,7 +82,7 @@ class FordelerKriterierService {
         Kriterie(GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorge(gjenlevende) },
         Kriterie(GJENLEVENDE_HAR_IKKE_FORELDREANSVAR) { gjenlevendeHarIkkeForeldreansvar(barn, gjenlevende) },
         Kriterie(INNSENDER_ER_IKKE_FORELDER) { soekerIkkeForelder(soeknad) },
-        //Kriterie(SOEKER_ER_IKKE_ALENEBARN) {soekerErIkkeAlenebarn(avdoed,gjenlevende, barn)}
+        Kriterie(SOEKER_ER_IKKE_ALENEBARN) { soekerErIkkeAlenebarn(avdoed,gjenlevende, barn) }
     )
 
     private fun harAdressebeskyttelse(person: Person): Boolean {
@@ -119,32 +122,31 @@ class FordelerKriterierService {
     }
 
     private fun soekerErIkkeAlenebarn(avdoed: Person, gjenlevende: Person, barn: Person): Boolean {
+
         val barnFnr = barn.foedselsnummer
         return false
     }
 
-    private fun harYrkesskade(sok: JsonMessage): Boolean {
-        return sok["@skjema_info"]["foreldre"]
-            .filter { it["type"].asText() == "AVDOED" }
-            .filter { it["doedsaarsakSkyldesYrkesskadeEllerYrkessykdom"]["svar"]["verdi"].asText() == "JA" }
-            .isNotEmpty()
+    private fun harYrkesskade(barnepensjon: Barnepensjon): Boolean {
+        return barnepensjon.foreldre
+            .filter { it.type == PersonType.AVDOED }
+            .any { it is Avdoed && it.doedsaarsakSkyldesYrkesskadeEllerYrkessykdom.svar.verdi == JaNeiVetIkke.JA }
     }
 
-    private fun soekerIkkeForelder(sok: JsonMessage): Boolean {
-        return sok["@skjema_info"]["innsender"]["foedselsnummer"]["svar"].asText() !in sok["@skjema_info"]["foreldre"]
-            .filter { it["type"].asText() == "GJENLEVENDE_FORELDER" }
-            .map { it["foedselsnummer"]["svar"].asText() }
+    private fun soekerIkkeForelder(barnepensjon: Barnepensjon): Boolean {
+        return barnepensjon.innsender.foedselsnummer !in barnepensjon.foreldre
+            .filter { it.type == PersonType.GJENLEVENDE_FORELDER }
+            .map { it.foedselsnummer }
     }
 
-    private fun harVerge(sok: JsonMessage): Boolean {
-        return sok["@skjema_info"]["soeker"]["verge"]["svar"]["verdi"].asText() == "JA"
+    private fun harVerge(barnepensjon: Barnepensjon): Boolean {
+        return barnepensjon.soeker.verge?.svar?.verdi == JaNeiVetIkke.JA
     }
 
-    private fun harHuketAvForUtenlandsopphold(sok: JsonMessage): Boolean {
-        return sok["@skjema_info"]["foreldre"]
-            .filter { it["type"].asText() == "AVDOED" }
-            .filter { it["utenlandsopphold"]["svar"]["verdi"].asText() == "JA" }
-            .isNotEmpty()
+    private fun harHuketAvForUtenlandsopphold(barnepensjon: Barnepensjon): Boolean {
+        return barnepensjon.foreldre
+            .filter { it.type == PersonType.AVDOED }
+            .any { it is Avdoed && it.utenlandsopphold.svar.verdi == JaNeiVetIkke.JA }
     }
 
     data class FordelerResultat(
@@ -153,12 +155,12 @@ class FordelerKriterierService {
     )
 
     private class Kriterie(val fordelerKriterie: FordelerKriterie, private val sjekk: Sjekk) {
-        fun blirOppfyltAv(message: JsonMessage): Boolean = sjekk(message)
+        fun blirOppfyltAv(soeknadBarnepensjon: Barnepensjon): Boolean = sjekk(soeknadBarnepensjon)
     }
 
-    fun sjekkMotKriterier(barn: Person, avdoed: Person, gjenlevende: Person, packet: JsonMessage): FordelerResultat {
-        return fordelerKriterier(barn, avdoed, gjenlevende, packet)
-            .filter { it.blirOppfyltAv(packet) }
+    fun sjekkMotKriterier(barn: Person, avdoed: Person, gjenlevende: Person, soeknad: Barnepensjon): FordelerResultat {
+        return fordelerKriterier(barn, avdoed, gjenlevende, soeknad)
+            .filter { it.blirOppfyltAv(soeknad) }
             .map { it.fordelerKriterie }
             .let { FordelerResultat(it.isEmpty(), it) }
     }

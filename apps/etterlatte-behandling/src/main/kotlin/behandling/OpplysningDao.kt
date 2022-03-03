@@ -22,7 +22,7 @@ class OpplysningDao(private val connection: () -> Connection) {
         return Behandlingsopplysning(
             getObject(1) as UUID,
             objectMapper.readValue(getString(2)),
-            Opplysningstyper.values().find { it.value == getString(3) }!!,
+            Opplysningstyper.valueOf(getString(3)),
             getString(4).deSerialize()!!,
             getString(5).deSerialize()!!,
         )
@@ -42,7 +42,7 @@ class OpplysningDao(private val connection: () -> Connection) {
                 setObject(1, behandlingsopplysning.id)
                 setString(2, behandlingsopplysning.opplysning.serialize())
                 setString(3, behandlingsopplysning.kilde.toJson())
-                setString(4, behandlingsopplysning.opplysningType.value)
+                setString(4, behandlingsopplysning.opplysningType.name)
                 setString(5, behandlingsopplysning.meta.serialize())
                 require(executeUpdate() == 1)
             }

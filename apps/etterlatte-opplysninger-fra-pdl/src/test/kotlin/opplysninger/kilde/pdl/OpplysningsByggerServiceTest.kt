@@ -2,6 +2,8 @@ package opplysninger.kilde.pdl
 
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.PersonInfo
 import no.nav.etterlatte.libs.common.objectMapper
@@ -189,17 +191,31 @@ internal class OpplysningsByggerServiceTest {
     }
 
     @Test
-    @Disabled
-    //TODO avklare om metode er klar for testing
-    fun avdoedDodsdato() {
+    fun `skal lage opplysning med avdoedes doedsdato`() {
         val avdoedDoedsdato =
             opplysningsByggerService.avdoedDodsdato(avdoedPdlMock, Opplysningstyper.AVDOED_DOEDSFALL_V1)
+        avdoedDoedsdato.apply {
+            assertEquals(Opplysningstyper.AVDOED_DOEDSFALL_V1, opplysningType)
+            assertEquals(Doedsdato::class.java, opplysning.javaClass)
+            assertEquals(avdoedPdlMock.doedsdato, opplysning.doedsdato)
+            assertEquals(avdoedPdlMock.foedselsnummer.value, opplysning.foedselsnummer)
+        }
+        opplysningsByggerService.avdoedDodsdato(avdoedPdlMock, Opplysningstyper.AVDOED_DOEDSFALL_V1)
 
     }
 
     //TODO avklare om metode er klar for testing
     @Test
-    fun soekerFoedselsdato() {
+    fun `skal lage opplysning med soekers foedselsdato`() {
+        val soekerFoedselsdato =
+            opplysningsByggerService.soekerFoedselsdato(soekerPdlMock, Opplysningstyper.SOEKER_FOEDSELSDATO_V1)
+        soekerFoedselsdato.apply {
+            assertEquals(Opplysningstyper.SOEKER_FOEDSELSDATO_V1, opplysningType)
+            assertEquals(Foedselsdato::class.java, opplysning.javaClass)
+            assertEquals(soekerPdlMock.foedselsdato, opplysning.foedselsdato)
+            assertEquals(soekerPdlMock.foedselsnummer.value, opplysning.foedselsnummer)
+        }
+
     }
 
 

@@ -84,7 +84,8 @@ class OpplysningsByggerService : OpplysningsBygger {
 
     fun soekerRelasjonForeldre(soekerPdl: Person, opplysningsType: Opplysningstyper, pdl: Pdl): Behandlingsopplysning<Foreldre> {
         val foreldreFraPdl =
-            soekerPdl.familieRelasjon?.foreldre?.map { it.value }?.map { pdl.hentPdlModell(it, PersonRolle.GJENLEVENDE) } // TODO hva er riktig rolle her?
+            soekerPdl.familieRelasjon?.foreldre?.map { it.value }
+                ?.map { pdl.hentPdlModell(it, PersonRolle.GJENLEVENDE) } // TODO hva er riktig rolle her?
         println(foreldreFraPdl)
         val foreldrePersonInfo = foreldreFraPdl?.map {
             PersonInfo(

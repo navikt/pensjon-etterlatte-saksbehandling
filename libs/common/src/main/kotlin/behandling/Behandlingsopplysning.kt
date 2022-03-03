@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 
 import java.time.Instant
 import java.util.*
@@ -14,17 +15,17 @@ import java.util.*
 open class Behandlingsopplysning<T>(
     val id: UUID,
     val kilde: Kilde,
-    val opplysningType: String,
+    val opplysningType: Opplysningstyper,
     val meta: ObjectNode,
     val opplysning: T,
     val attestering: Kilde? = null
 ) {
     override fun toString(): String {
-        return "Opplysning om $opplysningType: oppgitt av $kilde til å være: $opplysning"
+        return "Opplysning om ${opplysningType.value}: oppgitt av $kilde til å være: $opplysning"
     }
 
     open fun opplysningerSomMåAttesteres():List<String>{
-        return if(kilde is Saksbehandler && attestering == null) listOf("!" + opplysningType) else emptyList()
+        return if(kilde is Saksbehandler && attestering == null) listOf("!" + opplysningType.value) else emptyList()
     }
 
 

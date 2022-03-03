@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -27,14 +28,14 @@ internal class RealBehandlingServiceTest {
             Behandlingsopplysning(
                 UUID.randomUUID(),
                 Behandlingsopplysning.Saksbehandler("S01"),
-                "trygdetid",
+                Opplysningstyper.INNSENDER_PERSONINFO_V1,
                 objectMapper.createObjectNode(),
                 objectMapper.createObjectNode()
             ),
             Behandlingsopplysning(
                 UUID.randomUUID(),
                 Behandlingsopplysning.Saksbehandler("S01"),
-                "medlemskap",
+                Opplysningstyper.AVDOED_PERSONINFO_V1,
                 objectMapper.createObjectNode(),
                 objectMapper.createObjectNode()
             ),

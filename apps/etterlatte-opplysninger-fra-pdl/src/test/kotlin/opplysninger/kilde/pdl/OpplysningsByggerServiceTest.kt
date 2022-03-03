@@ -122,9 +122,10 @@ internal class OpplysningsByggerServiceTest {
 
     }
 
+
     @Test
     fun `lagOpplysning skal lag Behandlingsopplysning på rett format`() {
-        val behandlingsopplysning = lagOpplysning("opplysningstype", mockk<PersonInfo>())
+        val behandlingsopplysning = lagOpplysning(Opplysningstyper.TESTOPPLYSNING, mockk<PersonInfo>())
         behandlingsopplysning.apply {
             assertEquals(36, id.toString().length)
             assertEquals(Behandlingsopplysning.Pdl::class.java, kilde.javaClass)
@@ -141,10 +142,10 @@ internal class OpplysningsByggerServiceTest {
     @Test
     fun `skal lage opplysning om gjenlevende forelder`() {
         val opplysningGjenlevendeForelder = opplysningsByggerService.gjenlevendeForelderOpplysning(
-            gjenlevendeForelderPdlMock, Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1.value
+            gjenlevendeForelderPdlMock, Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1
         )
         opplysningGjenlevendeForelder.apply {
-            assertEquals(Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1.value, opplysningType)
+            assertEquals(Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1, opplysningType)
 
             assertEquals(PersonInfo::class.java, opplysning.javaClass)
             assertEquals(gjenlevendeForelderPdlMock.fornavn, opplysning.fornavn)
@@ -160,11 +161,11 @@ internal class OpplysningsByggerServiceTest {
     fun `skal lage personopplysning om avdød`() {
         val personopplysningAvdoed =
             opplysningsByggerService.personOpplysning(
-                avdoedPdlMock, Opplysningstyper.AVDOED_PERSONINFO_V1.value, PersonType.AVDOED
+                avdoedPdlMock, Opplysningstyper.AVDOED_PERSONINFO_V1, PersonType.AVDOED
             )
 
         personopplysningAvdoed.apply {
-            assertEquals(Opplysningstyper.AVDOED_PERSONINFO_V1.value, opplysningType)
+            assertEquals(Opplysningstyper.AVDOED_PERSONINFO_V1, opplysningType)
 
             assertEquals(PersonInfo::class.java, opplysning.javaClass)
             assertEquals(avdoedPdlMock.fornavn, opplysning.fornavn)
@@ -180,7 +181,7 @@ internal class OpplysningsByggerServiceTest {
     fun `skal lage personopplysning med persontype BARN for søker`() {
         val personopplysningSoeker =
             opplysningsByggerService.personOpplysning(
-                soekerPdlMock, Opplysningstyper.SOEKER_PERSONINFO_V1.value, PersonType.BARN
+                soekerPdlMock, Opplysningstyper.SOEKER_PERSONINFO_V1, PersonType.BARN
             )
         personopplysningSoeker.apply {
             assertEquals(PersonType.BARN, opplysning.type)
@@ -192,7 +193,7 @@ internal class OpplysningsByggerServiceTest {
     //TODO avklare om metode er klar for testing
     fun avdoedDodsdato() {
         val avdoedDoedsdato =
-            opplysningsByggerService.avdoedDodsdato(avdoedPdlMock, Opplysningstyper.AVDOED_DOEDSFALL_V1.value)
+            opplysningsByggerService.avdoedDodsdato(avdoedPdlMock, Opplysningstyper.AVDOED_DOEDSFALL_V1)
 
     }
 

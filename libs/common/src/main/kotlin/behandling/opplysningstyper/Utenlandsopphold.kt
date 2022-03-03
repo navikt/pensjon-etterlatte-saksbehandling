@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling.opplysningstyper
 
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Svar
 import java.time.LocalDate
 
 data class Utenlandsopphold(

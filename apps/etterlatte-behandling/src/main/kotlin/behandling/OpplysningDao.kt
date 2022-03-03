@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.database.singleOrNull
 import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import java.sql.Connection
 import java.sql.ResultSet
 import java.util.*
@@ -21,7 +22,7 @@ class OpplysningDao(private val connection: () -> Connection) {
         return Behandlingsopplysning(
             getObject(1) as UUID,
             objectMapper.readValue(getString(2)),
-            getString(3),
+            objectMapper.readValue(getString(3)),
             getString(4).deSerialize()!!,
             getString(5).deSerialize()!!,
         )
@@ -41,7 +42,7 @@ class OpplysningDao(private val connection: () -> Connection) {
                 setObject(1, behandlingsopplysning.id)
                 setString(2, behandlingsopplysning.opplysning.serialize())
                 setString(3, behandlingsopplysning.kilde.toJson())
-                setString(4, behandlingsopplysning.opplysningType)
+                setString(4, behandlingsopplysning.opplysningType.value)
                 setString(5, behandlingsopplysning.meta.serialize())
                 require(executeUpdate() == 1)
             }

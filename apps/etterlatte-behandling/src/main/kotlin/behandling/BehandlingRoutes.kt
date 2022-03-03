@@ -84,7 +84,7 @@ private fun mapDate(behandling: Behandling): LocalDateTime? {
         return null
     }
     val dato =
-        SoeknadMottattDato(LocalDateTime.parse(behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKNAD_MOTTATT_DATO.value }?.opplysning.toString()))
+        SoeknadMottattDato(LocalDateTime.parse(behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKNAD_MOTTATT_DATO }?.opplysning.toString()))
     println("Dato")
     println(dato)
     return dato.mottattDato

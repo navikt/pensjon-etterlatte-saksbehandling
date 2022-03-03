@@ -20,18 +20,18 @@ class VilkaarService {
         println(opplysninger)
 
         val soekerFoedselsdato =
-            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value }
+            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_FOEDSELSDATO_V1 }
                 .map { setOpplysningType<Foedselsdato>(it) }
 
-        val avdoedDoedsdato = opplysninger.filter { it.opplysningsType == Opplysningstyper.AVDOED_DOEDSFALL_V1.value }
+        val avdoedDoedsdato = opplysninger.filter { it.opplysningsType == Opplysningstyper.AVDOED_DOEDSFALL_V1 }
             .map { setOpplysningType<Doedsdato>(it) }
 
         val soekerRelasjonForeldre =
-            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1.value }
+            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1 }
                 .map { setOpplysningType<Foreldre>(it) }
 
         val avdoedUtenlandsopphold =
-            opplysninger.filter { it. opplysningsType == Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1.value}
+            opplysninger.filter { it. opplysningsType == Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1}
                 .map { setOpplysningType<Utenlandsopphold>(it)}
 
         return listOf(

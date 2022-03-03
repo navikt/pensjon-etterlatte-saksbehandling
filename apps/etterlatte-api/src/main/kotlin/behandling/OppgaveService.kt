@@ -54,7 +54,6 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient) {
         }
 
         fun mapTilOppgave(sakMedBehandling: SakMedBehandling): Oppgave {
-            println(sakMedBehandling.behandling.mottattDato)
             return Oppgave(
                 behandlingsId = sakMedBehandling.behandling.id,
                 sakId = sakMedBehandling.sak.id,

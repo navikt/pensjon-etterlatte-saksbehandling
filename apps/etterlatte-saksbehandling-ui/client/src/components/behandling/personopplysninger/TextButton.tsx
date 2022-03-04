@@ -5,22 +5,13 @@ import { TextButtonWrapper } from './styled'
 type Props = {
   isOpen: boolean
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
-  antall: number
 }
 
-export const TextButton: React.FC<Props> = ({ isOpen, setIsOpen, antall }) => {
+export const TextButton: React.FC<Props> = ({ isOpen, setIsOpen }) => {
   return (
     <TextButtonWrapper onClick={() => setIsOpen(!isOpen)}>
       <div className="textButton" onClick={() => setIsOpen(!isOpen)}>
-        {isOpen ? (
-          <>
-            Historikk <Collapse className="dropdownIcon" />
-          </>
-        ) : (
-          <>
-            Historikk <Expand className="dropdownIcon" />
-          </>
-        )}
+        Historikk {isOpen ? <Collapse className="dropdownIcon" /> : <Expand className="dropdownIcon" />}
       </div>
     </TextButtonWrapper>
   )

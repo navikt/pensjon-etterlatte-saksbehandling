@@ -88,7 +88,7 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
           </BodyShort>
           <span className="adresse">
             <BodyShort size="small">{person.adressenavn}</BodyShort>
-            <TextButton isOpen={visLogg} setIsOpen={setVisLogg} antall={1} />
+            <TextButton isOpen={visLogg} setIsOpen={setVisLogg} />
           </span>
           <HistorikkWrapper>
             {visLogg &&

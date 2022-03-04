@@ -14,9 +14,11 @@ import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
@@ -24,8 +26,9 @@ import no.nav.etterlatte.opplysninger.kilde.pdl.OpplysningsByggerService
 import no.nav.etterlatte.opplysninger.kilde.pdl.PdlService
 import no.nav.etterlatte.opplysninger.kilde.pdl.lagOpplysning
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
@@ -45,8 +48,22 @@ internal class OpplysningsByggerServiceTest {
         const val KILDE_PDL = "pdl"
         val mockedFamilierelasjon =
             FamilieRelasjon(null, listOf(Foedselsnummer.of("01018100157"), Foedselsnummer.of("07081177656")), null)
+        val mockedInnflyttingsliste =
+            listOf(
+                InnflyttingTilNorge("Sverige", LocalDate.parse("2020-05-08")),
+                InnflyttingTilNorge("Singapore", LocalDate.parse("2012-12-23"))
+            )
+        val mockedUtflyttingsliste =
+            listOf(
+                UtflyttingFraNorge("Sverige", LocalDate.parse("2018-02-01")),
+                UtflyttingFraNorge("Tyskland", LocalDate.parse("2005-09-18"))
+            )
+        val mockedUtland = Utland(mockedInnflyttingsliste, mockedUtflyttingsliste)
         val soekerPdlMock = mockPerson(GYLDIG_FNR_SOEKER, familieRelasjon = mockedFamilierelasjon)
-        val avdoedPdlMock = mockPerson(GYLDIG_FNR_AVDOED, doedsdato = LocalDate.parse("2022-01-02"))
+        val avdoedPdlMock =
+            mockPerson(GYLDIG_FNR_AVDOED, doedsdato = LocalDate.parse("2022-01-02"))
+        val avdoedPdlMockMedUtenlandsopphold =
+            mockPerson(GYLDIG_FNR_AVDOED, doedsdato = LocalDate.parse("2022-01-02"), utland = mockedUtland)
         val gjenlevendeForelderPdlMock = mockPerson(GYLDIG_FNR_GJENLEVENDE_FORELDER)
         val opplysningsByggerService = OpplysningsByggerService()
         val komplettBarnepensjonssoknad = readSoknadAsBarnepensjon("/fullMessage2.json")
@@ -273,6 +290,43 @@ internal class OpplysningsByggerServiceTest {
     @Test
     fun `skal kaste exception ved forsoek paa henting av gjenlevendes foedselsnummer`() {
         assertThrows<Exception> { opplysningsByggerService.hentGjenlevendeForelderFnr(ukomplettBarnepensjonssoknad) }
+    }
+
+    @Test
+    fun `avdoed har ikke hatt noen utenlandsopphold`() {
+        val avdoedInnOgUtflytting =
+            opplysningsByggerService.avdoedInnOgUtflytting(avdoedPdlMock, Opplysningstyper.AVDOED_INN_OG_UTFLYTTING_V1)
+
+        avdoedInnOgUtflytting.apply {
+            assertEquals("NEI", opplysning.harHattUtenlandsopphold)
+            assertNull(opplysning.innflytting)
+            assertNull(opplysning.utflytting)
+            assertEquals(GYLDIG_FNR_AVDOED, opplysning.foedselsnummer)
+        }
+    }
+
+    @Test
+    fun `avdoed har hatt utenlandsopphold`() {
+        val avdoedInnOgUtflytting =
+            opplysningsByggerService.avdoedInnOgUtflytting(
+                avdoedPdlMockMedUtenlandsopphold,
+                Opplysningstyper.AVDOED_INN_OG_UTFLYTTING_V1
+            )
+
+        avdoedInnOgUtflytting.apply {
+            assertEquals("JA", opplysning.harHattUtenlandsopphold)
+            assertNotNull(opplysning.innflytting)
+            assertNotNull(opplysning.utflytting)
+            opplysning.utflytting!!.forEachIndexed { index, it ->
+                assertEquals(mockedUtflyttingsliste[index].tilflyttingsland, it.tilflyttingsland)
+                assertEquals(mockedUtflyttingsliste[index].dato, it.dato)
+            }
+            opplysning.innflytting!!.forEachIndexed { index, it ->
+                assertEquals(mockedInnflyttingsliste[index].fraflyttingsland, it.fraflyttingsland)
+                assertEquals(mockedInnflyttingsliste[index].dato, it.dato)
+            }
+            assertEquals(GYLDIG_FNR_AVDOED, opplysning.foedselsnummer)
+        }
     }
 
 }

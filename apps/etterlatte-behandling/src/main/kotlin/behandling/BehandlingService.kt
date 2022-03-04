@@ -33,7 +33,9 @@ class RealBehandlingService(
     }
 
     override fun hentBehandlingerISak(sakid: Long): List<Behandling> {
-        return behandlinger.alleISak(sakid)
+        return behandlinger.alleISak(sakid).map {
+            BehandlingAggregat(it.id, behandlinger, opplysninger, vilkaarKlient).serialiserbarUtgave()
+        }
     }
 
     override fun startBehandling(sak: Long, nyeOpplysninger: List<Behandlingsopplysning<ObjectNode>>): Behandling {

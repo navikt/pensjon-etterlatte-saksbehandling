@@ -86,11 +86,10 @@ private fun mapDate(behandling: Behandling): LocalDateTime? {
     if (behandling.grunnlag.isEmpty()) {
         return null
     }
-    val dato =
-        SoeknadMottattDato(LocalDateTime.parse(behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKNAD_MOTTATT_DATO }?.opplysning.toString()))
-    println("Dato")
-    println(dato)
-    return dato.mottattDato
+    val dato = behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKNAD_MOTTATT_DATO }?.opplysning?.let {
+        LocalDateTime.parse(it.toString())
+    }
+    return dato
 }
 
 private fun <T> inTransaction(block: () -> T): T = Kontekst.get().databasecontxt.inTransaction {

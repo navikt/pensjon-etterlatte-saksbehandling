@@ -15,6 +15,7 @@ export const Personopplysninger = () => {
   const {
     sosken,
     soekerPdl,
+    soekerSoknad,
     mottattDato,
     dodsfall,
     avdodPersonPdl,
@@ -51,7 +52,7 @@ export const Personopplysninger = () => {
           <DetailWrapper>
             <Detail size="medium">Mottaker</Detail>
             <Detail size="small" className="detail">
-              {soekerPdl.opplysning.fornavn} {soekerPdl.opplysning.etternavn} ({soekerPdl?.opplysning.fornavn} {})
+              {soekerPdl?.opplysning.fornavn} {soekerPdl?.opplysning.etternavn} ({soekerSoknad?.opplysning.fornavn} {soekerSoknad?.opplysning.etternavn})
             </Detail>
           </DetailWrapper>
           <DetailWrapper>

@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.SoeknadMottattDato
 import java.time.LocalDateTime
+import no.nav.etterlatte.libs.common.objectMapper
 import java.util.*
 
 fun Route.behandlingRoutes(service: BehandlingService) {
@@ -87,9 +88,9 @@ private fun mapDate(behandling: Behandling): LocalDateTime? {
         return null
     }
     val dato = behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKNAD_MOTTATT_DATO }?.opplysning?.let {
-        LocalDateTime.parse(it.toString())
+        objectMapper.readValue(it.toString(), SoeknadMottattDato::class.java)
     }
-    return dato
+    return dato?.mottattDato
 }
 
 private fun <T> inTransaction(block: () -> T): T = Kontekst.get().databasecontxt.inTransaction {

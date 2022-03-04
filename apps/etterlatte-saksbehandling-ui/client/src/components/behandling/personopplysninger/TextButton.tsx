@@ -9,20 +9,16 @@ type Props = {
 }
 
 export const TextButton: React.FC<Props> = ({ isOpen, setIsOpen, antall }) => {
-  const getButtonText = () => {
-    return antall === 1 ? 'endring' : 'endringer'
-  }
-
   return (
     <TextButtonWrapper onClick={() => setIsOpen(!isOpen)}>
       <div className="textButton" onClick={() => setIsOpen(!isOpen)}>
         {isOpen ? (
           <>
-            Skjul {antall} {getButtonText()} <Collapse className="dropdownIcon" />
+            Historikk <Collapse className="dropdownIcon" />
           </>
         ) : (
           <>
-            Vis {antall} {getButtonText()} <Expand className="dropdownIcon" />
+            Historikk <Expand className="dropdownIcon" />
           </>
         )}
       </div>

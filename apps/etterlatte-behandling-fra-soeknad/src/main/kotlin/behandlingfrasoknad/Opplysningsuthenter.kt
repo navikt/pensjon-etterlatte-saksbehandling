@@ -126,7 +126,7 @@ class Opplysningsuthenter {
         return setBehandlingsopplysninger(
             barnepensjon, opplysningsType,
             Utenlandsadresse(
-                adresse?.svar,
+                adresse?.svar?.innhold,
                 adresse?.opplysning?.land?.svar?.innhold,
                 adresse?.opplysning?.adresse?.svar?.innhold,
                 barnepensjon.soeker.foedselsnummer.svar.value

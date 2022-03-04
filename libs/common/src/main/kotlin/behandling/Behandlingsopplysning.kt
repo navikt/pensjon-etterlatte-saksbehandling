@@ -21,11 +21,11 @@ open class Behandlingsopplysning<T>(
     val attestering: Kilde? = null
 ) {
     override fun toString(): String {
-        return "Opplysning om ${opplysningType.value}: oppgitt av $kilde til å være: $opplysning"
+        return "Opplysning om ${opplysningType.name}: oppgitt av $kilde til å være: $opplysning"
     }
 
     open fun opplysningerSomMåAttesteres():List<String>{
-        return if(kilde is Saksbehandler && attestering == null) listOf("!" + opplysningType.value) else emptyList()
+        return if(kilde is Saksbehandler && attestering == null) listOf("!" + opplysningType.name) else emptyList()
     }
 
 

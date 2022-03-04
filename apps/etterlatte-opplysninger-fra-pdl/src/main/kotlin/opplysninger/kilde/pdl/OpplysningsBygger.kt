@@ -29,6 +29,7 @@ class OpplysningsByggerService : OpplysningsBygger {
             avdoedDodsdato(avdoedPdl, Opplysningstyper.AVDOED_DOEDSFALL_V1),
             avdoedInnOgUtflytting(avdoedPdl, Opplysningstyper.AVDOED_INN_OG_UTFLYTTING_V1),
             soekerRelasjonForeldre(soekerPdl, Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1, pdl),
+            soekerBostedadresse(soekerPdl, Opplysningstyper.SOEKER_BOSTEDADRESSE_V1),
             gjenlevendeForelderOpplysning(
                 gjenlevendeForelderPdl,
                 Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1
@@ -98,6 +99,25 @@ class OpplysningsByggerService : OpplysningsBygger {
         }
 
         return lagOpplysning(opplysningsType, Foreldre(foreldrePersonInfo))
+    }
+
+    fun soekerBostedadresse(soekerPdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Bostedadresse> {
+        val adresse = soekerPdl.bostedsadresse?.map { Adresse(
+            it.type,
+            it.aktiv,
+            it.coAdresseNavn,
+            it.adresseLinje1,
+            it.adresseLinje2,
+            it.adresseLinje3,
+            it.postnr,
+            it.poststed,
+            it.land,
+            it.kilde,
+            it.gyldigFraOgMed,
+            it.gyldigTilOgMed
+        ) }
+
+        return lagOpplysning(opplysningsType, Bostedadresse(adresse))
     }
 
     fun hentAvdoedFnr(barnepensjon: Barnepensjon): String {

@@ -1,21 +1,24 @@
 package no.nav.etterlatte.fordeler
 
+import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_FORELDER_TIL_BARN
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_HATT_UTLANDSOPPHOLD
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_UTVANDRING
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_YRKESSKADE
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_VAR_IKKE_BOSATT_I_NORGE
 import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_FOR_GAMMELT
+import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_IKKE_ALENEBARN
 import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_IKKE_BOSATT_I_NORGE
 import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_IKKE_FOEDT_I_NORGE
 import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_IKKE_NORSK_STATSBORGER
 import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_HAR_ADRESSEBESKYTTELSE
+import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_HAR_HUKET_AV_UTLANDSADRESSE
 import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_HAR_UTVANDRING
 import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_HAR_VERGE
 import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE
 import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_HAR_IKKE_FORELDREANSVAR
+import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE
 import no.nav.etterlatte.fordeler.FordelerKriterie.INNSENDER_ER_IKKE_FORELDER
-import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_IKKE_ALENEBARN
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.Person
@@ -36,6 +39,7 @@ enum class FordelerKriterie(val forklaring: String) {
     BARN_HAR_ADRESSEBESKYTTELSE("Barn har adressebeskyttelse"),
     BARN_ER_IKKE_FOEDT_I_NORGE("Barn ikke fodt i Norge"),
     BARN_HAR_UTVANDRING("Barn har utvandring"),
+    BARN_HAR_HUKET_AV_UTLANDSADRESSE("Det er huket av for utenlandsopphold for avdøde i søknaden"),
     BARN_HAR_VERGE("Barn er market med verge i søknaden"),
     BARN_ER_IKKE_BOSATT_I_NORGE("Barn er ikke bosatt i Norge"),
     AVDOED_HAR_UTVANDRING("Avdoed har utvandring"),
@@ -43,7 +47,9 @@ enum class FordelerKriterie(val forklaring: String) {
     AVDOED_ER_IKKE_REGISTRERT_SOM_DOED("Avdød er ikke død"),
     AVDOED_HAR_HATT_UTLANDSOPPHOLD("Det er huket av for utenlandsopphold for avdøde i søknaden"),
     AVDOED_VAR_IKKE_BOSATT_I_NORGE("Avdød er ikke bosatt i Norge"),
+    AVDOED_ER_IKKE_FORELDER_TIL_BARN("Avdød er forelder til søker"),
     GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE("Gjenlevende er ikke bosatt i Norge"),
+    GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE("Gjenlevende har samme adresse"),
     GJENLEVENDE_HAR_IKKE_FORELDREANSVAR("Gjenlevende søker har ikke foreldreanvar"),
     INNSENDER_ER_IKKE_FORELDER("Søker er ikke markert som forelder i søknaden"),
     BARN_ER_IKKE_ALENEBARN("Søker er ikke alenebarn"),
@@ -52,17 +58,8 @@ enum class FordelerKriterie(val forklaring: String) {
 class FordelerKriterierService {
 
     /**
-     * Dødsfallet er registrert
-     * Alder - barn under 15 år
-     * Enebarn
-     * Verge og foreldreansvar  -trenger vi eksplisitt sjekk på verge?
-     * Ingen barn på vei
-     * Yrkesskade
-     * Avdød- ingen ut- og innvandringsdatoer
-     * Avdød - Ikke oppgitt utenlandsopphold
-     * Gjenlevende ektefelle/samboer - bosatt i Norge
-     * Barnet - bosatt i Norge + ingen ut- og innvandringsdatoe
-     * Avdød er biologisk forelder til søker
+     * Grunnlag for regler er også dokumenter på Confluence:
+     * https://confluence.adeo.no/display/TE/Fordelingsapp
      */
     private fun fordelerKriterier(
         barn: Person,
@@ -75,6 +72,7 @@ class FordelerKriterierService {
         Kriterie(BARN_ER_IKKE_NORSK_STATSBORGER) { ikkeNorskStatsborger(barn) },
         Kriterie(BARN_ER_IKKE_FOEDT_I_NORGE) { foedtUtland(barn) },
         Kriterie(BARN_ER_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorge(barn) },
+        Kriterie(BARN_HAR_HUKET_AV_UTLANDSADRESSE) { harHuketAvForUtenlandsadresse(soeknad) },
         Kriterie(BARN_HAR_UTVANDRING) { harUtvandring(barn) },
         Kriterie(BARN_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(barn) },
         Kriterie(BARN_HAR_VERGE) { harHuketAvForVerge(soeknad) },
@@ -82,6 +80,7 @@ class FordelerKriterierService {
 
         // Avdød
         Kriterie(AVDOED_ER_IKKE_REGISTRERT_SOM_DOED) { personErIkkeRegistrertDoed(avdoed) },
+        Kriterie(AVDOED_ER_IKKE_FORELDER_TIL_BARN) { ikkeForelderTilBarn(avdoed, barn) },
         Kriterie(AVDOED_VAR_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorge(avdoed) },
         Kriterie(AVDOED_HAR_UTVANDRING) { harUtvandring(avdoed) },
         Kriterie(AVDOED_HAR_HATT_UTLANDSOPPHOLD) { harHuketAvForUtenlandsopphold(soeknad) },
@@ -89,11 +88,16 @@ class FordelerKriterierService {
 
         // Gjenlevende
         Kriterie(GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorge(gjenlevende) },
+        Kriterie(GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE) { gjenlevendeOgBarnHarIkkeSammeAdresse(gjenlevende, barn) },
         Kriterie(GJENLEVENDE_HAR_IKKE_FORELDREANSVAR) { gjenlevendeHarIkkeForeldreansvar(barn, gjenlevende) },
 
         // Innsender
         Kriterie(INNSENDER_ER_IKKE_FORELDER) { innsenderIkkeForelder(soeknad) },
     )
+
+    private fun ikkeForelderTilBarn(avdoed: Person, barn: Person): Boolean {
+        return barn.familieRelasjon?.foreldre?.let { avdoed.foedselsnummer !in it } ?: true
+    }
 
     private fun harAdressebeskyttelse(person: Person): Boolean {
         return person.adressebeskyttelse != Adressebeskyttelse.UGRADERT
@@ -121,12 +125,21 @@ class FordelerKriterierService {
             ?.none { it == gjenlevende.foedselsnummer } == true
     }
 
-    //TODO tenke litt mer på dette kriteriet
+    // TODO sjekke at gyldig-til dato ikke er satt
+    // TODO sjekke hva som skjer med adresse på en død person - gyldig vil kanskje ikke lenger være aktuell?
+    // TODO sjekke på dødsfallstidpunkt for gjenlevende?
     private fun ikkeGyldigBostedsAdresseINorge(person: Person): Boolean {
         return person.bostedsadresse?.aktiv()?.type !in listOf(AdresseType.VEGADRESSE, AdresseType.MATRIKKELADRESSE)
     }
 
-    private fun forGammel(person: Person, alder: Int = 15): Boolean {
+    private fun gjenlevendeOgBarnHarIkkeSammeAdresse(gjenlevende: Person, barn: Person): Boolean {
+        val gjenlevendeAdresse = gjenlevende.bostedsadresse?.aktiv()
+        val barnAdresse = barn.bostedsadresse?.aktiv()
+        return !(gjenlevendeAdresse?.adresseLinje1 == barnAdresse?.adresseLinje1
+                && gjenlevendeAdresse?.postnr == barnAdresse?.postnr)
+    }
+
+    private fun forGammel(person: Person, alder: Int = 14): Boolean {
         return person.alder()?.let { it > alder } ?: true
     }
 
@@ -154,6 +167,10 @@ class FordelerKriterierService {
         return barnepensjon.foreldre
             .filter { it.type == PersonType.AVDOED }
             .any { it is Avdoed && it.utenlandsopphold.svar.verdi == JaNeiVetIkke.JA }
+    }
+
+    private fun harHuketAvForUtenlandsadresse(barnepensjon: Barnepensjon): Boolean {
+        return barnepensjon.soeker.utenlandsAdresse?.svar?.verdi == JaNeiVetIkke.JA
     }
 
     data class FordelerResultat(

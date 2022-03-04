@@ -31,8 +31,8 @@ internal class FordelerServiceTest {
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr } ) } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
-                ansvarligeForeldre = listOf(etterlattFnr),
-                foreldre = null,
+                ansvarligeForeldre = listOf(etterlattFnr, avdoedFnr),
+                foreldre = listOf(etterlattFnr, avdoedFnr),
                 barn = null,
             )
         )

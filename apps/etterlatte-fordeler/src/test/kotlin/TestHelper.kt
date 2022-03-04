@@ -49,11 +49,11 @@ fun mockPerson(
     familieRelasjon = familieRelasjon
 )
 
-fun mockNorskAdresse() = Adresse(
+fun mockNorskAdresse(adresseLinje1: String = "Testveien 4") = Adresse(
     type = AdresseType.VEGADRESSE,
     aktiv = true,
     coAdresseNavn = null,
-    adresseLinje1 = "Testveien 4",
+    adresseLinje1 = adresseLinje1,
     adresseLinje2 = null,
     adresseLinje3 = null,
     postnr = "1234",

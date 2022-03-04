@@ -98,21 +98,6 @@ internal class OpplysningsByggerServiceTest {
             gyldigTilOgMed = null
         )
 
-        fun mockUgyldigAdresse() = Adresse(
-            type = AdresseType.UKJENT_BOSTED,
-            aktiv = true,
-            coAdresseNavn = null,
-            adresseLinje1 = "Tull",
-            adresseLinje2 = null,
-            adresseLinje3 = null,
-            postnr = null,
-            poststed = null,
-            land = null,
-            kilde = "FREG",
-            gyldigFraOgMed = LocalDateTime.now().minusYears(1),
-            gyldigTilOgMed = null
-        )
-
         fun readSoknadAsBarnepensjon(file: String): Barnepensjon {
             val skjemaInfo = objectMapper.writeValueAsString(
                 objectMapper.readTree(readFile(file)).get("@skjema_info")
@@ -230,42 +215,41 @@ internal class OpplysningsByggerServiceTest {
         val pdlMock = mockk<PdlService>()
         every {
             pdlMock.hentPdlModell(
-                "01018100157",
+                GYLDIG_FNR_AVDOED,
                 PersonRolle.GJENLEVENDE
             )
-        } returns mockPerson("01018100157")
+        } returns mockPerson(GYLDIG_FNR_AVDOED)
 
         every {
             pdlMock.hentPdlModell(
-                "07081177656",
+                GYLDIG_FNR_GJENLEVENDE_FORELDER,
                 PersonRolle.GJENLEVENDE
             )
-        } returns mockPerson("07081177656")
-
-        println("test av hentPdlModell:")
-        println(
-            pdlMock.hentPdlModell(
-                "07081177656",
-                PersonRolle.GJENLEVENDE
-            )
-        )
+        } returns mockPerson(GYLDIG_FNR_GJENLEVENDE_FORELDER)
 
         val foreldreopplysning = opplysningsByggerService.soekerRelasjonForeldre(
             soekerPdlMock,
             Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1, pdlMock
         )
-        // forelder 1
         assertEquals(Foreldre::class.java, foreldreopplysning.opplysning.javaClass)
+        // Avdoed
+        //  TODO: avklare om avdoed forelder vil være blant foreldre. I soekerRelasjonForeldre hentes kun Personrolle.GJENLEVENDE fra hentPdlModell
         foreldreopplysning.opplysning.foreldre?.get(0)!!.apply {
             assertEquals(PersonInfo::class.java, javaClass)
-            //TODO sjekke elementer i PersonInfo()
-            //assertEquals(it.fornavn)
+            assertEquals(avdoedPdlMock.fornavn, fornavn)
+            assertEquals(avdoedPdlMock.etternavn, etternavn)
+            assertEquals(avdoedPdlMock.foedselsnummer.value, foedselsnummer.value)
+            // TODO: Adresse
+            assertEquals(PersonType.FORELDER, type)
         }
-        // forelder 2
+        // Gjenlevende
         foreldreopplysning.opplysning.foreldre?.get(1)!!.apply {
             assertEquals(PersonInfo::class.java, javaClass)
-            //TODO sjekke elementer i PersonInfo()
-            //assertEquals(it.fornavn)
+            assertEquals(gjenlevendeForelderPdlMock.fornavn, fornavn)
+            assertEquals(gjenlevendeForelderPdlMock.etternavn, etternavn)
+            assertEquals(gjenlevendeForelderPdlMock.foedselsnummer.value, foedselsnummer.value)
+            // TODO: Adresse
+            assertEquals(PersonType.FORELDER, type)
         }
     }
 

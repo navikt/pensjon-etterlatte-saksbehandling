@@ -26,7 +26,10 @@ fun Route.behandlingRoutes(service: BehandlingService) {
     get("/sak/{sakid}/behandlinger") {
         call.respond(inTransaction {
             service.hentBehandlingerISak(sakId)
-                .map { BehandlingSammendrag(it.id, it.sak, it.status, mapDate(it)) }
+                .map {
+                    println(it.grunnlag)
+                    BehandlingSammendrag(it.id, it.sak, it.status, mapDate(it))
+                }
                 .let { BehandlingSammendragListe(it) }
         })
     }

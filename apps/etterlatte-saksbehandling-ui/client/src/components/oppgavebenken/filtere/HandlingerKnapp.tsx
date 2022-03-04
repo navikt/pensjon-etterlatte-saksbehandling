@@ -15,7 +15,7 @@ const HandlingerKnapp: React.FC<{ saksbehandler: string; handling: Handlinger; b
   console.log(sakErTildeltInnloggetSaksbehandler);
 
   const goToBehandling = () => {
-    navigate(`behandling/${behandlingsId}/personopplysninger`)
+    navigate(`behandling/${behandlingsId}/soeknadsoversikt`)
   }
 
   //TODO skru på denne funksjonaliteten etter oppgavhåndteringer avklart

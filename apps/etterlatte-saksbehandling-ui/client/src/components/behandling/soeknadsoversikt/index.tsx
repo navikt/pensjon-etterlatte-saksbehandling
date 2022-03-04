@@ -9,7 +9,7 @@ import { PersonInfo } from './PersonInfo'
 import { format } from 'date-fns'
 import { usePersonInfoFromBehandling } from './usePersonInfoFromBehandling'
 
-export const Personopplysninger = () => {
+export const Soeknadsoversikt = () => {
   const [soeknadGyldigBegrunnelse, setSoeknadGyldigBegrunnelse] = useState('')
 
   const {

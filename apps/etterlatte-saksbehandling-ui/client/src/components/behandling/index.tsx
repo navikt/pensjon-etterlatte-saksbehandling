@@ -12,7 +12,7 @@ import { BehandlingsStatus, IBehandlingsStatus } from './behandlings-status'
 import { Beregne } from './beregne'
 import { Brev } from './brev'
 import { Inngangsvilkaar } from './inngangsvilkaar'
-import { Personopplysninger } from './personopplysninger'
+import { Soeknadsoversikt } from './soeknadsoversikt'
 import { Utbetalingsoversikt } from './utbetalingsoversikt'
 import { Vedtak } from './vedtak'
 import { IApiResponse } from '../../shared/api/types'
@@ -63,8 +63,8 @@ export const Behandling = () => {
             {/* stegmeny */}
             <StegMeny>
               <li>
-                <NavLink to="personopplysninger">
-                  <span>1.</span> Personopplysninger
+                <NavLink to="soeknadsoversikt">
+                  <span>1.</span> Søknadsoversikt
                 </NavLink>
               </li>
               <li>
@@ -131,7 +131,7 @@ export const Behandling = () => {
           </Column>
           <Column>
             <Routes>
-              <Route path="personopplysninger" element={<Personopplysninger />} />
+              <Route path="soeknadsoversikt" element={<Soeknadsoversikt />} />
               <Route path="inngangsvilkaar" element={<Inngangsvilkaar />} />
               <Route path="beregne" element={<Beregne />} />
               <Route path="vedtak" element={<Vedtak />} />

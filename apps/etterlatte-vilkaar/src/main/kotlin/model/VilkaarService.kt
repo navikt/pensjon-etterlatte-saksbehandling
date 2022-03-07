@@ -34,13 +34,15 @@ class VilkaarService {
         val soekerBostedadresse = opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_BOSTEDADRESSE_V1 }
             .map { setOpplysningType<Bostedadresse>(it) }
 
+        val soekerOppholdadresse = opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_OPPHOLDADRESSE_V1 }
+            .map { setOpplysningType<Oppholdadresse>(it)}
+
         val avdoedDoedsdato = opplysninger.filter { it.opplysningsType == Opplysningstyper.AVDOED_DOEDSFALL_V1 }
             .map { setOpplysningType<Doedsdato>(it) }
 
         val avdoedUtenlandsopphold =
             opplysninger.filter { it.opplysningsType == Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1 }
                 .map { setOpplysningType<Utenlandsopphold>(it) }
-
 
 
         return listOf(
@@ -54,6 +56,7 @@ class VilkaarService {
             vilkaarBarnetsMedlemskap(
                 Vilkaartyper.BARNETS_MEDLEMSKAP,
                 soekerBostedadresse,
+                soekerOppholdadresse,
                 soekerUtenlandsadresse,
                 avdoedDoedsdato
             )

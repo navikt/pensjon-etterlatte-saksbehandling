@@ -30,6 +30,7 @@ class OpplysningsByggerService : OpplysningsBygger {
             avdoedInnOgUtflytting(avdoedPdl, Opplysningstyper.AVDOED_INN_OG_UTFLYTTING_V1),
             soekerRelasjonForeldre(soekerPdl, Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1, pdl),
             soekerBostedadresse(soekerPdl, Opplysningstyper.SOEKER_BOSTEDADRESSE_V1),
+            soekerOppholdadresse(soekerPdl, Opplysningstyper.SOEKER_OPPHOLDADRESSE_V1),
             gjenlevendeForelderOpplysning(
                 gjenlevendeForelderPdl,
                 Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1
@@ -86,8 +87,7 @@ class OpplysningsByggerService : OpplysningsBygger {
     fun soekerRelasjonForeldre(soekerPdl: Person, opplysningsType: Opplysningstyper, pdl: Pdl): Behandlingsopplysning<Foreldre> {
         val foreldreFraPdl =
             soekerPdl.familieRelasjon?.foreldre?.map { it.value }
-                ?.map { pdl.hentPdlModell(it, PersonRolle.GJENLEVENDE) } // TODO hva er riktig rolle her?
-        println(foreldreFraPdl)
+                ?.map { pdl.hentPdlModell(it, PersonRolle.GJENLEVENDE) }
         val foreldrePersonInfo = foreldreFraPdl?.map {
             PersonInfo(
                 it.fornavn,
@@ -113,11 +113,30 @@ class OpplysningsByggerService : OpplysningsBygger {
             it.poststed,
             it.land,
             it.kilde,
-            it.gyldigFraOgMed,
-            it.gyldigTilOgMed
+            it.gyldigFraOgMed?.toLocalDate(),
+            it.gyldigTilOgMed?.toLocalDate()
         ) }
 
         return lagOpplysning(opplysningsType, Bostedadresse(adresse))
+    }
+
+    fun soekerOppholdadresse(soekerPdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Oppholdadresse> {
+        val adresse = soekerPdl.oppholdsadresse?.map { Adresse(
+            it.type,
+            it.aktiv,
+            it.coAdresseNavn,
+            it.adresseLinje1,
+            it.adresseLinje2,
+            it.adresseLinje3,
+            it.postnr,
+            it.poststed,
+            it.land,
+            it.kilde,
+            it.gyldigFraOgMed?.toLocalDate(),
+            it.gyldigTilOgMed?.toLocalDate()
+        ) }
+
+        return lagOpplysning(opplysningsType, Oppholdadresse(adresse))
     }
 
     fun hentAvdoedFnr(barnepensjon: Barnepensjon): String {

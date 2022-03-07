@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Bostedadresse
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foreldre
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Oppholdadresse
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsadresse
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -53,3 +54,9 @@ fun hentBostedsadresse(
     return bostedadresse ?: throw OpplysningKanIkkeHentesUt()
 }
 
+fun hentOppholdadresse(
+    oppholdadresse: List<VilkaarOpplysning<Oppholdadresse>>
+): Oppholdadresse {
+    val bostedadresse = oppholdadresse.find { it.kilde.type == "pdl" }?.opplysning
+    return bostedadresse ?: throw OpplysningKanIkkeHentesUt()
+}

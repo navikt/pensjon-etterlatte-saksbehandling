@@ -1,7 +1,7 @@
 package no.nav.etterlatte.libs.common.behandling.opplysningstyper
 
 import no.nav.etterlatte.libs.common.person.AdresseType
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 
 data class Adresse(
@@ -15,12 +15,14 @@ data class Adresse(
     val poststed: String?,
     val land: String?,
     val kilde: String,
-    val gyldigFraOgMed: LocalDateTime?,
-    val gyldigTilOgMed: LocalDateTime?,
+    val gyldigFraOgMed: LocalDate?,
+    val gyldigTilOgMed: LocalDate?,
 )
 
 data class Bostedadresse(
     val bostedadresse: List<Adresse>?
 )
 
-
+data class Oppholdadresse(
+    val oppholdadresse: List<Adresse>?
+)

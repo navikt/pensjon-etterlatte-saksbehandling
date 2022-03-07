@@ -49,7 +49,7 @@ fun mockPerson(
     familieRelasjon = familieRelasjon
 )
 
-fun mockNorskAdresse(adresseLinje1: String = "Testveien 4") = Adresse(
+fun mockNorskAdresse(adresseLinje1: String = "Testveien 4", gyldigTilOgMed: LocalDateTime? = null) = Adresse(
     type = AdresseType.VEGADRESSE,
     aktiv = true,
     coAdresseNavn = null,
@@ -61,11 +61,15 @@ fun mockNorskAdresse(adresseLinje1: String = "Testveien 4") = Adresse(
     land = null,
     kilde = "FREG",
     gyldigFraOgMed = LocalDateTime.now().minusYears(1),
-    gyldigTilOgMed = null
+    gyldigTilOgMed = gyldigTilOgMed
 )
 
-fun mockUgyldigAdresse() = Adresse(
-    type = AdresseType.UKJENT_BOSTED,
+fun mockUgyldigAdresse(
+    type: AdresseType = AdresseType.UKJENT_BOSTED,
+    gyldigFraOgMed: LocalDateTime = LocalDateTime.now().minusYears(1),
+    gyldigTilOgMed: LocalDateTime? = null
+) = Adresse(
+    type = type,
     aktiv = true,
     coAdresseNavn = null,
     adresseLinje1 = "Tull",
@@ -75,8 +79,8 @@ fun mockUgyldigAdresse() = Adresse(
     poststed = null,
     land = null,
     kilde = "FREG",
-    gyldigFraOgMed = LocalDateTime.now().minusYears(1),
-    gyldigTilOgMed = null
+    gyldigFraOgMed = gyldigFraOgMed,
+    gyldigTilOgMed = gyldigTilOgMed
 )
 
 fun readSoknad(file: String): Barnepensjon {

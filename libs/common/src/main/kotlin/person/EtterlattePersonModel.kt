@@ -99,3 +99,7 @@ fun Person.alder(): Int? {
 }
 
 fun List<Adresse>.aktiv(): Adresse? = firstOrNull { it.aktiv }
+
+fun List<Adresse>.nyeste(inkluderInaktiv: Boolean = false): Adresse? =
+    sortedByDescending { it.gyldigFraOgMed }.firstOrNull { if (inkluderInaktiv) true else it.gyldigTilOgMed == null }
+

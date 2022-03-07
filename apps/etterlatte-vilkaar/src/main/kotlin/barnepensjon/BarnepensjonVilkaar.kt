@@ -92,7 +92,7 @@ fun vilkaarBarnetsMedlemskap(
 
     return VurdertVilkaar(
         vilkaartype,
-        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+        setVikaarVurderingsResultat(listOf(harIkkeOppholdsadresseIUtlandetPdl, harIkkeBostedadresseIUtlandetSoeknad)),
         listOf(
             harIkkeBostedadresseIUtlandetPdl,
             harIkkeOppholdsadresseIUtlandetPdl,
@@ -104,7 +104,7 @@ fun vilkaarBarnetsMedlemskap(
 fun kriterieHarIkkeOppgittAdresseIUtlandet(utenlandsadresse: List<VilkaarOpplysning<Utenlandsadresse>>): Kriterie {
     val opplysningsGrunnlag = listOf(utenlandsadresse.filter { it.kilde.type == "privatperson" }).flatten()
     val resultat =
-        vurderOpplysning { hentUtenlandsadresseSoeknad(utenlandsadresse).adresseIUtlandet == "NEI" }
+        vurderOpplysning { hentUtenlandsadresseSoeknad(utenlandsadresse).adresseIUtlandet?.lowercase() == "nei" }
 
     return Kriterie(
         Kriterietyper.SOEKER_IKKE_OPPGITT_ADRESSE_I_UTLANDET_I_SOEKNAD,
@@ -157,9 +157,13 @@ fun kriterieHarIkkeOppholddsadresseIUtlandet(
 }
 
 fun harKunNorskeAdresserEtterDoedsdato(adresser: List<Adresse>?, doedsdato: LocalDate): VilkaarVurderingsResultat {
-    val harUtenlandskeAdresserIPdl = adresser?.filter {
-        it.gyldigTilOgMed?.isAfter(doedsdato) == true || it.aktiv
-    }?.map { it.land?.lowercase() == "norge" || it.land?.lowercase() == "nor" }?.contains(false)
+    val adresserEtterDoedsdato = adresser?.filter { it.gyldigTilOgMed?.isAfter(doedsdato) == true || it.aktiv }
+
+    if (adresserEtterDoedsdato != null && adresserEtterDoedsdato.any { it.land == null }) return VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+
+    val harUtenlandskeAdresserIPdl =
+        adresserEtterDoedsdato?.map { it.land?.lowercase() == "norge" || it.land?.lowercase() == "nor" }
+            ?.contains(false)
 
     return if (harUtenlandskeAdresserIPdl == null) {
         VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING

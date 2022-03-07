@@ -4,7 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
 
-//TODO vurdere å endre til logiske personer? barn/forelder/avdoed/etterlatt
 data class Person(
     val fornavn: String,
     val etternavn: String,
@@ -98,4 +97,6 @@ fun Person.alder(): Int? {
     return foedselsdato?.let { Period.between(foedselsdato, LocalDate.now()).years }
 }
 
+// TODO gir denne egentlig mening i nåværende form? Aktiv tar utgangspunkt i det vi får fra PPS, men det kan
+//  i teorien være en adresse som ikke lenger er gyldig da den kan ha satt gyldigTilDato
 fun List<Adresse>.aktiv(): Adresse? = firstOrNull { it.aktiv }

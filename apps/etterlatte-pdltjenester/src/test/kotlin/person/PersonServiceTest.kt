@@ -8,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlKlient
@@ -57,7 +58,7 @@ internal class PersonServiceTest {
     @Test
     fun`skal mappe person som inkluderer familierelasjon (foreldre)`() {
         val person = runBlocking {
-            personService.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
+            personService.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT), rolle = PersonRolle.BARN))
         }
 
         val expectedForeldreFnr = listOf("26117512737", "14097030880")
@@ -71,7 +72,7 @@ internal class PersonServiceTest {
     @Test
     fun`skal mappe person som inkluderer familierelasjon (ansvarlige foreldre)`() {
         val person = runBlocking {
-            personService.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
+            personService.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT), rolle = PersonRolle.BARN))
         }
 
         val expectedForeldreFnr = listOf("26117512737", "14097030880")
@@ -86,7 +87,7 @@ internal class PersonServiceTest {
     @Disabled("TODO - få inn datagrunnlag for denne")
     fun`skal mappe person som inkluderer familierelasjon (barn)`() {
         val person = runBlocking {
-            personService.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
+            personService.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT), rolle = PersonRolle.BARN))
         }
 
         val foreldreFnr = listOf("26117512737", "14097030880")
@@ -103,7 +104,7 @@ internal class PersonServiceTest {
 
         assertThrows<PdlForesporselFeilet> {
             runBlocking {
-                personService.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT)))
+                personService.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT), rolle = PersonRolle.BARN))
             }
         }
     }
@@ -114,7 +115,7 @@ internal class PersonServiceTest {
 
         runBlocking {
             assertThrows<PdlForesporselFeilet> {
-                personService.hentPerson(HentPersonRequest(Foedselsnummer.of(STOR_SNERK)))
+                personService.hentPerson(HentPersonRequest(Foedselsnummer.of(STOR_SNERK), rolle = PersonRolle.BARN))
             }
         }
     }

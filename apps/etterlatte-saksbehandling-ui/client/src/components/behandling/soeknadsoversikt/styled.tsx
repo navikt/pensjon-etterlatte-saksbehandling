@@ -37,6 +37,27 @@ export const PersonDetailWrapper = styled.div`
   .bodyShortHeading {
     font-weight: bold;
   }
+  .adresse {
+    display: inline-flex;
+  }
+`
+
+export const HistorikkWrapper = styled.div`
+  display: block;
+  padding-left: 5em;
+  font-size: 11px;
+  width: 400px;
+`
+
+export const HistorikkElement = styled.div`
+  font-size: 16px;
+  display: flex;
+  flex-wrap: wrap;
+
+  .date {
+    margin-right: 1em;
+    width: 10em;
+  }
 `
 
 export const PersonInfoHeader = styled.div`
@@ -60,7 +81,7 @@ export const HeadingWrapper = styled.div`
 `
 
 export const TextButtonWrapper = styled.div`  
-margin-left: auto;
+margin-left: 1em;
 margin-right: 5em;
 margin-bottom: 0;
 
@@ -68,7 +89,6 @@ margin-bottom: 0;
   margin-bottom: 0;
   display: inline-flex;
   justify-content: space-between;
-  text-decoration: underline;
   color: #0067c5;
   :hover {
     cursor: pointer;

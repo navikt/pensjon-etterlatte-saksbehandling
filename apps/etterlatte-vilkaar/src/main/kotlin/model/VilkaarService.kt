@@ -20,24 +20,44 @@ class VilkaarService {
         println(opplysninger)
 
         val soekerFoedselsdato =
-            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value }
+            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_FOEDSELSDATO_V1 }
                 .map { setOpplysningType<Foedselsdato>(it) }
 
-        val avdoedDoedsdato = opplysninger.filter { it.opplysningsType == Opplysningstyper.AVDOED_DOEDSFALL_V1.value }
-            .map { setOpplysningType<Doedsdato>(it) }
-
         val soekerRelasjonForeldre =
-            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1.value }
+            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1 }
                 .map { setOpplysningType<Foreldre>(it) }
 
+        val soekerUtenlandsadresse =
+            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_UTENLANDSADRESSE_V1 }
+                .map { setOpplysningType<Utenlandsadresse>(it) }
+
+        val soekerBostedadresse = opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_BOSTEDADRESSE_V1 }
+            .map { setOpplysningType<Bostedadresse>(it) }
+
+        val avdoedDoedsdato = opplysninger.filter { it.opplysningsType == Opplysningstyper.AVDOED_DOEDSFALL_V1 }
+            .map { setOpplysningType<Doedsdato>(it) }
+
         val avdoedUtenlandsopphold =
-            opplysninger.filter { it. opplysningsType == Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1.value}
-                .map { setOpplysningType<Utenlandsopphold>(it)}
+            opplysninger.filter { it.opplysningsType == Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1 }
+                .map { setOpplysningType<Utenlandsopphold>(it) }
+
+
 
         return listOf(
             vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, soekerFoedselsdato, avdoedDoedsdato),
             vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, avdoedDoedsdato, soekerRelasjonForeldre),
-            vilkaarAvdoedesMedlemskap(Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP, avdoedUtenlandsopphold, avdoedDoedsdato)
+            vilkaarAvdoedesMedlemskap(
+                Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
+                avdoedUtenlandsopphold,
+                avdoedDoedsdato
+            ),
+            vilkaarBarnetsMedlemskap(
+                Vilkaartyper.BARNETS_MEDLEMSKAP,
+                soekerBostedadresse,
+                soekerUtenlandsadresse,
+                avdoedDoedsdato
+            )
+
         )
 
     }

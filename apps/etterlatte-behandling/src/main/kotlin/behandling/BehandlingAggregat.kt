@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.*
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
@@ -42,7 +43,7 @@ class BehandlingAggregat(
         vilkårsprøv()
     }
 
-    fun leggTilGrunnlagUtenVilkårsprøving(data: ObjectNode, type: String, kilde: Behandlingsopplysning.Kilde?): UUID {
+    fun leggTilGrunnlagUtenVilkårsprøving(data: ObjectNode, type: Opplysningstyper, kilde: Behandlingsopplysning.Kilde?): UUID {
         val behandlingsopplysning = Behandlingsopplysning(
             UUID.randomUUID(),
             kildeFraRequestContekst(kilde),

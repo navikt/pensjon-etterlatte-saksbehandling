@@ -34,3 +34,10 @@ Et behandlingsbehov representerer at det har skjedd noe som gjør at det må gj�
 Pr nå er all informasjon som inngår i en behandling en opplysning. En opplysning er av en type og den har en kilde.
 #### Forbedringspotensiale
  * Opplysninger må kanskje kunne periodiseres avhengig av hvordan vi tenker på tidslinjer (eks: Skal et ekteskap være en opplysning med fom og potensiell tom-dato, eller er det en opplysning om at ekteskap er innkått og en annen opplysning om at ekteskap er opphørt)
+
+## Enhetstester
+Noen av testene bruker https://www.testcontainers.org/ for å dra opp en docker-container.
+Testene fungerer med Colima som alternativ til docker desktop på mac, men vi har hatt problemer med at docker.sock blir "borte" (typisk sier testen av det ikke finnes det docker-miljø, mens docker-kommandoer på cli går bra). Følgende kommando oppretter ny symlink til colima sin docker.sock.
+
+    sudo ln -s /Users/$(whoami)/.colima/docker.sock /var/run/docker.sock 
+

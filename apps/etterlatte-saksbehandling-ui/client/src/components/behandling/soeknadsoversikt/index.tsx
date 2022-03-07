@@ -9,19 +9,19 @@ import { PersonInfo } from './PersonInfo'
 import { format } from 'date-fns'
 import { usePersonInfoFromBehandling } from './usePersonInfoFromBehandling'
 
-export const Personopplysninger = () => {
+export const Soeknadsoversikt = () => {
   const [soeknadGyldigBegrunnelse, setSoeknadGyldigBegrunnelse] = useState('')
 
   const {
     sosken,
     soekerPdl,
+    soekerSoknad,
     mottattDato,
     dodsfall,
     avdodPersonPdl,
     avdodPersonSoknad,
     innsender,
-    gjenlevendePdl,
-    gjenlevendeSoknad,
+    gjenlevendePdl
   } = usePersonInfoFromBehandling()
 
   const soskenListe: IPersonFraSak[] = sosken?.opplysning.soesken.map((opplysning: any) => {
@@ -52,7 +52,7 @@ export const Personopplysninger = () => {
           <DetailWrapper>
             <Detail size="medium">Mottaker</Detail>
             <Detail size="small" className="detail">
-              {soekerPdl.opplysning.fornavn} {soekerPdl.opplysning.etternavn} ({soekerPdl?.opplysning.fornavn} {})
+              {soekerPdl?.opplysning.fornavn} {soekerPdl?.opplysning.etternavn} ({soekerSoknad?.opplysning.fornavn} {soekerSoknad?.opplysning.etternavn})
             </Detail>
           </DetailWrapper>
           <DetailWrapper>

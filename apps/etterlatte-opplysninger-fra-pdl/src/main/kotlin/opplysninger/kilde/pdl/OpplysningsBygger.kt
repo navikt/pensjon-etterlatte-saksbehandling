@@ -23,21 +23,34 @@ class OpplysningsByggerService : OpplysningsBygger {
         val gjenlevendeForelderPdl = pdl.hentPdlModell(gjenlevendeForelderFnr, PersonRolle.GJENLEVENDE)
 
         return listOf(
-            personOpplysning(soekerPdl, Opplysningstyper.SOEKER_PERSONINFO_V1.value, PersonType.BARN),
-            soekerFoedselsdato(soekerPdl, Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value),
-            personOpplysning(avdoedPdl, Opplysningstyper.AVDOED_PERSONINFO_V1.value, PersonType.AVDOED),
-            avdoedDodsdato(avdoedPdl, Opplysningstyper.AVDOED_DOEDSFALL_V1.value),
-            soekerRelasjonForeldre(soekerPdl, Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1.value, pdl),
+            personOpplysning(soekerPdl, Opplysningstyper.SOEKER_PERSONINFO_V1, PersonType.BARN),
+            soekerFoedselsdato(soekerPdl, Opplysningstyper.SOEKER_FOEDSELSDATO_V1),
+            personOpplysning(avdoedPdl, Opplysningstyper.AVDOED_PERSONINFO_V1, PersonType.AVDOED),
+            avdoedDodsdato(avdoedPdl, Opplysningstyper.AVDOED_DOEDSFALL_V1),
+            avdoedInnOgUtflytting(avdoedPdl, Opplysningstyper.AVDOED_INN_OG_UTFLYTTING_V1),
+            soekerRelasjonForeldre(soekerPdl, Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1, pdl),
+            soekerBostedadresse(soekerPdl, Opplysningstyper.SOEKER_BOSTEDADRESSE_V1),
             gjenlevendeForelderOpplysning(
                 gjenlevendeForelderPdl,
-                Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1.value
+                Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1
             )
         )
     }
 
+    fun avdoedInnOgUtflytting(avdoedPdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<UtlandInnOgUtflytting> {
+        val harHattUtenlandsopphold =  if (avdoedPdl.utland == null) "NEI" else "JA"
+        val opphold = UtlandInnOgUtflytting(
+            harHattUtenlandsopphold = harHattUtenlandsopphold,
+            innflytting = avdoedPdl.utland?.innflyttingTilNorge?.map { InnflyttingTilNorge(it.fraflyttingsland, it.dato) },
+            utflytting = avdoedPdl.utland?.utflyttingFraNorge?.map { UtflyttingFraNorge(it.tilflyttingsland, it.dato) },
+            foedselsnummer = avdoedPdl.foedselsnummer.value
+        )
+        return lagOpplysning(opplysningsType, opphold)
+    }
+
     fun gjenlevendeForelderOpplysning(
         gjenlevendePdl: Person,
-        opplysningsType: String
+        opplysningsType: Opplysningstyper
     ): Behandlingsopplysning<PersonInfo> {
         val gjenlevendePersonInfo = PersonInfo(
             gjenlevendePdl.fornavn,
@@ -51,7 +64,7 @@ class OpplysningsByggerService : OpplysningsBygger {
 
     fun personOpplysning(
         soekerPdl: Person,
-        opplysningsType: String,
+        opplysningsType: Opplysningstyper,
         personType: PersonType
     ): Behandlingsopplysning<PersonInfo> {
         val soekerPersonInfo =
@@ -59,20 +72,21 @@ class OpplysningsByggerService : OpplysningsBygger {
         return lagOpplysning(opplysningsType, soekerPersonInfo)
     }
 
-    fun avdoedDodsdato(avdoedPdl: Person, opplysningsType: String): Behandlingsopplysning<Doedsdato> {
+    fun avdoedDodsdato(avdoedPdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Doedsdato> {
         return lagOpplysning(opplysningsType, Doedsdato(avdoedPdl.doedsdato!!, avdoedPdl.foedselsnummer.value)) // TODO
     }
 
-    fun soekerFoedselsdato(soekerPdl: Person, opplysningsType: String): Behandlingsopplysning<Foedselsdato> {
+    fun soekerFoedselsdato(soekerPdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Foedselsdato> {
         return lagOpplysning(
             opplysningsType,
             Foedselsdato(soekerPdl.foedselsdato!!, soekerPdl.foedselsnummer.value)
         ) // TODO
     }
 
-    fun soekerRelasjonForeldre(soekerPdl: Person, opplysningsType: String, pdl: Pdl): Behandlingsopplysning<Foreldre> {
+    fun soekerRelasjonForeldre(soekerPdl: Person, opplysningsType: Opplysningstyper, pdl: Pdl): Behandlingsopplysning<Foreldre> {
         val foreldreFraPdl =
-            soekerPdl.familieRelasjon?.foreldre?.map { it.value }?.map { pdl.hentPdlModell(it, PersonRolle.GJENLEVENDE) } // TODO hva er riktig rolle her?
+            soekerPdl.familieRelasjon?.foreldre?.map { it.value }
+                ?.map { pdl.hentPdlModell(it, PersonRolle.GJENLEVENDE) } // TODO hva er riktig rolle her?
         println(foreldreFraPdl)
         val foreldrePersonInfo = foreldreFraPdl?.map {
             PersonInfo(
@@ -85,6 +99,25 @@ class OpplysningsByggerService : OpplysningsBygger {
         }
 
         return lagOpplysning(opplysningsType, Foreldre(foreldrePersonInfo))
+    }
+
+    fun soekerBostedadresse(soekerPdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Bostedadresse> {
+        val adresse = soekerPdl.bostedsadresse?.map { Adresse(
+            it.type,
+            it.aktiv,
+            it.coAdresseNavn,
+            it.adresseLinje1,
+            it.adresseLinje2,
+            it.adresseLinje3,
+            it.postnr,
+            it.poststed,
+            it.land,
+            it.kilde,
+            it.gyldigFraOgMed,
+            it.gyldigTilOgMed
+        ) }
+
+        return lagOpplysning(opplysningsType, Bostedadresse(adresse))
     }
 
     fun hentAvdoedFnr(barnepensjon: Barnepensjon): String {
@@ -106,7 +139,7 @@ class OpplysningsByggerService : OpplysningsBygger {
 
 }
 
-fun <T> lagOpplysning(opplysningsType: String, opplysning: T): Behandlingsopplysning<T> {
+fun <T> lagOpplysning(opplysningsType: Opplysningstyper, opplysning: T): Behandlingsopplysning<T> {
     return Behandlingsopplysning(
         UUID.randomUUID(),
         Behandlingsopplysning.Pdl("pdl", Instant.now(), null),

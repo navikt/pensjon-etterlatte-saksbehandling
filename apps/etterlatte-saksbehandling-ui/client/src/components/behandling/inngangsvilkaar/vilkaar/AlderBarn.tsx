@@ -12,7 +12,7 @@ import {
   VilkaarWrapper,
 } from '../styled'
 import { OpplysningsType, VilkaarProps } from '../types'
-import { IKriterie, IVilkaaropplysing, Kriterietype,VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { IKriterie, IVilkaaropplysing, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 
@@ -42,7 +42,7 @@ export const AlderBarn = (props: VilkaarProps) => {
     <VilkaarBorder id={props.id}>
       <Innhold>
         <Title>
-          <StatusIcon status={VilkaarVurderingsResultat.IKKE_OPPFYLT} large={true} /> Alder barn
+          <StatusIcon status={props.vilkaar.resultat} large={true} /> Alder barn
         </Title>
         <VilkaarWrapper>
           <VilkaarInfobokser>

@@ -3,6 +3,7 @@ package no.nav.etterlatte.itest
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.behandling.*
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.*
 import org.testcontainers.containers.PostgreSQLContainer
@@ -15,7 +16,7 @@ import javax.sql.DataSource
 internal class BehandlingDaoIntegrationTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
-    
+
 
     private lateinit var dataSource: DataSource
 
@@ -42,8 +43,8 @@ internal class BehandlingDaoIntegrationTest {
         val sakrepo = SakDao{connection}
         val behandlingRepo = BehandlingDao { connection }
         val opplysningRepo = OpplysningDao { connection }
-        val deltOpplysning = Behandlingsopplysning(UUID.randomUUID(), Behandlingsopplysning.Pdl("pdl", Instant.now(), null), "test", objectMapper.createObjectNode(), objectMapper.createObjectNode()).also { opplysningRepo.nyOpplysning(it) }
-        val ikkeDeltOpplysning = Behandlingsopplysning(UUID.randomUUID(), Behandlingsopplysning.Pdl("pdl", Instant.now(), null), "test", objectMapper.createObjectNode(), objectMapper.createObjectNode()).also { opplysningRepo.nyOpplysning(it) }
+        val deltOpplysning = Behandlingsopplysning(UUID.randomUUID(), Behandlingsopplysning.Pdl("pdl", Instant.now(), null), Opplysningstyper.TESTOPPLYSNING, objectMapper.createObjectNode(), objectMapper.createObjectNode()).also { opplysningRepo.nyOpplysning(it) }
+        val ikkeDeltOpplysning = Behandlingsopplysning(UUID.randomUUID(), Behandlingsopplysning.Pdl("pdl", Instant.now(), null), Opplysningstyper.TESTOPPLYSNING, objectMapper.createObjectNode(), objectMapper.createObjectNode()).also { opplysningRepo.nyOpplysning(it) }
         val sak1 = sakrepo.opprettSak("123", "BP").id
         val sak2 = sakrepo.opprettSak("321", "BP").id
         listOf(

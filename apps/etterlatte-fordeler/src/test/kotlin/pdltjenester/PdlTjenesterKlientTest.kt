@@ -1,4 +1,4 @@
-package no.nav.etterlatte.prosess.pdltjenester
+package no.nav.etterlatte.pdltjenester
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -10,11 +10,12 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.FNR_1
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
+import no.nav.etterlatte.readFile
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -22,10 +23,6 @@ import org.junit.jupiter.api.Test
 class PdlTjenesterKlientTest {
 
     private lateinit var pdlTjenesterKlient: PdlTjenesterKlient
-
-    private companion object {
-        const val TESTUSER_FNR = "11057523044"
-    }
 
     fun mockEndpoint(file: String) {
         val httpClient = HttpClient(MockEngine) {
@@ -37,8 +34,7 @@ class PdlTjenesterKlientTest {
                         val headers = headersOf(
                             "Content-Type" to listOf(ContentType.Application.Json.toString()),
                         )
-                        val payload = javaClass.getResource(file)!!.readText()
-                        respond(payload, headers = headers)
+                        respond(content = readFile(file), headers = headers)
                     } else {
                         error(request.url.fullPath)
                     }
@@ -56,7 +52,7 @@ class PdlTjenesterKlientTest {
 
         val person = runBlocking {
             pdlTjenesterKlient.hentPerson(HentPersonRequest(
-                foedselsnummer = Foedselsnummer.of(TESTUSER_FNR),
+                foedselsnummer = Foedselsnummer.of(FNR_1),
                 rolle = PersonRolle.BARN
             ))
         }

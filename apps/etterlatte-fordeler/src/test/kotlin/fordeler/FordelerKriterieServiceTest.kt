@@ -1,31 +1,46 @@
 package no.nav.etterlatte.fordeler
 
-import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.*
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
+import no.nav.etterlatte.FNR_2
+import no.nav.etterlatte.FNR_4
+import no.nav.etterlatte.FNR_5
+import no.nav.etterlatte.SVERIGE
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
+import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.mockUgyldigAdresse
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageProblems
+import no.nav.etterlatte.readSoknad
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.io.FileNotFoundException
 import java.time.LocalDate
 import java.time.LocalDate.now
 
-class FordelerKriterieServiceTest {
+internal class FordelerKriterieServiceTest {
 
     private val fordelerKriterierService = FordelerKriterierService()
 
     @Test
     fun `soeknad er en gyldig kandidat for fordeling`() {
         val barn = mockPerson(
-            bostedsadresse = mockNorskAdresse()
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                barn = null,
+                ansvarligeForeldre = null,
+                foreldre = listOf(Foedselsnummer.of(FNR_2)),
+            )
         )
         val avdoed = mockPerson(
+            fnr = FNR_2,
             doedsdato = LocalDate.parse("2022-01-01"),
-            bostedsadresse = mockNorskAdresse()
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                barn = listOf(barn.foedselsnummer),
+                ansvarligeForeldre = null,
+                foreldre = listOf(Foedselsnummer.of(FNR_2)),
+            )
         )
         val gjenlevende = mockPerson(
             bostedsadresse = mockNorskAdresse()
@@ -39,8 +54,8 @@ class FordelerKriterieServiceTest {
     @Test
     fun `barn som er for gammelt er ikke en gyldig kandidat`() {
         val barn = mockPerson(
-            foedselsaar = now().year - 16,
-            foedselsdato = now().minusYears(16)
+            foedselsaar = now().year - 15,
+            foedselsdato = now().minusYears(15)
         )
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
@@ -52,7 +67,7 @@ class FordelerKriterieServiceTest {
 
     @Test
     fun `barn som ikke er norsk statsborger er ikke en gyldig kandidat`() {
-        val barn = mockPerson(statsborgerskap = "SWE")
+        val barn = mockPerson(statsborgerskap = SVERIGE)
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
@@ -73,8 +88,19 @@ class FordelerKriterieServiceTest {
     }
 
     @Test
+    fun `barn som har huket av for utenlandsadresse er ikke en gyldig kandidat`() {
+        val barn = mockPerson()
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
+
+        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_UTENLANDSADRESSE)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_HAR_HUKET_AV_UTLANDSADRESSE))
+    }
+
+    @Test
     fun `barn som ikke er fodt i Norge er ikke en gyldig kandidat`() {
-        val barn = mockPerson(foedeland = "SWE")
+        val barn = mockPerson(foedeland = SVERIGE)
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
@@ -89,7 +115,7 @@ class FordelerKriterieServiceTest {
             utland = Utland(
                 utflyttingFraNorge = listOf(
                     UtflyttingFraNorge(
-                    tilflyttingsland = "SWE",
+                    tilflyttingsland = SVERIGE,
                     dato = LocalDate.parse("2010-01-01")
                 )
                 ),
@@ -129,12 +155,57 @@ class FordelerKriterieServiceTest {
     }
 
     @Test
+    fun `barn med sosken er ikke en gyldig kandidat`() {
+        val barn = mockPerson(
+            bostedsadresse = mockNorskAdresse()
+        )
+        val avdoed = mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                barn = listOf(Foedselsnummer.of(FNR_4)),
+                ansvarligeForeldre = null,
+                foreldre = null,
+            )
+        )
+        val gjenlevende = mockPerson(
+            bostedsadresse = mockNorskAdresse()
+        )
+
+        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_ER_IKKE_ALENEBARN))
+    }
+
+    @Test
+    fun `avdod som ikke er forelder til soker er ikke en gyldig kandidat`() {
+        val barn = mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                barn = null,
+                ansvarligeForeldre = null,
+                foreldre = listOf(Foedselsnummer.of(FNR_2)),
+            )
+        )
+        val avdoed = mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            doedsdato = now()
+        )
+        val gjenlevende = mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+        )
+
+        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_ER_IKKE_FORELDER_TIL_BARN))
+    }
+
+    @Test
     fun `avdod som har utvandret er ikke en gyldig kandidat`() {
         val barn = mockPerson()
         val avdoed = mockPerson(
             utland = Utland(
                 utflyttingFraNorge = listOf(UtflyttingFraNorge(
-                    tilflyttingsland = "SWE",
+                    tilflyttingsland = SVERIGE,
                     dato = LocalDate.parse("2010-01-01")
                 )),
                 innflyttingTilNorge = null
@@ -220,10 +291,27 @@ class FordelerKriterieServiceTest {
     }
 
     @Test
+    fun `gjenlevende og barn med ulike adresser er ikke en gyldig kandidat`() {
+        val barn = mockPerson(
+            bostedsadresse = mockNorskAdresse()
+        )
+        val avdoed = mockPerson(
+            bostedsadresse = mockNorskAdresse()
+        )
+        val gjenlevende = mockPerson(
+            bostedsadresse = mockNorskAdresse(adresseLinje1 = "En annen vei 2")
+        )
+
+        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE))
+    }
+
+    @Test
     fun `gjenlevende uten foreldreansvar er ikke en gyldig kandidat`() {
         val barn = mockPerson(
             familieRelasjon = FamilieRelasjon(
-                ansvarligeForeldre = listOf(Foedselsnummer.of("09018701453")),
+                ansvarligeForeldre = listOf(Foedselsnummer.of(FNR_5)),
                 foreldre = null,
                 barn = null,
             )
@@ -238,21 +326,11 @@ class FordelerKriterieServiceTest {
 
     companion object {
         val BARNEPENSJON_SOKNAD = readSoknad("/fordeler/soknad_barnepensjon.json")
+        val BARNEPENSJON_SOKNAD_UTENLANDSADRESSE = readSoknad("/fordeler/soknad_barn_har_utenlandsadresse.json")
         val BARNEPENSJON_SOKNAD_YRKESSKADE = readSoknad("/fordeler/soknad_har_yrkesskade.json")
         val BARNEPENSJON_SOKNAD_VERGE = readSoknad("/fordeler/soknad_har_verge.json")
         val BARNEPENSJON_SOKNAD_HUKET_AV_UTLAND = readSoknad("/fordeler/soknad_huket_av_utland.json")
         val BARNEPENSJON_SOKNAD_INNSENDER_IKKE_FORELDER = readSoknad("/fordeler/soknad_innsender_ikke_forelder.json")
-
-        private fun readSoknad(file: String) =
-            JsonMessage(readFile(file), MessageProblems("")).apply { requireKey("@skjema_info") }
-
-        private fun readSoknadAsBarnepensjon(file: String): Barnepensjon {
-            val skjemaInfo = objectMapper.writeValueAsString(objectMapper.readTree(readFile(file)).get("@skjema_info"))
-            return objectMapper.readValue(skjemaInfo, Barnepensjon::class.java)
-        }
-
-        private fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
-            ?: throw FileNotFoundException("Fant ikke filen $file")
     }
 
 }

@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.opplysninger.kilde.pdl.OpplysningsByggerService
+import no.nav.etterlatte.opplysninger.kilde.pdl.Pdl
 import no.nav.etterlatte.opplysninger.kilde.pdl.PdlService
 import no.nav.etterlatte.opplysninger.kilde.pdl.lagOpplysning
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -66,8 +67,8 @@ internal class OpplysningsByggerServiceTest {
             mockPerson(GYLDIG_FNR_AVDOED, doedsdato = LocalDate.parse("2022-01-02"), utland = mockedUtland)
         val gjenlevendeForelderPdlMock = mockPerson(GYLDIG_FNR_GJENLEVENDE_FORELDER)
         val opplysningsByggerService = OpplysningsByggerService()
-        val komplettBarnepensjonssoknad = readSoknadAsBarnepensjon("/fullMessage2.json")
-        val ukomplettBarnepensjonssoknad = readSoknadAsBarnepensjon("/fullMessage5.json")
+        val fullstendigBarnepensjonssoknad = readSoknadAsBarnepensjon("/fullstendig_barnepensjonssoknad.json")
+        val ufullstendigBarnepensjonssoknad = readSoknadAsBarnepensjon("/ufullstendig_barnepensjonssoknad.json")
 
         /* metode fra etterlatte-fordeler */
         fun mockPerson(
@@ -128,8 +129,47 @@ internal class OpplysningsByggerServiceTest {
     }
 
     @Test
-    fun byggOpplysninger() {
+    fun `byggOpplysninger skal kun inneholde de rette opplysningstypene`() {
+        val pdlMock = mockk<Pdl>()
+        every {
+            pdlMock.hentPdlModell(
+                "12101376212",
+                PersonRolle.BARN
+            )
+        } returns mockPerson(GYLDIG_FNR_SOEKER)
+        every {
+            pdlMock.hentPdlModell(
+                "22128202440",
+                PersonRolle.AVDOED,
+            )
+        } returns mockPerson(GYLDIG_FNR_AVDOED, doedsdato = LocalDate.parse("2022-01-02"))
+        every {
+            pdlMock.hentPdlModell(
+                "03108718357",
+                PersonRolle.GJENLEVENDE
+            )
+        } returns mockPerson(GYLDIG_FNR_GJENLEVENDE_FORELDER)
 
+        val opplysninger = opplysningsByggerService.byggOpplysninger(fullstendigBarnepensjonssoknad, pdlMock)
+
+        val opplysningstyper = listOf(
+            Opplysningstyper.SOEKER_PERSONINFO_V1,
+            Opplysningstyper.SOEKER_FOEDSELSDATO_V1,
+            Opplysningstyper.AVDOED_PERSONINFO_V1,
+            Opplysningstyper.AVDOED_DOEDSFALL_V1,
+            Opplysningstyper.AVDOED_INN_OG_UTFLYTTING_V1,
+            Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1,
+            Opplysningstyper.SOEKER_BOSTEDADRESSE_V1,
+            Opplysningstyper.SOEKER_OPPHOLDADRESSE_V1,
+            Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1,
+        )
+
+        assertTrue(opplysninger.map {
+            it.opplysningType
+        }.containsAll(opplysningstyper))
+
+        // TODO: kan kommenteres inn naar alle vilkaar er paa plass. Maa ogsaa da legge til alle opplysningstypene i val opplysningstyper
+        //assertEquals(opplysningstyper.size, opplysninger.size)
     }
 
 
@@ -272,24 +312,24 @@ internal class OpplysningsByggerServiceTest {
 
     @Test
     fun `skal hente avdoedes foedselsnummer`() {
-        val avdoedesFnr = opplysningsByggerService.hentAvdoedFnr(komplettBarnepensjonssoknad)
+        val avdoedesFnr = opplysningsByggerService.hentAvdoedFnr(fullstendigBarnepensjonssoknad)
         assertEquals("22128202440", avdoedesFnr)
     }
 
     @Test
     fun `skal kaste exception ved forsoek paa henting av avdoedes foedselsnummer`() {
-        assertThrows<Exception> { opplysningsByggerService.hentAvdoedFnr(ukomplettBarnepensjonssoknad) }
+        assertThrows<Exception> { opplysningsByggerService.hentAvdoedFnr(ufullstendigBarnepensjonssoknad) }
     }
 
     @Test
     fun `skal hente gjenlevende forelders foedselsnummer`() {
-        val gjenlevendeForelderFnr = opplysningsByggerService.hentGjenlevendeForelderFnr(komplettBarnepensjonssoknad)
+        val gjenlevendeForelderFnr = opplysningsByggerService.hentGjenlevendeForelderFnr(fullstendigBarnepensjonssoknad)
         assertEquals("03108718357", gjenlevendeForelderFnr)
     }
 
     @Test
     fun `skal kaste exception ved forsoek paa henting av gjenlevendes foedselsnummer`() {
-        assertThrows<Exception> { opplysningsByggerService.hentGjenlevendeForelderFnr(ukomplettBarnepensjonssoknad) }
+        assertThrows<Exception> { opplysningsByggerService.hentGjenlevendeForelderFnr(ufullstendigBarnepensjonssoknad) }
     }
 
     @Test

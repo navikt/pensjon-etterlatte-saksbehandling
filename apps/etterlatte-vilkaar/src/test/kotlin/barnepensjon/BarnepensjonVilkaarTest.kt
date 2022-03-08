@@ -314,7 +314,7 @@ internal class BarnepensjonVilkaarTest {
 
     val adresseDanmark = listOf(
         Adresse(
-            AdresseType.VEGADRESSE,
+            AdresseType.UTENLANDSKADRESSE,
             true,
             null,
             null,

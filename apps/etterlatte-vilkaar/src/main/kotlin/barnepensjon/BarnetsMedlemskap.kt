@@ -3,6 +3,7 @@ package no.nav.etterlatte.vilkaar.barnepensjon
 import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.barnepensjon.hentBostedsadresse
 import no.nav.etterlatte.barnepensjon.hentDoedsdato
+import no.nav.etterlatte.barnepensjon.hentKontaktadresse
 import no.nav.etterlatte.barnepensjon.hentOppholdadresse
 import no.nav.etterlatte.barnepensjon.hentUtenlandsadresseSoeknad
 import no.nav.etterlatte.barnepensjon.setVikaarVurderingsResultat
@@ -10,8 +11,10 @@ import no.nav.etterlatte.barnepensjon.vurderOpplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresse
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Bostedadresse
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Kontaktadresse
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Oppholdadresse
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsadresse
+import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -24,6 +27,7 @@ fun vilkaarBarnetsMedlemskap(
     vilkaartype: Vilkaartyper,
     soekerBostedadresse: List<VilkaarOpplysning<Bostedadresse>>,
     soekerOppholdadresse: List<VilkaarOpplysning<Oppholdadresse>>,
+    soekerKontaktadresse: List<VilkaarOpplysning<Kontaktadresse>>,
     soekerUtenlandsadresse: List<VilkaarOpplysning<Utenlandsadresse>>,
     doedsdato: List<VilkaarOpplysning<Doedsdato>>,
 ): VurdertVilkaar {
@@ -31,6 +35,8 @@ fun vilkaarBarnetsMedlemskap(
         kriterieHarIkkeBostedsadresseIUtlandet(soekerBostedadresse, doedsdato)
     val harIkkeOppholdsadresseIUtlandetPdl =
         kriterieHarIkkeOppholddsadresseIUtlandet(soekerOppholdadresse, doedsdato)
+    val harIkkeKontaktadresseIUtlandetPdl =
+        kriterieHarIkkeKontaktsadresseIUtlandet(soekerKontaktadresse, doedsdato)
     val harIkkeBostedadresseIUtlandetSoeknad = kriterieHarIkkeOppgittAdresseIUtlandet(soekerUtenlandsadresse)
 
     return VurdertVilkaar(
@@ -39,6 +45,7 @@ fun vilkaarBarnetsMedlemskap(
         listOf(
             harIkkeBostedadresseIUtlandetPdl,
             harIkkeOppholdsadresseIUtlandetPdl,
+            harIkkeKontaktadresseIUtlandetPdl,
             harIkkeBostedadresseIUtlandetSoeknad
         )
     )
@@ -63,57 +70,58 @@ fun kriterieHarIkkeBostedsadresseIUtlandet(
     val opplysningsGrunnlag = listOf(bostedadresse, doedsdato).flatten().filter { it.kilde.type == "pdl" }
 
     val resultat = try {
-        val bostedadresser = hentBostedsadresse(bostedadresse)
-        val doedsdato = hentDoedsdato(doedsdato).doedsdato
-        harKunNorskeAdresserEtterDoedsdato(bostedadresser.bostedadresse, doedsdato)
-
+        val bostedadressePdl = hentBostedsadresse(bostedadresse)
+        val doedsdatoPdl = hentDoedsdato(doedsdato).doedsdato
+        harKunNorskeAdresserEtterDoedsdato(bostedadressePdl.bostedadresse, doedsdatoPdl)
     } catch (ex: OpplysningKanIkkeHentesUt) {
         VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     }
 
-    return Kriterie(
-        Kriterietyper.SOEKER_IKKE_BOSTEDADRESSE_I_UTLANDET,
-        resultat,
-        opplysningsGrunnlag
-    )
+    return Kriterie(Kriterietyper.SOEKER_IKKE_BOSTEDADRESSE_I_UTLANDET, resultat, opplysningsGrunnlag)
 }
 
 fun kriterieHarIkkeOppholddsadresseIUtlandet(
-    oppholdadresse: List<VilkaarOpplysning<Oppholdadresse>>,
+    oppholdadresser: List<VilkaarOpplysning<Oppholdadresse>>,
     doedsdato: List<VilkaarOpplysning<Doedsdato>>
 ): Kriterie {
-    val opplysningsGrunnlag = listOf(oppholdadresse, doedsdato).flatten().filter { it.kilde.type == "pdl" }
+    val opplysningsGrunnlag = listOf(oppholdadresser, doedsdato).flatten().filter { it.kilde.type == "pdl" }
     val resultat = try {
-        val oppholdadresse = hentOppholdadresse(oppholdadresse)
-        val doedsdato = hentDoedsdato(doedsdato).doedsdato
-        harKunNorskeAdresserEtterDoedsdato(oppholdadresse.oppholdadresse, doedsdato)
-
+        val oppholdadresser = hentOppholdadresse(oppholdadresser)
+        val doedsdatoPdl = hentDoedsdato(doedsdato).doedsdato
+        harKunNorskeAdresserEtterDoedsdato(oppholdadresser.oppholdadresse, doedsdatoPdl)
     } catch (ex: OpplysningKanIkkeHentesUt) {
         VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     }
 
-    return Kriterie(
-        Kriterietyper.SOEKER_IKKE_OPPHOLDADRESSE_I_UTLANDET,
-        resultat,
-        opplysningsGrunnlag
-    )
+    return Kriterie(Kriterietyper.SOEKER_IKKE_OPPHOLDADRESSE_I_UTLANDET, resultat, opplysningsGrunnlag)
 }
+
+fun kriterieHarIkkeKontaktsadresseIUtlandet(
+    kontaktadresser: List<VilkaarOpplysning<Kontaktadresse>>,
+    doedsdato: List<VilkaarOpplysning<Doedsdato>>
+): Kriterie {
+    val opplysningsGrunnlag = listOf(kontaktadresser, doedsdato).flatten().filter { it.kilde.type == "pdl" }
+    val resultat = try {
+        val kontaktadresser = hentKontaktadresse(kontaktadresser)
+        val doedsdatoPdl = hentDoedsdato(doedsdato).doedsdato
+        harKunNorskeAdresserEtterDoedsdato(kontaktadresser.kontaktadresse, doedsdatoPdl)
+    } catch (ex: OpplysningKanIkkeHentesUt) {
+        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+    }
+
+    return Kriterie(Kriterietyper.SOEKER_IKKE_KONTAKTADRESSE_I_UTLANDET, resultat, opplysningsGrunnlag)
+}
+
 
 fun harKunNorskeAdresserEtterDoedsdato(adresser: List<Adresse>?, doedsdato: LocalDate): VilkaarVurderingsResultat {
     val adresserEtterDoedsdato = adresser?.filter { it.gyldigTilOgMed?.isAfter(doedsdato) == true || it.aktiv }
-
-    if (adresserEtterDoedsdato != null && adresserEtterDoedsdato.any { it.land == null }) return VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-
     val harUtenlandskeAdresserIPdl =
-        adresserEtterDoedsdato?.map { it.land?.lowercase() == "norge" || it.land?.lowercase() == "nor" }
-            ?.contains(false)
+        adresserEtterDoedsdato?.any { it.type == AdresseType.UTENLANDSKADRESSE ||  it.type == AdresseType.UTENLANDSKADRESSEFRITTFORMAT }
 
-    return if (harUtenlandskeAdresserIPdl == null) {
-        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-    } else if (harUtenlandskeAdresserIPdl == false) {
-        VilkaarVurderingsResultat.OPPFYLT
-    } else {
+    return if (harUtenlandskeAdresserIPdl == true) {
         VilkaarVurderingsResultat.IKKE_OPPFYLT
+    } else {
+        VilkaarVurderingsResultat.OPPFYLT
     }
 }
 

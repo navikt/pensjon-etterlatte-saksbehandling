@@ -116,13 +116,11 @@ class OpplysningsByggerService : OpplysningsBygger {
         return lagOpplysning(opplysningsType, Oppholdadresse(adresse))
     }
 
-<<<<<<< HEAD
     fun soekerKontaktadresse(soekerPdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Kontaktadresse> {
         val adresse = soekerPdl.kontaktadresse?.map { mapAdresse(it) }
         return lagOpplysning(opplysningsType, Kontaktadresse(adresse))
     }
 
-=======
     fun avdoedBostedadresse(pdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Bostedadresse> {
         val adresse = pdl.bostedsadresse?.map { mapAdresse(it)}
         return lagOpplysning(opplysningsType, Bostedadresse(adresse))
@@ -142,7 +140,6 @@ class OpplysningsByggerService : OpplysningsBygger {
         val adresse = pdl.oppholdsadresse?.map { mapAdresse(it) }
         return lagOpplysning(opplysningsType, Oppholdadresse(adresse))
     }
->>>>>>> fb75320 (opplysninger på gjenlevende og avoded)
 
     fun mapAdresse(it: no.nav.etterlatte.libs.common.person.Adresse): Adresse {
         return Adresse(

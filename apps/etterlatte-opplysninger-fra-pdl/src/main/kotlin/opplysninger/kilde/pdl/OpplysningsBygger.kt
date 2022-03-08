@@ -32,6 +32,10 @@ class OpplysningsByggerService : OpplysningsBygger {
             soekerBostedadresse(soekerPdl, Opplysningstyper.SOEKER_BOSTEDADRESSE_V1),
             soekerOppholdadresse(soekerPdl, Opplysningstyper.SOEKER_OPPHOLDADRESSE_V1),
             soekerKontaktadresse(soekerPdl, Opplysningstyper.SOEKER_KONTAKTADRESSE_V1),
+            avdoedBostedadresse(avdoedPdl, Opplysningstyper.AVDOED_BOSTEDADRESSE_V1),
+            avdoedOppholdadresse(avdoedPdl, Opplysningstyper.SOEKER_OPPHOLDADRESSE_V1),
+            gjenlevendeBostedadresse(gjenlevendeForelderPdl, Opplysningstyper.GJENLEVENDE_FORELDER_BOSTEDADRESSE_V1),
+            gjenlevendeOppholdadresse(gjenlevendeForelderPdl, Opplysningstyper.GJENLEVENDE_FORELDER_OPPHOLDADRESSE_V1),
             gjenlevendeForelderOpplysning(
                 gjenlevendeForelderPdl,
                 Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1
@@ -112,11 +116,33 @@ class OpplysningsByggerService : OpplysningsBygger {
         return lagOpplysning(opplysningsType, Oppholdadresse(adresse))
     }
 
+<<<<<<< HEAD
     fun soekerKontaktadresse(soekerPdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Kontaktadresse> {
         val adresse = soekerPdl.kontaktadresse?.map { mapAdresse(it) }
         return lagOpplysning(opplysningsType, Kontaktadresse(adresse))
     }
 
+=======
+    fun avdoedBostedadresse(pdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Bostedadresse> {
+        val adresse = pdl.bostedsadresse?.map { mapAdresse(it)}
+        return lagOpplysning(opplysningsType, Bostedadresse(adresse))
+    }
+
+    fun avdoedOppholdadresse(pdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Oppholdadresse> {
+        val adresse = pdl.oppholdsadresse?.map { mapAdresse(it) }
+        return lagOpplysning(opplysningsType, Oppholdadresse(adresse))
+    }
+
+    fun gjenlevendeBostedadresse(pdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Bostedadresse> {
+        val adresse = pdl.bostedsadresse?.map { mapAdresse(it)}
+        return lagOpplysning(opplysningsType, Bostedadresse(adresse))
+    }
+
+    fun gjenlevendeOppholdadresse(pdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Oppholdadresse> {
+        val adresse = pdl.oppholdsadresse?.map { mapAdresse(it) }
+        return lagOpplysning(opplysningsType, Oppholdadresse(adresse))
+    }
+>>>>>>> fb75320 (opplysninger på gjenlevende og avoded)
 
     fun mapAdresse(it: no.nav.etterlatte.libs.common.person.Adresse): Adresse {
         return Adresse(

@@ -49,7 +49,7 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
             <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
           </PersonInfoHeader>
         )
-      case RelatertPersonsRolle.FAR:
+      case RelatertPersonsRolle.FORELDER:
         return (
           <PersonInfoHeader>
             <ManIcon /> {person.navn}

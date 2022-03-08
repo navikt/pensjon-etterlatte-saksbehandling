@@ -30,6 +30,7 @@ export enum RelatertPersonsRolle {
   FAR = 'far',
   MEDMOR = 'medmor',
   BARN = 'barn',
+  FORELDER = 'forelder'
 }
 
 export enum PersonStatus {

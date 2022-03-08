@@ -107,7 +107,7 @@ export const Soeknadsoversikt = () => {
           person={{
             navn: `${gjenlevendePdl?.opplysning.fornavn} ${gjenlevendePdl?.opplysning.etternavn}`,
             personStatus: PersonStatus.LEVENDE,
-            rolle: RelatertPersonsRolle.FAR,
+            rolle: RelatertPersonsRolle.FORELDER,
             adressenavn: 'annet',
             fnr: gjenlevendePdl?.opplysning.foedselsnummer,
             statsborgerskap: 'NO',
@@ -117,7 +117,7 @@ export const Soeknadsoversikt = () => {
           person={{
             navn: `${avdodPersonPdl?.opplysning.fornavn} ${avdodPersonPdl?.opplysning.etternavn} (${avdodPersonSoknad?.opplysning.fornavn} ${avdodPersonSoknad?.opplysning.etternavn})`,
             personStatus: PersonStatus.DØD,
-            rolle: RelatertPersonsRolle.FAR,
+            rolle: RelatertPersonsRolle.FORELDER,
             adressenavn: 'annet',
             fnr: `${avdodPersonPdl?.opplysning.foedselsnummer} (${avdodPersonSoknad?.opplysning.foedselsnummer})`,
             statsborgerskap: 'NO',

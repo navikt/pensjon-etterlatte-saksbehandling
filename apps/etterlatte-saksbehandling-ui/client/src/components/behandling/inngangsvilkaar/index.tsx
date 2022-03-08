@@ -6,17 +6,17 @@ import { DoedsFallForelder } from './vilkaar/DoedsfallForelder'
 import { VilkaarsType } from '../../../store/reducers/BehandlingReducer'
 import { AvdoedesForutMedlemskap } from './vilkaar/AvdoedesForutMedlemskap'
 import { useLocation } from 'react-router-dom'
+import { BarnetsMedlemskap } from './vilkaar/BarnetsMedlemskap'
 
 export const Inngangsvilkaar = () => {
   const ctx = useContext(AppContext)
   const location = useLocation()
   const vilkaar = ctx.state.behandlingReducer.vilkårsprøving
 
-
   useEffect(() => {
-    const hash = location.hash.slice(1);
+    const hash = location.hash.slice(1)
     console.log(document.getElementById(hash))
-    document.getElementById(hash)?.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"})
+    document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' })
   }, [location.hash])
 
   if (vilkaar.length === 0) {
@@ -33,6 +33,10 @@ export const Inngangsvilkaar = () => {
       <AvdoedesForutMedlemskap
         id="avdodesmedlemskap"
         vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.AVDOEDES_FORUTGAAENDE_MELDLEMSKAP)}
+      />
+      <BarnetsMedlemskap
+        id="barnetsmedlemskap"
+        vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.BARNETS_MEDLEMSKAP)}
       />
     </Content>
   )

@@ -1,5 +1,4 @@
 import { IAction } from '../AppContext'
-import { OpplysningsType } from '../../components/behandling/inngangsvilkaar/types'
 
 export interface IDetaljertBehandling {
   id: string
@@ -22,9 +21,23 @@ export interface IBehandlingsopplysning {
   attestering: any
 }
 
+export enum OpplysningsType {
+  avdoed_doedsfall = 'AVDOED_DOEDSFALL_V1',
+  avdoed_personinfo = 'AVDOED_PERSONINFO_V1',
+  soeker_foedselsdato = 'SOEKER_FOEDSELSDATO_V1',
+  soeker_personinfo = 'SOEKER_PERSONINFO_V1',
+  soeker_relasjon_foreldre = 'SOEKER_RELASJON_FORELDRE_V1',
+  soeker_relasjon_soeksken = 'SOEKER_RELASJON_SOESKEN_V1',
+  soeker_bostedadresse = 'SOEKER_BOSTEDADRESSE_V1',
+  soeknad_mottatt = 'SOEKNAD_MOTTATT_DATO',
+  omsorg = 'SOEKER_DAGLIG_OMSORG_V1',
+  innsender = 'INNSENDER_PERSONINFO_V1',
+  gjenlevende_forelder_personinfo = 'GJENLEVENDE_FORELDER_PERSONINFO_V1',
+}
+
 export enum KildeType {
-  pdl = "pdl",
-  privatperson = "privatperson"
+  pdl = 'pdl',
+  privatperson = 'privatperson',
 }
 
 export interface IVilkaarsproving {
@@ -37,6 +50,7 @@ export enum VilkaarsType {
   SOEKER_ER_UNDER_20 = 'SOEKER_ER_UNDER_20',
   DOEDSFALL_ER_REGISTRERT = 'DOEDSFALL_ER_REGISTRERT',
   AVDOEDES_FORUTGAAENDE_MELDLEMSKAP = 'AVDOEDES_FORUTGAAENDE_MELDLEMSKAP',
+  BARNETS_MEDLEMSKAP = 'BARNETS_MEDLEMSKAP',
 }
 
 export enum VilkaarVurderingsResultat {
@@ -61,6 +75,10 @@ export enum Kriterietype {
   AVDOED_ER_FORELDER = 'AVDOED_ER_FORELDER',
   DOEDSFALL_ER_REGISTRERT_I_PDL = 'DOEDSFALL_ER_REGISTRERT_I_PDL',
   SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO = 'SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO',
+  SOEKER_IKKE_OPPGITT_ADRESSE_I_UTLANDET_I_SOEKNAD = 'SOEKER_IKKE_OPPGITT_ADRESSE_I_UTLANDET_I_SOEKNAD',
+  SOEKER_IKKE_BOSTEDADRESSE_I_UTLANDET = 'SOEKER_IKKE_BOSTEDADRESSE_I_UTLANDET',
+  SOEKER_IKKE_OPPHOLDADRESSE_I_UTLANDET = 'SOEKER_IKKE_OPPHOLDADRESSE_I_UTLANDET',
+  SOEKER_IKKE_KONTAKTADRESSE_I_UTLANDET = 'SOEKER_IKKE_KONTAKTADRESSE_I_UTLANDET',
 }
 
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {

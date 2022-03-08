@@ -16,10 +16,14 @@ import { Soeknadsoversikt } from './soeknadsoversikt'
 import { Utbetalingsoversikt } from './utbetalingsoversikt'
 import { Vedtak } from './vedtak'
 import { IApiResponse } from '../../shared/api/types'
-import { IDetaljertBehandling, KildeType, VilkaarVurderingsResultat } from '../../store/reducers/BehandlingReducer'
+import {
+  IDetaljertBehandling,
+  KildeType,
+  OpplysningsType,
+  VilkaarVurderingsResultat,
+} from '../../store/reducers/BehandlingReducer'
 import Spinner from '../../shared/Spinner'
 import { StatusBar, StatusBarTheme } from '../statusbar'
-import { OpplysningsType } from './inngangsvilkaar/types'
 
 const addBehandlingAction = (data: any) => ({ type: 'add_behandling', data })
 
@@ -39,7 +43,6 @@ export const Behandling = () => {
     }
   }, [match?.params.behandlingId])
 
-  
   const active = (hash: string) => {
     if (location.hash === hash) {
       return 'active'
@@ -47,13 +50,14 @@ export const Behandling = () => {
     return ''
   }
 
-  const person: any = ctx.state.behandlingReducer?.grunnlag.find(g => g.opplysningType === OpplysningsType.soeker_personinfo && g.kilde.type === KildeType.pdl)?.opplysning;
-
+  const person: any = ctx.state.behandlingReducer?.grunnlag.find(
+    (g) => g.opplysningType === OpplysningsType.soeker_personinfo && g.kilde.type === KildeType.pdl
+  )?.opplysning
 
   return (
     <>
       <StatusBar theme={StatusBarTheme.gray} personInfo={person} />
-      <Spinner visible={!loaded} label='Laster' />
+      <Spinner visible={!loaded} label="Laster" />
       {loaded && (
         <GridContainer>
           <Column>
@@ -97,7 +101,7 @@ export const Behandling = () => {
                       <span>Bostedsadresse</span>
                     </Link>
                   </li>
-                  
+
                   <li>
                     <Link to="#yrkesskade" className={active('#yrkesskade')}>
                       <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} />

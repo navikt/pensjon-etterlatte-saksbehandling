@@ -11,8 +11,13 @@ import {
   VilkaarVurderingColumn,
   VilkaarWrapper,
 } from '../styled'
-import { OpplysningsType, VilkaarProps } from '../types'
-import { IKriterie, IVilkaaropplysing, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
+import { VilkaarProps } from '../types'
+import {
+  IKriterie,
+  IVilkaaropplysing,
+  Kriterietype,
+  OpplysningsType,
+} from '../../../../store/reducers/BehandlingReducer'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 

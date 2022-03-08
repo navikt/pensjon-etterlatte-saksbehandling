@@ -16,6 +16,7 @@ on:
       - main
     paths:
       - apps/etterlatte-behandling/**
+      - libs/common/**
 
 jobs:
   build-and-publish:

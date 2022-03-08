@@ -102,26 +102,17 @@ class OpplysningsByggerService : OpplysningsBygger {
     }
 
     fun soekerBostedadresse(soekerPdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Bostedadresse> {
-        val adresse = soekerPdl.bostedsadresse?.map { Adresse(
-            it.type,
-            it.aktiv,
-            it.coAdresseNavn,
-            it.adresseLinje1,
-            it.adresseLinje2,
-            it.adresseLinje3,
-            it.postnr,
-            it.poststed,
-            it.land,
-            it.kilde,
-            it.gyldigFraOgMed?.toLocalDate(),
-            it.gyldigTilOgMed?.toLocalDate()
-        ) }
-
+        val adresse = soekerPdl.bostedsadresse?.map { mapAdresse(it)}
         return lagOpplysning(opplysningsType, Bostedadresse(adresse))
     }
 
     fun soekerOppholdadresse(soekerPdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Oppholdadresse> {
-        val adresse = soekerPdl.oppholdsadresse?.map { Adresse(
+        val adresse = soekerPdl.oppholdsadresse?.map { mapAdresse(it) }
+        return lagOpplysning(opplysningsType, Oppholdadresse(adresse))
+    }
+
+    fun mapAdresse(it: no.nav.etterlatte.libs.common.person.Adresse): Adresse {
+        return Adresse(
             it.type,
             it.aktiv,
             it.coAdresseNavn,
@@ -134,9 +125,7 @@ class OpplysningsByggerService : OpplysningsBygger {
             it.kilde,
             it.gyldigFraOgMed?.toLocalDate(),
             it.gyldigTilOgMed?.toLocalDate()
-        ) }
-
-        return lagOpplysning(opplysningsType, Oppholdadresse(adresse))
+        )
     }
 
     fun hentAvdoedFnr(barnepensjon: Barnepensjon): String {

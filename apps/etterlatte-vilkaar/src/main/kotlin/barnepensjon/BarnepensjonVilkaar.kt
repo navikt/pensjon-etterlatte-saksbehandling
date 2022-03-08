@@ -92,7 +92,7 @@ fun vilkaarBarnetsMedlemskap(
 
     return VurdertVilkaar(
         vilkaartype,
-        setVikaarVurderingsResultat(listOf(harIkkeOppholdsadresseIUtlandetPdl, harIkkeBostedadresseIUtlandetSoeknad)),
+        setVikaarVurderingsResultat(listOf(harIkkeBostedadresseIUtlandetPdl, harIkkeBostedadresseIUtlandetSoeknad)),
         listOf(
             harIkkeBostedadresseIUtlandetPdl,
             harIkkeOppholdsadresseIUtlandetPdl,

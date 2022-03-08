@@ -1,10 +1,15 @@
 package no.nav.etterlatte.fordeler
 
+import io.mockk.called
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
+import io.prometheus.client.Counter
+import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_YRKESSKADE
+import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_FOR_GAMMELT
 import no.nav.etterlatte.readFile
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -12,39 +17,50 @@ import org.junit.jupiter.api.Test
 internal class FordelerTest {
 
     private val fordelerService = mockk<FordelerService>()
+    private val metric = mockk<Counter>()
+    private val inspector = TestRapid().apply { Fordeler(this, fordelerService, metric) }
 
     @Test
     fun `skal fordele gyldig soknad til behandling`() {
         every { fordelerService.sjekkGyldighetForBehandling(any()) } returns FordelerResultat.GyldigForBehandling
 
-        val inspector = TestRapid()
-            .apply { fordeler(this) }
-            .apply { sendTestMessage(BARNEPENSJON_SOKNAD) }
-            .inspektør
+        val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
         assertEquals("ey_fordelt", inspector.message(0).get("@event_name").asText())
         assertEquals("true", inspector.message(0).get("@soeknad_fordelt").asText())
+
+        verify { metric wasNot called }
     }
 
     @Test
     fun `skal ikke fordele ugyldig soknad til behandling`() {
         every { fordelerService.sjekkGyldighetForBehandling(any()) } returns
-                FordelerResultat.IkkeGyldigForBehandling("Ikke gyldig for behandling")
+                FordelerResultat.UgyldigHendelse("Ikke gyldig for behandling")
 
-        val inspector = TestRapid()
-            .apply { fordeler(this) }
-            .apply { sendTestMessage(BARNEPENSJON_SOKNAD) }
-            .inspektør
+        val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
         assertEquals(0, inspector.size)
     }
 
     @Test
+    fun `skal ikke fordele soknad som ikke oppfyller alle kriterier til behandling`() {
+        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns
+                FordelerResultat.IkkeGyldigForBehandling(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
+
+        every { metric.labels(BARN_ER_FOR_GAMMELT.name).inc() } just runs
+        every { metric.labels(AVDOED_HAR_YRKESSKADE.name).inc() } just runs
+
+        val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
+
+        assertEquals(0, inspector.size)
+
+        verify(exactly = 1) { metric.labels(BARN_ER_FOR_GAMMELT.name).inc() }
+        verify(exactly = 1) { metric.labels(AVDOED_HAR_YRKESSKADE.name).inc() }
+    }
+
+    @Test
     fun `skal ikke sjekke soknad av annen type enn barnepensjon`() {
-        val inspector = TestRapid()
-            .apply { fordeler(this) }
-            .apply { sendTestMessage(GJENLEVENDE_SOKNAD) }
-            .inspektør
+        val inspector = inspector.apply { sendTestMessage(GJENLEVENDE_SOKNAD) }.inspektør
 
         assertEquals(0, inspector.size)
         verify(exactly = 0) { fordelerService.sjekkGyldighetForBehandling(any()) }
@@ -52,21 +68,15 @@ internal class FordelerTest {
 
     @Test
     fun `skal ikke sjekke soknad av annen versjon enn versjon 2`() {
-        val inspector = TestRapid()
-            .apply { fordeler(this) }
-            .apply { sendTestMessage(UGYLDIG_VERSJON) }
-            .inspektør
+        val inspector = inspector.apply { sendTestMessage(UGYLDIG_VERSJON) }.inspektør
 
         assertEquals(0, inspector.size)
         verify(exactly = 0) { fordelerService.sjekkGyldighetForBehandling(any()) }
     }
-
-    private fun fordeler(rapidsConnection: RapidsConnection) = Fordeler(rapidsConnection, fordelerService)
 
     companion object {
         val BARNEPENSJON_SOKNAD = readFile("/fordeler/soknad_barnepensjon.json")
         val GJENLEVENDE_SOKNAD = readFile("/fordeler/soknad_ikke_barnepensjon.json")
         val UGYLDIG_VERSJON = readFile("/fordeler/soknad_ugyldig_versjon.json")
     }
-
 }

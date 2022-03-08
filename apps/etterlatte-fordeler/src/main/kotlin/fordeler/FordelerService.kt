@@ -3,6 +3,7 @@ package no.nav.etterlatte.fordeler
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.fordeler.FordelerResultat.GyldigForBehandling
 import no.nav.etterlatte.fordeler.FordelerResultat.IkkeGyldigForBehandling
+import no.nav.etterlatte.fordeler.FordelerResultat.UgyldigHendelse
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
@@ -15,7 +16,8 @@ import java.time.format.DateTimeFormatter
 
 sealed class FordelerResultat {
     object GyldigForBehandling : FordelerResultat()
-    class IkkeGyldigForBehandling(val message: String, val logError: Boolean = false) : FordelerResultat()
+    class UgyldigHendelse(val message: String) : FordelerResultat()
+    class IkkeGyldigForBehandling(val ikkeOppfylteKriterier: List<FordelerKriterie>) : FordelerResultat()
 }
 
 class FordelerService(
@@ -29,9 +31,8 @@ class FordelerService(
 
         when {
             ugyldigHendelse(event) ->
-                IkkeGyldigForBehandling(
-                    message = "Avbrutt fordeling: Hendelsen er ikke lenger gyldig (${hendelseGyldigTil(event)})",
-                    logError = true
+                UgyldigHendelse(
+                    "Hendelsen er ikke lenger gyldig (${hendelseGyldigTil(event)})"
                 )
 
             else -> {
@@ -41,7 +42,7 @@ class FordelerService(
 
                 fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad).let {
                     if (it.kandidat) GyldigForBehandling
-                    else IkkeGyldigForBehandling("Avbrutt fordeling: ${it.forklaring}")
+                    else IkkeGyldigForBehandling(it.forklaring)
                 }
             }
         }

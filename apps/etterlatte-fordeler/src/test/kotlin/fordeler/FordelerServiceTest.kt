@@ -5,12 +5,14 @@ import io.mockk.mockk
 import no.nav.etterlatte.FNR_1
 import no.nav.etterlatte.FNR_2
 import no.nav.etterlatte.FNR_3
+import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.etterlatte.readSoknad
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -60,7 +62,42 @@ internal class FordelerServiceTest {
     fun `skal ikke fordele hendelse som ikke lenger er gyldig`() {
         val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent(OffsetDateTime.now().minusHours(2)))
 
-        assertTrue(resultat is FordelerResultat.IkkeGyldigForBehandling)
+        assertTrue(resultat is FordelerResultat.UgyldigHendelse)
+    }
+
+    @Test
+    fun `skal ikke fordele hendelse som ikke oppfyller alle kriterier`() {
+        val barnFnr = Foedselsnummer.of(FNR_1)
+        val avdoedFnr = Foedselsnummer.of(FNR_2)
+        val etterlattFnr = Foedselsnummer.of(FNR_3)
+
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr } ) } returns mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(etterlattFnr, avdoedFnr),
+                foreldre = listOf(etterlattFnr, avdoedFnr),
+                barn = null,
+            )
+        )
+
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
+            bostedsadresse = mockNorskAdresse()
+        )
+
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                ansvarligeForeldre = listOf(etterlattFnr),
+                foreldre = null,
+                barn = listOf(barnFnr),
+            )
+        )
+
+        val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent())
+
+        assertTrue(resultat is FordelerResultat.IkkeGyldigForBehandling && resultat.ikkeOppfylteKriterier.contains(
+            AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
+        ))
     }
 
     @Test

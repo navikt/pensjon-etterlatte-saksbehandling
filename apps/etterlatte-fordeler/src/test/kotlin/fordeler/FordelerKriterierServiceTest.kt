@@ -4,6 +4,7 @@ import no.nav.etterlatte.FNR_2
 import no.nav.etterlatte.FNR_4
 import no.nav.etterlatte.FNR_5
 import no.nav.etterlatte.SVERIGE
+import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -17,8 +18,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDate.now
+import java.time.LocalDateTime
 
-internal class FordelerKriterieServiceTest {
+internal class FordelerKriterierServiceTest {
 
     private val fordelerKriterierService = FordelerKriterierService()
 
@@ -35,7 +37,9 @@ internal class FordelerKriterieServiceTest {
         val avdoed = mockPerson(
             fnr = FNR_2,
             doedsdato = LocalDate.parse("2022-01-01"),
-            bostedsadresse = mockNorskAdresse(),
+            bostedsadresse = mockNorskAdresse(
+                gyldigTilOgMed = LocalDateTime.parse("2022-01-01T00:00:00")
+            ),
             familieRelasjon = FamilieRelasjon(
                 barn = listOf(barn.foedselsnummer),
                 ansvarligeForeldre = null,
@@ -258,6 +262,42 @@ internal class FordelerKriterieServiceTest {
         val barn = mockPerson()
         val avdoed = mockPerson(
             bostedsadresse = mockUgyldigAdresse()
+        )
+        val gjenlevende = mockPerson()
+
+        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_VAR_IKKE_BOSATT_I_NORGE))
+    }
+
+    @Test
+    fun `avdod med gyldig bostedsadresse i Norge foer doedsdato er ikke en gyldig kandidat`() {
+        val barn = mockPerson()
+        val avdoed = mockPerson(
+            doedsdato = LocalDate.parse("2022-01-03"),
+            bostedsadresse = mockUgyldigAdresse(
+                type = AdresseType.VEGADRESSE,
+                gyldigFraOgMed = LocalDateTime.parse("2022-01-01T00:00:00"),
+                gyldigTilOgMed = LocalDateTime.parse("2022-01-02T00:00:00")
+            )
+        )
+        val gjenlevende = mockPerson()
+
+        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_VAR_IKKE_BOSATT_I_NORGE))
+    }
+
+    @Test
+    fun `avdod med gyldig bostedsadresse i Norge etter doedsdato er ikke en gyldig kandidat`() {
+        val barn = mockPerson()
+        val avdoed = mockPerson(
+            doedsdato = LocalDate.parse("2022-01-01"),
+            bostedsadresse = mockUgyldigAdresse(
+                type = AdresseType.VEGADRESSE,
+                gyldigFraOgMed = LocalDateTime.parse("2022-01-02T00:00:00"),
+                gyldigTilOgMed = LocalDateTime.parse("2022-01-03T00:00:00")
+            )
         )
         val gjenlevende = mockPerson()
 

@@ -19,11 +19,13 @@ import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_ER_IKKE_BOSATT_I_
 import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_HAR_IKKE_FORELDREANSVAR
 import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE
 import no.nav.etterlatte.fordeler.FordelerKriterie.INNSENDER_ER_IKKE_FORELDER
+import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.aktiv
 import no.nav.etterlatte.libs.common.person.alder
+import no.nav.etterlatte.libs.common.person.nyeste
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
@@ -81,7 +83,7 @@ class FordelerKriterierService {
         // Avdød
         Kriterie(AVDOED_ER_IKKE_REGISTRERT_SOM_DOED) { personErIkkeRegistrertDoed(avdoed) },
         Kriterie(AVDOED_ER_IKKE_FORELDER_TIL_BARN) { ikkeForelderTilBarn(avdoed, barn) },
-        Kriterie(AVDOED_VAR_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorge(avdoed) },
+        Kriterie(AVDOED_VAR_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorgeForAvdoed(avdoed) },
         Kriterie(AVDOED_HAR_UTVANDRING) { harUtvandring(avdoed) },
         Kriterie(AVDOED_HAR_HATT_UTLANDSOPPHOLD) { harHuketAvForUtenlandsopphold(soeknad) },
         Kriterie(AVDOED_HAR_YRKESSKADE) { harHuketAvForYrkesskade(soeknad) },
@@ -125,19 +127,37 @@ class FordelerKriterierService {
             ?.none { it == gjenlevende.foedselsnummer } == true
     }
 
-    // TODO sjekke at gyldig-til dato ikke er satt
-    // TODO sjekke hva som skjer med adresse på en død person - gyldig vil kanskje ikke lenger være aktuell?
-    // TODO sjekke på dødsfallstidpunkt for gjenlevende?
     private fun ikkeGyldigBostedsAdresseINorge(person: Person): Boolean {
-        return person.bostedsadresse?.aktiv()?.type !in listOf(AdresseType.VEGADRESSE, AdresseType.MATRIKKELADRESSE)
+        val bostedsadresse = person.bostedsadresse?.nyeste()
+        return bostedsadresse?.let {
+            it.type !in listOf(AdresseType.VEGADRESSE, AdresseType.MATRIKKELADRESSE)
+        } ?: true
+    }
+
+    private fun ikkeGyldigBostedsAdresseINorgeForAvdoed(person: Person): Boolean {
+        val bostedsadresse = person.bostedsadresse?.nyeste(inkluderInaktiv = true)
+        return bostedsadresse?.let {
+            val ugyldigAdresseType = it.type !in listOf(AdresseType.VEGADRESSE, AdresseType.MATRIKKELADRESSE)
+            if (it.gyldigTilOgMed != null) {
+                val doedsdatoFoer = it.gyldigFraOgMed?.let { fom -> person.doedsdato?.isBefore(fom.toLocalDate()) } ?: true
+                val doedsdatoEtter = it.gyldigTilOgMed?.let { tom -> person.doedsdato?.isAfter(tom.toLocalDate()) } ?: true
+                doedsdatoFoer || doedsdatoEtter || ugyldigAdresseType
+            }
+            else ugyldigAdresseType
+        } ?: true
     }
 
     private fun gjenlevendeOgBarnHarIkkeSammeAdresse(gjenlevende: Person, barn: Person): Boolean {
         val gjenlevendeAdresse = gjenlevende.bostedsadresse?.aktiv()
         val barnAdresse = barn.bostedsadresse?.aktiv()
-        return !(gjenlevendeAdresse?.adresseLinje1 == barnAdresse?.adresseLinje1
-                && gjenlevendeAdresse?.postnr == barnAdresse?.postnr)
+        return !isAdresserLike(gjenlevendeAdresse, barnAdresse)
     }
+
+    private fun isAdresserLike(adresse1: Adresse?, adresse2: Adresse?) =
+        adresse1?.adresseLinje1 == adresse2?.adresseLinje1
+                && adresse1?.adresseLinje2 == adresse2?.adresseLinje2
+                && adresse1?.adresseLinje3 == adresse2?.adresseLinje3
+                && adresse1?.postnr == adresse2?.postnr
 
     private fun forGammel(person: Person, alder: Int = 14): Boolean {
         return person.alder()?.let { it > alder } ?: true
@@ -173,7 +193,7 @@ class FordelerKriterierService {
         return barnepensjon.soeker.utenlandsAdresse?.svar?.verdi == JaNeiVetIkke.JA
     }
 
-    data class FordelerResultat(
+    data class FordelerKriterierResultat(
         val kandidat: Boolean,
         val forklaring: List<FordelerKriterie>
     )
@@ -182,10 +202,15 @@ class FordelerKriterierService {
         fun blirOppfyltAv(soeknadBarnepensjon: Barnepensjon): Boolean = sjekk(soeknadBarnepensjon)
     }
 
-    fun sjekkMotKriterier(barn: Person, avdoed: Person, gjenlevende: Person, soeknad: Barnepensjon): FordelerResultat {
+    fun sjekkMotKriterier(
+        barn: Person,
+        avdoed: Person,
+        gjenlevende: Person,
+        soeknad: Barnepensjon
+    ): FordelerKriterierResultat {
         return fordelerKriterier(barn, avdoed, gjenlevende, soeknad)
             .filter { it.blirOppfyltAv(soeknad) }
             .map { it.fordelerKriterie }
-            .let { FordelerResultat(it.isEmpty(), it) }
+            .let { FordelerKriterierResultat(it.isEmpty(), it) }
     }
 }

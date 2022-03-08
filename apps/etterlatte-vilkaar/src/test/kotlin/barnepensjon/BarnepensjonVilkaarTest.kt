@@ -1,6 +1,9 @@
 package barnepensjon
 
+import no.nav.etterlatte.barnepensjon.kriterieIngenUtenlandsoppholdSisteFemAar
 import no.nav.etterlatte.barnepensjon.setVikaarVurderingsResultat
+import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
+import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresse
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Bostedadresse
@@ -25,14 +28,10 @@ import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.vilkaar.barnepensjon.kriterieHarIkkeBostedsadresseIUtlandet
 import no.nav.etterlatte.vilkaar.barnepensjon.kriterieHarIkkeOppgittAdresseIUtlandet
 import no.nav.etterlatte.vilkaar.barnepensjon.kriterieHarIkkeOppholddsadresseIUtlandet
-import no.nav.etterlatte.vilkaar.barnepensjon.kriterieIngenUtenlandsopphold
-import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBrukerErUnder20
-import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarDoedsfallErRegistrert
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
 import org.junit.jupiter.api.Assertions.*
-import java.time.LocalDateTime
 
 internal class BarnepensjonVilkaarTest {
 
@@ -94,9 +93,9 @@ internal class BarnepensjonVilkaarTest {
 
     @Test
     fun vurderAvdoedesForutgaaendeMeldemskap() {
-        val utenlandsopphold = kriterieIngenUtenlandsopphold(listOf(utenlandsopphold), listOf(doedsdatoForelderPdl))
+        val utenlandsopphold = kriterieIngenUtenlandsoppholdSisteFemAar(listOf(utenlandsopphold), listOf(doedsdatoForelderPdl))
         val ingenUtenlandsopphold =
-            kriterieIngenUtenlandsopphold(listOf(ingenUtenlandsopphold), listOf(doedsdatoForelderPdl))
+            kriterieIngenUtenlandsoppholdSisteFemAar(listOf(ingenUtenlandsopphold), listOf(doedsdatoForelderPdl))
 
         assertEquals(utenlandsopphold.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
         assertEquals(ingenUtenlandsopphold.resultat, VilkaarVurderingsResultat.OPPFYLT)

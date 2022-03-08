@@ -39,7 +39,8 @@ class Opplysningsuthenter {
             avdoedNaeringsinntekt(barnepensjonssoknad, Opplysningstyper.AVDOED_NAERINGSINNTEKT_V1),
             avdoedMilitaertjeneste(barnepensjonssoknad, Opplysningstyper.AVDOED_MILITAERTJENESTE_V1),
             soesken(barnepensjonssoknad, Opplysningstyper.SOEKER_RELASJON_SOESKEN_V1),
-            soeknadMottattDato(barnepensjonssoknad, Opplysningstyper.SOEKNAD_MOTTATT_DATO)
+            soeknadMottattDato(barnepensjonssoknad, Opplysningstyper.SOEKNAD_MOTTATT_DATO),
+            soeknadsType(barnepensjonssoknad, Opplysningstyper.SOEKNADSTYPE_V1)
         ).filterNotNull()
     }
 
@@ -57,6 +58,13 @@ class Opplysningsuthenter {
         )
     }
 
+    fun soeknadsType(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out SoeknadType> {
+        return setBehandlingsopplysninger(barnepensjon, opplysningsType, barnepensjon.type)
+    }
+
     fun hentAvdoedForelder(barnepensjon: Barnepensjon): Avdoed? {
         return barnepensjon.foreldre.find { it.type === PersonType.AVDOED }?.let { it as Avdoed }
     }
@@ -66,7 +74,10 @@ class Opplysningsuthenter {
             ?.let { it as GjenlevendeForelder }
     }
 
-    fun innsender(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out PersonInfo> {
+    fun innsender(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out PersonInfo> {
         return setBehandlingsopplysninger(
             barnepensjon, opplysningsType,
             PersonInfo(
@@ -83,7 +94,10 @@ class Opplysningsuthenter {
         return setBehandlingsopplysninger(barnepensjon, opplysningsType, Samtykke(barnepensjon.harSamtykket.svar))
     }
 
-    fun utbetalingsinformasjon(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out Utbetalingsinformasjon>? {
+    fun utbetalingsinformasjon(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out Utbetalingsinformasjon>? {
         return barnepensjon.utbetalingsInformasjon?.let {
             setBehandlingsopplysninger(
                 barnepensjon, opplysningsType,
@@ -101,7 +115,10 @@ class Opplysningsuthenter {
         }
     }
 
-    fun soekerPersoninfo(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out PersonInfo> {
+    fun soekerPersoninfo(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out PersonInfo> {
         return setBehandlingsopplysninger(
             barnepensjon, opplysningsType,
             PersonInfo(
@@ -114,14 +131,20 @@ class Opplysningsuthenter {
         )
     }
 
-    fun soekerStatsborgerskap(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out Statsborgerskap> {
+    fun soekerStatsborgerskap(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out Statsborgerskap> {
         return setBehandlingsopplysninger(
             barnepensjon, opplysningsType,
             Statsborgerskap(barnepensjon.soeker.statsborgerskap.svar, barnepensjon.soeker.foedselsnummer.svar.value)
         )
     }
 
-    fun soekerUtenlandsadresse(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out Utenlandsadresse> {
+    fun soekerUtenlandsadresse(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out Utenlandsadresse> {
         val adresse = barnepensjon.soeker.utenlandsAdresse
         return setBehandlingsopplysninger(
             barnepensjon, opplysningsType,
@@ -147,14 +170,20 @@ class Opplysningsuthenter {
         )
     }
 
-    fun soekerDagligOmsorg(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out DagligOmsorg>? {
+    fun soekerDagligOmsorg(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out DagligOmsorg>? {
         return setBehandlingsopplysninger(
             barnepensjon, opplysningsType,
             DagligOmsorg(barnepensjon.soeker.dagligOmsorg?.svar?.verdi)
         )
     }
 
-    fun gjenlevendeForelderPersoninfo(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out PersonInfo>? {
+    fun gjenlevendeForelderPersoninfo(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out PersonInfo>? {
         return hentGjenlevendeForelder(barnepensjon)?.let { forelder ->
             setBehandlingsopplysninger(
                 barnepensjon, opplysningsType,
@@ -169,7 +198,10 @@ class Opplysningsuthenter {
         }
     }
 
-    fun avdoedForelderPersoninfo(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out PersonInfo>? {
+    fun avdoedForelderPersoninfo(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out PersonInfo>? {
         return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
             setBehandlingsopplysninger(
                 barnepensjon, opplysningsType,
@@ -184,7 +216,10 @@ class Opplysningsuthenter {
         }
     }
 
-    fun avdoedDoedsdato(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out Doedsdato>? {
+    fun avdoedDoedsdato(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out Doedsdato>? {
         return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
             setBehandlingsopplysninger(
                 barnepensjon, opplysningsType,
@@ -196,7 +231,10 @@ class Opplysningsuthenter {
         }
     }
 
-    fun avdoedDoedsaarsak(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out Doedsaarsak>? {
+    fun avdoedDoedsaarsak(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out Doedsaarsak>? {
         return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
             setBehandlingsopplysninger(
                 barnepensjon, opplysningsType,
@@ -209,7 +247,10 @@ class Opplysningsuthenter {
     }
 
 
-    fun avdoedUtenlandsopphold(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out Utenlandsopphold>? {
+    fun avdoedUtenlandsopphold(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out Utenlandsopphold>? {
         return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
             setBehandlingsopplysninger(
                 barnepensjon, opplysningsType,
@@ -220,7 +261,7 @@ class Opplysningsuthenter {
                             opphold.land.svar.innhold,
                             opphold.fraDato?.svar?.innhold,
                             opphold.tilDato?.svar?.innhold,
-                            opphold.oppholdsType.svar.map {it.verdi},
+                            opphold.oppholdsType.svar.map { it.verdi },
                             opphold.medlemFolketrygd.svar.innhold,
                             opphold.pensjonsutbetaling?.svar?.innhold
                         )
@@ -231,7 +272,10 @@ class Opplysningsuthenter {
         }
     }
 
-    fun avdoedNaeringsinntekt(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out Naeringsinntekt>? {
+    fun avdoedNaeringsinntekt(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out Naeringsinntekt>? {
         return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
             setBehandlingsopplysninger(
                 barnepensjon, opplysningsType,
@@ -245,7 +289,10 @@ class Opplysningsuthenter {
         }
     }
 
-    fun avdoedMilitaertjeneste(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out Militaertjeneste>? {
+    fun avdoedMilitaertjeneste(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out Militaertjeneste>? {
         return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
             setBehandlingsopplysninger(
                 barnepensjon, opplysningsType,
@@ -274,7 +321,10 @@ class Opplysningsuthenter {
         )
     }
 
-    fun soeknadMottattDato(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out SoeknadMottattDato> {
+    fun soeknadMottattDato(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out SoeknadMottattDato> {
         return setBehandlingsopplysninger(
             barnepensjon, opplysningsType,
             SoeknadMottattDato(barnepensjon.mottattDato)

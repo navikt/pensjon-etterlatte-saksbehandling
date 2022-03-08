@@ -31,6 +31,7 @@ class OpplysningsByggerService : OpplysningsBygger {
             soekerRelasjonForeldre(soekerPdl, Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1, pdl),
             soekerBostedadresse(soekerPdl, Opplysningstyper.SOEKER_BOSTEDADRESSE_V1),
             soekerOppholdadresse(soekerPdl, Opplysningstyper.SOEKER_OPPHOLDADRESSE_V1),
+            soekerKontaktadresse(soekerPdl, Opplysningstyper.SOEKER_KONTAKTADRESSE_V1),
             gjenlevendeForelderOpplysning(
                 gjenlevendeForelderPdl,
                 Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1
@@ -111,6 +112,12 @@ class OpplysningsByggerService : OpplysningsBygger {
         return lagOpplysning(opplysningsType, Oppholdadresse(adresse))
     }
 
+    fun soekerKontaktadresse(soekerPdl: Person, opplysningsType: Opplysningstyper): Behandlingsopplysning<Kontaktadresse> {
+        val adresse = soekerPdl.kontaktadresse?.map { mapAdresse(it) }
+        return lagOpplysning(opplysningsType, Kontaktadresse(adresse))
+    }
+
+
     fun mapAdresse(it: no.nav.etterlatte.libs.common.person.Adresse): Adresse {
         return Adresse(
             it.type,
@@ -144,7 +151,6 @@ class OpplysningsByggerService : OpplysningsBygger {
         }
         throw Exception("Mangler fødselsnummer på gjenlevende forelder")
     }
-
 }
 
 fun <T> lagOpplysning(opplysningsType: Opplysningstyper, opplysning: T): Behandlingsopplysning<T> {

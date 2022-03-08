@@ -26,3 +26,7 @@ data class Bostedadresse(
 data class Oppholdadresse(
     val oppholdadresse: List<Adresse>?
 )
+
+data class Kontaktadresse(
+    val kontaktadresse: List<Adresse>?
+)

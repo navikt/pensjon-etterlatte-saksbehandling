@@ -7,10 +7,14 @@ import { VilkaarsType } from '../../../store/reducers/BehandlingReducer'
 import { AvdoedesForutMedlemskap } from './vilkaar/AvdoedesForutMedlemskap'
 import { useLocation } from 'react-router-dom'
 import { BarnetsMedlemskap } from './vilkaar/BarnetsMedlemskap'
+import { Button } from '@navikt/ds-react'
+import { useBehandlingRoutes } from '../BehandlingRoutes'
 
 export const Inngangsvilkaar = () => {
   const ctx = useContext(AppContext)
   const location = useLocation()
+  const { next } = useBehandlingRoutes()
+
   const vilkaar = ctx.state.behandlingReducer.vilkårsprøving
 
   useEffect(() => {
@@ -38,6 +42,10 @@ export const Inngangsvilkaar = () => {
         id="barnetsmedlemskap"
         vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.BARNETS_MEDLEMSKAP)}
       />
+
+      <Button variant="primary" size="medium" className="button" onClick={next}>
+        Bekreft og gå videre
+      </Button>
     </Content>
   )
 }

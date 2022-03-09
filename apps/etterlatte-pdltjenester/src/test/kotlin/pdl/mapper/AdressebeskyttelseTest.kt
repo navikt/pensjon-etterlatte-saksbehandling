@@ -1,7 +1,8 @@
-package no.nav.etterlatte.pdl
+package no.nav.etterlatte.pdl.mapper
 
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.pdl.PdlGradering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test

@@ -24,21 +24,16 @@ import org.junit.jupiter.api.assertThrows
 
 internal class PersonServiceTest {
 
-    private companion object {
-        private const val TRIVIELL_MIDTPUNKT = "19040550081"
-        private const val STOR_SNERK = "11057523044"
-    }
-
     private val pdlKlient = mockk<PdlKlient>()
     private val ppsKlient = mockk<ParallelleSannheterKlient>()
     private val personService = PersonService(pdlKlient, ppsKlient )
 
     @BeforeEach
     fun beforeEach() {
-        val personResponse: PdlPersonResponse = opprettResponse("/pdl/personUtvidetResponse.json")
+        val personResponse: PdlPersonResponse = mockResponse("/pdl/person.json")
         val hentPerson: PdlHentPerson = personResponse.data?.hentPerson!!
 
-        coEvery { pdlKlient.hentPerson(any()) } returns personResponse
+        coEvery { pdlKlient.hentPerson(any(), any()) } returns personResponse
         coEvery { ppsKlient.avklarNavn(any()) } returns hentPerson.navn.first()
         coEvery { ppsKlient.avklarAdressebeskyttelse(any()) } returns null
         coEvery { ppsKlient.avklarStatsborgerskap(any()) } returns hentPerson.statsborgerskap?.first()
@@ -58,7 +53,7 @@ internal class PersonServiceTest {
     @Test
     fun`skal mappe person som inkluderer familierelasjon (foreldre)`() {
         val person = runBlocking {
-            personService.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT), rolle = PersonRolle.BARN))
+            personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
         }
 
         val expectedForeldreFnr = listOf("26117512737", "14097030880")
@@ -72,7 +67,7 @@ internal class PersonServiceTest {
     @Test
     fun`skal mappe person som inkluderer familierelasjon (ansvarlige foreldre)`() {
         val person = runBlocking {
-            personService.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT), rolle = PersonRolle.BARN))
+            personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
         }
 
         val expectedForeldreFnr = listOf("26117512737", "14097030880")
@@ -87,7 +82,7 @@ internal class PersonServiceTest {
     @Disabled("TODO - få inn datagrunnlag for denne")
     fun`skal mappe person som inkluderer familierelasjon (barn)`() {
         val person = runBlocking {
-            personService.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT), rolle = PersonRolle.BARN))
+            personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
         }
 
         val foreldreFnr = listOf("26117512737", "14097030880")
@@ -99,69 +94,57 @@ internal class PersonServiceTest {
     }
 
     @Test
+    fun `Hent utland med innflytting mappes korrekt`() {
+        val person = runBlocking {
+            personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
+        }
+
+        assertEquals(2, person.utland?.innflyttingTilNorge?.size)
+        assertEquals("NIC", person.utland?.innflyttingTilNorge?.get(0)?.fraflyttingsland)
+        assertEquals("1970-09-14", person.utland?.innflyttingTilNorge?.get(0)?.dato.toString())
+    }
+
+    @Test
+    fun `Hent utland med utflytting mappes korrekt`() {
+        val person = runBlocking {
+            personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
+        }
+
+        assertEquals(1, person.utland?.utflyttingFraNorge?.size)
+        assertEquals("FRA", person.utland?.utflyttingFraNorge?.get(0)?.tilflyttingsland)
+        assertEquals("2021-07-01", person.utland?.utflyttingFraNorge?.get(0)?.dato.toString())
+    }
+
+    @Test
     fun `Person ikke finnes kaster exception`() {
-        coEvery { pdlKlient.hentPerson(any()) } returns PdlPersonResponse(data = null, errors = emptyList())
+        coEvery { pdlKlient.hentPerson(any(), any()) } returns PdlPersonResponse(data = null, errors = emptyList())
 
         assertThrows<PdlForesporselFeilet> {
             runBlocking {
-                personService.hentPerson(HentPersonRequest(Foedselsnummer.of(TRIVIELL_MIDTPUNKT), rolle = PersonRolle.BARN))
+                personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
             }
         }
     }
 
     @Test
     fun `Finner ikke person i PDL`() {
-        coEvery { pdlKlient.hentPerson(any()) } returns opprettResponse("/pdl/personResponseIkkeFunnet.json")
+        coEvery { pdlKlient.hentPerson(any(), any()) } returns mockResponse("/pdl/person_ikke_funnet.json")
 
         runBlocking {
             assertThrows<PdlForesporselFeilet> {
-                personService.hentPerson(HentPersonRequest(Foedselsnummer.of(STOR_SNERK), rolle = PersonRolle.BARN))
+                personService.hentPerson(HentPersonRequest(STOR_SNERK, rolle = PersonRolle.BARN))
             }
         }
     }
 
-    private inline fun <reified T> opprettResponse(fil: String): T {
+    private inline fun <reified T> mockResponse(fil: String): T {
         val json = javaClass.getResource(fil)!!.readText()
-
         return objectMapper.readValue(json, jacksonTypeRef())
     }
 
-    /*@Test
-    fun `Hent utland med innflytting mappes korrekt`() {
-        coEvery { personKlient.hentUtland(any()) } returns opprettResponse("/pdl/utlandResponseInnflytting.json")
-
-        val person = runBlocking {
-            service.hentUtland(Foedselsnummer.of(TRIVIELL_MIDTPUNKT))
-        }
-
-
-        assertEquals(2, person.innflyttingTilNorge?.size)
-        assertEquals("ESP", person.innflyttingTilNorge?.get(0)?.fraflyttingsland)
-        assertEquals("1970-06-06T00:00", person.innflyttingTilNorge?.get(0)?.dato)
-        assertTrue(person.utflyttingFraNorge?.isEmpty()!!)
-
-
+    private companion object {
+        private val TRIVIELL_MIDTPUNKT = Foedselsnummer.of("19040550081")
+        private val STOR_SNERK = Foedselsnummer.of("11057523044")
     }
-
-     */
-    /*
-    @Test
-    fun `Hent utland med utflytting mappes korrekt`() {
-        coEvery { personKlient.hentUtland(any()) } returns opprettResponse("/pdl/utlandResponseFraflytting.json")
-
-        val person = runBlocking {
-            service.hentUtland(Foedselsnummer.of(TRIVIELL_MIDTPUNKT))
-        }
-
-
-        assertEquals(1, person.utflyttingFraNorge?.size)
-        assertEquals("FRA", person.utflyttingFraNorge?.get(0)?.tilflyttingsland)
-        assertEquals("2021-07-01", person.utflyttingFraNorge?.get(0)?.dato)
-        assertTrue(person.innflyttingTilNorge?.isEmpty()!!)
-
-
-    }
-
-     */
 
 }

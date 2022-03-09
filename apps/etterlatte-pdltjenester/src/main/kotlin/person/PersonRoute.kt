@@ -12,9 +12,7 @@ import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(PersonService::class.java)
 
-/**
- * Endepunkter for uthenting av person fra PDL
- */
+
 fun Route.personApi(service: PersonService) {
     route("person") {
         post {

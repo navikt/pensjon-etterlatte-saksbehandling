@@ -24,13 +24,11 @@ class PdlTjenesterKlientTest {
 
     private lateinit var pdlTjenesterKlient: PdlTjenesterKlient
 
-    fun mockEndpoint(file: String) {
+    private fun mockEndpoint(file: String) {
         val httpClient = HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
-                    val path = "/person"
-                    if (request.url.fullPath == path && request.method == HttpMethod.Post
-                    ) {
+                    if (request.url.fullPath == "/person" && request.method == HttpMethod.Post) {
                         val headers = headersOf(
                             "Content-Type" to listOf(ContentType.Application.Json.toString()),
                         )

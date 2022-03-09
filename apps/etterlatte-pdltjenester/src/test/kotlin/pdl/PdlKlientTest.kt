@@ -9,20 +9,45 @@ import io.ktor.http.ContentType
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class PdlKlientTest {
 
-    private companion object {
-        private const val STOR_SNERK = "11057523044"
-    }
     private lateinit var pdlKlient: PdlKlient
 
+    @Test
+    fun `hentPerson returnerer gyldig person`() {
+        mockEndpoint("/pdl/person.json")
 
-    fun setup(jsonUrl: String) {
+        runBlocking {
+            val personResponse = pdlKlient.hentPerson(STOR_SNERK, PersonRolle.BARN)
+            val hentPerson = personResponse.data?.hentPerson
+
+            assertEquals("LITEN", hentPerson?.navn?.first()?.fornavn)
+            assertEquals("HEST", hentPerson?.navn?.first()?.etternavn)
+            assertEquals("2007-08-29", hentPerson?.foedsel?.first()?.foedselsdato?.toString())
+            assertEquals("NIC", hentPerson?.foedsel?.first()?.foedeland)
+            // TODO sjekk flere relevante felter
+        }
+    }
+
+    @Test
+    fun `hentPerson returnerer ikke funnet`() {
+        mockEndpoint("/pdl/person_ikke_funnet.json")
+
+        runBlocking {
+            val personResponse = pdlKlient.hentPerson(STOR_SNERK, PersonRolle.BARN)
+            val errors = personResponse.errors
+
+            assertEquals("Fant ikke person", errors?.first()?.message)
+        }
+    }
+
+    private fun mockEndpoint(jsonUrl: String) {
         val httpClient = HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
@@ -36,44 +61,14 @@ internal class PdlKlientTest {
                     }
                 }
             }
-            install(JsonFeature) { serializer = JacksonSerializer(no.nav.etterlatte.libs.common.objectMapper) }
+            install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
         }
 
         pdlKlient = PdlKlient(httpClient)
     }
 
-    @Test
-    fun `hentUtvidetPerson returnerer gyldig UtvidetPersonResponse objekt`() {
-        setup("/pdl/personUtvidetResponse.json")
-        runBlocking {
-            val testPerson = pdlKlient.hentPerson(pdlVariables())
-            assertEquals("LITEN", testPerson.data?.hentPerson?.navn?.get(0)?.fornavn)
-            //TODO her kan vi evt teste flere felter
-        }
+    private companion object {
+        private val STOR_SNERK = Foedselsnummer.of("11057523044")
     }
-
-    @Test
-    fun `hentPerson returnerer gyldig PersonResponse objekt`() {
-        setup("/pdl/personResponse.json")
-        runBlocking {
-            val testPerson = pdlKlient.hentPerson(pdlVariables())
-            assertEquals("TRIVIELL", testPerson.data?.hentPerson?.navn?.get(0)?.fornavn)
-            //TODO her kan vi evt teste flere felter
-        }
-    }
-
-    private fun pdlVariables() =
-        PdlVariables(
-            ident = STOR_SNERK,
-            bostedsadresse = true,
-            bostedsadresseHistorikk = true,
-            deltBostedsadresse = true,
-            kontaktadresse = true,
-            oppholdsadresse = true,
-            utland = true,
-            sivilstand = false,
-            familieRelasjon = true
-        )
-
 
 }

@@ -22,26 +22,6 @@
               }
             ]
           }
-        },
-        {
-          "fornavn": "LITEN",
-          "mellomnavn": null,
-          "etternavn": "KU",
-          "forkortetNavn": "KU LITEN",
-          "metadata": {
-            "master": "FREG",
-            "historisk": false,
-            "opplysningsId": "73ce82fb-f1da-4b55-8dfb-697459701626",
-            "endringer": [
-              {
-                "kilde": "Dolly",
-                "registrert": "2021-08-05T15:11:01",
-                "registrertAv": "Folkeregisteret",
-                "systemkilde": "FREG",
-                "type": "OPPRETT"
-              }
-            ]
-          }
         }
       ],
       "foedsel": [
@@ -346,7 +326,35 @@
           }
         }
       ],
-      "utflyttingFraNorge": [],
+      "utflyttingFraNorge": [
+        {
+          "tilflyttingsland": "FRA",
+          "tilflyttingsstedIUtlandet": "Paris",
+          "utflyttingsdato": "2021-07-01",
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2022-01-24T14:10:52",
+            "gyldighetstidspunkt": "2022-01-24T14:10:52",
+            "opphoerstidspunkt": null,
+            "kilde": "Dolly",
+            "aarsak": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "opplysningsId": "77e42dd2-0d74-46e3-9a73-2a0fe8104e4a",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2022-01-24T14:10:52",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
       "innflyttingTilNorge": [
         {
           "fraflyttingsland": "NIC",

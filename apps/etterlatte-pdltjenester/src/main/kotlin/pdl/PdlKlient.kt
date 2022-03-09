@@ -7,24 +7,18 @@ import io.ktor.client.request.post
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType.Application.Json
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
 
 
-interface Pdl {
-    suspend fun hentPerson(variables: PdlVariables): PdlPersonResponse
-}
+class PdlKlient(val httpClient: HttpClient) {
 
-class PdlKlient(val httpClient: HttpClient) : Pdl {
-
-    companion object {
-        const val TEMA = "PEN"
-    }
-
-    override suspend fun hentPerson(variables: PdlVariables): PdlPersonResponse {
+    suspend fun hentPerson(fnr: Foedselsnummer, rolle: PersonRolle): PdlPersonResponse {
         val request = PdlGraphqlRequest(
             query = getQuery("/pdl/hentPerson.graphql"),
-            variables = variables
+            variables = toPdlVariables(fnr, rolle)
         )
 
         return retry<PdlPersonResponse> {
@@ -45,5 +39,55 @@ class PdlKlient(val httpClient: HttpClient) : Pdl {
         return javaClass.getResource(name)!!
             .readText()
             .replace(Regex("[\n\t]"), "")
+    }
+
+    private fun toPdlVariables(fnr: Foedselsnummer, rolle: PersonRolle) =
+        when (rolle) {
+            PersonRolle.BARN ->
+                PdlVariables(
+                    ident = fnr.value,
+                    bostedsadresse = true,
+                    bostedsadresseHistorikk = true,
+                    deltBostedsadresse = true,
+                    kontaktadresse = true,
+                    kontaktadresseHistorikk = true,
+                    oppholdsadresse = true,
+                    oppholdsadresseHistorikk = true,
+                    utland = true,
+                    sivilstand = false,
+                    familieRelasjon = true
+                )
+            PersonRolle.GJENLEVENDE ->
+                PdlVariables(
+                    ident = fnr.value,
+                    bostedsadresse = true,
+                    bostedsadresseHistorikk = true,
+                    deltBostedsadresse = false,
+                    kontaktadresse = false,
+                    kontaktadresseHistorikk = false,
+                    oppholdsadresse = true,
+                    oppholdsadresseHistorikk = false,
+                    utland = true,
+                    sivilstand = true,
+                    familieRelasjon = true
+                )
+            PersonRolle.AVDOED ->
+                PdlVariables(
+                    ident = fnr.value,
+                    bostedsadresse = true,
+                    bostedsadresseHistorikk = true,
+                    deltBostedsadresse = false,
+                    kontaktadresse = true,
+                    kontaktadresseHistorikk = true,
+                    oppholdsadresse = true,
+                    oppholdsadresseHistorikk = true,
+                    utland = true,
+                    sivilstand = true,
+                    familieRelasjon = true
+                )
+        }
+
+    companion object {
+        const val TEMA = "PEN"
     }
 }

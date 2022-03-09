@@ -12,22 +12,46 @@ import {
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
-import { VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import {
+  IKriterie,
+  IVilkaaropplysing,
+  Kriterietype,
+  OpplysningsType,
+  VilkaarVurderingsResultat,
+} from '../../../../store/reducers/BehandlingReducer'
+import { Adressevisning } from './Adressevisning'
+import { IAdresse } from '../../soeknadsoversikt/types'
 
 export const BarnetsMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
 
-  /*  const bostedadresse = vilkaar.kriterier
+  console.log('barnetM', vilkaar)
+
+  const avdoedDoedsdato = vilkaar.kriterier
+    .find((krit: IKriterie) => krit.navn === Kriterietype.SOEKER_IKKE_BOSTEDADRESSE_I_UTLANDET)
+    .basertPaaOpplysninger.find(
+      (opplysning: IVilkaaropplysing) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsfall
+    )
+
+  const bostedadresser: IAdresse[] = vilkaar.kriterier
     .find((krit: IKriterie) => krit.navn === Kriterietype.SOEKER_IKKE_BOSTEDADRESSE_I_UTLANDET)
     .basertPaaOpplysninger.find(
       (opplysning: IVilkaaropplysing) => opplysning.opplysningsType === OpplysningsType.soeker_bostedadresse
-    )*/
+    ).opplysning.bostedadresse
+
+  console.log(bostedadresser)
 
   return (
     <VilkaarBorder id={props.id}>
       <Innhold>
         <Title>
-          <StatusIcon status={props.vilkaar?.resultat ? VilkaarVurderingsResultat.OPPFYLT : VilkaarVurderingsResultat.IKKE_OPPFYLT} large={true} /> Barnets medlemskap
+          <StatusIcon
+            status={
+              props.vilkaar?.resultat ? VilkaarVurderingsResultat.OPPFYLT : VilkaarVurderingsResultat.IKKE_OPPFYLT
+            }
+            large={true}
+          />{' '}
+          Barnets medlemskap
         </Title>
         <VilkaarWrapper>
           <VilkaarInfobokser>
@@ -39,6 +63,12 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
               <div>
                 <strong>Bostedadresse</strong>
               </div>
+              <div>
+                {bostedadresser.map((adresse, index) => (
+                  <Adressevisning adresse={adresse} doedsdato={avdoedDoedsdato} key={index} />
+                ))}
+              </div>
+
               <div>Adresse her</div>
             </VilkaarColumn>
           </VilkaarInfobokser>

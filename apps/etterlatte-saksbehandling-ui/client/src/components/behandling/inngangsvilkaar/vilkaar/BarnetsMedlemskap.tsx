@@ -12,6 +12,7 @@ import {
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
+import { VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 
 export const BarnetsMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
@@ -26,7 +27,7 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
     <VilkaarBorder id={props.id}>
       <Innhold>
         <Title>
-          <StatusIcon status={props.vilkaar.resultat} large={true} /> Barnets medlemskap
+          <StatusIcon status={props.vilkaar?.resultat ? VilkaarVurderingsResultat.OPPFYLT : VilkaarVurderingsResultat.IKKE_OPPFYLT} large={true} /> Barnets medlemskap
         </Title>
         <VilkaarWrapper>
           <VilkaarInfobokser>
@@ -42,8 +43,8 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
             </VilkaarColumn>
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
-            <VilkaarlisteTitle>{vilkaarErOppfylt(props.vilkaar.resultat)}</VilkaarlisteTitle>
-            <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
+            <VilkaarlisteTitle>{props.vilkaar?.resultat && vilkaarErOppfylt(props.vilkaar.resultat)}</VilkaarlisteTitle>
+            <VilkaarVurderingsliste kriterie={props.vilkaar?.kriterier ? vilkaar.kriterier : []} />
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
       </Innhold>

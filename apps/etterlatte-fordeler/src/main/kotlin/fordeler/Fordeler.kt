@@ -2,7 +2,6 @@ package no.nav.etterlatte.fordeler
 
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.prometheus.client.Counter
 import no.nav.etterlatte.fordeler.FordelerResultat.GyldigForBehandling
 import no.nav.etterlatte.fordeler.FordelerResultat.IkkeGyldigForBehandling
 import no.nav.etterlatte.fordeler.FordelerResultat.UgyldigHendelse
@@ -23,15 +22,10 @@ data class FordelerEvent(
     val hendelseGyldigTil: OffsetDateTime,
 )
 
-private val metric = Counter.build(
-    "etterlatte_fordeler_kriterier_ikke_oppfylt",
-    "Søknad avvist i fordeler fordi ett eller flere kriterier ikke er oppfylt"
-).labelNames("kriterie").create()
-
 internal class Fordeler(
     rapidsConnection: RapidsConnection,
     private val fordelerService: FordelerService,
-    private val ikkeOppfyltKriterier: Counter = metric.register()
+    private val fordelerMetricLogger: FordelerMetricLogger = FordelerMetricLogger()
 ) : River.PacketListener {
 
     private val logger = LoggerFactory.getLogger(Fordeler::class.java)
@@ -62,12 +56,11 @@ internal class Fordeler(
                     is GyldigForBehandling -> {
                         logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling")
                         context.publish(packet.toFordeltEvent().toJson())
+                        fordelerMetricLogger.logMetricFordelt()
                     }
                     is IkkeGyldigForBehandling -> {
-                        resultat.ikkeOppfylteKriterier.forEach {
-                            ikkeOppfyltKriterier.labels(it.name).inc()
-                        }
                         logger.info("Avbrutt fordeling: ${resultat.ikkeOppfylteKriterier}")
+                        fordelerMetricLogger.logMetricIkkeFordelt(resultat)
                     }
                     is UgyldigHendelse -> {
                         logger.error("Avbrutt fordeling: ${resultat.message}")

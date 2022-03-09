@@ -2,6 +2,7 @@ import format from 'date-fns/format'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import {
   IKriterie,
+  IPerson,
   IVilkaaropplysing,
   Kriterietype,
   OpplysningsType,
@@ -35,6 +36,10 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
       (opplysning: IVilkaaropplysing) => opplysning.opplysningsType === OpplysningsType.soeker_relasjon_foreldre
     )
 
+  const avdoedForelder = forelder?.opplysning.foreldre.find(
+    (forelder: IPerson) => forelder?.foedselsnummer === avdoedDoedsdato?.opplysning.foedselsnummer
+  )
+
   return (
     <VilkaarBorder id={props.id}>
       <Innhold>
@@ -64,17 +69,21 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
                 <strong>Avdød forelder</strong>
               </div>
               <div>
-                {forelder?.opplysning?.foreldre ? (
-                  forelder.opplysning.foreldre
+                {avdoedForelder ? (
+                  <>
+                    <div>
+                      {avdoedForelder.fornavn} {avdoedForelder.etternavn}
+                    </div>
+                  </>
                 ) : (
-                  <span className="missing">mangler</span>
+                  <span className="missing">mangler navn</span>
                 )}
               </div>
               <div>
                 {avdoedDoedsdato?.opplysning?.foedselsnummer ? (
                   avdoedDoedsdato.opplysning.foedselsnummer
                 ) : (
-                  <span className="missing">mangler</span>
+                  <span className="missing">mangler fødselsnummer</span>
                 )}
               </div>
             </VilkaarColumn>

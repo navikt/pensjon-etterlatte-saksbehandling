@@ -4,37 +4,42 @@ export interface IStatsborgerskap {
   gyldigTilOgMed?: Date
 }
 
-//Data som må hentes utenom saken fra register
-export interface IPersonFraRegister {
-  navn?: string
-  personStatus: PersonStatus // for barn og foreldre
-  rolle: RelatertPersonsRolle // for barn og foreldre
-  datoForDoedsfall?: Date
-  fnr: string // for barn og foreldre
-  adressenavn: string // for barn og foreldre
-}
-
 export interface IPersonFraSak {
-  navn?: string
+  navn: string
   personStatus: PersonStatus
   rolle: RelatertPersonsRolle
   fnr: string
-  adressenavn: string
+  adresser: IAdresse[]
   alderEtterlatt?: string
   statsborgerskap?: string
   datoForDoedsfall?: Date
+  fnrFraSoeknad: string
+  adresseFraSoeknad: string
+}
+
+export interface IAdresse {
+  adresseLinje1: string
+  adresseLinje2?: string
+  adresseLinje3?: string
+  aktiv: boolean
+  coAdresseNavn?: string
+  gyldigFraOgMed: Date
+  gyldigTilOgMed?: Date
+  kilde: string
+  land?: string
+  postnr: string
+  poststed?: string
+  type: string // adresseType
 }
 
 export enum RelatertPersonsRolle {
-  MOR = 'mor',
-  FAR = 'far',
-  MEDMOR = 'medmor',
   BARN = 'barn',
-  FORELDER = 'forelder'
+  FORELDER = 'forelder',
 }
 
 export enum PersonStatus {
-  DØD = 'Avdød',
-  LEVENDE = 'Gjenlevende',
+  AVDOED = 'Avdød',
+  GJENLEVENDE_FORELDER = 'Gjenlevende',
+  BARN = 'Etterlatt',
   ETTERLATT = 'Etterlatt',
 }

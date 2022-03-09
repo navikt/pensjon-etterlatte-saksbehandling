@@ -7,44 +7,30 @@ import {
   AlderEtterlattWrap,
   HistorikkWrapper,
   HistorikkElement,
+  Historikk,
 } from './styled'
 import { BodyShort } from '@navikt/ds-react'
 import { ChildIcon } from '../../../shared/icons/childIcon'
-import { ManIcon } from '../../../shared/icons/manIcon'
-import { WomanIcon } from '../../../shared/icons/womanIcon'
-import { RelatertPersonsRolle, IPersonFraSak } from './types'
+import { RelatertPersonsRolle, IPersonFraSak, IAdresse } from './types'
 import { TextButton } from './TextButton'
 import { format } from 'date-fns'
+import { sjekkDataFraSoeknadMotPdl } from './utils'
 
 type Props = {
   person: IPersonFraSak
 }
 
 export const PersonInfo: React.FC<Props> = ({ person }) => {
-  const [visLogg, setVisLogg] = useState(false)
+  const [visAdresseHistorikk, setVisAdresseHistorikk] = useState(false)
+  const gjeldendeAdresseFraPdl = person.adresser && person.adresser.find((adresse: IAdresse) => adresse.aktiv)
 
-  const adresser = [
-    {
-      adressenavn: 'Osloveien 12',
-      postnummer: '0125',
-      poststed: 'Oslo',
-      gyldigFraOgMed: new Date(2015, 1, 6),
-    },
-    {
-      adressenavn: 'Adresse-mock 2',
-      postnummer: '0000',
-      poststed: 'Oslo',
-      gyldigFraOgMed: new Date(2010, 1, 6),
-      gyldigTilOgMed: new Date(2015, 1, 5),
-    },
-  ]
-
-  const hentIconOgRolle = () => {
+  const hentPersonHeaderMedRolle = () => {
     switch (person.rolle) {
       case RelatertPersonsRolle.BARN:
         return (
           <PersonInfoHeader>
-            <ChildIcon /> {person.navn} <span className="personRolle">({person.rolle})</span>
+            <ChildIcon />
+            {person.navn} <span className="personRolle">({person.rolle})</span>
             <AlderEtterlattWrap>{person.alderEtterlatt} år</AlderEtterlattWrap>
             <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
           </PersonInfoHeader>
@@ -52,17 +38,7 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
       case RelatertPersonsRolle.FORELDER:
         return (
           <PersonInfoHeader>
-            <ManIcon /> {person.navn}
-            <span className="personRolle">
-              ({person.personStatus} {person.rolle})
-            </span>
-            <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
-          </PersonInfoHeader>
-        )
-      default:
-        return (
-          <PersonInfoHeader>
-            <WomanIcon /> {person.navn}
+            {person.navn}
             <span className="personRolle">
               ({person.personStatus} {person.rolle})
             </span>
@@ -74,36 +50,42 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
 
   return (
     <PersonInfoWrapper>
-      {hentIconOgRolle()}
+      {hentPersonHeaderMedRolle()}
       <div className="personWrapper">
         <PersonDetailWrapper>
           <BodyShort size="small" className="bodyShortHeading">
             Fødselsnummer
           </BodyShort>
-          <BodyShort size="small">{person.fnr}</BodyShort>
+          <BodyShort size="small">{sjekkDataFraSoeknadMotPdl(person?.fnr, person?.fnrFraSoeknad)}</BodyShort>
         </PersonDetailWrapper>
         <PersonDetailWrapper>
           <BodyShort size="small" className="bodyShortHeading">
             Adresse
           </BodyShort>
           <span className="adresse">
-            <BodyShort size="small">{person.adressenavn}</BodyShort>
-            <TextButton isOpen={visLogg} setIsOpen={setVisLogg} />
+            <BodyShort size="small">
+              {gjeldendeAdresseFraPdl &&
+                sjekkDataFraSoeknadMotPdl(gjeldendeAdresseFraPdl.adresseLinje1, person?.adresseFraSoeknad)}
+            </BodyShort>
+
+            <Historikk>
+              <TextButton isOpen={visAdresseHistorikk} setIsOpen={setVisAdresseHistorikk} />
+              <HistorikkWrapper>
+                {visAdresseHistorikk &&
+                  person.adresser.map((adresse, key) => (
+                    <HistorikkElement key={key}>
+                      <span className="date">
+                        {format(new Date(adresse.gyldigFraOgMed), 'dd.MM.yyyy')} -{' '}
+                        {adresse.gyldigTilOgMed && format(new Date(adresse.gyldigTilOgMed), 'dd.MM.yyyy') + ':'}
+                      </span>
+                      <span>
+                        {adresse.adresseLinje1}, {adresse.poststed}
+                      </span>
+                    </HistorikkElement>
+                  ))}
+              </HistorikkWrapper>
+            </Historikk>
           </span>
-          <HistorikkWrapper>
-            {visLogg &&
-              adresser.map((element, key) => (
-                <HistorikkElement key={key}>
-                  <span className="date">
-                    {format(new Date(element.gyldigFraOgMed), 'dd.MM.yyyy')} -{' '}
-                    {element.gyldigTilOgMed && format(new Date(element.gyldigTilOgMed), 'dd.MM.yyyy') + ':'}
-                  </span>
-                  <span>
-                    {element.adressenavn}, {element.poststed}
-                  </span>
-                </HistorikkElement>
-              ))}
-          </HistorikkWrapper>
         </PersonDetailWrapper>
       </div>
     </PersonInfoWrapper>

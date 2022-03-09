@@ -8,6 +8,7 @@ import { BehandlingsTypeSmall, IBehandlingsType } from '../behandlings-type'
 import { PersonInfo } from './PersonInfo'
 import { format } from 'date-fns'
 import { usePersonInfoFromBehandling } from './usePersonInfoFromBehandling'
+import { sjekkDataFraSoeknadMotPdl } from './utils'
 
 export const Soeknadsoversikt = () => {
   const [soeknadGyldigBegrunnelse, setSoeknadGyldigBegrunnelse] = useState('')
@@ -21,7 +22,11 @@ export const Soeknadsoversikt = () => {
     avdodPersonPdl,
     avdodPersonSoknad,
     innsender,
-    gjenlevendePdl
+    gjenlevendePdl,
+    gjenlevendeSoknad,
+    soekerBostedadresserPdl,
+    avdoedBostedadresserPdl,
+    gjenlevendeBostedadresserPdl,
   } = usePersonInfoFromBehandling()
 
   const soskenListe: IPersonFraSak[] = sosken?.opplysning.soesken.map((opplysning: any) => {
@@ -51,40 +56,33 @@ export const Soeknadsoversikt = () => {
         <InfoWrapper>
           <DetailWrapper>
             <Detail size="medium">Mottaker</Detail>
-            <Detail size="small" className="detail">
-              {soekerPdl?.opplysning.fornavn} {soekerPdl?.opplysning.etternavn} ({soekerSoknad?.opplysning.fornavn} {soekerSoknad?.opplysning.etternavn})
-            </Detail>
+            {sjekkDataFraSoeknadMotPdl(
+              `${soekerPdl?.opplysning.fornavn} ${soekerPdl?.opplysning.etternavn}`,
+              `${soekerSoknad?.opplysning.fornavn} ${soekerSoknad?.opplysning.etternavn}`
+            )}
           </DetailWrapper>
           <DetailWrapper>
             <Detail size="medium">Avdød forelder</Detail>
-            <Detail size="small" className="detail">
-              {avdodPersonPdl?.opplysning.fornavn} {avdodPersonPdl?.opplysning.etternavn} (
-              {avdodPersonSoknad?.opplysning.fornavn} {avdodPersonSoknad?.opplysning.etternavn})
-            </Detail>
+            {sjekkDataFraSoeknadMotPdl(
+              `${avdodPersonPdl?.opplysning.fornavn} ${avdodPersonPdl?.opplysning.etternavn}`,
+              `${avdodPersonSoknad?.opplysning.fornavn} ${avdodPersonSoknad?.opplysning.etternavn}`
+            )}
           </DetailWrapper>
           <DetailWrapper>
             <Detail size="medium">Søknad fremsatt av</Detail>
-            <Detail size="small" className="detail">
-              {innsender?.opplysning.fornavn} {innsender?.opplysning.etternavn}
-            </Detail>
+            {innsender?.opplysning.fornavn} {innsender?.opplysning.etternavn}
           </DetailWrapper>
           <DetailWrapper>
             <Detail size="medium">Søknad mottatt</Detail>
-            <Detail size="small" className="detail">
-              {format(new Date(mottattDato?.opplysning.mottattDato), 'dd.MM.yyyy')}
-            </Detail>
+            {format(new Date(mottattDato?.opplysning.mottattDato), 'dd.MM.yyyy')}
           </DetailWrapper>
           <DetailWrapper>
             <Detail size="medium">Dato for dødsfall</Detail>
-            <Detail size="small" className="detail">
-              {format(new Date(dodsfall?.opplysning.doedsdato), 'dd.MM.yyyy')}
-            </Detail>
+            {format(new Date(dodsfall?.opplysning.doedsdato), 'dd.MM.yyyy')}
           </DetailWrapper>
           <DetailWrapper>
             <Detail size="medium">Første mulig virkningstidspunkt</Detail>
-            <Detail size="small" className="detail">
-              01.01.22
-            </Detail>
+            01.01.22
           </DetailWrapper>
         </InfoWrapper>
 
@@ -95,10 +93,12 @@ export const Soeknadsoversikt = () => {
         <PersonInfo
           person={{
             navn: `${soekerPdl?.opplysning.fornavn} ${soekerPdl?.opplysning.etternavn}`,
-            personStatus: PersonStatus.ETTERLATT,
+            personStatus: PersonStatus.BARN,
             rolle: RelatertPersonsRolle.BARN,
-            adressenavn: 'annet',
+            adresser: soekerBostedadresserPdl?.opplysning.bostedadresse,
             fnr: soekerPdl?.opplysning.foedselsnummer,
+            fnrFraSoeknad: soekerSoknad?.opplysning.foedselsnummer,
+            adresseFraSoeknad: soekerSoknad?.opplysning.adresse,
             statsborgerskap: 'NO',
             alderEtterlatt: '15',
           }}
@@ -106,20 +106,24 @@ export const Soeknadsoversikt = () => {
         <PersonInfo
           person={{
             navn: `${gjenlevendePdl?.opplysning.fornavn} ${gjenlevendePdl?.opplysning.etternavn}`,
-            personStatus: PersonStatus.LEVENDE,
+            personStatus: PersonStatus.GJENLEVENDE_FORELDER,
             rolle: RelatertPersonsRolle.FORELDER,
-            adressenavn: 'annet',
+            adresser: gjenlevendeBostedadresserPdl?.opplysning.bostedadresse,
             fnr: gjenlevendePdl?.opplysning.foedselsnummer,
+            fnrFraSoeknad: gjenlevendeSoknad?.opplysning.foedselsnummer,
+            adresseFraSoeknad: gjenlevendeSoknad?.opplysning.adresse,
             statsborgerskap: 'NO',
           }}
         />
         <PersonInfo
           person={{
             navn: `${avdodPersonPdl?.opplysning.fornavn} ${avdodPersonPdl?.opplysning.etternavn} (${avdodPersonSoknad?.opplysning.fornavn} ${avdodPersonSoknad?.opplysning.etternavn})`,
-            personStatus: PersonStatus.DØD,
+            personStatus: PersonStatus.AVDOED,
             rolle: RelatertPersonsRolle.FORELDER,
-            adressenavn: 'annet',
-            fnr: `${avdodPersonPdl?.opplysning.foedselsnummer} (${avdodPersonSoknad?.opplysning.foedselsnummer})`,
+            adresser: avdoedBostedadresserPdl?.opplysning.bostedadresse,
+            fnr: `${avdodPersonPdl?.opplysning.foedselsnummer}`,
+            fnrFraSoeknad: avdodPersonSoknad?.opplysning.foedselsnummer,
+            adresseFraSoeknad: avdodPersonSoknad?.opplysning.adresse,
             statsborgerskap: 'NO',
           }}
         />

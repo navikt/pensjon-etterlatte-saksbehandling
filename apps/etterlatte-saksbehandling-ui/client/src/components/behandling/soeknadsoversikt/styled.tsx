@@ -13,6 +13,12 @@ export const DetailWrapper = styled.div`
   padding-top: 0.5em;
   margin-bottom: 2em;
   width: 33%;
+  font-size: 16px;
+`
+
+export const WarningText = styled.span`
+  color: #ba3a26;
+  display: block;
 `
 
 export const Border = styled.div`
@@ -22,13 +28,23 @@ export const Border = styled.div`
 export const PersonInfoWrapper = styled.div`
   border-bottom: 1px solid #b0b0b0;
   padding: 1.2em 1em 2em 0em;
-  width: 100%;
 
   .personWrapper {
-    display: flex;
+    width: 90%;
+    display: inline-flex;
     padding-top: 1em;
+    margin-right: 0em;
   }
 `
+
+export const AlertWrapper = styled.div`
+  width: 50%;
+  .alert {
+    max-width: 300px;
+    padding: 1em;
+  }
+`
+
 export const PersonDetailWrapper = styled.div`
   padding-top: 0.5em;
   padding-left: 1em;
@@ -39,12 +55,16 @@ export const PersonDetailWrapper = styled.div`
   }
   .adresse {
     display: inline-flex;
+    white-space: nowrap;
   }
 `
 
-export const HistorikkWrapper = styled.div`
+export const Historikk = styled.div`
   display: block;
-  padding-left: 5em;
+  padding-left: 1.5em;
+`
+
+export const HistorikkWrapper = styled.div`
   font-size: 11px;
   width: 400px;
 `
@@ -80,8 +100,7 @@ export const HeadingWrapper = styled.div`
   }
 `
 
-export const TextButtonWrapper = styled.div`  
-margin-left: 1em;
+export const TextButtonWrapper = styled.div`
 margin-right: 5em;
 margin-bottom: 0;
 

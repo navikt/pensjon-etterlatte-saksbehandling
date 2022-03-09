@@ -327,8 +327,8 @@ class Opplysningsuthenter {
     fun soeknadsType(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out SoeknadType> {
-        return setBehandlingsopplysninger(barnepensjon, opplysningsType, barnepensjon.type)
+    ): Behandlingsopplysning<out SoeknadstypeOpplysning> {
+        return setBehandlingsopplysninger(barnepensjon, opplysningsType, SoeknadstypeOpplysning(barnepensjon.type))
     }
 
 }

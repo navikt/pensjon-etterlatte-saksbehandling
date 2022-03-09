@@ -23,6 +23,7 @@ class BehandlingAggregat(
             opplysninger: OpplysningDao,
             vilkaarKlient: VilkaarKlient
         ): BehandlingAggregat {
+            logger.info("Oppretter en behandling på ${sak}")
             return Behandling(UUID.randomUUID(), sak, emptyList(), null, null)
                 .also {
                     behandlinger.opprett(it)

@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.Beregning
+import org.slf4j.LoggerFactory
 import java.util.*
 
 interface BehandlingService {
@@ -24,6 +25,8 @@ class RealBehandlingService(
     private val opplysninger: OpplysningDao,
     private val vilkaarKlient: VilkaarKlient
 ) : BehandlingService {
+    private val logger = LoggerFactory.getLogger(RealBehandlingService::class.java)
+
     override fun hentBehandling(behandling: UUID): Behandling {
         return BehandlingAggregat(behandling, behandlinger, opplysninger, vilkaarKlient).serialiserbarUtgave()
     }
@@ -39,6 +42,7 @@ class RealBehandlingService(
     }
 
     override fun startBehandling(sak: Long, nyeOpplysninger: List<Behandlingsopplysning<ObjectNode>>): Behandling {
+        logger.info("Starter en behandling")
         return BehandlingAggregat.opprett(sak, behandlinger, opplysninger, vilkaarKlient)
             .also { behandling ->
                 behandling.leggTilGrunnlagListe(nyeOpplysninger)

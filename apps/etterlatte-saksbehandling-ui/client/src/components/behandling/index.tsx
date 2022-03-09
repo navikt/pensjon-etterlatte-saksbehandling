@@ -9,12 +9,6 @@ import { StatusIcon } from '../../shared/icons/statusIcon'
 import { Column, GridContainer } from '../../shared/styled'
 import { AppContext } from '../../store/AppContext'
 import { BehandlingsStatus, IBehandlingsStatus } from './behandlings-status'
-import { Beregne } from './beregne'
-import { Brev } from './brev'
-import { Inngangsvilkaar } from './inngangsvilkaar'
-import { Soeknadsoversikt } from './soeknadsoversikt'
-import { Utbetalingsoversikt } from './utbetalingsoversikt'
-import { Vedtak } from './vedtak'
 import { IApiResponse } from '../../shared/api/types'
 import {
   IDetaljertBehandling,
@@ -24,6 +18,7 @@ import {
 } from '../../store/reducers/BehandlingReducer'
 import Spinner from '../../shared/Spinner'
 import { StatusBar, StatusBarTheme } from '../statusbar'
+import { useBehandlingRoutes } from './BehandlingRoutes'
 
 const addBehandlingAction = (data: any) => ({ type: 'add_behandling', data })
 
@@ -31,6 +26,7 @@ export const Behandling = () => {
   const ctx = useContext(AppContext)
   const match = useMatch('/behandling/:behandlingId/*')
   const location = useLocation()
+  const { behandlingRoutes } = useBehandlingRoutes()
 
   const [loaded, setLoaded] = useState<boolean>(false)
 
@@ -135,12 +131,9 @@ export const Behandling = () => {
           </Column>
           <Column>
             <Routes>
-              <Route path="soeknadsoversikt" element={<Soeknadsoversikt />} />
-              <Route path="inngangsvilkaar" element={<Inngangsvilkaar />} />
-              <Route path="beregne" element={<Beregne />} />
-              <Route path="vedtak" element={<Vedtak />} />
-              <Route path="utbetalingsoversikt" element={<Utbetalingsoversikt />} />
-              <Route path="brev" element={<Brev />} />
+              {behandlingRoutes.map((route) => {
+                return <Route key={route.path} path={route.path} element={route.element} />
+              })}
             </Routes>
           </Column>
           <Column>

@@ -1,12 +1,8 @@
 package no.nav.etterlatte.fordeler
 
-import io.mockk.called
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.verify
-import io.prometheus.client.Counter
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_YRKESSKADE
 import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_FOR_GAMMELT
 import no.nav.etterlatte.readFile
@@ -17,8 +13,8 @@ import org.junit.jupiter.api.Test
 internal class FordelerTest {
 
     private val fordelerService = mockk<FordelerService>()
-    private val metric = mockk<Counter>()
-    private val inspector = TestRapid().apply { Fordeler(this, fordelerService, metric) }
+    private val fordelerMetricLogger = mockk<FordelerMetricLogger>()
+    private val inspector = TestRapid().apply { Fordeler(this, fordelerService, fordelerMetricLogger) }
 
     @Test
     fun `skal fordele gyldig soknad til behandling`() {
@@ -29,7 +25,7 @@ internal class FordelerTest {
         assertEquals("ey_fordelt", inspector.message(0).get("@event_name").asText())
         assertEquals("true", inspector.message(0).get("@soeknad_fordelt").asText())
 
-        verify { metric wasNot called }
+        verify { fordelerMetricLogger.logMetricFordelt() }
     }
 
     @Test
@@ -47,15 +43,13 @@ internal class FordelerTest {
         every { fordelerService.sjekkGyldighetForBehandling(any()) } returns
                 FordelerResultat.IkkeGyldigForBehandling(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
 
-        every { metric.labels(BARN_ER_FOR_GAMMELT.name).inc() } just runs
-        every { metric.labels(AVDOED_HAR_YRKESSKADE.name).inc() } just runs
-
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
         assertEquals(0, inspector.size)
 
-        verify(exactly = 1) { metric.labels(BARN_ER_FOR_GAMMELT.name).inc() }
-        verify(exactly = 1) { metric.labels(AVDOED_HAR_YRKESSKADE.name).inc() }
+        verify(exactly = 1) { fordelerMetricLogger.logMetricIkkeFordelt(match {
+            it.ikkeOppfylteKriterier.containsAll(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
+        }) }
     }
 
     @Test

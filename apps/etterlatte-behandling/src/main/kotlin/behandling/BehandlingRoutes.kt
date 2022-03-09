@@ -41,8 +41,6 @@ fun Route.behandlingRoutes(service: BehandlingService) {
     }
 
     post("/behandlinger") { //Søk
-        val text = call.receiveText()
-        print(text)
         val behandlingsBehov = call.receive<BehandlingsBehov>()
         inTransaction {
             service.startBehandling(

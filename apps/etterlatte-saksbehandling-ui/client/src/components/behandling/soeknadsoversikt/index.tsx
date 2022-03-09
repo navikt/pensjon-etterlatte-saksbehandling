@@ -9,9 +9,12 @@ import { PersonInfo } from './PersonInfo'
 import { format } from 'date-fns'
 import { usePersonInfoFromBehandling } from './usePersonInfoFromBehandling'
 import { sjekkDataFraSoeknadMotPdl } from './utils'
+import { useBehandlingRoutes } from '../BehandlingRoutes'
 
 export const Soeknadsoversikt = () => {
   const [soeknadGyldigBegrunnelse, setSoeknadGyldigBegrunnelse] = useState('')
+  const { next } = useBehandlingRoutes()
+
 
   const {
     sosken,
@@ -143,7 +146,7 @@ export const Soeknadsoversikt = () => {
             maxLength={400}
             size="small"
           />
-          <Button variant="primary" size="medium" className="button">
+          <Button variant="primary" size="medium" className="button" onClick={next}>
             Bekreft og gå videre
           </Button>
           <Link href="#" className="link">

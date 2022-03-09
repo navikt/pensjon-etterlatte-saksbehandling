@@ -83,6 +83,24 @@ export enum Kriterietype {
   SOEKER_IKKE_KONTAKTADRESSE_I_UTLANDET = 'SOEKER_IKKE_KONTAKTADRESSE_I_UTLANDET',
 }
 
+export interface IPerson {
+  type: PersonType
+  fornavn: string
+  etternavn: string
+  foedselsnummer: string
+}
+
+export enum PersonType {
+  INNSENDER = 'INNSENDER',
+  GJENLEVENDE = ' GJENLEVENDE',
+  GJENLEVENDE_FORELDER = 'GJENLEVENDE_FORELDER',
+  AVDOED = 'AVDOED',
+  SAMBOER = 'SAMBOER',
+  VERGE = 'VERGE',
+  BARN = 'BARN',
+  FORELDER = 'FORELDER',
+}
+
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: '',
   sak: 0,

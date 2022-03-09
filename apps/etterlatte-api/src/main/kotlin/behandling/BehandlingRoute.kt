@@ -11,6 +11,7 @@ import io.ktor.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import java.time.LocalDateTime
@@ -58,7 +59,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
                             "11057523044",
                             LocalDateTime.now().toInstant(ZoneOffset.UTC)
 
-                        ), "testopplysning", objectMapper.createObjectNode(), objectMapper.createObjectNode()
+                        ), Opplysningstyper.TESTOPPLYSNING, objectMapper.createObjectNode(), objectMapper.createObjectNode()
                     )
                     val behandlingsBehov = BehandlingsBehov(sakId, listOf(testBehandlingsopplysning))
                     call.respond(service.opprettBehandling(behandlingsBehov, getAccessToken(call)))

@@ -1,9 +1,13 @@
 package no.nav.etterlatte.libs.common.vikaar
 
 
-enum class Kriterietyper(val value: String) {
-    AVDOED_ER_FORELDER("avdoed_er_forelder"),
-    DOEDSFALL_ER_REGISTRERT_I_PDL("doedsdato_er_registrert_i_pdl"),
-    SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO("soeker_er_under_20_paa_virkningsdato"),
-    AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR("avdoed_ikke_opphold_utland_siste_fem_aar")
+enum class Kriterietyper {
+    AVDOED_ER_FORELDER,
+    DOEDSFALL_ER_REGISTRERT_I_PDL,
+    SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
+    AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR,
+    SOEKER_IKKE_OPPGITT_ADRESSE_I_UTLANDET_I_SOEKNAD,
+    SOEKER_IKKE_BOSTEDADRESSE_I_UTLANDET,
+    SOEKER_IKKE_OPPHOLDADRESSE_I_UTLANDET,
+    SOEKER_IKKE_KONTAKTADRESSE_I_UTLANDET,
 }

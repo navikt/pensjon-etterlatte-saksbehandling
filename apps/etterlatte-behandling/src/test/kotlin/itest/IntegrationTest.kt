@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.Beregning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.sak.Sak
 import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -66,7 +67,7 @@ class ApplicationTest {
                                 Behandlingsopplysning(
                                     UUID.randomUUID(),
                                     Behandlingsopplysning.Privatperson("1234", Instant.now()),
-                                    "soeker_foedselsdato:v1",
+                                    Opplysningstyper.SOEKER_FOEDSELSDATO_V1,
                                     objectMapper.createObjectNode(),
                                     objectMapper.valueToTree(Foedselsdato(LocalDate.of(1986, Month.FEBRUARY, 6), "12345678910")) as ObjectNode
                                 )
@@ -115,10 +116,10 @@ class ApplicationTest {
                     )
                 })
                 val behandling: Behandling = (objectMapper.readValue(it.response.content!!))
-                assertNotNull(behandling.grunnlag.find { it.opplysningType == "soeker_foedselsdato:v1" })
+                assertNotNull(behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKER_FOEDSELSDATO_V1 })
                 assertEquals(
                     LocalDate.of(1986, 2, 6),
-                    behandling.grunnlag.find { it.opplysningType == "soeker_foedselsdato:v1" }!!.opplysning["foedselsdato"].textValue().let { LocalDate.parse(it) }
+                    behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKER_FOEDSELSDATO_V1  }!!.opplysning["foedselsdato"].textValue().let { LocalDate.parse(it) }
                 )
 
             }

@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BankkontoType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
@@ -16,11 +17,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.ZoneOffset
-import java.util.concurrent.atomic.AtomicBoolean
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OpplysningsuthenterTest {
-
 
     companion object {
         val opplysninger = Opplysningsuthenter().lagOpplysningsListe(
@@ -47,7 +46,7 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysning om innsenders personinfo`() {
-        consumeSingle<PersonInfo>("innsender_personinfo:v1")
+        consumeSingle<PersonInfo>(Opplysningstyper.INNSENDER_PERSONINFO_V1)
             .apply {
                 assertEquals("GØYAL", fornavn)
                 assertEquals("HØYSTAKK", etternavn)
@@ -57,8 +56,8 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om søkers personinfo`() {
-        consumeSingle<PersonInfo>("soeker_personinfo:v1")
+    fun `skal hente opplysning om soekers personinfo`() {
+        consumeSingle<PersonInfo>(Opplysningstyper.SOEKER_PERSONINFO_V1)
             .apply {
                 assertEquals("kirsten", fornavn)
                 assertEquals("jakobsen", etternavn)
@@ -69,7 +68,7 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysning om gjenlevende forelders personinfo`() {
-        consumeSingle<PersonInfo>("gjenlevende_forelder_personinfo:v1")
+        consumeSingle<PersonInfo>(Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1)
             .apply {
                 assertEquals("GØYAL", fornavn)
                 assertEquals("HØYSTAKK", etternavn)
@@ -80,7 +79,7 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysning om samtykke`() {
-        consumeSingle<Samtykke>("samtykke")
+        consumeSingle<Samtykke>(Opplysningstyper.SAMTYKKE)
             .apply {
                 assertEquals(true, harSamtykket)
             }
@@ -88,7 +87,7 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysning om utbetalingsinformasjon`() {
-        consumeSingle<Utbetalingsinformasjon>("utbetalingsinformasjon:v1")
+        consumeSingle<Utbetalingsinformasjon>(Opplysningstyper.UTBETALINGSINFORMASJON_V1)
             .apply {
                 assertEquals(BankkontoType.NORSK, bankkontoType)
                 assertEquals("6848.64.44444", kontonummer)
@@ -102,8 +101,8 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om søkers statsborkerskap`() {
-        consumeSingle<Statsborgerskap>("soeker_statsborgerskap:v1")
+    fun `skal hente opplysning om soekers statsborkerskap`() {
+        consumeSingle<Statsborgerskap>(Opplysningstyper.SOEKER_STATSBORGERSKAP_V1)
             .apply {
                 assertEquals("Norge", statsborgerskap)
                 assertEquals("12101376212", foedselsnummer)
@@ -112,16 +111,16 @@ internal class OpplysningsuthenterTest {
 
     @Test
     @Disabled
-    fun `skal hente opplysning om søkers adresse`() {
-        consumeSingle<Utenlandsadresse>("soeker_utenlandsadresse:v1")
+    fun `skal hente opplysning om soekers adresse`() {
+        consumeSingle<Utenlandsadresse>(Opplysningstyper.SOEKER_UTENLANDSADRESSE_V1)
             .apply {
                 println(this)
             }
     }
 
     @Test
-    fun `skal hente opplysning om søkers verge`() {
-        consumeSingle<Verge>("soeker_verge:v1")
+    fun `skal hente opplysning om soekers verge`() {
+        consumeSingle<Verge>(Opplysningstyper.SOEKER_VERGE_V1)
             .apply {
                 assertEquals("Nei", barnHarVerge?.innhold)
             }
@@ -129,15 +128,15 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysning om daglig omsorg`() {
-        consumeSingle<DagligOmsorg>("soker_daglig_omsorg:v1")
+        consumeSingle<DagligOmsorg>(Opplysningstyper.SOEKER_DAGLIG_OMSORG_V1)
             .apply {
                 assertNull(omsorgPerson)
             }
     }
 
     @Test
-    fun `skal hente opplysning om avdøde`() {
-        consumeSingle<PersonInfo>("avdoed_personinfo:v1")
+    fun `skal hente opplysning om avdoede`() {
+        consumeSingle<PersonInfo>(Opplysningstyper.AVDOED_PERSONINFO_V1)
             .apply {
                 assertEquals("fn", fornavn)
                 assertEquals("en", etternavn)
@@ -147,8 +146,8 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om avdødes dødsfall`() {
-        consumeSingle<Doedsdato>("avdoed_doedsfall:v1")
+    fun `skal hente opplysning om avdoedes doedsfall`() {
+        consumeSingle<Doedsdato>(Opplysningstyper.AVDOED_DOEDSFALL_V1)
             .apply {
                 assertEquals(LocalDate.of(2022, Month.JANUARY, 1), doedsdato)
                 assertEquals("22128202440", foedselsnummer)
@@ -157,16 +156,16 @@ internal class OpplysningsuthenterTest {
 
     @Test
     @Disabled
-    fun `skal hente opplysning om dødsårsak`() {
-        consumeSingle<Doedsaarsak>("avdoed_doedsaarsak:v1")
+    fun `skal hente opplysning om doedsaarsak`() {
+        consumeSingle<Doedsaarsak>(Opplysningstyper.AVDOED_DOEDSAARSAK_V1)
             .apply {
                 println(this)
             }
     }
 
     @Test
-    fun `skal hente opplysning om avdødes utenlandsopphold`() {
-        consumeSingle<Utenlandsopphold>("avdoed_utenlandsopphold:v1")
+    fun `skal hente opplysning om avdoedes utenlandsopphold`() {
+        consumeSingle<Utenlandsopphold>(Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1)
             .apply {
                 assertEquals("Nei", harHattUtenlandsopphold)
             }
@@ -174,8 +173,8 @@ internal class OpplysningsuthenterTest {
 
     @Test
     @Disabled
-    fun `skal hente opplysning om avdødes næringsinntekt`() {
-        consumeSingle<Naeringsinntekt>("avdoed_naeringsinntekt:v1")
+    fun `skal hente opplysning om avdoedes naeringsinntekt`() {
+        consumeSingle<Naeringsinntekt>(Opplysningstyper.AVDOED_NAERINGSINNTEKT_V1)
             .apply {
                 println(this)
             }
@@ -183,16 +182,16 @@ internal class OpplysningsuthenterTest {
 
     @Test
     @Disabled
-    fun `skal hente opplysning om avdødes militærtjeneste`() {
-        consumeSingle<Militaertjeneste>("avdoed_militaertjeneste:v1")
+    fun `skal hente opplysning om avdoedes militaertjeneste`() {
+        consumeSingle<Militaertjeneste>(Opplysningstyper.AVDOED_MILITAERTJENESTE_V1)
             .apply {
                 println(this)
             }
     }
 
     @Test
-    fun `skal hente opplysning om søsken`() {
-        consumeSingle<Soesken>("soeker_relasjon_soesken:v1")
+    fun `skal hente opplysning om soesken`() {
+        consumeSingle<Soesken>(Opplysningstyper.SOEKER_RELASJON_SOESKEN_V1)
             .apply {
                 assertTrue(soesken!!.isEmpty())
             }
@@ -200,14 +199,20 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysning om mottatt dato`() {
-        consumeSingle<SoeknadMottattDato>("soeknad_mottatt_dato")
+        consumeSingle<SoeknadMottattDato>(Opplysningstyper.SOEKNAD_MOTTATT_DATO)
             .apply {
                 assertEquals(LocalDateTime.parse("2022-02-14T14:37:24.573612786"), mottattDato)
             }
     }
 
+    @Test
+    fun `skal hente opplysning om soeknadstype`() {
+        consumeSingle<SoeknadstypeOpplysning>(Opplysningstyper.SOEKNADSTYPE_V1).apply {
+            assertEquals(SoeknadType.BARNEPENSJON, this.type)
+        }
+    }
 
-    inline fun <reified T> consumeSingle(opplysningType: String) =
+    inline fun <reified T> consumeSingle(opplysningType: Opplysningstyper) =
         opplysninger.filter { it.opplysningType == opplysningType }
             .also { assertEquals(1, it.size) }
             .first()

@@ -1,13 +1,22 @@
 package barnepensjon
 
+import no.nav.etterlatte.barnepensjon.kriterieIngenUtenlandsoppholdSisteFemAar
+import no.nav.etterlatte.barnepensjon.setVikaarVurderingsResultat
+import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
+import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresse
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Bostedadresse
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foreldre
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Oppholdadresse
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.PersonInfo
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsadresse
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsoppholdOpplysninger
+import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
@@ -16,11 +25,9 @@ import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
-import no.nav.etterlatte.vilkaar.barnepensjon.hentDoedsdato
-import no.nav.etterlatte.vilkaar.barnepensjon.kriterieIngenUtenlandsopphold
-import no.nav.etterlatte.vilkaar.barnepensjon.setVikaarVurderingsResultat
-import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBrukerErUnder20
-import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarDoedsfallErRegistrert
+import no.nav.etterlatte.vilkaar.barnepensjon.kriterieHarIkkeBostedsadresseIUtlandet
+import no.nav.etterlatte.vilkaar.barnepensjon.kriterieHarIkkeOppgittAdresseIUtlandet
+import no.nav.etterlatte.vilkaar.barnepensjon.kriterieHarIkkeOppholddsadresseIUtlandet
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
@@ -86,8 +93,9 @@ internal class BarnepensjonVilkaarTest {
 
     @Test
     fun vurderAvdoedesForutgaaendeMeldemskap() {
-        val utenlandsopphold = kriterieIngenUtenlandsopphold(listOf(utenlandsopphold), listOf(doedsdatoForelderPdl))
-        val ingenUtenlandsopphold = kriterieIngenUtenlandsopphold(listOf(ingenUtenlandsopphold), listOf(doedsdatoForelderPdl))
+        val utenlandsopphold = kriterieIngenUtenlandsoppholdSisteFemAar(listOf(utenlandsopphold), listOf(doedsdatoForelderPdl))
+        val ingenUtenlandsopphold =
+            kriterieIngenUtenlandsoppholdSisteFemAar(listOf(ingenUtenlandsopphold), listOf(doedsdatoForelderPdl))
 
         assertEquals(utenlandsopphold.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
         assertEquals(ingenUtenlandsopphold.resultat, VilkaarVurderingsResultat.OPPFYLT)
@@ -95,8 +103,52 @@ internal class BarnepensjonVilkaarTest {
     }
 
     @Test
-    fun vurderVilkaarsVurdering() {
+    fun vuderBarnetsMedlemskap() {
+        val ingenOppgittUtenlandsadresse =
+            kriterieHarIkkeOppgittAdresseIUtlandet(listOf(ingenUtenlandsadresseVilkaarOpplysning))
+        val harOppgittUtenlandsadresse = kriterieHarIkkeOppgittAdresseIUtlandet(listOf(harUtenlandsadresseVilkaarOpplysning))
 
+        val ingenUtenlandskBostedadresseEtterDoedsdato =
+            kriterieHarIkkeBostedsadresseIUtlandet(
+                listOf(ingenUtenlandsBostedadresseVilkaarOpplysning),
+                listOf(doedsdatoForelderPdl)
+            )
+
+        val harUtenlandskBostedadresseEtterDoedsdato =
+            kriterieHarIkkeBostedsadresseIUtlandet(
+                listOf(harUtenlandsBostedadresseVilkaarOpplysning),
+                listOf(doedsdatoForelderPdl)
+            )
+
+        val ingenBostedAdresser = kriterieHarIkkeBostedsadresseIUtlandet(
+            listOf(ingenBostedadresseVilkaarOpplysning),
+            listOf(doedsdatoForelderPdl)
+        )
+
+        val ingenUtenlandskOppholdadresseEtterDoedsdato =
+            kriterieHarIkkeOppholddsadresseIUtlandet(
+                listOf(ingenUtenlandsOppholdadresseVilkaarOpplysning),
+                listOf(doedsdatoForelderPdl)
+            )
+
+        val harUtenlandskOppholdadresseEtterDoedsdato =
+            kriterieHarIkkeOppholddsadresseIUtlandet(
+                listOf(harUtenlandsOppholdadresseVilkaarOpplysning),
+                listOf(doedsdatoForelderPdl)
+            )
+
+        assertEquals(VilkaarVurderingsResultat.OPPFYLT, ingenOppgittUtenlandsadresse.resultat)
+        assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, harOppgittUtenlandsadresse.resultat)
+        assertEquals(VilkaarVurderingsResultat.OPPFYLT, ingenUtenlandskBostedadresseEtterDoedsdato.resultat)
+        assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, harUtenlandskBostedadresseEtterDoedsdato.resultat)
+        assertEquals(VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, ingenBostedAdresser.resultat)
+        assertEquals(VilkaarVurderingsResultat.OPPFYLT, ingenUtenlandskOppholdadresseEtterDoedsdato.resultat)
+        assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, harUtenlandskOppholdadresseEtterDoedsdato.resultat)
+
+    }
+
+    @Test
+    fun vurderVilkaarsVurdering() {
         val kriterieOppfylt =
             Kriterie(Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, VilkaarVurderingsResultat.OPPFYLT, listOf())
         val kriterieIkkeOppfylt =
@@ -123,42 +175,41 @@ internal class BarnepensjonVilkaarTest {
             VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
             vilkaarKriterierOppfyltOgKanIkkeHentesUt
         )
-
     }
 
 
     val foedselsdatoBarnOver20 = VilkaarOpplysning(
-        opplysningsType = Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value,
+        opplysningsType = Opplysningstyper.SOEKER_FOEDSELSDATO_V1,
         kilde = Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
         opplysning = Foedselsdato(LocalDate.parse("2000-08-29"), "29082076127")
     )
 
     val foedselsdatoBarnUnder20 = VilkaarOpplysning(
-        opplysningsType = Opplysningstyper.SOEKER_FOEDSELSDATO_V1.value,
+        opplysningsType = Opplysningstyper.SOEKER_FOEDSELSDATO_V1,
         kilde = Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
         opplysning = Foedselsdato(LocalDate.parse("2020-06-10"), "06102076127")
     )
 
     val doedsdatoForelderPdl = VilkaarOpplysning(
-        opplysningsType = Opplysningstyper.AVDOED_DOEDSFALL_V1.value,
+        opplysningsType = Opplysningstyper.AVDOED_DOEDSFALL_V1,
         kilde = Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
         opplysning = Doedsdato(LocalDate.parse("2022-01-25"), "19078504903")
     )
 
     val doedsdatoIkkeForelderPdl = VilkaarOpplysning(
-        opplysningsType = Opplysningstyper.AVDOED_DOEDSFALL_V1.value,
+        opplysningsType = Opplysningstyper.AVDOED_DOEDSFALL_V1,
         kilde = Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
         opplysning = Doedsdato(LocalDate.parse("2022-01-25"), "11057523044")
     )
 
     val doedsdatoForelderSoeknad = VilkaarOpplysning(
-        opplysningsType = Opplysningstyper.AVDOED_DOEDSFALL_V1.value,
+        opplysningsType = Opplysningstyper.AVDOED_DOEDSFALL_V1,
         kilde = Behandlingsopplysning.Privatperson("19078504903", Instant.now()),
         opplysning = Doedsdato(LocalDate.parse("2022-01-25"), "19078504903")
     )
 
     val foreldre = VilkaarOpplysning(
-        opplysningsType = Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1.value,
+        opplysningsType = Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1,
         kilde = Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
         opplysning = Foreldre(
             listOf(
@@ -174,7 +225,7 @@ internal class BarnepensjonVilkaarTest {
     )
 
     val utenlandsopphold = VilkaarOpplysning(
-        opplysningsType = Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1.value,
+        opplysningsType = Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1,
         kilde = Behandlingsopplysning.Privatperson("19078504903", Instant.now()),
         opplysning = Utenlandsopphold(
             "JA",
@@ -202,14 +253,112 @@ internal class BarnepensjonVilkaarTest {
     )
 
     val ingenUtenlandsopphold = VilkaarOpplysning(
-        opplysningsType = Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1.value,
+        opplysningsType = Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1,
         kilde = Behandlingsopplysning.Privatperson("19078504903", Instant.now()),
         opplysning = Utenlandsopphold(
             "NEI",
             listOf(),
             "19078504903"
         )
+    )
 
+    val ingenUtenlandsadresseVilkaarOpplysning = VilkaarOpplysning(
+        opplysningsType = Opplysningstyper.SOEKER_UTENLANDSADRESSE_V1,
+        kilde = Behandlingsopplysning.Privatperson("19078504903", Instant.now()),
+        opplysning = Utenlandsadresse("NEI", null, null, null)
+    )
+
+    val harUtenlandsadresseVilkaarOpplysning = VilkaarOpplysning(
+        opplysningsType = Opplysningstyper.SOEKER_UTENLANDSADRESSE_V1,
+        kilde = Behandlingsopplysning.Privatperson("19078504903", Instant.now()),
+        opplysning = Utenlandsadresse("JA", null, null, null)
+    )
+
+
+    val ingenBostedadresseVilkaarOpplysning = VilkaarOpplysning(
+        opplysningsType = Opplysningstyper.SOEKER_UTENLANDSADRESSE_V1,
+        kilde = Behandlingsopplysning.Privatperson("19078504903", Instant.now()),
+        opplysning = Bostedadresse(bostedadresse = null)
+    )
+
+    val adresserNorge = listOf(
+        Adresse(
+            AdresseType.VEGADRESSE,
+            true,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "NOR",
+            "kilde",
+            LocalDate.parse("2025-01-26"),
+            null
+        ),
+        Adresse(
+            AdresseType.VEGADRESSE,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "NOR",
+            "kilde",
+            LocalDate.parse("2010-01-25"),
+            LocalDate.parse("2025-01-30"),
+        )
+    )
+
+    val adresseDanmark = listOf(
+        Adresse(
+            AdresseType.UTENLANDSKADRESSE,
+            true,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "DAN",
+            "kilde",
+            LocalDate.parse("2022-01-25"),
+            null
+        )
+    )
+
+    val ingenUtenlandsBostedadresseVilkaarOpplysning = VilkaarOpplysning(
+        opplysningsType = Opplysningstyper.SOEKER_BOSTEDADRESSE_V1,
+        kilde = Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
+        opplysning = Bostedadresse(
+            bostedadresse = adresserNorge
+        )
+    )
+
+    val harUtenlandsBostedadresseVilkaarOpplysning = VilkaarOpplysning(
+        opplysningsType = Opplysningstyper.SOEKER_BOSTEDADRESSE_V1,
+        kilde = Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
+        opplysning = Bostedadresse(
+            bostedadresse = adresseDanmark
+        )
+    )
+
+    val ingenUtenlandsOppholdadresseVilkaarOpplysning = VilkaarOpplysning(
+        opplysningsType = Opplysningstyper.SOEKER_OPPHOLDADRESSE_V1,
+        kilde = Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
+        opplysning = Oppholdadresse(
+            oppholdadresse = adresserNorge
+        )
+    )
+
+    val harUtenlandsOppholdadresseVilkaarOpplysning = VilkaarOpplysning(
+        opplysningsType = Opplysningstyper.SOEKER_OPPHOLDADRESSE_V1,
+        kilde = Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
+        opplysning = Oppholdadresse(
+            oppholdadresse = adresseDanmark
+        )
     )
 
 }

@@ -1,137 +1,76 @@
 package no.nav.etterlatte.fordeler
 
-import io.mockk.clearAllMocks
-import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.mockNorskAdresse
-import no.nav.etterlatte.mockPerson
-import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
+import io.mockk.verify
+import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_YRKESSKADE
+import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_FOR_GAMMELT
+import no.nav.etterlatte.readFile
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 internal class FordelerTest {
 
-    private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
-
-    private val nyhendelseJson = javaClass.getResource("/fordeler/soknad_barnepensjon.json")!!.readText()
-    private val hendelseIkkeBarnePensjonJson = javaClass.getResource("/fordeler/soknad_ikke_barnepensjon.json")!!.readText()
-    private val hendelseIkkeGyldig = javaClass.getResource("/fordeler/soknad_utgaatt_hendelse.json")!!.readText()
-
-    @AfterEach
-    fun afterEach() {
-        clearAllMocks()
-    }
+    private val fordelerService = mockk<FordelerService>()
+    private val fordelerMetricLogger = mockk<FordelerMetricLogger>()
+    private val inspector = TestRapid().apply { Fordeler(this, fordelerService, fordelerMetricLogger) }
 
     @Test
-    fun `gyldig soknad til vedtakslosning`() {
-        val barnFnr = Foedselsnummer.of("07010776133")
-        val avdoedFnr = Foedselsnummer.of("24014021406")
-        val etterlattFnr = Foedselsnummer.of("11057523044")
+    fun `skal fordele gyldig soknad til behandling`() {
+        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns FordelerResultat.GyldigForBehandling
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr } ) } returns mockPerson(
-            bostedsadresse = mockNorskAdresse(),
-            familieRelasjon = FamilieRelasjon(
-                ansvarligeForeldre = listOf(etterlattFnr),
-                foreldre = null,
-                barn = null,
-            )
-        )
-
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
-            doedsdato = LocalDate.parse("2022-01-01"),
-            bostedsadresse = mockNorskAdresse()
-        )
-
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
-            bostedsadresse = mockNorskAdresse(),
-            familieRelasjon = FamilieRelasjon(
-                ansvarligeForeldre = listOf(Foedselsnummer.of("11057523044")),
-                foreldre = null,
-                barn = listOf(Foedselsnummer.of("07010776133")),
-            )
-        )
-
-        val inspector = TestRapid()
-            .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
-            .apply { sendTestMessage(nyhendelseJson) }
-            .inspektør
+        val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
         assertEquals("ey_fordelt", inspector.message(0).get("@event_name").asText())
         assertEquals("true", inspector.message(0).get("@soeknad_fordelt").asText())
+
+        verify { fordelerMetricLogger.logMetricFordelt() }
     }
 
     @Test
-    fun `soknad med avdoed som ikke er registrert som doed skal ikke fordeles`() {
-        val barnFnr = Foedselsnummer.of("07010776133")
-        val avdoedFnr = Foedselsnummer.of("24014021406")
-        val etterlattFnr = Foedselsnummer.of("11057523044")
+    fun `skal ikke fordele ugyldig soknad til behandling`() {
+        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns
+                FordelerResultat.UgyldigHendelse("Ikke gyldig for behandling")
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
-            bostedsadresse = mockNorskAdresse(),
-            familieRelasjon = FamilieRelasjon(
-                ansvarligeForeldre = listOf(etterlattFnr),
-                foreldre = null,
-                barn = null,
-            )
-        )
+        val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == avdoedFnr }) } returns mockPerson(
-            bostedsadresse = mockNorskAdresse()
-        )
-
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == etterlattFnr }) } returns mockPerson(
-            bostedsadresse = mockNorskAdresse(),
-            familieRelasjon = FamilieRelasjon(
-                ansvarligeForeldre = listOf(Foedselsnummer.of("11057523044")),
-                foreldre = null,
-                barn = listOf(Foedselsnummer.of("07010776133")),
-            )
-        )
-
-        val inspector = TestRapid()
-            .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
-            .apply { sendTestMessage(nyhendelseJson) }
-            .inspektør
-
-        assertTrue(inspector.size == 0)
+        assertEquals(0, inspector.size)
     }
 
     @Test
-    fun hendelseIkkeGyldigLengre() {
-        val inspector = TestRapid()
-            .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
-            .apply { sendTestMessage(hendelseIkkeGyldig) }
-            .inspektør
+    fun `skal ikke fordele soknad som ikke oppfyller alle kriterier til behandling`() {
+        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns
+                FordelerResultat.IkkeGyldigForBehandling(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
 
-        assertTrue(inspector.size == 0)
+        val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
+
+        assertEquals(0, inspector.size)
+
+        verify(exactly = 1) { fordelerMetricLogger.logMetricIkkeFordelt(match {
+            it.ikkeOppfylteKriterier.containsAll(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
+        }) }
     }
 
     @Test
-    fun ikkeBarnepensjonSoeknad() {
-        val inspector = TestRapid()
-            .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
-            .apply { sendTestMessage(hendelseIkkeBarnePensjonJson) }
-            .inspektør
+    fun `skal ikke sjekke soknad av annen type enn barnepensjon`() {
+        val inspector = inspector.apply { sendTestMessage(GJENLEVENDE_SOKNAD) }.inspektør
 
-        assertTrue(inspector.size == 0)
+        assertEquals(0, inspector.size)
+        verify(exactly = 0) { fordelerService.sjekkGyldighetForBehandling(any()) }
     }
 
     @Test
-    fun `skal feile og logge dersom kall mot pdltjenester feiler`() {
-        coEvery { pdlTjenesterKlient.hentPerson(any()) } throws RuntimeException("Noe feilet")
+    fun `skal ikke sjekke soknad av annen versjon enn versjon 2`() {
+        val inspector = inspector.apply { sendTestMessage(UGYLDIG_VERSJON) }.inspektør
 
-        val inspector = TestRapid()
-            .apply { Fordeler(this, pdlTjenesterKlient, FordelerKriterierService()) }
-            .apply { sendTestMessage(nyhendelseJson) }
-            .inspektør
-
-        assertTrue(inspector.size == 0)
+        assertEquals(0, inspector.size)
+        verify(exactly = 0) { fordelerService.sjekkGyldighetForBehandling(any()) }
     }
 
+    companion object {
+        val BARNEPENSJON_SOKNAD = readFile("/fordeler/soknad_barnepensjon.json")
+        val GJENLEVENDE_SOKNAD = readFile("/fordeler/soknad_ikke_barnepensjon.json")
+        val UGYLDIG_VERSJON = readFile("/fordeler/soknad_ugyldig_versjon.json")
+    }
 }

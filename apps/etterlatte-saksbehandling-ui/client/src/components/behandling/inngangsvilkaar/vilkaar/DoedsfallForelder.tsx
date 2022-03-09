@@ -1,6 +1,11 @@
 import format from 'date-fns/format'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
-import { IKriterie, IVilkaaropplysing, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
+import {
+  IKriterie,
+  IVilkaaropplysing,
+  Kriterietype,
+  OpplysningsType,
+} from '../../../../store/reducers/BehandlingReducer'
 import {
   Innhold,
   Title,
@@ -11,7 +16,7 @@ import {
   VilkaarInfobokser,
   VilkaarlisteTitle,
 } from '../styled'
-import { OpplysningsType, VilkaarProps } from '../types'
+import { VilkaarProps } from '../types'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 
@@ -27,7 +32,7 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
   const forelder = vilkaar.kriterier
     .find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER)
     .basertPaaOpplysninger.find(
-      (opplysning: IVilkaaropplysing) => opplysning.opplysningsType === OpplysningsType.relasjon_foreldre
+      (opplysning: IVilkaaropplysing) => opplysning.opplysningsType === OpplysningsType.soeker_relasjon_foreldre
     )
 
   return (

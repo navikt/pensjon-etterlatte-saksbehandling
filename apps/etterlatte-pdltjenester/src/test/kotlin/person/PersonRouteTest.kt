@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -48,6 +49,7 @@ class PersonRouteTest {
     fun `skal returnere person`() {
         val hentPersonRequest = HentPersonRequest(
             foedselsnummer = Foedselsnummer.of(GYLDIG_FNR),
+            rolle = PersonRolle.BARN
         )
 
         coEvery { personService.hentPerson(hentPersonRequest) } returns mockPerson()
@@ -68,6 +70,7 @@ class PersonRouteTest {
     fun `skal returne 500 naar kall mot service feiler`() {
         val hentPersonRequest = HentPersonRequest(
             foedselsnummer = Foedselsnummer.of(GYLDIG_FNR),
+            rolle = PersonRolle.BARN
         )
 
         coEvery { personService.hentPerson(hentPersonRequest) } throws PdlForesporselFeilet("Noe feilet")

@@ -13,6 +13,12 @@ export const DetailWrapper = styled.div`
   padding-top: 0.5em;
   margin-bottom: 2em;
   width: 33%;
+  font-size: 16px;
+`
+
+export const WarningText = styled.span`
+  color: #ba3a26;
+  display: block;
 `
 
 export const Border = styled.div`
@@ -22,13 +28,23 @@ export const Border = styled.div`
 export const PersonInfoWrapper = styled.div`
   border-bottom: 1px solid #b0b0b0;
   padding: 1.2em 1em 2em 0em;
-  width: 100%;
 
   .personWrapper {
-    display: flex;
+    width: 90%;
+    display: inline-flex;
     padding-top: 1em;
+    margin-right: 0em;
   }
 `
+
+export const AlertWrapper = styled.div`
+  width: 50%;
+  .alert {
+    max-width: 300px;
+    padding: 1em;
+  }
+`
+
 export const PersonDetailWrapper = styled.div`
   padding-top: 0.5em;
   padding-left: 1em;
@@ -36,6 +52,31 @@ export const PersonDetailWrapper = styled.div`
 
   .bodyShortHeading {
     font-weight: bold;
+  }
+  .adresse {
+    display: inline-flex;
+    white-space: nowrap;
+  }
+`
+
+export const Historikk = styled.div`
+  display: block;
+  padding-left: 1.5em;
+`
+
+export const HistorikkWrapper = styled.div`
+  font-size: 11px;
+  width: 400px;
+`
+
+export const HistorikkElement = styled.div`
+  font-size: 16px;
+  display: flex;
+  flex-wrap: wrap;
+
+  .date {
+    margin-right: 1em;
+    width: 10em;
   }
 `
 
@@ -59,8 +100,7 @@ export const HeadingWrapper = styled.div`
   }
 `
 
-export const TextButtonWrapper = styled.div`  
-margin-left: auto;
+export const TextButtonWrapper = styled.div`
 margin-right: 5em;
 margin-bottom: 0;
 
@@ -68,7 +108,6 @@ margin-bottom: 0;
   margin-bottom: 0;
   display: inline-flex;
   justify-content: space-between;
-  text-decoration: underline;
   color: #0067c5;
   :hover {
     cursor: pointer;

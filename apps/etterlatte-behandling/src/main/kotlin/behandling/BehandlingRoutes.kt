@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.SoeknadMottattDato
 import java.time.LocalDateTime
+import no.nav.etterlatte.libs.common.objectMapper
 import java.util.*
 
 fun Route.behandlingRoutes(service: BehandlingService) {
@@ -26,7 +27,10 @@ fun Route.behandlingRoutes(service: BehandlingService) {
     get("/sak/{sakid}/behandlinger") {
         call.respond(inTransaction {
             service.hentBehandlingerISak(sakId)
-                .map { BehandlingSammendrag(it.id, it.sak, it.status, mapDate(it)) }
+                .map {
+                    println(it.grunnlag)
+                    BehandlingSammendrag(it.id, it.sak, it.status, mapDate(it))
+                }
                 .let { BehandlingSammendragListe(it) }
         })
     }
@@ -83,11 +87,10 @@ private fun mapDate(behandling: Behandling): LocalDateTime? {
     if (behandling.grunnlag.isEmpty()) {
         return null
     }
-    val dato =
-        SoeknadMottattDato(LocalDateTime.parse(behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKNAD_MOTTATT_DATO.value }?.opplysning.toString()))
-    println("Dato")
-    println(dato)
-    return dato.mottattDato
+    val dato = behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKNAD_MOTTATT_DATO }?.opplysning?.let {
+        objectMapper.readValue(it.toString(), SoeknadMottattDato::class.java)
+    }
+    return dato?.mottattDato
 }
 
 private fun <T> inTransaction(block: () -> T): T = Kontekst.get().databasecontxt.inTransaction {

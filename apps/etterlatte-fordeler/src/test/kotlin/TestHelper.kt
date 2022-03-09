@@ -1,18 +1,31 @@
 package no.nav.etterlatte
 
 
+import no.nav.etterlatte.fordeler.FordelerServiceTest
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
+import java.io.FileNotFoundException
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+const val FNR_1 = "07010776133"
+const val FNR_2 = "24014021406"
+const val FNR_3 = "11057523044"
+const val FNR_4 = "24014021406"
+const val FNR_5 = "09018701453"
+
+const val SVERIGE = "SWE"
+const val NORGE = "NOR"
+
 fun mockPerson(
-    fnr: String = "11057523044",
+    fnr: String = FNR_3,
     foedselsaar: Int = 2010,
     foedselsdato: LocalDate? = LocalDate.parse("2010-04-19"),
     doedsdato: LocalDate? = null,
     adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.UGRADERT,
-    statsborgerskap: String = "NOR",
-    foedeland: String = "NOR",
+    statsborgerskap: String = NORGE,
+    foedeland: String = NORGE,
     sivilstatus: Sivilstatus = Sivilstatus.UGIFT,
     utland: Utland? = null,
     bostedsadresse: Adresse? = null,
@@ -36,11 +49,11 @@ fun mockPerson(
     familieRelasjon = familieRelasjon
 )
 
-fun mockNorskAdresse() = Adresse(
+fun mockNorskAdresse(adresseLinje1: String = "Testveien 4", gyldigTilOgMed: LocalDateTime? = null) = Adresse(
     type = AdresseType.VEGADRESSE,
     aktiv = true,
     coAdresseNavn = null,
-    adresseLinje1 = "Testveien 4",
+    adresseLinje1 = adresseLinje1,
     adresseLinje2 = null,
     adresseLinje3 = null,
     postnr = "1234",
@@ -48,11 +61,15 @@ fun mockNorskAdresse() = Adresse(
     land = null,
     kilde = "FREG",
     gyldigFraOgMed = LocalDateTime.now().minusYears(1),
-    gyldigTilOgMed = null
+    gyldigTilOgMed = gyldigTilOgMed
 )
 
-fun mockUgyldigAdresse() = Adresse(
-    type = AdresseType.UKJENT_BOSTED,
+fun mockUgyldigAdresse(
+    type: AdresseType = AdresseType.UKJENT_BOSTED,
+    gyldigFraOgMed: LocalDateTime = LocalDateTime.now().minusYears(1),
+    gyldigTilOgMed: LocalDateTime? = null
+) = Adresse(
+    type = type,
     aktiv = true,
     coAdresseNavn = null,
     adresseLinje1 = "Tull",
@@ -62,6 +79,14 @@ fun mockUgyldigAdresse() = Adresse(
     poststed = null,
     land = null,
     kilde = "FREG",
-    gyldigFraOgMed = LocalDateTime.now().minusYears(1),
-    gyldigTilOgMed = null
+    gyldigFraOgMed = gyldigFraOgMed,
+    gyldigTilOgMed = gyldigTilOgMed
 )
+
+fun readSoknad(file: String): Barnepensjon {
+    val skjemaInfo = objectMapper.writeValueAsString(objectMapper.readTree(readFile(file)).get("@skjema_info"))
+    return objectMapper.readValue(skjemaInfo, Barnepensjon::class.java)
+}
+
+fun readFile(file: String) = FordelerServiceTest::class.java.getResource(file)?.readText()
+    ?: throw FileNotFoundException("Fant ikke filen $file")

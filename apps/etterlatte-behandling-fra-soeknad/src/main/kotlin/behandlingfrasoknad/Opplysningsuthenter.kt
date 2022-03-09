@@ -40,7 +40,7 @@ class Opplysningsuthenter {
             avdoedMilitaertjeneste(barnepensjonssoknad, Opplysningstyper.AVDOED_MILITAERTJENESTE_V1),
             soesken(barnepensjonssoknad, Opplysningstyper.SOEKER_RELASJON_SOESKEN_V1),
             soeknadMottattDato(barnepensjonssoknad, Opplysningstyper.SOEKNAD_MOTTATT_DATO),
-            soeknadsType(barnepensjonssoknad, Opplysningstyper.SOEKNADSTYPE_V1)
+            //soeknadsType(barnepensjonssoknad, Opplysningstyper.SOEKNADSTYPE_V1)
         ).filterNotNull()
     }
 
@@ -56,13 +56,6 @@ class Opplysningsuthenter {
             ), opplysningsType, objectMapper.createObjectNode(),
             data
         )
-    }
-
-    fun soeknadsType(
-        barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out SoeknadType> {
-        return setBehandlingsopplysninger(barnepensjon, opplysningsType, barnepensjon.type)
     }
 
     fun hentAvdoedForelder(barnepensjon: Barnepensjon): Avdoed? {
@@ -330,5 +323,12 @@ class Opplysningsuthenter {
             SoeknadMottattDato(barnepensjon.mottattDato)
         )
     }
+
+/*    fun soeknadsType(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out SoeknadType> {
+        return setBehandlingsopplysninger(barnepensjon, opplysningsType, barnepensjon.type)
+    }*/
 
 }

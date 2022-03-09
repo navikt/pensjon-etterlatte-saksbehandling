@@ -21,7 +21,7 @@ sealed class FordelerResultat {
 }
 
 class FordelerService(
-    private val fordelerKriterierService: FordelerKriterierService,
+    private val fordelerKriterier: FordelerKriterier,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val klokke: Clock = Clock.systemUTC()
 ) {
@@ -40,7 +40,7 @@ class FordelerService(
                 val avdoed = pdlTjenesterKlient.hentPerson(hentAvdoedRequest(soeknad))
                 val gjenlevende = pdlTjenesterKlient.hentPerson(hentGjenlevendeRequest(soeknad))
 
-                fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad).let {
+                fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad).let {
                     if (it.kandidat) GyldigForBehandling
                     else IkkeGyldigForBehandling(it.forklaring)
                 }

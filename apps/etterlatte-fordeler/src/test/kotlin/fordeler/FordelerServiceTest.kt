@@ -12,7 +12,6 @@ import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.etterlatte.readSoknad
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -22,7 +21,7 @@ import java.time.OffsetDateTime
 internal class FordelerServiceTest {
 
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
-    private val fordelerService = FordelerService(FordelerKriterierService(), pdlTjenesterKlient)
+    private val fordelerService = FordelerService(FordelerKriterier(), pdlTjenesterKlient)
 
     @Test
     fun `skal fordele gyldig soknad til behandling`() {

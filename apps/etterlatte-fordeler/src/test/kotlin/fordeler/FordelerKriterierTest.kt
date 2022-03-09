@@ -20,9 +20,9 @@ import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.LocalDateTime
 
-internal class FordelerKriterierServiceTest {
+internal class FordelerKriterierTest {
 
-    private val fordelerKriterierService = FordelerKriterierService()
+    private val fordelerKriterier = FordelerKriterier()
 
     @Test
     fun `soeknad er en gyldig kandidat for fordeling`() {
@@ -50,7 +50,7 @@ internal class FordelerKriterierServiceTest {
             bostedsadresse = mockNorskAdresse()
         )
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.isEmpty())
     }
@@ -64,7 +64,7 @@ internal class FordelerKriterierServiceTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_ER_FOR_GAMMELT))
     }
@@ -75,7 +75,7 @@ internal class FordelerKriterierServiceTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_ER_IKKE_NORSK_STATSBORGER))
     }
@@ -86,7 +86,7 @@ internal class FordelerKriterierServiceTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_HAR_ADRESSEBESKYTTELSE))
     }
@@ -97,7 +97,7 @@ internal class FordelerKriterierServiceTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_UTENLANDSADRESSE)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_UTENLANDSADRESSE)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_HAR_HUKET_AV_UTLANDSADRESSE))
     }
@@ -108,7 +108,7 @@ internal class FordelerKriterierServiceTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_ER_IKKE_FOEDT_I_NORGE))
     }
@@ -129,7 +129,7 @@ internal class FordelerKriterierServiceTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_HAR_UTVANDRING))
     }
@@ -140,7 +140,7 @@ internal class FordelerKriterierServiceTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_VERGE)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_VERGE)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_HAR_VERGE))
     }
@@ -153,7 +153,7 @@ internal class FordelerKriterierServiceTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_ER_IKKE_BOSATT_I_NORGE))
     }
@@ -175,7 +175,7 @@ internal class FordelerKriterierServiceTest {
             bostedsadresse = mockNorskAdresse()
         )
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_ER_IKKE_ALENEBARN))
     }
@@ -198,7 +198,7 @@ internal class FordelerKriterierServiceTest {
             bostedsadresse = mockNorskAdresse(),
         )
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_ER_IKKE_FORELDER_TIL_BARN))
     }
@@ -217,7 +217,7 @@ internal class FordelerKriterierServiceTest {
         )
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_HAR_UTVANDRING))
     }
@@ -228,7 +228,7 @@ internal class FordelerKriterierServiceTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_YRKESSKADE)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_YRKESSKADE)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_HAR_YRKESSKADE))
     }
@@ -241,7 +241,7 @@ internal class FordelerKriterierServiceTest {
         )
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED))
     }
@@ -252,7 +252,7 @@ internal class FordelerKriterierServiceTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_HUKET_AV_UTLAND)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_HUKET_AV_UTLAND)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_HAR_HATT_UTLANDSOPPHOLD))
     }
@@ -265,7 +265,7 @@ internal class FordelerKriterierServiceTest {
         )
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_VAR_IKKE_BOSATT_I_NORGE))
     }
@@ -283,7 +283,7 @@ internal class FordelerKriterierServiceTest {
         )
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_VAR_IKKE_BOSATT_I_NORGE))
     }
@@ -301,9 +301,20 @@ internal class FordelerKriterierServiceTest {
         )
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_VAR_IKKE_BOSATT_I_NORGE))
+    }
+
+    @Test
+    fun `avdod med adressebeskyttelse er ikke en gyldig kandidat`() {
+        val barn = mockPerson()
+        val avdoed = mockPerson(adressebeskyttelse = Adressebeskyttelse.STRENGT_FORTROLIG)
+        val gjenlevende = mockPerson()
+
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_HAR_ADRESSEBESKYTTELSE))
     }
 
     @Test
@@ -312,7 +323,7 @@ internal class FordelerKriterierServiceTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_INNSENDER_IKKE_FORELDER)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_INNSENDER_IKKE_FORELDER)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.INNSENDER_ER_IKKE_FORELDER))
     }
@@ -325,7 +336,7 @@ internal class FordelerKriterierServiceTest {
             bostedsadresse = mockUgyldigAdresse()
         )
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE))
     }
@@ -342,7 +353,7 @@ internal class FordelerKriterierServiceTest {
             bostedsadresse = mockNorskAdresse(adresseLinje1 = "En annen vei 2")
         )
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE))
     }
@@ -359,9 +370,20 @@ internal class FordelerKriterierServiceTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterierService.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.GJENLEVENDE_HAR_IKKE_FORELDREANSVAR))
+    }
+
+    @Test
+    fun `gjenlevende med adressebeskyttelse er ikke en gyldig kandidat`() {
+        val barn = mockPerson()
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson(adressebeskyttelse = Adressebeskyttelse.STRENGT_FORTROLIG)
+
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.GJENLEVENDE_HAR_ADRESSEBESKYTTELSE))
     }
 
     companion object {

@@ -9,7 +9,7 @@ import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.header
 import no.nav.etterlatte.fordeler.Fordeler
-import no.nav.etterlatte.fordeler.FordelerKriterierService
+import no.nav.etterlatte.fordeler.FordelerKriterier
 import no.nav.etterlatte.fordeler.FordelerService
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
@@ -27,7 +27,7 @@ fun main() {
         .also {
             Fordeler(
                 rapidsConnection = it,
-                fordelerService = FordelerService(FordelerKriterierService(), pdlTjenesterKlient(env))
+                fordelerService = FordelerService(FordelerKriterier(), pdlTjenesterKlient(env))
             )
         }.start()
 }

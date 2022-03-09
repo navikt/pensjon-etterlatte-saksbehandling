@@ -2,6 +2,7 @@ package no.nav.etterlatte.fordeler
 
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_FORELDER_TIL_BARN
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
+import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_ADRESSEBESKYTTELSE
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_HATT_UTLANDSOPPHOLD
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_UTVANDRING
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_YRKESSKADE
@@ -16,6 +17,7 @@ import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_HAR_HUKET_AV_UTLANDSADRE
 import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_HAR_UTVANDRING
 import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_HAR_VERGE
 import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE
+import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_HAR_ADRESSEBESKYTTELSE
 import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_HAR_IKKE_FORELDREANSVAR
 import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE
 import no.nav.etterlatte.fordeler.FordelerKriterie.INNSENDER_ER_IKKE_FORELDER
@@ -33,7 +35,10 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 
 private const val NORGE = "NOR"
 
-private typealias Sjekk = (Barnepensjon) -> Boolean
+data class FordelerKriterierResultat(
+    val kandidat: Boolean,
+    val forklaring: List<FordelerKriterie>
+)
 
 enum class FordelerKriterie(val forklaring: String) {
     BARN_ER_IKKE_NORSK_STATSBORGER("Barn er ikke norsk statsborger"),
@@ -44,40 +49,51 @@ enum class FordelerKriterie(val forklaring: String) {
     BARN_HAR_HUKET_AV_UTLANDSADRESSE("Det er huket av for utenlandsopphold for avdøde i søknaden"),
     BARN_HAR_VERGE("Barn er market med verge i søknaden"),
     BARN_ER_IKKE_BOSATT_I_NORGE("Barn er ikke bosatt i Norge"),
+    BARN_ER_IKKE_ALENEBARN("Barn (søker) er ikke alenebarn"),
+
     AVDOED_HAR_UTVANDRING("Avdoed har utvandring"),
     AVDOED_HAR_YRKESSKADE("Avdød er market med yrkesskade i søknaden"),
     AVDOED_ER_IKKE_REGISTRERT_SOM_DOED("Avdød er ikke død"),
     AVDOED_HAR_HATT_UTLANDSOPPHOLD("Det er huket av for utenlandsopphold for avdøde i søknaden"),
     AVDOED_VAR_IKKE_BOSATT_I_NORGE("Avdød er ikke bosatt i Norge"),
     AVDOED_ER_IKKE_FORELDER_TIL_BARN("Avdød er forelder til søker"),
+    AVDOED_HAR_ADRESSEBESKYTTELSE("Avdød har adressebeskyttelse"),
+
     GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE("Gjenlevende er ikke bosatt i Norge"),
     GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE("Gjenlevende har samme adresse"),
     GJENLEVENDE_HAR_IKKE_FORELDREANSVAR("Gjenlevende søker har ikke foreldreanvar"),
+    GJENLEVENDE_HAR_ADRESSEBESKYTTELSE("Gjenlevende har adressebeskyttelse"),
+
     INNSENDER_ER_IKKE_FORELDER("Søker er ikke markert som forelder i søknaden"),
-    BARN_ER_IKKE_ALENEBARN("Søker er ikke alenebarn"),
 }
 
-class FordelerKriterierService {
+class FordelerKriterier {
 
-    /**
-     * Grunnlag for regler er også dokumenter på Confluence:
-     * https://confluence.adeo.no/display/TE/Fordelingsapp
-     */
-    private fun fordelerKriterier(
+    fun sjekkMotKriterier(
         barn: Person,
         avdoed: Person,
         gjenlevende: Person,
-        soeknad : Barnepensjon
-    ) = listOf(
-        // Barn / søker
+        soeknad: Barnepensjon
+    ): FordelerKriterierResultat {
+        return fordelerKriterier(barn, avdoed, gjenlevende)
+            .filter { it.blirOppfyltAv(soeknad) }
+            .map { it.fordelerKriterie }
+            .let { FordelerKriterierResultat(it.isEmpty(), it) }
+    }
+
+    /**
+     * Grunnlag for regler er også dokumenter på Confluence: https://confluence.adeo.no/display/TE/Fordelingsapp
+     */
+    private fun fordelerKriterier(barn: Person, avdoed: Person, gjenlevende: Person) = listOf(
+        // Barn (søker)
         Kriterie(BARN_ER_FOR_GAMMELT) { forGammel(barn) },
         Kriterie(BARN_ER_IKKE_NORSK_STATSBORGER) { ikkeNorskStatsborger(barn) },
         Kriterie(BARN_ER_IKKE_FOEDT_I_NORGE) { foedtUtland(barn) },
         Kriterie(BARN_ER_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorge(barn) },
-        Kriterie(BARN_HAR_HUKET_AV_UTLANDSADRESSE) { harHuketAvForUtenlandsadresse(soeknad) },
+        Kriterie(BARN_HAR_HUKET_AV_UTLANDSADRESSE) { harHuketAvForUtenlandsadresse(it) },
         Kriterie(BARN_HAR_UTVANDRING) { harUtvandring(barn) },
         Kriterie(BARN_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(barn) },
-        Kriterie(BARN_HAR_VERGE) { harHuketAvForVerge(soeknad) },
+        Kriterie(BARN_HAR_VERGE) { harHuketAvForVerge(it) },
         Kriterie(BARN_ER_IKKE_ALENEBARN) { barnErIkkeAlenebarn(avdoed, barn) },
 
         // Avdød
@@ -85,16 +101,18 @@ class FordelerKriterierService {
         Kriterie(AVDOED_ER_IKKE_FORELDER_TIL_BARN) { ikkeForelderTilBarn(avdoed, barn) },
         Kriterie(AVDOED_VAR_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorgeForAvdoed(avdoed) },
         Kriterie(AVDOED_HAR_UTVANDRING) { harUtvandring(avdoed) },
-        Kriterie(AVDOED_HAR_HATT_UTLANDSOPPHOLD) { harHuketAvForUtenlandsopphold(soeknad) },
-        Kriterie(AVDOED_HAR_YRKESSKADE) { harHuketAvForYrkesskade(soeknad) },
+        Kriterie(AVDOED_HAR_HATT_UTLANDSOPPHOLD) { harHuketAvForUtenlandsopphold(it) },
+        Kriterie(AVDOED_HAR_YRKESSKADE) { harHuketAvForYrkesskade(it) },
+        Kriterie(AVDOED_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(avdoed) },
 
         // Gjenlevende
         Kriterie(GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE) { ikkeGyldigBostedsAdresseINorge(gjenlevende) },
         Kriterie(GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE) { gjenlevendeOgBarnHarIkkeSammeAdresse(gjenlevende, barn) },
         Kriterie(GJENLEVENDE_HAR_IKKE_FORELDREANSVAR) { gjenlevendeHarIkkeForeldreansvar(barn, gjenlevende) },
+        Kriterie(GJENLEVENDE_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(gjenlevende) },
 
         // Innsender
-        Kriterie(INNSENDER_ER_IKKE_FORELDER) { innsenderIkkeForelder(soeknad) },
+        Kriterie(INNSENDER_ER_IKKE_FORELDER) { innsenderIkkeForelder(it) },
     )
 
     private fun ikkeForelderTilBarn(avdoed: Person, barn: Person): Boolean {
@@ -193,24 +211,8 @@ class FordelerKriterierService {
         return barnepensjon.soeker.utenlandsAdresse?.svar?.verdi == JaNeiVetIkke.JA
     }
 
-    data class FordelerKriterierResultat(
-        val kandidat: Boolean,
-        val forklaring: List<FordelerKriterie>
-    )
-
-    private class Kriterie(val fordelerKriterie: FordelerKriterie, private val sjekk: Sjekk) {
+    private class Kriterie(val fordelerKriterie: FordelerKriterie, private val sjekk: (Barnepensjon) -> Boolean) {
         fun blirOppfyltAv(soeknadBarnepensjon: Barnepensjon): Boolean = sjekk(soeknadBarnepensjon)
     }
 
-    fun sjekkMotKriterier(
-        barn: Person,
-        avdoed: Person,
-        gjenlevende: Person,
-        soeknad: Barnepensjon
-    ): FordelerKriterierResultat {
-        return fordelerKriterier(barn, avdoed, gjenlevende, soeknad)
-            .filter { it.blirOppfyltAv(soeknad) }
-            .map { it.fordelerKriterie }
-            .let { FordelerKriterierResultat(it.isEmpty(), it) }
-    }
 }

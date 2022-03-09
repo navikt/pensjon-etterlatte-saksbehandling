@@ -205,15 +205,12 @@ internal class OpplysningsuthenterTest {
             }
     }
 
-/*
     @Test
     fun `skal hente opplysning om soeknadstype`() {
         consumeSingle<SoeknadType>(Opplysningstyper.SOEKNADSTYPE_V1).apply {
             assertEquals(SoeknadType.BARNEPENSJON, this)
         }
     }
-*/
-
 
     inline fun <reified T> consumeSingle(opplysningType: Opplysningstyper) =
         opplysninger.filter { it.opplysningType == opplysningType }

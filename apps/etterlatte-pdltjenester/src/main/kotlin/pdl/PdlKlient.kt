@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
 
 
-class PdlKlient(val httpClient: HttpClient) {
+class PdlKlient(private val httpClient: HttpClient) {
 
     suspend fun hentPerson(fnr: Foedselsnummer, rolle: PersonRolle): PdlPersonResponse {
         val request = PdlGraphqlRequest(

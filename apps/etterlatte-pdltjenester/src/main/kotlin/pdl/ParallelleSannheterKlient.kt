@@ -19,34 +19,33 @@ class ParallelleSannheterException(override val message: String) : RuntimeExcept
 
 class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) {
 
-    companion object {
-        val logger: Logger = LoggerFactory.getLogger(ParallelleSannheterKlient::class.java)
-    }
-
     suspend fun avklarNavn(pdlNavn: List<PdlNavn>) = avklar(pdlNavn, Avklaring.NAVN)
+
     suspend fun avklarAdressebeskyttelse(adressebeskyttelse: List<PdlAdressebeskyttelse>) =
         avklarNullable(adressebeskyttelse, Avklaring.ADRESSEBESKYTTELSE)
+
     suspend fun avklarStatsborgerskap(pdlStatsborgerskap: List<PdlStatsborgerskap>) =
         avklarNullable(pdlStatsborgerskap, Avklaring.STATSBORGERSKAP)
-    suspend fun avklarSivilstand(pdlSivilstand: List<PdlSivilstand>) = avklarNullable(pdlSivilstand,
-        Avklaring.SIVILSTAND
-    )
-    suspend fun avklarFoedsel(pdlFoedsel: List<PdlFoedsel>) = avklar(pdlFoedsel, Avklaring.FOEDSEL)
-    suspend fun avklarDoedsfall(pdlDoedsfall: List<PdlDoedsfall>) = avklarNullable(pdlDoedsfall, Avklaring.DOEDSFALL)
-    suspend fun avklarBostedsadresse(pdlBostedsadresse: List<PdlBostedsadresse>) = avklarNullable(pdlBostedsadresse,
-        Avklaring.BOSTEDSADRESSE
-    )
-    //TODO be PPS om å implementere delt bostedsadresse
-    fun avklarDeltBostedsadresse(pdlDeltBostedsadresse: List<PdlDeltBostedsadresse>) =
-        //avklarNullable(pdlDeltBostedsadresse, Avklaring.DELTBOSTEDSADRESSE
-        pdlDeltBostedsadresse.sortedByDescending { it.folkeregistermetadata?.gyldighetstidspunkt}.firstOrNull()
 
-    suspend fun avklarKontaktadresse(pdlKontaktadresse: List<PdlKontaktadresse>) = avklarNullable(pdlKontaktadresse,
-        Avklaring.KONTAKTADRESSE
-    )
-    suspend fun avklarOppholdsadresse(pdlOppholdsadresse: List<PdlOppholdsadresse>) = avklarNullable(pdlOppholdsadresse,
-        Avklaring.OPPHOLDSADRESSE
-    )
+    suspend fun avklarSivilstand(pdlSivilstand: List<PdlSivilstand>) =
+        avklarNullable(pdlSivilstand, Avklaring.SIVILSTAND)
+
+    suspend fun avklarFoedsel(pdlFoedsel: List<PdlFoedsel>) = avklar(pdlFoedsel, Avklaring.FOEDSEL)
+
+    suspend fun avklarDoedsfall(pdlDoedsfall: List<PdlDoedsfall>) = avklarNullable(pdlDoedsfall, Avklaring.DOEDSFALL)
+
+    suspend fun avklarBostedsadresse(pdlBostedsadresse: List<PdlBostedsadresse>) =
+        avklarNullable(pdlBostedsadresse, Avklaring.BOSTEDSADRESSE)
+
+    //TODO PPS skal implementere delt bostedsadresse - bruker samme endepunkt som bostedsadresse inntil videre
+    suspend fun avklarDeltBostedsadresse(pdlDeltBostedsadresse: List<PdlDeltBostedsadresse>) =
+        avklarNullable(pdlDeltBostedsadresse, Avklaring.BOSTEDSADRESSE)
+
+    suspend fun avklarKontaktadresse(pdlKontaktadresse: List<PdlKontaktadresse>) =
+        avklarNullable(pdlKontaktadresse, Avklaring.KONTAKTADRESSE)
+
+    suspend fun avklarOppholdsadresse(pdlOppholdsadresse: List<PdlOppholdsadresse>) =
+        avklarNullable(pdlOppholdsadresse, Avklaring.OPPHOLDSADRESSE)
 
     private suspend inline fun <reified T> avklar(list: List<T>, avklaring: Avklaring): T {
         return avklarNullable(list, avklaring)
@@ -93,6 +92,10 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
         DELTBOSTEDSADRESSE("deltbostedsadresse"),
         KONTAKTADRESSE("kontaktadresse"),
         OPPHOLDSADRESSE("oppholdsadresse")
+    }
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(ParallelleSannheterKlient::class.java)
     }
 
 }

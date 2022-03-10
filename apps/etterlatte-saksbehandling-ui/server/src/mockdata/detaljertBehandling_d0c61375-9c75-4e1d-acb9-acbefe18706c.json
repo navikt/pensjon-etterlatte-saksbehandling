@@ -730,8 +730,22 @@
                     "poststed": null,
                     "land": null,
                     "kilde": "FREG",
-                    "gyldigFraOgMed": "1999-01-01",
+                    "gyldigFraOgMed": "2020-01-01",
                     "gyldigTilOgMed": null
+                  },
+                  {
+                    "type": "VEGADRESSE",
+                    "aktiv": false,
+                    "coAdresseNavn": null,
+                    "adresseLinje1": "Liljeveien 12A",
+                    "adresseLinje2": null,
+                    "adresseLinje3": null,
+                    "postnr": "0462",
+                    "poststed": "Oslo",
+                    "land": null,
+                    "kilde": "FREG",
+                    "gyldigFraOgMed": "1999-01-01",
+                    "gyldigTilOgMed": "2020-01-01"
                   }
                 ]
               }
@@ -760,18 +774,6 @@
               "kilde": {
                 "navn": "pdl",
                 "tidspunktForInnhenting": "2022-03-09T11:53:54.777992056Z",
-                "registersReferanse": null,
-                "type": "pdl"
-              },
-              "opplysning": {
-                "oppholdadresse": []
-              }
-            },
-            {
-              "opplysningsType": "SOEKER_OPPHOLDADRESSE_V1",
-              "kilde": {
-                "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-09T11:53:54.778004502Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },

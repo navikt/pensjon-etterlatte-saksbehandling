@@ -50,7 +50,7 @@ export const VilkaarInfobokser = styled.div`
 
 export const VilkaarVurderingColumn = styled.div`
   flex: 1;
-  min-width: 250px;
+  min-width: 300px;
 `
 
 export const Innhold = styled.div`

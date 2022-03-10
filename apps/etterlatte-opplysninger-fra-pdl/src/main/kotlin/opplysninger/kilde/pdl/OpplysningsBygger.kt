@@ -62,7 +62,6 @@ class OpplysningsByggerService : OpplysningsBygger {
             gjenlevendePdl.fornavn,
             gjenlevendePdl.etternavn,
             gjenlevendePdl.foedselsnummer,
-            "adresse tba",
             PersonType.GJENLEVENDE_FORELDER
         )
         return lagOpplysning(opplysningsType, gjenlevendePersonInfo);
@@ -74,7 +73,7 @@ class OpplysningsByggerService : OpplysningsBygger {
         personType: PersonType
     ): Behandlingsopplysning<PersonInfo> {
         val soekerPersonInfo =
-            PersonInfo(soekerPdl.fornavn, soekerPdl.etternavn, soekerPdl.foedselsnummer, "Adresse", personType)
+            PersonInfo(soekerPdl.fornavn, soekerPdl.etternavn, soekerPdl.foedselsnummer, personType)
         return lagOpplysning(opplysningsType, soekerPersonInfo)
     }
 
@@ -98,7 +97,6 @@ class OpplysningsByggerService : OpplysningsBygger {
                 it.fornavn,
                 it.etternavn,
                 it.foedselsnummer,
-                "Adresse",
                 PersonType.FORELDER
             )
         }

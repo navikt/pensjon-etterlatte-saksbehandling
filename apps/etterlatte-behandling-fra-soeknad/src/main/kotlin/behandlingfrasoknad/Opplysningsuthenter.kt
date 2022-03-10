@@ -77,7 +77,6 @@ class Opplysningsuthenter {
                 barnepensjon.innsender.fornavn.svar,
                 barnepensjon.innsender.etternavn.svar,
                 barnepensjon.innsender.foedselsnummer.svar,
-                null,
                 PersonType.INNSENDER
             )
         )
@@ -118,7 +117,6 @@ class Opplysningsuthenter {
                 barnepensjon.soeker.fornavn.svar,
                 barnepensjon.soeker.etternavn.svar,
                 barnepensjon.soeker.foedselsnummer.svar,
-                null,
                 PersonType.BARN
             )
         )
@@ -184,7 +182,6 @@ class Opplysningsuthenter {
                     forelder.fornavn.svar,
                     forelder.etternavn.svar,
                     forelder.foedselsnummer.svar,
-                    forelder.adresse.svar,
                     PersonType.GJENLEVENDE_FORELDER
                 )
             )
@@ -202,7 +199,6 @@ class Opplysningsuthenter {
                     avdoed.fornavn.svar,
                     avdoed.etternavn.svar,
                     avdoed.foedselsnummer.svar,
-                    null,
                     PersonType.AVDOED
                 )
             )
@@ -304,7 +300,6 @@ class Opplysningsuthenter {
                 barn.fornavn.svar,
                 barn.etternavn.svar,
                 barn.foedselsnummer.svar,
-                null,
                 PersonType.BARN
             )
         }

@@ -6,8 +6,6 @@ import {
   StatsborgerskapWrap,
   AlderEtterlattWrap,
   AvdoedWrap,
-  HistorikkWrapper,
-  HistorikkElement,
   Historikk,
 } from './styled'
 import { ChildIcon } from '../../../shared/icons/childIcon'
@@ -15,6 +13,7 @@ import { IPersonFraSak, PersonStatus } from './types'
 import { TextButton } from './TextButton'
 import { format } from 'date-fns'
 import { sjekkDataFraSoeknadMotPdl, sjekkAdresseGjenlevendeISoeknadMotPdl } from './utils'
+import { Adressevisning } from '../felles/Adressevisning'
 
 type Props = {
   person: IPersonFraSak
@@ -61,52 +60,36 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
 
   return (
     <PersonInfoWrapper>
-      <div>
-        {hentPersonHeaderMedRolle()}
-        <div className="personWrapper">
-          <PersonDetailWrapper>
-            <div>
-              <strong>Fødselsnummer</strong>
-            </div>
-            {sjekkDataFraSoeknadMotPdl(person?.fnr, person?.fnrFraSoeknad)}
-          </PersonDetailWrapper>
-          <PersonDetailWrapper>
-            <div>
-              <strong> {person.personStatus === PersonStatus.AVDOED ? 'Adresse dødsfallstidspunkt' : 'Adresse'}</strong>
-            </div>
-            {person.personStatus === PersonStatus.GJENLEVENDE_FORELDER && person.adresseFraSoeknad ? (
-              sjekkDataFraSoeknadMotPdl(person.adresseFraPdl, person?.adresseFraSoeknad)
-            ) : (
-              <span>{person.adresseFraPdl}</span>
-            )}
-
-            {person.adresser && (
-              <Historikk>
-                <TextButton isOpen={visAdresseHistorikk} setIsOpen={setVisAdresseHistorikk} />
-                <HistorikkWrapper>
-                  {visAdresseHistorikk &&
-                    person.adresser
-                      .sort((x, y) => (x.gyldigFraOgMed > y.gyldigFraOgMed ? -1 : 1))
-                      .map((adresse, key) => (
-                        <HistorikkElement key={key}>
-                          <span className="date">
-                            {format(new Date(adresse.gyldigFraOgMed), 'dd.MM.yyyy')} -{' '}
-                            {adresse.gyldigTilOgMed && format(new Date(adresse.gyldigTilOgMed), 'dd.MM.yyyy') + ':'}
-                          </span>
-                          <span>
-                            {adresse.adresseLinje1}, {adresse.poststed}
-                          </span>
-                        </HistorikkElement>
-                      ))}
-                </HistorikkWrapper>
-              </Historikk>
-            )}
-          </PersonDetailWrapper>
+      {hentPersonHeaderMedRolle()}
+      <div className="personWrapper">
+        <PersonDetailWrapper adresse={false}>
+          <div>
+            <strong>Fødselsnummer</strong>
+          </div>
+          {sjekkDataFraSoeknadMotPdl(person?.fnr, person?.fnrFraSoeknad)}
+        </PersonDetailWrapper>
+        <PersonDetailWrapper adresse={true}>
+          <div>
+            <strong> {person.personStatus === PersonStatus.AVDOED ? 'Adresse dødsfallstidspunkt' : 'Adresse'}</strong>
+          </div>
+          {person.personStatus === PersonStatus.GJENLEVENDE_FORELDER && person.adresseFraSoeknad ? (
+            sjekkDataFraSoeknadMotPdl(person.adresseFraPdl, person?.adresseFraSoeknad)
+          ) : (
+            <span>{person.adresseFraPdl}</span>
+          )}
+          {person.adresser && (
+            <Historikk>
+              <TextButton isOpen={visAdresseHistorikk} setIsOpen={setVisAdresseHistorikk} />
+              {visAdresseHistorikk && <Adressevisning adresser={person.adresser} soeknadsoversikt={true} />}
+            </Historikk>
+          )}
+        </PersonDetailWrapper>
+        <div className="alertWrapper">
+          {person.personStatus === PersonStatus.GJENLEVENDE_FORELDER &&
+            person.adresseFraSoeknad &&
+            sjekkAdresseGjenlevendeISoeknadMotPdl(person.adresseFraSoeknad, person.adresseFraPdl)}
         </div>
       </div>
-      {person.personStatus === PersonStatus.GJENLEVENDE_FORELDER &&
-        person.adresseFraSoeknad &&
-        sjekkAdresseGjenlevendeISoeknadMotPdl(person.adresseFraSoeknad, person.adresseFraPdl)}
     </PersonInfoWrapper>
   )
 }

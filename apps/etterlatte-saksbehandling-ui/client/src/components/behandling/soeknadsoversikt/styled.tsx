@@ -27,42 +27,31 @@ export const Border = styled.div`
 export const PersonInfoWrapper = styled.div`
   border-bottom: 1px solid #b0b0b0;
   padding: 1.2em 1em 3em 0em;
-  display: inline-flex;
-  width: 100%;
-  justify-content: space-between;
 
   .personWrapper {
+    justify-content: space-between;
+    width: 100%;
     padding-top: 1em;
-    display: flex;
-    flex-grow: 1;
-  }
+    display: inline-flex;
 
-  @media (max-width: 1500px) {
-    flex-wrap: wrap;
+    .alertWrapper {
+      width: 300px;
+    }
   }
 `
-
-export const PersonDetailWrapper = styled.div`
+export const PersonDetailWrapper = styled.div<{ adresse: boolean }>`
   padding-top: 0.5em;
   padding-left: 1em;
-  flex-basis: 100px;
-  flex: 1;
-  min-width: 300px;
+  min-width: ${(props) => (props.adresse ? '400px' : '150px')};
 
   .bodyShortHeading {
     margin-bottom: 0.2em;
     font-weight: bold;
   }
-  .adresse {
-    white-space: nowrap;
-  }
 `
 
 export const AlertWrapper = styled.div`
-  margin-top: 2em;
-
   .alert {
-    width: 300px;
     padding: 1em;
   }
 `
@@ -71,14 +60,10 @@ export const Historikk = styled.div`
   padding-top: 0.5em;
 `
 
-export const HistorikkWrapper = styled.div`
-  font-size: 11px;
-`
-
 export const HistorikkElement = styled.div`
   font-size: 16px;
   display: flex;
-  flex-wrap: wrap;
+  white-space: nowrap;
 
   .date {
     margin-right: 1em;

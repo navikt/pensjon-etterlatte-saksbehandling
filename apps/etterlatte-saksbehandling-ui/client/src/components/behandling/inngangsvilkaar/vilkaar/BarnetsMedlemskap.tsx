@@ -53,9 +53,9 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
   const harUtelandsadresse = vilkaar.kriterier
     .find((krit: IKriterie) => krit.navn === Kriterietype.SOEKER_IKKE_OPPGITT_ADRESSE_I_UTLANDET_I_SOEKNAD)
     .basertPaaOpplysninger.find(
-      (opplysning: IVilkaaropplysing) => opplysning.opplysningsType === OpplysningsType.soeker_utenlandsadresse
+      (opplysning: IVilkaaropplysing) =>
+        opplysning.opplysningsType === OpplysningsType.soeker_utenlandsadresse_fra_soeknad
     )
-
 
   const bostedEtterDoedsdato = hentAdresserEtterDoedsdato(bostedadresser, avdoedDoedsdato)
   const oppholdEtterDoedsdato = hentAdresserEtterDoedsdato(oppholdsadresser, avdoedDoedsdato)

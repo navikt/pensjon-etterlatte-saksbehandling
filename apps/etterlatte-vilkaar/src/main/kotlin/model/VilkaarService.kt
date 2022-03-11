@@ -30,9 +30,9 @@ class VilkaarService {
             opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1 }
                 .map { setOpplysningType<Foreldre>(it) }
 
-        val soekerUtenlandsadresse =
-            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_UTENLANDSADRESSE_V1 }
-                .map { setOpplysningType<Utenlandsadresse>(it) }
+        val soekerUtenlandsadresseBarn =
+            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_UTENLANDSADRESSE_SOEKNAD_V1 }
+                .map { setOpplysningType<UtenlandsadresseBarn>(it) }
 
         val soekerBostedadresse = opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_BOSTEDADRESSE_V1 }
             .map { setOpplysningType<Bostedadresse>(it) }
@@ -64,7 +64,7 @@ class VilkaarService {
                 soekerBostedadresse,
                 soekerOppholdadresse,
                 soekerKontaktadresse,
-                soekerUtenlandsadresse,
+                soekerUtenlandsadresseBarn,
                 avdoedDoedsdato
             )
         )

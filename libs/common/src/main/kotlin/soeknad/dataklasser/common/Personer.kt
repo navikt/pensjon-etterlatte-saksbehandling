@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Gjenlevende
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.GjenlevendeForelder
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -46,6 +45,19 @@ data class Innsender(
 ) : Person {
     override val type: PersonType = PersonType.INNSENDER
 }
+
+data class GjenlevendeForelder(
+    override val fornavn: Opplysning<String>,
+    override val etternavn: Opplysning<String>,
+    override val foedselsnummer: Opplysning<Foedselsnummer>,
+
+    val adresse: Opplysning<String>,
+    val statsborgerskap: Opplysning<String>,
+    val kontaktinfo: Kontaktinfo,
+) : Person {
+    override val type = PersonType.GJENLEVENDE_FORELDER
+}
+
 
 data class Forelder(
     override val fornavn: Opplysning<String>,

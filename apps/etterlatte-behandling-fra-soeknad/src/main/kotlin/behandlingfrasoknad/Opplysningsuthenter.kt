@@ -7,12 +7,12 @@ import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsaarsak
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.GjenlevendeForelderInfo
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Naeringsinntekt
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsadresse
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Verge
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.GjenlevendeForelder
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.*
 import java.time.ZoneOffset
 import java.util.*
@@ -28,7 +28,7 @@ class Opplysningsuthenter {
             utbetalingsinformasjon(barnepensjonssoknad, Opplysningstyper.UTBETALINGSINFORMASJON_V1),
             soekerPersoninfo(barnepensjonssoknad, Opplysningstyper.SOEKER_PERSONINFO_V1),
             soekerStatsborgerskap(barnepensjonssoknad, Opplysningstyper.SOEKER_STATSBORGERSKAP_V1),
-            soekerUtenlandsadresse(barnepensjonssoknad, Opplysningstyper.SOEKER_UTENLANDSADRESSE_V1),
+            soekerUtenlandsadresse(barnepensjonssoknad, Opplysningstyper.SOEKER_UTENLANDSADRESSE_SOEKNAD_V1),
             soekerVerge(barnepensjonssoknad, Opplysningstyper.SOEKER_VERGE_V1),
             soekerDagligOmsorg(barnepensjonssoknad, Opplysningstyper.SOEKER_DAGLIG_OMSORG_V1),
             gjenlevendeForelderPersoninfo(barnepensjonssoknad, Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1),
@@ -38,6 +38,7 @@ class Opplysningsuthenter {
             avdoedUtenlandsopphold(barnepensjonssoknad, Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1),
             avdoedNaeringsinntekt(barnepensjonssoknad, Opplysningstyper.AVDOED_NAERINGSINNTEKT_V1),
             avdoedMilitaertjeneste(barnepensjonssoknad, Opplysningstyper.AVDOED_MILITAERTJENESTE_V1),
+            gjenlevendeForelder(barnepensjonssoknad, Opplysningstyper.GJENLEVENDE_FORELDER_INFO_V1),
             soesken(barnepensjonssoknad, Opplysningstyper.SOEKER_RELASJON_SOESKEN_V1),
             soeknadMottattDato(barnepensjonssoknad, Opplysningstyper.SOEKNAD_MOTTATT_DATO),
             soeknadsType(barnepensjonssoknad, Opplysningstyper.SOEKNADSTYPE_V1)
@@ -135,11 +136,11 @@ class Opplysningsuthenter {
     fun soekerUtenlandsadresse(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out Utenlandsadresse> {
+    ): Behandlingsopplysning<out UtenlandsadresseBarn> {
         val adresse = barnepensjon.soeker.utenlandsAdresse
         return setBehandlingsopplysninger(
             barnepensjon, opplysningsType,
-            Utenlandsadresse(
+            UtenlandsadresseBarn(
                 adresse?.svar?.innhold,
                 adresse?.opplysning?.land?.svar?.innhold,
                 adresse?.opplysning?.adresse?.svar?.innhold,
@@ -290,6 +291,18 @@ class Opplysningsuthenter {
                     avdoed.militaertjeneste?.opplysning?.svar?.innhold,
                     avdoed.foedselsnummer.svar.value
                 )
+            )
+        }
+    }
+
+    fun gjenlevendeForelder(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out GjenlevendeForelderInfo>? {
+        return hentGjenlevendeForelder(barnepensjon)?.let { it ->
+            setBehandlingsopplysninger(
+                barnepensjon, opplysningsType,
+                GjenlevendeForelderInfo(it.adresse.svar)
             )
         }
     }

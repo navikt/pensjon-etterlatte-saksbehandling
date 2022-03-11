@@ -40,14 +40,3 @@ data class Barnepensjon(
     }
 }
 
-data class GjenlevendeForelder(
-    override val fornavn: Opplysning<String>,
-    override val etternavn: Opplysning<String>,
-    override val foedselsnummer: Opplysning<Foedselsnummer>,
-
-    val adresse: Opplysning<String>,
-    val statsborgerskap: Opplysning<String>,
-    val kontaktinfo: Kontaktinfo,
-) : Person {
-    override val type = PersonType.GJENLEVENDE_FORELDER
-}

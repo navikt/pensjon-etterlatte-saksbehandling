@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foreldre
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Oppholdadresse
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.PersonInfo
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsadresse
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.person.AdresseType
@@ -105,8 +105,8 @@ internal class BarnepensjonVilkaarTest {
     @Test
     fun vuderBarnetsMedlemskap() {
         val ingenOppgittUtenlandsadresse =
-            kriterieHarIkkeOppgittAdresseIUtlandet(listOf(ingenUtenlandsadresseVilkaarOpplysning))
-        val harOppgittUtenlandsadresse = kriterieHarIkkeOppgittAdresseIUtlandet(listOf(harUtenlandsadresseVilkaarOpplysning))
+            kriterieHarIkkeOppgittAdresseIUtlandet(listOf(ingenUtenlandsadresseBarnVilkaarOpplysning))
+        val harOppgittUtenlandsadresse = kriterieHarIkkeOppgittAdresseIUtlandet(listOf(harUtenlandsadresseBarnVilkaarOpplysning))
 
         val ingenUtenlandskBostedadresseEtterDoedsdato =
             kriterieHarIkkeBostedsadresseIUtlandet(
@@ -261,21 +261,21 @@ internal class BarnepensjonVilkaarTest {
         )
     )
 
-    val ingenUtenlandsadresseVilkaarOpplysning = VilkaarOpplysning(
-        opplysningsType = Opplysningstyper.SOEKER_UTENLANDSADRESSE_V1,
+    val ingenUtenlandsadresseBarnVilkaarOpplysning = VilkaarOpplysning(
+        opplysningsType = Opplysningstyper.SOEKER_UTENLANDSADRESSE_SOEKNAD_V1,
         kilde = Behandlingsopplysning.Privatperson("19078504903", Instant.now()),
-        opplysning = Utenlandsadresse("NEI", null, null, null)
+        opplysning = UtenlandsadresseBarn("NEI", null, null, null)
     )
 
-    val harUtenlandsadresseVilkaarOpplysning = VilkaarOpplysning(
-        opplysningsType = Opplysningstyper.SOEKER_UTENLANDSADRESSE_V1,
+    val harUtenlandsadresseBarnVilkaarOpplysning = VilkaarOpplysning(
+        opplysningsType = Opplysningstyper.SOEKER_UTENLANDSADRESSE_SOEKNAD_V1,
         kilde = Behandlingsopplysning.Privatperson("19078504903", Instant.now()),
-        opplysning = Utenlandsadresse("JA", null, null, null)
+        opplysning = UtenlandsadresseBarn("JA", null, null, null)
     )
 
 
     val ingenBostedadresseVilkaarOpplysning = VilkaarOpplysning(
-        opplysningsType = Opplysningstyper.SOEKER_UTENLANDSADRESSE_V1,
+        opplysningsType = Opplysningstyper.SOEKER_UTENLANDSADRESSE_SOEKNAD_V1,
         kilde = Behandlingsopplysning.Privatperson("19078504903", Instant.now()),
         opplysning = Bostedadresse(bostedadresse = null)
     )

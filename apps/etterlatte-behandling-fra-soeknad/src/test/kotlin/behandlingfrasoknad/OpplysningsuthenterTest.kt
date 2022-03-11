@@ -112,7 +112,7 @@ internal class OpplysningsuthenterTest {
     @Test
     @Disabled
     fun `skal hente opplysning om soekers adresse`() {
-        consumeSingle<Utenlandsadresse>(Opplysningstyper.SOEKER_UTENLANDSADRESSE_V1)
+        consumeSingle<UtenlandsadresseBarn>(Opplysningstyper.SOEKER_UTENLANDSADRESSE_SOEKNAD_V1)
             .apply {
                 println(this)
             }

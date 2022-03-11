@@ -31,6 +31,21 @@
       "attestering": null
     },
     {
+      "id": "8ec4e677-3fce-4a0c-9b61-946ec61d24bf",
+      "kilde": {
+        "fnr": "03108718357",
+        "mottatDato": "2022-02-14T14:37:24.573612786Z",
+        "type": "privatperson"
+      },
+      "opplysningType": "GJENLEVENDE_FORELDER_INFO_V1",
+      "meta": {},
+      "opplysning": {
+        "adresse": "Sannergata 6C, 0557 Oslo"
+      },
+      "attestering": null
+    },
+
+    {
       "id": "8ec4e633-3fce-4a0c-9b61-946ec61d24bf",
       "kilde": {
         "fnr": "03108718357",
@@ -57,7 +72,6 @@
         "fornavn": "GØYAL",
         "etternavn": "HØYSTAKK",
         "foedselsnummer": "03108718357",
-        "adresse": null,
         "type": "INNSENDER"
       },
       "attestering": null
@@ -110,7 +124,6 @@
         "fornavn": "kirsten",
         "etternavn": "jakobsen",
         "foedselsnummer": "12101376212",
-        "adresse": null,
         "type": "BARN"
       },
       "attestering": null
@@ -194,7 +207,6 @@
         "fornavn": "GØYAL",
         "etternavn": "HØYSTAKK",
         "foedselsnummer": "03108718357",
-        "adresse": "Sannergata 6C, 0557 Oslo",
         "type": "GJENLEVENDE_FORELDER"
       },
       "attestering": null
@@ -212,7 +224,6 @@
         "fornavn": "fe",
         "etternavn": "fe",
         "foedselsnummer": "22128202440",
-        "adresse": null,
         "type": "AVDOED"
       },
       "attestering": null
@@ -319,7 +330,6 @@
         "fornavn": "TALENTFULL",
         "etternavn": "BLYANT",
         "foedselsnummer": "12101376212",
-        "adresse": "Adresse",
         "type": "BARN"
       },
       "attestering": null
@@ -354,7 +364,6 @@
         "fornavn": "VAKKER",
         "etternavn": "LAPP",
         "foedselsnummer": "22128202440",
-        "adresse": "Adresse",
         "type": "AVDOED"
       },
       "attestering": null
@@ -409,14 +418,12 @@
             "fornavn": "VAKKER",
             "etternavn": "LAPP",
             "foedselsnummer": "22128202440",
-            "adresse": "Adresse",
             "type": "FORELDER"
           },
           {
             "fornavn": "BRÅKETE",
             "etternavn": "POTET",
             "foedselsnummer": "03108718357",
-            "adresse": "Adresse",
             "type": "FORELDER"
           }
         ]
@@ -587,7 +594,6 @@
         "fornavn": "BRÅKETE",
         "etternavn": "POTET",
         "foedselsnummer": "03108718357",
-        "adresse": "adresse tba",
         "type": "GJENLEVENDE_FORELDER"
       },
       "attestering": null
@@ -832,7 +838,7 @@
           "resultat": "OPPFYLT",
           "basertPaaOpplysninger": [
             {
-              "opplysningsType": "SOEKER_UTENLANDSADRESSE_V1",
+              "opplysningsType": "SOEKER_UTENLANDSADRESSE_SOEKNAD_V1",
               "kilde": {
                 "fnr": "03108718357",
                 "mottatDato": "2022-02-14T14:37:24.573612786Z",

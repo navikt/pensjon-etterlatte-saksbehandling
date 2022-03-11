@@ -6,7 +6,6 @@ export const InfoWrapper = styled.div`
   margin-bottom: 30px;
   border-top: 1px solid #b0b0b0;
   padding: 1.2em 1em 2em 1em;
-  width: 100%;
 `
 
 export const DetailWrapper = styled.div`
@@ -27,52 +26,44 @@ export const Border = styled.div`
 
 export const PersonInfoWrapper = styled.div`
   border-bottom: 1px solid #b0b0b0;
-  padding: 1.2em 1em 2em 0em;
+  padding: 1.2em 1em 3em 0em;
 
   .personWrapper {
-    width: 90%;
-    display: inline-flex;
+    justify-content: space-between;
+    width: 100%;
     padding-top: 1em;
-    margin-right: 0em;
+    display: inline-flex;
+
+    .alertWrapper {
+      width: 300px;
+    }
+  }
+`
+export const PersonDetailWrapper = styled.div<{ adresse: boolean }>`
+  padding-top: 0.5em;
+  padding-left: 1em;
+  min-width: ${(props) => (props.adresse ? '400px' : '150px')};
+
+  .bodyShortHeading {
+    margin-bottom: 0.2em;
+    font-weight: bold;
   }
 `
 
 export const AlertWrapper = styled.div`
-  width: 50%;
   .alert {
-    max-width: 300px;
     padding: 1em;
   }
 `
 
-export const PersonDetailWrapper = styled.div`
-  padding-top: 0.5em;
-  padding-left: 1em;
-  width: 250px;
-
-  .bodyShortHeading {
-    font-weight: bold;
-  }
-  .adresse {
-    display: inline-flex;
-    white-space: nowrap;
-  }
-`
-
 export const Historikk = styled.div`
-  display: block;
-  padding-left: 1.5em;
-`
-
-export const HistorikkWrapper = styled.div`
-  font-size: 11px;
-  width: 400px;
+  padding-top: 0.5em;
 `
 
 export const HistorikkElement = styled.div`
   font-size: 16px;
   display: flex;
-  flex-wrap: wrap;
+  white-space: nowrap;
 
   .date {
     margin-right: 1em;
@@ -101,11 +92,8 @@ export const HeadingWrapper = styled.div`
 `
 
 export const TextButtonWrapper = styled.div`
-margin-right: 5em;
-margin-bottom: 0;
 
 .textButton{
-  margin-bottom: 0;
   display: inline-flex;
   justify-content: space-between;
   color: #0067c5;
@@ -134,6 +122,18 @@ export const StatsborgerskapWrap = styled.div`
 export const AlderEtterlattWrap = styled.div`
   background-color: #ccf1d6;
   border: 1px solid #33aa5f;
+  padding: 0.1em 0.5em;
+  border-radius: 4px;
+  font-weight: normal;
+  font-size: 14px;
+  margin-left: 0.7em;
+  margin-right: 0.5em;
+`
+
+export const AvdoedWrap = styled.div`
+  background-color: #262626;
+  color: white;
+  border: 1px solid #262626;
   padding: 0.1em 0.5em;
   border-radius: 4px;
   font-weight: normal;

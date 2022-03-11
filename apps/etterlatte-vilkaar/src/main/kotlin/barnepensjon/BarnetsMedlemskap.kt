@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Bostedadresse
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Kontaktadresse
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Oppholdadresse
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsadresse
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
@@ -28,7 +28,7 @@ fun vilkaarBarnetsMedlemskap(
     soekerBostedadresse: List<VilkaarOpplysning<Bostedadresse>>,
     soekerOppholdadresse: List<VilkaarOpplysning<Oppholdadresse>>,
     soekerKontaktadresse: List<VilkaarOpplysning<Kontaktadresse>>,
-    soekerUtenlandsadresse: List<VilkaarOpplysning<Utenlandsadresse>>,
+    soekerUtenlandsadresseBarn: List<VilkaarOpplysning<UtenlandsadresseBarn>>,
     doedsdato: List<VilkaarOpplysning<Doedsdato>>,
 ): VurdertVilkaar {
     val harIkkeBostedadresseIUtlandetPdl =
@@ -37,7 +37,7 @@ fun vilkaarBarnetsMedlemskap(
         kriterieHarIkkeOppholddsadresseIUtlandet(soekerOppholdadresse, doedsdato)
     val harIkkeKontaktadresseIUtlandetPdl =
         kriterieHarIkkeKontaktsadresseIUtlandet(soekerKontaktadresse, doedsdato)
-    val harIkkeBostedadresseIUtlandetSoeknad = kriterieHarIkkeOppgittAdresseIUtlandet(soekerUtenlandsadresse)
+    val harIkkeBostedadresseIUtlandetSoeknad = kriterieHarIkkeOppgittAdresseIUtlandet(soekerUtenlandsadresseBarn)
 
     return VurdertVilkaar(
         vilkaartype,
@@ -51,10 +51,10 @@ fun vilkaarBarnetsMedlemskap(
     )
 }
 
-fun kriterieHarIkkeOppgittAdresseIUtlandet(utenlandsadresse: List<VilkaarOpplysning<Utenlandsadresse>>): Kriterie {
-    val opplysningsGrunnlag = listOf(utenlandsadresse.filter { it.kilde.type == "privatperson" }).flatten()
+fun kriterieHarIkkeOppgittAdresseIUtlandet(utenlandsadresseBarn: List<VilkaarOpplysning<UtenlandsadresseBarn>>): Kriterie {
+    val opplysningsGrunnlag = listOf(utenlandsadresseBarn.filter { it.kilde.type == "privatperson" }).flatten()
     val resultat =
-        vurderOpplysning { hentUtenlandsadresseSoeknad(utenlandsadresse).adresseIUtlandet?.lowercase() == "nei" }
+        vurderOpplysning { hentUtenlandsadresseSoeknad(utenlandsadresseBarn).adresseIUtlandet?.lowercase() == "nei" }
 
     return Kriterie(
         Kriterietyper.SOEKER_IKKE_OPPGITT_ADRESSE_I_UTLANDET_I_SOEKNAD,

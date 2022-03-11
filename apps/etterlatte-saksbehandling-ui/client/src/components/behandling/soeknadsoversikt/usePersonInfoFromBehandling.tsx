@@ -50,6 +50,8 @@ export const usePersonInfoFromBehandling = () => {
     (g) => g.opplysningType === OpplysningsType.gjenlevende_forelder_bostedsadresse && g.kilde.type === KildeType.pdl
   )
 
+  const gjenlevendeForelderInfo = grunnlag.find((g) => g.opplysningType === OpplysningsType.gjenlevende_forelder_info)
+
   return {
     soekerSoknad,
     soekerPdl,
@@ -64,6 +66,7 @@ export const usePersonInfoFromBehandling = () => {
     soekerBostedadresserPdl,
     avdoedBostedadresserPdl,
     gjenlevendeBostedadresserPdl,
-    soekerFoedseldato
+    soekerFoedseldato,
+    gjenlevendeForelderInfo,
   }
 }

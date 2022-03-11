@@ -15,7 +15,6 @@ export interface IPersonFraSak {
   datoForDoedsfall?: Date
   fnrFraSoeknad: string
   adresseFraSoeknad?: string
-  adresseFraPdl: string
 }
 
 export interface IAdresse {
@@ -37,7 +36,6 @@ export interface IPersonOpplysning {
   fornavn: string
   etternavn: string
   foedselsnummer: string
-  adresse: string
   type: PersonStatus
 }
 

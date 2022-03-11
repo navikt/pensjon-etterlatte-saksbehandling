@@ -39,10 +39,13 @@ export const Soeknadsoversikt = () => {
     avdoedBostedadresserPdl,
     gjenlevendeBostedadresserPdl,
     soekerFoedseldato,
+    gjenlevendeForelderInfo,
   } = usePersonInfoFromBehandling()
 
   const doedsfallVilkaar: any = vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.DOEDSFALL_ER_REGISTRERT)
-  const avdoedErForelderVilkaar = doedsfallVilkaar.kriterier.find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER).resultat === VilkaarVurderingsResultat.OPPFYLT
+  const avdoedErForelderVilkaar =
+    doedsfallVilkaar.kriterier.find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER).resultat ===
+    VilkaarVurderingsResultat.OPPFYLT
   const avdoedErLikISoeknad = dodsfall?.opplysning.foedselsnummer === avdodPersonSoknad.opplysning.foedselsnummer
 
   const soskenListe: IPersonFraSak[] = sosken?.opplysning.soesken.map((opplysning: any) => {
@@ -50,7 +53,6 @@ export const Soeknadsoversikt = () => {
       navn: `${opplysning.fornavn} ${opplysning.etternavn}`,
       personStatus: PersonStatus.ETTERLATT,
       rolle: RelatertPersonsRolle.BARN,
-      adressenavn: 'annet',
       fnr: '332',
     }
   })
@@ -124,7 +126,6 @@ export const Soeknadsoversikt = () => {
             adresser: soekerBostedadresserPdl?.opplysning.bostedadresse,
             fnr: soekerPdl?.opplysning.foedselsnummer,
             fnrFraSoeknad: soekerSoknad?.opplysning.foedselsnummer,
-            adresseFraPdl: soekerPdl?.opplysning.adresse,
             statsborgerskap: 'NO',
             alderEtterlatt: hentAlderVedDoedsdato(
               soekerFoedseldato?.opplysning.foedselsdato,
@@ -140,8 +141,7 @@ export const Soeknadsoversikt = () => {
             adresser: gjenlevendeBostedadresserPdl?.opplysning.bostedadresse,
             fnr: gjenlevendePdl?.opplysning.foedselsnummer,
             fnrFraSoeknad: gjenlevendeSoknad?.opplysning.foedselsnummer,
-            adresseFraPdl: gjenlevendePdl?.opplysning.adresse,
-            adresseFraSoeknad: gjenlevendeSoknad?.opplysning.adresse,
+            adresseFraSoeknad: gjenlevendeForelderInfo?.opplysning.adresse,
             statsborgerskap: 'NO',
           }}
         />
@@ -153,11 +153,11 @@ export const Soeknadsoversikt = () => {
             adresser: avdoedBostedadresserPdl?.opplysning.bostedadresse,
             fnr: `${avdodPersonPdl?.opplysning.foedselsnummer}`,
             fnrFraSoeknad: avdodPersonSoknad?.opplysning.foedselsnummer,
-            adresseFraPdl: avdodPersonPdl?.opplysning.adresse,
             datoForDoedsfall: dodsfall?.opplysning.doedsdato,
             statsborgerskap: 'NO',
           }}
         />
+
         {soskenListe?.map((person) => (
           <PersonInfo key={`soesken_`} person={person} />
         ))}

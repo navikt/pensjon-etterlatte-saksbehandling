@@ -6,6 +6,8 @@ import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.jackson.*
+import io.ktor.request.header
+import io.ktor.request.path
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.cio.*
@@ -14,7 +16,10 @@ import kotlinx.coroutines.*
 import no.nav.etterlatte.behandling.*
 import no.nav.etterlatte.beregning.beregningRoutes
 import no.nav.etterlatte.database.DatabaseContext
+import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.sak.sakRoutes
+import java.util.*
 
 import javax.sql.DataSource
 
@@ -51,6 +56,10 @@ fun Application.module(beanFactory: BeanFactory){
     install(Authentication) {
         beanFactory.tokenValidering()()
     }
+    install(CallLogging) {
+        mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
+    }
+
     routing {
         beregningRoutes()
         naisprobes()

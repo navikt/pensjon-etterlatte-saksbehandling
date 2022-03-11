@@ -12,8 +12,11 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
+import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.model.VilkaarService
+import java.util.*
 
 
 fun main() {
@@ -30,6 +33,9 @@ fun Application.module() {
             registerModule(JavaTimeModule())
             disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         }
+    }
+    install(CallLogging) {
+        mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
     }
     routing {
         get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }

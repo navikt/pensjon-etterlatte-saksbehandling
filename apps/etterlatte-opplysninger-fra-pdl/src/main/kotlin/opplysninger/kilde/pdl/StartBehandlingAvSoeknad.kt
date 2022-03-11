@@ -2,6 +2,7 @@ package no.nav.etterlatte.opplysninger.kilde.pdl
 
 import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -29,15 +30,18 @@ internal class LeggTilOpplysnignerFraPdl(
             validate { it.requireValue("@soeknad_fordelt", true) }
             validate { it.requireKey("@sak_id") }
             validate { it.requireKey("@behandling_id") }
+            validate { it.interestedIn("@correlation_id") }
 
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val barnePensjon = objectMapper.treeToValue(packet["@skjema_info"], Barnepensjon::class.java)!!
-        behandlinger.leggTilOpplysninger(UUID.fromString(packet["@behandling_id"].asText()), opplysningsBygger.byggOpplysninger(barnePensjon, pdl))
+    override fun onPacket(packet: JsonMessage, context: MessageContext) =
+        withLogContext(packet.correlationId()) {
+            val barnePensjon = objectMapper.treeToValue(packet["@skjema_info"], Barnepensjon::class.java)!!
+            behandlinger.leggTilOpplysninger(UUID.fromString(packet["@behandling_id"].asText()), opplysningsBygger.byggOpplysninger(barnePensjon, pdl))
+        }
     }
-}
+
 
 interface Behandling {
     fun leggTilOpplysninger(behandling: UUID, opplysninger: List<Behandlingsopplysning<out Any>>)
@@ -50,3 +54,5 @@ interface Pdl {
 interface OpplysningsBygger {
     fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl):List<Behandlingsopplysning<out Any>>
 }
+
+private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

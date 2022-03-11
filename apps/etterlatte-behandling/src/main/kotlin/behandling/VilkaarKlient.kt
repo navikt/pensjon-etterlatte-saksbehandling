@@ -6,11 +6,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 
@@ -28,6 +31,9 @@ class KtorVilkarClient(private val url: String) : VilkaarKlient {
                         setSerializationInclusion(JsonInclude.Include.NON_NULL)
                         registerModule(JavaTimeModule())
                     }
+                }
+                defaultRequest {
+                    header(X_CORRELATION_ID, getCorrelationId())
                 }
             }.post(url) {
                 accept(ContentType.Application.Json)

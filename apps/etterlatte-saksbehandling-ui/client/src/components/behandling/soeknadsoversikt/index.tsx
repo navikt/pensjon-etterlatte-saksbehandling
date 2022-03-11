@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { Detail, Heading, RadioGroup, Radio, Textarea, Button, Link } from '@navikt/ds-react'
-import { InfoWrapper, DetailWrapper, HeadingWrapper, RadioGroupWrapper, Border } from './styled'
+import { useState, useContext } from 'react'
+import { AppContext } from '../../../store/AppContext'
+import { Detail, Heading, RadioGroup, Radio, Textarea, Button } from '@navikt/ds-react'
+import { InfoWrapper, DetailWrapper, HeadingWrapper, RadioGroupWrapper, Border, WarningText } from './styled'
 import { IPersonFraSak, PersonStatus, RelatertPersonsRolle } from './types'
 import { Content, ContentHeader } from '../../../shared/styled'
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../behandlings-status'
@@ -8,13 +9,20 @@ import { BehandlingsTypeSmall, IBehandlingsType } from '../behandlings-type'
 import { PersonInfo } from './PersonInfo'
 import { format } from 'date-fns'
 import { usePersonInfoFromBehandling } from './usePersonInfoFromBehandling'
-import { sjekkDataFraSoeknadMotPdl } from './utils'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
+import { hentAlderVedDoedsdato, sjekkDataFraSoeknadMotPdl, WarningAlert } from './utils'
+import {
+  IKriterie,
+  Kriterietype,
+  VilkaarsType,
+  VilkaarVurderingsResultat,
+} from '../../../store/reducers/BehandlingReducer'
 
 export const Soeknadsoversikt = () => {
   const [soeknadGyldigBegrunnelse, setSoeknadGyldigBegrunnelse] = useState('')
   const { next } = useBehandlingRoutes()
-
+  const ctx = useContext(AppContext)
+  const vilkaar = ctx.state.behandlingReducer.vilkårsprøving
 
   const {
     sosken,
@@ -30,7 +38,12 @@ export const Soeknadsoversikt = () => {
     soekerBostedadresserPdl,
     avdoedBostedadresserPdl,
     gjenlevendeBostedadresserPdl,
+    soekerFoedseldato,
   } = usePersonInfoFromBehandling()
+
+  const doedsfallVilkaar: any = vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.DOEDSFALL_ER_REGISTRERT)
+  const avdoedErForelderVilkaar = doedsfallVilkaar.kriterier.find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER).resultat === VilkaarVurderingsResultat.OPPFYLT
+  const avdoedErLikISoeknad = dodsfall?.opplysning.foedselsnummer === avdodPersonSoknad.opplysning.foedselsnummer
 
   const soskenListe: IPersonFraSak[] = sosken?.opplysning.soesken.map((opplysning: any) => {
     return {
@@ -66,9 +79,13 @@ export const Soeknadsoversikt = () => {
           </DetailWrapper>
           <DetailWrapper>
             <Detail size="medium">Avdød forelder</Detail>
-            {sjekkDataFraSoeknadMotPdl(
-              `${avdodPersonPdl?.opplysning.fornavn} ${avdodPersonPdl?.opplysning.etternavn}`,
-              `${avdodPersonSoknad?.opplysning.fornavn} ${avdodPersonSoknad?.opplysning.etternavn}`
+            {avdoedErForelderVilkaar ? (
+              sjekkDataFraSoeknadMotPdl(
+                `${avdodPersonPdl?.opplysning.fornavn} ${avdodPersonPdl?.opplysning.etternavn}`,
+                `${avdodPersonSoknad?.opplysning.fornavn} ${avdodPersonSoknad?.opplysning.etternavn}`
+              )
+            ) : (
+              <WarningText>Ingen foreldre er død</WarningText>
             )}
           </DetailWrapper>
           <DetailWrapper>
@@ -87,6 +104,12 @@ export const Soeknadsoversikt = () => {
             <Detail size="medium">Første mulig virkningstidspunkt</Detail>
             01.01.22
           </DetailWrapper>
+          {avdoedErForelderVilkaar &&
+            !avdoedErLikISoeknad &&
+            WarningAlert(
+              `I PDL er det oppgitt ${avdodPersonPdl?.opplysning.fornavn} ${avdodPersonPdl?.opplysning.etternavn} som avdød forelder, men i søknad er det oppgitt ${avdodPersonSoknad?.opplysning.fornavn} ${avdodPersonSoknad?.opplysning.etternavn}. Må avklares.`
+            )}
+          {!avdoedErForelderVilkaar && WarningAlert('Oppgitt avdød i søknad er ikke forelder til barnet. Må avklares.')}
         </InfoWrapper>
 
         <Heading spacing size="small" level="5">
@@ -101,9 +124,12 @@ export const Soeknadsoversikt = () => {
             adresser: soekerBostedadresserPdl?.opplysning.bostedadresse,
             fnr: soekerPdl?.opplysning.foedselsnummer,
             fnrFraSoeknad: soekerSoknad?.opplysning.foedselsnummer,
-            adresseFraSoeknad: soekerSoknad?.opplysning.adresse,
+            adresseFraPdl: soekerPdl?.opplysning.adresse,
             statsborgerskap: 'NO',
-            alderEtterlatt: '15',
+            alderEtterlatt: hentAlderVedDoedsdato(
+              soekerFoedseldato?.opplysning.foedselsdato,
+              dodsfall?.opplysning.doedsdato
+            ),
           }}
         />
         <PersonInfo
@@ -114,19 +140,21 @@ export const Soeknadsoversikt = () => {
             adresser: gjenlevendeBostedadresserPdl?.opplysning.bostedadresse,
             fnr: gjenlevendePdl?.opplysning.foedselsnummer,
             fnrFraSoeknad: gjenlevendeSoknad?.opplysning.foedselsnummer,
+            adresseFraPdl: gjenlevendePdl?.opplysning.adresse,
             adresseFraSoeknad: gjenlevendeSoknad?.opplysning.adresse,
             statsborgerskap: 'NO',
           }}
         />
         <PersonInfo
           person={{
-            navn: `${avdodPersonPdl?.opplysning.fornavn} ${avdodPersonPdl?.opplysning.etternavn} (${avdodPersonSoknad?.opplysning.fornavn} ${avdodPersonSoknad?.opplysning.etternavn})`,
+            navn: `${avdodPersonPdl?.opplysning.fornavn} ${avdodPersonPdl?.opplysning.etternavn}`,
             personStatus: PersonStatus.AVDOED,
             rolle: RelatertPersonsRolle.FORELDER,
             adresser: avdoedBostedadresserPdl?.opplysning.bostedadresse,
             fnr: `${avdodPersonPdl?.opplysning.foedselsnummer}`,
             fnrFraSoeknad: avdodPersonSoknad?.opplysning.foedselsnummer,
-            adresseFraSoeknad: avdodPersonSoknad?.opplysning.adresse,
+            adresseFraPdl: avdodPersonPdl?.opplysning.adresse,
+            datoForDoedsfall: dodsfall?.opplysning.doedsdato,
             statsborgerskap: 'NO',
           }}
         />
@@ -147,11 +175,8 @@ export const Soeknadsoversikt = () => {
             size="small"
           />
           <Button variant="primary" size="medium" className="button" onClick={next}>
-            Bekreft og gå videre
+            Lagre
           </Button>
-          <Link href="#" className="link">
-            Avbryt og behandle i pesys
-          </Link>
         </RadioGroupWrapper>
       </ContentHeader>
     </Content>

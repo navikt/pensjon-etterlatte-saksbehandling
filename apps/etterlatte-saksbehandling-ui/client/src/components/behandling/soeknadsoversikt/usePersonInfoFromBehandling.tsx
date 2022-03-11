@@ -26,6 +26,8 @@ export const usePersonInfoFromBehandling = () => {
   )
   const mottattDato = grunnlag.find((g) => g.opplysningType === OpplysningsType.soeknad_mottatt)
   const sosken = grunnlag.find((g) => g.opplysningType === OpplysningsType.soeker_relasjon_soeksken)
+  const soekerFoedseldato = grunnlag.find((g) => g.opplysningType === OpplysningsType.soeker_foedselsdato)
+
   const dodsfall = grunnlag.find((g) => g.opplysningType === OpplysningsType.avdoed_doedsfall)
   const innsender = grunnlag.find((g) => g.opplysningType === OpplysningsType.innsender)
   const gjenlevendePdl = grunnlag.find(
@@ -62,5 +64,6 @@ export const usePersonInfoFromBehandling = () => {
     soekerBostedadresserPdl,
     avdoedBostedadresserPdl,
     gjenlevendeBostedadresserPdl,
+    soekerFoedseldato
   }
 }

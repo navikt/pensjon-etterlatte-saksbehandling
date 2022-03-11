@@ -6,7 +6,6 @@ export const InfoWrapper = styled.div`
   margin-bottom: 30px;
   border-top: 1px solid #b0b0b0;
   padding: 1.2em 1em 2em 1em;
-  width: 100%;
 `
 
 export const DetailWrapper = styled.div`
@@ -27,46 +26,53 @@ export const Border = styled.div`
 
 export const PersonInfoWrapper = styled.div`
   border-bottom: 1px solid #b0b0b0;
-  padding: 1.2em 1em 2em 0em;
+  padding: 1.2em 1em 3em 0em;
+  display: inline-flex;
+  width: 100%;
+  justify-content: space-between;
 
   .personWrapper {
-    width: 90%;
-    display: inline-flex;
     padding-top: 1em;
-    margin-right: 0em;
+    display: flex;
+    flex-grow: 1;
   }
-`
 
-export const AlertWrapper = styled.div`
-  width: 50%;
-  .alert {
-    max-width: 300px;
-    padding: 1em;
+  @media (max-width: 1500px) {
+    flex-wrap: wrap;
   }
 `
 
 export const PersonDetailWrapper = styled.div`
   padding-top: 0.5em;
   padding-left: 1em;
-  width: 250px;
+  flex-basis: 100px;
+  flex: 1;
+  min-width: 300px;
 
   .bodyShortHeading {
+    margin-bottom: 0.2em;
     font-weight: bold;
   }
   .adresse {
-    display: inline-flex;
     white-space: nowrap;
   }
 `
 
+export const AlertWrapper = styled.div`
+  margin-top: 2em;
+
+  .alert {
+    width: 300px;
+    padding: 1em;
+  }
+`
+
 export const Historikk = styled.div`
-  display: block;
-  padding-left: 1.5em;
+  padding-top: 0.5em;
 `
 
 export const HistorikkWrapper = styled.div`
   font-size: 11px;
-  width: 400px;
 `
 
 export const HistorikkElement = styled.div`
@@ -101,11 +107,8 @@ export const HeadingWrapper = styled.div`
 `
 
 export const TextButtonWrapper = styled.div`
-margin-right: 5em;
-margin-bottom: 0;
 
 .textButton{
-  margin-bottom: 0;
   display: inline-flex;
   justify-content: space-between;
   color: #0067c5;
@@ -134,6 +137,18 @@ export const StatsborgerskapWrap = styled.div`
 export const AlderEtterlattWrap = styled.div`
   background-color: #ccf1d6;
   border: 1px solid #33aa5f;
+  padding: 0.1em 0.5em;
+  border-radius: 4px;
+  font-weight: normal;
+  font-size: 14px;
+  margin-left: 0.7em;
+  margin-right: 0.5em;
+`
+
+export const AvdoedWrap = styled.div`
+  background-color: #262626;
+  color: white;
+  border: 1px solid #262626;
   padding: 0.1em 0.5em;
   border-radius: 4px;
   font-weight: normal;

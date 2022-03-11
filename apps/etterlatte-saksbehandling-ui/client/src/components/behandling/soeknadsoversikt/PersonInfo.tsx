@@ -5,16 +5,16 @@ import {
   PersonInfoHeader,
   StatsborgerskapWrap,
   AlderEtterlattWrap,
+  AvdoedWrap,
   HistorikkWrapper,
   HistorikkElement,
   Historikk,
 } from './styled'
-import { BodyShort } from '@navikt/ds-react'
 import { ChildIcon } from '../../../shared/icons/childIcon'
-import { RelatertPersonsRolle, IPersonFraSak, IAdresse } from './types'
+import { IPersonFraSak, PersonStatus } from './types'
 import { TextButton } from './TextButton'
 import { format } from 'date-fns'
-import { sjekkDataFraSoeknadMotPdl } from './utils'
+import { sjekkDataFraSoeknadMotPdl, sjekkAdresseGjenlevendeISoeknadMotPdl } from './utils'
 
 type Props = {
   person: IPersonFraSak
@@ -22,11 +22,9 @@ type Props = {
 
 export const PersonInfo: React.FC<Props> = ({ person }) => {
   const [visAdresseHistorikk, setVisAdresseHistorikk] = useState(false)
-  const gjeldendeAdresseFraPdl = person.adresser && person.adresser.find((adresse: IAdresse) => adresse.aktiv)
-
   const hentPersonHeaderMedRolle = () => {
-    switch (person.rolle) {
-      case RelatertPersonsRolle.BARN:
+    switch (person.personStatus) {
+      case PersonStatus.ETTERLATT:
         return (
           <PersonInfoHeader>
             <ChildIcon />
@@ -35,7 +33,7 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
             <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
           </PersonInfoHeader>
         )
-      case RelatertPersonsRolle.FORELDER:
+      case PersonStatus.GJENLEVENDE_FORELDER:
         return (
           <PersonInfoHeader>
             {person.navn}
@@ -45,49 +43,70 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
             <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
           </PersonInfoHeader>
         )
+      case PersonStatus.AVDOED:
+        return (
+          <PersonInfoHeader>
+            {person.navn}
+            <span className="personRolle">
+              ({person.personStatus} {person.rolle})
+            </span>
+            {person.datoForDoedsfall && (
+              <AvdoedWrap>Død {format(new Date(person?.datoForDoedsfall), 'dd.MM.yyyy')}</AvdoedWrap>
+            )}
+            <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
+          </PersonInfoHeader>
+        )
     }
   }
 
   return (
     <PersonInfoWrapper>
-      {hentPersonHeaderMedRolle()}
-      <div className="personWrapper">
-        <PersonDetailWrapper>
-          <BodyShort size="small" className="bodyShortHeading">
-            Fødselsnummer
-          </BodyShort>
-          <BodyShort size="small">{sjekkDataFraSoeknadMotPdl(person?.fnr, person?.fnrFraSoeknad)}</BodyShort>
-        </PersonDetailWrapper>
-        <PersonDetailWrapper>
-          <BodyShort size="small" className="bodyShortHeading">
-            Adresse
-          </BodyShort>
-          <span className="adresse">
-            <BodyShort size="small">
-              {gjeldendeAdresseFraPdl &&
-                sjekkDataFraSoeknadMotPdl(gjeldendeAdresseFraPdl.adresseLinje1, person?.adresseFraSoeknad)}
-            </BodyShort>
+      <div>
+        {hentPersonHeaderMedRolle()}
+        <div className="personWrapper">
+          <PersonDetailWrapper>
+            <div>
+              <strong>Fødselsnummer</strong>
+            </div>
+            {sjekkDataFraSoeknadMotPdl(person?.fnr, person?.fnrFraSoeknad)}
+          </PersonDetailWrapper>
+          <PersonDetailWrapper>
+            <div>
+              <strong> {person.personStatus === PersonStatus.AVDOED ? 'Adresse dødsfallstidspunkt' : 'Adresse'}</strong>
+            </div>
+            {person.personStatus === PersonStatus.GJENLEVENDE_FORELDER && person.adresseFraSoeknad ? (
+              sjekkDataFraSoeknadMotPdl(person.adresseFraPdl, person?.adresseFraSoeknad)
+            ) : (
+              <span>{person.adresseFraPdl}</span>
+            )}
 
-            <Historikk>
-              <TextButton isOpen={visAdresseHistorikk} setIsOpen={setVisAdresseHistorikk} />
-              <HistorikkWrapper>
-                {visAdresseHistorikk &&
-                  person.adresser.map((adresse, key) => (
-                    <HistorikkElement key={key}>
-                      <span className="date">
-                        {format(new Date(adresse.gyldigFraOgMed), 'dd.MM.yyyy')} -{' '}
-                        {adresse.gyldigTilOgMed && format(new Date(adresse.gyldigTilOgMed), 'dd.MM.yyyy') + ':'}
-                      </span>
-                      <span>
-                        {adresse.adresseLinje1}, {adresse.poststed}
-                      </span>
-                    </HistorikkElement>
-                  ))}
-              </HistorikkWrapper>
-            </Historikk>
-          </span>
-        </PersonDetailWrapper>
+            {person.adresser && (
+              <Historikk>
+                <TextButton isOpen={visAdresseHistorikk} setIsOpen={setVisAdresseHistorikk} />
+                <HistorikkWrapper>
+                  {visAdresseHistorikk &&
+                    person.adresser
+                      .sort((x, y) => (x.gyldigFraOgMed > y.gyldigFraOgMed ? -1 : 1))
+                      .map((adresse, key) => (
+                        <HistorikkElement key={key}>
+                          <span className="date">
+                            {format(new Date(adresse.gyldigFraOgMed), 'dd.MM.yyyy')} -{' '}
+                            {adresse.gyldigTilOgMed && format(new Date(adresse.gyldigTilOgMed), 'dd.MM.yyyy') + ':'}
+                          </span>
+                          <span>
+                            {adresse.adresseLinje1}, {adresse.poststed}
+                          </span>
+                        </HistorikkElement>
+                      ))}
+                </HistorikkWrapper>
+              </Historikk>
+            )}
+          </PersonDetailWrapper>
+        </div>
       </div>
+      {person.personStatus === PersonStatus.GJENLEVENDE_FORELDER &&
+        person.adresseFraSoeknad &&
+        sjekkAdresseGjenlevendeISoeknadMotPdl(person.adresseFraSoeknad, person.adresseFraPdl)}
     </PersonInfoWrapper>
   )
 }

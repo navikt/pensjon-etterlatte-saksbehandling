@@ -14,7 +14,8 @@ export interface IPersonFraSak {
   statsborgerskap?: string
   datoForDoedsfall?: Date
   fnrFraSoeknad: string
-  adresseFraSoeknad: string
+  adresseFraSoeknad?: string
+  adresseFraPdl: string
 }
 
 export interface IAdresse {
@@ -30,6 +31,14 @@ export interface IAdresse {
   postnr: string
   poststed?: string
   type: string // adresseType
+}
+
+export interface IPersonOpplysning {
+  fornavn: string
+  etternavn: string
+  foedselsnummer: string
+  adresse: string
+  type: PersonStatus
 }
 
 export enum RelatertPersonsRolle {

@@ -1,23 +1,22 @@
 package no.nav.etterlatte.person
 
-import io.ktor.application.Application
-import io.ktor.application.install
-import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.*
 import io.ktor.routing.Route
-import io.ktor.routing.routing
 import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.setBody
 import io.ktor.server.testing.withTestApplication
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
+import io.mockk.every
+import io.mockk.invoke
 import io.mockk.mockk
-import no.nav.etterlatte.libs.common.objectMapper
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
@@ -28,6 +27,7 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.module
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -36,13 +36,10 @@ import java.time.LocalDateTime
 
 class PersonRouteTest {
 
-    private val personService = mockk<PersonService>().apply {
-        coEvery { hentPerson(any()) } returns mockk(relaxed = true)
-    }
-
-    companion object {
-        const val PERSON_ENDEPUNKT = "/person"
-        const val GYLDIG_FNR = "07081177656"
+    private val personService = mockk<PersonService>()
+    private val mockedSecurityContextMediator = mockk<SecurityContextMediator>(relaxed = true).apply {
+        val slot = slot<Route>()
+        every { secureRoute(capture(slot), captureLambda()) } answers { lambda<(Route) -> Unit>().invoke(slot.captured) }
     }
 
     @Test
@@ -54,13 +51,14 @@ class PersonRouteTest {
 
         coEvery { personService.hentPerson(hentPersonRequest) } returns mockPerson()
 
-        withTestApplication({ testModule { personApi(personService) } }) {
+        withTestApplication({ module(mockedSecurityContextMediator, personService) }) {
             handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(hentPersonRequest.toJson())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 coVerify { personService.hentPerson(any()) }
+                verify { mockedSecurityContextMediator.secureRoute(any(), any()) }
                 confirmVerified(personService)
             }
         }
@@ -75,13 +73,15 @@ class PersonRouteTest {
 
         coEvery { personService.hentPerson(hentPersonRequest) } throws PdlForesporselFeilet("Noe feilet")
 
-        withTestApplication({ testModule { personApi(personService) } }) {
+        withTestApplication({ module(mockedSecurityContextMediator, personService) }) {
             handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(hentPersonRequest.toJson())
             }.apply {
                 assertEquals(HttpStatusCode.InternalServerError, response.status())
+                assertEquals("En feil oppstod: Noe feilet", response.content)
                 coVerify { personService.hentPerson(any()) }
+                verify { mockedSecurityContextMediator.secureRoute(any(), any()) }
                 confirmVerified(personService)
             }
         }
@@ -125,15 +125,8 @@ class PersonRouteTest {
             familieRelasjon = familieRelasjon
         )
 
-}
-
-fun Application.testModule(routes: Route.() -> Unit) {
-    install(ContentNegotiation) {
-        register(ContentType.Application.Json, JacksonConverter(objectMapper))
-
-    }
-
-    routing {
-        routes()
+    companion object {
+        const val PERSON_ENDEPUNKT = "/person"
+        const val GYLDIG_FNR = "07081177656"
     }
 }

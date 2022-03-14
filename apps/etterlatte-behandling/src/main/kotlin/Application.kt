@@ -5,8 +5,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
+import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.*
 import io.ktor.request.header
+import io.ktor.request.httpMethod
 import io.ktor.request.path
 import io.ktor.response.*
 import io.ktor.routing.*
@@ -19,6 +21,8 @@ import no.nav.etterlatte.database.DatabaseContext
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.sak.sakRoutes
+import org.slf4j.LoggerFactory
+import org.slf4j.event.Level
 import java.util.*
 
 import javax.sql.DataSource
@@ -57,7 +61,16 @@ fun Application.module(beanFactory: BeanFactory){
         beanFactory.tokenValidering()()
     }
     install(CallLogging) {
+        level = Level.INFO
+        filter { call -> !call.request.path().startsWith("/internal") }
+        format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
         mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
+    }
+    install(StatusPages) {
+        exception<Throwable> { cause ->
+            log.error("En feil oppstod: ${cause.message}", cause)
+            call.respond(HttpStatusCode.InternalServerError, "En feil oppstod: ${cause.message}")
+        }
     }
 
     routing {

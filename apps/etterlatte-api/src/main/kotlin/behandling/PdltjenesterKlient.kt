@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
+import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -18,12 +19,12 @@ interface EtterlattePdl {
 
 // data class Person(private val fnr: String, private val fornavn: String, private val etternavn: String)
 
-class PdltjenesterKlient(config: Config) : EtterlattePdl {
+class PdltjenesterKlient(config: Config, httpClient: HttpClient) : EtterlattePdl {
 
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
-    private val downstreamResourceClient = DownstreamResourceClient(azureAdClient)
+    private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
     private val clientId = config.getString("pdl.client.id")
     private val resourceUrl = config.getString("pdl.resource.url")

@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
+import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -25,11 +26,11 @@ interface EtterlatteBehandling {
     suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean
 }
 
-class BehandlingKlient(config: Config) : EtterlatteBehandling {
+class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehandling {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
-    private val downstreamResourceClient = DownstreamResourceClient(azureAdClient)
+    private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")

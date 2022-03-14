@@ -34,7 +34,7 @@ export const Behandling = () => {
     if (match?.params.behandlingId) {
       hentBehandling(match.params.behandlingId).then((response: IApiResponse<IDetaljertBehandling>) => {
         ctx.dispatch(addBehandlingAction(response.data))
-        setLoaded(true)
+        setLoaded(false)
       })
     }
   }, [match?.params.behandlingId])
@@ -53,7 +53,9 @@ export const Behandling = () => {
   return (
     <>
       <StatusBar theme={StatusBarTheme.gray} personInfo={person} />
-      <Spinner visible={!loaded} label="Laster" />
+      <SpinnerWrap>
+        <Spinner visible={!loaded} label="Laster" />
+      </SpinnerWrap>
       {loaded && (
         <GridContainer>
           <Column>
@@ -282,3 +284,10 @@ const CheckedMenu = styled.ul`
     }
   }
 `
+
+const SpinnerWrap = styled.div`
+  display: flex;
+  justify-content:center;
+  margin: 3em;
+  text-align: center;
+`;

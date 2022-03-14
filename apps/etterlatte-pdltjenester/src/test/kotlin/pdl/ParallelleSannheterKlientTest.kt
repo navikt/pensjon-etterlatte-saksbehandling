@@ -23,11 +23,6 @@ internal class ParallelleSannheterKlientTest {
         apiUrl = "url"
     )
 
-    companion object {
-        const val PDL = "PDL"
-        const val FREG = "FREG"
-    }
-
     private fun setupHttpClient() = HttpClient(MockEngine) {
         engine {
             addHandler { request ->
@@ -75,4 +70,8 @@ internal class ParallelleSannheterKlientTest {
         )
     }
 
+    companion object {
+        const val PDL = "PDL"
+        const val FREG = "FREG"
+    }
 }

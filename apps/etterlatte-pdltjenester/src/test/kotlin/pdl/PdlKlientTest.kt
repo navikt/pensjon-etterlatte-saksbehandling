@@ -9,8 +9,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -65,10 +65,6 @@ internal class PdlKlientTest {
         }
 
         pdlKlient = PdlKlient(httpClient)
-    }
-
-    private companion object {
-        private val STOR_SNERK = Foedselsnummer.of("11057523044")
     }
 
 }

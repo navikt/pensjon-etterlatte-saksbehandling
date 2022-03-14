@@ -1,9 +1,9 @@
 import { Heading } from '@navikt/ds-react'
-import { Border } from './styled'
-import { PersonStatus, RelatertPersonsRolle } from './types'
-import { PersonInfo } from './PersonInfo'
+import { Border } from '../styled'
+import { PersonStatus, RelatertPersonsRolle } from '../types'
+import { PersonInfo } from './personinfo/PersonInfo'
 import { hentAlderVedDoedsdato } from './utils'
-import { usePersonInfoFromBehandling } from './usePersonInfoFromBehandling'
+import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
 
 export const Familieforhold = () => {
   const {
@@ -46,7 +46,7 @@ export const Familieforhold = () => {
           adresser: gjenlevendeBostedadresserPdl,
           fnr: gjenlevendePdl?.foedselsnummer,
           fnrFraSoeknad: gjenlevendeSoknad?.foedselsnummer,
-          adresseFraSoeknad: gjenlevendeForelderInfo.adresse,
+          adresseFraSoeknad: gjenlevendeForelderInfo?.adresse,
           statsborgerskap: 'NO',
         }}
       />

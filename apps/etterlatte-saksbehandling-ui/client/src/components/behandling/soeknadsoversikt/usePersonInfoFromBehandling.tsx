@@ -61,7 +61,7 @@ export const usePersonInfoFromBehandling = () => {
     (g) => g.opplysningType === OpplysningsType.gjenlevende_forelder_bostedsadresse && g.kilde.type === KildeType.pdl
   )?.opplysning.bostedadresse
 
-  const gjenlevendeForelderInfo = grunnlag.find(
+  const gjenlevendeForelderInfo: any = grunnlag.find(
     (g) => g.opplysningType === OpplysningsType.gjenlevende_forelder_info
   )?.opplysning
 

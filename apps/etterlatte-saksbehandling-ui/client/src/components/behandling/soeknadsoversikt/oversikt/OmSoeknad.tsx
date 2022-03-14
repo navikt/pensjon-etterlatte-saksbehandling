@@ -1,9 +1,9 @@
 import { useContext } from 'react'
-import { AppContext } from '../../../store/AppContext'
+import { AppContext } from '../../../../store/AppContext'
 import { Detail, Heading } from '@navikt/ds-react'
-import { InfoWrapper, DetailWrapper, HeadingWrapper, WarningText } from './styled'
-import { BehandlingsStatusSmall, IBehandlingsStatus } from '../behandlings-status'
-import { BehandlingsTypeSmall, IBehandlingsType } from '../behandlings-type'
+import { InfoWrapper, DetailWrapper, HeadingWrapper, WarningText } from '../styled'
+import { BehandlingsStatusSmall, IBehandlingsStatus } from '../../behandlings-status'
+import { BehandlingsTypeSmall, IBehandlingsType } from '../../behandlings-type'
 import { format } from 'date-fns'
 import { sjekkDataFraSoeknadMotPdl, WarningAlert } from './utils'
 import {
@@ -11,8 +11,8 @@ import {
   Kriterietype,
   VilkaarsType,
   VilkaarVurderingsResultat,
-} from '../../../store/reducers/BehandlingReducer'
-import { usePersonInfoFromBehandling } from './usePersonInfoFromBehandling'
+} from '../../../../store/reducers/BehandlingReducer'
+import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
 
 export const OmSoeknad = () => {
   const { soekerPdl, soekerSoknad, dodsfall, avdodPersonPdl, avdodPersonSoknad, innsender, mottattDato } =

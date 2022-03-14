@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { RadioGroup, Radio, Textarea, Button } from '@navikt/ds-react'
-import { RadioGroupWrapper } from './styled'
-import { useBehandlingRoutes } from '../BehandlingRoutes'
+import { RadioGroupWrapper } from '../styled'
+import { useBehandlingRoutes } from '../../BehandlingRoutes'
 
 export const SoeknadGyldigFremsatt = () => {
   const [soeknadGyldigBegrunnelse, setSoeknadGyldigBegrunnelse] = useState('')

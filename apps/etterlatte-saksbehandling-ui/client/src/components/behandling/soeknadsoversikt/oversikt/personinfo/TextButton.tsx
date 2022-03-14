@@ -1,6 +1,6 @@
 import { Collapse } from '@navikt/ds-icons'
 import { Expand } from '@navikt/ds-icons'
-import { TextButtonWrapper } from './styled'
+import { TextButtonWrapper } from '../../styled'
 
 type Props = {
   isOpen: boolean

@@ -1,7 +1,7 @@
 import { Content, ContentHeader } from '../../../shared/styled'
-import { OmSoeknad } from './OmSoeknad'
-import { Familieforhold } from './Familieforhold'
-import { SoeknadGyldigFremsatt } from './SoeknadGyldigFremsatt'
+import { OmSoeknad } from './oversikt/OmSoeknad'
+import { Familieforhold } from './oversikt/Familieforhold'
+import { SoeknadGyldigFremsatt } from './oversikt/SoeknadGyldigFremsatt'
 
 export const Soeknadsoversikt = () => {
   return (

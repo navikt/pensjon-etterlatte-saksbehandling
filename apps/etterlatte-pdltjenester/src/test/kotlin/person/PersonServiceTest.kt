@@ -1,14 +1,14 @@
 package no.nav.etterlatte.person
 
-import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.STOR_SNERK
+import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.mockResponse
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlKlient
@@ -135,16 +135,6 @@ internal class PersonServiceTest {
                 personService.hentPerson(HentPersonRequest(STOR_SNERK, rolle = PersonRolle.BARN))
             }
         }
-    }
-
-    private inline fun <reified T> mockResponse(fil: String): T {
-        val json = javaClass.getResource(fil)!!.readText()
-        return objectMapper.readValue(json, jacksonTypeRef())
-    }
-
-    private companion object {
-        private val TRIVIELL_MIDTPUNKT = Foedselsnummer.of("19040550081")
-        private val STOR_SNERK = Foedselsnummer.of("11057523044")
     }
 
 }

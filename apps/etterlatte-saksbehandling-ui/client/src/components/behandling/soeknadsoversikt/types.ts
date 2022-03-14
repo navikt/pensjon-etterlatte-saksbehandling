@@ -12,10 +12,9 @@ export interface IPersonFraSak {
   adresser: IAdresse[]
   alderEtterlatt?: string
   statsborgerskap?: string
-  datoForDoedsfall?: Date
+  datoForDoedsfall?: string
   fnrFraSoeknad: string
   adresseFraSoeknad?: string
-  adresseFraPdl: string
 }
 
 export interface IAdresse {
@@ -37,8 +36,12 @@ export interface IPersonOpplysning {
   fornavn: string
   etternavn: string
   foedselsnummer: string
-  adresse: string
   type: PersonStatus
+}
+
+export interface IDodsfall {
+  doedsdato: string
+  foedselsnummer: string
 }
 
 export enum RelatertPersonsRolle {

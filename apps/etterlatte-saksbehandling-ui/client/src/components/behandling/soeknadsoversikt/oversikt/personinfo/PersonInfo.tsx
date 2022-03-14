@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {
   PersonInfoWrapper,
   PersonDetailWrapper,
@@ -6,21 +5,22 @@ import {
   StatsborgerskapWrap,
   AlderEtterlattWrap,
   AvdoedWrap,
-  Historikk,
-} from './styled'
-import { ChildIcon } from '../../../shared/icons/childIcon'
-import { IPersonFraSak, PersonStatus } from './types'
-import { TextButton } from './TextButton'
+  PersonInfoBorder,
+} from '../../styled'
+import { ChildIcon } from '../../../../../shared/icons/childIcon'
+import { IAdresse, IPersonFraSak, PersonStatus } from '../../types'
 import { format } from 'date-fns'
-import { sjekkDataFraSoeknadMotPdl, sjekkAdresseGjenlevendeISoeknadMotPdl } from './utils'
-import { Adressevisning } from '../felles/Adressevisning'
+import { sjekkDataFraSoeknadMotPdl } from '../utils'
+import { PersonInfoAdresse } from './PersonInfoAdresse'
 
 type Props = {
   person: IPersonFraSak
 }
 
 export const PersonInfo: React.FC<Props> = ({ person }) => {
-  const [visAdresseHistorikk, setVisAdresseHistorikk] = useState(false)
+  const gjeldendeAdresse: IAdresse | undefined =
+    person.adresser && person.adresser.find((adresse: IAdresse) => adresse.aktiv === true)
+
   const hentPersonHeaderMedRolle = () => {
     switch (person.personStatus) {
       case PersonStatus.ETTERLATT:
@@ -59,37 +59,21 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
   }
 
   return (
-    <PersonInfoWrapper>
+    <PersonInfoBorder>
       {hentPersonHeaderMedRolle()}
-      <div className="personWrapper">
+      <PersonInfoWrapper>
         <PersonDetailWrapper adresse={false}>
           <div>
             <strong>Fødselsnummer</strong>
           </div>
           {sjekkDataFraSoeknadMotPdl(person?.fnr, person?.fnrFraSoeknad)}
         </PersonDetailWrapper>
-        <PersonDetailWrapper adresse={true}>
-          <div>
-            <strong> {person.personStatus === PersonStatus.AVDOED ? 'Adresse dødsfallstidspunkt' : 'Adresse'}</strong>
-          </div>
-          {person.personStatus === PersonStatus.GJENLEVENDE_FORELDER && person.adresseFraSoeknad ? (
-            sjekkDataFraSoeknadMotPdl(person.adresseFraPdl, person?.adresseFraSoeknad)
-          ) : (
-            <span>{person.adresseFraPdl}</span>
-          )}
-          {person.adresser && (
-            <Historikk>
-              <TextButton isOpen={visAdresseHistorikk} setIsOpen={setVisAdresseHistorikk} />
-              {visAdresseHistorikk && <Adressevisning adresser={person.adresser} soeknadsoversikt={true} />}
-            </Historikk>
-          )}
-        </PersonDetailWrapper>
-        <div className="alertWrapper">
-          {person.personStatus === PersonStatus.GJENLEVENDE_FORELDER &&
-            person.adresseFraSoeknad &&
-            sjekkAdresseGjenlevendeISoeknadMotPdl(person.adresseFraSoeknad, person.adresseFraPdl)}
-        </div>
-      </div>
-    </PersonInfoWrapper>
+        <PersonInfoAdresse
+          adresser={person.adresser}
+          adresseFraSoeknadGjenlevende={person.adresseFraSoeknad}
+          gjeldendeAdresse={gjeldendeAdresse}
+        />
+      </PersonInfoWrapper>
+    </PersonInfoBorder>
   )
 }

@@ -24,19 +24,19 @@ export const Border = styled.div`
   border-top: 1px solid #b0b0b0;
 `
 
-export const PersonInfoWrapper = styled.div`
+export const PersonInfoBorder = styled.div`
   border-bottom: 1px solid #b0b0b0;
   padding: 1.2em 1em 3em 0em;
+`
 
-  .personWrapper {
-    justify-content: space-between;
-    width: 100%;
-    padding-top: 1em;
-    display: inline-flex;
+export const PersonInfoWrapper = styled.div`
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 1em;
+  display: inline-flex;
 
-    .alertWrapper {
-      width: 300px;
-    }
+  .alertWrapper {
+    width: 300px;
   }
 `
 export const PersonDetailWrapper = styled.div<{ adresse: boolean }>`

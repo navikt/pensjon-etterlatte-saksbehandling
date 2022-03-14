@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../../shared/icons/genderIcon'
-import { PersonInfo } from '../behandling/soeknadsoversikt/PersonInfo'
 import { PersonStatus } from '../behandling/soeknadsoversikt/types'
 import { Fnr } from './fnr'
 import { Status } from './status'

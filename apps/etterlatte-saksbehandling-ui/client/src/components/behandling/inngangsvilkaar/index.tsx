@@ -19,7 +19,6 @@ export const Inngangsvilkaar = () => {
 
   useEffect(() => {
     const hash = location.hash.slice(1)
-    console.log(document.getElementById(hash))
     document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' })
   }, [location.hash])
 

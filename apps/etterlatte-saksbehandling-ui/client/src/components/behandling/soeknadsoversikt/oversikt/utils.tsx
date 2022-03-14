@@ -1,5 +1,5 @@
 import { Alert } from '@navikt/ds-react'
-import { AlertWrapper, WarningText } from './styled'
+import { AlertWrapper, WarningText } from '../styled'
 import moment from 'moment'
 
 export const sjekkDataFraSoeknadMotPdl = (dataFraPdl: string, dataFraSoeknad: string) => {

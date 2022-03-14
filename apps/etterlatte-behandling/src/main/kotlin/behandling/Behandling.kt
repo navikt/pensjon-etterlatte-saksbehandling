@@ -13,10 +13,12 @@ data class Behandling(
     val grunnlag: List<Behandlingsopplysning<ObjectNode>>,
     val vilkårsprøving: List<VurdertVilkaar>?,
     val beregning: Beregning?,
-    val fastsatt: Boolean = false
+    val fastsatt: Boolean = false,
+    val avbrutt: Boolean = false
 ) {
     val status
         get() = when {
+            avbrutt -> BehandlingStatus.AVBRUTT
             fastsatt -> BehandlingStatus.FASTSATT
             beregning != null -> BehandlingStatus.BEREGNET
             vilkårsprøving != null -> BehandlingStatus.VILKÅRSPRØVD

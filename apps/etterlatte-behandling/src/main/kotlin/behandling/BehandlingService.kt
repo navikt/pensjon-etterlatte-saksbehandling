@@ -18,6 +18,7 @@ interface BehandlingService {
     fun ferdigstill(behandling: UUID)
 
     fun slettBehandlingerISak(sak: Long)
+    fun avbrytBehandling(behandling: UUID): Behandling
 }
 
 class RealBehandlingService(
@@ -54,7 +55,9 @@ class RealBehandlingService(
         behandlingsId: UUID,
         opplysninger: List<Behandlingsopplysning<ObjectNode>>
     ) {
-        BehandlingAggregat(behandlingsId, behandlinger, this.opplysninger, vilkaarKlient).leggTilGrunnlagListe(opplysninger)
+        BehandlingAggregat(behandlingsId, behandlinger, this.opplysninger, vilkaarKlient).leggTilGrunnlagListe(
+            opplysninger
+        )
     }
 
     override fun vilkårsprøv(behandling: UUID) {
@@ -76,6 +79,10 @@ class RealBehandlingService(
         println("Sletter alle behandlinger i sak: $sak")
         opplysninger.slettOpplysningerISak(sak)
         behandlinger.slettBehandlingerISak(sak)
+    }
+
+    override fun avbrytBehandling(behandling: UUID): Behandling {
+        return BehandlingAggregat(behandling, behandlinger, opplysninger, vilkaarKlient).avbrytBehandling()
     }
 
 

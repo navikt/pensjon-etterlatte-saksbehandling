@@ -40,20 +40,32 @@ internal class BehandlingDaoIntegrationTest {
     @Test
     fun `Sletting av alle behandlinger i en sak`() {
         val connection = dataSource.connection
-        val sakrepo = SakDao{connection}
+        val sakrepo = SakDao { connection }
         val behandlingRepo = BehandlingDao { connection }
         val opplysningRepo = OpplysningDao { connection }
-        val deltOpplysning = Behandlingsopplysning(UUID.randomUUID(), Behandlingsopplysning.Pdl("pdl", Instant.now(), null), Opplysningstyper.TESTOPPLYSNING, objectMapper.createObjectNode(), objectMapper.createObjectNode()).also { opplysningRepo.nyOpplysning(it) }
-        val ikkeDeltOpplysning = Behandlingsopplysning(UUID.randomUUID(), Behandlingsopplysning.Pdl("pdl", Instant.now(), null), Opplysningstyper.TESTOPPLYSNING, objectMapper.createObjectNode(), objectMapper.createObjectNode()).also { opplysningRepo.nyOpplysning(it) }
+        val deltOpplysning = Behandlingsopplysning(
+            UUID.randomUUID(),
+            Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
+            Opplysningstyper.TESTOPPLYSNING,
+            objectMapper.createObjectNode(),
+            objectMapper.createObjectNode()
+        ).also { opplysningRepo.nyOpplysning(it) }
+        val ikkeDeltOpplysning = Behandlingsopplysning(
+            UUID.randomUUID(),
+            Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
+            Opplysningstyper.TESTOPPLYSNING,
+            objectMapper.createObjectNode(),
+            objectMapper.createObjectNode()
+        ).also { opplysningRepo.nyOpplysning(it) }
         val sak1 = sakrepo.opprettSak("123", "BP").id
         val sak2 = sakrepo.opprettSak("321", "BP").id
         listOf(
             Behandling(UUID.randomUUID(), sak1, listOf(deltOpplysning), null, null, false),
             Behandling(UUID.randomUUID(), sak1, listOf(ikkeDeltOpplysning), null, null, false),
             Behandling(UUID.randomUUID(), sak2, listOf(deltOpplysning), null, null, false)
-        ).forEach {b ->
+        ).forEach { b ->
             behandlingRepo.opprett(b)
-            b.grunnlag.forEach { o-> opplysningRepo.leggOpplysningTilBehandling(b.id, o.id)}
+            b.grunnlag.forEach { o -> opplysningRepo.leggOpplysningTilBehandling(b.id, o.id) }
         }
 
         Assertions.assertEquals(2, behandlingRepo.alleISak(sak1).size)
@@ -64,7 +76,46 @@ internal class BehandlingDaoIntegrationTest {
 
         Assertions.assertEquals(0, behandlingRepo.alleISak(sak1).size)
         Assertions.assertEquals(1, behandlingRepo.alleISak(sak2).size)
-        Assertions.assertEquals(1, opplysningRepo.finnOpplysningerIBehandling(behandlingRepo.alleISak(sak2).first().id).size)
+        Assertions.assertEquals(
+            1,
+            opplysningRepo.finnOpplysningerIBehandling(behandlingRepo.alleISak(sak2).first().id).size
+        )
+
+        connection.close()
+    }
+
+
+    @Test
+    fun `avbryte sak`() {
+        val connection = dataSource.connection
+        val sakrepo = SakDao { connection }
+        val behandlingRepo = BehandlingDao { connection }
+        val opplysningRepo = OpplysningDao { connection }
+        val ikkeDeltOpplysning = Behandlingsopplysning(
+            UUID.randomUUID(),
+            Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
+            Opplysningstyper.TESTOPPLYSNING,
+            objectMapper.createObjectNode(),
+            objectMapper.createObjectNode()
+        ).also { opplysningRepo.nyOpplysning(it) }
+        val sak1 = sakrepo.opprettSak("123", "BP").id
+        listOf(
+            Behandling(UUID.randomUUID(), sak1, listOf(ikkeDeltOpplysning), null, null, false),
+        ).forEach { b ->
+            behandlingRepo.opprett(b)
+            b.grunnlag.forEach { o -> opplysningRepo.leggOpplysningTilBehandling(b.id, o.id) }
+        }
+
+        Assertions.assertEquals(1, behandlingRepo.alleISak(sak1).size)
+
+        var behandling = behandlingRepo.hentBehandlingerMedSakId(sak1)
+        Assertions.assertEquals(1, behandling.size)
+        Assertions.assertEquals(false, behandling.first().avbrutt)
+
+        behandlingRepo.avbrytBehandling(behandling.first())
+        behandling = behandlingRepo.hentBehandlingerMedSakId(sak1)
+        Assertions.assertEquals(1, behandling.size)
+        Assertions.assertEquals(true, behandling.first().avbrutt)
 
         connection.close()
     }

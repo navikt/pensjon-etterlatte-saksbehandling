@@ -2,11 +2,14 @@ package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.*
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
+
+class AvbruttBehandlingException(message: String) : RuntimeException(message) {}
 
 class BehandlingAggregat(
     id: UUID,
@@ -33,18 +36,39 @@ class BehandlingAggregat(
         }
     }
 
-    private var lagretBehandling = requireNotNull(behandlinger.hent(id))
+    private object TilgangDao {
+        fun sjekkOmBehandlingTillatesEndret(behandling: Behandling): Boolean {
+            return behandling.status in listOf(
+                BehandlingStatus.VILKÅRSPRØVD,
+                BehandlingStatus.OPPRETTET,
+                BehandlingStatus.FASTSATT,
+                BehandlingStatus.BEREGNET
+            )
+        }
+    }
+
+    var lagretBehandling = requireNotNull(behandlinger.hent(id))
     private var lagredeOpplysninger = opplysninger.finnOpplysningerIBehandling(id)
 
     fun leggTilGrunnlagListe(nyeOpplysninger: List<Behandlingsopplysning<ObjectNode>>) {
         if (nyeOpplysninger.isEmpty()) return
+
         for (opplysning in nyeOpplysninger) {
             leggTilGrunnlagUtenVilkårsprøving(opplysning.opplysning, opplysning.opplysningType, opplysning.kilde)
         }
         vilkårsprøv()
     }
 
-    fun leggTilGrunnlagUtenVilkårsprøving(data: ObjectNode, type: Opplysningstyper, kilde: Behandlingsopplysning.Kilde?): UUID {
+    fun leggTilGrunnlagUtenVilkårsprøving(
+        data: ObjectNode,
+        type: Opplysningstyper,
+        kilde: Behandlingsopplysning.Kilde?
+    ): UUID {
+        if (!TilgangDao.sjekkOmBehandlingTillatesEndret(lagretBehandling)) {
+            throw AvbruttBehandlingException(
+                "Det tillattes ikke å legge til grunnlag uten vilkårsprøving for Behandling med id ${lagretBehandling.id} og status: ${lagretBehandling.status}"
+            )
+        }
         val behandlingsopplysning = Behandlingsopplysning(
             UUID.randomUUID(),
             kildeFraRequestContekst(kilde),
@@ -60,6 +84,11 @@ class BehandlingAggregat(
     }
 
     fun vilkårsprøv() {
+        if (!TilgangDao.sjekkOmBehandlingTillatesEndret(lagretBehandling)) {
+            throw AvbruttBehandlingException(
+                "Det tillates ikke å vilkårsprøve Behandling med id ${lagretBehandling.id} og status: ${lagretBehandling.status}"
+            )
+        }
         vilkaarKlient
             .vurderVilkaar(lagredeOpplysninger).also {
                 lagretBehandling = lagretBehandling.copy(
@@ -67,7 +96,15 @@ class BehandlingAggregat(
                 )
                 behandlinger.lagreVilkarsproving(lagretBehandling)
             }
+        logger.info("behandling ${lagretBehandling.id} i sak ${lagretBehandling.sak} er vilkårsprøvd")
 
+    }
+
+    fun avbrytBehandling(): Behandling {
+        behandlinger.avbrytBehandling(lagretBehandling)
+            .also { lagretBehandling = lagretBehandling.copy(avbrutt = true) }.let {
+                return lagretBehandling
+            }
     }
 
     private fun kildeFraRequestContekst(oppgittKilde: Behandlingsopplysning.Kilde?): Behandlingsopplysning.Kilde {

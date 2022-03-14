@@ -1,5 +1,5 @@
 package no.nav.etterlatte.libs.common.behandling
 
 enum class BehandlingStatus {
-    FASTSATT, BEREGNET, VILKÅRSPRØVD, OPPRETTET
+    FASTSATT, BEREGNET, VILKÅRSPRØVD, OPPRETTET, AVBRUTT
 }

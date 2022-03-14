@@ -16,7 +16,7 @@ class BehandlingDao(private val connection: () -> Connection) {
 
     fun hent(id: UUID): Behandling? {
         val stmt =
-            connection().prepareStatement("SELECT id, sak_id, vilkaarsproving, beregning FROM behandling where id = ?")
+            connection().prepareStatement("SELECT id, sak_id, vilkaarsproving, beregning, fastsatt, avbrutt FROM behandling where id = ?")
         stmt.setObject(1, id)
         return stmt.executeQuery().singleOrNull {
             Behandling(
@@ -24,27 +24,32 @@ class BehandlingDao(private val connection: () -> Connection) {
                 getLong(2),
                 emptyList(),
                 getString(3)?.let { objectMapper.readValue(it) },
-                getString(4)?.let { objectMapper.readValue(it) }
+                getString(4)?.let { objectMapper.readValue(it) },
+                getBoolean(5),
+                getBoolean(6)
             )
         }
     }
 
     fun alle(): List<Behandling> {
-        val stmt = connection().prepareStatement("SELECT id, sak_id, vilkaarsproving, beregning FROM behandling")
+        val stmt =
+            connection().prepareStatement("SELECT id, sak_id, vilkaarsproving, beregning, fastsatt, avbrutt FROM behandling")
         return stmt.executeQuery().toList {
             Behandling(
                 getObject(1) as UUID,
                 getLong(2),
                 emptyList<Behandlingsopplysning<ObjectNode>>(),
                 getString(3)?.let { objectMapper.readValue(it) },
-                getString(4)?.let { objectMapper.readValue(it) }
+                getString(5)?.let { objectMapper.readValue(it) },
+                getBoolean(5),
+                getBoolean(6)
             )
         }
     }
 
     fun alleISak(sakid: Long): List<Behandling> {
         val stmt =
-            connection().prepareStatement("SELECT id, sak_id, vilkaarsproving, beregning FROM behandling WHERE sak_id = ?")
+            connection().prepareStatement("SELECT id, sak_id, vilkaarsproving, beregning, fastsatt, avbrutt FROM behandling WHERE sak_id = ?")
         stmt.setLong(1, sakid)
         return stmt.executeQuery().toList {
             Behandling(
@@ -52,7 +57,9 @@ class BehandlingDao(private val connection: () -> Connection) {
                 getLong(2),
                 emptyList(),
                 getString(3)?.let { objectMapper.readValue(it) },
-                getString(4)?.let { objectMapper.readValue(it) }
+                getString(4)?.let { objectMapper.readValue(it) },
+                getBoolean(5),
+                getBoolean(6)
             )
         }
     }
@@ -85,16 +92,42 @@ class BehandlingDao(private val connection: () -> Connection) {
         require(stmt.executeUpdate() == 1)
     }
 
-    fun slettBehandlingerISak(id: Long){
+    fun slettBehandlingerISak(id: Long) {
         val statement = connection().prepareStatement("DELETE from behandling where sak_id = ?")
         statement.setLong(1, id)
         statement.executeUpdate()
     }
 
+    fun hentBehandlingerMedSakId(id: Long): List<Behandling> {
+        val stmt =
+            connection().prepareStatement("SELECT id, sak_id, vilkaarsproving, beregning, fastsatt, avbrutt from behandling where sak_id = ?")
+        stmt.setLong(1, id)
+        return stmt.executeQuery().toList {
+            Behandling(
+                getObject(1) as UUID,
+                getLong(2),
+                emptyList<Behandlingsopplysning<ObjectNode>>(),
+                getString(3)?.let { objectMapper.readValue(it) },
+                getString(4)?.let { objectMapper.readValue(it) },
+                getBoolean(5),
+                getBoolean(6)
+            )
+        }
+    }
+
+    fun avbrytBehandling(behandling: Behandling) {
+        val stmt = connection().prepareStatement("UPDATE behandling SET avbrutt = ? WHERE id = ?")
+        stmt.setBoolean(1, true)
+        stmt.setObject(2, behandling.id)
+        require(stmt.executeUpdate() == 1)
+    }
+
 
 }
 
-val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+val objectMapper =
+    jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
 fun ObjectNode?.serialize() = this?.let { objectMapper.writeValueAsString(it) }
 fun String?.deSerialize() = this?.let { objectMapper.readValue(this, ObjectNode::class.java) }
 

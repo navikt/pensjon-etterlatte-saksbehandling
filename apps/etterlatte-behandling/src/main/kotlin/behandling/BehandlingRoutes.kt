@@ -35,7 +35,7 @@ fun Route.behandlingRoutes(service: BehandlingService) {
         })
     }
 
-    delete ("/sak/{sakid}/behandlinger") {
+    delete("/sak/{sakid}/behandlinger") {
         inTransaction { service.slettBehandlingerISak(sakId) }
         call.respond(HttpStatusCode.OK)
     }
@@ -80,6 +80,11 @@ fun Route.behandlingRoutes(service: BehandlingService) {
             call.respond(HttpStatusCode.OK)
 
         }
+
+        post("avbrytBehandling/{behandlingsid}") {
+            inTransaction { service.avbrytBehandling(behandlingsId) }
+            call.respond(HttpStatusCode.OK)
+        }
     }
 }
 
@@ -87,9 +92,10 @@ private fun mapDate(behandling: Behandling): LocalDateTime? {
     if (behandling.grunnlag.isEmpty()) {
         return null
     }
-    val dato = behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKNAD_MOTTATT_DATO }?.opplysning?.let {
-        objectMapper.readValue(it.toString(), SoeknadMottattDato::class.java)
-    }
+    val dato =
+        behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKNAD_MOTTATT_DATO }?.opplysning?.let {
+            objectMapper.readValue(it.toString(), SoeknadMottattDato::class.java)
+        }
     return dato?.mottattDato
 }
 

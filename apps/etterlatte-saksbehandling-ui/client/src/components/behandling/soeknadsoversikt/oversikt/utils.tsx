@@ -33,3 +33,9 @@ export const sjekkAdresseGjenlevendeISoeknadMotPdl = (adresseFraSoeknad: string,
 export const hentAlderVedDoedsdato = (foedselsdato: string, doedsdato: string): string => {
   return Math.floor(moment(doedsdato).diff(moment(foedselsdato), 'years', true)).toString()
 }
+
+//TODO varsel til saksbehandler når dødsdato er 3 år før søknaden ble sendt inn
+export const hentVirketidspunkt = (doedsdato: string): string => {
+  return moment(doedsdato).add(1, 'M').startOf('month').toString()
+
+}

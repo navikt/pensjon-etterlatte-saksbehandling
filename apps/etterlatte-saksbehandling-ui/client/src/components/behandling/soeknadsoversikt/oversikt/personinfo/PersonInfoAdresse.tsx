@@ -9,15 +9,21 @@ type Props = {
   adresser: IAdresse[]
   adresseFraSoeknadGjenlevende: string | undefined
   gjeldendeAdresse: IAdresse | undefined
+  avodedPerson: boolean
 }
 
-export const PersonInfoAdresse: React.FC<Props> = ({ adresser, adresseFraSoeknadGjenlevende, gjeldendeAdresse }) => {
+export const PersonInfoAdresse: React.FC<Props> = ({
+  adresser,
+  adresseFraSoeknadGjenlevende,
+  gjeldendeAdresse,
+  avodedPerson,
+}) => {
   const [visAdresseHistorikk, setVisAdresseHistorikk] = useState(false)
   return (
     <>
       <PersonDetailWrapper adresse={true}>
         <div>
-          <strong>Adresse</strong>
+          <strong>{avodedPerson ? 'Adresse dødsfallstidspunkt' : 'Adresse'}</strong>
         </div>
         {gjeldendeAdresse ? (
           adresseFraSoeknadGjenlevende ? (
@@ -31,10 +37,10 @@ export const PersonInfoAdresse: React.FC<Props> = ({ adresser, adresseFraSoeknad
             </span>
           )
         ) : (
-          <span>Ingen adresse registert</span>
+          <span>Ingen adresse</span>
         )}
 
-        {adresser && (
+        {adresser && !avodedPerson && (
           <Historikk>
             <TextButton isOpen={visAdresseHistorikk} setIsOpen={setVisAdresseHistorikk} />
             {visAdresseHistorikk && <Adressevisning adresser={adresser} soeknadsoversikt={true} />}

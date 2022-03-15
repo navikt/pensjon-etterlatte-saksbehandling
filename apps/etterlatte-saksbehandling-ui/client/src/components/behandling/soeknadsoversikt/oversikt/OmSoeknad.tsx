@@ -5,7 +5,7 @@ import { InfoWrapper, DetailWrapper, HeadingWrapper, WarningText } from '../styl
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../../behandlings-status'
 import { BehandlingsTypeSmall, IBehandlingsType } from '../../behandlings-type'
 import { format } from 'date-fns'
-import { sjekkDataFraSoeknadMotPdl, WarningAlert } from './utils'
+import { hentVirketidspunkt, sjekkDataFraSoeknadMotPdl, WarningAlert } from './utils'
 import {
   IKriterie,
   Kriterietype,
@@ -72,7 +72,7 @@ export const OmSoeknad = () => {
         </DetailWrapper>
         <DetailWrapper>
           <Detail size="medium">Første mulig virkningstidspunkt</Detail>
-          01.01.22
+          {format(new Date(hentVirketidspunkt(dodsfall?.doedsdato)), 'dd.MM.yyyy')}
         </DetailWrapper>
         {avdoedErForelderVilkaar &&
           !avdoedErLikISoeknad &&

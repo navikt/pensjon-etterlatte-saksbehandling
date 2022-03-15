@@ -72,6 +72,7 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
           adresser={person.adresser}
           adresseFraSoeknadGjenlevende={person.adresseFraSoeknad}
           gjeldendeAdresse={gjeldendeAdresse}
+          avodedPerson={person.personStatus === PersonStatus.AVDOED}
         />
       </PersonInfoWrapper>
     </PersonInfoBorder>

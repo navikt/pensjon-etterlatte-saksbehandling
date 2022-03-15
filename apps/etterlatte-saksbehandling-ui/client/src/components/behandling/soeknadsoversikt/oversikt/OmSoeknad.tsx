@@ -5,7 +5,7 @@ import { InfoWrapper, DetailWrapper, HeadingWrapper, WarningText } from '../styl
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../../behandlings-status'
 import { BehandlingsTypeSmall, IBehandlingsType } from '../../behandlings-type'
 import { format } from 'date-fns'
-import { hentVirketidspunkt, sjekkDataFraSoeknadMotPdl, WarningAlert } from './utils'
+import { dodsfallMereEnn3AarSiden, hentVirketidspunkt, sjekkPersonFraSoeknadMotPdl } from './utils'
 import {
   IKriterie,
   Kriterietype,
@@ -13,6 +13,7 @@ import {
   VilkaarVurderingsResultat,
 } from '../../../../store/reducers/BehandlingReducer'
 import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
+import { AlertVarsel } from './AlertVarsel'
 
 export const OmSoeknad = () => {
   const { soekerPdl, soekerSoknad, dodsfall, avdodPersonPdl, avdodPersonSoknad, innsender, mottattDato } =
@@ -42,18 +43,12 @@ export const OmSoeknad = () => {
       <InfoWrapper>
         <DetailWrapper>
           <Detail size="medium">Mottaker</Detail>
-          {sjekkDataFraSoeknadMotPdl(
-            `${soekerPdl?.fornavn} ${soekerPdl?.etternavn}`,
-            `${soekerSoknad?.fornavn} ${soekerSoknad?.etternavn}`
-          )}
+          {sjekkPersonFraSoeknadMotPdl(soekerPdl, soekerSoknad)}
         </DetailWrapper>
         <DetailWrapper>
           <Detail size="medium">Avdød forelder</Detail>
           {avdoedErForelderVilkaar ? (
-            sjekkDataFraSoeknadMotPdl(
-              `${avdodPersonPdl?.fornavn} ${avdodPersonPdl?.etternavn}`,
-              `${avdodPersonSoknad?.fornavn} ${avdodPersonSoknad?.etternavn}`
-            )
+            sjekkPersonFraSoeknadMotPdl(avdodPersonPdl, avdodPersonSoknad)
           ) : (
             <WarningText>Ingen foreldre er død</WarningText>
           )}
@@ -74,12 +69,14 @@ export const OmSoeknad = () => {
           <Detail size="medium">Første mulig virkningstidspunkt</Detail>
           {format(new Date(hentVirketidspunkt(dodsfall?.doedsdato)), 'dd.MM.yyyy')}
         </DetailWrapper>
-        {avdoedErForelderVilkaar &&
-          !avdoedErLikISoeknad &&
-          WarningAlert(
-            `I PDL er det oppgitt ${avdodPersonPdl?.fornavn} ${avdodPersonPdl?.etternavn} som avdød forelder, men i søknad er det oppgitt ${avdodPersonSoknad?.fornavn} ${avdodPersonSoknad?.etternavn}. Må avklares.`
-          )}
-        {!avdoedErForelderVilkaar && WarningAlert('Oppgitt avdød i søknad er ikke forelder til barnet. Må avklares.')}
+        {avdoedErForelderVilkaar && !avdoedErLikISoeknad && (
+          <AlertVarsel varselType="ikke riktig oppgitt avdød i søknad" />
+        )}
+        {!avdoedErForelderVilkaar && <AlertVarsel varselType="forelder ikke død" />}
+
+        {dodsfallMereEnn3AarSiden(dodsfall?.doedsdato, mottattDato?.mottattDato) && (
+          <AlertVarsel varselType="dødsfall 3 år" />
+        )}
       </InfoWrapper>
     </>
   )

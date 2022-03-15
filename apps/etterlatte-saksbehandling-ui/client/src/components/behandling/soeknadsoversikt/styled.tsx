@@ -51,6 +51,7 @@ export const PersonDetailWrapper = styled.div<{ adresse: boolean }>`
 `
 
 export const AlertWrapper = styled.div`
+  max-width: 400px;
   .alert {
     padding: 1em;
   }

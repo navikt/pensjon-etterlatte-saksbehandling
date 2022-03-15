@@ -1,6 +1,7 @@
-import { Alert } from '@navikt/ds-react'
-import { AlertWrapper, WarningText } from '../styled'
+import { WarningText } from '../styled'
 import moment from 'moment'
+import { AlertVarsel } from './AlertVarsel'
+import { IPersonOpplysning } from '../types'
 
 export const sjekkDataFraSoeknadMotPdl = (dataFraPdl: string, dataFraSoeknad: string) => {
   return dataFraSoeknad === dataFraPdl || dataFraSoeknad === null ? (
@@ -13,29 +14,35 @@ export const sjekkDataFraSoeknadMotPdl = (dataFraPdl: string, dataFraSoeknad: st
   )
 }
 
-export const WarningAlert = (infomelding: string) => (
-  <AlertWrapper>
-    <Alert variant="warning" className="alert" size="small">
-      {infomelding}
-    </Alert>
-  </AlertWrapper>
-)
+export const sjekkPersonFraSoeknadMotPdl = (personFraPdl: IPersonOpplysning, personFraSoeknad: IPersonOpplysning) => {
+  //TODO: hvis fnr er likt, men navn forskjellig, hva skal vises?
+  return personFraSoeknad.foedselsnummer === personFraPdl.foedselsnummer ? (
+    <span>
+      {personFraPdl?.fornavn} {personFraPdl?.etternavn}
+    </span>
+  ) : (
+    <WarningText>
+      <div>
+        {personFraPdl?.fornavn} {personFraPdl?.etternavn}
+      </div>
+      {personFraSoeknad?.fornavn} {personFraSoeknad?.etternavn} (fra søknad)
+    </WarningText>
+  )
+}
 
 export const sjekkAdresseGjenlevendeISoeknadMotPdl = (adresseFraSoeknad: string, adresseFraPdl: string) => {
-  return (
-    adresseFraPdl !== adresseFraSoeknad &&
-    WarningAlert(
-      `Adresse til gjenlevende foreldre er ulik fra oppgitt i søknad og PDL. Orienter innsender og avklar hvilken adresse som stemmer.`
-    )
-  )
+  return adresseFraPdl !== adresseFraSoeknad && <AlertVarsel varselType="ikke lik adresse" />
 }
 
 export const hentAlderVedDoedsdato = (foedselsdato: string, doedsdato: string): string => {
   return Math.floor(moment(doedsdato).diff(moment(foedselsdato), 'years', true)).toString()
 }
 
-//TODO varsel til saksbehandler når dødsdato er 3 år før søknaden ble sendt inn
 export const hentVirketidspunkt = (doedsdato: string): string => {
+  //TODO: når skal virkningsdato være når dodsfall er mere enn 3 år siden?
   return moment(doedsdato).add(1, 'M').startOf('month').toString()
+}
 
+export const dodsfallMereEnn3AarSiden = (doedsdato: string, mottattDato: string): boolean => {
+  return moment(mottattDato).diff(doedsdato, 'years') >= 3
 }

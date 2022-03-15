@@ -45,8 +45,8 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
     ).opplysning.oppholdsadresse
 
   const kontaktadresser: IAdresse[] = vilkaar.kriterier
-    .find((krit: IKriterie) => krit.navn === Kriterietype.SOEKER_IKKE_KONTAKTADRESSE_I_UTLANDET)
-    .basertPaaOpplysninger.find(
+    ?.find((krit: IKriterie) => krit.navn === Kriterietype.SOEKER_IKKE_KONTAKTADRESSE_I_UTLANDET)
+    ?.basertPaaOpplysninger?.find(
       (opplysning: IVilkaaropplysing) => opplysning.opplysningsType === OpplysningsType.soeker_kontaktadresse
     ).opplysning.kontaktadresse
 
@@ -100,7 +100,7 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
             <VilkaarColumn>
               <div>
                 <strong>Utenlandsadresse fra søknad</strong>
-                <div>{harUtelandsadresse.opplysning.adresseIUtlandet}</div>
+                <div>{harUtelandsadresse?.opplysning.adresseIUtlandet}</div>
               </div>
             </VilkaarColumn>
           </VilkaarInfobokser>

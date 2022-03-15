@@ -1,12 +1,11 @@
 import format from 'date-fns/format'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import {
-  IKriterie,
   IPerson,
-  IVilkaaropplysing,
   Kriterietype,
   OpplysningsType,
 } from '../../../../store/reducers/BehandlingReducer'
+import { hentKriterier } from '../../behandling-utils'
 import {
   Innhold,
   Title,
@@ -24,17 +23,8 @@ import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 export const DoedsFallForelder = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
 
-  const avdoedDoedsdato = vilkaar.kriterier
-    .find((krit: IKriterie) => krit.navn === Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL)
-    .basertPaaOpplysninger.find(
-      (opplysning: IVilkaaropplysing) => opplysning.opplysningsType === OpplysningsType.avdoed_doedsfall
-    )
-
-  const forelder = vilkaar.kriterier
-    .find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER)
-    .basertPaaOpplysninger.find(
-      (opplysning: IVilkaaropplysing) => opplysning.opplysningsType === OpplysningsType.soeker_relasjon_foreldre
-    )
+  const avdoedDoedsdato: any = hentKriterier(vilkaar, Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL, OpplysningsType.avdoed_doedsfall)
+  const forelder: any = hentKriterier(vilkaar, Kriterietype.AVDOED_ER_FORELDER, OpplysningsType.soeker_relasjon_foreldre)
 
   const avdoedForelder = forelder?.opplysning.foreldre.find(
     (forelder: IPerson) => forelder?.foedselsnummer === avdoedDoedsdato?.opplysning.foedselsnummer

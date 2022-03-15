@@ -5,7 +5,7 @@ import {
   Kriterietype,
   OpplysningsType,
 } from '../../../../store/reducers/BehandlingReducer'
-import { hentKriterier } from '../../behandling-utils'
+import { hentKriterier } from '../../felles/utils'
 import {
   Innhold,
   Title,

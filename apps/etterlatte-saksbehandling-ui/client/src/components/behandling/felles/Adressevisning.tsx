@@ -12,9 +12,11 @@ export const Adressevisning = ({
   return (
     <div>
       {adresser?.length > 0 ? (
-        adresser.map((adresse, index) => (
-          <Adresse adresse={adresse} key={index} soeknadsoversikt={soeknadsoversikt ? soeknadsoversikt : false} />
-        ))
+        adresser
+          .sort((a, b) => (new Date(b.gyldigFraOgMed) > new Date(a.gyldigFraOgMed) ? 1 : -1))
+          .map((adresse, index) => (
+            <Adresse adresse={adresse} key={index} soeknadsoversikt={soeknadsoversikt ? soeknadsoversikt : false} />
+          ))
       ) : (
         <div>Ingen adresser</div>
       )}

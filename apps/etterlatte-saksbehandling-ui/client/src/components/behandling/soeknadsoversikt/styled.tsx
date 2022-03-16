@@ -13,6 +13,10 @@ export const DetailWrapper = styled.div`
   margin-bottom: 2em;
   width: 33%;
   font-size: 16px;
+
+  .warningText {
+    color: #ba3a26;
+  }
 `
 
 export const WarningText = styled.span`
@@ -72,7 +76,7 @@ export const HistorikkElement = styled.div`
   }
 `
 
-export const PersonInfoHeader = styled.div`
+export const PersonInfoHeaderWrapper = styled.div`
   display: inline-flex;
   font-weight: bold;
 
@@ -144,7 +148,7 @@ export const AvdoedWrap = styled.div`
 `
 
 export const RadioGroupWrapper = styled.div`
-  margin-top: 5em;
+  margin-top: 3em;
   max-width: 400px;
 
   .link {

@@ -1,66 +1,24 @@
-import {
-  PersonInfoWrapper,
-  PersonDetailWrapper,
-  PersonInfoHeader,
-  StatsborgerskapWrap,
-  AlderEtterlattWrap,
-  AvdoedWrap,
-  PersonInfoBorder,
-} from '../../styled'
-import { ChildIcon } from '../../../../../shared/icons/childIcon'
+import { PersonInfoWrapper, PersonDetailWrapper, PersonInfoBorder } from '../../styled'
 import { IAdresse, IPersonFraSak, PersonStatus } from '../../types'
-import { format } from 'date-fns'
 import { sjekkDataFraSoeknadMotPdl } from '../utils'
 import { PersonInfoAdresse } from './PersonInfoAdresse'
+import { PersonInfoHeader } from './PersonInfoHeader'
+import { usePersonInfoFromBehandling } from '../../usePersonInfoFromBehandling'
+import { hentAdresserEtterDoedsdato } from '../../../felles/utils'
 
 type Props = {
   person: IPersonFraSak
 }
 
 export const PersonInfo: React.FC<Props> = ({ person }) => {
+  const { dodsfall } = usePersonInfoFromBehandling()
   const gjeldendeAdresse: IAdresse | undefined =
     person.adresser && person.adresser.find((adresse: IAdresse) => adresse.aktiv === true)
-
-  const hentPersonHeaderMedRolle = () => {
-    switch (person.personStatus) {
-      case PersonStatus.ETTERLATT:
-        return (
-          <PersonInfoHeader>
-            <ChildIcon />
-            {person.navn} <span className="personRolle">({person.rolle})</span>
-            <AlderEtterlattWrap>{person.alderEtterlatt} år</AlderEtterlattWrap>
-            <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
-          </PersonInfoHeader>
-        )
-      case PersonStatus.GJENLEVENDE_FORELDER:
-        return (
-          <PersonInfoHeader>
-            {person.navn}
-            <span className="personRolle">
-              ({person.personStatus} {person.rolle})
-            </span>
-            <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
-          </PersonInfoHeader>
-        )
-      case PersonStatus.AVDOED:
-        return (
-          <PersonInfoHeader>
-            {person.navn}
-            <span className="personRolle">
-              ({person.personStatus} {person.rolle})
-            </span>
-            {person.datoForDoedsfall && (
-              <AvdoedWrap>Død {format(new Date(person?.datoForDoedsfall), 'dd.MM.yyyy')}</AvdoedWrap>
-            )}
-            <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
-          </PersonInfoHeader>
-        )
-    }
-  }
+  const bostedEtterDoedsdato = hentAdresserEtterDoedsdato(person.adresser, new Date(dodsfall.doedsdato))
 
   return (
     <PersonInfoBorder>
-      {hentPersonHeaderMedRolle()}
+      <PersonInfoHeader person={person} />
       <PersonInfoWrapper>
         <PersonDetailWrapper adresse={false}>
           <div>
@@ -69,7 +27,7 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
           {sjekkDataFraSoeknadMotPdl(person?.fnr, person?.fnrFraSoeknad)}
         </PersonDetailWrapper>
         <PersonInfoAdresse
-          adresser={person.adresser}
+          adresser={bostedEtterDoedsdato}
           adresseFraSoeknadGjenlevende={person.adresseFraSoeknad}
           gjeldendeAdresse={gjeldendeAdresse}
           avodedPerson={person.personStatus === PersonStatus.AVDOED}

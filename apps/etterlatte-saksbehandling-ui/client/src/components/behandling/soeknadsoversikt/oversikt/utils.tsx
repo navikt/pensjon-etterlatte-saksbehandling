@@ -38,11 +38,13 @@ export const hentAlderVedDoedsdato = (foedselsdato: string, doedsdato: string): 
   return Math.floor(moment(doedsdato).diff(moment(foedselsdato), 'years', true)).toString()
 }
 
-export const hentVirketidspunkt = (doedsdato: string): string => {
-  //TODO: når skal virkningsdato være når dodsfall er mere enn 3 år siden?
+export const hentVirkningstidspunkt = (doedsdato: string, mottattDato: string): string => {
+  if (sjekkDodsfallMerEnn3AarSiden(doedsdato, mottattDato)) {
+    return moment(moment(doedsdato).add(3, 'years').toString()).add(1, 'M').startOf('month').toString()
+  }
   return moment(doedsdato).add(1, 'M').startOf('month').toString()
 }
 
-export const dodsfallMereEnn3AarSiden = (doedsdato: string, mottattDato: string): boolean => {
-  return moment(mottattDato).diff(doedsdato, 'years') >= 3
+export const sjekkDodsfallMerEnn3AarSiden = (doedsdato: string, mottattDato: string): boolean => {
+  return moment(mottattDato).diff(moment(doedsdato), 'years', true) > 3
 }

@@ -11,7 +11,7 @@ export interface IPersonFraSak {
   fnr: string
   adresser: IAdresse[]
   alderEtterlatt?: string
-  statsborgerskap?: string
+  statsborgerskap: string
   datoForDoedsfall?: string
   fnrFraSoeknad: string
   adresseFraSoeknad?: string

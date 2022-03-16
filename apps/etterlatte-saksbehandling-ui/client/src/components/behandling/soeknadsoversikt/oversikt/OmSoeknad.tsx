@@ -5,7 +5,7 @@ import { InfoWrapper, DetailWrapper, HeadingWrapper, WarningText } from '../styl
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../../behandlings-status'
 import { BehandlingsTypeSmall, IBehandlingsType } from '../../behandlings-type'
 import { format } from 'date-fns'
-import { dodsfallMereEnn3AarSiden, hentVirketidspunkt, sjekkPersonFraSoeknadMotPdl } from './utils'
+import { sjekkDodsfallMerEnn3AarSiden, hentVirkningstidspunkt, sjekkPersonFraSoeknadMotPdl } from './utils'
 import {
   IKriterie,
   Kriterietype,
@@ -13,7 +13,7 @@ import {
   VilkaarVurderingsResultat,
 } from '../../../../store/reducers/BehandlingReducer'
 import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
-import { AlertVarsel } from './AlertVarsel'
+import { OmSoeknadVarsler } from './OmSoeknadVarsler'
 
 export const OmSoeknad = () => {
   const { soekerPdl, soekerSoknad, dodsfall, avdodPersonPdl, avdodPersonSoknad, innsender, mottattDato } =
@@ -26,6 +26,7 @@ export const OmSoeknad = () => {
     doedsfallVilkaar.kriterier.find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER).resultat ===
     VilkaarVurderingsResultat.OPPFYLT
   const avdoedErLikISoeknad = dodsfall?.foedselsnummer === avdodPersonSoknad.foedselsnummer
+  const dodsfallMerEnn3AarSiden = sjekkDodsfallMerEnn3AarSiden(dodsfall?.doedsdato, mottattDato?.mottattDato)
 
   return (
     <>
@@ -63,20 +64,21 @@ export const OmSoeknad = () => {
         </DetailWrapper>
         <DetailWrapper>
           <Detail size="medium">Dato for dødsfall</Detail>
-          {format(new Date(dodsfall?.doedsdato), 'dd.MM.yyyy')}
+          <span className={dodsfallMerEnn3AarSiden ? 'warningText' : ''}>
+            {format(new Date(dodsfall?.doedsdato), 'dd.MM.yyyy')}
+          </span>
         </DetailWrapper>
         <DetailWrapper>
           <Detail size="medium">Første mulig virkningstidspunkt</Detail>
-          {format(new Date(hentVirketidspunkt(dodsfall?.doedsdato)), 'dd.MM.yyyy')}
+          <span className={dodsfallMerEnn3AarSiden ? 'warningText' : ''}>
+            {format(new Date(hentVirkningstidspunkt(dodsfall?.doedsdato, mottattDato?.mottattDato)), 'dd.MM.yyyy')}
+          </span>
         </DetailWrapper>
-        {avdoedErForelderVilkaar && !avdoedErLikISoeknad && (
-          <AlertVarsel varselType="ikke riktig oppgitt avdød i søknad" />
-        )}
-        {!avdoedErForelderVilkaar && <AlertVarsel varselType="forelder ikke død" />}
-
-        {dodsfallMereEnn3AarSiden(dodsfall?.doedsdato, mottattDato?.mottattDato) && (
-          <AlertVarsel varselType="dødsfall 3 år" />
-        )}
+        <OmSoeknadVarsler
+          feilForelderOppgittSomAvdoed={avdoedErForelderVilkaar && !avdoedErLikISoeknad}
+          forelderIkkeDoed={!avdoedErForelderVilkaar}
+          dodsfallMerEnn3AarSiden={dodsfallMerEnn3AarSiden}
+        />
       </InfoWrapper>
     </>
   )

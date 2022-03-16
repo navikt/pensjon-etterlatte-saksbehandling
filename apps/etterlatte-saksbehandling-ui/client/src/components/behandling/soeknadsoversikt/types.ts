@@ -23,8 +23,8 @@ export interface IAdresse {
   adresseLinje3?: string | null
   aktiv: boolean 
   coAdresseNavn?: string | null
-  gyldigFraOgMed: string | null
-  gyldigTilOgMed?: string | null
+  gyldigFraOgMed: string
+  gyldigTilOgMed?: string
   kilde: string
   land?: string | null
   postnr: string

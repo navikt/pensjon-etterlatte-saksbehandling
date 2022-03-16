@@ -10,6 +10,7 @@ include(
     "apps:etterlatte-behandling-fra-soeknad",
     "apps:etterlatte-opplysninger-fra-pdl",
     "apps:etterlatte-testdata",
+    "apps:etterlatte-okonomi-vedtak",
     "libs:ktorclient-auth-clientcredentials",
     "libs:common",
     "libs:ktorclient-onbehalfof",

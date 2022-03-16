@@ -23,12 +23,11 @@ import { hentAdresserEtterDoedsdato, hentKriterier } from '../../felles/utils'
 export const BarnetsMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
 
-  const avdoedDoedsdato = hentKriterier(vilkaar, Kriterietype.SOEKER_IKKE_BOSTEDADRESSE_I_UTLANDET, OpplysningsType.avdoed_doedsfall)
+  const avdoedDoedsdato = hentKriterier(vilkaar, Kriterietype.SOEKER_IKKE_BOSTEDADRESSE_I_UTLANDET, OpplysningsType.avdoed_doedsfall).opplysning.doedsdato
   const bostedadresser = hentKriterier(vilkaar, Kriterietype.SOEKER_IKKE_BOSTEDADRESSE_I_UTLANDET, OpplysningsType.soeker_bostedadresse)?.opplysning.bostedadresse
   const oppholdsadresser = hentKriterier(vilkaar, Kriterietype.SOEKER_IKKE_OPPHOLDADRESSE_I_UTLANDET, OpplysningsType.soeker_oppholdsadresse)?.opplysning.oppholdsadresse
   const kontaktadresser = hentKriterier(vilkaar, Kriterietype.SOEKER_IKKE_KONTAKTADRESSE_I_UTLANDET, OpplysningsType.soeker_kontaktadresse)?.opplysning.kontaktadresse
   const harUtelandsadresse = hentKriterier(vilkaar, Kriterietype.SOEKER_IKKE_OPPGITT_ADRESSE_I_UTLANDET_I_SOEKNAD, OpplysningsType.soeker_utenlandsadresse_fra_soeknad)
-
 
   const bostedEtterDoedsdato = hentAdresserEtterDoedsdato(bostedadresser, avdoedDoedsdato)
   const oppholdEtterDoedsdato = hentAdresserEtterDoedsdato(oppholdsadresser, avdoedDoedsdato)

@@ -18,17 +18,17 @@ export interface IPersonFraSak {
 }
 
 export interface IAdresse {
-  adresseLinje1: string
-  adresseLinje2?: string
-  adresseLinje3?: string
-  aktiv: boolean
-  coAdresseNavn?: string
-  gyldigFraOgMed: Date
-  gyldigTilOgMed?: Date
+  adresseLinje1: string | null
+  adresseLinje2?: string | null
+  adresseLinje3?: string | null
+  aktiv: boolean 
+  coAdresseNavn?: string | null
+  gyldigFraOgMed: string | null
+  gyldigTilOgMed?: string | null
   kilde: string
-  land?: string
+  land?: string | null
   postnr: string
-  poststed?: string
+  poststed?: string | null
   type: string // adresseType
 }
 

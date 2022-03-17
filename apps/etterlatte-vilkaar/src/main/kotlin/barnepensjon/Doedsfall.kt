@@ -1,23 +1,24 @@
 package no.nav.etterlatte.barnepensjon
 
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foreldre
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
+import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
-
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foreldre
 
 
 fun vilkaarDoedsfallErRegistrert(
     vilkaartype: Vilkaartyper,
-    doedsdato: List<VilkaarOpplysning<Doedsdato>>,
-    foreldre: List<VilkaarOpplysning<Foreldre>>,
+    avdoed: VilkaarOpplysning<Person>,
+    soeker: VilkaarOpplysning<Person>,
 ): VurdertVilkaar {
-    val doedsdatoRegistrertIPdl = kriterieDoedsdatoRegistrertIPdl(doedsdato)
-    val avdoedErForeldre = kriterieAvdoedErForelder(foreldre, doedsdato)
+    val doedsdatoRegistrertIPdl = kriterieDoedsdatoRegistrertIPdl(avdoed)
+    val avdoedErForeldre = kriterieAvdoedErForelder(soeker, avdoed)
 
     return VurdertVilkaar(
         vilkaartype,
@@ -26,9 +27,9 @@ fun vilkaarDoedsfallErRegistrert(
     )
 }
 
-fun kriterieDoedsdatoRegistrertIPdl(doedsdato: List<VilkaarOpplysning<Doedsdato>>): Kriterie {
+fun kriterieDoedsdatoRegistrertIPdl(avdoed: VilkaarOpplysning<Person>): Kriterie {
     val resultat = try {
-        hentDoedsdato(doedsdato)
+        hentDoedsdato(avdoed)
         VilkaarVurderingsResultat.OPPFYLT
     } catch (ex: OpplysningKanIkkeHentesUt) {
         VilkaarVurderingsResultat.IKKE_OPPFYLT
@@ -37,15 +38,20 @@ fun kriterieDoedsdatoRegistrertIPdl(doedsdato: List<VilkaarOpplysning<Doedsdato>
     return Kriterie(
         Kriterietyper.DOEDSFALL_ER_REGISTRERT_I_PDL,
         resultat,
-        listOf(doedsdato).flatten().filter { it.kilde.type == "pdl" })
+        listOf(Kriteriegrunnlag(avdoed.kilde, Doedsdato(avdoed.opplysning.doedsdato, avdoed.opplysning.foedselsnummer)))
+    )
 }
 
 fun kriterieAvdoedErForelder(
-    foreldre: List<VilkaarOpplysning<Foreldre>>,
-    doedsdato: List<VilkaarOpplysning<Doedsdato>>
+    soeker: VilkaarOpplysning<Person>,
+    avdoed: VilkaarOpplysning<Person>,
 ): Kriterie {
-    val opplsyningsGrunnlag = listOf(foreldre, doedsdato).flatten().filter { it.kilde.type == "pdl" }
-    val resultat = vurderOpplysning { hentFnrForeldre(foreldre).contains(hentDoedsdato(doedsdato).foedselsnummer) }
+    val opplsyningsGrunnlag = listOf(
+        Kriteriegrunnlag(soeker.kilde, Foreldre(soeker.opplysning.familieRelasjon?.foreldre)),
+        Kriteriegrunnlag(avdoed.kilde, Doedsdato(avdoed.opplysning.doedsdato, avdoed.opplysning.foedselsnummer))
+    )
+
+    val resultat = vurderOpplysning { hentFnrForeldre(soeker).contains(avdoed.opplysning.foedselsnummer) }
 
     return Kriterie(Kriterietyper.AVDOED_ER_FORELDER, resultat, opplsyningsGrunnlag)
 }

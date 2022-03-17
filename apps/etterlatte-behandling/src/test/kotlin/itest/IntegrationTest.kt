@@ -11,7 +11,7 @@ import no.nav.etterlatte.behandling.*
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.Beregning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.sak.Sak
 import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens

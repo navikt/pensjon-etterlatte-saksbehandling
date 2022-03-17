@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsaarsak
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.GjenlevendeForelderInfo
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Naeringsinntekt
@@ -215,7 +215,7 @@ class Opplysningsuthenter {
                 barnepensjon, opplysningsType,
                 Doedsdato(
                     avdoed.datoForDoedsfallet.svar.innhold,
-                    avdoed.foedselsnummer.svar.value
+                    avdoed.foedselsnummer.svar
                 )
             )
         }

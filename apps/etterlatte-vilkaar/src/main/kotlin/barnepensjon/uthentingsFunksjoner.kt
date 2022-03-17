@@ -1,35 +1,31 @@
 package no.nav.etterlatte.barnepensjon
 
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Bostedadresse
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foreldre
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Kontaktadresse
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Oppholdadresse
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsadresseBarn
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 
 
-fun hentFnrForeldre(foreldre: List<VilkaarOpplysning<Foreldre>>): List<String> {
-    return foreldre.find { it.kilde.type == "pdl" }?.opplysning?.foreldre?.map { it.foedselsnummer.value }
+fun hentFnrForeldre(soeker: VilkaarOpplysning<Person>): List<Foedselsnummer> {
+    return soeker.opplysning.familieRelasjon?.foreldre?.map { it }
         ?: throw OpplysningKanIkkeHentesUt()
 }
 
-fun hentSoekerFoedselsdato(foedselsdato: List<VilkaarOpplysning<Foedselsdato>>): LocalDate {
-    return foedselsdato.find { it.kilde.type == "pdl" }?.opplysning?.foedselsdato
+fun hentFoedselsdato(person: VilkaarOpplysning<Person>): LocalDate {
+    return person.opplysning.foedselsdato
         ?: throw OpplysningKanIkkeHentesUt()
 }
 
-fun hentDoedsdato(doedsdato: List<VilkaarOpplysning<Doedsdato>>): Doedsdato {
-    return doedsdato.find { it.kilde.type == "pdl" }?.opplysning
+fun hentDoedsdato(person: VilkaarOpplysning<Person>): LocalDate {
+    return person.opplysning.doedsdato
         ?: throw OpplysningKanIkkeHentesUt()
 }
 
-fun hentVirkningsdato(doedsdato: List<VilkaarOpplysning<Doedsdato>>): LocalDate {
-    val doedsdato = doedsdato.find { it.kilde.type == "pdl" }?.opplysning?.doedsdato
+fun hentVirkningsdato(person: VilkaarOpplysning<Person>?): LocalDate {
+    val doedsdato = person?.opplysning?.doedsdato
     return doedsdato?.with(TemporalAdjusters.firstDayOfNextMonth()) ?: throw OpplysningKanIkkeHentesUt()
 }
 
@@ -41,30 +37,20 @@ fun hentUtenlandsopphold(
     return utenlandsopphold ?: throw OpplysningKanIkkeHentesUt()
 }
 
-fun hentUtenlandsadresseSoeknad(
-    utenlandsadresseBarn: List<VilkaarOpplysning<UtenlandsadresseBarn>>
-): UtenlandsadresseBarn {
-    val utenlandsadresse = utenlandsadresseBarn.find { it.kilde.type == "privatperson" }?.opplysning
-    return utenlandsadresse ?: throw OpplysningKanIkkeHentesUt()
+fun hentAdresser(
+    person: VilkaarOpplysning<Person>
+): Adresser {
+    val bostedadresse = person.opplysning.bostedsadresse
+    val oppholdadresse = person.opplysning.oppholdsadresse
+    val kontaktadresse = person.opplysning.kontaktadresse
+
+    val adresser = Adresser(bostedadresse, oppholdadresse, kontaktadresse)
+    val ingenAdresser = bostedadresse?.isEmpty() == true && oppholdadresse?.isEmpty() == true && kontaktadresse?.isEmpty() == true
+
+    return if (ingenAdresser) {
+        throw OpplysningKanIkkeHentesUt()
+    } else {
+        adresser
+    }
 }
 
-fun hentBostedsadresse(
-    bostedadresse: List<VilkaarOpplysning<Bostedadresse>>
-): Bostedadresse {
-    val bostedadresse = bostedadresse.find { it.kilde.type == "pdl" }?.opplysning
-    return bostedadresse ?: throw OpplysningKanIkkeHentesUt()
-}
-
-fun hentOppholdadresse(
-    oppholdadresse: List<VilkaarOpplysning<Oppholdadresse>>
-): Oppholdadresse {
-    val bostedadresse = oppholdadresse.find { it.kilde.type == "pdl" }?.opplysning
-    return bostedadresse ?: throw OpplysningKanIkkeHentesUt()
-}
-
-fun hentKontaktadresse(
-    kontaktadresse: List<VilkaarOpplysning<Kontaktadresse>>
-): Kontaktadresse {
-    val kontaktadresse = kontaktadresse.find { it.kilde.type == "pdl" }?.opplysning
-    return kontaktadresse ?: throw OpplysningKanIkkeHentesUt()
-}

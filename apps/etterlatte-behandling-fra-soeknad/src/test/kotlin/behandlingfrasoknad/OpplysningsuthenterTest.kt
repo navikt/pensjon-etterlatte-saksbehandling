@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BankkontoType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*

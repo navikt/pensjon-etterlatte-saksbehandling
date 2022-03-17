@@ -1,20 +1,22 @@
 package no.nav.etterlatte.barnepensjon
 
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsdato
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Foedselsdato
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
+import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
 
 
 fun vilkaarBrukerErUnder20(
     vilkaartype: Vilkaartyper,
-    foedselsdato: List<VilkaarOpplysning<Foedselsdato>>,
-    doedsdato: List<VilkaarOpplysning<Doedsdato>>,
+    soekerPdl: VilkaarOpplysning<Person>,
+    avdoedPdl: VilkaarOpplysning<Person>,
 ): VurdertVilkaar {
-    val soekerErUnder20 = kriterieSoekerErUnder20(foedselsdato, doedsdato)
+    val soekerErUnder20 = kriterieSoekerErUnder20(soekerPdl, avdoedPdl)
 
     return VurdertVilkaar(
         vilkaartype,
@@ -24,12 +26,16 @@ fun vilkaarBrukerErUnder20(
 }
 
 fun kriterieSoekerErUnder20(
-    foedselsdato: List<VilkaarOpplysning<Foedselsdato>>,
-    doedsdato: List<VilkaarOpplysning<Doedsdato>>
+    soekerPdl: VilkaarOpplysning<Person>,
+    avdoedPdl: VilkaarOpplysning<Person>
 ): Kriterie {
-    val opplysningsGrunnlag = listOf(foedselsdato, doedsdato).flatten().filter { it.kilde.type == "pdl" }
+    val opplysningsGrunnlag = listOf(
+        Kriteriegrunnlag(avdoedPdl.kilde, Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)),
+        Kriteriegrunnlag(soekerPdl.kilde, Foedselsdato(soekerPdl.opplysning.foedselsdato, soekerPdl.opplysning.foedselsnummer))
+    )
+
     val resultat =
-        vurderOpplysning { hentSoekerFoedselsdato(foedselsdato).plusYears(20) > hentVirkningsdato(doedsdato) }
+        vurderOpplysning { hentFoedselsdato(soekerPdl).plusYears(20) > hentVirkningsdato(avdoedPdl) }
     return Kriterie(Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, resultat, opplysningsGrunnlag)
 }
 

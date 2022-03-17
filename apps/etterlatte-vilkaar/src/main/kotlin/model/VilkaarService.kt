@@ -9,10 +9,14 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foreldre
 import no.nav.etterlatte.vilkaar.barnepensjon.*
 import org.slf4j.LoggerFactory
+import java.lang.IllegalStateException
 
 
 class VilkaarService {
@@ -22,61 +26,47 @@ class VilkaarService {
         logger.info("Map vilkaar")
         println(opplysninger)
 
-        val soekerFoedselsdato =
-            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_FOEDSELSDATO_V1 }
-                .map { setOpplysningType<Foedselsdato>(it) }
-
-        val soekerRelasjonForeldre =
-            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_RELASJON_FORELDRE_V1 }
-                .map { setOpplysningType<Foreldre>(it) }
-
-        val soekerUtenlandsadresseBarn =
-            opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_UTENLANDSADRESSE_SOEKNAD_V1 }
-                .map { setOpplysningType<UtenlandsadresseBarn>(it) }
-
-        val soekerBostedadresse = opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_BOSTEDADRESSE_V1 }
-            .map { setOpplysningType<Bostedadresse>(it) }
-
-        val soekerOppholdadresse = opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_OPPHOLDADRESSE_V1 }
-            .map { setOpplysningType<Oppholdadresse>(it)}
-
-        val soekerKontaktadresse = opplysninger.filter { it.opplysningsType == Opplysningstyper.SOEKER_KONTAKTADRESSE_V1 }
-            .map { setOpplysningType<Kontaktadresse>(it)}
-
-        val avdoedDoedsdato = opplysninger.filter { it.opplysningsType == Opplysningstyper.AVDOED_DOEDSFALL_V1 }
-            .map { setOpplysningType<Doedsdato>(it) }
-
         val avdoedUtenlandsopphold =
             opplysninger.filter { it.opplysningsType == Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1 }
                 .map { setOpplysningType<Utenlandsopphold>(it) }
 
+        val soekerPdl =
+            setOpplysningType<Person>(opplysninger.find { it.opplysningsType == Opplysningstyper.SOEKER_PDL_V1 })
+
+        val avdoedPdl =
+            setOpplysningType<Person>(opplysninger.find { it.opplysningsType == Opplysningstyper.AVDOED_PDL_V1 })
+
+        val gjenlevendePdl =
+            setOpplysningType<Person>(opplysninger.find { it.opplysningsType == Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1 })
 
         return listOf(
-            vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, soekerFoedselsdato, avdoedDoedsdato),
-            vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, avdoedDoedsdato, soekerRelasjonForeldre),
+            vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, soekerPdl, avdoedPdl),
+            vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, avdoedPdl, soekerPdl ),
             vilkaarAvdoedesMedlemskap(
                 Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
                 avdoedUtenlandsopphold,
-                avdoedDoedsdato
+                avdoedPdl
             ),
             vilkaarBarnetsMedlemskap(
                 Vilkaartyper.BARNETS_MEDLEMSKAP,
-                soekerBostedadresse,
-                soekerOppholdadresse,
-                soekerKontaktadresse,
-                soekerUtenlandsadresseBarn,
-                avdoedDoedsdato
+                soekerPdl,
+                gjenlevendePdl,
+                avdoedPdl,
             )
         )
     }
 
     companion object {
-        inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<out Any>): VilkaarOpplysning<T> {
-            return VilkaarOpplysning(
-                opplysning.opplysningsType,
-                opplysning.kilde,
-                objectMapper.readValue(opplysning.opplysning.toString())
-            )
+        inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<ObjectNode>?): VilkaarOpplysning<T> {
+            return if (opplysning != null) {
+                VilkaarOpplysning(
+                    opplysning.opplysningsType,
+                    opplysning.kilde,
+                    objectMapper.readValue(opplysning.opplysning.toString())
+                )
+            } else {
+                throw IllegalStateException()
+            }
         }
     }
 }

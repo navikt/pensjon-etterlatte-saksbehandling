@@ -1,12 +1,18 @@
 package no.nav.etterlatte.vedtaksoversetter
 
 
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
+
+data class Vedtak(
+    val sakId: Long,
+)
 
 
 internal class Vedtaksoversetter(
@@ -18,6 +24,7 @@ internal class Vedtaksoversetter(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "vedtak_fattet") }
+            validate { it.requireKey("@vedtak") }
             validate { it.rejectKey("@vedtak_oversatt") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
@@ -26,6 +33,15 @@ internal class Vedtaksoversetter(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             try {
+                // TODO finne relevante felter i vedtak
+                val vedtak: Vedtak = deserialize(packet["@vedtak"].textValue())
+
+                // TODO finne ut hvordan oppdrag skal bygges opp
+                val oppdrag: Oppdrag = oppdragFraVedtak(vedtak)
+
+                // TODO send oppdrag til MQ-tjeneste - krever tilgang til tjeneste som ligger onprem
+                sendOppdrag(oppdrag)
+
                 logger.info("")
                 context.publish(packet.apply { this["@vedtak_oversatt"] = true }.toJson())
             } catch (e: Exception) {
@@ -33,5 +49,14 @@ internal class Vedtaksoversetter(
             }
         }
 
+    private fun sendOppdrag(oppdrag: Oppdrag) {
+
+    }
+
+    private fun oppdragFraVedtak(vedtak: Vedtak): Oppdrag {
+        return Oppdrag()
+    }
+
     private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
+
 }

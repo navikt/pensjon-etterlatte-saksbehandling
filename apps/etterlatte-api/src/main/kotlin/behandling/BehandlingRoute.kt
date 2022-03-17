@@ -59,7 +59,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
                             "11057523044",
                             LocalDateTime.now().toInstant(ZoneOffset.UTC)
 
-                        ), Opplysningstyper.TESTOPPLYSNING, objectMapper.createObjectNode(), objectMapper.createObjectNode()
+                        ), Opplysningstyper.SOEKNAD_MOTTATT_DATO, objectMapper.createObjectNode(), objectMapper.createObjectNode()
                     )
                     val behandlingsBehov = BehandlingsBehov(sakId, listOf(testBehandlingsopplysning))
                     call.respond(service.opprettBehandling(behandlingsBehov, getAccessToken(call)))

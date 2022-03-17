@@ -4,12 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Doedsaarsak
-import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.GjenlevendeForelderInfo
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Naeringsinntekt
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsadresseBarn
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Forelder
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Verge
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
@@ -23,23 +19,11 @@ class Opplysningsuthenter {
         val barnepensjonssoknad = objectMapper.treeToValue<Barnepensjon>(jsonNode)!!
 
         return listOf<Behandlingsopplysning<out Any>?>(
-            innsender(barnepensjonssoknad, Opplysningstyper.INNSENDER_PERSONINFO_V1),
-            samtykke(barnepensjonssoknad, Opplysningstyper.SAMTYKKE),
+            avdoed(barnepensjonssoknad, Opplysningstyper.AVDOED_SOEKNAD_V1),
+            soeker(barnepensjonssoknad, Opplysningstyper.SOEKER_SOEKNAD_V1),
+            gjenlevendeForelder(barnepensjonssoknad, Opplysningstyper.GJENLEVENDE_FORELDER_SOEKNAD_V1),
             utbetalingsinformasjon(barnepensjonssoknad, Opplysningstyper.UTBETALINGSINFORMASJON_V1),
-            soekerPersoninfo(barnepensjonssoknad, Opplysningstyper.SOEKER_PERSONINFO_V1),
-            soekerStatsborgerskap(barnepensjonssoknad, Opplysningstyper.SOEKER_STATSBORGERSKAP_V1),
-            soekerUtenlandsadresse(barnepensjonssoknad, Opplysningstyper.SOEKER_UTENLANDSADRESSE_SOEKNAD_V1),
-            soekerVerge(barnepensjonssoknad, Opplysningstyper.SOEKER_VERGE_V1),
-            soekerDagligOmsorg(barnepensjonssoknad, Opplysningstyper.SOEKER_DAGLIG_OMSORG_V1),
-            gjenlevendeForelderPersoninfo(barnepensjonssoknad, Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1),
-            avdoedForelderPersoninfo(barnepensjonssoknad, Opplysningstyper.AVDOED_PERSONINFO_V1),
-            avdoedDoedsdato(barnepensjonssoknad, Opplysningstyper.AVDOED_DOEDSFALL_V1),
-            avdoedDoedsaarsak(barnepensjonssoknad, Opplysningstyper.AVDOED_DOEDSAARSAK_V1),
-            avdoedUtenlandsopphold(barnepensjonssoknad, Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1),
-            avdoedNaeringsinntekt(barnepensjonssoknad, Opplysningstyper.AVDOED_NAERINGSINNTEKT_V1),
-            avdoedMilitaertjeneste(barnepensjonssoknad, Opplysningstyper.AVDOED_MILITAERTJENESTE_V1),
-            gjenlevendeForelder(barnepensjonssoknad, Opplysningstyper.GJENLEVENDE_FORELDER_INFO_V1),
-            soesken(barnepensjonssoknad, Opplysningstyper.SOEKER_RELASJON_SOESKEN_V1),
+            samtykke(barnepensjonssoknad, Opplysningstyper.SAMTYKKE),
             soeknadMottattDato(barnepensjonssoknad, Opplysningstyper.SOEKNAD_MOTTATT_DATO),
             soeknadsType(barnepensjonssoknad, Opplysningstyper.SOEKNADSTYPE_V1)
         ).filterNotNull()
@@ -68,19 +52,94 @@ class Opplysningsuthenter {
             ?.let { it as GjenlevendeForelder }
     }
 
-    fun innsender(
+    fun avdoed(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out PersonInfo> {
+    ): Behandlingsopplysning<out AvdoedSoeknad>? {
+        return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
+            setBehandlingsopplysninger(barnepensjon, opplysningsType,
+                AvdoedSoeknad(
+                    type = PersonType.AVDOED,
+                    fornavn = avdoed.fornavn.svar,
+                    etternavn = avdoed.etternavn.svar,
+                    foedselsnummer = avdoed.foedselsnummer.svar,
+                    doedsdato = avdoed.datoForDoedsfallet.svar.innhold,
+                    statsborgerskap = avdoed.statsborgerskap.svar.innhold,
+                    utenlandsopphold = Utenlandsopphold(
+                        avdoed.utenlandsopphold.svar.innhold,
+                        avdoed.utenlandsopphold.opplysning?.map { opphold ->
+                            UtenlandsoppholdOpplysninger(
+                                opphold.land.svar.innhold,
+                                opphold.fraDato?.svar?.innhold,
+                                opphold.tilDato?.svar?.innhold,
+                                opphold.oppholdsType.svar.map { it.verdi },
+                                opphold.medlemFolketrygd.svar.innhold,
+                                opphold.pensjonsutbetaling?.svar?.innhold
+                            )
+                        }
+                    ),
+                    doedsaarsakSkyldesYrkesskadeEllerYrkessykdom = avdoed.doedsaarsakSkyldesYrkesskadeEllerYrkessykdom.svar.verdi
+                )
+            )
+        }
+    }
+
+    fun soeker(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out SoekerBarnSoeknad> {
+        val adresse = barnepensjon.soeker.utenlandsAdresse
+
         return setBehandlingsopplysninger(
             barnepensjon, opplysningsType,
-            PersonInfo(
-                barnepensjon.innsender.fornavn.svar,
-                barnepensjon.innsender.etternavn.svar,
-                barnepensjon.innsender.foedselsnummer.svar,
-                PersonType.INNSENDER
+            SoekerBarnSoeknad(
+                type = PersonType.BARN,
+                fornavn = barnepensjon.soeker.fornavn.svar,
+                etternavn = barnepensjon.soeker.etternavn.svar,
+                foedselsnummer = barnepensjon.soeker.foedselsnummer.svar,
+                statsborgerskap = barnepensjon.soeker.statsborgerskap.svar,
+                utenlandsadresse = UtenlandsadresseBarn(
+                    adresse?.svar?.innhold,
+                    adresse?.opplysning?.land?.svar?.innhold,
+                    adresse?.opplysning?.adresse?.svar?.innhold
+                ),
+                foreldre = barnepensjon.soeker.foreldre.map {
+                    Forelder(
+                        it.type,
+                        it.fornavn.svar,
+                        it.etternavn.svar,
+                        it.foedselsnummer.svar
+                    )
+                },
+                verge = Verge(
+                    barnepensjon.soeker.verge?.svar?.verdi,
+                    barnepensjon.soeker.verge?.opplysning?.fornavn?.svar,
+                    barnepensjon.soeker.verge?.opplysning?.etternavn?.svar,
+                    barnepensjon.soeker.verge?.opplysning?.foedselsnummer?.svar
+                ),
+                omsorgPerson = barnepensjon.soeker.dagligOmsorg?.svar?.verdi
             )
         )
+    }
+
+    fun gjenlevendeForelder(
+        barnepensjon: Barnepensjon,
+        opplysningsType: Opplysningstyper
+    ): Behandlingsopplysning<out GjenlevendeForelderSoeknad>? {
+        return hentGjenlevendeForelder(barnepensjon)?.let { forelder ->
+            setBehandlingsopplysninger(
+                barnepensjon, opplysningsType,
+                GjenlevendeForelderSoeknad(
+                    PersonType.GJENLEVENDE_FORELDER,
+                    forelder.fornavn.svar,
+                    forelder.etternavn.svar,
+                    forelder.foedselsnummer.svar,
+                    forelder.adresse.svar,
+                    forelder.statsborgerskap.svar,
+                    forelder.kontaktinfo.telefonnummer.svar.innhold
+                )
+            )
+        }
     }
 
     fun samtykke(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out Samtykke> {
@@ -106,220 +165,6 @@ class Opplysningsuthenter {
                 )
             )
         }
-    }
-
-    fun soekerPersoninfo(
-        barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out PersonInfo> {
-        return setBehandlingsopplysninger(
-            barnepensjon, opplysningsType,
-            PersonInfo(
-                barnepensjon.soeker.fornavn.svar,
-                barnepensjon.soeker.etternavn.svar,
-                barnepensjon.soeker.foedselsnummer.svar,
-                PersonType.BARN
-            )
-        )
-    }
-
-    fun soekerStatsborgerskap(
-        barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out Statsborgerskap> {
-        return setBehandlingsopplysninger(
-            barnepensjon, opplysningsType,
-            Statsborgerskap(barnepensjon.soeker.statsborgerskap.svar, barnepensjon.soeker.foedselsnummer.svar.value)
-        )
-    }
-
-    fun soekerUtenlandsadresse(
-        barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out UtenlandsadresseBarn> {
-        val adresse = barnepensjon.soeker.utenlandsAdresse
-        return setBehandlingsopplysninger(
-            barnepensjon, opplysningsType,
-            UtenlandsadresseBarn(
-                adresse?.svar?.innhold,
-                adresse?.opplysning?.land?.svar?.innhold,
-                adresse?.opplysning?.adresse?.svar?.innhold,
-                barnepensjon.soeker.foedselsnummer.svar.value
-            )
-        )
-    }
-
-    fun soekerVerge(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out Verge>? {
-        val verge = barnepensjon.soeker.verge
-        return setBehandlingsopplysninger(
-            barnepensjon, opplysningsType,
-            Verge(
-                verge?.svar,
-                verge?.opplysning?.fornavn?.svar,
-                verge?.opplysning?.etternavn?.svar,
-                verge?.opplysning?.foedselsnummer?.svar?.value
-            )
-        )
-    }
-
-    fun soekerDagligOmsorg(
-        barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out DagligOmsorg>? {
-        return setBehandlingsopplysninger(
-            barnepensjon, opplysningsType,
-            DagligOmsorg(barnepensjon.soeker.dagligOmsorg?.svar?.verdi)
-        )
-    }
-
-    fun gjenlevendeForelderPersoninfo(
-        barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out PersonInfo>? {
-        return hentGjenlevendeForelder(barnepensjon)?.let { forelder ->
-            setBehandlingsopplysninger(
-                barnepensjon, opplysningsType,
-                PersonInfo(
-                    forelder.fornavn.svar,
-                    forelder.etternavn.svar,
-                    forelder.foedselsnummer.svar,
-                    PersonType.GJENLEVENDE_FORELDER
-                )
-            )
-        }
-    }
-
-    fun avdoedForelderPersoninfo(
-        barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out PersonInfo>? {
-        return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
-            setBehandlingsopplysninger(
-                barnepensjon, opplysningsType,
-                PersonInfo(
-                    avdoed.fornavn.svar,
-                    avdoed.etternavn.svar,
-                    avdoed.foedselsnummer.svar,
-                    PersonType.AVDOED
-                )
-            )
-        }
-    }
-
-    fun avdoedDoedsdato(
-        barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out Doedsdato>? {
-        return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
-            setBehandlingsopplysninger(
-                barnepensjon, opplysningsType,
-                Doedsdato(
-                    avdoed.datoForDoedsfallet.svar.innhold,
-                    avdoed.foedselsnummer.svar
-                )
-            )
-        }
-    }
-
-    fun avdoedDoedsaarsak(
-        barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out Doedsaarsak>? {
-        return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
-            setBehandlingsopplysninger(
-                barnepensjon, opplysningsType,
-                Doedsaarsak(
-                    avdoed.doedsaarsakSkyldesYrkesskadeEllerYrkessykdom.svar,
-                    avdoed.foedselsnummer.svar.value
-                )
-            )
-        }
-    }
-
-
-    fun avdoedUtenlandsopphold(
-        barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out Utenlandsopphold>? {
-        return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
-            setBehandlingsopplysninger(
-                barnepensjon, opplysningsType,
-                Utenlandsopphold(
-                    avdoed.utenlandsopphold.svar.innhold,
-                    avdoed.utenlandsopphold.opplysning?.map { opphold ->
-                        UtenlandsoppholdOpplysninger(
-                            opphold.land.svar.innhold,
-                            opphold.fraDato?.svar?.innhold,
-                            opphold.tilDato?.svar?.innhold,
-                            opphold.oppholdsType.svar.map { it.verdi },
-                            opphold.medlemFolketrygd.svar.innhold,
-                            opphold.pensjonsutbetaling?.svar?.innhold
-                        )
-                    },
-                    avdoed.foedselsnummer.svar.value
-                )
-            )
-        }
-    }
-
-    fun avdoedNaeringsinntekt(
-        barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out Naeringsinntekt>? {
-        return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
-            setBehandlingsopplysninger(
-                barnepensjon, opplysningsType,
-                Naeringsinntekt(
-                    avdoed.naeringsInntekt?.svar,
-                    avdoed.naeringsInntekt?.opplysning?.naeringsinntektVedDoedsfall?.svar,
-                    avdoed.naeringsInntekt?.opplysning?.naeringsinntektPrAarFoerDoedsfall?.svar?.innhold,
-                    avdoed.foedselsnummer.svar.value
-                )
-            )
-        }
-    }
-
-    fun avdoedMilitaertjeneste(
-        barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out Militaertjeneste>? {
-        return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
-            setBehandlingsopplysninger(
-                barnepensjon, opplysningsType,
-                Militaertjeneste(
-                    avdoed.militaertjeneste?.svar,
-                    avdoed.militaertjeneste?.opplysning?.svar?.innhold,
-                    avdoed.foedselsnummer.svar.value
-                )
-            )
-        }
-    }
-
-    fun gjenlevendeForelder(
-        barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out GjenlevendeForelderInfo>? {
-        return hentGjenlevendeForelder(barnepensjon)?.let { it ->
-            setBehandlingsopplysninger(
-                barnepensjon, opplysningsType,
-                GjenlevendeForelderInfo(it.adresse.svar)
-            )
-        }
-    }
-
-    fun soesken(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out Soesken> {
-        val soeskenPersonInfo = barnepensjon.soesken.map { barn ->
-            PersonInfo(
-                barn.fornavn.svar,
-                barn.etternavn.svar,
-                barn.foedselsnummer.svar,
-                PersonType.BARN
-            )
-        }
-        return setBehandlingsopplysninger(
-            barnepensjon, opplysningsType,
-            Soesken(soeskenPersonInfo)
-        )
     }
 
     fun soeknadMottattDato(

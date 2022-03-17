@@ -68,7 +68,7 @@ class ApplicationTest {
                                 Behandlingsopplysning(
                                     UUID.randomUUID(),
                                     Behandlingsopplysning.Privatperson("1234", Instant.now()),
-                                    Opplysningstyper.SOEKER_FOEDSELSDATO_V1,
+                                    Opplysningstyper.SOEKER_SOEKNAD_V1,
                                     objectMapper.createObjectNode(),
                                     objectMapper.valueToTree(Foedselsdato(LocalDate.of(1986, Month.FEBRUARY, 6), Foedselsnummer.of("12345678910"))) as ObjectNode
                                 )
@@ -117,10 +117,10 @@ class ApplicationTest {
                     )
                 })
                 val behandling: Behandling = (objectMapper.readValue(it.response.content!!))
-                assertNotNull(behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKER_FOEDSELSDATO_V1 })
+                assertNotNull(behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKER_SOEKNAD_V1 })
                 assertEquals(
                     LocalDate.of(1986, 2, 6),
-                    behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKER_FOEDSELSDATO_V1  }!!.opplysning["foedselsdato"].textValue().let { LocalDate.parse(it) }
+                    behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKER_SOEKNAD_V1  }!!.opplysning["foedselsdato"].textValue().let { LocalDate.parse(it) }
                 )
 
             }

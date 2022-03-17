@@ -1,7 +1,7 @@
 package no.nav.etterlatte.barnepensjon
 
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
@@ -13,11 +13,11 @@ import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 
 fun vilkaarAvdoedesMedlemskap(
     vilkaartype: Vilkaartyper,
-    avdoedUtenlandsopphold: List<VilkaarOpplysning<Utenlandsopphold>>,
+    avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>,
     avdoedPdl: VilkaarOpplysning<Person>,
 ): VurdertVilkaar {
 
-    val utenlandsoppholdSisteFemAarene = kriterieIngenUtenlandsoppholdSisteFemAar(avdoedUtenlandsopphold, avdoedPdl)
+    val utenlandsoppholdSisteFemAarene = kriterieIngenUtenlandsoppholdSisteFemAar(avdoedSoeknad, avdoedPdl)
     // Kriterier: 1. bodd i norge siste 5 årene
     // 2. Arbeidet i norge siste 5 årene
     // 3. opphold utenfor Norge
@@ -32,16 +32,15 @@ fun vilkaarAvdoedesMedlemskap(
 }
 
 //TODO: dette vil nok utgå om vi henter inn medlemskap fra LovMe istedet.
-// Legg til info fra søknad
 
 fun kriterieIngenUtenlandsoppholdSisteFemAar(
-    utenlandsopphold: List<VilkaarOpplysning<Utenlandsopphold>>,
+    avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>,
     avdoedPdl: VilkaarOpplysning<Person>,
 ): Kriterie {
 
     val ingenOppholdUtlandetSisteFemAar = try {
         val femAarFoerDoedsdato = hentDoedsdato(avdoedPdl).minusYears(5)
-        val utenlandsoppholdSoeknad = hentUtenlandsopphold(utenlandsopphold, "privatperson")
+        val utenlandsoppholdSoeknad = avdoedSoeknad.opplysning.utenlandsopphold
         val oppholdSisteFemAAr = utenlandsoppholdSoeknad.opphold?.map { it.tilDato?.isAfter(femAarFoerDoedsdato) }
 
         if (oppholdSisteFemAAr != null && oppholdSisteFemAAr.contains(true)) {

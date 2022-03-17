@@ -46,14 +46,14 @@ internal class BehandlingDaoIntegrationTest {
         val deltOpplysning = Behandlingsopplysning(
             UUID.randomUUID(),
             Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
-            Opplysningstyper.TESTOPPLYSNING,
+            Opplysningstyper.SOEKNAD_MOTTATT_DATO,
             objectMapper.createObjectNode(),
             objectMapper.createObjectNode()
         ).also { opplysningRepo.nyOpplysning(it) }
         val ikkeDeltOpplysning = Behandlingsopplysning(
             UUID.randomUUID(),
             Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
-            Opplysningstyper.TESTOPPLYSNING,
+            Opplysningstyper.SOEKNAD_MOTTATT_DATO,
             objectMapper.createObjectNode(),
             objectMapper.createObjectNode()
         ).also { opplysningRepo.nyOpplysning(it) }
@@ -94,7 +94,7 @@ internal class BehandlingDaoIntegrationTest {
         val ikkeDeltOpplysning = Behandlingsopplysning(
             UUID.randomUUID(),
             Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
-            Opplysningstyper.TESTOPPLYSNING,
+            Opplysningstyper.SOEKNAD_MOTTATT_DATO,
             objectMapper.createObjectNode(),
             objectMapper.createObjectNode()
         ).also { opplysningRepo.nyOpplysning(it) }

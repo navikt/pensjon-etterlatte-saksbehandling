@@ -1,12 +1,25 @@
 package no.nav.etterlatte.libs.common.behandling.opplysningstyper
 
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import java.time.LocalDate
+
+data class AvdoedSoeknad(
+    val type: PersonType,
+    val fornavn: String,
+    val etternavn: String,
+    val foedselsnummer: Foedselsnummer,
+    val doedsdato: LocalDate,
+    val statsborgerskap: String,
+    val utenlandsopphold: Utenlandsopphold,
+    val doedsaarsakSkyldesYrkesskadeEllerYrkessykdom: JaNeiVetIkke,
+    )
 
 data class Utenlandsopphold(
     val harHattUtenlandsopphold: String,
     val opphold: List<UtenlandsoppholdOpplysninger>?,
-    val foedselsnummer: String
 )
 
 data class UtenlandsoppholdOpplysninger(

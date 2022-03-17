@@ -28,14 +28,14 @@ internal class RealBehandlingServiceTest {
             Behandlingsopplysning(
                 UUID.randomUUID(),
                 Behandlingsopplysning.Saksbehandler("S01"),
-                Opplysningstyper.INNSENDER_PERSONINFO_V1,
+                Opplysningstyper.SOEKER_SOEKNAD_V1,
                 objectMapper.createObjectNode(),
                 objectMapper.createObjectNode()
             ),
             Behandlingsopplysning(
                 UUID.randomUUID(),
                 Behandlingsopplysning.Saksbehandler("S01"),
-                Opplysningstyper.AVDOED_PERSONINFO_V1,
+                Opplysningstyper.AVDOED_SOEKNAD_V1,
                 objectMapper.createObjectNode(),
                 objectMapper.createObjectNode()
             ),

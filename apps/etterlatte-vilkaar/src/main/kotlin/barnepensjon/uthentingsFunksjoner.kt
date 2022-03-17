@@ -1,6 +1,7 @@
 package no.nav.etterlatte.barnepensjon
 
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
@@ -29,13 +30,6 @@ fun hentVirkningsdato(person: VilkaarOpplysning<Person>?): LocalDate {
     return doedsdato?.with(TemporalAdjusters.firstDayOfNextMonth()) ?: throw OpplysningKanIkkeHentesUt()
 }
 
-fun hentUtenlandsopphold(
-    utenlandsopphold: List<VilkaarOpplysning<Utenlandsopphold>>,
-    kildetype: String
-): Utenlandsopphold {
-    val utenlandsopphold = utenlandsopphold.find { it.kilde.type == kildetype }?.opplysning
-    return utenlandsopphold ?: throw OpplysningKanIkkeHentesUt()
-}
 
 fun hentAdresser(
     person: VilkaarOpplysning<Person>

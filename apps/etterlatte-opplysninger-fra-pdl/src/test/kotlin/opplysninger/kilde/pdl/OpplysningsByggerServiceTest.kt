@@ -1,13 +1,5 @@
 package opplysninger.kilde.pdl
 
-import io.mockk.every
-import io.mockk.mockk
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
-import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
-import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foreldre
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.PersonInfo
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
@@ -16,25 +8,13 @@ import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.opplysninger.kilde.pdl.OpplysningsByggerService
-import no.nav.etterlatte.opplysninger.kilde.pdl.Pdl
-import no.nav.etterlatte.opplysninger.kilde.pdl.PdlService
-import no.nav.etterlatte.opplysninger.kilde.pdl.lagOpplysning
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertThrows
 import java.io.FileNotFoundException
-import java.time.Instant
 
 import java.time.LocalDate
 import java.time.LocalDateTime

@@ -1,0 +1,39 @@
+package no.nav.etterlatte.libs.common.behandling.opplysningstyper
+
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OmsorgspersonType
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
+
+
+data class SoekerBarnSoeknad(
+    val type: PersonType,
+    val fornavn: String,
+    val etternavn: String,
+    val foedselsnummer: Foedselsnummer,
+    val statsborgerskap: String,
+    val utenlandsadresse: UtenlandsadresseBarn,
+    val foreldre: List<Forelder>,
+    val verge: Verge,
+    val omsorgPerson: OmsorgspersonType?
+)
+
+data class UtenlandsadresseBarn(
+    val adresseIUtlandet: String?,
+    val land: String?,
+    val adresse: String?,
+)
+
+data class Forelder(
+    val type: PersonType,
+    val fornavn: String,
+    val etternavn: String,
+    val foedselsnummer: Foedselsnummer,
+)
+
+data class Verge(
+    val barnHarVerge: JaNeiVetIkke?,
+    val fornavn: String?,
+    val etternavn: String?,
+    val foedselsnummer: Foedselsnummer?
+)

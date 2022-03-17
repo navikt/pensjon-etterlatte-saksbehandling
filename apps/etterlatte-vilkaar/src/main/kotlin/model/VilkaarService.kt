@@ -26,9 +26,8 @@ class VilkaarService {
         logger.info("Map vilkaar")
         println(opplysninger)
 
-        val avdoedUtenlandsopphold =
-            opplysninger.filter { it.opplysningsType == Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1 }
-                .map { setOpplysningType<Utenlandsopphold>(it) }
+        val avdoedSoeknad =
+            setOpplysningType<AvdoedSoeknad>(opplysninger.find { it.opplysningsType == Opplysningstyper.AVDOED_SOEKNAD_V1 })
 
         val soekerPdl =
             setOpplysningType<Person>(opplysninger.find { it.opplysningsType == Opplysningstyper.SOEKER_PDL_V1 })
@@ -44,7 +43,7 @@ class VilkaarService {
             vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, avdoedPdl, soekerPdl ),
             vilkaarAvdoedesMedlemskap(
                 Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
-                avdoedUtenlandsopphold,
+                avdoedSoeknad,
                 avdoedPdl
             ),
             vilkaarBarnetsMedlemskap(

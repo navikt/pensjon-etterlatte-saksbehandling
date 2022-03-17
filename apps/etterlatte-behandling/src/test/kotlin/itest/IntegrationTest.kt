@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.Beregning
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.sak.Sak
 import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -69,7 +70,7 @@ class ApplicationTest {
                                     Behandlingsopplysning.Privatperson("1234", Instant.now()),
                                     Opplysningstyper.SOEKER_FOEDSELSDATO_V1,
                                     objectMapper.createObjectNode(),
-                                    objectMapper.valueToTree(Foedselsdato(LocalDate.of(1986, Month.FEBRUARY, 6), "12345678910")) as ObjectNode
+                                    objectMapper.valueToTree(Foedselsdato(LocalDate.of(1986, Month.FEBRUARY, 6), Foedselsnummer.of("12345678910"))) as ObjectNode
                                 )
                             )
                         )

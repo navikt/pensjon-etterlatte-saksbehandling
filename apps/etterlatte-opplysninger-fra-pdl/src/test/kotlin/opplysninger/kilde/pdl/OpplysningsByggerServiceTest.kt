@@ -128,6 +128,8 @@ internal class OpplysningsByggerServiceTest {
 
     }
 
+    /*
+
     @Test
     fun `byggOpplysninger skal kun inneholde de rette opplysningstypene`() {
         val pdlMock = mockk<Pdl>()
@@ -367,5 +369,5 @@ internal class OpplysningsByggerServiceTest {
             assertEquals(GYLDIG_FNR_AVDOED, opplysning.foedselsnummer)
         }
     }
-
+*/
 }

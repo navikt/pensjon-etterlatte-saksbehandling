@@ -1,9 +1,10 @@
 package barnepensjon
 
+import no.nav.etterlatte.barnepensjon.kriterieIngenUtenlandsoppholdSisteFemAar
+import no.nav.etterlatte.barnepensjon.setVikaarVurderingsResultat
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foreldre
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
@@ -15,6 +16,8 @@ import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
+import no.nav.etterlatte.libs.common.vikaar.Kriterie
+import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
@@ -35,19 +38,19 @@ internal class BarnepensjonVilkaarTest {
 
         val vurderingBarnOver20 = vilkaarBrukerErUnder20(
             Vilkaartyper.SOEKER_ER_UNDER_20,
-            mapTilVilkaarstype(personBarnOver20),
-            mapTilVilkaarstype(personAvdoedMedDoedsdato)
+            mapTilVilkaarstypePerson(personBarnOver20),
+            mapTilVilkaarstypePerson(personAvdoedMedDoedsdato)
         )
         val vurderingBarnUnder20 = vilkaarBrukerErUnder20(
             Vilkaartyper.SOEKER_ER_UNDER_20,
-            mapTilVilkaarstype(personBarnUnder20),
-            mapTilVilkaarstype(personAvdoedMedDoedsdato)
+            mapTilVilkaarstypePerson(personBarnUnder20),
+            mapTilVilkaarstypePerson(personAvdoedMedDoedsdato)
         )
 
         val vurderingBarnUnder20UtenDoedsdato = vilkaarBrukerErUnder20(
             Vilkaartyper.SOEKER_ER_UNDER_20,
-            mapTilVilkaarstype(personBarnUnder20),
-            mapTilVilkaarstype(personAvdoedUtenDoedsdato)
+            mapTilVilkaarstypePerson(personBarnUnder20),
+            mapTilVilkaarstypePerson(personAvdoedUtenDoedsdato)
         )
 
         assertEquals(vurderingBarnOver20.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
@@ -57,14 +60,6 @@ internal class BarnepensjonVilkaarTest {
             VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         )
 
-    }
-
-    fun mapTilVilkaarstype(person: Person) : VilkaarOpplysning<Person> {
-        return VilkaarOpplysning(
-            Opplysningstyper.SOEKER_PDL_V1,
-            Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
-            person
-        )
     }
 
     @Test
@@ -77,22 +72,22 @@ internal class BarnepensjonVilkaarTest {
         val doedsdatoIkkeIPdl =
             vilkaarDoedsfallErRegistrert(
                 Vilkaartyper.DOEDSFALL_ER_REGISTRERT,
-                mapTilVilkaarstype(avdoedIngenDoedsdato),
-                mapTilVilkaarstype(barnAvdoedErForeldre)
+                mapTilVilkaarstypePerson(avdoedIngenDoedsdato),
+                mapTilVilkaarstypePerson(barnAvdoedErForeldre)
             )
 
         val avdoedErForelder =
             vilkaarDoedsfallErRegistrert(
                 Vilkaartyper.DOEDSFALL_ER_REGISTRERT,
-                mapTilVilkaarstype(avdoedRegistrertDoedsdato),
-                mapTilVilkaarstype(barnAvdoedErForeldre)
+                mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
+                mapTilVilkaarstypePerson(barnAvdoedErForeldre)
             )
 
         val avdoedIkkeForelder =
             vilkaarDoedsfallErRegistrert(
                 Vilkaartyper.DOEDSFALL_ER_REGISTRERT,
-                mapTilVilkaarstype(avdoedRegistrertDoedsdato),
-                mapTilVilkaarstype(barnAvdoedErIkkeForeldre)
+                mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
+                mapTilVilkaarstypePerson(barnAvdoedErIkkeForeldre)
             )
 
         assertEquals(doedsdatoIkkeIPdl.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
@@ -100,27 +95,34 @@ internal class BarnepensjonVilkaarTest {
         assertEquals(avdoedIkkeForelder.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
 
     }
-    /*
 
-    @Disabled
     @Test
     fun vurderAvdoedesForutgaaendeMeldemskap() {
+        val avdoedRegistrertDoedsdato = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, null, null)
+
         val utenlandsopphold =
-            kriterieIngenUtenlandsoppholdSisteFemAar(listOf(utenlandsoppholdSoeknad), listOf(doedsdatoForelderPdl))
+            kriterieIngenUtenlandsoppholdSisteFemAar(
+                listOf(mapTilVilkaarstypeUtenlandsopphold(utenlandsoppholdSoeknad)),
+                mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato)
+            )
+
         val ingenUtenlandsopphold =
-            kriterieIngenUtenlandsoppholdSisteFemAar(listOf(ingenUtenlandsoppholdSoeknad), listOf(doedsdatoForelderPdl))
+            kriterieIngenUtenlandsoppholdSisteFemAar(
+                listOf(
+                    mapTilVilkaarstypeUtenlandsopphold(
+                        ingenUtenlandsoppholdSoeknad
+                    )
+                ), mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato)
+            )
 
         assertEquals(utenlandsopphold.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
         assertEquals(ingenUtenlandsopphold.resultat, VilkaarVurderingsResultat.OPPFYLT)
-
     }
 
-
-    @Disabled
+    /*
     @Test
     fun vuderBarnetsMedlemskap() {
-
-        val test = lagMockPerson(foedselsdatoBarnOver20)
+        val test = lagMockPersonPdl(foedselsdatoBarnOver20)
 
         val ingenOppgittUtenlandsadresse =
             kriterieHarIkkeOppgittAdresseIUtlandet(listOf(ingenUtenlandsadresseBarnVilkaarOpplysning))
@@ -165,8 +167,10 @@ internal class BarnepensjonVilkaarTest {
         assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, harUtenlandskOppholdadresseEtterDoedsdato.resultat)
 
     }
+    */
 
-    @Disabled
+
+
     @Test
     fun vurderVilkaarsVurdering() {
         val kriterieOppfylt =
@@ -196,7 +200,22 @@ internal class BarnepensjonVilkaarTest {
             vilkaarKriterierOppfyltOgKanIkkeHentesUt
         )
     }
-*/
+
+    fun mapTilVilkaarstypeUtenlandsopphold(opphold: Utenlandsopphold): VilkaarOpplysning<Utenlandsopphold> {
+        return VilkaarOpplysning(
+            Opplysningstyper.SOEKER_PDL_V1,
+            Behandlingsopplysning.Privatperson("", Instant.now()),
+            opphold
+        )
+    }
+
+    fun mapTilVilkaarstypePerson(person: Person): VilkaarOpplysning<Person> {
+        return VilkaarOpplysning(
+            Opplysningstyper.SOEKER_PDL_V1,
+            Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
+            person
+        )
+    }
 
 
     val foedselsdatoBarnOver20 = LocalDate.parse("2000-08-29")
@@ -242,7 +261,6 @@ internal class BarnepensjonVilkaarTest {
     val ingenUtenlandsadresseBarnVilkaarOpplysning =
         UtenlandsadresseBarn("NEI", null, null, null)
 
-
     val harUtenlandsadresseBarnVilkaarOpplysning = UtenlandsadresseBarn("JA", null, null, null)
     val ingenBostedadresseVilkaarOpplysning = null
 
@@ -252,7 +270,13 @@ internal class BarnepensjonVilkaarTest {
         FINNESIKKE
     }
 
-    fun lagMockPersonPdl(foedselsdato: LocalDate?, foedselsnummer: Foedselsnummer?, doedsdato: LocalDate?, bosted: Bosted?, foreldre: List<Foedselsnummer>?): Person {
+    fun lagMockPersonPdl(
+        foedselsdato: LocalDate?,
+        foedselsnummer: Foedselsnummer?,
+        doedsdato: LocalDate?,
+        bosted: Bosted?,
+        foreldre: List<Foedselsnummer>?
+    ): Person {
         val foedselsdato = foedselsdato ?: LocalDate.parse("2020-06-10")
         val foedselsnummer = if (foedselsnummer == null) Foedselsnummer.of("19078504903") else foedselsnummer
         val adresse = if (bosted == Bosted.NORGE) {
@@ -263,24 +287,24 @@ internal class BarnepensjonVilkaarTest {
             null
         }
 
-            return Person(
-                "Test",
-                "Testulfsen",
-                foedselsnummer,
-                foedselsdato,
-                1920,
-                null,
-                doedsdato,
-                Adressebeskyttelse.UGRADERT,
-                adresse,
-                null,
-                adresse,
-                adresse,
-                null,
-                null,
-                null,
-                FamilieRelasjon(null, foreldre, null)
-            )
+        return Person(
+            "Test",
+            "Testulfsen",
+            foedselsnummer,
+            foedselsdato,
+            1920,
+            null,
+            doedsdato,
+            Adressebeskyttelse.UGRADERT,
+            adresse,
+            null,
+            adresse,
+            adresse,
+            null,
+            null,
+            null,
+            FamilieRelasjon(null, foreldre, null)
+        )
     }
 
 

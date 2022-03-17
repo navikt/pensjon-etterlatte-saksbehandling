@@ -10,7 +10,9 @@ dependencies {
     implementation(Ktor.ClientAuth)
     implementation(Ktor.ClientJackson)
 
-    //implementation("com.github.navikt.tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon:1.4201aa")
+    implementation("com.github.navikt.tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon:1.4201aa")
+
+    implementation("javax.xml.bind:jaxb-api:2.3.0")
 
     implementation(project(":libs:ktorclient-auth-clientcredentials"))
     implementation(project(":libs:common"))

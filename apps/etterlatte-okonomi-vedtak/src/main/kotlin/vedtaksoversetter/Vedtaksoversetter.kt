@@ -8,10 +8,26 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
+import no.trygdeetaten.skjema.oppdrag.Oppdrag110
+import no.trygdeetaten.skjema.oppdrag.OppdragsEnhet120
+import no.trygdeetaten.skjema.oppdrag.OppdragsLinje150
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.*
+import javax.xml.datatype.DatatypeFactory
+import javax.xml.datatype.XMLGregorianCalendar
 
 data class Vedtak(
     val sakId: Long,
+    val saksbehandlerId: Long,
+    val beregningsperioder: List<Beregningsperiode>,
+    val aktor: String,
+    val aktorFoedselsdato: LocalDate,
+)
+
+data class Beregningsperiode(
+    val behandlingsId: Long
 )
 
 
@@ -54,9 +70,43 @@ internal class Vedtaksoversetter(
     }
 
     private fun oppdragFraVedtak(vedtak: Vedtak): Oppdrag {
-        return Oppdrag()
+        val oppdrag110 = Oppdrag110().apply {
+            kodeAksjon = "1" // 3 = simulering
+            kodeEndring = "NY" // Alltid NY for førstegangsinnvilgelse
+            kodeFagomraade = "EY" // TODO må legges inn hos økonomi
+            fagsystemId = vedtak.sakId.toString()
+            utbetFrekvens = "MND"
+            oppdragGjelderId = vedtak.aktor
+            datoOppdragGjelderFom = vedtak.aktorFoedselsdato.toXMLDate()
+            saksbehId = vedtak.saksbehandlerId.toString()
+
+            oppdragsEnhet120.add(
+                OppdragsEnhet120().apply {
+                    enhet = ""
+                    typeEnhet = ""
+                    datoEnhetFom = LocalDate.now().toXMLDate()
+                }
+            )
+
+            oppdragsLinje150.addAll(
+                vedtak.beregningsperioder.map {
+                    OppdragsLinje150().apply {
+                        henvisning = it.behandlingsId.toString()
+                    }
+                }
+            )
+        }
+
+        return Oppdrag().apply {
+            this.oppdrag110 = oppdrag110
+        }
     }
 
     private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
+
+    fun LocalDate.toXMLDate(): XMLGregorianCalendar {
+        return DatatypeFactory.newInstance()
+            .newXMLGregorianCalendar(GregorianCalendar.from(atStartOfDay(ZoneId.systemDefault())))
+    }
 
 }

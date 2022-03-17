@@ -70,7 +70,7 @@ class ApplicationTest {
                                     Behandlingsopplysning.Privatperson("1234", Instant.now()),
                                     Opplysningstyper.SOEKER_SOEKNAD_V1,
                                     objectMapper.createObjectNode(),
-                                    objectMapper.valueToTree(Foedselsdato(LocalDate.of(1986, Month.FEBRUARY, 6), Foedselsnummer.of("12345678910"))) as ObjectNode
+                                    objectMapper.valueToTree(Foedselsdato(LocalDate.of(1986, Month.FEBRUARY, 6), Foedselsnummer.of("20110875720"))) as ObjectNode
                                 )
                             )
                         )

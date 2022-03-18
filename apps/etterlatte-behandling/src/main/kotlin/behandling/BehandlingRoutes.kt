@@ -6,7 +6,6 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
 import no.nav.etterlatte.libs.common.behandling.Beregning
@@ -19,39 +18,39 @@ import java.util.*
 
 fun Route.behandlingRoutes(service: BehandlingService) {
     get("/behandlinger") {
-        call.respond(inTransaction {
+        call.respond(
             service.hentBehandlinger().map { BehandlingSammendrag(it.id, it.sak, it.status, mapDate(it)) }
                 .let { BehandlingSammendragListe(it) }
-        })
+        )
     }
     get("/sak/{sakid}/behandlinger") {
-        call.respond(inTransaction {
+        call.respond(
             service.hentBehandlingerISak(sakId)
                 .map {
                     println(it.grunnlag)
                     BehandlingSammendrag(it.id, it.sak, it.status, mapDate(it))
                 }
                 .let { BehandlingSammendragListe(it) }
-        })
+        )
     }
 
     delete("/sak/{sakid}/behandlinger") {
-        inTransaction { service.slettBehandlingerISak(sakId) }
+        service.slettBehandlingerISak(sakId)
         call.respond(HttpStatusCode.OK)
     }
 
     post("/behandlinger") { //Søk
         val behandlingsBehov = call.receive<BehandlingsBehov>()
-        inTransaction {
+
             service.startBehandling(
                 behandlingsBehov.sak,
                 behandlingsBehov.opplysninger ?: emptyList()
             )
-        }.also { call.respondText(it.id.toString()) }
+        .also { call.respondText(it.id.toString()) }
     }
     route("/behandlinger/{behandlingsid}") {
         get {
-            call.respond(inTransaction { service.hentBehandling(behandlingsId) }?.let {
+            call.respond(service.hentBehandling(behandlingsId)?.let {
                 DetaljertBehandling(
                     it.id,
                     it.sak,
@@ -65,24 +64,24 @@ fun Route.behandlingRoutes(service: BehandlingService) {
 
         post("grunnlag") {
             val body = call.receive<LeggTilOpplysningerRequest>()
-            inTransaction { service.leggTilGrunnlagFraRegister(behandlingsId, body.opplysninger) }
+            service.leggTilGrunnlagFraRegister(behandlingsId, body.opplysninger)
             call.respond(HttpStatusCode.OK)
         }
 
         post("vilkaarsproeving") {
-            inTransaction { service.vilkårsprøv(behandlingsId) }
+             service.vilkårsprøv(behandlingsId)
             call.respond(HttpStatusCode.OK)
 
         }
         post("beregning") {
             val body = call.receive<Beregning>()
-            inTransaction { service.beregn(behandlingsId, body) }
+             service.beregn(behandlingsId, body)
             call.respond(HttpStatusCode.OK)
 
         }
 
         post("avbrytBehandling/{behandlingsid}") {
-            inTransaction { service.avbrytBehandling(behandlingsId) }
+             service.avbrytBehandling(behandlingsId)
             call.respond(HttpStatusCode.OK)
         }
     }
@@ -97,10 +96,6 @@ private fun mapDate(behandling: Behandling): LocalDateTime? {
             objectMapper.readValue(it.toString(), SoeknadMottattDato::class.java)
         }
     return dato?.mottattDato
-}
-
-private fun <T> inTransaction(block: () -> T): T = Kontekst.get().databasecontxt.inTransaction {
-    block()
 }
 
 inline val PipelineContext<*, ApplicationCall>.behandlingsId

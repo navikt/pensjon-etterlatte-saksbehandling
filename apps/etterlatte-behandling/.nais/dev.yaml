@@ -30,10 +30,15 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
+  kafka:
+    pool: nav-dev
   replicas:
     cpuThresholdPercentage: 90
     max: 1
     min: 1
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.dodsmelding
   accessPolicy:
     outbound:
       rules:

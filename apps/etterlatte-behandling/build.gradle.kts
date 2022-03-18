@@ -1,6 +1,6 @@
 
 plugins {
-    id("etterlatte.common")
+    id("etterlatte.kafka")
 }
 
 dependencies {

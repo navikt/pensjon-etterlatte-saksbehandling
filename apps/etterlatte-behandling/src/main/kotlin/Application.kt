@@ -83,6 +83,7 @@ fun Application.module(beanFactory: BeanFactory){
         }
 
     }
+    beanFactory.behandlingHendelser().start()
 }
 
 private fun Route.attachContekst(ds: DataSource){

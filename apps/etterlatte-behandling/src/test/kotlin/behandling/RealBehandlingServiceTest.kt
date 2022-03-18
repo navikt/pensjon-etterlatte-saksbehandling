@@ -4,23 +4,40 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseKontekst
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.sql.Connection
 
 import java.util.*
 
 internal class RealBehandlingServiceTest {
+
+    @BeforeEach
+    fun before(){
+        Kontekst.set(Context(mockk(), object:DatabaseKontekst{
+            override fun activeTx(): Connection {
+                return null as Connection
+            }
+            override fun <T> inTransaction(block: () -> T): T {
+                return block()
+            }
+        }))
+    }
 
     @Test
     fun hentBehandling() {
         val behandlingerMock = mockk<BehandlingDao>()
         val opplysningerMock = mockk<OpplysningDao>()
 
-        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, NoOpVilkaarKlient())
+        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock, NoOpVilkaarKlient()) , mockk())
 
         val id = UUID.randomUUID()
 
@@ -56,7 +73,7 @@ internal class RealBehandlingServiceTest {
 
         val opprettetBehandling = Behandling(UUID.randomUUID(), 1, emptyList(), null, null, false)
 
-        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, NoOpVilkaarKlient())
+        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock, NoOpVilkaarKlient()), mockk())
 
         every { behandlingerMock.opprett(capture(behandlingOpprettes)) } returns Unit
         every { behandlingerMock.hent(capture(behandlingHentes)) } returns opprettetBehandling
@@ -82,7 +99,7 @@ internal class RealBehandlingServiceTest {
 
         val opprettetBehandling = Behandling(UUID.randomUUID(), 1, emptyList(), null, null, false, false)
 
-        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, NoOpVilkaarKlient())
+        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock, NoOpVilkaarKlient()), mockk())
 
 
         every { behandlingerMock.opprett(capture(behandlingOpprettes)) } returns Unit

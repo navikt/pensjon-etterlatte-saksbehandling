@@ -4,6 +4,7 @@ import io.ktor.auth.*
 
 import no.nav.etterlatte.behandling.KtorVilkarClient
 import no.nav.etterlatte.behandling.VilkaarKlient
+import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
 import org.testcontainers.containers.PostgreSQLContainer
 
@@ -29,4 +30,11 @@ class LocalAppBeanFactory(val jdbcUrl: String): CommonFactory(){
     override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
     override fun vilkaarKlient(): VilkaarKlient = KtorVilkarClient("https://etterlatte-vilkaar.dev.intern.nav.no")
     override fun tokenValidering(): Authentication.Configuration.() -> Unit = Authentication.Configuration::tokenTestSupportAcceptsAllTokens
+    override fun rapid(): KafkaProdusent<String, String> {
+        return object: KafkaProdusent<String, String>{
+            override fun publiser(noekkel: String, verdi: String, headers: Map<String, ByteArray>): Pair<Int, Long> {
+                return 0 to 0
+            }
+        }
+    }
 }

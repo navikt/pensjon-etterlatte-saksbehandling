@@ -1,6 +1,10 @@
 package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.Beregning
 import org.slf4j.LoggerFactory
@@ -24,51 +28,62 @@ interface BehandlingService {
 class RealBehandlingService(
     private val behandlinger: BehandlingDao,
     private val opplysninger: OpplysningDao,
-    private val vilkaarKlient: VilkaarKlient
+    private val behandlingFactory: BehandlingFactory,
+    private val behandlingHendelser: SendChannel<Pair<UUID, BehandlingHendelseType>>
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(RealBehandlingService::class.java)
 
     override fun hentBehandling(behandling: UUID): Behandling {
-        return BehandlingAggregat(behandling, behandlinger, opplysninger, vilkaarKlient).serialiserbarUtgave()
+        return inTransaction { behandlingFactory.hent(behandling).serialiserbarUtgave() }
     }
 
     override fun hentBehandlinger(): List<Behandling> {
-        return behandlinger.alle()
+        return inTransaction { behandlinger.alle() }
     }
 
     override fun hentBehandlingerISak(sakid: Long): List<Behandling> {
-        return behandlinger.alleISak(sakid).map {
-            BehandlingAggregat(it.id, behandlinger, opplysninger, vilkaarKlient).serialiserbarUtgave()
+        return inTransaction {
+            behandlinger.alleISak(sakid).map {
+                behandlingFactory.hent(it.id).serialiserbarUtgave()
+            }
         }
     }
 
     override fun startBehandling(sak: Long, nyeOpplysninger: List<Behandlingsopplysning<ObjectNode>>): Behandling {
         logger.info("Starter en behandling")
-        return BehandlingAggregat.opprett(sak, behandlinger, opplysninger, vilkaarKlient)
-            .also { behandling ->
-                behandling.leggTilGrunnlagListe(nyeOpplysninger)
+        return inTransaction {
+            behandlingFactory.opprett(sak)
+                .also { behandling ->
+                    behandling.leggTilGrunnlagListe(nyeOpplysninger)
+                }
+
+        }.also {
+            runBlocking {
+                behandlingHendelser.send(it.lagretBehandling.id to BehandlingHendelseType.OPPRETTET)
             }
-            .serialiserbarUtgave()
+        }.serialiserbarUtgave()
     }
 
     override fun leggTilGrunnlagFraRegister(
         behandlingsId: UUID,
         opplysninger: List<Behandlingsopplysning<ObjectNode>>
     ) {
-        BehandlingAggregat(behandlingsId, behandlinger, this.opplysninger, vilkaarKlient).leggTilGrunnlagListe(
+        inTransaction { behandlingFactory.hent(behandlingsId).leggTilGrunnlagListe(
             opplysninger
-        )
+        )}.also {
+            runBlocking { behandlingHendelser.send(behandlingsId to BehandlingHendelseType.GRUNNLAGENDRET) }
+        }
     }
 
     override fun vilkårsprøv(behandling: UUID) {
-        BehandlingAggregat(behandling, behandlinger, opplysninger, vilkaarKlient).vilkårsprøv()
+        inTransaction { behandlingFactory.hent(behandling).vilkårsprøv()}
     }
 
     override fun beregn(behandling: UUID, beregning: Beregning) {
-        val lagretBehandling = requireNotNull(behandlinger.hent(behandling))
+        inTransaction { val lagretBehandling = requireNotNull(behandlinger.hent(behandling))
         require(!lagretBehandling.fastsatt)
         requireNotNull(lagretBehandling.vilkårsprøving)
-        behandlinger.lagreBeregning(lagretBehandling.copy(beregning = beregning))
+        behandlinger.lagreBeregning(lagretBehandling.copy(beregning = beregning))}
     }
 
     override fun ferdigstill(behandling: UUID) {
@@ -76,14 +91,19 @@ class RealBehandlingService(
     }
 
     override fun slettBehandlingerISak(sak: Long) {
-        println("Sletter alle behandlinger i sak: $sak")
-        opplysninger.slettOpplysningerISak(sak)
-        behandlinger.slettBehandlingerISak(sak)
+        inTransaction {
+            println("Sletter alle behandlinger i sak: $sak")
+            opplysninger.slettOpplysningerISak(sak)
+            behandlinger.slettBehandlingerISak(sak)
+        }
     }
 
     override fun avbrytBehandling(behandling: UUID): Behandling {
-        return BehandlingAggregat(behandling, behandlinger, opplysninger, vilkaarKlient).avbrytBehandling()
+        return inTransaction { behandlingFactory.hent(behandling).avbrytBehandling()}.also {
+            runBlocking {
+                behandlingHendelser.send(behandling to BehandlingHendelseType.AVBRUTT)
+            }
+        }
     }
-
 
 }

@@ -23,8 +23,8 @@ import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 export const DoedsFallForelder = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
 
-  const avdoedDoedsdato: any = hentKriterier(vilkaar, Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL, OpplysningsType.avdoed_doedsfall)
-  const forelder: any = hentKriterier(vilkaar, Kriterietype.AVDOED_ER_FORELDER, OpplysningsType.soeker_relasjon_foreldre)
+  const avdoedDoedsdato: any = hentKriterier(vilkaar, Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL, OpplysningsType.avdoed_forelder_pdl)
+  const forelder: any = hentKriterier(vilkaar, Kriterietype.AVDOED_ER_FORELDER, OpplysningsType.soeker_pdl)
 
   const avdoedForelder = forelder?.opplysning.foreldre.find(
     (forelder: IPerson) => forelder?.foedselsnummer === avdoedDoedsdato?.opplysning.foedselsnummer

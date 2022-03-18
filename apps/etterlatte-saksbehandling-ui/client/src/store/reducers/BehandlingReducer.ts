@@ -29,23 +29,8 @@ export enum OpplysningsType {
   avdoed_forelder_pdl = 'AVDOED_PDL_V1',
   avdoed_forelder_soeknad = 'AVDOED_SOEKNAD_V1',
 
-  avdoed_doedsfall = 'AVDOED_DOEDSFALL_V1',
-  avdoed_personinfo = 'AVDOED_PERSONINFO_V1',
-  soeker_foedselsdato = 'SOEKER_FOEDSELSDATO_V1',
-  soeker_personinfo = 'SOEKER_PERSONINFO_V1',
-  soeker_relasjon_foreldre = 'SOEKER_RELASJON_FORELDRE_V1',
-  soeker_relasjon_soeksken = 'SOEKER_RELASJON_SOESKEN_V1',
-  soeker_bostedadresse = 'SOEKER_BOSTEDADRESSE_V1',
-  soeker_oppholdsadresse = 'SOEKER_OPPHOLDADRESSE_V1',
-  soeker_kontaktadresse = 'SOEKER_KONTAKTADRESSE_V1',
-  soeker_utenlandsadresse_fra_soeknad = 'SOEKER_UTENLANDSADRESSE_SOEKNAD_V1',
-  avdoed_bostedadresse = 'AVDOED_BOSTEDADRESSE_V1',
-  gjenlevende_forelder_bostedsadresse = 'GJENLEVENDE_FORELDER_BOSTEDADRESSE_V1',
-  gjenlevende_forelder_info = 'GJENLEVENDE_FORELDER_INFO_V1',
   soeknad_mottatt = 'SOEKNAD_MOTTATT_DATO',
-  omsorg = 'SOEKER_DAGLIG_OMSORG_V1',
   innsender = 'INNSENDER_PERSONINFO_V1',
-  gjenlevende_forelder_personinfo = 'GJENLEVENDE_FORELDER_PERSONINFO_V1',
 }
 
 export enum KildeType {

@@ -43,7 +43,7 @@ const vilkaarMock = {
           "resultat": "OPPFYLT",
           "basertPaaOpplysninger": [
               {
-                  "opplysningsType": "AVDOED_DOEDSFALL_V1",
+                  "opplysningsType": "AVDOED_PDL_V1",
                   "kilde": {
                       "navn": "pdl",
                       "tidspunktForInnhenting": "2022-03-07T14:09:33.789469374Z",
@@ -62,7 +62,7 @@ const vilkaarMock = {
           "resultat": "OPPFYLT",
           "basertPaaOpplysninger": [
               {
-                  "opplysningsType": "SOEKER_RELASJON_FORELDRE_V1",
+                  "opplysningsType": "SOEKER_PDL_V1",
                   "kilde": {
                       "navn": "pdl",
                       "tidspunktForInnhenting": "2022-03-07T14:09:34.766506822Z",
@@ -89,7 +89,7 @@ const vilkaarMock = {
                   }
               },
               {
-                  "opplysningsType": "AVDOED_DOEDSFALL_V1",
+                  "opplysningsType": "AVDOED_PDL_V1",
                   "kilde": {
                       "navn": "pdl",
                       "tidspunktForInnhenting": "2022-03-07T14:09:33.789469374Z",
@@ -120,7 +120,7 @@ describe('Behandling-felles-utils', () => {
   })
 
   it('Test at hent kriterier returnerer riktig', () => {
-    const vilkaarResult = hentKriterier(vilkaarMock, Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL, OpplysningsType.avdoed_doedsfall)
-    expect(vilkaarResult.opplysningsType).toBe(OpplysningsType.avdoed_doedsfall)
+    const vilkaarResult = hentKriterier(vilkaarMock, Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL, OpplysningsType.avdoed_forelder_pdl)
+    expect(vilkaarResult.opplysningsType).toBe(OpplysningsType.avdoed_forelder_pdl)
   })
 })

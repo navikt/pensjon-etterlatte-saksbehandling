@@ -23,8 +23,8 @@ import { hentKriterier } from '../../felles/utils'
 export const AlderBarn = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
 
-  const barnetsFoedselsdato = hentKriterier(vilkaar, Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, OpplysningsType.soeker_foedselsdato);
-  const avdoedDoedsdato = hentKriterier(vilkaar, Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, OpplysningsType.avdoed_doedsfall);
+  const barnetsFoedselsdato = hentKriterier(vilkaar, Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, OpplysningsType.soeker_pdl);
+  const avdoedDoedsdato = hentKriterier(vilkaar, Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, OpplysningsType.avdoed_forelder_pdl);
 
   const barnetsAlderVedDoedsfall = differenceInYears(
     new Date(avdoedDoedsdato.opplysning.doedsdato),

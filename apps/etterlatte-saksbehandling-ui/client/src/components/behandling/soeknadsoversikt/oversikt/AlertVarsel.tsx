@@ -6,12 +6,12 @@ interface Props {
   varselType: string
 }
 export const AlertVarsel: React.FC<Props> = ({ varselType }) => {
-  const { avdodPersonPdl, avdodPersonSoknad } = usePersonInfoFromBehandling()
+  const { avdoedPersonPdl, avdodPersonSoknad } = usePersonInfoFromBehandling()
 
   const varsel = () => {
     switch (varselType) {
       case 'ikke riktig oppgitt avdød i søknad':
-        return `I PDL er det oppgitt ${avdodPersonPdl?.fornavn} ${avdodPersonPdl?.etternavn} som avdød forelder, men i søknad er det oppgitt ${avdodPersonSoknad?.fornavn} ${avdodPersonSoknad?.etternavn}. Må avklares.`
+        return `I PDL er det oppgitt ${avdoedPersonPdl?.fornavn} ${avdoedPersonPdl?.etternavn} som avdød forelder, men i søknad er det oppgitt ${avdodPersonSoknad?.fornavn} ${avdodPersonSoknad?.etternavn}. Må avklares.`
       case 'forelder ikke død':
         return 'Oppgitt avdød i søknad er ikke forelder til barnet. Må avklares.'
       case 'ikke lik adresse':

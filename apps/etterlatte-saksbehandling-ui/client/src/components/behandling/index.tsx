@@ -12,7 +12,6 @@ import { BehandlingsStatus, IBehandlingsStatus } from './behandlings-status'
 import { IApiResponse } from '../../shared/api/types'
 import {
   IDetaljertBehandling,
-  KildeType,
   OpplysningsType,
   VilkaarVurderingsResultat,
 } from '../../store/reducers/BehandlingReducer'
@@ -47,13 +46,13 @@ export const Behandling = () => {
   }
 
   const person: any = ctx.state.behandlingReducer?.grunnlag.find(
-    (g) => g.opplysningType === OpplysningsType.soeker_personinfo && g.kilde.type === KildeType.pdl
+    (g) => g.opplysningType === OpplysningsType.soeker_pdl
   )?.opplysning
 
   return (
     <>
       <StatusBar theme={StatusBarTheme.gray} personInfo={person} />
-        <Spinner visible={!loaded} label="Laster" />
+      <Spinner visible={!loaded} label="Laster" />
       {loaded && (
         <GridContainer>
           <Column>

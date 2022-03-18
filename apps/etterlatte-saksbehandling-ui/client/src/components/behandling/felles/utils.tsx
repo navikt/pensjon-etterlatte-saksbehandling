@@ -1,4 +1,4 @@
-import { IAdresse } from '../soeknadsoversikt/types'
+import { IAdresse } from '../types'
 import moment from 'moment'
 import { IKriterie, IVilkaaropplysing, Kriterietype, OpplysningsType } from '../../../store/reducers/BehandlingReducer'
 

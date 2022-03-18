@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { upperCaseFirst } from "../../utils";
-import { PersonStatus } from "../behandling/soeknadsoversikt/types";
+import { PersonStatus } from "../behandling/types";
 
 export interface IStatus {
     status: PersonStatus;

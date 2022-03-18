@@ -1,6 +1,6 @@
 import { PersonInfoHeaderWrapper, StatsborgerskapWrap, AlderEtterlattWrap, AvdoedWrap } from '../../styled'
 import { ChildIcon } from '../../../../../shared/icons/childIcon'
-import { IPersonFraSak, PersonStatus } from '../../types'
+import { IPersonFraSak, PersonStatus } from '../../../types'
 import { format } from 'date-fns'
 
 type Props = {
@@ -9,7 +9,7 @@ type Props = {
 
 export const PersonInfoHeader: React.FC<Props> = ({ person }) => {
   switch (person.personStatus) {
-    case PersonStatus.ETTERLATT:
+    case PersonStatus.BARN:
       return (
         <PersonInfoHeaderWrapper>
           <ChildIcon />
@@ -35,9 +35,7 @@ export const PersonInfoHeader: React.FC<Props> = ({ person }) => {
           <span className="personRolle">
             ({person.personStatus} {person.rolle})
           </span>
-          {person.datoForDoedsfall && (
-            <AvdoedWrap>Død {format(new Date(person?.datoForDoedsfall), 'dd.MM.yyyy')}</AvdoedWrap>
-          )}
+          <AvdoedWrap>Død {format(new Date(person.datoForDoedsfall), 'dd.MM.yyyy')}</AvdoedWrap>
           <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
         </PersonInfoHeaderWrapper>
       )

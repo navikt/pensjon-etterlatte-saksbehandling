@@ -16,7 +16,7 @@ import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
 import { OmSoeknadVarsler } from './OmSoeknadVarsler'
 
 export const OmSoeknad = () => {
-  const { soekerPdl, soekerSoknad, dodsfall, avdodPersonPdl, avdodPersonSoknad, innsender, mottattDato } =
+  const { soekerPdl, avdoedPersonPdl, soekerSoknad, avdodPersonSoknad, innsender, mottattDato } =
     usePersonInfoFromBehandling()
   const ctx = useContext(AppContext)
   const vilkaar = ctx.state.behandlingReducer.vilkårsprøving
@@ -25,8 +25,8 @@ export const OmSoeknad = () => {
   const avdoedErForelderVilkaar =
     doedsfallVilkaar.kriterier.find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER).resultat ===
     VilkaarVurderingsResultat.OPPFYLT
-  const avdoedErLikISoeknad = dodsfall?.foedselsnummer === avdodPersonSoknad.foedselsnummer
-  const dodsfallMerEnn3AarSiden = sjekkDodsfallMerEnn3AarSiden(dodsfall?.doedsdato, mottattDato?.mottattDato)
+  const avdoedErLikISoeknad = avdoedPersonPdl?.foedselsnummer === avdodPersonSoknad.foedselsnummer
+  const dodsfallMerEnn3AarSiden = sjekkDodsfallMerEnn3AarSiden(avdoedPersonPdl?.doedsdato, mottattDato?.mottattDato)
 
   return (
     <>
@@ -49,7 +49,7 @@ export const OmSoeknad = () => {
         <DetailWrapper>
           <Detail size="medium">Avdød forelder</Detail>
           {avdoedErForelderVilkaar ? (
-            sjekkPersonFraSoeknadMotPdl(avdodPersonPdl, avdodPersonSoknad)
+            sjekkPersonFraSoeknadMotPdl(avdoedPersonPdl, avdodPersonSoknad)
           ) : (
             <WarningText>Ingen foreldre er død</WarningText>
           )}
@@ -65,13 +65,16 @@ export const OmSoeknad = () => {
         <DetailWrapper>
           <Detail size="medium">Dato for dødsfall</Detail>
           <span className={dodsfallMerEnn3AarSiden ? 'warningText' : ''}>
-            {format(new Date(dodsfall?.doedsdato), 'dd.MM.yyyy')}
+            {format(new Date(avdoedPersonPdl?.doedsdato), 'dd.MM.yyyy')}
           </span>
         </DetailWrapper>
         <DetailWrapper>
           <Detail size="medium">Første mulig virkningstidspunkt</Detail>
           <span className={dodsfallMerEnn3AarSiden ? 'warningText' : ''}>
-            {format(new Date(hentVirkningstidspunkt(dodsfall?.doedsdato, mottattDato?.mottattDato)), 'dd.MM.yyyy')}
+            {format(
+              new Date(hentVirkningstidspunkt(avdoedPersonPdl?.doedsdato, mottattDato?.mottattDato)),
+              'dd.MM.yyyy'
+            )}
           </span>
         </DetailWrapper>
         <OmSoeknadVarsler

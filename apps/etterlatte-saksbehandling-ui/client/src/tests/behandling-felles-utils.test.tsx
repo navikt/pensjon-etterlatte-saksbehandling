@@ -1,6 +1,6 @@
 import React from 'react'
 import { hentAdresserEtterDoedsdato, hentKriterier } from '../components/behandling/felles/utils'
-import { IAdresse } from '../components/behandling/soeknadsoversikt/types'
+import { IAdresse } from '../components/behandling/types'
 import { Kriterietype, OpplysningsType } from '../store/reducers/BehandlingReducer';
 
 const adresserMock: IAdresse[] = [

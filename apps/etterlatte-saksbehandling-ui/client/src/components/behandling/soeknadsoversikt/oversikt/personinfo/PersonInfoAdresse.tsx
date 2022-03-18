@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { PersonDetailWrapper, Historikk } from '../../styled'
-import { IAdresse } from '../../types'
+import { IAdresse } from '../../../types'
 import { TextButton } from './TextButton'
 import { sjekkAdresseGjenlevendeISoeknadMotPdl, sjekkDataFraSoeknadMotPdl } from '../utils'
 import { Adressevisning } from '../../../felles/Adressevisning'

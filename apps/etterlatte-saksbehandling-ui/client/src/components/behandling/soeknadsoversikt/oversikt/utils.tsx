@@ -1,7 +1,7 @@
 import { WarningText } from '../styled'
 import moment from 'moment'
 import { AlertVarsel } from './AlertVarsel'
-import { IPersonOpplysning } from '../types'
+import { IPersonOpplysningFraPdl } from '../../types'
 
 export const sjekkDataFraSoeknadMotPdl = (dataFraPdl: string, dataFraSoeknad: string) => {
   return dataFraSoeknad === dataFraPdl || dataFraSoeknad === null ? (
@@ -14,7 +14,7 @@ export const sjekkDataFraSoeknadMotPdl = (dataFraPdl: string, dataFraSoeknad: st
   )
 }
 
-export const sjekkPersonFraSoeknadMotPdl = (personFraPdl: IPersonOpplysning, personFraSoeknad: IPersonOpplysning) => {
+export const sjekkPersonFraSoeknadMotPdl = (personFraPdl: IPersonOpplysningFraPdl, personFraSoeknad: any) => {
   //TODO: hvis fnr er likt, men navn forskjellig, hva skal vises?
   return personFraSoeknad.foedselsnummer === personFraPdl.foedselsnummer ? (
     <span>

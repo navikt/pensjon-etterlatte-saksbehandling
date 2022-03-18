@@ -22,6 +22,13 @@ export interface IBehandlingsopplysning {
 }
 
 export enum OpplysningsType {
+  soeker_pdl = 'SOEKER_PDL_V1',
+  soeker_soeknad = 'SOEKER_SOEKNAD_V1',
+  gjenlevende_forelder_pdl = 'GJENLEVENDE_FORELDER_PDL_V1',
+  gjenlevende_forelder_soeknad = 'GJENLEVENDE_FORELDER_SOEKNAD_V1',
+  avdoed_forelder_pdl = 'AVDOED_PDL_V1',
+  avdoed_forelder_soeknad = 'AVDOED_SOEKNAD_V1',
+
   avdoed_doedsfall = 'AVDOED_DOEDSFALL_V1',
   avdoed_personinfo = 'AVDOED_PERSONINFO_V1',
   soeker_foedselsdato = 'SOEKER_FOEDSELSDATO_V1',

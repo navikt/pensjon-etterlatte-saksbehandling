@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../../shared/icons/genderIcon'
-import { PersonStatus } from '../behandling/soeknadsoversikt/types'
+import { PersonStatus } from '../behandling/types'
 import { Fnr } from './fnr'
 import { Status } from './status'
 
@@ -35,7 +35,7 @@ export const StatusBar = (props: { theme?: StatusBarTheme; personInfo?: PersonIn
           </Name>
           <Skilletegn>/</Skilletegn>
           <Fnr copy value={props.personInfo?.foedselsnummer || 'N/A'} />
-          <Status value={{ status: PersonStatus.ETTERLATT, dato: '19.05.2011' }} />
+          <Status value={{ status: PersonStatus.BARN, dato: '19.05.2011' }} />
         </UserInfo>
       )}
     </StatusBarWrapper>

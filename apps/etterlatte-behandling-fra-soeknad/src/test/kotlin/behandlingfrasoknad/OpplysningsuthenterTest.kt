@@ -6,13 +6,11 @@ import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BankkontoType
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
-import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import org.junit.jupiter.api.Test
-
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -31,7 +29,6 @@ internal class OpplysningsuthenterTest {
             )!!
         )
     }
-/*
 
     @Test
     fun `alle opplysninger skal ha innsender som kilde`() {
@@ -47,43 +44,59 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om innsenders personinfo`() {
-        consumeSingle<PersonInfo>(Opplysningstyper.INNSENDER_PERSONINFO_V1)
+    fun `skal hente opplysning om avdoede`() {
+        consumeSingle<AvdoedSoeknad>(Opplysningstyper.AVDOED_SOEKNAD_V1)
             .apply {
-                assertEquals("GØYAL", fornavn)
-                assertEquals("HØYSTAKK", etternavn)
-                assertEquals("03108718357", foedselsnummer.value)
-                assertEquals(PersonType.INNSENDER, type)
+                assertEquals("fn", fornavn)
+                assertEquals("en", etternavn)
+                assertEquals(PersonType.AVDOED, type)
+                assertEquals("22128202440", foedselsnummer.value)
+                assertEquals(LocalDate.of(2022, Month.JANUARY, 1), doedsdato)
+                assertEquals("Norge", statsborgerskap)
+                assertEquals(JaNeiVetIkke.NEI, utenlandsopphold.harHattUtenlandsopphold)
+                assertEquals(JaNeiVetIkke.NEI, doedsaarsakSkyldesYrkesskadeEllerYrkessykdom)
             }
     }
 
     @Test
-    fun `skal hente opplysning om soekers personinfo`() {
-        consumeSingle<PersonInfo>(Opplysningstyper.SOEKER_PERSONINFO_V1)
+    fun `skal hente opplysning om soeker`() {
+        consumeSingle<SoekerBarnSoeknad>(Opplysningstyper.SOEKER_SOEKNAD_V1)
             .apply {
+                assertEquals(PersonType.BARN, type)
                 assertEquals("kirsten", fornavn)
                 assertEquals("jakobsen", etternavn)
                 assertEquals("12101376212", foedselsnummer.value)
-                assertEquals(PersonType.BARN, type)
+                assertEquals("Norge", statsborgerskap)
+                assertEquals(JaNeiVetIkke.NEI, utenlandsadresse.adresseIUtlandet)
+                assertEquals("GØYAL", foreldre[0].fornavn)
+                assertEquals("22128202440", foreldre[1].foedselsnummer.value)
+                assertEquals(JaNeiVetIkke.NEI, verge.barnHarVerge)
+                assertNull(omsorgPerson)
             }
     }
 
     @Test
-    fun `skal hente opplysning om gjenlevende forelders personinfo`() {
-        consumeSingle<PersonInfo>(Opplysningstyper.GJENLEVENDE_FORELDER_PERSONINFO_V1)
+    fun `skal hente opplysninger om gjenlevende forelder`() {
+        consumeSingle<GjenlevendeForelderSoeknad>(Opplysningstyper.GJENLEVENDE_FORELDER_SOEKNAD_V1)
             .apply {
                 assertEquals("GØYAL", fornavn)
                 assertEquals("HØYSTAKK", etternavn)
                 assertEquals("03108718357", foedselsnummer.value)
                 assertEquals(PersonType.GJENLEVENDE_FORELDER, type)
+                assertEquals("Sannergata 6C, 0557 Oslo", adresse)
+                assertEquals("Norge", statsborgerskap)
+                assertEquals("11111111", telefonnummer)
             }
     }
 
     @Test
-    fun `skal hente opplysning om samtykke`() {
-        consumeSingle<Samtykke>(Opplysningstyper.SAMTYKKE)
+    fun `skal hente opplysning om innsender`() {
+        consumeSingle<InnsenderSoeknad>(Opplysningstyper.INNSENDER_SOEKNAD_v1)
             .apply {
-                assertEquals(true, harSamtykket)
+                assertEquals(PersonType.INNSENDER, type)
+                assertEquals("GØYAL", fornavn)
+                assertEquals("HØYSTAKK", etternavn)
+                assertEquals("03108718357", foedselsnummer.value)
             }
     }
 
@@ -103,99 +116,10 @@ internal class OpplysningsuthenterTest {
     }
 
     @Test
-    fun `skal hente opplysning om soekers statsborkerskap`() {
-        consumeSingle<Statsborgerskap>(Opplysningstyper.SOEKER_STATSBORGERSKAP_V1)
+    fun `skal hente opplysning om samtykke`() {
+        consumeSingle<Samtykke>(Opplysningstyper.SAMTYKKE)
             .apply {
-                assertEquals("Norge", statsborgerskap)
-                assertEquals("12101376212", foedselsnummer)
-            }
-    }
-
-    @Test
-    @Disabled
-    fun `skal hente opplysning om soekers adresse`() {
-        consumeSingle<UtenlandsadresseBarn>(Opplysningstyper.SOEKER_UTENLANDSADRESSE_SOEKNAD_V1)
-            .apply {
-                println(this)
-            }
-    }
-
-    @Test
-    fun `skal hente opplysning om soekers verge`() {
-        consumeSingle<Verge>(Opplysningstyper.SOEKER_VERGE_V1)
-            .apply {
-                assertEquals("Nei", barnHarVerge?.innhold)
-            }
-    }
-
-    @Test
-    fun `skal hente opplysning om daglig omsorg`() {
-        consumeSingle<DagligOmsorg>(Opplysningstyper.SOEKER_DAGLIG_OMSORG_V1)
-            .apply {
-                assertNull(omsorgPerson)
-            }
-    }
-
-    @Test
-    fun `skal hente opplysning om avdoede`() {
-        consumeSingle<PersonInfo>(Opplysningstyper.AVDOED_PERSONINFO_V1)
-            .apply {
-                assertEquals("fn", fornavn)
-                assertEquals("en", etternavn)
-                assertEquals(PersonType.AVDOED, type)
-                assertEquals("22128202440", foedselsnummer.value)
-            }
-    }
-
-    @Test
-    fun `skal hente opplysning om avdoedes doedsfall`() {
-        consumeSingle<Doedsdato>(Opplysningstyper.AVDOED_DOEDSFALL_V1)
-            .apply {
-                assertEquals(LocalDate.of(2022, Month.JANUARY, 1), doedsdato)
-                assertEquals("22128202440", foedselsnummer)
-            }
-    }
-
-    @Test
-    @Disabled
-    fun `skal hente opplysning om doedsaarsak`() {
-        consumeSingle<Doedsaarsak>(Opplysningstyper.AVDOED_DOEDSAARSAK_V1)
-            .apply {
-                println(this)
-            }
-    }
-
-    @Test
-    fun `skal hente opplysning om avdoedes utenlandsopphold`() {
-        consumeSingle<Utenlandsopphold>(Opplysningstyper.AVDOED_UTENLANDSOPPHOLD_V1)
-            .apply {
-                assertEquals("Nei", harHattUtenlandsopphold)
-            }
-    }
-
-    @Test
-    @Disabled
-    fun `skal hente opplysning om avdoedes naeringsinntekt`() {
-        consumeSingle<Naeringsinntekt>(Opplysningstyper.AVDOED_NAERINGSINNTEKT_V1)
-            .apply {
-                println(this)
-            }
-    }
-
-    @Test
-    @Disabled
-    fun `skal hente opplysning om avdoedes militaertjeneste`() {
-        consumeSingle<Militaertjeneste>(Opplysningstyper.AVDOED_MILITAERTJENESTE_V1)
-            .apply {
-                println(this)
-            }
-    }
-
-    @Test
-    fun `skal hente opplysning om soesken`() {
-        consumeSingle<Soesken>(Opplysningstyper.SOEKER_RELASJON_SOESKEN_V1)
-            .apply {
-                assertTrue(soesken!!.isEmpty())
+                assertEquals(true, harSamtykket)
             }
     }
 
@@ -221,7 +145,5 @@ internal class OpplysningsuthenterTest {
             .let {
                 it.opplysning as T
             }
-
-*/
 
 }

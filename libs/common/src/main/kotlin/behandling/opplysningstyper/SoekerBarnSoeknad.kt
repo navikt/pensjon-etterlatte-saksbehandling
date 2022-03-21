@@ -19,7 +19,7 @@ data class SoekerBarnSoeknad(
 )
 
 data class UtenlandsadresseBarn(
-    val adresseIUtlandet: String?,
+    val adresseIUtlandet: JaNeiVetIkke?,
     val land: String?,
     val adresse: String?,
 )

@@ -67,14 +67,14 @@ class Opplysningsuthenter {
                     doedsdato = avdoed.datoForDoedsfallet.svar.innhold,
                     statsborgerskap = avdoed.statsborgerskap.svar.innhold,
                     utenlandsopphold = Utenlandsopphold(
-                        avdoed.utenlandsopphold.svar.innhold,
+                        avdoed.utenlandsopphold.svar.verdi,
                         avdoed.utenlandsopphold.opplysning?.map { opphold ->
                             UtenlandsoppholdOpplysninger(
                                 opphold.land.svar.innhold,
                                 opphold.fraDato?.svar?.innhold,
                                 opphold.tilDato?.svar?.innhold,
                                 opphold.oppholdsType.svar.map { it.verdi },
-                                opphold.medlemFolketrygd.svar.innhold,
+                                opphold.medlemFolketrygd.svar.verdi,
                                 opphold.pensjonsutbetaling?.svar?.innhold
                             )
                         }
@@ -100,7 +100,7 @@ class Opplysningsuthenter {
                 foedselsnummer = barnepensjon.soeker.foedselsnummer.svar,
                 statsborgerskap = barnepensjon.soeker.statsborgerskap.svar,
                 utenlandsadresse = UtenlandsadresseBarn(
-                    adresse?.svar?.innhold,
+                    adresse?.svar?.verdi,
                     adresse?.opplysning?.land?.svar?.innhold,
                     adresse?.opplysning?.adresse?.svar?.innhold
                 ),
@@ -176,7 +176,7 @@ class Opplysningsuthenter {
                     it.opplysning?.utenlandskBankAdresse?.svar?.innhold,
                     it.opplysning?.iban?.svar?.innhold,
                     it.opplysning?.swift?.svar?.innhold,
-                    it.opplysning?.skattetrekk?.svar,
+                    it.opplysning?.skattetrekk?.svar?.verdi,
                     it.opplysning?.skattetrekk?.opplysning?.svar?.innhold
                 )
             )

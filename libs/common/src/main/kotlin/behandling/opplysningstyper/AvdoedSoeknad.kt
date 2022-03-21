@@ -18,7 +18,7 @@ data class AvdoedSoeknad(
     )
 
 data class Utenlandsopphold(
-    val harHattUtenlandsopphold: String,
+    val harHattUtenlandsopphold: JaNeiVetIkke,
     val opphold: List<UtenlandsoppholdOpplysninger>?,
 )
 
@@ -27,6 +27,6 @@ data class UtenlandsoppholdOpplysninger(
     val fraDato: LocalDate?,
     val tilDato: LocalDate?,
     val oppholdsType: List<OppholdUtlandType>,
-    val medlemFolketrygd: String,
+    val medlemFolketrygd: JaNeiVetIkke,
     val pensjonsutbetaling: String?
 )

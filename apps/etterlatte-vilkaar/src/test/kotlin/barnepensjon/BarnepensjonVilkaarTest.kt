@@ -229,14 +229,14 @@ internal class BarnepensjonVilkaarTest {
 
 
     val utenlandsoppholdSoeknad = Utenlandsopphold(
-        "JA",
+        JaNeiVetIkke.JA,
         listOf(
             UtenlandsoppholdOpplysninger(
                 "Danmark",
                 LocalDate.parse("2010-01-25"),
                 LocalDate.parse("2022-01-25"),
                 listOf(OppholdUtlandType.ARBEIDET),
-                "JA",
+                JaNeiVetIkke.JA,
                 null
             ),
             UtenlandsoppholdOpplysninger(
@@ -244,20 +244,20 @@ internal class BarnepensjonVilkaarTest {
                 LocalDate.parse("2000-01-25"),
                 LocalDate.parse("2007-01-25"),
                 listOf(OppholdUtlandType.ARBEIDET),
-                "NEI",
+                JaNeiVetIkke.NEI,
                 null
             ),
         )
     )
 
     val ingenUtenlandsoppholdSoeknad = Utenlandsopphold(
-        "NEI",
+        JaNeiVetIkke.NEI,
         listOf()
     )
 
     val ingenUtenlandsadresseBarnVilkaarOpplysning =
-        UtenlandsadresseBarn("NEI", null, null)
-    val harUtenlandsadresseBarnVilkaarOpplysning = UtenlandsadresseBarn("JA", null, null)
+        UtenlandsadresseBarn(JaNeiVetIkke.NEI, null, null)
+    val harUtenlandsadresseBarnVilkaarOpplysning = UtenlandsadresseBarn(JaNeiVetIkke.JA, null, null)
 
 
     enum class Bosted {

@@ -19,9 +19,9 @@ import java.time.LocalDate
 
 fun vilkaarBarnetsMedlemskap(
     vilkaartype: Vilkaartyper,
-    soekerPdl: VilkaarOpplysning<Person>,
-    gjenlevendePdl: VilkaarOpplysning<Person>,
-    avdoedPdl: VilkaarOpplysning<Person>,
+    soekerPdl: VilkaarOpplysning<Person>?,
+    gjenlevendePdl: VilkaarOpplysning<Person>?,
+    avdoedPdl: VilkaarOpplysning<Person>?,
 ): VurdertVilkaar {
     //TODO legg adresse til fra søknad
     val barnHarIkkeAdresseIUtlandet =
@@ -44,10 +44,11 @@ fun vilkaarBarnetsMedlemskap(
 }
 
 fun kriterieHarIkkeAdresseIUtlandet(
-    person: VilkaarOpplysning<Person>,
-    avdoedPdl: VilkaarOpplysning<Person>,
+    person: VilkaarOpplysning<Person>?,
+    avdoedPdl: VilkaarOpplysning<Person>?,
     kriterietype: Kriterietyper
 ): Kriterie {
+    if(person == null || avdoedPdl == null) return  Kriterie(kriterietype, VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, emptyList())
     val resultat = try {
         val adresserPdl = hentAdresser(person)
         val doedsdatoPdl = hentDoedsdato(avdoedPdl)

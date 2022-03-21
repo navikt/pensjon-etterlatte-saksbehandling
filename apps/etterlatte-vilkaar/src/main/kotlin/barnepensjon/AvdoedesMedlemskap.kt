@@ -13,8 +13,8 @@ import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 
 fun vilkaarAvdoedesMedlemskap(
     vilkaartype: Vilkaartyper,
-    avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>,
-    avdoedPdl: VilkaarOpplysning<Person>,
+    avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
+    avdoedPdl: VilkaarOpplysning<Person>?,
 ): VurdertVilkaar {
 
     val utenlandsoppholdSisteFemAarene = kriterieIngenUtenlandsoppholdSisteFemAar(avdoedSoeknad, avdoedPdl)
@@ -34,9 +34,13 @@ fun vilkaarAvdoedesMedlemskap(
 //TODO: dette vil nok utgå om vi henter inn medlemskap fra LovMe istedet.
 
 fun kriterieIngenUtenlandsoppholdSisteFemAar(
-    avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>,
-    avdoedPdl: VilkaarOpplysning<Person>,
+    avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
+    avdoedPdl: VilkaarOpplysning<Person>?,
 ): Kriterie {
+
+    if(avdoedPdl == null || avdoedSoeknad == null) return Kriterie(
+        Kriterietyper.AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR, VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, emptyList()
+    )
 
     val ingenOppholdUtlandetSisteFemAar = try {
         val femAarFoerDoedsdato = hentDoedsdato(avdoedPdl).minusYears(5)

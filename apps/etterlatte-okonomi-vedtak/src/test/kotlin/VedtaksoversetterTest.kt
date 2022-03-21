@@ -1,3 +1,4 @@
+import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
 import no.nav.etterlatte.vedtaksoversetter.Vedtaksoversetter
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -5,7 +6,7 @@ import org.junit.jupiter.api.Test
 
 internal class VedtaksoversetterTest {
 
-    private val inspector = TestRapid().apply { Vedtaksoversetter(this) }
+    private val inspector = TestRapid().apply { Vedtaksoversetter(this, oppdragsMapper = OppdragMapper) }
 
     @Test
     fun `sjekk mottak av vedtak`() {

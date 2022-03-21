@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
 import no.nav.etterlatte.vedtaksoversetter.Vedtaksoversetter
 import no.nav.helse.rapids_rivers.RapidApplication
 
@@ -10,7 +11,7 @@ fun main() {
 
     RapidApplication.create(env)
         .also {
-            Vedtaksoversetter(rapidsConnection = it)
+            Vedtaksoversetter(rapidsConnection = it, oppdragsMapper = OppdragMapper)
         }.start()
 }
 

@@ -4,7 +4,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 data class Vedtak(
-    val sakId: Long,
+    val sakId: String,
     val saksbehandlerId: String,
     val beregningsperioder: List<Beregningsperiode>,
     val sakIdGjelderFnr: String,

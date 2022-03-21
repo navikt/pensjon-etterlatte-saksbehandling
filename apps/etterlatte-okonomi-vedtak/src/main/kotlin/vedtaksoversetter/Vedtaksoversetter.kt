@@ -1,14 +1,18 @@
 package no.nav.etterlatte.vedtaksoversetter
 
 
-import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
+import java.io.StringWriter
+import javax.xml.bind.JAXBContext
+import javax.xml.bind.Marshaller
 
 internal class Vedtaksoversetter(
     rapidsConnection: RapidsConnection,
@@ -30,7 +34,7 @@ internal class Vedtaksoversetter(
         withLogContext(packet.correlationId()) {
             try {
                 // TODO finne relevante felter i vedtak
-                val vedtak: Vedtak = deserialize(packet["@vedtak"].textValue())
+                val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson(), Vedtak::class.java)
 
                 // TODO finne ut hvordan oppdrag skal bygges opp
                 val oppdrag: Oppdrag = oppdragsMapper.oppdragFraVedtak(vedtak)
@@ -54,3 +58,17 @@ internal class Vedtaksoversetter(
 
 
 }
+
+fun Oppdrag.tilXml(): String {
+    val jaxbContext = JAXBContext.newInstance(Oppdrag::class.java)
+    val marshaller = jaxbContext.createMarshaller()
+    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
+
+    val stringWriter = StringWriter()
+    stringWriter.use {
+        marshaller.marshal(this, stringWriter)
+    }
+
+    return stringWriter.toString()
+}
+

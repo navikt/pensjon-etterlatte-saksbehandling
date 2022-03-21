@@ -8,6 +8,7 @@ import no.trygdeetaten.skjema.oppdrag.TfradragTillegg
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
+import javax.xml.datatype.DatatypeConstants
 import javax.xml.datatype.DatatypeFactory
 import javax.xml.datatype.XMLGregorianCalendar
 
@@ -18,7 +19,7 @@ object OppdragMapper {
             kodeAksjon = "1" // 3 = simulering
             kodeEndring = "NY" // Alltid NY for førstegangsinnvilgelse
             kodeFagomraade = "EY" // TODO må legges inn hos økonomi
-            fagsystemId = vedtak.sakId.toString()
+            fagsystemId = vedtak.sakId
             utbetFrekvens = "MND"
             oppdragGjelderId = vedtak.sakIdGjelderFnr
             datoOppdragGjelderFom = vedtak.aktorFoedselsdato.toXMLDate()
@@ -84,6 +85,8 @@ object OppdragMapper {
 
     private fun LocalDate.toXMLDate(): XMLGregorianCalendar {
         return DatatypeFactory.newInstance()
-            .newXMLGregorianCalendar(GregorianCalendar.from(atStartOfDay(ZoneId.systemDefault())))
+            .newXMLGregorianCalendar(GregorianCalendar.from(atStartOfDay(ZoneId.systemDefault()))).apply {
+                timezone = DatatypeConstants.FIELD_UNDEFINED
+            }
     }
 }

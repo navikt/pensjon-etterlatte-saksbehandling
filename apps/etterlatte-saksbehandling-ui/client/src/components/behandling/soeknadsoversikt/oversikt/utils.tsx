@@ -1,7 +1,7 @@
-import { WarningText } from '../styled'
 import moment from 'moment'
 import { AlertVarsel } from './AlertVarsel'
 import { IPersonOpplysningFraPdl } from '../../types'
+import { WarningText } from '../../../../shared/styled'
 
 export const sjekkDataFraSoeknadMotPdl = (dataFraPdl: string, dataFraSoeknad: string) => {
   return dataFraSoeknad === dataFraPdl || dataFraSoeknad === null ? (

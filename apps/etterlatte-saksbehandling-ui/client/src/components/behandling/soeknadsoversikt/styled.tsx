@@ -19,11 +19,6 @@ export const DetailWrapper = styled.div`
   }
 `
 
-export const WarningText = styled.span`
-  color: #ba3a26;
-  display: block;
-`
-
 export const Border = styled.div`
   border-top: 1px solid #b0b0b0;
 `
@@ -151,16 +146,8 @@ export const RadioGroupWrapper = styled.div`
   margin-top: 3em;
   max-width: 400px;
 
-  .link {
-    font-weight: bold;
+  .textarea {
     margin-top: 1em;
-    margin-left: 1.5em;
   }
-  .radioGroup {
-    margin-bottom: 1em;
-  }
-  .button {
-    margin-top: 1.5em;
-    padding: 0.5em 3em;
-  }
+}
 `

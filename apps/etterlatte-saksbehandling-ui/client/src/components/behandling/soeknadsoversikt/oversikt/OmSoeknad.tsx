@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import { AppContext } from '../../../../store/AppContext'
 import { Detail, Heading } from '@navikt/ds-react'
-import { InfoWrapper, DetailWrapper, HeadingWrapper, WarningText } from '../styled'
+import { InfoWrapper, DetailWrapper, HeadingWrapper } from '../styled'
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../../behandlings-status'
 import { BehandlingsTypeSmall, IBehandlingsType } from '../../behandlings-type'
 import { format } from 'date-fns'
@@ -14,6 +14,7 @@ import {
 } from '../../../../store/reducers/BehandlingReducer'
 import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
 import { OmSoeknadVarsler } from './OmSoeknadVarsler'
+import { WarningText } from '../../../../shared/styled'
 
 export const OmSoeknad = () => {
   const { soekerPdl, avdoedPersonPdl, soekerSoknad, avdodPersonSoknad, innsender, mottattDato } =

@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { RadioGroup, Radio, Textarea, Button } from '@navikt/ds-react'
+import { RadioGroup, Radio, Textarea } from '@navikt/ds-react'
 import { RadioGroupWrapper } from '../styled'
-import { useBehandlingRoutes } from '../../BehandlingRoutes'
 
 export const SoeknadGyldigFremsatt = () => {
   /*
@@ -12,7 +11,6 @@ export const SoeknadGyldigFremsatt = () => {
   */
   const [soeknadIkkeGyldig, setSoeknadIkkeGyldig] = useState<boolean>(false)
   const [soeknadGyldigBegrunnelse, setSoeknadGyldigBegrunnelse] = useState('')
-  const { next } = useBehandlingRoutes()
   return (
     <RadioGroupWrapper>
       <RadioGroup
@@ -26,6 +24,7 @@ export const SoeknadGyldigFremsatt = () => {
       </RadioGroup>
       {soeknadIkkeGyldig && (
         <Textarea
+          className="textarea"
           label="Begrunnelse (hvis aktuelt)"
           value={soeknadGyldigBegrunnelse}
           onChange={(e) => setSoeknadGyldigBegrunnelse(e.target.value)}
@@ -34,9 +33,6 @@ export const SoeknadGyldigFremsatt = () => {
           size="small"
         />
       )}
-      <Button variant="primary" size="medium" className="button" onClick={next}>
-        Lagre
-      </Button>
     </RadioGroupWrapper>
   )
 }

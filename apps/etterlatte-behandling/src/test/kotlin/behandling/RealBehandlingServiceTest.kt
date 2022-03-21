@@ -1,9 +1,11 @@
 package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import kotlinx.coroutines.channels.SendChannel
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
@@ -24,7 +26,7 @@ internal class RealBehandlingServiceTest {
     fun before(){
         Kontekst.set(Context(mockk(), object:DatabaseKontekst{
             override fun activeTx(): Connection {
-                return null as Connection
+                throw IllegalArgumentException()
             }
             override fun <T> inTransaction(block: () -> T): T {
                 return block()
@@ -71,14 +73,17 @@ internal class RealBehandlingServiceTest {
         val opplysningerHentes = slot<UUID>()
         val opplysningerMock = mockk<OpplysningDao>()
 
+        val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
+        val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
         val opprettetBehandling = Behandling(UUID.randomUUID(), 1, emptyList(), null, null, false)
 
-        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock, NoOpVilkaarKlient()), mockk())
+        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock, NoOpVilkaarKlient()), hendleseskanal)
 
         every { behandlingerMock.opprett(capture(behandlingOpprettes)) } returns Unit
         every { behandlingerMock.hent(capture(behandlingHentes)) } returns opprettetBehandling
         every { opplysningerMock.finnOpplysningerIBehandling(capture(opplysningerHentes)) } returns emptyList()
         every { behandlingerMock.lagreVilkarsproving(any()) } returns Unit
+        coEvery { hendleseskanal.send(capture(hendelse)) } returns Unit
 
         val resultat = sut.startBehandling(1, emptyList())
 
@@ -86,6 +91,8 @@ internal class RealBehandlingServiceTest {
         Assertions.assertEquals(1, behandlingOpprettes.captured.sak)
         Assertions.assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
         Assertions.assertEquals(opplysningerHentes.captured, behandlingOpprettes.captured.id)
+        Assertions.assertEquals(resultat.id, hendelse.captured.first)
+        Assertions.assertEquals(BehandlingHendelseType.OPPRETTET, hendelse.captured.second)
     }
 
     @Test
@@ -99,7 +106,7 @@ internal class RealBehandlingServiceTest {
 
         val opprettetBehandling = Behandling(UUID.randomUUID(), 1, emptyList(), null, null, false, false)
 
-        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock, NoOpVilkaarKlient()), mockk())
+        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock, NoOpVilkaarKlient()), mockChannel())
 
 
         every { behandlingerMock.opprett(capture(behandlingOpprettes)) } returns Unit
@@ -123,6 +130,8 @@ internal class RealBehandlingServiceTest {
 
 
 }
+
+fun mockChannel() = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>().apply { coEvery { send(any()) } returns Unit }
 
 class NoOpVilkaarKlient : VilkaarKlient {
     override fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): List<VurdertVilkaar> {

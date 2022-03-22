@@ -30,7 +30,7 @@ export enum OpplysningsType {
   avdoed_forelder_soeknad = 'AVDOED_SOEKNAD_V1',
 
   soeknad_mottatt = 'SOEKNAD_MOTTATT_DATO',
-  innsender = 'INNSENDER_SOEKNAD_v1',
+  innsender = 'INNSENDER_SOEKNAD_V1',
 }
 
 export enum KildeType {

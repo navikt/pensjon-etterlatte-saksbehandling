@@ -22,6 +22,8 @@ spec:
   azure: # ??
     application:
       enabled: true
+  envFrom:
+    - secret: barnepensjon-secrets
   replicas:
     cpuThresholdPercentage: 90
     max: 1

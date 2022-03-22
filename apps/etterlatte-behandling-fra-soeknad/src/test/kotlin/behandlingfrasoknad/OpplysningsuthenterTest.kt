@@ -91,7 +91,7 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysning om innsender`() {
-        consumeSingle<InnsenderSoeknad>(Opplysningstyper.INNSENDER_SOEKNAD_v1)
+        consumeSingle<InnsenderSoeknad>(Opplysningstyper.INNSENDER_SOEKNAD_V1)
             .apply {
                 assertEquals(PersonType.INNSENDER, type)
                 assertEquals("GØYAL", fornavn)

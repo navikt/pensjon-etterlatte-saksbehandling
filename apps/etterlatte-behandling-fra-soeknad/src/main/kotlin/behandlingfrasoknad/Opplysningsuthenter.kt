@@ -22,7 +22,7 @@ class Opplysningsuthenter {
             avdoed(barnepensjonssoknad, Opplysningstyper.AVDOED_SOEKNAD_V1),
             soeker(barnepensjonssoknad, Opplysningstyper.SOEKER_SOEKNAD_V1),
             gjenlevendeForelder(barnepensjonssoknad, Opplysningstyper.GJENLEVENDE_FORELDER_SOEKNAD_V1),
-            innsender(barnepensjonssoknad, Opplysningstyper.INNSENDER_SOEKNAD_v1),
+            innsender(barnepensjonssoknad, Opplysningstyper.INNSENDER_SOEKNAD_V1),
             utbetalingsinformasjon(barnepensjonssoknad, Opplysningstyper.UTBETALINGSINFORMASJON_V1),
             samtykke(barnepensjonssoknad, Opplysningstyper.SAMTYKKE),
             soeknadMottattDato(barnepensjonssoknad, Opplysningstyper.SOEKNAD_MOTTATT_DATO),

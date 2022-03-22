@@ -38,13 +38,18 @@ fun kriterieSoekerErUnder20(
             )
         }
     )
-    return if(opplysningsGrunnlag.size < 2) {
-        Kriterie(Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, emptyList())
+
+    val resultat = if (soekerPdl == null || avdoedPdl == null) {
+        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     } else {
-        val resultat =
-            vurderOpplysning { hentFoedselsdato(soekerPdl!!).plusYears(20) > hentVirkningsdato(avdoedPdl) }
-        Kriterie(Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, resultat, opplysningsGrunnlag)
+        vurderOpplysning { hentFoedselsdato(soekerPdl).plusYears(20) > hentVirkningsdato(avdoedPdl) }
     }
+
+    return Kriterie(
+            Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
+            resultat,
+            opplysningsGrunnlag
+        )
 
 
 }

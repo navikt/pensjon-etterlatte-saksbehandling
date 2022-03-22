@@ -38,8 +38,19 @@ fun kriterieIngenUtenlandsoppholdSisteFemAar(
     avdoedPdl: VilkaarOpplysning<Person>?,
 ): Kriterie {
 
-    if(avdoedPdl == null || avdoedSoeknad == null) return Kriterie(
-        Kriterietyper.AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR, VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, emptyList()
+    val opplysningsGrunnlag = listOfNotNull(
+        avdoedPdl?.let {
+            Kriteriegrunnlag(
+                avdoedPdl.kilde,
+                Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
+            )
+        },
+        avdoedSoeknad?.let { Kriteriegrunnlag(avdoedSoeknad.kilde, avdoedSoeknad.opplysning.utenlandsopphold) }
+    )
+
+    if (avdoedPdl == null || avdoedSoeknad == null) return opplysningsGrunnlagNull(
+        Kriterietyper.AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR,
+        opplysningsGrunnlag
     )
 
     val ingenOppholdUtlandetSisteFemAar = try {
@@ -56,8 +67,6 @@ fun kriterieIngenUtenlandsoppholdSisteFemAar(
     } catch (ex: OpplysningKanIkkeHentesUt) {
         VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     }
-
-    val opplysningsGrunnlag = listOf(Kriteriegrunnlag(avdoedPdl.kilde, Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)))
 
     return Kriterie(
         Kriterietyper.AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR, ingenOppholdUtlandetSisteFemAar, opplysningsGrunnlag

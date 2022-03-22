@@ -3,10 +3,14 @@ package no.nav.etterlatte.vilkaar.barnepensjon
 import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.barnepensjon.hentAdresser
 import no.nav.etterlatte.barnepensjon.hentDoedsdato
+import no.nav.etterlatte.barnepensjon.opplysningsGrunnlagNull
 import no.nav.etterlatte.barnepensjon.setVikaarVurderingsResultat
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
@@ -20,14 +24,20 @@ import java.time.LocalDate
 fun vilkaarBarnetsMedlemskap(
     vilkaartype: Vilkaartyper,
     soekerPdl: VilkaarOpplysning<Person>?,
+    soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
     gjenlevendePdl: VilkaarOpplysning<Person>?,
     avdoedPdl: VilkaarOpplysning<Person>?,
 ): VurdertVilkaar {
-    //TODO legg adresse til fra søknad
-    val barnHarIkkeAdresseIUtlandet =
-        kriterieHarIkkeAdresseIUtlandet(soekerPdl, avdoedPdl, Kriterietyper.SOEKER_IKKE_ADRESSE_I_UTLANDET)
 
-    val foreldreHarIkkeAdresseIUtlandet = kriterieHarIkkeAdresseIUtlandet(
+    val barnHarIkkeAdresseIUtlandet =
+        kriterieSoekerHarIkkeAdresseIUtlandet(
+            soekerPdl,
+            soekerSoeknad,
+            avdoedPdl,
+            Kriterietyper.SOEKER_IKKE_ADRESSE_I_UTLANDET
+        )
+
+    val foreldreHarIkkeAdresseIUtlandet = kriterieForeldreHarIkkeAdresseIUtlandet(
         gjenlevendePdl,
         avdoedPdl,
         Kriterietyper.GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET
@@ -43,59 +53,105 @@ fun vilkaarBarnetsMedlemskap(
     )
 }
 
-fun kriterieHarIkkeAdresseIUtlandet(
-    person: VilkaarOpplysning<Person>?,
+fun kriterieForeldreHarIkkeAdresseIUtlandet(
+    gjenlevendePdl: VilkaarOpplysning<Person>?,
     avdoedPdl: VilkaarOpplysning<Person>?,
     kriterietype: Kriterietyper
 ): Kriterie {
-    if(person == null || avdoedPdl == null) return  Kriterie(kriterietype, VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, emptyList())
+    val opplysningsGrunnlag = listOfNotNull(
+        gjenlevendePdl?.let { Kriteriegrunnlag(gjenlevendePdl.kilde, hentAdresser(gjenlevendePdl)) },
+        avdoedPdl?.let {
+            Kriteriegrunnlag(
+                avdoedPdl.kilde,
+                Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
+            )
+        }
+    )
+
+    if (gjenlevendePdl == null || avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
+
     val resultat = try {
-        val adresserPdl = hentAdresser(person)
-        val doedsdatoPdl = hentDoedsdato(avdoedPdl)
+        kunNorskePdlAdresser(gjenlevendePdl, avdoedPdl, kriterietype)
+    } catch (ex: OpplysningKanIkkeHentesUt) {
+        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+    }
 
-        val bostedResultat = harKunNorskeAdresserEtterDoedsdato(adresserPdl.bostedadresse, doedsdatoPdl)
-        val oppholdResultat = harKunNorskeAdresserEtterDoedsdato(adresserPdl.oppholdadresse, doedsdatoPdl)
-        val kontaktResultat = harKunNorskeAdresserEtterDoedsdato(adresserPdl.kontaktadresse, doedsdatoPdl)
-        if (listOf(bostedResultat, oppholdResultat, kontaktResultat).contains(VilkaarVurderingsResultat.IKKE_OPPFYLT)) {
-            if (kriterietype == Kriterietyper.SOEKER_IKKE_ADRESSE_I_UTLANDET) {
-                VilkaarVurderingsResultat.IKKE_OPPFYLT
-            } else {
+    return Kriterie(kriterietype, resultat, opplysningsGrunnlag)
+}
+
+fun kriterieSoekerHarIkkeAdresseIUtlandet(
+    soekerPdl: VilkaarOpplysning<Person>?,
+    soekerSoknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
+    avdoedPdl: VilkaarOpplysning<Person>?,
+    kriterietype: Kriterietyper
+): Kriterie {
+    val opplysningsGrunnlag = listOfNotNull(
+        soekerPdl?.let { Kriteriegrunnlag(soekerPdl.kilde, hentAdresser(soekerPdl)) },
+        soekerSoknad?.let { Kriteriegrunnlag(soekerSoknad.kilde, soekerSoknad.opplysning.utenlandsadresse) },
+        avdoedPdl?.let {
+            Kriteriegrunnlag(
+                avdoedPdl.kilde,
+                Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
+            )
+        }
+    )
+
+    if (soekerPdl == null || avdoedPdl == null || soekerSoknad == null) return opplysningsGrunnlagNull(
+        kriterietype,
+        opplysningsGrunnlag
+    )
+
+    val resultat = try {
+        val pdlResultat = kunNorskePdlAdresser(soekerPdl, avdoedPdl, kriterietype)
+        val soeknadResultat =
+            if (soekerSoknad.opplysning.utenlandsadresse.adresseIUtlandet == JaNeiVetIkke.JA) {
                 VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-            }
+            } else VilkaarVurderingsResultat.OPPFYLT
+        val resultater = listOf(pdlResultat, soeknadResultat)
 
-        } else {
+        if (resultater.all { it == VilkaarVurderingsResultat.OPPFYLT }) {
             VilkaarVurderingsResultat.OPPFYLT
+        } else if (resultater.any { it == VilkaarVurderingsResultat.IKKE_OPPFYLT }) {
+            VilkaarVurderingsResultat.IKKE_OPPFYLT
+        } else {
+            VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         }
 
     } catch (ex: OpplysningKanIkkeHentesUt) {
         VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     }
 
-    val opplysningsGrunnlag = listOf(
-        Kriteriegrunnlag(person.kilde, hentAdresser(person)),
-        Kriteriegrunnlag(
-            avdoedPdl.kilde,
-            Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
-        )
-    )
-
     return Kriterie(kriterietype, resultat, opplysningsGrunnlag)
 }
 
 
-/*
-fun kriterieHarIkkeOppgittAdresseIUtlandet(utenlandsadresseBarn: List<VilkaarOpplysning<UtenlandsadresseBarn>>): Kriterie {
-    val opplysningsGrunnlag = listOf(utenlandsadresseBarn.filter { it.kilde.type == "privatperson" }).flatten()
-    val resultat =
-        vurderOpplysning { hentUtenlandsadresseSoeknad(utenlandsadresseBarn).adresseIUtlandet?.lowercase() == "nei" }
+fun kunNorskePdlAdresser(
+    person: VilkaarOpplysning<Person>,
+    avdoedPdl: VilkaarOpplysning<Person>,
+    kriterietype: Kriterietyper
+): VilkaarVurderingsResultat {
+    val adresserPdl = hentAdresser(person)
+    val doedsdatoPdl = hentDoedsdato(avdoedPdl)
 
-    return Kriterie(
-        Kriterietyper.SOEKER_IKKE_OPPGITT_ADRESSE_I_UTLANDET_I_SOEKNAD,
-        resultat,
-        opplysningsGrunnlag
-    )
+    val bostedResultat = harKunNorskeAdresserEtterDoedsdato(adresserPdl.bostedadresse, doedsdatoPdl)
+    val oppholdResultat = harKunNorskeAdresserEtterDoedsdato(adresserPdl.oppholdadresse, doedsdatoPdl)
+    val kontaktResultat = harKunNorskeAdresserEtterDoedsdato(adresserPdl.kontaktadresse, doedsdatoPdl)
+    return if (listOf(
+            bostedResultat,
+            oppholdResultat,
+            kontaktResultat
+        ).contains(VilkaarVurderingsResultat.IKKE_OPPFYLT)
+    ) {
+        if (kriterietype == Kriterietyper.SOEKER_IKKE_ADRESSE_I_UTLANDET && bostedResultat == VilkaarVurderingsResultat.IKKE_OPPFYLT) {
+            VilkaarVurderingsResultat.IKKE_OPPFYLT
+        } else {
+            VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        }
+
+    } else {
+        VilkaarVurderingsResultat.OPPFYLT
+    }
 }
-*/
 
 
 fun harKunNorskeAdresserEtterDoedsdato(adresser: List<Adresse>?, doedsdato: LocalDate): VilkaarVurderingsResultat {

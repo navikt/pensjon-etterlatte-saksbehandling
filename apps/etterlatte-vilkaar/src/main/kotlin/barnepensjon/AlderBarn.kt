@@ -27,12 +27,14 @@ fun kriterieSoekerErUnder20(
     val opplysningsGrunnlag = listOfNotNull(
         avdoedPdl?.let {
             Kriteriegrunnlag(
+                KriterieOpplysningsType.DOEDSDATO,
                 avdoedPdl.kilde,
                 Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
             )
         },
         soekerPdl?.let {
             Kriteriegrunnlag(
+                KriterieOpplysningsType.FOEDSELSDATO,
                 soekerPdl.kilde,
                 Foedselsdato(soekerPdl.opplysning.foedselsdato, soekerPdl.opplysning.foedselsnummer)
             )
@@ -50,7 +52,5 @@ fun kriterieSoekerErUnder20(
             resultat,
             opplysningsGrunnlag
         )
-
-
 }
 

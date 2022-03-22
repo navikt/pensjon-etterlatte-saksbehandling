@@ -3,6 +3,7 @@ package no.nav.etterlatte.barnepensjon
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
+import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -40,6 +41,7 @@ fun kriterieDoedsdatoRegistrertIPdl(avdoed: VilkaarOpplysning<Person>?): Kriteri
             resultat,
             listOf(
                 Kriteriegrunnlag(
+                    KriterieOpplysningsType.DOEDSDATO,
                     avdoed.kilde,
                     Doedsdato(avdoed.opplysning.doedsdato, avdoed.opplysning.foedselsnummer)
                 )
@@ -53,9 +55,16 @@ fun kriterieAvdoedErForelder(
     avdoed: VilkaarOpplysning<Person>?,
 ): Kriterie {
     val opplsyningsGrunnlag = listOfNotNull(
-        soeker?.let { Kriteriegrunnlag(soeker.kilde, Foreldre(soeker.opplysning.familieRelasjon?.foreldre)) },
+        soeker?.let {
+            Kriteriegrunnlag(
+                KriterieOpplysningsType.FORELDRE,
+                soeker.kilde,
+                Foreldre(soeker.opplysning.familieRelasjon?.foreldre)
+            )
+        },
         avdoed?.let {
             Kriteriegrunnlag(
+                KriterieOpplysningsType.DOEDSDATO,
                 avdoed.kilde,
                 Doedsdato(avdoed.opplysning.doedsdato, avdoed.opplysning.foedselsnummer)
             )

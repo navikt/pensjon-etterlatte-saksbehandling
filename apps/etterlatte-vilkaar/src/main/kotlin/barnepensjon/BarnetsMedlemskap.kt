@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
+import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -59,9 +60,16 @@ fun kriterieForeldreHarIkkeAdresseIUtlandet(
     kriterietype: Kriterietyper
 ): Kriterie {
     val opplysningsGrunnlag = listOfNotNull(
-        gjenlevendePdl?.let { Kriteriegrunnlag(gjenlevendePdl.kilde, hentAdresser(gjenlevendePdl)) },
+        gjenlevendePdl?.let {
+            Kriteriegrunnlag(
+                KriterieOpplysningsType.ADRESSER,
+                gjenlevendePdl.kilde,
+                hentAdresser(gjenlevendePdl)
+            )
+        },
         avdoedPdl?.let {
             Kriteriegrunnlag(
+                KriterieOpplysningsType.DOEDSDATO,
                 avdoedPdl.kilde,
                 Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
             )
@@ -86,10 +94,11 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
     kriterietype: Kriterietyper
 ): Kriterie {
     val opplysningsGrunnlag = listOfNotNull(
-        soekerPdl?.let { Kriteriegrunnlag(soekerPdl.kilde, hentAdresser(soekerPdl)) },
-        soekerSoknad?.let { Kriteriegrunnlag(soekerSoknad.kilde, soekerSoknad.opplysning.utenlandsadresse) },
+        soekerPdl?.let { Kriteriegrunnlag(KriterieOpplysningsType.ADRESSER, soekerPdl.kilde, hentAdresser(soekerPdl)) },
+        soekerSoknad?.let { Kriteriegrunnlag(KriterieOpplysningsType.SOEKER_UTENLANDSOPPHOLD, soekerSoknad.kilde, soekerSoknad.opplysning.utenlandsadresse) },
         avdoedPdl?.let {
             Kriteriegrunnlag(
+                KriterieOpplysningsType.DOEDSDATO,
                 avdoedPdl.kilde,
                 Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
             )

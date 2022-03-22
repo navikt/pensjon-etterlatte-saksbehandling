@@ -60,23 +60,30 @@ export enum VilkaarVurderingsResultat {
 export interface IKriterie {
   navn: Kriterietype
   resultat: VilkaarVurderingsResultat
-  basertPaaOpplysninger: IVilkaaropplysing[]
-}
-
-export interface IVilkaaropplysing {
-  opplysningsType: OpplysningsType
-  kilde: string
-  opplysing: any
+  basertPaaOpplysninger: IKriterieOpplysing[]
 }
 
 export enum Kriterietype {
   AVDOED_ER_FORELDER = 'AVDOED_ER_FORELDER',
   DOEDSFALL_ER_REGISTRERT_I_PDL = 'DOEDSFALL_ER_REGISTRERT_I_PDL',
   SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO = 'SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO',
-  SOEKER_IKKE_OPPGITT_ADRESSE_I_UTLANDET_I_SOEKNAD = 'SOEKER_IKKE_OPPGITT_ADRESSE_I_UTLANDET_I_SOEKNAD',
-  SOEKER_IKKE_BOSTEDADRESSE_I_UTLANDET = 'SOEKER_IKKE_BOSTEDADRESSE_I_UTLANDET',
-  SOEKER_IKKE_OPPHOLDADRESSE_I_UTLANDET = 'SOEKER_IKKE_OPPHOLDADRESSE_I_UTLANDET',
-  SOEKER_IKKE_KONTAKTADRESSE_I_UTLANDET = 'SOEKER_IKKE_KONTAKTADRESSE_I_UTLANDET',
+  SOEKER_IKKE_ADRESSE_I_UTLANDET = 'SOEKER_IKKE_ADRESSE_I_UTLANDET',
+  GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET = 'GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET',
+}
+
+export interface IKriterieOpplysing {
+  kriterieOpplysningsType: KriterieOpplysningsType
+  kilde: string
+  opplysing: any
+}
+
+export enum KriterieOpplysningsType {
+  ADRESSER = 'ADRESSER',
+  DOEDSDATO = 'DOEDSDATO',
+  FOEDSELSDATO = 'FOEDSELSDATO',
+  FORELDRE = 'FORELDRE',
+  AVDOED_UTENLANDSOPPHOLD = 'AVDOED_UTENLANDSOPPHOLD',
+  SOEKER_UTENLANDSOPPHOLD = 'SOEKER_UTENLANDSOPPHOLD',
 }
 
 export interface IPerson {

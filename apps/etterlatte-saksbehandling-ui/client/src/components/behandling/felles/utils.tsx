@@ -1,6 +1,12 @@
 import { IAdresse } from '../types'
 import moment from 'moment'
-import { IKriterie, IVilkaaropplysing, Kriterietype, OpplysningsType } from '../../../store/reducers/BehandlingReducer'
+import {
+  IKriterie,
+  IKriterieOpplysing,
+  KriterieOpplysningsType,
+  Kriterietype,
+  OpplysningsType,
+} from '../../../store/reducers/BehandlingReducer'
 
 export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: Date): IAdresse[] {
   const etterDoedsdatoEllerAktiv = adresser?.filter(
@@ -14,11 +20,17 @@ export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: Date
 TODO: type opp return type
 */
 
-export const hentKriterier = (vilkaar: any, kriterieType: Kriterietype, opplysningsType: OpplysningsType) => {
+export const hentKriterier = (
+  vilkaar: any,
+  kriterieType: Kriterietype,
+  kriterieOpplysningsType: KriterieOpplysningsType
+) => {
   try {
     return vilkaar.kriterier
       ?.find((krit: IKriterie) => krit.navn === kriterieType)
-      ?.basertPaaOpplysninger.find((opplysning: IVilkaaropplysing) => opplysning.opplysningsType === opplysningsType)
+      ?.basertPaaOpplysninger.find(
+        (opplysning: IKriterieOpplysing) => opplysning.kriterieOpplysningsType === kriterieOpplysningsType
+      )
   } catch (e: any) {
     console.error(e)
   }

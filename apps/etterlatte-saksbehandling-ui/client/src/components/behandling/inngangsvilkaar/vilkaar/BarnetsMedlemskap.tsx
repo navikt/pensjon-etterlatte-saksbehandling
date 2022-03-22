@@ -13,6 +13,7 @@ import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import {
+  KriterieOpplysningsType,
   Kriterietype,
   OpplysningsType,
   VilkaarVurderingsResultat,
@@ -23,11 +24,31 @@ import { hentAdresserEtterDoedsdato, hentKriterier } from '../../felles/utils'
 export const BarnetsMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
 
-  const avdoedDoedsdato = hentKriterier(vilkaar, Kriterietype.SOEKER_IKKE_BOSTEDADRESSE_I_UTLANDET, OpplysningsType.avdoed_forelder_pdl).opplysning.doedsdato
-  const bostedadresser = hentKriterier(vilkaar, Kriterietype.SOEKER_IKKE_BOSTEDADRESSE_I_UTLANDET, OpplysningsType.soeker_pdl)?.opplysning.bostedadresse
-  const oppholdsadresser = hentKriterier(vilkaar, Kriterietype.SOEKER_IKKE_OPPHOLDADRESSE_I_UTLANDET, OpplysningsType.soeker_pdl)?.opplysning.oppholdsadresse
-  const kontaktadresser = hentKriterier(vilkaar, Kriterietype.SOEKER_IKKE_KONTAKTADRESSE_I_UTLANDET, OpplysningsType.soeker_pdl)?.opplysning.kontaktadresse
-  const harUtelandsadresse = hentKriterier(vilkaar, Kriterietype.SOEKER_IKKE_OPPGITT_ADRESSE_I_UTLANDET_I_SOEKNAD, OpplysningsType.soeker_pdl)
+  const avdoedDoedsdato = hentKriterier(
+    vilkaar,
+    Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET,
+    KriterieOpplysningsType.DOEDSDATO
+  ).opplysning.doedsdato
+  const bostedadresser = hentKriterier(
+    vilkaar,
+    Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET,
+    KriterieOpplysningsType.ADRESSER
+  )?.opplysning.bostedadresse
+  const oppholdsadresser = hentKriterier(
+    vilkaar,
+    Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET,
+    KriterieOpplysningsType.ADRESSER
+  )?.opplysning.oppholdsadresse
+  const kontaktadresser = hentKriterier(
+    vilkaar,
+    Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET,
+    KriterieOpplysningsType.ADRESSER
+  )?.opplysning.kontaktadresse
+  const harUtelandsadresse = hentKriterier(
+    vilkaar,
+    Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET,
+    KriterieOpplysningsType.ADRESSER
+  )
 
   const bostedEtterDoedsdato = hentAdresserEtterDoedsdato(bostedadresser, avdoedDoedsdato)
   const oppholdEtterDoedsdato = hentAdresserEtterDoedsdato(oppholdsadresser, avdoedDoedsdato)

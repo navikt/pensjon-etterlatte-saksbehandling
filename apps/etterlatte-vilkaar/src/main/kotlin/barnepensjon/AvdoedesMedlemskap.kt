@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
+import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -41,11 +42,18 @@ fun kriterieIngenUtenlandsoppholdSisteFemAar(
     val opplysningsGrunnlag = listOfNotNull(
         avdoedPdl?.let {
             Kriteriegrunnlag(
+                KriterieOpplysningsType.DOEDSDATO,
                 avdoedPdl.kilde,
                 Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
             )
         },
-        avdoedSoeknad?.let { Kriteriegrunnlag(avdoedSoeknad.kilde, avdoedSoeknad.opplysning.utenlandsopphold) }
+        avdoedSoeknad?.let {
+            Kriteriegrunnlag(
+                KriterieOpplysningsType.AVDOED_UTENLANDSOPPHOLD,
+                avdoedSoeknad.kilde,
+                avdoedSoeknad.opplysning.utenlandsopphold
+            )
+        }
     )
 
     if (avdoedPdl == null || avdoedSoeknad == null) return opplysningsGrunnlagNull(

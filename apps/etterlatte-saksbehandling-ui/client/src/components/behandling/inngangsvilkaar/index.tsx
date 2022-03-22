@@ -7,7 +7,6 @@ import { VilkaarsType } from '../../../store/reducers/BehandlingReducer'
 import { AvdoedesForutMedlemskap } from './vilkaar/AvdoedesForutMedlemskap'
 import { useLocation } from 'react-router-dom'
 import { BarnetsMedlemskap } from './vilkaar/BarnetsMedlemskap'
-import { BehandlingHandlingKnapper } from '../BehandlingHandlingKnapper'
 
 export const Inngangsvilkaar = () => {
   const ctx = useContext(AppContext)

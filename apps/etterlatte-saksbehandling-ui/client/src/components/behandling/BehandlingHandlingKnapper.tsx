@@ -82,10 +82,10 @@ export const VilkaarsKnapperWrapper = styled.div`
 
   .button {
     width: 200px;
-    margin: 0em 2em 0em 0em;
+    margin: 0em 1em 0em 1em;
   }
   .textButton {
-    margin-top: 1em;
+    margin-top: 2em;
     text-decoration: none;
     cursor: pointer;
     font-weight: bold;

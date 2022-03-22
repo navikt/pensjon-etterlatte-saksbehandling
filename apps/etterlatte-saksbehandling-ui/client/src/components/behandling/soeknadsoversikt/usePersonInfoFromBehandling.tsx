@@ -1,8 +1,13 @@
 import { useContext } from 'react'
 import { AppContext } from '../../../store/AppContext'
-
 import { OpplysningsType } from '../../../store/reducers/BehandlingReducer'
-import { IAvdoedFraSoeknad, IBarnFraSoeknad, IGjenlevendeFraSoeknad, IPersonOpplysningFraPdl } from '../types'
+import {
+  IAvdoedFraSoeknad,
+  IBarnFraSoeknad,
+  IGjenlevendeFraSoeknad,
+  IPersonOpplysning,
+  IPersonOpplysningFraPdl,
+} from '../types'
 
 export const usePersonInfoFromBehandling = () => {
   const ctx = useContext(AppContext)
@@ -37,8 +42,10 @@ export const usePersonInfoFromBehandling = () => {
     (g) => g.opplysningType === OpplysningsType.gjenlevende_forelder_soeknad
   )?.opplysning
 
-  const mottattDato = grunnlag.find((g) => g.opplysningType === OpplysningsType.soeknad_mottatt)?.opplysning
-  const innsender = grunnlag.find((g) => g.opplysningType === OpplysningsType.innsender)?.opplysning
+  const mottattDato: string = grunnlag.find((g) => g.opplysningType === OpplysningsType.soeknad_mottatt)?.opplysning
+    ?.mottattDato
+
+  const innsender: IPersonOpplysning = grunnlag.find((g) => g.opplysningType === OpplysningsType.innsender)?.opplysning
 
   return {
     soekerPdl,

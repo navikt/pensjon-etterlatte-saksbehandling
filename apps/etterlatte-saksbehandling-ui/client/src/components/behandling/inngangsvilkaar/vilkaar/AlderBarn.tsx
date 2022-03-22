@@ -12,10 +12,7 @@ import {
   VilkaarWrapper,
 } from '../styled'
 import { VilkaarProps } from '../types'
-import {
-  Kriterietype,
-  OpplysningsType,
-} from '../../../../store/reducers/BehandlingReducer'
+import { KriterieOpplysningsType, Kriterietype, OpplysningsType } from '../../../../store/reducers/BehandlingReducer'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import { hentKriterier } from '../../felles/utils'
@@ -23,8 +20,16 @@ import { hentKriterier } from '../../felles/utils'
 export const AlderBarn = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
 
-  const barnetsFoedselsdato = hentKriterier(vilkaar, Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, OpplysningsType.soeker_pdl);
-  const avdoedDoedsdato = hentKriterier(vilkaar, Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, OpplysningsType.avdoed_forelder_pdl);
+  const barnetsFoedselsdato = hentKriterier(
+    vilkaar,
+    Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
+    KriterieOpplysningsType.FOEDSELSDATO
+  )
+  const avdoedDoedsdato = hentKriterier(
+    vilkaar,
+    Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
+    KriterieOpplysningsType.DOEDSDATO
+  )
 
   const barnetsAlderVedDoedsfall = differenceInYears(
     new Date(avdoedDoedsdato.opplysning.doedsdato),

@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
+import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -38,8 +39,26 @@ fun kriterieIngenUtenlandsoppholdSisteFemAar(
     avdoedPdl: VilkaarOpplysning<Person>?,
 ): Kriterie {
 
-    if(avdoedPdl == null || avdoedSoeknad == null) return Kriterie(
-        Kriterietyper.AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR, VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, emptyList()
+    val opplysningsGrunnlag = listOfNotNull(
+        avdoedPdl?.let {
+            Kriteriegrunnlag(
+                KriterieOpplysningsType.DOEDSDATO,
+                avdoedPdl.kilde,
+                Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
+            )
+        },
+        avdoedSoeknad?.let {
+            Kriteriegrunnlag(
+                KriterieOpplysningsType.AVDOED_UTENLANDSOPPHOLD,
+                avdoedSoeknad.kilde,
+                avdoedSoeknad.opplysning.utenlandsopphold
+            )
+        }
+    )
+
+    if (avdoedPdl == null || avdoedSoeknad == null) return opplysningsGrunnlagNull(
+        Kriterietyper.AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR,
+        opplysningsGrunnlag
     )
 
     val ingenOppholdUtlandetSisteFemAar = try {
@@ -56,8 +75,6 @@ fun kriterieIngenUtenlandsoppholdSisteFemAar(
     } catch (ex: OpplysningKanIkkeHentesUt) {
         VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     }
-
-    val opplysningsGrunnlag = listOf(Kriteriegrunnlag(avdoedPdl.kilde, Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)))
 
     return Kriterie(
         Kriterietyper.AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR, ingenOppholdUtlandetSisteFemAar, opplysningsGrunnlag

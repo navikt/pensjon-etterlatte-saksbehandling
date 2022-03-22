@@ -6,10 +6,13 @@ import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AvdoedSoeknad
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Forelder
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsoppholdOpplysninger
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Verge
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
@@ -24,6 +27,7 @@ import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
+import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
@@ -34,10 +38,12 @@ internal class BarnepensjonVilkaarTest {
 
     @Test
     fun vurderAlderErUnder20() {
-        val personBarnOver20 = lagMockPersonPdl(foedselsdatoBarnOver20, null, null, Bosted.NORGE, null)
-        val personBarnUnder20 = lagMockPersonPdl(foedselsdatoBarnUnder20, null, null, Bosted.NORGE, null)
-        val personAvdoedMedDoedsdato = lagMockPersonPdl(foedselsdatoBarnUnder20, null, doedsdatoPdl, Bosted.NORGE, null)
-        val personAvdoedUtenDoedsdato = lagMockPersonPdl(foedselsdatoBarnUnder20, null, null, Bosted.NORGE, null)
+        val personBarnOver20 = lagMockPersonPdl(foedselsdatoBarnOver20, fnrBarn, null, adresserNorgePdl, null)
+        val personBarnUnder20 = lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresserNorgePdl, null)
+        val personAvdoedMedDoedsdato =
+            lagMockPersonPdl(foedselsdatoBarnUnder20, fnrAvdoed, doedsdatoPdl, adresserNorgePdl, null)
+        val personAvdoedUtenDoedsdato =
+            lagMockPersonPdl(foedselsdatoBarnUnder20, fnrAvdoed, null, adresserNorgePdl, null)
 
         val vurderingBarnOver20 = vilkaarBrukerErUnder20(
             Vilkaartyper.SOEKER_ER_UNDER_20,
@@ -69,8 +75,8 @@ internal class BarnepensjonVilkaarTest {
     fun vurderDoedsdatoErRegistrert() {
         val avdoedIngenDoedsdato = lagMockPersonPdl(null, fnrAvdoed, null, null, null)
         val avdoedRegistrertDoedsdato = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, null, null)
-        val barnAvdoedErForeldre = lagMockPersonPdl(null, null, null, null, avdoedErForeldre)
-        val barnAvdoedErIkkeForeldre = lagMockPersonPdl(null, null, null, null, avdoedErIkkeForeldre)
+        val barnAvdoedErForeldre = lagMockPersonPdl(null, fnrBarn, null, null, avdoedErForeldre)
+        val barnAvdoedErIkkeForeldre = lagMockPersonPdl(null, fnrBarn, null, null, avdoedErIkkeForeldre)
 
         val doedsdatoIkkeIPdl =
             vilkaarDoedsfallErRegistrert(
@@ -102,8 +108,8 @@ internal class BarnepensjonVilkaarTest {
     @Test
     fun vurderAvdoedesForutgaaendeMeldemskap() {
         val avdoedRegistrertDoedsdato = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, null, null)
-        val avdoedSoknadMedAdresse = lagMockPersonAvdoedSoeknad(utenlandsoppholdSoeknad)
-        val avdoedSoeknadUtenUtland = lagMockPersonAvdoedSoeknad(ingenUtenlandsoppholdSoeknad)
+        val avdoedSoknadMedAdresse = lagMockPersonAvdoedSoeknad(utenlandsoppholdAvdoedSoeknad)
+        val avdoedSoeknadUtenUtland = lagMockPersonAvdoedSoeknad(ingenUtenlandsoppholdAvdoedSoeknad)
 
         val utenlandsopphold =
             kriterieIngenUtenlandsoppholdSisteFemAar(
@@ -121,55 +127,62 @@ internal class BarnepensjonVilkaarTest {
         assertEquals(ingenUtenlandsopphold.resultat, VilkaarVurderingsResultat.OPPFYLT)
     }
 
-    /*
+
     @Test
     fun vuderBarnetsMedlemskap() {
-        val test = lagMockPersonPdl(foedselsdatoBarnOver20)
+        val avdoedRegistrertDoedsdato = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, null, null)
+        val gjenlevendePdlNorge = lagMockPersonPdl(null, fnrGjenlevende, null, adresserNorgePdl, null)
+        val gjenlevendePdlDanmark = lagMockPersonPdl(null, fnrGjenlevende, null, adresseDanmarkPdl, null)
 
-        val ingenOppgittUtenlandsadresse =
-            kriterieHarIkkeOppgittAdresseIUtlandet(listOf(ingenUtenlandsadresseBarnVilkaarOpplysning))
-        val harOppgittUtenlandsadresse =
-            kriterieHarIkkeOppgittAdresseIUtlandet(listOf(harUtenlandsadresseBarnVilkaarOpplysning))
+        val barnPdlNorge = lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresserNorgePdl, avdoedErForeldre)
+        val barnPdlDanmark =
+            lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresseDanmarkPdl, avdoedErForeldre)
+        val barnSoeknadNorge = lagMockPersonSoekerSoeknad(UtenlandsadresseBarn(JaNeiVetIkke.NEI, null, null))
+        val barnSoeknadDanmark = lagMockPersonSoekerSoeknad(UtenlandsadresseBarn(JaNeiVetIkke.JA, null, null))
 
-        val ingenUtenlandskBostedadresseEtterDoedsdato =
-            kriterieHarIkkeBostedsadresseIUtlandet(
-                listOf(ingenUtenlandsBostedadresseVilkaarOpplysning),
-                listOf(doedsdatoForelderPdl)
-            )
-
-        val harUtenlandskBostedadresseEtterDoedsdato =
-            kriterieHarIkkeBostedsadresseIUtlandet(
-                listOf(harUtenlandsBostedadresseVilkaarOpplysning),
-                listOf(doedsdatoForelderPdl)
-            )
-
-        val ingenBostedAdresser = kriterieHarIkkeBostedsadresseIUtlandet(
-            listOf(ingenBostedadresseVilkaarOpplysning),
-            listOf(doedsdatoForelderPdl)
+        val ingenUtenlandsAdresser = vilkaarBarnetsMedlemskap(
+            Vilkaartyper.BARNETS_MEDLEMSKAP,
+            mapTilVilkaarstypePerson(barnPdlNorge),
+            mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge),
+            mapTilVilkaarstypePerson(gjenlevendePdlNorge),
+            mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
         )
 
-        val ingenUtenlandskOppholdadresseEtterDoedsdato =
-            kriterieHarIkkeOppholddsadresseIUtlandet(
-                listOf(ingenUtenlandsOppholdadresseVilkaarOpplysning),
-                listOf(doedsdatoForelderPdl)
-            )
+        val barnUtenlandsAdresserPdl = vilkaarBarnetsMedlemskap(
+            Vilkaartyper.BARNETS_MEDLEMSKAP,
+            mapTilVilkaarstypePerson(barnPdlDanmark),
+            mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge),
+            mapTilVilkaarstypePerson(gjenlevendePdlNorge),
+            mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
+        )
 
-        val harUtenlandskOppholdadresseEtterDoedsdato =
-            kriterieHarIkkeOppholddsadresseIUtlandet(
-                listOf(harUtenlandsOppholdadresseVilkaarOpplysning),
-                listOf(doedsdatoForelderPdl)
-            )
+        val barnUtenlandsAdresserSoeknad = vilkaarBarnetsMedlemskap(
+            Vilkaartyper.BARNETS_MEDLEMSKAP,
+            mapTilVilkaarstypePerson(barnPdlNorge),
+            mapTilVilkaarstypeSoekerSoeknad(barnSoeknadDanmark),
+            mapTilVilkaarstypePerson(gjenlevendePdlNorge),
+            mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
+        )
 
-        assertEquals(VilkaarVurderingsResultat.OPPFYLT, ingenOppgittUtenlandsadresse.resultat)
-        assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, harOppgittUtenlandsadresse.resultat)
-        assertEquals(VilkaarVurderingsResultat.OPPFYLT, ingenUtenlandskBostedadresseEtterDoedsdato.resultat)
-        assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, harUtenlandskBostedadresseEtterDoedsdato.resultat)
-        assertEquals(VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, ingenBostedAdresser.resultat)
-        assertEquals(VilkaarVurderingsResultat.OPPFYLT, ingenUtenlandskOppholdadresseEtterDoedsdato.resultat)
-        assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, harUtenlandskOppholdadresseEtterDoedsdato.resultat)
+        val gjenlevendeUtenlandsAdresserPdl = vilkaarBarnetsMedlemskap(
+            Vilkaartyper.BARNETS_MEDLEMSKAP,
+            mapTilVilkaarstypePerson(barnPdlNorge),
+            mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge),
+            mapTilVilkaarstypePerson(gjenlevendePdlDanmark),
+            mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
+        )
 
+        assertEquals(VilkaarVurderingsResultat.OPPFYLT, ingenUtenlandsAdresser.resultat)
+        assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, barnUtenlandsAdresserPdl.resultat)
+        assertEquals(
+            VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            gjenlevendeUtenlandsAdresserPdl.resultat
+        )
+        assertEquals(
+            VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            barnUtenlandsAdresserSoeknad.resultat
+        )
     }
-    */
 
 
     @Test
@@ -202,68 +215,39 @@ internal class BarnepensjonVilkaarTest {
         )
     }
 
-    fun mapTilVilkaarstypeAvdoedSoeknad(person: AvdoedSoeknad): VilkaarOpplysning<AvdoedSoeknad> {
-        return VilkaarOpplysning(
-            Opplysningstyper.SOEKER_PDL_V1,
-            Behandlingsopplysning.Privatperson("", Instant.now()),
-            person
-        )
-    }
+    companion object {
+        val foedselsdatoBarnOver20 = LocalDate.parse("2000-08-29")
+        val foedselsdatoBarnUnder20 = LocalDate.parse("2020-06-10")
+        val doedsdatoPdl = LocalDate.parse("2021-01-25")
+        val fnrBarn = Foedselsnummer.of("19040550081")
+        val fnrAvdoed = Foedselsnummer.of("19078504903")
+        val fnrGjenlevende = Foedselsnummer.of("07081177656")
+        val avdoedErForeldre = listOf(Foedselsnummer.of("19078504903"))
+        val avdoedErIkkeForeldre = listOf(Foedselsnummer.of("11057523044"))
 
-    fun mapTilVilkaarstypePerson(person: Person): VilkaarOpplysning<Person> {
-        return VilkaarOpplysning(
-            Opplysningstyper.SOEKER_PDL_V1,
-            Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
-            person
-        )
-    }
+        fun mapTilVilkaarstypeAvdoedSoeknad(person: AvdoedSoeknad): VilkaarOpplysning<AvdoedSoeknad> {
+            return VilkaarOpplysning(
+                Opplysningstyper.AVDOED_SOEKNAD_V1,
+                Behandlingsopplysning.Privatperson("", Instant.now()),
+                person
+            )
+        }
 
+        fun mapTilVilkaarstypeSoekerSoeknad(person: SoekerBarnSoeknad): VilkaarOpplysning<SoekerBarnSoeknad> {
+            return VilkaarOpplysning(
+                Opplysningstyper.SOEKER_PDL_V1,
+                Behandlingsopplysning.Privatperson("", Instant.now()),
+                person
+            )
+        }
 
-    val foedselsdatoBarnOver20 = LocalDate.parse("2000-08-29")
-    val foedselsdatoBarnUnder20 = LocalDate.parse("2020-06-10")
-    val doedsdatoPdl = LocalDate.parse("2022-01-25")
-
-    val fnrAvdoed = Foedselsnummer.of("19078504903")
-    val avdoedErForeldre = listOf(Foedselsnummer.of("19078504903"))
-    val avdoedErIkkeForeldre = listOf(Foedselsnummer.of("11057523044"))
-
-
-    val utenlandsoppholdSoeknad = Utenlandsopphold(
-        JaNeiVetIkke.JA,
-        listOf(
-            UtenlandsoppholdOpplysninger(
-                "Danmark",
-                LocalDate.parse("2010-01-25"),
-                LocalDate.parse("2022-01-25"),
-                listOf(OppholdUtlandType.ARBEIDET),
-                JaNeiVetIkke.JA,
-                null
-            ),
-            UtenlandsoppholdOpplysninger(
-                "Costa Rica",
-                LocalDate.parse("2000-01-25"),
-                LocalDate.parse("2007-01-25"),
-                listOf(OppholdUtlandType.ARBEIDET),
-                JaNeiVetIkke.NEI,
-                null
-            ),
-        )
-    )
-
-    val ingenUtenlandsoppholdSoeknad = Utenlandsopphold(
-        JaNeiVetIkke.NEI,
-        listOf()
-    )
-
-    val ingenUtenlandsadresseBarnVilkaarOpplysning =
-        UtenlandsadresseBarn(JaNeiVetIkke.NEI, null, null)
-    val harUtenlandsadresseBarnVilkaarOpplysning = UtenlandsadresseBarn(JaNeiVetIkke.JA, null, null)
-
-
-    enum class Bosted {
-        NORGE,
-        UTLAND,
-        FINNESIKKE
+        fun mapTilVilkaarstypePerson(person: Person): VilkaarOpplysning<Person> {
+            return VilkaarOpplysning(
+                Opplysningstyper.SOEKER_PDL_V1,
+                Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
+                person
+            )
+        }
     }
 
     fun lagMockPersonAvdoedSoeknad(utenlandsopphold: Utenlandsopphold): AvdoedSoeknad {
@@ -274,50 +258,51 @@ internal class BarnepensjonVilkaarTest {
             Foedselsnummer.of("19078504903"),
             LocalDate.parse("2020-06-10"),
             "Norge",
-           utenlandsopphold,
+            utenlandsopphold,
             JaNeiVetIkke.NEI
         )
     }
 
-    fun lagMockPersonPdl(
-        foedselsdato: LocalDate?,
-        foedselsnummer: Foedselsnummer?,
-        doedsdato: LocalDate?,
-        bosted: Bosted?,
-        foreldre: List<Foedselsnummer>?
-    ): Person {
-        val foedselsdato = foedselsdato ?: LocalDate.parse("2020-06-10")
-        val foedselsnummer = if (foedselsnummer == null) Foedselsnummer.of("19078504903") else foedselsnummer
-        val adresse = if (bosted == Bosted.NORGE) {
-            adresserNorge
-        } else if (bosted == Bosted.UTLAND) {
-            adresseDanmark
-        } else {
+    fun lagMockPersonSoekerSoeknad(utland: UtenlandsadresseBarn): SoekerBarnSoeknad {
+        return SoekerBarnSoeknad(
+            PersonType.BARN,
+            "Fornavn",
+            "Etternavn",
+            fnrBarn,
+            "Norge",
+            utland,
+            listOf(Forelder(PersonType.AVDOED, "fornavn", "etternavn", fnrAvdoed)),
+            Verge(null, null, null, null),
             null
-        }
-
-        return Person(
-            "Test",
-            "Testulfsen",
-            foedselsnummer,
-            foedselsdato,
-            1920,
-            null,
-            doedsdato,
-            Adressebeskyttelse.UGRADERT,
-            adresse,
-            null,
-            adresse,
-            adresse,
-            null,
-            null,
-            null,
-            FamilieRelasjon(null, foreldre, null)
         )
     }
 
+    fun lagMockPersonPdl(
+        foedselsdato: LocalDate? = LocalDate.parse("2020-06-10"),
+        foedselsnummer: Foedselsnummer = Foedselsnummer.of("19078504903"),
+        doedsdato: LocalDate?,
+        adresse: List<Adresse>?,
+        foreldre: List<Foedselsnummer>?
+    ) = Person(
+        fornavn = "Test",
+        etternavn = "Testulfsen",
+        foedselsnummer = foedselsnummer,
+        foedselsdato = foedselsdato,
+        foedselsaar = 1985,
+        foedeland = null,
+        doedsdato = doedsdato,
+        adressebeskyttelse = Adressebeskyttelse.UGRADERT,
+        bostedsadresse = adresse,
+        deltBostedsadresse = null,
+        kontaktadresse = adresse,
+        oppholdsadresse = adresse,
+        sivilstatus = null,
+        statsborgerskap = null,
+        utland = null,
+        familieRelasjon = FamilieRelasjon(null, foreldre, null)
+    )
 
-    val adresserNorge = listOf(
+    val adresserNorgePdl = listOf(
         Adresse(
             AdresseType.VEGADRESSE,
             true,
@@ -348,7 +333,7 @@ internal class BarnepensjonVilkaarTest {
         )
     )
 
-    val adresseDanmark = listOf(
+    val adresseDanmarkPdl = listOf(
         Adresse(
             AdresseType.UTENLANDSKADRESSE,
             true,
@@ -363,6 +348,33 @@ internal class BarnepensjonVilkaarTest {
             LocalDateTime.parse("2022-01-25T00:00:00"),
             null
         )
+    )
+
+    val utenlandsoppholdAvdoedSoeknad = Utenlandsopphold(
+        JaNeiVetIkke.JA,
+        listOf(
+            UtenlandsoppholdOpplysninger(
+                "Danmark",
+                LocalDate.parse("2010-01-25"),
+                LocalDate.parse("2022-01-25"),
+                listOf(OppholdUtlandType.ARBEIDET),
+                JaNeiVetIkke.JA,
+                null
+            ),
+            UtenlandsoppholdOpplysninger(
+                "Costa Rica",
+                LocalDate.parse("2000-01-25"),
+                LocalDate.parse("2007-01-25"),
+                listOf(OppholdUtlandType.ARBEIDET),
+                JaNeiVetIkke.NEI,
+                null
+            ),
+        )
+    )
+
+    val ingenUtenlandsoppholdAvdoedSoeknad = Utenlandsopphold(
+        JaNeiVetIkke.NEI,
+        listOf()
     )
 
 }

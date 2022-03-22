@@ -3,11 +3,26 @@ import { Border } from '../styled'
 import { PersonStatus, RelatertPersonsRolle } from '../../types'
 import { PersonInfo } from './personinfo/PersonInfo'
 import { hentAlderVedDoedsdato } from './utils'
-import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
+import { PropsFamilieforhold } from '../props'
 
-export const Familieforhold = () => {
-  const { soekerPdl, avdoedPersonPdl, gjenlevendePdl, soekerSoknad, avdodPersonSoknad, gjenlevendeSoknad } =
-    usePersonInfoFromBehandling()
+export const Familieforhold: React.FC<PropsFamilieforhold> = ({
+  soekerPdl,
+  soekerSoknad,
+  avdoedPersonPdl,
+  avdodPersonSoknad,
+  gjenlevendePdl,
+  gjenlevendeSoknad,
+}) => {
+  if (!soekerPdl) {
+    return (
+      <>
+        <Heading spacing size="small" level="5">
+          Familieforhold
+        </Heading>
+        Mangler info om familieforhold
+      </>
+    )
+  }
 
   return (
     <>
@@ -22,10 +37,10 @@ export const Familieforhold = () => {
           rolle: RelatertPersonsRolle.BARN,
           adresser: soekerPdl?.bostedsadresse,
           fnr: soekerPdl?.foedselsnummer,
-          fnrFraSoeknad: soekerSoknad.foedselsnummer,
-          datoForDoedsfall: avdoedPersonPdl.doedsdato,
-          statsborgerskap: soekerPdl.statsborgerskap,
-          alderEtterlatt: hentAlderVedDoedsdato(soekerPdl.foedselsdato, avdoedPersonPdl?.doedsdato),
+          fnrFraSoeknad: soekerSoknad?.foedselsnummer,
+          datoForDoedsfall: avdoedPersonPdl?.doedsdato,
+          statsborgerskap: soekerPdl?.statsborgerskap,
+          alderEtterlatt: hentAlderVedDoedsdato(soekerPdl?.foedselsdato, avdoedPersonPdl?.doedsdato),
         }}
       />
       <PersonInfo
@@ -33,12 +48,12 @@ export const Familieforhold = () => {
           navn: `${gjenlevendePdl?.fornavn} ${gjenlevendePdl?.etternavn}`,
           personStatus: PersonStatus.GJENLEVENDE_FORELDER,
           rolle: RelatertPersonsRolle.FORELDER,
-          adresser: gjenlevendePdl.bostedsadresse,
+          adresser: gjenlevendePdl?.bostedsadresse,
           fnr: gjenlevendePdl?.foedselsnummer,
-          fnrFraSoeknad: gjenlevendeSoknad.foedselsnummer,
-          adresseFraSoeknad: gjenlevendeSoknad.adresse,
-          datoForDoedsfall: avdoedPersonPdl.doedsdato,
-          statsborgerskap: gjenlevendePdl.statsborgerskap,
+          fnrFraSoeknad: gjenlevendeSoknad?.foedselsnummer,
+          adresseFraSoeknad: gjenlevendeSoknad?.adresse,
+          datoForDoedsfall: avdoedPersonPdl?.doedsdato,
+          statsborgerskap: gjenlevendePdl?.statsborgerskap,
         }}
       />
       <PersonInfo
@@ -46,10 +61,10 @@ export const Familieforhold = () => {
           navn: `${avdoedPersonPdl?.fornavn} ${avdoedPersonPdl?.etternavn}`,
           personStatus: PersonStatus.AVDOED,
           rolle: RelatertPersonsRolle.FORELDER,
-          adresser: avdoedPersonPdl.bostedsadresse,
-          fnr: `${avdoedPersonPdl?.foedselsnummer}`,
-          fnrFraSoeknad: avdodPersonSoknad.foedselsnummer,
-          datoForDoedsfall: avdoedPersonPdl.doedsdato,
+          adresser: avdoedPersonPdl?.bostedsadresse,
+          fnr: avdoedPersonPdl?.foedselsnummer,
+          fnrFraSoeknad: avdodPersonSoknad?.foedselsnummer,
+          datoForDoedsfall: avdoedPersonPdl?.doedsdato,
           statsborgerskap: avdoedPersonPdl?.statsborgerskap,
         }}
       />

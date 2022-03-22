@@ -1,37 +1,38 @@
-import { useContext } from 'react'
-import { AppContext } from '../../../../store/AppContext'
 import { Detail, Heading } from '@navikt/ds-react'
 import { InfoWrapper, DetailWrapper, HeadingWrapper } from '../styled'
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../../behandlings-status'
 import { BehandlingsTypeSmall, IBehandlingsType } from '../../behandlings-type'
 import { format } from 'date-fns'
 import { sjekkDodsfallMerEnn3AarSiden, hentVirkningstidspunkt, sjekkPersonFraSoeknadMotPdl } from './utils'
-import {
-  IKriterie,
-  Kriterietype,
-  VilkaarsType,
-  VilkaarVurderingsResultat,
-} from '../../../../store/reducers/BehandlingReducer'
-import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
 import { OmSoeknadVarsler } from './OmSoeknadVarsler'
 import { WarningText } from '../../../../shared/styled'
+import { PropsOmSoeknad } from '../props'
 
-export const OmSoeknad = () => {
-  const { soekerPdl, avdoedPersonPdl, soekerSoknad, avdodPersonSoknad, innsender, mottattDato } =
-    usePersonInfoFromBehandling()
-  const ctx = useContext(AppContext)
-  const vilkaar = ctx.state.behandlingReducer.vilkårsprøving
+export const OmSoeknad: React.FC<PropsOmSoeknad> = ({
+  soekerPdl,
+  avdoedPersonPdl,
+  soekerSoknad,
+  avdodPersonSoknad,
+  innsender,
+  mottattDato,
+  avdoedErForelderVilkaar,
+}) => {
+  const avdoedErLikISoeknad = avdoedPersonPdl?.foedselsnummer === avdodPersonSoknad?.foedselsnummer
+  const dodsfallMerEnn3AarSiden = sjekkDodsfallMerEnn3AarSiden(avdoedPersonPdl?.doedsdato, mottattDato)
 
-  const doedsfallVilkaar: any = vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.DOEDSFALL_ER_REGISTRERT)
-  const avdoedErForelderVilkaar =
-    doedsfallVilkaar.kriterier.find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER).resultat ===
-    VilkaarVurderingsResultat.OPPFYLT
-  const avdoedErLikISoeknad = avdoedPersonPdl?.foedselsnummer === avdodPersonSoknad.foedselsnummer
-  const dodsfallMerEnn3AarSiden = sjekkDodsfallMerEnn3AarSiden(avdoedPersonPdl?.doedsdato, mottattDato?.mottattDato)
+  if (!soekerPdl) {
+    return (
+      <>
+        <Heading spacing size="small" level="5">
+          Om søknaden
+        </Heading>
+        <div style={{ marginBottom: '3em' }}>Mangler info om søknad</div>
+      </>
+    )
+  }
 
   return (
     <>
-      <h1>Søknadsoversikt</h1>
       <HeadingWrapper>
         <Heading spacing size="small" level="5">
           Om søknaden
@@ -61,7 +62,7 @@ export const OmSoeknad = () => {
         </DetailWrapper>
         <DetailWrapper>
           <Detail size="medium">Søknad mottatt</Detail>
-          {format(new Date(mottattDato?.mottattDato), 'dd.MM.yyyy')}
+          {format(new Date(mottattDato), 'dd.MM.yyyy')}
         </DetailWrapper>
         <DetailWrapper>
           <Detail size="medium">Dato for dødsfall</Detail>
@@ -72,10 +73,7 @@ export const OmSoeknad = () => {
         <DetailWrapper>
           <Detail size="medium">Første mulig virkningstidspunkt</Detail>
           <span className={dodsfallMerEnn3AarSiden ? 'warningText' : ''}>
-            {format(
-              new Date(hentVirkningstidspunkt(avdoedPersonPdl?.doedsdato, mottattDato?.mottattDato)),
-              'dd.MM.yyyy'
-            )}
+            {format(new Date(hentVirkningstidspunkt(avdoedPersonPdl?.doedsdato, mottattDato)), 'dd.MM.yyyy')}
           </span>
         </DetailWrapper>
         <OmSoeknadVarsler

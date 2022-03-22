@@ -21,9 +21,9 @@ class VilkaarService {
 
     fun mapVilkaar(opplysninger: List<VilkaarOpplysning<ObjectNode>>): List<VurdertVilkaar> {
         logger.info("Map vilkaar")
-        println(opplysninger)
 
         val avdoedSoeknad = finnOpplysning<AvdoedSoeknad>(opplysninger, Opplysningstyper.AVDOED_SOEKNAD_V1)
+        val soekerSoeknad = finnOpplysning<SoekerBarnSoeknad>(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1)
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1 )
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1 )
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger,  Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1 )
@@ -39,6 +39,7 @@ class VilkaarService {
             vilkaarBarnetsMedlemskap(
                 Vilkaartyper.BARNETS_MEDLEMSKAP,
                 soekerPdl,
+                soekerSoeknad,
                 gjenlevendePdl,
                 avdoedPdl,
             )

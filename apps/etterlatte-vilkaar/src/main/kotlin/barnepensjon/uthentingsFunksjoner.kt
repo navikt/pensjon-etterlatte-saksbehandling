@@ -25,11 +25,10 @@ fun hentDoedsdato(person: VilkaarOpplysning<Person>): LocalDate {
         ?: throw OpplysningKanIkkeHentesUt()
 }
 
-fun hentVirkningsdato(person: VilkaarOpplysning<Person>?): LocalDate {
-    val doedsdato = person?.opplysning?.doedsdato
+fun hentVirkningsdato(person: VilkaarOpplysning<Person>): LocalDate {
+    val doedsdato = person.opplysning.doedsdato
     return doedsdato?.with(TemporalAdjusters.firstDayOfNextMonth()) ?: throw OpplysningKanIkkeHentesUt()
 }
-
 
 fun hentAdresser(
     person: VilkaarOpplysning<Person>

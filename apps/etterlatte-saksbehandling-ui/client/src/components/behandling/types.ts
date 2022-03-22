@@ -68,7 +68,7 @@ export interface IBarnFraSoeknad {
   statsborgerskap: string
   utenlandsadresse: any
   foreldre: IPersonOpplysning[]
-  verge: any
+  verge: any //D2
   omsorgsperson: string
 }
 

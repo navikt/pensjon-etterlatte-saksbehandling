@@ -347,9 +347,10 @@
           "resultat": "OPPFYLT",
           "basertPaaOpplysninger": [
             {
+              "kriterieOpplysningsType": "DOEDSDATO",
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449688260Z",
+                "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -359,9 +360,10 @@
               }
             },
             {
+              "kriterieOpplysningsType": "FOEDSELSDATO",
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449703380Z",
+                "tidspunktForInnhenting": "2022-03-22T14:36:17.984597914Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -383,9 +385,10 @@
           "resultat": "OPPFYLT",
           "basertPaaOpplysninger": [
             {
+              "kriterieOpplysningsType": "DOEDSDATO",
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449688260Z",
+                "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -401,9 +404,10 @@
           "resultat": "OPPFYLT",
           "basertPaaOpplysninger": [
             {
+              "kriterieOpplysningsType": "FORELDRE",
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449703380Z",
+                "tidspunktForInnhenting": "2022-03-22T14:36:17.984597914Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -415,9 +419,10 @@
               }
             },
             {
+              "kriterieOpplysningsType": "DOEDSDATO",
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449688260Z",
+                "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -439,9 +444,10 @@
           "resultat": "OPPFYLT",
           "basertPaaOpplysninger": [
             {
+              "kriterieOpplysningsType": "DOEDSDATO",
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449688260Z",
+                "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -451,6 +457,7 @@
               }
             },
             {
+              "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
               "kilde": {
                 "fnr": "03108718357",
                 "mottatDato": "2022-02-14T14:37:24.573612786Z",
@@ -474,9 +481,10 @@
           "resultat": "OPPFYLT",
           "basertPaaOpplysninger": [
             {
+              "kriterieOpplysningsType": "ADRESSER",
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449703380Z",
+                "tidspunktForInnhenting": "2022-03-22T14:36:17.984597914Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -502,6 +510,7 @@
               }
             },
             {
+              "kriterieOpplysningsType": "SOEKER_UTENLANDSOPPHOLD",
               "kilde": {
                 "fnr": "03108718357",
                 "mottatDato": "2022-02-14T14:37:24.573612786Z",
@@ -514,9 +523,10 @@
               }
             },
             {
+              "kriterieOpplysningsType": "DOEDSDATO",
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449688260Z",
+                "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -532,9 +542,10 @@
           "resultat": "OPPFYLT",
           "basertPaaOpplysninger": [
             {
+              "kriterieOpplysningsType": "ADRESSER",
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449699568Z",
+                "tidspunktForInnhenting": "2022-03-22T14:36:17.984594065Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -560,9 +571,10 @@
               }
             },
             {
+              "kriterieOpplysningsType": "DOEDSDATO",
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449688260Z",
+                "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },

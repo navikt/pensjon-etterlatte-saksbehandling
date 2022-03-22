@@ -10,13 +10,10 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
-import java.io.StringWriter
-import javax.xml.bind.JAXBContext
-import javax.xml.bind.Marshaller
 
 internal class Vedtaksoversetter(
     rapidsConnection: RapidsConnection,
-    val oppdragsMapper: OppdragMapper
+    val oppdragMapper: OppdragMapper
 ) : River.PacketListener {
 
     private val logger = LoggerFactory.getLogger(Vedtaksoversetter::class.java)
@@ -37,12 +34,12 @@ internal class Vedtaksoversetter(
                 val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson(), Vedtak::class.java)
 
                 // TODO finne ut hvordan oppdrag skal bygges opp
-                val oppdrag: Oppdrag = oppdragsMapper.oppdragFraVedtak(vedtak)
+                val oppdrag: Oppdrag = oppdragMapper.oppdragFraVedtak(vedtak)
 
                 // TODO send oppdrag til MQ-tjeneste - krever tilgang til tjeneste som ligger onprem
                 sendOppdrag(oppdrag)
 
-                logger.info("")
+                logger.info("Oppdrag opprettet")
                 context.publish(packet.apply { this["@vedtak_oversatt"] = true }.toJson())
             } catch (e: Exception) {
                 logger.error("Uhåndtert feilsituasjon: ${e.message}", e)
@@ -50,25 +47,11 @@ internal class Vedtaksoversetter(
         }
 
     private fun sendOppdrag(oppdrag: Oppdrag) {
-
+        val xml = oppdrag.toXml()
+        // send
     }
-
 
     private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 
-
-}
-
-fun Oppdrag.tilXml(): String {
-    val jaxbContext = JAXBContext.newInstance(Oppdrag::class.java)
-    val marshaller = jaxbContext.createMarshaller()
-    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
-
-    val stringWriter = StringWriter()
-    stringWriter.use {
-        marshaller.marshal(this, stringWriter)
-    }
-
-    return stringWriter.toString()
 }
 

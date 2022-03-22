@@ -2,16 +2,17 @@ package vedtaksoversetter
 
 import dummyVedtak
 import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
+import no.nav.etterlatte.vedtaksoversetter.toXml
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
-internal class OppdragMapperTest {
+internal class JaxbTest {
 
     @Test
-    fun oppdragFraVedtak() {
+    fun `should generate xml from oppdrag`() {
         val oppdrag = OppdragMapper.oppdragFraVedtak(dummyVedtak())
+        val oppdragAsXml = oppdrag.toXml()
 
-        assertNotNull(oppdrag)
+        assertNotNull(oppdragAsXml)
     }
-
 }

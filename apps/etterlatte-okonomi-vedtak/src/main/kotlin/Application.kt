@@ -11,7 +11,7 @@ fun main() {
 
     RapidApplication.create(env)
         .also {
-            Vedtaksoversetter(rapidsConnection = it, oppdragsMapper = OppdragMapper)
+            Vedtaksoversetter(rapidsConnection = it, oppdragMapper = OppdragMapper)
         }.start()
 }
 

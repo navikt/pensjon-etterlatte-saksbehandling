@@ -8,9 +8,6 @@ export const Vedtak = () => {
     <Content>
       <ContentHeader>
         <h1>Vedtak</h1>
-        <Button variant="primary" size="medium" className="button" onClick={next}>
-          Bekreft og gå videre
-        </Button>
       </ContentHeader>
     </Content>
   )

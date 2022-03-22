@@ -20,17 +20,27 @@ export const useBehandlingRoutes = () => {
     { path: 'utbetalingsoversikt', element: <Utbetalingsoversikt /> },
     { path: 'brev', element: <Brev /> },
   ]
-  
+
+  const firstPage = behandlingRoutes.findIndex((item) => item.path === currentRoute) === 0
+  const lastPage = behandlingRoutes.findIndex((item) => item.path === currentRoute) === 5
+
   useEffect(() => {
     setCurrentRoute(match?.params.section)
-  },[]);
+  }, [match])
 
   const next = () => {
     const index = behandlingRoutes.findIndex((item) => item.path === currentRoute)
     const nextPath = behandlingRoutes[index + 1].path
-    setCurrentRoute(nextPath);
+    setCurrentRoute(nextPath)
     navigate(`/behandling/${match?.params.behandlingId}/${nextPath}`)
   }
 
-  return { next, behandlingRoutes, currentRoute }
+  const back = () => {
+    const index = behandlingRoutes.findIndex((item) => item.path === currentRoute)
+    const previousPath = behandlingRoutes[index - 1].path
+    setCurrentRoute(previousPath)
+    navigate(`/behandling/${match?.params.behandlingId}/${previousPath}`)
+  }
+
+  return { next, back, lastPage, firstPage, behandlingRoutes, currentRoute }
 }

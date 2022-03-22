@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMatch } from 'react-router-dom'
-import { Button } from '@navikt/ds-react'
+import { Button, Link } from '@navikt/ds-react'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { avbrytBehandling } from '../../shared/api/behandling'
 import { useNavigate } from 'react-router-dom'
@@ -10,7 +10,7 @@ import { IApiResponse } from '../../shared/api/types'
 import { WarningText } from '../../shared/styled'
 
 export const BehandlingHandlingKnapper = () => {
-  const { next } = useBehandlingRoutes()
+  const { next, back, lastPage, firstPage } = useBehandlingRoutes()
   const navigate = useNavigate()
   const match = useMatch('/behandling/:behandlingId/*')
 
@@ -31,15 +31,22 @@ export const BehandlingHandlingKnapper = () => {
     }
   }
   //TODO: andre tekster for knapper og innhold i modal
+  //TODO: Ferdigknapp på siste side?
 
   return (
     <VilkaarsKnapperWrapper>
-      <Button variant="primary" size="medium" className="button" onClick={next}>
-        Bekreft og gå videre
-      </Button>
-      <Button variant="secondary" size="medium" className="button" onClick={() => setIsOpen(true)}>
-        Avbryt og behandle i Pesys
-      </Button>
+      <div>
+        <Button variant="secondary" size="medium" className="button" onClick={back} disabled={firstPage}>
+          Tilbake
+        </Button>
+        <Button variant="primary" size="medium" className="button" onClick={next} disabled={lastPage}>
+          Neste
+        </Button>
+      </div>
+      <Link className="textButton" onClick={() => setIsOpen(true)}>
+        Avbryt behandling
+      </Link>
+
       {isOpen && (
         <Modal
           onClose={() => {
@@ -70,10 +77,20 @@ export const BehandlingHandlingKnapper = () => {
 }
 
 export const VilkaarsKnapperWrapper = styled.div`
-  margin: 2em 0em 2em 2em;
+  margin: 3em 0em 2em 0em;
+  text-align: center;
 
   .button {
-    width: 300px;
+    width: 200px;
     margin: 0em 2em 0em 0em;
+  }
+  .textButton {
+    margin-top: 1em;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: bold;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 `

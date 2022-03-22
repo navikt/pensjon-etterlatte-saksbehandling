@@ -8,9 +8,6 @@ export const Beregne = () => {
     <Content>
       <ContentHeader>
         <h1>Beregne</h1>
-        <Button variant="primary" size="medium" className="button" onClick={next}>
-          Bekreft og gå videre
-        </Button>
       </ContentHeader>
     </Content>
   )

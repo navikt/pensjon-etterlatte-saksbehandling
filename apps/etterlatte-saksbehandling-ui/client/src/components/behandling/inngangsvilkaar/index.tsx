@@ -39,7 +39,6 @@ export const Inngangsvilkaar = () => {
         id="barnetsmedlemskap"
         vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.BARNETS_MEDLEMSKAP)}
       />
-      <BehandlingHandlingKnapper />
     </Content>
   )
 }

@@ -25,6 +25,7 @@ export const Column = styled.div`
 `
 
 export const Content = styled.div`
+  min-height: 70vh;
   margin: 0;
   padding: 0;
 `

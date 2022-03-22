@@ -56,7 +56,6 @@ export const Soeknadsoversikt = () => {
         />
         <SoeknadGyldigFremsatt />
       </ContentHeader>
-      <BehandlingHandlingKnapper />
     </Content>
   )
 }

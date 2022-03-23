@@ -15,7 +15,6 @@ import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import {
   KriterieOpplysningsType,
   Kriterietype,
-  OpplysningsType,
   VilkaarVurderingsResultat,
 } from '../../../../store/reducers/BehandlingReducer'
 import { Adressevisning } from '../../felles/Adressevisning'

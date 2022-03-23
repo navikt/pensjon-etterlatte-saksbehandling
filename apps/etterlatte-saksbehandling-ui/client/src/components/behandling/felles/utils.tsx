@@ -5,7 +5,6 @@ import {
   IKriterieOpplysing,
   KriterieOpplysningsType,
   Kriterietype,
-  OpplysningsType,
 } from '../../../store/reducers/BehandlingReducer'
 
 export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: Date): IAdresse[] {

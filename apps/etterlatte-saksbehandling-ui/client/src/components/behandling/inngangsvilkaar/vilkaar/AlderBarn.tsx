@@ -12,7 +12,7 @@ import {
   VilkaarWrapper,
 } from '../styled'
 import { VilkaarProps } from '../types'
-import { KriterieOpplysningsType, Kriterietype, OpplysningsType } from '../../../../store/reducers/BehandlingReducer'
+import { KriterieOpplysningsType, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import { hentKriterier } from '../../felles/utils'

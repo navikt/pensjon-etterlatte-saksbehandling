@@ -1,11 +1,6 @@
 import format from 'date-fns/format'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
-import {
-  IPerson,
-  KriterieOpplysningsType,
-  Kriterietype,
-  OpplysningsType,
-} from '../../../../store/reducers/BehandlingReducer'
+import { IPerson, KriterieOpplysningsType, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
 import { hentKriterier } from '../../felles/utils'
 import {
   Innhold,

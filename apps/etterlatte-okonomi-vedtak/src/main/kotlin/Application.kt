@@ -51,7 +51,8 @@ fun main() {
 
 private fun connectionFactory(env: Map<String, String>): ConnectionFactory =
     MQConnectionFactory().apply {
-        hostName = env.required("OPPDRAG_MQ_HOSTNAME")
+        hostName = "b27apvl222.preprod.local"
+        //hostName = env.required("OPPDRAG_MQ_HOSTNAME")
         port = env.required("OPPDRAG_MQ_PORT").toInt()
         queueManager = env.required("OPPDRAG_MQ_MANAGER")
         channel =  env.required("OPPDRAG_MQ_CHANNEL")
@@ -64,5 +65,5 @@ private fun connectionFactory(env: Map<String, String>): ConnectionFactory =
 
     }
 
-private fun Map<String, String>.required(property: String) =
+private fun Map<String, String>.required(property: String): String =
     requireNotNull(this[property]) { "Property $property was null" }

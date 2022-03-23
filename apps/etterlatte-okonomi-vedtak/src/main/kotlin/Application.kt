@@ -9,14 +9,20 @@ import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
 import no.nav.etterlatte.vedtaksoversetter.OppdragSender
 import no.nav.etterlatte.vedtaksoversetter.Vedtaksoversetter
 import no.nav.helse.rapids_rivers.RapidApplication
+import org.slf4j.LoggerFactory
 import javax.jms.ConnectionFactory
 
 private const val UTF_8_WITH_PUA = 1208
+
+private val logger = LoggerFactory.getLogger(Vedtaksoversetter::class.java)
 
 fun main() {
     val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", this.required("NAIS_APP_NAME").replace("-", ""))
     }
+
+    logger.info("serviceUser: ${env.required("srvuser")}")
+    logger.info("hostname: ${env.required("OPPDRAG_MQ_HOSTNAME")}")
 
     val oppdragSender = OppdragSender(
         connectionFactory = connectionFactory(env),

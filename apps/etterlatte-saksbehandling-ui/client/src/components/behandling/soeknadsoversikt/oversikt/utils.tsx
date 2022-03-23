@@ -48,3 +48,15 @@ export const hentVirkningstidspunkt = (doedsdato: string, mottattDato: string): 
 export const sjekkDodsfallMerEnn3AarSiden = (doedsdato: string, mottattDato: string): boolean => {
   return moment(mottattDato).diff(moment(doedsdato), 'years', true) > 3
 }
+
+export const getStatsborgerskapTekst = (statsborgerskap: string) => {
+  //TODO eller slette? Hva slags strenger får man fra pdl?
+  switch (statsborgerskap) {
+    case 'NORGE':
+      return 'NO'
+    case 'NOR':
+      return 'NO'
+    default:
+      return statsborgerskap
+  }
+}

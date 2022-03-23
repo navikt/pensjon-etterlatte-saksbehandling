@@ -19,6 +19,9 @@ export const OmSoeknad: React.FC<PropsOmSoeknad> = ({
 }) => {
   const avdoedErLikISoeknad = avdoedPersonPdl?.foedselsnummer === avdodPersonSoknad?.foedselsnummer
   const dodsfallMerEnn3AarSiden = sjekkDodsfallMerEnn3AarSiden(avdoedPersonPdl?.doedsdato, mottattDato)
+  const innsenderHarForeldreansvar = soekerPdl?.familieRelasjon?.ansvarligeForeldre.find(
+    (fnr) => fnr === innsender.foedselsnummer
+  )
 
   if (!soekerPdl) {
     return (
@@ -58,7 +61,7 @@ export const OmSoeknad: React.FC<PropsOmSoeknad> = ({
         </DetailWrapper>
         <DetailWrapper>
           <Detail size="medium">Søknad fremsatt av</Detail>
-          {innsender?.fornavn} {innsender?.etternavn}
+          {innsender?.fornavn} {innsender?.etternavn} {innsenderHarForeldreansvar && '(foreldreansvar)'}
         </DetailWrapper>
         <DetailWrapper>
           <Detail size="medium">Søknad mottatt</Detail>

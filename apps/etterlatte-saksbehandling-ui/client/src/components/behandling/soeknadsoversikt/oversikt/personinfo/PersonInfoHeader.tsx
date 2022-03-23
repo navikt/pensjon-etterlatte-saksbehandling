@@ -2,6 +2,7 @@ import { PersonInfoHeaderWrapper, StatsborgerskapWrap, AlderEtterlattWrap, Avdoe
 import { ChildIcon } from '../../../../../shared/icons/childIcon'
 import { IPersonFraSak, PersonStatus } from '../../../types'
 import { format } from 'date-fns'
+import { getStatsborgerskapTekst } from '../utils'
 
 type Props = {
   person: IPersonFraSak
@@ -15,7 +16,7 @@ export const PersonInfoHeader: React.FC<Props> = ({ person }) => {
           <ChildIcon />
           {person.navn} <span className="personRolle">({person.rolle})</span>
           <AlderEtterlattWrap>{person.alderEtterlatt} år</AlderEtterlattWrap>
-          <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
+          <StatsborgerskapWrap>{getStatsborgerskapTekst(person.statsborgerskap)}</StatsborgerskapWrap>
         </PersonInfoHeaderWrapper>
       )
     case PersonStatus.GJENLEVENDE_FORELDER:
@@ -25,7 +26,7 @@ export const PersonInfoHeader: React.FC<Props> = ({ person }) => {
           <span className="personRolle">
             ({person.personStatus} {person.rolle})
           </span>
-          <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
+          <StatsborgerskapWrap>{getStatsborgerskapTekst(person.statsborgerskap)}</StatsborgerskapWrap>
         </PersonInfoHeaderWrapper>
       )
     case PersonStatus.AVDOED:
@@ -36,7 +37,7 @@ export const PersonInfoHeader: React.FC<Props> = ({ person }) => {
             ({person.personStatus} {person.rolle})
           </span>
           <AvdoedWrap>Død {format(new Date(person.datoForDoedsfall), 'dd.MM.yyyy')}</AvdoedWrap>
-          <StatsborgerskapWrap>{person.statsborgerskap}</StatsborgerskapWrap>
+          <StatsborgerskapWrap>{getStatsborgerskapTekst(person.statsborgerskap)}</StatsborgerskapWrap>
         </PersonInfoHeaderWrapper>
       )
   }

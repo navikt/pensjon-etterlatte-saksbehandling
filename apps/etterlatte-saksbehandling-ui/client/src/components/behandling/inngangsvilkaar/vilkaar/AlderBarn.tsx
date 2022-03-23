@@ -15,17 +15,17 @@ import { VilkaarProps } from '../types'
 import { KriterieOpplysningsType, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
-import { hentKriterier } from '../../felles/utils'
+import { hentKriterierMedOpplysning } from '../../felles/utils'
 
 export const AlderBarn = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
 
-  const barnetsFoedselsdato = hentKriterier(
+  const barnetsFoedselsdato = hentKriterierMedOpplysning(
     vilkaar,
     Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
     KriterieOpplysningsType.FOEDSELSDATO
   )
-  const avdoedDoedsdato = hentKriterier(
+  const avdoedDoedsdato = hentKriterierMedOpplysning(
     vilkaar,
     Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
     KriterieOpplysningsType.DOEDSDATO

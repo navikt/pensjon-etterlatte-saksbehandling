@@ -60,7 +60,7 @@ export enum VilkaarVurderingsResultat {
 export interface IKriterie {
   navn: Kriterietype
   resultat: VilkaarVurderingsResultat
-  basertPaaOpplysninger: IKriterieOpplysing[]
+  basertPaaOpplysninger: IKriterieOpplysning[]
 }
 
 export enum Kriterietype {
@@ -71,10 +71,10 @@ export enum Kriterietype {
   GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET = 'GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET',
 }
 
-export interface IKriterieOpplysing {
+export interface IKriterieOpplysning {
   kriterieOpplysningsType: KriterieOpplysningsType
-  kilde: string
-  opplysing: any
+  kilde: any
+  opplysning: any
 }
 
 export enum KriterieOpplysningsType {

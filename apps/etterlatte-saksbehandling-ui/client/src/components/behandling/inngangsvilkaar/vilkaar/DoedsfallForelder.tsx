@@ -1,7 +1,7 @@
 import format from 'date-fns/format'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import { IPerson, KriterieOpplysningsType, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
-import { hentKriterier } from '../../felles/utils'
+import { hentKriterierMedOpplysning } from '../../felles/utils'
 import {
   Innhold,
   Title,
@@ -19,12 +19,16 @@ import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 export const DoedsFallForelder = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
 
-  const avdoedDoedsdato: any = hentKriterier(
+  const avdoedDoedsdato: any = hentKriterierMedOpplysning(
     vilkaar,
     Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL,
     KriterieOpplysningsType.DOEDSDATO
   )
-  const forelder: any = hentKriterier(vilkaar, Kriterietype.AVDOED_ER_FORELDER, KriterieOpplysningsType.FORELDRE)
+  const forelder: any = hentKriterierMedOpplysning(
+    vilkaar,
+    Kriterietype.AVDOED_ER_FORELDER,
+    KriterieOpplysningsType.FORELDRE
+  )
 
   const avdoedForelder = forelder?.opplysning.foreldre.find(
     (forelder: IPerson) => forelder?.foedselsnummer === avdoedDoedsdato?.opplysning.foedselsnummer

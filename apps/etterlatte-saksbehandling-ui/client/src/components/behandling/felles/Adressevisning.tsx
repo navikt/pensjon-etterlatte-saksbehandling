@@ -15,7 +15,12 @@ export const Adressevisning = ({
         adresser
           .sort((a, b) => (new Date(b.gyldigFraOgMed) > new Date(a.gyldigFraOgMed) ? 1 : -1))
           .map((adresse, index) => (
-            <Adresse adresse={adresse} key={index} soeknadsoversikt={soeknadsoversikt ? soeknadsoversikt : false} />
+            <Adresse
+              adresse={adresse}
+              key={index}
+              soeknadsoversikt={soeknadsoversikt ? soeknadsoversikt : false}
+              index={index}
+            />
           ))
       ) : (
         <div>Ingen adresser</div>
@@ -24,10 +29,19 @@ export const Adressevisning = ({
   )
 }
 
-export const Adresse = ({ adresse, soeknadsoversikt }: { adresse: IAdresse; soeknadsoversikt: boolean }) => {
+export const Adresse = ({
+  adresse,
+  soeknadsoversikt,
+  index,
+}: {
+  adresse: IAdresse
+  soeknadsoversikt: boolean
+  index: number
+}) => {
   const fra = moment(adresse.gyldigFraOgMed).format('DD.MM.YYYY')
   const til = adresse.aktiv ? 'nå' : moment(adresse.gyldigTilOgMed).format('DD.MM.YYYY')
 
+  const padding = index > 0 ? '5px' : '0px'
   return (
     <>
       {soeknadsoversikt ? (
@@ -40,7 +54,7 @@ export const Adresse = ({ adresse, soeknadsoversikt }: { adresse: IAdresse; soek
           </span>
         </HistorikkElement>
       ) : (
-        <div style={{ paddingBottom: '10px' }}>
+        <div style={{ paddingTop: padding }}>
           <div>{adresse.adresseLinje1}</div>
           <div>
             {adresse.postnr} {adresse.poststed}

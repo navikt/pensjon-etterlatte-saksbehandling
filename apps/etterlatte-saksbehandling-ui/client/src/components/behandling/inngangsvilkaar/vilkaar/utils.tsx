@@ -13,40 +13,69 @@ export function vilkaarErOppfylt(resultat: VilkaarVurderingsResultat) {
   )
 }
 
-export function mapKriterieTypeTilTekst(navn: Kriterietype): String {
-  switch (navn) {
-    case Kriterietype.AVDOED_ER_FORELDER:
-      return 'Avdøde er barnets forelder'
-    case Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL:
-      return 'Dødsfallet er registrert i PDL'
-    case Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO:
-      return 'Barnet er under 20 år på virkningsdato'
-    case Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET:
-      return 'Barnet har ikke adresse i utlandet'
-    case Kriterietype.GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET:
-      return 'Foreldre har ikke adresse i utlandet'
+export interface VilkaarTittelSvar {
+  tittel: String
+  svar: String
+}
+
+export function mapKriterietyperTilTekst(krit: IKriterie): VilkaarTittelSvar {
+  let tittel
+  let svar
+
+  if (krit.navn === Kriterietype.AVDOED_ER_FORELDER) {
+    tittel = 'Avdøde er barnets forelder'
+    svar = mapEnkeltSvarTilTekst(krit)
+  } else if (krit.navn === Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL) {
+    tittel = 'Dødsfallet er registrert i PDL'
+    svar = mapEnkeltSvarTilTekst(krit)
+  } else if (krit.navn === Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO) {
+    tittel = 'Barnet er under 20 år på virkningsdato'
+    svar = mapEnkeltSvarTilTekst(krit)
+  } else if (krit.navn === Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET) {
+    tittel = 'Bostedsadresse i Norge'
+    if (krit.resultat === VilkaarVurderingsResultat.OPPFYLT) {
+      svar = 'Ja. Barnet bor i Norge og er medlem av trygden'
+    } else if (krit.resultat === VilkaarVurderingsResultat.IKKE_OPPFYLT) {
+      svar = 'Nei. Barnet er registert med utenlandsk bostedsadresse'
+    } else {
+      svar = 'Avklar. Barnet har registrert utenlandsk adresse'
+    }
+  } else if (
+    krit.navn === Kriterietype.GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET &&
+    krit.resultat !== VilkaarVurderingsResultat.OPPFYLT
+  ) {
+    tittel = 'Gjenlevende foreldre har bostedsadresse i Norge'
+    svar = 'Avklar. Gjenlevende foreldre har egistrert utenlandsk adresse'
+  } else {
+    tittel = ''
+    svar = ''
+  }
+
+  return { tittel: tittel, svar: svar }
+}
+
+export function mapEnkeltSvarTilTekst(krit: IKriterie): String {
+  switch (krit.resultat) {
+    case VilkaarVurderingsResultat.OPPFYLT:
+      return 'Ja'
+    case VilkaarVurderingsResultat.IKKE_OPPFYLT:
+      return 'Nei'
+    case VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING:
+      return 'Mangler info for vurdering'
   }
 }
 
-export function mapKriterieTilSvar(krit: IKriterie): String {
-  if (krit.resultat === VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
-    return 'Mangler info for vurdering'
+export function hentKildenavn(type: String): String {
+  switch (type) {
+    case 'pdl':
+      return 'PDL'
+    case 'privatperson':
+      return 'Søknad'
+    default:
+      return 'Ukjent kilde'
   }
+}
 
-  switch (krit.navn) {
-    case Kriterietype.AVDOED_ER_FORELDER:
-      return krit.resultat === VilkaarVurderingsResultat.OPPFYLT ? 'Ja' : 'Nei'
-    case Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL:
-      return krit.resultat === VilkaarVurderingsResultat.OPPFYLT ? 'Ja' : 'Nei'
-    case Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO:
-      return krit.resultat === VilkaarVurderingsResultat.OPPFYLT ? 'Ja' : 'Nei'
-    case Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET:
-      return krit.resultat === VilkaarVurderingsResultat.OPPFYLT
-        ? 'Ingen adresse i utlandet'
-        : 'Har oppgitt adresse i utlandet'
-    case Kriterietype.GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET:
-      return krit.resultat === VilkaarVurderingsResultat.OPPFYLT
-        ? 'Har ikke bostedsadresse i utlandet'
-        : 'Har bostedsadresse i utlandet'
-  }
+export const capitalize = (s: string) => {
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
 }

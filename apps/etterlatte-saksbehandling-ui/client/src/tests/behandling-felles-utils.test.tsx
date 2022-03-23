@@ -1,5 +1,5 @@
 import React from 'react'
-import { hentAdresserEtterDoedsdato, hentKriterier } from '../components/behandling/felles/utils'
+import { hentAdresserEtterDoedsdato, hentKriterierMedOpplysning } from '../components/behandling/felles/utils'
 import { IAdresse } from '../components/behandling/types'
 import { KriterieOpplysningsType, Kriterietype, OpplysningsType } from '../store/reducers/BehandlingReducer'
 
@@ -119,7 +119,7 @@ describe('Behandling-felles-utils', () => {
   })
 
   it('Test at hent kriterier returnerer riktig', () => {
-    const vilkaarResult = hentKriterier(
+    const vilkaarResult = hentKriterierMedOpplysning(
       vilkaarMock,
       Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL,
       KriterieOpplysningsType.DOEDSDATO

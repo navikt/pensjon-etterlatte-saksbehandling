@@ -41,7 +41,7 @@ spec:
     - name: OPPDRAG_MQ_HOSTNAME
       value: b27apvl222.preprod.local
     - name: OPPDRAG_MQ_PORT
-      value: 1413
+      value: "1413"
     - name: OPPDRAG_MQ_CHANNEL
       value: Q2_BARNEPENSJON
     - name: OPPDRAG_MQ_MANAGER

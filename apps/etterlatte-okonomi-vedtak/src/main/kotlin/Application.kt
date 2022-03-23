@@ -4,6 +4,7 @@ import com.ibm.mq.MQC
 import com.ibm.mq.jms.MQConnectionFactory
 import com.ibm.msg.client.jms.JmsConstants
 import com.ibm.msg.client.wmq.WMQConstants
+import no.nav.etterlatte.vedtaksoversetter.KvitteringMottaker
 import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
 import no.nav.etterlatte.vedtaksoversetter.OppdragSender
 import no.nav.etterlatte.vedtaksoversetter.Vedtaksoversetter
@@ -38,13 +39,13 @@ fun main() {
                 oppdragMapper = OppdragMapper,
                 oppdragSender = oppdragSender
             )
-            /*KvitteringMottaker(
+            KvitteringMottaker(
                 rapidsConnection = it,
                 connectionFactory = connectionFactory(env),
                 queue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
                 username = env.required("srvuser"),
                 password = env.required("srvpwd")
-            )*/
+            )
         }.start()
 }
 

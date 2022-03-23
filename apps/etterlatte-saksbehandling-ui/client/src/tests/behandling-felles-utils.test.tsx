@@ -1,5 +1,5 @@
 import React from 'react'
-import { hentAdresserEtterDoedsdato, hentKriterier } from '../components/behandling/felles/utils'
+import { hentAdresserEtterDoedsdato, hentKriterierMedOpplysning } from '../components/behandling/felles/utils'
 import { IAdresse } from '../components/behandling/types'
 import { KriterieOpplysningsType, Kriterietype, OpplysningsType } from '../store/reducers/BehandlingReducer'
 
@@ -43,7 +43,7 @@ const vilkaarMock = {
       resultat: 'OPPFYLT',
       basertPaaOpplysninger: [
         {
-          opplysningsType: 'AVDOED_PDL_V1',
+          kriterieOpplysningsType: 'DOEDSDATO',
           kilde: {
             navn: 'pdl',
             tidspunktForInnhenting: '2022-03-07T14:09:33.789469374Z',
@@ -62,7 +62,7 @@ const vilkaarMock = {
       resultat: 'OPPFYLT',
       basertPaaOpplysninger: [
         {
-          opplysningsType: 'SOEKER_PDL_V1',
+          kriterieOpplysningsType: 'FORELDRE',
           kilde: {
             navn: 'pdl',
             tidspunktForInnhenting: '2022-03-07T14:09:34.766506822Z',
@@ -89,7 +89,7 @@ const vilkaarMock = {
           },
         },
         {
-          opplysningsType: 'AVDOED_PDL_V1',
+          kriterieOpplysningsType: 'DOEDSDATO',
           kilde: {
             navn: 'pdl',
             tidspunktForInnhenting: '2022-03-07T14:09:33.789469374Z',
@@ -119,11 +119,11 @@ describe('Behandling-felles-utils', () => {
   })
 
   it('Test at hent kriterier returnerer riktig', () => {
-    const vilkaarResult = hentKriterier(
+    const vilkaarResult = hentKriterierMedOpplysning(
       vilkaarMock,
       Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL,
       KriterieOpplysningsType.DOEDSDATO
     )
-    expect(vilkaarResult.opplysningsType).toBe(OpplysningsType.avdoed_forelder_pdl)
+    expect(vilkaarResult.kriterieOpplysningsType).toBe(KriterieOpplysningsType.DOEDSDATO)
   })
 })

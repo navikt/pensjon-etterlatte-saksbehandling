@@ -1,6 +1,6 @@
 import { IKriterie, VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
-import { mapKriterieTilSvar, mapKriterieTypeTilTekst } from './utils'
+import { mapKriterietyperTilTekst } from './utils'
 
 export const VilkaarVurderingsliste = ({ kriterie }: { kriterie: IKriterie[] }) => {
   const oppfylt = kriterie.filter((krit) => krit.resultat === VilkaarVurderingsResultat.OPPFYLT)
@@ -19,8 +19,8 @@ export const VilkaarVurderingsliste = ({ kriterie }: { kriterie: IKriterie[] }) 
           </div>
 
           <div>
-            <div style={{ fontWeight: 'bold' }}>{mapKriterieTypeTilTekst(krit.navn)}</div>
-            <div>{mapKriterieTilSvar(krit)}</div>
+            <div style={{ fontWeight: 'bold' }}>{mapKriterietyperTilTekst(krit).tittel}</div>
+            <div>{mapKriterietyperTilTekst(krit).svar}</div>
           </div>
         </div>
       ))}

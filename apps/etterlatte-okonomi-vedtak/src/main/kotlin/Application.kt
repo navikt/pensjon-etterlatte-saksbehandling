@@ -50,15 +50,14 @@ fun main() {
 
 private fun connectionFactory(env: Map<String, String>): ConnectionFactory =
     MQConnectionFactory().apply {
-        hostName = "b27apvl222.preprod.local"
-        //hostName = env.required("OPPDRAG_MQ_HOSTNAME")
+        hostName = env.required("OPPDRAG_MQ_HOSTNAME")
         port = env.required("OPPDRAG_MQ_PORT").toInt()
         queueManager = env.required("OPPDRAG_MQ_MANAGER")
         channel =  env.required("OPPDRAG_MQ_CHANNEL")
         transportType = WMQConstants.WMQ_CM_CLIENT
         ccsid = UTF_8_WITH_PUA
 
-        setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, false)
+        setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, true)
         setIntProperty(WMQConstants.JMS_IBM_ENCODING, MQC.MQENC_NATIVE)
         setIntProperty(WMQConstants.JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA)
     }

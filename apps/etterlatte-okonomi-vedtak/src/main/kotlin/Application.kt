@@ -4,7 +4,6 @@ import com.ibm.mq.MQC
 import com.ibm.mq.jms.MQConnectionFactory
 import com.ibm.msg.client.jms.JmsConstants
 import com.ibm.msg.client.wmq.WMQConstants
-import no.nav.etterlatte.vedtaksoversetter.KvitteringMottaker
 import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
 import no.nav.etterlatte.vedtaksoversetter.OppdragSender
 import no.nav.etterlatte.vedtaksoversetter.Vedtaksoversetter
@@ -62,7 +61,6 @@ private fun connectionFactory(env: Map<String, String>): ConnectionFactory =
         setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, false)
         setIntProperty(WMQConstants.JMS_IBM_ENCODING, MQC.MQENC_NATIVE)
         setIntProperty(WMQConstants.JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA)
-
     }
 
 private fun Map<String, String>.required(property: String): String =

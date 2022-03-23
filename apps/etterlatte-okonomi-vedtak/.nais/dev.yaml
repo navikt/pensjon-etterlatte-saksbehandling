@@ -35,7 +35,7 @@ spec:
       #sette tilbake til none senere
       value: latest
     - name: OPPDRAG_SEND_MQ_NAME
-      value: QA.Q1_231.OB04_OPPDRAG_XML
+      value: QA.Q2_231.OB04_OPPDRAG_XML
     - name: OPPDRAG_KVITTERING_MQ_NAME
       value: QA.Q2_BARNEPENSJON.OPPDRAG_KVITTERING
     - name: OPPDRAG_MQ_HOSTNAME

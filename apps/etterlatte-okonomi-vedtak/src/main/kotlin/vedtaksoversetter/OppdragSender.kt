@@ -8,6 +8,7 @@ import javax.jms.ConnectionFactory
 class OppdragSender(
     val connectionFactory: ConnectionFactory,
     val queue: String,
+    val replyQueue: String,
     val username: String,
     val password: String,
 ) {
@@ -16,8 +17,10 @@ class OppdragSender(
         connectionFactory.createConnection(username, password).use {
             logger.info("Connection til MQ opprettet")
             it.createSession().use { session ->
-                val producer = session.createProducer(MQQueue(queue))
-                val message = connectionFactory.createContext().createTextMessage(oppdrag.toXml())
+                val producer = session.createProducer(session.createQueue(queue))
+                val message = session.createTextMessage(oppdrag.toXml()).apply {
+                    jmsReplyTo = MQQueue(replyQueue)
+                }
 
                 logger.info("Legger melding på køen")
                 producer.send(message)

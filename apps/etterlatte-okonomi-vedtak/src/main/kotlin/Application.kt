@@ -27,6 +27,7 @@ fun main() {
     val oppdragSender = OppdragSender(
         connectionFactory = connectionFactory(env),
         queue = env.required("OPPDRAG_SEND_MQ_NAME"),
+        replyQueue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
         username = env.required("srvuser"),
         password = env.required("srvpwd")
     )
@@ -38,13 +39,13 @@ fun main() {
                 oppdragMapper = OppdragMapper,
                 oppdragSender = oppdragSender
             )
-            KvitteringMottaker(
+            /*KvitteringMottaker(
                 rapidsConnection = it,
                 connectionFactory = connectionFactory(env),
                 queue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
                 username = env.required("srvuser"),
                 password = env.required("srvpwd")
-            )
+            )*/
         }.start()
 }
 
@@ -60,6 +61,7 @@ private fun connectionFactory(env: Map<String, String>): ConnectionFactory =
         setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, false)
         setIntProperty(WMQConstants.JMS_IBM_ENCODING, MQC.MQENC_NATIVE)
         setIntProperty(WMQConstants.JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA)
+
     }
 
 private fun Map<String, String>.required(property: String) =

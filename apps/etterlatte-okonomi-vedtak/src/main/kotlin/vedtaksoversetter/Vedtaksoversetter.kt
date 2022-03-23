@@ -32,13 +32,14 @@ internal class Vedtaksoversetter(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             try {
+                logger.info("Mottok fattet vedtak - klargjører for oppdrag")
                 val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson(), Vedtak::class.java)
                 val oppdrag: Oppdrag = oppdragMapper.oppdragFraVedtak(vedtak)
                 oppdragSender.sendOppdrag(oppdrag)
 
                 logger.info("Oppdrag opprettet")
 
-                context.publish(packet.apply { this["@vedtak_oversatt"] = true }.toJson())
+                //context.publish(packet.apply { this["@vedtak_oversatt"] = true }.toJson())
             } catch (e: Exception) {
                 logger.error("En feil oppstod: ${e.message}", e)
             }

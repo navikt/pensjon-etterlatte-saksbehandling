@@ -34,13 +34,15 @@ spec:
     - name: KAFKA_RESET_POLICY # ??
       #sette tilbake til none senere
       value: latest
-    - name: OPPDRAG_MQ_NAME
-      value: QA.Q1_231.OB04_OPPDRAG_XML
+    - name: OPPDRAG_SEND_MQ_NAME
+      value: QA.Q2_231.OB04_OPPDRAG_XML
+    - name: OPPDRAG_KVITTERING_MQ_NAME
+      value: QA.Q2_BARNEPENSJON.OPPDRAG_KVITTERING
     - name: OPPDRAG_MQ_HOSTNAME
-      value:
+      value: b27apvl222.preprod.local
     - name: OPPDRAG_MQ_PORT
       value: 1413
     - name: OPPDRAG_MQ_CHANNEL
-      value:
+      value: Q2_BARNEPENSJON
     - name: OPPDRAG_MQ_MANAGER
-      value: MRQ1
+      value: MQLS04

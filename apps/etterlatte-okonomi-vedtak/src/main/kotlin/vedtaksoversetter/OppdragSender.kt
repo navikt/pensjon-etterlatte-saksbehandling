@@ -14,9 +14,12 @@ class OppdragSender(
     fun sendOppdrag(oppdrag: Oppdrag) {
         logger.info("Sender utbetaling til Oppdrag")
         connectionFactory.createConnection(username, password).use {
+            logger.info("Connection til MQ opprettet")
             it.createSession().use { session ->
                 val producer = session.createProducer(MQQueue(queue))
                 val message = connectionFactory.createContext().createTextMessage(oppdrag.toXml())
+
+                logger.info("Legger melding på køen")
                 producer.send(message)
                 logger.info("Utbetaling overførert til Oppdrag")
             }

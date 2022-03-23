@@ -20,7 +20,8 @@ data class Oppdragsenhet(
 )
 
 enum class Endringskode(s: String) {
-    NY("NY"), ENDRING("ENDRING")
+    NY("NY"),
+    ENDRING("ENDRING")
 }
 
 enum class Enhetstype(s: String) { //TODO finne ut forkortelse til Behandlende og evt. andre enhetstyper

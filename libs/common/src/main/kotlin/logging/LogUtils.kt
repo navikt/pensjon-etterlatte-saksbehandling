@@ -6,10 +6,10 @@ import java.util.*
 const val X_CORRELATION_ID: String = "X-Correlation-Id"
 const val CORRELATION_ID: String = "correlation_id"
 
-fun <T> withLogContext(correlationId: String?, kv: Map<String, String> = emptyMap(), block: () -> T): T =
+fun <T> withLogContext(correlationId: String? = null, kv: Map<String, String> = emptyMap(), block: () -> T): T =
     innerLogContext(correlationId, kv, block)
 
-fun withLogContext(correlationId: String?, kv: Map<String, String> = emptyMap(), block: () -> Unit): Unit =
+fun withLogContext(correlationId: String? = null, kv: Map<String, String> = emptyMap(), block: () -> Unit): Unit =
     innerLogContext(correlationId, kv, block)
 
 private fun <T> innerLogContext(correlationId: String?, kv: Map<String, String> = emptyMap(), block: () -> T): T {

@@ -9,6 +9,7 @@ import no.nav.etterlatte.vedtaksoversetter.OppdragSender
 import no.nav.etterlatte.vedtaksoversetter.Vedtaksoversetter
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import readFile
 
@@ -25,6 +26,7 @@ internal class VedtaksoversetterTest {
         ) }
 
     @Test
+    @Disabled
     fun `sjekk mottak av vedtak`() {
         val inspector = inspector.apply { sendTestMessage(FATTET_VEDTAK) }.inspektør
 

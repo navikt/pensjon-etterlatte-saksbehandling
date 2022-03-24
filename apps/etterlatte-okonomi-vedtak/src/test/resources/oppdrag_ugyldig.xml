@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<oppdrag xmlns="http://www.trygdeetaten.no/skjema/oppdrag">
+    <mmel>
+        <systemId>231-OPPD</systemId>
+        <kodeMelding>B110018F</kodeMelding>
+        <alvorlighetsgrad>08</alvorlighetsgrad>
+        <beskrMelding>KODE-FAGOMRAADE er ugyldig: EY</beskrMelding>
+        <programId>K231BB10</programId>
+        <sectionNavn>WB10-LES-FAGOMRAADE</sectionNavn>
+    </mmel>
+    <oppdrag-110>
+        <kodeAksjon>1</kodeAksjon>
+        <kodeEndring>NY</kodeEndring>
+        <kodeFagomraade>EY</kodeFagomraade>
+        <fagsystemId>1234</fagsystemId>
+        <utbetFrekvens>MND</utbetFrekvens>
+        <oppdragGjelderId>12345612345</oppdragGjelderId>
+        <datoOppdragGjelderFom>2010-07-04</datoOppdragGjelderFom>
+        <saksbehId>4321</saksbehId>
+        <oppdrags-enhet-120>
+            <typeEnhet>BOS</typeEnhet>
+            <enhet>9999</enhet>
+            <datoEnhetFom>1999-09-28</datoEnhetFom>
+        </oppdrags-enhet-120>
+        <oppdrags-linje-150>
+            <kodeEndringLinje>NY</kodeEndringLinje>
+            <vedtakId>8888</vedtakId>
+            <delytelseId>delytelsesid</delytelseId>
+            <kodeKlassifik>BARNEPENSJON</kodeKlassifik>
+            <datoVedtakFom>2022-02-02</datoVedtakFom>
+            <datoVedtakTom>2030-01-04</datoVedtakTom>
+            <sats>10000</sats>
+            <fradragTillegg>T</fradragTillegg>
+            <typeSats>MND</typeSats>
+            <brukKjoreplan>J</brukKjoreplan>
+            <saksbehId>4321</saksbehId>
+            <utbetalesTilId>12345612345</utbetalesTilId>
+            <henvisning>1234</henvisning>
+        </oppdrags-linje-150>
+    </oppdrag-110>
+</ns2:oppdrag>

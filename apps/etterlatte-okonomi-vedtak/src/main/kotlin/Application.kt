@@ -4,13 +4,13 @@ import com.ibm.mq.MQC
 import com.ibm.mq.jms.MQConnectionFactory
 import com.ibm.msg.client.jms.JmsConstants
 import com.ibm.msg.client.wmq.WMQConstants
+import io.ktor.server.engine.ApplicationEngineEnvironment
 import no.nav.etterlatte.vedtaksoversetter.KvitteringMottaker
 import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
 import no.nav.etterlatte.vedtaksoversetter.OppdragSender
 import no.nav.etterlatte.vedtaksoversetter.Vedtaksoversetter
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 import javax.jms.ConnectionFactory
 
 private const val UTF_8_WITH_PUA = 1208
@@ -19,8 +19,6 @@ fun main() {
     val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", this.required("NAIS_APP_NAME").replace("-", ""))
     }
-
-    val logger = LoggerFactory.getLogger(OppdragSender::class.java)
 
     val jmsConnection = connectionFactory(env)
         .createConnection(env.required("srvuser"), env.required("srvpwd"))
@@ -46,7 +44,6 @@ fun main() {
 
             register(object : RapidsConnection.StatusListener {
                 override fun onStartup(rapidsConnection: RapidsConnection) {
-                    logger.info("Starter jms connection")
                     jmsConnection.start()
                 }
 

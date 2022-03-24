@@ -23,7 +23,7 @@ internal class KvitteringMottaker(
             logger.info("Connection created")
             jmsConnection.createSession(false, Session.AUTO_ACKNOWLEDGE).use { session ->
                 logger.info("Session created")
-                val consumer = session.createConsumer(MQQueue(queue))
+                val consumer = session.createConsumer(session.createQueue(queue))
                 logger.info("Consumer created")
                 consumer.setMessageListener { message ->
                     logger.info("Kvittering motatt - leser body")

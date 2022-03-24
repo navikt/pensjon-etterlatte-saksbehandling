@@ -27,7 +27,7 @@ export function mapKriterietyperTilTekst(krit: IKriterie): VilkaarTittelSvar {
     tittel = 'Dødsfallet er dokumentert'
     svar = mapEnkeltSvarTilTekst(krit)
   } else if (krit.navn === Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO) {
-    tittel = 'Barnet er under 20 år på virkningsdato'
+    tittel = 'Barnet er under 18 år på virkningsdato'
     svar = mapEnkeltSvarTilTekst(krit)
   } else if (krit.navn === Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET) {
     tittel = 'Barnet er medlem i trygden'

@@ -7,6 +7,7 @@ include(
     "apps:etterlatte-api",
     "apps:etterlatte-behandling",
     "apps:etterlatte-vilkaar",
+    "apps:etterlatte-vilkaar-kafka",
     "apps:etterlatte-behandling-fra-soeknad",
     "apps:etterlatte-opplysninger-fra-pdl",
     "apps:etterlatte-testdata",

@@ -1,7 +1,6 @@
 package no.nav.etterlatte
 
 import com.ibm.mq.MQC
-import com.ibm.mq.MQQueueManager
 import com.ibm.mq.jms.MQConnectionFactory
 import com.ibm.msg.client.jms.JmsConstants
 import com.ibm.msg.client.wmq.WMQConstants
@@ -10,9 +9,9 @@ import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
 import no.nav.etterlatte.vedtaksoversetter.OppdragSender
 import no.nav.etterlatte.vedtaksoversetter.Vedtaksoversetter
 import no.nav.helse.rapids_rivers.RapidApplication
+import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import javax.jms.ConnectionFactory
-import javax.sql.PooledConnection
 
 private const val UTF_8_WITH_PUA = 1208
 
@@ -21,15 +20,30 @@ fun main() {
         put("KAFKA_CONSUMER_GROUP_ID", this.required("NAIS_APP_NAME").replace("-", ""))
     }
 
+    val logger = LoggerFactory.getLogger(OppdragSender::class.java)
+
+    val jmsConnection = connectionFactory(env)
+        .createConnection(env.required("srvuser"), env.required("srvpwd"))
+
     val oppdragSender = OppdragSender(
-        connectionFactory = connectionFactory(env),
+        jmsConnection = jmsConnection,
         queue = env.required("OPPDRAG_SEND_MQ_NAME"),
         replyQueue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
-        username = env.required("srvuser"),
-        password = env.required("srvpwd")
     )
 
     RapidApplication.create(env)
+        .apply {
+            register(object : RapidsConnection.StatusListener {
+                override fun onStartup(rapidsConnection: RapidsConnection) {
+                    logger.info("Starter jms connection")
+                    jmsConnection.start()
+                }
+
+                override fun onShutdown(rapidsConnection: RapidsConnection) {
+                    jmsConnection.close()
+                }
+            })
+        }
         .also {
             Vedtaksoversetter(
                 rapidsConnection = it,
@@ -38,10 +52,8 @@ fun main() {
             )
             KvitteringMottaker(
                 rapidsConnection = it,
-                connectionFactory = connectionFactory(env),
+                jmsConnection = jmsConnection,
                 queue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
-                username = env.required("srvuser"),
-                password = env.required("srvpwd")
             )
         }.start()
 }

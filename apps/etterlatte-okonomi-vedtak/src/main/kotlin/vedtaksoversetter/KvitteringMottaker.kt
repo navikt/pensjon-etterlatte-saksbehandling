@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import javax.jms.ConnectionFactory
-import javax.jms.Session
 
 
 internal class KvitteringMottaker(
@@ -24,7 +23,7 @@ internal class KvitteringMottaker(
         withLogContext {
             connectionFactory.createConnection(username, password).use { connection ->
                 logger.info("Connection created")
-                connection.createSession(false, Session.AUTO_ACKNOWLEDGE).use { session ->
+                connection.createSession().use { session ->
                     logger.info("Session created")
                     val consumer = session.createConsumer(MQQueue(queue))
                     logger.info("Consumer created")

@@ -16,6 +16,7 @@ import { KriterieOpplysningsType, Kriterietype } from '../../../../store/reducer
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import { hentKriterierMedOpplysning } from '../../felles/utils'
+import { KildeDato } from './KildeDato'
 
 export const AlderBarn = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
@@ -58,6 +59,10 @@ export const AlderBarn = (props: VilkaarProps) => {
                 {format(new Date(barnetsFoedselsdato.opplysning.foedselsdato), 'dd.MM.yyyy')}{' '}
                 {barnetsAlder && <span>({barnetsAlder} år)</span>}
               </div>
+              <KildeDato
+                type={barnetsFoedselsdato?.kilde.type}
+                dato={barnetsFoedselsdato?.kilde.tidspunktForInnhenting}
+              />
             </VilkaarColumn>
             <VilkaarColumn>
               <div>

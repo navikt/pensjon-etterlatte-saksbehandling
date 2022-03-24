@@ -22,7 +22,7 @@ internal class KvitteringMottaker(
         withLogContext {
             consumer.setMessageListener { message ->
                try {
-                   logger.info("Kvittering fra Oppdrag mottatt")
+                   logger.info("Kvittering på utbetalingsoppdrag fra Oppdrag mottatt")
                    val oppdragXml = message.getBody(String::class.java)
                    val oppdrag = Jaxb.toOppdrag(oppdragXml)
 
@@ -31,7 +31,7 @@ internal class KvitteringMottaker(
                        else -> oppdragFeilet(oppdrag, oppdragXml)
                    }
                } catch (t: Throwable) {
-                   logger.error("Feilet under mottak av melding fra oppdrag", t)
+                   logger.error("Feilet under mottak av kvittering på utbetalingsoppdrag fra Oppdrag", t)
                }
             }
         }

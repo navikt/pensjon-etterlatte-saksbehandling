@@ -5,7 +5,6 @@ import {
   KriterieOpplysningsType,
   Kriterietype,
   OpplysningsType,
-  VilkaarVurderingsResultat,
 } from '../../../../store/reducers/BehandlingReducer'
 import { hentKriterierMedOpplysning } from '../../felles/utils'
 import {
@@ -67,7 +66,7 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
         <VilkaarWrapper>
           <VilkaarInfobokser>
             <VilkaarColumn>
-              <div>§ 18-5</div>
+              <div>§ 18-4</div>
               <div>En eller begge foreldrene døde</div>
             </VilkaarColumn>
             <VilkaarColumn>
@@ -91,7 +90,9 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
               <div>
                 {avdoedForelderFnr ? avdoedForelderFnr : <span className="missing">mangler fødselsnummer</span>}
               </div>
-              <KildeDato type={avdoedDoedsdato?.kilde.type} dato={avdoedDoedsdato?.kilde.tidspunktForInnhenting} />
+              {avdoedForelderFnr && (
+                <KildeDato type={avdoedDoedsdato?.kilde.type} dato={avdoedDoedsdato?.kilde.tidspunktForInnhenting} />
+              )}
             </VilkaarColumn>
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>

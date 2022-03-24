@@ -33,11 +33,11 @@ export const AlderBarn = (props: VilkaarProps) => {
   )
 
   const barnetsAlderVedDoedsfall = differenceInYears(
-    new Date(avdoedDoedsdato.opplysning.doedsdato),
-    new Date(barnetsFoedselsdato.opplysning.foedselsdato)
+    new Date(avdoedDoedsdato?.opplysning.doedsdato),
+    new Date(barnetsFoedselsdato?.opplysning.foedselsdato)
   )
 
-  const barnetsAlder = differenceInYears(new Date(), new Date(barnetsFoedselsdato.opplysning.foedselsdato))
+  const barnetsAlder = differenceInYears(new Date(), new Date(barnetsFoedselsdato?.opplysning.foedselsdato))
 
   return (
     <VilkaarBorder id={props.id}>
@@ -48,7 +48,7 @@ export const AlderBarn = (props: VilkaarProps) => {
         <VilkaarWrapper>
           <VilkaarInfobokser>
             <VilkaarColumn>
-              <div>§ 18-5</div>
+              <div>§ 18-4</div>
               <div>Barnet er under 20 år</div>
             </VilkaarColumn>
             <VilkaarColumn>
@@ -56,13 +56,21 @@ export const AlderBarn = (props: VilkaarProps) => {
                 <strong>Barnets fødselsdato</strong>
               </div>
               <div>
-                {format(new Date(barnetsFoedselsdato.opplysning.foedselsdato), 'dd.MM.yyyy')}{' '}
-                {barnetsAlder && <span>({barnetsAlder} år)</span>}
+                {barnetsFoedselsdato ? (
+                  <>
+                    <div>
+                      {format(new Date(barnetsFoedselsdato?.opplysning.foedselsdato), 'dd.MM.yyyy')}{' '}
+                      {barnetsAlder && <span>({barnetsAlder} år)</span>}
+                    </div>
+                    <KildeDato
+                      type={barnetsFoedselsdato?.kilde.type}
+                      dato={barnetsFoedselsdato?.kilde.tidspunktForInnhenting}
+                    />
+                  </>
+                ) : (
+                  <span className="missing">mangler</span>
+                )}
               </div>
-              <KildeDato
-                type={barnetsFoedselsdato?.kilde.type}
-                dato={barnetsFoedselsdato?.kilde.tidspunktForInnhenting}
-              />
             </VilkaarColumn>
             <VilkaarColumn>
               <div>

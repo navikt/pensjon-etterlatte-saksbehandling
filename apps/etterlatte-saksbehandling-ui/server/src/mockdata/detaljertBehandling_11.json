@@ -340,11 +340,11 @@
   "vilkårsprøving": [
     {
       "navn": "SOEKER_ER_UNDER_20",
-      "resultat": "OPPFYLT",
+      "resultat": "IKKE_OPPFYLT",
       "kriterier": [
         {
           "navn": "SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO",
-          "resultat": "OPPFYLT",
+          "resultat": "IKKE_OPPFYLT",
           "basertPaaOpplysninger": [
             {
               "kriterieOpplysningsType": "DOEDSDATO",
@@ -368,7 +368,7 @@
                 "type": "pdl"
               },
               "opplysning": {
-                "foedselsdato": "2013-10-12",
+                "foedselsdato": "2000-10-12",
                 "foedselsnummer": "12101376212"
               }
             }
@@ -474,11 +474,11 @@
     },
     {
       "navn": "BARNETS_MEDLEMSKAP",
-      "resultat": "OPPFYLT",
+      "resultat": "IKKE_OPPFYLT",
       "kriterier": [
         {
           "navn": "SOEKER_IKKE_ADRESSE_I_UTLANDET",
-          "resultat": "OPPFYLT",
+          "resultat": "IKKE_OPPFYLT",
           "basertPaaOpplysninger": [
             {
               "kriterieOpplysningsType": "ADRESSER",
@@ -491,15 +491,15 @@
               "opplysning": {
                 "bostedadresse": [
                   {
-                    "type": "VEGADRESSE",
+                    "type": "UTENLANDSKADRESSE",
                     "aktiv": true,
                     "coAdresseNavn": null,
-                    "adresseLinje1": "Bøveien 937",
+                    "adresseLinje1": "Kinaveien 937",
                     "adresseLinje2": null,
                     "adresseLinje3": null,
-                    "postnr": "8475",
-                    "poststed": null,
-                    "land": null,
+                    "postnr": "98765",
+                    "poststed": "Beijing",
+                    "land": "Kina",
                     "kilde": "FREG",
                     "gyldigFraOgMed": "1999-01-01T00:00:00",
                     "gyldigTilOgMed": null
@@ -517,9 +517,9 @@
                 "type": "privatperson"
               },
               "opplysning": {
-                "adresseIUtlandet": "NEI",
-                "land": null,
-                "adresse": null
+                "adresseIUtlandet": "JA",
+                "land": "Kina",
+                "adresse": "Veg 1A, 09876 Beijing"
               }
             },
             {

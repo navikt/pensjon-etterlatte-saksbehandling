@@ -41,8 +41,6 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
   const oppholdEtterDoedsdato = hentAdresserEtterDoedsdato(adresserBarn?.opplysning?.oppholdadresse, avdoedDoedsdato)
   const kontaktEtterDoedsdato = hentAdresserEtterDoedsdato(adresserBarn?.opplysning?.kontaktadresse, avdoedDoedsdato)
 
-  console.log(vilkaar)
-
   const gjenlevendeKriterie = hentKriterie(vilkaar, Kriterietype.GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET)
   const adresserGjenlevendePdl = hentKriterieOpplysning(gjenlevendeKriterie, KriterieOpplysningsType.ADRESSER)
   const gjenlevendeSkalVises = gjenlevendeKriterie.resultat !== VilkaarVurderingsResultat.OPPFYLT
@@ -52,7 +50,9 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
   const gjenlevendeKontakt = hentUtenlandskAdresse(adresserGjenlevendePdl?.opplysning.kontaktadresse, avdoedDoedsdato)
 
   const kriterieListe = gjenlevendeSkalVises
-    ? vilkaar?.kriterier
+    ? vilkaar?.kriterier.filter(
+        (krit: IKriterie) => krit.navn === Kriterietype.GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET
+      )
     : vilkaar?.kriterier.filter((krit: IKriterie) => krit.navn === Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET)
 
   return (
@@ -95,8 +95,8 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
                 <div>{capitalize(barnUtlandSoeknad?.opplysning.adresseIUtlandet)}</div>
                 {barnUtlandSoeknad?.opplysning.adresseIUtlandet === 'JA' && (
                   <>
-                    <div>barnUtlandSoeknad?.opplysning.adresse</div>
-                    <div>barnUtlandSoeknad?.opplysning.land</div>
+                    <div>{barnUtlandSoeknad?.opplysning.adresse}</div>
+                    <div>{barnUtlandSoeknad?.opplysning.land}</div>
                   </>
                 )}
                 <KildeDato type={barnUtlandSoeknad?.kilde.type} dato={barnUtlandSoeknad?.kilde.mottattDato} />

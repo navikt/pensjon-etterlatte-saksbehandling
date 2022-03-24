@@ -24,7 +24,7 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
         </Title>
         <VilkaarWrapper>
           <VilkaarColumn>
-            <div>§ 18-5</div>
+            <div>§ 18-2</div>
             <div>Den avdøde var medlem av trygden eller mottok pensjon/uføretrygd de siste 5 årene før dødsfallet</div>
           </VilkaarColumn>
         </VilkaarWrapper>

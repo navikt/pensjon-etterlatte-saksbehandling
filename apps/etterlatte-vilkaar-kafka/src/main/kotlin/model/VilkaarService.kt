@@ -56,7 +56,6 @@ class VilkaarService {
                 opplysning.kilde,
                 objectMapper.readValue(opplysning.opplysning.toString())
             )}
-
         }
 
         inline fun <reified T> finnOpplysning(opplysninger: List<VilkaarOpplysning<ObjectNode>>, type: Opplysningstyper): VilkaarOpplysning<T>? {

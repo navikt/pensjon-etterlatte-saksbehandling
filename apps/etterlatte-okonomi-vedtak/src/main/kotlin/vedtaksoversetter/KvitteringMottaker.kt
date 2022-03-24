@@ -1,7 +1,6 @@
 package no.nav.etterlatte.vedtaksoversetter
 
 
-import com.ibm.mq.jms.MQQueue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -18,20 +17,22 @@ internal class KvitteringMottaker(
 
     private val logger = LoggerFactory.getLogger(KvitteringMottaker::class.java)
 
+    private val session = jmsConnection.createSession(false, Session.AUTO_ACKNOWLEDGE)
+    private val consumer = session.createConsumer(session.createQueue(queue))
+
     init {
         withLogContext {
-            logger.info("Connection created")
-            jmsConnection.createSession(false, Session.AUTO_ACKNOWLEDGE).use { session ->
-                logger.info("Session created")
-                val consumer = session.createConsumer(session.createQueue(queue))
-                logger.info("Consumer created")
-                consumer.setMessageListener { message ->
-                    logger.info("Kvittering motatt - leser body")
-                    val body = message.getBody(String::class.java)
-                    logger.info("Kvittering mottatt", kv("body", body))
-
-                    //rapidsConnection.publish("")
-                }
+            logger.info("Setting message listener")
+            logger.info("Connection:$jmsConnection")
+            consumer.setMessageListener { message ->
+               try {
+                   logger.info("Kvittering motatt - leser body")
+                   val body = message.getBody(String::class.java)
+                   logger.info("Kvittering mottatt", kv("body", body))
+               } catch (t: Throwable) {
+                   logger.error("Feilet under mottak av melding")
+               }
+            //rapidsConnection.publish("")
             }
         }
     }

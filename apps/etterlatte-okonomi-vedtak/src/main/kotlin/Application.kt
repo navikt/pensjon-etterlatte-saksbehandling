@@ -33,6 +33,17 @@ fun main() {
 
     RapidApplication.create(env)
         .apply {
+            KvitteringMottaker(
+                rapidsConnection = this,
+                jmsConnection = jmsConnection,
+                queue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
+            )
+            Vedtaksoversetter(
+                rapidsConnection = this,
+                oppdragMapper = OppdragMapper,
+                oppdragSender = oppdragSender
+            )
+
             register(object : RapidsConnection.StatusListener {
                 override fun onStartup(rapidsConnection: RapidsConnection) {
                     logger.info("Starter jms connection")
@@ -43,18 +54,6 @@ fun main() {
                     jmsConnection.close()
                 }
             })
-        }
-        .also {
-            Vedtaksoversetter(
-                rapidsConnection = it,
-                oppdragMapper = OppdragMapper,
-                oppdragSender = oppdragSender
-            )
-            KvitteringMottaker(
-                rapidsConnection = it,
-                jmsConnection = jmsConnection,
-                queue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
-            )
         }.start()
 }
 

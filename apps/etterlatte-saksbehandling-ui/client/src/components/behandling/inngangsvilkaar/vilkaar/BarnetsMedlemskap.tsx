@@ -11,7 +11,7 @@ import {
 } from '../styled'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import { capitalize, vilkaarErOppfylt } from './utils'
-import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
+import { VilkaarVurderingEnkeltElement, VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import {
   IKriterie,
   IKriterieOpplysning,
@@ -49,11 +49,26 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
   const gjenlevendeOpphold = hentUtenlandskAdresse(adresserGjenlevendePdl?.opplysning.oppholdadresse, avdoedDoedsdato)
   const gjenlevendeKontakt = hentUtenlandskAdresse(adresserGjenlevendePdl?.opplysning.kontaktadresse, avdoedDoedsdato)
 
-  const kriterieListe = gjenlevendeSkalVises
-    ? vilkaar?.kriterier.filter(
-        (krit: IKriterie) => krit.navn === Kriterietype.GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET
-      )
-    : vilkaar?.kriterier.filter((krit: IKriterie) => krit.navn === Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET)
+  function lagVilkaarVisning() {
+    if (gjenlevendeKriterie.resultat === VilkaarVurderingsResultat.OPPFYLT) {
+      return <VilkaarVurderingsliste kriterie={[soekerKriterie]} />
+    } else {
+      const tittel = 'Barnet er medlem i trygden'
+      let svar
+      let resultat
+      if (soekerKriterie.resultat === VilkaarVurderingsResultat.OPPFYLT) {
+        svar = 'Avklar. Gjenlevende har utenlandsk adresse'
+        resultat = VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+      } else if (soekerKriterie.resultat === VilkaarVurderingsResultat.IKKE_OPPFYLT) {
+        svar = 'Nei. Barnet har utenlandsk bostedsadresse'
+        resultat = VilkaarVurderingsResultat.IKKE_OPPFYLT
+      } else {
+        svar = 'Avklar. Barnet og gjenlevende har utenlandsk adresse'
+        resultat = VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+      }
+      return <VilkaarVurderingEnkeltElement tittel={tittel} svar={svar} resultat={resultat} />
+    }
+  }
 
   return (
     <VilkaarBorder id={props.id}>
@@ -124,7 +139,7 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
             <VilkaarlisteTitle>{props.vilkaar?.resultat && vilkaarErOppfylt(props.vilkaar.resultat)}</VilkaarlisteTitle>
-            <VilkaarVurderingsliste kriterie={props.vilkaar?.kriterier ? kriterieListe : []} />
+            {lagVilkaarVisning()}
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
       </Innhold>

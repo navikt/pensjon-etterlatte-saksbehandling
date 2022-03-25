@@ -34,16 +34,10 @@ export function mapKriterietyperTilTekst(krit: IKriterie): VilkaarTittelSvar {
     if (krit.resultat === VilkaarVurderingsResultat.OPPFYLT) {
       svar = 'Ja. Barnet har bostedsadresse i Norge'
     } else if (krit.resultat === VilkaarVurderingsResultat.IKKE_OPPFYLT) {
-      svar = 'Nei. Barnet er registert med utenlandsk bostedsadresse'
+      svar = 'Nei. Barnet har utenlandsk bostedsadresse'
     } else {
       svar = 'Avklar. Barnet har registrert utenlandsk adresse'
     }
-  } else if (
-    krit.navn === Kriterietype.GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET &&
-    krit.resultat !== VilkaarVurderingsResultat.OPPFYLT
-  ) {
-    tittel = 'Barnet er medlem i trygden'
-    svar = 'Avklar. Gjenlevende foreldre har utenlandsk adresse'
   } else {
     tittel = ''
     svar = ''

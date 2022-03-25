@@ -23,7 +23,7 @@ export const PersonInfoAdresse: React.FC<Props> = ({
     <>
       <PersonDetailWrapper adresse={true}>
         <div>
-          <strong>{avodedPerson ? 'Adresse dødsfallstidspunkt' : 'Adresse'}</strong>
+          <strong>{avodedPerson ? 'Bostedadresse dødsfallstidspunkt' : 'Bostedadresse'}</strong>
         </div>
         {gjeldendeAdresse ? (
           adresseFraSoeknadGjenlevende ? (
@@ -37,7 +37,7 @@ export const PersonInfoAdresse: React.FC<Props> = ({
             </span>
           )
         ) : (
-          <span>Ingen adresse</span>
+          <span>Ingen bostedadresse</span>
         )}
 
         {adresser && !avodedPerson && (

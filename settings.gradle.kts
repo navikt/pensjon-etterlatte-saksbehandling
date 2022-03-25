@@ -12,6 +12,7 @@ include(
     "apps:etterlatte-opplysninger-fra-pdl",
     "apps:etterlatte-testdata",
     "apps:etterlatte-okonomi-vedtak",
+    "apps:etterlatte-opplysninger-fra-inntektskomponenten",
     "libs:ktorclient-auth-clientcredentials",
     "libs:common",
     "libs:ktorclient-onbehalfof",

@@ -18,7 +18,7 @@ class GcpKafkaConfig(
 ): KafkaConfig {
     override fun producerConfig() = kafkaBaseConfig().apply {
         put(ProducerConfig.ACKS_CONFIG, "1")
-        put(ProducerConfig.CLIENT_ID_CONFIG, "etterlatte-post-til-kafka")
+        put(ProducerConfig.CLIENT_ID_CONFIG, "etterlatte-behandling")
         put(ProducerConfig.LINGER_MS_CONFIG, "0")
         put(ProducerConfig.RETRIES_CONFIG, Int.MAX_VALUE)
         put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")

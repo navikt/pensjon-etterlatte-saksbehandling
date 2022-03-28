@@ -17,10 +17,11 @@ internal class LesVilkaarsmelding(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event_name", "oppdatert_grunnlag") }
-            validate { it.requireKey("@vilkaarsopplysninger") }
-            validate { it.rejectKey("@sak_id") }
-            validate { it.rejectKey("@behandling_id") }
+            validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
+            //validate { it.requireKey("@vilkaarsopplysninger") }
+            //validate { it.rejectKey("@sak_id") }
+            //validate { it.rejectKey("@behandling_id") }
+            validate {it.rejectKey("@vilkaarsvurdering")}
             validate { it.interestedIn("@correlation_id") }
 
         }.register(this)
@@ -32,12 +33,12 @@ internal class LesVilkaarsmelding(
             //TODO Logikk for å kalle vilkarService
             val vilkaarsVurdering = vilkaar.mapVilkaar(
                 objectMapper.treeToValue(
-                    packet["@vilkaarsopplysninger"],
+                    packet["grunnlag"],
                     JsonNodeDto::class.java
                 ).opplysninger
             )
-            val sak = packet["@sak_id"]
-            val behandlingsid = packet["@behandling_id"]
+            //val sak = packet["@sak_id"]
+            //val behandlingsid = packet["@behandling_id"]
 
             packet["@vilkaarsvurdering"] = vilkaarsVurdering
 

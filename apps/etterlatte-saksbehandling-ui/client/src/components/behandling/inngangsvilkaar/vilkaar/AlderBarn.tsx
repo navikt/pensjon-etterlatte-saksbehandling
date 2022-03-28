@@ -3,6 +3,7 @@ import differenceInYears from 'date-fns/differenceInYears'
 import format from 'date-fns/format'
 import {
   Innhold,
+  Lovtekst,
   Title,
   VilkaarBorder,
   VilkaarColumn,
@@ -45,12 +46,9 @@ export const AlderBarn = (props: VilkaarProps) => {
         <Title>
           <StatusIcon status={props.vilkaar.resultat} large={true} /> Alder barn
         </Title>
+        <Lovtekst>§ 18-4: Barnet er under 18 år</Lovtekst>
         <VilkaarWrapper>
           <VilkaarInfobokser>
-            <VilkaarColumn>
-              <div>§ 18-4</div>
-              <div>Barnet er under 18 år</div>
-            </VilkaarColumn>
             <VilkaarColumn>
               <div>
                 <strong>Barnets fødselsdato</strong>

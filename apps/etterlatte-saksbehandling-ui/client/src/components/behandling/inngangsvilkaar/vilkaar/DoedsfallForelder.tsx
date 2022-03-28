@@ -9,6 +9,7 @@ import {
 import { hentKriterierMedOpplysning } from '../../felles/utils'
 import {
   Innhold,
+  Lovtekst,
   Title,
   VilkaarBorder,
   VilkaarColumn,
@@ -63,12 +64,9 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
         <Title>
           <StatusIcon status={props.vilkaar.resultat} large={true} /> Dødsfall forelder
         </Title>
+        <Lovtekst>§ 18-4: En eller begge foreldrene døde</Lovtekst>
         <VilkaarWrapper>
           <VilkaarInfobokser>
-            <VilkaarColumn>
-              <div>§ 18-4</div>
-              <div>En eller begge foreldrene døde</div>
-            </VilkaarColumn>
             <VilkaarColumn>
               <div>
                 <strong>Dødsdato</strong>

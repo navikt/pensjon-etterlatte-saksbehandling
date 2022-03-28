@@ -14,16 +14,16 @@ export const VilkaarWrapper = styled.div`
   justify-content: space-between;
   align-items: top;
   gap: 20px;
-
-  @media (max-width: 1200px) {
-    flex-wrap: wrap;
-  }
 `
 
 export const Title = styled.div`
   display: flex;
   font-size: 1.2em;
   font-weight: bold;
+`
+export const Lovtekst = styled.div`
+  display: flex;
+  margin-top: 10px;
 `
 export const VilkaarlisteTitle = styled.div`
   display: flex;
@@ -32,9 +32,15 @@ export const VilkaarlisteTitle = styled.div`
 `
 
 export const VilkaarColumn = styled.div`
-  flex-basis: 300px;
-  flex: 1;
-  min-width: 150px;
+  width: calc((100% / 3) - (40px / 3));
+
+  @media (max-width: 1600px) {
+    width: calc((100% / 2) - (20px / 2));
+  }
+
+  @media (max-width: 1300px) {
+    width: 100%;
+  }
 
   .missing {
     color: red;
@@ -51,6 +57,7 @@ export const VilkaarInfobokser = styled.div`
 export const VilkaarVurderingColumn = styled.div`
   flex: 1;
   min-width: 300px;
+  flex-grow: 0;
 `
 
 export const Innhold = styled.div`

@@ -1,6 +1,7 @@
 import { VilkaarProps } from '../types'
 import {
   Innhold,
+  Lovtekst,
   Title,
   VilkaarBorder,
   VilkaarColumn,
@@ -13,7 +14,6 @@ import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import { capitalize, vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingEnkeltElement, VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import {
-  IKriterie,
   IKriterieOpplysning,
   KriterieOpplysningsType,
   Kriterietype,
@@ -77,12 +77,9 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
           <StatusIcon status={props.vilkaar.resultat} large={true} />
           Barnets medlemskap
         </Title>
+        <Lovtekst>§ 18-3: Barnet er medlem av trygden/bosatt i Norge fra dødsfalltidspunktet til i dag</Lovtekst>
         <VilkaarWrapper>
           <VilkaarInfobokser>
-            <VilkaarColumn>
-              <div>§ 18-3</div>
-              <div>Barnet er medlem av trygden/bosatt i Norge fra dødsfalltidspunktet til i dag</div>
-            </VilkaarColumn>
             <VilkaarColumn>
               <div>
                 <strong>Barnets bostedadresse</strong>
@@ -158,9 +155,7 @@ const GjenlevendeAdresser = ({
 }) => {
   return (
     <>
-      {adresse == undefined || adresse.length == 0 ? (
-        <div></div>
-      ) : (
+      {adresse != undefined && adresse.length > 0 && (
         <VilkaarColumn>
           <div>
             <strong>Gjenlevendes {tittel}</strong>

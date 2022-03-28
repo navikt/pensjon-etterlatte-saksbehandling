@@ -21,6 +21,7 @@ internal class LesVilkaarsmelding(
             //validate { it.requireKey("@vilkaarsopplysninger") }
             //validate { it.rejectKey("@sak_id") }
             //validate { it.rejectKey("@behandling_id") }
+            validate { it.requireKey("grunnlag")}
             validate {it.rejectKey("@vilkaarsvurdering")}
             validate { it.interestedIn("@correlation_id") }
 

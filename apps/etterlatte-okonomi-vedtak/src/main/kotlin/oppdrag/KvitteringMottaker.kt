@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksoversetter
+package no.nav.etterlatte.oppdrag
 
 
 import net.logstash.logback.argument.StructuredArguments.kv

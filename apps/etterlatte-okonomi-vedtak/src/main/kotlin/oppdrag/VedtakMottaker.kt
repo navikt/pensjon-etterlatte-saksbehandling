@@ -1,7 +1,7 @@
-package no.nav.etterlatte.vedtaksoversetter
+package no.nav.etterlatte.oppdrag
 
 
-import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.domain.Vedtak
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -10,18 +10,13 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 
 
-internal class Vedtaksoversetter(
+internal class VedtakMottaker(
     rapidsConnection: RapidsConnection,
-    val oppdragMapper: OppdragMapper,
-    val oppdragSender: OppdragSender,
-    val utbetalingsoppdragDao: UtbetalingsoppdragDao,
+    private val oppdragService: OppdragService,
 ) : River.PacketListener {
-
-    private val logger = LoggerFactory.getLogger(Vedtaksoversetter::class.java)
 
     init {
         River(rapidsConnection).apply {
@@ -36,16 +31,8 @@ internal class Vedtaksoversetter(
         withLogContext(packet.correlationId()) {
             try {
                 logger.info("Fattet vedtak mottatt")
-                val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson(), Vedtak::class.java)
-
-                logger.info("Oppretter utbetalingsoppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId}")
-                val oppdrag: Oppdrag = oppdragMapper.oppdragFraVedtak(vedtak)
-
-                utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
-                oppdragSender.sendOppdrag(oppdrag)
-                utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.SENDT)
-
-                //context.publish(packet.apply { this["@vedtak_oversatt"] = true }.toJson())
+                val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson())
+                oppdragService.opprettOgSendOppdrag(vedtak)
             } catch (e: Exception) {
                 logger.error("En feil oppstod: ${e.message}", e)
             }
@@ -53,5 +40,8 @@ internal class Vedtaksoversetter(
 
     private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 
+    companion object {
+        private val logger = LoggerFactory.getLogger(VedtakMottaker::class.java)
+    }
 }
 

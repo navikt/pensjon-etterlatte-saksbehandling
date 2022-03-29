@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksoversetter
+package no.nav.etterlatte.oppdrag
 
 import com.ibm.mq.jms.MQQueue
 import no.nav.etterlatte.common.Jaxb

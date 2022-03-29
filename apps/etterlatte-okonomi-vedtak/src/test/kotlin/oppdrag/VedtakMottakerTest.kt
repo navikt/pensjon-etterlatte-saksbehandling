@@ -1,7 +1,6 @@
-package no.nav.etterlatte.vedtaksoversetter
+package no.nav.etterlatte.oppdrag
 
 import io.mockk.mockk
-import io.mockk.spyk
 import io.mockk.verifyOrder
 import no.nav.etterlatte.readFile
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -9,18 +8,14 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-internal class VedtaksoversetterTest {
+internal class VedtakMottakerTest {
 
-    private val oppdragMapper = spyk<OppdragMapper>()
-    private val oppdragSender = mockk<OppdragSender>(relaxed = true)
-    private val oppdragRepository = mockk<UtbetalingsoppdragDao>(relaxed = true)
+    private val oppdragService = mockk<OppdragService>(relaxed = true)
 
     private val inspector = TestRapid().apply {
-        Vedtaksoversetter(
+        VedtakMottaker(
             rapidsConnection = this,
-            oppdragMapper = oppdragMapper,
-            oppdragSender = oppdragSender,
-            utbetalingsoppdragDao = oppdragRepository
+            oppdragService = oppdragService,
         ) }
 
     @Test
@@ -30,12 +25,11 @@ internal class VedtaksoversetterTest {
 
         assertEquals("true", inspector.message(0).get("@vedtak_oversatt").asText())
         verifyOrder {
-            oppdragMapper.oppdragFraVedtak(any())
-            oppdragSender.sendOppdrag(any())
+            oppdragService.opprettOgSendOppdrag(any())
         }
     }
 
     companion object {
-        val FATTET_VEDTAK = readFile("vedtak.json")
+        val FATTET_VEDTAK = readFile("/vedtak.json")
     }
 }

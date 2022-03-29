@@ -2,11 +2,12 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.config.DataSourceBuilder
 import no.nav.etterlatte.config.JmsConnectionFactoryBuilder
-import no.nav.etterlatte.vedtaksoversetter.KvitteringMottaker
-import no.nav.etterlatte.vedtaksoversetter.UtbetalingsoppdragDao
-import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
-import no.nav.etterlatte.vedtaksoversetter.OppdragSender
-import no.nav.etterlatte.vedtaksoversetter.Vedtaksoversetter
+import no.nav.etterlatte.oppdrag.KvitteringMottaker
+import no.nav.etterlatte.oppdrag.OppdragMapper
+import no.nav.etterlatte.oppdrag.OppdragSender
+import no.nav.etterlatte.oppdrag.OppdragService
+import no.nav.etterlatte.oppdrag.UtbetalingsoppdragDao
+import no.nav.etterlatte.oppdrag.VedtakMottaker
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 
@@ -43,6 +44,12 @@ fun main() {
 
     val utbetalingsoppdragDao = UtbetalingsoppdragDao(dataSourceBuilder.dataSource())
 
+    val oppdragService = OppdragService(
+        oppdragMapper = OppdragMapper,
+        oppdragSender = oppdragSender,
+        utbetalingsoppdragDao = utbetalingsoppdragDao
+    )
+
     RapidApplication.create(env)
         .apply {
             KvitteringMottaker(
@@ -51,11 +58,9 @@ fun main() {
                 jmsConnection = jmsConnection,
                 queue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
             )
-            Vedtaksoversetter(
+            VedtakMottaker(
                 rapidsConnection = this,
-                oppdragMapper = OppdragMapper,
-                oppdragSender = oppdragSender,
-                utbetalingsoppdragDao = utbetalingsoppdragDao
+                oppdragService = oppdragService
             )
 
             register(object : RapidsConnection.StatusListener {

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksoversetter
+package no.nav.etterlatte.oppdrag
 
 import no.nav.etterlatte.mockVedtak
 import org.junit.jupiter.api.Assertions.assertNotNull

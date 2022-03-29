@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksoversetter
+package no.nav.etterlatte.oppdrag
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.common.Jaxb
@@ -50,7 +50,8 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
     fun opprettUtbetalingsoppdrag(vedtak: Vedtak, oppdrag: Oppdrag) =
         dataSource.connection.use { connection ->
             val stmt = connection.prepareStatement(
-                "INSERT INTO utbetalingsoppdrag(vedtak_id, behandling_id, sak_id, oppdrag, vedtak, status) VALUES(?, ?, ?, ?, ?, ?)"
+                "INSERT INTO utbetalingsoppdrag(vedtak_id, behandling_id, sak_id, oppdrag, vedtak, status) " +
+                        "VALUES(?, ?, ?, ?, ?, ?)"
             )
 
             stmt.use {

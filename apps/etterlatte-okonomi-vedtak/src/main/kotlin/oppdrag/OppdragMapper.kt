@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksoversetter
+package no.nav.etterlatte.oppdrag
 
 import no.nav.etterlatte.domain.Endringskode
 import no.nav.etterlatte.domain.Enhetstype

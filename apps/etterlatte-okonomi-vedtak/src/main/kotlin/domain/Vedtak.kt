@@ -1,16 +1,17 @@
-package no.nav.etterlatte.vedtaksoversetter
+package no.nav.etterlatte.domain
 
 import java.math.BigDecimal
 import java.time.LocalDate
 
 data class Vedtak(
+    val vedtakId: String,
+    val behandlingsId: String,
     val sakId: String,
     val saksbehandlerId: String,
     val beregningsperioder: List<Beregningsperiode>,
     val sakIdGjelderFnr: String,
     val aktorFoedselsdato: LocalDate,
     val oppdragsenheter: List<Oppdragsenhet>,
-    val vedtakId: String
 )
 
 data class Oppdragsenhet(
@@ -28,13 +29,11 @@ enum class Enhetstype(s: String) { //TODO finne ut forkortelse til Behandlende o
     BOSTED("BOS")
 }
 
-
 enum class Ytelseskomponent(s: String) {
     BARNEPENSJON("BP")
 }
 
 data class Beregningsperiode(
-    val behandlingsId: String,
     val endringskode: Endringskode,
     val delytelsesId: String,
     val ytelseskomponent: Ytelseskomponent,

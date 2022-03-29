@@ -1,7 +1,6 @@
-package vedtaksoversetter
+package no.nav.etterlatte.vedtaksoversetter
 
-import dummyVedtak
-import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
+import no.nav.etterlatte.mockVedtak
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
@@ -9,7 +8,7 @@ internal class OppdragMapperTest {
 
     @Test
     fun oppdragFraVedtak() {
-        val oppdrag = OppdragMapper.oppdragFraVedtak(dummyVedtak())
+        val oppdrag = OppdragMapper.oppdragFraVedtak(mockVedtak())
 
         assertNotNull(oppdrag)
     }

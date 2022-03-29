@@ -1,28 +1,26 @@
-package vedtaksoversetter
+package no.nav.etterlatte.vedtaksoversetter
 
 import io.mockk.mockk
 import io.mockk.spyk
-import io.mockk.verify
 import io.mockk.verifyOrder
-import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
-import no.nav.etterlatte.vedtaksoversetter.OppdragSender
-import no.nav.etterlatte.vedtaksoversetter.Vedtaksoversetter
+import no.nav.etterlatte.readFile
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import readFile
 
 internal class VedtaksoversetterTest {
 
     private val oppdragMapper = spyk<OppdragMapper>()
     private val oppdragSender = mockk<OppdragSender>(relaxed = true)
+    private val oppdragRepository = mockk<UtbetalingsoppdragDao>(relaxed = true)
 
     private val inspector = TestRapid().apply {
         Vedtaksoversetter(
             rapidsConnection = this,
             oppdragMapper = oppdragMapper,
             oppdragSender = oppdragSender,
+            utbetalingsoppdragDao = oppdragRepository
         ) }
 
     @Test

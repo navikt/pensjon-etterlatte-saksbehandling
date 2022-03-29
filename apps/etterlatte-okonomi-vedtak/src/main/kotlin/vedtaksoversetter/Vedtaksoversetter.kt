@@ -1,6 +1,8 @@
 package no.nav.etterlatte.vedtaksoversetter
 
 
+import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
+import no.nav.etterlatte.domain.Vedtak
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -16,6 +18,7 @@ internal class Vedtaksoversetter(
     rapidsConnection: RapidsConnection,
     val oppdragMapper: OppdragMapper,
     val oppdragSender: OppdragSender,
+    val utbetalingsoppdragDao: UtbetalingsoppdragDao,
 ) : River.PacketListener {
 
     private val logger = LoggerFactory.getLogger(Vedtaksoversetter::class.java)
@@ -38,7 +41,9 @@ internal class Vedtaksoversetter(
                 logger.info("Oppretter utbetalingsoppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId}")
                 val oppdrag: Oppdrag = oppdragMapper.oppdragFraVedtak(vedtak)
 
+                utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
                 oppdragSender.sendOppdrag(oppdrag)
+                utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.SENDT)
 
                 //context.publish(packet.apply { this["@vedtak_oversatt"] = true }.toJson())
             } catch (e: Exception) {

@@ -1,18 +1,17 @@
-package vedtaksoversetter
+package no.nav.etterlatte.common
 
-import dummyVedtak
-import no.nav.etterlatte.vedtaksoversetter.Jaxb
+import no.nav.etterlatte.mockVedtak
+import no.nav.etterlatte.readFile
 import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import readFile
 
 internal class JaxbTest {
 
     @Test
     fun `should generate xml from oppdrag`() {
-        val oppdrag = OppdragMapper.oppdragFraVedtak(dummyVedtak())
+        val oppdrag = OppdragMapper.oppdragFraVedtak(mockVedtak())
         val oppdragAsXml = Jaxb.toXml(oppdrag)
 
         assertNotNull(oppdragAsXml)

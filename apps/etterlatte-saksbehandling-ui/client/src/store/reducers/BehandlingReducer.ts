@@ -4,7 +4,7 @@ export interface IDetaljertBehandling {
   id: string
   sak: number
   grunnlag: IBehandlingsopplysning[]
-  vilkårsprøving: IVilkaarsproving[]
+  vilkårsprøving: IVilkaarResultat
   beregning: any
   fastsatt: boolean
 }
@@ -38,6 +38,10 @@ export enum KildeType {
   privatperson = 'privatperson',
 }
 
+export interface IVilkaarResultat {
+  resultat: VilkaarVurderingsResultat | undefined
+  vilkaar: IVilkaarsproving[]
+}
 export interface IVilkaarsproving {
   navn: VilkaarsType
   resultat: VilkaarVurderingsResultat
@@ -108,7 +112,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: '',
   sak: 0,
   grunnlag: [],
-  vilkårsprøving: [],
+  vilkårsprøving: { resultat: undefined, vilkaar: [] },
   beregning: undefined,
   fastsatt: false,
 }

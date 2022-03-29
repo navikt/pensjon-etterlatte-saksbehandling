@@ -36,7 +36,6 @@ export const Lovtekst = styled.div`
 export const VilkaarInfobokser = styled.div`
   display: flex;
   flex-direction: row;
-
   align-items: top;
   flex-grow: 1;
   flex-wrap: wrap;

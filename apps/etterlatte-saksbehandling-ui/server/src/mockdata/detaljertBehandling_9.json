@@ -337,257 +337,260 @@
       "attestering": null
     }
   ],
-  "vilkårsprøving": [
-    {
-      "navn": "SOEKER_ER_UNDER_20",
-      "resultat": "OPPFYLT",
-      "kriterier": [
-        {
-          "navn": "SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO",
-          "resultat": "OPPFYLT",
-          "basertPaaOpplysninger": [
-            {
-              "kriterieOpplysningsType": "DOEDSDATO",
-              "kilde": {
-                "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
-                "registersReferanse": null,
-                "type": "pdl"
+  "vilkårsprøving": {
+    "resultat": "OPPFYLT",
+    "vilkaar": [
+      {
+        "navn": "SOEKER_ER_UNDER_20",
+        "resultat": "OPPFYLT",
+        "kriterier": [
+          {
+            "navn": "SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
               },
-              "opplysning": {
-                "doedsdato": "2022-02-10",
-                "foedselsnummer": "22128202440"
+              {
+                "kriterieOpplysningsType": "FOEDSELSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984597914Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "foedselsdato": "2013-10-12",
+                  "foedselsnummer": "12101376212"
+                }
               }
-            },
-            {
-              "kriterieOpplysningsType": "FOEDSELSDATO",
-              "kilde": {
-                "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T14:36:17.984597914Z",
-                "registersReferanse": null,
-                "type": "pdl"
+            ]
+          }
+        ]
+      },
+      {
+        "navn": "DOEDSFALL_ER_REGISTRERT",
+        "resultat": "OPPFYLT",
+        "kriterier": [
+          {
+            "navn": "DOEDSFALL_ER_REGISTRERT_I_PDL",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_ER_FORELDER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "kriterieOpplysningsType": "FORELDRE",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984597914Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "foreldre": [
+                    "22128202440",
+                    "03108718357"
+                  ]
+                }
               },
-              "opplysning": {
-                "foedselsdato": "2013-10-12",
-                "foedselsnummer": "12101376212"
+              {
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
               }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "navn": "DOEDSFALL_ER_REGISTRERT",
-      "resultat": "OPPFYLT",
-      "kriterier": [
-        {
-          "navn": "DOEDSFALL_ER_REGISTRERT_I_PDL",
-          "resultat": "OPPFYLT",
-          "basertPaaOpplysninger": [
-            {
-              "kriterieOpplysningsType": "DOEDSDATO",
-              "kilde": {
-                "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
-                "registersReferanse": null,
-                "type": "pdl"
+            ]
+          }
+        ]
+      },
+      {
+        "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
+        "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
+        "kriterier": [
+          {
+            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
               },
-              "opplysning": {
-                "doedsdato": "2022-02-10",
-                "foedselsnummer": "22128202440"
+              {
+                "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
+                "kilde": {
+                  "fnr": "03108718357",
+                  "mottatDato": "2022-02-14T14:37:24.573612786Z",
+                  "type": "privatperson"
+                },
+                "opplysning": {
+                  "harHattUtenlandsopphold": "NEI",
+                  "opphold": null
+                }
               }
-            }
-          ]
-        },
-        {
-          "navn": "AVDOED_ER_FORELDER",
-          "resultat": "OPPFYLT",
-          "basertPaaOpplysninger": [
-            {
-              "kriterieOpplysningsType": "FORELDRE",
-              "kilde": {
-                "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T14:36:17.984597914Z",
-                "registersReferanse": null,
-                "type": "pdl"
+            ]
+          }
+        ]
+      },
+      {
+        "navn": "BARNETS_MEDLEMSKAP",
+        "resultat": "OPPFYLT",
+        "kriterier": [
+          {
+            "navn": "SOEKER_IKKE_ADRESSE_I_UTLANDET",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "kriterieOpplysningsType": "ADRESSER",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984597914Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "bostedadresse": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Bøveien 937",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "8475",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "1999-01-01T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ],
+                  "oppholdadresse": [],
+                  "kontaktadresse": []
+                }
               },
-              "opplysning": {
-                "foreldre": [
-                  "22128202440",
-                  "03108718357"
-                ]
-              }
-            },
-            {
-              "kriterieOpplysningsType": "DOEDSDATO",
-              "kilde": {
-                "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
-                "registersReferanse": null,
-                "type": "pdl"
+              {
+                "kriterieOpplysningsType": "SOEKER_UTENLANDSOPPHOLD",
+                "kilde": {
+                  "fnr": "03108718357",
+                  "mottatDato": "2022-02-14T14:37:24.573612786Z",
+                  "type": "privatperson"
+                },
+                "opplysning": {
+                  "adresseIUtlandet": "NEI",
+                  "land": null,
+                  "adresse": null
+                }
               },
-              "opplysning": {
-                "doedsdato": "2022-02-10",
-                "foedselsnummer": "22128202440"
+              {
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
               }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
-      "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
-      "kriterier": [
-        {
-          "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR",
-          "resultat": "OPPFYLT",
-          "basertPaaOpplysninger": [
-            {
-              "kriterieOpplysningsType": "DOEDSDATO",
-              "kilde": {
-                "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
-                "registersReferanse": null,
-                "type": "pdl"
+            ]
+          },
+          {
+            "navn": "GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "kriterieOpplysningsType": "ADRESSER",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984594065Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "bostedadresse": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Bøveien 937",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "8475",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "1999-01-01T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ],
+                  "oppholdadresse": [],
+                  "kontaktadresse": null
+                }
               },
-              "opplysning": {
-                "doedsdato": "2022-02-10",
-                "foedselsnummer": "22128202440"
+              {
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
               }
-            },
-            {
-              "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
-              "kilde": {
-                "fnr": "03108718357",
-                "mottatDato": "2022-02-14T14:37:24.573612786Z",
-                "type": "privatperson"
-              },
-              "opplysning": {
-                "harHattUtenlandsopphold": "NEI",
-                "opphold": null
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "navn": "BARNETS_MEDLEMSKAP",
-      "resultat": "OPPFYLT",
-      "kriterier": [
-        {
-          "navn": "SOEKER_IKKE_ADRESSE_I_UTLANDET",
-          "resultat": "OPPFYLT",
-          "basertPaaOpplysninger": [
-            {
-              "kriterieOpplysningsType": "ADRESSER",
-              "kilde": {
-                "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T14:36:17.984597914Z",
-                "registersReferanse": null,
-                "type": "pdl"
-              },
-              "opplysning": {
-                "bostedadresse": [
-                  {
-                    "type": "VEGADRESSE",
-                    "aktiv": true,
-                    "coAdresseNavn": null,
-                    "adresseLinje1": "Bøveien 937",
-                    "adresseLinje2": null,
-                    "adresseLinje3": null,
-                    "postnr": "8475",
-                    "poststed": null,
-                    "land": null,
-                    "kilde": "FREG",
-                    "gyldigFraOgMed": "1999-01-01T00:00:00",
-                    "gyldigTilOgMed": null
-                  }
-                ],
-                "oppholdadresse": [],
-                "kontaktadresse": []
-              }
-            },
-            {
-              "kriterieOpplysningsType": "SOEKER_UTENLANDSOPPHOLD",
-              "kilde": {
-                "fnr": "03108718357",
-                "mottatDato": "2022-02-14T14:37:24.573612786Z",
-                "type": "privatperson"
-              },
-              "opplysning": {
-                "adresseIUtlandet": "NEI",
-                "land": null,
-                "adresse": null
-              }
-            },
-            {
-              "kriterieOpplysningsType": "DOEDSDATO",
-              "kilde": {
-                "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
-                "registersReferanse": null,
-                "type": "pdl"
-              },
-              "opplysning": {
-                "doedsdato": "2022-02-10",
-                "foedselsnummer": "22128202440"
-              }
-            }
-          ]
-        },
-        {
-          "navn": "GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET",
-          "resultat": "OPPFYLT",
-          "basertPaaOpplysninger": [
-            {
-              "kriterieOpplysningsType": "ADRESSER",
-              "kilde": {
-                "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T14:36:17.984594065Z",
-                "registersReferanse": null,
-                "type": "pdl"
-              },
-              "opplysning": {
-                "bostedadresse": [
-                  {
-                    "type": "VEGADRESSE",
-                    "aktiv": true,
-                    "coAdresseNavn": null,
-                    "adresseLinje1": "Bøveien 937",
-                    "adresseLinje2": null,
-                    "adresseLinje3": null,
-                    "postnr": "8475",
-                    "poststed": null,
-                    "land": null,
-                    "kilde": "FREG",
-                    "gyldigFraOgMed": "1999-01-01T00:00:00",
-                    "gyldigTilOgMed": null
-                  }
-                ],
-                "oppholdadresse": [],
-                "kontaktadresse": null
-              }
-            },
-            {
-              "kriterieOpplysningsType": "DOEDSDATO",
-              "kilde": {
-                "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
-                "registersReferanse": null,
-                "type": "pdl"
-              },
-              "opplysning": {
-                "doedsdato": "2022-02-10",
-                "foedselsnummer": "22128202440"
-              }
-            }
-          ]
-        }
-      ]
-    }
-  ],
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "beregning": null,
   "fastsatt": false
 }

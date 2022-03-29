@@ -10,6 +10,7 @@ import { hentKriterierMedOpplysning } from '../../felles/utils'
 import {
   Innhold,
   Lovtekst,
+  StatusColumn,
   Title,
   VilkaarBorder,
   VilkaarColumn,
@@ -21,9 +22,10 @@ import {
 import { VilkaarProps } from '../types'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
-import { KildeDato } from './KildeDato'
+import { KildeDatoOpplysning, KildeDatoVilkaar } from './KildeDatoOpplysning'
 import { useContext } from 'react'
 import { AppContext } from '../../../../store/AppContext'
+import { AutomaticIcon } from '../../../../shared/icons/automaticIcon'
 
 export const DoedsFallForelder = (props: VilkaarProps) => {
   const ctx = useContext(AppContext)
@@ -61,12 +63,15 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
   return (
     <VilkaarBorder id={props.id}>
       <Innhold>
-        <Title>
-          <StatusIcon status={props.vilkaar.resultat} large={true} /> Dødsfall forelder
-        </Title>
-        <Lovtekst>§ 18-4: En eller begge foreldrene døde</Lovtekst>
         <VilkaarWrapper>
+          <StatusColumn>
+            <StatusIcon status={props.vilkaar.resultat} large={true} />
+          </StatusColumn>
           <VilkaarInfobokser>
+            <VilkaarColumn>
+              <Title>Dødsfall forelder</Title>
+              <Lovtekst>§ 18-4: En eller begge foreldrene døde</Lovtekst>
+            </VilkaarColumn>
             <VilkaarColumn>
               <div>
                 <strong>Dødsdato</strong>
@@ -78,7 +83,10 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
                   <span className="missing">mangler</span>
                 )}
               </div>
-              <KildeDato type={avdoedDoedsdato?.kilde.type} dato={avdoedDoedsdato?.kilde.tidspunktForInnhenting} />
+              <KildeDatoOpplysning
+                type={avdoedDoedsdato?.kilde.type}
+                dato={avdoedDoedsdato?.kilde.tidspunktForInnhenting}
+              />
             </VilkaarColumn>
             <VilkaarColumn>
               <div>
@@ -89,12 +97,18 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
                 {avdoedForelderFnr ? avdoedForelderFnr : <span className="missing">mangler fødselsnummer</span>}
               </div>
               {avdoedForelderFnr && (
-                <KildeDato type={avdoedDoedsdato?.kilde.type} dato={avdoedDoedsdato?.kilde.tidspunktForInnhenting} />
+                <KildeDatoOpplysning
+                  type={avdoedDoedsdato?.kilde.type}
+                  dato={avdoedDoedsdato?.kilde.tidspunktForInnhenting}
+                />
               )}
             </VilkaarColumn>
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
-            <VilkaarlisteTitle>{vilkaarErOppfylt(props.vilkaar.resultat)}</VilkaarlisteTitle>
+            <VilkaarlisteTitle>
+              <AutomaticIcon /> {vilkaarErOppfylt(props.vilkaar.resultat)}
+            </VilkaarlisteTitle>
+            <KildeDatoVilkaar type={'automatisk'} dato={new Date()} />
             <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
           </VilkaarVurderingColumn>
         </VilkaarWrapper>

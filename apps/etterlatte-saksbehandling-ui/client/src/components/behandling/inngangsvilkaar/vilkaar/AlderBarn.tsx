@@ -11,13 +11,15 @@ import {
   VilkaarlisteTitle,
   VilkaarVurderingColumn,
   VilkaarWrapper,
+  StatusColumn,
 } from '../styled'
 import { VilkaarProps } from '../types'
 import { KriterieOpplysningsType, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
 import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import { hentKriterierMedOpplysning } from '../../felles/utils'
-import { KildeDato } from './KildeDato'
+import { KildeDatoOpplysning, KildeDatoVilkaar } from './KildeDatoOpplysning'
+import { AutomaticIcon } from '../../../../shared/icons/automaticIcon'
 
 export const AlderBarn = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
@@ -43,12 +45,15 @@ export const AlderBarn = (props: VilkaarProps) => {
   return (
     <VilkaarBorder id={props.id}>
       <Innhold>
-        <Title>
-          <StatusIcon status={props.vilkaar.resultat} large={true} /> Alder barn
-        </Title>
-        <Lovtekst>§ 18-4: Barnet er under 18 år</Lovtekst>
         <VilkaarWrapper>
+          <StatusColumn>
+            <StatusIcon status={props.vilkaar.resultat} large={true} />
+          </StatusColumn>
           <VilkaarInfobokser>
+            <VilkaarColumn>
+              <Title>Alder barn</Title>
+              <Lovtekst>§ 18-4: Barnet er under 18 år</Lovtekst>
+            </VilkaarColumn>
             <VilkaarColumn>
               <div>
                 <strong>Barnets fødselsdato</strong>
@@ -60,7 +65,7 @@ export const AlderBarn = (props: VilkaarProps) => {
                       {format(new Date(barnetsFoedselsdato?.opplysning.foedselsdato), 'dd.MM.yyyy')}{' '}
                       {barnetsAlder && <span>({barnetsAlder} år)</span>}
                     </div>
-                    <KildeDato
+                    <KildeDatoOpplysning
                       type={barnetsFoedselsdato?.kilde.type}
                       dato={barnetsFoedselsdato?.kilde.tidspunktForInnhenting}
                     />
@@ -80,7 +85,10 @@ export const AlderBarn = (props: VilkaarProps) => {
             </VilkaarColumn>
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
-            <VilkaarlisteTitle>{vilkaarErOppfylt(vilkaar.resultat)}</VilkaarlisteTitle>
+            <VilkaarlisteTitle>
+              <AutomaticIcon /> {vilkaarErOppfylt(vilkaar.resultat)}
+            </VilkaarlisteTitle>
+            <KildeDatoVilkaar type={'automatisk'} dato={new Date()} />
             <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
           </VilkaarVurderingColumn>
         </VilkaarWrapper>

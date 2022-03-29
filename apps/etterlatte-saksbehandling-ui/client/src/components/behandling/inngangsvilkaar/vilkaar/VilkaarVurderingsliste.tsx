@@ -35,7 +35,7 @@ export const VilkaarVurderingEnkeltElement = ({
 }) => {
   return (
     <div style={{ display: 'flex', marginTop: '10px' }}>
-      <div style={{ marginRight: '20px', marginTop: '10px' }}>
+      <div style={{ marginTop: '10px' }}>
         <StatusIcon status={resultat} />
       </div>
 

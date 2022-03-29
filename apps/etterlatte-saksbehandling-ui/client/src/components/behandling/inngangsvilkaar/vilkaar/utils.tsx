@@ -63,6 +63,8 @@ export function hentKildenavn(type: String): String {
       return 'PDL'
     case 'privatperson':
       return 'Søknad'
+    case 'automatisk':
+      return 'Automatisk'
     default:
       return 'Ukjent kilde'
   }

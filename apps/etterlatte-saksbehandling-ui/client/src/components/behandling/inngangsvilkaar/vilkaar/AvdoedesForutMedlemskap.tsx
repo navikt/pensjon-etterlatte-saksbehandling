@@ -3,14 +3,19 @@ import { VilkaarVurderingsResultat } from '../../../../store/reducers/Behandling
 import {
   Innhold,
   Lovtekst,
+  StatusColumn,
   Title,
   VilkaarBorder,
+  VilkaarColumn,
+  VilkaarInfobokser,
   VilkaarlisteTitle,
   VilkaarVurderingColumn,
   VilkaarWrapper,
 } from '../styled'
 import { VilkaarProps } from '../types'
 import { TidslinjeMedlemskap } from './TidslinjeMedlemskap'
+import { AutomaticIcon } from '../../../../shared/icons/automaticIcon'
+import { KildeDatoVilkaar } from './KildeDatoOpplysning'
 
 export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
@@ -19,18 +24,26 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
   return (
     <VilkaarBorder id={props.id}>
       <Innhold>
-        <Title>
-          <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} large={true} /> Avdødes forutgående medlemskap
-        </Title>
-        <Lovtekst>
-          § 18-2: Den avdøde var medlem av trygden eller mottok pensjon/uføretrygd de siste 5 årene før dødsfallet
-        </Lovtekst>
-        <TidslinjeMedlemskap />
         <VilkaarWrapper>
+          <StatusColumn>
+            <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} large={true} />
+          </StatusColumn>
+          <VilkaarInfobokser>
+            <VilkaarColumn>
+              <Title>Avdødes forutgående medlemskap</Title>
+              <Lovtekst>
+                § 18-2: Den avdøde var medlem av trygden eller mottok pensjon/uføretrygd de siste 5 årene før dødsfallet
+              </Lovtekst>
+            </VilkaarColumn>
+          </VilkaarInfobokser>
           <VilkaarVurderingColumn>
-            <VilkaarlisteTitle>Vilkår er oppfylt</VilkaarlisteTitle>
+            <VilkaarlisteTitle>
+              <AutomaticIcon /> Vilkår er oppfylt
+            </VilkaarlisteTitle>
+            <KildeDatoVilkaar type={'automatisk'} dato={new Date()} />
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
+        <TidslinjeMedlemskap />
       </Innhold>
     </VilkaarBorder>
   )

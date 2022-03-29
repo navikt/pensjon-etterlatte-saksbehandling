@@ -87,5 +87,6 @@ const SvgWrapper = styled.div<{ status: VilkaarVurderingsResultat; large?: boole
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  margin-right: 10px;
+  margin-right: 15px;
+  padding-left: ${(props) => (props.large ? 0 : '16px')};
 `

@@ -2,6 +2,7 @@ import { VilkaarProps } from '../types'
 import {
   Innhold,
   Lovtekst,
+  StatusColumn,
   Title,
   VilkaarBorder,
   VilkaarColumn,
@@ -26,8 +27,9 @@ import {
   hentKriterieOpplysning,
   hentUtenlandskAdresse,
 } from '../../felles/utils'
-import { KildeDato } from './KildeDato'
+import { KildeDatoOpplysning, KildeDatoVilkaar } from './KildeDatoOpplysning'
 import { IAdresse } from '../../types'
+import { AutomaticIcon } from '../../../../shared/icons/automaticIcon'
 
 export const BarnetsMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
@@ -73,32 +75,43 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
   return (
     <VilkaarBorder id={props.id}>
       <Innhold>
-        <Title>
-          <StatusIcon status={props.vilkaar.resultat} large={true} />
-          Barnets medlemskap
-        </Title>
-        <Lovtekst>§ 18-3: Barnet er medlem av trygden/bosatt i Norge fra dødsfalltidspunktet til i dag</Lovtekst>
         <VilkaarWrapper>
+          <StatusColumn>
+            <StatusIcon status={props.vilkaar.resultat} large={true} />
+          </StatusColumn>
           <VilkaarInfobokser>
+            <VilkaarColumn>
+              <Title>Barnets medlemskap</Title>
+              <Lovtekst>§ 18-3: Barnet er medlem av trygden/bosatt i Norge fra dødsfalltidspunktet til i dag</Lovtekst>
+            </VilkaarColumn>
             <VilkaarColumn>
               <div>
                 <strong>Barnets bostedadresse</strong>
                 <Adressevisning adresser={bostedEtterDoedsdato} />
-                <KildeDato type={adresserBarn?.kilde.type} dato={adresserBarn?.kilde.tidspunktForInnhenting} />
+                <KildeDatoOpplysning
+                  type={adresserBarn?.kilde.type}
+                  dato={adresserBarn?.kilde.tidspunktForInnhenting}
+                />
               </div>
             </VilkaarColumn>
             <VilkaarColumn>
               <div>
                 <strong>Barnets oppholdsadresse</strong>
                 <Adressevisning adresser={oppholdEtterDoedsdato} />
-                <KildeDato type={adresserBarn?.kilde.type} dato={adresserBarn?.kilde.tidspunktForInnhenting} />
+                <KildeDatoOpplysning
+                  type={adresserBarn?.kilde.type}
+                  dato={adresserBarn?.kilde.tidspunktForInnhenting}
+                />
               </div>
             </VilkaarColumn>
             <VilkaarColumn>
               <div>
                 <strong>Barnets kontaktadresse</strong>
                 <Adressevisning adresser={kontaktEtterDoedsdato} />
-                <KildeDato type={adresserBarn?.kilde.type} dato={adresserBarn?.kilde.tidspunktForInnhenting} />
+                <KildeDatoOpplysning
+                  type={adresserBarn?.kilde.type}
+                  dato={adresserBarn?.kilde.tidspunktForInnhenting}
+                />
               </div>
             </VilkaarColumn>
             <VilkaarColumn>
@@ -111,7 +124,7 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
                     <div>{barnUtlandSoeknad?.opplysning.land}</div>
                   </>
                 )}
-                <KildeDato type={barnUtlandSoeknad?.kilde.type} dato={barnUtlandSoeknad?.kilde.mottattDato} />
+                <KildeDatoOpplysning type={barnUtlandSoeknad?.kilde.type} dato={barnUtlandSoeknad?.kilde.mottattDato} />
               </div>
             </VilkaarColumn>
             {gjenlevendeSkalVises && (
@@ -134,8 +147,12 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
               </>
             )}
           </VilkaarInfobokser>
+
           <VilkaarVurderingColumn>
-            <VilkaarlisteTitle>{props.vilkaar?.resultat && vilkaarErOppfylt(props.vilkaar.resultat)}</VilkaarlisteTitle>
+            <VilkaarlisteTitle>
+              <AutomaticIcon /> {props.vilkaar?.resultat && vilkaarErOppfylt(props.vilkaar.resultat)}
+            </VilkaarlisteTitle>
+            <KildeDatoVilkaar type={'automatisk'} dato={new Date()} />
             {lagVilkaarVisning()}
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
@@ -160,7 +177,7 @@ const GjenlevendeAdresser = ({
           <div>
             <strong>Gjenlevendes {tittel}</strong>
             <Adressevisning adresser={adresse} />
-            <KildeDato type={kritOpp?.kilde?.type} dato={kritOpp?.kilde?.tidspunktForInnhenting} />
+            <KildeDatoOpplysning type={kritOpp?.kilde?.type} dato={kritOpp?.kilde?.tidspunktForInnhenting} />
           </div>
         </VilkaarColumn>
       )}

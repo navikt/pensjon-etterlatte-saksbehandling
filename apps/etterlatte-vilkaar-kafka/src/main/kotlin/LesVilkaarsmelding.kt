@@ -1,4 +1,3 @@
-
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.core.JsonParser
@@ -30,8 +29,8 @@ internal class LesVilkaarsmelding(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
-            validate { it.requireKey("grunnlag")}
-            validate {it.rejectKey("@vilkaarsvurdering")}
+            validate { it.requireKey("grunnlag") }
+            validate { it.rejectKey("@vilkaarsvurdering") }
             validate { it.interestedIn("@correlation_id") }
 
         }.register(this)
@@ -41,16 +40,11 @@ internal class LesVilkaarsmelding(
         withLogContext(packet.correlationId()) {
 
 
-
             val grunnlagListe = packet["grunnlag"].toString()
-            try {
-                val hmm = objectMapper.readValue<List<VilkaarOpplysning<ObjectNode>>>(grunnlagListe)
-                val vilkaarsVurdering = vilkaar.mapVilkaar(hmm)
-                packet["@vilkaarsvurdering"] = vilkaarsVurdering
-            }catch (e: Exception){
-                //TODO Spise poisonpills
-            }
 
+            val hmm = objectMapper.readValue<List<VilkaarOpplysning<ObjectNode>>>(grunnlagListe)
+            val vilkaarsVurdering = vilkaar.mapVilkaar(hmm)
+            packet["@vilkaarsvurdering"] = vilkaarsVurdering
             context.publish(packet.toJson())
         }
 }

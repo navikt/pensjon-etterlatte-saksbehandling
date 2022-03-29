@@ -24,13 +24,12 @@ import java.util.*
 fun main() {
     System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
-    //TODO refaktorere ut appbuilder
+        //TODO refaktorere ut appbuilder
     }.also { env ->
-        AppBuilder(env).also { ab ->
-            RapidApplication.create(env)
-                .also { LesVilkaarsmelding(it, ab.createVilkaarService()) }
-                .start()
-        }
+        RapidApplication.create(env)
+            .also { LesVilkaarsmelding(it, VilkaarService()) }
+            .start()
     }
 }
+
 

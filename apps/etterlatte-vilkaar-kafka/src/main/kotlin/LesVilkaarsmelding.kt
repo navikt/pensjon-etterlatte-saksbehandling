@@ -20,12 +20,13 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import org.slf4j.LoggerFactory
 
 internal class LesVilkaarsmelding(
     rapidsConnection: RapidsConnection,
     private val vilkaar: VilkaarService
 ) : River.PacketListener {
-
+    private val logger = LoggerFactory.getLogger(LesVilkaarsmelding::class.java)
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
@@ -46,6 +47,8 @@ internal class LesVilkaarsmelding(
                 val vilkaarsVurdering = vilkaar.mapVilkaar(hmm)
                 packet["@vilkaarsvurdering"] = vilkaarsVurdering
                 context.publish(packet.toJson())
+                //TODO
+                logger.info("Vurdert Vilkår")
             } catch (e: Exception){
                 //TODO endre denne
                 println("spiser en melding fordi" +e)
@@ -56,6 +59,3 @@ internal class LesVilkaarsmelding(
 }
 
 private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
-
-//data class RequestDto(val opplysninger: List<VilkaarOpplysning<ObjectNode>>)
-//data class RequestDto(val opplysninger: TypeReference<List<VilkaarOpplysning<ObjectNode>>>)

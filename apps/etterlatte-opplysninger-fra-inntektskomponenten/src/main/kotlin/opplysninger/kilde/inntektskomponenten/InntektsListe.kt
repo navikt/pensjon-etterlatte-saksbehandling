@@ -1,6 +1,6 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.opplysninger.kilde.inntektskomponenten
 
-data class Json4Kotlin_Base (
+data class InntektsKomponentenResponse (
     val arbeidsInntektMaaned : List<ArbeidsInntektMaaned>,
     val ident : Ident
 )

@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -14,6 +15,7 @@ import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.model.VilkaarService
 import java.util.*
@@ -49,7 +51,6 @@ fun Application.module() {
                 }
             )
         }
-
     }
 }
 

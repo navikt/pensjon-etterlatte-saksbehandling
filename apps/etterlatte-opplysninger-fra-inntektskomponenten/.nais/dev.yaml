@@ -32,3 +32,15 @@ spec:
     - name: KAFKA_RESET_POLICY
       #sette tilbake til none senere
       value: earliest
+    - name: ETTERLATTE_PROXY_INNTEKT
+      value: http://etterlatte-proxy/inntektskomponenten
+    - name: ETTERLATTE_PROXY_AUDIENCE
+      value: "dev-gcp:etterlatte:etterlatte-proxy"
+    - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-proxy/.default
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-proxy
+          namespace: etterlatte
+          cluster: dev-fss

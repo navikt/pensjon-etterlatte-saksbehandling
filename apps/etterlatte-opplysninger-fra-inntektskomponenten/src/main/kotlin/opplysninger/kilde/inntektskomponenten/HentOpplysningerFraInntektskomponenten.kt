@@ -1,5 +1,7 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.opplysninger.kilde.inntektskomponenten
 
+import no.nav.etterlatte.InntektsKomponenten
+import no.nav.etterlatte.OpplysningsBygger
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -10,7 +12,11 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 
-internal class HentOpplysningerFraInntektskomponenten(rapidsConnection: RapidsConnection, private val inntektsKomponentenService: InntektsKomponenten): River.PacketListener {
+internal class HentOpplysningerFraInntektskomponenten(
+    rapidsConnection: RapidsConnection,
+    private val inntektsKomponentenService: InntektsKomponenten,
+    private val opplysningsBygger: OpplysningsBygger
+) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "ey_fordelt") }
@@ -30,7 +36,7 @@ internal class HentOpplysningerFraInntektskomponenten(rapidsConnection: RapidsCo
         withLogContext(packet.correlationId()) {
             val barnePensjon = objectMapper.treeToValue(packet["@skjema_info"], Barnepensjon::class.java)!!
             val fnr = hentAvdoedFnr(barnePensjon)
-            inntektsKomponentenService.hentInntektListe(fnr)
+            opplysningsBygger.byggOpplysninger(barnePensjon, inntektsKomponentenService.hentInntektListe(fnr))
         }
 
     private fun hentAvdoedFnr(barnepensjon: Barnepensjon): Foedselsnummer {

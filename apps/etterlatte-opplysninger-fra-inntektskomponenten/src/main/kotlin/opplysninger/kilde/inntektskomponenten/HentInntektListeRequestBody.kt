@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.opplysninger.kilde.inntektskomponenten
 
 data class InntektListeIdent(val identifikator: String, val aktoerType: String) // enum
 

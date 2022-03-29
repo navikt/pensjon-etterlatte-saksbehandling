@@ -15,14 +15,14 @@ import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
+import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 
 interface VilkaarKlient {
-    fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): List<VurdertVilkaar>
+    fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): VilkaarResultat
 }
 
 class KtorVilkarClient(private val url: String) : VilkaarKlient {
-    override fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): List<VurdertVilkaar> {
+    override fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): VilkaarResultat {
         return runBlocking {
             HttpClient(CIO) {
                 install(JsonFeature) {

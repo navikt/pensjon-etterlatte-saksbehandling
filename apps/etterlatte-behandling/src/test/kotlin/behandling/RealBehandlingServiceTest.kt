@@ -11,7 +11,7 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
+import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -134,7 +134,7 @@ internal class RealBehandlingServiceTest {
 fun mockChannel() = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>().apply { coEvery { send(any()) } returns Unit }
 
 class NoOpVilkaarKlient : VilkaarKlient {
-    override fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): List<VurdertVilkaar> {
-        return listOf()
+    override fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): VilkaarResultat {
+        return VilkaarResultat(null, listOf())
     }
 }

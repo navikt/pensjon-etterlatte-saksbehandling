@@ -9,7 +9,7 @@
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "AVDOED_SOEKNAD_V1",
+      "opplysningsType": "AVDOED_SOEKNAD_V1",
       "meta": {},
       "opplysning": {
         "type": "AVDOED",
@@ -33,7 +33,7 @@
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "SOEKER_SOEKNAD_V1",
+      "opplysningsType": "SOEKER_SOEKNAD_V1",
       "meta": {},
       "opplysning": {
         "type": "BARN",
@@ -77,7 +77,7 @@
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "GJENLEVENDE_FORELDER_SOEKNAD_V1",
+      "opplysningsType": "GJENLEVENDE_FORELDER_SOEKNAD_V1",
       "meta": {},
       "opplysning": {
         "type": "GJENLEVENDE_FORELDER",
@@ -97,7 +97,7 @@
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "INNSENDER_SOEKNAD_v1",
+      "opplysningsType": "INNSENDER_SOEKNAD_V1",
       "meta": {},
       "opplysning": {
         "type": "INNSENDER",
@@ -114,7 +114,7 @@
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "UTBETALINGSINFORMASJON_V1",
+      "opplysningsType": "UTBETALINGSINFORMASJON_V1",
       "meta": {},
       "opplysning": {
         "bankkontoType": "NORSK",
@@ -135,7 +135,7 @@
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "SAMTYKKE",
+      "opplysningsType": "SAMTYKKE",
       "meta": {},
       "opplysning": {
         "harSamtykket": true
@@ -149,7 +149,7 @@
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "SOEKNAD_MOTTATT_DATO",
+      "opplysningsType": "SOEKNAD_MOTTATT_DATO",
       "meta": {},
       "opplysning": {
         "mottattDato": "2022-02-14T14:37:24.573612786"
@@ -163,7 +163,7 @@
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "SOEKNADSTYPE_V1",
+      "opplysningsType": "SOEKNADSTYPE_V1",
       "meta": {},
       "opplysning": {
         "type": "BARNEPENSJON"
@@ -178,7 +178,7 @@
         "registersReferanse": null,
         "type": "pdl"
       },
-      "opplysningType": "AVDOED_PDL_V1",
+      "opplysningsType": "AVDOED_PDL_V1",
       "meta": {},
       "opplysning": {
         "fornavn": "VAKKER",
@@ -232,7 +232,7 @@
         "registersReferanse": null,
         "type": "pdl"
       },
-      "opplysningType": "GJENLEVENDE_FORELDER_PDL_V1",
+      "opplysningsType": "GJENLEVENDE_FORELDER_PDL_V1",
       "meta": {},
       "opplysning": {
         "fornavn": "BRÅKETE",
@@ -286,7 +286,7 @@
         "registersReferanse": null,
         "type": "pdl"
       },
-      "opplysningType": "SOEKER_PDL_V1",
+      "opplysningsType": "SOEKER_PDL_V1",
       "meta": {},
       "opplysning": {
         "fornavn": "TALENTFULL",

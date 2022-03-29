@@ -41,11 +41,17 @@ internal class LesVilkaarsmelding(
 
 
             val grunnlagListe = packet["grunnlag"].toString()
+            try {
+                val hmm = objectMapper.readValue<List<VilkaarOpplysning<ObjectNode>>>(grunnlagListe)
+                val vilkaarsVurdering = vilkaar.mapVilkaar(hmm)
+                packet["@vilkaarsvurdering"] = vilkaarsVurdering
+                context.publish(packet.toJson())
+            } catch (e: Exception){
+                //TODO endre denne
+                println("spiser en melding fordi" +e)
+            }
 
-            val hmm = objectMapper.readValue<List<VilkaarOpplysning<ObjectNode>>>(grunnlagListe)
-            val vilkaarsVurdering = vilkaar.mapVilkaar(hmm)
-            packet["@vilkaarsvurdering"] = vilkaarsVurdering
-            context.publish(packet.toJson())
+
         }
 }
 

@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.*
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
+import java.time.LocalDateTime
 
 
 fun vilkaarBrukerErUnder20(
@@ -15,8 +16,9 @@ fun vilkaarBrukerErUnder20(
 
     return VurdertVilkaar(
         vilkaartype,
-        setVikaarVurderingsResultat(listOf(soekerErUnder20)),
-        listOf(soekerErUnder20)
+        setVikaarVurderingFraKriterier(listOf(soekerErUnder20)),
+        listOf(soekerErUnder20),
+        LocalDateTime.now()
     )
 }
 

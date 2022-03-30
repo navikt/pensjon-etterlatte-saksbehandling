@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Assertions.*
 import java.time.LocalDateTime
 
 internal class BarnepensjonVilkaarTest {
-
     @Test
     fun vurderAlderErUnder20() {
         val personBarnOver20 = lagMockPersonPdl(foedselsdatoBarnOver20, fnrBarn, null, adresserNorgePdl, null)
@@ -200,11 +199,11 @@ internal class BarnepensjonVilkaarTest {
             listOf()
         )
 
-        val vilkaarKriterierOppfylt = setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieOppfylt))
+        val vilkaarKriterierOppfylt = setVikaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieOppfylt))
         val vilkaarEtKriterieIkkeOppfylt =
-            setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieIkkeOppfylt, kriterieKanIkkeVurdere))
+            setVikaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieIkkeOppfylt, kriterieKanIkkeVurdere))
         val vilkaarKriterierOppfyltOgKanIkkeHentesUt =
-            setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieKanIkkeVurdere, kriterieOppfylt))
+            setVikaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieKanIkkeVurdere, kriterieOppfylt))
 
         assertEquals(VilkaarVurderingsResultat.OPPFYLT, vilkaarKriterierOppfylt)
         assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, vilkaarEtKriterieIkkeOppfylt)

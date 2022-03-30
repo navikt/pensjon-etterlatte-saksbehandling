@@ -1,8 +1,9 @@
 package model
 
-import barnepensjon.setVilkaarResultat
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.databind.node.ObjectNode
+import barnepensjon.hentSisteVurderteDato
+import barnepensjon.setVilkaarVurderingFraVilkaar
 import no.nav.etterlatte.barnepensjon.vilkaarAvdoedesMedlemskap
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
@@ -46,9 +47,10 @@ class VilkaarService {
             )
         )
 
-        val vilkaarResultat = setVilkaarResultat(vilkaar)
+        val vilkaarResultat = setVilkaarVurderingFraVilkaar(vilkaar)
+        val vurdertDato = hentSisteVurderteDato(vilkaar)
 
-        return VilkaarResultat(vilkaarResultat, vilkaar)
+        return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
 
     }
 

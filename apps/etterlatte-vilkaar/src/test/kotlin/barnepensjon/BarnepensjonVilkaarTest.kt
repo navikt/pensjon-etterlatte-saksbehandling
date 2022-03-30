@@ -1,7 +1,7 @@
 package barnepensjon
 
 import no.nav.etterlatte.barnepensjon.kriterieIngenUtenlandsoppholdSisteFemAar
-import no.nav.etterlatte.barnepensjon.setVikaarVurderingsResultat
+import no.nav.etterlatte.barnepensjon.setVikaarVurderingFraKriterier
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
+import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -35,7 +36,6 @@ import org.junit.jupiter.api.Assertions.*
 import java.time.LocalDateTime
 
 internal class BarnepensjonVilkaarTest {
-
     @Test
     fun vurderAlderErUnder20() {
         val personBarnOver20 = lagMockPersonPdl(foedselsdatoBarnOver20, fnrBarn, null, adresserNorgePdl, null)
@@ -201,11 +201,11 @@ internal class BarnepensjonVilkaarTest {
             listOf()
         )
 
-        val vilkaarKriterierOppfylt = setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieOppfylt))
+        val vilkaarKriterierOppfylt = setVikaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieOppfylt))
         val vilkaarEtKriterieIkkeOppfylt =
-            setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieIkkeOppfylt, kriterieKanIkkeVurdere))
+            setVikaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieIkkeOppfylt, kriterieKanIkkeVurdere))
         val vilkaarKriterierOppfyltOgKanIkkeHentesUt =
-            setVikaarVurderingsResultat(listOf(kriterieOppfylt, kriterieKanIkkeVurdere, kriterieOppfylt))
+            setVikaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieKanIkkeVurdere, kriterieOppfylt))
 
         assertEquals(VilkaarVurderingsResultat.OPPFYLT, vilkaarKriterierOppfylt)
         assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, vilkaarEtKriterieIkkeOppfylt)

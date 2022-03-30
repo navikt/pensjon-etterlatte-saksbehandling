@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
+import java.time.LocalDateTime
 
 fun vilkaarAvdoedesMedlemskap(
     vilkaartype: Vilkaartyper,
@@ -28,7 +29,8 @@ fun vilkaarAvdoedesMedlemskap(
     return VurdertVilkaar(
         vilkaartype,
         VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, //endre når vi får inn flere opplysninger
-        listOf(utenlandsoppholdSisteFemAarene)
+        listOf(utenlandsoppholdSisteFemAarene),
+        LocalDateTime.now()
     )
 }
 

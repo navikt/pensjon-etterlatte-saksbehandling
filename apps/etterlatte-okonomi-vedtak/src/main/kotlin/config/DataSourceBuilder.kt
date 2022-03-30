@@ -15,7 +15,11 @@ class DataSourceBuilder(
         it.password = password
         it.transactionIsolation = "TRANSACTION_SERIALIZABLE"
         it.initializationFailTimeout = -1
-        //it.maximumPoolSize = 12
+
+        it.maximumPoolSize = 3
+        it.minimumIdle = 1
+        it.idleTimeout = 10001
+        it.maxLifetime = 30001
     }
 
     fun dataSource() = HikariDataSource(hikariConfig)

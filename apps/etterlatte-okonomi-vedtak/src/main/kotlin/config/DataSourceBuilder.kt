@@ -13,17 +13,22 @@ class DataSourceBuilder(
         it.jdbcUrl = jdbcUrl
         it.username = username
         it.password = password
-        it.transactionIsolation = "TRANSACTION_SERIALIZABLE"
-        it.initializationFailTimeout = -1
+        //it.transactionIsolation = "TRANSACTION_SERIALIZABLE"
+        it.initializationFailTimeout = 6000
+        it.maximumPoolSize = 3
+        it.minimumIdle = 0
+        it.idleTimeout = 10001
+        it.maxLifetime = 30001
 
-        it.maximumPoolSize = 50
+        it.validate()
     }
+    private val dataSource = HikariDataSource(hikariConfig)
 
-    fun dataSource() = HikariDataSource(hikariConfig)
+    fun dataSource() = dataSource
 
     fun migrate() =
         Flyway.configure()
-            .dataSource(dataSource())
+            .dataSource(dataSource)
             .load()
             .migrate()
 

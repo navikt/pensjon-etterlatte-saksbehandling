@@ -2,8 +2,8 @@ package model
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.etterlatte.barnepensjon.hentSisteVurderteDato
-import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraVilkaar
+import barnepensjon.hentSisteVurderteDato
+import barnepensjon.setVilkaarVurderingFraVilkaar
 import no.nav.etterlatte.barnepensjon.vilkaarAvdoedesMedlemskap
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert

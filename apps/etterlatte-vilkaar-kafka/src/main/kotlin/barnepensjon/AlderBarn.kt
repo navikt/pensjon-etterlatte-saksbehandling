@@ -1,6 +1,6 @@
 package no.nav.etterlatte.barnepensjon
 
-import barnepensjon.setVikaarVurderingsResultat
+import barnepensjon.setVikaarVurderingFraKriterier
 import barnepensjon.vurderOpplysning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.*

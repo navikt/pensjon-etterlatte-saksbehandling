@@ -33,7 +33,7 @@ internal class VedtaksMottaker(
                 logger.info("Fattet vedtak mottatt")
                 val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson(), Vedtak::class.java)
                 context.publish(packet.toAttestertEvent().toJson())
-                logger.info("Vedtak attestert")
+                logger.info("Vedtak attestert og lagt tilbake til RR")
             } catch (e: Exception) {
                 logger.error("En feil oppstod: ${e.message}", e)
             }

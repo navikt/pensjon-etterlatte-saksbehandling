@@ -1,5 +1,6 @@
 package no.nav.etterlatte.barnepensjon
 
+import barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold

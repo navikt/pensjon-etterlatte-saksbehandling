@@ -1,7 +1,6 @@
 package barnepensjon
 
 import no.nav.etterlatte.barnepensjon.kriterieIngenUtenlandsoppholdSisteFemAar
-import no.nav.etterlatte.barnepensjon.setVikaarVurderingsResultat
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning

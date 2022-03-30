@@ -19,7 +19,6 @@ class BehandlingsService(
             }
         }
     }
-
 }
 
 data class LeggTilVilkaarsResultatRequest(

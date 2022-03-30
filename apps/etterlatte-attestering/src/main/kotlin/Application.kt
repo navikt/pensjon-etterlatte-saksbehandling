@@ -9,6 +9,7 @@ fun main() {
         put("KAFKA_CONSUMER_GROUP_ID", this.required("NAIS_APP_NAME").replace("-", ""))
     }
 
+    // starter app
     RapidApplication.create(env)
         .also {
             VedtaksMottaker(it)

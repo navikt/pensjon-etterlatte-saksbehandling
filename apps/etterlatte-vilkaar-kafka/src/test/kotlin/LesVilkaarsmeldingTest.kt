@@ -1,8 +1,7 @@
-import io.mockk.every
-import io.mockk.verify
-import model.VilkaarService
+
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
+import no.nav.etterlatte.model.VilkaarService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

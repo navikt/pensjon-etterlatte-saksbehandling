@@ -1,9 +1,5 @@
 package no.nav.etterlatte.barnepensjon
 
-import barnepensjon.OpplysningKanIkkeHentesUt
-import barnepensjon.opplysningsGrunnlagNull
-import barnepensjon.setVikaarVurderingFraKriterier
-import barnepensjon.vurderOpplysning
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Kriterie

@@ -1,4 +1,4 @@
-package barnepensjon
+package no.nav.etterlatte.barnepensjon
 
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag

@@ -1,7 +1,5 @@
 package no.nav.etterlatte.barnepensjon
 
-import barnepensjon.setVikaarVurderingFraKriterier
-import barnepensjon.vurderOpplysning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.*
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
@@ -52,9 +50,9 @@ fun kriterieSoekerErUnder20(
     }
 
     return Kriterie(
-        Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
-        resultat,
-        opplysningsGrunnlag
-    )
+            Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
+            resultat,
+            opplysningsGrunnlag
+        )
 }
 

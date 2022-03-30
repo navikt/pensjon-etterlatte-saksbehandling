@@ -2,15 +2,20 @@ import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import { VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import {
   Innhold,
+  Lovtekst,
+  StatusColumn,
   Title,
   VilkaarBorder,
+  VilkaarColumn,
+  VilkaarInfobokser,
   VilkaarlisteTitle,
   VilkaarVurderingColumn,
   VilkaarWrapper,
-  VilkaarColumn,
 } from '../styled'
 import { VilkaarProps } from '../types'
 import { TidslinjeMedlemskap } from './TidslinjeMedlemskap'
+import { AutomaticIcon } from '../../../../shared/icons/automaticIcon'
+import { KildeDatoVilkaar } from './KildeDatoOpplysning'
 
 export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
@@ -19,22 +24,26 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
   return (
     <VilkaarBorder id={props.id}>
       <Innhold>
-        <Title>
-          <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} large={true} /> Avdødes forutgående medlemskap
-        </Title>
         <VilkaarWrapper>
-          <VilkaarColumn>
-            <div>§ 18-5</div>
-            <div>Den avdøde var medlem av trygden eller mottok pensjon/uføretrygd de siste 5 årene før dødsfallet</div>
-          </VilkaarColumn>
-        </VilkaarWrapper>
-
-        <TidslinjeMedlemskap />
-        <VilkaarWrapper>
+          <StatusColumn>
+            <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} large={true} />
+          </StatusColumn>
+          <VilkaarInfobokser>
+            <VilkaarColumn>
+              <Title>Avdødes forutgående medlemskap</Title>
+              <Lovtekst>
+                § 18-2: Den avdøde var medlem av trygden eller mottok pensjon/uføretrygd de siste 5 årene før dødsfallet
+              </Lovtekst>
+            </VilkaarColumn>
+          </VilkaarInfobokser>
           <VilkaarVurderingColumn>
-            <VilkaarlisteTitle>Vilkår er ikke oppfylt</VilkaarlisteTitle>
+            <VilkaarlisteTitle>
+              <AutomaticIcon /> Vilkår er oppfylt
+            </VilkaarlisteTitle>
+            <KildeDatoVilkaar type={'automatisk'} dato={new Date()} />
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
+        <TidslinjeMedlemskap />
       </Innhold>
     </VilkaarBorder>
   )

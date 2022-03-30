@@ -2,6 +2,7 @@ rootProject.name = "pensjon-etterlatte-saksbehandling"
 
 include(
     "apps:etterlatte-fordeler",
+    "apps:etterlatte-attestering",
     "apps:etterlatte-overvaaking",
     "apps:etterlatte-pdltjenester",
     "apps:etterlatte-api",
@@ -12,6 +13,7 @@ include(
     "apps:etterlatte-opplysninger-fra-pdl",
     "apps:etterlatte-testdata",
     "apps:etterlatte-okonomi-vedtak",
+    "apps:etterlatte-opplysninger-fra-inntektskomponenten",
     "libs:ktorclient-auth-clientcredentials",
     "libs:common",
     "libs:ktorclient-onbehalfof",

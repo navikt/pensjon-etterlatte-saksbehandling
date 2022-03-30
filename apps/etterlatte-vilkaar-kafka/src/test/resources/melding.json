@@ -1,22 +1,22 @@
 {
-  "id": "2d0c61375-adresser",
-  "sak": 5,
+  "id": "890334a5-7e55-4247-b766-fe0d4c6d6a45",
+  "sak": 6,
   "grunnlag": [
     {
-      "id": "183d768a-9e98-45e1-b9e9-32fd3c86a4bd",
+      "id": "61fde08d-cf20-4362-86c3-1d3d594da826",
       "kilde": {
         "fnr": "03108718357",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "AVDOED_SOEKNAD_V1",
+      "opplysningsType": "AVDOED_SOEKNAD_V1",
       "meta": {},
       "opplysning": {
         "type": "AVDOED",
-        "fornavn": "VAKKER",
-        "etternavn": "LAPP",
+        "fornavn": "fe",
+        "etternavn": "fe",
         "foedselsnummer": "22128202440",
-        "doedsdato": "2017-01-01",
+        "doedsdato": "2022-01-01",
         "statsborgerskap": "Norge",
         "utenlandsopphold": {
           "harHattUtenlandsopphold": "NEI",
@@ -27,18 +27,18 @@
       "attestering": null
     },
     {
-      "id": "cad5569b-be0d-499f-8f1b-e3a8e4aa484c",
+      "id": "5daa00fc-94d0-4967-b516-a287392a9265",
       "kilde": {
         "fnr": "03108718357",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "SOEKER_SOEKNAD_V1",
+      "opplysningsType": "SOEKER_SOEKNAD_V1",
       "meta": {},
       "opplysning": {
         "type": "BARN",
-        "fornavn": "TALENTFULL",
-        "etternavn": "BLYANT",
+        "fornavn": "kirsten",
+        "etternavn": "jakobsen",
         "foedselsnummer": "12101376212",
         "statsborgerskap": "Norge",
         "utenlandsadresse": {
@@ -49,14 +49,14 @@
         "foreldre": [
           {
             "type": "FORELDER",
-            "fornavn": "BRÅKETE",
-            "etternavn": "POTET",
-            "foedselsnummer": "03108718357"
+            "fornavn": "GØYAL",
+            "etternavn": "HØYSTAKK",
+            "foedselsnummer": "12101376212"
           },
           {
             "type": "FORELDER",
-            "fornavn": "VAKKER",
-            "etternavn": "LAPP",
+            "fornavn": "fe",
+            "etternavn": "fe",
             "foedselsnummer": "22128202440"
           }
         ],
@@ -71,18 +71,18 @@
       "attestering": null
     },
     {
-      "id": "c0ff69f8-8a82-4b68-95ef-541a33ee6acf",
+      "id": "2c3487a2-3bb5-4058-9a7d-61d0ef971965",
       "kilde": {
         "fnr": "03108718357",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "GJENLEVENDE_FORELDER_SOEKNAD_V1",
+      "opplysningsType": "GJENLEVENDE_FORELDER_SOEKNAD_V1",
       "meta": {},
       "opplysning": {
         "type": "GJENLEVENDE_FORELDER",
-        "fornavn": "BRÅKETE",
-        "etternavn": "POTET",
+        "fornavn": "GØYAL",
+        "etternavn": "HØYSTAKK",
         "foedselsnummer": "03108718357",
         "adresse": "Sannergata 6C, 0557 Oslo",
         "statsborgerskap": "Norge",
@@ -91,30 +91,30 @@
       "attestering": null
     },
     {
-      "id": "33e9eb39-efc0-4a0a-b595-84cfcf4da715",
+      "id": "62f0081b-f585-4d80-8387-e6cbe43eecb1",
       "kilde": {
         "fnr": "03108718357",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "INNSENDER_SOEKNAD_V1",
+      "opplysningsType": "INNSENDER_SOEKNAD_V1",
       "meta": {},
       "opplysning": {
         "type": "INNSENDER",
-        "fornavn": "BRÅKETE",
-        "etternavn": "POTET",
+        "fornavn": "GØYAL",
+        "etternavn": "HØYSTAKK",
         "foedselsnummer": "03108718357"
       },
       "attestering": null
     },
     {
-      "id": "4fd9ca42-a2f8-4ccf-8615-ce9db6fa11b2",
+      "id": "779f8f99-7757-4ba6-814b-0859eb1a7dbe",
       "kilde": {
         "fnr": "03108718357",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "UTBETALINGSINFORMASJON_V1",
+      "opplysningsType": "UTBETALINGSINFORMASJON_V1",
       "meta": {},
       "opplysning": {
         "bankkontoType": "NORSK",
@@ -129,13 +129,13 @@
       "attestering": null
     },
     {
-      "id": "46e43b79-21a2-4eab-8cd2-cc7f20587311",
+      "id": "c00b05d2-c32f-4907-bc0f-db97a3ddcadb",
       "kilde": {
         "fnr": "03108718357",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "SAMTYKKE",
+      "opplysningsType": "SAMTYKKE",
       "meta": {},
       "opplysning": {
         "harSamtykket": true
@@ -143,13 +143,13 @@
       "attestering": null
     },
     {
-      "id": "98b0b5e3-93b9-46ac-b5f6-250e90e25fe0",
+      "id": "c9dc019f-2628-436e-8335-050030d5bd06",
       "kilde": {
         "fnr": "03108718357",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "SOEKNAD_MOTTATT_DATO",
+      "opplysningsType": "SOEKNAD_MOTTATT_DATO",
       "meta": {},
       "opplysning": {
         "mottattDato": "2022-02-14T14:37:24.573612786"
@@ -157,13 +157,13 @@
       "attestering": null
     },
     {
-      "id": "ae835327-1545-45e5-ae43-76557df3efae",
+      "id": "c7f265a5-7cb8-40b6-96d2-9da95506f146",
       "kilde": {
         "fnr": "03108718357",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
-      "opplysningType": "SOEKNADSTYPE_V1",
+      "opplysningsType": "SOEKNADSTYPE_V1",
       "meta": {},
       "opplysning": {
         "type": "BARNEPENSJON"
@@ -171,14 +171,14 @@
       "attestering": null
     },
     {
-      "id": "40f465ae-5c66-49b3-bea5-48f93e9c952d",
+      "id": "bb9b9a5d-ffcc-4368-9de3-443e6ac32342",
       "kilde": {
         "navn": "pdl",
-        "tidspunktForInnhenting": "2022-03-22T11:34:32.449688260Z",
+        "tidspunktForInnhenting": "2022-03-21T14:26:21.971631997Z",
         "registersReferanse": null,
         "type": "pdl"
       },
-      "opplysningType": "AVDOED_PDL_V1",
+      "opplysningsType": "AVDOED_PDL_V1",
       "meta": {},
       "opplysning": {
         "fornavn": "VAKKER",
@@ -187,7 +187,7 @@
         "foedselsdato": "1982-12-22",
         "foedselsaar": 1982,
         "foedeland": "NOR",
-        "doedsdato": "2017-02-10",
+        "doedsdato": "2022-02-10",
         "adressebeskyttelse": "UGRADERT",
         "bostedsadresse": [
           {
@@ -198,7 +198,7 @@
             "adresseLinje2": null,
             "adresseLinje3": null,
             "postnr": "8475",
-            "poststed": "Oslo",
+            "poststed": null,
             "land": null,
             "kilde": "FREG",
             "gyldigFraOgMed": "1999-01-01T00:00:00",
@@ -217,20 +217,22 @@
         "familieRelasjon": {
           "ansvarligeForeldre": null,
           "foreldre": null,
-          "barn": ["12101376212"]
+          "barn": [
+            "12101376212"
+          ]
         }
       },
       "attestering": null
     },
     {
-      "id": "b3a5c4cd-02cb-4a34-a5d2-8390d74b0299",
+      "id": "0d7bb4c9-801a-48da-a221-f5fd189ee956",
       "kilde": {
         "navn": "pdl",
-        "tidspunktForInnhenting": "2022-03-22T11:34:32.449699568Z",
+        "tidspunktForInnhenting": "2022-03-21T14:26:21.971719804Z",
         "registersReferanse": null,
         "type": "pdl"
       },
-      "opplysningType": "GJENLEVENDE_FORELDER_PDL_V1",
+      "opplysningsType": "GJENLEVENDE_FORELDER_PDL_V1",
       "meta": {},
       "opplysning": {
         "fornavn": "BRÅKETE",
@@ -244,30 +246,16 @@
         "bostedsadresse": [
           {
             "type": "VEGADRESSE",
-            "aktiv": false,
+            "aktiv": true,
             "coAdresseNavn": null,
             "adresseLinje1": "Bøveien 937",
             "adresseLinje2": null,
             "adresseLinje3": null,
             "postnr": "8475",
-            "poststed": "Oslo",
+            "poststed": null,
             "land": null,
             "kilde": "FREG",
             "gyldigFraOgMed": "1999-01-01T00:00:00",
-            "gyldigTilOgMed": "2022-02-20T00:00:00"
-          },
-          {
-            "type": "VEGADRESSE",
-            "aktiv": true,
-            "coAdresseNavn": null,
-            "adresseLinje1": "Sannergata 6C",
-            "adresseLinje2": null,
-            "adresseLinje3": null,
-            "postnr": "0557",
-            "poststed": "Oslo",
-            "land": null,
-            "kilde": "FREG",
-            "gyldigFraOgMed": "2022-02-20T00:00:00",
             "gyldigTilOgMed": null
           }
         ],
@@ -283,20 +271,22 @@
         "familieRelasjon": {
           "ansvarligeForeldre": null,
           "foreldre": null,
-          "barn": ["12101376212"]
+          "barn": [
+            "12101376212"
+          ]
         }
       },
       "attestering": null
     },
     {
-      "id": "161b1590-eb02-4e62-9e52-35402a82ffa4",
+      "id": "60b5c275-e88e-41c2-9371-0d254e7d9655",
       "kilde": {
         "navn": "pdl",
-        "tidspunktForInnhenting": "2022-03-22T11:34:32.449703380Z",
+        "tidspunktForInnhenting": "2022-03-21T14:26:21.971735709Z",
         "registersReferanse": null,
         "type": "pdl"
       },
-      "opplysningType": "SOEKER_PDL_V1",
+      "opplysningsType": "SOEKER_PDL_V1",
       "meta": {},
       "opplysning": {
         "fornavn": "TALENTFULL",
@@ -310,30 +300,16 @@
         "bostedsadresse": [
           {
             "type": "VEGADRESSE",
-            "aktiv": false,
+            "aktiv": true,
             "coAdresseNavn": null,
             "adresseLinje1": "Bøveien 937",
             "adresseLinje2": null,
             "adresseLinje3": null,
             "postnr": "8475",
-            "poststed": "Oslo",
+            "poststed": null,
             "land": null,
             "kilde": "FREG",
             "gyldigFraOgMed": "1999-01-01T00:00:00",
-            "gyldigTilOgMed": "2022-02-20T00:00:00"
-          },
-          {
-            "type": "VEGADRESSE",
-            "aktiv": true,
-            "coAdresseNavn": null,
-            "adresseLinje1": "Sannergata 6C",
-            "adresseLinje2": null,
-            "adresseLinje3": null,
-            "postnr": "0557",
-            "poststed": "Oslo",
-            "land": null,
-            "kilde": "FREG",
-            "gyldigFraOgMed": "2022-02-20T00:00:00",
             "gyldigTilOgMed": null
           }
         ],
@@ -347,8 +323,14 @@
           "utflyttingFraNorge": []
         },
         "familieRelasjon": {
-          "ansvarligeForeldre": ["22128202440", "03108718357"],
-          "foreldre": ["22128202440", "03108718357"],
+          "ansvarligeForeldre": [
+            "22128202440",
+            "03108718357"
+          ],
+          "foreldre": [
+            "22128202440",
+            "03108718357"
+          ],
           "barn": null
         }
       },
@@ -367,7 +349,7 @@
             {
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449688260Z",
+                "tidspunktForInnhenting": "2022-03-21T14:26:21.971631997Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -379,7 +361,7 @@
             {
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449703380Z",
+                "tidspunktForInnhenting": "2022-03-21T14:26:21.971735709Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -403,7 +385,7 @@
             {
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449688260Z",
+                "tidspunktForInnhenting": "2022-03-21T14:26:21.971631997Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -421,18 +403,21 @@
             {
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449703380Z",
+                "tidspunktForInnhenting": "2022-03-21T14:26:21.971735709Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
               "opplysning": {
-                "foreldre": ["22128202440", "03108718357"]
+                "foreldre": [
+                  "22128202440",
+                  "03108718357"
+                ]
               }
             },
             {
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449688260Z",
+                "tidspunktForInnhenting": "2022-03-21T14:26:21.971631997Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -456,24 +441,13 @@
             {
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449688260Z",
+                "tidspunktForInnhenting": "2022-03-21T14:26:21.971631997Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
               "opplysning": {
                 "doedsdato": "2022-02-10",
                 "foedselsnummer": "22128202440"
-              }
-            },
-            {
-              "kilde": {
-                "fnr": "03108718357",
-                "mottatDato": "2022-02-14T14:37:24.573612786Z",
-                "type": "privatperson"
-              },
-              "opplysning": {
-                "harHattUtenlandsopphold": "NEI",
-                "opphold": null
               }
             }
           ]
@@ -491,7 +465,7 @@
             {
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449703380Z",
+                "tidspunktForInnhenting": "2022-03-21T14:26:21.971735709Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -505,7 +479,7 @@
                     "adresseLinje2": null,
                     "adresseLinje3": null,
                     "postnr": "8475",
-                    "poststed": "Oslo",
+                    "poststed": null,
                     "land": null,
                     "kilde": "FREG",
                     "gyldigFraOgMed": "1999-01-01T00:00:00",
@@ -518,20 +492,8 @@
             },
             {
               "kilde": {
-                "fnr": "03108718357",
-                "mottatDato": "2022-02-14T14:37:24.573612786Z",
-                "type": "privatperson"
-              },
-              "opplysning": {
-                "adresseIUtlandet": "NEI",
-                "land": null,
-                "adresse": null
-              }
-            },
-            {
-              "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449688260Z",
+                "tidspunktForInnhenting": "2022-03-21T14:26:21.971631997Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -549,7 +511,7 @@
             {
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449699568Z",
+                "tidspunktForInnhenting": "2022-03-21T14:26:21.971719804Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -563,7 +525,7 @@
                     "adresseLinje2": null,
                     "adresseLinje3": null,
                     "postnr": "8475",
-                    "poststed": "Oslo",
+                    "poststed": null,
                     "land": null,
                     "kilde": "FREG",
                     "gyldigFraOgMed": "1999-01-01T00:00:00",
@@ -577,7 +539,7 @@
             {
               "kilde": {
                 "navn": "pdl",
-                "tidspunktForInnhenting": "2022-03-22T11:34:32.449688260Z",
+                "tidspunktForInnhenting": "2022-03-21T14:26:21.971631997Z",
                 "registersReferanse": null,
                 "type": "pdl"
               },
@@ -592,5 +554,16 @@
     }
   ],
   "beregning": null,
-  "fastsatt": false
+  "fastsatt": false,
+  "avbrutt": false,
+  "status": "VILKÅRSPRØVD",
+  "system_read_count": 0,
+  "system_participating_services": [
+    {
+      "service": "etterlatte-behandling",
+      "instance": "etterlatte-behandling-f6849948c-t4qhv",
+      "time": "2022-03-21T15:26:22.994195102"
+    }
+  ],
+  "@event": "BEHANDLING:GRUNNLAGENDRET"
 }

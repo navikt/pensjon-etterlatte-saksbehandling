@@ -1,7 +1,6 @@
-
 [
   {
-    "behandlingsId": "b304cba3-7e0c-4be0-9133-9325c195139b",
+    "behandlingsId": "9",
     "sakId": 6,
     "status": "OPPRETTET",
     "soeknadType": "Gjenlevendepensjon",
@@ -14,7 +13,7 @@
     "handling": "BEHANDLE"
   },
   {
-    "behandlingsId": "d0c61375-9c75-4e1d-acb9-acbefe18706c",
+    "behandlingsId": "10",
     "sakId": 3,
     "status": "OPPRETTET",
     "soeknadType": "Barnepensjon",
@@ -22,12 +21,12 @@
     "regdato": "2019-01-21T05:47:08.644",
     "fristdato": "2019-01-29T05:47:08.644",
     "fnr": "29081276127",
-    "beskrivelse": "ren copy paste",
+    "beskrivelse": "",
     "saksbehandler": "",
     "handling": "BEHANDLE"
   },
   {
-    "behandlingsId": "2d0c61375-9c75-4e1d-acb9-acbefe18706c",
+    "behandlingsId": "11",
     "sakId": 4,
     "status": "OPPRETTET",
     "soeknadType": "Barnepensjon",
@@ -35,20 +34,7 @@
     "regdato": "2019-01-21T05:47:08.644",
     "fristdato": "2020-01-29T05:47:08.644",
     "fnr": "29081276127",
-    "beskrivelse": "test forskjellige adresser",
-    "saksbehandler": "",
-    "handling": "BEHANDLE"
-  },
-  {
-    "behandlingsId": "2d0c61375-adresser",
-    "sakId": 5,
-    "status": "OPPRETTET",
-    "soeknadType": "Barnepensjon",
-    "behandlingType": "FØRSTEGANGSBEHANDLING",
-    "regdato": "2019-01-21T05:47:08.644",
-    "fristdato": "2020-01-29T05:47:08.644",
-    "fnr": "29081276127",
-    "beskrivelse": "test adresser og virkningstidspunkt",
+    "beskrivelse": "",
     "saksbehandler": "",
     "handling": "BEHANDLE"
   }

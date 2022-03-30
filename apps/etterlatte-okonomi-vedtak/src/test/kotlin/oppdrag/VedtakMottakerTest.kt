@@ -25,7 +25,7 @@ internal class VedtakMottakerTest {
 
         assertEquals("true", inspector.message(0).get("@vedtak_oversatt").asText())
         verifyOrder {
-            oppdragService.opprettOgSendOppdrag(any())
+            oppdragService.opprettOgSendOppdrag(any(), any())
         }
     }
 

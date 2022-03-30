@@ -2,6 +2,7 @@ package no.nav.etterlatte.oppdrag
 
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.domain.Attestasjon
 import no.nav.etterlatte.domain.Vedtak
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -21,6 +22,7 @@ internal class VedtakMottaker(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "vedtak_fattet") }
+            validate { it.demandValue("@vedtak_attestert", true) }
             validate { it.requireKey("@vedtak") }
             validate { it.rejectKey("@vedtak_oversatt") }
             validate { it.interestedIn("@correlation_id") }
@@ -30,9 +32,10 @@ internal class VedtakMottaker(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             try {
-                logger.info("Fattet vedtak mottatt")
+                logger.info("Attestert vedtak mottatt")
                 val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson())
-                oppdragService.opprettOgSendOppdrag(vedtak)
+                val attestasjon: Attestasjon = objectMapper.readValue(packet["@attestasjon"].toJson())
+                oppdragService.opprettOgSendOppdrag(vedtak, attestasjon)
             } catch (e: Exception) {
                 logger.error("En feil oppstod: ${e.message}", e)
             }

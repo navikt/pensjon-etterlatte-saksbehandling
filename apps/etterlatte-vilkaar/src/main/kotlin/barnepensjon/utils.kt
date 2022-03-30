@@ -4,11 +4,21 @@ import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
+import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 
 class OpplysningKanIkkeHentesUt : IllegalStateException()
 
 fun setVikaarVurderingsResultat(kriterie: List<Kriterie>): VilkaarVurderingsResultat {
     val resultat = kriterie.map { it.resultat }
+    return hentVurdering(resultat)
+}
+
+fun setVilkaarResultat(vilkaar: List<VurdertVilkaar>): VilkaarVurderingsResultat {
+    val resultat = vilkaar.map { it.resultat }
+    return hentVurdering(resultat)
+}
+
+fun hentVurdering(resultat: List<VilkaarVurderingsResultat>): VilkaarVurderingsResultat {
     return if (resultat.all { it == VilkaarVurderingsResultat.OPPFYLT }) {
         VilkaarVurderingsResultat.OPPFYLT
     } else if (resultat.any { it == VilkaarVurderingsResultat.IKKE_OPPFYLT }) {
@@ -33,3 +43,4 @@ fun opplysningsGrunnlagNull(kriterietype: Kriterietyper, opplysningsGrunnlag: Li
         opplysningsGrunnlag
     )
 }
+

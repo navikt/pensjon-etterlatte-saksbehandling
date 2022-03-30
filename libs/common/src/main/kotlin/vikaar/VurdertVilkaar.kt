@@ -10,3 +10,8 @@ data class VurdertVilkaar(
     val kriterier: List<Kriterie>,
 )
 
+data class VilkaarResultat(
+    val resultat: VilkaarVurderingsResultat?,
+    val vilkaar: List<VurdertVilkaar>?
+)
+

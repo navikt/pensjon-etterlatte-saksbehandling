@@ -13,17 +13,36 @@ export const VilkaarVurderingsliste = ({ kriterie }: { kriterie: IKriterie[] }) 
   return (
     <div>
       {liste.map((krit) => (
-        <div key={krit.navn} style={{ display: 'flex', marginTop: '10px' }}>
-          <div style={{ marginRight: '20px', marginTop: '10px' }}>
-            <StatusIcon status={krit.resultat} />
-          </div>
-
-          <div>
-            <div style={{ fontWeight: 'bold' }}>{mapKriterietyperTilTekst(krit).tittel}</div>
-            <div>{mapKriterietyperTilTekst(krit).svar}</div>
-          </div>
-        </div>
+        <VilkaarVurderingEnkeltElement
+          key={krit.navn}
+          tittel={mapKriterietyperTilTekst(krit).tittel}
+          svar={mapKriterietyperTilTekst(krit).svar}
+          resultat={krit.resultat}
+        />
       ))}
+    </div>
+  )
+}
+
+export const VilkaarVurderingEnkeltElement = ({
+  tittel,
+  svar,
+  resultat,
+}: {
+  tittel: String
+  svar: String
+  resultat: VilkaarVurderingsResultat
+}) => {
+  return (
+    <div style={{ display: 'flex', marginTop: '10px' }}>
+      <div style={{ marginTop: '10px' }}>
+        <StatusIcon status={resultat} />
+      </div>
+
+      <div>
+        <div style={{ fontWeight: 'bold' }}>{tittel}</div>
+        <div>{svar}</div>
+      </div>
     </div>
   )
 }

@@ -65,9 +65,9 @@ class ApplicationTest {
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
         var behandlingOpprettet: UUID? = null
-
+        val beans = TestBeanFactory(postgreSQLContainer.jdbcUrl, kafkaConfig , topicname)
         withTestApplication({
-            module(TestBeanFactory(postgreSQLContainer.jdbcUrl, kafkaConfig , topicname))
+            module(beans)
         }) {
             handleRequest(HttpMethod.Get, "/saker/123") {
                 addAuthSaksbehandler()
@@ -153,7 +153,7 @@ class ApplicationTest {
 
             }
         }
-
+        beans.behandlingHendelser().nyHendelse.close()
 
         assertNotNull(behandlingOpprettet)
         consumer.poll(2000).also { assertFalse(it.isEmpty) }.forEach {

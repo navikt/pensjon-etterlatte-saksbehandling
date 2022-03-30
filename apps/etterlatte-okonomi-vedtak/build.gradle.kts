@@ -9,7 +9,7 @@ dependencies {
     implementation(Ktor.ClientAuth)
     implementation(Ktor.ClientJackson)
 
-    implementation("com.ibm.mq:com.ibm.mq.allclient:9.2.0.1")
+    implementation("com.ibm.mq:com.ibm.mq.allclient:9.2.5.0")
     implementation("com.github.navikt.tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon:1.4201aa")
 
     implementation("javax.xml.bind:jaxb-api:2.3.0")

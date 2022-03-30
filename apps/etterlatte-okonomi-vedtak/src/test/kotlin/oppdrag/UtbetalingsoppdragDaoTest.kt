@@ -2,7 +2,8 @@ package no.nav.etterlatte.oppdrag
 
 import no.nav.etterlatte.config.DataSourceBuilder
 import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
-import no.nav.etterlatte.mockVedtak
+import no.nav.etterlatte.dummyAttestasjon
+import no.nav.etterlatte.dummyVedtak
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -58,8 +59,8 @@ internal class UtbetalingsoppdragDaoTest {
 
     @Test
     fun `skal opprette og hente utbetalingsoppdrag`() {
-        val vedtak = mockVedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak)
+        val vedtak = dummyVedtak()
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, dummyAttestasjon())
 
         utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
         val utbetalingsoppdrag = utbetalingsoppdragDao.hentUtbetalingsoppdrag(vedtak.vedtakId)
@@ -76,8 +77,8 @@ internal class UtbetalingsoppdragDaoTest {
 
     @Test
     fun `skal sette kvittering på utbetalingsoppdrag`() {
-        val vedtak = mockVedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak)
+        val vedtak = dummyVedtak()
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, dummyAttestasjon())
 
         utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
 
@@ -103,8 +104,8 @@ internal class UtbetalingsoppdragDaoTest {
 
     @Test
     fun `skal oppdatere status på utbetalingsoppdrag`() {
-        val vedtak = mockVedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak)
+        val vedtak = dummyVedtak()
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, dummyAttestasjon())
 
         val utbetalingsoppdrag = utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
 

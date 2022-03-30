@@ -71,7 +71,7 @@ export const TidslinjeMedlemskap = () => {
 }
 
 export const Tidslinje = styled.div`
-  margin-top: 40px;
+  margin-top: 60px;
   width: 100%;
   position: relative;
   margin-bottom: 30px;

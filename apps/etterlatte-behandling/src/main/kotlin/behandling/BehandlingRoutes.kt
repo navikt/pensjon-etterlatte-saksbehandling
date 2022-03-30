@@ -14,6 +14,8 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.SoeknadMottattDato
 import java.time.LocalDateTime
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.util.*
 
 fun Route.behandlingRoutes(service: BehandlingService) {
@@ -73,6 +75,14 @@ fun Route.behandlingRoutes(service: BehandlingService) {
             call.respond(HttpStatusCode.OK)
 
         }
+
+        post("lagrevilkaarsproeving") {
+            val body = call.receive<VilkaarResultat>()
+            service.lagreVilkårsprøving(behandlingsId, body)
+            call.respond(HttpStatusCode.OK)
+
+        }
+
         post("beregning") {
             val body = call.receive<Beregning>()
              service.beregn(behandlingsId, body)

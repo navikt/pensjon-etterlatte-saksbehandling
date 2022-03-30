@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.domain.Attestasjon
 import no.nav.etterlatte.domain.Beregningsperiode
 import no.nav.etterlatte.domain.Endringskode
 import no.nav.etterlatte.domain.Enhetstype
@@ -15,7 +16,7 @@ object TestHelper
 fun readFile(file: String) = TestHelper::class.java.getResource(file)?.readText()
     ?: throw FileNotFoundException("Fant ikke filen $file")
 
-fun mockVedtak() = Vedtak(
+fun dummyVedtak() = Vedtak(
     sakId = "1234",
     vedtakId = "8888",
     behandlingsId = "1234",
@@ -39,4 +40,8 @@ fun mockVedtak() = Vedtak(
             datoEnhetFOM = LocalDate.parse("1999-09-28")
         )
     )
+)
+
+fun dummyAttestasjon() = Attestasjon(
+    "Z123456"
 )

@@ -29,20 +29,17 @@ import javax.sql.DataSource
 
 fun main() {
     ventPaaNettverk()
-    appFromEnv(System.getenv()).start(true)
+    appFromEnv(System.getenv()).run()
 }
 
 
 
-fun appFromEnv(env: Map<String, String>): ApplicationEngine {
+fun appFromEnv(env: Map<String, String>): App {
     return appFromBeanfactory(EnvBasedBeanFactory(env))
 }
 
-fun appFromBeanfactory(env: BeanFactory): ApplicationEngine {
-    return embeddedServer(CIO, applicationEngineEnvironment {
-        modules.add{ module(env) }
-        connector { port = 8080 }
-    })
+fun appFromBeanfactory(env: BeanFactory): App {
+    return App(env)
 }
 
 fun Application.module(beanFactory: BeanFactory){
@@ -97,6 +94,16 @@ private fun Route.attachContekst(ds: DataSource){
             proceed()
         }
         Kontekst.remove()
+    }
+}
+
+class App(private val beanFactory: BeanFactory){
+    fun run(){
+        embeddedServer(CIO, applicationEngineEnvironment {
+            modules.add{ module(beanFactory) }
+            connector { port = 8080 }
+        }).start(true)
+        beanFactory.behandlingHendelser().nyHendelse.close()
     }
 }
 

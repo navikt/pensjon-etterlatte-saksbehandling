@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppdrag
 
+import no.nav.etterlatte.domain.Attestasjon
 import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
 import no.nav.etterlatte.domain.Vedtak
 import org.slf4j.LoggerFactory
@@ -9,8 +10,8 @@ class OppdragService(
     val oppdragSender: OppdragSender,
     val utbetalingsoppdragDao: UtbetalingsoppdragDao,
 ) {
-    fun opprettOgSendOppdrag(vedtak: Vedtak) {
-        val oppdrag = oppdragMapper.oppdragFraVedtak(vedtak)
+    fun opprettOgSendOppdrag(vedtak: Vedtak, attestasjon: Attestasjon) {
+        val oppdrag = oppdragMapper.oppdragFraVedtak(vedtak, attestasjon)
 
         logger.info("Oppretter utbetalingsoppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId}")
         utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
@@ -18,7 +19,7 @@ class OppdragService(
         logger.info("Sender oppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId}")
         oppdragSender.sendOppdrag(oppdrag)
 
-        logger.info("Oppdaterer status")
+        logger.info("Oppdaterer status til ${UtbetalingsoppdragStatus.SENDT.name}")
         utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.SENDT)
     }
 

@@ -1,8 +1,10 @@
 package no.nav.etterlatte.oppdrag
 
+import no.nav.etterlatte.domain.Attestasjon
 import no.nav.etterlatte.domain.Endringskode
 import no.nav.etterlatte.domain.Enhetstype
 import no.nav.etterlatte.domain.Vedtak
+import no.trygdeetaten.skjema.oppdrag.Attestant180
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import no.trygdeetaten.skjema.oppdrag.Oppdrag110
 import no.trygdeetaten.skjema.oppdrag.OppdragsEnhet120
@@ -17,7 +19,7 @@ import javax.xml.datatype.XMLGregorianCalendar
 
 object OppdragMapper {
 
-    fun oppdragFraVedtak(vedtak: Vedtak): Oppdrag {
+    fun oppdragFraVedtak(vedtak: Vedtak, attestasjon: Attestasjon): Oppdrag {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = "1" // 3 = simulering
             kodeEndring = "NY" // Alltid NY for førstegangsinnvilgelse
@@ -76,6 +78,12 @@ object OppdragMapper {
                         //refOppdragsId
                         //refDelytelseId
                         //refLinjeId
+
+                        attestant180.add(
+                            Attestant180().apply {
+                                attestasjon.attestantId
+                            }
+                        )
                     }
                 }
             )

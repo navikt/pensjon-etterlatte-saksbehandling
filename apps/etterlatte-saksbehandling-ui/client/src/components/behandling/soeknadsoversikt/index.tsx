@@ -25,7 +25,7 @@ export const Soeknadsoversikt = () => {
   } = usePersonInfoFromBehandling()
 
   const ctx = useContext(AppContext)
-  const vilkaar = ctx.state.behandlingReducer.vilkårsprøving
+  const vilkaar = ctx.state.behandlingReducer.vilkårsprøving.vilkaar
   const doedsfallVilkaar: any = vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.DOEDSFALL_ER_REGISTRERT)
 
   return (

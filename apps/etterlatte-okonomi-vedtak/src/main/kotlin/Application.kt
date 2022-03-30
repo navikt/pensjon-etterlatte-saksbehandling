@@ -17,13 +17,15 @@ fun main() {
         put("KAFKA_CONSUMER_GROUP_ID", this.required("NAIS_APP_NAME").replace("-", ""))
     }
 
-    val dataSourceBuilder = DataSourceBuilder(
-        jdbcUrl = env.required("DB_JDBC_URL"),
+    val dataSource = DataSourceBuilder(
+        jdbcUrl = jdbcUrl(
+            host = env.required("DB_HOST"),
+            port = env.required("DB_PORT"),
+            databaseName = env.required("DB_DATABASE")
+        ),
         username = env.required("DB_USERNAME"),
         password = env.required("DB_PASSWORD"),
-    ).also {
-        it.migrate()
-    }
+    ).apply { migrate() }.dataSource()
 
     val jmsConnectionFactoryBuilder = JmsConnectionFactoryBuilder(
         hostname = env.required("OPPDRAG_MQ_HOSTNAME"),
@@ -42,7 +44,7 @@ fun main() {
         replyQueue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
     )
 
-    val utbetalingsoppdragDao = UtbetalingsoppdragDao(dataSourceBuilder.dataSource())
+    val utbetalingsoppdragDao = UtbetalingsoppdragDao(dataSource)
 
     val oppdragService = OppdragService(
         oppdragMapper = OppdragMapper,
@@ -77,3 +79,6 @@ fun main() {
 
 fun Map<String, String>.required(property: String): String =
     requireNotNull(this[property]) { "Property $property was null" }
+
+private fun jdbcUrl(host: String, port: String, databaseName: String) =
+    "jdbc:postgresql://${host}:$port/$databaseName"

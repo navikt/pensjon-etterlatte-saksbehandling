@@ -19,7 +19,7 @@ import javax.sql.DataSource
 internal class UtbetalingsoppdragDaoTest {
 
     @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
 
     private lateinit var dataSource: DataSource
     private lateinit var utbetalingsoppdragDao: UtbetalingsoppdragDao

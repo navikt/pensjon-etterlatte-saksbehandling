@@ -5,6 +5,8 @@ import no.nav.etterlatte.*
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
@@ -97,6 +99,18 @@ class BehandlingAggregat(
                 behandlinger.lagreVilkarsproving(lagretBehandling)
             }
         logger.info("behandling ${lagretBehandling.id} i sak ${lagretBehandling.sak} er vilkårsprøvd")
+
+    }
+
+    fun lagreVilkårsprøving(vilkarsproeving: VilkaarResultat) {
+        if (!TilgangDao.sjekkOmBehandlingTillatesEndret(lagretBehandling)) {
+            throw AvbruttBehandlingException(
+                "Det tillates ikke å vilkårsprøve Behandling med id ${lagretBehandling.id} og status: ${lagretBehandling.status}"
+            )
+        }
+        lagretBehandling = lagretBehandling.copy(
+            vilkårsprøving = vilkarsproeving
+        )
 
     }
 

@@ -13,7 +13,7 @@ class BehandlingsService(
 ) : Behandling {
     override fun leggTilVilkaarsresultat(behandling: UUID, vilkaarResultat: VilkaarResultat) {
          runBlocking {
-            behandling_app.post<String>("$url/behandlinger/$behandling/grunnlag") {
+            behandling_app.post<String>("$url/behandlinger/$behandling/lagrevilkaarsproeving") {
                 contentType(ContentType.Application.Json)
                 body = LeggTilVilkaarsResultatRequest(vilkaarResultat)
             }

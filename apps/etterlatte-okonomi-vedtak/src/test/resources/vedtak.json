@@ -1,6 +1,8 @@
 {
   "@event_name": "vedtak_fattet",
   "@vedtak": {
+    "vedtakId": "1234",
+    "behandlingsId": "9876",
     "sakId": "1234",
     "saksbehandlerId": "4321",
     "beregningsperioder": [

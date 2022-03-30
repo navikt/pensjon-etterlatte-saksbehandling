@@ -15,6 +15,7 @@ export const Inngangsvilkaar = () => {
 
   const vilkaar = ctx.state.behandlingReducer.vilkårsprøving.vilkaar
   const vilkaarResultat = ctx.state.behandlingReducer.vilkårsprøving.resultat
+  const vurderingsDato = ctx.state.behandlingReducer.vilkårsprøving.vurdertDato
 
   useEffect(() => {
     const hash = location.hash.slice(1)
@@ -34,13 +35,13 @@ export const Inngangsvilkaar = () => {
       />
       <AvdoedesForutMedlemskap
         id="avdodesmedlemskap"
-        vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.AVDOEDES_FORUTGAAENDE_MELDLEMSKAP)}
+        vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP)}
       />
       <BarnetsMedlemskap
         id="barnetsmedlemskap"
         vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.BARNETS_MEDLEMSKAP)}
       />
-      <VilkaarResultat id="vilkaarResultat" resultat={vilkaarResultat} />
+      <VilkaarResultat id="vilkaarResultat" resultat={vilkaarResultat} dato={vurderingsDato} />
     </Content>
   )
 }

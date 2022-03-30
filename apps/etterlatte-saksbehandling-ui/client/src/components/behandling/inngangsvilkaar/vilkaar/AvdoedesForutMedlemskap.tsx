@@ -40,7 +40,7 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
             <VilkaarlisteTitle>
               <AutomaticIcon /> Vilkår er oppfylt
             </VilkaarlisteTitle>
-            <KildeDatoVilkaar type={'automatisk'} dato={new Date()} />
+            <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
         <TidslinjeMedlemskap />

@@ -152,7 +152,7 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
             <VilkaarlisteTitle>
               <AutomaticIcon /> {props.vilkaar?.resultat && vilkaarErOppfylt(props.vilkaar.resultat)}
             </VilkaarlisteTitle>
-            <KildeDatoVilkaar type={'automatisk'} dato={new Date()} />
+            <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
             {lagVilkaarVisning()}
           </VilkaarVurderingColumn>
         </VilkaarWrapper>

@@ -108,7 +108,7 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
             <VilkaarlisteTitle>
               <AutomaticIcon /> {vilkaarErOppfylt(props.vilkaar.resultat)}
             </VilkaarlisteTitle>
-            <KildeDatoVilkaar type={'automatisk'} dato={new Date()} />
+            <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
             <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
           </VilkaarVurderingColumn>
         </VilkaarWrapper>

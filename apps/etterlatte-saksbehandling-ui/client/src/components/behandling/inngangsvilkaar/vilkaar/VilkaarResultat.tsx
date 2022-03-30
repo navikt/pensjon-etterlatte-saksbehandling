@@ -2,16 +2,20 @@ import { VilkaarVurderingsResultat } from '../../../../store/reducers/Behandling
 import React from 'react'
 import { VilkaarBorder } from '../styled'
 import styled from 'styled-components'
+import moment from 'moment'
 
 type Props = {
   id: any
   resultat: VilkaarVurderingsResultat | undefined
+  dato: string
 }
 
-export const VilkaarResultat: React.FC<Props> = ({ id, resultat }) => {
+export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato }) => {
+  const datoFormatert = moment(dato).format('DD.MM.YYYY')
+
   let tekst
   if (resultat === VilkaarVurderingsResultat.OPPFYLT) {
-    tekst = 'Innvilget fra DD.MM.ÅÅÅÅ'
+    tekst = 'Innvilget fra ' + datoFormatert
   } else if (resultat === VilkaarVurderingsResultat.IKKE_OPPFYLT) {
     tekst = 'Avslag'
   } else {

@@ -41,6 +41,7 @@ export enum KildeType {
 export interface IVilkaarResultat {
   resultat: VilkaarVurderingsResultat | undefined
   vilkaar: IVilkaarsproving[]
+  vurdertDato: string
 }
 export interface IVilkaarsproving {
   navn: VilkaarsType
@@ -51,7 +52,7 @@ export interface IVilkaarsproving {
 export enum VilkaarsType {
   SOEKER_ER_UNDER_20 = 'SOEKER_ER_UNDER_20',
   DOEDSFALL_ER_REGISTRERT = 'DOEDSFALL_ER_REGISTRERT',
-  AVDOEDES_FORUTGAAENDE_MELDLEMSKAP = 'AVDOEDES_FORUTGAAENDE_MELDLEMSKAP',
+  AVDOEDES_FORUTGAAENDE_MEDLEMSKAP = 'AVDOEDES_FORUTGAAENDE_MEDLEMSKAP',
   BARNETS_MEDLEMSKAP = 'BARNETS_MEDLEMSKAP',
 }
 
@@ -112,7 +113,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: '',
   sak: 0,
   grunnlag: [],
-  vilkårsprøving: { resultat: undefined, vilkaar: [] },
+  vilkårsprøving: { resultat: undefined, vilkaar: [], vurdertDato: '' },
   beregning: undefined,
   fastsatt: false,
 }

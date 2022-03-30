@@ -379,7 +379,8 @@
             "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
             "basertPaaOpplysninger": []
           }
-        ]
+        ],
+        "vurdertDato": "2022-03-30T14:36:17.984583465Z"
       },
       {
         "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
@@ -416,7 +417,8 @@
               }
             ]
           }
-        ]
+        ],
+        "vurdertDato": "2022-03-30T14:36:17.984583465Z"
       },
       {
         "navn": "BARNETS_MEDLEMSKAP",
@@ -531,10 +533,12 @@
               }
             ]
           }
-        ]
+        ],
+        "vurdertDato": "2022-03-30T14:36:17.984583465Z"
       }
-    ]
-  }
+    ],
+    "vurdertDato": "2022-03-30T14:36:17.984583465Z"
+  },
   "beregning": null,
   "fastsatt": false
 }

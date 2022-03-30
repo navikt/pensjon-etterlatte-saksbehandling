@@ -376,7 +376,8 @@
               }
             ]
           }
-        ]
+        ],
+        "vurdertDato": "2022-03-30T14:36:17.984583465Z"
       },
       {
         "navn": "DOEDSFALL_ER_REGISTRERT",
@@ -435,7 +436,8 @@
               }
             ]
           }
-        ]
+        ],
+        "vurdertDato": "2022-03-30T14:36:17.984583465Z"
       },
       {
         "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
@@ -472,7 +474,8 @@
               }
             ]
           }
-        ]
+        ],
+        "vurdertDato": "2022-03-30T14:36:17.984583465Z"
       },
       {
         "navn": "BARNETS_MEDLEMSKAP",
@@ -587,9 +590,11 @@
               }
             ]
           }
-        ]
+        ],
+        "vurdertDato": "2022-03-30T14:36:17.984583465Z"
       }
-    ]
+    ],
+    "vurdertDato": "2022-03-30T14:36:17.984583465Z"
   },
   "beregning": null,
   "fastsatt": false

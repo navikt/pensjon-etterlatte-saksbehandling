@@ -1,5 +1,9 @@
-package no.nav.etterlatte.vedtaksoversetter
+package no.nav.etterlatte.oppdrag
 
+import no.nav.etterlatte.domain.Attestasjon
+import no.nav.etterlatte.domain.Endringskode
+import no.nav.etterlatte.domain.Enhetstype
+import no.nav.etterlatte.domain.Vedtak
 import no.trygdeetaten.skjema.oppdrag.Attestant180
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import no.trygdeetaten.skjema.oppdrag.Oppdrag110
@@ -68,7 +72,7 @@ object OppdragMapper {
                         utbetalesTilId = vedtak.sakIdGjelderFnr
                         //datoUtbetalesTilIdFom
                         //kodeArbeidsgiver
-                        henvisning = it.behandlingsId
+                        henvisning = vedtak.behandlingsId
                         //typeSoknad = "" TODO: tror det skal stå noe her
                         //refFagsystemId
                         //refOppdragsId
@@ -83,12 +87,10 @@ object OppdragMapper {
                     }
                 }
             )
-
         }
 
         return Oppdrag().apply {
             this.oppdrag110 = oppdrag110
-
         }
     }
 
@@ -99,3 +101,5 @@ object OppdragMapper {
             }
     }
 }
+
+fun Oppdrag.vedtakId() = oppdrag110.oppdragsLinje150.first().vedtakId

@@ -17,9 +17,16 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        name: etterlatte-oppdrag
+        databases:
+          - name: oppdrag
+            envVarPrefix: DB
   kafka:
     pool: nav-dev
-  azure: # ??
+  azure:
     application:
       enabled: true
   envFrom:
@@ -31,7 +38,7 @@ spec:
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
-    - name: KAFKA_RESET_POLICY # ??
+    - name: KAFKA_RESET_POLICY
       #sette tilbake til none senere
       value: latest
     - name: OPPDRAG_SEND_MQ_NAME

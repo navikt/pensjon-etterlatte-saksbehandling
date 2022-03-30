@@ -1,13 +1,12 @@
-package vedtaksoversetter
+package no.nav.etterlatte.common
 
-import dummyAttestasjon
-import dummyVedtak
-import no.nav.etterlatte.vedtaksoversetter.Jaxb
-import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
+import no.nav.etterlatte.dummyAttestasjon
+import no.nav.etterlatte.dummyVedtak
+import no.nav.etterlatte.oppdrag.OppdragMapper
+import no.nav.etterlatte.readFile
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import readFile
 
 internal class JaxbTest {
 
@@ -21,7 +20,7 @@ internal class JaxbTest {
 
     @Test
     fun `should convert xml to oppdrag`() {
-        val oppdragXml = readFile("oppdrag_ugyldig.xml")
+        val oppdragXml = readFile("/oppdrag_ugyldig.xml")
         val oppdrag = Jaxb.toOppdrag(oppdragXml)
 
         assertNotNull(oppdrag)

@@ -1,6 +1,7 @@
-package no.nav.etterlatte.vedtaksoversetter
+package no.nav.etterlatte.oppdrag
 
 import com.ibm.mq.jms.MQQueue
+import no.nav.etterlatte.common.Jaxb
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 import javax.jms.Connection
@@ -14,7 +15,7 @@ class OppdragSender(
         logger.info("Sender utbetalingsoppdrag til Oppdrag")
         jmsConnection.createSession().use { session ->
             val producer = session.createProducer(session.createQueue(queue))
-            val message = session.createTextMessage(oppdrag.toXml()).apply {
+            val message = session.createTextMessage(Jaxb.toXml(oppdrag)).apply {
                 jmsReplyTo = MQQueue(replyQueue)
             }
             producer.send(message)

@@ -1,27 +1,42 @@
 package no.nav.etterlatte
 
-import com.ibm.mq.MQC
-import com.ibm.mq.jms.MQConnectionFactory
-import com.ibm.msg.client.jms.JmsConstants
-import com.ibm.msg.client.wmq.WMQConstants
-import io.ktor.server.engine.ApplicationEngineEnvironment
-import no.nav.etterlatte.vedtaksoversetter.KvitteringMottaker
-import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
-import no.nav.etterlatte.vedtaksoversetter.OppdragSender
-import no.nav.etterlatte.vedtaksoversetter.Vedtaksoversetter
+import no.nav.etterlatte.config.DataSourceBuilder
+import no.nav.etterlatte.config.JmsConnectionFactoryBuilder
+import no.nav.etterlatte.oppdrag.KvitteringMottaker
+import no.nav.etterlatte.oppdrag.OppdragMapper
+import no.nav.etterlatte.oppdrag.OppdragSender
+import no.nav.etterlatte.oppdrag.OppdragService
+import no.nav.etterlatte.oppdrag.UtbetalingsoppdragDao
+import no.nav.etterlatte.oppdrag.VedtakMottaker
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import javax.jms.ConnectionFactory
 
-private const val UTF_8_WITH_PUA = 1208
 
 fun main() {
     val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", this.required("NAIS_APP_NAME").replace("-", ""))
     }
 
-    val jmsConnection = connectionFactory(env)
-        .createConnection(env.required("srvuser"), env.required("srvpwd"))
+    val dataSource = DataSourceBuilder(
+        jdbcUrl = jdbcUrl(
+            host = env.required("DB_HOST"),
+            port = env.required("DB_PORT"),
+            databaseName = env.required("DB_DATABASE")
+        ),
+        username = env.required("DB_USERNAME"),
+        password = env.required("DB_PASSWORD"),
+    ).apply { migrate() }.dataSource()
+
+    val jmsConnectionFactoryBuilder = JmsConnectionFactoryBuilder(
+        hostname = env.required("OPPDRAG_MQ_HOSTNAME"),
+        port = env.required("OPPDRAG_MQ_PORT").toInt(),
+        queueManager = env.required("OPPDRAG_MQ_MANAGER"),
+        channel =  env.required("OPPDRAG_MQ_CHANNEL"),
+        username = env.required("srvuser"),
+        password = env.required("srvpwd")
+    )
+
+    val jmsConnection = jmsConnectionFactoryBuilder.connection()
 
     val oppdragSender = OppdragSender(
         jmsConnection = jmsConnection,
@@ -29,17 +44,25 @@ fun main() {
         replyQueue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
     )
 
+    val utbetalingsoppdragDao = UtbetalingsoppdragDao(dataSource)
+
+    val oppdragService = OppdragService(
+        oppdragMapper = OppdragMapper,
+        oppdragSender = oppdragSender,
+        utbetalingsoppdragDao = utbetalingsoppdragDao
+    )
+
     RapidApplication.create(env)
         .apply {
             KvitteringMottaker(
                 rapidsConnection = this,
+                utbetalingsoppdragDao = utbetalingsoppdragDao,
                 jmsConnection = jmsConnection,
                 queue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
             )
-            Vedtaksoversetter(
+            VedtakMottaker(
                 rapidsConnection = this,
-                oppdragMapper = OppdragMapper,
-                oppdragSender = oppdragSender
+                oppdragService = oppdragService
             )
 
             register(object : RapidsConnection.StatusListener {
@@ -54,19 +77,8 @@ fun main() {
         }.start()
 }
 
-private fun connectionFactory(env: Map<String, String>): ConnectionFactory =
-    MQConnectionFactory().apply {
-        hostName = env.required("OPPDRAG_MQ_HOSTNAME")
-        port = env.required("OPPDRAG_MQ_PORT").toInt()
-        queueManager = env.required("OPPDRAG_MQ_MANAGER")
-        channel =  env.required("OPPDRAG_MQ_CHANNEL")
-        transportType = WMQConstants.WMQ_CM_CLIENT
-        ccsid = UTF_8_WITH_PUA
-
-        setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, true)
-        setIntProperty(WMQConstants.JMS_IBM_ENCODING, MQC.MQENC_NATIVE)
-        setIntProperty(WMQConstants.JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA)
-    }
-
-private fun Map<String, String>.required(property: String): String =
+fun Map<String, String>.required(property: String): String =
     requireNotNull(this[property]) { "Property $property was null" }
+
+private fun jdbcUrl(host: String, port: String, databaseName: String) =
+    "jdbc:postgresql://${host}:$port/$databaseName"

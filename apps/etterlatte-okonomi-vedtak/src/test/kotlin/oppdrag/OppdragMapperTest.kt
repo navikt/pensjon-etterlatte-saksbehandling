@@ -1,8 +1,7 @@
-package vedtaksoversetter
+package no.nav.etterlatte.oppdrag
 
-import dummyAttestasjon
-import dummyVedtak
-import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
+import no.nav.etterlatte.dummyAttestasjon
+import no.nav.etterlatte.dummyVedtak
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 

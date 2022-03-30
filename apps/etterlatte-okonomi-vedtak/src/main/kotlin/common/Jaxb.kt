@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksoversetter
+package no.nav.etterlatte.common
 
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import java.io.StringReader

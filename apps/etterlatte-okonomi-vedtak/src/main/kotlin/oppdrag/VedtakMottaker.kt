@@ -24,6 +24,7 @@ internal class VedtakMottaker(
             validate { it.demandValue("@event_name", "vedtak_fattet") }
             validate { it.demandValue("@vedtak_attestert", true) }
             validate { it.requireKey("@vedtak") }
+            validate { it.requireKey("@attestasjon") }
             validate { it.rejectKey("@vedtak_oversatt") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)

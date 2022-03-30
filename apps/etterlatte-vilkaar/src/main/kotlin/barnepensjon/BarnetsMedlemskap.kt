@@ -4,9 +4,8 @@ import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.barnepensjon.hentAdresser
 import no.nav.etterlatte.barnepensjon.hentDoedsdato
 import no.nav.etterlatte.barnepensjon.opplysningsGrunnlagNull
-import no.nav.etterlatte.barnepensjon.setVikaarVurderingsResultat
+import no.nav.etterlatte.barnepensjon.setVikaarVurderingFraKriterier
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.SoekerBarnSoeknad
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Person
@@ -21,6 +20,7 @@ import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 fun vilkaarBarnetsMedlemskap(
     vilkaartype: Vilkaartyper,
@@ -46,11 +46,12 @@ fun vilkaarBarnetsMedlemskap(
 
     return VurdertVilkaar(
         vilkaartype,
-        setVikaarVurderingsResultat(listOf(barnHarIkkeAdresseIUtlandet, foreldreHarIkkeAdresseIUtlandet)),
+        setVikaarVurderingFraKriterier(listOf(barnHarIkkeAdresseIUtlandet, foreldreHarIkkeAdresseIUtlandet)),
         listOf(
             barnHarIkkeAdresseIUtlandet,
             foreldreHarIkkeAdresseIUtlandet
-        )
+        ),
+        LocalDateTime.now()
     )
 }
 

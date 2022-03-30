@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foreldre
+import java.time.LocalDateTime
 
 
 fun vilkaarDoedsfallErRegistrert(
@@ -27,8 +28,9 @@ fun vilkaarDoedsfallErRegistrert(
 
     return VurdertVilkaar(
         vilkaartype,
-        setVikaarVurderingsResultat(listOf(doedsdatoRegistrertIPdl, avdoedErForeldre)),
-        listOf(doedsdatoRegistrertIPdl, avdoedErForeldre)
+        setVikaarVurderingFraKriterier(listOf(doedsdatoRegistrertIPdl, avdoedErForeldre)),
+        listOf(doedsdatoRegistrertIPdl, avdoedErForeldre),
+        LocalDateTime.now()
     )
 }
 

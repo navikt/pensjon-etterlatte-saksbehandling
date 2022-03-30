@@ -5,15 +5,16 @@ import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
+import java.time.LocalDateTime
 
 class OpplysningKanIkkeHentesUt : IllegalStateException()
 
-fun setVikaarVurderingsResultat(kriterie: List<Kriterie>): VilkaarVurderingsResultat {
+fun setVikaarVurderingFraKriterier(kriterie: List<Kriterie>): VilkaarVurderingsResultat {
     val resultat = kriterie.map { it.resultat }
     return hentVurdering(resultat)
 }
 
-fun setVilkaarResultat(vilkaar: List<VurdertVilkaar>): VilkaarVurderingsResultat {
+fun setVilkaarVurderingFraVilkaar(vilkaar: List<VurdertVilkaar>): VilkaarVurderingsResultat {
     val resultat = vilkaar.map { it.resultat }
     return hentVurdering(resultat)
 }
@@ -28,6 +29,10 @@ fun hentVurdering(resultat: List<VilkaarVurderingsResultat>): VilkaarVurderingsR
     }
 }
 
+fun hentSisteVurderteDato(vilkaar: List<VurdertVilkaar>): LocalDateTime {
+    val datoer = vilkaar.map { it.vurdertDato }
+    return datoer.maxOf { it }
+}
 
 fun vurderOpplysning(vurdering: () -> Boolean): VilkaarVurderingsResultat = try {
     if (vurdering()) VilkaarVurderingsResultat.OPPFYLT else VilkaarVurderingsResultat.IKKE_OPPFYLT
@@ -36,7 +41,10 @@ fun vurderOpplysning(vurdering: () -> Boolean): VilkaarVurderingsResultat = try 
 }
 
 
-fun opplysningsGrunnlagNull(kriterietype: Kriterietyper, opplysningsGrunnlag: List<Kriteriegrunnlag<out Any>>) : Kriterie {
+fun opplysningsGrunnlagNull(
+    kriterietype: Kriterietyper,
+    opplysningsGrunnlag: List<Kriteriegrunnlag<out Any>>
+): Kriterie {
     return Kriterie(
         kriterietype,
         VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.sql.Connection
+import java.time.LocalDateTime
 
 import java.util.*
 
@@ -135,6 +136,6 @@ fun mockChannel() = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>().app
 
 class NoOpVilkaarKlient : VilkaarKlient {
     override fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): VilkaarResultat {
-        return VilkaarResultat(null, listOf())
+        return VilkaarResultat(null, listOf(), LocalDateTime.now())
     }
 }

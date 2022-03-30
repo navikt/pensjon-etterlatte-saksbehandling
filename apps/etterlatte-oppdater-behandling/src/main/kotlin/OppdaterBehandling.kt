@@ -18,6 +18,7 @@ internal class OppdaterBehandling(
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("grunnlag") }
+            validate { it.requireKey("id") }
             validate { it.requireKey("@vilkaarsvurdering") }
             validate { it.interestedIn("@correlation_id") }
 
@@ -26,7 +27,7 @@ internal class OppdaterBehandling(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            behandlinger.leggTilVilkaarsresultat(UUID.fromString(packet["@behandling_id"].asText()), packet["@vilkaarsvurdering"] as VilkaarResultat)
+            behandlinger.leggTilVilkaarsresultat(UUID.fromString(packet["id"].asText()), packet["@vilkaarsvurdering"] as VilkaarResultat)
         }
     }
 

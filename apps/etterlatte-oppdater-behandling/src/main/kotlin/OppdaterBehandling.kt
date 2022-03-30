@@ -1,6 +1,10 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -27,7 +31,8 @@ internal class OppdaterBehandling(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            behandlinger.leggTilVilkaarsresultat(UUID.fromString(packet["id"].asText()), packet["@vilkaarsvurdering"] as VilkaarResultat)
+            objectMapper.readValue<VilkaarResultat>(packet["@vilkaarsvurdering"].toString())
+            behandlinger.leggTilVilkaarsresultat(UUID.fromString(packet["id"].asText()), objectMapper.readValue(packet["@vilkaarsvurdering"].toString()))
         }
     }
 

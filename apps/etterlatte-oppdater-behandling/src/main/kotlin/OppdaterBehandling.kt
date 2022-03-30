@@ -10,6 +10,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class OppdaterBehandling(
@@ -17,7 +18,7 @@ internal class OppdaterBehandling(
     private val behandlinger: Behandling,
 
     ) : River.PacketListener {
-
+    private val logger = LoggerFactory.getLogger(OppdaterBehandling::class.java)
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
@@ -31,8 +32,13 @@ internal class OppdaterBehandling(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            objectMapper.readValue<VilkaarResultat>(packet["@vilkaarsvurdering"].toString())
-            behandlinger.leggTilVilkaarsresultat(UUID.fromString(packet["id"].asText()), objectMapper.readValue(packet["@vilkaarsvurdering"].toString()))
+            try {
+                objectMapper.readValue<VilkaarResultat>(packet["@vilkaarsvurdering"].toString())
+                behandlinger.leggTilVilkaarsresultat(UUID.fromString(packet["id"].asText()), objectMapper.readValue(packet["@vilkaarsvurdering"].toString()))
+            } catch (e: Exception){
+                logger.info("Spiser en melding: "+e)
+            }
+
         }
     }
 

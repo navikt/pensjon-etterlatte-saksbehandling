@@ -2,7 +2,6 @@ package vedtaksoversetter
 
 import io.mockk.mockk
 import io.mockk.spyk
-import io.mockk.verify
 import io.mockk.verifyOrder
 import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
 import no.nav.etterlatte.vedtaksoversetter.OppdragSender
@@ -23,7 +22,8 @@ internal class VedtaksoversetterTest {
             rapidsConnection = this,
             oppdragMapper = oppdragMapper,
             oppdragSender = oppdragSender,
-        ) }
+        )
+    }
 
     @Test
     @Disabled
@@ -32,7 +32,7 @@ internal class VedtaksoversetterTest {
 
         assertEquals("true", inspector.message(0).get("@vedtak_oversatt").asText())
         verifyOrder {
-            oppdragMapper.oppdragFraVedtak(any())
+            oppdragMapper.oppdragFraVedtak(any(), any())
             oppdragSender.sendOppdrag(any())
         }
     }

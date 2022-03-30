@@ -1,5 +1,6 @@
 package vedtaksoversetter
 
+import dummyAttestasjon
 import dummyVedtak
 import no.nav.etterlatte.vedtaksoversetter.Jaxb
 import no.nav.etterlatte.vedtaksoversetter.OppdragMapper
@@ -12,7 +13,7 @@ internal class JaxbTest {
 
     @Test
     fun `should generate xml from oppdrag`() {
-        val oppdrag = OppdragMapper.oppdragFraVedtak(dummyVedtak())
+        val oppdrag = OppdragMapper.oppdragFraVedtak(dummyVedtak(), dummyAttestasjon())
         val oppdragAsXml = Jaxb.toXml(oppdrag)
 
         assertNotNull(oppdragAsXml)

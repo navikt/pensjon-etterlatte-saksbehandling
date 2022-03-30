@@ -1,3 +1,4 @@
+import no.nav.etterlatte.vedtaksoversetter.Attestasjon
 import no.nav.etterlatte.vedtaksoversetter.Beregningsperiode
 import no.nav.etterlatte.vedtaksoversetter.Endringskode
 import no.nav.etterlatte.vedtaksoversetter.Enhetstype
@@ -37,4 +38,8 @@ fun dummyVedtak() = Vedtak(
         )
     ),
     vedtakId = "8888"
+)
+
+fun dummyAttestasjon() = Attestasjon(
+    "Z123456"
 )

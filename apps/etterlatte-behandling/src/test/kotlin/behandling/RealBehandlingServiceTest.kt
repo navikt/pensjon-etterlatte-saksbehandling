@@ -61,7 +61,7 @@ internal class RealBehandlingServiceTest {
             ),
         )
 
-        every { behandlingerMock.hent(id) } returns Behandling(id, 1, emptyList(), null, null, false)
+        every { behandlingerMock.hent(id) } returns Behandling(id, 1, emptyList(), null, null, null, false)
         every { opplysningerMock.finnOpplysningerIBehandling(id) } returns opplysninger
         Assertions.assertEquals(2, sut.hentBehandling(id).grunnlag.size)
     }
@@ -76,7 +76,7 @@ internal class RealBehandlingServiceTest {
 
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
-        val opprettetBehandling = Behandling(UUID.randomUUID(), 1, emptyList(), null, null, false)
+        val opprettetBehandling = Behandling(UUID.randomUUID(), 1, emptyList(), null, null, null, false)
 
         val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock), hendleseskanal)
 
@@ -105,7 +105,7 @@ internal class RealBehandlingServiceTest {
         val opplysningerMock = mockk<OpplysningDao>()
         val behandlingAvbrytes = slot<Behandling>()
 
-        val opprettetBehandling = Behandling(UUID.randomUUID(), 1, emptyList(), null, null, false, false)
+        val opprettetBehandling = Behandling(UUID.randomUUID(), 1, emptyList(), null, null, null, false, false)
 
         val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock), mockChannel())
 

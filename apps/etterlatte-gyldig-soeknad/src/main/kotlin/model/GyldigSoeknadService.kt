@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.opplysningstyper.GjenlevendeFore
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.objectMapper
@@ -16,13 +17,14 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.slf4j.LoggerFactory
+import setVurdering
 import vurderOpplysning
 import java.time.LocalDateTime
 
 class GyldigSoeknadService {
     private val logger = LoggerFactory.getLogger(GyldigSoeknadService::class.java)
 
-    fun mapOpplysninger(opplysninger: List<VilkaarOpplysning<ObjectNode>>) {
+    fun mapOpplysninger(opplysninger: List<VilkaarOpplysning<ObjectNode>>): GyldighetsResultat {
         logger.info("Map opplysninger for å vurdere om søknad er gyldig")
 
         val innsender = finnOpplysning<InnsenderSoeknad>(opplysninger, Opplysningstyper.INNSENDER_SOEKNAD_V1)
@@ -32,7 +34,7 @@ class GyldigSoeknadService {
         val soekerSoeknad = finnOpplysning<SoekerBarnSoeknad>(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1)
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
 
-        val gyldighetResultat = listOf(
+        val gyldighet = listOf(
             innsenderErForelder(GyldighetsTyper.INNSENDER_ER_FORELDER, gjenlevendeSoeknad, innsender),
             gjenlevendeForelderHarForeldreansvar(
                 GyldighetsTyper.HAR_FORELDREANSVAR_FOR_BARNET,
@@ -45,6 +47,11 @@ class GyldigSoeknadService {
                 gjenlevendePdl
             )
         )
+
+        val gyldighetResultat = setVurdering(gyldighet)
+        val vurdertDato = LocalDateTime.now()
+
+        return GyldighetsResultat(gyldighetResultat, gyldighet, vurdertDato )
     }
 
     fun innsenderErForelder(

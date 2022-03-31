@@ -5,6 +5,7 @@ import no.nav.etterlatte.*
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import org.slf4j.LoggerFactory
@@ -27,7 +28,7 @@ class BehandlingAggregat(
             opplysninger: OpplysningDao
         ): BehandlingAggregat {
             logger.info("Oppretter en behandling på ${sak}")
-            return Behandling(UUID.randomUUID(), sak, emptyList(), null, null)
+            return Behandling(UUID.randomUUID(), sak, emptyList(), null,null, null)
                 .also {
                     behandlinger.opprett(it)
                     logger.info("Opprettet behandling ${it.id} i sak ${it.sak}")
@@ -39,6 +40,7 @@ class BehandlingAggregat(
     private object TilgangDao {
         fun sjekkOmBehandlingTillatesEndret(behandling: Behandling): Boolean {
             return behandling.status in listOf(
+                BehandlingStatus.GYLDIGHETSPRØVD,
                 BehandlingStatus.VILKÅRSPRØVD,
                 BehandlingStatus.OPPRETTET,
                 BehandlingStatus.FASTSATT,
@@ -94,6 +96,19 @@ class BehandlingAggregat(
         )
         behandlinger.lagreVilkarsproving(lagretBehandling)
         logger.info("behandling ${lagretBehandling.id} i sak ${lagretBehandling.sak} er vilkårsprøvd")
+    }
+
+    fun lagreGyldighetprøving(gyldighetsproeving: GyldighetsResultat) {
+        if (!TilgangDao.sjekkOmBehandlingTillatesEndret(lagretBehandling)) {
+            throw AvbruttBehandlingException(
+                "Det tillates ikke å gyldighetsprøve Behandling med id ${lagretBehandling.id} og status: ${lagretBehandling.status}"
+            )
+        }
+        lagretBehandling = lagretBehandling.copy(
+            gyldighetsprøving = gyldighetsproeving
+        )
+        behandlinger.lagreGyldighetsproving(lagretBehandling)
+        logger.info("behandling ${lagretBehandling.id} i sak ${lagretBehandling.sak} er gyldighetsprøvd")
     }
 
     fun avbrytBehandling(): Behandling {

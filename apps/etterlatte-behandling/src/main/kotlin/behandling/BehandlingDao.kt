@@ -16,7 +16,7 @@ class BehandlingDao(private val connection: () -> Connection) {
 
     fun hent(id: UUID): Behandling? {
         val stmt =
-            connection().prepareStatement("SELECT id, sak_id, vilkaarsproving, beregning, fastsatt, avbrutt FROM behandling where id = ?")
+            connection().prepareStatement("SELECT id, sak_id, gyldighetsproving, vilkaarsproving, beregning, fastsatt, avbrutt FROM behandling where id = ?")
         stmt.setObject(1, id)
         return stmt.executeQuery().singleOrNull {
             Behandling(
@@ -25,31 +25,33 @@ class BehandlingDao(private val connection: () -> Connection) {
                 emptyList(),
                 getString(3)?.let { objectMapper.readValue(it) },
                 getString(4)?.let { objectMapper.readValue(it) },
-                getBoolean(5),
-                getBoolean(6)
+                getString(5)?.let { objectMapper.readValue(it) },
+                getBoolean(6),
+                getBoolean(7)
             )
         }
     }
 
     fun alle(): List<Behandling> {
         val stmt =
-            connection().prepareStatement("SELECT id, sak_id, vilkaarsproving, beregning, fastsatt, avbrutt FROM behandling")
+            connection().prepareStatement("SELECT id, sak_id, gyldighetsproving, vilkaarsproving, beregning, fastsatt, avbrutt FROM behandling")
         return stmt.executeQuery().toList {
             Behandling(
                 getObject(1) as UUID,
                 getLong(2),
                 emptyList<Behandlingsopplysning<ObjectNode>>(),
                 getString(3)?.let { objectMapper.readValue(it) },
+                getString(4)?.let { objectMapper.readValue(it) },
                 getString(5)?.let { objectMapper.readValue(it) },
-                getBoolean(5),
-                getBoolean(6)
+                getBoolean(6),
+                getBoolean(7)
             )
         }
     }
 
     fun alleISak(sakid: Long): List<Behandling> {
         val stmt =
-            connection().prepareStatement("SELECT id, sak_id, vilkaarsproving, beregning, fastsatt, avbrutt FROM behandling WHERE sak_id = ?")
+            connection().prepareStatement("SELECT id, sak_id, gyldighetsproving, vilkaarsproving, beregning, fastsatt, avbrutt FROM behandling WHERE sak_id = ?")
         stmt.setLong(1, sakid)
         return stmt.executeQuery().toList {
             Behandling(
@@ -58,6 +60,7 @@ class BehandlingDao(private val connection: () -> Connection) {
                 emptyList(),
                 getString(3)?.let { objectMapper.readValue(it) },
                 getString(4)?.let { objectMapper.readValue(it) },
+                getString(5)?.let { objectMapper.readValue(it) },
                 getBoolean(5),
                 getBoolean(6)
             )
@@ -85,6 +88,13 @@ class BehandlingDao(private val connection: () -> Connection) {
         require(stmt.executeUpdate() == 1)
     }
 
+    fun lagreGyldighetsproving(behandling: Behandling) {
+        val stmt = connection().prepareStatement("UPDATE behandling SET gyldighetsproving = ? WHERE id = ?")
+        stmt.setObject(1, objectMapper.writeValueAsString(behandling.gyldighetsprøving))
+        stmt.setObject(2, behandling.id)
+        require(stmt.executeUpdate() == 1)
+    }
+
     fun lagreFastsett(behandling: Behandling) {
         val stmt = connection().prepareStatement("UPDATE behandling SET fastsatt = ? WHERE id = ?")
         stmt.setBoolean(1, behandling.fastsatt)
@@ -100,7 +110,7 @@ class BehandlingDao(private val connection: () -> Connection) {
 
     fun hentBehandlingerMedSakId(id: Long): List<Behandling> {
         val stmt =
-            connection().prepareStatement("SELECT id, sak_id, vilkaarsproving, beregning, fastsatt, avbrutt from behandling where sak_id = ?")
+            connection().prepareStatement("SELECT id, sak_id, gyldighetsproving, vilkaarsproving, beregning, fastsatt, avbrutt from behandling where sak_id = ?")
         stmt.setLong(1, id)
         return stmt.executeQuery().toList {
             Behandling(
@@ -109,8 +119,9 @@ class BehandlingDao(private val connection: () -> Connection) {
                 emptyList<Behandlingsopplysning<ObjectNode>>(),
                 getString(3)?.let { objectMapper.readValue(it) },
                 getString(4)?.let { objectMapper.readValue(it) },
-                getBoolean(5),
-                getBoolean(6)
+                getString(5)?.let { objectMapper.readValue(it) },
+                getBoolean(6),
+                getBoolean(7)
             )
         }
     }

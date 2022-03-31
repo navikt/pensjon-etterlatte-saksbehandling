@@ -7,6 +7,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.Beregning
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import org.slf4j.LoggerFactory
@@ -18,6 +19,7 @@ interface BehandlingService {
     fun hentBehandlingerISak(sakid: Long): List<Behandling>
     fun startBehandling(sak: Long, nyeOpplysninger: List<Behandlingsopplysning<ObjectNode>>): Behandling
     fun leggTilGrunnlagFraRegister(behandling: UUID, opplysninger: List<Behandlingsopplysning<ObjectNode>>)
+    fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
     fun lagreVilkårsprøving(behandling: UUID, vilkaarsproeving: VilkaarResultat)
     fun beregn(behandling: UUID, beregning: Beregning)
     fun ferdigstill(behandling: UUID)
@@ -77,6 +79,10 @@ class RealBehandlingService(
 
     override fun lagreVilkårsprøving(behandling: UUID, vilkaarsproeving: VilkaarResultat) {
         inTransaction { behandlingFactory.hent(behandling).lagreVilkårsprøving(vilkaarsproeving)}
+    }
+
+    override fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat) {
+        inTransaction { behandlingFactory.hent(behandling).lagreGyldighetprøving(gyldighetsproeving)}
     }
 
     override fun beregn(behandling: UUID, beregning: Beregning) {

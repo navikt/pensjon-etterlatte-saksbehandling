@@ -1,10 +1,9 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -24,6 +23,7 @@ internal class OppdaterBehandling(
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("grunnlag") }
             validate { it.requireKey("id") }
+            validate { it.requireKey("@gyldighetsvurdering") }
             validate { it.requireKey("@vilkaarsvurdering") }
             validate { it.interestedIn("@correlation_id") }
 
@@ -34,6 +34,9 @@ internal class OppdaterBehandling(
         withLogContext(packet.correlationId()) {
             try {
                 val behandlingsID = packet["id"].asText()
+                behandlinger.leggTilGyldighetsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@vilkaarsvurdering"].toString()))
+                logger.info("Oppdatert Behandling med id $behandlingsID med ny gyldighetsvurdering")
+
                 behandlinger.leggTilVilkaarsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@vilkaarsvurdering"].toString()))
                 logger.info("Oppdatert Behandling med id $behandlingsID med ny vilkaarsvurdering")
                 //TODO publisere melding
@@ -47,6 +50,7 @@ internal class OppdaterBehandling(
 
 
 interface Behandling {
+    fun leggTilGyldighetsresultat(behandling: UUID, gyldighetsResultat: GyldighetsResultat)
     fun leggTilVilkaarsresultat(behandling: UUID, vilkaarResultat: VilkaarResultat)
 }
 

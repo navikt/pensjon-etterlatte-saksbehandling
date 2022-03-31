@@ -21,7 +21,7 @@ internal class VedtaksMottaker(
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "vedtak_fattet") }
             validate { it.requireKey("@vedtak") }
-            validate { it.rejectKey("@vedtak_attestert") }
+            validate { it.rejectKey("@attestasjon") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
@@ -32,7 +32,8 @@ internal class VedtaksMottaker(
             try {
                 logger.info("Fattet vedtak mottatt")
                 val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson(), Vedtak::class.java)
-                context.publish(packet.toAttestertEvent().toJson())
+                packet["@attestasjon"] = attester()
+                context.publish(packet.toJson())
                 logger.info("Vedtak attestert og lagt tilbake til RR")
             } catch (e: Exception) {
                 logger.error("En feil oppstod: ${e.message}", e)
@@ -40,12 +41,6 @@ internal class VedtaksMottaker(
         }
 
     private fun attester() = Attestasjon("Z123456")
-
-    private fun JsonMessage.toAttestertEvent() = apply {
-        this["@vedtak_attestert"] = true
-        this["@attestasjon"] = attester().toJson()
-        this["@correlation_id"] = getCorrelationId()
-    }
 
     private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 

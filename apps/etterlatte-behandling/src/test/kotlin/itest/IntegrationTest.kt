@@ -124,13 +124,15 @@ class ApplicationTest {
                 assertEquals(1, it.behandlinger.size)
             }
 
+            //TODO erstatte med kafkatest
+            /*
             handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/vilkaarsproeving") {
                 addAuthSaksbehandler()
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {
                 assertEquals(HttpStatusCode.OK, it.response.status())
             }
-
+             */
             handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/beregning") {
                 addAuthSaksbehandler()
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())

@@ -33,9 +33,12 @@ internal class OppdaterBehandling(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             try {
-                val gah = objectMapper.readValue<VilkaarResultat>(packet["@vilkaarsvurdering"].toString())
-                behandlinger.leggTilVilkaarsresultat(UUID.fromString(packet["id"].asText()), objectMapper.readValue(packet["@vilkaarsvurdering"].toString()))
+                val behandlingsID = packet["id"].asText()
+                behandlinger.leggTilVilkaarsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@vilkaarsvurdering"].toString()))
+                logger.info("Oppdatert Behandling med id $behandlingsID med ny vilkaarsvurdering")
+                //TODO publisere melding
             } catch (e: Exception){
+                //TODO endre denne
                 logger.info("Spiser en melding: "+e)
             }
 

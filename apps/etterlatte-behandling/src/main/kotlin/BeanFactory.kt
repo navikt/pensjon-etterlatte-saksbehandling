@@ -18,7 +18,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 interface BeanFactory {
     fun datasourceBuilder(): DataSourceBuilder
     fun sakService(): SakService
-    fun vilkaarKlient(): VilkaarKlient
+    //fun vilkaarKlient(): VilkaarKlient
     fun behandlingService(): BehandlingService
     fun tokenValidering(): Authentication.Configuration.()->Unit
     fun sakDao(): SakDao
@@ -40,14 +40,14 @@ abstract class CommonFactory: BeanFactory{
     }
 
     override fun behandlingHendelser(): BehandlingsHendelser {
-        return cached { BehandlingsHendelser(rapid(), BehandlingFactory(behandlingDao(), opplysningDao(), vilkaarKlient()), datasourceBuilder().dataSource) }
+        return cached { BehandlingsHendelser(rapid(), BehandlingFactory(behandlingDao(), opplysningDao()), datasourceBuilder().dataSource) }
     }
     override fun behandlingsFactory(): BehandlingFactory {
-        return cached { BehandlingFactory(behandlingDao(), opplysningDao(), vilkaarKlient()) }
+        return cached { BehandlingFactory(behandlingDao(), opplysningDao()) }
     }
 
     override fun sakService(): SakService = RealSakService(sakDao())
-    override fun behandlingService(): BehandlingService = RealBehandlingService(behandlingDao(), opplysningDao(), BehandlingFactory(behandlingDao(), opplysningDao(), vilkaarKlient()), behandlingHendelser().nyHendelse)
+    override fun behandlingService(): BehandlingService = RealBehandlingService(behandlingDao(), opplysningDao(), BehandlingFactory(behandlingDao(), opplysningDao()), behandlingHendelser().nyHendelse)
     override fun sakDao(): SakDao = SakDao{ databaseContext().activeTx()}
     override fun behandlingDao(): BehandlingDao = BehandlingDao { databaseContext().activeTx() }
     override fun opplysningDao(): OpplysningDao = OpplysningDao { databaseContext().activeTx() }
@@ -56,7 +56,6 @@ abstract class CommonFactory: BeanFactory{
 class EnvBasedBeanFactory(val env: Map<String, String>): CommonFactory() {
 
     override fun datasourceBuilder(): DataSourceBuilder = cached { DataSourceBuilder(env) }
-    override fun vilkaarKlient(): VilkaarKlient = KtorVilkarClient("http://etterlatte-vilkaar")
     override fun tokenValidering(): Authentication.Configuration.() -> Unit = { tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load())) }
     override fun rapid(): KafkaProdusent<String, String> {
         return KafkaProdusentImpl(

@@ -16,8 +16,7 @@ class AvbruttBehandlingException(message: String) : RuntimeException(message) {}
 class BehandlingAggregat(
     id: UUID,
     private val behandlinger: BehandlingDao,
-    private val opplysninger: OpplysningDao,
-    private val vilkaarKlient: VilkaarKlient
+    private val opplysninger: OpplysningDao
 ) {
     companion object {
         private val logger = LoggerFactory.getLogger(BehandlingAggregat::class.java)
@@ -25,8 +24,7 @@ class BehandlingAggregat(
         fun opprett(
             sak: Long,
             behandlinger: BehandlingDao,
-            opplysninger: OpplysningDao,
-            vilkaarKlient: VilkaarKlient
+            opplysninger: OpplysningDao
         ): BehandlingAggregat {
             logger.info("Oppretter en behandling på ${sak}")
             return Behandling(UUID.randomUUID(), sak, emptyList(), null, null)
@@ -34,7 +32,7 @@ class BehandlingAggregat(
                     behandlinger.opprett(it)
                     logger.info("Opprettet behandling ${it.id} i sak ${it.sak}")
                 }
-                .let { BehandlingAggregat(it.id, behandlinger, opplysninger, vilkaarKlient) }
+                .let { BehandlingAggregat(it.id, behandlinger, opplysninger) }
         }
     }
 
@@ -58,7 +56,7 @@ class BehandlingAggregat(
         for (opplysning in nyeOpplysninger) {
             leggTilGrunnlagUtenVilkårsprøving(opplysning.opplysning, opplysning.opplysningType, opplysning.kilde)
         }
-        vilkårsprøv()
+        //vilkårsprøv()
     }
 
     fun leggTilGrunnlagUtenVilkårsprøving(
@@ -83,23 +81,6 @@ class BehandlingAggregat(
         lagredeOpplysninger += behandlingsopplysning
         logger.info("La til opplysning $type i behandling ${lagretBehandling.id}")
         return behandlingsopplysning.id
-    }
-
-    fun vilkårsprøv() {
-        if (!TilgangDao.sjekkOmBehandlingTillatesEndret(lagretBehandling)) {
-            throw AvbruttBehandlingException(
-                "Det tillates ikke å vilkårsprøve Behandling med id ${lagretBehandling.id} og status: ${lagretBehandling.status}"
-            )
-        }
-        vilkaarKlient
-            .vurderVilkaar(lagredeOpplysninger).also {
-                lagretBehandling = lagretBehandling.copy(
-                    vilkårsprøving = it
-                )
-                behandlinger.lagreVilkarsproving(lagretBehandling)
-            }
-        logger.info("behandling ${lagretBehandling.id} i sak ${lagretBehandling.sak} er vilkårsprøvd")
-
     }
 
     fun lagreVilkårsprøving(vilkarsproeving: VilkaarResultat) {

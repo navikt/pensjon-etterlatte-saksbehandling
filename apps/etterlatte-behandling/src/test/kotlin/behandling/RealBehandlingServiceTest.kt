@@ -134,9 +134,3 @@ internal class RealBehandlingServiceTest {
 }
 
 fun mockChannel() = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>().apply { coEvery { send(any()) } returns Unit }
-
-class NoOpVilkaarKlient : VilkaarKlient {
-    override fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): VilkaarResultat {
-        return VilkaarResultat(null, listOf(), LocalDateTime.now())
-    }
-}

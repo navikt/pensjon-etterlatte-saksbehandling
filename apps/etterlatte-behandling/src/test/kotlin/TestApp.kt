@@ -2,8 +2,6 @@ package no.nav.etterlatte
 
 import io.ktor.auth.*
 
-import no.nav.etterlatte.behandling.KtorVilkarClient
-import no.nav.etterlatte.behandling.VilkaarKlient
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
 import org.testcontainers.containers.PostgreSQLContainer

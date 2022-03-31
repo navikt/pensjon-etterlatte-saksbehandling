@@ -111,7 +111,8 @@ class BehandlingAggregat(
         lagretBehandling = lagretBehandling.copy(
             vilkårsprøving = vilkarsproeving
         )
-
+        behandlinger.lagreVilkarsproving(lagretBehandling)
+        logger.info("behandling ${lagretBehandling.id} i sak ${lagretBehandling.sak} er vilkårsprøvd")
     }
 
     fun avbrytBehandling(): Behandling {

@@ -15,7 +15,7 @@ class BehandlingsService(
          runBlocking {
             behandling_app.post<String>("$url/behandlinger/$behandling/lagrevilkaarsproeving") {
                 contentType(ContentType.Application.Json)
-                body = LeggTilVilkaarsResultatRequest(vilkaarResultat)
+                body = vilkaarResultat
             }
         }
     }

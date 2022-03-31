@@ -40,7 +40,7 @@ internal class LesVilkaarsmelding(
                 logger.info("Vurdert Vilkår")
             } catch (e: Exception){
                 //TODO endre denne
-                println("spiser en melding fordi" +e)
+                println("spiser en melding fordi: " +e)
             }
 
 

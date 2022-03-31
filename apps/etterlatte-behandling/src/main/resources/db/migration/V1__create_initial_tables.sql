@@ -14,6 +14,7 @@ CREATE TABLE behandling
     sak_id BIGINT NOT NULL
         CONSTRAINT behandling_sak_id_fk
             REFERENCES sak (id),
+    gyldighetsproving TEXT,
     vilkaarsproving TEXT,
     beregning TEXT,
     fastsatt boolean

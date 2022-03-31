@@ -16,9 +16,7 @@ class DataSourceBuilder(
 
         it.initializationFailTimeout = 6000
         it.maximumPoolSize = 3
-        it.minimumIdle = 0
-        //it.idleTimeout = 10001
-        //it.maxLifetime = 30001
+        it.maxLifetime = 30001
 
         it.validate()
     }

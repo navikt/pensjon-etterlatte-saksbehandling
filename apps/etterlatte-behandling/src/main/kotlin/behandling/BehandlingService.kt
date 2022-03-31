@@ -18,12 +18,9 @@ interface BehandlingService {
     fun hentBehandlingerISak(sakid: Long): List<Behandling>
     fun startBehandling(sak: Long, nyeOpplysninger: List<Behandlingsopplysning<ObjectNode>>): Behandling
     fun leggTilGrunnlagFraRegister(behandling: UUID, opplysninger: List<Behandlingsopplysning<ObjectNode>>)
-
-    fun vilkårsprøv(behandling: UUID)
     fun lagreVilkårsprøving(behandling: UUID, vilkaarsproeving: VilkaarResultat)
     fun beregn(behandling: UUID, beregning: Beregning)
     fun ferdigstill(behandling: UUID)
-
     fun slettBehandlingerISak(sak: Long)
     fun avbrytBehandling(behandling: UUID): Behandling
 }
@@ -76,10 +73,6 @@ class RealBehandlingService(
         )}.also {
             runBlocking { behandlingHendelser.send(behandlingsId to BehandlingHendelseType.GRUNNLAGENDRET) }
         }
-    }
-
-    override fun vilkårsprøv(behandling: UUID) {
-        inTransaction { behandlingFactory.hent(behandling).vilkårsprøv()}
     }
 
     override fun lagreVilkårsprøving(behandling: UUID, vilkaarsproeving: VilkaarResultat) {

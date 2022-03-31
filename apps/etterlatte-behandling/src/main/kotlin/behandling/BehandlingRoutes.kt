@@ -70,12 +70,6 @@ fun Route.behandlingRoutes(service: BehandlingService) {
             call.respond(HttpStatusCode.OK)
         }
 
-        post("vilkaarsproeving") {
-             service.vilkårsprøv(behandlingsId)
-            call.respond(HttpStatusCode.OK)
-
-        }
-
         post("lagrevilkaarsproeving") {
             val body = call.receive<VilkaarResultat>()
             service.lagreVilkårsprøving(behandlingsId, body)

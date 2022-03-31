@@ -181,7 +181,6 @@ fun TestApplicationRequest.addAuthServiceBruker() {
 
 class TestBeanFactory(private val jdbcUrl: String, private val kafkaConfig: KafkaConfig, private val rapidtopic: String) : CommonFactory() {
     override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
-    override fun vilkaarKlient(): VilkaarKlient = NoOpVilkaarKlient()
     override fun tokenValidering(): Authentication.Configuration.() -> Unit =
         Authentication.Configuration::tokenTestSupportAcceptsAllTokens
 

@@ -1,4 +1,4 @@
-import { PersonInfoHeaderWrapper, StatsborgerskapWrap, AlderEtterlattWrap, AvdoedWrap } from '../../styled'
+import { PersonInfoHeaderWrapper, StatsborgerskapWrap, BarnAlderWrap, AvdoedWrap } from '../../styled'
 import { ChildIcon } from '../../../../../shared/icons/childIcon'
 import { IPersonFraSak, PersonStatus } from '../../../types'
 import { format } from 'date-fns'
@@ -15,7 +15,7 @@ export const PersonInfoHeader: React.FC<Props> = ({ person }) => {
         <PersonInfoHeaderWrapper>
           <ChildIcon />
           {person.navn} <span className="personRolle">({person.rolle})</span>
-          <AlderEtterlattWrap>{person.alderEtterlatt} år</AlderEtterlattWrap>
+          <BarnAlderWrap>{person.alderEtterlatt} år</BarnAlderWrap>
           <StatsborgerskapWrap>{getStatsborgerskapTekst(person.statsborgerskap)}</StatsborgerskapWrap>
         </PersonInfoHeaderWrapper>
       )

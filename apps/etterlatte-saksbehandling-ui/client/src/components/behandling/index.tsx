@@ -108,7 +108,7 @@ export const Behandling = () => {
               </li>
               <li>
                 <NavLink to="beregne">
-                  <span>3.</span> Beregne
+                  <span>3.</span> Beregning og vedtak
                 </NavLink>
               </li>
               <li>

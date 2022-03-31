@@ -78,6 +78,7 @@ export const PersonInfoHeaderWrapper = styled.div`
   .personRolle {
     font-weight: normal;
     margin-left: 0.5em;
+    margin-right: 0.7em;
   }
 `
 
@@ -116,18 +117,16 @@ export const StatsborgerskapWrap = styled.div`
   border-radius: 4px;
   font-weight: normal;
   font-size: 14px;
-  margin-left: 0.7em;
   margin-right: 0.5em;
 `
-export const AlderEtterlattWrap = styled.div`
+export const BarnAlderWrap = styled.div`
   background-color: #ccf1d6;
   border: 1px solid #33aa5f;
   padding: 0.1em 0.5em;
   border-radius: 4px;
   font-weight: normal;
   font-size: 14px;
-  margin-left: 0.7em;
-  margin-right: 0.5em;
+  margin-right: 1em;
 `
 
 export const AvdoedWrap = styled.div`
@@ -139,7 +138,7 @@ export const AvdoedWrap = styled.div`
   font-weight: normal;
   font-size: 14px;
   margin-left: 0.7em;
-  margin-right: 0.5em;
+  margin-right: 0.9em;
 `
 
 export const RadioGroupWrapper = styled.div`

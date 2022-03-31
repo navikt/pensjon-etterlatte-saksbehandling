@@ -26,6 +26,7 @@ class InntektsKomponentenService(private val inntektskomponentenClient: HttpClie
             )
 
 
+        // Her må det muligens gjøres ett kall pr år. PGA tregheter mot eksterne systemer. Vi får bare teste
         val inntektsListe = runBlocking {
                 inntektskomponentenClient.post<InntektsKomponentenResponse>("$url") {
                     contentType(ContentType.Application.Json)

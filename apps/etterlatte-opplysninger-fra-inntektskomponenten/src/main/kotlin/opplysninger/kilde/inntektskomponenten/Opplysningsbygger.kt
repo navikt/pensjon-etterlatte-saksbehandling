@@ -14,53 +14,37 @@ class OpplysningsByggerService : OpplysningsBygger {
         barnepensjon: Barnepensjon,
         inntektsKomponentenResponse: InntektsKomponentenResponse
     ): List<Behandlingsopplysning<out Any>> {
-        TODO("Not yet implemented")
 
-        // return listOf()
+        // TODO: sjekk om det finnes inntekt for uføretrygd eller alderspensjon i løpet av de siste fem år
+        val uforetrygd = harFaattUforetrygd(inntektsKomponentenResponse.arbeidsInntektMaaned)
+        val alderspensjon = harFaatAlderspensjon(inntektsKomponentenResponse.arbeidsInntektMaaned)
+
+        return listOf(lagOpplysning(Opplysningstyper.PENSJON_UFORE_V1, PensjonUforeOpplysning(uforetrygd, alderspensjon)))
     }
 
-    /*
-    override fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl): List<Behandlingsopplysning<out Any>> {
-
-        val soekersFnr = barnepensjon.soeker.foedselsnummer.svar.value
-        val avdoedFnr = hentAvdoedFnr(barnepensjon)
-        val gjenlevendeForelderFnr = hentGjenlevendeForelderFnr(barnepensjon)
-
-        val soekerPdl = pdl.hentPdlModell(soekersFnr, PersonRolle.BARN)
-        val avdoedPdl = pdl.hentPdlModell(avdoedFnr, PersonRolle.AVDOED)
-        val gjenlevendeForelderPdl = pdl.hentPdlModell(gjenlevendeForelderFnr, PersonRolle.GJENLEVENDE)
-
-        return listOf(
-            personOpplysning(avdoedPdl, Opplysningstyper.AVDOED_PDL_V1),
-            personOpplysning(gjenlevendeForelderPdl, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1),
-            personOpplysning(soekerPdl, Opplysningstyper.SOEKER_PDL_V1),
-        )
-    }
-
-    fun personOpplysning(
-        personPdl: Person,
-        opplysningsType: Opplysningstyper,
-    ): Behandlingsopplysning<Person> {
-        return lagOpplysning(opplysningsType, personPdl )
-    }
-
-    fun hentAvdoedFnr(barnepensjon: Barnepensjon): String {
-        val fnr = barnepensjon.foreldre.find { it.type === PersonType.AVDOED }?.foedselsnummer?.svar?.value
-        if (fnr != null) {
-            return fnr
+    // TODO - simpel sjekk. Vil vi ha ut noe mer?
+    fun harFaatAlderspensjon(arbeidsInntektListe: List<ArbeidsInntektMaaned>): Boolean {
+        arbeidsInntektListe.forEach { inntektMaaned ->
+            inntektMaaned.arbeidsInntektInformasjon.inntektListe.forEach{ inntekt ->
+                if(inntekt.inntektType === "ufoeretrygd") {
+                    return true
+                }
+            }
         }
-        throw Exception("Mangler fødselsnummer")
+        return false
     }
 
-    fun hentGjenlevendeForelderFnr(barnepensjon: Barnepensjon): String {
-        val fnr =
-            barnepensjon.foreldre.find { it.type === PersonType.GJENLEVENDE_FORELDER }?.foedselsnummer?.svar?.value
-        if (fnr != null) {
-            return fnr
+    // TODO - simpel sjekk. Vil vi ha ut noe mer?
+    fun harFaattUforetrygd(arbeidsInntektListe: List<ArbeidsInntektMaaned>): Boolean {
+        arbeidsInntektListe.forEach { inntektMaaned ->
+            inntektMaaned.arbeidsInntektInformasjon.inntektListe.forEach{ inntekt ->
+                if(inntekt.inntektType === "alderspensjon") {
+                    return true
+                }
+            }
         }
-        throw Exception("Mangler fødselsnummer på gjenlevende forelder")
+        return false
     }
-    */
 
 }
 
@@ -73,3 +57,5 @@ fun <T> lagOpplysning(opplysningsType: Opplysningstyper, opplysning: T): Behandl
         opplysning
     )
 }
+
+data class PensjonUforeOpplysning(val mottattUforetrygd: Boolean, val mottattAlderspensjon: Boolean)

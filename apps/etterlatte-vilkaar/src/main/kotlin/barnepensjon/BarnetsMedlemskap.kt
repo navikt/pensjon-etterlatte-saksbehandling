@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
@@ -82,7 +82,7 @@ fun kriterieForeldreHarIkkeAdresseIUtlandet(
     val resultat = try {
         kunNorskePdlAdresser(gjenlevendePdl, avdoedPdl, kriterietype)
     } catch (ex: OpplysningKanIkkeHentesUt) {
-        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     }
 
     return Kriterie(kriterietype, resultat, opplysningsGrunnlag)
@@ -115,20 +115,20 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
         val pdlResultat = kunNorskePdlAdresser(soekerPdl, avdoedPdl, kriterietype)
         val soeknadResultat =
             if (soekerSoknad.opplysning.utenlandsadresse.adresseIUtlandet == JaNeiVetIkke.JA) {
-                VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-            } else VilkaarVurderingsResultat.OPPFYLT
+                VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+            } else VurderingsResultat.OPPFYLT
         val resultater = listOf(pdlResultat, soeknadResultat)
 
-        if (resultater.all { it == VilkaarVurderingsResultat.OPPFYLT }) {
-            VilkaarVurderingsResultat.OPPFYLT
-        } else if (resultater.any { it == VilkaarVurderingsResultat.IKKE_OPPFYLT }) {
-            VilkaarVurderingsResultat.IKKE_OPPFYLT
+        if (resultater.all { it == VurderingsResultat.OPPFYLT }) {
+            VurderingsResultat.OPPFYLT
+        } else if (resultater.any { it == VurderingsResultat.IKKE_OPPFYLT }) {
+            VurderingsResultat.IKKE_OPPFYLT
         } else {
-            VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         }
 
     } catch (ex: OpplysningKanIkkeHentesUt) {
-        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     }
 
     return Kriterie(kriterietype, resultat, opplysningsGrunnlag)
@@ -139,7 +139,7 @@ fun kunNorskePdlAdresser(
     person: VilkaarOpplysning<Person>,
     avdoedPdl: VilkaarOpplysning<Person>,
     kriterietype: Kriterietyper
-): VilkaarVurderingsResultat {
+): VurderingsResultat {
     val adresserPdl = hentAdresser(person)
     val doedsdatoPdl = hentDoedsdato(avdoedPdl)
 
@@ -150,30 +150,30 @@ fun kunNorskePdlAdresser(
             bostedResultat,
             oppholdResultat,
             kontaktResultat
-        ).contains(VilkaarVurderingsResultat.IKKE_OPPFYLT)
+        ).contains(VurderingsResultat.IKKE_OPPFYLT)
     ) {
-        if (kriterietype == Kriterietyper.SOEKER_IKKE_ADRESSE_I_UTLANDET && bostedResultat == VilkaarVurderingsResultat.IKKE_OPPFYLT) {
-            VilkaarVurderingsResultat.IKKE_OPPFYLT
+        if (kriterietype == Kriterietyper.SOEKER_IKKE_ADRESSE_I_UTLANDET && bostedResultat == VurderingsResultat.IKKE_OPPFYLT) {
+            VurderingsResultat.IKKE_OPPFYLT
         } else {
-            VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         }
 
     } else {
-        VilkaarVurderingsResultat.OPPFYLT
+        VurderingsResultat.OPPFYLT
     }
 }
 
 
-fun harKunNorskeAdresserEtterDoedsdato(adresser: List<Adresse>?, doedsdato: LocalDate): VilkaarVurderingsResultat {
+fun harKunNorskeAdresserEtterDoedsdato(adresser: List<Adresse>?, doedsdato: LocalDate): VurderingsResultat {
     val adresserEtterDoedsdato =
         adresser?.filter { it.gyldigTilOgMed?.toLocalDate()?.isAfter(doedsdato) == true || it.aktiv }
     val harUtenlandskeAdresserIPdl =
         adresserEtterDoedsdato?.any { it.type == AdresseType.UTENLANDSKADRESSE || it.type == AdresseType.UTENLANDSKADRESSEFRITTFORMAT }
 
     return if (harUtenlandskeAdresserIPdl == true) {
-        VilkaarVurderingsResultat.IKKE_OPPFYLT
+        VurderingsResultat.IKKE_OPPFYLT
     } else {
-        VilkaarVurderingsResultat.OPPFYLT
+        VurderingsResultat.OPPFYLT
     }
 }
 

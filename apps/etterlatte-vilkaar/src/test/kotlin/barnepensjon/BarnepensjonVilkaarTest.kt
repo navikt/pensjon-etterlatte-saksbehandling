@@ -25,9 +25,8 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
-import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -62,11 +61,11 @@ internal class BarnepensjonVilkaarTest {
             mapTilVilkaarstypePerson(personAvdoedUtenDoedsdato)
         )
 
-        assertEquals(vurderingBarnOver20.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
-        assertEquals(vurderingBarnUnder20.resultat, VilkaarVurderingsResultat.OPPFYLT)
+        assertEquals(vurderingBarnOver20.resultat, VurderingsResultat.IKKE_OPPFYLT)
+        assertEquals(vurderingBarnUnder20.resultat, VurderingsResultat.OPPFYLT)
         assertEquals(
             vurderingBarnUnder20UtenDoedsdato.resultat,
-            VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         )
 
     }
@@ -99,9 +98,9 @@ internal class BarnepensjonVilkaarTest {
                 mapTilVilkaarstypePerson(barnAvdoedErIkkeForeldre)
             )
 
-        assertEquals(doedsdatoIkkeIPdl.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
-        assertEquals(avdoedErForelder.resultat, VilkaarVurderingsResultat.OPPFYLT)
-        assertEquals(avdoedIkkeForelder.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
+        assertEquals(doedsdatoIkkeIPdl.resultat, VurderingsResultat.IKKE_OPPFYLT)
+        assertEquals(avdoedErForelder.resultat, VurderingsResultat.OPPFYLT)
+        assertEquals(avdoedIkkeForelder.resultat, VurderingsResultat.IKKE_OPPFYLT)
 
     }
 
@@ -123,8 +122,8 @@ internal class BarnepensjonVilkaarTest {
                 mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato)
             )
 
-        assertEquals(utenlandsopphold.resultat, VilkaarVurderingsResultat.IKKE_OPPFYLT)
-        assertEquals(ingenUtenlandsopphold.resultat, VilkaarVurderingsResultat.OPPFYLT)
+        assertEquals(utenlandsopphold.resultat, VurderingsResultat.IKKE_OPPFYLT)
+        assertEquals(ingenUtenlandsopphold.resultat, VurderingsResultat.OPPFYLT)
     }
 
 
@@ -172,14 +171,14 @@ internal class BarnepensjonVilkaarTest {
             mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
         )
 
-        assertEquals(VilkaarVurderingsResultat.OPPFYLT, ingenUtenlandsAdresser.resultat)
-        assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, barnUtenlandsAdresserPdl.resultat)
+        assertEquals(VurderingsResultat.OPPFYLT, ingenUtenlandsAdresser.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, barnUtenlandsAdresserPdl.resultat)
         assertEquals(
-            VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
             gjenlevendeUtenlandsAdresserPdl.resultat
         )
         assertEquals(
-            VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
             barnUtenlandsAdresserSoeknad.resultat
         )
     }
@@ -188,16 +187,16 @@ internal class BarnepensjonVilkaarTest {
     @Test
     fun vurderVilkaarsVurdering() {
         val kriterieOppfylt =
-            Kriterie(Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, VilkaarVurderingsResultat.OPPFYLT, listOf())
+            Kriterie(Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, VurderingsResultat.OPPFYLT, listOf())
         val kriterieIkkeOppfylt =
             Kriterie(
                 Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
-                VilkaarVurderingsResultat.IKKE_OPPFYLT,
+                VurderingsResultat.IKKE_OPPFYLT,
                 listOf()
             )
         val kriterieKanIkkeVurdere = Kriterie(
             Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
-            VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
             listOf()
         )
 
@@ -207,10 +206,10 @@ internal class BarnepensjonVilkaarTest {
         val vilkaarKriterierOppfyltOgKanIkkeHentesUt =
             setVikaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieKanIkkeVurdere, kriterieOppfylt))
 
-        assertEquals(VilkaarVurderingsResultat.OPPFYLT, vilkaarKriterierOppfylt)
-        assertEquals(VilkaarVurderingsResultat.IKKE_OPPFYLT, vilkaarEtKriterieIkkeOppfylt)
+        assertEquals(VurderingsResultat.OPPFYLT, vilkaarKriterierOppfylt)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, vilkaarEtKriterieIkkeOppfylt)
         assertEquals(
-            VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
             vilkaarKriterierOppfyltOgKanIkkeHentesUt
         )
     }

@@ -1,19 +1,19 @@
 package no.nav.etterlatte.libs.common.vikaar
 import java.time.LocalDateTime
 
-enum class VilkaarVurderingsResultat {
+enum class VurderingsResultat {
     OPPFYLT, IKKE_OPPFYLT, KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING;
 }
 
 data class VurdertVilkaar(
     val navn: Vilkaartyper,
-    val resultat: VilkaarVurderingsResultat,
+    val resultat: VurderingsResultat,
     val kriterier: List<Kriterie>,
     val vurdertDato: LocalDateTime
 )
 
 data class VilkaarResultat(
-    val resultat: VilkaarVurderingsResultat?,
+    val resultat: VurderingsResultat?,
     val vilkaar: List<VurdertVilkaar>?,
     val vurdertDato: LocalDateTime
 )

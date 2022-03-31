@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foreldre
@@ -34,9 +34,9 @@ fun kriterieDoedsdatoRegistrertIPdl(avdoed: VilkaarOpplysning<Person>?): Kriteri
     return avdoed?.let {
         val resultat = try {
             hentDoedsdato(avdoed)
-            VilkaarVurderingsResultat.OPPFYLT
+            VurderingsResultat.OPPFYLT
         } catch (ex: OpplysningKanIkkeHentesUt) {
-            VilkaarVurderingsResultat.IKKE_OPPFYLT
+            VurderingsResultat.IKKE_OPPFYLT
         }
         Kriterie(
             Kriterietyper.DOEDSFALL_ER_REGISTRERT_I_PDL,
@@ -74,7 +74,7 @@ fun kriterieAvdoedErForelder(
     )
 
     val resultat = if (soeker == null || avdoed == null) {
-        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     } else {
         vurderOpplysning { hentFnrForeldre(soeker).contains(avdoed.opplysning.foedselsnummer) }
     }

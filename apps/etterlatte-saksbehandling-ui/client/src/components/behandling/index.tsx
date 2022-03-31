@@ -18,7 +18,7 @@ import {
 import Spinner from '../../shared/Spinner'
 import { StatusBar, StatusBarTheme } from '../statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
-import { BehandlingHandlingKnapper } from './BehandlingHandlingKnapper'
+import { BehandlingHandlingKnapper } from './handlinger/BehandlingHandlingKnapper'
 
 const addBehandlingAction = (data: any) => ({ type: 'add_behandling', data })
 

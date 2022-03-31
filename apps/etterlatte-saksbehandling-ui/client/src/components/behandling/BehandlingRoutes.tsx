@@ -33,6 +33,7 @@ export const useBehandlingRoutes = () => {
     const nextPath = behandlingRoutes[index + 1].path
     setCurrentRoute(nextPath)
     navigate(`/behandling/${match?.params.behandlingId}/${nextPath}`)
+    window.scrollTo(0, 0)
   }
 
   const back = () => {
@@ -40,6 +41,7 @@ export const useBehandlingRoutes = () => {
     const previousPath = behandlingRoutes[index - 1].path
     setCurrentRoute(previousPath)
     navigate(`/behandling/${match?.params.behandlingId}/${previousPath}`)
+    window.scrollTo(0, 0)
   }
 
   return { next, back, lastPage, firstPage, behandlingRoutes, currentRoute }

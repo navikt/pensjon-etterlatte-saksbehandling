@@ -1,8 +1,9 @@
 package no.nav.etterlatte.oppdrag
 
+import no.nav.etterlatte.attestasjon
 import no.nav.etterlatte.config.DataSourceBuilder
 import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
-import no.nav.etterlatte.attestasjon
+import no.nav.etterlatte.util.TestContainers
 import no.nav.etterlatte.vedtak
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import org.junit.jupiter.api.AfterAll
@@ -12,15 +13,13 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class UtbetalingsoppdragDaoIntegrationTest {
 
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
+    @Container private val postgreSQLContainer = TestContainers.postgreSQLContainer
 
     private lateinit var dataSource: DataSource
     private lateinit var utbetalingsoppdragDao: UtbetalingsoppdragDao

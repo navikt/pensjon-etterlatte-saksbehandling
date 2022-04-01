@@ -14,7 +14,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 
 
-internal class VedtakMottaker(
+class VedtakMottaker(
     rapidsConnection: RapidsConnection,
     private val oppdragService: OppdragService,
 ) : River.PacketListener {

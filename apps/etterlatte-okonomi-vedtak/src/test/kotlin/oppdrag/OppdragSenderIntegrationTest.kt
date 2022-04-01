@@ -8,24 +8,19 @@ import no.nav.etterlatte.config.JmsConnectionFactoryBuilder
 import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
 import no.nav.etterlatte.oppdragMedFeiletKvittering
 import no.nav.etterlatte.oppdragMedGodkjentKvittering
+import no.nav.etterlatte.util.TestContainers
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import javax.jms.Connection
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OppdragSenderIntegrationTest {
 
-    @Container
-    private val ibmMQContainer = GenericContainer<Nothing>("ibmcom/mq").apply {
-        withEnv("LICENSE","accept")
-        withEnv("MQ_QMGR_NAME","QM1")
-        withExposedPorts(1414)
-    }
+    @Container private val ibmMQContainer = TestContainers.ibmMQContainer
 
     private lateinit var jmsConnection: Connection
     private lateinit var oppdragSender: OppdragSender

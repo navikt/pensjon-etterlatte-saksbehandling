@@ -2,8 +2,8 @@ package no.nav.etterlatte.oppdrag
 
 import no.nav.etterlatte.config.DataSourceBuilder
 import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
-import no.nav.etterlatte.dummyAttestasjon
-import no.nav.etterlatte.dummyVedtak
+import no.nav.etterlatte.attestasjon
+import no.nav.etterlatte.vedtak
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -17,7 +17,7 @@ import org.testcontainers.junit.jupiter.Container
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class UtbetalingsoppdragDaoTest {
+internal class UtbetalingsoppdragDaoIntegrationTest {
 
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
@@ -43,6 +43,7 @@ internal class UtbetalingsoppdragDaoTest {
     @AfterAll
     fun afterAll() {
         postgreSQLContainer.stop()
+
     }
 
     @AfterEach
@@ -59,8 +60,8 @@ internal class UtbetalingsoppdragDaoTest {
 
     @Test
     fun `skal opprette og hente utbetalingsoppdrag`() {
-        val vedtak = dummyVedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, dummyAttestasjon())
+        val vedtak = vedtak()
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon())
 
         utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
         val utbetalingsoppdrag = utbetalingsoppdragDao.hentUtbetalingsoppdrag(vedtak.vedtakId)
@@ -77,8 +78,8 @@ internal class UtbetalingsoppdragDaoTest {
 
     @Test
     fun `skal sette kvittering på utbetalingsoppdrag`() {
-        val vedtak = dummyVedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, dummyAttestasjon())
+        val vedtak = vedtak()
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon())
 
         utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
 
@@ -104,8 +105,8 @@ internal class UtbetalingsoppdragDaoTest {
 
     @Test
     fun `skal oppdatere status på utbetalingsoppdrag`() {
-        val vedtak = dummyVedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, dummyAttestasjon())
+        val vedtak = vedtak()
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon())
 
         val utbetalingsoppdrag = utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
 

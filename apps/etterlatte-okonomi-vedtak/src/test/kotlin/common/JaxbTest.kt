@@ -1,7 +1,7 @@
 package no.nav.etterlatte.common
 
-import no.nav.etterlatte.dummyAttestasjon
-import no.nav.etterlatte.dummyVedtak
+import no.nav.etterlatte.attestasjon
+import no.nav.etterlatte.vedtak
 import no.nav.etterlatte.oppdrag.OppdragMapper
 import no.nav.etterlatte.readFile
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -12,7 +12,7 @@ internal class JaxbTest {
 
     @Test
     fun `should generate xml from oppdrag`() {
-        val oppdrag = OppdragMapper.oppdragFraVedtak(dummyVedtak(), dummyAttestasjon())
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak(), attestasjon())
         val oppdragAsXml = Jaxb.toXml(oppdrag)
 
         assertNotNull(oppdragAsXml)

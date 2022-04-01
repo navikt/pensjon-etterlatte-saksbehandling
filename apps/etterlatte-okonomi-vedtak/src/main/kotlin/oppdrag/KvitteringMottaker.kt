@@ -14,8 +14,8 @@ import javax.jms.Session
 
 internal class KvitteringMottaker(
     private val rapidsConnection: RapidsConnection,
-    private val jmsConnection: Connection,
     private val utbetalingsoppdragDao: UtbetalingsoppdragDao,
+    jmsConnection: Connection,
     queue: String,
 ) {
     private val session = jmsConnection.createSession(false, Session.CLIENT_ACKNOWLEDGE)

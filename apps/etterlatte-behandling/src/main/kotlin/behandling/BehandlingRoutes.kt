@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.Beregning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.SoeknadMottattDato
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import java.time.LocalDateTime
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
@@ -70,17 +71,16 @@ fun Route.behandlingRoutes(service: BehandlingService) {
             call.respond(HttpStatusCode.OK)
         }
 
-        post("vilkaarsproeving") {
-             service.vilkårsprøv(behandlingsId)
+        post("lagregyldighetsproeving") {
+            val body = call.receive<GyldighetsResultat>()
+            service.lagreGyldighetsprøving(behandlingsId, body)
             call.respond(HttpStatusCode.OK)
-
         }
 
         post("lagrevilkaarsproeving") {
             val body = call.receive<VilkaarResultat>()
             service.lagreVilkårsprøving(behandlingsId, body)
             call.respond(HttpStatusCode.OK)
-
         }
 
         post("beregning") {

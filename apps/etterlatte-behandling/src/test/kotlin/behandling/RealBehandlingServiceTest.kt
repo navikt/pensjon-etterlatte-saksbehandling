@@ -40,7 +40,7 @@ internal class RealBehandlingServiceTest {
         val behandlingerMock = mockk<BehandlingDao>()
         val opplysningerMock = mockk<OpplysningDao>()
 
-        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock, NoOpVilkaarKlient()) , mockk())
+        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock) , mockk())
 
         val id = UUID.randomUUID()
 
@@ -61,7 +61,7 @@ internal class RealBehandlingServiceTest {
             ),
         )
 
-        every { behandlingerMock.hent(id) } returns Behandling(id, 1, emptyList(), null, null, false)
+        every { behandlingerMock.hent(id) } returns Behandling(id, 1, emptyList(), null, null, null, false)
         every { opplysningerMock.finnOpplysningerIBehandling(id) } returns opplysninger
         Assertions.assertEquals(2, sut.hentBehandling(id).grunnlag.size)
     }
@@ -76,9 +76,9 @@ internal class RealBehandlingServiceTest {
 
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
-        val opprettetBehandling = Behandling(UUID.randomUUID(), 1, emptyList(), null, null, false)
+        val opprettetBehandling = Behandling(UUID.randomUUID(), 1, emptyList(), null, null, null, false)
 
-        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock, NoOpVilkaarKlient()), hendleseskanal)
+        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock), hendleseskanal)
 
         every { behandlingerMock.opprett(capture(behandlingOpprettes)) } returns Unit
         every { behandlingerMock.hent(capture(behandlingHentes)) } returns opprettetBehandling
@@ -105,9 +105,9 @@ internal class RealBehandlingServiceTest {
         val opplysningerMock = mockk<OpplysningDao>()
         val behandlingAvbrytes = slot<Behandling>()
 
-        val opprettetBehandling = Behandling(UUID.randomUUID(), 1, emptyList(), null, null, false, false)
+        val opprettetBehandling = Behandling(UUID.randomUUID(), 1, emptyList(), null, null, null, false, false)
 
-        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock, NoOpVilkaarKlient()), mockChannel())
+        val sut = RealBehandlingService(behandlingerMock, opplysningerMock, BehandlingFactory(behandlingerMock, opplysningerMock), mockChannel())
 
 
         every { behandlingerMock.opprett(capture(behandlingOpprettes)) } returns Unit
@@ -126,16 +126,11 @@ internal class RealBehandlingServiceTest {
         every { behandlingerMock.hent(capture(behandlingEtterVilkårsvurdering)) } returns behandlingEtterAvbrutt
 
         // avbrutt behandling kan ikke endres
-        assertThrows<AvbruttBehandlingException> { sut.vilkårsprøv(behandlingEtterAvbrutt.id) }
+        //TODO endre til en annen test her?
+        //assertThrows<AvbruttBehandlingException> { sut.vilkårsprøv(behandlingEtterAvbrutt.id) }
     }
 
 
 }
 
 fun mockChannel() = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>().apply { coEvery { send(any()) } returns Unit }
-
-class NoOpVilkaarKlient : VilkaarKlient {
-    override fun vurderVilkaar(opplysninger: List<Behandlingsopplysning<ObjectNode>>): VilkaarResultat {
-        return VilkaarResultat(null, listOf(), LocalDateTime.now())
-    }
-}

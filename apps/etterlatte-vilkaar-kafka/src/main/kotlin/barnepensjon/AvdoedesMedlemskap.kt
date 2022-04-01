@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
@@ -28,7 +28,7 @@ fun vilkaarAvdoedesMedlemskap(
 
     return VurdertVilkaar(
         vilkaartype,
-        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, //endre når vi får inn flere opplysninger
+        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, //endre når vi får inn flere opplysninger
         listOf(utenlandsoppholdSisteFemAarene),
         LocalDateTime.now()
     )
@@ -69,13 +69,13 @@ fun kriterieIngenUtenlandsoppholdSisteFemAar(
         val oppholdSisteFemAAr = utenlandsoppholdSoeknad.opphold?.map { it.tilDato?.isAfter(femAarFoerDoedsdato) }
 
         if (oppholdSisteFemAAr != null && oppholdSisteFemAAr.contains(true)) {
-            VilkaarVurderingsResultat.IKKE_OPPFYLT
+            VurderingsResultat.IKKE_OPPFYLT
         } else {
-            VilkaarVurderingsResultat.OPPFYLT
+            VurderingsResultat.OPPFYLT
         }
 
     } catch (ex: OpplysningKanIkkeHentesUt) {
-        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     }
 
     return Kriterie(

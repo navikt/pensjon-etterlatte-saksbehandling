@@ -3,29 +3,29 @@ package no.nav.etterlatte.barnepensjon
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarVurderingsResultat
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
 class OpplysningKanIkkeHentesUt : IllegalStateException()
 
-fun setVikaarVurderingFraKriterier(kriterie: List<Kriterie>): VilkaarVurderingsResultat {
+fun setVikaarVurderingFraKriterier(kriterie: List<Kriterie>): VurderingsResultat {
     val resultat = kriterie.map { it.resultat }
     return hentVurdering(resultat)
 }
 
-fun setVilkaarVurderingFraVilkaar(vilkaar: List<VurdertVilkaar>): VilkaarVurderingsResultat {
+fun setVilkaarVurderingFraVilkaar(vilkaar: List<VurdertVilkaar>): VurderingsResultat {
     val resultat = vilkaar.map { it.resultat }
     return hentVurdering(resultat)
 }
 
-fun hentVurdering(resultat: List<VilkaarVurderingsResultat>): VilkaarVurderingsResultat {
-    return if (resultat.all { it == VilkaarVurderingsResultat.OPPFYLT }) {
-        VilkaarVurderingsResultat.OPPFYLT
-    } else if (resultat.any { it == VilkaarVurderingsResultat.IKKE_OPPFYLT }) {
-        VilkaarVurderingsResultat.IKKE_OPPFYLT
+fun hentVurdering(resultat: List<VurderingsResultat>): VurderingsResultat {
+    return if (resultat.all { it == VurderingsResultat.OPPFYLT }) {
+        VurderingsResultat.OPPFYLT
+    } else if (resultat.any { it == VurderingsResultat.IKKE_OPPFYLT }) {
+        VurderingsResultat.IKKE_OPPFYLT
     } else {
-        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     }
 }
 
@@ -34,10 +34,10 @@ fun hentSisteVurderteDato(vilkaar: List<VurdertVilkaar>): LocalDateTime {
     return datoer.maxOf { it }
 }
 
-fun vurderOpplysning(vurdering: () -> Boolean): VilkaarVurderingsResultat = try {
-    if (vurdering()) VilkaarVurderingsResultat.OPPFYLT else VilkaarVurderingsResultat.IKKE_OPPFYLT
+fun vurderOpplysning(vurdering: () -> Boolean): VurderingsResultat = try {
+    if (vurdering()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT
 } catch (ex: OpplysningKanIkkeHentesUt) {
-    VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+    VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
 }
 
 
@@ -47,7 +47,7 @@ fun opplysningsGrunnlagNull(
 ): Kriterie {
     return Kriterie(
         kriterietype,
-        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
         opplysningsGrunnlag
     )
 }

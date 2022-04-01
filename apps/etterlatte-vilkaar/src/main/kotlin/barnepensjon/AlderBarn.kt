@@ -44,7 +44,7 @@ fun kriterieSoekerErUnder20(
     )
 
     val resultat = if (soekerPdl == null || avdoedPdl == null) {
-        VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     } else {
         vurderOpplysning { hentFoedselsdato(soekerPdl).plusYears(18) > hentVirkningsdato(avdoedPdl) }
     }

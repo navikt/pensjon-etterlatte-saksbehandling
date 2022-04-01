@@ -60,9 +60,9 @@ internal class BehandlingDaoIntegrationTest {
         val sak1 = sakrepo.opprettSak("123", "BP").id
         val sak2 = sakrepo.opprettSak("321", "BP").id
         listOf(
-            Behandling(UUID.randomUUID(), sak1, listOf(deltOpplysning), null, null, false),
-            Behandling(UUID.randomUUID(), sak1, listOf(ikkeDeltOpplysning), null, null, false),
-            Behandling(UUID.randomUUID(), sak2, listOf(deltOpplysning), null, null, false)
+            Behandling(UUID.randomUUID(), sak1, listOf(deltOpplysning), null, null, null, false),
+            Behandling(UUID.randomUUID(), sak1, listOf(ikkeDeltOpplysning), null, null, null, false),
+            Behandling(UUID.randomUUID(), sak2, listOf(deltOpplysning), null, null, null, false)
         ).forEach { b ->
             behandlingRepo.opprett(b)
             b.grunnlag.forEach { o -> opplysningRepo.leggOpplysningTilBehandling(b.id, o.id) }
@@ -100,7 +100,7 @@ internal class BehandlingDaoIntegrationTest {
         ).also { opplysningRepo.nyOpplysning(it) }
         val sak1 = sakrepo.opprettSak("123", "BP").id
         listOf(
-            Behandling(UUID.randomUUID(), sak1, listOf(ikkeDeltOpplysning), null, null, false),
+            Behandling(UUID.randomUUID(), sak1, listOf(ikkeDeltOpplysning), null, null, null, false),
         ).forEach { b ->
             behandlingRepo.opprett(b)
             b.grunnlag.forEach { o -> opplysningRepo.leggOpplysningTilBehandling(b.id, o.id) }

@@ -22,7 +22,6 @@ internal class VedtakMottaker(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "vedtak_fattet") }
-            validate { it.demandValue("@vedtak_attestert", true) }
             validate { it.requireKey("@vedtak") }
             validate { it.requireKey("@attestasjon") }
             validate { it.rejectKey("@vedtak_oversatt") }

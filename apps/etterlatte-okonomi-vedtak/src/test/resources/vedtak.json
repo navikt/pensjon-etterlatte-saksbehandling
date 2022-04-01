@@ -1,13 +1,13 @@
 {
   "@event_name": "vedtak_fattet",
   "@vedtak": {
-    "vedtakId": "1234",
-    "behandlingsId": "9876",
-    "sakId": "1234",
-    "saksbehandlerId": "4321",
+    "vedtakId": "88d8",
+    "behandlingsId": "94876",
+    "sakId": "12434",
+    "saksbehandlerId": "43321",
     "beregningsperioder": [
       {
-        "behandlingsId": "1234",
+        "behandlingsId": "12334",
         "endringskode": "NY",
         "delytelsesId": "delytelsesid",
         "ytelseskomponent": "BARNEPENSJON",
@@ -16,7 +16,7 @@
         "belop": 10000
       }
     ],
-    "sakIdGjelderFnr": "12345612345",
+    "sakIdGjelderFnr": "12335612345",
     "aktorFoedselsdato": "2010-07-04",
     "oppdragsenheter": [
       {
@@ -24,7 +24,22 @@
         "enhetsnummer": "9999",
         "datoEnhetFOM": "1999-09-28"
       }
-    ],
-    "vedtakId": "8888"
-  }
+    ]
+  },
+  "system_read_count": 1,
+  "system_participating_services": [
+    {
+      "service": "etterlatte-testdata",
+      "instance": "etterlatte-testdata-9cdd88686-92rtq",
+      "time": "2022-03-30T15:36:37.268216224"
+    },
+    {
+      "service": "etterlatte-attestering",
+      "instance": "etterlatte-attestering-6dc778dfff-qz56f",
+      "time": "2022-03-30T15:36:37.282127149"
+    }
+  ],
+  "@vedtak_attestert": true,
+  "@attestasjon": "{\"attestantId\":\"Z123456\",\"ugyldigFraDato\":null}",
+  "@correlation_id": "6cb1b890-c1cb-41fd-87c1-0c9f40902076"
 }

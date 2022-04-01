@@ -23,7 +23,7 @@ object OppdragMapper {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = "1" // 3 = simulering
             kodeEndring = "NY" // Alltid NY for førstegangsinnvilgelse
-            kodeFagomraade = "EY" // TODO må legges inn hos økonomi
+            kodeFagomraade = "EY" // TODO må legges inn hos økonomi // PENBP for å teste tilsvarende PESYS
             fagsystemId = vedtak.sakId
             utbetFrekvens = "MND"
             oppdragGjelderId = vedtak.sakIdGjelderFnr
@@ -50,7 +50,7 @@ object OppdragMapper {
                         //kodeStatusLinje
                         //datoStatusFom
                         vedtakId = vedtak.vedtakId
-                        delytelseId = it.delytelsesId
+                        delytelseId = it.delytelsesId // TODO: finne tilsvarende delytelsesId for PESYS
                         //linjeid // får dette fra Oppdragssystemet
                         kodeKlassifik = it.ytelseskomponent.toString()
                         //datoKlassifikFom

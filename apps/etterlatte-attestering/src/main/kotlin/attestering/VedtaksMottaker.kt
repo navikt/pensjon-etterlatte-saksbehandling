@@ -1,6 +1,6 @@
 package no.nav.etterlatte.attestering
 
-import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.domain.Attestasjon
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson

@@ -33,6 +33,7 @@ internal class LesGyldigSoeknadsmelding(
             try {
                 val grunnlag = objectMapper.readValue<List<VilkaarOpplysning<ObjectNode>>>(grunnlagListe)
                 val gyldighetsVurdering = gyldigSoeknad.mapOpplysninger(grunnlag)
+                logger.info("Gyldighetsvurdering I lesGyldigsoeknad: {}", gyldighetsVurdering)
                 packet["@gyldighetsvurdering"] = gyldighetsVurdering
                 context.publish(packet.toJson())
                 //TODO

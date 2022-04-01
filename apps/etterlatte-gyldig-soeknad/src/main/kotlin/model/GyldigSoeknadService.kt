@@ -55,6 +55,9 @@ class GyldigSoeknadService {
         val gyldighetResultat = setVurdering(gyldighet)
         val vurdertDato = LocalDateTime.now()
 
+        val test = GyldighetsResultat(gyldighetResultat, gyldighet, vurdertDato )
+        logger.info("gyldighetResultat TEST: {}", test)
+
         return GyldighetsResultat(gyldighetResultat, gyldighet, vurdertDato )
     }
 

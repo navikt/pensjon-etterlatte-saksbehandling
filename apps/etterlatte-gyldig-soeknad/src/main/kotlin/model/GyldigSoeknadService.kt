@@ -124,7 +124,7 @@ class GyldigSoeknadService {
         inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<ObjectNode>?): VilkaarOpplysning<T>? {
             return opplysning?.let {
                 VilkaarOpplysning(
-                    opplysning.opplysningsType,
+                    opplysning.opplysningType,
                     opplysning.kilde,
                     objectMapper.readValue(opplysning.opplysning.toString())
                 )
@@ -135,7 +135,7 @@ class GyldigSoeknadService {
             opplysninger: List<VilkaarOpplysning<ObjectNode>>,
             type: Opplysningstyper
         ): VilkaarOpplysning<T>? {
-            return setOpplysningType(opplysninger.find { it.opplysningsType == type })
+            return setOpplysningType(opplysninger.find { it.opplysningType == type })
         }
     }
 

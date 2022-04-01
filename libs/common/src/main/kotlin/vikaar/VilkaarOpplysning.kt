@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 
 open class VilkaarOpplysning<T>(
-    val opplysningsType: Opplysningstyper,
+    val opplysningType: Opplysningstyper,
     val kilde: Behandlingsopplysning.Kilde,
     val opplysning: T
 )

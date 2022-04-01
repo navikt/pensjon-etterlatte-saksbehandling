@@ -58,6 +58,7 @@ fun Route.behandlingRoutes(service: BehandlingService) {
                     it.id,
                     it.sak,
                     it.grunnlag,
+                    it.gyldighetsprøving,
                     it.vilkårsprøving,
                     it.beregning,
                     it.fastsatt
@@ -87,7 +88,6 @@ fun Route.behandlingRoutes(service: BehandlingService) {
             val body = call.receive<Beregning>()
              service.beregn(behandlingsId, body)
             call.respond(HttpStatusCode.OK)
-
         }
 
         post("avbrytBehandling/{behandlingsid}") {

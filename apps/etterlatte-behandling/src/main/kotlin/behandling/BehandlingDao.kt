@@ -61,8 +61,8 @@ class BehandlingDao(private val connection: () -> Connection) {
                 getString(3)?.let { objectMapper.readValue(it) },
                 getString(4)?.let { objectMapper.readValue(it) },
                 getString(5)?.let { objectMapper.readValue(it) },
-                getBoolean(5),
-                getBoolean(6)
+                getBoolean(6),
+                getBoolean(7)
             )
         }
     }

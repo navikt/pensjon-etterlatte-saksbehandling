@@ -18,7 +18,6 @@ import org.apache.kafka.common.serialization.StringSerializer
 interface BeanFactory {
     fun datasourceBuilder(): DataSourceBuilder
     fun sakService(): SakService
-    //fun vilkaarKlient(): VilkaarKlient
     fun behandlingService(): BehandlingService
     fun tokenValidering(): Authentication.Configuration.()->Unit
     fun sakDao(): SakDao

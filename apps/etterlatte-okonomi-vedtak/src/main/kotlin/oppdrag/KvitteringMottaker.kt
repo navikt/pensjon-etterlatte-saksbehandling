@@ -12,7 +12,7 @@ import javax.jms.Connection
 import javax.jms.Session
 
 
-internal class KvitteringMottaker(
+class KvitteringMottaker(
     private val rapidsConnection: RapidsConnection,
     private val utbetalingsoppdragDao: UtbetalingsoppdragDao,
     jmsConnection: Connection,

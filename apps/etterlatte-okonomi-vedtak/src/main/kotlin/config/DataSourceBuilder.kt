@@ -20,6 +20,7 @@ class DataSourceBuilder(
 
         it.validate()
     }
+
     private val dataSource = HikariDataSource(hikariConfig)
 
     fun dataSource() = dataSource

@@ -34,7 +34,7 @@ internal class OppdaterBehandling(
         withLogContext(packet.correlationId()) {
             try {
                 val behandlingsID = packet["id"].asText()
-                behandlinger.leggTilGyldighetsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@vilkaarsvurdering"].toString()))
+                behandlinger.leggTilGyldighetsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@gyldighetsvurdering"].toString()))
                 logger.info("Oppdatert Behandling med id $behandlingsID med ny gyldighetsvurdering")
 
                 behandlinger.leggTilVilkaarsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@vilkaarsvurdering"].toString()))

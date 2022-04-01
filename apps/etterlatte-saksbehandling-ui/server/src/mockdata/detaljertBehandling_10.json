@@ -337,6 +337,27 @@
       "attestering": null
     }
   ],
+  "gyldighetsprøving": {
+    "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
+    "vurderinger": [
+      {
+        "navn": "INNSENDER_ER_FORELDER",
+        "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
+        "vurdertDato": "2022-04-01T13:35:55.281534758"
+      },
+      {
+        "navn": "HAR_FORELDREANSVAR_FOR_BARNET",
+        "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
+        "vurdertDato": "2022-04-01T13:35:55.28173531"
+      },
+      {
+        "navn": "BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL",
+        "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
+        "vurdertDato": "2022-04-01T13:35:55.282075942"
+      }
+    ],
+    "vurdertDato": "2022-04-01T13:35:55.282309633"
+  },
   "vilkårsprøving": {
     "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
     "vilkaar": [

@@ -20,14 +20,12 @@ import org.slf4j.LoggerFactory
 import setVurdering
 import vurderOpplysning
 import java.time.LocalDateTime
-import kotlin.math.log
 
 class GyldigSoeknadService {
     private val logger = LoggerFactory.getLogger(GyldigSoeknadService::class.java)
 
     fun mapOpplysninger(opplysninger: List<VilkaarOpplysning<ObjectNode>>): GyldighetsResultat {
         logger.info("Map opplysninger for å vurdere om søknad er gyldig")
-        logger.info("mapOpplysninger: {}", opplysninger)
 
         val innsender = finnOpplysning<InnsenderSoeknad>(opplysninger, Opplysningstyper.INNSENDER_SOEKNAD_V1)
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
@@ -50,13 +48,8 @@ class GyldigSoeknadService {
             )
         )
 
-        logger.info("gyldighet: {}", gyldighet)
-
         val gyldighetResultat = setVurdering(gyldighet)
         val vurdertDato = LocalDateTime.now()
-
-        val test = GyldighetsResultat(gyldighetResultat, gyldighet, vurdertDato )
-        logger.info("gyldighetResultat TEST: {}", test)
 
         return GyldighetsResultat(gyldighetResultat, gyldighet, vurdertDato )
     }
@@ -67,13 +60,12 @@ class GyldigSoeknadService {
         innsender: VilkaarOpplysning<InnsenderSoeknad>?
     ): VurdertGyldighet {
 
-
         val resultat = if (gjenlevende == null || innsender == null) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
             vurderOpplysning { innsender.opplysning.foedselsnummer == gjenlevende.opplysning.foedselsnummer }
         }
-        logger.info("Gydlighet: Vurder om innsender er forelder {}", resultat)
+
         return VurdertGyldighet(
             gyldighetstype,
             resultat,
@@ -86,14 +78,12 @@ class GyldigSoeknadService {
         gjenlevendePdl: VilkaarOpplysning<Person>?,
         soekerPdl: VilkaarOpplysning<Person>?
     ): VurdertGyldighet {
-
-
         val resultat = if (gjenlevendePdl == null || soekerPdl == null) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
             vurderOpplysning { hentFnrAnsvarligeForeldre(soekerPdl).contains(gjenlevendePdl.opplysning.foedselsnummer) }
         }
-        logger.info("Gydlighet: Vurder om gjenlevende forelder har foreldreansvar {}", resultat)
+
         return VurdertGyldighet(
             gyldighetstype,
             resultat,
@@ -107,7 +97,6 @@ class GyldigSoeknadService {
         soekerPdl: VilkaarOpplysning<Person>?,
         gjenlevendePdl: VilkaarOpplysning<Person>?
     ): VurdertGyldighet {
-    logger.info("Gydlighet: Vurder om barn og gjenlevende forelder har samme bostedsadresse")
         val resultat = try {
             if (gjenlevendePdl == null || soekerPdl == null) {
                 VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
@@ -124,7 +113,6 @@ class GyldigSoeknadService {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         }
 
-        logger.info("Gydlighet: Vurder om barn og gjenlevende forelder har samme bostedsadresse {}", resultat)
         return VurdertGyldighet(
             gyldighetstype,
             resultat,

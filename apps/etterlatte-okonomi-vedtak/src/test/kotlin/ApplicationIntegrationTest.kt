@@ -1,6 +1,8 @@
 package no.nav.etterlatte
 
-import config.ApplicationContext
+import io.mockk.every
+import io.mockk.spyk
+import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.util.TestContainers
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterAll
@@ -23,8 +25,7 @@ class ApplicationIntegrationTest {
         postgreSQLContainer.start()
         ibmMQContainer.start()
 
-        rapidsConnection = TestRapid()
-        applicationContext = ApplicationContext(mapOf(
+        val env = mapOf(
             // DB
             "DB_HOST" to postgreSQLContainer.host,
             "DB_PORT" to postgreSQLContainer.firstMappedPort.toString(),
@@ -39,17 +40,22 @@ class ApplicationIntegrationTest {
             "OPPDRAG_MQ_PORT" to ibmMQContainer.firstMappedPort.toString(),
             "OPPDRAG_MQ_CHANNEL" to "DEV.ADMIN.SVRCONN",
             "OPPDRAG_MQ_MANAGER" to "QM1",
+
+            // Service user
             "srvuser" to "admin",
             "srvpwd" to "passw0rd",
+        )
 
-        ), rapidsConnection)
+        rapidsConnection = TestRapid()
+        applicationContext = spyk(ApplicationContext(env)).apply {
+            every { rapidsConnection() } returns rapidsConnection
+        }
     }
 
     @AfterAll
     fun afterAll() {
-        rapidsConnection.stop()
-        postgreSQLContainer.stop()
         ibmMQContainer.stop()
+        postgreSQLContainer.stop()
     }
 
     @Test
@@ -57,6 +63,8 @@ class ApplicationIntegrationTest {
         bootstrap(applicationContext)
 
         rapidsConnection.sendTestMessage(FATTET_VEDTAK)
+
+        // TODO gjøre noen sjekker her
     }
 
     companion object {

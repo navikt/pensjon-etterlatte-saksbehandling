@@ -1,7 +1,5 @@
-package config
+package no.nav.etterlatte.config
 
-import no.nav.etterlatte.config.DataSourceBuilder
-import no.nav.etterlatte.config.JmsConnectionFactoryBuilder
 import no.nav.etterlatte.oppdrag.KvitteringMottaker
 import no.nav.etterlatte.oppdrag.OppdragMapper
 import no.nav.etterlatte.oppdrag.OppdragSender
@@ -16,9 +14,10 @@ import javax.sql.DataSource
 
 class ApplicationContext(
     private val env: Map<String, String>,
-    val rapidsConnection: RapidsConnection = RapidApplication.create(env),
 ) {
-    val dataSource = DataSourceBuilder(
+    fun rapidsConnection() = RapidApplication.create(env)
+
+    fun dataSourceBuilder() = DataSourceBuilder(
         jdbcUrl = jdbcUrl(
             host = env.required("DB_HOST"),
             port = env.required("DB_PORT"),
@@ -26,9 +25,9 @@ class ApplicationContext(
         ),
         username = env.required("DB_USERNAME"),
         password = env.required("DB_PASSWORD"),
-    ).apply { migrate() }.dataSource()
+    )
 
-    val jmsConnectionFactoryBuilder = JmsConnectionFactoryBuilder(
+    fun jmsConnectionFactoryBuilder() = JmsConnectionFactoryBuilder(
         hostname = env.required("OPPDRAG_MQ_HOSTNAME"),
         port = env.required("OPPDRAG_MQ_PORT").toInt(),
         queueManager = env.required("OPPDRAG_MQ_MANAGER"),
@@ -54,7 +53,7 @@ class ApplicationContext(
     fun kvitteringMottaker(
         rapidsConnection: RapidsConnection,
         utbetalingsoppdragDao: UtbetalingsoppdragDao,
-        jmsConnection: Connection,
+        jmsConnection: Connection
     ) = KvitteringMottaker(
         rapidsConnection = rapidsConnection,
         utbetalingsoppdragDao = utbetalingsoppdragDao,

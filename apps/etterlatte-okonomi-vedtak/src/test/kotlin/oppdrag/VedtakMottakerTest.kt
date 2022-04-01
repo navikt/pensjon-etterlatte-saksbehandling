@@ -4,8 +4,6 @@ import io.mockk.mockk
 import io.mockk.verifyOrder
 import no.nav.etterlatte.readFile
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class VedtakMottakerTest {
@@ -19,11 +17,9 @@ internal class VedtakMottakerTest {
         ) }
 
     @Test
-    @Disabled
-    fun `sjekk mottak av vedtak`() {
-        val inspector = inspector.apply { sendTestMessage(FATTET_VEDTAK) }.inspektør
+    fun `sjekk mottak av vedtak med attestasjon`() {
+        inspector.apply { sendTestMessage(FATTET_VEDTAK) }
 
-        assertEquals("true", inspector.message(0).get("@vedtak_oversatt").asText())
         verifyOrder {
             oppdragService.opprettOgSendOppdrag(any(), any())
         }

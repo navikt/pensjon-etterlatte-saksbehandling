@@ -26,6 +26,10 @@
       }
     ]
   },
+  "@attestasjon": {
+    "attestantId": "Z123456",
+    "ugyldigFraDato": null
+  },
   "system_read_count": 1,
   "system_participating_services": [
     {
@@ -39,7 +43,5 @@
       "time": "2022-03-30T15:36:37.282127149"
     }
   ],
-  "@vedtak_attestert": true,
-  "@attestasjon": "{\"attestantId\":\"Z123456\",\"ugyldigFraDato\":null}",
   "@correlation_id": "6cb1b890-c1cb-41fd-87c1-0c9f40902076"
 }

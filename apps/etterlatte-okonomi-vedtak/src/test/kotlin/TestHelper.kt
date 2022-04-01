@@ -7,6 +7,8 @@ import no.nav.etterlatte.domain.Enhetstype
 import no.nav.etterlatte.domain.Oppdragsenhet
 import no.nav.etterlatte.domain.Vedtak
 import no.nav.etterlatte.domain.Ytelseskomponent
+import no.nav.etterlatte.oppdrag.OppdragMapper
+import no.trygdeetaten.skjema.oppdrag.Mmel
 import java.io.FileNotFoundException
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -16,7 +18,7 @@ object TestHelper
 fun readFile(file: String) = TestHelper::class.java.getResource(file)?.readText()
     ?: throw FileNotFoundException("Fant ikke filen $file")
 
-fun dummyVedtak() = Vedtak(
+fun vedtak() = Vedtak(
     sakId = "1234",
     vedtakId = "8888",
     behandlingsId = "1234",
@@ -42,6 +44,20 @@ fun dummyVedtak() = Vedtak(
     )
 )
 
-fun dummyAttestasjon() = Attestasjon(
-    "Z123456"
+fun oppdrag() = OppdragMapper.oppdragFraVedtak(vedtak(), attestasjon())
+
+fun oppdragMedGodkjentKvittering() = oppdrag().apply {
+    mmel = Mmel().apply {
+        alvorlighetsgrad = "00"
+    }
+}
+
+fun oppdragMedFeiletKvittering() = oppdrag().apply {
+    mmel = Mmel().apply {
+        alvorlighetsgrad = "12"
+    }
+}
+
+fun attestasjon() = Attestasjon(
+    attestantId = "Z123456"
 )

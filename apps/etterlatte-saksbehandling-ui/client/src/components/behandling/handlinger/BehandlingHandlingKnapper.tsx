@@ -1,4 +1,6 @@
 import { useMatch } from 'react-router-dom'
+import { AppContext } from '../../../store/AppContext'
+import { useContext } from 'react'
 import { Button } from '@navikt/ds-react'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { BeregningModal } from './sendTilAttesteringModal'
@@ -6,16 +8,20 @@ import { AvbrytBehandling } from './avbryt'
 import styled from 'styled-components'
 import { handlinger } from './typer'
 import { VilkaarsVurderingKnapper } from './vilkaarsvurderingKnapper'
+import { GyldighetVurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 
 export const BehandlingHandlingKnapper = () => {
+  const ctx = useContext(AppContext)
   const { next, back, lastPage, firstPage } = useBehandlingRoutes()
   const section = useMatch('/behandling/:behandlingId/:section')
+  const soeknadGyldigFremsatt =
+    ctx.state.behandlingReducer.gyldighetsprøving.resultat === GyldighetVurderingsResultat.OPPFYLT
 
   const NesteKnapp = () => {
     switch (section?.params.section) {
       case 'soeknadsoversikt':
         return (
-          <Button variant="primary" size="medium" className="button" onClick={next}>
+          <Button variant="primary" size="medium" className="button" onClick={next} disabled={!soeknadGyldigFremsatt}>
             {handlinger.START.navn}
           </Button>
         )

@@ -5,6 +5,7 @@ export interface IDetaljertBehandling {
   sak: number
   grunnlag: IBehandlingsopplysning[]
   vilkårsprøving: IVilkaarResultat
+  gyldighetsprøving: IGyldighetResultat
   beregning: any
   fastsatt: boolean
 }
@@ -36,6 +37,30 @@ export enum OpplysningsType {
 export enum KildeType {
   pdl = 'pdl',
   privatperson = 'privatperson',
+}
+
+export interface IGyldighetResultat {
+  resultat: GyldighetVurderingsResultat
+  vurderinger: IGyldighetproving[]
+  vurdertDato: string
+}
+
+export interface IGyldighetproving {
+  navn: GyldighetType
+  resultat: GyldighetVurderingsResultat
+  vurdertDato: string
+}
+
+export enum GyldighetType {
+  INNSENDER_ER_FORELDER = 'INNSENDER_ER_FORELDER',
+  HAR_FORELDREANSVAR_FOR_BARNET = 'HAR_FORELDREANSVAR_FOR_BARNET',
+  BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL = 'BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL',
+}
+
+export enum GyldighetVurderingsResultat {
+  OPPFYLT = 'OPPFYLT',
+  IKKE_OPPFYLT = 'IKKE_OPPFYLT',
+  KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING = 'KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING',
 }
 
 export interface IVilkaarResultat {
@@ -114,6 +139,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   sak: 0,
   grunnlag: [],
   vilkårsprøving: { resultat: undefined, vilkaar: [], vurdertDato: '' },
+  gyldighetsprøving: { resultat: GyldighetVurderingsResultat.OPPFYLT, vurderinger: [], vurdertDato: '' },
   beregning: undefined,
   fastsatt: false,
 }

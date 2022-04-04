@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { PersonDetailWrapper, Historikk } from '../../styled'
 import { IAdresse } from '../../../types'
 import { TextButton } from './TextButton'
-import { sjekkAdresseGjenlevendeISoeknadMotPdl, sjekkDataFraSoeknadMotPdl } from '../utils'
+import { sjekkDataFraSoeknadMotPdl } from '../utils'
 import { Adressevisning } from '../../../felles/Adressevisning'
 
 type Props = {
@@ -47,14 +47,6 @@ export const PersonInfoAdresse: React.FC<Props> = ({
           </Historikk>
         )}
       </PersonDetailWrapper>
-      <div className="alertWrapper">
-        {adresseFraSoeknadGjenlevende &&
-          gjeldendeAdresse &&
-          sjekkAdresseGjenlevendeISoeknadMotPdl(
-            adresseFraSoeknadGjenlevende,
-            `${gjeldendeAdresse.adresseLinje1}, ${gjeldendeAdresse.postnr} ${gjeldendeAdresse.poststed}`
-          )}
-      </div>
     </>
   )
 }

@@ -3,6 +3,7 @@ import { ChildIcon } from '../../../../../shared/icons/childIcon'
 import { IPersonFraSak, PersonStatus } from '../../../types'
 import { format } from 'date-fns'
 import { getStatsborgerskapTekst } from '../utils'
+import { PeopleIcon } from '../../../../../shared/icons/peopleIcon'
 
 type Props = {
   person: IPersonFraSak
@@ -13,7 +14,9 @@ export const PersonInfoHeader: React.FC<Props> = ({ person }) => {
     case PersonStatus.BARN:
       return (
         <PersonInfoHeaderWrapper>
-          <ChildIcon />
+          <span className="icon">
+            <ChildIcon />
+          </span>
           {person.navn} <span className="personRolle">({person.rolle})</span>
           <BarnAlderWrap>{person.alderEtterlatt} år</BarnAlderWrap>
           <StatsborgerskapWrap>{getStatsborgerskapTekst(person.statsborgerskap)}</StatsborgerskapWrap>
@@ -22,6 +25,9 @@ export const PersonInfoHeader: React.FC<Props> = ({ person }) => {
     case PersonStatus.GJENLEVENDE_FORELDER:
       return (
         <PersonInfoHeaderWrapper>
+          <span className="icon">
+            <PeopleIcon />
+          </span>
           {person.navn}
           <span className="personRolle">
             ({person.personStatus} {person.rolle})
@@ -32,9 +38,12 @@ export const PersonInfoHeader: React.FC<Props> = ({ person }) => {
     case PersonStatus.AVDOED:
       return (
         <PersonInfoHeaderWrapper>
+          <span className="icon">
+            <PeopleIcon />
+          </span>
           {person.navn}
           <span className="personRolle">
-            ({person.personStatus} {person.rolle})
+            {person.personStatus} {person.rolle})
           </span>
           <AvdoedWrap>Død {format(new Date(person.datoForDoedsfall), 'dd.MM.yyyy')}</AvdoedWrap>
           <StatsborgerskapWrap>{getStatsborgerskapTekst(person.statsborgerskap)}</StatsborgerskapWrap>

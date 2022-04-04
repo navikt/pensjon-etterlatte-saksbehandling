@@ -16,6 +16,7 @@ include(
     "apps:etterlatte-okonomi-vedtak",
     "apps:etterlatte-opplysninger-fra-inntektskomponenten",
     "apps:etterlatte-oppdater-behandling",
+    "apps:etterlatte-beregning",
     "libs:ktorclient-auth-clientcredentials",
     "libs:common",
     "libs:ktorclient-onbehalfof",

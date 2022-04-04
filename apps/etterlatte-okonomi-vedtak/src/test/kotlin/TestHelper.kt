@@ -18,16 +18,16 @@ object TestHelper
 fun readFile(file: String) = TestHelper::class.java.getResource(file)?.readText()
     ?: throw FileNotFoundException("Fant ikke filen $file")
 
-fun vedtak() = Vedtak(
-    sakId = "1234",
-    vedtakId = "8888",
-    behandlingsId = "1234",
+fun vedtak(vedtakId: String = "1") = Vedtak(
+    vedtakId = vedtakId,
+    behandlingsId = "11",
+    sakId = "111",
     saksbehandlerId = "4321",
     sakIdGjelderFnr = "12345612345",
     aktorFoedselsdato = LocalDate.parse("2010-07-04"),
+    behandlingstype = Endringskode.NY,
     beregningsperioder = listOf(
         Beregningsperiode(
-            endringskode = Endringskode.NY,
             delytelsesId = "delytelsesid",
             ytelseskomponent = Ytelseskomponent.BARNEPENSJON,
             datoFOM = LocalDate.parse("2022-02-02"),
@@ -44,17 +44,23 @@ fun vedtak() = Vedtak(
     )
 )
 
-fun oppdrag() = OppdragMapper.oppdragFraVedtak(vedtak(), attestasjon())
+fun oppdrag(vedtakId: String = "8888") = OppdragMapper.oppdragFraVedtak(vedtak(vedtakId), attestasjon())
 
-fun oppdragMedGodkjentKvittering() = oppdrag().apply {
+fun oppdragMedGodkjentKvittering(vedtakId: String = "1") = oppdrag(vedtakId).apply {
     mmel = Mmel().apply {
         alvorlighetsgrad = "00"
     }
+    oppdrag110 = this.oppdrag110.apply {
+        oppdragsId = 1
+    }
 }
 
-fun oppdragMedFeiletKvittering() = oppdrag().apply {
+fun oppdragMedFeiletKvittering(vedtakId: String = "1") = oppdrag(vedtakId).apply {
     mmel = Mmel().apply {
         alvorlighetsgrad = "12"
+    }
+    oppdrag110 = this.oppdrag110.apply {
+        oppdragsId = 1
     }
 }
 

@@ -8,6 +8,7 @@ import no.nav.etterlatte.domain.Vedtak
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
+import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 import javax.sql.DataSource
 
@@ -49,6 +50,8 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
 
     fun opprettUtbetalingsoppdrag(vedtak: Vedtak, oppdrag: Oppdrag) =
         dataSource.connection.use { connection ->
+            logger.info("Oppretter utbetalingsoppdrag for vedtakId=${vedtak.vedtakId}")
+
             val stmt = connection.prepareStatement(
                 "INSERT INTO utbetalingsoppdrag(vedtak_id, behandling_id, sak_id, oppdrag, vedtak, status) " +
                         "VALUES(?, ?, ?, ?, ?, ?)"
@@ -68,6 +71,8 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
 
     fun oppdaterStatus(vedtakId: String, status: UtbetalingsoppdragStatus) =
         dataSource.connection.use { connection ->
+            logger.info("Oppdaterer status i utbetalingsoppdrag for vedtakId=$vedtakId til $status")
+
             val stmt = connection.prepareStatement(
                 "UPDATE utbetalingsoppdrag SET status = ? WHERE vedtak_id = ?"
             )
@@ -83,6 +88,8 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
     fun oppdaterKvittering(oppdragMedKvittering: Oppdrag) =
         dataSource.connection.use { connection ->
             requireNotNull(oppdragMedKvittering.mmel) { "Oppdrag innholdt ikke kvitteringsmelding"}
+
+            logger.info("Oppdaterer kvittering i utbetalingsoppdrag for vedtakId=${oppdragMedKvittering.vedtakId()}")
 
             val stmt = connection.prepareStatement(
                 "UPDATE utbetalingsoppdrag SET kvittering = ?, oppdrag_id = ? WHERE vedtak_id = ?"
@@ -105,5 +112,9 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
         } else {
             null
         }
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(UtbetalingsoppdragDao::class.java)
     }
 }

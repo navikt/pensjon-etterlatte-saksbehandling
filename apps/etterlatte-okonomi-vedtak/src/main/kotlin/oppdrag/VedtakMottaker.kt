@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 
 
 class VedtakMottaker(
-    rapidsConnection: RapidsConnection,
+    private val rapidsConnection: RapidsConnection,
     private val oppdragService: OppdragService,
 ) : River.PacketListener {
 
@@ -32,10 +32,13 @@ class VedtakMottaker(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             try {
-                logger.info("Attestert vedtak mottatt")
                 val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson())
+                logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
+
                 val attestasjon: Attestasjon = objectMapper.readValue(packet["@attestasjon"].toJson())
                 oppdragService.opprettOgSendOppdrag(vedtak, attestasjon)
+
+                rapidsConnection.publish(mapOf("@event_name" to "sendt_til_utbetaling").toJson())
             } catch (e: Exception) {
                 logger.error("En feil oppstod: ${e.message}", e)
             }

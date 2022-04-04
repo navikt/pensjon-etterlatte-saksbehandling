@@ -3,14 +3,12 @@ import { AppContext } from '../../../store/AppContext'
 import { Content, ContentHeader } from '../../../shared/styled'
 import { OmSoeknad } from './oversikt/OmSoeknad'
 import { Familieforhold } from './oversikt/Familieforhold'
-import { SoeknadGyldigFremsatt } from './oversikt/SoeknadGyldigFremsatt'
 import { usePersonInfoFromBehandling } from './usePersonInfoFromBehandling'
-import {
-  IKriterie,
-  Kriterietype,
-  VilkaarsType,
-  VilkaarVurderingsResultat,
-} from '../../../store/reducers/BehandlingReducer'
+import { GyldighetType } from '../../../store/reducers/BehandlingReducer'
+import { HeadingWrapper } from './styled'
+import { BehandlingsStatusSmall, IBehandlingsStatus } from '../behandlings-status'
+import { BehandlingsTypeSmall, IBehandlingsType } from '../behandlings-type'
+import { Heading } from '@navikt/ds-react'
 
 export const Soeknadsoversikt = () => {
   const {
@@ -25,25 +23,34 @@ export const Soeknadsoversikt = () => {
   } = usePersonInfoFromBehandling()
 
   const ctx = useContext(AppContext)
-  const vilkaar = ctx.state.behandlingReducer.vilkårsprøving.vilkaar
-  const doedsfallVilkaar: any = vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.DOEDSFALL_ER_REGISTRERT)
+  const gyldighet = ctx.state.behandlingReducer.gyldighetsprøving
 
   return (
     <Content>
       <ContentHeader>
-        <h1>Søknadsoversikt</h1>
+        <HeadingWrapper>
+          <Heading spacing size="xlarge" level="5">
+            Søknadsoversikt
+          </Heading>
+          <div className="details">
+            <BehandlingsStatusSmall status={IBehandlingsStatus.FORSTEGANG} />
+            <BehandlingsTypeSmall type={IBehandlingsType.BARNEPENSJON} />
+          </div>
+        </HeadingWrapper>
+
         <OmSoeknad
-          soekerPdl={soekerPdl}
+          gyldighet={gyldighet}
           avdoedPersonPdl={avdoedPersonPdl}
-          soekerSoknad={soekerSoknad}
-          avdodPersonSoknad={avdodPersonSoknad}
           innsender={innsender}
           mottattDato={mottattDato}
-          avdoedErForelderVilkaar={
-            doedsfallVilkaar &&
-            doedsfallVilkaar.kriterier.find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER)
-              .resultat === VilkaarVurderingsResultat.OPPFYLT
-          }
+          gjenlevendePdl={gjenlevendePdl}
+          gjenlevendeHarForeldreansvar={gyldighet.vurderinger.find(
+            (g) => g.navn === GyldighetType.HAR_FORELDREANSVAR_FOR_BARNET
+          )}
+          gjenlevendeOgSoekerLikAdresse={gyldighet.vurderinger.find(
+            (g) => g.navn === GyldighetType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL
+          )}
+          innsenderHarForeldreAnsvar={gyldighet.vurderinger.find((g) => g.navn === GyldighetType.INNSENDER_ER_FORELDER)}
         />
         <Familieforhold
           soekerPdl={soekerPdl}
@@ -53,7 +60,6 @@ export const Soeknadsoversikt = () => {
           gjenlevendePdl={gjenlevendePdl}
           gjenlevendeSoknad={gjenlevendeSoknad}
         />
-        <SoeknadGyldigFremsatt />
       </ContentHeader>
     </Content>
   )

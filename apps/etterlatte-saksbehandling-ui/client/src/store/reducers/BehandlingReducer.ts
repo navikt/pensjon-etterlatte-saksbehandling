@@ -40,7 +40,7 @@ export enum KildeType {
 }
 
 export interface IGyldighetResultat {
-  resultat: GyldighetVurderingsResultat
+  resultat: GyldighetVurderingsResultat | undefined
   vurderinger: IGyldighetproving[]
   vurdertDato: string
 }
@@ -139,7 +139,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   sak: 0,
   grunnlag: [],
   vilkårsprøving: { resultat: undefined, vilkaar: [], vurdertDato: '' },
-  gyldighetsprøving: { resultat: GyldighetVurderingsResultat.OPPFYLT, vurderinger: [], vurdertDato: '' },
+  gyldighetsprøving: { resultat: undefined, vurderinger: [], vurdertDato: '' },
   beregning: undefined,
   fastsatt: false,
 }

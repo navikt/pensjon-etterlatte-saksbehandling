@@ -1,21 +1,23 @@
 import styled from 'styled-components'
 
 export const InfoWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 30px;
-  border-top: 1px solid #b0b0b0;
-  padding: 1.2em 1em 2em 1em;
+  display: grid;
+  grid-gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
 `
 
 export const DetailWrapper = styled.div`
-  padding-top: 0.5em;
-  margin-bottom: 2em;
-  width: 33%;
   font-size: 16px;
+  min-width: 200px;
+  height: 100px;
 
   .warningText {
     color: #ba3a26;
+    max-width: 150px;
+    display: block;
+  }
+  .text {
+    max-width: 150px;
   }
 `
 
@@ -29,14 +31,10 @@ export const PersonInfoBorder = styled.div`
 `
 
 export const PersonInfoWrapper = styled.div`
-  justify-content: space-between;
-  width: 100%;
-  padding-top: 1em;
-  display: inline-flex;
-
-  .alertWrapper {
-    width: 300px;
-  }
+  padding-top: 1.2em;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  flex-wrap: wrap;
 `
 export const PersonDetailWrapper = styled.div<{ adresse: boolean }>`
   padding-top: 0.5em;
@@ -50,8 +48,11 @@ export const PersonDetailWrapper = styled.div<{ adresse: boolean }>`
 `
 
 export const AlertWrapper = styled.div`
-  max-width: 400px;
+  min-width: 200px;
+  max-width: 350px;
+
   .alert {
+    font-size: 10px;
     padding: 1em;
   }
 `
@@ -74,21 +75,27 @@ export const HistorikkElement = styled.div`
 export const PersonInfoHeaderWrapper = styled.div`
   display: inline-flex;
   font-weight: bold;
+  margin-top: 10px;
 
   .personRolle {
     font-weight: normal;
     margin-left: 0.5em;
     margin-right: 0.7em;
   }
+
+  .icon {
+    margin-right: 0.5em;
+  }
 `
 
 export const HeadingWrapper = styled.div`
   display: inline-flex;
+  margin-top: 3em;
 
   .details {
     justify-content: center;
     align-item: center;
-    padding: 0.2em;
+    padding: 0.6em;
   }
 `
 
@@ -149,4 +156,9 @@ export const RadioGroupWrapper = styled.div`
     margin-top: 1em;
   }
 }
+`
+
+export const IconWrapper = styled.span`
+  margin-left: -40px;
+  margin-right: 20px;
 `

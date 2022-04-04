@@ -13,17 +13,6 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({
   gjenlevendePdl,
   gjenlevendeSoknad,
 }) => {
-  if (!soekerPdl) {
-    return (
-      <>
-        <Heading spacing size="small" level="5">
-          Familieforhold
-        </Heading>
-        Mangler info om familieforhold
-      </>
-    )
-  }
-
   return (
     <>
       <Heading spacing size="small" level="5">

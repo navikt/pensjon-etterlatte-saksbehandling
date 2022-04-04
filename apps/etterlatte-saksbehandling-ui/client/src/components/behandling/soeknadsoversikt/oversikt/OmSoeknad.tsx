@@ -1,72 +1,28 @@
-import { Detail, Heading } from '@navikt/ds-react'
-import { InfoWrapper, DetailWrapper, HeadingWrapper } from '../styled'
-import { BehandlingsStatusSmall, IBehandlingsStatus } from '../../behandlings-status'
-import { BehandlingsTypeSmall, IBehandlingsType } from '../../behandlings-type'
+import { Detail } from '@navikt/ds-react'
+import { InfoWrapper, DetailWrapper } from '../styled'
 import { format } from 'date-fns'
-import { sjekkDodsfallMerEnn3AarSiden, hentVirkningstidspunkt, sjekkPersonFraSoeknadMotPdl } from './utils'
-import { OmSoeknadVarsler } from './OmSoeknadVarsler'
-import { WarningText } from '../../../../shared/styled'
+import { sjekkDodsfallMerEnn3AarSiden, hentVirkningstidspunkt } from './utils'
 import { PropsOmSoeknad } from '../props'
+import { SoeknadGyldigFremsatt } from './SoeknadGyldigFremsatt'
+import styled from 'styled-components'
+import { AlertVarsel } from './AlertVarsel'
+import { GyldighetVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 
 export const OmSoeknad: React.FC<PropsOmSoeknad> = ({
-  soekerPdl,
+  gyldighet,
   avdoedPersonPdl,
-  soekerSoknad,
-  avdodPersonSoknad,
   innsender,
   mottattDato,
-  avdoedErForelderVilkaar,
+  gjenlevendePdl,
+  gjenlevendeHarForeldreansvar,
+  gjenlevendeOgSoekerLikAdresse,
+  innsenderHarForeldreAnsvar,
 }) => {
-  const avdoedErLikISoeknad = avdoedPersonPdl?.foedselsnummer === avdodPersonSoknad?.foedselsnummer
   const dodsfallMerEnn3AarSiden = sjekkDodsfallMerEnn3AarSiden(avdoedPersonPdl?.doedsdato, mottattDato)
-  const innsenderHarForeldreansvar = soekerPdl?.familieRelasjon?.ansvarligeForeldre.find(
-    (fnr) => fnr === innsender.foedselsnummer
-  )
-
-  if (!soekerPdl) {
-    return (
-      <>
-        <Heading spacing size="small" level="5">
-          Om søknaden
-        </Heading>
-        <div style={{ marginBottom: '3em' }}>Mangler info om søknad</div>
-      </>
-    )
-  }
 
   return (
-    <>
-      <HeadingWrapper>
-        <Heading spacing size="small" level="5">
-          Om søknaden
-        </Heading>
-        <div className="details">
-          <BehandlingsStatusSmall status={IBehandlingsStatus.FORSTEGANG} />
-          <BehandlingsTypeSmall type={IBehandlingsType.BARNEPENSJON} />
-        </div>
-      </HeadingWrapper>
-
+    <SoeknadOversikt>
       <InfoWrapper>
-        <DetailWrapper>
-          <Detail size="medium">Mottaker</Detail>
-          {sjekkPersonFraSoeknadMotPdl(soekerPdl, soekerSoknad)}
-        </DetailWrapper>
-        <DetailWrapper>
-          <Detail size="medium">Avdød forelder</Detail>
-          {avdoedErForelderVilkaar ? (
-            sjekkPersonFraSoeknadMotPdl(avdoedPersonPdl, avdodPersonSoknad)
-          ) : (
-            <WarningText>Ingen foreldre er død</WarningText>
-          )}
-        </DetailWrapper>
-        <DetailWrapper>
-          <Detail size="medium">Søknad fremsatt av</Detail>
-          {innsender?.fornavn} {innsender?.etternavn} {innsenderHarForeldreansvar && '(foreldreansvar)'}
-        </DetailWrapper>
-        <DetailWrapper>
-          <Detail size="medium">Søknad mottatt</Detail>
-          {format(new Date(mottattDato), 'dd.MM.yyyy')}
-        </DetailWrapper>
         <DetailWrapper>
           <Detail size="medium">Dato for dødsfall</Detail>
           <span className={dodsfallMerEnn3AarSiden ? 'warningText' : ''}>
@@ -74,17 +30,62 @@ export const OmSoeknad: React.FC<PropsOmSoeknad> = ({
           </span>
         </DetailWrapper>
         <DetailWrapper>
-          <Detail size="medium">Første mulig virkningstidspunkt</Detail>
+          <Detail size="medium">Søknadsdato</Detail>
+          {format(new Date(mottattDato), 'dd.MM.yyyy')}
+        </DetailWrapper>
+        <DetailWrapper>
+          <Detail size="medium" className="text">
+            Første mulig virkningstidspunkt
+          </Detail>
           <span className={dodsfallMerEnn3AarSiden ? 'warningText' : ''}>
             {format(new Date(hentVirkningstidspunkt(avdoedPersonPdl?.doedsdato, mottattDato)), 'dd.MM.yyyy')}
           </span>
         </DetailWrapper>
-        <OmSoeknadVarsler
-          feilForelderOppgittSomAvdoed={avdoedErForelderVilkaar && !avdoedErLikISoeknad}
-          forelderIkkeDoed={!avdoedErForelderVilkaar}
-          dodsfallMerEnn3AarSiden={dodsfallMerEnn3AarSiden}
-        />
+        <DetailWrapper>
+          <Detail size="medium">Innsender</Detail>
+          <div>
+            {innsender?.fornavn} {innsender?.etternavn}
+            <div>
+              {innsenderHarForeldreAnsvar?.resultat === GyldighetVurderingsResultat.OPPFYLT && '(gjenlevende forelder)'}
+            </div>
+          </div>
+        </DetailWrapper>
+        <DetailWrapper>
+          <Detail size="medium">Foreldreansvar</Detail>
+          {gjenlevendeHarForeldreansvar?.resultat === GyldighetVurderingsResultat.OPPFYLT ? (
+            <div>
+              {gjenlevendePdl?.fornavn} {gjenlevendePdl?.etternavn}
+              <div>(gjenlevende forelder)</div>
+            </div>
+          ) : (
+            <span className="warningText">Mangler info</span>
+          )}
+        </DetailWrapper>
+        <DetailWrapper>
+          <Detail size="medium">Adresse</Detail>
+          {gjenlevendeOgSoekerLikAdresse?.resultat === GyldighetVurderingsResultat.OPPFYLT ? (
+            <div className="text">Barnet bor på samme adresse som gjenlevende forelder</div>
+          ) : (
+            <span className="warningText">Barnet bor ikke på samme adresse som gjenlevende forelder</span>
+          )}
+        </DetailWrapper>
       </InfoWrapper>
-    </>
+      <div className="soeknadGyldigFremsatt">
+        <DetailWrapper>{dodsfallMerEnn3AarSiden && <AlertVarsel varselType="dødsfall 3 år" />}</DetailWrapper>
+        <SoeknadGyldigFremsatt gyldighet={gyldighet} />
+      </div>
+    </SoeknadOversikt>
   )
 }
+
+export const SoeknadOversikt = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 5em;
+  border-top: 1px solid #b0b0b0;
+  padding-top: 2em;
+  .soeknadGyldigFremsatt {
+    height: 200px;
+    margin-bottom: 0.5em;
+  }
+`

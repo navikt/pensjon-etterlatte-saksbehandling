@@ -1,38 +1,78 @@
-import { useState } from 'react'
-import { RadioGroup, Radio, Textarea } from '@navikt/ds-react'
-import { RadioGroupWrapper } from '../styled'
+import styled from 'styled-components'
+import {
+  GyldighetType,
+  GyldighetVurderingsResultat,
+  IGyldighetResultat,
+} from '../../../../store/reducers/BehandlingReducer'
+import { format } from 'date-fns'
+import { GyldighetIcon } from '../../../../shared/icons/gyldigIcon'
+import { hentGyldighetsTekst } from './utils'
 
-export const SoeknadGyldigFremsatt = () => {
-  /*
-  TODO Må være mulig å lagre svaret. Når det trykkes på lagre-knappen skal 
-  informasjonsgrunnlaget som lå til grunn på det tidpunktet svaret ble avgitt
-  lagres. Må være mulig (dette gjelder generelt for vilkårsvurdering) å kunne
-  se tilbake på/vise frem informasjonsgrunnlaget i ettertid.
-  */
-  const [soeknadIkkeGyldig, setSoeknadIkkeGyldig] = useState<boolean>(false)
-  const [soeknadGyldigBegrunnelse, setSoeknadGyldigBegrunnelse] = useState('')
+export const SoeknadGyldigFremsatt = ({ gyldighet }: { gyldighet: IGyldighetResultat }) => {
+  const sjekkInfo = (): any => {
+    const bostedadresse = gyldighet.vurderinger.find(
+      (vilkaar) => vilkaar.navn === GyldighetType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL
+    )
+    const foreldreransvar = gyldighet.vurderinger.find(
+      (vilkaar) => vilkaar.navn === GyldighetType.HAR_FORELDREANSVAR_FOR_BARNET
+    )
+    const innsender = gyldighet.vurderinger.find((vilkaar) => vilkaar.navn === GyldighetType.INNSENDER_ER_FORELDER)
+
+    return (
+      gyldighet.resultat &&
+      bostedadresse &&
+      foreldreransvar &&
+      innsender &&
+      hentGyldighetsTekst(gyldighet.resultat, bostedadresse, foreldreransvar, innsender)
+    )
+  }
   return (
-    <RadioGroupWrapper>
-      <RadioGroup
-        legend="Er søknaden gyldig fremsatt?"
-        size="small"
-        className="radioGroup"
-        onChange={(event) => (event === 'ja' ? setSoeknadIkkeGyldig(false) : setSoeknadIkkeGyldig(true))}
-      >
-        <Radio value="ja">Ja</Radio>
-        <Radio value="nei">Nei</Radio>
-      </RadioGroup>
-      {soeknadIkkeGyldig && (
-        <Textarea
-          className="textarea"
-          label="Begrunnelse (hvis aktuelt)"
-          value={soeknadGyldigBegrunnelse}
-          onChange={(e) => setSoeknadGyldigBegrunnelse(e.target.value)}
-          minRows={2}
-          maxLength={400}
-          size="small"
-        />
-      )}
-    </RadioGroupWrapper>
+    <Wrapper>
+      <div>{gyldighet.resultat && <GyldighetIcon status={gyldighet.resultat} large={true} />}</div>
+      <div>
+        <Title>Søknad gyldig fremsatt</Title>
+        <Undertekst gray={true}>Automatisk {format(new Date(gyldighet.vurdertDato), 'dd.MM.yyyy')}</Undertekst>
+        {gyldighet.resultat === GyldighetVurderingsResultat.OPPFYLT ? (
+          <Undertekst gray={false}>Ja søknad er gyldig fremsatt</Undertekst>
+        ) : (
+          <Undertekst gray={false}>{sjekkInfo()}</Undertekst>
+        )}
+      </div>
+      {/* <Endre>
+        <LockedIcon /> <span className="text">Endre</span>
+      </Endre>
+      */}
+    </Wrapper>
   )
 }
+
+export const Wrapper = styled.div`
+  display: inline-flex;
+  border-left: 4px solid #e5e5e5;
+  margin-top: 10px;
+  max-height: 150px;
+`
+export const Endre = styled.div`
+  display: inline-flex;
+  height: 25px;
+  display: inline-flex;
+  cursor: pointer;
+  color: #0056b4;
+
+  .text {
+    padding-bottom: 10px;
+  }
+`
+
+export const Title = styled.div`
+  display: flex;
+  font-size: 18px;
+  font-weight: bold;
+`
+export const Undertekst = styled.div<{ gray: boolean }>`
+  display: flex;
+  margin-bottom: 1em;
+  margin-top: 0.3em;
+  max-width: 300px;
+  color: ${(props) => (props.gray ? '#707070' : '#000000')};
+`

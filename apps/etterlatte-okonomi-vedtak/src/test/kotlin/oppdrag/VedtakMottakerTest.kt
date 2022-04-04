@@ -26,6 +26,6 @@ internal class VedtakMottakerTest {
     }
 
     companion object {
-        val FATTET_VEDTAK = readFile("/vedtak.json")
+        val FATTET_VEDTAK = readFile("/vedtak1.json")
     }
 }

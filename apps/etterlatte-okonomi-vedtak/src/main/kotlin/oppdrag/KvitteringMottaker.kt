@@ -5,6 +5,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.common.Jaxb
 import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
@@ -54,13 +55,15 @@ class KvitteringMottaker(
     private fun oppdragGodkjent(oppdrag: Oppdrag) {
         logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} godkjent")
         utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.GODKJENT)
-        // TODO lagre status i db og publiser melding på kafka
+        rapidsConnection.publish(mapOf("@event_name" to "utbetaling_godkjent").toJson())
+        // TODO utvid melding
     }
 
     private fun oppdragFeilet(oppdrag: Oppdrag, oppdragXml: String) {
         logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet", kv("oppdrag", oppdragXml))
         utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.FEILET)
-        // TODO lagre status i db og publiser melding på kafka
+        rapidsConnection.publish(mapOf("@event_name" to "utbetaling_feilet").toJson())
+        // TODO utvid melding
     }
 
     companion object {

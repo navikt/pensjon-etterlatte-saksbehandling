@@ -16,10 +16,9 @@ class OppdragService(
         logger.info("Oppretter utbetalingsoppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId}")
         utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
 
-        logger.info("Sender oppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId}")
+        logger.info("Sender oppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId} til oppdrag")
         oppdragSender.sendOppdrag(oppdrag)
 
-        logger.info("Oppdaterer status til ${UtbetalingsoppdragStatus.SENDT.name}")
         utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.SENDT)
     }
 

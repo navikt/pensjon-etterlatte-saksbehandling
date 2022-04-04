@@ -8,9 +8,10 @@ data class Vedtak(
     val behandlingsId: String,
     val sakId: String,
     val saksbehandlerId: String,
-    val beregningsperioder: List<Beregningsperiode>,
     val sakIdGjelderFnr: String,
     val aktorFoedselsdato: LocalDate,
+    val behandlingstype: Endringskode,
+    val beregningsperioder: List<Beregningsperiode>,
     val oppdragsenheter: List<Oppdragsenhet>,
 )
 
@@ -34,7 +35,6 @@ enum class Ytelseskomponent(s: String) {
 }
 
 data class Beregningsperiode(
-    val endringskode: Endringskode,
     val delytelsesId: String,
     val ytelseskomponent: Ytelseskomponent,
     val datoFOM: LocalDate,

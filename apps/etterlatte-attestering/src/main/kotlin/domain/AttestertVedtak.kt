@@ -4,8 +4,8 @@ import java.time.LocalDateTime
 
 data class AttestertVedtak(
     val vedtakId: String,
-    val attestantId: String,
-    val attestasjonstidspunkt: LocalDateTime,
+    val attestantId: String?,
+    val attestasjonstidspunkt: LocalDateTime?,
     val attestasjonsstatus: AttestasjonsStatus
 )
 

@@ -26,6 +26,36 @@ class AttestasjonDao(private val connection: () -> Connection) {
                 it.executeQuery().singleOrNull {
                     AttestertVedtak(
                         vedtakId = getString("vedtak_id"),
+                        attestantId = getString("attestant_id") ?: null,
+                        attestasjonstidspunkt = getTimestamp("attestasjonstidspunkt")?.toLocalDateTime(),
+                        attestasjonsstatus = getString("attestasjonsstatus").let { status ->
+                            AttestasjonsStatus.valueOf(
+                                status
+                            )
+                        }
+                    )
+                }
+            }
+        }
+
+    fun attesterVedtak(vedtakId: String, attestasjon: Attestasjon): AttestertVedtak? =
+        connection().use { connection ->
+            val stmt = connection.prepareStatement(
+                "UPDATE attestasjon " +
+                        "SET attestasjonsstatus = ?::status, attestant_id = ?, attestasjonstidspunkt = ?" +
+                        "WHERE vedtak_id = ? " +
+                        "RETURNING *"
+            )
+
+            stmt.use {
+                it.setString(1, AttestasjonsStatus.ATTESTERT.name)
+                it.setString(2, attestasjon.attestantId)
+                it.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()))
+                it.setString(4, vedtakId)
+
+                it.executeQuery().singleOrNull {
+                    AttestertVedtak(
+                        vedtakId = getString("vedtak_id"),
                         attestantId = getString("attestant_id"),
                         attestasjonstidspunkt = getTimestamp("attestasjonstidspunkt").toLocalDateTime(),
                         attestasjonsstatus = getString("attestasjonsstatus").let { status ->
@@ -38,9 +68,26 @@ class AttestasjonDao(private val connection: () -> Connection) {
             }
         }
 
+
     private fun hentAttestertVedtakNonNull(vedtakId: String): AttestertVedtak =
         hentAttestertVedtak(vedtakId)
             ?: throw AttestertVedtakNotFoundException("Attestert Vedtak for vedtak med vedtakId=$vedtakId finnes ikke")
+
+
+    fun opprettMottattVedtak(vedtak: Vedtak) =
+        connection().use { connection ->
+            val stmt = connection.prepareStatement(
+                "INSERT INTO attestasjon(vedtak_id, attestasjonsstatus)" +
+                        "VALUES (?, ?::status)"
+            )
+
+            stmt.use {
+                it.setString(1, vedtak.vedtakId)
+                it.setString(2, AttestasjonsStatus.TIL_ATTESTERING.name)
+
+                require(it.executeUpdate() == 1)
+            }
+        }.let { hentAttestertVedtakNonNull(vedtak.vedtakId) }
 
     fun opprettAttestertVedtak(vedtak: Vedtak, attestasjon: Attestasjon) =
         connection().use { connection ->
@@ -53,7 +100,7 @@ class AttestasjonDao(private val connection: () -> Connection) {
                 it.setString(1, vedtak.vedtakId)
                 it.setString(2, attestasjon.attestantId)
                 it.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()))
-                it.setString(4, AttestasjonsStatus.TIL_ATTESTERING.name)
+                it.setString(4, AttestasjonsStatus.ATTESTERT.name)
 
                 require(it.executeUpdate() == 1)
             }

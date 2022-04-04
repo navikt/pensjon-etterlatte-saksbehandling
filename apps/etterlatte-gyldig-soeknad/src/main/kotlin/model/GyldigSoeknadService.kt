@@ -59,6 +59,7 @@ class GyldigSoeknadService {
         gjenlevende: VilkaarOpplysning<GjenlevendeForelderSoeknad>?,
         innsender: VilkaarOpplysning<InnsenderSoeknad>?
     ): VurdertGyldighet {
+
         val resultat = if (gjenlevende == null || innsender == null) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
@@ -96,7 +97,6 @@ class GyldigSoeknadService {
         soekerPdl: VilkaarOpplysning<Person>?,
         gjenlevendePdl: VilkaarOpplysning<Person>?
     ): VurdertGyldighet {
-
         val resultat = try {
             if (gjenlevendePdl == null || soekerPdl == null) {
                 VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING

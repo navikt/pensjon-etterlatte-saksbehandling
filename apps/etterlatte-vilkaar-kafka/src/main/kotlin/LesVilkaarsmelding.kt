@@ -21,6 +21,7 @@ internal class LesVilkaarsmelding(
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("grunnlag") }
             validate { it.rejectKey("@vilkaarsvurdering") }
+            validate { it.rejectKey("@gyldighetsvurdering") }
             validate { it.interestedIn("@correlation_id") }
 
         }.register(this)

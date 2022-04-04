@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.OppgaveService
 import no.nav.etterlatte.behandling.PdltjenesterKlient
+import no.nav.etterlatte.behandling.VedtakService
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
@@ -26,6 +27,8 @@ class ApplicationContext(configLocation: String? = null) {
     )
 
     val oppgaveService: OppgaveService = OppgaveService(behandlingKlient)
+
+    val vedtakService = VedtakService(behandlingKlient)
 
     private fun httpClient() = HttpClient {
         install(JsonFeature) {

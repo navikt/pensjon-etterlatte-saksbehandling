@@ -23,8 +23,8 @@ internal class OppdaterBehandling(
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("grunnlag") }
             validate { it.requireKey("id") }
-            validate { it.requireKey("@gyldighetsvurdering") }
-            validate { it.requireKey("@vilkaarsvurdering") }
+            validate { it.interestedIn("@gyldighetsvurdering") }
+            validate { it.interestedIn("@vilkaarsvurdering") }
             validate { it.interestedIn("@correlation_id") }
 
         }.register(this)
@@ -34,12 +34,16 @@ internal class OppdaterBehandling(
         withLogContext(packet.correlationId()) {
             try {
                 val behandlingsID = packet["id"].asText()
-                behandlinger.leggTilGyldighetsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@vilkaarsvurdering"].toString()))
-                logger.info("Oppdatert Behandling med id $behandlingsID med ny gyldighetsvurdering")
+                if (packet["@gyldighetsvurdering"].toString().isNotEmpty()) {
+                    behandlinger.leggTilGyldighetsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@gyldighetsvurdering"].toString()))
+                    logger.info("Oppdatert Behandling med id $behandlingsID med ny gyldighetsvurdering")
+                }
+                if (packet["@vilkaarsvurdering"].toString().isNotEmpty()) {
+                    behandlinger.leggTilVilkaarsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@vilkaarsvurdering"].toString()))
+                    logger.info("Oppdatert Behandling med id $behandlingsID med ny vilkaarsvurdering")
+                }
 
-                behandlinger.leggTilVilkaarsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@vilkaarsvurdering"].toString()))
-                logger.info("Oppdatert Behandling med id $behandlingsID med ny vilkaarsvurdering")
-                //TODO publisere melding
+
             } catch (e: Exception){
                 //TODO endre denne
                 logger.info("Spiser en melding: "+e)

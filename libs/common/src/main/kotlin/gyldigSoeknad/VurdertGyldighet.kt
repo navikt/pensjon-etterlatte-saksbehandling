@@ -11,6 +11,6 @@ data class VurdertGyldighet(
 
 data class GyldighetsResultat(
     val resultat: VurderingsResultat?,
-    val vurderinger: List<VurdertGyldighet>?,
+    val vurderinger: List<VurdertGyldighet>,
     val vurdertDato: LocalDateTime
 )

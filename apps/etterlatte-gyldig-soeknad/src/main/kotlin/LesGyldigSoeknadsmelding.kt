@@ -21,6 +21,7 @@ internal class LesGyldigSoeknadsmelding(
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("grunnlag") }
             validate { it.rejectKey("@gyldighetsvurdering") }
+            validate { it.rejectKey("@vilkaarsvurdering") }
             validate { it.interestedIn("@correlation_id") }
 
         }.register(this)
@@ -33,6 +34,7 @@ internal class LesGyldigSoeknadsmelding(
             try {
                 val grunnlag = objectMapper.readValue<List<VilkaarOpplysning<ObjectNode>>>(grunnlagListe)
                 val gyldighetsVurdering = gyldigSoeknad.mapOpplysninger(grunnlag)
+                logger.info("Gyldighetsvurdering I lesGyldigsoeknad: {}", gyldighetsVurdering)
                 packet["@gyldighetsvurdering"] = gyldighetsVurdering
                 context.publish(packet.toJson())
                 //TODO

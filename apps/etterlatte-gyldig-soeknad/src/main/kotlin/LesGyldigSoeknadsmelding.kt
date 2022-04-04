@@ -21,6 +21,7 @@ internal class LesGyldigSoeknadsmelding(
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("grunnlag") }
             validate { it.rejectKey("@gyldighetsvurdering") }
+            validate { it.rejectKey("@vilkaarsvurdering") }
             validate { it.interestedIn("@correlation_id") }
 
         }.register(this)

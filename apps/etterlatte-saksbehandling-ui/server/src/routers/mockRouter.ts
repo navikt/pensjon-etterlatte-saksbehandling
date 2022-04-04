@@ -16,7 +16,7 @@ mockRouter.get('/oppgaver', (req: Request, res: Response) => {
   let oppgaver = require('../mockdata/oppgaverMockData.json')
   setTimeout(() => {
     res.json({ oppgaver })
-  }, 3000)
+  }, 1000)
 })
 
 mockRouter.get(`/behandling/:id`, (req: Request, res: Response) => {
@@ -24,5 +24,5 @@ mockRouter.get(`/behandling/:id`, (req: Request, res: Response) => {
   let behandling = require(`../mockdata/detaljertBehandling_${id}.json`)
   setTimeout(() => {
     res.json(behandling)
-  }, 3000)
+  }, 1000)
 })

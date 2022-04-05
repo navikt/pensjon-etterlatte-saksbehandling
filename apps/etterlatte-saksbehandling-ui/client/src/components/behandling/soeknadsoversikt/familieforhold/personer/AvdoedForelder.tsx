@@ -14,7 +14,7 @@ import { PersonInfo } from './personinfo/PersonInfo'
 import { IconWrapper, PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { PeopleIcon } from '../../../../../shared/icons/peopleIcon'
 import { AvdoedWrap, TypeStatusWrap } from '../../styled'
-import { format } from 'date-fns/esm'
+import { format } from 'date-fns'
 import { getStatsborgerskapTekst } from '../../utils'
 
 type Props = {

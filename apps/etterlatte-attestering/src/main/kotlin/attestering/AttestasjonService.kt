@@ -1,22 +1,52 @@
 package no.nav.etterlatte.attestering
 
 import no.nav.etterlatte.domain.Attestasjon
+import no.nav.etterlatte.domain.AttestasjonsStatus
 import no.nav.etterlatte.domain.AttestertVedtak
+
+class KanIkkeEndreAttestertVedtakException(message: String) : RuntimeException(message)
+class AttestertVedtakEksistererIkke(message: String) : RuntimeException(message)
+class AttestertVedtakEksistererAllerede(message: String) : RuntimeException(message)
 
 class AttestasjonService(
     val attestasjonDao: AttestasjonDao,
 ) {
 
-    // TODO: sjekke at vedtaket ikke eksisterer først
-    // TODO: sjekke at vedtak ikke allerede er attestert før det attesteres
+    private object TilgangDao {
+        fun sjekkOmBehandlingTillatesEndret(attestertVedtak: AttestertVedtak): Boolean {
+            return attestertVedtak.attestasjonsstatus in listOf(
+                AttestasjonsStatus.TIL_ATTESTERING,
+                AttestasjonsStatus.IKKE_ATTESTERT
+            )
+        }
+    }
 
-    fun opprettAttestertVedtak(vedtak: Vedtak, attestasjon: Attestasjon): AttestertVedtak =
-        attestasjonDao.opprettAttestertVedtak(vedtak, attestasjon)
+    fun hentAttestertVedtak(vedtakId: String): AttestertVedtak? =
+        attestasjonDao.hentAttestertVedtak(vedtakId)
 
-    fun opprettVedtakUtenAttestering(vedtak: Vedtak): AttestertVedtak? =
-        attestasjonDao.opprettMottattVedtak(vedtak)
+    fun opprettAttestertVedtak(vedtak: Vedtak, attestasjon: Attestasjon): AttestertVedtak {
+        if (hentAttestertVedtak(vedtak.vedtakId) != null) {
+            throw AttestertVedtakEksistererAllerede("Attestert vedtak med vedtakId ${vedtak.vedtakId} eksisterer allerede")
+        } else {
+            return attestasjonDao.opprettAttestertVedtak(vedtak, attestasjon)
+        }
+    }
 
-    fun attesterVedtak(vedtakId: String, attestasjon: Attestasjon): AttestertVedtak? =
-        attestasjonDao.attesterVedtak(vedtakId, attestasjon)
+    fun opprettVedtakUtenAttestering(vedtak: Vedtak): AttestertVedtak? {
+        if (hentAttestertVedtak(vedtak.vedtakId) != null) {
+            throw AttestertVedtakEksistererAllerede("Attestert vedtak med vedtakId ${vedtak.vedtakId} eksisterer allerede")
+        } else {
+            return attestasjonDao.opprettMottattVedtak(vedtak)
+        }
+    }
 
+    fun attesterVedtak(vedtakId: String, attestasjon: Attestasjon): AttestertVedtak? {
+        val attestertVedtak = hentAttestertVedtak(vedtakId)
+            ?: throw AttestertVedtakEksistererIkke("Attestert vedtak med vedtakId $vedtakId eksisterer ikke")
+        if (!TilgangDao.sjekkOmBehandlingTillatesEndret(attestertVedtak)) {
+            throw KanIkkeEndreAttestertVedtakException("Kan ikke attestere vedtak $vedtakId med attestasjonsstatus ${attestertVedtak.attestasjonsstatus}")
+        } else {
+            return attestasjonDao.attesterVedtak(vedtakId, attestasjon)
+        }
+    }
 }

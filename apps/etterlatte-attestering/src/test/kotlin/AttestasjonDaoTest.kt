@@ -1,4 +1,7 @@
 import no.nav.etterlatte.attestering.AttestasjonDao
+import no.nav.etterlatte.attestering.AttestasjonService
+import no.nav.etterlatte.attestering.AttestertVedtakEksistererAllerede
+import no.nav.etterlatte.attestering.KanIkkeEndreAttestertVedtakException
 import no.nav.etterlatte.config.DataSourceBuilder
 import no.nav.etterlatte.domain.AttestasjonsStatus
 import org.junit.jupiter.api.AfterAll
@@ -9,6 +12,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDateTime
@@ -23,6 +27,7 @@ internal class AttestasjonDaoTest {
 
     private lateinit var dataSource: DataSource
     private lateinit var attestasjonDao: AttestasjonDao
+    private lateinit var attestasjonService: AttestasjonService
 
     @BeforeAll
     fun beforeAll() {
@@ -35,6 +40,7 @@ internal class AttestasjonDaoTest {
         ).let {
             dataSource = it.dataSource()
             attestasjonDao = AttestasjonDao { dataSource.connection }
+            attestasjonService = AttestasjonService(attestasjonDao)
             it.migrate()
         }
     }
@@ -61,7 +67,7 @@ internal class AttestasjonDaoTest {
         val vedtak = vedtak()
         val attestasjon = attestasjon()
 
-        val attestertVedtak = attestasjonDao.opprettAttestertVedtak(vedtak, attestasjon)
+        val attestertVedtak = attestasjonService.opprettAttestertVedtak(vedtak, attestasjon)
 
         assertEquals(vedtak.vedtakId, attestertVedtak.vedtakId)
         assertEquals(attestasjon.attestantId, attestertVedtak.attestantId)
@@ -82,15 +88,15 @@ internal class AttestasjonDaoTest {
         val vedtak = vedtak()
         val attestasjon = attestasjon()
 
-        val uattestertVedtak = attestasjonDao.opprettMottattVedtak(vedtak)
+        val uattestertVedtak = attestasjonService.opprettVedtakUtenAttestering(vedtak)
 
-        assertEquals(vedtak.vedtakId, uattestertVedtak.vedtakId)
-        assertNull(uattestertVedtak.attestantId)
-        assertNull(uattestertVedtak.attestasjonstidspunkt)
+        assertEquals(vedtak.vedtakId, uattestertVedtak!!.vedtakId)
+        assertNull(uattestertVedtak!!.attestantId)
+        assertNull(uattestertVedtak!!.attestasjonstidspunkt)
         assertEquals(AttestasjonsStatus.TIL_ATTESTERING, uattestertVedtak.attestasjonsstatus)
 
 
-        val attestertVedtak = attestasjonDao.attesterVedtak(vedtak.vedtakId, attestasjon)
+        val attestertVedtak = attestasjonService.attesterVedtak(vedtak.vedtakId, attestasjon)
 
         assertEquals(vedtak.vedtakId, attestertVedtak!!.vedtakId)
         assertEquals(attestasjon.attestantId, attestertVedtak!!.attestantId)
@@ -104,5 +110,38 @@ internal class AttestasjonDaoTest {
                     )
         )
         assertEquals(AttestasjonsStatus.ATTESTERT, attestertVedtak.attestasjonsstatus)
+    }
+
+    @Test
+    fun `skal ikke kunne opprette attestert vedtak eller vedtak uten attestering om det allerede eksisterer`() {
+
+        val vedtak = vedtak()
+        val attestasjon = attestasjon()
+
+        val attestertVedtak = attestasjonService.opprettAttestertVedtak(vedtak, attestasjon)
+        assertThrows<AttestertVedtakEksistererAllerede> {
+            attestasjonService.opprettAttestertVedtak(
+                vedtak,
+                attestasjon
+            )
+        }
+        assertThrows<AttestertVedtakEksistererAllerede> {
+            attestasjonService.opprettVedtakUtenAttestering(
+                vedtak
+            )
+        }
+    }
+
+    @Test
+    fun `skal ikke kunne attestere allerede attestert vedtak`() {
+
+        val vedtak = vedtak()
+        val attestasjon = attestasjon()
+
+        attestasjonService.opprettAttestertVedtak(vedtak, attestasjon)
+
+        assertThrows<KanIkkeEndreAttestertVedtakException> {
+            attestasjonService.attesterVedtak(vedtak.vedtakId, attestasjon)
+        }
     }
 }

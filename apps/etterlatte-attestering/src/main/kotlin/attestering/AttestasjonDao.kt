@@ -38,13 +38,12 @@ class AttestasjonDao(private val connection: () -> Connection) {
             }
         }
 
-    fun attesterVedtak(vedtakId: String, attestasjon: Attestasjon): AttestertVedtak? =
+    fun attesterVedtak(vedtakId: String, attestasjon: Attestasjon): AttestertVedtak =
         connection().use { connection ->
             val stmt = connection.prepareStatement(
                 "UPDATE attestasjon " +
                         "SET attestasjonsstatus = ?::status, attestant_id = ?, attestasjonstidspunkt = ?" +
-                        "WHERE vedtak_id = ? " +
-                        "RETURNING *"
+                        "WHERE vedtak_id = ? "
             )
 
             stmt.use {
@@ -53,20 +52,26 @@ class AttestasjonDao(private val connection: () -> Connection) {
                 it.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()))
                 it.setString(4, vedtakId)
 
-                it.executeQuery().singleOrNull {
-                    AttestertVedtak(
-                        vedtakId = getString("vedtak_id"),
-                        attestantId = getString("attestant_id"),
-                        attestasjonstidspunkt = getTimestamp("attestasjonstidspunkt").toLocalDateTime(),
-                        attestasjonsstatus = getString("attestasjonsstatus").let { status ->
-                            AttestasjonsStatus.valueOf(
-                                status
-                            )
-                        }
-                    )
-                }
+                require(it.executeUpdate() == 1)
+
             }
-        }
+        }.let { hentAttestertVedtakNonNull(vedtakId) }
+
+    fun settAttestertVedtakTilIkkeAttestert(vedtakId: String): AttestertVedtak =
+        connection().use { connection ->
+            val stmt = connection.prepareStatement(
+                "UPDATE attestasjon " +
+                        "SET attestasjonsstatus = ?::status " +
+                        "WHERE vedtak_id = ? "
+            )
+
+            stmt.use {
+                it.setString(1, AttestasjonsStatus.IKKE_ATTESTERT.name)
+                it.setString(2, vedtakId)
+
+                require(it.executeUpdate() == 1)
+            }
+        }.let { hentAttestertVedtakNonNull(vedtakId) }
 
 
     private fun hentAttestertVedtakNonNull(vedtakId: String): AttestertVedtak =

@@ -64,9 +64,6 @@ internal class AttestasjonDaoTest {
 
     @Test
     fun `skal opprette og lagre attestert vedtak i databasen`() {
-        val vedtak = vedtak()
-        val attestasjon = attestasjon()
-
         val attestertVedtak = attestasjonService.opprettAttestertVedtak(vedtak, attestasjon)
 
         assertEquals(vedtak.vedtakId, attestertVedtak.vedtakId)
@@ -85,12 +82,9 @@ internal class AttestasjonDaoTest {
 
     @Test
     fun `skal opprette ikke-attestert vedtak i databasen og så attestere vedtaket`() {
-        val vedtak = vedtak()
-        val attestasjon = attestasjon()
-
         val uattestertVedtak = attestasjonService.opprettVedtakUtenAttestering(vedtak)
 
-        assertEquals(vedtak.vedtakId, uattestertVedtak!!.vedtakId)
+        assertEquals(vedtak.vedtakId, uattestertVedtak.vedtakId)
         assertNull(uattestertVedtak.attestantId)
         assertNull(uattestertVedtak.attestasjonstidspunkt)
         assertEquals(AttestasjonsStatus.TIL_ATTESTERING, uattestertVedtak.attestasjonsstatus)
@@ -98,7 +92,7 @@ internal class AttestasjonDaoTest {
 
         val attestertVedtak = attestasjonService.attesterVedtak(vedtak.vedtakId, attestasjon)
 
-        assertEquals(vedtak.vedtakId, attestertVedtak!!.vedtakId)
+        assertEquals(vedtak.vedtakId, attestertVedtak.vedtakId)
         assertEquals(attestasjon.attestantId, attestertVedtak.attestantId)
         assertTrue(
             (attestertVedtak.attestasjonstidspunkt!!.isAfter(
@@ -113,11 +107,7 @@ internal class AttestasjonDaoTest {
     }
 
     @Test
-    fun `skal ikke kunne opprette attestert vedtak eller vedtak uten attestering om det allerede eksisterer`() {
-
-        val vedtak = vedtak()
-        val attestasjon = attestasjon()
-
+    fun `skal ikke kunne opprette attestert vedtak eller vedtak uten attestering om vedtakId eksisterer`() {
         attestasjonService.opprettAttestertVedtak(vedtak, attestasjon)
         assertThrows<AttestertVedtakEksistererAllerede> {
             attestasjonService.opprettAttestertVedtak(
@@ -135,13 +125,23 @@ internal class AttestasjonDaoTest {
     @Test
     fun `skal ikke kunne attestere allerede attestert vedtak`() {
 
-        val vedtak = vedtak()
-        val attestasjon = attestasjon()
-
         attestasjonService.opprettAttestertVedtak(vedtak, attestasjon)
 
         assertThrows<KanIkkeEndreAttestertVedtakException> {
             attestasjonService.attesterVedtak(vedtak.vedtakId, attestasjon)
         }
+    }
+
+    @Test
+    fun `skal sette attestert vedtak til ikke attestert`() {
+        attestasjonService.opprettVedtakUtenAttestering(vedtak)
+        val ikkeAttestertVedtak = attestasjonService.settAttestertVedtakTilIkkeAttestert(vedtak.vedtakId)
+
+        assertEquals(AttestasjonsStatus.IKKE_ATTESTERT, ikkeAttestertVedtak.attestasjonsstatus)
+    }
+
+    companion object {
+        val vedtak = vedtak()
+        val attestasjon = attestasjon()
     }
 }

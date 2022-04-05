@@ -29,8 +29,6 @@ internal class LesVilkaarsmelding(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-
-
             val grunnlagListe = packet["grunnlag"].toString()
             try {
                 val hmm = objectMapper.readValue<List<VilkaarOpplysning<ObjectNode>>>(grunnlagListe)

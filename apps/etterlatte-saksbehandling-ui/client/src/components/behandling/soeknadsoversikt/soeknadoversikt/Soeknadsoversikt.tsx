@@ -1,4 +1,3 @@
-import { DetailWrapper } from '../styled'
 import { sjekkDodsfallMerEnn3AarSiden } from '../utils'
 import { PropsOmSoeknad } from '../props'
 import { SoeknadGyldigFremsatt } from './SoeknadGyldigFremsatt'

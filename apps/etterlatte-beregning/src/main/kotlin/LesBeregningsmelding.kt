@@ -36,7 +36,6 @@ internal class LesBeregningsmelding(
                 val beregningsResultat = beregning.beregnResultat(objectMapper.readValue(grunnlagListe))
                 packet["@beregning"] = beregningsResultat
                 context.publish(packet.toJson())
-                //TODO
                 logger.info("Publisert en beregning")
             } catch (e: Exception){
                 //TODO endre denne

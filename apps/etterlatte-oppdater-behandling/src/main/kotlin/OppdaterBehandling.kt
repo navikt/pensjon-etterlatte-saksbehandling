@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -25,6 +26,7 @@ internal class OppdaterBehandling(
             validate { it.requireKey("id") }
             validate { it.interestedIn("@gyldighetsvurdering") }
             validate { it.interestedIn("@vilkaarsvurdering") }
+            validate { it.interestedIn("@beregning") }
             validate { it.interestedIn("@correlation_id") }
 
         }.register(this)
@@ -42,6 +44,10 @@ internal class OppdaterBehandling(
                     behandlinger.leggTilVilkaarsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@vilkaarsvurdering"].toString()))
                     logger.info("Oppdatert Behandling med id $behandlingsID med ny vilkaarsvurdering")
                 }
+                if (packet["@beregning"].toString().isNotEmpty()) {
+                    behandlinger.leggTilBeregningsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@beregning"].toString()))
+                    logger.info("Oppdatert Behandling med id $behandlingsID med ny beregning")
+                }
 
 
             } catch (e: Exception){
@@ -56,6 +62,7 @@ internal class OppdaterBehandling(
 interface Behandling {
     fun leggTilGyldighetsresultat(behandling: UUID, gyldighetsResultat: GyldighetsResultat)
     fun leggTilVilkaarsresultat(behandling: UUID, vilkaarResultat: VilkaarResultat)
+    fun leggTilBeregningsresultat(behandling: UUID, beregningsResultat: BeregningsResultat)
 }
 
 private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

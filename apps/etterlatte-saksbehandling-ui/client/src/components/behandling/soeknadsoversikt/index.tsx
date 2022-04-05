@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import { AppContext } from '../../../store/AppContext'
 import { Content, ContentHeader } from '../../../shared/styled'
-import { OmSoeknad } from './oversikt/OmSoeknad'
+import { SoeknadOversikt } from './oversikt/Soeknadsoversikt'
 import { Familieforhold } from './oversikt/Familieforhold'
 import { usePersonInfoFromBehandling } from './usePersonInfoFromBehandling'
 import { GyldighetType } from '../../../store/reducers/BehandlingReducer'
@@ -38,7 +38,7 @@ export const Soeknadsoversikt = () => {
           </div>
         </HeadingWrapper>
 
-        <OmSoeknad
+        <SoeknadOversikt
           gyldighet={gyldighet}
           avdoedPersonPdl={avdoedPersonPdl}
           innsender={innsender}

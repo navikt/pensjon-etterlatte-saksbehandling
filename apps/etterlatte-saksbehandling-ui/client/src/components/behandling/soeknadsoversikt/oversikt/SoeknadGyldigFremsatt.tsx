@@ -47,10 +47,10 @@ export const SoeknadGyldigFremsatt = ({ gyldighet }: { gyldighet: IGyldighetResu
 }
 
 export const Wrapper = styled.div`
-  display: inline-flex;
+  display: flex;
   border-left: 4px solid #e5e5e5;
-  margin-top: 10px;
-  max-height: 150px;
+  margin-top: 50px;
+  max-height: fit-content;
 `
 export const Endre = styled.div`
   display: inline-flex;
@@ -73,6 +73,6 @@ export const Undertekst = styled.div<{ gray: boolean }>`
   display: flex;
   margin-bottom: 1em;
   margin-top: 0.3em;
-  max-width: 300px;
+  max-width: 18em;
   color: ${(props) => (props.gray ? '#707070' : '#000000')};
 `

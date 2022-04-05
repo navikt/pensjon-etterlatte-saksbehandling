@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useMatch, useNavigate } from 'react-router'
 import { Beregne } from './beregne'
-import { Brev } from './brev'
 import { Inngangsvilkaar } from './inngangsvilkaar'
 import { Soeknadsoversikt } from './soeknadsoversikt'
-import { Utbetalingsoversikt } from './utbetalingsoversikt'
-import { Vedtak } from './vedtak'
+//import { Brev } from './brev'
+//import { Utbetalingsoversikt } from './utbetalingsoversikt'
+//import { Vedtak } from './vedtak'
 
 export const useBehandlingRoutes = () => {
   const [currentRoute, setCurrentRoute] = useState<string | undefined>()
@@ -16,9 +16,9 @@ export const useBehandlingRoutes = () => {
     { path: 'soeknadsoversikt', element: <Soeknadsoversikt /> },
     { path: 'inngangsvilkaar', element: <Inngangsvilkaar /> },
     { path: 'beregne', element: <Beregne /> },
-    { path: 'vedtak', element: <Vedtak /> },
-    { path: 'utbetalingsoversikt', element: <Utbetalingsoversikt /> },
-    { path: 'brev', element: <Brev /> },
+    //{ path: 'vedtak', element: <Vedtak /> },
+    //{ path: 'utbetalingsoversikt', element: <Utbetalingsoversikt /> },
+    //{ path: 'brev', element: <Brev /> },
   ]
 
   const firstPage = behandlingRoutes.findIndex((item) => item.path === currentRoute) === 0

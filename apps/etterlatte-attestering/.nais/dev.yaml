@@ -19,6 +19,13 @@ spec:
     path: /metrics
   kafka:
     pool: nav-dev
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        name: etterlatte-attestasjon
+        databases:
+          - name: attestasjon
+            envVarPrefix: DB
   azure:
     application:
       enabled: true

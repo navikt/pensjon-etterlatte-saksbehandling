@@ -91,17 +91,17 @@ internal class AttestasjonDaoTest {
         val uattestertVedtak = attestasjonService.opprettVedtakUtenAttestering(vedtak)
 
         assertEquals(vedtak.vedtakId, uattestertVedtak!!.vedtakId)
-        assertNull(uattestertVedtak!!.attestantId)
-        assertNull(uattestertVedtak!!.attestasjonstidspunkt)
+        assertNull(uattestertVedtak.attestantId)
+        assertNull(uattestertVedtak.attestasjonstidspunkt)
         assertEquals(AttestasjonsStatus.TIL_ATTESTERING, uattestertVedtak.attestasjonsstatus)
 
 
         val attestertVedtak = attestasjonService.attesterVedtak(vedtak.vedtakId, attestasjon)
 
         assertEquals(vedtak.vedtakId, attestertVedtak!!.vedtakId)
-        assertEquals(attestasjon.attestantId, attestertVedtak!!.attestantId)
+        assertEquals(attestasjon.attestantId, attestertVedtak.attestantId)
         assertTrue(
-            (attestertVedtak!!.attestasjonstidspunkt!!.isAfter(
+            (attestertVedtak.attestasjonstidspunkt!!.isAfter(
                 LocalDateTime.now().minusSeconds(20)
             ) and
                     attestertVedtak.attestasjonstidspunkt!!.isBefore(
@@ -118,7 +118,7 @@ internal class AttestasjonDaoTest {
         val vedtak = vedtak()
         val attestasjon = attestasjon()
 
-        val attestertVedtak = attestasjonService.opprettAttestertVedtak(vedtak, attestasjon)
+        attestasjonService.opprettAttestertVedtak(vedtak, attestasjon)
         assertThrows<AttestertVedtakEksistererAllerede> {
             attestasjonService.opprettAttestertVedtak(
                 vedtak,

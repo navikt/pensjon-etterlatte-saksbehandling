@@ -11,8 +11,9 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 
 
-internal class VedtaksMottaker(
+class VedtaksMottaker(
     rapidsConnection: RapidsConnection,
+    val attestasjonService: AttestasjonService
 ) : River.PacketListener {
 
     private val logger = LoggerFactory.getLogger(VedtaksMottaker::class.java)
@@ -32,9 +33,12 @@ internal class VedtaksMottaker(
             try {
                 logger.info("Fattet vedtak mottatt")
                 val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson(), Vedtak::class.java)
+
+                attestasjonService.opprettAttestertVedtak(vedtak, attester())
+
                 packet["@attestasjon"] = attester()
                 context.publish(packet.toJson())
-                logger.info("Vedtak attestert og lagt tilbake til RR")
+                logger.info("Vedtak attestert")
             } catch (e: Exception) {
                 logger.error("En feil oppstod: ${e.message}", e)
             }

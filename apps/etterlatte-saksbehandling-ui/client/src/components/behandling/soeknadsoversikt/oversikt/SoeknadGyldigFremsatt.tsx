@@ -1,9 +1,5 @@
 import styled from 'styled-components'
-import {
-  GyldighetType,
-  GyldighetVurderingsResultat,
-  IGyldighetResultat,
-} from '../../../../store/reducers/BehandlingReducer'
+import { GyldighetType, VurderingsResultat, IGyldighetResultat } from '../../../../store/reducers/BehandlingReducer'
 import { format } from 'date-fns'
 import { GyldighetIcon } from '../../../../shared/icons/gyldigIcon'
 import { hentGyldighetsTekst } from './utils'
@@ -32,7 +28,7 @@ export const SoeknadGyldigFremsatt = ({ gyldighet }: { gyldighet: IGyldighetResu
       <div>
         <Title>Søknad gyldig fremsatt</Title>
         <Undertekst gray={true}>Automatisk {format(new Date(gyldighet.vurdertDato), 'dd.MM.yyyy')}</Undertekst>
-        {gyldighet.resultat === GyldighetVurderingsResultat.OPPFYLT ? (
+        {gyldighet.resultat === VurderingsResultat.OPPFYLT ? (
           <Undertekst gray={false}>Ja søknad er gyldig fremsatt</Undertekst>
         ) : (
           <Undertekst gray={false}>{sjekkInfo()}</Undertekst>

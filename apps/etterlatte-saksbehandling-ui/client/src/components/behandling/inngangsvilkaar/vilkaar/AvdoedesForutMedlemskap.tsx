@@ -1,5 +1,5 @@
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
-import { VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import {
   Innhold,
   Lovtekst,
@@ -26,7 +26,7 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
       <Innhold>
         <VilkaarWrapper>
           <StatusColumn>
-            <StatusIcon status={VilkaarVurderingsResultat.OPPFYLT} large={true} />
+            <StatusIcon status={VurderingsResultat.OPPFYLT} large={true} />
           </StatusColumn>
           <VilkaarInfobokser>
             <VilkaarColumn>

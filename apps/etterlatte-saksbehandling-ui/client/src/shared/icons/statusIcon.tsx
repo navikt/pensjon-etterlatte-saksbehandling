@@ -1,12 +1,12 @@
 import styled from 'styled-components'
-import { VilkaarVurderingsResultat } from '../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '../../store/reducers/BehandlingReducer'
 
-export const StatusIcon = (props: { status: VilkaarVurderingsResultat; large?: boolean }) => {
+export const StatusIcon = (props: { status: VurderingsResultat; large?: boolean }) => {
   const symbol = hentSymbol()
 
   function hentSymbol() {
     switch (props.status) {
-      case VilkaarVurderingsResultat.OPPFYLT:
+      case VurderingsResultat.OPPFYLT:
         return (
           <svg
             width={props.large ? '26px' : '20px'}
@@ -26,7 +26,7 @@ export const StatusIcon = (props: { status: VilkaarVurderingsResultat; large?: b
           </svg>
         )
 
-      case VilkaarVurderingsResultat.IKKE_OPPFYLT:
+      case VurderingsResultat.IKKE_OPPFYLT:
         return (
           <svg
             width={props.large ? '26px' : '20px'}
@@ -45,7 +45,7 @@ export const StatusIcon = (props: { status: VilkaarVurderingsResultat; large?: b
             ></path>
           </svg>
         )
-      case VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING:
+      case VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING:
         return (
           <>
             <svg
@@ -78,12 +78,12 @@ export const StatusIcon = (props: { status: VilkaarVurderingsResultat; large?: b
 }
 
 const colors = {
-  [VilkaarVurderingsResultat.OPPFYLT]: '#06893a',
-  [VilkaarVurderingsResultat.IKKE_OPPFYLT]: '#ba3a26',
-  [VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING]: '#FF9100',
+  [VurderingsResultat.OPPFYLT]: '#06893a',
+  [VurderingsResultat.IKKE_OPPFYLT]: '#ba3a26',
+  [VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING]: '#FF9100',
 }
 
-const SvgWrapper = styled.div<{ status: VilkaarVurderingsResultat; large?: boolean }>`
+const SvgWrapper = styled.div<{ status: VurderingsResultat; large?: boolean }>`
   display: inline-flex;
   justify-content: center;
   align-items: center;

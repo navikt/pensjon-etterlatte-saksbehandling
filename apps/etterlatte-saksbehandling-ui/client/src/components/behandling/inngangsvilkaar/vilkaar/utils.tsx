@@ -1,12 +1,12 @@
-import { IKriterie, Kriterietype, VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { IKriterie, Kriterietype, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 
-export function vilkaarErOppfylt(resultat: VilkaarVurderingsResultat) {
+export function vilkaarErOppfylt(resultat: VurderingsResultat) {
   switch (resultat) {
-    case VilkaarVurderingsResultat.OPPFYLT:
+    case VurderingsResultat.OPPFYLT:
       return 'Vilkår er oppfyllt'
-    case VilkaarVurderingsResultat.IKKE_OPPFYLT:
+    case VurderingsResultat.IKKE_OPPFYLT:
       return 'Vilkår er ikke oppfyllt'
-    case VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING:
+    case VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING:
       return 'Vilkår trenger avklaring'
   }
 }
@@ -31,9 +31,9 @@ export function mapKriterietyperTilTekst(krit: IKriterie): VilkaarTittelSvar {
     svar = mapEnkeltSvarTilTekst(krit)
   } else if (krit.navn === Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET) {
     tittel = 'Barnet er medlem i trygden'
-    if (krit.resultat === VilkaarVurderingsResultat.OPPFYLT) {
+    if (krit.resultat === VurderingsResultat.OPPFYLT) {
       svar = 'Ja. Barnet har bostedsadresse i Norge'
-    } else if (krit.resultat === VilkaarVurderingsResultat.IKKE_OPPFYLT) {
+    } else if (krit.resultat === VurderingsResultat.IKKE_OPPFYLT) {
       svar = 'Nei. Barnet har utenlandsk bostedsadresse'
     } else {
       svar = 'Avklar. Barnet har registrert utenlandsk adresse'
@@ -48,11 +48,11 @@ export function mapKriterietyperTilTekst(krit: IKriterie): VilkaarTittelSvar {
 
 export function mapEnkeltSvarTilTekst(krit: IKriterie): String {
   switch (krit.resultat) {
-    case VilkaarVurderingsResultat.OPPFYLT:
+    case VurderingsResultat.OPPFYLT:
       return 'Ja'
-    case VilkaarVurderingsResultat.IKKE_OPPFYLT:
+    case VurderingsResultat.IKKE_OPPFYLT:
       return 'Nei'
-    case VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING:
+    case VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING:
       return 'Mangler info for vurdering'
   }
 }

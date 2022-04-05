@@ -8,14 +8,13 @@ import { AvbrytBehandling } from './avbryt'
 import styled from 'styled-components'
 import { handlinger } from './typer'
 import { VilkaarsVurderingKnapper } from './vilkaarsvurderingKnapper'
-import { GyldighetVurderingsResultat } from '../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 
 export const BehandlingHandlingKnapper = () => {
   const ctx = useContext(AppContext)
   const { next, back, lastPage, firstPage } = useBehandlingRoutes()
   const section = useMatch('/behandling/:behandlingId/:section')
-  const soeknadGyldigFremsatt =
-    ctx.state.behandlingReducer.gyldighetsprøving.resultat === GyldighetVurderingsResultat.OPPFYLT
+  const soeknadGyldigFremsatt = ctx.state.behandlingReducer.gyldighetsprøving.resultat === VurderingsResultat.OPPFYLT
 
   const NesteKnapp = () => {
     switch (section?.params.section) {

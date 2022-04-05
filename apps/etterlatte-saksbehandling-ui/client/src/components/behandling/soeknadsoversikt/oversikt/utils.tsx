@@ -1,11 +1,7 @@
 import moment from 'moment'
 import { IPersonOpplysningFraPdl } from '../../types'
 import { WarningText } from '../../../../shared/styled'
-import {
-  GyldighetType,
-  GyldighetVurderingsResultat,
-  IGyldighetproving,
-} from '../../../../store/reducers/BehandlingReducer'
+import { GyldighetType, VurderingsResultat, IGyldighetproving } from '../../../../store/reducers/BehandlingReducer'
 
 export const sjekkDataFraSoeknadMotPdl = (dataFraPdl: string, dataFraSoeknad: string) => {
   return dataFraSoeknad === dataFraPdl || dataFraSoeknad === null ? (
@@ -66,7 +62,7 @@ export const getStatsborgerskapTekst = (statsborgerskap: string) => {
 }
 
 export const hentGyldighetsTekst = (
-  gyldighetResultat: GyldighetVurderingsResultat,
+  gyldighetResultat: VurderingsResultat,
   bosted: IGyldighetproving,
   foreldreransvar: IGyldighetproving,
   innsender: IGyldighetproving
@@ -89,9 +85,9 @@ export const hentGyldighetsTekst = (
     resultat = gyldigheter[0]
   }
 
-  if (gyldighetResultat === GyldighetVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
+  if (gyldighetResultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
     return `Nei, mangler info om ${resultat}. Må avklares.`
-  } else if (gyldighetResultat === GyldighetVurderingsResultat.IKKE_OPPFYLT) {
+  } else if (gyldighetResultat === VurderingsResultat.IKKE_OPPFYLT) {
     return `Nei, ${resultat}. Må avklares.`
   } else return ''
 }
@@ -100,25 +96,25 @@ export function mapGyldighetstyperTilTekst(gyldig: IGyldighetproving): String | 
   let svar
 
   if (gyldig.navn === GyldighetType.INNSENDER_ER_FORELDER) {
-    if (gyldig.resultat === GyldighetVurderingsResultat.IKKE_OPPFYLT) {
+    if (gyldig.resultat === VurderingsResultat.IKKE_OPPFYLT) {
       svar = 'innsender har ikke foreldreansvar'
-    } else if (gyldig.resultat === GyldighetVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
+    } else if (gyldig.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
       svar = 'innsender'
     } else {
       svar = undefined
     }
   } else if (gyldig.navn === GyldighetType.HAR_FORELDREANSVAR_FOR_BARNET) {
-    if (gyldig.resultat === GyldighetVurderingsResultat.IKKE_OPPFYLT) {
+    if (gyldig.resultat === VurderingsResultat.IKKE_OPPFYLT) {
       svar = 'gjenlevende forelder har ikke foreldreansvar'
-    } else if (gyldig.resultat === GyldighetVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
+    } else if (gyldig.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
       svar = 'foreldreansvar'
     } else {
       svar = undefined
     }
   } else if (gyldig.navn === GyldighetType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL) {
-    if (gyldig.resultat === GyldighetVurderingsResultat.IKKE_OPPFYLT) {
+    if (gyldig.resultat === VurderingsResultat.IKKE_OPPFYLT) {
       svar = 'barn og gjenlevende forelder bor ikke på samme adresse'
-    } else if (gyldig.resultat === GyldighetVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
+    } else if (gyldig.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
       svar = 'bostedsadresser'
     }
   } else {

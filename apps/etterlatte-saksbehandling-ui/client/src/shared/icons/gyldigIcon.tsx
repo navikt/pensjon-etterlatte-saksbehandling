@@ -1,10 +1,10 @@
 import styled from 'styled-components'
-import { GyldighetVurderingsResultat } from '../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '../../store/reducers/BehandlingReducer'
 
-export const GyldighetIcon = (props: { status: GyldighetVurderingsResultat; large?: boolean }) => {
+export const GyldighetIcon = (props: { status: VurderingsResultat; large?: boolean }) => {
   return (
     <SvgWrapper status={props.status} large={props.large}>
-      {props.status === GyldighetVurderingsResultat.OPPFYLT ? (
+      {props.status === VurderingsResultat.OPPFYLT ? (
         <svg
           width={props.large ? '26px' : '20px'}
           height={props.large ? '26px' : '20px'}
@@ -44,7 +44,7 @@ export const GyldighetIcon = (props: { status: GyldighetVurderingsResultat; larg
   )
 }
 
-const SvgWrapper = styled.div<{ status: GyldighetVurderingsResultat; large?: boolean }>`
+const SvgWrapper = styled.div<{ status: VurderingsResultat; large?: boolean }>`
   display: inline-flex;
   justify-content: center;
   align-items: center;

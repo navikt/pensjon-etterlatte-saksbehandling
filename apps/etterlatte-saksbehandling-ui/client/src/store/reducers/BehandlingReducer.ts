@@ -39,15 +39,21 @@ export enum KildeType {
   privatperson = 'privatperson',
 }
 
+export enum VurderingsResultat {
+  OPPFYLT = 'OPPFYLT',
+  IKKE_OPPFYLT = 'IKKE_OPPFYLT',
+  KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING = 'KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING',
+}
+
 export interface IGyldighetResultat {
-  resultat: GyldighetVurderingsResultat | undefined
+  resultat: VurderingsResultat | undefined
   vurderinger: IGyldighetproving[]
   vurdertDato: string
 }
 
 export interface IGyldighetproving {
   navn: GyldighetType
-  resultat: GyldighetVurderingsResultat
+  resultat: VurderingsResultat
   vurdertDato: string
 }
 
@@ -57,20 +63,14 @@ export enum GyldighetType {
   BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL = 'BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL',
 }
 
-export enum GyldighetVurderingsResultat {
-  OPPFYLT = 'OPPFYLT',
-  IKKE_OPPFYLT = 'IKKE_OPPFYLT',
-  KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING = 'KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING',
-}
-
 export interface IVilkaarResultat {
-  resultat: VilkaarVurderingsResultat | undefined
+  resultat: VurderingsResultat | undefined
   vilkaar: IVilkaarsproving[]
   vurdertDato: string
 }
 export interface IVilkaarsproving {
   navn: VilkaarsType
-  resultat: VilkaarVurderingsResultat
+  resultat: VurderingsResultat
   basertPaaOpplysninger: IKriterie[]
 }
 
@@ -81,15 +81,9 @@ export enum VilkaarsType {
   BARNETS_MEDLEMSKAP = 'BARNETS_MEDLEMSKAP',
 }
 
-export enum VilkaarVurderingsResultat {
-  OPPFYLT = 'OPPFYLT',
-  IKKE_OPPFYLT = 'IKKE_OPPFYLT',
-  KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING = 'KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING',
-}
-
 export interface IKriterie {
   navn: Kriterietype
-  resultat: VilkaarVurderingsResultat
+  resultat: VurderingsResultat
   basertPaaOpplysninger: IKriterieOpplysning[]
 }
 

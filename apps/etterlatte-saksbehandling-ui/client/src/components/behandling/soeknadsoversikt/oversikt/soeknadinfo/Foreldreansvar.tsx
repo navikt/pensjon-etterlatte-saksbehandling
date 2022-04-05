@@ -2,7 +2,7 @@ import { Detail } from '@navikt/ds-react'
 import { DetailWrapper, WarningIconWrapper } from '../../styled'
 import { WarningIcon } from '../../../../../shared/icons/warningIcon'
 import { IPersonOpplysningFraPdl } from '../../../types'
-import { GyldighetVurderingsResultat, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
 
 export const Foreldreansvar = ({
   gjenlevendePdl,
@@ -13,7 +13,7 @@ export const Foreldreansvar = ({
 }) => {
   return (
     <DetailWrapper>
-      {gjenlevendeHarForeldreansvar?.resultat === GyldighetVurderingsResultat.OPPFYLT && (
+      {gjenlevendeHarForeldreansvar?.resultat === VurderingsResultat.OPPFYLT && (
         <div>
           <Detail size="medium">Foreldreansvar</Detail>
           {gjenlevendePdl?.fornavn} {gjenlevendePdl?.etternavn}
@@ -21,7 +21,7 @@ export const Foreldreansvar = ({
         </div>
       )}
 
-      {gjenlevendeHarForeldreansvar?.resultat === GyldighetVurderingsResultat.IKKE_OPPFYLT && (
+      {gjenlevendeHarForeldreansvar?.resultat === VurderingsResultat.IKKE_OPPFYLT && (
         <div>
           <Detail size="medium" className="detailWrapperWithIcon">
             <WarningIconWrapper>
@@ -35,8 +35,7 @@ export const Foreldreansvar = ({
         </div>
       )}
 
-      {gjenlevendeHarForeldreansvar?.resultat ===
-        GyldighetVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
+      {gjenlevendeHarForeldreansvar?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
         <div>
           <Detail size="medium" className="detailWrapperWithIcon">
             <WarningIconWrapper>

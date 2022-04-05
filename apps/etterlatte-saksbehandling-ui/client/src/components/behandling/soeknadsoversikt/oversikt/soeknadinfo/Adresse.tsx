@@ -1,7 +1,7 @@
 import { Detail } from '@navikt/ds-react'
 import { DetailWrapper, WarningIconWrapper } from '../../styled'
 import { WarningIcon } from '../../../../../shared/icons/warningIcon'
-import { GyldighetVurderingsResultat, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
 
 export const Adresse = ({
   gjenlevendeOgSoekerLikAdresse,
@@ -10,14 +10,14 @@ export const Adresse = ({
 }) => {
   return (
     <DetailWrapper>
-      {gjenlevendeOgSoekerLikAdresse?.resultat === GyldighetVurderingsResultat.OPPFYLT && (
+      {gjenlevendeOgSoekerLikAdresse?.resultat === VurderingsResultat.OPPFYLT && (
         <div>
           <Detail size="medium">Adresse</Detail>
           <div className="text">Barnet bor på samme adresse som gjenlevende forelder</div>
         </div>
       )}
 
-      {gjenlevendeOgSoekerLikAdresse?.resultat === GyldighetVurderingsResultat.IKKE_OPPFYLT && (
+      {gjenlevendeOgSoekerLikAdresse?.resultat === VurderingsResultat.IKKE_OPPFYLT && (
         <div>
           <Detail size="medium" className="detailWrapperWithIcon">
             <WarningIconWrapper>
@@ -28,8 +28,7 @@ export const Adresse = ({
           <span className="warningText">Barnet bor ikke på samme adresse som gjenlevende forelder</span>
         </div>
       )}
-      {gjenlevendeOgSoekerLikAdresse?.resultat ===
-        GyldighetVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
+      {gjenlevendeOgSoekerLikAdresse?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
         <div>
           <Detail size="medium" className="detailWrapperWithIcon">
             <WarningIconWrapper>

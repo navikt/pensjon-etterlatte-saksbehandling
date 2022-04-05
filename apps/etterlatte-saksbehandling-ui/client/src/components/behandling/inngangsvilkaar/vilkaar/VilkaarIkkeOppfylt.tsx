@@ -1,12 +1,12 @@
 import styled from 'styled-components'
 import { CloseIcon } from '../../../../shared/icons/closeIcon'
-import { VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 
-export const VilkaarIkkeOppfylt = (props: { status: VilkaarVurderingsResultat; errorText: string }) => {
-  if (props.status === VilkaarVurderingsResultat.OPPFYLT) {
+export const VilkaarIkkeOppfylt = (props: { status: VurderingsResultat; errorText: string }) => {
+  if (props.status === VurderingsResultat.OPPFYLT) {
     return <></>
   }
-  if (props.status === VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
+  if (props.status === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
     return (
       <VilkaarError>
         <Error>

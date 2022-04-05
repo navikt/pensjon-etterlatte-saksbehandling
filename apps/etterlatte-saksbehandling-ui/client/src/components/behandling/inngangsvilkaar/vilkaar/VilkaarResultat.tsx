@@ -1,4 +1,4 @@
-import { VilkaarVurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import React from 'react'
 import { VilkaarBorder } from '../styled'
 import styled from 'styled-components'
@@ -6,13 +6,17 @@ import moment from 'moment'
 
 type Props = {
   id: any
-  resultat: VilkaarVurderingsResultat | undefined
+  resultat: VurderingsResultat | undefined
   dato: string
 }
 
 /** Bare funksjoner for at Arnt skulle få teste grensesnittet */
-const randomizeForTest = (): VilkaarVurderingsResultat => {
-  const result = [VilkaarVurderingsResultat.OPPFYLT, VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, VilkaarVurderingsResultat.IKKE_OPPFYLT]
+const randomizeForTest = (): VurderingsResultat => {
+  const result = [
+    VurderingsResultat.OPPFYLT,
+    VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+    VurderingsResultat.IKKE_OPPFYLT,
+  ]
   return result[Math.floor(Math.random() * 3)]
 }
 const resultat = randomizeForTest() //TODO: fjern
@@ -20,11 +24,11 @@ const resultat = randomizeForTest() //TODO: fjern
 
 export const VilkaarResultat: React.FC<Props> = ({ id, /*resultat,*/ dato }) => {
   const datoFormatert = moment(dato).format('DD.MM.YYYY')
-  
-  let tekst = "";
-  if (resultat === VilkaarVurderingsResultat.OPPFYLT) {
+
+  let tekst = ''
+  if (resultat === VurderingsResultat.OPPFYLT) {
     tekst = 'Innvilget fra ' + datoFormatert
-  } else if (resultat === VilkaarVurderingsResultat.IKKE_OPPFYLT) {
+  } else if (resultat === VurderingsResultat.IKKE_OPPFYLT) {
     tekst = 'Avslag'
   } else {
     tekst = 'Trenger avklaring'

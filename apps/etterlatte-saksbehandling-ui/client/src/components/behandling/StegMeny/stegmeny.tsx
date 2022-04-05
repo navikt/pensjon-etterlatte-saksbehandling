@@ -2,12 +2,12 @@ import styled from 'styled-components'
 import { NavLink } from 'react-router-dom'
 import { useContext } from 'react'
 import { AppContext } from '../../../store/AppContext'
-import { GyldighetVurderingsResultat, VilkaarVurderingsResultat } from '../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 
 export const StegMeny = () => {
   const ctx = useContext(AppContext)
-  const gyldighet = ctx.state.behandlingReducer.gyldighetsprøving.resultat === GyldighetVurderingsResultat.OPPFYLT
-  const vilkaar = ctx.state.behandlingReducer.vilkårsprøving.resultat === VilkaarVurderingsResultat.OPPFYLT
+  const gyldighet = ctx.state.behandlingReducer.gyldighetsprøving.resultat === VurderingsResultat.OPPFYLT
+  const vilkaar = ctx.state.behandlingReducer.vilkårsprøving.resultat === VurderingsResultat.OPPFYLT
 
   return (
     <StegMenyWrapper>

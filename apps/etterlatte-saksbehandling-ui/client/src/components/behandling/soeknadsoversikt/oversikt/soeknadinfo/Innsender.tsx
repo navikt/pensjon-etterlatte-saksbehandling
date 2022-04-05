@@ -1,6 +1,6 @@
 import { Detail } from '@navikt/ds-react'
 import { DetailWrapper, WarningIconWrapper } from '../../styled'
-import { GyldighetVurderingsResultat, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
 import { WarningIcon } from '../../../../../shared/icons/warningIcon'
 import { IPersonOpplysning } from '../../../types'
 
@@ -13,7 +13,7 @@ export const Innsender = ({
 }) => {
   return (
     <DetailWrapper>
-      {innsenderHarForeldreAnsvar?.resultat === GyldighetVurderingsResultat.OPPFYLT && (
+      {innsenderHarForeldreAnsvar?.resultat === VurderingsResultat.OPPFYLT && (
         <div>
           <Detail size="medium">Innsender</Detail>
           {innsender?.fornavn} {innsender?.etternavn}
@@ -21,7 +21,7 @@ export const Innsender = ({
         </div>
       )}
 
-      {innsenderHarForeldreAnsvar?.resultat === GyldighetVurderingsResultat.IKKE_OPPFYLT && (
+      {innsenderHarForeldreAnsvar?.resultat === VurderingsResultat.IKKE_OPPFYLT && (
         <div>
           <Detail size="medium" className="detailWrapperWithIcon">
             <WarningIconWrapper>
@@ -35,8 +35,7 @@ export const Innsender = ({
         </div>
       )}
 
-      {innsenderHarForeldreAnsvar?.resultat ===
-        GyldighetVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
+      {innsenderHarForeldreAnsvar?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
         <div>
           <Detail size="medium" className="detailWrapperWithIcon">
             <WarningIconWrapper>

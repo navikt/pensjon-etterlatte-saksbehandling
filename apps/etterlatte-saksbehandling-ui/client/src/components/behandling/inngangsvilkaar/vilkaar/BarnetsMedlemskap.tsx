@@ -18,7 +18,7 @@ import {
   IKriterieOpplysning,
   KriterieOpplysningsType,
   Kriterietype,
-  VilkaarVurderingsResultat,
+  VurderingsResultat,
 } from '../../../../store/reducers/BehandlingReducer'
 import { Adressevisning } from '../../felles/Adressevisning'
 import {
@@ -45,28 +45,28 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
 
   const gjenlevendeKriterie = hentKriterie(vilkaar, Kriterietype.GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET)
   const adresserGjenlevendePdl = hentKriterieOpplysning(gjenlevendeKriterie, KriterieOpplysningsType.ADRESSER)
-  const gjenlevendeSkalVises = gjenlevendeKriterie.resultat !== VilkaarVurderingsResultat.OPPFYLT
+  const gjenlevendeSkalVises = gjenlevendeKriterie.resultat !== VurderingsResultat.OPPFYLT
 
   const gjenlevendeBosted = hentUtenlandskAdresse(adresserGjenlevendePdl?.opplysning.bostedadresse, avdoedDoedsdato)
   const gjenlevendeOpphold = hentUtenlandskAdresse(adresserGjenlevendePdl?.opplysning.oppholdadresse, avdoedDoedsdato)
   const gjenlevendeKontakt = hentUtenlandskAdresse(adresserGjenlevendePdl?.opplysning.kontaktadresse, avdoedDoedsdato)
 
   function lagVilkaarVisning() {
-    if (gjenlevendeKriterie.resultat === VilkaarVurderingsResultat.OPPFYLT) {
+    if (gjenlevendeKriterie.resultat === VurderingsResultat.OPPFYLT) {
       return <VilkaarVurderingsliste kriterie={[soekerKriterie]} />
     } else {
       const tittel = 'Barnet er medlem i trygden'
       let svar
       let resultat
-      if (soekerKriterie.resultat === VilkaarVurderingsResultat.OPPFYLT) {
+      if (soekerKriterie.resultat === VurderingsResultat.OPPFYLT) {
         svar = 'Avklar. Gjenlevende har utenlandsk adresse'
-        resultat = VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-      } else if (soekerKriterie.resultat === VilkaarVurderingsResultat.IKKE_OPPFYLT) {
+        resultat = VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+      } else if (soekerKriterie.resultat === VurderingsResultat.IKKE_OPPFYLT) {
         svar = 'Nei. Barnet har utenlandsk bostedsadresse'
-        resultat = VilkaarVurderingsResultat.IKKE_OPPFYLT
+        resultat = VurderingsResultat.IKKE_OPPFYLT
       } else {
         svar = 'Avklar. Barnet og gjenlevende har utenlandsk adresse'
-        resultat = VilkaarVurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        resultat = VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
       }
       return <VilkaarVurderingEnkeltElement tittel={tittel} svar={svar} resultat={resultat} />
     }

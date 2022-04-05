@@ -12,7 +12,7 @@ import {
   IKriterie,
   Kriterietype,
   VilkaarsType,
-  GyldighetVurderingsResultat,
+  VurderingsResultat,
 } from '../../../../../store/reducers/BehandlingReducer'
 import { AlertVarsel } from '../AlertVarsel'
 import { WarningIcon } from '../../../../../shared/icons/warningIcon'
@@ -39,7 +39,7 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
       const avdoedErForelderVilkaar =
         doedsfallVilkaar &&
         doedsfallVilkaar.kriterier.find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER).resultat ===
-          GyldighetVurderingsResultat.OPPFYLT
+          VurderingsResultat.OPPFYLT
 
       const avdoedErLikISoeknad = person?.fnrFraSoeknad === person?.fnr
 

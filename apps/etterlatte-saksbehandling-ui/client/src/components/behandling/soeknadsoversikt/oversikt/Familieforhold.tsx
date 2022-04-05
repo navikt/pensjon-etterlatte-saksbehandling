@@ -1,5 +1,5 @@
+import styled from 'styled-components'
 import { Heading } from '@navikt/ds-react'
-import { Border } from '../styled'
 import { PersonStatus, RelatertPersonsRolle } from '../../types'
 import { PersonInfo } from './personinfo/PersonInfo'
 import { hentAlderVedDoedsdato } from './utils'
@@ -60,3 +60,7 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({
     </>
   )
 }
+
+export const Border = styled.div`
+  border-top: 1px solid #b0b0b0;
+`

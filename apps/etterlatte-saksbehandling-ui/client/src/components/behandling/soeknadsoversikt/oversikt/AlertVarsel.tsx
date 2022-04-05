@@ -1,5 +1,5 @@
+import styled from 'styled-components'
 import { Alert } from '@navikt/ds-react'
-import { AlertWrapper } from '../styled'
 import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
 
 interface Props {
@@ -18,6 +18,8 @@ export const AlertVarsel: React.FC<Props> = ({ varselType }) => {
         return 'Adresse til gjenlevende foreldre er ulik fra oppgitt i søknad og PDL. Orienter innsender og avklar hvilken adresse som stemmer.'
       case 'dødsfall 3 år':
         return 'Dato for dødsfall er mer enn 3 år tilbake i tid. Første mulig virkningstidspunkt er senere enn første måned etter dødsfall.'
+      case 'mangler':
+        return 'Mangler info om avdød. Må avklares'
     }
   }
 
@@ -29,3 +31,13 @@ export const AlertVarsel: React.FC<Props> = ({ varselType }) => {
     </AlertWrapper>
   )
 }
+
+export const AlertWrapper = styled.div`
+  min-width: 200px;
+  max-width: 350px;
+
+  .alert {
+    font-size: 10px;
+    padding: 1em;
+  }
+`

@@ -1,6 +1,6 @@
+import styled from 'styled-components'
 import { Collapse } from '@navikt/ds-icons'
 import { Expand } from '@navikt/ds-icons'
-import { TextButtonWrapper } from '../../styled'
 
 type Props = {
   isOpen: boolean
@@ -16,3 +16,21 @@ export const TextButton: React.FC<Props> = ({ isOpen, setIsOpen }) => {
     </TextButtonWrapper>
   )
 }
+
+export const TextButtonWrapper = styled.div`
+
+.textButton{
+  display: inline-flex;
+  justify-content: space-between;
+  color: #0067c5;
+  :hover {
+    cursor: pointer;
+  }
+  .dropdownIcon {
+    margin-bottom: 0;
+    margin-left: 0.5em;
+    margin-top 0.1em;
+ 
+  }
+}
+`

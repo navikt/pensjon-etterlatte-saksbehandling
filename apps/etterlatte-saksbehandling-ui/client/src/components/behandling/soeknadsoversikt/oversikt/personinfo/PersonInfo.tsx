@@ -1,4 +1,5 @@
-import { PersonInfoWrapper, PersonDetailWrapper, PersonInfoBorder, IconWrapper } from '../../styled'
+import styled from 'styled-components'
+import { PersonDetailWrapper } from '../../styled'
 import { IAdresse, IPersonFraSak, PersonStatus } from '../../../types'
 import { sjekkAdresseGjenlevendeISoeknadMotPdl, sjekkDataFraSoeknadMotPdl } from '../utils'
 import { PersonInfoAdresse } from './PersonInfoAdresse'
@@ -95,3 +96,19 @@ export const PersonInfo: React.FC<Props> = ({ person }) => {
     </PersonInfoBorder>
   )
 }
+
+export const PersonInfoBorder = styled.div`
+  border-bottom: 1px solid #b0b0b0;
+  padding: 1.2em 1em 3em 0em;
+`
+
+export const IconWrapper = styled.span`
+  margin-left: -40px;
+  margin-right: 20px;
+`
+export const PersonInfoWrapper = styled.div`
+  padding-top: 1.2em;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  flex-wrap: wrap;
+`

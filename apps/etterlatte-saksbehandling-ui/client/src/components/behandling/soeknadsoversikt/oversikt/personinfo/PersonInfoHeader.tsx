@@ -1,4 +1,5 @@
-import { PersonInfoHeaderWrapper, StatsborgerskapWrap, BarnAlderWrap, AvdoedWrap } from '../../styled'
+import styled from 'styled-components'
+import { StatsborgerskapWrap, BarnAlderWrap, AvdoedWrap } from '../../styled'
 import { ChildIcon } from '../../../../../shared/icons/childIcon'
 import { IPersonFraSak, PersonStatus } from '../../../types'
 import { format } from 'date-fns'
@@ -51,3 +52,19 @@ export const PersonInfoHeader: React.FC<Props> = ({ person }) => {
       )
   }
 }
+
+export const PersonInfoHeaderWrapper = styled.div`
+  display: inline-flex;
+  font-weight: bold;
+  margin-top: 10px;
+
+  .personRolle {
+    font-weight: normal;
+    margin-left: 0.5em;
+    margin-right: 0.7em;
+  }
+
+  .icon {
+    margin-right: 0.5em;
+  }
+`

@@ -22,6 +22,7 @@ internal class LesBeregningsmelding(
             validate { it.requireKey("grunnlag") }
             validate { it.requireKey("@vilkaarsvurdering") }
             validate { it.requireKey("@gyldighetsvurdering") }
+            validate { it.rejectKey("@beregning") }
             validate { it.interestedIn("@correlation_id") }
 
         }.register(this)

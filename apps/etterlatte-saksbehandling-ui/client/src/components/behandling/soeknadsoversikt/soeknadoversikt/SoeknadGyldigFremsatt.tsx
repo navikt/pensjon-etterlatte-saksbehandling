@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { GyldighetType, VurderingsResultat, IGyldighetResultat } from '../../../../store/reducers/BehandlingReducer'
 import { format } from 'date-fns'
 import { GyldighetIcon } from '../../../../shared/icons/gyldigIcon'
-import { hentGyldighetsTekst } from './utils'
+import { hentGyldighetsTekst } from '../utils'
 
 export const SoeknadGyldigFremsatt = ({ gyldighet }: { gyldighet: IGyldighetResultat }) => {
   const sjekkInfo = (): any => {
@@ -47,6 +47,7 @@ export const Wrapper = styled.div`
   border-left: 4px solid #e5e5e5;
   margin-top: 50px;
   max-height: fit-content;
+  width: 350px;
 `
 export const Endre = styled.div`
   display: inline-flex;

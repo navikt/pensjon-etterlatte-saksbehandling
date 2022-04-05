@@ -1,7 +1,7 @@
 import moment from 'moment'
-import { IPersonOpplysningFraPdl } from '../../types'
-import { WarningText } from '../../../../shared/styled'
-import { GyldighetType, VurderingsResultat, IGyldighetproving } from '../../../../store/reducers/BehandlingReducer'
+import { IPersonOpplysningFraPdl } from '../types'
+import { WarningText } from '../../../shared/styled'
+import { GyldighetType, VurderingsResultat, IGyldighetproving } from '../../../store/reducers/BehandlingReducer'
 
 export const sjekkDataFraSoeknadMotPdl = (dataFraPdl: string, dataFraSoeknad: string) => {
   return dataFraSoeknad === dataFraPdl || dataFraSoeknad === null ? (

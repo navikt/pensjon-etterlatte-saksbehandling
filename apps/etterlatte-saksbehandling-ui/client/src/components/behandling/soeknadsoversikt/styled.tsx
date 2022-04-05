@@ -2,7 +2,7 @@ import styled from 'styled-components'
 
 export const DetailWrapper = styled.div`
   font-size: 16px;
-  min-width: 200px;
+  width: 150px;
   height: 100px;
 
   .warningText {
@@ -28,11 +28,6 @@ export const PersonDetailWrapper = styled.div<{ adresse: boolean }>`
   padding-top: 0.5em;
   padding-left: 1em;
   min-width: ${(props) => (props.adresse ? '400px' : '150px')};
-
-  .bodyShortHeading {
-    margin-bottom: 0.2em;
-    font-weight: bold;
-  }
 `
 
 export const Historikk = styled.div`
@@ -55,29 +50,18 @@ export const HeadingWrapper = styled.div`
   margin-top: 3em;
 
   .details {
-    justify-content: center;
-    align-item: center;
     padding: 0.6em;
   }
 `
 
-export const StatsborgerskapWrap = styled.div`
-  background-color: #ffeccc;
-  border: 1px solid #ffc166;
+export const TypeStatusWrap = styled.div<{ type: string }>`
+  background-color: ${(props) => (props.type === 'barn' ? '#ccf1d6' : '#ffeccc')};
+  border: 1px solid ${(props) => (props.type === 'barn' ? '#33aa5f;' : '#ffc166')};
   padding: 0.1em 0.5em;
   border-radius: 4px;
   font-weight: normal;
   font-size: 14px;
-  margin-right: 0.5em;
-`
-export const BarnAlderWrap = styled.div`
-  background-color: #ccf1d6;
-  border: 1px solid #33aa5f;
-  padding: 0.1em 0.5em;
-  border-radius: 4px;
-  font-weight: normal;
-  font-size: 14px;
-  margin-right: 1em;
+  margin-right: ${(props) => (props.type === 'barn' ? '1em;' : '0.5em')};
 `
 
 export const AvdoedWrap = styled.div`

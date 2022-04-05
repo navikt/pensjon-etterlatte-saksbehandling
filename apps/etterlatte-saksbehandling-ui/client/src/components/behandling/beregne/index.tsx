@@ -1,12 +1,12 @@
 import { useContext } from 'react'
 import { AppContext } from '../../../store/AppContext'
 import { Content, ContentHeader } from '../../../shared/styled'
-import { BarnAlderWrap, StatsborgerskapWrap } from '../soeknadsoversikt/styled'
+import { TypeStatusWrap } from '../soeknadsoversikt/styled'
 import { Sammendrag } from './sammendrag'
 import styled from 'styled-components'
 import { FileIcon } from '../../../shared/icons/fileIcon'
 import { OpplysningsType } from '../../../store/reducers/BehandlingReducer'
-import { hentVirkningstidspunkt } from '../soeknadsoversikt/oversikt/utils'
+import { hentVirkningstidspunkt } from '../soeknadsoversikt/utils'
 import { format } from 'date-fns'
 
 export const Beregne = () => {
@@ -27,8 +27,8 @@ export const Beregne = () => {
         <h1>Beregning og vedtak</h1>
         <InfoWrapper>
           <DetailWrapper>
-            <BarnAlderWrap>Barnepensjon</BarnAlderWrap>
-            <StatsborgerskapWrap>Nasjonal sak</StatsborgerskapWrap>
+            <TypeStatusWrap type="barn">Barnepensjon</TypeStatusWrap>
+            <TypeStatusWrap type="statsborgerskap">Nasjonal sak</TypeStatusWrap>
           </DetailWrapper>
 
           <div className="text">

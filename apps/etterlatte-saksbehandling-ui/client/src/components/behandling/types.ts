@@ -1,14 +1,28 @@
-export interface IPersonFraSak {
+export interface IBarnFraSak {
   navn: string
-  personStatus: PersonStatus
-  rolle: RelatertPersonsRolle
   fnr: string
-  adresser: IAdresse[]
-  alderEtterlatt?: string
   statsborgerskap: string
+  adresser: IAdresse[]
+  alderEtterlatt: string
+  fnrFraSoeknad: string
+}
+
+export interface IAvdoedFraSak {
+  navn: string
+  fnr: string
+  statsborgerskap: string
+  adresser: IAdresse[]
   datoForDoedsfall: string
   fnrFraSoeknad: string
-  adresseFraSoeknad?: string
+}
+
+export interface IGjenlevendeFraSak {
+  navn: string
+  fnr: string
+  statsborgerskap: string
+  adresser: IAdresse[]
+  fnrFraSoeknad: string
+  adresseFraSoeknad: string
 }
 
 export interface IAdresse {

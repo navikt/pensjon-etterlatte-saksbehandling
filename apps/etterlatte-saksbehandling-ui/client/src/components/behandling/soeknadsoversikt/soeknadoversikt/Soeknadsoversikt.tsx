@@ -1,9 +1,9 @@
 import { DetailWrapper } from '../styled'
-import { sjekkDodsfallMerEnn3AarSiden } from './utils'
+import { sjekkDodsfallMerEnn3AarSiden } from '../utils'
 import { PropsOmSoeknad } from '../props'
 import { SoeknadGyldigFremsatt } from './SoeknadGyldigFremsatt'
 import styled from 'styled-components'
-import { AlertVarsel } from './AlertVarsel'
+import { AlertVarsel } from '../AlertVarsel'
 import { Foreldreansvar } from './soeknadinfo/Foreldreansvar'
 import { Adresse } from './soeknadinfo/Adresse'
 import { Innsender } from './soeknadinfo/Innsender'
@@ -38,7 +38,9 @@ export const SoeknadOversikt: React.FC<PropsOmSoeknad> = ({
         <Adresse gjenlevendeOgSoekerLikAdresse={gjenlevendeOgSoekerLikAdresse} />
       </InfoWrapper>
       <div className="soeknadGyldigFremsatt">
-        <DetailWrapper>{dodsfallMerEnn3AarSiden && <AlertVarsel varselType="dødsfall 3 år" />}</DetailWrapper>
+        <div className="dodsfallMerEnn3AarSiden">
+          {dodsfallMerEnn3AarSiden && <AlertVarsel varselType="dødsfall 3 år" />}
+        </div>
         <SoeknadGyldigFremsatt gyldighet={gyldighet} />
       </div>
     </SoeknadOversiktWrapper>
@@ -51,11 +53,18 @@ export const SoeknadOversiktWrapper = styled.div`
   margin-bottom: 2em;
   border-top: 1px solid #b0b0b0;
   padding-top: 2em;
+
+  .soeknadGyldigFremsatt {
+    .dodsfallMerEnn3AarSiden {
+      font-size: 16px;
+      min-width: 200px;
+      height: 100px;
+    }
+  }
 `
 
 export const InfoWrapper = styled.div`
   display: grid;
-  grid-gap: 10px;
   grid-template-columns: repeat(3, 1fr);
   height: 300px;
   flex-grow: 1;

@@ -1,6 +1,6 @@
 import { Detail } from '@navikt/ds-react'
 import { DetailWrapper } from '../../styled'
-import { hentVirkningstidspunkt } from '../utils'
+import { hentVirkningstidspunkt } from '../../utils'
 import { format } from 'date-fns'
 import { IPersonOpplysningFraPdl } from '../../../types'
 

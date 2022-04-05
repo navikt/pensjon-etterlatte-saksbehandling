@@ -3,13 +3,27 @@ import { useState } from 'react'
 import { Modal } from '../../../shared/modal/modal'
 import styled from 'styled-components'
 import { handlinger } from './typer'
+import { sendTilAttestering } from '../../../shared/api/behandling'
+import { useMatch } from 'react-router'
 
 interface Props {
   nextPage: () => void
 }
 export const BeregningModal: React.FC<Props> = ({ nextPage }) => {
   const [beregneModalisOpen, setBeregneModalisOpen] = useState(false)
-  //TODO send til attestering: EY-500
+  const match = useMatch('/behandling/:behandlingId/*')
+  
+  const send = () => {
+    if(!match?.params.behandlingId) throw new Error("Mangler behandlingsid");
+    console.log(match.params.behandlingId)
+    const result = sendTilAttestering(match.params.behandlingId);
+    console.log(result);
+    // if success
+    setBeregneModalisOpen(false)
+    nextPage();
+    // if not, show error message
+  }
+
   return (
     <>
       <Button variant="primary" size="medium" className="button" onClick={() => setBeregneModalisOpen(true)}>
@@ -34,7 +48,7 @@ export const BeregningModal: React.FC<Props> = ({ nextPage }) => {
             >
               {handlinger.ATTESTERING_MODAL.NEI.navn}
             </Button>
-            <Button variant="primary" size="medium" className="button" onClick={nextPage}>
+            <Button variant="primary" size="medium" className="button" onClick={send}>
               {handlinger.ATTESTERING_MODAL.JA.navn}
             </Button>
           </ModalContent>

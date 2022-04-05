@@ -26,3 +26,11 @@ mockRouter.get(`/behandling/:id`, (req: Request, res: Response) => {
     res.json(behandling)
   }, 1000)
 })
+
+mockRouter.post(`/vedtak/:id`, (req: Request, res: Response) => {
+  const id = req.params.id;
+  // let vedtakIverksatt = require(`../mockdata/detaljertBehandling_${id}.json`)
+  setTimeout(() => {
+    res.json("her kommer det data")
+  }, 1000)
+})

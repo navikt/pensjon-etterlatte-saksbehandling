@@ -24,6 +24,7 @@ interface EtterlatteBehandling {
     suspend fun hentBehandling(behandlingId: String, accessToken: String): Any
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag
     suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean
+    suspend fun sendTilAttestering(behandlingId: String, accessToken: String): Boolean
 }
 
 class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehandling {
@@ -178,6 +179,25 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
             throw e
         }
     }
+
+    override suspend fun sendTilAttestering(behandlingId: String, accessToken: String): Boolean {
+        logger.info("Sender til attestering")
+        try {
+            throw Exception("Not implemented")
+            /*
+            downstreamResourceClient.post(Resource(clientId, "$resourceUrl/sak/$sakId/behandlinger"), accessToken, "")
+                .mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
+            return true
+             */
+        } catch (e: Exception) {
+            logger.error("Sending til attestering feilet", e)
+            throw e
+        }
+    }
+
 
 }
 

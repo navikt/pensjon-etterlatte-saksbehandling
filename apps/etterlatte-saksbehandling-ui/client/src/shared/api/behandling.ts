@@ -30,3 +30,18 @@ export const avbrytBehandling = async (behandlingsid: string): Promise<IApiRespo
     return { status: 500 }
   }
 }
+
+export const sendTilAttestering = async (behandlingsId: string): Promise<IApiResponse<any>> => {
+  try {
+    const result: Response = await fetch(`${path}/api/vedtak/${behandlingsId}`, {
+      method: 'post',
+    })
+    return {
+      status: result.status,
+      data: await result.json(),
+    }
+  } catch (e) {
+    console.log(e)
+    return { status: 500 }
+  }
+}

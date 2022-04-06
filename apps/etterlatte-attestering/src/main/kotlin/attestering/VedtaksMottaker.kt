@@ -38,7 +38,7 @@ class VedtaksMottaker(
 
                 packet["@attestasjon"] = attester()
                 context.publish(packet.toJson())
-                logger.info("Vedtak attestert")
+                logger.info("Vedtak attestert og skrevet tilbake Kafka")
             } catch (e: Exception) {
                 logger.error("En feil oppstod: ${e.message}", e)
             }

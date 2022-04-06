@@ -29,9 +29,8 @@ class AttestasjonService(
         if (hentAttestertVedtak(vedtak.vedtakId) != null) {
             throw AttestertVedtakEksistererAllerede("Attestert vedtak med vedtakId ${vedtak.vedtakId} eksisterer allerede")
         }
-        val opprettetAttestertVedtak = attestasjonDao.opprettAttestertVedtak(vedtak, attestasjon)
-        logger.info("Vedtak med id ${opprettetAttestertVedtak.vedtakId} attestert av ${opprettetAttestertVedtak.attestantId} og lagret i databasen ${opprettetAttestertVedtak.tidspunkt}")
-        return opprettetAttestertVedtak
+        return attestasjonDao.opprettAttestertVedtak(vedtak, attestasjon)
+            .also { logger.info("Vedtak med id ${it.vedtakId} attestert av ${it.attestantId} er lagret i databasen ${it.tidspunkt}") }
     }
 
     fun opprettVedtakUtenAttestering(vedtak: Vedtak): AttestertVedtak {
@@ -39,6 +38,7 @@ class AttestasjonService(
             throw AttestertVedtakEksistererAllerede("Attestert vedtak med vedtakId ${vedtak.vedtakId} eksisterer allerede")
         }
         return attestasjonDao.opprettMottattVedtak(vedtak)
+            .also { logger.info("Vedtak med id ${it.vedtakId} uten attestering er lagret i databasen ${it.tidspunkt}") }
 
     }
 
@@ -49,6 +49,7 @@ class AttestasjonService(
             throw KanIkkeEndreAttestertVedtakException("Kan ikke sette vedtak $vedtakId med status ${attestertVedtak.status} til status: IKKE_ATTESTERT")
         }
         return attestasjonDao.settAttestertVedtakTilIkkeAttestert(vedtakId)
+            .also { logger.info("Vedtak med id ${it.vedtakId} er satt til IKKE_ATTESTERT i databasen") }
 
     }
 
@@ -59,6 +60,7 @@ class AttestasjonService(
             throw KanIkkeEndreAttestertVedtakException("Kan ikke attestere vedtak $vedtakId med status ${attestertVedtak.status}")
         }
         return attestasjonDao.attesterVedtak(vedtakId, attestasjon)
+            .also { logger.info("Vedtak med id ${it.vedtakId} attestert av ${it.attestantId} er lagret i databasen ${it.tidspunkt}") }
     }
 
     companion object {

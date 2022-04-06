@@ -10,30 +10,27 @@ fun main() {
         env = System.getenv().toMutableMap().apply {
             put("KAFKA_CONSUMER_GROUP_ID", this.required("NAIS_APP_NAME").replace("-", ""))
         }
-    ).also { bootstrap(it) }
+    ).also { rapidApplication(it).start() }
 }
 
-fun bootstrap(applicationContext: ApplicationContext) {
-    val dataSource = applicationContext.dataSourceBuilder().apply { migrate() }.dataSource()
-    val jmsConnection = applicationContext.jmsConnectionFactoryBuilder().connection()
-    val utbetalingsoppdragDao = applicationContext.utbetalingsoppdragDao(dataSource)
+fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection {
+    val dataSourceBuilder = applicationContext.dataSourceBuilder().also { it.migrate() }
+    val jmsConnectionFactory = applicationContext.jmsConnectionFactory()
+    val utbetalingsoppdragDao = applicationContext.utbetalingsoppdragDao(dataSourceBuilder.dataSource())
     val oppdragService = applicationContext.oppdragService(
-        oppdragSender = applicationContext.oppdragSender(jmsConnection),
+        oppdragSender = applicationContext.oppdragSender(jmsConnectionFactory),
         utbetalingsoppdragDao = utbetalingsoppdragDao
     )
 
-    applicationContext.rapidsConnection()
+    return applicationContext.rapidsConnection()
         .apply {
-            applicationContext.kvitteringMottaker(this, utbetalingsoppdragDao, jmsConnection)
+            applicationContext.kvitteringMottaker(this, utbetalingsoppdragDao, jmsConnectionFactory)
             applicationContext.vedtakMottaker(this, oppdragService)
 
             register(object : RapidsConnection.StatusListener {
-                override fun onStartup(rapidsConnection: RapidsConnection) {
-                    jmsConnection.start()
-                }
                 override fun onShutdown(rapidsConnection: RapidsConnection) {
-                    jmsConnection.close()
+                    jmsConnectionFactory.stop()
                 }
             })
-        }.start()
+        }
 }

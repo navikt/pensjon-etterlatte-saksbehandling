@@ -27,7 +27,7 @@ class ApplicationContext(
         password = env.required("DB_PASSWORD"),
     )
 
-    fun jmsConnectionFactoryBuilder() = JmsConnectionFactoryBuilder(
+    fun jmsConnectionFactory() = JmsConnectionFactory(
         hostname = env.required("OPPDRAG_MQ_HOSTNAME"),
         port = env.required("OPPDRAG_MQ_PORT").toInt(),
         queueManager = env.required("OPPDRAG_MQ_MANAGER"),
@@ -36,8 +36,8 @@ class ApplicationContext(
         password = env.required("srvpwd")
     )
 
-    fun oppdragSender(jmsConnection: Connection) = OppdragSender(
-        jmsConnection = jmsConnection,
+    fun oppdragSender(jmsConnectionFactory: JmsConnectionFactory) = OppdragSender(
+        jmsConnectionFactory = jmsConnectionFactory,
         queue = env.required("OPPDRAG_SEND_MQ_NAME"),
         replyQueue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
     )
@@ -53,11 +53,11 @@ class ApplicationContext(
     fun kvitteringMottaker(
         rapidsConnection: RapidsConnection,
         utbetalingsoppdragDao: UtbetalingsoppdragDao,
-        jmsConnection: Connection
+        jmsConnectionFactory: JmsConnectionFactory
     ) = KvitteringMottaker(
         rapidsConnection = rapidsConnection,
         utbetalingsoppdragDao = utbetalingsoppdragDao,
-        jmsConnection = jmsConnection,
+        jmsConnectionFactory = jmsConnectionFactory,
         queue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
     )
 

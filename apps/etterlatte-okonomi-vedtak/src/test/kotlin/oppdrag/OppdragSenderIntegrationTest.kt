@@ -1,10 +1,9 @@
 package no.nav.etterlatte.oppdrag
 
-import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.config.JmsConnectionFactoryBuilder
+import no.nav.etterlatte.config.JmsConnectionFactory
 import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
 import no.nav.etterlatte.oppdragMedFeiletKvittering
 import no.nav.etterlatte.oppdragMedGodkjentKvittering
@@ -15,14 +14,13 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
-import javax.jms.Connection
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OppdragSenderIntegrationTest {
 
     @Container private val ibmMQContainer = TestContainers.ibmMQContainer
 
-    private lateinit var jmsConnection: Connection
+    private lateinit var jmsConnectionFactory: JmsConnectionFactory
     private lateinit var oppdragSender: OppdragSender
     private lateinit var kvitteringMottaker: KvitteringMottaker
     private val utbetalingsoppdragDao: UtbetalingsoppdragDao = mockk<UtbetalingsoppdragDao>().apply {
@@ -34,7 +32,7 @@ internal class OppdragSenderIntegrationTest {
     fun beforeAll() {
         ibmMQContainer.start()
 
-        val jmsConnectionFactory = JmsConnectionFactoryBuilder(
+        jmsConnectionFactory = JmsConnectionFactory(
             hostname = ibmMQContainer.host,
             port = ibmMQContainer.firstMappedPort,
             queueManager = "QM1",
@@ -43,11 +41,8 @@ internal class OppdragSenderIntegrationTest {
             password = "passw0rd"
         )
 
-        jmsConnection = jmsConnectionFactory.connection()
-            .also { it.start() }
-
         oppdragSender = OppdragSender(
-            jmsConnection = jmsConnection,
+            jmsConnectionFactory = jmsConnectionFactory,
             queue = "DEV.QUEUE.1",
             replyQueue = "DEV.QUEUE.1"
         )
@@ -55,20 +50,20 @@ internal class OppdragSenderIntegrationTest {
         kvitteringMottaker = KvitteringMottaker(
             rapidsConnection = TestRapid(),
             utbetalingsoppdragDao = utbetalingsoppdragDao,
-            jmsConnection = jmsConnection,
+            jmsConnectionFactory = jmsConnectionFactory,
             queue = "DEV.QUEUE.1",
         )
     }
 
     @AfterAll
     fun afterAll() {
-        jmsConnection.close()
+        jmsConnectionFactory.stop()
         ibmMQContainer.stop()
     }
 
     @Test
     fun `skal sende oppdrag på køen, motta godkjent kvittering og oppdatere status`() {
-        val oppdrag = oppdragMedGodkjentKvittering()
+        val oppdrag = oppdragMedGodkjentKvittering(vedtakId = "1")
 
         oppdragSender.sendOppdrag(oppdrag)
 
@@ -77,13 +72,11 @@ internal class OppdragSenderIntegrationTest {
             vedtakId = oppdrag.vedtakId(),
             status = UtbetalingsoppdragStatus.GODKJENT
         ) }
-
-        confirmVerified(utbetalingsoppdragDao)
     }
 
     @Test
     fun `skal sende oppdrag på køen, motta feilet kvittering og oppdatere status`() {
-        val oppdrag = oppdragMedFeiletKvittering()
+        val oppdrag = oppdragMedFeiletKvittering(vedtakId = "2")
 
         oppdragSender.sendOppdrag(oppdrag)
 
@@ -92,7 +85,5 @@ internal class OppdragSenderIntegrationTest {
             vedtakId = oppdrag.vedtakId(),
             status = UtbetalingsoppdragStatus.FEILET
         ) }
-
-        confirmVerified(utbetalingsoppdragDao)
     }
 }

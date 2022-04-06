@@ -12,7 +12,7 @@ export const GridContainer = styled.div`
 `
 
 export const Column = styled.div`
-  min-width: 250px;
+  min-width: 280px;
   &:nth-child(2) {
     flex-grow: 1;
     border-right: 1px solid #c6c2bf;

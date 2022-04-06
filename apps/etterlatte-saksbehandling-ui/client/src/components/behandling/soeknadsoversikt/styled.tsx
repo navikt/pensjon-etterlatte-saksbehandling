@@ -25,8 +25,7 @@ export const WarningIconWrapper = styled.div`
 
 export const PersonDetailWrapper = styled.div<{ adresse: boolean }>`
   padding-top: 0.5em;
-  padding-left: 1em;
-  min-width: ${(props) => (props.adresse ? '400px' : '150px')};
+  min-width: ${(props) => (props.adresse ? '300px' : '100px')};
 `
 
 export const Historikk = styled.div`

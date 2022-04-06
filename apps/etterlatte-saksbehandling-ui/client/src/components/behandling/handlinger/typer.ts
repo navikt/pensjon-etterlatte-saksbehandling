@@ -5,7 +5,7 @@ export const handlinger = {
 
   VILKAARSVURDERING: {
     BEREGNE: { id: 'beregne', navn: 'Beregne og fatte vedtak' },
-    AVSLAG: { id: 'avslag', navn: 'Gå til avslag' },
+    AVSLAG: { id: 'avslag', navn: 'Avslå og send til attestering' },
     VENT: { id: 'vent', navn: 'Sett saken på vent' },
   },
   ATTESTERING: { id: 'beregne', navn: 'Send til attestering' },

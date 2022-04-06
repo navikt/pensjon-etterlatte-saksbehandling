@@ -16,7 +16,7 @@ export const Barn: React.FC<Props> = ({ person }) => {
         <span className="icon">
           <ChildIcon />
         </span>
-        {person.navn} <span className="personRolle">{RelatertPersonsRolle.BARN}</span>
+        {person.navn} <span className="personRolle">({RelatertPersonsRolle.BARN})</span>
         <TypeStatusWrap type="barn">{person.alderEtterlatt} år</TypeStatusWrap>
         <TypeStatusWrap type="statsborgerskap">{getStatsborgerskapTekst(person.statsborgerskap)}</TypeStatusWrap>
       </PersonHeader>

@@ -136,5 +136,4 @@ const IconButton = styled.div`
 const MenuHead = styled.div`
   padding: 2em 1em;
   height: 100px;
-  border-bottom: 1px solid #ccc;
 `

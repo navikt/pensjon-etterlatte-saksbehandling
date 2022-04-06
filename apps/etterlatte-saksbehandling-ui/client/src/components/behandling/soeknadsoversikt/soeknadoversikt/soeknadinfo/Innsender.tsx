@@ -41,7 +41,7 @@ export const Innsender = ({
             <WarningIconWrapper>
               <WarningIcon />
             </WarningIconWrapper>
-            Foreldreansvar
+            Innsender
           </Detail>
           <span className="warningText">Mangler info</span>
         </div>

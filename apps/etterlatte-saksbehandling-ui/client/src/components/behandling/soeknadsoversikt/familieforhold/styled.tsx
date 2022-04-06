@@ -1,13 +1,14 @@
 import styled from 'styled-components'
 
 export const PersonBorder = styled.div`
-  border-bottom: 1px solid #b0b0b0;
+  border-top: 1px dashed #000000;
+
   padding: 1.2em 1em 3em 0em;
 `
 
 export const IconWrapper = styled.span`
-  margin-left: -40px;
-  margin-right: 20px;
+  margin-left: -55px;
+  margin-right: 40px;
 `
 export const PersonInfoWrapper = styled.div`
   padding-top: 1.2em;
@@ -27,6 +28,7 @@ export const PersonHeader = styled.div`
   }
 
   .icon {
+    margin-left: -2em;
     margin-right: 0.5em;
   }
 `

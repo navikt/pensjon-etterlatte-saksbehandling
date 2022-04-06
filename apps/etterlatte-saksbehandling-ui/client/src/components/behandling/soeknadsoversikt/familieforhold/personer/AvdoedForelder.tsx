@@ -36,7 +36,6 @@ export const AvdoedForelder: React.FC<Props> = ({ person }) => {
       doedsfallVilkaar.kriterier.find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER).resultat
 
     const avdoedErLikISoeknad = person?.fnrFraSoeknad === person?.fnr
-    console.log(doedsfallVilkaar.kriterier.find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER))
     setFeilForelderOppgittSomAvdoed(avdoedErForelderVilkaar && !avdoedErLikISoeknad)
     setForelderErDoed(avdoedErForelderVilkaar)
   }, [])

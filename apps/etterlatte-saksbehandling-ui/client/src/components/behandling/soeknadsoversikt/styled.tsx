@@ -8,7 +8,6 @@ export const DetailWrapper = styled.div`
   .warningText {
     color: #ba3a26;
     max-width: 150px;
-    display: block;
   }
   .text {
     max-width: 150px;
@@ -61,6 +60,7 @@ export const TypeStatusWrap = styled.div<{ type: string }>`
   border-radius: 4px;
   font-weight: normal;
   font-size: 14px;
+  height: 25px;
   margin-right: ${(props) => (props.type === 'barn' ? '1em;' : '0.5em')};
 `
 

@@ -37,30 +37,30 @@ export const Soeknadsoversikt = () => {
             <BehandlingsTypeSmall type={IBehandlingsType.BARNEPENSJON} />
           </div>
         </HeadingWrapper>
-
-        <SoeknadOversikt
-          gyldighet={gyldighet}
-          avdoedPersonPdl={avdoedPersonPdl}
-          innsender={innsender}
-          mottattDato={mottattDato}
-          gjenlevendePdl={gjenlevendePdl}
-          gjenlevendeHarForeldreansvar={gyldighet.vurderinger.find(
-            (g) => g.navn === GyldighetType.HAR_FORELDREANSVAR_FOR_BARNET
-          )}
-          gjenlevendeOgSoekerLikAdresse={gyldighet.vurderinger.find(
-            (g) => g.navn === GyldighetType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL
-          )}
-          innsenderHarForeldreAnsvar={gyldighet.vurderinger.find((g) => g.navn === GyldighetType.INNSENDER_ER_FORELDER)}
-        />
-        <Familieforhold
-          soekerPdl={soekerPdl}
-          soekerSoknad={soekerSoknad}
-          avdoedPersonPdl={avdoedPersonPdl}
-          avdodPersonSoknad={avdodPersonSoknad}
-          gjenlevendePdl={gjenlevendePdl}
-          gjenlevendeSoknad={gjenlevendeSoknad}
-        />
       </ContentHeader>
+
+      <SoeknadOversikt
+        gyldighet={gyldighet}
+        avdoedPersonPdl={avdoedPersonPdl}
+        innsender={innsender}
+        mottattDato={mottattDato}
+        gjenlevendePdl={gjenlevendePdl}
+        gjenlevendeHarForeldreansvar={gyldighet.vurderinger.find(
+          (g) => g.navn === GyldighetType.HAR_FORELDREANSVAR_FOR_BARNET
+        )}
+        gjenlevendeOgSoekerLikAdresse={gyldighet.vurderinger.find(
+          (g) => g.navn === GyldighetType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL
+        )}
+        innsenderHarForeldreAnsvar={gyldighet.vurderinger.find((g) => g.navn === GyldighetType.INNSENDER_ER_FORELDER)}
+      />
+      <Familieforhold
+        soekerPdl={soekerPdl}
+        soekerSoknad={soekerSoknad}
+        avdoedPersonPdl={avdoedPersonPdl}
+        avdodPersonSoknad={avdodPersonSoknad}
+        gjenlevendePdl={gjenlevendePdl}
+        gjenlevendeSoknad={gjenlevendeSoknad}
+      />
     </Content>
   )
 }

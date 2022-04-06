@@ -50,8 +50,7 @@ export const SoeknadOversiktWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
   margin-bottom: 2em;
-  border-top: 1px solid #b0b0b0;
-  padding-top: 2em;
+  padding: 2em 5em;
 
   .soeknadGyldigFremsatt {
     .dodsfallMerEnn3AarSiden {

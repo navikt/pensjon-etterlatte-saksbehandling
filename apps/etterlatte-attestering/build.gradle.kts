@@ -14,6 +14,14 @@ dependencies {
     implementation(project(":libs:common"))
     implementation("org.junit.jupiter:junit-jupiter:5.8.1")
 
+    implementation("com.zaxxer:HikariCP:3.4.5")
+    implementation("org.flywaydb:flyway-core:6.5.0")
+    implementation("org.postgresql:postgresql:42.3.3")
+
+    testImplementation("org.testcontainers:testcontainers:1.16.3")
+    testImplementation("org.testcontainers:junit-jupiter:1.16.3")
+    testImplementation("org.testcontainers:postgresql:1.16.0")
+
     testImplementation(Ktor.ClientMock)
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.attestering
+package no.nav.etterlatte.domain
 
 import java.time.LocalDate
 

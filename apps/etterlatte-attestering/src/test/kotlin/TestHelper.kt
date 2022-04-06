@@ -1,10 +1,10 @@
-import no.nav.etterlatte.attestering.Beregningsperiode
-import no.nav.etterlatte.attestering.Endringskode
-import no.nav.etterlatte.attestering.Enhetstype
-import no.nav.etterlatte.attestering.Oppdragsenhet
-import no.nav.etterlatte.attestering.Vedtak
-import no.nav.etterlatte.attestering.Ytelseskomponent
-import no.nav.etterlatte.domain.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
+import no.nav.etterlatte.libs.common.vedtak.Endringskode
+import no.nav.etterlatte.libs.common.vedtak.Enhetstype
+import no.nav.etterlatte.libs.common.vedtak.Oppdragsenhet
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.Ytelseskomponent
 import java.io.FileNotFoundException
 import java.math.BigDecimal
 import java.time.LocalDate

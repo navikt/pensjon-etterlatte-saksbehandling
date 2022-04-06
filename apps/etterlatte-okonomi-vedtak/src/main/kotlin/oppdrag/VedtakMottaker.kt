@@ -2,11 +2,11 @@ package no.nav.etterlatte.oppdrag
 
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.domain.Attestasjon
-import no.nav.etterlatte.domain.Vedtak
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection

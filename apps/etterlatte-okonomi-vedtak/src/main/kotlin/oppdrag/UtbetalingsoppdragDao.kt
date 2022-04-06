@@ -4,9 +4,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.common.Jaxb
 import no.nav.etterlatte.domain.Utbetalingsoppdrag
 import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
-import no.nav.etterlatte.domain.Vedtak
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
@@ -87,7 +87,7 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
 
     fun oppdaterKvittering(oppdragMedKvittering: Oppdrag) =
         dataSource.connection.use { connection ->
-            requireNotNull(oppdragMedKvittering.mmel) { "Oppdrag innholdt ikke kvitteringsmelding"}
+            requireNotNull(oppdragMedKvittering.mmel) { "Oppdrag innholdt ikke kvitteringsmelding" }
 
             logger.info("Oppdaterer kvittering i utbetalingsoppdrag for vedtakId=${oppdragMedKvittering.vedtakId()}")
 

@@ -49,7 +49,7 @@ class KvitteringMottaker(
             utbetalingsoppdragDao.oppdaterKvittering(oppdrag)
 
             when (oppdrag.mmel.alvorlighetsgrad) {
-                "00", "04" -> oppdragGodkjent(oppdrag)
+                "00", "04" -> oppdragGodkjent(oppdrag, oppdragXml)
                 //"08" // noe saksbehandler må håndtere
                 //"12" // hånteres av tjenesten
                 else -> oppdragFeilet(oppdrag, oppdragXml)
@@ -62,8 +62,8 @@ class KvitteringMottaker(
         }
     }
 
-    private fun oppdragGodkjent(oppdrag: Oppdrag) {
-        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} godkjent")
+    private fun oppdragGodkjent(oppdrag: Oppdrag, oppdragXml: String) {
+        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} godkjent", kv("oppdrag", oppdragXml))
         utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.GODKJENT)
         rapidsConnection.publish(mapOf("@event_name" to "utbetaling_godkjent").toJson())
         // TODO utvid melding

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.attestering
+package no.nav.etterlatte.libs.common.vedtak
 
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -21,9 +21,9 @@ data class Oppdragsenhet(
     val datoEnhetFOM: LocalDate
 )
 
-enum class Endringskode(s: String) {
-    NY("NY"),
-    ENDRING("ENDRING")
+enum class Endringskode() {
+    NY,
+    ENDRING
 }
 
 enum class Enhetstype(s: String) { //TODO finne ut forkortelse til Behandlende og evt. andre enhetstyper

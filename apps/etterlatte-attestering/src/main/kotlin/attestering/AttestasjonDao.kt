@@ -1,8 +1,9 @@
 package no.nav.etterlatte.attestering
 
-import no.nav.etterlatte.domain.Attestasjon
 import no.nav.etterlatte.domain.AttestasjonsStatus
 import no.nav.etterlatte.domain.AttestertVedtak
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Timestamp

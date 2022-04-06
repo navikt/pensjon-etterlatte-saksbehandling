@@ -1,8 +1,8 @@
 import io.mockk.mockk
 import no.nav.etterlatte.attestering.AttestasjonService
 import no.nav.etterlatte.attestering.VedtaksMottaker
-import no.nav.etterlatte.domain.Attestasjon
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull

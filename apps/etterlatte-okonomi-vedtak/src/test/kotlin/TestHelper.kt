@@ -1,12 +1,12 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.domain.Attestasjon
-import no.nav.etterlatte.domain.Beregningsperiode
-import no.nav.etterlatte.domain.Endringskode
-import no.nav.etterlatte.domain.Enhetstype
-import no.nav.etterlatte.domain.Oppdragsenhet
-import no.nav.etterlatte.domain.Vedtak
-import no.nav.etterlatte.domain.Ytelseskomponent
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
+import no.nav.etterlatte.libs.common.vedtak.Endringskode
+import no.nav.etterlatte.libs.common.vedtak.Enhetstype
+import no.nav.etterlatte.libs.common.vedtak.Oppdragsenhet
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.Ytelseskomponent
 import no.nav.etterlatte.oppdrag.OppdragMapper
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import java.io.FileNotFoundException

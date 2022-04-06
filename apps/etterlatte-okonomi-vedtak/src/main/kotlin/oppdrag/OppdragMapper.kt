@@ -1,9 +1,9 @@
 package no.nav.etterlatte.oppdrag
 
-import no.nav.etterlatte.domain.Attestasjon
-import no.nav.etterlatte.domain.Endringskode
-import no.nav.etterlatte.domain.Enhetstype
-import no.nav.etterlatte.domain.Vedtak
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.Endringskode
+import no.nav.etterlatte.libs.common.vedtak.Enhetstype
+import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.trygdeetaten.skjema.oppdrag.Attestant180
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import no.trygdeetaten.skjema.oppdrag.Oppdrag110
@@ -27,7 +27,8 @@ object OppdragMapper {
             fagsystemId = vedtak.sakId
             utbetFrekvens = "MND"
             oppdragGjelderId = vedtak.sakIdGjelderFnr
-            datoOppdragGjelderFom = vedtak.aktorFoedselsdato.toXMLDate() // TODO første virkningsdato eller 01.01.1900
+            datoOppdragGjelderFom =
+                LocalDate.parse("1900-01-01").toXMLDate() // TODO første virkningsdato eller 01.01.1900
             saksbehId = vedtak.saksbehandlerId
 
             // aktuelle enheter knyttet til oppdraget
@@ -37,8 +38,8 @@ object OppdragMapper {
                         typeEnhet = when (it.enhetsType) {
                             Enhetstype.BOSTED -> "BOS"
                         }
-                        enhet = it.enhetsnummer // alltid 4819 enhetsnummer (ikke enheten som fatter vedtaket)
-                        datoEnhetFom = it.datoEnhetFOM.toXMLDate() // TODO 01.01.1900
+                        enhet = "4819" // alltid 4819 enhetsnummer (ikke enheten som fatter vedtaket)
+                        datoEnhetFom = LocalDate.parse("1900-01-01").toXMLDate()// TODO 01.01.1900
                     }
                 )
             }
@@ -50,9 +51,10 @@ object OppdragMapper {
                         //kodeStatusLinje
                         //datoStatusFom TODO ved opphør skal denne være fra første mnd etter
                         vedtakId = vedtak.vedtakId
-                        delytelseId = it.delytelsesId // TODO: kan være hva som helst - må være unik innenfor Oppdrag - må taes vare på
+                        delytelseId =
+                            it.delytelsesId // TODO: kan være hva som helst - må være unik innenfor Oppdrag - må taes vare på
                         //linjeid // får dette fra Oppdragssystemet
-                        kodeKlassifik = it.ytelseskomponent.toString()
+                        kodeKlassifik = it.ytelseskomponent.toString() // PENBPGP-OPTP
                         //datoKlassifikFom
                         datoVedtakFom = it.datoFOM.toXMLDate()
                         datoVedtakTom =

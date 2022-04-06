@@ -83,7 +83,7 @@ object OppdragMapper {
 
                         attestant180.add(
                             Attestant180().apply {
-                                attestasjon.attestantId
+                                attestantId = attestasjon.attestantId
                             }
                         )
                     }

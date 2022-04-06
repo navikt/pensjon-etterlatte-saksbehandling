@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
 export enum IBehandlingsStatus {
-    FORSTEGANG = "førstegangsbehandling",
-    REVURDERING = "revurdering",
+    FORSTEGANG = "Førstegangsbehandling",
+    REVURDERING = "Revurdering",
 }
 
 const colors = {

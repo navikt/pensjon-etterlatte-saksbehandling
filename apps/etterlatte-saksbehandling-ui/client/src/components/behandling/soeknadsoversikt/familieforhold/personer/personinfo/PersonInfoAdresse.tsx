@@ -20,33 +20,31 @@ export const PersonInfoAdresse: React.FC<Props> = ({
 }) => {
   const [visAdresseHistorikk, setVisAdresseHistorikk] = useState(false)
   return (
-    <>
-      <PersonDetailWrapper adresse={true}>
-        <div>
-          <strong>{avodedPerson ? 'Bostedadresse dødsfallstidspunkt' : 'Bostedadresse'}</strong>
-        </div>
-        {gjeldendeAdresse ? (
-          adresseFraSoeknadGjenlevende ? (
-            sjekkDataFraSoeknadMotPdl(
-              `${gjeldendeAdresse.adresseLinje1}, ${gjeldendeAdresse.postnr} ${gjeldendeAdresse.poststed}`,
-              adresseFraSoeknadGjenlevende
-            )
-          ) : (
-            <span>
-              {gjeldendeAdresse.adresseLinje1}, {gjeldendeAdresse.postnr} {gjeldendeAdresse.poststed}
-            </span>
+    <PersonDetailWrapper adresse={true}>
+      <div>
+        <strong>{avodedPerson ? 'Bostedadresse dødsfallstidspunkt' : 'Bostedadresse'}</strong>
+      </div>
+      {gjeldendeAdresse ? (
+        adresseFraSoeknadGjenlevende ? (
+          sjekkDataFraSoeknadMotPdl(
+            `${gjeldendeAdresse.adresseLinje1}, ${gjeldendeAdresse.postnr} ${gjeldendeAdresse.poststed}`,
+            adresseFraSoeknadGjenlevende
           )
         ) : (
-          <span>Ingen bostedadresse</span>
-        )}
+          <span>
+            {gjeldendeAdresse.adresseLinje1}, {gjeldendeAdresse.postnr} {gjeldendeAdresse.poststed}
+          </span>
+        )
+      ) : (
+        <span>Ingen bostedadresse</span>
+      )}
 
-        {adresser && !avodedPerson && (
-          <Historikk>
-            <TextButton isOpen={visAdresseHistorikk} setIsOpen={setVisAdresseHistorikk} />
-            {visAdresseHistorikk && <Adressevisning adresser={adresser} soeknadsoversikt={true} />}
-          </Historikk>
-        )}
-      </PersonDetailWrapper>
-    </>
+      {adresser && !avodedPerson && (
+        <Historikk>
+          <TextButton isOpen={visAdresseHistorikk} setIsOpen={setVisAdresseHistorikk} />
+          {visAdresseHistorikk && <Adressevisning adresser={adresser} soeknadsoversikt={true} />}
+        </Historikk>
+      )}
+    </PersonDetailWrapper>
   )
 }

@@ -46,7 +46,7 @@ export const Behandling = () => {
         <GridContainer>
           <Column>
             <MenuHead>
-              <BehandlingsStatus status={IBehandlingsStatus.FORSTEGANG} />
+              <Title>{IBehandlingsStatus.FORSTEGANG}</Title>
             </MenuHead>
             <StegMeny />
           </Column>
@@ -136,4 +136,8 @@ const IconButton = styled.div`
 const MenuHead = styled.div`
   padding: 2em 1em;
   height: 100px;
+`
+const Title = styled.div`
+  font-weight: 600;
+  font-size: 24px;
 `

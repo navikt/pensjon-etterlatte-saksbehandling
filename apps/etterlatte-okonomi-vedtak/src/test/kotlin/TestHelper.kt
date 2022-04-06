@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.vedtak.Endringskode
 import no.nav.etterlatte.libs.common.vedtak.Enhetstype
 import no.nav.etterlatte.libs.common.vedtak.Oppdragsenhet
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
-import no.nav.etterlatte.libs.common.vedtak.Ytelseskomponent
 import no.nav.etterlatte.oppdrag.OppdragMapper
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import java.io.FileNotFoundException
@@ -29,7 +28,7 @@ fun vedtak(vedtakId: String = "1") = Vedtak(
     beregningsperioder = listOf(
         Beregningsperiode(
             delytelsesId = "delytelsesid",
-            ytelseskomponent = Ytelseskomponent.BARNEPENSJON,
+            ytelseskomponent = "PENBPGP-OPTP",
             datoFOM = LocalDate.parse("2022-02-02"),
             datoTOM = LocalDate.parse("2030-01-04"),
             belop = BigDecimal(10000)

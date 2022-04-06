@@ -30,13 +30,9 @@ enum class Enhetstype(s: String) { //TODO finne ut forkortelse til Behandlende o
     BOSTED("BOS")
 }
 
-enum class Ytelseskomponent(s: String) {
-    BARNEPENSJON("BP")
-}
-
 data class Beregningsperiode(
     val delytelsesId: String,
-    val ytelseskomponent: Ytelseskomponent,
+    val ytelseskomponent: String,
     val datoFOM: LocalDate,
     val datoTOM: LocalDate,
     val belop: BigDecimal,

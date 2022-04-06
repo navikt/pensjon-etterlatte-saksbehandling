@@ -8,6 +8,7 @@
     "behandlingstype": "NY",
     "sakIdGjelderFnr": "07010776133",
     "aktorFoedselsdato": "1900-01-01",
+    "behandlingstype": "NY",
     "beregningsperioder": [
       {
         "delytelsesId": "1",

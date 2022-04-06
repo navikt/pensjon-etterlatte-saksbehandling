@@ -23,11 +23,11 @@ object OppdragMapper {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = "1" // 3 = simulering
             kodeEndring = "NY" // Alltid NY for førstegangsinnvilgelse
-            kodeFagomraade = "EY" // TODO må legges inn hos økonomi // PENBP for å teste tilsvarende PESYS
+            kodeFagomraade = "PENBP" // TODO midlertidig verdi fra pesys
             fagsystemId = vedtak.sakId
             utbetFrekvens = "MND"
             oppdragGjelderId = vedtak.sakIdGjelderFnr
-            datoOppdragGjelderFom = vedtak.aktorFoedselsdato.toXMLDate()
+            datoOppdragGjelderFom = vedtak.aktorFoedselsdato.toXMLDate() // TODO første virkningsdato eller 01.01.1900
             saksbehId = vedtak.saksbehandlerId
 
             // aktuelle enheter knyttet til oppdraget
@@ -37,8 +37,8 @@ object OppdragMapper {
                         typeEnhet = when (it.enhetsType) {
                             Enhetstype.BOSTED -> "BOS"
                         }
-                        enhet = it.enhetsnummer
-                        datoEnhetFom = it.datoEnhetFOM.toXMLDate()
+                        enhet = it.enhetsnummer // alltid 4819 enhetsnummer (ikke enheten som fatter vedtaket)
+                        datoEnhetFom = it.datoEnhetFOM.toXMLDate() // TODO 01.01.1900
                     }
                 )
             }
@@ -48,9 +48,9 @@ object OppdragMapper {
                     OppdragsLinje150().apply {
                         kodeEndringLinje = Endringskode.NY.toString()
                         //kodeStatusLinje
-                        //datoStatusFom
+                        //datoStatusFom TODO ved opphør skal denne være fra første mnd etter
                         vedtakId = vedtak.vedtakId
-                        delytelseId = it.delytelsesId // TODO: finne tilsvarende delytelsesId for PESYS
+                        delytelseId = it.delytelsesId // TODO: kan være hva som helst - må være unik innenfor Oppdrag - må taes vare på
                         //linjeid // får dette fra Oppdragssystemet
                         kodeKlassifik = it.ytelseskomponent.toString()
                         //datoKlassifikFom

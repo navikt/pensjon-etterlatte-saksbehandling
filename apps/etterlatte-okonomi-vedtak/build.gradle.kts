@@ -21,6 +21,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:3.4.5")
     implementation("org.flywaydb:flyway-core:6.5.0")
     implementation("org.postgresql:postgresql:42.3.3")
+    implementation("org.messaginghub:pooled-jms:2.0.5")
 
     testImplementation(Ktor.ClientMock)
     testImplementation(MockK.MockK)

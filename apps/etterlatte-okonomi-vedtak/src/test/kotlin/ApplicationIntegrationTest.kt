@@ -5,6 +5,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.common.Jaxb
 import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.config.JmsConnectionFactory
 import no.nav.etterlatte.util.TestContainers
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
-import javax.jms.Connection
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApplicationIntegrationTest {
@@ -23,7 +23,7 @@ class ApplicationIntegrationTest {
     @Container private val ibmMQContainer = TestContainers.ibmMQContainer
 
     private lateinit var rapidsConnection: TestRapid
-    private lateinit var jmsConnection: Connection
+    private lateinit var connectionFactory: JmsConnectionFactory
 
     @BeforeAll
     fun beforeAll() {
@@ -50,20 +50,15 @@ class ApplicationIntegrationTest {
 
         val applicationContext = spyk(ApplicationContext(env)).apply {
             every { rapidsConnection() } returns spyk(TestRapid()).also { rapidsConnection = it }
-            every { jmsConnectionFactoryBuilder() } answers { spyk(callOriginal()) {
-                every { connection() } answers { callOriginal().also {
-                    jmsConnection = it
-                    it.start() }
-                }
-            } }
+            every { jmsConnectionFactory() } answers { spyk(callOriginal()).also { connectionFactory = it } }
         }
 
-        bootstrap(applicationContext)
+        rapidApplication(applicationContext).start()
     }
 
     @AfterAll
     fun afterAll() {
-        jmsConnection.close()
+        connectionFactory.stop()
         ibmMQContainer.stop()
         postgreSQLContainer.stop()
         rapidsConnection.stop()
@@ -97,7 +92,7 @@ class ApplicationIntegrationTest {
     }
 
     private fun sendKvitteringsmeldingFraOppdrag(oppdrag: Oppdrag) {
-        jmsConnection.createSession().use { session ->
+        connectionFactory.connection().createSession().use { session ->
             val producer = session.createProducer(session.createQueue("DEV.QUEUE.2"))
             val message = session.createTextMessage(Jaxb.toXml(oppdrag))
             producer.send(message)

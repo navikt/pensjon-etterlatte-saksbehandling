@@ -29,7 +29,7 @@ export const SoeknadGyldigFremsatt = ({ gyldighet }: { gyldighet: IGyldighetResu
         <Title>Søknad gyldig fremsatt</Title>
         <Undertekst gray={true}>Automatisk {format(new Date(gyldighet.vurdertDato), 'dd.MM.yyyy')}</Undertekst>
         {gyldighet.resultat === VurderingsResultat.OPPFYLT ? (
-          <Undertekst gray={false}>Ja søknad er gyldig fremsatt</Undertekst>
+          <Undertekst gray={false}>Ja. søknad er gyldig fremsatt.</Undertekst>
         ) : (
           <Undertekst gray={false}>{sjekkInfo()}</Undertekst>
         )}
@@ -45,7 +45,7 @@ export const SoeknadGyldigFremsatt = ({ gyldighet }: { gyldighet: IGyldighetResu
 export const Wrapper = styled.div`
   display: flex;
   border-left: 4px solid #e5e5e5;
-  margin-top: 50px;
+  margin-top: 10px;
   max-height: fit-content;
   width: 350px;
 `

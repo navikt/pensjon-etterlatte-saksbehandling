@@ -64,6 +64,6 @@ export const SoeknadOversiktWrapper = styled.div`
 export const InfoWrapper = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  height: 300px;
+  height: 220px;
   flex-grow: 1;
 `

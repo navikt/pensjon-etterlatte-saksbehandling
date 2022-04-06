@@ -1,4 +1,4 @@
-import { Detail } from '@navikt/ds-react'
+import { Label } from '@navikt/ds-react'
 import { DetailWrapper, WarningIconWrapper } from '../../styled'
 import { WarningIcon } from '../../../../../shared/icons/warningIcon'
 import { VurderingsResultat, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
@@ -12,30 +12,30 @@ export const Adresse = ({
     <DetailWrapper>
       {gjenlevendeOgSoekerLikAdresse?.resultat === VurderingsResultat.OPPFYLT && (
         <div>
-          <Detail size="medium">Adresse</Detail>
+          <Label size="medium">Adresse</Label>
           <div className="text">Barnet bor på samme adresse som gjenlevende forelder</div>
         </div>
       )}
 
       {gjenlevendeOgSoekerLikAdresse?.resultat === VurderingsResultat.IKKE_OPPFYLT && (
         <div>
-          <Detail size="medium" className="detailWrapperWithIcon">
+          <Label size="small" className="labelWrapperWithIcon">
             <WarningIconWrapper>
               <WarningIcon />
             </WarningIconWrapper>
             Adresse
-          </Detail>
+          </Label>
           <span className="warningText">Barnet bor ikke på samme adresse som gjenlevende forelder</span>
         </div>
       )}
       {gjenlevendeOgSoekerLikAdresse?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
         <div>
-          <Detail size="medium" className="detailWrapperWithIcon">
+          <Label size="small" className="labelWrapperWithIcon">
             <WarningIconWrapper>
               <WarningIcon />
             </WarningIconWrapper>
             Adresse
-          </Detail>
+          </Label>
           <span className="warningText">Mangler info</span>
         </div>
       )}

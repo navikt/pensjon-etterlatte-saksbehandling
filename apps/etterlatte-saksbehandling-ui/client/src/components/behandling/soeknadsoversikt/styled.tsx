@@ -9,11 +9,14 @@ export const DetailWrapper = styled.div`
     color: #ba3a26;
     max-width: 150px;
   }
+  .headertext {
+    width: 250px;
+  }
   .text {
-    max-width: 150px;
+    width: 150px;
   }
 
-  .detailWrapperWithIcon {
+  .labelWrapperWithIcon {
     display: flex;
   }
 `

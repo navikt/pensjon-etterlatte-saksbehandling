@@ -1,4 +1,4 @@
-import { Detail } from '@navikt/ds-react'
+import { Label } from '@navikt/ds-react'
 import { DetailWrapper } from '../../styled'
 import { format } from 'date-fns'
 import { IPersonOpplysningFraPdl } from '../../../types'
@@ -12,7 +12,7 @@ export const DoedsfallDato = ({
 }) => {
   return (
     <DetailWrapper>
-      <Detail size="medium">Dato for dødsfall</Detail>
+      <Label size="small" className='headertext'>Dato for dødsfall</Label>
       <span className={dodsfallMerEnn3AarSiden ? 'warningText' : ''}>
         {format(new Date(avdoedPersonPdl?.doedsdato), 'dd.MM.yyyy')}
       </span>

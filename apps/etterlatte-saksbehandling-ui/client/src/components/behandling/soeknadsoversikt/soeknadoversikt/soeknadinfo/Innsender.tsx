@@ -1,4 +1,4 @@
-import { Detail } from '@navikt/ds-react'
+import { Label } from '@navikt/ds-react'
 import { DetailWrapper, WarningIconWrapper } from '../../styled'
 import { VurderingsResultat, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
 import { WarningIcon } from '../../../../../shared/icons/warningIcon'
@@ -15,7 +15,7 @@ export const Innsender = ({
     <DetailWrapper>
       {innsenderHarForeldreAnsvar?.resultat === VurderingsResultat.OPPFYLT && (
         <div>
-          <Detail size="medium">Innsender</Detail>
+          <Label size="small">Innsender</Label>
           {innsender?.fornavn} {innsender?.etternavn}
           <div>(gjenlevende forelder)</div>
         </div>
@@ -23,12 +23,12 @@ export const Innsender = ({
 
       {innsenderHarForeldreAnsvar?.resultat === VurderingsResultat.IKKE_OPPFYLT && (
         <div>
-          <Detail size="medium" className="detailWrapperWithIcon">
+          <Label size="small" className="labelWrapperWithIcon">
             <WarningIconWrapper>
               <WarningIcon />
             </WarningIconWrapper>
             Innsender
-          </Detail>
+          </Label>
           <span className="warningText">
             {innsender?.fornavn} {innsender?.etternavn}
           </span>
@@ -37,12 +37,12 @@ export const Innsender = ({
 
       {innsenderHarForeldreAnsvar?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
         <div>
-          <Detail size="medium" className="detailWrapperWithIcon">
+          <Label size="small" className="labelWrapperWithIcon">
             <WarningIconWrapper>
               <WarningIcon />
             </WarningIconWrapper>
             Innsender
-          </Detail>
+          </Label>
           <span className="warningText">Mangler info</span>
         </div>
       )}

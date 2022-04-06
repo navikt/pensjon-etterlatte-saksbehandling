@@ -1,4 +1,4 @@
-import { Detail } from '@navikt/ds-react'
+import { Label } from '@navikt/ds-react'
 import { DetailWrapper } from '../../styled'
 import { hentVirkningstidspunkt } from '../../utils'
 import { format } from 'date-fns'
@@ -15,9 +15,9 @@ export const Virkningstidspunkt = ({
 }) => {
   return (
     <DetailWrapper>
-      <Detail size="medium" className="text">
+      <Label size="small" className={dodsfallMerEnn3AarSiden ? "" :"headertext"}>
         Første mulig virkningstidspunkt
-      </Detail>
+      </Label>
       <span className={dodsfallMerEnn3AarSiden ? 'warningText' : ''}>
         {format(new Date(hentVirkningstidspunkt(avdoedPersonPdl?.doedsdato, mottattDato)), 'dd.MM.yyyy')}
       </span>

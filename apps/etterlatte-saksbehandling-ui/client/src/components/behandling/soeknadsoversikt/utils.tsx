@@ -86,9 +86,9 @@ export const hentGyldighetsTekst = (
   }
 
   if (gyldighetResultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
-    return `Nei, mangler info om ${resultat}. Må avklares.`
+    return `Nei. mangler info om ${resultat}. Må avklares.`
   } else if (gyldighetResultat === VurderingsResultat.IKKE_OPPFYLT) {
-    return `Nei, ${resultat}. Må avklares.`
+    return `Nei. ${resultat}. Må avklares.`
   } else return ''
 }
 

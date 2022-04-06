@@ -1,4 +1,4 @@
-import { Detail } from '@navikt/ds-react'
+import { Label } from '@navikt/ds-react'
 import { DetailWrapper, WarningIconWrapper } from '../../styled'
 import { WarningIcon } from '../../../../../shared/icons/warningIcon'
 import { IPersonOpplysningFraPdl } from '../../../types'
@@ -15,7 +15,7 @@ export const Foreldreansvar = ({
     <DetailWrapper>
       {gjenlevendeHarForeldreansvar?.resultat === VurderingsResultat.OPPFYLT && (
         <div>
-          <Detail size="medium">Foreldreansvar</Detail>
+          <Label size="small">Foreldreansvar</Label>
           {gjenlevendePdl?.fornavn} {gjenlevendePdl?.etternavn}
           <div>(gjenlevende forelder)</div>
         </div>
@@ -23,12 +23,12 @@ export const Foreldreansvar = ({
 
       {gjenlevendeHarForeldreansvar?.resultat === VurderingsResultat.IKKE_OPPFYLT && (
         <div>
-          <Detail size="medium" className="detailWrapperWithIcon">
+          <Label size="small" className="labelWrapperWithIcon">
             <WarningIconWrapper>
               <WarningIcon />
             </WarningIconWrapper>
             Foreldreansvar
-          </Detail>
+          </Label>
           <span className="warningText">
             {gjenlevendePdl?.fornavn} {gjenlevendePdl?.etternavn}
           </span>
@@ -37,12 +37,12 @@ export const Foreldreansvar = ({
 
       {gjenlevendeHarForeldreansvar?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
         <div>
-          <Detail size="medium" className="detailWrapperWithIcon">
+          <Label size="small" className="labelWrapperWithIcon">
             <WarningIconWrapper>
               <WarningIcon />
             </WarningIconWrapper>
             Foreldreansvar
-          </Detail>
+          </Label>
           <span className="warningText">Mangler info</span>
         </div>
       )}

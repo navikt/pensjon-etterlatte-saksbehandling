@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.config.required
+import no.nav.helse.rapids_rivers.RapidsConnection
 
 
 fun main() {
@@ -9,17 +10,17 @@ fun main() {
         env = System.getenv().toMutableMap().apply {
             put("KAFKA_CONSUMER_GROUP_ID", this.required("NAIS_APP_NAME").replace("-", ""))
         }
-    ).also { bootstrap(it) }
+    ).also { rapidApplication(it).start() }
 }
 
-fun bootstrap(applicationContext: ApplicationContext) {
-    val dataSource = applicationContext.dataSourceBuilder().apply { migrate() }.dataSource()
-    val attestasjonsDao = applicationContext.attestasjonsDao(dataSource)
+fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection {
+    val dataSourceBuilder = applicationContext.dataSourceBuilder().also { it.migrate() }
+    val attestasjonsDao = applicationContext.attestasjonsDao(dataSourceBuilder.dataSource())
     val attestasjonService = applicationContext.attestasjonService(attestasjonsDao)
 
-    applicationContext.rapidsConnection()
+    return applicationContext.rapidsConnection()
         .apply {
             applicationContext.vedtaksMottaker(this, attestasjonService)
-        }.start()
+        }
 }
 

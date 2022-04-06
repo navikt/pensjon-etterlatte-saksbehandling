@@ -13,8 +13,8 @@ class AttestasjonService(
 ) {
 
     private object TilgangDao {
-        fun sjekkOmBehandlingTillatesEndret(attestertVedtak: AttestertVedtak): Boolean {
-            return attestertVedtak.attestasjonsstatus in listOf(
+        fun sjekkOmAttestasjonTillatesEndret(attestertVedtak: AttestertVedtak): Boolean {
+            return attestertVedtak.status in listOf(
                 AttestasjonsStatus.TIL_ATTESTERING,
                 AttestasjonsStatus.IKKE_ATTESTERT
             )
@@ -43,8 +43,8 @@ class AttestasjonService(
     fun settAttestertVedtakTilIkkeAttestert(vedtakId: String): AttestertVedtak {
         val attestertVedtak = hentAttestertVedtak(vedtakId)
             ?: throw AttestertVedtakEksistererIkke("Attestert vedtak med vedtakId $vedtakId eksisterer ikke")
-        if (!TilgangDao.sjekkOmBehandlingTillatesEndret(attestertVedtak)) {
-            throw KanIkkeEndreAttestertVedtakException("Kan ikke sette vedtak $vedtakId med attestasjonsstatus ${attestertVedtak.attestasjonsstatus} til attestasjonsstatus: IKKE_ATTESTERT")
+        if (!TilgangDao.sjekkOmAttestasjonTillatesEndret(attestertVedtak)) {
+            throw KanIkkeEndreAttestertVedtakException("Kan ikke sette vedtak $vedtakId med status ${attestertVedtak.status} til status: IKKE_ATTESTERT")
         }
         return attestasjonDao.settAttestertVedtakTilIkkeAttestert(vedtakId)
 
@@ -53,10 +53,9 @@ class AttestasjonService(
     fun attesterVedtak(vedtakId: String, attestasjon: Attestasjon): AttestertVedtak {
         val attestertVedtak = hentAttestertVedtak(vedtakId)
             ?: throw AttestertVedtakEksistererIkke("Attestert vedtak med vedtakId $vedtakId eksisterer ikke")
-        if (!TilgangDao.sjekkOmBehandlingTillatesEndret(attestertVedtak)) {
-            throw KanIkkeEndreAttestertVedtakException("Kan ikke attestere vedtak $vedtakId med attestasjonsstatus ${attestertVedtak.attestasjonsstatus}")
+        if (!TilgangDao.sjekkOmAttestasjonTillatesEndret(attestertVedtak)) {
+            throw KanIkkeEndreAttestertVedtakException("Kan ikke attestere vedtak $vedtakId med status ${attestertVedtak.status}")
         }
         return attestasjonDao.attesterVedtak(vedtakId, attestasjon)
-
     }
 }

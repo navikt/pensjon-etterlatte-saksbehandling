@@ -4,6 +4,6 @@ CREATE TABLE attestasjon (
     id BIGSERIAL PRIMARY KEY,
     vedtak_id VARCHAR NOT NULL,
     attestant_id VARCHAR,
-    attestasjonstidspunkt TIMESTAMP,
-    attestasjonsstatus status
+    tidspunkt TIMESTAMP,
+    status status
 );

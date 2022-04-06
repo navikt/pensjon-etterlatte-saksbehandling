@@ -69,15 +69,15 @@ internal class AttestasjonDaoTest {
         assertEquals(vedtak.vedtakId, attestertVedtak.vedtakId)
         assertEquals(attestasjon.attestantId, attestertVedtak.attestantId)
         assertTrue(
-            (attestertVedtak.attestasjonstidspunkt!!.isAfter(
+            (attestertVedtak.tidspunkt!!.isAfter(
                 LocalDateTime.now().minusSeconds(20)
             ) and
-                    attestertVedtak.attestasjonstidspunkt!!.isBefore(
+                    attestertVedtak.tidspunkt!!.isBefore(
                         LocalDateTime.now().plusSeconds(0)
                     )
                     )
         )
-        assertEquals(AttestasjonsStatus.ATTESTERT, attestertVedtak.attestasjonsstatus)
+        assertEquals(AttestasjonsStatus.ATTESTERT, attestertVedtak.status)
     }
 
     @Test
@@ -86,8 +86,8 @@ internal class AttestasjonDaoTest {
 
         assertEquals(vedtak.vedtakId, uattestertVedtak.vedtakId)
         assertNull(uattestertVedtak.attestantId)
-        assertNull(uattestertVedtak.attestasjonstidspunkt)
-        assertEquals(AttestasjonsStatus.TIL_ATTESTERING, uattestertVedtak.attestasjonsstatus)
+        assertNull(uattestertVedtak.tidspunkt)
+        assertEquals(AttestasjonsStatus.TIL_ATTESTERING, uattestertVedtak.status)
 
 
         val attestertVedtak = attestasjonService.attesterVedtak(vedtak.vedtakId, attestasjon)
@@ -95,15 +95,15 @@ internal class AttestasjonDaoTest {
         assertEquals(vedtak.vedtakId, attestertVedtak.vedtakId)
         assertEquals(attestasjon.attestantId, attestertVedtak.attestantId)
         assertTrue(
-            (attestertVedtak.attestasjonstidspunkt!!.isAfter(
+            (attestertVedtak.tidspunkt!!.isAfter(
                 LocalDateTime.now().minusSeconds(20)
             ) and
-                    attestertVedtak.attestasjonstidspunkt!!.isBefore(
+                    attestertVedtak.tidspunkt!!.isBefore(
                         LocalDateTime.now().plusSeconds(0)
                     )
                     )
         )
-        assertEquals(AttestasjonsStatus.ATTESTERT, attestertVedtak.attestasjonsstatus)
+        assertEquals(AttestasjonsStatus.ATTESTERT, attestertVedtak.status)
     }
 
     @Test
@@ -137,7 +137,7 @@ internal class AttestasjonDaoTest {
         attestasjonService.opprettVedtakUtenAttestering(vedtak)
         val ikkeAttestertVedtak = attestasjonService.settAttestertVedtakTilIkkeAttestert(vedtak.vedtakId)
 
-        assertEquals(AttestasjonsStatus.IKKE_ATTESTERT, ikkeAttestertVedtak.attestasjonsstatus)
+        assertEquals(AttestasjonsStatus.IKKE_ATTESTERT, ikkeAttestertVedtak.status)
     }
 
     companion object {

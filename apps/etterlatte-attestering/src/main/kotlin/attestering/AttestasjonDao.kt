@@ -15,7 +15,7 @@ class AttestasjonDao(private val connection: () -> Connection) {
     fun hentAttestertVedtak(vedtakId: String): AttestertVedtak? =
         connection().use { connection ->
             val stmt = connection.prepareStatement(
-                "SELECT vedtak_id, attestant_id, attestasjonstidspunkt, attestasjonsstatus " +
+                "SELECT vedtak_id, attestant_id, tidspunkt, status " +
                         "FROM attestasjon " +
                         "WHERE vedtak_id = ?"
             )
@@ -27,8 +27,8 @@ class AttestasjonDao(private val connection: () -> Connection) {
                     AttestertVedtak(
                         vedtakId = getString("vedtak_id"),
                         attestantId = getString("attestant_id") ?: null,
-                        attestasjonstidspunkt = getTimestamp("attestasjonstidspunkt")?.toLocalDateTime(),
-                        attestasjonsstatus = getString("attestasjonsstatus").let { status ->
+                        tidspunkt = getTimestamp("tidspunkt")?.toLocalDateTime(),
+                        status = getString("status").let { status ->
                             AttestasjonsStatus.valueOf(
                                 status
                             )
@@ -42,7 +42,7 @@ class AttestasjonDao(private val connection: () -> Connection) {
         connection().use { connection ->
             val stmt = connection.prepareStatement(
                 "UPDATE attestasjon " +
-                        "SET attestasjonsstatus = ?::status, attestant_id = ?, attestasjonstidspunkt = ?" +
+                        "SET status = ?::status, attestant_id = ?, tidspunkt = ?" +
                         "WHERE vedtak_id = ? "
             )
 
@@ -61,7 +61,7 @@ class AttestasjonDao(private val connection: () -> Connection) {
         connection().use { connection ->
             val stmt = connection.prepareStatement(
                 "UPDATE attestasjon " +
-                        "SET attestasjonsstatus = ?::status " +
+                        "SET status = ?::status " +
                         "WHERE vedtak_id = ? "
             )
 
@@ -82,7 +82,7 @@ class AttestasjonDao(private val connection: () -> Connection) {
     fun opprettMottattVedtak(vedtak: Vedtak) =
         connection().use { connection ->
             val stmt = connection.prepareStatement(
-                "INSERT INTO attestasjon(vedtak_id, attestasjonsstatus)" +
+                "INSERT INTO attestasjon(vedtak_id, status)" +
                         "VALUES (?, ?::status)"
             )
 
@@ -97,7 +97,7 @@ class AttestasjonDao(private val connection: () -> Connection) {
     fun opprettAttestertVedtak(vedtak: Vedtak, attestasjon: Attestasjon) =
         connection().use { connection ->
             val stmt = connection.prepareStatement(
-                "INSERT INTO attestasjon(vedtak_id, attestant_id, attestasjonstidspunkt, attestasjonsstatus)" +
+                "INSERT INTO attestasjon(vedtak_id, attestant_id, tidspunkt, status)" +
                         "VALUES (?, ?, ?, ?::status)"
             )
 

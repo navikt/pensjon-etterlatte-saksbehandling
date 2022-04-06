@@ -5,13 +5,11 @@ import no.nav.etterlatte.config.required
 
 
 fun main() {
-    bootstrap(
-        ApplicationContext(
-            env = System.getenv().toMutableMap().apply {
-                put("KAFKA_CONSUMER_GROUP_ID", this.required("NAIS_APP_NAME").replace("-", ""))
-            }
-        )
-    )
+    ApplicationContext(
+        env = System.getenv().toMutableMap().apply {
+            put("KAFKA_CONSUMER_GROUP_ID", this.required("NAIS_APP_NAME").replace("-", ""))
+        }
+    ).also { bootstrap(it) }
 }
 
 fun bootstrap(applicationContext: ApplicationContext) {

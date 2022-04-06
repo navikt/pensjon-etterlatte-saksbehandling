@@ -14,16 +14,16 @@ object TestHelper
 fun readFile(file: String) = TestHelper::class.java.getResource(file)?.readText()
     ?: throw FileNotFoundException("Fant ikke filen $file")
 
-fun vedtak() = Vedtak(
-    sakId = "1234",
-    vedtakId = "8888",
-    behandlingsId = "1234",
+fun vedtak(vedtakId: String = "1") = Vedtak(
+    vedtakId = vedtakId,
+    behandlingsId = "11",
+    sakId = "111",
     saksbehandlerId = "4321",
     sakIdGjelderFnr = "12345612345",
     aktorFoedselsdato = LocalDate.parse("2010-07-04"),
+    behandlingstype = Endringskode.NY,
     beregningsperioder = listOf(
         Beregningsperiode(
-            endringskode = Endringskode.NY,
             delytelsesId = "delytelsesid",
             ytelseskomponent = Ytelseskomponent.BARNEPENSJON,
             datoFOM = LocalDate.parse("2022-02-02"),

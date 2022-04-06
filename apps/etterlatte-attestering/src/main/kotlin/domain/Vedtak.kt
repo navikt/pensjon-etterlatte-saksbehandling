@@ -3,15 +3,15 @@ package no.nav.etterlatte.attestering
 import java.math.BigDecimal
 import java.time.LocalDate
 
-
 data class Vedtak(
     val vedtakId: String,
     val behandlingsId: String,
     val sakId: String,
     val saksbehandlerId: String,
-    val beregningsperioder: List<Beregningsperiode>,
     val sakIdGjelderFnr: String,
     val aktorFoedselsdato: LocalDate,
+    val behandlingstype: Endringskode,
+    val beregningsperioder: List<Beregningsperiode>,
     val oppdragsenheter: List<Oppdragsenhet>,
 )
 
@@ -35,11 +35,9 @@ enum class Ytelseskomponent(s: String) {
 }
 
 data class Beregningsperiode(
-    val endringskode: Endringskode,
     val delytelsesId: String,
     val ytelseskomponent: Ytelseskomponent,
     val datoFOM: LocalDate,
     val datoTOM: LocalDate,
     val belop: BigDecimal,
 )
-

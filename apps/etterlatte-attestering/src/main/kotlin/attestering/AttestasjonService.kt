@@ -3,6 +3,7 @@ package no.nav.etterlatte.attestering
 import no.nav.etterlatte.domain.Attestasjon
 import no.nav.etterlatte.domain.AttestasjonsStatus
 import no.nav.etterlatte.domain.AttestertVedtak
+import org.slf4j.LoggerFactory
 
 class KanIkkeEndreAttestertVedtakException(message: String) : RuntimeException(message)
 class AttestertVedtakEksistererIkke(message: String) : RuntimeException(message)
@@ -28,8 +29,9 @@ class AttestasjonService(
         if (hentAttestertVedtak(vedtak.vedtakId) != null) {
             throw AttestertVedtakEksistererAllerede("Attestert vedtak med vedtakId ${vedtak.vedtakId} eksisterer allerede")
         }
-        return attestasjonDao.opprettAttestertVedtak(vedtak, attestasjon)
-
+        val opprettetAttestertVedtak = attestasjonDao.opprettAttestertVedtak(vedtak, attestasjon)
+        logger.info("Vedtak med id ${opprettetAttestertVedtak.vedtakId} attestert av ${opprettetAttestertVedtak.attestantId} og lagret i databasen ${opprettetAttestertVedtak.tidspunkt}")
+        return opprettetAttestertVedtak
     }
 
     fun opprettVedtakUtenAttestering(vedtak: Vedtak): AttestertVedtak {
@@ -57,5 +59,9 @@ class AttestasjonService(
             throw KanIkkeEndreAttestertVedtakException("Kan ikke attestere vedtak $vedtakId med status ${attestertVedtak.status}")
         }
         return attestasjonDao.attesterVedtak(vedtakId, attestasjon)
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(AttestasjonService::class.java)
     }
 }

@@ -46,6 +46,7 @@ class KvitteringMottaker(
             oppdragXml = message.getBody(String::class.java)
             val oppdrag = Jaxb.toOppdrag(oppdragXml)
 
+
             utbetalingsoppdragDao.oppdaterKvittering(oppdrag)
 
             when (oppdrag.mmel.alvorlighetsgrad) {
@@ -64,6 +65,7 @@ class KvitteringMottaker(
 
     private fun oppdragGodkjent(oppdrag: Oppdrag, oppdragXml: String) {
         logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} godkjent", kv("oppdrag", oppdragXml))
+        logger.info("OppdragslinjeId: ${oppdrag.oppdrag110.oppdragsId} linjeIder: ${oppdrag.oppdrag110.oppdragsLinje150.map { it.linjeId }}")
         utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.GODKJENT)
         rapidsConnection.publish(mapOf("@event_name" to "utbetaling_godkjent").toJson())
         // TODO utvid melding

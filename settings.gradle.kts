@@ -20,5 +20,6 @@ include(
     "libs:ktorclient-auth-clientcredentials",
     "libs:common",
     "libs:ktorclient-onbehalfof",
-    "jobs:test-fordeler"
+    "jobs:test-fordeler",
+    "apps:etterlatte-vilkaar-api"
 )

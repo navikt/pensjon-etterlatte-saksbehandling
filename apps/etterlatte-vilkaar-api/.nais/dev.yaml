@@ -1,0 +1,55 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-pdltjenester
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  liveness:
+    path: "internal/isalive"
+    initialDelay: 60
+    timeout: 1
+    periodSeconds: 5
+    failureThreshold: 10
+  readiness:
+    path: "internal/isready"
+    initialDelay: 60
+    timeout: 1
+  prometheus:
+    enabled: true
+    path: /metrics
+  replicas:
+    min: 1
+    max: 1
+  tokenx:
+    enabled: true
+  azure:
+    application:
+      enabled: true
+  kafka:
+    pool: nav-dev
+  env:
+    - name: PDL_URL
+      value: http://etterlatte-pdl-proxy/pdl
+    - name: PDL_AUDIENCE
+      value: "dev-gcp:etterlatte:etterlatte-pdl-proxy"
+    - name: PDL_OUTBOUND_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-pdl-proxy/.default
+    - name: PPS_URL
+      value: https://pensjon-parallelle-sannheter.dev.intern.nav.no
+    - name: ROOT_LOGLEVEL
+      value: "INFO"
+    - name: NAV_CONSUMER_ID
+      value: "srvbarnepensjon"
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-pdl-proxy
+    inbound:
+      rules:
+        - application: etterlatte-fordeler
+        - application: etterlatte-api
+        - application: etterlatte-opplysninger-fra-pdl

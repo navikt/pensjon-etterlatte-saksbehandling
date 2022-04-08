@@ -3,6 +3,8 @@ import React from 'react'
 import { VilkaarBorder } from '../styled'
 import styled from 'styled-components'
 import moment from 'moment'
+import { BehandlingHandlingKnapper } from '../../handlinger/BehandlingHandlingKnapper'
+import { VilkaarsVurderingKnapper } from '../../handlinger/vilkaarsvurderingKnapper'
 
 type Props = {
   id: any
@@ -10,7 +12,19 @@ type Props = {
   dato: string
 }
 
-export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato }) => {
+/** Bare funksjoner for at Arnt skulle få teste grensesnittet */
+const randomizeForTest = (): VurderingsResultat => {
+  const result = [
+    VurderingsResultat.OPPFYLT,
+    VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+    VurderingsResultat.IKKE_OPPFYLT,
+  ]
+  return result[Math.floor(Math.random() * 3)]
+}
+const resultat = randomizeForTest() //TODO: fjern
+/** Bare funksjoner for at Arnt skulle få teste grensesnittet */
+
+export const VilkaarResultat: React.FC<Props> = ({ id, /*resultat,*/ dato }) => {
   const datoFormatert = moment(dato).format('DD.MM.YYYY')
 
   let tekst = ''
@@ -21,12 +35,19 @@ export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato }) => {
   } else {
     tekst = 'Trenger avklaring'
   }
+
   return (
-    <VilkaarBorder id={id}>
-      <TekstWrapper>
-        Vilkårsresultat: &nbsp; <strong> {tekst}</strong>
-      </TekstWrapper>
-    </VilkaarBorder>
+    <>
+      <VilkaarBorder id={id}>
+        <TekstWrapper>
+          Vilkårsresultat: &nbsp; <strong> {tekst}</strong>
+        </TekstWrapper>
+      </VilkaarBorder>
+
+      <BehandlingHandlingKnapper>
+        <VilkaarsVurderingKnapper vilkaarResultat={resultat} />
+      </BehandlingHandlingKnapper>
+    </>
   )
 }
 

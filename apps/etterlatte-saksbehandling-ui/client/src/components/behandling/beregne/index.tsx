@@ -8,6 +8,8 @@ import { FileIcon } from '../../../shared/icons/fileIcon'
 import { OpplysningsType } from '../../../store/reducers/BehandlingReducer'
 import { hentVirkningstidspunkt } from '../soeknadsoversikt/utils'
 import { format } from 'date-fns'
+import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
+import { BeregningModal } from '../handlinger/sendTilAttesteringModal'
 
 export const Beregne = () => {
   const ctx = useContext(AppContext)
@@ -43,6 +45,9 @@ export const Beregne = () => {
           <span className="text">Vis vedtaksbrev</span>
         </VedtaksbrevWrapper>
       </ContentHeader>
+      <BehandlingHandlingKnapper>
+        <BeregningModal />
+      </BehandlingHandlingKnapper>
     </Content>
   )
 }

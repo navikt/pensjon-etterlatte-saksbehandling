@@ -1,51 +1,14 @@
-import { useMatch } from 'react-router-dom'
-import { AppContext } from '../../../store/AppContext'
-import { useContext } from 'react'
-import { Button } from '@navikt/ds-react'
-import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { BeregningModal } from './sendTilAttesteringModal'
 import { AvbrytBehandling } from './avbryt'
 import styled from 'styled-components'
-import { handlinger } from './typer'
-import { VilkaarsVurderingKnapper } from './vilkaarsvurderingKnapper'
-import { VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
+import { Tilbake } from './tilbake'
+import { ReactNode } from 'react'
 
-export const BehandlingHandlingKnapper = () => {
-  const ctx = useContext(AppContext)
-  const { next, back, lastPage, firstPage } = useBehandlingRoutes()
-  const section = useMatch('/behandling/:behandlingId/:section')
-  const soeknadGyldigFremsatt = ctx.state.behandlingReducer.gyldighetsprøving.resultat === VurderingsResultat.OPPFYLT
-
-  const NesteKnapp = () => {
-    switch (section?.params.section) {
-      case 'soeknadsoversikt':
-        return (
-          <Button variant="primary" size="medium" className="button" onClick={next} disabled={!soeknadGyldigFremsatt}>
-            {handlinger.START.navn}
-          </Button>
-        )
-      case 'inngangsvilkaar':
-        return <VilkaarsVurderingKnapper nextPage={next} />
-      case 'beregne':
-        return <BeregningModal nextPage={next} />
-      default:
-        return (
-          <Button variant="primary" size="medium" className="button" onClick={next} disabled={lastPage}>
-            {handlinger.NESTE.navn}
-          </Button>
-        )
-    }
-  }
-
+export const BehandlingHandlingKnapper = ({ children }: { children: ReactNode }) => {
   return (
     <KnapperWrapper>
       <div>
-        {!firstPage && (
-          <Button variant="secondary" size="medium" className="button" onClick={back}>
-            {handlinger.TILBAKE.navn}
-          </Button>
-        )}
-        {NesteKnapp()}
+        <Tilbake />
+        {children}
       </div>
       <AvbrytBehandling />
     </KnapperWrapper>

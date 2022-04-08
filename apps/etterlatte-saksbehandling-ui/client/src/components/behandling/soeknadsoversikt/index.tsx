@@ -4,11 +4,13 @@ import { Content, ContentHeader } from '../../../shared/styled'
 import { SoeknadOversikt } from './soeknadoversikt/Soeknadsoversikt'
 import { Familieforhold } from './familieforhold/Familieforhold'
 import { usePersonInfoFromBehandling } from './usePersonInfoFromBehandling'
-import { GyldighetType } from '../../../store/reducers/BehandlingReducer'
+import { GyldighetType, VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 import { HeadingWrapper } from './styled'
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../behandlings-status'
 import { BehandlingsTypeSmall, IBehandlingsType } from '../behandlings-type'
 import { Heading } from '@navikt/ds-react'
+import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
+import { Start } from '../handlinger/start'
 
 export const Soeknadsoversikt = () => {
   const {
@@ -61,6 +63,9 @@ export const Soeknadsoversikt = () => {
         gjenlevendePdl={gjenlevendePdl}
         gjenlevendeSoknad={gjenlevendeSoknad}
       />
+      <BehandlingHandlingKnapper>
+        <Start soeknadGyldigFremsatt={gyldighet.resultat === VurderingsResultat.OPPFYLT} />
+      </BehandlingHandlingKnapper>
     </Content>
   )
 }

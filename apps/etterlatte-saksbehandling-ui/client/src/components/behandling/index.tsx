@@ -13,7 +13,6 @@ import { IDetaljertBehandling, OpplysningsType } from '../../store/reducers/Beha
 import Spinner from '../../shared/Spinner'
 import { StatusBar, StatusBarTheme } from '../statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
-import { BehandlingHandlingKnapper } from './handlinger/BehandlingHandlingKnapper'
 import { StegMeny } from './StegMeny/stegmeny'
 
 const addBehandlingAction = (data: any) => ({ type: 'add_behandling', data })
@@ -56,7 +55,6 @@ export const Behandling = () => {
                 return <Route key={route.path} path={route.path} element={route.element} />
               })}
             </Routes>
-            {loaded && <BehandlingHandlingKnapper />}
           </Column>
           <Column>
             <Tab />

@@ -1,14 +1,10 @@
-import { useContext } from 'react'
-import { AppContext } from '../../../store/AppContext'
 import { handlinger } from './typer'
 import { Button } from '@navikt/ds-react'
 import { VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
+import { useBehandlingRoutes } from '../BehandlingRoutes'
 
-export const VilkaarsVurderingKnapper = ({ nextPage }: { nextPage: () => void }) => {
-  const ctx = useContext(AppContext)
-  const vilkaarResultat = ctx.state.behandlingReducer.vilkårsprøving.resultat
-
-  //TODO - hvis ikke oppfylt eller settes på vent, hva skal skje med sidemenyen? skal man ikke kunne trykke videre i den?
+export const VilkaarsVurderingKnapper = ({ vilkaarResultat }: { vilkaarResultat: VurderingsResultat | undefined }) => {
+  const { next } = useBehandlingRoutes()
 
   return (
     <>
@@ -30,7 +26,7 @@ export const VilkaarsVurderingKnapper = ({ nextPage }: { nextPage: () => void })
             )
           case VurderingsResultat.OPPFYLT:
             return (
-              <Button variant="primary" size="medium" className="button" onClick={nextPage}>
+              <Button variant="primary" size="medium" className="button" onClick={next}>
                 {handlinger.VILKAARSVURDERING.BEREGNE.navn}
               </Button>
             )

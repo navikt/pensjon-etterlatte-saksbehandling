@@ -5,11 +5,11 @@ import styled from 'styled-components'
 import { handlinger } from './typer'
 import { sendTilAttestering } from '../../../shared/api/behandling'
 import { useMatch } from 'react-router'
+import { useBehandlingRoutes } from '../BehandlingRoutes'
 
-interface Props {
-  nextPage: () => void
-}
-export const BeregningModal: React.FC<Props> = ({ nextPage }) => {
+export const BeregningModal: React.FC = () => {
+  const { next } = useBehandlingRoutes()
+
   const [beregneModalisOpen, setBeregneModalisOpen] = useState(false)
   const match = useMatch('/behandling/:behandlingId/*')
   
@@ -20,7 +20,7 @@ export const BeregningModal: React.FC<Props> = ({ nextPage }) => {
     console.log(result);
     // if success
     setBeregneModalisOpen(false)
-    nextPage();
+    next();
     // if not, show error message
   }
 

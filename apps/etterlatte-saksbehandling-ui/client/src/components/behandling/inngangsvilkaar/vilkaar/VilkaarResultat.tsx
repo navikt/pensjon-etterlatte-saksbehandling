@@ -10,19 +10,7 @@ type Props = {
   dato: string
 }
 
-/** Bare funksjoner for at Arnt skulle få teste grensesnittet */
-const randomizeForTest = (): VurderingsResultat => {
-  const result = [
-    VurderingsResultat.OPPFYLT,
-    VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
-    VurderingsResultat.IKKE_OPPFYLT,
-  ]
-  return result[Math.floor(Math.random() * 3)]
-}
-const resultat = randomizeForTest() //TODO: fjern
-/** Bare funksjoner for at Arnt skulle få teste grensesnittet */
-
-export const VilkaarResultat: React.FC<Props> = ({ id, /*resultat,*/ dato }) => {
+export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato }) => {
   const datoFormatert = moment(dato).format('DD.MM.YYYY')
 
   let tekst = ''

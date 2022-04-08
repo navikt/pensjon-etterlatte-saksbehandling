@@ -8,14 +8,15 @@ import { AvdoedesForutMedlemskap } from './vilkaar/AvdoedesForutMedlemskap'
 import { useLocation } from 'react-router-dom'
 import { BarnetsMedlemskap } from './vilkaar/BarnetsMedlemskap'
 import { VilkaarResultat } from './vilkaar/VilkaarResultat'
+import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
 
 export const Inngangsvilkaar = () => {
   const ctx = useContext(AppContext)
   const location = useLocation()
 
+  const { virkningstidspunkt } = usePersonInfoFromBehandling()
   const vilkaar = ctx.state.behandlingReducer.vilkårsprøving.vilkaar
   const vilkaarResultat = ctx.state.behandlingReducer.vilkårsprøving.resultat
-  const vurderingsDato = ctx.state.behandlingReducer.vilkårsprøving.vurdertDato
 
   useEffect(() => {
     const hash = location.hash.slice(1)
@@ -41,7 +42,7 @@ export const Inngangsvilkaar = () => {
         id="barnetsmedlemskap"
         vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.BARNETS_MEDLEMSKAP)}
       />
-      <VilkaarResultat id="vilkaarResultat" resultat={vilkaarResultat} dato={vurderingsDato} />
+      <VilkaarResultat id="vilkaarResultat" resultat={vilkaarResultat} dato={virkningstidspunkt} />
     </Content>
   )
 }

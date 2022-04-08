@@ -1,28 +1,14 @@
-import { useContext } from 'react'
-import { AppContext } from '../../../store/AppContext'
 import { Content, ContentHeader } from '../../../shared/styled'
 import { TypeStatusWrap } from '../soeknadsoversikt/styled'
 import { Sammendrag } from './sammendrag'
 import styled from 'styled-components'
 import { FileIcon } from '../../../shared/icons/fileIcon'
-import { OpplysningsType } from '../../../store/reducers/BehandlingReducer'
-import { hentVirkningstidspunkt } from '../soeknadsoversikt/utils'
-import { format } from 'date-fns'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { BeregningModal } from '../handlinger/sendTilAttesteringModal'
+import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
 
 export const Beregne = () => {
-  const ctx = useContext(AppContext)
-  const grunnlag = ctx.state.behandlingReducer.grunnlag
-
-  const mottattDato: string = grunnlag.find((g) => g.opplysningType === OpplysningsType.soeknad_mottatt)?.opplysning
-    ?.mottattDato
-
-  const doedsdato: string = grunnlag.find((g) => g.opplysningType === OpplysningsType.avdoed_forelder_pdl)?.opplysning
-    ?.doedsdato
-
-  const virkningstidspunkt = format(new Date(hentVirkningstidspunkt(doedsdato, mottattDato)), 'dd.MM.yyyy')
-
+  const { virkningstidspunkt } = usePersonInfoFromBehandling()
   return (
     <Content>
       <ContentHeader>
@@ -34,7 +20,8 @@ export const Beregne = () => {
           </DetailWrapper>
 
           <div className="text">
-            Vilkårsresultat: <strong>Innvilget fra {virkningstidspunkt}</strong>
+            Vilkårsresultat:
+            <strong>Innvilget fra {virkningstidspunkt}</strong>
           </div>
         </InfoWrapper>
 

@@ -1,13 +1,14 @@
 import { useContext } from 'react'
-import { AppContext } from '../../../store/AppContext'
-import { OpplysningsType } from '../../../store/reducers/BehandlingReducer'
+import { AppContext } from '../../store/AppContext'
+import { OpplysningsType } from '../../store/reducers/BehandlingReducer'
+import { hentVirkningstidspunkt } from './soeknadsoversikt/utils'
 import {
   IAvdoedFraSoeknad,
   IBarnFraSoeknad,
   IGjenlevendeFraSoeknad,
   IPersonOpplysning,
   IPersonOpplysningFraPdl,
-} from '../types'
+} from './types'
 
 export const usePersonInfoFromBehandling = () => {
   const ctx = useContext(AppContext)
@@ -47,6 +48,9 @@ export const usePersonInfoFromBehandling = () => {
 
   const innsender: IPersonOpplysning = grunnlag.find((g) => g.opplysningType === OpplysningsType.innsender)?.opplysning
 
+  //TODO regne ut virkningstidspunkt i backend?
+  const virkningstidspunkt: string = hentVirkningstidspunkt(avdoedPersonPdl?.doedsdato, mottattDato)
+
   return {
     soekerPdl,
     soekerSoknad,
@@ -56,5 +60,6 @@ export const usePersonInfoFromBehandling = () => {
     gjenlevendeSoknad,
     mottattDato,
     innsender,
+    virkningstidspunkt,
   }
 }

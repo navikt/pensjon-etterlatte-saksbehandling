@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { Alert } from '@navikt/ds-react'
-import { usePersonInfoFromBehandling } from './usePersonInfoFromBehandling'
+import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
 
 interface Props {
   varselType: string

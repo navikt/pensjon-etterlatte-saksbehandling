@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppdrag
 
+import no.nav.etterlatte.domain.Utbetalingsoppdrag
 import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
@@ -10,7 +11,7 @@ class OppdragService(
     val oppdragSender: OppdragSender,
     val utbetalingsoppdragDao: UtbetalingsoppdragDao,
 ) {
-    fun opprettOgSendOppdrag(vedtak: Vedtak, attestasjon: Attestasjon) {
+    fun opprettOgSendOppdrag(vedtak: Vedtak, attestasjon: Attestasjon): Utbetalingsoppdrag {
         val oppdrag = oppdragMapper.oppdragFraVedtak(vedtak, attestasjon)
 
         logger.info("Oppretter utbetalingsoppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId}")
@@ -19,7 +20,7 @@ class OppdragService(
         logger.info("Sender oppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId} til oppdrag")
         oppdragSender.sendOppdrag(oppdrag)
 
-        utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.SENDT)
+        return utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.SENDT)
     }
 
     companion object {

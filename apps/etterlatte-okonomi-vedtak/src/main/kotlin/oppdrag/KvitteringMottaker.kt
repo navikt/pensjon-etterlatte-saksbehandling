@@ -46,14 +46,14 @@ class KvitteringMottaker(
             oppdragXml = message.getBody(String::class.java)
             val oppdrag = Jaxb.toOppdrag(oppdragXml)
 
-
             utbetalingsoppdragDao.oppdaterKvittering(oppdrag)
 
             when (oppdrag.mmel.alvorlighetsgrad) {
-                "00", "04" -> oppdragGodkjent(oppdrag, oppdragXml)
-                //"08" // noe saksbehandler må håndtere
-                //"12" // hånteres av tjenesten
-                else -> oppdragFeilet(oppdrag, oppdragXml)
+                "00" -> oppdragAkseptert(oppdrag)
+                "04" -> oppdragAkseptertMedFeil(oppdrag)
+                "08" -> oppdragAvvist(oppdrag)
+                "12" -> oppdragFeilet(oppdrag, oppdragXml)
+                else -> oppdragFeiletUkjent(oppdrag, oppdragXml)
             }
 
             logger.info("Melding med id=${message.jmsMessageID} er lest og behandlet")
@@ -63,24 +63,48 @@ class KvitteringMottaker(
         }
     }
 
-    private fun oppdragGodkjent(oppdrag: Oppdrag, oppdragXml: String) {
-        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} godkjent", kv("oppdrag", oppdragXml))
-        logger.info("OppdragslinjeId: ${oppdrag.oppdrag110.oppdragsId} linjeIder: ${oppdrag.oppdrag110.oppdragsLinje150.map { it.linjeId }}")
+    private fun oppdragAkseptert(oppdrag: Oppdrag) {
+        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} akseptert")
         utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.GODKJENT)
-        rapidsConnection.publish(mapOf("@event_name" to "utbetaling_godkjent").toJson())
-        // TODO utvid melding
+        rapidsConnection.publish(utbetalingEvent(oppdrag, UtbetalingsoppdragStatus.GODKJENT))
+    }
+
+    private fun oppdragAkseptertMedFeil(oppdrag: Oppdrag) {
+        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} akseptert med feil")
+        utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.GODKJENT_MED_FEIL)
+        rapidsConnection.publish(utbetalingEvent(oppdrag, UtbetalingsoppdragStatus.GODKJENT))
+    }
+
+    private fun oppdragAvvist(oppdrag: Oppdrag) {
+        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} avvist")
+        utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.AVVIST)
+        rapidsConnection.publish(utbetalingEvent(oppdrag, UtbetalingsoppdragStatus.AVVIST))
     }
 
     private fun oppdragFeilet(oppdrag: Oppdrag, oppdragXml: String) {
         logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet", kv("oppdrag", oppdragXml))
         utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.FEILET)
-        rapidsConnection.publish(mapOf("@event_name" to "utbetaling_feilet").toJson())
-        // TODO utvid melding
+        rapidsConnection.publish(utbetalingEvent(oppdrag, UtbetalingsoppdragStatus.FEILET))
     }
+
+    private fun oppdragFeiletUkjent(oppdrag: Oppdrag, oppdragXml: String) {
+        // TODO bør denne håndteres på noen annen måte?
+        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet med ukjent feil", kv("oppdrag", oppdragXml))
+        utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.FEILET_UKJENT_FEIL)
+        rapidsConnection.publish(utbetalingEvent(oppdrag, UtbetalingsoppdragStatus.FEILET_UKJENT_FEIL))
+    }
+
+    private fun utbetalingEvent(oppdrag: Oppdrag, status: UtbetalingsoppdragStatus) = mapOf(
+        "@event_name" to "utbetaling_oppdatert",
+        "@status" to status.name,
+        "@beskrivelse" to oppdrag.kvitteringBeskrivelse()
+    ).toJson()
 
     companion object {
         private val logger = LoggerFactory.getLogger(KvitteringMottaker::class.java)
     }
+
+    private fun Oppdrag.kvitteringBeskrivelse() = "${this.mmel.kodeMelding} ${this.mmel.beskrMelding}"
 
 }
 

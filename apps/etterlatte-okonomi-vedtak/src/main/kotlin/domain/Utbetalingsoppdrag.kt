@@ -7,7 +7,10 @@ enum class UtbetalingsoppdragStatus {
     MOTTATT,
     SENDT,
     GODKJENT,
-    FEILET
+    GODKJENT_MED_FEIL,
+    AVVIST,
+    FEILET,
+    FEILET_UKJENT_FEIL
 }
 
 data class Utbetalingsoppdrag(

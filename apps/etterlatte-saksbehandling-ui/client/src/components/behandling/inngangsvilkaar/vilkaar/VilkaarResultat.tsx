@@ -31,7 +31,7 @@ export const VilkaarResultat: React.FC<Props> = ({ id, /*resultat,*/ dato }) => 
   if (resultat === VurderingsResultat.OPPFYLT) {
     tekst = 'Innvilget fra ' + datoFormatert
   } else if (resultat === VurderingsResultat.IKKE_OPPFYLT) {
-    tekst = 'Avslag'
+    tekst = 'Avslag fra ' + datoFormatert
   } else {
     tekst = 'Trenger avklaring'
   }

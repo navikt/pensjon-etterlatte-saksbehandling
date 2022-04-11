@@ -33,7 +33,7 @@ export const avbrytBehandling = async (behandlingsid: string): Promise<IApiRespo
 
 export const sendTilAttestering = async (behandlingsId: string): Promise<IApiResponse<any>> => {
   try {
-    const result: Response = await fetch(`${path}/api/vedtak/${behandlingsId}`, {
+    const result: Response = await fetch(`${path}/api/attestering/${behandlingsId}`, {
       method: 'post',
     })
     return {

@@ -2,6 +2,7 @@ import { Content, ContentHeader } from '../../../shared/styled'
 import { TypeStatusWrap } from '../soeknadsoversikt/styled'
 import { Sammendrag } from './sammendrag'
 import styled from 'styled-components'
+import { format } from 'date-fns'
 import { FileIcon } from '../../../shared/icons/fileIcon'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { BeregningModal } from '../handlinger/sendTilAttesteringModal'
@@ -20,8 +21,8 @@ export const Beregne = () => {
           </DetailWrapper>
 
           <div className="text">
-            Vilkårsresultat:
-            <strong>Innvilget fra {virkningstidspunkt}</strong>
+            Vilkårsresultat:{" "}
+            <strong>Innvilget fra {format(new Date(virkningstidspunkt), 'dd.MM.yyyy')}</strong>
           </div>
         </InfoWrapper>
 

@@ -8,7 +8,7 @@ class ApplicationContext(configLocation: String? = null) {
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
 
     fun securityMediator(): SecurityContextMediator = SecurityContextMediatorFactory.from(config)
-    fun vilkaarDao() = VilkarDaoInMemory()
+    fun vilkaarDao() = VilkaarDaoInMemory()
     fun vilkaarService(vilkaarDao: VilkaarDao) = VilkaarService(vilkaarDao)
 
 }

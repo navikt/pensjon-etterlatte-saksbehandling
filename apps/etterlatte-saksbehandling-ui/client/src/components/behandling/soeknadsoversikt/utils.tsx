@@ -40,7 +40,12 @@ export const hentAlderVedDoedsdato = (foedselsdato: string, doedsdato: string): 
 
 export const hentVirkningstidspunkt = (doedsdato: string, mottattDato: string): string => {
   if (sjekkDodsfallMerEnn3AarSiden(doedsdato, mottattDato)) {
-    return moment(moment(doedsdato).add(3, 'years').toString()).add(1, 'M').startOf('month').toString()
+    /*
+    TODO se mere på utregning av virkningstidspunkt. for gjenlevende er det 3 måneder(?) og barnepensjon 1,
+    men er det mere enn 3 år siden dødsfall, går man bare 3 år tilbake. Denne burde kanskje regnes ut i backend og ligge 
+    lagret på behandlingen, og så må saksbehandler ha mulighet til å endre den hvis det er behov, på vilkårssiden der den vises.
+    */
+    return moment(doedsdato).add(3, 'years').startOf('month').toString()
   }
   return moment(doedsdato).add(1, 'M').startOf('month').toString()
 }

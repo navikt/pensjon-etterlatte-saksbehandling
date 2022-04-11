@@ -40,7 +40,7 @@ spec:
           kind: Project
         role: roles/cloudsql.client
   envFrom:
-    - secret: google-sql-etterlatte-vilkaar-kafka-vilkaar-vilkaar-ap-da9265d3
+    - secret: google-sql-etterlatte-vilkaar-kafka-vurdertvilkaar-vil-9936ffea
   env:
     - name: DB_REGION
       value: "europe-north1"

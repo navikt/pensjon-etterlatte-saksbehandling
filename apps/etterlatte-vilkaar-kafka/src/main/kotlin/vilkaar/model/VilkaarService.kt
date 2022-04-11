@@ -9,13 +9,12 @@ import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.vilkaar.barnepensjon.*
 import org.slf4j.LoggerFactory
+import vilkaar.grunnlag.Vilkaarsgrunnlag
 
 
 class VilkaarService {
@@ -23,27 +22,33 @@ class VilkaarService {
 
     fun mapVilkaar(opplysninger: List<VilkaarOpplysning<ObjectNode>>): VilkaarResultat {
         logger.info("Map vilkaar")
+        return mapVilkaar(Vilkaarsgrunnlag(
+            avdoedSoeknad = finnOpplysning(opplysninger, Opplysningstyper.AVDOED_SOEKNAD_V1),
+            soekerSoeknad = finnOpplysning(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1),
+            soekerPdl = finnOpplysning(opplysninger, Opplysningstyper.SOEKER_PDL_V1),
+            avdoedPdl = finnOpplysning(opplysninger, Opplysningstyper.AVDOED_PDL_V1),
+            gjenlevendePdl = finnOpplysning(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1),
+        ))
 
-        val avdoedSoeknad = finnOpplysning<AvdoedSoeknad>(opplysninger, Opplysningstyper.AVDOED_SOEKNAD_V1)
-        val soekerSoeknad = finnOpplysning<SoekerBarnSoeknad>(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1)
-        val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
-        val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
-        val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
+    }
+
+
+    fun mapVilkaar(grunnlag: Vilkaarsgrunnlag): VilkaarResultat {
 
         val vilkaar = listOf(
-            vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, soekerPdl, avdoedPdl),
-            vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, avdoedPdl, soekerPdl),
+            vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, grunnlag.soekerPdl, grunnlag.avdoedPdl),
+            vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, grunnlag.avdoedPdl, grunnlag.soekerPdl),
             vilkaarAvdoedesMedlemskap(
                 Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
-                avdoedSoeknad,
-                avdoedPdl
+                grunnlag.avdoedSoeknad,
+                grunnlag.avdoedPdl
             ),
             vilkaarBarnetsMedlemskap(
                 Vilkaartyper.BARNETS_MEDLEMSKAP,
-                soekerPdl,
-                soekerSoeknad,
-                gjenlevendePdl,
-                avdoedPdl,
+                grunnlag.soekerPdl,
+                grunnlag.soekerSoeknad,
+                grunnlag.gjenlevendePdl,
+                grunnlag.avdoedPdl,
             )
         )
 

@@ -33,6 +33,8 @@ internal class LesVilkaarsmeldingTest {
 
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get("@event").asText())
         //TODO oppdatere testen
+        println(inspector.message(0).get("@vilkaarsvurdering"))
+
         Assertions.assertEquals(3, inspector.message(0).get("@vilkaarsvurdering").size())
 
         //verify { fordelerMetricLogger.logMetricFordelt() }

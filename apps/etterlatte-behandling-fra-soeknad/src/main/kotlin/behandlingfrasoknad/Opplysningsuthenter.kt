@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Forelder
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
@@ -26,7 +27,8 @@ class Opplysningsuthenter {
             utbetalingsinformasjon(barnepensjonssoknad, Opplysningstyper.UTBETALINGSINFORMASJON_V1),
             samtykke(barnepensjonssoknad, Opplysningstyper.SAMTYKKE),
             soeknadMottattDato(barnepensjonssoknad, Opplysningstyper.SOEKNAD_MOTTATT_DATO),
-            soeknadsType(barnepensjonssoknad, Opplysningstyper.SOEKNADSTYPE_V1)
+            soeknadsType(barnepensjonssoknad, Opplysningstyper.SOEKNADSTYPE_V1),
+            personGalleri(barnepensjonssoknad)
         ).filterNotNull()
     }
 
@@ -198,6 +200,18 @@ class Opplysningsuthenter {
         opplysningsType: Opplysningstyper
     ): Behandlingsopplysning<out SoeknadstypeOpplysning> {
         return setBehandlingsopplysninger(barnepensjon, opplysningsType, SoeknadstypeOpplysning(barnepensjon.type))
+    }
+
+    fun personGalleri(
+        barnepensjon: Barnepensjon
+    ): Behandlingsopplysning<out Persongalleri> {
+        return setBehandlingsopplysninger(barnepensjon, Opplysningstyper.PERSONGALLERI_V1, Persongalleri(
+            soker = barnepensjon.soeker.foedselsnummer.svar.value,
+            innsender = barnepensjon.innsender.foedselsnummer.svar.value,
+            soesken = barnepensjon.soesken.map { it.foedselsnummer.svar.value },
+            avdoed = barnepensjon.foreldre.filter { it.type == PersonType.AVDOED }.map { it.foedselsnummer.svar.value },
+            gjenlevende = barnepensjon.foreldre.filter { it.type == PersonType.GJENLEVENDE_FORELDER }.map { it.foedselsnummer.svar.value }
+        ))
     }
 
 }

@@ -3,6 +3,7 @@ package vilkaar
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -30,7 +31,8 @@ data class HendelseVilkaarsvureringOpprettet(
 ): VilkarsVurerngHendelse
 data class HendelseGrunnlagsbehov(
     val behandling: UUID,
-    val grunnlagstype: Opplysningstyper
+    val grunnlagstype: Opplysningstyper,
+    val person: String?
 ): VilkarsVurerngHendelse
 sealed interface VilkarsVurerngHendelse
 
@@ -43,13 +45,16 @@ class VurderVilkaar(val dao: Dao<VurderteVilkaarDao>) {
         Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
     )
     val service = VilkaarService()
+/*
 
+ */
     fun handleHendelse(behandlingOpprettet: HendelseBehandlingOpprettet): List<VilkarsVurerngHendelse> {
         return dao.inTransaction {
             val eksisterendeVurderinger = hentOppVurderinger(behandlingOpprettet.behandling)
             return@inTransaction if(eksisterendeVurderinger.isNotEmpty()){
                 emptyList() //TODO: Skal den gjøre gjøre noe annet
             }else {
+                val persongalleri = behandlingOpprettet.opplysninger.find { it.opplysningType == Opplysningstyper.PERSONGALLERI_V1 }?.let { setOpplysningType<Persongalleri>(it) }?.opplysning
                 val grunnlag = behandlingOpprettet.opplysninger.fold(Vilkaarsgrunnlag() to interessantGrunnlag) { acc, opplysning ->
                     when (opplysning.opplysningType) {
                         Opplysningstyper.AVDOED_SOEKNAD_V1 -> acc.first.copy(avdoedSoeknad = setOpplysningType(opplysning))
@@ -68,7 +73,7 @@ class VurderVilkaar(val dao: Dao<VurderteVilkaarDao>) {
                 lagreVurdering(vurdering)
                 println(vurdering)
                 grunnlag.second.map {
-                    HendelseGrunnlagsbehov(behandlingOpprettet.behandling, it)
+                    HendelseGrunnlagsbehov(behandlingOpprettet.behandling, it, persongalleri?.fnrForOpplysning(it))
                 } + HendelseVilkaarsvureringOpprettet(behandlingOpprettet.behandling, vurdering.vilkaarResultat)
             }
         }
@@ -104,15 +109,6 @@ class VurderVilkaar(val dao: Dao<VurderteVilkaarDao>) {
 
 }
 
-inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<ObjectNode>?): VilkaarOpplysning<T>? {
-    return opplysning?.let {
-        VilkaarOpplysning(
-            opplysning.opplysningType,
-            opplysning.kilde,
-            objectMapper.readValue(opplysning.opplysning.toString())
-        )
-    }
-}
 inline fun <reified T> setOpplysningType(opplysning: Behandlingsopplysning<ObjectNode>?): VilkaarOpplysning<T>? {
     return opplysning?.let {
         VilkaarOpplysning(
@@ -121,4 +117,12 @@ inline fun <reified T> setOpplysningType(opplysning: Behandlingsopplysning<Objec
             objectMapper.readValue(opplysning.opplysning.toString())
         )
     }
+}
+
+
+fun Persongalleri.fnrForOpplysning(opplysningstype: Opplysningstyper): String? = when (opplysningstype) {
+    Opplysningstyper.SOEKER_SOEKNAD_V1, Opplysningstyper.SOEKER_PDL_V1 -> soker
+    Opplysningstyper.AVDOED_SOEKNAD_V1, Opplysningstyper.AVDOED_PDL_V1 -> avdoed.firstOrNull()
+    Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1 -> gjenlevende.firstOrNull()
+    else -> null
 }

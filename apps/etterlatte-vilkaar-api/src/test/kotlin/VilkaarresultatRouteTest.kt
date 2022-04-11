@@ -36,8 +36,9 @@ class VilkaarresultatRouteTest {
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
 
-                val vilkaarResultatForBehandling = objectMapper.readValue(response.content!!, VilkaarResultatForBehandling::class.java)
-                assertEquals(behandlingId, vilkaarResultatForBehandling.behandlingId)
+                val vilkaarResultatForBehandling =
+                    objectMapper.readValue(response.content!!, VilkaarResultatForBehandling::class.java)
+                assertEquals(behandlingId, vilkaarResultatForBehandling.behandling)
 
                 verify { vilkaarService.hentVilkaarResultat(behandlingId) }
                 verify { securityContextMediator.secureRoute(any(), any()) }
@@ -53,7 +54,13 @@ class VilkaarresultatRouteTest {
     private fun String.withParameter(parameter: String) = "$this/$parameter"
 
     private fun vilkaarResultatForBehandling(behandlingId: String) = VilkaarResultatForBehandling(
-        behandlingId = behandlingId,
+        behandling = behandlingId,
+        avdoedSoeknad = null,
+        soekerSoeknad = null,
+        soekerPdl = null,
+        avdoedPdl = null,
+        gjenlevendePdl = null,
+        versjon = 1,
         VilkaarResultat(
             VurderingsResultat.OPPFYLT,
             emptyList(),

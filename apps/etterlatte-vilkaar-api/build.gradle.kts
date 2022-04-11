@@ -17,6 +17,9 @@ dependencies {
     implementation(Ktor.Jackson)
     implementation(Ktor.Auth)
 
+    implementation("com.google.cloud.sql:postgres-socket-factory:1.5.0")
+    implementation("com.zaxxer:HikariCP:3.4.5")
+
     implementation(Micrometer.Prometheus)
     implementation(Jackson.DatatypeJsr310)
     implementation(Jackson.DatatypeJdk8)

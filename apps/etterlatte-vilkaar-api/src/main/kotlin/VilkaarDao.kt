@@ -1,5 +1,7 @@
-import model.VilkaarResultatForBehandling
+package no.nav.etterlatte
+
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.model.VilkaarResultatForBehandling
 import java.sql.ResultSet
 import javax.sql.DataSource
 

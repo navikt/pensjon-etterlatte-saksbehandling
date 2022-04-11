@@ -1,3 +1,5 @@
+package no.nav.etterlatte
+
 import io.ktor.application.call
 import io.ktor.application.log
 import io.ktor.http.HttpStatusCode

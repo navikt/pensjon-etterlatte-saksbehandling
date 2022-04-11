@@ -7,9 +7,9 @@ import io.ktor.routing.Route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
-import ktortokenexchange.SecurityContext
-import ktortokenexchange.SecurityContextMediator
-import ktortokenexchange.ThreadBoundSecCtx
+import no.nav.etterlatte.ktortokenexchange.SecurityContext
+import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
+import no.nav.etterlatte.ktortokenexchange.ThreadBoundSecCtx
 
 class LolSecMediator : SecurityContextMediator {
     private fun attachToRoute(route: Route) {

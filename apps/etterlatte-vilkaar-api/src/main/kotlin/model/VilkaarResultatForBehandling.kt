@@ -1,4 +1,5 @@
-package model
+package no.nav.etterlatte.model
+
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat

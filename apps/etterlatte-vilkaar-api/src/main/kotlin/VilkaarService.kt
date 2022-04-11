@@ -1,4 +1,6 @@
-import model.VilkaarResultatForBehandling
+package no.nav.etterlatte
+
+import no.nav.etterlatte.model.VilkaarResultatForBehandling
 
 
 class VilkaarService(

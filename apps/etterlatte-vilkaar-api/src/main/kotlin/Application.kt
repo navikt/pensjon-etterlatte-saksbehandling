@@ -1,8 +1,10 @@
+package no.nav.etterlatte
+
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import config.DataSourceBuilder
 import io.ktor.auth.LolSecMediator
-import ktortokenexchange.SecurityContextMediator
+import no.nav.etterlatte.config.DataSourceBuilder
+import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
 
 
 class ApplicationContext(

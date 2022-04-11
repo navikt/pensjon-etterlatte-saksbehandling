@@ -1,4 +1,5 @@
-import health.healthApi
+package no.nav.etterlatte
+
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -18,9 +19,10 @@ import io.ktor.server.cio.CIO
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
-import ktortokenexchange.SecurityContextMediator
-import ktortokenexchange.installAuthUsing
-import ktortokenexchange.secureRouteUsing
+import no.nav.etterlatte.health.healthApi
+import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
+import no.nav.etterlatte.ktortokenexchange.installAuthUsing
+import no.nav.etterlatte.ktortokenexchange.secureRouteUsing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper

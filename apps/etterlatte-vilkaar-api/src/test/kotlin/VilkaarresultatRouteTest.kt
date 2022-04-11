@@ -64,10 +64,12 @@ class VilkaarresultatRouteTest {
         avdoedPdl = null,
         gjenlevendePdl = null,
         versjon = 1,
-        VilkaarResultat(
-            VurderingsResultat.OPPFYLT,
-            emptyList(),
-            LocalDateTime.now()
+        objectMapper.valueToTree(
+            VilkaarResultat(
+                VurderingsResultat.OPPFYLT,
+                emptyList(),
+                LocalDateTime.now()
+            )
         )
     )
 }

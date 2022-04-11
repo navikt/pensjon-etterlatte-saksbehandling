@@ -47,29 +47,25 @@ class VilkaarDaoJdbc(val dataSource: DataSource) : VilkaarDao {
                 it.executeQuery().singleOrNull {
                     VilkaarResultatForBehandling(
                         behandling = getObject("behandling") as UUID,
-                        avdoedSoeknad = getString("avdoedSoeknad").let { avdoedSoeknad ->
-                            objectMapper.valueToTree(
+                        avdoedSoeknad = getString("avdoedSoeknad")?.let { avdoedSoeknad ->
+                            objectMapper.readTree(
                                 avdoedSoeknad
                             )
                         },
-                        soekerSoeknad = getString("soekerSoeknad").let { soekerSoeknad ->
-                            objectMapper.valueToTree(
+                        soekerSoeknad = getString("soekerSoeknad")?.let { soekerSoeknad ->
+                            objectMapper.readTree(
                                 soekerSoeknad
                             )
                         },
-                        soekerPdl = getString("avdoedPdl").let { soekerPdl -> objectMapper.valueToTree(soekerPdl) },
-                        avdoedPdl = getString("avdoedPdl").let { avdoedPdl -> objectMapper.valueToTree(avdoedPdl) },
-                        gjenlevendePdl = getString("avdoedPdl").let { gjenlevendePdl ->
-                            objectMapper.valueToTree(
+                        soekerPdl = getString("avdoedPdl")?.let { soekerPdl -> objectMapper.readTree(soekerPdl) },
+                        avdoedPdl = getString("avdoedPdl")?.let { avdoedPdl -> objectMapper.readTree(avdoedPdl) },
+                        gjenlevendePdl = getString("avdoedPdl")?.let { gjenlevendePdl ->
+                            objectMapper.readTree(
                                 gjenlevendePdl
                             )
                         },
                         versjon = getLong("versjon"),
-                        vilkaarResultat = getString("vilkaarResultat").let { vilkaarResultat ->
-                            objectMapper.valueToTree(
-                                vilkaarResultat
-                            )
-                        }
+                        vilkaarResultat = objectMapper.readTree(getString("vilkaarResultat"))
                     )
                 }
             }

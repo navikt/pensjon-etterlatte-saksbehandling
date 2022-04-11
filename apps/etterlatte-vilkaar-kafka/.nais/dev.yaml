@@ -11,6 +11,7 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_14
+        cascadingDelete: true
         name: etterlatte-vilkaar-kafka
         databases:
           - name: vilkaar

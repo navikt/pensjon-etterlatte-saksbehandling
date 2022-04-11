@@ -13,7 +13,7 @@ spec:
       - type: POSTGRES_14
         name: etterlatte-vilkaar-rr
         databases:
-          - name: vilkaar
+          - name: vurdertvilkaar
             envVarPrefix: DB
             users:
               - name: vilkaar-api

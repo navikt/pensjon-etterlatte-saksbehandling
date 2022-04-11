@@ -10,10 +10,12 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
-import model.VilkaarResultatForBehandling
+import no.nav.etterlatte.VilkaarService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.model.VilkaarResultatForBehandling
+import no.nav.etterlatte.module
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime

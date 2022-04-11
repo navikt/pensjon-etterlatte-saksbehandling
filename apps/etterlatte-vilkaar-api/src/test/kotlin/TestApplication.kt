@@ -1,6 +1,8 @@
 import io.ktor.auth.LolSecMediator
 import io.mockk.every
 import io.mockk.spyk
+import no.nav.etterlatte.ApplicationContext
+import no.nav.etterlatte.Server
 
 
 fun main() {

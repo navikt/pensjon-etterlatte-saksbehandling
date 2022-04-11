@@ -3,17 +3,18 @@ import com.zaxxer.hikari.HikariDataSource
 import org.flywaydb.core.Flyway
 import javax.sql.DataSource
 
+
+
 class DataSourceBuilder(private val env: Map<String, String>) {
     private val hikariConfig = HikariConfig().apply {
-        jdbcUrl = env["DB_JDBC_URL"] ?: String.format(
-            "jdbc:postgresql://%s:%s/%s%s",
-            requireNotNull(env["DB_HOST"]) { "database host must be set if jdbc url is not provided" },
-            requireNotNull(env["DB_PORT"]) { "database port must be set if jdbc url is not provided" },
-            requireNotNull(env["DB_DATABASE"]) { "database name must be set if jdbc url is not provided" },
-            env["DB_USERNAME"]?.let { "?user=$it" } ?: "")
+        jdbcUrl = jdbcUrl(
+            host = env.required("DB_HOST"),
+            port = env.required("DB_PORT"),
+            databaseName = env.required("DB_DATABASE")
+        )
 
-        env["DB_USERNAME"]?.let { this.username = it }
-        env["DB_PASSWORD"]?.let { this.password = it }
+        username = env.required("DB_USERNAME")
+        password = env.required("DB_PASSWORD")
         setTransactionIsolation("TRANSACTION_SERIALIZABLE")
         initializationFailTimeout = 6000
 
@@ -40,3 +41,9 @@ class DataSourceBuilder(private val env: Map<String, String>) {
             .load()
             .migrate()
 }
+
+fun jdbcUrl(host: String, port: String, databaseName: String) =
+    "jdbc:postgresql://${host}:$port/$databaseName"
+
+fun Map<String, String>.required(property: String): String =
+    requireNotNull(this[property]) { "Property $property was null" }

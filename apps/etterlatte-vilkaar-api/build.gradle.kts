@@ -18,6 +18,7 @@ dependencies {
     implementation(Ktor.Auth)
 
     implementation("com.google.cloud.sql:postgres-socket-factory:1.5.0")
+    implementation("org.postgresql:postgresql:42.3.3")
     implementation("com.zaxxer:HikariCP:3.4.5")
 
     implementation(Micrometer.Prometheus)

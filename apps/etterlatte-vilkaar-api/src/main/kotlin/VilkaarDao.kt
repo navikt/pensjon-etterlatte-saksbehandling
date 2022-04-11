@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.model.VilkaarResultatForBehandling
 import java.sql.ResultSet
+import java.util.*
 import javax.sql.DataSource
 
 interface VilkaarDao {
@@ -41,11 +42,11 @@ class VilkaarDaoJdbc(val dataSource: DataSource) : VilkaarDao {
             )
 
             stmt.use {
-                it.setString(1, behandlingId)
+                it.setObject(1, UUID.fromString(behandlingId))
 
                 it.executeQuery().singleOrNull {
                     VilkaarResultatForBehandling(
-                        behandling = getString("behandling"),
+                        behandling = getObject("behandling") as UUID,
                         avdoedSoeknad = getString("avdoedSoeknad").let { avdoedSoeknad ->
                             objectMapper.valueToTree(
                                 avdoedSoeknad

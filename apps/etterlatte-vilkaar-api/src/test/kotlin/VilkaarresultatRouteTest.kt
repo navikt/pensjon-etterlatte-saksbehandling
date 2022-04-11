@@ -19,6 +19,7 @@ import no.nav.etterlatte.module
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import java.util.*
 
 
 class VilkaarresultatRouteTest {
@@ -28,7 +29,7 @@ class VilkaarresultatRouteTest {
 
     @Test
     fun `skal returnere vilkaarresultat`() {
-        val behandlingId = "1234"
+        val behandlingId = UUID.randomUUID().toString()
 
         coEvery { vilkaarService.hentVilkaarResultat(behandlingId) } returns vilkaarResultatForBehandling(behandlingId)
 
@@ -40,7 +41,7 @@ class VilkaarresultatRouteTest {
 
                 val vilkaarResultatForBehandling =
                     objectMapper.readValue(response.content!!, VilkaarResultatForBehandling::class.java)
-                assertEquals(behandlingId, vilkaarResultatForBehandling.behandling)
+                assertEquals(behandlingId, vilkaarResultatForBehandling.behandling.toString())
 
                 verify { vilkaarService.hentVilkaarResultat(behandlingId) }
                 verify { securityContextMediator.secureRoute(any(), any()) }
@@ -56,7 +57,7 @@ class VilkaarresultatRouteTest {
     private fun String.withParameter(parameter: String) = "$this/$parameter"
 
     private fun vilkaarResultatForBehandling(behandlingId: String) = VilkaarResultatForBehandling(
-        behandling = behandlingId,
+        behandling = UUID.fromString(behandlingId),
         avdoedSoeknad = null,
         soekerSoeknad = null,
         soekerPdl = null,

@@ -16,9 +16,9 @@ import java.util.*
 
 internal class BesvarOpplysningsbehov(
     rapidsConnection: RapidsConnection,
-    private val behandlinger: Behandling,
+    //private val behandlinger: Behandling,
     private val pdl: Pdl,
-    private val opplysningsBygger: OpplysningsBygger
+    //private val opplysningsBygger: OpplysningsBygger
 ) : River.PacketListener {
 
     init {

@@ -27,14 +27,10 @@ internal class BehovBesvart(
     }
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val grunnlagListe: List<Behandlingsopplysning<ObjectNode>> = objectMapper.readValue(packet["opplysning"].toJson())!!
-            val behandling = UUID.fromString(packet["id"].textValue())
-            try {
-                vilkaar.handleHendelse(HendelseNyttGrunnlag(behandling, grunnlagListe)).forEach { handterReturHendleser.handterHendelse(it, packet, context, behandling) }
-            } catch (e: Exception){
-                //TODO endre denne
-                println("spiser en melding fordi: " +e)
-            }
+            val grunnlagListe: Behandlingsopplysning<ObjectNode> = objectMapper.readValue(packet["opplysning"].toJson())!!
+            val behandling = UUID.fromString(packet["behandling"].textValue())
+            vilkaar.handleHendelse(HendelseNyttGrunnlag(behandling, listOf(grunnlagListe))).forEach { handterReturHendleser.handterHendelse(it, packet, context, behandling) }
+
         }
 }
 

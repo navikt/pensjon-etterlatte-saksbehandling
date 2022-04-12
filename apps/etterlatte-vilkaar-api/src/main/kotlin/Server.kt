@@ -4,6 +4,8 @@ import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.application.log
+import io.ktor.auth.Authentication
+import io.ktor.auth.authenticate
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.StatusPages
@@ -20,9 +22,6 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import no.nav.etterlatte.health.healthApi
-import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
-import no.nav.etterlatte.ktortokenexchange.installAuthUsing
-import no.nav.etterlatte.ktortokenexchange.secureRouteUsing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
@@ -34,7 +33,7 @@ class Server(applicationContext: ApplicationContext) {
     private val engine = embeddedServer(CIO, environment = applicationEngineEnvironment {
         module {
             module(
-                securityContextMediator = applicationContext.securityMediator(),
+                authenticationConfiguration = applicationContext.tokenValidering(),
                 vilkaarService = applicationContext.vilkaarService(applicationContext.vilkaarDao()),
             )
         }
@@ -45,7 +44,7 @@ class Server(applicationContext: ApplicationContext) {
 }
 
 fun Application.module(
-    securityContextMediator: SecurityContextMediator,
+    authenticationConfiguration: Authentication.Configuration.() -> Unit,
     vilkaarService: VilkaarService
 ) {
     install(ContentNegotiation) {
@@ -63,11 +62,13 @@ fun Application.module(
             call.respond(HttpStatusCode.InternalServerError, "En feil oppstod: ${cause.message}")
         }
     }
-    installAuthUsing(securityContextMediator)
+    install(Authentication) {
+        authenticationConfiguration()
+    }
 
     routing {
         healthApi()
-        secureRouteUsing(securityContextMediator) {
+        authenticate {
             VilkaarRoute(vilkaarService)
         }
     }

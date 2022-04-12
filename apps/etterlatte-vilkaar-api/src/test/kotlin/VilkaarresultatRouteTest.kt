@@ -1,4 +1,4 @@
-import io.ktor.auth.LolSecMediator
+import io.ktor.auth.Authentication
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
@@ -8,7 +8,6 @@ import io.ktor.server.testing.withTestApplication
 import io.mockk.coEvery
 import io.mockk.confirmVerified
 import io.mockk.mockk
-import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.VilkaarService
 import no.nav.etterlatte.libs.common.objectMapper
@@ -18,6 +17,7 @@ import no.nav.etterlatte.model.VurdertVilkaar
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import sikkerhet.tokenTestSupportAcceptsAllTokens
 import java.time.LocalDateTime
 import java.util.*
 
@@ -25,7 +25,6 @@ import java.util.*
 class VilkaarresultatRouteTest {
 
     private val vilkaarService = mockk<VilkaarService>()
-    private val securityContextMediator = spyk<LolSecMediator>()
 
     @Test
     fun `skal returnere vilkaarresultat`() {
@@ -33,7 +32,12 @@ class VilkaarresultatRouteTest {
 
         coEvery { vilkaarService.hentVilkaarResultat(behandlingId) } returns vilkaarResultatForBehandling(behandlingId)
 
-        withTestApplication({ module(securityContextMediator, vilkaarService) }) {
+        withTestApplication({
+            module(
+                Authentication.Configuration::tokenTestSupportAcceptsAllTokens,
+                vilkaarService
+            )
+        }) {
             handleRequest(HttpMethod.Get, VILKAARRESULTAT_ENDEPUNKT.withParameter(behandlingId)) {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.apply {
@@ -44,7 +48,6 @@ class VilkaarresultatRouteTest {
                 assertEquals(behandlingId, vurdertVilkaar.behandling.toString())
 
                 verify { vilkaarService.hentVilkaarResultat(behandlingId) }
-                verify { securityContextMediator.secureRoute(any(), any()) }
                 confirmVerified(vilkaarService)
             }
         }

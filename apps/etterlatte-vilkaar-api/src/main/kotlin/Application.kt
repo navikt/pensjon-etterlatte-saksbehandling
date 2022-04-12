@@ -2,9 +2,10 @@ package no.nav.etterlatte
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import io.ktor.auth.Authentication
+import io.ktor.config.HoconApplicationConfig
 import no.nav.etterlatte.config.DataSourceBuilder
-import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
-import no.nav.etterlatte.ktortokenexchange.SecurityContextMediatorFactory
+import no.nav.security.token.support.ktor.tokenValidationSupport
 
 
 class ApplicationContext(
@@ -22,7 +23,14 @@ class ApplicationContext(
         databaseName = env.required("DB_VILKAAR_API_DATABASE")
     )
 
-    fun securityMediator(): SecurityContextMediator = SecurityContextMediatorFactory.from(config)
+    fun tokenValidering(): Authentication.Configuration.() -> Unit = {
+        tokenValidationSupport(
+            config = HoconApplicationConfig(
+                ConfigFactory.load()
+            )
+        )
+    }
+
     fun vilkaarDao() = VilkaarDaoJdbc(dataSourceBuilder().dataSource())
     fun vilkaarService(vilkaarDao: VilkaarDao) = VilkaarService(vilkaarDao)
 

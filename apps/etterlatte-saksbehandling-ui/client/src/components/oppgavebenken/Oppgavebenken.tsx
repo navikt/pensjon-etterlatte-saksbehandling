@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react'
 import OppgaveHeader from './OppgaveHeader'
 import OppgaveListe from './OppgaveListe'
 import styled from 'styled-components'
-import {parse} from 'date-fns'
 import {
   BehandlingTypeFilter,
   FilterPar,

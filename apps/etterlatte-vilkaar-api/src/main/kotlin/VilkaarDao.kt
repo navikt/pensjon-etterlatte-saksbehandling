@@ -39,7 +39,7 @@ class VilkaarDaoJdbc(val dataSource: DataSource) : VilkaarDao {
                 """SELECT behandling, avdoedSoeknad, soekerSoeknad, soekerPdl, avdoedPdl, gjenlevendePdl, versjon, vilkaarResultat
                         FROM vurdertvilkaar
                         WHERE behandling = ?
-                        ORDER BY versjon DESCENDING
+                        ORDER BY versjon DESC
                         LIMIT 1""".trimIndent()
             )
 

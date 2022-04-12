@@ -28,7 +28,6 @@ import no.nav.etterlatte.behandling.vedtakRoute
 import no.nav.etterlatte.health.healthApi
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.etterlatte.vilkaar.vilkaarRoute
 import no.nav.security.token.support.ktor.tokenValidationSupport
 import org.slf4j.event.Level
 import java.util.*
@@ -66,7 +65,6 @@ class Server(applicationContext: ApplicationContext) {
                         behandlingRoute(applicationContext.behandlingService)
                         oppgaveRoute(applicationContext.oppgaveService)
                         vedtakRoute(applicationContext.vedtakService)
-                        vilkaarRoute(applicationContext.vilkaarService)
                     }
                 }
             }

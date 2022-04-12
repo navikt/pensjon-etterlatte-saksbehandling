@@ -29,7 +29,12 @@ internal class BehovBesvart(
         withLogContext(packet.correlationId()) {
             val grunnlagListe: Behandlingsopplysning<ObjectNode> = objectMapper.readValue(packet["opplysning"].toJson())!!
             val behandling = UUID.fromString(packet["behandling"].textValue())
-            vilkaar.handleHendelse(HendelseNyttGrunnlag(behandling, listOf(grunnlagListe))).forEach { handterReturHendleser.handterHendelse(it, packet, context, behandling) }
+            vilkaar.handleHendelse(HendelseNyttGrunnlag(behandling, listOf(grunnlagListe))).forEach { handterReturHendleser.handterHendelse(it, JsonMessage.newMessage(
+                mapOf(
+                    "@event" to  "VILKAAR:VURDERT",
+                    "behandling" to behandling
+                )
+            ), context, behandling) }
 
         }
 }

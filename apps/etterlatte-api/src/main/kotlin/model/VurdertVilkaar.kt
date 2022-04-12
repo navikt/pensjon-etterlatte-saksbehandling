@@ -1,10 +1,9 @@
 package no.nav.etterlatte.model
 
-
 import com.fasterxml.jackson.databind.JsonNode
 import java.util.*
 
-data class VilkaarResultatForBehandling(
+data class VurdertVilkaar(
     val behandling: UUID,
     val avdoedSoeknad: JsonNode?,
     val soekerSoeknad: JsonNode?,

@@ -1,17 +1,17 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.model.VilkaarResultatForBehandling
+import no.nav.etterlatte.model.VurdertVilkaar
 import java.sql.ResultSet
 import java.util.*
 import javax.sql.DataSource
 
 interface VilkaarDao {
-    fun hentVilkaarResultat(behandlingId: String): VilkaarResultatForBehandling?
+    fun hentVilkaarResultat(behandlingId: String): VurdertVilkaar?
 }
 
 class VilkaarDaoInMemory() : VilkaarDao {
-    val vilkaar = HashMap<String, VilkaarResultatForBehandling>()
+    val vilkaar = HashMap<String, VurdertVilkaar>()
 
     /*
     init {
@@ -29,11 +29,11 @@ class VilkaarDaoInMemory() : VilkaarDao {
 
      */
 
-    override fun hentVilkaarResultat(behandlingId: String): VilkaarResultatForBehandling? = vilkaar.get(behandlingId)
+    override fun hentVilkaarResultat(behandlingId: String): VurdertVilkaar? = vilkaar.get(behandlingId)
 }
 
 class VilkaarDaoJdbc(val dataSource: DataSource) : VilkaarDao {
-    override fun hentVilkaarResultat(behandlingId: String): VilkaarResultatForBehandling? =
+    override fun hentVilkaarResultat(behandlingId: String): VurdertVilkaar? =
         dataSource.connection.use { connection ->
             val stmt = connection.prepareStatement(
                 "SELECT behandling, avdoedSoeknad, soekerSoeknad, soekerPdl, avdoedPdl, gjenlevendePdl, versjon, vilkaarResultat " +
@@ -45,7 +45,7 @@ class VilkaarDaoJdbc(val dataSource: DataSource) : VilkaarDao {
                 it.setObject(1, UUID.fromString(behandlingId))
 
                 it.executeQuery().singleOrNull {
-                    VilkaarResultatForBehandling(
+                    VurdertVilkaar(
                         behandling = getObject("behandling") as UUID,
                         avdoedSoeknad = getString("avdoedSoeknad")?.let { avdoedSoeknad ->
                             objectMapper.readTree(

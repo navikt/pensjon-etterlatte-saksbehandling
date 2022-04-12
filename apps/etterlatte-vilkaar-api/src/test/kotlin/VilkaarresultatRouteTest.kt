@@ -14,7 +14,7 @@ import no.nav.etterlatte.VilkaarService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-import no.nav.etterlatte.model.VilkaarResultatForBehandling
+import no.nav.etterlatte.model.VurdertVilkaar
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -39,9 +39,9 @@ class VilkaarresultatRouteTest {
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
 
-                val vilkaarResultatForBehandling =
-                    objectMapper.readValue(response.content!!, VilkaarResultatForBehandling::class.java)
-                assertEquals(behandlingId, vilkaarResultatForBehandling.behandling.toString())
+                val vurdertVilkaar =
+                    objectMapper.readValue(response.content!!, VurdertVilkaar::class.java)
+                assertEquals(behandlingId, vurdertVilkaar.behandling.toString())
 
                 verify { vilkaarService.hentVilkaarResultat(behandlingId) }
                 verify { securityContextMediator.secureRoute(any(), any()) }
@@ -51,12 +51,12 @@ class VilkaarresultatRouteTest {
     }
 
     companion object {
-        const val VILKAARRESULTAT_ENDEPUNKT = "/vilkaarresultat"
+        const val VILKAARRESULTAT_ENDEPUNKT = "/vurdertvilkaar"
     }
 
     private fun String.withParameter(parameter: String) = "$this/$parameter"
 
-    private fun vilkaarResultatForBehandling(behandlingId: String) = VilkaarResultatForBehandling(
+    private fun vilkaarResultatForBehandling(behandlingId: String) = VurdertVilkaar(
         behandling = UUID.fromString(behandlingId),
         avdoedSoeknad = null,
         soekerSoeknad = null,

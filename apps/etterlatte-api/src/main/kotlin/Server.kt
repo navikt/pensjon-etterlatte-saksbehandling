@@ -28,6 +28,7 @@ import no.nav.etterlatte.behandling.vedtakRoute
 import no.nav.etterlatte.health.healthApi
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.vilkaar.vilkaarRoute
 import no.nav.security.token.support.ktor.tokenValidationSupport
 import org.slf4j.event.Level
 import java.util.*
@@ -36,7 +37,7 @@ class Server(applicationContext: ApplicationContext) {
     private val engine = embeddedServer(CIO, environment = applicationEngineEnvironment {
         module {
             install(ContentNegotiation) {
-                jackson{
+                jackson {
                     registerModule(JavaTimeModule())
                     disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 }
@@ -62,9 +63,10 @@ class Server(applicationContext: ApplicationContext) {
                 healthApi()
                 authenticate {
                     route("api") {
-                        behandlingRoute(applicationContext.behandlingService);
+                        behandlingRoute(applicationContext.behandlingService)
                         oppgaveRoute(applicationContext.oppgaveService)
                         vedtakRoute(applicationContext.vedtakService)
+                        vilkaarRoute(applicationContext.vilkaarService)
                     }
                 }
             }

@@ -2,9 +2,9 @@ package no.nav.etterlatte
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import io.ktor.auth.LolSecMediator
 import no.nav.etterlatte.config.DataSourceBuilder
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
+import no.nav.etterlatte.ktortokenexchange.SecurityContextMediatorFactory
 
 
 class ApplicationContext(
@@ -22,7 +22,7 @@ class ApplicationContext(
         databaseName = env.required("DB_VILKAAR_API_DATABASE")
     )
 
-    fun securityMediator(): SecurityContextMediator = LolSecMediator()
+    fun securityMediator(): SecurityContextMediator = SecurityContextMediatorFactory.from(config)
     fun vilkaarDao() = VilkaarDaoJdbc(dataSourceBuilder().dataSource())
     fun vilkaarService(vilkaarDao: VilkaarDao) = VilkaarService(vilkaarDao)
 

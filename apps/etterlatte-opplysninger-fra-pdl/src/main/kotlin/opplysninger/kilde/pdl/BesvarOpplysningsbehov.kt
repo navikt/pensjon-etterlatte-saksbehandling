@@ -12,18 +12,16 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import org.slf4j.LoggerFactory
 import java.util.*
 
 internal class BesvarOpplysningsbehov(
     rapidsConnection: RapidsConnection,
-    //private val behandlinger: Behandling,
     private val pdl: Pdl,
-    //private val opplysningsBygger: OpplysningsBygger
 ) : River.PacketListener {
-
+    private val logger = LoggerFactory.getLogger(BesvarOpplysningsbehov::class.java)
     init {
         River(rapidsConnection).apply {
-            //validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("@behov") }
             validate { it.requireKey("behandling") }
             validate { it.requireKey("fnr") }
@@ -36,11 +34,18 @@ internal class BesvarOpplysningsbehov(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val personRolle = objectMapper.treeToValue(packet["rolle"], PersonRolle::class.java)!!
-            val behandling = objectMapper.treeToValue(packet["@behov"], Opplysningstyper::class.java)!!
-            val pdlInfo = pdl.hentPdlModell(packet["fnr"].asText(), personRolle)
-            packet["opplysning"] = personOpplysning(pdlInfo, behandling)
-            context.publish(packet.toJson())
+
+            if(packet["@behov"].asText() in listOf(Opplysningstyper.AVDOED_PDL_V1.name,Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1.name,Opplysningstyper.SOEKER_PDL_V1.name)){
+                val personRolle = objectMapper.treeToValue(packet["rolle"], PersonRolle::class.java)!!
+                val behandling = objectMapper.treeToValue(packet["@behov"], Opplysningstyper::class.java)!!
+                val pdlInfo = pdl.hentPdlModell(packet["fnr"].asText(), personRolle)
+                packet["opplysning"] = personOpplysning(pdlInfo, behandling)
+                context.publish(packet.toJson())
+                logger.info("Svarte på et behov av type: " + behandling.name)
+            } else {
+                logger.info("Så et behov jeg ikke kunne svare på")
+            }
+
         }
     }
 

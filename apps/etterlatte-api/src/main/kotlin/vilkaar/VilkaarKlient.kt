@@ -20,7 +20,7 @@ class VilkaarKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("vilkaarapi.client.id")
     private val resourceUrl = config.getString("vilkaarapi.resource.url")
 
-    suspend fun vurdertVilkaar(behandlingId: String, accessToken: String): VurdertVilkaar {
+    suspend fun hentVurdertVilkaar(behandlingId: String, accessToken: String): VurdertVilkaar? {
         try {
             logger.info("Henter vurdert vilkaar for behandling $behandlingId")
             val json = downstreamResourceClient
@@ -33,6 +33,8 @@ class VilkaarKlient(config: Config, httpClient: HttpClient) {
                     success = { json -> json },
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
+
+
 
             return objectMapper.readValue(json.toString(), VurdertVilkaar::class.java)
         } catch (e: Exception) {

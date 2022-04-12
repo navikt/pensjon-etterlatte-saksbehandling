@@ -5,9 +5,11 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
-
+import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import no.nav.etterlatte.vilkaar.VilkaarKlient
 import org.slf4j.LoggerFactory
 
 
@@ -18,7 +20,11 @@ data class BehandlingsBehov(
     val opplysninger: List<Behandlingsopplysning<ObjectNode>>?
 )
 
-class BehandlingService(private val behandlingKlient: BehandlingKlient, private val pdlKlient: PdltjenesterKlient) {
+class BehandlingService(
+    private val behandlingKlient: BehandlingKlient,
+    private val pdlKlient: PdltjenesterKlient,
+    private val vilkaarKlient: VilkaarKlient
+) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
 
     suspend fun hentPerson(fnr: String, accessToken: String): PersonSakerResult {
@@ -47,7 +53,17 @@ class BehandlingService(private val behandlingKlient: BehandlingKlient, private 
 
     suspend fun hentBehandling(behandlingId: String, accessToken: String): DetaljertBehandling {
         logger.info("Henter behandling")
-        return behandlingKlient.hentBehandling(behandlingId, accessToken)
+        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+        val vilkaar = vilkaarKlient.hentVurdertVilkaar(behandlingId, accessToken)
+        return vilkaar?.vilkaarResultat?.let {
+            behandling.copy(
+                vilkårsprøving = objectMapper.treeToValue(
+                    vilkaar.vilkaarResultat,
+                    VilkaarResultat::class.java
+                )
+            )
+        } ?: behandling
+
     }
 
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag {

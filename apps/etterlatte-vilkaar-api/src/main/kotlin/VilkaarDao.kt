@@ -36,9 +36,11 @@ class VilkaarDaoJdbc(val dataSource: DataSource) : VilkaarDao {
     override fun hentVilkaarResultat(behandlingId: String): VurdertVilkaar? =
         dataSource.connection.use { connection ->
             val stmt = connection.prepareStatement(
-                "SELECT behandling, avdoedSoeknad, soekerSoeknad, soekerPdl, avdoedPdl, gjenlevendePdl, versjon, vilkaarResultat " +
-                        "FROM vurdertvilkaar " +
-                        "WHERE behandling = ?"
+                """SELECT behandling, avdoedSoeknad, soekerSoeknad, soekerPdl, avdoedPdl, gjenlevendePdl, versjon, vilkaarResultat
+                        FROM vurdertvilkaar
+                        WHERE behandling = ?
+                        ORDER BY versjon DESCENDING
+                        LIMIT 1""".trimIndent()
             )
 
             stmt.use {

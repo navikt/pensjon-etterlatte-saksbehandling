@@ -1,14 +1,14 @@
 import { IdType, Row } from 'react-table'
+import { format } from 'date-fns'
 import { IOppgave, SaksbehandlerFilter } from '../typer/oppgavebenken'
 import { getContainsSelectFilter } from '../OppgaveListe'
-import moment from 'moment'
 
 export function globalFilterFunction(rows: Row<IOppgave>[], columnIds: IdType<IOppgave>[], filterValue: string) {
   return rows.filter((row) => {
     return columnIds.some((id) => {
       const rowValue = row.values[id]
       if (id === 'regdato' || id === 'fristdato') {
-        return moment(rowValue).format('DD.MM.YYYY').toString() === filterValue
+        return format(rowValue, 'dd.MM.yyyy') === filterValue
       } else if (id === 'enhet' || id === 'status' || id === 'prioritet') {
         return getContainsSelectFilter(id, rowValue, filterValue)
       }

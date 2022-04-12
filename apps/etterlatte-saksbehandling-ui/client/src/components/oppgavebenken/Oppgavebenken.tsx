@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import OppgaveHeader from './OppgaveHeader'
 import OppgaveListe from './OppgaveListe'
 import styled from 'styled-components'
+import {parse} from 'date-fns'
 import {
   BehandlingTypeFilter,
   FilterPar,
@@ -17,7 +18,6 @@ import { hentOppgaver } from '../../shared/api/oppgaver'
 import Spinner from '../../shared/Spinner'
 import { AppContext, IAppContext } from '../../store/AppContext'
 import { IApiResponse } from '../../shared/api/types'
-import moment from 'moment'
 
 const OppgavebenkContainer = styled.div`
   max-width: 60em;
@@ -86,10 +86,10 @@ function mapOppgaveResponse(data: any): IOppgave {
   const oppgave: IOppgave = {
     sakId: data.sakId,
     behandlingsId: data.behandlingsId,
-    regdato: moment(data.regdato, 'YYYY-MM-DD').toDate(),
+    regdato: new Date(data.regdato),
     soeknadType: data.soeknadType.toUpperCase() as SoeknadTypeFilter,
     behandlingType: data.behandlingType.toUpperCase() as BehandlingTypeFilter,
-    fristdato: moment(data.fristdato, 'YYYY-MM-DD').toDate(),
+    fristdato: new Date(data.fristdato),
     fnr: data.fnr,
     beskrivelse: data.beskrivelse,
     status: mapStatus(data.status.toUpperCase()),

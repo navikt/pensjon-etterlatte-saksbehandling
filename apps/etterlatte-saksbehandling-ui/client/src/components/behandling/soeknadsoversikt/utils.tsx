@@ -1,4 +1,4 @@
-import moment from 'moment'
+import { differenceInYears, add, startOfMonth } from 'date-fns'
 import { IPersonOpplysningFraPdl } from '../types'
 import { WarningText } from '../../../shared/styled'
 import { GyldighetType, VurderingsResultat, IGyldighetproving } from '../../../store/reducers/BehandlingReducer'
@@ -35,7 +35,7 @@ export const sjekkAdresseGjenlevendeISoeknadMotPdl = (adresseFraSoeknad: string,
 }
 
 export const hentAlderVedDoedsdato = (foedselsdato: string, doedsdato: string): string => {
-  return Math.floor(moment(doedsdato).diff(moment(foedselsdato), 'years', true)).toString()
+  return Math.floor(differenceInYears(new Date(doedsdato), new Date(foedselsdato))).toString()
 }
 
 export const hentVirkningstidspunkt = (doedsdato: string, mottattDato: string): string => {
@@ -45,13 +45,13 @@ export const hentVirkningstidspunkt = (doedsdato: string, mottattDato: string): 
     men er det mere enn 3 år siden dødsfall, går man bare 3 år tilbake. Denne burde kanskje regnes ut i backend og ligge 
     lagret på behandlingen, og så må saksbehandler ha mulighet til å endre den hvis det er behov, på vilkårssiden der den vises.
     */
-    return moment(doedsdato).add(3, 'years').startOf('month').toString()
+    return startOfMonth(add(new Date(doedsdato), {years: 3})).toString()
   }
-  return moment(doedsdato).add(1, 'M').startOf('month').toString()
+  return startOfMonth(add(new Date(doedsdato), {months: 1})).toString()
 }
 
 export const sjekkDodsfallMerEnn3AarSiden = (doedsdato: string, mottattDato: string): boolean => {
-  return moment(mottattDato).diff(moment(doedsdato), 'years', true) > 3
+  return differenceInYears(new Date(mottattDato), new Date(doedsdato)) > 3
 }
 
 export const getStatsborgerskapTekst = (statsborgerskap: string) => {

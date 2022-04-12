@@ -5,12 +5,9 @@ import '../../App.css'
 import styled from 'styled-components'
 import 'react-datepicker/dist/react-datepicker.css'
 import '../../index.css'
-import moment from 'moment'
 import { GlobalFilter } from './filtere/GlobalFilter'
 import ColumnFilters from './filtere/ColumnFilters'
 import { AppContext, IAppContext } from '../../store/AppContext'
-
-moment.defaultFormat = 'DD.MM.YYYY'
 
 type Props = {
   oppgaveFelter: IOppgaveFelter

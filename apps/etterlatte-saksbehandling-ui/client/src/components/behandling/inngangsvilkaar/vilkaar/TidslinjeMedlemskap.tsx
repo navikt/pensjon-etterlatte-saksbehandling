@@ -1,11 +1,11 @@
 import styled from 'styled-components'
-import moment from 'moment'
+import { format, sub } from 'date-fns'
 import { aarIProsent } from './tidslinjeUtils'
 import { Tidsperiode } from './Tidsperiode'
 
 export const TidslinjeMedlemskap = () => {
-  const doedsdato = moment('2022-06-01', 'YYYY-MM-DD')
-  const femAarTidligere = moment('2022-06-01', 'YYYY-MM-DD').subtract(5, 'years')
+  const doedsdato = format(Date.parse('2022-06-01'), 'yyyy-MM-dd')
+  const femAarTidligere = format(sub(Date.parse('2022-06-01'), {years: 5}), 'yyyy-MM-dd')
 
   const navnOgProsentPaaDatoer = aarIProsent(femAarTidligere, doedsdato)
 
@@ -43,7 +43,7 @@ export const TidslinjeMedlemskap = () => {
     <Tidslinje>
       <Grid>
         <GridBorder style={{ top: '10px' }}>&nbsp;</GridBorder>
-        <GridDatoer leftmargin={'0px'}>{moment(femAarTidligere).format('DD.MM.YYYY')}</GridDatoer>
+        <GridDatoer leftmargin={'0px'}>{femAarTidligere}</GridDatoer>
         {navnOgProsentPaaDatoer.map((aar) => (
           <GridDatoerWrapper prosent={aar[1]} key={aar[1].toString()}>
             <GridDatoer leftmargin={'-16px'}>{aar[0]}</GridDatoer>
@@ -51,7 +51,7 @@ export const TidslinjeMedlemskap = () => {
           </GridDatoerWrapper>
         ))}
         <GridDoedsdato>
-          <GridDatoer leftmargin={'-150px'}>dødsdato: {moment(doedsdato).format('DD.MM.YYYY')}</GridDatoer>
+          <GridDatoer leftmargin={'-150px'}>dødsdato: {doedsdato}</GridDatoer>
         </GridDoedsdato>
         <GridBorder style={{ bottom: '-30px' }}>&nbsp;</GridBorder>
       </Grid>

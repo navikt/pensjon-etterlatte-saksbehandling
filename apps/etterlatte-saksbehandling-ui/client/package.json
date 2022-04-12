@@ -9,7 +9,6 @@
     "@navikt/fnrvalidator": "1.1.4",
     "@navikt/navspa": "^4.0.0",
     "date-fns": "^2.28.0",
-    "moment": "^2.29.1",
     "nav-frontend-js-utils": "^1.0.20",
     "nav-frontend-lenker": "2.0.1",
     "nav-frontend-lenker-style": "2.0.1",

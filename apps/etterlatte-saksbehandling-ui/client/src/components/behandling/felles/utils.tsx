@@ -1,5 +1,5 @@
 import { IAdresse } from '../types'
-import moment from 'moment'
+import {isAfter} from 'date-fns'
 import {
   IKriterie,
   IKriterieOpplysning,
@@ -9,7 +9,7 @@ import {
 
 export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: Date): IAdresse[] {
   const etterDoedsdatoEllerAktiv = adresser?.filter(
-    (adresse) => moment(adresse.gyldigTilOgMed).isAfter(moment(doedsdato)) || adresse.aktiv
+    (adresse) => isAfter(new Date(adresse.gyldigTilOgMed!), doedsdato) || adresse.aktiv
   )
 
   return etterDoedsdatoEllerAktiv

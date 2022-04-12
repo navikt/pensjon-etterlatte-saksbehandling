@@ -8,19 +8,18 @@ import {
   statusFilter,
   StatusFilter,
 } from './typer/oppgavebenken'
-import moment from 'moment'
+import { format } from 'date-fns'
 import { ColorTag } from './styled'
 import SaksbehandlerTildelKnapp from './filtere/SaksbehandlerTildelKnapp'
 import HandlingerKnapp from './filtere/HandlingerKnapp'
 
-moment.defaultFormat = 'DD.MM.YYYY'
 
 export const kolonner: ReadonlyArray<Column<IOppgave>> = [
   {
     Header: 'Reg. dato',
     accessor: 'regdato',
     Cell: ({ value: dato }) => {
-      return moment(dato).format()
+      return format(dato, 'dd.MM.yyyy')
     },
     sortType: 'datetime',
   },
@@ -28,7 +27,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     Header: 'Frist',
     accessor: 'fristdato',
     Cell: ({ value: dato }) => {
-      return moment(dato).format()
+      return format(dato, 'dd.MM.yyyy')
     },
     sortType: 'datetime',
   },

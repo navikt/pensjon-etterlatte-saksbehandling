@@ -1,5 +1,5 @@
 import { IAdresse } from '../types'
-import moment from 'moment'
+import {format} from 'date-fns'
 import { HistorikkElement } from '../soeknadsoversikt/styled'
 
 export const Adressevisning = ({
@@ -38,8 +38,8 @@ export const Adresse = ({
   soeknadsoversikt: boolean
   index: number
 }) => {
-  const fra = moment(adresse.gyldigFraOgMed).format('DD.MM.YYYY')
-  const til = adresse.aktiv ? 'nå' : moment(adresse.gyldigTilOgMed).format('DD.MM.YYYY')
+  const fra = format(new Date(adresse.gyldigFraOgMed), 'dd.MM.yyyy')
+  const til = adresse.aktiv ? 'nå' : format(new Date(adresse.gyldigTilOgMed!), 'dd.MM.yyyy')
 
   const padding = index > 0 ? '5px' : '0px'
   return (

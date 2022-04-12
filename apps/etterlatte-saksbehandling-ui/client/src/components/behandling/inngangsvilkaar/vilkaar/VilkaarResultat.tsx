@@ -2,7 +2,7 @@ import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer
 import React from 'react'
 import { VilkaarBorder } from '../styled'
 import styled from 'styled-components'
-import moment from 'moment'
+import {format} from 'date-fns'
 import { BehandlingHandlingKnapper } from '../../handlinger/BehandlingHandlingKnapper'
 import { VilkaarsVurderingKnapper } from '../../handlinger/vilkaarsvurderingKnapper'
 
@@ -25,7 +25,7 @@ const resultat = randomizeForTest() //TODO: fjern
 /** Bare funksjoner for at Arnt skulle få teste grensesnittet */
 
 export const VilkaarResultat: React.FC<Props> = ({ id, /*resultat,*/ dato }) => {
-  const datoFormatert = moment(dato).format('DD.MM.YYYY')
+  const datoFormatert = format(new Date(dato), 'dd.MM.yyyy')
 
   let tekst = ''
   if (resultat === VurderingsResultat.OPPFYLT) {

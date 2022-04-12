@@ -1,9 +1,12 @@
-import moment from 'moment'
+import { format } from "date-fns"
 import { hentKildenavn } from './utils'
 import styled from 'styled-components'
 
-export const KildeDatoOpplysning = ({ type, dato }: { type: String; dato: Date }) => {
-  const dataDato = moment(dato).format('DD.MM.YYYY')
+export const KildeDatoOpplysning = ({ type, dato }: { type: String; dato: string }) => {
+  if(!dato) {
+    return <div />
+  }
+  const dataDato = format(new Date(dato), 'dd.MM.yyyy')
   const kilde = hentKildenavn(type)
 
   return (
@@ -19,8 +22,8 @@ export const KildeOppysning = styled.div`
   margin-top: 5px;
 `
 
-export const KildeDatoVilkaar = ({ type, dato }: { type: String; dato: Date }) => {
-  const dataDato = moment(dato).format('DD.MM.YYYY')
+export const KildeDatoVilkaar = ({ type, dato }: { type: String; dato: string }) => {
+  const dataDato = format(new Date(dato), 'dd.MM.yyyy')
   const kilde = hentKildenavn(type)
 
   return (

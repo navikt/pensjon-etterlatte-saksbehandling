@@ -2,9 +2,9 @@ import { IOppgaveFelt, IOppgaveFelter } from '../typer/oppgavefelter'
 import React, { useRef } from 'react'
 import { Label } from 'nav-frontend-skjema'
 import DatePicker from 'react-datepicker'
+import { parse } from 'date-fns'
 import styled from 'styled-components'
 import { FilterElement } from '../styled'
-import moment from 'moment'
 import { settFilterVerdi } from './setFilterVerdi'
 
 type Props = {
@@ -63,7 +63,7 @@ const DateColumnFilter: React.FC<Props> = ({ oppgaveFelt, oppgaveFelter, setOppg
 
 const parseDate = (dato?: Date | string) => {
   if (!dato) return
-  else if (typeof dato === 'string') return moment(dato, moment.defaultFormat).toDate()
+  else if (typeof dato === 'string') return parse(dato, "dd.MM.yyyy", new Date())
   else return dato
 }
 

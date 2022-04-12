@@ -1,4 +1,4 @@
-import moment, { Moment } from 'moment'
+import { format } from 'date-fns'
 import { startdatoOffsetProsent, tidsperiodeProsent } from './tidslinjeUtils'
 import { OfficeIcon } from '../../../../shared/icons/officeIcon'
 import { HomeIcon } from '../../../../shared/icons/homeIcon'
@@ -10,8 +10,8 @@ export const Tidsperiode = ({
   periode,
   index,
 }: {
-  doedsdato: Moment
-  femAarTidligere: Moment
+  doedsdato: string
+  femAarTidligere: string
   periode: any
   index: number
 }) => {
@@ -19,14 +19,13 @@ export const Tidsperiode = ({
   const startDatoOffset = startdatoOffsetProsent(periode.innhold.fraDato, femAarTidligere)
 
   const colors = ['#a6cbdc', '#a5a5d7', '#c4adde', '#d7a9c6']
-
   return (
     <Rad style={{ left: startDatoOffset, width: lengdePeriode, backgroundColor: colors[index % colors.length] }}>
       <InnholdWrapper>
         <Ikon>{periode.periodeType === 'jobb' ? <OfficeIcon /> : <HomeIcon />}</Ikon>
         <div>
           <InnholdDatoFraTil>
-            {moment(periode.innhold.fraDato).format('MM.YYYY')} - {moment(periode.innhold.tilDato).format('MM.YYYY')}
+            {format(new Date(periode.innhold.fraDato), 'MM.yyyy')} - {format(new Date(periode.innhold.tilDato), 'MM.yyyy')}
           </InnholdDatoFraTil>
           <InnholdBeskrivelse>{periode.innhold.beskrivelse}</InnholdBeskrivelse>
           <InnholdKilde>{periode.innhold.kilde}</InnholdKilde>

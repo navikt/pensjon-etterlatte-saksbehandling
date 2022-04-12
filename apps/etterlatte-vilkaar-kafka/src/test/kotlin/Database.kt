@@ -5,6 +5,8 @@ import org.junit.jupiter.api.*
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import vilkaar.VurderteVilkaarDao
+import vilkaar.grunnlag.GrunnlagHendelseType
+import vilkaar.grunnlag.Grunnlagshendelse
 import vilkaar.grunnlag.Vilkaarsgrunnlag
 import vilkaar.grunnlag.VilkarIBehandling
 import java.sql.SQLException
@@ -41,6 +43,20 @@ internal class Database {
         val behandling = UUID.randomUUID()
         VurderteVilkaarDao(dataSource.connection).also {
             Assertions.assertTrue(it.hentOppVurderinger(behandling).isEmpty())
+
+            assertThrows<SQLException> {
+                it.lagreVurdering(VilkarIBehandling(behandling, Vilkaarsgrunnlag(), 1, VilkaarService().mapVilkaar(Vilkaarsgrunnlag())))
+            }
+
+            it.lagreGrunnlagshendelse(
+                listOf( Grunnlagshendelse(
+                behandling,
+                null, GrunnlagHendelseType.BEHANDLING_OPPRETTET, 1 , null
+            )))
+
+            it.hentGrunnlagsHendelser(behandling).forEach { println(it) }
+
+
             it.lagreVurdering(VilkarIBehandling(behandling, Vilkaarsgrunnlag(), 1, VilkaarService().mapVilkaar(Vilkaarsgrunnlag())))
             assertThrows<SQLException> {
                 it.lagreVurdering(VilkarIBehandling(behandling, Vilkaarsgrunnlag(), 1, VilkaarService().mapVilkaar(Vilkaarsgrunnlag())))

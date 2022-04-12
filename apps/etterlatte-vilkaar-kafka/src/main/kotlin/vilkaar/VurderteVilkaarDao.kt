@@ -1,10 +1,16 @@
 package vilkaar
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
+import vilkaar.grunnlag.GrunnlagHendelseType
+import vilkaar.grunnlag.Grunnlagshendelse
 import vilkaar.grunnlag.Vilkaarsgrunnlag
 import vilkaar.grunnlag.VilkarIBehandling
 import java.sql.Connection
+import java.sql.Types
 import java.util.*
 
 class VurderteVilkaarDao(val connection: Connection) {
@@ -29,6 +35,63 @@ class VurderteVilkaarDao(val connection: Connection) {
 
             }
     }
+
+    fun lagreGrunnlagshendelse(hendelser: List<Grunnlagshendelse>){
+        if(hendelser.isEmpty()) return
+        connection.prepareStatement("INSERT INTO grunnlagshendelse(behandling, opplysning, kilde, opplysningtype, hendelsenummer, hendelsetype, hendelseref) VALUES(?, ?, ?, ?, ?, ?, ?)").also { statement ->
+            hendelser.forEach { hendelse ->
+                statement.setObject(1, hendelse.behandling)
+                statement.setString(2, hendelse.opplysning?.opplysning?.let { objectMapper.writeValueAsString(it) })
+                statement.setString(3, hendelse.opplysning?.kilde?.let { objectMapper.writeValueAsString(it) })
+                statement.setString(4, hendelse.opplysning?.opplysningType?.name)
+                statement.setLong(5, hendelse.hendelsenummer)
+                statement.setString(6, hendelse.hendelsetype.name)
+                if(hendelse.hendelsereferanse == null) statement.setNull(7, Types.BIGINT) else statement.setLong(7, hendelse.hendelsereferanse)
+                statement.addBatch()
+            }
+            require(statement.executeBatch().sum() == hendelser.size)
+        }
+
+    }
+
+    fun hentGrunnlagsHendelser(behandling: UUID): List<Grunnlagshendelse> {
+       return connection.prepareStatement("SELECT opplysning, kilde, opplysningtype, hendelsenummer, hendelsetype, hendelseref from grunnlagshendelse WHERE behandling = ?")
+            .also {
+                it.setObject(1, behandling)
+            }
+            .executeQuery().toList {
+             Grunnlagshendelse(
+                behandling = behandling,
+                hendelsenummer = getLong("hendelsenummer"),
+                opplysning = lagVilkaarOpplysning(getString("opplysningtype"), getString("kilde"), getString("opplysning")),
+                hendelsetype = GrunnlagHendelseType.valueOf(getString("hendelsetype")),
+                hendelsereferanse = getLong("hendelseref").takeIf { !wasNull() }
+
+            )
+        }
+
+    }
+
+    private fun lagVilkaarOpplysning(type: String?, kilde: String?, opplysning: String?):VilkaarOpplysning<ObjectNode>?{
+        return type?.let { kilde?.let { opplysning?.let { VilkaarOpplysning(
+            opplysningType = Opplysningstyper.valueOf(type),
+            kilde = objectMapper.readValue(kilde),
+            opplysning = objectMapper.readTree(opplysning) as ObjectNode
+        ) } } }
+    }
+
+    /*
+    CREATE TABLE grunnlagshendelse(
+    behandling UUID NOT NULL,
+    opplysning TEXT,
+    kilde TEXT,
+    opplysningtype TEXT NOT NULL,
+    hendelsenummer BIGINT NOT NULL,
+    PRIMARY KEY(behandling, hendelsenummer)
+);
+
+    * */
+
 
     fun lagreVurdering(vilkarIBehandling: VilkarIBehandling){
         connection.prepareStatement("INSERT INTO vurdertvilkaar(behandling, versjon, vilkaarResultat, avdoedSoeknad, soekerSoeknad, soekerPdl, avdoedPdl, gjenlevendePdl) values(?, ?, ?, ?, ?, ?, ?, ?)")

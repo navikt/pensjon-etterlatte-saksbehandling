@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
@@ -56,6 +57,8 @@ class BehandlingService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
         val vilkaar = vilkaarKlient.hentVurdertVilkaar(behandlingId, accessToken)
         return vilkaar?.vilkaarResultat?.let {
+            logger.info("Kopierer over vilkaarResultat til behandling")
+            logger.info("vilkarresultat", kv("vilkaarResultat", vilkaar.vilkaarResultat))
             behandling.copy(
                 vilkårsprøving = objectMapper.treeToValue(
                     vilkaar.vilkaarResultat,

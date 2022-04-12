@@ -38,7 +38,7 @@ internal class BesvarOpplysningsbehov(
         withLogContext(packet.correlationId()) {
             val personRolle = objectMapper.treeToValue(packet["rolle"], PersonRolle::class.java)!!
             val behandling = objectMapper.treeToValue(packet["@behov"], Opplysningstyper::class.java)!!
-            val pdlInfo = pdl.hentPdlModell(packet["@opplysningsbehov.fnr"].asText(), personRolle)
+            val pdlInfo = pdl.hentPdlModell(packet["fnr"].asText(), personRolle)
             packet["opplysning"] = personOpplysning(pdlInfo, behandling)
             context.publish(packet.toJson())
         }

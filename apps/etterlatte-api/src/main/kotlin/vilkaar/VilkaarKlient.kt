@@ -17,8 +17,8 @@ class VilkaarKlient(config: Config, httpClient: HttpClient) {
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
-    private val clientId = config.getString("behandling.client.id")
-    private val resourceUrl = config.getString("behandling.resource.url")
+    private val clientId = config.getString("vilkaarapi.client.id")
+    private val resourceUrl = config.getString("vilkaarapi.resource.url")
 
     suspend fun vurdertVilkaar(behandlingId: String, accessToken: String): VurdertVilkaar {
         try {

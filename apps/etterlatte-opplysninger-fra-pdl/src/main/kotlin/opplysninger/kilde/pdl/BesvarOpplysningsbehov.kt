@@ -28,6 +28,7 @@ internal class BesvarOpplysningsbehov(
             validate { it.requireKey("behandling") }
             validate { it.requireKey("fnr") }
             validate { it.requireKey("rolle") }
+            validate { it.rejectKey("opplysning") }
             validate { it.interestedIn("@correlation_id") }
 
         }.register(this)

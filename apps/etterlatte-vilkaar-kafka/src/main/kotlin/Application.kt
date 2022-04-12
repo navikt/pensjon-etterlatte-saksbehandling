@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import BehandlingOpprettet
+import BehovBesvart
 import DataSourceBuilder
 import LesVilkaarsmelding
 import no.nav.etterlatte.model.VilkaarService
@@ -20,7 +21,10 @@ fun main() {
         RapidApplication.create(env)
             .also {
                 LesVilkaarsmelding(it, VilkaarService())
-                BehandlingOpprettet(it, VurderVilkaar(Dao(datasource, ::VurderteVilkaarDao)))
+                VurderVilkaar(Dao(datasource, ::VurderteVilkaarDao)).also { svc ->
+                    BehandlingOpprettet(it, svc)
+                    BehovBesvart(it, svc)
+                }
             }.start()
     }
 }

@@ -80,7 +80,7 @@ class VurderVilkaar(val dao: Dao<VurderteVilkaarDao>) {
 
     }
 
-    private fun handleHendelse(hendelse: HendelseNyttGrunnlag): List<VilkarsVurerngHendelse>{
+    fun handleHendelse(hendelse: HendelseNyttGrunnlag): List<VilkarsVurerngHendelse>{
         return dao.inTransaction {
             val nyesteVurdering = hentOppVurderinger(hendelse.behandling).maxByOrNull { it.versjon }
             if(nyesteVurdering == null ) emptyList()

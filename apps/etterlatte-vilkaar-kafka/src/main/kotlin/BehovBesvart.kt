@@ -9,39 +9,33 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import vilkaar.HendelseBehandlingOpprettet
-import vilkaar.VurderVilkaar
+import vilkaar.*
 import java.util.UUID
 
-internal class BehandlingOpprettet(
+internal class BehovBesvart(
     rapidsConnection: RapidsConnection,
     private val vilkaar: VurderVilkaar
 ) : River.PacketListener {
     private val handterReturHendleser = HandterVilkarsVurerngHendelse()
+
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", "BEHANDLING:OPPRETTET") }
-            validate { it.requireKey("grunnlag", "id") }
-            validate { it.rejectKey("@vilkaarsvurdering") }
+            validate { it.demandAny("@behov", vilkaar.interessantGrunnlag.map { type -> type.name }) }
+            validate { it.requireKey("behandling", "opplysning") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val grunnlagListe: List<Behandlingsopplysning<ObjectNode>> = objectMapper.readValue(packet["grunnlag"].toJson())!!
+            val grunnlagListe: List<Behandlingsopplysning<ObjectNode>> = objectMapper.readValue(packet["opplysning"].toJson())!!
             val behandling = UUID.fromString(packet["id"].textValue())
             try {
-                vilkaar.handleHendelse(HendelseBehandlingOpprettet(behandling, grunnlagListe)).forEach {handterReturHendleser.handterHendelse(it, packet, context, behandling)}
-
+                vilkaar.handleHendelse(HendelseNyttGrunnlag(behandling, grunnlagListe)).forEach { handterReturHendleser.handterHendelse(it, packet, context, behandling) }
             } catch (e: Exception){
                 //TODO endre denne
                 println("spiser en melding fordi: " +e)
             }
-
-
         }
 }
-
-
 
 private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

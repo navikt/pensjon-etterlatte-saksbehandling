@@ -16,14 +16,11 @@ import java.util.*
 
 internal class BesvarOpplysningsbehov(
     rapidsConnection: RapidsConnection,
-    //private val behandlinger: Behandling,
     private val pdl: Pdl,
-    //private val opplysningsBygger: OpplysningsBygger
 ) : River.PacketListener {
 
     init {
         River(rapidsConnection).apply {
-            //validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("@behov") }
             validate { it.requireKey("behandling") }
             validate { it.requireKey("fnr") }
@@ -36,6 +33,12 @@ internal class BesvarOpplysningsbehov(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
+
+            if(packet["@behov"].asText() in listOf(Opplysningstyper.AVDOED_PDL_V1.name,Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1.name,Opplysningstyper.SOEKER_PDL_V1.name)){
+                println("tjoho")
+            } else {
+                println("bah")
+            }
             val personRolle = objectMapper.treeToValue(packet["rolle"], PersonRolle::class.java)!!
             val behandling = objectMapper.treeToValue(packet["@behov"], Opplysningstyper::class.java)!!
             val pdlInfo = pdl.hentPdlModell(packet["fnr"].asText(), personRolle)

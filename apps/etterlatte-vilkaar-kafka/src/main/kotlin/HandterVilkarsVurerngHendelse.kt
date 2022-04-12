@@ -14,22 +14,24 @@ class HandterVilkarsVurerngHendelse {
     }
 
     fun handterHendelse (hendelse: VilkarsVurerngHendelse, originalPakke: JsonMessage, messageContext: MessageContext, behandling: UUID){
-        if(hendelse is HendelseVilkaarsvureringOpprettet) {
-            originalPakke["@vilkaarsvurdering"] = hendelse.vurderVilkaar
-            messageContext.publish(originalPakke.toJson())
-            logger.info("Vurdert Vilkår i behandling $behandling")
-        }
-        if (hendelse is HendelseGrunnlagsbehov){
-            messageContext.publish(JsonMessage.newMessage(
-                mapOf<String, Any>(
-                    "@behov" to hendelse.grunnlagstype,
-                    "behandling" to hendelse.behandling,
-                ).let {
-                    hendelse.person?.let {person -> it + ("fnr" to person) }?: it
-                }.let {
-                    hendelse.grunnlagstype.personRolle?.let {rolle -> it + ("rolle" to rolle) }?: it
-                }
-            ).toJson())
+        when(hendelse){
+            is HendelseVilkaarsvureringOpprettet -> {
+                originalPakke["@vilkaarsvurdering"] = hendelse.vurderVilkaar
+                messageContext.publish(originalPakke.toJson())
+                logger.info("Vurdert Vilkår i behandling $behandling")
+            }
+            is HendelseGrunnlagsbehov -> {
+                messageContext.publish(JsonMessage.newMessage(
+                    mapOf<String, Any>(
+                        "@behov" to hendelse.grunnlagstype,
+                        "behandling" to hendelse.behandling,
+                    ).let {
+                        hendelse.person?.let {person -> it + ("fnr" to person) }?: it
+                    }.let {
+                        hendelse.grunnlagstype.personRolle?.let {rolle -> it + ("rolle" to rolle) }?: it
+                    }
+                ).toJson())
+            }
         }
     }
 }

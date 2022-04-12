@@ -7,7 +7,7 @@ import LesVilkaarsmelding
 import no.nav.etterlatte.model.VilkaarService
 import no.nav.helse.rapids_rivers.RapidApplication
 import vilkaar.Dao
-import vilkaar.VurderVilkaar
+import vilkaar.VurderVilkaarImpl
 import vilkaar.VurderteVilkaarDao
 
 fun main() {
@@ -21,7 +21,7 @@ fun main() {
         RapidApplication.create(env)
             .also {
                 LesVilkaarsmelding(it, VilkaarService())
-                VurderVilkaar(Dao(datasource, ::VurderteVilkaarDao)).also { svc ->
+                VurderVilkaarImpl(Dao(datasource, ::VurderteVilkaarDao)).also { svc ->
                     BehandlingOpprettet(it, svc)
                     BehovBesvart(it, svc)
                 }

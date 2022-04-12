@@ -36,19 +36,26 @@ data class HendelseGrunnlagsbehov(
 ): VilkarsVurerngHendelse
 sealed interface VilkarsVurerngHendelse
 
-class VurderVilkaar(val dao: Dao<VurderteVilkaarDao>) {
-    val interessantGrunnlag = listOf(
+
+interface VurderVilkaar{
+    val interessantGrunnlag: List<Opplysningstyper>
+    fun handleHendelse(behandlingOpprettet: HendelseBehandlingOpprettet): List<VilkarsVurerngHendelse>
+    fun handleHendelse(hendelse: HendelseNyttGrunnlag): List<VilkarsVurerngHendelse>
+}
+
+class VurderVilkaarImpl(val dao: Dao<VurderteVilkaarDao>): VurderVilkaar {
+    override val interessantGrunnlag = listOf(
         Opplysningstyper.AVDOED_SOEKNAD_V1,
         Opplysningstyper.SOEKER_SOEKNAD_V1,
         Opplysningstyper.SOEKER_PDL_V1,
         Opplysningstyper.AVDOED_PDL_V1,
         Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
     )
-    val service = VilkaarService()
+    private val service = VilkaarService()
 /*
 
  */
-    fun handleHendelse(behandlingOpprettet: HendelseBehandlingOpprettet): List<VilkarsVurerngHendelse> {
+    override fun handleHendelse(behandlingOpprettet: HendelseBehandlingOpprettet): List<VilkarsVurerngHendelse> {
         return dao.inTransaction {
             val eksisterendeVurderinger = hentOppVurderinger(behandlingOpprettet.behandling)
             return@inTransaction if(eksisterendeVurderinger.isNotEmpty()){
@@ -80,7 +87,7 @@ class VurderVilkaar(val dao: Dao<VurderteVilkaarDao>) {
 
     }
 
-    fun handleHendelse(hendelse: HendelseNyttGrunnlag): List<VilkarsVurerngHendelse>{
+    override fun handleHendelse(hendelse: HendelseNyttGrunnlag): List<VilkarsVurerngHendelse>{
         return dao.inTransaction {
             val nyesteVurdering = hentOppVurderinger(hendelse.behandling).maxByOrNull { it.versjon }
             if(nyesteVurdering == null ) emptyList()

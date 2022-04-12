@@ -5,8 +5,8 @@ import javax.sql.DataSource
 
 
 
-class DataSourceBuilder(private val env: Map<String, String>) {
-    private val hikariConfig = HikariConfig().apply {
+class DataSourceBuilder(config: HikariConfig) {
+    constructor(env: Map<String, String>) : this( HikariConfig().apply {
         jdbcUrl = jdbcUrl(
             host = env.required("DB_HOST"),
             port = env.required("DB_PORT"),
@@ -15,29 +15,24 @@ class DataSourceBuilder(private val env: Map<String, String>) {
 
         username = env.required("DB_USERNAME")
         password = env.required("DB_PASSWORD")
-        setTransactionIsolation("TRANSACTION_SERIALIZABLE")
-        initializationFailTimeout = 6000
 
-    }
+    })
 
     val dataSource: DataSource
     init {
-        if (!env.containsKey("DB_JDBC_URL")) {
-            checkNotNull(env["DB_USERNAME"]) { "username must be set when vault is disabled" }
-            checkNotNull(env["DB_PASSWORD"]) { "password must be set when vault is disabled" }
-        }
-        dataSource = HikariDataSource(hikariConfig)
+
+        dataSource = HikariDataSource(config.apply {
+            setTransactionIsolation("TRANSACTION_SERIALIZABLE")
+            initializationFailTimeout = 6000
+
+        })
     }
 
     fun migrate() =  runMigration(dataSource)
 
-
     private fun runMigration(dataSource: DataSource) =
         Flyway.configure()
             .dataSource(dataSource)
-            .apply {
-                if (env.containsKey("NAIS_CLUSTER_NAME")) locations("db/migration", "db/gcp")
-            }
             .load()
             .migrate()
 }

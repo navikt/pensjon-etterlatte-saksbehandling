@@ -6,10 +6,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.vilkaar.VilkaarKlient
 import org.slf4j.LoggerFactory
 
@@ -59,12 +57,7 @@ class BehandlingService(
         return vilkaar?.vilkaarResultat?.let {
             logger.info("Kopierer over vilkaarResultat til behandling")
             logger.info("vilkarresultat", kv("vilkaarResultat", vilkaar.vilkaarResultat))
-            behandling.copy(
-                vilkårsprøving = objectMapper.treeToValue(
-                    vilkaar.vilkaarResultat,
-                    VilkaarResultat::class.java
-                )
-            )
+            behandling.copy(vilkårsprøving = it)
         } ?: behandling
 
     }

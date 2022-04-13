@@ -21,6 +21,12 @@ dependencies {
     implementation("org.postgresql:postgresql:42.3.3")
     implementation("com.zaxxer:HikariCP:3.4.5")
 
+    testImplementation("org.testcontainers:testcontainers:1.16.3")
+    testImplementation("org.testcontainers:junit-jupiter:1.16.3")
+    testImplementation("org.testcontainers:postgresql:1.16.0")
+    implementation("org.flywaydb:flyway-core:8.5.7")
+
+
     implementation(Micrometer.Prometheus)
     implementation(Jackson.DatatypeJsr310)
     implementation(Jackson.DatatypeJdk8)

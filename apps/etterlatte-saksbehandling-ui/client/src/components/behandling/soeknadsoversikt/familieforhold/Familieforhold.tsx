@@ -14,6 +14,7 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({
   avdodPersonSoknad,
   gjenlevendePdl,
   gjenlevendeSoknad,
+  innsender,
 }) => {
   return (
     <>
@@ -43,6 +44,7 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({
             fnrFraSoeknad: gjenlevendeSoknad?.foedselsnummer,
             adresseFraSoeknad: gjenlevendeSoknad?.adresse,
           }}
+          innsenderErGjenlevende={innsender.foedselsnummer === gjenlevendePdl.foedselsnummer}
         />
         <AvdoedForelder
           person={{

@@ -66,10 +66,11 @@ export const TypeStatusWrap = styled.div<{ type: string }>`
   margin-right: ${(props) => (props.type === 'barn' ? '1em;' : '0.5em')};
 `
 
-export const AvdoedWrap = styled.div`
-  background-color: #262626;
-  color: white;
-  border: 1px solid #262626;
+export const ForelderWrap = styled.div<{ avdoed?: boolean }>`
+  background-color: ${(props) => (props.avdoed ? '#262626' : '#ffeccc')};
+  color: ${(props) => (props.avdoed ? '#FFFFFF' : '262626')};
+  border: 1px solid ${(props) => (props.avdoed ? '#262626' : '#262626')};
+  height: 25px;
   padding: 0.1em 0.5em;
   border-radius: 4px;
   font-weight: normal;

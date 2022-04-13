@@ -25,4 +25,5 @@ export interface PropsFamilieforhold {
   avdodPersonSoknad: IAvdoedFraSoeknad
   gjenlevendePdl: IPersonOpplysningFraPdl
   gjenlevendeSoknad: IGjenlevendeFraSoeknad
+  innsender: IPersonOpplysning
 }

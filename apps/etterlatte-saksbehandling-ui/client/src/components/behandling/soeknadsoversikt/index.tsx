@@ -62,6 +62,7 @@ export const Soeknadsoversikt = () => {
         avdodPersonSoknad={avdodPersonSoknad}
         gjenlevendePdl={gjenlevendePdl}
         gjenlevendeSoknad={gjenlevendeSoknad}
+        innsender={innsender}
       />
       <BehandlingHandlingKnapper>
         <Start soeknadGyldigFremsatt={gyldighet.resultat === VurderingsResultat.OPPFYLT} />

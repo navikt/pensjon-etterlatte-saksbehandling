@@ -19,7 +19,7 @@ class VilkaarDaoJdbc(val dataSource: DataSource) : VilkaarDao {
         dataSource.connection.use { connection ->
 
             val stmt =
-                connection.prepareStatement("SELECT * FROM vurdertvilkaar where behandling = ? ORDER BY versjon DESC LIMIT 1")
+                connection.prepareStatement("SELECT behandling, avdoedSoeknad, soekerSoeknad, soekerPdl, avdoedPdl, gjenlevendePdl, versjon, vilkaarResultat FROM vurdertvilkaar where behandling = ? ORDER BY versjon DESC LIMIT 1")
 
             stmt.use {
                 it.setObject(1, UUID.fromString(behandlingId))
@@ -38,7 +38,7 @@ class VilkaarDaoJdbc(val dataSource: DataSource) : VilkaarDao {
                         vilkaarResultat = objectMapper.readValue(getString("vilkaarResultat"))
                     )
                 }
-            }.also { logger.info("Returnerer fra hentVilkaarResultat" + it.toString()) }
+            }.also { logger.info("Returnerer fra hentVilkaarResultat " + it.toString()) }
         }
 
     /*

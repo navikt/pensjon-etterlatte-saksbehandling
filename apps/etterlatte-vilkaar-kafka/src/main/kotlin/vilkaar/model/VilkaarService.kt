@@ -1,20 +1,20 @@
 package no.nav.etterlatte.model
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.barnepensjon.hentSisteVurderteDato
 import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraVilkaar
 import no.nav.etterlatte.barnepensjon.vilkaarAvdoedesMedlemskap
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
-import no.nav.etterlatte.libs.common.vikaar.Vilkaarsgrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
-import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
+import no.nav.etterlatte.vilkaar.barnepensjon.*
 import org.slf4j.LoggerFactory
+import vilkaar.grunnlag.Vilkaarsgrunnlag
 
 
 class VilkaarService {
@@ -22,15 +22,13 @@ class VilkaarService {
 
     fun mapVilkaar(opplysninger: List<VilkaarOpplysning<ObjectNode>>): VilkaarResultat {
         logger.info("Map vilkaar")
-        return mapVilkaar(
-            Vilkaarsgrunnlag(
-                avdoedSoeknad = finnOpplysning(opplysninger, Opplysningstyper.AVDOED_SOEKNAD_V1),
-                soekerSoeknad = finnOpplysning(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1),
-                soekerPdl = finnOpplysning(opplysninger, Opplysningstyper.SOEKER_PDL_V1),
-                avdoedPdl = finnOpplysning(opplysninger, Opplysningstyper.AVDOED_PDL_V1),
-                gjenlevendePdl = finnOpplysning(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1),
-            )
-        )
+        return mapVilkaar(Vilkaarsgrunnlag(
+            avdoedSoeknad = finnOpplysning(opplysninger, Opplysningstyper.AVDOED_SOEKNAD_V1),
+            soekerSoeknad = finnOpplysning(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1),
+            soekerPdl = finnOpplysning(opplysninger, Opplysningstyper.SOEKER_PDL_V1),
+            avdoedPdl = finnOpplysning(opplysninger, Opplysningstyper.AVDOED_PDL_V1),
+            gjenlevendePdl = finnOpplysning(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1),
+        ))
 
     }
 

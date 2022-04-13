@@ -5,6 +5,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.withTestApplication
+import io.mockk.coEvery
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.verify
@@ -15,7 +16,6 @@ import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.model.VurdertVilkaar
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import sikkerhet.tokenTestSupportAcceptsAllTokens
 import java.time.LocalDateTime
@@ -27,11 +27,10 @@ class VilkaarresultatRouteTest {
     private val vilkaarService = mockk<VilkaarService>()
 
     @Test
-    @Disabled
     fun `skal returnere vilkaarresultat`() {
         val behandlingId = UUID.randomUUID().toString()
 
-        //coEvery { vilkaarService.hentVilkaarResultat(behandlingId) } returns vilkaarResultatForBehandling(behandlingId)
+        coEvery { vilkaarService.hentVilkaarResultat(behandlingId) } returns vilkaarResultatForBehandling(behandlingId)
 
         withTestApplication({
             module(

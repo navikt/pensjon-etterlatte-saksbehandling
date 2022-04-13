@@ -1,12 +1,12 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.libs.common.vikaar.VilkarIBehandling
+import no.nav.etterlatte.model.VurdertVilkaar
 
 
 class VilkaarService(
     private val vilkaarDao: VilkaarDao
 ) {
 
-    fun hentVilkaarResultat(behandlingId: String): VilkarIBehandling? =
+    fun hentVilkaarResultat(behandlingId: String): VurdertVilkaar? =
         vilkaarDao.hentVilkaarResultat(behandlingId)
 }

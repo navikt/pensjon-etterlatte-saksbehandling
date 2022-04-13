@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.Vilkaarsgrunnlag
 import no.nav.etterlatte.libs.common.vikaar.VilkarIBehandling
-import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 import java.util.*
 import javax.sql.DataSource
@@ -14,7 +13,6 @@ interface VilkaarDao {
 }
 
 class VilkaarDaoJdbc(val dataSource: DataSource) : VilkaarDao {
-    val logger = LoggerFactory.getLogger(VilkaarDaoJdbc::class.java)
     override fun hentVilkaarResultat(behandlingId: String): VilkarIBehandling? =
         dataSource.connection.use { connection ->
 
@@ -24,7 +22,6 @@ class VilkaarDaoJdbc(val dataSource: DataSource) : VilkaarDao {
             stmt.use {
                 it.setObject(1, UUID.fromString(behandlingId))
                 it.executeQuery().singleOrNull {
-                    logger.info("Fant vurdert vilkaar")
                     VilkarIBehandling(
                         behandling = getObject("behandling") as UUID,
                         grunnlag = Vilkaarsgrunnlag(
@@ -38,7 +35,7 @@ class VilkaarDaoJdbc(val dataSource: DataSource) : VilkaarDao {
                         vilkaarResultat = objectMapper.readValue(getString("vilkaarResultat"))
                     )
                 }
-            }.also { logger.info("Returnerer fra hentVilkaarResultat" + it.toString()) }
+            }
         }
 
     /*

@@ -100,11 +100,10 @@ class KvitteringMottaker(
         "@beskrivelse" to oppdrag.kvitteringBeskrivelse()
     ).toJson()
 
+    private fun Oppdrag.kvitteringBeskrivelse() = "${this.mmel.kodeMelding} ${this.mmel.beskrMelding}"
+
     companion object {
         private val logger = LoggerFactory.getLogger(KvitteringMottaker::class.java)
     }
-
-    private fun Oppdrag.kvitteringBeskrivelse() = "${this.mmel.kodeMelding} ${this.mmel.beskrMelding}"
-
 }
 

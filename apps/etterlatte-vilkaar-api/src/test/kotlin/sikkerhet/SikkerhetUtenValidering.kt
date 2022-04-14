@@ -1,8 +1,10 @@
-package sikkerhet
+package no.nav.etterlatte.sikkerhet
 
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.http.*
+import io.ktor.application.call
+import io.ktor.auth.Authentication
+import io.ktor.auth.AuthenticationPipeline
+import io.ktor.auth.AuthenticationProvider
+import io.ktor.http.Headers
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.ktor.TokenValidationContextPrincipal

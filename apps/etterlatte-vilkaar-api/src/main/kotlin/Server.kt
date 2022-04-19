@@ -32,10 +32,7 @@ class Server(applicationContext: ApplicationContext) {
 
     private val engine = embeddedServer(CIO, environment = applicationEngineEnvironment {
         module {
-            module(
-                authenticationConfiguration = applicationContext.tokenValidering(),
-                vilkaarService = applicationContext.vilkaarService(applicationContext.vilkaarDao()),
-            )
+            module(applicationContext)
         }
         connector { port = 8080 }
     })
@@ -43,10 +40,11 @@ class Server(applicationContext: ApplicationContext) {
     fun run() = engine.start(true)
 }
 
-fun Application.module(
-    authenticationConfiguration: Authentication.Configuration.() -> Unit,
-    vilkaarService: VilkaarService
-) {
+fun Application.module(applicationContext: ApplicationContext) {
+    val vilkaarDao = applicationContext.vilkaarDao()
+    val vilkaarService = applicationContext.vilkaarService(vilkaarDao)
+    val tokenValidering = applicationContext.tokenValidering()
+
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
@@ -63,7 +61,7 @@ fun Application.module(
         }
     }
     install(Authentication) {
-        authenticationConfiguration()
+        tokenValidering(this)
     }
 
     routing {

@@ -34,4 +34,11 @@ dependencies {
     testImplementation(Ktor.ServerTests)
     testImplementation(Kotlinx.CoroutinesCore)
     testImplementation(NavFelles.MockOauth2Server)
+
+    testImplementation("org.testcontainers:testcontainers:1.16.3")
+    testImplementation("org.testcontainers:junit-jupiter:1.16.3")
+    testImplementation("org.testcontainers:postgresql:1.16.0")
+
+    testImplementation("org.flywaydb:flyway-core:6.5.0")
+    testImplementation("org.postgresql:postgresql:42.3.3")
 }

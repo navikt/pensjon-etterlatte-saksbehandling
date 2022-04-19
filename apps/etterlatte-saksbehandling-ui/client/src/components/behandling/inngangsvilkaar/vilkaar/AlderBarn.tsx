@@ -10,8 +10,8 @@ import {
   VilkaarInfobokser,
   VilkaarlisteTitle,
   VilkaarVurderingColumn,
+  VilkaarVurderingContainer,
   VilkaarWrapper,
-  StatusColumn,
 } from '../styled'
 import { VilkaarProps } from '../types'
 import { KriterieOpplysningsType, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
@@ -19,7 +19,6 @@ import { vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import { hentKriterierMedOpplysning } from '../../felles/utils'
 import { KildeDatoOpplysning, KildeDatoVilkaar } from './KildeDatoOpplysning'
-import { AutomaticIcon } from '../../../../shared/icons/automaticIcon'
 
 export const AlderBarn = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
@@ -46,9 +45,6 @@ export const AlderBarn = (props: VilkaarProps) => {
     <VilkaarBorder id={props.id}>
       <Innhold>
         <VilkaarWrapper>
-          <StatusColumn>
-            <StatusIcon status={props.vilkaar.resultat} large={true} />
-          </StatusColumn>
           <VilkaarInfobokser>
             <VilkaarColumn>
               <Title>Alder barn</Title>
@@ -85,11 +81,13 @@ export const AlderBarn = (props: VilkaarProps) => {
             </VilkaarColumn>
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
-            <VilkaarlisteTitle>
-              <AutomaticIcon /> {vilkaarErOppfylt(vilkaar.resultat)}
-            </VilkaarlisteTitle>
-            <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
-            <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
+            <VilkaarVurderingContainer>
+              <VilkaarlisteTitle>
+                <StatusIcon status={props.vilkaar.resultat} large={true} /> {vilkaarErOppfylt(vilkaar.resultat)}
+              </VilkaarlisteTitle>
+              <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
+              <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
+            </VilkaarVurderingContainer>
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
       </Innhold>

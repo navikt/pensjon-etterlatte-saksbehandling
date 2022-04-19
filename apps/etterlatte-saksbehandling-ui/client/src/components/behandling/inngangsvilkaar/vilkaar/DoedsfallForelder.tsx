@@ -10,13 +10,13 @@ import { hentKriterierMedOpplysning } from '../../felles/utils'
 import {
   Innhold,
   Lovtekst,
-  StatusColumn,
   Title,
   VilkaarBorder,
   VilkaarColumn,
   VilkaarInfobokser,
   VilkaarlisteTitle,
   VilkaarVurderingColumn,
+  VilkaarVurderingContainer,
   VilkaarWrapper,
 } from '../styled'
 import { VilkaarProps } from '../types'
@@ -25,7 +25,6 @@ import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import { KildeDatoOpplysning, KildeDatoVilkaar } from './KildeDatoOpplysning'
 import { useContext } from 'react'
 import { AppContext } from '../../../../store/AppContext'
-import { AutomaticIcon } from '../../../../shared/icons/automaticIcon'
 
 export const DoedsFallForelder = (props: VilkaarProps) => {
   const ctx = useContext(AppContext)
@@ -64,9 +63,6 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
     <VilkaarBorder id={props.id}>
       <Innhold>
         <VilkaarWrapper>
-          <StatusColumn>
-            <StatusIcon status={props.vilkaar.resultat} large={true} />
-          </StatusColumn>
           <VilkaarInfobokser>
             <VilkaarColumn>
               <Title>Dødsfall forelder</Title>
@@ -105,11 +101,13 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
             </VilkaarColumn>
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
-            <VilkaarlisteTitle>
-              <AutomaticIcon /> {vilkaarErOppfylt(props.vilkaar.resultat)}
-            </VilkaarlisteTitle>
-            <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
-            <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
+            <VilkaarVurderingContainer>
+              <VilkaarlisteTitle>
+                <StatusIcon status={props.vilkaar.resultat} large={true} /> {vilkaarErOppfylt(props.vilkaar.resultat)}
+              </VilkaarlisteTitle>
+              <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
+              <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
+            </VilkaarVurderingContainer>
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
       </Innhold>

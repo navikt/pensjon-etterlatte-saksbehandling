@@ -3,18 +3,17 @@ import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer
 import {
   Innhold,
   Lovtekst,
-  StatusColumn,
   Title,
   VilkaarBorder,
   VilkaarColumn,
   VilkaarInfobokser,
   VilkaarlisteTitle,
   VilkaarVurderingColumn,
+  VilkaarVurderingContainer,
   VilkaarWrapper,
 } from '../styled'
 import { VilkaarProps } from '../types'
 import { TidslinjeMedlemskap } from './TidslinjeMedlemskap'
-import { AutomaticIcon } from '../../../../shared/icons/automaticIcon'
 import { KildeDatoVilkaar } from './KildeDatoOpplysning'
 
 export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
@@ -25,9 +24,6 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
     <VilkaarBorder id={props.id}>
       <Innhold>
         <VilkaarWrapper>
-          <StatusColumn>
-            <StatusIcon status={VurderingsResultat.OPPFYLT} large={true} />
-          </StatusColumn>
           <VilkaarInfobokser>
             <VilkaarColumn>
               <Title>Avdødes forutgående medlemskap</Title>
@@ -37,10 +33,12 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
             </VilkaarColumn>
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
-            <VilkaarlisteTitle>
-              <AutomaticIcon /> Vilkår er oppfylt
-            </VilkaarlisteTitle>
-            <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
+            <VilkaarVurderingContainer>
+              <VilkaarlisteTitle>
+                <StatusIcon status={VurderingsResultat.OPPFYLT} large={true} /> Vilkår er oppfylt
+              </VilkaarlisteTitle>
+              <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
+            </VilkaarVurderingContainer>
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
         <TidslinjeMedlemskap />

@@ -1,5 +1,4 @@
 import { IKriterie, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
-import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import { mapKriterietyperTilTekst } from './utils'
 
 export const VilkaarVurderingsliste = ({ kriterie }: { kriterie: IKriterie[] }) => {
@@ -17,28 +16,15 @@ export const VilkaarVurderingsliste = ({ kriterie }: { kriterie: IKriterie[] }) 
           key={krit.navn}
           tittel={mapKriterietyperTilTekst(krit).tittel}
           svar={mapKriterietyperTilTekst(krit).svar}
-          resultat={krit.resultat}
         />
       ))}
     </div>
   )
 }
 
-export const VilkaarVurderingEnkeltElement = ({
-  tittel,
-  svar,
-  resultat,
-}: {
-  tittel: String
-  svar: String
-  resultat: VurderingsResultat
-}) => {
+export const VilkaarVurderingEnkeltElement = ({ tittel, svar }: { tittel: String; svar: String }) => {
   return (
-    <div style={{ display: 'flex', marginTop: '10px' }}>
-      <div style={{ marginTop: '10px' }}>
-        <StatusIcon status={resultat} />
-      </div>
-
+    <div style={{ display: 'flex', marginTop: '10px', paddingLeft: '55px' }}>
       <div>
         <div style={{ fontWeight: 'bold' }}>{tittel}</div>
         <div>{svar}</div>

@@ -1,9 +1,9 @@
-import { format } from "date-fns"
+import { format } from 'date-fns'
 import { hentKildenavn } from './utils'
 import styled from 'styled-components'
 
 export const KildeDatoOpplysning = ({ type, dato }: { type: String; dato: string }) => {
-  if(!dato) {
+  if (!dato) {
     return <div />
   }
   const dataDato = format(new Date(dato), 'dd.MM.yyyy')
@@ -35,6 +35,6 @@ export const KildeDatoVilkaar = ({ type, dato }: { type: String; dato: string })
 export const KildeVilkaar = styled.div`
   color: grey;
   font-size: 0.9em;
-  padding-left: 51px;
+  padding-left: 55px;
   margin-bottom: 30px;
 `

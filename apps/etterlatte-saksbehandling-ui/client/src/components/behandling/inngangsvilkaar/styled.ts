@@ -65,8 +65,13 @@ export const VilkaarVurderingColumn = styled.div`
   flex-grow: 0;
 `
 
+export const VilkaarVurderingContainer = styled.div`
+  border-left: 4px solid #e5e5e5;
+`
+
 export const VilkaarlisteTitle = styled.div`
   display: flex;
-  font-size: 1.1em;
+  font-size: 1.2em;
   font-weight: bold;
+  margin-left: 15px;
 `

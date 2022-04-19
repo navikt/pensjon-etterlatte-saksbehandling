@@ -2,13 +2,13 @@ import { VilkaarProps } from '../types'
 import {
   Innhold,
   Lovtekst,
-  StatusColumn,
   Title,
   VilkaarBorder,
   VilkaarColumn,
   VilkaarInfobokser,
   VilkaarlisteTitle,
   VilkaarVurderingColumn,
+  VilkaarVurderingContainer,
   VilkaarWrapper,
 } from '../styled'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
@@ -29,7 +29,6 @@ import {
 } from '../../felles/utils'
 import { KildeDatoOpplysning, KildeDatoVilkaar } from './KildeDatoOpplysning'
 import { IAdresse } from '../../types'
-import { AutomaticIcon } from '../../../../shared/icons/automaticIcon'
 
 export const BarnetsMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
@@ -38,6 +37,7 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
   const avdoedDoedsdato = hentKriterieOpplysning(soekerKriterie, KriterieOpplysningsType.DOEDSDATO)?.opplysning
   const adresserBarn = hentKriterieOpplysning(soekerKriterie, KriterieOpplysningsType.ADRESSER)
   const barnUtlandSoeknad = hentKriterieOpplysning(soekerKriterie, KriterieOpplysningsType.SOEKER_UTENLANDSOPPHOLD)
+  console.log(barnUtlandSoeknad)
 
   const bostedEtterDoedsdato = hentAdresserEtterDoedsdato(adresserBarn?.opplysning?.bostedadresse, avdoedDoedsdato)
   const oppholdEtterDoedsdato = hentAdresserEtterDoedsdato(adresserBarn?.opplysning?.oppholdadresse, avdoedDoedsdato)
@@ -57,18 +57,14 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
     } else {
       const tittel = 'Barnet er medlem i trygden'
       let svar
-      let resultat
       if (soekerKriterie.resultat === VurderingsResultat.OPPFYLT) {
         svar = 'Avklar. Gjenlevende har utenlandsk adresse'
-        resultat = VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
       } else if (soekerKriterie.resultat === VurderingsResultat.IKKE_OPPFYLT) {
         svar = 'Nei. Barnet har utenlandsk bostedsadresse'
-        resultat = VurderingsResultat.IKKE_OPPFYLT
       } else {
         svar = 'Avklar. Barnet og gjenlevende har utenlandsk adresse'
-        resultat = VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
       }
-      return <VilkaarVurderingEnkeltElement tittel={tittel} svar={svar} resultat={resultat} />
+      return <VilkaarVurderingEnkeltElement tittel={tittel} svar={svar} />
     }
   }
 
@@ -76,9 +72,6 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
     <VilkaarBorder id={props.id}>
       <Innhold>
         <VilkaarWrapper>
-          <StatusColumn>
-            <StatusIcon status={props.vilkaar.resultat} large={true} />
-          </StatusColumn>
           <VilkaarInfobokser>
             <VilkaarColumn>
               <Title>Barnets medlemskap</Title>
@@ -124,7 +117,7 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
                     <div>{barnUtlandSoeknad?.opplysning.land}</div>
                   </>
                 )}
-                <KildeDatoOpplysning type={barnUtlandSoeknad?.kilde.type} dato={barnUtlandSoeknad?.kilde.mottattDato} />
+                <KildeDatoOpplysning type={barnUtlandSoeknad?.kilde.type} dato={barnUtlandSoeknad?.kilde.mottatDato} />
               </div>
             </VilkaarColumn>
             {gjenlevendeSkalVises && (
@@ -149,11 +142,14 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
           </VilkaarInfobokser>
 
           <VilkaarVurderingColumn>
-            <VilkaarlisteTitle>
-              <AutomaticIcon /> {props.vilkaar?.resultat && vilkaarErOppfylt(props.vilkaar.resultat)}
-            </VilkaarlisteTitle>
-            <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
-            {lagVilkaarVisning()}
+            <VilkaarVurderingContainer>
+              <VilkaarlisteTitle>
+                <StatusIcon status={props.vilkaar.resultat} large={true} />{' '}
+                {props.vilkaar?.resultat && vilkaarErOppfylt(props.vilkaar.resultat)}
+              </VilkaarlisteTitle>
+              <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
+              {lagVilkaarVisning()}
+            </VilkaarVurderingContainer>
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
       </Innhold>

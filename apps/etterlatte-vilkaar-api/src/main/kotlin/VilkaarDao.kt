@@ -1,38 +1,44 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.model.VurdertVilkaar
+import no.nav.etterlatte.libs.common.vikaar.Vilkaarsgrunnlag
+import no.nav.etterlatte.libs.common.vikaar.VilkarIBehandling
 import java.sql.ResultSet
 import java.util.*
 import javax.sql.DataSource
 
 interface VilkaarDao {
-    fun hentVilkaarResultat(behandlingId: String): VurdertVilkaar?
-}
-
-class VilkaarDaoInMemory() : VilkaarDao {
-    val vilkaar = HashMap<String, VurdertVilkaar>()
-
-    /*
-    init {
-        vilkaar.put(
-            "1234", VilkaarResultatForBehandling(
-                behandling = "1234",
-                VilkaarResultat(
-                    VurderingsResultat.OPPFYLT,
-                    emptyList(),
-                    LocalDateTime.now()
-                )
-            )
-        )
-    }
-
-     */
-
-    override fun hentVilkaarResultat(behandlingId: String): VurdertVilkaar? = vilkaar.get(behandlingId)
+    fun hentVilkaarResultat(behandlingId: String): VilkarIBehandling?
 }
 
 class VilkaarDaoJdbc(val dataSource: DataSource) : VilkaarDao {
+    override fun hentVilkaarResultat(behandlingId: String): VilkarIBehandling? =
+        dataSource.connection.use { connection ->
+
+            val stmt =
+                connection.prepareStatement("SELECT * FROM vurdertvilkaar where behandling = ? ORDER BY versjon DESC LIMIT 1")
+
+            stmt.use {
+                it.setObject(1, UUID.fromString(behandlingId))
+                it.executeQuery().singleOrNull {
+                    VilkarIBehandling(
+                        behandling = getObject("behandling") as UUID,
+                        grunnlag = Vilkaarsgrunnlag(
+                            avdoedSoeknad = getString("avdoedSoeknad")?.let { objectMapper.readValue(it) },
+                            soekerSoeknad = getString("soekerSoeknad")?.let { objectMapper.readValue(it) },
+                            soekerPdl = getString("soekerPdl")?.let { objectMapper.readValue(it) },
+                            avdoedPdl = getString("avdoedPdl")?.let { objectMapper.readValue(it) },
+                            gjenlevendePdl = getString("gjenlevendePdl")?.let { objectMapper.readValue(it) }
+                        ),
+                        versjon = getLong("versjon"),
+                        vilkaarResultat = objectMapper.readValue(getString("vilkaarResultat"))
+                    )
+                }
+            }
+        }
+
+    /*
     override fun hentVilkaarResultat(behandlingId: String): VurdertVilkaar? =
         dataSource.connection.use { connection ->
             val stmt = connection.prepareStatement(
@@ -72,7 +78,7 @@ class VilkaarDaoJdbc(val dataSource: DataSource) : VilkaarDao {
                 }
             }
         }
-
+     */
     private fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
         return if (next()) {
             block().also {

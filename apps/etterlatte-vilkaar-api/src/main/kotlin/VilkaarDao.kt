@@ -38,7 +38,7 @@ class VilkaarDaoJdbc(val dataSource: DataSource) : VilkaarDao {
                         vilkaarResultat = objectMapper.readValue(getString("vilkaarResultat"))
                     )
                 }
-            }.also { logger.info("Returnerer fra hentVilkaarResultat " + it.toString()) }
+            }.also { logger.info("Returnerer fra hentVilkaarResultat  " + it.toString()) }
         }
 
     /*

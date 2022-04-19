@@ -5,9 +5,13 @@ import no.nav.etterlatte.config.StandardJdbcUrlBuilder
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.Grunnlagshendelse
 import no.nav.etterlatte.libs.common.vikaar.VilkarIBehandling
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -15,6 +19,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.sql.Types
+import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
 
@@ -114,11 +119,25 @@ internal class VilkaarDaoIntegrationTest {
     }
 
     @Test
-    fun `hent vilkaar`() {
+    fun `Vilkår lagres korrekt i databasen og kan hentes ut`() {
         // TODO legg til en vilkaarsvurdering for å teste uthenting
         val vilkaarResultat = vilkaarDao.hentVilkaarResultat(behandlingId.toString())
-
         assertNotNull(vilkaarResultat)
+        assertEquals(behandlingId, vilkaarResultat!!.behandling)
+        assertNull(vilkaarResultat.grunnlag.avdoedPdl)
+        assertNull(vilkaarResultat.grunnlag.avdoedSoeknad)
+        assertNull(vilkaarResultat.grunnlag.soekerPdl)
+        assertNull(vilkaarResultat.grunnlag.soekerSoeknad)
+        assertNull(vilkaarResultat.grunnlag.gjenlevendePdl)
+        assertEquals(1, vilkaarResultat.versjon)
+        assertEquals(VurderingsResultat.OPPFYLT, vilkaarResultat.vilkaarResultat.resultat)
+        assertEquals(0, vilkaarResultat.vilkaarResultat.vilkaar!!.size)
+        assertTrue(
+            vilkaarResultat.vilkaarResultat.vurdertDato.isBefore(LocalDateTime.now()) and vilkaarResultat.vilkaarResultat.vurdertDato.isAfter(
+                LocalDateTime.now().minusSeconds(10)
+            )
+        )
+
     }
 
 }

@@ -4,10 +4,10 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.vikaar.VilkarIBehandling
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.model.VurdertVilkaar
 import org.slf4j.LoggerFactory
 
 class VilkaarKlient(config: Config, httpClient: HttpClient) {
@@ -20,7 +20,7 @@ class VilkaarKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("vilkaarapi.client.id")
     private val resourceUrl = config.getString("vilkaarapi.resource.url")
 
-    suspend fun hentVurdertVilkaar(behandlingId: String, accessToken: String): VurdertVilkaar? {
+    suspend fun hentVurdertVilkaar(behandlingId: String, accessToken: String): VilkarIBehandling? {
         try {
             logger.info("Henter vurdert vilkaar for behandling $behandlingId")
             val json = downstreamResourceClient
@@ -36,7 +36,7 @@ class VilkaarKlient(config: Config, httpClient: HttpClient) {
 
 
 
-            return objectMapper.readValue(json.toString(), VurdertVilkaar::class.java)
+            return objectMapper.readValue(json.toString(), VilkarIBehandling::class.java)
         } catch (e: Exception) {
             logger.error("Henting av person fra behandling feilet", e)
             throw e

@@ -6,8 +6,6 @@ import no.nav.etterlatte.common.Jaxb
 import no.nav.etterlatte.config.JmsConnectionFactory
 import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.toJson
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 import javax.jms.ExceptionListener
@@ -17,8 +15,7 @@ import javax.jms.Session
 
 
 class KvitteringMottaker(
-    private val rapidsConnection: RapidsConnection,
-    private val utbetalingsoppdragDao: UtbetalingsoppdragDao,
+    private val oppdragService: OppdragService,
     jmsConnectionFactory: JmsConnectionFactory,
     queue: String,
 ) : MessageListener {
@@ -46,14 +43,14 @@ class KvitteringMottaker(
             oppdragXml = message.getBody(String::class.java)
             val oppdrag = Jaxb.toOppdrag(oppdragXml)
 
-
-            utbetalingsoppdragDao.oppdaterKvittering(oppdrag)
+            oppdragService.oppdaterKvittering(oppdrag)
 
             when (oppdrag.mmel.alvorlighetsgrad) {
-                "00", "04" -> oppdragGodkjent(oppdrag, oppdragXml)
-                //"08" // noe saksbehandler må håndtere
-                //"12" // hånteres av tjenesten
-                else -> oppdragFeilet(oppdrag, oppdragXml)
+                "00" -> oppdragAkseptert(oppdrag)
+                "04" -> oppdragAkseptertMedFeil(oppdrag)
+                "08" -> oppdragAvvist(oppdrag)
+                "12" -> oppdragFeilet(oppdrag, oppdragXml)
+                else -> oppdragFeiletUkjent(oppdrag, oppdragXml)
             }
 
             logger.info("Melding med id=${message.jmsMessageID} er lest og behandlet")
@@ -63,24 +60,35 @@ class KvitteringMottaker(
         }
     }
 
-    private fun oppdragGodkjent(oppdrag: Oppdrag, oppdragXml: String) {
-        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} godkjent", kv("oppdrag", oppdragXml))
-        logger.info("OppdragslinjeId: ${oppdrag.oppdrag110.oppdragsId} linjeIder: ${oppdrag.oppdrag110.oppdragsLinje150.map { it.linjeId }}")
-        utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.GODKJENT)
-        rapidsConnection.publish(mapOf("@event_name" to "utbetaling_godkjent").toJson())
-        // TODO utvid melding
+    private fun oppdragAkseptert(oppdrag: Oppdrag) {
+        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} akseptert")
+        oppdragService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingsoppdragStatus.GODKJENT)
+    }
+
+    private fun oppdragAkseptertMedFeil(oppdrag: Oppdrag) {
+        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} akseptert med feil")
+        oppdragService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingsoppdragStatus.GODKJENT_MED_FEIL)
+    }
+
+    private fun oppdragAvvist(oppdrag: Oppdrag) {
+        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} avvist")
+        oppdragService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingsoppdragStatus.AVVIST)
     }
 
     private fun oppdragFeilet(oppdrag: Oppdrag, oppdragXml: String) {
         logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet", kv("oppdrag", oppdragXml))
-        utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.FEILET)
-        rapidsConnection.publish(mapOf("@event_name" to "utbetaling_feilet").toJson())
-        // TODO utvid melding
+        oppdragService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingsoppdragStatus.FEILET)
     }
+
+    private fun oppdragFeiletUkjent(oppdrag: Oppdrag, oppdragXml: String) {
+        // TODO bør denne håndteres på noen annen måte?
+        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet med ukjent feil", kv("oppdrag", oppdragXml))
+        oppdragService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingsoppdragStatus.FEILET_UKJENT_FEIL)
+    }
+
 
     companion object {
         private val logger = LoggerFactory.getLogger(KvitteringMottaker::class.java)
     }
-
 }
 

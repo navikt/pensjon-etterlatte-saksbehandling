@@ -6,6 +6,8 @@ import io.mockk.verify
 import no.nav.etterlatte.common.Jaxb
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.config.JmsConnectionFactory
+import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.util.TestContainers
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
@@ -70,22 +72,52 @@ class ApplicationIntegrationTest {
     }
 
     @Test
-    fun `skal motta vedtak, lagre i db og sende til MQ - motta kvittering og sende oppdrag_godkjent event`() {
+    fun `skal sende oppdrag og motta kvittering for godkjent oppdrag`() {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
-        verify(timeout = TIMEOUT) { rapidsConnection.publish( match { it.contains("sendt_til_utbetaling") }) }
+        verify(timeout = TIMEOUT) { rapidsConnection.publish(
+            match {
+                it.toJsonNode().let { event ->
+                    event["@event_name"].textValue() == "utbetaling_oppdatert" &&
+                    event["@status"].textValue() == UtbetalingsoppdragStatus.SENDT.name
+                }
+            }
+        )}
 
         sendKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering(vedtakId = "1"))
-        verify(timeout = TIMEOUT) { rapidsConnection.publish( match { it.contains("utbetaling_godkjent") }) }
+        verify(timeout = TIMEOUT) { rapidsConnection.publish(
+            match {
+                it.toJsonNode().let { event ->
+                    event["@event_name"].textValue() == "utbetaling_oppdatert" &&
+                    event["@status"].textValue() == UtbetalingsoppdragStatus.GODKJENT.name
+                }
+            }
+        )}
     }
 
     @Test
-    fun `skal motta vedtak, lagre i db og sende til MQ - motta kvittering og sende oppdrag_feilet event`() {
+    fun `skal sende oppdrag og motta kvittering for feilet oppdrag`() {
         sendFattetVedtakEvent(FATTET_VEDTAK_2)
-        verify(timeout = TIMEOUT) { rapidsConnection.publish( match { it.contains("sendt_til_utbetaling") }) }
+        verify(timeout = TIMEOUT) { rapidsConnection.publish(
+            match {
+                it.toJsonNode().let { event ->
+                    event["@event_name"].textValue() == "utbetaling_oppdatert" &&
+                            event["@status"].textValue() == UtbetalingsoppdragStatus.SENDT.name
+                }
+            }
+        )}
 
         sendKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering(vedtakId = "2"))
-        verify(timeout = TIMEOUT) { rapidsConnection.publish( match { it.contains("utbetaling_feilet") }) }
+        verify(timeout = TIMEOUT) { rapidsConnection.publish(
+            match {
+                it.toJsonNode().let { event ->
+                    event["@event_name"].textValue() == "utbetaling_oppdatert" &&
+                            event["@status"].textValue() == UtbetalingsoppdragStatus.FEILET.name
+                }
+            }
+        )}
     }
+
+    // TODO legg på flere tilsvarende tester her når vi vet hvilke statuser vi får
 
     private fun sendFattetVedtakEvent(vedtakEvent: String) {
         rapidsConnection.sendTestMessage(vedtakEvent)
@@ -98,6 +130,8 @@ class ApplicationIntegrationTest {
             producer.send(message)
         }
     }
+
+    private fun String.toJsonNode() = objectMapper.readTree(this)
 
     companion object {
         val FATTET_VEDTAK_1 = readFile("/vedtak1.json")

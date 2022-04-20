@@ -8,7 +8,6 @@ import no.nav.etterlatte.oppdrag.UtbetalingsoppdragDao
 import no.nav.etterlatte.oppdrag.VedtakMottaker
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import javax.jms.Connection
 import javax.sql.DataSource
 
 
@@ -31,7 +30,7 @@ class ApplicationContext(
         hostname = env.required("OPPDRAG_MQ_HOSTNAME"),
         port = env.required("OPPDRAG_MQ_PORT").toInt(),
         queueManager = env.required("OPPDRAG_MQ_MANAGER"),
-        channel =  env.required("OPPDRAG_MQ_CHANNEL"),
+        channel = env.required("OPPDRAG_MQ_CHANNEL"),
         username = env.required("srvuser"),
         password = env.required("srvpwd")
     )
@@ -44,19 +43,22 @@ class ApplicationContext(
 
     fun utbetalingsoppdragDao(dataSource: DataSource) = UtbetalingsoppdragDao(dataSource)
 
-    fun oppdragService(oppdragSender: OppdragSender, utbetalingsoppdragDao: UtbetalingsoppdragDao) = OppdragService(
+    fun oppdragService(
+        oppdragSender: OppdragSender,
+        utbetalingsoppdragDao: UtbetalingsoppdragDao,
+        rapidsConnection: RapidsConnection
+    ) = OppdragService(
         oppdragMapper = OppdragMapper,
         oppdragSender = oppdragSender,
-        utbetalingsoppdragDao = utbetalingsoppdragDao
+        utbetalingsoppdragDao = utbetalingsoppdragDao,
+        rapidsConnection = rapidsConnection
     )
 
     fun kvitteringMottaker(
-        rapidsConnection: RapidsConnection,
-        utbetalingsoppdragDao: UtbetalingsoppdragDao,
+        oppdragService: OppdragService,
         jmsConnectionFactory: JmsConnectionFactory
     ) = KvitteringMottaker(
-        rapidsConnection = rapidsConnection,
-        utbetalingsoppdragDao = utbetalingsoppdragDao,
+        oppdragService = oppdragService,
         jmsConnectionFactory = jmsConnectionFactory,
         queue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
     )

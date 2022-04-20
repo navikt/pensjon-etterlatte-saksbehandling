@@ -2,6 +2,7 @@ package no.nav.etterlatte.oppdrag
 
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.domain.Utbetalingsoppdrag
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -36,13 +37,18 @@ class VedtakMottaker(
                 logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
 
                 val attestasjon: Attestasjon = objectMapper.readValue(packet["@attestasjon"].toJson())
-                oppdragService.opprettOgSendOppdrag(vedtak, attestasjon)
+                val utbetalingsoppdrag = oppdragService.opprettOgSendOppdrag(vedtak, attestasjon)
 
-                rapidsConnection.publish(mapOf("@event_name" to "sendt_til_utbetaling").toJson())
+                rapidsConnection.publish(utbetalingEvent(utbetalingsoppdrag))
             } catch (e: Exception) {
                 logger.error("En feil oppstod: ${e.message}", e)
             }
         }
+
+    private fun utbetalingEvent(utbetalingsoppdrag: Utbetalingsoppdrag) = mapOf(
+        "@event_name" to "utbetaling_oppdatert",
+        "@status" to utbetalingsoppdrag.status.name
+    ).toJson()
 
     private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 

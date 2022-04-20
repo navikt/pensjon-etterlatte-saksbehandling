@@ -19,12 +19,13 @@ fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection {
     val utbetalingsoppdragDao = applicationContext.utbetalingsoppdragDao(dataSourceBuilder.dataSource())
     val oppdragService = applicationContext.oppdragService(
         oppdragSender = applicationContext.oppdragSender(jmsConnectionFactory),
-        utbetalingsoppdragDao = utbetalingsoppdragDao
+        utbetalingsoppdragDao = utbetalingsoppdragDao,
+        rapidsConnection = applicationContext.rapidsConnection()
     )
 
     return applicationContext.rapidsConnection()
         .apply {
-            applicationContext.kvitteringMottaker(this, utbetalingsoppdragDao, jmsConnectionFactory)
+            applicationContext.kvitteringMottaker(oppdragService, jmsConnectionFactory)
             applicationContext.vedtakMottaker(this, oppdragService)
 
             register(object : RapidsConnection.StatusListener {

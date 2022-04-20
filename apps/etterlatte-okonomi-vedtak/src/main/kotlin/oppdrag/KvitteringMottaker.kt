@@ -6,8 +6,6 @@ import no.nav.etterlatte.common.Jaxb
 import no.nav.etterlatte.config.JmsConnectionFactory
 import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.toJson
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 import javax.jms.ExceptionListener
@@ -17,8 +15,7 @@ import javax.jms.Session
 
 
 class KvitteringMottaker(
-    private val rapidsConnection: RapidsConnection,
-    private val utbetalingsoppdragDao: UtbetalingsoppdragDao,
+    private val oppdragService: OppdragService,
     jmsConnectionFactory: JmsConnectionFactory,
     queue: String,
 ) : MessageListener {
@@ -46,7 +43,7 @@ class KvitteringMottaker(
             oppdragXml = message.getBody(String::class.java)
             val oppdrag = Jaxb.toOppdrag(oppdragXml)
 
-            utbetalingsoppdragDao.oppdaterKvittering(oppdrag)
+            oppdragService.oppdaterKvittering(oppdrag)
 
             when (oppdrag.mmel.alvorlighetsgrad) {
                 "00" -> oppdragAkseptert(oppdrag)
@@ -65,42 +62,30 @@ class KvitteringMottaker(
 
     private fun oppdragAkseptert(oppdrag: Oppdrag) {
         logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} akseptert")
-        utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.GODKJENT)
-        rapidsConnection.publish(utbetalingEvent(oppdrag, UtbetalingsoppdragStatus.GODKJENT))
+        oppdragService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingsoppdragStatus.GODKJENT)
     }
 
     private fun oppdragAkseptertMedFeil(oppdrag: Oppdrag) {
         logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} akseptert med feil")
-        utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.GODKJENT_MED_FEIL)
-        rapidsConnection.publish(utbetalingEvent(oppdrag, UtbetalingsoppdragStatus.GODKJENT))
+        oppdragService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingsoppdragStatus.GODKJENT_MED_FEIL)
     }
 
     private fun oppdragAvvist(oppdrag: Oppdrag) {
         logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} avvist")
-        utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.AVVIST)
-        rapidsConnection.publish(utbetalingEvent(oppdrag, UtbetalingsoppdragStatus.AVVIST))
+        oppdragService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingsoppdragStatus.AVVIST)
     }
 
     private fun oppdragFeilet(oppdrag: Oppdrag, oppdragXml: String) {
         logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet", kv("oppdrag", oppdragXml))
-        utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.FEILET)
-        rapidsConnection.publish(utbetalingEvent(oppdrag, UtbetalingsoppdragStatus.FEILET))
+        oppdragService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingsoppdragStatus.FEILET)
     }
 
     private fun oppdragFeiletUkjent(oppdrag: Oppdrag, oppdragXml: String) {
         // TODO bør denne håndteres på noen annen måte?
         logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet med ukjent feil", kv("oppdrag", oppdragXml))
-        utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.FEILET_UKJENT_FEIL)
-        rapidsConnection.publish(utbetalingEvent(oppdrag, UtbetalingsoppdragStatus.FEILET_UKJENT_FEIL))
+        oppdragService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingsoppdragStatus.FEILET_UKJENT_FEIL)
     }
 
-    private fun utbetalingEvent(oppdrag: Oppdrag, status: UtbetalingsoppdragStatus) = mapOf(
-        "@event_name" to "utbetaling_oppdatert",
-        "@status" to status.name,
-        "@beskrivelse" to oppdrag.kvitteringBeskrivelse()
-    ).toJson()
-
-    private fun Oppdrag.kvitteringBeskrivelse() = "${this.mmel.kodeMelding} ${this.mmel.beskrMelding}"
 
     companion object {
         private val logger = LoggerFactory.getLogger(KvitteringMottaker::class.java)

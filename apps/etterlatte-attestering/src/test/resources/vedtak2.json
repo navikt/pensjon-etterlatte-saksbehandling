@@ -1,24 +1,22 @@
 {
   "@event_name": "vedtak_fattet",
   "@vedtak": {
-    "vedtakId": "15",
-    "behandlingsId": "15",
-    "sakId": "15",
-    "saksbehandlerId": "1",
+    "vedtakId": "20",
+    "behandlingsId": "20",
+    "sakId": "20",
+    "saksbehandlerId": "1234",
+    "behandlingstype": "NY",
+    "sakIdGjelderFnr": "24116324268",
+    "aktorFoedselsdato": "2010-07-04",
     "beregningsperioder": [
       {
-        "behandlingsId": "15",
-        "endringskode": "NY",
-        "delytelsesId": "delytelsesid",
+        "delytelsesId": "vedtakID:datoFOM:ytelseskomponent",
         "ytelseskomponent": "BARNEPENSJON-OPTP",
         "datoFOM": "2022-02-02",
         "datoTOM": "2030-01-04",
         "belop": 10000
       }
     ],
-    "sakIdGjelderFnr": "24116324268",
-    "aktorFoedselsdato": "2010-07-04",
-    "behandlingstype": "NY",
     "oppdragsenheter": [
       {
         "enhetsType": "BOSTED",

@@ -52,7 +52,7 @@ object OppdragMapper {
                         //datoStatusFom TODO ved opphør skal denne være fra første mnd etter
                         vedtakId = vedtak.vedtakId
                         delytelseId =
-                            it.delytelsesId // TODO: kan være hva som helst - må være unik innenfor Oppdrag - må taes vare på
+                            it.delytelsesId
                         //linjeid // får dette fra Oppdragssystemet
                         kodeKlassifik = it.ytelseskomponent
                         //datoKlassifikFom
@@ -65,17 +65,17 @@ object OppdragMapper {
                         typeSats = "MND"
                         //skyldnerId
                         //datoSkyldnerFom
-                        //kravhaverId // TODO: usikker på denne
+                        //kravhaverId //
                         //datoKravhaverFom
                         //kid
                         //datoKidFom
-                        brukKjoreplan = "J" // TODO: sjekk om "J" stemmer
+                        brukKjoreplan = "J"
                         saksbehId = vedtak.saksbehandlerId
                         utbetalesTilId = vedtak.sakIdGjelderFnr
                         //datoUtbetalesTilIdFom
                         //kodeArbeidsgiver
                         henvisning = vedtak.behandlingsId
-                        //typeSoknad = "" TODO: tror det skal stå noe her
+                        //typeSoknad = ""
                         //refFagsystemId
                         //refOppdragsId
                         //refDelytelseId

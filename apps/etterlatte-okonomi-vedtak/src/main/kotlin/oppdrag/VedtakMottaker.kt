@@ -37,6 +37,7 @@ class VedtakMottaker(
                 logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
 
                 val attestasjon: Attestasjon = objectMapper.readValue(packet["@attestasjon"].toJson())
+                // TODO: Hør med Lars Erik: Dersom det skal skje en feil her - vil samme melding i kafka forsøkes behandlet på nytt
                 val utbetalingsoppdrag = oppdragService.opprettOgSendOppdrag(vedtak, attestasjon)
 
                 rapidsConnection.publish(utbetalingEvent(utbetalingsoppdrag))

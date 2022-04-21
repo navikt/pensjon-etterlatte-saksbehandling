@@ -23,6 +23,7 @@ class OppdragService(
 
         logger.info("Sender oppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId} til oppdrag")
         oppdragSender.sendOppdrag(oppdrag)
+        // TODO: catche feil fra sendOppdrag, og kun oppdater status dersom sendOppdrag ikke feiler?
 
         return utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.SENDT)
     }

@@ -23,7 +23,7 @@ object OppdragMapper {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = "1" // 3 = simulering
             kodeEndring = "NY" // Alltid NY for førstegangsinnvilgelse
-            kodeFagomraade = "PENBP" // TODO midlertidig verdi fra pesys
+            kodeFagomraade = "BARNEPE"
             fagsystemId = vedtak.sakId
             utbetFrekvens = "MND"
             oppdragGjelderId = vedtak.sakIdGjelderFnr
@@ -54,7 +54,7 @@ object OppdragMapper {
                         delytelseId =
                             it.delytelsesId // TODO: kan være hva som helst - må være unik innenfor Oppdrag - må taes vare på
                         //linjeid // får dette fra Oppdragssystemet
-                        kodeKlassifik = it.ytelseskomponent.toString() // PENBPGP-OPTP
+                        kodeKlassifik = it.ytelseskomponent
                         //datoKlassifikFom
                         datoVedtakFom = it.datoFOM.toXMLDate()
                         datoVedtakTom =

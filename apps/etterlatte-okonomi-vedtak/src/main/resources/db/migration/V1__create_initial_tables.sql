@@ -7,6 +7,6 @@ CREATE TABLE utbetalingsoppdrag
     vedtak TEXT NOT NULL,
     oppdrag TEXT NOT NULL,
     status VARCHAR NOT NULL,
-    oppdrag_id VARCHAR, -- TODO: Fjerne denne da vi ikke får den returnert fra oppdrag
+    oppdrag_id VARCHAR,
     kvittering TEXT
 );

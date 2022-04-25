@@ -10,7 +10,7 @@ include(
     "apps:etterlatte-gyldig-soeknad",
     "apps:etterlatte-vilkaar",
     "apps:etterlatte-vilkaar-kafka",
-    "apps:etterlatte-behandling-fra-soeknad",
+    "apps:etterlatte-opplysninger-fra-soeknad",
     "apps:etterlatte-opplysninger-fra-pdl",
     "apps:etterlatte-testdata",
     "apps:etterlatte-okonomi-vedtak",

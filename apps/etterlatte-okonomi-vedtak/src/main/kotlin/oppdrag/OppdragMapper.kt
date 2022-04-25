@@ -21,25 +21,23 @@ object OppdragMapper {
 
     fun oppdragFraVedtak(vedtak: Vedtak, attestasjon: Attestasjon): Oppdrag {
         val oppdrag110 = Oppdrag110().apply {
-            kodeAksjon = "1" // 3 = simulering
-            kodeEndring = "NY" // Alltid NY for førstegangsinnvilgelse
+            kodeAksjon = "1"
+            kodeEndring = "NY"
             kodeFagomraade = "BARNEPE"
             fagsystemId = vedtak.sakId
             utbetFrekvens = "MND"
             oppdragGjelderId = vedtak.sakIdGjelderFnr
-            datoOppdragGjelderFom =
-                LocalDate.parse("1900-01-01").toXMLDate() // TODO første virkningsdato eller 01.01.1900
+            datoOppdragGjelderFom = LocalDate.parse("1900-01-01").toXMLDate()
             saksbehId = vedtak.saksbehandlerId
 
-            // aktuelle enheter knyttet til oppdraget
             vedtak.oppdragsenheter.forEach {
                 oppdragsEnhet120.add(
                     OppdragsEnhet120().apply {
                         typeEnhet = when (it.enhetsType) {
                             Enhetstype.BOSTED -> "BOS"
                         }
-                        enhet = "4819" // alltid 4819 enhetsnummer (ikke enheten som fatter vedtaket)
-                        datoEnhetFom = LocalDate.parse("1900-01-01").toXMLDate()// TODO 01.01.1900
+                        enhet = "4819"
+                        datoEnhetFom = LocalDate.parse("1900-01-01").toXMLDate()
                     }
                 )
             }
@@ -48,38 +46,18 @@ object OppdragMapper {
                 vedtak.beregningsperioder.map {
                     OppdragsLinje150().apply {
                         kodeEndringLinje = Endringskode.NY.toString()
-                        //kodeStatusLinje
-                        //datoStatusFom TODO ved opphør skal denne være fra første mnd etter
                         vedtakId = vedtak.vedtakId
-                        delytelseId =
-                            it.delytelsesId
-                        //linjeid // får dette fra Oppdragssystemet
+                        delytelseId = it.delytelsesId
                         kodeKlassifik = it.ytelseskomponent
-                        //datoKlassifikFom
                         datoVedtakFom = it.datoFOM.toXMLDate()
-                        datoVedtakTom =
-                            it.datoTOM.toXMLDate() // TODO sjekk med vedtak om siste i mnd eller første i neste mnd
-
+                        datoVedtakTom = it.datoTOM.toXMLDate()
                         sats = it.belop
                         fradragTillegg = TfradragTillegg.T
                         typeSats = "MND"
-                        //skyldnerId
-                        //datoSkyldnerFom
-                        //kravhaverId //
-                        //datoKravhaverFom
-                        //kid
-                        //datoKidFom
                         brukKjoreplan = "J"
                         saksbehId = vedtak.saksbehandlerId
                         utbetalesTilId = vedtak.sakIdGjelderFnr
-                        //datoUtbetalesTilIdFom
-                        //kodeArbeidsgiver
                         henvisning = vedtak.behandlingsId
-                        //typeSoknad = ""
-                        //refFagsystemId
-                        //refOppdragsId
-                        //refDelytelseId
-                        //refLinjeId
 
                         attestant180.add(
                             Attestant180().apply {

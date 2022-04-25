@@ -1,1 +1,1 @@
-# etterlatte-behandling-fra-soeknad
+# etterlatte-opplysninger-fra-soeknad

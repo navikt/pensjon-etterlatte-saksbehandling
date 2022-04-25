@@ -1,4 +1,4 @@
-name: etterlatte-behandling-fra-soeknad
+name: etterlatte-opplysninger-fra-soeknad
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
@@ -15,7 +15,7 @@ on:
     branches:
       - main
     paths:
-      - apps/etterlatte-behandling-fra-soeknad/**
+      - apps/etterlatte-opplysninger-fra-soeknad/**
 
 jobs:
   build-and-publish:

@@ -32,23 +32,40 @@ class VedtakMottaker(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
+            val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson())
+            logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
+
             try {
-                val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson())
-                logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
-
-                val attestasjon: Attestasjon = objectMapper.readValue(packet["@attestasjon"].toJson())
-                // TODO: Hør med Lars Erik: Dersom det skal skje en feil her - vil samme melding i kafka forsøkes behandlet på nytt
-                val utbetalingsoppdrag = oppdragService.opprettOgSendOppdrag(vedtak, attestasjon)
-
-                rapidsConnection.publish(utbetalingEvent(utbetalingsoppdrag))
+                if (oppdragService.oppdragEksistererFraFor(vedtak)) {
+                    logger.info("Vedtak eksisterer fra før. Sendes ikke videre til oppdrag")
+                    rapidsConnection.publish(utbetalingsoppdragEksisterer(vedtak))
+                } else {
+                    val attestasjon: Attestasjon = objectMapper.readValue(packet["@attestasjon"].toJson())
+                    val utbetalingsoppdrag = oppdragService.opprettOgSendOppdrag(vedtak, attestasjon)
+                    rapidsConnection.publish(utbetalingEvent(utbetalingsoppdrag))
+                }
             } catch (e: Exception) {
                 logger.error("En feil oppstod: ${e.message}", e)
+                rapidsConnection.publish(utbetalingFeilet(vedtak))
+                throw e
             }
         }
 
+
     private fun utbetalingEvent(utbetalingsoppdrag: Utbetalingsoppdrag) = mapOf(
         "@event_name" to "utbetaling_oppdatert",
+        "@vedtakId" to utbetalingsoppdrag.oppdrag.vedtakId(),
         "@status" to utbetalingsoppdrag.status.name
+    ).toJson()
+
+    private fun utbetalingFeilet(vedtak: Vedtak) = mapOf(
+        "@event_name" to "utbetaling_feilet",
+        "@vedtakId" to vedtak.vedtakId,
+    ).toJson()
+
+    private fun utbetalingsoppdragEksisterer(vedtak: Vedtak) = mapOf(
+        "@event_name" to "utbetaling_eksisterer",
+        "@vedtakId" to vedtak.vedtakId,
     ).toJson()
 
     private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

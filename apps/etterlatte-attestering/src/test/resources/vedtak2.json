@@ -1,9 +1,9 @@
 {
   "@event_name": "vedtak_fattet",
   "@vedtak": {
-    "vedtakId": "20",
-    "behandlingsId": "20",
-    "sakId": "20",
+    "vedtakId": "21",
+    "behandlingsId": "21",
+    "sakId": "21",
     "saksbehandlerId": "1234",
     "behandlingstype": "NY",
     "sakIdGjelderFnr": "24116324268",
@@ -12,8 +12,8 @@
       {
         "delytelsesId": "vedtakID:datoFOM:ytelseskomponent",
         "ytelseskomponent": "BARNEPENSJON-OPTP",
-        "datoFOM": "2022-02-02",
-        "datoTOM": "2030-01-04",
+        "datoFOM": "2030-02-05",
+        "datoTOM": "2031-01-04",
         "belop": 10000
       }
     ],

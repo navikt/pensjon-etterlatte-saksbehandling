@@ -19,7 +19,8 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class UtbetalingsoppdragDaoIntegrationTest {
 
-    @Container private val postgreSQLContainer = TestContainers.postgreSQLContainer
+    @Container
+    private val postgreSQLContainer = TestContainers.postgreSQLContainer
 
     private lateinit var dataSource: DataSource
     private lateinit var utbetalingsoppdragDao: UtbetalingsoppdragDao
@@ -66,7 +67,7 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
         val utbetalingsoppdrag = utbetalingsoppdragDao.hentUtbetalingsoppdrag(vedtak.vedtakId)
 
         assertNotNull(utbetalingsoppdrag?.id)
-        assertEquals(UtbetalingsoppdragStatus.MOTTATT, utbetalingsoppdrag?.status)
+        assertEquals(UtbetalingsoppdragStatus.SENDT, utbetalingsoppdrag?.status)
         assertEquals(vedtak.vedtakId, utbetalingsoppdrag?.vedtakId)
         assertEquals(vedtak.behandlingsId, utbetalingsoppdrag?.behandlingId)
         assertEquals(vedtak.sakId, utbetalingsoppdrag?.sakId)
@@ -76,7 +77,7 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
     }
 
     @Test
-    fun `skal sette kvittering på utbetalingsoppdrag`() {
+    fun `skal sette kvittering paa utbetalingsoppdrag`() {
         val vedtak = vedtak()
         val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon())
 
@@ -103,20 +104,20 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
     }
 
     @Test
-    fun `skal oppdatere status på utbetalingsoppdrag`() {
+    fun `skal oppdatere status paa utbetalingsoppdrag`() {
         val vedtak = vedtak()
         val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon())
 
         val utbetalingsoppdrag = utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
 
         assertNotNull(utbetalingsoppdrag)
-        assertEquals(UtbetalingsoppdragStatus.MOTTATT, utbetalingsoppdrag.status)
+        assertEquals(UtbetalingsoppdragStatus.SENDT, utbetalingsoppdrag.status)
 
         val utbetalingsoppdragOppdatert = utbetalingsoppdragDao.oppdaterStatus(
             vedtakId = vedtak.vedtakId,
-            status = UtbetalingsoppdragStatus.SENDT
+            status = UtbetalingsoppdragStatus.GODKJENT
         )
 
-        assertEquals(UtbetalingsoppdragStatus.SENDT, utbetalingsoppdragOppdatert.status)
+        assertEquals(UtbetalingsoppdragStatus.GODKJENT, utbetalingsoppdragOppdatert.status)
     }
 }

@@ -18,15 +18,13 @@ class OppdragService(
     fun opprettOgSendOppdrag(vedtak: Vedtak, attestasjon: Attestasjon): Utbetalingsoppdrag {
         val oppdrag = oppdragMapper.oppdragFraVedtak(vedtak, attestasjon)
 
-        logger.info("Oppretter utbetalingsoppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId}")
-        utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
-
         logger.info("Sender oppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId} til oppdrag")
         oppdragSender.sendOppdrag(oppdrag)
-        // TODO: catche feil fra sendOppdrag, og kun oppdater status dersom sendOppdrag ikke feiler?
-
-        return utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), UtbetalingsoppdragStatus.SENDT)
+        return utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
     }
+
+    fun oppdragEksistererFraFor(vedtak: Vedtak) =
+        utbetalingsoppdragDao.hentUtbetalingsoppdrag(vedtak.vedtakId) != null
 
     fun oppdaterKvittering(oppdrag: Oppdrag): Utbetalingsoppdrag {
         logger.info("Oppdaterer kvittering for oppdrag med id=${oppdrag.vedtakId()}")
@@ -39,12 +37,15 @@ class OppdragService(
 
     private fun utbetalingEvent(oppdrag: Oppdrag, status: UtbetalingsoppdragStatus) = mapOf(
         "@event_name" to "utbetaling_oppdatert",
+        "@vedtakId" to oppdrag.vedtakId(),
         "@status" to status.name,
         "@beskrivelse" to oppdrag.kvitteringBeskrivelse()
     ).toJson()
 
-    private fun Oppdrag.kvitteringBeskrivelse() = "${this.mmel.kodeMelding} ${this.mmel.beskrMelding}"
-
+    private fun Oppdrag.kvitteringBeskrivelse() = when (this.mmel.kodeMelding) {
+        "00" -> "Utbetalingsoppdrag OK"
+        else -> "${this.mmel.kodeMelding} ${this.mmel.beskrMelding}"
+    }
 
     companion object {
         private val logger = LoggerFactory.getLogger(OppdragService::class.java)

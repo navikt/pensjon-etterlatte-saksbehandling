@@ -63,7 +63,7 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
                 it.setString(3, vedtak.sakId)
                 it.setString(4, Jaxb.toXml(oppdrag))
                 it.setString(5, vedtak.toJson())
-                it.setString(6, UtbetalingsoppdragStatus.MOTTATT.name)
+                it.setString(6, UtbetalingsoppdragStatus.SENDT.name)
 
                 require(it.executeUpdate() == 1)
             }

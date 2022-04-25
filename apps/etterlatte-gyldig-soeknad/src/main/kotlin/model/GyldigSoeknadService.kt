@@ -1,9 +1,7 @@
 package model
 
-import OpplysningKanIkkeHentesUt
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import hentBostedsAdresser
 import hentFnrAnsvarligeForeldre
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.GjenlevendeForelderSoeknad
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.InnsenderSoeknad
@@ -40,11 +38,6 @@ class GyldigSoeknadService {
                 GyldighetsTyper.HAR_FORELDREANSVAR_FOR_BARNET,
                 gjenlevendePdl,
                 soekerPdl
-            ),
-            barnOgForelderSammeBostedsadressePdl(
-                GyldighetsTyper.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL,
-                soekerPdl,
-                gjenlevendePdl
             )
         )
 
@@ -91,34 +84,6 @@ class GyldigSoeknadService {
         )
     }
 
-
-    fun barnOgForelderSammeBostedsadressePdl(
-        gyldighetstype: GyldighetsTyper,
-        soekerPdl: VilkaarOpplysning<Person>?,
-        gjenlevendePdl: VilkaarOpplysning<Person>?
-    ): VurdertGyldighet {
-        val resultat = try {
-            if (gjenlevendePdl == null || soekerPdl == null) {
-                VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-            } else {
-                val adresseBarn = hentBostedsAdresser(soekerPdl).find { it.aktiv }
-                val adresseGjenlevende = hentBostedsAdresser(gjenlevendePdl).find { it.aktiv }
-
-                val adresse1 = adresseBarn?.adresseLinje1 == adresseGjenlevende?.adresseLinje1
-                val postnr = adresseBarn?.postnr == adresseGjenlevende?.postnr
-                val poststed = adresseBarn?.poststed == adresseGjenlevende?.poststed
-                vurderOpplysning { adresse1 && postnr && poststed }
-            }
-        } catch (ex: OpplysningKanIkkeHentesUt) {
-            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-        }
-
-        return VurdertGyldighet(
-            gyldighetstype,
-            resultat,
-            LocalDateTime.now()
-        )
-    }
 
     companion object {
         inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<ObjectNode>?): VilkaarOpplysning<T>? {

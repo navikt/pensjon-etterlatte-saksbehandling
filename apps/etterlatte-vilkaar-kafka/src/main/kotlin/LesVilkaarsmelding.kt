@@ -31,8 +31,8 @@ internal class LesVilkaarsmelding(
         withLogContext(packet.correlationId()) {
             val grunnlagListe = packet["grunnlag"].toString()
             try {
-                val hmm = objectMapper.readValue<List<VilkaarOpplysning<ObjectNode>>>(grunnlagListe)
-                val vilkaarsVurdering = vilkaar.mapVilkaar(hmm)
+                val grunnlagForVilkaar = objectMapper.readValue<List<VilkaarOpplysning<ObjectNode>>>(grunnlagListe)
+                val vilkaarsVurdering = vilkaar.mapVilkaar(grunnlagForVilkaar)
                 packet["@vilkaarsvurdering"] = vilkaarsVurdering
                 context.publish(packet.toJson())
                 //TODO

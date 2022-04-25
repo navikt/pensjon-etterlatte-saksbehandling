@@ -19,13 +19,6 @@ fun vurderOpplysning(vurdering: () -> Boolean): VurderingsResultat = try {
     VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
 }
 
-fun hentBostedsAdresser(
-    person: VilkaarOpplysning<Person>
-): List<Adresse> {
-    return person.opplysning.bostedsadresse
-        ?: throw OpplysningKanIkkeHentesUt()
-}
-
 fun setVurdering(liste: List<VurdertGyldighet>): VurderingsResultat {
     val resultat = liste.map { it.resultat }
     return hentVurdering(resultat)

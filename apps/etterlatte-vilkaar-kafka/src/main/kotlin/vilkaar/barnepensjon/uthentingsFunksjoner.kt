@@ -3,6 +3,7 @@ package no.nav.etterlatte.barnepensjon
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
+import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -45,5 +46,12 @@ fun hentAdresser(
     } else {
         adresser
     }
+}
+
+fun hentBostedsAdresser(
+    person: VilkaarOpplysning<Person>
+): List<Adresse> {
+    return person.opplysning.bostedsadresse
+        ?: throw OpplysningKanIkkeHentesUt()
 }
 

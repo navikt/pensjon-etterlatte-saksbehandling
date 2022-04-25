@@ -7,3 +7,7 @@ data class Adresser(
     val oppholdadresse: List<Adresse>?,
     val kontaktadresse: List<Adresse>?
 )
+
+data class Bostedadresser(
+    val bostedadresse: List<Adresse>?,
+)

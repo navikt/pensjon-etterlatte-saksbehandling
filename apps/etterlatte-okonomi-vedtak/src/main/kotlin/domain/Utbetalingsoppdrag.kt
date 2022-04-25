@@ -4,13 +4,11 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 
 enum class UtbetalingsoppdragStatus {
-    MOTTATT,
     SENDT,
     GODKJENT,
     GODKJENT_MED_FEIL,
     AVVIST,
     FEILET,
-    FEILET_UKJENT_FEIL
 }
 
 data class Utbetalingsoppdrag(

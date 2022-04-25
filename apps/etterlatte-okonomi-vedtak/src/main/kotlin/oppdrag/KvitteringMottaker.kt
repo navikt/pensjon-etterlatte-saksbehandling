@@ -83,7 +83,7 @@ class KvitteringMottaker(
     private fun oppdragFeiletUkjent(oppdrag: Oppdrag, oppdragXml: String) {
         // TODO bør denne håndteres på noen annen måte?
         logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet med ukjent feil", kv("oppdrag", oppdragXml))
-        oppdragService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingsoppdragStatus.FEILET_UKJENT_FEIL)
+        oppdragService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingsoppdragStatus.FEILET)
     }
 
 

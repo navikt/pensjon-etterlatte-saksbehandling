@@ -2,7 +2,8 @@ package model
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import hentFnrAnsvarligeForeldre
+import hentFnrForeldre
+import hentFnrForeldreAnsvar
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.GjenlevendeForelderSoeknad
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
@@ -33,10 +34,10 @@ class GyldigSoeknadService {
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
 
         val gyldighet = listOf(
-            innsenderErForelder(GyldighetsTyper.INNSENDER_ER_FORELDER, gjenlevendeSoeknad, innsender),
+            innsenderErForelder(GyldighetsTyper.INNSENDER_ER_FORELDER, gjenlevendeSoeknad, innsender, soekerPdl),
             gjenlevendeForelderHarForeldreansvar(
                 GyldighetsTyper.HAR_FORELDREANSVAR_FOR_BARNET,
-                gjenlevendePdl,
+                gjenlevendeSoeknad,
                 soekerPdl
             )
         )
@@ -44,19 +45,23 @@ class GyldigSoeknadService {
         val gyldighetResultat = setVurdering(gyldighet)
         val vurdertDato = LocalDateTime.now()
 
-        return GyldighetsResultat(gyldighetResultat, gyldighet, vurdertDato )
+        return GyldighetsResultat(gyldighetResultat, gyldighet, vurdertDato)
     }
 
     fun innsenderErForelder(
         gyldighetstype: GyldighetsTyper,
-        gjenlevende: VilkaarOpplysning<GjenlevendeForelderSoeknad>?,
-        innsender: VilkaarOpplysning<InnsenderSoeknad>?
+        gjenlevende: VilkaarOpplysning<GjenlevendeForelderSoeknad>?, //gjenlevende fnr søknad
+        innsender: VilkaarOpplysning<InnsenderSoeknad>?, //innsender fnr søknad
+        soekerPdl: VilkaarOpplysning<Person>? // familierelasjon foreldre til barnet
     ): VurdertGyldighet {
 
-        val resultat = if (gjenlevende == null || innsender == null) {
+        val resultat = if (gjenlevende == null || innsender == null || soekerPdl == null) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
-            vurderOpplysning { innsender.opplysning.foedselsnummer == gjenlevende.opplysning.foedselsnummer }
+            vurderOpplysning {
+                innsender.opplysning.foedselsnummer == gjenlevende.opplysning.foedselsnummer &&
+                hentFnrForeldre(soekerPdl).contains(gjenlevende.opplysning.foedselsnummer)
+            }
         }
 
         return VurdertGyldighet(
@@ -68,13 +73,13 @@ class GyldigSoeknadService {
 
     fun gjenlevendeForelderHarForeldreansvar(
         gyldighetstype: GyldighetsTyper,
-        gjenlevendePdl: VilkaarOpplysning<Person>?,
+        gjenlevende: VilkaarOpplysning<GjenlevendeForelderSoeknad>?, //gjenlevende fnr søknad
         soekerPdl: VilkaarOpplysning<Person>?
     ): VurdertGyldighet {
-        val resultat = if (gjenlevendePdl == null || soekerPdl == null) {
+        val resultat = if (gjenlevende == null || soekerPdl == null) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
-            vurderOpplysning { hentFnrAnsvarligeForeldre(soekerPdl).contains(gjenlevendePdl.opplysning.foedselsnummer) }
+            vurderOpplysning { hentFnrForeldreAnsvar(soekerPdl).contains(gjenlevende.opplysning.foedselsnummer) }
         }
 
         return VurdertGyldighet(

@@ -40,8 +40,7 @@ internal class LesGyldigSoeknadsmelding(
                 //TODO
                 logger.info("Vurdert gyldighet av søknad")
             } catch (e: Exception){
-                //TODO endre denne
-                println("spiser en melding fordi" +e)
+                println("Gyldighetsvurdering feilet " +e)
             }
 
 

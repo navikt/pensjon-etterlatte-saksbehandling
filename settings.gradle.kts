@@ -21,5 +21,4 @@ include(
     "libs:common",
     "libs:ktorclient-onbehalfof",
     "jobs:test-fordeler",
-    "apps:etterlatte-vilkaar-api"
 )

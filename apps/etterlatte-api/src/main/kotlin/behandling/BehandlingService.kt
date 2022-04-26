@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
-import no.nav.etterlatte.vilkaar.VilkaarKlient
 import org.slf4j.LoggerFactory
 
 
@@ -21,8 +20,7 @@ data class BehandlingsBehov(
 
 class BehandlingService(
     private val behandlingKlient: BehandlingKlient,
-    private val pdlKlient: PdltjenesterKlient,
-    private val vilkaarKlient: VilkaarKlient
+    private val pdlKlient: PdltjenesterKlient
 ) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
 
@@ -53,12 +51,7 @@ class BehandlingService(
     suspend fun hentBehandling(behandlingId: String, accessToken: String): DetaljertBehandling {
         logger.info("Henter behandling")
         val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
-        val vilkaar = vilkaarKlient.hentVurdertVilkaar(behandlingId, accessToken)
-        return vilkaar?.vilkaarResultat?.let {
-            logger.info("Kopierer over vilkaarResultat til behandling")
-            logger.info("vilkarresultat", kv("vilkaarResultat", vilkaar.vilkaarResultat))
-            behandling.copy(vilkårsprøving = it)
-        } ?: behandling
+        return behandling
 
     }
 

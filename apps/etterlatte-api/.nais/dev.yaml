@@ -33,10 +33,6 @@ spec:
       value: 8a5e70a5-2ba8-4951-8a7f-1ee2b442fb0c
     - name: ETTERLATTE_PDL_URL
       value: http://etterlatte-pdltjenester
-    - name: ETTERLATTE_VILKAAR_API_URL
-      value: http://etterlatte-vilkaar-api
-    - name: ETTERLATTE_VILKAAR_API_CLIENT_ID
-      value: 857adbd4-700f-42d3-bbd6-4a195a49271d
   accessPolicy:
     outbound:
       rules:

@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 class OppdragService(
     val oppdragMapper: OppdragMapper,
@@ -20,7 +21,8 @@ class OppdragService(
 
         logger.info("Sender oppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId} til oppdrag")
         oppdragSender.sendOppdrag(oppdrag)
-        return utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
+        val opprettetTidspunkt = LocalDateTime.now()
+        return utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag, opprettetTidspunkt)
     }
 
     fun oppdragEksistererFraFor(vedtak: Vedtak) =
@@ -33,7 +35,7 @@ class OppdragService(
 
     fun oppdaterStatusOgPubliserKvittering(oppdrag: Oppdrag, status: UtbetalingsoppdragStatus) =
         utbetalingsoppdragDao.oppdaterStatus(oppdrag.vedtakId(), status)
-            .also { rapidsConnection.publish(utbetalingEvent(oppdrag, status)) }
+            .also { rapidsConnection.publish("key", utbetalingEvent(oppdrag, status)) }
 
     private fun utbetalingEvent(oppdrag: Oppdrag, status: UtbetalingsoppdragStatus) = mapOf(
         "@event_name" to "utbetaling_oppdatert",
@@ -50,4 +52,5 @@ class OppdragService(
     companion object {
         private val logger = LoggerFactory.getLogger(OppdragService::class.java)
     }
+
 }

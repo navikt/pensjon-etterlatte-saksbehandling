@@ -2,6 +2,7 @@ package no.nav.etterlatte.domain
 
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
+import java.time.LocalDateTime
 
 enum class UtbetalingsoppdragStatus {
     SENDT,
@@ -18,7 +19,12 @@ data class Utbetalingsoppdrag(
     val sakId: String,
     val status: UtbetalingsoppdragStatus,
     val vedtak: Vedtak,
-    val oppdrag: Oppdrag,
-    val oppdragId: String? = null,
-    val kvittering: Oppdrag? = null
+    val opprettetTidspunkt: LocalDateTime,
+    val endret: LocalDateTime,
+    val fodselsnummer: String,
+    val utgaendeOppdrag: Oppdrag,
+    val oppdragKvittering: Oppdrag? = null,
+    val beskrivelseOppdrag: String? = null,
+    val feilkodeOppdrag: String? = null,
+    val meldingKodeOppdrag: String? = null // 00, 04, 08, 12
 )

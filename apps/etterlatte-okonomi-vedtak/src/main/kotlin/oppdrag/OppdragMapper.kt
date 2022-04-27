@@ -42,6 +42,9 @@ object OppdragMapper {
                 )
             }
 
+            // TODO: legge til linje for avstemming 115 (avstemmingsnøkler)
+            //avstemming115
+
             oppdragsLinje150.addAll(
                 vedtak.beregningsperioder.map {
                     OppdragsLinje150().apply {

@@ -10,6 +10,8 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
+import java.sql.Timestamp
+import java.time.LocalDateTime
 import javax.sql.DataSource
 
 
@@ -20,7 +22,7 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
     fun hentUtbetalingsoppdrag(vedtakId: String): Utbetalingsoppdrag? =
         dataSource.connection.use { connection ->
             val stmt = connection.prepareStatement(
-                "SELECT id, vedtak_id, behandling_id, sak_id, oppdrag, vedtak, status, oppdrag_id, kvittering " +
+                "SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet_tidspunkt, endret, fodselsnummer, utgaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, melding_kode_oppdrag " +
                         "FROM utbetalingsoppdrag " +
                         "WHERE vedtak_id = ?"
             )
@@ -34,11 +36,16 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
                         vedtakId = getString("vedtak_id"),
                         behandlingId = getString("behandling_id"),
                         sakId = getString("sak_id"),
-                        oppdrag = getString("oppdrag").let(Jaxb::toOppdrag),
-                        vedtak = getString("vedtak").let { vedtak -> objectMapper.readValue(vedtak) },
                         status = getString("status").let(UtbetalingsoppdragStatus::valueOf),
-                        oppdragId = getString("oppdrag_id"),
-                        kvittering = getString("kvittering")?.let(Jaxb::toOppdrag),
+                        vedtak = getString("vedtak").let { vedtak -> objectMapper.readValue(vedtak) },
+                        opprettetTidspunkt = getTimestamp("opprettet_tidspunkt").toLocalDateTime(),
+                        endret = getTimestamp("endret").toLocalDateTime(),
+                        fodselsnummer = getString("fodselsnummer"),
+                        utgaendeOppdrag = getString("utgaende_oppdrag").let(Jaxb::toOppdrag),
+                        oppdragKvittering = getString("oppdrag_kvittering")?.let(Jaxb::toOppdrag),
+                        beskrivelseOppdrag = getString("beskrivelse_oppdrag"),
+                        feilkodeOppdrag = getString("feilkode_oppdrag"),
+                        meldingKodeOppdrag = getString("melding_kode_oppdrag")
                     )
                 }
             }
@@ -48,13 +55,13 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
         hentUtbetalingsoppdrag(vedtakId)
             ?: throw UtbetalingsoppdragNotFoundException("Oppdrag for vedtak med vedtakId=$vedtakId finnes ikke")
 
-    fun opprettUtbetalingsoppdrag(vedtak: Vedtak, oppdrag: Oppdrag) =
+    fun opprettUtbetalingsoppdrag(vedtak: Vedtak, oppdrag: Oppdrag, opprettetTidspunkt: LocalDateTime) =
         dataSource.connection.use { connection ->
             logger.info("Oppretter utbetalingsoppdrag for vedtakId=${vedtak.vedtakId}")
 
             val stmt = connection.prepareStatement(
-                "INSERT INTO utbetalingsoppdrag(vedtak_id, behandling_id, sak_id, oppdrag, vedtak, status) " +
-                        "VALUES(?, ?, ?, ?, ?, ?)"
+                "INSERT INTO utbetalingsoppdrag(vedtak_id, behandling_id, sak_id, utgaende_oppdrag, status, vedtak, opprettet_tidspunkt, endret, fodselsnummer) " +
+                        "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
             )
 
             stmt.use {
@@ -62,8 +69,13 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
                 it.setString(2, vedtak.behandlingsId)
                 it.setString(3, vedtak.sakId)
                 it.setString(4, Jaxb.toXml(oppdrag))
-                it.setString(5, vedtak.toJson())
-                it.setString(6, UtbetalingsoppdragStatus.SENDT.name)
+                it.setString(5, UtbetalingsoppdragStatus.SENDT.name)
+                it.setString(6, vedtak.toJson())
+                it.setTimestamp(7, Timestamp.valueOf(opprettetTidspunkt))
+                it.setTimestamp(8, Timestamp.valueOf(opprettetTidspunkt))
+                it.setString(9, vedtak.sakIdGjelderFnr)
+
+
 
                 require(it.executeUpdate() == 1)
             }
@@ -92,7 +104,7 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
             logger.info("Oppdaterer kvittering i utbetalingsoppdrag for vedtakId=${oppdragMedKvittering.vedtakId()}")
 
             val stmt = connection.prepareStatement(
-                "UPDATE utbetalingsoppdrag SET kvittering = ?, oppdrag_id = ? WHERE vedtak_id = ?"
+                "UPDATE utbetalingsoppdrag SET oppdrag_kvittering = ?, oppdrag_id = ? WHERE vedtak_id = ?"
             )
 
             stmt.use {

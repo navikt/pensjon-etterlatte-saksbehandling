@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
+import java.time.LocalDateTime
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -62,8 +63,9 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
     fun `skal opprette og hente utbetalingsoppdrag`() {
         val vedtak = vedtak()
         val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon())
+        val opprettet_tidspunkt = LocalDateTime.now()
 
-        utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
+        utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag, opprettet_tidspunkt)
         val utbetalingsoppdrag = utbetalingsoppdragDao.hentUtbetalingsoppdrag(vedtak.vedtakId)
 
         assertNotNull(utbetalingsoppdrag?.id)
@@ -73,15 +75,16 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
         assertEquals(vedtak.sakId, utbetalingsoppdrag?.sakId)
         assertEquals(vedtak.vedtakId, utbetalingsoppdrag?.vedtakId)
         assertNotNull(utbetalingsoppdrag?.vedtak)
-        assertNotNull(utbetalingsoppdrag?.oppdrag)
+        assertNotNull(utbetalingsoppdrag?.utgaendeOppdrag)
     }
 
     @Test
     fun `skal sette kvittering paa utbetalingsoppdrag`() {
         val vedtak = vedtak()
         val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon())
+        val opprettet_tidspunkt = LocalDateTime.now()
 
-        utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
+        utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag, opprettet_tidspunkt)
 
         val oppdragMedKvittering = oppdrag.apply {
             oppdrag110.oppdragsId = 1
@@ -91,15 +94,15 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
         utbetalingsoppdragDao.oppdaterKvittering(oppdragMedKvittering)
         val utbetalingsoppdragOppdatert = utbetalingsoppdragDao.hentUtbetalingsoppdrag(oppdrag.vedtakId())
 
-        assertNotNull(utbetalingsoppdragOppdatert?.kvittering)
-        assertNotNull(utbetalingsoppdragOppdatert?.kvittering?.mmel)
+        assertNotNull(utbetalingsoppdragOppdatert?.oppdragKvittering)
+        assertNotNull(utbetalingsoppdragOppdatert?.oppdragKvittering?.mmel)
         assertEquals(
             oppdragMedKvittering.mmel?.alvorlighetsgrad,
-            utbetalingsoppdragOppdatert?.kvittering?.mmel?.alvorlighetsgrad
+            utbetalingsoppdragOppdatert?.oppdragKvittering?.mmel?.alvorlighetsgrad
         )
         assertEquals(
             oppdragMedKvittering.oppdrag110.oppdragsId,
-            utbetalingsoppdragOppdatert?.kvittering?.oppdrag110?.oppdragsId
+            utbetalingsoppdragOppdatert?.oppdragKvittering?.oppdrag110?.oppdragsId
         )
     }
 
@@ -107,8 +110,9 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
     fun `skal oppdatere status paa utbetalingsoppdrag`() {
         val vedtak = vedtak()
         val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon())
+        val opprettet_tidspunkt = LocalDateTime.now()
 
-        val utbetalingsoppdrag = utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag)
+        val utbetalingsoppdrag = utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag, opprettet_tidspunkt)
 
         assertNotNull(utbetalingsoppdrag)
         assertEquals(UtbetalingsoppdragStatus.SENDT, utbetalingsoppdrag.status)

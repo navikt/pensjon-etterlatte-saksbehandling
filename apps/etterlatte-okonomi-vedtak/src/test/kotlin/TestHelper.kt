@@ -11,6 +11,7 @@ import no.trygdeetaten.skjema.oppdrag.Mmel
 import java.io.FileNotFoundException
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 object TestHelper
 
@@ -43,7 +44,7 @@ fun vedtak(vedtakId: String = "1") = Vedtak(
     )
 )
 
-fun oppdrag(vedtakId: String = "8888") = OppdragMapper.oppdragFraVedtak(vedtak(vedtakId), attestasjon())
+fun oppdrag(vedtakId: String = "8888") = OppdragMapper.oppdragFraVedtak(vedtak(vedtakId), attestasjon(), LocalDateTime.now())
 
 fun oppdragMedGodkjentKvittering(vedtakId: String = "1") = oppdrag(vedtakId).apply {
     mmel = Mmel().apply {

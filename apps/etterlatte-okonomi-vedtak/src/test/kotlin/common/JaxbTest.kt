@@ -7,12 +7,13 @@ import no.nav.etterlatte.readFile
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 internal class JaxbTest {
 
     @Test
     fun `should generate xml from oppdrag`() {
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak(), attestasjon())
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak(), attestasjon(), LocalDateTime.now())
         val oppdragAsXml = Jaxb.toXml(oppdrag)
 
         assertNotNull(oppdragAsXml)

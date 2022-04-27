@@ -17,11 +17,11 @@ class OppdragService(
     val rapidsConnection: RapidsConnection
 ) {
     fun opprettOgSendOppdrag(vedtak: Vedtak, attestasjon: Attestasjon): Utbetalingsoppdrag {
-        val oppdrag = oppdragMapper.oppdragFraVedtak(vedtak, attestasjon)
+        val opprettetTidspunkt = LocalDateTime.now()
+        val oppdrag = oppdragMapper.oppdragFraVedtak(vedtak, attestasjon, nokkelAvstemming = opprettetTidspunkt)
 
         logger.info("Sender oppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId} til oppdrag")
         oppdragSender.sendOppdrag(oppdrag)
-        val opprettetTidspunkt = LocalDateTime.now()
         return utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag, opprettetTidspunkt)
     }
 

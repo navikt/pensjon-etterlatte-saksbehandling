@@ -62,7 +62,7 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
     @Test
     fun `skal opprette og hente utbetalingsoppdrag`() {
         val vedtak = vedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon())
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), LocalDateTime.now())
         val opprettet_tidspunkt = LocalDateTime.now()
 
         utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag, opprettet_tidspunkt)
@@ -81,7 +81,7 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
     @Test
     fun `skal sette kvittering paa utbetalingsoppdrag`() {
         val vedtak = vedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon())
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), LocalDateTime.now())
         val opprettet_tidspunkt = LocalDateTime.now()
 
         utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag, opprettet_tidspunkt)
@@ -109,7 +109,7 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
     @Test
     fun `skal oppdatere status paa utbetalingsoppdrag`() {
         val vedtak = vedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon())
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), LocalDateTime.now())
         val opprettet_tidspunkt = LocalDateTime.now()
 
         val utbetalingsoppdrag = utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag, opprettet_tidspunkt)

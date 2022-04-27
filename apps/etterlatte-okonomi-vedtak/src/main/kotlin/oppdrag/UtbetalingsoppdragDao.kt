@@ -104,13 +104,15 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
             logger.info("Oppdaterer kvittering i utbetalingsoppdrag for vedtakId=${oppdragMedKvittering.vedtakId()}")
 
             val stmt = connection.prepareStatement(
-                "UPDATE utbetalingsoppdrag SET oppdrag_kvittering = ?, oppdrag_id = ? WHERE vedtak_id = ?"
+                "UPDATE utbetalingsoppdrag SET oppdrag_kvittering = ?, beskrivelse_oppdrag = ?, feilkode_oppdrag = ?, melding_kode_oppdrag = ? WHERE vedtak_id = ?"
             )
 
             stmt.use {
                 it.setString(1, Jaxb.toXml(oppdragMedKvittering))
-                it.setString(2, oppdragMedKvittering.oppdrag110.oppdragsId.toString())
-                it.setString(3, oppdragMedKvittering.vedtakId())
+                it.setString(2, oppdragMedKvittering.mmel.beskrMelding)
+                it.setString(3, oppdragMedKvittering.mmel.kodeMelding)
+                it.setString(4, oppdragMedKvittering.mmel.alvorlighetsgrad)
+                it.setString(5, oppdragMedKvittering.vedtakId())
 
                 require(it.executeUpdate() == 1)
             }

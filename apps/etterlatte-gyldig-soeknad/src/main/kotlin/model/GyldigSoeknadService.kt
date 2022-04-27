@@ -1,19 +1,19 @@
 package model
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.readValue
+import Pdl
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import hentFnrForeldre
 import hentFnrForeldreAnsvar
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.GjenlevendeForelderSoeknad
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.InnsenderSoeknad
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.slf4j.LoggerFactory
 import setVurdering
@@ -23,22 +23,38 @@ import java.time.LocalDateTime
 class GyldigSoeknadService {
     private val logger = LoggerFactory.getLogger(GyldigSoeknadService::class.java)
 
-    fun mapOpplysninger(opplysninger: List<VilkaarOpplysning<ObjectNode>>): GyldighetsResultat {
-        logger.info("Map opplysninger for å vurdere om søknad er gyldig")
+    fun hentPersongalleriFraSoeknad(jsonNode: JsonNode): Persongalleri {
+        logger.info("Hent persongalleri fra søknad")
 
-        val innsender = finnOpplysning<InnsenderSoeknad>(opplysninger, Opplysningstyper.INNSENDER_SOEKNAD_V1)
-        val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
-        val gjenlevendeSoeknad =
-            finnOpplysning<GjenlevendeForelderSoeknad>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_SOEKNAD_V1)
-        val soekerSoeknad = finnOpplysning<SoekerBarnSoeknad>(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1)
-        val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
+        val barnepensjon = objectMapper.treeToValue<Barnepensjon>(jsonNode)!!
 
+        return Persongalleri(
+            soker = barnepensjon.soeker.foedselsnummer.svar.value,
+            innsender = barnepensjon.innsender.foedselsnummer.svar.value,
+            soesken = barnepensjon.soesken.map { it.foedselsnummer.svar.value },
+            avdoed = barnepensjon.foreldre.filter { it.type == PersonType.AVDOED }.map { it.foedselsnummer.svar.value },
+            gjenlevende = barnepensjon.foreldre.filter { it.type == PersonType.GJENLEVENDE_FORELDER }
+                .map { it.foedselsnummer.svar.value }
+        )
+    }
+
+    fun hentSoekerFraPdl(fnrSoeker: String, pdl: Pdl): FamilieRelasjon? {
+        val soeker = pdl.hentPdlModell(fnrSoeker, PersonRolle.BARN)
+        return soeker.familieRelasjon
+    }
+
+    fun vurderGyldighet(persongalleri: Persongalleri, familieRelasjonSoeker: FamilieRelasjon?): GyldighetsResultat {
         val gyldighet = listOf(
-            innsenderErForelder(GyldighetsTyper.INNSENDER_ER_FORELDER, gjenlevendeSoeknad, innsender, soekerPdl),
-            gjenlevendeForelderHarForeldreansvar(
+            innsenderErForelder(
+                GyldighetsTyper.INNSENDER_ER_FORELDER,
+                persongalleri.gjenlevende,
+                persongalleri.innsender,
+                familieRelasjonSoeker
+            ),
+            innsenderHarForeldreansvar(
                 GyldighetsTyper.HAR_FORELDREANSVAR_FOR_BARNET,
-                gjenlevendeSoeknad,
-                soekerPdl
+                persongalleri.innsender,
+                familieRelasjonSoeker
             )
         )
 
@@ -48,19 +64,19 @@ class GyldigSoeknadService {
         return GyldighetsResultat(gyldighetResultat, gyldighet, vurdertDato)
     }
 
+
     fun innsenderErForelder(
         gyldighetstype: GyldighetsTyper,
-        gjenlevende: VilkaarOpplysning<GjenlevendeForelderSoeknad>?, //gjenlevende fnr søknad
-        innsender: VilkaarOpplysning<InnsenderSoeknad>?, //innsender fnr søknad
-        soekerPdl: VilkaarOpplysning<Person>? // familierelasjon foreldre til barnet
+        gjenlevende: List<String>?,
+        innsender: String?,
+        soekerFamilieRelasjonPdl: FamilieRelasjon?
     ): VurdertGyldighet {
-
-        val resultat = if (gjenlevende == null || innsender == null || soekerPdl == null) {
+        val resultat = if (gjenlevende == null || innsender == null || soekerFamilieRelasjonPdl == null) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
             vurderOpplysning {
-                innsender.opplysning.foedselsnummer == gjenlevende.opplysning.foedselsnummer &&
-                hentFnrForeldre(soekerPdl).contains(gjenlevende.opplysning.foedselsnummer)
+                gjenlevende.contains(innsender) &&
+                        hentFnrForeldre(soekerFamilieRelasjonPdl).contains(innsender)
             }
         }
 
@@ -71,15 +87,15 @@ class GyldigSoeknadService {
         )
     }
 
-    fun gjenlevendeForelderHarForeldreansvar(
+    fun innsenderHarForeldreansvar(
         gyldighetstype: GyldighetsTyper,
-        gjenlevende: VilkaarOpplysning<GjenlevendeForelderSoeknad>?, //gjenlevende fnr søknad
-        soekerPdl: VilkaarOpplysning<Person>?
+        innsender: String?,
+        soekerPdlFamilieRelasjon: FamilieRelasjon?
     ): VurdertGyldighet {
-        val resultat = if (gjenlevende == null || soekerPdl == null) {
+        val resultat = if (innsender == null || soekerPdlFamilieRelasjon == null) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
-            vurderOpplysning { hentFnrForeldreAnsvar(soekerPdl).contains(gjenlevende.opplysning.foedselsnummer) }
+            vurderOpplysning { hentFnrForeldreAnsvar(soekerPdlFamilieRelasjon).contains(innsender) }
         }
 
         return VurdertGyldighet(
@@ -87,26 +103,6 @@ class GyldigSoeknadService {
             resultat,
             LocalDateTime.now()
         )
-    }
-
-
-    companion object {
-        inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<ObjectNode>?): VilkaarOpplysning<T>? {
-            return opplysning?.let {
-                VilkaarOpplysning(
-                    opplysning.opplysningType,
-                    opplysning.kilde,
-                    objectMapper.readValue(opplysning.opplysning.toString())
-                )
-            }
-        }
-
-        inline fun <reified T> finnOpplysning(
-            opplysninger: List<VilkaarOpplysning<ObjectNode>>,
-            type: Opplysningstyper
-        ): VilkaarOpplysning<T>? {
-            return setOpplysningType(opplysninger.find { it.opplysningType == type })
-        }
     }
 
 }

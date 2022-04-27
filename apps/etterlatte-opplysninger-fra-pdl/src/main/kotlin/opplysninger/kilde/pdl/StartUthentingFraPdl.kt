@@ -13,7 +13,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import java.util.*
 
-internal class LeggTilOpplysnignerFraPdl(
+internal class LeggTilOpplysningerFraPdl(
     rapidsConnection: RapidsConnection,
     private val behandlinger: Behandling,
     private val pdl: Pdl,

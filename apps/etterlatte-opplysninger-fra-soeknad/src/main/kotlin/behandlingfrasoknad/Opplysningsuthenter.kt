@@ -28,6 +28,7 @@ class Opplysningsuthenter {
             samtykke(barnepensjonssoknad, Opplysningstyper.SAMTYKKE),
             soeknadMottattDato(barnepensjonssoknad, Opplysningstyper.SOEKNAD_MOTTATT_DATO),
             soeknadsType(barnepensjonssoknad, Opplysningstyper.SOEKNADSTYPE_V1),
+            //TODO: skal vi kun ha personGalleri i gyldig søknad? eg slettes her, eller fint med dobblet opp?
             personGalleri(barnepensjonssoknad)
         ).filterNotNull()
     }

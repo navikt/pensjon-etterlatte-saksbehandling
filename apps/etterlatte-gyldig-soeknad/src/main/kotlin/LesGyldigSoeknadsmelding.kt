@@ -1,50 +1,78 @@
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.databind.JsonNode
 import model.GyldigSoeknadService
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import java.util.*
 
 internal class LesGyldigSoeknadsmelding(
     rapidsConnection: RapidsConnection,
-    private val gyldigSoeknad: GyldigSoeknadService
+    private val gyldigSoeknad: GyldigSoeknadService,
+    private val pdl: Pdl,
+    private val behandling: Behandling,
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(LesGyldigSoeknadsmelding::class.java)
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
-            validate { it.requireKey("grunnlag") }
-            validate { it.rejectKey("@gyldighetsvurdering") }
-            validate { it.rejectKey("@vilkaarsvurdering") }
+            validate { it.demandValue("@event_name", "ey_fordelt") }
+            validate { it.demandValue("@soeknad_fordelt", true) }
             validate { it.interestedIn("@correlation_id") }
+            validate { it.requireKey("@skjema_info") }
+            validate { it.demandValue("@skjema_info.type", "BARNEPENSJON") }
+            validate { it.demandValue("@skjema_info.versjon", "2") }
+            validate { it.requireKey("@lagret_soeknad_id") }
+            validate { it.requireKey("@fnr_soeker") } //TODO sjekk at dette er riktig verdi
 
         }.register(this)
     }
 
+
+    //TODO hvordan håndtere overskriving av gyldig soeknad
+
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
 
-            val grunnlagListe = packet["grunnlag"].toString()
             try {
-                val grunnlag = objectMapper.readValue<List<VilkaarOpplysning<ObjectNode>>>(grunnlagListe)
-                val gyldighetsVurdering = gyldigSoeknad.mapOpplysninger(grunnlag)
+                val personGalleri = gyldigSoeknad.hentPersongalleriFraSoeknad(packet["@skjema_info"])
+                val familieRelasjonPdl = gyldigSoeknad.hentSoekerFraPdl(personGalleri.soker, pdl)
+                val gyldighetsVurdering = gyldigSoeknad.vurderGyldighet(personGalleri, familieRelasjonPdl)
+                val erGyldigFramsatt = if (gyldighetsVurdering.resultat == VurderingsResultat.OPPFYLT) true else false
                 logger.info("Gyldighetsvurdering I lesGyldigsoeknad: {}", gyldighetsVurdering)
-                packet["@gyldighetsvurdering"] = gyldighetsVurdering
+
+                val sak = behandling.skaffSak(packet["@fnr_soeker"].asText(), packet["@skjema_info"]["type"].asText())
+                val behandlingsid = behandling.initierBehandling(sak, packet["@skjema_info"], packet["@lagret_soeknad_id"].longValue(), personGalleri)
+                behandling.lagreGyldighetsVurdering(behandlingsid, gyldighetsVurdering)
+
+                packet["@sak_id"] = sak
+                packet["@behandling_id"] = behandlingsid
+                // Mulig denne ikke er nødvendig, men kan være greit å ha et skille på den
+                packet["@gyldig_innsender"] = erGyldigFramsatt
+
                 context.publish(packet.toJson())
-                //TODO
                 logger.info("Vurdert gyldighet av søknad")
             } catch (e: Exception){
                 println("Gyldighetsvurdering feilet " +e)
             }
-
-
         }
+}
+
+interface Pdl {
+    fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): Person
+}
+
+interface Behandling {
+    fun initierBehandling(sak: Long, jsonNode: JsonNode, jsonNode1: Long, persongalleri: Persongalleri): UUID
+    fun skaffSak(person:String, saktype:String): Long
+    fun lagreGyldighetsVurdering(behandlingsId: UUID, gyldighetsVurdering: GyldighetsResultat)
 }
 
 private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

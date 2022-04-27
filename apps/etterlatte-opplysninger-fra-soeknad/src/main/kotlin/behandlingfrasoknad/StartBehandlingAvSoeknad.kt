@@ -10,7 +10,6 @@ import java.util.*
 
 internal class StartBehandlingAvSoeknad(
     rapidsConnection: RapidsConnection,
-    private val behandlinger: Behandling
 ) : River.PacketListener {
 
     init {
@@ -18,23 +17,17 @@ internal class StartBehandlingAvSoeknad(
             validate { it.demandValue("@event_name", "ey_fordelt") }
             validate { it.requireKey("@skjema_info") }
             validate { it.requireValue("@skjema_info.versjon", "2") }
-            validate { it.requireKey("@lagret_soeknad_id") }
-            validate { it.requireKey("@fnr_soeker") }
             validate { it.requireValue("@soeknad_fordelt", true) }
-            validate { it.rejectKey("@sak_id") }
-            validate { it.rejectKey("@behandling_id") }
+            validate { it.requireKey("@sak_id") }
+            validate { it.requireKey("@behandling_id") }
             validate { it.interestedIn("@correlation_id") }
-
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val sak = behandlinger.skaffSak(packet["@fnr_soeker"].asText(), packet["@skjema_info"]["type"].asText())
-            val behandlingsid = behandlinger.initierBehandling(sak, packet["@skjema_info"], packet["@lagret_soeknad_id"].longValue())
 
-            packet["@sak_id"] = sak
-            packet["@behandling_id"] = behandlingsid
+            // TODO lage melding med opplysninger
 
             context.publish(packet.toJson())
         }

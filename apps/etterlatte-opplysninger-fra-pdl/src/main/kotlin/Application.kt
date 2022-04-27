@@ -2,7 +2,7 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.opplysninger.kilde.pdl.AppBuilder
 import no.nav.etterlatte.opplysninger.kilde.pdl.BesvarOpplysningsbehov
-import no.nav.etterlatte.opplysninger.kilde.pdl.LeggTilOpplysnignerFraPdl
+import no.nav.etterlatte.opplysninger.kilde.pdl.LeggTilOpplysningerFraPdl
 import no.nav.helse.rapids_rivers.RapidApplication
 
 fun main() {
@@ -12,7 +12,7 @@ fun main() {
         AppBuilder(env).also { ab ->
             RapidApplication.create(env)
                 .also {
-                    LeggTilOpplysnignerFraPdl(it, ab.createBehandlingService(), ab.createPdlService(), ab.createOpplysningsbygger())
+                    LeggTilOpplysningerFraPdl(it, ab.createBehandlingService(), ab.createPdlService(), ab.createOpplysningsbygger())
                     BesvarOpplysningsbehov(it, ab.createPdlService())
 
                 }.start()

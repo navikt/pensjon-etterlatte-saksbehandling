@@ -10,6 +10,8 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -69,13 +71,27 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
         val utbetalingsoppdrag = utbetalingsoppdragDao.hentUtbetalingsoppdrag(vedtak.vedtakId)
 
         assertNotNull(utbetalingsoppdrag?.id)
-        assertEquals(UtbetalingsoppdragStatus.SENDT, utbetalingsoppdrag?.status)
         assertEquals(vedtak.vedtakId, utbetalingsoppdrag?.vedtakId)
         assertEquals(vedtak.behandlingsId, utbetalingsoppdrag?.behandlingId)
         assertEquals(vedtak.sakId, utbetalingsoppdrag?.sakId)
+        assertEquals(UtbetalingsoppdragStatus.SENDT, utbetalingsoppdrag?.status)
         assertEquals(vedtak.vedtakId, utbetalingsoppdrag?.vedtakId)
-        assertNotNull(utbetalingsoppdrag?.vedtak)
-        assertNotNull(utbetalingsoppdrag?.utgaendeOppdrag)
+        assertTrue(
+            utbetalingsoppdrag?.opprettetTidspunkt!!.isAfter(
+                LocalDateTime.now().minusSeconds(10)
+            ) and utbetalingsoppdrag.opprettetTidspunkt.isBefore(LocalDateTime.now())
+        )
+        assertTrue(
+            utbetalingsoppdrag.endret.isAfter(
+                LocalDateTime.now().minusSeconds(10)
+            ) and utbetalingsoppdrag.endret.isBefore(LocalDateTime.now())
+        )
+        assertEquals(vedtak.sakIdGjelderFnr, utbetalingsoppdrag.fodselsnummer)
+        assertNotNull(utbetalingsoppdrag.utgaendeOppdrag)
+        assertNull(utbetalingsoppdrag.oppdragKvittering)
+        assertNull(utbetalingsoppdrag.beskrivelseOppdrag)
+        assertNull(utbetalingsoppdrag.feilkodeOppdrag)
+        assertNull(utbetalingsoppdrag.meldingKodeOppdrag)
     }
 
     @Test
@@ -88,7 +104,7 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
 
         val oppdragMedKvittering = oppdrag.apply {
             oppdrag110.oppdragsId = 1
-            mmel = Mmel().withAlvorlighetsgrad("08")
+            mmel = Mmel().withAlvorlighetsgrad("08").withBeskrMelding("beskrivende melding").withKodeMelding("1234")
         }
 
         utbetalingsoppdragDao.oppdaterKvittering(oppdragMedKvittering)

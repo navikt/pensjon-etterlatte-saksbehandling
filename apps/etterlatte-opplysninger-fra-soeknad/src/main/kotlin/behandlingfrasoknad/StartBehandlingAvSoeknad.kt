@@ -33,6 +33,7 @@ internal class StartBehandlingAvSoeknad(
         }
     }
 
+//TODO slette kobling mot behandling
 interface Behandling {
     fun initierBehandling(sak: Long, jsonNode: JsonNode, jsonNode1: Long): UUID
     fun skaffSak(person:String, saktype:String): Long

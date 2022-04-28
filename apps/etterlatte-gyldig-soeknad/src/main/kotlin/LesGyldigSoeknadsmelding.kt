@@ -31,12 +31,8 @@ internal class LesGyldigSoeknadsmelding(
             validate { it.demandValue("@skjema_info.versjon", "2") }
             validate { it.requireKey("@lagret_soeknad_id") }
             validate { it.requireKey("@fnr_soeker") } //TODO sjekk at dette er riktig verdi
-
         }.register(this)
     }
-
-
-    //TODO hvordan håndtere overskriving av gyldig soeknad
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {

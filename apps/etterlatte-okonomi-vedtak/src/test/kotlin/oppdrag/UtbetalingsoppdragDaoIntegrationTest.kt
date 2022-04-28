@@ -8,6 +8,7 @@ import no.nav.etterlatte.vedtak
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -70,37 +71,42 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
         utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag, opprettet_tidspunkt)
         val utbetalingsoppdrag = utbetalingsoppdragDao.hentUtbetalingsoppdrag(vedtak.vedtakId)
 
-        assertNotNull(utbetalingsoppdrag?.id)
-        assertEquals(vedtak.vedtakId, utbetalingsoppdrag?.vedtakId)
-        assertEquals(vedtak.behandlingsId, utbetalingsoppdrag?.behandlingId)
-        assertEquals(vedtak.sakId, utbetalingsoppdrag?.sakId)
-        assertEquals(UtbetalingsoppdragStatus.SENDT, utbetalingsoppdrag?.status)
-        assertEquals(vedtak.vedtakId, utbetalingsoppdrag?.vedtakId)
-        assertTrue(
-            utbetalingsoppdrag?.opprettetTidspunkt!!.isAfter(
-                LocalDateTime.now().minusSeconds(10)
-            ) and utbetalingsoppdrag.opprettetTidspunkt.isBefore(LocalDateTime.now())
+        assertAll(
+            "Skal sjekke at utbetalingsoppdrag er korrekt opprettet",
+            { assertNotNull(utbetalingsoppdrag?.id) },
+            { assertEquals(vedtak.vedtakId, utbetalingsoppdrag?.vedtakId) },
+            { assertEquals(vedtak.behandlingsId, utbetalingsoppdrag?.behandlingId) },
+            { assertEquals(vedtak.sakId, utbetalingsoppdrag?.sakId) },
+            { assertEquals(UtbetalingsoppdragStatus.SENDT, utbetalingsoppdrag?.status) },
+            { assertEquals(vedtak.vedtakId, utbetalingsoppdrag?.vedtakId) },
+            {
+                assertTrue(
+                    utbetalingsoppdrag?.opprettetTidspunkt!!.isAfter(
+                        LocalDateTime.now().minusSeconds(10)
+                    ) and utbetalingsoppdrag.opprettetTidspunkt.isBefore(LocalDateTime.now())
+                )
+            },
+            {
+                assertTrue(
+                    utbetalingsoppdrag!!.endret.isAfter(
+                        LocalDateTime.now().minusSeconds(10)
+                    ) and utbetalingsoppdrag.endret.isBefore(LocalDateTime.now())
+                )
+            },
+            {
+                assertTrue(
+                    utbetalingsoppdrag!!.avstemmingsnoekkel.isAfter(
+                        LocalDateTime.now().minusSeconds(10)
+                    ) and utbetalingsoppdrag.avstemmingsnoekkel.isBefore(LocalDateTime.now())
+                )
+            },
+            { assertEquals(vedtak.sakIdGjelderFnr, utbetalingsoppdrag?.foedselsnummer) },
+            { assertNotNull(utbetalingsoppdrag?.utgaaendeOppdrag) },
+            { assertNull(utbetalingsoppdrag?.oppdragKvittering) },
+            { assertNull(utbetalingsoppdrag?.beskrivelseOppdrag) },
+            { assertNull(utbetalingsoppdrag?.feilkodeOppdrag) },
+            { assertNull(utbetalingsoppdrag?.meldingKodeOppdrag) }
         )
-        assertTrue(
-            utbetalingsoppdrag.endret.isAfter(
-                LocalDateTime.now().minusSeconds(10)
-            ) and utbetalingsoppdrag.endret.isBefore(LocalDateTime.now())
-        )
-        assertTrue(
-            utbetalingsoppdrag.avstemmingsnoekkel.isAfter(
-                LocalDateTime.now().minusSeconds(10)
-            ) and utbetalingsoppdrag.avstemmingsnoekkel.isBefore(LocalDateTime.now())
-        )
-        assertEquals(vedtak.sakIdGjelderFnr, utbetalingsoppdrag.foedselsnummer)
-        assertNotNull(utbetalingsoppdrag.utgaaendeOppdrag)
-        listOf(
-            utbetalingsoppdrag.oppdragKvittering,
-            utbetalingsoppdrag.beskrivelseOppdrag,
-            utbetalingsoppdrag.feilkodeOppdrag,
-            utbetalingsoppdrag.meldingKodeOppdrag
-        ).forEach {
-            assertNull(it)
-        }
     }
 
     @Test

@@ -22,7 +22,7 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
     fun hentUtbetalingsoppdrag(vedtakId: String): Utbetalingsoppdrag? =
         dataSource.connection.use { connection ->
             val stmt = connection.prepareStatement(
-                "SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet_tidspunkt, endret, fodselsnummer, utgaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, melding_kode_oppdrag " +
+                "SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, foedselsnummer, utgaaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, meldingkode_oppdrag " +
                         "FROM utbetalingsoppdrag " +
                         "WHERE vedtak_id = ?"
             )
@@ -38,14 +38,15 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
                         sakId = getString("sak_id"),
                         status = getString("status").let(UtbetalingsoppdragStatus::valueOf),
                         vedtak = getString("vedtak").let { vedtak -> objectMapper.readValue(vedtak) },
-                        opprettetTidspunkt = getTimestamp("opprettet_tidspunkt").toLocalDateTime(),
+                        opprettetTidspunkt = getTimestamp("opprettet").toLocalDateTime(),
+                        avstemmingsnoekkel = getTimestamp("avstemmingsnoekkel").toLocalDateTime(),
                         endret = getTimestamp("endret").toLocalDateTime(),
-                        fodselsnummer = getString("fodselsnummer"),
-                        utgaendeOppdrag = getString("utgaende_oppdrag").let(Jaxb::toOppdrag),
+                        foedselsnummer = getString("foedselsnummer"),
+                        utgaaendeOppdrag = getString("utgaaende_oppdrag").let(Jaxb::toOppdrag),
                         oppdragKvittering = getString("oppdrag_kvittering")?.let(Jaxb::toOppdrag),
                         beskrivelseOppdrag = getString("beskrivelse_oppdrag"),
                         feilkodeOppdrag = getString("feilkode_oppdrag"),
-                        meldingKodeOppdrag = getString("melding_kode_oppdrag")
+                        meldingKodeOppdrag = getString("meldingkode_oppdrag")
                     )
                 }
             }
@@ -60,8 +61,8 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
             logger.info("Oppretter utbetalingsoppdrag for vedtakId=${vedtak.vedtakId}")
 
             val stmt = connection.prepareStatement(
-                "INSERT INTO utbetalingsoppdrag(vedtak_id, behandling_id, sak_id, utgaende_oppdrag, status, vedtak, opprettet_tidspunkt, endret, fodselsnummer) " +
-                        "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                "INSERT INTO utbetalingsoppdrag(vedtak_id, behandling_id, sak_id, utgaaende_oppdrag, status, vedtak, opprettet, avstemmingsnoekkel, endret, foedselsnummer) " +
+                        "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             )
 
             stmt.use {
@@ -73,7 +74,8 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
                 it.setString(6, vedtak.toJson())
                 it.setTimestamp(7, Timestamp.valueOf(opprettetTidspunkt))
                 it.setTimestamp(8, Timestamp.valueOf(opprettetTidspunkt))
-                it.setString(9, vedtak.sakIdGjelderFnr)
+                it.setTimestamp(9, Timestamp.valueOf(opprettetTidspunkt))
+                it.setString(10, vedtak.sakIdGjelderFnr)
 
 
 
@@ -104,7 +106,7 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
             logger.info("Oppdaterer kvittering i utbetalingsoppdrag for vedtakId=${oppdragMedKvittering.vedtakId()}")
 
             val stmt = connection.prepareStatement(
-                "UPDATE utbetalingsoppdrag SET oppdrag_kvittering = ?, beskrivelse_oppdrag = ?, feilkode_oppdrag = ?, melding_kode_oppdrag = ? WHERE vedtak_id = ?"
+                "UPDATE utbetalingsoppdrag SET oppdrag_kvittering = ?, beskrivelse_oppdrag = ?, feilkode_oppdrag = ?, meldingkode_oppdrag = ? WHERE vedtak_id = ?"
             )
 
             stmt.use {

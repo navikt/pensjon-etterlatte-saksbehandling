@@ -15,7 +15,7 @@ internal class VedtakMottakerTest {
     private val oppdragService = mockk<OppdragService>(relaxed = true) {
         every { opprettOgSendOppdrag(any(), any()) } returns mockk {
             every { status } returns UtbetalingsoppdragStatus.SENDT
-            every { utgaendeOppdrag } returns oppdrag("3")
+            every { utgaaendeOppdrag } returns oppdrag("3")
         }
     }
 

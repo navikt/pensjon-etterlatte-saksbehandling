@@ -13,12 +13,12 @@ class AvstemmingDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    INSERT INTO avstemming (opprettet, avstemmingsnokkel_tom, antall_avstemte_oppdrag)
-                    VALUES (:opprettet, :avstemmingsnokkel_tom, :antall_avstemte_oppdrag)
+                    INSERT INTO avstemming (opprettet, avstemmingsnoekkel_tom, antall_avstemte_oppdrag)
+                    VALUES (:opprettet, :avstemmingsnoekkel_tom, :antall_avstemte_oppdrag)
                     """,
                 paramMap = mapOf(
                     "opprettet" to Timestamp.valueOf(avstemming.opprettet),
-                    "avstemmingsnokkel_tom" to Timestamp.valueOf(avstemming.avstemmingsnokkelTilOgMed),
+                    "avstemmingsnoekkel_tom" to Timestamp.valueOf(avstemming.avstemmingsnokkelTilOgMed),
                     "antall_avstemte_oppdrag" to avstemming.antallAvstemteOppdrag
                 )
             )
@@ -30,9 +30,9 @@ class AvstemmingDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    SELECT id, opprettet, avstemmingsnokkel_tom, antall_avstemte_oppdrag 
+                    SELECT id, opprettet, avstemmingsnoekkel_tom, antall_avstemte_oppdrag 
                     FROM avstemming 
-                    ORDER BY avstemmingsnokkel_tom DESC
+                    ORDER BY avstemmingsnoekkel_tom DESC
                     LIMIT 1
                     """
             )
@@ -43,7 +43,7 @@ class AvstemmingDao(private val dataSource: DataSource) {
         FullfortAvstemming(
             id = row.long("id"),
             opprettet = row.localDateTime("opprettet"),
-            avstemmingsnokkelTilOgMed = row.localDateTime("avstemmingsnokkel_tom"),
+            avstemmingsnokkelTilOgMed = row.localDateTime("avstemmingsnoekkel_tom"),
             antallAvstemteOppdrag = row.int("antall_avstemte_oppdrag")
         )
 }

@@ -86,12 +86,21 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
                 LocalDateTime.now().minusSeconds(10)
             ) and utbetalingsoppdrag.endret.isBefore(LocalDateTime.now())
         )
+        assertTrue(
+            utbetalingsoppdrag.avstemmingsnoekkel.isAfter(
+                LocalDateTime.now().minusSeconds(10)
+            ) and utbetalingsoppdrag.avstemmingsnoekkel.isBefore(LocalDateTime.now())
+        )
         assertEquals(vedtak.sakIdGjelderFnr, utbetalingsoppdrag.foedselsnummer)
         assertNotNull(utbetalingsoppdrag.utgaaendeOppdrag)
-        assertNull(utbetalingsoppdrag.oppdragKvittering)
-        assertNull(utbetalingsoppdrag.beskrivelseOppdrag)
-        assertNull(utbetalingsoppdrag.feilkodeOppdrag)
-        assertNull(utbetalingsoppdrag.meldingKodeOppdrag)
+        listOf(
+            utbetalingsoppdrag.oppdragKvittering,
+            utbetalingsoppdrag.beskrivelseOppdrag,
+            utbetalingsoppdrag.feilkodeOppdrag,
+            utbetalingsoppdrag.meldingKodeOppdrag
+        ).forEach {
+            assertNull(it)
+        }
     }
 
     @Test

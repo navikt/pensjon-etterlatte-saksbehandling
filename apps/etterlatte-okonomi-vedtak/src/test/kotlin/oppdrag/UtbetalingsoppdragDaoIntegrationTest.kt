@@ -125,16 +125,21 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
         utbetalingsoppdragDao.oppdaterKvittering(oppdragMedKvittering)
         val utbetalingsoppdragOppdatert = utbetalingsoppdragDao.hentUtbetalingsoppdrag(oppdrag.vedtakId())
 
-        assertNotNull(utbetalingsoppdragOppdatert?.oppdragKvittering)
-        assertNotNull(utbetalingsoppdragOppdatert?.oppdragKvittering?.mmel)
-        assertEquals(
-            oppdragMedKvittering.mmel?.alvorlighetsgrad,
-            utbetalingsoppdragOppdatert?.oppdragKvittering?.mmel?.alvorlighetsgrad
-        )
-        assertEquals(
-            oppdragMedKvittering.oppdrag110.oppdragsId,
-            utbetalingsoppdragOppdatert?.oppdragKvittering?.oppdrag110?.oppdragsId
-        )
+        assertAll("skal sjekke at kvittering er opprettet korrekt på utbetalingsoppdrag",
+            { assertNotNull(utbetalingsoppdragOppdatert?.oppdragKvittering) },
+            { assertNotNull(utbetalingsoppdragOppdatert?.oppdragKvittering?.mmel) },
+            {
+                assertEquals(
+                    oppdragMedKvittering.mmel?.alvorlighetsgrad,
+                    utbetalingsoppdragOppdatert?.oppdragKvittering?.mmel?.alvorlighetsgrad
+                )
+            },
+            {
+                assertEquals(
+                    oppdragMedKvittering.oppdrag110.oppdragsId,
+                    utbetalingsoppdragOppdatert?.oppdragKvittering?.oppdrag110?.oppdragsId
+                )
+            })
     }
 
     @Test

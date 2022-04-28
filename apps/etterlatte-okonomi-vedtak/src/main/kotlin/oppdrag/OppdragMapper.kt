@@ -24,7 +24,7 @@ object OppdragMapper {
 
     private val tidspunktFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
 
-    fun oppdragFraVedtak(vedtak: Vedtak, attestasjon: Attestasjon, nokkelAvstemming: LocalDateTime): Oppdrag {
+    fun oppdragFraVedtak(vedtak: Vedtak, attestasjon: Attestasjon, avstemmingNokkel: LocalDateTime): Oppdrag {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = "1"
             kodeEndring = "NY"
@@ -36,8 +36,8 @@ object OppdragMapper {
             saksbehId = vedtak.saksbehandlerId
 
             avstemming115 = Avstemming115().apply {
-                nokkelAvstemming = tidspunktFormatter.format(nokkelAvstemming)
-                tidspktMelding = tidspunktFormatter.format(nokkelAvstemming)
+                nokkelAvstemming = tidspunktFormatter.format(avstemmingNokkel)
+                tidspktMelding = tidspunktFormatter.format(avstemmingNokkel)
                 kodeKomponent = "BARNEPE"
             }
 

@@ -23,6 +23,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core:6.5.0")
     implementation("org.postgresql:postgresql:42.3.3")
     implementation("org.messaginghub:pooled-jms:2.0.5")
+    implementation("com.github.seratch:kotliquery:1.7.0")
 
     testImplementation(Ktor.ClientMock)
     testImplementation(MockK.MockK)

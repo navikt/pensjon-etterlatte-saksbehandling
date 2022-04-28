@@ -18,7 +18,7 @@ class OppdragService(
 ) {
     fun opprettOgSendOppdrag(vedtak: Vedtak, attestasjon: Attestasjon): Utbetalingsoppdrag {
         val opprettetTidspunkt = LocalDateTime.now()
-        val oppdrag = oppdragMapper.oppdragFraVedtak(vedtak, attestasjon, nokkelAvstemming = opprettetTidspunkt)
+        val oppdrag = oppdragMapper.oppdragFraVedtak(vedtak, attestasjon, avstemmingNokkel = opprettetTidspunkt)
 
         logger.info("Sender oppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId} til oppdrag")
         oppdragSender.sendOppdrag(oppdrag)

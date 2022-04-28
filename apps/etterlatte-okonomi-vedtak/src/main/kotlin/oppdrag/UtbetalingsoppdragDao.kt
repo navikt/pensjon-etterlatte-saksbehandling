@@ -52,6 +52,41 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
             }
         }
 
+    fun hentAlleUtbetalingsoppdragMellom(fraOgMed: LocalDateTime, tilOgMed: LocalDateTime): List<Utbetalingsoppdrag> =
+        dataSource.connection.use { connection ->
+            val stmt = connection.prepareStatement(
+                "SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, foedselsnummer, utgaaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, meldingkode_oppdrag " +
+                        "FROM utbetalingsoppdrag " +
+                        "WHERE avstemmingsnoekkel BETWEEN ? AND ?"
+            )
+
+            stmt.use {
+                it.setTimestamp(1, Timestamp.valueOf(fraOgMed))
+                it.setTimestamp(2, Timestamp.valueOf(tilOgMed))
+
+                it.executeQuery().toList {
+                    Utbetalingsoppdrag(
+                        id = getInt("id"),
+                        vedtakId = getString("vedtak_id"),
+                        behandlingId = getString("behandling_id"),
+                        sakId = getString("sak_id"),
+                        status = getString("status").let(UtbetalingsoppdragStatus::valueOf),
+                        vedtak = getString("vedtak").let { vedtak -> objectMapper.readValue(vedtak) },
+                        opprettetTidspunkt = getTimestamp("opprettet").toLocalDateTime(),
+                        avstemmingsnoekkel = getTimestamp("avstemmingsnoekkel").toLocalDateTime(),
+                        endret = getTimestamp("endret").toLocalDateTime(),
+                        foedselsnummer = getString("foedselsnummer"),
+                        utgaaendeOppdrag = getString("utgaaende_oppdrag").let(Jaxb::toOppdrag),
+                        oppdragKvittering = getString("oppdrag_kvittering")?.let(Jaxb::toOppdrag),
+                        beskrivelseOppdrag = getString("beskrivelse_oppdrag"),
+                        feilkodeOppdrag = getString("feilkode_oppdrag"),
+                        meldingKodeOppdrag = getString("meldingkode_oppdrag")
+                    )
+                }
+            }
+        }
+
+
     private fun hentUtbetalingsoppdragNonNull(vedtakId: String): Utbetalingsoppdrag =
         hentUtbetalingsoppdrag(vedtakId)
             ?: throw UtbetalingsoppdragNotFoundException("Oppdrag for vedtak med vedtakId=$vedtakId finnes ikke")
@@ -128,6 +163,13 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
         } else {
             null
         }
+    }
+
+    fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
+        return generateSequence {
+            if (next()) block()
+            else null
+        }.toList()
     }
 
     companion object {

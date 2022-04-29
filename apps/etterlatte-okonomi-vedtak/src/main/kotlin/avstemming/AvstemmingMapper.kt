@@ -20,8 +20,6 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
 
     private val avleverendeAvstemmingsId = encodeUUIDBase64(id)
     private val antOverforteMeldinger = utbetalingsoppdrag.size
-    private val avstemmingPeriode = periode(utbetalingsoppdrag)
-    // TODO: // trans-nokkel-avlev, skal dette være vedtak.sakId ?
 
     fun avstemmingsmelding(): List<Avstemmingsdata> =
         if (utbetalingsoppdrag.isEmpty()) emptyList()
@@ -33,9 +31,11 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
         avstemmingsdataLister().ifEmpty { listOf(avstemmingsdata(AksjonType.DATA)) }.let {
             it.first().apply {
                 this.total = totaldata()
-                this.periode = Periodedata().apply {
-                    datoAvstemtFom = avstemmingPeriode.start
-                    datoAvstemtTom = avstemmingPeriode.endInclusive
+                this.periode = periode(utbetalingsoppdrag).let { periode ->
+                    Periodedata().apply {
+                        datoAvstemtFom = periode.start
+                        datoAvstemtTom = periode.endInclusive
+                    }
                 }
                 this.grunnlag = grunnlagsdata(utbetalingsoppdrag)
             }

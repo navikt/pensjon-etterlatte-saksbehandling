@@ -52,21 +52,14 @@ internal class AvstemmingMapperTest {
     }
 
     @Test
-    fun `antall i grunnlagsdata skal vaere 0 for alle statuser unntatt godkjent`() {
-        val utbetalingsoppdragsliste = listOf(
-            mockk<Utbetalingsoppdrag>(relaxed = true) {
-                every { status } returns UtbetalingsoppdragStatus.GODKJENT
-            },
-            mockk(relaxed = true) {
-                every { status } returns UtbetalingsoppdragStatus.GODKJENT
-            }
-        )
+    fun `antall i grunnlagsdata skal vaere 0 for alle statuser`() {
+        val utbetalingsoppdragsliste = emptyList<Utbetalingsoppdrag>()
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdragsliste, UUID.randomUUID())
         val grunnlagsdata = avstemmingsdataMapper.grunnlagsdata(utbetalingsoppdragsliste)
 
         assertAll("Skal telle opp rett antall godkjent, varsel, avvist og mangler",
-            { assertEquals(grunnlagsdata.godkjentAntall, 2) },
+            { assertEquals(grunnlagsdata.godkjentAntall, 0) },
             { assertEquals(grunnlagsdata.varselAntall, 0) },
             { assertEquals(grunnlagsdata.avvistAntall, 0) },
             { assertEquals(grunnlagsdata.manglerAntall, 0) })
@@ -78,16 +71,16 @@ internal class AvstemmingMapperTest {
             mockk<Utbetalingsoppdrag>(relaxed = true) {
                 every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0) // foerste
             },
-            mockk<Utbetalingsoppdrag>(relaxed = true) {
+            mockk(relaxed = true) {
                 every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusDays(1)
             },
-            mockk<Utbetalingsoppdrag>(relaxed = true) {
+            mockk(relaxed = true) {
                 every { avstemmingsnoekkel } returns LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0) // siste
             },
-            mockk<Utbetalingsoppdrag>(relaxed = true) {
+            mockk(relaxed = true) {
                 every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusHours(1)
             },
-            mockk<Utbetalingsoppdrag>(relaxed = true) {
+            mockk(relaxed = true) {
                 every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusMinutes(2)
             },
         )

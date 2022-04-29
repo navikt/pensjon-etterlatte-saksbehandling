@@ -30,7 +30,7 @@ internal class LesGyldigSoeknadsmelding(
             validate { it.demandValue("@skjema_info.type", "BARNEPENSJON") }
             validate { it.demandValue("@skjema_info.versjon", "2") }
             validate { it.requireKey("@lagret_soeknad_id") }
-            validate { it.requireKey("@fnr_soeker") } //TODO sjekk at dette er riktig verdi
+            validate { it.requireKey("@fnr_soeker") } //TODO: sjekk at dette er riktig verdi
         }.register(this)
     }
 

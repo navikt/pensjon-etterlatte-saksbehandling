@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandlingfrasoknad
+package no.nav.etterlatte.opplysningerfrasoknad
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.treeToValue

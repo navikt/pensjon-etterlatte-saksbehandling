@@ -17,7 +17,7 @@ RENAME COLUMN kvittering TO oppdrag_kvittering;
 
 
 CREATE TABLE avstemming (
-    id                      BIGSERIAL                PRIMARY KEY,
+    id                      UUID                PRIMARY KEY,
     opprettet               TIMESTAMP WITH TIME ZONE NOT NULL,
     avstemmingsnoekkel_tom  TIMESTAMP WITH TIME ZONE NOT NULL,
     antall_avstemte_oppdrag INT                      NOT NULL

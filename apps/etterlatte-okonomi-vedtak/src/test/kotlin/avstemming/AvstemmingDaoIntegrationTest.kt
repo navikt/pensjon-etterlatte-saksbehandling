@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
+import java.time.Instant
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
@@ -39,7 +40,7 @@ internal class AvstemmingDaoIntegrationTest {
 
     @Test
     fun `skal opprette avstemming`() {
-        val avstemming = NyAvstemming(
+        val avstemming = Avstemming(
             avstemmingsnokkelTilOgMed = LocalDateTime.now(),
             antallAvstemteOppdrag = 1
         )
@@ -53,19 +54,19 @@ internal class AvstemmingDaoIntegrationTest {
     fun `skal hente nyeste avstemming`() {
         val now = LocalDateTime.now()
 
-        val avstemming1 = NyAvstemming(
+        val avstemming1 = Avstemming(
             opprettet = now,
             avstemmingsnokkelTilOgMed = now,
             antallAvstemteOppdrag = 1
         )
 
-        val avstemming2 = NyAvstemming(
+        val avstemming2 = Avstemming(
             opprettet = now.minusDays(1),
             avstemmingsnokkelTilOgMed = now.minusDays(1),
             antallAvstemteOppdrag = 2
         )
 
-        val avstemming3 = NyAvstemming(
+        val avstemming3 = Avstemming(
             opprettet = now.minusDays(2),
             avstemmingsnokkelTilOgMed = now.minusDays(2),
             antallAvstemteOppdrag = 3
@@ -79,6 +80,8 @@ internal class AvstemmingDaoIntegrationTest {
 
         assertEquals(now, nyesteAvstemming?.opprettet)
         assertEquals(1, nyesteAvstemming?.antallAvstemteOppdrag)
+
+        println(Instant.now())
     }
 
     @Test

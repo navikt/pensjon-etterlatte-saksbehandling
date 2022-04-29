@@ -1,5 +1,7 @@
 package no.nav.etterlatte.avstemming
 
+import no.nav.etterlatte.domain.Utbetalingsoppdrag
+import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Aksjonsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AvstemmingType
@@ -16,12 +18,13 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-class AvstemmingsdataMapper(id: UUID) {
+class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id: UUID) {
 
     private val avleverendeAvstemmingsId = encodeUUIDBase64(id)
     private val antOverforteMeldinger = 1000 // TODO: hente det totale antallet oppdrag som er hentet
     private val totaltOverfortBelop = 0 // TODO: denne er frivillig. Kan utvides med denne
-    private val grunnlagsdata: Grunnlagsdata = Grunnlagsdata() // TODO: metode for å hente grunnlagsdata
+    private val grunnlagsdata: Grunnlagsdata =
+        grunnlagsdata(utbetalingsoppdrag) // TODO: metode for å hente grunnlagsdata
     private val detaljdata: List<Detaljdata> = listOf(Detaljdata()) // TODO: metode for å hente ut detaljdata
     // TODO: // trans-nokkel-avlev, skal dette være vedtak.sakId ?
 
@@ -81,5 +84,15 @@ class AvstemmingsdataMapper(id: UUID) {
         return Base64.getUrlEncoder().encodeToString(bb.array()).substring(0, 22)
     }
 
+    fun grunnlagsdata(liste: List<Utbetalingsoppdrag>) = Grunnlagsdata().apply {
+        val oppdragEtterStatus = liste.groupBy { it.status }
+
+        godkjentAntall = oppdragEtterStatus[UtbetalingsoppdragStatus.GODKJENT]?.count() ?: 0
+        varselAntall = oppdragEtterStatus[UtbetalingsoppdragStatus.GODKJENT_MED_FEIL]?.count() ?: 0
+        avvistAntall = oppdragEtterStatus[UtbetalingsoppdragStatus.AVVIST]?.count() ?: 0
+        val antFeilet = oppdragEtterStatus[UtbetalingsoppdragStatus.FEILET]?.count() ?: 0
+        val antSendtUtenKvittering = oppdragEtterStatus[UtbetalingsoppdragStatus.SENDT]?.count() ?: 0
+        manglerAntall = antFeilet + antSendtUtenKvittering
+    }
 
 }

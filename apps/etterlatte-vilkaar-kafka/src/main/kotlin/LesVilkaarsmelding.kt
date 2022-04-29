@@ -35,14 +35,11 @@ internal class LesVilkaarsmelding(
                 val vilkaarsVurdering = vilkaar.mapVilkaar(grunnlagForVilkaar)
                 packet["@vilkaarsvurdering"] = vilkaarsVurdering
                 context.publish(packet.toJson())
-                //TODO
+
                 logger.info("Vurdert Vilkår")
             } catch (e: Exception){
-                //TODO endre denne
-                println("spiser en melding fordi: " +e)
+                println("Vilkår kunne ikke vurderes: " + e)
             }
-
-
         }
 }
 

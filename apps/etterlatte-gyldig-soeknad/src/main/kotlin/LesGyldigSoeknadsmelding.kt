@@ -50,7 +50,6 @@ internal class LesGyldigSoeknadsmelding(
 
                 packet["@sak_id"] = sak
                 packet["@behandling_id"] = behandlingsid
-                // Mulig denne ikke er nødvendig, men kan være greit å ha et skille på den
                 packet["@gyldig_innsender"] = erGyldigFramsatt
 
                 context.publish(packet.toJson())

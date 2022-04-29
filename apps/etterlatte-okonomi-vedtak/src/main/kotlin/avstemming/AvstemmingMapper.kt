@@ -8,22 +8,19 @@ import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AvstemmingType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Avstemmingsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.DetaljType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Detaljdata
-import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Fortegn
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Grunnlagsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.KildeType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Periodedata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Totaldata
-import java.math.BigDecimal
 import java.nio.ByteBuffer
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id: UUID) {
 
     private val avleverendeAvstemmingsId = encodeUUIDBase64(id)
-    private val antOverforteMeldinger = 1000 // TODO: hente det totale antallet oppdrag som er hentet
-    private val totaltOverfortBelop = 0 // TODO: denne er frivillig. Kan utvides med denne
+    private val antOverforteMeldinger = utbetalingsoppdrag.size
+    private val avstemmingPeriode = periode(utbetalingsoppdrag)
     // TODO: // trans-nokkel-avlev, skal dette være vedtak.sakId ?
 
     fun avstemmingsmelding(): List<Avstemmingsdata> =
@@ -36,7 +33,10 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
         avstemmingsdataLister().ifEmpty { listOf(avstemmingsdata(AksjonType.DATA)) }.let {
             it.first().apply {
                 this.total = totaldata()
-                this.periode = periodedata()
+                this.periode = Periodedata().apply {
+                    datoAvstemtFom = avstemmingPeriode.start
+                    datoAvstemtTom = avstemmingPeriode.endInclusive
+                }
                 this.grunnlag = grunnlagsdata(utbetalingsoppdrag)
             }
             it
@@ -61,7 +61,7 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
             }
         }
 
-    private fun avstemmingsdataLister() : List<Avstemmingsdata> {
+    private fun avstemmingsdataLister(): List<Avstemmingsdata> {
         return detaljdata(utbetalingsoppdrag).chunked(ANTALL_DETALJER_PER_AVSTEMMINGMELDING).map {
             avstemmingsdata(AksjonType.DATA).apply {
                 this.detalj.addAll(it)
@@ -89,7 +89,7 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
             }
         }
 
-    private fun toDetaljType(utbetalingsoppdragStatus : UtbetalingsoppdragStatus) : DetaljType? =
+    private fun toDetaljType(utbetalingsoppdragStatus: UtbetalingsoppdragStatus): DetaljType? =
         when (utbetalingsoppdragStatus) {
             UtbetalingsoppdragStatus.SENDT -> DetaljType.MANG
             UtbetalingsoppdragStatus.GODKJENT_MED_FEIL -> DetaljType.VARS
@@ -113,14 +113,6 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
     private fun totaldata() =
         Totaldata().apply {
             totalAntall = antOverforteMeldinger
-            totalBelop = BigDecimal(totaltOverfortBelop)
-            fortegn = Fortegn.T
-        }
-
-    private fun periodedata() =
-        Periodedata().apply {
-            datoAvstemtFom = LocalDateTime.MIN.format(tidsstempel) // TODO: finne timestamp for første record
-            datoAvstemtTom = LocalDateTime.now().format(tidsstempel) // TODO: finne timestamp for siste record
         }
 
     private fun encodeUUIDBase64(uuid: UUID): String {
@@ -134,4 +126,13 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
         private const val ANTALL_DETALJER_PER_AVSTEMMINGMELDING = 70
         private val tidsstempel = DateTimeFormatter.ofPattern("yyyyMMddHH")
     }
+
+    fun periode(liste: List<Utbetalingsoppdrag>): ClosedRange<String> {
+        check(liste.isNotEmpty())
+        return object : ClosedRange<String> {
+            override val start = liste.minOf { it.avstemmingsnoekkel }.format(tidsstempel)
+            override val endInclusive = liste.maxOf { it.avstemmingsnoekkel }.format(tidsstempel)
+        }
+    }
+
 }

@@ -82,7 +82,7 @@ fun utbetalingsoppdrag(
         sakId = "1",
         status = status,
         vedtak = vedtak(vedtakId),
-        opprettetTidspunkt = LocalDateTime.now(),
+        opprettet = LocalDateTime.now(),
         endret = LocalDateTime.now(),
         avstemmingsnoekkel = LocalDateTime.now(),
         foedselsnummer = "12345678903",

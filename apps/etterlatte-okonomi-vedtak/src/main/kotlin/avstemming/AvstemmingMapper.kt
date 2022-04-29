@@ -8,20 +8,18 @@ import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AvstemmingType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Avstemmingsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.DetaljType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Detaljdata
-import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Fortegn
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Grunnlagsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.KildeType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Periodedata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Totaldata
 import java.nio.ByteBuffer
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 class AvstemmingsdataMapper(
     private val utbetalingsoppdrag: List<Utbetalingsoppdrag>,
     private val id: UUID,
-    private val detaljerPrMelding: Int = DETALJER_PER_AVSTEMMINGMELDING
+    private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING
 ) {
     private val avleverendeAvstemmingsId = encodeUUIDBase64(id)
 
@@ -34,9 +32,9 @@ class AvstemmingsdataMapper(
     private fun datameldinger(): List<Avstemmingsdata> =
         avstemmingsdataLister().ifEmpty { listOf(avstemmingsdata(AksjonType.DATA)) }.let {
             it.first().apply {
-                this.total = totaldata()
-                this.periode = periodedata()
-                this.grunnlag = grunnlagsdata(utbetalingsoppdrag)
+                total = totaldata()
+                periode = periodedata()
+                grunnlag = grunnlagsdata()
             }
             it
         }
@@ -88,7 +86,7 @@ class AvstemmingsdataMapper(
             }
         }
 
-    private fun toDetaljType(utbetalingsoppdragStatus : UtbetalingsoppdragStatus) : DetaljType? =
+    private fun toDetaljType(utbetalingsoppdragStatus: UtbetalingsoppdragStatus): DetaljType? =
         when (utbetalingsoppdragStatus) {
             UtbetalingsoppdragStatus.SENDT -> DetaljType.MANG
             UtbetalingsoppdragStatus.GODKJENT_MED_FEIL -> DetaljType.VARS
@@ -98,8 +96,8 @@ class AvstemmingsdataMapper(
         }
 
     // TODO denne bør egentlig ikke være public
-    fun grunnlagsdata(liste: List<Utbetalingsoppdrag>) = Grunnlagsdata().apply {
-        val oppdragEtterStatus = liste.groupBy { it.status }
+    fun grunnlagsdata() = Grunnlagsdata().apply {
+        val oppdragEtterStatus = utbetalingsoppdrag.groupBy { it.status }
 
         godkjentAntall = oppdragEtterStatus[UtbetalingsoppdragStatus.GODKJENT]?.count() ?: 0
         varselAntall = oppdragEtterStatus[UtbetalingsoppdragStatus.GODKJENT_MED_FEIL]?.count() ?: 0
@@ -112,14 +110,23 @@ class AvstemmingsdataMapper(
     private fun totaldata() =
         Totaldata().apply {
             totalAntall = utbetalingsoppdrag.size
-            fortegn = Fortegn.T
         }
 
     private fun periodedata() =
         Periodedata().apply {
-            datoAvstemtFom = LocalDateTime.MIN.format(tidsstempel) // TODO: finne timestamp for første record
-            datoAvstemtTom = LocalDateTime.now().format(tidsstempel) // TODO: finne timestamp for siste record
+            val periode = periode(utbetalingsoppdrag)
+            datoAvstemtFom = periode.start
+            datoAvstemtTom = periode.endInclusive
         }
+
+    // TODO denne bør egentlig ikke være public
+    fun periode(liste: List<Utbetalingsoppdrag>): ClosedRange<String> {
+        check(liste.isNotEmpty())
+        return object : ClosedRange<String> {
+            override val start = liste.minOf { it.avstemmingsnoekkel }.format(tidsstempel)
+            override val endInclusive = liste.maxOf { it.avstemmingsnoekkel }.format(tidsstempel)
+        }
+    }
 
     private fun encodeUUIDBase64(uuid: UUID): String {
         val bb = ByteBuffer.wrap(ByteArray(16))
@@ -129,7 +136,7 @@ class AvstemmingsdataMapper(
     }
 
     companion object {
-        private const val DETALJER_PER_AVSTEMMINGMELDING = 70
+        private const val ANTALL_DETALJER_PER_AVSTEMMINGMELDING = 70
         private val tidsstempel = DateTimeFormatter.ofPattern("yyyyMMddHH")
     }
 }

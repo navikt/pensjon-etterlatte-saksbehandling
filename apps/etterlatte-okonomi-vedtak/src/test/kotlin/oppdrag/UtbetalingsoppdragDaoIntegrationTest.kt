@@ -81,9 +81,9 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
             { assertEquals(vedtak.vedtakId, utbetalingsoppdrag?.vedtakId) },
             {
                 assertTrue(
-                    utbetalingsoppdrag?.opprettetTidspunkt!!.isAfter(
+                    utbetalingsoppdrag?.opprettet!!.isAfter(
                         LocalDateTime.now().minusSeconds(10)
-                    ) and utbetalingsoppdrag.opprettetTidspunkt.isBefore(LocalDateTime.now())
+                    ) and utbetalingsoppdrag.opprettet.isBefore(LocalDateTime.now())
                 )
             },
             {

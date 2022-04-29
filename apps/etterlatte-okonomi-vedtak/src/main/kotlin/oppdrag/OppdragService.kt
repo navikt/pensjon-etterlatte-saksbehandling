@@ -25,6 +25,10 @@ class OppdragService(
         return utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag, opprettetTidspunkt)
     }
 
+    fun hentAlleUtbetalingsoppdragMellom(fraOgMed: LocalDateTime, tilOgMed: LocalDateTime) =
+        utbetalingsoppdragDao.hentAlleUtbetalingsoppdragMellom(fraOgMed, tilOgMed)
+
+
     fun oppdragEksistererFraFor(vedtak: Vedtak) =
         utbetalingsoppdragDao.hentUtbetalingsoppdrag(vedtak.vedtakId) != null
 

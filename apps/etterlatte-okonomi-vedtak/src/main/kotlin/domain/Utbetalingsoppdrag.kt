@@ -19,7 +19,7 @@ data class Utbetalingsoppdrag(
     val sakId: String,
     val status: UtbetalingsoppdragStatus,
     val vedtak: Vedtak,
-    val opprettetTidspunkt: LocalDateTime,
+    val opprettet: LocalDateTime,
     val endret: LocalDateTime,
     val avstemmingsnoekkel: LocalDateTime,
     val foedselsnummer: String,

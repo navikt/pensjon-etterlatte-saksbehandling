@@ -13,24 +13,23 @@ import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Grunnlagsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.KildeType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Periodedata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Totaldata
-import java.math.BigDecimal
 import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id: UUID) {
-
+class AvstemmingsdataMapper(
+    private val utbetalingsoppdrag: List<Utbetalingsoppdrag>,
+    private val id: UUID,
+    private val detaljerPrMelding: Int = DETALJER_PER_AVSTEMMINGMELDING
+) {
     private val avleverendeAvstemmingsId = encodeUUIDBase64(id)
-    private val antOverforteMeldinger = 1000 // TODO: hente det totale antallet oppdrag som er hentet
-    private val totaltOverfortBelop = 0 // TODO: denne er frivillig. Kan utvides med denne
-    // TODO: // trans-nokkel-avlev, skal dette være vedtak.sakId ?
 
-    fun avstemmingsmelding(): List<Avstemmingsdata> =
+    fun opprettAvstemmingsmelding(): List<Avstemmingsdata> =
         if (utbetalingsoppdrag.isEmpty()) emptyList()
-        else listOf(startmelding()) + datameldinger() + listOf(sluttmelding())
+        else startmelding() + datameldinger() + sluttmelding()
 
-    private fun startmelding() = avstemmingsdata(AksjonType.START)
+    private fun startmelding() = listOf(avstemmingsdata(AksjonType.START))
 
     private fun datameldinger(): List<Avstemmingsdata> =
         avstemmingsdataLister().ifEmpty { listOf(avstemmingsdata(AksjonType.DATA)) }.let {
@@ -42,11 +41,10 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
             it
         }
 
-    private fun sluttmelding() = avstemmingsdata(AksjonType.AVSL)
+    private fun sluttmelding() = listOf(avstemmingsdata(AksjonType.AVSL))
 
     private fun avstemmingsdata(aksjonstype: AksjonType) =
         Avstemmingsdata().apply {
-            // 110
             aksjon = Aksjonsdata().apply {
                 aksjonType = aksjonstype
                 kildeType = KildeType.AVLEV
@@ -62,7 +60,7 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
         }
 
     private fun avstemmingsdataLister() : List<Avstemmingsdata> {
-        return detaljdata(utbetalingsoppdrag).chunked(ANTALL_DETALJER_PER_AVSTEMMINGMELDING).map {
+        return detaljdata(utbetalingsoppdrag).chunked(detaljerPrMelding).map {
             avstemmingsdata(AksjonType.DATA).apply {
                 this.detalj.addAll(it)
             }
@@ -76,6 +74,7 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
                 Detaljdata().apply {
                     this.detaljType = detaljType
                     offnr = it.foedselsnummer
+                    // TODO: // trans-nokkel-avlev, skal dette være vedtak.sakId ?
                     avleverendeTransaksjonNokkel = it.avstemmingsnoekkel.format(tidsstempel)
                     tidspunkt = it.avstemmingsnoekkel.format(tidsstempel)
                     if (detaljType in listOf(DetaljType.AVVI, DetaljType.VARS) && it.oppdragKvittering != null) {
@@ -112,8 +111,7 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
 
     private fun totaldata() =
         Totaldata().apply {
-            totalAntall = antOverforteMeldinger
-            totalBelop = BigDecimal(totaltOverfortBelop)
+            totalAntall = utbetalingsoppdrag.size
             fortegn = Fortegn.T
         }
 
@@ -131,7 +129,7 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
     }
 
     companion object {
-        private const val ANTALL_DETALJER_PER_AVSTEMMINGMELDING = 70
+        private const val DETALJER_PER_AVSTEMMINGMELDING = 70
         private val tidsstempel = DateTimeFormatter.ofPattern("yyyyMMddHH")
     }
 }

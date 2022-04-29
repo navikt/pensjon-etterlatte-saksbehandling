@@ -28,7 +28,7 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
     private val detaljdata: List<Detaljdata> = listOf(Detaljdata()) // TODO: metode for å hente ut detaljdata
     // TODO: // trans-nokkel-avlev, skal dette være vedtak.sakId ?
 
-    private companion object {
+    companion object {
         private const val DETALJER_PER_AVSTEMMINGMELDING = 70
         private val tidsstempel = DateTimeFormatter.ofPattern("yyyyMMddHH")
     }

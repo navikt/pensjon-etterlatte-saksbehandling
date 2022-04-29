@@ -4,39 +4,49 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.domain.Utbetalingsoppdrag
 import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
-import no.nav.etterlatte.oppdrag.UtbetalingsoppdragDao
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
+import org.junit.jupiter.api.assertAll
+import java.util.*
 
 internal class AvstemmingMapperTest {
-
 
     @Test
     fun `grunnlagsdata opprettes korrekt`() {
 
-        val utbetalingsoppdragsDao = mockk<UtbetalingsoppdragDao>(relaxed = true) {
-            every { hentAlleUtbetalingsoppdragMellom(any(), any()) } returns mockk {
-                listOf(mockk<Utbetalingsoppdrag>(relaxed = true) {
-                    every { status } returnsMany listOf(
-                        UtbetalingsoppdragStatus.GODKJENT,
-                        UtbetalingsoppdragStatus.GODKJENT,
-                        UtbetalingsoppdragStatus.GODKJENT,
-                        UtbetalingsoppdragStatus.GODKJENT,
-                        UtbetalingsoppdragStatus.FEILET,
-                        UtbetalingsoppdragStatus.AVVIST,
-                        UtbetalingsoppdragStatus.AVVIST,
-                        UtbetalingsoppdragStatus.GODKJENT_MED_FEIL,
-                        UtbetalingsoppdragStatus.GODKJENT_MED_FEIL,
-                        UtbetalingsoppdragStatus.GODKJENT_MED_FEIL,
-                        UtbetalingsoppdragStatus.SENDT,
-                        UtbetalingsoppdragStatus.SENDT,
-                        UtbetalingsoppdragStatus.SENDT
-                    )
-                })
-            }
-        }
+        val utbetalingsoppdragsliste = listOf(
+            mockk<Utbetalingsoppdrag>(relaxed = true) {
+                every { status } returns UtbetalingsoppdragStatus.GODKJENT
+            },
+            mockk(relaxed = true) {
+                every { status } returns UtbetalingsoppdragStatus.GODKJENT
+            },
+            mockk(relaxed = true) {
+                every { status } returns UtbetalingsoppdragStatus.GODKJENT_MED_FEIL
+            },
+            mockk(relaxed = true) {
+                every { status } returns UtbetalingsoppdragStatus.AVVIST
+            },
+            mockk(relaxed = true) {
+                every { status } returns UtbetalingsoppdragStatus.AVVIST
+            },
+            mockk(relaxed = true) {
+                every { status } returns UtbetalingsoppdragStatus.AVVIST
+            },
+            mockk(relaxed = true) {
+                every { status } returns UtbetalingsoppdragStatus.SENDT
+            },
+            mockk(relaxed = true) {
+                every { status } returns UtbetalingsoppdragStatus.FEILET
+            },
+        )
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdragsliste, UUID.randomUUID())
+        val grunnlagsdata = avstemmingsdataMapper.grunnlagsdata(utbetalingsoppdragsliste)
 
-        val utbetalingsOppdrag =
-            utbetalingsoppdragsDao.hentAlleUtbetalingsoppdragMellom(LocalDateTime.MIN, LocalDateTime.MAX)
+        assertAll("Skal telle opp rett antall godkjent, varsel, avvist og mangler",
+            { assertEquals(grunnlagsdata.godkjentAntall, 2) },
+            { assertEquals(grunnlagsdata.varselAntall, 1) },
+            { assertEquals(grunnlagsdata.avvistAntall, 3) },
+            { assertEquals(grunnlagsdata.manglerAntall, 2) })
     }
 }

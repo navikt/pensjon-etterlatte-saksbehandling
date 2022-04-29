@@ -1,13 +1,23 @@
 package no.nav.etterlatte
 
-import io.ktor.client.HttpClient
-import model.FattetVedtak
+import model.VedtakType
+import model.brev.InnvilgetBrevRequest
+import no.nav.etterlatte.vedtak.VedtakService
 import org.slf4j.LoggerFactory
+import pdf.PdfGeneratorKlient
 
-class BrevService(private val klient: HttpClient, private val url: String) {
+class BrevService(private val pdfGenerator: PdfGeneratorKlient) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
+    private val vedtakService = VedtakService()
 
-    fun opprettBrev(vedtak: FattetVedtak): String = "Hei jeg er et ${vedtak.type}'s-brev!".also {
-        logger.info("Brev opprettet!")
+    suspend fun opprettBrev(vedtakId: Long): ByteArray {
+        val vedtak = vedtakService.hentVedtak(vedtakId)
+
+        return when (vedtak.type) {
+            VedtakType.INNVILGELSE -> pdfGenerator.genererPdf(InnvilgetBrevRequest.fraVedtak(vedtak)).also {
+                logger.info("Generert brev for vedtak (vedtakId=${vedtak.vedtakId}) med størrelse: ${it.size}")
+            }
+            else -> throw Exception("Vedtakstype er ikke støttet: ${vedtak.type}")
+        }
     }
 }

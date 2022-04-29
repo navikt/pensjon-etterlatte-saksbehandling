@@ -11,10 +11,13 @@ import io.ktor.client.request.header
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import pdf.PdfGeneratorKlient
 
 class ApplicationContext(configLocation: String? = null) {
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
-    val brevService = BrevService(httpClient(), config.getString("pdfgen.url"))
+    private val pdfGenerator = PdfGeneratorKlient(httpClient(), config.getString("pdfgen.url"))
+
+    val brevService = BrevService(pdfGenerator)
 
     private fun httpClient() = HttpClient(OkHttp) {
         install(JsonFeature) {

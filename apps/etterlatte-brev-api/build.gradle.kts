@@ -13,7 +13,6 @@ dependencies {
     implementation(Ktor.ClientCioJvm)
     implementation(Ktor.ClientAuth)
     implementation(Ktor.ClientLogging)
-    implementation(Ktor.MetricsMicrometer)
     implementation(Ktor.Jackson)
     implementation(Ktor.Auth)
     implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.14")
@@ -31,5 +30,4 @@ dependencies {
     testImplementation(Ktor.ServerTests)
     testImplementation(Kotlinx.CoroutinesCore)
     testImplementation(NavFelles.MockOauth2Server)
-
 }

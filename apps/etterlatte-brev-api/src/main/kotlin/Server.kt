@@ -56,4 +56,3 @@ class Server(applicationContext: ApplicationContext) {
 
     fun run() = engine.start(true)
 }
-

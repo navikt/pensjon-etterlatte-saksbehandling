@@ -115,28 +115,39 @@ internal class AvstemmingMapperTest {
                 every { status } returns UtbetalingsoppdragStatus.FEILET // telles som mangler
             },
         )
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdragsliste, UUID.randomUUID())
-        val grunnlagsdata = avstemmingsdataMapper.grunnlagsdata()
+        val avstemmingsdataMapper =
+            AvstemmingsdataMapper(utbetalingsoppdrag = utbetalingsoppdragsliste, id = UUID.randomUUID())
+        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val (_, dataMelding, _) = avstemmingsmelding
 
         assertAll("Skal telle opp rett antall godkjent, varsel, avvist og mangler",
-            { assertEquals(grunnlagsdata.godkjentAntall, 2) },
-            { assertEquals(grunnlagsdata.varselAntall, 1) },
-            { assertEquals(grunnlagsdata.avvistAntall, 3) },
-            { assertEquals(grunnlagsdata.manglerAntall, 2) })
+            { assertEquals(2, dataMelding.grunnlag.godkjentAntall) },
+            { assertEquals(1, dataMelding.grunnlag.varselAntall) },
+            { assertEquals(3, dataMelding.grunnlag.avvistAntall) },
+            { assertEquals(2, dataMelding.grunnlag.manglerAntall) }
+        )
     }
 
     @Test
-    fun `antall i grunnlagsdata skal vaere 0 for alle statuser`() {
-        val utbetalingsoppdragsliste = emptyList<Utbetalingsoppdrag>()
+    fun `antall i grunnlagsdata skal vaere 0 for alle statuser unntatt godkjent`() {
+        val utbetalingsoppdgragsliste = listOf(
+            mockk<Utbetalingsoppdrag>(relaxed = true) {
+                every { status } returns UtbetalingsoppdragStatus.GODKJENT
+            },
+            mockk(relaxed = true) {
+                every { status } returns UtbetalingsoppdragStatus.GODKJENT
+            })
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdragsliste, UUID.randomUUID())
-        val grunnlagsdata = avstemmingsdataMapper.grunnlagsdata()
+        val avstemmingsdataMapper =
+            AvstemmingsdataMapper(utbetalingsoppdrag = utbetalingsoppdgragsliste, id = UUID.randomUUID())
+        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val (_, dataMelding, _) = avstemmingsmelding
 
-        assertAll("Skal telle opp rett antall godkjent, varsel, avvist og mangler",
-            { assertEquals(grunnlagsdata.godkjentAntall, 0) },
-            { assertEquals(grunnlagsdata.varselAntall, 0) },
-            { assertEquals(grunnlagsdata.avvistAntall, 0) },
-            { assertEquals(grunnlagsdata.manglerAntall, 0) })
+        assertAll("Antall i grunnlagsdato skal vaere 0 for alle statuser",
+            { assertEquals(2, dataMelding.grunnlag.godkjentAntall) },
+            { assertEquals(0, dataMelding.grunnlag.varselAntall) },
+            { assertEquals(0, dataMelding.grunnlag.avvistAntall) },
+            { assertEquals(0, dataMelding.grunnlag.manglerAntall) })
     }
 
     @Test
@@ -156,14 +167,16 @@ internal class AvstemmingMapperTest {
             },
             mockk(relaxed = true) {
                 every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusMinutes(2)
-            },
+            }
         )
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdgragsliste, UUID.randomUUID())
-        val periode = avstemmingsdataMapper.periode(utbetalingsoppdgragsliste)
+        val avstemmingsdataMapper =
+            AvstemmingsdataMapper(utbetalingsoppdrag = utbetalingsoppdgragsliste, id = UUID.randomUUID())
+        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val (_, dataMelding, _) = avstemmingsmelding
         assertAll("skal finne forste og siste avstemmingsnoekkel i liste",
-            { assertEquals("2020041014", periode.start) },
-            { assertEquals("2022012422", periode.endInclusive) }
+            { assertEquals("2020041014", dataMelding.periode.datoAvstemtFom) },
+            { assertEquals("2022012422", dataMelding.periode.datoAvstemtTom) }
         )
     }
 }

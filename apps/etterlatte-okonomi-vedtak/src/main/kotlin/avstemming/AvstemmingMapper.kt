@@ -57,7 +57,7 @@ class AvstemmingsdataMapper(
             }
         }
 
-    private fun avstemmingsdataLister() : List<Avstemmingsdata> {
+    private fun avstemmingsdataLister(): List<Avstemmingsdata> {
         return detaljdata(utbetalingsoppdrag).chunked(detaljerPrMelding).map {
             avstemmingsdata(AksjonType.DATA).apply {
                 this.detalj.addAll(it)
@@ -95,8 +95,7 @@ class AvstemmingsdataMapper(
             UtbetalingsoppdragStatus.GODKJENT -> null
         }
 
-    // TODO denne bør egentlig ikke være public
-    fun grunnlagsdata() = Grunnlagsdata().apply {
+    private fun grunnlagsdata() = Grunnlagsdata().apply {
         val oppdragEtterStatus = utbetalingsoppdrag.groupBy { it.status }
 
         godkjentAntall = oppdragEtterStatus[UtbetalingsoppdragStatus.GODKJENT]?.count() ?: 0
@@ -119,8 +118,8 @@ class AvstemmingsdataMapper(
             datoAvstemtTom = periode.endInclusive
         }
 
-    // TODO denne bør egentlig ikke være public
-    fun periode(liste: List<Utbetalingsoppdrag>): ClosedRange<String> {
+
+    private fun periode(liste: List<Utbetalingsoppdrag>): ClosedRange<String> {
         check(liste.isNotEmpty())
         return object : ClosedRange<String> {
             override val start = liste.minOf { it.avstemmingsnoekkel }.format(tidsstempel)

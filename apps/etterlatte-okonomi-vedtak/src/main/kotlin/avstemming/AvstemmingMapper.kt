@@ -6,6 +6,7 @@ import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Aksjonsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AvstemmingType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Avstemmingsdata
+import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.DetaljType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Detaljdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Fortegn
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Grunnlagsdata
@@ -23,15 +24,25 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
     private val avleverendeAvstemmingsId = encodeUUIDBase64(id)
     private val antOverforteMeldinger = 1000 // TODO: hente det totale antallet oppdrag som er hentet
     private val totaltOverfortBelop = 0 // TODO: denne er frivillig. Kan utvides med denne
-    private val grunnlagsdata: Grunnlagsdata =
-        grunnlagsdata(utbetalingsoppdrag) // TODO: metode for å hente grunnlagsdata
-    private val detaljdata: List<Detaljdata> = listOf(Detaljdata()) // TODO: metode for å hente ut detaljdata
     // TODO: // trans-nokkel-avlev, skal dette være vedtak.sakId ?
 
-    companion object {
-        private const val DETALJER_PER_AVSTEMMINGMELDING = 70
-        private val tidsstempel = DateTimeFormatter.ofPattern("yyyyMMddHH")
-    }
+    fun avstemmingsmelding(): List<Avstemmingsdata> =
+        if (utbetalingsoppdrag.isEmpty()) emptyList()
+        else listOf(startmelding()) + datameldinger() + listOf(sluttmelding())
+
+    private fun startmelding() = avstemmingsdata(AksjonType.START)
+
+    private fun datameldinger(): List<Avstemmingsdata> =
+        avstemmingsdataLister().ifEmpty { listOf(avstemmingsdata(AksjonType.DATA)) }.let {
+            it.first().apply {
+                this.total = totaldata()
+                this.periode = periodedata()
+                this.grunnlag = grunnlagsdata(utbetalingsoppdrag)
+            }
+            it
+        }
+
+    private fun sluttmelding() = avstemmingsdata(AksjonType.AVSL)
 
     private fun avstemmingsdata(aksjonstype: AksjonType) =
         Avstemmingsdata().apply {
@@ -45,45 +56,49 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
                 underkomponentKode = "BARNEPE" // TODO: korrekt?
                 //nokkelFom =  // TODO: logikk for å finne laveste avstemmingsnøkkel
                 // nokkelTom // TODO: logikk for å finne høyeste avstemmingsnøkkel
-                //avleverendeAvstemmingId = // TODO: lage en unik ID for en avstemming
+                avleverendeAvstemmingId = avleverendeAvstemmingsId
                 brukerId = "BARNEPE" // TODO: finne ut hva som skal settes her
             }
         }
 
-    fun avstemmingsdataData(avstemmingsdata: Avstemmingsdata) =
-        avstemmingsdata.apply {
-            total = Totaldata().apply {
-                totalAntall = antOverforteMeldinger
-                totalBelop = BigDecimal(totaltOverfortBelop)
-                fortegn = Fortegn.T
+    private fun avstemmingsdataLister() : List<Avstemmingsdata> {
+        return detaljdata(utbetalingsoppdrag).chunked(ANTALL_DETALJER_PER_AVSTEMMINGMELDING).map {
+            avstemmingsdata(AksjonType.DATA).apply {
+                this.detalj.addAll(it)
             }
-
-            grunnlag = grunnlagsdata
-
-            detalj.addAll(detaljdata)
-
-            periode = Periodedata().apply {
-                datoAvstemtFom = LocalDateTime.MIN.format(tidsstempel) // TODO: finne timestamp for første record
-                datoAvstemtTom = LocalDateTime.now().format(tidsstempel) // TODO: finne timestamp for siste record
-            }
-
-
         }
-
-    fun fullestendigAvstemmingsmelding() = listOf(
-        avstemmingsdata(AksjonType.START),
-        avstemmingsdataData(avstemmingsdata((AksjonType.DATA))),
-        avstemmingsdata(AksjonType.AVSL)
-    )
-
-
-    private fun encodeUUIDBase64(uuid: UUID): String {
-        val bb = ByteBuffer.wrap(ByteArray(16))
-        bb.putLong(uuid.mostSignificantBits)
-        bb.putLong(uuid.leastSignificantBits)
-        return Base64.getUrlEncoder().encodeToString(bb.array()).substring(0, 22)
     }
 
+    private fun detaljdata(utbetalingsoppdrag: List<Utbetalingsoppdrag>): List<Detaljdata> =
+        utbetalingsoppdrag.mapNotNull {
+            val detaljType = toDetaljType(it.status)
+            if (detaljType != null) {
+                Detaljdata().apply {
+                    this.detaljType = detaljType
+                    offnr = it.foedselsnummer
+                    avleverendeTransaksjonNokkel = it.avstemmingsnoekkel.format(tidsstempel)
+                    tidspunkt = it.avstemmingsnoekkel.format(tidsstempel)
+                    if (detaljType in listOf(DetaljType.AVVI, DetaljType.VARS) && it.oppdragKvittering != null) {
+                        meldingKode = it.meldingKodeOppdrag
+                        alvorlighetsgrad = it.feilkodeOppdrag
+                        tekstMelding = it.beskrivelseOppdrag
+                    }
+                }
+            } else {
+                null
+            }
+        }
+
+    private fun toDetaljType(utbetalingsoppdragStatus : UtbetalingsoppdragStatus) : DetaljType? =
+        when (utbetalingsoppdragStatus) {
+            UtbetalingsoppdragStatus.SENDT -> DetaljType.MANG
+            UtbetalingsoppdragStatus.GODKJENT_MED_FEIL -> DetaljType.VARS
+            UtbetalingsoppdragStatus.AVVIST -> DetaljType.AVVI
+            UtbetalingsoppdragStatus.FEILET -> DetaljType.AVVI
+            UtbetalingsoppdragStatus.GODKJENT -> null
+        }
+
+    // TODO denne bør egentlig ikke være public
     fun grunnlagsdata(liste: List<Utbetalingsoppdrag>) = Grunnlagsdata().apply {
         val oppdragEtterStatus = liste.groupBy { it.status }
 
@@ -95,4 +110,28 @@ class AvstemmingsdataMapper(val utbetalingsoppdrag: List<Utbetalingsoppdrag>, id
         manglerAntall = antFeilet + antSendtUtenKvittering
     }
 
+    private fun totaldata() =
+        Totaldata().apply {
+            totalAntall = antOverforteMeldinger
+            totalBelop = BigDecimal(totaltOverfortBelop)
+            fortegn = Fortegn.T
+        }
+
+    private fun periodedata() =
+        Periodedata().apply {
+            datoAvstemtFom = LocalDateTime.MIN.format(tidsstempel) // TODO: finne timestamp for første record
+            datoAvstemtTom = LocalDateTime.now().format(tidsstempel) // TODO: finne timestamp for siste record
+        }
+
+    private fun encodeUUIDBase64(uuid: UUID): String {
+        val bb = ByteBuffer.wrap(ByteArray(16))
+        bb.putLong(uuid.mostSignificantBits)
+        bb.putLong(uuid.leastSignificantBits)
+        return Base64.getUrlEncoder().encodeToString(bb.array()).substring(0, 22)
+    }
+
+    companion object {
+        private const val ANTALL_DETALJER_PER_AVSTEMMINGMELDING = 70
+        private val tidsstempel = DateTimeFormatter.ofPattern("yyyyMMddHH")
+    }
 }

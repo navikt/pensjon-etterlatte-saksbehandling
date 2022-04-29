@@ -28,6 +28,11 @@ export const StegMeny = () => {
         <NavLink to="brev">Brev</NavLink>
       </li>
       */}
+      {process.env.NODE_ENV !== 'production' && (
+        <li>
+          <NavLink to="brev">Brev</NavLink>
+        </li>
+      )}
     </StegMenyWrapper>
   )
 }

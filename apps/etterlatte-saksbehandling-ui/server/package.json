@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@types/express-http-proxy": "^1.6.3",
+    "axios": "^0.27.2",
     "express": "^4.17.1",
     "express-http-proxy": "^1.6.3",
     "node-fetch": "^2.6.6",

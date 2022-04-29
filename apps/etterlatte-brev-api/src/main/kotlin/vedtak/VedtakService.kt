@@ -7,7 +7,7 @@ import model.VedtakType
 import java.time.LocalDate
 
 class VedtakService {
-    fun hentVedtak(vedtakId: Long) = Vedtak(
+    fun hentVedtak(vedtakId: String) = Vedtak(
         vedtakId = vedtakId,
         type = VedtakType.INNVILGELSE,
         status = "Fattet",

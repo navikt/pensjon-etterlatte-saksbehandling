@@ -3,7 +3,7 @@ package model
 import java.time.LocalDate
 
 data class Vedtak(
-    val vedtakId: Long,
+    val vedtakId: String,
     val type: VedtakType,
     val status: String,
     val dato: LocalDate,

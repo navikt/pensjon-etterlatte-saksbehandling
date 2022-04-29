@@ -10,7 +10,7 @@ class BrevService(private val pdfGenerator: PdfGeneratorKlient) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
     private val vedtakService = VedtakService()
 
-    suspend fun opprettBrev(vedtakId: Long): ByteArray {
+    suspend fun opprettBrev(vedtakId: String): ByteArray {
         val vedtak = vedtakService.hentVedtak(vedtakId)
 
         return when (vedtak.type) {

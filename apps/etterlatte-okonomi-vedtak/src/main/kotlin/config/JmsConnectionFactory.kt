@@ -26,10 +26,11 @@ class JmsConnectionFactory(
         it.transportType = WMQConstants.WMQ_CM_CLIENT
         it.ccsid = UTF_8_WITH_PUA
 
-        it.clientReconnectOptions =
-            WMQConstants.WMQ_CLIENT_RECONNECT // https://www.ibm.com/docs/en/ibm-mq/7.5?topic=objects-clientreconnectoptions
-        it.clientReconnectTimeout =
-            600 // default 1800 - https://www.ibm.com/docs/en/ibm-mq/7.5?topic=objects-clientreconnecttimeout
+        // TODO fjernet disse da de gjorde at ting ikke fungerte i tester
+        //it.clientReconnectOptions =
+        //    WMQConstants.WMQ_CLIENT_RECONNECT // https://www.ibm.com/docs/en/ibm-mq/7.5?topic=objects-clientreconnectoptions
+        //it.clientReconnectTimeout =
+        //    600 // default 1800 - https://www.ibm.com/docs/en/ibm-mq/7.5?topic=objects-clientreconnecttimeout
 
 
         it.setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, true)

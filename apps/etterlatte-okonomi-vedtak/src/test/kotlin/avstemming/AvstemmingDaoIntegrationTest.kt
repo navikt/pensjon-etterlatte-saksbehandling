@@ -76,7 +76,7 @@ internal class AvstemmingDaoIntegrationTest {
         avstemmingDao.opprettAvstemming(avstemming3)
         avstemmingDao.opprettAvstemming(avstemming2)
 
-        val nyesteAvstemming = avstemmingDao.hentNyesteAvstemming()
+        val nyesteAvstemming = avstemmingDao.hentSisteAvstemming()
 
         assertEquals(now, nyesteAvstemming?.opprettet)
         assertEquals(1, nyesteAvstemming?.antallAvstemteOppdrag)
@@ -86,7 +86,7 @@ internal class AvstemmingDaoIntegrationTest {
 
     @Test
     fun `skal gi null dersom det ikke finnes noen avstemming`() {
-        val nyesteAvstemming = avstemmingDao.hentNyesteAvstemming()
+        val nyesteAvstemming = avstemmingDao.hentSisteAvstemming()
 
         assertNull(nyesteAvstemming)
     }

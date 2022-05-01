@@ -29,7 +29,7 @@ class AvstemmingDao(private val dataSource: DataSource) {
                 .also { require(it == 1) { "Kunne ikke opprette avstemming" } }
         }
 
-    fun hentNyesteAvstemming(): Avstemming? =
+    fun hentSisteAvstemming(): Avstemming? =
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """

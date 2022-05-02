@@ -35,7 +35,7 @@ internal class RealGrunnlagServiceTest {
         val GrunnlagerMock = mockk<GrunnlagDao>()
         val opplysningerMock = mockk<OpplysningDao>()
 
-        val sut = RealGrunnlagService(GrunnlagerMock, opplysningerMock, GrunnlagFactory(GrunnlagerMock, opplysningerMock) , mockk())
+        val sut = RealGrunnlagService(GrunnlagerMock, opplysningerMock, GrunnlagFactory(GrunnlagerMock, opplysningerMock))
 
         val id = UUID.randomUUID()
 
@@ -73,7 +73,7 @@ internal class RealGrunnlagServiceTest {
         val hendelse = slot<Pair<Long, GrunnlagHendelserType>>()
         val opprettetGrunnlag = Grunnlag(UUID.randomUUID(), 1, emptyList())
 
-        val sut = RealGrunnlagService(GrunnlagerMock, opplysningerMock, GrunnlagFactory(GrunnlagerMock, opplysningerMock), hendelseskanal)
+        val sut = RealGrunnlagService(GrunnlagerMock, opplysningerMock, GrunnlagFactory(GrunnlagerMock, opplysningerMock))//, hendelseskanal)
 
         every { GrunnlagerMock.opprett(capture(GrunnlagOpprettes)) } returns Unit
         every { GrunnlagerMock.hent(capture(GrunnlagHentes)) } returns opprettetGrunnlag
@@ -89,9 +89,6 @@ internal class RealGrunnlagServiceTest {
         Assertions.assertEquals(resultat.id, hendelse.captured.first)
         Assertions.assertEquals(GrunnlagHendelserType.OPPRETTET, hendelse.captured.second)
     }
-
-
-
 }
 
 fun mockChannel() = mockk<SendChannel<Pair<Long, GrunnlagHendelserType>>>().apply { coEvery { send(any()) } returns Unit }

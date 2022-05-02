@@ -14,6 +14,8 @@ import no.nav.etterlatte.sak.SakService
 import no.nav.security.token.support.ktor.tokenValidationSupport
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.common.serialization.StringSerializer
+import no.nav.helse.rapids_rivers.RapidApplication
+import no.nav.helse.rapids_rivers.RapidsConnection
 
 interface BeanFactory {
     fun datasourceBuilder(): DataSourceBuilder
@@ -24,6 +26,7 @@ interface BeanFactory {
     fun grunnlagDao(): GrunnlagDao
     fun opplysningDao(): OpplysningDao
     fun rapid():KafkaProdusent<String, String>
+    fun rapid2():RapidsConnection
     fun grunnlagHendelser(): GrunnlagHendelser
     fun behandlingsFactory(): GrunnlagFactory
 }
@@ -39,14 +42,14 @@ abstract class CommonFactory: BeanFactory{
     }
 
     override fun grunnlagHendelser(): GrunnlagHendelser {
-        return cached { GrunnlagHendelser(rapid(), GrunnlagFactory(grunnlagDao(), opplysningDao()), datasourceBuilder().dataSource) }
+        return cached { GrunnlagHendelser(rapid2(), GrunnlagFactory(grunnlagDao(), opplysningDao()), datasourceBuilder().dataSource) }
     }
     override fun behandlingsFactory(): GrunnlagFactory {
         return cached { GrunnlagFactory(grunnlagDao(), opplysningDao()) }
     }
 
     override fun sakService(): SakService = RealSakService(sakDao())
-    override fun grunnlagsService(): GrunnlagService = RealGrunnlagService(grunnlagDao(), opplysningDao(), GrunnlagFactory(grunnlagDao(), opplysningDao()), grunnlagHendelser().nyHendelse)
+    override fun grunnlagsService(): GrunnlagService = RealGrunnlagService(grunnlagDao(), opplysningDao(), GrunnlagFactory(grunnlagDao(), opplysningDao())) //grunnlagHendelser().nyHendelse)
     override fun sakDao(): SakDao = SakDao{ databaseContext().activeTx()}
     override fun grunnlagDao(): GrunnlagDao = GrunnlagDao { databaseContext().activeTx() }
     override fun opplysningDao(): OpplysningDao = OpplysningDao { databaseContext().activeTx() }
@@ -56,11 +59,17 @@ class EnvBasedBeanFactory(val env: Map<String, String>): CommonFactory() {
 
     override fun datasourceBuilder(): DataSourceBuilder = cached { DataSourceBuilder(env) }
     override fun tokenValidering(): Authentication.Configuration.() -> Unit = { tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load())) }
+
     override fun rapid(): KafkaProdusent<String, String> {
+
         return KafkaProdusentImpl(
             KafkaProducer(kafkaConfig().producerConfig(), StringSerializer(), StringSerializer()),
             env.getValue("KAFKA_RAPID_TOPIC")
         )
+    }
+    override fun rapid2(): RapidsConnection {
+        return RapidApplication.create(env)
+
     }
 
     private fun kafkaConfig(): KafkaConfig = GcpKafkaConfig(

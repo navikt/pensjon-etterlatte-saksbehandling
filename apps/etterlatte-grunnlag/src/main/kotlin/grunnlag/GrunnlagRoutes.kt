@@ -13,7 +13,7 @@ import java.util.*
 //KUN LES
 fun Route.grunnlagRoutes(service: GrunnlagService) {
 
-  //Kun denne vi skal beholde? Og endre
+  //TODO Kun denne vi skal beholde? Og endre
     route("/behandlinger/{saksid}") {
         get {
             //TODO toLong?!?

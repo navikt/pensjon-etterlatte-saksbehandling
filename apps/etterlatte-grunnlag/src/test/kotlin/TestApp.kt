@@ -4,6 +4,8 @@ import io.ktor.auth.*
 
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
+import no.nav.helse.rapids_rivers.RapidApplication
+import no.nav.helse.rapids_rivers.RapidsConnection
 import org.testcontainers.containers.PostgreSQLContainer
 
 fun main(){
@@ -24,6 +26,7 @@ fun main(){
 
 }
 
+//TODO what is this?
 class LocalAppBeanFactory(val jdbcUrl: String): CommonFactory(){
     override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
     override fun tokenValidering(): Authentication.Configuration.() -> Unit = Authentication.Configuration::tokenTestSupportAcceptsAllTokens
@@ -34,4 +37,6 @@ class LocalAppBeanFactory(val jdbcUrl: String): CommonFactory(){
             }
         }
     }
+    //TODO her må det kanskje gjøres noe?
+    override fun rapid2(): RapidsConnection = RapidApplication.create(mapOf("KAFKA_CONSUMER_GROUP_ID" to "etterlattegrunnlag"))
 }

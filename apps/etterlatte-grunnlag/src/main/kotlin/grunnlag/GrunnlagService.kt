@@ -19,7 +19,7 @@ class RealGrunnlagService(
     private val grunnlagDao: GrunnlagDao,
     private val opplysninger: OpplysningDao,
     private val grunnlagFactory: GrunnlagFactory,
-    private val grunnlagHendelser: SendChannel<Pair<Long, GrunnlagHendelserType>>
+    //private val grunnlagHendelser: SendChannel<Pair<Long, GrunnlagHendelserType>>
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
 
@@ -40,7 +40,7 @@ class RealGrunnlagService(
         }
     }
 
-    //TODO Lage nytt grunnlag
+    //TODO Lage nytt grunnlag og skrive om til å returnere grunnlag
     override fun opprettGrunnlag(sak: Long, nyeOpplysninger: List<Grunnlagsopplysning<ObjectNode>>): Grunnlag {
         logger.info("Starter en behandling")
         return inTransaction {
@@ -51,7 +51,8 @@ class RealGrunnlagService(
 
         }.also {
             runBlocking {
-                grunnlagHendelser.send(it.lagretGrunnlag.saksId to GrunnlagHendelserType.OPPRETTET)
+            //TODO returnere grunnlag istedenfor
+            //grunnlagHendelser.send(it.lagretGrunnlag.saksId to GrunnlagHendelserType.OPPRETTET)
             }
         }.serialiserbarUtgave()
     }
@@ -63,7 +64,10 @@ class RealGrunnlagService(
         inTransaction { grunnlagFactory.hent(saksid).leggTilGrunnlagListe(
             opplysninger
         )}.also {
-            runBlocking { grunnlagHendelser.send(saksid to GrunnlagHendelserType.GRUNNLAGENDRET) }
+            runBlocking {
+                //TODO unødvendig å gjøre noe her?
+                //grunnlagHendelser.send(saksid to GrunnlagHendelserType.GRUNNLAGENDRET)
+            }
         }
     }
 }

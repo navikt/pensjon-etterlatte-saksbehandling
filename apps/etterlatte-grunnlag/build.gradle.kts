@@ -1,6 +1,7 @@
 
 plugins {
     id("etterlatte.kafka")
+    id("etterlatte.rapids-and-rivers")
 }
 
 dependencies {

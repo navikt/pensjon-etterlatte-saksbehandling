@@ -27,7 +27,10 @@ import javax.sql.DataSource
 
 fun main() {
     ventPaaNettverk()
-    appFromEnv(System.getenv()).run()
+    val env = System.getenv().toMutableMap().apply {
+        put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
+    }
+    appFromEnv(env).run()
 }
 
 
@@ -77,7 +80,8 @@ fun Application.module(beanFactory: BeanFactory){
         }
 
     }
-    beanFactory.grunnlagHendelser().start()
+    //TODO trengs start e.l.?
+    beanFactory.grunnlagHendelser()
 }
 
 private fun Route.attachContekst(ds: DataSource){
@@ -100,7 +104,8 @@ class App(private val beanFactory: BeanFactory){
             modules.add{ module(beanFactory) }
             connector { port = 8080 }
         }).start(true)
-        beanFactory.grunnlagHendelser().nyHendelse.close()
+        //TODO trengs denne?
+        //beanFactory.grunnlagHendelser().nyHendelse.close()
     }
 }
 

@@ -12,6 +12,7 @@ import java.time.Instant
 import java.util.*
 import javax.sql.DataSource
 
+/*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingDaoIntegrationTest {
     @Container
@@ -121,3 +122,4 @@ internal class BehandlingDaoIntegrationTest {
     }
 
 }
+*/

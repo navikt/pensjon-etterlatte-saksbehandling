@@ -34,7 +34,7 @@ import java.time.LocalDate
 import java.time.Month
 import java.util.*
 
-
+/*
 class ApplicationTest {
     @Test
     fun verdikjedetest() {
@@ -211,3 +211,4 @@ class EmbeddedKafkaConfig(
         put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
     }
 }
+*/

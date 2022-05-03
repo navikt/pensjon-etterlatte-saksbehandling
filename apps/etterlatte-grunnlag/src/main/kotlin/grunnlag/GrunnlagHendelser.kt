@@ -1,19 +1,15 @@
 package no.nav.etterlatte.grunnlag
 
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.SendChannel
-import no.nav.etterlatte.*
-import no.nav.etterlatte.database.DatabaseContext
-import no.nav.etterlatte.kafka.JsonMessage
-import no.nav.etterlatte.kafka.KafkaProdusent
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.*
 import javax.sql.DataSource
 
 enum class GrunnlagHendelserType {
@@ -32,46 +28,20 @@ class GrunnlagHendelser(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "ny_opplysning") }
-            //TODO mer her
+            validate { it.requireKey("opplysning") }
+            validate { it.requireKey("saksId") }
         }.register(this)
     }
 
     override fun onPacket(packet: no.nav.helse.rapids_rivers.JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            //TODO do something med meldinger
+            val gjeldendeGrunnlag = grunnlag.hent(packet["saksId"].asLong())
+            //TODO denne ble stygg
+            val opplysning = objectMapper.treeToValue<Grunnlagsopplysning<ObjectNode>>(packet["opplysning"])!!
+            gjeldendeGrunnlag.leggTilGrunnlagListe(listOf(opplysning))
+            logger.info("Har gjort et forsøk på å legge til en opplysning tror jeg")
         }
-/*
-    fun start() {
-        GlobalScope.launch {
-            withContext(
-                Dispatchers.Default + Kontekst.asContextElement(
-                    value = Context(Self("hendelsespubliserer"), DatabaseContext(datasource))
-                )
-            ) {
-                for (hendelse in kanal) {
-                    rapid.publiser(hendelse.first.toString(),
-                        JsonMessage(objectMapper.writeValueAsString(inTransaction { grunnlag.hent(hendelse.first) }.serialiserbarUtgave())).also {
-                            it["@event"] = "BEHANDLING:${hendelse.second.name}"
-                        }.toJson()
-                    ).also {
-                        logger.info("Posted event ${hendelse.second.name} for behandling ${hendelse.first} to partiton ${it.first}, offset ${it.second}")
-                    }
-                }
-            }
-            Kontekst.remove()
-        }.invokeOnCompletion {
-            rapid.close()
-            if (it == null || it is CancellationException) {
-                logger.info("BehandlingsHendelser finished")
-            } else {
-                logger.error("BehandlingsHendelser ended exeptionally", it)
-            }
-        }
-    }
-}
 
- */
-
-private fun no.nav.helse.rapids_rivers.JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
+    private fun no.nav.helse.rapids_rivers.JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 }
 

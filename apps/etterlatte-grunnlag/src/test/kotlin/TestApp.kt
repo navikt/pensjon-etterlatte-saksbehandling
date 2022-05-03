@@ -2,7 +2,6 @@ package no.nav.etterlatte
 
 import io.ktor.auth.*
 
-import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection

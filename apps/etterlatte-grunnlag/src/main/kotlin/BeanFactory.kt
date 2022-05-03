@@ -4,16 +4,10 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.auth.*
 import io.ktor.config.*
 import no.nav.etterlatte.grunnlag.*
-import no.nav.etterlatte.kafka.GcpKafkaConfig
-import no.nav.etterlatte.kafka.KafkaConfig
-import no.nav.etterlatte.kafka.KafkaProdusent
-import no.nav.etterlatte.kafka.KafkaProdusentImpl
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.security.token.support.ktor.tokenValidationSupport
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.common.serialization.StringSerializer
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 
@@ -62,12 +56,4 @@ class EnvBasedBeanFactory(val env: Map<String, String>): CommonFactory() {
         return RapidApplication.create(env)
 
     }
-
-    private fun kafkaConfig(): KafkaConfig = GcpKafkaConfig(
-        bootstrapServers = env.getValue("KAFKA_BROKERS"),
-        truststore = env.getValue("KAFKA_TRUSTSTORE_PATH"),
-        truststorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD"),
-        keystoreLocation = env.getValue("KAFKA_KEYSTORE_PATH"),
-        keystorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD")
-    )
 }

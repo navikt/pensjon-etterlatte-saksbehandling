@@ -12,7 +12,7 @@ spec:
     sqlInstances:
       - type: POSTGRES_12
         cascadingDelete: true
-        name: etterlatte-behandling
+        name: etterlatte-sak-og-behandling
         databases:
           - name: sakogbehandling
             envVarPrefix: DB

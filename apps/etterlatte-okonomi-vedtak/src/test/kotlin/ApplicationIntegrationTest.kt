@@ -10,8 +10,8 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.nav.etterlatte.avstemming.AvstemmingJob
-import no.nav.etterlatte.avstemming.AvstemmingService
+import no.nav.etterlatte.avstemming.GrensesnittsavstemmingJob
+import no.nav.etterlatte.avstemming.GrensesnittsavstemmingService
 import no.nav.etterlatte.common.Jaxb
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.config.JmsConnectionFactory
@@ -38,8 +38,11 @@ import java.util.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApplicationIntegrationTest {
 
-    @Container private val postgreSQLContainer = TestContainers.postgreSQLContainer
-    @Container private val ibmMQContainer = TestContainers.ibmMQContainer
+    @Container
+    private val postgreSQLContainer = TestContainers.postgreSQLContainer
+
+    @Container
+    private val ibmMQContainer = TestContainers.ibmMQContainer
 
     private lateinit var rapidsConnection: TestRapid
     private lateinit var connectionFactory: JmsConnectionFactory
@@ -70,16 +73,16 @@ class ApplicationIntegrationTest {
             "ELECTOR_PATH" to "some.path"
         )
 
-        val slot = slot<AvstemmingService>()
+        val slot = slot<GrensesnittsavstemmingService>()
 
         val applicationContext = spyk(ApplicationContext(env)).apply {
             every { rapidsConnection() } returns spyk(TestRapid()).also { rapidsConnection = it }
             every { jmsConnectionFactory() } answers { spyk(callOriginal()).also { connectionFactory = it } }
             every { avstemmingJob(capture(slot), any(), any()) } answers {
-                AvstemmingJob(
-                    avstemmingService = slot.captured,
+                GrensesnittsavstemmingJob(
+                    grensesnittsavstemmingService = slot.captured,
                     leaderElection = LeaderElection(env.required("ELECTOR_PATH"), HttpClient(mockElectionResultNotLeader())),
-                    starttidspunkt = Date.from(Instant.now().plusSeconds(100)),
+                    starttidspunkt = Date.from(Instant.now().plusSeconds(5)),
                     periode = Duration.ofSeconds(30)
                 )
             }

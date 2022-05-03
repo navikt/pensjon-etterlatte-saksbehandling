@@ -10,7 +10,6 @@ import no.nav.etterlatte.oppdrag.UtbetalingsoppdragDao
 import no.nav.etterlatte.utbetalingsoppdrag
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.util.*
 
 internal class AvstemmingServiceTest {
 
@@ -18,7 +17,7 @@ internal class AvstemmingServiceTest {
     private val utbetalingsoppdragDao: UtbetalingsoppdragDao = mockk()
     private val avstemmingSender: AvstemmingSender = mockk()
 
-    private val avstemmingService: AvstemmingService = AvstemmingService(
+    private val grensesnittsavstemmingService: GrensesnittsavstemmingService = GrensesnittsavstemmingService(
         avstemmingSender = avstemmingSender,
         avstemmingDao = avstemmingDao,
         utbetalingsoppdragDao = utbetalingsoppdragDao
@@ -42,12 +41,14 @@ internal class AvstemmingServiceTest {
         every { avstemmingSender.sendAvstemming(any()) } just runs
         every { avstemmingDao.opprettAvstemming(any()) } returns 1
 
-        avstemmingService.startAvstemming(fraOgMed, til)
+        grensesnittsavstemmingService.startGrensesnittsavstemming(fraOgMed, til)
 
         verify(exactly = 3) { avstemmingSender.sendAvstemming(any()) }
-        verify { avstemmingDao.opprettAvstemming(match {
-            it.antallAvstemteOppdrag == 1 && it.fraOgMed == fraOgMed
-        }) }
+        verify {
+            avstemmingDao.opprettAvstemming(match {
+                it.antallAvstemteOppdrag == 1 && it.fraOgMed == fraOgMed
+            })
+        }
     }
 
 

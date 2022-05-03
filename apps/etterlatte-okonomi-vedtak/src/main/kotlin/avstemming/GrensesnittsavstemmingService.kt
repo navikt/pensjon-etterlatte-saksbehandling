@@ -4,13 +4,13 @@ import no.nav.etterlatte.oppdrag.UtbetalingsoppdragDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
-class AvstemmingService(
+class GrensesnittsavstemmingService(
     private val avstemmingSender: AvstemmingSender,
     private val avstemmingDao: AvstemmingDao,
     private val utbetalingsoppdragDao: UtbetalingsoppdragDao,
 ) {
 
-    fun startAvstemming(
+    fun startGrensesnittsavstemming(
         fraOgMed: LocalDateTime = hentFraTid(),
         til: LocalDateTime = hentTilTid()
     ) {
@@ -22,7 +22,7 @@ class AvstemmingService(
 
         avstemmingsmelding.forEachIndexed { index, avstemmingsdata ->
             avstemmingSender.sendAvstemming(avstemmingsdata)
-            logger.info("Avstemmingsmelding ${index+1} av ${avstemmingsmelding.size} overført til Oppdrag")
+            logger.info("Avstemmingsmelding ${index + 1} av ${avstemmingsmelding.size} overført til Oppdrag")
         }
 
         // TODO dersom vi har null oppdrag - hva skal da lagres?

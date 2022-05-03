@@ -1,9 +1,9 @@
 package no.nav.etterlatte.config
 
 import no.nav.etterlatte.avstemming.AvstemmingDao
-import no.nav.etterlatte.avstemming.AvstemmingJob
 import no.nav.etterlatte.avstemming.AvstemmingSender
-import no.nav.etterlatte.avstemming.AvstemmingService
+import no.nav.etterlatte.avstemming.GrensesnittsavstemmingJob
+import no.nav.etterlatte.avstemming.GrensesnittsavstemmingService
 import no.nav.etterlatte.common.next
 import no.nav.etterlatte.oppdrag.KvitteringMottaker
 import no.nav.etterlatte.oppdrag.OppdragMapper
@@ -14,7 +14,6 @@ import no.nav.etterlatte.oppdrag.VedtakMottaker
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.Duration
-import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -91,7 +90,7 @@ class ApplicationContext(
         avstemmingDao: AvstemmingDao,
         avstemmingSender: AvstemmingSender,
         utbetalingsoppdragDao: UtbetalingsoppdragDao
-    ) = AvstemmingService(
+    ) = GrensesnittsavstemmingService(
         avstemmingDao = avstemmingDao,
         avstemmingSender = avstemmingSender,
         utbetalingsoppdragDao = utbetalingsoppdragDao
@@ -100,12 +99,12 @@ class ApplicationContext(
     fun leaderElection() = LeaderElection(env.required("ELECTOR_PATH"))
 
     fun avstemmingJob(
-        avstemmingService: AvstemmingService,
+        grensesnittsavstemmingService: GrensesnittsavstemmingService,
         leaderElection: LeaderElection,
         starttidspunkt: Date = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).next(LocalTime.of(1, 0, 0))
     ) =
-        AvstemmingJob(
-            avstemmingService = avstemmingService,
+        GrensesnittsavstemmingJob(
+            grensesnittsavstemmingService = grensesnittsavstemmingService,
             leaderElection = leaderElection,
             starttidspunkt = starttidspunkt,
             periode = Duration.of(1, ChronoUnit.DAYS)

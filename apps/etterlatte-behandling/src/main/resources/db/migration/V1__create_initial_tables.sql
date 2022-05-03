@@ -14,8 +14,9 @@ CREATE TABLE behandling
     sak_id BIGINT NOT NULL
         CONSTRAINT behandling_sak_id_fk
             REFERENCES sak (id),
-    soekand_mottatt_dato DATE,
     behandling_opprettet TIMESTAMP,
+    sist_endret TIMESTAMP,
+    soekand_mottatt_dato DATE,
     innsender TEXT,
     soeker TEXT,
     gjenlevende TEXT,
@@ -23,6 +24,4 @@ CREATE TABLE behandling
     soesken TEXT,
     gyldighetssproving TEXT,
     status TEXT, -- gyldig_soeknad, ikke_gyldig_soeknad, avbrutt, under_behandling, fattet_vedtak, attestert, iverksatt,
-    sist_endret TIMESTAMP,
-
 );

@@ -16,12 +16,10 @@ import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import kotlinx.coroutines.*
 import no.nav.etterlatte.behandling.*
-import no.nav.etterlatte.beregning.beregningRoutes
 import no.nav.etterlatte.database.DatabaseContext
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.sak.sakRoutes
-import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.util.*
 

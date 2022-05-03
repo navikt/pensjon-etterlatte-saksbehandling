@@ -1,6 +1,7 @@
 package model.brev
 
 import model.Vedtak
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.model.brev.BrevRequest
 import java.time.LocalDate
 
@@ -9,7 +10,8 @@ data class InnvilgetBrevRequest(
     val utbetalingsinfo: Utbetalingsinfo,
     val barn: Barn,
     val avdoed: Avdoed,
-    val aktuelleParagrafer: List<String>
+    val aktuelleParagrafer: List<String>,
+    override val spraak: Spraak
 ) : BrevRequest() {
     override fun templateName(): String = "innvilget"
 
@@ -29,7 +31,8 @@ data class InnvilgetBrevRequest(
                 navn = vedtak.avdoed.navn,
                 doedsdato = vedtak.avdoed.doedsdato
             ),
-            aktuelleParagrafer = vedtak.vilkaar
+            aktuelleParagrafer = vedtak.vilkaar,
+            spraak = Spraak.NB
         )
     }
 }

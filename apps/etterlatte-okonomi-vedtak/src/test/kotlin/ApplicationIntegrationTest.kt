@@ -78,8 +78,8 @@ class ApplicationIntegrationTest {
             every { avstemmingJob(capture(slot), any(), any()) } answers {
                 AvstemmingJob(
                     avstemmingService = slot.captured,
-                    leaderElection = LeaderElection(env.required("ELECTOR_PATH"), HttpClient(mockElectionResult())),
-                    starttidspunkt = Date.from(Instant.now().plusSeconds(5)),
+                    leaderElection = LeaderElection(env.required("ELECTOR_PATH"), HttpClient(mockElectionResultNotLeader())),
+                    starttidspunkt = Date.from(Instant.now().plusSeconds(100)),
                     periode = Duration.ofSeconds(30)
                 )
             }
@@ -97,14 +97,23 @@ class ApplicationIntegrationTest {
         )
     }
 
+    private fun mockElectionResultNotLeader() = MockEngine {
+        respond(
+            content = mapOf("name" to "invalidhost").toJson(),
+            status = HttpStatusCode.OK
+        )
+    }
+
+    /*
     @Test
     fun `test avstemmingsjobb`() {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
-    }
+    }*/
 
     @Test
-    fun `skal sende oppdrag og motta kvittering for godkjent oppdrag`() {
+    fun `skal sende utbetaling til oppdrag`() {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
+
         verify(timeout = TIMEOUT) { rapidsConnection.publish(
             match {
                 it.toJsonNode().let { event ->
@@ -113,11 +122,17 @@ class ApplicationIntegrationTest {
                 }
             }
         )}
+    }
 
+    @Test
+    fun `skal motta kvittering fra oppdrag`() {
+        sendFattetVedtakEvent(FATTET_VEDTAK_1)
         sendKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering(vedtakId = "1"))
-        verify(timeout = TIMEOUT) { rapidsConnection.publish(
+
+        verify(timeout = TIMEOUT) { rapidsConnection.publish("key",
             match {
                 it.toJsonNode().let { event ->
+                    event["@event_name"].textValue() == "utbetaling_oppdatert" &&
                     event["@status"].textValue() == UtbetalingsoppdragStatus.GODKJENT.name
                 }
             }
@@ -125,23 +140,15 @@ class ApplicationIntegrationTest {
     }
 
     @Test
-    fun `skal sende oppdrag og motta kvittering for feilet oppdrag`() {
-        sendFattetVedtakEvent(FATTET_VEDTAK_2)
-        verify(timeout = TIMEOUT) { rapidsConnection.publish(
-            match {
-                it.toJsonNode().let { event ->
-                    event["@event_name"].textValue() == "utbetaling_oppdatert" &&
-                            event["@status"].textValue() == UtbetalingsoppdragStatus.SENDT.name
-                }
-            }
-        )}
+    fun `skal motta kvittering fra oppdrag med feil`() {
+        sendFattetVedtakEvent(FATTET_VEDTAK_1)
+        sendKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering(vedtakId = "1"))
 
-        sendKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering(vedtakId = "2"))
-        verify(timeout = TIMEOUT) { rapidsConnection.publish(
+        verify(timeout = TIMEOUT) { rapidsConnection.publish("key",
             match {
                 it.toJsonNode().let { event ->
                     event["@event_name"].textValue() == "utbetaling_oppdatert" &&
-                            event["@status"].textValue() == UtbetalingsoppdragStatus.FEILET.name
+                    event["@status"].textValue() == UtbetalingsoppdragStatus.FEILET.name
                 }
             }
         )}
@@ -160,8 +167,6 @@ class ApplicationIntegrationTest {
         rapidsConnection.stop()
     }
 
-    // TODO legg på flere tilsvarende tester her når vi vet hvilke statuser vi får
-
     private fun sendFattetVedtakEvent(vedtakEvent: String) {
         rapidsConnection.sendTestMessage(vedtakEvent)
     }
@@ -179,6 +184,6 @@ class ApplicationIntegrationTest {
     companion object {
         val FATTET_VEDTAK_1 = readFile("/vedtak1.json")
         val FATTET_VEDTAK_2 = readFile("/vedtak2.json")
-        const val TIMEOUT: Long = 10000
+        const val TIMEOUT: Long = 5000
     }
 }

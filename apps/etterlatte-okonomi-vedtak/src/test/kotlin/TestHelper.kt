@@ -60,6 +60,8 @@ fun oppdragMedGodkjentKvittering(vedtakId: String = "1") = oppdrag(vedtakId).app
 fun oppdragMedFeiletKvittering(vedtakId: String = "1") = oppdrag(vedtakId).apply {
     mmel = Mmel().apply {
         alvorlighetsgrad = "12"
+        kodeMelding = "KodeMelding"
+        beskrMelding = "Beskrivelse"
     }
     oppdrag110 = this.oppdrag110.apply {
         oppdragsId = 1

@@ -18,6 +18,7 @@ include(
     "apps:etterlatte-oppdater-behandling",
     "apps:etterlatte-beregning",
     "apps:etterlatte-vedtaksvurdering",
+    "apps:etterlatte-grunnlag",
     "libs:ktorclient-auth-clientcredentials",
     "libs:common",
     "libs:ktorclient-onbehalfof",

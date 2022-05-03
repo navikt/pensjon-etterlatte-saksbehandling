@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
 import org.junit.jupiter.api.Assertions.*
+import vilkaar.barnepensjon.ekstraVilkaarBarnOgForelderSammeBostedsadresse
 import java.time.LocalDateTime
 
 internal class BarnepensjonVilkaarTest {
@@ -183,6 +184,29 @@ internal class BarnepensjonVilkaarTest {
         )
     }
 
+    @Test
+    fun vuderSammeBostedsadresse() {
+        val barnPdlNorge = lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresserNorgePdl, avdoedErForeldre)
+        val barnPdlDanmark =
+            lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresseDanmarkPdl, avdoedErForeldre)
+        val gjenlevendePdlNorge = lagMockPersonPdl(null, fnrGjenlevende, null, adresserNorgePdl, null)
+        val gjenlevendePdlDanmark = lagMockPersonPdl(null, fnrGjenlevende, null, adresseDanmarkPdl, null)
+
+        val sammeAdresse = ekstraVilkaarBarnOgForelderSammeBostedsadresse(
+            Vilkaartyper.SAMME_ADRESSE,
+            mapTilVilkaarstypePerson(barnPdlNorge),
+            mapTilVilkaarstypePerson(gjenlevendePdlNorge)
+        )
+
+        val ulikeAdresse = ekstraVilkaarBarnOgForelderSammeBostedsadresse(
+            Vilkaartyper.SAMME_ADRESSE,
+            mapTilVilkaarstypePerson(barnPdlNorge),
+            mapTilVilkaarstypePerson(gjenlevendePdlDanmark)
+        )
+        assertEquals(VurderingsResultat.OPPFYLT, sammeAdresse.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, ulikeAdresse.resultat)
+
+    }
 
     @Test
     fun vurderVilkaarsVurdering() {
@@ -306,11 +330,11 @@ internal class BarnepensjonVilkaarTest {
             AdresseType.VEGADRESSE,
             true,
             null,
+            "Fiolveien 1A",
             null,
             null,
-            null,
-            null,
-            null,
+            "0485",
+            "Oslo",
             "NOR",
             "kilde",
             LocalDateTime.parse("2025-01-26T00:00:00"),
@@ -337,11 +361,11 @@ internal class BarnepensjonVilkaarTest {
             AdresseType.UTENLANDSKADRESSE,
             true,
             null,
+            "Danmarkveien 2A",
             null,
             null,
-            null,
-            null,
-            null,
+            "123345",
+            "København",
             "DAN",
             "kilde",
             LocalDateTime.parse("2022-01-25T00:00:00"),

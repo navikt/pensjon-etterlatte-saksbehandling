@@ -1,7 +1,7 @@
 package behandlingfrasoknad
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import no.nav.etterlatte.behandlingfrasoknad.Opplysningsuthenter
+import no.nav.etterlatte.opplysningerfrasoknad.Opplysningsuthenter
 import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*

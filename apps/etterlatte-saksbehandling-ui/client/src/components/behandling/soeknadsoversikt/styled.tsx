@@ -13,7 +13,7 @@ export const DetailWrapper = styled.div`
     width: 250px;
   }
   .text {
-    width: 150px;
+    width: 280px;
   }
 
   .labelWrapperWithIcon {
@@ -53,6 +53,22 @@ export const HeadingWrapper = styled.div`
   .details {
     padding: 0.6em;
   }
+`
+
+export const Header = styled.div`
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 1em;
+  margin-top: 2em;
+`
+
+export const Border = styled.div`
+  border-top: 1px solid #b0b0b0;
+  margin-bottom: 1em;
+`
+
+export const DashedBorder = styled.div`
+  border-top: 0.5px dashed #000000;
 `
 
 export const TypeStatusWrap = styled.div<{ type: string }>`

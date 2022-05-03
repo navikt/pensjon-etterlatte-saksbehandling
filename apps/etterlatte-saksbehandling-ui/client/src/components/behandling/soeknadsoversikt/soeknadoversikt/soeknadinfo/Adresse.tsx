@@ -13,16 +13,15 @@ export const Adresse = ({
       {gjenlevendeOgSoekerLikAdresse?.resultat === VurderingsResultat.OPPFYLT && (
         <div>
           <Label size="medium">Adresse</Label>
-          <div className="text">Barnet bor på samme adresse som gjenlevende forelder</div>
+          <div className="text">
+            Gjenlevende og avdøde bodde sammen med barnet, og gjenlevende og barnet fortsatt bor sammen
+          </div>
         </div>
       )}
 
       {gjenlevendeOgSoekerLikAdresse?.resultat === VurderingsResultat.IKKE_OPPFYLT && (
         <div>
           <Label size="small" className="labelWrapperWithIcon">
-            <WarningIconWrapper>
-              <WarningIcon />
-            </WarningIconWrapper>
             Adresse
           </Label>
           <span className="warningText">Barnet bor ikke på samme adresse som gjenlevende forelder</span>

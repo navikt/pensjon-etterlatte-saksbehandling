@@ -66,61 +66,38 @@ export const getStatsborgerskapTekst = (statsborgerskap: string) => {
   }
 }
 
-export const hentGyldighetsTekst = (
-  gyldighetResultat: VurderingsResultat,
-  bosted: IGyldighetproving,
-  foreldreransvar: IGyldighetproving,
-  innsender: IGyldighetproving
-) => {
-  const bostedTekst = bosted && mapGyldighetstyperTilTekst(bosted)
-  const foreldreansvarTekst = foreldreransvar && mapGyldighetstyperTilTekst(foreldreransvar)
-  const innsenderTekst = innsender && mapGyldighetstyperTilTekst(innsender)
-
-  const gyldigheter = []
-  let resultat
-
-  bostedTekst && gyldigheter.push(bostedTekst)
-  foreldreansvarTekst && gyldigheter.push(foreldreansvarTekst)
-  innsenderTekst && gyldigheter.push(innsenderTekst)
-
-  if (gyldigheter.length > 1) {
-    const last = gyldigheter.pop()
-    resultat = gyldigheter.join(', ') + ' og ' + last
-  } else {
-    resultat = gyldigheter[0]
-  }
-
-  if (gyldighetResultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
-    return `Nei. mangler info om ${resultat}. Må avklares.`
-  } else if (gyldighetResultat === VurderingsResultat.IKKE_OPPFYLT) {
-    return `Nei. ${resultat}. Må avklares.`
-  } else return ''
-}
-
 export function mapGyldighetstyperTilTekst(gyldig: IGyldighetproving): String | undefined {
   let svar
 
-  if (gyldig.navn === GyldighetType.INNSENDER_ER_FORELDER) {
+  if (gyldig.navn === GyldighetType.HAR_FORELDREANSVAR_FOR_BARNET) {
     if (gyldig.resultat === VurderingsResultat.IKKE_OPPFYLT) {
-      svar = 'innsender har ikke foreldreansvar'
+      svar = 'Nei. innsender har ikke forelderansvar. Dette må avklares før du kan starte vilkårsvurderingen.'
     } else if (gyldig.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
-      svar = 'innsender'
+      svar = 'Mangler info'
     } else {
       svar = undefined
     }
-  } else if (gyldig.navn === GyldighetType.HAR_FORELDREANSVAR_FOR_BARNET) {
+  } else if (gyldig.navn === GyldighetType.INNSENDER_ER_FORELDER) {
     if (gyldig.resultat === VurderingsResultat.IKKE_OPPFYLT) {
-      svar = 'gjenlevende forelder har ikke foreldreansvar'
+      svar = 'Nei, innsender er ikke gjenlevende forelder. Dette må avklares før du kan starte vilkårsvurderingen.'
     } else if (gyldig.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
-      svar = 'foreldreansvar'
+      svar = 'Mangler info'
     } else {
       svar = undefined
     }
-  } else if (gyldig.navn === GyldighetType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL) {
+  } else {
+    svar = undefined
+  }
+  return svar
+}
+
+export function hentGyldigBostedTekst(gyldig: IGyldighetproving): String | undefined {
+  let svar
+  if (gyldig.navn === GyldighetType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL) {
     if (gyldig.resultat === VurderingsResultat.IKKE_OPPFYLT) {
       svar = 'barn og gjenlevende forelder bor ikke på samme adresse'
     } else if (gyldig.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
-      svar = 'bostedsadresser'
+      svar = 'Mangler info'
     }
   } else {
     svar = undefined

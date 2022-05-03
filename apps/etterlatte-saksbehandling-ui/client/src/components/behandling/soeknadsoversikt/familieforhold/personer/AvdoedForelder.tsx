@@ -53,7 +53,7 @@ export const AvdoedForelder: React.FC<Props> = ({ person }) => {
         </span>
         {person.navn}
         <span className="personRolle">
-          {PersonStatus.AVDOED} {RelatertPersonsRolle.FORELDER})
+          ({PersonStatus.AVDOED} {RelatertPersonsRolle.FORELDER})
         </span>
         <ForelderWrap avdoed={true}>Død {format(new Date(person.datoForDoedsfall), 'dd.MM.yyyy')}</ForelderWrap>
         <TypeStatusWrap type="statsborgerskap">{getStatsborgerskapTekst(person.statsborgerskap)}</TypeStatusWrap>

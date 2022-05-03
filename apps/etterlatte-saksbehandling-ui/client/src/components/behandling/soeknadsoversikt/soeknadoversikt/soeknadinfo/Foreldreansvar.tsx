@@ -29,9 +29,7 @@ export const Foreldreansvar = ({
             </WarningIconWrapper>
             Foreldreansvar
           </Label>
-          <span className="warningText">
-            {gjenlevendePdl?.fornavn} {gjenlevendePdl?.etternavn}
-          </span>
+          <span className="warningText">innsender har ikke foreldreansvar</span>
         </div>
       )}
 

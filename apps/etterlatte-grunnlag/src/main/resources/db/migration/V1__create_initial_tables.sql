@@ -1,22 +1,11 @@
-CREATE TABLE sak
-(
-    id BIGSERIAL
-            PRIMARY KEY,
-    fnr VARCHAR,
-    sakType VARCHAR
-);
 
-
-CREATE TABLE behandling
+CREATE TABLE grunnlag
 (
     id UUID
             PRIMARY KEY,
     sak_id BIGINT NOT NULL
         CONSTRAINT behandling_sak_id_fk
             REFERENCES sak (id),
-    vilkaarsproving TEXT,
-    beregning TEXT,
-    fastsatt boolean
 );
 
 CREATE TABLE opplysning
@@ -28,9 +17,9 @@ CREATE TABLE opplysning
     type TEXT
 );
 
-CREATE TABLE opplysning_i_behandling
+CREATE TABLE opplysning_i_grunnlag
 (
-    behandling_id UUID NOT NULL
+    grunnlag_id UUID NOT NULL
         CONSTRAINT opplysning_i_behandling_fk1
             REFERENCES behandling (id),
     opplysning_id UUID NOT NULL

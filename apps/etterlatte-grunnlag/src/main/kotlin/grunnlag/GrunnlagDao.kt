@@ -64,7 +64,7 @@ class GrunnlagDao(private val connection: () -> Connection) {
 
     fun hentBehandlingerMedSakId(id: Long): List<Grunnlag> {
         val stmt =
-            connection().prepareStatement("SELECT id, sak_id, gyldighetsproving, vilkaarsproving, beregning, fastsatt, avbrutt from behandling where sak_id = ?")
+            connection().prepareStatement("SELECT id, sak_id from behandling where sak_id = ?")
         stmt.setLong(1, id)
         return stmt.executeQuery().toList {
             Grunnlag(

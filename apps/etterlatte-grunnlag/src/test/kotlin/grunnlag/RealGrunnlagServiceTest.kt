@@ -32,10 +32,10 @@ internal class RealGrunnlagServiceTest {
 
     //@Test
     fun hentGrunnlag() {
-        val GrunnlagerMock = mockk<GrunnlagDao>()
+        val grunnlagMock = mockk<GrunnlagDao>()
         val opplysningerMock = mockk<OpplysningDao>()
 
-        val sut = RealGrunnlagService(GrunnlagerMock, opplysningerMock, GrunnlagFactory(GrunnlagerMock, opplysningerMock))
+        val sut = RealGrunnlagService(grunnlagMock, opplysningerMock, GrunnlagFactory(grunnlagMock, opplysningerMock))
 
         val id = UUID.randomUUID()
 
@@ -56,7 +56,7 @@ internal class RealGrunnlagServiceTest {
             ),
         )
         //TODO finne ut av ID greier
-        every { GrunnlagerMock.hent(3) } returns Grunnlag(id, 1, emptyList())
+        every { grunnlagMock.hent(3) } returns Grunnlag(id, 1, emptyList())
         every { opplysningerMock.finnOpplysningerIGrunnlag(3) } returns opplysninger
         Assertions.assertEquals(2, sut.hentGrunnlag(3).grunnlag.size)
     }

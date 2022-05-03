@@ -30,13 +30,6 @@ fun main(){
 class LocalAppBeanFactory(val jdbcUrl: String): CommonFactory(){
     override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
     override fun tokenValidering(): Authentication.Configuration.() -> Unit = Authentication.Configuration::tokenTestSupportAcceptsAllTokens
-    override fun rapid(): KafkaProdusent<String, String> {
-        return object: KafkaProdusent<String, String>{
-            override fun publiser(noekkel: String, verdi: String, headers: Map<String, ByteArray>): Pair<Int, Long> {
-                return 0 to 0
-            }
-        }
-    }
     //TODO her må det kanskje gjøres noe?
-    override fun rapid2(): RapidsConnection = RapidApplication.create(mapOf("KAFKA_CONSUMER_GROUP_ID" to "etterlattegrunnlag"))
+    override fun rapid(): RapidsConnection = RapidApplication.create(mapOf("KAFKA_CONSUMER_GROUP_ID" to "etterlattegrunnlag"))
 }

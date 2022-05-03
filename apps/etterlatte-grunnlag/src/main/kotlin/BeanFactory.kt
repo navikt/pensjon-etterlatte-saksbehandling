@@ -25,8 +25,7 @@ interface BeanFactory {
     fun sakDao(): SakDao
     fun grunnlagDao(): GrunnlagDao
     fun opplysningDao(): OpplysningDao
-    fun rapid():KafkaProdusent<String, String>
-    fun rapid2():RapidsConnection
+    fun rapid():RapidsConnection
     fun grunnlagHendelser(): GrunnlagHendelser
     fun behandlingsFactory(): GrunnlagFactory
 }
@@ -42,7 +41,7 @@ abstract class CommonFactory: BeanFactory{
     }
 
     override fun grunnlagHendelser(): GrunnlagHendelser {
-        return cached { GrunnlagHendelser(rapid2(), GrunnlagFactory(grunnlagDao(), opplysningDao()), datasourceBuilder().dataSource) }
+        return cached { GrunnlagHendelser(rapid(), GrunnlagFactory(grunnlagDao(), opplysningDao()), datasourceBuilder().dataSource) }
     }
     override fun behandlingsFactory(): GrunnlagFactory {
         return cached { GrunnlagFactory(grunnlagDao(), opplysningDao()) }
@@ -59,15 +58,7 @@ class EnvBasedBeanFactory(val env: Map<String, String>): CommonFactory() {
 
     override fun datasourceBuilder(): DataSourceBuilder = cached { DataSourceBuilder(env) }
     override fun tokenValidering(): Authentication.Configuration.() -> Unit = { tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load())) }
-
-    override fun rapid(): KafkaProdusent<String, String> {
-
-        return KafkaProdusentImpl(
-            KafkaProducer(kafkaConfig().producerConfig(), StringSerializer(), StringSerializer()),
-            env.getValue("KAFKA_RAPID_TOPIC")
-        )
-    }
-    override fun rapid2(): RapidsConnection {
+    override fun rapid(): RapidsConnection {
         return RapidApplication.create(env)
 
     }

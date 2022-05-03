@@ -1,7 +1,5 @@
 package no.nav.etterlatte.grunnlag
 
-import java.util.*
-
 class GrunnlagFactory(private val behandlinger: GrunnlagDao,
                       private val opplysninger: OpplysningDao
 ) {

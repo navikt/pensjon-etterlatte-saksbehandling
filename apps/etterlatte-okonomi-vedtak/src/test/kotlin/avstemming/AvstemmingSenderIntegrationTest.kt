@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
+import java.time.LocalDateTime
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -40,17 +41,18 @@ internal class AvstemmingSenderIntegrationTest {
 
     @Test
     fun `skal sende avstemmingsmeldinger på køen`() {
+        val fraOgMed = LocalDateTime.now().minusDays(1)
+        val til = LocalDateTime.now()
+
         val utbetalingsoppdrag = listOf(
             utbetalingsoppdrag(id = 1, status = UtbetalingsoppdragStatus.FEILET),
             utbetalingsoppdrag(id = 2, status = UtbetalingsoppdragStatus.FEILET),
             utbetalingsoppdrag(id = 3, status = UtbetalingsoppdragStatus.FEILET)
         )
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, UUID.randomUUID(), 2)
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1", 2)
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
-        val meldingerSendt = avstemmingSender.sendAvstemming(avstemmingsmelding)
-
-        assertEquals(4, meldingerSendt)
+        avstemmingSender.sendAvstemming(avstemmingsmelding.first())
     }
 
     @AfterAll

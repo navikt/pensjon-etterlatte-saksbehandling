@@ -20,9 +20,12 @@ internal class AvstemmingMapperTest {
 
     @Test
     fun `skal returnere tom liste dersom det ikke er noen utbetalingsoppdrag og avstemme`() {
+        val fraOgMed = LocalDateTime.now().minusDays(1)
+        val til = LocalDateTime.now()
+
         val utbetalingsoppdrag = emptyList<Utbetalingsoppdrag>()
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, UUID.randomUUID())
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1")
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
         assertEquals(emptyList<Avstemmingsdata>(), avstemmingsmelding)
@@ -30,9 +33,12 @@ internal class AvstemmingMapperTest {
 
     @Test
     fun `skal opprette avstemming fra utbetalingsoppdrag med startmelding, datamelding og sluttmelding`() {
+        val fraOgMed = LocalDateTime.now().minusDays(1)
+        val til = LocalDateTime.now()
+
         val utbetalingsoppdrag = listOf(utbetalingsoppdrag(status = UtbetalingsoppdragStatus.FEILET))
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, UUID.randomUUID())
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1")
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
         val (startMelding, dataMelding, sluttMelding) = avstemmingsmelding
@@ -44,13 +50,16 @@ internal class AvstemmingMapperTest {
 
     @Test
     fun `skal skal splitte opp datameldinger slik at de kun inneholder et gitt antall detaljer`() {
+        val fraOgMed = LocalDateTime.now().minusDays(1)
+        val til = LocalDateTime.now()
+
         val utbetalingsoppdrag = listOf(
             utbetalingsoppdrag(id = 1, status = UtbetalingsoppdragStatus.FEILET),
             utbetalingsoppdrag(id = 2, status = UtbetalingsoppdragStatus.FEILET),
             utbetalingsoppdrag(id = 3, status = UtbetalingsoppdragStatus.FEILET),
         )
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, UUID.randomUUID(), 2)
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1", 2)
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
         val (_, dataMelding1, dataMelding2, _) = avstemmingsmelding
@@ -60,18 +69,20 @@ internal class AvstemmingMapperTest {
 
         assertEquals(AksjonType.DATA, dataMelding2.aksjon.aksjonType)
         assertEquals(1, dataMelding2.detalj.size)
-
     }
 
     @Test
     fun `skal kun inneholde grunnadata, total og periode i forste datamelding`() {
+        val fraOgMed = LocalDateTime.now().minusDays(1)
+        val til = LocalDateTime.now()
+
         val utbetalingsoppdrag = listOf(
             utbetalingsoppdrag(id = 1, status = UtbetalingsoppdragStatus.FEILET),
             utbetalingsoppdrag(id = 2, status = UtbetalingsoppdragStatus.FEILET),
             utbetalingsoppdrag(id = 3, status = UtbetalingsoppdragStatus.FEILET),
         )
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, UUID.randomUUID(), 2)
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1", 2)
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
         val (_, dataMelding1, dataMelding2, _) = avstemmingsmelding
@@ -89,6 +100,9 @@ internal class AvstemmingMapperTest {
 
     @Test
     fun `antall i grunnlagsdata skal telles opp korrekt for godkjent, varsel, avvist og mangler`() {
+        val fraOgMed = LocalDateTime.now().minusDays(1)
+        val til = LocalDateTime.now()
+
         val utbetalingsoppdragsliste = listOf(
             mockk<Utbetalingsoppdrag>(relaxed = true) {
                 every { status } returns UtbetalingsoppdragStatus.GODKJENT
@@ -116,7 +130,12 @@ internal class AvstemmingMapperTest {
             },
         )
         val avstemmingsdataMapper =
-            AvstemmingsdataMapper(utbetalingsoppdrag = utbetalingsoppdragsliste, id = UUID.randomUUID())
+            AvstemmingsdataMapper(
+                utbetalingsoppdrag = utbetalingsoppdragsliste,
+                fraOgMed = fraOgMed,
+                til = til,
+                avstemmingId = "1"
+            )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
 
@@ -130,6 +149,9 @@ internal class AvstemmingMapperTest {
 
     @Test
     fun `antall i grunnlagsdata skal vaere 0 for alle statuser unntatt godkjent`() {
+        val fraOgMed = LocalDateTime.now().minusDays(1)
+        val til = LocalDateTime.now()
+
         val utbetalingsoppdgragsliste = listOf(
             mockk<Utbetalingsoppdrag>(relaxed = true) {
                 every { status } returns UtbetalingsoppdragStatus.GODKJENT
@@ -139,7 +161,12 @@ internal class AvstemmingMapperTest {
             })
 
         val avstemmingsdataMapper =
-            AvstemmingsdataMapper(utbetalingsoppdrag = utbetalingsoppdgragsliste, id = UUID.randomUUID())
+            AvstemmingsdataMapper(
+                utbetalingsoppdrag = utbetalingsoppdgragsliste,
+                fraOgMed = fraOgMed,
+                til = til,
+                avstemmingId = "1"
+            )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
 
@@ -152,6 +179,9 @@ internal class AvstemmingMapperTest {
 
     @Test
     fun `foerste og siste avstemmingsnoekkel skal finnes fra utbetalingsoppdrag`() {
+        val fraOgMed = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).minusDays(1)
+        val til = LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0).plusHours(1)
+
         val utbetalingsoppdgragsliste = listOf(
             mockk<Utbetalingsoppdrag>(relaxed = true) {
                 every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0) // foerste
@@ -171,11 +201,16 @@ internal class AvstemmingMapperTest {
         )
 
         val avstemmingsdataMapper =
-            AvstemmingsdataMapper(utbetalingsoppdrag = utbetalingsoppdgragsliste, id = UUID.randomUUID())
+            AvstemmingsdataMapper(
+                utbetalingsoppdrag = utbetalingsoppdgragsliste,
+                fraOgMed = fraOgMed,
+                til = til,
+                avstemmingId = "1"
+            )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
         assertAll("skal finne forste og siste avstemmingsnoekkel i liste",
-            { assertEquals("2020041014", dataMelding.periode.datoAvstemtFom) },
+            { assertEquals("2020040914", dataMelding.periode.datoAvstemtFom) },
             { assertEquals("2022012422", dataMelding.periode.datoAvstemtTom) }
         )
     }

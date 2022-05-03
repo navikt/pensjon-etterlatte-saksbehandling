@@ -12,17 +12,16 @@ import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Grunnlagsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.KildeType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Periodedata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Totaldata
-import java.nio.ByteBuffer
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 class AvstemmingsdataMapper(
     private val utbetalingsoppdrag: List<Utbetalingsoppdrag>,
-    private val id: UUID,
+    private val fraOgMed: LocalDateTime,
+    private val til: LocalDateTime,
+    private val avstemmingId: String,
     private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING
 ) {
-    private val avleverendeAvstemmingsId = encodeUUIDBase64(id)
-
     fun opprettAvstemmingsmelding(): List<Avstemmingsdata> =
         if (utbetalingsoppdrag.isEmpty()) emptyList()
         else startmelding() + datameldinger() + sluttmelding()
@@ -44,15 +43,17 @@ class AvstemmingsdataMapper(
     private fun avstemmingsdata(aksjonstype: AksjonType) =
         Avstemmingsdata().apply {
             aksjon = Aksjonsdata().apply {
+                val periode = periode(utbetalingsoppdrag)
+
                 aksjonType = aksjonstype
                 kildeType = KildeType.AVLEV
                 avstemmingType = AvstemmingType.GRSN
                 avleverendeKomponentKode = "BARNEPE" // TODO: korrekt?
                 mottakendeKomponentKode = "OS"
                 underkomponentKode = "BARNEPE" // TODO: korrekt?
-                //nokkelFom =  // TODO: logikk for å finne laveste avstemmingsnøkkel
-                // nokkelTom // TODO: logikk for å finne høyeste avstemmingsnøkkel
-                avleverendeAvstemmingId = avleverendeAvstemmingsId
+                nokkelFom = periode.start.format(tidsstempelMikro)
+                nokkelTom = periode.endInclusive.format(tidsstempelMikro)
+                avleverendeAvstemmingId = avstemmingId
                 brukerId = "BARNEPE" // TODO: finne ut hva som skal settes her
             }
         }
@@ -72,9 +73,8 @@ class AvstemmingsdataMapper(
                 Detaljdata().apply {
                     this.detaljType = detaljType
                     offnr = it.foedselsnummer
-                    // TODO: // trans-nokkel-avlev, skal dette være vedtak.sakId ?
-                    avleverendeTransaksjonNokkel = it.avstemmingsnoekkel.format(tidsstempel)
-                    tidspunkt = it.avstemmingsnoekkel.format(tidsstempel)
+                    avleverendeTransaksjonNokkel = it.sakId // TODO skal dette være sakId ?
+                    tidspunkt = it.avstemmingsnoekkel.format(tidsstempelTime)
                     if (detaljType in listOf(DetaljType.AVVI, DetaljType.VARS) && it.oppdragKvittering != null) {
                         meldingKode = it.meldingKodeOppdrag
                         alvorlighetsgrad = it.feilkodeOppdrag
@@ -113,29 +113,21 @@ class AvstemmingsdataMapper(
 
     private fun periodedata() =
         Periodedata().apply {
-            val periode = periode(utbetalingsoppdrag)
-            datoAvstemtFom = periode.start
-            datoAvstemtTom = periode.endInclusive
+            datoAvstemtFom = fraOgMed.format(tidsstempelTime)
+            datoAvstemtTom = til.minusHours(1).format(tidsstempelTime)
         }
 
-
-    private fun periode(liste: List<Utbetalingsoppdrag>): ClosedRange<String> {
+    private fun periode(liste: List<Utbetalingsoppdrag>): ClosedRange<LocalDateTime> {
         check(liste.isNotEmpty())
-        return object : ClosedRange<String> {
-            override val start = liste.minOf { it.avstemmingsnoekkel }.format(tidsstempel)
-            override val endInclusive = liste.maxOf { it.avstemmingsnoekkel }.format(tidsstempel)
+        return object : ClosedRange<LocalDateTime> {
+            override val start = liste.minOf { it.avstemmingsnoekkel }
+            override val endInclusive = liste.maxOf { it.avstemmingsnoekkel }
         }
-    }
-
-    private fun encodeUUIDBase64(uuid: UUID): String {
-        val bb = ByteBuffer.wrap(ByteArray(16))
-        bb.putLong(uuid.mostSignificantBits)
-        bb.putLong(uuid.leastSignificantBits)
-        return Base64.getUrlEncoder().encodeToString(bb.array()).substring(0, 22)
     }
 
     companion object {
         private const val ANTALL_DETALJER_PER_AVSTEMMINGMELDING = 70
-        private val tidsstempel = DateTimeFormatter.ofPattern("yyyyMMddHH")
+        private val tidsstempelTime = DateTimeFormatter.ofPattern("yyyyMMddHH")
+        private val tidsstempelMikro = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
     }
 }

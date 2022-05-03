@@ -1,13 +1,25 @@
 package no.nav.etterlatte
 
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.http.HttpStatusCode
 import io.mockk.every
+import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import no.nav.etterlatte.avstemming.AvstemmingJob
+import no.nav.etterlatte.avstemming.AvstemmingService
 import no.nav.etterlatte.common.Jaxb
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.config.JmsConnectionFactory
+import no.nav.etterlatte.config.LeaderElection
+import no.nav.etterlatte.config.required
 import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.util.TestContainers
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
@@ -17,6 +29,11 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
+import java.net.InetAddress
+import java.time.Duration
+import java.time.Instant
+import java.util.*
+
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApplicationIntegrationTest {
@@ -45,30 +62,44 @@ class ApplicationIntegrationTest {
             "OPPDRAG_MQ_PORT" to ibmMQContainer.firstMappedPort.toString(),
             "OPPDRAG_MQ_CHANNEL" to "DEV.ADMIN.SVRCONN",
             "OPPDRAG_MQ_MANAGER" to "QM1",
+            "OPPDRAG_AVSTEMMING_MQ_NAME" to "DEV.QUEUE.1",
 
             "srvuser" to "admin",
             "srvpwd" to "passw0rd",
+
+            "ELECTOR_PATH" to "some.path"
         )
+
+        val slot = slot<AvstemmingService>()
 
         val applicationContext = spyk(ApplicationContext(env)).apply {
             every { rapidsConnection() } returns spyk(TestRapid()).also { rapidsConnection = it }
             every { jmsConnectionFactory() } answers { spyk(callOriginal()).also { connectionFactory = it } }
+            every { avstemmingJob(capture(slot), any(), any()) } answers {
+                AvstemmingJob(
+                    avstemmingService = slot.captured,
+                    leaderElection = LeaderElection(env.required("ELECTOR_PATH"), HttpClient(mockElectionResult())),
+                    starttidspunkt = Date.from(Instant.now().plusSeconds(5)),
+                    periode = Duration.ofSeconds(30)
+                )
+            }
         }
 
         rapidApplication(applicationContext).start()
     }
 
-    @AfterAll
-    fun afterAll() {
-        connectionFactory.stop()
-        ibmMQContainer.stop()
-        postgreSQLContainer.stop()
-        rapidsConnection.stop()
+    private fun mockElectionResult() = MockEngine {
+        respond(
+            content = mapOf("name" to withContext(Dispatchers.IO) {
+                InetAddress.getLocalHost()
+            }.hostName).toJson(),
+            status = HttpStatusCode.OK
+        )
     }
 
-    @AfterEach
-    fun afterEach() {
-        rapidsConnection.reset()
+    @Test
+    fun `test avstemmingsjobb`() {
+        sendFattetVedtakEvent(FATTET_VEDTAK_1)
     }
 
     @Test
@@ -87,7 +118,6 @@ class ApplicationIntegrationTest {
         verify(timeout = TIMEOUT) { rapidsConnection.publish(
             match {
                 it.toJsonNode().let { event ->
-                    event["@event_name"].textValue() == "utbetaling_oppdatert" &&
                     event["@status"].textValue() == UtbetalingsoppdragStatus.GODKJENT.name
                 }
             }
@@ -117,6 +147,19 @@ class ApplicationIntegrationTest {
         )}
     }
 
+    @AfterEach
+    fun afterEach() {
+        rapidsConnection.reset()
+    }
+
+    @AfterAll
+    fun afterAll() {
+        connectionFactory.stop()
+        ibmMQContainer.stop()
+        postgreSQLContainer.stop()
+        rapidsConnection.stop()
+    }
+
     // TODO legg på flere tilsvarende tester her når vi vet hvilke statuser vi får
 
     private fun sendFattetVedtakEvent(vedtakEvent: String) {
@@ -136,6 +179,6 @@ class ApplicationIntegrationTest {
     companion object {
         val FATTET_VEDTAK_1 = readFile("/vedtak1.json")
         val FATTET_VEDTAK_2 = readFile("/vedtak2.json")
-        const val TIMEOUT: Long = 2000
+        const val TIMEOUT: Long = 10000
     }
 }

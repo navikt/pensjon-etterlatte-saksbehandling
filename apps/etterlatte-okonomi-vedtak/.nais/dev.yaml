@@ -17,6 +17,7 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
+  leaderElection: true
   gcp:
     sqlInstances:
       - type: POSTGRES_14

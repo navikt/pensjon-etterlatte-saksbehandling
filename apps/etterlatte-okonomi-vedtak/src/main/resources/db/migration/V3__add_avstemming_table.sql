@@ -17,8 +17,9 @@ RENAME COLUMN kvittering TO oppdrag_kvittering;
 
 
 CREATE TABLE avstemming (
-    id                      UUID                PRIMARY KEY,
+    id                      VARCHAR(32)                PRIMARY KEY,
     opprettet               TIMESTAMP WITH TIME ZONE NOT NULL,
-    avstemmingsnoekkel_tom  TIMESTAMP WITH TIME ZONE NOT NULL,
+    fra_og_med              TIMESTAMP WITH TIME ZONE NOT NULL,
+    til                     TIMESTAMP WITH TIME ZONE NOT NULL,
     antall_avstemte_oppdrag INT                      NOT NULL
 );

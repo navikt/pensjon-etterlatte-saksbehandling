@@ -26,27 +26,27 @@ internal class AvstemmingServiceTest {
 
     @Test
     fun `skal opprette avstemming og sende til oppdrag`() {
-        val avstemmingsnokkelFra = LocalDateTime.now().minusDays(1)
-        val avstemmingsnokkelTil = LocalDateTime.now()
+        val fraOgMed = LocalDateTime.now().minusDays(1)
+        val til = LocalDateTime.now()
+        val utbetalingsoppdrag = listOf(utbetalingsoppdrag(status = UtbetalingsoppdragStatus.FEILET))
+
         val avstemming = Avstemming(
-            id = UUID.randomUUID(),
             opprettet = LocalDateTime.now(),
-            avstemmingsnokkelTilOgMed = avstemmingsnokkelFra,
+            fraOgMed = fraOgMed,
+            til = til,
             antallAvstemteOppdrag = 10
         )
 
-        val utbetalingsoppdrag = listOf(utbetalingsoppdrag(status = UtbetalingsoppdragStatus.FEILET))
-
         every { avstemmingDao.hentSisteAvstemming() } returns avstemming
-        every { utbetalingsoppdragDao.hentAlleUtbetalingsoppdragMellom(avstemmingsnokkelFra, avstemmingsnokkelTil) } returns utbetalingsoppdrag
-        every { avstemmingSender.sendAvstemming(any()) } returns 3
+        every { utbetalingsoppdragDao.hentAlleUtbetalingsoppdragMellom(any(), any()) } returns utbetalingsoppdrag
+        every { avstemmingSender.sendAvstemming(any()) } just runs
         every { avstemmingDao.opprettAvstemming(any()) } returns 1
 
-        avstemmingService.startAvstemming(avstemmingNokkelTil = avstemmingsnokkelTil)
+        avstemmingService.startAvstemming(fraOgMed, til)
 
-        verify { avstemmingSender.sendAvstemming(any()) }
+        verify(exactly = 3) { avstemmingSender.sendAvstemming(any()) }
         verify { avstemmingDao.opprettAvstemming(match {
-            it.antallAvstemteOppdrag == 1 && it.avstemmingsnokkelTilOgMed == avstemmingsnokkelTil
+            it.antallAvstemteOppdrag == 1 && it.fraOgMed == fraOgMed
         }) }
     }
 

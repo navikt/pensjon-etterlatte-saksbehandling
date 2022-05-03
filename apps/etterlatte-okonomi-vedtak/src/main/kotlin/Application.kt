@@ -14,16 +14,27 @@ fun main() {
 }
 
 fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection {
-    val dataSourceBuilder = applicationContext.dataSourceBuilder().also { it.migrate() }
+    val dataSource = applicationContext.dataSourceBuilder().also { it.migrate() }.dataSource()
     val jmsConnectionFactory = applicationContext.jmsConnectionFactory()
-    val utbetalingsoppdragDao = applicationContext.utbetalingsoppdragDao(dataSourceBuilder.dataSource())
+    val utbetalingsoppdragDao = applicationContext.utbetalingsoppdragDao(dataSource)
+
+    val rapidsConnection = applicationContext.rapidsConnection()
     val oppdragService = applicationContext.oppdragService(
         oppdragSender = applicationContext.oppdragSender(jmsConnectionFactory),
         utbetalingsoppdragDao = utbetalingsoppdragDao,
-        rapidsConnection = applicationContext.rapidsConnection()
+        rapidsConnection = rapidsConnection
     )
 
-    return applicationContext.rapidsConnection()
+    val avstemmingService = applicationContext.avstemmingService(
+        avstemmingDao = applicationContext.avstemmingDao(dataSource),
+        avstemmingSender = applicationContext.avstemmingSender(jmsConnectionFactory),
+        utbetalingsoppdragDao = utbetalingsoppdragDao
+    )
+
+    // Jobber
+    applicationContext.avstemmingJob(avstemmingService, applicationContext.leaderElection()).planlegg()
+
+    return rapidsConnection
         .apply {
             applicationContext.kvitteringMottaker(oppdragService, jmsConnectionFactory)
             applicationContext.vedtakMottaker(this, oppdragService)

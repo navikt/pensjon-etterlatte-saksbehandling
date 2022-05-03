@@ -52,17 +52,17 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
             }
         }
 
-    fun hentAlleUtbetalingsoppdragMellom(fraOgMed: LocalDateTime, tilOgMed: LocalDateTime): List<Utbetalingsoppdrag> =
+    fun hentAlleUtbetalingsoppdragMellom(fraOgMed: LocalDateTime, til: LocalDateTime): List<Utbetalingsoppdrag> =
         dataSource.connection.use { connection ->
             val stmt = connection.prepareStatement(
                 "SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, foedselsnummer, utgaaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, meldingkode_oppdrag " +
                         "FROM utbetalingsoppdrag " +
-                        "WHERE avstemmingsnoekkel BETWEEN ? AND ?"
+                        "WHERE avstemmingsnoekkel >= ? AND avstemmingsnoekkel < ?"
             )
 
             stmt.use {
                 it.setTimestamp(1, Timestamp.valueOf(fraOgMed))
-                it.setTimestamp(2, Timestamp.valueOf(tilOgMed))
+                it.setTimestamp(2, Timestamp.valueOf(til))
 
                 it.executeQuery().toList {
                     Utbetalingsoppdrag(

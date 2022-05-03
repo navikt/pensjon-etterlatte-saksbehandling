@@ -8,6 +8,14 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_12
+        cascadingDelete: true
+        name: etterlatte-sak-og-behandling
+        databases:
+          - name: sakogbehandling
+            envVarPrefix: DB
   startup:
     initialDelay: 7
     failureThreshold: 10

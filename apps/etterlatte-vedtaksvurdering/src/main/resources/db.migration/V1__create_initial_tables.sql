@@ -1,20 +1,10 @@
-CREATE TABLE beregningsresultat (
+CREATE TABLE vedtak (
     id UUID PRIMARY KEY,
     sakId BIGINT NOT NULL,
     behandlingId BIGINT NOT NULL,
-    beregningsresultat TEXT
-)
-
-CREATE TABLE vilkaarsresultat (
-    id UUID PRIMARY KEY,
-    sakId BIGINT NOT NULL,
-    behandlingId BIGINT NOT NULL,
+    saksbehandlerId VARCHAR,
+    avkortingsresultat TEXT
     vilkaarsresultat TEXT
-)
-
-CREATE TABLE avkorting (
-    id UUID PRIMARY KEY,
-    sakId BIGINT NOT NULL,
-    behandlingId BIGINT NOT NULL,
     beregningsresultat TEXT
+    vedtakfattet boolean DEFAULT false
 )

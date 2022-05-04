@@ -27,9 +27,11 @@ fun main() {
         RapidApplication.create(env)
             .also { LagreBeregningsresultat(it, vedtaksvurderingService) }
             .start()
+
+        Server(vedtaksvurderingService).run()
+
     }
 
-    Server(vedtaksvurderingService).run()
 
 }
 

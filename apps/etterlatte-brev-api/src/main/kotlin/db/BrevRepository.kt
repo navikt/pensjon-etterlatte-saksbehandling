@@ -70,7 +70,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
     }
 
     private object Queries {
-        const val HENT_BREV_QUERY = "SELECT (id, vedtak_id) FROM brev WHERE vedtak_id = ?"
+        const val HENT_BREV_QUERY = "SELECT id, vedtak_id, pdf FROM brev WHERE vedtak_id = ?"
 
         const val OPPDATER_BREV_QUERY = "UPDATE brev SET pdf = ? WHERE vedtak_id = ? RETURNING id"
 

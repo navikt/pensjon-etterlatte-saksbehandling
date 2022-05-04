@@ -83,7 +83,7 @@ class ApplicationContext(
 
     fun avstemmingSender(jmsConnectionFactory: JmsConnectionFactory) = AvstemmingsdataSender(
         jmsConnectionFactory = jmsConnectionFactory,
-        queue = env.required("OPPDRAG_AVSTEMMING_MQ_NAME") // TODO
+        queue = env.required("OPPDRAG_AVSTEMMING_MQ_NAME")
     )
 
     fun avstemmingService(

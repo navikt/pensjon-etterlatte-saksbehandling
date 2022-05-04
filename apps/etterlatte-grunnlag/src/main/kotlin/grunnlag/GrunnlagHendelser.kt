@@ -19,7 +19,7 @@ enum class GrunnlagHendelserType {
 class GrunnlagHendelser(
     rapidsConnection: RapidsConnection,
     private val grunnlag: GrunnlagFactory,
-    private val datasource: DataSource
+    //private val datasource: DataSource
 ) : River.PacketListener {
 
 
@@ -30,13 +30,13 @@ class GrunnlagHendelser(
             validate { it.demandValue("@event_name", "ny_opplysning") }
             validate { it.requireKey("opplysning") }
             validate { it.requireKey("saksId") }
+            validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
 
     override fun onPacket(packet: no.nav.helse.rapids_rivers.JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             val gjeldendeGrunnlag = grunnlag.hent(packet["saksId"].asLong())
-            //TODO denne ble stygg
             val opplysning = objectMapper.treeToValue<Grunnlagsopplysning<ObjectNode>>(packet["opplysning"])!!
             gjeldendeGrunnlag.leggTilGrunnlagListe(listOf(opplysning))
             logger.info("Har gjort et forsøk på å legge til en opplysning tror jeg")

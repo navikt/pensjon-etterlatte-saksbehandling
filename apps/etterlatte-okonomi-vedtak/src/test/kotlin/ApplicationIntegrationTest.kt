@@ -8,13 +8,12 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import io.mockk.every
 import io.mockk.spyk
 import io.mockk.verify
-import no.nav.etterlatte.utbetaling.UtbetalingJaxb
+import no.nav.etterlatte.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.config.JmsConnectionFactory
-import no.nav.etterlatte.domain.UtbetalingStatus
+import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.util.TestContainers
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.junit.jupiter.api.AfterAll
@@ -153,7 +152,7 @@ class ApplicationIntegrationTest {
     private fun sendKvitteringsmeldingFraOppdrag(oppdrag: Oppdrag) {
         connectionFactory.connection().createSession().use { session ->
             val producer = session.createProducer(session.createQueue("DEV.QUEUE.2"))
-            val message = session.createTextMessage(UtbetalingJaxb.toXml(oppdrag))
+            val message = session.createTextMessage(OppdragJaxb.toXml(oppdrag))
             producer.send(message)
         }
     }

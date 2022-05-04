@@ -1,12 +1,10 @@
-package no.nav.etterlatte.oppdrag
+package no.nav.etterlatte.iverksetting
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.domain.UtbetalingStatus
+import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.oppdrag
 import no.nav.etterlatte.readFile
-import no.nav.etterlatte.utbetaling.UtbetalingService
-import no.nav.etterlatte.utbetaling.VedtakMottaker
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -16,7 +14,7 @@ internal class VedtakMottakerTest {
 
     private val utbetalingService = mockk<UtbetalingService>(relaxed = true) {
         every { iverksettUtbetaling(any(), any()) } returns mockk {
-            every { status } returns UtbetalingStatus.SENDT
+            every { status } returns no.nav.etterlatte.iverksetting.utbetaling.UtbetalingStatus.SENDT
             every { utgaaendeOppdrag } returns oppdrag("3")
         }
     }

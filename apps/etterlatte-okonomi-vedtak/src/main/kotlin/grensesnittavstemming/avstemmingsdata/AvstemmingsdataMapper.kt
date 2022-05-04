@@ -1,7 +1,7 @@
-package no.nav.etterlatte.grensesnittavstemming
+package no.nav.etterlatte.grensesnittavstemming.avstemmingsdata
 
-import no.nav.etterlatte.domain.Utbetaling
-import no.nav.etterlatte.domain.UtbetalingStatus
+import no.nav.etterlatte.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Aksjonsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AvstemmingType

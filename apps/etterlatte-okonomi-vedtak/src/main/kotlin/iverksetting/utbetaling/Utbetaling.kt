@@ -1,4 +1,4 @@
-package no.nav.etterlatte.domain
+package no.nav.etterlatte.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.trygdeetaten.skjema.oppdrag.Oppdrag

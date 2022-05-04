@@ -1,9 +1,12 @@
-package no.nav.etterlatte.utbetaling
+package no.nav.etterlatte.iverksetting
 
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.config.JmsConnectionFactory
-import no.nav.etterlatte.domain.UtbetalingStatus
+import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.etterlatte.iverksetting.oppdrag.vedtakId
+import no.nav.etterlatte.iverksetting.oppdrag.OppdragJaxb
+import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
@@ -40,7 +43,7 @@ class KvitteringMottaker(
         try {
             logger.info("Kvittering på utbetalingsoppdrag fra Oppdrag mottatt med id=${message.jmsMessageID}")
             oppdragXml = message.getBody(String::class.java)
-            val oppdrag = UtbetalingJaxb.toOppdrag(oppdragXml)
+            val oppdrag = OppdragJaxb.toOppdrag(oppdragXml)
 
             utbetalingService.oppdaterKvittering(oppdrag)
 
@@ -75,7 +78,7 @@ class KvitteringMottaker(
     }
 
     private fun oppdragFeilet(oppdrag: Oppdrag, oppdragXml: String) {
-        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet", kv("utbetaling", oppdragXml))
+        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet", kv("iverksetting", oppdragXml))
         utbetalingService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingStatus.FEILET)
     }
 
@@ -83,7 +86,7 @@ class KvitteringMottaker(
         // TODO bør denne håndteres på noen annen måte?
         logger.info(
             "Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet med ukjent feil",
-            kv("utbetaling", oppdragXml)
+            kv("iverksetting", oppdragXml)
         )
         utbetalingService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingStatus.FEILET)
     }

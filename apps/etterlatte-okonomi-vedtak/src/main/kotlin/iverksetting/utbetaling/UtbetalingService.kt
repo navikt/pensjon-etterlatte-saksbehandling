@@ -1,7 +1,8 @@
-package no.nav.etterlatte.utbetaling
+package no.nav.etterlatte.iverksetting.utbetaling
 
-import no.nav.etterlatte.domain.Utbetaling
-import no.nav.etterlatte.domain.UtbetalingStatus
+import no.nav.etterlatte.iverksetting.oppdrag.OppdragMapper
+import no.nav.etterlatte.iverksetting.oppdrag.OppdragSender
+import no.nav.etterlatte.iverksetting.oppdrag.vedtakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Vedtak

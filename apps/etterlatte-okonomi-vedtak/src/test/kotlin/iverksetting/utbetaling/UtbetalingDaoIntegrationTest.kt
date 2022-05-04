@@ -1,12 +1,10 @@
-package no.nav.etterlatte.oppdrag
+package no.nav.etterlatte.iverksetting.utbetaling
 
 import no.nav.etterlatte.attestasjon
 import no.nav.etterlatte.config.DataSourceBuilder
-import no.nav.etterlatte.domain.UtbetalingStatus
-import no.nav.etterlatte.utbetaling.OppdragMapper
-import no.nav.etterlatte.utbetaling.UtbetalingDao
-import no.nav.etterlatte.utbetaling.vedtakId
-import no.nav.etterlatte.util.TestContainers
+import no.nav.etterlatte.iverksetting.oppdrag.OppdragMapper
+import no.nav.etterlatte.iverksetting.oppdrag.vedtakId
+import no.nav.etterlatte.TestContainers
 import no.nav.etterlatte.vedtak
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import org.junit.jupiter.api.AfterAll
@@ -45,17 +43,6 @@ internal class UtbetalingDaoIntegrationTest {
             utbetalingDao = UtbetalingDao(dataSource)
             it.migrate()
         }
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
-
-    }
-
-    @AfterEach
-    fun afterEach() {
-        cleanDatabase()
     }
 
     private fun cleanDatabase() {
@@ -162,5 +149,15 @@ internal class UtbetalingDaoIntegrationTest {
         )
 
         assertEquals(UtbetalingStatus.GODKJENT, utbetalingsoppdragOppdatert.status)
+    }
+
+    @AfterEach
+    fun afterEach() {
+        cleanDatabase()
+    }
+
+    @AfterAll
+    fun afterAll() {
+        postgreSQLContainer.stop()
     }
 }

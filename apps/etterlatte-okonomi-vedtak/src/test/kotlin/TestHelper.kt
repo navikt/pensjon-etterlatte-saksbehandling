@@ -1,14 +1,14 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.domain.Utbetaling
-import no.nav.etterlatte.domain.UtbetalingStatus
+import no.nav.etterlatte.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
 import no.nav.etterlatte.libs.common.vedtak.Endringskode
 import no.nav.etterlatte.libs.common.vedtak.Enhetstype
 import no.nav.etterlatte.libs.common.vedtak.Oppdragsenhet
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
-import no.nav.etterlatte.utbetaling.OppdragMapper
+import no.nav.etterlatte.iverksetting.oppdrag.OppdragMapper
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import java.io.FileNotFoundException
 import java.math.BigDecimal

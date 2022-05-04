@@ -1,4 +1,4 @@
-package no.nav.etterlatte.utbetaling
+package no.nav.etterlatte.iverksetting.oppdrag
 
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Endringskode

@@ -1,16 +1,16 @@
 package no.nav.etterlatte.config
 
 import no.nav.etterlatte.common.next
-import no.nav.etterlatte.grensesnittavstemming.AvstemmingsdataSender
 import no.nav.etterlatte.grensesnittavstemming.GrensesnittavstemmingDao
 import no.nav.etterlatte.grensesnittavstemming.GrensesnittsavstemmingJob
 import no.nav.etterlatte.grensesnittavstemming.GrensesnittsavstemmingService
-import no.nav.etterlatte.utbetaling.KvitteringMottaker
-import no.nav.etterlatte.utbetaling.OppdragMapper
-import no.nav.etterlatte.utbetaling.OppdragSender
-import no.nav.etterlatte.utbetaling.UtbetalingDao
-import no.nav.etterlatte.utbetaling.UtbetalingService
-import no.nav.etterlatte.utbetaling.VedtakMottaker
+import no.nav.etterlatte.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
+import no.nav.etterlatte.iverksetting.KvitteringMottaker
+import no.nav.etterlatte.iverksetting.VedtakMottaker
+import no.nav.etterlatte.iverksetting.oppdrag.OppdragMapper
+import no.nav.etterlatte.iverksetting.oppdrag.OppdragSender
+import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingDao
+import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.Duration

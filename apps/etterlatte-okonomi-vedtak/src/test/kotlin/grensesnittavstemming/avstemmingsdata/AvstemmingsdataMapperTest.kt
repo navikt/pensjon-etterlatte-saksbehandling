@@ -1,10 +1,10 @@
-package no.nav.etterlatte.avstemming
+package no.nav.etterlatte.grensesnittavstemming.avstemmingsdata
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.domain.Utbetaling
-import no.nav.etterlatte.domain.UtbetalingStatus
-import no.nav.etterlatte.grensesnittavstemming.AvstemmingsdataMapper
+import no.nav.etterlatte.grensesnittavstemming.avstemmingsdata.AvstemmingsdataMapper
+import no.nav.etterlatte.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetalingsoppdrag
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Avstemmingsdata
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.assertAll
 import java.time.LocalDateTime
 import java.time.Month
 
-internal class AvstemmingMapperTest {
+internal class AvstemmingsdataMapperTest {
 
     @Test
     fun `skal returnere tom liste dersom det ikke er noen utbetalingsoppdrag og avstemme`() {

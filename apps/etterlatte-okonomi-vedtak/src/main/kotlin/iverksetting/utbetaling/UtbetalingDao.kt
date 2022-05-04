@@ -1,8 +1,8 @@
-package no.nav.etterlatte.utbetaling
+package no.nav.etterlatte.iverksetting.utbetaling
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.domain.Utbetaling
-import no.nav.etterlatte.domain.UtbetalingStatus
+import no.nav.etterlatte.iverksetting.oppdrag.OppdragJaxb
+import no.nav.etterlatte.iverksetting.oppdrag.vedtakId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 import javax.sql.DataSource
 
 
-data class UtbetalingsoppdragNotFoundException(override val message: String) : RuntimeException(message)
+data class UtbetalingNotFoundException(override val message: String) : RuntimeException(message)
 
 class UtbetalingDao(private val dataSource: DataSource) {
 
@@ -41,8 +41,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
                         avstemmingsnoekkel = getTimestamp("avstemmingsnoekkel").toLocalDateTime(),
                         endret = getTimestamp("endret").toLocalDateTime(),
                         foedselsnummer = getString("foedselsnummer"),
-                        utgaaendeOppdrag = getString("utgaaende_oppdrag").let(UtbetalingJaxb::toOppdrag),
-                        oppdragKvittering = getString("oppdrag_kvittering")?.let(UtbetalingJaxb::toOppdrag),
+                        utgaaendeOppdrag = getString("utgaaende_oppdrag").let(OppdragJaxb::toOppdrag),
+                        oppdragKvittering = getString("oppdrag_kvittering")?.let(OppdragJaxb::toOppdrag),
                         beskrivelseOppdrag = getString("beskrivelse_oppdrag"),
                         feilkodeOppdrag = getString("feilkode_oppdrag"),
                         meldingKodeOppdrag = getString("meldingkode_oppdrag")
@@ -75,8 +75,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
                         avstemmingsnoekkel = getTimestamp("avstemmingsnoekkel").toLocalDateTime(),
                         endret = getTimestamp("endret").toLocalDateTime(),
                         foedselsnummer = getString("foedselsnummer"),
-                        utgaaendeOppdrag = getString("utgaaende_oppdrag").let(UtbetalingJaxb::toOppdrag),
-                        oppdragKvittering = getString("oppdrag_kvittering")?.let(UtbetalingJaxb::toOppdrag),
+                        utgaaendeOppdrag = getString("utgaaende_oppdrag").let(OppdragJaxb::toOppdrag),
+                        oppdragKvittering = getString("oppdrag_kvittering")?.let(OppdragJaxb::toOppdrag),
                         beskrivelseOppdrag = getString("beskrivelse_oppdrag"),
                         feilkodeOppdrag = getString("feilkode_oppdrag"),
                         meldingKodeOppdrag = getString("meldingkode_oppdrag")
@@ -88,7 +88,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
     private fun hentUtbetalingNonNull(vedtakId: String): Utbetaling =
         hentUtbetaling(vedtakId)
-            ?: throw UtbetalingsoppdragNotFoundException("Oppdrag for vedtak med vedtakId=$vedtakId finnes ikke")
+            ?: throw UtbetalingNotFoundException("Oppdrag for vedtak med vedtakId=$vedtakId finnes ikke")
 
     fun opprettUtbetaling(vedtak: Vedtak, oppdrag: Oppdrag, opprettetTidspunkt: LocalDateTime) =
         dataSource.connection.use { connection ->
@@ -103,7 +103,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 it.setString(1, vedtak.vedtakId)
                 it.setString(2, vedtak.behandlingsId)
                 it.setString(3, vedtak.sakId)
-                it.setString(4, UtbetalingJaxb.toXml(oppdrag))
+                it.setString(4, OppdragJaxb.toXml(oppdrag))
                 it.setString(5, UtbetalingStatus.SENDT.name)
                 it.setString(6, vedtak.toJson())
                 it.setTimestamp(7, Timestamp.valueOf(opprettetTidspunkt))
@@ -144,7 +144,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
             )
 
             stmt.use {
-                it.setString(1, UtbetalingJaxb.toXml(oppdragMedKvittering))
+                it.setString(1, OppdragJaxb.toXml(oppdragMedKvittering))
                 it.setString(2, oppdragMedKvittering.mmel.beskrMelding)
                 it.setString(3, oppdragMedKvittering.mmel.kodeMelding)
                 it.setString(4, oppdragMedKvittering.mmel.alvorlighetsgrad)

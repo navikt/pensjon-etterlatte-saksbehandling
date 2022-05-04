@@ -1,4 +1,4 @@
-package no.nav.etterlatte.grensesnittavstemming
+package no.nav.etterlatte.grensesnittavstemming.avstemmingsdata
 
 import no.nav.etterlatte.config.JmsConnectionFactory
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Avstemmingsdata
@@ -13,7 +13,7 @@ class AvstemmingsdataSender(
         val connection = jmsConnectionFactory.connection()
         connection.createSession().use { session ->
             val producer = session.createProducer(session.createQueue(queue))
-            val message = session.createTextMessage(GrensesnittavstemmingJaxb.toXml(avstemmingsdata))
+            val message = session.createTextMessage(AvstemmingsdataJaxb.toXml(avstemmingsdata))
             producer.send(message)
             logger.info("Avstemmingsdata overført til Oppdrag")
         }

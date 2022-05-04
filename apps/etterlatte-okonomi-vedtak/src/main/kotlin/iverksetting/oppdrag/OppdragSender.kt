@@ -1,4 +1,4 @@
-package no.nav.etterlatte.utbetaling
+package no.nav.etterlatte.iverksetting.oppdrag
 
 import com.ibm.mq.jms.MQQueue
 import no.nav.etterlatte.config.JmsConnectionFactory
@@ -15,7 +15,7 @@ class OppdragSender(
         val connection = jmsConnectionFactory.connection()
         connection.createSession().use { session ->
             val producer = session.createProducer(session.createQueue(queue))
-            val message = session.createTextMessage(UtbetalingJaxb.toXml(oppdrag)).apply {
+            val message = session.createTextMessage(OppdragJaxb.toXml(oppdrag)).apply {
                 jmsReplyTo = MQQueue(replyQueue)
             }
             producer.send(message)

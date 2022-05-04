@@ -4,19 +4,14 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.auth.*
 import io.ktor.config.*
 import no.nav.etterlatte.grunnlag.*
-import no.nav.etterlatte.sak.RealSakService
-import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.sak.SakService
 import no.nav.security.token.support.ktor.tokenValidationSupport
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 
 interface BeanFactory {
     fun datasourceBuilder(): DataSourceBuilder
-    fun sakService(): SakService
     fun grunnlagsService(): GrunnlagService
     fun tokenValidering(): Authentication.Configuration.()->Unit
-    fun sakDao(): SakDao
     fun grunnlagDao(): GrunnlagDao
     fun opplysningDao(): OpplysningDao
     fun rapid():RapidsConnection
@@ -41,9 +36,8 @@ abstract class CommonFactory: BeanFactory{
         return cached { GrunnlagFactory(grunnlagDao(), opplysningDao()) }
     }
 
-    override fun sakService(): SakService = RealSakService(sakDao())
     override fun grunnlagsService(): GrunnlagService = RealGrunnlagService(grunnlagDao(), opplysningDao(), GrunnlagFactory(grunnlagDao(), opplysningDao())) //grunnlagHendelser().nyHendelse)
-    override fun sakDao(): SakDao = SakDao{ databaseContext().activeTx()}
+
     override fun grunnlagDao(): GrunnlagDao = GrunnlagDao { databaseContext().activeTx() }
     override fun opplysningDao(): OpplysningDao = OpplysningDao { databaseContext().activeTx() }
 }

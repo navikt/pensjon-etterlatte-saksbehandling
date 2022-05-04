@@ -82,7 +82,7 @@ class GrunnlagAggregat(
             data
         )
         opplysninger.nyOpplysning(grunnlagsopplysning)
-        opplysninger.leggOpplysningTilBehandling(lagretGrunnlag.id, grunnlagsopplysning.id)
+        opplysninger.leggOpplysningTilGrunnlag(lagretGrunnlag.id, grunnlagsopplysning.id)
         lagredeOpplysninger += grunnlagsopplysning
         logger.info("La til opplysning $type i behandling ${lagretGrunnlag.id}")
         return grunnlagsopplysning.id

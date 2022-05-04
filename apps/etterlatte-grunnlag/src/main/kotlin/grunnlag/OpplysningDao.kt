@@ -49,7 +49,7 @@ class OpplysningDao(private val connection: () -> Connection) {
             }
     }
 
-    fun leggOpplysningTilBehandling(behandling: UUID, opplysning: UUID) {
+    fun leggOpplysningTilGrunnlag(behandling: UUID, opplysning: UUID) {
         connection().prepareStatement("INSERT INTO opplysning_i_behandling(behandling_id, opplysning_id) VALUES(?, ?)")
             .apply {
                 setObject(1, behandling)

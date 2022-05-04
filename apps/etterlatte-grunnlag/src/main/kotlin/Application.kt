@@ -36,7 +36,7 @@ fun main() {
     RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule{
         module(beanFactory)
     }.build().apply {
-        GrunnlagHendelser(this, GrunnlagFactory(beanFactory.grunnlagDao(), beanFactory.opplysningDao()), beanFactory.datasourceBuilder().dataSource)
+        GrunnlagHendelser(this, GrunnlagFactory(beanFactory.opplysningDao()), beanFactory.datasourceBuilder().dataSource)
     }.start()
 }
 

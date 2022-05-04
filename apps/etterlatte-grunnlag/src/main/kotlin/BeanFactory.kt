@@ -10,7 +10,6 @@ interface BeanFactory {
     fun datasourceBuilder(): DataSourceBuilder
     fun grunnlagsService(): GrunnlagService
     fun tokenValidering(): Authentication.Configuration.()->Unit
-    fun grunnlagDao(): GrunnlagDao
     fun opplysningDao(): OpplysningDao
     fun behandlingsFactory(): GrunnlagFactory
 }
@@ -26,12 +25,11 @@ abstract class CommonFactory: BeanFactory{
     }
 
     override fun behandlingsFactory(): GrunnlagFactory {
-        return cached { GrunnlagFactory(grunnlagDao(), opplysningDao()) }
+        return cached { GrunnlagFactory(opplysningDao()) }
     }
 
-    override fun grunnlagsService(): GrunnlagService = RealGrunnlagService(grunnlagDao(), opplysningDao(), GrunnlagFactory(grunnlagDao(), opplysningDao())) //grunnlagHendelser().nyHendelse)
+    override fun grunnlagsService(): GrunnlagService = RealGrunnlagService(opplysningDao(), GrunnlagFactory(opplysningDao())) //grunnlagHendelser().nyHendelse)
 
-    override fun grunnlagDao(): GrunnlagDao = GrunnlagDao { databaseContext().activeTx() }
     override fun opplysningDao(): OpplysningDao = OpplysningDao { databaseContext().activeTx() }
 }
 

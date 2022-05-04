@@ -2,12 +2,10 @@ package no.nav.etterlatte.grunnlag
 
 import io.ktor.application.*
 import io.ktor.http.*
-import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
 import no.nav.etterlatte.libs.common.grunnlag.DetaljertGrunnlag
-import java.util.*
 
 
 //KUN LES
@@ -19,7 +17,6 @@ fun Route.grunnlagRoutes(service: GrunnlagService) {
             //TODO toLong?!?
             call.respond(service.hentGrunnlag(saksId.toLong())?.let {
                 DetaljertGrunnlag(
-                    it.id,
                     it.saksId,
                     it.grunnlag,
                 )

@@ -2,9 +2,9 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.*
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.objectMapper
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.*
@@ -13,7 +13,6 @@ import java.util.*
 
 class GrunnlagAggregat(
     private val saksid: Long,
-    private val grunnlagDao: GrunnlagDao,
     private val opplysninger: OpplysningDao
 ) {
     companion object {
@@ -21,36 +20,17 @@ class GrunnlagAggregat(
 
         fun opprett(
             sak: Long,
-            grunnlag: GrunnlagDao,
             opplysninger: OpplysningDao
         ): GrunnlagAggregat {
-            logger.info("Oppretter en behandling på ${sak}")
-            return Grunnlag(UUID.randomUUID(), sak, emptyList())
+            logger.info("Oppretter grunnlag for ${sak}")
+            return Grunnlag(sak, emptyList())
                 .also {
-                    grunnlag.opprett(it)
-                    logger.info("Opprettet behandling ${it.id} i sak ${it.saksId}")
+                    logger.info("Opprettet grunnlag for sak ${it.saksId}")
                 }
-                .let { GrunnlagAggregat(it.saksId, grunnlag, opplysninger) }
+                .let { GrunnlagAggregat(it.saksId, opplysninger) }
         }
     }
 
-    //TODO trengs noe sånt?
-    /*
-    private object TilgangDao {
-        fun sjekkOmBehandlingTillatesEndret(grunnlag: Grunnlag): Boolean {
-            return grunnlag.status in listOf(
-                BehandlingStatus.GYLDIGHETSPRØVD,
-                BehandlingStatus.VILKÅRSPRØVD,
-                BehandlingStatus.OPPRETTET,
-                BehandlingStatus.FASTSATT,
-                BehandlingStatus.BEREGNET
-            )
-        }
-    }
-
-     */
-
-    var lagretGrunnlag = requireNotNull(grunnlagDao.hent(saksid))
     private var lagredeOpplysninger = opplysninger.finnOpplysningerIGrunnlag(saksid)
 
     fun leggTilGrunnlagListe(nyeOpplysninger: List<Grunnlagsopplysning<ObjectNode>>) {
@@ -59,7 +39,6 @@ class GrunnlagAggregat(
         for (opplysning in nyeOpplysninger) {
             leggTilGrunnlagUtenVilkårsprøving(opplysning.opplysning, opplysning.opplysningType, opplysning.kilde)
         }
-        //vilkårsprøv()
     }
 
     fun leggTilGrunnlagUtenVilkårsprøving(
@@ -67,13 +46,6 @@ class GrunnlagAggregat(
         type: Opplysningstyper,
         kilde: Grunnlagsopplysning.Kilde?
     ): UUID {
-        /*if (!TilgangDao.sjekkOmBehandlingTillatesEndret(lagretBehandling)) {
-            throw AvbruttBehandlingException(
-                "Det tillattes ikke å legge til grunnlag uten vilkårsprøving for Behandling med id ${lagretBehandling.id} og status: ${lagretBehandling.status}"
-            )
-        }
-
-         */
         val grunnlagsopplysning = Grunnlagsopplysning(
             UUID.randomUUID(),
             kildeFraRequestContekst(kilde),
@@ -81,10 +53,9 @@ class GrunnlagAggregat(
             objectMapper.createObjectNode(),
             data
         )
-        opplysninger.nyOpplysning(grunnlagsopplysning)
-        opplysninger.leggOpplysningTilGrunnlag(lagretGrunnlag.id, grunnlagsopplysning.id)
-        lagredeOpplysninger += grunnlagsopplysning
-        logger.info("La til opplysning $type i behandling ${lagretGrunnlag.id}")
+        opplysninger.leggOpplysningTilGrunnlag(saksid, grunnlagsopplysning)
+        lagredeOpplysninger = lagredeOpplysninger + grunnlagsopplysning
+        logger.info("La til opplysning $type i sak ${saksid}")
         return grunnlagsopplysning.id
     }
 
@@ -101,5 +72,6 @@ class GrunnlagAggregat(
     }
 
 
-    fun serialiserbarUtgave() = lagretGrunnlag.copy(grunnlag = lagredeOpplysninger)
+    fun serialiserbarUtgave() = Grunnlag(saksId = saksid, grunnlag = lagredeOpplysninger)
 }
+

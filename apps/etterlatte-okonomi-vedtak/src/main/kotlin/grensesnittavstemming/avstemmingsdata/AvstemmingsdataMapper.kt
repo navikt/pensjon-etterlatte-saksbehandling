@@ -96,14 +96,13 @@ class AvstemmingsdataMapper(
         }
 
     private fun grunnlagsdata() = Grunnlagsdata().apply {
-        val oppdragEtterStatus = utbetaling.groupBy { it.status }
-
-        godkjentAntall = oppdragEtterStatus[UtbetalingStatus.GODKJENT]?.count() ?: 0
-        varselAntall = oppdragEtterStatus[UtbetalingStatus.GODKJENT_MED_FEIL]?.count() ?: 0
-        avvistAntall = oppdragEtterStatus[UtbetalingStatus.AVVIST]?.count() ?: 0
-        val antFeilet = oppdragEtterStatus[UtbetalingStatus.FEILET]?.count() ?: 0
-        val antSendtUtenKvittering = oppdragEtterStatus[UtbetalingStatus.SENDT]?.count() ?: 0
-        manglerAntall = antFeilet + antSendtUtenKvittering
+        val utbetalingEtterStatus = utbetaling.groupBy { it.status }
+        val antFeilet = utbetalingEtterStatus[UtbetalingStatus.FEILET]?.count() ?: 0
+        val antAvvist = utbetalingEtterStatus[UtbetalingStatus.AVVIST]?.count() ?: 0
+        godkjentAntall = utbetalingEtterStatus[UtbetalingStatus.GODKJENT]?.count() ?: 0
+        varselAntall = utbetalingEtterStatus[UtbetalingStatus.GODKJENT_MED_FEIL]?.count() ?: 0
+        avvistAntall = antFeilet + antAvvist
+        manglerAntall = utbetalingEtterStatus[UtbetalingStatus.SENDT]?.count() ?: 0
     }
 
     private fun totaldata() =

@@ -142,8 +142,8 @@ internal class AvstemmingsdataMapperTest {
         assertAll("Skal telle opp rett antall godkjent, varsel, avvist og mangler",
             { assertEquals(2, dataMelding.grunnlag.godkjentAntall) },
             { assertEquals(1, dataMelding.grunnlag.varselAntall) },
-            { assertEquals(3, dataMelding.grunnlag.avvistAntall) },
-            { assertEquals(2, dataMelding.grunnlag.manglerAntall) }
+            { assertEquals(4, dataMelding.grunnlag.avvistAntall) },
+            { assertEquals(1, dataMelding.grunnlag.manglerAntall) }
         )
     }
 

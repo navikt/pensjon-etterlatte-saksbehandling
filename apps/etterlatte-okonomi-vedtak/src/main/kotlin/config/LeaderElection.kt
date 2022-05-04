@@ -16,7 +16,8 @@ class LeaderElection(
 
     fun isLeader(): Boolean {
         val leader = runBlocking {
-            httpClient.get<String>("http://$electorPath/test").let(objectMapper::readTree).get("name").asText()
+            httpClient.get<String>("http://$electorPath/")
+                .let(objectMapper::readTree).get("name").asText()
         }
         val amLeader = leader == me
         logger.info("Current pod: $me. Leader: $leader. Current pod is leader: $amLeader")

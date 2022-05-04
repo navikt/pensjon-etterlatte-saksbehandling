@@ -42,7 +42,7 @@ class VedtakMottaker(
                 } else {
                     val attestasjon: Attestasjon = objectMapper.readValue(packet["@attestasjon"].toJson())
                     val utbetalingsoppdrag = oppdragService.opprettOgSendOppdrag(vedtak, attestasjon)
-                    rapidsConnection.publish(utbetalingEvent(utbetalingsoppdrag))
+                    rapidsConnection.publish("key", utbetalingEvent(utbetalingsoppdrag))
                 }
             } catch (e: Exception) {
                 logger.error("En feil oppstod: ${e.message}", e)

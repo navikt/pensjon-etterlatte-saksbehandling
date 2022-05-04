@@ -1,22 +1,16 @@
 package no.nav.etterlatte
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
-import io.ktor.http.HttpStatusCode
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import io.mockk.every
-import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import no.nav.etterlatte.avstemming.GrensesnittsavstemmingJob
-import no.nav.etterlatte.avstemming.GrensesnittsavstemmingService
 import no.nav.etterlatte.common.Jaxb
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.config.JmsConnectionFactory
-import no.nav.etterlatte.config.LeaderElection
-import no.nav.etterlatte.config.required
 import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -29,10 +23,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
-import java.net.InetAddress
-import java.time.Duration
-import java.time.Instant
-import java.util.*
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -44,6 +34,8 @@ class ApplicationIntegrationTest {
     @Container
     private val ibmMQContainer = TestContainers.ibmMQContainer
 
+    private val electionServer = WireMockServer(options().port(8089))
+
     private lateinit var rapidsConnection: TestRapid
     private lateinit var connectionFactory: JmsConnectionFactory
 
@@ -51,6 +43,7 @@ class ApplicationIntegrationTest {
     fun beforeAll() {
         postgreSQLContainer.start()
         ibmMQContainer.start()
+        electionServer.start()
 
         val env = mapOf(
             "DB_HOST" to postgreSQLContainer.host,
@@ -70,57 +63,29 @@ class ApplicationIntegrationTest {
             "srvuser" to "admin",
             "srvpwd" to "passw0rd",
 
-            "ELECTOR_PATH" to "some.path"
+            "ELECTOR_PATH" to electionServer.baseUrl().replace("http://", "")
         )
 
-        val slot = slot<GrensesnittsavstemmingService>()
+        electionServer.stubFor(get(urlEqualTo("/"))
+                .willReturn(aResponse()
+                    .withBody(mapOf("name" to "some.value").toJson())
+                ))
 
-        val applicationContext = spyk(ApplicationContext(env)).apply {
+        spyk(ApplicationContext(env)).apply {
             every { rapidsConnection() } returns spyk(TestRapid()).also { rapidsConnection = it }
             every { jmsConnectionFactory() } answers { spyk(callOriginal()).also { connectionFactory = it } }
-            every { avstemmingJob(capture(slot), any(), any()) } answers {
-                GrensesnittsavstemmingJob(
-                    grensesnittsavstemmingService = slot.captured,
-                    leaderElection = LeaderElection(env.required("ELECTOR_PATH"), HttpClient(mockElectionResultNotLeader())),
-                    starttidspunkt = Date.from(Instant.now().plusSeconds(5)),
-                    periode = Duration.ofSeconds(30)
-                )
-            }
-        }
-
-        rapidApplication(applicationContext).start()
+        }.run { rapidApplication(this).start() }
     }
-
-    private fun mockElectionResult() = MockEngine {
-        respond(
-            content = mapOf("name" to withContext(Dispatchers.IO) {
-                InetAddress.getLocalHost()
-            }.hostName).toJson(),
-            status = HttpStatusCode.OK
-        )
-    }
-
-    private fun mockElectionResultNotLeader() = MockEngine {
-        respond(
-            content = mapOf("name" to "invalidhost").toJson(),
-            status = HttpStatusCode.OK
-        )
-    }
-
-    /*
-    @Test
-    fun `test avstemmingsjobb`() {
-        sendFattetVedtakEvent(FATTET_VEDTAK_1)
-    }*/
 
     @Test
     fun `skal sende utbetaling til oppdrag`() {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
 
-        verify(timeout = TIMEOUT) { rapidsConnection.publish(
+        verify(timeout = TIMEOUT) { rapidsConnection.publish("key",
             match {
                 it.toJsonNode().let { event ->
                     event["@event_name"].textValue() == "utbetaling_oppdatert" &&
+                    event["@vedtakId"].textValue() == "1" &&
                     event["@status"].textValue() == UtbetalingsoppdragStatus.SENDT.name
                 }
             }
@@ -136,6 +101,7 @@ class ApplicationIntegrationTest {
             match {
                 it.toJsonNode().let { event ->
                     event["@event_name"].textValue() == "utbetaling_oppdatert" &&
+                    event["@vedtakId"].textValue() == "1" &&
                     event["@status"].textValue() == UtbetalingsoppdragStatus.GODKJENT.name
                 }
             }
@@ -151,6 +117,7 @@ class ApplicationIntegrationTest {
             match {
                 it.toJsonNode().let { event ->
                     event["@event_name"].textValue() == "utbetaling_oppdatert" &&
+                    event["@vedtakId"].textValue() == "1" &&
                     event["@status"].textValue() == UtbetalingsoppdragStatus.FEILET.name
                 }
             }
@@ -186,7 +153,6 @@ class ApplicationIntegrationTest {
 
     companion object {
         val FATTET_VEDTAK_1 = readFile("/vedtak1.json")
-        val FATTET_VEDTAK_2 = readFile("/vedtak2.json")
         const val TIMEOUT: Long = 5000
     }
 }

@@ -4,8 +4,6 @@ import no.nav.etterlatte.database.singleOrNull
 import no.nav.etterlatte.database.toList
 import java.sql.Connection
 
-
-
 class SakDao(private val connection: ()->Connection) {
     fun hentSaker(): List<Sak> {
         val statement = connection().prepareStatement("SELECT id, sakType, fnr from sak")
@@ -43,7 +41,6 @@ class SakDao(private val connection: ()->Connection) {
             ident = getString(3),
             id = getLong(1)) }
     }
-
 
 }
 

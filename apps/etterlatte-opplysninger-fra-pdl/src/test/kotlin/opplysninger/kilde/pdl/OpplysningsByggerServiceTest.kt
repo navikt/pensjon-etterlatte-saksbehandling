@@ -2,8 +2,8 @@ package opplysninger.kilde.pdl
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
@@ -161,10 +161,10 @@ internal class OpplysningsByggerServiceTest {
         val behandlingsopplysning = lagOpplysning(Opplysningstyper.AVDOED_PDL_V1, mockk<Person>())
         behandlingsopplysning.apply {
             assertEquals(36, id.toString().length)
-            assertEquals(Behandlingsopplysning.Pdl::class.java, kilde.javaClass)
-            assertEquals(KILDE_PDL, (kilde as Behandlingsopplysning.Pdl).navn)
+            assertEquals(Grunnlagsopplysning.Pdl::class.java, kilde.javaClass)
+            assertEquals(KILDE_PDL, (kilde as Grunnlagsopplysning.Pdl).navn)
             assertTrue(
-                (kilde as Behandlingsopplysning.Pdl).tidspunktForInnhenting in Instant.now()
+                (kilde as Grunnlagsopplysning.Pdl).tidspunktForInnhenting in Instant.now()
                     .minusSeconds(10)..Instant.now().plusSeconds(1)
             )
             assertTrue(meta.asText().isEmpty())

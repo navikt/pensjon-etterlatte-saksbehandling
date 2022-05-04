@@ -3,7 +3,7 @@ package no.nav.etterlatte.grunnlag
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.database.toList
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import java.sql.Connection

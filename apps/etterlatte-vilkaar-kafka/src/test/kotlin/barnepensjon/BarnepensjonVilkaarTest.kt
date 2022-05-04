@@ -4,15 +4,15 @@ import no.nav.etterlatte.barnepensjon.kriterieIngenUtenlandsoppholdSisteFemAar
 import no.nav.etterlatte.barnepensjon.setVikaarVurderingFraKriterier
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AvdoedSoeknad
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Forelder
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.SoekerBarnSoeknad
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsadresseBarn
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsoppholdOpplysninger
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Verge
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Forelder
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Verge
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
@@ -251,7 +251,7 @@ internal class BarnepensjonVilkaarTest {
         fun mapTilVilkaarstypeAvdoedSoeknad(person: AvdoedSoeknad): VilkaarOpplysning<AvdoedSoeknad> {
             return VilkaarOpplysning(
                 Opplysningstyper.AVDOED_SOEKNAD_V1,
-                Behandlingsopplysning.Privatperson("", Instant.now()),
+                Grunnlagsopplysning.Privatperson("", Instant.now()),
                 person
             )
         }
@@ -259,7 +259,7 @@ internal class BarnepensjonVilkaarTest {
         fun mapTilVilkaarstypeSoekerSoeknad(person: SoekerBarnSoeknad): VilkaarOpplysning<SoekerBarnSoeknad> {
             return VilkaarOpplysning(
                 Opplysningstyper.SOEKER_PDL_V1,
-                Behandlingsopplysning.Privatperson("", Instant.now()),
+                Grunnlagsopplysning.Privatperson("", Instant.now()),
                 person
             )
         }
@@ -267,7 +267,7 @@ internal class BarnepensjonVilkaarTest {
         fun mapTilVilkaarstypePerson(person: Person): VilkaarOpplysning<Person> {
             return VilkaarOpplysning(
                 Opplysningstyper.SOEKER_PDL_V1,
-                Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
+                Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
                 person
             )
         }

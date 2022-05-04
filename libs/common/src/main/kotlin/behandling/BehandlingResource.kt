@@ -1,19 +1,15 @@
 package no.nav.etterlatte.libs.common.behandling
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 data class BehandlingSammendragListe(val behandlinger: List<BehandlingSammendrag>)
-data class BehandlingSammendrag(val id: UUID, val sak: Long, val status: BehandlingStatus, val mottattDato: LocalDateTime?)
+
+data class BehandlingSammendrag(val id: UUID, val sak: Long, val status: BehandlingStatus?, val mottattDato: LocalDate?)
+
 data class DetaljertBehandling(
-    val id: UUID,
-    val sak: Long,
-    val grunnlag: List<Behandlingsopplysning<ObjectNode>>,
-    val gyldighetsprøving: GyldighetsResultat?,
-    val vilkårsprøving: VilkaarResultat?,
-    val beregning: Beregning?,
-    val fastsatt: Boolean = false
+        val id: UUID,
+        val sak: Long,
+//TODO: hva mer skal vi ha med her?
 )

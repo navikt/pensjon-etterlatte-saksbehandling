@@ -1,13 +1,8 @@
-import io.ktor.http.*
-
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.etterlatte.BehandlingsService
 import no.nav.etterlatte.OppdaterBehandling
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 
@@ -19,7 +14,7 @@ internal class OppdaterBehandlingTest {
 
     @Test
     fun `skal fordele gyldig soknad til behandling`() {
-        every { behandlingService.leggTilVilkaarsresultat(any(),any()) }.returns(Unit)
+        //every { behandlingService.leggTilVilkaarsresultat(any(),any()) }.returns(Unit)
 
         val inspector = inspector.apply { sendTestMessage(fullMelding) }.inspektør
 

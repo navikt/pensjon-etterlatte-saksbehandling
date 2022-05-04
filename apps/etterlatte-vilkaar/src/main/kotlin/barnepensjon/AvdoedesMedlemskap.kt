@@ -1,6 +1,6 @@
 package no.nav.etterlatte.barnepensjon
 
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AvdoedSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Kriterie

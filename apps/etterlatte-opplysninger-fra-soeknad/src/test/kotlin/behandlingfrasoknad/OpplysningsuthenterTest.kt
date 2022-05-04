@@ -3,8 +3,8 @@ package behandlingfrasoknad
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.opplysningerfrasoknad.Opplysningsuthenter
 import no.nav.etterlatte.common.objectMapper
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BankkontoType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
@@ -32,14 +32,14 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `alle opplysninger skal ha innsender som kilde`() {
-        val kilde = Behandlingsopplysning.Privatperson(
+        val kilde = Grunnlagsopplysning.Privatperson(
             "03108718357", LocalDateTime.parse("2022-02-14T14:37:24.573612786").toInstant(
                 ZoneOffset.UTC
             )
         )
         opplysninger.forEach {
-            assertEquals(kilde.fnr, (it.kilde as Behandlingsopplysning.Privatperson).fnr)
-            assertEquals(kilde.mottatDato, (it.kilde as Behandlingsopplysning.Privatperson).mottatDato)
+            assertEquals(kilde.fnr, (it.kilde as Grunnlagsopplysning.Privatperson).fnr)
+            assertEquals(kilde.mottatDato, (it.kilde as Grunnlagsopplysning.Privatperson).mottatDato)
         }
     }
 

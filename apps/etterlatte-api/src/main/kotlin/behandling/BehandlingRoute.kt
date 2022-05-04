@@ -10,8 +10,8 @@ import io.ktor.routing.post
 import io.ktor.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingsBehov
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import java.time.LocalDateTime
@@ -54,8 +54,8 @@ fun Route.behandlingRoute(service: BehandlingService) {
                     call.response.status(HttpStatusCode(400, "Bad request"))
                     call.respond("SakId mangler")
                 } else {
-                    val testBehandlingsopplysning = Behandlingsopplysning(
-                        UUID.randomUUID(), Behandlingsopplysning.Privatperson(
+                    val testBehandlingsopplysning = Grunnlagsopplysning(
+                        UUID.randomUUID(), Grunnlagsopplysning.Privatperson(
                             "11057523044",
                             LocalDateTime.now().toInstant(ZoneOffset.UTC)
 

@@ -1,10 +1,9 @@
 package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
@@ -15,7 +14,7 @@ data class PersonSakerResult(val person: Person, val saker: SakerResult)
 
 data class BehandlingsBehov(
     val sak: Long,
-    val opplysninger: List<Behandlingsopplysning<ObjectNode>>?
+    val opplysninger: List<Grunnlagsopplysning<ObjectNode>>?
 )
 
 class BehandlingService(

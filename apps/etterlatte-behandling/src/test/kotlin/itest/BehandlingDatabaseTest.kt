@@ -1,17 +1,5 @@
 package no.nav.etterlatte.itest
 
-import no.nav.etterlatte.DataSourceBuilder
-import no.nav.etterlatte.behandling.*
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.sak.SakDao
-import org.junit.jupiter.api.*
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
-import java.time.Instant
-import java.util.*
-import javax.sql.DataSource
-
 /*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingDaoIntegrationTest {

@@ -1,6 +1,6 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.HentOpplysningerFraInntektskomponenten
@@ -26,5 +26,5 @@ interface InntektsKomponenten {
 }
 
 interface OpplysningsBygger {
-    fun byggOpplysninger(barnepensjon: Barnepensjon, inntektsKomponentenResponse: InntektsKomponentenResponse):List<Behandlingsopplysning<out Any>>
+    fun byggOpplysninger(barnepensjon: Barnepensjon, inntektsKomponentenResponse: InntektsKomponentenResponse):List<Grunnlagsopplysning<out Any>>
 }

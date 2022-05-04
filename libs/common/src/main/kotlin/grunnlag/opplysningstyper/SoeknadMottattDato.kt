@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.behandling.opplysningstyper
+package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
 
 import java.time.LocalDateTime
 

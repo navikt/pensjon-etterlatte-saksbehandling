@@ -5,7 +5,7 @@ import no.nav.etterlatte.barnepensjon.hentAdresser
 import no.nav.etterlatte.barnepensjon.hentDoedsdato
 import no.nav.etterlatte.barnepensjon.opplysningsGrunnlagNull
 import no.nav.etterlatte.barnepensjon.setVikaarVurderingFraKriterier
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Person

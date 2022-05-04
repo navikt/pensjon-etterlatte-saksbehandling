@@ -1,23 +1,8 @@
 package no.nav.etterlatte.behandling
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import kotlinx.coroutines.channels.SendChannel
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseKontekst
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
-import java.sql.Connection
-import java.time.LocalDateTime
 
 import java.util.*
 

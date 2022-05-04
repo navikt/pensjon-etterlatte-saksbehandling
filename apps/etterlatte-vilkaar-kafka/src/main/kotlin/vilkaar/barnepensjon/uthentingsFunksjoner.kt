@@ -1,8 +1,8 @@
 package no.nav.etterlatte.barnepensjon
 
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AvdoedSoeknad
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person

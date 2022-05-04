@@ -1,9 +1,8 @@
 package no.nav.etterlatte.opplysninger.kilde.pdl
 
 import no.nav.etterlatte.common.objectMapper
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
@@ -44,7 +43,7 @@ internal class LeggTilOpplysningerFraPdl(
 
 
 interface Behandling {
-    fun leggTilOpplysninger(behandling: UUID, opplysninger: List<Behandlingsopplysning<out Any>>)
+    fun leggTilOpplysninger(behandling: UUID, opplysninger: List<Grunnlagsopplysning<out Any>>)
 }
 
 interface Pdl {
@@ -52,7 +51,7 @@ interface Pdl {
 }
 
 interface OpplysningsBygger {
-    fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl):List<Behandlingsopplysning<out Any>>
+    fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl):List<Grunnlagsopplysning<out Any>>
 }
 
 private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

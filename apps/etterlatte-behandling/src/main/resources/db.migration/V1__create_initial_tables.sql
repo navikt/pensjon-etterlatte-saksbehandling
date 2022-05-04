@@ -24,5 +24,5 @@ CREATE TABLE behandling
     avdoed TEXT,
     soesken TEXT,
     gyldighetssproving TEXT,
-    status TEXT, -- gyldig_soeknad, ikke_gyldig_soeknad, avbrutt, under_behandling, fattet_vedtak, attestert, iverksatt,
+    status TEXT,
 );

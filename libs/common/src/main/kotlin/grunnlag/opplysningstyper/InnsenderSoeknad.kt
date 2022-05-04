@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.behandling.opplysningstyper
+package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
 
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType

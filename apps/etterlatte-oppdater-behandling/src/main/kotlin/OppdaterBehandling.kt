@@ -25,8 +25,6 @@ internal class OppdaterBehandling(
             validate { it.requireKey("grunnlag") }
             validate { it.requireKey("id") }
             validate { it.interestedIn("@gyldighetsvurdering") }
-            validate { it.interestedIn("@vilkaarsvurdering") }
-            validate { it.interestedIn("@beregning") }
             validate { it.interestedIn("@correlation_id") }
 
         }.register(this)
@@ -40,15 +38,6 @@ internal class OppdaterBehandling(
                     behandlinger.leggTilGyldighetsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@gyldighetsvurdering"].toString()))
                     logger.info("Oppdatert Behandling med id $behandlingsID med ny gyldighetsvurdering")
                 }
-                if (packet["@vilkaarsvurdering"].toString().isNotEmpty()) {
-                    behandlinger.leggTilVilkaarsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@vilkaarsvurdering"].toString()))
-                    logger.info("Oppdatert Behandling med id $behandlingsID med ny vilkaarsvurdering")
-                }
-                if (packet["@beregning"].toString().isNotEmpty()) {
-                    behandlinger.leggTilBeregningsresultat(UUID.fromString(behandlingsID), objectMapper.readValue(packet["@beregning"].toString()))
-                    logger.info("Oppdatert Behandling med id $behandlingsID med ny beregning")
-                }
-
 
             } catch (e: Exception){
                 //TODO endre denne
@@ -61,8 +50,6 @@ internal class OppdaterBehandling(
 
 interface Behandling {
     fun leggTilGyldighetsresultat(behandling: UUID, gyldighetsResultat: GyldighetsResultat)
-    fun leggTilVilkaarsresultat(behandling: UUID, vilkaarResultat: VilkaarResultat)
-    fun leggTilBeregningsresultat(behandling: UUID, beregningsResultat: BeregningsResultat)
 }
 
 private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

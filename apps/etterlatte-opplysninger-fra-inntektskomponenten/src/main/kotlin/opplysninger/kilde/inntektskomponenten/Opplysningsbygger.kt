@@ -1,8 +1,8 @@
 package no.nav.etterlatte.opplysninger.kilde.inntektskomponenten
 
 import no.nav.etterlatte.OpplysningsBygger
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import java.time.Instant
@@ -13,7 +13,7 @@ class OpplysningsByggerService : OpplysningsBygger {
     override fun byggOpplysninger(
         barnepensjon: Barnepensjon,
         inntektsKomponentenResponse: InntektsKomponentenResponse
-    ): List<Behandlingsopplysning<out Any>> {
+    ): List<Grunnlagsopplysning<out Any>> {
 
         // TODO: sjekk om det finnes inntekt for uføretrygd eller alderspensjon i løpet av de siste fem år
         val uforetrygd = harFaattUforetrygd(inntektsKomponentenResponse.arbeidsInntektMaaned)
@@ -48,10 +48,10 @@ class OpplysningsByggerService : OpplysningsBygger {
 
 }
 
-fun <T> lagOpplysning(opplysningsType: Opplysningstyper, opplysning: T): Behandlingsopplysning<T> {
-    return Behandlingsopplysning(
+fun <T> lagOpplysning(opplysningsType: Opplysningstyper, opplysning: T): Grunnlagsopplysning<T> {
+    return Grunnlagsopplysning(
         UUID.randomUUID(),
-        Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
+        Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
         opplysningsType,
         objectMapper.createObjectNode(),
         opplysning

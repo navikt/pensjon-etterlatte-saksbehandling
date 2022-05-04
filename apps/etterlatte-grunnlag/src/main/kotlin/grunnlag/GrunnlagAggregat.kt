@@ -2,8 +2,8 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.*
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import org.slf4j.LoggerFactory
 import java.time.Instant

@@ -39,7 +39,7 @@ internal class LesGyldigSoeknadsmelding(
 
             try {
                 val personGalleri = gyldigSoeknad.hentPersongalleriFraSoeknad(packet["@skjema_info"])
-                val familieRelasjonPdl = gyldigSoeknad.hentSoekerFraPdl(personGalleri.soker, pdl)
+                val familieRelasjonPdl = gyldigSoeknad.hentSoekerFraPdl(personGalleri.soeker, pdl)
                 val gyldighetsVurdering = gyldigSoeknad.vurderGyldighet(personGalleri, familieRelasjonPdl)
                 val erGyldigFramsatt = if (gyldighetsVurdering.resultat == VurderingsResultat.OPPFYLT) true else false
                 logger.info("Gyldighetsvurdering I lesGyldigsoeknad: {}", gyldighetsVurdering)

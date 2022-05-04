@@ -2,7 +2,10 @@ package no.nav.etterlatte.oppdrag
 
 import no.nav.etterlatte.attestasjon
 import no.nav.etterlatte.config.DataSourceBuilder
-import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
+import no.nav.etterlatte.domain.UtbetalingStatus
+import no.nav.etterlatte.utbetaling.OppdragMapper
+import no.nav.etterlatte.utbetaling.UtbetalingDao
+import no.nav.etterlatte.utbetaling.vedtakId
 import no.nav.etterlatte.util.TestContainers
 import no.nav.etterlatte.vedtak
 import no.trygdeetaten.skjema.oppdrag.Mmel
@@ -21,13 +24,13 @@ import java.time.LocalDateTime
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class UtbetalingsoppdragDaoIntegrationTest {
+internal class UtbetalingDaoIntegrationTest {
 
     @Container
     private val postgreSQLContainer = TestContainers.postgreSQLContainer
 
     private lateinit var dataSource: DataSource
-    private lateinit var utbetalingsoppdragDao: UtbetalingsoppdragDao
+    private lateinit var utbetalingDao: UtbetalingDao
 
     @BeforeAll
     fun beforeAll() {
@@ -39,7 +42,7 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
             password = postgreSQLContainer.password
         ).let {
             dataSource = it.dataSource()
-            utbetalingsoppdragDao = UtbetalingsoppdragDao(dataSource)
+            utbetalingDao = UtbetalingDao(dataSource)
             it.migrate()
         }
     }
@@ -68,8 +71,8 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
         val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), LocalDateTime.now())
         val opprettet_tidspunkt = LocalDateTime.now()
 
-        utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag, opprettet_tidspunkt)
-        val utbetalingsoppdrag = utbetalingsoppdragDao.hentUtbetalingsoppdrag(vedtak.vedtakId)
+        utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettet_tidspunkt)
+        val utbetalingsoppdrag = utbetalingDao.hentUtbetaling(vedtak.vedtakId)
 
         assertAll(
             "Skal sjekke at utbetalingsoppdrag er korrekt opprettet",
@@ -77,7 +80,7 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
             { assertEquals(vedtak.vedtakId, utbetalingsoppdrag?.vedtakId) },
             { assertEquals(vedtak.behandlingsId, utbetalingsoppdrag?.behandlingId) },
             { assertEquals(vedtak.sakId, utbetalingsoppdrag?.sakId) },
-            { assertEquals(UtbetalingsoppdragStatus.SENDT, utbetalingsoppdrag?.status) },
+            { assertEquals(UtbetalingStatus.SENDT, utbetalingsoppdrag?.status) },
             { assertEquals(vedtak.vedtakId, utbetalingsoppdrag?.vedtakId) },
             {
                 assertTrue(
@@ -115,15 +118,15 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
         val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), LocalDateTime.now())
         val opprettet_tidspunkt = LocalDateTime.now()
 
-        utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag, opprettet_tidspunkt)
+        utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettet_tidspunkt)
 
         val oppdragMedKvittering = oppdrag.apply {
             oppdrag110.oppdragsId = 1
             mmel = Mmel().withAlvorlighetsgrad("08").withBeskrMelding("beskrivende melding").withKodeMelding("1234")
         }
 
-        utbetalingsoppdragDao.oppdaterKvittering(oppdragMedKvittering)
-        val utbetalingsoppdragOppdatert = utbetalingsoppdragDao.hentUtbetalingsoppdrag(oppdrag.vedtakId())
+        utbetalingDao.oppdaterKvittering(oppdragMedKvittering)
+        val utbetalingsoppdragOppdatert = utbetalingDao.hentUtbetaling(oppdrag.vedtakId())
 
         assertAll("skal sjekke at kvittering er opprettet korrekt på utbetalingsoppdrag",
             { assertNotNull(utbetalingsoppdragOppdatert?.oppdragKvittering) },
@@ -148,16 +151,16 @@ internal class UtbetalingsoppdragDaoIntegrationTest {
         val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), LocalDateTime.now())
         val opprettet_tidspunkt = LocalDateTime.now()
 
-        val utbetalingsoppdrag = utbetalingsoppdragDao.opprettUtbetalingsoppdrag(vedtak, oppdrag, opprettet_tidspunkt)
+        val utbetalingsoppdrag = utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettet_tidspunkt)
 
         assertNotNull(utbetalingsoppdrag)
-        assertEquals(UtbetalingsoppdragStatus.SENDT, utbetalingsoppdrag.status)
+        assertEquals(UtbetalingStatus.SENDT, utbetalingsoppdrag.status)
 
-        val utbetalingsoppdragOppdatert = utbetalingsoppdragDao.oppdaterStatus(
+        val utbetalingsoppdragOppdatert = utbetalingDao.oppdaterStatus(
             vedtakId = vedtak.vedtakId,
-            status = UtbetalingsoppdragStatus.GODKJENT
+            status = UtbetalingStatus.GODKJENT
         )
 
-        assertEquals(UtbetalingsoppdragStatus.GODKJENT, utbetalingsoppdragOppdatert.status)
+        assertEquals(UtbetalingStatus.GODKJENT, utbetalingsoppdragOppdatert.status)
     }
 }

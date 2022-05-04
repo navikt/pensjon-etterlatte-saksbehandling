@@ -1,7 +1,7 @@
-package no.nav.etterlatte.avstemming
+package no.nav.etterlatte.grensesnittavstemming
 
-import no.nav.etterlatte.domain.Utbetalingsoppdrag
-import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
+import no.nav.etterlatte.domain.Utbetaling
+import no.nav.etterlatte.domain.UtbetalingStatus
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Aksjonsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AvstemmingType
@@ -16,14 +16,14 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class AvstemmingsdataMapper(
-    private val utbetalingsoppdrag: List<Utbetalingsoppdrag>,
+    private val utbetaling: List<Utbetaling>,
     private val fraOgMed: LocalDateTime,
     private val til: LocalDateTime,
     private val avstemmingId: String,
     private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING
 ) {
     fun opprettAvstemmingsmelding(): List<Avstemmingsdata> =
-        if (utbetalingsoppdrag.isEmpty()) emptyList()
+        if (utbetaling.isEmpty()) emptyList()
         else startmelding() + datameldinger() + sluttmelding()
 
     private fun startmelding() = listOf(avstemmingsdata(AksjonType.START))
@@ -43,7 +43,7 @@ class AvstemmingsdataMapper(
     private fun avstemmingsdata(aksjonstype: AksjonType) =
         Avstemmingsdata().apply {
             aksjon = Aksjonsdata().apply {
-                val periode = periode(utbetalingsoppdrag)
+                val periode = periode(utbetaling)
 
                 aksjonType = aksjonstype
                 kildeType = KildeType.AVLEV
@@ -59,15 +59,15 @@ class AvstemmingsdataMapper(
         }
 
     private fun avstemmingsdataLister(): List<Avstemmingsdata> {
-        return detaljdata(utbetalingsoppdrag).chunked(detaljerPrMelding).map {
+        return detaljdata(utbetaling).chunked(detaljerPrMelding).map {
             avstemmingsdata(AksjonType.DATA).apply {
                 this.detalj.addAll(it)
             }
         }
     }
 
-    private fun detaljdata(utbetalingsoppdrag: List<Utbetalingsoppdrag>): List<Detaljdata> =
-        utbetalingsoppdrag.mapNotNull {
+    private fun detaljdata(utbetaling: List<Utbetaling>): List<Detaljdata> =
+        utbetaling.mapNotNull {
             val detaljType = toDetaljType(it.status)
             if (detaljType != null) {
                 Detaljdata().apply {
@@ -86,29 +86,29 @@ class AvstemmingsdataMapper(
             }
         }
 
-    private fun toDetaljType(utbetalingsoppdragStatus: UtbetalingsoppdragStatus): DetaljType? =
-        when (utbetalingsoppdragStatus) {
-            UtbetalingsoppdragStatus.SENDT -> DetaljType.MANG
-            UtbetalingsoppdragStatus.GODKJENT_MED_FEIL -> DetaljType.VARS
-            UtbetalingsoppdragStatus.AVVIST -> DetaljType.AVVI
-            UtbetalingsoppdragStatus.FEILET -> DetaljType.AVVI
-            UtbetalingsoppdragStatus.GODKJENT -> null
+    private fun toDetaljType(utbetalingStatus: UtbetalingStatus): DetaljType? =
+        when (utbetalingStatus) {
+            UtbetalingStatus.SENDT -> DetaljType.MANG
+            UtbetalingStatus.GODKJENT_MED_FEIL -> DetaljType.VARS
+            UtbetalingStatus.AVVIST -> DetaljType.AVVI
+            UtbetalingStatus.FEILET -> DetaljType.AVVI
+            UtbetalingStatus.GODKJENT -> null
         }
 
     private fun grunnlagsdata() = Grunnlagsdata().apply {
-        val oppdragEtterStatus = utbetalingsoppdrag.groupBy { it.status }
+        val oppdragEtterStatus = utbetaling.groupBy { it.status }
 
-        godkjentAntall = oppdragEtterStatus[UtbetalingsoppdragStatus.GODKJENT]?.count() ?: 0
-        varselAntall = oppdragEtterStatus[UtbetalingsoppdragStatus.GODKJENT_MED_FEIL]?.count() ?: 0
-        avvistAntall = oppdragEtterStatus[UtbetalingsoppdragStatus.AVVIST]?.count() ?: 0
-        val antFeilet = oppdragEtterStatus[UtbetalingsoppdragStatus.FEILET]?.count() ?: 0
-        val antSendtUtenKvittering = oppdragEtterStatus[UtbetalingsoppdragStatus.SENDT]?.count() ?: 0
+        godkjentAntall = oppdragEtterStatus[UtbetalingStatus.GODKJENT]?.count() ?: 0
+        varselAntall = oppdragEtterStatus[UtbetalingStatus.GODKJENT_MED_FEIL]?.count() ?: 0
+        avvistAntall = oppdragEtterStatus[UtbetalingStatus.AVVIST]?.count() ?: 0
+        val antFeilet = oppdragEtterStatus[UtbetalingStatus.FEILET]?.count() ?: 0
+        val antSendtUtenKvittering = oppdragEtterStatus[UtbetalingStatus.SENDT]?.count() ?: 0
         manglerAntall = antFeilet + antSendtUtenKvittering
     }
 
     private fun totaldata() =
         Totaldata().apply {
-            totalAntall = utbetalingsoppdrag.size
+            totalAntall = utbetaling.size
         }
 
     private fun periodedata() =
@@ -117,7 +117,7 @@ class AvstemmingsdataMapper(
             datoAvstemtTom = til.minusHours(1).format(tidsstempelTime)
         }
 
-    private fun periode(liste: List<Utbetalingsoppdrag>): ClosedRange<LocalDateTime> {
+    private fun periode(liste: List<Utbetaling>): ClosedRange<LocalDateTime> {
         check(liste.isNotEmpty())
         return object : ClosedRange<LocalDateTime> {
             override val start = liste.minOf { it.avstemmingsnoekkel }

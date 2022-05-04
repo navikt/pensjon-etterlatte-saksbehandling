@@ -1,10 +1,10 @@
-package no.nav.etterlatte.avstemming
+package no.nav.etterlatte.grensesnittavstemming
 
 import java.nio.ByteBuffer
 import java.time.LocalDateTime
 import java.util.*
 
-data class Avstemming(
+data class Grensesnittavstemming(
     val id: String = encodeUUIDBase64(UUID.randomUUID()),
     val opprettet: LocalDateTime = LocalDateTime.now(),
     val fraOgMed: LocalDateTime,

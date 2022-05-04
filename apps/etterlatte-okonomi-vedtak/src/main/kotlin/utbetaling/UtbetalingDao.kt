@@ -1,9 +1,8 @@
-package no.nav.etterlatte.oppdrag
+package no.nav.etterlatte.utbetaling
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.common.Jaxb
-import no.nav.etterlatte.domain.Utbetalingsoppdrag
-import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
+import no.nav.etterlatte.domain.Utbetaling
+import no.nav.etterlatte.domain.UtbetalingStatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
@@ -17,9 +16,9 @@ import javax.sql.DataSource
 
 data class UtbetalingsoppdragNotFoundException(override val message: String) : RuntimeException(message)
 
-class UtbetalingsoppdragDao(private val dataSource: DataSource) {
+class UtbetalingDao(private val dataSource: DataSource) {
 
-    fun hentUtbetalingsoppdrag(vedtakId: String): Utbetalingsoppdrag? =
+    fun hentUtbetaling(vedtakId: String): Utbetaling? =
         dataSource.connection.use { connection ->
             val stmt = connection.prepareStatement(
                 "SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, foedselsnummer, utgaaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, meldingkode_oppdrag " +
@@ -31,19 +30,19 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
                 it.setObject(1, vedtakId)
 
                 it.executeQuery().singleOrNull {
-                    Utbetalingsoppdrag(
+                    Utbetaling(
                         id = getInt("id"),
                         vedtakId = getString("vedtak_id"),
                         behandlingId = getString("behandling_id"),
                         sakId = getString("sak_id"),
-                        status = getString("status").let(UtbetalingsoppdragStatus::valueOf),
+                        status = getString("status").let(UtbetalingStatus::valueOf),
                         vedtak = getString("vedtak").let { vedtak -> objectMapper.readValue(vedtak) },
                         opprettet = getTimestamp("opprettet").toLocalDateTime(),
                         avstemmingsnoekkel = getTimestamp("avstemmingsnoekkel").toLocalDateTime(),
                         endret = getTimestamp("endret").toLocalDateTime(),
                         foedselsnummer = getString("foedselsnummer"),
-                        utgaaendeOppdrag = getString("utgaaende_oppdrag").let(Jaxb::toOppdrag),
-                        oppdragKvittering = getString("oppdrag_kvittering")?.let(Jaxb::toOppdrag),
+                        utgaaendeOppdrag = getString("utgaaende_oppdrag").let(UtbetalingJaxb::toOppdrag),
+                        oppdragKvittering = getString("oppdrag_kvittering")?.let(UtbetalingJaxb::toOppdrag),
                         beskrivelseOppdrag = getString("beskrivelse_oppdrag"),
                         feilkodeOppdrag = getString("feilkode_oppdrag"),
                         meldingKodeOppdrag = getString("meldingkode_oppdrag")
@@ -52,7 +51,7 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
             }
         }
 
-    fun hentAlleUtbetalingsoppdragMellom(fraOgMed: LocalDateTime, til: LocalDateTime): List<Utbetalingsoppdrag> =
+    fun hentAlleUtbetalingerMellom(fraOgMed: LocalDateTime, til: LocalDateTime): List<Utbetaling> =
         dataSource.connection.use { connection ->
             val stmt = connection.prepareStatement(
                 "SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, foedselsnummer, utgaaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, meldingkode_oppdrag " +
@@ -65,19 +64,19 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
                 it.setTimestamp(2, Timestamp.valueOf(til))
 
                 it.executeQuery().toList {
-                    Utbetalingsoppdrag(
+                    Utbetaling(
                         id = getInt("id"),
                         vedtakId = getString("vedtak_id"),
                         behandlingId = getString("behandling_id"),
                         sakId = getString("sak_id"),
-                        status = getString("status").let(UtbetalingsoppdragStatus::valueOf),
+                        status = getString("status").let(UtbetalingStatus::valueOf),
                         vedtak = getString("vedtak").let { vedtak -> objectMapper.readValue(vedtak) },
                         opprettet = getTimestamp("opprettet").toLocalDateTime(),
                         avstemmingsnoekkel = getTimestamp("avstemmingsnoekkel").toLocalDateTime(),
                         endret = getTimestamp("endret").toLocalDateTime(),
                         foedselsnummer = getString("foedselsnummer"),
-                        utgaaendeOppdrag = getString("utgaaende_oppdrag").let(Jaxb::toOppdrag),
-                        oppdragKvittering = getString("oppdrag_kvittering")?.let(Jaxb::toOppdrag),
+                        utgaaendeOppdrag = getString("utgaaende_oppdrag").let(UtbetalingJaxb::toOppdrag),
+                        oppdragKvittering = getString("oppdrag_kvittering")?.let(UtbetalingJaxb::toOppdrag),
                         beskrivelseOppdrag = getString("beskrivelse_oppdrag"),
                         feilkodeOppdrag = getString("feilkode_oppdrag"),
                         meldingKodeOppdrag = getString("meldingkode_oppdrag")
@@ -87,11 +86,11 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
         }
 
 
-    private fun hentUtbetalingsoppdragNonNull(vedtakId: String): Utbetalingsoppdrag =
-        hentUtbetalingsoppdrag(vedtakId)
+    private fun hentUtbetalingNonNull(vedtakId: String): Utbetaling =
+        hentUtbetaling(vedtakId)
             ?: throw UtbetalingsoppdragNotFoundException("Oppdrag for vedtak med vedtakId=$vedtakId finnes ikke")
 
-    fun opprettUtbetalingsoppdrag(vedtak: Vedtak, oppdrag: Oppdrag, opprettetTidspunkt: LocalDateTime) =
+    fun opprettUtbetaling(vedtak: Vedtak, oppdrag: Oppdrag, opprettetTidspunkt: LocalDateTime) =
         dataSource.connection.use { connection ->
             logger.info("Oppretter utbetalingsoppdrag for vedtakId=${vedtak.vedtakId}")
 
@@ -104,8 +103,8 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
                 it.setString(1, vedtak.vedtakId)
                 it.setString(2, vedtak.behandlingsId)
                 it.setString(3, vedtak.sakId)
-                it.setString(4, Jaxb.toXml(oppdrag))
-                it.setString(5, UtbetalingsoppdragStatus.SENDT.name)
+                it.setString(4, UtbetalingJaxb.toXml(oppdrag))
+                it.setString(5, UtbetalingStatus.SENDT.name)
                 it.setString(6, vedtak.toJson())
                 it.setTimestamp(7, Timestamp.valueOf(opprettetTidspunkt))
                 it.setTimestamp(8, Timestamp.valueOf(opprettetTidspunkt))
@@ -116,9 +115,9 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
 
                 require(it.executeUpdate() == 1)
             }
-        }.let { hentUtbetalingsoppdragNonNull(vedtak.vedtakId) }
+        }.let { hentUtbetalingNonNull(vedtak.vedtakId) }
 
-    fun oppdaterStatus(vedtakId: String, status: UtbetalingsoppdragStatus) =
+    fun oppdaterStatus(vedtakId: String, status: UtbetalingStatus) =
         dataSource.connection.use { connection ->
             logger.info("Oppdaterer status i utbetalingsoppdrag for vedtakId=$vedtakId til $status")
 
@@ -132,7 +131,7 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
 
                 require(it.executeUpdate() == 1)
             }
-        }.let { hentUtbetalingsoppdragNonNull(vedtakId) }
+        }.let { hentUtbetalingNonNull(vedtakId) }
 
     fun oppdaterKvittering(oppdragMedKvittering: Oppdrag) =
         dataSource.connection.use { connection ->
@@ -145,7 +144,7 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
             )
 
             stmt.use {
-                it.setString(1, Jaxb.toXml(oppdragMedKvittering))
+                it.setString(1, UtbetalingJaxb.toXml(oppdragMedKvittering))
                 it.setString(2, oppdragMedKvittering.mmel.beskrMelding)
                 it.setString(3, oppdragMedKvittering.mmel.kodeMelding)
                 it.setString(4, oppdragMedKvittering.mmel.alvorlighetsgrad)
@@ -153,7 +152,7 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
 
                 require(it.executeUpdate() == 1)
             }
-        }.let { hentUtbetalingsoppdragNonNull(oppdragMedKvittering.vedtakId()) }
+        }.let { hentUtbetalingNonNull(oppdragMedKvittering.vedtakId()) }
 
     private fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
         return if (next()) {
@@ -173,6 +172,6 @@ class UtbetalingsoppdragDao(private val dataSource: DataSource) {
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(UtbetalingsoppdragDao::class.java)
+        private val logger = LoggerFactory.getLogger(UtbetalingDao::class.java)
     }
 }

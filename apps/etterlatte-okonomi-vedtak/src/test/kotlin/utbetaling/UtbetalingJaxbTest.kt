@@ -1,20 +1,19 @@
-package no.nav.etterlatte.common
+package no.nav.etterlatte.utbetaling
 
 import no.nav.etterlatte.attestasjon
-import no.nav.etterlatte.vedtak
-import no.nav.etterlatte.oppdrag.OppdragMapper
 import no.nav.etterlatte.readFile
+import no.nav.etterlatte.vedtak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
-internal class JaxbTest {
+internal class UtbetalingJaxbTest {
 
     @Test
     fun `should generate xml from oppdrag`() {
         val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak(), attestasjon(), LocalDateTime.now())
-        val oppdragAsXml = Jaxb.toXml(oppdrag)
+        val oppdragAsXml = UtbetalingJaxb.toXml(oppdrag)
 
         assertNotNull(oppdragAsXml)
     }
@@ -22,7 +21,7 @@ internal class JaxbTest {
     @Test
     fun `should convert xml to oppdrag`() {
         val oppdragXml = readFile("/oppdrag_ugyldig.xml")
-        val oppdrag = Jaxb.toOppdrag(oppdragXml)
+        val oppdrag = UtbetalingJaxb.toOppdrag(oppdragXml)
 
         assertNotNull(oppdrag)
         assertEquals("08", oppdrag.mmel.alvorlighetsgrad)

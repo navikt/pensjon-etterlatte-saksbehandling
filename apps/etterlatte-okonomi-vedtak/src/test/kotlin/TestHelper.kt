@@ -1,14 +1,14 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.domain.Utbetalingsoppdrag
-import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
+import no.nav.etterlatte.domain.Utbetaling
+import no.nav.etterlatte.domain.UtbetalingStatus
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
 import no.nav.etterlatte.libs.common.vedtak.Endringskode
 import no.nav.etterlatte.libs.common.vedtak.Enhetstype
 import no.nav.etterlatte.libs.common.vedtak.Oppdragsenhet
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
-import no.nav.etterlatte.oppdrag.OppdragMapper
+import no.nav.etterlatte.utbetaling.OppdragMapper
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import java.io.FileNotFoundException
 import java.math.BigDecimal
@@ -46,7 +46,8 @@ fun vedtak(vedtakId: String = "1") = Vedtak(
     )
 )
 
-fun oppdrag(vedtakId: String = "8888") = OppdragMapper.oppdragFraVedtak(vedtak(vedtakId), attestasjon(), LocalDateTime.now())
+fun oppdrag(vedtakId: String = "8888") =
+    OppdragMapper.oppdragFraVedtak(vedtak(vedtakId), attestasjon(), LocalDateTime.now())
 
 fun oppdragMedGodkjentKvittering(vedtakId: String = "1") = oppdrag(vedtakId).apply {
     mmel = Mmel().apply {
@@ -74,10 +75,10 @@ fun attestasjon() = Attestasjon(
 
 fun utbetalingsoppdrag(
     id: Int = 1,
-    status: UtbetalingsoppdragStatus = UtbetalingsoppdragStatus.GODKJENT,
+    status: UtbetalingStatus = UtbetalingStatus.GODKJENT,
     vedtakId: String = "1",
 ) =
-    Utbetalingsoppdrag(
+    Utbetaling(
         id = id,
         vedtakId = vedtakId,
         behandlingId = "1",

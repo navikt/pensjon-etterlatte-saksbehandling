@@ -3,6 +3,7 @@ package no.nav.etterlatte.avstemming
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.grensesnittavstemming.GrensesnittsavstemmingJob
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.jupiter.api.Test

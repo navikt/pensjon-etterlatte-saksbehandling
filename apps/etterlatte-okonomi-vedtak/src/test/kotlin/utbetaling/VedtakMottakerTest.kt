@@ -2,9 +2,11 @@ package no.nav.etterlatte.oppdrag
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
+import no.nav.etterlatte.domain.UtbetalingStatus
 import no.nav.etterlatte.oppdrag
 import no.nav.etterlatte.readFile
+import no.nav.etterlatte.utbetaling.UtbetalingService
+import no.nav.etterlatte.utbetaling.VedtakMottaker
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -12,9 +14,9 @@ import org.junit.jupiter.api.assertThrows
 
 internal class VedtakMottakerTest {
 
-    private val oppdragService = mockk<OppdragService>(relaxed = true) {
-        every { opprettOgSendOppdrag(any(), any()) } returns mockk {
-            every { status } returns UtbetalingsoppdragStatus.SENDT
+    private val utbetalingService = mockk<UtbetalingService>(relaxed = true) {
+        every { iverksettUtbetaling(any(), any()) } returns mockk {
+            every { status } returns UtbetalingStatus.SENDT
             every { utgaaendeOppdrag } returns oppdrag("3")
         }
     }
@@ -23,7 +25,7 @@ internal class VedtakMottakerTest {
     private val inspector = TestRapid().apply {
         VedtakMottaker(
             rapidsConnection = this,
-            oppdragService = oppdragService,
+            utbetalingService = utbetalingService,
         )
     }
 
@@ -40,7 +42,7 @@ internal class VedtakMottakerTest {
 
     @Test
     fun `mottatt vedtak eksisterer fra for og poster utbetaling eksisterer-melding`() {
-        every { oppdragService.oppdragEksistererFraFor(any()) } returns true
+        every { utbetalingService.utbetalingEksisterer(any()) } returns true
         inspector.apply { sendTestMessage(FATTET_VEDTAK) }
 
         inspector.inspektør.message(0).run {
@@ -52,7 +54,7 @@ internal class VedtakMottakerTest {
 
     @Test
     fun `mottatt vedtak forer til feil og publiserer utbetaling feilet-melding`() {
-        every { oppdragService.oppdragEksistererFraFor(any()) } throws Exception()
+        every { utbetalingService.utbetalingEksisterer(any()) } throws Exception()
         assertThrows<Exception> { inspector.apply { sendTestMessage(FATTET_VEDTAK) } }
 
         inspector.inspektør.message(0).run {

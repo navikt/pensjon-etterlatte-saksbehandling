@@ -1,24 +1,25 @@
 package no.nav.etterlatte.avstemming
 
 import no.nav.etterlatte.config.JmsConnectionFactory
-import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
+import no.nav.etterlatte.domain.UtbetalingStatus
+import no.nav.etterlatte.grensesnittavstemming.AvstemmingsdataMapper
+import no.nav.etterlatte.grensesnittavstemming.AvstemmingsdataSender
 import no.nav.etterlatte.utbetalingsoppdrag
 import no.nav.etterlatte.util.TestContainers
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDateTime
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class AvstemmingSenderIntegrationTest {
+internal class AvstemmingsdataSenderIntegrationTest {
 
-    @Container private val ibmMQContainer = TestContainers.ibmMQContainer
+    @Container
+    private val ibmMQContainer = TestContainers.ibmMQContainer
     private lateinit var jmsConnectionFactory: JmsConnectionFactory
-    private lateinit var avstemmingSender: AvstemmingSender
+    private lateinit var avstemmingsdataSender: AvstemmingsdataSender
 
     @BeforeAll
     fun beforeAll() {
@@ -33,7 +34,7 @@ internal class AvstemmingSenderIntegrationTest {
             password = "passw0rd"
         )
 
-        avstemmingSender = AvstemmingSender(
+        avstemmingsdataSender = AvstemmingsdataSender(
             jmsConnectionFactory = jmsConnectionFactory,
             queue = "DEV.QUEUE.1",
         )
@@ -45,14 +46,14 @@ internal class AvstemmingSenderIntegrationTest {
         val til = LocalDateTime.now()
 
         val utbetalingsoppdrag = listOf(
-            utbetalingsoppdrag(id = 1, status = UtbetalingsoppdragStatus.FEILET),
-            utbetalingsoppdrag(id = 2, status = UtbetalingsoppdragStatus.FEILET),
-            utbetalingsoppdrag(id = 3, status = UtbetalingsoppdragStatus.FEILET)
+            utbetalingsoppdrag(id = 1, status = UtbetalingStatus.FEILET),
+            utbetalingsoppdrag(id = 2, status = UtbetalingStatus.FEILET),
+            utbetalingsoppdrag(id = 3, status = UtbetalingStatus.FEILET)
         )
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1", 2)
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
-        avstemmingSender.sendAvstemming(avstemmingsmelding.first())
+        avstemmingsdataSender.sendAvstemming(avstemmingsmelding.first())
     }
 
     @AfterAll

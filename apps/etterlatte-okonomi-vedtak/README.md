@@ -2,6 +2,6 @@
 
 ## Konsept
 
-Oversetter vedtak til et format som kan oversendes til oppdrag
+Oversetter vedtak til et format som kan oversendes til utbetaling
 
 ## TODO

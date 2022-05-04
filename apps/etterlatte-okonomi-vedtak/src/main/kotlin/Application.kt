@@ -21,18 +21,18 @@ fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection {
     val rapidsConnection = applicationContext.rapidsConnection()
     val oppdragService = applicationContext.oppdragService(
         oppdragSender = applicationContext.oppdragSender(jmsConnectionFactory),
-        utbetalingsoppdragDao = utbetalingsoppdragDao,
+        utbetalingDao = utbetalingsoppdragDao,
         rapidsConnection = rapidsConnection
     )
 
     val avstemmingService = applicationContext.avstemmingService(
-        avstemmingDao = applicationContext.avstemmingDao(dataSource),
-        avstemmingSender = applicationContext.avstemmingSender(jmsConnectionFactory),
-        utbetalingsoppdragDao = utbetalingsoppdragDao
+        grensesnittavstemmingDao = applicationContext.avstemmingDao(dataSource),
+        avstemmingsdataSender = applicationContext.avstemmingSender(jmsConnectionFactory),
+        utbetalingDao = utbetalingsoppdragDao
     )
 
     // Jobber
-    applicationContext.avstemmingJob(avstemmingService, applicationContext.leaderElection()).planlegg()
+    applicationContext.avstemmingJob(avstemmingService, applicationContext.leaderElection()).schedule()
 
     return rapidsConnection
         .apply {

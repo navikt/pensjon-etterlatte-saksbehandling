@@ -1,8 +1,8 @@
-package no.nav.etterlatte.avstemming
+package no.nav.etterlatte.grensesnittavstemming
 
 import no.nav.etterlatte.config.LeaderElection
+import no.nav.etterlatte.libs.common.logging.withLogContext
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 import java.time.Duration
 import java.util.*
 import kotlin.concurrent.fixedRateTimer
@@ -15,7 +15,7 @@ class GrensesnittsavstemmingJob(
 ) {
     private val jobbNavn = this::class.simpleName
 
-    fun planlegg() {
+    fun schedule() {
         fixedRateTimer(
             name = jobbNavn,
             daemon = true,
@@ -41,15 +41,13 @@ class GrensesnittsavstemmingJob(
     ) {
         private val log = LoggerFactory.getLogger(this::class.java)
 
+
         fun run() {
-            if (leaderElection.isLeader()) {
-                log.info("Starter $jobbNavn")
-                // Ktor legger på X-Correlation-ID for web-requests, men vi har ikke noe tilsvarende automagi for meldingskøen.
-                MDC.put(
-                    "X-Correlation-ID",
-                    UUID.randomUUID().toString()
-                ) // TODO: bytte ut denne med vår egen x-correlation id?
-                grensesnittsavstemmingService.startGrensesnittsavstemming()
+            withLogContext {
+                if (leaderElection.isLeader()) {
+                    log.info("Starter $jobbNavn")
+                    grensesnittsavstemmingService.startGrensesnittsavstemming()
+                }
             }
         }
     }

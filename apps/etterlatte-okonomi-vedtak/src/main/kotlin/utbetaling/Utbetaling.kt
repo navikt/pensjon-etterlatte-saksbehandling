@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import java.time.LocalDateTime
 
-enum class UtbetalingsoppdragStatus {
+enum class UtbetalingStatus {
     SENDT,
     GODKJENT,
     GODKJENT_MED_FEIL,
@@ -12,12 +12,12 @@ enum class UtbetalingsoppdragStatus {
     FEILET,
 }
 
-data class Utbetalingsoppdrag(
+data class Utbetaling(
     val id: Int,
     val vedtakId: String,
     val behandlingId: String,
     val sakId: String,
-    val status: UtbetalingsoppdragStatus,
+    val status: UtbetalingStatus,
     val vedtak: Vedtak,
     val opprettet: LocalDateTime,
     val endret: LocalDateTime,

@@ -1,8 +1,8 @@
-package no.nav.etterlatte.oppdrag
+package no.nav.etterlatte.utbetaling
 
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.domain.Utbetalingsoppdrag
+import no.nav.etterlatte.domain.Utbetaling
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 
 class VedtakMottaker(
     private val rapidsConnection: RapidsConnection,
-    private val oppdragService: OppdragService,
+    private val utbetalingService: UtbetalingService,
 ) : River.PacketListener {
 
     init {
@@ -36,12 +36,12 @@ class VedtakMottaker(
             logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
 
             try {
-                if (oppdragService.oppdragEksistererFraFor(vedtak)) {
+                if (utbetalingService.utbetalingEksisterer(vedtak)) {
                     logger.info("Vedtak eksisterer fra før. Sendes ikke videre til oppdrag")
                     rapidsConnection.publish(utbetalingsoppdragEksisterer(vedtak))
                 } else {
                     val attestasjon: Attestasjon = objectMapper.readValue(packet["@attestasjon"].toJson())
-                    val utbetalingsoppdrag = oppdragService.opprettOgSendOppdrag(vedtak, attestasjon)
+                    val utbetalingsoppdrag = utbetalingService.iverksettUtbetaling(vedtak, attestasjon)
                     rapidsConnection.publish("key", utbetalingEvent(utbetalingsoppdrag))
                 }
             } catch (e: Exception) {
@@ -52,10 +52,10 @@ class VedtakMottaker(
         }
 
 
-    private fun utbetalingEvent(utbetalingsoppdrag: Utbetalingsoppdrag) = mapOf(
+    private fun utbetalingEvent(utbetaling: Utbetaling) = mapOf(
         "@event_name" to "utbetaling_oppdatert",
-        "@vedtakId" to utbetalingsoppdrag.utgaaendeOppdrag.vedtakId(),
-        "@status" to utbetalingsoppdrag.status.name
+        "@vedtakId" to utbetaling.utgaaendeOppdrag.vedtakId(),
+        "@status" to utbetaling.status.name
     ).toJson()
 
     private fun utbetalingFeilet(vedtak: Vedtak) = mapOf(

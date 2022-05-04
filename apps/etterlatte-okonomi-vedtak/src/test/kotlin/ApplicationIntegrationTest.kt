@@ -8,10 +8,10 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import io.mockk.every
 import io.mockk.spyk
 import io.mockk.verify
-import no.nav.etterlatte.common.Jaxb
+import no.nav.etterlatte.utbetaling.UtbetalingJaxb
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.config.JmsConnectionFactory
-import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
+import no.nav.etterlatte.domain.UtbetalingStatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.util.TestContainers
@@ -66,10 +66,13 @@ class ApplicationIntegrationTest {
             "ELECTOR_PATH" to electionServer.baseUrl().replace("http://", "")
         )
 
-        electionServer.stubFor(get(urlEqualTo("/"))
-                .willReturn(aResponse()
-                    .withBody(mapOf("name" to "some.value").toJson())
-                ))
+        electionServer.stubFor(
+            get(urlEqualTo("/"))
+                .willReturn(
+                    aResponse()
+                        .withBody(mapOf("name" to "some.value").toJson())
+                )
+        )
 
         spyk(ApplicationContext(env)).apply {
             every { rapidsConnection() } returns spyk(TestRapid()).also { rapidsConnection = it }
@@ -81,15 +84,17 @@ class ApplicationIntegrationTest {
     fun `skal sende utbetaling til oppdrag`() {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
 
-        verify(timeout = TIMEOUT) { rapidsConnection.publish("key",
-            match {
-                it.toJsonNode().let { event ->
-                    event["@event_name"].textValue() == "utbetaling_oppdatert" &&
-                    event["@vedtakId"].textValue() == "1" &&
-                    event["@status"].textValue() == UtbetalingsoppdragStatus.SENDT.name
+        verify(timeout = TIMEOUT) {
+            rapidsConnection.publish("key",
+                match {
+                    it.toJsonNode().let { event ->
+                        event["@event_name"].textValue() == "utbetaling_oppdatert" &&
+                                event["@vedtakId"].textValue() == "1" &&
+                                event["@status"].textValue() == UtbetalingStatus.SENDT.name
+                    }
                 }
-            }
-        )}
+            )
+        }
     }
 
     @Test
@@ -97,15 +102,17 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
         sendKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering(vedtakId = "1"))
 
-        verify(timeout = TIMEOUT) { rapidsConnection.publish("key",
-            match {
-                it.toJsonNode().let { event ->
-                    event["@event_name"].textValue() == "utbetaling_oppdatert" &&
-                    event["@vedtakId"].textValue() == "1" &&
-                    event["@status"].textValue() == UtbetalingsoppdragStatus.GODKJENT.name
+        verify(timeout = TIMEOUT) {
+            rapidsConnection.publish("key",
+                match {
+                    it.toJsonNode().let { event ->
+                        event["@event_name"].textValue() == "utbetaling_oppdatert" &&
+                                event["@vedtakId"].textValue() == "1" &&
+                                event["@status"].textValue() == UtbetalingStatus.GODKJENT.name
+                    }
                 }
-            }
-        )}
+            )
+        }
     }
 
     @Test
@@ -113,15 +120,17 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
         sendKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering(vedtakId = "1"))
 
-        verify(timeout = TIMEOUT) { rapidsConnection.publish("key",
-            match {
-                it.toJsonNode().let { event ->
-                    event["@event_name"].textValue() == "utbetaling_oppdatert" &&
-                    event["@vedtakId"].textValue() == "1" &&
-                    event["@status"].textValue() == UtbetalingsoppdragStatus.FEILET.name
+        verify(timeout = TIMEOUT) {
+            rapidsConnection.publish("key",
+                match {
+                    it.toJsonNode().let { event ->
+                        event["@event_name"].textValue() == "utbetaling_oppdatert" &&
+                                event["@vedtakId"].textValue() == "1" &&
+                                event["@status"].textValue() == UtbetalingStatus.FEILET.name
+                    }
                 }
-            }
-        )}
+            )
+        }
     }
 
     @AfterEach
@@ -144,7 +153,7 @@ class ApplicationIntegrationTest {
     private fun sendKvitteringsmeldingFraOppdrag(oppdrag: Oppdrag) {
         connectionFactory.connection().createSession().use { session ->
             val producer = session.createProducer(session.createQueue("DEV.QUEUE.2"))
-            val message = session.createTextMessage(Jaxb.toXml(oppdrag))
+            val message = session.createTextMessage(UtbetalingJaxb.toXml(oppdrag))
             producer.send(message)
         }
     }

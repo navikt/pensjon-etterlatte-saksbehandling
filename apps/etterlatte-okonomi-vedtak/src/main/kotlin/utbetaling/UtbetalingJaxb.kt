@@ -1,4 +1,4 @@
-package no.nav.etterlatte.common
+package no.nav.etterlatte.utbetaling
 
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import java.io.StringReader
@@ -8,7 +8,7 @@ import javax.xml.bind.Marshaller
 import javax.xml.stream.XMLInputFactory
 import javax.xml.transform.stream.StreamSource
 
-object Jaxb {
+object UtbetalingJaxb {
     private val jaxbContext = JAXBContext.newInstance(Oppdrag::class.java)
     private val xmlInputFactory = XMLInputFactory.newInstance()
 

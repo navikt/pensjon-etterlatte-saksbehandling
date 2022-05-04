@@ -4,9 +4,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.config.JmsConnectionFactory
-import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
+import no.nav.etterlatte.domain.UtbetalingStatus
 import no.nav.etterlatte.oppdragMedFeiletKvittering
 import no.nav.etterlatte.oppdragMedGodkjentKvittering
+import no.nav.etterlatte.utbetaling.KvitteringMottaker
+import no.nav.etterlatte.utbetaling.OppdragSender
+import no.nav.etterlatte.utbetaling.UtbetalingService
 import no.nav.etterlatte.util.TestContainers
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -23,7 +26,7 @@ internal class OppdragSenderIntegrationTest {
     private lateinit var jmsConnectionFactory: JmsConnectionFactory
     private lateinit var oppdragSender: OppdragSender
     private lateinit var kvitteringMottaker: KvitteringMottaker
-    private val oppdragService: OppdragService = mockk<OppdragService>().apply {
+    private val utbetalingService: UtbetalingService = mockk<UtbetalingService>().apply {
         every { oppdaterKvittering(any()) } returns mockk()
         every { oppdaterStatusOgPubliserKvittering(any(), any()) } returns mockk()
     }
@@ -48,7 +51,7 @@ internal class OppdragSenderIntegrationTest {
         )
 
         kvitteringMottaker = KvitteringMottaker(
-            oppdragService = oppdragService,
+            utbetalingService = utbetalingService,
             jmsConnectionFactory = jmsConnectionFactory,
             queue = "DEV.QUEUE.1",
         )
@@ -66,11 +69,11 @@ internal class OppdragSenderIntegrationTest {
 
         oppdragSender.sendOppdrag(oppdrag)
 
-        verify(timeout = 2000) { oppdragService.oppdaterKvittering(any()) }
+        verify(timeout = 2000) { utbetalingService.oppdaterKvittering(any()) }
         verify(timeout = 2000) {
-            oppdragService.oppdaterStatusOgPubliserKvittering(
+            utbetalingService.oppdaterStatusOgPubliserKvittering(
                 oppdrag = any(),
-                status = UtbetalingsoppdragStatus.GODKJENT
+                status = UtbetalingStatus.GODKJENT
             )
         }
     }
@@ -81,11 +84,11 @@ internal class OppdragSenderIntegrationTest {
 
         oppdragSender.sendOppdrag(oppdrag)
 
-        verify(timeout = 2000) { oppdragService.oppdaterKvittering(any()) }
+        verify(timeout = 2000) { utbetalingService.oppdaterKvittering(any()) }
         verify(timeout = 2000) {
-            oppdragService.oppdaterStatusOgPubliserKvittering(
+            utbetalingService.oppdaterStatusOgPubliserKvittering(
                 oppdrag = any(),
-                status = UtbetalingsoppdragStatus.FEILET
+                status = UtbetalingStatus.FEILET
             )
         }
 

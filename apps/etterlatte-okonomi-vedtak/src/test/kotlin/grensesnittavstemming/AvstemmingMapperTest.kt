@@ -2,8 +2,9 @@ package no.nav.etterlatte.avstemming
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.domain.Utbetalingsoppdrag
-import no.nav.etterlatte.domain.UtbetalingsoppdragStatus
+import no.nav.etterlatte.domain.Utbetaling
+import no.nav.etterlatte.domain.UtbetalingStatus
+import no.nav.etterlatte.grensesnittavstemming.AvstemmingsdataMapper
 import no.nav.etterlatte.utbetalingsoppdrag
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Avstemmingsdata
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import java.time.LocalDateTime
 import java.time.Month
-import java.util.*
 
 internal class AvstemmingMapperTest {
 
@@ -23,9 +23,9 @@ internal class AvstemmingMapperTest {
         val fraOgMed = LocalDateTime.now().minusDays(1)
         val til = LocalDateTime.now()
 
-        val utbetalingsoppdrag = emptyList<Utbetalingsoppdrag>()
+        val utbetaling = emptyList<Utbetaling>()
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1")
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetaling, fraOgMed, til, "1")
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
         assertEquals(emptyList<Avstemmingsdata>(), avstemmingsmelding)
@@ -36,7 +36,7 @@ internal class AvstemmingMapperTest {
         val fraOgMed = LocalDateTime.now().minusDays(1)
         val til = LocalDateTime.now()
 
-        val utbetalingsoppdrag = listOf(utbetalingsoppdrag(status = UtbetalingsoppdragStatus.FEILET))
+        val utbetalingsoppdrag = listOf(utbetalingsoppdrag(status = UtbetalingStatus.FEILET))
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1")
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
@@ -54,9 +54,9 @@ internal class AvstemmingMapperTest {
         val til = LocalDateTime.now()
 
         val utbetalingsoppdrag = listOf(
-            utbetalingsoppdrag(id = 1, status = UtbetalingsoppdragStatus.FEILET),
-            utbetalingsoppdrag(id = 2, status = UtbetalingsoppdragStatus.FEILET),
-            utbetalingsoppdrag(id = 3, status = UtbetalingsoppdragStatus.FEILET),
+            utbetalingsoppdrag(id = 1, status = UtbetalingStatus.FEILET),
+            utbetalingsoppdrag(id = 2, status = UtbetalingStatus.FEILET),
+            utbetalingsoppdrag(id = 3, status = UtbetalingStatus.FEILET),
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1", 2)
@@ -77,9 +77,9 @@ internal class AvstemmingMapperTest {
         val til = LocalDateTime.now()
 
         val utbetalingsoppdrag = listOf(
-            utbetalingsoppdrag(id = 1, status = UtbetalingsoppdragStatus.FEILET),
-            utbetalingsoppdrag(id = 2, status = UtbetalingsoppdragStatus.FEILET),
-            utbetalingsoppdrag(id = 3, status = UtbetalingsoppdragStatus.FEILET),
+            utbetalingsoppdrag(id = 1, status = UtbetalingStatus.FEILET),
+            utbetalingsoppdrag(id = 2, status = UtbetalingStatus.FEILET),
+            utbetalingsoppdrag(id = 3, status = UtbetalingStatus.FEILET),
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1", 2)
@@ -104,34 +104,34 @@ internal class AvstemmingMapperTest {
         val til = LocalDateTime.now()
 
         val utbetalingsoppdragsliste = listOf(
-            mockk<Utbetalingsoppdrag>(relaxed = true) {
-                every { status } returns UtbetalingsoppdragStatus.GODKJENT
+            mockk<Utbetaling>(relaxed = true) {
+                every { status } returns UtbetalingStatus.GODKJENT
             },
             mockk(relaxed = true) {
-                every { status } returns UtbetalingsoppdragStatus.GODKJENT
+                every { status } returns UtbetalingStatus.GODKJENT
             },
             mockk(relaxed = true) {
-                every { status } returns UtbetalingsoppdragStatus.GODKJENT_MED_FEIL
+                every { status } returns UtbetalingStatus.GODKJENT_MED_FEIL
             },
             mockk(relaxed = true) {
-                every { status } returns UtbetalingsoppdragStatus.AVVIST
+                every { status } returns UtbetalingStatus.AVVIST
             },
             mockk(relaxed = true) {
-                every { status } returns UtbetalingsoppdragStatus.AVVIST
+                every { status } returns UtbetalingStatus.AVVIST
             },
             mockk(relaxed = true) {
-                every { status } returns UtbetalingsoppdragStatus.AVVIST
+                every { status } returns UtbetalingStatus.AVVIST
             },
             mockk(relaxed = true) {
-                every { status } returns UtbetalingsoppdragStatus.SENDT // telles som mangler
+                every { status } returns UtbetalingStatus.SENDT // telles som mangler
             },
             mockk(relaxed = true) {
-                every { status } returns UtbetalingsoppdragStatus.FEILET // telles som mangler
+                every { status } returns UtbetalingStatus.FEILET // telles som mangler
             },
         )
         val avstemmingsdataMapper =
             AvstemmingsdataMapper(
-                utbetalingsoppdrag = utbetalingsoppdragsliste,
+                utbetaling = utbetalingsoppdragsliste,
                 fraOgMed = fraOgMed,
                 til = til,
                 avstemmingId = "1"
@@ -153,16 +153,16 @@ internal class AvstemmingMapperTest {
         val til = LocalDateTime.now()
 
         val utbetalingsoppdgragsliste = listOf(
-            mockk<Utbetalingsoppdrag>(relaxed = true) {
-                every { status } returns UtbetalingsoppdragStatus.GODKJENT
+            mockk<Utbetaling>(relaxed = true) {
+                every { status } returns UtbetalingStatus.GODKJENT
             },
             mockk(relaxed = true) {
-                every { status } returns UtbetalingsoppdragStatus.GODKJENT
+                every { status } returns UtbetalingStatus.GODKJENT
             })
 
         val avstemmingsdataMapper =
             AvstemmingsdataMapper(
-                utbetalingsoppdrag = utbetalingsoppdgragsliste,
+                utbetaling = utbetalingsoppdgragsliste,
                 fraOgMed = fraOgMed,
                 til = til,
                 avstemmingId = "1"
@@ -183,7 +183,7 @@ internal class AvstemmingMapperTest {
         val til = LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0).plusHours(1)
 
         val utbetalingsoppdgragsliste = listOf(
-            mockk<Utbetalingsoppdrag>(relaxed = true) {
+            mockk<Utbetaling>(relaxed = true) {
                 every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0) // foerste
             },
             mockk(relaxed = true) {
@@ -202,7 +202,7 @@ internal class AvstemmingMapperTest {
 
         val avstemmingsdataMapper =
             AvstemmingsdataMapper(
-                utbetalingsoppdrag = utbetalingsoppdgragsliste,
+                utbetaling = utbetalingsoppdgragsliste,
                 fraOgMed = fraOgMed,
                 til = til,
                 avstemmingId = "1"

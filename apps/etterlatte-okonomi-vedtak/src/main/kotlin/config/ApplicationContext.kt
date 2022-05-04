@@ -1,16 +1,16 @@
 package no.nav.etterlatte.config
 
-import no.nav.etterlatte.avstemming.AvstemmingDao
-import no.nav.etterlatte.avstemming.AvstemmingSender
-import no.nav.etterlatte.avstemming.GrensesnittsavstemmingJob
-import no.nav.etterlatte.avstemming.GrensesnittsavstemmingService
 import no.nav.etterlatte.common.next
-import no.nav.etterlatte.oppdrag.KvitteringMottaker
-import no.nav.etterlatte.oppdrag.OppdragMapper
-import no.nav.etterlatte.oppdrag.OppdragSender
-import no.nav.etterlatte.oppdrag.OppdragService
-import no.nav.etterlatte.oppdrag.UtbetalingsoppdragDao
-import no.nav.etterlatte.oppdrag.VedtakMottaker
+import no.nav.etterlatte.grensesnittavstemming.AvstemmingsdataSender
+import no.nav.etterlatte.grensesnittavstemming.GrensesnittavstemmingDao
+import no.nav.etterlatte.grensesnittavstemming.GrensesnittsavstemmingJob
+import no.nav.etterlatte.grensesnittavstemming.GrensesnittsavstemmingService
+import no.nav.etterlatte.utbetaling.KvitteringMottaker
+import no.nav.etterlatte.utbetaling.OppdragMapper
+import no.nav.etterlatte.utbetaling.OppdragSender
+import no.nav.etterlatte.utbetaling.UtbetalingDao
+import no.nav.etterlatte.utbetaling.UtbetalingService
+import no.nav.etterlatte.utbetaling.VedtakMottaker
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.Duration
@@ -52,48 +52,48 @@ class ApplicationContext(
         replyQueue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
     )
 
-    fun utbetalingsoppdragDao(dataSource: DataSource) = UtbetalingsoppdragDao(dataSource)
+    fun utbetalingsoppdragDao(dataSource: DataSource) = UtbetalingDao(dataSource)
 
     fun oppdragService(
         oppdragSender: OppdragSender,
-        utbetalingsoppdragDao: UtbetalingsoppdragDao,
+        utbetalingDao: UtbetalingDao,
         rapidsConnection: RapidsConnection
-    ) = OppdragService(
+    ) = UtbetalingService(
         oppdragMapper = OppdragMapper,
         oppdragSender = oppdragSender,
-        utbetalingsoppdragDao = utbetalingsoppdragDao,
+        utbetalingDao = utbetalingDao,
         rapidsConnection = rapidsConnection
     )
 
     fun kvitteringMottaker(
-        oppdragService: OppdragService,
+        utbetalingService: UtbetalingService,
         jmsConnectionFactory: JmsConnectionFactory
     ) = KvitteringMottaker(
-        oppdragService = oppdragService,
+        utbetalingService = utbetalingService,
         jmsConnectionFactory = jmsConnectionFactory,
         queue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
     )
 
-    fun vedtakMottaker(rapidsConnection: RapidsConnection, oppdragService: OppdragService) = VedtakMottaker(
+    fun vedtakMottaker(rapidsConnection: RapidsConnection, utbetalingService: UtbetalingService) = VedtakMottaker(
         rapidsConnection = rapidsConnection,
-        oppdragService = oppdragService
+        utbetalingService = utbetalingService
     )
 
-    fun avstemmingDao(dataSource: DataSource) = AvstemmingDao(dataSource)
+    fun avstemmingDao(dataSource: DataSource) = GrensesnittavstemmingDao(dataSource)
 
-    fun avstemmingSender(jmsConnectionFactory: JmsConnectionFactory) = AvstemmingSender(
+    fun avstemmingSender(jmsConnectionFactory: JmsConnectionFactory) = AvstemmingsdataSender(
         jmsConnectionFactory = jmsConnectionFactory,
         queue = env.required("OPPDRAG_AVSTEMMING_MQ_NAME") // TODO
     )
 
     fun avstemmingService(
-        avstemmingDao: AvstemmingDao,
-        avstemmingSender: AvstemmingSender,
-        utbetalingsoppdragDao: UtbetalingsoppdragDao
+        grensesnittavstemmingDao: GrensesnittavstemmingDao,
+        avstemmingsdataSender: AvstemmingsdataSender,
+        utbetalingDao: UtbetalingDao
     ) = GrensesnittsavstemmingService(
-        avstemmingDao = avstemmingDao,
-        avstemmingSender = avstemmingSender,
-        utbetalingsoppdragDao = utbetalingsoppdragDao
+        grensesnittavstemmingDao = grensesnittavstemmingDao,
+        avstemmingsdataSender = avstemmingsdataSender,
+        utbetalingDao = utbetalingDao
     )
 
     fun leaderElection() = LeaderElection(env.required("ELECTOR_PATH"))

@@ -25,7 +25,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
             }
             .executeQuery()
             .singleOrNull {
-                Brev(getLong(1), getLong(2), getBytes(3))
+                Brev(getLong("id"), getLong("vedtak_id"), getBytes("pdf"))
             }
     }
 
@@ -70,7 +70,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
     }
 
     private object Queries {
-        const val HENT_BREV_QUERY = "SELECT id, vedtak_id, pdf FROM brev WHERE vedtak_id = ?"
+        const val HENT_BREV_QUERY = "SELECT * FROM brev WHERE vedtak_id = ?"
 
         const val OPPDATER_BREV_QUERY = "UPDATE brev SET pdf = ? WHERE vedtak_id = ? RETURNING id"
 

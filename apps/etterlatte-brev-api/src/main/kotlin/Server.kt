@@ -2,8 +2,10 @@ package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.typesafe.config.ConfigFactory
 import health.healthApi
 import io.ktor.application.install
+import io.ktor.config.tryGetString
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
@@ -51,7 +53,9 @@ class Server(applicationContext: ApplicationContext) {
 //                }
             }
         }
-        connector { port = 8080 }
+        connector {
+            port = ConfigFactory.load().tryGetString("port")?.toInt() ?: 8080
+        }
     })
 
     fun run() = engine.start(true)

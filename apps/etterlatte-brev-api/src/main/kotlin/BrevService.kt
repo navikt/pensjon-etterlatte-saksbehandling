@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import model.Vedtak
 import model.VedtakType
 import model.brev.InnvilgetBrevRequest
 import no.nav.etterlatte.db.BrevRepository
@@ -15,14 +16,14 @@ class BrevService(
     private val vedtakService = VedtakService()
 
     suspend fun hentBrev(behandlingId: String): ByteArray {
-        val brev = db.hentBrev(behandlingId.toLong())
-
-        return brev?.data ?: opprett(behandlingId)
-    }
-
-    private suspend fun opprett(behandlingId: String): ByteArray {
         val vedtak = vedtakService.hentVedtak(behandlingId)
 
+        val brev = db.hentBrev(vedtak.vedtakId.toLong())
+
+        return brev?.data ?: opprett(vedtak)
+    }
+
+    private suspend fun opprett(vedtak: Vedtak): ByteArray {
         val pdf = when (vedtak.type) {
             VedtakType.INNVILGELSE -> pdfGenerator.genererPdf(InnvilgetBrevRequest.fraVedtak(vedtak))
             else -> throw Exception("Vedtakstype er ikke støttet: ${vedtak.type}")

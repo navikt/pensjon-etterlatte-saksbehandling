@@ -1,15 +1,12 @@
 import { Request, RequestHandler, Response } from 'express'
-import axios, { AxiosResponse } from 'axios'
+import fetch from 'node-fetch'
 
 export default function pdf(): RequestHandler {
   return async (req: Request, res: Response) => {
-    const path = `http://localhost:8081${req.path}`
+    const path = `http://localhost:8085/brev${req.path}`
 
-    const data = await axios(path, {
-      method: 'POST',
-      responseType: 'arraybuffer',
-      data: req.body,
-    }).then((response: AxiosResponse) => response.data)
+    const data = await fetch(path, { method: 'GET' })
+        .then(res => res.buffer())
 
     res.contentType('application/pdf')
     res.send(await data)

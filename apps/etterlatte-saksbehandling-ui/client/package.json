@@ -8,7 +8,6 @@
     "@navikt/ds-react": "^0.13.1",
     "@navikt/fnrvalidator": "1.1.4",
     "@navikt/navspa": "^4.0.0",
-    "axios": "^0.27.2",
     "date-fns": "^2.28.0",
     "nav-frontend-js-utils": "^1.0.20",
     "nav-frontend-lenker": "2.0.1",

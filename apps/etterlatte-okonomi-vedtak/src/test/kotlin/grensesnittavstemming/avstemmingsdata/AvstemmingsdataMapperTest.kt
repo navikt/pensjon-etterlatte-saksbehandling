@@ -2,12 +2,10 @@ package no.nav.etterlatte.grensesnittavstemming.avstemmingsdata
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.grensesnittavstemming.avstemmingsdata.AvstemmingsdataMapper
 import no.nav.etterlatte.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetalingsoppdrag
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
-import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Avstemmingsdata
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -17,19 +15,6 @@ import java.time.LocalDateTime
 import java.time.Month
 
 internal class AvstemmingsdataMapperTest {
-
-    @Test
-    fun `skal returnere tom liste dersom det ikke er noen utbetalingsoppdrag og avstemme`() {
-        val fraOgMed = LocalDateTime.now().minusDays(1)
-        val til = LocalDateTime.now()
-
-        val utbetaling = emptyList<Utbetaling>()
-
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetaling, fraOgMed, til, "1")
-        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
-
-        assertEquals(emptyList<Avstemmingsdata>(), avstemmingsmelding)
-    }
 
     @Test
     fun `skal opprette avstemming fra utbetalingsoppdrag med startmelding, datamelding og sluttmelding`() {
@@ -129,13 +114,9 @@ internal class AvstemmingsdataMapperTest {
                 every { status } returns UtbetalingStatus.FEILET // telles som mangler
             },
         )
-        val avstemmingsdataMapper =
-            AvstemmingsdataMapper(
-                utbetaling = utbetalingsoppdragsliste,
-                fraOgMed = fraOgMed,
-                til = til,
-                avstemmingId = "1"
-            )
+        val avstemmingsdataMapper = AvstemmingsdataMapper(
+            utbetalinger = utbetalingsoppdragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
+        )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
 
@@ -148,70 +129,90 @@ internal class AvstemmingsdataMapperTest {
     }
 
     @Test
-    fun `antall i grunnlagsdata skal vaere 0 for alle statuser unntatt godkjent`() {
+    fun `antall i grunnlagsdata skal vaere 0 for alle statuser naar det er ingen utbetalinger aa avstemme`() {
         val fraOgMed = LocalDateTime.now().minusDays(1)
         val til = LocalDateTime.now()
 
-        val utbetalingsoppdgragsliste = listOf(
-            mockk<Utbetaling>(relaxed = true) {
-                every { status } returns UtbetalingStatus.GODKJENT
-            },
-            mockk(relaxed = true) {
-                every { status } returns UtbetalingStatus.GODKJENT
-            })
+        val utbetalingsoppdgragsliste = emptyList<Utbetaling>()
 
-        val avstemmingsdataMapper =
-            AvstemmingsdataMapper(
-                utbetaling = utbetalingsoppdgragsliste,
-                fraOgMed = fraOgMed,
-                til = til,
-                avstemmingId = "1"
-            )
+        val avstemmingsdataMapper = AvstemmingsdataMapper(
+            utbetalinger = utbetalingsoppdgragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
+        )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
 
         assertAll("Antall i grunnlagsdato skal vaere 0 for alle statuser",
-            { assertEquals(2, dataMelding.grunnlag.godkjentAntall) },
+            { assertEquals(0, dataMelding.grunnlag.godkjentAntall) },
             { assertEquals(0, dataMelding.grunnlag.varselAntall) },
             { assertEquals(0, dataMelding.grunnlag.avvistAntall) },
             { assertEquals(0, dataMelding.grunnlag.manglerAntall) })
     }
 
     @Test
+    fun `antall meldinger skal vaere satt til 0 naar det er ingen utbetalinger aa avstemme`() {
+        val fraOgMed = LocalDateTime.now().minusDays(1)
+        val til = LocalDateTime.now()
+
+        val utbetalingsoppdgragsliste = emptyList<Utbetaling>()
+
+        val avstemmingsdataMapper = AvstemmingsdataMapper(
+            utbetalinger = utbetalingsoppdgragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
+        )
+        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val (startmelding, dataMelding, sluttmelding) = avstemmingsmelding
+
+        assertEquals(0, dataMelding.total.totalAntall)
+    }
+
+    @Test
+    fun `nokkelTom og nokkelFom er satt til 0 naar det er ingen utbetalinger aa avstemme`() {
+        val fraOgMed = LocalDateTime.now().minusDays(1)
+        val til = LocalDateTime.now()
+
+        val utbetalingsoppdgragsliste = emptyList<Utbetaling>()
+
+        val avstemmingsdataMapper = AvstemmingsdataMapper(
+            utbetalinger = utbetalingsoppdgragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
+        )
+        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+        val (startmelding, dataMelding, sluttmelding) = avstemmingsmelding
+
+        assertAll(
+            "nokkelTom og nokkelFom er satt til 0 naar det er ingen utbetalinger aa avstemme",
+            { assertEquals("0", startmelding.aksjon.nokkelFom) },
+            { assertEquals("0", startmelding.aksjon.nokkelTom) },
+            { assertEquals("0", dataMelding.aksjon.nokkelFom) },
+            { assertEquals("0", dataMelding.aksjon.nokkelFom) },
+            { assertEquals("0", sluttmelding.aksjon.nokkelTom) },
+            { assertEquals("0", sluttmelding.aksjon.nokkelTom) },
+        )
+    }
+
+
+    @Test
     fun `foerste og siste avstemmingsnoekkel skal finnes fra utbetalingsoppdrag`() {
         val fraOgMed = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).minusDays(1)
         val til = LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0).plusHours(1)
 
-        val utbetalingsoppdgragsliste = listOf(
-            mockk<Utbetaling>(relaxed = true) {
-                every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0) // foerste
-            },
-            mockk(relaxed = true) {
-                every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusDays(1)
-            },
-            mockk(relaxed = true) {
-                every { avstemmingsnoekkel } returns LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0) // siste
-            },
-            mockk(relaxed = true) {
-                every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusHours(1)
-            },
-            mockk(relaxed = true) {
-                every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusMinutes(2)
-            }
-        )
+        val utbetalingsoppdgragsliste = listOf(mockk<Utbetaling>(relaxed = true) {
+            every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0) // foerste
+        }, mockk(relaxed = true) {
+            every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusDays(1)
+        }, mockk(relaxed = true) {
+            every { avstemmingsnoekkel } returns LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0) // siste
+        }, mockk(relaxed = true) {
+            every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusHours(1)
+        }, mockk(relaxed = true) {
+            every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusMinutes(2)
+        })
 
-        val avstemmingsdataMapper =
-            AvstemmingsdataMapper(
-                utbetaling = utbetalingsoppdgragsliste,
-                fraOgMed = fraOgMed,
-                til = til,
-                avstemmingId = "1"
-            )
+        val avstemmingsdataMapper = AvstemmingsdataMapper(
+            utbetalinger = utbetalingsoppdgragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
+        )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
         assertAll("skal finne forste og siste avstemmingsnoekkel i liste",
             { assertEquals("2020040914", dataMelding.periode.datoAvstemtFom) },
-            { assertEquals("2022012422", dataMelding.periode.datoAvstemtTom) }
-        )
+            { assertEquals("2022012422", dataMelding.periode.datoAvstemtTom) })
     }
 }

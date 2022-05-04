@@ -16,15 +16,14 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class AvstemmingsdataMapper(
-    private val utbetaling: List<Utbetaling>,
+    private val utbetalinger: List<Utbetaling>,
     private val fraOgMed: LocalDateTime,
     private val til: LocalDateTime,
     private val avstemmingId: String,
     private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING
 ) {
     fun opprettAvstemmingsmelding(): List<Avstemmingsdata> =
-        if (utbetaling.isEmpty()) emptyList()
-        else startmelding() + datameldinger() + sluttmelding()
+        startmelding() + datameldinger() + sluttmelding()
 
     private fun startmelding() = listOf(avstemmingsdata(AksjonType.START))
 
@@ -43,7 +42,7 @@ class AvstemmingsdataMapper(
     private fun avstemmingsdata(aksjonstype: AksjonType) =
         Avstemmingsdata().apply {
             aksjon = Aksjonsdata().apply {
-                val periode = periode(utbetaling)
+                val periode = periode(utbetalinger)
 
                 aksjonType = aksjonstype
                 kildeType = KildeType.AVLEV
@@ -51,15 +50,15 @@ class AvstemmingsdataMapper(
                 avleverendeKomponentKode = "ETTERLAT"
                 mottakendeKomponentKode = "OS"
                 underkomponentKode = "BARNEPE"
-                nokkelFom = periode.start.format(tidsstempelMikro)
-                nokkelTom = periode.endInclusive.format(tidsstempelMikro)
+                nokkelFom = periode?.start?.format(tidsstempelMikro) ?: "0"
+                nokkelTom = periode?.endInclusive?.format(tidsstempelMikro) ?: "0"
                 avleverendeAvstemmingId = avstemmingId
                 brukerId = "ETTERLAT" // TODO: systembruker - definere selv
             }
         }
 
     private fun avstemmingsdataLister(): List<Avstemmingsdata> {
-        return detaljdata(utbetaling).chunked(detaljerPrMelding).map {
+        return detaljdata(utbetalinger).chunked(detaljerPrMelding).map {
             avstemmingsdata(AksjonType.DATA).apply {
                 this.detalj.addAll(it)
             }
@@ -96,7 +95,7 @@ class AvstemmingsdataMapper(
         }
 
     private fun grunnlagsdata() = Grunnlagsdata().apply {
-        val utbetalingEtterStatus = utbetaling.groupBy { it.status }
+        val utbetalingEtterStatus = utbetalinger.groupBy { it.status }
         val antFeilet = utbetalingEtterStatus[UtbetalingStatus.FEILET]?.count() ?: 0
         val antAvvist = utbetalingEtterStatus[UtbetalingStatus.AVVIST]?.count() ?: 0
         godkjentAntall = utbetalingEtterStatus[UtbetalingStatus.GODKJENT]?.count() ?: 0
@@ -107,7 +106,7 @@ class AvstemmingsdataMapper(
 
     private fun totaldata() =
         Totaldata().apply {
-            totalAntall = utbetaling.size
+            totalAntall = utbetalinger.size
         }
 
     private fun periodedata() =
@@ -116,11 +115,12 @@ class AvstemmingsdataMapper(
             datoAvstemtTom = til.minusHours(1).format(tidsstempelTime)
         }
 
-    private fun periode(liste: List<Utbetaling>): ClosedRange<LocalDateTime> {
-        check(liste.isNotEmpty())
-        return object : ClosedRange<LocalDateTime> {
-            override val start = liste.minOf { it.avstemmingsnoekkel }
-            override val endInclusive = liste.maxOf { it.avstemmingsnoekkel }
+    private fun periode(liste: List<Utbetaling>): ClosedRange<LocalDateTime>? {
+        return if (liste.isEmpty()) null else {
+            object : ClosedRange<LocalDateTime> {
+                override val start = liste.minOf { it.avstemmingsnoekkel }
+                override val endInclusive = liste.maxOf { it.avstemmingsnoekkel }
+            }
         }
     }
 

@@ -11,7 +11,7 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_12
-        cascadingDelete: true
+        cascadingDelete: false
         name: etterlatte-sakogbehandlinger
         databases:
           - name: sakogbehandlinger

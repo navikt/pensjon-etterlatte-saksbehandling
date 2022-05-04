@@ -48,13 +48,13 @@ class AvstemmingsdataMapper(
                 aksjonType = aksjonstype
                 kildeType = KildeType.AVLEV
                 avstemmingType = AvstemmingType.GRSN
-                avleverendeKomponentKode = "BARNEPE" // TODO: korrekt?
+                avleverendeKomponentKode = "ETTERLAT"
                 mottakendeKomponentKode = "OS"
-                underkomponentKode = "BARNEPE" // TODO: korrekt?
+                underkomponentKode = "BARNEPE"
                 nokkelFom = periode.start.format(tidsstempelMikro)
                 nokkelTom = periode.endInclusive.format(tidsstempelMikro)
                 avleverendeAvstemmingId = avstemmingId
-                brukerId = "BARNEPE" // TODO: finne ut hva som skal settes her
+                brukerId = "ETTERLAT" // TODO: systembruker - definere selv
             }
         }
 
@@ -73,7 +73,7 @@ class AvstemmingsdataMapper(
                 Detaljdata().apply {
                     this.detaljType = detaljType
                     offnr = it.foedselsnummer
-                    avleverendeTransaksjonNokkel = it.sakId // TODO skal dette være sakId ?
+                    avleverendeTransaksjonNokkel = it.sakId
                     tidspunkt = it.avstemmingsnoekkel.format(tidsstempelTime)
                     if (detaljType in listOf(DetaljType.AVVI, DetaljType.VARS) && it.oppdragKvittering != null) {
                         meldingKode = it.meldingKodeOppdrag

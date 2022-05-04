@@ -12,13 +12,14 @@ import io.ktor.request.httpMethod
 import io.ktor.request.path
 import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.server.cio.*
-import io.ktor.server.engine.*
 import kotlinx.coroutines.*
 import no.nav.etterlatte.database.DatabaseContext
+import no.nav.etterlatte.grunnlag.GrunnlagFactory
+import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.grunnlagRoutes
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.event.Level
 import java.util.*
 import javax.sql.DataSource
@@ -28,24 +29,18 @@ fun main() {
     val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
     }
-    appFromEnv(env).run()
-}
+    val beanFactory = EnvBasedBeanFactory(env)
 
+    beanFactory.datasourceBuilder().migrate()
 
-
-fun appFromEnv(env: Map<String, String>): App {
-    return appFromBeanfactory(EnvBasedBeanFactory(env))
-}
-
-fun appFromBeanfactory(env: BeanFactory): App {
-    return App(env)
+    RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule{
+        module(beanFactory)
+    }.build().apply {
+        GrunnlagHendelser(this, GrunnlagFactory(beanFactory.grunnlagDao(), beanFactory.opplysningDao()), beanFactory.datasourceBuilder().dataSource)
+    }.start()
 }
 
 fun Application.module(beanFactory: BeanFactory){
-
-    val ds = beanFactory.datasourceBuilder().apply {
-        migrate()
-    }
 
     install(ContentNegotiation) {
         jackson{
@@ -70,15 +65,12 @@ fun Application.module(beanFactory: BeanFactory){
     }
 
     routing {
-        naisprobes()
         authenticate {
-            attachContekst(ds.dataSource)
+            attachContekst(beanFactory.datasourceBuilder().dataSource)
             grunnlagRoutes(beanFactory.grunnlagsService())
         }
 
     }
-    //TODO trengs start e.l.?
-    beanFactory.grunnlagHendelser()
 }
 
 private fun Route.attachContekst(ds: DataSource){
@@ -95,31 +87,7 @@ private fun Route.attachContekst(ds: DataSource){
     }
 }
 
-class App(private val beanFactory: BeanFactory){
-    fun run(){
-        embeddedServer(CIO, applicationEngineEnvironment {
-            modules.add{ module(beanFactory) }
-            connector { port = 8080 }
-        }).start(true)
-        //TODO trengs denne?
-        //beanFactory.grunnlagHendelser().nyHendelse.close()
-    }
-}
-
 private fun ventPaaNettverk() {
     runBlocking { delay(5000) }
 }
 
-fun Route.naisprobes(){
-    route("internal"){
-        get("isalive"){
-            call.respondText { "OK" }
-        }
-        get("isready"){
-            call.respondText { "OK" }
-        }
-        get("started"){
-            call.respondText { "OK" }
-        }
-    }
-}

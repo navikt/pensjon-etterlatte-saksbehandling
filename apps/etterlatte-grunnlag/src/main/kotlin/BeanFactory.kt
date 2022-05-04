@@ -5,8 +5,6 @@ import io.ktor.auth.*
 import io.ktor.config.*
 import no.nav.etterlatte.grunnlag.*
 import no.nav.security.token.support.ktor.tokenValidationSupport
-import no.nav.helse.rapids_rivers.RapidApplication
-import no.nav.helse.rapids_rivers.RapidsConnection
 
 interface BeanFactory {
     fun datasourceBuilder(): DataSourceBuilder
@@ -14,8 +12,6 @@ interface BeanFactory {
     fun tokenValidering(): Authentication.Configuration.()->Unit
     fun grunnlagDao(): GrunnlagDao
     fun opplysningDao(): OpplysningDao
-    fun rapid():RapidsConnection
-    fun grunnlagHendelser(): GrunnlagHendelser
     fun behandlingsFactory(): GrunnlagFactory
 }
 
@@ -29,9 +25,6 @@ abstract class CommonFactory: BeanFactory{
 
     }
 
-    override fun grunnlagHendelser(): GrunnlagHendelser {
-        return cached { GrunnlagHendelser(rapid(), GrunnlagFactory(grunnlagDao(), opplysningDao()), datasourceBuilder().dataSource) }
-    }
     override fun behandlingsFactory(): GrunnlagFactory {
         return cached { GrunnlagFactory(grunnlagDao(), opplysningDao()) }
     }
@@ -46,8 +39,5 @@ class EnvBasedBeanFactory(val env: Map<String, String>): CommonFactory() {
 
     override fun datasourceBuilder(): DataSourceBuilder = cached { DataSourceBuilder(env) }
     override fun tokenValidering(): Authentication.Configuration.() -> Unit = { tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load())) }
-    override fun rapid(): RapidsConnection {
-        return RapidApplication.create(env)
 
-    }
 }

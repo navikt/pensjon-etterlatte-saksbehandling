@@ -1,6 +1,5 @@
 
 plugins {
-    id("etterlatte.kafka")
     id("etterlatte.rapids-and-rivers")
 }
 
@@ -9,8 +8,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:3.4.5")
     implementation("org.flywaydb:flyway-core:6.5.0")
     implementation("org.postgresql:postgresql:42.2.5")
-    implementation(Ktor.ServerCore)
-    implementation(Ktor.ServerCio)
+
     implementation(Ktor.ClientCore)
     implementation(Ktor.ClientJackson)
     implementation(Ktor.ClientCioJvm)

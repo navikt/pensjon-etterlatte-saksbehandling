@@ -9,14 +9,10 @@ import io.ktor.routing.route
 
 fun Route.brevRoute(service: BrevService) {
     route("brev") {
-        get("{vedtakId}/opprett") {
-            val vedtakId = context.parameters["vedtakId"]
+        get("{behandlingId}") {
+            val behandlingId = context.parameters["behandlingId"]!!
 
-            if (!vedtakId.isNullOrEmpty()) {
-                call.respond(service.opprettBrev(vedtakId))
-            } else {
-               call.respond(HttpStatusCode.BadRequest, "VedtakId mangler")
-            }
+            call.respond(service.hentBrev(behandlingId))
         }
 
         get("{vedtakId}/send") {

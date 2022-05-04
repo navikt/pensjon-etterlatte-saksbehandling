@@ -16,6 +16,12 @@ spec:
   readiness:
     initialDelay: 5
     path: /health/isready
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        databases:
+          - name: etterlatte-brev
+            envVarPrefix: DB
   azure:
     application:
       enabled: true

@@ -82,3 +82,14 @@ object Kotest {
 
     const val AssertionsCore = "io.kotest:kotest-assertions-core:$version"
 }
+
+object Database {
+    const val HikariCP = "com.zaxxer:HikariCP:3.4.5"
+    const val FlywayDB = "org.flywaydb:flyway-core:6.5.0"
+    const val Postgresql = "org.postgresql:postgresql:42.2.5"
+}
+
+object TestContainer {
+    const val Jupiter = "org.testcontainers:junit-jupiter:1.15.3"
+    const val Postgresql = "org.testcontainers:postgresql:1.16.0"
+}

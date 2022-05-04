@@ -6,6 +6,10 @@ dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:ktorclient-onbehalfof"))
 
+    implementation(Database.HikariCP)
+    implementation(Database.FlywayDB)
+    implementation(Database.Postgresql)
+
     implementation(Ktor.ServerCore)
     implementation(Ktor.ServerCio)
     implementation(Ktor.ClientCore)
@@ -30,4 +34,6 @@ dependencies {
     testImplementation(Ktor.ServerTests)
     testImplementation(Kotlinx.CoroutinesCore)
     testImplementation(NavFelles.MockOauth2Server)
+    testImplementation(TestContainer.Jupiter)
+    testImplementation(TestContainer.Postgresql)
 }

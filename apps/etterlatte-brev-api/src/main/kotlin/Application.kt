@@ -8,16 +8,24 @@ import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.header
+import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import pdf.PdfGeneratorKlient
 
-class ApplicationContext(configLocation: String? = null) {
-    private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
+class ApplicationContext {
+    private val config: Config = ConfigFactory.load()
     private val pdfGenerator = PdfGeneratorKlient(httpClient(), config.getString("pdfgen.url"))
 
-    val brevService = BrevService(pdfGenerator)
+    private val datasourceBuilder = DataSourceBuilder(System.getenv())
+    private val db = BrevRepository.using(datasourceBuilder.dataSource)
+
+    val brevService = BrevService(db, pdfGenerator)
+
+    init {
+        datasourceBuilder.migrate()
+    }
 
     private fun httpClient() = HttpClient(OkHttp) {
         install(JsonFeature) {

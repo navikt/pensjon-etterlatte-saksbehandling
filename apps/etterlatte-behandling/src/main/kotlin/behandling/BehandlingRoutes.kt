@@ -9,11 +9,7 @@ import io.ktor.util.pipeline.*
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
-import java.time.LocalDateTime
-import no.nav.etterlatte.libs.common.objectMapper
 import java.util.*
 
 fun Route.behandlingRoutes(service: BehandlingService) {

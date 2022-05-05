@@ -9,7 +9,6 @@ import no.nav.etterlatte.database.singleOrNull
 import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import java.sql.Connection
-import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.util.*
 
@@ -24,39 +23,8 @@ class BehandlingDao(private val connection: () -> Connection) {
             )
         stmt.setObject(1, id)
 
-
-        return stmt.executeQuery().singleOrNull {
-            Behandling(
-                id = getObject(1) as UUID,
-                sak = getLong(2),
-                behandlingOpprettet = getTimestamp(3).toLocalDateTime(),
-                sistEndret = getTimestamp(4).toLocalDateTime(),
-                soeknadMottattDato = getDate(5).toLocalDate(), //todo endres til datetime?
-                innsender = getString(6),
-                soeker = getString(7),
-                gjenlevende = getString(8)?.let { objectMapper.readValue(it) },
-                avdoed = getString(9)?.let { objectMapper.readValue(it) },
-                soesken = getString(10)?.let { objectMapper.readValue(it) },
-                gyldighetsproeving = getString(11)?.let { objectMapper.readValue(it) },
-                status = getString(12)?.let { BehandlingStatus.valueOf(it) },
-            )
-        }
+        return stmt.executeQuery().singleOrNull { asBehandling(this) }
     }
-
-    fun asBehandling(rs: ResultSet) =  Behandling(
-        id = rs.getObject(1) as UUID,
-        sak = rs.getLong(2),
-        behandlingOpprettet = rs.getTimestamp(3).toLocalDateTime(),
-        sistEndret = rs.getTimestamp(4).toLocalDateTime(),
-        soeknadMottattDato = rs.getDate(5).toLocalDate(), //todo endres til datetime?
-        innsender = rs.getString(6),
-        soeker = rs.getString(7),
-        gjenlevende = rs.getString(8)?.let { objectMapper.readValue(it) },
-        avdoed = rs.getString(9)?.let { objectMapper.readValue(it) },
-        soesken = rs.getString(10)?.let { objectMapper.readValue(it) },
-        gyldighetsproeving = rs.getString(11)?.let { objectMapper.readValue(it) },
-        status = rs.getString(12)?.let { objectMapper.readValue(it) },
-    )
 
     fun alleBehandlinger(): List<Behandling> {
         val stmt =
@@ -65,7 +33,7 @@ class BehandlingDao(private val connection: () -> Connection) {
                         "soeknadMottattDato, innsender, soeker, gjenlevende, avdoed, soesken, " +
                         "gyldighetsproeving, status  FROM behandling"
             )
-        return listeResultat(stmt)
+        return stmt.executeQuery().toList { asBehandling(this) }
     }
 
     fun alleBehandingerISak(sakid: Long): List<Behandling> {
@@ -76,27 +44,23 @@ class BehandlingDao(private val connection: () -> Connection) {
                         "gyldighetsproeving, status  FROM behandling where id = ?"
             )
         stmt.setLong(1, sakid)
-        return listeResultat(stmt)
+        return stmt.executeQuery().toList { asBehandling(this) }
     }
 
-    fun listeResultat(stmt: PreparedStatement): List<Behandling> {
-        return stmt.executeQuery().toList {
-            Behandling(
-                id = getObject(1) as UUID,
-                sak = getLong(2),
-                behandlingOpprettet = getTimestamp(3).toLocalDateTime(),
-                sistEndret = getTimestamp(4).toLocalDateTime(),
-                soeknadMottattDato = getDate(5).toLocalDate(),
-                innsender = getString(6),
-                soeker = getString(7),
-                gjenlevende = getString(8)?.let { objectMapper.readValue(it) },
-                avdoed = getString(9)?.let { objectMapper.readValue(it) },
-                soesken = getString(10)?.let { objectMapper.readValue(it) },
-                gyldighetsproeving = getString(11)?.let { objectMapper.readValue(it) },
-                status = getString(12)?.let { objectMapper.readValue(it) },
-            )
-        }
-    }
+    fun asBehandling(rs: ResultSet) = Behandling(
+        id = rs.getObject("id") as UUID,
+        sak = rs.getLong("sak_id"),
+        behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toLocalDateTime(),
+        sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
+        soeknadMottattDato = rs.getTimestamp("soekand_mottatt_dato").toLocalDateTime(),
+        innsender = rs.getString("innsender"),
+        soeker = rs.getString("soeker"),
+        gjenlevende = rs.getString("gjenlevende")?.let { objectMapper.readValue(it) },
+        avdoed = rs.getString("avdoed")?.let { objectMapper.readValue(it) },
+        soesken = rs.getString("soesken")?.let { objectMapper.readValue(it) },
+        gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
+        status = rs.getString("status")?.let { objectMapper.readValue(it) },
+    )
 
     fun opprett(behandling: Behandling) {
         val stmt = connection().prepareStatement("INSERT INTO behandling(id, sak_id) VALUES(?, ?)")
@@ -119,8 +83,8 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     fun avbrytBehandling(behandling: Behandling) {
-        val stmt = connection().prepareStatement("UPDATE behandling SET avbrutt = ? WHERE id = ?")
-        stmt.setBoolean(1, true)
+        val stmt = connection().prepareStatement("UPDATE behandling SET status = ? WHERE id = ?")
+        stmt.setString(1, BehandlingStatus.AVBRUTT.name)
         stmt.setObject(2, behandling.id)
         require(stmt.executeUpdate() == 1)
     }

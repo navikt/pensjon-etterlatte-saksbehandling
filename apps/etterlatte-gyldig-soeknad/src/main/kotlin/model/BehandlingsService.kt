@@ -13,7 +13,7 @@ class BehandlingsService(
     private val behandling_app: HttpClient,
     private val url: String,
 ) : Behandling {
-    override fun initierBehandling(sak: Long, jsonNode: JsonNode, jsonNode1: Long, persongalleri: Persongalleri): UUID {
+    override fun initierBehandling(sak: Long, skjemaInfo: JsonNode, soeknadId: Long, persongalleri: Persongalleri): UUID {
         return runBlocking {
             behandling_app.post<String>("$url/behandlinger") {
                 contentType(ContentType.Application.Json)

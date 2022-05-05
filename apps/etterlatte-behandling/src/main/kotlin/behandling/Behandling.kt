@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -11,7 +10,7 @@ data class Behandling(
     val sak: Long,
     val behandlingOpprettet: LocalDateTime,
     val sistEndret: LocalDateTime,
-    val soeknadMottattDato: LocalDate?,
+    val soeknadMottattDato: LocalDateTime?,
     val innsender: String,
     val soeker: String,
     val gjenlevende: List<String>?,

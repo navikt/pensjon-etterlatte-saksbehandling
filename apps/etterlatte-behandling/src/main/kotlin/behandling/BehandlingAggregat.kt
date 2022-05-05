@@ -26,7 +26,7 @@ class BehandlingAggregat(
                 sak,
                 LocalDateTime.now(),
                 LocalDateTime.now(),
-                LocalDate.now(), //må hentes fra søknad
+                LocalDateTime.now(), //må hentes fra søknad
                 "", //må hentes fra søknad
                 "", //må hentes fra søknad
                 emptyList(), //må hentes fra søknad

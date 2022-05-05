@@ -1,12 +1,10 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.etterlatte.*
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import org.slf4j.LoggerFactory
-import java.time.Instant
 import java.util.*
 
 //class AvbruttBehandlingException(message: String) : RuntimeException(message) {}
@@ -37,11 +35,11 @@ class GrunnlagAggregat(
         if (nyeOpplysninger.isEmpty()) return
 
         for (opplysning in nyeOpplysninger) {
-            leggTilGrunnlagUtenVilkårsprøving(opplysning.opplysning, opplysning.opplysningType, opplysning.kilde)
+            leggTilGrunnlagUtenVilkaarsprøving(opplysning.opplysning, opplysning.opplysningType, opplysning.kilde)
         }
     }
 
-    fun leggTilGrunnlagUtenVilkårsprøving(
+    fun leggTilGrunnlagUtenVilkaarsprøving(
         data: ObjectNode,
         type: Opplysningstyper,
         kilde: Grunnlagsopplysning.Kilde

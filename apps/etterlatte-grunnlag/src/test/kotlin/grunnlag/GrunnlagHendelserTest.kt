@@ -2,14 +2,12 @@ package grunnlag
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.EnvBasedBeanFactory
 import no.nav.etterlatte.grunnlag.GrunnlagFactory
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

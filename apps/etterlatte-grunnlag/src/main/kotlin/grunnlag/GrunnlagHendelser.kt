@@ -1,9 +1,7 @@
 package no.nav.etterlatte.grunnlag
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -13,7 +11,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.awt.print.Book
 
 
 enum class GrunnlagHendelserType {

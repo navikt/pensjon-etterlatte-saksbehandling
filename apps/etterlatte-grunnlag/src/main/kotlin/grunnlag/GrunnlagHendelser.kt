@@ -1,16 +1,20 @@
 package no.nav.etterlatte.grunnlag
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import javax.sql.DataSource
+import java.awt.print.Book
+
 
 enum class GrunnlagHendelserType {
     OPPRETTET, GRUNNLAGENDRET, AVBRUTT
@@ -37,9 +41,15 @@ class GrunnlagHendelser(
     override fun onPacket(packet: no.nav.helse.rapids_rivers.JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             val gjeldendeGrunnlag = grunnlag.hent(packet["saksId"].asLong())
-            val opplysning = objectMapper.treeToValue<Grunnlagsopplysning<ObjectNode>>(packet["opplysning"])!!
-            gjeldendeGrunnlag.leggTilGrunnlagListe(listOf(opplysning))
-            logger.info("Har gjort et forsøk på å legge til en opplysning tror jeg")
+            val opplysninger: List<Grunnlagsopplysning<ObjectNode>> =
+                objectMapper.readValue(packet["opplysning"].toJson())!!
+            gjeldendeGrunnlag.leggTilGrunnlagListe(opplysninger)
+
+            //TODO Her bør jeg vel lage en ny melding
+            packet["grunnlag"] = gjeldendeGrunnlag.serialiserbarUtgave()
+            packet["@event_name"] = "GRUNNLAG:GRUNNLAGENDRET"
+            context.publish(packet.toJson())
+            logger.info("Lagt ut melding om grunnlagsendring")
         }
 
     private fun no.nav.helse.rapids_rivers.JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

@@ -44,11 +44,12 @@ class GrunnlagAggregat(
     fun leggTilGrunnlagUtenVilkårsprøving(
         data: ObjectNode,
         type: Opplysningstyper,
-        kilde: Grunnlagsopplysning.Kilde?
+        kilde: Grunnlagsopplysning.Kilde
     ): UUID {
         val grunnlagsopplysning = Grunnlagsopplysning(
             UUID.randomUUID(),
-            kildeFraRequestContekst(kilde),
+            //kildeFraRequestContekst(kilde),
+            kilde,
             type,
             objectMapper.createObjectNode(),
             data
@@ -59,7 +60,8 @@ class GrunnlagAggregat(
         return grunnlagsopplysning.id
     }
 
-
+    //TODO tukler ikke med kilde ennå
+/*
     private fun kildeFraRequestContekst(oppgittKilde: Grunnlagsopplysning.Kilde?): Grunnlagsopplysning.Kilde {
         return if (Kontekst.get().AppUser.kanSetteKilde() && oppgittKilde != null) oppgittKilde else when (Kontekst.get().AppUser) {
             is Saksbehandler -> if (oppgittKilde == null) Grunnlagsopplysning.Saksbehandler(Kontekst.get().AppUser.name()) else throw IllegalArgumentException()
@@ -71,6 +73,8 @@ class GrunnlagAggregat(
         }
     }
 
+
+ */
 
     fun serialiserbarUtgave() = Grunnlag(saksId = saksid, grunnlag = lagredeOpplysninger)
 }

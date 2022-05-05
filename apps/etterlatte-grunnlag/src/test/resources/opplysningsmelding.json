@@ -9,7 +9,7 @@
         "registersReferanse": null,
         "type": "pdl"
       },
-      "opplysningsType": "AVDOED_PDL_V1",
+      "opplysningType": "AVDOED_PDL_V1",
       "meta": {},
       "opplysning": {
         "fornavn": "VAKKER",

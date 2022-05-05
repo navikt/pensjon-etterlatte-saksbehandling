@@ -19,18 +19,7 @@ import java.util.*
 class GrunnlagHendelserTest {
     companion object {
         val melding = readFile("/opplysningsmelding.json")
-        //val beanFactory = EnvBasedBeanFactory(env)
         val opplysningerMock = mockk<OpplysningDao>()
-
-       /* fun readmelding(file: String): Barnepensjon {
-            val skjemaInfo = objectMapper.writeValueAsString(
-                objectMapper.readTree(readFile(file)).get("@skjema_info")
-            )
-            return objectMapper.readValue(skjemaInfo, Barnepensjon::class.java)
-        }
-
-        */
-
         fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")
     }
@@ -58,14 +47,10 @@ class GrunnlagHendelserTest {
         )
 
         every { opplysningerMock.finnOpplysningerIGrunnlag(4)} returns opplysninger
+        every { opplysningerMock.leggOpplysningTilGrunnlag(4,any())} returns Unit
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-        Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get("@event").asText())
-        //TODO oppdatere testen
-        println(inspector.message(0).get("@vilkaarsvurdering"))
-
-        Assertions.assertEquals(3, inspector.message(0).get("@vilkaarsvurdering").size())
-
-        //verify { fordelerMetricLogger.logMetricFordelt() }
+        Assertions.assertEquals("GRUNNLAG:GRUNNLAGENDRET", inspector.message(0).get("@event_name").asText())
+        Assertions.assertEquals(3, inspector.message(0).get("grunnlag").get("grunnlag").size())
     }
 }

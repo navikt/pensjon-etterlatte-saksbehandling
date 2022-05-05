@@ -42,10 +42,10 @@ class UtbetalingDao(private val dataSource: DataSource) {
                         endret = getTimestamp("endret").toLocalDateTime(),
                         foedselsnummer = getString("foedselsnummer"),
                         utgaaendeOppdrag = getString("utgaaende_oppdrag").let(OppdragJaxb::toOppdrag),
-                        oppdragKvittering = getString("oppdrag_kvittering")?.let(OppdragJaxb::toOppdrag),
-                        beskrivelseOppdrag = getString("beskrivelse_oppdrag"),
-                        feilkodeOppdrag = getString("feilkode_oppdrag"),
-                        meldingKodeOppdrag = getString("meldingkode_oppdrag")
+                        kvitteringOppdrag = getString("oppdrag_kvittering")?.let(OppdragJaxb::toOppdrag),
+                        kvitteringBeskrivelse = getString("beskrivelse_oppdrag"),
+                        kvitteringFeilkode = getString("feilkode_oppdrag"),
+                        kvitteringMeldingKode = getString("meldingkode_oppdrag")
                     )
                 }
             }
@@ -76,10 +76,10 @@ class UtbetalingDao(private val dataSource: DataSource) {
                         endret = getTimestamp("endret").toLocalDateTime(),
                         foedselsnummer = getString("foedselsnummer"),
                         utgaaendeOppdrag = getString("utgaaende_oppdrag").let(OppdragJaxb::toOppdrag),
-                        oppdragKvittering = getString("oppdrag_kvittering")?.let(OppdragJaxb::toOppdrag),
-                        beskrivelseOppdrag = getString("beskrivelse_oppdrag"),
-                        feilkodeOppdrag = getString("feilkode_oppdrag"),
-                        meldingKodeOppdrag = getString("meldingkode_oppdrag")
+                        kvitteringOppdrag = getString("oppdrag_kvittering")?.let(OppdragJaxb::toOppdrag),
+                        kvitteringBeskrivelse = getString("beskrivelse_oppdrag"),
+                        kvitteringFeilkode = getString("feilkode_oppdrag"),
+                        kvitteringMeldingKode = getString("meldingkode_oppdrag")
                     )
                 }
             }

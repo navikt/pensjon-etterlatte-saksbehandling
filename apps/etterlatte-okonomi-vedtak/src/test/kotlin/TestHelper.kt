@@ -90,8 +90,8 @@ fun utbetalingsoppdrag(
         avstemmingsnoekkel = LocalDateTime.now(),
         foedselsnummer = "12345678903",
         utgaaendeOppdrag = oppdrag(vedtakId),
-        oppdragKvittering = oppdrag(vedtakId),
-        beskrivelseOppdrag = "En beskrivelse",
-        feilkodeOppdrag = "hva skal stå her?",
-        meldingKodeOppdrag = "08"
+        kvitteringOppdrag = oppdrag(vedtakId),
+        kvitteringBeskrivelse = "En beskrivelse",
+        kvitteringFeilkode = "hva skal stå her?",
+        kvitteringMeldingKode = "08"
     )

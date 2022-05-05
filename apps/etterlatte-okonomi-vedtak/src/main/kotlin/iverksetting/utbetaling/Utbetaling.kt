@@ -24,8 +24,8 @@ data class Utbetaling(
     val avstemmingsnoekkel: LocalDateTime,
     val foedselsnummer: String,
     val utgaaendeOppdrag: Oppdrag,
-    val oppdragKvittering: Oppdrag? = null,
-    val beskrivelseOppdrag: String? = null,
-    val feilkodeOppdrag: String? = null,
-    val meldingKodeOppdrag: String? = null // 00, 04, 08, 12
+    val kvitteringOppdrag: Oppdrag? = null,
+    val kvitteringBeskrivelse: String? = null,
+    val kvitteringFeilkode: String? = null,
+    val kvitteringMeldingKode: String? = null // 00, 04, 08, 12
 )

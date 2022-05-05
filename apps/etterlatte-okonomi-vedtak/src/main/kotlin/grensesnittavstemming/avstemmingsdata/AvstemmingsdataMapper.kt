@@ -43,17 +43,18 @@ class AvstemmingsdataMapper(
         Avstemmingsdata().apply {
             aksjon = Aksjonsdata().apply {
                 val periode = periode(utbetalinger)
+                val fagomraade = "BARNEPE"
 
                 aksjonType = aksjonstype
                 kildeType = KildeType.AVLEV
                 avstemmingType = AvstemmingType.GRSN
                 avleverendeKomponentKode = "ETTERLAT"
                 mottakendeKomponentKode = "OS"
-                underkomponentKode = "BARNEPE"
+                underkomponentKode = fagomraade
                 nokkelFom = periode?.start?.format(tidsstempelMikro) ?: "0"
                 nokkelTom = periode?.endInclusive?.format(tidsstempelMikro) ?: "0"
                 avleverendeAvstemmingId = avstemmingId
-                brukerId = "ETTERLAT" // TODO: systembruker - definere selv
+                brukerId = fagomraade
             }
         }
 
@@ -74,10 +75,10 @@ class AvstemmingsdataMapper(
                     offnr = it.foedselsnummer
                     avleverendeTransaksjonNokkel = it.sakId
                     tidspunkt = it.avstemmingsnoekkel.format(tidsstempelTime)
-                    if (detaljType in listOf(DetaljType.AVVI, DetaljType.VARS) && it.oppdragKvittering != null) {
-                        meldingKode = it.meldingKodeOppdrag
-                        alvorlighetsgrad = it.feilkodeOppdrag
-                        tekstMelding = it.beskrivelseOppdrag
+                    if (detaljType in listOf(DetaljType.AVVI, DetaljType.VARS) && it.kvitteringOppdrag != null) {
+                        meldingKode = it.kvitteringMeldingKode
+                        alvorlighetsgrad = it.kvitteringFeilkode
+                        tekstMelding = it.kvitteringBeskrivelse
                     }
                 }
             } else {

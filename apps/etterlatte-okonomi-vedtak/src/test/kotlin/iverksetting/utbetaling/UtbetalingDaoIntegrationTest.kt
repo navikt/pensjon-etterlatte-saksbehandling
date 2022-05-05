@@ -92,10 +92,10 @@ internal class UtbetalingDaoIntegrationTest {
             },
             { assertEquals(vedtak.sakIdGjelderFnr, utbetalingsoppdrag?.foedselsnummer) },
             { assertNotNull(utbetalingsoppdrag?.utgaaendeOppdrag) },
-            { assertNull(utbetalingsoppdrag?.oppdragKvittering) },
-            { assertNull(utbetalingsoppdrag?.beskrivelseOppdrag) },
-            { assertNull(utbetalingsoppdrag?.feilkodeOppdrag) },
-            { assertNull(utbetalingsoppdrag?.meldingKodeOppdrag) }
+            { assertNull(utbetalingsoppdrag?.kvitteringOppdrag) },
+            { assertNull(utbetalingsoppdrag?.kvitteringBeskrivelse) },
+            { assertNull(utbetalingsoppdrag?.kvitteringFeilkode) },
+            { assertNull(utbetalingsoppdrag?.kvitteringMeldingKode) }
         )
     }
 
@@ -116,18 +116,18 @@ internal class UtbetalingDaoIntegrationTest {
         val utbetalingsoppdragOppdatert = utbetalingDao.hentUtbetaling(oppdrag.vedtakId())
 
         assertAll("skal sjekke at kvittering er opprettet korrekt på utbetalingsoppdrag",
-            { assertNotNull(utbetalingsoppdragOppdatert?.oppdragKvittering) },
-            { assertNotNull(utbetalingsoppdragOppdatert?.oppdragKvittering?.mmel) },
+            { assertNotNull(utbetalingsoppdragOppdatert?.kvitteringOppdrag) },
+            { assertNotNull(utbetalingsoppdragOppdatert?.kvitteringOppdrag?.mmel) },
             {
                 assertEquals(
                     oppdragMedKvittering.mmel?.alvorlighetsgrad,
-                    utbetalingsoppdragOppdatert?.oppdragKvittering?.mmel?.alvorlighetsgrad
+                    utbetalingsoppdragOppdatert?.kvitteringOppdrag?.mmel?.alvorlighetsgrad
                 )
             },
             {
                 assertEquals(
                     oppdragMedKvittering.oppdrag110.oppdragsId,
-                    utbetalingsoppdragOppdatert?.oppdragKvittering?.oppdrag110?.oppdragsId
+                    utbetalingsoppdragOppdatert?.kvitteringOppdrag?.oppdrag110?.oppdragsId
                 )
             })
     }

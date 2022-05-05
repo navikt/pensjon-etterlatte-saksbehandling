@@ -78,7 +78,7 @@ class KvitteringMottaker(
     }
 
     private fun oppdragFeilet(oppdrag: Oppdrag, oppdragXml: String) {
-        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet", kv("iverksetting", oppdragXml))
+        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet", kv("oppdrag", oppdragXml))
         utbetalingService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingStatus.FEILET)
     }
 
@@ -86,11 +86,10 @@ class KvitteringMottaker(
         // TODO bør denne håndteres på noen annen måte?
         logger.info(
             "Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet med ukjent feil",
-            kv("iverksetting", oppdragXml)
+            kv("utbetaling/iverksetting", oppdragXml)
         )
         utbetalingService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingStatus.FEILET)
     }
-
 
     companion object {
         private val logger = LoggerFactory.getLogger(KvitteringMottaker::class.java)

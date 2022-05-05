@@ -1,4 +1,4 @@
-package no.nav.etterlatte.utbetaling
+package no.nav.etterlatte
 
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.etterlatte.utbetaling.config.required

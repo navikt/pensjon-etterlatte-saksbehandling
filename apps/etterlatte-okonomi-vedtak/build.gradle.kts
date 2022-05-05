@@ -34,11 +34,3 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:1.16.3")
     testImplementation("org.testcontainers:postgresql:1.16.0")
 }
-
-tasks {
-    named<Jar>("jar") {
-        manifest {
-            attributes["Main-Class"] = "no.nav.etterlatte.utbetaling.ApplicationKt"
-        }
-    }
-}

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
 import no.nav.etterlatte.utbetaling.attestasjon
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.vedtak
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test

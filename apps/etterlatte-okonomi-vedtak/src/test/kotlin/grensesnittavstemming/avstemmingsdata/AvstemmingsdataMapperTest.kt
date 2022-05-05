@@ -1,10 +1,10 @@
-package no.nav.etterlatte.grensesnittavstemming.avstemmingsdata
+package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.iverksetting.utbetaling.Utbetaling
-import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingStatus
-import no.nav.etterlatte.utbetalingsoppdrag
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.etterlatte.utbetaling.utbetalingsoppdrag
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

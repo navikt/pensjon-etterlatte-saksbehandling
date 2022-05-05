@@ -1,4 +1,4 @@
-package no.nav.etterlatte.grensesnittavstemming
+package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
 import kotliquery.Row
 import kotliquery.param

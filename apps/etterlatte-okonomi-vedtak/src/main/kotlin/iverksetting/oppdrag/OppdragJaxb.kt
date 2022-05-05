@@ -1,4 +1,4 @@
-package no.nav.etterlatte.iverksetting.oppdrag
+package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import java.io.StringReader

@@ -1,6 +1,6 @@
-package no.nav.etterlatte.grensesnittavstemming.avstemmingsdata
+package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
-import no.nav.etterlatte.config.JmsConnectionFactory
+import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Avstemmingsdata
 import org.slf4j.LoggerFactory
 

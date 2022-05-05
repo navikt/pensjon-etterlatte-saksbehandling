@@ -1,15 +1,15 @@
-package no.nav.etterlatte.iverksetting.oppdrag
+package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.TestContainers
-import no.nav.etterlatte.config.JmsConnectionFactory
-import no.nav.etterlatte.iverksetting.KvitteringMottaker
-import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingService
-import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingStatus
-import no.nav.etterlatte.oppdragMedFeiletKvittering
-import no.nav.etterlatte.oppdragMedGodkjentKvittering
+import no.nav.etterlatte.utbetaling.TestContainers
+import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
+import no.nav.etterlatte.utbetaling.iverksetting.KvitteringMottaker
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.etterlatte.utbetaling.oppdragMedFeiletKvittering
+import no.nav.etterlatte.utbetaling.oppdragMedGodkjentKvittering
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test

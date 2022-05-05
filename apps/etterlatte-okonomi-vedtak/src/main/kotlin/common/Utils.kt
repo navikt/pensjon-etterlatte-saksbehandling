@@ -1,4 +1,4 @@
-package no.nav.etterlatte.common
+package no.nav.etterlatte.utbetaling.common
 
 import java.time.LocalTime
 import java.time.ZonedDateTime

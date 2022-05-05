@@ -1,8 +1,8 @@
-package no.nav.etterlatte.grensesnittavstemming
+package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
-import no.nav.etterlatte.grensesnittavstemming.avstemmingsdata.AvstemmingsdataMapper
-import no.nav.etterlatte.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
-import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingDao
+import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataMapper
+import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 

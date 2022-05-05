@@ -1,8 +1,8 @@
-package no.nav.etterlatte.iverksetting.utbetaling
+package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
-import no.nav.etterlatte.iverksetting.oppdrag.OppdragMapper
-import no.nav.etterlatte.iverksetting.oppdrag.OppdragSender
-import no.nav.etterlatte.iverksetting.oppdrag.vedtakId
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
@@ -25,10 +25,6 @@ class UtbetalingService(
         oppdragSender.sendOppdrag(oppdrag)
         return utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettetTidspunkt)
     }
-
-    fun hentAlleUtbetalingerMellom(fraOgMed: LocalDateTime, tilOgMed: LocalDateTime) =
-        utbetalingDao.hentAlleUtbetalingerMellom(fraOgMed, tilOgMed)
-
 
     fun utbetalingEksisterer(vedtak: Vedtak) =
         utbetalingDao.hentUtbetaling(vedtak.vedtakId) != null

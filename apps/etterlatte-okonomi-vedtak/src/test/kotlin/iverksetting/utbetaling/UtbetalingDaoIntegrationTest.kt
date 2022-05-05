@@ -1,11 +1,11 @@
-package no.nav.etterlatte.iverksetting.utbetaling
+package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
-import no.nav.etterlatte.attestasjon
-import no.nav.etterlatte.config.DataSourceBuilder
-import no.nav.etterlatte.iverksetting.oppdrag.OppdragMapper
-import no.nav.etterlatte.iverksetting.oppdrag.vedtakId
-import no.nav.etterlatte.TestContainers
-import no.nav.etterlatte.vedtak
+import no.nav.etterlatte.utbetaling.attestasjon
+import no.nav.etterlatte.utbetaling.config.DataSourceBuilder
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
+import no.nav.etterlatte.utbetaling.TestContainers
+import no.nav.etterlatte.utbetaling.vedtak
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach

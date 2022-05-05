@@ -1,8 +1,8 @@
-package no.nav.etterlatte.iverksetting.utbetaling
+package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.iverksetting.oppdrag.OppdragJaxb
-import no.nav.etterlatte.iverksetting.oppdrag.vedtakId
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Vedtak

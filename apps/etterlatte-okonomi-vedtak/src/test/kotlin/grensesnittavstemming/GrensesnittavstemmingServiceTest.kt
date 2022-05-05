@@ -1,14 +1,14 @@
-package no.nav.etterlatte.grensesnittavstemming
+package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import no.nav.etterlatte.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
-import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingDao
-import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingStatus
-import no.nav.etterlatte.utbetalingsoppdrag
+import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.etterlatte.utbetaling.utbetalingsoppdrag
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.grensesnittavstemming
+package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
 import java.nio.ByteBuffer
 import java.time.LocalDateTime

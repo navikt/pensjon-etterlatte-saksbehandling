@@ -1,7 +1,7 @@
-package no.nav.etterlatte.iverksetting.oppdrag
+package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
 import com.ibm.mq.jms.MQQueue
-import no.nav.etterlatte.config.JmsConnectionFactory
+import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 

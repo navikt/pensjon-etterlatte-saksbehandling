@@ -1,4 +1,4 @@
-package no.nav.etterlatte.config
+package no.nav.etterlatte.utbetaling.config
 
 import com.ibm.mq.MQC
 import com.ibm.mq.jms.MQConnectionFactory

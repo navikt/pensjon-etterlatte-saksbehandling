@@ -1,10 +1,10 @@
-package no.nav.etterlatte.iverksetting
+package no.nav.etterlatte.utbetaling.iverksetting
 
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.iverksetting.utbetaling.Utbetaling
-import no.nav.etterlatte.iverksetting.oppdrag.vedtakId
-import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingService
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.grensesnittavstemming.avstemmingsdata
+package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Avstemmingsdata
 import java.io.StringWriter

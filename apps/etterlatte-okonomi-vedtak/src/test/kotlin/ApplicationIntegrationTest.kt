@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.utbetaling
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
@@ -8,10 +8,10 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import io.mockk.every
 import io.mockk.spyk
 import io.mockk.verify
-import no.nav.etterlatte.iverksetting.oppdrag.OppdragJaxb
-import no.nav.etterlatte.config.ApplicationContext
-import no.nav.etterlatte.config.JmsConnectionFactory
-import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
+import no.nav.etterlatte.utbetaling.config.ApplicationContext
+import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.testsupport.TestRapid

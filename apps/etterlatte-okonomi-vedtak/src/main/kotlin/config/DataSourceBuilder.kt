@@ -1,4 +1,4 @@
-package no.nav.etterlatte.config
+package no.nav.etterlatte.utbetaling.config
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource

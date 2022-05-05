@@ -1,10 +1,10 @@
-package no.nav.etterlatte.grensesnittavstemming
+package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.etterlatte.TestContainers
-import no.nav.etterlatte.config.DataSourceBuilder
+import no.nav.etterlatte.utbetaling.TestContainers
+import no.nav.etterlatte.utbetaling.config.DataSourceBuilder
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals

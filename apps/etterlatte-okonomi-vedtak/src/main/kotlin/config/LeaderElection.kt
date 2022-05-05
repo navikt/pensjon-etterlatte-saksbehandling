@@ -1,4 +1,4 @@
-package no.nav.etterlatte.config
+package no.nav.etterlatte.utbetaling.config
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient

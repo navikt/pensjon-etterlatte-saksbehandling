@@ -1,7 +1,7 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.utbetaling
 
-import no.nav.etterlatte.config.ApplicationContext
-import no.nav.etterlatte.config.required
+import no.nav.etterlatte.utbetaling.config.ApplicationContext
+import no.nav.etterlatte.utbetaling.config.required
 import no.nav.helse.rapids_rivers.RapidsConnection
 
 

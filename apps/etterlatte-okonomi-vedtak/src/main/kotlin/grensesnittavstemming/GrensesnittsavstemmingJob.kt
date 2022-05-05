@@ -1,6 +1,6 @@
-package no.nav.etterlatte.grensesnittavstemming
+package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
-import no.nav.etterlatte.config.LeaderElection
+import no.nav.etterlatte.utbetaling.config.LeaderElection
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import org.slf4j.LoggerFactory
 import java.time.Duration

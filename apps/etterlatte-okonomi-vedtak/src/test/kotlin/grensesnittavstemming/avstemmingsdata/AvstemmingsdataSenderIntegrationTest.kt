@@ -1,9 +1,9 @@
-package no.nav.etterlatte.grensesnittavstemming.avstemmingsdata
+package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
-import no.nav.etterlatte.TestContainers
-import no.nav.etterlatte.config.JmsConnectionFactory
-import no.nav.etterlatte.iverksetting.utbetaling.UtbetalingStatus
-import no.nav.etterlatte.utbetalingsoppdrag
+import no.nav.etterlatte.utbetaling.TestContainers
+import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.etterlatte.utbetaling.utbetalingsoppdrag
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test

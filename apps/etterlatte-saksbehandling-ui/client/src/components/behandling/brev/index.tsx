@@ -7,7 +7,7 @@ import { BodyLong, Cell, Grid } from "@navikt/ds-react";
 export const Brev = () => {
   const { behandlingId } = useParams()
 
-  const [error, setError] = useState<string>("wtf")
+  const [error, setError] = useState<string>()
   const [fileURL, setFileURL] = useState<string>()
 
   const generatePDF = () => hentBrev(behandlingId!!)

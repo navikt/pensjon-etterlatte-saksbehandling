@@ -5,21 +5,26 @@ import io.mockk.mockk
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.utbetalingsoppdrag
+import no.nav.su.se.bakover.common.Tidspunkt
+import no.nav.su.se.bakover.common.tidssoneNorge
+import no.nav.su.se.bakover.common.toTidspunkt
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.Month
+import java.time.temporal.ChronoUnit
 
 internal class AvstemmingsdataMapperTest {
 
     @Test
     fun `skal opprette avstemming fra utbetalingsoppdrag med startmelding, datamelding og sluttmelding`() {
-        val fraOgMed = LocalDateTime.now().minusDays(1)
-        val til = LocalDateTime.now()
+        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val til = Tidspunkt.now()
 
         val utbetalingsoppdrag = listOf(utbetalingsoppdrag(status = UtbetalingStatus.FEILET))
 
@@ -35,8 +40,8 @@ internal class AvstemmingsdataMapperTest {
 
     @Test
     fun `skal skal splitte opp datameldinger slik at de kun inneholder et gitt antall detaljer`() {
-        val fraOgMed = LocalDateTime.now().minusDays(1)
-        val til = LocalDateTime.now()
+        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val til = Tidspunkt.now()
 
         val utbetalingsoppdrag = listOf(
             utbetalingsoppdrag(id = 1, status = UtbetalingStatus.FEILET),
@@ -58,8 +63,8 @@ internal class AvstemmingsdataMapperTest {
 
     @Test
     fun `skal kun inneholde grunnadata, total og periode i forste datamelding`() {
-        val fraOgMed = LocalDateTime.now().minusDays(1)
-        val til = LocalDateTime.now()
+        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val til = Tidspunkt.now()
 
         val utbetalingsoppdrag = listOf(
             utbetalingsoppdrag(id = 1, status = UtbetalingStatus.FEILET),
@@ -85,8 +90,8 @@ internal class AvstemmingsdataMapperTest {
 
     @Test
     fun `antall i grunnlagsdata skal telles opp korrekt for godkjent, varsel, avvist og mangler`() {
-        val fraOgMed = LocalDateTime.now().minusDays(1)
-        val til = LocalDateTime.now()
+        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val til = Tidspunkt.now()
 
         val utbetalingsoppdragsliste = listOf(
             mockk<Utbetaling>(relaxed = true) {
@@ -130,8 +135,8 @@ internal class AvstemmingsdataMapperTest {
 
     @Test
     fun `antall i grunnlagsdata skal vaere 0 for alle statuser naar det er ingen utbetalinger aa avstemme`() {
-        val fraOgMed = LocalDateTime.now().minusDays(1)
-        val til = LocalDateTime.now()
+        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val til = Tidspunkt.now()
 
         val utbetalingsoppdgragsliste = emptyList<Utbetaling>()
 
@@ -150,8 +155,8 @@ internal class AvstemmingsdataMapperTest {
 
     @Test
     fun `antall meldinger skal vaere satt til 0 naar det er ingen utbetalinger aa avstemme`() {
-        val fraOgMed = LocalDateTime.now().minusDays(1)
-        val til = LocalDateTime.now()
+        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val til = Tidspunkt.now()
 
         val utbetalingsoppdgragsliste = emptyList<Utbetaling>()
 
@@ -166,8 +171,8 @@ internal class AvstemmingsdataMapperTest {
 
     @Test
     fun `nokkelTom og nokkelFom er satt til 0 naar det er ingen utbetalinger aa avstemme`() {
-        val fraOgMed = LocalDateTime.now().minusDays(1)
-        val til = LocalDateTime.now()
+        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val til = Tidspunkt.now()
 
         val utbetalingsoppdgragsliste = emptyList<Utbetaling>()
 
@@ -191,19 +196,32 @@ internal class AvstemmingsdataMapperTest {
 
     @Test
     fun `foerste og siste avstemmingsnoekkel skal finnes fra utbetalingsoppdrag`() {
-        val fraOgMed = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).minusDays(1)
-        val til = LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0).plusHours(1)
+        val fraOgMed = (LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).minusDays(1).toTidspunkt(tidssoneNorge()))
+        val til = LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0).plusHours(1).toTidspunkt(tidssoneNorge())
 
         val utbetalingsoppdgragsliste = listOf(mockk<Utbetaling>(relaxed = true) {
-            every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0) // foerste
+            every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).toTidspunkt(
+                tidssoneNorge()
+            ) // foerste
         }, mockk(relaxed = true) {
             every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusDays(1)
+                .toTidspunkt(
+                    tidssoneNorge()
+                )
         }, mockk(relaxed = true) {
-            every { avstemmingsnoekkel } returns LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0) // siste
+            every { avstemmingsnoekkel } returns LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0).toTidspunkt(
+                tidssoneNorge()
+            ) // siste
         }, mockk(relaxed = true) {
             every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusHours(1)
+                .toTidspunkt(
+                    tidssoneNorge()
+                )
         }, mockk(relaxed = true) {
             every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusMinutes(2)
+                .toTidspunkt(
+                    tidssoneNorge()
+                )
         })
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(

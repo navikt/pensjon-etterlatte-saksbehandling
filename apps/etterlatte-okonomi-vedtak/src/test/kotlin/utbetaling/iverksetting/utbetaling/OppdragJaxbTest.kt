@@ -5,16 +5,16 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.readFile
 import no.nav.etterlatte.utbetaling.vedtak
+import no.nav.su.se.bakover.common.Tidspunkt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 
 internal class OppdragJaxbTest {
 
     @Test
     fun `should generate xml from oppdrag`() {
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak(), attestasjon(), LocalDateTime.now())
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak(), attestasjon(), Tidspunkt.now())
         val oppdragAsXml = OppdragJaxb.toXml(oppdrag)
 
         assertNotNull(oppdragAsXml)

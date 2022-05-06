@@ -5,6 +5,7 @@ import kotliquery.param
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.su.se.bakover.common.toTidspunkt
 import java.sql.Timestamp
 import javax.sql.DataSource
 
@@ -19,9 +20,9 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
                     """,
                 paramMap = mapOf(
                     "id" to grensesnittavstemming.id.param<String>(),
-                    "opprettet" to Timestamp.valueOf(grensesnittavstemming.opprettet).param<Timestamp>(),
-                    "fra_og_med" to Timestamp.valueOf(grensesnittavstemming.fraOgMed).param<Timestamp>(),
-                    "til" to Timestamp.valueOf(grensesnittavstemming.til).param<Timestamp>(),
+                    "opprettet" to Timestamp.from(grensesnittavstemming.opprettet.instant).param<Timestamp>(),
+                    "fra_og_med" to Timestamp.from(grensesnittavstemming.fraOgMed.instant).param<Timestamp>(),
+                    "til" to Timestamp.from(grensesnittavstemming.til.instant).param<Timestamp>(),
                     "antall_avstemte_oppdrag" to grensesnittavstemming.antallAvstemteOppdrag.param<Int>()
                 )
             )
@@ -45,9 +46,9 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
     private fun toAvstemming(row: Row) =
         Grensesnittavstemming(
             id = row.string("id"),
-            opprettet = row.localDateTime("opprettet"),
-            fraOgMed = row.localDateTime("fra_og_med"),
-            til = row.localDateTime("til"),
+            opprettet = row.instant("opprettet").toTidspunkt(),
+            fraOgMed = row.instant("fra_og_med").toTidspunkt(),
+            til = row.instant("til").toTidspunkt(),
             antallAvstemteOppdrag = row.int("antall_avstemte_oppdrag")
         )
 }

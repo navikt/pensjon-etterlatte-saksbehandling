@@ -1,7 +1,5 @@
 package no.nav.etterlatte.utbetaling
 
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
 import no.nav.etterlatte.libs.common.vedtak.Endringskode
@@ -9,11 +7,13 @@ import no.nav.etterlatte.libs.common.vedtak.Enhetstype
 import no.nav.etterlatte.libs.common.vedtak.Oppdragsenhet
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.su.se.bakover.common.Tidspunkt
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import java.io.FileNotFoundException
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 object TestHelper
 
@@ -47,7 +47,7 @@ fun vedtak(vedtakId: String = "1") = Vedtak(
 )
 
 fun oppdrag(vedtakId: String = "8888") =
-    OppdragMapper.oppdragFraVedtak(vedtak(vedtakId), attestasjon(), LocalDateTime.now())
+    OppdragMapper.oppdragFraVedtak(vedtak(vedtakId), attestasjon(), Tidspunkt.now())
 
 fun oppdragMedGodkjentKvittering(vedtakId: String = "1") = oppdrag(vedtakId).apply {
     mmel = Mmel().apply {
@@ -85,9 +85,9 @@ fun utbetalingsoppdrag(
         sakId = "1",
         status = status,
         vedtak = vedtak(vedtakId),
-        opprettet = LocalDateTime.now(),
-        endret = LocalDateTime.now(),
-        avstemmingsnoekkel = LocalDateTime.now(),
+        opprettet = Tidspunkt.now(),
+        endret = Tidspunkt.now(),
+        avstemmingsnoekkel = Tidspunkt.now(),
         foedselsnummer = "12345678903",
         utgaaendeOppdrag = oppdrag(vedtakId),
         kvitteringOppdrag = oppdrag(vedtakId),

@@ -4,12 +4,14 @@ import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.utbetalingsoppdrag
+import no.nav.su.se.bakover.common.Tidspunkt
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AvstemmingsdataSenderIntegrationTest {
@@ -40,8 +42,8 @@ internal class AvstemmingsdataSenderIntegrationTest {
 
     @Test
     fun `skal sende avstemmingsmeldinger på køen`() {
-        val fraOgMed = LocalDateTime.now().minusDays(1)
-        val til = LocalDateTime.now()
+        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val til = Tidspunkt.now()
 
         val utbetalingsoppdrag = listOf(
             utbetalingsoppdrag(id = 1, status = UtbetalingStatus.FEILET),

@@ -5,6 +5,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.config.DataSourceBuilder
+import no.nav.su.se.bakover.common.Tidspunkt
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -12,7 +13,8 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -40,9 +42,10 @@ internal class GrensesnittavstemmingDaoIntegrationTest {
     @Test
     fun `skal opprette avstemming`() {
         val grensesnittavstemming = Grensesnittavstemming(
-            fraOgMed = LocalDateTime.now().minusDays(1),
-            til = LocalDateTime.now(),
-            antallAvstemteOppdrag = 1
+            fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS)),
+            til = Tidspunkt.now(),
+            antallAvstemteOppdrag = 1,
+            opprettet = Tidspunkt.now()
         )
 
         val antallRaderOppdatert = grensesnittavstemmingDao.opprettAvstemming(grensesnittavstemming)
@@ -52,26 +55,26 @@ internal class GrensesnittavstemmingDaoIntegrationTest {
 
     @Test
     fun `skal hente nyeste avstemming`() {
-        val now = LocalDateTime.now()
+        val now = Tidspunkt.now()
 
         val grensesnittavstemming1 = Grensesnittavstemming(
             opprettet = now,
-            fraOgMed = LocalDateTime.now().minusDays(1),
+            fraOgMed = now.minus(1, ChronoUnit.DAYS),
             til = now,
             antallAvstemteOppdrag = 1
         )
 
         val grensesnittavstemming2 = Grensesnittavstemming(
-            opprettet = now.minusDays(1),
-            fraOgMed = LocalDateTime.now().minusDays(2),
-            til = now.minusDays(1),
+            opprettet = now.minus(1, ChronoUnit.DAYS),
+            fraOgMed = now.minus(2, ChronoUnit.DAYS),
+            til = now.minus(1, ChronoUnit.DAYS),
             antallAvstemteOppdrag = 2
         )
 
         val grensesnittavstemming3 = Grensesnittavstemming(
-            opprettet = now.minusDays(2),
-            fraOgMed = LocalDateTime.now().minusDays(3),
-            til = now.minusDays(2),
+            opprettet = now.minus(2, ChronoUnit.DAYS),
+            fraOgMed = now.minus(3, ChronoUnit.DAYS),
+            til = now.minus(2, ChronoUnit.DAYS),
             antallAvstemteOppdrag = 3
         )
 

@@ -9,8 +9,11 @@ import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.Avstem
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.utbetalingsoppdrag
+import no.nav.su.se.bakover.common.Tidspunkt
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
+import java.time.Clock
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 internal class GrensesnittavstemmingServiceTest {
 
@@ -21,17 +24,18 @@ internal class GrensesnittavstemmingServiceTest {
     private val grensesnittsavstemmingService: GrensesnittsavstemmingService = GrensesnittsavstemmingService(
         avstemmingsdataSender = avstemmingsdataSender,
         grensesnittavstemmingDao = grensesnittavstemmingDao,
-        utbetalingDao = utbetalingDao
+        utbetalingDao = utbetalingDao,
+        clock = Clock.systemUTC()
     )
 
     @Test
     fun `skal opprette avstemming og sende til oppdrag`() {
-        val fraOgMed = LocalDateTime.now().minusDays(1)
-        val til = LocalDateTime.now()
+        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val til = Tidspunkt.now()
         val utbetalingsoppdrag = listOf(utbetalingsoppdrag(status = UtbetalingStatus.FEILET))
 
         val grensesnittavstemming = Grensesnittavstemming(
-            opprettet = LocalDateTime.now(),
+            opprettet = Tidspunkt.now(),
             fraOgMed = fraOgMed,
             til = til,
             antallAvstemteOppdrag = 10

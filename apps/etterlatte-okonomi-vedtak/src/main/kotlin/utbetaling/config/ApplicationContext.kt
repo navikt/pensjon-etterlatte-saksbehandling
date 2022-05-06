@@ -13,6 +13,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import java.time.Clock
 import java.time.Duration
 import java.time.LocalTime
 import java.time.ZoneId
@@ -25,6 +26,9 @@ import javax.sql.DataSource
 class ApplicationContext(
     private val env: Map<String, String>,
 ) {
+
+    fun clock() = Clock.systemUTC()
+
     fun rapidsConnection() = RapidApplication.create(env)
 
     fun dataSourceBuilder() = DataSourceBuilder(
@@ -54,7 +58,7 @@ class ApplicationContext(
 
     fun utbetalingsoppdragDao(dataSource: DataSource) = UtbetalingDao(dataSource)
 
-    fun oppdragService(
+    fun utbetalingService(
         oppdragSender: OppdragSender,
         utbetalingDao: UtbetalingDao,
         rapidsConnection: RapidsConnection
@@ -62,7 +66,8 @@ class ApplicationContext(
         oppdragMapper = OppdragMapper,
         oppdragSender = oppdragSender,
         utbetalingDao = utbetalingDao,
-        rapidsConnection = rapidsConnection
+        rapidsConnection = rapidsConnection,
+        clock = clock()
     )
 
     fun kvitteringMottaker(
@@ -86,14 +91,15 @@ class ApplicationContext(
         queue = env.required("OPPDRAG_AVSTEMMING_MQ_NAME")
     )
 
-    fun avstemmingService(
+    fun grensesnittsavstemmingService(
         grensesnittavstemmingDao: GrensesnittavstemmingDao,
         avstemmingsdataSender: AvstemmingsdataSender,
-        utbetalingDao: UtbetalingDao
+        utbetalingDao: UtbetalingDao,
     ) = GrensesnittsavstemmingService(
         grensesnittavstemmingDao = grensesnittavstemmingDao,
         avstemmingsdataSender = avstemmingsdataSender,
-        utbetalingDao = utbetalingDao
+        utbetalingDao = utbetalingDao,
+        clock = clock()
     )
 
     fun leaderElection() = LeaderElection(env.required("ELECTOR_PATH"))
@@ -107,7 +113,7 @@ class ApplicationContext(
             grensesnittsavstemmingService = grensesnittsavstemmingService,
             leaderElection = leaderElection,
             starttidspunkt = starttidspunkt,
-            periode = Duration.of(1, ChronoUnit.DAYS)
+            periode = Duration.of(1, ChronoUnit.DAYS),
         )
 
     private fun jdbcUrl(host: String, port: String, databaseName: String) =

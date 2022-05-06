@@ -19,13 +19,13 @@ fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection {
     val utbetalingsoppdragDao = applicationContext.utbetalingsoppdragDao(dataSource)
 
     val rapidsConnection = applicationContext.rapidsConnection()
-    val oppdragService = applicationContext.oppdragService(
+    val oppdragService = applicationContext.utbetalingService(
         oppdragSender = applicationContext.oppdragSender(jmsConnectionFactory),
         utbetalingDao = utbetalingsoppdragDao,
         rapidsConnection = rapidsConnection
     )
 
-    val avstemmingService = applicationContext.avstemmingService(
+    val avstemmingService = applicationContext.grensesnittsavstemmingService(
         grensesnittavstemmingDao = applicationContext.avstemmingDao(dataSource),
         avstemmingsdataSender = applicationContext.avstemmingSender(jmsConnectionFactory),
         utbetalingDao = utbetalingsoppdragDao

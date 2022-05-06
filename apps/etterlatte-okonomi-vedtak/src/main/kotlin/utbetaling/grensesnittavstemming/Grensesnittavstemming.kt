@@ -1,14 +1,14 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
+import no.nav.su.se.bakover.common.Tidspunkt
 import java.nio.ByteBuffer
-import java.time.LocalDateTime
 import java.util.*
 
 data class Grensesnittavstemming(
     val id: String = encodeUUIDBase64(UUID.randomUUID()),
-    val opprettet: LocalDateTime = LocalDateTime.now(),
-    val fraOgMed: LocalDateTime,
-    val til: LocalDateTime,
+    val opprettet: Tidspunkt,
+    val fraOgMed: Tidspunkt,
+    val til: Tidspunkt,
     val antallAvstemteOppdrag: Int
 ) {
     companion object {

@@ -1,11 +1,12 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
+import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.attestasjon
 import no.nav.etterlatte.utbetaling.config.DataSourceBuilder
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
-import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.vedtak
+import no.nav.su.se.bakover.common.Tidspunkt
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -18,7 +19,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
-import java.time.LocalDateTime
+import java.time.Instant
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -55,8 +56,8 @@ internal class UtbetalingDaoIntegrationTest {
     @Test
     fun `skal opprette og hente utbetalingsoppdrag`() {
         val vedtak = vedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), LocalDateTime.now())
-        val opprettet_tidspunkt = LocalDateTime.now()
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), Tidspunkt.now())
+        val opprettet_tidspunkt = Tidspunkt.now()
 
         utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettet_tidspunkt)
         val utbetalingsoppdrag = utbetalingDao.hentUtbetaling(vedtak.vedtakId)
@@ -71,23 +72,23 @@ internal class UtbetalingDaoIntegrationTest {
             { assertEquals(vedtak.vedtakId, utbetalingsoppdrag?.vedtakId) },
             {
                 assertTrue(
-                    utbetalingsoppdrag?.opprettet!!.isAfter(
-                        LocalDateTime.now().minusSeconds(10)
-                    ) and utbetalingsoppdrag.opprettet.isBefore(LocalDateTime.now())
+                    utbetalingsoppdrag?.opprettet!!.instant.isAfter(
+                        Instant.now().minusSeconds(10)
+                    ) and utbetalingsoppdrag.opprettet.instant.isBefore(Instant.now())
                 )
             },
             {
                 assertTrue(
-                    utbetalingsoppdrag!!.endret.isAfter(
-                        LocalDateTime.now().minusSeconds(10)
-                    ) and utbetalingsoppdrag.endret.isBefore(LocalDateTime.now())
+                    utbetalingsoppdrag!!.endret.instant.isAfter(
+                        Instant.now().minusSeconds(10)
+                    ) and utbetalingsoppdrag.endret.instant.isBefore(Instant.now())
                 )
             },
             {
                 assertTrue(
-                    utbetalingsoppdrag!!.avstemmingsnoekkel.isAfter(
-                        LocalDateTime.now().minusSeconds(10)
-                    ) and utbetalingsoppdrag.avstemmingsnoekkel.isBefore(LocalDateTime.now())
+                    utbetalingsoppdrag!!.avstemmingsnoekkel.instant.isAfter(
+                        Instant.now().minusSeconds(10)
+                    ) and utbetalingsoppdrag.avstemmingsnoekkel.instant.isBefore(Instant.now())
                 )
             },
             { assertEquals(vedtak.sakIdGjelderFnr, utbetalingsoppdrag?.foedselsnummer) },
@@ -102,8 +103,8 @@ internal class UtbetalingDaoIntegrationTest {
     @Test
     fun `skal sette kvittering paa utbetalingsoppdrag`() {
         val vedtak = vedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), LocalDateTime.now())
-        val opprettet_tidspunkt = LocalDateTime.now()
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), Tidspunkt.now())
+        val opprettet_tidspunkt = Tidspunkt.now()
 
         utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettet_tidspunkt)
 
@@ -112,7 +113,7 @@ internal class UtbetalingDaoIntegrationTest {
             mmel = Mmel().withAlvorlighetsgrad("08").withBeskrMelding("beskrivende melding").withKodeMelding("1234")
         }
 
-        utbetalingDao.oppdaterKvittering(oppdragMedKvittering)
+        utbetalingDao.oppdaterKvittering(oppdragMedKvittering, Tidspunkt.now())
         val utbetalingsoppdragOppdatert = utbetalingDao.hentUtbetaling(oppdrag.vedtakId())
 
         assertAll("skal sjekke at kvittering er opprettet korrekt på utbetalingsoppdrag",
@@ -135,8 +136,8 @@ internal class UtbetalingDaoIntegrationTest {
     @Test
     fun `skal oppdatere status paa utbetalingsoppdrag`() {
         val vedtak = vedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), LocalDateTime.now())
-        val opprettet_tidspunkt = LocalDateTime.now()
+        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), Tidspunkt.now())
+        val opprettet_tidspunkt = Tidspunkt.now()
 
         val utbetalingsoppdrag = utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettet_tidspunkt)
 
@@ -145,7 +146,8 @@ internal class UtbetalingDaoIntegrationTest {
 
         val utbetalingsoppdragOppdatert = utbetalingDao.oppdaterStatus(
             vedtakId = vedtak.vedtakId,
-            status = UtbetalingStatus.GODKJENT
+            status = UtbetalingStatus.GODKJENT,
+            endret = Tidspunkt.now()
         )
 
         assertEquals(UtbetalingStatus.GODKJENT, utbetalingsoppdragOppdatert.status)

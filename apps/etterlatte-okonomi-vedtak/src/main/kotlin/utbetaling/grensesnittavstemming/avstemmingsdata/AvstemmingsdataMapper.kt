@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.su.se.bakover.common.Tidspunkt
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Aksjonsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AvstemmingType
@@ -12,16 +13,18 @@ import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Grunnlagsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.KildeType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Periodedata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Totaldata
-import java.time.LocalDateTime
+import java.time.Instant
 import java.time.format.DateTimeFormatter
 
 class AvstemmingsdataMapper(
     private val utbetalinger: List<Utbetaling>,
-    private val fraOgMed: LocalDateTime,
-    private val til: LocalDateTime,
+    private val fraOgMed: Tidspunkt,
+    private val til: Tidspunkt,
     private val avstemmingId: String,
     private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING
 ) {
+    private val avstemmingsperiode = periode(utbetalinger)
+
     fun opprettAvstemmingsmelding(): List<Avstemmingsdata> =
         startmelding() + datameldinger() + sluttmelding()
 
@@ -42,7 +45,6 @@ class AvstemmingsdataMapper(
     private fun avstemmingsdata(aksjonstype: AksjonType) =
         Avstemmingsdata().apply {
             aksjon = Aksjonsdata().apply {
-                val periode = periode(utbetalinger)
                 val fagomraade = "BARNEPE"
 
                 aksjonType = aksjonstype
@@ -51,8 +53,11 @@ class AvstemmingsdataMapper(
                 avleverendeKomponentKode = "ETTERLAT"
                 mottakendeKomponentKode = "OS"
                 underkomponentKode = fagomraade
-                nokkelFom = periode?.start?.format(tidsstempelMikro) ?: "0"
-                nokkelTom = periode?.endInclusive?.format(tidsstempelMikro) ?: "0"
+                nokkelFom =
+                    avstemmingsperiode?.start?.let { Tidspunkt(it).toNorskTid() }?.format(tidsstempelMikro) ?: "0"
+                nokkelTom =
+                    avstemmingsperiode?.endInclusive?.let { Tidspunkt(it).toNorskTid() }?.format(tidsstempelMikro)
+                        ?: "0"
                 avleverendeAvstemmingId = avstemmingId
                 brukerId = fagomraade
             }
@@ -74,7 +79,7 @@ class AvstemmingsdataMapper(
                     this.detaljType = detaljType
                     offnr = it.foedselsnummer
                     avleverendeTransaksjonNokkel = it.sakId
-                    tidspunkt = it.avstemmingsnoekkel.format(tidsstempelTime)
+                    tidspunkt = it.avstemmingsnoekkel.toNorskTid().format(tidsstempelTime)
                     if (detaljType in listOf(DetaljType.AVVI, DetaljType.VARS) && it.kvitteringOppdrag != null) {
                         meldingKode = it.kvitteringMeldingKode
                         alvorlighetsgrad = it.kvitteringFeilkode
@@ -112,15 +117,15 @@ class AvstemmingsdataMapper(
 
     private fun periodedata() =
         Periodedata().apply {
-            datoAvstemtFom = fraOgMed.format(tidsstempelTime)
-            datoAvstemtTom = til.minusHours(1).format(tidsstempelTime)
+            datoAvstemtFom = fraOgMed.toNorskTid().format(tidsstempelTime)
+            datoAvstemtTom = til.toNorskTid().minusHours(1).format(tidsstempelTime)
         }
 
-    private fun periode(liste: List<Utbetaling>): ClosedRange<LocalDateTime>? {
+    private fun periode(liste: List<Utbetaling>): ClosedRange<Instant>? {
         return if (liste.isEmpty()) null else {
-            object : ClosedRange<LocalDateTime> {
-                override val start = liste.minOf { it.avstemmingsnoekkel }
-                override val endInclusive = liste.maxOf { it.avstemmingsnoekkel }
+            object : ClosedRange<Instant> {
+                override val start = liste.minOf { it.avstemmingsnoekkel.instant }
+                override val endInclusive = liste.maxOf { it.avstemmingsnoekkel.instant }
             }
         }
     }

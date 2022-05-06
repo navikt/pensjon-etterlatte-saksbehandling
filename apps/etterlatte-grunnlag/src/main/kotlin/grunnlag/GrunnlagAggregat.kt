@@ -20,7 +20,7 @@ class GrunnlagAggregat(
             sak: Long,
             opplysninger: OpplysningDao
         ): GrunnlagAggregat {
-            logger.info("Oppretter grunnlag for ${sak}")
+            logger.info("Oppretter grunnlag for $sak")
             return Grunnlag(sak, emptyList())
                 .also {
                     logger.info("Opprettet grunnlag for sak ${it.saksId}")
@@ -54,7 +54,7 @@ class GrunnlagAggregat(
         )
         opplysninger.leggOpplysningTilGrunnlag(saksid, grunnlagsopplysning)
         lagredeOpplysninger = lagredeOpplysninger + grunnlagsopplysning
-        logger.info("La til opplysning $type i sak ${saksid}")
+        logger.info("La til opplysning $type i sak $saksid")
         return grunnlagsopplysning.id
     }
 

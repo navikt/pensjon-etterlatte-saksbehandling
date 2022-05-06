@@ -54,3 +54,4 @@ spec:
         - host: https://login.microsoftonline.com
       rules:
         - application: etterlatte-api
+        - application: etterlatte-brev-api

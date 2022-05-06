@@ -13,6 +13,7 @@ interface GrunnlagService {
 }
 
 class RealGrunnlagService(
+    //TODO stemmer det at jeg ikke trenger dette nå?
     private val opplysninger: OpplysningDao,
     private val grunnlagFactory: GrunnlagFactory,
     //private val grunnlagHendelser: SendChannel<Pair<Long, GrunnlagHendelserType>>

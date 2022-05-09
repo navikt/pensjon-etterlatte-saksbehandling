@@ -10,9 +10,9 @@ import java.net.InetAddress
 class LeaderElection(
     private val electorPath: String,
     private val httpClient: HttpClient = HttpClient(),
+    private val me: String? = InetAddress.getLocalHost().hostName
 ) {
     private val objectMapper = jacksonObjectMapper()
-    private val me: String? = InetAddress.getLocalHost().hostName
 
     fun isLeader(): Boolean {
         val leader = runBlocking {

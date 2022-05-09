@@ -7,9 +7,9 @@ import java.util.*
 data class Grensesnittavstemming(
     val id: String = encodeUUIDBase64(UUID.randomUUID()),
     val opprettet: Tidspunkt,
-    val fraOgMed: Tidspunkt,
-    val til: Tidspunkt,
-    val antallAvstemteOppdrag: Int
+    val periodeFraOgMed: Tidspunkt,
+    val periodeTil: Tidspunkt,
+    val antallOppdrag: Int,
 ) {
     companion object {
         private fun encodeUUIDBase64(uuid: UUID): String {

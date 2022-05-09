@@ -17,9 +17,9 @@ RENAME COLUMN kvittering TO oppdrag_kvittering;
 
 
 CREATE TABLE avstemming (
-    id                      VARCHAR(32)                PRIMARY KEY,
-    opprettet               TIMESTAMP WITH TIME ZONE NOT NULL,
-    fra_og_med              TIMESTAMP WITH TIME ZONE NOT NULL,
-    til                     TIMESTAMP WITH TIME ZONE NOT NULL,
-    antall_avstemte_oppdrag INT                      NOT NULL
+    id                      VARCHAR(32)                 PRIMARY KEY,
+    opprettet               TIMESTAMP WITH TIME ZONE    NOT NULL,
+    periode_fra             TIMESTAMP WITH TIME ZONE    NOT NULL,
+    periode_til             TIMESTAMP WITH TIME ZONE    NOT NULL,
+    antall_oppdrag          INT                         NOT NULL
 );

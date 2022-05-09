@@ -15,15 +15,15 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    INSERT INTO avstemming (id, opprettet, fra_og_med, til, antall_avstemte_oppdrag)
-                    VALUES (:id, :opprettet, :fra_og_med, :til, :antall_avstemte_oppdrag)
+                    INSERT INTO avstemming (id, opprettet, periode_fra, periode_til, antall_oppdrag)
+                    VALUES (:id, :opprettet, :periode_fra, :periode_til, :antall_oppdrag)
                     """,
                 paramMap = mapOf(
                     "id" to grensesnittavstemming.id.param<String>(),
                     "opprettet" to Timestamp.from(grensesnittavstemming.opprettet.instant).param<Timestamp>(),
-                    "fra_og_med" to Timestamp.from(grensesnittavstemming.fraOgMed.instant).param<Timestamp>(),
-                    "til" to Timestamp.from(grensesnittavstemming.til.instant).param<Timestamp>(),
-                    "antall_avstemte_oppdrag" to grensesnittavstemming.antallAvstemteOppdrag.param<Int>()
+                    "periode_fra" to Timestamp.from(grensesnittavstemming.periodeFraOgMed.instant).param<Timestamp>(),
+                    "periode_til" to Timestamp.from(grensesnittavstemming.periodeTil.instant).param<Timestamp>(),
+                    "antall_oppdrag" to grensesnittavstemming.antallOppdrag.param<Int>()
                 )
             )
                 .let { session.run(it.asUpdate) }
@@ -34,9 +34,9 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    SELECT id, opprettet, fra_og_med, til, antall_avstemte_oppdrag 
+                    SELECT id, opprettet, periode_fra, periode_til, antall_oppdrag 
                     FROM avstemming 
-                    ORDER BY til DESC
+                    ORDER BY periode_til DESC
                     LIMIT 1
                     """
             )
@@ -47,9 +47,9 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
         Grensesnittavstemming(
             id = row.string("id"),
             opprettet = row.instant("opprettet").toTidspunkt(),
-            fraOgMed = row.instant("fra_og_med").toTidspunkt(),
-            til = row.instant("til").toTidspunkt(),
-            antallAvstemteOppdrag = row.int("antall_avstemte_oppdrag")
+            periodeFraOgMed = row.instant("periode_fra").toTidspunkt(),
+            periodeTil = row.instant("periode_til").toTidspunkt(),
+            antallOppdrag = row.int("antall_oppdrag")
         )
 
 }

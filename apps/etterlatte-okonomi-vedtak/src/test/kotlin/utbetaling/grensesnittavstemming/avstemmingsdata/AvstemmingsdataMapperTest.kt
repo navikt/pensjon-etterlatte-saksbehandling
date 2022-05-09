@@ -127,7 +127,7 @@ internal class AvstemmingsdataMapperTest {
             utbetaling(id = 8, status = UtbetalingStatus.FEILET),
         )
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalingsoppdragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
+            utbetalinger = utbetalingsoppdragsliste, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = "1"
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
@@ -159,7 +159,7 @@ internal class AvstemmingsdataMapperTest {
         val utbetalingsoppdgragsliste = emptyList<Utbetaling>()
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalingsoppdgragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
+            utbetalinger = utbetalingsoppdgragsliste, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = "1"
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
@@ -179,7 +179,7 @@ internal class AvstemmingsdataMapperTest {
         val utbetalingsoppdgragsliste = emptyList<Utbetaling>()
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalingsoppdgragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
+            utbetalinger = utbetalingsoppdgragsliste, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = "1"
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
@@ -195,7 +195,7 @@ internal class AvstemmingsdataMapperTest {
         val utbetalingsoppdgragsliste = emptyList<Utbetaling>()
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalingsoppdgragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
+            utbetalinger = utbetalingsoppdgragsliste, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = "1"
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (startmelding, dataMelding, sluttmelding) = avstemmingsmelding
@@ -214,7 +214,7 @@ internal class AvstemmingsdataMapperTest {
 
     @Test
     fun `foerste og siste avstemmingsnoekkel skal finnes fra utbetalingsoppdrag`() {
-        val fraOgMed = (LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).minusDays(1).toTidspunkt(tidssoneNorge()))
+        val fraOgMed = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).minusDays(1).toTidspunkt(tidssoneNorge())
         val til = LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0).plusHours(1).toTidspunkt(tidssoneNorge())
 
         val utbetalingsoppdragsliste = listOf(
@@ -226,7 +226,7 @@ internal class AvstemmingsdataMapperTest {
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalingsoppdragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
+            utbetalinger = utbetalingsoppdragsliste, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = "1"
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding

@@ -36,9 +36,9 @@ internal class GrensesnittavstemmingServiceTest {
 
         val grensesnittavstemming = Grensesnittavstemming(
             opprettet = Tidspunkt.now(),
-            fraOgMed = fraOgMed,
-            til = til,
-            antallAvstemteOppdrag = 10
+            periodeFraOgMed = fraOgMed,
+            periodeTil = til,
+            antallOppdrag = 10
         )
 
         every { grensesnittavstemmingDao.hentSisteAvstemming() } returns grensesnittavstemming
@@ -51,7 +51,7 @@ internal class GrensesnittavstemmingServiceTest {
         verify(exactly = 3) { avstemmingsdataSender.sendAvstemming(any()) }
         verify {
             grensesnittavstemmingDao.opprettAvstemming(match {
-                it.antallAvstemteOppdrag == 1 && it.fraOgMed == fraOgMed
+                it.antallOppdrag == 1 && it.periodeFraOgMed == fraOgMed
             })
         }
     }

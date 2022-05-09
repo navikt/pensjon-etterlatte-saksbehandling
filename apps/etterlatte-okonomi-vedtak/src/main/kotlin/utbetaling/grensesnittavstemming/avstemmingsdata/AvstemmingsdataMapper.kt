@@ -20,8 +20,8 @@ import java.math.BigDecimal
 
 class AvstemmingsdataMapper(
     private val utbetalinger: List<Utbetaling>,
-    private val fraOgMed: Tidspunkt,
-    private val til: Tidspunkt,
+    private val periodeFraOgMed: Tidspunkt,
+    private val periodeTil: Tidspunkt,
     private val avstemmingId: String,
     private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING
 ) {
@@ -150,8 +150,8 @@ class AvstemmingsdataMapper(
 
     private fun periodedata() =
         Periodedata().apply {
-            datoAvstemtFom = fraOgMed.toNorskTid().format(tidsstempelTime)
-            datoAvstemtTom = til.toNorskTid().minusHours(1).format(tidsstempelTime)
+            datoAvstemtFom = periodeFraOgMed.toNorskTid().format(tidsstempelTime)
+            datoAvstemtTom = periodeTil.toNorskTid().minusHours(1).format(tidsstempelTime)
         }
 
     private fun periode(liste: List<Utbetaling>): ClosedRange<Instant>? {

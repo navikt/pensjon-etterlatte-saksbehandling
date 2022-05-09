@@ -42,9 +42,9 @@ internal class GrensesnittavstemmingDaoIntegrationTest {
     @Test
     fun `skal opprette avstemming`() {
         val grensesnittavstemming = Grensesnittavstemming(
-            fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS)),
-            til = Tidspunkt.now(),
-            antallAvstemteOppdrag = 1,
+            periodeFraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS)),
+            periodeTil = Tidspunkt.now(),
+            antallOppdrag = 1,
             opprettet = Tidspunkt.now()
         )
 
@@ -59,23 +59,23 @@ internal class GrensesnittavstemmingDaoIntegrationTest {
 
         val grensesnittavstemming1 = Grensesnittavstemming(
             opprettet = now,
-            fraOgMed = now.minus(1, ChronoUnit.DAYS),
-            til = now,
-            antallAvstemteOppdrag = 1
+            periodeFraOgMed = now.minus(1, ChronoUnit.DAYS),
+            periodeTil = now,
+            antallOppdrag = 1
         )
 
         val grensesnittavstemming2 = Grensesnittavstemming(
             opprettet = now.minus(1, ChronoUnit.DAYS),
-            fraOgMed = now.minus(2, ChronoUnit.DAYS),
-            til = now.minus(1, ChronoUnit.DAYS),
-            antallAvstemteOppdrag = 2
+            periodeFraOgMed = now.minus(2, ChronoUnit.DAYS),
+            periodeTil = now.minus(1, ChronoUnit.DAYS),
+            antallOppdrag = 2
         )
 
         val grensesnittavstemming3 = Grensesnittavstemming(
             opprettet = now.minus(2, ChronoUnit.DAYS),
-            fraOgMed = now.minus(3, ChronoUnit.DAYS),
-            til = now.minus(2, ChronoUnit.DAYS),
-            antallAvstemteOppdrag = 3
+            periodeFraOgMed = now.minus(3, ChronoUnit.DAYS),
+            periodeTil = now.minus(2, ChronoUnit.DAYS),
+            antallOppdrag = 3
         )
 
         grensesnittavstemmingDao.opprettAvstemming(grensesnittavstemming1)
@@ -85,7 +85,7 @@ internal class GrensesnittavstemmingDaoIntegrationTest {
         val nyesteAvstemming = grensesnittavstemmingDao.hentSisteAvstemming()
 
         assertEquals(now, nyesteAvstemming?.opprettet)
-        assertEquals(1, nyesteAvstemming?.antallAvstemteOppdrag)
+        assertEquals(1, nyesteAvstemming?.antallOppdrag)
     }
 
     @Test

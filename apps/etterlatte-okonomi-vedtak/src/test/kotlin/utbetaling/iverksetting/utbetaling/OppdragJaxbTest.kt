@@ -5,7 +5,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.readFile
 import no.nav.etterlatte.utbetaling.vedtak
-import no.nav.su.se.bakover.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test

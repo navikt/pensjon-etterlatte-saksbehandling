@@ -1,4 +1,4 @@
-package no.nav.su.se.bakover.common
+package no.nav.etterlatte.utbetaling.common
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue

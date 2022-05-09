@@ -1,6 +1,6 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
-import no.nav.su.se.bakover.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import java.nio.ByteBuffer
 import java.util.*
 

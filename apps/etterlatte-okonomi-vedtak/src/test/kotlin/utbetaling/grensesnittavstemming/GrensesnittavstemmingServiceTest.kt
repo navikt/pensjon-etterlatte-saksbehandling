@@ -9,7 +9,7 @@ import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.Avstem
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.utbetalingsoppdrag
-import no.nav.su.se.bakover.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import org.junit.jupiter.api.Test
 import java.time.Clock
 import java.time.Instant

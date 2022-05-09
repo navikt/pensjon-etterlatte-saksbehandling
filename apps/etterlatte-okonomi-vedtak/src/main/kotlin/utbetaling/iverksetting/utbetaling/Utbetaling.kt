@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
-import no.nav.su.se.bakover.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 
 enum class UtbetalingStatus {

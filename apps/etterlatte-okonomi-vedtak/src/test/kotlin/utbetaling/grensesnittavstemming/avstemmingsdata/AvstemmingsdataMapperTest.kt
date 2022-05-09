@@ -5,9 +5,9 @@ import io.mockk.mockk
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.utbetalingsoppdrag
-import no.nav.su.se.bakover.common.Tidspunkt
-import no.nav.su.se.bakover.common.tidssoneNorge
-import no.nav.su.se.bakover.common.toTidspunkt
+import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.tidssoneNorge
+import no.nav.etterlatte.utbetaling.common.toTidspunkt
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

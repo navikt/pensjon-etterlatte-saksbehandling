@@ -48,7 +48,7 @@ internal class RealBehandlingServiceTest {
             "Soeker",
             listOf("Gjenlevende"),
             listOf("Avdoed"),
-            null,
+            emptyList(),
             null,
             BehandlingStatus.OPPRETTET
         )

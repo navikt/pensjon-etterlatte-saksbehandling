@@ -1,6 +1,19 @@
 package no.nav.etterlatte.itest
 
-/*
+import no.nav.etterlatte.DataSourceBuilder
+import no.nav.etterlatte.behandling.*
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.sak.SakDao
+import org.junit.jupiter.api.*
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
+import java.time.Instant
+import java.time.LocalDateTime
+import java.util.*
+import javax.sql.DataSource
+
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingDaoIntegrationTest {
     @Container
@@ -31,62 +44,37 @@ internal class BehandlingDaoIntegrationTest {
         val connection = dataSource.connection
         val sakrepo = SakDao { connection }
         val behandlingRepo = BehandlingDao { connection }
-        val opplysningRepo = OpplysningDao { connection }
-        val deltOpplysning = Behandlingsopplysning(
-            UUID.randomUUID(),
-            Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
-            Opplysningstyper.SOEKNAD_MOTTATT_DATO,
-            objectMapper.createObjectNode(),
-            objectMapper.createObjectNode()
-        ).also { opplysningRepo.nyOpplysning(it) }
-        val ikkeDeltOpplysning = Behandlingsopplysning(
-            UUID.randomUUID(),
-            Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
-            Opplysningstyper.SOEKNAD_MOTTATT_DATO,
-            objectMapper.createObjectNode(),
-            objectMapper.createObjectNode()
-        ).also { opplysningRepo.nyOpplysning(it) }
+
         val sak1 = sakrepo.opprettSak("123", "BP").id
         val sak2 = sakrepo.opprettSak("321", "BP").id
         listOf(
-            Behandling(UUID.randomUUID(), sak1, listOf(deltOpplysning), null, null, null, false),
-            Behandling(UUID.randomUUID(), sak1, listOf(ikkeDeltOpplysning), null, null, null, false),
-            Behandling(UUID.randomUUID(), sak2, listOf(deltOpplysning), null, null, null, false)
+            Behandling(UUID.randomUUID(), sak1, LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), null, null, emptyList(), emptyList(),
+                emptyList(), null, BehandlingStatus.OPPRETTET ),
+            Behandling(UUID.randomUUID(), sak1, LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), null, null, emptyList(), emptyList(),
+                emptyList(), null, BehandlingStatus.OPPRETTET ),
+            Behandling(UUID.randomUUID(), sak2, LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), null, null, emptyList(), emptyList(),
+                emptyList(), null, BehandlingStatus.OPPRETTET ),
         ).forEach { b ->
             behandlingRepo.opprett(b)
-            b.grunnlag.forEach { o -> opplysningRepo.leggOpplysningTilBehandling(b.id, o.id) }
         }
 
-        Assertions.assertEquals(2, behandlingRepo.alleISak(sak1).size)
+        Assertions.assertEquals(2, behandlingRepo.alleBehandingerISak(sak1).size)
 
-
-        opplysningRepo.slettOpplysningerISak(sak1)
         behandlingRepo.slettBehandlingerISak(sak1)
 
-        Assertions.assertEquals(0, behandlingRepo.alleISak(sak1).size)
-        Assertions.assertEquals(1, behandlingRepo.alleISak(sak2).size)
-        Assertions.assertEquals(
-            1,
-            opplysningRepo.finnOpplysningerIBehandling(behandlingRepo.alleISak(sak2).first().id).size
-        )
+        Assertions.assertEquals(0, behandlingRepo.alleBehandingerISak(sak1).size)
+        Assertions.assertEquals(1, behandlingRepo.alleBehandingerISak(sak2).size)
 
         connection.close()
     }
 
-
+/*
     @Test
     fun `avbryte sak`() {
         val connection = dataSource.connection
         val sakrepo = SakDao { connection }
         val behandlingRepo = BehandlingDao { connection }
-        val opplysningRepo = OpplysningDao { connection }
-        val ikkeDeltOpplysning = Behandlingsopplysning(
-            UUID.randomUUID(),
-            Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
-            Opplysningstyper.SOEKNAD_MOTTATT_DATO,
-            objectMapper.createObjectNode(),
-            objectMapper.createObjectNode()
-        ).also { opplysningRepo.nyOpplysning(it) }
+
         val sak1 = sakrepo.opprettSak("123", "BP").id
         listOf(
             Behandling(UUID.randomUUID(), sak1, listOf(ikkeDeltOpplysning), null, null, null, false),
@@ -109,5 +97,7 @@ internal class BehandlingDaoIntegrationTest {
         connection.close()
     }
 
+ */
+
 }
-*/
+

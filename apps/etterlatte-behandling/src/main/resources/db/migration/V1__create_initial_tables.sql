@@ -24,5 +24,5 @@ CREATE TABLE behandling
     avdoed TEXT,
     soesken TEXT,
     gyldighetssproving TEXT,
-    status TEXT,
+    status TEXT
 );

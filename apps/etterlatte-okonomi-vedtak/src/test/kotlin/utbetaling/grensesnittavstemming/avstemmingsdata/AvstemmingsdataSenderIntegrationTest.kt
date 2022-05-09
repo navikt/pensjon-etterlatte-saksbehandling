@@ -3,7 +3,7 @@ package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
-import no.nav.etterlatte.utbetaling.utbetalingsoppdrag
+import no.nav.etterlatte.utbetaling.utbetaling
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -46,9 +46,9 @@ internal class AvstemmingsdataSenderIntegrationTest {
         val til = Tidspunkt.now()
 
         val utbetalingsoppdrag = listOf(
-            utbetalingsoppdrag(id = 1, status = UtbetalingStatus.FEILET),
-            utbetalingsoppdrag(id = 2, status = UtbetalingStatus.FEILET),
-            utbetalingsoppdrag(id = 3, status = UtbetalingStatus.FEILET)
+            utbetaling(id = 1, status = UtbetalingStatus.FEILET),
+            utbetaling(id = 2, status = UtbetalingStatus.FEILET),
+            utbetaling(id = 3, status = UtbetalingStatus.FEILET)
         )
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1", 2)
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()

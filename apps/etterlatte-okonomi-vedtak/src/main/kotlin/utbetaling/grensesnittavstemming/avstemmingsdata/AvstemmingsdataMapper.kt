@@ -9,12 +9,14 @@ import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AvstemmingType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Avstemmingsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.DetaljType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Detaljdata
+import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Fortegn
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Grunnlagsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.KildeType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Periodedata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Totaldata
 import java.time.Instant
 import java.time.format.DateTimeFormatter
+import java.math.BigDecimal
 
 class AvstemmingsdataMapper(
     private val utbetalinger: List<Utbetaling>,
@@ -101,18 +103,49 @@ class AvstemmingsdataMapper(
         }
 
     private fun grunnlagsdata() = Grunnlagsdata().apply {
-        val utbetalingEtterStatus = utbetalinger.groupBy { it.status }
-        val antFeilet = utbetalingEtterStatus[UtbetalingStatus.FEILET]?.count() ?: 0
-        val antAvvist = utbetalingEtterStatus[UtbetalingStatus.AVVIST]?.count() ?: 0
-        godkjentAntall = utbetalingEtterStatus[UtbetalingStatus.GODKJENT]?.count() ?: 0
-        varselAntall = utbetalingEtterStatus[UtbetalingStatus.GODKJENT_MED_FEIL]?.count() ?: 0
-        avvistAntall = antFeilet + antAvvist
-        manglerAntall = utbetalingEtterStatus[UtbetalingStatus.SENDT]?.count() ?: 0
+        val utbetalinger = utbetalinger.groupBy { it.status }
+
+        godkjentAntall = getAntall(utbetalinger[UtbetalingStatus.GODKJENT])
+        godkjentBelop = getBelop(utbetalinger[UtbetalingStatus.GODKJENT])
+        godkjentFortegn = getFortegn(godkjentBelop)
+
+        varselAntall = getAntall(utbetalinger[UtbetalingStatus.GODKJENT_MED_FEIL])
+        varselBelop = getBelop(utbetalinger[UtbetalingStatus.GODKJENT_MED_FEIL])
+        varselFortegn = getFortegn(varselBelop)
+
+        avvistAntall = listOf(
+            getAntall(utbetalinger[UtbetalingStatus.FEILET]),
+            getAntall(utbetalinger[UtbetalingStatus.AVVIST])
+        ).sum()
+        avvistBelop = listOf(
+            getBelop(utbetalinger[UtbetalingStatus.FEILET]),
+            getBelop(utbetalinger[UtbetalingStatus.AVVIST])
+        ).reduce(BigDecimal::add)
+        avvistFortegn = getFortegn(avvistBelop)
+
+        manglerAntall = getAntall(utbetalinger[UtbetalingStatus.SENDT])
+        manglerBelop = getBelop(utbetalinger[UtbetalingStatus.SENDT])
+        manglerFortegn = getFortegn(manglerBelop)
+    }
+
+    private fun getAntall(utbetalinger: List<Utbetaling>?) = utbetalinger?.count() ?: 0
+
+    private fun getBelop(utbetalinger: List<Utbetaling>?) =
+        utbetalinger?.sumOf {
+            it.utgaaendeOppdrag.oppdrag110.oppdragsLinje150 // TODO er dette riktig sted å hente dette?
+                .map { oppdragsLinje -> oppdragsLinje.sats }
+                .reduce(BigDecimal::add)
+        } ?: BigDecimal.ZERO
+
+    private fun getFortegn(belop: BigDecimal): Fortegn {
+        return if (belop >= BigDecimal.ZERO) Fortegn.T else Fortegn.F
     }
 
     private fun totaldata() =
         Totaldata().apply {
-            totalAntall = utbetalinger.size
+            totalAntall = getAntall(utbetalinger)
+            totalBelop = getBelop(utbetalinger)
+            fortegn = getFortegn(totalBelop)
         }
 
     private fun periodedata() =

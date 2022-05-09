@@ -73,10 +73,11 @@ fun attestasjon() = Attestasjon(
     attestantId = "Z123456"
 )
 
-fun utbetalingsoppdrag(
+fun utbetaling(
     id: Int = 1,
     status: UtbetalingStatus = UtbetalingStatus.GODKJENT,
     vedtakId: String = "1",
+    avstemmingsnoekkel: Tidspunkt = Tidspunkt.now()
 ) =
     Utbetaling(
         id = id,
@@ -87,7 +88,7 @@ fun utbetalingsoppdrag(
         vedtak = vedtak(vedtakId),
         opprettet = Tidspunkt.now(),
         endret = Tidspunkt.now(),
-        avstemmingsnoekkel = Tidspunkt.now(),
+        avstemmingsnoekkel = avstemmingsnoekkel,
         foedselsnummer = "12345678903",
         utgaaendeOppdrag = oppdrag(vedtakId),
         kvitteringOppdrag = oppdrag(vedtakId),

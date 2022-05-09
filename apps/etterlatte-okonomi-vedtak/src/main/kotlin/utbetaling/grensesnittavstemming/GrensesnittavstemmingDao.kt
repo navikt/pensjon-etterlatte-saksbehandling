@@ -51,4 +51,5 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
             til = row.instant("til").toTidspunkt(),
             antallAvstemteOppdrag = row.int("antall_avstemte_oppdrag")
         )
+
 }

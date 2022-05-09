@@ -89,30 +89,14 @@ internal class AvstemmingsdataMapperTest {
         val til = LocalDateTime.now()
 
         val utbetalingsoppdragsliste = listOf(
-            mockk<Utbetaling>(relaxed = true) {
-                every { status } returns UtbetalingStatus.GODKJENT
-            },
-            mockk(relaxed = true) {
-                every { status } returns UtbetalingStatus.GODKJENT
-            },
-            mockk(relaxed = true) {
-                every { status } returns UtbetalingStatus.GODKJENT_MED_FEIL
-            },
-            mockk(relaxed = true) {
-                every { status } returns UtbetalingStatus.AVVIST
-            },
-            mockk(relaxed = true) {
-                every { status } returns UtbetalingStatus.AVVIST
-            },
-            mockk(relaxed = true) {
-                every { status } returns UtbetalingStatus.AVVIST
-            },
-            mockk(relaxed = true) {
-                every { status } returns UtbetalingStatus.SENDT // telles som mangler
-            },
-            mockk(relaxed = true) {
-                every { status } returns UtbetalingStatus.FEILET // telles som mangler
-            },
+            utbetalingsoppdrag(id = 1, status = UtbetalingStatus.GODKJENT),
+            utbetalingsoppdrag(id = 2, status = UtbetalingStatus.GODKJENT),
+            utbetalingsoppdrag(id = 3, status = UtbetalingStatus.GODKJENT_MED_FEIL),
+            utbetalingsoppdrag(id = 4, status = UtbetalingStatus.AVVIST),
+            utbetalingsoppdrag(id = 5, status = UtbetalingStatus.AVVIST),
+            utbetalingsoppdrag(id = 6, status = UtbetalingStatus.AVVIST),
+            utbetalingsoppdrag(id = 7, status = UtbetalingStatus.SENDT),
+            utbetalingsoppdrag(id = 8, status = UtbetalingStatus.FEILET),
         )
         val avstemmingsdataMapper = AvstemmingsdataMapper(
             utbetalinger = utbetalingsoppdragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
@@ -159,7 +143,7 @@ internal class AvstemmingsdataMapperTest {
             utbetalinger = utbetalingsoppdgragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
-        val (startmelding, dataMelding, sluttmelding) = avstemmingsmelding
+        val (_, dataMelding, _) = avstemmingsmelding
 
         assertEquals(0, dataMelding.total.totalAntall)
     }
@@ -194,20 +178,16 @@ internal class AvstemmingsdataMapperTest {
         val fraOgMed = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).minusDays(1)
         val til = LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0).plusHours(1)
 
-        val utbetalingsoppdgragsliste = listOf(mockk<Utbetaling>(relaxed = true) {
-            every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0) // foerste
-        }, mockk(relaxed = true) {
-            every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusDays(1)
-        }, mockk(relaxed = true) {
-            every { avstemmingsnoekkel } returns LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0) // siste
-        }, mockk(relaxed = true) {
-            every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusHours(1)
-        }, mockk(relaxed = true) {
-            every { avstemmingsnoekkel } returns LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusMinutes(2)
-        })
+        val utbetalingsoppdragsliste = listOf(
+            utbetalingsoppdrag(id = 1, avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0)),
+            utbetalingsoppdrag(id = 2, avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusDays(1)),
+            utbetalingsoppdrag(id = 3, avstemmingsnoekkel = LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0)),
+            utbetalingsoppdrag(id = 4, avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusHours(1)),
+            utbetalingsoppdrag(id = 5, avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusMinutes(2)),
+        )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalingsoppdgragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
+            utbetalinger = utbetalingsoppdragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding

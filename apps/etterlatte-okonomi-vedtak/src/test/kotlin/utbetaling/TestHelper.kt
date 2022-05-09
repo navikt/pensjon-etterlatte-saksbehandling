@@ -77,6 +77,7 @@ fun utbetalingsoppdrag(
     id: Int = 1,
     status: UtbetalingStatus = UtbetalingStatus.GODKJENT,
     vedtakId: String = "1",
+    avstemmingsnoekkel: LocalDateTime = LocalDateTime.now()
 ) =
     Utbetaling(
         id = id,
@@ -87,7 +88,7 @@ fun utbetalingsoppdrag(
         vedtak = vedtak(vedtakId),
         opprettet = LocalDateTime.now(),
         endret = LocalDateTime.now(),
-        avstemmingsnoekkel = LocalDateTime.now(),
+        avstemmingsnoekkel = avstemmingsnoekkel,
         foedselsnummer = "12345678903",
         utgaaendeOppdrag = oppdrag(vedtakId),
         kvitteringOppdrag = oppdrag(vedtakId),

@@ -6,6 +6,10 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import java.sql.Timestamp
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAmount
+import java.time.temporal.TemporalUnit
 import javax.sql.DataSource
 
 class GrensesnittavstemmingDao(private val dataSource: DataSource) {
@@ -50,4 +54,6 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
             til = row.localDateTime("til"),
             antallAvstemteOppdrag = row.int("antall_avstemte_oppdrag")
         )
+
+    fun Row.toTidspunkt(columnLabel: String) =  this.instant(columnLabel).is
 }

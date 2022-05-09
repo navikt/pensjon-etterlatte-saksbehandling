@@ -8,7 +8,7 @@ import io.mockk.verify
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
-import no.nav.etterlatte.utbetaling.utbetalingsoppdrag
+import no.nav.etterlatte.utbetaling.utbetaling
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
@@ -28,7 +28,7 @@ internal class GrensesnittavstemmingServiceTest {
     fun `skal opprette avstemming og sende til oppdrag`() {
         val fraOgMed = LocalDateTime.now().minusDays(1)
         val til = LocalDateTime.now()
-        val utbetalingsoppdrag = listOf(utbetalingsoppdrag(status = UtbetalingStatus.FEILET))
+        val utbetalingsoppdrag = listOf(utbetaling(status = UtbetalingStatus.FEILET))
 
         val grensesnittavstemming = Grensesnittavstemming(
             opprettet = LocalDateTime.now(),

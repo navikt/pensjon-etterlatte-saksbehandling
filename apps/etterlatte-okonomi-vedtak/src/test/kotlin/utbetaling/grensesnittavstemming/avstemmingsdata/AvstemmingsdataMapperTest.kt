@@ -1,16 +1,16 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
-import no.nav.etterlatte.utbetaling.utbetalingsoppdrag
+import no.nav.etterlatte.utbetaling.utbetaling
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
+import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Fortegn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.Month
 
@@ -21,7 +21,7 @@ internal class AvstemmingsdataMapperTest {
         val fraOgMed = LocalDateTime.now().minusDays(1)
         val til = LocalDateTime.now()
 
-        val utbetalingsoppdrag = listOf(utbetalingsoppdrag(status = UtbetalingStatus.FEILET))
+        val utbetalingsoppdrag = listOf(utbetaling(status = UtbetalingStatus.FEILET))
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1")
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
@@ -39,9 +39,9 @@ internal class AvstemmingsdataMapperTest {
         val til = LocalDateTime.now()
 
         val utbetalingsoppdrag = listOf(
-            utbetalingsoppdrag(id = 1, status = UtbetalingStatus.FEILET),
-            utbetalingsoppdrag(id = 2, status = UtbetalingStatus.FEILET),
-            utbetalingsoppdrag(id = 3, status = UtbetalingStatus.FEILET),
+            utbetaling(id = 1, status = UtbetalingStatus.FEILET),
+            utbetaling(id = 2, status = UtbetalingStatus.FEILET),
+            utbetaling(id = 3, status = UtbetalingStatus.FEILET),
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1", 2)
@@ -62,9 +62,9 @@ internal class AvstemmingsdataMapperTest {
         val til = LocalDateTime.now()
 
         val utbetalingsoppdrag = listOf(
-            utbetalingsoppdrag(id = 1, status = UtbetalingStatus.FEILET),
-            utbetalingsoppdrag(id = 2, status = UtbetalingStatus.FEILET),
-            utbetalingsoppdrag(id = 3, status = UtbetalingStatus.FEILET),
+            utbetaling(id = 1, status = UtbetalingStatus.FEILET),
+            utbetaling(id = 2, status = UtbetalingStatus.FEILET),
+            utbetaling(id = 3, status = UtbetalingStatus.FEILET),
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1", 2)
@@ -84,19 +84,42 @@ internal class AvstemmingsdataMapperTest {
     }
 
     @Test
+    fun `skal returnere riktig totalantall, totalbelop og fortegn`() {
+        val fraOgMed = LocalDateTime.now().minusDays(1)
+        val til = LocalDateTime.now()
+
+        val utbetalingsoppdrag = listOf(
+            utbetaling(id = 1, status = UtbetalingStatus.SENDT),
+            utbetaling(id = 2, status = UtbetalingStatus.GODKJENT),
+            utbetaling(id = 3, status = UtbetalingStatus.GODKJENT_MED_FEIL),
+            utbetaling(id = 4, status = UtbetalingStatus.AVVIST),
+            utbetaling(id = 5, status = UtbetalingStatus.FEILET),
+        )
+
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1")
+        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+
+        val (_, dataMelding, _) = avstemmingsmelding
+
+        assertEquals(5, dataMelding.total.totalAntall)
+        assertEquals(BigDecimal(50_000), dataMelding.total.totalBelop)
+        assertEquals(Fortegn.T, dataMelding.total.fortegn)
+    }
+
+    @Test
     fun `antall i grunnlagsdata skal telles opp korrekt for godkjent, varsel, avvist og mangler`() {
         val fraOgMed = LocalDateTime.now().minusDays(1)
         val til = LocalDateTime.now()
 
         val utbetalingsoppdragsliste = listOf(
-            utbetalingsoppdrag(id = 1, status = UtbetalingStatus.GODKJENT),
-            utbetalingsoppdrag(id = 2, status = UtbetalingStatus.GODKJENT),
-            utbetalingsoppdrag(id = 3, status = UtbetalingStatus.GODKJENT_MED_FEIL),
-            utbetalingsoppdrag(id = 4, status = UtbetalingStatus.AVVIST),
-            utbetalingsoppdrag(id = 5, status = UtbetalingStatus.AVVIST),
-            utbetalingsoppdrag(id = 6, status = UtbetalingStatus.AVVIST),
-            utbetalingsoppdrag(id = 7, status = UtbetalingStatus.SENDT),
-            utbetalingsoppdrag(id = 8, status = UtbetalingStatus.FEILET),
+            utbetaling(id = 1, status = UtbetalingStatus.GODKJENT),
+            utbetaling(id = 2, status = UtbetalingStatus.GODKJENT),
+            utbetaling(id = 3, status = UtbetalingStatus.GODKJENT_MED_FEIL),
+            utbetaling(id = 4, status = UtbetalingStatus.AVVIST),
+            utbetaling(id = 5, status = UtbetalingStatus.AVVIST),
+            utbetaling(id = 6, status = UtbetalingStatus.AVVIST),
+            utbetaling(id = 7, status = UtbetalingStatus.SENDT),
+            utbetaling(id = 8, status = UtbetalingStatus.FEILET),
         )
         val avstemmingsdataMapper = AvstemmingsdataMapper(
             utbetalinger = utbetalingsoppdragsliste, fraOgMed = fraOgMed, til = til, avstemmingId = "1"
@@ -106,9 +129,20 @@ internal class AvstemmingsdataMapperTest {
 
         assertAll("Skal telle opp rett antall godkjent, varsel, avvist og mangler",
             { assertEquals(2, dataMelding.grunnlag.godkjentAntall) },
+            { assertEquals(BigDecimal(20_000), dataMelding.grunnlag.godkjentBelop) },
+            { assertEquals(Fortegn.T, dataMelding.grunnlag.godkjentFortegn) },
+
             { assertEquals(1, dataMelding.grunnlag.varselAntall) },
+            { assertEquals(BigDecimal(10_000), dataMelding.grunnlag.varselBelop) },
+            { assertEquals(Fortegn.T, dataMelding.grunnlag.varselFortegn) },
+
             { assertEquals(4, dataMelding.grunnlag.avvistAntall) },
-            { assertEquals(1, dataMelding.grunnlag.manglerAntall) }
+            { assertEquals(BigDecimal(40_000), dataMelding.grunnlag.avvistBelop) },
+            { assertEquals(Fortegn.T, dataMelding.grunnlag.avvistFortegn) },
+
+            { assertEquals(1, dataMelding.grunnlag.manglerAntall) },
+            { assertEquals(BigDecimal(10_000), dataMelding.grunnlag.manglerBelop) },
+            { assertEquals(Fortegn.T, dataMelding.grunnlag.manglerFortegn) }
         )
     }
 
@@ -179,11 +213,11 @@ internal class AvstemmingsdataMapperTest {
         val til = LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0).plusHours(1)
 
         val utbetalingsoppdragsliste = listOf(
-            utbetalingsoppdrag(id = 1, avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0)),
-            utbetalingsoppdrag(id = 2, avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusDays(1)),
-            utbetalingsoppdrag(id = 3, avstemmingsnoekkel = LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0)),
-            utbetalingsoppdrag(id = 4, avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusHours(1)),
-            utbetalingsoppdrag(id = 5, avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusMinutes(2)),
+            utbetaling(id = 1, avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0)),
+            utbetaling(id = 2, avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusDays(1)),
+            utbetaling(id = 3, avstemmingsnoekkel = LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0)),
+            utbetaling(id = 4, avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusHours(1)),
+            utbetaling(id = 5, avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusMinutes(2)),
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(

@@ -73,7 +73,7 @@ fun attestasjon() = Attestasjon(
     attestantId = "Z123456"
 )
 
-fun utbetalingsoppdrag(
+fun utbetaling(
     id: Int = 1,
     status: UtbetalingStatus = UtbetalingStatus.GODKJENT,
     vedtakId: String = "1",

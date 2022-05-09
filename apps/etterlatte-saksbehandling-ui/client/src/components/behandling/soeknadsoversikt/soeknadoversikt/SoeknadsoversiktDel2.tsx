@@ -2,7 +2,6 @@ import styled from 'styled-components'
 import { Adresse } from './soeknadinfo/Adresse'
 import { InfoWrapper } from './Soeknadsoversikt'
 import { BarnetTilGode } from './gyldigSoeknad/BarnetTilGode'
-import { Header } from '../styled'
 
 export const SoeknadOversiktDel2: React.FC<any> = ({ gjenlevendeOgSoekerLikAdresse, gyldighet }) => {
   return (
@@ -28,4 +27,11 @@ export const Wrapper = styled.div`
   .soeknadGyldigFremsatt {
     margin-right: 2em;
   }
+`
+
+export const Header = styled.div`
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 1em;
+  margin-top: 0em;
 `

@@ -3,7 +3,6 @@ import { PersonInfo } from './personinfo/PersonInfo'
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { ChildIcon } from '../../../../../shared/icons/childIcon'
 import { TypeStatusWrap } from '../../styled'
-import { getStatsborgerskapTekst } from '../../utils'
 
 type Props = {
   person: IBarnFraSak
@@ -18,7 +17,6 @@ export const Barn: React.FC<Props> = ({ person }) => {
         </span>
         {person.navn} <span className="personRolle">({RelatertPersonsRolle.BARN})</span>
         <TypeStatusWrap type="barn">{person.alderEtterlatt} år</TypeStatusWrap>
-        <TypeStatusWrap type="statsborgerskap">{getStatsborgerskapTekst(person.statsborgerskap)}</TypeStatusWrap>
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfo

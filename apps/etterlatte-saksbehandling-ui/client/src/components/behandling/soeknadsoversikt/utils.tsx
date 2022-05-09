@@ -45,25 +45,13 @@ export const hentVirkningstidspunkt = (doedsdato: string, mottattDato: string): 
     men er det mere enn 3 år siden dødsfall, går man bare 3 år tilbake. Denne burde kanskje regnes ut i backend og ligge 
     lagret på behandlingen, og så må saksbehandler ha mulighet til å endre den hvis det er behov, på vilkårssiden der den vises.
     */
-    return startOfMonth(add(new Date(doedsdato), {years: 3})).toString()
+    return startOfMonth(add(new Date(doedsdato), { years: 3 })).toString()
   }
-  return startOfMonth(add(new Date(doedsdato), {months: 1})).toString()
+  return startOfMonth(add(new Date(doedsdato), { months: 1 })).toString()
 }
 
 export const sjekkDodsfallMerEnn3AarSiden = (doedsdato: string, mottattDato: string): boolean => {
   return differenceInYears(new Date(mottattDato), new Date(doedsdato)) > 3
-}
-
-export const getStatsborgerskapTekst = (statsborgerskap: string) => {
-  //TODO eller slette? Hva slags strenger får man fra pdl?
-  switch (statsborgerskap) {
-    case 'NORGE':
-      return 'NO'
-    case 'NOR':
-      return 'NO'
-    default:
-      return statsborgerskap
-  }
 }
 
 export function mapGyldighetstyperTilTekst(gyldig: IGyldighetproving): String | undefined {

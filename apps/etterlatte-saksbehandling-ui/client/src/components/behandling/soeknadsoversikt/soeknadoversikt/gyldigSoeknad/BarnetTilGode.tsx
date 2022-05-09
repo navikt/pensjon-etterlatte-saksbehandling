@@ -21,9 +21,7 @@ export const BarnetTilGode = ({ gyldighet }: { gyldighet: IGyldighetResultat }) 
       <div>
         <Title>Pensjon kommer barnet til gode</Title>
         <Undertekst gray={true}>Automatisk {format(new Date(gyldighet.vurdertDato), 'dd.MM.yyyy')}</Undertekst>
-        {bostedadresse && bostedadresse.resultat === VurderingsResultat.OPPFYLT ? (
-          <Undertekst gray={false}>Søknaden er gyldig og kommer barnet til gode.</Undertekst>
-        ) : (
+        {bostedadresse && bostedadresse.resultat !== VurderingsResultat.OPPFYLT && (
           <Undertekst gray={false}>{sjekkInfo()}</Undertekst>
         )}
       </div>

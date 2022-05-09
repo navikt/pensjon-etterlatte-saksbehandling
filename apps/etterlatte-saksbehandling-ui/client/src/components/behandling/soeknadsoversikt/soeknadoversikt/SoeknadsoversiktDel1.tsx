@@ -1,5 +1,4 @@
 import styled from 'styled-components'
-import { Header } from '../styled'
 import { SoeknadGyldigFremsatt } from './gyldigSoeknad/SoeknadGyldigFremsatt'
 import { Foreldreansvar } from './soeknadinfo/Foreldreansvar'
 import { Innsender } from './soeknadinfo/Innsender'
@@ -38,4 +37,11 @@ export const Wrapper = styled.div`
   .soeknadGyldigFremsatt {
     margin-right: 2em;
   }
+`
+
+export const Header = styled.div`
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 1em;
+  margin-top: 2em;
 `

@@ -4,9 +4,9 @@ import { WarningIcon } from '../../../../../shared/icons/warningIcon'
 import { IconWrapper, PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { PersonInfo } from './personinfo/PersonInfo'
 import { PeopleIcon } from '../../../../../shared/icons/peopleIcon'
-import { ForelderWrap, TypeStatusWrap } from '../../styled'
+import { ForelderWrap } from '../../styled'
 import { IAdresse, IGjenlevendeFraSak, PersonStatus, RelatertPersonsRolle } from '../../../types'
-import { getStatsborgerskapTekst, sjekkAdresseGjenlevendeISoeknadMotPdl } from '../../utils'
+import { sjekkAdresseGjenlevendeISoeknadMotPdl } from '../../utils'
 
 type Props = {
   person: IGjenlevendeFraSak
@@ -46,8 +46,6 @@ export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenle
           ({PersonStatus.GJENLEVENDE_FORELDER} {RelatertPersonsRolle.FORELDER})
         </span>
         {innsenderErGjenlevende && <ForelderWrap>Innsender av søknad</ForelderWrap>}
-
-        <TypeStatusWrap type="statsborgerskap">{getStatsborgerskapTekst(person.statsborgerskap)}</TypeStatusWrap>
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfo

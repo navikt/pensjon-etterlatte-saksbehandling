@@ -55,13 +55,6 @@ export const HeadingWrapper = styled.div`
   }
 `
 
-export const Header = styled.div`
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 1em;
-  margin-top: 2em;
-`
-
 export const Border = styled.div`
   border-top: 1px solid #b0b0b0;
   margin-bottom: 1em;
@@ -91,6 +84,5 @@ export const ForelderWrap = styled.div<{ avdoed?: boolean }>`
   border-radius: 4px;
   font-weight: normal;
   font-size: 14px;
-  margin-left: 0.7em;
   margin-right: 0.9em;
 `

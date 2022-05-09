@@ -21,11 +21,7 @@ export const SoeknadGyldigFremsatt = ({ gyldighet }: { gyldighet: IGyldighetResu
       <div>
         <Title>Søknad gyldig fremsatt</Title>
         <Undertekst gray={true}>Automatisk {format(new Date(gyldighet.vurdertDato), 'dd.MM.yyyy')}</Undertekst>
-        {gyldighet.resultat === VurderingsResultat.OPPFYLT ? (
-          <Undertekst gray={false}>Ja. søknad er gyldig fremsatt.</Undertekst>
-        ) : (
-          <Undertekst gray={false}>{sjekkInfo()}</Undertekst>
-        )}
+        {gyldighet.resultat !== VurderingsResultat.OPPFYLT && <Undertekst gray={false}>{sjekkInfo()}</Undertekst>}
       </div>
       {/* <Endre>
         <LockedIcon /> <span className="text">Endre</span>

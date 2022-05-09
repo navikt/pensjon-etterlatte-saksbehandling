@@ -12,7 +12,7 @@ export const Adresse = ({
     <DetailWrapper>
       {gjenlevendeOgSoekerLikAdresse?.resultat === VurderingsResultat.OPPFYLT && (
         <div>
-          <Label size="medium">Adresse</Label>
+          <Label size="small">Adresse</Label>
           <div className="text">
             Gjenlevende og avdøde bodde sammen med barnet, og gjenlevende og barnet fortsatt bor sammen
           </div>

@@ -84,6 +84,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         stmt.setString(6, behandling.avdoed?.toJson())
         stmt.setString(7, behandling.soesken?.toJson())
         stmt.setObject(8, behandling.id)
+        require(stmt.executeUpdate() == 1)
     }
 
     fun lagreGyldighetsproving(behandling: Behandling) {

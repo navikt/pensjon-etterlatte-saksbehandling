@@ -46,9 +46,10 @@ class BehandlingAggregat(
     private object TilgangDao {
         fun sjekkOmBehandlingTillatesEndret(behandling: Behandling): Boolean {
             return behandling.status in listOf(
+                BehandlingStatus.OPPRETTET,
                 BehandlingStatus.GYLDIG_SOEKNAD,
-                BehandlingStatus.UNDER_BEHANDLING,
                 BehandlingStatus.IKKE_GYLDIG_SOEKNAD,
+                BehandlingStatus.UNDER_BEHANDLING,
             )
         }
     }

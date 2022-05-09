@@ -1,9 +1,9 @@
 package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -26,14 +26,14 @@ class BehandlingAggregat(
                 sak,
                 LocalDateTime.now(),
                 LocalDateTime.now(),
-                LocalDateTime.now(), //må hentes fra søknad
-                "", //må hentes fra søknad
-                "", //må hentes fra søknad
-                emptyList(), //må hentes fra søknad
-                emptyList(), //må hentes fra søknad
                 null,
                 null,
-                BehandlingStatus.GYLDIG_SOEKNAD // må hentes fra gyldighetsprøving
+                null,
+                emptyList(),
+                emptyList(),
+                null,
+                null,
+                BehandlingStatus.OPPRETTET
             )
                 .also {
                     behandlinger.opprett(it)
@@ -54,6 +54,28 @@ class BehandlingAggregat(
     }
 
     var lagretBehandling = requireNotNull(behandlinger.hentBehandling(id))
+
+    fun leggTilPersongalleriOgDato(persongalleri: Persongalleri, mottattDato: String) {
+        if (!TilgangDao.sjekkOmBehandlingTillatesEndret(lagretBehandling)) {
+            throw AvbruttBehandlingException(
+                "Det tillates ikke å legge til opplysninger på behandling med id ${lagretBehandling.id} og status: ${lagretBehandling.status}"
+            )
+        }
+
+        lagretBehandling = lagretBehandling.copy(
+            sistEndret = LocalDateTime.now(),
+            soeknadMottattDato = LocalDateTime.parse(mottattDato),
+            innsender = persongalleri.innsender,
+            soeker = persongalleri.soeker,
+            gjenlevende = persongalleri.gjenlevende,
+            avdoed = persongalleri.avdoed,
+            soesken = persongalleri.soesken,
+        )
+
+        behandlinger.lagrePersongalleriOgMottattdato(lagretBehandling)
+        logger.info("Persongalleri er lagret i behandling ${lagretBehandling.id} i sak ${lagretBehandling.sak}")
+
+    }
 
     fun lagreGyldighetprøving(gyldighetsproeving: GyldighetsResultat) {
         if (!TilgangDao.sjekkOmBehandlingTillatesEndret(lagretBehandling)) {

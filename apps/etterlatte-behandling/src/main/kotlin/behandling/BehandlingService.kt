@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -11,7 +12,7 @@ interface BehandlingService {
     fun hentBehandling(behandling: UUID): Behandling?
     fun hentBehandlinger(): List<Behandling>
     fun hentBehandlingerISak(sakid: Long): List<Behandling>
-    fun startBehandling(sak: Long): Behandling
+    fun startBehandling(sak: Long, persongalleri: Persongalleri, mottattDato: String): Behandling
     fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
     fun slettBehandlingerISak(sak: Long)
     fun avbrytBehandling(behandling: UUID): Behandling
@@ -40,13 +41,13 @@ class RealBehandlingService(
         }
     }
 
-    override fun startBehandling(sak: Long): Behandling {
+    override fun startBehandling(sak: Long, persongalleri: Persongalleri, mottattDato: String): Behandling {
         logger.info("Starter en behandling")
         return inTransaction {
             behandlingFactory.opprett(sak)
-               // .also { behandling ->
-              //      behandling.leggTilGrunnlagListe(nyeOpplysninger)
-              //  } //todo: endre til persongalleri osv her
+               .also { behandling ->
+                    behandling.leggTilPersongalleriOgDato(persongalleri, mottattDato)
+                }
 
         }.also {
             runBlocking {

@@ -48,11 +48,7 @@ internal class LesGyldigSoeknadsmelding(
 
                 val sak = behandling.skaffSak(packet["@fnr_soeker"].asText(), packet["@skjema_info"]["type"].asText())
                 val behandlingsid = behandling.initierBehandling(
-                    sak,
-                    packet["@skjema_info"],
-                    packet["@lagret_soeknad_id"].longValue(),
-                    packet["@skjema_info"]["mottattDato"].asText(),
-                    personGalleri
+                    sak, packet["@skjema_info"]["mottattDato"].asText(), personGalleri
                 )
                 behandling.lagreGyldighetsVurdering(behandlingsid, gyldighetsVurdering)
 
@@ -75,8 +71,6 @@ interface Pdl {
 interface Behandling {
     fun initierBehandling(
         sak: Long,
-        skjemaInfo: JsonNode,
-        soeknadId: Long,
         mottattDato: String,
         persongalleri: Persongalleri
     ): UUID

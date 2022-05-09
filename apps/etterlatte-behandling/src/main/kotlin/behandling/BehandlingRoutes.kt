@@ -39,6 +39,8 @@ fun Route.behandlingRoutes(service: BehandlingService) {
 
             service.startBehandling(
                 behandlingsBehov.sak,
+                behandlingsBehov.persongalleri,
+                behandlingsBehov.mottattDato,
             )
         .also { call.respondText(it.id.toString()) }
     }
@@ -53,7 +55,7 @@ fun Route.behandlingRoutes(service: BehandlingService) {
         }
 
 
-        post("lagregyldighetsproeving") {
+        post("gyldigfremsatt") {
             val body = call.receive<GyldighetsResultat>()
             service.lagreGyldighetsprøving(behandlingsId, body)
             call.respond(HttpStatusCode.OK)

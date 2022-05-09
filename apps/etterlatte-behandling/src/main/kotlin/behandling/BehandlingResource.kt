@@ -1,8 +1,9 @@
 package no.nav.etterlatte.behandling
 
-import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 
 data class BehandlingsBehov(
     val sak: Long,
-    //val opplysninger: List<Grunnlagsopplysning<ObjectNode>>? TODO: andre ting her?
+    val persongalleri: Persongalleri,
+    val mottattDato: String,
 )

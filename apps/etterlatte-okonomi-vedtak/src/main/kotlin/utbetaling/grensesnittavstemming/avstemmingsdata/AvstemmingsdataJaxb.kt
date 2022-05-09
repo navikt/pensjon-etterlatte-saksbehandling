@@ -10,15 +10,18 @@ import javax.xml.namespace.QName
 object AvstemmingsdataJaxb {
     private val jaxbContext = JAXBContext.newInstance(Avstemmingsdata::class.java)
 
-    fun toXml(avstemmingsmelding: Avstemmingsdata): String {
+    fun toXml(avstemmingsdata: Avstemmingsdata): String {
         val stringWriter = StringWriter()
         jaxbContext.createMarshaller().apply {
             setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
         }.marshal(
-            JAXBElement(QName("", "Avstemmingsdata"), Avstemmingsdata::class.java, avstemmingsmelding),
+            JAXBElement(QName("", "Avstemmingsdata"), Avstemmingsdata::class.java, avstemmingsdata),
             stringWriter
         )
         return stringWriter.toString()
     }
+
+    fun toXml(avstemmingsdata: List<Avstemmingsdata>): String =
+        avstemmingsdata.joinToString("\n") { toXml(it).trimIndent() }
 
 }

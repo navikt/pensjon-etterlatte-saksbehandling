@@ -8,14 +8,16 @@ class AvstemmingsdataSender(
     private val jmsConnectionFactory: JmsConnectionFactory,
     private val queue: String,
 ) {
-    fun sendAvstemming(avstemmingsdata: Avstemmingsdata) {
+    fun sendAvstemming(avstemmingsdata: Avstemmingsdata): String {
         logger.info("Sender avstemmingsdata til Oppdrag")
         val connection = jmsConnectionFactory.connection()
         connection.createSession().use { session ->
             val producer = session.createProducer(session.createQueue(queue))
-            val message = session.createTextMessage(AvstemmingsdataJaxb.toXml(avstemmingsdata))
+            val xml = AvstemmingsdataJaxb.toXml(avstemmingsdata)
+            val message = session.createTextMessage(xml)
             producer.send(message)
             logger.info("Avstemmingsdata overført til Oppdrag")
+            return xml
         }
     }
 

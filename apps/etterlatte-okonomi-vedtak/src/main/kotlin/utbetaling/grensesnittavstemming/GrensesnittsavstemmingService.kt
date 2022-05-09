@@ -17,50 +17,46 @@ class GrensesnittsavstemmingService(
 ) {
 
     fun startGrensesnittsavstemming(
-        periodeFraOgMed: Tidspunkt = hentFraTid(),
-        periodeTil: Tidspunkt = hentTilTid()
+        periodeFraOgMed: Tidspunkt = hentFraTidForrigeAvstemming(),
+        periodeTil: Tidspunkt = hentTilTidStartAvDagen()
     ) {
         logger.info("Avstemmer fra $periodeFraOgMed til $periodeTil")
-        val utbetalingsoppdrag = utbetalingDao.hentAlleUtbetalingerMellom(periodeFraOgMed, periodeTil)
-
-        val grensesnittavstemming = Grensesnittavstemming(
+        val utbetalinger = utbetalingDao.hentAlleUtbetalingerMellom(periodeFraOgMed, periodeTil)
+        val avstemming = Grensesnittavstemming(
             periodeFraOgMed = periodeFraOgMed,
             periodeTil = periodeTil,
-            antallOppdrag = utbetalingsoppdrag.size,
+            antallOppdrag = utbetalinger.size,
             opprettet = Tidspunkt.now(clock)
         )
 
-        val avstemmingMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalingsoppdrag,
-            periodeFraOgMed = periodeFraOgMed,
-            periodeTil = periodeTil,
-            avstemmingId = grensesnittavstemming.id
-        )
-        val avstemmingsmelding = avstemmingMapper.opprettAvstemmingsmelding()
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, periodeFraOgMed, periodeTil, avstemming.id)
+        val avstemmingsdataListe = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
-        avstemmingsmelding.forEachIndexed { index, avstemmingsdata ->
-            avstemmingsdataSender.sendAvstemming(avstemmingsdata)
-            logger.info("Avstemmingsmelding ${index + 1} av ${avstemmingsmelding.size} overført til Oppdrag")
+        val sendtAvstemmingsdata = avstemmingsdataListe.mapIndexed { index, avstemmingsdata ->
+            val sendtAvstemmingsdata = avstemmingsdataSender.sendAvstemming(avstemmingsdata)
+            logger.info("Avstemmingsmelding ${index + 1} av ${avstemmingsdataListe.size} overført til Oppdrag")
+            sendtAvstemmingsdata
         }
 
-        grensesnittavstemmingDao.opprettAvstemming(grensesnittavstemming)
+        grensesnittavstemmingDao.opprettAvstemming(
+            avstemming.copy(avstemmingsdata = sendtAvstemmingsdata.joinToString("\n"))
+        )
 
         logger.info(
-            "Avstemming fra $periodeFraOgMed til $periodeTil fullført - ${utbetalingsoppdrag.size} oppdrag ble avstemt"
+            "Avstemming fra $periodeFraOgMed til $periodeTil fullført - ${utbetalinger.size} oppdrag ble avstemt"
         )
     }
 
-    // Setter til-tid kl 00.00 norsk tid
-    private fun hentTilTid(): Tidspunkt =
+    private fun hentTilTidStartAvDagen(): Tidspunkt =
         Tidspunkt.now(clock)
             .toZonedNorskTid()
-            .truncatedTo(ChronoUnit.DAYS)
+            .truncatedTo(ChronoUnit.DAYS) // 00.00 norsk tid
             .toInstant().let {
                 Tidspunkt(it)
             }
 
-
-    private fun hentFraTid() = grensesnittavstemmingDao.hentSisteAvstemming()?.periodeTil ?: MIN_INSTANT
+    private fun hentFraTidForrigeAvstemming() =
+        grensesnittavstemmingDao.hentSisteAvstemming()?.periodeTil ?: MIN_INSTANT
 
     companion object {
         private val MIN_INSTANT = Tidspunkt(Instant.EPOCH)

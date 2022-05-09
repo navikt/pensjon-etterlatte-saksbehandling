@@ -4,21 +4,18 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.typesafe.config.ConfigFactory
 import health.healthApi
-import io.ktor.application.install
-import io.ktor.config.tryGetString
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
-import io.ktor.jackson.jackson
-import io.ktor.request.header
-import io.ktor.request.httpMethod
-import io.ktor.request.path
-import io.ktor.routing.routing
-import io.ktor.server.cio.CIO
-import io.ktor.server.engine.applicationEngineEnvironment
-import io.ktor.server.engine.connector
-import io.ktor.server.engine.embeddedServer
+import io.ktor.application.*
+import io.ktor.auth.*
+import io.ktor.config.*
+import io.ktor.features.*
+import io.ktor.jackson.*
+import io.ktor.request.*
+import io.ktor.routing.*
+import io.ktor.server.cio.*
+import io.ktor.server.engine.*
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.security.token.support.ktor.tokenValidationSupport
 import org.slf4j.event.Level
 import java.util.*
 
@@ -39,18 +36,21 @@ class Server(applicationContext: ApplicationContext) {
                 mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
             }
 
-//            install(Authentication) {
-//                tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
-//            }
+            if (applicationContext.localDevelopment) {
+                routing { brevRoute(applicationContext.brevService) }
+            } else {
+                install(Authentication) {
+                    tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
+                }
 
-            routing {
-                healthApi()
-                brevRoute(applicationContext.brevService)
-//                authenticate {
-//                    route("api") {
-//                       brevRoute(applicationContext.brevService)
-//                    }
-//                }
+                routing {
+                    healthApi()
+                    authenticate {
+                        route("api") {
+                            brevRoute(applicationContext.brevService)
+                        }
+                    }
+                }
             }
         }
         connector {

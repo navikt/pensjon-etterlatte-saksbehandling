@@ -19,6 +19,7 @@ dependencies {
     implementation(Ktor.ClientLogging)
     implementation(Ktor.Jackson)
     implementation(Ktor.Auth)
+    implementation(project(":libs:ktorclient-auth-clientcredentials"))
     implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.14")
 
     implementation(Micrometer.Prometheus)

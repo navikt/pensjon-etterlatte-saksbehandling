@@ -33,6 +33,10 @@ spec:
   env:
     - name: ETTERLATTE_PDFGEN_URL
       value: "http://ey-pdfgen/api/v1/genpdf/eypdfgen"
+    - name: JOURNALPOST_URL
+      value: "https://dokarkiv.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost"
+    - name: AZURE_DOKARKIV_SCOPE
+      value: "api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default"
   accessPolicy:
     outbound:
       rules:

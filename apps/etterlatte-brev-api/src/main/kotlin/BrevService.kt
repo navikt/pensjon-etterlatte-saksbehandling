@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import journalpost.JournalpostService
 import model.Vedtak
 import model.VedtakType
 import model.brev.InnvilgetBrevRequest
@@ -10,7 +11,8 @@ import pdf.PdfGeneratorKlient
 
 class BrevService(
     private val db: BrevRepository,
-    private val pdfGenerator: PdfGeneratorKlient
+    private val pdfGenerator: PdfGeneratorKlient,
+    private val journalpostService: JournalpostService
 ) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
     private val vedtakService = VedtakService()
@@ -32,5 +34,14 @@ class BrevService(
         logger.info("Generert brev for vedtak (vedtakId=${vedtak.vedtakId}) med størrelse: ${pdf.size}")
 
         return db.opprettBrev(vedtak.vedtakId.toLong(), pdf).data
+    }
+
+    // Må nok rydde opp i hvordan brev lenkes opp i databasen.
+    suspend fun sendBrev(behandlingId: String) {
+        val vedtak = vedtakService.hentVedtak(behandlingId)
+        val brev = db.hentBrev(vedtak.vedtakId.toLong())
+            ?: throw Exception("Klarte ikke finne brev tilhørende vedtak med vedtakId ${vedtak.vedtakId}")
+
+        journalpostService.journalfoer(vedtak, brev)
     }
 }

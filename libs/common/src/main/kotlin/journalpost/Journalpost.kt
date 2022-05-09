@@ -17,13 +17,13 @@ data class JournalpostRequest(
     val avsenderMottaker: AvsenderMottaker,
     val bruker: Bruker,
     val eksternReferanseId: String,
-    var dokumenter: List<JournalpostDokument>
+    val dokumenter: List<JournalpostDokument>
 )
 
 data class AvsenderMottaker(
     val id: String,
     val idType: String = "FNR",
-    val navn: String
+    val navn: String? = null
 )
 
 data class Bruker(
@@ -33,7 +33,7 @@ data class Bruker(
 
 data class JournalpostDokument(
     val tittel: String,
-    val dokumentKategori: DokumentKategori,
+    val dokumentKategori: DokumentKategori?,
     val brevkode: String = "XX.YY-ZZ",
     val dokumentvarianter: List<DokumentVariant>
 )

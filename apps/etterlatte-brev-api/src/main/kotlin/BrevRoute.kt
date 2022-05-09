@@ -15,7 +15,11 @@ fun Route.brevRoute(service: BrevService) {
             call.respond(service.hentBrev(behandlingId))
         }
 
-        get("{vedtakId}/send") {
+        get("{behandlingId}/send") {
+            val behandlingId = context.parameters["behandlingId"]!!
+
+            service.sendBrev(behandlingId)
+
             call.respond("OK")
         }
     }

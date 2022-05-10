@@ -15,15 +15,16 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    INSERT INTO avstemming (id, opprettet, periode_fra, periode_til, antall_oppdrag)
-                    VALUES (:id, :opprettet, :periode_fra, :periode_til, :antall_oppdrag)
+                    INSERT INTO avstemming (id, opprettet, periode_fra, periode_til, antall_oppdrag, avstemmingsdata)
+                    VALUES (:id, :opprettet, :periode_fra, :periode_til, :antall_oppdrag, :avstemmingsdata)
                     """,
                 paramMap = mapOf(
-                    "id" to grensesnittavstemming.id.param<String>(),
+                    "id" to grensesnittavstemming.id.value.param<String>(),
                     "opprettet" to Timestamp.from(grensesnittavstemming.opprettet.instant).param<Timestamp>(),
                     "periode_fra" to Timestamp.from(grensesnittavstemming.periodeFraOgMed.instant).param<Timestamp>(),
                     "periode_til" to Timestamp.from(grensesnittavstemming.periodeTil.instant).param<Timestamp>(),
-                    "antall_oppdrag" to grensesnittavstemming.antallOppdrag.param<Int>()
+                    "antall_oppdrag" to grensesnittavstemming.antallOppdrag.param<Int>(),
+                    "avstemmingsdata" to grensesnittavstemming.avstemmingsdata.param<String>(),
                 )
             )
                 .let { session.run(it.asUpdate) }
@@ -34,7 +35,7 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    SELECT id, opprettet, periode_fra, periode_til, antall_oppdrag 
+                    SELECT id, opprettet, periode_fra, periode_til, antall_oppdrag, avstemmingsdata
                     FROM avstemming 
                     ORDER BY periode_til DESC
                     LIMIT 1
@@ -45,11 +46,12 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
 
     private fun toAvstemming(row: Row) =
         Grensesnittavstemming(
-            id = row.string("id"),
+            id = UUIDBase64(row.string("id")),
             opprettet = row.instant("opprettet").toTidspunkt(),
             periodeFraOgMed = row.instant("periode_fra").toTidspunkt(),
             periodeTil = row.instant("periode_til").toTidspunkt(),
-            antallOppdrag = row.int("antall_oppdrag")
+            antallOppdrag = row.int("antall_oppdrag"),
+            avstemmingsdata = row.stringOrNull("avstemmingsdata"),
         )
 
 }

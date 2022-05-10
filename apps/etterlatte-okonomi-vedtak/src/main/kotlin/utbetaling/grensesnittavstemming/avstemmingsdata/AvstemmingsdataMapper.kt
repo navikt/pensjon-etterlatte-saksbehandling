@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Aksjonsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AvstemmingType
@@ -22,7 +23,7 @@ class AvstemmingsdataMapper(
     private val utbetalinger: List<Utbetaling>,
     private val periodeFraOgMed: Tidspunkt,
     private val periodeTil: Tidspunkt,
-    private val avstemmingId: String,
+    private val avstemmingId: UUIDBase64,
     private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING
 ) {
     private val avstemmingsperiode = periode(utbetalinger)
@@ -60,7 +61,7 @@ class AvstemmingsdataMapper(
                 nokkelTom =
                     avstemmingsperiode?.endInclusive?.let { Tidspunkt(it).toNorskTid() }?.format(tidsstempelMikro)
                         ?: "0"
-                avleverendeAvstemmingId = avstemmingId
+                avleverendeAvstemmingId = avstemmingId.value
                 brukerId = fagomraade
             }
         }

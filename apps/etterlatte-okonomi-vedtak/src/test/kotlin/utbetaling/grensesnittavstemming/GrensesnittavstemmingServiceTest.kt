@@ -43,7 +43,7 @@ internal class GrensesnittavstemmingServiceTest {
 
         every { grensesnittavstemmingDao.hentSisteAvstemming() } returns grensesnittavstemming
         every { utbetalingDao.hentAlleUtbetalingerMellom(any(), any()) } returns utbetalingsoppdrag
-        every { avstemmingsdataSender.sendAvstemming(any()) } just runs
+        every { avstemmingsdataSender.sendAvstemming(any()) } returns "message"
         every { grensesnittavstemmingDao.opprettAvstemming(any()) } returns 1
 
         grensesnittsavstemmingService.startGrensesnittsavstemming(fraOgMed, til)

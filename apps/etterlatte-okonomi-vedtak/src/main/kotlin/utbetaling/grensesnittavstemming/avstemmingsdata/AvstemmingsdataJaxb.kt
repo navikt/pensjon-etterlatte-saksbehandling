@@ -21,7 +21,4 @@ object AvstemmingsdataJaxb {
         return stringWriter.toString()
     }
 
-    fun toXml(avstemmingsdata: List<Avstemmingsdata>): String =
-        avstemmingsdata.joinToString("\n") { toXml(it).trimIndent() }
-
 }

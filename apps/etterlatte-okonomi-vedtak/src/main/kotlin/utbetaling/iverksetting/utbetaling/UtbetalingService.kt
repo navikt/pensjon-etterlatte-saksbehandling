@@ -3,11 +3,12 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.trygdeetaten.skjema.oppdrag.Mmel
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 import java.time.Clock
@@ -35,6 +36,18 @@ class UtbetalingService(
         logger.info("Oppdaterer kvittering for oppdrag med id=${oppdrag.vedtakId()}")
         return utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock))
     }
+
+
+    // TODO: sette inn kolonne i database som viser at kvittering er oppdatert manuelt?
+    fun settKvitteringManuelt(vedtakId: String) = utbetalingDao.hentUtbetaling(vedtakId)?.let {
+        it.utgaaendeOppdrag.apply {
+            mmel = Mmel().apply {
+                systemId = "231-OPPD" // TODO: en annen systemid her for å indikere manuell jobb?
+                alvorlighetsgrad = "00"
+            }
+        }.let { utbetalingDao.oppdaterKvittering(it, Tidspunkt.now(clock)) }
+    }
+
 
     fun oppdaterStatusOgPubliserKvittering(oppdrag: Oppdrag, status: UtbetalingStatus) =
         utbetalingDao.oppdaterStatus(oppdrag.vedtakId(), status, Tidspunkt.now(clock))

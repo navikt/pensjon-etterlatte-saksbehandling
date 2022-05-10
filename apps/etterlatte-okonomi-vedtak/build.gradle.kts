@@ -8,6 +8,8 @@ dependencies {
     implementation(Ktor.ClientCore)
     implementation(Ktor.ClientJackson)
 
+    implementation("org.jetbrains:annotations:13.0")
+
     implementation("com.ibm.mq:com.ibm.mq.allclient:9.2.5.0")
     implementation("org.messaginghub:pooled-jms:2.0.5")
     implementation("com.github.navikt.tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon:1.4201aa")

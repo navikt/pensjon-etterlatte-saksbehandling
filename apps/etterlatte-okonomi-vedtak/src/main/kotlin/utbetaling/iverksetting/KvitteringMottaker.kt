@@ -2,12 +2,12 @@ package no.nav.etterlatte.utbetaling.iverksetting
 
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
-import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
-import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 import javax.jms.ExceptionListener
@@ -25,7 +25,6 @@ class KvitteringMottaker(
     init {
         withLogContext {
             val connection = jmsConnectionFactory.connection().apply {
-                // TODO hvordan forsøke å sette opp connection på nytt?
                 exceptionListener = ExceptionListener {
                     logger.error("En feil oppstod med tilkobling mot MQ: ${it.message}", it)
                 }
@@ -44,6 +43,9 @@ class KvitteringMottaker(
             logger.info("Kvittering på utbetalingsoppdrag fra Oppdrag mottatt med id=${message.jmsMessageID}")
             oppdragXml = message.getBody(String::class.java)
             val oppdrag = OppdragJaxb.toOppdrag(oppdragXml)
+
+            logger.info("Kvittering mottatt fra Oppdrag", kv("oppdragXml", oppdrag))
+            logger.info("Kvittering mottatt fra Oppdrag", kv("oppdragXml", oppdragXml))
 
             utbetalingService.oppdaterKvittering(oppdrag)
 

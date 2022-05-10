@@ -1,11 +1,9 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
+import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataMapper
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
-import no.nav.etterlatte.utbetaling.common.Tidspunkt
-import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataJaxb
-import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Avstemmingsdata
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Instant
@@ -26,11 +24,11 @@ class GrensesnittsavstemmingService(
         val utbetalingsoppdrag = utbetalingDao.hentAlleUtbetalingerMellom(periodeFraOgMed, periodeTil)
 
         val grensesnittavstemming = Grensesnittavstemming(
-                periodeFraOgMed = periodeFraOgMed,
-                periodeTil = periodeTil,
-                antallOppdrag = utbetalingsoppdrag.size,
-                opprettet = Tidspunkt.now(clock)
-            )
+            periodeFraOgMed = periodeFraOgMed,
+            periodeTil = periodeTil,
+            antallOppdrag = utbetalingsoppdrag.size,
+            opprettet = Tidspunkt.now(clock)
+        )
 
         val avstemmingMapper = AvstemmingsdataMapper(
             utbetalinger = utbetalingsoppdrag,
@@ -60,6 +58,7 @@ class GrensesnittsavstemmingService(
             .toInstant().let {
                 Tidspunkt(it)
             }
+
 
     private fun hentFraTid() = grensesnittavstemmingDao.hentSisteAvstemming()?.periodeTil ?: MIN_INSTANT
 

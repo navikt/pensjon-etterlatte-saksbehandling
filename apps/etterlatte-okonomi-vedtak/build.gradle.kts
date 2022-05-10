@@ -1,12 +1,11 @@
 plugins {
     id("etterlatte.rapids-and-rivers")
+    id("com.faire.gradle.analyze") version "1.0.9"
 }
 
 dependencies {
     implementation(Ktor.OkHttp)
     implementation(Ktor.ClientCore)
-    implementation(Ktor.ClientLoggingJvm)
-    implementation(Ktor.ClientAuth)
     implementation(Ktor.ClientJackson)
 
     implementation("com.ibm.mq:com.ibm.mq.allclient:9.2.5.0")

@@ -6,10 +6,9 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import no.nav.etterlatte.Kontekst
 
-
 fun Route.sakRoutes(sakService: SakService){
     get("/saker") {
-        call.respond(Person(inTransaction { sakService.hentSaker() }))
+        call.respond(Saker(inTransaction { sakService.hentSaker() }))
     }
 
     get("/saker/{id}") {
@@ -17,7 +16,7 @@ fun Route.sakRoutes(sakService: SakService){
     }
     route("personer/{id}"){
         get("saker") {
-            call.respond(Person(inTransaction {
+            call.respond(Saker(inTransaction {
                 sakService.finnSaker(requireNotNull(call.parameters["id"]))
             }))
         }
@@ -30,17 +29,14 @@ fun Route.sakRoutes(sakService: SakService){
             }
         }
     }
-
 }
-
 
 private fun <T> inTransaction(block:()->T): T = Kontekst.get().databasecontxt.inTransaction {
     block()
 }
 
-data class Person(val saker: List<Sak>)
-
 data class Sak(val ident: String, val sakType: String, val id:Long)
+data class Saker(val saker: List<Sak>)
 
 
 

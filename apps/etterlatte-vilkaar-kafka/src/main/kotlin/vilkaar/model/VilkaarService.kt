@@ -7,9 +7,9 @@ import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraVilkaar
 import no.nav.etterlatte.barnepensjon.vilkaarAvdoedesMedlemskap
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AvdoedSoeknad
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person

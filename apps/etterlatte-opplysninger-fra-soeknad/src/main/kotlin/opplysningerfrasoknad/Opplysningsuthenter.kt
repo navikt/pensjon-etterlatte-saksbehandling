@@ -3,12 +3,13 @@ package no.nav.etterlatte.opplysningerfrasoknad
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.common.objectMapper
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Forelder
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Verge
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Samtykke
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.*
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Forelder
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Verge
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.*
 import java.time.ZoneOffset
@@ -16,10 +17,10 @@ import java.util.*
 
 class Opplysningsuthenter {
 
-    fun lagOpplysningsListe(jsonNode: JsonNode): List<Behandlingsopplysning<out Any>> {
+    fun lagOpplysningsListe(jsonNode: JsonNode): List<Grunnlagsopplysning<out Any>> {
         val barnepensjonssoknad = objectMapper.treeToValue<Barnepensjon>(jsonNode)!!
 
-        return listOf<Behandlingsopplysning<out Any>?>(
+        return listOf<Grunnlagsopplysning<out Any>?>(
             avdoed(barnepensjonssoknad, Opplysningstyper.AVDOED_SOEKNAD_V1),
             soeker(barnepensjonssoknad, Opplysningstyper.SOEKER_SOEKNAD_V1),
             gjenlevendeForelder(barnepensjonssoknad, Opplysningstyper.GJENLEVENDE_FORELDER_SOEKNAD_V1),
@@ -37,9 +38,9 @@ class Opplysningsuthenter {
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper,
         data: T
-    ): Behandlingsopplysning<T> {
-        return Behandlingsopplysning(
-            UUID.randomUUID(), Behandlingsopplysning.Privatperson(
+    ): Grunnlagsopplysning<T> {
+        return Grunnlagsopplysning(
+            UUID.randomUUID(), Grunnlagsopplysning.Privatperson(
                 barnepensjon.innsender.foedselsnummer.svar.value,
                 barnepensjon.mottattDato.toInstant(ZoneOffset.UTC)
             ), opplysningsType, objectMapper.createObjectNode(),
@@ -59,7 +60,7 @@ class Opplysningsuthenter {
     fun avdoed(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out AvdoedSoeknad>? {
+    ): Grunnlagsopplysning<out AvdoedSoeknad>? {
         return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
             setBehandlingsopplysninger(barnepensjon, opplysningsType,
                 AvdoedSoeknad(
@@ -91,7 +92,7 @@ class Opplysningsuthenter {
     fun soeker(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out SoekerBarnSoeknad> {
+    ): Grunnlagsopplysning<out SoekerBarnSoeknad> {
         val adresse = barnepensjon.soeker.utenlandsAdresse
 
         return setBehandlingsopplysninger(
@@ -129,7 +130,7 @@ class Opplysningsuthenter {
     fun gjenlevendeForelder(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out GjenlevendeForelderSoeknad>? {
+    ): Grunnlagsopplysning<out GjenlevendeForelderSoeknad>? {
         return hentGjenlevendeForelder(barnepensjon)?.let { forelder ->
             setBehandlingsopplysninger(
                 barnepensjon, opplysningsType,
@@ -149,7 +150,7 @@ class Opplysningsuthenter {
     fun innsender(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out InnsenderSoeknad> {
+    ): Grunnlagsopplysning<out InnsenderSoeknad> {
         return setBehandlingsopplysninger(
             barnepensjon, opplysningsType,
             InnsenderSoeknad(
@@ -161,14 +162,14 @@ class Opplysningsuthenter {
         )
     }
 
-    fun samtykke(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Behandlingsopplysning<out Samtykke> {
+    fun samtykke(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Grunnlagsopplysning<out Samtykke> {
         return setBehandlingsopplysninger(barnepensjon, opplysningsType, Samtykke(barnepensjon.harSamtykket.svar))
     }
 
     fun utbetalingsinformasjon(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out Utbetalingsinformasjon>? {
+    ): Grunnlagsopplysning<out Utbetalingsinformasjon>? {
         return barnepensjon.utbetalingsInformasjon?.let {
             setBehandlingsopplysninger(
                 barnepensjon, opplysningsType,
@@ -189,7 +190,7 @@ class Opplysningsuthenter {
     fun soeknadMottattDato(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out SoeknadMottattDato> {
+    ): Grunnlagsopplysning<out SoeknadMottattDato> {
         return setBehandlingsopplysninger(
             barnepensjon, opplysningsType,
             SoeknadMottattDato(barnepensjon.mottattDato)
@@ -199,15 +200,15 @@ class Opplysningsuthenter {
     fun soeknadsType(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper
-    ): Behandlingsopplysning<out SoeknadstypeOpplysning> {
+    ): Grunnlagsopplysning<out SoeknadstypeOpplysning> {
         return setBehandlingsopplysninger(barnepensjon, opplysningsType, SoeknadstypeOpplysning(barnepensjon.type))
     }
 
     fun personGalleri(
         barnepensjon: Barnepensjon
-    ): Behandlingsopplysning<out Persongalleri> {
+    ): Grunnlagsopplysning<out Persongalleri> {
         return setBehandlingsopplysninger(barnepensjon, Opplysningstyper.PERSONGALLERI_V1, Persongalleri(
-            soker = barnepensjon.soeker.foedselsnummer.svar.value,
+            soeker = barnepensjon.soeker.foedselsnummer.svar.value,
             innsender = barnepensjon.innsender.foedselsnummer.svar.value,
             soesken = barnepensjon.soesken.map { it.foedselsnummer.svar.value },
             avdoed = barnepensjon.foreldre.filter { it.type == PersonType.AVDOED }.map { it.foedselsnummer.svar.value },

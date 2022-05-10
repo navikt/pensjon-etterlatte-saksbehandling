@@ -1,0 +1,58 @@
+{
+  "@event_name": "ny_opplysning",
+  "opplysning": [
+    {
+      "id": "bb9b9a5d-ffcc-4368-9de3-443e6ac32342",
+      "kilde": {
+        "navn": "pdl",
+        "tidspunktForInnhenting": "2022-03-21T14:26:21.971631997Z",
+        "registersReferanse": null,
+        "type": "pdl"
+      },
+      "opplysningType": "AVDOED_PDL_V1",
+      "meta": {},
+      "opplysning": {
+        "fornavn": "VAKKER",
+        "etternavn": "LAPP",
+        "foedselsnummer": "22128202440",
+        "foedselsdato": "1982-12-22",
+        "foedselsaar": 1982,
+        "foedeland": "NOR",
+        "doedsdato": "2022-02-10",
+        "adressebeskyttelse": "UGRADERT",
+        "bostedsadresse": [{
+          "type": "VEGADRESSE",
+          "aktiv": true,
+          "coAdresseNavn": null,
+          "adresseLinje1": "Bøveien 937",
+          "adresseLinje2": null,
+          "adresseLinje3": null,
+          "postnr": "8475",
+          "poststed": null,
+          "land": null,
+          "kilde": "FREG",
+          "gyldigFraOgMed": "1999-01-01T00:00:00",
+          "gyldigTilOgMed": null
+        }],
+        "deltBostedsadresse": null,
+        "kontaktadresse": [],
+        "oppholdsadresse": [],
+        "sivilstatus": "UGIFT",
+        "statsborgerskap": "NOR",
+        "utland": {
+          "innflyttingTilNorge": [],
+          "utflyttingFraNorge": []
+        },
+        "familieRelasjon": {
+          "ansvarligeForeldre": null,
+          "foreldre": null,
+          "barn": [
+            "12101376212"
+          ]
+        }
+      },
+      "attestering": null
+    }
+  ],
+  "saksId": 4
+}

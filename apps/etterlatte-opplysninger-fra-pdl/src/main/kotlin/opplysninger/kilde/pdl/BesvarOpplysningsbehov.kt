@@ -1,19 +1,16 @@
 package no.nav.etterlatte.opplysninger.kilde.pdl
 
 import no.nav.etterlatte.common.objectMapper
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class BesvarOpplysningsbehov(
     rapidsConnection: RapidsConnection,
@@ -54,6 +51,6 @@ private fun JsonMessage.correlationId(): String? = get("@correlation_id").textVa
 fun personOpplysning(
     personPdl: Person,
     opplysningsType: Opplysningstyper,
-): Behandlingsopplysning<Person> {
+): Grunnlagsopplysning<Person> {
     return lagOpplysning(opplysningsType, personPdl )
 }

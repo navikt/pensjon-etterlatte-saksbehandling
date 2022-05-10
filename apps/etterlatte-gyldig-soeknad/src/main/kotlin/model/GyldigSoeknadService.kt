@@ -29,7 +29,7 @@ class GyldigSoeknadService {
         val barnepensjon = objectMapper.treeToValue<Barnepensjon>(jsonNode)!!
 
         return Persongalleri(
-            soker = barnepensjon.soeker.foedselsnummer.svar.value,
+            soeker = barnepensjon.soeker.foedselsnummer.svar.value,
             innsender = barnepensjon.innsender.foedselsnummer.svar.value,
             soesken = barnepensjon.soesken.map { it.foedselsnummer.svar.value },
             avdoed = barnepensjon.foreldre.filter { it.type == PersonType.AVDOED }.map { it.foedselsnummer.svar.value },

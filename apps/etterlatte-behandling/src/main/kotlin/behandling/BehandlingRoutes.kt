@@ -8,21 +8,14 @@ import io.ktor.routing.*
 import io.ktor.util.pipeline.*
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
-import no.nav.etterlatte.libs.common.behandling.Beregning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
-import java.time.LocalDateTime
-import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
-import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.util.*
 
 fun Route.behandlingRoutes(service: BehandlingService) {
     get("/behandlinger") {
         call.respond(
-            service.hentBehandlinger().map { BehandlingSammendrag(it.id, it.sak, it.status, mapDate(it)) }
+            service.hentBehandlinger().map { BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato) }
                 .let { BehandlingSammendragListe(it) }
         )
     }
@@ -30,8 +23,7 @@ fun Route.behandlingRoutes(service: BehandlingService) {
         call.respond(
             service.hentBehandlingerISak(sakId)
                 .map {
-                    println(it.grunnlag)
-                    BehandlingSammendrag(it.id, it.sak, it.status, mapDate(it))
+                    BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato)
                 }
                 .let { BehandlingSammendragListe(it) }
         )
@@ -47,7 +39,8 @@ fun Route.behandlingRoutes(service: BehandlingService) {
 
             service.startBehandling(
                 behandlingsBehov.sak,
-                behandlingsBehov.opplysninger ?: emptyList()
+                behandlingsBehov.persongalleri,
+                behandlingsBehov.mottattDato,
             )
         .also { call.respondText(it.id.toString()) }
     }
@@ -57,55 +50,23 @@ fun Route.behandlingRoutes(service: BehandlingService) {
                 DetaljertBehandling(
                     it.id,
                     it.sak,
-                    it.grunnlag,
-                    it.gyldighetsprøving,
-                    it.vilkårsprøving,
-                    it.beregning,
-                    it.fastsatt
                 )
             } ?: HttpStatusCode.NotFound)
         }
 
-        post("grunnlag") {
-            val body = call.receive<LeggTilOpplysningerRequest>()
-            service.leggTilGrunnlagFraRegister(behandlingsId, body.opplysninger)
-            call.respond(HttpStatusCode.OK)
-        }
 
-        post("lagregyldighetsproeving") {
+        post("gyldigfremsatt") {
             val body = call.receive<GyldighetsResultat>()
             service.lagreGyldighetsprøving(behandlingsId, body)
             call.respond(HttpStatusCode.OK)
         }
 
-        post("lagrevilkaarsproeving") {
-            val body = call.receive<VilkaarResultat>()
-            service.lagreVilkårsprøving(behandlingsId, body)
-            call.respond(HttpStatusCode.OK)
-        }
-
-        post("beregning") {
-            val body = call.receive<Beregning>()
-             service.beregn(behandlingsId, body)
-            call.respond(HttpStatusCode.OK)
-        }
 
         post("avbrytBehandling/{behandlingsid}") {
              service.avbrytBehandling(behandlingsId)
             call.respond(HttpStatusCode.OK)
         }
     }
-}
-
-private fun mapDate(behandling: Behandling): LocalDateTime? {
-    if (behandling.grunnlag.isEmpty()) {
-        return null
-    }
-    val dato =
-        behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKNAD_MOTTATT_DATO }?.opplysning?.let {
-            objectMapper.readValue(it.toString(), SoeknadMottattDato::class.java)
-        }
-    return dato?.mottattDato
 }
 
 inline val PipelineContext<*, ApplicationCall>.behandlingsId

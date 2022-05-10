@@ -13,7 +13,7 @@ export const DetailWrapper = styled.div`
     width: 250px;
   }
   .text {
-    width: 150px;
+    width: 280px;
   }
 
   .labelWrapperWithIcon {
@@ -55,6 +55,15 @@ export const HeadingWrapper = styled.div`
   }
 `
 
+export const Border = styled.div`
+  border-top: 1px solid #b0b0b0;
+  margin-bottom: 1em;
+`
+
+export const DashedBorder = styled.div`
+  border-top: 0.5px dashed #000000;
+`
+
 export const TypeStatusWrap = styled.div<{ type: string }>`
   background-color: ${(props) => (props.type === 'barn' ? '#ccf1d6' : '#ffeccc')};
   border: 1px solid ${(props) => (props.type === 'barn' ? '#33aa5f;' : '#ffc166')};
@@ -75,6 +84,5 @@ export const ForelderWrap = styled.div<{ avdoed?: boolean }>`
   border-radius: 4px;
   font-weight: normal;
   font-size: 14px;
-  margin-left: 0.7em;
   margin-right: 0.9em;
 `

@@ -4,15 +4,15 @@ import no.nav.etterlatte.barnepensjon.kriterieIngenUtenlandsoppholdSisteFemAar
 import no.nav.etterlatte.barnepensjon.setVikaarVurderingFraKriterier
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AvdoedSoeknad
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Forelder
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.SoekerBarnSoeknad
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsadresseBarn
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Utenlandsopphold
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.UtenlandsoppholdOpplysninger
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Verge
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Forelder
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Verge
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
 import org.junit.jupiter.api.Assertions.*
+import vilkaar.barnepensjon.ekstraVilkaarBarnOgForelderSammeBostedsadresse
 import java.time.LocalDateTime
 
 internal class BarnepensjonVilkaarTest {
@@ -183,6 +184,29 @@ internal class BarnepensjonVilkaarTest {
         )
     }
 
+    @Test
+    fun vuderSammeBostedsadresse() {
+        val barnPdlNorge = lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresserNorgePdl, avdoedErForeldre)
+        val barnPdlDanmark =
+            lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresseDanmarkPdl, avdoedErForeldre)
+        val gjenlevendePdlNorge = lagMockPersonPdl(null, fnrGjenlevende, null, adresserNorgePdl, null)
+        val gjenlevendePdlDanmark = lagMockPersonPdl(null, fnrGjenlevende, null, adresseDanmarkPdl, null)
+
+        val sammeAdresse = ekstraVilkaarBarnOgForelderSammeBostedsadresse(
+            Vilkaartyper.SAMME_ADRESSE,
+            mapTilVilkaarstypePerson(barnPdlNorge),
+            mapTilVilkaarstypePerson(gjenlevendePdlNorge)
+        )
+
+        val ulikeAdresse = ekstraVilkaarBarnOgForelderSammeBostedsadresse(
+            Vilkaartyper.SAMME_ADRESSE,
+            mapTilVilkaarstypePerson(barnPdlNorge),
+            mapTilVilkaarstypePerson(gjenlevendePdlDanmark)
+        )
+        assertEquals(VurderingsResultat.OPPFYLT, sammeAdresse.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, ulikeAdresse.resultat)
+
+    }
 
     @Test
     fun vurderVilkaarsVurdering() {
@@ -227,7 +251,7 @@ internal class BarnepensjonVilkaarTest {
         fun mapTilVilkaarstypeAvdoedSoeknad(person: AvdoedSoeknad): VilkaarOpplysning<AvdoedSoeknad> {
             return VilkaarOpplysning(
                 Opplysningstyper.AVDOED_SOEKNAD_V1,
-                Behandlingsopplysning.Privatperson("", Instant.now()),
+                Grunnlagsopplysning.Privatperson("", Instant.now()),
                 person
             )
         }
@@ -235,7 +259,7 @@ internal class BarnepensjonVilkaarTest {
         fun mapTilVilkaarstypeSoekerSoeknad(person: SoekerBarnSoeknad): VilkaarOpplysning<SoekerBarnSoeknad> {
             return VilkaarOpplysning(
                 Opplysningstyper.SOEKER_PDL_V1,
-                Behandlingsopplysning.Privatperson("", Instant.now()),
+                Grunnlagsopplysning.Privatperson("", Instant.now()),
                 person
             )
         }
@@ -243,7 +267,7 @@ internal class BarnepensjonVilkaarTest {
         fun mapTilVilkaarstypePerson(person: Person): VilkaarOpplysning<Person> {
             return VilkaarOpplysning(
                 Opplysningstyper.SOEKER_PDL_V1,
-                Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
+                Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
                 person
             )
         }
@@ -306,11 +330,11 @@ internal class BarnepensjonVilkaarTest {
             AdresseType.VEGADRESSE,
             true,
             null,
+            "Fiolveien 1A",
             null,
             null,
-            null,
-            null,
-            null,
+            "0485",
+            "Oslo",
             "NOR",
             "kilde",
             LocalDateTime.parse("2025-01-26T00:00:00"),
@@ -337,11 +361,11 @@ internal class BarnepensjonVilkaarTest {
             AdresseType.UTENLANDSKADRESSE,
             true,
             null,
+            "Danmarkveien 2A",
             null,
             null,
-            null,
-            null,
-            null,
+            "123345",
+            "København",
             "DAN",
             "kilde",
             LocalDateTime.parse("2022-01-25T00:00:00"),

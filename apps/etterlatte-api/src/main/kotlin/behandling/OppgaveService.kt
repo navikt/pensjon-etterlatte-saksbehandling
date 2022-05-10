@@ -10,7 +10,7 @@ import java.util.*
 data class Oppgave(
     val behandlingsId: UUID,
     val sakId: Long,
-    val status: BehandlingStatus,
+    val status: BehandlingStatus?,
     val soeknadType: String,
     val behandlingType: BehandlingType,
     val regdato: String,

@@ -29,9 +29,10 @@ export const Innsender = ({
             </WarningIconWrapper>
             Innsender
           </Label>
-          <span className="warningText">
+          <span>
             {innsender?.fornavn} {innsender?.etternavn}
           </span>
+          <div className="warningText"> Ikke gjenlevende forelder</div>
         </div>
       )}
 

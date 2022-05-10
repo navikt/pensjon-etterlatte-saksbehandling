@@ -13,9 +13,8 @@ import { WarningIcon } from '../../../../../shared/icons/warningIcon'
 import { PersonInfo } from './personinfo/PersonInfo'
 import { IconWrapper, PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { PeopleIcon } from '../../../../../shared/icons/peopleIcon'
-import { ForelderWrap, TypeStatusWrap } from '../../styled'
+import { ForelderWrap } from '../../styled'
 import { format } from 'date-fns'
-import { getStatsborgerskapTekst } from '../../utils'
 
 type Props = {
   person: IAvdoedFraSak
@@ -53,10 +52,9 @@ export const AvdoedForelder: React.FC<Props> = ({ person }) => {
         </span>
         {person.navn}
         <span className="personRolle">
-          {PersonStatus.AVDOED} {RelatertPersonsRolle.FORELDER})
+          ({PersonStatus.AVDOED} {RelatertPersonsRolle.FORELDER})
         </span>
         <ForelderWrap avdoed={true}>Død {format(new Date(person.datoForDoedsfall), 'dd.MM.yyyy')}</ForelderWrap>
-        <TypeStatusWrap type="statsborgerskap">{getStatsborgerskapTekst(person.statsborgerskap)}</TypeStatusWrap>
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfo

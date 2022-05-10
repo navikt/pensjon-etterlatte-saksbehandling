@@ -11,9 +11,10 @@ spec:
   gcp:
     sqlInstances:
       - type: POSTGRES_12
-        name: etterlatte-behandling
+        cascadingDelete: false
+        name: etterlatte-sakogbehandlinger
         databases:
-          - name: behandlinger
+          - name: sakogbehandlinger
             envVarPrefix: DB
   startup:
     initialDelay: 7

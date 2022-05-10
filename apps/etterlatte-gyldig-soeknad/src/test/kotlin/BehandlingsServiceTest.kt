@@ -1,8 +1,6 @@
 package behandlingfrasoknad
 
-import Behandling
 import BehandlingsService
-import LesGyldigSoeknadsmelding
 import NyBehandlingRequest
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
@@ -19,16 +17,10 @@ import io.ktor.utils.io.ByteReadChannel
 import io.mockk.every
 import io.mockk.mockk
 import model.GyldigSoeknadService
-import model.PdlService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import org.junit.jupiter.api.Test
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.*
-import java.time.LocalDateTime
 import java.util.*
 
 internal class BehandlingsServiceTest {
@@ -60,8 +52,7 @@ internal class BehandlingsServiceTest {
         val hendelseJson = objectMapper.readTree(javaClass.getResource("/fullMessage2.json")!!.readText())
         val hentetSaksid = behandlingsservice.initierBehandling(
             1,
-            hendelseJson["@skjema_info"],
-            hendelseJson["@lagret_soeknad_id"].longValue(),
+            hendelseJson["@skjema_info"]["mottattDato"].asText(),
             persongalleri.hentPersongalleriFraSoeknad(hendelseJson["@skjema_info"])
         )
 

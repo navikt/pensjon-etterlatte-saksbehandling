@@ -26,3 +26,12 @@ spec:
     - name: KAFKA_RESET_POLICY
       #sette tilbake til none senere
       value: earliest
+    - name: BEHANDLING_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+    - name: PDLTJENESTER_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-behandling
+        - application: etterlatte-pdltjenester

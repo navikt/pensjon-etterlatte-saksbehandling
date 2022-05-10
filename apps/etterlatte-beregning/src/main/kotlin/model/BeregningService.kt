@@ -2,7 +2,7 @@ package no.nav.etterlatte.model
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
 import no.nav.etterlatte.libs.common.beregning.*

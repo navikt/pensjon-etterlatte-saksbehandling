@@ -1,7 +1,6 @@
 import styled from 'styled-components'
 
 export const PersonBorder = styled.div`
-  border-top: 1px dashed #000000;
   padding: 1.2em 1em 3em 0em;
 `
 

@@ -16,12 +16,10 @@ import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 import kotlinx.coroutines.*
 import no.nav.etterlatte.behandling.*
-import no.nav.etterlatte.beregning.beregningRoutes
 import no.nav.etterlatte.database.DatabaseContext
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.sak.sakRoutes
-import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.util.*
 
@@ -32,8 +30,6 @@ fun main() {
     appFromEnv(System.getenv()).run()
 }
 
-
-
 fun appFromEnv(env: Map<String, String>): App {
     return appFromBeanfactory(EnvBasedBeanFactory(env))
 }
@@ -43,7 +39,6 @@ fun appFromBeanfactory(env: BeanFactory): App {
 }
 
 fun Application.module(beanFactory: BeanFactory){
-
     val ds = beanFactory.datasourceBuilder().apply {
         migrate()
     }
@@ -54,15 +49,18 @@ fun Application.module(beanFactory: BeanFactory){
             disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         }
     }
+
     install(Authentication) {
         beanFactory.tokenValidering()()
     }
+
     install(CallLogging) {
         level = Level.INFO
         filter { call -> !call.request.path().startsWith("/internal") }
         format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
         mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
     }
+
     install(StatusPages) {
         exception<Throwable> { cause ->
             log.error("En feil oppstod: ${cause.message}", cause)
@@ -71,7 +69,6 @@ fun Application.module(beanFactory: BeanFactory){
     }
 
     routing {
-        beregningRoutes()
         naisprobes()
         authenticate {
             attachContekst(ds.dataSource)

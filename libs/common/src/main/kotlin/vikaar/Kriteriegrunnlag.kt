@@ -1,10 +1,10 @@
 package no.nav.etterlatte.libs.common.vikaar
 
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 
 data class Kriteriegrunnlag<T>(
     val kriterieOpplysningsType: KriterieOpplysningsType,
-    val kilde: Behandlingsopplysning.Kilde,
+    val kilde: Grunnlagsopplysning.Kilde,
     val opplysning: T
 )
 

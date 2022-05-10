@@ -1,40 +1,6 @@
 package no.nav.etterlatte.itest
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.readValue
-import io.ktor.auth.*
-import io.ktor.http.*
-import io.ktor.server.testing.*
-import no.nav.common.KafkaEnvironment
-import no.nav.etterlatte.*
-import no.nav.etterlatte.behandling.*
-import no.nav.etterlatte.kafka.KafkaConfig
-import no.nav.etterlatte.kafka.KafkaProdusent
-import no.nav.etterlatte.kafka.KafkaProdusentImpl
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.Beregning
-import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.sak.Sak
-import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
-import org.apache.kafka.clients.CommonClientConfigs
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerConfig
-import org.apache.kafka.common.serialization.StringDeserializer
-import org.apache.kafka.common.serialization.StringSerializer
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
-import org.testcontainers.containers.PostgreSQLContainer
-import java.time.Instant
-import java.time.LocalDate
-import java.time.Month
-import java.util.*
-
-
+/*
 class ApplicationTest {
     @Test
     fun verdikjedetest() {
@@ -211,3 +177,4 @@ class EmbeddedKafkaConfig(
         put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
     }
 }
+*/

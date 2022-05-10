@@ -1,0 +1,1 @@
+ALTER TABLE avstemming ADD COLUMN avstemmingsdata VARCHAR(32) NULL DEFAULT NULL

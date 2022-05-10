@@ -1,8 +1,8 @@
 package no.nav.etterlatte.opplysninger.kilde.pdl
 
 import no.nav.etterlatte.common.objectMapper
-import no.nav.etterlatte.libs.common.behandling.Behandlingsopplysning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.*
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
@@ -12,7 +12,7 @@ import java.util.*
 
 class OpplysningsByggerService : OpplysningsBygger {
 
-    override fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl): List<Behandlingsopplysning<out Any>> {
+    override fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl): List<Grunnlagsopplysning<out Any>> {
 
         val soekersFnr = barnepensjon.soeker.foedselsnummer.svar.value
         val avdoedFnr = hentAvdoedFnr(barnepensjon)
@@ -32,7 +32,7 @@ class OpplysningsByggerService : OpplysningsBygger {
     fun personOpplysning(
         personPdl: Person,
         opplysningsType: Opplysningstyper,
-    ): Behandlingsopplysning<Person> {
+    ): Grunnlagsopplysning<Person> {
         return lagOpplysning(opplysningsType, personPdl )
     }
 
@@ -54,10 +54,10 @@ class OpplysningsByggerService : OpplysningsBygger {
     }
 }
 
-fun <T> lagOpplysning(opplysningsType: Opplysningstyper, opplysning: T): Behandlingsopplysning<T> {
-    return Behandlingsopplysning(
+fun <T> lagOpplysning(opplysningsType: Opplysningstyper, opplysning: T): Grunnlagsopplysning<T> {
+    return Grunnlagsopplysning(
         UUID.randomUUID(),
-        Behandlingsopplysning.Pdl("pdl", Instant.now(), null),
+        Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
         opplysningsType,
         objectMapper.createObjectNode(),
         opplysning

@@ -19,25 +19,27 @@ fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection {
     val utbetalingsoppdragDao = applicationContext.utbetalingsoppdragDao(dataSource)
 
     val rapidsConnection = applicationContext.rapidsConnection()
-    val oppdragService = applicationContext.utbetalingService(
+    val utbetalingService = applicationContext.utbetalingService(
         oppdragSender = applicationContext.oppdragSender(jmsConnectionFactory),
         utbetalingDao = utbetalingsoppdragDao,
         rapidsConnection = rapidsConnection
     )
 
-    val avstemmingService = applicationContext.grensesnittsavstemmingService(
+    val grensesnittavstemmingService = applicationContext.grensesnittsavstemmingService(
         grensesnittavstemmingDao = applicationContext.avstemmingDao(dataSource),
         avstemmingsdataSender = applicationContext.avstemmingSender(jmsConnectionFactory),
         utbetalingDao = utbetalingsoppdragDao
     )
 
     // Jobber
-    applicationContext.avstemmingJob(avstemmingService, applicationContext.leaderElection()).schedule()
+    applicationContext.grensesnittavstemmingJob(grensesnittavstemmingService, applicationContext.leaderElection())
+        .schedule()
 
     return rapidsConnection
         .apply {
-            applicationContext.kvitteringMottaker(oppdragService, jmsConnectionFactory)
-            applicationContext.vedtakMottaker(this, oppdragService)
+            applicationContext.kvitteringMottaker(utbetalingService, jmsConnectionFactory)
+            applicationContext.vedtakMottaker(this, utbetalingService)
+            applicationContext.oppgavetrigger(this, utbetalingService, grensesnittavstemmingService)
 
             register(object : RapidsConnection.StatusListener {
                 override fun onShutdown(rapidsConnection: RapidsConnection) {

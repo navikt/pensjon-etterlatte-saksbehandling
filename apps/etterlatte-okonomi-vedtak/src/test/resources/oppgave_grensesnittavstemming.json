@@ -1,0 +1,7 @@
+{
+  "@event_name": "okonomi_vedtak_oppgave",
+  "@oppgave": {
+    "oppgavetype": "START_GRENSESNITTAVSTEMMING",
+    "vedtakId": null
+  }
+}

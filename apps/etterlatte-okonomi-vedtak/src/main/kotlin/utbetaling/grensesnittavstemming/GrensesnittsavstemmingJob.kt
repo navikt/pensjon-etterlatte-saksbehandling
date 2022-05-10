@@ -15,7 +15,7 @@ class GrensesnittsavstemmingJob(
 ) {
     private val jobbNavn = this::class.simpleName
 
-    fun schedule() {
+    fun schedule() =
         fixedRateTimer(
             name = jobbNavn,
             daemon = true,
@@ -32,7 +32,7 @@ class GrensesnittsavstemmingJob(
                 logger.error("Avstemming feilet", throwable)
             }
         }
-    }
+
 
     class Grensesnittsavstemming(
         val grensesnittsavstemmingService: GrensesnittsavstemmingService,

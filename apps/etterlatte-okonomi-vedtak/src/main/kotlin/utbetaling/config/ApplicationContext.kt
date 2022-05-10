@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.config
 
+import no.nav.etterlatte.utbetaling.common.Oppgavetrigger
 import no.nav.etterlatte.utbetaling.common.next
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittavstemmingDao
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingJob
@@ -102,9 +103,19 @@ class ApplicationContext(
         clock = clock()
     )
 
+    fun oppgavetrigger(
+        rapidsConnection: RapidsConnection,
+        utbetalingService: UtbetalingService,
+        grensesnittsavstemmingService: GrensesnittsavstemmingService,
+    ) = Oppgavetrigger(
+        rapidsConnection = rapidsConnection,
+        utbetalingService = utbetalingService,
+        grensesnittsavstemmingService = grensesnittsavstemmingService,
+    )
+
     fun leaderElection() = LeaderElection(env.required("ELECTOR_PATH"))
 
-    fun avstemmingJob(
+    fun grensesnittavstemmingJob(
         grensesnittsavstemmingService: GrensesnittsavstemmingService,
         leaderElection: LeaderElection,
         starttidspunkt: Date = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).next(LocalTime.of(3, 0, 0))

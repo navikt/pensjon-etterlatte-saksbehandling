@@ -7,7 +7,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
+import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import java.util.*
@@ -16,7 +16,7 @@ fun Route.behandlingRoutes(service: BehandlingService) {
     get("/behandlinger") {
         call.respond(
             service.hentBehandlinger().map { BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato) }
-                .let { BehandlingSammendragListe(it) }
+                .let { BehandlingListe(it) }
         )
     }
     get("/sak/{sakid}/behandlinger") {
@@ -25,7 +25,7 @@ fun Route.behandlingRoutes(service: BehandlingService) {
                 .map {
                     BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato)
                 }
-                .let { BehandlingSammendragListe(it) }
+                .let { BehandlingListe(it) }
         )
     }
 
@@ -50,6 +50,16 @@ fun Route.behandlingRoutes(service: BehandlingService) {
                 DetaljertBehandling(
                     it.id,
                     it.sak,
+                    it.behandlingOpprettet,
+                    it.sistEndret,
+                    it.soeknadMottattDato,
+                    it.innsender,
+                    it.soeker,
+                    it.gjenlevende,
+                    it.avdoed,
+                    it.soesken,
+                    it.gyldighetsproeving,
+                    it.status,
                 )
             } ?: HttpStatusCode.NotFound)
         }

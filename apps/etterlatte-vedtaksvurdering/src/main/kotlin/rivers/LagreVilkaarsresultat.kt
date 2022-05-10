@@ -9,6 +9,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import java.util.*
 
 internal class LagreVilkaarsresultat(
     rapidsConnection: RapidsConnection,
@@ -29,7 +30,7 @@ internal class LagreVilkaarsresultat(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
 
-            val behandlingId = packet["@behandling_id"].toString()
+            val behandlingId = UUID.fromString(packet["@behandling_id"].toString())
             val sakId = packet["@sak_id"].toString()
             val vilkaarsResultat = objectMapper.readValue(packet["@vilkaarsvurdering"].toString(), VilkaarResultat::class.java)
             try {

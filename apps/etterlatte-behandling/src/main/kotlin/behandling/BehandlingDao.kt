@@ -91,9 +91,10 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     fun lagreGyldighetsproving(behandling: Behandling) {
-        val stmt = connection().prepareStatement("UPDATE behandling SET gyldighetssproving = ? WHERE id = ?")
+        val stmt = connection().prepareStatement("UPDATE behandling SET gyldighetssproving = ?, status = ? WHERE id = ?")
         stmt.setObject(1, objectMapper.writeValueAsString(behandling.gyldighetsproeving))
-        stmt.setObject(2, behandling.id)
+        stmt.setString(2, behandling.status?.name)
+        stmt.setObject(3, behandling.id)
         require(stmt.executeUpdate() == 1)
     }
 

@@ -2,7 +2,7 @@ package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
+import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.person.Person
@@ -42,7 +42,7 @@ class BehandlingService(
         return behandlingKlient.hentSaker(accessToken)
     }
 
-    suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingSammendragListe {
+    suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingListe {
         logger.info("Henter behandlinger for sak $sakId")
         return behandlingKlient.hentBehandlingerForSak(sakId, accessToken)
     }

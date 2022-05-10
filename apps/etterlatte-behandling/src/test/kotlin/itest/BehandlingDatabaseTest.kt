@@ -159,16 +159,14 @@ internal class BehandlingDaoIntegrationTest {
                     vurdertDato = LocalDateTime.now()
                 )),
                 vurdertDato = LocalDateTime.now()
-            )
+            ),
+            status = BehandlingStatus.GYLDIG_SOEKNAD
         )
 
         behandlingRepo.lagreGyldighetsproving(gyldighetsproevingBehanding)
         val lagretGyldighetsproving = requireNotNull(behandlingRepo.hentBehandling(persongalleriBehandling.id))
 
         Assertions.assertEquals(gyldighetsproevingBehanding.gyldighetsproeving, lagretGyldighetsproving.gyldighetsproeving)
-
-
-
     }
 
     @Test

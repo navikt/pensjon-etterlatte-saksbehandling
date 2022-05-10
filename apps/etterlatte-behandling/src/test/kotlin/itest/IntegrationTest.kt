@@ -1,6 +1,36 @@
 package no.nav.etterlatte.itest
 
-/*
+import com.fasterxml.jackson.module.kotlin.readValue
+import io.ktor.auth.*
+import io.ktor.http.*
+import io.ktor.server.testing.*
+import no.nav.common.KafkaEnvironment
+import no.nav.etterlatte.*
+import no.nav.etterlatte.behandling.*
+import no.nav.etterlatte.kafka.KafkaConfig
+import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.kafka.KafkaProdusentImpl
+import no.nav.etterlatte.libs.common.behandling.BehandlingListe
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
+import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.sak.Sak
+import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
+import org.apache.kafka.clients.CommonClientConfigs
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerConfig
+import org.apache.kafka.common.serialization.StringDeserializer
+import org.apache.kafka.common.serialization.StringSerializer
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
+import org.testcontainers.containers.PostgreSQLContainer
+import java.time.LocalDateTime
+import java.util.*
+
 class ApplicationTest {
     @Test
     fun verdikjedetest() {
@@ -18,7 +48,7 @@ class ApplicationTest {
             }
         )
 
-    embeddedKafkaEnvironment.start()
+        embeddedKafkaEnvironment.start()
 
         val kafkaConfig = EmbeddedKafkaConfig(embeddedKafkaEnvironment.brokersURL.substringAfterLast("/"))
         val consumer = KafkaConsumer(kafkaConfig.consumer(), StringDeserializer(), StringDeserializer())
@@ -31,20 +61,23 @@ class ApplicationTest {
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
         var behandlingOpprettet: UUID? = null
-        val beans = TestBeanFactory(postgreSQLContainer.jdbcUrl, kafkaConfig , topicname)
+        val beans = TestBeanFactory(postgreSQLContainer.jdbcUrl, kafkaConfig, topicname)
         withTestApplication({
             module(beans)
         }) {
+
             handleRequest(HttpMethod.Get, "/saker/123") {
                 addAuthSaksbehandler()
             }.apply {
                 assertEquals(HttpStatusCode.NotFound, response.status())
             }
+
             val sak: Sak = handleRequest(HttpMethod.Get, "/personer/$fnr/saker/BP") {
                 addAuthSaksbehandler()
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
             }.response.content!!.let { objectMapper.readValue(it) }
+
             handleRequest(HttpMethod.Get, "/saker/${sak.id}") {
                 addAuthSaksbehandler()
             }.also {
@@ -62,15 +95,8 @@ class ApplicationTest {
                     no.nav.etterlatte.libs.common.objectMapper.writeValueAsString(
                         BehandlingsBehov(
                             1,
-                            listOf(
-                                Behandlingsopplysning(
-                                    UUID.randomUUID(),
-                                    Behandlingsopplysning.Privatperson("1234", Instant.now()),
-                                    Opplysningstyper.SOEKER_SOEKNAD_V1,
-                                    objectMapper.createObjectNode(),
-                                    objectMapper.valueToTree(Foedselsdato(LocalDate.of(1986, Month.FEBRUARY, 6), Foedselsnummer.of("20110875720"))) as ObjectNode
-                                )
-                            )
+                            Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
+                            LocalDateTime.now().toString()
                         )
                     )
                 )
@@ -85,27 +111,31 @@ class ApplicationTest {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.let {
                 assertEquals(HttpStatusCode.OK, it.response.status())
-                objectMapper.readValue<BehandlingSammendragListe>(it.response.content!!)
+                objectMapper.readValue<BehandlingListe>(it.response.content!!)
             }.also {
                 assertEquals(1, it.behandlinger.size)
             }
 
-            //TODO erstatte med kafkatest
-            /*
-            handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/vilkaarsproeving") {
+            handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/gyldigfremsatt") {
                 addAuthSaksbehandler()
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.also {
+                setBody(
+                    no.nav.etterlatte.libs.common.objectMapper.writeValueAsString(
+                        GyldighetsResultat(
+                            VurderingsResultat.OPPFYLT,
+                            listOf(
+                                VurdertGyldighet(
+                                    GyldighetsTyper.INNSENDER_ER_FORELDER,
+                                    VurderingsResultat.OPPFYLT,
+                                    LocalDateTime.now()
+                                )
+                            ),
+                            LocalDateTime.now()
+                        )
+                    )
+                )
+            }.let {
                 assertEquals(HttpStatusCode.OK, it.response.status())
-            }
-             */
-            handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/beregning") {
-                addAuthSaksbehandler()
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(objectMapper.writeValueAsString(Beregning(emptyList(), 123)))
-            }.also {
-                //TODO vi får ikke beregning sånn som det er nå
-            //assertEquals(HttpStatusCode.OK, it.response.status())
             }
 
             handleRequest(HttpMethod.Get, "/behandlinger/$behandlingId") {
@@ -114,14 +144,13 @@ class ApplicationTest {
             }.also {
                 assertEquals(HttpStatusCode.OK, it.response.status())
                 val behandling: Behandling = (objectMapper.readValue(it.response.content!!))
-                assertNotNull(behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKER_SOEKNAD_V1 })
-                assertEquals(
-                    LocalDate.of(1986, 2, 6),
-                    behandling.grunnlag.find { it.opplysningType == Opplysningstyper.SOEKER_SOEKNAD_V1  }!!.opplysning["foedselsdato"].textValue().let { LocalDate.parse(it) }
-                )
+                assertNotNull(behandling.id)
+                assertEquals("innsender", behandling.innsender)
+                assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving?.resultat)
 
             }
         }
+
         beans.behandlingHendelser().nyHendelse.close()
 
         assertNotNull(behandlingOpprettet)
@@ -148,17 +177,24 @@ fun TestApplicationRequest.addAuthServiceBruker() {
 }
 
 
-class TestBeanFactory(private val jdbcUrl: String, private val kafkaConfig: KafkaConfig, private val rapidtopic: String) : CommonFactory() {
+class TestBeanFactory(
+    private val jdbcUrl: String,
+    private val kafkaConfig: KafkaConfig,
+    private val rapidtopic: String
+) : CommonFactory() {
     override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
     override fun tokenValidering(): Authentication.Configuration.() -> Unit =
         Authentication.Configuration::tokenTestSupportAcceptsAllTokens
 
-    override fun rapid(): KafkaProdusent<String, String> = KafkaProdusentImpl(KafkaProducer(kafkaConfig.producerConfig(), StringSerializer(), StringSerializer()),rapidtopic)
+    override fun rapid(): KafkaProdusent<String, String> = KafkaProdusentImpl(
+        KafkaProducer(kafkaConfig.producerConfig(), StringSerializer(), StringSerializer()),
+        rapidtopic
+    )
 }
 
 class EmbeddedKafkaConfig(
     private val bootstrapServers: String,
-): KafkaConfig {
+) : KafkaConfig {
     override fun producerConfig() = kafkaBaseConfig().apply {
         put(ProducerConfig.ACKS_CONFIG, "1")
         put(ProducerConfig.CLIENT_ID_CONFIG, "etterlatte-post-til-kafka")
@@ -177,4 +213,4 @@ class EmbeddedKafkaConfig(
         put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
     }
 }
-*/
+

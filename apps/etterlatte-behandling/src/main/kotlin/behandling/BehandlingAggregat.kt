@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -84,8 +85,12 @@ class BehandlingAggregat(
                 "Det tillates ikke å gyldighetsprøve Behandling med id ${lagretBehandling.id} og status: ${lagretBehandling.status}"
             )
         }
+        val status =
+            if (gyldighetsproeving.resultat == VurderingsResultat.OPPFYLT) BehandlingStatus.GYLDIG_SOEKNAD else BehandlingStatus.IKKE_GYLDIG_SOEKNAD
+
         lagretBehandling = lagretBehandling.copy(
-            gyldighetsproeving = gyldighetsproeving
+            gyldighetsproeving = gyldighetsproeving,
+            status = status
         )
         behandlinger.lagreGyldighetsproving(lagretBehandling)
         logger.info("behandling ${lagretBehandling.id} i sak ${lagretBehandling.sak} er gyldighetsprøvd")

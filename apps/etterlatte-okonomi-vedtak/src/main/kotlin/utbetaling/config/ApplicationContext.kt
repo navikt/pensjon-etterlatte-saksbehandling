@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.config
 
+import no.nav.etterlatte.utbetaling.common.next
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittavstemmingDao
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingJob
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingService
@@ -14,7 +15,9 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.Clock
 import java.time.Duration
-import java.time.Instant
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
@@ -104,15 +107,13 @@ class ApplicationContext(
     fun avstemmingJob(
         grensesnittsavstemmingService: GrensesnittsavstemmingService,
         leaderElection: LeaderElection,
-        starttidspunkt: Date = Date.from(
-            Instant.now().plusSeconds(30)
-        ) //ZonedDateTime.now(ZoneId.of("Europe/Oslo")).next(LocalTime.of(1, 0, 0)) TODO: endre tilbake til kl 1:00
+        starttidspunkt: Date = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).next(LocalTime.of(3, 0, 0))
     ) =
         GrensesnittsavstemmingJob(
             grensesnittsavstemmingService = grensesnittsavstemmingService,
             leaderElection = leaderElection,
             starttidspunkt = starttidspunkt,
-            periode = Duration.of(10, ChronoUnit.MINUTES),
+            periode = Duration.of(1, ChronoUnit.DAYS),
         )
 
     private fun jdbcUrl(host: String, port: String, databaseName: String) =

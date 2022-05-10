@@ -4,16 +4,9 @@ import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import java.nio.ByteBuffer
 import java.util.*
 
-data class Grensesnittavstemming(
-    val id: String = encodeUUIDBase64(UUID.randomUUID()),
-    val opprettet: Tidspunkt,
-    val periodeFraOgMed: Tidspunkt,
-    val periodeTil: Tidspunkt,
-    val antallOppdrag: Int,
-    val avstemmingsdata: String? = null,
-) {
+
+data class UUIDBase64(val value: String = encodeUUIDBase64(UUID.randomUUID())) {
     companion object {
-        // Kortere UUID for oppdrag
         private fun encodeUUIDBase64(uuid: UUID): String {
             val bb = ByteBuffer.wrap(ByteArray(16))
             bb.putLong(uuid.mostSignificantBits)
@@ -22,3 +15,12 @@ data class Grensesnittavstemming(
         }
     }
 }
+
+data class Grensesnittavstemming(
+    val id: UUIDBase64 = UUIDBase64(),
+    val opprettet: Tidspunkt,
+    val periodeFraOgMed: Tidspunkt,
+    val periodeTil: Tidspunkt,
+    val antallOppdrag: Int,
+    val avstemmingsdata: String? = null,
+)

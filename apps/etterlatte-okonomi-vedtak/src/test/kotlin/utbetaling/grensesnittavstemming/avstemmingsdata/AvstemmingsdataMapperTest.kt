@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.Tidspunkt.Companion.tidssoneNorge
 import no.nav.etterlatte.utbetaling.common.toTidspunkt
+import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.utbetaling
@@ -26,9 +27,9 @@ internal class AvstemmingsdataMapperTest {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
 
-        val utbetalingsoppdrag = listOf(utbetaling(status = UtbetalingStatus.FEILET))
+        val utbetalinger = listOf(utbetaling(status = UtbetalingStatus.FEILET))
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1")
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
         val (startMelding, dataMelding, sluttMelding) = avstemmingsmelding
@@ -43,13 +44,13 @@ internal class AvstemmingsdataMapperTest {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
 
-        val utbetalingsoppdrag = listOf(
+        val utbetalinger = listOf(
             utbetaling(id = 1, status = UtbetalingStatus.FEILET),
             utbetaling(id = 2, status = UtbetalingStatus.FEILET),
             utbetaling(id = 3, status = UtbetalingStatus.FEILET),
         )
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1", 2)
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
         val (_, dataMelding1, dataMelding2, _) = avstemmingsmelding
@@ -66,13 +67,13 @@ internal class AvstemmingsdataMapperTest {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
 
-        val utbetalingsoppdrag = listOf(
+        val utbetalinger = listOf(
             utbetaling(id = 1, status = UtbetalingStatus.FEILET),
             utbetaling(id = 2, status = UtbetalingStatus.FEILET),
             utbetaling(id = 3, status = UtbetalingStatus.FEILET),
         )
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1", 2)
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
         val (_, dataMelding1, dataMelding2, _) = avstemmingsmelding
@@ -93,7 +94,7 @@ internal class AvstemmingsdataMapperTest {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
 
-        val utbetalingsoppdrag = listOf(
+        val utbetalinger = listOf(
             utbetaling(id = 1, status = UtbetalingStatus.SENDT),
             utbetaling(id = 2, status = UtbetalingStatus.GODKJENT),
             utbetaling(id = 3, status = UtbetalingStatus.GODKJENT_MED_FEIL),
@@ -101,7 +102,7 @@ internal class AvstemmingsdataMapperTest {
             utbetaling(id = 5, status = UtbetalingStatus.FEILET),
         )
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, "1")
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
         val (_, dataMelding, _) = avstemmingsmelding
@@ -116,7 +117,7 @@ internal class AvstemmingsdataMapperTest {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
 
-        val utbetalingsoppdragsliste = listOf(
+        val utbetalinger = listOf(
             utbetaling(id = 1, status = UtbetalingStatus.GODKJENT),
             utbetaling(id = 2, status = UtbetalingStatus.GODKJENT),
             utbetaling(id = 3, status = UtbetalingStatus.GODKJENT_MED_FEIL),
@@ -127,7 +128,7 @@ internal class AvstemmingsdataMapperTest {
             utbetaling(id = 8, status = UtbetalingStatus.FEILET),
         )
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalingsoppdragsliste, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = "1"
+            utbetalinger = utbetalinger, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = UUIDBase64()
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
@@ -156,10 +157,10 @@ internal class AvstemmingsdataMapperTest {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
 
-        val utbetalingsoppdgragsliste = emptyList<Utbetaling>()
+        val utbetalinger = emptyList<Utbetaling>()
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalingsoppdgragsliste, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = "1"
+            utbetalinger = utbetalinger, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = UUIDBase64()
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
@@ -176,10 +177,10 @@ internal class AvstemmingsdataMapperTest {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
 
-        val utbetalingsoppdgragsliste = emptyList<Utbetaling>()
+        val utbetalinger = emptyList<Utbetaling>()
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalingsoppdgragsliste, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = "1"
+            utbetalinger = utbetalinger, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = UUIDBase64("1")
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
@@ -192,10 +193,10 @@ internal class AvstemmingsdataMapperTest {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
 
-        val utbetalingsoppdgragsliste = emptyList<Utbetaling>()
+        val utbetalinger = emptyList<Utbetaling>()
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalingsoppdgragsliste, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = "1"
+            utbetalinger = utbetalinger, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = UUIDBase64()
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (startmelding, dataMelding, sluttmelding) = avstemmingsmelding
@@ -217,7 +218,7 @@ internal class AvstemmingsdataMapperTest {
         val fraOgMed = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).minusDays(1).toTidspunkt(tidssoneNorge)
         val til = LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0).plusHours(1).toTidspunkt(tidssoneNorge)
 
-        val utbetalingsoppdragsliste = listOf(
+        val utbetalinger = listOf(
             utbetaling(
                 id = 1,
                 avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).toTidspunkt(tidssoneNorge)
@@ -244,7 +245,7 @@ internal class AvstemmingsdataMapperTest {
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalingsoppdragsliste, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = "1"
+            utbetalinger = utbetalinger, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = UUIDBase64()
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding

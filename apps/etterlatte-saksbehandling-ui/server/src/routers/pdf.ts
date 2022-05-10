@@ -7,9 +7,14 @@ export default function pdf(): RequestHandler {
   return async (req: Request, res: Response) => {
     const path = `${apiUrl}/brev${req.path}`
 
-    const data = await fetch(path).then(res => res.buffer())
+    const result = await fetch(path)
+        .then(res => ({ status: res.status, data: res.buffer() }))
 
-    res.contentType('application/pdf')
-    res.send(await data)
+    if (result.status == 200) {
+      res.contentType('application/pdf')
+      res.send(await result.data)
+    } else {
+      res.sendStatus(result.status)
+    }
   }
 }

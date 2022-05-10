@@ -12,20 +12,25 @@ enum class UtbetalingStatus {
     FEILET,
 }
 
+data class VedtakId(val value: String)
+data class SakId(val value: String)
+data class BehandlingId(val value: String)
+data class Foedselsnummer(val value: String)
+
 data class Utbetaling(
-    val id: Int,
-    val vedtakId: String,
-    val behandlingId: String,
-    val sakId: String,
+    val id: Long,
+    val sakId: SakId,
+    val behandlingId: BehandlingId,
+    val vedtakId: VedtakId,
     val status: UtbetalingStatus,
-    val vedtak: Vedtak,
     val opprettet: Tidspunkt,
     val endret: Tidspunkt,
     val avstemmingsnoekkel: Tidspunkt,
-    val foedselsnummer: String,
-    val utgaaendeOppdrag: Oppdrag,
-    val kvitteringOppdrag: Oppdrag? = null,
+    val foedselsnummer: Foedselsnummer,
+    val vedtak: Vedtak,
+    val oppdrag: Oppdrag,
+    val kvittering: Oppdrag? = null,
     val kvitteringBeskrivelse: String? = null,
     val kvitteringFeilkode: String? = null,
-    val kvitteringMeldingKode: String? = null // 00, 04, 08, 12
+    val kvitteringMeldingKode: String? = null
 )

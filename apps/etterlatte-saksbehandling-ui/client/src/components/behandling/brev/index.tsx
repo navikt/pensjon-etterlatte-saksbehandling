@@ -4,7 +4,8 @@ import { BodyLong, Button, Cell, ContentContainer, Grid, Table, Tag } from "@nav
 import { AppContext } from "../../../store/AppContext";
 import { IPerson, OpplysningsType } from "../../../store/reducers/BehandlingReducer";
 import BrevModal from "./brev-modal";
-import { Success } from '@navikt/ds-icons'
+import { Information, Success } from '@navikt/ds-icons'
+import NyttBrev from "./nytt-brev";
 
 export const Brev = () => {
   const { state } = useContext(AppContext)
@@ -62,8 +63,8 @@ export const Brev = () => {
                           {opplysning.foedselsnummer}
                         </Table.DataCell>
                         <Table.DataCell>
-                          <Tag variant="warning" size={'small'}>
-                            Ikke sendt
+                          <Tag variant="warning" size={'small'} style={{width: '100%'}}>
+                            Ikke sendt &nbsp;<Information />
                           </Tag>
                         </Table.DataCell>
                         <Table.DataCell>
@@ -81,7 +82,7 @@ export const Brev = () => {
                       12101376212
                     </Table.DataCell>
                     <Table.DataCell>
-                      <Tag variant="success" size={'small'}>
+                      <Tag variant="success" size={'small'} style={{width: '100%'}}>
                         Sendt &nbsp;<Success/>
                       </Tag>
                     </Table.DataCell>
@@ -95,6 +96,10 @@ export const Brev = () => {
               </Table>
             </Cell>
           </Grid>
+        </ContentContainer>
+
+        <ContentContainer>
+          <NyttBrev />
         </ContentContainer>
       </Content>
   )

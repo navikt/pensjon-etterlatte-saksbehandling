@@ -29,8 +29,8 @@ class BehandlingAggregat(
                 null,
                 null,
                 null,
-                emptyList(),
-                emptyList(),
+                null,
+                null,
                 null,
                 null,
                 BehandlingStatus.OPPRETTET

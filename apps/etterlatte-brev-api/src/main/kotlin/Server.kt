@@ -8,8 +8,10 @@ import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.config.*
 import io.ktor.features.*
+import io.ktor.http.*
 import io.ktor.jackson.*
 import io.ktor.request.*
+import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
@@ -34,6 +36,13 @@ class Server(applicationContext: ApplicationContext) {
                 filter { call -> !call.request.path().startsWith("/health") }
                 format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
                 mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
+            }
+
+            install(StatusPages) {
+                exception<Throwable> { cause ->
+                    log.error("En feil oppstod: ${cause.message}", cause)
+                    call.respond(HttpStatusCode.InternalServerError, "En intern feil har oppstått")
+                }
             }
 
             if (applicationContext.localDevelopment) {

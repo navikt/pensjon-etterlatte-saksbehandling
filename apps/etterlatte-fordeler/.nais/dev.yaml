@@ -40,3 +40,4 @@ spec:
     outbound:
       rules:
         - application: etterlatte-pdltjenester
+        - application: etterlatte-gyldig-soeknad

@@ -1,7 +1,5 @@
-import com.fasterxml.jackson.databind.JsonNode
 import model.GyldigSoeknadService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.Person
@@ -12,7 +10,6 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.*
 
 internal class LesGyldigSoeknadsmelding(
@@ -38,6 +35,7 @@ internal class LesGyldigSoeknadsmelding(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
+            logger.info("Gyldighetsvurdering av mottat søknad fra fordeler starter")
 
             try {
                 val personGalleri = gyldigSoeknad.hentPersongalleriFraSoeknad(packet["@skjema_info"])

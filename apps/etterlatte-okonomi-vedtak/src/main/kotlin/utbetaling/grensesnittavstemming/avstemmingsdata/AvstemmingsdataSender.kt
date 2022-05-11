@@ -12,7 +12,8 @@ class AvstemmingsdataSender(
         logger.info("Sender avstemmingsdata til Oppdrag")
         val connection = jmsConnectionFactory.connection()
         connection.createSession().use { session ->
-            val producer = session.createProducer(session.createQueue(queue))
+            // Fjerner JMS-headers med targetClient=1
+            val producer = session.createProducer(session.createQueue("queue:///$queue?targetClient=1"))
             val xml = AvstemmingsdataJaxb.toXml(avstemmingsdata)
             val message = session.createTextMessage(xml)
             producer.send(message)

@@ -2,11 +2,11 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.attestasjon
+import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.config.DataSourceBuilder
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.nav.etterlatte.utbetaling.vedtak
-import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -48,8 +48,7 @@ internal class UtbetalingDaoIntegrationTest {
 
     private fun cleanDatabase() {
         dataSource.connection.use {
-            it.prepareStatement("TRUNCATE utbetalingsoppdrag")
-                .apply { execute() }
+            it.prepareStatement("TRUNCATE utbetalingsoppdrag").apply { execute() }
         }
     }
 
@@ -62,8 +61,7 @@ internal class UtbetalingDaoIntegrationTest {
         utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettetTidspunkt)
         val utbetaling = utbetalingDao.hentUtbetaling(vedtak.vedtakId)
 
-        assertAll(
-            "Skal sjekke at utbetalingsoppdrag er korrekt opprettet",
+        assertAll("Skal sjekke at utbetalingsoppdrag er korrekt opprettet",
             { assertNotNull(utbetaling?.id) },
             { assertEquals(vedtak.vedtakId, utbetaling?.vedtakId?.value) },
             { assertEquals(vedtak.behandlingsId, utbetaling?.behandlingId?.value) },
@@ -95,9 +93,49 @@ internal class UtbetalingDaoIntegrationTest {
             { assertNull(utbetaling?.kvittering) },
             { assertNull(utbetaling?.kvitteringBeskrivelse) },
             { assertNull(utbetaling?.kvitteringFeilkode) },
-            { assertNull(utbetaling?.kvitteringMeldingKode) }
+            { assertNull(utbetaling?.kvitteringMeldingKode) })
+    }
+
+    @Test
+    fun `skal hente alle utbetalinger mellom to tidspunkter`() {
+        val attestasjon = attestasjon()
+
+        val vedtak1 = vedtak("1")
+        val vedtak2 = vedtak("2")
+        val vedtak3 = vedtak("3")
+        val vedtak4 = vedtak("4")
+        val vedtak5 = vedtak("5")
+
+        val jan1 = Tidspunkt(Instant.parse("2022-01-01T00:00:00Z"))
+        val jan2 = Tidspunkt(Instant.parse("2022-02-01T00:00:00Z"))
+        val jan3 = Tidspunkt(Instant.parse("2022-03-01T00:00:00Z"))
+        val jan4 = Tidspunkt(Instant.parse("2022-04-01T00:00:00Z"))
+        val jan5 = Tidspunkt(Instant.parse("2022-05-01T00:00:00Z"))
+        val jan6 = Tidspunkt(Instant.parse("2022-06-01T00:00:00Z"))
+
+        val oppdrag1 = OppdragMapper.oppdragFraVedtak(vedtak1, attestasjon, jan1)
+        val oppdrag2 = OppdragMapper.oppdragFraVedtak(vedtak2, attestasjon, jan2)
+        val oppdrag3 = OppdragMapper.oppdragFraVedtak(vedtak3, attestasjon, jan3)
+        val oppdrag4 = OppdragMapper.oppdragFraVedtak(vedtak4, attestasjon, jan4)
+        val oppdrag5 = OppdragMapper.oppdragFraVedtak(vedtak5, attestasjon, jan6)
+
+        utbetalingDao.opprettUtbetaling(vedtak1, oppdrag1, jan1)
+        utbetalingDao.opprettUtbetaling(vedtak2, oppdrag2, jan2)
+        utbetalingDao.opprettUtbetaling(vedtak3, oppdrag3, jan3)
+        utbetalingDao.opprettUtbetaling(vedtak4, oppdrag4, jan4)
+        utbetalingDao.opprettUtbetaling(vedtak5, oppdrag5, jan6)
+
+        val utbetalinger = utbetalingDao.hentAlleUtbetalingerMellom(jan2, jan5)
+
+        assertAll(
+            "3 utbetalinger skal hentes, med vedtak id 2, 3 og 4",
+            { assertEquals(3, utbetalinger.size) },
+            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == "2" }) },
+            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == "3" }) },
+            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == "4" }) },
         )
     }
+
 
     @Test
     fun `skal sette kvittering paa utbetalingsoppdrag`() {
@@ -109,10 +147,7 @@ internal class UtbetalingDaoIntegrationTest {
 
         val oppdragMedKvittering = oppdrag.apply {
             oppdrag110.oppdragsId = 1
-            mmel = Mmel()
-                .withAlvorlighetsgrad("08")
-                .withBeskrMelding("beskrivende melding")
-                .withKodeMelding("1234")
+            mmel = Mmel().withAlvorlighetsgrad("08").withBeskrMelding("beskrivende melding").withKodeMelding("1234")
         }
 
         utbetalingDao.oppdaterKvittering(oppdragMedKvittering, Tidspunkt.now())
@@ -123,14 +158,12 @@ internal class UtbetalingDaoIntegrationTest {
             { assertNotNull(utbetalingOppdatert?.kvittering?.mmel) },
             {
                 assertEquals(
-                    oppdragMedKvittering.mmel?.alvorlighetsgrad,
-                    utbetalingOppdatert?.kvittering?.mmel?.alvorlighetsgrad
+                    oppdragMedKvittering.mmel?.alvorlighetsgrad, utbetalingOppdatert?.kvittering?.mmel?.alvorlighetsgrad
                 )
             },
             {
                 assertEquals(
-                    oppdragMedKvittering.oppdrag110.oppdragsId,
-                    utbetalingOppdatert?.kvittering?.oppdrag110?.oppdragsId
+                    oppdragMedKvittering.oppdrag110.oppdragsId, utbetalingOppdatert?.kvittering?.oppdrag110?.oppdragsId
                 )
             })
     }
@@ -147,9 +180,7 @@ internal class UtbetalingDaoIntegrationTest {
         assertEquals(UtbetalingStatus.SENDT, utbetaling.status)
 
         val utbetalingsoppdragOppdatert = utbetalingDao.oppdaterStatus(
-            vedtakId = vedtak.vedtakId,
-            status = UtbetalingStatus.GODKJENT,
-            endret = Tidspunkt.now()
+            vedtakId = vedtak.vedtakId, status = UtbetalingStatus.GODKJENT, endret = Tidspunkt.now()
         )
 
         assertEquals(UtbetalingStatus.GODKJENT, utbetalingsoppdragOppdatert.status)

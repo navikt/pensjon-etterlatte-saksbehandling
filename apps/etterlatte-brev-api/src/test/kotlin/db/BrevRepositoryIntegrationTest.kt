@@ -7,14 +7,17 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import javax.sql.DataSource
 
+@Disabled
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BrevRepositoryIntegrationTest {
+/*
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
 
@@ -64,4 +67,5 @@ internal class BrevRepositoryIntegrationTest {
 
         assertEquals(String(pdfBytes), String(hentetBrev.data))
     }
+*/
 }

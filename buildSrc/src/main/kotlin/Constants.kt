@@ -85,7 +85,7 @@ object Kotest {
 
 object Database {
     const val HikariCP = "com.zaxxer:HikariCP:3.4.5"
-    const val FlywayDB = "org.flywaydb:flyway-core:6.5.0"
+    const val FlywayDB = "org.flywaydb:flyway-core:8.5.10"
     const val Postgresql = "org.postgresql:postgresql:42.2.5"
 }
 

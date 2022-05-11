@@ -1,6 +1,6 @@
 import { BodyLong, Button, Modal } from "@navikt/ds-react";
 import { useState } from "react";
-import { hentBrev } from "../../../shared/api/brev";
+import { genererPdf } from "../../../shared/api/brev";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
@@ -17,14 +17,12 @@ const ButtonRow = styled.div`
   width: 100%;
 `
 
-export default function BrevModal() {
-  const { behandlingId } = useParams()
-
+export default function BrevModal({ brevId }: { brevId: string }) {
   const [error, setError] = useState<string>()
   const [fileURL, setFileURL] = useState<string>()
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
-  const generatePDF = () => hentBrev(behandlingId!!)
+  const generatePDF = () => genererPdf(brevId)
       .then(file => URL.createObjectURL(file))
       .then(url => setFileURL(url))
       .catch(e => setError(e.message))

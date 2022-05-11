@@ -1,44 +1,65 @@
 import { Content, ContentHeader } from '../../../shared/styled'
-import { useContext } from 'react'
-import { BodyLong, Button, Cell, ContentContainer, Grid, Table, Tag } from "@navikt/ds-react";
-import { AppContext } from "../../../store/AppContext";
-import { IPerson, OpplysningsType } from "../../../store/reducers/BehandlingReducer";
+import { useEffect, useState } from 'react'
+import { Button, ContentContainer, Heading, Table, Tag } from "@navikt/ds-react";
+import { OpplysningsType } from "../../../store/reducers/BehandlingReducer";
 import BrevModal from "./brev-modal";
-import { Information, Success } from '@navikt/ds-icons'
+import { Information } from '@navikt/ds-icons'
 import NyttBrev from "./nytt-brev";
+import { Border, HeadingWrapper } from "../soeknadsoversikt/styled";
+import { BehandlingsStatusSmall, IBehandlingsStatus } from "../behandlings-status";
+import { BehandlingsTypeSmall, IBehandlingsType } from "../behandlings-type";
+import { Soeknadsdato } from "../soeknadsoversikt/soeknadoversikt/soeknadinfo/Soeknadsdato";
+import { usePersonInfoFromBehandling } from "../usePersonInfoFromBehandling";
+import { BehandlingHandlingKnapper } from "../handlinger/BehandlingHandlingKnapper";
+import { hentAlleBrev } from "../../../shared/api/brev";
+import { useParams } from "react-router-dom";
 
 export const Brev = () => {
-  const { state } = useContext(AppContext)
+  const { behandlingId } = useParams()
+  const { mottattDato } = usePersonInfoFromBehandling()
+  // const { state } = useContext(AppContext)
 
-  const gyldigeTyper = [OpplysningsType.innsender, OpplysningsType.soeker_pdl]
+  // const gyldigeTyper = [OpplysningsType.innsender, OpplysningsType.soeker_pdl]
 
-  console.log(state.behandlingReducer.grunnlag)
+  // const grunnlagListe: IBehandlingsopplysning[] = state.behandlingReducer.grunnlag
+  //     .filter(grunnlag => gyldigeTyper.includes(grunnlag.opplysningType))
 
-  const opplysninger: IPerson[] = state.behandlingReducer.grunnlag
-      .filter(grunnlag => gyldigeTyper.includes(grunnlag.opplysningType))
-      .map(grunnlag => grunnlag.opplysning as IPerson)
+  const [brevListe, setBrevListe] = useState<any[]>()
+
+  const type = (opplysningType: OpplysningsType): string => {
+    switch (opplysningType) {
+      case OpplysningsType.innsender:
+        return 'Innsender'
+      case OpplysningsType.gjenlevende_forelder_pdl:
+        return 'Forelder'
+      case OpplysningsType.soeker_pdl:
+        return 'Søker'
+      default:
+        return ''
+    }
+  }
+
+  useEffect(() => {
+    hentAlleBrev(behandlingId!!)
+        .then(res => setBrevListe(res))
+  }, [])
 
   return (
       <Content>
         <ContentHeader>
-          <h1>Brev</h1>
+          <HeadingWrapper>
+            <Heading spacing size={'xlarge'} level={'5'}>
+              Brev
+            </Heading>
+            <div className="details">
+              <BehandlingsStatusSmall status={IBehandlingsStatus.FORSTEGANG} />
+              <BehandlingsTypeSmall type={IBehandlingsType.BARNEPENSJON} />
+            </div>
+          </HeadingWrapper>
+          <Soeknadsdato mottattDato={mottattDato} />
         </ContentHeader>
 
         <ContentContainer>
-          <Grid>
-            <Cell xs={12}>
-              <BodyLong>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sed ante sit amet tellus aliquet
-                mattis. Donec blandit, urna ac vulputate tincidunt, lorem massa tempor lectus, nec porttitor velit nunc
-                ac ex. Vivamus vel elementum magna. Nullam tristique nisl sit amet ante interdum, vitae tincidunt libero
-                placerat. Pellentesque et dolor at felis dapibus cursus viverra ut massa. Nunc ac pharetra est. Donec
-                finibus ante ut volutpat blandit. Integer condimentum eros malesuada luctus egestas. Integer sodales
-                aliquet nisi non elementum. Nunc congue, nisi in congue dictum, odio est ultrices enim, non venenatis
-                nulla diam non purus. Pellentesque dapibus rutrum elementum.
-              </BodyLong>
-            </Cell>
-
-            <Cell xs={12}>
               <Table>
                 <Table.Header>
                   <Table.Row>
@@ -46,21 +67,26 @@ export const Brev = () => {
                     <Table.HeaderCell>Filnavn</Table.HeaderCell>
                     <Table.HeaderCell>Mottaker navn</Table.HeaderCell>
                     <Table.HeaderCell>Fødselsnummer</Table.HeaderCell>
+                    <Table.HeaderCell>Rolle</Table.HeaderCell>
                     <Table.HeaderCell>Status</Table.HeaderCell>
                     <Table.HeaderCell>Handlinger</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
 
                 <Table.Body>
-                  {opplysninger.map((opplysning, i) => (
+                  {brevListe?.map((brev, i) => (
                       <Table.Row key={i}>
-                        <Table.DataCell>{i + 1}</Table.DataCell>
+                        <Table.DataCell>{brev.id}</Table.DataCell>
                         <Table.DataCell>Vedtak om innvilget barnepensjon</Table.DataCell>
                         <Table.DataCell>
-                          {opplysning.fornavn} {opplysning.etternavn}
+                          {brev.mottaker.fornavn} {brev.mottaker.etternavn}
                         </Table.DataCell>
                         <Table.DataCell>
-                          {opplysning.foedselsnummer}
+                          {brev.mottaker.foedselsnummer}
+                        </Table.DataCell>
+                        <Table.DataCell>
+                          {/*{type(grunnlag.opplysningType)}*/}
+                          UKJENT
                         </Table.DataCell>
                         <Table.DataCell>
                           <Tag variant="warning" size={'small'} style={{width: '100%'}}>
@@ -68,39 +94,25 @@ export const Brev = () => {
                           </Tag>
                         </Table.DataCell>
                         <Table.DataCell>
-                          <BrevModal/>
+                          <BrevModal brevId={brev.id}/>
                         </Table.DataCell>
                       </Table.Row>
                   ))}
-                  <Table.Row>
-                    <Table.DataCell>{opplysninger.length + 1}</Table.DataCell>
-                    <Table.DataCell>Informasjonsbrev</Table.DataCell>
-                    <Table.DataCell>
-                      TALENTFULL BLYANT
-                    </Table.DataCell>
-                    <Table.DataCell>
-                      12101376212
-                    </Table.DataCell>
-                    <Table.DataCell>
-                      <Tag variant="success" size={'small'} style={{width: '100%'}}>
-                        Sendt &nbsp;<Success/>
-                      </Tag>
-                    </Table.DataCell>
-                    <Table.DataCell>
-                      <Button variant={'secondary'} size={'small'}>
-                        Vis brev
-                      </Button>
-                    </Table.DataCell>
-                  </Table.Row>
                 </Table.Body>
               </Table>
-            </Cell>
-          </Grid>
         </ContentContainer>
 
         <ContentContainer>
           <NyttBrev />
         </ContentContainer>
+
+        <Border />
+
+        <BehandlingHandlingKnapper>
+          <Button variant={'primary'}>
+            Fullfør behandling
+          </Button>
+        </BehandlingHandlingKnapper>
       </Content>
   )
 }

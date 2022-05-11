@@ -7,7 +7,7 @@ import { mockRouter } from './routers/mockRouter'
 import { modiaRouter } from './routers/modia'
 import { expressProxy } from './routers/proxy'
 import { logger } from './utils/logger'
-import pdf from './routers/pdf'
+import brev from './routers/brev'
 
 const app = express()
 
@@ -44,7 +44,7 @@ if (process.env.DEVELOPMENT !== 'true') {
 
 app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
 
-app.use('/pdf', pdf())
+app.use('/brev', brev)
 
 if (isDev) {
   app.use('/api', mockRouter)

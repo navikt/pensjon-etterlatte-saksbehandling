@@ -22,7 +22,6 @@ internal class BehandlingDaoIntegrationTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
 
-
     private lateinit var dataSource: DataSource
 
     @BeforeAll
@@ -48,11 +47,12 @@ internal class BehandlingDaoIntegrationTest {
         val sakrepo = SakDao { connection }
         val behandlingRepo = BehandlingDao { connection }
         val sak1 = sakrepo.opprettSak("123", "BP").id
+        val behandlingOpprettet = LocalDateTime.now()
 
         val behandlingUtenPersongalleri = Behandling(
             UUID.randomUUID(),
             sak1,
-            LocalDateTime.now(),
+            behandlingOpprettet,
             LocalDateTime.now(),
             LocalDateTime.now(),
             null,

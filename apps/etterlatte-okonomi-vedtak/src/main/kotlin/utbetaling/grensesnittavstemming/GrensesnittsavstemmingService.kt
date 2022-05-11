@@ -17,8 +17,8 @@ class GrensesnittsavstemmingService(
 ) {
 
     fun startGrensesnittsavstemming(
-        periodeFraOgMed: Tidspunkt = hentFraTidForrigeAvstemming(),
-        periodeTil: Tidspunkt = hentTilTidStartAvDagen()
+        periodeFraOgMed: Tidspunkt = tidspunktForrigeAvstemming(),
+        periodeTil: Tidspunkt = tidspunktMidnattIdag()
     ) {
         logger.info("Avstemmer fra $periodeFraOgMed til $periodeTil")
         if (periodeFraOgMed != periodeTil) {
@@ -51,7 +51,7 @@ class GrensesnittsavstemmingService(
         }
     }
 
-    private fun hentTilTidStartAvDagen(): Tidspunkt =
+    private fun tidspunktMidnattIdag(): Tidspunkt =
         Tidspunkt.now(clock)
             .toZonedNorskTid()
             .truncatedTo(ChronoUnit.DAYS) // 00.00 norsk tid
@@ -59,7 +59,7 @@ class GrensesnittsavstemmingService(
                 Tidspunkt(it)
             }
 
-    private fun hentFraTidForrigeAvstemming() =
+    private fun tidspunktForrigeAvstemming() =
         grensesnittavstemmingDao.hentSisteAvstemming()?.periodeTil ?: MIN_INSTANT
 
     companion object {

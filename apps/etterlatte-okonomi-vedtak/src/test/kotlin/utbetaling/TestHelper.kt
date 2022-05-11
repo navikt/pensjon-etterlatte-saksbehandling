@@ -81,7 +81,8 @@ fun utbetaling(
     id: Long = 1,
     status: UtbetalingStatus = UtbetalingStatus.GODKJENT,
     vedtakId: String = "1",
-    avstemmingsnoekkel: Tidspunkt = Tidspunkt.now()
+    avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
+    opprettet: Tidspunkt = Tidspunkt.now()
 ) =
     Utbetaling(
         id = id,
@@ -90,7 +91,7 @@ fun utbetaling(
         sakId = SakId("1"),
         status = status,
         vedtak = vedtak(vedtakId),
-        opprettet = Tidspunkt.now(),
+        opprettet = opprettet,
         endret = Tidspunkt.now(),
         avstemmingsnoekkel = avstemmingsnoekkel,
         foedselsnummer = Foedselsnummer("12345678903"),

@@ -1,15 +1,13 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.utbetaling
-import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import org.junit.jupiter.api.Test
 import java.time.Clock
 import java.time.Instant

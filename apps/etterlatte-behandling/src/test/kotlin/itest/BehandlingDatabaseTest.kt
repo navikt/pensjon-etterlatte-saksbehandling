@@ -12,7 +12,9 @@ import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.*
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
 
@@ -47,7 +49,7 @@ internal class BehandlingDaoIntegrationTest {
         val sakrepo = SakDao { connection }
         val behandlingRepo = BehandlingDao { connection }
         val sak1 = sakrepo.opprettSak("123", "BP").id
-        val behandlingOpprettet = LocalDateTime.now()
+        val behandlingOpprettet = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
 
         val behandlingUtenPersongalleri = Behandling(
             UUID.randomUUID(),

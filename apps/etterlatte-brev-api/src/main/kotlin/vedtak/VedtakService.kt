@@ -9,7 +9,7 @@ import java.time.LocalDate
 class VedtakService {
     fun hentVedtak(vedtakId: String) = Vedtak(
         vedtakId = vedtakId,
-        type = VedtakType.INNVILGELSE,
+        type = if (vedtakId.toInt() % 2 == 0) VedtakType.INNVILGELSE else VedtakType.AVSLAG,
         status = "Fattet",
         dato = LocalDate.now(),
         gjelderFom = LocalDate.now(),

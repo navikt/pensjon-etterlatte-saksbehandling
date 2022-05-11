@@ -5,6 +5,7 @@ import model.Vedtak
 import model.VedtakType
 import model.brev.InnvilgetBrevRequest
 import no.nav.etterlatte.db.BrevRepository
+import model.brev.AvslagBrevRequest
 import no.nav.etterlatte.vedtak.VedtakService
 import org.slf4j.LoggerFactory
 import pdf.PdfGeneratorKlient
@@ -26,10 +27,13 @@ class BrevService(
     }
 
     private suspend fun opprett(vedtak: Vedtak): ByteArray {
-        val pdf = when (vedtak.type) {
-            VedtakType.INNVILGELSE -> pdfGenerator.genererPdf(InnvilgetBrevRequest.fraVedtak(vedtak))
+        val pdfRequest = when (vedtak.type) {
+            VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(vedtak)
+            VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(vedtak)
             else -> throw Exception("Vedtakstype er ikke støttet: ${vedtak.type}")
         }
+
+        val pdf = pdfGenerator.genererPdf(pdfRequest)
 
         logger.info("Generert brev for vedtak (vedtakId=${vedtak.vedtakId}) med størrelse: ${pdf.size}")
 

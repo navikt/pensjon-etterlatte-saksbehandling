@@ -4,27 +4,20 @@ import model.Vedtak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.model.brev.BrevRequest
 import no.nav.etterlatte.model.brev.Mottaker
-import java.time.LocalDate
 
-data class InnvilgetBrevRequest(
+data class AvslagBrevRequest(
     val saksnummer: String,
-    val utbetalingsinfo: Utbetalingsinfo,
     val barn: Barn,
     val avdoed: Avdoed,
     val aktuelleParagrafer: List<String>,
     override val spraak: Spraak,
     override val mottaker: Mottaker
 ) : BrevRequest() {
-    override fun templateName(): String = "innvilget"
+    override fun templateName(): String = "avslag"
 
     companion object {
-        fun fraVedtak(vedtak: Vedtak): InnvilgetBrevRequest = InnvilgetBrevRequest(
+        fun fraVedtak(vedtak: Vedtak): AvslagBrevRequest = AvslagBrevRequest(
             saksnummer = vedtak.saksnummer,
-            utbetalingsinfo = Utbetalingsinfo(
-                beloep = vedtak.sum,
-                kontonummer = vedtak.kontonummer,
-                virkningsdato = vedtak.virkningsdato
-            ),
             barn = Barn(
                 navn = vedtak.barn.navn,
                 fnr = vedtak.barn.fnr,
@@ -39,5 +32,3 @@ data class InnvilgetBrevRequest(
         )
     }
 }
-
-data class Utbetalingsinfo(val beloep: Double, val kontonummer: String, val virkningsdato: LocalDate)

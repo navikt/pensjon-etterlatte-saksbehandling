@@ -20,6 +20,7 @@ internal class BesvarOpplysningsbehov(
     init {
         River(rapidsConnection).apply {
             validate { it.requireKey("@behov") }
+            //TODO endre til saksId
             validate { it.requireKey("behandling") }
             validate { it.requireKey("fnr") }
             validate { it.requireKey("rolle") }

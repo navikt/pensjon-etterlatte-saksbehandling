@@ -14,6 +14,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.*
 import no.nav.etterlatte.database.DatabaseContext
+import no.nav.etterlatte.grunnlag.BehandlingHendelser
 import no.nav.etterlatte.grunnlag.GrunnlagFactory
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.grunnlagRoutes
@@ -36,7 +37,9 @@ fun main() {
     RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule{
         module(beanFactory)
     }.build().apply {
-        GrunnlagHendelser(this, GrunnlagFactory(beanFactory.opplysningDao()))//, beanFactory.datasourceBuilder().dataSource)
+        val grunnlag = GrunnlagFactory(beanFactory.opplysningDao())
+        GrunnlagHendelser(this, grunnlag)//, beanFactory.datasourceBuilder().dataSource)
+        BehandlingHendelser(this,grunnlag)
     }.start()
 }
 

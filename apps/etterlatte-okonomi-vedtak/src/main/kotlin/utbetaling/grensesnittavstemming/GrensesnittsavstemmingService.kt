@@ -21,30 +21,34 @@ class GrensesnittsavstemmingService(
         periodeTil: Tidspunkt = hentTilTidStartAvDagen()
     ) {
         logger.info("Avstemmer fra $periodeFraOgMed til $periodeTil")
-        val utbetalinger = utbetalingDao.hentAlleUtbetalingerMellom(periodeFraOgMed, periodeTil)
-        val avstemming = Grensesnittavstemming(
-            periodeFraOgMed = periodeFraOgMed,
-            periodeTil = periodeTil,
-            antallOppdrag = utbetalinger.size,
-            opprettet = Tidspunkt.now(clock)
-        )
+        if (periodeFraOgMed != periodeTil) {
+            val utbetalinger = utbetalingDao.hentAlleUtbetalingerMellom(periodeFraOgMed, periodeTil)
+            val avstemming = Grensesnittavstemming(
+                periodeFraOgMed = periodeFraOgMed,
+                periodeTil = periodeTil,
+                antallOppdrag = utbetalinger.size,
+                opprettet = Tidspunkt.now(clock)
+            )
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, periodeFraOgMed, periodeTil, avstemming.id)
-        val avstemmingsdataListe = avstemmingsdataMapper.opprettAvstemmingsmelding()
+            val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, periodeFraOgMed, periodeTil, avstemming.id)
+            val avstemmingsdataListe = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
-        val sendtAvstemmingsdata = avstemmingsdataListe.mapIndexed { index, avstemmingsdata ->
-            val sendtAvstemmingsdata = avstemmingsdataSender.sendAvstemming(avstemmingsdata)
-            logger.info("Avstemmingsmelding ${index + 1} av ${avstemmingsdataListe.size} overført til Oppdrag")
-            sendtAvstemmingsdata
+            val sendtAvstemmingsdata = avstemmingsdataListe.mapIndexed { index, avstemmingsdata ->
+                val sendtAvstemmingsdata = avstemmingsdataSender.sendAvstemming(avstemmingsdata)
+                logger.info("Avstemmingsmelding ${index + 1} av ${avstemmingsdataListe.size} overført til Oppdrag")
+                sendtAvstemmingsdata
+            }
+
+            grensesnittavstemmingDao.opprettAvstemming(
+                avstemming.copy(avstemmingsdata = sendtAvstemmingsdata.joinToString("\n"))
+            )
+
+            logger.info(
+                "Avstemming fra $periodeFraOgMed til $periodeTil fullført - ${utbetalinger.size} oppdrag ble avstemt"
+            )
+        } else {
+            logger.warn("Utfører ikke avstemming fordi denne perioden allerede er kjørt")
         }
-
-        grensesnittavstemmingDao.opprettAvstemming(
-            avstemming.copy(avstemmingsdata = sendtAvstemmingsdata.joinToString("\n"))
-        )
-
-        logger.info(
-            "Avstemming fra $periodeFraOgMed til $periodeTil fullført - ${utbetalinger.size} oppdrag ble avstemt"
-        )
     }
 
     private fun hentTilTidStartAvDagen(): Tidspunkt =

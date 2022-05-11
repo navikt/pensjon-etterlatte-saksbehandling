@@ -18,6 +18,9 @@ fun main() {
     System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }.also { env ->
+
+        Server(vedtaksvurderingService).run()
+
         RapidApplication.create(env)
             .also { LagreAvkorting(it, vedtaksvurderingService) }
             .start()
@@ -28,7 +31,7 @@ fun main() {
             .also { LagreBeregningsresultat(it, vedtaksvurderingService) }
             .start()
 
-        Server(vedtaksvurderingService).run()
+
 
     }
 

@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.Endringskode
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.AfterAll
@@ -46,13 +47,13 @@ internal class DBTest {
         postgreSQLContainer.stop()
     }
 
-    @Test
     fun leggtilberegningsresultat() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
+        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
 
         val now = LocalDateTime.now()
         val beregningsperiode = listOf<Beregningsperiode>()
-        vedtakRepo.lagreBeregningsresultat("12321423523545", uuid, BeregningsResultat(
+        vedtaksvurderingService.lagreBeregningsresultat("12321423523545", uuid, BeregningsResultat(
             UUID.randomUUID(),
             Beregningstyper.BPGP,
             Endringskode.NY,
@@ -62,7 +63,6 @@ internal class DBTest {
         ))
     }
 
-    @Test
     fun leggtilvilkaarsresultat() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
@@ -74,23 +74,25 @@ internal class DBTest {
         ))
     }
 
-    @Test
     fun leggtilavkortingsresultat() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
-        val now = LocalDateTime.now()
-        val beregningsperiode = listOf<Beregningsperiode>()
-        //vedtaksvurderingService.lagreAvkorting()
+        vedtaksvurderingService.lagreAvkorting("12321423523545", uuid, objectMapper.writeValueAsString("Test"))
     }
 
     @Test
-    fun hentVedtak() {
+    fun testDB() {
+        leggtilavkortingsresultat()
+        leggtilvilkaarsresultat()
+        leggtilberegningsresultat()
+
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
         val vedtaket = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         assert(vedtaket?.beregningsResultat != null)
-//        assert(vedtaket?.avkortingsResultat != null)
+        assert(vedtaket?.avkortingsResultat != null)
         assert(vedtaket?.vilkaarsResultat != null)
-
     }
+
+
 }

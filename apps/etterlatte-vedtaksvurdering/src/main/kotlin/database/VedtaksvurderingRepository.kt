@@ -26,12 +26,13 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         logger.info("Lagrer vilkaarsresultat")
         connection.use {
             val statement = it.prepareStatement(Queries.lagreVilkaarResultat)
-            statement.setLong(0, sakId.toLong())
-            statement.setObject(1, behandlingsId)
-            statement.setString(2, objectMapper.writeValueAsString(vilkaarsresultat))
+            statement.setLong(1, sakId.toLong())
+            statement.setObject(2, behandlingsId)
+            statement.setString(3, objectMapper.writeValueAsString(vilkaarsresultat))
             statement.execute()
         }
     }
+
     fun oppdaterVilkaarsresultat(sakId: String, behandlingsId: UUID, vilkaarsresultat: VilkaarResultat) {
         logger.info("Lagrer vilkaarsresultat")
         connection.use {
@@ -66,22 +67,22 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    fun lagreAvkorting(sakId: String, behandlingsId: UUID, avkortingsResultat: Any) {
+    fun lagreAvkorting(sakId: String, behandlingsId: UUID, avkortingsResultat: String) {
         logger.info("Lagrer avkorting")
         connection.use {
             val statement = it.prepareStatement(Queries.lagreAvkortingsresultat)
-            statement.setLong(0, sakId.toLong())
-            statement.setObject(1, behandlingsId)
-            statement.setString(2, objectMapper.writeValueAsString(avkortingsResultat))
+            statement.setLong(1, sakId.toLong())
+            statement.setObject(2, behandlingsId)
+            statement.setString(3, avkortingsResultat)
             statement.execute()
         }
     }
 
-    fun oppdaterAvkorting(sakId: String, behandlingsId: UUID, avkortingsResultat: Any) {
+    fun oppdaterAvkorting(sakId: String, behandlingsId: UUID, avkortingsResultat: String) {
         logger.info("Lagrer avkorting")
         connection.use {
             val statement = it.prepareStatement(Queries.oppdaterAvkortingsresultat)
-            statement.setString(1, objectMapper.writeValueAsString(avkortingsResultat))
+            statement.setString(1, avkortingsResultat)
             statement.setLong(2, sakId.toLong())
             statement.setObject(3, behandlingsId)
             statement.execute()
@@ -98,7 +99,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                     getString(1),
                     getObject(2) as UUID,
                     getString(3),
-                    getString(4),
+                    getString(4)?.let { objectMapper.readValue(it) },
                     getString(5)?.let { objectMapper.readValue(it) },
                     getString(6)?.let { objectMapper.readValue(it) },
                     getBoolean(7)
@@ -109,11 +110,11 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     }
 
     fun fattVedtak(saksbehandlerId: String, sakId: String, behandlingsId: UUID) {
-        connection.use { it ->
+        connection.use {
             val statement = it.prepareStatement(Queries.fattVedtak)
-            statement.setString(1, saksbehandlerId,)
+            statement.setString(1, saksbehandlerId)
             statement.setBoolean(2, true)
-            statement.setString(3, sakId)
+            statement.setLong(3, sakId.toLong())
             statement.setObject(4, behandlingsId)
             statement.execute()
         }
@@ -141,11 +142,7 @@ private object Queries {
     val oppdaterAvkortingsresultat = "UPDATE vedtak SET avkortingsresultat = ? WHERE sakId = ? AND behandlingId = ?"
 
     val fattVedtak = "UPDATE vedtak SET saksbehandlerId = ?, vedtakfattet = ? WHERE sakId = ? AND behandlingId = ?"
-
     val hentVedtak = "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, vedtakfattet FROM vedtak WHERE sakId = ? AND behandlingId = ?"
-    val hentBeregningsresultat = "SELECT beregningsresultat FROM vedtak WHERE sakId = ? AND behandlingId = ?"
-    val hentVilkaarsresultat = "SELECT vilkaarsresultat FROM vedtak WHERE sakId = ? AND behandlingId = ?"
-    val hentAvkortingsresultat = "SELECT avkortingsresultat FROM vedtak WHERE sakId = ? AND behandlingId = ?"
 
 }
 

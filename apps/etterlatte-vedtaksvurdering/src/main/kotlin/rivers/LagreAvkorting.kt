@@ -31,7 +31,7 @@ internal class LagreAvkorting(
         withLogContext(packet.correlationId()) {
             val behandlingId = UUID.fromString(packet["@behandling_id"].toString())
             val sakId = packet["@sak_id"].toString()
-            val avkorting = objectMapper.readValue(packet["@avkorting"].toString(), VilkaarResultat::class.java)
+            val avkorting = "test" //objectMapper.readValue(packet["@avkorting"].toString(), VilkaarResultat::class.java)
 
             try {
                 vedtaksvurderingService.lagreAvkorting(sakId, behandlingId, avkorting)

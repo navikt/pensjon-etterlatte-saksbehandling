@@ -9,13 +9,12 @@ import java.util.*
 
 class VedtaksvurderingService(private val repository: VedtaksvurderingRepository) {
 
-    fun lagreAvkorting(sakId: String, behandlingId: UUID, avkorting: Any) {
+    fun lagreAvkorting(sakId: String, behandlingId: UUID, avkorting: String) {
         val vedtak = repository.hentVedtak(sakId, behandlingId)
         if(vedtak == null) {
             repository.lagreAvkorting(sakId, behandlingId, avkorting)
         } else {
             repository.oppdaterAvkorting(sakId, behandlingId, avkorting)
-
         }
     }
 
@@ -41,8 +40,9 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
         return repository.hentVedtak(sakId, behandlingId)
     }
 
-    fun fattVedtak() {
+    fun fattVedtak(sakId: String, behandlingId: UUID) {
         //repository
+        return repository.fattVedtak("abc", sakId, behandlingId)
     }
 
 }

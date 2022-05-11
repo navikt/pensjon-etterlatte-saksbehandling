@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Avstemmingsdata
 import org.slf4j.LoggerFactory
@@ -17,7 +18,7 @@ class AvstemmingsdataSender(
             val xml = AvstemmingsdataJaxb.toXml(avstemmingsdata)
             val message = session.createTextMessage(xml)
             producer.send(message)
-            logger.info("Avstemmingsdata overført til Oppdrag")
+            logger.info("Avstemmingsdata overført til Oppdrag", kv("avstemmingsdata", xml))
             return xml
         }
     }

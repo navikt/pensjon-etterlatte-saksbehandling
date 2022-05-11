@@ -108,7 +108,7 @@ internal class AvstemmingsdataJaxbTest {
                 <meldingKode>08</meldingKode>
                 <alvorlighetsgrad>hva skal stå her?</alvorlighetsgrad>
                 <tekstMelding>En beskrivelse</tekstMelding>
-                <tidspunkt>2022051115</tidspunkt>
+                <tidspunkt>${formatterTime.format(avstemmingsnoekkel.toNorskTid())}</tidspunkt>
             </detalj>
         </Avstemmingsdata>
         

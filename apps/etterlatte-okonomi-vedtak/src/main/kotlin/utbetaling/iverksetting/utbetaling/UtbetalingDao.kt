@@ -11,6 +11,7 @@ import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 import java.sql.Timestamp
+import java.util.*
 import javax.sql.DataSource
 
 
@@ -50,8 +51,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
             )
 
             stmt.use {
-                it.setTimestamp(1, Timestamp.from(fraOgMed.instant))
-                it.setTimestamp(2, Timestamp.from(til.instant))
+                it.setTimestamp(1, Timestamp.from(fraOgMed.instant), tzUTC)
+                it.setTimestamp(2, Timestamp.from(til.instant), tzUTC)
 
                 it.executeQuery().toList(toUtbetaling())
             }
@@ -81,9 +82,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 it.setString(4, OppdragJaxb.toXml(oppdrag))
                 it.setString(5, UtbetalingStatus.SENDT.name)
                 it.setString(6, vedtak.toJson())
-                it.setTimestamp(7, Timestamp.from(opprettetTidspunkt.instant))
-                it.setTimestamp(8, Timestamp.from(opprettetTidspunkt.instant))
-                it.setTimestamp(9, Timestamp.from(opprettetTidspunkt.instant))
+                it.setTimestamp(7, Timestamp.from(opprettetTidspunkt.instant), tzUTC)
+                it.setTimestamp(8, Timestamp.from(opprettetTidspunkt.instant), tzUTC)
+                it.setTimestamp(9, Timestamp.from(opprettetTidspunkt.instant), tzUTC)
                 it.setString(10, vedtak.sakIdGjelderFnr)
 
 
@@ -102,7 +103,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
             stmt.use {
                 it.setString(1, status.name)
-                it.setTimestamp(2, Timestamp.from(endret.instant))
+                it.setTimestamp(2, Timestamp.from(endret.instant), tzUTC)
                 it.setString(3, vedtakId)
 
                 require(it.executeUpdate() == 1)
@@ -129,7 +130,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 it.setString(2, oppdragMedKvittering.mmel.beskrMelding)
                 it.setString(3, oppdragMedKvittering.mmel.alvorlighetsgrad)
                 it.setString(4, oppdragMedKvittering.mmel.kodeMelding)
-                it.setTimestamp(5, Timestamp.from(endret.instant))
+                it.setTimestamp(5, Timestamp.from(endret.instant), tzUTC)
                 it.setString(6, oppdragMedKvittering.vedtakId())
 
                 require(it.executeUpdate() == 1)
@@ -145,9 +146,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 behandlingId = BehandlingId(getString("behandling_id")),
                 vedtakId = VedtakId(getString("vedtak_id")),
                 status = getString("status").let(UtbetalingStatus::valueOf),
-                opprettet = Tidspunkt(getTimestamp("opprettet").toInstant()),
-                endret = Tidspunkt(getTimestamp("endret").toInstant()),
-                avstemmingsnoekkel = Tidspunkt(getTimestamp("avstemmingsnoekkel").toInstant()),
+                opprettet = Tidspunkt(getTimestamp("opprettet", tzUTC).toInstant()),
+                endret = Tidspunkt(getTimestamp("endret", tzUTC).toInstant()),
+                avstemmingsnoekkel = Tidspunkt(getTimestamp("avstemmingsnoekkel", tzUTC).toInstant()),
                 foedselsnummer = Foedselsnummer(getString("foedselsnummer")),
                 vedtak = getString("vedtak").let { vedtak -> objectMapper.readValue(vedtak) },
                 oppdrag = getString("utgaaende_oppdrag").let(OppdragJaxb::toOppdrag),
@@ -177,5 +178,6 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
     companion object {
         private val logger = LoggerFactory.getLogger(UtbetalingDao::class.java)
+        val tzUTC = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
     }
 }

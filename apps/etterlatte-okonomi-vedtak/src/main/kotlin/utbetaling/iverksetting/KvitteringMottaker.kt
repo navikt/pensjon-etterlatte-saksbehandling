@@ -40,7 +40,7 @@ class KvitteringMottaker(
         var oppdragXml: String? = null
 
         try {
-            logger.info("Kvittering på utbetalingsoppdrag fra Oppdrag mottatt med id=${message.jmsMessageID}")
+            logger.info("Kvittering på utbetaling fra Oppdrag mottatt med id=${message.jmsMessageID}")
             oppdragXml = message.getBody(String::class.java)
             val oppdrag = OppdragJaxb.toOppdrag(oppdragXml)
 
@@ -65,29 +65,28 @@ class KvitteringMottaker(
     }
 
     private fun oppdragAkseptert(oppdrag: Oppdrag) {
-        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} akseptert")
+        logger.info("Utbetaling med id=${oppdrag.vedtakId()} godkjent")
         utbetalingService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingStatus.GODKJENT)
     }
 
     private fun oppdragAkseptertMedFeil(oppdrag: Oppdrag) {
-        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} akseptert med feil")
+        logger.info("Utbetaling med id=${oppdrag.vedtakId()} godkjent med feil")
         utbetalingService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingStatus.GODKJENT_MED_FEIL)
     }
 
     private fun oppdragAvvist(oppdrag: Oppdrag) {
-        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} avvist")
+        logger.info("Utbetaling med id=${oppdrag.vedtakId()} avvist")
         utbetalingService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingStatus.AVVIST)
     }
 
     private fun oppdragFeilet(oppdrag: Oppdrag, oppdragXml: String) {
-        logger.info("Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet", kv("oppdrag", oppdragXml))
+        logger.info("Utbetaling med id=${oppdrag.vedtakId()} feilet", kv("oppdrag", oppdragXml))
         utbetalingService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingStatus.FEILET)
     }
 
     private fun oppdragFeiletUkjent(oppdrag: Oppdrag, oppdragXml: String) {
-        // TODO bør denne håndteres på noen annen måte?
         logger.info(
-            "Utbetalingsoppdrag med id=${oppdrag.vedtakId()} feilet med ukjent feil",
+            "Utbetaling med id=${oppdrag.vedtakId()} feilet med ukjent feil",
             kv("utbetaling/iverksetting", oppdragXml)
         )
         utbetalingService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingStatus.FEILET)

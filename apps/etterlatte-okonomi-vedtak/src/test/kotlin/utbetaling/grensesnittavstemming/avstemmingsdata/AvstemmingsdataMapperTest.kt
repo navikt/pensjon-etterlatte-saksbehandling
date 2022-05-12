@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
-import no.nav.etterlatte.utbetaling.common.Tidspunkt.Companion.tidssoneNorge
+import no.nav.etterlatte.utbetaling.common.norskTidssone
 import no.nav.etterlatte.utbetaling.common.toTidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
@@ -23,7 +23,7 @@ import java.time.temporal.ChronoUnit
 internal class AvstemmingsdataMapperTest {
 
     @Test
-    fun `skal opprette avstemming fra utbetalingsoppdrag med startmelding, datamelding og sluttmelding`() {
+    fun `skal opprette avstemming fra utbetaling med startmelding, datamelding og sluttmelding`() {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
 
@@ -214,33 +214,45 @@ internal class AvstemmingsdataMapperTest {
 
 
     @Test
-    fun `foerste og siste avstemmingsnoekkel skal finnes fra utbetalingsoppdrag`() {
-        val fraOgMed = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).minusDays(1).toTidspunkt(tidssoneNorge)
-        val til = LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0).plusHours(1).toTidspunkt(tidssoneNorge)
+    fun `foerste og siste avstemmingsnoekkel skal finnes fra utbetalinger`() {
+        val fraOgMed = LocalDateTime.of(
+            2020, Month.APRIL, 10, 14, 0, 0
+        ).minusDays(1).toTidspunkt(norskTidssone)
+
+        val til = LocalDateTime.of(
+            2022, Month.JANUARY, 24, 22, 0, 0
+        ).plusHours(1).toTidspunkt(norskTidssone)
 
         val utbetalinger = listOf(
             utbetaling(
                 id = 1,
-                avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).toTidspunkt(tidssoneNorge)
+                avstemmingsnoekkel = LocalDateTime.of(
+                    2020, Month.APRIL, 10, 14, 0, 0
+                ).toTidspunkt(norskTidssone)
             ),
             utbetaling(
                 id = 2,
-                avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusDays(1)
-                    .toTidspunkt(tidssoneNorge)
+                avstemmingsnoekkel = LocalDateTime.of(
+                    2020, Month.APRIL, 10, 14, 0, 0
+                ).plusDays(1).toTidspunkt(norskTidssone)
             ),
             utbetaling(
                 id = 3,
-                avstemmingsnoekkel = LocalDateTime.of(2022, Month.JANUARY, 24, 22, 0, 0).toTidspunkt(tidssoneNorge)
+                avstemmingsnoekkel = LocalDateTime.of(
+                    2022, Month.JANUARY, 24, 22, 0, 0
+                ).toTidspunkt(norskTidssone)
             ),
             utbetaling(
                 id = 4,
-                avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusHours(1)
-                    .toTidspunkt(tidssoneNorge)
+                avstemmingsnoekkel = LocalDateTime.of(
+                    2020, Month.APRIL, 10, 14, 0, 0
+                ).plusHours(1).toTidspunkt(norskTidssone)
             ),
             utbetaling(
                 id = 5,
-                avstemmingsnoekkel = LocalDateTime.of(2020, Month.APRIL, 10, 14, 0, 0).plusMinutes(2)
-                    .toTidspunkt(tidssoneNorge)
+                avstemmingsnoekkel = LocalDateTime.of(
+                    2020, Month.APRIL, 10, 14, 0, 0)
+                    .plusMinutes(2).toTidspunkt(norskTidssone)
             ),
         )
 

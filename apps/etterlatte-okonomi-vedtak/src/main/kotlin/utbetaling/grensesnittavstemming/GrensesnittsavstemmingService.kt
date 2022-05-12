@@ -1,6 +1,8 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.toNorskTid
+import no.nav.etterlatte.utbetaling.common.toTidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataMapper
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
@@ -53,11 +55,9 @@ class GrensesnittsavstemmingService(
 
     private fun tidspunktMidnattIdag(): Tidspunkt =
         Tidspunkt.now(clock)
-            .toZonedNorskTid()
+            .toNorskTid()
             .truncatedTo(ChronoUnit.DAYS) // 00.00 norsk tid
-            .toInstant().let {
-                Tidspunkt(it)
-            }
+            .toTidspunkt()
 
     private fun tidspunktForrigeAvstemming() =
         grensesnittavstemmingDao.hentSisteAvstemming()?.periodeTil ?: MIN_INSTANT

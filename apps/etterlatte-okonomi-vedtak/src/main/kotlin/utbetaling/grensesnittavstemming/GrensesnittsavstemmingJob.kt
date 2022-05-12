@@ -33,14 +33,12 @@ class GrensesnittsavstemmingJob(
             }
         }
 
-
     class Grensesnittsavstemming(
         val grensesnittsavstemmingService: GrensesnittsavstemmingService,
         val leaderElection: LeaderElection,
         val jobbNavn: String,
     ) {
         private val log = LoggerFactory.getLogger(this::class.java)
-
 
         fun run() {
             withLogContext {
@@ -51,7 +49,6 @@ class GrensesnittsavstemmingJob(
             }
         }
     }
-
 
     companion object {
         private val logger = LoggerFactory.getLogger(GrensesnittsavstemmingJob::class.java)

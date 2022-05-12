@@ -31,9 +31,9 @@ class GrunnlagHendelser(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event_name", "ny_opplysning") }
+            //validate { it.demandValue("@event_name", "ny_opplysning") }
             validate { it.requireKey("opplysning") }
-            validate { it.requireKey("saksId") }
+            validate { it.requireKey("sak") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
@@ -42,11 +42,12 @@ class GrunnlagHendelser(
         withLogContext(packet.correlationId()) {
             if(Kontekst.get().AppUser !is Self){ logger.warn("AppUser i kontekst er ikke Self i R&R-flyten") }
 
+            //TODO fjerne spor av liste
             val lagretGrunnlag = inTransaction {
-                val gjeldendeGrunnlag = grunnlag.hent(packet["saksId"].asLong())
-                val opplysninger: List<Grunnlagsopplysning<ObjectNode>> =
+                val gjeldendeGrunnlag = grunnlag.hent(packet["sak"].asLong())
+                val opplysninger: Grunnlagsopplysning<ObjectNode> =
                     objectMapper.readValue(packet["opplysning"].toJson())!!
-                gjeldendeGrunnlag.leggTilGrunnlagListe(opplysninger)
+                gjeldendeGrunnlag.leggTilGrunnlagListe(listOf( opplysninger))
                 gjeldendeGrunnlag
             }
 

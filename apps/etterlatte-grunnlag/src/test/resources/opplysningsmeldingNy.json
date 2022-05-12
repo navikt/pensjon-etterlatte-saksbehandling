@@ -1,0 +1,78 @@
+{
+  "@behov": "SOEKER_PDL_V1",
+  "sak": 1,
+  "fnr": "12101376212",
+  "rolle": "BARN",
+  "@correlation_id": null,
+  "system_read_count": 1,
+  "system_participating_services": [
+    {
+      "service": "etterlatte-grunnlag",
+      "instance": "etterlatte-grunnlag-7c44bb85c9-9jrp2",
+      "time": "2022-05-12T15:59:55.112657478"
+    },
+    {
+      "service": "etterlatte-opplysninger-fra-pdl",
+      "instance": "etterlatte-opplysninger-fra-pdl-54dd59fdf7-gftr9",
+      "time": "2022-05-12T15:59:55.216971582"
+    }
+  ],
+  "opplysning": {
+    "id": "612a5c09-4888-4c43-86a2-27ea0e04c63d",
+    "kilde": {
+      "navn": "pdl",
+      "tidspunktForInnhenting": "2022-05-12T13:59:59.603607876Z",
+      "registersReferanse": null,
+      "type": "pdl"
+    },
+    "opplysningType": "SOEKER_PDL_V1",
+    "meta": {},
+    "opplysning": {
+      "fornavn": "TALENTFULL",
+      "etternavn": "BLYANT",
+      "foedselsnummer": "12101376212",
+      "foedselsdato": "2013-10-12",
+      "foedselsaar": 2013,
+      "foedeland": "NOR",
+      "doedsdato": null,
+      "adressebeskyttelse": "UGRADERT",
+      "bostedsadresse": [
+        {
+          "type": "VEGADRESSE",
+          "aktiv": true,
+          "coAdresseNavn": null,
+          "adresseLinje1": "Bøveien 937",
+          "adresseLinje2": null,
+          "adresseLinje3": null,
+          "postnr": "8475",
+          "poststed": null,
+          "land": null,
+          "kilde": "FREG",
+          "gyldigFraOgMed": "1999-01-01T00:00:00",
+          "gyldigTilOgMed": null
+        }
+      ],
+      "deltBostedsadresse": null,
+      "kontaktadresse": [],
+      "oppholdsadresse": [],
+      "sivilstatus": "UOPPGITT",
+      "statsborgerskap": "NOR",
+      "utland": {
+        "innflyttingTilNorge": [],
+        "utflyttingFraNorge": []
+      },
+      "familieRelasjon": {
+        "ansvarligeForeldre": [
+          "22128202440",
+          "03108718357"
+        ],
+        "foreldre": [
+          "22128202440",
+          "03108718357"
+        ],
+        "barn": null
+      }
+    },
+    "attestering": null
+  }
+}

@@ -1,6 +1,5 @@
 {
   "@event_name": "ey_fordelt",
-  "@soeknad_fordelt": true,
   "@skjema_info": {
     "imageTag": "9f1f95b2472742227b37d19dd2d735ac9001995e",
     "spraak": "nb",
@@ -145,11 +144,11 @@
       },
       {
         "fornavn": {
-          "svar": "fn",
+          "svar": "fe",
           "spoersmaal": "Fornavn"
         },
         "etternavn": {
-          "svar": "en",
+          "svar": "fe",
           "spoersmaal": "Etternavn"
         },
         "foedselsnummer": {
@@ -208,22 +207,29 @@
     "mottattDato": "2022-02-14T14:37:24.573612786",
     "template": "barnepensjon_v2"
   },
-  "@lagret_soeknad_id": 360,
+  "@lagret_soeknad_id": "TEST-157fb687-3dfe-40bf-b099-45d531c0d12d",
   "@template": "soeknad",
-  "@fnr_soeker": "20110875720",
-  "@hendelse_gyldig_til": "2025-01-03T13:15:31.249299158Z",
-  "system_read_count": 1,
+  "@fnr_soeker": "12101376212",
+  "@hendelse_gyldig_til": "2022-05-12T10:17:34.833603804+02:00",
+  "system_read_count": 2,
   "system_participating_services": [
     {
-      "service": "innsendt-soeknad",
-      "instance": "innsendt-soeknad-5df54b5547-xtntr",
-      "time": "2022-01-03T13:45:31.249795745"
+      "service": "etterlatte-testdata",
+      "instance": "etterlatte-testdata-5b9947f9cb-bfv7k",
+      "time": "2022-05-12T09:17:34.83685562"
     },
     {
       "service": "sjekk-adressebeskyttelse",
-      "instance": "sjekk-adressebeskyttelse-66bffc6ccc-4wmsn",
-      "time": "2022-01-03T13:45:31.256701251"
+      "instance": "sjekk-adressebeskyttelse-868f49b8c9-lr8d2",
+      "time": "2022-05-12T09:17:34.899362407"
+    },
+    {
+      "service": "etterlatte-fordeler",
+      "instance": "etterlatte-fordeler-696d4f464-j6n4r",
+      "time": "2022-05-12T09:17:36.828587291"
     }
   ],
-  "@adressebeskyttelse": "STRENGT_FORTROLIG_UTLAND"
+  "@adressebeskyttelse": "UGRADERT",
+  "@soeknad_fordelt": true,
+  "@correlation_id": "f7542492-0ee4-477d-9cf7-01262c3f263e"
 }

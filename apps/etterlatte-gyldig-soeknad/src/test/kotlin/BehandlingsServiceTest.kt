@@ -49,7 +49,7 @@ internal class BehandlingsServiceTest {
             emptyList()
         )
 
-        val hendelseJson = objectMapper.readTree(javaClass.getResource("/fullMessage2.json")!!.readText())
+        val hendelseJson = objectMapper.readTree(javaClass.getResource("/fordeltmelding.json")!!.readText())
         val hentetSaksid = behandlingsservice.initierBehandling(
             1,
             hendelseJson["@skjema_info"]["mottattDato"].asText(),

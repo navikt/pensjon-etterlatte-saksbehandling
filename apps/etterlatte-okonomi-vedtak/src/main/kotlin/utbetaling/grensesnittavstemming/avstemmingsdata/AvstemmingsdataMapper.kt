@@ -1,9 +1,9 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Aksjonsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AvstemmingType
@@ -15,9 +15,9 @@ import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Grunnlagsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.KildeType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Periodedata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Totaldata
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.format.DateTimeFormatter
-import java.math.BigDecimal
 
 class AvstemmingsdataMapper(
     private val utbetalinger: List<Utbetaling>,
@@ -82,7 +82,7 @@ class AvstemmingsdataMapper(
                     this.detaljType = detaljType
                     offnr = it.foedselsnummer.value
                     avleverendeTransaksjonNokkel = it.sakId.value
-                    tidspunkt = it.avstemmingsnoekkel.toNorskTid().format(tidsstempelTime)
+                    tidspunkt = it.avstemmingsnoekkel.toNorskTid().format(tidsstempelMikro)
                     if (detaljType in listOf(DetaljType.AVVI, DetaljType.VARS) && it.kvittering != null) {
                         meldingKode = it.kvitteringMeldingKode
                         alvorlighetsgrad = it.kvitteringFeilkode

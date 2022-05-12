@@ -24,7 +24,8 @@ internal class AvstemmingsdataJaxbTest {
 
         val uuid = UUIDBase64()
         val utbetaling = listOf(
-            utbetaling(id = 1, status = UtbetalingStatus.FEILET, avstemmingsnoekkel = til, opprettet = til))
+            utbetaling(id = 1, status = UtbetalingStatus.FEILET, avstemmingsnoekkel = til, opprettet = til)
+        )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetaling, fraOgMed, til, uuid)
         val (startMelding, dataMelding, sluttMelding) = avstemmingsdataMapper.opprettAvstemmingsmelding()
@@ -108,7 +109,7 @@ internal class AvstemmingsdataJaxbTest {
                 <meldingKode>08</meldingKode>
                 <alvorlighetsgrad>hva skal stå her?</alvorlighetsgrad>
                 <tekstMelding>En beskrivelse</tekstMelding>
-                <tidspunkt>${formatterTime.format(avstemmingsnoekkel.toNorskTid())}</tidspunkt>
+                <tidspunkt>${formatterMicro.format(avstemmingsnoekkel.toNorskTid())}</tidspunkt>
             </detalj>
         </Avstemmingsdata>
         

@@ -1,13 +1,13 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.tidspunktMidnattIdag
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataMapper
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 class GrensesnittsavstemmingService(
     private val avstemmingsdataSender: AvstemmingsdataSender,
@@ -16,10 +16,17 @@ class GrensesnittsavstemmingService(
     private val clock: Clock
 ) {
 
+    fun hentNestePeriode() = Avstemmingsperiode(
+        fraOgMed = tidspunktMidnattIdag(clock),
+        til = grensesnittavstemmingDao.hentSisteAvstemming()?.periodeTil ?: MIN_INSTANT,
+    )
+
     fun startGrensesnittsavstemming(
-        periodeFraOgMed: Tidspunkt = tidspunktForrigeAvstemming(),
-        periodeTil: Tidspunkt = tidspunktMidnattIdag()
+        avstemmingsperiode: Avstemmingsperiode = hentNestePeriode()
     ) {
+        val periodeFraOgMed = avstemmingsperiode.fraOgMed
+        val periodeTil = avstemmingsperiode.til
+
         logger.info("Avstemmer fra $periodeFraOgMed til $periodeTil")
         if (periodeFraOgMed != periodeTil) {
             val utbetalinger = utbetalingDao.hentAlleUtbetalingerMellom(periodeFraOgMed, periodeTil)
@@ -50,17 +57,6 @@ class GrensesnittsavstemmingService(
             logger.warn("Utfører ikke avstemming fordi denne perioden allerede er kjørt")
         }
     }
-
-    private fun tidspunktMidnattIdag(): Tidspunkt =
-        Tidspunkt.now(clock)
-            .toZonedNorskTid()
-            .truncatedTo(ChronoUnit.DAYS) // 00.00 norsk tid
-            .toInstant().let {
-                Tidspunkt(it)
-            }
-
-    private fun tidspunktForrigeAvstemming() =
-        grensesnittavstemmingDao.hentSisteAvstemming()?.periodeTil ?: MIN_INSTANT
 
     companion object {
         private val MIN_INSTANT = Tidspunkt(Instant.EPOCH)

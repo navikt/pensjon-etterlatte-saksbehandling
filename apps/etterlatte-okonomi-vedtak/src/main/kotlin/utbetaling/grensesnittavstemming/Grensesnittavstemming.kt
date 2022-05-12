@@ -5,6 +5,11 @@ import java.nio.ByteBuffer
 import java.util.*
 
 
+data class Avstemmingsperiode(
+    val fraOgMed: Tidspunkt,
+    val til: Tidspunkt
+)
+
 data class UUIDBase64(val value: String = encodeUUIDBase64(UUID.randomUUID())) {
     companion object {
         private fun encodeUUIDBase64(uuid: UUID): String {

@@ -2,6 +2,9 @@ package grunnlag
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.Self
 import no.nav.etterlatte.grunnlag.GrunnlagFactory
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
@@ -11,6 +14,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import testutils.TestDbKontekst
 import java.io.FileNotFoundException
 import java.util.*
 
@@ -27,6 +31,8 @@ class GrunnlagHendelserTest {
 
     @Test
     fun `skal lese opplysningsbehov og legge til opplysning`() {
+        Kontekst.set(Context(Self("testApp"), TestDbKontekst))
+
         val opplysninger = listOf(
             Grunnlagsopplysning(
                 UUID.randomUUID(),

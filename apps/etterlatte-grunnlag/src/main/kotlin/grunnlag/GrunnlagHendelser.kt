@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -39,15 +40,18 @@ class GrunnlagHendelser(
 
     override fun onPacket(packet: no.nav.helse.rapids_rivers.JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            if(Kontekst.get()?.AppUser !is Self){ logger.warn("AppUser i kontekst er ikke Self i R&R-flyten") }
+            if(Kontekst.get().AppUser !is Self){ logger.warn("AppUser i kontekst er ikke Self i R&R-flyten") }
 
-            val gjeldendeGrunnlag = grunnlag.hent(packet["saksId"].asLong())
-            val opplysninger: List<Grunnlagsopplysning<ObjectNode>> =
-                objectMapper.readValue(packet["opplysning"].toJson())!!
-            gjeldendeGrunnlag.leggTilGrunnlagListe(opplysninger)
+            val lagretGrunnlag = inTransaction {
+                val gjeldendeGrunnlag = grunnlag.hent(packet["saksId"].asLong())
+                val opplysninger: List<Grunnlagsopplysning<ObjectNode>> =
+                    objectMapper.readValue(packet["opplysning"].toJson())!!
+                gjeldendeGrunnlag.leggTilGrunnlagListe(opplysninger)
+                gjeldendeGrunnlag
+            }
 
             //TODO Her bør jeg vel lage en ny melding
-            packet["grunnlag"] = gjeldendeGrunnlag.serialiserbarUtgave()
+            packet["grunnlag"] = lagretGrunnlag.serialiserbarUtgave()
             packet["@event_name"] = "GRUNNLAG:GRUNNLAGENDRET"
             context.publish(packet.toJson())
             logger.info("Lagt ut melding om grunnlagsendring")

@@ -25,7 +25,7 @@ import org.slf4j.event.Level
 import java.util.*
 import javax.sql.DataSource
 
-fun main() {
+suspend fun main() {
     ventPaaNettverk()
     val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
@@ -40,7 +40,13 @@ fun main() {
         val grunnlag = GrunnlagFactory(beanFactory.opplysningDao())
         GrunnlagHendelser(this, grunnlag)//, beanFactory.datasourceBuilder().dataSource)
         BehandlingHendelser(this,grunnlag)
-    }.start()
+    }.also {
+            withContext(Dispatchers.Default + Kontekst.asContextElement(
+            value = Context(Self("etterlatte-grunnlag"), DatabaseContext( beanFactory.datasourceBuilder().dataSource))
+        )){
+           it.start()
+        }
+        }
 }
 
 fun Application.module(beanFactory: BeanFactory){

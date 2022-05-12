@@ -8,6 +8,10 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
   liveness:
     initialDelay: 5
     path: /isalive

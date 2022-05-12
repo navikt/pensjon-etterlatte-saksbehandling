@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { Button, ContentContainer, Heading, Table, Tag } from "@navikt/ds-react";
 import { OpplysningsType } from "../../../store/reducers/BehandlingReducer";
 import BrevModal from "./brev-modal";
-import { Information } from '@navikt/ds-icons'
+import { Information, Success } from '@navikt/ds-icons'
 import NyttBrev from "./nytt-brev";
 import { Border, HeadingWrapper } from "../soeknadsoversikt/styled";
 import { BehandlingsStatusSmall, IBehandlingsStatus } from "../behandlings-status";
@@ -17,32 +17,47 @@ import { useParams } from "react-router-dom";
 export const Brev = () => {
   const { behandlingId } = useParams()
   const { mottattDato } = usePersonInfoFromBehandling()
-  // const { state } = useContext(AppContext)
-
-  // const gyldigeTyper = [OpplysningsType.innsender, OpplysningsType.soeker_pdl]
-
-  // const grunnlagListe: IBehandlingsopplysning[] = state.behandlingReducer.grunnlag
-  //     .filter(grunnlag => gyldigeTyper.includes(grunnlag.opplysningType))
 
   const [brevListe, setBrevListe] = useState<any[]>()
-
-  const type = (opplysningType: OpplysningsType): string => {
-    switch (opplysningType) {
-      case OpplysningsType.innsender:
-        return 'Innsender'
-      case OpplysningsType.gjenlevende_forelder_pdl:
-        return 'Forelder'
-      case OpplysningsType.soeker_pdl:
-        return 'Søker'
-      default:
-        return ''
-    }
-  }
 
   useEffect(() => {
     hentAlleBrev(behandlingId!!)
         .then(res => setBrevListe(res))
   }, [])
+
+  const ferdigstill = (id: any) => {
+    console.log(id)
+
+    return Promise.resolve()
+  }
+
+  const hentStatusTag = (status: string) => {
+    if (['OPPRETTET', 'OPPDATERT'].includes(status)) {
+      return (
+          <Tag variant={'warning'} size={'small'} style={{ width: '100%' }}>
+            Ikke sendt &nbsp;<Information/>
+          </Tag>
+      )
+    } else if (status === 'FERDIGSTILT') {
+      return (
+          <Tag variant={'info'} size={'small'} style={{ width: '100%' }}>
+            Ferdigstilt &nbsp;<Information/>
+          </Tag>
+      )
+    } else if (status === 'SENDT') {
+        return (
+            <Tag variant={'success'} size={'small'} style={{ width: '100%' }}>
+              Sendt &nbsp;<Success/>
+            </Tag>
+        )
+    } else {
+      return (
+          <Tag variant={'error'} size={'small'} style={{ width: '100%' }}>
+            Slettet &nbsp;<Information/>
+          </Tag>
+      )
+    }
+  }
 
   return (
       <Content>
@@ -52,61 +67,62 @@ export const Brev = () => {
               Brev
             </Heading>
             <div className="details">
-              <BehandlingsStatusSmall status={IBehandlingsStatus.FORSTEGANG} />
-              <BehandlingsTypeSmall type={IBehandlingsType.BARNEPENSJON} />
+              <BehandlingsStatusSmall status={IBehandlingsStatus.FORSTEGANG}/>
+              <BehandlingsTypeSmall type={IBehandlingsType.BARNEPENSJON}/>
             </div>
           </HeadingWrapper>
-          <Soeknadsdato mottattDato={mottattDato} />
+          <Soeknadsdato mottattDato={mottattDato}/>
         </ContentHeader>
 
         <ContentContainer>
-              <Table>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.HeaderCell>ID</Table.HeaderCell>
-                    <Table.HeaderCell>Filnavn</Table.HeaderCell>
-                    <Table.HeaderCell>Mottaker navn</Table.HeaderCell>
-                    <Table.HeaderCell>Fødselsnummer</Table.HeaderCell>
-                    <Table.HeaderCell>Rolle</Table.HeaderCell>
-                    <Table.HeaderCell>Status</Table.HeaderCell>
-                    <Table.HeaderCell>Handlinger</Table.HeaderCell>
-                  </Table.Row>
-                </Table.Header>
+          <Table>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell>ID</Table.HeaderCell>
+                <Table.HeaderCell>Filnavn</Table.HeaderCell>
+                <Table.HeaderCell>Mottaker navn</Table.HeaderCell>
+                <Table.HeaderCell>Fødselsnummer</Table.HeaderCell>
+                {/* TODO: Burde vi vise hvilken rolle mottakeren har? Søker, innsender, etc..? */}
+                {/*<Table.HeaderCell>Rolle</Table.HeaderCell>*/}
+                <Table.HeaderCell>Status</Table.HeaderCell>
+                <Table.HeaderCell>Handlinger</Table.HeaderCell>
+              </Table.Row>
+            </Table.Header>
 
-                <Table.Body>
-                  {brevListe?.map((brev, i) => (
-                      <Table.Row key={i}>
-                        <Table.DataCell>{brev.id}</Table.DataCell>
-                        <Table.DataCell>Vedtak om innvilget barnepensjon</Table.DataCell>
-                        <Table.DataCell>
-                          {brev.mottaker.fornavn} {brev.mottaker.etternavn}
-                        </Table.DataCell>
-                        <Table.DataCell>
-                          {brev.mottaker.foedselsnummer}
-                        </Table.DataCell>
-                        <Table.DataCell>
-                          {/*{type(grunnlag.opplysningType)}*/}
-                          UKJENT
-                        </Table.DataCell>
-                        <Table.DataCell>
-                          <Tag variant="warning" size={'small'} style={{width: '100%'}}>
-                            Ikke sendt &nbsp;<Information />
-                          </Tag>
-                        </Table.DataCell>
-                        <Table.DataCell>
-                          <BrevModal brevId={brev.id}/>
-                        </Table.DataCell>
-                      </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table>
+            <Table.Body>
+              {brevListe?.map((brev, i) => (
+                  <Table.Row key={i}>
+                    <Table.DataCell>{brev.id}</Table.DataCell>
+                    <Table.DataCell>Vedtak om innvilget barnepensjon</Table.DataCell>
+                    <Table.DataCell>
+                      {brev.mottaker.fornavn} {brev.mottaker.etternavn}
+                    </Table.DataCell>
+                    <Table.DataCell>
+                      {brev.mottaker.foedselsnummer}
+                    </Table.DataCell>
+                    <Table.DataCell>
+                      {hentStatusTag(brev.status)}
+                    </Table.DataCell>
+                    <Table.DataCell>
+                      {['FERDIGSTILT', 'SENDT'].includes(brev.status) ? (
+                          <Button variant={'secondary'} size={'small'}>
+                            Vis
+                          </Button>
+                      ) : (
+                          <BrevModal brevId={brev.id} ferdigstill={ferdigstill}/>
+                      )}
+                    </Table.DataCell>
+                  </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
         </ContentContainer>
 
         <ContentContainer>
-          <NyttBrev />
+          <NyttBrev/>
         </ContentContainer>
 
-        <Border />
+        <Border/>
 
         <BehandlingHandlingKnapper>
           <Button variant={'primary'}>

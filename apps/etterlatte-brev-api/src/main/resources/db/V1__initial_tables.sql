@@ -40,8 +40,10 @@ CREATE TABLE status
 );
 
 INSERT INTO status(id, rang) VALUES('OPPRETTET', 1);
-INSERT INTO status(id, rang) VALUES('SENDT',2);
-INSERT INTO status(id, rang) VALUES('SLETTET', 3);
+INSERT INTO status(id, rang) VALUES('OPPDATERT',2);
+INSERT INTO status(id, rang) VALUES('FERDIGSTILT',3);
+INSERT INTO status(id, rang) VALUES('SENDT',4);
+INSERT INTO status(id, rang) VALUES('SLETTET', 5);
 
 CREATE TABLE hendelse
 (

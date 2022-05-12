@@ -9,7 +9,8 @@ import java.time.LocalDate
 class VedtakService {
     fun hentVedtak(vedtakId: String) = Vedtak(
         vedtakId = vedtakId,
-        type = if (vedtakId.toInt() % 2 == 0) VedtakType.INNVILGELSE else VedtakType.AVSLAG,
+//        type = if (vedtakId.toInt() % 2 == 0) VedtakType.INNVILGELSE else VedtakType.AVSLAG,
+        type = VedtakType.INNVILGELSE,
         status = "Fattet",
         dato = LocalDate.now(),
         gjelderFom = LocalDate.now(),
@@ -18,8 +19,8 @@ class VedtakService {
         saksnummer = "123456",
         virkningsdato = LocalDate.now(),
         barn = Barn(
-            navn = "Ola nordmann",
-            fnr = "01010120200"
+            navn = "Blåøyd Saks",
+            fnr = "05111850870"
         ),
         avdoed = Avdoed(
             navn = "Avdød nordmann",

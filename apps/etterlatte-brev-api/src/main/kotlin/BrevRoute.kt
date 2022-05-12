@@ -14,37 +14,39 @@ fun Route.brevRoute(service: BrevService) {
         get("{behandlingId}") {
             val behandlingId = context.parameters["behandlingId"]!!
 
-            call.respond(service.hentBrev(behandlingId))
+            call.respond(service.hentAlleBrev(behandlingId))
         }
 
         post("{behandlingId}") {
             val behandlingId = context.parameters["behandlingId"]!!
-            val mottaker = call.receive<Mottaker>()
+            val request = call.receive<OpprettBrevRequest>()
 
-            val brev = service.opprett(behandlingId, mottaker)
+            val brev = service.opprett(behandlingId, request.mottaker, request.mal)
 
             call.respond(brev)
         }
 
-        post("{behandlingId}/pdf") {
-            val behandlingId = context.parameters["behandlingId"]!!
-//            val request = call.receive<OpprettBrevRequest>()
+        post("{brevId}/pdf") {
+            val brevId = context.parameters["brevId"]!!
+            val bytes = service.hentBrevInnhold(brevId.toLong())
 
-//            val pdfBytes = service.genererPdf(behandlingId)
-//
-            call.respond("".toByteArray())
+            call.respond(bytes)
         }
 
-        get("{behandlingId}/send") {
-            val behandlingId = context.parameters["behandlingId"]!!
+        post("{brevId}/ferdigstill") {
+            val brevId = context.parameters["brevId"]!!
 
-            service.sendBrev(behandlingId)
+            val brev = service.ferdigstillBrev(brevId.toLong())
 
-            call.respond("OK")
+            //TODO: Sending av brev
+//            service.sendBrev(behandlingId)
+
+            call.respond(brev)
         }
     }
 }
 
 class OpprettBrevRequest(
+    val mal: String,
     val mottaker: Mottaker
 )

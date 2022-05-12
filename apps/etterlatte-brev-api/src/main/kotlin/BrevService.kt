@@ -7,7 +7,10 @@ import model.brev.InnvilgetBrevRequest
 import no.nav.etterlatte.db.Brev
 import no.nav.etterlatte.db.BrevRepository
 import model.brev.AvslagBrevRequest
+import no.nav.etterlatte.db.Adresse
+import no.nav.etterlatte.db.BrevID
 import no.nav.etterlatte.db.Mottaker
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.vedtak.VedtakService
 import org.slf4j.LoggerFactory
 import pdf.PdfGeneratorKlient
@@ -20,26 +23,45 @@ class BrevService(
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
     private val vedtakService = VedtakService()
 
-    suspend fun hentBrev(behandlingId: String): List<Brev> {
+    suspend fun hentAlleBrev(behandlingId: String): List<Brev> {
         val brev = db.hentBrevForBehandling(behandlingId.toLong())
 
         return brev.ifEmpty {
-//            listOf(opprett(behandlingId))
-            emptyList()
+            logger.info("Ingen brev funnet for behandling $behandlingId. Forsøker å opprette fra vedtak.")
+            listOf(opprettFraVedtak(behandlingId))
         }
     }
 
-    suspend fun opprett(behandlingId: String, mottaker: Mottaker): Brev {
+    fun hentBrevMedId(id: BrevID): Brev = db.hentBrev(id)
 
+    fun hentBrevInnhold(id: BrevID): ByteArray = db.hentBrevInnhold(id)
+
+    fun opprett(behandlingId: String, mottaker: Mottaker, mal: String): Brev {
+        // TODO: Fikse støtte for mal
         return db.opprettBrev(behandlingId.toLong(), mottaker)
     }
 
-    suspend fun opprett(behandlingId: String): ByteArray {
+    fun ferdigstillBrev(id: BrevID): Brev {
+        db.oppdaterStatus(id, "FERDIGSTILT")
+
+        return hentBrevMedId(id)
+    }
+
+    suspend fun opprettFraVedtak(behandlingId: String): Brev {
+        // TODO: Håndtere tilfeller hvor vedtak mangler ...
         val vedtak = vedtakService.hentVedtak(behandlingId)
 
-        val brev = db.hentBrev(vedtak.vedtakId.toLong())
+        val navn = vedtak.barn.navn.split(" ")
+        val mottaker = Mottaker(
+            fornavn = navn[0],
+            etternavn= navn[1],
+            foedselsnummer = Foedselsnummer.of(vedtak.barn.fnr),
+            adresse = Adresse("Fyrstikkalléen 1", "0661", "Oslo")
+        )
 
-        return brev?.data ?: genererPdf(vedtak)
+        val pdf = genererPdf(vedtak)
+
+        return db.opprettBrev(behandlingId.toLong(), mottaker, pdf)
     }
 
     private suspend fun genererPdf(vedtak: Vedtak): ByteArray {

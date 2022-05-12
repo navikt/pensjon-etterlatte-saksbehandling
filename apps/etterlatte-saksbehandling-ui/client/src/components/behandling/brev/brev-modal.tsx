@@ -1,4 +1,4 @@
-import { BodyLong, Button, Modal } from "@navikt/ds-react";
+import { BodyLong, Button, Loader, Modal } from "@navikt/ds-react";
 import { useState } from "react";
 import { genererPdf } from "../../../shared/api/brev";
 import { useParams } from "react-router-dom";
@@ -17,28 +17,29 @@ const ButtonRow = styled.div`
   width: 100%;
 `
 
-export default function BrevModal({ brevId }: { brevId: string }) {
+export default function BrevModal({ brevId, ferdigstill }: {
+  brevId: string
+  ferdigstill: (id: any) => Promise<void>
+}) {
   const [error, setError] = useState<string>()
   const [fileURL, setFileURL] = useState<string>()
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
-  const generatePDF = () => genererPdf(brevId)
-      .then(file => URL.createObjectURL(file))
-      .then(url => setFileURL(url))
-      .catch(e => setError(e.message))
-      .finally(() => {
-        if (fileURL) URL.revokeObjectURL(fileURL)
-      })
-
   const open = () => {
     setIsOpen(true)
 
-    generatePDF()
+    genererPdf(brevId)
+        .then(file => URL.createObjectURL(file))
+        .then(url => setFileURL(url))
+        .catch(e => setError(e.message))
+        .finally(() => {
+          if (fileURL) URL.revokeObjectURL(fileURL)
+        })
   }
 
   const send = () => {
-    console.log('wheeeeee')
-    setIsOpen(false)
+    ferdigstill(brevId)
+        .then(() => setIsOpen(false))
   }
 
   return (

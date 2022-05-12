@@ -15,7 +15,6 @@ import java.util.*
 internal class LesGyldigSoeknadsmelding(
     rapidsConnection: RapidsConnection,
     private val gyldigSoeknad: GyldigSoeknadService,
-    private val pdl: Pdl,
     private val behandling: Behandling,
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(LesGyldigSoeknadsmelding::class.java)
@@ -26,10 +25,8 @@ internal class LesGyldigSoeknadsmelding(
             validate { it.demandValue("@soeknad_fordelt", true) }
             validate { it.interestedIn("@correlation_id") }
             validate { it.requireKey("@skjema_info") }
-            validate { it.demandValue("@skjema_info.type", "BARNEPENSJON") }
-            validate { it.demandValue("@skjema_info.versjon", "2") }
-            validate { it.requireKey("@lagret_soeknad_id") }
             validate { it.requireKey("@fnr_soeker") } //TODO: sjekk at dette er riktig verdi
+            validate { it.rejectKey("@gyldig_innsender") }
         }.register(this)
     }
 
@@ -39,9 +36,8 @@ internal class LesGyldigSoeknadsmelding(
 
             try {
                 val personGalleri = gyldigSoeknad.hentPersongalleriFraSoeknad(packet["@skjema_info"])
-                val familieRelasjonPdl = gyldigSoeknad.hentSoekerFraPdl(personGalleri.soeker, pdl)
-                val gyldighetsVurdering = gyldigSoeknad.vurderGyldighet(personGalleri, familieRelasjonPdl)
-                val erGyldigFramsatt = if (gyldighetsVurdering.resultat == VurderingsResultat.OPPFYLT) true else false
+                val gyldighetsVurdering = gyldigSoeknad.vurderGyldighet(personGalleri)
+                val erGyldigFramsatt = (gyldighetsVurdering.resultat == VurderingsResultat.OPPFYLT)
                 logger.info("Gyldighetsvurdering I lesGyldigsoeknad: {}", gyldighetsVurdering)
 
                 val sak = behandling.skaffSak(packet["@fnr_soeker"].asText(), packet["@skjema_info"]["type"].asText())

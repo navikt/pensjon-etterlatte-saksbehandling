@@ -20,7 +20,7 @@ import setVurdering
 import vurderOpplysning
 import java.time.LocalDateTime
 
-class GyldigSoeknadService {
+class GyldigSoeknadService(private val pdl: Pdl,) {
     private val logger = LoggerFactory.getLogger(GyldigSoeknadService::class.java)
 
     fun hentPersongalleriFraSoeknad(jsonNode: JsonNode): Persongalleri {
@@ -38,12 +38,13 @@ class GyldigSoeknadService {
         )
     }
 
-    fun hentSoekerFraPdl(fnrSoeker: String, pdl: Pdl): FamilieRelasjon? {
+    fun hentSoekerFraPdl(fnrSoeker: String): FamilieRelasjon? {
         val soeker = pdl.hentPdlModell(fnrSoeker, PersonRolle.BARN)
         return soeker.familieRelasjon
     }
 
-    fun vurderGyldighet(persongalleri: Persongalleri, familieRelasjonSoeker: FamilieRelasjon?): GyldighetsResultat {
+    fun vurderGyldighet(persongalleri: Persongalleri): GyldighetsResultat {
+        val familieRelasjonSoeker = hentSoekerFraPdl(persongalleri.soeker )
         val gyldighet = listOf(
             innsenderErForelder(
                 GyldighetsTyper.INNSENDER_ER_FORELDER,

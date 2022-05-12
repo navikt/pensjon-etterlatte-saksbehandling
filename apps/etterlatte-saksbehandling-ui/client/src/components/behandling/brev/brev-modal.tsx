@@ -1,29 +1,37 @@
 import { BodyLong, Button, Loader, Modal } from "@navikt/ds-react";
 import { useState } from "react";
-import { genererPdf } from "../../../shared/api/brev";
+import { ferdigstillBrev, genererPdf } from "../../../shared/api/brev";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
+import { Delete, Findout, Notes, Success } from "@navikt/ds-icons";
 
 const PdfViewer = styled.iframe`
-  margin: 80px 30px;
+  margin-top: 60px;
+  margin-bottom: 20px;
   width: 800px;
   height: 1080px;
 `
 
 const ButtonRow = styled.div`
   background: white;
-  position: absolute;
-  bottom: 0;
+  //overflow: hidden;
   width: 100%;
+  text-align: right;
 `
 
-export default function BrevModal({ brevId, ferdigstill }: {
+const ActionBtn = styled(Button)`
+  min-width: 100px;
+`
+
+export default function BrevModal({ brevId, status }: {
   brevId: string
-  ferdigstill: (id: any) => Promise<void>
+  status: string
 }) {
   const [error, setError] = useState<string>()
   const [fileURL, setFileURL] = useState<string>()
   const [isOpen, setIsOpen] = useState<boolean>(false)
+
+  const isDone = ['FERDIGSTILT', 'SENDT'].includes(status)
 
   const open = () => {
     setIsOpen(true)
@@ -38,18 +46,19 @@ export default function BrevModal({ brevId, ferdigstill }: {
   }
 
   const send = () => {
-    ferdigstill(brevId)
+    ferdigstillBrev(brevId)
         .then(() => setIsOpen(false))
   }
 
   return (
       <>
-        <Button
-            variant={'primary'}
-            size={'small'}
-            onClick={open}
-        >
-          Ferdigstill
+        <Button variant={isDone ? 'secondary' : 'primary'} size={'small'} onClick={open}>
+          {/*{isDone ? "Vis" : "Ferdigstill"}*/}
+          {isDone ? <Findout /> : <Notes />}
+        </Button>
+        &nbsp;&nbsp;
+        <Button variant={'danger'} size={'small'} disabled={isDone}>
+          <Delete />
         </Button>
 
         <Modal open={isOpen} onClose={() => setIsOpen(false)}>
@@ -68,12 +77,17 @@ export default function BrevModal({ brevId, ferdigstill }: {
 
             <ButtonRow>
               <Button variant={'secondary'} onClick={() => setIsOpen(false)}>
-                Avbryt
+                {isDone ? 'Lukk' : 'Avbryt'}
               </Button>
 
-              <Button variant={'primary'} onClick={send}>
-                Send
-              </Button>
+              {!isDone && (
+                  <>
+                    &nbsp;&nbsp;
+                    <Button variant={'primary'} onClick={send}>
+                      Godkjenn <Success />
+                    </Button>
+                  </>
+              )}
             </ButtonRow>
           </Modal.Content>
         </Modal>

@@ -1,8 +1,8 @@
 import { BodyShort, Button, Cell, Grid, Modal, Select, TextField } from "@navikt/ds-react";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Add } from "@navikt/ds-icons";
 import styled from "styled-components";
-import { opprettBrev } from "../../../shared/api/brev";
+import { hentMaler, opprettBrev } from "../../../shared/api/brev";
 import { useParams } from "react-router-dom";
 import { Border } from "../soeknadsoversikt/styled";
 import { IBehandlingsopplysning, OpplysningsType } from "../../../store/reducers/BehandlingReducer";
@@ -19,6 +19,11 @@ export default function NyttBrev() {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [mottaker, setMottaker] = useState<any>({})
   const [mal, setMal] = useState<any>({})
+  const [maler, setMaler] = useState<any>([])
+
+  useEffect(() => {
+    hentMaler().then(res => setMaler(res))
+  }, [])
 
   const gyldigeTyper = [OpplysningsType.innsender, OpplysningsType.soeker_pdl]
 
@@ -78,9 +83,9 @@ export default function NyttBrev() {
 
             <Select label={'Mal'} size={'medium'} onChange={(e) => setMal(e.target.value)}>
               <option value={undefined}>Velg mal ...</option>
-              <option value={'verge-dokumentasjon-nb'}>Dokumentasjon om vergemål</option>
-              <option value={'innvilget-nb'}>Vedtak om innvilget barnepensjon</option>
-              <option value={'avslag-nb'}>Vedtak om avslått barnepensjon</option>
+              {maler.map((mal: any, i: number) => (
+                <option key={i} value={mal.malkode}>{mal.filnavn}</option>
+              ))}
             </Select>
 
             <br/>

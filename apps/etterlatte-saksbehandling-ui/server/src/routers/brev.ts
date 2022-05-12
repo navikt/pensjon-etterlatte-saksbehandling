@@ -1,4 +1,4 @@
-import { Request, RequestHandler, Response, Router } from 'express'
+import { Request, Response, Router } from 'express'
 import fetch from 'node-fetch'
 
 const router = Router({ mergeParams: true })
@@ -15,6 +15,13 @@ router.get('/:behandlingId', async (req: Request, res: Response) => {
   res.send(await data)
 })
 
+router.get('/maler', async (req: Request, res: Response) => {
+  const data = await fetch(`${apiUrl}/brev/maler`)
+      .then(res => res.json())
+
+  res.send(await data)
+})
+
 router.post('/:behandlingId', async (req: Request, res: Response) => {
   const path = `${apiUrl}/brev/${req.params.behandlingId}`
 
@@ -25,6 +32,15 @@ router.post('/:behandlingId', async (req: Request, res: Response) => {
       'Content-Type': 'application/json'
     }
   })
+      .then(res => res.json())
+
+  res.send(await data)
+})
+
+router.post('/:brevId/ferdigstill', async (req: Request, res: Response) => {
+  const path = `${apiUrl}/brev/${req.params.brevId}/ferdigstill`
+
+  const data = await fetch(path, { method: 'POST' })
       .then(res => res.json())
 
   res.send(await data)

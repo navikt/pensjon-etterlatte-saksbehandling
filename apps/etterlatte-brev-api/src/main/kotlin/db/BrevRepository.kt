@@ -58,8 +58,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
                             postnummer = getString("postnummer"),
                             poststed = getString("poststed")
                         )
-                    ),
-                    data = getBytes("bytes")
+                    )
                 )
             }!!
     }

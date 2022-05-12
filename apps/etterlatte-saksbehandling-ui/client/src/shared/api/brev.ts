@@ -4,6 +4,14 @@ export const hentAlleBrev = async (behandlingId: string): Promise<any> =>
     await fetch(`${path}/brev/${behandlingId}`)
         .then(res => res.json())
 
+export const hentMaler = async (): Promise<any> =>
+    await fetch(`${path}/brev/maler`).then(res => res.json())
+
+export const ferdigstillBrev = async (brevId: string): Promise<any> =>
+    await fetch(`${path}/brev/${brevId}/ferdigstill`, {
+      method: 'POST'
+    }).then(res => res.json())
+
 export const opprettBrev = async (behandlingId: string, mottaker: any, mal: string): Promise<any> =>
     await fetch(`${path}/brev/${behandlingId}`, {
       method: 'POST',
@@ -11,8 +19,7 @@ export const opprettBrev = async (behandlingId: string, mottaker: any, mal: stri
       headers: {
         'Content-Type': 'application/json'
       }
-    })
-        .then(res => res.json())
+    }).then(res => res.json())
 
 export const genererPdf = async (brevId: string): Promise<Blob> =>
     await fetch(`${path}/brev/${brevId}/pdf`, { method: 'POST' })

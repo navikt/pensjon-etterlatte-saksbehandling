@@ -11,6 +11,8 @@ import no.nav.etterlatte.db.Adresse
 import no.nav.etterlatte.db.BrevID
 import no.nav.etterlatte.db.Mottaker
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import no.nav.etterlatte.model.brev.BrevRequest
 import no.nav.etterlatte.vedtak.VedtakService
 import org.slf4j.LoggerFactory
 import pdf.PdfGeneratorKlient
@@ -32,22 +34,34 @@ class BrevService(
         }
     }
 
-    fun hentBrevMedId(id: BrevID): Brev = db.hentBrev(id)
-
     fun hentBrevInnhold(id: BrevID): ByteArray = db.hentBrevInnhold(id)
 
-    fun opprett(behandlingId: String, mottaker: Mottaker, mal: String): Brev {
+    suspend fun opprett(behandlingId: String, mottaker: Mottaker, mal: String): Brev {
         // TODO: Fikse støtte for mal
-        return db.opprettBrev(behandlingId.toLong(), mottaker)
+        val request = object : BrevRequest() {
+            override val spraak: Spraak
+                get() = Spraak.NB
+            override val mottaker: no.nav.etterlatte.model.brev.Mottaker
+                get() = no.nav.etterlatte.model.brev.Mottaker(
+                    navn = "${mottaker.fornavn} ${mottaker.etternavn}",
+                    adresse = mottaker.adresse.adresse,
+                    postnummer = mottaker.adresse.postnummer
+                )
+            override fun templateName(): String = mal
+        }
+
+        val pdf = pdfGenerator.genererPdf(request)
+
+        return db.opprettBrev(behandlingId.toLong(), mottaker, pdf)
     }
 
     fun ferdigstillBrev(id: BrevID): Brev {
         db.oppdaterStatus(id, "FERDIGSTILT")
 
-        return hentBrevMedId(id)
+        return db.hentBrev(id)
     }
 
-    suspend fun opprettFraVedtak(behandlingId: String): Brev {
+    private suspend fun opprettFraVedtak(behandlingId: String): Brev {
         // TODO: Håndtere tilfeller hvor vedtak mangler ...
         val vedtak = vedtakService.hentVedtak(behandlingId)
 

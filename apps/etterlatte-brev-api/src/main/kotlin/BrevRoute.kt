@@ -9,8 +9,22 @@ import io.ktor.routing.post
 import io.ktor.routing.route
 import no.nav.etterlatte.db.Mottaker
 
+data class Mal(
+    val filnavn: String,
+    val malkode: String
+)
+
 fun Route.brevRoute(service: BrevService) {
     route("brev") {
+        get("maler") {
+            val maler = listOf(
+                Mal("Vedtak om innvilget barnepensjon", "innvilget"),
+                Mal("Dokumentasjon om vergemål", "verge")
+            )
+
+            call.respond(maler)
+        }
+
         get("{behandlingId}") {
             val behandlingId = context.parameters["behandlingId"]!!
 
@@ -37,9 +51,6 @@ fun Route.brevRoute(service: BrevService) {
             val brevId = context.parameters["brevId"]!!
 
             val brev = service.ferdigstillBrev(brevId.toLong())
-
-            //TODO: Sending av brev
-//            service.sendBrev(behandlingId)
 
             call.respond(brev)
         }

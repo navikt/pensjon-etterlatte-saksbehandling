@@ -1,9 +1,8 @@
 import { Content, ContentHeader } from '../../../shared/styled'
 import { useEffect, useState } from 'react'
 import { Button, ContentContainer, Heading, Table, Tag } from "@navikt/ds-react";
-import { OpplysningsType } from "../../../store/reducers/BehandlingReducer";
 import BrevModal from "./brev-modal";
-import { Information, Success } from '@navikt/ds-icons'
+import { Information, Success, Delete } from '@navikt/ds-icons'
 import NyttBrev from "./nytt-brev";
 import { Border, HeadingWrapper } from "../soeknadsoversikt/styled";
 import { BehandlingsStatusSmall, IBehandlingsStatus } from "../behandlings-status";
@@ -25,12 +24,6 @@ export const Brev = () => {
         .then(res => setBrevListe(res))
   }, [])
 
-  const ferdigstill = (id: any) => {
-    console.log(id)
-
-    return Promise.resolve()
-  }
-
   const hentStatusTag = (status: string) => {
     if (['OPPRETTET', 'OPPDATERT'].includes(status)) {
       return (
@@ -45,11 +38,11 @@ export const Brev = () => {
           </Tag>
       )
     } else if (status === 'SENDT') {
-        return (
-            <Tag variant={'success'} size={'small'} style={{ width: '100%' }}>
-              Sendt &nbsp;<Success/>
-            </Tag>
-        )
+      return (
+          <Tag variant={'success'} size={'small'} style={{ width: '100%' }}>
+            Sendt &nbsp;<Success/>
+          </Tag>
+      )
     } else {
       return (
           <Tag variant={'error'} size={'small'} style={{ width: '100%' }}>
@@ -104,13 +97,7 @@ export const Brev = () => {
                       {hentStatusTag(brev.status)}
                     </Table.DataCell>
                     <Table.DataCell>
-                      {['FERDIGSTILT', 'SENDT'].includes(brev.status) ? (
-                          <Button variant={'secondary'} size={'small'}>
-                            Vis
-                          </Button>
-                      ) : (
-                          <BrevModal brevId={brev.id} ferdigstill={ferdigstill}/>
-                      )}
+                      <BrevModal brevId={brev.id} status={brev.status}/>
                     </Table.DataCell>
                   </Table.Row>
               ))}
@@ -125,7 +112,7 @@ export const Brev = () => {
         <Border/>
 
         <BehandlingHandlingKnapper>
-          <Button variant={'primary'}>
+          <Button variant={'primary'} disabled={true}>
             Fullfør behandling
           </Button>
         </BehandlingHandlingKnapper>

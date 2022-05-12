@@ -47,6 +47,7 @@ spec:
     inbound:
       rules:
         - application: etterlatte-api
+        - application: etterlatte-gyldig-soeknad
         - application: etterlatte-oppdater-behandling
         - application: etterlatte-opplysninger-fra-soeknad
           permissions:

@@ -39,7 +39,7 @@ object OppdragMapper {
             avstemming115 = Avstemming115().apply {
                 nokkelAvstemming = avstemmingNokkel.toNorskTid().format(tidspunktFormatter)
                 tidspktMelding = avstemmingNokkel.toNorskTid().format(tidspunktFormatter)
-                kodeKomponent = "BARNEPE"
+                kodeKomponent = "ETTERLAT"
             }
 
             vedtak.oppdragsenheter.forEach {

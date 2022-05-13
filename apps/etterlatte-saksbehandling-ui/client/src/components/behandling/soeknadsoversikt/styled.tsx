@@ -61,7 +61,11 @@ export const Border = styled.div`
 `
 
 export const DashedBorder = styled.div`
-  border-top: 0.5px dashed #000000;
+  background-image: linear-gradient(to right, #000 10%, rgba(255, 255, 255, 0) 0%);
+  background-size: 10px 1px;
+  background-repeat: repeat-x;
+  width: 100%;
+  padding: 1px;
 `
 
 export const TypeStatusWrap = styled.div<{ type: string }>`

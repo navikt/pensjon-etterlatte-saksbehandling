@@ -17,8 +17,8 @@ class GrensesnittsavstemmingService(
 ) {
 
     fun hentNestePeriode() = Avstemmingsperiode(
-        fraOgMed = tidspunktMidnattIdag(clock),
-        til = grensesnittavstemmingDao.hentSisteAvstemming()?.periode?.til ?: MIN_INSTANT,
+        fraOgMed = grensesnittavstemmingDao.hentSisteAvstemming()?.periode?.til ?: MIN_INSTANT,
+        til = tidspunktMidnattIdag(clock)
     )
 
     fun startGrensesnittsavstemming(

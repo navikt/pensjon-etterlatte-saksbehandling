@@ -7,7 +7,6 @@ import no.nav.etterlatte.utbetaling.utbetaling
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -48,12 +47,12 @@ internal class AvstemmingsdataSenderIntegrationTest {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
 
-        val utbetalingsoppdrag = listOf(
+        val utbetalinger = listOf(
             utbetaling(id = 1, status = UtbetalingStatus.FEILET),
             utbetaling(id = 2, status = UtbetalingStatus.FEILET),
             utbetaling(id = 3, status = UtbetalingStatus.FEILET)
         )
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalingsoppdrag, fraOgMed, til, UUIDBase64(), 2)
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
         val avstemmingsdata = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
         val xml = avstemmingsdataSender.sendAvstemming(avstemmingsdata.first())

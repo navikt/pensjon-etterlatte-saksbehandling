@@ -31,7 +31,7 @@ internal class GrensesnittavstemmingServiceTest {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
         val periode = Avstemmingsperiode(fraOgMed, til)
-        val utbetalingsoppdrag = listOf(utbetaling(status = UtbetalingStatus.FEILET))
+        val utbetaling = listOf(utbetaling(status = UtbetalingStatus.FEILET))
 
         val grensesnittavstemming = Grensesnittavstemming(
             opprettet = Tidspunkt.now(),
@@ -41,7 +41,7 @@ internal class GrensesnittavstemmingServiceTest {
         )
 
         every { grensesnittavstemmingDao.hentSisteAvstemming() } returns grensesnittavstemming
-        every { utbetalingDao.hentAlleUtbetalingerMellom(any(), any()) } returns utbetalingsoppdrag
+        every { utbetalingDao.hentAlleUtbetalingerMellom(any(), any()) } returns utbetaling
         every { avstemmingsdataSender.sendAvstemming(any()) } returns "message"
         every { grensesnittavstemmingDao.opprettAvstemming(any()) } returns 1
 
@@ -55,4 +55,3 @@ internal class GrensesnittavstemmingServiceTest {
         }
     }
 }
-

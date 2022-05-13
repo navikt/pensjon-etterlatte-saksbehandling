@@ -16,19 +16,19 @@ fun main() {
 fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection {
     val dataSource = applicationContext.dataSourceBuilder().also { it.migrate() }.dataSource()
     val jmsConnectionFactory = applicationContext.jmsConnectionFactory()
-    val utbetalingsoppdragDao = applicationContext.utbetalingsoppdragDao(dataSource)
+    val utbetalingDao = applicationContext.utbetalingDao(dataSource)
 
     val rapidsConnection = applicationContext.rapidsConnection()
     val utbetalingService = applicationContext.utbetalingService(
         oppdragSender = applicationContext.oppdragSender(jmsConnectionFactory),
-        utbetalingDao = utbetalingsoppdragDao,
+        utbetalingDao = utbetalingDao,
         rapidsConnection = rapidsConnection
     )
 
     val grensesnittavstemmingService = applicationContext.grensesnittsavstemmingService(
         grensesnittavstemmingDao = applicationContext.avstemmingDao(dataSource),
         avstemmingsdataSender = applicationContext.avstemmingSender(jmsConnectionFactory),
-        utbetalingDao = utbetalingsoppdragDao
+        utbetalingDao = utbetalingDao
     )
 
     // Jobber

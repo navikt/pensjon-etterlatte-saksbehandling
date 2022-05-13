@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.vedtak.Endringskode
 import no.nav.etterlatte.libs.common.vedtak.Enhetstype
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.toNorskTid
 import no.trygdeetaten.skjema.oppdrag.Attestant180
 import no.trygdeetaten.skjema.oppdrag.Avstemming115
 import no.trygdeetaten.skjema.oppdrag.Oppdrag

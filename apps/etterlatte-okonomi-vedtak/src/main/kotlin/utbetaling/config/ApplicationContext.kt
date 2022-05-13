@@ -57,7 +57,7 @@ class ApplicationContext(
         replyQueue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
     )
 
-    fun utbetalingsoppdragDao(dataSource: DataSource) = UtbetalingDao(dataSource)
+    fun utbetalingDao(dataSource: DataSource) = UtbetalingDao(dataSource)
 
     fun utbetalingService(
         oppdragSender: OppdragSender,

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.toNorskTid
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
@@ -57,10 +58,13 @@ class AvstemmingsdataMapper(
                 mottakendeKomponentKode = "OS"
                 underkomponentKode = fagomraade
                 nokkelFom =
-                    avstemmingsperiode?.start?.let { Tidspunkt(it).toNorskTid() }?.format(tidsstempelMikro) ?: "0"
+                    avstemmingsperiode?.start?.let {
+                        Tidspunkt(it).toNorskTid()
+                    }?.format(tidsstempelMikro) ?: "0"
                 nokkelTom =
-                    avstemmingsperiode?.endInclusive?.let { Tidspunkt(it).toNorskTid() }?.format(tidsstempelMikro)
-                        ?: "0"
+                    avstemmingsperiode?.endInclusive?.let {
+                        Tidspunkt(it).toNorskTid()
+                    }?.format(tidsstempelMikro) ?: "0"
                 avleverendeAvstemmingId = avstemmingId.value
                 brukerId = fagomraade
             }

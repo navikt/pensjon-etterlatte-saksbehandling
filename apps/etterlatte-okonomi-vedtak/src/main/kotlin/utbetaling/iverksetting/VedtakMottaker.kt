@@ -40,11 +40,11 @@ class VedtakMottaker(
             try {
                 if (utbetalingService.utbetalingEksisterer(vedtak)) {
                     logger.info("Vedtak eksisterer fra før. Sendes ikke videre til oppdrag")
-                    rapidsConnection.publish(utbetalingsoppdragEksisterer(vedtak))
+                    rapidsConnection.publish(utbetalingEksisterer(vedtak))
                 } else {
                     val attestasjon: Attestasjon = objectMapper.readValue(packet["@attestasjon"].toJson())
-                    val utbetalingsoppdrag = utbetalingService.iverksettUtbetaling(vedtak, attestasjon)
-                    rapidsConnection.publish("key", utbetalingEvent(utbetalingsoppdrag))
+                    val utbetaling = utbetalingService.iverksettUtbetaling(vedtak, attestasjon)
+                    rapidsConnection.publish("key", utbetalingEvent(utbetaling))
                 }
             } catch (e: Exception) {
                 logger.error("En feil oppstod: ${e.message}", e)
@@ -65,7 +65,7 @@ class VedtakMottaker(
         "@vedtakId" to vedtak.vedtakId,
     ).toJson()
 
-    private fun utbetalingsoppdragEksisterer(vedtak: Vedtak) = mapOf(
+    private fun utbetalingEksisterer(vedtak: Vedtak) = mapOf(
         "@event_name" to "utbetaling_eksisterer",
         "@vedtakId" to vedtak.vedtakId,
     ).toJson()

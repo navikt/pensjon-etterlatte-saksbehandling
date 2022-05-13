@@ -1,0 +1,28 @@
+{
+  "id": "f525f2f7-e246-43d7-b61a-5f0757472916",
+  "sak": 1,
+  "behandlingOpprettet": "2022-05-12T11:09:06.103964",
+  "sistEndret": "2022-05-12T11:09:06.128951",
+  "soeknadMottattDato": "2022-02-14T14:37:24.573613",
+  "innsender": "03108718357",
+  "soeker": "12101376212",
+  "gjenlevende": [
+    "03108718357",
+    "03108718353"
+  ],
+  "avdoed": [
+    "22128202440"
+  ],
+  "soesken": [],
+  "gyldighetsproeving": null,
+  "status": "OPPRETTET",
+  "system_read_count": 0,
+  "system_participating_services": [
+    {
+      "service": "etterlatte-behandling",
+      "instance": "etterlatte-behandling-f979bc968-dfl6j",
+      "time": "2022-05-12T11:09:08.607306872"
+    }
+  ],
+  "@event": "BEHANDLING:OPPRETTET"
+}

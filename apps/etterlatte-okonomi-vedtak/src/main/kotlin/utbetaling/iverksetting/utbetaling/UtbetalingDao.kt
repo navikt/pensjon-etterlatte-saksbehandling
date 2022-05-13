@@ -20,13 +20,15 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
     fun hentUtbetaling(vedtakId: String): Utbetaling? =
         dataSource.connection.use { connection ->
-            val stmt = connection.prepareStatement("""
+            val stmt = connection.prepareStatement(
+                """
                 SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
                     foedselsnummer, utgaaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, 
                     meldingkode_oppdrag
                 FROM utbetalingsoppdrag 
                 WHERE vedtak_id = ?
-            """)
+            """
+            )
 
             stmt.use {
                 it.setObject(1, vedtakId)
@@ -37,13 +39,15 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
     fun hentAlleUtbetalingerMellom(fraOgMed: Tidspunkt, til: Tidspunkt): List<Utbetaling> =
         dataSource.connection.use { connection ->
-            val stmt = connection.prepareStatement("""
+            val stmt = connection.prepareStatement(
+                """
                 SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
                     foedselsnummer, utgaaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, 
                     meldingkode_oppdrag
                 FROM utbetalingsoppdrag
                 WHERE avstemmingsnoekkel >= ? AND avstemmingsnoekkel < ?
-                """)
+                """
+            )
 
             stmt.use {
                 it.setTimestamp(1, Timestamp.from(fraOgMed.instant))
@@ -62,11 +66,13 @@ class UtbetalingDao(private val dataSource: DataSource) {
         dataSource.connection.use { connection ->
             logger.info("Oppretter utbetaling for vedtakId=${vedtak.vedtakId}")
 
-            val stmt = connection.prepareStatement("""
+            val stmt = connection.prepareStatement(
+                """
                 INSERT INTO utbetalingsoppdrag(vedtak_id, behandling_id, sak_id, utgaaende_oppdrag, status, vedtak, 
                     opprettet, avstemmingsnoekkel, endret, foedselsnummer)
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """)
+            """
+            )
 
             stmt.use {
                 it.setString(1, vedtak.vedtakId)
@@ -109,18 +115,20 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
             logger.info("Oppdaterer kvittering i utbetaling for vedtakId=${oppdragMedKvittering.vedtakId()}")
 
-            val stmt = connection.prepareStatement("""
+            val stmt = connection.prepareStatement(
+                """
                 UPDATE utbetalingsoppdrag 
                 SET oppdrag_kvittering = ?, beskrivelse_oppdrag = ?, feilkode_oppdrag = ?, 
                     meldingkode_oppdrag = ?, endret = ? 
                 WHERE vedtak_id = ?
-            """)
+            """
+            )
 
             stmt.use {
                 it.setString(1, OppdragJaxb.toXml(oppdragMedKvittering))
                 it.setString(2, oppdragMedKvittering.mmel.beskrMelding)
-                it.setString(3, oppdragMedKvittering.mmel.kodeMelding)
-                it.setString(4, oppdragMedKvittering.mmel.alvorlighetsgrad)
+                it.setString(3, oppdragMedKvittering.mmel.alvorlighetsgrad)
+                it.setString(4, oppdragMedKvittering.mmel.kodeMelding)
                 it.setTimestamp(5, Timestamp.from(endret.instant))
                 it.setString(6, oppdragMedKvittering.vedtakId())
 

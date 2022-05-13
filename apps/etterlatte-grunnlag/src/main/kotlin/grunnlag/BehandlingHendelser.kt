@@ -35,39 +35,58 @@ class BehandlingHendelser(
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BEHANDLING:OPPRETTET") }
             //TODO Finne ut hva denne er?
-            validate { it.requireKey("persongalleri") }
-            validate { it.requireKey("saksId") }
+            validate { it.requireKey("innsender") }
+            validate { it.requireKey("soeker") }
+            validate { it.requireKey("gjenlevende") }
+            validate { it.requireKey("avdoed") }
+            validate { it.requireKey("sak") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val persongalleri = objectMapper.treeToValue<Persongalleri>(packet["persongalleri"])!!
-            grunnlag.opprett(packet["saksId"].asLong())
+            //val persongalleri = objectMapper.treeToValue<Persongalleri>(packet["persongalleri"])!!
+
+            grunnlag.opprett(packet["sak"].asLong())
 
             //TODO dette må jeg gjøre smartere, ellers må Persongalleri restruktureres
             context.publish(
                 JsonMessage.newMessage(
                 mapOf(
                     "@behov" to Opplysningstyper.SOEKER_PDL_V1,
-                    "sak" to packet["saksId"],
-                    "fnr" to persongalleri.soeker,
+                    "sak" to packet["sak"],
+                    "fnr" to packet["soeker"],
                     "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
                     "@correlation_id" to packet["@correlation_id"]
                 )
             ).toJson())
-
-            context.publish(
-                JsonMessage.newMessage(
-                    mapOf(
-                        "@behov" to Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1,
-                        "sak" to packet["saksId"],
-                        "fnr" to persongalleri.soeker,
-                        "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
-                        "@correlation_id" to packet["@correlation_id"]
-                    )
-                ).toJson())
+             packet["gjenlevende"].forEach { fnr ->
+                context.publish(
+                    JsonMessage.newMessage(
+                        mapOf(
+                            "@behov" to Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1,
+                            "sak" to packet["sak"],
+                            "fnr" to fnr.asText(),
+                            "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
+                            "@correlation_id" to packet["@correlation_id"]
+                        )
+                    ).toJson()
+                )
+            }
+            packet["avdoed"].forEach { fnr ->
+                context.publish(
+                    JsonMessage.newMessage(
+                        mapOf(
+                            "@behov" to Opplysningstyper.AVDOED_PDL_V1,
+                            "sak" to packet["sak"],
+                            "fnr" to fnr.asText(),
+                            "rolle" to Opplysningstyper.AVDOED_PDL_V1.personRolle!!,
+                            "@correlation_id" to packet["@correlation_id"]
+                        )
+                    ).toJson()
+                )
+            }
 
         }
 

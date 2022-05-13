@@ -30,6 +30,7 @@ internal class GrensesnittavstemmingServiceTest {
     fun `skal opprette avstemming og sende til oppdrag`() {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
+        val periode = Avstemmingsperiode(fraOgMed, til)
         val utbetaling = listOf(utbetaling(status = UtbetalingStatus.FEILET))
 
         val grensesnittavstemming = Grensesnittavstemming(
@@ -44,7 +45,7 @@ internal class GrensesnittavstemmingServiceTest {
         every { avstemmingsdataSender.sendAvstemming(any()) } returns "message"
         every { grensesnittavstemmingDao.opprettAvstemming(any()) } returns 1
 
-        grensesnittsavstemmingService.startGrensesnittsavstemming(fraOgMed, til)
+        grensesnittsavstemmingService.startGrensesnittsavstemming(periode)
 
         verify(exactly = 3) { avstemmingsdataSender.sendAvstemming(any()) }
         verify {
@@ -53,6 +54,4 @@ internal class GrensesnittavstemmingServiceTest {
             })
         }
     }
-
-
 }

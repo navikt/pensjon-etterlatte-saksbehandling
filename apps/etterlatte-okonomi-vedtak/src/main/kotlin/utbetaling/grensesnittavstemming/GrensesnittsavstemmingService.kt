@@ -18,44 +18,38 @@ class GrensesnittsavstemmingService(
 
     fun hentNestePeriode() = Avstemmingsperiode(
         fraOgMed = tidspunktMidnattIdag(clock),
-        til = grensesnittavstemmingDao.hentSisteAvstemming()?.periodeTil ?: MIN_INSTANT,
+        til = grensesnittavstemmingDao.hentSisteAvstemming()?.periode?.til ?: MIN_INSTANT,
     )
 
     fun startGrensesnittsavstemming(
-        avstemmingsperiode: Avstemmingsperiode = hentNestePeriode()
+        periode: Avstemmingsperiode = hentNestePeriode()
     ) {
-        val periodeFraOgMed = avstemmingsperiode.fraOgMed
-        val periodeTil = avstemmingsperiode.til
+        logger.info("Avstemmer fra ${periode.fraOgMed} til ${periode.til}")
+        val utbetalinger = utbetalingDao.hentAlleUtbetalingerMellom(periode.fraOgMed, periode.til)
+        val avstemmingId = UUIDBase64()
 
-        logger.info("Avstemmer fra $periodeFraOgMed til $periodeTil")
-        if (periodeFraOgMed != periodeTil) {
-            val utbetalinger = utbetalingDao.hentAlleUtbetalingerMellom(periodeFraOgMed, periodeTil)
-            val avstemming = Grensesnittavstemming(
-                periodeFraOgMed = periodeFraOgMed,
-                periodeTil = periodeTil,
-                antallOppdrag = utbetalinger.size,
-                opprettet = Tidspunkt.now(clock)
-            )
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, periode.fraOgMed, periode.til, avstemmingId)
+        val avstemmingsdataListe = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
-            val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, periodeFraOgMed, periodeTil, avstemming.id)
-            val avstemmingsdataListe = avstemmingsdataMapper.opprettAvstemmingsmelding()
-
-            val sendtAvstemmingsdata = avstemmingsdataListe.mapIndexed { index, avstemmingsdata ->
-                val sendtAvstemmingsdata = avstemmingsdataSender.sendAvstemming(avstemmingsdata)
-                logger.info("Avstemmingsmelding ${index + 1} av ${avstemmingsdataListe.size} overført til Oppdrag")
-                sendtAvstemmingsdata
-            }
-
-            grensesnittavstemmingDao.opprettAvstemming(
-                avstemming.copy(avstemmingsdata = sendtAvstemmingsdata.joinToString("\n"))
-            )
-
-            logger.info(
-                "Avstemming fra $periodeFraOgMed til $periodeTil fullført - ${utbetalinger.size} oppdrag ble avstemt"
-            )
-        } else {
-            logger.warn("Utfører ikke avstemming fordi denne perioden allerede er kjørt")
+        val sendtAvstemmingsdata = avstemmingsdataListe.mapIndexed { index, avstemmingsdata ->
+            val sendtAvstemmingsdata = avstemmingsdataSender.sendAvstemming(avstemmingsdata)
+            logger.info("Avstemmingsmelding ${index + 1} av ${avstemmingsdataListe.size} overført til Oppdrag")
+            sendtAvstemmingsdata
         }
+
+        grensesnittavstemmingDao.opprettAvstemming(
+            Grensesnittavstemming(
+                id = avstemmingId,
+                periode = periode,
+                antallOppdrag = utbetalinger.size,
+                opprettet = Tidspunkt.now(clock),
+                avstemmingsdata = sendtAvstemmingsdata.joinToString("\n")
+            )
+        )
+
+        logger.info(
+            "Avstemming fra ${periode.fraOgMed} til ${periode.til} fullført - ${utbetalinger.size} oppdrag ble avstemt"
+        )
     }
 
     companion object {

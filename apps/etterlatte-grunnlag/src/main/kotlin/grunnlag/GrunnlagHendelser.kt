@@ -35,6 +35,7 @@ class GrunnlagHendelser(
             validate { it.requireKey("opplysning") }
             validate { it.requireKey("sak") }
             validate { it.rejectKey("grunnlag")}
+            validate { it.rejectKey("@event_name")}
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }

@@ -52,6 +52,7 @@ class GrunnlagHendelserTest {
 
         every { opplysningerMock.finnOpplysningerIGrunnlag(any())} returns opplysninger
         every { opplysningerMock.leggOpplysningTilGrunnlag(any(),any())} returns Unit
+        every { opplysningerMock.slettSpesifikkOpplysningISak(any(),any())} returns Unit
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         Assertions.assertEquals("GRUNNLAG:GRUNNLAGENDRET", inspector.message(0).get("@event_name").asText())

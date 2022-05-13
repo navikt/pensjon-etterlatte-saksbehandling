@@ -2,7 +2,7 @@ import { Content, ContentHeader } from '../../../shared/styled'
 import { useEffect, useState } from 'react'
 import { Button, ContentContainer, Heading, Table, Tag } from "@navikt/ds-react";
 import BrevModal from "./brev-modal";
-import { Information, Success, Delete } from '@navikt/ds-icons'
+import { Information, Success } from '@navikt/ds-icons'
 import NyttBrev from "./nytt-brev";
 import { Border, HeadingWrapper } from "../soeknadsoversikt/styled";
 import { BehandlingsStatusSmall, IBehandlingsStatus } from "../behandlings-status";

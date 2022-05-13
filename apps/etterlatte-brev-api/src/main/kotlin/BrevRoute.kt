@@ -4,6 +4,7 @@ import io.ktor.application.call
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.Route
+import io.ktor.routing.delete
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.route
@@ -45,6 +46,14 @@ fun Route.brevRoute(service: BrevService) {
             val bytes = service.hentBrevInnhold(brevId.toLong())
 
             call.respond(bytes)
+        }
+
+        delete("{brevId") {
+            val brevId = context.parameters["brevId"]!!
+
+            val brev = service.slettBrev(brevId.toLong())
+
+            call.respond("OK")
         }
 
         post("{brevId}/ferdigstill") {

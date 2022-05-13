@@ -12,6 +12,11 @@ export const ferdigstillBrev = async (brevId: string): Promise<any> =>
       method: 'POST'
     }).then(res => res.json())
 
+export const slettBrev = async (brevId: string): Promise<any> =>
+    await fetch(`${path}/brev/${brevId}`, {
+      method: 'DELETE'
+    }).then(res => res.json())
+
 export const opprettBrev = async (behandlingId: string, mottaker: any, mal: string): Promise<any> =>
     await fetch(`${path}/brev/${behandlingId}`, {
       method: 'POST',

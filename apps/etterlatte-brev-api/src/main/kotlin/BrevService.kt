@@ -10,6 +10,7 @@ import model.brev.AvslagBrevRequest
 import no.nav.etterlatte.db.Adresse
 import no.nav.etterlatte.db.BrevID
 import no.nav.etterlatte.db.Mottaker
+import no.nav.etterlatte.db.NyttBrev
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.model.brev.BrevRequest
@@ -36,6 +37,15 @@ class BrevService(
 
     fun hentBrevInnhold(id: BrevID): ByteArray = db.hentBrevInnhold(id)
 
+    fun slettBrev(id: BrevID): Boolean {
+        val brev = db.hentBrev(id)
+
+        if (brev.status != "OPPRETTET" && brev.status != "OPPDATERT")
+            throw RuntimeException("Brev er ferdigstilt og kan ikke slettes!")
+
+        return false
+    }
+
     suspend fun opprett(behandlingId: String, mottaker: Mottaker, mal: String): Brev {
         // TODO: Fikse støtte for mal
         val request = object : BrevRequest() {
@@ -52,7 +62,7 @@ class BrevService(
 
         val pdf = pdfGenerator.genererPdf(request)
 
-        return db.opprettBrev(behandlingId.toLong(), mottaker, pdf)
+        return db.opprettBrev(NyttBrev(behandlingId.toLong(), mal, mottaker, pdf))
     }
 
     fun ferdigstillBrev(id: BrevID): Brev {
@@ -75,7 +85,7 @@ class BrevService(
 
         val pdf = genererPdf(vedtak)
 
-        return db.opprettBrev(behandlingId.toLong(), mottaker, pdf)
+        return db.opprettBrev(NyttBrev(behandlingId.toLong(), vedtak.status, mottaker, pdf))
     }
 
     private suspend fun genererPdf(vedtak: Vedtak): ByteArray {

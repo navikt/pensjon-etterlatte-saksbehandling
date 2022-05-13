@@ -1,6 +1,8 @@
 package no.nav.etterlatte.db
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import io.ktor.client.utils.EmptyContent.status
 import no.nav.etterlatte.db.BrevRepository.Queries.HENT_ALLE_BREV_QUERY
 import no.nav.etterlatte.db.BrevRepository.Queries.HENT_BREV_QUERY
 import no.nav.etterlatte.db.BrevRepository.Queries.HENT_SISTE_STATUS
@@ -31,10 +33,26 @@ data class Mottaker(
 class Brev(
     val id: BrevID,
     val behandlingId: Long,
+    val tittel: String,
     val status: String,
     val mottaker: Mottaker,
+    @JsonIgnore
     val data: ByteArray? = null
-)
+) {
+    companion object {
+        fun fraNyttBrev(id: BrevID, nyttBrev: NyttBrev) =
+            Brev(id, nyttBrev.behandlingId, nyttBrev.tittel, nyttBrev.status, nyttBrev.mottaker, nyttBrev.pdf)
+    }
+}
+
+class NyttBrev(
+    val behandlingId: Long,
+    val tittel: String,
+    val mottaker: Mottaker,
+    val pdf: ByteArray
+) {
+    val status: String = "OPPRETTET"
+}
 
 class BrevRepository private constructor(private val ds: DataSource) {
 
@@ -48,6 +66,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
                 Brev(
                     id = getLong("id"),
                     behandlingId = getLong("behandling_id"),
+                    tittel = getString("tittel"),
                     status = getString("status_id"),
                     Mottaker(
                         fornavn = getString("fornavn"),
@@ -80,6 +99,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
                 Brev(
                     id = getLong("id"),
                     behandlingId = getLong("behandling_id"),
+                    tittel = getString("tittel"),
                     status = getString("status_id"),
                     Mottaker(
                         fornavn = getString("fornavn"),
@@ -95,36 +115,34 @@ class BrevRepository private constructor(private val ds: DataSource) {
             }
     }
 
-    fun opprettBrev(behandlingId: Long, mottaker: Mottaker, pdf: ByteArray? = null): Brev = connection.use {
+    fun opprettBrev(nyttBrev: NyttBrev): Brev = connection.use {
         val id = it.prepareStatement(OPPRETT_BREV_QUERY)
             .apply {
-                setLong(1, behandlingId)
-                setString(2, mottaker.fornavn)
-                setString(3, mottaker.etternavn)
-                setString(4, mottaker.adresse.adresse)
-                setString(5, mottaker.adresse.postnummer)
-                setString(6, mottaker.adresse.poststed)
+                setLong(1, nyttBrev.behandlingId)
+                setString(2, nyttBrev.tittel)
+                setString(3, nyttBrev.mottaker.fornavn)
+                setString(4, nyttBrev.mottaker.etternavn)
+                setString(5, nyttBrev.mottaker.adresse.adresse)
+                setString(6, nyttBrev.mottaker.adresse.postnummer)
+                setString(7, nyttBrev.mottaker.adresse.poststed)
             }
             .executeQuery()
             .singleOrNull { getLong(1) }!!
 
-        if (pdf != null) {
-            val inserted = it.prepareStatement("INSERT INTO innhold (brev_id, malnavn, spraak, bytes) VALUES (?, ?, ?, ?)")
-                .apply {
-                    setLong(1, id)
-                    setString(2, "navn på malen")
-                    setString(3, "nb")
-                    setBytes(4, pdf)
-                }
-                .executeUpdate()
+        val inserted = it.prepareStatement("INSERT INTO innhold (brev_id, mal, spraak, bytes) VALUES (?, ?, ?, ?)")
+            .apply {
+                setLong(1, id)
+                setString(2, "navn på malen")
+                setString(3, "nb")
+                setBytes(4, nyttBrev.pdf)
+            }
+            .executeUpdate()
 
-            if (inserted < 1) throw RuntimeException()
-        }
+        if (inserted < 1) throw RuntimeException()
 
-        val status = "OPPRETTET"
-        oppdaterStatus(id, status)
+        oppdaterStatus(id, nyttBrev.status)
 
-        Brev(id, behandlingId, status, mottaker, pdf)
+        Brev.fraNyttBrev(id, nyttBrev)
     }
 
     fun oppdaterStatus(id: BrevID, status: String, payload: String? = null) = connection.use {
@@ -169,7 +187,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
 
     private object Queries {
         const val HENT_BREV_QUERY = """
-            SELECT b.id, b.behandling_id, h.status_id, m.*
+            SELECT b.id, b.behandling_id, b.tittel, h.status_id, m.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -182,7 +200,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
         """
 
         const val HENT_ALLE_BREV_QUERY = """
-            SELECT b.id, b.behandling_id, h.status_id, m.*
+            SELECT b.id, b.behandling_id, b.tittel, h.status_id, m.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -203,7 +221,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
 
         const val OPPRETT_BREV_QUERY = """
             WITH nytt_brev AS (
-                INSERT INTO brev (behandling_id) VALUES (?) RETURNING id
+                INSERT INTO brev (behandling_id, tittel) VALUES (?, ?) RETURNING id
             ) INSERT INTO mottaker (brev_id, fornavn, etternavn, adresse, postnummer, poststed)
                 VALUES ((SELECT id FROM nytt_brev), ?, ?, ?, ?, ?) RETURNING brev_id
         """

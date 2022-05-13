@@ -15,6 +15,15 @@ router.get('/:behandlingId', async (req: Request, res: Response) => {
   res.send(await data)
 })
 
+router.get('/:brevId', async (req: Request, res: Response) => {
+  const path = `${apiUrl}/brev/${req.params.behandlingId}`
+
+  const data = await fetch(path, { method: 'DELETE' })
+      .then(res => res.json())
+
+  res.send(await data)
+})
+
 router.get('/maler', async (req: Request, res: Response) => {
   const data = await fetch(`${apiUrl}/brev/maler`)
       .then(res => res.json())

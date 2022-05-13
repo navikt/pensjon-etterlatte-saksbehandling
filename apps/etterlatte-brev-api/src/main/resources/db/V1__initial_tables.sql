@@ -4,6 +4,7 @@ CREATE TABLE brev
         CONSTRAINT brev_pk
             PRIMARY KEY,
     behandling_id BIGINT NOT NULL,
+    tittel TEXT NOT NULL,
     opprettet TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'UTC') NOT NULL
 );
 
@@ -26,7 +27,7 @@ CREATE TABLE innhold
     brev_id BIGINT NOT NULL
         PRIMARY KEY
             REFERENCES brev (id),
-    malnavn TEXT,
+    mal TEXT,
     spraak TEXT,
     bytes BYTEA NOT NULL
 );

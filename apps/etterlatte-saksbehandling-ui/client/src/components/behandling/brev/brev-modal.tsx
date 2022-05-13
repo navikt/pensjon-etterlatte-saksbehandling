@@ -1,12 +1,11 @@
-import { BodyLong, Button, Loader, Modal } from "@navikt/ds-react";
+import { BodyLong, Button, Modal } from "@navikt/ds-react";
 import { useState } from "react";
-import { ferdigstillBrev, genererPdf } from "../../../shared/api/brev";
-import { useParams } from "react-router-dom";
+import { ferdigstillBrev, genererPdf, slettBrev } from "../../../shared/api/brev";
 import styled from "styled-components";
 import { Delete, Findout, Notes, Success } from "@navikt/ds-icons";
 
 const PdfViewer = styled.iframe`
-  margin-top: 60px;
+  //margin-top: 60px;
   margin-bottom: 20px;
   width: 800px;
   height: 1080px;
@@ -17,10 +16,6 @@ const ButtonRow = styled.div`
   //overflow: hidden;
   width: 100%;
   text-align: right;
-`
-
-const ActionBtn = styled(Button)`
-  min-width: 100px;
 `
 
 export default function BrevModal({ brevId, status }: {
@@ -50,6 +45,11 @@ export default function BrevModal({ brevId, status }: {
         .then(() => setIsOpen(false))
   }
 
+  const slett = () => {
+    slettBrev(brevId)
+        .then(() => console.log('Slettet ok!'))
+  }
+
   return (
       <>
         <Button variant={isDone ? 'secondary' : 'primary'} size={'small'} onClick={open}>
@@ -57,12 +57,14 @@ export default function BrevModal({ brevId, status }: {
           {isDone ? <Findout /> : <Notes />}
         </Button>
         &nbsp;&nbsp;
-        <Button variant={'danger'} size={'small'} disabled={isDone}>
+        <Button variant={'danger'} size={'small'} disabled={isDone} onClick={slett}>
           <Delete />
         </Button>
 
         <Modal open={isOpen} onClose={() => setIsOpen(false)}>
           <Modal.Content>
+            <h2>{status}</h2>
+
             {error && (
                 <BodyLong>
                   En feil har oppstått ved henting av PDF:

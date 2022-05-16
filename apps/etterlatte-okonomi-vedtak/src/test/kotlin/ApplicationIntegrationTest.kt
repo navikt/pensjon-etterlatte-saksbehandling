@@ -5,13 +5,14 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
-import io.mockk.every
+import io.ktor.http.Url
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
+import no.nav.etterlatte.utbetaling.config.ApplicationProperties
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
@@ -39,7 +40,7 @@ class ApplicationIntegrationTest {
 
     private val electionServer = WireMockServer(options().port(8089))
 
-    private lateinit var rapidsConnection: TestRapid
+    private val rapidsConnection: TestRapid = spyk(TestRapid())
     private lateinit var connectionFactory: JmsConnectionFactory
 
     @BeforeAll
@@ -48,25 +49,22 @@ class ApplicationIntegrationTest {
         ibmMQContainer.start()
         electionServer.start()
 
-        val env = mapOf(
-            "DB_HOST" to postgreSQLContainer.host,
-            "DB_PORT" to postgreSQLContainer.firstMappedPort.toString(),
-            "DB_DATABASE" to postgreSQLContainer.databaseName,
-            "DB_USERNAME" to postgreSQLContainer.username,
-            "DB_PASSWORD" to postgreSQLContainer.password,
-
-            "OPPDRAG_SEND_MQ_NAME" to "DEV.QUEUE.1",
-            "OPPDRAG_KVITTERING_MQ_NAME" to "DEV.QUEUE.2",
-            "OPPDRAG_MQ_HOSTNAME" to ibmMQContainer.host,
-            "OPPDRAG_MQ_PORT" to ibmMQContainer.firstMappedPort.toString(),
-            "OPPDRAG_MQ_CHANNEL" to "DEV.ADMIN.SVRCONN",
-            "OPPDRAG_MQ_MANAGER" to "QM1",
-            "OPPDRAG_AVSTEMMING_MQ_NAME" to "DEV.QUEUE.1",
-
-            "srvuser" to "admin",
-            "srvpwd" to "passw0rd",
-
-            "ELECTOR_PATH" to electionServer.baseUrl().replace("http://", "")
+        val applicationProperties = ApplicationProperties(
+            dbName = postgreSQLContainer.databaseName,
+            dbHost = postgreSQLContainer.host,
+            dbPort = postgreSQLContainer.firstMappedPort,
+            dbUsername = postgreSQLContainer.username,
+            dbPassword = postgreSQLContainer.password,
+            mqHost = ibmMQContainer.host,
+            mqPort = ibmMQContainer.firstMappedPort,
+            mqQueueManager = "QM1",
+            mqChannel = "DEV.ADMIN.SVRCONN",
+            mqSendQueue = "DEV.QUEUE.1",
+            mqKvitteringQueue = "DEV.QUEUE.2",
+            mqAvstemmingQueue = "DEV.QUEUE.1",
+            serviceUserUsername = "admin",
+            serviceUserPassword = "passw0rd",
+            leaderElectorPath = Url(electionServer.baseUrl()).let { "${it.host}:${it.port}" },
         )
 
         electionServer.stubFor(
@@ -77,10 +75,12 @@ class ApplicationIntegrationTest {
                 )
         )
 
-        spyk(ApplicationContext(env)).apply {
-            every { rapidsConnection() } returns spyk(TestRapid()).also { rapidsConnection = it }
-            every { jmsConnectionFactory() } answers { spyk(callOriginal()).also { connectionFactory = it } }
-        }.run { rapidApplication(this).start() }
+        ApplicationContext(applicationProperties, rapidsConnection).also {
+            connectionFactory = it.jmsConnectionFactory
+            it.dataSourceBuilder.migrate() // TODO bør ikke trenge denne med TestRapid()
+
+            rapidApplication(it).start()
+        }
     }
 
     @Test

@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling.config
 
 import no.nav.etterlatte.utbetaling.common.Oppgavetrigger
 import no.nav.etterlatte.utbetaling.common.next
+import no.nav.etterlatte.utbetaling.common.norskTidssone
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittavstemmingDao
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingJob
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingService
@@ -17,119 +18,105 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.Clock
 import java.time.Duration
 import java.time.LocalTime
-import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
-import javax.sql.DataSource
 
 
 class ApplicationContext(
-    private val env: Map<String, String>,
+    private val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
+    val rapidsConnection: RapidsConnection = RapidApplication.create(System.getenv().withConsumerGroupId())
 ) {
+    val clock = Clock.systemUTC()
 
-    fun clock() = Clock.systemUTC()
-
-    fun rapidsConnection() = RapidApplication.create(env)
-
-    fun dataSourceBuilder() = DataSourceBuilder(
+    val dataSourceBuilder = DataSourceBuilder(
         jdbcUrl = jdbcUrl(
-            host = env.required("DB_HOST"),
-            port = env.required("DB_PORT"),
-            databaseName = env.required("DB_DATABASE")
+            host = properties.dbHost,
+            port = properties.dbPort,
+            databaseName = properties.dbName
         ),
-        username = env.required("DB_USERNAME"),
-        password = env.required("DB_PASSWORD"),
+        username = properties.dbUsername,
+        password = properties.dbPassword,
     )
 
-    fun jmsConnectionFactory() = JmsConnectionFactory(
-        hostname = env.required("OPPDRAG_MQ_HOSTNAME"),
-        port = env.required("OPPDRAG_MQ_PORT").toInt(),
-        queueManager = env.required("OPPDRAG_MQ_MANAGER"),
-        channel = env.required("OPPDRAG_MQ_CHANNEL"),
-        username = env.required("srvuser"),
-        password = env.required("srvpwd")
+    val dataSource = dataSourceBuilder.dataSource()
+
+    val jmsConnectionFactory = JmsConnectionFactory(
+        hostname = properties.mqHost,
+        port = properties.mqPort,
+        queueManager = properties.mqQueueManager,
+        channel = properties.mqChannel,
+        username = properties.serviceUserUsername,
+        password = properties.serviceUserPassword
     )
 
-    fun oppdragSender(jmsConnectionFactory: JmsConnectionFactory) = OppdragSender(
+    val oppdragSender = OppdragSender(
         jmsConnectionFactory = jmsConnectionFactory,
-        queue = env.required("OPPDRAG_SEND_MQ_NAME"),
-        replyQueue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
+        queue = properties.mqSendQueue,
+        replyQueue = properties.mqKvitteringQueue,
     )
 
-    fun utbetalingDao(dataSource: DataSource) = UtbetalingDao(dataSource)
+    val utbetalingDao = UtbetalingDao(dataSource)
 
-    fun utbetalingService(
-        oppdragSender: OppdragSender,
-        utbetalingDao: UtbetalingDao,
-        rapidsConnection: RapidsConnection
-    ) = UtbetalingService(
+    val utbetalingService = UtbetalingService(
         oppdragMapper = OppdragMapper,
         oppdragSender = oppdragSender,
         utbetalingDao = utbetalingDao,
         rapidsConnection = rapidsConnection,
-        clock = clock()
+        clock = clock
     )
 
-    fun kvitteringMottaker(
-        utbetalingService: UtbetalingService,
-        jmsConnectionFactory: JmsConnectionFactory
-    ) = KvitteringMottaker(
-        utbetalingService = utbetalingService,
+    val avstemmingsdataSender = AvstemmingsdataSender(
         jmsConnectionFactory = jmsConnectionFactory,
-        queue = env.required("OPPDRAG_KVITTERING_MQ_NAME"),
+        queue = properties.mqAvstemmingQueue
     )
 
-    fun vedtakMottaker(rapidsConnection: RapidsConnection, utbetalingService: UtbetalingService) = VedtakMottaker(
-        rapidsConnection = rapidsConnection,
-        utbetalingService = utbetalingService
-    )
+    val grensesnittavstemmingDao = GrensesnittavstemmingDao(dataSource)
 
-    fun avstemmingDao(dataSource: DataSource) = GrensesnittavstemmingDao(dataSource)
-
-    fun avstemmingSender(jmsConnectionFactory: JmsConnectionFactory) = AvstemmingsdataSender(
-        jmsConnectionFactory = jmsConnectionFactory,
-        queue = env.required("OPPDRAG_AVSTEMMING_MQ_NAME")
-    )
-
-    fun grensesnittsavstemmingService(
-        grensesnittavstemmingDao: GrensesnittavstemmingDao,
-        avstemmingsdataSender: AvstemmingsdataSender,
-        utbetalingDao: UtbetalingDao,
-    ) = GrensesnittsavstemmingService(
+    val grensesnittsavstemmingService = GrensesnittsavstemmingService(
         grensesnittavstemmingDao = grensesnittavstemmingDao,
         avstemmingsdataSender = avstemmingsdataSender,
         utbetalingDao = utbetalingDao,
-        clock = clock()
+        clock = clock
     )
 
-    fun oppgavetrigger(
-        rapidsConnection: RapidsConnection,
-        utbetalingService: UtbetalingService,
-        grensesnittsavstemmingService: GrensesnittsavstemmingService,
-    ) = Oppgavetrigger(
-        rapidsConnection = rapidsConnection,
-        utbetalingService = utbetalingService,
-        grensesnittsavstemmingService = grensesnittsavstemmingService,
-    )
+    val leaderElection = LeaderElection(properties.leaderElectorPath)
 
-    fun leaderElection() = LeaderElection(env.required("ELECTOR_PATH"))
-
-    fun grensesnittavstemmingJob(
-        grensesnittsavstemmingService: GrensesnittsavstemmingService,
-        leaderElection: LeaderElection,
-        starttidspunkt: Date = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).next(LocalTime.of(3, 0, 0))
-    ) =
+    val grensesnittavstemmingJob =
         GrensesnittsavstemmingJob(
             grensesnittsavstemmingService = grensesnittsavstemmingService,
             leaderElection = leaderElection,
-            starttidspunkt = starttidspunkt,
+            starttidspunkt = ZonedDateTime.now(norskTidssone).next(LocalTime.of(3, 0, 0)),
             periode = Duration.of(1, ChronoUnit.DAYS),
         )
 
-    private fun jdbcUrl(host: String, port: String, databaseName: String) =
+    val oppgavetrigger by lazy {
+        Oppgavetrigger(
+            rapidsConnection = rapidsConnection,
+            utbetalingService = utbetalingService,
+            grensesnittsavstemmingService = grensesnittsavstemmingService,
+        )
+    }
+
+    val kvitteringMottaker by lazy {
+        KvitteringMottaker(
+            utbetalingService = utbetalingService,
+            jmsConnectionFactory = jmsConnectionFactory,
+            queue = properties.mqKvitteringQueue
+        )
+    }
+
+    val vedtakMottaker by lazy {
+        VedtakMottaker(
+            rapidsConnection = rapidsConnection,
+            utbetalingService = utbetalingService
+        )
+    }
+
+    private fun jdbcUrl(host: String, port: Int, databaseName: String) =
         "jdbc:postgresql://${host}:$port/$databaseName"
 }
 
-fun Map<String, String>.required(property: String): String =
-    requireNotNull(this[property]) { "Property $property was null" }
+private fun Map<String, String>.withConsumerGroupId() =
+    this.toMutableMap().apply {
+        put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
+    }

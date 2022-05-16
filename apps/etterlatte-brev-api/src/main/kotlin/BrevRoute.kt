@@ -45,7 +45,7 @@ fun Route.brevRoute(service: BrevService) {
             call.respond(bytes)
         }
 
-        delete("{brevId") {
+        delete("{brevId}") {
             val brevId = call.parameters["brevId"]!!
 
             val brev = service.slettBrev(brevId.toLong())

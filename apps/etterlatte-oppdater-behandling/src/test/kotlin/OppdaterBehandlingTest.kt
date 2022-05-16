@@ -1,8 +1,10 @@
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.etterlatte.BehandlingsService
 import no.nav.etterlatte.OppdaterBehandling
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 
@@ -14,13 +16,14 @@ internal class OppdaterBehandlingTest {
 
     @Test
     fun `skal fordele gyldig soknad til behandling`() {
-        //every { behandlingService.leggTilVilkaarsresultat(any(),any()) }.returns(Unit)
+        val sakIdSlot = slot<Long>()
+        every { behandlingService.grunnlagEndretISak(capture(sakIdSlot)) }.returns(Unit)
 
-        val inspector = inspector.apply { sendTestMessage(fullMelding) }.inspektør
+        val inspector = inspector.apply { sendTestMessage(fullMelding) }
 
-        //Assertions.assertEquals("ey_fordelt", inspector.message(0).get("@event").asText())
-        //Assertions.assertEquals("true", inspector.message(0).get("@soeknad_fordelt").asText())
+        inspector.sendTestMessage(fullMelding)
 
+        Assertions.assertEquals(1L, sakIdSlot.captured)
     }
 
 

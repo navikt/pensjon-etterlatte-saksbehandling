@@ -18,7 +18,7 @@ internal class OppdaterBehandling(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "GRUNNLAG:GRUNNLAGENDRET") }
-            validate { it.requireKey("grunnlag") }
+            validate { it.requireKey("sak") }
             validate { it.interestedIn("@correlation_id") }
 
         }.register(this)

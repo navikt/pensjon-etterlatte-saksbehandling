@@ -13,9 +13,7 @@ class DataSourceBuilder(
         it.jdbcUrl = jdbcUrl
         it.username = username
         it.password = password
-
-        it.transactionIsolation =
-            "TRANSACTION_SERIALIZABLE" // låser raden ved endring TODO: https://www.postgresql.org/docs/current/transaction-iso.html
+        it.transactionIsolation = "TRANSACTION_SERIALIZABLE"
         it.initializationFailTimeout = 6000
         it.maximumPoolSize = 3
         it.maxLifetime = 30001

@@ -46,7 +46,7 @@ fun Route.behandlingRoutes(service: BehandlingService) {
     }
 
     post("/saker/{sakid}/hendelse/grunnlagendret") { //Søk
-        service.hentBehandlinger()
+        service.grunnlagISakEndret(sakId)
         call.respond(HttpStatusCode.OK)
     }
     route("/behandlinger/{behandlingsid}") {

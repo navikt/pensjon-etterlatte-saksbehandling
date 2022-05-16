@@ -14,10 +14,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.*
 import no.nav.etterlatte.database.DatabaseContext
-import no.nav.etterlatte.grunnlag.BehandlingHendelser
-import no.nav.etterlatte.grunnlag.GrunnlagFactory
-import no.nav.etterlatte.grunnlag.GrunnlagHendelser
-import no.nav.etterlatte.grunnlag.grunnlagRoutes
+import no.nav.etterlatte.grunnlag.*
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -40,6 +37,7 @@ suspend fun main() {
         val grunnlag = GrunnlagFactory(beanFactory.opplysningDao())
         GrunnlagHendelser(this, grunnlag)//, beanFactory.datasourceBuilder().dataSource)
         BehandlingHendelser(this,grunnlag)
+        BehandlingEndretHendlese(this,grunnlag)
     }.also {
             withContext(Dispatchers.Default + Kontekst.asContextElement(
             value = Context(Self("etterlatte-grunnlag"), DatabaseContext( beanFactory.datasourceBuilder().dataSource))

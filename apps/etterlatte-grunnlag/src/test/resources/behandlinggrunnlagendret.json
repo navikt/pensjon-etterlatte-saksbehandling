@@ -1,0 +1,42 @@
+{
+  "id": "57679c04-fbb3-42cf-a4d0-ad677f5fae41",
+  "sak": 1,
+  "behandlingOpprettet": "2022-05-16T09:27:29.633238",
+  "sistEndret": "2022-05-16T09:27:29.726541",
+  "soeknadMottattDato": "2022-02-14T14:37:24.573613",
+  "innsender": "03108718357",
+  "soeker": "12101376212",
+  "gjenlevende": [
+    "03108718357"
+  ],
+  "avdoed": [
+    "22128202440"
+  ],
+  "soesken": [],
+  "gyldighetsproeving": {
+    "resultat": "OPPFYLT",
+    "vurderinger": [
+      {
+        "navn": "INNSENDER_ER_FORELDER",
+        "resultat": "OPPFYLT",
+        "vurdertDato": "2022-05-16T09:27:25.05323366"
+      },
+      {
+        "navn": "HAR_FORELDREANSVAR_FOR_BARNET",
+        "resultat": "OPPFYLT",
+        "vurdertDato": "2022-05-16T09:27:25.053428346"
+      }
+    ],
+    "vurdertDato": "2022-05-16T09:27:25.053447372"
+  },
+  "status": "GYLDIG_SOEKNAD",
+  "system_read_count": 0,
+  "system_participating_services": [
+    {
+      "service": "etterlatte-behandling",
+      "instance": "etterlatte-behandling-5c45966b89-kr5b4",
+      "time": "2022-05-16T11:26:08.246562809"
+    }
+  ],
+  "@event": "BEHANDLING:GRUNNLAGENDRET"
+}

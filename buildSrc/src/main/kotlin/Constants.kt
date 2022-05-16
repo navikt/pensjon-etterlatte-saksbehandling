@@ -13,7 +13,7 @@ object Kotlinx {
 }
 
 object Ktor {
-    private const val version = "1.6.1"
+    private const val version = "1.6.8"
 
     const val OkHttp = "io.ktor:ktor-client-okhttp:$version"
     const val ServerNetty = "io.ktor:ktor-server-netty:$version"

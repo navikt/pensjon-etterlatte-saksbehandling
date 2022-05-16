@@ -43,10 +43,10 @@ class BrevService(
         if (brev.status != "OPPRETTET" && brev.status != "OPPDATERT")
             throw RuntimeException("Brev er ferdigstilt og kan ikke slettes!")
 
-        return false
+        return db.slett(id)
     }
 
-    suspend fun opprett(behandlingId: String, mottaker: Mottaker, mal: String): Brev {
+    suspend fun opprett(behandlingId: String, mottaker: Mottaker, mal: Mal): Brev {
         // TODO: Fikse støtte for mal
         val request = object : BrevRequest() {
             override val spraak: Spraak
@@ -57,12 +57,12 @@ class BrevService(
                     adresse = mottaker.adresse.adresse,
                     postnummer = mottaker.adresse.postnummer
                 )
-            override fun templateName(): String = mal
+            override fun templateName(): String = mal.navn
         }
 
         val pdf = pdfGenerator.genererPdf(request)
 
-        return db.opprettBrev(NyttBrev(behandlingId.toLong(), mal, mottaker, pdf))
+        return db.opprettBrev(NyttBrev(behandlingId.toLong(), mal.tittel, mottaker, pdf))
     }
 
     fun ferdigstillBrev(id: BrevID): Brev {
@@ -84,8 +84,9 @@ class BrevService(
         )
 
         val pdf = genererPdf(vedtak)
+        val tittel = "Vedtak om ${vedtak.type.name.lowercase()}"
 
-        return db.opprettBrev(NyttBrev(behandlingId.toLong(), vedtak.status, mottaker, pdf))
+        return db.opprettBrev(NyttBrev(behandlingId.toLong(), tittel, mottaker, pdf))
     }
 
     private suspend fun genererPdf(vedtak: Vedtak): ByteArray {
@@ -106,7 +107,6 @@ class BrevService(
     suspend fun sendBrev(behandlingId: String) {
         val vedtak = vedtakService.hentVedtak(behandlingId)
         val brev = db.hentBrev(vedtak.vedtakId.toLong())
-            ?: throw Exception("Klarte ikke finne brev tilhørende vedtak med vedtakId ${vedtak.vedtakId}")
 
         journalpostService.journalfoer(vedtak, brev)
     }

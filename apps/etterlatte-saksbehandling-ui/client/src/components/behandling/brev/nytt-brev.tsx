@@ -1,4 +1,4 @@
-import { BodyShort, Button, Cell, Grid, Modal, Select, TextField } from "@navikt/ds-react";
+import { BodyShort, Button, Cell, Grid, Loader, Modal, Select, TextField } from "@navikt/ds-react";
 import { useContext, useEffect, useState } from "react";
 import { Add } from "@navikt/ds-icons";
 import styled from "styled-components";
@@ -12,7 +12,7 @@ const CustomModal = styled(Modal)`
   width: 540px;
 `
 
-export default function NyttBrev() {
+export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => void }) {
   const { behandlingId } = useParams()
   const { state } = useContext(AppContext)
 
@@ -20,6 +20,7 @@ export default function NyttBrev() {
   const [mottaker, setMottaker] = useState<any>({})
   const [mal, setMal] = useState<any>({})
   const [maler, setMaler] = useState<any>([])
+  const [laster, setLaster] = useState(false)
 
   useEffect(() => {
     hentMaler().then(res => setMaler(res))
@@ -33,9 +34,13 @@ export default function NyttBrev() {
   const opprett = () => {
     if (!mal) return
 
-    opprettBrev(behandlingId!!, mottaker, mal)
-        .then(res => console.log(res))
-        .finally(() => setIsOpen(false))
+    setLaster(true)
+    opprettBrev(behandlingId!!, mottaker, { tittel: maler.find((m: any) => m.navn === mal).tittel, navn: mal })
+        .then(brev => leggTilNytt(brev))
+        .finally(() => {
+          setLaster(false)
+          setIsOpen(false)
+        })
   }
 
   const oppdaterMottaker = (fnr: string) => {
@@ -84,7 +89,7 @@ export default function NyttBrev() {
             <Select label={'Mal'} size={'medium'} onChange={(e) => setMal(e.target.value)}>
               <option value={undefined}>Velg mal ...</option>
               {maler.map((mal: any, i: number) => (
-                <option key={i} value={mal.malkode}>{mal.filnavn}</option>
+                <option key={i} value={mal.navn}>{mal.tittel}</option>
               ))}
             </Select>
 
@@ -161,8 +166,8 @@ export default function NyttBrev() {
             <br/>
             <br/>
 
-            <Button variant={'primary'} style={{ float: 'right' }} onClick={opprett}>
-              Lagre
+            <Button variant={'primary'} style={{ float: 'right' }} onClick={opprett} disabled={laster}>
+              Lagre {laster && <Loader />}
             </Button>
             <br/>
             <br/>

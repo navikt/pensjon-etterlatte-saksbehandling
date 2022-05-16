@@ -10,19 +10,45 @@ import { BehandlingsTypeSmall, IBehandlingsType } from "../behandlings-type";
 import { Soeknadsdato } from "../soeknadsoversikt/soeknadoversikt/soeknadinfo/Soeknadsdato";
 import { usePersonInfoFromBehandling } from "../usePersonInfoFromBehandling";
 import { BehandlingHandlingKnapper } from "../handlinger/BehandlingHandlingKnapper";
-import { hentAlleBrev } from "../../../shared/api/brev";
+import { ferdigstillBrev, hentAlleBrev, slettBrev } from "../../../shared/api/brev";
 import { useParams } from "react-router-dom";
 
 export const Brev = () => {
   const { behandlingId } = useParams()
   const { mottattDato } = usePersonInfoFromBehandling()
 
-  const [brevListe, setBrevListe] = useState<any[]>()
+  const [brevListe, setBrevListe] = useState<any[]>([])
 
   useEffect(() => {
     hentAlleBrev(behandlingId!!)
         .then(res => setBrevListe(res))
   }, [])
+
+  const ferdigstill = (brevId: any): Promise<void> => {
+    return ferdigstillBrev(brevId)
+        .then((brev: any) => {
+          const nyListe: any[] = brevListe.filter((v: any) => v.id !== brevId)
+
+          nyListe.push(brev)
+
+          setBrevListe(nyListe)
+        })
+  }
+
+  const leggTilNytt = (brev: any) => {
+    const nyListe = [...brevListe]
+    nyListe.push(brev)
+    setBrevListe(nyListe)
+  }
+
+  const slett = (brevId: any): Promise<void> => {
+    return slettBrev(brevId)
+        .then(() => {
+          const nyListe = brevListe?.filter(brev => brev.id !== brevId)
+
+          setBrevListe(nyListe)
+        })
+  }
 
   const hentStatusTag = (status: string) => {
     if (['OPPRETTET', 'OPPDATERT'].includes(status)) {
@@ -74,9 +100,7 @@ export const Brev = () => {
                 <Table.HeaderCell>ID</Table.HeaderCell>
                 <Table.HeaderCell>Filnavn</Table.HeaderCell>
                 <Table.HeaderCell>Mottaker navn</Table.HeaderCell>
-                <Table.HeaderCell>Fødselsnummer</Table.HeaderCell>
                 {/* TODO: Burde vi vise hvilken rolle mottakeren har? Søker, innsender, etc..? */}
-                {/*<Table.HeaderCell>Rolle</Table.HeaderCell>*/}
                 <Table.HeaderCell>Status</Table.HeaderCell>
                 <Table.HeaderCell>Handlinger</Table.HeaderCell>
               </Table.Row>
@@ -86,18 +110,20 @@ export const Brev = () => {
               {brevListe?.map((brev, i) => (
                   <Table.Row key={i}>
                     <Table.DataCell>{brev.id}</Table.DataCell>
-                    <Table.DataCell>Vedtak om innvilget barnepensjon</Table.DataCell>
+                    <Table.DataCell>{brev.tittel}</Table.DataCell>
                     <Table.DataCell>
                       {brev.mottaker.fornavn} {brev.mottaker.etternavn}
-                    </Table.DataCell>
-                    <Table.DataCell>
-                      {brev.mottaker.foedselsnummer}
                     </Table.DataCell>
                     <Table.DataCell>
                       {hentStatusTag(brev.status)}
                     </Table.DataCell>
                     <Table.DataCell>
-                      <BrevModal brevId={brev.id} status={brev.status}/>
+                      <BrevModal
+                          brevId={brev.id}
+                          status={brev.status}
+                          ferdigstill={ferdigstill}
+                          slett={slett}
+                      />
                     </Table.DataCell>
                   </Table.Row>
               ))}
@@ -106,7 +132,7 @@ export const Brev = () => {
         </ContentContainer>
 
         <ContentContainer>
-          <NyttBrev/>
+          <NyttBrev leggTilNytt={leggTilNytt}/>
         </ContentContainer>
 
         <Border/>

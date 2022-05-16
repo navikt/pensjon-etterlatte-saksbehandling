@@ -1,6 +1,6 @@
 import { BodyLong, Button, Modal } from "@navikt/ds-react";
 import { useState } from "react";
-import { ferdigstillBrev, genererPdf, slettBrev } from "../../../shared/api/brev";
+import { genererPdf } from "../../../shared/api/brev";
 import styled from "styled-components";
 import { Delete, Findout, Notes, Success } from "@navikt/ds-icons";
 
@@ -18,9 +18,11 @@ const ButtonRow = styled.div`
   text-align: right;
 `
 
-export default function BrevModal({ brevId, status }: {
+export default function BrevModal({ brevId, status, ferdigstill, slett }: {
   brevId: string
   status: string
+  ferdigstill: (brevId: any) => Promise<void>
+  slett: (brevId: any) => Promise<void>
 }) {
   const [error, setError] = useState<string>()
   const [fileURL, setFileURL] = useState<string>()
@@ -40,15 +42,9 @@ export default function BrevModal({ brevId, status }: {
         })
   }
 
-  const send = () => {
-    ferdigstillBrev(brevId)
-        .then(() => setIsOpen(false))
-  }
+  const ferdigstillBrev = () => ferdigstill(brevId).then(() => setIsOpen(false))
 
-  const slett = () => {
-    slettBrev(brevId)
-        .then(() => console.log('Slettet ok!'))
-  }
+  const slettBrev = () => slett(brevId).then(() => setIsOpen(false))
 
   return (
       <>
@@ -57,7 +53,7 @@ export default function BrevModal({ brevId, status }: {
           {isDone ? <Findout /> : <Notes />}
         </Button>
         &nbsp;&nbsp;
-        <Button variant={'danger'} size={'small'} disabled={isDone} onClick={slett}>
+        <Button variant={'danger'} size={'small'} disabled={isDone} onClick={slettBrev}>
           <Delete />
         </Button>
 
@@ -85,7 +81,7 @@ export default function BrevModal({ brevId, status }: {
               {!isDone && (
                   <>
                     &nbsp;&nbsp;
-                    <Button variant={'primary'} onClick={send}>
+                    <Button variant={'primary'} onClick={ferdigstillBrev}>
                       Godkjenn <Success />
                     </Button>
                   </>

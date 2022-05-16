@@ -19,8 +19,8 @@ class VedtakService {
         saksnummer = "123456",
         virkningsdato = LocalDate.now(),
         barn = Barn(
-            navn = "Blåøyd Saks",
-            fnr = "05111850870"
+            navn = "Talendfull Blyant",
+            fnr = "12101376212"
         ),
         avdoed = Avdoed(
             navn = "Avdød nordmann",

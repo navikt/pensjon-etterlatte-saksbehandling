@@ -15,9 +15,9 @@ export const ferdigstillBrev = async (brevId: string): Promise<any> =>
 export const slettBrev = async (brevId: string): Promise<any> =>
     await fetch(`${path}/brev/${brevId}`, {
       method: 'DELETE'
-    }).then(res => res.json())
+    }).then(res => res.text())
 
-export const opprettBrev = async (behandlingId: string, mottaker: any, mal: string): Promise<any> =>
+export const opprettBrev = async (behandlingId: string, mottaker: any, mal: any): Promise<any> =>
     await fetch(`${path}/brev/${behandlingId}`, {
       method: 'POST',
       body: JSON.stringify({ mottaker, mal }),

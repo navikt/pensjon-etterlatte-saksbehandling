@@ -19,6 +19,12 @@ class BehandlingsService(
         }
     }
 
+    override fun grunnlagEndretISak(sak: Long) {
+        runBlocking {
+            behandling_app.post<String>("$url/saker/$sak/hendelse/grunnlagendret") {}
+        }
+    }
+
 }
 
 

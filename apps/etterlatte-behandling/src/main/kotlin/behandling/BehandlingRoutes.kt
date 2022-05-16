@@ -44,6 +44,11 @@ fun Route.behandlingRoutes(service: BehandlingService) {
             )
         .also { call.respondText(it.id.toString()) }
     }
+
+    post("$/saker/{sakid}/hendelse/grunnlagendret") { //Søk
+        service.hentBehandlinger()
+        call.respond(HttpStatusCode.OK)
+    }
     route("/behandlinger/{behandlingsid}") {
         get {
             call.respond(service.hentBehandling(behandlingsId)?.let {

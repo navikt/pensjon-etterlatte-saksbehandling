@@ -38,7 +38,6 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester
-        - application: etterlatte-vilkaar-api
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui

@@ -45,7 +45,7 @@ fun Route.behandlingRoutes(service: BehandlingService) {
         .also { call.respondText(it.id.toString()) }
     }
 
-    post("$/saker/{sakid}/hendelse/grunnlagendret") { //Søk
+    post("/saker/{sakid}/hendelse/grunnlagendret") { //Søk
         service.hentBehandlinger()
         call.respond(HttpStatusCode.OK)
     }

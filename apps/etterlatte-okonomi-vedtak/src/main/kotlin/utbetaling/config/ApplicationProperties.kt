@@ -20,7 +20,7 @@ data class ApplicationProperties(
     companion object {
         fun fromEnv(env: Map<String, String>) = env.run {
             ApplicationProperties(
-                dbName = value("DB_NAME"),
+                dbName = value("DB_DATABASE"),
                 dbHost = value("DB_HOST"),
                 dbPort = value("DB_PORT").toInt(),
                 dbUsername = value("DB_USERNAME"),

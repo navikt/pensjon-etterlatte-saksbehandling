@@ -20,13 +20,24 @@ class UtbetalingService(
     val rapidsConnection: RapidsConnection,
     val clock: Clock
 ) {
-    fun iverksettUtbetaling(vedtak: Vedtak, attestasjon: Attestasjon): Utbetaling {
-        val opprettetTidspunkt = Tidspunkt.now(clock)
-        val oppdrag = oppdragMapper.oppdragFraVedtak(vedtak, attestasjon, opprettetTidspunkt)
+    fun iverksettUtbetaling(vedtak: Vedtak): Utbetaling {
+        val tidligereUtbetalingerForSak = utbetalingDao.hentUtbetalinger(SakId(vedtak.sakId))
+        val utbetaling: Utbetaling = toUtbetaling(vedtak, tidligereUtbetalingerForSak)
+
+        val oppdrag = oppdragMapper.oppdragFraUtbetaling(utbetaling)
 
         logger.info("Sender oppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId} til oppdrag")
         oppdragSender.sendOppdrag(oppdrag)
-        return utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettetTidspunkt)
+        return utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
+    }
+
+    private fun toUtbetaling(vedtak: Vedtak, utbetalinger: List<Utbetaling>): Utbetaling {
+        val utbetalingslinjer = utbetalinger.flatMap { it.utbetalingslinjer }
+
+
+        val opprettetTidspunkt = Tidspunkt.now(clock)
+        // opprett utbetaling her
+
     }
 
     fun utbetalingEksisterer(vedtak: Vedtak) =

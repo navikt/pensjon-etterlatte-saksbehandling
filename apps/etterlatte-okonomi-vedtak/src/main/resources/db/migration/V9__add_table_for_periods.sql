@@ -8,7 +8,7 @@ CREATE TABLE utbetalingslinje (
     beloep                  NUMERIC                     NOT NULL,
     utbetaling_id           VARCHAR                     REFERENCES utbetaling(id),
     erstatter_id            VARCHAR(32)                 DEFAULT NULL,
-    sak_id                  VARCHAR(32)                 REFERENCES utbetaling(sak_id)
+    sak_id                  VARCHAR(32)                 NOT NULL
 );
 
 -- id  opprettet   periode_fra     periode_til     beloep   utbetaling_id  erstatter_id    sak_id

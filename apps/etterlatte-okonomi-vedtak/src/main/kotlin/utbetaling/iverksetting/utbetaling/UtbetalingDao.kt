@@ -3,13 +3,15 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.forsteDagIMaaneden
+import no.nav.etterlatte.utbetaling.common.sisteDagIMaaneden
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
+import java.sql.Statement
 import java.sql.Timestamp
 import java.util.*
 import javax.sql.DataSource
@@ -19,8 +21,30 @@ data class UtbetalingNotFoundException(override val message: String) : RuntimeEx
 
 class UtbetalingDao(private val dataSource: DataSource) {
 
+    fun hentUtbetalinger(sakId: SakId): List<Utbetaling> {
+        dataSource.connection.use { connection ->
+            val stmt = connection.prepareStatement(
+                """
+                SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
+                    foedselsnummer, utgaaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, 
+                    meldingkode_oppdrag
+                FROM utbetalingsoppdrag 
+                WHERE sak_id = ?
+            """
+            )
+
+            stmt.use {
+                it.setObject(1, sakId.value)
+
+                it.executeQuery().toList { toUtbetaling() }
+            }
+        }
+    }
+
     fun hentUtbetaling(vedtakId: String): Utbetaling? =
         dataSource.connection.use { connection ->
+            val utbetalingslinjer = hentUtbetalingslinjer()
+
             val stmt = connection.prepareStatement(
                 """
                 SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
@@ -34,9 +58,27 @@ class UtbetalingDao(private val dataSource: DataSource) {
             stmt.use {
                 it.setObject(1, vedtakId)
 
+                it.executeQuery().singleOrNull(toUtbetaling(utbetalingslinjer))
+            }
+        }
+
+    fun hentUtbetalingslinjer(utbetalingId: UUID): List<Utbetalingslinje> {
+        dataSource.connection.use { connection ->
+            val stmt = connection.prepareStatement(
+                """
+                SELECT 
+                FROM utbetalingslinje 
+                WHERE utbetaling_id = ?
+            """
+            )
+
+            stmt.use {
+                it.setObject(1, vedtakId)
+
                 it.executeQuery().singleOrNull(toUtbetaling())
             }
         }
+    }
 
     fun hentAlleUtbetalingerMellom(fraOgMed: Tidspunkt, til: Tidspunkt): List<Utbetaling> =
         dataSource.connection.use { connection ->
@@ -63,35 +105,66 @@ class UtbetalingDao(private val dataSource: DataSource) {
         hentUtbetaling(vedtakId)
             ?: throw UtbetalingNotFoundException("Utbetaling for vedtak med vedtakId=$vedtakId finnes ikke")
 
-    fun opprettUtbetaling(vedtak: Vedtak, oppdrag: Oppdrag, opprettetTidspunkt: Tidspunkt) =
+
+
+    fun opprettUtbetaling(utbetaling: Utbetaling) =
         dataSource.connection.use { connection ->
-            logger.info("Oppretter utbetaling for vedtakId=${vedtak.vedtakId}")
+            logger.info("Oppretter utbetaling for vedtakId=${utbetaling.vedtakId}")
 
             val stmt = connection.prepareStatement(
                 """
-                INSERT INTO utbetalingsoppdrag(vedtak_id, behandling_id, sak_id, utgaaende_oppdrag, status, vedtak, 
+                INSERT INTO utbetalingsoppdrag(id, vedtak_id, behandling_id, sak_id, utgaaende_oppdrag, status, vedtak, 
                     opprettet, avstemmingsnoekkel, endret, foedselsnummer)
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
             )
 
             stmt.use {
-                it.setString(1, vedtak.vedtakId)
-                it.setString(2, vedtak.behandlingsId)
-                it.setString(3, vedtak.sakId)
-                it.setString(4, OppdragJaxb.toXml(oppdrag))
-                it.setString(5, UtbetalingStatus.SENDT.name)
-                it.setString(6, vedtak.toJson())
-                it.setTimestamp(7, Timestamp.from(opprettetTidspunkt.instant), tzUTC)
-                it.setTimestamp(8, Timestamp.from(opprettetTidspunkt.instant), tzUTC)
-                it.setTimestamp(9, Timestamp.from(opprettetTidspunkt.instant), tzUTC)
-                it.setString(10, vedtak.sakIdGjelderFnr)
-
-
+                it.setString(1, utbetaling.id.toString())
+                it.setString(2, utbetaling.vedtakId.value)
+                it.setString(3, utbetaling.behandlingId.value)
+                it.setString(4, utbetaling.sakId.value)
+                it.setString(5, utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) })
+                it.setString(6, UtbetalingStatus.SENDT.name)
+                it.setString(7, utbetaling.vedtak.toJson())
+                it.setTimestamp(8, Timestamp.from(utbetaling.opprettet.instant), tzUTC)
+                it.setTimestamp(9, Timestamp.from(utbetaling.avstemmingsnoekkel.instant), tzUTC)
+                it.setTimestamp(10, Timestamp.from(utbetaling.endret.instant), tzUTC)
+                it.setString(11, utbetaling.foedselsnummer.value)
 
                 require(it.executeUpdate() == 1)
             }
-        }.let { hentUtbetalingNonNull(vedtak.vedtakId) }
+
+            utbetaling.utbetalingslinjer.forEach {
+                opprettUtbetalingslinje(it)
+            }
+
+
+        }.let { hentUtbetalingNonNull(utbetaling.vedtakId.value) }
+
+    fun opprettUtbetalingslinje(utbetalingslinje: Utbetalingslinje) =
+        dataSource.connection.use { connection ->
+            val stmt = connection.prepareStatement(
+                """
+                INSERT INTO utbetalingslinje(id, opprettet, periode_fra, periode_til, beloep, utbetaling_id, sak_id, erstatter_id)
+                VALUES(?,?,?,?,?,?,?,?)
+            """
+            )
+
+            stmt.use {
+                it.setString(1, utbetalingslinje.id)
+                it.setTimestamp(2, Timestamp.from(utbetalingslinje.opprettet.instant), tzUTC)
+                it.setObject(3, forsteDagIMaaneden(utbetalingslinje.periode.fom))
+                it.setObject(4, utbetalingslinje.periode.tom?.let { tom -> sisteDagIMaaneden(tom) } )
+                it.setBigDecimal(5, utbetalingslinje.beloep)
+                it.setString(6, utbetalingslinje.utbetalingId.toString())
+                it.setString(7, utbetalingslinje.sakId.value)
+                it.setString(8, utbetalingslinje.erstatterId)
+
+                require(it.executeUpdate() == 1)
+            }
+        }
+
 
     fun oppdaterStatus(vedtakId: String, status: UtbetalingStatus, endret: Tidspunkt) =
         dataSource.connection.use { connection ->
@@ -138,10 +211,10 @@ class UtbetalingDao(private val dataSource: DataSource) {
         }.let { hentUtbetalingNonNull(oppdragMedKvittering.vedtakId()) }
 
 
-    private fun toUtbetaling(): ResultSet.() -> Utbetaling =
+    private fun toUtbetaling(utbetalingslinjer: List<Utbetalingslinje>): ResultSet.() -> Utbetaling =
         {
             Utbetaling(
-                id = getLong("id"),
+                id = getString("id").let { UUID.fromString(it) },
                 sakId = SakId(getString("sak_id")),
                 behandlingId = BehandlingId(getString("behandling_id")),
                 vedtakId = VedtakId(getString("vedtak_id")),
@@ -155,7 +228,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 kvittering = getString("oppdrag_kvittering")?.let(OppdragJaxb::toOppdrag),
                 kvitteringBeskrivelse = getString("beskrivelse_oppdrag"),
                 kvitteringFeilkode = getString("feilkode_oppdrag"),
-                kvitteringMeldingKode = getString("meldingkode_oppdrag")
+                kvitteringMeldingKode = getString("meldingkode_oppdrag"),
+                utbetalingslinjer = utbetalingslinjer
             )
         }
 

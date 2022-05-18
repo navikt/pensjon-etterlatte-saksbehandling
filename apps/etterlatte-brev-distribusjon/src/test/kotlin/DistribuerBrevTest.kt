@@ -20,7 +20,7 @@ class DistribuerBrevTest {
         val mockJournalpostResponse = JournalpostResponse(journalpostId = "12345", journalpostferdigstilt = true)
         val distribusjonMelding = DistribusjonMelding(
             vedtakId = "00001",
-            brevId = "1000",
+            brevId = 1000L,
             mottaker = AvsenderMottaker(id = "0101202012345"),
             bruker = Bruker(id = "0101202012345"),
             tittel = "Vi har innvilget din søknad om barnepensjon"
@@ -36,7 +36,7 @@ class DistribuerBrevTest {
 
         inspector.message(0).get("@event").asText() shouldBe "BREV:DISTRIBUER"
         inspector.message(0).get("@distribuert").asBoolean() shouldBe true
-        inspector.message(0).get("@brevId").asText() shouldBe distribusjonMelding.brevId
+        inspector.message(0).get("@brevId").asLong() shouldBe distribusjonMelding.brevId
         inspector.message(0).get("@journalpostResponse").asText() shouldBe mockJournalpostResponse.toJson()
     }
 }

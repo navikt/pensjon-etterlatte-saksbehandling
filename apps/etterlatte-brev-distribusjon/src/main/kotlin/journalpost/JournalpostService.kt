@@ -1,39 +1,37 @@
 package journalpost
 
-import no.nav.etterlatte.db.Brev
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.journalpost.JournalpostKlient
-import no.nav.etterlatte.libs.common.brev.model.Vedtak
-import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
-import no.nav.etterlatte.libs.common.journalpost.Bruker
+import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.journalpost.DokumentVariant
 import no.nav.etterlatte.libs.common.journalpost.JournalPostType
 import no.nav.etterlatte.libs.common.journalpost.JournalpostDokument
 import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
-import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
-import java.util.*
 
 class JournalpostService(private val client: JournalpostKlient) {
     private val logger = LoggerFactory.getLogger(JournalpostService::class.java)
 
-    suspend fun journalfoer(vedtak: Vedtak, brev: Brev): JournalpostResponse {
-        logger.info("Oppretter journalpost for vedtak (id=${vedtak.vedtakId}) med saksnummer ${vedtak.saksnummer}")
+    fun journalfoer(melding: DistribusjonMelding): JournalpostResponse = runBlocking {
+        logger.info("Oppretter journalpost for vedtak (id=${melding.vedtakId})")
 
-        val request = mapTilJournalpostRequest(vedtak, brev)
+        val dokumenter = emptyList<DokumentVariant>()
+        val request = mapTilJournalpostRequest(melding, dokumenter)
 
-        return client.opprettJournalpost(request, true)
+        client.opprettJournalpost(request, true)
     }
 
     companion object {
-        private val encoder = Base64.getEncoder()
-
-        fun mapTilJournalpostRequest(vedtak: Vedtak, brev: Brev): JournalpostRequest = JournalpostRequest(
-            tittel = "Vi har innvilget din søknad om barnepensjon",
+        fun mapTilJournalpostRequest(
+            melding: DistribusjonMelding,
+            dokumenter: List<DokumentVariant>
+        ): JournalpostRequest = JournalpostRequest(
+            tittel = melding.tittel,
             journalpostType = JournalPostType.UTGAAENDE,
             behandlingstema = "ab0255", //SoeknadType.BARNEPENSJON
-            avsenderMottaker = AvsenderMottaker(id = vedtak.barn.fnr),
-            bruker = Bruker(id = vedtak.barn.fnr),
+            avsenderMottaker = melding.mottaker,
+            bruker = melding.bruker,
             eksternReferanseId = "todo", // blir sjekket for duplikat.
             // fagsaksystem = "EY??"
             // sak = {...}
@@ -43,10 +41,7 @@ class JournalpostService(private val client: JournalpostKlient) {
                     // "brevkode" = "??"
                     dokumentKategori = null, // depricated
                     brevkode = "XX.YY-ZZ",
-                    dokumentvarianter = listOf(
-                        DokumentVariant.ArkivPDF(encoder.encodeToString(brev.data)),
-                        DokumentVariant.OriginalJson(vedtak.toJson()) // ??
-                    )
+                    dokumentvarianter = dokumenter
                 )
             ),
             tema = "EYB", // https://confluence.adeo.no/display/BOA/Tema,

@@ -1,8 +1,6 @@
 package no.nav.etterlatte
 
 import journalpost.JournalpostService
-import model.Vedtak
-import model.VedtakType
 import model.brev.InnvilgetBrevRequest
 import no.nav.etterlatte.db.Brev
 import no.nav.etterlatte.db.BrevRepository
@@ -11,6 +9,8 @@ import no.nav.etterlatte.db.Adresse
 import no.nav.etterlatte.db.BrevID
 import no.nav.etterlatte.db.Mottaker
 import no.nav.etterlatte.db.NyttBrev
+import no.nav.etterlatte.libs.common.brev.model.Vedtak
+import no.nav.etterlatte.libs.common.brev.model.VedtakType
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.model.brev.BrevRequest

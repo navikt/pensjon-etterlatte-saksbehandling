@@ -156,23 +156,9 @@ class BrevRepository private constructor(private val ds: DataSource) {
     }
 
     fun slett(id: BrevID): Boolean = connection.use {
-        it.prepareStatement("""
-            DELETE FROM hendelse WHERE brev_id = ?;
-            DELETE FROM innhold WHERE brev_id = ?;
-            DELETE FROM mottaker WHERE brev_id = ?;
-            DELETE FROM brev WHERE id = ?;
-        """.trimIndent())
-            .apply {
-                setLong(1, id)
-            }
-            .executeUpdate() > 0
-    }
-
-    fun hentSisteStatus(id: BrevID): String = connection.use {
-        it.prepareStatement(HENT_SISTE_STATUS)
+        it.prepareStatement("DELETE FROM brev WHERE id = ?")
             .apply { setLong(1, id) }
-            .executeQuery()
-            .singleOrNull { getString(1) }!!
+            .executeUpdate() > 0
     }
 
     private fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {

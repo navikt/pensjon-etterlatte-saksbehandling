@@ -23,13 +23,13 @@ fun Route.brevRoute(service: BrevService) {
             call.respond(maler)
         }
 
-        get("{behandlingId}") {
+        get("behandling/{behandlingId}") {
             val behandlingId = call.parameters["behandlingId"]!!
 
             call.respond(service.hentAlleBrev(behandlingId))
         }
 
-        post("{behandlingId}") {
+        post("behandling/{behandlingId}") {
             val behandlingId = call.parameters["behandlingId"]!!
             val request = call.receive<OpprettBrevRequest>()
 

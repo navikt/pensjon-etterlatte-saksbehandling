@@ -10,7 +10,7 @@ import { BehandlingsTypeSmall, IBehandlingsType } from "../behandlings-type";
 import { Soeknadsdato } from "../soeknadsoversikt/soeknadoversikt/soeknadinfo/Soeknadsdato";
 import { usePersonInfoFromBehandling } from "../usePersonInfoFromBehandling";
 import { BehandlingHandlingKnapper } from "../handlinger/BehandlingHandlingKnapper";
-import { ferdigstillBrev, hentAlleBrev, slettBrev } from "../../../shared/api/brev";
+import { ferdigstillBrev, hentBrevForBehandling, slettBrev } from "../../../shared/api/brev";
 import { useParams } from "react-router-dom";
 
 export const Brev = () => {
@@ -20,7 +20,7 @@ export const Brev = () => {
   const [brevListe, setBrevListe] = useState<any[]>([])
 
   useEffect(() => {
-    hentAlleBrev(behandlingId!!)
+    hentBrevForBehandling(behandlingId!!)
         .then(res => setBrevListe(res))
   }, [])
 

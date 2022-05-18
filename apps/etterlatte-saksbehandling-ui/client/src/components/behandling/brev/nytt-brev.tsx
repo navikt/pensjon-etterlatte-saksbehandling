@@ -2,7 +2,7 @@ import { BodyShort, Button, Cell, Grid, Loader, Modal, Select, TextField } from 
 import { useContext, useEffect, useState } from "react";
 import { Add } from "@navikt/ds-icons";
 import styled from "styled-components";
-import { hentMaler, opprettBrev } from "../../../shared/api/brev";
+import { hentMaler, nyttBrevForBehandling } from "../../../shared/api/brev";
 import { useParams } from "react-router-dom";
 import { Border } from "../soeknadsoversikt/styled";
 import { IBehandlingsopplysning, OpplysningsType } from "../../../store/reducers/BehandlingReducer";
@@ -35,21 +35,28 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
     if (!mal) return
 
     setLaster(true)
-    opprettBrev(behandlingId!!, mottaker, { tittel: maler.find((m: any) => m.navn === mal).tittel, navn: mal })
+    nyttBrevForBehandling(behandlingId!!, mottaker, { tittel: maler.find((m: any) => m.navn === mal).tittel, navn: mal })
         .then(brev => leggTilNytt(brev))
         .finally(() => {
+          setMottaker(undefined)
           setLaster(false)
           setIsOpen(false)
         })
   }
 
   const oppdaterMottaker = (fnr: string) => {
+    if (!fnr) {
+      setMottaker({})
+      return
+    }
+
     const opplysning = grunnlagListe.find(v => v.opplysning.foedselsnummer === fnr)!!.opplysning
 
     setMottaker({
       ...mottaker,
       fornavn: opplysning.fornavn,
-      etternavn: opplysning.etternavn
+      etternavn: opplysning.etternavn,
+      adresse: {}
     })
   }
 
@@ -89,21 +96,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
             <Select label={'Mal'} size={'medium'} onChange={(e) => setMal(e.target.value)}>
               <option value={undefined}>Velg mal ...</option>
               {maler.map((mal: any, i: number) => (
-                <option key={i} value={mal.navn}>{mal.tittel}</option>
-              ))}
-            </Select>
-
-            <br/>
-            <br/>
-            <Border/>
-            <br/>
-
-            <Select label={'Velg mottaker'} onChange={(e) => oppdaterMottaker(e.target.value)}>
-              <option value={''}></option>
-              {grunnlagListe.map((v, i) => (
-                  <option key={i} value={v.opplysning.foedselsnummer}>
-                    {v.opplysning.fornavn} {v.opplysning.etternavn} ({type(v.opplysningType)})
-                  </option>
+                  <option key={i} value={mal.navn}>{mal.tittel}</option>
               ))}
             </Select>
 
@@ -113,6 +106,20 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
             <br/>
 
             <>
+              <Select label={'Velg mottaker'} onChange={(e) => oppdaterMottaker(e.target.value)}>
+                <option value={''}></option>
+                {grunnlagListe.map((v, i) => (
+                    <option key={i} value={v.opplysning.foedselsnummer}>
+                      {v.opplysning.fornavn} {v.opplysning.etternavn} ({type(v.opplysningType)})
+                    </option>
+                ))}
+              </Select>
+
+              <br/>
+              <br/>
+              <Border/>
+              <br/>
+
               <Grid>
                 <Cell xs={12}>
                   <TextField
@@ -161,14 +168,14 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
                       })}/>
                 </Cell>
               </Grid>
+
+              <br/>
+              <br/>
+
+              <Button variant={'primary'} style={{ float: 'right' }} onClick={opprett} disabled={laster}>
+                Lagre {laster && <Loader/>}
+              </Button>
             </>
-
-            <br/>
-            <br/>
-
-            <Button variant={'primary'} style={{ float: 'right' }} onClick={opprett} disabled={laster}>
-              Lagre {laster && <Loader />}
-            </Button>
             <br/>
             <br/>
           </Modal.Content>

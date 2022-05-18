@@ -6,7 +6,7 @@ const router = Router({ mergeParams: true })
 const apiUrl = process.env.API_URL || 'http://localhost:8085'
 
 // Hent alle brev tilknyttet behandling ID
-router.get('/:behandlingId', async (req: Request, res: Response) => {
+router.get('/behandling/:behandlingId', async (req: Request, res: Response) => {
   const path = `${apiUrl}/brev/${req.params.behandlingId}`
 
   const data = await fetch(path)
@@ -36,7 +36,7 @@ router.get('/maler', async (req: Request, res: Response) => {
   res.send(await data)
 })
 
-router.post('/:behandlingId', async (req: Request, res: Response) => {
+router.post('/behandling/:behandlingId', async (req: Request, res: Response) => {
   const path = `${apiUrl}/brev/${req.params.behandlingId}`
 
   const data = await fetch(path, {
@@ -75,21 +75,3 @@ router.post('/:brevId/pdf', async (req: Request, res: Response) => {
 })
 
 export default router
-
-/*
-export default function pdf(): RequestHandler {
-  return async (req: Request, res: Response) => {
-    const path = `${apiUrl}/brev${req.path}`
-
-    const result = await fetch(path)
-        .then(res => ({ status: res.status, data: res.buffer() }))
-
-    if (result.status == 200) {
-      res.contentType('application/pdf')
-      res.send(await result.data)
-    } else {
-      res.sendStatus(result.status)
-    }
-  }
-}
-*/

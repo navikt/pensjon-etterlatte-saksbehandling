@@ -12,7 +12,8 @@ CREATE TABLE mottaker
 (
     brev_id BIGINT NOT NULL
         PRIMARY KEY
-            REFERENCES brev (id),
+            REFERENCES brev (id)
+                ON DELETE CASCADE,
     fornavn TEXT NOT NULL,
     etternavn TEXT NOT NULL,
     foedselsnummer TEXT DEFAULT NULL,
@@ -26,7 +27,8 @@ CREATE TABLE innhold
 (
     brev_id BIGINT NOT NULL
         PRIMARY KEY
-            REFERENCES brev (id),
+            REFERENCES brev (id)
+                ON DELETE CASCADE,
     mal TEXT,
     spraak TEXT,
     bytes BYTEA NOT NULL
@@ -52,8 +54,9 @@ CREATE TABLE hendelse
         CONSTRAINT hendelse_pk
             PRIMARY KEY,
     brev_id BIGINT NOT NULL
-        CONSTRAINT brev_id_fkj
-            REFERENCES brev (id),
+        CONSTRAINT brev_id_fk
+            REFERENCES brev (id)
+                ON DELETE CASCADE,
     status_id VARCHAR(24)
         CONSTRAINT status_id_fk
             REFERENCES status (id),

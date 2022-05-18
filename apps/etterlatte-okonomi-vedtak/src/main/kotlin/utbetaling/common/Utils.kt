@@ -1,9 +1,12 @@
 package no.nav.etterlatte.utbetaling.common
 
 import java.time.Clock
+import java.time.LocalDate
 import java.time.LocalTime
+import java.time.YearMonth
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAdjusters
 import java.util.*
 
 fun ZonedDateTime.next(atTime: LocalTime): Date {
@@ -30,3 +33,10 @@ fun tidspunktMidnattIdag(clock: Clock = Clock.systemUTC()): Tidspunkt =
         .toNorskTid()
         .truncatedTo(ChronoUnit.DAYS) // 00.00 norsk tid
         .toTidspunkt()
+
+
+fun forsteDagIMaaneden(yearMonth: YearMonth) =
+    LocalDate.of(yearMonth.year, yearMonth.month, 1)
+
+fun sisteDagIMaaneden(yearMonth: YearMonth) =
+    forsteDagIMaaneden(yearMonth).with(TemporalAdjusters.lastDayOfMonth())

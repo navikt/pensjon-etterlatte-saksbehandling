@@ -2,10 +2,8 @@ package no.nav.etterlatte.db
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import io.ktor.client.utils.EmptyContent.status
 import no.nav.etterlatte.db.BrevRepository.Queries.HENT_ALLE_BREV_QUERY
 import no.nav.etterlatte.db.BrevRepository.Queries.HENT_BREV_QUERY
-import no.nav.etterlatte.db.BrevRepository.Queries.HENT_SISTE_STATUS
 import no.nav.etterlatte.db.BrevRepository.Queries.OPPDATER_STATUS_QUERY
 import no.nav.etterlatte.db.BrevRepository.Queries.OPPRETT_BREV_QUERY
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -62,24 +60,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
         it.prepareStatement(HENT_BREV_QUERY)
             .apply { setLong(1, id) }
             .executeQuery()
-            .singleOrNull {
-                Brev(
-                    id = getLong("id"),
-                    behandlingId = getLong("behandling_id"),
-                    tittel = getString("tittel"),
-                    status = getString("status_id"),
-                    Mottaker(
-                        fornavn = getString("fornavn"),
-                        etternavn = getString("etternavn"),
-//                        foedselsnummer = getString("foedselsnummer"),
-                        adresse = Adresse(
-                            adresse = getString("adresse"),
-                            postnummer = getString("postnummer"),
-                            poststed = getString("poststed")
-                        )
-                    )
-                )
-            }!!
+            .singleOrNull { mapTilBrev() }!!
     }
 
     fun hentBrevInnhold(id: BrevID): ByteArray = connection.use {
@@ -91,28 +72,9 @@ class BrevRepository private constructor(private val ds: DataSource) {
 
     fun hentBrevForBehandling(behandlingId: Long): List<Brev> = connection.use {
         it.prepareStatement(HENT_ALLE_BREV_QUERY)
-            .apply {
-                setLong(1, behandlingId)
-            }
+            .apply { setLong(1, behandlingId) }
             .executeQuery()
-            .toList {
-                Brev(
-                    id = getLong("id"),
-                    behandlingId = getLong("behandling_id"),
-                    tittel = getString("tittel"),
-                    status = getString("status_id"),
-                    Mottaker(
-                        fornavn = getString("fornavn"),
-                        etternavn = getString("etternavn"),
-//                        foedselsnummer = getString("foedselsnummer"),
-                        adresse = Adresse(
-                            adresse = getString("adresse"),
-                            postnummer = getString("postnummer"),
-                            poststed = getString("poststed")
-                        )
-                    )
-                )
-            }
+            .toList { mapTilBrev() }
     }
 
     fun opprettBrev(nyttBrev: NyttBrev): Brev = connection.use {
@@ -177,6 +139,22 @@ class BrevRepository private constructor(private val ds: DataSource) {
             else null
         }.toList()
     }
+
+    private fun ResultSet.mapTilBrev() = Brev(
+        id = getLong("id"),
+        behandlingId = getLong("behandling_id"),
+        tittel = getString("tittel"),
+        status = getString("status_id"),
+        Mottaker(
+            fornavn = getString("fornavn"),
+            etternavn = getString("etternavn"),
+            adresse = Adresse(
+                adresse = getString("adresse"),
+                postnummer = getString("postnummer"),
+                poststed = getString("poststed")
+            )
+        )
+    )
 
     companion object {
         fun using(datasource: DataSource): BrevRepository {

@@ -38,7 +38,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
     nyttBrevForBehandling(behandlingId!!, mottaker, { tittel: maler.find((m: any) => m.navn === mal).tittel, navn: mal })
         .then(brev => leggTilNytt(brev))
         .finally(() => {
-          setMottaker(undefined)
+          setMottaker({})
           setLaster(false)
           setIsOpen(false)
         })

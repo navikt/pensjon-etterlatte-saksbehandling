@@ -7,7 +7,7 @@ const apiUrl = process.env.API_URL || 'http://localhost:8085'
 
 // Hent alle brev tilknyttet behandling ID
 router.get('/behandling/:behandlingId', async (req: Request, res: Response) => {
-  const path = `${apiUrl}/brev/${req.params.behandlingId}`
+  const path = `${apiUrl}/brev/behandling/${req.params.behandlingId}`
 
   const data = await fetch(path)
       .then(res => res.json())
@@ -17,8 +17,6 @@ router.get('/behandling/:behandlingId', async (req: Request, res: Response) => {
 
 router.delete('/:brevId', async (req: Request, res: Response) => {
   const path = `${apiUrl}/brev/${req.params.brevId}`
-
-  console.log(`\n\nDELETE: ${path}\n\n`)
 
   const data = await fetch(path, { method: 'DELETE' })
       .then(res => {
@@ -37,7 +35,7 @@ router.get('/maler', async (req: Request, res: Response) => {
 })
 
 router.post('/behandling/:behandlingId', async (req: Request, res: Response) => {
-  const path = `${apiUrl}/brev/${req.params.behandlingId}`
+  const path = `${apiUrl}/brev/behandling/${req.params.behandlingId}`
 
   const data = await fetch(path, {
     method: 'POST',

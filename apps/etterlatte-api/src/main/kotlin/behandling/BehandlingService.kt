@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
+import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
+import java.util.*
 
 
 data class PersonSakerResult(val person: Person, val saker: Saker)
@@ -21,7 +24,9 @@ data class BehandlingsBehov(
 
 class BehandlingService(
     private val behandlingKlient: BehandlingKlient,
-    private val pdlKlient: PdltjenesterKlient
+    private val pdlKlient: PdltjenesterKlient,
+    private val grunnlagKlient: EtterlatteGrunnlag,
+    private val vedtakKlient: EtterlatteVedtak
 ) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
 
@@ -49,9 +54,21 @@ class BehandlingService(
         return behandlingKlient.hentBehandlingerForSak(sakId, accessToken)
     }
 
-    suspend fun hentBehandling(behandlingId: String, accessToken: String): DetaljertBehandling {
+    suspend fun hentBehandling(behandlingId: String, accessToken: String): DetaljertBehandlingDto {
         logger.info("Henter behandling")
-        return behandlingKlient.hentBehandling(behandlingId, accessToken)
+        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
+        val grunnlag = grunnlagKlient.hentGrunnlagForSak(behandling.sak.toInt(), accessToken)
+        val vedtak = vedtakKlient.hentVedtak(behandling.sak.toInt(), behandlingId, accessToken)
+        return DetaljertBehandlingDto(
+            behandling.id,
+            behandling.sak,
+            grunnlag,
+            behandling.gyldighetsproeving,
+            vedtak.vilkaarsResultat,
+            null,
+            false
+        )
+
     }
 
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag {
@@ -64,3 +81,13 @@ class BehandlingService(
     }
 
 }
+
+data class DetaljertBehandlingDto(
+    val id: UUID,
+    val sak: Long,
+    val grunnlag: List<Grunnlagsopplysning<ObjectNode>>,
+    val gyldighetsprøving: GyldighetsResultat?,
+    val vilkårsprøving: VilkaarResultat?,
+    val beregning: BeregningsResultat?,
+    val fastsatt: Boolean = false
+)

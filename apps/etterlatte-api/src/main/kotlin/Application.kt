@@ -8,11 +8,7 @@ import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.header
-import no.nav.etterlatte.behandling.BehandlingKlient
-import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.OppgaveService
-import no.nav.etterlatte.behandling.PdltjenesterKlient
-import no.nav.etterlatte.behandling.VedtakService
+import no.nav.etterlatte.behandling.*
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
@@ -23,7 +19,9 @@ class ApplicationContext(configLocation: String? = null) {
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     val behandlingService: BehandlingService = BehandlingService(
         behandlingKlient = behandlingKlient,
-        pdlKlient = PdltjenesterKlient(config, httpClient())
+        pdlKlient = PdltjenesterKlient(config, httpClient()),
+        grunnlagKlient = GrunnlagKlient(config, httpClient()),
+        vedtakKlient = VedtakKlient(config, httpClient()),
     )
 
     val oppgaveService: OppgaveService = OppgaveService(behandlingKlient)

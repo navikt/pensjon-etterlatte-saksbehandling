@@ -20,8 +20,8 @@ internal class LagreBeregningsresultat(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
-            validate { it.requireKey("@sak_id") }
-            validate { it.requireKey("@behandling_id") }
+            validate { it.requireKey("sak") }
+            validate { it.requireKey("id") }
             validate { it.requireKey("@beregning") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
@@ -29,8 +29,8 @@ internal class LagreBeregningsresultat(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val behandlingId = UUID.fromString(packet["@behandling_id"].toString())
-            val sakId = packet["@sak_id"].toString()
+            val behandlingId = UUID.fromString(packet["id"].asText())
+            val sakId = packet["sak"].toString()
             val beregningsResultat = objectMapper.readValue(packet["@beregning"].toString(), BeregningsResultat::class.java)
 
             try {

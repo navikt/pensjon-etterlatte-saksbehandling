@@ -19,9 +19,9 @@ internal class LagreVilkaarsresultat(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
-            validate { it.requireKey("@sak_id") }
-            validate { it.requireKey("@behandling_id") }
+            validate { it.demandValue("@event","BEHANDLING:GRUNNLAGENDRET") }
+            validate { it.requireKey("sak") }
+            validate { it.requireKey("id") }
             validate { it.requireKey("@vilkaarsvurdering") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
@@ -29,8 +29,8 @@ internal class LagreVilkaarsresultat(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val behandlingId = UUID.fromString(packet["@behandling_id"].textValue())
-            val sakId = packet["@sak_id"].toString()
+            val behandlingId = UUID.fromString(packet["id"].asText())
+            val sakId = packet["sak"].toString()
             val vilkaarsResultat = objectMapper.readValue(packet["@vilkaarsvurdering"].toString(), VilkaarResultat::class.java)
             try {
                 vedtaksvurderingService.lagreVilkaarsresultat(sakId, behandlingId, vilkaarsResultat)

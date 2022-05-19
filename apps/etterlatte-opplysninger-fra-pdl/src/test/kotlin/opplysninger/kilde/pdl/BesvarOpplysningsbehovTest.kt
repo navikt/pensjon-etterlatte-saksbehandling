@@ -61,7 +61,8 @@ class BesvarOpplysningsbehovTest {
             val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
             Assertions.assertEquals(Opplysningstyper.SOEKER_PDL_V1.name, inspector.message(0).get("@behov").asText())
-            Assertions.assertEquals("Ola", inspector.message(0).get("opplysning").get("opplysning").get("fornavn").asText())
+            //TODO fikse litt på denne
+            Assertions.assertEquals("Ola", inspector.message(0).get("opplysning").first().get("opplysning").get("fornavn").asText())
             Assertions.assertEquals(1, inspector.size)
         }
     }

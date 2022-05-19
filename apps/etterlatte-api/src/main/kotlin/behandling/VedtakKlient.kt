@@ -40,7 +40,7 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
 
         try {
             val json =
-                downstreamResourceClient.get(Resource(clientId, "$resourceUrl/hentvedtak/$sakId/$behandlingId"), accessToken)
+                downstreamResourceClient.get(Resource(clientId, "$resourceUrl/api/hentvedtak/$sakId/$behandlingId"), accessToken)
                     .mapBoth(
                         success = { json -> json },
                         failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }

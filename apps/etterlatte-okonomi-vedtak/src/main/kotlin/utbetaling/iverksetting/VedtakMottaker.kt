@@ -56,7 +56,7 @@ class VedtakMottaker(
 
     private fun utbetalingEvent(utbetaling: Utbetaling) = mapOf(
         "@event_name" to "utbetaling_oppdatert",
-        "@vedtakId" to utbetaling.oppdrag.vedtakId(),
+        "@vedtakId" to utbetaling.vedtakId,
         "@status" to utbetaling.status.name
     ).toJson()
 

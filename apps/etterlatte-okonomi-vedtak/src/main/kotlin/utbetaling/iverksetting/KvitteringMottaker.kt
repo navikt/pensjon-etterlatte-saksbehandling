@@ -9,7 +9,9 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
+import okio.ByteString.Companion.toByteString
 import org.slf4j.LoggerFactory
+import java.util.*
 import javax.jms.ExceptionListener
 import javax.jms.Message
 import javax.jms.MessageListener

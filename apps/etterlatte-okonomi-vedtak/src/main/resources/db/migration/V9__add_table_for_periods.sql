@@ -1,4 +1,5 @@
 ALTER TABLE utbetalingsoppdrag RENAME TO utbetaling;
+ALTER TABLE utbetaling ALTER COLUMN id TYPE VARCHAR;
 
 CREATE TABLE utbetalingslinje (
     id                      VARCHAR(32)                 PRIMARY KEY,
@@ -10,6 +11,7 @@ CREATE TABLE utbetalingslinje (
     erstatter_id            VARCHAR(32)                 DEFAULT NULL,
     sak_id                  VARCHAR(32)                 NOT NULL
 );
+
 
 -- id  opprettet   periode_fra     periode_til     beloep   utbetaling_id  erstatter_id    sak_id
 -- 1   01.01.22    01 22                           10000    1                              1

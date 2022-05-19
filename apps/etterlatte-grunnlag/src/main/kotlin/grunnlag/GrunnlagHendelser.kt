@@ -43,20 +43,25 @@ class GrunnlagHendelser(
     override fun onPacket(packet: no.nav.helse.rapids_rivers.JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             if(Kontekst.get().AppUser !is Self){ logger.warn("AppUser i kontekst er ikke Self i R&R-flyten") }
+            try {
 
-            val lagretGrunnlag = inTransaction {
-                val gjeldendeGrunnlag = grunnlag.hent(packet["sak"].asLong())
-                val opplysninger: List<Grunnlagsopplysning<ObjectNode>> =
-                    objectMapper.readValue(packet["opplysning"].toJson())!!
-                gjeldendeGrunnlag.leggTilGrunnlagListe(opplysninger)
-                gjeldendeGrunnlag
+
+                val lagretGrunnlag = inTransaction {
+                    val gjeldendeGrunnlag = grunnlag.hent(packet["sak"].asLong())
+                    val opplysninger: List<Grunnlagsopplysning<ObjectNode>> =
+                        objectMapper.readValue(packet["opplysning"].toJson())!!
+                    gjeldendeGrunnlag.leggTilGrunnlagListe(opplysninger)
+                    gjeldendeGrunnlag
+                }
+
+                //TODO Her bør jeg vel lage en ny melding
+                packet["grunnlag"] = lagretGrunnlag.serialiserbarUtgave()
+                packet["@event_name"] = "GRUNNLAG:GRUNNLAGENDRET"
+                context.publish(packet.toJson())
+                logger.info("Lagt ut melding om grunnlagsendring")
+            } catch (e: Exception) {
+                logger.error("Spiser en melding fordi: " +e.message)
             }
-
-            //TODO Her bør jeg vel lage en ny melding
-            packet["grunnlag"] = lagretGrunnlag.serialiserbarUtgave()
-            packet["@event_name"] = "GRUNNLAG:GRUNNLAGENDRET"
-            context.publish(packet.toJson())
-            logger.info("Lagt ut melding om grunnlagsendring")
         }
 
     private fun no.nav.helse.rapids_rivers.JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

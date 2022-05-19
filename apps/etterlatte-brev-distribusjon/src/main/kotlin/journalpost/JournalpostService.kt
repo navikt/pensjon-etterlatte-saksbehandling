@@ -3,18 +3,19 @@ package journalpost
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.journalpost.JournalpostKlient
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
-import no.nav.etterlatte.libs.common.journalpost.DokumentVariant
-import no.nav.etterlatte.libs.common.journalpost.JournalPostType
-import no.nav.etterlatte.libs.common.journalpost.JournalpostDokument
-import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
-import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
+import no.nav.etterlatte.libs.common.journalpost.*
 import org.slf4j.LoggerFactory
 
-class JournalpostService(private val client: JournalpostKlient) {
+interface JournalpostService {
+    fun journalfoer(melding: DistribusjonMelding): JournalpostResponse
+}
+
+
+class JournalpostServiceImpl(private val client: JournalpostKlient) : JournalpostService {
     private val logger = LoggerFactory.getLogger(JournalpostService::class.java)
 
-    fun journalfoer(melding: DistribusjonMelding): JournalpostResponse = runBlocking {
-        logger.info("Oppretter journalpost for vedtak (id=${melding.vedtakId})")
+    override fun journalfoer(melding: DistribusjonMelding): JournalpostResponse = runBlocking {
+        logger.info("Oppretter journalpost for brev med id=${melding.brevId}")
 
         val dokumenter = emptyList<DokumentVariant>()
         val request = mapTilJournalpostRequest(melding, dokumenter)

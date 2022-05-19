@@ -7,12 +7,12 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlagTyper.InnsenderErForelderGrunnlag
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.*
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -158,7 +158,7 @@ internal class BehandlingDaoIntegrationTest {
                 vurderinger = listOf(VurdertGyldighet(
                     navn = GyldighetsTyper.INNSENDER_ER_FORELDER,
                     resultat = VurderingsResultat.OPPFYLT,
-                    vurdertDato = LocalDateTime.now()
+                    basertPaaOpplysninger = InnsenderErForelderGrunnlag(null, null, null)
                 )),
                 vurdertDato = LocalDateTime.now()
             ),

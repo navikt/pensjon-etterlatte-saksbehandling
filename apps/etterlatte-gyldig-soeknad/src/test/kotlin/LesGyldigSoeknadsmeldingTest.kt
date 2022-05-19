@@ -35,7 +35,7 @@ internal class LesVilkaarsmeldingTest {
         TestRapid().apply { LesGyldigSoeknadsmelding(this, gyldigSoeknadServiceMock, behandlingMock) }
 
     @Test
-    fun `skal vurdere søknad til gyldig`() {
+    fun `skal lage nye messages for sakid, behandlingid, og gyldig framsatt`() {
         val persongalleri = Persongalleri(
             "soeker",
             "innsender",

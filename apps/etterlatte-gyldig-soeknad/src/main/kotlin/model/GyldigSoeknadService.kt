@@ -9,6 +9,8 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.InnsenderHarForeldreansvarGrunnlag
+import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlagTyper.InnsenderErForelderGrunnlag
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -20,7 +22,7 @@ import setVurdering
 import vurderOpplysning
 import java.time.LocalDateTime
 
-class GyldigSoeknadService(private val pdl: Pdl,) {
+class GyldigSoeknadService(private val pdl: Pdl) {
     private val logger = LoggerFactory.getLogger(GyldigSoeknadService::class.java)
 
     fun hentPersongalleriFraSoeknad(jsonNode: JsonNode): Persongalleri {
@@ -44,7 +46,7 @@ class GyldigSoeknadService(private val pdl: Pdl,) {
     }
 
     fun vurderGyldighet(persongalleri: Persongalleri): GyldighetsResultat {
-        val familieRelasjonSoeker = hentSoekerFraPdl(persongalleri.soeker )
+        val familieRelasjonSoeker = hentSoekerFraPdl(persongalleri.soeker)
         val gyldighet = listOf(
             innsenderErForelder(
                 GyldighetsTyper.INNSENDER_ER_FORELDER,
@@ -84,7 +86,7 @@ class GyldigSoeknadService(private val pdl: Pdl,) {
         return VurdertGyldighet(
             gyldighetstype,
             resultat,
-            LocalDateTime.now()
+            InnsenderErForelderGrunnlag(soekerFamilieRelasjonPdl, innsender, gjenlevende)
         )
     }
 
@@ -102,7 +104,7 @@ class GyldigSoeknadService(private val pdl: Pdl,) {
         return VurdertGyldighet(
             gyldighetstype,
             resultat,
-            LocalDateTime.now()
+            InnsenderHarForeldreansvarGrunnlag(soekerPdlFamilieRelasjon, innsender)
         )
     }
 

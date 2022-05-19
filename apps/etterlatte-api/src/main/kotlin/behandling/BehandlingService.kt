@@ -1,6 +1,8 @@
 package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -54,21 +56,20 @@ class BehandlingService(
         return behandlingKlient.hentBehandlingerForSak(sakId, accessToken)
     }
 
-    suspend fun hentBehandling(behandlingId: String, accessToken: String): DetaljertBehandlingDto {
+    suspend fun hentBehandling(behandlingId: String, accessToken: String) = coroutineScope {
         logger.info("Henter behandling")
-        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
-        val grunnlag = grunnlagKlient.hentGrunnlagForSak(behandling.sak.toInt(), accessToken)
-        val vedtak = vedtakKlient.hentVedtak(behandling.sak.toInt(), behandlingId, accessToken)
-        return DetaljertBehandlingDto(
-            behandling.id,
-            behandling.sak,
-            grunnlag,
-            behandling.gyldighetsproeving,
-            vedtak.vilkaarsResultat,
-            null,
-            false
-        )
-
+        behandlingKlient.hentBehandling(behandlingId, accessToken).let {behandling ->
+            val grunnlag =  async { grunnlagKlient.hentGrunnlagForSak(behandling.sak.toInt(), accessToken) }
+            val vedtak = async { vedtakKlient.hentVedtak(behandling.sak.toInt(), behandlingId, accessToken) }
+            DetaljertBehandlingDto(
+                id = behandling.id,
+                sak = behandling.sak,
+                grunnlag = grunnlag.await(),
+                gyldighetsprøving = behandling.gyldighetsproeving,
+                vilkårsprøving = vedtak.await().vilkaarsResultat,
+                beregning = null
+            )
+        }
     }
 
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag {

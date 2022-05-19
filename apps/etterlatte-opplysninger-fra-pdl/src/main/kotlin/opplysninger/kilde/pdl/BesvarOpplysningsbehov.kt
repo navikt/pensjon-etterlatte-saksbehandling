@@ -43,7 +43,7 @@ internal class BesvarOpplysningsbehov(
                 val personRolle = objectMapper.treeToValue(packet["rolle"], PersonRolle::class.java)!!
                 val behandling = objectMapper.treeToValue(packet["@behov"], Opplysningstyper::class.java)!!
                 val pdlInfo = pdl.hentPdlModell(packet["fnr"].asText(), personRolle)
-                packet["opplysning"] = personOpplysning(pdlInfo, behandling)
+                packet["opplysning"] = listOf(personOpplysning(pdlInfo, behandling))
                 context.publish(packet.toJson())
                 logger.info("Svarte på et behov av type: " + behandling.name)
             } else {

@@ -1,14 +1,8 @@
 package no.nav.etterlatte
 
-import model.brev.InnvilgetBrevRequest
-import no.nav.etterlatte.db.Brev
-import no.nav.etterlatte.db.BrevRepository
 import model.brev.AvslagBrevRequest
-import no.nav.etterlatte.db.Adresse
-import no.nav.etterlatte.db.BrevID
-import no.nav.etterlatte.db.Mottaker
-import no.nav.etterlatte.db.NyttBrev
-import no.nav.etterlatte.db.Status
+import model.brev.InnvilgetBrevRequest
+import no.nav.etterlatte.db.*
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.brev.model.Vedtak
 import no.nav.etterlatte.libs.common.brev.model.VedtakType
@@ -119,8 +113,8 @@ class BrevService(
     ).let {
         """{
                 "@event": "BREV:DISTRIBUER",
-                "payload": ${it.toJson()},
-                "@brevId": "${it.brevId}"
+                "@brevId": ${it.brevId},
+                "payload": ${it.toJson()}
         }"""
     }
 }

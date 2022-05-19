@@ -34,6 +34,7 @@ class ApplicationBuilder {
                         datasourceBuilder.migrate()
                     }
                 })
+                OppdaterDistribusjonStatus(this, db)
             }
 
     private fun sendToRapid(message: String) = rapidsConnection.publish(message)

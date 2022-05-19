@@ -62,6 +62,24 @@ class BrevRepository private constructor(private val ds: DataSource) {
         Brev.fraNyttBrev(id, nyttBrev)
     }
 
+    fun setJournalpostId(brevId: Long, journalpostId: String): Boolean = connection.use {
+        it.prepareStatement("UPDATE brev SET journalpost_id = ? WHERE id = ?")
+            .apply {
+                setString(1, journalpostId)
+                setLong(2, brevId)
+            }
+            .executeUpdate() > 0
+    }
+
+    fun setBestillingId(brevId: Long, journalpostId: String): Boolean = connection.use {
+        it.prepareStatement("UPDATE brev SET bestilling_id = ? WHERE id = ?")
+            .apply {
+                setString(1, journalpostId)
+                setLong(2, brevId)
+            }
+            .executeUpdate() > 0
+    }
+
     fun oppdaterStatus(id: BrevID, status: Status, payload: String? = null) = connection.use {
         it.prepareStatement(OPPDATER_STATUS_QUERY)
             .apply {
@@ -162,5 +180,4 @@ class BrevRepository private constructor(private val ds: DataSource) {
             INSERT INTO hendelse (brev_id, status_id, payload) VALUES (?, ?, ?)
         """
     }
-
 }

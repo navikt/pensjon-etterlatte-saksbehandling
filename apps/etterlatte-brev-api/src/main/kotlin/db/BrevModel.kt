@@ -10,7 +10,8 @@ enum class Status {
     OPPRETTET,
     OPPDATERT,
     FERDIGSTILT,
-    SENDT,
+    JOURNALFOERT,
+    DISTRIBUERT,
     SLETTET
 }
 

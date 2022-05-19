@@ -17,7 +17,7 @@
       "time": "2022-05-12T15:59:55.216971582"
     }
   ],
-  "opplysning": {
+  "opplysning": [{
     "id": "612a5c09-4888-4c43-86a2-27ea0e04c63d",
     "kilde": {
       "navn": "pdl",
@@ -75,4 +75,5 @@
     },
     "attestering": null
   }
+    ]
 }

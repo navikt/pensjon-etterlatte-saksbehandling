@@ -10,28 +10,24 @@ import java.util.*
 import java.util.Objects.isNull
 
 data class Vedtak (
-    val vedtakId: Long,
+    val vedtakId: Long, //Løpenummer (BIGSERIAL)
     val virk: Periode,
-    val behandlingsId: UUID,
     val sak: Sak,
     val behandling: Behandling,
-    val ytelse: String,
     val type: VedtakType,
-    val behandlingstype: String,
     val grunnlag: List<Grunnlagsopplysning<ObjectNode>>,
-    //val gyldighetsprøving: GyldighetsResultat?, tror ikke denne er aktuell for vedtaket?
     val vilkaarsvurdering: VilkaarResultat?,
     val beregning: BilagMedSammendrag<List<Beregningsperiode>>?,
     val avkorting: BilagMedSammendrag<List<Beregningsperiode>>?,
     val pensjonTilUtbetaling:List<Utbetalingsperiode>?,
     val vedtakFattet: VedtakFattet?,
     val attestasjon: Attestasjon?,
-    //mottaker-fnr //lol
 )
 
 data class Behandling (
+    val type: BehandlingType,
     val id:UUID,
-    )
+)
 
 data class Sak(val ident: String, val sakType: String, val id:Long)
 
@@ -63,15 +59,27 @@ data class Beregningsperiode(
 data class Utbetalingsperiode(
     val id: Long,
     val periode: Periode,
-    val beloep: BigDecimal,
+    val beloep: BigDecimal?,
+    val type: UtbetalingsperiodeType
 )
+
+enum class UtbetalingsperiodeType {
+    OPPHOER, UTBETALING
+}
 
 data class Attestasjon(
     val attestant: String,
     val attesterendeEnhet: String, //aktuell?
     val tidspunkt: ZonedDateTime
 )
+enum class BehandlingType{
+    REVURDERING, FORSTEGANGSBEHANDLING
+}
+
+enum class BehandlingAarsak{
+    SOEKNAD
+}
 
 enum class VedtakType{
-    INNVILGELSE //førstegangsvedtak? Innvilgelse av barnepensjon//
+    INNVILGELSE, OPPHOER, AVSLAG, ENDRING
 }

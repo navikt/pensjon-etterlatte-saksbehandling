@@ -8,13 +8,13 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
-#  gcp:
-#    sqlInstances:
-#      - type: POSTGRES_14
-#        name: etterlatte-vedtaksvurdering
-#        databases:
-#          - name: vedtaksvurdering
-#            envVarPrefix: DB
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        name: etterlatte-vedtaksvurdering
+        databases:
+          - name: vedtaksvurdering
+            envVarPrefix: DB
   startup:
     initialDelay: 7
     failureThreshold: 10

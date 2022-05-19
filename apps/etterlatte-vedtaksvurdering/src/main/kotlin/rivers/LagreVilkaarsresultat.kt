@@ -29,8 +29,7 @@ internal class LagreVilkaarsresultat(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-
-            val behandlingId = UUID.fromString(packet["@behandling_id"].toString())
+            val behandlingId = UUID.fromString(packet["@behandling_id"].textValue())
             val sakId = packet["@sak_id"].toString()
             val vilkaarsResultat = objectMapper.readValue(packet["@vilkaarsvurdering"].toString(), VilkaarResultat::class.java)
             try {

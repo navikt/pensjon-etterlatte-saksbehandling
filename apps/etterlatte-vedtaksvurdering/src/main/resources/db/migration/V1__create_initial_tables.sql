@@ -1,7 +1,7 @@
 CREATE TABLE vedtak
 (
     id BIGSERIAL PRIMARY KEY,
-    sakId BIGINT NOT NULL UNIQUE,
+    sakId BIGINT NOT NULL,
     behandlingId UUID NOT NULL,
     saksbehandlerId VARCHAR,
     avkortingsresultat TEXT,

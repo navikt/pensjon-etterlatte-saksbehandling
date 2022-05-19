@@ -13,18 +13,17 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 
-internal class DistribuerBrev(
+internal class JournalfoerBrev(
     private val rapidsConnection: RapidsConnection,
     private val journalpostService: JournalpostService,
 ) : River.PacketListener {
-    private val logger = LoggerFactory.getLogger(DistribuerBrev::class.java)
+    private val logger = LoggerFactory.getLogger(JournalfoerBrev::class.java)
 
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BREV:DISTRIBUER") }
-            validate { it.requireKey("payload") }
-            validate { it.requireKey("@brevId") }
-            validate { it.rejectKey("@distribuert") }
+            validate { it.requireKey("@brevId", "payload") }
+            validate { it.rejectKey("@distribuert", "@journalfoert") }
         }.register(this)
     }
 
@@ -49,7 +48,7 @@ internal class DistribuerBrev(
     private fun RapidsConnection.svarSuksess(packet: JsonMessage, journalpostResponse: JournalpostResponse) {
         logger.info("Brev har blitt journalført. Svarer tilbake med bekreftelse.")
 
-        packet["@distribuert"] = true
+        packet["@journalfoert"] = true
         packet["@journalpostResponse"] = journalpostResponse.toJson()
 
         publish(packet.toJson())

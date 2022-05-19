@@ -2,7 +2,7 @@
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import no.nav.etterlatte.DistribuerBrev
+import no.nav.etterlatte.JournalfoerBrev
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
 import no.nav.etterlatte.libs.common.journalpost.Bruker
@@ -12,8 +12,8 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 
-class DistribuerBrevTest {
-    private val inspector = TestRapid().apply { DistribuerBrev(this, JournalpostServiceMock()) }
+class JournalfoerBrevTest {
+    private val inspector = TestRapid().apply { JournalfoerBrev(this, JournalpostServiceMock()) }
 
     @Test
     fun `Skal distribuere meldingen og svare bekreftende`() {
@@ -33,7 +33,7 @@ class DistribuerBrevTest {
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         inspector.message(0).get("@event").asText() shouldBe "BREV:DISTRIBUER"
-        inspector.message(0).get("@distribuert").asBoolean() shouldBe true
+        inspector.message(0).get("@journalfoert").asBoolean() shouldBe true
         inspector.message(0).get("@brevId").asLong() shouldBe distribusjonMelding.brevId
         objectMapper.readValue<JournalpostResponse>(inspector.message(0).get("@journalpostResponse").asText()).let {
             it.journalpostId shouldNotBe null

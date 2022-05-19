@@ -8,6 +8,6 @@ fun main() {
     }
 
     RapidApplication.create(env)
-        .also { DistribuerBrev(it, AppBuilder(env).journalpostService) }
+        .also { JournalfoerBrev(it, AppBuilder(env).journalpostService) }
         .start()
 }

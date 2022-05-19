@@ -8,6 +8,7 @@ import no.nav.etterlatte.db.Adresse
 import no.nav.etterlatte.db.BrevID
 import no.nav.etterlatte.db.Mottaker
 import no.nav.etterlatte.db.NyttBrev
+import no.nav.etterlatte.db.Status
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.brev.model.Vedtak
 import no.nav.etterlatte.libs.common.brev.model.VedtakType
@@ -43,7 +44,7 @@ class BrevService(
     fun slettBrev(id: BrevID): Boolean {
         val brev = db.hentBrev(id)
 
-        if (brev.status != "OPPRETTET" && brev.status != "OPPDATERT")
+        if (brev.status != Status.OPPRETTET && brev.status != Status.OPPDATERT)
             throw RuntimeException("Brev er ferdigstilt og kan ikke slettes!")
 
         return db.slett(id)
@@ -72,7 +73,7 @@ class BrevService(
         val brev: Brev = db.hentBrev(id)
 
         sendToRapid(opprettDistribusjonsmelding(brev))
-        db.oppdaterStatus(id, "FERDIGSTILT")
+        db.oppdaterStatus(id, Status.FERDIGSTILT)
 
         return brev
     }

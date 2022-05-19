@@ -11,6 +11,7 @@ router.get('/behandling/:behandlingId', async (req: Request, res: Response) => {
 
   const data = await fetch(path)
       .then(res => res.json())
+      .catch(() => res.sendStatus(500))
 
   res.send(await data)
 })
@@ -18,18 +19,15 @@ router.get('/behandling/:behandlingId', async (req: Request, res: Response) => {
 router.delete('/:brevId', async (req: Request, res: Response) => {
   const path = `${apiUrl}/brev/${req.params.brevId}`
 
-  const data = await fetch(path, { method: 'DELETE' })
-      .then(res => {
-        console.log(`${res.status}: ${res.statusText}`)
-        return res.status
-      })
-
-  res.send(data)
+  await fetch(path, { method: 'DELETE' })
+      .then(response => res.sendStatus(response.status))
+      .catch(() => res.sendStatus(500))
 })
 
 router.get('/maler', async (req: Request, res: Response) => {
   const data = await fetch(`${apiUrl}/brev/maler`)
       .then(res => res.json())
+      .catch(() => res.sendStatus(500))
 
   res.send(await data)
 })
@@ -45,6 +43,7 @@ router.post('/behandling/:behandlingId', async (req: Request, res: Response) => 
     }
   })
       .then(res => res.json())
+      .catch(() => res.sendStatus(500))
 
   res.send(await data)
 })
@@ -54,6 +53,7 @@ router.post('/:brevId/ferdigstill', async (req: Request, res: Response) => {
 
   const data = await fetch(path, { method: 'POST' })
       .then(res => res.json())
+      .catch(() => res.sendStatus(500))
 
   res.send(await data)
 })

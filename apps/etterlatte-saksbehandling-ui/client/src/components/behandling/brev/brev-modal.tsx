@@ -1,8 +1,8 @@
-import { BodyLong, Button, Modal } from "@navikt/ds-react";
+import { BodyLong, Button, Modal, Tag } from "@navikt/ds-react";
 import { useState } from "react";
 import { genererPdf } from "../../../shared/api/brev";
 import styled from "styled-components";
-import { Delete, Findout, Notes, Success } from "@navikt/ds-icons";
+import { Delete, Findout, Information, Notes, Success } from "@navikt/ds-icons";
 
 const PdfViewer = styled.iframe`
   //margin-top: 60px;
@@ -18,9 +18,8 @@ const ButtonRow = styled.div`
   text-align: right;
 `
 
-export default function BrevModal({ brevId, status, ferdigstill, slett }: {
-  brevId: string
-  status: string
+export default function BrevModal({ brev, ferdigstill, slett }: {
+  brev: any
   ferdigstill: (brevId: any) => Promise<void>
   slett: (brevId: any) => Promise<void>
 }) {
@@ -28,12 +27,12 @@ export default function BrevModal({ brevId, status, ferdigstill, slett }: {
   const [fileURL, setFileURL] = useState<string>()
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
-  const isDone = ['FERDIGSTILT', 'SENDT'].includes(status)
+  const isDone = ['FERDIGSTILT', 'SENDT'].includes(brev.status)
 
   const open = () => {
     setIsOpen(true)
 
-    genererPdf(brevId)
+    genererPdf(brev.id)
         .then(file => URL.createObjectURL(file))
         .then(url => setFileURL(url))
         .catch(e => setError(e.message))
@@ -42,14 +41,13 @@ export default function BrevModal({ brevId, status, ferdigstill, slett }: {
         })
   }
 
-  const ferdigstillBrev = () => ferdigstill(brevId).then(() => setIsOpen(false))
+  const ferdigstillBrev = () => ferdigstill(brev.id).then(() => setIsOpen(false))
 
-  const slettBrev = () => slett(brevId).then(() => setIsOpen(false))
+  const slettBrev = () => slett(brev.id).then(() => setIsOpen(false))
 
   return (
       <>
         <Button variant={isDone ? 'secondary' : 'primary'} size={'small'} onClick={open}>
-          {/*{isDone ? "Vis" : "Ferdigstill"}*/}
           {isDone ? <Findout /> : <Notes />}
         </Button>
         &nbsp;&nbsp;
@@ -59,7 +57,12 @@ export default function BrevModal({ brevId, status, ferdigstill, slett }: {
 
         <Modal open={isOpen} onClose={() => setIsOpen(false)}>
           <Modal.Content>
-            <h2>{status}</h2>
+            <h2>{brev.tittel}</h2>
+            <h4>
+              <Tag variant={'info'} size={'small'}>
+                {brev.status}
+              </Tag>
+            </h4>
 
             {error && (
                 <BodyLong>

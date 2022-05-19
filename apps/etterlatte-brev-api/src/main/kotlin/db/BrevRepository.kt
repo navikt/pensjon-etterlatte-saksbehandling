@@ -1,56 +1,11 @@
 package no.nav.etterlatte.db
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.db.BrevRepository.Queries.HENT_ALLE_BREV_QUERY
 import no.nav.etterlatte.db.BrevRepository.Queries.HENT_BREV_QUERY
 import no.nav.etterlatte.db.BrevRepository.Queries.OPPDATER_STATUS_QUERY
 import no.nav.etterlatte.db.BrevRepository.Queries.OPPRETT_BREV_QUERY
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import java.sql.ResultSet
 import javax.sql.DataSource
-
-typealias BrevID = Long
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Adresse(
-    val adresse: String,
-    val postnummer: String,
-    val poststed: String,
-    val land: String? = null
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Mottaker(
-    val fornavn: String,
-    val etternavn: String,
-    val foedselsnummer: Foedselsnummer? = null,
-    val adresse: Adresse
-)
-
-class Brev(
-    val id: BrevID,
-    val behandlingId: Long,
-    val tittel: String,
-    val status: String,
-    val mottaker: Mottaker,
-    @JsonIgnore
-    val data: ByteArray? = null
-) {
-    companion object {
-        fun fraNyttBrev(id: BrevID, nyttBrev: NyttBrev) =
-            Brev(id, nyttBrev.behandlingId, nyttBrev.tittel, nyttBrev.status, nyttBrev.mottaker, nyttBrev.pdf)
-    }
-}
-
-class NyttBrev(
-    val behandlingId: Long,
-    val tittel: String,
-    val mottaker: Mottaker,
-    val pdf: ByteArray
-) {
-    val status: String = "OPPRETTET"
-}
 
 class BrevRepository private constructor(private val ds: DataSource) {
 
@@ -107,11 +62,11 @@ class BrevRepository private constructor(private val ds: DataSource) {
         Brev.fraNyttBrev(id, nyttBrev)
     }
 
-    fun oppdaterStatus(id: BrevID, status: String, payload: String? = null) = connection.use {
+    fun oppdaterStatus(id: BrevID, status: Status, payload: String? = null) = connection.use {
         it.prepareStatement(OPPDATER_STATUS_QUERY)
             .apply {
                 setLong(1, id)
-                setString(2, status)
+                setString(2, status.name)
                 setString(3, payload ?: "{}")
             }
             .executeUpdate()
@@ -144,7 +99,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
         id = getLong("id"),
         behandlingId = getLong("behandling_id"),
         tittel = getString("tittel"),
-        status = getString("status_id"),
+        status = Status.valueOf(getString("status_id")),
         Mottaker(
             fornavn = getString("fornavn"),
             etternavn = getString("etternavn"),

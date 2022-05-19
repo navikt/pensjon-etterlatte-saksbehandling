@@ -1,4 +1,4 @@
-import { BodyShort, Button, Cell, Grid, Loader, Modal, Select, TextField } from "@navikt/ds-react";
+import { Button, Cell, Grid, Loader, Modal, Select, TextField } from "@navikt/ds-react";
 import { useContext, useEffect, useState } from "react";
 import { Add } from "@navikt/ds-icons";
 import styled from "styled-components";
@@ -12,12 +12,22 @@ const CustomModal = styled(Modal)`
   width: 540px;
 `
 
+interface Mottaker {
+  fornavn?: string
+  etternavn?: string
+  adresse?: {
+    adresse?: string
+    postnummer?: string
+    poststed?: string
+  }
+}
+
 export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => void }) {
   const { behandlingId } = useParams()
   const { state } = useContext(AppContext)
 
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [mottaker, setMottaker] = useState<any>({})
+  const [mottaker, setMottaker] = useState<Mottaker>({})
   const [mal, setMal] = useState<any>({})
   const [maler, setMaler] = useState<any>([])
   const [laster, setLaster] = useState(false)
@@ -83,14 +93,6 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
           <Modal.Content>
             <h1>Opprett nytt brev</h1>
 
-            <BodyShort>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sed ante sit amet tellus aliquet
-              mattis. Donec blandit, urna ac vulputate tincidunt, lorem massa tempor lectus, nec porttitor velit nunc ac
-              ex. Vivamus vel elementum magna. Nullam tristique nisl sit amet ante interdum, vitae tincidunt libero
-              placerat.
-            </BodyShort>
-
-            <br/>
             <br/>
 
             <Select label={'Mal'} size={'medium'} onChange={(e) => setMal(e.target.value)}>

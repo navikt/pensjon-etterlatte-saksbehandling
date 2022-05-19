@@ -1,6 +1,6 @@
 import { Content, ContentHeader } from '../../../shared/styled'
 import { useEffect, useState } from 'react'
-import { Button, ContentContainer, Heading, Table, Tag } from "@navikt/ds-react";
+import { Alert, BodyShort, Button, ContentContainer, Heading, Table, Tag } from "@navikt/ds-react";
 import BrevModal from "./brev-modal";
 import { Information, Success } from '@navikt/ds-icons'
 import NyttBrev from "./nytt-brev";
@@ -18,10 +18,12 @@ export const Brev = () => {
   const { mottattDato } = usePersonInfoFromBehandling()
 
   const [brevListe, setBrevListe] = useState<any[]>([])
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     hentBrevForBehandling(behandlingId!!)
         .then(res => setBrevListe(res))
+        .catch(() => setError(true))
   }, [])
 
   const ferdigstill = (brevId: any): Promise<void> => {
@@ -119,8 +121,7 @@ export const Brev = () => {
                     </Table.DataCell>
                     <Table.DataCell>
                       <BrevModal
-                          brevId={brev.id}
-                          status={brev.status}
+                          brev={brev}
                           ferdigstill={ferdigstill}
                           slett={slett}
                       />
@@ -129,6 +130,12 @@ export const Brev = () => {
               ))}
             </Table.Body>
           </Table>
+
+          {error && (
+              <Alert variant={'error'} style={{ marginTop: '10px'}}>
+                Det har oppstått en feil...
+              </Alert>
+          )}
         </ContentContainer>
 
         <ContentContainer>

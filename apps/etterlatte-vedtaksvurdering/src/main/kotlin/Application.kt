@@ -19,15 +19,13 @@ fun main() {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }.also { env ->
 
-        Server(vedtaksvurderingService).run()
-
-        RapidApplication.create(env)
-            .also { LagreAvkorting(it, vedtaksvurderingService) }
-            .also { LagreVilkaarsresultat(it, vedtaksvurderingService) }
-            .also { LagreBeregningsresultat(it, vedtaksvurderingService) }
-            .start()
-
-
+        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule{
+            module(vedtaksvurderingService)
+        }.build().apply {
+            LagreAvkorting(this, vedtaksvurderingService)
+            LagreVilkaarsresultat(this, vedtaksvurderingService)
+            LagreBeregningsresultat(this, vedtaksvurderingService)
+        }.start()
 
     }
 

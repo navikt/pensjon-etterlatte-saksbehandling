@@ -5,6 +5,8 @@ import no.nav.etterlatte.libs.common.vedtak.Endringskode
 import no.nav.etterlatte.libs.common.vedtak.Enhetstype
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.forsteDagIMaaneden
+import no.nav.etterlatte.utbetaling.common.sisteDagIMaaneden
 import no.nav.etterlatte.utbetaling.common.toNorskTid
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.trygdeetaten.skjema.oppdrag.Attestant180
@@ -26,51 +28,55 @@ object OppdragMapper {
 
     private val tidspunktFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
 
-    fun oppdragFraUtbetaling(utbetaling: Utbetaling): Oppdrag {
+    fun oppdragFraVedtak(vedtak: Vedtak, attestasjon: Attestasjon, avstemmingNokkel: Tidspunkt): Oppdrag {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = "1"
             kodeEndring = "NY"
             kodeFagomraade = "BARNEPE"
-            fagsystemId = utbetaling.sakId.value
+            fagsystemId = vedtak.sakId
             utbetFrekvens = "MND"
-            oppdragGjelderId = utbetaling.foedselsnummer.value
+            oppdragGjelderId = vedtak.sakIdGjelderFnr
             datoOppdragGjelderFom = LocalDate.parse("1900-01-01").toXMLDate()
             saksbehId = vedtak.saksbehandlerId
 
             avstemming115 = Avstemming115().apply {
-                nokkelAvstemming = utbetaling.avstemmingsnoekkel.toNorskTid().format(tidspunktFormatter)
-                tidspktMelding = utbetaling.avstemmingsnoekkel.toNorskTid().format(tidspunktFormatter)
+                nokkelAvstemming = avstemmingNokkel.toNorskTid().format(tidspunktFormatter)
+                tidspktMelding = avstemmingNokkel.toNorskTid().format(tidspunktFormatter)
                 kodeKomponent = "ETTERLAT"
             }
 
-            oppdragsEnhet120.add(
-                OppdragsEnhet120().apply {
-                    typeEnhet = "BOS"
-                    enhet = "4819"
-                    datoEnhetFom = LocalDate.parse("1900-01-01").toXMLDate()
-                }
-            )
+            vedtak.oppdragsenheter.forEach {
+                oppdragsEnhet120.add(
+                    OppdragsEnhet120().apply {
+                        typeEnhet = when (it.enhetsType) {
+                            Enhetstype.BOSTED -> "BOS"
+                        }
+                        enhet = "4819"
+                        datoEnhetFom = LocalDate.parse("1900-01-01").toXMLDate()
+                    }
+                )
+            }
 
             oppdragsLinje150.addAll(
-                utbetaling.utbetalingslinjer.map {
+                vedtak.beregningsperioder.map {
                     OppdragsLinje150().apply {
                         kodeEndringLinje = Endringskode.NY.toString()
-                        vedtakId = utbetaling.vedtakId.value
-                        delytelseId = it.id.toString()
-                        kodeKlassifik = "" // TODO
-                        datoVedtakFom = it.periode.fom.toXMLDate()
-                        datoVedtakTom = it.periode.tom.toXMLDate()
-                        sats = it.beloep
+                        vedtakId = vedtak.vedtakId
+                        delytelseId = it.delytelsesId
+                        kodeKlassifik = it.ytelseskomponent
+                        datoVedtakFom = it.datoFOM.toXMLDate()
+                        datoVedtakTom = it.datoTOM.toXMLDate()
+                        sats = it.belop
                         fradragTillegg = TfradragTillegg.T
                         typeSats = "MND"
                         brukKjoreplan = "J"
                         saksbehId = vedtak.saksbehandlerId
-                        utbetalesTilId = utbetaling.foedselsnummer.value
-                        henvisning = utbetaling.behandlingId.value
+                        utbetalesTilId = vedtak.sakIdGjelderFnr
+                        henvisning = vedtak.behandlingsId
 
                         attestant180.add(
                             Attestant180().apply {
-                                attestantId = vedtak.attestasjon.attestantId
+                                attestantId = attestasjon.attestantId
                             }
                         )
                     }

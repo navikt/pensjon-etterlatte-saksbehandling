@@ -1,10 +1,10 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
-import no.nav.etterlatte.domene.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.util.*
 
 
@@ -48,12 +48,19 @@ data class Utbetaling(
 data class Utbetalingslinje(
     val id: String,
     val opprettet: Tidspunkt,
-    val periode: Periode,
+    val periode: Utbetalingsperiode,
     val beloep: BigDecimal,
     val utbetalingId: UUID,
     val sakId: SakId,
-    val erstatterId: String
+    val erstatterId: String? = null
 )
+
+data class Utbetalingsperiode(
+    val fra: LocalDate,
+    val til: LocalDate? = null
+)
+
+data class UUID30(val value: String = UUID.randomUUID().toString().substring(0, 30))
 
 /*
 01.01 Vedtak: Jan 22 - Des 22: 10000 kr (opphøres eksplisitt)

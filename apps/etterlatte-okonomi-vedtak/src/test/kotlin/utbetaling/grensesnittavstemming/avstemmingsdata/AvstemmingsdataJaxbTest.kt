@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 internal class AvstemmingsdataJaxbTest {
 
@@ -25,7 +26,7 @@ internal class AvstemmingsdataJaxbTest {
 
         val uuid = UUIDBase64()
         val utbetaling = listOf(
-            utbetaling(id = 1, status = UtbetalingStatus.FEILET, avstemmingsnoekkel = til, opprettet = til)
+            utbetaling(id = UUID.randomUUID(), status = UtbetalingStatus.FEILET, avstemmingsnoekkel = til, opprettet = til)
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetaling, fraOgMed, til, uuid)

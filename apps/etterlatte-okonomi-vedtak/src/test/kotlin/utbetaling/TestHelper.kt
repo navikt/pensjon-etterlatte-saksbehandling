@@ -13,11 +13,16 @@ import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.BehandlingId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Foedselsnummer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UUID30
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsperiode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.VedtakId
 import no.trygdeetaten.skjema.oppdrag.Mmel
+import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import java.io.FileNotFoundException
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.*
 
 object TestHelper
 
@@ -47,7 +52,8 @@ fun vedtak(vedtakId: String = "1") = Vedtak(
             enhetsnummer = "9999",
             datoEnhetFOM = LocalDate.parse("1999-09-28")
         )
-    )
+    ),
+    attestasjon = attestasjon()
 )
 
 fun oppdrag(vedtakId: String = "8888") =
@@ -78,17 +84,19 @@ fun attestasjon() = Attestasjon(
 )
 
 fun utbetaling(
-    id: Long = 1,
+    id: UUID = UUID.randomUUID(),
+    sakId: SakId = SakId("1"),
     status: UtbetalingStatus = UtbetalingStatus.GODKJENT,
     vedtakId: String = "1",
     avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
-    opprettet: Tidspunkt = Tidspunkt.now()
+    opprettet: Tidspunkt = Tidspunkt.now(),
+    utbetalingslinjer: List<Utbetalingslinje> = listOf(utbetalingslinje(id, sakId))
 ) =
     Utbetaling(
         id = id,
         vedtakId = VedtakId(vedtakId),
         behandlingId = BehandlingId("1"),
-        sakId = SakId("1"),
+        sakId = sakId,
         status = status,
         vedtak = vedtak(vedtakId),
         opprettet = opprettet,
@@ -99,5 +107,22 @@ fun utbetaling(
         kvittering = oppdrag(vedtakId),
         kvitteringBeskrivelse = "En beskrivelse",
         kvitteringFeilkode = "hva skal stå her?",
-        kvitteringMeldingKode = "08"
+        kvitteringMeldingKode = "08",
+        utbetalingslinjer = utbetalingslinjer
+    )
+
+private fun utbetalingslinje(
+    utbetalingId: UUID,
+    sakId: SakId,
+): Utbetalingslinje =
+    Utbetalingslinje(
+        id = UUID30().value,
+        opprettet = Tidspunkt.now(),
+        periode = Utbetalingsperiode(
+            fra = LocalDate.parse("2022-01-01"),
+        ),
+        beloep = BigDecimal.valueOf(3000),
+        utbetalingId = utbetalingId,
+        sakId = sakId,
+        erstatterId = null
     )

@@ -20,11 +20,11 @@ class UtbetalingService(
     val rapidsConnection: RapidsConnection,
     val clock: Clock
 ) {
-    fun iverksettUtbetaling(vedtak: Vedtak): Utbetaling {
+    fun iverksettUtbetaling(vedtak: Vedtak, attestasjon: Attestasjon): Utbetaling {
         val tidligereUtbetalingerForSak = utbetalingDao.hentUtbetalinger(SakId(vedtak.sakId))
         val utbetaling: Utbetaling = toUtbetaling(vedtak, tidligereUtbetalingerForSak)
-
-        val oppdrag = oppdragMapper.oppdragFraUtbetaling(utbetaling)
+        val opprettetTidspunkt = Tidspunkt.now(clock)
+        val oppdrag = oppdragMapper.oppdragFraVedtak(vedtak, attestasjon, opprettetTidspunkt)
 
         logger.info("Sender oppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId} til oppdrag")
         oppdragSender.sendOppdrag(oppdrag)
@@ -37,6 +37,7 @@ class UtbetalingService(
 
         val opprettetTidspunkt = Tidspunkt.now(clock)
         // opprett utbetaling her
+        return utbetalinger.last() // TODO
 
     }
 
@@ -50,12 +51,12 @@ class UtbetalingService(
 
     // TODO: sette inn kolonne i database som viser at kvittering er oppdatert manuelt?
     fun settKvitteringManuelt(vedtakId: String) = utbetalingDao.hentUtbetaling(vedtakId)?.let {
-        it.oppdrag.apply {
+        it.oppdrag?.apply {
             mmel = Mmel().apply {
                 systemId = "231-OPPD" // TODO: en annen systemid her for å indikere manuell jobb?
                 alvorlighetsgrad = "00"
             }
-        }.let { utbetalingDao.oppdaterKvittering(it, Tidspunkt.now(clock)) }
+        }.let { utbetalingDao.oppdaterKvittering(it!!, Tidspunkt.now(clock)) } // TODO
     }
 
 

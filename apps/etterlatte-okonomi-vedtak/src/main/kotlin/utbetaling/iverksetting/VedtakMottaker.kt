@@ -2,14 +2,12 @@ package no.nav.etterlatte.utbetaling.iverksetting
 
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
-import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
+import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -42,8 +40,7 @@ class VedtakMottaker(
                     logger.info("Vedtak eksisterer fra før. Sendes ikke videre til oppdrag")
                     rapidsConnection.publish(utbetalingEksisterer(vedtak))
                 } else {
-                    val attestasjon: Attestasjon = objectMapper.readValue(packet["@attestasjon"].toJson())
-                    val utbetaling = utbetalingService.iverksettUtbetaling(vedtak, attestasjon)
+                    val utbetaling = utbetalingService.iverksettUtbetaling(vedtak)
                     rapidsConnection.publish("key", utbetalingEvent(utbetaling))
                 }
             } catch (e: Exception) {

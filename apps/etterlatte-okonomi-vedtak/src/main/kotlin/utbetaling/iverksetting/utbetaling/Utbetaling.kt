@@ -9,9 +9,11 @@ import java.util.*
 
 
 data class VedtakId(val value: String)
-data class SakId(val value: String)
+data class SakId(val value: Long)
 data class BehandlingId(val value: String)
+data class UtbetalingslinjeId(val value: Long)
 data class Foedselsnummer(val value: String)
+data class NavIdent(val value: String)
 
 enum class UtbetalingStatus {
     SENDT,
@@ -35,7 +37,9 @@ data class Utbetaling(
     val opprettet: Tidspunkt,
     val endret: Tidspunkt,
     val avstemmingsnoekkel: Tidspunkt,
-    val foedselsnummer: Foedselsnummer,
+    val stoenadsmottaker: Foedselsnummer,
+    val saksbehandler: NavIdent,
+    val attestant: NavIdent,
     val vedtak: Vedtak,
     val oppdrag: Oppdrag? = null,
     val kvittering: Oppdrag? = null,
@@ -46,14 +50,19 @@ data class Utbetaling(
 )
 
 data class Utbetalingslinje(
-    val id: String,
+    val id: UtbetalingslinjeId,
     val opprettet: Tidspunkt,
     val periode: Utbetalingsperiode,
     val beloep: BigDecimal,
     val utbetalingId: UUID,
     val sakId: SakId,
-    val erstatterId: String? = null
+    val erstatterId: String? = null,
+    val endring: Endring? = null
 )
+
+enum class Endring {
+    OPPHOER
+}
 
 data class Utbetalingsperiode(
     val fra: LocalDate,

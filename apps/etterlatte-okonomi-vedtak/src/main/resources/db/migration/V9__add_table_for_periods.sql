@@ -1,5 +1,6 @@
 ALTER TABLE utbetalingsoppdrag RENAME TO utbetaling;
 ALTER TABLE utbetaling ALTER COLUMN id TYPE VARCHAR;
+ALTER TABLE utbetaling ALTER COLUMN sak_id TYPE BIGINT;
 
 CREATE TABLE utbetalingslinje (
     id                      VARCHAR(32)                 PRIMARY KEY,
@@ -9,7 +10,7 @@ CREATE TABLE utbetalingslinje (
     beloep                  NUMERIC                     NOT NULL,
     utbetaling_id           VARCHAR                     REFERENCES utbetaling(id),
     erstatter_id            VARCHAR(32)                 DEFAULT NULL,
-    sak_id                  VARCHAR(32)                 NOT NULL
+    sak_id                  BIGINT                      NOT NULL
 );
 
 

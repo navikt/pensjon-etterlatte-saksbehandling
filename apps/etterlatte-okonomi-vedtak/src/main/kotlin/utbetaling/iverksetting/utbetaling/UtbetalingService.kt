@@ -1,8 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
+import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
@@ -20,16 +19,70 @@ class UtbetalingService(
     val rapidsConnection: RapidsConnection,
     val clock: Clock
 ) {
-    fun iverksettUtbetaling(vedtak: Vedtak, attestasjon: Attestasjon): Utbetaling {
-        val tidligereUtbetalingerForSak = utbetalingDao.hentUtbetalinger(SakId(vedtak.sakId))
+    fun iverksettUtbetaling(vedtak: Vedtak): Utbetaling {
+
+        val tidligereUtbetalingerForSak = utbetalingDao.hentUtbetalinger(vedtak.sak.id)
+        // hva gjøres dersom sakId ikke finnes i databasen, men vedtaket er IKKE et førstegangsvedtak?
+
+        // må uansett her håndtere én av tre situasjoner:
+        // 1. Førstegangsinnvilgelse
+        // 2. Rent opphør
+        // 3. Endringer (flere linjer og muligens opphør)
+
+        if (tidligereUtbetalingerForSak.isEmpty()) {
+            forstegangsinnvilgelse(vedtak)
+        }
+
+        /* Håndtere case:
+        / 1. Førstegangsinnvilgelse (1 utbetalingslinje)
+        / 2. Førstegangsinnvilgelse (2 eller flere utbetalingslinjer)
+        / 3. Opphør av sak (1 utbetalingslinje)
+        / 4. Opphør av sak (2 eller flere utbetalingslinjer)
+        / 5. Førstegangsinnvilgelse og opphør i samme vedtak (minst 2 utbetalingslinjer)
+
+         For revurdering / opphør: må finne utbetalingslinjer som gjelder per nå.
+         Eksempel på utbetalingslinjer:
+             1       2       3       4
+         |-------|-------|-------|------------------------->
+
+         Så kommer en revurdering...
+                         5               6       7
+                     |---------------|-------|------------->
+
+         Hva skal settes som erstatterId i Utbetalingslinje?
+         - 2 for linje 5? eller kanskje 2, 3 og 4?
+         - 4 for linje 6 og linje 7?
+         Må iallefall ha i modellen/databasen at en linje erstattes av en annen for å ha et konsept
+         om hvilke utbetalingslinjer som gjelder nå og ikke.
+
+         */
+
+
         val utbetaling: Utbetaling = toUtbetaling(vedtak, tidligereUtbetalingerForSak)
         val opprettetTidspunkt = Tidspunkt.now(clock)
-        val oppdrag = oppdragMapper.oppdragFraVedtak(vedtak, attestasjon, opprettetTidspunkt)
+        val oppdrag = oppdragMapper.oppdragFraVedtak(vedtak, opprettetTidspunkt)
 
-        logger.info("Sender oppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId} til oppdrag")
+        logger.info("Sender oppdrag for sakId=${vedtak.sak.id} med vedtakId=${vedtak.vedtakId} til oppdrag")
         oppdragSender.sendOppdrag(oppdrag)
         return utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
     }
+
+
+    fun forstegangsinnvilgelse(vedtak: Vedtak) {
+        val opprettetTidspunkt = Tidspunkt.now(clock)
+        val nyUtbetaling: Utbetaling = toNyUtbetaling(vedtak)
+        val oppdrag = oppdragMapper.oppdragFraUtbetaling(nyUtbetaling, true)
+
+        logger.info("Sender oppdrag for sakId=${vedtak.sak.id} med vedtakId=${vedtak.vedtakId} til oppdrag")
+        oppdragSender.sendOppdrag(oppdrag)
+
+        // return utbetalingDao.opprettUtbetaling(nyUtbetaling.copy(oppdrag = oppdrag))
+    }
+
+    private fun toNyUtbetaling(vedtak: Vedtak): Utbetaling {
+        //return Utbetaling()
+    }
+
 
     private fun toUtbetaling(vedtak: Vedtak, utbetalinger: List<Utbetaling>): Utbetaling {
         val utbetalingslinjer = utbetalinger.flatMap { it.utbetalingslinjer }

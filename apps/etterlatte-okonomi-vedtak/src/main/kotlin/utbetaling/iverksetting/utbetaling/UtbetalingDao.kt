@@ -2,16 +2,12 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.TransactionalSession
-import kotliquery.param
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.etterlatte.domene.vedtak.Periode
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
-import no.nav.etterlatte.utbetaling.common.forsteDagIMaaneden
-import no.nav.etterlatte.utbetaling.common.sisteDagIMaaneden
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
@@ -19,7 +15,6 @@ import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.*
 import javax.sql.DataSource
 
@@ -90,7 +85,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
             }
         }
 
-    fun hentUtbetalinger(sakId: SakId): List<Utbetaling> =
+    fun hentUtbetalinger(sakId: Long): List<Utbetaling> =
         dataSource.connection.use { connection ->
             val stmt = connection.prepareStatement(
                 """
@@ -103,7 +98,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
             )
 
             stmt.use {
-                it.setObject(1, sakId.value)
+                it.setLong(1, sakId)
 
                 it.executeQuery().toList {
                     val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(this.getString("id"))
@@ -189,7 +184,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 it.setString(1, utbetaling.id.toString())
                 it.setString(2, utbetaling.vedtakId.value)
                 it.setString(3, utbetaling.behandlingId.value)
-                it.setString(4, utbetaling.sakId.value)
+                it.setLong(4, utbetaling.sakId.value)
                 it.setString(5, utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) })
                 it.setString(6, UtbetalingStatus.SENDT.name)
                 it.setString(7, utbetaling.vedtak.toJson())
@@ -224,7 +219,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 it.setObject(4, utbetalingslinje.periode.til)
                 it.setBigDecimal(5, utbetalingslinje.beloep)
                 it.setString(6, utbetalingslinje.utbetalingId.toString())
-                it.setString(7, utbetalingslinje.sakId.value)
+                it.setLong(7, utbetalingslinje.sakId.value)
                 it.setString(8, utbetalingslinje.erstatterId)
 
                 require(it.executeUpdate() == 1)
@@ -281,7 +276,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
         with(resultSet) {
             Utbetaling(
                 id = getString("id").let { UUID.fromString(it) },
-                sakId = SakId(getString("sak_id")),
+                sakId = SakId(getLong("sak_id")),
                 behandlingId = BehandlingId(getString("behandling_id")),
                 vedtakId = VedtakId(getString("vedtak_id")),
                 status = getString("status").let(UtbetalingStatus::valueOf),
@@ -303,7 +298,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
         with(resultSet) {
             Utbetalingslinje(
                 id = getString("id"),
-                sakId = SakId(getString("sak_id")),
+                sakId = SakId(getLong("sak_id")),
                 periode = Utbetalingsperiode(
                     fra = getObject("periode_fra", LocalDate::class.java),
                     til = getObject("periode_til", LocalDate::class.java),

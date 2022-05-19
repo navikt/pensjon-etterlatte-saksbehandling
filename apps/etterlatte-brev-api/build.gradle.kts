@@ -1,5 +1,5 @@
 plugins {
-    id("etterlatte.common")
+    id("etterlatte.rapids-and-rivers")
 }
 
 dependencies {

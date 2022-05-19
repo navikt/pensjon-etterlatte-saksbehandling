@@ -1,8 +1,5 @@
 package no.nav.etterlatte
 
-import journalpost.JournalpostService
-import model.Vedtak
-import model.VedtakType
 import model.brev.InnvilgetBrevRequest
 import no.nav.etterlatte.db.Brev
 import no.nav.etterlatte.db.BrevRepository
@@ -11,8 +8,14 @@ import no.nav.etterlatte.db.Adresse
 import no.nav.etterlatte.db.BrevID
 import no.nav.etterlatte.db.Mottaker
 import no.nav.etterlatte.db.NyttBrev
+import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
+import no.nav.etterlatte.libs.common.brev.model.Vedtak
+import no.nav.etterlatte.libs.common.brev.model.VedtakType
+import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
+import no.nav.etterlatte.libs.common.journalpost.Bruker
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.model.brev.BrevRequest
 import no.nav.etterlatte.vedtak.VedtakService
 import org.slf4j.LoggerFactory
@@ -21,7 +24,7 @@ import pdf.PdfGeneratorKlient
 class BrevService(
     private val db: BrevRepository,
     private val pdfGenerator: PdfGeneratorKlient,
-    private val journalpostService: JournalpostService
+    private val sendToRapid: (String) -> Unit
 ) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
     private val vedtakService = VedtakService()
@@ -66,9 +69,12 @@ class BrevService(
     }
 
     fun ferdigstillBrev(id: BrevID): Brev {
+        val brev: Brev = db.hentBrev(id)
+
+        sendToRapid(opprettDistribusjonsmelding(brev))
         db.oppdaterStatus(id, "FERDIGSTILT")
 
-        return db.hentBrev(id)
+        return brev
     }
 
     private suspend fun opprettFraVedtak(behandlingId: String): Brev {
@@ -78,7 +84,7 @@ class BrevService(
         val navn = vedtak.barn.navn.split(" ")
         val mottaker = Mottaker(
             fornavn = navn[0],
-            etternavn= navn[1],
+            etternavn = navn[1],
             foedselsnummer = Foedselsnummer.of(vedtak.barn.fnr),
             adresse = Adresse("Fyrstikkalléen 1", "0661", "Oslo")
         )
@@ -103,11 +109,17 @@ class BrevService(
         return pdf
     }
 
-    // Må nok rydde opp i hvordan brev lenkes opp i databasen.
-    suspend fun sendBrev(behandlingId: String) {
-        val vedtak = vedtakService.hentVedtak(behandlingId)
-        val brev = db.hentBrev(vedtak.vedtakId.toLong())
-
-        journalpostService.journalfoer(vedtak, brev)
+    private fun opprettDistribusjonsmelding(brev: Brev): String = DistribusjonMelding(
+        vedtakId = "Vedtak_Id",
+        brevId = brev.id,
+        mottaker = AvsenderMottaker(brev.mottaker.foedselsnummer?.value ?: "0101202212345"),
+        bruker = Bruker(brev.mottaker.foedselsnummer?.value ?: "0101202212345"),
+        tittel = brev.tittel
+    ).let {
+        """{
+                "@event": "BREV:DISTRIBUER",
+                "payload": ${it.toJson()},
+                "@brevId": "${it.brevId}"
+        }"""
     }
 }

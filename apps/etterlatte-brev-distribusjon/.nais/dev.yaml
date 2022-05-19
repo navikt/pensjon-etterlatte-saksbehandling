@@ -1,0 +1,35 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-brev-distribusjon
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  liveness:
+    initialDelay: 5
+    path: /isalive
+  readiness:
+    initialDelay: 5
+    path: /isready
+  prometheus:
+    enabled: true
+    path: /metrics
+  kafka:
+    pool: nav-dev
+  azure:
+    application:
+      enabled: true
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.dodsmelding
+    - name: JOURNALPOST_URL
+      value: "https://dokarkiv.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost"
+    - name: AZURE_DOKARKIV_SCOPE
+      value: "api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default"

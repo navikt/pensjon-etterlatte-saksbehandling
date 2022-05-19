@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.output.MigrateResult
 import javax.sql.DataSource
 
 class DataSourceBuilder(private val env: Map<String, String>) {
@@ -28,7 +29,7 @@ class DataSourceBuilder(private val env: Map<String, String>) {
         dataSource = HikariDataSource(hikariConfig)
     }
 
-    fun migrate() = runMigration(dataSource)
+    fun migrate(): MigrateResult = runMigration(dataSource)
 
     private fun runMigration(dataSource: DataSource) =
         Flyway.configure()

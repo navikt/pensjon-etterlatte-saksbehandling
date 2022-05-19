@@ -1,6 +1,6 @@
 package model.brev
 
-import model.Vedtak
+import no.nav.etterlatte.libs.common.brev.model.Vedtak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.model.brev.BrevRequest
 import no.nav.etterlatte.model.brev.Mottaker

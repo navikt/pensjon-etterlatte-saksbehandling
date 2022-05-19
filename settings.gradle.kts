@@ -18,6 +18,7 @@ include(
     "apps:etterlatte-beregning",
     "apps:etterlatte-grunnlag",
     "apps:etterlatte-brev-api",
+    "apps:etterlatte-brev-distribusjon",
     "libs:ktorclient-auth-clientcredentials",
     "libs:common",
     "libs:ktorclient-onbehalfof",

@@ -1,9 +1,9 @@
 package no.nav.etterlatte.vedtak
 
-import model.Avdoed
-import model.Barn
-import model.Vedtak
-import model.VedtakType
+import no.nav.etterlatte.libs.common.brev.model.Avdoed
+import no.nav.etterlatte.libs.common.brev.model.Barn
+import no.nav.etterlatte.libs.common.brev.model.Vedtak
+import no.nav.etterlatte.libs.common.brev.model.VedtakType
 import java.time.LocalDate
 
 class VedtakService {

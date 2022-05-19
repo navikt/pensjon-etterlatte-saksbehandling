@@ -23,11 +23,7 @@ fun main() {
 
         RapidApplication.create(env)
             .also { LagreAvkorting(it, vedtaksvurderingService) }
-            .start()
-        RapidApplication.create(env)
             .also { LagreVilkaarsresultat(it, vedtaksvurderingService) }
-            .start()
-        RapidApplication.create(env)
             .also { LagreBeregningsresultat(it, vedtaksvurderingService) }
             .start()
 

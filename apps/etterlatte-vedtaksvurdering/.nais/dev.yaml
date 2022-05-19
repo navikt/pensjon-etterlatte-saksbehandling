@@ -15,17 +15,12 @@ spec:
         databases:
           - name: vedtaksvurdering
             envVarPrefix: DB
-  startup:
-    initialDelay: 7
-    failureThreshold: 10
-    periodSeconds: 5
-    path: /internal/started
   liveness:
     initialDelay: 5
-    path: /internal/isalive
+    path: /isalive
   readiness:
     initialDelay: 5
-    path: /internal/isready
+    path: /isready
   azure:
     application:
       enabled: true

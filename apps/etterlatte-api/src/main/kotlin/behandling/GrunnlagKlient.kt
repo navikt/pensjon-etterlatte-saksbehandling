@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.grunnlag.DetaljertGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -44,7 +45,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnla
                         success = { json -> json },
                         failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                     ).response
-            return objectMapper.readValue(json.toString())
+            return objectMapper.readValue<DetaljertGrunnlag>(json.toString()).grunnlag
         } catch (e: Exception) {
             logger.error("Henting av behandlinger feilet", e)
             throw e

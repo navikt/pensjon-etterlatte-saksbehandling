@@ -44,12 +44,11 @@ class GrunnlagHendelser(
         withLogContext(packet.correlationId()) {
             if(Kontekst.get().AppUser !is Self){ logger.warn("AppUser i kontekst er ikke Self i R&R-flyten") }
 
-            //TODO fjerne spor av liste
             val lagretGrunnlag = inTransaction {
                 val gjeldendeGrunnlag = grunnlag.hent(packet["sak"].asLong())
-                val opplysninger: Grunnlagsopplysning<ObjectNode> =
+                val opplysninger: List<Grunnlagsopplysning<ObjectNode>> =
                     objectMapper.readValue(packet["opplysning"].toJson())!!
-                gjeldendeGrunnlag.leggTilGrunnlagListe(listOf( opplysninger))
+                gjeldendeGrunnlag.leggTilGrunnlagListe(opplysninger)
                 gjeldendeGrunnlag
             }
 

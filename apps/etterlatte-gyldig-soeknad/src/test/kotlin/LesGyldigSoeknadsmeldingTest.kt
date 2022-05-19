@@ -47,7 +47,7 @@ internal class LesVilkaarsmeldingTest {
                 VurdertGyldighet(
                     GyldighetsTyper.INNSENDER_ER_FORELDER,
                     VurderingsResultat.OPPFYLT,
-                    LocalDateTime.now()
+                    "innsenderFnr"
                 )
             ),
             LocalDateTime.now()

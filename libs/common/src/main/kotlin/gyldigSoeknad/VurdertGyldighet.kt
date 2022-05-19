@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 data class VurdertGyldighet(
     val navn: GyldighetsTyper,
     val resultat: VurderingsResultat,
-    val basertPaaOpplysninger: Any
+    val basertPaaOpplysninger: Any?
 )
 
 data class GyldighetsResultat(

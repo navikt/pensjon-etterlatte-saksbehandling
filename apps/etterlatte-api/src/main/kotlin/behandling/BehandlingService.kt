@@ -7,10 +7,12 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
+import no.nav.etterlatte.typer.Sak
+import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
 
 
-data class PersonSakerResult(val person: Person, val saker: SakerResult)
+data class PersonSakerResult(val person: Person, val saker: Saker)
 
 data class BehandlingsBehov(
     val sak: Long,
@@ -37,7 +39,7 @@ class BehandlingService(
         return behandlingKlient.opprettSakForPerson(fnr, sakType, accessToken)
     }
 
-    suspend fun hentSaker(accessToken: String): SakerResult {
+    suspend fun hentSaker(accessToken: String): Saker {
         logger.info("Henter alle saker")
         return behandlingKlient.hentSaker(accessToken)
     }
@@ -49,9 +51,7 @@ class BehandlingService(
 
     suspend fun hentBehandling(behandlingId: String, accessToken: String): DetaljertBehandling {
         logger.info("Henter behandling")
-        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
-        return behandling
-
+        return behandlingKlient.hentBehandling(behandlingId, accessToken)
     }
 
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag {

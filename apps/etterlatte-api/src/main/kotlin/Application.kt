@@ -27,7 +27,6 @@ class ApplicationContext(configLocation: String? = null) {
     )
 
     val oppgaveService: OppgaveService = OppgaveService(behandlingKlient)
-
     val vedtakService = VedtakService(behandlingKlient)
 
     private fun httpClient() = HttpClient {

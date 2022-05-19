@@ -6,7 +6,13 @@ import java.util.*
 
 data class BehandlingListe(val behandlinger: List<BehandlingSammendrag>)
 
-data class BehandlingSammendrag(val id: UUID, val sak: Long, val status: BehandlingStatus?, val soeknadMottattDato: LocalDateTime?)
+data class BehandlingSammendrag(
+    val id: UUID,
+    val sak: Long,
+    val status: BehandlingStatus?,
+    val soeknadMottattDato: LocalDateTime?,
+    val behandlingOpprettet: LocalDateTime?
+)
 
 data class DetaljertBehandling(
     val id: UUID,

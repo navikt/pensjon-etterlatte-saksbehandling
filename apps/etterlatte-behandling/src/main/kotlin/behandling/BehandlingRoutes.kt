@@ -15,7 +15,7 @@ import java.util.*
 fun Route.behandlingRoutes(service: BehandlingService) {
     get("/behandlinger") {
         call.respond(
-            service.hentBehandlinger().map { BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato) }
+            service.hentBehandlinger().map { BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato, it.behandlingOpprettet) }
                 .let { BehandlingListe(it) }
         )
     }
@@ -23,7 +23,7 @@ fun Route.behandlingRoutes(service: BehandlingService) {
         call.respond(
             service.hentBehandlingerISak(sakId)
                 .map {
-                    BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato)
+                    BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato, it.behandlingOpprettet)
                 }
                 .let { BehandlingListe(it) }
         )

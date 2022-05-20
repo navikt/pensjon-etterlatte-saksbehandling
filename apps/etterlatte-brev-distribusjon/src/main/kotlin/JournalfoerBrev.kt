@@ -23,13 +23,13 @@ internal class JournalfoerBrev(
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BREV:DISTRIBUER") }
             validate { it.requireKey("@brevId", "payload") }
-            validate { it.rejectKey("@distribuert", "@journalfoert") }
+            validate { it.rejectKey("@bestilling_id", "@journalpostResponse") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext {
-            logger.info("Starter distribuering av brev.")
+            logger.info("Starter journalføring av brev.")
 
             val melding = packet.distribusjonsmelding()
             val journalpostResponse = journalpostService.journalfoer(melding)
@@ -48,7 +48,6 @@ internal class JournalfoerBrev(
     private fun RapidsConnection.svarSuksess(packet: JsonMessage, journalpostResponse: JournalpostResponse) {
         logger.info("Brev har blitt journalført. Svarer tilbake med bekreftelse.")
 
-        packet["@journalfoert"] = true
         packet["@journalpostResponse"] = journalpostResponse.toJson()
 
         publish(packet.toJson())

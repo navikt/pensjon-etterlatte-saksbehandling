@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.distribusjon.DistribusjonServiceMock
 import no.nav.helse.rapids_rivers.RapidApplication
 
 fun main() {
@@ -8,6 +9,9 @@ fun main() {
     }
 
     RapidApplication.create(env)
-        .also { JournalfoerBrev(it, AppBuilder(env).journalpostService) }
+        .apply {
+            JournalfoerBrev(this, AppBuilder(env).journalpostService)
+            DistribuerBrev(this, DistribusjonServiceMock())
+        }
         .start()
 }

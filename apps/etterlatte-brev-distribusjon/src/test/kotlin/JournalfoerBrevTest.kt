@@ -16,7 +16,7 @@ class JournalfoerBrevTest {
     private val inspector = TestRapid().apply { JournalfoerBrev(this, JournalpostServiceMock()) }
 
     @Test
-    fun `Skal distribuere meldingen og svare bekreftende`() {
+    fun `Skal journalfoere brevet og svare bekreftende`() {
         val distribusjonMelding = DistribusjonMelding(
             vedtakId = "00001",
             brevId = 1000L,
@@ -33,7 +33,6 @@ class JournalfoerBrevTest {
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         inspector.message(0).get("@event").asText() shouldBe "BREV:DISTRIBUER"
-        inspector.message(0).get("@journalfoert").asBoolean() shouldBe true
         inspector.message(0).get("@brevId").asLong() shouldBe distribusjonMelding.brevId
         objectMapper.readValue<JournalpostResponse>(inspector.message(0).get("@journalpostResponse").asText()).let {
             it.journalpostId shouldNotBe null

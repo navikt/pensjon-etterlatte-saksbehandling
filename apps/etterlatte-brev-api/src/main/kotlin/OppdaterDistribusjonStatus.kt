@@ -18,8 +18,8 @@ internal class OppdaterDistribusjonStatus(rapidsConnection: RapidsConnection, pr
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BREV:DISTRIBUER") }
-            validate { it.requireKey("@brevId", "@journalfoert") }
-            validate { it.interestedIn("@journalpostResponse", "@distribuert")}
+            validate { it.requireKey("@brevId", "@journalpostResponse") }
+            validate { it.interestedIn("@bestilling_id")}
         }.register(this)
     }
 
@@ -28,10 +28,11 @@ internal class OppdaterDistribusjonStatus(rapidsConnection: RapidsConnection, pr
         withLogContext(brevId.toString()) {
             logger.info("Mottatt oppdatering fra brev-distribusjon for brev med id ${brevId}.")
 
-            if (packet["@distribuert"].booleanValue()) {
-                db.oppdaterStatus(brevId, Status.DISTRIBUERT, """{"id": "todo"}""")
-                db.setBestillingId(brevId, "todo")
-            } else if (packet["@journalfoert"].booleanValue()) {
+            if (packet["@bestilling_id"].isTextual) {
+                val bestillingId = packet["@bestilling_id"].asText()
+                db.oppdaterStatus(brevId, Status.DISTRIBUERT, """{"bestillingId": "$bestillingId"}""")
+                db.setBestillingId(brevId, bestillingId)
+            } else {
                 val response: JournalpostResponse = objectMapper.readValue(packet["@journalpostResponse"].asText())
                 db.oppdaterStatus(brevId, Status.JOURNALFOERT, response.toJson())
                 db.setJournalpostId(brevId, response.journalpostId)

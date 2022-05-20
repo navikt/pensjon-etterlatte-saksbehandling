@@ -25,7 +25,7 @@ internal class LesVilkaarsmeldingTest {
 
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get("@event").asText())
         Assertions.assertEquals(3, inspector.message(0).get("@vilkaarsvurdering").size())
-        Assertions.assertEquals(1, inspector.message(0).get("@gyldigeAdresserVurdering").size())
+        Assertions.assertEquals(3, inspector.message(0).get("@gyldigeAdresserVurdering").size())
 
     }
 }

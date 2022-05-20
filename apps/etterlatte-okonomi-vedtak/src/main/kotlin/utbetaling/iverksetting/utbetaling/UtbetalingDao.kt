@@ -265,7 +265,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 it.setString(3, oppdragMedKvittering.mmel.alvorlighetsgrad)
                 it.setString(4, oppdragMedKvittering.mmel.kodeMelding)
                 it.setTimestamp(5, Timestamp.from(endret.instant), tzUTC)
-                it.setString(6, oppdragMedKvittering.vedtakId())
+                it.setString(6, oppdragMedKvittering.vedtakId()
 
                 require(it.executeUpdate() == 1)
             }

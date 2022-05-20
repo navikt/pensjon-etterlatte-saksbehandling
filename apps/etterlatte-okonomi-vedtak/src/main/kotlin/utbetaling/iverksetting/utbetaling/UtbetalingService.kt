@@ -40,20 +40,47 @@ class UtbetalingService(
         / 4. Opphør av sak (2 eller flere utbetalingslinjer)
         / 5. Førstegangsinnvilgelse og opphør i samme vedtak (minst 2 utbetalingslinjer)
 
+
          For revurdering / opphør: må finne utbetalingslinjer som gjelder per nå.
          Eksempel på utbetalingslinjer:
              1       2       3       4
          |-------|-------|-------|------------------------->
+               5    6       7               8
+              |--|-------|-------|------------------------->
+                9     10          11
+              |--|-----------|----------->
+             9
+         |-------|
+           10  11
+         |----|--|
 
-         Så kommer en revurdering...
-                         5               6       7
-                     |---------------|-------|------------->
+         5: ENDR?
+         6,7,8: NY?
+
+
+         Historikk-messig, også behov for å se hvilke utbetalinger fom faktisk har skjedd?
+         F.eks en revurdering tilbake i tid:
+                   8                    9
+         |------------------|------------------------>
+         - I tilfelle med kun utbetalingslinjer 1,2,3 og 4, så nå en revurdering med 8 og 9 ->
+            - er 8 UEND eller NY?
+            - er 9 UEND eller NY?
+
 
          Hva skal settes som erstatterId i Utbetalingslinje?
          - 2 for linje 5? eller kanskje 2, 3 og 4?
          - 4 for linje 6 og linje 7?
          Må iallefall ha i modellen/databasen at en linje erstattes av en annen for å ha et konsept
          om hvilke utbetalingslinjer som gjelder nå og ikke.
+
+         Behov for å finne gjeldene utbetaling for et gitt tidsrom:
+
+         1. Henter ut eksisterende utbetalingslinjer for en sak
+         2. Må finne tidligste nye utbetalingslinje, og finne ut hvilken linje denne erstatter (sorter perioder)
+            - trenger referansen til eksisterende utbetalingslinje som blir erstattet av den tidligste nye utbetalingslinjen
+         3. Hvis det er opphør: send opphørsmelding
+         4. Hvis det er en endring: send de nye meldingene inn som "ENDR" eller "NY"
+            - Eventuelt kun den første av de nye meldingene som sendes inn som "ENDR"?
 
          */
 

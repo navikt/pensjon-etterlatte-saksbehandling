@@ -1,6 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
+import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import java.math.BigDecimal
@@ -8,7 +8,7 @@ import java.time.LocalDate
 import java.util.*
 
 
-data class VedtakId(val value: String)
+data class VedtakId(val value: Long)
 data class SakId(val value: Long)
 data class BehandlingId(val value: String)
 data class UtbetalingslinjeId(val value: Long)
@@ -53,10 +53,10 @@ data class Utbetalingslinje(
     val id: UtbetalingslinjeId,
     val opprettet: Tidspunkt,
     val periode: Utbetalingsperiode,
-    val beloep: BigDecimal,
+    val beloep: BigDecimal? = null,
     val utbetalingId: UUID,
     val sakId: SakId,
-    val erstatterId: String? = null,
+    val erstatterId: UtbetalingslinjeId? = null,
     val endring: Endring? = null
 )
 
@@ -64,10 +64,24 @@ enum class Endring {
     OPPHOER
 }
 
+
 data class Utbetalingsperiode(
     val fra: LocalDate,
     val til: LocalDate? = null
-)
+) {
+}
+
+fun tidligsteUtbetalingslinje(list: List<Utbetalingslinje>) =
+    list.minByOrNull { it.periode.fra }
+
+/*
+Utbetalingsperioder som hører til siste utbetaling:
+- inneholder én av disse dato for den første nye utbetalingslinjen?
+    - hvis ja: erstatte denne
+- Hvis nei -> må da finne tidligsteUtbetalingslinje blant eksisterende gjeldende linjer
+    - erstatter så den
+
+ */
 
 data class UUID30(val value: String = UUID.randomUUID().toString().substring(0, 30))
 

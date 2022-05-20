@@ -7,9 +7,7 @@ import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.*
-import io.ktor.request.header
-import io.ktor.request.httpMethod
-import io.ktor.request.path
+import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.*
@@ -60,7 +58,9 @@ fun Application.module(beanFactory: BeanFactory){
     }
     install(CallLogging) {
         level = Level.INFO
-        filter { call -> !call.request.path().startsWith("/internal") }
+        val naisEndepunkt = listOf("isalive", "isready", "metrics")
+        filter { call -> call.request.document().let { !naisEndepunkt.contains(it) }
+        }
         format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
         mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
     }

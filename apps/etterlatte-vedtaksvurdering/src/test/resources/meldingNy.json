@@ -422,10 +422,11 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
+                "id": "99c1643c-a35f-4d4a-bc44-018e1cb26f8c",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-05-19T08:28:45.792260408Z",
+                  "tidspunktForInnhenting": "2022-05-20T12:30:01.095856468Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -435,10 +436,11 @@
                 }
               },
               {
+                "id": "acde1d68-4478-4393-ba51-f631a24aa9cf",
                 "kriterieOpplysningsType": "FOEDSELSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-05-19T08:28:44.782353074Z",
+                  "tidspunktForInnhenting": "2022-05-20T12:30:00.101241913Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -450,7 +452,7 @@
             ]
           }
         ],
-        "vurdertDato": "2022-05-19T10:28:47.492621143"
+        "vurdertDato": "2022-05-20T14:30:01.42349102"
       },
       {
         "navn": "DOEDSFALL_ER_REGISTRERT",
@@ -461,10 +463,11 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
+                "id": "99c1643c-a35f-4d4a-bc44-018e1cb26f8c",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-05-19T08:28:45.792260408Z",
+                  "tidspunktForInnhenting": "2022-05-20T12:30:01.095856468Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -480,10 +483,11 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
+                "id": "acde1d68-4478-4393-ba51-f631a24aa9cf",
                 "kriterieOpplysningsType": "FORELDRE",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-05-19T08:28:44.782353074Z",
+                  "tidspunktForInnhenting": "2022-05-20T12:30:00.101241913Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -495,10 +499,11 @@
                 }
               },
               {
+                "id": "99c1643c-a35f-4d4a-bc44-018e1cb26f8c",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-05-19T08:28:45.792260408Z",
+                  "tidspunktForInnhenting": "2022-05-20T12:30:01.095856468Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -510,7 +515,7 @@
             ]
           }
         ],
-        "vurdertDato": "2022-05-19T10:28:47.492644716"
+        "vurdertDato": "2022-05-20T14:30:01.4235184"
       },
       {
         "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
@@ -521,10 +526,11 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
+                "id": "99c1643c-a35f-4d4a-bc44-018e1cb26f8c",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-05-19T08:28:45.792260408Z",
+                  "tidspunktForInnhenting": "2022-05-20T12:30:01.095856468Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -534,6 +540,7 @@
                 }
               },
               {
+                "id": "4208ce1d-7773-4c9f-b955-f1de12e905f2",
                 "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
                 "kilde": {
                   "fnr": "03108718357",
@@ -548,7 +555,7 @@
             ]
           }
         ],
-        "vurdertDato": "2022-05-19T10:28:47.492650589"
+        "vurdertDato": "2022-05-20T14:30:01.423527552"
       },
       {
         "navn": "BARNETS_MEDLEMSKAP",
@@ -559,10 +566,11 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
+                "id": "acde1d68-4478-4393-ba51-f631a24aa9cf",
                 "kriterieOpplysningsType": "ADRESSER",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-05-19T08:28:44.782353074Z",
+                  "tidspunktForInnhenting": "2022-05-20T12:30:00.101241913Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -588,6 +596,7 @@
                 }
               },
               {
+                "id": "9ef7f450-a346-4a2b-a77c-7f52949b7b9c",
                 "kriterieOpplysningsType": "SOEKER_UTENLANDSOPPHOLD",
                 "kilde": {
                   "fnr": "03108718357",
@@ -601,10 +610,11 @@
                 }
               },
               {
+                "id": "99c1643c-a35f-4d4a-bc44-018e1cb26f8c",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-05-19T08:28:45.792260408Z",
+                  "tidspunktForInnhenting": "2022-05-20T12:30:01.095856468Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -620,10 +630,11 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
+                "id": "bc2cdd66-c013-49bf-ac80-6e6e5ddcb57d",
                 "kriterieOpplysningsType": "ADRESSER",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-05-19T08:28:45.274615594Z",
+                  "tidspunktForInnhenting": "2022-05-20T12:30:00.654268292Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -649,10 +660,11 @@
                 }
               },
               {
+                "id": "99c1643c-a35f-4d4a-bc44-018e1cb26f8c",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-05-19T08:28:45.792260408Z",
+                  "tidspunktForInnhenting": "2022-05-20T12:30:01.095856468Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -664,7 +676,7 @@
             ]
           }
         ],
-        "vurdertDato": "2022-05-19T10:28:47.492668797"
+        "vurdertDato": "2022-05-20T14:30:01.423558484"
       },
       {
         "navn": "SAMME_ADRESSE",
@@ -675,10 +687,11 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
+                "id": "acde1d68-4478-4393-ba51-f631a24aa9cf",
                 "kriterieOpplysningsType": "BOSTEDADRESSE_SOEKER",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-05-19T08:28:44.782353074Z",
+                  "tidspunktForInnhenting": "2022-05-20T12:30:00.101241913Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -702,10 +715,11 @@
                 }
               },
               {
+                "id": "bc2cdd66-c013-49bf-ac80-6e6e5ddcb57d",
                 "kriterieOpplysningsType": "BOSTEDADRESSE_GJENLEVENDE",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-05-19T08:28:45.274615594Z",
+                  "tidspunktForInnhenting": "2022-05-20T12:30:00.654268292Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -731,10 +745,10 @@
             ]
           }
         ],
-        "vurdertDato": "2022-05-19T10:28:47.49267785"
+        "vurdertDato": "2022-05-20T14:30:01.423570975"
       }
     ],
-    "vurdertDato": "2022-05-19T10:28:47.49267785"
+    "vurdertDato": "2022-05-20T14:30:01.423570975"
   },
   "@beregning": {
     "id": "eef2a9ec-e2df-400d-9fbd-3679e92c384e",

@@ -39,7 +39,7 @@ internal class JournalfoerBrev(
     }
 
     private fun JsonMessage.distribusjonsmelding(): DistribusjonMelding = try {
-        objectMapper.readValue(this["payload"].toString())
+        objectMapper.readValue(this["payload"].asText())
     } catch (ex: Exception) {
         logger.error("Klarte ikke parse distribusjonsmeldingen:", ex)
         throw ex

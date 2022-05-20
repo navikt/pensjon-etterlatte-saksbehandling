@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.model.brev.BrevRequest
 import no.nav.etterlatte.vedtak.VedtakService
+import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import pdf.PdfGeneratorKlient
 
@@ -55,6 +56,7 @@ class BrevService(
                     adresse = mottaker.adresse.adresse,
                     postnummer = mottaker.adresse.postnummer
                 )
+
             override fun templateName(): String = mal.navn
         }
 
@@ -111,10 +113,12 @@ class BrevService(
         bruker = Bruker(brev.mottaker.foedselsnummer?.value ?: "0101202212345"),
         tittel = brev.tittel
     ).let {
-        """{
-                "@event": "BREV:DISTRIBUER",
-                "@brevId": ${it.brevId},
-                "payload": ${it.toJson()}
-        }"""
+        JsonMessage.newMessage(
+            mapOf(
+                "@event" to "BREV:DISTRIBUER",
+                "@brevId" to it.brevId,
+                "payload" to it.toJson()
+            )
+        ).toJson()
     }
 }

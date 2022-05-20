@@ -1,4 +1,3 @@
-
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -9,6 +8,7 @@ import no.nav.etterlatte.libs.common.journalpost.Bruker
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 
@@ -24,13 +24,14 @@ class JournalfoerBrevTest {
             bruker = Bruker(id = "0101202012345"),
             tittel = "Vi har innvilget din søknad om barnepensjon"
         )
-        val melding = """{
-                "@event": "BREV:DISTRIBUER",
-                "payload": ${distribusjonMelding.toJson()},
-                "@brevId": "${distribusjonMelding.brevId}"
-            }"""
-
-        val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
+        val melding = JsonMessage.newMessage(
+            mapOf(
+                "@event" to "BREV:DISTRIBUER",
+                "@brevId" to distribusjonMelding.brevId,
+                "payload" to distribusjonMelding.toJson()
+            )
+        )
+        val inspector = inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         inspector.message(0).get("@event").asText() shouldBe "BREV:DISTRIBUER"
         inspector.message(0).get("@brevId").asLong() shouldBe distribusjonMelding.brevId

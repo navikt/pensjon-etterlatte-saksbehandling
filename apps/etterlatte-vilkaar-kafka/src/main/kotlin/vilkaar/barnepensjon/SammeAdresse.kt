@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
-fun ekstraVilkaarBarnOgForelderSammeBostedsadresse(
+fun gyldigSoeknadBarnOgForelderSammeBostedsadresse(
     vilkaartype: Vilkaartyper,
     soekerPdl: VilkaarOpplysning<Person>?,
     gjenlevendePdl: VilkaarOpplysning<Person>?

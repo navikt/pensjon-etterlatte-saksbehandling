@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.vilkaar.barnepensjon.*
 import org.slf4j.LoggerFactory
-import vilkaar.barnepensjon.ekstraVilkaarBarnOgForelderSammeBostedsadresse
+import vilkaar.barnepensjon.gyldigSoeknadBarnOgForelderSammeBostedsadresse
 
 
 class VilkaarService {
@@ -31,7 +31,6 @@ class VilkaarService {
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
-
 
         val vilkaar = listOf(
             vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, soekerPdl, avdoedPdl),
@@ -47,19 +46,35 @@ class VilkaarService {
                 soekerSoeknad,
                 gjenlevendePdl,
                 avdoedPdl,
-            ),
-            ekstraVilkaarBarnOgForelderSammeBostedsadresse(
-                Vilkaartyper.SAMME_ADRESSE,
-                soekerPdl,
-                gjenlevendePdl
             )
         )
+
+
 
         val vilkaarResultat = setVilkaarVurderingFraVilkaar(vilkaar)
         val vurdertDato = hentSisteVurderteDato(vilkaar)
 
         return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
 
+    }
+
+    fun mapGyldigSoknad(opplysninger: List<VilkaarOpplysning<ObjectNode>>) : VilkaarResultat {
+        logger.info("Map gyldig søknadsadresser")
+        val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
+        val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
+
+        val gyldigeAdresser = listOf(
+            gyldigSoeknadBarnOgForelderSammeBostedsadresse(
+                Vilkaartyper.SAMME_ADRESSE,
+                soekerPdl,
+                gjenlevendePdl
+            )
+        )
+
+        val vilkaarResultat = setVilkaarVurderingFraVilkaar(gyldigeAdresser)
+        val vurdertDato = hentSisteVurderteDato(gyldigeAdresser)
+
+        return VilkaarResultat(vilkaarResultat, gyldigeAdresser, vurdertDato)
     }
 
     companion object {

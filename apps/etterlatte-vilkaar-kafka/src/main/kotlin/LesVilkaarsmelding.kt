@@ -1,4 +1,3 @@
-
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -16,11 +15,13 @@ internal class LesVilkaarsmelding(
     private val vilkaar: VilkaarService
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(LesVilkaarsmelding::class.java)
+
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("grunnlag") }
             validate { it.rejectKey("@vilkaarsvurdering") }
+            validate { it.rejectKey("@gyldigeAdresserVurdering") }
             validate { it.rejectKey("@gyldighetsvurdering") }
             validate { it.interestedIn("@correlation_id") }
 
@@ -33,11 +34,14 @@ internal class LesVilkaarsmelding(
             try {
                 val grunnlagForVilkaar = objectMapper.readValue<List<VilkaarOpplysning<ObjectNode>>>(grunnlagListe)
                 val vilkaarsVurdering = vilkaar.mapVilkaar(grunnlagForVilkaar)
+                val gyldigSoeknadsadresserVurdering = vilkaar.mapGyldigSoknad(grunnlagForVilkaar)
+
                 packet["@vilkaarsvurdering"] = vilkaarsVurdering
+                packet["@gyldigeAdresserVurdering"] = gyldigSoeknadsadresserVurdering
                 context.publish(packet.toJson())
 
                 logger.info("Vurdert Vilkår")
-            } catch (e: Exception){
+            } catch (e: Exception) {
                 println("Vilkår kunne ikke vurderes: " + e)
             }
         }

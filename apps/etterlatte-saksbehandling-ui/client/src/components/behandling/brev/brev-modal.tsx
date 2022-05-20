@@ -2,7 +2,7 @@ import { BodyLong, Button, Modal, Tag } from "@navikt/ds-react";
 import { useState } from "react";
 import { genererPdf } from "../../../shared/api/brev";
 import styled from "styled-components";
-import { Delete, Findout, Information, Notes, Success } from "@navikt/ds-icons";
+import { Delete, Findout, Notes, Success } from "@navikt/ds-icons";
 
 const PdfViewer = styled.iframe`
   //margin-top: 60px;

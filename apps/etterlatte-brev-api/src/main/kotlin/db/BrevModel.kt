@@ -42,9 +42,15 @@ class Brev(
 ) {
     companion object {
         fun fraNyttBrev(id: BrevID, nyttBrev: NyttBrev) =
-            Brev(id, nyttBrev.behandlingId, nyttBrev.tittel, nyttBrev.status, nyttBrev.mottaker, nyttBrev.pdf)
+            Brev(id, nyttBrev.behandlingId, nyttBrev.tittel, nyttBrev.status, nyttBrev.mottaker)
     }
 }
+
+class BrevInnhold(
+    val mal: String,
+    val spraak: String,
+    val data: ByteArray
+)
 
 class NyttBrev(
     val behandlingId: Long,

@@ -18,11 +18,17 @@ class BrevRepository private constructor(private val ds: DataSource) {
             .singleOrNull { mapTilBrev() }!!
     }
 
-    fun hentBrevInnhold(id: BrevID): ByteArray = connection.use {
-        it.prepareStatement("SELECT bytes FROM innhold WHERE brev_id = ?")
+    fun hentBrevInnhold(id: BrevID): BrevInnhold = connection.use {
+        it.prepareStatement("SELECT * FROM innhold WHERE brev_id = ?")
             .apply { setLong(1, id) }
             .executeQuery()
-            .singleOrNull { getBytes("bytes") }!!
+            .singleOrNull {
+                BrevInnhold(
+                    getString("mal"),
+                    getString("spraak"),
+                    getBytes("bytes")
+                )
+            }!!
     }
 
     fun hentBrevForBehandling(behandlingId: Long): List<Brev> = connection.use {
@@ -46,6 +52,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
             .executeQuery()
             .singleOrNull { getLong(1) }!!
 
+        // TODO: Lagre malnavn og språk
         val inserted = it.prepareStatement("INSERT INTO innhold (brev_id, mal, spraak, bytes) VALUES (?, ?, ?, ?)")
             .apply {
                 setLong(1, id)

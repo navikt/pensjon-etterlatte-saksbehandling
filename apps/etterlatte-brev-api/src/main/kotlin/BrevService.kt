@@ -1,8 +1,15 @@
 package no.nav.etterlatte
 
-import model.brev.AvslagBrevRequest
 import model.brev.InnvilgetBrevRequest
-import no.nav.etterlatte.db.*
+import no.nav.etterlatte.db.Brev
+import no.nav.etterlatte.db.BrevRepository
+import model.brev.AvslagBrevRequest
+import no.nav.etterlatte.db.Adresse
+import no.nav.etterlatte.db.BrevID
+import no.nav.etterlatte.db.BrevInnhold
+import no.nav.etterlatte.db.Mottaker
+import no.nav.etterlatte.db.NyttBrev
+import no.nav.etterlatte.db.Status
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.brev.model.Vedtak
 import no.nav.etterlatte.libs.common.brev.model.VedtakType
@@ -34,7 +41,7 @@ class BrevService(
         }
     }
 
-    fun hentBrevInnhold(id: BrevID): ByteArray = db.hentBrevInnhold(id)
+    fun hentBrevInnhold(id: BrevID): BrevInnhold = db.hentBrevInnhold(id)
 
     fun slettBrev(id: BrevID): Boolean {
         val brev = db.hentBrev(id)

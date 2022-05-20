@@ -1,6 +1,6 @@
 import { Content, ContentHeader } from '../../../shared/styled'
 import { useEffect, useState } from 'react'
-import { Alert, BodyShort, Button, ContentContainer, Heading, Table, Tag } from "@navikt/ds-react";
+import { Alert, Button, ContentContainer, Heading, Table, Tag } from "@navikt/ds-react";
 import BrevModal from "./brev-modal";
 import { Information, Success } from '@navikt/ds-icons'
 import NyttBrev from "./nytt-brev";

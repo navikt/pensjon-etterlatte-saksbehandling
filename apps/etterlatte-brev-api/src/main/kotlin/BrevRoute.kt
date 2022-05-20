@@ -40,9 +40,9 @@ fun Route.brevRoute(service: BrevService) {
 
         post("{brevId}/pdf") {
             val brevId = call.parameters["brevId"]!!
-            val bytes = service.hentBrevInnhold(brevId.toLong())
+            val innhold = service.hentBrevInnhold(brevId.toLong())
 
-            call.respond(bytes)
+            call.respond(innhold.data)
         }
 
         delete("{brevId}") {

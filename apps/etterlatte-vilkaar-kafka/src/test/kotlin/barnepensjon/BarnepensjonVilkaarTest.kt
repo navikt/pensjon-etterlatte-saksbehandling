@@ -34,6 +34,8 @@ import java.time.LocalDate
 import org.junit.jupiter.api.Assertions.*
 import vilkaar.barnepensjon.ekstraVilkaarBarnOgForelderSammeBostedsadresse
 import java.time.LocalDateTime
+import java.util.*
+import java.util.UUID.randomUUID
 
 internal class BarnepensjonVilkaarTest {
     @Test
@@ -250,6 +252,7 @@ internal class BarnepensjonVilkaarTest {
 
         fun mapTilVilkaarstypeAvdoedSoeknad(person: AvdoedSoeknad): VilkaarOpplysning<AvdoedSoeknad> {
             return VilkaarOpplysning(
+                randomUUID(),
                 Opplysningstyper.AVDOED_SOEKNAD_V1,
                 Grunnlagsopplysning.Privatperson("", Instant.now()),
                 person
@@ -258,6 +261,7 @@ internal class BarnepensjonVilkaarTest {
 
         fun mapTilVilkaarstypeSoekerSoeknad(person: SoekerBarnSoeknad): VilkaarOpplysning<SoekerBarnSoeknad> {
             return VilkaarOpplysning(
+                randomUUID(),
                 Opplysningstyper.SOEKER_PDL_V1,
                 Grunnlagsopplysning.Privatperson("", Instant.now()),
                 person
@@ -266,6 +270,7 @@ internal class BarnepensjonVilkaarTest {
 
         fun mapTilVilkaarstypePerson(person: Person): VilkaarOpplysning<Person> {
             return VilkaarOpplysning(
+                randomUUID(),
                 Opplysningstyper.SOEKER_PDL_V1,
                 Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
                 person

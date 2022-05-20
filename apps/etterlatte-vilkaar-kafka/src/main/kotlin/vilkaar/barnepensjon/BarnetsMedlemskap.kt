@@ -63,6 +63,7 @@ fun kriterieForeldreHarIkkeAdresseIUtlandet(
     val opplysningsGrunnlag = listOfNotNull(
         gjenlevendePdl?.let {
             Kriteriegrunnlag(
+                gjenlevendePdl.id,
                 KriterieOpplysningsType.ADRESSER,
                 gjenlevendePdl.kilde,
                 hentAdresser(gjenlevendePdl)
@@ -70,6 +71,7 @@ fun kriterieForeldreHarIkkeAdresseIUtlandet(
         },
         avdoedPdl?.let {
             Kriteriegrunnlag(
+                avdoedPdl.id,
                 KriterieOpplysningsType.DOEDSDATO,
                 avdoedPdl.kilde,
                 Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
@@ -95,10 +97,11 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
     kriterietype: Kriterietyper
 ): Kriterie {
     val opplysningsGrunnlag = listOfNotNull(
-        soekerPdl?.let { Kriteriegrunnlag(KriterieOpplysningsType.ADRESSER, soekerPdl.kilde, hentAdresser(soekerPdl)) },
-        soekerSoknad?.let { Kriteriegrunnlag(KriterieOpplysningsType.SOEKER_UTENLANDSOPPHOLD, soekerSoknad.kilde, soekerSoknad.opplysning.utenlandsadresse) },
+        soekerPdl?.let { Kriteriegrunnlag(soekerPdl.id, KriterieOpplysningsType.ADRESSER, soekerPdl.kilde, hentAdresser(soekerPdl)) },
+        soekerSoknad?.let { Kriteriegrunnlag(soekerSoknad.id, KriterieOpplysningsType.SOEKER_UTENLANDSOPPHOLD, soekerSoknad.kilde, soekerSoknad.opplysning.utenlandsadresse) },
         avdoedPdl?.let {
             Kriteriegrunnlag(
+                avdoedPdl.id,
                 KriterieOpplysningsType.DOEDSDATO,
                 avdoedPdl.kilde,
                 Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)

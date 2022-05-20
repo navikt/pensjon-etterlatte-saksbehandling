@@ -1,8 +1,10 @@
 package no.nav.etterlatte.libs.common.vikaar
 
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import java.util.*
 
 data class Kriteriegrunnlag<T>(
+    val id: UUID,
     val kriterieOpplysningsType: KriterieOpplysningsType,
     val kilde: Grunnlagsopplysning.Kilde,
     val opplysning: T

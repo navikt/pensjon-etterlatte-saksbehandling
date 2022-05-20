@@ -38,6 +38,7 @@ fun kriterieSammeBostedsadresse(
     val opplysningsGrunnlag = listOfNotNull(
         soekerPdl?.let {
             Kriteriegrunnlag(
+                soekerPdl.id,
                 KriterieOpplysningsType.BOSTEDADRESSE_SOEKER,
                 soekerPdl.kilde,
                 Bostedadresser(soekerPdl.opplysning.bostedsadresse)
@@ -45,6 +46,7 @@ fun kriterieSammeBostedsadresse(
         },
         gjenlevendePdl?.let {
             Kriteriegrunnlag(
+                gjenlevendePdl.id,
                 KriterieOpplysningsType.BOSTEDADRESSE_GJENLEVENDE,
                 gjenlevendePdl.kilde,
                 Bostedadresser(gjenlevendePdl.opplysning.bostedsadresse)

@@ -66,6 +66,7 @@ class VilkaarService {
         inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<ObjectNode>?): VilkaarOpplysning<T>? {
             return opplysning?.let {
                 VilkaarOpplysning(
+                    opplysning.id,
                     opplysning.opplysningType,
                     opplysning.kilde,
                     objectMapper.readValue(opplysning.opplysning.toString())

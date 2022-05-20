@@ -44,6 +44,7 @@ fun kriterieIngenUtenlandsoppholdSisteFemAar(
     val opplysningsGrunnlag = listOfNotNull(
         avdoedPdl?.let {
             Kriteriegrunnlag(
+                avdoedPdl.id,
                 KriterieOpplysningsType.DOEDSDATO,
                 avdoedPdl.kilde,
                 Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
@@ -51,6 +52,7 @@ fun kriterieIngenUtenlandsoppholdSisteFemAar(
         },
         avdoedSoeknad?.let {
             Kriteriegrunnlag(
+                avdoedSoeknad.id,
                 KriterieOpplysningsType.AVDOED_UTENLANDSOPPHOLD,
                 avdoedSoeknad.kilde,
                 avdoedSoeknad.opplysning.utenlandsopphold

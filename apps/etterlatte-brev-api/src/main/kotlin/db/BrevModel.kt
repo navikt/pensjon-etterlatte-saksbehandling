@@ -37,6 +37,7 @@ class Brev(
     val tittel: String,
     val status: Status,
     val mottaker: Mottaker,
+    // TODO: Burde dette fjernes fra brevet og heller være helt adskilt?
     @JsonIgnore
     val data: ByteArray? = null
 ) {

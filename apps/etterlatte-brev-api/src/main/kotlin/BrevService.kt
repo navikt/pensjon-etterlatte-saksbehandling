@@ -1,12 +1,13 @@
 package no.nav.etterlatte
 
-import model.brev.InnvilgetBrevRequest
-import no.nav.etterlatte.db.Brev
-import no.nav.etterlatte.db.BrevRepository
+import model.brev.AnnetBrevRequest
 import model.brev.AvslagBrevRequest
+import model.brev.InnvilgetBrevRequest
 import no.nav.etterlatte.db.Adresse
+import no.nav.etterlatte.db.Brev
 import no.nav.etterlatte.db.BrevID
 import no.nav.etterlatte.db.BrevInnhold
+import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.db.Mottaker
 import no.nav.etterlatte.db.NyttBrev
 import no.nav.etterlatte.db.Status
@@ -18,7 +19,6 @@ import no.nav.etterlatte.libs.common.journalpost.Bruker
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.model.brev.BrevRequest
 import no.nav.etterlatte.vedtak.VedtakService
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
@@ -53,19 +53,13 @@ class BrevService(
     }
 
     suspend fun opprett(behandlingId: String, mottaker: Mottaker, mal: Mal): Brev {
-        // TODO: Fikse støtte for mal
-        val request = object : BrevRequest() {
-            override val spraak: Spraak
-                get() = Spraak.NB
-            override val mottaker: no.nav.etterlatte.model.brev.Mottaker
-                get() = no.nav.etterlatte.model.brev.Mottaker(
-                    navn = "${mottaker.fornavn} ${mottaker.etternavn}",
-                    adresse = mottaker.adresse.adresse,
-                    postnummer = mottaker.adresse.postnummer
-                )
+        val mottaker1 = no.nav.etterlatte.model.brev.Mottaker(
+            navn = "${mottaker.fornavn} ${mottaker.etternavn}",
+            adresse = mottaker.adresse.adresse,
+            postnummer = mottaker.adresse.postnummer
+        )
 
-            override fun templateName(): String = mal.navn
-        }
+        val request = AnnetBrevRequest(mal, Spraak.NB, mottaker1)
 
         val pdf = pdfGenerator.genererPdf(request)
 

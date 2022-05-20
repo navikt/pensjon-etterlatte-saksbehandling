@@ -38,7 +38,8 @@ class BrevRepository private constructor(private val ds: DataSource) {
             .toList { mapTilBrev() }
     }
 
-    fun opprettBrev(nyttBrev: NyttBrev): Brev = connection.use {
+    fun opprettBrev(nyttBrev: NyttBrev): Brev =
+        connection.use {
         val id = it.prepareStatement(OPPRETT_BREV_QUERY)
             .apply {
                 setLong(1, nyttBrev.behandlingId)
@@ -78,10 +79,10 @@ class BrevRepository private constructor(private val ds: DataSource) {
             .executeUpdate() > 0
     }
 
-    fun setBestillingId(brevId: Long, journalpostId: String): Boolean = connection.use {
+    fun setBestillingId(brevId: Long, bestillingId: String): Boolean = connection.use {
         it.prepareStatement("UPDATE brev SET bestilling_id = ? WHERE id = ?")
             .apply {
-                setString(1, journalpostId)
+                setString(1, bestillingId)
                 setLong(2, brevId)
             }
             .executeUpdate() > 0

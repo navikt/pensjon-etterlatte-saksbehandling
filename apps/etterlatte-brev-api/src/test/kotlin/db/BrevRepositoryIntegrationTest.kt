@@ -1,17 +1,20 @@
 package db
 
+import io.mockk.InternalPlatformDsl.toStr
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.db.Adresse
 import no.nav.etterlatte.db.Brev
 import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.db.Mottaker
 import no.nav.etterlatte.db.NyttBrev
+import no.nav.etterlatte.db.Status
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -117,6 +120,46 @@ internal class BrevRepositoryIntegrationTest {
         val resterendeBrev = db.hentBrevForBehandling(behandlingId)
 
         assertEquals(2, resterendeBrev.size)
+    }
+
+    @Test
+    fun `Oppdater journalpost ID`() {
+        val journalpostId = UUID.randomUUID().toString()
+
+        val brev = opprettBrev(1L)
+
+        assertTrue(db.setJournalpostId(brev.id, journalpostId))
+    }
+
+    @Test
+    fun `Oppdater bestilling ID`() {
+        val journalpostId = UUID.randomUUID().toString()
+
+        val brev = opprettBrev(1L)
+
+        assertTrue(db.setBestillingId(brev.id, journalpostId))
+    }
+
+    @Test
+    fun `Oppdater status`() {
+        val opprettetBrev = opprettBrev(1L)
+
+        db.oppdaterStatus(opprettetBrev.id, Status.OPPDATERT)
+        db.oppdaterStatus(opprettetBrev.id, Status.FERDIGSTILT)
+        db.oppdaterStatus(opprettetBrev.id, Status.JOURNALFOERT)
+        db.oppdaterStatus(opprettetBrev.id, Status.DISTRIBUERT)
+
+        val count = connection.use {
+            it.prepareStatement("SELECT COUNT(*) FROM hendelse WHERE brev_id = ${opprettetBrev.id}")
+                .executeQuery()
+                .let { rs ->
+                    if (rs.next()) rs.getInt("count")
+                    else fail()
+                }
+        }
+
+        // Skal være 5 hendelser. 1 for opprettet, og 4 for resten som ble kjørt manuelt
+        assertEquals(5, count)
     }
 
     private fun opprettBrev(behandlingId: Long): Brev {

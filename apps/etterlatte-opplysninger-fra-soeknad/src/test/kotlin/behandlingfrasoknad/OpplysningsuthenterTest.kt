@@ -24,7 +24,7 @@ internal class OpplysningsuthenterTest {
         val opplysninger = Opplysningsuthenter().lagOpplysningsListe(
             objectMapper.treeToValue(
                 objectMapper.readTree(
-                    javaClass.getResource("/fullMessage2.json")!!.readText()
+                    javaClass.getResource("/melding.json")!!.readText()
                 )!!["@skjema_info"]
             )!!
         )

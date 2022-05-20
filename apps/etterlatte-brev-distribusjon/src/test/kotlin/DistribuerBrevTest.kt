@@ -26,6 +26,6 @@ class DistribuerBrevTest {
 
         inspector.message(0).get("@event").asText() shouldBe "BREV:DISTRIBUER"
         inspector.message(0).get("@brevId").asLong() shouldBe brevId
-        inspector.message(0).get("@bestilling_id").asText() shouldNotBe null
+        inspector.message(0).get("@bestillingId").asText() shouldNotBe null
     }
 }

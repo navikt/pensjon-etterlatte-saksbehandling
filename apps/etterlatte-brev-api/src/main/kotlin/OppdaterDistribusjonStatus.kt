@@ -19,7 +19,7 @@ internal class OppdaterDistribusjonStatus(rapidsConnection: RapidsConnection, pr
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BREV:DISTRIBUER") }
             validate { it.requireKey("@brevId", "@journalpostResponse") }
-            validate { it.interestedIn("@bestilling_id")}
+            validate { it.interestedIn("@bestillingId")}
         }.register(this)
     }
 
@@ -28,8 +28,8 @@ internal class OppdaterDistribusjonStatus(rapidsConnection: RapidsConnection, pr
         withLogContext(brevId.toString()) {
             logger.info("Mottatt oppdatering fra brev-distribusjon for brev med id ${brevId}.")
 
-            if (packet["@bestilling_id"].isTextual) {
-                val bestillingId = packet["@bestilling_id"].asText()
+            if (packet["@bestillingId"].isTextual) {
+                val bestillingId = packet["@bestillingId"].asText()
                 db.oppdaterStatus(brevId, Status.DISTRIBUERT, """{"bestillingId": "$bestillingId"}""")
                 db.setBestillingId(brevId, bestillingId)
             } else {

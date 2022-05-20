@@ -48,7 +48,7 @@ class OppdaterDistribusjonStatusTest {
             "@event" to "BREV:DISTRIBUER",
             "@brevId" to brevId,
             "@journalpostResponse" to journalpostResponse.toJson(),
-            "@bestilling_id" to bestillingId
+            "@bestillingId" to bestillingId
         ))
 
         inspector.apply { sendTestMessage(melding.toJson()) }.inspektør

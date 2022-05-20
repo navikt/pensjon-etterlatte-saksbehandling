@@ -22,7 +22,7 @@ internal class DistribuerBrev(
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BREV:DISTRIBUER") }
             validate { it.requireKey("@brevId", "@journalpostResponse") }
-            validate { it.rejectKey("@bestilling_id") }
+            validate { it.rejectKey("@bestillingId") }
         }.register(this)
     }
 
@@ -46,7 +46,7 @@ internal class DistribuerBrev(
     private fun RapidsConnection.svarSuksess(packet: JsonMessage, bestillingId: BestillingID) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
 
-        packet["@bestilling_id"] = bestillingId
+        packet["@bestillingId"] = bestillingId
 
         publish(packet.toJson())
     }

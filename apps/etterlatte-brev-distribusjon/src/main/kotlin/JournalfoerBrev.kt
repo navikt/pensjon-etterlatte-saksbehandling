@@ -23,7 +23,7 @@ internal class JournalfoerBrev(
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BREV:DISTRIBUER") }
             validate { it.requireKey("@brevId", "payload") }
-            validate { it.rejectKey("@bestilling_id", "@journalpostResponse") }
+            validate { it.rejectKey("@bestillingId", "@journalpostResponse") }
         }.register(this)
     }
 

@@ -14,9 +14,9 @@ import org.junit.jupiter.api.assertThrows
 internal class VedtakMottakerTest {
 
     private val utbetalingService = mockk<UtbetalingService>(relaxed = true) {
-        every { iverksettUtbetaling(any(), any()) } returns mockk {
+        every { iverksettUtbetaling(any()) } returns mockk {
             every { status } returns UtbetalingStatus.SENDT
-            every { oppdrag } returns oppdrag("3")
+            every { oppdrag } returns oppdrag(3)
         }
     }
 

@@ -1,27 +1,32 @@
 package no.nav.etterlatte.utbetaling
 
-import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.Beregningsperiode
-import no.nav.etterlatte.libs.common.vedtak.Endringskode
-import no.nav.etterlatte.libs.common.vedtak.Enhetstype
-import no.nav.etterlatte.libs.common.vedtak.Oppdragsenhet
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
-import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.etterlatte.domene.vedtak.Attestasjon
+import no.nav.etterlatte.domene.vedtak.Behandling
+import no.nav.etterlatte.domene.vedtak.BehandlingType
+import no.nav.etterlatte.domene.vedtak.Periode
+import no.nav.etterlatte.domene.vedtak.Sak
+import no.nav.etterlatte.domene.vedtak.UtbetalingsperiodeType
+import no.nav.etterlatte.domene.vedtak.Vedtak
+import no.nav.etterlatte.domene.vedtak.VedtakFattet
+import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.BehandlingId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Foedselsnummer
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.NavIdent
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UUID30
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsperiode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.VedtakId
 import no.trygdeetaten.skjema.oppdrag.Mmel
-import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import java.io.FileNotFoundException
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
+import java.time.ZonedDateTime
 import java.util.*
 
 object TestHelper
@@ -29,37 +34,47 @@ object TestHelper
 fun readFile(file: String) = TestHelper::class.java.getResource(file)?.readText()
     ?: throw FileNotFoundException("Fant ikke filen $file")
 
-fun vedtak(vedtakId: String = "1") = Vedtak(
+fun vedtak2(vedtakId: Long) = Vedtak(
     vedtakId = vedtakId,
-    behandlingsId = "11",
-    sakId = "111",
-    saksbehandlerId = "4321",
-    sakIdGjelderFnr = "12345612345",
-    aktorFoedselsdato = LocalDate.parse("2010-07-04"),
-    behandlingstype = Endringskode.NY,
-    beregningsperioder = listOf(
-        Beregningsperiode(
-            delytelsesId = "delytelsesid",
-            ytelseskomponent = "PENBPGP-OPTP",
-            datoFOM = LocalDate.parse("2022-02-02"),
-            datoTOM = LocalDate.parse("2030-01-04"),
-            belop = BigDecimal(10000)
+    behandling = Behandling(
+        id = UUID.randomUUID(),
+        type = BehandlingType.FORSTEGANGSBEHANDLING
+    ),
+    sak = Sak(
+        id = 1,
+        ident = "12345678",
+        sakType = ""
+    ),
+    type = VedtakType.INNVILGELSE,
+    virk = Periode(YearMonth.of(2022, 1), YearMonth.of(2022, 2)),
+    grunnlag = emptyList(),
+    vedtakFattet = VedtakFattet(
+        ansvarligSaksbehandler = "12345678",
+        ansvarligEnhet = "123",
+        tidspunkt = ZonedDateTime.now()
+    ),
+    attestasjon = Attestasjon(
+        attestant = "87654321",
+        attesterendeEnhet = "123",
+        tidspunkt = ZonedDateTime.now()
+    ),
+    pensjonTilUtbetaling = listOf(
+        no.nav.etterlatte.domene.vedtak.Utbetalingsperiode(
+            id = 1,
+            periode = Periode(YearMonth.of(2022, 1), YearMonth.of(2022, 2)),
+            beloep = BigDecimal.valueOf(2000),
+            type = UtbetalingsperiodeType.UTBETALING
         )
     ),
-    oppdragsenheter = listOf(
-        Oppdragsenhet(
-            enhetsType = Enhetstype.BOSTED,
-            enhetsnummer = "9999",
-            datoEnhetFOM = LocalDate.parse("1999-09-28")
-        )
-    ),
-    attestasjon = attestasjon()
+    avkorting = null,
+    beregning = null,
+    vilkaarsvurdering = null
 )
 
-fun oppdrag(vedtakId: String = "8888") =
-    OppdragMapper.oppdragFraVedtak(vedtak(vedtakId), attestasjon(), Tidspunkt.now())
+fun oppdrag(vedtakId: Long = 1) =
+    OppdragMapper.oppdragFraUtbetaling(utbetaling(vedtakId = vedtakId), foerstegangsinnvilgelse = true)
 
-fun oppdragMedGodkjentKvittering(vedtakId: String = "1") = oppdrag(vedtakId).apply {
+fun oppdragMedGodkjentKvittering(vedtakId: Long = 1) = oppdrag(vedtakId).apply {
     mmel = Mmel().apply {
         alvorlighetsgrad = "00"
     }
@@ -68,7 +83,7 @@ fun oppdragMedGodkjentKvittering(vedtakId: String = "1") = oppdrag(vedtakId).app
     }
 }
 
-fun oppdragMedFeiletKvittering(vedtakId: String = "1") = oppdrag(vedtakId).apply {
+fun oppdragMedFeiletKvittering(vedtakId: Long = 1) = oppdrag(vedtakId).apply {
     mmel = Mmel().apply {
         alvorlighetsgrad = "12"
         kodeMelding = "KodeMelding"
@@ -79,15 +94,11 @@ fun oppdragMedFeiletKvittering(vedtakId: String = "1") = oppdrag(vedtakId).apply
     }
 }
 
-fun attestasjon() = Attestasjon(
-    attestantId = "Z123456"
-)
-
 fun utbetaling(
     id: UUID = UUID.randomUUID(),
-    sakId: SakId = SakId("1"),
+    sakId: SakId = SakId(1),
     status: UtbetalingStatus = UtbetalingStatus.GODKJENT,
-    vedtakId: String = "1",
+    vedtakId: Long = 1,
     avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
     opprettet: Tidspunkt = Tidspunkt.now(),
     utbetalingslinjer: List<Utbetalingslinje> = listOf(utbetalingslinje(id, sakId))
@@ -98,16 +109,13 @@ fun utbetaling(
         behandlingId = BehandlingId("1"),
         sakId = sakId,
         status = status,
-        vedtak = vedtak(vedtakId),
+        vedtak = vedtak2(vedtakId),
         opprettet = opprettet,
         endret = Tidspunkt.now(),
         avstemmingsnoekkel = avstemmingsnoekkel,
-        foedselsnummer = Foedselsnummer("12345678903"),
-        oppdrag = oppdrag(vedtakId),
-        kvittering = oppdrag(vedtakId),
-        kvitteringBeskrivelse = "En beskrivelse",
-        kvitteringFeilkode = "hva skal stå her?",
-        kvitteringMeldingKode = "08",
+        stoenadsmottaker = Foedselsnummer("12345678903"),
+        saksbehandler = NavIdent("12345678"),
+        attestant = NavIdent("87654321"),
         utbetalingslinjer = utbetalingslinjer
     )
 
@@ -116,7 +124,7 @@ private fun utbetalingslinje(
     sakId: SakId,
 ): Utbetalingslinje =
     Utbetalingslinje(
-        id = UUID30().value,
+        id = UtbetalingslinjeId(1),
         opprettet = Tidspunkt.now(),
         periode = Utbetalingsperiode(
             fra = LocalDate.parse("2022-01-01"),

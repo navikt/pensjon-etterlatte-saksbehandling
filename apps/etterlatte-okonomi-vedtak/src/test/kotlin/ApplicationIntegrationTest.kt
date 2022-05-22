@@ -103,7 +103,7 @@ class ApplicationIntegrationTest {
     @Test
     fun `skal motta kvittering fra oppdrag`() {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
-        sendKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering(vedtakId = "1"))
+        sendKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering(vedtakId = 1))
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish("key",
@@ -121,7 +121,7 @@ class ApplicationIntegrationTest {
     @Test
     fun `skal motta kvittering fra oppdrag med feil`() {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
-        sendKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering(vedtakId = "1"))
+        sendKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering(vedtakId = 1))
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish("key",

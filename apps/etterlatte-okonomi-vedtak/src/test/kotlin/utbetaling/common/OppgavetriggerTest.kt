@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingService
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.readFile
@@ -15,8 +14,8 @@ import org.junit.jupiter.api.Test
 internal class OppgavetriggerTest {
 
     private val utbetalingService = mockk<UtbetalingService>(relaxed = true) {
-        every { settKvitteringManuelt("1") } returns mockk<Utbetaling>(relaxed = true)
-        every { utbetalingDao.hentUtbetaling("1") } returns utbetaling(status = UtbetalingStatus.SENDT)
+        every { settKvitteringManuelt(1) } returns mockk(relaxed = true)
+        every { utbetalingDao.hentUtbetaling(1) } returns utbetaling(status = UtbetalingStatus.SENDT)
         every { utbetalingDao.oppdaterKvittering(any(), any()) } returns utbetaling(status = UtbetalingStatus.GODKJENT)
     }
     private val grensesnittsavstemmingService = mockk<GrensesnittsavstemmingService>() {
@@ -48,7 +47,7 @@ internal class OppgavetriggerTest {
         inspector.apply { sendTestMessage(oppgave_sett_kvittering) }
 
         verify {
-            utbetalingService.settKvitteringManuelt("1")
+            utbetalingService.settKvitteringManuelt(1)
         }
     }
 

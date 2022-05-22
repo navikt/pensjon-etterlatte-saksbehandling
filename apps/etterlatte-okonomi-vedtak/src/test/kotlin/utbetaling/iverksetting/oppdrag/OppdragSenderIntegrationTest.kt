@@ -64,7 +64,7 @@ internal class OppdragSenderIntegrationTest {
 
     @Test
     fun `skal sende oppdrag på køen, motta godkjent kvittering og oppdatere status`() {
-        val oppdrag = oppdragMedGodkjentKvittering(vedtakId = "1")
+        val oppdrag = oppdragMedGodkjentKvittering(vedtakId = 1)
 
         oppdragSender.sendOppdrag(oppdrag)
 
@@ -79,7 +79,7 @@ internal class OppdragSenderIntegrationTest {
 
     @Test
     fun `skal sende oppdrag på køen, motta feilet kvittering og oppdatere status`() {
-        val oppdrag = oppdragMedFeiletKvittering(vedtakId = "2")
+        val oppdrag = oppdragMedFeiletKvittering(vedtakId = 2)
 
         oppdragSender.sendOppdrag(oppdrag)
 

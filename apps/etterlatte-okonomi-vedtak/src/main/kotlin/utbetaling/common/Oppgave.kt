@@ -6,5 +6,5 @@ enum class Oppgavetype {
 
 data class Oppgave(
     val oppgavetype: Oppgavetype,
-    val vedtakId: String?
+    val vedtakId: Long?
 )

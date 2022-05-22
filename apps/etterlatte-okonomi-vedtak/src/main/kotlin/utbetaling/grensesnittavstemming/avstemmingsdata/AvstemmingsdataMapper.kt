@@ -84,8 +84,8 @@ class AvstemmingsdataMapper(
             if (detaljType != null) {
                 Detaljdata().apply {
                     this.detaljType = detaljType
-                    offnr = it.foedselsnummer.value
-                    avleverendeTransaksjonNokkel = it.sakId.value
+                    offnr = it.stoenadsmottaker.value
+                    avleverendeTransaksjonNokkel = it.sakId.value.toString()
                     tidspunkt = it.avstemmingsnoekkel.toNorskTid().format(tidsstempelMikro)
                     if (detaljType in listOf(DetaljType.AVVI, DetaljType.VARS) && it.kvittering != null) {
                         meldingKode = it.kvitteringMeldingKode

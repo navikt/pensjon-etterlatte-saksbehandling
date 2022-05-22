@@ -23,7 +23,7 @@ data class UtbetalingNotFoundException(override val message: String) : RuntimeEx
 
 class UtbetalingDao(private val dataSource: DataSource) {
 
-    fun hentUtbetaling(vedtakId: String): Utbetaling? =
+    fun hentUtbetaling(vedtakId: Long): Utbetaling? =
         dataSource.connection.use { connection ->
             val stmt = connection.prepareStatement(
                 """
@@ -107,7 +107,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
             }
         }
 
-    private fun hentUtbetalingNonNull(vedtakId: String): Utbetaling =
+    private fun hentUtbetalingNonNull(vedtakId: Long): Utbetaling =
         hentUtbetaling(vedtakId)
             ?: throw UtbetalingNotFoundException("Utbetaling for vedtak med vedtakId=$vedtakId finnes ikke")
 
@@ -134,7 +134,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                         "opprettet" to Timestamp.from(utbetaling.opprettet.instant),
                         "avstemmingsnoekkel" to Timestamp.from(utbetaling.avstemmingsnoekkel.instant),
                         "endret" to Timestamp.from(utbetaling.endret.instant),
-                        "foedselsnummer" to utbetaling.foedselsnummer.value
+                        "foedselsnummer" to utbetaling.stoenadsmottaker.value
                     )
                 ).let { tx.run(it.asUpdate) }
 
@@ -182,7 +182,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
             stmt.use {
                 it.setString(1, utbetaling.id.toString())
-                it.setString(2, utbetaling.vedtakId.value)
+                it.setLong(2, utbetaling.vedtakId.value)
                 it.setString(3, utbetaling.behandlingId.value)
                 it.setLong(4, utbetaling.sakId.value)
                 it.setString(5, utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) })
@@ -191,7 +191,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 it.setTimestamp(8, Timestamp.from(utbetaling.opprettet.instant), tzUTC)
                 it.setTimestamp(9, Timestamp.from(utbetaling.avstemmingsnoekkel.instant), tzUTC)
                 it.setTimestamp(10, Timestamp.from(utbetaling.endret.instant), tzUTC)
-                it.setString(11, utbetaling.foedselsnummer.value)
+                it.setString(11, utbetaling.stoenadsmottaker.value)
 
                 require(it.executeUpdate() == 1)
             }
@@ -213,21 +213,21 @@ class UtbetalingDao(private val dataSource: DataSource) {
             )
 
             stmt.use {
-                it.setString(1, utbetalingslinje.id)
+                it.setLong(1, utbetalingslinje.id.value)
                 it.setTimestamp(2, Timestamp.from(utbetalingslinje.opprettet.instant), tzUTC)
                 it.setObject(3, utbetalingslinje.periode.fra)
                 it.setObject(4, utbetalingslinje.periode.til)
                 it.setBigDecimal(5, utbetalingslinje.beloep)
                 it.setString(6, utbetalingslinje.utbetalingId.toString())
                 it.setLong(7, utbetalingslinje.sakId.value)
-                it.setString(8, utbetalingslinje.erstatterId)
+                it.setObject(8, utbetalingslinje.erstatterId?.value)
 
                 require(it.executeUpdate() == 1)
             }
         }
 
 
-    fun oppdaterStatus(vedtakId: String, status: UtbetalingStatus, endret: Tidspunkt) =
+    fun oppdaterStatus(vedtakId: Long, status: UtbetalingStatus, endret: Tidspunkt) =
         dataSource.connection.use { connection ->
             logger.info("Oppdaterer status i utbetaling for vedtakId=$vedtakId til $status")
 
@@ -238,7 +238,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
             stmt.use {
                 it.setString(1, status.name)
                 it.setTimestamp(2, Timestamp.from(endret.instant), tzUTC)
-                it.setString(3, vedtakId)
+                it.setLong(3, vedtakId)
 
                 require(it.executeUpdate() == 1)
             }
@@ -265,7 +265,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 it.setString(3, oppdragMedKvittering.mmel.alvorlighetsgrad)
                 it.setString(4, oppdragMedKvittering.mmel.kodeMelding)
                 it.setTimestamp(5, Timestamp.from(endret.instant), tzUTC)
-                it.setString(6, oppdragMedKvittering.vedtakId()
+                it.setLong(6, oppdragMedKvittering.vedtakId())
 
                 require(it.executeUpdate() == 1)
             }
@@ -278,12 +278,14 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 id = getString("id").let { UUID.fromString(it) },
                 sakId = SakId(getLong("sak_id")),
                 behandlingId = BehandlingId(getString("behandling_id")),
-                vedtakId = VedtakId(getString("vedtak_id")),
+                vedtakId = VedtakId(getLong("vedtak_id")),
                 status = getString("status").let(UtbetalingStatus::valueOf),
                 opprettet = Tidspunkt(getTimestamp("opprettet", tzUTC).toInstant()),
                 endret = Tidspunkt(getTimestamp("endret", tzUTC).toInstant()),
                 avstemmingsnoekkel = Tidspunkt(getTimestamp("avstemmingsnoekkel", tzUTC).toInstant()),
-                foedselsnummer = Foedselsnummer(getString("foedselsnummer")),
+                stoenadsmottaker = Foedselsnummer(getString("foedselsnummer")),
+                saksbehandler = NavIdent(getString("saksbehandler")),
+                attestant = NavIdent(getString("attestant")),
                 vedtak = getString("vedtak").let { vedtak -> objectMapper.readValue(vedtak) },
                 oppdrag = getString("utgaaende_oppdrag").let(OppdragJaxb::toOppdrag),
                 kvittering = getString("oppdrag_kvittering")?.let(OppdragJaxb::toOppdrag),
@@ -297,7 +299,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
     private fun toUtbetalingslinje(resultSet: ResultSet) =
         with(resultSet) {
             Utbetalingslinje(
-                id = getString("id"),
+                id = UtbetalingslinjeId(getLong("id")),
                 sakId = SakId(getLong("sak_id")),
                 periode = Utbetalingsperiode(
                     fra = getObject("periode_fra", LocalDate::class.java),
@@ -305,7 +307,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 ),
                 opprettet = Tidspunkt(getTimestamp("opprettet", tzUTC).toInstant()),
                 beloep = getBigDecimal("beloep"),
-                erstatterId = getString("erstatter_id"),
+                erstatterId = UtbetalingslinjeId(getLong("erstatter_id")),
                 utbetalingId = getString("utbetaling_id").let { UUID.fromString(it) },
             )
         }

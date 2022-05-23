@@ -91,10 +91,8 @@ internal class UtbetalingDaoIntegrationTest {
             },
             { assertEquals(utbetaling.stoenadsmottaker.value, opprettetUtbetaling?.stoenadsmottaker?.value) },
             { assertNotNull(opprettetUtbetaling?.oppdrag) },
-            { assertNull(opprettetUtbetaling?.kvittering) },
-            { assertNull(opprettetUtbetaling?.kvitteringBeskrivelse) },
-            { assertNull(opprettetUtbetaling?.kvitteringFeilkode) },
-            { assertNull(opprettetUtbetaling?.kvitteringMeldingKode) })
+            { assertNull(opprettetUtbetaling?.kvittering) }
+        )
     }
 
     // TODO: nye tester for å sjekke at utbetalingslinjer opprettes korrekt
@@ -187,15 +185,10 @@ internal class UtbetalingDaoIntegrationTest {
 
         assertAll("skal sjekke at kvittering er opprettet korrekt på utbetaling",
             { assertNotNull(utbetalingOppdatert?.kvittering) },
-            { assertNotNull(utbetalingOppdatert?.kvittering?.mmel) },
+            { assertNotNull(utbetalingOppdatert?.kvittering?.oppdrag?.mmel) },
             {
                 assertEquals(
-                    oppdragMedKvittering.mmel?.alvorlighetsgrad, utbetalingOppdatert?.kvittering?.mmel?.alvorlighetsgrad
-                )
-            },
-            {
-                assertEquals(
-                    oppdragMedKvittering.oppdrag110.oppdragsId, utbetalingOppdatert?.kvittering?.oppdrag110?.oppdragsId
+                    oppdragMedKvittering.mmel?.alvorlighetsgrad, utbetalingOppdatert?.kvittering?.oppdrag?.mmel?.alvorlighetsgrad
                 )
             })
     }

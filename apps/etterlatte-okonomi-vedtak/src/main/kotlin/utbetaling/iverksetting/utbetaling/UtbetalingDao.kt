@@ -170,65 +170,6 @@ class UtbetalingDao(private val dataSource: DataSource) {
         ).let { tx.run(it.asUpdate) }
     }
 
-    fun opprettUtbetaling2(utbetaling: Utbetaling) =
-        dataSource.connection.use { connection ->
-            logger.info("Oppretter utbetaling for vedtakId=${utbetaling.vedtakId}")
-
-            val stmt = connection.prepareStatement(
-                """
-                INSERT INTO utbetaling(id, vedtak_id, behandling_id, sak_id, utgaaende_oppdrag, status, vedtak, 
-                    opprettet, avstemmingsnoekkel, endret, foedselsnummer)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """
-            )
-
-            stmt.use {
-                it.setString(1, utbetaling.id.toString())
-                it.setLong(2, utbetaling.vedtakId.value)
-                it.setString(3, utbetaling.behandlingId.value)
-                it.setLong(4, utbetaling.sakId.value)
-                it.setString(5, utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) })
-                it.setString(6, UtbetalingStatus.SENDT.name)
-                it.setString(7, utbetaling.vedtak.toJson())
-                it.setTimestamp(8, Timestamp.from(utbetaling.opprettet.instant), tzUTC)
-                it.setTimestamp(9, Timestamp.from(utbetaling.avstemmingsnoekkel.instant), tzUTC)
-                it.setTimestamp(10, Timestamp.from(utbetaling.endret.instant), tzUTC)
-                it.setString(11, utbetaling.stoenadsmottaker.value)
-
-                require(it.executeUpdate() == 1)
-            }
-
-            utbetaling.utbetalingslinjer.forEach {
-                opprettUtbetalingslinje(it)
-            }
-
-
-        }.let { hentUtbetalingNonNull(utbetaling.vedtakId.value) }
-
-    fun opprettUtbetalingslinje(utbetalingslinje: Utbetalingslinje) =
-        dataSource.connection.use { connection ->
-            val stmt = connection.prepareStatement(
-                """
-                INSERT INTO utbetalingslinje(id, opprettet, periode_fra, periode_til, beloep, utbetaling_id, sak_id, erstatter_id)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?)
-            """
-            )
-
-            stmt.use {
-                it.setLong(1, utbetalingslinje.id.value)
-                it.setTimestamp(2, Timestamp.from(utbetalingslinje.opprettet.instant), tzUTC)
-                it.setObject(3, utbetalingslinje.periode.fra)
-                it.setObject(4, utbetalingslinje.periode.til)
-                it.setBigDecimal(5, utbetalingslinje.beloep)
-                it.setString(6, utbetalingslinje.utbetalingId.toString())
-                it.setLong(7, utbetalingslinje.sakId.value)
-                it.setObject(8, utbetalingslinje.erstatterId?.value)
-
-                require(it.executeUpdate() == 1)
-            }
-        }
-
-
     fun oppdaterStatus(vedtakId: Long, status: UtbetalingStatus, endret: Tidspunkt) =
         dataSource.connection.use { connection ->
             logger.info("Oppdaterer status i utbetaling for vedtakId=$vedtakId til $status")
@@ -290,10 +231,14 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 attestant = NavIdent(getString("attestant")),
                 vedtak = getString("vedtak").let { vedtak -> objectMapper.readValue(vedtak) },
                 oppdrag = getString("utgaaende_oppdrag").let(OppdragJaxb::toOppdrag),
-                kvittering = getString("oppdrag_kvittering")?.let(OppdragJaxb::toOppdrag),
-                kvitteringBeskrivelse = getString("beskrivelse_oppdrag"),
-                kvitteringFeilkode = getString("feilkode_oppdrag"),
-                kvitteringMeldingKode = getString("meldingkode_oppdrag"),
+                kvittering = getString("oppdrag_kvittering")?.let {
+                    Kvittering(
+                        oppdrag = OppdragJaxb.toOppdrag(it),
+                        beskrivelse = getString("beskrivelse_oppdrag"),
+                        feilkode = getString("feilkode_oppdrag"),
+                        meldingKode = getString("meldingkode_oppdrag")
+                    )
+                },
                 utbetalingslinjer = utbetalingslinjer
             )
         }

@@ -35,6 +35,13 @@ data class Utbetalingsperiode(
 
 data class UUID30(val value: String = UUID.randomUUID().toString().substring(0, 30))
 
+data class Kvittering(
+    val oppdrag: Oppdrag,
+    val feilkode: String,
+    val beskrivelse: String? = null,
+    val meldingKode: String? = null,
+)
+
 data class Utbetaling(
     val id: UUID,
     val sakId: SakId,
@@ -49,10 +56,7 @@ data class Utbetaling(
     val attestant: NavIdent,
     val vedtak: Vedtak,
     val oppdrag: Oppdrag? = null,
-    val kvittering: Oppdrag? = null,
-    val kvitteringBeskrivelse: String? = null,
-    val kvitteringFeilkode: String? = null,
-    val kvitteringMeldingKode: String? = null,
+    val kvittering: Kvittering? = null,
     val utbetalingslinjer: List<Utbetalingslinje>
 )
 

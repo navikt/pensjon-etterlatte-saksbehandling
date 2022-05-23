@@ -14,6 +14,7 @@ import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.BehandlingId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Foedselsnummer
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Kvittering
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.NavIdent
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
@@ -23,6 +24,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsperiode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.VedtakId
 import no.trygdeetaten.skjema.oppdrag.Mmel
+import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import java.io.FileNotFoundException
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -78,12 +80,17 @@ fun oppdrag(vedtakId: Long = 1) =
 fun oppdrag(utbetaling: Utbetaling, foerstegangsbehandling: Boolean = true) =
     OppdragMapper.oppdragFraUtbetaling(utbetaling, foerstegangsbehandling)
 
+fun kvittering(oppdragMedKvittering: Oppdrag) =
+    Kvittering(
+        oppdrag = oppdragMedKvittering,
+        beskrivelse = oppdragMedKvittering.mmel.alvorlighetsgrad,
+        feilkode = oppdragMedKvittering.mmel.beskrMelding,
+        meldingKode = oppdragMedKvittering.mmel.kodeMelding
+    )
+
 fun oppdragMedGodkjentKvittering(vedtakId: Long = 1) = oppdrag(vedtakId).apply {
     mmel = Mmel().apply {
         alvorlighetsgrad = "00"
-    }
-    oppdrag110 = this.oppdrag110.apply {
-        oppdragsId = 1
     }
 }
 
@@ -92,9 +99,6 @@ fun oppdragMedFeiletKvittering(vedtakId: Long = 1) = oppdrag(vedtakId).apply {
         alvorlighetsgrad = "12"
         kodeMelding = "KodeMelding"
         beskrMelding = "Beskrivelse"
-    }
-    oppdrag110 = this.oppdrag110.apply {
-        oppdragsId = 1
     }
 }
 
@@ -106,7 +110,8 @@ fun utbetaling(
     avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
     opprettet: Tidspunkt = Tidspunkt.now(),
     utbetalingslinjeId: Long = 1L,
-    utbetalingslinjer: List<Utbetalingslinje> = listOf(utbetalingslinje(id, sakId, utbetalingslinjeId))
+    utbetalingslinjer: List<Utbetalingslinje> = listOf(utbetalingslinje(id, sakId, utbetalingslinjeId)),
+    kvittering: Kvittering? = null
 ) =
     Utbetaling(
         id = id,
@@ -122,9 +127,7 @@ fun utbetaling(
         saksbehandler = NavIdent("12345678"),
         attestant = NavIdent("87654321"),
         utbetalingslinjer = utbetalingslinjer,
-        kvitteringMeldingKode = "08",
-        kvitteringFeilkode = "hva skal stå her?",
-        kvitteringBeskrivelse = "En beskrivelse"
+        kvittering = kvittering
     )
 
 private fun utbetalingslinje(
@@ -134,16 +137,12 @@ private fun utbetalingslinje(
 ): Utbetalingslinje =
     Utbetalingslinje(
         id = UtbetalingslinjeId(utbetalingslinjeId),
+        utbetalingId = utbetalingId,
+        erstatterId = null,
         opprettet = Tidspunkt.now(),
+        sakId = sakId,
         periode = Utbetalingsperiode(
             fra = LocalDate.parse("2022-01-01"),
         ),
         beloep = BigDecimal.valueOf(10000),
-        utbetalingId = utbetalingId,
-        sakId = sakId,
-        erstatterId = null,
     )
-
-fun main() {
-    println(vedtak(1).toJson())
-}

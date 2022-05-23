@@ -16,7 +16,21 @@ class UtbetalingMapper(
 
     private val utbetalingsperioder = vedtak.pensjonTilUtbetaling!!.sortedBy { it.periode.fom }
 
-    fun opprettUtbetaling(): Utbetaling = utbetaling(utbetalingslinjer())
+    fun opprettUtbetaling(): Utbetaling = Utbetaling(
+        id = utbetalingId,
+        sakId = SakId(vedtak.sak.id),
+        behandlingId = BehandlingId(vedtak.behandling.id.toString()), // TODO: må erstattes til en maks 30 tegn lang nøkkel
+        vedtakId = VedtakId(vedtak.vedtakId),
+        status = UtbetalingStatus.SENDT,
+        opprettet = opprettet,
+        endret = opprettet,
+        avstemmingsnoekkel = opprettet,
+        stoenadsmottaker = Foedselsnummer(vedtak.sak.ident),
+        saksbehandler = NavIdent(vedtak.vedtakFattet!!.ansvarligSaksbehandler),
+        attestant = NavIdent(vedtak.attestasjon!!.attestant),
+        vedtak = vedtak,
+        utbetalingslinjer = utbetalingslinjer()
+    )
 
     private fun utbetalingslinjer() = utbetalingsperioder.map {
         Utbetalingslinje(
@@ -37,29 +51,6 @@ class UtbetalingMapper(
         )
     }
 
-    private fun utbetaling(utbetalingslinjer: List<Utbetalingslinje>) = Utbetaling(
-        id = utbetalingId,
-        sakId = SakId(vedtak.sak.id),
-        behandlingId = BehandlingId(vedtak.behandling.id.toString()), // TODO: må erstattes til en maks 30 tegn lang nøkkel
-        vedtakId = VedtakId(vedtak.vedtakId),
-        status = UtbetalingStatus.SENDT,
-        opprettet = opprettet,
-        endret = opprettet,
-        avstemmingsnoekkel = opprettet,
-        stoenadsmottaker = Foedselsnummer(vedtak.sak.ident),
-        saksbehandler = NavIdent(vedtak.vedtakFattet!!.ansvarligSaksbehandler),
-        attestant = NavIdent(vedtak.attestasjon!!.attestant),
-        vedtak = vedtak,
-        utbetalingslinjer = utbetalingslinjer
-    )
-
-    /*
-           1     2     3
-V1: |-----|-----|----->
-        4    5     6
-V2:    |--|-----|----->
-     */
-
     private fun finnErstatterId(utbetalingslinjeId: Long): UtbetalingslinjeId? {
         return if (utbetalingsperioder.indexOfFirst { it.id == utbetalingslinjeId } == 0) {
             finnIdSisteUtbetalingslinje()
@@ -79,7 +70,5 @@ V2:    |--|-----|----->
             UtbetalingStatus.GODKJENT,
             UtbetalingStatus.GODKJENT_MED_FEIL
         )
-    }.maxByOrNull { it.opprettet.instant }?.let {
-        it.utbetalingslinjer.last().id
-    }
+    }.maxByOrNull { it.opprettet.instant }?.utbetalingslinjer?.last()?.id
 }

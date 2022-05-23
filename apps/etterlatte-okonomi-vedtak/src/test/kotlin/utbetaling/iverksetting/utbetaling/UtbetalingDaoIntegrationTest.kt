@@ -156,7 +156,7 @@ internal class UtbetalingDaoIntegrationTest {
             )
         )
 
-        val utbetalinger = utbetalingDao.hentAlleUtbetalingerMellom(jan2, jan5)
+        val utbetalinger = utbetalingDao.hentUtbetalinger(jan2, jan5)
 
         assertAll(
             "3 utbetalinger skal hentes, med vedtak id 2, 3 og 4",

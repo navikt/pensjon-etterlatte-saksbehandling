@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
-import no.nav.etterlatte.utbetaling.common.norskTidssone
 import no.nav.etterlatte.utbetaling.common.tidspunktMidnattIdag
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
@@ -47,7 +46,7 @@ internal class GrensesnittavstemmingServiceTest {
         )
 
         every { grensesnittavstemmingDao.hentSisteAvstemming() } returns grensesnittavstemming
-        every { utbetalingDao.hentAlleUtbetalingerMellom(any(), any()) } returns utbetaling
+        every { utbetalingDao.hentUtbetalinger(any(), any()) } returns utbetaling
         every { avstemmingsdataSender.sendAvstemming(any()) } returns "message"
         every { grensesnittavstemmingDao.opprettAvstemming(any()) } returns 1
 

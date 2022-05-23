@@ -52,7 +52,6 @@ class UtbetalingService(
         }.let { utbetalingDao.oppdaterKvittering(it!!, Tidspunkt.now(clock)) } // TODO
     }
 
-
     fun oppdaterStatusOgPubliserKvittering(oppdrag: Oppdrag, status: UtbetalingStatus) =
         utbetalingDao.oppdaterStatus(oppdrag.vedtakId(), status, Tidspunkt.now(clock))
             .also { rapidsConnection.publish("key", utbetalingEvent(oppdrag, status)) }

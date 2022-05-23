@@ -25,7 +25,7 @@ class GrensesnittsavstemmingService(
         periode: Avstemmingsperiode = hentNestePeriode()
     ) {
         logger.info("Avstemmer fra ${periode.fraOgMed} til ${periode.til}")
-        val utbetalinger = utbetalingDao.hentAlleUtbetalingerMellom(periode.fraOgMed, periode.til)
+        val utbetalinger = utbetalingDao.hentUtbetalinger(periode.fraOgMed, periode.til)
         val avstemmingId = UUIDBase64()
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, periode.fraOgMed, periode.til, avstemmingId)

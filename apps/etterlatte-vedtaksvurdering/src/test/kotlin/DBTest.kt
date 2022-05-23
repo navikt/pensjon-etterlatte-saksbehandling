@@ -74,6 +74,17 @@ internal class DBTest {
         ))
     }
 
+    fun leggtilkommersoekertilgoderesultat() {
+        val vedtakRepo = VedtaksvurderingRepository(dataSource)
+        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
+        val now = LocalDateTime.now()
+        vedtaksvurderingService.lagreKommerSoekerTilgodeResultat("12321423523545", uuid, VilkaarResultat(
+            VurderingsResultat.OPPFYLT,
+            emptyList(),
+            now
+        ))
+    }
+
     fun leggtilavkortingsresultat() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
@@ -84,6 +95,7 @@ internal class DBTest {
     fun testDB() {
         leggtilavkortingsresultat()
         leggtilvilkaarsresultat()
+        leggtilkommersoekertilgoderesultat()
         leggtilberegningsresultat()
 
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
@@ -92,6 +104,7 @@ internal class DBTest {
         assert(vedtaket?.beregningsResultat != null)
         assert(vedtaket?.avkortingsResultat != null)
         assert(vedtaket?.vilkaarsResultat != null)
+        assert(vedtaket?.kommerSoekerTilgodeResultat != null)
     }
 
 

@@ -67,6 +67,7 @@ class BehandlingService(
                 grunnlag = grunnlag.await(),
                 gyldighetsprøving = behandling.gyldighetsproeving,
                 vilkårsprøving = vedtak.await().vilkaarsResultat,
+                kommerSoekerTilgode = vedtak.await().kommerSoekerTilgodeResultat,
                 beregning = null
             )
         }
@@ -89,6 +90,7 @@ data class DetaljertBehandlingDto(
     val grunnlag: List<Grunnlagsopplysning<ObjectNode>>,
     val gyldighetsprøving: GyldighetsResultat?,
     val vilkårsprøving: VilkaarResultat?,
+    val kommerSoekerTilgode: VilkaarResultat?,
     val beregning: BeregningsResultat?,
     val fastsatt: Boolean = false
 )

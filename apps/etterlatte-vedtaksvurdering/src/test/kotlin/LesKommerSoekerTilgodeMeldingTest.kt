@@ -28,11 +28,8 @@ internal class LesKommerSoekerTilgodeMeldingTest {
     fun `skal lese melding`() {
         val tilgoderesultat = slot<VilkaarResultat>()
         every { vedtaksvurderingServiceMock.lagreKommerSoekerTilgodeResultat(any(), any(), capture(tilgoderesultat)) } returns Unit
-
         inspector.apply { sendTestMessage(melding) }.inspektør
-
         Assertions.assertEquals(VurderingsResultat.OPPFYLT, tilgoderesultat.captured.resultat)
-
     }
 
 }

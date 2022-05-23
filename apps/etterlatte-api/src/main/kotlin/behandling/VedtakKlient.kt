@@ -36,7 +36,7 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
 
 
     override suspend fun hentVedtak(sakId: Int, behandlingId: String, accessToken: String): Vedtak {
-        logger.info("Henter alle behandlinger i en sak")
+        logger.info("Henter vedtak for en behandling")
 
         try {
             val json =
@@ -47,7 +47,7 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
                     ).response
             return objectMapper.readValue(json.toString())
         } catch (e: Exception) {
-            logger.error("Henting av behandlinger feilet", e)
+            logger.error("Henting  vedtak for en behandling feilet", e)
             throw e
         }    }
 
@@ -61,5 +61,6 @@ data class Vedtak(
     val avkortingsResultat: String?,
     val beregningsResultat: BeregningsResultat?,
     val vilkaarsResultat: VilkaarResultat?,
+    val kommerSoekerTilgodeResultat: VilkaarResultat?,
     val vedtakFattet: Boolean?
 )

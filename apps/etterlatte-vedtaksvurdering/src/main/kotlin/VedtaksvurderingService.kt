@@ -38,6 +38,12 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
 
     fun lagreKommerSoekerTilgodeResultat(sakId: String, behandlingId: UUID, kommerSoekerTilgodeResultat: VilkaarResultat) {
         val vedtak = repository.hentVedtak(sakId, behandlingId)
+
+        if(vedtak == null) {
+            repository.lagreKommerSoekerTilgodeResultat(sakId, behandlingId, kommerSoekerTilgodeResultat)
+        } else {
+            repository.oppdaterKommerSoekerTilgodeResultat(sakId, behandlingId, kommerSoekerTilgodeResultat)
+        }
     }
 
     fun hentVedtak(sakId: String, behandlingId: UUID): Vedtak? {

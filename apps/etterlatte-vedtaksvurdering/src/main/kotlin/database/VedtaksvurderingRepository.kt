@@ -44,6 +44,28 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
+    fun lagreKommerSoekerTilgodeResultat(sakId: String, behandlingsId: UUID, kommerSoekerTilgodeResultat: VilkaarResultat) {
+        logger.info("Lagrer kommerSoekerTilgodeResultat")
+        connection.use {
+            val statement = it.prepareStatement(Queries.lagreKommerSoekerTilgodeResultat)
+            statement.setLong(1, sakId.toLong())
+            statement.setObject(2, behandlingsId)
+            statement.setString(3, objectMapper.writeValueAsString(kommerSoekerTilgodeResultat))
+            statement.execute()
+        }
+    }
+
+    fun oppdaterKommerSoekerTilgodeResultat(sakId: String, behandlingsId: UUID, kommerSoekerTilgodeResultat: VilkaarResultat) {
+        logger.info("Lagrer kommerSoekerTilgodeResultat")
+        connection.use {
+            val statement = it.prepareStatement(Queries.oppdatereKommerSoekerTilgodeResultat)
+            statement.setString(1, objectMapper.writeValueAsString(kommerSoekerTilgodeResultat))
+            statement.setLong(2, sakId.toLong())
+            statement.setObject(3, behandlingsId)
+            statement.execute()
+        }
+    }
+
     fun lagreBeregningsresultat(sakId: String, behandlingsId: UUID, beregningsresultat: BeregningsResultat) {
         logger.info("Lagrer beregningsresultat")
 
@@ -102,7 +124,8 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                     getString(4)?.let { objectMapper.readValue(it) },
                     getString(5)?.let { objectMapper.readValue(it) },
                     getString(6)?.let { objectMapper.readValue(it) },
-                    getBoolean(7)
+                    getString(7)?.let { objectMapper.readValue(it) },
+                    getBoolean(8)
                 )
             }
         }
@@ -128,6 +151,7 @@ data class Vedtak(
     val avkortingsResultat: String?,
     val beregningsResultat: BeregningsResultat?,
     val vilkaarsResultat: VilkaarResultat?,
+    val kommerSoekerTilgodeResultat: VilkaarResultat?,
     val vedtakFattet: Boolean?
 )
 
@@ -138,11 +162,14 @@ private object Queries {
     val lagreVilkaarResultat = "INSERT INTO vedtak(sakId, behandlingId, vilkaarsresultat) VALUES (?, ?, ?) "
     val oppdaterVilkaarResultat = "UPDATE vedtak SET vilkaarsresultat = ? WHERE sakId = ? AND behandlingId = ?"
 
+    val lagreKommerSoekerTilgodeResultat = "INSERT INTO vedtak(sakId, behandlingId, kommersoekertilgoderesultat) VALUES (?, ?, ?)"
+    val oppdatereKommerSoekerTilgodeResultat = "UPDATE vedtak SET kommersoekertilgoderesultat = ? WHERE sakId = ? AND behandlingId = ?"
+
     val lagreAvkortingsresultat = "INSERT INTO vedtak(sakId, behandlingId, avkortingsresultat) VALUES (?, ?, ?)"
     val oppdaterAvkortingsresultat = "UPDATE vedtak SET avkortingsresultat = ? WHERE sakId = ? AND behandlingId = ?"
 
     val fattVedtak = "UPDATE vedtak SET saksbehandlerId = ?, vedtakfattet = ? WHERE sakId = ? AND behandlingId = ?"
-    val hentVedtak = "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, vedtakfattet FROM vedtak WHERE sakId = ? AND behandlingId = ?"
+    val hentVedtak = "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet FROM vedtak WHERE sakId = ? AND behandlingId = ?"
 
 }
 

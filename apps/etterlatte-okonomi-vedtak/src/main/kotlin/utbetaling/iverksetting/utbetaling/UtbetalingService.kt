@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
+import no.nav.etterlatte.domene.vedtak.BehandlingType
 import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
@@ -20,13 +21,13 @@ class UtbetalingService(
     val clock: Clock
 ) {
     fun iverksettUtbetaling(vedtak: Vedtak): Utbetaling {
-        val utbetalingMapper = UtbetalingMapper(
+        val utbetaling = UtbetalingMapper(
             tidligereUtbetalinger = utbetalingDao.hentUtbetalinger(vedtak.sak.id),
             vedtak = vedtak,
-        )
+        ).opprettUtbetaling()
 
-        val utbetaling = utbetalingMapper.opprettUtbetaling()
-        val oppdrag = oppdragMapper.oppdragFraUtbetaling(utbetaling, true)
+        val foerstegangsbehandling = vedtak.behandling.type == BehandlingType.FORSTEGANGSBEHANDLING
+        val oppdrag = oppdragMapper.oppdragFraUtbetaling(utbetaling, foerstegangsbehandling)
 
         logger.info("Sender oppdrag for sakId=${vedtak.sak.id} med vedtakId=${vedtak.vedtakId} til oppdrag")
         oppdragSender.sendOppdrag(oppdrag)

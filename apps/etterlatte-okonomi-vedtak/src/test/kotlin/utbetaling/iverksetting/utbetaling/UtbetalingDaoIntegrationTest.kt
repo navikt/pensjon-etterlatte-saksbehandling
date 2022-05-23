@@ -5,6 +5,7 @@ import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.config.DataSourceBuilder
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
+import no.nav.etterlatte.utbetaling.oppdrag
 import no.nav.etterlatte.utbetaling.utbetaling
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import org.junit.jupiter.api.AfterAll
@@ -53,11 +54,14 @@ internal class UtbetalingDaoIntegrationTest {
 
     @Test
     fun `skal opprette og hente utbetaling`() {
-        val utbetaling = utbetaling(avstemmingsnoekkel = Tidspunkt.now())
 
-        utbetalingDao.opprettUtbetaling(utbetaling)
+        val utbetaling = utbetaling(avstemmingsnoekkel = Tidspunkt.now())
+        val oppdrag = oppdrag(utbetaling)
+
+        utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
         val opprettetUtbetaling = utbetalingDao.hentUtbetaling(utbetaling.vedtakId.value)
 
+        // TODO: legg til nye felter; iallefall saksbehandler og attestant
         assertAll("Skal sjekke at utbetaling er korrekt opprettet",
             { assertNotNull(opprettetUtbetaling?.id) },
             { assertEquals(utbetaling.vedtakId.value, opprettetUtbetaling?.vedtakId?.value) },
@@ -93,6 +97,22 @@ internal class UtbetalingDaoIntegrationTest {
             { assertNull(opprettetUtbetaling?.kvitteringMeldingKode) })
     }
 
+    // TODO: nye tester for å sjekke at utbetalingslinjer opprettes korrekt
+
+    private fun opprettUtbetaling(
+        avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
+        vedtakId: Long = 1,
+        utbetalingslinjeId: Long
+    ): Utbetaling {
+        val utbetaling = utbetaling(
+            avstemmingsnoekkel = avstemmingsnoekkel,
+            vedtakId = vedtakId,
+            utbetalingslinjeId = utbetalingslinjeId
+        )
+        val oppdrag = oppdrag(utbetaling)
+        return utbetaling.copy(oppdrag = oppdrag)
+    }
+
     @Test
     fun `skal hente alle utbetalinger mellom to tidspunkter`() {
         val jan1 = Tidspunkt(Instant.parse("2022-01-01T00:00:00Z"))
@@ -102,11 +122,41 @@ internal class UtbetalingDaoIntegrationTest {
         val jan5 = Tidspunkt(Instant.parse("2022-05-01T00:00:00Z"))
         val jan6 = Tidspunkt(Instant.parse("2022-06-01T00:00:00Z"))
 
-        utbetalingDao.opprettUtbetaling(utbetaling(avstemmingsnoekkel = jan1, vedtakId = 1))
-        utbetalingDao.opprettUtbetaling(utbetaling(avstemmingsnoekkel = jan2, vedtakId = 2))
-        utbetalingDao.opprettUtbetaling(utbetaling(avstemmingsnoekkel = jan3, vedtakId = 3))
-        utbetalingDao.opprettUtbetaling(utbetaling(avstemmingsnoekkel = jan4, vedtakId = 4))
-        utbetalingDao.opprettUtbetaling(utbetaling(avstemmingsnoekkel = jan6, vedtakId = 6))
+        utbetalingDao.opprettUtbetaling(
+            opprettUtbetaling(
+                avstemmingsnoekkel = jan1,
+                vedtakId = 1,
+                utbetalingslinjeId = 1
+            )
+        )
+        utbetalingDao.opprettUtbetaling(
+            opprettUtbetaling(
+                avstemmingsnoekkel = jan2,
+                vedtakId = 2,
+                utbetalingslinjeId = 2
+            )
+        )
+        utbetalingDao.opprettUtbetaling(
+            opprettUtbetaling(
+                avstemmingsnoekkel = jan3,
+                vedtakId = 3,
+                utbetalingslinjeId = 3
+            )
+        )
+        utbetalingDao.opprettUtbetaling(
+            opprettUtbetaling(
+                avstemmingsnoekkel = jan4,
+                vedtakId = 4,
+                utbetalingslinjeId = 4
+            )
+        )
+        utbetalingDao.opprettUtbetaling(
+            opprettUtbetaling(
+                avstemmingsnoekkel = jan6,
+                vedtakId = 6,
+                utbetalingslinjeId = 5
+            )
+        )
 
         val utbetalinger = utbetalingDao.hentAlleUtbetalingerMellom(jan2, jan5)
 
@@ -152,10 +202,12 @@ internal class UtbetalingDaoIntegrationTest {
 
     @Test
     fun `skal oppdatere status paa utbetaling`() {
+
         val opprettetTidspunkt = Tidspunkt.now()
 
         val utbetaling = utbetaling(avstemmingsnoekkel = opprettetTidspunkt)
-        val opprettetUtbetaling = utbetalingDao.opprettUtbetaling(utbetaling)
+        val oppdrag = oppdrag(utbetaling)
+        val opprettetUtbetaling = utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
 
         assertNotNull(opprettetUtbetaling)
         assertEquals(UtbetalingStatus.SENDT, opprettetUtbetaling.status)

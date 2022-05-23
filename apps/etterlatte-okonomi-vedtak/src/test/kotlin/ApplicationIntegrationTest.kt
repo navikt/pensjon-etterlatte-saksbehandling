@@ -92,7 +92,7 @@ class ApplicationIntegrationTest {
                 match {
                     it.toJsonNode().let { event ->
                         event["@event_name"].textValue() == "utbetaling_oppdatert" &&
-                                event["@vedtakId"].textValue() == "1" &&
+                                event["@vedtakId"].longValue() == 1L &&
                                 event["@status"].textValue() == UtbetalingStatus.SENDT.name
                     }
                 }
@@ -110,7 +110,7 @@ class ApplicationIntegrationTest {
                 match {
                     it.toJsonNode().let { event ->
                         event["@event_name"].textValue() == "utbetaling_oppdatert" &&
-                                event["@vedtakId"].textValue() == "1" &&
+                                event["@vedtakId"].longValue() == 1L &&
                                 event["@status"].textValue() == UtbetalingStatus.GODKJENT.name
                     }
                 }
@@ -128,7 +128,7 @@ class ApplicationIntegrationTest {
                 match {
                     it.toJsonNode().let { event ->
                         event["@event_name"].textValue() == "utbetaling_oppdatert" &&
-                                event["@vedtakId"].textValue() == "1" &&
+                                event["@vedtakId"].longValue() == 1L &&
                                 event["@status"].textValue() == UtbetalingStatus.FEILET.name
                     }
                 }
@@ -164,7 +164,7 @@ class ApplicationIntegrationTest {
     private fun String.toJsonNode() = objectMapper.readTree(this)
 
     companion object {
-        val FATTET_VEDTAK_1 = readFile("/vedtak1.json")
+        val FATTET_VEDTAK_1 = readFile("/vedtak.json")
         const val TIMEOUT: Long = 5000
     }
 }

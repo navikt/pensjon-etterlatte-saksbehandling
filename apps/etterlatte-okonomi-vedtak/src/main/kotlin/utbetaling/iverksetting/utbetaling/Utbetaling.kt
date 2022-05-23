@@ -57,11 +57,11 @@ data class Utbetalingslinje(
     val utbetalingId: UUID,
     val sakId: SakId,
     val erstatterId: UtbetalingslinjeId? = null,
-    val endring: Endring? = null
+    val utbetalingslinjetype: Utbetalingslinjetype? = null
 )
 
-enum class Endring {
-    OPPHOER
+enum class Utbetalingslinjetype {
+    OPPHOER, UTBETALING
 }
 
 
@@ -71,8 +71,6 @@ data class Utbetalingsperiode(
 ) {
 }
 
-fun tidligsteUtbetalingslinje(list: List<Utbetalingslinje>) =
-    list.minByOrNull { it.periode.fra }
 
 /*
 Utbetalingsperioder som hører til siste utbetaling:

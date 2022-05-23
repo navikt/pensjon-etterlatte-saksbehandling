@@ -1,18 +1,20 @@
 ALTER TABLE utbetalingsoppdrag RENAME TO utbetaling;
 ALTER TABLE utbetaling ALTER COLUMN id TYPE VARCHAR;
 ALTER TABLE utbetaling ALTER COLUMN sak_id TYPE BIGINT USING sak_id::bigint;
+ALTER TABLE utbetaling ALTER COLUMN vedtak_id TYPE BIGINT USING vedtak_id::bigint;
+
 
 ALTER TABLE utbetaling ADD COLUMN saksbehandler VARCHAR(32) NOT NULL;
 ALTER TABLE utbetaling ADD COLUMN attestant VARCHAR(32) NOT NULL;
 
 CREATE TABLE utbetalingslinje (
-    id                      VARCHAR(32)                 PRIMARY KEY,
+    id                      BIGINT                      PRIMARY KEY,
     opprettet               TIMESTAMP WITH TIME ZONE    NOT NULL,
     periode_fra             DATE                        NOT NULL,
     periode_til             DATE                        ,
     beloep                  NUMERIC                     NOT NULL,
     utbetaling_id           VARCHAR                     REFERENCES utbetaling(id),
-    erstatter_id            VARCHAR(32)                 DEFAULT NULL,
+    erstatter_id            BIGINT                      DEFAULT NULL,
     sak_id                  BIGINT                      NOT NULL
 );
 

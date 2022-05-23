@@ -9,6 +9,7 @@ import no.nav.etterlatte.domene.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.domene.vedtak.VedtakFattet
 import no.nav.etterlatte.domene.vedtak.VedtakType
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.BehandlingId
@@ -34,7 +35,7 @@ object TestHelper
 fun readFile(file: String) = TestHelper::class.java.getResource(file)?.readText()
     ?: throw FileNotFoundException("Fant ikke filen $file")
 
-fun vedtak2(vedtakId: Long) = Vedtak(
+fun vedtak(vedtakId: Long) = Vedtak(
     vedtakId = vedtakId,
     behandling = Behandling(
         id = UUID.randomUUID(),
@@ -42,7 +43,7 @@ fun vedtak2(vedtakId: Long) = Vedtak(
     ),
     sak = Sak(
         id = 1,
-        ident = "12345678",
+        ident = "12345678913",
         sakType = ""
     ),
     type = VedtakType.INNVILGELSE,
@@ -61,7 +62,7 @@ fun vedtak2(vedtakId: Long) = Vedtak(
     pensjonTilUtbetaling = listOf(
         no.nav.etterlatte.domene.vedtak.Utbetalingsperiode(
             id = 1,
-            periode = Periode(YearMonth.of(2022, 1), YearMonth.of(2022, 2)),
+            periode = Periode(fom = YearMonth.of(2022, 1), null),
             beloep = BigDecimal.valueOf(2000),
             type = UtbetalingsperiodeType.UTBETALING
         )
@@ -72,7 +73,10 @@ fun vedtak2(vedtakId: Long) = Vedtak(
 )
 
 fun oppdrag(vedtakId: Long = 1) =
-    OppdragMapper.oppdragFraUtbetaling(utbetaling(vedtakId = vedtakId), foerstegangsinnvilgelse = true)
+    OppdragMapper.oppdragFraUtbetaling(utbetaling(vedtakId = vedtakId), foerstegangsbehandling = true)
+
+fun oppdrag(utbetaling: Utbetaling, foerstegangsbehandling: Boolean = true) =
+    OppdragMapper.oppdragFraUtbetaling(utbetaling, foerstegangsbehandling)
 
 fun oppdragMedGodkjentKvittering(vedtakId: Long = 1) = oppdrag(vedtakId).apply {
     mmel = Mmel().apply {
@@ -101,7 +105,8 @@ fun utbetaling(
     vedtakId: Long = 1,
     avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
     opprettet: Tidspunkt = Tidspunkt.now(),
-    utbetalingslinjer: List<Utbetalingslinje> = listOf(utbetalingslinje(id, sakId))
+    utbetalingslinjeId: Long = 1L,
+    utbetalingslinjer: List<Utbetalingslinje> = listOf(utbetalingslinje(id, sakId, utbetalingslinjeId))
 ) =
     Utbetaling(
         id = id,
@@ -109,28 +114,36 @@ fun utbetaling(
         behandlingId = BehandlingId("1"),
         sakId = sakId,
         status = status,
-        vedtak = vedtak2(vedtakId),
+        vedtak = vedtak(vedtakId),
         opprettet = opprettet,
         endret = Tidspunkt.now(),
         avstemmingsnoekkel = avstemmingsnoekkel,
         stoenadsmottaker = Foedselsnummer("12345678903"),
         saksbehandler = NavIdent("12345678"),
         attestant = NavIdent("87654321"),
-        utbetalingslinjer = utbetalingslinjer
+        utbetalingslinjer = utbetalingslinjer,
+        kvitteringMeldingKode = "08",
+        kvitteringFeilkode = "hva skal stå her?",
+        kvitteringBeskrivelse = "En beskrivelse"
     )
 
 private fun utbetalingslinje(
     utbetalingId: UUID,
     sakId: SakId,
+    utbetalingslinjeId: Long
 ): Utbetalingslinje =
     Utbetalingslinje(
-        id = UtbetalingslinjeId(1),
+        id = UtbetalingslinjeId(utbetalingslinjeId),
         opprettet = Tidspunkt.now(),
         periode = Utbetalingsperiode(
             fra = LocalDate.parse("2022-01-01"),
         ),
-        beloep = BigDecimal.valueOf(3000),
+        beloep = BigDecimal.valueOf(10000),
         utbetalingId = utbetalingId,
         sakId = sakId,
-        erstatterId = null
+        erstatterId = null,
     )
+
+fun main() {
+    println(vedtak(1).toJson())
+}

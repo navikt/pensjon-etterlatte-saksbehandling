@@ -24,8 +24,6 @@ class VedtakMottaker(
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "vedtak_fattet") }
             validate { it.requireKey("@vedtak") }
-            validate { it.requireKey("@attestasjon") }
-            validate { it.rejectKey("@vedtak_oversatt") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
@@ -53,7 +51,7 @@ class VedtakMottaker(
 
     private fun utbetalingEvent(utbetaling: Utbetaling) = mapOf(
         "@event_name" to "utbetaling_oppdatert",
-        "@vedtakId" to utbetaling.vedtakId,
+        "@vedtakId" to utbetaling.vedtakId.value,
         "@status" to utbetaling.status.name
     ).toJson()
 

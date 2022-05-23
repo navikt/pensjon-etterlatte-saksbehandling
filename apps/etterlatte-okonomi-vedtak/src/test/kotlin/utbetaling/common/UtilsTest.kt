@@ -42,24 +42,24 @@ internal class UtilsTest {
     @Test
     fun `skal returnere siste dag i maaneden`() {
         val jan2022 = YearMonth.of(2022, Month.JANUARY)
-        val sisteDagJanuar = forsteDagIMaaneden(jan2022)
+        val sisteDagJanuar = sisteDagIMaaneden(jan2022)
 
         val feb2022 = YearMonth.of(2022, Month.FEBRUARY)
-        val sisteDagJFebruar = forsteDagIMaaneden(feb2022)
+        val sisteDagFebruar = sisteDagIMaaneden(feb2022)
 
         val april2022 = YearMonth.of(2022, Month.APRIL)
-        val sisteDagApril = forsteDagIMaaneden(april2022)
+        val sisteDagApril = sisteDagIMaaneden(april2022)
 
         assertAll("Skal returnere siste dag i maaneden for januar, februar og april",
             { assertEquals(jan2022.year, sisteDagJanuar.year) },
             { assertEquals(jan2022.month, sisteDagJanuar.month) },
             { assertEquals(31, sisteDagJanuar.dayOfMonth) },
-            { assertEquals(feb2022.year, sisteDagJanuar.year) },
-            { assertEquals(feb2022.month, sisteDagJanuar.month) },
-            { assertEquals(28, sisteDagJanuar.dayOfMonth) },
-            { assertEquals(april2022.year, sisteDagJanuar.year) },
-            { assertEquals(april2022.month, sisteDagJanuar.month) },
-            { assertEquals(30, sisteDagJanuar.dayOfMonth) }
+            { assertEquals(feb2022.year, sisteDagFebruar.year) },
+            { assertEquals(feb2022.month, sisteDagFebruar.month) },
+            { assertEquals(28, sisteDagFebruar.dayOfMonth) },
+            { assertEquals(april2022.year, sisteDagApril.year) },
+            { assertEquals(april2022.month, sisteDagApril.month) },
+            { assertEquals(30, sisteDagApril.dayOfMonth) }
         )
     }
 }

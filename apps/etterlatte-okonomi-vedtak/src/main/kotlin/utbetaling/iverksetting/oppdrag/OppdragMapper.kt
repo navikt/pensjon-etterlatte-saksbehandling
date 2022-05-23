@@ -1,8 +1,8 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
 import no.nav.etterlatte.utbetaling.common.toNorskTid
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Endring
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
 import no.trygdeetaten.skjema.oppdrag.Attestant180
 import no.trygdeetaten.skjema.oppdrag.Avstemming115
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
@@ -24,10 +24,11 @@ object OppdragMapper {
 
     private val tidspunktFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
 
-    fun oppdragFraUtbetaling(utbetaling: Utbetaling, foerstegangsinnvilgelse: Boolean): Oppdrag {
+    fun oppdragFraUtbetaling(utbetaling: Utbetaling, foerstegangsbehandling: Boolean): Oppdrag {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = "1"
-            kodeEndring = if (foerstegangsinnvilgelse) "NY" else "ENDR"
+            kodeEndring = if (foerstegangsbehandling) "NY" else "ENDR"
+            //kodeStatus = TODO: skal opphør settes på 110-linjen
             kodeFagomraade = "BARNEPE"
             fagsystemId = utbetaling.sakId.value.toString()
             utbetFrekvens = "MND"
@@ -52,16 +53,16 @@ object OppdragMapper {
             oppdragsLinje150.addAll(
                 utbetaling.utbetalingslinjer.map {
                     OppdragsLinje150().apply {
-                        if (it.endring == null) {
-                            kodeEndringLinje = "NY"
-                        } else {
-                            kodeEndringLinje = "ENDR"
+                        // TODO: trenger også her en kodeEndringLinje: "ENDRING" i tilfeller hvor kun ett attributt endres for en utbetalingslinje
+                        kodeEndringLinje = "NY"
+                        if (it.erstatterId != null) {
                             refFagsystemId = utbetaling.sakId.value.toString()
-                            refDelytelseId = it.erstatterId?.value.toString()
+                            refDelytelseId = it.erstatterId.value.toString()
                         }
-                        kodeStatusLinje = it.endring?.let {
+                        kodeStatusLinje = it.utbetalingslinjetype?.let {
                             when (it) {
-                                Endring.OPPHOER -> TkodeStatusLinje.OPPH
+                                Utbetalingslinjetype.OPPHOER -> TkodeStatusLinje.OPPH
+                                else -> null
                             }
                         }
                         vedtakId = utbetaling.vedtakId.value.toString()

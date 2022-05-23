@@ -9,7 +9,7 @@ import java.time.ZonedDateTime
 import java.util.*
 import java.util.Objects.isNull
 
-data class Vedtak (
+data class Vedtak(
     val vedtakId: Long, //Løpenummer (BIGSERIAL)
     val virk: Periode,
     val sak: Sak,
@@ -19,22 +19,22 @@ data class Vedtak (
     val vilkaarsvurdering: VilkaarResultat?,
     val beregning: BilagMedSammendrag<List<Beregningsperiode>>?,
     val avkorting: BilagMedSammendrag<List<Beregningsperiode>>?,
-    val pensjonTilUtbetaling:List<Utbetalingsperiode>?,
+    val pensjonTilUtbetaling: List<Utbetalingsperiode>?,
     val vedtakFattet: VedtakFattet?,
     val attestasjon: Attestasjon?,
 )
 
-data class Behandling (
+data class Behandling(
     val type: BehandlingType,
-    val id:UUID,
+    val id: UUID,
 )
 
-data class Sak(val ident: String, val sakType: String, val id:Long)
+data class Sak(val ident: String, val sakType: String, val id: Long)
 
 data class Periode(
-    val fom:YearMonth,
-    val tom:YearMonth?
-){
+    val fom: YearMonth,
+    val tom: YearMonth?
+) {
     init {
         require(isNull(tom) || fom == tom || fom.isBefore(tom))
     }
@@ -64,7 +64,7 @@ data class Utbetalingsperiode(
 )
 
 enum class UtbetalingsperiodeType {
-    OPPHOER, UTBETALING
+    OPPHOER, UTBETALING  // TODO: trenger vi en ENDRING-type her?
 }
 
 data class Attestasjon(
@@ -72,14 +72,15 @@ data class Attestasjon(
     val attesterendeEnhet: String, //aktuell?
     val tidspunkt: ZonedDateTime
 )
-enum class BehandlingType{
+
+enum class BehandlingType {
     REVURDERING, FORSTEGANGSBEHANDLING
 }
 
-enum class BehandlingAarsak{
+enum class BehandlingAarsak {
     SOEKNAD
 }
 
-enum class VedtakType{
+enum class VedtakType {
     INNVILGELSE, OPPHOER, AVSLAG, ENDRING
 }

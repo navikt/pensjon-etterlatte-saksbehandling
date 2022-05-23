@@ -5,6 +5,7 @@ import no.nav.etterlatte.utbetaling.common.toNorskTid
 import no.nav.etterlatte.utbetaling.common.toTidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.etterlatte.utbetaling.oppdrag
 import no.nav.etterlatte.utbetaling.utbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -26,7 +27,12 @@ internal class AvstemmingsdataJaxbTest {
 
         val uuid = UUIDBase64()
         val utbetaling = listOf(
-            utbetaling(id = UUID.randomUUID(), status = UtbetalingStatus.FEILET, avstemmingsnoekkel = til, opprettet = til)
+            utbetaling(
+                id = UUID.randomUUID(),
+                status = UtbetalingStatus.FEILET,
+                avstemmingsnoekkel = til,
+                opprettet = til
+            ).let { it.copy(oppdrag = oppdrag(it)) }
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetaling, fraOgMed, til, uuid)

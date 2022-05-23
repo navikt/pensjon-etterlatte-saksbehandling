@@ -29,14 +29,14 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 """
                 SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
                     foedselsnummer, utgaaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, 
-                    meldingkode_oppdrag
+                    meldingkode_oppdrag, saksbehandler, attestant 
                 FROM utbetaling 
                 WHERE vedtak_id = ?
             """
             )
 
             stmt.use {
-                it.setObject(1, vedtakId)
+                it.setLong(1, vedtakId)
 
                 it.executeQuery().singleOrNull {
                     val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(this.getString("id"))
@@ -56,7 +56,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
             )
 
             stmt.use {
-                it.setObject(1, utbetalingId)
+                it.setString(1, utbetalingId)
 
                 it.executeQuery().toList(this::toUtbetalingslinje)
             }
@@ -68,7 +68,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 """
                 SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
                     foedselsnummer, utgaaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, 
-                    meldingkode_oppdrag
+                    meldingkode_oppdrag, saksbehandler, attestant
                 FROM utbetaling
                 WHERE avstemmingsnoekkel >= ? AND avstemmingsnoekkel < ?
                 """
@@ -119,9 +119,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 queryOf(
                     statement = """
                         INSERT INTO utbetaling(id, vedtak_id, behandling_id, sak_id, utgaaende_oppdrag, status, vedtak, 
-                            opprettet, avstemmingsnoekkel, endret, foedselsnummer)
+                            opprettet, avstemmingsnoekkel, endret, foedselsnummer, saksbehandler, attestant)
                         VALUES(:id, :vedtakId, :behandlingId, :sakId, :oppdrag, :status, :vedtak, :opprettet, 
-                            :avstemmingsnoekkel, :endret, :foedselsnummer)
+                            :avstemmingsnoekkel, :endret, :foedselsnummer, :saksbehandler, :attestant)
                         """,
                     paramMap = mapOf(
                         "id" to utbetaling.id.toString(),
@@ -134,7 +134,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
                         "opprettet" to Timestamp.from(utbetaling.opprettet.instant),
                         "avstemmingsnoekkel" to Timestamp.from(utbetaling.avstemmingsnoekkel.instant),
                         "endret" to Timestamp.from(utbetaling.endret.instant),
-                        "foedselsnummer" to utbetaling.stoenadsmottaker.value
+                        "foedselsnummer" to utbetaling.stoenadsmottaker.value,
+                        "saksbehandler" to utbetaling.saksbehandler.value,
+                        "attestant" to utbetaling.attestant.value
                     )
                 ).let { tx.run(it.asUpdate) }
 
@@ -156,7 +158,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     :erstatter_id)
             """,
             paramMap = mapOf(
-                "id" to utbetalingslinje.id,
+                "id" to utbetalingslinje.id.value,
                 "opprettet" to Timestamp.from(utbetalingslinje.opprettet.instant),
                 "periode_fra" to utbetalingslinje.periode.fra,
                 "periode_til" to utbetalingslinje.periode.til,

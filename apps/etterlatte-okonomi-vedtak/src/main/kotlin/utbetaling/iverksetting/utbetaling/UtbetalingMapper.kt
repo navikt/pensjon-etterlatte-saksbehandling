@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
+import no.nav.etterlatte.domene.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.domene.vedtak.Vedtak
-import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.forsteDagIMaaneden
 import no.nav.etterlatte.utbetaling.common.sisteDagIMaaneden
@@ -11,12 +11,14 @@ class UtbetalingMapper(
     val tidligereUtbetalinger: List<Utbetaling>,
     val vedtak: Vedtak,
     val utbetalingId: UUID = UUID.randomUUID(),
-    val opprettet: Tidspunkt = Tidspunkt.now()
+    val opprettet: Tidspunkt = Tidspunkt.now(),
 ) {
+
+    private val utbetalingsperioder = vedtak.pensjonTilUtbetaling!!.sortedBy { it.periode.fom }
 
     fun opprettUtbetaling(): Utbetaling = utbetaling(utbetalingslinjer())
 
-    private fun utbetalingslinjer() = vedtak.pensjonTilUtbetaling!!.map {
+    private fun utbetalingslinjer() = utbetalingsperioder.map {
         Utbetalingslinje(
             id = UtbetalingslinjeId(it.id),
             opprettet = opprettet,
@@ -27,9 +29,9 @@ class UtbetalingMapper(
             beloep = it.beloep,
             utbetalingId = utbetalingId,
             sakId = SakId(vedtak.sak.id),
-            endring = when (vedtak.type) {
-                VedtakType.OPPHOER -> Endring.OPPHOER
-                else -> null
+            utbetalingslinjetype = when (it.type) {
+                UtbetalingsperiodeType.OPPHOER -> Utbetalingslinjetype.OPPHOER
+                UtbetalingsperiodeType.UTBETALING -> Utbetalingslinjetype.UTBETALING
             },
             erstatterId = finnErstatterId(utbetalingslinjeId = it.id)
         )
@@ -51,15 +53,26 @@ class UtbetalingMapper(
         utbetalingslinjer = utbetalingslinjer
     )
 
+    /*
+           1     2     3
+V1: |-----|-----|----->
+        4    5     6
+V2:    |--|-----|----->
+     */
+
     private fun finnErstatterId(utbetalingslinjeId: Long): UtbetalingslinjeId? {
-        return if (vedtak.pensjonTilUtbetaling!!.indexOfFirst { it.id == utbetalingslinjeId } == 0) {
+        return if (utbetalingsperioder.indexOfFirst { it.id == utbetalingslinjeId } == 0) {
             finnIdSisteUtbetalingslinje()
         } else {
             UtbetalingslinjeId(
-                vedtak.pensjonTilUtbetaling!![vedtak.pensjonTilUtbetaling!!.indexOfFirst { it.id == utbetalingslinjeId } - 1].id
+                finnForrigeIndeks(utbetalingslinjeId)
             )
         }
     }
+
+    // TODO: gjøre dette på en sikrere/finere måte
+    private fun finnForrigeIndeks(utbetalingslinjeId: Long) =
+        utbetalingsperioder[utbetalingsperioder.indexOfFirst { it.id == utbetalingslinjeId } - 1].id
 
     private fun finnIdSisteUtbetalingslinje() = tidligereUtbetalinger.filter {
         it.status in listOf(

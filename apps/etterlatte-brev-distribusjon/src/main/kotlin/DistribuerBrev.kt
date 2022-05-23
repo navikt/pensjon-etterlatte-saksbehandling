@@ -3,6 +3,8 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.distribusjon.BestillingID
 import no.nav.etterlatte.distribusjon.DistribusjonService
+import no.nav.etterlatte.distribusjon.DistribusjonsTidspunktType
+import no.nav.etterlatte.distribusjon.DistribusjonsType
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -30,7 +32,12 @@ internal class DistribuerBrev(
         withLogContext {
             logger.info("Starter distribuering av brev.")
 
-            val bestillingId = distribusjonService.distribuerJournalpost(packet.journalpostId())
+            val bestillingId = distribusjonService.distribuerJournalpost(
+                journalpostId = packet.journalpostId(),
+                type = DistribusjonsType.VEDTAK, // todo: Støtte andre brev.
+                tidspunkt = DistribusjonsTidspunktType.KJERNETID, // todo: dobbeltsjekk.
+                adresse = null // todo: Støtte adresse. Og sjekke opp dist. til organiasjonsnummer.
+            )
 
             rapidsConnection.svarSuksess(packet, bestillingId)
         }

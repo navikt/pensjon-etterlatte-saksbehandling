@@ -49,7 +49,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
         dataSource.connection.use { connection ->
             val stmt = connection.prepareStatement(
                 """
-                SELECT id, opprettet, periode_fra, periode_til, beloep, utbetaling_id, sak_id, erstatter_id
+                SELECT id, type, utbetaling_id, erstatter_id, opprettet, periode_fra, periode_til, beloep, sak_id
                 FROM utbetalingslinje 
                 WHERE utbetaling_id = ?
             """
@@ -152,20 +152,21 @@ class UtbetalingDao(private val dataSource: DataSource) {
     ) {
         queryOf(
             statement = """
-                INSERT INTO utbetalingslinje(id, opprettet, periode_fra, periode_til, beloep, utbetaling_id, 
-                    sak_id, erstatter_id)
-                VALUES(:id, :opprettet, :periode_fra, :periode_til, :beloep, :utbetaling_id, :sak_id, 
-                    :erstatter_id)
+                INSERT INTO utbetalingslinje(id, type, utbetaling_id, erstatter_id, opprettet, periode_fra, periode_til, 
+                    beloep, sak_id)
+                VALUES(:id, :type, :utbetaling_id, :erstatter_id, :opprettet, :periode_fra, :periode_til,  
+                    :beloep, :sak_id)
             """,
             paramMap = mapOf(
                 "id" to utbetalingslinje.id.value,
+                "type" to utbetalingslinje.type.name,
+                "utbetaling_id" to utbetalingslinje.utbetalingId.toString(),
+                "erstatter_id" to utbetalingslinje.erstatterId,
                 "opprettet" to Timestamp.from(utbetalingslinje.opprettet.instant),
+                "sak_id" to utbetalingslinje.sakId.value,
                 "periode_fra" to utbetalingslinje.periode.fra,
                 "periode_til" to utbetalingslinje.periode.til,
                 "beloep" to utbetalingslinje.beloep,
-                "utbetaling_id" to utbetalingslinje.utbetalingId.toString(),
-                "sak_id" to utbetalingslinje.sakId.value,
-                "erstatter_id" to utbetalingslinje.erstatterId
             )
         ).let { tx.run(it.asUpdate) }
     }
@@ -247,15 +248,16 @@ class UtbetalingDao(private val dataSource: DataSource) {
         with(resultSet) {
             Utbetalingslinje(
                 id = UtbetalingslinjeId(getLong("id")),
+                type = getString("type").let { Utbetalingslinjetype.valueOf(it) },
+                utbetalingId = getString("utbetaling_id").let { UUID.fromString(it) },
+                erstatterId = UtbetalingslinjeId(getLong("erstatter_id")),
+                opprettet = Tidspunkt(getTimestamp("opprettet", tzUTC).toInstant()),
                 sakId = SakId(getLong("sak_id")),
                 periode = Utbetalingsperiode(
                     fra = getObject("periode_fra", LocalDate::class.java),
                     til = getObject("periode_til", LocalDate::class.java),
                 ),
-                opprettet = Tidspunkt(getTimestamp("opprettet", tzUTC).toInstant()),
                 beloep = getBigDecimal("beloep"),
-                erstatterId = UtbetalingslinjeId(getLong("erstatter_id")),
-                utbetalingId = getString("utbetaling_id").let { UUID.fromString(it) },
             )
         }
 

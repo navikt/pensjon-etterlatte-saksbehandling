@@ -10,6 +10,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.oppdragMedFeiletKvittering
 import no.nav.etterlatte.utbetaling.oppdragMedGodkjentKvittering
+import no.nav.etterlatte.utbetaling.utbetaling
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -64,7 +65,7 @@ internal class OppdragSenderIntegrationTest {
 
     @Test
     fun `skal sende oppdrag på køen, motta godkjent kvittering og oppdatere status`() {
-        val oppdrag = oppdragMedGodkjentKvittering(vedtakId = 1)
+        val oppdrag = oppdragMedGodkjentKvittering(utbetaling(vedtakId = 1))
 
         oppdragSender.sendOppdrag(oppdrag)
 
@@ -79,7 +80,7 @@ internal class OppdragSenderIntegrationTest {
 
     @Test
     fun `skal sende oppdrag på køen, motta feilet kvittering og oppdatere status`() {
-        val oppdrag = oppdragMedFeiletKvittering(vedtakId = 2)
+        val oppdrag = oppdragMedFeiletKvittering(utbetaling(vedtakId = 1))
 
         oppdragSender.sendOppdrag(oppdrag)
 
@@ -90,7 +91,5 @@ internal class OppdragSenderIntegrationTest {
                 status = UtbetalingStatus.FEILET
             )
         }
-
-
     }
 }

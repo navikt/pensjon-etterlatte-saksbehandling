@@ -59,7 +59,7 @@ object OppdragMapper {
                             refFagsystemId = utbetaling.sakId.value.toString()
                             refDelytelseId = it.erstatterId.value.toString()
                         }
-                        kodeStatusLinje = it.utbetalingslinjetype?.let {
+                        kodeStatusLinje = it.type?.let {
                             when (it) {
                                 Utbetalingslinjetype.OPPHOER -> TkodeStatusLinje.OPPH
                                 else -> null

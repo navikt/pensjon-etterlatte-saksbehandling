@@ -29,7 +29,7 @@ class UtbetalingMapper(
             beloep = it.beloep,
             utbetalingId = utbetalingId,
             sakId = SakId(vedtak.sak.id),
-            utbetalingslinjetype = when (it.type) {
+            type = when (it.type) {
                 UtbetalingsperiodeType.OPPHOER -> Utbetalingslinjetype.OPPHOER
                 UtbetalingsperiodeType.UTBETALING -> Utbetalingslinjetype.UTBETALING
             },

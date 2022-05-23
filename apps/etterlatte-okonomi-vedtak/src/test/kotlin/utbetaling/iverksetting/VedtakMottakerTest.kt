@@ -7,6 +7,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.VedtakId
 import no.nav.etterlatte.utbetaling.oppdrag
 import no.nav.etterlatte.utbetaling.readFile
+import no.nav.etterlatte.utbetaling.utbetaling
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -17,7 +18,7 @@ internal class VedtakMottakerTest {
     private val utbetalingService = mockk<UtbetalingService>(relaxed = true) {
         every { iverksettUtbetaling(any()) } returns mockk {
             every { status } returns UtbetalingStatus.SENDT
-            every { oppdrag } returns oppdrag(1)
+            every { oppdrag } returns oppdrag(utbetaling(vedtakId = 1))
             every { vedtakId } returns VedtakId(1)
         }
     }

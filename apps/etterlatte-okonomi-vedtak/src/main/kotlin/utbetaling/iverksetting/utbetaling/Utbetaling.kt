@@ -62,11 +62,11 @@ data class Utbetaling(
 
 data class Utbetalingslinje(
     val id: UtbetalingslinjeId,
+    val type: Utbetalingslinjetype,
+    val utbetalingId: UUID,
+    val erstatterId: UtbetalingslinjeId? = null,
     val opprettet: Tidspunkt,
+    val sakId: SakId,
     val periode: Utbetalingsperiode,
     val beloep: BigDecimal? = null,
-    val utbetalingId: UUID,
-    val sakId: SakId,
-    val erstatterId: UtbetalingslinjeId? = null,
-    val utbetalingslinjetype: Utbetalingslinjetype? = null
 )

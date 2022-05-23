@@ -9,7 +9,6 @@ import no.nav.etterlatte.domene.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.domene.vedtak.VedtakFattet
 import no.nav.etterlatte.domene.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.BehandlingId
@@ -21,6 +20,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsperiode
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.VedtakId
 import no.trygdeetaten.skjema.oppdrag.Mmel
@@ -74,9 +74,6 @@ fun vedtak(vedtakId: Long) = Vedtak(
     vilkaarsvurdering = null
 )
 
-fun oppdrag(vedtakId: Long = 1) =
-    OppdragMapper.oppdragFraUtbetaling(utbetaling(vedtakId = vedtakId), foerstegangsbehandling = true)
-
 fun oppdrag(utbetaling: Utbetaling, foerstegangsbehandling: Boolean = true) =
     OppdragMapper.oppdragFraUtbetaling(utbetaling, foerstegangsbehandling)
 
@@ -88,13 +85,13 @@ fun kvittering(oppdragMedKvittering: Oppdrag) =
         meldingKode = oppdragMedKvittering.mmel.kodeMelding
     )
 
-fun oppdragMedGodkjentKvittering(vedtakId: Long = 1) = oppdrag(vedtakId).apply {
+fun oppdragMedGodkjentKvittering(utbetaling: Utbetaling = utbetaling(vedtakId = 1)) = oppdrag(utbetaling).apply {
     mmel = Mmel().apply {
         alvorlighetsgrad = "00"
     }
 }
 
-fun oppdragMedFeiletKvittering(vedtakId: Long = 1) = oppdrag(vedtakId).apply {
+fun oppdragMedFeiletKvittering(utbetaling: Utbetaling = utbetaling(vedtakId = 1)) = oppdrag(utbetaling).apply {
     mmel = Mmel().apply {
         alvorlighetsgrad = "12"
         kodeMelding = "KodeMelding"
@@ -130,13 +127,14 @@ fun utbetaling(
         kvittering = kvittering
     )
 
-private fun utbetalingslinje(
+fun utbetalingslinje(
     utbetalingId: UUID,
     sakId: SakId,
     utbetalingslinjeId: Long
 ): Utbetalingslinje =
     Utbetalingslinje(
         id = UtbetalingslinjeId(utbetalingslinjeId),
+        type = Utbetalingslinjetype.UTBETALING,
         utbetalingId = utbetalingId,
         erstatterId = null,
         opprettet = Tidspunkt.now(),

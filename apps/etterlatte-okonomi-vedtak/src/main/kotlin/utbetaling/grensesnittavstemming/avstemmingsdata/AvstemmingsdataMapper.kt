@@ -137,8 +137,8 @@ class AvstemmingsdataMapper(
 
     private fun getBelop(utbetalinger: List<Utbetaling>?) =
         utbetalinger?.sumOf {
-            it.oppdrag!!.oppdrag110.oppdragsLinje150 // TODO er dette riktig sted å hente dette?
-                .map { oppdragsLinje -> oppdragsLinje.sats }
+            it.utbetalingslinjer
+                .mapNotNull { utbetalingslinje -> utbetalingslinje.beloep }
                 .reduce(BigDecimal::add)
         } ?: BigDecimal.ZERO
 

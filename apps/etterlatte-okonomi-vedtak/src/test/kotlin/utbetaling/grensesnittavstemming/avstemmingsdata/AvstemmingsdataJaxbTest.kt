@@ -32,7 +32,7 @@ internal class AvstemmingsdataJaxbTest {
                 status = UtbetalingStatus.FEILET,
                 avstemmingsnoekkel = til,
                 opprettet = til
-            ).let { it.copy(oppdrag = oppdrag(it)) }
+            ).let { it.copy(oppdrag = oppdrag(it), kvittering = oppdrag(it)) }
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetaling, fraOgMed, til, uuid)

@@ -23,10 +23,17 @@ enum class UtbetalingStatus {
     FEILET,
 }
 
-data class Utbetalinger(
-    val sakid: SakId,
-    val utbetalinger: List<Utbetaling>,
+enum class Utbetalingslinjetype {
+    OPPHOER,
+    UTBETALING
+}
+
+data class Utbetalingsperiode(
+    val fra: LocalDate,
+    val til: LocalDate? = null
 )
+
+data class UUID30(val value: String = UUID.randomUUID().toString().substring(0, 30))
 
 data class Utbetaling(
     val id: UUID,
@@ -59,34 +66,3 @@ data class Utbetalingslinje(
     val erstatterId: UtbetalingslinjeId? = null,
     val utbetalingslinjetype: Utbetalingslinjetype? = null
 )
-
-enum class Utbetalingslinjetype {
-    OPPHOER, UTBETALING
-}
-
-
-data class Utbetalingsperiode(
-    val fra: LocalDate,
-    val til: LocalDate? = null
-) {
-}
-
-
-/*
-Utbetalingsperioder som hører til siste utbetaling:
-- inneholder én av disse dato for den første nye utbetalingslinjen?
-    - hvis ja: erstatte denne
-- Hvis nei -> må da finne tidligsteUtbetalingslinje blant eksisterende gjeldende linjer
-    - erstatter så den
-
- */
-
-data class UUID30(val value: String = UUID.randomUUID().toString().substring(0, 30))
-
-/*
-01.01 Vedtak: Jan 22 - Des 22: 10000 kr (opphøres eksplisitt)
-01.02 Vedtak: Juni 22 - Feb 23: 7000 kr (opphøres implisitt)
-01.03 Opphør: fom april 22
-
- */
-

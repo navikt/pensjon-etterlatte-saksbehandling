@@ -19,9 +19,8 @@ internal class LesAvkortingsmelding(
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("grunnlag") }
             validate { it.requireKey("@vilkaarsvurdering") }
-            //TODO se på logikk for å 'samle' rivers
-            //validate { it.requireKey("@gyldighetsvurdering") }
-            validate { it.rejectKey("@beregning") }
+            validate { it.requireKey("@beregning") }
+            validate { it.rejectKey("@avkorting")}
             validate { it.interestedIn("@correlation_id") }
 
         }.register(this)
@@ -33,8 +32,8 @@ internal class LesAvkortingsmelding(
             //TODO her må jeg sikkert ha noe anna info
             val grunnlagListe = packet["grunnlag"].toString()
             try {
-                val beregningsResultat = avkorting.avkortingsResultat(objectMapper.readValue(grunnlagListe))
-                packet["@beregning"] = beregningsResultat
+                val avkortingsResultat = avkorting.avkortingsResultat(objectMapper.readValue(grunnlagListe))
+                packet["@avkorting"] = avkortingsResultat
                 context.publish(packet.toJson())
                 logger.info("Publisert en beregning")
             } catch (e: Exception){

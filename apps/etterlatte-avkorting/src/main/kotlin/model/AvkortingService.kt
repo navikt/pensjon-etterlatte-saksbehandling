@@ -18,6 +18,7 @@ import java.util.*
 class AvkortingService {
     private val logger = LoggerFactory.getLogger(AvkortingService::class.java)
 
+    //TODO byttes til å være basert på beregning
     fun avkortingsResultat(opplysninger: List<VilkaarOpplysning<ObjectNode>>): AvkortingsResultat {
         logger.info("Leverer en fake beregning")
 

@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.vilkaar.barnepensjon.*
 import org.slf4j.LoggerFactory
-import vilkaar.barnepensjon.gyldigSoeknadBarnOgForelderSammeBostedsadresse
+import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
 
 
 class VilkaarService {
@@ -49,32 +49,29 @@ class VilkaarService {
             )
         )
 
-
-
         val vilkaarResultat = setVilkaarVurderingFraVilkaar(vilkaar)
         val vurdertDato = hentSisteVurderteDato(vilkaar)
 
         return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
-
     }
 
-    fun mapGyldigSoknad(opplysninger: List<VilkaarOpplysning<ObjectNode>>) : VilkaarResultat {
-        logger.info("Map gyldig søknadsadresser")
+    fun mapKommerSoekerTilGode(opplysninger: List<VilkaarOpplysning<ObjectNode>>) : VilkaarResultat {
+        logger.info("Map opplysninger for å vurdere om penger kommer søker til gode")
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
 
-        val gyldigeAdresser = listOf(
-            gyldigSoeknadBarnOgForelderSammeBostedsadresse(
+        val sammeAdresser = listOf(
+            barnOgForelderSammeBostedsadresse(
                 Vilkaartyper.SAMME_ADRESSE,
                 soekerPdl,
                 gjenlevendePdl
             )
         )
 
-        val vilkaarResultat = setVilkaarVurderingFraVilkaar(gyldigeAdresser)
-        val vurdertDato = hentSisteVurderteDato(gyldigeAdresser)
+        val vilkaarResultat = setVilkaarVurderingFraVilkaar(sammeAdresser)
+        val vurdertDato = hentSisteVurderteDato(sammeAdresser)
 
-        return VilkaarResultat(vilkaarResultat, gyldigeAdresser, vurdertDato)
+        return VilkaarResultat(vilkaarResultat, sammeAdresser, vurdertDato)
     }
 
     companion object {

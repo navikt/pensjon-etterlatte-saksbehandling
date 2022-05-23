@@ -1,5 +1,4 @@
 
-import io.mockk.mockk
 import no.nav.etterlatte.model.VilkaarService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions

@@ -750,6 +750,81 @@
     ],
     "vurdertDato": "2022-05-20T14:30:01.423570975"
   },
+  "@kommersoekertilgode": {
+    "resultat": "OPPFYLT",
+    "vilkaar": [
+      {
+        "navn": "SAMME_ADRESSE",
+        "resultat": "OPPFYLT",
+        "kriterier": [
+          {
+            "navn": "SAMME_BOSTEDSADRESSE",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "70daad21-2d14-4d64-862c-278f4c9f0192",
+                "kriterieOpplysningsType": "BOSTEDADRESSE_SOEKER",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-05-23T09:19:39.591099091Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "bostedadresse": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Bøveien 937",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "8475",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "1999-01-01T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "1365f530-503e-4f5b-b2d8-40749f880812",
+                "kriterieOpplysningsType": "BOSTEDADRESSE_GJENLEVENDE",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-05-23T09:19:40.173032566Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "bostedadresse": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Bøveien 937",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "8475",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "1999-01-01T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-05-23T11:19:45.626168616"
+      }
+    ],
+    "vurdertDato": "2022-05-23T11:19:45.626168616"
+  },
   "@beregning": {
     "id": "eef2a9ec-e2df-400d-9fbd-3679e92c384e",
     "type": "GP",

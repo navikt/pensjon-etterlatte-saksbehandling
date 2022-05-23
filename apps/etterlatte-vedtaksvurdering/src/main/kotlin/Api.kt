@@ -15,11 +15,11 @@ fun Route.Api(service: VedtaksvurderingService) {
     get("hentvedtak/{sakId}/{behandlingId}") {
         val sakId = call.parameters["sakId"].toString()
         val behandlingId = UUID.fromString(call.parameters["behandlingId"])
-        val vilkaarsresultat = service.hentVedtak(sakId, behandlingId)
-        if(vilkaarsresultat == null) {
+        val vedtaksresultat = service.hentVedtak(sakId, behandlingId)
+        if(vedtaksresultat == null) {
             call.response.status(HttpStatusCode.NotFound)
         } else {
-            call.respond(vilkaarsresultat)
+            call.respond(vedtaksresultat)
         }
     }
 

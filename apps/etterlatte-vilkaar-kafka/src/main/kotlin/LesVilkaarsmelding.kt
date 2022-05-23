@@ -21,7 +21,7 @@ internal class LesVilkaarsmelding(
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("grunnlag") }
             validate { it.rejectKey("@vilkaarsvurdering") }
-            validate { it.rejectKey("@gyldigeAdresserVurdering") }
+            validate { it.rejectKey("@kommersoekertilgode") }
             validate { it.rejectKey("@gyldighetsvurdering") }
             validate { it.interestedIn("@correlation_id") }
 
@@ -34,10 +34,10 @@ internal class LesVilkaarsmelding(
             try {
                 val grunnlagForVilkaar = objectMapper.readValue<List<VilkaarOpplysning<ObjectNode>>>(grunnlagListe)
                 val vilkaarsVurdering = vilkaar.mapVilkaar(grunnlagForVilkaar)
-                val gyldigSoeknadsadresserVurdering = vilkaar.mapGyldigSoknad(grunnlagForVilkaar)
+                val kommerSoekerTilGodeVurdering = vilkaar.mapKommerSoekerTilGode(grunnlagForVilkaar)
 
                 packet["@vilkaarsvurdering"] = vilkaarsVurdering
-                packet["@gyldigeAdresserVurdering"] = gyldigSoeknadsadresserVurdering
+                packet["@kommersoekertilgode"] = kommerSoekerTilGodeVurdering
                 context.publish(packet.toJson())
 
                 logger.info("Vurdert Vilkår")

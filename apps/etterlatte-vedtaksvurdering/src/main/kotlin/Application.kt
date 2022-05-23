@@ -4,6 +4,7 @@ import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.database.VedtaksvurderingRepository
 import no.nav.etterlatte.rivers.LagreAvkorting
 import no.nav.etterlatte.rivers.LagreBeregningsresultat
+import no.nav.etterlatte.rivers.LagreKommerSoekerTilgodeResultat
 import no.nav.etterlatte.rivers.LagreVilkaarsresultat
 import no.nav.helse.rapids_rivers.RapidApplication
 
@@ -25,6 +26,7 @@ fun main() {
             LagreAvkorting(this, vedtaksvurderingService)
             LagreVilkaarsresultat(this, vedtaksvurderingService)
             LagreBeregningsresultat(this, vedtaksvurderingService)
+            LagreKommerSoekerTilgodeResultat(this, vedtaksvurderingService)
         }.start()
 
     }

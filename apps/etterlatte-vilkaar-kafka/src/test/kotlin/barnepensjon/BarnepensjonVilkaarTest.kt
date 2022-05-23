@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
 import org.junit.jupiter.api.Assertions.*
-import vilkaar.barnepensjon.gyldigSoeknadBarnOgForelderSammeBostedsadresse
+import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
 import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 
@@ -193,13 +193,13 @@ internal class BarnepensjonVilkaarTest {
         val gjenlevendePdlNorge = lagMockPersonPdl(null, fnrGjenlevende, null, adresserNorgePdl, null)
         val gjenlevendePdlDanmark = lagMockPersonPdl(null, fnrGjenlevende, null, adresseDanmarkPdl, null)
 
-        val sammeAdresse = gyldigSoeknadBarnOgForelderSammeBostedsadresse(
+        val sammeAdresse = barnOgForelderSammeBostedsadresse(
             Vilkaartyper.SAMME_ADRESSE,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlNorge)
         )
 
-        val ulikeAdresse = gyldigSoeknadBarnOgForelderSammeBostedsadresse(
+        val ulikeAdresse = barnOgForelderSammeBostedsadresse(
             Vilkaartyper.SAMME_ADRESSE,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlDanmark)

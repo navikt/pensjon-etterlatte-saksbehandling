@@ -6,15 +6,12 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import no.nav.etterlatte.saksbehandling.api.typer.klientside.DetaljertBehandlingDto
 import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
-import java.util.*
 
 
 data class PersonSakerResult(val person: Person, val saker: Saker)
@@ -83,14 +80,3 @@ class BehandlingService(
     }
 
 }
-
-data class DetaljertBehandlingDto(
-    val id: UUID,
-    val sak: Long,
-    val grunnlag: List<Grunnlagsopplysning<ObjectNode>>,
-    val gyldighetsprøving: GyldighetsResultat?,
-    val vilkårsprøving: VilkaarResultat?,
-    val kommerSoekerTilgode: VilkaarResultat?,
-    val beregning: BeregningsResultat?,
-    val fastsatt: Boolean = false
-)

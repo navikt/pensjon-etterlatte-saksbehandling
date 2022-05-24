@@ -3,8 +3,8 @@ package no.nav.etterlatte.grunnlag
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.database.toList
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import java.sql.Connection
 import java.sql.ResultSet
@@ -20,7 +20,6 @@ class OpplysningDao(private val connection: () -> Connection) {
             objectMapper.createObjectNode(),
             getString("data").deSerialize()!!,
         )
-
     }
     fun finnOpplysningerIGrunnlag(sakId: Long): List<Grunnlagsopplysning<ObjectNode>> {
         return connection().prepareStatement("SELECT id, kilde,  type, data  FROM opplysning WHERE sak_id = ?")
@@ -48,6 +47,12 @@ class OpplysningDao(private val connection: () -> Connection) {
         statement.executeUpdate()
     }
 
+    fun slettSpesifikkOpplysningISak(id: Long,type: Opplysningstyper ){
+        val statement = connection().prepareStatement("DELETE from opplysning where sak_id = ? AND type = ?")
+        statement.setLong(1, id)
+        statement.setString(2, type.name)
+        statement.executeUpdate()
+    }
 }
 
 fun ObjectNode?.serialize() = this?.let { objectMapper.writeValueAsString(it) }

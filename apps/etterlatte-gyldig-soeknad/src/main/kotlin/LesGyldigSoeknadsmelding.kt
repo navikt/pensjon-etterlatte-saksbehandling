@@ -1,7 +1,5 @@
-import com.fasterxml.jackson.databind.JsonNode
 import model.GyldigSoeknadService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.Person
@@ -12,13 +10,11 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.*
 
 internal class LesGyldigSoeknadsmelding(
     rapidsConnection: RapidsConnection,
     private val gyldigSoeknad: GyldigSoeknadService,
-    private val pdl: Pdl,
     private val behandling: Behandling,
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(LesGyldigSoeknadsmelding::class.java)
@@ -29,21 +25,19 @@ internal class LesGyldigSoeknadsmelding(
             validate { it.demandValue("@soeknad_fordelt", true) }
             validate { it.interestedIn("@correlation_id") }
             validate { it.requireKey("@skjema_info") }
-            validate { it.demandValue("@skjema_info.type", "BARNEPENSJON") }
-            validate { it.demandValue("@skjema_info.versjon", "2") }
-            validate { it.requireKey("@lagret_soeknad_id") }
             validate { it.requireKey("@fnr_soeker") } //TODO: sjekk at dette er riktig verdi
+            validate { it.rejectKey("@gyldig_innsender") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
+            logger.info("Gyldighetsvurdering av mottat søknad fra fordeler starter")
 
             try {
                 val personGalleri = gyldigSoeknad.hentPersongalleriFraSoeknad(packet["@skjema_info"])
-                val familieRelasjonPdl = gyldigSoeknad.hentSoekerFraPdl(personGalleri.soeker, pdl)
-                val gyldighetsVurdering = gyldigSoeknad.vurderGyldighet(personGalleri, familieRelasjonPdl)
-                val erGyldigFramsatt = if (gyldighetsVurdering.resultat == VurderingsResultat.OPPFYLT) true else false
+                val gyldighetsVurdering = gyldigSoeknad.vurderGyldighet(personGalleri)
+                val erGyldigFramsatt = (gyldighetsVurdering.resultat == VurderingsResultat.OPPFYLT)
                 logger.info("Gyldighetsvurdering I lesGyldigsoeknad: {}", gyldighetsVurdering)
 
                 val sak = behandling.skaffSak(packet["@fnr_soeker"].asText(), packet["@skjema_info"]["type"].asText())

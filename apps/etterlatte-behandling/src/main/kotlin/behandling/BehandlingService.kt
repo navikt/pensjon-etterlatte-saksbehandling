@@ -16,6 +16,7 @@ interface BehandlingService {
     fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
     fun slettBehandlingerISak(sak: Long)
     fun avbrytBehandling(behandling: UUID): Behandling
+    fun grunnlagISakEndret(sak: Long)
 }
 
 class RealBehandlingService(
@@ -72,6 +73,18 @@ class RealBehandlingService(
         return inTransaction { behandlingFactory.hent(behandling).avbrytBehandling()}.also {
             runBlocking {
                 behandlingHendelser.send(behandling to BehandlingHendelseType.AVBRUTT)
+            }
+        }
+    }
+
+    override fun grunnlagISakEndret(sak: Long) {
+        inTransaction {
+            behandlinger.alleBehandingerISak(sak)
+        }.also {
+            runBlocking {
+                it.forEach{
+                    behandlingHendelser.send(it.id to BehandlingHendelseType.GRUNNLAGENDRET)
+                }
             }
         }
     }

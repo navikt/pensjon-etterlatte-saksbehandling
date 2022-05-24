@@ -12,7 +12,7 @@ fun main() {
         AppBuilder(env).also { ab ->
             RapidApplication.create(env)
                 .also {
-                    LesGyldigSoeknadsmelding(it, GyldigSoeknadService(), ab.createPdlService(), ab.createBehandlingService())
+                    LesGyldigSoeknadsmelding(it, GyldigSoeknadService(ab.createPdlService()), ab.createBehandlingService())
                 }.start()
         }
     }

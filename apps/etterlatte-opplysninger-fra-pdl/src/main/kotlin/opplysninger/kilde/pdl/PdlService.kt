@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 
+
 class PdlService(private val pdl: HttpClient, private val url: String) : Pdl {
     override fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): Person {
         val personRequest = HentPersonRequest(Foedselsnummer.of(foedselsnummer), rolle)

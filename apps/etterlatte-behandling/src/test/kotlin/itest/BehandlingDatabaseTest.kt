@@ -13,6 +13,7 @@ import org.junit.jupiter.api.*
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
 
@@ -21,7 +22,6 @@ import javax.sql.DataSource
 internal class BehandlingDaoIntegrationTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
-
 
     private lateinit var dataSource: DataSource
 
@@ -48,11 +48,12 @@ internal class BehandlingDaoIntegrationTest {
         val sakrepo = SakDao { connection }
         val behandlingRepo = BehandlingDao { connection }
         val sak1 = sakrepo.opprettSak("123", "BP").id
+        val behandlingOpprettet = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
 
         val behandlingUtenPersongalleri = Behandling(
             UUID.randomUUID(),
             sak1,
-            LocalDateTime.now(),
+            behandlingOpprettet,
             LocalDateTime.now(),
             LocalDateTime.now(),
             null,
@@ -156,19 +157,17 @@ internal class BehandlingDaoIntegrationTest {
                 vurderinger = listOf(VurdertGyldighet(
                     navn = GyldighetsTyper.INNSENDER_ER_FORELDER,
                     resultat = VurderingsResultat.OPPFYLT,
-                    vurdertDato = LocalDateTime.now()
+                    basertPaaOpplysninger = "innsenderfnr"
                 )),
                 vurdertDato = LocalDateTime.now()
-            )
+            ),
+            status = BehandlingStatus.GYLDIG_SOEKNAD
         )
 
         behandlingRepo.lagreGyldighetsproving(gyldighetsproevingBehanding)
         val lagretGyldighetsproving = requireNotNull(behandlingRepo.hentBehandling(persongalleriBehandling.id))
 
         Assertions.assertEquals(gyldighetsproevingBehanding.gyldighetsproeving, lagretGyldighetsproving.gyldighetsproeving)
-
-
-
     }
 
     @Test

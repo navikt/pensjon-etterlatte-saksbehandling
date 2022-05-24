@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.common
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import java.io.Serializable
 import java.time.Clock
@@ -30,13 +31,12 @@ abstract class TruncatedInstant(
  * based on the precision at hand - which may lead to rows not being picked up as expected. This case is especially
  * relevant i.e when combining timestamp-db-fields (truncated by db) with Instants stored as json (not truncated by db).
  */
-class Tidspunkt(
+class Tidspunkt @JsonCreator(mode = JsonCreator.Mode.DELEGATING) constructor(
     instant: Instant,
 ) : TruncatedInstant(instant.truncatedTo(unit)) {
 
     companion object {
         val unit: ChronoUnit = ChronoUnit.MICROS
-        val tidssoneNorge = ZoneId.of("Europe/Oslo")
         fun now(clock: Clock = Clock.systemUTC()) = Tidspunkt(Instant.now(clock))
     }
 
@@ -53,12 +53,12 @@ class Tidspunkt(
     override fun hashCode() = instant.hashCode()
     override fun plus(amount: Long, unit: TemporalUnit): Tidspunkt = instant.plus(amount, unit).toTidspunkt()
     override fun minus(amount: Long, unit: TemporalUnit): Tidspunkt = instant.minus(amount, unit).toTidspunkt()
-    fun toNorskTid(): LocalDateTime = LocalDateTime.ofInstant(this.instant, tidssoneNorge)
-    fun toZonedNorskTid(): ZonedDateTime = ZonedDateTime.ofInstant(this.instant, tidssoneNorge)
+
 }
 
 fun Instant.toTidspunkt() = Tidspunkt(this)
-fun LocalDateTime.toTidspunkt(zoneId: ZoneId) = this.atZone(zoneId).toTidspunkt()
-fun ZonedDateTime.toTidspunkt() = this.toInstant().toTidspunkt()
+fun ZonedDateTime.toTidspunkt() = toInstant().toTidspunkt()
+fun LocalDateTime.toTidspunkt(zoneId: ZoneId) = atZone(zoneId).toTidspunkt()
+fun Tidspunkt.toNorskTid(): ZonedDateTime = ZonedDateTime.ofInstant(this.instant, norskTidssone)
 
-
+val norskTidssone: ZoneId = ZoneId.of("Europe/Oslo")

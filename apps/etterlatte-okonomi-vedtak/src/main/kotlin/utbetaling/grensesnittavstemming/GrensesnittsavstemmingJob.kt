@@ -15,7 +15,7 @@ class GrensesnittsavstemmingJob(
 ) {
     private val jobbNavn = this::class.simpleName
 
-    fun schedule() {
+    fun schedule() =
         fixedRateTimer(
             name = jobbNavn,
             daemon = true,
@@ -32,7 +32,6 @@ class GrensesnittsavstemmingJob(
                 logger.error("Avstemming feilet", throwable)
             }
         }
-    }
 
     class Grensesnittsavstemming(
         val grensesnittsavstemmingService: GrensesnittsavstemmingService,
@@ -40,7 +39,6 @@ class GrensesnittsavstemmingJob(
         val jobbNavn: String,
     ) {
         private val log = LoggerFactory.getLogger(this::class.java)
-
 
         fun run() {
             withLogContext {
@@ -51,7 +49,6 @@ class GrensesnittsavstemmingJob(
             }
         }
     }
-
 
     companion object {
         private val logger = LoggerFactory.getLogger(GrensesnittsavstemmingJob::class.java)

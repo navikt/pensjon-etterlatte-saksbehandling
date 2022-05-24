@@ -43,6 +43,7 @@ fun kriterieDoedsdatoRegistrertIPdl(avdoed: VilkaarOpplysning<Person>?): Kriteri
             resultat,
             listOf(
                 Kriteriegrunnlag(
+                    avdoed.id,
                     KriterieOpplysningsType.DOEDSDATO,
                     avdoed.kilde,
                     Doedsdato(avdoed.opplysning.doedsdato, avdoed.opplysning.foedselsnummer)
@@ -59,6 +60,7 @@ fun kriterieAvdoedErForelder(
     val opplsyningsGrunnlag = listOfNotNull(
         soeker?.let {
             Kriteriegrunnlag(
+                soeker.id,
                 KriterieOpplysningsType.FORELDRE,
                 soeker.kilde,
                 Foreldre(soeker.opplysning.familieRelasjon?.foreldre)
@@ -66,6 +68,7 @@ fun kriterieAvdoedErForelder(
         },
         avdoed?.let {
             Kriteriegrunnlag(
+                avdoed.id,
                 KriterieOpplysningsType.DOEDSDATO,
                 avdoed.kilde,
                 Doedsdato(avdoed.opplysning.doedsdato, avdoed.opplysning.foedselsnummer)

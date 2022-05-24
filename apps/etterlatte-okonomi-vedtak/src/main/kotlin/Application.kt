@@ -1,48 +1,33 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
-import no.nav.etterlatte.utbetaling.config.required
 import no.nav.helse.rapids_rivers.RapidsConnection
 
 
 fun main() {
-    ApplicationContext(
-        env = System.getenv().toMutableMap().apply {
-            put("KAFKA_CONSUMER_GROUP_ID", this.required("NAIS_APP_NAME").replace("-", ""))
-        }
-    ).also { rapidApplication(it).start() }
+    ApplicationContext().also {
+        jobs(it)
+        rapidApplication(it).start()
+    }
 }
 
-fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection {
-    val dataSource = applicationContext.dataSourceBuilder().also { it.migrate() }.dataSource()
-    val jmsConnectionFactory = applicationContext.jmsConnectionFactory()
-    val utbetalingsoppdragDao = applicationContext.utbetalingsoppdragDao(dataSource)
+fun jobs(applicationContext: ApplicationContext) {
+    applicationContext.grensesnittavstemmingJob.schedule()
+}
 
-    val rapidsConnection = applicationContext.rapidsConnection()
-    val oppdragService = applicationContext.utbetalingService(
-        oppdragSender = applicationContext.oppdragSender(jmsConnectionFactory),
-        utbetalingDao = utbetalingsoppdragDao,
-        rapidsConnection = rapidsConnection
-    )
-
-    val avstemmingService = applicationContext.grensesnittsavstemmingService(
-        grensesnittavstemmingDao = applicationContext.avstemmingDao(dataSource),
-        avstemmingsdataSender = applicationContext.avstemmingSender(jmsConnectionFactory),
-        utbetalingDao = utbetalingsoppdragDao
-    )
-
-    // Jobber
-    applicationContext.avstemmingJob(avstemmingService, applicationContext.leaderElection()).schedule()
-
-    return rapidsConnection
+fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
+    applicationContext.rapidsConnection
         .apply {
-            applicationContext.kvitteringMottaker(oppdragService, jmsConnectionFactory)
-            applicationContext.vedtakMottaker(this, oppdragService)
+            applicationContext.vedtakMottaker
+            applicationContext.kvitteringMottaker
+            applicationContext.oppgavetrigger
 
             register(object : RapidsConnection.StatusListener {
+                override fun onStartup(rapidsConnection: RapidsConnection) {
+                    applicationContext.dataSourceBuilder.migrate()
+                }
                 override fun onShutdown(rapidsConnection: RapidsConnection) {
-                    jmsConnectionFactory.stop()
+                    applicationContext.jmsConnectionFactory.stop()
                 }
             })
         }
-}

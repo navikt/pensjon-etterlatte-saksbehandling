@@ -33,12 +33,12 @@ internal class StartUthentingFraSoeknad(
 
             JsonMessage.newMessage(
                 mapOf(
-                    "@event_name" to "opplysninger_soeknad",
-                    "@sak_id" to packet["@sak_id"],
+                    //"@event_name" to "opplysninger_soeknad",
+                    "sak" to packet["@sak_id"],
                     "@behandling_id" to packet["@behandling_id"],
                     "@gyldig_innsender" to packet["@gyldig_innsender"],
                     "@correlation_id" to packet["@correlation_id"],
-                    "@opplysninger_soeknad" to opplysninger
+                    "opplysning" to opplysninger
                 )
             ).apply {
                 try {

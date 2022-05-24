@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.vilkaar.barnepensjon.*
 import org.slf4j.LoggerFactory
-import vilkaar.barnepensjon.ekstraVilkaarBarnOgForelderSammeBostedsadresse
+import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
 
 
 class VilkaarService {
@@ -31,7 +31,6 @@ class VilkaarService {
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
-
 
         val vilkaar = listOf(
             vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, soekerPdl, avdoedPdl),
@@ -47,11 +46,6 @@ class VilkaarService {
                 soekerSoeknad,
                 gjenlevendePdl,
                 avdoedPdl,
-            ),
-            ekstraVilkaarBarnOgForelderSammeBostedsadresse(
-                Vilkaartyper.SAMME_ADRESSE,
-                soekerPdl,
-                gjenlevendePdl
             )
         )
 
@@ -59,13 +53,32 @@ class VilkaarService {
         val vurdertDato = hentSisteVurderteDato(vilkaar)
 
         return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
+    }
 
+    fun mapKommerSoekerTilGode(opplysninger: List<VilkaarOpplysning<ObjectNode>>) : VilkaarResultat {
+        logger.info("Map opplysninger for å vurdere om penger kommer søker til gode")
+        val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
+        val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
+
+        val sammeAdresser = listOf(
+            barnOgForelderSammeBostedsadresse(
+                Vilkaartyper.SAMME_ADRESSE,
+                soekerPdl,
+                gjenlevendePdl
+            )
+        )
+
+        val vilkaarResultat = setVilkaarVurderingFraVilkaar(sammeAdresser)
+        val vurdertDato = hentSisteVurderteDato(sammeAdresser)
+
+        return VilkaarResultat(vilkaarResultat, sammeAdresser, vurdertDato)
     }
 
     companion object {
         inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<ObjectNode>?): VilkaarOpplysning<T>? {
             return opplysning?.let {
                 VilkaarOpplysning(
+                    opplysning.id,
                     opplysning.opplysningType,
                     opplysning.kilde,
                     objectMapper.readValue(opplysning.opplysning.toString())

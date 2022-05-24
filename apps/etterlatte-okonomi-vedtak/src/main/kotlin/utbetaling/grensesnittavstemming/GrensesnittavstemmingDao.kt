@@ -7,6 +7,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.utbetaling.common.toTidspunkt
 import java.sql.Timestamp
+import java.util.*
 import javax.sql.DataSource
 
 class GrensesnittavstemmingDao(private val dataSource: DataSource) {
@@ -21,8 +22,8 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
                 paramMap = mapOf(
                     "id" to grensesnittavstemming.id.value.param<String>(),
                     "opprettet" to Timestamp.from(grensesnittavstemming.opprettet.instant).param<Timestamp>(),
-                    "periode_fra" to Timestamp.from(grensesnittavstemming.periodeFraOgMed.instant).param<Timestamp>(),
-                    "periode_til" to Timestamp.from(grensesnittavstemming.periodeTil.instant).param<Timestamp>(),
+                    "periode_fra" to Timestamp.from(grensesnittavstemming.periode.fraOgMed.instant).param<Timestamp>(),
+                    "periode_til" to Timestamp.from(grensesnittavstemming.periode.til.instant).param<Timestamp>(),
                     "antall_oppdrag" to grensesnittavstemming.antallOppdrag.param<Int>(),
                     "avstemmingsdata" to grensesnittavstemming.avstemmingsdata.param<String>(),
                 )
@@ -48,10 +49,16 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
         Grensesnittavstemming(
             id = UUIDBase64(row.string("id")),
             opprettet = row.instant("opprettet").toTidspunkt(),
-            periodeFraOgMed = row.instant("periode_fra").toTidspunkt(),
-            periodeTil = row.instant("periode_til").toTidspunkt(),
+            periode = Avstemmingsperiode(
+                fraOgMed = row.instant("periode_fra").toTidspunkt(),
+                til = row.instant("periode_til").toTidspunkt(),
+            ),
             antallOppdrag = row.int("antall_oppdrag"),
-            avstemmingsdata = row.stringOrNull("avstemmingsdata"),
+            avstemmingsdata = row.string("avstemmingsdata"),
         )
+
+    companion object {
+        val tzUTC = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+    }
 
 }

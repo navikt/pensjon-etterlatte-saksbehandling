@@ -15,13 +15,7 @@ import no.nav.etterlatte.security.ktor.clientCredential
 
 class AppBuilder(private val props: Map<String, String>) {
 
-    private val behandling_app = behandlingHttpClient()
     private val pdlTjenester = pdlTjenesterHttpClient()
-
-
-    fun createBehandlingService(): Behandling {
-        return BehandlingsService(behandling_app, "http://etterlatte-behandling")
-    }
 
     fun createPdlService(): Pdl {
         return PdlService(pdlTjenester, "http://etterlatte-pdltjenester")
@@ -30,19 +24,6 @@ class AppBuilder(private val props: Map<String, String>) {
     fun createOpplysningsbygger(): OpplysningsBygger {
         return OpplysningsByggerService()
     }
-
-    private fun behandlingHttpClient() = HttpClient(OkHttp) {
-        install(JsonFeature) { serializer = JacksonSerializer{
-            registerModule(JavaTimeModule())
-            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        } }
-        install(Auth) {
-            clientCredential {
-                config = props.toMutableMap()
-                    .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("BEHANDLING_AZURE_SCOPE"))) }
-            }
-        }
-    }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 
     private fun pdlTjenesterHttpClient() = HttpClient(OkHttp) {
         install(JsonFeature) { serializer = JacksonSerializer{

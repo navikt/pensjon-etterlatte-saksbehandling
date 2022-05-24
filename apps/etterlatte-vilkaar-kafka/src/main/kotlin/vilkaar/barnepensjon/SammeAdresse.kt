@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
-fun ekstraVilkaarBarnOgForelderSammeBostedsadresse(
+fun barnOgForelderSammeBostedsadresse(
     vilkaartype: Vilkaartyper,
     soekerPdl: VilkaarOpplysning<Person>?,
     gjenlevendePdl: VilkaarOpplysning<Person>?
@@ -38,6 +38,7 @@ fun kriterieSammeBostedsadresse(
     val opplysningsGrunnlag = listOfNotNull(
         soekerPdl?.let {
             Kriteriegrunnlag(
+                soekerPdl.id,
                 KriterieOpplysningsType.BOSTEDADRESSE_SOEKER,
                 soekerPdl.kilde,
                 Bostedadresser(soekerPdl.opplysning.bostedsadresse)
@@ -45,6 +46,7 @@ fun kriterieSammeBostedsadresse(
         },
         gjenlevendePdl?.let {
             Kriteriegrunnlag(
+                gjenlevendePdl.id,
                 KriterieOpplysningsType.BOSTEDADRESSE_GJENLEVENDE,
                 gjenlevendePdl.kilde,
                 Bostedadresser(gjenlevendePdl.opplysning.bostedsadresse)

@@ -2,11 +2,11 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.attestasjon
+import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.config.DataSourceBuilder
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.nav.etterlatte.utbetaling.vedtak
-import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -48,65 +48,102 @@ internal class UtbetalingDaoIntegrationTest {
 
     private fun cleanDatabase() {
         dataSource.connection.use {
-            it.prepareStatement("DELETE FROM utbetalingsoppdrag WHERE vedtak_id IS NOT NULL")
-                .apply { execute() }
+            it.prepareStatement("TRUNCATE utbetalingsoppdrag").apply { execute() }
         }
     }
 
     @Test
-    fun `skal opprette og hente utbetalingsoppdrag`() {
+    fun `skal opprette og hente utbetaling`() {
         val vedtak = vedtak()
         val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), Tidspunkt.now())
-        val opprettet_tidspunkt = Tidspunkt.now()
+        val opprettetTidspunkt = Tidspunkt.now()
 
-        utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettet_tidspunkt)
-        val utbetalingsoppdrag = utbetalingDao.hentUtbetaling(vedtak.vedtakId)
+        utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettetTidspunkt)
+        val utbetaling = utbetalingDao.hentUtbetaling(vedtak.vedtakId)
 
-        assertAll(
-            "Skal sjekke at utbetalingsoppdrag er korrekt opprettet",
-            { assertNotNull(utbetalingsoppdrag?.id) },
-            { assertEquals(vedtak.vedtakId, utbetalingsoppdrag?.vedtakId) },
-            { assertEquals(vedtak.behandlingsId, utbetalingsoppdrag?.behandlingId) },
-            { assertEquals(vedtak.sakId, utbetalingsoppdrag?.sakId) },
-            { assertEquals(UtbetalingStatus.SENDT, utbetalingsoppdrag?.status) },
-            { assertEquals(vedtak.vedtakId, utbetalingsoppdrag?.vedtakId) },
+        assertAll("Skal sjekke at utbetaling er korrekt opprettet",
+            { assertNotNull(utbetaling?.id) },
+            { assertEquals(vedtak.vedtakId, utbetaling?.vedtakId?.value) },
+            { assertEquals(vedtak.behandlingsId, utbetaling?.behandlingId?.value) },
+            { assertEquals(vedtak.sakId, utbetaling?.sakId?.value) },
+            { assertEquals(UtbetalingStatus.SENDT, utbetaling?.status) },
             {
                 assertTrue(
-                    utbetalingsoppdrag?.opprettet!!.instant.isAfter(
+                    utbetaling?.opprettet!!.instant.isAfter(
                         Instant.now().minusSeconds(10)
-                    ) and utbetalingsoppdrag.opprettet.instant.isBefore(Instant.now())
+                    ) and utbetaling.opprettet.instant.isBefore(Instant.now())
                 )
             },
             {
                 assertTrue(
-                    utbetalingsoppdrag!!.endret.instant.isAfter(
+                    utbetaling!!.endret.instant.isAfter(
                         Instant.now().minusSeconds(10)
-                    ) and utbetalingsoppdrag.endret.instant.isBefore(Instant.now())
+                    ) and utbetaling.endret.instant.isBefore(Instant.now())
                 )
             },
             {
                 assertTrue(
-                    utbetalingsoppdrag!!.avstemmingsnoekkel.instant.isAfter(
+                    utbetaling!!.avstemmingsnoekkel.instant.isAfter(
                         Instant.now().minusSeconds(10)
-                    ) and utbetalingsoppdrag.avstemmingsnoekkel.instant.isBefore(Instant.now())
+                    ) and utbetaling.avstemmingsnoekkel.instant.isBefore(Instant.now())
                 )
             },
-            { assertEquals(vedtak.sakIdGjelderFnr, utbetalingsoppdrag?.foedselsnummer) },
-            { assertNotNull(utbetalingsoppdrag?.utgaaendeOppdrag) },
-            { assertNull(utbetalingsoppdrag?.kvitteringOppdrag) },
-            { assertNull(utbetalingsoppdrag?.kvitteringBeskrivelse) },
-            { assertNull(utbetalingsoppdrag?.kvitteringFeilkode) },
-            { assertNull(utbetalingsoppdrag?.kvitteringMeldingKode) }
-        )
+            { assertEquals(vedtak.sakIdGjelderFnr, utbetaling?.foedselsnummer?.value) },
+            { assertNotNull(utbetaling?.oppdrag) },
+            { assertNull(utbetaling?.kvittering) },
+            { assertNull(utbetaling?.kvitteringBeskrivelse) },
+            { assertNull(utbetaling?.kvitteringFeilkode) },
+            { assertNull(utbetaling?.kvitteringMeldingKode) })
     }
 
     @Test
-    fun `skal sette kvittering paa utbetalingsoppdrag`() {
+    fun `skal hente alle utbetalinger mellom to tidspunkter`() {
+        val attestasjon = attestasjon()
+
+        val vedtak1 = vedtak("1")
+        val vedtak2 = vedtak("2")
+        val vedtak3 = vedtak("3")
+        val vedtak4 = vedtak("4")
+        val vedtak5 = vedtak("5")
+
+        val jan1 = Tidspunkt(Instant.parse("2022-01-01T00:00:00Z"))
+        val jan2 = Tidspunkt(Instant.parse("2022-02-01T00:00:00Z"))
+        val jan3 = Tidspunkt(Instant.parse("2022-03-01T00:00:00Z"))
+        val jan4 = Tidspunkt(Instant.parse("2022-04-01T00:00:00Z"))
+        val jan5 = Tidspunkt(Instant.parse("2022-05-01T00:00:00Z"))
+        val jan6 = Tidspunkt(Instant.parse("2022-06-01T00:00:00Z"))
+
+        val oppdrag1 = OppdragMapper.oppdragFraVedtak(vedtak1, attestasjon, jan1)
+        val oppdrag2 = OppdragMapper.oppdragFraVedtak(vedtak2, attestasjon, jan2)
+        val oppdrag3 = OppdragMapper.oppdragFraVedtak(vedtak3, attestasjon, jan3)
+        val oppdrag4 = OppdragMapper.oppdragFraVedtak(vedtak4, attestasjon, jan4)
+        val oppdrag5 = OppdragMapper.oppdragFraVedtak(vedtak5, attestasjon, jan6)
+
+        utbetalingDao.opprettUtbetaling(vedtak1, oppdrag1, jan1)
+        utbetalingDao.opprettUtbetaling(vedtak2, oppdrag2, jan2)
+        utbetalingDao.opprettUtbetaling(vedtak3, oppdrag3, jan3)
+        utbetalingDao.opprettUtbetaling(vedtak4, oppdrag4, jan4)
+        utbetalingDao.opprettUtbetaling(vedtak5, oppdrag5, jan6)
+
+        val utbetalinger = utbetalingDao.hentAlleUtbetalingerMellom(jan2, jan5)
+
+        assertAll(
+            "3 utbetalinger skal hentes, med vedtak id 2, 3 og 4",
+            { assertEquals(3, utbetalinger.size) },
+            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == "2" }) },
+            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == "3" }) },
+            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == "4" }) },
+        )
+    }
+
+
+    @Test
+    fun `skal sette kvittering paa utbetaling`() {
         val vedtak = vedtak()
         val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), Tidspunkt.now())
-        val opprettet_tidspunkt = Tidspunkt.now()
+        val opprettetTidspunkt = Tidspunkt.now()
 
-        utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettet_tidspunkt)
+        utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettetTidspunkt)
 
         val oppdragMedKvittering = oppdrag.apply {
             oppdrag110.oppdragsId = 1
@@ -114,43 +151,39 @@ internal class UtbetalingDaoIntegrationTest {
         }
 
         utbetalingDao.oppdaterKvittering(oppdragMedKvittering, Tidspunkt.now())
-        val utbetalingsoppdragOppdatert = utbetalingDao.hentUtbetaling(oppdrag.vedtakId())
+        val utbetalingOppdatert = utbetalingDao.hentUtbetaling(oppdrag.vedtakId())
 
-        assertAll("skal sjekke at kvittering er opprettet korrekt på utbetalingsoppdrag",
-            { assertNotNull(utbetalingsoppdragOppdatert?.kvitteringOppdrag) },
-            { assertNotNull(utbetalingsoppdragOppdatert?.kvitteringOppdrag?.mmel) },
+        assertAll("skal sjekke at kvittering er opprettet korrekt på utbetaling",
+            { assertNotNull(utbetalingOppdatert?.kvittering) },
+            { assertNotNull(utbetalingOppdatert?.kvittering?.mmel) },
             {
                 assertEquals(
-                    oppdragMedKvittering.mmel?.alvorlighetsgrad,
-                    utbetalingsoppdragOppdatert?.kvitteringOppdrag?.mmel?.alvorlighetsgrad
+                    oppdragMedKvittering.mmel?.alvorlighetsgrad, utbetalingOppdatert?.kvittering?.mmel?.alvorlighetsgrad
                 )
             },
             {
                 assertEquals(
-                    oppdragMedKvittering.oppdrag110.oppdragsId,
-                    utbetalingsoppdragOppdatert?.kvitteringOppdrag?.oppdrag110?.oppdragsId
+                    oppdragMedKvittering.oppdrag110.oppdragsId, utbetalingOppdatert?.kvittering?.oppdrag110?.oppdragsId
                 )
             })
     }
 
     @Test
-    fun `skal oppdatere status paa utbetalingsoppdrag`() {
+    fun `skal oppdatere status paa utbetaling`() {
         val vedtak = vedtak()
         val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), Tidspunkt.now())
-        val opprettet_tidspunkt = Tidspunkt.now()
+        val opprettetTidspunkt = Tidspunkt.now()
 
-        val utbetalingsoppdrag = utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettet_tidspunkt)
+        val utbetaling = utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettetTidspunkt)
 
-        assertNotNull(utbetalingsoppdrag)
-        assertEquals(UtbetalingStatus.SENDT, utbetalingsoppdrag.status)
+        assertNotNull(utbetaling)
+        assertEquals(UtbetalingStatus.SENDT, utbetaling.status)
 
-        val utbetalingsoppdragOppdatert = utbetalingDao.oppdaterStatus(
-            vedtakId = vedtak.vedtakId,
-            status = UtbetalingStatus.GODKJENT,
-            endret = Tidspunkt.now()
+        val utbetalingOppdatert = utbetalingDao.oppdaterStatus(
+            vedtakId = vedtak.vedtakId, status = UtbetalingStatus.GODKJENT, endret = Tidspunkt.now()
         )
 
-        assertEquals(UtbetalingStatus.GODKJENT, utbetalingsoppdragOppdatert.status)
+        assertEquals(UtbetalingStatus.GODKJENT, utbetalingOppdatert.status)
     }
 
     @AfterEach

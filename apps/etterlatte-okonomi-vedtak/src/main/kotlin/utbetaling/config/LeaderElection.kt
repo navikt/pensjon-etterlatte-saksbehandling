@@ -7,14 +7,14 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.net.InetAddress
 
-class LeaderElection(
+open class LeaderElection(
     private val electorPath: String,
     private val httpClient: HttpClient = HttpClient(),
     private val me: String? = InetAddress.getLocalHost().hostName
 ) {
     private val objectMapper = jacksonObjectMapper()
 
-    fun isLeader(): Boolean {
+    open fun isLeader(): Boolean {
         val leader = runBlocking {
             httpClient.get<String>("http://$electorPath/").let(objectMapper::readTree).get("name").asText()
         }

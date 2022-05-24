@@ -11,6 +11,8 @@ import no.nav.etterlatte.libs.common.toJson
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Timestamp
+import java.time.ZoneId
+import java.time.ZoneOffset
 import java.util.*
 
 class BehandlingDao(private val connection: () -> Connection) {
@@ -51,7 +53,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     fun asBehandling(rs: ResultSet) = Behandling(
         id = rs.getObject("id") as UUID,
         sak = rs.getLong("sak_id"),
-        behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toLocalDateTime(),
+        behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         soeknadMottattDato = rs.getTimestamp("soekand_mottatt_dato")?.toLocalDateTime(),
         innsender = rs.getString("innsender"),
@@ -68,7 +70,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement("INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status) VALUES(?, ?, ?, ?, ?)")
         stmt.setObject(1, behandling.id)
         stmt.setLong(2, behandling.sak)
-        stmt.setTimestamp(3, Timestamp.valueOf(behandling.behandlingOpprettet))
+        stmt.setTimestamp(3, Timestamp.from(behandling.behandlingOpprettet.atZone(ZoneId.systemDefault()).toInstant()))
         stmt.setTimestamp(4, Timestamp.valueOf(behandling.sistEndret))
         stmt.setString(5, behandling.status?.name)
         stmt.executeUpdate()
@@ -91,9 +93,10 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     fun lagreGyldighetsproving(behandling: Behandling) {
-        val stmt = connection().prepareStatement("UPDATE behandling SET gyldighetssproving = ? WHERE id = ?")
+        val stmt = connection().prepareStatement("UPDATE behandling SET gyldighetssproving = ?, status = ? WHERE id = ?")
         stmt.setObject(1, objectMapper.writeValueAsString(behandling.gyldighetsproeving))
-        stmt.setObject(2, behandling.id)
+        stmt.setString(2, behandling.status?.name)
+        stmt.setObject(3, behandling.id)
         require(stmt.executeUpdate() == 1)
     }
 

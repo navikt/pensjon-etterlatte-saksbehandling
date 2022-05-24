@@ -33,12 +33,22 @@ spec:
       value: 8a5e70a5-2ba8-4951-8a7f-1ee2b442fb0c
     - name: ETTERLATTE_PDL_URL
       value: http://etterlatte-pdltjenester
+    - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
+      value: ce96a301-13db-4409-b277-5b27f464d08b
+    - name: ETTERLATTE_GRUNNLAG_URL
+      value: http://etterlatte-grunnlag
+    - name: ETTERLATTE_VEDTAK_CLIENT_ID
+      value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
+    - name: ETTERLATTE_VEDTAK_URL
+      value: http://etterlatte-vedtaksvurdering
+
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester
-        - application: etterlatte-vilkaar-api
+        - application: etterlatte-grunnlag
+        - application: etterlatte-vedtaksvurdering
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui

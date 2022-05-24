@@ -37,10 +37,9 @@ class UtbetalingService(
         return utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock))
     }
 
-
     // TODO: sette inn kolonne i database som viser at kvittering er oppdatert manuelt?
     fun settKvitteringManuelt(vedtakId: String) = utbetalingDao.hentUtbetaling(vedtakId)?.let {
-        it.utgaaendeOppdrag.apply {
+        it.oppdrag.apply {
             mmel = Mmel().apply {
                 systemId = "231-OPPD" // TODO: en annen systemid her for å indikere manuell jobb?
                 alvorlighetsgrad = "00"
@@ -62,7 +61,7 @@ class UtbetalingService(
     ).toJson()
 
     private fun Oppdrag.kvitteringBeskrivelse() = when (this.mmel.kodeMelding) {
-        "00" -> "Utbetalingsoppdrag OK"
+        "00" -> "Utbetaling OK"
         else -> "${this.mmel.kodeMelding} ${this.mmel.beskrMelding}"
     }
 

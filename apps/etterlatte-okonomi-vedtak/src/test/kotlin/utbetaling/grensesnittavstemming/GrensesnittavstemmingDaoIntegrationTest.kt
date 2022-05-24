@@ -42,10 +42,13 @@ internal class GrensesnittavstemmingDaoIntegrationTest {
     @Test
     fun `skal opprette avstemming`() {
         val grensesnittavstemming = Grensesnittavstemming(
-            periodeFraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS)),
-            periodeTil = Tidspunkt.now(),
+            periode = Avstemmingsperiode(
+                fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS)),
+                til = Tidspunkt.now(),
+            ),
             antallOppdrag = 1,
-            opprettet = Tidspunkt.now()
+            opprettet = Tidspunkt.now(),
+            avstemmingsdata = "",
         )
 
         val antallRaderOppdatert = grensesnittavstemmingDao.opprettAvstemming(grensesnittavstemming)
@@ -59,23 +62,32 @@ internal class GrensesnittavstemmingDaoIntegrationTest {
 
         val grensesnittavstemming1 = Grensesnittavstemming(
             opprettet = now,
-            periodeFraOgMed = now.minus(1, ChronoUnit.DAYS),
-            periodeTil = now,
-            antallOppdrag = 1
+            periode = Avstemmingsperiode(
+                fraOgMed = now.minus(1, ChronoUnit.DAYS),
+                til = now
+            ),
+            antallOppdrag = 1,
+            avstemmingsdata = "",
         )
 
         val grensesnittavstemming2 = Grensesnittavstemming(
             opprettet = now.minus(1, ChronoUnit.DAYS),
-            periodeFraOgMed = now.minus(2, ChronoUnit.DAYS),
-            periodeTil = now.minus(1, ChronoUnit.DAYS),
-            antallOppdrag = 2
+            periode = Avstemmingsperiode(
+                fraOgMed = now.minus(2, ChronoUnit.DAYS),
+                til = now.minus(1, ChronoUnit.DAYS),
+            ),
+            antallOppdrag = 2,
+            avstemmingsdata = "",
         )
 
         val grensesnittavstemming3 = Grensesnittavstemming(
             opprettet = now.minus(2, ChronoUnit.DAYS),
-            periodeFraOgMed = now.minus(3, ChronoUnit.DAYS),
-            periodeTil = now.minus(2, ChronoUnit.DAYS),
-            antallOppdrag = 3
+            periode = Avstemmingsperiode(
+                fraOgMed = now.minus(3, ChronoUnit.DAYS),
+                til = now.minus(2, ChronoUnit.DAYS),
+            ),
+            antallOppdrag = 3,
+            avstemmingsdata = "",
         )
 
         grensesnittavstemmingDao.opprettAvstemming(grensesnittavstemming1)

@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.grunnlag.OpplysningDao
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import org.junit.jupiter.api.*
 import org.testcontainers.containers.PostgreSQLContainer
@@ -45,8 +45,6 @@ internal class GrunnlagDaoIntegrationTest {
     @Test
     fun `Legge til opplysning og hente den etterpå`() {
         val connection = dataSource.connection
-        //val sakrepo = SakDao { connection }
-        //val grunnlagRepo = GrunnlagDao { connection }
         val opplysningRepo = OpplysningDao { connection }
         val datoMottat = LocalDate.of(2022,Month.MAY,3).atStartOfDay()
 
@@ -64,8 +62,21 @@ internal class GrunnlagDaoIntegrationTest {
             objectMapper.createObjectNode(),
             objectMapper.createObjectNode()
         ).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
+        val uuid =UUID.randomUUID()
+        Grunnlagsopplysning(
+            uuid,
+            Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
+            Opplysningstyper.SOEKNAD_MOTTATT_DATO,
+            objectMapper.createObjectNode(),
+            objectMapper.createObjectNode()
+        ).also {
+            opplysningRepo.slettSpesifikkOpplysningISak(2,it.opplysningType)
+            opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
+
 
         Assertions.assertEquals(1, opplysningRepo.finnOpplysningerIGrunnlag(1).size)
+        Assertions.assertEquals(1, opplysningRepo.finnOpplysningerIGrunnlag(2).size)
+        Assertions.assertEquals(uuid, opplysningRepo.finnOpplysningerIGrunnlag(2).first().id)
         Assertions.assertEquals(datoMottat, opplysningRepo.finnOpplysningerIGrunnlag(1).first().opplysning.let { objectMapper.treeToValue<SoeknadMottattDato>(it) }?.mottattDato )
 
         connection.close()

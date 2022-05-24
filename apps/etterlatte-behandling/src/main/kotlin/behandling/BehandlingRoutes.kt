@@ -7,7 +7,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
+import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import java.util.*
@@ -15,17 +15,17 @@ import java.util.*
 fun Route.behandlingRoutes(service: BehandlingService) {
     get("/behandlinger") {
         call.respond(
-            service.hentBehandlinger().map { BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato) }
-                .let { BehandlingSammendragListe(it) }
+            service.hentBehandlinger().map { BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato, it.behandlingOpprettet) }
+                .let { BehandlingListe(it) }
         )
     }
     get("/sak/{sakid}/behandlinger") {
         call.respond(
             service.hentBehandlingerISak(sakId)
                 .map {
-                    BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato)
+                    BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato, it.behandlingOpprettet)
                 }
-                .let { BehandlingSammendragListe(it) }
+                .let { BehandlingListe(it) }
         )
     }
 
@@ -44,12 +44,27 @@ fun Route.behandlingRoutes(service: BehandlingService) {
             )
         .also { call.respondText(it.id.toString()) }
     }
+
+    post("/saker/{sakid}/hendelse/grunnlagendret") { //Søk
+        service.grunnlagISakEndret(sakId)
+        call.respond(HttpStatusCode.OK)
+    }
     route("/behandlinger/{behandlingsid}") {
         get {
             call.respond(service.hentBehandling(behandlingsId)?.let {
                 DetaljertBehandling(
                     it.id,
                     it.sak,
+                    it.behandlingOpprettet,
+                    it.sistEndret,
+                    it.soeknadMottattDato,
+                    it.innsender,
+                    it.soeker,
+                    it.gjenlevende,
+                    it.avdoed,
+                    it.soesken,
+                    it.gyldighetsproeving,
+                    it.status,
                 )
             } ?: HttpStatusCode.NotFound)
         }

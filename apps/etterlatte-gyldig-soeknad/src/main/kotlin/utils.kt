@@ -5,12 +5,12 @@ import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 class OpplysningKanIkkeHentesUt : IllegalStateException()
 
 fun hentFnrForeldre(familieRelasjon: FamilieRelasjon): List<String> {
-    return familieRelasjon?.foreldre?.map { it.value }
+    return familieRelasjon.foreldre?.map { it.value }
         ?: throw OpplysningKanIkkeHentesUt()
 }
 
 fun hentFnrForeldreAnsvar(familieRelasjon: FamilieRelasjon): List<String> {
-    return familieRelasjon?.ansvarligeForeldre?.map { it.value }
+    return familieRelasjon.ansvarligeForeldre?.map { it.value }
         ?: throw OpplysningKanIkkeHentesUt()
 }
 

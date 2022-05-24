@@ -1,16 +1,23 @@
 package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
+import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
+import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import no.nav.etterlatte.typer.Sak
+import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
+import java.util.*
 
 
-data class PersonSakerResult(val person: Person, val saker: SakerResult)
+data class PersonSakerResult(val person: Person, val saker: Saker)
 
 data class BehandlingsBehov(
     val sak: Long,
@@ -19,7 +26,9 @@ data class BehandlingsBehov(
 
 class BehandlingService(
     private val behandlingKlient: BehandlingKlient,
-    private val pdlKlient: PdltjenesterKlient
+    private val pdlKlient: PdltjenesterKlient,
+    private val grunnlagKlient: EtterlatteGrunnlag,
+    private val vedtakKlient: EtterlatteVedtak
 ) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
 
@@ -37,21 +46,31 @@ class BehandlingService(
         return behandlingKlient.opprettSakForPerson(fnr, sakType, accessToken)
     }
 
-    suspend fun hentSaker(accessToken: String): SakerResult {
+    suspend fun hentSaker(accessToken: String): Saker {
         logger.info("Henter alle saker")
         return behandlingKlient.hentSaker(accessToken)
     }
 
-    suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingSammendragListe {
+    suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingListe {
         logger.info("Henter behandlinger for sak $sakId")
         return behandlingKlient.hentBehandlingerForSak(sakId, accessToken)
     }
 
-    suspend fun hentBehandling(behandlingId: String, accessToken: String): DetaljertBehandling {
+    suspend fun hentBehandling(behandlingId: String, accessToken: String) = coroutineScope {
         logger.info("Henter behandling")
-        val behandling = behandlingKlient.hentBehandling(behandlingId, accessToken)
-        return behandling
-
+        behandlingKlient.hentBehandling(behandlingId, accessToken).let {behandling ->
+            val grunnlag =  async { grunnlagKlient.hentGrunnlagForSak(behandling.sak.toInt(), accessToken) }
+            val vedtak = async { vedtakKlient.hentVedtak(behandling.sak.toInt(), behandlingId, accessToken) }
+            DetaljertBehandlingDto(
+                id = behandling.id,
+                sak = behandling.sak,
+                grunnlag = grunnlag.await(),
+                gyldighetsprøving = behandling.gyldighetsproeving,
+                vilkårsprøving = vedtak.await().vilkaarsResultat,
+                kommerSoekerTilgode = vedtak.await().kommerSoekerTilgodeResultat,
+                beregning = null
+            )
+        }
     }
 
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag {
@@ -64,3 +83,14 @@ class BehandlingService(
     }
 
 }
+
+data class DetaljertBehandlingDto(
+    val id: UUID,
+    val sak: Long,
+    val grunnlag: List<Grunnlagsopplysning<ObjectNode>>,
+    val gyldighetsprøving: GyldighetsResultat?,
+    val vilkårsprøving: VilkaarResultat?,
+    val kommerSoekerTilgode: VilkaarResultat?,
+    val beregning: BeregningsResultat?,
+    val fastsatt: Boolean = false
+)

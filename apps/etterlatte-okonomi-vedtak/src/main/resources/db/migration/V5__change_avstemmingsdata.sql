@@ -1,0 +1,1 @@
+ALTER TABLE avstemming ALTER COLUMN avstemmingsdata TYPE TEXT

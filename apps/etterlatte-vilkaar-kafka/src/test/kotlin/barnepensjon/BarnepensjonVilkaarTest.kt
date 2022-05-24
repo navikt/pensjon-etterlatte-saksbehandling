@@ -32,8 +32,9 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
 import org.junit.jupiter.api.Assertions.*
-import vilkaar.barnepensjon.ekstraVilkaarBarnOgForelderSammeBostedsadresse
+import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
 import java.time.LocalDateTime
+import java.util.UUID.randomUUID
 
 internal class BarnepensjonVilkaarTest {
     @Test
@@ -192,13 +193,13 @@ internal class BarnepensjonVilkaarTest {
         val gjenlevendePdlNorge = lagMockPersonPdl(null, fnrGjenlevende, null, adresserNorgePdl, null)
         val gjenlevendePdlDanmark = lagMockPersonPdl(null, fnrGjenlevende, null, adresseDanmarkPdl, null)
 
-        val sammeAdresse = ekstraVilkaarBarnOgForelderSammeBostedsadresse(
+        val sammeAdresse = barnOgForelderSammeBostedsadresse(
             Vilkaartyper.SAMME_ADRESSE,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlNorge)
         )
 
-        val ulikeAdresse = ekstraVilkaarBarnOgForelderSammeBostedsadresse(
+        val ulikeAdresse = barnOgForelderSammeBostedsadresse(
             Vilkaartyper.SAMME_ADRESSE,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlDanmark)
@@ -250,6 +251,7 @@ internal class BarnepensjonVilkaarTest {
 
         fun mapTilVilkaarstypeAvdoedSoeknad(person: AvdoedSoeknad): VilkaarOpplysning<AvdoedSoeknad> {
             return VilkaarOpplysning(
+                randomUUID(),
                 Opplysningstyper.AVDOED_SOEKNAD_V1,
                 Grunnlagsopplysning.Privatperson("", Instant.now()),
                 person
@@ -258,6 +260,7 @@ internal class BarnepensjonVilkaarTest {
 
         fun mapTilVilkaarstypeSoekerSoeknad(person: SoekerBarnSoeknad): VilkaarOpplysning<SoekerBarnSoeknad> {
             return VilkaarOpplysning(
+                randomUUID(),
                 Opplysningstyper.SOEKER_PDL_V1,
                 Grunnlagsopplysning.Privatperson("", Instant.now()),
                 person
@@ -266,6 +269,7 @@ internal class BarnepensjonVilkaarTest {
 
         fun mapTilVilkaarstypePerson(person: Person): VilkaarOpplysning<Person> {
             return VilkaarOpplysning(
+                randomUUID(),
                 Opplysningstyper.SOEKER_PDL_V1,
                 Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
                 person

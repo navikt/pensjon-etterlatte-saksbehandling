@@ -4,23 +4,23 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendragListe
+import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
+import no.nav.etterlatte.typer.Sak
+import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
 
 
-data class SakerResult(val saker: List<Sak>)
-
 interface EtterlatteBehandling {
-    suspend fun hentSakerForPerson(fnr: String, accessToken: String): SakerResult
+    suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker
     suspend fun opprettSakForPerson(fnr: String, sakType: SoeknadType, accessToken: String): Sak
-    suspend fun hentSaker(accessToken: String): SakerResult
-    suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingSammendragListe
+    suspend fun hentSaker(accessToken: String): Saker
+    suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingListe
     suspend fun hentBehandling(behandlingId: String, accessToken: String): Any
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag
     suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean
@@ -45,7 +45,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
 
 
     @Suppress("UNCHECKED_CAST")
-    override suspend fun hentSakerForPerson(fnr: String, accessToken: String): SakerResult {
+    override suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker {
         try {
             logger.info("Henter saker fra behandling")
             val json = downstreamResourceClient
@@ -59,7 +59,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
 
-            return objectMapper.readValue(json.toString(), SakerResult::class.java)
+            return objectMapper.readValue(json.toString(), Saker::class.java)
         } catch (e: Exception) {
             logger.error("Henting av person fra behandling feilet", e)
             throw e
@@ -88,7 +88,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         }
     }
 
-    override suspend fun hentSaker(accessToken: String): SakerResult {
+    override suspend fun hentSaker(accessToken: String): Saker {
         try {
             logger.info("Henter alle saker")
 
@@ -103,14 +103,14 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
 
-            return objectMapper.readValue(json.toString(), SakerResult::class.java)
+            return objectMapper.readValue(json.toString(), Saker::class.java)
         } catch (e: Exception) {
             logger.error("Henting av saker fra behandling feilet", e)
             throw e
         }
     }
 
-    override suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingSammendragListe {
+    override suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingListe {
         logger.info("Henter alle behandlinger i en sak")
 
         try {
@@ -120,7 +120,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                         success = { json -> json },
                         failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                     ).response
-            return objectMapper.readValue(json.toString(), BehandlingSammendragListe::class.java)
+            return objectMapper.readValue(json.toString(), BehandlingListe::class.java)
         } catch (e: Exception) {
             logger.error("Henting av behandlinger feilet", e)
             throw e

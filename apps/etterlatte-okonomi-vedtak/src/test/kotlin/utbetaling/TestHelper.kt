@@ -10,6 +10,10 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.BehandlingId
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Foedselsnummer
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.VedtakId
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import java.io.FileNotFoundException
 import java.math.BigDecimal
@@ -74,24 +78,25 @@ fun attestasjon() = Attestasjon(
 )
 
 fun utbetaling(
-    id: Int = 1,
+    id: Long = 1,
     status: UtbetalingStatus = UtbetalingStatus.GODKJENT,
     vedtakId: String = "1",
-    avstemmingsnoekkel: Tidspunkt = Tidspunkt.now()
+    avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
+    opprettet: Tidspunkt = Tidspunkt.now()
 ) =
     Utbetaling(
         id = id,
-        vedtakId = vedtakId,
-        behandlingId = "1",
-        sakId = "1",
+        vedtakId = VedtakId(vedtakId),
+        behandlingId = BehandlingId("1"),
+        sakId = SakId("1"),
         status = status,
         vedtak = vedtak(vedtakId),
-        opprettet = Tidspunkt.now(),
+        opprettet = opprettet,
         endret = Tidspunkt.now(),
         avstemmingsnoekkel = avstemmingsnoekkel,
-        foedselsnummer = "12345678903",
-        utgaaendeOppdrag = oppdrag(vedtakId),
-        kvitteringOppdrag = oppdrag(vedtakId),
+        foedselsnummer = Foedselsnummer("12345678903"),
+        oppdrag = oppdrag(vedtakId),
+        kvittering = oppdrag(vedtakId),
         kvitteringBeskrivelse = "En beskrivelse",
         kvitteringFeilkode = "hva skal stå her?",
         kvitteringMeldingKode = "08"

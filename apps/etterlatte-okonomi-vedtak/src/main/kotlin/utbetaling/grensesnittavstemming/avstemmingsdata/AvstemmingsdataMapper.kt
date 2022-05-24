@@ -1,9 +1,10 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
+import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.toNorskTid
+import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
-import no.nav.etterlatte.utbetaling.common.Tidspunkt
-import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Aksjonsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AvstemmingType
@@ -15,9 +16,9 @@ import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Grunnlagsdata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.KildeType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Periodedata
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Totaldata
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.format.DateTimeFormatter
-import java.math.BigDecimal
 
 class AvstemmingsdataMapper(
     private val utbetalinger: List<Utbetaling>,
@@ -57,10 +58,13 @@ class AvstemmingsdataMapper(
                 mottakendeKomponentKode = "OS"
                 underkomponentKode = fagomraade
                 nokkelFom =
-                    avstemmingsperiode?.start?.let { Tidspunkt(it).toNorskTid() }?.format(tidsstempelMikro) ?: "0"
+                    avstemmingsperiode?.start?.let {
+                        Tidspunkt(it).toNorskTid()
+                    }?.format(tidsstempelMikro) ?: "0"
                 nokkelTom =
-                    avstemmingsperiode?.endInclusive?.let { Tidspunkt(it).toNorskTid() }?.format(tidsstempelMikro)
-                        ?: "0"
+                    avstemmingsperiode?.endInclusive?.let {
+                        Tidspunkt(it).toNorskTid()
+                    }?.format(tidsstempelMikro) ?: "0"
                 avleverendeAvstemmingId = avstemmingId.value
                 brukerId = fagomraade
             }
@@ -80,10 +84,10 @@ class AvstemmingsdataMapper(
             if (detaljType != null) {
                 Detaljdata().apply {
                     this.detaljType = detaljType
-                    offnr = it.foedselsnummer
-                    avleverendeTransaksjonNokkel = it.sakId
-                    tidspunkt = it.avstemmingsnoekkel.toNorskTid().format(tidsstempelTime)
-                    if (detaljType in listOf(DetaljType.AVVI, DetaljType.VARS) && it.kvitteringOppdrag != null) {
+                    offnr = it.foedselsnummer.value
+                    avleverendeTransaksjonNokkel = it.sakId.value
+                    tidspunkt = it.avstemmingsnoekkel.toNorskTid().format(tidsstempelMikro)
+                    if (detaljType in listOf(DetaljType.AVVI, DetaljType.VARS) && it.kvittering != null) {
                         meldingKode = it.kvitteringMeldingKode
                         alvorlighetsgrad = it.kvitteringFeilkode
                         tekstMelding = it.kvitteringBeskrivelse
@@ -133,7 +137,7 @@ class AvstemmingsdataMapper(
 
     private fun getBelop(utbetalinger: List<Utbetaling>?) =
         utbetalinger?.sumOf {
-            it.utgaaendeOppdrag.oppdrag110.oppdragsLinje150 // TODO er dette riktig sted å hente dette?
+            it.oppdrag.oppdrag110.oppdragsLinje150 // TODO er dette riktig sted å hente dette?
                 .map { oppdragsLinje -> oppdragsLinje.sats }
                 .reduce(BigDecimal::add)
         } ?: BigDecimal.ZERO

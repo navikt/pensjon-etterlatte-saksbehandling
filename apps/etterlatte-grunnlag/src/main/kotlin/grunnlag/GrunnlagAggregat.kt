@@ -2,12 +2,7 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.objectMapper
 import org.slf4j.LoggerFactory
-import java.util.*
-
-//class AvbruttBehandlingException(message: String) : RuntimeException(message) {}
 
 class GrunnlagAggregat(
     private val saksid: Long,
@@ -35,28 +30,13 @@ class GrunnlagAggregat(
         if (nyeOpplysninger.isEmpty()) return
 
         for (opplysning in nyeOpplysninger) {
-            leggTilGrunnlagUtenVilkaarsprøving(opplysning.opplysning, opplysning.opplysningType, opplysning.kilde)
+
+            opplysninger.slettSpesifikkOpplysningISak(saksid,opplysning.opplysningType)
+            lagredeOpplysninger = lagredeOpplysninger + opplysning
+            opplysninger.leggOpplysningTilGrunnlag(saksid, opplysning)
         }
     }
 
-    fun leggTilGrunnlagUtenVilkaarsprøving(
-        data: ObjectNode,
-        type: Opplysningstyper,
-        kilde: Grunnlagsopplysning.Kilde
-    ): UUID {
-        val grunnlagsopplysning = Grunnlagsopplysning(
-            UUID.randomUUID(),
-            //kildeFraRequestContekst(kilde),
-            kilde,
-            type,
-            objectMapper.createObjectNode(),
-            data
-        )
-        opplysninger.leggOpplysningTilGrunnlag(saksid, grunnlagsopplysning)
-        lagredeOpplysninger = lagredeOpplysninger + grunnlagsopplysning
-        logger.info("La til opplysning $type i sak $saksid")
-        return grunnlagsopplysning.id
-    }
 
     //TODO tukler ikke med kilde ennå
 /*

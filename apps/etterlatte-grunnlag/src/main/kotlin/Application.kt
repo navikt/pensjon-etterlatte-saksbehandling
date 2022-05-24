@@ -7,16 +7,12 @@ import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.*
-import io.ktor.request.header
-import io.ktor.request.httpMethod
-import io.ktor.request.path
+import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.coroutines.*
 import no.nav.etterlatte.database.DatabaseContext
-import no.nav.etterlatte.grunnlag.GrunnlagFactory
-import no.nav.etterlatte.grunnlag.GrunnlagHendelser
-import no.nav.etterlatte.grunnlag.grunnlagRoutes
+import no.nav.etterlatte.grunnlag.*
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -24,7 +20,7 @@ import org.slf4j.event.Level
 import java.util.*
 import javax.sql.DataSource
 
-fun main() {
+suspend fun main() {
     ventPaaNettverk()
     val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
@@ -36,8 +32,17 @@ fun main() {
     RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule{
         module(beanFactory)
     }.build().apply {
-        GrunnlagHendelser(this, GrunnlagFactory(beanFactory.opplysningDao()))//, beanFactory.datasourceBuilder().dataSource)
-    }.start()
+        val grunnlag = GrunnlagFactory(beanFactory.opplysningDao())
+        GrunnlagHendelser(this, grunnlag)//, beanFactory.datasourceBuilder().dataSource)
+        BehandlingHendelser(this,grunnlag)
+        BehandlingEndretHendlese(this,grunnlag)
+    }.also {
+            withContext(Dispatchers.Default + Kontekst.asContextElement(
+            value = Context(Self("etterlatte-grunnlag"), DatabaseContext( beanFactory.datasourceBuilder().dataSource))
+        )){
+           it.start()
+        }
+        }
 }
 
 fun Application.module(beanFactory: BeanFactory){
@@ -53,7 +58,9 @@ fun Application.module(beanFactory: BeanFactory){
     }
     install(CallLogging) {
         level = Level.INFO
-        filter { call -> !call.request.path().startsWith("/internal") }
+        val naisEndepunkt = listOf("isalive", "isready", "metrics")
+        filter { call -> call.request.document().let { !naisEndepunkt.contains(it) }
+        }
         format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
         mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
     }

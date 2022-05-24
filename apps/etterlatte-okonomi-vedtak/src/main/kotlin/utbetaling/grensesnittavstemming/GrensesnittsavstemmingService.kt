@@ -1,13 +1,13 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.tidspunktMidnattIdag
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataMapper
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 class GrensesnittsavstemmingService(
     private val avstemmingsdataSender: AvstemmingsdataSender,
@@ -16,20 +16,19 @@ class GrensesnittsavstemmingService(
     private val clock: Clock
 ) {
 
-    fun startGrensesnittsavstemming(
-        periodeFraOgMed: Tidspunkt = hentFraTidForrigeAvstemming(),
-        periodeTil: Tidspunkt = hentTilTidStartAvDagen()
-    ) {
-        logger.info("Avstemmer fra $periodeFraOgMed til $periodeTil")
-        val utbetalinger = utbetalingDao.hentAlleUtbetalingerMellom(periodeFraOgMed, periodeTil)
-        val avstemming = Grensesnittavstemming(
-            periodeFraOgMed = periodeFraOgMed,
-            periodeTil = periodeTil,
-            antallOppdrag = utbetalinger.size,
-            opprettet = Tidspunkt.now(clock)
-        )
+    fun hentNestePeriode() = Avstemmingsperiode(
+        fraOgMed = grensesnittavstemmingDao.hentSisteAvstemming()?.periode?.til ?: MIN_INSTANT,
+        til = tidspunktMidnattIdag(clock)
+    )
 
-        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, periodeFraOgMed, periodeTil, avstemming.id)
+    fun startGrensesnittsavstemming(
+        periode: Avstemmingsperiode = hentNestePeriode()
+    ) {
+        logger.info("Avstemmer fra ${periode.fraOgMed} til ${periode.til}")
+        val utbetalinger = utbetalingDao.hentAlleUtbetalingerMellom(periode.fraOgMed, periode.til)
+        val avstemmingId = UUIDBase64()
+
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, periode.fraOgMed, periode.til, avstemmingId)
         val avstemmingsdataListe = avstemmingsdataMapper.opprettAvstemmingsmelding()
 
         val sendtAvstemmingsdata = avstemmingsdataListe.mapIndexed { index, avstemmingsdata ->
@@ -39,24 +38,19 @@ class GrensesnittsavstemmingService(
         }
 
         grensesnittavstemmingDao.opprettAvstemming(
-            avstemming.copy(avstemmingsdata = sendtAvstemmingsdata.joinToString("\n"))
+            Grensesnittavstemming(
+                id = avstemmingId,
+                periode = periode,
+                antallOppdrag = utbetalinger.size,
+                opprettet = Tidspunkt.now(clock),
+                avstemmingsdata = sendtAvstemmingsdata.joinToString("\n")
+            )
         )
 
         logger.info(
-            "Avstemming fra $periodeFraOgMed til $periodeTil fullført - ${utbetalinger.size} oppdrag ble avstemt"
+            "Avstemming fra ${periode.fraOgMed} til ${periode.til} fullført - ${utbetalinger.size} oppdrag ble avstemt"
         )
     }
-
-    private fun hentTilTidStartAvDagen(): Tidspunkt =
-        Tidspunkt.now(clock)
-            .toZonedNorskTid()
-            .truncatedTo(ChronoUnit.DAYS) // 00.00 norsk tid
-            .toInstant().let {
-                Tidspunkt(it)
-            }
-
-    private fun hentFraTidForrigeAvstemming() =
-        grensesnittavstemmingDao.hentSisteAvstemming()?.periodeTil ?: MIN_INSTANT
 
     companion object {
         private val MIN_INSTANT = Tidspunkt(Instant.EPOCH)

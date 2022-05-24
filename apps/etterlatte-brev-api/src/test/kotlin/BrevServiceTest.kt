@@ -1,8 +1,5 @@
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+
+import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BrevService
 import no.nav.etterlatte.db.Brev
@@ -11,6 +8,7 @@ import no.nav.etterlatte.db.Status
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import pdf.PdfGeneratorKlient
+import vedtak.VedtakServiceMock
 
 internal class BrevServiceTest {
 
@@ -18,7 +16,7 @@ internal class BrevServiceTest {
     private val mockPdfGen = mockk<PdfGeneratorKlient>()
     private val sendToRapid = mockk<(String) -> Unit>()
 
-    private val service = BrevService(mockkDb, mockPdfGen, sendToRapid)
+    private val service = BrevService(mockkDb, mockPdfGen, VedtakServiceMock(), sendToRapid)
 
     @Test
     fun `Hent alle brev, ingen brev, skal opprette for vedtak`() {

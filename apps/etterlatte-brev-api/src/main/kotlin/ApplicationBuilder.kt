@@ -1,3 +1,4 @@
+
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
@@ -14,6 +15,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import pdf.PdfGeneratorKlient
+import vedtak.VedtakServiceMock
 
 class ApplicationBuilder {
     private val env = System.getenv().toMutableMap().apply {
@@ -21,9 +23,10 @@ class ApplicationBuilder {
     }
     private val localDevelopment: Boolean = env["BREV_LOCAL_DEV"].toBoolean()
     private val pdfGenerator = PdfGeneratorKlient(pdfHttpClient(), env["ETTERLATTE_PDFGEN_URL"]!!)
+    private val vedtakService = VedtakServiceMock()
     private val datasourceBuilder = DataSourceBuilder(env)
     private val db = BrevRepository.using(datasourceBuilder.dataSource)
-    private val brevService = BrevService(db, pdfGenerator, ::sendToRapid)
+    private val brevService = BrevService(db, pdfGenerator, vedtakService, ::sendToRapid)
     private val rapidsConnection: RapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule { apiModule(localDevelopment) { brevRoute(brevService) } }

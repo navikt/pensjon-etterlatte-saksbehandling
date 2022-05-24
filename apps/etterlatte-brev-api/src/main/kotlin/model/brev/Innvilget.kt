@@ -1,6 +1,6 @@
 package model.brev
 
-import no.nav.etterlatte.libs.common.brev.model.Vedtak
+import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.model.brev.BrevRequest
 import no.nav.etterlatte.model.brev.Mottaker
@@ -19,23 +19,20 @@ data class InnvilgetBrevRequest(
 
     companion object {
         fun fraVedtak(vedtak: Vedtak): InnvilgetBrevRequest = InnvilgetBrevRequest(
-            saksnummer = vedtak.saksnummer,
+            saksnummer = vedtak.sak.id.toString(),
             utbetalingsinfo = Utbetalingsinfo(
-                beloep = vedtak.sum,
-                kontonummer = vedtak.kontonummer,
-                virkningsdato = vedtak.virkningsdato
+                beloep = vedtak.pensjonTilUtbetaling!![0].beloep!!.toDouble(),
+                virkningsdato = LocalDate.of(vedtak.virk.fom.year, vedtak.virk.fom.month, 1),
+                kontonummer = "<todo: Ikke tilgjengelig>"
             ),
             barn = Barn(
-                navn = vedtak.barn.navn,
-                fnr = vedtak.barn.fnr,
+                navn = "Ola nordmann", // todo: Hentes fra pdl/grunnlag
+                fnr = vedtak.sak.ident,
             ),
-            avdoed = Avdoed(
-                navn = vedtak.avdoed.navn,
-                doedsdato = vedtak.avdoed.doedsdato
-            ),
-            aktuelleParagrafer = vedtak.vilkaar,
-            spraak = Spraak.NB,
-            mottaker = Mottaker(navn = vedtak.barn.navn, adresse = "Testadresse", postnummer = "0000")
+            avdoed = Avdoed("Gammel, mann", LocalDate.now()), // todo: Hentes fra behandling/grunnlag.
+            aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår? Nødvendig?
+            spraak = Spraak.NB, // todo, må hentes.
+            mottaker = Mottaker(navn = "Barn barnesen", adresse = "Testadresse", postnummer = "0000")
         )
     }
 }

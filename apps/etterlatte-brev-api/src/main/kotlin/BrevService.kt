@@ -3,17 +3,10 @@ package no.nav.etterlatte
 import model.brev.AnnetBrevRequest
 import model.brev.AvslagBrevRequest
 import model.brev.InnvilgetBrevRequest
-import no.nav.etterlatte.db.Adresse
-import no.nav.etterlatte.db.Brev
-import no.nav.etterlatte.db.BrevID
-import no.nav.etterlatte.db.BrevInnhold
-import no.nav.etterlatte.db.BrevRepository
-import no.nav.etterlatte.db.Mottaker
-import no.nav.etterlatte.db.NyttBrev
-import no.nav.etterlatte.db.Status
+import no.nav.etterlatte.db.*
+import no.nav.etterlatte.domene.vedtak.Vedtak
+import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
-import no.nav.etterlatte.libs.common.brev.model.Vedtak
-import no.nav.etterlatte.libs.common.brev.model.VedtakType
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
 import no.nav.etterlatte.libs.common.journalpost.Bruker
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -27,10 +20,10 @@ import pdf.PdfGeneratorKlient
 class BrevService(
     private val db: BrevRepository,
     private val pdfGenerator: PdfGeneratorKlient,
+    private val vedtakService: VedtakService,
     private val sendToRapid: (String) -> Unit
 ) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
-    private val vedtakService = VedtakService()
 
     suspend fun hentAlleBrev(behandlingId: String): List<Brev> {
         val brev = db.hentBrevForBehandling(behandlingId.toLong())
@@ -76,14 +69,13 @@ class BrevService(
     }
 
     private suspend fun opprettFraVedtak(behandlingId: String): Brev {
-        // TODO: Håndtere tilfeller hvor vedtak mangler ...
-        val vedtak = vedtakService.hentVedtak(behandlingId)
+        val vedtak = vedtakService.hentVedtak(behandlingId.toLong())
 
-        val navn = vedtak.barn.navn.split(" ")
+        // todo: Hent info fra grunnlag/behandling.
         val mottaker = Mottaker(
-            fornavn = navn[0],
-            etternavn = navn[1],
-            foedselsnummer = Foedselsnummer.of(vedtak.barn.fnr),
+            fornavn = "Ola",
+            etternavn = "Nordmann",
+            foedselsnummer = Foedselsnummer.of(vedtak.sak.ident),
             adresse = Adresse("Fyrstikkalléen 1", "0661", "Oslo")
         )
 

@@ -20,7 +20,6 @@ class OpplysningDao(private val connection: () -> Connection) {
             objectMapper.createObjectNode(),
             getString("data").deSerialize()!!,
         )
-
     }
     fun finnOpplysningerIGrunnlag(sakId: Long): List<Grunnlagsopplysning<ObjectNode>> {
         return connection().prepareStatement("SELECT id, kilde,  type, data  FROM opplysning WHERE sak_id = ?")
@@ -54,7 +53,6 @@ class OpplysningDao(private val connection: () -> Connection) {
         statement.setString(2, type.name)
         statement.executeUpdate()
     }
-
 }
 
 fun ObjectNode?.serialize() = this?.let { objectMapper.writeValueAsString(it) }

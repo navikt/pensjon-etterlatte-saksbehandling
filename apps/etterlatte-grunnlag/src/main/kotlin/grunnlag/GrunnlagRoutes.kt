@@ -16,12 +16,11 @@ private val logger: Logger = LoggerFactory.getLogger("no.nav.etterlatte.grunnlag
 //KUN LES
 fun Route.grunnlagRoutes(service: GrunnlagService) {
 
-  //TODO Kun denne vi skal beholde? Og endre
     route("/behandlinger/{saksid}") {
         get {
             if(Kontekst.get()?.AppUser !is ExternalUser){ logger.warn("AppUser i kontekst er ikke ekstern bruker i endepunkt") }
 
-            //TODO toLong?!?
+
             call.respond(service.hentGrunnlag(saksId.toLong())?.let {
                 DetaljertGrunnlag(
                     it.saksId,
@@ -36,12 +35,5 @@ fun Route.grunnlagRoutes(service: GrunnlagService) {
 inline val PipelineContext<*, ApplicationCall>.saksId
     get() = requireNotNull(call.parameters["saksid"])
 
-        /*.let {
-        UUID.fromString(
-            it
-        )
-    }
-
-         */
 inline val PipelineContext<*, ApplicationCall>.sakId get() = requireNotNull(call.parameters["sakid"]).toLong()
 

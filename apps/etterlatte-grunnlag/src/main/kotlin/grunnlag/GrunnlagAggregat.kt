@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.slf4j.LoggerFactory
 
-//class AvbruttBehandlingException(message: String) : RuntimeException(message) {}
-
 class GrunnlagAggregat(
     private val saksid: Long,
     private val opplysninger: OpplysningDao

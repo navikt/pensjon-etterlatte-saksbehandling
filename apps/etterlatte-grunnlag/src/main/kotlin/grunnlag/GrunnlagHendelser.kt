@@ -15,15 +15,9 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-
-enum class GrunnlagHendelserType {
-    OPPRETTET, GRUNNLAGENDRET, AVBRUTT
-}
-
 class GrunnlagHendelser(
     rapidsConnection: RapidsConnection,
     private val grunnlag: GrunnlagFactory,
-    //private val datasource: DataSource
 ) : River.PacketListener {
 
 
@@ -31,7 +25,6 @@ class GrunnlagHendelser(
 
     init {
         River(rapidsConnection).apply {
-            //validate { it.demandValue("@event_name", "ny_opplysning") }
             validate { it.requireKey("opplysning") }
             validate { it.requireKey("sak") }
             validate { it.rejectKey("grunnlag")}

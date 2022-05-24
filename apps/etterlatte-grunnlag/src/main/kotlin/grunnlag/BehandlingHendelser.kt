@@ -13,15 +13,9 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-
-enum class BehandlingHendelserType {
-    OPPRETTET, GRUNNLAGENDRET, AVBRUTT
-}
-
 class BehandlingHendelser(
     rapidsConnection: RapidsConnection,
     private val grunnlag: GrunnlagFactory,
-    //private val datasource: DataSource
 ) : River.PacketListener {
 
 
@@ -43,7 +37,6 @@ class BehandlingHendelser(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             if(Kontekst.get().AppUser !is Self){ logger.warn("AppUser i kontekst er ikke Self i R&R-flyten") }
-            //val persongalleri = objectMapper.treeToValue<Persongalleri>(packet["persongalleri"])!!
             inTransaction {
                 grunnlag.opprett(packet["sak"].asLong())
             }

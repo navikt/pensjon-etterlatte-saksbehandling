@@ -2,10 +2,8 @@ package no.nav.etterlatte.model
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
-import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
-import no.nav.etterlatte.libs.common.avkorting.Avkortingsperiode
-import no.nav.etterlatte.libs.common.avkorting.Endringskode
+import no.nav.etterlatte.libs.common.avkorting.*
+import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
@@ -19,19 +17,17 @@ class AvkortingService {
     private val logger = LoggerFactory.getLogger(AvkortingService::class.java)
 
     //TODO byttes til å være basert på beregning
-    fun avkortingsResultat(opplysninger: List<VilkaarOpplysning<ObjectNode>>): AvkortingsResultat {
+    fun avkortingsResultat(beregningsResultat: BeregningsResultat): AvkortingsResultat {
         logger.info("Leverer en fake beregning")
-
-        //TODO faktisk avkorte noe
-
-
-
-        return AvkortingsResultat(
+        val avkortingRes = AvkortingsResultat(
+            //TODO se på hvordan denne initieres
             id = UUID.randomUUID(),
             type = Beregningstyper.GP,
             endringskode = Endringskode.NY,
             resultat = AvkortingsResultatType.BEREGNET,
-            beregningsperioder = listOf(
+            beregningsperioder = emptyList<Avkortingsperiode>(),
+            /*
+            listOf(
                 Avkortingsperiode(
                     avkortingsId = "First",
                     type = Beregningstyper.GP,
@@ -46,9 +42,30 @@ class AvkortingService {
                     datoTOM = LocalDateTime.of(2035, 1, 4, 0, 1),
                     belop = 1001
                 )
-            ),
+            )
+            ,
+             */
             beregnetDato = LocalDateTime.now()
         )
+
+        //TODO faktisk avkorte noe
+        val beregningsperioder = beregningsResultat.beregningsperioder
+        var i = 1
+        for (periode in beregningsperioder) {
+            avkortingRes.beregningsperioder.plus(Avkortingsperiode(
+                avkortingsId = i++.toString(),
+                type = Avkortingstyper.INNTEKT,
+                datoFOM = periode.datoFOM,
+                datoTOM = periode.datoTOM,
+                belop = beregnAvkorting(periode.belop)
+            ))
+
+        }
+        return avkortingRes
+    }
+    //TODO implementere avkortning (må ha inn inntekt)
+    fun beregnAvkorting(belop: Int): Int {
+        return belop - 5
     }
 
     companion object {

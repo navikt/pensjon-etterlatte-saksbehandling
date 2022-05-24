@@ -28,7 +28,7 @@ data class AvkortingsResultat(
 
 data class Avkortingsperiode(
     val avkortingsId: String,
-    val type: Beregningstyper,
+    val type: Avkortingstyper,
     val datoFOM: LocalDateTime,
     val datoTOM: LocalDateTime,
     val belop: Int

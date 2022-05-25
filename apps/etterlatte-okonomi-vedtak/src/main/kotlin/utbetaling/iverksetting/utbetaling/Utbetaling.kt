@@ -1,6 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
-import no.nav.etterlatte.domene.vedtak.Vedtak
+
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import java.math.BigDecimal
@@ -16,21 +16,15 @@ data class Foedselsnummer(val value: String)
 data class NavIdent(val value: String)
 
 enum class UtbetalingStatus {
-    SENDT,
-    GODKJENT,
-    GODKJENT_MED_FEIL,
-    AVVIST,
-    FEILET,
+    SENDT, GODKJENT, GODKJENT_MED_FEIL, AVVIST, FEILET,
 }
 
 enum class Utbetalingslinjetype {
-    OPPHOER,
-    UTBETALING
+    OPPHOER, UTBETALING
 }
 
-data class Utbetalingsperiode(
-    val fra: LocalDate,
-    val til: LocalDate? = null
+data class PeriodeForUtbetaling(
+    val fra: LocalDate, val til: LocalDate? = null
 )
 
 data class UUID30(val value: String = UUID.randomUUID().toString().substring(0, 30))
@@ -54,7 +48,7 @@ data class Utbetaling(
     val stoenadsmottaker: Foedselsnummer,
     val saksbehandler: NavIdent,
     val attestant: NavIdent,
-    val vedtak: Vedtak,
+    val vedtak: Utbetalingsvedtak,
     val oppdrag: Oppdrag? = null,
     val kvittering: Kvittering? = null,
     val utbetalingslinjer: List<Utbetalingslinje>
@@ -67,6 +61,6 @@ data class Utbetalingslinje(
     val erstatterId: UtbetalingslinjeId? = null,
     val opprettet: Tidspunkt,
     val sakId: SakId,
-    val periode: Utbetalingsperiode,
+    val periode: PeriodeForUtbetaling,
     val beloep: BigDecimal? = null,
 )

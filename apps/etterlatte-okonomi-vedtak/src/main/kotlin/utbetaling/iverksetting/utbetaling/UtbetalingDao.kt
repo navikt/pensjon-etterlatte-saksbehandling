@@ -245,7 +245,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 erstatterId = longOrNull("erstatter_id")?.let { UtbetalingslinjeId(it) },
                 opprettet = Tidspunkt(sqlTimestamp("opprettet").toInstant()),
                 sakId = SakId(long("sak_id")),
-                periode = Utbetalingsperiode(
+                periode = PeriodeForUtbetaling(
                     fra = localDate("periode_fra"),
                     til = localDateOrNull("periode_til"),
                 ),

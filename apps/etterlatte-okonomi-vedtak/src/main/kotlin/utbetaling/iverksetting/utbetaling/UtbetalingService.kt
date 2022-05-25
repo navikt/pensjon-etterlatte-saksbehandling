@@ -1,7 +1,5 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
-import no.nav.etterlatte.domene.vedtak.BehandlingType
-import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
@@ -20,7 +18,7 @@ class UtbetalingService(
     val rapidsConnection: RapidsConnection,
     val clock: Clock
 ) {
-    fun iverksettUtbetaling(vedtak: Vedtak): Utbetaling {
+    fun iverksettUtbetaling(vedtak: Utbetalingsvedtak): Utbetaling {
         val utbetaling = UtbetalingMapper(
             tidligereUtbetalinger = utbetalingDao.hentUtbetalinger(vedtak.sak.id),
             vedtak = vedtak,
@@ -34,7 +32,7 @@ class UtbetalingService(
         return utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
     }
 
-    fun utbetalingEksisterer(vedtak: Vedtak) =
+    fun utbetalingEksisterer(vedtak: Utbetalingsvedtak) =
         utbetalingDao.hentUtbetaling(vedtak.vedtakId) != null
 
     fun oppdaterKvittering(oppdrag: Oppdrag): Utbetaling {

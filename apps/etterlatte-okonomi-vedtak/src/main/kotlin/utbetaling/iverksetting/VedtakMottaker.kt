@@ -2,12 +2,13 @@ package no.nav.etterlatte.utbetaling.iverksetting
 
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.domene.vedtak.Vedtak
+import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -24,13 +25,14 @@ class VedtakMottaker(
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "vedtak_fattet") }
             validate { it.requireKey("@vedtak") }
+            validate { it.requireAny("@vedtak.type", listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name))}
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson())
+            val vedtak: Utbetalingsvedtak = objectMapper.readValue(packet["@vedtak"].toJson())
             logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
 
             try {
@@ -55,12 +57,12 @@ class VedtakMottaker(
         "@status" to utbetaling.status.name
     ).toJson()
 
-    private fun utbetalingFeilet(vedtak: Vedtak) = mapOf(
+    private fun utbetalingFeilet(vedtak: Utbetalingsvedtak) = mapOf(
         "@event_name" to "utbetaling_feilet",
         "@vedtakId" to vedtak.vedtakId,
     ).toJson()
 
-    private fun utbetalingEksisterer(vedtak: Vedtak) = mapOf(
+    private fun utbetalingEksisterer(vedtak: Utbetalingsvedtak) = mapOf(
         "@event_name" to "utbetaling_eksisterer",
         "@vedtakId" to vedtak.vedtakId,
     ).toJson()

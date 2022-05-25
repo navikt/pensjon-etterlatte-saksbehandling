@@ -19,6 +19,8 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.oppdragMedFeiletKvittering
 import no.nav.etterlatte.utbetaling.oppdragMedGodkjentKvittering
 import no.nav.etterlatte.utbetaling.readFile
+import no.nav.etterlatte.utbetaling.vedtak
+import no.nav.etterlatte.utbetaling.vedtakEvent
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.junit.jupiter.api.AfterAll
@@ -85,7 +87,7 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal sende utbetaling til oppdrag`() {
-        sendFattetVedtakEvent(FATTET_VEDTAK_1)
+        sendFattetVedtakEvent(vedtakEvent(vedtak()))
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish("key",

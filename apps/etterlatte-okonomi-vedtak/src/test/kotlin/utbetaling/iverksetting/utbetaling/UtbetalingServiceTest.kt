@@ -5,14 +5,11 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import no.nav.etterlatte.domene.vedtak.Periode
-import no.nav.etterlatte.domene.vedtak.Utbetalingsperiode
-import no.nav.etterlatte.domene.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.utbetaling.common.toXMLDate
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
 import no.nav.etterlatte.utbetaling.utbetaling
-import no.nav.etterlatte.utbetaling.vedtak
+import no.nav.etterlatte.utbetaling.utbetalingsvedtak
 import no.trygdeetaten.skjema.oppdrag.TkodeStatusLinje
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -31,7 +28,7 @@ internal class UtbetalingServiceTest {
         rapidsConnection = mockk(),
         clock = Clock.systemUTC()
     )
-    
+
     @Test
     fun `skal opprette utbetaling med opphoer`() {
         every { utbetalingDao.hentUtbetalinger(any()) } returns listOf(utbetaling(utbetalingslinjeId = 1L))
@@ -63,7 +60,7 @@ internal class UtbetalingServiceTest {
         }
     }
 
-    private fun vedtakMedOpphoer() = vedtak(
+    private fun vedtakMedOpphoer() = utbetalingsvedtak(
         utbetalingsperioder = listOf(
             Utbetalingsperiode(
                 id = 2L,

@@ -1,7 +1,5 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
-import no.nav.etterlatte.domene.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.forsteDagIMaaneden
 import no.nav.etterlatte.utbetaling.common.sisteDagIMaaneden
@@ -9,12 +7,12 @@ import java.util.*
 
 class UtbetalingMapper(
     val tidligereUtbetalinger: List<Utbetaling>,
-    val vedtak: Vedtak,
+    val vedtak: Utbetalingsvedtak,
     val utbetalingId: UUID = UUID.randomUUID(),
     val opprettet: Tidspunkt = Tidspunkt.now(),
 ) {
 
-    private val utbetalingsperioder = vedtak.pensjonTilUtbetaling!!.sortedBy { it.periode.fom }
+    private val utbetalingsperioder = vedtak.pensjonTilUtbetaling.sortedBy { it.periode.fom }
 
     fun opprettUtbetaling(): Utbetaling {
         if (tidligereUtbetalinger.isEmpty() &&
@@ -36,8 +34,8 @@ class UtbetalingMapper(
             endret = opprettet,
             avstemmingsnoekkel = opprettet,
             stoenadsmottaker = Foedselsnummer(vedtak.sak.ident),
-            saksbehandler = NavIdent(vedtak.vedtakFattet!!.ansvarligSaksbehandler),
-            attestant = NavIdent(vedtak.attestasjon!!.attestant),
+            saksbehandler = NavIdent(vedtak.vedtakFattet.ansvarligSaksbehandler),
+            attestant = NavIdent(vedtak.attestasjon.attestant),
             vedtak = vedtak,
             utbetalingslinjer = utbetalingslinjer()
         )
@@ -46,7 +44,7 @@ class UtbetalingMapper(
         Utbetalingslinje(
             id = UtbetalingslinjeId(it.id),
             opprettet = opprettet,
-            periode = Utbetalingsperiode(
+            periode = PeriodeForUtbetaling(
                 fra = forsteDagIMaaneden(it.periode.fom),
                 til = it.periode.tom?.let { dato -> sisteDagIMaaneden(dato) }
             ),

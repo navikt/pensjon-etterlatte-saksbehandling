@@ -1,0 +1,2 @@
+truncate table grunnlagshendelse;
+INSERT INTO grunnlagshendelse(opplysning_id, sak_id, opplysning, kilde, opplysning_type, hendelsenummer) SELECT  id, sak_id, data, kilde, type, row_number() OVER (PARTITION BY sak_id) from opplysning;

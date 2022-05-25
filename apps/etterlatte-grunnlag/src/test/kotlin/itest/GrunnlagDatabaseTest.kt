@@ -82,4 +82,64 @@ internal class GrunnlagDaoIntegrationTest {
         connection.close()
     }
 
+    @Test
+    fun `Ny opplysning skal overskrive gammel, old way`() {
+        val connection = dataSource.connection
+        val opplysningRepo = OpplysningDao { connection }
+
+        Grunnlagsopplysning(
+            UUID.randomUUID(),
+            Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
+            Opplysningstyper.SOEKNAD_MOTTATT_DATO,
+            objectMapper.createObjectNode(),
+            objectMapper.createObjectNode()
+        ).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
+        val uuid =UUID.randomUUID()
+        Grunnlagsopplysning(
+            uuid,
+            Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
+            Opplysningstyper.SOEKNAD_MOTTATT_DATO,
+            objectMapper.createObjectNode(),
+            objectMapper.createObjectNode()
+        ).also {
+            opplysningRepo.slettSpesifikkOpplysningISak(2,it.opplysningType)
+            opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
+
+
+        Assertions.assertEquals(1, opplysningRepo.finnOpplysningerIGrunnlag(2).size)
+        Assertions.assertEquals(uuid, opplysningRepo.finnOpplysningerIGrunnlag(2).first().id)
+
+        connection.close()
+    }
+
+    @Test
+    fun `Ny opplysning skal overskrive gammel, new way`() {
+        val connection = dataSource.connection
+        val opplysningRepo = OpplysningDao { connection }
+
+        Grunnlagsopplysning(
+            UUID.randomUUID(),
+            Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
+            Opplysningstyper.SOEKNAD_MOTTATT_DATO,
+            objectMapper.createObjectNode(),
+            objectMapper.createObjectNode()
+        ).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
+        val uuid =UUID.randomUUID()
+        Grunnlagsopplysning(
+            uuid,
+            Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
+            Opplysningstyper.SOEKNAD_MOTTATT_DATO,
+            objectMapper.createObjectNode(),
+            objectMapper.createObjectNode()
+        ).also {
+            opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
+
+        opplysningRepo.finnOpplysningerIGrunnlagHendelsesbasert(2).also {
+            Assertions.assertEquals(1, it.size)
+            Assertions.assertEquals(uuid, it.first().id)
+        }
+
+        connection.close()
+    }
+
 }

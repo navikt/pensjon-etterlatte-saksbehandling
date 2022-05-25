@@ -37,23 +37,6 @@ class GrunnlagAggregat(
         }
     }
 
-
-    //TODO tukler ikke med kilde ennå
-/*
-    private fun kildeFraRequestContekst(oppgittKilde: Grunnlagsopplysning.Kilde?): Grunnlagsopplysning.Kilde {
-        return if (Kontekst.get().AppUser.kanSetteKilde() && oppgittKilde != null) oppgittKilde else when (Kontekst.get().AppUser) {
-            is Saksbehandler -> if (oppgittKilde == null) Grunnlagsopplysning.Saksbehandler(Kontekst.get().AppUser.name()) else throw IllegalArgumentException()
-            is Kunde -> if (oppgittKilde == null) Grunnlagsopplysning.Privatperson(
-                Kontekst.get().AppUser.name(),
-                Instant.now()
-            ) else throw IllegalArgumentException()
-            else -> throw IllegalArgumentException()
-        }
-    }
-
-
- */
-
     fun serialiserbarUtgave() = Grunnlag(saksId = saksid, grunnlag = lagredeOpplysninger)
 }
 

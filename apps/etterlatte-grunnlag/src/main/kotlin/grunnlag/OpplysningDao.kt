@@ -11,7 +11,11 @@ import java.sql.ResultSet
 import java.util.*
 
 class OpplysningDao(private val connection: () -> Connection) {
-
+    data class GrunnlagHendelse(
+        val opplysning: Grunnlagsopplysning<ObjectNode>,
+        val sakId: Long,
+        val hendelseNummer: Long
+    )
     fun ResultSet.asBehandlingOpplysning(): Grunnlagsopplysning<ObjectNode> {
         return Grunnlagsopplysning(
             getObject("id") as UUID,
@@ -21,6 +25,15 @@ class OpplysningDao(private val connection: () -> Connection) {
             getString("data").deSerialize()!!,
         )
     }
+
+    fun ResultSet.asGrunnlagshendelse(): GrunnlagHendelse {
+        return GrunnlagHendelse(
+            asBehandlingOpplysning(),
+            getLong("sak_id"),
+            getLong("hendelsenummer"),
+        )
+
+    }
     fun finnOpplysningerIGrunnlag(sakId: Long): List<Grunnlagsopplysning<ObjectNode>> {
         return connection().prepareStatement("SELECT id, kilde,  type, data  FROM opplysning WHERE sak_id = ?")
             .apply {
@@ -28,8 +41,19 @@ class OpplysningDao(private val connection: () -> Connection) {
             }.executeQuery().toList { asBehandlingOpplysning() }
 
     }
+    fun finnOpplysningerIGrunnlagHendelsesbasert(sakId: Long): List<Grunnlagsopplysning<ObjectNode>> {
+        return connection().prepareStatement("""
+            SELECT opplysning_id id, kilde,  opplysning_type type, opplysning data  
+            FROM grunnlagshendelse hendelse 
+            WHERE hendelse.sak_id = ? AND NOT EXISTS(SELECT 1 FROM grunnlagshendelse annen where annen.sak_id = hendelse.sak_id AND hendelse.opplysning_type = annen.opplysning_type AND annen.hendelsenummer > hendelse.hendelsenummer)""".trimIndent())
+            .apply {
+                setLong(1, sakId)
+            }.executeQuery().toList { asBehandlingOpplysning() }
 
-    fun leggOpplysningTilGrunnlag(sakId: Long, behandlingsopplysning: Grunnlagsopplysning<ObjectNode>) {
+    }
+
+
+    fun leggOpplysningTilGrunnlagGammel(sakId: Long, behandlingsopplysning: Grunnlagsopplysning<ObjectNode>) {
         connection().prepareStatement("INSERT INTO opplysning(id, sak_id, data, kilde, type) VALUES(?, ?, ?, ?, ?)")
             .apply {
                 setObject(1, behandlingsopplysning.id)
@@ -39,8 +63,11 @@ class OpplysningDao(private val connection: () -> Connection) {
                 setString(5, behandlingsopplysning.opplysningType.name)
                 require(executeUpdate() == 1)
             }
-        connection().prepareStatement("""INSERT INTO grunnlagshendelse(opplysning_id, sak_id, opplysning, kilde, opplysning_type, hendelsenummer)
-            | VALUES(?, ?, ?, ?, ?, COALESCE((select max (hendelsenummer) +1 from grunnlagshendelse where sak_id = ?), 1))""".trimMargin())
+    }
+
+    fun leggOpplysningTilGrunnlagNy(sakId: Long, behandlingsopplysning: Grunnlagsopplysning<ObjectNode>): Long {
+        return connection().prepareStatement("""INSERT INTO grunnlagshendelse(opplysning_id, sak_id, opplysning, kilde, opplysning_type, hendelsenummer)
+            | VALUES(?, ?, ?, ?, ?, COALESCE((select max (hendelsenummer) + 1 from grunnlagshendelse where sak_id = ?), 1)) returning hendelsenummer """.trimMargin())
             .apply {
                 setObject(1, behandlingsopplysning.id)
                 setLong(2, sakId)
@@ -48,8 +75,11 @@ class OpplysningDao(private val connection: () -> Connection) {
                 setString(4, behandlingsopplysning.kilde.toJson())
                 setString(5, behandlingsopplysning.opplysningType.name)
                 setLong(6, sakId)
-                require(executeUpdate() == 1)
-            }
+            }.executeQuery().apply { next() }.getLong("hendelsenummer")
+    }
+    fun leggOpplysningTilGrunnlag(sakId: Long, behandlingsopplysning: Grunnlagsopplysning<ObjectNode>) {
+        leggOpplysningTilGrunnlagGammel(sakId, behandlingsopplysning)
+        leggOpplysningTilGrunnlagNy(sakId, behandlingsopplysning)
     }
 
     fun slettOpplysningerISak(id: Long){

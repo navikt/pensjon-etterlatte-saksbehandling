@@ -2,26 +2,21 @@ import { Label } from '@navikt/ds-react'
 import { DetailWrapper, WarningIconWrapper } from '../../styled'
 import { VurderingsResultat, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
 import { WarningIcon } from '../../../../../shared/icons/warningIcon'
-import { IPersonOpplysning } from '../../../types'
 
-export const Innsender = ({
-  innsenderHarForeldreAnsvar,
-  innsender,
-}: {
-  innsenderHarForeldreAnsvar: IGyldighetproving | undefined
-  innsender: IPersonOpplysning
-}) => {
+export const Innsender = ({ innsenderErForelder }: { innsenderErForelder: IGyldighetproving | undefined }) => {
+  const navn = innsenderErForelder?.basertPaaOpplysninger?.innsender?.navn
+
   return (
     <DetailWrapper>
-      {innsenderHarForeldreAnsvar?.resultat === VurderingsResultat.OPPFYLT && (
+      {innsenderErForelder?.resultat === VurderingsResultat.OPPFYLT && (
         <div>
           <Label size="small">Innsender</Label>
-          {innsender?.fornavn} {innsender?.etternavn}
+          {navn}
           <div>(gjenlevende forelder)</div>
         </div>
       )}
 
-      {innsenderHarForeldreAnsvar?.resultat === VurderingsResultat.IKKE_OPPFYLT && (
+      {innsenderErForelder?.resultat === VurderingsResultat.IKKE_OPPFYLT && (
         <div>
           <Label size="small" className="labelWrapperWithIcon">
             <WarningIconWrapper>
@@ -29,14 +24,12 @@ export const Innsender = ({
             </WarningIconWrapper>
             Innsender
           </Label>
-          <span>
-            {innsender?.fornavn} {innsender?.etternavn}
-          </span>
+          <span>{navn}</span>
           <div className="warningText"> Ikke gjenlevende forelder</div>
         </div>
       )}
 
-      {innsenderHarForeldreAnsvar?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
+      {innsenderErForelder?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
         <div>
           <Label size="small" className="labelWrapperWithIcon">
             <WarningIconWrapper>

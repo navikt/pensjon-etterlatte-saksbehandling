@@ -1,5 +1,9 @@
 import styled from 'styled-components'
-import { GyldighetType, VurderingsResultat, IGyldighetResultat } from '../../../../../store/reducers/BehandlingReducer'
+import {
+  GyldigFramsattType,
+  VurderingsResultat,
+  IGyldighetResultat,
+} from '../../../../../store/reducers/BehandlingReducer'
 import { format } from 'date-fns'
 import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
 import { hentGyldigBostedTekst } from '../../utils'
@@ -7,7 +11,7 @@ import { Title, Undertekst } from './styled'
 
 export const BarnetTilGode = ({ gyldighet }: { gyldighet: IGyldighetResultat }) => {
   const bostedadresse = gyldighet.vurderinger.find(
-    (vilkaar) => vilkaar.navn === GyldighetType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL
+    (vilkaar) => vilkaar.navn === GyldigFramsattType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL
   )
 
   const sjekkInfo = (): any => {

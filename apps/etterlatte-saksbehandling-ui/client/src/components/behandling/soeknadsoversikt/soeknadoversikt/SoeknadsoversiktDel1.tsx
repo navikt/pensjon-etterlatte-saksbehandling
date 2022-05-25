@@ -5,24 +5,22 @@ import { Innsender } from './soeknadinfo/Innsender'
 import { Verge } from './soeknadinfo/Verge'
 import { InfoWrapper } from './Soeknadsoversikt'
 
-export const SoeknadOversiktDel1: React.FC<any> = ({
-  innsender,
-  gjenlevendePdl,
-  gjenlevendeHarForeldreansvar,
-  innsenderHarForeldreAnsvar,
-  gyldighet,
-}) => {
+export const SoeknadOversiktDel1: React.FC<any> = ({ innsenderHarForeldreansvar, innsenderErForelder, gyldighet }) => {
   return (
     <>
       <Header>Gyldig fremsatt</Header>
       <Wrapper>
         <InfoWrapper>
-          <Innsender innsender={innsender} innsenderHarForeldreAnsvar={innsenderHarForeldreAnsvar} />
-          <Foreldreansvar gjenlevendePdl={gjenlevendePdl} gjenlevendeHarForeldreansvar={gjenlevendeHarForeldreansvar} />
+          <Innsender innsenderErForelder={innsenderErForelder} />
+          <Foreldreansvar innsenderHarForeldreansvar={innsenderHarForeldreansvar} />
           <Verge />
         </InfoWrapper>
         <div className="soeknadGyldigFremsatt">
-          <SoeknadGyldigFremsatt gyldighet={gyldighet} />
+          <SoeknadGyldigFremsatt
+            gyldighet={gyldighet}
+            innsenderErForelder={innsenderErForelder}
+            innsenderHarForeldreansvar={innsenderHarForeldreansvar}
+          />
         </div>
       </Wrapper>
     </>

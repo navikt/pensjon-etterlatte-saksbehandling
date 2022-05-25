@@ -10,12 +10,10 @@ import {
 export interface PropsOmSoeknad {
   gyldighet: IGyldighetResultat
   avdoedPersonPdl: IPersonOpplysningFraPdl
-  innsender: IPersonOpplysning
   mottattDato: string
-  gjenlevendePdl: IPersonOpplysningFraPdl
-  gjenlevendeHarForeldreansvar: IGyldighetproving | undefined
+  innsenderHarForeldreansvar: IGyldighetproving | undefined
   gjenlevendeOgSoekerLikAdresse: IGyldighetproving | undefined
-  innsenderHarForeldreAnsvar: IGyldighetproving | undefined
+  innsenderErForelder: IGyldighetproving | undefined
 }
 
 export interface PropsFamilieforhold {

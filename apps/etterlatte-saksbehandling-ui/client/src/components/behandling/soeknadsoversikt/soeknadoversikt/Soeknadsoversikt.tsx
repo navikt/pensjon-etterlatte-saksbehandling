@@ -7,21 +7,17 @@ import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer
 export const SoeknadOversikt: React.FC<PropsOmSoeknad> = ({
   gyldighet,
   avdoedPersonPdl,
-  innsender,
   mottattDato,
-  gjenlevendePdl,
-  gjenlevendeHarForeldreansvar,
+  innsenderHarForeldreansvar,
   gjenlevendeOgSoekerLikAdresse,
-  innsenderHarForeldreAnsvar,
+  innsenderErForelder,
 }) => {
   return (
     <SoeknadOversiktWrapper>
       <div>
         <SoeknadOversiktDel1
-          innsender={innsender}
-          gjenlevendePdl={gjenlevendePdl}
-          gjenlevendeHarForeldreansvar={gjenlevendeHarForeldreansvar}
-          innsenderHarForeldreAnsvar={innsenderHarForeldreAnsvar}
+          innsenderHarForeldreansvar={innsenderHarForeldreansvar}
+          innsenderErForelder={innsenderErForelder}
           gyldighet={gyldighet}
         />
 

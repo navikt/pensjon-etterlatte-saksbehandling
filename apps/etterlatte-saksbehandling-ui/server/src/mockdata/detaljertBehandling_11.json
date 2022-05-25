@@ -343,20 +343,49 @@
       {
         "navn": "INNSENDER_ER_FORELDER",
         "resultat": "IKKE_OPPFYLT",
-        "vurdertDato": "2022-04-01T13:35:55.281534758"
+        "basertPaaOpplysninger": {
+          "familieRelasjon": {
+            "ansvarligeForeldre": [
+              "22128202440"
+            ],
+            "foreldre": [
+              "22128202440"
+            ],
+            "barn": null
+          },
+          "innsender": {
+            "navn": "BRÅKETE POTET",
+            "fnr": "03108718357"
+          },
+          "gjenlevende": [
+            {
+              "navn": "BRÅKETE POTET",
+              "fnr": "03108718357"
+            }
+          ]
+        }
       },
       {
         "navn": "HAR_FORELDREANSVAR_FOR_BARNET",
         "resultat": "IKKE_OPPFYLT",
-        "vurdertDato": "2022-04-01T13:35:55.28173531"
-      },
-      {
-        "navn": "BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL",
-        "resultat": "IKKE_OPPFYLT",
-        "vurdertDato": "2022-04-01T13:35:55.282075942"
+        "basertPaaOpplysninger": {
+          "familieRelasjon": {
+            "ansvarligeForeldre": [
+              "22128202440"
+            ],
+            "foreldre": [
+              "22128202440"
+            ],
+            "barn": null
+          },
+          "innsender": {
+            "navn": "BRÅKETE POTET",
+            "fnr": "03108718357"
+          }
+        }
       }
     ],
-    "vurdertDato": "2022-04-01T13:35:55.282309633"
+    "vurdertDato": "2022-05-23T16:09:19.403051468"
   },
   "vilkårsprøving": {
     "resultat": "IKKE_OPPFYLT",

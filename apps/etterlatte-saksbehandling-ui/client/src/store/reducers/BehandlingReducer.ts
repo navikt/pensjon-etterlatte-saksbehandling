@@ -52,15 +52,15 @@ export interface IGyldighetResultat {
 }
 
 export interface IGyldighetproving {
-  navn: GyldighetType
+  navn: GyldigFramsattType
   resultat: VurderingsResultat
-  vurdertDato: string
+  basertPaaOpplysninger: any
 }
 
-export enum GyldighetType {
+export enum GyldigFramsattType {
   INNSENDER_ER_FORELDER = 'INNSENDER_ER_FORELDER',
   HAR_FORELDREANSVAR_FOR_BARNET = 'HAR_FORELDREANSVAR_FOR_BARNET',
-  BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL = 'BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL',
+  BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL = 'BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL', //todo del av pensjon til gode, flyttes?
 }
 
 export interface IVilkaarResultat {
@@ -68,6 +68,7 @@ export interface IVilkaarResultat {
   vilkaar: IVilkaarsproving[]
   vurdertDato: string
 }
+
 export interface IVilkaarsproving {
   navn: VilkaarsType
   resultat: VurderingsResultat

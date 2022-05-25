@@ -1,27 +1,25 @@
 import { Label } from '@navikt/ds-react'
 import { DetailWrapper, WarningIconWrapper } from '../../styled'
 import { WarningIcon } from '../../../../../shared/icons/warningIcon'
-import { IPersonOpplysningFraPdl } from '../../../types'
 import { VurderingsResultat, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
 
 export const Foreldreansvar = ({
-  gjenlevendePdl,
-  gjenlevendeHarForeldreansvar,
+  innsenderHarForeldreansvar,
 }: {
-  gjenlevendePdl: IPersonOpplysningFraPdl
-  gjenlevendeHarForeldreansvar: IGyldighetproving | undefined
+  innsenderHarForeldreansvar: IGyldighetproving | undefined
 }) => {
+  const navn = innsenderHarForeldreansvar?.basertPaaOpplysninger?.innsender?.navn
   return (
     <DetailWrapper>
-      {gjenlevendeHarForeldreansvar?.resultat === VurderingsResultat.OPPFYLT && (
+      {innsenderHarForeldreansvar?.resultat === VurderingsResultat.OPPFYLT && (
         <div>
           <Label size="small">Foreldreansvar</Label>
-          {gjenlevendePdl?.fornavn} {gjenlevendePdl?.etternavn}
+          {navn}
           <div>(gjenlevende forelder)</div>
         </div>
       )}
 
-      {gjenlevendeHarForeldreansvar?.resultat === VurderingsResultat.IKKE_OPPFYLT && (
+      {innsenderHarForeldreansvar?.resultat === VurderingsResultat.IKKE_OPPFYLT && (
         <div>
           <Label size="small" className="labelWrapperWithIcon">
             <WarningIconWrapper>
@@ -29,11 +27,11 @@ export const Foreldreansvar = ({
             </WarningIconWrapper>
             Foreldreansvar
           </Label>
-          <span className="warningText">innsender har ikke foreldreansvar</span>
+          <span className="warningText">Innsender har ikke foreldreansvar</span>
         </div>
       )}
 
-      {gjenlevendeHarForeldreansvar?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
+      {innsenderHarForeldreansvar?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
         <div>
           <Label size="small" className="labelWrapperWithIcon">
             <WarningIconWrapper>

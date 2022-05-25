@@ -1,7 +1,7 @@
 import { differenceInYears, add, startOfMonth } from 'date-fns'
 import { IPersonOpplysningFraPdl } from '../types'
 import { WarningText } from '../../../shared/styled'
-import { GyldighetType, VurderingsResultat, IGyldighetproving } from '../../../store/reducers/BehandlingReducer'
+import { GyldigFramsattType, VurderingsResultat, IGyldighetproving } from '../../../store/reducers/BehandlingReducer'
 
 export const sjekkDataFraSoeknadMotPdl = (dataFraPdl: string, dataFraSoeknad: string) => {
   return dataFraSoeknad === dataFraPdl || dataFraSoeknad === null ? (
@@ -42,7 +42,7 @@ export const hentVirkningstidspunkt = (doedsdato: string, mottattDato: string): 
   if (sjekkDodsfallMerEnn3AarSiden(doedsdato, mottattDato)) {
     /*
     TODO se mere på utregning av virkningstidspunkt. for gjenlevende er det 3 måneder(?) og barnepensjon 1,
-    men er det mere enn 3 år siden dødsfall, går man bare 3 år tilbake. Denne burde kanskje regnes ut i backend og ligge 
+    men er det mere enn 3 år siden dødsfall, går man bare 3 år tilbake. Denne burde kanskje regnes ut i backend og ligge
     lagret på behandlingen, og så må saksbehandler ha mulighet til å endre den hvis det er behov, på vilkårssiden der den vises.
     */
     return startOfMonth(add(new Date(doedsdato), { years: 3 })).toString()
@@ -57,7 +57,7 @@ export const sjekkDodsfallMerEnn3AarSiden = (doedsdato: string, mottattDato: str
 export function mapGyldighetstyperTilTekst(gyldig: IGyldighetproving): String | undefined {
   let svar
 
-  if (gyldig.navn === GyldighetType.HAR_FORELDREANSVAR_FOR_BARNET) {
+  if (gyldig.navn === GyldigFramsattType.HAR_FORELDREANSVAR_FOR_BARNET) {
     if (gyldig.resultat === VurderingsResultat.IKKE_OPPFYLT) {
       svar = 'Nei. innsender har ikke forelderansvar. Dette må avklares før du kan starte vilkårsvurderingen.'
     } else if (gyldig.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
@@ -65,7 +65,7 @@ export function mapGyldighetstyperTilTekst(gyldig: IGyldighetproving): String | 
     } else {
       svar = undefined
     }
-  } else if (gyldig.navn === GyldighetType.INNSENDER_ER_FORELDER) {
+  } else if (gyldig.navn === GyldigFramsattType.INNSENDER_ER_FORELDER) {
     if (gyldig.resultat === VurderingsResultat.IKKE_OPPFYLT) {
       svar = 'Nei, innsender er ikke gjenlevende forelder. Dette må avklares før du kan starte vilkårsvurderingen.'
     } else if (gyldig.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
@@ -81,7 +81,7 @@ export function mapGyldighetstyperTilTekst(gyldig: IGyldighetproving): String | 
 
 export function hentGyldigBostedTekst(gyldig: IGyldighetproving): String | undefined {
   let svar
-  if (gyldig.navn === GyldighetType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL) {
+  if (gyldig.navn === GyldigFramsattType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL) {
     if (gyldig.resultat === VurderingsResultat.IKKE_OPPFYLT) {
       svar = 'barn og gjenlevende forelder bor ikke på samme adresse'
     } else if (gyldig.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {

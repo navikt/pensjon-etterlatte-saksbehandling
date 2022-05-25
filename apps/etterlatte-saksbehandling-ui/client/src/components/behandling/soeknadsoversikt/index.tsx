@@ -4,7 +4,7 @@ import { Content, ContentHeader } from '../../../shared/styled'
 import { SoeknadOversikt } from './soeknadoversikt/Soeknadsoversikt'
 import { Familieforhold, FamilieforholdWrapper } from './familieforhold/Familieforhold'
 import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
-import { GyldighetType, VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
+import { GyldigFramsattType, VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 import { Border, HeadingWrapper } from './styled'
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../behandlings-status'
 import { BehandlingsTypeSmall, IBehandlingsType } from '../behandlings-type'
@@ -47,16 +47,14 @@ export const Soeknadsoversikt = () => {
       <SoeknadOversikt
         gyldighet={gyldighet}
         avdoedPersonPdl={avdoedPersonPdl}
-        innsender={innsender}
         mottattDato={mottattDato}
-        gjenlevendePdl={gjenlevendePdl}
-        gjenlevendeHarForeldreansvar={gyldighet.vurderinger.find(
-          (g) => g.navn === GyldighetType.HAR_FORELDREANSVAR_FOR_BARNET
+        innsenderHarForeldreansvar={gyldighet.vurderinger.find(
+          (g) => g.navn === GyldigFramsattType.HAR_FORELDREANSVAR_FOR_BARNET
         )}
         gjenlevendeOgSoekerLikAdresse={gyldighet.vurderinger.find(
-          (g) => g.navn === GyldighetType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL
+          (g) => g.navn === GyldigFramsattType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL
         )}
-        innsenderHarForeldreAnsvar={gyldighet.vurderinger.find((g) => g.navn === GyldighetType.INNSENDER_ER_FORELDER)}
+        innsenderErForelder={gyldighet.vurderinger.find((g) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER)}
       />
       <Border />
       {gyldighet.resultat === VurderingsResultat.OPPFYLT ? (

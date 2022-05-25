@@ -1,6 +1,9 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.exc.InvalidFormatException
+import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -25,28 +28,35 @@ class VedtakMottaker(
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "vedtak_fattet") }
             validate { it.requireKey("@vedtak") }
-            validate { it.requireAny("@vedtak.type", listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name))}
+            validate { it.requireAny("@vedtak.type", listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name)) }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val vedtak: Utbetalingsvedtak = objectMapper.readValue(packet["@vedtak"].toJson())
-            logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
-
             try {
-                if (utbetalingService.utbetalingEksisterer(vedtak)) {
-                    logger.info("Vedtak eksisterer fra før. Sendes ikke videre til oppdrag")
-                    rapidsConnection.publish(utbetalingEksisterer(vedtak))
-                } else {
-                    val utbetaling = utbetalingService.iverksettUtbetaling(vedtak)
-                    rapidsConnection.publish("key", utbetalingEvent(utbetaling))
+                val vedtak: Utbetalingsvedtak = objectMapper.readValue(packet["@vedtak"].toJson())
+                logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
+                try {
+
+                    if (utbetalingService.utbetalingEksisterer(vedtak)) {
+                        logger.info("Vedtak eksisterer fra før. Sendes ikke videre til oppdrag")
+                        rapidsConnection.publish(utbetalingEksisterer(vedtak))
+                    } else {
+                        val utbetaling = utbetalingService.iverksettUtbetaling(vedtak)
+                        rapidsConnection.publish("key", utbetalingEvent(utbetaling))
+                    }
+                } catch (e: Exception) {
+                    logger.error("En feil oppstod: ${e.message}", e)
+                    rapidsConnection.publish(utbetalingFeilet(vedtak))
+                    throw e
                 }
             } catch (e: Exception) {
-                logger.error("En feil oppstod: ${e.message}", e)
-                rapidsConnection.publish(utbetalingFeilet(vedtak))
-                throw e
+                if (e is InvalidFormatException || e is MissingKotlinParameterException) {
+                    logger.error("Kunne ikke deresialisere vedtak: ", packet["@vedtak"].toJson())
+                    rapidsConnection.publish(deserialiseringFeilet(packet["@vedtak"]))
+                } else throw e
             }
         }
 
@@ -60,6 +70,11 @@ class VedtakMottaker(
     private fun utbetalingFeilet(vedtak: Utbetalingsvedtak) = mapOf(
         "@event_name" to "utbetaling_feilet",
         "@vedtakId" to vedtak.vedtakId,
+    ).toJson()
+
+    private fun deserialiseringFeilet(vedtakJson: JsonNode) = mapOf(
+        "@event_name" to "deserialisering_feilet",
+        "@mottattVedtak" to vedtakJson,
     ).toJson()
 
     private fun utbetalingEksisterer(vedtak: Utbetalingsvedtak) = mapOf(

@@ -70,44 +70,13 @@ internal class GrunnlagDaoIntegrationTest {
             objectMapper.createObjectNode(),
             objectMapper.createObjectNode()
         ).also {
-            opplysningRepo.slettSpesifikkOpplysningISak(2,it.opplysningType)
             opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
 
 
-        Assertions.assertEquals(1, opplysningRepo.finnOpplysningerIGrunnlag(1).size)
-        Assertions.assertEquals(1, opplysningRepo.finnOpplysningerIGrunnlag(2).size)
-        Assertions.assertEquals(uuid, opplysningRepo.finnOpplysningerIGrunnlag(2).first().id)
-        Assertions.assertEquals(datoMottat, opplysningRepo.finnOpplysningerIGrunnlag(1).first().opplysning.let { objectMapper.treeToValue<SoeknadMottattDato>(it) }?.mottattDato )
-
-        connection.close()
-    }
-
-    @Test
-    fun `Ny opplysning skal overskrive gammel, old way`() {
-        val connection = dataSource.connection
-        val opplysningRepo = OpplysningDao { connection }
-
-        Grunnlagsopplysning(
-            UUID.randomUUID(),
-            Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
-            Opplysningstyper.SOEKNAD_MOTTATT_DATO,
-            objectMapper.createObjectNode(),
-            objectMapper.createObjectNode()
-        ).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
-        val uuid =UUID.randomUUID()
-        Grunnlagsopplysning(
-            uuid,
-            Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
-            Opplysningstyper.SOEKNAD_MOTTATT_DATO,
-            objectMapper.createObjectNode(),
-            objectMapper.createObjectNode()
-        ).also {
-            opplysningRepo.slettSpesifikkOpplysningISak(2,it.opplysningType)
-            opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
-
-
-        Assertions.assertEquals(1, opplysningRepo.finnOpplysningerIGrunnlag(2).size)
-        Assertions.assertEquals(uuid, opplysningRepo.finnOpplysningerIGrunnlag(2).first().id)
+        Assertions.assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(1).size)
+        Assertions.assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(2).size)
+        Assertions.assertEquals(uuid, opplysningRepo.finnHendelserIGrunnlag(2).first().opplysning.id)
+        Assertions.assertEquals(datoMottat, opplysningRepo.finnHendelserIGrunnlag(1).first().opplysning.let { objectMapper.treeToValue<SoeknadMottattDato>(it.opplysning) }?.mottattDato )
 
         connection.close()
     }
@@ -134,9 +103,9 @@ internal class GrunnlagDaoIntegrationTest {
         ).also {
             opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
 
-        opplysningRepo.finnOpplysningerIGrunnlagHendelsesbasert(2).also {
+        opplysningRepo.finnHendelserIGrunnlag(2).also {
             Assertions.assertEquals(1, it.size)
-            Assertions.assertEquals(uuid, it.first().id)
+            Assertions.assertEquals(uuid, it.first().opplysning.id)
         }
 
         connection.close()

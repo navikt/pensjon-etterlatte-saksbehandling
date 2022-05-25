@@ -32,9 +32,9 @@ suspend fun main() {
     RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule{
         module(beanFactory)
     }.build().apply {
-        val grunnlag = GrunnlagFactory(beanFactory.opplysningDao())
+        val grunnlag = beanFactory.grunnlagsService()
         GrunnlagHendelser(this, grunnlag)//, beanFactory.datasourceBuilder().dataSource)
-        BehandlingHendelser(this,grunnlag)
+        BehandlingHendelser(this)
         BehandlingEndretHendlese(this,grunnlag)
     }.also {
             withContext(Dispatchers.Default + Kontekst.asContextElement(

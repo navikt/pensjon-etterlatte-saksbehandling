@@ -3,7 +3,6 @@ package no.nav.etterlatte
 import com.typesafe.config.ConfigFactory
 import io.ktor.auth.*
 import io.ktor.config.*
-import no.nav.etterlatte.grunnlag.GrunnlagFactory
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
@@ -14,7 +13,6 @@ interface BeanFactory {
     fun grunnlagsService(): GrunnlagService
     fun tokenValidering(): Authentication.Configuration.()->Unit
     fun opplysningDao(): OpplysningDao
-    fun behandlingsFactory(): GrunnlagFactory
 }
 
 abstract class CommonFactory: BeanFactory{
@@ -27,11 +25,7 @@ abstract class CommonFactory: BeanFactory{
 
     }
 
-    override fun behandlingsFactory(): GrunnlagFactory {
-        return cached { GrunnlagFactory(opplysningDao()) }
-    }
-
-    override fun grunnlagsService(): GrunnlagService = RealGrunnlagService(GrunnlagFactory(opplysningDao())) //grunnlagHendelser().nyHendelse)
+    override fun grunnlagsService(): GrunnlagService = RealGrunnlagService(opplysningDao()) //grunnlagHendelser().nyHendelse)
 
     override fun opplysningDao(): OpplysningDao = OpplysningDao { databaseContext().activeTx() }
 }

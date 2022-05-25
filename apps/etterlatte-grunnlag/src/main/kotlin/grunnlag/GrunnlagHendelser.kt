@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory
 
 class GrunnlagHendelser(
     rapidsConnection: RapidsConnection,
-    private val grunnlag: GrunnlagFactory,
+    private val grunnlag: GrunnlagService,
 ) : River.PacketListener {
 
 
@@ -39,16 +38,10 @@ class GrunnlagHendelser(
             try {
 
 
-                val lagretGrunnlag = inTransaction {
-                    val gjeldendeGrunnlag = grunnlag.hent(packet["sak"].asLong())
-                    val opplysninger: List<Grunnlagsopplysning<ObjectNode>> =
-                        objectMapper.readValue(packet["opplysning"].toJson())!!
-                    gjeldendeGrunnlag.leggTilGrunnlagListe(opplysninger)
-                    gjeldendeGrunnlag
-                }
+                val opplysninger: List<Grunnlagsopplysning<ObjectNode>> = objectMapper.readValue(packet["opplysning"].toJson())!!
 
                 //TODO Her bør jeg vel lage en ny melding
-                packet["grunnlag"] = lagretGrunnlag.serialiserbarUtgave()
+                packet["grunnlag"] = grunnlag.opprettGrunnlag(packet["sak"].asLong(), opplysninger)
                 packet["@event_name"] = "GRUNNLAG:GRUNNLAGENDRET"
                 context.publish(packet.toJson())
                 logger.info("Lagt ut melding om grunnlagsendring")

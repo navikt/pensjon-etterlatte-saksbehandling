@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
 import no.nav.etterlatte.utbetaling.common.toNorskTid
+import no.nav.etterlatte.utbetaling.common.toXMLDate
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
 import no.trygdeetaten.skjema.oppdrag.Attestant180
@@ -12,12 +13,7 @@ import no.trygdeetaten.skjema.oppdrag.OppdragsLinje150
 import no.trygdeetaten.skjema.oppdrag.TfradragTillegg
 import no.trygdeetaten.skjema.oppdrag.TkodeStatusLinje
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.*
-import javax.xml.datatype.DatatypeConstants
-import javax.xml.datatype.DatatypeFactory
-import javax.xml.datatype.XMLGregorianCalendar
 
 
 object OppdragMapper {
@@ -91,13 +87,6 @@ object OppdragMapper {
         return Oppdrag().apply {
             this.oppdrag110 = oppdrag110
         }
-    }
-
-    private fun LocalDate.toXMLDate(): XMLGregorianCalendar {
-        return DatatypeFactory.newInstance()
-            .newXMLGregorianCalendar(GregorianCalendar.from(atStartOfDay(ZoneId.systemDefault()))).apply {
-                timezone = DatatypeConstants.FIELD_UNDEFINED
-            }
     }
 }
 

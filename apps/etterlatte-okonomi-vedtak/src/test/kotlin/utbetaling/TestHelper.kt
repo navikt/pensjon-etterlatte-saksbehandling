@@ -37,7 +37,18 @@ object TestHelper
 fun readFile(file: String) = TestHelper::class.java.getResource(file)?.readText()
     ?: throw FileNotFoundException("Fant ikke filen $file")
 
-fun vedtak(vedtakId: Long) = Vedtak(
+fun vedtak(
+    vedtakId: Long = 1,
+    utbetalingsperioder: List<no.nav.etterlatte.domene.vedtak.Utbetalingsperiode> = listOf(
+        no.nav.etterlatte.domene.vedtak.Utbetalingsperiode(
+            id = 1,
+            periode = Periode(fom = YearMonth.of(2022, 1), null),
+            beloep = BigDecimal.valueOf(2000),
+            type = UtbetalingsperiodeType.UTBETALING
+        )
+    )
+
+) = Vedtak(
     vedtakId = vedtakId,
     behandling = Behandling(
         id = UUID.randomUUID(),
@@ -61,14 +72,7 @@ fun vedtak(vedtakId: Long) = Vedtak(
         attesterendeEnhet = "123",
         tidspunkt = ZonedDateTime.now()
     ),
-    pensjonTilUtbetaling = listOf(
-        no.nav.etterlatte.domene.vedtak.Utbetalingsperiode(
-            id = 1,
-            periode = Periode(fom = YearMonth.of(2022, 1), null),
-            beloep = BigDecimal.valueOf(2000),
-            type = UtbetalingsperiodeType.UTBETALING
-        )
-    ),
+    pensjonTilUtbetaling = utbetalingsperioder,
     avkorting = null,
     beregning = null,
     vilkaarsvurdering = null

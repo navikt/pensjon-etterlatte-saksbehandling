@@ -16,21 +16,31 @@ class UtbetalingMapper(
 
     private val utbetalingsperioder = vedtak.pensjonTilUtbetaling!!.sortedBy { it.periode.fom }
 
-    fun opprettUtbetaling(): Utbetaling = Utbetaling(
-        id = utbetalingId,
-        sakId = SakId(vedtak.sak.id),
-        behandlingId = BehandlingId(vedtak.behandling.id.toString()), // TODO: må erstattes til en maks 30 tegn lang nøkkel
-        vedtakId = VedtakId(vedtak.vedtakId),
-        status = UtbetalingStatus.SENDT,
-        opprettet = opprettet,
-        endret = opprettet,
-        avstemmingsnoekkel = opprettet,
-        stoenadsmottaker = Foedselsnummer(vedtak.sak.ident),
-        saksbehandler = NavIdent(vedtak.vedtakFattet!!.ansvarligSaksbehandler),
-        attestant = NavIdent(vedtak.attestasjon!!.attestant),
-        vedtak = vedtak,
-        utbetalingslinjer = utbetalingslinjer()
-    )
+    fun opprettUtbetaling(): Utbetaling {
+        if (tidligereUtbetalinger.isEmpty() &&
+            utbetalingsperioder.size == 1 &&
+            utbetalingsperioder.first().type == UtbetalingsperiodeType.OPPHOER) {
+
+            throw IngenEksisterendeUtbetalingException()
+        }
+        return utbetaling()
+    }
+
+    private fun utbetaling() = Utbetaling(
+            id = utbetalingId,
+            sakId = SakId(vedtak.sak.id),
+            behandlingId = BehandlingId(vedtak.behandling.id.toString()), // TODO: må erstattes til en maks 30 tegn lang nøkkel
+            vedtakId = VedtakId(vedtak.vedtakId),
+            status = UtbetalingStatus.SENDT,
+            opprettet = opprettet,
+            endret = opprettet,
+            avstemmingsnoekkel = opprettet,
+            stoenadsmottaker = Foedselsnummer(vedtak.sak.ident),
+            saksbehandler = NavIdent(vedtak.vedtakFattet!!.ansvarligSaksbehandler),
+            attestant = NavIdent(vedtak.attestasjon!!.attestant),
+            vedtak = vedtak,
+            utbetalingslinjer = utbetalingslinjer()
+        )
 
     private fun utbetalingslinjer() = utbetalingsperioder.map {
         Utbetalingslinje(
@@ -72,3 +82,5 @@ class UtbetalingMapper(
         )
     }.maxByOrNull { it.opprettet.instant }?.utbetalingslinjer?.last()?.id
 }
+
+class IngenEksisterendeUtbetalingException : RuntimeException()

@@ -8,6 +8,9 @@ import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 import java.util.*
+import javax.xml.datatype.DatatypeConstants
+import javax.xml.datatype.DatatypeFactory
+import javax.xml.datatype.XMLGregorianCalendar
 
 fun ZonedDateTime.next(atTime: LocalTime): Date {
     return if (this.toLocalTime().isAfter(atTime)) {
@@ -40,3 +43,11 @@ fun forsteDagIMaaneden(yearMonth: YearMonth) =
 
 fun sisteDagIMaaneden(yearMonth: YearMonth) =
     forsteDagIMaaneden(yearMonth).with(TemporalAdjusters.lastDayOfMonth())
+
+
+fun LocalDate.toXMLDate(): XMLGregorianCalendar {
+    return DatatypeFactory.newInstance()
+        .newXMLGregorianCalendar(GregorianCalendar.from(atStartOfDay(norskTidssone))).apply {
+            timezone = DatatypeConstants.FIELD_UNDEFINED
+        }
+}

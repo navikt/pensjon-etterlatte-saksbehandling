@@ -39,6 +39,17 @@ class OpplysningDao(private val connection: () -> Connection) {
                 setString(5, behandlingsopplysning.opplysningType.name)
                 require(executeUpdate() == 1)
             }
+        connection().prepareStatement("""INSERT INTO grunnlagshendelse(opplysning_id, sak_id, opplysning, kilde, opplysning_type, hendelsenummer)
+            | VALUES(?, ?, ?, ?, ?, COALESCE((select max (hendelsenummer) +1 from grunnlagshendelse where sak_id = ?), 1))""".trimMargin())
+            .apply {
+                setObject(1, behandlingsopplysning.id)
+                setLong(2, sakId)
+                setString(3, behandlingsopplysning.opplysning.serialize())
+                setString(4, behandlingsopplysning.kilde.toJson())
+                setString(5, behandlingsopplysning.opplysningType.name)
+                setLong(6, sakId)
+                require(executeUpdate() == 1)
+            }
     }
 
     fun slettOpplysningerISak(id: Long){

@@ -1,5 +1,5 @@
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -19,7 +19,7 @@ internal class LesVilkaarsmelding(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
-            validate { it.requireKey("grunnlag") }
+            validate { it.requireKey("@grunnlag") }
             validate { it.rejectKey("@vilkaarsvurdering") }
             validate { it.rejectKey("@kommersoekertilgode") }
             validate { it.rejectKey("@gyldighetsvurdering") }
@@ -30,19 +30,20 @@ internal class LesVilkaarsmelding(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val grunnlagListe = packet["grunnlag"].toString()
             try {
-                val grunnlagForVilkaar = objectMapper.readValue<List<VilkaarOpplysning<ObjectNode>>>(grunnlagListe)
+                val grunnlag = requireNotNull(objectMapper.treeToValue<Grunnlag>(packet["@grunnlag"]))
+                val grunnlagForVilkaar = grunnlag.grunnlag.map { VilkaarOpplysning(it.id, it.opplysningType, it.kilde, it.opplysning) }
                 val vilkaarsVurdering = vilkaar.mapVilkaar(grunnlagForVilkaar)
                 val kommerSoekerTilGodeVurdering = vilkaar.mapKommerSoekerTilGode(grunnlagForVilkaar)
 
                 packet["@vilkaarsvurdering"] = vilkaarsVurdering
+                packet["@vilkaarsvurderingGrunnlagRef"] = grunnlag.versjon
                 packet["@kommersoekertilgode"] = kommerSoekerTilGodeVurdering
                 context.publish(packet.toJson())
 
                 logger.info("Vurdert Vilkår")
             } catch (e: Exception) {
-                println("Vilkår kunne ikke vurderes: " + e)
+                println("Vilkår kunne ikke vurderes: $e")
             }
         }
 }

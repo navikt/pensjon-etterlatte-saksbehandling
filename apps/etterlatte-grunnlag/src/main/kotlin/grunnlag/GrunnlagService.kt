@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.slf4j.LoggerFactory
 
@@ -35,6 +36,6 @@ class RealGrunnlagService(
     }
 
     private fun hentGrunnlagUtenTransaksjon(sak: Long): Grunnlag {
-        return  opplysninger.finnHendelserIGrunnlag(sak).let { hendelser -> Grunnlag(saksId = sak, grunnlag = hendelser.map { it.opplysning }, hendelser.maxOfOrNull { it.hendelseNummer } ?: 0)}
+        return  opplysninger.finnHendelserIGrunnlag(sak).let { hendelser -> Grunnlag(saksId = sak, grunnlag = hendelser.map { it.opplysning }, hendelser.maxOfOrNull { it.hendelseNummer } ?: 0) }
     }
 }

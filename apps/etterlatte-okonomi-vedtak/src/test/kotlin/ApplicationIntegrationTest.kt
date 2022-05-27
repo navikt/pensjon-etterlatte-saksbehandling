@@ -19,6 +19,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.oppdragMedFeiletKvittering
 import no.nav.etterlatte.utbetaling.oppdragMedGodkjentKvittering
 import no.nav.etterlatte.utbetaling.readFile
+import no.nav.etterlatte.utbetaling.ugyldigVedtakTilUtbetaling
 import no.nav.etterlatte.utbetaling.vedtak
 import no.nav.etterlatte.utbetaling.vedtakEvent
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -132,6 +133,21 @@ class ApplicationIntegrationTest {
                         event["@event_name"].textValue() == "utbetaling_oppdatert" &&
                                 event["@vedtakId"].longValue() == 1L &&
                                 event["@status"].textValue() == UtbetalingStatus.FEILET.name
+                    }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `skal post melding paa kafka dersom vedtak ikke kan deserialiseres`() {
+        sendFattetVedtakEvent(vedtakEvent(ugyldigVedtakTilUtbetaling()))
+
+        verify(timeout = TIMEOUT) {
+            rapidsConnection.publish("key",
+                match {
+                    it.toJsonNode().let { event ->
+                        event["@event_name"].textValue() == "deserialisering_feilet"
                     }
                 }
             )

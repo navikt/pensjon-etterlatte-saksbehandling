@@ -1,33 +1,7 @@
 package no.nav.etterlatte.fordeler
 
-import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_FORELDER_TIL_BARN
-import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
-import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_ADRESSEBESKYTTELSE
-import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_HATT_UTLANDSOPPHOLD
-import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_UTVANDRING
-import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_YRKESSKADE
-import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_VAR_IKKE_BOSATT_I_NORGE
-import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_FOR_GAMMELT
-import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_IKKE_ALENEBARN
-import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_IKKE_BOSATT_I_NORGE
-import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_IKKE_FOEDT_I_NORGE
-import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_IKKE_NORSK_STATSBORGER
-import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_HAR_ADRESSEBESKYTTELSE
-import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_HAR_HUKET_AV_UTLANDSADRESSE
-import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_HAR_UTVANDRING
-import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_HAR_VERGE
-import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE
-import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_HAR_ADRESSEBESKYTTELSE
-import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_HAR_IKKE_FORELDREANSVAR
-import no.nav.etterlatte.fordeler.FordelerKriterie.GJENLEVENDE_OG_BARN_HAR_IKKE_SAMME_ADRESSE
-import no.nav.etterlatte.fordeler.FordelerKriterie.INNSENDER_ER_IKKE_FORELDER
-import no.nav.etterlatte.libs.common.person.Adresse
-import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.aktiv
-import no.nav.etterlatte.libs.common.person.alder
-import no.nav.etterlatte.libs.common.person.nyeste
+import no.nav.etterlatte.fordeler.FordelerKriterie.*
+import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
@@ -94,7 +68,7 @@ class FordelerKriterier {
         Kriterie(BARN_HAR_UTVANDRING) { harUtvandring(barn) },
         Kriterie(BARN_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(barn) },
         Kriterie(BARN_HAR_VERGE) { harHuketAvForVerge(it) },
-        Kriterie(BARN_ER_IKKE_ALENEBARN) { barnErIkkeAlenebarn(avdoed, barn) },
+        Kriterie(BARN_ER_IKKE_ALENEBARN) { barnErIkkeAlenebarn(avdoed, barn, gjenlevende) },
 
         // Avdød
         Kriterie(AVDOED_ER_IKKE_REGISTRERT_SOM_DOED) { personErIkkeRegistrertDoed(avdoed) },
@@ -181,8 +155,12 @@ class FordelerKriterier {
         return person.alder()?.let { it > alder } ?: true
     }
 
-    private fun barnErIkkeAlenebarn(avdoed: Person, barn: Person): Boolean {
-        return avdoed.familieRelasjon?.barn?.minus(barn.foedselsnummer)?.isNotEmpty() ?: false
+    private fun barnErIkkeAlenebarn(avdoed: Person, barn: Person, gjenlevende: Person): Boolean {
+        return avdoed.familieRelasjon?.barn?.minus(barn.foedselsnummer)?.let { avdoedAndreBarn ->
+            gjenlevende.familieRelasjon?.barn?.let { gjenlevendeBarn ->
+                (avdoedAndreBarn.any { (it in gjenlevendeBarn) })
+            }
+        } ?:false
     }
 
     private fun harHuketAvForYrkesskade(barnepensjon: Barnepensjon): Boolean {

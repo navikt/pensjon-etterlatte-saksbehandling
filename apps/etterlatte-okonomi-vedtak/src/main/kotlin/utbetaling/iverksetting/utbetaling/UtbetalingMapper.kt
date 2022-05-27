@@ -60,25 +60,26 @@ class UtbetalingMapper(
     }
 
     private fun finnErstatterId(utbetalingslinjeId: Long): UtbetalingslinjeId? {
-        return if (utbetalingsperioder.indexOfFirst { it.id == utbetalingslinjeId } == 0) {
-            finnIdSisteUtbetalingslinje()
+        return if (indeksForUtbetalingslinje(utbetalingslinjeId) == 0) {
+            utbetalingslinjeIdForForrigeUtbetalingslinje()
         } else {
-            UtbetalingslinjeId(
-                finnForrigeIndeks(utbetalingslinjeId)
-            )
+            utbetalingslinjeIdForForrigeUtbetalingslinje(utbetalingslinjeId)
         }
     }
 
-    // TODO: gjøre dette på en sikrere/finere måte
-    private fun finnForrigeIndeks(utbetalingslinjeId: Long) =
-        utbetalingsperioder[utbetalingsperioder.indexOfFirst { it.id == utbetalingslinjeId } - 1].id
+    private fun utbetalingslinjeIdForForrigeUtbetalingslinje(utbetalingslinjeId: Long) =
+        UtbetalingslinjeId(utbetalingsperioder[indeksForUtbetalingslinje(utbetalingslinjeId) - 1].id)
 
-    private fun finnIdSisteUtbetalingslinje() = tidligereUtbetalinger.filter {
+    private fun utbetalingslinjeIdForForrigeUtbetalingslinje() = tidligereUtbetalinger.filter {
         it.status in listOf(
             UtbetalingStatus.GODKJENT,
             UtbetalingStatus.GODKJENT_MED_FEIL
         )
     }.maxByOrNull { it.opprettet.instant }?.utbetalingslinjer?.last()?.id
+
+    private fun indeksForUtbetalingslinje(utbetalingslinjeId: Long) =
+        utbetalingsperioder.indexOfFirst { it.id == utbetalingslinjeId }
+
 }
 
 class IngenEksisterendeUtbetalingException : RuntimeException()

@@ -27,8 +27,6 @@ data class PeriodeForUtbetaling(
     val fra: LocalDate, val til: LocalDate? = null
 )
 
-data class UUID30(val value: String = UUID.randomUUID().toString().substring(0, 30))
-
 data class Kvittering(
     val oppdrag: Oppdrag,
     val feilkode: String,

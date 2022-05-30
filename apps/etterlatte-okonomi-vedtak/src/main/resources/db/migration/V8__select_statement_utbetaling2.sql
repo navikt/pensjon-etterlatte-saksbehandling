@@ -1,1 +1,0 @@
-SELECT opprettet from utbetalingsoppdrag ;

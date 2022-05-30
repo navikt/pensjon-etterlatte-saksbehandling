@@ -88,8 +88,8 @@ class AvstemmingsdataMapper(
                     avleverendeTransaksjonNokkel = it.sakId.value.toString()
                     tidspunkt = it.avstemmingsnoekkel.toNorskTid().format(tidsstempelMikro)
                     if (detaljType in listOf(DetaljType.AVVI, DetaljType.VARS) && it.kvittering != null) {
-                        meldingKode = it.kvittering.meldingKode
-                        alvorlighetsgrad = it.kvittering.feilkode
+                        meldingKode = it.kvittering.kode
+                        alvorlighetsgrad = it.kvittering.alvorlighetsgrad
                         tekstMelding = it.kvittering.beskrivelse
                     }
                 }

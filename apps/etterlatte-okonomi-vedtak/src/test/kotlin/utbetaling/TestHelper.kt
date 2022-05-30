@@ -73,8 +73,8 @@ fun kvittering(oppdragMedKvittering: Oppdrag) =
     Kvittering(
         oppdrag = oppdragMedKvittering,
         beskrivelse = oppdragMedKvittering.mmel.alvorlighetsgrad,
-        feilkode = oppdragMedKvittering.mmel.beskrMelding,
-        meldingKode = oppdragMedKvittering.mmel.kodeMelding
+        alvorlighetsgrad = oppdragMedKvittering.mmel.beskrMelding,
+        kode = oppdragMedKvittering.mmel.kodeMelding
     )
 
 fun oppdragMedGodkjentKvittering(utbetaling: Utbetaling = utbetaling(vedtakId = 1)) = oppdrag(utbetaling).apply {

@@ -29,9 +29,9 @@ data class PeriodeForUtbetaling(
 
 data class Kvittering(
     val oppdrag: Oppdrag,
-    val feilkode: String,
+    val alvorlighetsgrad: String,
     val beskrivelse: String? = null,
-    val meldingKode: String? = null,
+    val kode: String? = null,
 )
 
 data class Utbetaling(

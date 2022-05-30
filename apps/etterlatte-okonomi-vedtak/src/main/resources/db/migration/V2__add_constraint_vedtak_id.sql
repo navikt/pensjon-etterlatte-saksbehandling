@@ -1,1 +1,0 @@
-ALTER TABLE utbetalingsoppdrag ADD UNIQUE (vedtak_id);

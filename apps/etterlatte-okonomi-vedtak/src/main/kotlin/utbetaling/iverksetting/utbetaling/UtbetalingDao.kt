@@ -29,25 +29,25 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
                 queryOf(
                     statement = """
-                        INSERT INTO utbetaling(id, vedtak_id, behandling_id, sak_id, utgaaende_oppdrag, status, vedtak, 
-                            opprettet, avstemmingsnoekkel, endret, foedselsnummer, saksbehandler, attestant)
+                        INSERT INTO utbetaling(id, vedtak_id, behandling_id, sak_id, oppdrag, status, vedtak, 
+                            opprettet, avstemmingsnoekkel, endret, stoenadsmottaker, saksbehandler, attestant)
                         VALUES(:id, :vedtakId, :behandlingId, :sakId, :oppdrag, :status, :vedtak, :opprettet, 
-                            :avstemmingsnoekkel, :endret, :foedselsnummer, :saksbehandler, :attestant)
+                            :avstemmingsnoekkel, :endret, :stoenadsmottaker, :saksbehandler, :attestant)
                         """,
                     paramMap = mapOf(
                         "id" to utbetaling.id.toString(),
                         "vedtakId" to utbetaling.vedtakId.value,
                         "behandlingId" to utbetaling.behandlingId.value,
                         "sakId" to utbetaling.sakId.value,
-                        "oppdrag" to utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) },
                         "status" to UtbetalingStatus.SENDT.name,
                         "vedtak" to utbetaling.vedtak.toJson(),
                         "opprettet" to Timestamp.from(utbetaling.opprettet.instant),
                         "avstemmingsnoekkel" to Timestamp.from(utbetaling.avstemmingsnoekkel.instant),
                         "endret" to Timestamp.from(utbetaling.endret.instant),
-                        "foedselsnummer" to utbetaling.stoenadsmottaker.value,
+                        "stoenadsmottaker" to utbetaling.stoenadsmottaker.value,
                         "saksbehandler" to utbetaling.saksbehandler.value,
-                        "attestant" to utbetaling.attestant.value
+                        "attestant" to utbetaling.attestant.value,
+                        "oppdrag" to utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) },
                     )
                 ).let { tx.run(it.asUpdate) }
 
@@ -87,8 +87,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
             queryOf(
                 statement = """
                     SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
-                        foedselsnummer, utgaaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, 
-                        meldingkode_oppdrag, saksbehandler, attestant 
+                        stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, kvittering_alvorlighetsgrad, 
+                        kvittering_kode, saksbehandler, attestant 
                     FROM utbetaling 
                     WHERE vedtak_id = :vedtakId
                     """,
@@ -120,8 +120,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
             queryOf(
                 statement = """
                     SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
-                        foedselsnummer, utgaaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, 
-                        meldingkode_oppdrag, saksbehandler, attestant
+                        stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, kvittering_alvorlighetsgrad,  
+                        kvittering_kode, saksbehandler, attestant
                     FROM utbetaling
                     WHERE avstemmingsnoekkel >= :fraOgMed AND avstemmingsnoekkel < :til
                     """,
@@ -143,8 +143,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
             queryOf(
                 statement = """
                     SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
-                        foedselsnummer, utgaaende_oppdrag, oppdrag_kvittering, beskrivelse_oppdrag, feilkode_oppdrag, 
-                        meldingkode_oppdrag, saksbehandler, attestant
+                        stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, kvittering_alvorlighetsgrad, 
+                        kvittering_kode, saksbehandler, attestant
                     FROM utbetaling
                     WHERE sak_id = :sakId
                     """,
@@ -186,15 +186,16 @@ class UtbetalingDao(private val dataSource: DataSource) {
             queryOf(
                 statement = """
                     UPDATE utbetaling 
-                    SET oppdrag_kvittering = :oppdrag, beskrivelse_oppdrag = :beskrivelse, feilkode_oppdrag = :feilkode, 
-                        meldingkode_oppdrag = :meldingkode, endret = :endret 
+                    SET kvittering = :kvittering, kvittering_beskrivelse = :beskrivelse, 
+                        kvittering_alvorlighetsgrad = :alvorlighetsgrad, kvittering_kode = :kode, 
+                        endret = :endret 
                     WHERE vedtak_id = :vedtakId
                     """,
                 paramMap = mapOf(
-                    "oppdrag" to OppdragJaxb.toXml(oppdragMedKvittering),
+                    "kvittering" to OppdragJaxb.toXml(oppdragMedKvittering),
                     "beskrivelse" to oppdragMedKvittering.mmel.beskrMelding,
-                    "feilkode" to oppdragMedKvittering.mmel.alvorlighetsgrad,
-                    "meldingkode" to oppdragMedKvittering.mmel.kodeMelding,
+                    "alvorlighetsgrad" to oppdragMedKvittering.mmel.alvorlighetsgrad,
+                    "kode" to oppdragMedKvittering.mmel.kodeMelding,
                     "endret" to Timestamp.from(endret.instant),
                     "vedtakId" to oppdragMedKvittering.vedtakId()
                 )
@@ -219,17 +220,17 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 opprettet = Tidspunkt(sqlTimestamp("opprettet").toInstant()),
                 endret = Tidspunkt(sqlTimestamp("endret").toInstant()),
                 avstemmingsnoekkel = Tidspunkt(sqlTimestamp("avstemmingsnoekkel").toInstant()),
-                stoenadsmottaker = Foedselsnummer(string("foedselsnummer")),
+                stoenadsmottaker = Foedselsnummer(string("stoenadsmottaker")),
                 saksbehandler = NavIdent(string("saksbehandler")),
                 attestant = NavIdent(string("attestant")),
                 vedtak = string("vedtak").let { vedtak -> objectMapper.readValue(vedtak) },
-                oppdrag = string("utgaaende_oppdrag").let(OppdragJaxb::toOppdrag),
-                kvittering = stringOrNull("oppdrag_kvittering")?.let {
+                oppdrag = string("oppdrag").let(OppdragJaxb::toOppdrag),
+                kvittering = stringOrNull("kvittering")?.let {
                     Kvittering(
                         oppdrag = OppdragJaxb.toOppdrag(it),
-                        feilkode = string("feilkode_oppdrag"),
-                        beskrivelse = stringOrNull("beskrivelse_oppdrag"),
-                        meldingKode = stringOrNull("meldingkode_oppdrag")
+                        alvorlighetsgrad = string("kvittering_alvorlighetsgrad"),
+                        beskrivelse = stringOrNull("kvittering_beskrivelse"),
+                        kode = stringOrNull("kvittering_kode")
                     )
                 },
                 utbetalingslinjer = utbetalingslinjer

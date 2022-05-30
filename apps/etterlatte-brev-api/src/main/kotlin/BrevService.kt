@@ -16,6 +16,7 @@ import no.nav.etterlatte.vedtak.VedtakService
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import pdf.PdfGeneratorKlient
+import java.util.*
 
 class BrevService(
     private val db: BrevRepository,
@@ -106,10 +107,14 @@ class BrevService(
         bruker = Bruker(brev.mottaker.foedselsnummer?.value ?: "0101202212345"),
         tittel = brev.tittel
     ).let {
+        val correlationId = UUID.randomUUID().toString()
+        logger.info("Oppretter distribusjonsmelding for brev (id=${brev.id}) med correlation_id=$correlationId")
+
         JsonMessage.newMessage(
             mapOf(
                 "@event" to "BREV:DISTRIBUER",
                 "@brevId" to it.brevId,
+                "@correlation_id" to correlationId,
                 "payload" to it.toJson()
             )
         ).toJson()

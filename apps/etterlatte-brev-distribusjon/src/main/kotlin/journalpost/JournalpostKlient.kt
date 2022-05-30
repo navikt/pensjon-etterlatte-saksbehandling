@@ -6,6 +6,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -18,7 +19,7 @@ class JournalpostKlient(private val client: HttpClient, private val url: String)
         client.post("$url?forsoekFerdigstill=$ferdigstill") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
-            header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
+            header(X_CORRELATION_ID, MDC.get(X_CORRELATION_ID) ?: UUID.randomUUID().toString())
             body = request.toJson()
         }
     } catch (responseException: ResponseException) {

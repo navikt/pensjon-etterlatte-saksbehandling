@@ -22,13 +22,13 @@ internal class JournalfoerBrev(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BREV:DISTRIBUER") }
-            validate { it.requireKey("@brevId", "payload") }
+            validate { it.requireKey("@brevId", "@correlation_id", "payload") }
             validate { it.rejectKey("@bestillingId", "@journalpostResponse") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext {
+        withLogContext(packet["@correlation_id"].asText()) {
             logger.info("Starter journalføring av brev.")
 
             val melding = packet.distribusjonsmelding()

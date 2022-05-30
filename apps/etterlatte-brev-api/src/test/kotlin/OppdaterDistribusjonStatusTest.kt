@@ -28,6 +28,7 @@ class OppdaterDistribusjonStatusTest {
         val melding = JsonMessage.newMessage(mapOf(
             "@event" to "BREV:DISTRIBUER",
             "@brevId" to brevId,
+            "@correlation_id" to UUID.randomUUID().toString(),
             "@journalpostResponse" to journalpostResponse.toJson()
         ))
 
@@ -47,6 +48,7 @@ class OppdaterDistribusjonStatusTest {
         val melding = JsonMessage.newMessage(mapOf(
             "@event" to "BREV:DISTRIBUER",
             "@brevId" to brevId,
+            "@correlation_id" to UUID.randomUUID().toString(),
             "@journalpostResponse" to journalpostResponse.toJson(),
             "@bestillingId" to bestillingId
         ))

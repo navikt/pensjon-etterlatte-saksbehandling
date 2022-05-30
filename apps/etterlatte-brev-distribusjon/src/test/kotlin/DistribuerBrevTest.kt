@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
+import java.util.*
 
 class DistribuerBrevTest {
     private val inspector = TestRapid().apply { DistribuerBrev(this, DistribusjonServiceMock()) }
@@ -20,6 +21,7 @@ class DistribuerBrevTest {
             mapOf(
                 "@event" to "BREV:DISTRIBUER",
                 "@brevId" to brevId,
+                "@correlation_id" to UUID.randomUUID().toString(),
                 "@journalpostResponse" to journalpostResponse.toJson()
         ))
         val inspector = inspector.apply { sendTestMessage(melding.toJson()) }.inspektør

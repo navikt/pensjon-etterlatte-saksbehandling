@@ -1,3 +1,4 @@
+
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.db.Status
@@ -18,14 +19,14 @@ internal class OppdaterDistribusjonStatus(rapidsConnection: RapidsConnection, pr
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BREV:DISTRIBUER") }
-            validate { it.requireKey("@brevId", "@journalpostResponse") }
-            validate { it.interestedIn("@bestillingId")}
+            validate { it.requireKey("@brevId", "@correlation_id", "@journalpostResponse") }
+            validate { it.interestedIn("@bestillingId") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val brevId = packet["@brevId"].longValue()
-        withLogContext(brevId.toString()) {
+        withLogContext(packet["@correlation_id"].asText()) {
+            val brevId = packet["@brevId"].longValue()
             logger.info("Mottatt oppdatering fra brev-distribusjon for brev med id ${brevId}.")
 
             if (packet["@bestillingId"].isTextual) {

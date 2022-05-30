@@ -23,13 +23,13 @@ internal class DistribuerBrev(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BREV:DISTRIBUER") }
-            validate { it.requireKey("@brevId", "@journalpostResponse") }
+            validate { it.requireKey("@brevId", "@correlation_id", "@journalpostResponse") }
             validate { it.rejectKey("@bestillingId") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext {
+        withLogContext(packet["@correlation_id"].asText()) {
             logger.info("Starter distribuering av brev.")
 
             val bestillingId = distribusjonService.distribuerJournalpost(

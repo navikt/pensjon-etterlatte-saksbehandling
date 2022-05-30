@@ -24,8 +24,9 @@ fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
 
             register(object : RapidsConnection.StatusListener {
                 override fun onStartup(rapidsConnection: RapidsConnection) {
-                    applicationContext.dataSourceBuilder.migrate()
+                    //applicationContext.dataSourceBuilder.migrate()
                 }
+
                 override fun onShutdown(rapidsConnection: RapidsConnection) {
                     applicationContext.jmsConnectionFactory.stop()
                 }

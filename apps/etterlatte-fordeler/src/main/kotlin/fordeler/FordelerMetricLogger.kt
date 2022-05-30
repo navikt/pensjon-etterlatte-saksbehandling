@@ -22,10 +22,6 @@ internal class FordelerMetricLogger(
     private val kriterierIkkeOppfyltMetric: Counter = defaultKriterierIkkeOppfyltMetric.register(),
     private val fordelerStatusMetric: Counter = defaultFordelerStatusMetric.register(),
 ) {
-    fun resettMetrikker() {
-        this.kriterierIkkeOppfyltMetric.clear()
-        this.fordelerStatusMetric.clear()
-    }
 
     fun logMetricFordelt() {
         this.fordelerStatusMetric.labels(FordelerStatus.GYLDIG_FOR_BEHANDLING.name).inc()

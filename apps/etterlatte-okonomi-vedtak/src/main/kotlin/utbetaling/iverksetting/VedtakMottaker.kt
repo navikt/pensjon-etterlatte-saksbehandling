@@ -55,7 +55,7 @@ class VedtakMottaker(
             } catch (e: Exception) {
                 if (e is InvalidFormatException || e is MissingKotlinParameterException) {
                     logger.error("Kunne ikke deresialisere vedtak: ", packet["@vedtak"].toJson())
-                    rapidsConnection.publish(deserialiseringFeilet(packet["@vedtak"]))
+                    rapidsConnection.publish("key", deserialiseringFeilet(packet["@vedtak"]))
                 } else throw e
             }
         }

@@ -24,7 +24,6 @@ object OppdragMapper {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = "1"
             kodeEndring = if (foerstegangsbehandling) "NY" else "ENDR"
-            //kodeStatus = TODO: skal opphør settes på 110-linjen
             kodeFagomraade = "BARNEPE"
             fagsystemId = utbetaling.sakId.value.toString()
             utbetFrekvens = "MND"
@@ -49,16 +48,17 @@ object OppdragMapper {
             oppdragsLinje150.addAll(
                 utbetaling.utbetalingslinjer.map {
                     OppdragsLinje150().apply {
-                        // TODO: trenger også her en kodeEndringLinje: "ENDRING" i tilfeller hvor kun ett attributt endres for en utbetalingslinje
-                        kodeEndringLinje = "NY"
                         if (it.erstatterId != null) {
+                            kodeEndringLinje = "ENDR"
                             refFagsystemId = utbetaling.sakId.value.toString()
                             refDelytelseId = it.erstatterId.value.toString()
+                        } else {
+                            kodeEndringLinje = "NY"
                         }
-                        kodeStatusLinje = it.type?.let {
+                        kodeStatusLinje = it.type.let {
                             when (it) {
                                 Utbetalingslinjetype.OPPHOER -> TkodeStatusLinje.OPPH
-                                else -> null
+                                Utbetalingslinjetype.UTBETALING -> null
                             }
                         }
                         vedtakId = utbetaling.vedtakId.value.toString()

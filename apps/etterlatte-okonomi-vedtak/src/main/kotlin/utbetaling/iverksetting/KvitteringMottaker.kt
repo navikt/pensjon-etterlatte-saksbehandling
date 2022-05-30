@@ -1,6 +1,8 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
@@ -39,30 +41,34 @@ class KvitteringMottaker(
     }
 
     override fun onMessage(message: Message) {
-        var oppdragXml: String? = null
+        runBlocking {
+            delay(2000) // TODO race condition - kvittering kommer før utbetaling er lagret
 
-        try {
-            logger.info("Kvittering på utbetaling fra Oppdrag mottatt med id=${message.jmsMessageID}")
-            oppdragXml = message.getBody(String::class.java)
-            val oppdrag = OppdragJaxb.toOppdrag(oppdragXml)
+            var oppdragXml: String? = null
 
-            logger.info("Kvittering mottatt fra Oppdrag", kv("oppdragXml", oppdrag))
-            logger.info("Kvittering mottatt fra Oppdrag", kv("oppdragXml", oppdragXml))
+            try {
+                logger.info("Kvittering på utbetaling fra Oppdrag mottatt med id=${message.jmsMessageID}")
+                oppdragXml = message.getBody(String::class.java)
+                val oppdrag = OppdragJaxb.toOppdrag(oppdragXml)
 
-            utbetalingService.oppdaterKvittering(oppdrag)
+                logger.info("Kvittering mottatt fra Oppdrag", kv("oppdragXml", oppdrag))
+                logger.info("Kvittering mottatt fra Oppdrag", kv("oppdragXml", oppdragXml))
 
-            when (oppdrag.mmel.alvorlighetsgrad) {
-                "00" -> oppdragAkseptert(oppdrag)
-                "04" -> oppdragAkseptertMedFeil(oppdrag)
-                "08" -> oppdragAvvist(oppdrag)
-                "12" -> oppdragFeilet(oppdrag, oppdragXml)
-                else -> oppdragFeiletUkjent(oppdrag, oppdragXml)
+                utbetalingService.oppdaterKvittering(oppdrag)
+
+                when (oppdrag.mmel.alvorlighetsgrad) {
+                    "00" -> oppdragAkseptert(oppdrag)
+                    "04" -> oppdragAkseptertMedFeil(oppdrag)
+                    "08" -> oppdragAvvist(oppdrag)
+                    "12" -> oppdragFeilet(oppdrag, oppdragXml)
+                    else -> oppdragFeiletUkjent(oppdrag, oppdragXml)
+                }
+
+                logger.info("Melding med id=${message.jmsMessageID} er lest og behandlet")
+
+            } catch (t: Throwable) {
+                logger.error("Feilet under mottak av kvittering fra Oppdrag", kv("oppdragXml", oppdragXml), t)
             }
-
-            logger.info("Melding med id=${message.jmsMessageID} er lest og behandlet")
-
-        } catch (t: Throwable) {
-            logger.error("Feilet under mottak av kvittering fra Oppdrag", kv("oppdragXml", oppdragXml), t)
         }
     }
 

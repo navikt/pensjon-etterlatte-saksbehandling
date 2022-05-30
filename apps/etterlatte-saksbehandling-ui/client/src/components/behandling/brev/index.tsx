@@ -65,10 +65,16 @@ export const Brev = () => {
             Ferdigstilt &nbsp;<Information/>
           </Tag>
       )
-    } else if (status === 'SENDT') {
+    } else if (status === 'JOURNALFOERT') {
       return (
           <Tag variant={'success'} size={'small'} style={{ width: '100%' }}>
-            Sendt &nbsp;<Success/>
+            Journalført &nbsp;<Success/>
+          </Tag>
+      )
+    } else if (status === 'DISTRIBUERT') {
+      return (
+          <Tag variant={'success'} size={'small'} style={{ width: '100%' }}>
+            Distribuert &nbsp;<Success/>
           </Tag>
       )
     } else {

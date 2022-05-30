@@ -24,13 +24,15 @@ class JournalpostServiceImpl(private val client: JournalpostKlient) : Journalpos
     }
 
     companion object {
+        private const val BEHANDLINGSTEMA_BP = "ab0255"
+
         fun mapTilJournalpostRequest(
             melding: DistribusjonMelding,
             dokumenter: List<DokumentVariant>
         ): JournalpostRequest = JournalpostRequest(
             tittel = melding.tittel,
             journalpostType = JournalPostType.UTGAAENDE,
-            behandlingstema = "ab0255", //SoeknadType.BARNEPENSJON
+            behandlingstema = BEHANDLINGSTEMA_BP,
             avsenderMottaker = melding.mottaker,
             bruker = melding.bruker,
             eksternReferanseId = "todo", // blir sjekket for duplikat.

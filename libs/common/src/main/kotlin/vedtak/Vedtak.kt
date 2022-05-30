@@ -13,6 +13,7 @@ data class Vedtak(
     val behandlingstype: Endringskode,
     val beregningsperioder: List<Beregningsperiode>,
     val oppdragsenheter: List<Oppdragsenhet>,
+    val attestasjon: Attestasjon,
 )
 
 data class Oppdragsenhet(

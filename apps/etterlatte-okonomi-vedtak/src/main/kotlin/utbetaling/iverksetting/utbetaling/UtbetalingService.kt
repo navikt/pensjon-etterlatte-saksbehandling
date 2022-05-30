@@ -1,8 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
@@ -20,16 +18,21 @@ class UtbetalingService(
     val rapidsConnection: RapidsConnection,
     val clock: Clock
 ) {
-    fun iverksettUtbetaling(vedtak: Vedtak, attestasjon: Attestasjon): Utbetaling {
-        val opprettetTidspunkt = Tidspunkt.now(clock)
-        val oppdrag = oppdragMapper.oppdragFraVedtak(vedtak, attestasjon, opprettetTidspunkt)
+    fun iverksettUtbetaling(vedtak: Utbetalingsvedtak): Utbetaling {
+        val utbetaling = UtbetalingMapper(
+            tidligereUtbetalinger = utbetalingDao.hentUtbetalinger(vedtak.sak.id),
+            vedtak = vedtak,
+        ).opprettUtbetaling()
 
-        logger.info("Sender oppdrag for sakId=${vedtak.sakId} med vedtakId=${vedtak.vedtakId} til oppdrag")
+        val foerstegangsbehandling = vedtak.behandling.type == BehandlingType.FORSTEGANGSBEHANDLING
+        val oppdrag = oppdragMapper.oppdragFraUtbetaling(utbetaling, foerstegangsbehandling)
+
+        logger.info("Sender oppdrag for sakId=${vedtak.sak.id} med vedtakId=${vedtak.vedtakId} til oppdrag")
         oppdragSender.sendOppdrag(oppdrag)
-        return utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettetTidspunkt)
+        return utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
     }
 
-    fun utbetalingEksisterer(vedtak: Vedtak) =
+    fun utbetalingEksisterer(vedtak: Utbetalingsvedtak) =
         utbetalingDao.hentUtbetaling(vedtak.vedtakId) != null
 
     fun oppdaterKvittering(oppdrag: Oppdrag): Utbetaling {
@@ -38,15 +41,14 @@ class UtbetalingService(
     }
 
     // TODO: sette inn kolonne i database som viser at kvittering er oppdatert manuelt?
-    fun settKvitteringManuelt(vedtakId: String) = utbetalingDao.hentUtbetaling(vedtakId)?.let {
-        it.oppdrag.apply {
+    fun settKvitteringManuelt(vedtakId: Long) = utbetalingDao.hentUtbetaling(vedtakId)?.let {
+        it.oppdrag?.apply {
             mmel = Mmel().apply {
                 systemId = "231-OPPD" // TODO: en annen systemid her for å indikere manuell jobb?
                 alvorlighetsgrad = "00"
             }
-        }.let { utbetalingDao.oppdaterKvittering(it, Tidspunkt.now(clock)) }
+        }.let { utbetalingDao.oppdaterKvittering(it!!, Tidspunkt.now(clock)) } // TODO
     }
-
 
     fun oppdaterStatusOgPubliserKvittering(oppdrag: Oppdrag, status: UtbetalingStatus) =
         utbetalingDao.oppdaterStatus(oppdrag.vedtakId(), status, Tidspunkt.now(clock))

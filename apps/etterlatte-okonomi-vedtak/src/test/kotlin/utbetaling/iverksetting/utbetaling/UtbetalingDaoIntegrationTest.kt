@@ -1,12 +1,12 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.utbetaling.TestContainers
-import no.nav.etterlatte.utbetaling.attestasjon
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.config.DataSourceBuilder
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
-import no.nav.etterlatte.utbetaling.vedtak
+import no.nav.etterlatte.utbetaling.oppdrag
+import no.nav.etterlatte.utbetaling.utbetaling
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -48,64 +48,71 @@ internal class UtbetalingDaoIntegrationTest {
 
     private fun cleanDatabase() {
         dataSource.connection.use {
-            it.prepareStatement("TRUNCATE utbetalingsoppdrag").apply { execute() }
+            it.prepareStatement("TRUNCATE utbetaling CASCADE").apply { execute() }
         }
     }
 
     @Test
     fun `skal opprette og hente utbetaling`() {
-        val vedtak = vedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), Tidspunkt.now())
-        val opprettetTidspunkt = Tidspunkt.now()
 
-        utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettetTidspunkt)
-        val utbetaling = utbetalingDao.hentUtbetaling(vedtak.vedtakId)
+        val utbetaling = utbetaling(avstemmingsnoekkel = Tidspunkt.now())
+        val oppdrag = oppdrag(utbetaling)
 
+        utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
+        val opprettetUtbetaling = utbetalingDao.hentUtbetaling(utbetaling.vedtakId.value)
+
+        // TODO: legg til nye felter; iallefall saksbehandler og attestant
         assertAll("Skal sjekke at utbetaling er korrekt opprettet",
-            { assertNotNull(utbetaling?.id) },
-            { assertEquals(vedtak.vedtakId, utbetaling?.vedtakId?.value) },
-            { assertEquals(vedtak.behandlingsId, utbetaling?.behandlingId?.value) },
-            { assertEquals(vedtak.sakId, utbetaling?.sakId?.value) },
-            { assertEquals(UtbetalingStatus.SENDT, utbetaling?.status) },
+            { assertNotNull(opprettetUtbetaling?.id) },
+            { assertEquals(utbetaling.vedtakId.value, opprettetUtbetaling?.vedtakId?.value) },
+            { assertEquals(utbetaling.behandlingId.value, opprettetUtbetaling?.behandlingId?.value) },
+            { assertEquals(utbetaling.sakId.value, opprettetUtbetaling?.sakId?.value) },
+            { assertEquals(UtbetalingStatus.SENDT, opprettetUtbetaling?.status) },
             {
                 assertTrue(
-                    utbetaling?.opprettet!!.instant.isAfter(
+                    opprettetUtbetaling?.opprettet!!.instant.isAfter(
                         Instant.now().minusSeconds(10)
-                    ) and utbetaling.opprettet.instant.isBefore(Instant.now())
+                    ) and opprettetUtbetaling.opprettet.instant.isBefore(Instant.now())
                 )
             },
             {
                 assertTrue(
-                    utbetaling!!.endret.instant.isAfter(
+                    opprettetUtbetaling!!.endret.instant.isAfter(
                         Instant.now().minusSeconds(10)
-                    ) and utbetaling.endret.instant.isBefore(Instant.now())
+                    ) and opprettetUtbetaling.endret.instant.isBefore(Instant.now())
                 )
             },
             {
                 assertTrue(
-                    utbetaling!!.avstemmingsnoekkel.instant.isAfter(
+                    opprettetUtbetaling!!.avstemmingsnoekkel.instant.isAfter(
                         Instant.now().minusSeconds(10)
-                    ) and utbetaling.avstemmingsnoekkel.instant.isBefore(Instant.now())
+                    ) and opprettetUtbetaling.avstemmingsnoekkel.instant.isBefore(Instant.now())
                 )
             },
-            { assertEquals(vedtak.sakIdGjelderFnr, utbetaling?.foedselsnummer?.value) },
-            { assertNotNull(utbetaling?.oppdrag) },
-            { assertNull(utbetaling?.kvittering) },
-            { assertNull(utbetaling?.kvitteringBeskrivelse) },
-            { assertNull(utbetaling?.kvitteringFeilkode) },
-            { assertNull(utbetaling?.kvitteringMeldingKode) })
+            { assertEquals(utbetaling.stoenadsmottaker.value, opprettetUtbetaling?.stoenadsmottaker?.value) },
+            { assertNotNull(opprettetUtbetaling?.oppdrag) },
+            { assertNull(opprettetUtbetaling?.kvittering) }
+        )
+    }
+
+    // TODO: nye tester for å sjekke at utbetalingslinjer opprettes korrekt
+
+    private fun opprettUtbetaling(
+        avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
+        vedtakId: Long = 1,
+        utbetalingslinjeId: Long
+    ): Utbetaling {
+        val utbetaling = utbetaling(
+            avstemmingsnoekkel = avstemmingsnoekkel,
+            vedtakId = vedtakId,
+            utbetalingslinjeId = utbetalingslinjeId
+        )
+        val oppdrag = oppdrag(utbetaling)
+        return utbetaling.copy(oppdrag = oppdrag)
     }
 
     @Test
     fun `skal hente alle utbetalinger mellom to tidspunkter`() {
-        val attestasjon = attestasjon()
-
-        val vedtak1 = vedtak("1")
-        val vedtak2 = vedtak("2")
-        val vedtak3 = vedtak("3")
-        val vedtak4 = vedtak("4")
-        val vedtak5 = vedtak("5")
-
         val jan1 = Tidspunkt(Instant.parse("2022-01-01T00:00:00Z"))
         val jan2 = Tidspunkt(Instant.parse("2022-02-01T00:00:00Z"))
         val jan3 = Tidspunkt(Instant.parse("2022-03-01T00:00:00Z"))
@@ -113,37 +120,60 @@ internal class UtbetalingDaoIntegrationTest {
         val jan5 = Tidspunkt(Instant.parse("2022-05-01T00:00:00Z"))
         val jan6 = Tidspunkt(Instant.parse("2022-06-01T00:00:00Z"))
 
-        val oppdrag1 = OppdragMapper.oppdragFraVedtak(vedtak1, attestasjon, jan1)
-        val oppdrag2 = OppdragMapper.oppdragFraVedtak(vedtak2, attestasjon, jan2)
-        val oppdrag3 = OppdragMapper.oppdragFraVedtak(vedtak3, attestasjon, jan3)
-        val oppdrag4 = OppdragMapper.oppdragFraVedtak(vedtak4, attestasjon, jan4)
-        val oppdrag5 = OppdragMapper.oppdragFraVedtak(vedtak5, attestasjon, jan6)
+        utbetalingDao.opprettUtbetaling(
+            opprettUtbetaling(
+                avstemmingsnoekkel = jan1,
+                vedtakId = 1,
+                utbetalingslinjeId = 1
+            )
+        )
+        utbetalingDao.opprettUtbetaling(
+            opprettUtbetaling(
+                avstemmingsnoekkel = jan2,
+                vedtakId = 2,
+                utbetalingslinjeId = 2
+            )
+        )
+        utbetalingDao.opprettUtbetaling(
+            opprettUtbetaling(
+                avstemmingsnoekkel = jan3,
+                vedtakId = 3,
+                utbetalingslinjeId = 3
+            )
+        )
+        utbetalingDao.opprettUtbetaling(
+            opprettUtbetaling(
+                avstemmingsnoekkel = jan4,
+                vedtakId = 4,
+                utbetalingslinjeId = 4
+            )
+        )
+        utbetalingDao.opprettUtbetaling(
+            opprettUtbetaling(
+                avstemmingsnoekkel = jan6,
+                vedtakId = 6,
+                utbetalingslinjeId = 5
+            )
+        )
 
-        utbetalingDao.opprettUtbetaling(vedtak1, oppdrag1, jan1)
-        utbetalingDao.opprettUtbetaling(vedtak2, oppdrag2, jan2)
-        utbetalingDao.opprettUtbetaling(vedtak3, oppdrag3, jan3)
-        utbetalingDao.opprettUtbetaling(vedtak4, oppdrag4, jan4)
-        utbetalingDao.opprettUtbetaling(vedtak5, oppdrag5, jan6)
-
-        val utbetalinger = utbetalingDao.hentAlleUtbetalingerMellom(jan2, jan5)
+        val utbetalinger = utbetalingDao.hentUtbetalinger(jan2, jan5)
 
         assertAll(
             "3 utbetalinger skal hentes, med vedtak id 2, 3 og 4",
             { assertEquals(3, utbetalinger.size) },
-            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == "2" }) },
-            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == "3" }) },
-            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == "4" }) },
+            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == 2L }) },
+            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == 3L }) },
+            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == 4L }) },
         )
     }
 
-
     @Test
     fun `skal sette kvittering paa utbetaling`() {
-        val vedtak = vedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), Tidspunkt.now())
         val opprettetTidspunkt = Tidspunkt.now()
+        val utbetaling = utbetaling(avstemmingsnoekkel = opprettetTidspunkt)
+        val oppdrag = OppdragMapper.oppdragFraUtbetaling(utbetaling, true)
 
-        utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettetTidspunkt)
+        utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
 
         val oppdragMedKvittering = oppdrag.apply {
             oppdrag110.oppdragsId = 1
@@ -155,32 +185,28 @@ internal class UtbetalingDaoIntegrationTest {
 
         assertAll("skal sjekke at kvittering er opprettet korrekt på utbetaling",
             { assertNotNull(utbetalingOppdatert?.kvittering) },
-            { assertNotNull(utbetalingOppdatert?.kvittering?.mmel) },
+            { assertNotNull(utbetalingOppdatert?.kvittering?.oppdrag?.mmel) },
             {
                 assertEquals(
-                    oppdragMedKvittering.mmel?.alvorlighetsgrad, utbetalingOppdatert?.kvittering?.mmel?.alvorlighetsgrad
-                )
-            },
-            {
-                assertEquals(
-                    oppdragMedKvittering.oppdrag110.oppdragsId, utbetalingOppdatert?.kvittering?.oppdrag110?.oppdragsId
+                    oppdragMedKvittering.mmel?.alvorlighetsgrad, utbetalingOppdatert?.kvittering?.oppdrag?.mmel?.alvorlighetsgrad
                 )
             })
     }
 
     @Test
     fun `skal oppdatere status paa utbetaling`() {
-        val vedtak = vedtak()
-        val oppdrag = OppdragMapper.oppdragFraVedtak(vedtak, attestasjon(), Tidspunkt.now())
+
         val opprettetTidspunkt = Tidspunkt.now()
 
-        val utbetaling = utbetalingDao.opprettUtbetaling(vedtak, oppdrag, opprettetTidspunkt)
+        val utbetaling = utbetaling(avstemmingsnoekkel = opprettetTidspunkt)
+        val oppdrag = oppdrag(utbetaling)
+        val opprettetUtbetaling = utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
 
-        assertNotNull(utbetaling)
-        assertEquals(UtbetalingStatus.SENDT, utbetaling.status)
+        assertNotNull(opprettetUtbetaling)
+        assertEquals(UtbetalingStatus.SENDT, opprettetUtbetaling.status)
 
         val utbetalingOppdatert = utbetalingDao.oppdaterStatus(
-            vedtakId = vedtak.vedtakId, status = UtbetalingStatus.GODKJENT, endret = Tidspunkt.now()
+            vedtakId = utbetaling.vedtakId.value, status = UtbetalingStatus.GODKJENT, endret = Tidspunkt.now()
         )
 
         assertEquals(UtbetalingStatus.GODKJENT, utbetalingOppdatert.status)

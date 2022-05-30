@@ -48,9 +48,9 @@ internal class AvstemmingsdataSenderIntegrationTest {
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(
-            utbetaling(id = 1, status = UtbetalingStatus.FEILET),
-            utbetaling(id = 2, status = UtbetalingStatus.FEILET),
-            utbetaling(id = 3, status = UtbetalingStatus.FEILET)
+            utbetaling(status = UtbetalingStatus.FEILET),
+            utbetaling(status = UtbetalingStatus.FEILET),
+            utbetaling(status = UtbetalingStatus.FEILET)
         )
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
         val avstemmingsdata = avstemmingsdataMapper.opprettAvstemmingsmelding()

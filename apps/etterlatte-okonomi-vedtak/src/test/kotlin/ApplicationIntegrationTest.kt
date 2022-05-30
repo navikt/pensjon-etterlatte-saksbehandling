@@ -19,6 +19,9 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.oppdragMedFeiletKvittering
 import no.nav.etterlatte.utbetaling.oppdragMedGodkjentKvittering
 import no.nav.etterlatte.utbetaling.readFile
+import no.nav.etterlatte.utbetaling.ugyldigVedtakTilUtbetaling
+import no.nav.etterlatte.utbetaling.vedtak
+import no.nav.etterlatte.utbetaling.vedtakEvent
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.junit.jupiter.api.AfterAll
@@ -85,14 +88,14 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal sende utbetaling til oppdrag`() {
-        sendFattetVedtakEvent(FATTET_VEDTAK_1)
+        sendFattetVedtakEvent(vedtakEvent(vedtak()))
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish("key",
                 match {
                     it.toJsonNode().let { event ->
                         event["@event_name"].textValue() == "utbetaling_oppdatert" &&
-                                event["@vedtakId"].textValue() == "1" &&
+                                event["@vedtakId"].longValue() == 1L &&
                                 event["@status"].textValue() == UtbetalingStatus.SENDT.name
                     }
                 }
@@ -103,14 +106,14 @@ class ApplicationIntegrationTest {
     @Test
     fun `skal motta kvittering fra oppdrag`() {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
-        sendKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering(vedtakId = "1"))
+        sendKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering())
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish("key",
                 match {
                     it.toJsonNode().let { event ->
                         event["@event_name"].textValue() == "utbetaling_oppdatert" &&
-                                event["@vedtakId"].textValue() == "1" &&
+                                event["@vedtakId"].longValue() == 1L &&
                                 event["@status"].textValue() == UtbetalingStatus.GODKJENT.name
                     }
                 }
@@ -121,15 +124,30 @@ class ApplicationIntegrationTest {
     @Test
     fun `skal motta kvittering fra oppdrag med feil`() {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
-        sendKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering(vedtakId = "1"))
+        sendKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering())
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish("key",
                 match {
                     it.toJsonNode().let { event ->
                         event["@event_name"].textValue() == "utbetaling_oppdatert" &&
-                                event["@vedtakId"].textValue() == "1" &&
+                                event["@vedtakId"].longValue() == 1L &&
                                 event["@status"].textValue() == UtbetalingStatus.FEILET.name
+                    }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `skal post melding paa kafka dersom vedtak ikke kan deserialiseres`() {
+        sendFattetVedtakEvent(vedtakEvent(ugyldigVedtakTilUtbetaling()))
+
+        verify(timeout = TIMEOUT) {
+            rapidsConnection.publish("key",
+                match {
+                    it.toJsonNode().let { event ->
+                        event["@event_name"].textValue() == "deserialisering_feilet"
                     }
                 }
             )
@@ -164,7 +182,7 @@ class ApplicationIntegrationTest {
     private fun String.toJsonNode() = objectMapper.readTree(this)
 
     companion object {
-        val FATTET_VEDTAK_1 = readFile("/vedtak1.json")
+        val FATTET_VEDTAK_1 = readFile("/vedtak.json")
         const val TIMEOUT: Long = 5000
     }
 }

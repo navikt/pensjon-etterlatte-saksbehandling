@@ -4,8 +4,10 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.VedtakId
 import no.nav.etterlatte.utbetaling.oppdrag
 import no.nav.etterlatte.utbetaling.readFile
+import no.nav.etterlatte.utbetaling.utbetaling
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -14,9 +16,10 @@ import org.junit.jupiter.api.assertThrows
 internal class VedtakMottakerTest {
 
     private val utbetalingService = mockk<UtbetalingService>(relaxed = true) {
-        every { iverksettUtbetaling(any(), any()) } returns mockk {
+        every { iverksettUtbetaling(any()) } returns mockk {
             every { status } returns UtbetalingStatus.SENDT
-            every { oppdrag } returns oppdrag("3")
+            every { oppdrag } returns oppdrag(utbetaling(vedtakId = 1))
+            every { vedtakId } returns VedtakId(1)
         }
     }
 
@@ -34,7 +37,7 @@ internal class VedtakMottakerTest {
 
         inspector.inspektør.message(0).run {
             assertEquals("utbetaling_oppdatert", get("@event_name").textValue())
-            assertEquals("3", get("@vedtakId").textValue())
+            assertEquals(1L, get("@vedtakId").longValue())
             assertEquals("SENDT", get("@status").textValue())
         }
     }
@@ -46,7 +49,7 @@ internal class VedtakMottakerTest {
 
         inspector.inspektør.message(0).run {
             assertEquals("utbetaling_eksisterer", get("@event_name").textValue())
-            assertEquals("3", get("@vedtakId").textValue())
+            assertEquals(1L, get("@vedtakId").longValue())
         }
     }
 
@@ -58,11 +61,11 @@ internal class VedtakMottakerTest {
 
         inspector.inspektør.message(0).run {
             assertEquals("utbetaling_feilet", get("@event_name").textValue())
-            assertEquals("3", get("@vedtakId").textValue())
+            assertEquals(1L, get("@vedtakId").longValue())
         }
     }
 
     companion object {
-        val FATTET_VEDTAK = readFile("/vedtak3.json")
+        val FATTET_VEDTAK = readFile("/vedtak.json")
     }
 }

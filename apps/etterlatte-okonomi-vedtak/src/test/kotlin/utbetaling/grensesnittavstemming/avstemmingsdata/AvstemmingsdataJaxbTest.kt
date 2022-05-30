@@ -5,12 +5,17 @@ import no.nav.etterlatte.utbetaling.common.toNorskTid
 import no.nav.etterlatte.utbetaling.common.toTidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.etterlatte.utbetaling.kvittering
+import no.nav.etterlatte.utbetaling.oppdrag
+import no.nav.etterlatte.utbetaling.oppdragMedFeiletKvittering
+import no.nav.etterlatte.utbetaling.oppdragMedGodkjentKvittering
 import no.nav.etterlatte.utbetaling.utbetaling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 internal class AvstemmingsdataJaxbTest {
 
@@ -25,7 +30,12 @@ internal class AvstemmingsdataJaxbTest {
 
         val uuid = UUIDBase64()
         val utbetaling = listOf(
-            utbetaling(id = 1, status = UtbetalingStatus.FEILET, avstemmingsnoekkel = til, opprettet = til)
+            utbetaling(
+                id = UUID.randomUUID(),
+                status = UtbetalingStatus.FEILET,
+                avstemmingsnoekkel = til,
+                opprettet = til
+            ).let { it.copy(oppdrag = oppdrag(it), kvittering = kvittering(oppdragMedFeiletKvittering())) }
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetaling, fraOgMed, til, uuid)
@@ -107,9 +117,9 @@ internal class AvstemmingsdataJaxbTest {
                 <detaljType>AVVI</detaljType>
                 <offnr>12345678903</offnr>
                 <avleverendeTransaksjonNokkel>1</avleverendeTransaksjonNokkel>
-                <meldingKode>08</meldingKode>
-                <alvorlighetsgrad>hva skal stå her?</alvorlighetsgrad>
-                <tekstMelding>En beskrivelse</tekstMelding>
+                <meldingKode>KodeMelding</meldingKode>
+                <alvorlighetsgrad>Beskrivelse</alvorlighetsgrad>
+                <tekstMelding>12</tekstMelding>
                 <tidspunkt>${formatterMicro.format(avstemmingsnoekkel.toNorskTid())}</tidspunkt>
             </detalj>
         </Avstemmingsdata>

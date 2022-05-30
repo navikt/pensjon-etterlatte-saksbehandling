@@ -45,9 +45,9 @@ internal class AvstemmingsdataMapperTest {
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(
-            utbetaling(id = 1, status = UtbetalingStatus.FEILET),
-            utbetaling(id = 2, status = UtbetalingStatus.FEILET),
-            utbetaling(id = 3, status = UtbetalingStatus.FEILET),
+            utbetaling(status = UtbetalingStatus.FEILET),
+            utbetaling(status = UtbetalingStatus.FEILET),
+            utbetaling(status = UtbetalingStatus.FEILET),
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
@@ -68,9 +68,9 @@ internal class AvstemmingsdataMapperTest {
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(
-            utbetaling(id = 1, status = UtbetalingStatus.FEILET),
-            utbetaling(id = 2, status = UtbetalingStatus.FEILET),
-            utbetaling(id = 3, status = UtbetalingStatus.FEILET),
+            utbetaling(status = UtbetalingStatus.FEILET),
+            utbetaling(status = UtbetalingStatus.FEILET),
+            utbetaling(status = UtbetalingStatus.FEILET),
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
@@ -95,11 +95,11 @@ internal class AvstemmingsdataMapperTest {
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(
-            utbetaling(id = 1, status = UtbetalingStatus.SENDT),
-            utbetaling(id = 2, status = UtbetalingStatus.GODKJENT),
-            utbetaling(id = 3, status = UtbetalingStatus.GODKJENT_MED_FEIL),
-            utbetaling(id = 4, status = UtbetalingStatus.AVVIST),
-            utbetaling(id = 5, status = UtbetalingStatus.FEILET),
+            utbetaling(status = UtbetalingStatus.SENDT),
+            utbetaling(status = UtbetalingStatus.GODKJENT),
+            utbetaling(status = UtbetalingStatus.GODKJENT_MED_FEIL),
+            utbetaling(status = UtbetalingStatus.AVVIST),
+            utbetaling(status = UtbetalingStatus.FEILET),
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
@@ -118,14 +118,14 @@ internal class AvstemmingsdataMapperTest {
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(
-            utbetaling(id = 1, status = UtbetalingStatus.GODKJENT),
-            utbetaling(id = 2, status = UtbetalingStatus.GODKJENT),
-            utbetaling(id = 3, status = UtbetalingStatus.GODKJENT_MED_FEIL),
-            utbetaling(id = 4, status = UtbetalingStatus.AVVIST),
-            utbetaling(id = 5, status = UtbetalingStatus.AVVIST),
-            utbetaling(id = 6, status = UtbetalingStatus.AVVIST),
-            utbetaling(id = 7, status = UtbetalingStatus.SENDT),
-            utbetaling(id = 8, status = UtbetalingStatus.FEILET),
+            utbetaling(status = UtbetalingStatus.GODKJENT),
+            utbetaling(status = UtbetalingStatus.GODKJENT),
+            utbetaling(status = UtbetalingStatus.GODKJENT_MED_FEIL),
+            utbetaling(status = UtbetalingStatus.AVVIST),
+            utbetaling(status = UtbetalingStatus.AVVIST),
+            utbetaling(status = UtbetalingStatus.AVVIST),
+            utbetaling(status = UtbetalingStatus.SENDT),
+            utbetaling(status = UtbetalingStatus.FEILET),
         )
         val avstemmingsdataMapper = AvstemmingsdataMapper(
             utbetalinger = utbetalinger, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = UUIDBase64()
@@ -225,31 +225,26 @@ internal class AvstemmingsdataMapperTest {
 
         val utbetalinger = listOf(
             utbetaling(
-                id = 1,
                 avstemmingsnoekkel = LocalDateTime.of(
                     2020, Month.APRIL, 10, 14, 0, 0
                 ).toTidspunkt(norskTidssone)
             ),
             utbetaling(
-                id = 2,
                 avstemmingsnoekkel = LocalDateTime.of(
                     2020, Month.APRIL, 10, 14, 0, 0
                 ).plusDays(1).toTidspunkt(norskTidssone)
             ),
             utbetaling(
-                id = 3,
                 avstemmingsnoekkel = LocalDateTime.of(
                     2022, Month.JANUARY, 24, 22, 0, 0
                 ).toTidspunkt(norskTidssone)
             ),
             utbetaling(
-                id = 4,
                 avstemmingsnoekkel = LocalDateTime.of(
                     2020, Month.APRIL, 10, 14, 0, 0
                 ).plusHours(1).toTidspunkt(norskTidssone)
             ),
             utbetaling(
-                id = 5,
                 avstemmingsnoekkel = LocalDateTime.of(
                     2020, Month.APRIL, 10, 14, 0, 0)
                     .plusMinutes(2).toTidspunkt(norskTidssone)

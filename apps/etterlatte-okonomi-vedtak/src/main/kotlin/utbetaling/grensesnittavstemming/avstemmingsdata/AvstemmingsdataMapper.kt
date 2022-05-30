@@ -84,13 +84,13 @@ class AvstemmingsdataMapper(
             if (detaljType != null) {
                 Detaljdata().apply {
                     this.detaljType = detaljType
-                    offnr = it.foedselsnummer.value
-                    avleverendeTransaksjonNokkel = it.sakId.value
+                    offnr = it.stoenadsmottaker.value
+                    avleverendeTransaksjonNokkel = it.sakId.value.toString()
                     tidspunkt = it.avstemmingsnoekkel.toNorskTid().format(tidsstempelMikro)
                     if (detaljType in listOf(DetaljType.AVVI, DetaljType.VARS) && it.kvittering != null) {
-                        meldingKode = it.kvitteringMeldingKode
-                        alvorlighetsgrad = it.kvitteringFeilkode
-                        tekstMelding = it.kvitteringBeskrivelse
+                        meldingKode = it.kvittering.meldingKode
+                        alvorlighetsgrad = it.kvittering.feilkode
+                        tekstMelding = it.kvittering.beskrivelse
                     }
                 }
             } else {
@@ -137,8 +137,8 @@ class AvstemmingsdataMapper(
 
     private fun getBelop(utbetalinger: List<Utbetaling>?) =
         utbetalinger?.sumOf {
-            it.oppdrag.oppdrag110.oppdragsLinje150 // TODO er dette riktig sted å hente dette?
-                .map { oppdragsLinje -> oppdragsLinje.sats }
+            it.utbetalingslinjer
+                .mapNotNull { utbetalingslinje -> utbetalingslinje.beloep }
                 .reduce(BigDecimal::add)
         } ?: BigDecimal.ZERO
 

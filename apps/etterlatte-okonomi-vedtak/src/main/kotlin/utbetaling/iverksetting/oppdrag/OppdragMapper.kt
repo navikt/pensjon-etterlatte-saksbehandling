@@ -1,11 +1,9 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
-import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.Endringskode
-import no.nav.etterlatte.libs.common.vedtak.Enhetstype
-import no.nav.etterlatte.libs.common.vedtak.Vedtak
-import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.toNorskTid
+import no.nav.etterlatte.utbetaling.common.toXMLDate
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
 import no.trygdeetaten.skjema.oppdrag.Attestant180
 import no.trygdeetaten.skjema.oppdrag.Avstemming115
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
@@ -13,67 +11,72 @@ import no.trygdeetaten.skjema.oppdrag.Oppdrag110
 import no.trygdeetaten.skjema.oppdrag.OppdragsEnhet120
 import no.trygdeetaten.skjema.oppdrag.OppdragsLinje150
 import no.trygdeetaten.skjema.oppdrag.TfradragTillegg
+import no.trygdeetaten.skjema.oppdrag.TkodeStatusLinje
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.*
-import javax.xml.datatype.DatatypeConstants
-import javax.xml.datatype.DatatypeFactory
-import javax.xml.datatype.XMLGregorianCalendar
+
 
 object OppdragMapper {
 
     private val tidspunktFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
 
-    fun oppdragFraVedtak(vedtak: Vedtak, attestasjon: Attestasjon, avstemmingNokkel: Tidspunkt): Oppdrag {
+    fun oppdragFraUtbetaling(utbetaling: Utbetaling, foerstegangsbehandling: Boolean): Oppdrag {
         val oppdrag110 = Oppdrag110().apply {
             kodeAksjon = "1"
-            kodeEndring = "NY"
+            kodeEndring = if (foerstegangsbehandling) "NY" else "ENDR"
             kodeFagomraade = "BARNEPE"
-            fagsystemId = vedtak.sakId
+            fagsystemId = utbetaling.sakId.value.toString()
             utbetFrekvens = "MND"
-            oppdragGjelderId = vedtak.sakIdGjelderFnr
+            oppdragGjelderId = utbetaling.stoenadsmottaker.value
             datoOppdragGjelderFom = LocalDate.parse("1900-01-01").toXMLDate()
-            saksbehId = vedtak.saksbehandlerId
+            saksbehId = utbetaling.saksbehandler.value
 
             avstemming115 = Avstemming115().apply {
-                nokkelAvstemming = avstemmingNokkel.toNorskTid().format(tidspunktFormatter)
-                tidspktMelding = avstemmingNokkel.toNorskTid().format(tidspunktFormatter)
+                nokkelAvstemming = utbetaling.avstemmingsnoekkel.toNorskTid().format(tidspunktFormatter)
+                tidspktMelding = utbetaling.avstemmingsnoekkel.toNorskTid().format(tidspunktFormatter)
                 kodeKomponent = "ETTERLAT"
             }
 
-            vedtak.oppdragsenheter.forEach {
-                oppdragsEnhet120.add(
-                    OppdragsEnhet120().apply {
-                        typeEnhet = when (it.enhetsType) {
-                            Enhetstype.BOSTED -> "BOS"
-                        }
-                        enhet = "4819"
-                        datoEnhetFom = LocalDate.parse("1900-01-01").toXMLDate()
-                    }
-                )
-            }
+            oppdragsEnhet120.add(
+                OppdragsEnhet120().apply {
+                    typeEnhet = "BOS"
+                    enhet = "4819"
+                    datoEnhetFom = LocalDate.parse("1900-01-01").toXMLDate()
+                }
+            )
 
             oppdragsLinje150.addAll(
-                vedtak.beregningsperioder.map {
+                utbetaling.utbetalingslinjer.map {
                     OppdragsLinje150().apply {
-                        kodeEndringLinje = Endringskode.NY.toString()
-                        vedtakId = vedtak.vedtakId
-                        delytelseId = it.delytelsesId
-                        kodeKlassifik = it.ytelseskomponent
-                        datoVedtakFom = it.datoFOM.toXMLDate()
-                        datoVedtakTom = it.datoTOM.toXMLDate()
-                        sats = it.belop
+                        if (it.erstatterId != null) {
+                            kodeEndringLinje = "ENDR"
+                            refFagsystemId = utbetaling.sakId.value.toString()
+                            refDelytelseId = it.erstatterId.value.toString()
+                        } else {
+                            kodeEndringLinje = "NY"
+                        }
+                        kodeStatusLinje = it.type.let {
+                            when (it) {
+                                Utbetalingslinjetype.OPPHOER -> TkodeStatusLinje.OPPH
+                                Utbetalingslinjetype.UTBETALING -> null
+                            }
+                        }
+                        vedtakId = utbetaling.vedtakId.value.toString()
+                        delytelseId = it.id.value.toString()
+                        kodeKlassifik = "BARNEPENSJON-OPTP"
+                        datoVedtakFom = it.periode.fra.toXMLDate()
+                        datoVedtakTom = it.periode.til?.let { it.toXMLDate() }
+                        sats = it.beloep
                         fradragTillegg = TfradragTillegg.T
                         typeSats = "MND"
                         brukKjoreplan = "J"
-                        saksbehId = vedtak.saksbehandlerId
-                        utbetalesTilId = vedtak.sakIdGjelderFnr
-                        henvisning = vedtak.behandlingsId
+                        saksbehId = utbetaling.saksbehandler.value
+                        utbetalesTilId = utbetaling.stoenadsmottaker.value
+                        henvisning = utbetaling.behandlingId.value
 
                         attestant180.add(
                             Attestant180().apply {
-                                attestantId = attestasjon.attestantId
+                                attestantId = utbetaling.attestant.value
                             }
                         )
                     }
@@ -85,13 +88,6 @@ object OppdragMapper {
             this.oppdrag110 = oppdrag110
         }
     }
-
-    private fun LocalDate.toXMLDate(): XMLGregorianCalendar {
-        return DatatypeFactory.newInstance()
-            .newXMLGregorianCalendar(GregorianCalendar.from(atStartOfDay(ZoneId.systemDefault()))).apply {
-                timezone = DatatypeConstants.FIELD_UNDEFINED
-            }
-    }
 }
 
-fun Oppdrag.vedtakId() = oppdrag110.oppdragsLinje150.first().vedtakId
+fun Oppdrag.vedtakId() = oppdrag110.oppdragsLinje150.first().vedtakId.toLong()

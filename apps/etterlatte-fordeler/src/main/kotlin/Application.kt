@@ -1,13 +1,12 @@
 package no.nav.etterlatte
 
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.features.auth.Auth
-import io.ktor.client.features.defaultRequest
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.request.header
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.auth.*
+import io.ktor.client.features.json.*
+import io.ktor.client.request.*
 import no.nav.etterlatte.fordeler.Fordeler
 import no.nav.etterlatte.fordeler.FordelerKriterier
 import no.nav.etterlatte.fordeler.FordelerService
@@ -23,7 +22,9 @@ fun main() {
         put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
     }
 
-    RapidApplication.create(env).also {
+    RapidApplication.create(env) { _, kafkaRapid ->
+        kafkaRapid.seekToBeginning()}
+            .also {
             Fordeler(
                 rapidsConnection = it, fordelerService = FordelerService(FordelerKriterier(), pdlTjenesterKlient(env))
             )

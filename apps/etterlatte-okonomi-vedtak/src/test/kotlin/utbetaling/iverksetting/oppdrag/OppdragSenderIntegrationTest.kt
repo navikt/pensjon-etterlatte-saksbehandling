@@ -69,8 +69,8 @@ internal class OppdragSenderIntegrationTest {
 
         oppdragSender.sendOppdrag(oppdrag)
 
-        verify(timeout = 2000) { utbetalingService.oppdaterKvittering(any()) }
-        verify(timeout = 2000) {
+        verify(timeout = 5000) { utbetalingService.oppdaterKvittering(any()) }
+        verify(timeout = 5000) {
             utbetalingService.oppdaterStatusOgPubliserKvittering(
                 oppdrag = any(),
                 status = UtbetalingStatus.GODKJENT

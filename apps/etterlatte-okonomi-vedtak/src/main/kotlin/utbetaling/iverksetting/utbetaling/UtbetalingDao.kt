@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotliquery.Parameter
 import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
@@ -69,7 +70,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     :beloep, :sak_id)
             """,
             paramMap = mapOf(
-                "id" to utbetalingslinje.id.value,
+                "id" to Parameter<Long>(utbetalingslinje.id.value, Long::class.java),
                 "type" to utbetalingslinje.type.name,
                 "utbetaling_id" to utbetalingslinje.utbetalingId.toString(),
                 "erstatter_id" to utbetalingslinje.erstatterId,

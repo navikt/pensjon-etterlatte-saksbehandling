@@ -1,7 +1,7 @@
 {
   "@event_name": "vedtak_fattet",
   "@vedtak": {
-    "vedtakId": 1,
+    "vedtakId": 2,
     "virk": {
       "fom": "2022-01",
       "tom": "2022-02"
@@ -12,23 +12,23 @@
       "id": 1
     },
     "behandling": {
-      "type": "FORSTEGANGSBEHANDLING",
+      "type": "REVURDERING",
       "id": "e89c6e25-4f22-48b3-b975-4c868d830913"
     },
-    "type": "INNVILGELSE",
+    "type": "OPPHOER",
     "grunnlag": [],
     "vilkaarsvurdering": null,
     "beregning": null,
     "avkorting": null,
     "pensjonTilUtbetaling": [
       {
-        "id": 1,
+        "id": 2,
         "periode": {
-          "fom": "2022-01",
+          "fom": "2022-02",
           "tom": null
         },
-        "beloep": 2000,
-        "type": "UTBETALING"
+        "beloep": null,
+        "type": "OPPHOER"
       }
     ],
     "vedtakFattet": {

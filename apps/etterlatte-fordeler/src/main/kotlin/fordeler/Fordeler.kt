@@ -26,6 +26,7 @@ internal class Fordeler(
     private val fordelerMetricLogger: FordelerMetricLogger = FordelerMetricLogger()
 ) : River.PacketListener {
 
+
     private val logger = LoggerFactory.getLogger(Fordeler::class.java)
 
     init {
@@ -44,6 +45,7 @@ internal class Fordeler(
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
 
+        fordelerMetricLogger.resettMetrikker()
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =

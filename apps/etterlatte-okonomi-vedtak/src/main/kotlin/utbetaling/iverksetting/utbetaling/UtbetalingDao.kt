@@ -1,9 +1,9 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotliquery.Parameter
 import kotliquery.Row
 import kotliquery.TransactionalSession
+import kotliquery.param
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -14,7 +14,9 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 import java.sql.Timestamp
+import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
@@ -36,19 +38,19 @@ class UtbetalingDao(private val dataSource: DataSource) {
                             :avstemmingsnoekkel, :endret, :stoenadsmottaker, :saksbehandler, :attestant)
                         """,
                     paramMap = mapOf(
-                        "id" to utbetaling.id.toString(),
-                        "vedtakId" to utbetaling.vedtakId.value,
-                        "behandlingId" to utbetaling.behandlingId.value,
-                        "sakId" to utbetaling.sakId.value,
-                        "status" to UtbetalingStatus.SENDT.name,
-                        "vedtak" to utbetaling.vedtak.toJson(),
-                        "opprettet" to Timestamp.from(utbetaling.opprettet.instant),
-                        "avstemmingsnoekkel" to Timestamp.from(utbetaling.avstemmingsnoekkel.instant),
-                        "endret" to Timestamp.from(utbetaling.endret.instant),
-                        "stoenadsmottaker" to utbetaling.stoenadsmottaker.value,
-                        "saksbehandler" to utbetaling.saksbehandler.value,
-                        "attestant" to utbetaling.attestant.value,
-                        "oppdrag" to utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) },
+                        "id" to utbetaling.id.toString().param<String>(),
+                        "vedtakId" to utbetaling.vedtakId.value.param<Long>(),
+                        "behandlingId" to utbetaling.behandlingId.value.param<String>(),
+                        "sakId" to utbetaling.sakId.value.param<Long>(),
+                        "status" to UtbetalingStatus.SENDT.name.param<String>(),
+                        "vedtak" to utbetaling.vedtak.toJson().param<String>(),
+                        "opprettet" to Timestamp.from(utbetaling.opprettet.instant).param<Timestamp>(),
+                        "avstemmingsnoekkel" to Timestamp.from(utbetaling.avstemmingsnoekkel.instant).param<Timestamp>(),
+                        "endret" to Timestamp.from(utbetaling.endret.instant).param<Timestamp>(),
+                        "stoenadsmottaker" to utbetaling.stoenadsmottaker.value.param<String>(),
+                        "saksbehandler" to utbetaling.saksbehandler.value.param<String>(),
+                        "attestant" to utbetaling.attestant.value.param<String>(),
+                        "oppdrag" to utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) }.param<String>(),
                     )
                 ).let { tx.run(it.asUpdate) }
 
@@ -70,15 +72,15 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     :beloep, :sak_id)
             """,
             paramMap = mapOf(
-                "id" to Parameter<Long>(utbetalingslinje.id.value, Long::class.java),
-                "type" to utbetalingslinje.type.name,
-                "utbetaling_id" to utbetalingslinje.utbetalingId.toString(),
-                "erstatter_id" to utbetalingslinje.erstatterId,
-                "opprettet" to Timestamp.from(utbetalingslinje.opprettet.instant),
-                "sak_id" to utbetalingslinje.sakId.value,
-                "periode_fra" to utbetalingslinje.periode.fra,
-                "periode_til" to utbetalingslinje.periode.til,
-                "beloep" to utbetalingslinje.beloep,
+                "id" to utbetalingslinje.id.value.param<Long>(),
+                "type" to utbetalingslinje.type.name.param<String>(),
+                "utbetaling_id" to utbetalingslinje.utbetalingId.toString().param<String>(),
+                "erstatter_id" to utbetalingslinje.erstatterId?.value.param<Long>(),
+                "opprettet" to Timestamp.from(utbetalingslinje.opprettet.instant).param<Timestamp>(),
+                "sak_id" to utbetalingslinje.sakId.value.param<Long>(),
+                "periode_fra" to utbetalingslinje.periode.fra.param<LocalDate>(),
+                "periode_til" to utbetalingslinje.periode.til.param<LocalDate>(),
+                "beloep" to utbetalingslinje.beloep.param<BigDecimal>(),
             )
         ).let { tx.run(it.asUpdate) }
     }
@@ -170,9 +172,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     UPDATE utbetaling SET status = :status, endret = :endret WHERE vedtak_id = :vedtakId
                     """,
                 paramMap = mapOf(
-                    "status" to status.name,
-                    "endret" to Timestamp.from(endret.instant),
-                    "vedtakId" to vedtakId
+                    "status" to status.name.param<String>(),
+                    "endret" to Timestamp.from(endret.instant).param<Timestamp>(),
+                    "vedtakId" to vedtakId.param<Long>()
                 )
             )
                 .let { session.run(it.asUpdate) }
@@ -193,12 +195,12 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     WHERE vedtak_id = :vedtakId
                     """,
                 paramMap = mapOf(
-                    "kvittering" to OppdragJaxb.toXml(oppdragMedKvittering),
-                    "beskrivelse" to oppdragMedKvittering.mmel.beskrMelding,
-                    "alvorlighetsgrad" to oppdragMedKvittering.mmel.alvorlighetsgrad,
-                    "kode" to oppdragMedKvittering.mmel.kodeMelding,
-                    "endret" to Timestamp.from(endret.instant),
-                    "vedtakId" to oppdragMedKvittering.vedtakId()
+                    "kvittering" to OppdragJaxb.toXml(oppdragMedKvittering).param<String>(),
+                    "beskrivelse" to oppdragMedKvittering.mmel.beskrMelding.param<String>(),
+                    "alvorlighetsgrad" to oppdragMedKvittering.mmel.alvorlighetsgrad.param<String>(),
+                    "kode" to oppdragMedKvittering.mmel.kodeMelding.param<String>(),
+                    "endret" to Timestamp.from(endret.instant).param<Timestamp>(),
+                    "vedtakId" to oppdragMedKvittering.vedtakId().param<Long>()
                 )
             )
                 .let { session.run(it.asUpdate) }

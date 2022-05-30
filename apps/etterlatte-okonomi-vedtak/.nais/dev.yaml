@@ -18,15 +18,6 @@ spec:
     enabled: true
     path: /metrics
   leaderElection: true
-  gcp:
-    sqlInstances:
-      - type: POSTGRES_14
-        name: etterlatte-oppdrag
-        cascadingDelete: true
-        databases:
-          - name: oppdrag
-            envVarPrefix: DB
-
   kafka:
     pool: nav-dev
   azure:

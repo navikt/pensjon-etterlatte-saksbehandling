@@ -2,51 +2,28 @@ import { useEffect, useRef, useState } from 'react'
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { getPerson, opprettBehandlingPaaSak, opprettSakPaaPerson } from '../../shared/api/person'
+import { getPerson, opprettBehandlingPaaSak } from '../../shared/api/person'
 import { PersonInfo, StatusBar, StatusBarTheme } from '../statusbar'
 import { Container } from '../../shared/styled'
-import { SakslisteProps } from './saksliste'
 import { Dokumentoversikt } from './dokumentoversikt'
 import { Saksoversikt } from './saksoversikt'
+import { useNavigate } from 'react-router-dom'
+import { Dokumenter, SakslisteProps } from './typer'
 
 //todo: typer
-const testDokumenter = {
-  dokumenter: [
+const testDokumenter: Dokumenter = {
+  brev: [
     {
-      kolonner: [
-        {
-          col: 'Dato',
-          value: '13.05.2021',
-        },
-        {
-          col: 'Tittel',
-          value: 'Innvilgelsesbrev barnepensjon',
-          link: 'link',
-        },
-
-        {
-          col: 'Status',
-          value: 'Sendt ut',
-        },
-      ],
+      dato: '13.05.2021',
+      tittel: 'Innvilgelsesbrev barnepensjon',
+      link: 'link',
+      status: 'Sendt ut',
     },
     {
-      kolonner: [
-        {
-          col: 'Dato',
-          value: '09.05.2021',
-        },
-        {
-          col: 'Tittel',
-          value: 'Søknad barnepensjon - førstegangsbehandling',
-          link: 'link',
-        },
-
-        {
-          col: 'Status',
-          value: 'Motatt',
-        },
-      ],
+      dato: '09.05.2021',
+      tittel: 'Søknad barnepensjon - førstegangsbehandling',
+      link: 'link',
+      status: 'Motatt',
     },
   ],
 }
@@ -54,62 +31,27 @@ const testDokumenter = {
 const testdata: SakslisteProps = {
   saker: [
     {
+      sakId: 1,
+      type: 'Barnepensjon',
+      sakstype: 'Nasjonal',
       behandlinger: [
         {
-          kolonner: [
-            {
-              col: 'Opprettet',
-              value: '12.01.2021',
-            },
-            {
-              col: 'Type',
-              value: 'Revurdering',
-            },
-            {
-              col: 'Årsak',
-              value: 'Søknad',
-            },
-            {
-              col: 'Status',
-              value: 'Utredes',
-            },
-            {
-              col: 'Vedtaksdato',
-              value: '18.01.2021',
-            },
-            {
-              col: 'Resultat',
-              value: 'Ikke satt',
-            },
-          ],
+          id: 11,
+          opprettet: '12.01.2021',
+          type: 'Revurdering',
+          årsak: 'Søknad',
+          status: 'Utredes',
+          vedtaksdato: '18.01.20201',
+          resultat: 'Ikke satt',
         },
         {
-          kolonner: [
-            {
-              col: 'Opprettet',
-              value: '12.01.2021',
-            },
-            {
-              col: 'Type',
-              value: 'Førstegangsbehandling',
-            },
-            {
-              col: 'årsak',
-              value: 'Søknad',
-            },
-            {
-              col: 'Status',
-              value: 'Ferdigstilt',
-            },
-            {
-              col: 'Vedtaksdato',
-              value: '18.01.2021',
-            },
-            {
-              col: 'Resultat',
-              value: 'Innvilget',
-            },
-          ],
+          id: 9,
+          opprettet: '01.01.2021',
+          type: 'Førstegangsbehandling',
+          årsak: 'Søknad',
+          status: 'Ferdigstilt',
+          vedtaksdato: '10.01.2021',
+          resultat: 'Innvilget',
         },
       ],
     },
@@ -117,6 +59,7 @@ const testdata: SakslisteProps = {
 }
 
 export const Person = () => {
+  const navigate = useNavigate()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [personData, setPersonData] = useState({})
   const [personinfo, setPersoninfo] = useState<PersonInfo>()
@@ -139,18 +82,15 @@ export const Person = () => {
       }
     })()
   }, [])
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const opprettSak = () => {
-    if (match.fnr) {
-      opprettSakPaaPerson(match.fnr)
-    }
-  }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const opprettBehandling = () => {
     if (sakIdInput.current.value) {
       opprettBehandlingPaaSak(Number(sakIdInput.current.value))
     }
+  }
+
+  const goToBehandling = (behandlingsId: string) => {
+    navigate(`/behandling/${behandlingsId}/soeknadsoversikt`)
   }
 
   return (
@@ -164,22 +104,11 @@ export const Person = () => {
           </Tlist>
 
           <TabPanel>
-            <Saksoversikt {...testdata} />
+            <Saksoversikt saksliste={testdata} opprettBehandling={opprettBehandling} goToBehandling={goToBehandling} />
           </TabPanel>
           <TabPanel>
             <Dokumentoversikt {...testDokumenter} />
           </TabPanel>
-
-          {/** <TabPanel>
-            <p>
-              <button onClick={opprettSak}>Opprett/hent sak</button>
-            </p>
-            <p>
-              <input ref={sakIdInput} placeholder="sakid" name="sakid" />
-              <button onClick={opprettBehandling}>Opprett behandling på denne saken</button>
-            </p>
-          </TabPanel>
-          */}
         </Tabs>
       </Container>
     </>

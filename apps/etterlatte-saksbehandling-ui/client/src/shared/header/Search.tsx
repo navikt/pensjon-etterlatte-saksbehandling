@@ -3,7 +3,7 @@ import { SearchField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { SearchIcon } from '../icons/searchIcon'
 import { useNavigate } from 'react-router-dom'
-import { getPerson, IPersonResult } from '../api/person'
+import { getPerson, IPersonResult, opprettSakPaaPerson } from '../api/person'
 import { People } from '@navikt/ds-icons'
 
 export const Search = () => {
@@ -36,6 +36,12 @@ export const Search = () => {
     }
   }
 
+  const opprettSak = (fnr: string) => {
+    if (fnr) {
+      opprettSakPaaPerson(fnr)
+    }
+  }
+
   return (
     <>
       <SearchField label="" style={{ paddingBottom: '8px', width: '300px' }}>
@@ -52,7 +58,9 @@ export const Search = () => {
               {searchResult.person.fornavn} {searchResult.person.etternavn}
             </div>
             {searchResult.saker.saker.length === 0 ? (
-              <div className="sak">Ingen fagsak. Trykk for å opprette {'->'}</div>
+              <div className="sak" onClick={() => opprettSak(searchInput)}>
+                Ingen fagsak. Trykk for å opprette {'>'}
+              </div>
             ) : (
               <div className="sak">
                 Sak {console.log(searchResult.saker)} {searchResult.saker.saker[0].sakType}

@@ -1,9 +1,10 @@
-import { Link, Table } from '@navikt/ds-react'
+import { Table } from '@navikt/ds-react'
 import styled from 'styled-components'
+import { Dokument } from './typer'
 
 const colonner = ['Dato', 'Tittel', 'Status']
 
-export const Dokumentliste = (props: any) => {
+export const Dokumentliste = ({ dokumenter }: { dokumenter: Dokument[] }) => {
   return (
     <TableWrapper>
       <Table>
@@ -14,23 +15,17 @@ export const Dokumentliste = (props: any) => {
             ))}
           </Table.Row>
         </Table.Header>
-        <Table.Body>
-          {props.dokumenter.map((doc: any, i: number) => (
-            <Table.Row key={i}>
-              {doc.kolonner.map((col: any, i: number) =>
-                col.col !== 'Tittel' ? (
-                  <Table.DataCell className="tableCell" key={i}>
-                    {col.value}
-                  </Table.DataCell>
-                ) : (
-                  <Table.DataCell key={col.col}>
-                    <Link href={col.link}>{col.value}</Link>
-                  </Table.DataCell>
-                )
-              )}
+        {dokumenter.map((brev, i) => (
+          <Table.Body key={i}>
+            <Table.Row>
+              <Table.DataCell key={`data${brev.dato}`}>{brev.dato}</Table.DataCell>
+              <Table.DataCell key={`data${brev.tittel}`}>
+                <Link>{brev.tittel}</Link>
+              </Table.DataCell>
+              <Table.DataCell key={`data${brev.status}`}>{brev.status}</Table.DataCell>
             </Table.Row>
-          ))}
-        </Table.Body>
+          </Table.Body>
+        ))}
       </Table>
     </TableWrapper>
   )
@@ -40,4 +35,10 @@ export const TableWrapper = styled.div`
   .test {
     border-bottom: 1.5px solid #000000;
   }
+`
+
+export const Link = styled.div`
+  cursor: pointer;
+  text-decoration: underline;
+  color: #0067c5;
 `

@@ -1,41 +1,59 @@
-import { Saksliste, SakslisteProps } from './saksliste'
+import { Saksliste } from './saksliste'
 import styled from 'styled-components'
 import { Next } from '@navikt/ds-icons'
 import { Button } from '@navikt/ds-react'
+import { Behandling, Sak, SakslisteProps } from './typer'
 
-export const Saksoversikt = (props: SakslisteProps) => {
+export const Saksoversikt = ({
+  saksliste,
+  opprettBehandling,
+  goToBehandling,
+}: {
+  saksliste: SakslisteProps
+  opprettBehandling: any
+  goToBehandling: (behandlingsId: string) => void
+}) => {
+  const sisteBehandlingISak = (sak: Sak): Behandling => {
+    return sak.behandlinger.reduce((a, b) => (a.opprettet > b.opprettet ? a : b))
+  }
+
   return (
-    <SaksoversiktWrapper>
-      <h1>Barnepensjon</h1>
-      <InfoWrapper>
-        <div>
-          <Col>Sakstype</Col>
-          <Value>Nasjonal</Value>
-        </div>
+    <>
+      {saksliste.saker.map((sak) => (
+        <SaksoversiktWrapper key={sak.sakId}>
+          <h1>{sak.type}</h1>
 
-        <div>
-          <Col>Gjelder</Col>
-          <Value>Førstegangsbehandling</Value>
-        </div>
+          <InfoWrapper>
+            <div>
+              <Col>Sakstype</Col>
+              <Value>{sak.sakstype}</Value>
+            </div>
 
-        <div>
-          <Col>Status</Col>
-          <Value>Løpende</Value>
-        </div>
+            <div>
+              <Col>Gjelder</Col>
+              <Value>{sisteBehandlingISak(sak).type}</Value>
+            </div>
 
-        <IconButton onClick={() => console.log('test')}>
-          <Next fontSize={30} />
-        </IconButton>
-      </InfoWrapper>
+            <div>
+              <Col>Status</Col>
+              <Value>{sisteBehandlingISak(sak).status}</Value>
+            </div>
 
-      <div className="behandlinger">
-        <h2>Behandlinger</h2>
-        <Saksliste {...props} />
-      </div>
-      <Button variant="secondary" size="medium" className="button" onClick={() => console.log('test')}>
-        Opprett ny behandling
-      </Button>
-    </SaksoversiktWrapper>
+            <IconButton onClick={() => goToBehandling(sisteBehandlingISak(sak).id.toString())}>
+              <Next fontSize={30} />
+            </IconButton>
+          </InfoWrapper>
+
+          <div className="behandlinger">
+            <h2>Behandlinger</h2>
+            <Saksliste saksliste={sak.behandlinger} goToBehandling={goToBehandling} />
+          </div>
+          <Button variant="secondary" size="medium" className="button" onClick={opprettBehandling}>
+            Opprett ny behandling
+          </Button>
+        </SaksoversiktWrapper>
+      ))}
+    </>
   )
 }
 
@@ -48,6 +66,9 @@ export const IconButton = styled.div`
 `
 
 export const SaksoversiktWrapper = styled.div`
+  min-width: 40em;
+  max-width: 70%;
+
   margin: 3em 1em;
   .behandlinger {
     margin-top: 5em;
@@ -55,6 +76,7 @@ export const SaksoversiktWrapper = styled.div`
 
   h1 {
     margin-bottom: 1em;
+    text-transform: capitalize;
   }
 
   .button {

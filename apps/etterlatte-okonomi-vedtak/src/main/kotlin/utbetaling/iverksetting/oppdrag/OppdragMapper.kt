@@ -48,12 +48,10 @@ object OppdragMapper {
             oppdragsLinje150.addAll(
                 utbetaling.utbetalingslinjer.map {
                     OppdragsLinje150().apply {
+                        kodeEndringLinje = "NY"
                         if (it.erstatterId != null) {
-                            kodeEndringLinje = "ENDR"
                             refFagsystemId = utbetaling.sakId.value.toString()
                             refDelytelseId = it.erstatterId.value.toString()
-                        } else {
-                            kodeEndringLinje = "NY"
                         }
                         kodeStatusLinje = it.type.let {
                             when (it) {

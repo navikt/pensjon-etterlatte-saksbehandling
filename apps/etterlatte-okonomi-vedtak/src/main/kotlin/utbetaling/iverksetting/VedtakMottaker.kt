@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.fasterxml.jackson.module.kotlin.readValue
+import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -54,7 +55,7 @@ class VedtakMottaker(
                 }
             } catch (e: Exception) {
                 if (e is InvalidFormatException || e is MissingKotlinParameterException) {
-                    logger.error("Kunne ikke deresialisere vedtak: ", packet["@vedtak"].toJson())
+                    logger.error("Kunne ikke deresialisere vedtak: ${e.message}", kv("vedtak", packet["@vedtak"].toJson()), e)
                     rapidsConnection.publish("key", deserialiseringFeilet(packet["@vedtak"]))
                 } else throw e
             }

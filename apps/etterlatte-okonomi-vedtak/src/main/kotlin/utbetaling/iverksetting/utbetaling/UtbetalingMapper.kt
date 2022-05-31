@@ -30,9 +30,9 @@ class UtbetalingMapper(
         id = utbetalingId,
         sakId = SakId(vedtak.sak.id),
         behandlingId = BehandlingId(
-            vedtak.behandling.id.toString(),
+            vedtak.behandling.id,
             vedtak.behandling.id.toUUID30()
-        ), // TODO: må erstattes til en maks 30 tegn lang nøkkel
+        ),
         vedtakId = VedtakId(vedtak.vedtakId),
         status = UtbetalingStatus.SENDT,
         opprettet = opprettet,

@@ -39,9 +39,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
                             :avstemmingsnoekkel, :endret, :stoenadsmottaker, :saksbehandler, :attestant)
                         """,
                     paramMap = mapOf(
-                        "id" to utbetaling.id.toString().param<String>(),
+                        "id" to utbetaling.id.param<UUID>(),
                         "vedtakId" to utbetaling.vedtakId.value.param<Long>(),
-                        "behandlingId" to utbetaling.behandlingId.value.param<String>(),
+                        "behandlingId" to utbetaling.behandlingId.value.param<UUID>(),
                         "behandlingIdTilOppdrag" to utbetaling.behandlingId.shortValue.toString().param<String>(),
                         "sakId" to utbetaling.sakId.value.param<Long>(),
                         "status" to UtbetalingStatus.SENDT.name.param<String>(),
@@ -77,7 +77,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
             paramMap = mapOf(
                 "id" to utbetalingslinje.id.value.param<Long>(),
                 "type" to utbetalingslinje.type.name.param<String>(),
-                "utbetaling_id" to utbetalingslinje.utbetalingId.toString().param<String>(),
+                "utbetaling_id" to utbetalingslinje.utbetalingId.param<UUID>(),
                 "erstatter_id" to utbetalingslinje.erstatterId?.value.param<Long>(),
                 "opprettet" to Timestamp.from(utbetalingslinje.opprettet.instant).param<Timestamp>(),
                 "sak_id" to utbetalingslinje.sakId.value.param<Long>(),
@@ -98,17 +98,17 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     FROM utbetaling 
                     WHERE vedtak_id = :vedtakId
                     """,
-                paramMap = mapOf("vedtakId" to vedtakId)
+                paramMap = mapOf("vedtakId" to vedtakId.param<Long>())
             )
                 .let {
                     session.run(it.map { row ->
-                        val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.string("id"))
+                        val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
                         toUtbetaling(row, utbetalingslinjer)
                     }.asSingle)
                 }
         }
 
-    private fun hentUtbetalingslinjerForUtbetaling(utbetalingId: String): List<Utbetalingslinje> =
+    private fun hentUtbetalingslinjerForUtbetaling(utbetalingId: UUID): List<Utbetalingslinje> =
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
@@ -116,7 +116,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     FROM utbetalingslinje 
                     WHERE utbetaling_id = :utbetalingId
                     """,
-                paramMap = mapOf("utbetalingId" to utbetalingId)
+                paramMap = mapOf("utbetalingId" to utbetalingId.param<UUID>())
             )
                 .let { session.run(it.map(::toUtbetalingslinje).asList) }
         }
@@ -132,13 +132,13 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     WHERE avstemmingsnoekkel >= :fraOgMed AND avstemmingsnoekkel < :til
                     """,
                 paramMap = mapOf(
-                    "fraOgMed" to Timestamp.from(fraOgMed.instant),
-                    "til" to Timestamp.from(til.instant)
+                    "fraOgMed" to Timestamp.from(fraOgMed.instant).param<Timestamp>(),
+                    "til" to Timestamp.from(til.instant).param<Timestamp>()
                 )
             )
                 .let {
                     session.run(it.map { row ->
-                        val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.string("id"))
+                        val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
                         toUtbetaling(row, utbetalingslinjer)
                     }.asList)
                 }
@@ -155,12 +155,12 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     WHERE sak_id = :sakId
                     """,
                 paramMap = mapOf(
-                    "sakId" to sakId,
+                    "sakId" to sakId.param<Long>(),
                 )
             )
                 .let {
                     session.run(it.map { row ->
-                        val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.string("id"))
+                        val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
                         toUtbetaling(row, utbetalingslinjer)
                     }.asList)
                 }
@@ -218,9 +218,12 @@ class UtbetalingDao(private val dataSource: DataSource) {
     private fun toUtbetaling(row: Row, utbetalingslinjer: List<Utbetalingslinje>) =
         with(row) {
             Utbetaling(
-                id = string("id").let { UUID.fromString(it) },
+                id = uuid("id"),
                 sakId = SakId(long("sak_id")),
-                behandlingId = BehandlingId(string("behandling_id"), UUID30(string("behandling_id_til_oppdrag"))),
+                behandlingId = BehandlingId(
+                    value = uuid("behandling_id"),
+                    shortValue = UUID30(string("behandling_id_til_oppdrag"))
+                ),
                 vedtakId = VedtakId(long("vedtak_id")),
                 status = string("status").let(UtbetalingStatus::valueOf),
                 opprettet = Tidspunkt(sqlTimestamp("opprettet").toInstant()),
@@ -248,7 +251,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
             Utbetalingslinje(
                 id = UtbetalingslinjeId(long("id")),
                 type = string("type").let { Utbetalingslinjetype.valueOf(it) },
-                utbetalingId = string("utbetaling_id").let { UUID.fromString(it) },
+                utbetalingId = uuid("utbetaling_id"),
                 erstatterId = longOrNull("erstatter_id")?.let { UtbetalingslinjeId(it) },
                 opprettet = Tidspunkt(sqlTimestamp("opprettet").toInstant()),
                 sakId = SakId(long("sak_id")),

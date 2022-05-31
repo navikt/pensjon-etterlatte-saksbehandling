@@ -11,7 +11,7 @@ import java.util.*
 
 data class VedtakId(val value: Long)
 data class SakId(val value: Long)
-data class BehandlingId(val value: String, val shortValue: UUID30)
+data class BehandlingId(val value: UUID, val shortValue: UUID30)
 data class UtbetalingslinjeId(val value: Long)
 data class Foedselsnummer(val value: String)
 data class NavIdent(val value: String)

@@ -1,7 +1,7 @@
 package no.nav.etterlatte.utbetaling
 
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
-import no.nav.etterlatte.utbetaling.common.UUID30
+import no.nav.etterlatte.utbetaling.common.toUUID30
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Attestasjon
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Behandling
@@ -106,7 +106,7 @@ fun utbetaling(
     Utbetaling(
         id = id,
         vedtakId = VedtakId(vedtakId),
-        behandlingId = BehandlingId("1", UUID30("1")),
+        behandlingId = UUID.randomUUID().let { BehandlingId(it, it.toUUID30()) },
         sakId = sakId,
         status = status,
         vedtak = utbetalingsvedtak(vedtakId),

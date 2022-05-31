@@ -33,9 +33,9 @@ export const StatusBar = (props: { theme?: StatusBarTheme; personInfo?: PersonIn
           <Name>
             {props.personInfo?.fornavn} {props.personInfo?.etternavn}
           </Name>
-          <Skilletegn>/</Skilletegn>
+          <Skilletegn>|</Skilletegn>
           <Fnr copy value={props.personInfo?.foedselsnummer || 'N/A'} />
-          <Status value={{ status: PersonStatus.BARN, dato: '19.05.2011' }} />
+          {/** <Status value={{ status: PersonStatus.BARN, dato: '19.05.2011' }} />*/}
         </UserInfo>
       )}
     </StatusBarWrapper>
@@ -44,7 +44,7 @@ export const StatusBar = (props: { theme?: StatusBarTheme; personInfo?: PersonIn
 
 const StatusBarWrapper = styled.div<{ theme: StatusBarTheme }>`
   background-color: ${(props) => (props.theme === StatusBarTheme.gray ? '#F8F8F8' : '#fff')};
-  padding: 0.6em 1em;
+  padding: 0.6em 0em;
   line-height: 30px;
   border-bottom: 1px solid #c6c2bf;
 `
@@ -54,12 +54,13 @@ const UserInfo = styled.div`
   flex-direction: row;
   justify-content: space-between;
   align-items: baseline;
-  width: 450px;
+  width: fit-content;
   margin-left: 1em;
 `
 
 const Skilletegn = styled.div`
   margin-right: 1em;
+  margin-left: 1em;
 `
 
 const Name = styled.div`

@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react'
 import { SearchIcon } from '../icons/searchIcon'
 import { useNavigate } from 'react-router-dom'
 import { getPerson, IPersonResult } from '../api/person'
-
-
+import { People } from '@navikt/ds-icons'
 
 export const Search = () => {
   const [searchInput, setSearchInput] = useState('')
@@ -39,7 +38,7 @@ export const Search = () => {
 
   return (
     <>
-      <SearchField label="" style={{ paddingBottom: '8px' }}>
+      <SearchField label="" style={{ paddingBottom: '8px', width: '300px' }}>
         <SearchField.Input type="tel" placeholder="Fødselsnummer" onKeyUp={onEnter} onChange={onChange} />
         <SearchField.Button>
           <SearchIcon />
@@ -47,27 +46,52 @@ export const Search = () => {
       </SearchField>
       {searchResult && (
         <Dropdown>
-          <div onClick={goToPerson}>
-            <div>{searchResult.person.fornavn} {searchResult.person.etternavn} ({searchResult.person.ident})</div>
+          <People className="icon" fontSize={25} />
+          <SearchResult onClick={goToPerson}>
+            <div className="navn">
+              {searchResult.person.fornavn} {searchResult.person.etternavn}
+            </div>
             {searchResult.saker.saker.length === 0 ? (
-              <div>Ingen fagsak. Trykk for å opprette {'->'}</div>
-            ): (
-              <div>Sak {console.log(searchResult.saker)} {searchResult.saker.saker[0].sakType}</div>
+              <div className="sak">Ingen fagsak. Trykk for å opprette {'->'}</div>
+            ) : (
+              <div className="sak">
+                Sak {console.log(searchResult.saker)} {searchResult.saker.saker[0].sakType}
+              </div>
             )}
-          </div>
+          </SearchResult>
         </Dropdown>
       )}
-      
     </>
   )
 }
 
 const Dropdown = styled.div`
+  display: flex;
   background-color: #fff;
-  width: 239px;
-  height: 100px;
+  width: 300px;
+  height: fit-content;
   top: 53px;
   border: 1px solid #000;
   position: absolute;
   color: #000;
+
+  .icon {
+    margin-left: 10px;
+    align-self: center;
+  }
+`
+
+const SearchResult = styled.div`
+  cursor: pointer;
+  padding: 0.5em;
+  padding-left: 1em;
+  align-self: center;
+
+  .navn {
+    font-weight: 500;
+  }
+
+  .sak {
+    color: gray;
+  }
 `

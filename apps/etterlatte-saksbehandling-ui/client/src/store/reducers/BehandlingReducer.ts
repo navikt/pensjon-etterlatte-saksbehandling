@@ -6,8 +6,20 @@ export interface IDetaljertBehandling {
   grunnlag: IBehandlingsopplysning[]
   vilkårsprøving: IVilkaarResultat
   gyldighetsprøving: IGyldighetResultat
+  kommerSoekerTilgode: IKommerSoekerTilgode
   beregning: any
   fastsatt: boolean
+}
+
+export interface IKommerSoekerTilgode {
+  kommerSoekerTilgodeVurdering: IVilkaarResultat
+  familieforhold: IFamiliemedlem[]
+}
+
+export interface IFamiliemedlem {
+  navn: string
+  fnr: string
+  rolle: PersonRolle
 }
 
 export interface IBehandlingsopplysning {
@@ -60,7 +72,6 @@ export interface IGyldighetproving {
 export enum GyldigFramsattType {
   INNSENDER_ER_FORELDER = 'INNSENDER_ER_FORELDER',
   HAR_FORELDREANSVAR_FOR_BARNET = 'HAR_FORELDREANSVAR_FOR_BARNET',
-  BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL = 'BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL', //todo del av pensjon til gode, flyttes?
 }
 
 export interface IVilkaarResultat {
@@ -80,6 +91,7 @@ export enum VilkaarsType {
   DOEDSFALL_ER_REGISTRERT = 'DOEDSFALL_ER_REGISTRERT',
   AVDOEDES_FORUTGAAENDE_MEDLEMSKAP = 'AVDOEDES_FORUTGAAENDE_MEDLEMSKAP',
   BARNETS_MEDLEMSKAP = 'BARNETS_MEDLEMSKAP',
+  SAMME_ADRESSE = 'SAMME_ADRESSE',
 }
 
 export interface IKriterie {
@@ -129,12 +141,22 @@ export enum PersonType {
   FORELDER = 'FORELDER',
 }
 
+export enum PersonRolle {
+  BARN = 'BARN',
+  AVDOED = 'AVDOED',
+  GJENLEVENDE = 'GJENLEVENDE',
+}
+
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: '',
   sak: 0,
   grunnlag: [],
   vilkårsprøving: { resultat: undefined, vilkaar: [], vurdertDato: '' },
   gyldighetsprøving: { resultat: undefined, vurderinger: [], vurdertDato: '' },
+  kommerSoekerTilgode: {
+    kommerSoekerTilgodeVurdering: { resultat: undefined, vilkaar: [], vurdertDato: '' },
+    familieforhold: [],
+  },
   beregning: undefined,
   fastsatt: false,
 }

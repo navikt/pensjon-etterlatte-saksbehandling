@@ -1,4 +1,4 @@
-import { IGyldighetproving, IGyldighetResultat } from '../../../store/reducers/BehandlingReducer'
+import { IGyldighetResultat, IKommerSoekerTilgode } from '../../../store/reducers/BehandlingReducer'
 import {
   IAvdoedFraSoeknad,
   IBarnFraSoeknad,
@@ -8,12 +8,8 @@ import {
 } from '../types'
 
 export interface PropsOmSoeknad {
-  gyldighet: IGyldighetResultat
-  avdoedPersonPdl: IPersonOpplysningFraPdl
-  mottattDato: string
-  innsenderHarForeldreansvar: IGyldighetproving | undefined
-  gjenlevendeOgSoekerLikAdresse: IGyldighetproving | undefined
-  innsenderErForelder: IGyldighetproving | undefined
+  gyldigFramsatt: IGyldighetResultat
+  kommerSoekerTilgode: IKommerSoekerTilgode
 }
 
 export interface PropsFamilieforhold {

@@ -1,21 +1,19 @@
 import { Label } from '@navikt/ds-react'
 import { DetailWrapper, WarningIconWrapper } from '../../styled'
 import { WarningIcon } from '../../../../../shared/icons/warningIcon'
-import { VurderingsResultat, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat, IVilkaarsproving } from '../../../../../store/reducers/BehandlingReducer'
 
 export const Adresse = ({
   gjenlevendeOgSoekerLikAdresse,
 }: {
-  gjenlevendeOgSoekerLikAdresse: IGyldighetproving | undefined
+  gjenlevendeOgSoekerLikAdresse: IVilkaarsproving | undefined
 }) => {
   return (
     <DetailWrapper>
       {gjenlevendeOgSoekerLikAdresse?.resultat === VurderingsResultat.OPPFYLT && (
         <div>
           <Label size="small">Adresse</Label>
-          <div className="text">
-            Gjenlevende og avdøde bodde sammen med barnet, og gjenlevende og barnet fortsatt bor sammen
-          </div>
+          <div className="text">Gjenlevende og barnet bor fortsatt sammen</div>
         </div>
       )}
 

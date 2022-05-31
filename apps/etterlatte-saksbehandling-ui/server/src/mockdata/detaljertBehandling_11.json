@@ -646,6 +646,160 @@
     ],
     "vurdertDato": "2022-03-30T14:36:17.984583465Z"
   },
+  "kommerSoekerTilgode": {
+    "kommerSoekerTilgodeVurdering": {
+      "resultat": "OPPFYLT",
+      "vilkaar": [
+        {
+          "navn": "SAMME_ADRESSE",
+          "resultat": "OPPFYLT",
+          "kriterier": [
+            {
+              "navn": "SAMME_BOSTEDSADRESSE",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "576ad249-fdbe-43a5-9f47-c73361a959af",
+                  "kriterieOpplysningsType": "BOSTEDADRESSE_SOEKER",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-05-31T10:53:28.328011116Z",
+                    "registersReferanse": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": true,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Bøveien 937",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "8475",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "1999-01-01T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "589130e9-afcb-4161-a46f-5efcc2f683a3",
+                  "kriterieOpplysningsType": "BOSTEDADRESSE_GJENLEVENDE",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-05-31T10:53:29.158238926Z",
+                    "registersReferanse": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": true,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Bøveien 937",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "8475",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "1999-01-01T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-05-31T12:53:36.206922854"
+        }
+      ],
+      "vurdertDato": "2022-05-31T12:53:36.206922854"
+    },
+    "familieforhold": [
+      {
+        "navn": "TALENTFULL BLYANT",
+        "fnr": "12101376212",
+        "rolle": "BARN",
+        "adresser": {
+          "bostedadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Bøveien 937",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "8475",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "1999-01-01T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "oppholdadresse": [],
+          "kontaktadresse": []
+        }
+      },
+      {
+        "navn": "BRÅKETE POTET",
+        "fnr": "03108718357",
+        "rolle": "GJENLEVENDE",
+        "adresser": {
+          "bostedadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Bøveien 937",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "8475",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "1999-01-01T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "oppholdadresse": [],
+          "kontaktadresse": []
+        }
+      },
+      {
+        "navn": "VAKKER LAPP",
+        "fnr": "22128202440",
+        "rolle": "AVDOED",
+        "adresser": {
+          "bostedadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Bøveien 937",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "8475",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "1999-01-01T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "oppholdadresse": [],
+          "kontaktadresse": []
+        }
+      }
+    ]
+  },
   "beregning": null,
   "fastsatt": false
 }

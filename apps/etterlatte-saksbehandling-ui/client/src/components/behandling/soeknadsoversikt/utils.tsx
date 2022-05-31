@@ -1,7 +1,13 @@
 import { differenceInYears, add, startOfMonth } from 'date-fns'
 import { IPersonOpplysningFraPdl } from '../types'
 import { WarningText } from '../../../shared/styled'
-import { GyldigFramsattType, VurderingsResultat, IGyldighetproving } from '../../../store/reducers/BehandlingReducer'
+import {
+  GyldigFramsattType,
+  VurderingsResultat,
+  IGyldighetproving,
+  IVilkaarsproving,
+  VilkaarsType,
+} from '../../../store/reducers/BehandlingReducer'
 
 export const sjekkDataFraSoeknadMotPdl = (dataFraPdl: string, dataFraSoeknad: string) => {
   return dataFraSoeknad === dataFraPdl || dataFraSoeknad === null ? (
@@ -79,9 +85,9 @@ export function mapGyldighetstyperTilTekst(gyldig: IGyldighetproving): String | 
   return svar
 }
 
-export function hentGyldigBostedTekst(gyldig: IGyldighetproving): String | undefined {
+export function hentGyldigBostedTekst(gyldig: IVilkaarsproving): String | undefined {
   let svar
-  if (gyldig.navn === GyldigFramsattType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL) {
+  if (gyldig.navn === VilkaarsType.SAMME_ADRESSE) {
     if (gyldig.resultat === VurderingsResultat.IKKE_OPPFYLT) {
       svar = 'barn og gjenlevende forelder bor ikke på samme adresse'
     } else if (gyldig.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {

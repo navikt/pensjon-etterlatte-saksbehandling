@@ -1,38 +1,37 @@
 import styled from 'styled-components'
-import {
-  GyldigFramsattType,
-  VurderingsResultat,
-  IGyldighetResultat,
-} from '../../../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat, IVilkaarsproving, IVilkaarResultat } from '../../../../../store/reducers/BehandlingReducer'
 import { format } from 'date-fns'
 import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
 import { hentGyldigBostedTekst } from '../../utils'
 import { Title, Undertekst } from './styled'
 
-export const BarnetTilGode = ({ gyldighet }: { gyldighet: IGyldighetResultat }) => {
-  const bostedadresse = gyldighet.vurderinger.find(
-    (vilkaar) => vilkaar.navn === GyldigFramsattType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL
-  )
-
+export const BarnetTilGode = ({
+  sammeAdresse,
+  kommerSoekerTilgodeVurdering,
+}: {
+  sammeAdresse: IVilkaarsproving | undefined
+  kommerSoekerTilgodeVurdering: IVilkaarResultat
+}) => {
   const sjekkInfo = (): any => {
-    return gyldighet.resultat && bostedadresse && hentGyldigBostedTekst(bostedadresse)
+    return kommerSoekerTilgodeVurdering.resultat && sammeAdresse && hentGyldigBostedTekst(sammeAdresse)
   }
+
   return (
     <Wrapper>
-      {bostedadresse && (
-        <div>{gyldighet.resultat && <GyldighetIcon status={bostedadresse.resultat} large={true} />}</div>
+      {sammeAdresse && (
+        <div>
+          {sammeAdresse?.resultat && <GyldighetIcon status={kommerSoekerTilgodeVurdering.resultat!!} large={true} />}
+        </div>
       )}
       <div>
         <Title>Pensjon kommer barnet til gode</Title>
-        <Undertekst gray={true}>Automatisk {format(new Date(gyldighet.vurdertDato), 'dd.MM.yyyy')}</Undertekst>
-        {bostedadresse && bostedadresse.resultat !== VurderingsResultat.OPPFYLT && (
+        <Undertekst gray={true}>
+          Automatisk {format(new Date(kommerSoekerTilgodeVurdering.vurdertDato), 'dd.MM.yyyy')}
+        </Undertekst>
+        {sammeAdresse && sammeAdresse?.resultat !== VurderingsResultat.OPPFYLT && (
           <Undertekst gray={false}>{sjekkInfo()}</Undertekst>
         )}
       </div>
-      {/* <Endre>
-        <LockedIcon /> <span className="text">Endre</span>
-      </Endre>
-      */}
     </Wrapper>
   )
 }

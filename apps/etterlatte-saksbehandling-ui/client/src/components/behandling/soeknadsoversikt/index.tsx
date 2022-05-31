@@ -4,7 +4,7 @@ import { Content, ContentHeader } from '../../../shared/styled'
 import { SoeknadOversikt } from './soeknadoversikt/Soeknadsoversikt'
 import { Familieforhold, FamilieforholdWrapper } from './familieforhold/Familieforhold'
 import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
-import { GyldigFramsattType, VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 import { Border, HeadingWrapper } from './styled'
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../behandlings-status'
 import { BehandlingsTypeSmall, IBehandlingsType } from '../behandlings-type'
@@ -27,7 +27,8 @@ export const Soeknadsoversikt = () => {
   } = usePersonInfoFromBehandling()
 
   const ctx = useContext(AppContext)
-  const gyldighet = ctx.state.behandlingReducer.gyldighetsprøving
+  const gyldigFramsatt = ctx.state.behandlingReducer.gyldighetsprøving
+  const kommerSoekerTilgode = ctx.state.behandlingReducer.kommerSoekerTilgode
 
   return (
     <Content>
@@ -44,20 +45,9 @@ export const Soeknadsoversikt = () => {
         <Soeknadsdato mottattDato={mottattDato} />
       </ContentHeader>
 
-      <SoeknadOversikt
-        gyldighet={gyldighet}
-        avdoedPersonPdl={avdoedPersonPdl}
-        mottattDato={mottattDato}
-        innsenderHarForeldreansvar={gyldighet.vurderinger.find(
-          (g) => g.navn === GyldigFramsattType.HAR_FORELDREANSVAR_FOR_BARNET
-        )}
-        gjenlevendeOgSoekerLikAdresse={gyldighet.vurderinger.find(
-          (g) => g.navn === GyldigFramsattType.BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL
-        )}
-        innsenderErForelder={gyldighet.vurderinger.find((g) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER)}
-      />
+      <SoeknadOversikt gyldigFramsatt={gyldigFramsatt} kommerSoekerTilgode={kommerSoekerTilgode} />
       <Border />
-      {gyldighet.resultat === VurderingsResultat.OPPFYLT ? (
+      {gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT ? (
         <Familieforhold
           soekerPdl={soekerPdl}
           soekerSoknad={soekerSoknad}
@@ -89,7 +79,7 @@ export const Soeknadsoversikt = () => {
       )}
 
       <BehandlingHandlingKnapper>
-        <Start soeknadGyldigFremsatt={gyldighet.resultat === VurderingsResultat.OPPFYLT} />
+        <Start soeknadGyldigFremsatt={gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT} />
       </BehandlingHandlingKnapper>
     </Content>
   )

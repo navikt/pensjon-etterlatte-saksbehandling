@@ -1,33 +1,16 @@
 import { PropsOmSoeknad } from '../props'
 import styled from 'styled-components'
-import { SoeknadOversiktDel1 } from './SoeknadsoversiktDel1'
-import { SoeknadOversiktDel2 } from './SoeknadsoversiktDel2'
+import { SoeknadOversiktGyldigFramsatt } from './SoeknadsoversiktDel1'
+import { SoeknadOversiktKommerSoekerTilgode } from './SoeknadsoversiktDel2'
 import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 
-export const SoeknadOversikt: React.FC<PropsOmSoeknad> = ({
-  gyldighet,
-  avdoedPersonPdl,
-  mottattDato,
-  innsenderHarForeldreansvar,
-  gjenlevendeOgSoekerLikAdresse,
-  innsenderErForelder,
-}) => {
+export const SoeknadOversikt: React.FC<PropsOmSoeknad> = ({ gyldigFramsatt, kommerSoekerTilgode }) => {
   return (
     <SoeknadOversiktWrapper>
       <div>
-        <SoeknadOversiktDel1
-          innsenderHarForeldreansvar={innsenderHarForeldreansvar}
-          innsenderErForelder={innsenderErForelder}
-          gyldighet={gyldighet}
-        />
-
-        {gyldighet.resultat === VurderingsResultat.OPPFYLT && (
-          <SoeknadOversiktDel2
-            avdoedPersonPdl={avdoedPersonPdl}
-            mottattDato={mottattDato}
-            gjenlevendeOgSoekerLikAdresse={gjenlevendeOgSoekerLikAdresse}
-            gyldighet={gyldighet}
-          />
+        <SoeknadOversiktGyldigFramsatt gyldigFramsatt={gyldigFramsatt} />
+        {gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT && (
+          <SoeknadOversiktKommerSoekerTilgode kommerSoekerTilgode={kommerSoekerTilgode} />
         )}
       </div>
     </SoeknadOversiktWrapper>

@@ -4,8 +4,17 @@ import { Foreldreansvar } from './soeknadinfo/Foreldreansvar'
 import { Innsender } from './soeknadinfo/Innsender'
 import { Verge } from './soeknadinfo/Verge'
 import { InfoWrapper } from './Soeknadsoversikt'
+import { GyldigFramsattType, IGyldighetproving } from '../../../../store/reducers/BehandlingReducer'
 
-export const SoeknadOversiktDel1: React.FC<any> = ({ innsenderHarForeldreansvar, innsenderErForelder, gyldighet }) => {
+export const SoeknadOversiktGyldigFramsatt: React.FC<any> = ({ gyldigFramsatt }) => {
+  const innsenderHarForeldreansvar = gyldigFramsatt.vurderinger.find(
+    (g: IGyldighetproving) => g.navn === GyldigFramsattType.HAR_FORELDREANSVAR_FOR_BARNET
+  )
+
+  const innsenderErForelder = gyldigFramsatt.vurderinger.find(
+    (g: IGyldighetproving) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER
+  )
+
   return (
     <>
       <Header>Gyldig fremsatt</Header>
@@ -17,7 +26,7 @@ export const SoeknadOversiktDel1: React.FC<any> = ({ innsenderHarForeldreansvar,
         </InfoWrapper>
         <div className="soeknadGyldigFremsatt">
           <SoeknadGyldigFremsatt
-            gyldighet={gyldighet}
+            gyldigFramsatt={gyldigFramsatt}
             innsenderErForelder={innsenderErForelder}
             innsenderHarForeldreansvar={innsenderHarForeldreansvar}
           />

@@ -9,11 +9,11 @@ import { mapGyldighetstyperTilTekst } from '../../utils'
 import { Title, Undertekst, Wrapper } from './styled'
 
 export const SoeknadGyldigFremsatt = ({
-  gyldighet,
+  gyldigFramsatt,
   innsenderHarForeldreansvar,
   innsenderErForelder,
 }: {
-  gyldighet: IGyldighetResultat
+  gyldigFramsatt: IGyldighetResultat
   innsenderHarForeldreansvar: IGyldighetproving | undefined
   innsenderErForelder: IGyldighetproving | undefined
 }) => {
@@ -23,15 +23,15 @@ export const SoeknadGyldigFremsatt = ({
     return harForeldreansvar ? harForeldreansvar : erForelder
   }
   const tittel =
-    gyldighet.resultat !== VurderingsResultat.OPPFYLT ? 'Søknad ikke gyldig fremsatt' : 'Søknad gyldig fremsatt'
+    gyldigFramsatt.resultat !== VurderingsResultat.OPPFYLT ? 'Søknad ikke gyldig fremsatt' : 'Søknad gyldig fremsatt'
 
   return (
     <Wrapper>
-      <div>{gyldighet.resultat && <GyldighetIcon status={gyldighet.resultat} large={true} />}</div>
+      <div>{gyldigFramsatt.resultat && <GyldighetIcon status={gyldigFramsatt.resultat} large={true} />}</div>
       <div>
         <Title>{tittel}</Title>
-        <Undertekst gray={true}>Automatisk {format(new Date(gyldighet.vurdertDato), 'dd.MM.yyyy')}</Undertekst>
-        {gyldighet.resultat !== VurderingsResultat.OPPFYLT && <Undertekst gray={false}>{sjekkInfo()}</Undertekst>}
+        <Undertekst gray={true}>Automatisk {format(new Date(gyldigFramsatt.vurdertDato), 'dd.MM.yyyy')}</Undertekst>
+        {gyldigFramsatt.resultat !== VurderingsResultat.OPPFYLT && <Undertekst gray={false}>{sjekkInfo()}</Undertekst>}
       </div>
       {/* <Endre>
         <LockedIcon /> <span className="text">Endre</span>

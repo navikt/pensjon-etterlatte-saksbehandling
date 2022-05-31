@@ -31,6 +31,7 @@ dependencies {
     implementation(NavFelles.TokenValidationKtor)
 
     testImplementation(MockK.MockK)
+    testImplementation(Kotest.AssertionsCore)
     testImplementation(Ktor.ClientMock)
     testImplementation(Ktor.ServerTests)
     testImplementation(Kotlinx.CoroutinesCore)

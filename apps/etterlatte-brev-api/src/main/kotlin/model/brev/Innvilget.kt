@@ -1,5 +1,8 @@
 package model.brev
 
+import model.brev.mapper.finnAvdoed
+import model.brev.mapper.finnBarn
+import model.brev.mapper.finnUtbetalingsinfo
 import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.model.brev.BrevRequest
@@ -20,16 +23,9 @@ data class InnvilgetBrevRequest(
     companion object {
         fun fraVedtak(vedtak: Vedtak): InnvilgetBrevRequest = InnvilgetBrevRequest(
             saksnummer = vedtak.sak.id.toString(),
-            utbetalingsinfo = Utbetalingsinfo(
-                beloep = vedtak.pensjonTilUtbetaling!![0].beloep!!.toDouble(),
-                virkningsdato = LocalDate.of(vedtak.virk.fom.year, vedtak.virk.fom.month, 1),
-                kontonummer = "<todo: Ikke tilgjengelig>"
-            ),
-            barn = Barn(
-                navn = "Ola nordmann", // todo: Hentes fra pdl/grunnlag
-                fnr = vedtak.sak.ident,
-            ),
-            avdoed = Avdoed("Gammel, mann", LocalDate.now()), // todo: Hentes fra behandling/grunnlag.
+            utbetalingsinfo = vedtak.finnUtbetalingsinfo(),
+            barn = vedtak.finnBarn(),
+            avdoed = vedtak.finnAvdoed(),
             aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår? Nødvendig?
             spraak = Spraak.NB, // todo, må hentes.
             mottaker = Mottaker(navn = "Barn barnesen", adresse = "Testadresse", postnummer = "0000")

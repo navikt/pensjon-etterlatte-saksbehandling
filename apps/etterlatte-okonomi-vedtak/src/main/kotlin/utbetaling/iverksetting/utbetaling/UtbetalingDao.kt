@@ -42,7 +42,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                         "id" to utbetaling.id.param<UUID>(),
                         "vedtakId" to utbetaling.vedtakId.value.param<Long>(),
                         "behandlingId" to utbetaling.behandlingId.value.param<UUID>(),
-                        "behandlingIdTilOppdrag" to utbetaling.behandlingId.shortValue.toString().param<String>(),
+                        "behandlingIdTilOppdrag" to utbetaling.behandlingId.shortValue.value.param<String>(),
                         "sakId" to utbetaling.sakId.value.param<Long>(),
                         "status" to UtbetalingStatus.SENDT.name.param<String>(),
                         "vedtak" to utbetaling.vedtak.toJson().param<String>(),

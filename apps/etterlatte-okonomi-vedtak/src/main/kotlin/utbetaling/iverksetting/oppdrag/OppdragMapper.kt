@@ -72,7 +72,7 @@ object OppdragMapper {
                         brukKjoreplan = "J"
                         saksbehId = utbetaling.saksbehandler.value
                         utbetalesTilId = utbetaling.stoenadsmottaker.value
-                        henvisning = utbetaling.behandlingId.shortValue.toString()
+                        henvisning = utbetaling.behandlingId.shortValue.value
 
                         attestant180.add(
                             Attestant180().apply {

@@ -139,13 +139,14 @@ export const Person = () => {
       }
     })()
   }, [])
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const opprettSak = () => {
     if (match.fnr) {
       opprettSakPaaPerson(match.fnr)
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const opprettBehandling = () => {
     if (sakIdInput.current.value) {
       opprettBehandlingPaaSak(Number(sakIdInput.current.value))

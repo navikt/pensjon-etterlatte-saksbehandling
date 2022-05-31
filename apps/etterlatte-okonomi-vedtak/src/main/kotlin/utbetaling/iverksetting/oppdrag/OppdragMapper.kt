@@ -53,12 +53,14 @@ object OppdragMapper {
                             refFagsystemId = utbetaling.sakId.value.toString()
                             refDelytelseId = it.erstatterId.value.toString()
                         }
-                        kodeStatusLinje = it.type.let {
-                            when (it) {
-                                Utbetalingslinjetype.OPPHOER -> TkodeStatusLinje.OPPH
-                                Utbetalingslinjetype.UTBETALING -> null
+                        when (it.type) {
+                            Utbetalingslinjetype.OPPHOER -> {
+                                kodeStatusLinje = TkodeStatusLinje.OPPH
+                                datoStatusFom = it.periode.fra.toXMLDate()
                             }
+                            else -> {}
                         }
+
                         vedtakId = utbetaling.vedtakId.value.toString()
                         delytelseId = it.id.value.toString()
                         kodeKlassifik = "BARNEPENSJON-OPTP"

@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.UUID30
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -10,7 +11,7 @@ import java.util.*
 
 data class VedtakId(val value: Long)
 data class SakId(val value: Long)
-data class BehandlingId(val value: String)
+data class BehandlingId(val value: String, val shortValue: UUID30)
 data class UtbetalingslinjeId(val value: Long)
 data class Foedselsnummer(val value: String)
 data class NavIdent(val value: String)

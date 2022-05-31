@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.common
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import java.time.Clock
@@ -8,6 +9,7 @@ import java.time.Instant
 import java.time.Month
 import java.time.YearMonth
 import java.time.ZoneId
+import java.util.*
 
 internal class UtilsTest {
 
@@ -60,6 +62,26 @@ internal class UtilsTest {
             { assertEquals(april2022.year, sisteDagApril.year) },
             { assertEquals(april2022.month, sisteDagApril.month) },
             { assertEquals(30, sisteDagApril.dayOfMonth) }
+        )
+    }
+
+    @Test
+    fun `uuid30 skal ikke inneholde bindestreker`() {
+        val uuid30 = UUID.randomUUID().toUUID30()
+        assertFalse(uuid30.toString().contains("-"))
+    }
+
+    @Test
+    fun `uuid30 skal besta av uuids foerste 30 tegn med unntak av bindestrekene`() {
+        val uuid = UUID.randomUUID()
+        val uuidUtenBindestrek = uuid.toString().replace("-", "")
+        val uuidUFoerste30Tegn = uuidUtenBindestrek.substring(0, 30)
+        val uuid30 = uuid.toUUID30()
+
+        assertAll(
+            "uuid30 skal besta av uuids foerste 30 tegn med unntak av bindestrekene",
+            { assertEquals(30, uuid30.value.length) },
+            { assertEquals(uuidUFoerste30Tegn, uuid30.value) }
         )
     }
 }

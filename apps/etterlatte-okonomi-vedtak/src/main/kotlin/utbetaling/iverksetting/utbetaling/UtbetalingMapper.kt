@@ -3,6 +3,7 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.forsteDagIMaaneden
 import no.nav.etterlatte.utbetaling.common.sisteDagIMaaneden
+import no.nav.etterlatte.utbetaling.common.toUUID30
 import java.util.*
 
 class UtbetalingMapper(
@@ -17,7 +18,8 @@ class UtbetalingMapper(
     fun opprettUtbetaling(): Utbetaling {
         if (tidligereUtbetalinger.isEmpty() &&
             utbetalingsperioder.size == 1 &&
-            utbetalingsperioder.first().type == UtbetalingsperiodeType.OPPHOER) {
+            utbetalingsperioder.first().type == UtbetalingsperiodeType.OPPHOER
+        ) {
 
             throw IngenEksisterendeUtbetalingException()
         }
@@ -25,20 +27,23 @@ class UtbetalingMapper(
     }
 
     private fun utbetaling() = Utbetaling(
-            id = utbetalingId,
-            sakId = SakId(vedtak.sak.id),
-            behandlingId = BehandlingId(vedtak.behandling.id.toString()), // TODO: må erstattes til en maks 30 tegn lang nøkkel
-            vedtakId = VedtakId(vedtak.vedtakId),
-            status = UtbetalingStatus.SENDT,
-            opprettet = opprettet,
-            endret = opprettet,
-            avstemmingsnoekkel = opprettet,
-            stoenadsmottaker = Foedselsnummer(vedtak.sak.ident),
-            saksbehandler = NavIdent(vedtak.vedtakFattet.ansvarligSaksbehandler),
-            attestant = NavIdent(vedtak.attestasjon.attestant),
-            vedtak = vedtak,
-            utbetalingslinjer = utbetalingslinjer()
-        )
+        id = utbetalingId,
+        sakId = SakId(vedtak.sak.id),
+        behandlingId = BehandlingId(
+            vedtak.behandling.id.toString(),
+            vedtak.behandling.id.toUUID30()
+        ), // TODO: må erstattes til en maks 30 tegn lang nøkkel
+        vedtakId = VedtakId(vedtak.vedtakId),
+        status = UtbetalingStatus.SENDT,
+        opprettet = opprettet,
+        endret = opprettet,
+        avstemmingsnoekkel = opprettet,
+        stoenadsmottaker = Foedselsnummer(vedtak.sak.ident),
+        saksbehandler = NavIdent(vedtak.vedtakFattet.ansvarligSaksbehandler),
+        attestant = NavIdent(vedtak.attestasjon.attestant),
+        vedtak = vedtak,
+        utbetalingslinjer = utbetalingslinjer()
+    )
 
     private fun utbetalingslinjer() = utbetalingsperioder.map {
         Utbetalingslinje(

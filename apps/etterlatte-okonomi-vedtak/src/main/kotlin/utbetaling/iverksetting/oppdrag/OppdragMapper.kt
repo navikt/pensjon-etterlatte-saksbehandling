@@ -65,14 +65,14 @@ object OppdragMapper {
                         delytelseId = it.id.value.toString()
                         kodeKlassifik = "BARNEPENSJON-OPTP"
                         datoVedtakFom = it.periode.fra.toXMLDate()
-                        datoVedtakTom = it.periode.til?.let { it.toXMLDate() }
+                        datoVedtakTom = it.periode.til?.toXMLDate()
                         sats = it.beloep
                         fradragTillegg = TfradragTillegg.T
                         typeSats = "MND"
                         brukKjoreplan = "J"
                         saksbehId = utbetaling.saksbehandler.value
                         utbetalesTilId = utbetaling.stoenadsmottaker.value
-                        henvisning = utbetaling.behandlingId.value
+                        henvisning = utbetaling.behandlingId.shortValue.toString()
 
                         attestant180.add(
                             Attestant180().apply {

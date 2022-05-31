@@ -51,3 +51,7 @@ fun LocalDate.toXMLDate(): XMLGregorianCalendar {
             timezone = DatatypeConstants.FIELD_UNDEFINED
         }
 }
+
+fun UUID.toUUID30() = this.toString().replace("-", "").substring(0, 30).let { UUID30(it) }
+
+data class UUID30(val value: String)

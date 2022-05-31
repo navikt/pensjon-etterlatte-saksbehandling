@@ -10,6 +10,7 @@ import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.utbetaling.common.UUID30
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
@@ -32,20 +33,22 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
                 queryOf(
                     statement = """
-                        INSERT INTO utbetaling(id, vedtak_id, behandling_id, sak_id, oppdrag, status, vedtak, 
+                        INSERT INTO utbetaling(id, vedtak_id, behandling_id, behandling_id_til_oppdrag, sak_id, oppdrag, status, vedtak, 
                             opprettet, avstemmingsnoekkel, endret, stoenadsmottaker, saksbehandler, attestant)
-                        VALUES(:id, :vedtakId, :behandlingId, :sakId, :oppdrag, :status, :vedtak, :opprettet, 
+                        VALUES(:id, :vedtakId, :behandlingId, :behandlingIdTilOppdrag, :sakId, :oppdrag, :status, :vedtak, :opprettet, 
                             :avstemmingsnoekkel, :endret, :stoenadsmottaker, :saksbehandler, :attestant)
                         """,
                     paramMap = mapOf(
                         "id" to utbetaling.id.toString().param<String>(),
                         "vedtakId" to utbetaling.vedtakId.value.param<Long>(),
                         "behandlingId" to utbetaling.behandlingId.value.param<String>(),
+                        "behandlingIdTilOppdrag" to utbetaling.behandlingId.shortValue.toString().param<String>(),
                         "sakId" to utbetaling.sakId.value.param<Long>(),
                         "status" to UtbetalingStatus.SENDT.name.param<String>(),
                         "vedtak" to utbetaling.vedtak.toJson().param<String>(),
                         "opprettet" to Timestamp.from(utbetaling.opprettet.instant).param<Timestamp>(),
-                        "avstemmingsnoekkel" to Timestamp.from(utbetaling.avstemmingsnoekkel.instant).param<Timestamp>(),
+                        "avstemmingsnoekkel" to Timestamp.from(utbetaling.avstemmingsnoekkel.instant)
+                            .param<Timestamp>(),
                         "endret" to Timestamp.from(utbetaling.endret.instant).param<Timestamp>(),
                         "stoenadsmottaker" to utbetaling.stoenadsmottaker.value.param<String>(),
                         "saksbehandler" to utbetaling.saksbehandler.value.param<String>(),
@@ -89,7 +92,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
+                    SELECT id, vedtak_id, behandling_id, behandling_id_til_oppdrag,  sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
                         stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, kvittering_alvorlighetsgrad, 
                         kvittering_kode, saksbehandler, attestant 
                     FROM utbetaling 
@@ -122,7 +125,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
+                    SELECT id, vedtak_id, behandling_id, behandling_id_til_oppdrag, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
                         stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, kvittering_alvorlighetsgrad,  
                         kvittering_kode, saksbehandler, attestant
                     FROM utbetaling
@@ -145,7 +148,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    SELECT id, vedtak_id, behandling_id, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
+                    SELECT id, vedtak_id, behandling_id, behandling_id_til_oppdrag, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
                         stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, kvittering_alvorlighetsgrad, 
                         kvittering_kode, saksbehandler, attestant
                     FROM utbetaling
@@ -217,7 +220,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
             Utbetaling(
                 id = string("id").let { UUID.fromString(it) },
                 sakId = SakId(long("sak_id")),
-                behandlingId = BehandlingId(string("behandling_id")),
+                behandlingId = BehandlingId(string("behandling_id"), UUID30(string("behandling_id_til_oppdrag"))),
                 vedtakId = VedtakId(long("vedtak_id")),
                 status = string("status").let(UtbetalingStatus::valueOf),
                 opprettet = Tidspunkt(sqlTimestamp("opprettet").toInstant()),

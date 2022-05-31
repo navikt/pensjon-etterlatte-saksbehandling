@@ -12,6 +12,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
 import no.nav.etterlatte.utbetaling.utbetaling
 import no.nav.etterlatte.utbetaling.utbetalingsvedtak
 import no.trygdeetaten.skjema.oppdrag.TkodeStatusLinje
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
@@ -105,6 +106,31 @@ internal class UtbetalingServiceTest {
         assertThrows<IngenEksisterendeUtbetalingException> {
             utbetalingService.iverksettUtbetaling(vedtakMedOpphoer())
         }
+    }
+
+    @Test
+    fun `skal returnere EksisterendeData med datatype EKSISTERENDE_VEDTAKID om vedtak eksisterer`() {
+        every { utbetalingDao.hentUtbetaling(any()) } returns utbetaling()
+        val eksisterendeData = utbetalingService.eksisterendeData(utbetalingsvedtak())
+        assertEquals(Datatype.EKSISTERENDE_VEDTAKID, eksisterendeData.eksisterendeDatatype)
+    }
+
+    @Test
+    fun `skal returnere EksisterendeData med datatype EKSISTERENDE_UTBETALINGSLINJEID om utbetalingslinjer eksisterer`() {
+        every { utbetalingDao.hentUtbetaling(any()) } returns null
+        every { utbetalingDao.hentUtbetalingslinjer(any()) } returns listOf(mockk<Utbetalingslinje>() {
+            every { id } returns UtbetalingslinjeId(1)
+        })
+        val eksisterendeData = utbetalingService.eksisterendeData(utbetalingsvedtak())
+        assertEquals(Datatype.EKSISTERENDE_UTBETALINGSLINJEID, eksisterendeData.eksisterendeDatatype)
+    }
+
+    @Test
+    fun `skal returnere EksisterendeData med datatype INGEN_EKSISTERENDE_DATA om ingen data eksisterer`() {
+        every { utbetalingDao.hentUtbetaling(any()) } returns null
+        every { utbetalingDao.hentUtbetalingslinjer(any()) } returns emptyList()
+        val eksisterendeData = utbetalingService.eksisterendeData(utbetalingsvedtak())
+        assertEquals(Datatype.INGEN_EKSISTERENDE_DATA, eksisterendeData.eksisterendeDatatype)
     }
 
     private fun YearMonth.toXmlDate() = forsteDagIMaaneden(this).toXMLDate()

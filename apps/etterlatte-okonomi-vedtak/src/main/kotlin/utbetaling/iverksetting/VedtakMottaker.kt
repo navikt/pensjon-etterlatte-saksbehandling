@@ -10,6 +10,7 @@ import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Datatype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
@@ -40,13 +41,25 @@ class VedtakMottaker(
                 val vedtak: Utbetalingsvedtak = objectMapper.readValue(packet["@vedtak"].toJson())
                 logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
                 try {
-
-                    if (utbetalingService.utbetalingEksisterer(vedtak)) {
-                        logger.info("Vedtak eksisterer fra før. Sendes ikke videre til oppdrag")
-                        rapidsConnection.publish(utbetalingEksisterer(vedtak))
-                    } else {
-                        val utbetaling = utbetalingService.iverksettUtbetaling(vedtak)
-                        rapidsConnection.publish("key", utbetalingEvent(utbetaling))
+                    val eksisterendeData = utbetalingService.eksisterendeData(vedtak)
+                    when (eksisterendeData.eksisterendeDatatype) {
+                        Datatype.EKSISTERENDE_VEDTAKID -> {
+                            logger.info("Vedtak eksisterer fra før. Sendes ikke videre til oppdrag")
+                            rapidsConnection.publish(utbetalingEksisterer(vedtak))
+                        }
+                        Datatype.EKSISTERENDE_UTBETALINGSLINJEID -> {
+                            logger.info("En eller flere utbetalingslinjer eksisterer fra før. Sendes ikke videre til oppdrag")
+                            eksisterendeData.data?.let {
+                                rapidsConnection.publish(
+                                    "key",
+                                    utbetalingslinjerEksisterer(eksisterendeData.data)
+                                )
+                            }
+                        }
+                        Datatype.INGEN_EKSISTERENDE_DATA -> {
+                            val utbetaling = utbetalingService.iverksettUtbetaling(vedtak)
+                            rapidsConnection.publish("key", utbetalingEvent(utbetaling))
+                        }
                     }
                 } catch (e: Exception) {
                     logger.error("En feil oppstod: ${e.message}", e)
@@ -81,6 +94,11 @@ class VedtakMottaker(
     private fun utbetalingEksisterer(vedtak: Utbetalingsvedtak) = mapOf(
         "@event_name" to "utbetaling_eksisterer",
         "@vedtakId" to vedtak.vedtakId,
+    ).toJson()
+
+    private fun utbetalingslinjerEksisterer(utbetalingslinjeIder: List<Long>) = mapOf(
+        "@event_name" to "utbetalingslinjer_eksisterer",
+        "@utbetalingslinjer" to utbetalingslinjeIder.joinToString(", "),
     ).toJson()
 
     private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

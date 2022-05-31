@@ -121,6 +121,22 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 .let { session.run(it.map(::toUtbetalingslinje).asList) }
         }
 
+    fun hentUtbetalingslinjer(utbetalingslinjeIder: List<Utbetalingsperiode>): List<Utbetalingslinje> =
+        using(sessionOf(dataSource)) { session ->
+            queryOf(
+                statement = """
+                    SELECT id, type, utbetaling_id, erstatter_id, opprettet, periode_fra, periode_til, beloep, sak_id
+                    FROM utbetalingslinje 
+                    WHERE id = ANY(:utbetalingId)
+                    """,
+                paramMap = mapOf(
+                    "utbetalingId" to session.createArrayOf("bigint", utbetalingslinjeIder.map { it.id })
+                )
+            )
+                .let { session.run(it.map(::toUtbetalingslinje).asList) }
+        }
+
+
     fun hentUtbetalinger(fraOgMed: Tidspunkt, til: Tidspunkt): List<Utbetaling> =
         using(sessionOf(dataSource)) { session ->
             queryOf(

@@ -2,6 +2,8 @@ package no.nav.etterlatte.utbetaling.iverksetting
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Datatype
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.EksisterendeData
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.VedtakId
@@ -33,6 +35,7 @@ internal class VedtakMottakerTest {
 
     @Test
     fun `attestert vedtak mottatt korrekt og utbetaling_oppdatert-event postet`() {
+        every { utbetalingService.eksisterendeData(any()) } returns EksisterendeData(Datatype.INGEN_EKSISTERENDE_DATA)
         inspector.apply { sendTestMessage(FATTET_VEDTAK) }
 
         inspector.inspektør.message(0).run {
@@ -44,7 +47,7 @@ internal class VedtakMottakerTest {
 
     @Test
     fun `mottatt vedtak eksisterer fra for og poster utbetaling eksisterer-melding`() {
-        every { utbetalingService.utbetalingEksisterer(any()) } returns true
+        every { utbetalingService.eksisterendeData(any()) } returns EksisterendeData(Datatype.EKSISTERENDE_VEDTAKID)
         inspector.apply { sendTestMessage(FATTET_VEDTAK) }
 
         inspector.inspektør.message(0).run {
@@ -53,10 +56,23 @@ internal class VedtakMottakerTest {
         }
     }
 
+    @Test
+    fun `utbetalingslinjer i mottatt vedtak eksisterer fra for og poster utbetalingslinjer eksisterer-melding`() {
+        every { utbetalingService.eksisterendeData(any()) } returns EksisterendeData(
+            Datatype.EKSISTERENDE_UTBETALINGSLINJEID,
+            listOf(1, 2, 3)
+        )
+        inspector.apply { sendTestMessage(FATTET_VEDTAK) }
+
+        inspector.inspektør.message(0).run {
+            assertEquals("utbetalingslinjer_eksisterer", get("@event_name").textValue())
+        }
+    }
+
 
     @Test
     fun `mottatt vedtak forer til feil og publiserer utbetaling feilet-melding`() {
-        every { utbetalingService.utbetalingEksisterer(any()) } throws Exception()
+        every { utbetalingService.eksisterendeData(any()) } throws Exception()
         assertThrows<Exception> { inspector.apply { sendTestMessage(FATTET_VEDTAK) } }
 
         inspector.inspektør.message(0).run {

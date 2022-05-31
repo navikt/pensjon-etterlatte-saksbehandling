@@ -7,6 +7,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.nav.etterlatte.utbetaling.oppdrag
 import no.nav.etterlatte.utbetaling.utbetaling
+import no.nav.etterlatte.utbetaling.utbetalingslinje
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -19,7 +20,10 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
+import java.math.BigDecimal
 import java.time.Instant
+import java.time.YearMonth
+import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -188,7 +192,8 @@ internal class UtbetalingDaoIntegrationTest {
             { assertNotNull(utbetalingOppdatert?.kvittering?.oppdrag?.mmel) },
             {
                 assertEquals(
-                    oppdragMedKvittering.mmel?.alvorlighetsgrad, utbetalingOppdatert?.kvittering?.oppdrag?.mmel?.alvorlighetsgrad
+                    oppdragMedKvittering.mmel?.alvorlighetsgrad,
+                    utbetalingOppdatert?.kvittering?.oppdrag?.mmel?.alvorlighetsgrad
                 )
             })
     }
@@ -211,6 +216,42 @@ internal class UtbetalingDaoIntegrationTest {
 
         assertEquals(UtbetalingStatus.GODKJENT, utbetalingOppdatert.status)
     }
+
+    @Test
+    fun `skal hente liste med utbetalingslinjer`() {
+        val opprettetTidspunkt = Tidspunkt.now()
+        val utbetalingId = UUID.randomUUID()
+        val utbetaling = utbetaling(
+            id = utbetalingId,
+            avstemmingsnoekkel = opprettetTidspunkt,
+            utbetalingslinjer = listOf(
+                utbetalingslinje(utbetalingId, SakId(1L), 1),
+                utbetalingslinje(utbetalingId, SakId(1L), 2),
+                utbetalingslinje(utbetalingId, SakId(1L), 3),
+            )
+        )
+        val oppdrag = oppdrag(utbetaling)
+        utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
+
+        val periode = Periode(YearMonth.now(), null)
+        val utbetalingslinjeIder =
+            listOf(
+                Utbetalingsperiode(1L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING),
+                Utbetalingsperiode(2L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING),
+                Utbetalingsperiode(3L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING)
+            )
+        val utbetalingslinjer = utbetalingDao.hentUtbetalingslinjer(utbetalingslinjeIder)
+        println(utbetalingslinjer)
+
+        assertAll(
+            "tre utbetalingslinjer med ider 1,2 og 3 skal hentes fra databasen",
+            { assertEquals(3, utbetalingslinjer.size) },
+            { assertTrue(utbetalingslinjer.any { it.id.value == 1L }) },
+            { assertTrue(utbetalingslinjer.any { it.id.value == 2L }) },
+            { assertTrue(utbetalingslinjer.any { it.id.value == 3L }) },
+        )
+    }
+
 
     @AfterEach
     fun afterEach() {

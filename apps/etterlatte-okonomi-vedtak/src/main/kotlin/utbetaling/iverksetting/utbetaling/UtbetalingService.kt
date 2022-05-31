@@ -35,6 +35,23 @@ class UtbetalingService(
     fun utbetalingEksisterer(vedtak: Utbetalingsvedtak) =
         utbetalingDao.hentUtbetaling(vedtak.vedtakId) != null
 
+    fun eksisterendeUtbetalingslinjer(vedtak: Utbetalingsvedtak) =
+        utbetalingDao.hentUtbetalingslinjer(vedtak.pensjonTilUtbetaling).map { it.id.value }
+
+    fun eksisterendeData(vedtak: Utbetalingsvedtak): EksisterendeData {
+        return if (utbetalingEksisterer(vedtak)) {
+            EksisterendeData(Datatype.EKSISTERENDE_VEDTAKID)
+        } else {
+            val eksisterendeUtbetalingslinjer = eksisterendeUtbetalingslinjer(vedtak)
+            if (eksisterendeUtbetalingslinjer.isNotEmpty()) {
+                EksisterendeData(Datatype.EKSISTERENDE_UTBETALINGSLINJEID, eksisterendeUtbetalingslinjer)
+            } else {
+                EksisterendeData(Datatype.INGEN_EKSISTERENDE_DATA)
+            }
+        }
+    }
+
+
     fun oppdaterKvittering(oppdrag: Oppdrag): Utbetaling {
         logger.info("Oppdaterer kvittering for oppdrag med vedtakId=${oppdrag.vedtakId()}")
         return utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock))
@@ -70,5 +87,13 @@ class UtbetalingService(
     companion object {
         private val logger = LoggerFactory.getLogger(UtbetalingService::class.java)
     }
+}
 
+data class EksisterendeData(
+    val eksisterendeDatatype: Datatype,
+    val data: List<Long>? = null
+)
+
+enum class Datatype() {
+    EKSISTERENDE_UTBETALINGSLINJEID, EKSISTERENDE_VEDTAKID, INGEN_EKSISTERENDE_DATA
 }

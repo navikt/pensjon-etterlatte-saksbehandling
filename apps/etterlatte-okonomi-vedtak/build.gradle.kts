@@ -21,7 +21,7 @@ dependencies {
     implementation(project(":libs:common"))
 
     implementation("com.zaxxer:HikariCP:3.4.5")
-    implementation("org.flywaydb:flyway-core:6.5.0")
+    implementation("org.flywaydb:flyway-core:8.5.11")
     implementation("org.postgresql:postgresql:42.3.3")
     implementation("com.github.seratch:kotliquery:1.7.0")
 

@@ -1,0 +1,24 @@
+{
+  "person": {
+    "fornavn": "TALENTFULL",
+    "etternavn": "BLYANT",
+    "foedselsnummer": "12101376212",
+    "foedselsaar": 2013,
+    "foedselsdato": "2013-10-12",
+    "doedsdato": "null",
+    "adressebeskyttelse": false,
+    "adresse": "Bøveien",
+    "husnummer": "937",
+    "husbokstav": null,
+    "postnummer": "8475",
+    "poststed": "8475",
+    "statsborgerskap": "NOR",
+    "foedeland": "ESP",
+    "sivilstatus": "UGIFT",
+    "utland": null,
+    "rolle": null
+  },
+  "saker": {
+    "saker": [{ "ident": "11057523044", "sakType": "barnepensjon", "id": 1 }]
+  }
+}

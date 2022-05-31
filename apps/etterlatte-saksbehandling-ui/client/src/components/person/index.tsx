@@ -3,14 +3,57 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { getPerson, opprettBehandlingPaaSak, opprettSakPaaPerson } from '../../shared/api/person'
-import { StatusBar, StatusBarTheme } from '../statusbar'
+import { PersonInfo, StatusBar, StatusBarTheme } from '../statusbar'
 import { Container } from '../../shared/styled'
-import { Saksliste, SakslisteProps } from './saksliste'
+import { SakslisteProps } from './saksliste'
+import { Dokumentoversikt } from './dokumentoversikt'
+import { Saksoversikt } from './saksoversikt'
+
+//todo: typer
+const testDokumenter = {
+  dokumenter: [
+    {
+      kolonner: [
+        {
+          col: 'Dato',
+          value: '13.05.2021',
+        },
+        {
+          col: 'Tittel',
+          value: 'Innvilgelsesbrev barnepensjon',
+          link: 'link',
+        },
+
+        {
+          col: 'Status',
+          value: 'Sendt ut',
+        },
+      ],
+    },
+    {
+      kolonner: [
+        {
+          col: 'Dato',
+          value: '09.05.2021',
+        },
+        {
+          col: 'Tittel',
+          value: 'Søknad barnepensjon - førstegangsbehandling',
+          link: 'link',
+        },
+
+        {
+          col: 'Status',
+          value: 'Motatt',
+        },
+      ],
+    },
+  ],
+}
 
 const testdata: SakslisteProps = {
   saker: [
     {
-      name: 'Fagsak 1',
       behandlinger: [
         {
           kolonner: [
@@ -20,11 +63,15 @@ const testdata: SakslisteProps = {
             },
             {
               col: 'Type',
-              value: 'Barnepensjon',
+              value: 'Revurdering',
+            },
+            {
+              col: 'Årsak',
+              value: 'Søknad',
             },
             {
               col: 'Status',
-              value: 'Opprettet',
+              value: 'Utredes',
             },
             {
               col: 'Vedtaksdato',
@@ -32,7 +79,7 @@ const testdata: SakslisteProps = {
             },
             {
               col: 'Resultat',
-              value: 'Vedtatt',
+              value: 'Ikke satt',
             },
           ],
         },
@@ -44,11 +91,15 @@ const testdata: SakslisteProps = {
             },
             {
               col: 'Type',
-              value: 'Barnepensjon',
+              value: 'Førstegangsbehandling',
+            },
+            {
+              col: 'årsak',
+              value: 'Søknad',
             },
             {
               col: 'Status',
-              value: 'Opprettet',
+              value: 'Ferdigstilt',
             },
             {
               col: 'Vedtaksdato',
@@ -56,39 +107,10 @@ const testdata: SakslisteProps = {
             },
             {
               col: 'Resultat',
-              value: 'Vedtatt',
+              value: 'Innvilget',
             },
           ],
-        }
-      ],
-    },
-    {
-      name: 'Fagsak 2',
-      behandlinger: [
-        {
-          kolonner: [
-            {
-              col: 'Opprettet',
-              value: '12.01.2021',
-            },
-            {
-              col: 'Type',
-              value: 'Barnepensjon',
-            },
-            {
-              col: 'Status',
-              value: 'Opprettet',
-            },
-            {
-              col: 'Vedtaksdato',
-              value: '18.01.2021',
-            },
-            {
-              col: 'Resultat',
-              value: 'Vedtatt',
-            },
-          ],
-        }
+        },
       ],
     },
   ],
@@ -97,6 +119,8 @@ const testdata: SakslisteProps = {
 export const Person = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [personData, setPersonData] = useState({})
+  const [personinfo, setPersoninfo] = useState<PersonInfo>()
+
   const match = useParams<{ fnr: string }>()
 
   const sakIdInput = useRef() as React.MutableRefObject<HTMLInputElement>
@@ -106,6 +130,12 @@ export const Person = () => {
       if (match.fnr) {
         const person = await getPerson(match.fnr)
         setPersonData(person)
+        setPersoninfo({
+          fornavn: person.data.person.fornavn,
+          etternavn: person.data.person.etternavn,
+          foedselsnummer: person.data.person.foedselsnummer,
+          type: 'Etterlatt',
+        })
       }
     })()
   }, [])
@@ -124,35 +154,22 @@ export const Person = () => {
 
   return (
     <>
-      <StatusBar theme={StatusBarTheme.gray} />
-
+      <StatusBar theme={StatusBarTheme.gray} personInfo={personinfo} />
       <Container>
         <Tabs>
           <Tlist>
-            <Tab>Personopplysninger</Tab>
-            <Tab>Behandlingsoversikt</Tab>
-            <Tab>Stønadshisstorikk</Tab>
-            <Tab>Modia meldinger</Tab>
-            <Tab>Dokumentoversikt</Tab>
-            <Tab>Testgreier</Tab>
+            <TabElement>Saksoversikt</TabElement>
+            <TabElement>Dokumentoversikt</TabElement>
           </Tlist>
 
           <TabPanel>
-            <h2>Innhold</h2>
+            <Saksoversikt {...testdata} />
           </TabPanel>
           <TabPanel>
-            <Saksliste {...testdata} />
+            <Dokumentoversikt {...testDokumenter} />
           </TabPanel>
-          <TabPanel>
-            <h2>Any content 3</h2>
-          </TabPanel>
-          <TabPanel>
-            <h2>Any content 4</h2>
-          </TabPanel>
-          <TabPanel>
-            <h2>Any content 5</h2>
-          </TabPanel>
-          <TabPanel>
+
+          {/** <TabPanel>
             <p>
               <button onClick={opprettSak}>Opprett/hent sak</button>
             </p>
@@ -161,17 +178,22 @@ export const Person = () => {
               <button onClick={opprettBehandling}>Opprett behandling på denne saken</button>
             </p>
           </TabPanel>
+          */}
         </Tabs>
       </Container>
     </>
   )
 }
 
+const TabElement = styled(Tab)`
+  margin-left: 10px;
+  margin-right: 10px;
+`
+
 const Tlist = styled(TabList)`
   display: flex;
   list-style-type: none;
   margin: 1em 0 0;
-  justify-content: space-between;
   li {
     color: var(--nav-blue);
     cursor: pointer;

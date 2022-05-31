@@ -5,11 +5,17 @@ import personsokUtenSak from '../mockdata/personsokUtenSak.json'
 
 export const mockRouter = express.Router() // for å støtte dekoratør for innloggede flater
 
-mockRouter.get('/personer/:fnr', (req: Request, res: Response) => {
+mockRouter.get(`/personer/:fnr`, (req: Request, res: Response) => {
+  const fnr = req.params.fnr
+
   if (req.params.fnr === '26117512737') {
     return res.json(personsokUtenSak)
   }
-  return res.json(personsok)
+  let person = require(`../mockdata/personsok_${fnr}.json`)
+  setTimeout(() => {
+    res.json(person)
+  }, 1000)
+  // return res.json(personsok)
 })
 
 mockRouter.get('/oppgaver', (req: Request, res: Response) => {

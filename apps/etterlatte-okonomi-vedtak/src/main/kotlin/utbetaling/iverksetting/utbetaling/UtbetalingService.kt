@@ -36,7 +36,7 @@ class UtbetalingService(
         utbetalingDao.hentUtbetaling(vedtak.vedtakId) != null
 
     fun oppdaterKvittering(oppdrag: Oppdrag): Utbetaling {
-        logger.info("Oppdaterer kvittering for oppdrag med id=${oppdrag.vedtakId()}")
+        logger.info("Oppdaterer kvittering for oppdrag med vedtakId=${oppdrag.vedtakId()}")
         return utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock))
     }
 

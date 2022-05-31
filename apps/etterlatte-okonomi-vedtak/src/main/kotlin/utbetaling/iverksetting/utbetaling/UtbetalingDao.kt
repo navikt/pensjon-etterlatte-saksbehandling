@@ -29,7 +29,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
     fun opprettUtbetaling(utbetaling: Utbetaling) =
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
-                logger.info("Oppretter utbetaling for vedtakId=${utbetaling.vedtakId}")
+                logger.info("Oppretter utbetaling for vedtakId=${utbetaling.vedtakId.value}")
 
                 queryOf(
                     statement = """

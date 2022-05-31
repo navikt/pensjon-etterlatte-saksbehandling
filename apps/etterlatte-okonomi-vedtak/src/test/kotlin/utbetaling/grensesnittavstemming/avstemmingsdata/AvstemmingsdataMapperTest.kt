@@ -7,6 +7,7 @@ import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.utbetaling
+import no.nav.etterlatte.utbetaling.utbetalingMedOpphoer
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Fortegn
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -109,6 +110,23 @@ internal class AvstemmingsdataMapperTest {
 
         assertEquals(5, dataMelding.total.totalAntall)
         assertEquals(BigDecimal(50_000), dataMelding.total.totalBelop)
+        assertEquals(Fortegn.T, dataMelding.total.fortegn)
+    }
+
+    @Test
+    fun `skal returnere riktig totalantall, totalbelop og fortegn ved opphor`() {
+        val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
+        val til = Tidspunkt.now()
+
+        val utbetalinger = listOf(utbetalingMedOpphoer())
+
+        val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
+        val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
+
+        val (_, dataMelding, _) = avstemmingsmelding
+
+        assertEquals(1, dataMelding.total.totalAntall)
+        assertEquals(BigDecimal(0), dataMelding.total.totalBelop)
         assertEquals(Fortegn.T, dataMelding.total.fortegn)
     }
 

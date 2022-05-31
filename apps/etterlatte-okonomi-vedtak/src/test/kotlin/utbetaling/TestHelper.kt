@@ -122,11 +122,13 @@ fun utbetaling(
 fun utbetalingslinje(
     utbetalingId: UUID,
     sakId: SakId,
-    utbetalingslinjeId: Long
+    utbetalingslinjeId: Long,
+    type: Utbetalingslinjetype = Utbetalingslinjetype.UTBETALING,
+    beloep: BigDecimal? = BigDecimal.valueOf(10000)
 ): Utbetalingslinje =
     Utbetalingslinje(
         id = UtbetalingslinjeId(utbetalingslinjeId),
-        type = Utbetalingslinjetype.UTBETALING,
+        type = type,
         utbetalingId = utbetalingId,
         erstatterId = null,
         opprettet = Tidspunkt.now(),
@@ -134,5 +136,17 @@ fun utbetalingslinje(
         periode = PeriodeForUtbetaling(
             fra = LocalDate.parse("2022-01-01"),
         ),
-        beloep = BigDecimal.valueOf(10000),
+        beloep = beloep,
     )
+
+fun utbetalingMedOpphoer() = utbetaling(
+    utbetalingslinjer = listOf(
+        utbetalingslinje(
+            utbetalingId = UUID.randomUUID(),
+            sakId = SakId(1),
+            utbetalingslinjeId = 1,
+            type = Utbetalingslinjetype.OPPHOER,
+            beloep = null
+        )
+    )
+)

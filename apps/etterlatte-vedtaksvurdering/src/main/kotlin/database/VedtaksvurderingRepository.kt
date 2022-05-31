@@ -3,6 +3,7 @@ package no.nav.etterlatte.database
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
@@ -44,7 +45,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    fun lagreKommerSoekerTilgodeResultat(sakId: String, behandlingsId: UUID, kommerSoekerTilgodeResultat: VilkaarResultat) {
+    fun lagreKommerSoekerTilgodeResultat(sakId: String, behandlingsId: UUID, kommerSoekerTilgodeResultat: KommerSoekerTilgode) {
         logger.info("Lagrer kommerSoekerTilgodeResultat")
         connection.use {
             val statement = it.prepareStatement(Queries.lagreKommerSoekerTilgodeResultat)
@@ -55,7 +56,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    fun oppdaterKommerSoekerTilgodeResultat(sakId: String, behandlingsId: UUID, kommerSoekerTilgodeResultat: VilkaarResultat) {
+    fun oppdaterKommerSoekerTilgodeResultat(sakId: String, behandlingsId: UUID, kommerSoekerTilgodeResultat: KommerSoekerTilgode) {
         logger.info("Lagrer kommerSoekerTilgodeResultat")
         connection.use {
             val statement = it.prepareStatement(Queries.oppdatereKommerSoekerTilgodeResultat)
@@ -151,7 +152,7 @@ data class Vedtak(
     val avkortingsResultat: String?,
     val beregningsResultat: BeregningsResultat?,
     val vilkaarsResultat: VilkaarResultat?,
-    val kommerSoekerTilgodeResultat: VilkaarResultat?,
+    val kommerSoekerTilgodeResultat: KommerSoekerTilgode?,
     val vedtakFattet: Boolean?
 )
 

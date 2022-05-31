@@ -6,6 +6,7 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
@@ -61,6 +62,6 @@ data class Vedtak(
     val avkortingsResultat: String?,
     val beregningsResultat: BeregningsResultat?,
     val vilkaarsResultat: VilkaarResultat?,
-    val kommerSoekerTilgodeResultat: VilkaarResultat?,
+    val kommerSoekerTilgodeResultat: KommerSoekerTilgode?,
     val vedtakFattet: Boolean?
 )

@@ -7,12 +7,17 @@ import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraVilkaar
 import no.nav.etterlatte.barnepensjon.vilkaarAvdoedesMedlemskap
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.vikaar.Familiemedlem
+import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.vilkaar.barnepensjon.*
@@ -55,10 +60,12 @@ class VilkaarService {
         return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
     }
 
-    fun mapKommerSoekerTilGode(opplysninger: List<VilkaarOpplysning<ObjectNode>>) : VilkaarResultat {
+    fun mapKommerSoekerTilGode(opplysninger: List<VilkaarOpplysning<ObjectNode>>): KommerSoekerTilgode {
         logger.info("Map opplysninger for å vurdere om penger kommer søker til gode")
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
+        val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
+
 
         val sammeAdresser = listOf(
             barnOgForelderSammeBostedsadresse(
@@ -70,8 +77,15 @@ class VilkaarService {
 
         val vilkaarResultat = setVilkaarVurderingFraVilkaar(sammeAdresser)
         val vurdertDato = hentSisteVurderteDato(sammeAdresser)
+        val vurdering = VilkaarResultat(vilkaarResultat, sammeAdresser, vurdertDato)
 
-        return VilkaarResultat(vilkaarResultat, sammeAdresser, vurdertDato)
+        val familieforhold = listOf(
+            mapFamiliemedlem(soekerPdl, PersonRolle.BARN),
+            mapFamiliemedlem(gjenlevendePdl, PersonRolle.GJENLEVENDE),
+            mapFamiliemedlem(avdoedPdl, PersonRolle.AVDOED)
+        )
+
+        return KommerSoekerTilgode(vurdering, familieforhold)
     }
 
     companion object {
@@ -95,3 +109,16 @@ class VilkaarService {
     }
 }
 
+fun mapFamiliemedlem(
+    person: VilkaarOpplysning<Person>?,
+    rolle: PersonRolle
+): Familiemedlem? {
+    return person?.opplysning?.let {
+        Familiemedlem(
+            navn = it.fornavn + " " + it.etternavn,
+            fnr = it.foedselsnummer,
+            rolle = rolle,
+            adresser = Adresser(it.bostedsadresse, it.oppholdsadresse, it.kontaktadresse)
+        )
+    }
+}

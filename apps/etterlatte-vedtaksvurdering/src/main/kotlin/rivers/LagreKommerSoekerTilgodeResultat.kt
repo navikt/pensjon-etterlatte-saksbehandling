@@ -3,6 +3,7 @@ package no.nav.etterlatte.rivers
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -31,7 +32,7 @@ internal class LagreKommerSoekerTilgodeResultat(
         withLogContext(packet.correlationId()) {
             val behandlingId = UUID.fromString(packet["id"].asText())
             val sakId = packet["sak"].toString()
-            val kommerSoekerTilgodeResultat = objectMapper.readValue(packet["@kommersoekertilgode"].toString(), VilkaarResultat::class.java)
+            val kommerSoekerTilgodeResultat = objectMapper.readValue(packet["@kommersoekertilgode"].toString(), KommerSoekerTilgode::class.java)
             try {
                 vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(sakId, behandlingId, kommerSoekerTilgodeResultat)
             } catch (e: Exception){

@@ -2,12 +2,18 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.database.VedtaksvurderingRepository
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.vikaar.Familiemedlem
+import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.AfterAll
@@ -53,36 +59,52 @@ internal class DBTest {
 
         val now = LocalDateTime.now()
         val beregningsperiode = listOf<Beregningsperiode>()
-        vedtaksvurderingService.lagreBeregningsresultat("12321423523545", uuid, BeregningsResultat(
-            UUID.randomUUID(),
-            Beregningstyper.BPGP,
-            Endringskode.NY,
-            BeregningsResultatType.BEREGNET,
-            beregningsperiode,
-            now
-        ))
+        vedtaksvurderingService.lagreBeregningsresultat(
+            "12321423523545", uuid, BeregningsResultat(
+                UUID.randomUUID(),
+                Beregningstyper.BPGP,
+                Endringskode.NY,
+                BeregningsResultatType.BEREGNET,
+                beregningsperiode,
+                now
+            )
+        )
     }
 
     fun leggtilvilkaarsresultat() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
         val now = LocalDateTime.now()
-        vedtaksvurderingService.lagreVilkaarsresultat("12321423523545", uuid, VilkaarResultat(
-            VurderingsResultat.OPPFYLT,
-            emptyList(),
-            now
-        ))
+        vedtaksvurderingService.lagreVilkaarsresultat(
+            "12321423523545", uuid, VilkaarResultat(
+                VurderingsResultat.OPPFYLT,
+                emptyList(),
+                now
+            )
+        )
     }
 
     fun leggtilkommersoekertilgoderesultat() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
         val now = LocalDateTime.now()
-        vedtaksvurderingService.lagreKommerSoekerTilgodeResultat("12321423523545", uuid, VilkaarResultat(
-            VurderingsResultat.OPPFYLT,
-            emptyList(),
-            now
-        ))
+        vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(
+            "12321423523545", uuid, KommerSoekerTilgode(
+                VilkaarResultat(
+                    VurderingsResultat.OPPFYLT,
+                    emptyList(),
+                    now
+                ),
+                listOf(
+                    Familiemedlem(
+                        "Navn",
+                        Foedselsnummer.of("03108718357"),
+                        PersonRolle.GJENLEVENDE,
+                        Adresser(null, null, null)
+                    )
+                )
+            )
+        )
     }
 
     fun leggtilavkortingsresultat() {

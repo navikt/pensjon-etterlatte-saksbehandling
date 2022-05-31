@@ -3,7 +3,7 @@ package no.nav.etterlatte
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.rivers.LagreKommerSoekerTilgodeResultat
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -26,10 +26,10 @@ internal class LesKommerSoekerTilgodeMeldingTest {
 
     @Test
     fun `skal lese melding`() {
-        val tilgoderesultat = slot<VilkaarResultat>()
+        val tilgoderesultat = slot<KommerSoekerTilgode>()
         every { vedtaksvurderingServiceMock.lagreKommerSoekerTilgodeResultat(any(), any(), capture(tilgoderesultat)) } returns Unit
         inspector.apply { sendTestMessage(melding) }.inspektør
-        Assertions.assertEquals(VurderingsResultat.OPPFYLT, tilgoderesultat.captured.resultat)
+        Assertions.assertEquals(VurderingsResultat.OPPFYLT, tilgoderesultat.captured.kommerSoekerTilgodeVurdering.resultat)
     }
 
 }

@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.database.Vedtak
 import no.nav.etterlatte.database.VedtaksvurderingRepository
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
+import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import java.util.*
 
@@ -36,7 +37,7 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
         }
     }
 
-    fun lagreKommerSoekerTilgodeResultat(sakId: String, behandlingId: UUID, kommerSoekerTilgodeResultat: VilkaarResultat) {
+    fun lagreKommerSoekerTilgodeResultat(sakId: String, behandlingId: UUID, kommerSoekerTilgodeResultat: KommerSoekerTilgode) {
         val vedtak = repository.hentVedtak(sakId, behandlingId)
 
         if(vedtak == null) {

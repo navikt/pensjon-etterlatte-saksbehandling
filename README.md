@@ -2,7 +2,6 @@
 
 Monorepo for ny saksbehandlingsløsning for ytelser til etterlatte
 
-
 ## Apper
 
 [etterlatte-api](apps/etterlatte-api) \
@@ -29,7 +28,7 @@ Tjeneste som holder styr på behandlinger.
 [etterlatte-gyldig-soeknad](apps/etterlatte-gyldig-soeknad) \
 // TODO
 
-[etterlatte-okonomi-vedtak](apps/etterlatte-okonomi-vedtak) \
+[etterlatte-utbetaling](apps/etterlatte-utbetaling) \
 Oversetter vedtak til et format som kan oversendes til oppdrag.
 
 [etterlatte-oppdater-behandling](apps/etterlatte-oppdater-behandling) \
@@ -62,18 +61,15 @@ Appen består av en statisk frontend og en backend-for-frontends i NodeJS.
 [etterlatte-vilkaar-kafka](apps/etterlatte-vilkaar-kafka) \
 // TODO
 
-
 # Bygg og deploy
 
-En app bygges og deployes automatisk når en endring legges til i `main`. 
+En app bygges og deployes automatisk når en endring legges til i `main`.
 
 For å trigge **manuell deploy** kan du gå til `Actions -> (velg workflow) -> Run workflow from <branch>`
-
 
 # Henvendelser
 
 Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
-
 
 ## For NAV-ansatte
 

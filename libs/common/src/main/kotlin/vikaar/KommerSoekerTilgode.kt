@@ -37,5 +37,5 @@ data class PersoninfoGjenlevendeForelder(
     val fnr: Foedselsnummer?,
     val rolle: PersonRolle,
     val adresser: Adresser,
-    val adresseSoekand: String?,
+    val adresseSoeknad: String?,
 )

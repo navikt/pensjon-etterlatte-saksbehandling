@@ -826,8 +826,8 @@
       ],
       "vurdertDato": "2022-05-23T16:09:31.485360252"
     },
-    "familieforhold": [
-      {
+    "familieforhold": {
+      "avdoed": {
         "navn": "Mamma Mia",
         "fnr": "22128202440",
         "rolle": "GJENLEVENDE",
@@ -849,9 +849,34 @@
             }],
             "oppholdadresse": null,
             "kontaktadresse": null
-          }
+          },
+        "doedsdato": "2022-05-23"
+      },
+      "soeker": {
+        "navn": "Mamma Mia",
+        "fnr": "22128202440",
+        "rolle": "GJENLEVENDE",
+        "adresser":
+        {
+          "bostedadresse": null,
+          "oppholdadresse": null,
+          "kontaktadresse": null
+        },
+        "foedselsdato": "2012-05-23"
+      },
+      "gjenlevendeForelder": {
+        "navn": "Mamma Mia",
+        "fnr": "22128202440",
+        "rolle": "GJENLEVENDE",
+        "adresser":
+        {
+          "bostedadresse": null,
+          "oppholdadresse": null,
+          "kontaktadresse": null
+        },
+        "adresseSoeknad": "Adresse 3"
       }
-    ]
+    }
   },
   "@beregning": {
     "id": "eef2a9ec-e2df-400d-9fbd-3679e92c384e",

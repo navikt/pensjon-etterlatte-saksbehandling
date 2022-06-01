@@ -142,7 +142,7 @@ fun mapFamiliemedlemmer(
                 fnr = it?.foedselsnummer,
                 rolle = PersonRolle.AVDOED,
                 adresser = Adresser(it?.bostedsadresse, it?.oppholdsadresse, it?.kontaktadresse),
-                adresseSoekand = gjenlevendeSoeknad?.opplysning?.adresse,
+                adresseSoeknad = gjenlevendeSoeknad?.opplysning?.adresse,
             )
         })
 }

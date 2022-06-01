@@ -9,15 +9,18 @@ import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.GjenlevendeForelderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.vikaar.Familiemedlem
+import no.nav.etterlatte.libs.common.vikaar.Familiemedlemmer
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
+import no.nav.etterlatte.libs.common.vikaar.PersoninfoAvdoed
+import no.nav.etterlatte.libs.common.vikaar.PersoninfoGjenlevendeForelder
+import no.nav.etterlatte.libs.common.vikaar.PersoninfoSoeker
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.vilkaar.barnepensjon.*
@@ -64,6 +67,8 @@ class VilkaarService {
         logger.info("Map opplysninger for å vurdere om penger kommer søker til gode")
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
+        val gjenlevendeSoeknad =
+            finnOpplysning<GjenlevendeForelderSoeknad>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_SOEKNAD_V1)
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
 
 
@@ -79,11 +84,8 @@ class VilkaarService {
         val vurdertDato = hentSisteVurderteDato(sammeAdresser)
         val vurdering = VilkaarResultat(vilkaarResultat, sammeAdresser, vurdertDato)
 
-        val familieforhold = listOf(
-            mapFamiliemedlem(soekerPdl, PersonRolle.BARN),
-            mapFamiliemedlem(gjenlevendePdl, PersonRolle.GJENLEVENDE),
-            mapFamiliemedlem(avdoedPdl, PersonRolle.AVDOED)
-        )
+        val familieforhold = mapFamiliemedlemmer(soekerPdl, gjenlevendePdl, gjenlevendeSoeknad, avdoedPdl)
+
 
         return KommerSoekerTilgode(vurdering, familieforhold)
     }
@@ -109,16 +111,38 @@ class VilkaarService {
     }
 }
 
-fun mapFamiliemedlem(
-    person: VilkaarOpplysning<Person>?,
-    rolle: PersonRolle
-): Familiemedlem? {
-    return person?.opplysning?.let {
-        Familiemedlem(
-            navn = it.fornavn + " " + it.etternavn,
-            fnr = it.foedselsnummer,
-            rolle = rolle,
-            adresser = Adresser(it.bostedsadresse, it.oppholdsadresse, it.kontaktadresse)
-        )
-    }
+fun mapFamiliemedlemmer(
+    soeker: VilkaarOpplysning<Person>?,
+    gjenlevende: VilkaarOpplysning<Person>?,
+    gjenlevendeSoeknad: VilkaarOpplysning<GjenlevendeForelderSoeknad>?,
+    avdoed: VilkaarOpplysning<Person>?,
+): Familiemedlemmer {
+    return Familiemedlemmer(
+        avdoed = avdoed?.opplysning.let {
+            PersoninfoAvdoed(
+                navn = it?.fornavn + " " + it?.etternavn,
+                fnr = it?.foedselsnummer,
+                rolle = PersonRolle.AVDOED,
+                adresser = Adresser(it?.bostedsadresse, it?.oppholdsadresse, it?.kontaktadresse),
+                doedsdato = it?.doedsdato
+            )
+        },
+        soeker = soeker?.opplysning.let {
+            PersoninfoSoeker(
+                navn = it?.fornavn + " " + it?.etternavn,
+                fnr = it?.foedselsnummer,
+                rolle = PersonRolle.AVDOED,
+                adresser = Adresser(it?.bostedsadresse, it?.oppholdsadresse, it?.kontaktadresse),
+                foedselsdato = it?.foedselsdato
+            )
+        },
+        gjenlevendeForelder = gjenlevende?.opplysning.let {
+            PersoninfoGjenlevendeForelder(
+                navn = it?.fornavn + " " + it?.etternavn,
+                fnr = it?.foedselsnummer,
+                rolle = PersonRolle.AVDOED,
+                adresser = Adresser(it?.bostedsadresse, it?.oppholdsadresse, it?.kontaktadresse),
+                adresseSoekand = gjenlevendeSoeknad?.opplysning?.adresse,
+            )
+        })
 }

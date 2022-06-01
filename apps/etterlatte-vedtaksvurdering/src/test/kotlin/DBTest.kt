@@ -9,11 +9,13 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.vikaar.Familiemedlem
+import no.nav.etterlatte.libs.common.vikaar.Familiemedlemmer
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
+import no.nav.etterlatte.libs.common.vikaar.PersoninfoAvdoed
+import no.nav.etterlatte.libs.common.vikaar.PersoninfoGjenlevendeForelder
+import no.nav.etterlatte.libs.common.vikaar.PersoninfoSoeker
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.AfterAll
@@ -22,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import javax.sql.DataSource
@@ -95,16 +98,35 @@ internal class DBTest {
                     emptyList(),
                     now
                 ),
-                listOf(
-                    Familiemedlem(
+
+                Familiemedlemmer(
+                    avdoed = PersoninfoAvdoed(
                         "Navn",
                         Foedselsnummer.of("03108718357"),
-                        PersonRolle.GJENLEVENDE,
-                        Adresser(null, null, null)
+                        PersonRolle.AVDOED,
+                        Adresser(null, null, null),
+                        LocalDate.of(2020, 1, 1),
+                    ),
+                    soeker = PersoninfoSoeker(
+                        "Navn",
+                        Foedselsnummer.of("03108718357"),
+                        PersonRolle.BARN,
+                        Adresser(null, null, null),
+                        LocalDate.of(2010, 1, 1),
+                    ),
+                    gjenlevendeForelder = PersoninfoGjenlevendeForelder(
+                        "Navn",
+                        Foedselsnummer.of("03108718357"),
+                        PersonRolle.BARN,
+                        Adresser(null, null, null),
+                        "Oppgitt adresse i søknad",
                     )
                 )
+
             )
+
         )
+
     }
 
     fun leggtilavkortingsresultat() {

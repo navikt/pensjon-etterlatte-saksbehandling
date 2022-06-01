@@ -1,6 +1,6 @@
 package no.nav.etterlatte.utbetaling
 
-import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.toUUID30
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Attestasjon

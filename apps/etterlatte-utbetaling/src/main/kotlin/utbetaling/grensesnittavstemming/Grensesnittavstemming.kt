@@ -1,6 +1,6 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
-import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.nio.ByteBuffer
 import java.util.*
 
@@ -21,7 +21,7 @@ data class Avstemmingsperiode(
     val til: Tidspunkt
 ) {
     init {
-        require(fraOgMed.instant.isBefore(til.instant)) { "fraOgMed-tidspunkt maa vaere foer til-tidspunkt"}
+        require(fraOgMed.instant.isBefore(til.instant)) { "fraOgMed-tidspunkt maa vaere foer til-tidspunkt" }
     }
 }
 

@@ -5,7 +5,7 @@ import kotliquery.param
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.etterlatte.utbetaling.common.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import java.sql.Timestamp
 import java.util.*
 import javax.sql.DataSource

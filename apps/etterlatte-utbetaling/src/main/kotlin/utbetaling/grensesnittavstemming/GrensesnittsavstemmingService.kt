@@ -1,6 +1,6 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
-import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.tidspunktMidnattIdag
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataMapper
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender

@@ -1,8 +1,8 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata
 
-import no.nav.etterlatte.utbetaling.common.Tidspunkt
-import no.nav.etterlatte.utbetaling.common.norskTidssone
-import no.nav.etterlatte.utbetaling.common.toTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
@@ -264,7 +264,8 @@ internal class AvstemmingsdataMapperTest {
             ),
             utbetaling(
                 avstemmingsnoekkel = LocalDateTime.of(
-                    2020, Month.APRIL, 10, 14, 0, 0)
+                    2020, Month.APRIL, 10, 14, 0, 0
+                )
                     .plusMinutes(2).toTidspunkt(norskTidssone)
             ),
         )

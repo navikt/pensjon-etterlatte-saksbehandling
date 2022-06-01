@@ -1,8 +1,8 @@
 package no.nav.etterlatte.utbetaling.config
 
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
 import no.nav.etterlatte.utbetaling.common.Oppgavetrigger
 import no.nav.etterlatte.utbetaling.common.next
-import no.nav.etterlatte.utbetaling.common.norskTidssone
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittavstemmingDao
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingJob
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingService

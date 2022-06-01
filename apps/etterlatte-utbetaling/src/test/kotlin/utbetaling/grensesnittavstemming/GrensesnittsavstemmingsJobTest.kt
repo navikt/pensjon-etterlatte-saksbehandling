@@ -3,7 +3,7 @@ package no.nav.etterlatte.utbetaling.grensesnittavstemming
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.utbetaling.common.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.jupiter.api.Test

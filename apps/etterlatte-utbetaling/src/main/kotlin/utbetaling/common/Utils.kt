@@ -1,5 +1,9 @@
 package no.nav.etterlatte.utbetaling.common
 
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.norskTidssone
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalTime

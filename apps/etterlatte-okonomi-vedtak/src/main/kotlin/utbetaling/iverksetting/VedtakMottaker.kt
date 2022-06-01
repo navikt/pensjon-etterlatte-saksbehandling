@@ -68,9 +68,15 @@ class VedtakMottaker(
                 }
             } catch (e: Exception) {
                 if (e is InvalidFormatException || e is MissingKotlinParameterException) {
-                    logger.error("Kunne ikke deresialisere vedtak: ${e.message}", kv("vedtak", packet["@vedtak"].toJson()), e)
+                    logger.error(
+                        "Kunne ikke deresialisere vedtak: ${e.message}",
+                        kv("vedtak", packet["@vedtak"].toJson()),
+                        e
+                    )
                     rapidsConnection.publish("key", deserialiseringFeilet(packet["@vedtak"]))
-                } else throw e
+                }
+                // TODO: håndtere PSQLException eller MQException?
+                else throw e
             }
         }
 

@@ -1,0 +1,45 @@
+{
+  "@event_name": "vedtak_fattet",
+  "@vedtak": {
+    "vedtakId": 20,
+    "virk": {
+      "fom": "2022-01",
+      "tom": "2022-02"
+    },
+    "sak": {
+      "ident": "16017919184",
+      "sakType": "",
+      "id": 6
+    },
+    "behandling": {
+      "type": "REVURDERING",
+      "id": "a89c2e15-4f32-44b3-b976-4c862d830213"
+    },
+    "type": "INNVILGELSE",
+    "grunnlag": [],
+    "vilkaarsvurdering": null,
+    "beregning": null,
+    "avkorting": null,
+    "pensjonTilUtbetaling": [
+      {
+        "id": 21,
+        "periode": {
+          "fom": "2022-06",
+          "tom": null
+        },
+        "beloep": 5000,
+        "type": "UTBETALING"
+      }
+    ],
+    "vedtakFattet": {
+      "ansvarligSaksbehandler": "12345678",
+      "ansvarligEnhet": "123",
+      "tidspunkt": "2022-05-23T12:25:43.667223+02:00"
+    },
+    "attestasjon": {
+      "attestant": "87654321",
+      "attesterendeEnhet": "123",
+      "tidspunkt": "2022-05-23T12:25:43.669844+02:00"
+    }
+  }
+}

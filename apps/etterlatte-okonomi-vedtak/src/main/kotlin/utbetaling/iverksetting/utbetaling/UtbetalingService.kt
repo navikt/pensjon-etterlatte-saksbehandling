@@ -32,11 +32,10 @@ class UtbetalingService(
         return utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
     }
 
-    fun utbetalingEksisterer(vedtak: Utbetalingsvedtak) =
-        utbetalingDao.hentUtbetaling(vedtak.vedtakId) != null
+    fun utbetalingEksisterer(vedtak: Utbetalingsvedtak) = utbetalingDao.hentUtbetaling(vedtak.vedtakId) != null
 
     fun eksisterendeUtbetalingslinjer(vedtak: Utbetalingsvedtak) =
-        utbetalingDao.hentUtbetalingslinjer(vedtak.pensjonTilUtbetaling).map { it.id.value }
+        utbetalingDao.hentUtbetalingslinjer(vedtak.pensjonTilUtbetaling)
 
     fun eksisterendeData(vedtak: Utbetalingsvedtak): EksisterendeData {
         return if (utbetalingEksisterer(vedtak)) {
@@ -44,7 +43,8 @@ class UtbetalingService(
         } else {
             val eksisterendeUtbetalingslinjer = eksisterendeUtbetalingslinjer(vedtak)
             if (eksisterendeUtbetalingslinjer.isNotEmpty()) {
-                EksisterendeData(Datatype.EKSISTERENDE_UTBETALINGSLINJEID, eksisterendeUtbetalingslinjer)
+                EksisterendeData(Datatype.EKSISTERENDE_UTBETALINGSLINJEID,
+                    eksisterendeUtbetalingslinjer.map { it.id.value })
             } else {
                 EksisterendeData(Datatype.INGEN_EKSISTERENDE_DATA)
             }
@@ -90,8 +90,7 @@ class UtbetalingService(
 }
 
 data class EksisterendeData(
-    val eksisterendeDatatype: Datatype,
-    val data: List<Long>? = null
+    val eksisterendeDatatype: Datatype, val data: List<Long>? = null
 )
 
 enum class Datatype() {

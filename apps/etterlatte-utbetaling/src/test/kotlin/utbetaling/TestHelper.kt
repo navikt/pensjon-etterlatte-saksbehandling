@@ -121,9 +121,9 @@ fun utbetaling(
     )
 
 fun utbetalingslinje(
-    utbetalingId: UUID,
-    sakId: SakId,
-    utbetalingslinjeId: Long,
+    utbetalingId: UUID = UUID.randomUUID(),
+    sakId: SakId = SakId(1),
+    utbetalingslinjeId: Long = 1,
     type: Utbetalingslinjetype = Utbetalingslinjetype.UTBETALING,
     beloep: BigDecimal? = BigDecimal.valueOf(10000)
 ): Utbetalingslinje =

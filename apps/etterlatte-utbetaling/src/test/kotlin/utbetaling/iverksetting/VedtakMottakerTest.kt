@@ -2,14 +2,14 @@ package no.nav.etterlatte.utbetaling.iverksetting
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Datatype
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.EksisterendeData
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.VedtakId
-import no.nav.etterlatte.utbetaling.oppdrag
 import no.nav.etterlatte.utbetaling.readFile
 import no.nav.etterlatte.utbetaling.utbetaling
+import no.nav.etterlatte.utbetaling.utbetalingslinje
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -17,15 +17,7 @@ import org.junit.jupiter.api.assertThrows
 
 internal class VedtakMottakerTest {
 
-    private val utbetalingService = mockk<UtbetalingService>(relaxed = true) {
-        every { iverksettUtbetaling(any()) } returns mockk {
-            every { status } returns UtbetalingStatus.SENDT
-            every { oppdrag } returns oppdrag(utbetaling(vedtakId = 1))
-            every { vedtakId } returns VedtakId(1)
-        }
-    }
-
-
+    private val utbetalingService = mockk<UtbetalingService>()
     private val inspector = TestRapid().apply {
         VedtakMottaker(
             rapidsConnection = this,
@@ -34,50 +26,80 @@ internal class VedtakMottakerTest {
     }
 
     @Test
-    fun `attestert vedtak mottatt korrekt og utbetaling_oppdatert-event postet`() {
-        every { utbetalingService.eksisterendeData(any()) } returns EksisterendeData(Datatype.INGEN_EKSISTERENDE_DATA)
+    fun `skal returnere event med SENDT status dersom utbetaling sendes til oppdrag`() {
+        val utbetaling = utbetaling(status = UtbetalingStatus.SENDT, vedtakId = 1)
+
+        every { utbetalingService.iverksettUtbetaling(any()) } returns IverksettResultat.SendtTilOppdrag(utbetaling)
+
         inspector.apply { sendTestMessage(FATTET_VEDTAK) }
 
         inspector.inspektør.message(0).run {
-            assertEquals("utbetaling_oppdatert", get("@event_name").textValue())
-            assertEquals(1L, get("@vedtakId").longValue())
-            assertEquals("SENDT", get("@status").textValue())
+            val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
+            assertEquals("utbetaling_oppdatert", event.eventName)
+            assertEquals(utbetaling.status, event.utbetalingResponse.status)
+            assertEquals(utbetaling.vedtakId.value, event.utbetalingResponse.vedtakId)
         }
     }
 
     @Test
-    fun `mottatt vedtak eksisterer fra for og poster utbetaling eksisterer-melding`() {
-        every { utbetalingService.eksisterendeData(any()) } returns EksisterendeData(Datatype.EKSISTERENDE_VEDTAKID)
+    fun `skal returnere event med FEILET status og feilmelding dersom utbetaling for vedtak eksisterer`() {
+        val utbetaling = utbetaling(status = UtbetalingStatus.GODKJENT, vedtakId = 1)
+
+        every { utbetalingService.iverksettUtbetaling(any()) } returns
+                IverksettResultat.UtbetalingForVedtakEksisterer(utbetaling)
+
         inspector.apply { sendTestMessage(FATTET_VEDTAK) }
 
         inspector.inspektør.message(0).run {
-            assertEquals("utbetaling_eksisterer", get("@event_name").textValue())
-            assertEquals(1L, get("@vedtakId").longValue())
+            val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
+            assertEquals("utbetaling_oppdatert", event.eventName)
+            assertEquals(UtbetalingStatus.FEILET, event.utbetalingResponse.status)
+            assertEquals(utbetaling.vedtakId.value, event.utbetalingResponse.vedtakId)
+            assertEquals(
+                "Vedtak med vedtakId=${utbetaling.vedtakId.value} eksisterer fra før",
+                event.utbetalingResponse.feilmelding
+            )
         }
     }
 
     @Test
-    fun `utbetalingslinjer i mottatt vedtak eksisterer fra for og poster utbetalingslinjer eksisterer-melding`() {
-        every { utbetalingService.eksisterendeData(any()) } returns EksisterendeData(
-            Datatype.EKSISTERENDE_UTBETALINGSLINJEID,
-            listOf(1, 2, 3)
+    fun `skal returnere event med FEILET status og feilmelding dersom utbetalinglinjer for vedtak eksisterer`() {
+        val utbetalingslinjer = listOf(
+            utbetalingslinje(utbetalingslinjeId = 1),
+            utbetalingslinje(utbetalingslinjeId = 2)
         )
+
+        every { utbetalingService.iverksettUtbetaling(any()) } returns
+                IverksettResultat.UtbetalingslinjerForVedtakEksisterer(utbetalingslinjer)
+
         inspector.apply { sendTestMessage(FATTET_VEDTAK) }
 
         inspector.inspektør.message(0).run {
-            assertEquals("utbetalingslinjer_eksisterer", get("@event_name").textValue())
+            val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
+            assertEquals("utbetaling_oppdatert", event.eventName)
+            assertEquals(UtbetalingStatus.FEILET, event.utbetalingResponse.status)
+            assertEquals(1, event.utbetalingResponse.vedtakId)
+            assertEquals(
+                "En eller flere utbetalingslinjer med id=[1,2] eksisterer fra før",
+                event.utbetalingResponse.feilmelding
+            )
         }
     }
 
-
     @Test
-    fun `mottatt vedtak forer til feil og publiserer utbetaling feilet-melding`() {
-        every { utbetalingService.eksisterendeData(any()) } throws Exception()
-        assertThrows<Exception> { inspector.apply { sendTestMessage(FATTET_VEDTAK) } }
+    fun `skal returnere event med FEILET status og generell feilmelding dersom en uventet feil oppstar`() {
+        every { utbetalingService.iverksettUtbetaling(any()) } throws RuntimeException("Noe feilet")
+        assertThrows<RuntimeException> { inspector.apply { sendTestMessage(FATTET_VEDTAK) } }
 
         inspector.inspektør.message(0).run {
-            assertEquals("utbetaling_feilet", get("@event_name").textValue())
-            assertEquals(1L, get("@vedtakId").longValue())
+            val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
+            assertEquals("utbetaling_oppdatert", event.eventName)
+            assertEquals(UtbetalingStatus.FEILET, event.utbetalingResponse.status)
+            assertEquals(1, event.utbetalingResponse.vedtakId)
+            assertEquals(
+                "En feil oppstod under prosessering av vedtak med vedtakId=1: Noe feilet",
+                event.utbetalingResponse.feilmelding
+            )
         }
     }
 

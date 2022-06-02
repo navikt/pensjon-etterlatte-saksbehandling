@@ -2,14 +2,20 @@ package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.utbetaling.iverksetting.UtbetalingEvent
+import no.nav.etterlatte.utbetaling.iverksetting.UtbetalingResponse
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.SendtTilOppdrag
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingForVedtakEksisterer
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingslinjerForVedtakEksisterer
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 import java.time.Clock
+
 
 class UtbetalingService(
     val oppdragMapper: OppdragMapper,
@@ -18,39 +24,33 @@ class UtbetalingService(
     val rapidsConnection: RapidsConnection,
     val clock: Clock
 ) {
-    fun iverksettUtbetaling(vedtak: Utbetalingsvedtak): Utbetaling {
-        val utbetaling = UtbetalingMapper(
-            tidligereUtbetalinger = utbetalingDao.hentUtbetalinger(vedtak.sak.id),
-            vedtak = vedtak,
-        ).opprettUtbetaling()
+    fun iverksettUtbetaling(vedtak: Utbetalingsvedtak): IverksettResultat {
+        val utbetalingForVedtak = utbetalingDao.hentUtbetaling(vedtak.vedtakId)
+        val utbetalingslinjerForVedtak =  utbetalingDao.hentUtbetalingslinjer(vedtak.pensjonTilUtbetaling)
 
-        val foerstegangsbehandling = vedtak.behandling.type == BehandlingType.FORSTEGANGSBEHANDLING
-        val oppdrag = oppdragMapper.oppdragFraUtbetaling(utbetaling, foerstegangsbehandling)
+        return when {
+            utbetalingForVedtak != null ->
+                UtbetalingForVedtakEksisterer(utbetalingForVedtak)
 
-        logger.info("Sender oppdrag for sakId=${vedtak.sak.id} med vedtakId=${vedtak.vedtakId} til oppdrag")
-        oppdragSender.sendOppdrag(oppdrag)
-        return utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
-    }
+            utbetalingslinjerForVedtak.isNotEmpty() ->
+                UtbetalingslinjerForVedtakEksisterer(utbetalingslinjerForVedtak)
 
-    fun utbetalingEksisterer(vedtak: Utbetalingsvedtak) = utbetalingDao.hentUtbetaling(vedtak.vedtakId) != null
+            else -> {
+                val utbetaling = UtbetalingMapper(
+                    tidligereUtbetalinger = utbetalingDao.hentUtbetalinger(vedtak.sak.id),
+                    vedtak = vedtak,
+                ).opprettUtbetaling()
 
-    fun eksisterendeUtbetalingslinjer(vedtak: Utbetalingsvedtak) =
-        utbetalingDao.hentUtbetalingslinjer(vedtak.pensjonTilUtbetaling)
+                val foerstegangsbehandling = vedtak.behandling.type == BehandlingType.FORSTEGANGSBEHANDLING
+                val oppdrag = oppdragMapper.oppdragFraUtbetaling(utbetaling, foerstegangsbehandling)
 
-    fun eksisterendeData(vedtak: Utbetalingsvedtak): EksisterendeData {
-        return if (utbetalingEksisterer(vedtak)) {
-            EksisterendeData(Datatype.EKSISTERENDE_VEDTAKID)
-        } else {
-            val eksisterendeUtbetalingslinjer = eksisterendeUtbetalingslinjer(vedtak)
-            if (eksisterendeUtbetalingslinjer.isNotEmpty()) {
-                EksisterendeData(Datatype.EKSISTERENDE_UTBETALINGSLINJEID,
-                    eksisterendeUtbetalingslinjer.map { it.id.value })
-            } else {
-                EksisterendeData(Datatype.INGEN_EKSISTERENDE_DATA)
+                logger.info("Sender oppdrag for sakId=${vedtak.sak.id} med vedtakId=${vedtak.vedtakId} til oppdrag")
+                oppdragSender.sendOppdrag(oppdrag)
+
+                SendtTilOppdrag(utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag)))
             }
         }
     }
-
 
     fun oppdaterKvittering(oppdrag: Oppdrag): Utbetaling {
         logger.info("Oppdaterer kvittering for oppdrag med vedtakId=${oppdrag.vedtakId()}")
@@ -72,15 +72,17 @@ class UtbetalingService(
             .also { rapidsConnection.publish("key", utbetalingEvent(oppdrag, status)) }
 
 
-    private fun utbetalingEvent(oppdrag: Oppdrag, status: UtbetalingStatus) = mapOf(
-        "@event_name" to "utbetaling_oppdatert",
-        "@vedtakId" to oppdrag.vedtakId(),
-        "@status" to status.name,
-        "@beskrivelse" to oppdrag.kvitteringBeskrivelse()
-    ).toJson()
+    private fun utbetalingEvent(oppdrag: Oppdrag, status: UtbetalingStatus) =
+        UtbetalingEvent(
+            utbetalingResponse = UtbetalingResponse(
+                status = status,
+                vedtakId = oppdrag.vedtakId(),
+                feilmelding = oppdrag.kvitteringFeilmelding()
+            )
+        ).toJson()
 
-    private fun Oppdrag.kvitteringBeskrivelse() = when (this.mmel.kodeMelding) {
-        "00" -> "Utbetaling OK"
+    private fun Oppdrag.kvitteringFeilmelding() = when (this.mmel.kodeMelding) {
+        "00" -> null
         else -> "${this.mmel.kodeMelding} ${this.mmel.beskrMelding}"
     }
 
@@ -89,10 +91,8 @@ class UtbetalingService(
     }
 }
 
-data class EksisterendeData(
-    val eksisterendeDatatype: Datatype, val data: List<Long>? = null
-)
-
-enum class Datatype() {
-    EKSISTERENDE_UTBETALINGSLINJEID, EKSISTERENDE_VEDTAKID, INGEN_EKSISTERENDE_DATA
+sealed class IverksettResultat {
+    class SendtTilOppdrag(val utbetaling: Utbetaling) : IverksettResultat()
+    class UtbetalingslinjerForVedtakEksisterer(val utbetalingslinjer: List<Utbetalingslinje>) : IverksettResultat()
+    class UtbetalingForVedtakEksisterer(val utbetaling: Utbetaling) : IverksettResultat()
 }

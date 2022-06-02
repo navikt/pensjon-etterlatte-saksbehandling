@@ -1,19 +1,14 @@
 package no.nav.etterlatte
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
-import io.ktor.http.Url
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.etterlatte.utbetaling.config.ApplicationProperties
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
+import no.nav.etterlatte.utbetaling.iverksetting.EVENT_NAME_OPPDATERT
+import no.nav.etterlatte.utbetaling.iverksetting.UtbetalingEvent
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.oppdragMedFeiletKvittering
@@ -41,8 +36,6 @@ class ApplicationIntegrationTest {
     @Container
     private val ibmMQContainer = TestContainers.ibmMQContainer
 
-    private val electionServer = WireMockServer(options().port(8089))
-
     private val rapidsConnection: TestRapid = spyk(TestRapid())
     private lateinit var connectionFactory: JmsConnectionFactory
 
@@ -50,7 +43,6 @@ class ApplicationIntegrationTest {
     fun beforeAll() {
         postgreSQLContainer.start()
         ibmMQContainer.start()
-        electionServer.start()
 
         val applicationProperties = ApplicationProperties(
             dbName = postgreSQLContainer.databaseName,
@@ -67,15 +59,7 @@ class ApplicationIntegrationTest {
             mqAvstemmingQueue = "DEV.QUEUE.1",
             serviceUserUsername = "admin",
             serviceUserPassword = "passw0rd",
-            leaderElectorPath = Url(electionServer.baseUrl()).let { "${it.host}:${it.port}" },
-        )
-
-        electionServer.stubFor(
-            get(urlEqualTo("/"))
-                .willReturn(
-                    aResponse()
-                        .withBody(mapOf("name" to "some.value").toJson())
-                )
+            leaderElectorPath = "",
         )
 
         ApplicationContext(applicationProperties, rapidsConnection).also {
@@ -93,10 +77,10 @@ class ApplicationIntegrationTest {
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish("key",
                 match {
-                    it.toJsonNode().let { event ->
-                        event["@event_name"].textValue() == "utbetaling_oppdatert" &&
-                                event["@vedtakId"].longValue() == 1L &&
-                                event["@status"].textValue() == UtbetalingStatus.SENDT.name
+                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                        this.eventName == EVENT_NAME_OPPDATERT &&
+                                this.utbetalingResponse.vedtakId == 1L &&
+                                this.utbetalingResponse.status == UtbetalingStatus.SENDT
                     }
                 }
             )
@@ -111,10 +95,10 @@ class ApplicationIntegrationTest {
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish("key",
                 match {
-                    it.toJsonNode().let { event ->
-                        event["@event_name"].textValue() == "utbetaling_oppdatert" &&
-                                event["@vedtakId"].longValue() == 1L &&
-                                event["@status"].textValue() == UtbetalingStatus.GODKJENT.name
+                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                        this.eventName == EVENT_NAME_OPPDATERT &&
+                                this.utbetalingResponse.vedtakId == 1L &&
+                                this.utbetalingResponse.status == UtbetalingStatus.GODKJENT
                     }
                 }
             )
@@ -129,10 +113,11 @@ class ApplicationIntegrationTest {
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish("key",
                 match {
-                    it.toJsonNode().let { event ->
-                        event["@event_name"].textValue() == "utbetaling_oppdatert" &&
-                                event["@vedtakId"].longValue() == 1L &&
-                                event["@status"].textValue() == UtbetalingStatus.FEILET.name
+                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                        this.eventName == EVENT_NAME_OPPDATERT &&
+                                this.utbetalingResponse.vedtakId == 1L &&
+                                this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                                this.utbetalingResponse.feilmelding == "KodeMelding Beskrivelse"
                     }
                 }
             )
@@ -146,8 +131,11 @@ class ApplicationIntegrationTest {
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish("key",
                 match {
-                    it.toJsonNode().let { event ->
-                        event["@event_name"].textValue() == "deserialisering_feilet"
+                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                        this.eventName == EVENT_NAME_OPPDATERT &&
+                                this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                                this.utbetalingResponse.feilmelding
+                                    ?.contains("En feil oppstod under prosessering av vedtak med vedtakId=null") != null
                     }
                 }
             )
@@ -178,8 +166,6 @@ class ApplicationIntegrationTest {
             producer.send(message)
         }
     }
-
-    private fun String.toJsonNode() = objectMapper.readTree(this)
 
     companion object {
         val FATTET_VEDTAK_1 = readFile("/vedtak.json")

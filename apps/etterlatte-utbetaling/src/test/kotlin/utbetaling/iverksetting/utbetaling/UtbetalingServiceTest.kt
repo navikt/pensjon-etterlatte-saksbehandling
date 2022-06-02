@@ -9,10 +9,13 @@ import no.nav.etterlatte.utbetaling.common.forsteDagIMaaneden
 import no.nav.etterlatte.utbetaling.common.toXMLDate
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingForVedtakEksisterer
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingslinjerForVedtakEksisterer
 import no.nav.etterlatte.utbetaling.utbetaling
+import no.nav.etterlatte.utbetaling.utbetalingslinje
 import no.nav.etterlatte.utbetaling.utbetalingsvedtak
 import no.trygdeetaten.skjema.oppdrag.TkodeStatusLinje
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
@@ -32,7 +35,31 @@ internal class UtbetalingServiceTest {
     )
 
     @Test
+    fun `skal stoppe opprettelse av utbetaling hvis vedtak finnes fra for`() {
+        every { utbetalingDao.hentUtbetaling(any()) } returns utbetaling()
+        every { utbetalingDao.hentUtbetalingslinjer(any()) } returns emptyList()
+
+        val vedtak = vedtakLoepende()
+        val resultat = utbetalingService.iverksettUtbetaling(vedtak)
+
+        assertTrue(resultat is UtbetalingForVedtakEksisterer)
+    }
+
+    @Test
+    fun `skal stoppe opprettelse av utbetaling hvis en eller flere utbetalingslinjer for vedtak finnes fra for`() {
+        every { utbetalingDao.hentUtbetaling(any()) } returns null
+        every { utbetalingDao.hentUtbetalingslinjer(any()) } returns listOf(utbetalingslinje())
+
+        val vedtak = vedtakLoepende()
+        val resultat = utbetalingService.iverksettUtbetaling(vedtak)
+
+        assertTrue(resultat is UtbetalingslinjerForVedtakEksisterer)
+    }
+
+    @Test
     fun `skal opprette loepende utbetaling uten tidligere utbetalinger`() {
+        every { utbetalingDao.hentUtbetaling(any()) } returns null
+        every { utbetalingDao.hentUtbetalingslinjer(any()) } returns emptyList()
         every { utbetalingDao.hentUtbetalinger(any()) } returns emptyList()
         every { utbetalingDao.opprettUtbetaling(any()) } returns utbetaling()
         every { oppdragSender.sendOppdrag(any()) } just runs
@@ -56,6 +83,8 @@ internal class UtbetalingServiceTest {
     @Test
     fun `skal opprette loepende utbetaling med en tidligere loepende utbetaling`() {
         val eksisterendeUtbetaling = utbetaling(utbetalingslinjeId = 1)
+        every { utbetalingDao.hentUtbetaling(any()) } returns null
+        every { utbetalingDao.hentUtbetalingslinjer(any()) } returns emptyList()
         every { utbetalingDao.hentUtbetalinger(any()) } returns listOf(eksisterendeUtbetaling)
         every { utbetalingDao.opprettUtbetaling(any()) } returns utbetaling()
         every { oppdragSender.sendOppdrag(any()) } just runs
@@ -79,6 +108,8 @@ internal class UtbetalingServiceTest {
     @Test
     fun `skal opprette utbetaling med opphoer`() {
         val eksisterendeUtbetaling = utbetaling(utbetalingslinjeId = 1L)
+        every { utbetalingDao.hentUtbetaling(any()) } returns null
+        every { utbetalingDao.hentUtbetalingslinjer(any()) } returns emptyList()
         every { utbetalingDao.hentUtbetalinger(any()) } returns listOf(eksisterendeUtbetaling)
         every { utbetalingDao.opprettUtbetaling(any()) } returns utbetaling()
         every { oppdragSender.sendOppdrag(any()) } just runs
@@ -101,36 +132,13 @@ internal class UtbetalingServiceTest {
 
     @Test
     fun `skal feile dersom vedtak inneholder opphoer men det finnes ingen eksisterende utbetalinger`() {
+        every { utbetalingDao.hentUtbetaling(any()) } returns null
+        every { utbetalingDao.hentUtbetalingslinjer(any()) } returns emptyList()
         every { utbetalingDao.hentUtbetalinger(any()) } returns emptyList()
 
         assertThrows<IngenEksisterendeUtbetalingException> {
             utbetalingService.iverksettUtbetaling(vedtakMedOpphoer())
         }
-    }
-
-    @Test
-    fun `skal returnere EksisterendeData med datatype EKSISTERENDE_VEDTAKID om vedtak eksisterer`() {
-        every { utbetalingDao.hentUtbetaling(any()) } returns utbetaling()
-        val eksisterendeData = utbetalingService.eksisterendeData(utbetalingsvedtak())
-        assertEquals(Datatype.EKSISTERENDE_VEDTAKID, eksisterendeData.eksisterendeDatatype)
-    }
-
-    @Test
-    fun `skal returnere EksisterendeData med datatype EKSISTERENDE_UTBETALINGSLINJEID om utbetalingslinjer eksisterer`() {
-        every { utbetalingDao.hentUtbetaling(any()) } returns null
-        every { utbetalingDao.hentUtbetalingslinjer(any()) } returns listOf(mockk<Utbetalingslinje>() {
-            every { id } returns UtbetalingslinjeId(1)
-        })
-        val eksisterendeData = utbetalingService.eksisterendeData(utbetalingsvedtak())
-        assertEquals(Datatype.EKSISTERENDE_UTBETALINGSLINJEID, eksisterendeData.eksisterendeDatatype)
-    }
-
-    @Test
-    fun `skal returnere EksisterendeData med datatype INGEN_EKSISTERENDE_DATA om ingen data eksisterer`() {
-        every { utbetalingDao.hentUtbetaling(any()) } returns null
-        every { utbetalingDao.hentUtbetalingslinjer(any()) } returns emptyList()
-        val eksisterendeData = utbetalingService.eksisterendeData(utbetalingsvedtak())
-        assertEquals(Datatype.INGEN_EKSISTERENDE_DATA, eksisterendeData.eksisterendeDatatype)
     }
 
     private fun YearMonth.toXmlDate() = forsteDagIMaaneden(this).toXMLDate()

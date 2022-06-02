@@ -28,7 +28,7 @@ internal class LesVilkaarsmeldingTest {
     @Test
     fun `skal lese melding`() {
         val vilkarsres = slot<VilkaarResultat>()
-        every { vedtaksvurderingServiceMock.lagreVilkaarsresultat(any(), any(), capture(vilkarsres)) } returns Unit
+        every { vedtaksvurderingServiceMock.lagreVilkaarsresultat(any(), any(), any(), capture(vilkarsres)) } returns Unit
         inspector.apply { sendTestMessage(melding) }.inspektør
         Assertions.assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, vilkarsres.captured.resultat)
 

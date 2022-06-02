@@ -4,7 +4,6 @@ import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -23,6 +22,8 @@ internal class LagreKommerSoekerTilgodeResultat(
             validate { it.demandValue("@event","BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("sak") }
             validate { it.requireKey("id") }
+            validate { it.requireKey("soeker") }
+
             validate { it.requireKey("@kommersoekertilgode") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
@@ -34,7 +35,7 @@ internal class LagreKommerSoekerTilgodeResultat(
             val sakId = packet["sak"].toString()
             val kommerSoekerTilgodeResultat = objectMapper.readValue(packet["@kommersoekertilgode"].toString(), KommerSoekerTilgode::class.java)
             try {
-                vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(sakId, behandlingId, kommerSoekerTilgodeResultat)
+                vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(sakId, behandlingId, packet["soeker"].textValue(), kommerSoekerTilgodeResultat)
             } catch (e: Exception){
                 println("spiser en melding fordi: " +e)
             }

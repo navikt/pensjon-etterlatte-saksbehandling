@@ -27,7 +27,7 @@ internal class LesKommerSoekerTilgodeMeldingTest {
     @Test
     fun `skal lese melding`() {
         val tilgoderesultat = slot<KommerSoekerTilgode>()
-        every { vedtaksvurderingServiceMock.lagreKommerSoekerTilgodeResultat(any(), any(), capture(tilgoderesultat)) } returns Unit
+        every { vedtaksvurderingServiceMock.lagreKommerSoekerTilgodeResultat(any(), any(), any(), capture(tilgoderesultat)) } returns Unit
         inspector.apply { sendTestMessage(melding) }.inspektør
         Assertions.assertEquals(VurderingsResultat.OPPFYLT, tilgoderesultat.captured.kommerSoekerTilgodeVurdering.resultat)
     }

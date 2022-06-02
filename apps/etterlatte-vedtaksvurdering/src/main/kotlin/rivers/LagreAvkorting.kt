@@ -1,7 +1,10 @@
 package no.nav.etterlatte.rivers
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.VedtaksvurderingService
+import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -20,8 +23,9 @@ internal class LagreAvkorting(
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("sak") }
             validate { it.requireKey("id") }
-            //TODO denne må fjernes og lagring av avkorting må endres når vi implementerer avkorting
-            validate { it.requireKey("PASSE_PÅ_Å_SKRIVE_OM") }
+            validate { it.requireKey("@avkorting") }
+            validate { it.requireKey("soeker") }
+            validate { it.requireKey("@avkorting") }
             validate { it.requireKey("@avkorting") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
@@ -31,10 +35,10 @@ internal class LagreAvkorting(
         withLogContext(packet.correlationId()) {
             val behandlingId = UUID.fromString(packet["id"].textValue())
             val sakId = packet["sak"].toString()
-            val avkorting = packet["@avkorting"].asText() //objectMapper.readValue(packet["@avkorting"].toString(), VilkaarResultat::class.java)
+            val avkorting = objectMapper.readValue<AvkortingsResultat>(packet["@avkorting"].toString())
 
             try {
-                vedtaksvurderingService.lagreAvkorting(sakId, behandlingId, avkorting)
+                vedtaksvurderingService.lagreAvkorting(sakId, behandlingId, packet["soeker"].textValue(), avkorting)
             } catch (e: Exception){
                 //TODO endre denne
                 println("spiser en melding fordi: " +e)

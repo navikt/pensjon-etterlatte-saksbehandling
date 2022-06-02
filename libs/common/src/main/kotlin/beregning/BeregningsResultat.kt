@@ -24,7 +24,8 @@ data class BeregningsResultat(
     val endringskode: Endringskode,
     val resultat: BeregningsResultatType,
     val beregningsperioder: List<Beregningsperiode>,
-    val beregnetDato: LocalDateTime
+    val beregnetDato: LocalDateTime,
+    val grunnlagVerson: Long = 0
 )
 
 data class Beregningsperiode(

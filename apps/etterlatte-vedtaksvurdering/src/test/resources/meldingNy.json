@@ -901,6 +901,13 @@
     ],
     "beregnetDato": "2022-05-19T10:28:47.50082322"
   },
-  "@avkorting": "noe",
+  "@avkorting": {
+    "id": "eef2a9ec-e2df-400d-9fbd-3679e92c384e",
+    "type": "GP",
+    "endringskode": "NY",
+    "resultat": "BEREGNET",
+    "beregningsperioder": [],
+    "beregnetDato": "2022-05-19T10:28:47.50082322"
+  },
   "PASSE_PÅ_Å_SKRIVE_OM": "hihi"
 }

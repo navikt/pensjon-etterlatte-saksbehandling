@@ -2,13 +2,14 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.database.VedtaksvurderingRepository
+import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
+import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.Endringskode
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.vikaar.Familiemedlemmer
@@ -18,10 +19,7 @@ import no.nav.etterlatte.libs.common.vikaar.PersoninfoGjenlevendeForelder
 import no.nav.etterlatte.libs.common.vikaar.PersoninfoSoeker
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
@@ -63,7 +61,7 @@ internal class DBTest {
         val now = LocalDateTime.now()
         val beregningsperiode = listOf<Beregningsperiode>()
         vedtaksvurderingService.lagreBeregningsresultat(
-            "12321423523545", uuid, BeregningsResultat(
+            "12321423523545", uuid, "", BeregningsResultat(
                 UUID.randomUUID(),
                 Beregningstyper.BPGP,
                 Endringskode.NY,
@@ -78,21 +76,20 @@ internal class DBTest {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
         val now = LocalDateTime.now()
-        vedtaksvurderingService.lagreVilkaarsresultat(
-            "12321423523545", uuid, VilkaarResultat(
-                VurderingsResultat.OPPFYLT,
-                emptyList(),
-                now
-            )
-        )
+        vedtaksvurderingService.lagreVilkaarsresultat("12321423523545", uuid, "fnr", VilkaarResultat(
+            VurderingsResultat.OPPFYLT,
+            emptyList(),
+            now
+        ))
     }
 
     fun leggtilkommersoekertilgoderesultat() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
         val now = LocalDateTime.now()
+
         vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(
-            "12321423523545", uuid, KommerSoekerTilgode(
+            "12321423523545", uuid, "fnr", KommerSoekerTilgode(
                 VilkaarResultat(
                     VurderingsResultat.OPPFYLT,
                     emptyList(),
@@ -132,7 +129,7 @@ internal class DBTest {
     fun leggtilavkortingsresultat() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
-        vedtaksvurderingService.lagreAvkorting("12321423523545", uuid, objectMapper.writeValueAsString("Test"))
+        vedtaksvurderingService.lagreAvkorting("12321423523545", uuid, "fnr", AvkortingsResultat(UUID.randomUUID(), Beregningstyper.BPGP, no.nav.etterlatte.libs.common.avkorting.Endringskode.NY, AvkortingsResultatType.BEREGNET, emptyList(), LocalDateTime.now()))
     }
 
     @Test
@@ -147,9 +144,23 @@ internal class DBTest {
         val vedtaket = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         assert(vedtaket?.beregningsResultat != null)
         assert(vedtaket?.avkortingsResultat != null)
+        assert(vedtaket?.beregningsResultat?.grunnlagVerson == 0.toLong())
         assert(vedtaket?.vilkaarsResultat != null)
         assert(vedtaket?.kommerSoekerTilgodeResultat != null)
+
+
+        vedtaksvurderingService.fattVedtak("12321423523545", uuid, "saksbehandler")
+        val fattetVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
+        Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
+
+
+        vedtaksvurderingService.attesterVedtak("12321423523545", uuid, "attestant")
+        val attestertVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
+        Assertions.assertNotNull(attestertVedtak?.attestant)
+        Assertions.assertNotNull(attestertVedtak?.datoattestert)
+
+
+        val fulltvedtak = vedtaksvurderingService.hentFellesVedtak("12321423523545", uuid)
+        Assertions.assertNotNull(fulltvedtak)
     }
-
-
 }

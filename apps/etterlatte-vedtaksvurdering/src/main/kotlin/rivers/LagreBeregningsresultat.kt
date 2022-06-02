@@ -22,6 +22,7 @@ internal class LagreBeregningsresultat(
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("sak") }
             validate { it.requireKey("id") }
+            validate { it.requireKey("soeker") }
             validate { it.requireKey("@beregning") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
@@ -34,7 +35,7 @@ internal class LagreBeregningsresultat(
             val beregningsResultat = objectMapper.readValue(packet["@beregning"].toString(), BeregningsResultat::class.java)
 
             try {
-                vedtaksvurderingService.lagreBeregningsresultat(sakId, behandlingId, beregningsResultat)
+                vedtaksvurderingService.lagreBeregningsresultat(sakId, behandlingId, packet["soeker"].textValue(), beregningsResultat)
             } catch (e: Exception){
                 //TODO endre denne
                 println("spiser en melding fordi: " +e)

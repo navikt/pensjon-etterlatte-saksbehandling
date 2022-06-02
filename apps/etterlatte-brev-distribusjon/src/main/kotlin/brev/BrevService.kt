@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev
 import io.ktor.client.*
 import io.ktor.client.request.*
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import java.util.*
@@ -20,7 +21,7 @@ class BrevServiceImpl(private val client: HttpClient, private val url: String) :
 
         try {
             return client.get<ByteArray>("$url/$id/pdf") {
-                header(X_CORRELATION_ID, MDC.get(X_CORRELATION_ID) ?: UUID.randomUUID().toString())
+                header(X_CORRELATION_ID, getXCorrelationId())
             }
         } catch (ex: Exception) {
             logger.error("Klarte ikke hente brevinnhold for brev med id = $id", ex)

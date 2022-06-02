@@ -10,4 +10,11 @@ abstract class BrevRequest {
     abstract fun templateName(): String
 }
 
-data class Mottaker(val navn: String, val adresse: String, val postnummer: String)
+data class Mottaker(
+    val fornavn: String,
+    val etternavn: String,
+    val adresse: String,
+    val postnummer: String,
+    val poststed: String,
+    val land: String? = null
+)

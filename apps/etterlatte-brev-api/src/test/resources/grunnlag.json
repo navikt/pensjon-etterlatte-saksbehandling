@@ -303,8 +303,8 @@
             "adresseLinje2": null,
             "adresseLinje3": null,
             "postnr": "8475",
-            "poststed": null,
-            "land": null,
+            "poststed": "Oslo",
+            "land": "Norge",
             "kilde": "FREG",
             "gyldigFraOgMed": "1999-01-01T00:00:00",
             "gyldigTilOgMed": null

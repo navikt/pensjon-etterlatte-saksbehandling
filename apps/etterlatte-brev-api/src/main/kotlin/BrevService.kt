@@ -4,12 +4,10 @@ import model.brev.AnnetBrevRequest
 import model.brev.AvslagBrevRequest
 import model.brev.InnvilgetBrevRequest
 import no.nav.etterlatte.db.*
-import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
 import no.nav.etterlatte.libs.common.journalpost.Bruker
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.vedtak.VedtakService
@@ -17,6 +15,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import pdf.PdfGeneratorKlient
 import java.util.*
+import no.nav.etterlatte.model.brev.Mottaker as BrevMottaker
 
 class BrevService(
     private val db: BrevRepository,
@@ -47,13 +46,16 @@ class BrevService(
     }
 
     suspend fun opprett(behandlingId: String, mottaker: Mottaker, mal: Mal): Brev {
-        val mottaker1 = no.nav.etterlatte.model.brev.Mottaker(
-            navn = "${mottaker.fornavn} ${mottaker.etternavn}",
+        val brevMottaker = BrevMottaker(
+            fornavn = mottaker.fornavn,
+            etternavn = mottaker.etternavn,
             adresse = mottaker.adresse.adresse,
-            postnummer = mottaker.adresse.postnummer
+            postnummer = mottaker.adresse.postnummer,
+            poststed = mottaker.adresse.poststed,
+            land = mottaker.adresse.land
         )
 
-        val request = AnnetBrevRequest(mal, Spraak.NB, mottaker1)
+        val request = AnnetBrevRequest(mal, Spraak.NB, brevMottaker)
 
         val pdf = pdfGenerator.genererPdf(request)
 
@@ -72,32 +74,28 @@ class BrevService(
     private suspend fun opprettFraVedtak(behandlingId: String): Brev {
         val vedtak = vedtakService.hentVedtak(behandlingId.toLong())
 
-        // todo: Hent info fra grunnlag/behandling.
-        val mottaker = Mottaker(
-            fornavn = "Ola",
-            etternavn = "Nordmann",
-            foedselsnummer = Foedselsnummer.of(vedtak.sak.ident),
-            adresse = Adresse("Fyrstikkalléen 1", "0661", "Oslo")
-        )
-
-        val pdf = genererPdf(vedtak)
-        val tittel = "Vedtak om ${vedtak.type.name.lowercase()}"
-
-        return db.opprettBrev(NyttBrev(behandlingId.toLong(), tittel, mottaker, pdf))
-    }
-
-    private suspend fun genererPdf(vedtak: Vedtak): ByteArray {
-        val pdfRequest = when (vedtak.type) {
+        val brevRequest = when (vedtak.type) {
             VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(vedtak)
             VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(vedtak)
             else -> throw Exception("Vedtakstype er ikke støttet: ${vedtak.type}")
         }
 
-        val pdf = pdfGenerator.genererPdf(pdfRequest)
+        val pdf = pdfGenerator.genererPdf(brevRequest)
 
         logger.info("Generert brev for vedtak (vedtakId=${vedtak.vedtakId}) med størrelse: ${pdf.size}")
 
-        return pdf
+        val tittel = "Vedtak om ${vedtak.type.name.lowercase()}"
+        val mottaker = Mottaker(
+            fornavn = brevRequest.mottaker.fornavn,
+            etternavn = brevRequest.mottaker.etternavn,
+            adresse = Adresse(
+                adresse = brevRequest.mottaker.adresse,
+                postnummer = brevRequest.mottaker.postnummer,
+                poststed = brevRequest.mottaker.poststed,
+                land = brevRequest.mottaker.land
+            ),
+        )
+        return db.opprettBrev(NyttBrev(behandlingId.toLong(), tittel, mottaker, pdf))
     }
 
     private fun opprettDistribusjonsmelding(brev: Brev): String = DistribusjonMelding(

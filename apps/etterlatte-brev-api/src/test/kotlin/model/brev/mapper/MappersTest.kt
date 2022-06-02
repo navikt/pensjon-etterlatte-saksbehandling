@@ -11,13 +11,12 @@ import java.io.FileNotFoundException
 import java.time.LocalDate
 
 internal class MappersTest {
+    private val vedtak = VedtakServiceMock().hentVedtak(1).copy(
+        grunnlag = objectMapper.readValue<Testdata>(readFile("/grunnlag.json")).grunnlag
+    )
 
     @Test
     fun `Skal finne avdoede i grunnlaget`() {
-        val vedtak = VedtakServiceMock().hentVedtak(1).copy(
-            grunnlag = objectMapper.readValue<Testdata>(readFile("/grunnlag.json")).grunnlag
-        )
-
         val avdoed = vedtak.finnAvdoed()
 
         avdoed.navn shouldBe "VAKKER LAPP"
@@ -26,14 +25,22 @@ internal class MappersTest {
 
     @Test
     fun `Skal finne barnet i grunnlaget`() {
-        val vedtak = VedtakServiceMock().hentVedtak(1).copy(
-            grunnlag = objectMapper.readValue<Testdata>(readFile("/grunnlag.json")).grunnlag
-        )
-
         val barn = vedtak.finnBarn()
 
         barn.navn shouldBe "TALENTFULL BLYANT"
         barn.fnr shouldBe "12101376212"
+    }
+
+    @Test
+    fun `Skal finne barnets adresse som mottaker`() {
+        val mottaker = vedtak.finnMottaker()
+
+        mottaker.fornavn shouldBe "TALENTFULL"
+        mottaker.etternavn shouldBe "BLYANT"
+        mottaker.adresse shouldBe "Bøveien 937"
+        mottaker.postnummer shouldBe "8475"
+        mottaker.poststed shouldBe "Oslo"
+        mottaker.land shouldBe "Norge"
     }
 }
 

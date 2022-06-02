@@ -2,6 +2,7 @@ package model.brev
 
 import model.brev.mapper.finnAvdoed
 import model.brev.mapper.finnBarn
+import model.brev.mapper.finnMottaker
 import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.model.brev.BrevRequest
@@ -24,7 +25,7 @@ data class AvslagBrevRequest(
             avdoed = vedtak.finnAvdoed(),
             aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår?
             spraak = Spraak.NB, // todo, må hentes.
-            mottaker = Mottaker(navn = "Barn barnsen", adresse = "Testadresse", postnummer = "0000")
+            mottaker = vedtak.finnMottaker()
         )
     }
 }

@@ -164,6 +164,17 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             statement.execute()
         }
     }
+
+    //migrerer databaseraden fra v2 til v3
+    fun lagreFnr(sakId: String, behandlingId: UUID, fnr: String) {
+        connection.use {
+            val statement = it.prepareStatement(Queries.lagreFnr)
+            statement.setString(1, fnr)
+            statement.setLong(2, sakId.toLong())
+            statement.setObject(3, behandlingId)
+            statement.execute()
+        }
+    }
 }
 
 data class Vedtak(
@@ -198,6 +209,8 @@ private object Queries {
     val fattVedtak = "UPDATE vedtak SET saksbehandlerId = ?, vedtakfattet = ?, datoFattet = now() WHERE sakId = ? AND behandlingId = ?"
     val attesterVedtak = "UPDATE vedtak SET attestant = ?, datoAttestert = now() WHERE sakId = ? AND behandlingId = ?"
     val hentVedtak = "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant FROM vedtak WHERE sakId = ? AND behandlingId = ?"
+
+    val lagreFnr = "UPDATE vedtak SET fnr = ? WHERE sakId = ? AND behandlingId = ?"
 }
 
 fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {

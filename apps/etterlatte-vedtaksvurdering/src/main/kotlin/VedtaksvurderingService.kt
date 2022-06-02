@@ -39,6 +39,9 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
         if(vedtak == null) {
             repository.lagreVilkaarsresultat(sakId, behandlingId, fnr, vilkaarResultat)
         } else {
+            if(vedtak.fnr == null){
+                repository.lagreFnr(sakId, behandlingId, fnr)
+            }
             repository.oppdaterVilkaarsresultat(sakId, behandlingId, vilkaarResultat)
         }
     }

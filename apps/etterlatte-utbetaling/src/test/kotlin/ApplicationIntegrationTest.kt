@@ -17,7 +17,6 @@ import no.nav.etterlatte.utbetaling.readFile
 import no.nav.etterlatte.utbetaling.ugyldigVedtakTilUtbetaling
 import no.nav.etterlatte.utbetaling.vedtak
 import no.nav.etterlatte.utbetaling.vedtakEvent
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -64,8 +63,6 @@ class ApplicationIntegrationTest {
 
         ApplicationContext(applicationProperties, rapidsConnection).also {
             connectionFactory = it.jmsConnectionFactory
-            it.dataSourceBuilder.migrate() // TODO bør ikke trenge denne med TestRapid()
-
             rapidApplication(it).start()
         }
     }
@@ -90,7 +87,7 @@ class ApplicationIntegrationTest {
     @Test
     fun `skal motta kvittering fra oppdrag`() {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
-        sendKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering())
+        simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering())
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish("key",
@@ -108,7 +105,7 @@ class ApplicationIntegrationTest {
     @Test
     fun `skal motta kvittering fra oppdrag med feil`() {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
-        sendKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering())
+        simulerKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering())
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish("key",
@@ -149,17 +146,16 @@ class ApplicationIntegrationTest {
 
     @AfterAll
     fun afterAll() {
-        connectionFactory.stop()
+        rapidsConnection.stop()
         ibmMQContainer.stop()
         postgreSQLContainer.stop()
-        rapidsConnection.stop()
     }
 
     private fun sendFattetVedtakEvent(vedtakEvent: String) {
         rapidsConnection.sendTestMessage(vedtakEvent)
     }
 
-    private fun sendKvitteringsmeldingFraOppdrag(oppdrag: Oppdrag) {
+    private fun simulerKvitteringsmeldingFraOppdrag(oppdrag: Oppdrag) {
         connectionFactory.connection().createSession().use { session ->
             val producer = session.createProducer(session.createQueue("DEV.QUEUE.2"))
             val message = session.createTextMessage(OppdragJaxb.toXml(oppdrag))

@@ -33,8 +33,6 @@ spec:
   env:
     - name: ETTERLATTE_PDFGEN_URL
       value: "http://ey-pdfgen/api/v1/genpdf/eypdfgen"
-    - name: AZURE_DOKARKIV_SCOPE
-      value: "api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
   accessPolicy:
@@ -44,3 +42,4 @@ spec:
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui
+        - application: etterlatte-brev-distribusjon

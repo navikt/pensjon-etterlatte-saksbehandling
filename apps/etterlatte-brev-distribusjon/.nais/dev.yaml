@@ -37,3 +37,12 @@ spec:
       value: "https://dokdistfordeling-q1.nais.preprod.local/rest/v1"
     - name: DOKDISTFORDEL_SCOPE
       value: "todo"
+    - name: BREV_API_SCOPE
+      value: "api://dev-gcp.etterlatte.etterlatte-brev-api/.default"
+    - name: BREV_API_URL
+      value: "http://etterlatte-brev-api/brev"
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-brev-api
+        - application: etterlatte-brev-api

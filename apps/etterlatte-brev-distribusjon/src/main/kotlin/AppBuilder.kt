@@ -7,6 +7,7 @@ import io.ktor.client.features.auth.*
 import io.ktor.client.features.json.*
 import journalpost.JournalpostService
 import journalpost.JournalpostServiceImpl
+import no.nav.etterlatte.brev.BrevServiceImpl
 import no.nav.etterlatte.distribusjon.DistribusjonKlient
 import no.nav.etterlatte.distribusjon.DistribusjonService
 import no.nav.etterlatte.distribusjon.DistribusjonServiceImpl
@@ -25,7 +26,7 @@ class AppBuilder {
         true -> JournalpostServiceMock()
         false -> {
             val klient = JournalpostKlient(httpClient("AZURE_DOKARKIV_SCOPE"), requireNotNull(env["JOURNALPOST_URL"]))
-            JournalpostServiceImpl(klient)
+            JournalpostServiceImpl(klient, BrevServiceImpl(httpClient("BREV_API_SCOPE"), requireNotNull("BREV_API_URL")))
         }
     }
 

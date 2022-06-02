@@ -7,7 +7,6 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import java.sql.Timestamp
-import java.util.*
 import javax.sql.DataSource
 
 class GrensesnittavstemmingDao(private val dataSource: DataSource) {
@@ -56,9 +55,4 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
             antallOppdrag = row.int("antall_oppdrag"),
             avstemmingsdata = row.string("avstemmingsdata"),
         )
-
-    companion object {
-        val tzUTC = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-    }
-
 }

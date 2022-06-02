@@ -27,6 +27,8 @@ spec:
         cascadingDelete: false
         databases:
           - name: utbetaling
+            envVarPrefix: BLA
+          - name: utbetaling-v2
             envVarPrefix: DB
   kafka:
     pool: nav-dev

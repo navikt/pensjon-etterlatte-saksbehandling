@@ -1,23 +1,23 @@
 import styled from 'styled-components'
 import { Adresse } from './Adresse'
 import { InfoWrapper } from '../Soeknadsoversikt'
-import { BarnetTilGode } from './BarnetTilGode'
+import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
 import { IKommerSoekerTilgode, VilkaarsType } from '../../../../../store/reducers/BehandlingReducer'
 
 export const OversiktKommerSoekerTilgode = ({ kommerSoekerTilgode }: { kommerSoekerTilgode: IKommerSoekerTilgode }) => {
-  const sammeAdresse = kommerSoekerTilgode.kommerSoekerTilgodeVurdering.vilkaar.find(
+  const gjenlevendeOgSoekerLikAdresse = kommerSoekerTilgode.kommerSoekerTilgodeVurdering.vilkaar.find(
     (vilkaar) => vilkaar.navn === VilkaarsType.SAMME_ADRESSE
   )
   return (
     <>
-      <Header>Kommer barnet til gode</Header>
+      <Header>Vurdering om pensjonen kommer barnet til gode</Header>
       <Wrapper>
         <InfoWrapper>
-          <Adresse gjenlevendeOgSoekerLikAdresse={sammeAdresse} />
+          <Adresse gjenlevendeOgSoekerLikAdresse={gjenlevendeOgSoekerLikAdresse} />
         </InfoWrapper>
         <div className="soeknadGyldigFremsatt">
-          <BarnetTilGode
-            sammeAdresse={sammeAdresse}
+          <KommerBarnetTilGodeVurdering
+            gjenlevendeOgSoekerLikAdresse={gjenlevendeOgSoekerLikAdresse}
             kommerSoekerTilgodeVurdering={kommerSoekerTilgode.kommerSoekerTilgodeVurdering}
           />
         </div>

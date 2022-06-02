@@ -50,7 +50,7 @@ export const Soeknadsoversikt = () => {
             <FamilieforholdWrapper>
               <GjenlevendeForelder
                 person={kommerSoekerTilgode.familieforhold.gjenlevendeForelder}
-                innsenderErGjenlevende={innsenderErGjenlevende}
+                innsenderErGjenlevendeForelder={innsenderErGjenlevende}
               />
             </FamilieforholdWrapper>
             <Border />

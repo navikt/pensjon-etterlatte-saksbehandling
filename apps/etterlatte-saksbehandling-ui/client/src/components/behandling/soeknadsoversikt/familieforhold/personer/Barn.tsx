@@ -3,16 +3,15 @@ import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { ChildIcon } from '../../../../../shared/icons/childIcon'
 import { TypeStatusWrap } from '../../styled'
-import { IPersoninfoSoeker, IVilkaarsproving } from '../../../../../store/reducers/BehandlingReducer'
+import { IPersoninfoSoeker } from '../../../../../store/reducers/BehandlingReducer'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 
 type Props = {
   person: IPersoninfoSoeker
-  barnOgGjenlevendeSammeAdresse: IVilkaarsproving | undefined
   alderVedDoedsdato: string
 }
 
-export const Barn: React.FC<Props> = ({ person, barnOgGjenlevendeSammeAdresse, alderVedDoedsdato }) => {
+export const Barn: React.FC<Props> = ({ person, alderVedDoedsdato }) => {
   return (
     <PersonBorder>
       <PersonHeader>

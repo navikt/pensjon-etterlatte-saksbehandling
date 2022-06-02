@@ -1,5 +1,4 @@
-import { WarningIcon } from '../../../../../shared/icons/warningIcon'
-import { IconWrapper, PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
+import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PeopleIcon } from '../../../../../shared/icons/peopleIcon'
 import { ForelderWrap } from '../../styled'
@@ -9,17 +8,12 @@ import { IPersoninfoGjenlevendeForelder } from '../../../../../store/reducers/Be
 
 type Props = {
   person: IPersoninfoGjenlevendeForelder
-  innsenderErGjenlevende: boolean
+  innsenderErGjenlevendeForelder: boolean
 }
 
-export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenlevende }) => {
+export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenlevendeForelder }) => {
   return (
     <PersonBorder>
-      {!innsenderErGjenlevende && (
-        <IconWrapper>
-          <WarningIcon />
-        </IconWrapper>
-      )}
       <PersonHeader>
         <span className="icon">
           <PeopleIcon />
@@ -28,7 +22,7 @@ export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenle
         <span className="personRolle">
           ({PersonStatus.GJENLEVENDE_FORELDER} {RelatertPersonsRolle.FORELDER})
         </span>
-        {innsenderErGjenlevende && <ForelderWrap>Innsender av søknad</ForelderWrap>}
+        {innsenderErGjenlevendeForelder && <ForelderWrap>Innsender av søknad</ForelderWrap>}
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfoFnr fnr={person.fnr} />

@@ -1,17 +1,7 @@
-import { useEffect, useState } from 'react'
-import { useContext } from 'react'
-import { AppContext } from '../../../../../store/AppContext'
-import {
-  IKriterie,
-  IPersoninfoAvdoed,
-  Kriterietype,
-  VilkaarsType,
-  VurderingsResultat,
-} from '../../../../../store/reducers/BehandlingReducer'
+import { IPersoninfoAvdoed } from '../../../../../store/reducers/BehandlingReducer'
 import { PersonStatus, RelatertPersonsRolle } from '../../../types'
-import { WarningIcon } from '../../../../../shared/icons/warningIcon'
 import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
-import { IconWrapper, PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
+import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { PeopleIcon } from '../../../../../shared/icons/peopleIcon'
 import { ForelderWrap } from '../../styled'
 import { format } from 'date-fns'
@@ -22,30 +12,8 @@ type Props = {
 }
 
 export const AvdoedForelder: React.FC<Props> = ({ person }) => {
-  const ctx = useContext(AppContext)
-
-  const [feilForelderOppgittSomAvdoed, setFeilForelderOppgittSomAvdoed] = useState<boolean>()
-  const [forelderErDoed, setForelderErDoed] = useState<any>()
-
-  useEffect(() => {
-    const vilkaar = ctx.state.behandlingReducer.vilkårsprøving.vilkaar
-    const doedsfallVilkaar: any = vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.DOEDSFALL_ER_REGISTRERT)
-
-    const avdoedErForelderVilkaar =
-      doedsfallVilkaar &&
-      doedsfallVilkaar.kriterier.find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER).resultat
-
-    setFeilForelderOppgittSomAvdoed(avdoedErForelderVilkaar)
-    setForelderErDoed(avdoedErForelderVilkaar)
-  }, [])
-
   return (
     <PersonBorder>
-      {(feilForelderOppgittSomAvdoed || forelderErDoed !== VurderingsResultat.OPPFYLT) && (
-        <IconWrapper>
-          <WarningIcon />
-        </IconWrapper>
-      )}
       <PersonHeader>
         <span className="icon">
           <PeopleIcon />

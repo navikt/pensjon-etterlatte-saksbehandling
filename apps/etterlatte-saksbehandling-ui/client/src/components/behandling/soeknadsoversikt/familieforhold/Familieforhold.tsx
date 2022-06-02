@@ -11,8 +11,6 @@ import {
   IGyldighetproving,
   IGyldighetResultat,
   IKommerSoekerTilgode,
-  IVilkaarsproving,
-  VilkaarsType,
   VurderingsResultat,
 } from '../../../../store/reducers/BehandlingReducer'
 
@@ -22,10 +20,6 @@ export interface PropsFamilieforhold {
 }
 
 export const Familieforhold: React.FC<PropsFamilieforhold> = ({ kommerSoekerTilgode, gyldigFramsatt }) => {
-  const barnOgGjenlevendeSammeAdresse = kommerSoekerTilgode.kommerSoekerTilgodeVurdering.vilkaar.find(
-    (v: IVilkaarsproving) => v.navn === VilkaarsType.SAMME_ADRESSE
-  )
-
   const innsenderErGjenlevende =
     gyldigFramsatt.vurderinger.find((g: IGyldighetproving) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER)
       ?.resultat === VurderingsResultat.OPPFYLT
@@ -41,7 +35,6 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ kommerSoekerTilg
         <DashedBorder />
         <Barn
           person={kommerSoekerTilgode.familieforhold.soeker}
-          barnOgGjenlevendeSammeAdresse={barnOgGjenlevendeSammeAdresse}
           alderVedDoedsdato={hentAlderVedDoedsdato(
             kommerSoekerTilgode.familieforhold.soeker.foedselsdato,
             kommerSoekerTilgode.familieforhold.avdoed.doedsdato
@@ -50,7 +43,7 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ kommerSoekerTilg
         <DashedBorder />
         <GjenlevendeForelder
           person={kommerSoekerTilgode.familieforhold.gjenlevendeForelder}
-          innsenderErGjenlevende={innsenderErGjenlevende}
+          innsenderErGjenlevendeForelder={innsenderErGjenlevende}
         />
         <DashedBorder />
         <AvdoedForelder person={kommerSoekerTilgode.familieforhold.avdoed} />

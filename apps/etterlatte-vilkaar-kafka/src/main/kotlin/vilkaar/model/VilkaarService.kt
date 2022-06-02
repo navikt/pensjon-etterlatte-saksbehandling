@@ -1,31 +1,22 @@
 package no.nav.etterlatte.model
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.etterlatte.barnepensjon.hentSisteVurderteDato
-import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraVilkaar
-import no.nav.etterlatte.barnepensjon.vilkaarAvdoedesMedlemskap
-import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
-import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.barnepensjon.*
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.GjenlevendeForelderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.vikaar.Familiemedlemmer
-import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
-import no.nav.etterlatte.libs.common.vikaar.PersoninfoAvdoed
-import no.nav.etterlatte.libs.common.vikaar.PersoninfoGjenlevendeForelder
-import no.nav.etterlatte.libs.common.vikaar.PersoninfoSoeker
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
-import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
-import no.nav.etterlatte.vilkaar.barnepensjon.*
+import no.nav.etterlatte.libs.common.vikaar.*
+import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
 import org.slf4j.LoggerFactory
 import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
+import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 
 
 class VilkaarService {
@@ -62,6 +53,20 @@ class VilkaarService {
 
         return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
     }
+
+    //TODO riktig å bruke localdate? endre til zoned
+    fun beregnVilkaarstidspunkt (opplysninger: List<VilkaarOpplysning<ObjectNode>>, opprettet: LocalDate): LocalDate? {
+        logger.info("beregner virkningstidspunkt")
+        val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
+        return avdoedPdl?.opplysning?.doedsdato?.let { hentVirkningstidspunkt(it, opprettet) }
+    }
+    fun hentVirkningstidspunkt (doedsdato: LocalDate, mottattDato: LocalDate): LocalDate{
+        if (mottattDato.year - doedsdato.year > 3) {
+            return mottattDato.minusYears(3).with(TemporalAdjusters.firstDayOfNextMonth())
+        }
+        return mottattDato.with(TemporalAdjusters.firstDayOfNextMonth())
+    }
+
 
     fun mapKommerSoekerTilGode(opplysninger: List<VilkaarOpplysning<ObjectNode>>): KommerSoekerTilgode {
         logger.info("Map opplysninger for å vurdere om penger kommer søker til gode")

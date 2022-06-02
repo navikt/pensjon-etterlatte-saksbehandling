@@ -570,5 +570,6 @@
       "time": "2022-03-21T15:26:22.994195102"
     }
   ],
-  "@event": "BEHANDLING:GRUNNLAGENDRET"
+  "@event": "BEHANDLING:GRUNNLAGENDRET",
+  "behandlingOpprettet": "2022-05-23T16:09:19.717707"
 }

@@ -9,6 +9,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 internal class LesVilkaarsmelding(
     rapidsConnection: RapidsConnection,
@@ -20,6 +21,7 @@ internal class LesVilkaarsmelding(
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("@grunnlag") }
+            validate { it.requireKey("behandlingOpprettet") }
             validate { it.rejectKey("@vilkaarsvurdering") }
             validate { it.rejectKey("@kommersoekertilgode") }
             validate { it.rejectKey("@gyldighetsvurdering") }
@@ -35,6 +37,8 @@ internal class LesVilkaarsmelding(
                 val grunnlagForVilkaar = grunnlag.grunnlag.map { VilkaarOpplysning(it.id, it.opplysningType, it.kilde, it.opplysning) }
                 val vilkaarsVurdering = vilkaar.mapVilkaar(grunnlagForVilkaar)
                 val kommerSoekerTilGodeVurdering = vilkaar.mapKommerSoekerTilGode(grunnlagForVilkaar)
+                val behandlingopprettet = LocalDateTime.parse(packet["behandlingOpprettet"].asText()).toLocalDate()
+                val virkningstidspunkt = vilkaar.beregnVilkaarstidspunkt(grunnlagForVilkaar, behandlingopprettet)
 
                 packet["@vilkaarsvurdering"] = vilkaarsVurdering
                 packet["@vilkaarsvurderingGrunnlagRef"] = grunnlag.versjon

@@ -28,7 +28,6 @@ internal class HentOpplysningerFraInntektskomponenten(
             validate { it.requireKey("@sak_id") }
             validate { it.requireKey("@behandling_id") }
             validate { it.interestedIn("@correlation_id") }
-
         }.register(this)
     }
 

@@ -19,7 +19,7 @@ class InntektsKomponentenService(private val inntektskomponentenClient: HttpClie
         val hentInntektlisteRequest =
             HentInntektListeRequestBody(
                 InntektListeIdent(fnr.value, "NATURLIG_IDENT"),
-                "UfoereA-Inntekt",
+                "Gjenlevendepensjon",
                 "2015-02",
                 "2022-03",
                 "Ufoere"

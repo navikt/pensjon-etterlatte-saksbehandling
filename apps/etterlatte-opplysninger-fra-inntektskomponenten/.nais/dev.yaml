@@ -33,7 +33,7 @@ spec:
       #sette tilbake til none senere
       value: earliest
     - name: ETTERLATTE_PROXY_INNTEKT
-      value: http://etterlatte-proxy/inntektskomponenten
+      value: http://etterlatte-proxy/aad/inntektskomponenten
     - name: ETTERLATTE_PROXY_AUDIENCE
       value: "dev-gcp:etterlatte:etterlatte-proxy"
     - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE

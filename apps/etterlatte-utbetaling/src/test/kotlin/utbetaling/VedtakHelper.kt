@@ -171,7 +171,7 @@ fun genererEtterfolgendeUtbetalingsperioder(
     forrigeId: Long,
     startPeriode: YearMonth,
     startBelop: BigDecimal
-) = (1..antall).mapIndexed() { index, _ ->
+) = (1..antall).map { index ->
     if (index < antall) {
         Utbetalingsperiode(
             id = forrigeId + index,
@@ -231,11 +231,15 @@ fun main() {
     )
     val revurderingsvedtakEvent = vedtakEvent(revurderingsvedtak)
 
+    val opphoersVedtak = vedtakEvent(opphoersVedtak(revurderingsvedtak))
+
     // printer et vedtakevent og et revurderingsevent
     println("FORSTEGANGSBEHANDLING: ")
     println(vedtakEvent)
     println("REVURDERING: ")
     println(revurderingsvedtakEvent)
+    println("OPPHOER: ")
+    println(opphoersVedtak)
 
 
 }

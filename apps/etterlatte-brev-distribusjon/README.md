@@ -9,4 +9,4 @@ Rapid app for å distribuere brev. Håndterer journalføring og distribusjon.
 
 Legg f. eks til følgende environment variabler i IntelliJ: 
 
-`DB_JDBC_URL=jdbc:postgresql://localhost:5456/postgres;DB_USERNAME=postgres;DB_PASSWORD=postgresPW;BREV_LOCAL_DEV=true;KAFKA_RAPID_TOPIC=brev;KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:51336;KAFKA_CONSUMER_GROUP_ID=0;NAIS_APP_NAME=etterlatte-brev-distribusjon;HTTP_PORT=8090;`
+`DB_JDBC_URL=jdbc:postgresql://localhost:5432/postgres;DB_USERNAME=postgres;DB_PASSWORD=postgres;BREV_LOCAL_DEV=true;KAFKA_RAPID_TOPIC=brev;KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:51336;KAFKA_CONSUMER_GROUP_ID=0;NAIS_APP_NAME=etterlatte-brev-distribusjon;HTTP_PORT=8090;`

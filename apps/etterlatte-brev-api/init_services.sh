@@ -13,7 +13,7 @@ echo "Starting postgres docker image"
 docker pull postgres
 docker run \
     --name etterlatte-brev \
-    -e POSTGRES_PASSWORD=test \
+    -e POSTGRES_PASSWORD=postgres \
     -p 5432:5432 \
     -d \
     --rm \
@@ -60,4 +60,4 @@ docker run \
 #docker exec etterlatte-brev psql -U postgres -c "CREATE DATABASE \"postgres\";" 2>/dev/null
 
 echo "Run Kotlin application with the following env variables:"
-echo -e "\033[0;36mDB_HOST=localhost;DB_PORT=5432;DB_DATABASE=postgres;DB_USERNAME=postgres;DB_PASSWORD=test\033[0m"
+echo -e "\033[0;36mDB_HOST=localhost;DB_PORT=5432;DB_DATABASE=postgres;DB_USERNAME=postgres;DB_PASSWORD=postgres\033[0m"

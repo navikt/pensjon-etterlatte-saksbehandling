@@ -1,16 +1,24 @@
-import { PropsOmSoeknad } from '../props'
 import styled from 'styled-components'
-import { SoeknadOversiktGyldigFramsatt } from './SoeknadsoversiktDel1'
-import { SoeknadOversiktKommerSoekerTilgode } from './SoeknadsoversiktDel2'
-import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { OversiktGyldigFramsatt } from './gyldigFramsattSoeknad/OversiktGyldigFramsatt'
+import { OversiktKommerSoekerTilgode } from './kommerBarnetTilgode/OversiktKommerSoekerTilgode'
+import {
+  IGyldighetResultat,
+  IKommerSoekerTilgode,
+  VurderingsResultat,
+} from '../../../../store/reducers/BehandlingReducer'
+
+export interface PropsOmSoeknad {
+  gyldigFramsatt: IGyldighetResultat
+  kommerSoekerTilgode: IKommerSoekerTilgode
+}
 
 export const SoeknadOversikt: React.FC<PropsOmSoeknad> = ({ gyldigFramsatt, kommerSoekerTilgode }) => {
   return (
     <SoeknadOversiktWrapper>
       <div>
-        <SoeknadOversiktGyldigFramsatt gyldigFramsatt={gyldigFramsatt} />
+        <OversiktGyldigFramsatt gyldigFramsatt={gyldigFramsatt} />
         {gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT && (
-          <SoeknadOversiktKommerSoekerTilgode kommerSoekerTilgode={kommerSoekerTilgode} />
+          <OversiktKommerSoekerTilgode kommerSoekerTilgode={kommerSoekerTilgode} />
         )}
       </div>
     </SoeknadOversiktWrapper>

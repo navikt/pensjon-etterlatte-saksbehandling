@@ -3,7 +3,7 @@ import { VurderingsResultat, IVilkaarsproving, IVilkaarResultat } from '../../..
 import { format } from 'date-fns'
 import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
 import { hentGyldigBostedTekst } from '../../utils'
-import { Title, Undertekst } from './styled'
+import { Title, Undertekst } from '../gyldigFramsattSoeknad/styled'
 
 export const BarnetTilGode = ({
   sammeAdresse,

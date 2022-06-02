@@ -1,38 +1,21 @@
-import { useEffect, useState } from 'react'
-import { AlertVarsel } from '../../AlertVarsel'
 import { WarningIcon } from '../../../../../shared/icons/warningIcon'
 import { IconWrapper, PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
-import { PersonInfo } from './personinfo/PersonInfo'
+import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PeopleIcon } from '../../../../../shared/icons/peopleIcon'
 import { ForelderWrap } from '../../styled'
-import { IAdresse, IGjenlevendeFraSak, PersonStatus, RelatertPersonsRolle } from '../../../types'
-import { sjekkAdresseGjenlevendeISoeknadMotPdl } from '../../utils'
+import { PersonStatus, RelatertPersonsRolle } from '../../../types'
+import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
+import { IPersoninfoGjenlevendeForelder } from '../../../../../store/reducers/BehandlingReducer'
 
 type Props = {
-  person: IGjenlevendeFraSak
+  person: IPersoninfoGjenlevendeForelder
   innsenderErGjenlevende: boolean
 }
 
 export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenlevende }) => {
-  const gjeldendeAdresse: IAdresse | undefined =
-    person.adresser && person.adresser.find((adresse: IAdresse) => adresse.aktiv === true)
-
-  const [gjenlevendeAdresselLikSoeknadOgPdl, setGjenlevendeAdresselLikSoeknadOgPdl] = useState<boolean>()
-
-  useEffect(() => {
-    if (person.adresseFraSoeknad && gjeldendeAdresse) {
-      setGjenlevendeAdresselLikSoeknadOgPdl(
-        sjekkAdresseGjenlevendeISoeknadMotPdl(
-          person.adresseFraSoeknad,
-          `${gjeldendeAdresse.adresseLinje1}, ${gjeldendeAdresse.postnr} ${gjeldendeAdresse.poststed}`
-        )
-      )
-    }
-  }, [])
-
   return (
     <PersonBorder>
-      {gjenlevendeAdresselLikSoeknadOgPdl && (
+      {!innsenderErGjenlevende && (
         <IconWrapper>
           <WarningIcon />
         </IconWrapper>
@@ -48,14 +31,8 @@ export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenle
         {innsenderErGjenlevende && <ForelderWrap>Innsender av søknad</ForelderWrap>}
       </PersonHeader>
       <PersonInfoWrapper>
-        <PersonInfo
-          fnr={person.fnr}
-          fnrFraSoeknad={person.fnrFraSoeknad}
-          bostedEtterDoedsdato={person.adresser}
-          adresseFraSoeknad={person.adresseFraSoeknad}
-          avdoedPerson={false}
-        />
-        {gjenlevendeAdresselLikSoeknadOgPdl && <AlertVarsel varselType="ikke lik adresse" />}
+        <PersonInfoFnr fnr={person.fnr} />
+        <PersonInfoAdresse adresser={person.adresser} visHistorikk={true} />
       </PersonInfoWrapper>
     </PersonBorder>
   )

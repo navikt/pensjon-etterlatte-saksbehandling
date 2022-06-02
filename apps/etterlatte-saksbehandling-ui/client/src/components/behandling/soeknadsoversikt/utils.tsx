@@ -1,6 +1,4 @@
 import { differenceInYears, add, startOfMonth } from 'date-fns'
-import { IPersonOpplysningFraPdl } from '../types'
-import { WarningText } from '../../../shared/styled'
 import {
   GyldigFramsattType,
   VurderingsResultat,
@@ -9,41 +7,11 @@ import {
   VilkaarsType,
 } from '../../../store/reducers/BehandlingReducer'
 
-export const sjekkDataFraSoeknadMotPdl = (dataFraPdl: string, dataFraSoeknad: string) => {
-  return dataFraSoeknad === dataFraPdl || dataFraSoeknad === null ? (
-    <span>{dataFraPdl}</span>
-  ) : (
-    <WarningText>
-      <div>{dataFraPdl}</div>
-      {dataFraSoeknad} (fra søknad)
-    </WarningText>
-  )
-}
-
-export const sjekkPersonFraSoeknadMotPdl = (personFraPdl: IPersonOpplysningFraPdl, personFraSoeknad: any) => {
-  //TODO: hvis fnr er likt, men navn forskjellig, hva skal vises?
-  return personFraSoeknad.foedselsnummer === personFraPdl.foedselsnummer ? (
-    <span>
-      {personFraPdl?.fornavn} {personFraPdl?.etternavn}
-    </span>
-  ) : (
-    <WarningText>
-      <div>
-        {personFraPdl?.fornavn} {personFraPdl?.etternavn}
-      </div>
-      {personFraSoeknad?.fornavn} {personFraSoeknad?.etternavn} (fra søknad)
-    </WarningText>
-  )
-}
-
-export const sjekkAdresseGjenlevendeISoeknadMotPdl = (adresseFraSoeknad: string, adresseFraPdl: string): boolean => {
-  return adresseFraPdl !== adresseFraSoeknad
-}
-
 export const hentAlderVedDoedsdato = (foedselsdato: string, doedsdato: string): string => {
   return Math.floor(differenceInYears(new Date(doedsdato), new Date(foedselsdato))).toString()
 }
 
+//TODO: Flyttes til sjekk i backend
 export const hentVirkningstidspunkt = (doedsdato: string, mottattDato: string): string => {
   if (sjekkDodsfallMerEnn3AarSiden(doedsdato, mottattDato)) {
     /*
@@ -65,7 +33,7 @@ export function mapGyldighetstyperTilTekst(gyldig: IGyldighetproving): String | 
 
   if (gyldig.navn === GyldigFramsattType.HAR_FORELDREANSVAR_FOR_BARNET) {
     if (gyldig.resultat === VurderingsResultat.IKKE_OPPFYLT) {
-      svar = 'Nei. innsender har ikke forelderansvar. Dette må avklares før du kan starte vilkårsvurderingen.'
+      svar = 'Nei, innsender har ikke forelderansvar. Dette må avklares før du kan starte vilkårsvurderingen.'
     } else if (gyldig.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
       svar = 'Mangler info'
     } else {
@@ -89,7 +57,7 @@ export function hentGyldigBostedTekst(gyldig: IVilkaarsproving): String | undefi
   let svar
   if (gyldig.navn === VilkaarsType.SAMME_ADRESSE) {
     if (gyldig.resultat === VurderingsResultat.IKKE_OPPFYLT) {
-      svar = 'barn og gjenlevende forelder bor ikke på samme adresse'
+      svar = 'Barn og gjenlevende forelder bor ikke på samme adresse'
     } else if (gyldig.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING) {
       svar = 'Mangler info'
     }

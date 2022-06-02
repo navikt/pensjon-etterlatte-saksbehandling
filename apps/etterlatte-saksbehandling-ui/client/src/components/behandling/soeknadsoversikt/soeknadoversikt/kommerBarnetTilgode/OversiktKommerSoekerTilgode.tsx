@@ -1,14 +1,10 @@
 import styled from 'styled-components'
-import { Adresse } from './soeknadinfo/Adresse'
-import { InfoWrapper } from './Soeknadsoversikt'
-import { BarnetTilGode } from './gyldigSoeknad/BarnetTilGode'
-import { IKommerSoekerTilgode, VilkaarsType } from '../../../../store/reducers/BehandlingReducer'
+import { Adresse } from './Adresse'
+import { InfoWrapper } from '../Soeknadsoversikt'
+import { BarnetTilGode } from './BarnetTilGode'
+import { IKommerSoekerTilgode, VilkaarsType } from '../../../../../store/reducers/BehandlingReducer'
 
-export const SoeknadOversiktKommerSoekerTilgode = ({
-  kommerSoekerTilgode,
-}: {
-  kommerSoekerTilgode: IKommerSoekerTilgode
-}) => {
+export const OversiktKommerSoekerTilgode = ({ kommerSoekerTilgode }: { kommerSoekerTilgode: IKommerSoekerTilgode }) => {
   const sammeAdresse = kommerSoekerTilgode.kommerSoekerTilgodeVurdering.vilkaar.find(
     (vilkaar) => vilkaar.navn === VilkaarsType.SAMME_ADRESSE
   )

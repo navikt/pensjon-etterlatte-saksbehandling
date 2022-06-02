@@ -3,21 +3,22 @@ import { useContext } from 'react'
 import { AppContext } from '../../../../../store/AppContext'
 import {
   IKriterie,
+  IPersoninfoAvdoed,
   Kriterietype,
   VilkaarsType,
   VurderingsResultat,
 } from '../../../../../store/reducers/BehandlingReducer'
-import { IAvdoedFraSak, PersonStatus, RelatertPersonsRolle } from '../../../types'
-import { AlertVarsel } from '../../AlertVarsel'
+import { PersonStatus, RelatertPersonsRolle } from '../../../types'
 import { WarningIcon } from '../../../../../shared/icons/warningIcon'
-import { PersonInfo } from './personinfo/PersonInfo'
+import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { IconWrapper, PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { PeopleIcon } from '../../../../../shared/icons/peopleIcon'
 import { ForelderWrap } from '../../styled'
 import { format } from 'date-fns'
+import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 
 type Props = {
-  person: IAvdoedFraSak
+  person: IPersoninfoAvdoed
 }
 
 export const AvdoedForelder: React.FC<Props> = ({ person }) => {
@@ -34,8 +35,7 @@ export const AvdoedForelder: React.FC<Props> = ({ person }) => {
       doedsfallVilkaar &&
       doedsfallVilkaar.kriterier.find((krit: IKriterie) => krit.navn === Kriterietype.AVDOED_ER_FORELDER).resultat
 
-    const avdoedErLikISoeknad = person?.fnrFraSoeknad === person?.fnr
-    setFeilForelderOppgittSomAvdoed(avdoedErForelderVilkaar && !avdoedErLikISoeknad)
+    setFeilForelderOppgittSomAvdoed(avdoedErForelderVilkaar)
     setForelderErDoed(avdoedErForelderVilkaar)
   }, [])
 
@@ -54,22 +54,11 @@ export const AvdoedForelder: React.FC<Props> = ({ person }) => {
         <span className="personRolle">
           ({PersonStatus.AVDOED} {RelatertPersonsRolle.FORELDER})
         </span>
-        <ForelderWrap avdoed={true}>Død {format(new Date(person.datoForDoedsfall), 'dd.MM.yyyy')}</ForelderWrap>
+        <ForelderWrap avdoed={true}>Død {format(new Date(person.doedsdato), 'dd.MM.yyyy')}</ForelderWrap>
       </PersonHeader>
       <PersonInfoWrapper>
-        <PersonInfo
-          fnr={person.fnr}
-          fnrFraSoeknad={person.fnrFraSoeknad}
-          bostedEtterDoedsdato={person.adresser}
-          avdoedPerson={true}
-        />
-        <div>
-          {feilForelderOppgittSomAvdoed && <AlertVarsel varselType="ikke riktig oppgitt avdød i søknad" />}
-          {forelderErDoed === VurderingsResultat.IKKE_OPPFYLT && <AlertVarsel varselType="forelder ikke død" />}
-          {forelderErDoed === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
-            <AlertVarsel varselType="mangler" />
-          )}
-        </div>
+        <PersonInfoFnr fnr={person.fnr} />
+        <PersonInfoAdresse adresser={person.adresser} visHistorikk={false} />
       </PersonInfoWrapper>
     </PersonBorder>
   )

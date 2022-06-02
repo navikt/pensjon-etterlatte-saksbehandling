@@ -722,8 +722,34 @@
       ],
       "vurdertDato": "2022-05-31T12:53:36.206922854"
     },
-    "familieforhold": [
-      {
+    "familieforhold": {
+      "avdoed": {
+        "navn": "VAKKER LAPP",
+        "fnr": "22128202440",
+        "rolle": "AVDOED",
+        "adresser": {
+          "bostedadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Bøveien 937",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "8475",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "1999-01-01T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "oppholdadresse": [],
+          "kontaktadresse": []
+        },
+        "doedsdato": "2022-01-01"
+      },
+      "soeker": {
         "navn": "TALENTFULL BLYANT",
         "fnr": "12101376212",
         "rolle": "BARN",
@@ -746,9 +772,10 @@
           ],
           "oppholdadresse": [],
           "kontaktadresse": []
-        }
+        },
+        "foedselsdato": "2015-01-01"
       },
-      {
+      "gjenlevendeForelder": {
         "navn": "BRÅKETE POTET",
         "fnr": "03108718357",
         "rolle": "GJENLEVENDE",
@@ -772,33 +799,8 @@
           "oppholdadresse": [],
           "kontaktadresse": []
         }
-      },
-      {
-        "navn": "VAKKER LAPP",
-        "fnr": "22128202440",
-        "rolle": "AVDOED",
-        "adresser": {
-          "bostedadresse": [
-            {
-              "type": "VEGADRESSE",
-              "aktiv": true,
-              "coAdresseNavn": null,
-              "adresseLinje1": "Bøveien 937",
-              "adresseLinje2": null,
-              "adresseLinje3": null,
-              "postnr": "8475",
-              "poststed": null,
-              "land": null,
-              "kilde": "FREG",
-              "gyldigFraOgMed": "1999-01-01T00:00:00",
-              "gyldigTilOgMed": null
-            }
-          ],
-          "oppholdadresse": [],
-          "kontaktadresse": []
-        }
       }
-    ]
+    }
   },
   "beregning": null,
   "fastsatt": false

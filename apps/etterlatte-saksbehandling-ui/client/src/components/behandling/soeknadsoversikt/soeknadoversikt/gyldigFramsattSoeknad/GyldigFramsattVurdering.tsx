@@ -8,7 +8,7 @@ import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
 import { mapGyldighetstyperTilTekst } from '../../utils'
 import { Title, Undertekst, Wrapper } from './styled'
 
-export const SoeknadGyldigFremsatt = ({
+export const GyldigFramsattVurdering = ({
   gyldigFramsatt,
   innsenderHarForeldreansvar,
   innsenderErForelder,
@@ -33,10 +33,6 @@ export const SoeknadGyldigFremsatt = ({
         <Undertekst gray={true}>Automatisk {format(new Date(gyldigFramsatt.vurdertDato), 'dd.MM.yyyy')}</Undertekst>
         {gyldigFramsatt.resultat !== VurderingsResultat.OPPFYLT && <Undertekst gray={false}>{sjekkInfo()}</Undertekst>}
       </div>
-      {/* <Endre>
-        <LockedIcon /> <span className="text">Endre</span>
-      </Endre>
-      */}
     </Wrapper>
   )
 }

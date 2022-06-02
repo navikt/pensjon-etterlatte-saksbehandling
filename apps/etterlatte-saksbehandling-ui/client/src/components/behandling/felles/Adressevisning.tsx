@@ -1,5 +1,5 @@
 import { IAdresse } from '../types'
-import {format} from 'date-fns'
+import { format } from 'date-fns'
 import { HistorikkElement } from '../soeknadsoversikt/styled'
 
 export const Adressevisning = ({
@@ -50,7 +50,7 @@ export const Adresse = ({
             {fra} - {til}:
           </span>
           <span>
-            {adresse.adresseLinje1}, {adresse.poststed}
+            {adresse.adresseLinje1} {adresse.poststed}
           </span>
         </HistorikkElement>
       ) : (

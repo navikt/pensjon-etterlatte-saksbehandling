@@ -1,4 +1,5 @@
 import { IAction } from '../AppContext'
+import { IAdresse } from '../../components/behandling/types'
 
 export interface IDetaljertBehandling {
   id: string
@@ -13,13 +14,43 @@ export interface IDetaljertBehandling {
 
 export interface IKommerSoekerTilgode {
   kommerSoekerTilgodeVurdering: IVilkaarResultat
-  familieforhold: IFamiliemedlem[]
+  familieforhold: IFamiliemedlemmer
 }
 
-export interface IFamiliemedlem {
+export interface IFamiliemedlemmer {
+  avdoed: IPersoninfoAvdoed
+  soeker: IPersoninfoSoeker
+  gjenlevendeForelder: IPersoninfoGjenlevendeForelder
+}
+
+export interface IPersoninfoAvdoed {
   navn: string
   fnr: string
   rolle: PersonRolle
+  adresser: IAdresser
+  doedsdato: string
+}
+
+export interface IPersoninfoSoeker {
+  navn: string
+  fnr: string
+  rolle: PersonRolle
+  adresser: IAdresser
+  foedselsdato: string
+}
+
+export interface IPersoninfoGjenlevendeForelder {
+  navn: string
+  fnr: string
+  rolle: PersonRolle
+  adresser: IAdresser
+  adresseSoeknad: string
+}
+
+export interface IAdresser {
+  bostedadresse: IAdresse[]
+  oppholdadresse: IAdresse[]
+  kontaktadresse: IAdresse[]
 }
 
 export interface IBehandlingsopplysning {
@@ -155,7 +186,29 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   gyldighetsprøving: { resultat: undefined, vurderinger: [], vurdertDato: '' },
   kommerSoekerTilgode: {
     kommerSoekerTilgodeVurdering: { resultat: undefined, vilkaar: [], vurdertDato: '' },
-    familieforhold: [],
+    familieforhold: {
+      avdoed: {
+        navn: '',
+        fnr: '',
+        rolle: PersonRolle.AVDOED,
+        adresser: { bostedadresse: [], oppholdadresse: [], kontaktadresse: [] },
+        doedsdato: '',
+      },
+      soeker: {
+        navn: '',
+        fnr: '',
+        rolle: PersonRolle.AVDOED,
+        adresser: { bostedadresse: [], oppholdadresse: [], kontaktadresse: [] },
+        foedselsdato: '',
+      },
+      gjenlevendeForelder: {
+        navn: '',
+        fnr: '',
+        rolle: PersonRolle.AVDOED,
+        adresser: { bostedadresse: [], oppholdadresse: [], kontaktadresse: [] },
+        adresseSoeknad: '',
+      },
+    },
   },
   beregning: undefined,
   fastsatt: false,

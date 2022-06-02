@@ -1,14 +1,18 @@
-import { IBarnFraSak, RelatertPersonsRolle } from '../../../types'
-import { PersonInfo } from './personinfo/PersonInfo'
+import { RelatertPersonsRolle } from '../../../types'
+import { PersonInfoFnr } from './personinfo/PersonInfoFnr'
 import { PersonBorder, PersonHeader, PersonInfoWrapper } from '../styled'
 import { ChildIcon } from '../../../../../shared/icons/childIcon'
 import { TypeStatusWrap } from '../../styled'
+import { IPersoninfoSoeker, IVilkaarsproving } from '../../../../../store/reducers/BehandlingReducer'
+import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 
 type Props = {
-  person: IBarnFraSak
+  person: IPersoninfoSoeker
+  barnOgGjenlevendeSammeAdresse: IVilkaarsproving | undefined
+  alderVedDoedsdato: string
 }
 
-export const Barn: React.FC<Props> = ({ person }) => {
+export const Barn: React.FC<Props> = ({ person, barnOgGjenlevendeSammeAdresse, alderVedDoedsdato }) => {
   return (
     <PersonBorder>
       <PersonHeader>
@@ -16,15 +20,11 @@ export const Barn: React.FC<Props> = ({ person }) => {
           <ChildIcon />
         </span>
         {person.navn} <span className="personRolle">({RelatertPersonsRolle.BARN})</span>
-        <TypeStatusWrap type="barn">{person.alderEtterlatt} år</TypeStatusWrap>
+        <TypeStatusWrap type="barn">{alderVedDoedsdato} år</TypeStatusWrap>
       </PersonHeader>
       <PersonInfoWrapper>
-        <PersonInfo
-          fnr={person.fnr}
-          fnrFraSoeknad={person.fnrFraSoeknad}
-          bostedEtterDoedsdato={person.adresser}
-          avdoedPerson={false}
-        />
+        <PersonInfoFnr fnr={person.fnr} />
+        <PersonInfoAdresse adresser={person.adresser} visHistorikk={true} />
       </PersonInfoWrapper>
     </PersonBorder>
   )

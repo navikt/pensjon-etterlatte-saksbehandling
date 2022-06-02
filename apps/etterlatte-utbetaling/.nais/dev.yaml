@@ -25,6 +25,9 @@ spec:
       - type: POSTGRES_14
         name: etterlatte-utbetaling
         cascadingDelete: true
+        databases:
+          - name: utbetaling
+            envVarPrefix: DB
   kafka:
     pool: nav-dev
   azure:

@@ -44,7 +44,12 @@ class VedtakMottaker(
         River(rapidsConnection).apply {
             validate { it.demandValue("@event_name", "vedtak_fattet") }
             validate { it.requireKey("@vedtak") }
-            validate { it.requireAny("@vedtak.type", listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name)) }
+            validate {
+                it.requireAny(
+                    "@vedtak.type",
+                    listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name, VedtakType.ENDRING.name)
+                )
+            }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }

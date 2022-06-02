@@ -1,7 +1,7 @@
 {
   "@event_name": "vedtak_fattet",
   "@vedtak": {
-    "vedtakId": 20,
+    "vedtakId": 21,
     "virk": {
       "fom": "2022-01",
       "tom": "2022-02"
@@ -9,10 +9,10 @@
     "sak": {
       "ident": "16017919184",
       "sakType": "",
-      "id": 6
+      "id": 7
     },
     "behandling": {
-      "type": "REVURDERING",
+      "type": "FORSTEGANGSBEHANDLING",
       "id": "a89c2e15-4f32-44b3-b976-4c862d830213"
     },
     "type": "INNVILGELSE",
@@ -22,9 +22,9 @@
     "avkorting": null,
     "pensjonTilUtbetaling": [
       {
-        "id": 21,
+        "id": 22,
         "periode": {
-          "fom": "2022-06",
+          "fom": "2022-07",
           "tom": null
         },
         "beloep": 5000,

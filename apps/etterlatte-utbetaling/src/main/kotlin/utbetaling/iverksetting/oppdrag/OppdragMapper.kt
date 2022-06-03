@@ -91,3 +91,4 @@ object OppdragMapper {
 }
 
 fun Oppdrag.vedtakId() = oppdrag110.oppdragsLinje150.first().vedtakId.toLong()
+fun Oppdrag.sakId() = oppdrag110.fagsystemId

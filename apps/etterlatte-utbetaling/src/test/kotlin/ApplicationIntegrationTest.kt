@@ -78,7 +78,7 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(vedtakEvent(vedtak()))
 
         verify(timeout = TIMEOUT) {
-            rapidsConnection.publish("key",
+            rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.eventName == EVENT_NAME_OPPDATERT &&
@@ -95,7 +95,7 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(vedtakEvent(ugyldigVedtakTilUtbetaling()))
 
         verify(timeout = TIMEOUT) {
-            rapidsConnection.publish("key",
+            rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.eventName == EVENT_NAME_OPPDATERT &&
@@ -116,7 +116,7 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(vedtakEvent(vedtak()))
 
         verify(timeout = TIMEOUT) {
-            rapidsConnection.publish("key",
+            rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.eventName == EVENT_NAME_OPPDATERT &&
@@ -135,7 +135,7 @@ class ApplicationIntegrationTest {
         sendFattetVedtakEvent(vedtakEvent(vedtak(vedtakId = 2)))
 
         verify(timeout = TIMEOUT) {
-            rapidsConnection.publish("key",
+            rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.eventName == EVENT_NAME_OPPDATERT &&
@@ -156,7 +156,7 @@ class ApplicationIntegrationTest {
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering())
 
         verify(timeout = TIMEOUT) {
-            rapidsConnection.publish("key",
+            rapidsConnection.publish(any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.eventName == EVENT_NAME_OPPDATERT &&
@@ -173,7 +173,7 @@ class ApplicationIntegrationTest {
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering())
 
         verify(timeout = TIMEOUT) {
-            rapidsConnection.publish("key",
+            rapidsConnection.publish(any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.eventName == EVENT_NAME_OPPDATERT &&
@@ -192,7 +192,7 @@ class ApplicationIntegrationTest {
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering()) // forventer at status skal være SENDT
 
         verify(timeout = TIMEOUT) {
-            rapidsConnection.publish("key",
+            rapidsConnection.publish(any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.eventName == EVENT_NAME_OPPDATERT &&
@@ -211,7 +211,7 @@ class ApplicationIntegrationTest {
         simulerKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering())
 
         verify(timeout = TIMEOUT) {
-            rapidsConnection.publish("key",
+            rapidsConnection.publish(any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.eventName == EVENT_NAME_OPPDATERT &&

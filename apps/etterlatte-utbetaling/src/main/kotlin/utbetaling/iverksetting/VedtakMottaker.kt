@@ -36,7 +36,7 @@ data class UtbetalingResponse(
 )
 
 class VedtakMottaker(
-    private val rapidsConnection: RapidsConnection,
+    rapidsConnection: RapidsConnection,
     private val utbetalingService: UtbetalingService,
 ) : River.PacketListener {
 
@@ -64,24 +64,24 @@ class VedtakMottaker(
                 when (val resultat = utbetalingService.iverksettUtbetaling(vedtak)) {
                     is SendtTilOppdrag -> {
                         logger.info("Vedtak med vedtakId=${vedtak.vedtakId} sendt til oppdrag - avventer kvittering")
-                        sendUtbetalingSendtEvent(resultat.utbetaling)
+                        sendUtbetalingSendtEvent(context, resultat.utbetaling)
                     }
                     is UtbetalingForVedtakEksisterer -> {
                         val feilmelding = "Vedtak med vedtakId=${vedtak.vedtakId} eksisterer fra før"
                         logger.error(feilmelding)
-                        sendUtbetalingFeiletEvent(vedtak.vedtakId, feilmelding)
+                        sendUtbetalingFeiletEvent(context, vedtak.vedtakId, feilmelding)
                     }
                     is UtbetalingslinjerForVedtakEksisterer -> {
                         val ider = resultat.utbetalingslinjer.joinToString(",") { it.id.value.toString() }
                         val feilmelding = "En eller flere utbetalingslinjer med id=[$ider] eksisterer fra før"
                         logger.error(feilmelding)
-                        sendUtbetalingFeiletEvent(vedtak.vedtakId, feilmelding)
+                        sendUtbetalingFeiletEvent(context, vedtak.vedtakId, feilmelding)
                     }
                 }
             } catch (e: Exception) {
                 val feilmelding = "En feil oppstod under prosessering av vedtak med vedtakId=$vedtakId: ${e.message}"
                 logger.error(feilmelding, e)
-                sendUtbetalingFeiletEvent(vedtakId, feilmelding)
+                sendUtbetalingFeiletEvent(context, vedtakId, feilmelding)
 
                 if (feilSkalKastesVidere(e)) throw e
             }
@@ -99,8 +99,8 @@ class VedtakMottaker(
         return e !is KunneIkkeLeseVedtakException
     }
 
-    private fun sendUtbetalingFeiletEvent(vedtakId: Long? = null, beskrivelse: String) {
-        rapidsConnection.publish("key",
+    private fun sendUtbetalingFeiletEvent(context: MessageContext, vedtakId: Long? = null, beskrivelse: String) {
+        context.publish(
             UtbetalingEvent(
                 utbetalingResponse = UtbetalingResponse(
                     status = UtbetalingStatus.FEILET,
@@ -111,8 +111,8 @@ class VedtakMottaker(
         )
     }
 
-    private fun sendUtbetalingSendtEvent(utbetaling: Utbetaling) {
-        rapidsConnection.publish("key",
+    private fun sendUtbetalingSendtEvent(context: MessageContext, utbetaling: Utbetaling) {
+        context.publish(
             UtbetalingEvent(
                 utbetalingResponse = UtbetalingResponse(
                     status = utbetaling.status,

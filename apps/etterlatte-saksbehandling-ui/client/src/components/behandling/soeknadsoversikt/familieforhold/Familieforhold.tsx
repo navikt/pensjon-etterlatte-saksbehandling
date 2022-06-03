@@ -26,29 +26,45 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ kommerSoekerTilg
 
   return (
     <>
-      <ContentHeader>
-        <Heading spacing size="medium" level="5">
-          Familieforhold
-        </Heading>
-      </ContentHeader>
-      <FamilieforholdWrapper>
-        <DashedBorder />
-        <Barn
-          person={kommerSoekerTilgode.familieforhold.soeker}
-          alderVedDoedsdato={hentAlderVedDoedsdato(
-            kommerSoekerTilgode.familieforhold.soeker.foedselsdato,
-            kommerSoekerTilgode.familieforhold.avdoed.doedsdato
-          )}
-        />
-        <DashedBorder />
-        <GjenlevendeForelder
-          person={kommerSoekerTilgode.familieforhold.gjenlevendeForelder}
-          innsenderErGjenlevendeForelder={innsenderErGjenlevende}
-        />
-        <DashedBorder />
-        <AvdoedForelder person={kommerSoekerTilgode.familieforhold.avdoed} />
-      </FamilieforholdWrapper>
-      <Border />
+      {gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT ? (
+        <>
+          <ContentHeader>
+            <Heading spacing size="medium" level="5">
+              Familieforhold
+            </Heading>
+          </ContentHeader>
+          <FamilieforholdWrapper>
+            <DashedBorder />
+            <Barn
+              person={kommerSoekerTilgode.familieforhold.soeker}
+              alderVedDoedsdato={hentAlderVedDoedsdato(
+                kommerSoekerTilgode.familieforhold.soeker.foedselsdato,
+                kommerSoekerTilgode.familieforhold.avdoed.doedsdato
+              )}
+            />
+            <DashedBorder />
+            <GjenlevendeForelder
+              person={kommerSoekerTilgode.familieforhold.gjenlevendeForelder}
+              innsenderErGjenlevendeForelder={innsenderErGjenlevende}
+            />
+            <DashedBorder />
+            <AvdoedForelder person={kommerSoekerTilgode.familieforhold.avdoed} />
+          </FamilieforholdWrapper>
+          <Border />
+        </>
+      ) : (
+        { innsenderErGjenlevende } && (
+          <>
+            <FamilieforholdWrapper>
+              <GjenlevendeForelder
+                person={kommerSoekerTilgode.familieforhold.gjenlevendeForelder}
+                innsenderErGjenlevendeForelder={innsenderErGjenlevende}
+              />
+            </FamilieforholdWrapper>
+            <Border />
+          </>
+        )
+      )}
     </>
   )
 }

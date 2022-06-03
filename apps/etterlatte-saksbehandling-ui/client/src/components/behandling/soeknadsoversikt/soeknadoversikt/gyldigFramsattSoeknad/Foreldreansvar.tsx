@@ -1,47 +1,29 @@
-import { Label } from '@navikt/ds-react'
-import { DetailWrapper, WarningIconWrapper } from '../../styled'
-import { WarningIcon } from '../../../../../shared/icons/warningIcon'
 import { VurderingsResultat, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
+import { OversiktElement } from '../OversiktElement'
 
-export const Foreldreansvar = ({
-  innsenderHarForeldreansvar,
-}: {
+interface Props {
   innsenderHarForeldreansvar: IGyldighetproving | undefined
-}) => {
-  const navn = innsenderHarForeldreansvar?.basertPaaOpplysninger?.innsender?.navn
-  return (
-    <DetailWrapper>
-      {innsenderHarForeldreansvar?.resultat === VurderingsResultat.OPPFYLT && (
-        <div>
-          <Label size="small">Foreldreansvar</Label>
-          {navn}
-          <div>(gjenlevende forelder)</div>
-        </div>
-      )}
+}
 
-      {innsenderHarForeldreansvar?.resultat === VurderingsResultat.IKKE_OPPFYLT && (
-        <div>
-          <Label size="small" className="labelWrapperWithIcon">
-            <WarningIconWrapper>
-              <WarningIcon />
-            </WarningIconWrapper>
-            Foreldreansvar
-          </Label>
-          <span className="warningText">Innsender har ikke foreldreansvar</span>
-        </div>
-      )}
+export const Foreldreansvar = ({ innsenderHarForeldreansvar }: Props) => {
+  const navn =
+    innsenderHarForeldreansvar?.resultat === VurderingsResultat.OPPFYLT
+      ? innsenderHarForeldreansvar?.basertPaaOpplysninger?.innsender?.navn
+      : undefined
+  const label = 'Foreldreansvar'
+  const tekst = settTekst(innsenderHarForeldreansvar?.resultat)
+  const erOppfylt = innsenderHarForeldreansvar?.resultat === VurderingsResultat.OPPFYLT
 
-      {innsenderHarForeldreansvar?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
-        <div>
-          <Label size="small" className="labelWrapperWithIcon">
-            <WarningIconWrapper>
-              <WarningIcon />
-            </WarningIconWrapper>
-            Foreldreansvar
-          </Label>
-          <span className="warningText">Mangler info</span>
-        </div>
-      )}
-    </DetailWrapper>
-  )
+  function settTekst(vurdering: VurderingsResultat | undefined): string {
+    switch (vurdering) {
+      case VurderingsResultat.OPPFYLT:
+        return '(gjenlevende forelder)'
+      case VurderingsResultat.IKKE_OPPFYLT:
+        return 'Innsender har ikke foreldreansvar'
+      default:
+        return 'Mangler info'
+    }
+  }
+
+  return <OversiktElement navn={navn} label={label} tekst={tekst} erOppfylt={erOppfylt} />
 }

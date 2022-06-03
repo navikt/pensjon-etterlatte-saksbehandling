@@ -1,45 +1,29 @@
-import { Label } from '@navikt/ds-react'
-import { DetailWrapper, WarningIconWrapper } from '../../styled'
-import { VurderingsResultat, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
-import { WarningIcon } from '../../../../../shared/icons/warningIcon'
+import { IGyldighetproving, VurderingsResultat } from '../../../../../store/reducers/BehandlingReducer'
+import { OversiktElement } from '../OversiktElement'
 
-export const Innsender = ({ innsenderErForelder }: { innsenderErForelder: IGyldighetproving | undefined }) => {
-  const navn = innsenderErForelder?.basertPaaOpplysninger?.innsender?.navn
+interface Props {
+  innsenderErForelder: IGyldighetproving | undefined
+}
 
-  return (
-    <DetailWrapper>
-      {innsenderErForelder?.resultat === VurderingsResultat.OPPFYLT && (
-        <div>
-          <Label size="small">Innsender</Label>
-          {navn}
-          <div>(gjenlevende forelder)</div>
-        </div>
-      )}
+export const Innsender = ({ innsenderErForelder }: Props) => {
+  const navn =
+    innsenderErForelder?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+      ? undefined
+      : innsenderErForelder?.basertPaaOpplysninger?.innsender?.navn
+  const label = 'Innsender'
+  const tekst = settTekst(innsenderErForelder?.resultat)
+  const erOppfylt = innsenderErForelder?.resultat === VurderingsResultat.OPPFYLT
 
-      {innsenderErForelder?.resultat === VurderingsResultat.IKKE_OPPFYLT && (
-        <div>
-          <Label size="small" className="labelWrapperWithIcon">
-            <WarningIconWrapper>
-              <WarningIcon />
-            </WarningIconWrapper>
-            Innsender
-          </Label>
-          <span>{navn}</span>
-          <div className="warningText"> Ikke gjenlevende forelder</div>
-        </div>
-      )}
+  function settTekst(vurdering: VurderingsResultat | undefined): string {
+    switch (vurdering) {
+      case VurderingsResultat.OPPFYLT:
+        return '(gjenlevende forelder)'
+      case VurderingsResultat.IKKE_OPPFYLT:
+        return 'Ikke gjenlevende forelder'
+      default:
+        return 'Mangler info'
+    }
+  }
 
-      {innsenderErForelder?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
-        <div>
-          <Label size="small" className="labelWrapperWithIcon">
-            <WarningIconWrapper>
-              <WarningIcon />
-            </WarningIconWrapper>
-            Innsender
-          </Label>
-          <span className="warningText">Mangler info</span>
-        </div>
-      )}
-    </DetailWrapper>
-  )
+  return <OversiktElement navn={navn} label={label} tekst={tekst} erOppfylt={erOppfylt} />
 }

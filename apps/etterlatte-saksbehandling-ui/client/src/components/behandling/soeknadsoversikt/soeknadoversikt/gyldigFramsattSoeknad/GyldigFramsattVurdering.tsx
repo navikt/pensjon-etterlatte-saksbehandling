@@ -1,7 +1,7 @@
 import {
-  VurderingsResultat,
-  IGyldighetResultat,
   IGyldighetproving,
+  IGyldighetResultat,
+  VurderingsResultat,
 } from '../../../../../store/reducers/BehandlingReducer'
 import { format } from 'date-fns'
 import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
@@ -17,15 +17,22 @@ export const GyldigFramsattVurdering = ({
   innsenderHarForeldreansvar: IGyldighetproving | undefined
   innsenderErForelder: IGyldighetproving | undefined
 }) => {
-  const hentTekst = (): any => {
-    const harForeldreansvar = innsenderHarForeldreansvar && mapGyldighetstyperTilTekst(innsenderHarForeldreansvar)
-    const erForelder = innsenderErForelder && mapGyldighetstyperTilTekst(innsenderErForelder)
+  const hentTekst = (): string | undefined => {
+    if (gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT) {
+      return undefined
+    } else {
+      const harForeldreansvar = mapGyldighetstyperTilTekst(innsenderHarForeldreansvar)
+      const erForelder = mapGyldighetstyperTilTekst(innsenderErForelder)
+      const avklarSetning = 'Dette må avklares før du kan starte vilkårsvurderingen. '
+      const string = erForelder + harForeldreansvar + avklarSetning
 
-    innsenderErForelder?.resultat !== VurderingsResultat.OPPFYLT ? erForelder : harForeldreansvar
+      return string
+    }
   }
 
   const tittel =
     gyldigFramsatt.resultat !== VurderingsResultat.OPPFYLT ? 'Søknad ikke gyldig fremsatt' : 'Søknad gyldig fremsatt'
+  const vurderingstekst = hentTekst()
 
   return (
     <Wrapper>
@@ -33,7 +40,9 @@ export const GyldigFramsattVurdering = ({
       <div>
         <Title>{tittel}</Title>
         <Undertekst gray={true}>Automatisk {format(new Date(gyldigFramsatt.vurdertDato), 'dd.MM.yyyy')}</Undertekst>
-        {gyldigFramsatt.resultat !== VurderingsResultat.OPPFYLT && <Undertekst gray={false}>{hentTekst()}</Undertekst>}
+        {gyldigFramsatt.resultat !== VurderingsResultat.OPPFYLT && (
+          <Undertekst gray={false}>{vurderingstekst}</Undertekst>
+        )}
       </div>
     </Wrapper>
   )

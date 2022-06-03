@@ -35,9 +35,9 @@ spec:
     - name: ETTERLATTE_PROXY_INNTEKT
       value: http://etterlatte-proxy/aad/inntektskomponenten
     - name: ETTERLATTE_PROXY_AUDIENCE
-      value: "dev-gcp:etterlatte:etterlatte-proxy"
+      value: "dev-fss:etterlatte:etterlatte-proxy"
     - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-proxy/.default
+      value: api://dev-fss.etterlatte.etterlatte-proxy/.default
   accessPolicy:
     outbound:
       rules:

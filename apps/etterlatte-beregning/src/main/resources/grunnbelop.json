@@ -1,0 +1,483 @@
+{
+  "grunnbeløp": [
+    {
+      "dato": "2022-05-01",
+      "grunnbeløp": 111477,
+      "grunnbeløpPerMåned": 9290,
+      "gjennomsnittPerÅr": 109784,
+      "omregningsfaktor": 1.047726,
+      "virkningstidspunktForMinsteinntekt": "2022-05-23"
+    },
+    {
+      "dato": "2021-05-01",
+      "grunnbeløp": 106399,
+      "grunnbeløpPerMåned": 8867,
+      "gjennomsnittPerÅr": 104716,
+      "omregningsfaktor": 1.049807,
+      "virkningstidspunktForMinsteinntekt": "2021-05-24"
+    },
+    {
+      "dato": "2020-05-01",
+      "grunnbeløp": 101351,
+      "grunnbeløpPerMåned": 8446,
+      "gjennomsnittPerÅr": 100853,
+      "omregningsfaktor": 1.014951,
+      "virkningstidspunktForMinsteinntekt": "2020-09-21"
+    },
+    {
+      "dato": "2019-05-01",
+      "grunnbeløp": 99858,
+      "grunnbeløpPerMåned": 8322,
+      "gjennomsnittPerÅr": 98866,
+      "omregningsfaktor": 1.030707,
+      "virkningstidspunktForMinsteinntekt": "2019-05-27"
+    },
+    {
+      "dato": "2018-05-01",
+      "grunnbeløp": 96883,
+      "grunnbeløpPerMåned": 8074,
+      "gjennomsnittPerÅr": 95800,
+      "omregningsfaktor": 1.034699,
+      "virkningstidspunktForMinsteinntekt": "2018-06-04"
+    },
+    {
+      "dato": "2017-05-01",
+      "grunnbeløp": 93634,
+      "grunnbeløpPerMåned": 7803,
+      "gjennomsnittPerÅr": 93281,
+      "omregningsfaktor": 1.011428,
+      "virkningstidspunktForMinsteinntekt": "2017-05-29"
+    },
+    {
+      "dato": "2016-05-01",
+      "grunnbeløp": 92576,
+      "grunnbeløpPerMåned": 7715,
+      "gjennomsnittPerÅr": 91740,
+      "omregningsfaktor": 1.027846,
+      "virkningstidspunktForMinsteinntekt": "2016-05-30"
+    },
+    {
+      "dato": "2015-05-01",
+      "grunnbeløp": 90068,
+      "grunnbeløpPerMåned": 7506,
+      "gjennomsnittPerÅr": 89502,
+      "omregningsfaktor": 1.019214,
+      "virkningstidspunktForMinsteinntekt": "2015-06-01"
+    },
+    {
+      "dato": "2014-05-01",
+      "grunnbeløp": 88370,
+      "grunnbeløpPerMåned": 7364,
+      "gjennomsnittPerÅr": 87328,
+      "omregningsfaktor": 1.036659,
+      "virkningstidspunktForMinsteinntekt": "2014-06-30"
+    },
+    {
+      "dato": "2013-05-01",
+      "grunnbeløp": 85245,
+      "grunnbeløpPerMåned": 7104,
+      "gjennomsnittPerÅr": 84204,
+      "omregningsfaktor": 1.038029,
+      "virkningstidspunktForMinsteinntekt": "2013-06-24"
+    },
+    {
+      "dato": "2012-05-01",
+      "grunnbeløp": 82122,
+      "grunnbeløpPerMåned": 6844,
+      "gjennomsnittPerÅr": 81153,
+      "omregningsfaktor": 1.036685
+    },
+    {
+      "dato": "2011-05-01",
+      "grunnbeløp": 79216,
+      "grunnbeløpPerMåned": 6601,
+      "gjennomsnittPerÅr": 78024,
+      "omregningsfaktor": 1.047263
+    },
+    {
+      "dato": "2010-05-01",
+      "grunnbeløp": 75641,
+      "grunnbeløpPerMåned": 6303,
+      "gjennomsnittPerÅr": 74721,
+      "omregningsfaktor": 1.03787
+    },
+    {
+      "dato": "2009-05-01",
+      "grunnbeløp": 72881,
+      "grunnbeløpPerMåned": 6073,
+      "gjennomsnittPerÅr": 72006,
+      "omregningsfaktor": 1.037363
+    },
+    {
+      "dato": "2008-05-01",
+      "grunnbeløp": 70256,
+      "grunnbeløpPerMåned": 5855,
+      "gjennomsnittPerÅr": 69108,
+      "omregningsfaktor": 1.051548
+    },
+    {
+      "dato": "2007-05-01",
+      "grunnbeløp": 66812,
+      "grunnbeløpPerMåned": 5568,
+      "gjennomsnittPerÅr": 65505,
+      "omregningsfaktor": 1.062329
+    },
+    {
+      "dato": "2006-05-01",
+      "grunnbeløp": 62892,
+      "grunnbeløpPerMåned": 5241,
+      "gjennomsnittPerÅr": 62161,
+      "omregningsfaktor": 1.036129
+    },
+    {
+      "dato": "2005-05-01",
+      "grunnbeløp": 60699,
+      "grunnbeløpPerMåned": 5058,
+      "gjennomsnittPerÅr": 60059,
+      "omregningsfaktor": 1.032682
+    },
+    {
+      "dato": "2004-05-01",
+      "grunnbeløp": 58778,
+      "grunnbeløpPerMåned": 4898,
+      "gjennomsnittPerÅr": 58139,
+      "omregningsfaktor": 1.033714
+    },
+    {
+      "dato": "2003-05-01",
+      "grunnbeløp": 56861,
+      "grunnbeløpPerMåned": 4738,
+      "gjennomsnittPerÅr": 55964,
+      "omregningsfaktor": 1.049677
+    },
+    {
+      "dato": "2002-05-01",
+      "grunnbeløp": 54170,
+      "grunnbeløpPerMåned": 4514,
+      "gjennomsnittPerÅr": 53233,
+      "omregningsfaktor": 1.054712
+    },
+    {
+      "dato": "2001-05-01",
+      "grunnbeløp": 51360,
+      "grunnbeløpPerMåned": 4280,
+      "gjennomsnittPerÅr": 50603,
+      "omregningsfaktor": 1.046242
+    },
+    {
+      "dato": "2000-05-01",
+      "grunnbeløp": 49090,
+      "grunnbeløpPerMåned": 4091,
+      "gjennomsnittPerÅr": 48377,
+      "omregningsfaktor": 1.04558
+    },
+    {
+      "dato": "1999-05-01",
+      "grunnbeløp": 46950,
+      "grunnbeløpPerMåned": 3913,
+      "gjennomsnittPerÅr": 46423,
+      "omregningsfaktor": 1.034825
+    },
+    {
+      "dato": "1998-05-01",
+      "grunnbeløp": 45370,
+      "grunnbeløpPerMåned": 3781,
+      "gjennomsnittPerÅr": 44413,
+      "omregningsfaktor": 1.067529
+    },
+    {
+      "dato": "1997-05-01",
+      "grunnbeløp": 42500,
+      "grunnbeløpPerMåned": 3542,
+      "gjennomsnittPerÅr": 42000,
+      "omregningsfaktor": 1.036585
+    },
+    {
+      "dato": "1996-05-01",
+      "grunnbeløp": 41000,
+      "grunnbeløpPerMåned": 3417,
+      "gjennomsnittPerÅr": 40410,
+      "omregningsfaktor": 1.045119
+    },
+    {
+      "dato": "1995-05-01",
+      "grunnbeløp": 39230,
+      "grunnbeløpPerMåned": 3269,
+      "gjennomsnittPerÅr": 38847,
+      "omregningsfaktor": 1.0302
+    },
+    {
+      "dato": "1994-05-01",
+      "grunnbeløp": 38080,
+      "grunnbeløpPerMåned": 3173,
+      "gjennomsnittPerÅr": 37820,
+      "omregningsfaktor": 1.020912
+    },
+    {
+      "dato": "1993-05-01",
+      "grunnbeløp": 37300,
+      "grunnbeløpPerMåned": 3108,
+      "gjennomsnittPerÅr": 37033,
+      "omregningsfaktor": 1.021918
+    },
+    {
+      "dato": "1992-05-01",
+      "grunnbeløp": 36500,
+      "grunnbeløpPerMåned": 3042,
+      "gjennomsnittPerÅr": 36167,
+      "omregningsfaktor": 1.028169
+    },
+    {
+      "dato": "1991-05-01",
+      "grunnbeløp": 35500,
+      "grunnbeløpPerMåned": 2958,
+      "gjennomsnittPerÅr": 35033,
+      "omregningsfaktor": 1.041056
+    },
+    {
+      "dato": "1990-12-01",
+      "grunnbeløp": 34100,
+      "grunnbeløpPerMåned": 2842,
+      "gjennomsnittPerÅr": 33575,
+      "omregningsfaktor": 1.002941
+    },
+    {
+      "dato": "1990-05-01",
+      "grunnbeløp": 34000,
+      "grunnbeløpPerMåned": 2833,
+      "omregningsfaktor": 1.039755
+    },
+    {
+      "dato": "1989-04-01",
+      "grunnbeløp": 32700,
+      "grunnbeløpPerMåned": 2725,
+      "gjennomsnittPerÅr": 32275,
+      "omregningsfaktor": 1.054839
+    },
+    {
+      "dato": "1988-04-01",
+      "grunnbeløp": 31000,
+      "grunnbeløpPerMåned": 2583,
+      "gjennomsnittPerÅr": 30850,
+      "omregningsfaktor": 1.019737
+    },
+    {
+      "dato": "1988-01-01",
+      "grunnbeløp": 30400,
+      "grunnbeløpPerMåned": 2533,
+      "omregningsfaktor": 1.016722
+    },
+    {
+      "dato": "1987-05-01",
+      "grunnbeløp": 29900,
+      "grunnbeløpPerMåned": 2492,
+      "gjennomsnittPerÅr": 29267,
+      "omregningsfaktor": 1.067857
+    },
+    {
+      "dato": "1986-05-01",
+      "grunnbeløp": 28000,
+      "grunnbeløpPerMåned": 2333,
+      "gjennomsnittPerÅr": 27433,
+      "omregningsfaktor": 1.064639
+    },
+    {
+      "dato": "1986-01-01",
+      "grunnbeløp": 26300,
+      "grunnbeløpPerMåned": 2192,
+      "omregningsfaktor": 1.015444
+    },
+    {
+      "dato": "1985-05-01",
+      "grunnbeløp": 25900,
+      "grunnbeløpPerMåned": 2158,
+      "gjennomsnittPerÅr": 25333,
+      "omregningsfaktor": 1.070248
+    },
+    {
+      "dato": "1984-05-01",
+      "grunnbeløp": 24200,
+      "grunnbeløpPerMåned": 2017,
+      "gjennomsnittPerÅr": 23667,
+      "omregningsfaktor": 1.070796
+    },
+    {
+      "dato": "1983-05-01",
+      "grunnbeløp": 22600,
+      "grunnbeløpPerMåned": 1883,
+      "gjennomsnittPerÅr": 22333,
+      "omregningsfaktor": 1.036697
+    },
+    {
+      "dato": "1983-01-01",
+      "grunnbeløp": 21800,
+      "grunnbeløpPerMåned": 1817,
+      "omregningsfaktor": 1.028302
+    },
+    {
+      "dato": "1982-05-01",
+      "grunnbeløp": 21200,
+      "grunnbeløpPerMåned": 1767,
+      "gjennomsnittPerÅr": 20667,
+      "omregningsfaktor": 1.081633
+    },
+    {
+      "dato": "1981-10-01",
+      "grunnbeløp": 19600,
+      "grunnbeløpPerMåned": 1633,
+      "gjennomsnittPerÅr": 18658,
+      "omregningsfaktor": 1.026178
+    },
+    {
+      "dato": "1981-05-01",
+      "grunnbeløp": 19100,
+      "grunnbeløpPerMåned": 1592,
+      "omregningsfaktor": 1.097701
+    },
+    {
+      "dato": "1981-01-01",
+      "grunnbeløp": 17400,
+      "grunnbeløpPerMåned": 1450,
+      "omregningsfaktor": 1.029586
+    },
+    {
+      "dato": "1980-05-01",
+      "grunnbeløp": 16900,
+      "grunnbeløpPerMåned": 1408,
+      "gjennomsnittPerÅr": 16633,
+      "omregningsfaktor": 1.049689
+    },
+    {
+      "dato": "1980-01-01",
+      "grunnbeløp": 16100,
+      "grunnbeløpPerMåned": 1342,
+      "omregningsfaktor": 1.059211
+    },
+    {
+      "dato": "1979-01-01",
+      "grunnbeløp": 15200,
+      "grunnbeløpPerMåned": 1267,
+      "gjennomsnittPerÅr": 15200,
+      "omregningsfaktor": 1.034014
+    },
+    {
+      "dato": "1978-07-01",
+      "grunnbeløp": 14700,
+      "grunnbeløpPerMåned": 1225,
+      "gjennomsnittPerÅr": 14550,
+      "omregningsfaktor": 1.020833
+    },
+    {
+      "dato": "1977-12-01",
+      "grunnbeløp": 14400,
+      "grunnbeløpPerMåned": 1200,
+      "gjennomsnittPerÅr": 13383,
+      "omregningsfaktor": 1.074627
+    },
+    {
+      "dato": "1977-05-01",
+      "grunnbeløp": 13400,
+      "grunnbeløpPerMåned": 1117,
+      "omregningsfaktor": 1.022901
+    },
+    {
+      "dato": "1977-01-01",
+      "grunnbeløp": 13100,
+      "grunnbeløpPerMåned": 1092,
+      "omregningsfaktor": 1.082645
+    },
+    {
+      "dato": "1976-05-01",
+      "grunnbeløp": 12100,
+      "grunnbeløpPerMåned": 1008,
+      "gjennomsnittPerÅr": 12000,
+      "omregningsfaktor": 1.025424
+    },
+    {
+      "dato": "1976-01-01",
+      "grunnbeløp": 11800,
+      "grunnbeløpPerMåned": 983,
+      "omregningsfaktor": 1.072727
+    },
+    {
+      "dato": "1975-05-01",
+      "grunnbeløp": 11000,
+      "grunnbeløpPerMåned": 917,
+      "gjennomsnittPerÅr": 10800,
+      "omregningsfaktor": 1.057692
+    },
+    {
+      "dato": "1975-01-01",
+      "grunnbeløp": 10400,
+      "grunnbeløpPerMåned": 867,
+      "omregningsfaktor": 1.072165
+    },
+    {
+      "dato": "1974-05-01",
+      "grunnbeløp": 9700,
+      "grunnbeløpPerMåned": 808,
+      "gjennomsnittPerÅr": 9533,
+      "omregningsfaktor": 1.054348
+    },
+    {
+      "dato": "1974-01-01",
+      "grunnbeløp": 9200,
+      "grunnbeløpPerMåned": 767,
+      "omregningsfaktor": 1.082353
+    },
+    {
+      "dato": "1973-01-01",
+      "grunnbeløp": 8500,
+      "grunnbeløpPerMåned": 708,
+      "gjennomsnittPerÅr": 8500,
+      "omregningsfaktor": 1.075949
+    },
+    {
+      "dato": "1972-01-01",
+      "grunnbeløp": 7900,
+      "grunnbeløpPerMåned": 658,
+      "gjennomsnittPerÅr": 7900,
+      "omregningsfaktor": 1.053333
+    },
+    {
+      "dato": "1971-05-01",
+      "grunnbeløp": 7500,
+      "grunnbeløpPerMåned": 625,
+      "gjennomsnittPerÅr": 7400,
+      "omregningsfaktor": 1.041667
+    },
+    {
+      "dato": "1971-01-01",
+      "grunnbeløp": 7200,
+      "grunnbeløpPerMåned": 600,
+      "omregningsfaktor": 1.058824
+    },
+    {
+      "dato": "1970-01-01",
+      "grunnbeløp": 6800,
+      "grunnbeløpPerMåned": 567,
+      "gjennomsnittPerÅr": 6800,
+      "omregningsfaktor": 1.0625
+    },
+    {
+      "dato": "1969-01-01",
+      "grunnbeløp": 6400,
+      "grunnbeløpPerMåned": 533,
+      "gjennomsnittPerÅr": 6400,
+      "omregningsfaktor": 1.084746
+    },
+    {
+      "dato": "1968-01-01",
+      "grunnbeløp": 5900,
+      "grunnbeløpPerMåned": 492,
+      "gjennomsnittPerÅr": 5900,
+      "omregningsfaktor": 1.092593
+    },
+    {
+      "dato": "1967-01-01",
+      "grunnbeløp": 5400,
+      "grunnbeløpPerMåned": 450,
+      "gjennomsnittPerÅr": 5400
+    }
+  ]
+}

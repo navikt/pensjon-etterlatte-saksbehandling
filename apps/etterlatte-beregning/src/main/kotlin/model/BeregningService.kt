@@ -1,13 +1,14 @@
 package no.nav.etterlatte.model
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.*
+import com.fasterxml.jackson.module.kotlin.readValue
+import model.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.*
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -15,11 +16,13 @@ import java.util.*
 class BeregningService {
     private val logger = LoggerFactory.getLogger(BeregningService::class.java)
 
-    fun beregnResultat(opplysninger: List<VilkaarOpplysning<ObjectNode>>): BeregningsResultat {
+
+    fun beregnResultat(opplysninger: List<VilkaarOpplysning<ObjectNode>>, virkFOM: LocalDate): BeregningsResultat {
         logger.info("Leverer en fake beregning")
 
-        //TODO faktisk beregne noe
-        //val fiktivberegning = finnOpplysning<AvdoedSoeknad>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
+
+        //TODO lage beregningsperioder basert på grunnbeløpsperioder
+        val beregningsperioder = finnBeregningsperioder(virkFOM)
 
 
         return BeregningsResultat(
@@ -27,22 +30,25 @@ class BeregningService {
             type = Beregningstyper.GP,
             endringskode = Endringskode.NY,
             resultat = BeregningsResultatType.BEREGNET,
-            beregningsperioder = listOf(
-                Beregningsperiode(
+            beregningsperioder = beregningsperioder,
+            beregnetDato = LocalDateTime.now()
+        )
+    }
+
+    //TODO finne en smooth måte å beregne beregningsperioder
+    fun finnBeregningsperioder(virkFOM: LocalDate): List<Beregningsperiode> {
+        val grunnbeloep = Grunnbeloep.hentGforPeriode(virkFOM)
+        val perioder = grunnbeloep.map { Pair(it.dato, Grunnbeloep.beregnTom(it)) }
+
+        return perioder.map {
+            (Beregningsperiode(
                 delytelsesId = "First",
                 type = Beregningstyper.GP,
-                datoFOM = LocalDateTime.of(2022,2,2,0,1),
-                datoTOM = LocalDateTime.of(2030,1,4,0,1),
-                belop = 1000),
-                Beregningsperiode(
-                    delytelsesId = "First",
-                    type = Beregningstyper.GP,
-                    datoFOM = LocalDateTime.of(2030,2,1,0,1),
-                    datoTOM = LocalDateTime.of(2035,1,4,0,1),
-                    belop = 1001)
-                ),
-            beregnetDato = LocalDateTime.now()
-            )
+                datoFOM = it.first.atStartOfDay(),
+                datoTOM = it.second?.atStartOfDay() ?: LocalDateTime.MAX,
+                belop = Grunnbeloep.hentGjeldendeG(it.first).grunnbeløpPerMåned
+            ))
+        }
     }
 
     companion object {

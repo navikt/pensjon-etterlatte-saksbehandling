@@ -1,15 +1,14 @@
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.model.BeregningService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 internal class LesBeregningsmelding(
     rapidsConnection: RapidsConnection,
@@ -21,6 +20,7 @@ internal class LesBeregningsmelding(
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("grunnlag") }
             validate { it.requireKey("@vilkaarsvurdering") }
+            validate { it.requireKey("@virkningstidspunkt") }
             //TODO se på logikk for å 'samle' rivers
             //validate { it.requireKey("@gyldighetsvurdering") }
             validate { it.rejectKey("@beregning") }
@@ -35,7 +35,7 @@ internal class LesBeregningsmelding(
             //TODO her må jeg sikkert ha noe anna info
             val grunnlagListe = packet["grunnlag"].toString()
             try {
-                val beregningsResultat = beregning.beregnResultat(objectMapper.readValue(grunnlagListe))
+                val beregningsResultat = beregning.beregnResultat(objectMapper.readValue(grunnlagListe), LocalDate.parse(packet["@virkningstidspunkt"].asText()))
                 packet["@beregning"] = beregningsResultat
                 context.publish(packet.toJson())
                 logger.info("Publisert en beregning")

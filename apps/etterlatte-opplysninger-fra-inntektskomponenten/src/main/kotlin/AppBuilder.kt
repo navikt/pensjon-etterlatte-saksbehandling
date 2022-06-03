@@ -20,7 +20,7 @@ class AppBuilder(private val props: Map<String, String>) {
     fun createInntektsKomponentService(): InntektsKomponenten {
         return InntektsKomponentenService(
             inntektsKomponentClient(),
-            config.getString("no.nav.etterlatte.tjenester.inntektskomponenten.url")
+            config.getString("no.nav.etterlatte.tjenester.inntektskomponenten.proxyUrl")
         )
     }
 
@@ -43,7 +43,7 @@ class AppBuilder(private val props: Map<String, String>) {
             }
         }
         defaultRequest {
-            url.takeFrom(inntektsConfig.getString("proxy") + url.encodedPath)
+            url.takeFrom(inntektsConfig.getString("proxyUrl") + url.encodedPath)
         }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 

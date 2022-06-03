@@ -19,16 +19,16 @@ class InntektsKomponentenService(private val inntektskomponentenClient: HttpClie
         val hentInntektlisteRequest =
             HentInntektListeRequestBody(
                 InntektListeIdent(fnr.value, "NATURLIG_IDENT"),
-                "Gjenlevendepensjon",
+                "Etterlatteytelser",
                 "2015-02",
                 "2022-03",
-                "Ufoere"
+                "Etterlatteytelser"
             )
 
 
         // Her må det muligens gjøres ett kall pr år. PGA tregheter mot eksterne systemer. Vi får bare teste
         val inntektsListe = runBlocking {
-                inntektskomponentenClient.post<InntektsKomponentenResponse>("$url") {
+                inntektskomponentenClient.post<InntektsKomponentenResponse>(url) {
                     contentType(ContentType.Application.Json)
                     body = hentInntektlisteRequest
                 }

@@ -29,11 +29,12 @@ class AppBuilder(private val props: Map<String, String>) {
     }
 
     private fun inntektsKomponentClient() = HttpClient(OkHttp) {
+        val inntektsConfig = config.getConfig("no.nav.etterlatte.tjenester.inntektskomponenten")
         val env = mutableMapOf(
-            "AZURE_APP_CLIENT_ID" to config.getString("client_id"),
-            "AZURE_APP_WELL_KNOWN_URL" to config.getString("well_known_url"),
-            "AZURE_APP_OUTBOUND_SCOPE" to config.getString("outbound"),
-            "AZURE_APP_JWK" to config.getString("client_jwk")
+            "AZURE_APP_CLIENT_ID" to inntektsConfig.getString("client_id"),
+            "AZURE_APP_WELL_KNOWN_URL" to inntektsConfig.getString("well_known_url"),
+            "AZURE_APP_OUTBOUND_SCOPE" to inntektsConfig.getString("outbound"),
+            "AZURE_APP_JWK" to inntektsConfig.getString("client_jwk")
         )
         install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
         install(Auth) {
@@ -42,7 +43,7 @@ class AppBuilder(private val props: Map<String, String>) {
             }
         }
         defaultRequest {
-            url.takeFrom(config.getString("url") + url.encodedPath)
+            url.takeFrom(inntektsConfig.getString("proxy") + url.encodedPath)
         }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 

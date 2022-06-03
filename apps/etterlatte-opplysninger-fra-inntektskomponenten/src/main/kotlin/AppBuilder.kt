@@ -20,7 +20,7 @@ class AppBuilder(private val props: Map<String, String>) {
     fun createInntektsKomponentService(): InntektsKomponenten {
         return InntektsKomponentenService(
             inntektsKomponentClient(),
-            config.getString("no.nav.etterlatte.tjenester.inntektskomponenten")
+            config.getString("no.nav.etterlatte.tjenester.inntektskomponenten.url")
         )
     }
 

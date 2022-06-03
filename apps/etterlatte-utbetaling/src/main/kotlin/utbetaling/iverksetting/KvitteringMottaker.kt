@@ -5,11 +5,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.KvitteringOppdatert
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.UgyldigStatus
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.UtbetalingFinnesIkke
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.helse.rapids_rivers.RapidsConnection
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 import javax.jms.ExceptionListener
@@ -19,6 +24,7 @@ import javax.jms.Session
 
 
 class KvitteringMottaker(
+    private val rapidsConnection: RapidsConnection,
     private val utbetalingService: UtbetalingService,
     jmsConnectionFactory: JmsConnectionFactory,
     queue: String,
@@ -39,7 +45,7 @@ class KvitteringMottaker(
     override fun onMessage(message: Message) {
         withLogContext {
             runBlocking {
-                delay(2000) // TODO race condition - kvittering kommer før utbetaling er lagret
+                delay(1000) // TODO race condition - kvittering kommer før utbetaling er lagret
 
                 var oppdragXml: String? = null
 
@@ -50,52 +56,73 @@ class KvitteringMottaker(
 
                     logger.info("Kvittering mottatt fra Oppdrag", kv("oppdragXml", oppdragXml))
 
-                    utbetalingService.oppdaterKvittering(oppdrag)
-
-                    when (oppdrag.mmel.alvorlighetsgrad) {
-                        "00" -> oppdragAkseptert(oppdrag)
-                        "04" -> oppdragAkseptertMedFeil(oppdrag)
-                        "08" -> oppdragAvvist(oppdrag)
-                        "12" -> oppdragFeilet(oppdrag, oppdragXml)
-                        else -> oppdragFeiletUkjent(oppdrag, oppdragXml)
+                    when (val resultat = utbetalingService.oppdaterKvittering(oppdrag)) {
+                        is KvitteringOppdatert -> {
+                            when (oppdrag.mmel.alvorlighetsgrad) {
+                                "00" -> oppdragGodkjent(oppdrag)
+                                "04" -> oppdragGodkjentMedFeil(oppdrag)
+                                "08" -> oppdragAvvist(oppdrag)
+                                "12" -> oppdragFeilet(oppdrag, oppdragXml)
+                                else -> oppdragFeilet(oppdrag, oppdragXml)
+                            }
+                        }
+                        is UtbetalingFinnesIkke -> {
+                            val feilmelding = "Finner ingen utbetaling for vedtakId=${resultat.vedtakId}"
+                            logger.error(feilmelding)
+                            sendUtbetalingEvent(UtbetalingStatus.FEILET, oppdrag.vedtakId(), feilmelding)
+                        }
+                        is UgyldigStatus -> {
+                            val feilmelding = """
+                                Utbetalingen for vedtakId=${oppdrag.vedtakId()} har feil status (${resultat.status})
+                            """.trimIndent()
+                            logger.error(feilmelding)
+                            sendUtbetalingEvent(UtbetalingStatus.FEILET, oppdrag.vedtakId(), feilmelding)
+                        }
                     }
 
                     logger.info("Melding med id=${message.jmsMessageID} er lest og behandlet")
 
-                } catch (t: Throwable) {
-                    logger.error("Feilet under mottak av kvittering fra Oppdrag", kv("oppdragXml", oppdragXml), t)
+                } catch (e: Exception) {
+                    val feilmelding = "En feil oppstod under prosessering av kvittering fra Oppdrag"
+                    logger.error(feilmelding, kv("oppdragXml", oppdragXml), e)
+                    sendUtbetalingEvent(UtbetalingStatus.FEILET, feilmelding = feilmelding)
                 }
             }
         }
     }
 
-    private fun oppdragAkseptert(oppdrag: Oppdrag) {
-        logger.info("Utbetaling med id=${oppdrag.vedtakId()} godkjent")
-        utbetalingService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingStatus.GODKJENT)
+    private fun oppdragGodkjent(oppdrag: Oppdrag) {
+        logger.info("Utbetaling med vedtakId=${oppdrag.vedtakId()} godkjent")
+        sendUtbetalingEvent(UtbetalingStatus.GODKJENT, oppdrag.vedtakId())
     }
 
-    private fun oppdragAkseptertMedFeil(oppdrag: Oppdrag) {
-        logger.info("Utbetaling med id=${oppdrag.vedtakId()} godkjent med feil")
-        utbetalingService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingStatus.GODKJENT_MED_FEIL)
+    private fun oppdragGodkjentMedFeil(oppdrag: Oppdrag) {
+        logger.info("Utbetaling med vedtakId=${oppdrag.vedtakId()} godkjent med feil")
+        sendUtbetalingEvent(UtbetalingStatus.GODKJENT_MED_FEIL, oppdrag.vedtakId(), oppdrag.kvitteringFeilmelding())
     }
 
     private fun oppdragAvvist(oppdrag: Oppdrag) {
-        logger.info("Utbetaling med id=${oppdrag.vedtakId()} avvist")
-        utbetalingService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingStatus.AVVIST)
+        logger.info("Utbetaling med vedtakId=${oppdrag.vedtakId()} avvist")
+        sendUtbetalingEvent(UtbetalingStatus.AVVIST, oppdrag.vedtakId(), oppdrag.kvitteringFeilmelding())
     }
 
     private fun oppdragFeilet(oppdrag: Oppdrag, oppdragXml: String) {
-        logger.info("Utbetaling med id=${oppdrag.vedtakId()} feilet", kv("oppdrag", oppdragXml))
-        utbetalingService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingStatus.FEILET)
+        logger.info("Utbetaling med vedtakId=${oppdrag.vedtakId()} feilet", kv("oppdrag", oppdragXml))
+        sendUtbetalingEvent(UtbetalingStatus.FEILET, oppdrag.vedtakId(), oppdrag.kvitteringFeilmelding())
     }
 
-    private fun oppdragFeiletUkjent(oppdrag: Oppdrag, oppdragXml: String) {
-        logger.info(
-            "Utbetaling med id=${oppdrag.vedtakId()} feilet med ukjent feil",
-            kv("utbetaling/iverksetting", oppdragXml)
+    private fun sendUtbetalingEvent(status: UtbetalingStatus, vedtakId: Long? = null, feilmelding: String? = null) =
+        rapidsConnection.publish("key",
+            UtbetalingEvent(
+                utbetalingResponse = UtbetalingResponse(
+                    status = status,
+                    vedtakId = vedtakId,
+                    feilmelding = feilmelding
+                )
+            ).toJson()
         )
-        utbetalingService.oppdaterStatusOgPubliserKvittering(oppdrag, UtbetalingStatus.FEILET)
-    }
+
+    private fun Oppdrag.kvitteringFeilmelding() = "${this.mmel.kodeMelding} ${this.mmel.beskrMelding}"
 
     companion object {
         private val logger = LoggerFactory.getLogger(KvitteringMottaker::class.java)

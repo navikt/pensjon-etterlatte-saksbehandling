@@ -33,10 +33,12 @@ class UtbetalingDao(private val dataSource: DataSource) {
 
                 queryOf(
                     statement = """
-                        INSERT INTO utbetaling(id, vedtak_id, behandling_id, behandling_id_til_oppdrag, sak_id, oppdrag, status, vedtak, 
-                            opprettet, avstemmingsnoekkel, endret, stoenadsmottaker, saksbehandler, attestant)
-                        VALUES(:id, :vedtakId, :behandlingId, :behandlingIdTilOppdrag, :sakId, :oppdrag, :status, :vedtak, :opprettet, 
-                            :avstemmingsnoekkel, :endret, :stoenadsmottaker, :saksbehandler, :attestant)
+                        INSERT INTO utbetaling(id, vedtak_id, behandling_id, behandling_id_til_oppdrag, sak_id, oppdrag, 
+                            status, vedtak, opprettet, avstemmingsnoekkel, endret, stoenadsmottaker, saksbehandler, 
+                            attestant)
+                        VALUES(:id, :vedtakId, :behandlingId, :behandlingIdTilOppdrag, :sakId, :oppdrag, :status, 
+                            :vedtak, :opprettet, :avstemmingsnoekkel, :endret, :stoenadsmottaker, :saksbehandler, 
+                            :attestant)
                         """,
                     paramMap = mapOf(
                         "id" to utbetaling.id.param<UUID>(),
@@ -92,9 +94,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    SELECT id, vedtak_id, behandling_id, behandling_id_til_oppdrag,  sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
-                        stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, kvittering_alvorlighetsgrad, 
-                        kvittering_kode, saksbehandler, attestant 
+                    SELECT id, vedtak_id, behandling_id, behandling_id_til_oppdrag,  sak_id, status, vedtak, opprettet, 
+                        avstemmingsnoekkel, endret, stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, 
+                        kvittering_alvorlighetsgrad, kvittering_kode, saksbehandler, attestant 
                     FROM utbetaling 
                     WHERE vedtak_id = :vedtakId
                     """,
@@ -141,9 +143,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    SELECT id, vedtak_id, behandling_id, behandling_id_til_oppdrag, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
-                        stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, kvittering_alvorlighetsgrad,  
-                        kvittering_kode, saksbehandler, attestant
+                    SELECT id, vedtak_id, behandling_id, behandling_id_til_oppdrag, sak_id, status, vedtak, opprettet, 
+                        avstemmingsnoekkel, endret, stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, 
+                        kvittering_alvorlighetsgrad, kvittering_kode, saksbehandler, attestant
                     FROM utbetaling
                     WHERE avstemmingsnoekkel >= :fraOgMed AND avstemmingsnoekkel < :til
                     """,
@@ -164,9 +166,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    SELECT id, vedtak_id, behandling_id, behandling_id_til_oppdrag, sak_id, status, vedtak, opprettet, avstemmingsnoekkel, endret, 
-                        stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, kvittering_alvorlighetsgrad, 
-                        kvittering_kode, saksbehandler, attestant
+                    SELECT id, vedtak_id, behandling_id, behandling_id_til_oppdrag, sak_id, status, vedtak, opprettet, 
+                        avstemmingsnoekkel, endret, stoenadsmottaker, oppdrag, kvittering, kvittering_beskrivelse, 
+                        kvittering_alvorlighetsgrad, kvittering_kode, saksbehandler, attestant
                     FROM utbetaling
                     WHERE sak_id = :sakId
                     """,
@@ -182,6 +184,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 }
         }
 
+    @Deprecated("Brukes ikke lenger?")
     fun oppdaterStatus(vedtakId: Long, status: UtbetalingStatus, endret: Tidspunkt) =
         using(sessionOf(dataSource)) { session ->
             logger.info("Oppdaterer status i utbetaling for vedtakId=$vedtakId til $status")
@@ -210,7 +213,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     UPDATE utbetaling 
                     SET kvittering = :kvittering, kvittering_beskrivelse = :beskrivelse, 
                         kvittering_alvorlighetsgrad = :alvorlighetsgrad, kvittering_kode = :kode, 
-                        endret = :endret 
+                        status = :status, endret = :endret 
                     WHERE vedtak_id = :vedtakId
                     """,
                 paramMap = mapOf(
@@ -218,6 +221,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     "beskrivelse" to oppdragMedKvittering.mmel.beskrMelding.param<String>(),
                     "alvorlighetsgrad" to oppdragMedKvittering.mmel.alvorlighetsgrad.param<String>(),
                     "kode" to oppdragMedKvittering.mmel.kodeMelding.param<String>(),
+                    "status" to statusFraKvittering(oppdragMedKvittering.mmel.alvorlighetsgrad).name.param<String>(),
                     "endret" to Timestamp.from(endret.instant).param<Timestamp>(),
                     "vedtakId" to oppdragMedKvittering.vedtakId().param<Long>()
                 )
@@ -277,6 +281,15 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 ),
                 beloep = bigDecimalOrNull("beloep"),
             )
+        }
+
+    private fun statusFraKvittering(alvorlighetsgrad: String) =
+        when (alvorlighetsgrad) {
+            "00" -> UtbetalingStatus.GODKJENT
+            "04" -> UtbetalingStatus.GODKJENT_MED_FEIL
+            "08" -> UtbetalingStatus.AVVIST
+            "12" -> UtbetalingStatus.FEILET
+            else -> UtbetalingStatus.FEILET
         }
 
     companion object {

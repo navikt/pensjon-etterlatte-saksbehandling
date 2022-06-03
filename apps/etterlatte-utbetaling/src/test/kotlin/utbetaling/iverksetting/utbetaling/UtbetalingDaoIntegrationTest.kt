@@ -188,6 +188,7 @@ internal class UtbetalingDaoIntegrationTest {
         val utbetalingOppdatert = utbetalingDao.hentUtbetaling(oppdrag.vedtakId())
 
         assertAll("skal sjekke at kvittering er opprettet korrekt på utbetaling",
+            { assertEquals(UtbetalingStatus.AVVIST, utbetalingOppdatert?.status) },
             { assertNotNull(utbetalingOppdatert?.kvittering) },
             { assertNotNull(utbetalingOppdatert?.kvittering?.oppdrag?.mmel) },
             {
@@ -251,7 +252,6 @@ internal class UtbetalingDaoIntegrationTest {
             { assertTrue(utbetalingslinjer.any { it.id.value == 3L }) },
         )
     }
-
 
     @AfterEach
     fun afterEach() {

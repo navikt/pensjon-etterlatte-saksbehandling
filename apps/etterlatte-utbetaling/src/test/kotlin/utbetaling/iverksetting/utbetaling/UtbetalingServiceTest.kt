@@ -62,7 +62,7 @@ internal class UtbetalingServiceTest {
         every { utbetalingDao.hentUtbetalingslinjer(any()) } returns emptyList()
         every { utbetalingDao.hentUtbetalinger(any()) } returns emptyList()
         every { utbetalingDao.opprettUtbetaling(any()) } returns utbetaling()
-        every { oppdragSender.sendOppdrag(any()) } just runs
+        every { oppdragSender.sendOppdrag(any()) } returns ""
 
         val vedtak = vedtakLoepende()
         utbetalingService.iverksettUtbetaling(vedtak)
@@ -87,7 +87,7 @@ internal class UtbetalingServiceTest {
         every { utbetalingDao.hentUtbetalingslinjer(any()) } returns emptyList()
         every { utbetalingDao.hentUtbetalinger(any()) } returns listOf(eksisterendeUtbetaling)
         every { utbetalingDao.opprettUtbetaling(any()) } returns utbetaling()
-        every { oppdragSender.sendOppdrag(any()) } just runs
+        every { oppdragSender.sendOppdrag(any()) } returns ""
 
         val vedtak = vedtakLoepende()
         utbetalingService.iverksettUtbetaling(vedtak)
@@ -112,7 +112,7 @@ internal class UtbetalingServiceTest {
         every { utbetalingDao.hentUtbetalingslinjer(any()) } returns emptyList()
         every { utbetalingDao.hentUtbetalinger(any()) } returns listOf(eksisterendeUtbetaling)
         every { utbetalingDao.opprettUtbetaling(any()) } returns utbetaling()
-        every { oppdragSender.sendOppdrag(any()) } just runs
+        every { oppdragSender.sendOppdrag(any()) } returns ""
 
         val vedtak = vedtakMedOpphoer()
         utbetalingService.iverksettUtbetaling(vedtak)

@@ -1,17 +1,11 @@
 package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
-import no.nav.etterlatte.utbetaling.iverksetting.KvitteringMottaker
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
-import no.nav.etterlatte.utbetaling.oppdragMedFeiletKvittering
-import no.nav.etterlatte.utbetaling.oppdragMedGodkjentKvittering
+import no.nav.etterlatte.utbetaling.oppdrag
 import no.nav.etterlatte.utbetaling.utbetaling
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -25,11 +19,6 @@ internal class OppdragSenderIntegrationTest {
 
     private lateinit var jmsConnectionFactory: JmsConnectionFactory
     private lateinit var oppdragSender: OppdragSender
-    private lateinit var kvitteringMottaker: KvitteringMottaker
-    private val utbetalingService: UtbetalingService = mockk<UtbetalingService>().apply {
-        every { oppdaterKvittering(any()) } returns mockk()
-        every { oppdaterStatusOgPubliserKvittering(any(), any()) } returns mockk()
-    }
 
     @BeforeAll
     fun beforeAll() {
@@ -49,47 +38,20 @@ internal class OppdragSenderIntegrationTest {
             queue = "DEV.QUEUE.1",
             replyQueue = "DEV.QUEUE.1"
         )
+    }
 
-        kvitteringMottaker = KvitteringMottaker(
-            utbetalingService = utbetalingService,
-            jmsConnectionFactory = jmsConnectionFactory,
-            queue = "DEV.QUEUE.1",
-        )
+    @Test
+    fun `skal legge oppdrag på køen`() {
+        val oppdrag = oppdrag(utbetaling(vedtakId = 1))
+
+        val oppdragXml = oppdragSender.sendOppdrag(oppdrag)
+
+        assertNotNull(oppdragXml)
     }
 
     @AfterAll
     fun afterAll() {
         jmsConnectionFactory.stop()
         ibmMQContainer.stop()
-    }
-
-    @Test
-    fun `skal sende oppdrag på køen, motta godkjent kvittering og oppdatere status`() {
-        val oppdrag = oppdragMedGodkjentKvittering(utbetaling(vedtakId = 1))
-
-        oppdragSender.sendOppdrag(oppdrag)
-
-        verify(timeout = 5000) { utbetalingService.oppdaterKvittering(any()) }
-        verify(timeout = 5000) {
-            utbetalingService.oppdaterStatusOgPubliserKvittering(
-                oppdrag = any(),
-                status = UtbetalingStatus.GODKJENT
-            )
-        }
-    }
-
-    @Test
-    fun `skal sende oppdrag på køen, motta feilet kvittering og oppdatere status`() {
-        val oppdrag = oppdragMedFeiletKvittering(utbetaling(vedtakId = 1))
-
-        oppdragSender.sendOppdrag(oppdrag)
-
-        verify(timeout = 5000) { utbetalingService.oppdaterKvittering(any()) }
-        verify(timeout = 5000) {
-            utbetalingService.oppdaterStatusOgPubliserKvittering(
-                oppdrag = any(),
-                status = UtbetalingStatus.FEILET
-            )
-        }
     }
 }

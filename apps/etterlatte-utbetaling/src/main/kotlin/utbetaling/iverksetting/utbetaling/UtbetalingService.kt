@@ -1,15 +1,15 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.utbetaling.iverksetting.UtbetalingEvent
-import no.nav.etterlatte.utbetaling.iverksetting.UtbetalingResponse
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.SendtTilOppdrag
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingForVedtakEksisterer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingslinjerForVedtakEksisterer
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.KvitteringOppdatert
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.UgyldigStatus
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.UtbetalingFinnesIkke
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.trygdeetaten.skjema.oppdrag.Mmel
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
@@ -52,9 +52,18 @@ class UtbetalingService(
         }
     }
 
-    fun oppdaterKvittering(oppdrag: Oppdrag): Utbetaling {
-        logger.info("Oppdaterer kvittering for oppdrag med vedtakId=${oppdrag.vedtakId()}")
-        return utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock))
+    fun oppdaterKvittering(oppdrag: Oppdrag): OppdaterKvitteringResultat {
+        val utbetaling = utbetalingDao.hentUtbetaling(oppdrag.vedtakId())
+
+        return when {
+            utbetaling == null -> UtbetalingFinnesIkke(oppdrag.vedtakId())
+            utbetaling.status != UtbetalingStatus.SENDT -> UgyldigStatus(utbetaling.status)
+            else -> {
+                logger.info("Oppdaterer kvittering for oppdrag med vedtakId=${oppdrag.vedtakId()}")
+                val oppdatertUtbetaling = utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock))
+                KvitteringOppdatert(oppdatertUtbetaling)
+            }
+        }
     }
 
     // TODO: sette inn kolonne i database som viser at kvittering er oppdatert manuelt?
@@ -67,25 +76,6 @@ class UtbetalingService(
         }.let { utbetalingDao.oppdaterKvittering(it!!, Tidspunkt.now(clock)) } // TODO
     }
 
-    fun oppdaterStatusOgPubliserKvittering(oppdrag: Oppdrag, status: UtbetalingStatus) =
-        utbetalingDao.oppdaterStatus(oppdrag.vedtakId(), status, Tidspunkt.now(clock))
-            .also { rapidsConnection.publish("key", utbetalingEvent(oppdrag, status)) }
-
-
-    private fun utbetalingEvent(oppdrag: Oppdrag, status: UtbetalingStatus) =
-        UtbetalingEvent(
-            utbetalingResponse = UtbetalingResponse(
-                status = status,
-                vedtakId = oppdrag.vedtakId(),
-                feilmelding = oppdrag.kvitteringFeilmelding()
-            )
-        ).toJson()
-
-    private fun Oppdrag.kvitteringFeilmelding() = when (this.mmel.kodeMelding) {
-        "00" -> null
-        else -> "${this.mmel.kodeMelding} ${this.mmel.beskrMelding}"
-    }
-
     companion object {
         private val logger = LoggerFactory.getLogger(UtbetalingService::class.java)
     }
@@ -95,4 +85,10 @@ sealed class IverksettResultat {
     class SendtTilOppdrag(val utbetaling: Utbetaling) : IverksettResultat()
     class UtbetalingslinjerForVedtakEksisterer(val utbetalingslinjer: List<Utbetalingslinje>) : IverksettResultat()
     class UtbetalingForVedtakEksisterer(val utbetaling: Utbetaling) : IverksettResultat()
+}
+
+sealed class OppdaterKvitteringResultat {
+    class KvitteringOppdatert(val utbetaling: Utbetaling) : OppdaterKvitteringResultat()
+    class UtbetalingFinnesIkke(val vedtakId: Long) : OppdaterKvitteringResultat()
+    class UgyldigStatus(val status: UtbetalingStatus) : OppdaterKvitteringResultat()
 }

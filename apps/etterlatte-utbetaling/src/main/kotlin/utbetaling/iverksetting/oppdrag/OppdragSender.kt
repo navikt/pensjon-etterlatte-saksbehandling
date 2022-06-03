@@ -10,16 +10,18 @@ class OppdragSender(
     private val queue: String,
     private val replyQueue: String,
 ) {
-    fun sendOppdrag(oppdrag: Oppdrag) {
+    fun sendOppdrag(oppdrag: Oppdrag): String {
         logger.info("Sender utbetaling til Oppdrag")
         val connection = jmsConnectionFactory.connection()
-        connection.createSession().use { session ->
+        return connection.createSession().use { session ->
             val producer = session.createProducer(session.createQueue(queue))
-            val message = session.createTextMessage(OppdragJaxb.toXml(oppdrag)).apply {
+            val oppdragXml = OppdragJaxb.toXml(oppdrag)
+            val message = session.createTextMessage(oppdragXml).apply {
                 jmsReplyTo = MQQueue(replyQueue)
             }
             producer.send(message)
             logger.info("Utbetaling overført til Oppdrag")
+            oppdragXml
         }
     }
 

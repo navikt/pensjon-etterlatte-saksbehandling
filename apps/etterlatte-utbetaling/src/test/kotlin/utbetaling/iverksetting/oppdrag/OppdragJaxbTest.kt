@@ -1,7 +1,5 @@
-package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
+package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
 
-import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
-import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.readFile
 import no.nav.etterlatte.utbetaling.utbetaling
 import org.junit.jupiter.api.Assertions.assertEquals

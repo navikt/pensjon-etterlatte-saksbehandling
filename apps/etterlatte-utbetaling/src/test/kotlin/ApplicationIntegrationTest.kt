@@ -2,6 +2,9 @@ package no.nav.etterlatte
 
 import io.mockk.spyk
 import io.mockk.verify
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
@@ -24,6 +27,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
+import javax.sql.DataSource
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -37,6 +41,7 @@ class ApplicationIntegrationTest {
 
     private val rapidsConnection: TestRapid = spyk(TestRapid())
     private lateinit var connectionFactory: JmsConnectionFactory
+    private lateinit var dataSource: DataSource
 
     @BeforeAll
     fun beforeAll() {
@@ -63,6 +68,7 @@ class ApplicationIntegrationTest {
 
         ApplicationContext(applicationProperties, rapidsConnection).also {
             connectionFactory = it.jmsConnectionFactory
+            dataSource = it.dataSource
             rapidApplication(it).start()
         }
     }
@@ -85,7 +91,67 @@ class ApplicationIntegrationTest {
     }
 
     @Test
-    fun `skal motta kvittering fra oppdrag`() {
+    fun `skal feile dersom vedtak ikke kan leses`() {
+        sendFattetVedtakEvent(vedtakEvent(ugyldigVedtakTilUtbetaling()))
+
+        verify(timeout = TIMEOUT) {
+            rapidsConnection.publish("key",
+                match {
+                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                        this.eventName == EVENT_NAME_OPPDATERT &&
+                                this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                                this.utbetalingResponse.feilmelding
+                                    ?.contains(
+                                        "En feil oppstod under prosessering av vedtak med vedtakId=null"
+                                    ) != false
+                    }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `skal feile dersom det finnes utbetaling for vedtaket allerede`() {
+        sendFattetVedtakEvent(vedtakEvent(vedtak()))
+        sendFattetVedtakEvent(vedtakEvent(vedtak()))
+
+        verify(timeout = TIMEOUT) {
+            rapidsConnection.publish("key",
+                match {
+                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                        this.eventName == EVENT_NAME_OPPDATERT &&
+                                this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                                this.utbetalingResponse.feilmelding
+                                    ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false
+                    }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `skal feile dersom det eksisterer utbetalingslinjer med samme id som i nytt vedtak`() {
+        sendFattetVedtakEvent(vedtakEvent(vedtak()))
+        sendFattetVedtakEvent(vedtakEvent(vedtak(vedtakId = 2)))
+
+        verify(timeout = TIMEOUT) {
+            rapidsConnection.publish("key",
+                match {
+                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                        this.eventName == EVENT_NAME_OPPDATERT &&
+                                this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                                this.utbetalingResponse.feilmelding
+                                    ?.contains(
+                                        "En eller flere utbetalingslinjer med id=[1] eksisterer fra før"
+                                    ) != false
+                    }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `skal motta kvittering fra oppdrag som er godkjent`() {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering())
 
@@ -103,7 +169,44 @@ class ApplicationIntegrationTest {
     }
 
     @Test
-    fun `skal motta kvittering fra oppdrag med feil`() {
+    fun `skal motta kvittering fra oppdrag som er godkjent men feiler fordi utbetaling for vedtak ikke finnes`() {
+        simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering())
+
+        verify(timeout = TIMEOUT) {
+            rapidsConnection.publish("key",
+                match {
+                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                        this.eventName == EVENT_NAME_OPPDATERT &&
+                                this.utbetalingResponse.vedtakId == 1L &&
+                                this.utbetalingResponse.status == UtbetalingStatus.FEILET
+                    }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `skal motta kvittering fra oppdrag som er godkjent men feiler fordi status for utbetaling er ugyldig`() {
+        sendFattetVedtakEvent(FATTET_VEDTAK_1)
+        simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering()) // setter status til GODKJENT
+        simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering()) // forventer at status skal være SENDT
+
+        verify(timeout = TIMEOUT) {
+            rapidsConnection.publish("key",
+                match {
+                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                        this.eventName == EVENT_NAME_OPPDATERT &&
+                                this.utbetalingResponse.vedtakId == 1L &&
+                                this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                                this.utbetalingResponse.feilmelding == "Utbetalingen for vedtakId=1 har feil status (GODKJENT)"
+                    }
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `skal motta kvittering fra oppdrag som har feilet`() {
         sendFattetVedtakEvent(FATTET_VEDTAK_1)
         simulerKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering())
 
@@ -121,27 +224,13 @@ class ApplicationIntegrationTest {
         }
     }
 
-    @Test
-    fun `skal post melding paa kafka dersom vedtak ikke kan deserialiseres`() {
-        sendFattetVedtakEvent(vedtakEvent(ugyldigVedtakTilUtbetaling()))
-
-        verify(timeout = TIMEOUT) {
-            rapidsConnection.publish("key",
-                match {
-                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
-                                this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
-                                this.utbetalingResponse.feilmelding
-                                    ?.contains("En feil oppstod under prosessering av vedtak med vedtakId=null") != null
-                    }
-                }
-            )
-        }
-    }
-
     @AfterEach
     fun afterEach() {
         rapidsConnection.reset()
+
+        using(sessionOf(dataSource)) {
+            it.run(queryOf("TRUNCATE utbetaling CASCADE").asExecute)
+        }
     }
 
     @AfterAll

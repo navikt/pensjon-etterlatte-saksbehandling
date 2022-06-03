@@ -99,6 +99,7 @@ class ApplicationContext(
 
     val kvitteringMottaker by lazy {
         KvitteringMottaker(
+            rapidsConnection = rapidsConnection,
             utbetalingService = utbetalingService,
             jmsConnectionFactory = jmsConnectionFactory,
             queue = properties.mqKvitteringQueue

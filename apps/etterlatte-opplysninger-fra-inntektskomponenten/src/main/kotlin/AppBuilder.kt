@@ -31,10 +31,10 @@ class AppBuilder(private val props: Map<String, String>) {
     private fun inntektsKomponentClient() = HttpClient(OkHttp) {
         val inntektsConfig = config.getConfig("no.nav.etterlatte.tjenester.inntektskomponenten")
         val env = mutableMapOf(
-            "AZURE_APP_CLIENT_ID" to inntektsConfig.getString("client_id"),
-            "AZURE_APP_WELL_KNOWN_URL" to inntektsConfig.getString("well_known_url"),
+            "AZURE_APP_CLIENT_ID" to inntektsConfig.getString("clientId"),
+            "AZURE_APP_WELL_KNOWN_URL" to inntektsConfig.getString("wellKnownUrl"),
             "AZURE_APP_OUTBOUND_SCOPE" to inntektsConfig.getString("outbound"),
-            "AZURE_APP_JWK" to inntektsConfig.getString("client_jwk")
+            "AZURE_APP_JWK" to inntektsConfig.getString("clientJwk")
         )
         install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
         install(Auth) {

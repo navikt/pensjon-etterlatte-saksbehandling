@@ -7,7 +7,10 @@ import io.ktor.client.features.auth.Auth
 import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.request.header
 import io.ktor.http.takeFrom
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.InntektsKomponentenService
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.OpplysningsByggerService
@@ -43,7 +46,7 @@ class AppBuilder(private val props: Map<String, String>) {
             }
         }
         defaultRequest {
-            url.takeFrom(inntektsConfig.getString("proxyUrl") + url.encodedPath)
+            header(X_CORRELATION_ID, getCorrelationId())
         }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 

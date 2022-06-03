@@ -12,8 +12,10 @@ interface JournalpostService {
 }
 
 
-class JournalpostServiceImpl(private val client: JournalpostKlient, private val brevService: BrevService) :
-    JournalpostService {
+class JournalpostServiceImpl(
+    private val client: JournalpostKlient,
+    private val brevService: BrevService
+) : JournalpostService {
     private val logger = LoggerFactory.getLogger(JournalpostService::class.java)
 
     override fun journalfoer(melding: DistribusjonMelding): JournalpostResponse = runBlocking {
@@ -38,19 +40,17 @@ class JournalpostServiceImpl(private val client: JournalpostKlient, private val 
             avsenderMottaker = melding.mottaker,
             bruker = melding.bruker,
             eksternReferanseId = "${melding.vedtakId}.${melding.brevId}",
-            // fagsaksystem = "EY??"
             // sak = {...}
             dokumenter = listOf(dokumentInnhold.tilJournalpostDokument(melding)),
             tema = "EYB", // https://confluence.adeo.no/display/BOA/Tema,
-            kanal = "S", // skal denne legges til etterpå?
-            journalfoerendeEnhet = "XX" // må hentes fra vedtak?
+            kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal
+            journalfoerendeEnhet = melding.journalfoerendeEnhet
         )
     }
 }
 
 private fun ByteArray.tilJournalpostDokument(melding: DistribusjonMelding) = JournalpostDokument(
     tittel = melding.tittel,
-    dokumentKategori = null, // depricated
-    brevkode = "XX.YY-ZZ", // fra vedtak?
+    brevkode = melding.brevKode,
     dokumentvarianter = listOf(DokumentVariant.ArkivPDF(this.toString()))
 )

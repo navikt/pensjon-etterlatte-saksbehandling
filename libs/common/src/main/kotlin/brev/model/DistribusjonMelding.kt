@@ -8,5 +8,7 @@ data class DistribusjonMelding(
     val brevId: Long,
     val mottaker: AvsenderMottaker,
     val bruker: Bruker,
-    val tittel: String
+    val tittel: String,
+    val brevKode: String,
+    val journalfoerendeEnhet: String
 )

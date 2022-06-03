@@ -33,7 +33,7 @@ data class Bruker(
 
 data class JournalpostDokument(
     val tittel: String,
-    val dokumentKategori: DokumentKategori?,
+    val dokumentKategori: DokumentKategori? = null, // depricated
     val brevkode: String = "XX.YY-ZZ",
     val dokumentvarianter: List<DokumentVariant>
 )

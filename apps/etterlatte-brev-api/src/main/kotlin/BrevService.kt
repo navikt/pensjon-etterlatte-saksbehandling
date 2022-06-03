@@ -64,8 +64,10 @@ class BrevService(
 
     fun ferdigstillBrev(id: BrevID): Brev {
         val brev: Brev = db.hentBrev(id)
+        val vedtak = vedtakService.hentVedtak(brev.behandlingId)
 
-        sendToRapid(opprettDistribusjonsmelding(brev))
+        // todo: Brev kan genereres på bakgrunn av både behandling og vedtak. Må hente data fra ulike steder.
+        sendToRapid(opprettDistribusjonsmelding(brev, vedtak.vedtakFattet!!.ansvarligEnhet))
         db.oppdaterStatus(id, Status.FERDIGSTILT)
 
         return brev
@@ -98,12 +100,14 @@ class BrevService(
         return db.opprettBrev(NyttBrev(behandlingId.toLong(), tittel, mottaker, pdf))
     }
 
-    private fun opprettDistribusjonsmelding(brev: Brev): String = DistribusjonMelding(
+    private fun opprettDistribusjonsmelding(brev: Brev, behandlendeEnhet: String): String = DistribusjonMelding(
         vedtakId = "Vedtak_Id",
         brevId = brev.id,
         mottaker = AvsenderMottaker(brev.mottaker.foedselsnummer?.value ?: "0101202212345"),
         bruker = Bruker(brev.mottaker.foedselsnummer?.value ?: "0101202212345"),
-        tittel = brev.tittel
+        tittel = brev.tittel,
+        brevKode = "XX.YY-ZZ",
+        journalfoerendeEnhet = behandlendeEnhet
     ).let {
         val correlationId = UUID.randomUUID().toString()
         logger.info("Oppretter distribusjonsmelding for brev (id=${brev.id}) med correlation_id=$correlationId")

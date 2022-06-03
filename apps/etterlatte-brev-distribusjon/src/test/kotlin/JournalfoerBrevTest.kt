@@ -23,7 +23,9 @@ class JournalfoerBrevTest {
             brevId = 1000L,
             mottaker = AvsenderMottaker(id = "0101202012345"),
             bruker = Bruker(id = "0101202012345"),
-            tittel = "Vi har innvilget din søknad om barnepensjon"
+            tittel = "Vi har innvilget din søknad om barnepensjon",
+            brevKode = "XX.YY-ZZ",
+            journalfoerendeEnhet = "1234"
         )
         val melding = JsonMessage.newMessage(
             mapOf(

@@ -14,6 +14,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneOffset
 import java.time.temporal.TemporalAdjusters
@@ -34,15 +35,22 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
         }
     }
 
-    fun lagreVilkaarsresultat(sakId: String, behandlingId: UUID, fnr: String, vilkaarResultat: VilkaarResultat) {
+    fun lagreVilkaarsresultat(sakId: String, behandlingId: UUID, fnr: String, vilkaarResultat: VilkaarResultat, virkningsDato: LocalDate) {
         val vedtak = repository.hentVedtak(sakId, behandlingId)
         if(vedtak == null) {
-            repository.lagreVilkaarsresultat(sakId, behandlingId, fnr, vilkaarResultat)
+            repository.lagreVilkaarsresultat(sakId, behandlingId, fnr, vilkaarResultat, virkningsDato)
         } else {
-            if(vedtak.fnr == null){
-                repository.lagreFnr(sakId, behandlingId, fnr)
-            }
+            migrer(vedtak, fnr, virkningsDato)
             repository.oppdaterVilkaarsresultat(sakId, behandlingId, vilkaarResultat)
+        }
+    }
+
+    private fun migrer(vedtak: Vedtak, fnr: String, virkningsDato: LocalDate) {
+        if(vedtak.fnr == null){ //Migrere v2 til v3
+            repository.lagreFnr(vedtak.sakId, vedtak.behandlingId, fnr)
+        }
+        if(vedtak.virkningsDato == null){ //Migrere v3 til v4
+            repository.lagreDatoVirk(vedtak.sakId, vedtak.behandlingId, virkningsDato)
         }
     }
 
@@ -74,8 +82,9 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
         return repository.hentVedtak(sakId, behandlingId)?.let {
             Vedtak(
                 it.id, //må få med vedtak-id fra databasen
-                Periode(it.vilkaarsResultat?.vilkaar?.find { it.navn == Vilkaartyper.DOEDSFALL_ER_REGISTRERT }?.kriterier?.find { it.navn == Kriterietyper.DOEDSFALL_ER_REGISTRERT_I_PDL }?.basertPaaOpplysninger?.find { it.kriterieOpplysningsType == KriterieOpplysningsType.DOEDSDATO }?.opplysning?.let { it as Doedsdato }?.doedsdato?.with(
-                    TemporalAdjusters.firstDayOfNextMonth())?.let { YearMonth.of(it.year, it.month) } ?: YearMonth.now(), null), //må få inn dette på toppnivå?
+                Periode(
+                    it.virkningsDato?.let(YearMonth::from) ?: (it.vilkaarsResultat?.vilkaar?.find { it.navn == Vilkaartyper.DOEDSFALL_ER_REGISTRERT }?.kriterier?.find { it.navn == Kriterietyper.DOEDSFALL_ER_REGISTRERT_I_PDL }?.basertPaaOpplysninger?.find { it.kriterieOpplysningsType == KriterieOpplysningsType.DOEDSDATO }?.opplysning?.let { it as Doedsdato }?.doedsdato?.with(
+                    TemporalAdjusters.firstDayOfNextMonth())?.let { YearMonth.of(it.year, it.month) }) ?: YearMonth.now(), null), //må få inn dette på toppnivå?
                 Sak(it.fnr!!, "BARNEPENSJON", sakId.toLong()), //mer sakinfo inn i prosess og vedtaksammendrag
                 Behandling(BehandlingType.FORSTEGANGSBEHANDLING, behandlingId), // Behandlingsinfo må lagres
                 if(it.vilkaarsResultat?.resultat == VurderingsResultat.OPPFYLT) VedtakType.INNVILGELSE else VedtakType.AVSLAG, //Hvor skal vi bestemme vedtakstype?
@@ -96,12 +105,23 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
     }
 
     fun fattVedtak(sakId: String, behandlingId: UUID, saksbehandler: String) {
-        //repository
-        return repository.fattVedtak(saksbehandler, sakId, behandlingId)
+        requireNotNull( hentFellesVedtak(sakId, behandlingId)).also {
+            require(it.vedtakFattet == null)
+            require(it.type == VedtakType.INNVILGELSE)
+            require(it.vilkaarsvurdering != null)
+            require(it.beregning != null)
+            require(it.avkorting != null)
+        }
+        repository.fattVedtak(saksbehandler, sakId, behandlingId)
+        publiserHendelse("FATTET", sakId, behandlingId)
     }
 
 
     fun attesterVedtak(sakId: String, behandlingId: UUID, saksbehandler: String) {
+        requireNotNull( hentFellesVedtak(sakId, behandlingId)).also {
+            require(it.vedtakFattet != null)
+            require(it.attestasjon == null)
+        }
         repository.attesterVedtak(saksbehandler, sakId, behandlingId)
         publiserHendelse("ATTESTERT", sakId, behandlingId)
 

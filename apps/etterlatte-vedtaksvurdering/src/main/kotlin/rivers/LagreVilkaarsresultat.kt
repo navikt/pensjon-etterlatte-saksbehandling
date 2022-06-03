@@ -9,7 +9,9 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.*
+
 
 internal class LagreVilkaarsresultat(
     rapidsConnection: RapidsConnection,
@@ -23,6 +25,7 @@ internal class LagreVilkaarsresultat(
             validate { it.requireKey("sak") }
             validate { it.requireKey("id") }
             validate { it.requireKey("soeker") }
+            validate { it.requireKey("@virkningstidspunkt") }
             validate { it.requireKey("@vilkaarsvurdering") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
@@ -34,7 +37,7 @@ internal class LagreVilkaarsresultat(
             val sakId = packet["sak"].toString()
             val vilkaarsResultat = objectMapper.readValue(packet["@vilkaarsvurdering"].toString(), VilkaarResultat::class.java)
             try {
-                vedtaksvurderingService.lagreVilkaarsresultat(sakId, behandlingId, packet["soeker"].textValue(), vilkaarsResultat)
+                vedtaksvurderingService.lagreVilkaarsresultat(sakId, behandlingId, packet["soeker"].textValue(), vilkaarsResultat, LocalDate.parse(packet["@virkningstidspunkt"].textValue()) )
             } catch (e: Exception){
                 //TODO endre denne
                 println("spiser en melding fordi: " +e)

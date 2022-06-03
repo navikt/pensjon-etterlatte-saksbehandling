@@ -80,7 +80,7 @@ internal class DBTest {
             VurderingsResultat.OPPFYLT,
             emptyList(),
             now
-        ))
+        ), LocalDate.now())
     }
 
     fun leggtilkommersoekertilgoderesultat() {
@@ -147,6 +147,7 @@ internal class DBTest {
         assert(vedtaket?.beregningsResultat?.grunnlagVerson == 0.toLong())
         assert(vedtaket?.vilkaarsResultat != null)
         assert(vedtaket?.kommerSoekerTilgodeResultat != null)
+        Assertions.assertNotNull(vedtaket?.virkningsDato)
 
 
         vedtaksvurderingService.fattVedtak("12321423523545", uuid, "saksbehandler")
@@ -158,6 +159,7 @@ internal class DBTest {
         val attestertVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         Assertions.assertNotNull(attestertVedtak?.attestant)
         Assertions.assertNotNull(attestertVedtak?.datoattestert)
+        Assertions.assertNotNull(attestertVedtak?.virkningsDato)
 
 
         val fulltvedtak = vedtaksvurderingService.hentFellesVedtak("12321423523545", uuid)

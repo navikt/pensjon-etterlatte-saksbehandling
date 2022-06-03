@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
 import javax.sql.DataSource
@@ -25,7 +26,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    fun lagreVilkaarsresultat(sakId: String, behandlingsId: UUID, fnr: String, vilkaarsresultat: VilkaarResultat) {
+    fun lagreVilkaarsresultat(sakId: String, behandlingsId: UUID, fnr: String, vilkaarsresultat: VilkaarResultat, virkningsDato: LocalDate) {
         logger.info("Lagrer vilkaarsresultat")
         connection.use {
             val statement = it.prepareStatement(Queries.lagreVilkaarResultat)
@@ -33,6 +34,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             statement.setObject(2, behandlingsId)
             statement.setString(3, objectMapper.writeValueAsString(vilkaarsresultat))
             statement.setString(4, fnr)
+            statement.setDate(5, java.sql.Date.valueOf(virkningsDato))
             statement.execute()
         }
     }
@@ -129,19 +131,35 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                     getString(1),
                     getObject(2) as UUID,
                     getString(3),
-                    getString(4)?.let { objectMapper.readValue(it) },
-                    getString(5)?.let { objectMapper.readValue(it) },
-                    getString(6)?.let { objectMapper.readValue(it) },
-                    getString(7)?.let { objectMapper.readValue(it) },
+                    getString(4)?.let { try {
+                        objectMapper.readValue(it)
+                    } catch (ex: Exception){
+                        null
+                    } },
+                    getJsonObject(5),
+                    getJsonObject(6),
+                    getJsonObject(7),
                     getBoolean(8),
                     getString(10),
                     getTimestamp(11)?.toInstant(),
                     getTimestamp(12)?.toInstant(),
                     getString(13),
+                    getDate(14)?.toLocalDate()
                 )
             }
         }
         return resultat
+    }
+
+    private inline fun <reified T> ResultSet.getJsonObject(c: Int):T? {
+        return getString(c)?.let { try {
+            objectMapper.readValue(it)
+        } catch (ex: Exception){
+            logger.warn("vedtak ${getLong("id")} kan ikke lese kolonne $c")
+            null
+        }
+
+        }
     }
 
     fun fattVedtak(saksbehandlerId: String, sakId: String, behandlingsId: UUID) {
@@ -165,11 +183,20 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    //migrerer databaseraden fra v2 til v3
     fun lagreFnr(sakId: String, behandlingId: UUID, fnr: String) {
         connection.use {
             val statement = it.prepareStatement(Queries.lagreFnr)
             statement.setString(1, fnr)
+            statement.setLong(2, sakId.toLong())
+            statement.setObject(3, behandlingId)
+            statement.execute()
+        }
+    }
+
+    fun lagreDatoVirk(sakId: String, behandlingId: UUID, datoVirk: LocalDate) {
+        connection.use {
+            val statement = it.prepareStatement(Queries.lagreDatoVirkFom)
+            statement.setDate(1, java.sql.Date.valueOf(datoVirk))
             statement.setLong(2, sakId.toLong())
             statement.setObject(3, behandlingId)
             statement.execute()
@@ -190,14 +217,15 @@ data class Vedtak(
     val fnr: String?,
     val datoFattet: Instant?,
     val datoattestert: Instant?,
-    val attestant: String?
+    val attestant: String?,
+    val virkningsDato: LocalDate?,
 )
 
 private object Queries {
     val lagreBeregningsresultat = "INSERT INTO vedtak(sakId, behandlingId, beregningsresultat, fnr) VALUES (?, ?, ?, ?)"
     val oppdaterBeregningsresultat = "UPDATE vedtak SET beregningsresultat = ? WHERE sakId = ? AND behandlingId = ?"
 
-    val lagreVilkaarResultat = "INSERT INTO vedtak(sakId, behandlingId, vilkaarsresultat) VALUES (?, ?, ?, ?) "
+    val lagreVilkaarResultat = "INSERT INTO vedtak(sakId, behandlingId, vilkaarsresultat, datoVirkFom) VALUES (?, ?, ?, ?, ?) "
     val oppdaterVilkaarResultat = "UPDATE vedtak SET vilkaarsresultat = ? WHERE sakId = ? AND behandlingId = ?"
 
     val lagreKommerSoekerTilgodeResultat = "INSERT INTO vedtak(sakId, behandlingId, kommersoekertilgoderesultat, fnr) VALUES (?, ?, ?, ?)"
@@ -208,9 +236,10 @@ private object Queries {
 
     val fattVedtak = "UPDATE vedtak SET saksbehandlerId = ?, vedtakfattet = ?, datoFattet = now() WHERE sakId = ? AND behandlingId = ?"
     val attesterVedtak = "UPDATE vedtak SET attestant = ?, datoAttestert = now() WHERE sakId = ? AND behandlingId = ?"
-    val hentVedtak = "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant FROM vedtak WHERE sakId = ? AND behandlingId = ?"
+    val hentVedtak = "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom FROM vedtak WHERE sakId = ? AND behandlingId = ?"
 
     val lagreFnr = "UPDATE vedtak SET fnr = ? WHERE sakId = ? AND behandlingId = ?"
+    val lagreDatoVirkFom = "UPDATE vedtak SET datoVirkFom = ? WHERE sakId = ? AND behandlingId = ?"
 }
 
 fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {

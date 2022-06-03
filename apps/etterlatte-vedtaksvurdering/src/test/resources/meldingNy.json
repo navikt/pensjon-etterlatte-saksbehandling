@@ -410,6 +410,7 @@
       "attestering": null
     }
   ],
+  "@virkningstidspunkt": "2022-07-01",
   "@vilkaarsvurdering": {
     "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
     "vilkaar": [

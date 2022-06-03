@@ -1,9 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.utbetaling.common.forsteDagIMaaneden
 import no.nav.etterlatte.utbetaling.common.toXMLDate

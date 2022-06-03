@@ -8,10 +8,12 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
+import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.sakId
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.vedtakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.KvitteringOppdatert
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.UgyldigStatus
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.UtbetalingFinnesIkke
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -59,24 +61,24 @@ class KvitteringMottaker(
                     when (val resultat = utbetalingService.oppdaterKvittering(oppdrag)) {
                         is KvitteringOppdatert -> {
                             when (oppdrag.mmel.alvorlighetsgrad) {
-                                "00" -> oppdragGodkjent(oppdrag)
-                                "04" -> oppdragGodkjentMedFeil(oppdrag)
-                                "08" -> oppdragAvvist(oppdrag)
-                                "12" -> oppdragFeilet(oppdrag, oppdragXml)
-                                else -> oppdragFeilet(oppdrag, oppdragXml)
+                                "00" -> oppdragGodkjent(resultat.utbetaling)
+                                "04" -> oppdragGodkjentMedFeil(resultat.utbetaling)
+                                "08" -> oppdragAvvist(resultat.utbetaling)
+                                "12" -> oppdragFeilet(resultat.utbetaling, oppdragXml)
+                                else -> oppdragFeilet(resultat.utbetaling, oppdragXml)
                             }
                         }
                         is UtbetalingFinnesIkke -> {
                             val feilmelding = "Finner ingen utbetaling for vedtakId=${resultat.vedtakId}"
                             logger.error(feilmelding)
-                            sendUtbetalingEvent(UtbetalingStatus.FEILET, oppdrag.vedtakId(), feilmelding)
+                            sendUtbetalingFeiletEvent(feilmelding, oppdrag)
                         }
                         is UgyldigStatus -> {
                             val feilmelding = """
                                 Utbetalingen for vedtakId=${oppdrag.vedtakId()} har feil status (${resultat.status})
                             """.trimIndent()
                             logger.error(feilmelding)
-                            sendUtbetalingEvent(UtbetalingStatus.FEILET, oppdrag.vedtakId(), feilmelding)
+                            sendUtbetalingFeiletEvent(feilmelding, oppdrag)
                         }
                     }
 
@@ -85,44 +87,58 @@ class KvitteringMottaker(
                 } catch (e: Exception) {
                     val feilmelding = "En feil oppstod under prosessering av kvittering fra Oppdrag"
                     logger.error(feilmelding, kv("oppdragXml", oppdragXml), e)
-                    sendUtbetalingEvent(UtbetalingStatus.FEILET, feilmelding = feilmelding)
+                    sendUtbetalingFeiletEvent(feilmelding)
                 }
             }
         }
     }
 
-    private fun oppdragGodkjent(oppdrag: Oppdrag) {
-        logger.info("Utbetaling med vedtakId=${oppdrag.vedtakId()} godkjent")
-        sendUtbetalingEvent(UtbetalingStatus.GODKJENT, oppdrag.vedtakId())
+    private fun oppdragGodkjent(utbetaling: Utbetaling) {
+        logger.info("Utbetaling med vedtakId=${utbetaling.vedtakId.value} godkjent")
+        sendUtbetalingEvent(utbetaling)
     }
 
-    private fun oppdragGodkjentMedFeil(oppdrag: Oppdrag) {
-        logger.info("Utbetaling med vedtakId=${oppdrag.vedtakId()} godkjent med feil")
-        sendUtbetalingEvent(UtbetalingStatus.GODKJENT_MED_FEIL, oppdrag.vedtakId(), oppdrag.kvitteringFeilmelding())
+    private fun oppdragGodkjentMedFeil(utbetaling: Utbetaling) {
+        logger.info("Utbetaling med vedtakId=${utbetaling.vedtakId.value} godkjent med feil")
+        sendUtbetalingEvent(utbetaling)
     }
 
-    private fun oppdragAvvist(oppdrag: Oppdrag) {
-        logger.info("Utbetaling med vedtakId=${oppdrag.vedtakId()} avvist")
-        sendUtbetalingEvent(UtbetalingStatus.AVVIST, oppdrag.vedtakId(), oppdrag.kvitteringFeilmelding())
+    private fun oppdragAvvist(utbetaling: Utbetaling) {
+        logger.info("Utbetaling med vedtakId=${utbetaling.vedtakId.value} avvist")
+        sendUtbetalingEvent(utbetaling)
     }
 
-    private fun oppdragFeilet(oppdrag: Oppdrag, oppdragXml: String) {
-        logger.info("Utbetaling med vedtakId=${oppdrag.vedtakId()} feilet", kv("oppdrag", oppdragXml))
-        sendUtbetalingEvent(UtbetalingStatus.FEILET, oppdrag.vedtakId(), oppdrag.kvitteringFeilmelding())
+    private fun oppdragFeilet(utbetaling: Utbetaling, oppdragXml: String) {
+        logger.info("Utbetaling med vedtakId=${utbetaling.vedtakId.value} feilet", kv("oppdrag", oppdragXml))
+        sendUtbetalingEvent(utbetaling)
     }
 
-    private fun sendUtbetalingEvent(status: UtbetalingStatus, vedtakId: Long? = null, feilmelding: String? = null) =
-        rapidsConnection.publish("key",
+    private fun sendUtbetalingEvent(utbetaling: Utbetaling) =
+        rapidsConnection.publish(utbetaling.sakId.value.toString(),
             UtbetalingEvent(
                 utbetalingResponse = UtbetalingResponse(
-                    status = status,
-                    vedtakId = vedtakId,
+                    status = utbetaling.status,
+                    vedtakId = utbetaling.vedtakId.value,
+                    feilmelding = utbetaling.kvitteringFeilmelding()
+                )
+            ).toJson()
+        )
+
+    private fun sendUtbetalingFeiletEvent(feilmelding: String, oppdrag: Oppdrag? = null) =
+        rapidsConnection.publish(oppdrag?.sakId() ?: "",
+            UtbetalingEvent(
+                utbetalingResponse = UtbetalingResponse(
+                    status = UtbetalingStatus.FEILET,
+                    vedtakId = oppdrag?.vedtakId(),
                     feilmelding = feilmelding
                 )
             ).toJson()
         )
 
-    private fun Oppdrag.kvitteringFeilmelding() = "${this.mmel.kodeMelding} ${this.mmel.beskrMelding}"
+    private fun Utbetaling.kvitteringFeilmelding() = when (this.kvittering?.alvorlighetsgrad) {
+        "00" -> null
+        else ->  "${this.kvittering?.kode} ${this.kvittering?.beskrivelse}"
+    }
 
     companion object {
         private val logger = LoggerFactory.getLogger(KvitteringMottaker::class.java)

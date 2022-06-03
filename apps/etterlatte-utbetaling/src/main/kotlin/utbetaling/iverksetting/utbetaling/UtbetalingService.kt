@@ -26,7 +26,7 @@ class UtbetalingService(
 ) {
     fun iverksettUtbetaling(vedtak: Utbetalingsvedtak): IverksettResultat {
         val utbetalingForVedtak = utbetalingDao.hentUtbetaling(vedtak.vedtakId)
-        val utbetalingslinjerForVedtak =  utbetalingDao.hentUtbetalingslinjer(vedtak.pensjonTilUtbetaling)
+        val utbetalingslinjerForVedtak = utbetalingDao.hentUtbetalingslinjer(vedtak.pensjonTilUtbetaling)
 
         return when {
             utbetalingForVedtak != null ->

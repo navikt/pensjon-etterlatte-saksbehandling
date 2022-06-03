@@ -206,23 +206,23 @@ fun vedtakEvent(vedtak: Vedtak) = """
 fun main() {
     val initiellUtbetalingsperiode =
         Utbetalingsperiode(
-            31,
+            40,
             Periode(fom = YearMonth.of(2019, Month.JANUARY), tom = null),
             BigDecimal(1000),
             UtbetalingsperiodeType.UTBETALING
         )
     val vedtak = vedtak(
-        vedtakId = 31,
+        vedtakId = 40,
         utbetalingsperioder = listOf(initiellUtbetalingsperiode),
-        ident = "16017919184",
-        sakId = 10
+        ident = "16018222837",
+        sakId = 15
     )
     val vedtakEvent = vedtakEvent(vedtak)
 
     val revurderingsvedtak = revurderingVedtak(
         vedtak = vedtak,
         utbetalingsperioder = genererEtterfolgendeUtbetalingsperioder(
-            antall = 4,
+            antall = 2,
             intervallMnd = 6,
             forrigeId = vedtak.pensjonTilUtbetaling!!.last().id,
             startPeriode = vedtak.pensjonTilUtbetaling!!.last().periode.fom.plusMonths(1),

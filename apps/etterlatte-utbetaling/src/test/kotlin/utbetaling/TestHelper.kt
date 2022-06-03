@@ -100,7 +100,15 @@ fun utbetaling(
     avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
     opprettet: Tidspunkt = Tidspunkt.now(),
     utbetalingslinjeId: Long = 1L,
-    utbetalingslinjer: List<Utbetalingslinje> = listOf(utbetalingslinje(id, sakId, utbetalingslinjeId)),
+    periodeFra: LocalDate = LocalDate.parse("2022-01-01"),
+    utbetalingslinjer: List<Utbetalingslinje> = listOf(
+        utbetalingslinje(
+            id,
+            sakId,
+            utbetalingslinjeId,
+            periodeFra = periodeFra
+        )
+    ),
     kvittering: Kvittering? = null
 ) =
     Utbetaling(
@@ -125,7 +133,8 @@ fun utbetalingslinje(
     sakId: SakId = SakId(1),
     utbetalingslinjeId: Long = 1,
     type: Utbetalingslinjetype = Utbetalingslinjetype.UTBETALING,
-    beloep: BigDecimal? = BigDecimal.valueOf(10000)
+    beloep: BigDecimal? = BigDecimal.valueOf(10000),
+    periodeFra: LocalDate = LocalDate.parse("2022-01-01")
 ): Utbetalingslinje =
     Utbetalingslinje(
         id = UtbetalingslinjeId(utbetalingslinjeId),
@@ -135,7 +144,7 @@ fun utbetalingslinje(
         opprettet = Tidspunkt.now(),
         sakId = sakId,
         periode = PeriodeForUtbetaling(
-            fra = LocalDate.parse("2022-01-01"),
+            fra = periodeFra,
         ),
         beloep = beloep,
     )

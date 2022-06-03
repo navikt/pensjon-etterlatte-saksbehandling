@@ -62,7 +62,7 @@ class VilkaarService {
     }
     fun hentVirkningstidspunkt (doedsdato: LocalDate, mottattDato: LocalDate): LocalDate{
         if (mottattDato.year - doedsdato.year > 3) {
-            return mottattDato.minusYears(3).with(TemporalAdjusters.firstDayOfNextMonth())
+            return mottattDato.minusYears(3).with(TemporalAdjusters.firstDayOfMonth())
         }
         return mottattDato.with(TemporalAdjusters.firstDayOfNextMonth())
     }

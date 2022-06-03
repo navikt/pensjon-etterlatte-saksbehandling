@@ -33,7 +33,7 @@ spec:
       #sette tilbake til none senere
       value: earliest
     - name: ETTERLATTE_PROXY_INNTEKT
-      value: http://etterlatte-proxy/aad/inntektskomponenten
+      value: https://etterlatte-proxy.dev-fss-pub.nais.io/aad/inntektskomponenten
     - name: ETTERLATTE_PROXY_AUDIENCE
       value: "dev-fss:etterlatte:etterlatte-proxy"
     - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE

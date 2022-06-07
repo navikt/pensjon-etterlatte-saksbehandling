@@ -39,7 +39,7 @@ internal class LesVilkaarsmelding(
                 val kommerSoekerTilGodeVurdering = vilkaar.mapKommerSoekerTilGode(grunnlagForVilkaar)
                 val behandlingopprettet = LocalDateTime.parse(packet["behandlingOpprettet"].asText()).toLocalDate()
 
-                packet["@virkningstidspunkt"] = vilkaar.beregnVirkningstidspunkt(grunnlagForVilkaar, behandlingopprettet).toString()
+                packet["@virkningstidspunkt"] = vilkaar.beregnVilkaarstidspunkt(grunnlagForVilkaar, behandlingopprettet).toString()
                 packet["@vilkaarsvurdering"] = vilkaarsVurdering
                 packet["@vilkaarsvurderingGrunnlagRef"] = grunnlag.versjon
                 packet["@kommersoekertilgode"] = kommerSoekerTilGodeVurdering

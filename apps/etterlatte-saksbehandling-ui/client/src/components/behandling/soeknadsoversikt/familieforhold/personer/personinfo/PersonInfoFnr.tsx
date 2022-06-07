@@ -6,13 +6,11 @@ type Props = {
 
 export const PersonInfoFnr: React.FC<Props> = ({ fnr }) => {
   return (
-    <>
-      <PersonDetailWrapper adresse={false}>
-        <div>
-          <strong>Fødselsnummer</strong>
-        </div>
-        {fnr}
-      </PersonDetailWrapper>
-    </>
+    <PersonDetailWrapper adresse={false}>
+      <div>
+        <strong>Fødselsnummer</strong>
+      </div>
+      {fnr}
+    </PersonDetailWrapper>
   )
 }

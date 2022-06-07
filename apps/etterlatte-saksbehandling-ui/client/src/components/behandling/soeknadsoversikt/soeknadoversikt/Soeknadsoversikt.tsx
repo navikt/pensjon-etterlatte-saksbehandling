@@ -2,23 +2,24 @@ import styled from 'styled-components'
 import { OversiktGyldigFramsatt } from './gyldigFramsattSoeknad/OversiktGyldigFramsatt'
 import { OversiktKommerSoekerTilgode } from './kommerBarnetTilgode/OversiktKommerSoekerTilgode'
 import {
+  IDetaljertBehandling,
   IGyldighetResultat,
   IKommerSoekerTilgode,
   VurderingsResultat,
 } from '../../../../store/reducers/BehandlingReducer'
+import { Behandling } from '../../../person/typer'
 
 export interface PropsOmSoeknad {
-  gyldigFramsatt: IGyldighetResultat
-  kommerSoekerTilgode: IKommerSoekerTilgode
+  behandling: IDetaljertBehandling
 }
 
-export const SoeknadOversikt: React.FC<PropsOmSoeknad> = ({ gyldigFramsatt, kommerSoekerTilgode }) => {
+export const SoeknadOversikt: React.FC<PropsOmSoeknad> = ({ behandling }) => {
   return (
     <SoeknadOversiktWrapper>
       <div>
-        <OversiktGyldigFramsatt gyldigFramsatt={gyldigFramsatt} />
-        {gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT && (
-          <OversiktKommerSoekerTilgode kommerSoekerTilgode={kommerSoekerTilgode} />
+        <OversiktGyldigFramsatt gyldigFramsatt={behandling.gyldighetsprøving} />
+        {behandling.gyldighetsprøving.resultat === VurderingsResultat.OPPFYLT && (
+          <OversiktKommerSoekerTilgode kommerSoekerTilgode={behandling.kommerSoekerTilgode} />
         )}
       </div>
     </SoeknadOversiktWrapper>

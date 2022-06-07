@@ -10,6 +10,8 @@ export interface IDetaljertBehandling {
   kommerSoekerTilgode: IKommerSoekerTilgode
   beregning: any
   fastsatt: boolean
+  soeknadMottattDato: string
+  virkningstidspunkt: string
 }
 
 export interface IKommerSoekerTilgode {
@@ -27,7 +29,7 @@ export interface IPersoninfoAvdoed {
   navn: string
   fnr: string
   rolle: PersonRolle
-  adresser: IAdresser
+  bostedadresser: IAdresse[]
   doedsdato: string
 }
 
@@ -35,22 +37,22 @@ export interface IPersoninfoSoeker {
   navn: string
   fnr: string
   rolle: PersonRolle
-  adresser: IAdresser
+  bostedadresser: IAdresse[]
+  soeknadAdresse: IUtlandsadresseSoeknad
   foedselsdato: string
+}
+
+export interface IUtlandsadresseSoeknad {
+  adresseIUtlandet: string
+  land?: string
+  adresse?: string
 }
 
 export interface IPersoninfoGjenlevendeForelder {
   navn: string
   fnr: string
   rolle: PersonRolle
-  adresser: IAdresser
-  adresseSoeknad: string
-}
-
-export interface IAdresser {
-  bostedadresse: IAdresse[]
-  oppholdadresse: IAdresse[]
-  kontaktadresse: IAdresse[]
+  bostedadresser: IAdresse[]
 }
 
 export interface IBehandlingsopplysning {
@@ -191,27 +193,29 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
         navn: '',
         fnr: '',
         rolle: PersonRolle.AVDOED,
-        adresser: { bostedadresse: [], oppholdadresse: [], kontaktadresse: [] },
+        bostedadresser: [],
         doedsdato: '',
       },
       soeker: {
         navn: '',
         fnr: '',
         rolle: PersonRolle.AVDOED,
-        adresser: { bostedadresse: [], oppholdadresse: [], kontaktadresse: [] },
+        bostedadresser: [],
+        soeknadAdresse: { adresseIUtlandet: '' },
         foedselsdato: '',
       },
       gjenlevendeForelder: {
         navn: '',
         fnr: '',
         rolle: PersonRolle.AVDOED,
-        adresser: { bostedadresse: [], oppholdadresse: [], kontaktadresse: [] },
-        adresseSoeknad: '',
+        bostedadresser: [],
       },
     },
   },
   beregning: undefined,
   fastsatt: false,
+  soeknadMottattDato: '',
+  virkningstidspunkt: '',
 }
 
 export const behandlingReducer = (state = detaljertBehandlingInitialState, action: IAction): any => {

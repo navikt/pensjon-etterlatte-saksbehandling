@@ -3,7 +3,6 @@ import { AppContext } from '../../../store/AppContext'
 import { Content, ContentHeader } from '../../../shared/styled'
 import { SoeknadOversikt } from './soeknadoversikt/Soeknadsoversikt'
 import { Familieforhold } from './familieforhold/Familieforhold'
-import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
 import { VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 import { Border, HeadingWrapper } from './styled'
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../behandlings-status'
@@ -14,11 +13,7 @@ import { Start } from '../handlinger/start'
 import { Soeknadsdato } from './soeknadoversikt/Soeknadsdato'
 
 export const Soeknadsoversikt = () => {
-  const { mottattDato } = usePersonInfoFromBehandling()
-
-  const ctx = useContext(AppContext)
-  const gyldigFramsatt = ctx.state.behandlingReducer.gyldighetsprøving
-  const kommerSoekerTilgode = ctx.state.behandlingReducer.kommerSoekerTilgode
+  const behandling = useContext(AppContext).state.behandlingReducer
 
   return (
     <Content>
@@ -32,13 +27,13 @@ export const Soeknadsoversikt = () => {
             <BehandlingsTypeSmall type={IBehandlingsType.BARNEPENSJON} />
           </div>
         </HeadingWrapper>
-        <Soeknadsdato mottattDato={mottattDato} />
+        <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />
       </ContentHeader>
-      <SoeknadOversikt gyldigFramsatt={gyldigFramsatt} kommerSoekerTilgode={kommerSoekerTilgode} />
+      <SoeknadOversikt behandling={behandling} />
       <Border />
-      <Familieforhold kommerSoekerTilgode={kommerSoekerTilgode} gyldigFramsatt={gyldigFramsatt} />
+      <Familieforhold behandling={behandling} />
       <BehandlingHandlingKnapper>
-        <Start soeknadGyldigFremsatt={gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT} />
+        <Start soeknadGyldigFremsatt={behandling.gyldighetsprøving.resultat === VurderingsResultat.OPPFYLT} />
       </BehandlingHandlingKnapper>
     </Content>
   )

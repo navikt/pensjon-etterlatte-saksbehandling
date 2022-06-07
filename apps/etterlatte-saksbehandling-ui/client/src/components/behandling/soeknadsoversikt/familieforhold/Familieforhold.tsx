@@ -8,26 +8,25 @@ import { ContentHeader } from '../../../../shared/styled'
 import { Border, DashedBorder } from '../styled'
 import {
   GyldigFramsattType,
+  IDetaljertBehandling,
   IGyldighetproving,
-  IGyldighetResultat,
-  IKommerSoekerTilgode,
   VurderingsResultat,
 } from '../../../../store/reducers/BehandlingReducer'
 
 export interface PropsFamilieforhold {
-  kommerSoekerTilgode: IKommerSoekerTilgode
-  gyldigFramsatt: IGyldighetResultat
+  behandling: IDetaljertBehandling
 }
 
-export const Familieforhold: React.FC<PropsFamilieforhold> = ({ kommerSoekerTilgode, gyldigFramsatt }) => {
+export const Familieforhold: React.FC<PropsFamilieforhold> = ({ behandling }) => {
   const innsenderErGjenlevende =
-    gyldigFramsatt.vurderinger.find((g: IGyldighetproving) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER)
-      ?.resultat === VurderingsResultat.OPPFYLT
-  const doedsdato = kommerSoekerTilgode.familieforhold.avdoed.doedsdato
+    behandling.gyldighetsprøving.vurderinger.find(
+      (g: IGyldighetproving) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER
+    )?.resultat === VurderingsResultat.OPPFYLT
+  const doedsdato = behandling.kommerSoekerTilgode.familieforhold.avdoed.doedsdato
 
   return (
     <>
-      {gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT ? (
+      {behandling.gyldighetsprøving.resultat === VurderingsResultat.OPPFYLT ? (
         <>
           <ContentHeader>
             <Heading spacing size="medium" level="5">
@@ -37,21 +36,21 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ kommerSoekerTilg
           <FamilieforholdWrapper>
             <DashedBorder />
             <Barn
-              person={kommerSoekerTilgode.familieforhold.soeker}
+              person={behandling.kommerSoekerTilgode.familieforhold.soeker}
               alderVedDoedsdato={hentAlderVedDoedsdato(
-                kommerSoekerTilgode.familieforhold.soeker.foedselsdato,
+                behandling.kommerSoekerTilgode.familieforhold.soeker.foedselsdato,
                 doedsdato
               )}
               doedsdato={doedsdato}
             />
             <DashedBorder />
             <GjenlevendeForelder
-              person={kommerSoekerTilgode.familieforhold.gjenlevendeForelder}
+              person={behandling.kommerSoekerTilgode.familieforhold.gjenlevendeForelder}
               innsenderErGjenlevendeForelder={innsenderErGjenlevende}
               doedsdato={doedsdato}
             />
             <DashedBorder />
-            <AvdoedForelder person={kommerSoekerTilgode.familieforhold.avdoed} />
+            <AvdoedForelder person={behandling.kommerSoekerTilgode.familieforhold.avdoed} />
           </FamilieforholdWrapper>
           <Border />
         </>
@@ -60,7 +59,7 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ kommerSoekerTilg
           <>
             <FamilieforholdWrapper>
               <GjenlevendeForelder
-                person={kommerSoekerTilgode.familieforhold.gjenlevendeForelder}
+                person={behandling.kommerSoekerTilgode.familieforhold.gjenlevendeForelder}
                 innsenderErGjenlevendeForelder={innsenderErGjenlevende}
                 doedsdato={doedsdato}
               />

@@ -4,7 +4,6 @@ import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.database.VedtaksvurderingRepository
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -76,11 +75,13 @@ internal class DBTest {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
         val now = LocalDateTime.now()
-        vedtaksvurderingService.lagreVilkaarsresultat("12321423523545", uuid, "fnr", VilkaarResultat(
-            VurderingsResultat.OPPFYLT,
-            emptyList(),
-            now
-        ), LocalDate.now())
+        vedtaksvurderingService.lagreVilkaarsresultat(
+            "12321423523545", uuid, "fnr", VilkaarResultat(
+                VurderingsResultat.OPPFYLT,
+                emptyList(),
+                now
+            ), LocalDate.now()
+        )
     }
 
     fun leggtilkommersoekertilgoderesultat() {
@@ -101,22 +102,22 @@ internal class DBTest {
                         "Navn",
                         Foedselsnummer.of("03108718357"),
                         PersonRolle.AVDOED,
-                        Adresser(null, null, null),
+                        listOf(),
                         LocalDate.of(2020, 1, 1),
                     ),
                     soeker = PersoninfoSoeker(
                         "Navn",
                         Foedselsnummer.of("03108718357"),
                         PersonRolle.BARN,
-                        Adresser(null, null, null),
+                        listOf(),
+                        null,
                         LocalDate.of(2010, 1, 1),
                     ),
                     gjenlevendeForelder = PersoninfoGjenlevendeForelder(
                         "Navn",
                         Foedselsnummer.of("03108718357"),
                         PersonRolle.BARN,
-                        Adresser(null, null, null),
-                        "Oppgitt adresse i søknad",
+                        listOf()
                     )
                 )
 
@@ -129,7 +130,19 @@ internal class DBTest {
     fun leggtilavkortingsresultat() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
-        vedtaksvurderingService.lagreAvkorting("12321423523545", uuid, "fnr", AvkortingsResultat(UUID.randomUUID(), Beregningstyper.BPGP, no.nav.etterlatte.libs.common.avkorting.Endringskode.NY, AvkortingsResultatType.BEREGNET, emptyList(), LocalDateTime.now()))
+        vedtaksvurderingService.lagreAvkorting(
+            "12321423523545",
+            uuid,
+            "fnr",
+            AvkortingsResultat(
+                UUID.randomUUID(),
+                Beregningstyper.BPGP,
+                no.nav.etterlatte.libs.common.avkorting.Endringskode.NY,
+                AvkortingsResultatType.BEREGNET,
+                emptyList(),
+                LocalDateTime.now()
+            )
+        )
     }
 
     @Test

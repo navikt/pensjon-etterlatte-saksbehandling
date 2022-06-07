@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.vikaar
 
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
+import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import java.time.LocalDate
@@ -19,7 +20,8 @@ data class PersoninfoSoeker(
     val navn: String,
     val fnr: Foedselsnummer?,
     val rolle: PersonRolle,
-    val adresser: Adresser,
+    val bostedadresser: List<Adresse>?,
+    val soeknadAdresse: UtenlandsadresseBarn?,
     val foedselsdato: LocalDate?,
 )
 
@@ -27,7 +29,7 @@ data class PersoninfoAvdoed(
     val navn: String,
     val fnr: Foedselsnummer?,
     val rolle: PersonRolle,
-    val adresser: Adresser,
+    val bostedadresser: List<Adresse>?,
     val doedsdato: LocalDate?,
 )
 
@@ -36,6 +38,5 @@ data class PersoninfoGjenlevendeForelder(
     val navn: String,
     val fnr: Foedselsnummer?,
     val rolle: PersonRolle,
-    val adresser: Adresser,
-    val adresseSoeknad: String?,
+    val bostedadresser: List<Adresse>?,
 )

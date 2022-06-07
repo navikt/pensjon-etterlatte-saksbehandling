@@ -90,7 +90,7 @@ internal class BehandlingServiceTest {
     fun hentBehandling() {
         val behandlingid = UUID.randomUUID()
         val detaljertBehandling = DetaljertBehandling(behandlingid, 4, LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(), null, null, null, null, null, null, null)
-        val vedtak = Vedtak("4", behandlingid, null, null, null, VilkaarResultat(VurderingsResultat.OPPFYLT, null, LocalDateTime.now()), null, null)
+        val vedtak = Vedtak("4", behandlingid, null, null, null, VilkaarResultat(VurderingsResultat.OPPFYLT, null, LocalDateTime.now()), null, null, null)
         val grunnlag = listOf(Grunnlagsopplysning(
             UUID.randomUUID(),
             Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),

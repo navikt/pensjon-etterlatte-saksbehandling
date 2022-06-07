@@ -6,6 +6,8 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 data class DetaljertBehandlingDto(
@@ -16,5 +18,7 @@ data class DetaljertBehandlingDto(
     val vilkårsprøving: VilkaarResultat?,
     val kommerSoekerTilgode: KommerSoekerTilgode?,
     val beregning: BeregningsResultat?,
-    val fastsatt: Boolean = false
+    val fastsatt: Boolean = false,
+    val soeknadMottattDato: LocalDateTime?,
+    val virkningsTidspunkt: LocalDate?
 )

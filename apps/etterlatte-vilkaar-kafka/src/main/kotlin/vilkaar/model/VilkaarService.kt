@@ -54,13 +54,13 @@ class VilkaarService {
         return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
     }
 
-    //TODO riktig å bruke localdate? endre til zoned
-    fun beregnVilkaarstidspunkt (opplysninger: List<VilkaarOpplysning<ObjectNode>>, opprettet: LocalDate): LocalDate? {
+    fun beregnVirkningstidspunkt(opplysninger: List<VilkaarOpplysning<ObjectNode>>, opprettet: LocalDate): LocalDate? {
         logger.info("beregner virkningstidspunkt")
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
         return avdoedPdl?.opplysning?.doedsdato?.let { hentVirkningstidspunkt(it, opprettet) }
     }
-    fun hentVirkningstidspunkt (doedsdato: LocalDate, mottattDato: LocalDate): LocalDate{
+
+    fun hentVirkningstidspunkt(doedsdato: LocalDate, mottattDato: LocalDate): LocalDate {
         if (mottattDato.year - doedsdato.year > 3) {
             return mottattDato.minusYears(3).with(TemporalAdjusters.firstDayOfMonth())
         }
@@ -72,10 +72,9 @@ class VilkaarService {
         logger.info("Map opplysninger for å vurdere om penger kommer søker til gode")
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
-        val gjenlevendeSoeknad =
-            finnOpplysning<GjenlevendeForelderSoeknad>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_SOEKNAD_V1)
+        val soekerSoeknad =
+            finnOpplysning<SoekerBarnSoeknad>(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1)
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
-
 
         val sammeAdresser = listOf(
             barnOgForelderSammeBostedsadresse(
@@ -89,8 +88,7 @@ class VilkaarService {
         val vurdertDato = hentSisteVurderteDato(sammeAdresser)
         val vurdering = VilkaarResultat(vilkaarResultat, sammeAdresser, vurdertDato)
 
-        val familieforhold = mapFamiliemedlemmer(soekerPdl, gjenlevendePdl, gjenlevendeSoeknad, avdoedPdl)
-
+        val familieforhold = mapFamiliemedlemmer(soekerPdl, soekerSoeknad, gjenlevendePdl, avdoedPdl)
 
         return KommerSoekerTilgode(vurdering, familieforhold)
     }
@@ -118,8 +116,8 @@ class VilkaarService {
 
 fun mapFamiliemedlemmer(
     soeker: VilkaarOpplysning<Person>?,
+    soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
     gjenlevende: VilkaarOpplysning<Person>?,
-    gjenlevendeSoeknad: VilkaarOpplysning<GjenlevendeForelderSoeknad>?,
     avdoed: VilkaarOpplysning<Person>?,
 ): Familiemedlemmer {
     return Familiemedlemmer(
@@ -128,7 +126,7 @@ fun mapFamiliemedlemmer(
                 navn = it?.fornavn + " " + it?.etternavn,
                 fnr = it?.foedselsnummer,
                 rolle = PersonRolle.AVDOED,
-                adresser = Adresser(it?.bostedsadresse, it?.oppholdsadresse, it?.kontaktadresse),
+                bostedadresser = it?.bostedsadresse,
                 doedsdato = it?.doedsdato
             )
         },
@@ -137,7 +135,8 @@ fun mapFamiliemedlemmer(
                 navn = it?.fornavn + " " + it?.etternavn,
                 fnr = it?.foedselsnummer,
                 rolle = PersonRolle.AVDOED,
-                adresser = Adresser(it?.bostedsadresse, it?.oppholdsadresse, it?.kontaktadresse),
+                bostedadresser = it?.bostedsadresse,
+                soeknadAdresse = soekerSoeknad?.opplysning?.utenlandsadresse,
                 foedselsdato = it?.foedselsdato
             )
         },
@@ -146,8 +145,7 @@ fun mapFamiliemedlemmer(
                 navn = it?.fornavn + " " + it?.etternavn,
                 fnr = it?.foedselsnummer,
                 rolle = PersonRolle.AVDOED,
-                adresser = Adresser(it?.bostedsadresse, it?.oppholdsadresse, it?.kontaktadresse),
-                adresseSoeknad = gjenlevendeSoeknad?.opplysning?.adresse,
+                bostedadresser = it?.bostedsadresse,
             )
         })
 }

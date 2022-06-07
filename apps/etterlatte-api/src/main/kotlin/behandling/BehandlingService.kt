@@ -55,8 +55,8 @@ class BehandlingService(
 
     suspend fun hentBehandling(behandlingId: String, accessToken: String) = coroutineScope {
         logger.info("Henter behandling")
-        behandlingKlient.hentBehandling(behandlingId, accessToken).let {behandling ->
-            val grunnlag =  async { grunnlagKlient.hentGrunnlagForSak(behandling.sak.toInt(), accessToken) }
+        behandlingKlient.hentBehandling(behandlingId, accessToken).let { behandling ->
+            val grunnlag = async { grunnlagKlient.hentGrunnlagForSak(behandling.sak.toInt(), accessToken) }
             val vedtak = async { vedtakKlient.hentVedtak(behandling.sak.toInt(), behandlingId, accessToken) }
             DetaljertBehandlingDto(
                 id = behandling.id,
@@ -65,7 +65,9 @@ class BehandlingService(
                 gyldighetsprøving = behandling.gyldighetsproeving,
                 vilkårsprøving = vedtak.await().vilkaarsResultat,
                 kommerSoekerTilgode = vedtak.await().kommerSoekerTilgodeResultat,
-                beregning = null
+                beregning = null,
+                soeknadMottattDato = behandling.soeknadMottattDato,
+                virkningsTidspunkt = vedtak.await().virkningsDato
             )
         }
     }

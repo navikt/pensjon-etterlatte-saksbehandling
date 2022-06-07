@@ -36,8 +36,7 @@ fun vedtak(vedtakId: String = "1") = Vedtak(
             enhetsnummer = "9999",
             datoEnhetFOM = LocalDate.parse("1999-09-28")
         )
-    ),
-    attestasjon()
+    )
 )
 
 fun attestasjon() = Attestasjon(

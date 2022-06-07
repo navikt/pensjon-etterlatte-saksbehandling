@@ -18,6 +18,8 @@ import java.util.*
 
 interface EtterlatteVedtak {
     suspend fun hentVedtak(sakId: Int, behandlingId: String, accessToken: String): Vedtak
+    suspend fun fattVedtak(sakId: Int, behandlingId: String, accessToken: String)
+    suspend fun attesterVedtak(sakId: Int, behandlingId: String, accessToken: String)
 }
 
 class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
@@ -54,6 +56,34 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
         }    }
 
 
+    override suspend fun fattVedtak(sakId: Int, behandlingId: String, accessToken: String) {
+        logger.info("Sender til attestering")
+        try {
+            downstreamResourceClient.post(Resource(clientId, "$resourceUrl/api/fattVedtak"), accessToken, FattVedtakBody(sakId.toString(), behandlingId))
+                .mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
+        } catch (e: Exception) {
+            logger.error("Sending til attestering feilet", e)
+            throw e
+        }
+    }
+    override suspend fun attesterVedtak(sakId: Int, behandlingId: String, accessToken: String) {
+        logger.info("Sender til attestering")
+        try {
+            downstreamResourceClient.post(Resource(clientId, "$resourceUrl/api/attesterVedtak"), accessToken, FattVedtakBody(sakId.toString(), behandlingId))
+                .mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
+        } catch (e: Exception) {
+            logger.error("Sending til attestering feilet", e)
+            throw e
+        }
+    }
+
+
 }
 
 data class Vedtak(
@@ -66,3 +96,5 @@ data class Vedtak(
     val kommerSoekerTilgodeResultat: KommerSoekerTilgode?,
     val vedtakFattet: Boolean?
 )
+
+data class FattVedtakBody(val sakId: String, val behandlingId: String)

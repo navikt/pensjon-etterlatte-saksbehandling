@@ -66,7 +66,8 @@ class BehandlingService(
                 vilkårsprøving = vedtak.await().vilkaarsResultat,
                 kommerSoekerTilgode = vedtak.await().kommerSoekerTilgodeResultat,
                 beregning = null,
-                soeknadMottattDato = behandling.soeknadMottattDato
+                soeknadMottattDato = behandling.soeknadMottattDato,
+                virkningstidspunkt = vedtak.await().virkningsDato
             )
         }
     }

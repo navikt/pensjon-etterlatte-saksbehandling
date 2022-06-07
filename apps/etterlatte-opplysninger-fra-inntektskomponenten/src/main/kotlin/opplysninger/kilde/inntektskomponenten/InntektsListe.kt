@@ -6,7 +6,7 @@ data class InntektsKomponentenResponse (
 )
 
 data class Ident (
-    val identifikator : Int,
+    val identifikator : String,
     val aktoerType : String
 )
 

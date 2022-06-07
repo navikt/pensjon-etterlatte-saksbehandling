@@ -1,10 +1,6 @@
 package no.nav.etterlatte.barnepensjon
 
-import no.nav.etterlatte.libs.common.vikaar.Kriterie
-import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
-import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
+import no.nav.etterlatte.libs.common.vikaar.*
 import java.time.LocalDateTime
 
 class OpplysningKanIkkeHentesUt : IllegalStateException()
@@ -15,7 +11,9 @@ fun setVikaarVurderingFraKriterier(kriterie: List<Kriterie>): VurderingsResultat
 }
 
 fun setVilkaarVurderingFraVilkaar(vilkaar: List<VurdertVilkaar>): VurderingsResultat {
-    val resultat = vilkaar.map { it.resultat }
+    val resultat = vilkaar
+        .filter { it.navn != Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP }
+        .map { it.resultat }
     return hentVurdering(resultat)
 }
 

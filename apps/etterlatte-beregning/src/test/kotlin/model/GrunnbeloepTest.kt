@@ -15,7 +15,8 @@ class GrunnbeloepTest {
     @Test
     fun `sjekk siste G i periode gir rett beloep`(){
         val tidspunkt = LocalDate.of(2022,1,1)
-        val grunnbeloep = Grunnbeloep.hentGforPeriode(tidspunkt)
+        val tidspunktSlutt = LocalDate.of(2022,12,1)
+        val grunnbeloep = Grunnbeloep.hentGforPeriode(tidspunkt, tidspunktSlutt)
         Assertions.assertEquals(grunnbeloep.first().grunnbeløpPerMåned,8867 )
         Assertions.assertEquals(grunnbeloep.last().grunnbeløpPerMåned,9290 )
         Assertions.assertEquals(grunnbeloep.size, 2)

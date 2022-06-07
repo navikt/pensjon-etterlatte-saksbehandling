@@ -5,13 +5,17 @@ import { ForelderWrap } from '../../styled'
 import { PersonStatus, RelatertPersonsRolle } from '../../../types'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import { IPersoninfoGjenlevendeForelder } from '../../../../../store/reducers/BehandlingReducer'
+import { hentAdresserEtterDoedsdato } from '../../../felles/utils'
 
 type Props = {
   person: IPersoninfoGjenlevendeForelder
   innsenderErGjenlevendeForelder: boolean
+  doedsdato: string
 }
 
-export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenlevendeForelder }) => {
+export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenlevendeForelder, doedsdato }) => {
+  const adresserEtterDoedsdato = hentAdresserEtterDoedsdato(person.adresser?.bostedadresse, new Date(doedsdato))
+
   return (
     <PersonBorder>
       <PersonHeader>
@@ -26,7 +30,7 @@ export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenle
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfoFnr fnr={person.fnr} />
-        <PersonInfoAdresse adresser={person.adresser} visHistorikk={true} />
+        <PersonInfoAdresse adresser={adresserEtterDoedsdato} visHistorikk={true} />
       </PersonInfoWrapper>
     </PersonBorder>
   )

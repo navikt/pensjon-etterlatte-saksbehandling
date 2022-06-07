@@ -798,6 +798,34 @@
               "kilde": "FREG",
               "gyldigFraOgMed": "1999-01-01T00:00:00",
               "gyldigTilOgMed": null
+            },
+            {
+              "type": "VEGADRESSE",
+              "aktiv": false,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Kodeveien 9",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "0485",
+              "poststed": "Oslo",
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "1999-01-01T00:00:00",
+              "gyldigTilOgMed": "2022-02-01T00:00:00"
+            },
+            {
+              "type": "VEGADRESSE",
+              "aktiv": false,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Gammel adresse 9",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "0485",
+              "poststed": "Oslo",
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "1999-01-01T00:00:00",
+              "gyldigTilOgMed": "2000-01-01T00:00:00"
             }
           ],
           "oppholdadresse": [],

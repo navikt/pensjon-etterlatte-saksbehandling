@@ -3,17 +3,16 @@ import { PersonDetailWrapper, Historikk } from '../../../styled'
 import { IAdresse } from '../../../../types'
 import { TextButton } from './TextButton'
 import { Adressevisning } from '../../../../felles/Adressevisning'
-import { IAdresser } from '../../../../../../store/reducers/BehandlingReducer'
 
 type Props = {
-  adresser: IAdresser | undefined
+  adresser: IAdresse[] | undefined
   visHistorikk: boolean
 }
 
 export const PersonInfoAdresse: React.FC<Props> = ({ adresser, visHistorikk }) => {
   const [visAdresseHistorikk, setVisAdresseHistorikk] = useState(false)
 
-  const gjeldendeAdresse: IAdresse | undefined = adresser?.bostedadresse?.find((adresse: IAdresse) => adresse.aktiv)
+  const gjeldendeAdresse: IAdresse | undefined = adresser?.find((adresse: IAdresse) => adresse.aktiv)
 
   return (
     <PersonDetailWrapper adresse={true}>
@@ -31,7 +30,7 @@ export const PersonInfoAdresse: React.FC<Props> = ({ adresser, visHistorikk }) =
       {adresser && visHistorikk && (
         <Historikk>
           <TextButton isOpen={visAdresseHistorikk} setIsOpen={setVisAdresseHistorikk} />
-          {visAdresseHistorikk && <Adressevisning adresser={adresser.bostedadresse} soeknadsoversikt={true} />}
+          {visAdresseHistorikk && <Adressevisning adresser={adresser} soeknadsoversikt={true} />}
         </Historikk>
       )}
     </PersonDetailWrapper>

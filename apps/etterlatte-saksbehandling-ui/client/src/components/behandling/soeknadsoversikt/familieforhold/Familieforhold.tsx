@@ -23,6 +23,7 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ kommerSoekerTilg
   const innsenderErGjenlevende =
     gyldigFramsatt.vurderinger.find((g: IGyldighetproving) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER)
       ?.resultat === VurderingsResultat.OPPFYLT
+  const doedsdato = kommerSoekerTilgode.familieforhold.avdoed.doedsdato
 
   return (
     <>
@@ -39,13 +40,15 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ kommerSoekerTilg
               person={kommerSoekerTilgode.familieforhold.soeker}
               alderVedDoedsdato={hentAlderVedDoedsdato(
                 kommerSoekerTilgode.familieforhold.soeker.foedselsdato,
-                kommerSoekerTilgode.familieforhold.avdoed.doedsdato
+                doedsdato
               )}
+              doedsdato={doedsdato}
             />
             <DashedBorder />
             <GjenlevendeForelder
               person={kommerSoekerTilgode.familieforhold.gjenlevendeForelder}
               innsenderErGjenlevendeForelder={innsenderErGjenlevende}
+              doedsdato={doedsdato}
             />
             <DashedBorder />
             <AvdoedForelder person={kommerSoekerTilgode.familieforhold.avdoed} />
@@ -59,6 +62,7 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ kommerSoekerTilg
               <GjenlevendeForelder
                 person={kommerSoekerTilgode.familieforhold.gjenlevendeForelder}
                 innsenderErGjenlevendeForelder={innsenderErGjenlevende}
+                doedsdato={doedsdato}
               />
             </FamilieforholdWrapper>
             <Border />

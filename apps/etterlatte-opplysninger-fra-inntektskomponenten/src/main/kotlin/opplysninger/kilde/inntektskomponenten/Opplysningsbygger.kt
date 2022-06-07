@@ -16,8 +16,12 @@ class OpplysningsByggerService : OpplysningsBygger {
     ): List<Grunnlagsopplysning<out Any>> {
 
         // TODO: sjekk om det finnes inntekt for uføretrygd eller alderspensjon i løpet av de siste fem år
-        val uforetrygd = harFaattUforetrygd(inntektsKomponentenResponse.arbeidsInntektMaaned)
-        val alderspensjon = harFaatAlderspensjon(inntektsKomponentenResponse.arbeidsInntektMaaned)
+        var uforetrygd = false
+        var alderspensjon = false
+        if(inntektsKomponentenResponse.arbeidsInntektMaaned != null) {
+            uforetrygd = harFaattUforetrygd(inntektsKomponentenResponse.arbeidsInntektMaaned)
+            alderspensjon = harFaatAlderspensjon(inntektsKomponentenResponse.arbeidsInntektMaaned)
+        }
 
         return listOf(lagOpplysning(Opplysningstyper.PENSJON_UFORE_V1, PensjonUforeOpplysning(uforetrygd, alderspensjon)))
     }

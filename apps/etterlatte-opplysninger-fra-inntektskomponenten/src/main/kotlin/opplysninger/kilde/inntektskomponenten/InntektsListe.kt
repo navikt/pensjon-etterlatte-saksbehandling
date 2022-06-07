@@ -1,7 +1,7 @@
 package no.nav.etterlatte.opplysninger.kilde.inntektskomponenten
 
 data class InntektsKomponentenResponse (
-    val arbeidsInntektMaaned : List<ArbeidsInntektMaaned>,
+    val arbeidsInntektMaaned : List<ArbeidsInntektMaaned>?,
     val ident : Ident
 )
 

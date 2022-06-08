@@ -1,17 +1,11 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../../shared/icons/genderIcon'
 import { Fnr } from './fnr'
+import { PersonInfo } from '../person/typer'
 
 export enum StatusBarTheme {
   gray = 'gray',
   white = 'white',
-}
-
-export interface PersonInfo {
-  fornavn: string
-  etternavn: string
-  foedselsnummer: string
-  type: string
 }
 
 export const StatusBar = (props: { theme?: StatusBarTheme; personInfo?: PersonInfo }) => {
@@ -28,9 +22,7 @@ export const StatusBar = (props: { theme?: StatusBarTheme; personInfo?: PersonIn
       {props.personInfo?.foedselsnummer && (
         <UserInfo>
           <GenderIcon gender={gender()} />
-          <Name>
-            {props.personInfo?.fornavn} {props.personInfo?.etternavn}
-          </Name>
+          <Name>{props.personInfo?.navn}</Name>
           <Skilletegn>|</Skilletegn>
           <Fnr copy value={props.personInfo?.foedselsnummer || 'N/A'} />
           {/** <Status value={{ status: PersonStatus.BARN, dato: '19.05.2011' }} />*/}

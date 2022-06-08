@@ -55,18 +55,16 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ behandling }) =>
           <Border />
         </>
       ) : (
-        { innsenderErGjenlevende } && (
-          <>
-            <FamilieforholdWrapper>
-              <GjenlevendeForelder
-                person={behandling.kommerSoekerTilgode.familieforhold.gjenlevendeForelder}
-                innsenderErGjenlevendeForelder={innsenderErGjenlevende}
-                doedsdato={doedsdato}
-              />
-            </FamilieforholdWrapper>
-            <Border />
-          </>
-        )
+        <>
+          <FamilieforholdWrapper>
+            <GjenlevendeForelder
+              person={behandling.kommerSoekerTilgode.familieforhold.gjenlevendeForelder}
+              innsenderErGjenlevendeForelder={innsenderErGjenlevende}
+              doedsdato={doedsdato}
+            />
+          </FamilieforholdWrapper>
+          <Border />
+        </>
       )}
     </>
   )

@@ -4,7 +4,6 @@ import { IAdresse } from '../../components/behandling/types'
 export interface IDetaljertBehandling {
   id: string
   sak: number
-  grunnlag: IBehandlingsopplysning[]
   vilkårsprøving: IVilkaarResultat
   gyldighetsprøving: IGyldighetResultat
   kommerSoekerTilgode: IKommerSoekerTilgode
@@ -183,7 +182,6 @@ export enum PersonRolle {
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: '',
   sak: 0,
-  grunnlag: [],
   vilkårsprøving: { resultat: undefined, vilkaar: [], vurdertDato: '' },
   gyldighetsprøving: { resultat: undefined, vurderinger: [], vurdertDato: '' },
   kommerSoekerTilgode: {

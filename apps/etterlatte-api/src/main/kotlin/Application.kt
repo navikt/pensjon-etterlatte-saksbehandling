@@ -21,7 +21,6 @@ class ApplicationContext(configLocation: String? = null) {
     val behandlingService: BehandlingService = BehandlingService(
         behandlingKlient = behandlingKlient,
         pdlKlient = PdltjenesterKlient(config, httpClient()),
-        grunnlagKlient = GrunnlagKlient(config, httpClient()),
         vedtakKlient = vedtakKlient,
     )
 

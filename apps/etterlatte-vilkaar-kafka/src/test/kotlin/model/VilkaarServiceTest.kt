@@ -17,7 +17,7 @@ internal class VilkaarServiceTest {
     fun `virkFomErFoersteIMaanedEtterDoedsfall`(){
         assertVirkfom(LocalDate.of(2022, 3, 5), LocalDate.of(2022, 4, 2), LocalDate.of(2022, 4, 1))
         assertVirkfom(LocalDate.of(2021, 2, 5), LocalDate.of(2022, 4, 2), LocalDate.of(2021, 3, 1))
-        assertVirkfom(LocalDate.of(2012, 3, 5), LocalDate.of(2022, 4, 2), LocalDate.of(2019, 4, 1))
+        assertVirkfom(LocalDate.of(2012, 1, 5), LocalDate.of(2022, 3, 2), LocalDate.of(2019, 3, 1))
     }
 }
 

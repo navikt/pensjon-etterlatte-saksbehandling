@@ -1,13 +1,7 @@
 import styled from 'styled-components'
 import { OversiktGyldigFramsatt } from './gyldigFramsattSoeknad/OversiktGyldigFramsatt'
 import { OversiktKommerSoekerTilgode } from './kommerBarnetTilgode/OversiktKommerSoekerTilgode'
-import {
-  IDetaljertBehandling,
-  IGyldighetResultat,
-  IKommerSoekerTilgode,
-  VurderingsResultat,
-} from '../../../../store/reducers/BehandlingReducer'
-import { Behandling } from '../../../person/typer'
+import { IDetaljertBehandling, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 
 export interface PropsOmSoeknad {
   behandling: IDetaljertBehandling

@@ -15,6 +15,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.ZoneOffset
 import java.time.temporal.TemporalAdjusters
@@ -106,10 +107,10 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
                 emptyList(), //Ikke lenger aktuell
                 it.vilkaarsResultat, //Bør periodiseres
                 BilagMedSammendrag(objectMapper.valueToTree(it.beregningsResultat) as ObjectNode, it.beregningsResultat?.beregningsperioder?.map { Beregningsperiode(Periode(
-                    YearMonth.from(it.datoFOM), YearMonth.from(it.datoTOM)), BigDecimal.valueOf(it.belop.toLong())
+                    YearMonth.from(it.datoFOM), it.datoTOM?.takeIf { it.isBefore(LocalDateTime.MAX) }?.let(YearMonth::from)), BigDecimal.valueOf(it.belop.toLong())
                 ) }?: emptyList()), // sammendraget bør lages av beregning
                 BilagMedSammendrag(objectMapper.valueToTree(it.avkortingsResultat) as ObjectNode, it.avkortingsResultat?.beregningsperioder?.map { Beregningsperiode(Periode(
-                    YearMonth.from(it.datoFOM), YearMonth.from(it.datoTOM)), BigDecimal.valueOf(it.belop.toLong())
+                    YearMonth.from(it.datoFOM), it.datoTOM?.takeIf { it.isBefore(LocalDateTime.MAX) }?.let(YearMonth::from)), BigDecimal.valueOf(it.belop.toLong())
                 ) }?: emptyList()), // sammendraget bør lages av avkorting,
                 repository.hentUtbetalingsPerioder(it.id),
                 it.saksbehandlerId?.let { ansvarligSaksbehadnlier -> VedtakFattet(ansvarligSaksbehadnlier, "0000", it.datoFattet?.atZone(
@@ -181,8 +182,9 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
         val manglendePerioderMellomBeregninger = perioderFraBeregning
             .map { it.periode }
             .zipWithNext()
-            .map { Periode(requireNotNull( it.first.tom).plusMonths(1), it.second.fom.minusMonths(1)) }
-            .filter { !it.tom!!.isBefore(it.fom) }
+            .map { requireNotNull( it.first.tom).plusMonths(1) to it.second.fom.minusMonths(1) }
+            .filter { !it.second!!.isBefore(it.first) }
+            .map { Periode(it.first, it.second) }
             .map { Utbetalingsperiode(0, it, null, UtbetalingsperiodeType.OPPHOER) }
         val fomBeregninger = perioderFraBeregning.firstOrNull()?.periode?.fom
         val manglendeStart = if (fomBeregninger == null || vedtak.virk.fom.isBefore(fomBeregninger)) Utbetalingsperiode(0, Periode(vedtak.virk.fom, null), null, UtbetalingsperiodeType.OPPHOER)  else null

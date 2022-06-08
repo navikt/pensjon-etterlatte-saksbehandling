@@ -2,7 +2,6 @@ package no.nav.etterlatte.db
 
 import no.nav.etterlatte.db.BrevRepository.Queries.HENT_ALLE_BREV_QUERY
 import no.nav.etterlatte.db.BrevRepository.Queries.HENT_BREV_QUERY
-import no.nav.etterlatte.db.BrevRepository.Queries.OPPDATER_ADRESSE
 import no.nav.etterlatte.db.BrevRepository.Queries.OPPDATER_STATUS_QUERY
 import no.nav.etterlatte.db.BrevRepository.Queries.OPPRETT_BREV_QUERY
 import no.nav.etterlatte.libs.common.brev.model.*
@@ -50,11 +49,15 @@ class BrevRepository private constructor(private val ds: DataSource) {
                     setBoolean(3, nyttBrev.erVedtaksbrev)
                     setString(4, nyttBrev.mottaker.foedselsnummer?.value)
                     setString(5, nyttBrev.mottaker.orgnummer)
+                    setString(6, nyttBrev.mottaker.adresse?.fornavn)
+                    setString(7, nyttBrev.mottaker.adresse?.etternavn)
+                    setString(8, nyttBrev.mottaker.adresse?.adresse)
+                    setString(9, nyttBrev.mottaker.adresse?.postnummer)
+                    setString(10, nyttBrev.mottaker.adresse?.poststed)
+                    setString(11, nyttBrev.mottaker.adresse?.land)
                 }
                 .executeQuery()
                 .singleOrNull { getLong(1) }!!
-
-            nyttBrev.mottaker.adresse?.let { adresse -> oppdaterAdresse(id, adresse) }
 
             // TODO: Lagre malnavn og språk
             val inserted = it.prepareStatement("INSERT INTO innhold (brev_id, mal, spraak, bytes) VALUES (?, ?, ?, ?)")
@@ -72,20 +75,6 @@ class BrevRepository private constructor(private val ds: DataSource) {
 
             Brev.fraNyttBrev(id, nyttBrev)
         }
-
-    private fun oppdaterAdresse(brevId: Long, adresse: Adresse): Boolean = connection.use {
-        it.prepareStatement(OPPDATER_ADRESSE)
-            .apply {
-                setLong(1, brevId)
-                setString(2, adresse.fornavn)
-                setString(3, adresse.etternavn)
-                setString(4, adresse.adresse)
-                setString(5, adresse.postnummer)
-                setString(6, adresse.poststed)
-                setString(7, adresse.land)
-            }
-            .executeUpdate() > 0
-    }
 
     fun setJournalpostId(brevId: Long, journalpostId: String): Boolean = connection.use {
         it.prepareStatement("UPDATE brev SET journalpost_id = ? WHERE id = ?")
@@ -165,11 +154,10 @@ class BrevRepository private constructor(private val ds: DataSource) {
 
     private object Queries {
         const val HENT_BREV_QUERY = """
-            SELECT b.id, b.behandling_id, b.tittel, b.vedtaksbrev, h.status_id, m.*, a.*
+            SELECT b.id, b.behandling_id, b.tittel, b.vedtaksbrev, h.status_id, m.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
-            INNER JOIN adresse a on b.id = a.brev_id
             WHERE b.id = ?
             AND h.id IN (
                 SELECT DISTINCT ON (brev_id) id
@@ -179,11 +167,10 @@ class BrevRepository private constructor(private val ds: DataSource) {
         """
 
         const val HENT_ALLE_BREV_QUERY = """
-            SELECT b.id, b.behandling_id, b.tittel, b.vedtaksbrev, h.status_id, m.*, a.*
+            SELECT b.id, b.behandling_id, b.tittel, b.vedtaksbrev, h.status_id, m.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
-            INNER JOIN adresse a on b.id = a.brev_id
             WHERE b.behandling_id = ?
             AND h.id IN (
                 SELECT DISTINCT ON (brev_id) id
@@ -196,13 +183,8 @@ class BrevRepository private constructor(private val ds: DataSource) {
             WITH nytt_brev AS (
                 INSERT INTO brev (behandling_id, tittel, vedtaksbrev) VALUES (?, ?, ?) RETURNING id
             ) 
-            INSERT INTO mottaker (brev_id, foedselsnummer, orgnummer)
-                VALUES ((SELECT id FROM nytt_brev), ?, ?) RETURNING brev_id
-        """
-
-        const val OPPDATER_ADRESSE = """
-            INSERT INTO adresse (brev_id, fornavn, etternavn, adresse, postnummer, poststed, land)
-                VALUES (?, ?, ?, ?, ?, ?, ?) 
+            INSERT INTO mottaker (brev_id, foedselsnummer, orgnummer, fornavn, etternavn, adresse, postnummer, poststed, land)
+                VALUES ((SELECT id FROM nytt_brev), ?, ?, ?, ?, ?, ?, ?, ?) RETURNING brev_id
         """
 
         const val OPPDATER_STATUS_QUERY = """

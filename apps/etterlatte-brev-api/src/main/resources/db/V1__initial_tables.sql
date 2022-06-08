@@ -18,20 +18,12 @@ CREATE TABLE mottaker
             REFERENCES brev (id)
                 ON DELETE CASCADE,
     foedselsnummer TEXT NULL,
-    orgnummer TEXT NULL
-);
-
-CREATE TABLE adresse
-(
-    brev_id BIGINT NOT NULL
-        PRIMARY KEY
-        REFERENCES brev (id)
-            ON DELETE CASCADE,
+    orgnummer TEXT NULL,
     fornavn TEXT NULL,
     etternavn TEXT NULL,
-    adresse TEXT NOT NULL,
-    postnummer TEXT NOT NULL,
-    poststed TEXT NOT NULL,
+    adresse TEXT NULL,
+    postnummer TEXT NULL,
+    poststed TEXT NULL,
     land TEXT DEFAULT NULL
 );
 

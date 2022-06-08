@@ -29,7 +29,13 @@ data class Mottaker(
     val foedselsnummer: Foedselsnummer? = null,
     val orgnummer: String? = null,
     val adresse: Adresse? = null,
-)
+) {
+    init {
+        if (foedselsnummer == null && orgnummer == null && adresse == null) {
+            throw IllegalArgumentException("Enten fødselsnummer, orgnummer eller adresse må være spesifisert")
+        }
+    }
+}
 
 class Brev(
     val id: BrevID,

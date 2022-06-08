@@ -32,7 +32,7 @@ data class Beregningsperiode(
     val delytelsesId: String,
     val type: Beregningstyper,
     val datoFOM: LocalDateTime,
-    val datoTOM: LocalDateTime,
+    val datoTOM: LocalDateTime?,
     val belop: Int
 )
 

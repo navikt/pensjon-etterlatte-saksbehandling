@@ -42,10 +42,10 @@ class BeregningService {
 
         return perioder.map {
             (Beregningsperiode(
-                delytelsesId = "First",
+                delytelsesId = "BP",
                 type = Beregningstyper.GP,
                 datoFOM = it.first.atStartOfDay(),
-                datoTOM = it.second?.atStartOfDay() ?: LocalDateTime.MAX,
+                datoTOM = it.second?.atStartOfDay(),
                 belop = Grunnbeloep.hentGjeldendeG(it.first).grunnbeløpPerMåned
             ))
         }

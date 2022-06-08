@@ -18,7 +18,7 @@ class AvkortingService {
 
     fun avkortingsResultat(beregningsResultat: BeregningsResultat): AvkortingsResultat {
         logger.info("Leverer en fake beregning")
-        val avkortingRes = AvkortingsResultat(
+        return AvkortingsResultat(
             //TODO se på hvordan denne initieres
             id = UUID.randomUUID(),
             type = beregningsResultat.type,
@@ -27,14 +27,13 @@ class AvkortingService {
             beregningsperioder = avkortPerioder(beregningsResultat.beregningsperioder),
             beregnetDato = LocalDateTime.now()
         )
-        return avkortingRes
     }
     //TODO implementere avkortning (må ha inn inntekt)
-    fun beregnAvkorting(belop: Int): Int {
+    private fun beregnAvkorting(belop: Int): Int {
         return belop - 5
     }
 
-    fun avkortPerioder(beregningsperioder: List<Beregningsperiode>): List<Avkortingsperiode> {
+    private fun avkortPerioder(beregningsperioder: List<Beregningsperiode>): List<Avkortingsperiode> {
         var i = 1
         var avkortingsperioder: List<Avkortingsperiode> = emptyList()
         for (periode in beregningsperioder) {

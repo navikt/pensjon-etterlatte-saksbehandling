@@ -8,12 +8,12 @@ import java.time.LocalDate
 class Grunnbeloep {
 
     companion object {
-        val melding = readFile("/grunnbelop.json")
+        private val melding = readFile("/grunnbelop.json")
 
-        val gListe = objectMapper.readValue(melding, grunnbeløpListe::class.java)
+        private val gListe: GrunnbeløpListe = objectMapper.readValue(melding, GrunnbeløpListe::class.java)
 
 
-        fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
+        private fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")
 
         fun hentGforPeriode(datoFOM: LocalDate, datoTOM: LocalDate = LocalDate.MAX): List<G> {
@@ -24,21 +24,21 @@ class Grunnbeloep {
                 }.sortedBy { it.dato }
         }
         fun hentGjeldendeG (dato: LocalDate): G {
-            return gListe.grunnbeløp.filter { it.dato.isBefore(dato)||it.dato.isEqual(dato) && beregnTom(it)
-                ?.isAfter(dato) ?: true }.first()
+            return gListe.grunnbeløp.first {
+                it.dato.isBefore(dato) || it.dato.isEqual(dato) && beregnTom(it)
+                    ?.isAfter(dato) ?: true
+            }
         }
 
         //TODO virker denna?
         fun beregnTom(g: G): LocalDate? {
-            return gListe.grunnbeløp.sortedBy { it.dato }.zipWithNext().find { it.first.dato == g.dato }?.let {
-                it.second.dato
-            }
+            return gListe.grunnbeløp.sortedBy { it.dato }.zipWithNext().find { it.first.dato == g.dato }?.second?.dato
         }
     }
 }
 
 
-data class grunnbeløpListe(
+data class GrunnbeløpListe(
     val grunnbeløp: List<G>
 )
 

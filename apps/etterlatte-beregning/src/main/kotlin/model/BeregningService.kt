@@ -36,7 +36,7 @@ class BeregningService {
     }
 
     //TODO finne en smooth måte å beregne beregningsperioder
-    fun finnBeregningsperioder(virkFOM: LocalDate): List<Beregningsperiode> {
+    private fun finnBeregningsperioder(virkFOM: LocalDate): List<Beregningsperiode> {
         val grunnbeloep = Grunnbeloep.hentGforPeriode(virkFOM)
         val perioder = grunnbeloep.map { Pair(it.dato, Grunnbeloep.beregnTom(it)) }
 

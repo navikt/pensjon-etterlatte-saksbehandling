@@ -41,7 +41,7 @@ internal class LesBeregningsmelding(
                 logger.info("Publisert en beregning")
             } catch (e: Exception){
                 //TODO endre denne
-                println("spiser en melding fordi: " +e)
+                println("spiser en melding fordi: $e")
             }
 
 

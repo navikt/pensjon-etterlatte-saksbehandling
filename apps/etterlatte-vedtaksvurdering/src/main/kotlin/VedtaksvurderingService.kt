@@ -104,7 +104,39 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
         }
     }
 
-    fun fattVedtak(sakId: String, behandlingId: UUID, saksbehandler: String) {
+    fun fattVedtakSaksbehandler(sakId: String, behandlingId: UUID, saksbehandler: String){
+        val vedtak = requireNotNull( hentVedtak(sakId, behandlingId))
+        rapid.get().publish(
+            newMessage(
+                mapOf(
+                    "@event" to "SAKSBEHANDLER:FATT_VEDTAK",
+                    "@sakId" to sakId.toLong(),
+                    "@vedtakId" to vedtak.id,
+                    "@behandlingId" to behandlingId.toString(),
+                    "@saksbehandler" to saksbehandler,
+                )
+            ).toJson()
+        )
+    }
+
+    fun attesterVedtakSaksbehandler(sakId: String, behandlingId: UUID, saksbehandler: String) {
+        val vedtak = requireNotNull( hentVedtak(sakId, behandlingId))
+        rapid.get().publish(
+            newMessage(
+                mapOf(
+                    "@event" to "SAKSBEHANDLER:ATTESTER_VEDTAK",
+                    "@sakId" to sakId.toLong(),
+                    "@vedtakId" to vedtak.id,
+                    "@behandlingId" to behandlingId.toString(),
+                    "@saksbehandler" to saksbehandler,
+                )
+            ).toJson()
+        )
+
+    }
+
+
+    fun fattVedtak(sakId: String, behandlingId: UUID, saksbehandler: String): no.nav.etterlatte.domene.vedtak.Vedtak {
         requireNotNull( hentFellesVedtak(sakId, behandlingId)).also {
             require(it.vedtakFattet == null)
             require(it.type == VedtakType.INNVILGELSE)
@@ -113,28 +145,17 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
             require(it.avkorting != null)
         }
         repository.fattVedtak(saksbehandler, sakId, behandlingId)
-        publiserHendelse("FATTET", sakId, behandlingId)
+        return requireNotNull( hentFellesVedtak(sakId, behandlingId))
     }
 
 
-    fun attesterVedtak(sakId: String, behandlingId: UUID, saksbehandler: String) {
+    fun attesterVedtak(sakId: String, behandlingId: UUID, saksbehandler: String): no.nav.etterlatte.domene.vedtak.Vedtak {
         requireNotNull( hentFellesVedtak(sakId, behandlingId)).also {
             require(it.vedtakFattet != null)
             require(it.attestasjon == null)
         }
         repository.attesterVedtak(saksbehandler, sakId, behandlingId)
-        publiserHendelse("ATTESTERT", sakId, behandlingId)
+        return requireNotNull( hentFellesVedtak(sakId, behandlingId))
 
-    }
-    fun publiserHendelse(hendelse: String, sakId: String, behandlingId: UUID ){
-        rapid.get().also {
-            if (it == null){
-                logger.warn("Skulle publisere hendelse om at VEDTAK:$hendelse, men rapid er ikke intiert i servicelaget")
-            } else {
-                hentFellesVedtak(sakId, behandlingId)!!.also { vedtak ->
-                    it.publish(vedtak.vedtakId.toString(), newMessage(mapOf("@event" to "VEDTAK:$hendelse", "@vedtak" to vedtak)).toJson())
-                }
-            }
-        }
     }
 }

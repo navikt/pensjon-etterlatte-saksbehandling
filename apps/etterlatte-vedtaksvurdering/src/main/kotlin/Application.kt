@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.database.VedtaksvurderingRepository
+import no.nav.etterlatte.rivers.*
 import no.nav.etterlatte.rivers.LagreAvkorting
 import no.nav.etterlatte.rivers.LagreBeregningsresultat
 import no.nav.etterlatte.rivers.LagreKommerSoekerTilgodeResultat
@@ -33,6 +34,8 @@ fun main() {
             LagreVilkaarsresultat(this, vedtaksvurderingService)
             LagreBeregningsresultat(this, vedtaksvurderingService)
             LagreKommerSoekerTilgodeResultat(this, vedtaksvurderingService)
+            FattVedtak(this, vedtaksvurderingService)
+            AttesterVedtak(this, vedtaksvurderingService)
         }.start()
 
     }

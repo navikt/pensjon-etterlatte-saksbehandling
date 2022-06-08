@@ -30,13 +30,13 @@ fun Route.Api(service: VedtaksvurderingService) {
         val saksbehandlerId = call.principal<TokenValidationContextPrincipal>()!!.context.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")
 
         val vedtakBody = call.receive<FattVedtakBody>()
-        service.fattVedtak(vedtakBody.sakId, UUID.fromString(vedtakBody.behandlingId), saksbehandlerId)
+        service.fattVedtakSaksbehandler(vedtakBody.sakId, UUID.fromString(vedtakBody.behandlingId), saksbehandlerId)
         call.respond("ok")
     }
     post("attesterVedtak") {
         val saksbehandlerId = call.principal<TokenValidationContextPrincipal>()!!.context.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")
         val vedtakBody = call.receive<FattVedtakBody>()
-        service.attesterVedtak(vedtakBody.sakId, UUID.fromString(vedtakBody.behandlingId), saksbehandlerId)
+        service.attesterVedtakSaksbehandler(vedtakBody.sakId, UUID.fromString(vedtakBody.behandlingId), saksbehandlerId)
         call.respond("ok")
     }
 }

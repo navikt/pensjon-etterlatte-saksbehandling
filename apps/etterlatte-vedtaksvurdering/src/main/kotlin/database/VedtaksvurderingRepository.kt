@@ -1,15 +1,20 @@
 package no.nav.etterlatte.database
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.domene.vedtak.Periode
+import no.nav.etterlatte.domene.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.domene.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import org.slf4j.LoggerFactory
+import java.sql.Date
 import java.sql.ResultSet
 import java.time.Instant
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
 import javax.sql.DataSource
@@ -151,6 +156,22 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         return resultat
     }
 
+    fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> {
+        val resultat = connection.use { it ->
+            val statement = it.prepareStatement(Queries.hentUtbetalingsperiode)
+            statement.setLong(1, vedtakId)
+            statement.executeQuery().toList {
+                Utbetalingsperiode(
+                    getLong("id"),
+                    Periode(YearMonth.from(getDate("datoFom").toLocalDate()), getDate("datoTom")?.toLocalDate()?.let(YearMonth::from)),
+                    getBigDecimal("beloep"),
+                    UtbetalingsperiodeType.valueOf(getString("type"))
+                )
+            }
+        }
+        return resultat
+    }
+
     private inline fun <reified T> ResultSet.getJsonObject(c: Int):T? {
         return getString(c)?.let { try {
             objectMapper.readValue(it)
@@ -173,8 +194,22 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    fun attesterVedtak(saksbehandlerId: String, sakId: String, behandlingsId: UUID) {
+    fun attesterVedtak(saksbehandlerId: String, sakId: String, behandlingsId: UUID, vedtakId: Long, utbetalingsperioder: List<Utbetalingsperiode>) {
         connection.use {
+            val insertPersoderStatement = it.prepareStatement(Queries.lagreUtbetalingsperiode)
+            utbetalingsperioder.forEach{
+                insertPersoderStatement.setLong(1, vedtakId)
+                insertPersoderStatement.setDate(2, it.periode.fom.atDay(1).let(Date::valueOf))
+                insertPersoderStatement.setDate(3, it.periode.tom?.atEndOfMonth()?.let(Date::valueOf) )
+                insertPersoderStatement.setString(4, it.type.name)
+                insertPersoderStatement.setBigDecimal(5, it.beloep)
+
+                insertPersoderStatement.addBatch()
+            }
+            if(utbetalingsperioder.isNotEmpty()) insertPersoderStatement.executeBatch().forEach {
+                require(it == 1)
+            }
+
             val statement = it.prepareStatement(Queries.attesterVedtak)
             statement.setString(1, saksbehandlerId)
             statement.setLong(2, sakId.toLong())
@@ -240,6 +275,9 @@ private object Queries {
 
     val lagreFnr = "UPDATE vedtak SET fnr = ? WHERE sakId = ? AND behandlingId = ?"
     val lagreDatoVirkFom = "UPDATE vedtak SET datoVirkFom = ? WHERE sakId = ? AND behandlingId = ?"
+
+    val lagreUtbetalingsperiode = "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) VALUES (?, ?, ?, ?, ?)"
+    val hentUtbetalingsperiode = "SELECT * FROM utbetalingsperiode WHERE vedtakid = ?"
 }
 
 fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {

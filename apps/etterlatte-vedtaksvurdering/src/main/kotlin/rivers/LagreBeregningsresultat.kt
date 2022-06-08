@@ -1,5 +1,6 @@
 package no.nav.etterlatte.rivers
 
+import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -36,6 +37,13 @@ internal class LagreBeregningsresultat(
 
             try {
                 vedtaksvurderingService.lagreBeregningsresultat(sakId, behandlingId, packet["soeker"].textValue(), beregningsResultat)
+            } catch (e: KanIkkeEndreFattetVedtak){
+                packet["@event"] = "VEDTAK:ENDRING_FORKASTET"
+                packet["@vedtakId"] = e.vedtakId
+                packet["@forklaring"] = "Beregning forkastet fordi vedtak allerede er fattet"
+                context.publish(
+                    packet.toJson()
+                )
             } catch (e: Exception){
                 //TODO endre denne
                 println("spiser en melding fordi: " +e)

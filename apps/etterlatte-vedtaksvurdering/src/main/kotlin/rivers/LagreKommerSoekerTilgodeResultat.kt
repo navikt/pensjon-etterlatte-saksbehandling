@@ -1,5 +1,6 @@
 package no.nav.etterlatte.rivers
 
+import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -36,6 +37,13 @@ internal class LagreKommerSoekerTilgodeResultat(
             val kommerSoekerTilgodeResultat = objectMapper.readValue(packet["@kommersoekertilgode"].toString(), KommerSoekerTilgode::class.java)
             try {
                 vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(sakId, behandlingId, packet["soeker"].textValue(), kommerSoekerTilgodeResultat)
+            } catch (e: KanIkkeEndreFattetVedtak){
+                packet["@event"] = "VEDTAK:ENDRING_FORKASTET"
+                packet["@vedtakId"] = e.vedtakId
+                packet["@forklaring"] = "Kommer søker tilgode forkastet fordi vedtak allerede er fattet"
+                context.publish(
+                    packet.toJson()
+                )
             } catch (e: Exception){
                 println("spiser en melding fordi: " +e)
             }

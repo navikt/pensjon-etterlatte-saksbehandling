@@ -1,6 +1,7 @@
 package no.nav.etterlatte.rivers
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -39,7 +40,15 @@ internal class LagreAvkorting(
 
             try {
                 vedtaksvurderingService.lagreAvkorting(sakId, behandlingId, packet["soeker"].textValue(), avkorting)
-            } catch (e: Exception){
+            }catch (e: KanIkkeEndreFattetVedtak){
+                packet["@event"] = "VEDTAK:ENDRING_FORKASTET"
+                packet["@vedtakId"] = e.vedtakId
+                packet["@forklaring"] = "Avkorting forkastet fordi vedtak allerede er fattet"
+                context.publish(
+                    packet.toJson()
+                )
+            }
+            catch (e: Exception){
                 //TODO endre denne
                 println("spiser en melding fordi: " +e)
             }

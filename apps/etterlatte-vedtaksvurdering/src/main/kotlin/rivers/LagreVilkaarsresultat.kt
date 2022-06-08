@@ -1,5 +1,6 @@
 package no.nav.etterlatte.rivers
 
+import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -38,6 +39,13 @@ internal class LagreVilkaarsresultat(
             val vilkaarsResultat = objectMapper.readValue(packet["@vilkaarsvurdering"].toString(), VilkaarResultat::class.java)
             try {
                 vedtaksvurderingService.lagreVilkaarsresultat(sakId, behandlingId, packet["soeker"].textValue(), vilkaarsResultat, LocalDate.parse(packet["@virkningstidspunkt"].textValue()) )
+            }catch (e: KanIkkeEndreFattetVedtak){
+                packet["@event"] = "VEDTAK:ENDRING_FORKASTET"
+                packet["@vedtakId"] = e.vedtakId
+                packet["@forklaring"] = "Vilkaarsvurdering forkastet fordi vedtak allerede er fattet"
+                context.publish(
+                    packet.toJson()
+                )
             } catch (e: Exception){
                 //TODO endre denne
                 println("spiser en melding fordi: " +e)

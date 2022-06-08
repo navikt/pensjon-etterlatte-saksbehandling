@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
 import org.junit.jupiter.api.Assertions.*
+import vilkaar.barnepensjon.barnIngenOppgittUtlandsadresse
 import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
 import java.time.LocalDateTime
 import java.util.UUID.randomUUID
@@ -194,13 +195,13 @@ internal class BarnepensjonVilkaarTest {
         val gjenlevendePdlDanmark = lagMockPersonPdl(null, fnrGjenlevende, null, adresseDanmarkPdl, null)
 
         val sammeAdresse = barnOgForelderSammeBostedsadresse(
-            Vilkaartyper.SAMME_ADRESSE,
+            Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlNorge)
         )
 
         val ulikeAdresse = barnOgForelderSammeBostedsadresse(
-            Vilkaartyper.SAMME_ADRESSE,
+            Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlDanmark)
         )
@@ -208,6 +209,27 @@ internal class BarnepensjonVilkaarTest {
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, ulikeAdresse.resultat)
 
     }
+
+    @Test
+    fun vurderBarnIngenUtlandsadresse() {
+        val barnSoeknadNorge = lagMockPersonSoekerSoeknad(UtenlandsadresseBarn(JaNeiVetIkke.NEI, null, null))
+        val barnSoeknadDanmark = lagMockPersonSoekerSoeknad(UtenlandsadresseBarn(JaNeiVetIkke.JA, null, null))
+
+        val ikkeUtland = barnIngenOppgittUtlandsadresse(
+            Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE,
+            mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge)
+        )
+
+        val utland = barnIngenOppgittUtlandsadresse(
+            Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE,
+            mapTilVilkaarstypeSoekerSoeknad(barnSoeknadDanmark)
+        )
+
+        assertEquals(VurderingsResultat.OPPFYLT, ikkeUtland.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, utland.resultat)
+
+    }
+
 
     @Test
     fun vurderVilkaarsVurdering() {

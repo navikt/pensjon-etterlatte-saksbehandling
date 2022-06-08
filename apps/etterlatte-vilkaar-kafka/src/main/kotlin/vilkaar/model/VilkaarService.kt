@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.vikaar.*
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
 import org.slf4j.LoggerFactory
+import vilkaar.barnepensjon.barnIngenOppgittUtlandsadresse
 import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
@@ -52,7 +53,7 @@ class VilkaarService {
         return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
     }
 
-    fun beregnVilkaarstidspunkt (opplysninger: List<VilkaarOpplysning<ObjectNode>>, opprettet: LocalDate): LocalDate? {
+    fun beregnVilkaarstidspunkt(opplysninger: List<VilkaarOpplysning<ObjectNode>>, opprettet: LocalDate): LocalDate? {
         logger.info("beregner virkningstidspunkt")
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
         return avdoedPdl?.opplysning?.doedsdato?.let { hentVirkningstidspunkt(it, opprettet) }
@@ -76,10 +77,11 @@ class VilkaarService {
 
         val sammeAdresser = listOf(
             barnOgForelderSammeBostedsadresse(
-                Vilkaartyper.SAMME_ADRESSE,
+                Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
                 soekerPdl,
                 gjenlevendePdl
-            )
+            ),
+            barnIngenOppgittUtlandsadresse(Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE, soekerSoeknad)
         )
 
         val vilkaarResultat = setVilkaarVurderingFraVilkaar(sammeAdresser)

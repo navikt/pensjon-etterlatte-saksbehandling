@@ -17,7 +17,7 @@ interface User{
 }
 abstract class ExternalUser(val identifiedBy: TokenValidationContext): User
 
-class Self(val prosess: String): User{
+class Self(private val prosess: String): User{
     override fun name() = prosess
     override fun kanSetteKilde() = true
 }

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.database
 
 import no.nav.etterlatte.DatabaseKontekst
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.sql.Connection
 import java.util.concurrent.atomic.AtomicBoolean
@@ -8,7 +9,7 @@ import javax.sql.DataSource
 
 class DatabaseContext (private val ds: DataSource ): DatabaseKontekst {
     companion object{
-        val logger = LoggerFactory.getLogger(DatabaseContext::class.java)
+        val logger: Logger = LoggerFactory.getLogger(DatabaseContext::class.java)
     }
     private val transaktionOpen = AtomicBoolean(false)
 

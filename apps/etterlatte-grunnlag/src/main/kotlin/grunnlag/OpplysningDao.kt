@@ -16,7 +16,7 @@ class OpplysningDao(private val connection: () -> Connection) {
         val sakId: Long,
         val hendelseNummer: Long
     )
-    fun ResultSet.asBehandlingOpplysning(): Grunnlagsopplysning<ObjectNode> {
+    private fun ResultSet.asBehandlingOpplysning(): Grunnlagsopplysning<ObjectNode> {
         return Grunnlagsopplysning(
             getObject("opplysning_id") as UUID,
             objectMapper.readValue(getString("kilde")),
@@ -26,7 +26,7 @@ class OpplysningDao(private val connection: () -> Connection) {
         )
     }
 
-    fun ResultSet.asGrunnlagshendelse(): GrunnlagHendelse {
+    private fun ResultSet.asGrunnlagshendelse(): GrunnlagHendelse {
         return GrunnlagHendelse(
             asBehandlingOpplysning(),
             getLong("sak_id"),

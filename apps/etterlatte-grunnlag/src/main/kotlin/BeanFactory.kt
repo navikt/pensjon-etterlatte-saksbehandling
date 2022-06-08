@@ -30,7 +30,7 @@ abstract class CommonFactory: BeanFactory{
     override fun opplysningDao(): OpplysningDao = OpplysningDao { databaseContext().activeTx() }
 }
 
-class EnvBasedBeanFactory(val env: Map<String, String>): CommonFactory() {
+class EnvBasedBeanFactory(private val env: Map<String, String>): CommonFactory() {
 
     override fun datasourceBuilder(): DataSourceBuilder = cached { DataSourceBuilder(env) }
     override fun tokenValidering(): Authentication.Configuration.() -> Unit = { tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load())) }

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.avkorting.*
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
-import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -22,7 +21,7 @@ class AvkortingService {
         val avkortingRes = AvkortingsResultat(
             //TODO se på hvordan denne initieres
             id = UUID.randomUUID(),
-            type = Beregningstyper.GP,
+            type = beregningsResultat.type,
             endringskode = Endringskode.NY,
             resultat = AvkortingsResultatType.BEREGNET,
             beregningsperioder = avkortPerioder(beregningsResultat.beregningsperioder),

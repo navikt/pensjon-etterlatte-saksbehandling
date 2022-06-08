@@ -2,8 +2,11 @@ package no.nav.etterlatte.db
 
 import no.nav.etterlatte.db.BrevRepository.Queries.HENT_ALLE_BREV_QUERY
 import no.nav.etterlatte.db.BrevRepository.Queries.HENT_BREV_QUERY
+import no.nav.etterlatte.db.BrevRepository.Queries.OPPDATER_ADRESSE
 import no.nav.etterlatte.db.BrevRepository.Queries.OPPDATER_STATUS_QUERY
 import no.nav.etterlatte.db.BrevRepository.Queries.OPPRETT_BREV_QUERY
+import no.nav.etterlatte.libs.common.brev.model.*
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import java.sql.ResultSet
 import javax.sql.DataSource
 
@@ -31,43 +34,57 @@ class BrevRepository private constructor(private val ds: DataSource) {
             }!!
     }
 
-    fun hentBrevForBehandling(behandlingId: Long): List<Brev> = connection.use {
+    fun hentBrevForBehandling(behandlingId: String): List<Brev> = connection.use {
         it.prepareStatement(HENT_ALLE_BREV_QUERY)
-            .apply { setLong(1, behandlingId) }
+            .apply { setString(1, behandlingId) }
             .executeQuery()
             .toList { mapTilBrev() }
     }
 
     fun opprettBrev(nyttBrev: NyttBrev): Brev =
         connection.use {
-        val id = it.prepareStatement(OPPRETT_BREV_QUERY)
+            val id = it.prepareStatement(OPPRETT_BREV_QUERY)
+                .apply {
+                    setString(1, nyttBrev.behandlingId)
+                    setString(2, nyttBrev.tittel)
+                    setBoolean(3, nyttBrev.erVedtaksbrev)
+                    setString(4, nyttBrev.mottaker.foedselsnummer?.value)
+                    setString(5, nyttBrev.mottaker.orgnummer)
+                }
+                .executeQuery()
+                .singleOrNull { getLong(1) }!!
+
+            nyttBrev.mottaker.adresse?.let { adresse -> oppdaterAdresse(id, adresse) }
+
+            // TODO: Lagre malnavn og språk
+            val inserted = it.prepareStatement("INSERT INTO innhold (brev_id, mal, spraak, bytes) VALUES (?, ?, ?, ?)")
+                .apply {
+                    setLong(1, id)
+                    setString(2, "navn på malen")
+                    setString(3, "nb")
+                    setBytes(4, nyttBrev.pdf)
+                }
+                .executeUpdate()
+
+            if (inserted < 1) throw RuntimeException()
+
+            oppdaterStatus(id, nyttBrev.status)
+
+            Brev.fraNyttBrev(id, nyttBrev)
+        }
+
+    private fun oppdaterAdresse(brevId: Long, adresse: Adresse): Boolean = connection.use {
+        it.prepareStatement(OPPDATER_ADRESSE)
             .apply {
-                setLong(1, nyttBrev.behandlingId)
-                setString(2, nyttBrev.tittel)
-                setString(3, nyttBrev.mottaker.fornavn)
-                setString(4, nyttBrev.mottaker.etternavn)
-                setString(5, nyttBrev.mottaker.adresse.adresse)
-                setString(6, nyttBrev.mottaker.adresse.postnummer)
-                setString(7, nyttBrev.mottaker.adresse.poststed)
+                setLong(1, brevId)
+                setString(2, adresse.fornavn)
+                setString(3, adresse.etternavn)
+                setString(4, adresse.adresse)
+                setString(5, adresse.postnummer)
+                setString(6, adresse.poststed)
+                setString(7, adresse.land)
             }
-            .executeQuery()
-            .singleOrNull { getLong(1) }!!
-
-        // TODO: Lagre malnavn og språk
-        val inserted = it.prepareStatement("INSERT INTO innhold (brev_id, mal, spraak, bytes) VALUES (?, ?, ?, ?)")
-            .apply {
-                setLong(1, id)
-                setString(2, "navn på malen")
-                setString(3, "nb")
-                setBytes(4, nyttBrev.pdf)
-            }
-            .executeUpdate()
-
-        if (inserted < 1) throw RuntimeException()
-
-        oppdaterStatus(id, nyttBrev.status)
-
-        Brev.fraNyttBrev(id, nyttBrev)
+            .executeUpdate() > 0
     }
 
     fun setJournalpostId(brevId: Long, journalpostId: String): Boolean = connection.use {
@@ -123,18 +140,21 @@ class BrevRepository private constructor(private val ds: DataSource) {
 
     private fun ResultSet.mapTilBrev() = Brev(
         id = getLong("id"),
-        behandlingId = getLong("behandling_id"),
+        behandlingId = getString("behandling_id"),
         tittel = getString("tittel"),
         status = Status.valueOf(getString("status_id")),
-        Mottaker(
-            fornavn = getString("fornavn"),
-            etternavn = getString("etternavn"),
+        mottaker = Mottaker(
+            foedselsnummer = getString("foedselsnummer")?.let { Foedselsnummer.of(it) },
+            orgnummer = getString("orgnummer"),
             adresse = Adresse(
+                fornavn = getString("fornavn"),
+                etternavn = getString("etternavn"),
                 adresse = getString("adresse"),
                 postnummer = getString("postnummer"),
                 poststed = getString("poststed")
             )
-        )
+        ),
+        erVedtaksbrev = getBoolean("vedtaksbrev")
     )
 
     companion object {
@@ -145,10 +165,11 @@ class BrevRepository private constructor(private val ds: DataSource) {
 
     private object Queries {
         const val HENT_BREV_QUERY = """
-            SELECT b.id, b.behandling_id, b.tittel, h.status_id, m.*
+            SELECT b.id, b.behandling_id, b.tittel, b.vedtaksbrev, h.status_id, m.*, a.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
+            INNER JOIN adresse a on b.id = a.brev_id
             WHERE b.id = ?
             AND h.id IN (
                 SELECT DISTINCT ON (brev_id) id
@@ -158,10 +179,11 @@ class BrevRepository private constructor(private val ds: DataSource) {
         """
 
         const val HENT_ALLE_BREV_QUERY = """
-            SELECT b.id, b.behandling_id, b.tittel, h.status_id, m.*
+            SELECT b.id, b.behandling_id, b.tittel, b.vedtaksbrev, h.status_id, m.*, a.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
+            INNER JOIN adresse a on b.id = a.brev_id
             WHERE b.behandling_id = ?
             AND h.id IN (
                 SELECT DISTINCT ON (brev_id) id
@@ -170,18 +192,17 @@ class BrevRepository private constructor(private val ds: DataSource) {
             )
         """
 
-        const val HENT_SISTE_STATUS = """
-            SELECT * FROM hendelse
-            WHERE brev_id IN (
-                SELECT MAX(opprettet)
-            )
-        """
-
         const val OPPRETT_BREV_QUERY = """
             WITH nytt_brev AS (
-                INSERT INTO brev (behandling_id, tittel) VALUES (?, ?) RETURNING id
-            ) INSERT INTO mottaker (brev_id, fornavn, etternavn, adresse, postnummer, poststed)
-                VALUES ((SELECT id FROM nytt_brev), ?, ?, ?, ?, ?) RETURNING brev_id
+                INSERT INTO brev (behandling_id, tittel, vedtaksbrev) VALUES (?, ?, ?) RETURNING id
+            ) 
+            INSERT INTO mottaker (brev_id, foedselsnummer, orgnummer)
+                VALUES ((SELECT id FROM nytt_brev), ?, ?) RETURNING brev_id
+        """
+
+        const val OPPDATER_ADRESSE = """
+            INSERT INTO adresse (brev_id, fornavn, etternavn, adresse, postnummer, poststed, land)
+                VALUES (?, ?, ?, ?, ?, ?, ?) 
         """
 
         const val OPPDATER_STATUS_QUERY = """

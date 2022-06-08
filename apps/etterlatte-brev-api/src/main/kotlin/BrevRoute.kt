@@ -1,15 +1,11 @@
 package no.nav.etterlatte
 
-import io.ktor.application.call
-import io.ktor.http.HttpStatusCode
-import io.ktor.request.receive
-import io.ktor.response.respond
-import io.ktor.routing.Route
-import io.ktor.routing.delete
-import io.ktor.routing.get
-import io.ktor.routing.post
-import io.ktor.routing.route
-import no.nav.etterlatte.db.Mottaker
+import io.ktor.application.*
+import io.ktor.http.*
+import io.ktor.request.*
+import io.ktor.response.*
+import io.ktor.routing.*
+import no.nav.etterlatte.libs.common.brev.model.Mottaker
 
 fun Route.brevRoute(service: BrevService) {
     route("brev") {

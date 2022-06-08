@@ -1,12 +1,15 @@
+
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.JournalfoerBrev
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
-import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
+import no.nav.etterlatte.libs.common.brev.model.Mottaker
+import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import no.nav.etterlatte.libs.common.journalpost.Bruker
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -19,10 +22,11 @@ class JournalfoerBrevTest {
     @Test
     fun `Skal journalfoere brevet og svare bekreftende`() {
         val distribusjonMelding = DistribusjonMelding(
-            vedtakId = "00001",
+            behandlingId = UUID.randomUUID().toString(),
+            distribusjonType = DistribusjonsType.VEDTAK,
             brevId = 1000L,
-            mottaker = AvsenderMottaker(id = "0101202012345"),
-            bruker = Bruker(id = "0101202012345"),
+            mottaker = Mottaker(foedselsnummer = Foedselsnummer.of("03108718357")),
+            bruker = Bruker(id = "03108718357"),
             tittel = "Vi har innvilget din søknad om barnepensjon",
             brevKode = "XX.YY-ZZ",
             journalfoerendeEnhet = "1234"

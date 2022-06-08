@@ -13,9 +13,11 @@ const CustomModal = styled(Modal)`
 `
 
 interface Mottaker {
-  fornavn?: string
-  etternavn?: string
+  foedselsnummer?: string,
+  orgnummer?: string,
   adresse?: {
+    fornavn?: string
+    etternavn?: string
     adresse?: string
     postnummer?: string
     poststed?: string
@@ -64,9 +66,10 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
 
     setMottaker({
       ...mottaker,
-      fornavn: opplysning.fornavn,
-      etternavn: opplysning.etternavn,
-      adresse: {}
+      adresse: {
+        fornavn: opplysning.fornavn,
+        etternavn: opplysning.etternavn,
+      }
     })
   }
 
@@ -126,14 +129,20 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
                 <Cell xs={12}>
                   <TextField
                       label={'Fornavn'}
-                      value={mottaker.fornavn || ''}
-                      onChange={(e) => setMottaker({ ...mottaker, fornavn: e.target.value })}/>
+                      value={mottaker.adresse?.fornavn || ''}
+                      onChange={(e) => setMottaker({
+                        ...mottaker,
+                        adresse: {...mottaker.adresse, fornavn: e.target.value }
+                        })}/>
                 </Cell>
                 <Cell xs={12}>
                   <TextField
                       label={'Etternavn'}
-                      value={mottaker.etternavn || ''}
-                      onChange={(e) => setMottaker({ ...mottaker, etternavn: e.target.value })}/>
+                      value={mottaker.adresse?.etternavn || ''}
+                      onChange={(e) => setMottaker({
+                        ...mottaker,
+                        adresse: {...mottaker.adresse, etternavn: e.target.value }
+                      })}/>
                 </Cell>
               </Grid>
 

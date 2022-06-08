@@ -13,10 +13,11 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.ZonedDateTime
 import java.util.*
+import kotlin.random.Random
 
 class VedtakServiceMock : VedtakService {
-    override fun hentVedtak(vedtakId: Long) = Vedtak(
-        vedtakId = vedtakId,
+    override fun hentVedtak(behandlingId: String) = Vedtak(
+        vedtakId = Random.nextLong(),
         virk = Periode(YearMonth.of(2022, 1), null),
         sak = Sak("11057523044", "barnepensjon", 100L),
         behandling = Behandling(BehandlingType.FORSTEGANGSBEHANDLING, id = UUID.randomUUID()),

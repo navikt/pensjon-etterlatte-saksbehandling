@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.journalpost.JournalpostKlient
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
+import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.journalpost.*
 import org.slf4j.LoggerFactory
 
@@ -37,9 +38,9 @@ class JournalpostServiceImpl(
             tittel = melding.tittel,
             journalpostType = JournalPostType.UTGAAENDE,
             behandlingstema = BEHANDLINGSTEMA_BP,
-            avsenderMottaker = melding.mottaker,
+            avsenderMottaker = melding.mottaker.tilAvsenderMottaker(),
             bruker = melding.bruker,
-            eksternReferanseId = "${melding.vedtakId}.${melding.brevId}",
+            eksternReferanseId = "${melding.behandlingId}.${melding.brevId}",
             // sak = {...}
             dokumenter = listOf(dokumentInnhold.tilJournalpostDokument(melding)),
             tema = "EYB", // https://confluence.adeo.no/display/BOA/Tema,
@@ -47,6 +48,16 @@ class JournalpostServiceImpl(
             journalfoerendeEnhet = melding.journalfoerendeEnhet
         )
     }
+}
+
+private fun Mottaker.tilAvsenderMottaker() = when {
+    foedselsnummer != null -> AvsenderMottaker(id = foedselsnummer!!.value)
+    orgnummer != null -> AvsenderMottaker(id = orgnummer, idType = "ORGNR")
+    adresse != null -> {
+        val navn = "${adresse!!.fornavn} ${adresse!!.etternavn}"
+        AvsenderMottaker(id = null, navn = navn, idType = null, land = adresse!!.land)
+    }
+    else -> throw Exception("Ingen brevmottaker spesifisert")
 }
 
 private fun ByteArray.tilJournalpostDokument(melding: DistribusjonMelding) = JournalpostDokument(

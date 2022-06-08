@@ -1,29 +1,14 @@
 package db
 
-import io.mockk.InternalPlatformDsl.toStr
 import no.nav.etterlatte.DataSourceBuilder
-import no.nav.etterlatte.db.Adresse
-import no.nav.etterlatte.db.Brev
 import no.nav.etterlatte.db.BrevRepository
-import no.nav.etterlatte.db.Mottaker
-import no.nav.etterlatte.db.NyttBrev
-import no.nav.etterlatte.db.Status
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import no.nav.etterlatte.libs.common.brev.model.*
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.*
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
-import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BrevRepositoryIntegrationTest {
@@ -63,32 +48,31 @@ internal class BrevRepositoryIntegrationTest {
 
     @Test
     fun `Enkel test med lagring og henting av brev`() {
-        val behandlingId = Random.nextLong()
+        val behandlingId = UUID.randomUUID().toString()
 
         assertTrue(db.hentBrevForBehandling(behandlingId).isEmpty())
 
         val nyttBrev = opprettBrev(behandlingId)
 
         val brevTilBehandling = db.hentBrevForBehandling(behandlingId).single()
-        assertNull(brevTilBehandling.data)
         assertEquals(nyttBrev.status, brevTilBehandling.status)
 
         val hentetBrev = db.hentBrev(nyttBrev.id)
         assertEquals(nyttBrev.id, hentetBrev.id)
         assertEquals(behandlingId, hentetBrev.behandlingId)
-        assertNull(hentetBrev.data)
+        assertEquals(hentetBrev.mottaker, opprettMottaker())
     }
 
     @Test
     fun `Lagring av flere brev paa flere behandlinger`() {
-        val behandlingId = 1L
+        val behandlingId = "1"
 
         opprettBrev(behandlingId)
         opprettBrev(behandlingId)
         opprettBrev(behandlingId)
 
         LongRange(2, 10).forEach {
-            opprettBrev(it)
+            opprettBrev(it.toString())
         }
 
         assertEquals(3, db.hentBrevForBehandling(behandlingId).size)
@@ -96,9 +80,7 @@ internal class BrevRepositoryIntegrationTest {
 
     @Test
     fun `Hent pdf for brev`() {
-        val nyttBrev = opprettBrev(1)
-
-        assertNull(nyttBrev.data)
+        val nyttBrev = opprettBrev("1")
 
         val innhold = db.hentBrevInnhold(nyttBrev.id)
 
@@ -107,7 +89,7 @@ internal class BrevRepositoryIntegrationTest {
 
     @Test
     fun `Slett brev`() {
-        val behandlingId = 1L
+        val behandlingId = "1"
 
         opprettBrev(behandlingId)
         opprettBrev(behandlingId)
@@ -126,7 +108,7 @@ internal class BrevRepositoryIntegrationTest {
     fun `Oppdater journalpost ID`() {
         val journalpostId = UUID.randomUUID().toString()
 
-        val brev = opprettBrev(1L)
+        val brev = opprettBrev("1")
 
         assertTrue(db.setJournalpostId(brev.id, journalpostId))
     }
@@ -135,14 +117,14 @@ internal class BrevRepositoryIntegrationTest {
     fun `Oppdater bestilling ID`() {
         val journalpostId = UUID.randomUUID().toString()
 
-        val brev = opprettBrev(1L)
+        val brev = opprettBrev("1")
 
         assertTrue(db.setBestillingId(brev.id, journalpostId))
     }
 
     @Test
     fun `Oppdater status`() {
-        val opprettetBrev = opprettBrev(1L)
+        val opprettetBrev = opprettBrev("1")
 
         db.oppdaterStatus(opprettetBrev.id, Status.OPPDATERT)
         db.oppdaterStatus(opprettetBrev.id, Status.FERDIGSTILT)
@@ -162,22 +144,22 @@ internal class BrevRepositoryIntegrationTest {
         assertEquals(5, count)
     }
 
-    private fun opprettBrev(behandlingId: Long): Brev {
+    private fun opprettBrev(behandlingId: String): Brev {
         return db.opprettBrev(
             NyttBrev(
                 behandlingId = behandlingId,
                 tittel = UUID.randomUUID().toString(),
                 mottaker = opprettMottaker(),
-                pdf = PDF_BYTES
+                pdf = PDF_BYTES,
+                erVedtaksbrev = false
             )
         )
     }
 
     private fun opprettMottaker() = Mottaker(
-        fornavn = "Test",
-        etternavn = "Testesen",
-        foedselsnummer = null,
         adresse = Adresse(
+            fornavn = "Test",
+            etternavn = "Testesen",
             adresse = "Fyrstikkaleen 1",
             postnummer = "1234",
             poststed = "Oslo"

@@ -3,10 +3,11 @@ CREATE TABLE brev
     id BIGSERIAL
         CONSTRAINT brev_pk
             PRIMARY KEY,
-    behandling_id BIGINT NOT NULL,
+    behandling_id TEXT NOT NULL,
     journalpost_id TEXT NULL,
     bestilling_id TEXT NULL,
     tittel TEXT NOT NULL,
+    vedtaksbrev BOOLEAN NOT NULL,
     opprettet TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'UTC') NOT NULL
 );
 
@@ -16,9 +17,18 @@ CREATE TABLE mottaker
         PRIMARY KEY
             REFERENCES brev (id)
                 ON DELETE CASCADE,
-    fornavn TEXT NOT NULL,
-    etternavn TEXT NOT NULL,
-    foedselsnummer TEXT DEFAULT NULL,
+    foedselsnummer TEXT NULL,
+    orgnummer TEXT NULL
+);
+
+CREATE TABLE adresse
+(
+    brev_id BIGINT NOT NULL
+        PRIMARY KEY
+        REFERENCES brev (id)
+            ON DELETE CASCADE,
+    fornavn TEXT NULL,
+    etternavn TEXT NULL,
     adresse TEXT NOT NULL,
     postnummer TEXT NOT NULL,
     poststed TEXT NOT NULL,

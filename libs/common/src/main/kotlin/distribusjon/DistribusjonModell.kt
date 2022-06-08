@@ -1,4 +1,4 @@
-package no.nav.etterlatte.distribusjon
+package no.nav.etterlatte.libs.common.distribusjon
 
 import no.nav.etterlatte.libs.common.person.Adresse
 
@@ -12,7 +12,7 @@ data class DistribuerJournalpostRequest(
     val distribusjonstidspunkt: DistribusjonsTidspunktType,
 )
 
-data class Mottaker(
+data class Adresse(
     val adressetype: String,
     val adresselinje1: String?,
     val adresselinje2: String?,

@@ -1,12 +1,14 @@
 package no.nav.etterlatte.libs.common.brev.model
 
-import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
+import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import no.nav.etterlatte.libs.common.journalpost.Bruker
 
 data class DistribusjonMelding(
-    val vedtakId: String,
+    val behandlingId: String,
+    val distribusjonType: DistribusjonsType,
     val brevId: Long,
-    val mottaker: AvsenderMottaker,
+    val mottaker: Mottaker,
+    val mottakerAdresse: Adresse? = null,
     val bruker: Bruker,
     val tittel: String,
     val brevKode: String,

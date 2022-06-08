@@ -1,7 +1,7 @@
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.db.BrevRepository
-import no.nav.etterlatte.db.Status
+import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper

@@ -11,7 +11,7 @@ import java.io.FileNotFoundException
 import java.time.LocalDate
 
 internal class MappersTest {
-    private val vedtak = VedtakServiceMock().hentVedtak(1).copy(
+    private val vedtak = VedtakServiceMock().hentVedtak("1").copy(
         grunnlag = objectMapper.readValue<Testdata>(readFile("/grunnlag.json")).grunnlag
     )
 

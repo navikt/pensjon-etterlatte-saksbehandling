@@ -3,11 +3,14 @@ package no.nav.etterlatte
 import model.brev.AnnetBrevRequest
 import model.brev.AvslagBrevRequest
 import model.brev.InnvilgetBrevRequest
-import no.nav.etterlatte.db.*
+import model.brev.mapper.finnBarn
+import no.nav.etterlatte.db.BrevRepository
+import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.domene.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
-import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
+import no.nav.etterlatte.libs.common.brev.model.*
+import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import no.nav.etterlatte.libs.common.journalpost.Bruker
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.vedtak.VedtakService
@@ -25,14 +28,7 @@ class BrevService(
 ) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
 
-    suspend fun hentAlleBrev(behandlingId: String): List<Brev> {
-        val brev = db.hentBrevForBehandling(behandlingId.toLong())
-
-        return brev.ifEmpty {
-            logger.info("Ingen brev funnet for behandling $behandlingId. Forsøker å opprette fra vedtak.")
-            listOf(opprettFraVedtak(behandlingId))
-        }
-    }
+    fun hentAlleBrev(behandlingId: String): List<Brev> = db.hentBrevForBehandling(behandlingId)
 
     fun hentBrevInnhold(id: BrevID): BrevInnhold = db.hentBrevInnhold(id)
 
@@ -46,36 +42,21 @@ class BrevService(
     }
 
     suspend fun opprett(behandlingId: String, mottaker: Mottaker, mal: Mal): Brev {
-        val brevMottaker = BrevMottaker(
-            fornavn = mottaker.fornavn,
-            etternavn = mottaker.etternavn,
-            adresse = mottaker.adresse.adresse,
-            postnummer = mottaker.adresse.postnummer,
-            poststed = mottaker.adresse.poststed,
-            land = mottaker.adresse.land
-        )
+        val brevMottaker = when {
+            // mottaker.foedselsnummer != null -> BrevMottaker()
+            // mottaker.orgnummer != null -> BrevMottaker()
+            mottaker.adresse != null -> BrevMottaker.fraAdresse(adresse = mottaker.adresse!!)
+            else -> throw Exception("Ingen brevmottaker spesifisert")
+        }
 
         val request = AnnetBrevRequest(mal, Spraak.NB, brevMottaker)
 
         val pdf = pdfGenerator.genererPdf(request)
 
-        return db.opprettBrev(NyttBrev(behandlingId.toLong(), mal.tittel, mottaker, pdf))
+        return db.opprettBrev(NyttBrev(behandlingId, mal.tittel, mottaker, false, pdf))
     }
 
-    fun ferdigstillBrev(id: BrevID): Brev {
-        val brev: Brev = db.hentBrev(id)
-        val vedtak = vedtakService.hentVedtak(brev.behandlingId)
-
-        // todo: Brev kan genereres på bakgrunn av både behandling og vedtak. Må hente data fra ulike steder.
-        sendToRapid(opprettDistribusjonsmelding(brev, vedtak.vedtakFattet!!.ansvarligEnhet))
-        db.oppdaterStatus(id, Status.FERDIGSTILT)
-
-        return brev
-    }
-
-    private suspend fun opprettFraVedtak(behandlingId: String): Brev {
-        val vedtak = vedtakService.hentVedtak(behandlingId.toLong())
-
+    suspend fun opprettFraVedtak(vedtak: Vedtak): Brev {
         val brevRequest = when (vedtak.type) {
             VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(vedtak)
             VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(vedtak)
@@ -87,38 +68,43 @@ class BrevService(
         logger.info("Generert brev for vedtak (vedtakId=${vedtak.vedtakId}) med størrelse: ${pdf.size}")
 
         val tittel = "Vedtak om ${vedtak.type.name.lowercase()}"
-        val mottaker = Mottaker(
-            fornavn = brevRequest.mottaker.fornavn,
-            etternavn = brevRequest.mottaker.etternavn,
-            adresse = Adresse(
-                adresse = brevRequest.mottaker.adresse,
-                postnummer = brevRequest.mottaker.postnummer,
-                poststed = brevRequest.mottaker.poststed,
-                land = brevRequest.mottaker.land
-            ),
-        )
-        return db.opprettBrev(NyttBrev(behandlingId.toLong(), tittel, mottaker, pdf))
+        val mottaker = Mottaker(Foedselsnummer.of(vedtak.finnBarn().fnr))
+        return db.opprettBrev(NyttBrev(vedtak.behandling.id.toString(), tittel, mottaker, true, pdf))
     }
 
-    private fun opprettDistribusjonsmelding(brev: Brev, behandlendeEnhet: String): String = DistribusjonMelding(
-        vedtakId = "Vedtak_Id",
-        brevId = brev.id,
-        mottaker = AvsenderMottaker(brev.mottaker.foedselsnummer?.value ?: "0101202212345"),
-        bruker = Bruker(brev.mottaker.foedselsnummer?.value ?: "0101202212345"),
-        tittel = brev.tittel,
-        brevKode = "XX.YY-ZZ",
-        journalfoerendeEnhet = behandlendeEnhet
-    ).let {
-        val correlationId = UUID.randomUUID().toString()
-        logger.info("Oppretter distribusjonsmelding for brev (id=${brev.id}) med correlation_id=$correlationId")
+    fun ferdigstillBrev(id: BrevID): Brev {
+        val brev: Brev = db.hentBrev(id)
 
-        JsonMessage.newMessage(
-            mapOf(
-                "@event" to "BREV:DISTRIBUER",
-                "@brevId" to it.brevId,
-                "@correlation_id" to correlationId,
-                "payload" to it.toJson()
-            )
-        ).toJson()
+        // todo: vedtak må byttes ut med grunnlag for å fungere på behandlinger også.
+        val vedtak = vedtakService.hentVedtak(brev.behandlingId)
+
+        sendToRapid(opprettDistribusjonsmelding(brev, vedtak))
+        db.oppdaterStatus(id, Status.FERDIGSTILT)
+
+        return brev
     }
+
+    private fun opprettDistribusjonsmelding(brev: Brev, vedtak: Vedtak): String =
+        DistribusjonMelding(
+            behandlingId = brev.behandlingId,
+            distribusjonType = if (brev.erVedtaksbrev) DistribusjonsType.VEDTAK else DistribusjonsType.VIKTIG,
+            brevId = brev.id,
+            mottaker = brev.mottaker,
+            bruker = Bruker(vedtak.finnBarn().fnr),
+            tittel = brev.tittel,
+            brevKode = "XX.YY-ZZ",
+            journalfoerendeEnhet = vedtak.vedtakFattet!!.ansvarligEnhet
+        ).let {
+            val correlationId = UUID.randomUUID().toString()
+            logger.info("Oppretter distribusjonsmelding for brev (id=${brev.id}) med correlation_id=$correlationId")
+
+            JsonMessage.newMessage(
+                mapOf(
+                    "@event" to "BREV:DISTRIBUER",
+                    "@brevId" to it.brevId,
+                    "@correlation_id" to correlationId,
+                    "payload" to it.toJson()
+                )
+            ).toJson()
+        }
 }

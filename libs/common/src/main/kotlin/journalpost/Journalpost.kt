@@ -21,9 +21,10 @@ data class JournalpostRequest(
 )
 
 data class AvsenderMottaker(
-    val id: String,
-    val idType: String = "FNR",
-    val navn: String? = null
+    val id: String?,
+    val idType: String? = "FNR",
+    val navn: String? = null,
+    val land: String? = null
 )
 
 data class Bruker(

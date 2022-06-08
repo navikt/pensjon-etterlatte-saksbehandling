@@ -1,7 +1,11 @@
 package no.nav.etterlatte.distribusjon
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.brev.model.Adresse
+import no.nav.etterlatte.libs.common.distribusjon.BestillingID
+import no.nav.etterlatte.libs.common.distribusjon.DistribuerJournalpostRequest
+import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType
+import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 
 interface DistribusjonService {
     fun distribuerJournalpost(

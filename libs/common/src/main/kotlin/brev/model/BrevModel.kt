@@ -1,6 +1,5 @@
-package no.nav.etterlatte.db
+package no.nav.etterlatte.libs.common.brev.model
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 
@@ -17,6 +16,8 @@ enum class Status {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Adresse(
+    val fornavn: String,
+    val etternavn: String,
     val adresse: String,
     val postnummer: String,
     val poststed: String,
@@ -25,25 +26,29 @@ data class Adresse(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Mottaker(
-    val fornavn: String,
-    val etternavn: String,
     val foedselsnummer: Foedselsnummer? = null,
-    val adresse: Adresse
+    val orgnummer: String? = null,
+    val adresse: Adresse? = null,
 )
 
 class Brev(
     val id: BrevID,
-    val behandlingId: Long,
+    val behandlingId: String,
     val tittel: String,
     val status: Status,
     val mottaker: Mottaker,
-    // TODO: Burde dette fjernes fra brevet og heller være helt adskilt?
-    @JsonIgnore
-    val data: ByteArray? = null
+    val erVedtaksbrev: Boolean,
 ) {
     companion object {
         fun fraNyttBrev(id: BrevID, nyttBrev: NyttBrev) =
-            Brev(id, nyttBrev.behandlingId, nyttBrev.tittel, nyttBrev.status, nyttBrev.mottaker)
+            Brev(
+                id = id,
+                behandlingId = nyttBrev.behandlingId,
+                tittel = nyttBrev.tittel,
+                status = nyttBrev.status,
+                mottaker = nyttBrev.mottaker,
+                erVedtaksbrev = nyttBrev.erVedtaksbrev
+            )
     }
 }
 
@@ -54,9 +59,10 @@ class BrevInnhold(
 )
 
 class NyttBrev(
-    val behandlingId: Long,
+    val behandlingId: String,
     val tittel: String,
     val mottaker: Mottaker,
+    val erVedtaksbrev: Boolean,
     val pdf: ByteArray
 ) {
     val status: Status = Status.OPPRETTET

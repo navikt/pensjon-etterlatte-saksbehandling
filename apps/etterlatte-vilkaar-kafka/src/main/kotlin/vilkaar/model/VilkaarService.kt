@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.vikaar.*
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
 import org.slf4j.LoggerFactory
 import vilkaar.barnepensjon.barnIngenOppgittUtlandsadresse
+import vilkaar.barnepensjon.barnOgAvdoedSammeBostedsadresse
 import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
@@ -75,18 +76,23 @@ class VilkaarService {
             finnOpplysning<SoekerBarnSoeknad>(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1)
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
 
-        val sammeAdresser = listOf(
+        val kommerBarnetTilGode = listOf(
             barnOgForelderSammeBostedsadresse(
                 Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
                 soekerPdl,
                 gjenlevendePdl
             ),
-            barnIngenOppgittUtlandsadresse(Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE, soekerSoeknad)
+            barnIngenOppgittUtlandsadresse(Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE, soekerSoeknad),
+            barnOgAvdoedSammeBostedsadresse(
+                Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
+                soekerPdl,
+                avdoedPdl
+            )
         )
 
-        val vilkaarResultat = setVilkaarVurderingFraVilkaar(sammeAdresser)
-        val vurdertDato = hentSisteVurderteDato(sammeAdresser)
-        val vurdering = VilkaarResultat(vilkaarResultat, sammeAdresser, vurdertDato)
+        val vilkaarResultat = setVurderingFraKommerBarnetTilGode(kommerBarnetTilGode)
+        val vurdertDato = hentSisteVurderteDato(kommerBarnetTilGode)
+        val vurdering = VilkaarResultat(vilkaarResultat, kommerBarnetTilGode, vurdertDato)
 
         val familieforhold = mapFamiliemedlemmer(soekerPdl, soekerSoeknad, gjenlevendePdl, avdoedPdl)
 

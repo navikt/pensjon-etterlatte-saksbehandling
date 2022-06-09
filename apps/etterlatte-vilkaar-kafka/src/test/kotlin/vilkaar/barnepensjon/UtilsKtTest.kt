@@ -1,6 +1,7 @@
 package vilkaar.barnepensjon
 
 import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraVilkaar
+import no.nav.etterlatte.barnepensjon.setVurderingFraKommerBarnetTilGode
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
@@ -19,8 +20,15 @@ internal class UtilsKtTest {
         val manglerInfoVilkaarBarnetsMedlemskap = VurdertVilkaar(Vilkaartyper.BARNETS_MEDLEMSKAP, VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, emptyList(), LocalDateTime.now())
         val ikkeOppfyltVilkaarAvdodesMedlemskap = VurdertVilkaar(Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP, VurderingsResultat.IKKE_OPPFYLT, emptyList(), LocalDateTime.now())
         val manglerInfoVilkaarAvdodesMedlemskap = VurdertVilkaar(Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP, VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, emptyList(), LocalDateTime.now())
-    }
 
+        val oppfyltGjenlevendeBarnSammeAdresse = VurdertVilkaar(Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE, VurderingsResultat.OPPFYLT, emptyList(), LocalDateTime.now())
+        val ikkeOppfyltGjenlevendeBarnSammeAdresse = VurdertVilkaar(Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE, VurderingsResultat.IKKE_OPPFYLT, emptyList(), LocalDateTime.now())
+        val manglerInfoGjenlevendeBarnSammeAdresse = VurdertVilkaar(Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE, VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, emptyList(), LocalDateTime.now())
+        val oppfyltBarnIngenUtlandsadresse = VurdertVilkaar(Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE, VurderingsResultat.OPPFYLT, emptyList(), LocalDateTime.now())
+        val ikkeOppfyltBarnIngenUtlandsadresse = VurdertVilkaar(Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE, VurderingsResultat.IKKE_OPPFYLT, emptyList(), LocalDateTime.now())
+        val oppfyltBarnAvdoedSammeAdresse = VurdertVilkaar(Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE, VurderingsResultat.OPPFYLT, emptyList(), LocalDateTime.now())
+        val ikkeOppfyltBarnAvdoedSammeAdresse = VurdertVilkaar(Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE, VurderingsResultat.IKKE_OPPFYLT, emptyList(), LocalDateTime.now())
+    }
 
     @Test
     fun vilkarsvurderingOppfyltOmAlleVilkårOppfylt() {
@@ -43,4 +51,29 @@ internal class UtilsKtTest {
         assertEquals(VurderingsResultat.OPPFYLT, setVilkaarVurderingFraVilkaar(listOf(oppfyltVilkarAlder, oppfyltVilkarDoedsfall, oppfyltVilkarBarnetsMedlemskap, manglerInfoVilkaarAvdodesMedlemskap)))
         assertEquals(VurderingsResultat.OPPFYLT, setVilkaarVurderingFraVilkaar(listOf(oppfyltVilkarAlder, oppfyltVilkarDoedsfall, oppfyltVilkarBarnetsMedlemskap, ikkeOppfyltVilkaarAvdodesMedlemskap)))
     }
+
+    @Test
+    fun kommerBarnetTilGodeVurderingOppfylt() {
+        assertEquals(VurderingsResultat.OPPFYLT, setVurderingFraKommerBarnetTilGode(listOf(
+            oppfyltGjenlevendeBarnSammeAdresse, oppfyltBarnIngenUtlandsadresse, ikkeOppfyltBarnAvdoedSammeAdresse)))
+    }
+
+    @Test
+    fun kommerBarnetTilGodeVurderingIkkeOppfylt() {
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, setVurderingFraKommerBarnetTilGode(listOf(
+            ikkeOppfyltGjenlevendeBarnSammeAdresse, oppfyltBarnIngenUtlandsadresse, ikkeOppfyltBarnAvdoedSammeAdresse)))
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, setVurderingFraKommerBarnetTilGode(listOf(
+            ikkeOppfyltGjenlevendeBarnSammeAdresse, oppfyltBarnIngenUtlandsadresse, oppfyltBarnAvdoedSammeAdresse)))
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, setVurderingFraKommerBarnetTilGode(listOf(
+            oppfyltGjenlevendeBarnSammeAdresse, ikkeOppfyltBarnIngenUtlandsadresse, ikkeOppfyltBarnAvdoedSammeAdresse)))
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, setVurderingFraKommerBarnetTilGode(listOf(
+            ikkeOppfyltBarnAvdoedSammeAdresse, ikkeOppfyltBarnIngenUtlandsadresse, oppfyltBarnAvdoedSammeAdresse)))
+    }
+
+    @Test
+    fun kommerBarnetTilGodeVurderingManglerInfo() {
+        assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, setVurderingFraKommerBarnetTilGode(listOf(
+            manglerInfoGjenlevendeBarnSammeAdresse, oppfyltBarnIngenUtlandsadresse, ikkeOppfyltBarnAvdoedSammeAdresse)))
+    }
+
 }

@@ -17,7 +17,24 @@ fun setVilkaarVurderingFraVilkaar(vilkaar: List<VurdertVilkaar>): VurderingsResu
     return hentVurdering(resultat)
 }
 
-fun hentVurdering(resultat: List<VurderingsResultat>): VurderingsResultat {
+
+fun setVurderingFraKommerBarnetTilGode(vilkaar: List<VurdertVilkaar>): VurderingsResultat {
+    val gjenlevendeBarnSammeAdresse =
+        vilkaar.find { it.navn === Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE }?.resultat
+    val barnIngenUtlandsadresse =
+        vilkaar.find { it.navn === Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE }?.resultat
+    val avdoedAdresse =
+        vilkaar.find { it.navn === Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE }?.resultat
+
+    return if (gjenlevendeBarnSammeAdresse !== VurderingsResultat.IKKE_OPPFYLT) {
+        hentVurdering(listOf(gjenlevendeBarnSammeAdresse, barnIngenUtlandsadresse))
+    } else {
+        hentVurdering(listOf(gjenlevendeBarnSammeAdresse, barnIngenUtlandsadresse, avdoedAdresse ))
+    }
+
+}
+
+fun hentVurdering(resultat: List<VurderingsResultat?>): VurderingsResultat {
     return if (resultat.all { it == VurderingsResultat.OPPFYLT }) {
         VurderingsResultat.OPPFYLT
     } else if (resultat.any { it == VurderingsResultat.IKKE_OPPFYLT }) {
@@ -37,7 +54,6 @@ fun vurderOpplysning(vurdering: () -> Boolean): VurderingsResultat = try {
 } catch (ex: OpplysningKanIkkeHentesUt) {
     VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
 }
-
 
 fun opplysningsGrunnlagNull(
     kriterietype: Kriterietyper,

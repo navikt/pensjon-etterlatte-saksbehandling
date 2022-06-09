@@ -57,34 +57,30 @@ class KvitteringMottaker(
 
                     when (val resultat = utbetalingService.oppdaterKvittering(oppdrag)) {
                         is KvitteringOppdatert -> {
-                            when (oppdrag.mmel.alvorlighetsgrad) {
-                                "00" -> oppdragGodkjent(resultat.utbetaling)
-                                "04" -> oppdragGodkjentMedFeil(resultat.utbetaling)
-                                "08" -> oppdragAvvist(resultat.utbetaling)
-                                "12" -> oppdragFeilet(resultat.utbetaling, oppdragXml)
-                                else -> oppdragFeilet(resultat.utbetaling, oppdragXml)
-                            }
+                            oppdrag.haandterMottattKvittering(resultat.utbetaling, oppdragXml)
                         }
                         is UtbetalingFinnesIkke -> {
-                            val feilmelding = "Finner ingen utbetaling for vedtakId=${resultat.vedtakId}"
-                            logger.error(feilmelding)
-                            sendUtbetalingFeiletEvent(feilmelding, oppdrag)
+                            "Finner ingen utbetaling for vedtakId=${resultat.vedtakId}".also {
+                                logger.error(it)
+                                sendUtbetalingFeiletEvent(it, oppdrag)
+                            }
                         }
                         is UgyldigStatus -> {
-                            val feilmelding = """
-                                Utbetalingen for vedtakId=${oppdrag.vedtakId()} har feil status (${resultat.status})
-                            """.trimIndent()
-                            logger.error(feilmelding)
-                            sendUtbetalingFeiletEvent(feilmelding, oppdrag)
+                            """Utbetalingen for vedtakId=${oppdrag.vedtakId()} har feil status (${resultat.status})
+                            """.trimIndent().also {
+                                logger.error(it)
+                                sendUtbetalingFeiletEvent(it, oppdrag)
+                            }
                         }
                     }
 
                     logger.info("Melding med id=${message.jmsMessageID} er lest og behandlet")
 
                 } catch (e: Exception) {
-                    val feilmelding = "En feil oppstod under prosessering av kvittering fra Oppdrag"
-                    logger.error(feilmelding, kv("oppdragXml", oppdragXml), e)
-                    sendUtbetalingFeiletEvent(feilmelding)
+                    "En feil oppstod under prosessering av kvittering fra Oppdrag".also {
+                        logger.error(it, kv("oppdragXml", oppdragXml), e)
+                        sendUtbetalingFeiletEvent(it)
+                    }
                 }
             }
         }
@@ -138,6 +134,15 @@ class KvitteringMottaker(
         "00" -> null
         else -> "${this.kvittering?.kode} ${this.kvittering?.beskrivelse}"
     }
+
+    private fun Oppdrag.haandterMottattKvittering(utbetaling: Utbetaling, oppdragXml: String) =
+        when (this.mmel.alvorlighetsgrad) {
+            "00" -> oppdragGodkjent(utbetaling)
+            "04" -> oppdragGodkjentMedFeil(utbetaling)
+            "08" -> oppdragAvvist(utbetaling)
+            "12" -> oppdragFeilet(utbetaling, oppdragXml)
+            else -> oppdragFeilet(utbetaling, oppdragXml)
+        }
 
     companion object {
         private val logger = LoggerFactory.getLogger(KvitteringMottaker::class.java)

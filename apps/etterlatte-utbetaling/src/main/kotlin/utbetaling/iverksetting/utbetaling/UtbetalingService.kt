@@ -16,7 +16,6 @@ import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
 import java.time.Clock
 
-
 class UtbetalingService(
     val oppdragMapper: OppdragMapper,
     val oppdragSender: OppdragSender,
@@ -30,8 +29,8 @@ class UtbetalingService(
             utbetalingDao.hentDupliserteUtbetalingslinjer(vedtak.pensjonTilUtbetaling, vedtak.vedtakId)
 
         return when {
-            utbetalingForVedtak != null && utbetalingForVedtak.status() != UtbetalingStatus.MOTTATT ->
-                UtbetalingForVedtakEksisterer(utbetalingForVedtak)
+            utbetalingEksisterer(utbetalingForVedtak) ->
+                UtbetalingForVedtakEksisterer(utbetalingForVedtak!!)
 
             dupliserteUtbetalingslinjer.isNotEmpty() ->
                 UtbetalingslinjerForVedtakEksisterer(dupliserteUtbetalingslinjer)
@@ -65,15 +64,21 @@ class UtbetalingService(
 
         return when {
             utbetaling == null -> UtbetalingFinnesIkke(oppdrag.vedtakId())
-            utbetaling.status() != UtbetalingStatus.SENDT && utbetaling.status() != UtbetalingStatus.MOTTATT -> {
+            utbetaling.ugyldigStatus() -> {
                 UgyldigStatus(
                     utbetaling.status()
                 )
             }
             else -> {
-                logger.info("Oppdaterer kvittering for oppdrag med vedtakId=${oppdrag.vedtakId()}")
-                val oppdatertUtbetaling = utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock), utbetaling.id)
-                KvitteringOppdatert(oppdatertUtbetaling)
+                KvitteringOppdatert(
+                    utbetalingDao.oppdaterKvittering(
+                        oppdrag,
+                        Tidspunkt.now(clock),
+                        utbetaling.id
+                    )
+                ).also {
+                    logger.info("Kvittering for oppdrag med vedtakId=${oppdrag.vedtakId()} oppdatert")
+                }
             }
         }
     }
@@ -93,6 +98,11 @@ class UtbetalingService(
         tidspunkt = Tidspunkt.now(clock)
     )
 
+    fun Utbetaling.ugyldigStatus() =
+        this.status() != UtbetalingStatus.SENDT && this.status() != UtbetalingStatus.MOTTATT
+
+    fun utbetalingEksisterer(utbetaling: Utbetaling?) =
+        utbetaling != null && utbetaling.status() != UtbetalingStatus.MOTTATT && utbetaling.status() != UtbetalingStatus.INGEN_UTBETALINGSLINJER
 
     companion object {
         private val logger = LoggerFactory.getLogger(UtbetalingService::class.java)

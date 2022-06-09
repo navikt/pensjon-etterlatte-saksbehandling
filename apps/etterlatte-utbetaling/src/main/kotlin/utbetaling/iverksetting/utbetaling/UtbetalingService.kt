@@ -42,21 +42,20 @@ class UtbetalingService(
                     vedtak = vedtak,
                 ).opprettUtbetaling()
 
-                val foerstegangsbehandling = vedtak.behandling.type == BehandlingType.FORSTEGANGSBEHANDLING
-                val oppdrag = oppdragMapper.oppdragFraUtbetaling(utbetaling, foerstegangsbehandling)
+                oppdragMapper.oppdragFraUtbetaling(
+                    utbetaling = utbetaling,
+                    foerstegangsbehandling = vedtak.behandling.type == BehandlingType.FORSTEGANGSBEHANDLING
+                )
+                    .also {
+                        utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = it))
+                        oppdragSender.sendOppdrag(it)
+                    }.let {
+                        utbetalingDao.nyUtbetalingshendelse(
+                            utbetaling.vedtakId.value,
+                            utbetaling.sendtUtbetalingshendelse(clock)
+                        ).let { SendtTilOppdrag(it) }
+                    }
 
-                utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
-
-                logger.info("Sender oppdrag for sakId=${vedtak.sak.id} med vedtakId=${vedtak.vedtakId} til oppdrag")
-                oppdragSender.sendOppdrag(oppdrag)
-                utbetalingDao.nyUtbetalingshendelse(
-                    utbetaling.vedtakId.value,
-                    Utbetalingshendelse(
-                        utbetalingId = utbetaling.id,
-                        status = UtbetalingStatus.SENDT,
-                        tidspunkt = Tidspunkt.now(clock)
-                    )
-                ).let { SendtTilOppdrag(it) }
             }
         }
     }
@@ -87,6 +86,13 @@ class UtbetalingService(
             }
         }?.let { oppdrag -> utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock), utbetaling.id) }
     }
+
+    fun Utbetaling.sendtUtbetalingshendelse(clock: Clock) = Utbetalingshendelse(
+        utbetalingId = this.id,
+        status = UtbetalingStatus.SENDT,
+        tidspunkt = Tidspunkt.now(clock)
+    )
+
 
     companion object {
         private val logger = LoggerFactory.getLogger(UtbetalingService::class.java)

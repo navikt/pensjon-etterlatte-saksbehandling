@@ -20,13 +20,14 @@ export const StegMeny = () => {
       <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
         <NavLink to="beregne">Beregning</NavLink>
       </li>
+      <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
+        <NavLink to="brev">Brev</NavLink>
+      </li>
       {/*
       <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
         <NavLink to="utbetalingsoversikt">Simulering til oppdrag</NavLink>
       </li>
-      <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
-        <NavLink to="brev">Brev</NavLink>
-      </li>
+     
       */}
     </StegMenyWrapper>
   )

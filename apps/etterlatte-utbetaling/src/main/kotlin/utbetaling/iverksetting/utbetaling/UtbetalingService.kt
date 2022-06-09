@@ -29,7 +29,7 @@ class UtbetalingService(
             utbetalingDao.hentDupliserteUtbetalingslinjer(vedtak.pensjonTilUtbetaling, vedtak.vedtakId)
 
         return when {
-            utbetalingEksisterer(utbetalingForVedtak) ->
+            utbetalingForVedtak.utbetalingEksisterer() ->
                 UtbetalingForVedtakEksisterer(utbetalingForVedtak!!)
 
             dupliserteUtbetalingslinjer.isNotEmpty() ->
@@ -101,8 +101,9 @@ class UtbetalingService(
     fun Utbetaling.ugyldigStatus() =
         this.status() != UtbetalingStatus.SENDT && this.status() != UtbetalingStatus.MOTTATT
 
-    fun utbetalingEksisterer(utbetaling: Utbetaling?) =
-        utbetaling != null && utbetaling.status() != UtbetalingStatus.MOTTATT && utbetaling.status() != UtbetalingStatus.INGEN_UTBETALINGSLINJER
+
+    fun Utbetaling?.utbetalingEksisterer() =
+        this != null && this.status() != UtbetalingStatus.MOTTATT && this.status() != UtbetalingStatus.INGEN_UTBETALINGSLINJER
 
     companion object {
         private val logger = LoggerFactory.getLogger(UtbetalingService::class.java)

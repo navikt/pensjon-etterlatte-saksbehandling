@@ -680,7 +680,7 @@
         "vurdertDato": "2022-05-20T14:30:01.423558484"
       },
       {
-        "navn": "SAMME_ADRESSE",
+        "navn": "GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE",
         "resultat": "OPPFYLT",
         "kriterier": [
           {
@@ -756,7 +756,7 @@
       "resultat": "OPPFYLT",
       "vilkaar": [
         {
-          "navn": "SAMME_ADRESSE",
+          "navn": "GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE",
           "resultat": "OPPFYLT",
           "kriterier": [
             {

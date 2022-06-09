@@ -22,9 +22,9 @@ fun main() {
 }
 
 interface InntektsKomponenten {
-    fun hentInntektListe(fnr: Foedselsnummer): InntektsKomponentenResponse
+    fun hentInntektListe(fnr: Foedselsnummer, doedsdato: String): InntektsKomponentenResponse
 }
 
 interface OpplysningsBygger {
-    fun byggOpplysninger(barnepensjon: Barnepensjon, inntektsKomponentenResponse: InntektsKomponentenResponse):List<Grunnlagsopplysning<out Any>>
+    fun byggOpplysninger(inntektsKomponentenResponse: InntektsKomponentenResponse):List<Grunnlagsopplysning<out Any>>
 }

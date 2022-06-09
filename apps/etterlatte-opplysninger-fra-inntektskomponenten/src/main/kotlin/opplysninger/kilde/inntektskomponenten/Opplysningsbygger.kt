@@ -11,7 +11,6 @@ import java.util.*
 class OpplysningsByggerService : OpplysningsBygger {
 
     override fun byggOpplysninger(
-        barnepensjon: Barnepensjon,
         inntektsKomponentenResponse: InntektsKomponentenResponse
     ): List<Grunnlagsopplysning<out Any>> {
 
@@ -21,9 +20,12 @@ class OpplysningsByggerService : OpplysningsBygger {
         if(inntektsKomponentenResponse.arbeidsInntektMaaned != null) {
             uforetrygd = harFaattUforetrygd(inntektsKomponentenResponse.arbeidsInntektMaaned)
             alderspensjon = harFaatAlderspensjon(inntektsKomponentenResponse.arbeidsInntektMaaned)
+            return listOf(lagOpplysning(Opplysningstyper.PENSJON_UFORE_V1,
+                PensjonUforeOpplysning(uforetrygd, alderspensjon, inntektsKomponentenResponse.arbeidsInntektMaaned)))
         }
 
-        return listOf(lagOpplysning(Opplysningstyper.PENSJON_UFORE_V1, PensjonUforeOpplysning(uforetrygd, alderspensjon)))
+        throw Exception("Ingen grunnlagsopplysninger tilgjengelig for avdød")
+
     }
 
     // TODO - simpel sjekk. Vil vi ha ut noe mer?
@@ -62,4 +64,4 @@ fun <T> lagOpplysning(opplysningsType: Opplysningstyper, opplysning: T): Grunnla
     )
 }
 
-data class PensjonUforeOpplysning(val mottattUforetrygd: Boolean, val mottattAlderspensjon: Boolean)
+data class PensjonUforeOpplysning(val mottattUforetrygd: Boolean, val mottattAlderspensjon: Boolean, val grunnlag: List<ArbeidsInntektMaaned>)

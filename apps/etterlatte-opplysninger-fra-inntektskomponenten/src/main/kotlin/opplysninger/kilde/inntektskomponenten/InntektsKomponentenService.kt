@@ -7,13 +7,14 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.InntektsKomponenten
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import org.slf4j.LoggerFactory
 
 class InntektsKomponentenService(private val inntektskomponentenClient: HttpClient, private val url: String) :
     InntektsKomponenten {
     private val logger = LoggerFactory.getLogger(InntektsKomponentenService::class.java)
 
-    override fun hentInntektListe(fnr: Foedselsnummer): InntektsKomponentenResponse {
+    override fun hentInntektListe(fnr: Foedselsnummer, doedsdato: String): InntektsKomponentenResponse {
         logger.info("Henter inntektliste fra inntektskomponenten")
 
         val hentInntektlisteRequest =

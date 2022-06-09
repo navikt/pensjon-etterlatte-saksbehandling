@@ -7,7 +7,6 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class FattVedtak(
     rapidsConnection: RapidsConnection,
@@ -28,7 +27,7 @@ internal class FattVedtak(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val behandlingId = UUID.fromString(packet["@behandlingId"].textValue())
+            val behandlingId = packet["@behandlingId"].asUUID()
             val sakId = packet["@sakId"].longValue()
             val saksbehandler = packet["@saksbehandler"].textValue()
             val fattetVedtak = vedtaksvurderingService.fattVedtak(sakId.toString(), behandlingId, saksbehandler)
@@ -40,5 +39,3 @@ internal class FattVedtak(
             ).toJson())
         }
 }
-
-private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

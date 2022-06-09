@@ -10,7 +10,6 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class LagreBeregningsresultat(
     rapidsConnection: RapidsConnection,
@@ -31,7 +30,7 @@ internal class LagreBeregningsresultat(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val behandlingId = UUID.fromString(packet["id"].asText())
+            val behandlingId = packet["id"].asUUID()
             val sakId = packet["sak"].toString()
             val beregningsResultat = objectMapper.readValue(packet["@beregning"].toString(), BeregningsResultat::class.java)
 
@@ -45,12 +44,9 @@ internal class LagreBeregningsresultat(
                     packet.toJson()
                 )
             } catch (e: Exception){
-                //TODO endre denne
-                println("spiser en melding fordi: " +e)
+                logger.warn("Kunne ikke oppdatere vedtak",e)
             }
 
 
         }
 }
-
-private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

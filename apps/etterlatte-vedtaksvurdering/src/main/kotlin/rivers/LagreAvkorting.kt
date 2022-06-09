@@ -11,7 +11,6 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class LagreAvkorting(
     rapidsConnection: RapidsConnection,
@@ -27,14 +26,13 @@ internal class LagreAvkorting(
             validate { it.requireKey("@avkorting") }
             validate { it.requireKey("soeker") }
             validate { it.requireKey("@avkorting") }
-            validate { it.requireKey("@avkorting") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val behandlingId = UUID.fromString(packet["id"].textValue())
+            val behandlingId = packet["id"].asUUID()
             val sakId = packet["sak"].toString()
             val avkorting = objectMapper.readValue<AvkortingsResultat>(packet["@avkorting"].toString())
 
@@ -49,11 +47,8 @@ internal class LagreAvkorting(
                 )
             }
             catch (e: Exception){
-                //TODO endre denne
-                println("spiser en melding fordi: " +e)
+                logger.warn("Kunne ikke oppdatere vedtak",e)
             }
 
         }
 }
-
-private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

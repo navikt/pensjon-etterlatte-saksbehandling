@@ -152,7 +152,7 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal motta kvittering fra oppdrag som er godkjent`() {
-        sendFattetVedtakEvent(FATTET_VEDTAK_1)
+        sendFattetVedtakEvent(ATTESTERT_VEDTAK)
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering())
 
         verify(timeout = TIMEOUT) {
@@ -187,7 +187,7 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal motta kvittering fra oppdrag som er godkjent men feiler fordi status for utbetaling er ugyldig`() {
-        sendFattetVedtakEvent(FATTET_VEDTAK_1)
+        sendFattetVedtakEvent(ATTESTERT_VEDTAK)
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering()) // setter status til GODKJENT
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering()) // forventer at status skal være SENDT
 
@@ -207,7 +207,7 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal motta kvittering fra oppdrag som har feilet`() {
-        sendFattetVedtakEvent(FATTET_VEDTAK_1)
+        sendFattetVedtakEvent(ATTESTERT_VEDTAK)
         simulerKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering())
 
         verify(timeout = TIMEOUT) {
@@ -253,7 +253,7 @@ class ApplicationIntegrationTest {
     }
 
     companion object {
-        val FATTET_VEDTAK_1 = readFile("/vedtak.json")
+        val ATTESTERT_VEDTAK = readFile("/vedtak.json")
         const val TIMEOUT: Long = 5000
     }
 }

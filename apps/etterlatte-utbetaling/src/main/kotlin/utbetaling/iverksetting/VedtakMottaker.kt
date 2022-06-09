@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory
 
 data class KunneIkkeLeseVedtakException(val e: Exception) : RuntimeException(e)
 
-const val EVENT_NAME_OPPDATERT = "utbetaling_oppdatert"
+const val EVENT_NAME_OPPDATERT = "UTBETALING:OPPDATERT"
 
 data class UtbetalingEvent(
     @JsonProperty("@event_name") val eventName: String = EVENT_NAME_OPPDATERT,
@@ -42,7 +42,7 @@ class VedtakMottaker(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event_name", "vedtak_fattet") }
+            validate { it.demandValue("@event_name", "VEDTAK:ATTESTERT") }
             validate { it.requireKey("@vedtak") }
             validate {
                 it.requireAny(

@@ -17,7 +17,7 @@ data class Foedselsnummer(val value: String)
 data class NavIdent(val value: String)
 
 enum class UtbetalingStatus {
-    SENDT, GODKJENT, GODKJENT_MED_FEIL, AVVIST, FEILET,
+    GODKJENT, GODKJENT_MED_FEIL, AVVIST, FEILET, SENDT, MOTTATT, INGEN_UTBETALINGSLINJER
 }
 
 enum class Utbetalingslinjetype {
@@ -40,7 +40,6 @@ data class Utbetaling(
     val sakId: SakId,
     val behandlingId: BehandlingId,
     val vedtakId: VedtakId,
-    val status: UtbetalingStatus,
     val opprettet: Tidspunkt,
     val endret: Tidspunkt,
     val avstemmingsnoekkel: Tidspunkt,
@@ -50,8 +49,12 @@ data class Utbetaling(
     val vedtak: Utbetalingsvedtak,
     val oppdrag: Oppdrag? = null,
     val kvittering: Kvittering? = null,
-    val utbetalingslinjer: List<Utbetalingslinje>
-)
+    val utbetalingslinjer: List<Utbetalingslinje>,
+    val utbetalingshendelser: List<Utbetalingshendelse>
+) {
+    fun status() =
+        utbetalingshendelser.minByOrNull { it.status }?.status ?: UtbetalingStatus.INGEN_UTBETALINGSLINJER
+}
 
 data class Utbetalingslinje(
     val id: UtbetalingslinjeId,
@@ -62,4 +65,11 @@ data class Utbetalingslinje(
     val sakId: SakId,
     val periode: PeriodeForUtbetaling,
     val beloep: BigDecimal? = null,
+)
+
+data class Utbetalingshendelse(
+    val id: UUID = UUID.randomUUID(),
+    val utbetalingId: UUID,
+    val tidspunkt: Tidspunkt = Tidspunkt.now(),
+    val status: UtbetalingStatus
 )

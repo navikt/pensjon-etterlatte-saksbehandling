@@ -1,7 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
 
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -47,8 +46,6 @@ class KvitteringMottaker(
     override fun onMessage(message: Message) {
         withLogContext {
             runBlocking {
-                delay(1000) // TODO race condition - kvittering kommer før utbetaling er lagret
-
                 var oppdragXml: String? = null
 
                 try {
@@ -114,10 +111,11 @@ class KvitteringMottaker(
     }
 
     private fun sendUtbetalingEvent(utbetaling: Utbetaling) =
-        rapidsConnection.publish(utbetaling.sakId.value.toString(),
+        rapidsConnection.publish(
+            utbetaling.sakId.value.toString(),
             UtbetalingEvent(
                 utbetalingResponse = UtbetalingResponse(
-                    status = utbetaling.status,
+                    status = utbetaling.status(),
                     vedtakId = utbetaling.vedtakId.value,
                     feilmelding = utbetaling.kvitteringFeilmelding()
                 )
@@ -125,7 +123,8 @@ class KvitteringMottaker(
         )
 
     private fun sendUtbetalingFeiletEvent(feilmelding: String, oppdrag: Oppdrag? = null) =
-        rapidsConnection.publish(oppdrag?.sakId() ?: "",
+        rapidsConnection.publish(
+            oppdrag?.sakId() ?: "",
             UtbetalingEvent(
                 utbetalingResponse = UtbetalingResponse(
                     status = UtbetalingStatus.FEILET,
@@ -137,7 +136,7 @@ class KvitteringMottaker(
 
     private fun Utbetaling.kvitteringFeilmelding() = when (this.kvittering?.alvorlighetsgrad) {
         "00" -> null
-        else ->  "${this.kvittering?.kode} ${this.kvittering?.beskrivelse}"
+        else -> "${this.kvittering?.kode} ${this.kvittering?.beskrivelse}"
     }
 
     companion object {

@@ -26,14 +26,15 @@ class UtbetalingService(
 ) {
     fun iverksettUtbetaling(vedtak: Utbetalingsvedtak): IverksettResultat {
         val utbetalingForVedtak = utbetalingDao.hentUtbetaling(vedtak.vedtakId)
-        val utbetalingslinjerForVedtak = utbetalingDao.hentUtbetalingslinjer(vedtak.pensjonTilUtbetaling)
+        val dupliserteUtbetalingslinjer =
+            utbetalingDao.hentDupliserteUtbetalingslinjer(vedtak.pensjonTilUtbetaling, vedtak.vedtakId)
 
         return when {
-            utbetalingForVedtak != null ->
+            utbetalingForVedtak != null && utbetalingForVedtak.status() != UtbetalingStatus.MOTTATT ->
                 UtbetalingForVedtakEksisterer(utbetalingForVedtak)
 
-            utbetalingslinjerForVedtak.isNotEmpty() ->
-                UtbetalingslinjerForVedtakEksisterer(utbetalingslinjerForVedtak)
+            dupliserteUtbetalingslinjer.isNotEmpty() ->
+                UtbetalingslinjerForVedtakEksisterer(dupliserteUtbetalingslinjer)
 
             else -> {
                 val utbetaling = UtbetalingMapper(
@@ -44,10 +45,18 @@ class UtbetalingService(
                 val foerstegangsbehandling = vedtak.behandling.type == BehandlingType.FORSTEGANGSBEHANDLING
                 val oppdrag = oppdragMapper.oppdragFraUtbetaling(utbetaling, foerstegangsbehandling)
 
+                utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
+
                 logger.info("Sender oppdrag for sakId=${vedtak.sak.id} med vedtakId=${vedtak.vedtakId} til oppdrag")
                 oppdragSender.sendOppdrag(oppdrag)
-
-                SendtTilOppdrag(utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag)))
+                utbetalingDao.nyUtbetalingshendelse(
+                    utbetaling.vedtakId.value,
+                    Utbetalingshendelse(
+                        utbetalingId = utbetaling.id,
+                        status = UtbetalingStatus.SENDT,
+                        tidspunkt = Tidspunkt.now(clock)
+                    )
+                ).let { SendtTilOppdrag(it) }
             }
         }
     }
@@ -57,23 +66,26 @@ class UtbetalingService(
 
         return when {
             utbetaling == null -> UtbetalingFinnesIkke(oppdrag.vedtakId())
-            utbetaling.status != UtbetalingStatus.SENDT -> UgyldigStatus(utbetaling.status)
+            utbetaling.status() != UtbetalingStatus.SENDT && utbetaling.status() != UtbetalingStatus.MOTTATT -> {
+                UgyldigStatus(
+                    utbetaling.status()
+                )
+            }
             else -> {
                 logger.info("Oppdaterer kvittering for oppdrag med vedtakId=${oppdrag.vedtakId()}")
-                val oppdatertUtbetaling = utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock))
+                val oppdatertUtbetaling = utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock), utbetaling.id)
                 KvitteringOppdatert(oppdatertUtbetaling)
             }
         }
     }
 
-    // TODO: sette inn kolonne i database som viser at kvittering er oppdatert manuelt?
-    fun settKvitteringManuelt(vedtakId: Long) = utbetalingDao.hentUtbetaling(vedtakId)?.let {
-        it.oppdrag?.apply {
+    fun settKvitteringManuelt(vedtakId: Long) = utbetalingDao.hentUtbetaling(vedtakId)?.let { utbetaling ->
+        utbetaling.oppdrag?.apply {
             mmel = Mmel().apply {
-                systemId = "231-OPPD" // TODO: en annen systemid her for å indikere manuell jobb?
+                systemId = "231-OPPD"
                 alvorlighetsgrad = "00"
             }
-        }.let { utbetalingDao.oppdaterKvittering(it!!, Tidspunkt.now(clock)) } // TODO
+        }?.let { oppdrag -> utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock), utbetaling.id) }
     }
 
     companion object {

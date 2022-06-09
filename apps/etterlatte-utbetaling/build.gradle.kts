@@ -14,6 +14,7 @@ dependencies {
     implementation("org.messaginghub:pooled-jms:2.0.5")
     implementation("com.github.navikt.tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon:1.4201aa")
     implementation("com.github.navikt.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon:1.4201aa")
+    implementation("com.github.navikt.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:2589.e85bf84")
 
     implementation("javax.xml.bind:jaxb-api:2.3.0")
     implementation("org.glassfish.jaxb:jaxb-runtime:2.3.2")
@@ -30,7 +31,7 @@ dependencies {
     testImplementation(Kotlinx.CoroutinesCore)
 
     testImplementation("org.testcontainers:testcontainers:1.16.3")
-    testImplementation("com.github.tomakehurst:wiremock:2.27.2")
+    testImplementation("com.github.tomakehurst:wiremock:2.33.2")
     testImplementation("org.testcontainers:junit-jupiter:1.16.3")
     testImplementation("org.testcontainers:postgresql:1.16.0")
 }

@@ -34,7 +34,6 @@ class UtbetalingMapper(
             vedtak.behandling.id.toUUID30()
         ),
         vedtakId = VedtakId(vedtak.vedtakId),
-        status = UtbetalingStatus.SENDT,
         opprettet = opprettet,
         endret = opprettet,
         avstemmingsnoekkel = opprettet,
@@ -42,7 +41,8 @@ class UtbetalingMapper(
         saksbehandler = NavIdent(vedtak.vedtakFattet.ansvarligSaksbehandler),
         attestant = NavIdent(vedtak.attestasjon.attestant),
         vedtak = vedtak,
-        utbetalingslinjer = utbetalingslinjer()
+        utbetalingslinjer = utbetalingslinjer(),
+        utbetalingshendelser = emptyList()
     )
 
     private fun utbetalingslinjer() = utbetalingsperioder.map {
@@ -76,7 +76,7 @@ class UtbetalingMapper(
         UtbetalingslinjeId(utbetalingsperioder[indeksForUtbetalingslinje(utbetalingslinjeId) - 1].id)
 
     private fun utbetalingslinjeIdForForrigeUtbetalingslinje() = tidligereUtbetalinger.filter {
-        it.status in listOf(
+        it.status() in listOf(
             UtbetalingStatus.GODKJENT,
             UtbetalingStatus.GODKJENT_MED_FEIL
         )

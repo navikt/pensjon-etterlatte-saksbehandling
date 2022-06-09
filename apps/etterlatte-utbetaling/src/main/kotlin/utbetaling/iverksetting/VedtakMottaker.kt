@@ -95,7 +95,6 @@ class VedtakMottaker(
         }
 
     private fun feilSkalKastesVidere(e: Exception): Boolean {
-        // TODO: håndtere PSQLException eller MQException?
         return e !is KunneIkkeLeseVedtakException
     }
 
@@ -115,10 +114,11 @@ class VedtakMottaker(
         context.publish(
             UtbetalingEvent(
                 utbetalingResponse = UtbetalingResponse(
-                    status = utbetaling.status,
+                    status = utbetaling.status(),
                     vedtakId = utbetaling.vedtakId.value
                 )
-            ).toJson())
+            ).toJson()
+        )
     }
 
     private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

@@ -42,7 +42,7 @@ internal class HentOpplysningerFraInntektskomponenten(
                 )
             ) {
                 val fnr = Foedselsnummer.of(packet["fnr"].asText())
-                val doedsdato = LocalDate.parse(packet["doedsdato"].toString())
+                val doedsdato = LocalDate.parse(packet["doedsdato"].asText())
                 val opplysninger = opplysningsBygger.byggOpplysninger(inntektsKomponentenService.hentInntektListe(fnr, doedsdato))
                 packet["opplysning"] = opplysninger
                 context.publish(packet.toJson())

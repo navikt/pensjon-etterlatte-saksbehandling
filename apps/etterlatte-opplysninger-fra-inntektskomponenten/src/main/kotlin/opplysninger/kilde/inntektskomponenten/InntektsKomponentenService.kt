@@ -9,6 +9,7 @@ import no.nav.etterlatte.InntektsKomponenten
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class InntektsKomponentenService(private val inntektskomponentenClient: HttpClient, private val url: String) :
     InntektsKomponenten {
@@ -21,8 +22,8 @@ class InntektsKomponentenService(private val inntektskomponentenClient: HttpClie
             HentInntektListeRequestBody(
                 InntektListeIdent(fnr.value, "NATURLIG_IDENT"),
                 "Etterlatteytelser",
-                doedsdato.minusYears(5).toString(),
-                doedsdato.toString(),
+                doedsdato.minusYears(5).format(DateTimeFormatter.ofPattern("yyyy-MM")).toString(),
+                doedsdato.format(DateTimeFormatter.ofPattern("yyyy-MM")).toString(),
                 "Etterlatteytelser"
             )
 

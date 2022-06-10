@@ -46,9 +46,5 @@ data class G(
     val dato: LocalDate,
     val grunnbeløp: Int,
     val grunnbeløpPerMåned: Int,
-    val gjennomsnittPerÅr: Int?,
     val omregningsfaktor: BigDecimal?,
-    val virkningstidspunktForMinsteinntekt: LocalDate?,
-
-    //fun sort()
 )

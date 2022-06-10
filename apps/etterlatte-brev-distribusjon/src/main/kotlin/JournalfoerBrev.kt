@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import journalpost.JournalpostService
+import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -21,7 +22,7 @@ internal class JournalfoerBrev(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", "BREV:DISTRIBUER") }
+            validate { it.demandValue("@event", BrevEventTypes.FERDIGSTILT.toString()) }
             validate { it.requireKey("@brevId", "@correlation_id", "payload") }
             validate { it.rejectKey("@bestillingId", "@journalpostResponse") }
         }.register(this)
@@ -48,6 +49,7 @@ internal class JournalfoerBrev(
     private fun RapidsConnection.svarSuksess(packet: JsonMessage, journalpostResponse: JournalpostResponse) {
         logger.info("Brev har blitt journalført. Svarer tilbake med bekreftelse.")
 
+        packet["@event"] = BrevEventTypes.JOURNALFOERT.toString()
         packet["@journalpostResponse"] = journalpostResponse.toJson()
 
         publish(packet.toJson())

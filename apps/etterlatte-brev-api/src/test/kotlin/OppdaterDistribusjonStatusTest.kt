@@ -4,6 +4,7 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.db.BrevRepository
+import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.toJson
@@ -26,7 +27,7 @@ class OppdaterDistribusjonStatusTest {
     @Test
     fun `Skal lagre ned journalpost-detaljer ved svar fra brev-distribusjon`() {
         val melding = JsonMessage.newMessage(mapOf(
-            "@event" to "BREV:DISTRIBUER",
+            "@event" to BrevEventTypes.JOURNALFOERT.toString(),
             "@brevId" to brevId,
             "@correlation_id" to UUID.randomUUID().toString(),
             "@journalpostResponse" to journalpostResponse.toJson()
@@ -46,7 +47,7 @@ class OppdaterDistribusjonStatusTest {
     fun `Skal lagre ned distribusjons-detaljer ved svar fra brev-distribusjon`() {
         val bestillingId = UUID.randomUUID().toString()
         val melding = JsonMessage.newMessage(mapOf(
-            "@event" to "BREV:DISTRIBUER",
+            "@event" to BrevEventTypes.DISTRIBUERT.toString(),
             "@brevId" to brevId,
             "@correlation_id" to UUID.randomUUID().toString(),
             "@journalpostResponse" to journalpostResponse.toJson(),

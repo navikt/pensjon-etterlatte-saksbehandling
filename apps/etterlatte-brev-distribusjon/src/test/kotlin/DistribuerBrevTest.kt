@@ -3,6 +3,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.DistribuerBrev
 import no.nav.etterlatte.distribusjon.DistribusjonServiceMock
+import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
@@ -34,7 +35,7 @@ class DistribuerBrevTest {
         )
         val melding = JsonMessage.newMessage(
             mapOf(
-                "@event" to "BREV:DISTRIBUER",
+                "@event" to BrevEventTypes.JOURNALFOERT.toString(),
                 "@brevId" to brevId,
                 "@correlation_id" to UUID.randomUUID().toString(),
                 "@journalpostResponse" to journalpostResponse.toJson(),
@@ -42,7 +43,7 @@ class DistribuerBrevTest {
         ))
         val inspector = inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        inspector.message(0).get("@event").asText() shouldBe "BREV:DISTRIBUER"
+        inspector.message(0).get("@event").asText() shouldBe BrevEventTypes.DISTRIBUERT.toString()
         inspector.message(0).get("@brevId").asLong() shouldBe brevId
         inspector.message(0).get("@bestillingId").asText() shouldNotBe null
     }

@@ -14,3 +14,11 @@ data class DistribusjonMelding(
     val brevKode: String,
     val journalfoerendeEnhet: String
 )
+
+enum class BrevEventTypes {
+    FERDIGSTILT, JOURNALFOERT, DISTRIBUERT;
+
+    override fun toString(): String {
+        return "BREV:$name"
+    }
+}

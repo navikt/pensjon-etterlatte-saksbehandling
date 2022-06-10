@@ -3,6 +3,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.JournalfoerBrev
+import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
@@ -33,7 +34,7 @@ class JournalfoerBrevTest {
         )
         val melding = JsonMessage.newMessage(
             mapOf(
-                "@event" to "BREV:DISTRIBUER",
+                "@event" to BrevEventTypes.FERDIGSTILT.toString(),
                 "@brevId" to distribusjonMelding.brevId,
                 "@correlation_id" to UUID.randomUUID().toString(),
                 "payload" to distribusjonMelding.toJson()
@@ -41,7 +42,7 @@ class JournalfoerBrevTest {
         )
         val inspector = inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        inspector.message(0).get("@event").asText() shouldBe "BREV:DISTRIBUER"
+        inspector.message(0).get("@event").asText() shouldBe BrevEventTypes.JOURNALFOERT.toString()
         inspector.message(0).get("@brevId").asLong() shouldBe distribusjonMelding.brevId
         objectMapper.readValue<JournalpostResponse>(inspector.message(0).get("@journalpostResponse").asText()).let {
             it.journalpostId shouldNotBe null

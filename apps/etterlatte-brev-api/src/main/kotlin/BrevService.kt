@@ -100,7 +100,7 @@ class BrevService(
 
             JsonMessage.newMessage(
                 mapOf(
-                    "@event" to "BREV:DISTRIBUER",
+                    "@event" to BrevEventTypes.FERDIGSTILT.toString(),
                     "@brevId" to it.brevId,
                     "@correlation_id" to correlationId,
                     "payload" to it.toJson()

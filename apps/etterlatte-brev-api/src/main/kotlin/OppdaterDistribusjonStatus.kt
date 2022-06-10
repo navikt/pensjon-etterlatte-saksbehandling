@@ -1,6 +1,8 @@
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.db.BrevRepository
+import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes.DISTRIBUERT
+import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes.JOURNALFOERT
 import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -18,7 +20,7 @@ internal class OppdaterDistribusjonStatus(rapidsConnection: RapidsConnection, pr
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", "BREV:DISTRIBUER") }
+            validate { it.demandAny("@event", listOf(JOURNALFOERT.toString(), DISTRIBUERT.toString())) }
             validate { it.requireKey("@brevId", "@correlation_id", "@journalpostResponse") }
             validate { it.interestedIn("@bestillingId") }
         }.register(this)
@@ -29,7 +31,7 @@ internal class OppdaterDistribusjonStatus(rapidsConnection: RapidsConnection, pr
             val brevId = packet["@brevId"].longValue()
             logger.info("Mottatt oppdatering fra brev-distribusjon for brev med id ${brevId}.")
 
-            if (packet["@bestillingId"].isTextual) {
+            if (packet["@event"].asText() == DISTRIBUERT.toString()) {
                 val bestillingId = packet["@bestillingId"].asText()
                 db.oppdaterStatus(brevId, Status.DISTRIBUERT, """{"bestillingId": "$bestillingId"}""")
                 db.setBestillingId(brevId, bestillingId)

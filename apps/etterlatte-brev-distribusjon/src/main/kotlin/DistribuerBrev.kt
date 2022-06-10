@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.distribusjon.DistribusjonService
+import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.distribusjon.BestillingID
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType
@@ -22,7 +23,7 @@ internal class DistribuerBrev(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", "BREV:DISTRIBUER") }
+            validate { it.demandValue("@event", BrevEventTypes.JOURNALFOERT.toString()) }
             validate { it.requireKey("@brevId", "payload", "@correlation_id", "@journalpostResponse") }
             validate { it.rejectKey("@bestillingId") }
         }.register(this)
@@ -61,6 +62,7 @@ internal class DistribuerBrev(
     private fun RapidsConnection.svarSuksess(packet: JsonMessage, bestillingId: BestillingID) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
 
+        packet["@event"] = BrevEventTypes.DISTRIBUERT.toString()
         packet["@bestillingId"] = bestillingId
 
         publish(packet.toJson())

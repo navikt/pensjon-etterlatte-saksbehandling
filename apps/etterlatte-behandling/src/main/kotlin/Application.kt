@@ -19,6 +19,8 @@ import no.nav.etterlatte.behandling.*
 import no.nav.etterlatte.database.DatabaseContext
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.oppgave.OppgaveDao
+import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakRoutes
 import org.slf4j.event.Level
 import java.util.*
@@ -74,6 +76,7 @@ fun Application.module(beanFactory: BeanFactory){
             attachContekst(ds.dataSource)
             sakRoutes(beanFactory.sakService())
             behandlingRoutes(beanFactory.behandlingService())
+            oppgaveRoutes(OppgaveDao(ds.dataSource))
         }
 
     }

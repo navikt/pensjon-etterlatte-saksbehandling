@@ -13,6 +13,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 internal class HentOpplysningerFraInntektskomponenten(
     rapidsConnection: RapidsConnection,
@@ -41,7 +42,7 @@ internal class HentOpplysningerFraInntektskomponenten(
                 )
             ) {
                 val fnr = Foedselsnummer.of(packet["fnr"].asText())
-                val doedsdato = packet["doedsdato"].toString()
+                val doedsdato = LocalDate.parse(packet["doedsdato"].toString())
                 val opplysninger = opplysningsBygger.byggOpplysninger(inntektsKomponentenService.hentInntektListe(fnr, doedsdato))
                 packet["opplysning"] = opplysninger
                 context.publish(packet.toJson())

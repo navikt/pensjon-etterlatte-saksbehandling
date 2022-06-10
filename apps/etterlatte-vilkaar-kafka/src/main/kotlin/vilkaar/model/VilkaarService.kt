@@ -6,6 +6,7 @@ import no.nav.etterlatte.barnepensjon.*
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.inntekt.PensjonUforeOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -30,6 +31,8 @@ class VilkaarService {
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
+        val pensjonUfore = finnOpplysning<PensjonUforeOpplysning>(opplysninger, Opplysningstyper.PENSJON_UFORE_V1)
+
 
         val vilkaar = listOf(
             vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, soekerPdl, avdoedPdl),
@@ -37,7 +40,8 @@ class VilkaarService {
             vilkaarAvdoedesMedlemskap(
                 Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
                 avdoedSoeknad,
-                avdoedPdl
+                avdoedPdl,
+                pensjonUfore
             ),
             vilkaarBarnetsMedlemskap(
                 Vilkaartyper.BARNETS_MEDLEMSKAP,

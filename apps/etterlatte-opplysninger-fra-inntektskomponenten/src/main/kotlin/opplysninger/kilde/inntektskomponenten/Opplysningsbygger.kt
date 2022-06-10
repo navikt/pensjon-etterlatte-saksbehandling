@@ -3,10 +3,15 @@ package no.nav.etterlatte.opplysninger.kilde.inntektskomponenten
 import no.nav.etterlatte.OpplysningsBygger
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.inntekt.ArbeidsInntektMaaned
+import no.nav.etterlatte.libs.common.inntekt.Inntekt
+import no.nav.etterlatte.libs.common.inntekt.InntektsBeskrivelse
+import no.nav.etterlatte.libs.common.inntekt.PensjonUforeOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import java.time.Instant
 import java.util.*
+
+
 
 class OpplysningsByggerService : OpplysningsBygger {
 
@@ -15,13 +20,14 @@ class OpplysningsByggerService : OpplysningsBygger {
     ): List<Grunnlagsopplysning<out Any>> {
 
         // TODO: sjekk om det finnes inntekt for uføretrygd eller alderspensjon i løpet av de siste fem år
-        var uforetrygd = false
-        var alderspensjon = false
+        val uforetrygd: List<Inntekt>
+        val alderspensjon: List<Inntekt>
         if(inntektsKomponentenResponse.arbeidsInntektMaaned != null) {
             uforetrygd = harFaattUforetrygd(inntektsKomponentenResponse.arbeidsInntektMaaned)
             alderspensjon = harFaatAlderspensjon(inntektsKomponentenResponse.arbeidsInntektMaaned)
             return listOf(lagOpplysning(Opplysningstyper.PENSJON_UFORE_V1,
-                PensjonUforeOpplysning(uforetrygd, alderspensjon, inntektsKomponentenResponse.arbeidsInntektMaaned)))
+                PensjonUforeOpplysning(uforetrygd, alderspensjon, inntektsKomponentenResponse.arbeidsInntektMaaned)
+            ))
         }
 
         throw Exception("Ingen grunnlagsopplysninger tilgjengelig for avdød")
@@ -29,27 +35,30 @@ class OpplysningsByggerService : OpplysningsBygger {
     }
 
     // TODO - simpel sjekk. Vil vi ha ut noe mer?
-    fun harFaatAlderspensjon(arbeidsInntektListe: List<ArbeidsInntektMaaned>): Boolean {
+    fun harFaatAlderspensjon(arbeidsInntektListe: List<ArbeidsInntektMaaned>): List<Inntekt> {
+        val inntektListe = arrayListOf<Inntekt>()
+
         arbeidsInntektListe.forEach { inntektMaaned ->
             inntektMaaned.arbeidsInntektInformasjon.inntektListe.forEach{ inntekt ->
-                if(inntekt.inntektType === "ufoeretrygd") {
-                    return true
+                if(inntekt.beskrivelse == InntektsBeskrivelse.ALDERSPENSJON) {
+                    inntektListe.add(inntekt)
                 }
             }
         }
-        return false
+        return inntektListe
     }
 
     // TODO - simpel sjekk. Vil vi ha ut noe mer?
-    fun harFaattUforetrygd(arbeidsInntektListe: List<ArbeidsInntektMaaned>): Boolean {
+    fun harFaattUforetrygd(arbeidsInntektListe: List<ArbeidsInntektMaaned>): List<Inntekt> {
+        val inntektListe = arrayListOf<Inntekt>()
         arbeidsInntektListe.forEach { inntektMaaned ->
             inntektMaaned.arbeidsInntektInformasjon.inntektListe.forEach{ inntekt ->
-                if(inntekt.inntektType === "alderspensjon") {
-                    return true
+                if(inntekt.beskrivelse == InntektsBeskrivelse.UFORETRYGD) {
+                    inntektListe.add(inntekt)
                 }
             }
         }
-        return false
+        return inntektListe
     }
 
 }
@@ -64,4 +73,3 @@ fun <T> lagOpplysning(opplysningsType: Opplysningstyper, opplysning: T): Grunnla
     )
 }
 
-data class PensjonUforeOpplysning(val mottattUforetrygd: Boolean, val mottattAlderspensjon: Boolean, val grunnlag: List<ArbeidsInntektMaaned>)

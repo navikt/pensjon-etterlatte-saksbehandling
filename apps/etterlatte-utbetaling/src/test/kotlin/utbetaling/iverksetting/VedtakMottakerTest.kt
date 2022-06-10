@@ -35,7 +35,7 @@ internal class VedtakMottakerTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
-            assertEquals(EVENT_NAME_OPPDATERT, event.eventName)
+            assertEquals(EVENT_NAME_OPPDATERT, event.event)
             assertEquals(utbetaling.status, event.utbetalingResponse.status)
             assertEquals(utbetaling.vedtakId.value, event.utbetalingResponse.vedtakId)
         }
@@ -52,7 +52,7 @@ internal class VedtakMottakerTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
-            assertEquals(EVENT_NAME_OPPDATERT, event.eventName)
+            assertEquals(EVENT_NAME_OPPDATERT, event.event)
             assertEquals(UtbetalingStatus.FEILET, event.utbetalingResponse.status)
             assertEquals(utbetaling.vedtakId.value, event.utbetalingResponse.vedtakId)
             assertEquals(
@@ -76,7 +76,7 @@ internal class VedtakMottakerTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
-            assertEquals(EVENT_NAME_OPPDATERT, event.eventName)
+            assertEquals(EVENT_NAME_OPPDATERT, event.event)
             assertEquals(UtbetalingStatus.FEILET, event.utbetalingResponse.status)
             assertEquals(1, event.utbetalingResponse.vedtakId)
             assertEquals(
@@ -93,7 +93,7 @@ internal class VedtakMottakerTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
-            assertEquals(EVENT_NAME_OPPDATERT, event.eventName)
+            assertEquals(EVENT_NAME_OPPDATERT, event.event)
             assertEquals(UtbetalingStatus.FEILET, event.utbetalingResponse.status)
             assertEquals(1, event.utbetalingResponse.vedtakId)
             assertEquals(

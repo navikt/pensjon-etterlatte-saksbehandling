@@ -17,6 +17,7 @@ interface BehandlingService {
     fun slettBehandlingerISak(sak: Long)
     fun avbrytBehandling(behandling: UUID): Behandling
     fun grunnlagISakEndret(sak: Long)
+    fun registrerVedtakHendelse(behandling: UUID, hendelse: String)
 }
 
 class RealBehandlingService(
@@ -87,6 +88,10 @@ class RealBehandlingService(
                 }
             }
         }
+    }
+
+    override fun registrerVedtakHendelse(behandling: UUID, hendelse: String) {
+        inTransaction { behandlingFactory.hent(behandling).registrerVedtakHendelse(hendelse)}
     }
 
 }

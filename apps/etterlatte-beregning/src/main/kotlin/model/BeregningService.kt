@@ -35,19 +35,26 @@ class BeregningService {
         )
     }
 
-    //TODO finne en smooth måte å beregne beregningsperioder
     private fun finnBeregningsperioder(virkFOM: LocalDate): List<Beregningsperiode> {
         val grunnbeloep = Grunnbeloep.hentGforPeriode(virkFOM)
         val perioder = grunnbeloep.map { Pair(it.dato, Grunnbeloep.beregnTom(it)) }
+
 
         return perioder.map {
             (Beregningsperiode(
                 delytelsesId = "BP",
                 type = Beregningstyper.GP,
-                datoFOM = it.first.atStartOfDay(),
+                datoFOM = beregnFoersteFom(it.first,virkFOM).atStartOfDay(),
                 datoTOM = it.second?.atStartOfDay(),
                 belop = Grunnbeloep.hentGjeldendeG(it.first).grunnbeløpPerMåned
             ))
+        }
+    }
+    private fun beregnFoersteFom (first: LocalDate, virkFOM: LocalDate ): LocalDate {
+        if(first.isBefore(virkFOM)) {
+            return virkFOM
+        } else {
+            return first
         }
     }
 

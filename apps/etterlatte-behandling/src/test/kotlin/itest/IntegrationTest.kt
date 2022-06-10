@@ -149,6 +149,23 @@ class ApplicationTest {
                 assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving?.resultat)
 
             }
+            handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {
+                addAuthSaksbehandler()
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.response.status())
+            }
+            handleRequest(HttpMethod.Get, "/behandlinger/$behandlingId") {
+                addAuthSaksbehandler()
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.response.status())
+                val behandling: Behandling = (objectMapper.readValue(it.response.content!!))
+                assertNotNull(behandling.id)
+                assertEquals("FATTET_VEDTAK", behandling.status?.name)
+
+            }
+
         }
 
         beans.behandlingHendelser().nyHendelse.close()

@@ -32,7 +32,7 @@ class Grunnbeloep {
 
         //TODO virker denna?
         fun beregnTom(g: G): LocalDate? {
-            return gListe.grunnbeløp.sortedBy { it.dato }.zipWithNext().find { it.first.dato == g.dato }?.second?.dato
+            return gListe.grunnbeløp.sortedBy { it.dato }.zipWithNext().find { it.first.dato == g.dato }?.second?.dato?.minusDays(1)
         }
     }
 }
@@ -46,9 +46,5 @@ data class G(
     val dato: LocalDate,
     val grunnbeløp: Int,
     val grunnbeløpPerMåned: Int,
-    val gjennomsnittPerÅr: Int?,
     val omregningsfaktor: BigDecimal?,
-    val virkningstidspunktForMinsteinntekt: LocalDate?,
-
-    //fun sort()
 )

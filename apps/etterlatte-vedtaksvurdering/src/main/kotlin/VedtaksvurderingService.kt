@@ -151,6 +151,24 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
 
     }
 
+    fun underkjennVedtakSaksbehandler(sakId: String, behandlingId: UUID, saksbehandler: String, kommentar: String, valgtBegrunnelse: String) {
+        val vedtak = requireNotNull( hentVedtak(sakId, behandlingId))
+        rapid.get().publish( vedtak.sakId,
+            newMessage(
+                mapOf(
+                    "@event" to "SAKSBEHANDLER:ATTESTER_VEDTAK",
+                    "@sakId" to sakId.toLong(),
+                    "@vedtakId" to vedtak.id,
+                    "@behandlingId" to behandlingId.toString(),
+                    "@saksbehandler" to saksbehandler,
+                    "@valgtBegrunnelse" to valgtBegrunnelse,
+                    "@kommentar" to kommentar,
+                )
+            ).toJson()
+        )
+
+    }
+
     fun fattVedtak(sakId: String, behandlingId: UUID, saksbehandler: String): no.nav.etterlatte.domene.vedtak.Vedtak {
         requireNotNull( hentFellesVedtak(sakId, behandlingId)).also {
             require(it.vedtakFattet == null)
@@ -158,8 +176,8 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
             require(it.vilkaarsvurdering != null)
             require(it.beregning != null)
             require(it.avkorting != null)
+            repository.fattVedtak(saksbehandler, sakId, it.vedtakId, behandlingId)
         }
-        repository.fattVedtak(saksbehandler, sakId, behandlingId)
         return requireNotNull( hentFellesVedtak(sakId, behandlingId))
     }
 
@@ -173,6 +191,15 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
         return requireNotNull( hentFellesVedtak(sakId, behandlingId))
 
     }
+    fun underkjennVedtak(sakId: String, behandlingId: UUID, saksbehandler: String, kommentar: String, valgtBegrunnelse: String) {
+        val vedtak = requireNotNull( hentFellesVedtak(sakId, behandlingId)).also {
+            require(it.vedtakFattet != null)
+            require(it.attestasjon == null)
+        }
+        repository.underkjennVedtak(saksbehandler, sakId, behandlingId, vedtak.vedtakId, kommentar, valgtBegrunnelse)
+
+    }
+
 
     fun utbetalingsperioderFraVedtak(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak): List<Utbetalingsperiode> {
         if(vedtak.type != VedtakType.INNVILGELSE) return listOf(Utbetalingsperiode(0, vedtak.virk.copy(tom = null), null, UtbetalingsperiodeType.OPPHOER))

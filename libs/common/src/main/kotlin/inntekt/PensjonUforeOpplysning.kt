@@ -3,7 +3,6 @@ package no.nav.etterlatte.libs.common.inntekt
 data class PensjonUforeOpplysning(
     val mottattUforetrygd: List<Inntekt>,
     val mottattAlderspensjon: List<Inntekt>,
-    val grunnlag: List<ArbeidsInntektMaaned>
     )
 
 

@@ -26,12 +26,11 @@ class OpplysningsByggerService : OpplysningsBygger {
             uforetrygd = harFaattUforetrygd(inntektsKomponentenResponse.arbeidsInntektMaaned)
             alderspensjon = harFaatAlderspensjon(inntektsKomponentenResponse.arbeidsInntektMaaned)
             return listOf(lagOpplysning(Opplysningstyper.PENSJON_UFORE_V1,
-                PensjonUforeOpplysning(uforetrygd, alderspensjon, inntektsKomponentenResponse.arbeidsInntektMaaned)
+                PensjonUforeOpplysning(uforetrygd, alderspensjon)
             ))
         }
 
-        throw Exception("Ingen grunnlagsopplysninger tilgjengelig for avdød")
-
+        return emptyList()
     }
 
     // TODO - simpel sjekk. Vil vi ha ut noe mer?

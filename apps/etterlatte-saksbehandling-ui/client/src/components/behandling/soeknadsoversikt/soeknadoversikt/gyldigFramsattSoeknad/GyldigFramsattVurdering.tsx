@@ -6,7 +6,7 @@ import {
 import { format } from 'date-fns'
 import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
 import { mapGyldighetstyperTilTekst } from '../../utils'
-import { Title, Undertekst, Wrapper } from './styled'
+import { VurderingsContainer, VurderingsTitle, Undertekst } from '../../styled'
 
 export const GyldigFramsattVurdering = ({
   gyldigFramsatt,
@@ -35,15 +35,15 @@ export const GyldigFramsattVurdering = ({
   const vurderingstekst = hentTekst()
 
   return (
-    <Wrapper>
+    <VurderingsContainer>
       <div>{gyldigFramsatt.resultat && <GyldighetIcon status={gyldigFramsatt.resultat} large={true} />}</div>
       <div>
-        <Title>{tittel}</Title>
+        <VurderingsTitle>{tittel}</VurderingsTitle>
         <Undertekst gray={true}>Automatisk {format(new Date(gyldigFramsatt.vurdertDato), 'dd.MM.yyyy')}</Undertekst>
         {gyldigFramsatt.resultat !== VurderingsResultat.OPPFYLT && (
           <Undertekst gray={false}>{vurderingstekst}</Undertekst>
         )}
       </div>
-    </Wrapper>
+    </VurderingsContainer>
   )
 }

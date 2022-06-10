@@ -1,10 +1,9 @@
-import styled from 'styled-components'
 import { GyldigFramsattVurdering } from './GyldigFramsattVurdering'
 import { Foreldreansvar } from './Foreldreansvar'
 import { Innsender } from './Innsender'
 import { Verge } from './Verge'
-import { InfoWrapper } from '../Soeknadsoversikt'
 import { GyldigFramsattType, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
+import { InfobokserWrapper, Header, VurderingsWrapper, SoeknadOversiktWrapper } from '../../styled'
 
 export const OversiktGyldigFramsatt: React.FC<any> = ({ gyldigFramsatt }) => {
   const innsenderHarForeldreansvar = gyldigFramsatt.vurderinger.find(
@@ -18,37 +17,20 @@ export const OversiktGyldigFramsatt: React.FC<any> = ({ gyldigFramsatt }) => {
   return (
     <>
       <Header>Gyldig fremsatt</Header>
-      <Wrapper>
-        <InfoWrapper>
+      <SoeknadOversiktWrapper>
+        <InfobokserWrapper>
           <Innsender innsenderErForelder={innsenderErForelder} />
           <Foreldreansvar innsenderHarForeldreansvar={innsenderHarForeldreansvar} />
           <Verge />
-        </InfoWrapper>
-        <div className="soeknadGyldigFremsatt">
+        </InfobokserWrapper>
+        <VurderingsWrapper>
           <GyldigFramsattVurdering
             gyldigFramsatt={gyldigFramsatt}
             innsenderErForelder={innsenderErForelder}
             innsenderHarForeldreansvar={innsenderHarForeldreansvar}
           />
-        </div>
-      </Wrapper>
+        </VurderingsWrapper>
+      </SoeknadOversiktWrapper>
     </>
   )
 }
-
-export const Wrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-
-  .soeknadGyldigFremsatt {
-    margin-right: 2em;
-  }
-`
-
-export const Header = styled.div`
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 1em;
-  margin-top: 2em;
-`

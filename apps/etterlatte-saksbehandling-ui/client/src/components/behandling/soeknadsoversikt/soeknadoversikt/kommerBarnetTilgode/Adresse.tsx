@@ -1,41 +1,36 @@
-import { Label } from '@navikt/ds-react'
-import { DetailWrapper, WarningIconWrapper } from '../../styled'
-import { WarningIcon } from '../../../../../shared/icons/warningIcon'
-import { VurderingsResultat, IVilkaarsproving } from '../../../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat, IVilkaarResultat, VilkaarsType } from '../../../../../store/reducers/BehandlingReducer'
+import { OversiktElement } from '../OversiktElement'
+import { hentBarnUtlandsadresseTekst, hentSammeAdresseSomAvdoedTekst, hentSammeAdresseTekst } from '../../utils'
 
 export const Adresse = ({
-  gjenlevendeOgSoekerLikAdresse,
+  kommerSoekerTilgodeVurdering,
 }: {
-  gjenlevendeOgSoekerLikAdresse: IVilkaarsproving | undefined
+  kommerSoekerTilgodeVurdering: IVilkaarResultat | undefined
 }) => {
-  return (
-    <DetailWrapper>
-      {gjenlevendeOgSoekerLikAdresse?.resultat === VurderingsResultat.OPPFYLT && (
-        <div>
-          <Label size="small">Adresse</Label>
-          <div className="text">Gjenlevende og barnet bor på samme adresse</div>
-        </div>
-      )}
+  const navn = undefined
+  const label = 'Adresse'
+  const tekst = settTekst()
+  const erOppfylt = kommerSoekerTilgodeVurdering?.resultat === VurderingsResultat.OPPFYLT
 
-      {gjenlevendeOgSoekerLikAdresse?.resultat === VurderingsResultat.IKKE_OPPFYLT && (
-        <div>
-          <Label size="small" className="labelWrapperWithIcon">
-            Adresse
-          </Label>
-          <span className="warningText">Barnet bor ikke på samme adresse som gjenlevende forelder</span>
-        </div>
-      )}
-      {gjenlevendeOgSoekerLikAdresse?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING && (
-        <div>
-          <Label size="small" className="labelWrapperWithIcon">
-            <WarningIconWrapper>
-              <WarningIcon />
-            </WarningIconWrapper>
-            Adresse
-          </Label>
-          <span className="warningText">Mangler info</span>
-        </div>
-      )}
-    </DetailWrapper>
-  )
+  function settTekst(): string {
+    const sammeAdresse = kommerSoekerTilgodeVurdering?.vilkaar.find(
+      (vilkaar) => vilkaar.navn === VilkaarsType.SAMME_ADRESSE
+    )
+    const barnIngenUtland = kommerSoekerTilgodeVurdering?.vilkaar.find(
+      (vilkaar) => vilkaar.navn === VilkaarsType.BARN_INGEN_OPPGITT_UTLANDSADRESSE
+    )
+    const sammeAdresseAvdoed = kommerSoekerTilgodeVurdering?.vilkaar.find(
+      (vilkaar) => vilkaar.navn === VilkaarsType.BARN_BOR_PAA_AVDOEDES_ADRESSE
+    )
+
+    const sammeAdresseSvar = hentSammeAdresseTekst(sammeAdresse?.resultat)
+    const barnUtlandsadresseSvar = hentBarnUtlandsadresseTekst(barnIngenUtland?.resultat)
+    const sammeAdresseAvdoedSvar = hentSammeAdresseSomAvdoedTekst(sammeAdresseAvdoed?.resultat)
+
+    let svar = sammeAdresseSvar + barnUtlandsadresseSvar
+    svar = sammeAdresse?.resultat === VurderingsResultat.IKKE_OPPFYLT ? svar + sammeAdresseAvdoedSvar : svar
+    return svar
+  }
+
+  return <OversiktElement navn={navn} label={label} tekst={tekst} erOppfylt={erOppfylt} />
 }

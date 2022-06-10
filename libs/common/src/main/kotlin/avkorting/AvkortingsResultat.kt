@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.avkorting
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 //TODO denne klassen må gås igjennom
@@ -29,8 +30,8 @@ data class AvkortingsResultat(
 data class Avkortingsperiode(
     val avkortingsId: String,
     val type: Avkortingstyper,
-    val datoFOM: LocalDateTime,
-    val datoTOM: LocalDateTime?,
+    val datoFOM: YearMonth,
+    val datoTOM: YearMonth?,
     val belop: Int
 )
 

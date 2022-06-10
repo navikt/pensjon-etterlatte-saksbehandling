@@ -107,10 +107,10 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
                 emptyList(), //Ikke lenger aktuell
                 it.vilkaarsResultat, //Bør periodiseres
                 BilagMedSammendrag(objectMapper.valueToTree(it.beregningsResultat) as ObjectNode, it.beregningsResultat?.beregningsperioder?.map { Beregningsperiode(Periode(
-                    YearMonth.from(it.datoFOM), it.datoTOM?.takeIf { it.isBefore(LocalDateTime.MAX) }?.let(YearMonth::from)), BigDecimal.valueOf(it.belop.toLong())
+                    YearMonth.from(it.datoFOM), it.datoTOM?.takeIf { it.isBefore(YearMonth.from(LocalDateTime.MAX)) }?.let(YearMonth::from)), BigDecimal.valueOf(it.belop.toLong())
                 ) }?: emptyList()), // sammendraget bør lages av beregning
                 BilagMedSammendrag(objectMapper.valueToTree(it.avkortingsResultat) as ObjectNode, it.avkortingsResultat?.beregningsperioder?.map { Beregningsperiode(Periode(
-                    YearMonth.from(it.datoFOM), it.datoTOM?.takeIf { it.isBefore(LocalDateTime.MAX) }?.let(YearMonth::from)), BigDecimal.valueOf(it.belop.toLong())
+                    YearMonth.from(it.datoFOM), it.datoTOM?.takeIf { it.isBefore(YearMonth.from(LocalDateTime.MAX)) }?.let(YearMonth::from)), BigDecimal.valueOf(it.belop.toLong())
                 ) }?: emptyList()), // sammendraget bør lages av avkorting,
                 repository.hentUtbetalingsPerioder(it.id),
                 it.saksbehandlerId?.let { ansvarligSaksbehadnlier -> VedtakFattet(ansvarligSaksbehadnlier, "0000", it.datoFattet?.atZone(

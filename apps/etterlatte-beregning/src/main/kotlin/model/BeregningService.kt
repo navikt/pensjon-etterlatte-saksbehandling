@@ -8,8 +8,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 
@@ -17,7 +17,7 @@ class BeregningService {
     private val logger = LoggerFactory.getLogger(BeregningService::class.java)
 
 
-    fun beregnResultat(opplysninger: List<VilkaarOpplysning<ObjectNode>>, virkFOM: LocalDate): BeregningsResultat {
+    fun beregnResultat(opplysninger: List<VilkaarOpplysning<ObjectNode>>, virkFOM: YearMonth): BeregningsResultat {
         logger.info("Leverer en fake beregning")
 
 
@@ -35,7 +35,7 @@ class BeregningService {
         )
     }
 
-    private fun finnBeregningsperioder(virkFOM: LocalDate): List<Beregningsperiode> {
+    private fun finnBeregningsperioder(virkFOM: YearMonth): List<Beregningsperiode> {
         val grunnbeloep = Grunnbeloep.hentGforPeriode(virkFOM)
         val perioder = grunnbeloep.map { Pair(it.dato, Grunnbeloep.beregnTom(it)) }
 
@@ -44,17 +44,17 @@ class BeregningService {
             (Beregningsperiode(
                 delytelsesId = "BP",
                 type = Beregningstyper.GP,
-                datoFOM = beregnFoersteFom(it.first,virkFOM).atStartOfDay(),
-                datoTOM = it.second?.atStartOfDay(),
+                datoFOM = beregnFoersteFom(it.first,virkFOM),
+                datoTOM = it.second,
                 belop = Grunnbeloep.hentGjeldendeG(it.first).grunnbeløpPerMåned
             ))
         }
     }
-    private fun beregnFoersteFom (first: LocalDate, virkFOM: LocalDate ): LocalDate {
-        if(first.isBefore(virkFOM)) {
-            return virkFOM
+    private fun beregnFoersteFom (first: YearMonth, virkFOM: YearMonth ): YearMonth {
+        return if(first.isBefore(virkFOM)) {
+            virkFOM
         } else {
-            return first
+            first
         }
     }
 

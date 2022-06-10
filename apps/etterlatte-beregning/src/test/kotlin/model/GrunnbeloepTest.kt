@@ -22,4 +22,5 @@ class GrunnbeloepTest {
         Assertions.assertEquals(grunnbeloep.size, 2)
     }
 
+
 }

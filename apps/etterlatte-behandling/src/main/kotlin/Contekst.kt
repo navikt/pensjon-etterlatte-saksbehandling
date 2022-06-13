@@ -39,7 +39,7 @@ class Saksbehandler(identifiedBy: TokenValidationContext): ExternalUser(identifi
     }
 
     fun harRolleSaksbehandler(): Boolean{
-        return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim("groups", "0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e")
+        return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim("groups", "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf")
     }
     fun harRolleAttestant(): Boolean{
         return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim("groups", "63f46f74-84a8-4d1c-87a8-78532ab3ae60")

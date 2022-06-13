@@ -16,8 +16,8 @@ fun Route.sakRoutes(sakService: SakService){
         call.respond(inTransaction { sakService.finnSak(requireNotNull(call.parameters["id"]).toLong()) } ?: HttpStatusCode.NotFound)
     }
     delete("/saker/{id}/") {
-        sakService.slettSak(requireNotNull(call.parameters["id"]).toLong())
-        call.respond(inTransaction { sakService.slettSak(requireNotNull(call.parameters["id"]).toLong()) })
+        no.nav.etterlatte.sak.inTransaction {sakService.slettSak(requireNotNull(call.parameters["id"]).toLong())}
+        call.respond(HttpStatusCode.OK)
     }
     route("personer/{id}"){
         get("saker") {

@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{ image }}
+  image: docker.pkg.github.com/navikt/pensjon-etterlatte-saksbehandling/etterlatte-saksbehandling-ui:6c7de1657b6b2cf538c6489982e94abc080dfcd9
   port: 8080
   replicas:
     min: 1
@@ -21,7 +21,7 @@ spec:
       allowAllUsers: false
       claims:
         groups:
-          - id: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e # Required for authorization
+          - id: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf # Required for authorization
         extra:
           - NAVident
     sidecar:

@@ -5,7 +5,6 @@ import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.behandling.sakId
 
 fun Route.sakRoutes(sakService: SakService){
     get("/saker") {
@@ -16,7 +15,7 @@ fun Route.sakRoutes(sakService: SakService){
         call.respond(inTransaction { sakService.finnSak(requireNotNull(call.parameters["id"]).toLong()) } ?: HttpStatusCode.NotFound)
     }
     delete("/saker/{id}/") {
-        sakService.slettSak(sakId)
+        sakService.slettSak(requireNotNull(call.parameters["id"]).toLong())
         call.respond(HttpStatusCode.OK)
     }
     route("personer/{id}"){

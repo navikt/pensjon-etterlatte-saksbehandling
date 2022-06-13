@@ -8,6 +8,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.utbetaling
 import no.nav.etterlatte.utbetaling.utbetalingMedOpphoer
+import no.nav.etterlatte.utbetaling.utbetalingshendelse
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.AksjonType
 import no.nav.virksomhet.tjenester.avstemming.meldinger.v1.Fortegn
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -28,7 +29,8 @@ internal class AvstemmingsdataMapperTest {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
 
-        val utbetalinger = listOf(utbetaling(status = UtbetalingStatus.FEILET))
+        val utbetalinger =
+            listOf(utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))))
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
@@ -46,9 +48,9 @@ internal class AvstemmingsdataMapperTest {
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(
-            utbetaling(status = UtbetalingStatus.FEILET),
-            utbetaling(status = UtbetalingStatus.FEILET),
-            utbetaling(status = UtbetalingStatus.FEILET),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
@@ -69,9 +71,9 @@ internal class AvstemmingsdataMapperTest {
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(
-            utbetaling(status = UtbetalingStatus.FEILET),
-            utbetaling(status = UtbetalingStatus.FEILET),
-            utbetaling(status = UtbetalingStatus.FEILET),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
@@ -96,11 +98,11 @@ internal class AvstemmingsdataMapperTest {
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(
-            utbetaling(status = UtbetalingStatus.SENDT),
-            utbetaling(status = UtbetalingStatus.GODKJENT),
-            utbetaling(status = UtbetalingStatus.GODKJENT_MED_FEIL),
-            utbetaling(status = UtbetalingStatus.AVVIST),
-            utbetaling(status = UtbetalingStatus.FEILET),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.SENDT))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT_MED_FEIL))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
@@ -136,14 +138,14 @@ internal class AvstemmingsdataMapperTest {
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(
-            utbetaling(status = UtbetalingStatus.GODKJENT),
-            utbetaling(status = UtbetalingStatus.GODKJENT),
-            utbetaling(status = UtbetalingStatus.GODKJENT_MED_FEIL),
-            utbetaling(status = UtbetalingStatus.AVVIST),
-            utbetaling(status = UtbetalingStatus.AVVIST),
-            utbetaling(status = UtbetalingStatus.AVVIST),
-            utbetaling(status = UtbetalingStatus.SENDT),
-            utbetaling(status = UtbetalingStatus.FEILET),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT_MED_FEIL))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.SENDT))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
         )
         val avstemmingsdataMapper = AvstemmingsdataMapper(
             utbetalinger = utbetalinger, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = UUIDBase64()

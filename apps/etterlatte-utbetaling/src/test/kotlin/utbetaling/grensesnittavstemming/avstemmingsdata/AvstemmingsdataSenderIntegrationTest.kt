@@ -6,6 +6,7 @@ import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.UUIDBase64
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.utbetaling
+import no.nav.etterlatte.utbetaling.utbetalingshendelse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
@@ -43,14 +44,14 @@ internal class AvstemmingsdataSenderIntegrationTest {
     }
 
     @Test
-    fun `skal sende avstemmingsmeldinger på køen`() {
+    fun `skal sende avstemmingsmeldinger på koeen`() {
         val fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS))
         val til = Tidspunkt.now()
 
         val utbetalinger = listOf(
-            utbetaling(status = UtbetalingStatus.FEILET),
-            utbetaling(status = UtbetalingStatus.FEILET),
-            utbetaling(status = UtbetalingStatus.FEILET)
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
         )
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
         val avstemmingsdata = avstemmingsdataMapper.opprettAvstemmingsmelding()

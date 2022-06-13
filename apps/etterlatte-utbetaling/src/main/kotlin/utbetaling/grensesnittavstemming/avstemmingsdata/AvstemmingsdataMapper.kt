@@ -80,7 +80,7 @@ class AvstemmingsdataMapper(
 
     private fun detaljdata(utbetaling: List<Utbetaling>): List<Detaljdata> =
         utbetaling.mapNotNull {
-            val detaljType = toDetaljType(it.status)
+            val detaljType = toDetaljType(it.status())
             if (detaljType != null) {
                 Detaljdata().apply {
                     this.detaljType = detaljType
@@ -104,11 +104,11 @@ class AvstemmingsdataMapper(
             UtbetalingStatus.GODKJENT_MED_FEIL -> DetaljType.VARS
             UtbetalingStatus.AVVIST -> DetaljType.AVVI
             UtbetalingStatus.FEILET -> DetaljType.AVVI
-            UtbetalingStatus.GODKJENT -> null
+            UtbetalingStatus.GODKJENT, UtbetalingStatus.MOTTATT -> null
         }
 
     private fun grunnlagsdata() = Grunnlagsdata().apply {
-        val utbetalinger = utbetalinger.groupBy { it.status }
+        val utbetalinger = utbetalinger.groupBy { it.status() }
 
         godkjentAntall = getAntall(utbetalinger[UtbetalingStatus.GODKJENT])
         godkjentBelop = getBelop(utbetalinger[UtbetalingStatus.GODKJENT])

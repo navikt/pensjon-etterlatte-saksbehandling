@@ -17,7 +17,7 @@ import vilkaar.barnepensjon.barnIngenOppgittUtlandsadresse
 import vilkaar.barnepensjon.barnOgAvdoedSammeBostedsadresse
 import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
 import java.time.LocalDate
-import java.time.temporal.TemporalAdjusters
+import java.time.YearMonth
 
 
 class VilkaarService {
@@ -58,17 +58,17 @@ class VilkaarService {
         return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
     }
 
-    fun beregnVilkaarstidspunkt(opplysninger: List<VilkaarOpplysning<ObjectNode>>, opprettet: LocalDate): LocalDate? {
+    fun beregnVilkaarstidspunkt(opplysninger: List<VilkaarOpplysning<ObjectNode>>, opprettet: LocalDate): YearMonth? {
         logger.info("beregner virkningstidspunkt")
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
         return avdoedPdl?.opplysning?.doedsdato?.let { hentVirkningstidspunkt(it, opprettet) }
     }
 
-    fun hentVirkningstidspunkt(doedsdato: LocalDate, mottattDato: LocalDate): LocalDate {
+    fun hentVirkningstidspunkt(doedsdato: LocalDate, mottattDato: LocalDate): YearMonth {
         if (mottattDato.year - doedsdato.year > 3) {
-            return mottattDato.minusYears(3).with(TemporalAdjusters.firstDayOfMonth())
+            return YearMonth.of(mottattDato.year -3, mottattDato.month)
         }
-        return doedsdato.with(TemporalAdjusters.firstDayOfNextMonth())
+        return YearMonth.of(doedsdato.year, doedsdato.month+1)
     }
 
 

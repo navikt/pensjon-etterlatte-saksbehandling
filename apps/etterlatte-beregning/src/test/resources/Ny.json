@@ -1,0 +1,1324 @@
+{
+  "id": "2da2ecac-3b97-4c82-a714-e073fcbc84f3",
+  "sak": 3,
+  "behandlingOpprettet": "2022-06-13T11:32:14.247753",
+  "sistEndret": "2022-06-13T11:32:14.324934",
+  "soeknadMottattDato": "2022-02-14T14:37:24.573613",
+  "innsender": "03108718357",
+  "soeker": "12101376212",
+  "gjenlevende": [
+    "03108718357"
+  ],
+  "avdoed": [
+    "22128202440"
+  ],
+  "soesken": [],
+  "gyldighetsproeving": {
+    "resultat": "OPPFYLT",
+    "vurderinger": [
+      {
+        "navn": "INNSENDER_ER_FORELDER",
+        "resultat": "OPPFYLT",
+        "basertPaaOpplysninger": {
+          "familieRelasjon": {
+            "ansvarligeForeldre": [
+              "22128202440",
+              "03108718357"
+            ],
+            "foreldre": [
+              "22128202440",
+              "03108718357"
+            ],
+            "barn": null
+          },
+          "innsender": {
+            "navn": "BRÅKETE POTET",
+            "fnr": "03108718357"
+          },
+          "gjenlevende": [
+            {
+              "navn": "BRÅKETE POTET",
+              "fnr": "03108718357"
+            }
+          ]
+        }
+      },
+      {
+        "navn": "HAR_FORELDREANSVAR_FOR_BARNET",
+        "resultat": "OPPFYLT",
+        "basertPaaOpplysninger": {
+          "familieRelasjon": {
+            "ansvarligeForeldre": [
+              "22128202440",
+              "03108718357"
+            ],
+            "foreldre": [
+              "22128202440",
+              "03108718357"
+            ],
+            "barn": null
+          },
+          "innsender": {
+            "navn": "BRÅKETE POTET",
+            "fnr": "03108718357"
+          }
+        }
+      }
+    ],
+    "vurdertDato": "2022-06-13T11:32:12.982687239"
+  },
+  "status": "GYLDIG_SOEKNAD",
+  "system_read_count": 2,
+  "system_participating_services": [
+    {
+      "service": "etterlatte-behandling",
+      "instance": "etterlatte-behandling-747d65bc7f-sv57v",
+      "time": "2022-06-13T11:32:20.514128475"
+    },
+    {
+      "service": "etterlatte-grunnlag",
+      "instance": "etterlatte-grunnlag-85cc4549b4-8fhvh",
+      "time": "2022-06-13T11:32:20.52201297"
+    },
+    {
+      "service": "etterlatte-vilkaar-kafka",
+      "instance": "etterlatte-vilkaar-kafka-69695c84fb-mg49n",
+      "time": "2022-06-13T11:32:20.538142749"
+    }
+  ],
+  "@event": "BEHANDLING:GRUNNLAGENDRET",
+  "grunnlag": [
+    {
+      "id": "3d5a45ec-8c38-4f48-923d-5022e7361a5a",
+      "kilde": {
+        "fnr": "03108718357",
+        "mottatDato": "2022-02-14T14:37:24.573612786Z",
+        "type": "privatperson"
+      },
+      "opplysningType": "AVDOED_SOEKNAD_V1",
+      "meta": {},
+      "opplysning": {
+        "type": "AVDOED",
+        "fornavn": "fe",
+        "etternavn": "fe",
+        "foedselsnummer": "22128202440",
+        "doedsdato": "2022-01-01",
+        "statsborgerskap": "Norge",
+        "utenlandsopphold": {
+          "harHattUtenlandsopphold": "NEI",
+          "opphold": null
+        },
+        "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": "NEI"
+      },
+      "attestering": null
+    },
+    {
+      "id": "12f1414d-bea1-4131-ba94-65dc1244d929",
+      "kilde": {
+        "fnr": "03108718357",
+        "mottatDato": "2022-02-14T14:37:24.573612786Z",
+        "type": "privatperson"
+      },
+      "opplysningType": "SOEKER_SOEKNAD_V1",
+      "meta": {},
+      "opplysning": {
+        "type": "BARN",
+        "fornavn": "kirsten",
+        "etternavn": "jakobsen",
+        "foedselsnummer": "12101376212",
+        "statsborgerskap": "Norge",
+        "utenlandsadresse": {
+          "adresseIUtlandet": "NEI",
+          "land": null,
+          "adresse": null
+        },
+        "foreldre": [
+          {
+            "type": "FORELDER",
+            "fornavn": "GØYAL",
+            "etternavn": "HØYSTAKK",
+            "foedselsnummer": "12101376212"
+          },
+          {
+            "type": "FORELDER",
+            "fornavn": "fe",
+            "etternavn": "fe",
+            "foedselsnummer": "22128202440"
+          }
+        ],
+        "verge": {
+          "barnHarVerge": "NEI",
+          "fornavn": null,
+          "etternavn": null,
+          "foedselsnummer": null
+        },
+        "omsorgPerson": null
+      },
+      "attestering": null
+    },
+    {
+      "id": "5e97683a-9af0-4537-89cc-a64d304983b0",
+      "kilde": {
+        "fnr": "03108718357",
+        "mottatDato": "2022-02-14T14:37:24.573612786Z",
+        "type": "privatperson"
+      },
+      "opplysningType": "GJENLEVENDE_FORELDER_SOEKNAD_V1",
+      "meta": {},
+      "opplysning": {
+        "type": "GJENLEVENDE_FORELDER",
+        "fornavn": "GØYAL",
+        "etternavn": "HØYSTAKK",
+        "foedselsnummer": "03108718357",
+        "adresse": "Sannergata 6C, 0557 Oslo",
+        "statsborgerskap": "Norge",
+        "telefonnummer": "11111111"
+      },
+      "attestering": null
+    },
+    {
+      "id": "048d457d-b59b-4ca3-92f9-8c6bb5e87a80",
+      "kilde": {
+        "fnr": "03108718357",
+        "mottatDato": "2022-02-14T14:37:24.573612786Z",
+        "type": "privatperson"
+      },
+      "opplysningType": "INNSENDER_SOEKNAD_V1",
+      "meta": {},
+      "opplysning": {
+        "type": "INNSENDER",
+        "fornavn": "GØYAL",
+        "etternavn": "HØYSTAKK",
+        "foedselsnummer": "03108718357"
+      },
+      "attestering": null
+    },
+    {
+      "id": "39b21ae1-c353-42ce-b5b2-80d7ed40c09f",
+      "kilde": {
+        "fnr": "03108718357",
+        "mottatDato": "2022-02-14T14:37:24.573612786Z",
+        "type": "privatperson"
+      },
+      "opplysningType": "UTBETALINGSINFORMASJON_V1",
+      "meta": {},
+      "opplysning": {
+        "bankkontoType": "NORSK",
+        "kontonummer": "6848.64.44444",
+        "utenlandskBankNavn": null,
+        "utenlandskBankAdresse": null,
+        "iban": null,
+        "swift": null,
+        "oenskerSkattetrekk": null,
+        "oensketSkattetrekkProsent": null
+      },
+      "attestering": null
+    },
+    {
+      "id": "53330863-bbd0-4f19-bd18-7de68f81d0a2",
+      "kilde": {
+        "fnr": "03108718357",
+        "mottatDato": "2022-02-14T14:37:24.573612786Z",
+        "type": "privatperson"
+      },
+      "opplysningType": "SAMTYKKE",
+      "meta": {},
+      "opplysning": {
+        "harSamtykket": true
+      },
+      "attestering": null
+    },
+    {
+      "id": "ea174501-dbf5-4523-bb8d-7573022104e2",
+      "kilde": {
+        "fnr": "03108718357",
+        "mottatDato": "2022-02-14T14:37:24.573612786Z",
+        "type": "privatperson"
+      },
+      "opplysningType": "SOEKNAD_MOTTATT_DATO",
+      "meta": {},
+      "opplysning": {
+        "mottattDato": "2022-02-14T14:37:24.573612786"
+      },
+      "attestering": null
+    },
+    {
+      "id": "28730a3f-f653-46e7-84ec-3d138ed36c15",
+      "kilde": {
+        "fnr": "03108718357",
+        "mottatDato": "2022-02-14T14:37:24.573612786Z",
+        "type": "privatperson"
+      },
+      "opplysningType": "SOEKNADSTYPE_V1",
+      "meta": {},
+      "opplysning": {
+        "type": "BARNEPENSJON"
+      },
+      "attestering": null
+    },
+    {
+      "id": "1d76f62b-55c6-4ef6-97fd-2b1c16529122",
+      "kilde": {
+        "fnr": "03108718357",
+        "mottatDato": "2022-02-14T14:37:24.573612786Z",
+        "type": "privatperson"
+      },
+      "opplysningType": "PERSONGALLERI_V1",
+      "meta": {},
+      "opplysning": {
+        "soeker": "12101376212",
+        "innsender": "03108718357",
+        "soesken": [],
+        "avdoed": [
+          "22128202440"
+        ],
+        "gjenlevende": [
+          "03108718357"
+        ]
+      },
+      "attestering": null
+    },
+    {
+      "id": "0ed4ab8b-b276-438a-b44e-023c224fd8fe",
+      "kilde": {
+        "navn": "pdl",
+        "tidspunktForInnhenting": "2022-06-13T09:32:18.070306042Z",
+        "registersReferanse": null,
+        "type": "pdl"
+      },
+      "opplysningType": "SOEKER_PDL_V1",
+      "meta": {},
+      "opplysning": {
+        "fornavn": "TALENTFULL",
+        "etternavn": "BLYANT",
+        "foedselsnummer": "12101376212",
+        "foedselsdato": "2013-10-12",
+        "foedselsaar": 2013,
+        "foedeland": "NOR",
+        "doedsdato": null,
+        "adressebeskyttelse": "UGRADERT",
+        "bostedsadresse": [
+          {
+            "type": "VEGADRESSE",
+            "aktiv": true,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Bøveien 937",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "8475",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "1999-01-01T00:00:00",
+            "gyldigTilOgMed": null
+          }
+        ],
+        "deltBostedsadresse": null,
+        "kontaktadresse": [],
+        "oppholdsadresse": [],
+        "sivilstatus": "UOPPGITT",
+        "statsborgerskap": "NOR",
+        "utland": {
+          "innflyttingTilNorge": [],
+          "utflyttingFraNorge": []
+        },
+        "familieRelasjon": {
+          "ansvarligeForeldre": [
+            "22128202440",
+            "03108718357"
+          ],
+          "foreldre": [
+            "22128202440",
+            "03108718357"
+          ],
+          "barn": null
+        }
+      },
+      "attestering": null
+    },
+    {
+      "id": "21cc8be7-eb7b-4c70-8208-7aadb01b2c2d",
+      "kilde": {
+        "navn": "pdl",
+        "tidspunktForInnhenting": "2022-06-13T09:32:18.574864059Z",
+        "registersReferanse": null,
+        "type": "pdl"
+      },
+      "opplysningType": "GJENLEVENDE_FORELDER_PDL_V1",
+      "meta": {},
+      "opplysning": {
+        "fornavn": "BRÅKETE",
+        "etternavn": "POTET",
+        "foedselsnummer": "03108718357",
+        "foedselsdato": "1987-10-03",
+        "foedselsaar": 1987,
+        "foedeland": "NOR",
+        "doedsdato": null,
+        "adressebeskyttelse": "UGRADERT",
+        "bostedsadresse": [
+          {
+            "type": "VEGADRESSE",
+            "aktiv": true,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Bøveien 937",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "8475",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "1999-01-01T00:00:00",
+            "gyldigTilOgMed": null
+          }
+        ],
+        "deltBostedsadresse": null,
+        "kontaktadresse": [],
+        "oppholdsadresse": [],
+        "sivilstatus": "UOPPGITT",
+        "statsborgerskap": "NOR",
+        "utland": {
+          "innflyttingTilNorge": [],
+          "utflyttingFraNorge": []
+        },
+        "familieRelasjon": {
+          "ansvarligeForeldre": [],
+          "foreldre": [],
+          "barn": null
+        }
+      },
+      "attestering": null
+    },
+    {
+      "id": "4a7ef440-b33f-4002-a10d-6975c9247458",
+      "kilde": {
+        "navn": "pdl",
+        "tidspunktForInnhenting": "2022-06-13T09:32:19.039482374Z",
+        "registersReferanse": null,
+        "type": "pdl"
+      },
+      "opplysningType": "AVDOED_PDL_V1",
+      "meta": {},
+      "opplysning": {
+        "fornavn": "VAKKER",
+        "etternavn": "LAPP",
+        "foedselsnummer": "22128202440",
+        "foedselsdato": "1982-12-22",
+        "foedselsaar": 1982,
+        "foedeland": "NOR",
+        "doedsdato": "2022-02-10",
+        "adressebeskyttelse": "UGRADERT",
+        "bostedsadresse": [
+          {
+            "type": "VEGADRESSE",
+            "aktiv": true,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Bøveien 937",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "8475",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "1999-01-01T00:00:00",
+            "gyldigTilOgMed": null
+          }
+        ],
+        "deltBostedsadresse": null,
+        "kontaktadresse": [],
+        "oppholdsadresse": [],
+        "sivilstatus": "UGIFT",
+        "statsborgerskap": "NOR",
+        "utland": {
+          "innflyttingTilNorge": [],
+          "utflyttingFraNorge": []
+        },
+        "familieRelasjon": {
+          "ansvarligeForeldre": null,
+          "foreldre": null,
+          "barn": [
+            "12101376212"
+          ]
+        }
+      },
+      "attestering": null
+    }
+  ],
+  "@grunnlag": {
+    "saksId": 3,
+    "grunnlag": [
+      {
+        "id": "3d5a45ec-8c38-4f48-923d-5022e7361a5a",
+        "kilde": {
+          "fnr": "03108718357",
+          "mottatDato": "2022-02-14T14:37:24.573612786Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "AVDOED_SOEKNAD_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "AVDOED",
+          "fornavn": "fe",
+          "etternavn": "fe",
+          "foedselsnummer": "22128202440",
+          "doedsdato": "2022-01-01",
+          "statsborgerskap": "Norge",
+          "utenlandsopphold": {
+            "harHattUtenlandsopphold": "NEI",
+            "opphold": null
+          },
+          "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": "NEI"
+        },
+        "attestering": null
+      },
+      {
+        "id": "12f1414d-bea1-4131-ba94-65dc1244d929",
+        "kilde": {
+          "fnr": "03108718357",
+          "mottatDato": "2022-02-14T14:37:24.573612786Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "SOEKER_SOEKNAD_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "BARN",
+          "fornavn": "kirsten",
+          "etternavn": "jakobsen",
+          "foedselsnummer": "12101376212",
+          "statsborgerskap": "Norge",
+          "utenlandsadresse": {
+            "adresseIUtlandet": "NEI",
+            "land": null,
+            "adresse": null
+          },
+          "foreldre": [
+            {
+              "type": "FORELDER",
+              "fornavn": "GØYAL",
+              "etternavn": "HØYSTAKK",
+              "foedselsnummer": "12101376212"
+            },
+            {
+              "type": "FORELDER",
+              "fornavn": "fe",
+              "etternavn": "fe",
+              "foedselsnummer": "22128202440"
+            }
+          ],
+          "verge": {
+            "barnHarVerge": "NEI",
+            "fornavn": null,
+            "etternavn": null,
+            "foedselsnummer": null
+          },
+          "omsorgPerson": null
+        },
+        "attestering": null
+      },
+      {
+        "id": "5e97683a-9af0-4537-89cc-a64d304983b0",
+        "kilde": {
+          "fnr": "03108718357",
+          "mottatDato": "2022-02-14T14:37:24.573612786Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "GJENLEVENDE_FORELDER_SOEKNAD_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "GJENLEVENDE_FORELDER",
+          "fornavn": "GØYAL",
+          "etternavn": "HØYSTAKK",
+          "foedselsnummer": "03108718357",
+          "adresse": "Sannergata 6C, 0557 Oslo",
+          "statsborgerskap": "Norge",
+          "telefonnummer": "11111111"
+        },
+        "attestering": null
+      },
+      {
+        "id": "048d457d-b59b-4ca3-92f9-8c6bb5e87a80",
+        "kilde": {
+          "fnr": "03108718357",
+          "mottatDato": "2022-02-14T14:37:24.573612786Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "INNSENDER_SOEKNAD_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "INNSENDER",
+          "fornavn": "GØYAL",
+          "etternavn": "HØYSTAKK",
+          "foedselsnummer": "03108718357"
+        },
+        "attestering": null
+      },
+      {
+        "id": "39b21ae1-c353-42ce-b5b2-80d7ed40c09f",
+        "kilde": {
+          "fnr": "03108718357",
+          "mottatDato": "2022-02-14T14:37:24.573612786Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "UTBETALINGSINFORMASJON_V1",
+        "meta": {},
+        "opplysning": {
+          "bankkontoType": "NORSK",
+          "kontonummer": "6848.64.44444",
+          "utenlandskBankNavn": null,
+          "utenlandskBankAdresse": null,
+          "iban": null,
+          "swift": null,
+          "oenskerSkattetrekk": null,
+          "oensketSkattetrekkProsent": null
+        },
+        "attestering": null
+      },
+      {
+        "id": "53330863-bbd0-4f19-bd18-7de68f81d0a2",
+        "kilde": {
+          "fnr": "03108718357",
+          "mottatDato": "2022-02-14T14:37:24.573612786Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "SAMTYKKE",
+        "meta": {},
+        "opplysning": {
+          "harSamtykket": true
+        },
+        "attestering": null
+      },
+      {
+        "id": "ea174501-dbf5-4523-bb8d-7573022104e2",
+        "kilde": {
+          "fnr": "03108718357",
+          "mottatDato": "2022-02-14T14:37:24.573612786Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "SOEKNAD_MOTTATT_DATO",
+        "meta": {},
+        "opplysning": {
+          "mottattDato": "2022-02-14T14:37:24.573612786"
+        },
+        "attestering": null
+      },
+      {
+        "id": "28730a3f-f653-46e7-84ec-3d138ed36c15",
+        "kilde": {
+          "fnr": "03108718357",
+          "mottatDato": "2022-02-14T14:37:24.573612786Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "SOEKNADSTYPE_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "BARNEPENSJON"
+        },
+        "attestering": null
+      },
+      {
+        "id": "1d76f62b-55c6-4ef6-97fd-2b1c16529122",
+        "kilde": {
+          "fnr": "03108718357",
+          "mottatDato": "2022-02-14T14:37:24.573612786Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "PERSONGALLERI_V1",
+        "meta": {},
+        "opplysning": {
+          "soeker": "12101376212",
+          "innsender": "03108718357",
+          "soesken": [],
+          "avdoed": [
+            "22128202440"
+          ],
+          "gjenlevende": [
+            "03108718357"
+          ]
+        },
+        "attestering": null
+      },
+      {
+        "id": "0ed4ab8b-b276-438a-b44e-023c224fd8fe",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-06-13T09:32:18.070306042Z",
+          "registersReferanse": null,
+          "type": "pdl"
+        },
+        "opplysningType": "SOEKER_PDL_V1",
+        "meta": {},
+        "opplysning": {
+          "fornavn": "TALENTFULL",
+          "etternavn": "BLYANT",
+          "foedselsnummer": "12101376212",
+          "foedselsdato": "2013-10-12",
+          "foedselsaar": 2013,
+          "foedeland": "NOR",
+          "doedsdato": null,
+          "adressebeskyttelse": "UGRADERT",
+          "bostedsadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Bøveien 937",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "8475",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "1999-01-01T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "deltBostedsadresse": null,
+          "kontaktadresse": [],
+          "oppholdsadresse": [],
+          "sivilstatus": "UOPPGITT",
+          "statsborgerskap": "NOR",
+          "utland": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "familieRelasjon": {
+            "ansvarligeForeldre": [
+              "22128202440",
+              "03108718357"
+            ],
+            "foreldre": [
+              "22128202440",
+              "03108718357"
+            ],
+            "barn": null
+          }
+        },
+        "attestering": null
+      },
+      {
+        "id": "21cc8be7-eb7b-4c70-8208-7aadb01b2c2d",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-06-13T09:32:18.574864059Z",
+          "registersReferanse": null,
+          "type": "pdl"
+        },
+        "opplysningType": "GJENLEVENDE_FORELDER_PDL_V1",
+        "meta": {},
+        "opplysning": {
+          "fornavn": "BRÅKETE",
+          "etternavn": "POTET",
+          "foedselsnummer": "03108718357",
+          "foedselsdato": "1987-10-03",
+          "foedselsaar": 1987,
+          "foedeland": "NOR",
+          "doedsdato": null,
+          "adressebeskyttelse": "UGRADERT",
+          "bostedsadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Bøveien 937",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "8475",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "1999-01-01T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "deltBostedsadresse": null,
+          "kontaktadresse": [],
+          "oppholdsadresse": [],
+          "sivilstatus": "UOPPGITT",
+          "statsborgerskap": "NOR",
+          "utland": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "familieRelasjon": {
+            "ansvarligeForeldre": [],
+            "foreldre": [],
+            "barn": null
+          }
+        },
+        "attestering": null
+      },
+      {
+        "id": "4a7ef440-b33f-4002-a10d-6975c9247458",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-06-13T09:32:19.039482374Z",
+          "registersReferanse": null,
+          "type": "pdl"
+        },
+        "opplysningType": "AVDOED_PDL_V1",
+        "meta": {},
+        "opplysning": {
+          "fornavn": "VAKKER",
+          "etternavn": "LAPP",
+          "foedselsnummer": "22128202440",
+          "foedselsdato": "1982-12-22",
+          "foedselsaar": 1982,
+          "foedeland": "NOR",
+          "doedsdato": "2022-02-10",
+          "adressebeskyttelse": "UGRADERT",
+          "bostedsadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Bøveien 937",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "8475",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "1999-01-01T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "deltBostedsadresse": null,
+          "kontaktadresse": [],
+          "oppholdsadresse": [],
+          "sivilstatus": "UGIFT",
+          "statsborgerskap": "NOR",
+          "utland": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "familieRelasjon": {
+            "ansvarligeForeldre": null,
+            "foreldre": null,
+            "barn": [
+              "12101376212"
+            ]
+          }
+        },
+        "attestering": null
+      }
+    ],
+    "versjon": 12
+  },
+  "@virkningstidspunkt": "2022-03-01",
+  "@vilkaarsvurdering": {
+    "resultat": "OPPFYLT",
+    "vilkaar": [
+      {
+        "navn": "SOEKER_ER_UNDER_20",
+        "resultat": "OPPFYLT",
+        "kriterier": [
+          {
+            "navn": "SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "4a7ef440-b33f-4002-a10d-6975c9247458",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-06-13T09:32:19.039482374Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
+              },
+              {
+                "id": "0ed4ab8b-b276-438a-b44e-023c224fd8fe",
+                "kriterieOpplysningsType": "FOEDSELSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-06-13T09:32:18.070306042Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "foedselsdato": "2013-10-12",
+                  "foedselsnummer": "12101376212"
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-06-13T11:32:20.5396541"
+      },
+      {
+        "navn": "DOEDSFALL_ER_REGISTRERT",
+        "resultat": "OPPFYLT",
+        "kriterier": [
+          {
+            "navn": "DOEDSFALL_ER_REGISTRERT_I_PDL",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "4a7ef440-b33f-4002-a10d-6975c9247458",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-06-13T09:32:19.039482374Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_ER_FORELDER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "0ed4ab8b-b276-438a-b44e-023c224fd8fe",
+                "kriterieOpplysningsType": "FORELDRE",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-06-13T09:32:18.070306042Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "foreldre": [
+                    "22128202440",
+                    "03108718357"
+                  ]
+                }
+              },
+              {
+                "id": "4a7ef440-b33f-4002-a10d-6975c9247458",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-06-13T09:32:19.039482374Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-06-13T11:32:20.539678767"
+      },
+      {
+        "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
+        "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
+        "kriterier": [
+          {
+            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "4a7ef440-b33f-4002-a10d-6975c9247458",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-06-13T09:32:19.039482374Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
+              },
+              {
+                "id": "3d5a45ec-8c38-4f48-923d-5022e7361a5a",
+                "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
+                "kilde": {
+                  "fnr": "03108718357",
+                  "mottatDato": "2022-02-14T14:37:24.573612786Z",
+                  "type": "privatperson"
+                },
+                "opplysning": {
+                  "harHattUtenlandsopphold": "NEI",
+                  "opphold": null
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-06-13T11:32:20.539687697"
+      },
+      {
+        "navn": "BARNETS_MEDLEMSKAP",
+        "resultat": "OPPFYLT",
+        "kriterier": [
+          {
+            "navn": "SOEKER_IKKE_ADRESSE_I_UTLANDET",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "0ed4ab8b-b276-438a-b44e-023c224fd8fe",
+                "kriterieOpplysningsType": "ADRESSER",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-06-13T09:32:18.070306042Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "bostedadresse": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Bøveien 937",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "8475",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "1999-01-01T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ],
+                  "oppholdadresse": [],
+                  "kontaktadresse": []
+                }
+              },
+              {
+                "id": "12f1414d-bea1-4131-ba94-65dc1244d929",
+                "kriterieOpplysningsType": "SOEKER_UTENLANDSOPPHOLD",
+                "kilde": {
+                  "fnr": "03108718357",
+                  "mottatDato": "2022-02-14T14:37:24.573612786Z",
+                  "type": "privatperson"
+                },
+                "opplysning": {
+                  "adresseIUtlandet": "NEI",
+                  "land": null,
+                  "adresse": null
+                }
+              },
+              {
+                "id": "4a7ef440-b33f-4002-a10d-6975c9247458",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-06-13T09:32:19.039482374Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
+              }
+            ]
+          },
+          {
+            "navn": "GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "21cc8be7-eb7b-4c70-8208-7aadb01b2c2d",
+                "kriterieOpplysningsType": "ADRESSER",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-06-13T09:32:18.574864059Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "bostedadresse": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Bøveien 937",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "8475",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "1999-01-01T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ],
+                  "oppholdadresse": [],
+                  "kontaktadresse": []
+                }
+              },
+              {
+                "id": "4a7ef440-b33f-4002-a10d-6975c9247458",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-06-13T09:32:19.039482374Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-06-13T11:32:20.539702806"
+      }
+    ],
+    "vurdertDato": "2022-06-13T11:32:20.539702806"
+  },
+  "@vilkaarsvurderingGrunnlagRef": 12,
+  "@kommersoekertilgode": {
+    "kommerSoekerTilgodeVurdering": {
+      "resultat": "OPPFYLT",
+      "vilkaar": [
+        {
+          "navn": "GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE",
+          "resultat": "OPPFYLT",
+          "kriterier": [
+            {
+              "navn": "SAMME_BOSTEDSADRESSE",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "0ed4ab8b-b276-438a-b44e-023c224fd8fe",
+                  "kriterieOpplysningsType": "BOSTEDADRESSE_SOEKER",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-06-13T09:32:18.070306042Z",
+                    "registersReferanse": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": true,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Bøveien 937",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "8475",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "1999-01-01T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "21cc8be7-eb7b-4c70-8208-7aadb01b2c2d",
+                  "kriterieOpplysningsType": "BOSTEDADRESSE_GJENLEVENDE",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-06-13T09:32:18.574864059Z",
+                    "registersReferanse": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": true,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Bøveien 937",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "8475",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "1999-01-01T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-06-13T11:32:20.540193968"
+        },
+        {
+          "navn": "BARN_INGEN_OPPGITT_UTLANDSADRESSE",
+          "resultat": "OPPFYLT",
+          "kriterier": [
+            {
+              "navn": "SOEKER_IKKE_ADRESSE_I_UTLANDET",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "12f1414d-bea1-4131-ba94-65dc1244d929",
+                  "kriterieOpplysningsType": "SOEKER_UTENLANDSOPPHOLD",
+                  "kilde": {
+                    "fnr": "03108718357",
+                    "mottatDato": "2022-02-14T14:37:24.573612786Z",
+                    "type": "privatperson"
+                  },
+                  "opplysning": {
+                    "adresseIUtlandet": "NEI",
+                    "land": null,
+                    "adresse": null
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-06-13T11:32:20.540201962"
+        },
+        {
+          "navn": "BARN_BOR_PAA_AVDOEDES_ADRESSE",
+          "resultat": "OPPFYLT",
+          "kriterier": [
+            {
+              "navn": "SAMME_BOSTEDSADRESSE",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "0ed4ab8b-b276-438a-b44e-023c224fd8fe",
+                  "kriterieOpplysningsType": "BOSTEDADRESSE_SOEKER",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-06-13T09:32:18.070306042Z",
+                    "registersReferanse": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": true,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Bøveien 937",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "8475",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "1999-01-01T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "4a7ef440-b33f-4002-a10d-6975c9247458",
+                  "kriterieOpplysningsType": "BOSTEDADRESSE_AVDOED",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-06-13T09:32:19.039482374Z",
+                    "registersReferanse": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": true,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Bøveien 937",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "8475",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "1999-01-01T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-06-13T11:32:20.540209478"
+        }
+      ],
+      "vurdertDato": "2022-06-13T11:32:20.540209478"
+    },
+    "familieforhold": {
+      "avdoed": {
+        "navn": "VAKKER LAPP",
+        "fnr": "22128202440",
+        "rolle": "AVDOED",
+        "bostedadresser": [
+          {
+            "type": "VEGADRESSE",
+            "aktiv": true,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Bøveien 937",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "8475",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "1999-01-01T00:00:00",
+            "gyldigTilOgMed": null
+          }
+        ],
+        "doedsdato": "2022-02-10"
+      },
+      "soeker": {
+        "navn": "TALENTFULL BLYANT",
+        "fnr": "12101376212",
+        "rolle": "AVDOED",
+        "bostedadresser": [
+          {
+            "type": "VEGADRESSE",
+            "aktiv": true,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Bøveien 937",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "8475",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "1999-01-01T00:00:00",
+            "gyldigTilOgMed": null
+          }
+        ],
+        "soeknadAdresse": {
+          "adresseIUtlandet": "NEI",
+          "land": null,
+          "adresse": null
+        },
+        "foedselsdato": "2013-10-12"
+      },
+      "gjenlevendeForelder": {
+        "navn": "BRÅKETE POTET",
+        "fnr": "03108718357",
+        "rolle": "AVDOED",
+        "bostedadresser": [
+          {
+            "type": "VEGADRESSE",
+            "aktiv": true,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Bøveien 937",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "8475",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "1999-01-01T00:00:00",
+            "gyldigTilOgMed": null
+          }
+        ]
+      }
+    }
+  }
+}

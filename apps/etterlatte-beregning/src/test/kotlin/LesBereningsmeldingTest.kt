@@ -12,7 +12,7 @@ import java.time.YearMonth
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class LesBereningsmeldingTest {
     companion object {
-        val melding = readFile("/melding.json")
+        val melding = readFile("/Ny.json")
 
         fun readmelding(file: String): Barnepensjon {
             val skjemaInfo = objectMapper.writeValueAsString(

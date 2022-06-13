@@ -1,6 +1,6 @@
 import { VurderingsResultat, IVilkaarResultat, VilkaarsType } from '../../../../../store/reducers/BehandlingReducer'
 import { OversiktElement } from '../OversiktElement'
-import { hentBarnUtlandsadresseTekst, hentSammeAdresseSomAvdoedTekst, hentSammeAdresseTekst } from '../../utils'
+import { hentKommerBarnetTilgodeTekst } from '../../utils'
 
 export const Adresse = ({
   kommerSoekerTilgodeVurdering,
@@ -23,13 +23,13 @@ export const Adresse = ({
       (vilkaar) => vilkaar.navn === VilkaarsType.BARN_BOR_PAA_AVDOEDES_ADRESSE
     )
 
-    const sammeAdresseSvar = hentSammeAdresseTekst(sammeAdresse?.resultat)
-    const barnUtlandsadresseSvar = hentBarnUtlandsadresseTekst(barnIngenUtland?.resultat)
-    const sammeAdresseAvdoedSvar = hentSammeAdresseSomAvdoedTekst(sammeAdresseAvdoed?.resultat)
+    const svar = hentKommerBarnetTilgodeTekst(
+      sammeAdresse?.resultat,
+      barnIngenUtland?.resultat,
+      sammeAdresseAvdoed?.resultat
+    )
 
-    let svar = sammeAdresseSvar + barnUtlandsadresseSvar
-    svar = sammeAdresse?.resultat === VurderingsResultat.IKKE_OPPFYLT ? svar + sammeAdresseAvdoedSvar : svar
-    return svar
+    return svar ? svar : ''
   }
 
   return <OversiktElement navn={navn} label={label} tekst={tekst} erOppfylt={erOppfylt} />

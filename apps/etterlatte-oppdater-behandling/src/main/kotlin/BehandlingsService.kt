@@ -8,6 +8,7 @@ import java.util.*
 interface Behandling {
     fun grunnlagEndretISak(sak: Long)
     fun vedtakHendelse(behandlingid: UUID, hendelse: String)
+    fun slettSakOgBehandlinger(sakId: Long)
 }
 class BehandlingsService(
     private val behandling_app: HttpClient,
@@ -21,6 +22,13 @@ class BehandlingsService(
     override fun vedtakHendelse(behandlingid: UUID, hendelse: String) {
         runBlocking {
             behandling_app.post<String>("$url/behandlinger/$behandlingid/hendelser/vedtak/$hendelse") {}
+        }
+    }
+
+    override fun slettSakOgBehandlinger(sakId: Long) {
+        runBlocking {
+            behandling_app.delete<String>("$url/sak/$sakId/behandlinger")
+            behandling_app.delete<String>("$url/saker/$sakId/")
         }
     }
 

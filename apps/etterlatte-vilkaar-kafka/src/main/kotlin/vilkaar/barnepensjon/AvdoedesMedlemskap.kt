@@ -1,6 +1,8 @@
 package no.nav.etterlatte.barnepensjon
 
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
+import no.nav.etterlatte.libs.common.inntekt.PensjonUforeOpplysning
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
@@ -12,11 +14,13 @@ import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
+import java.util.*
 
 fun vilkaarAvdoedesMedlemskap(
     vilkaartype: Vilkaartyper,
     avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
     avdoedPdl: VilkaarOpplysning<Person>?,
+    pensjonUforeOpplysning: VilkaarOpplysning<PensjonUforeOpplysning>?
 ): VurdertVilkaar {
 
     val utenlandsoppholdSisteFemAarene = kriterieIngenUtenlandsoppholdSisteFemAar(avdoedSoeknad, avdoedPdl)
@@ -25,6 +29,42 @@ fun vilkaarAvdoedesMedlemskap(
     // 3. opphold utenfor Norge
     // ELLER :
     // 4. mottatt trydg / uføre eller pensjon siste 5 årene
+    val harMottattUforeTrygdSisteFemAar = pensjonUforeOpplysning?.opplysning?.mottattUforetrygd?: emptyList()
+    val harMottattPensjonSisteFemAar = pensjonUforeOpplysning?.opplysning?.mottattAlderspensjon?: emptyList()
+
+    if(harMottattPensjonSisteFemAar.isNotEmpty() || harMottattUforeTrygdSisteFemAar.isNotEmpty()) {
+        val kriterier = arrayListOf<Kriterie>()
+
+        if (harMottattPensjonSisteFemAar.isNotEmpty()) {
+            kriterier.add(
+                Kriterie(
+                    Kriterietyper.AVDOED_HAR_MOTTATT_PENSJON_SISTE_FEM_AAR,
+                    VurderingsResultat.OPPFYLT,
+                    listOf(Kriteriegrunnlag(
+                        UUID.randomUUID(),
+                        KriterieOpplysningsType.AVDOED_UFORE_PENSJON,
+                        Grunnlagsopplysning.Inntektskomponenten("inntektskomponenten"),
+                        harMottattPensjonSisteFemAar
+                    ))
+                )
+            )
+        }
+        if (harMottattUforeTrygdSisteFemAar.isNotEmpty()) {
+            kriterier.add(
+                Kriterie(
+                    Kriterietyper.AVDOED_HAR_MOTTATT_TRYGD_SISTE_FEM_AAR,
+                    VurderingsResultat.OPPFYLT,
+                    listOf(Kriteriegrunnlag(
+                        UUID.randomUUID(),
+                        KriterieOpplysningsType.AVDOED_UFORE_PENSJON,
+                        Grunnlagsopplysning.Inntektskomponenten("inntektskomponenten"),
+                        harMottattUforeTrygdSisteFemAar
+                    ))
+                )
+            )
+        }
+        return VurdertVilkaar(vilkaartype, VurderingsResultat.OPPFYLT, kriterier, LocalDateTime.now())
+    }
 
     return VurdertVilkaar(
         vilkaartype,

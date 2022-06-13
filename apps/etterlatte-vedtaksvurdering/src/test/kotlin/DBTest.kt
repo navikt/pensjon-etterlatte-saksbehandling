@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.database.AttesteringsHendelseType
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.database.VedtaksvurderingRepository
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
@@ -168,6 +169,11 @@ internal class DBTest {
         Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
 
 
+
+        vedtaksvurderingService.underkjennVedtak("12321423523545", uuid, "saksbehandler", "Ikke bra nok", "KODE_FOR_NOE")
+        vedtaksvurderingService.fattVedtak("12321423523545", uuid, "saksbehandler")
+
+
         vedtaksvurderingService.attesterVedtak("12321423523545", uuid, "attestant")
         val attestertVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         Assertions.assertNotNull(attestertVedtak?.attestant)
@@ -177,5 +183,12 @@ internal class DBTest {
 
         val fulltvedtak = vedtaksvurderingService.hentFellesVedtak("12321423523545", uuid)
         Assertions.assertNotNull(fulltvedtak)
+        vedtakRepo.hentAttesteringHendelser(fulltvedtak!!.vedtakId).also {
+                Assertions.assertEquals(AttesteringsHendelseType.SENDT_TIL_ATTESTERING, it[0].hendelse)
+                Assertions.assertEquals(AttesteringsHendelseType.UNDERKJENT, it[1].hendelse)
+                Assertions.assertEquals(AttesteringsHendelseType.SENDT_TIL_ATTESTERING, it[2].hendelse)
+                Assertions.assertEquals(AttesteringsHendelseType.ATTESTERT, it[3].hendelse)
+        }
+
     }
 }

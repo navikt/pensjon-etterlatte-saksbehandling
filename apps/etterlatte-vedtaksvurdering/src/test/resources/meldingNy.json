@@ -680,7 +680,7 @@
         "vurdertDato": "2022-05-20T14:30:01.423558484"
       },
       {
-        "navn": "SAMME_ADRESSE",
+        "navn": "GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE",
         "resultat": "OPPFYLT",
         "kriterier": [
           {
@@ -756,7 +756,7 @@
       "resultat": "OPPFYLT",
       "vilkaar": [
         {
-          "navn": "SAMME_ADRESSE",
+          "navn": "GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE",
           "resultat": "OPPFYLT",
           "kriterier": [
             {
@@ -888,15 +888,15 @@
       {
         "delytelsesId": "First",
         "type": "GP",
-        "datoFOM": "2022-02-02T00:01:00",
-        "datoTOM": "2030-01-04T00:01:00",
+        "datoFOM": "2022-02",
+        "datoTOM": "2030-01",
         "belop": 1000
       },
       {
         "delytelsesId": "First",
         "type": "GP",
-        "datoFOM": "2030-02-01T00:01:00",
-        "datoTOM": "2035-01-04T00:01:00",
+        "datoFOM": "2030-02",
+        "datoTOM": "2035-01",
         "belop": 1001
       }
     ],

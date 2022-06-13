@@ -1,49 +1,53 @@
-import styled from 'styled-components'
-import { IVilkaarResultat, IVilkaarsproving, VurderingsResultat } from '../../../../../store/reducers/BehandlingReducer'
+import { IVilkaarResultat, VilkaarsType, VurderingsResultat } from '../../../../../store/reducers/BehandlingReducer'
 import { format } from 'date-fns'
 import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
-import { hentGyldigBostedTekst } from '../../utils'
-import { Title, Undertekst } from '../gyldigFramsattSoeknad/styled'
+import { hentKommerBarnetTilgodeVurderingsTekst } from '../../utils'
+import { VurderingsTitle, Undertekst, VurderingsContainer } from '../../styled'
 
 export const KommerBarnetTilGodeVurdering = ({
-  gjenlevendeOgSoekerLikAdresse,
   kommerSoekerTilgodeVurdering,
 }: {
-  gjenlevendeOgSoekerLikAdresse: IVilkaarsproving | undefined
   kommerSoekerTilgodeVurdering: IVilkaarResultat
 }) => {
   const hentTekst = (): any => {
-    return gjenlevendeOgSoekerLikAdresse && hentGyldigBostedTekst(gjenlevendeOgSoekerLikAdresse)
+    const sammeAdresse = kommerSoekerTilgodeVurdering?.vilkaar.find(
+      (vilkaar) => vilkaar.navn === VilkaarsType.SAMME_ADRESSE
+    )
+    const barnIngenUtland = kommerSoekerTilgodeVurdering?.vilkaar.find(
+      (vilkaar) => vilkaar.navn === VilkaarsType.BARN_INGEN_OPPGITT_UTLANDSADRESSE
+    )
+    const sammeAdresseAvdoed = kommerSoekerTilgodeVurdering?.vilkaar.find(
+      (vilkaar) => vilkaar.navn === VilkaarsType.BARN_BOR_PAA_AVDOEDES_ADRESSE
+    )
+
+    return hentKommerBarnetTilgodeVurderingsTekst(
+      sammeAdresse?.resultat,
+      barnIngenUtland?.resultat,
+      sammeAdresseAvdoed?.resultat
+    )
   }
 
   const tittel =
     kommerSoekerTilgodeVurdering.resultat !== VurderingsResultat.OPPFYLT
-      ? 'Ikke sannsynlig Pensjon kommer barnet til gode'
+      ? 'Ikke sannsynlig pensjon kommer barnet til gode'
       : 'Sannsynlig pensjonen kommer barnet til gode'
 
   return (
-    <Wrapper>
+    <VurderingsContainer>
       <div>
         {kommerSoekerTilgodeVurdering.resultat && (
           <GyldighetIcon status={kommerSoekerTilgodeVurdering.resultat} large={true} />
         )}
       </div>
       <div>
-        <Title>{tittel}</Title>
+        <VurderingsTitle>{tittel}</VurderingsTitle>
         <Undertekst gray={true}>
           Automatisk {format(new Date(kommerSoekerTilgodeVurdering.vurdertDato), 'dd.MM.yyyy')}
         </Undertekst>
-        {gjenlevendeOgSoekerLikAdresse?.resultat !== VurderingsResultat.OPPFYLT && (
+        {kommerSoekerTilgodeVurdering?.resultat !== VurderingsResultat.OPPFYLT && (
           <Undertekst gray={false}>{hentTekst()}</Undertekst>
         )}
       </div>
-    </Wrapper>
+    </VurderingsContainer>
   )
 }
-
-export const Wrapper = styled.div`
-  display: flex;
-  border-left: 4px solid #e5e5e5;
-  height: fit-content;
-  width: 350px;
-`

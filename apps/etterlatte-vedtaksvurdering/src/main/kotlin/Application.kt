@@ -36,6 +36,7 @@ fun main() {
             LagreKommerSoekerTilgodeResultat(this, vedtaksvurderingService)
             FattVedtak(this, vedtaksvurderingService)
             AttesterVedtak(this, vedtaksvurderingService)
+            UnderkjennVedtak(this, vedtaksvurderingService)
         }.start()
 
     }

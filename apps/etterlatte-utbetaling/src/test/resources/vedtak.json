@@ -1,5 +1,5 @@
 {
-  "@event_name": "vedtak_fattet",
+  "@event": "VEDTAK:ATTESTERT",
   "@vedtak": {
     "vedtakId": 1,
     "virk": {

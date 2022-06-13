@@ -1,5 +1,7 @@
 package no.nav.etterlatte.rivers
 
+import no.nav.etterlatte.KanIkkeEndreFattetVedtak
+import no.nav.etterlatte.VedtakKanIkkeFattes
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -7,7 +9,6 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.util.*
 
 internal class FattVedtak(
     rapidsConnection: RapidsConnection,
@@ -22,16 +23,28 @@ internal class FattVedtak(
             validate { it.requireKey("@behandlingId") }
             validate { it.requireKey("@vedtakId") }
             validate { it.requireKey("@saksbehandler") }
+            validate { it.rejectKey("@feil") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val behandlingId = UUID.fromString(packet["@behandlingId"].textValue())
+            val behandlingId = packet["@behandlingId"].asUUID()
             val sakId = packet["@sakId"].longValue()
             val saksbehandler = packet["@saksbehandler"].textValue()
-            val fattetVedtak = vedtaksvurderingService.fattVedtak(sakId.toString(), behandlingId, saksbehandler)
+            val fattetVedtak = try {
+                vedtaksvurderingService.fattVedtak(sakId.toString(), behandlingId, saksbehandler)
+            } catch (ex: Exception){
+                when(ex){
+                    is KanIkkeEndreFattetVedtak,
+                    is VedtakKanIkkeFattes ->  {
+                        packet["@feil"] = "Feil under fatting av vedtak"
+                        context.publish(packet.toJson())
+                    }
+                    else -> throw ex
+                }
+            }
             context.publish(JsonMessage.newMessage(
                 mapOf(
                     "@event" to "VEDTAK:FATTET",
@@ -40,5 +53,3 @@ internal class FattVedtak(
             ).toJson())
         }
 }
-
-private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

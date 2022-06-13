@@ -1,9 +1,69 @@
 import styled from 'styled-components'
 
+export const Innhold = styled.div`
+  padding: 2em 2em 2em 4em;
+`
+
+export const SoeknadOversiktWrapper = styled.div`
+  padding: 1em 1em 1em 0em;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: top;
+`
+
+export const Header = styled.div`
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 1em;
+  margin-top: 0em;
+`
+
+export const InfobokserWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: top;
+  flex-grow: 1;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding-right: 20px;
+`
+
+export const Infoboks = styled.div`
+  width: calc((100% / 3) - (40px / 3));
+
+  @media (max-width: 1600px) {
+    width: calc((100% / 2) - (20px / 2));
+  }
+
+  @media (max-width: 1300px) {
+    width: 100%;
+  }
+`
+
+export const InfoWrapper = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  > * {
+    width: 180px;
+  }
+
+  flex-grow: 1;
+`
+
+export const Undertekst = styled.div<{ gray: boolean }>`
+  display: flex;
+  margin-bottom: ${(props) => (props.gray ? '1em;' : '0em')};
+  margin-top: 0.3em;
+  max-width: 250px;
+  color: ${(props) => (props.gray ? '#707070' : '#000000')};
+`
+
 export const DetailWrapper = styled.div`
   font-size: 16px;
   width: 150px;
-  height: 100px;
+  margin-bottom: 2em;
 
   .warningText {
     color: #ba3a26;
@@ -21,9 +81,21 @@ export const DetailWrapper = styled.div`
   }
 `
 
-export const WarningIconWrapper = styled.div`
-  margin-left: -25px;
-  margin-right: 5px;
+export const VurderingsWrapper = styled.div`
+  flex: 1;
+  flex-grow: 0;
+  min-width: 300px;
+`
+
+export const VurderingsContainer = styled.div`
+  display: flex;
+  border-left: 4px solid #e5e5e5;
+`
+
+export const VurderingsTitle = styled.div`
+  display: flex;
+  font-size: 1.1em;
+  font-weight: bold;
 `
 
 export const PersonDetailWrapper = styled.div<{ adresse: boolean }>`

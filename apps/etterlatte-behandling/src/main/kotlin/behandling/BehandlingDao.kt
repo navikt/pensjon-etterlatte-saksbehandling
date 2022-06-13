@@ -12,7 +12,6 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.util.*
 
 class BehandlingDao(private val connection: () -> Connection) {
@@ -107,9 +106,17 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     fun avbrytBehandling(behandling: Behandling) {
+        lagreStatus(behandling.id, BehandlingStatus.AVBRUTT)
+    }
+
+    fun lagreStatus(lagretBehandling: Behandling) {
+        lagreStatus(lagretBehandling.id, lagretBehandling.status)
+    }
+
+    private fun lagreStatus(behandling: UUID, status: BehandlingStatus?){
         val stmt = connection().prepareStatement("UPDATE behandling SET status = ? WHERE id = ?")
-        stmt.setString(1, BehandlingStatus.AVBRUTT.name)
-        stmt.setObject(2, behandling.id)
+        stmt.setString(1, status?.name)
+        stmt.setObject(2, behandling)
         require(stmt.executeUpdate() == 1)
     }
 }

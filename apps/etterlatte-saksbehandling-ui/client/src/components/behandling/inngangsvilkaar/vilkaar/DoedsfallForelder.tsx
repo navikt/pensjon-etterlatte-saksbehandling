@@ -1,11 +1,6 @@
 import format from 'date-fns/format'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
-import {
-  IPerson,
-  KriterieOpplysningsType,
-  Kriterietype,
-  OpplysningsType,
-} from '../../../../store/reducers/BehandlingReducer'
+import { IPerson, KriterieOpplysningsType, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
 import { hentKriterierMedOpplysning } from '../../felles/utils'
 import {
   Innhold,
@@ -28,8 +23,6 @@ import { AppContext } from '../../../../store/AppContext'
 
 export const DoedsFallForelder = (props: VilkaarProps) => {
   const ctx = useContext(AppContext)
-  const grunnlag = ctx.state.behandlingReducer.grunnlag
-
   const vilkaar = props.vilkaar
 
   const avdoedDoedsdato: any = hentKriterierMedOpplysning(
@@ -47,14 +40,10 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
     (forelder: IPerson) => forelder === avdoedDoedsdato?.opplysning.foedselsnummer
   )
 
-  const avdoedForelderGrunnlag = grunnlag.find(
-    (g) => g.opplysningType === OpplysningsType.avdoed_forelder_pdl
-  )?.opplysning
+  const avdoedPersoninfo = ctx.state.behandlingReducer.kommerSoekerTilgode.familieforhold.avdoed
 
   const avdoedNavn = avdoedForelderFnr ? (
-    <div>
-      {avdoedForelderGrunnlag?.fornavn} {avdoedForelderGrunnlag?.etternavn}
-    </div>
+    <div>{avdoedPersoninfo?.navn}</div>
   ) : (
     <span className="missing">mangler navn</span>
   )

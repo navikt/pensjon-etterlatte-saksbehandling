@@ -3,12 +3,12 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { getPerson, opprettBehandlingPaaSak } from '../../shared/api/person'
-import { PersonInfo, StatusBar, StatusBarTheme } from '../statusbar'
+import { StatusBar, StatusBarTheme } from '../statusbar'
 import { Container } from '../../shared/styled'
 import { Dokumentoversikt } from './dokumentoversikt'
 import { Saksoversikt } from './saksoversikt'
 import { useNavigate } from 'react-router-dom'
-import { Dokumenter, SakslisteProps } from './typer'
+import { Dokumenter, PersonInfo, SakslisteProps } from './typer'
 
 //todo: typer
 const testDokumenter: Dokumenter = {
@@ -74,8 +74,7 @@ export const Person = () => {
         const person = await getPerson(match.fnr)
         setPersonData(person)
         setPersoninfo({
-          fornavn: person.data.person.fornavn,
-          etternavn: person.data.person.etternavn,
+          navn: person.data.person.fornavn + person.data.person.etternavn,
           foedselsnummer: person.data.person.foedselsnummer,
           type: 'Etterlatt',
         })

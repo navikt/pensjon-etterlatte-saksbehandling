@@ -32,6 +32,8 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
 import org.junit.jupiter.api.Assertions.*
+import vilkaar.barnepensjon.barnIngenOppgittUtlandsadresse
+import vilkaar.barnepensjon.barnOgAvdoedSammeBostedsadresse
 import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
 import java.time.LocalDateTime
 import java.util.UUID.randomUUID
@@ -188,19 +190,17 @@ internal class BarnepensjonVilkaarTest {
     @Test
     fun vuderSammeBostedsadresse() {
         val barnPdlNorge = lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresserNorgePdl, avdoedErForeldre)
-        val barnPdlDanmark =
-            lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresseDanmarkPdl, avdoedErForeldre)
         val gjenlevendePdlNorge = lagMockPersonPdl(null, fnrGjenlevende, null, adresserNorgePdl, null)
         val gjenlevendePdlDanmark = lagMockPersonPdl(null, fnrGjenlevende, null, adresseDanmarkPdl, null)
 
         val sammeAdresse = barnOgForelderSammeBostedsadresse(
-            Vilkaartyper.SAMME_ADRESSE,
+            Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlNorge)
         )
 
         val ulikeAdresse = barnOgForelderSammeBostedsadresse(
-            Vilkaartyper.SAMME_ADRESSE,
+            Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlDanmark)
         )
@@ -208,6 +208,49 @@ internal class BarnepensjonVilkaarTest {
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, ulikeAdresse.resultat)
 
     }
+
+    @Test
+    fun vurderBarnIngenUtlandsadresse() {
+        val barnSoeknadNorge = lagMockPersonSoekerSoeknad(UtenlandsadresseBarn(JaNeiVetIkke.NEI, null, null))
+        val barnSoeknadDanmark = lagMockPersonSoekerSoeknad(UtenlandsadresseBarn(JaNeiVetIkke.JA, null, null))
+
+        val ikkeUtland = barnIngenOppgittUtlandsadresse(
+            Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE,
+            mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge)
+        )
+
+        val utland = barnIngenOppgittUtlandsadresse(
+            Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE,
+            mapTilVilkaarstypeSoekerSoeknad(barnSoeknadDanmark)
+        )
+
+        assertEquals(VurderingsResultat.OPPFYLT, ikkeUtland.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, utland.resultat)
+
+    }
+
+    @Test
+    fun vurderBarnOgAvdoedSammeAdresse() {
+        val barnPdlNorge = lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresserNorgePdl, avdoedErForeldre)
+        val avdoedPdlNorge = lagMockPersonPdl(null, fnrAvdoed, null, adresserNorgePdl, null)
+        val avdoedPdlDanmark = lagMockPersonPdl(null, fnrAvdoed, null, adresseDanmarkPdl, null)
+
+        val sammeAdresse = barnOgAvdoedSammeBostedsadresse(
+            Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
+            mapTilVilkaarstypePerson(barnPdlNorge),
+            mapTilVilkaarstypePerson(avdoedPdlNorge)
+        )
+
+        val ulikeAdresse = barnOgAvdoedSammeBostedsadresse(
+            Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
+            mapTilVilkaarstypePerson(barnPdlNorge),
+            mapTilVilkaarstypePerson(avdoedPdlDanmark)
+        )
+        assertEquals(VurderingsResultat.OPPFYLT, sammeAdresse.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, ulikeAdresse.resultat)
+
+    }
+
 
     @Test
     fun vurderVilkaarsVurdering() {
@@ -346,7 +389,7 @@ internal class BarnepensjonVilkaarTest {
         ),
         Adresse(
             AdresseType.VEGADRESSE,
-            false,
+            true,
             null,
             null,
             null,

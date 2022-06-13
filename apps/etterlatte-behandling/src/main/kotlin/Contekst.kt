@@ -34,6 +34,13 @@ class Saksbehandler(identifiedBy: TokenValidationContext): ExternalUser(identifi
     override fun name(): String {
         return identifiedBy.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")
     }
+
+    fun harRolleSaksbehandler(): Boolean{
+        return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim("groups", "0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e")
+    }
+    fun harRolleAttestant(): Boolean{
+        return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim("groups", "63f46f74-84a8-4d1c-87a8-78532ab3ae60")
+    }
 }
 
 class Kunde(identifiedBy: TokenValidationContext): ExternalUser(identifiedBy){

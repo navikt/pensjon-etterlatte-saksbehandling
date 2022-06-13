@@ -4,7 +4,6 @@ import { IAdresse } from '../../components/behandling/types'
 export interface IDetaljertBehandling {
   id: string
   sak: number
-  grunnlag: IBehandlingsopplysning[]
   vilkårsprøving: IVilkaarResultat
   gyldighetsprøving: IGyldighetResultat
   kommerSoekerTilgode: IKommerSoekerTilgode
@@ -124,7 +123,9 @@ export enum VilkaarsType {
   DOEDSFALL_ER_REGISTRERT = 'DOEDSFALL_ER_REGISTRERT',
   AVDOEDES_FORUTGAAENDE_MEDLEMSKAP = 'AVDOEDES_FORUTGAAENDE_MEDLEMSKAP',
   BARNETS_MEDLEMSKAP = 'BARNETS_MEDLEMSKAP',
-  SAMME_ADRESSE = 'SAMME_ADRESSE',
+  SAMME_ADRESSE = 'GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE',
+  BARN_BOR_PAA_AVDOEDES_ADRESSE = 'BARN_BOR_PAA_AVDOEDES_ADRESSE',
+  BARN_INGEN_OPPGITT_UTLANDSADRESSE = 'BARN_INGEN_OPPGITT_UTLANDSADRESSE',
 }
 
 export interface IKriterie {
@@ -183,7 +184,6 @@ export enum PersonRolle {
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: '',
   sak: 0,
-  grunnlag: [],
   vilkårsprøving: { resultat: undefined, vilkaar: [], vurdertDato: '' },
   gyldighetsprøving: { resultat: undefined, vurderinger: [], vurdertDato: '' },
   kommerSoekerTilgode: {

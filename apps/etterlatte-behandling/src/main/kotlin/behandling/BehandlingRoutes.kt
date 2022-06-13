@@ -81,6 +81,15 @@ fun Route.behandlingRoutes(service: BehandlingService) {
              service.avbrytBehandling(behandlingsId)
             call.respond(HttpStatusCode.OK)
         }
+
+        post("hendelser/vedtak/{hendelse}") {
+            service.registrerVedtakHendelse(behandlingsId, requireNotNull(call.parameters["hendelse"]))
+
+
+            call.respond(HttpStatusCode.OK)
+        }
+
+
     }
 }
 

@@ -69,8 +69,7 @@ class BehandlingHendelser(
                             "rolle" to Opplysningstyper.AVDOED_PDL_V1.personRolle!!,
                             "@correlation_id" to packet["@correlation_id"]
                         )
-                    ).toJson()
-                )
+                    ).toJson())
             }
 
         }

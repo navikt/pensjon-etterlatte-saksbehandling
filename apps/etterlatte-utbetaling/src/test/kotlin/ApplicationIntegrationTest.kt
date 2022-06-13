@@ -81,7 +81,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.vedtakId == 1L &&
                                 this.utbetalingResponse.status == UtbetalingStatus.SENDT
                     }
@@ -98,7 +98,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
                                 this.utbetalingResponse.feilmelding
                                     ?.contains(
@@ -119,7 +119,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
                                 this.utbetalingResponse.feilmelding
                                     ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false
@@ -138,7 +138,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
                                 this.utbetalingResponse.feilmelding
                                     ?.contains(
@@ -152,14 +152,14 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal motta kvittering fra oppdrag som er godkjent`() {
-        sendFattetVedtakEvent(FATTET_VEDTAK_1)
+        sendFattetVedtakEvent(ATTESTERT_VEDTAK)
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering())
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish(any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.vedtakId == 1L &&
                                 this.utbetalingResponse.status == UtbetalingStatus.GODKJENT
                     }
@@ -176,7 +176,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.vedtakId == 1L &&
                                 this.utbetalingResponse.status == UtbetalingStatus.FEILET
                     }
@@ -187,7 +187,7 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal motta kvittering fra oppdrag som er godkjent men feiler fordi status for utbetaling er ugyldig`() {
-        sendFattetVedtakEvent(FATTET_VEDTAK_1)
+        sendFattetVedtakEvent(ATTESTERT_VEDTAK)
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering()) // setter status til GODKJENT
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering()) // forventer at status skal være SENDT
 
@@ -195,7 +195,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.vedtakId == 1L &&
                                 this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
                                 this.utbetalingResponse.feilmelding == "Utbetalingen for vedtakId=1 har feil status (GODKJENT)"
@@ -207,14 +207,14 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal motta kvittering fra oppdrag som har feilet`() {
-        sendFattetVedtakEvent(FATTET_VEDTAK_1)
+        sendFattetVedtakEvent(ATTESTERT_VEDTAK)
         simulerKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering())
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish(any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.vedtakId == 1L &&
                                 this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
                                 this.utbetalingResponse.feilmelding == "KodeMelding Beskrivelse"
@@ -253,7 +253,7 @@ class ApplicationIntegrationTest {
     }
 
     companion object {
-        val FATTET_VEDTAK_1 = readFile("/vedtak.json")
+        val ATTESTERT_VEDTAK = readFile("/vedtak.json")
         const val TIMEOUT: Long = 5000
     }
 }

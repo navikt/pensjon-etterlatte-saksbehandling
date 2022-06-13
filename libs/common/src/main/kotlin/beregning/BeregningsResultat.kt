@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.beregning
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 enum class Beregningstyper {
@@ -31,8 +32,8 @@ data class BeregningsResultat(
 data class Beregningsperiode(
     val delytelsesId: String,
     val type: Beregningstyper,
-    val datoFOM: LocalDateTime,
-    val datoTOM: LocalDateTime,
+    val datoFOM: YearMonth,
+    val datoTOM: YearMonth?,
     val belop: Int
 )
 

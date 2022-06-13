@@ -6,15 +6,18 @@ import no.nav.etterlatte.barnepensjon.*
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.inntekt.PensjonUforeOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.vikaar.*
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
 import org.slf4j.LoggerFactory
+import vilkaar.barnepensjon.barnIngenOppgittUtlandsadresse
+import vilkaar.barnepensjon.barnOgAvdoedSammeBostedsadresse
 import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
 import java.time.LocalDate
-import java.time.temporal.TemporalAdjusters
+import java.time.YearMonth
 
 
 class VilkaarService {
@@ -28,6 +31,8 @@ class VilkaarService {
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
+        val pensjonUfore = finnOpplysning<PensjonUforeOpplysning>(opplysninger, Opplysningstyper.PENSJON_UFORE_V1)
+
 
         val vilkaar = listOf(
             vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, soekerPdl, avdoedPdl),
@@ -35,7 +40,8 @@ class VilkaarService {
             vilkaarAvdoedesMedlemskap(
                 Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
                 avdoedSoeknad,
-                avdoedPdl
+                avdoedPdl,
+                pensjonUfore
             ),
             vilkaarBarnetsMedlemskap(
                 Vilkaartyper.BARNETS_MEDLEMSKAP,
@@ -52,17 +58,17 @@ class VilkaarService {
         return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
     }
 
-    fun beregnVilkaarstidspunkt (opplysninger: List<VilkaarOpplysning<ObjectNode>>, opprettet: LocalDate): LocalDate? {
+    fun beregnVilkaarstidspunkt(opplysninger: List<VilkaarOpplysning<ObjectNode>>, opprettet: LocalDate): YearMonth? {
         logger.info("beregner virkningstidspunkt")
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
         return avdoedPdl?.opplysning?.doedsdato?.let { hentVirkningstidspunkt(it, opprettet) }
     }
 
-    fun hentVirkningstidspunkt(doedsdato: LocalDate, mottattDato: LocalDate): LocalDate {
+    fun hentVirkningstidspunkt(doedsdato: LocalDate, mottattDato: LocalDate): YearMonth {
         if (mottattDato.year - doedsdato.year > 3) {
-            return mottattDato.minusYears(3).with(TemporalAdjusters.firstDayOfMonth())
+            return YearMonth.of(mottattDato.year -3, mottattDato.month)
         }
-        return doedsdato.with(TemporalAdjusters.firstDayOfNextMonth())
+        return YearMonth.of(doedsdato.year, doedsdato.month+1)
     }
 
 
@@ -74,17 +80,23 @@ class VilkaarService {
             finnOpplysning<SoekerBarnSoeknad>(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1)
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
 
-        val sammeAdresser = listOf(
+        val kommerBarnetTilGode = listOf(
             barnOgForelderSammeBostedsadresse(
-                Vilkaartyper.SAMME_ADRESSE,
+                Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
                 soekerPdl,
                 gjenlevendePdl
+            ),
+            barnIngenOppgittUtlandsadresse(Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE, soekerSoeknad),
+            barnOgAvdoedSammeBostedsadresse(
+                Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
+                soekerPdl,
+                avdoedPdl
             )
         )
 
-        val vilkaarResultat = setVilkaarVurderingFraVilkaar(sammeAdresser)
-        val vurdertDato = hentSisteVurderteDato(sammeAdresser)
-        val vurdering = VilkaarResultat(vilkaarResultat, sammeAdresser, vurdertDato)
+        val vilkaarResultat = setVurderingFraKommerBarnetTilGode(kommerBarnetTilGode)
+        val vurdertDato = hentSisteVurderteDato(kommerBarnetTilGode)
+        val vurdering = VilkaarResultat(vilkaarResultat, kommerBarnetTilGode, vurdertDato)
 
         val familieforhold = mapFamiliemedlemmer(soekerPdl, soekerSoeknad, gjenlevendePdl, avdoedPdl)
 

@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.HentOpplysningerFraInntektskomponenten
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.InntektsKomponentenResponse
 import no.nav.helse.rapids_rivers.RapidApplication
+import java.time.LocalDate
 
 fun main() {
     System.getenv().toMutableMap().apply {
@@ -22,9 +23,9 @@ fun main() {
 }
 
 interface InntektsKomponenten {
-    fun hentInntektListe(fnr: Foedselsnummer): InntektsKomponentenResponse
+    fun hentInntektListe(fnr: Foedselsnummer, doedsdato: LocalDate): InntektsKomponentenResponse
 }
 
 interface OpplysningsBygger {
-    fun byggOpplysninger(barnepensjon: Barnepensjon, inntektsKomponentenResponse: InntektsKomponentenResponse):List<Grunnlagsopplysning<out Any>>
+    fun byggOpplysninger(inntektsKomponentenResponse: InntektsKomponentenResponse):List<Grunnlagsopplysning<out Any>>
 }

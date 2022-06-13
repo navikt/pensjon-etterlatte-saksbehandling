@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.avkorting.*
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
-import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -19,23 +18,22 @@ class AvkortingService {
 
     fun avkortingsResultat(beregningsResultat: BeregningsResultat): AvkortingsResultat {
         logger.info("Leverer en fake beregning")
-        val avkortingRes = AvkortingsResultat(
+        return AvkortingsResultat(
             //TODO se på hvordan denne initieres
             id = UUID.randomUUID(),
-            type = Beregningstyper.GP,
+            type = beregningsResultat.type,
             endringskode = Endringskode.NY,
             resultat = AvkortingsResultatType.BEREGNET,
             beregningsperioder = avkortPerioder(beregningsResultat.beregningsperioder),
             beregnetDato = LocalDateTime.now()
         )
-        return avkortingRes
     }
     //TODO implementere avkortning (må ha inn inntekt)
-    fun beregnAvkorting(belop: Int): Int {
+    private fun beregnAvkorting(belop: Int): Int {
         return belop - 5
     }
 
-    fun avkortPerioder(beregningsperioder: List<Beregningsperiode>): List<Avkortingsperiode> {
+    private fun avkortPerioder(beregningsperioder: List<Beregningsperiode>): List<Avkortingsperiode> {
         var i = 1
         var avkortingsperioder: List<Avkortingsperiode> = emptyList()
         for (periode in beregningsperioder) {

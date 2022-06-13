@@ -27,3 +27,9 @@ export interface Dokument {
 export interface Dokumenter {
   brev: Dokument[]
 }
+
+export interface PersonInfo {
+  navn: string
+  foedselsnummer: string
+  type: string
+}

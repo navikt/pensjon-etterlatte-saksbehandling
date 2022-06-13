@@ -42,7 +42,13 @@ class UtbetalingMapper(
         attestant = NavIdent(vedtak.attestasjon.attestant),
         vedtak = vedtak,
         utbetalingslinjer = utbetalingslinjer(),
-        utbetalingshendelser = emptyList()
+        utbetalingshendelser = listOf(
+            Utbetalingshendelse(
+                utbetalingId = utbetalingId,
+                tidspunkt = opprettet,
+                status = UtbetalingStatus.MOTTATT
+            )
+        )
     )
 
     private fun utbetalingslinjer() = utbetalingsperioder.map {

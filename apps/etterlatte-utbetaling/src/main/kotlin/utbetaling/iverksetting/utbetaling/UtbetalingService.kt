@@ -103,7 +103,7 @@ class UtbetalingService(
 
 
     fun Utbetaling?.utbetalingEksisterer() =
-        this != null && this.status() != UtbetalingStatus.MOTTATT && this.status() != UtbetalingStatus.INGEN_UTBETALINGSLINJER
+        this != null && this.status() != UtbetalingStatus.MOTTATT
 
     companion object {
         private val logger = LoggerFactory.getLogger(UtbetalingService::class.java)

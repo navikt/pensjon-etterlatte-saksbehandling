@@ -204,7 +204,12 @@ internal class UtbetalingDaoIntegrationTest {
         val utbetalingOppdatert = utbetalingDao.hentUtbetaling(oppdrag.vedtakId())
 
         assertAll("skal sjekke at kvittering er opprettet korrekt på utbetaling",
-            { assertEquals(UtbetalingStatus.AVVIST, utbetalingOppdatert?.status()) },
+            {
+                assertEquals(
+                    UtbetalingStatus.AVVIST,
+                    utbetalingOppdatert?.status()
+                )
+            }, // SKAL VEL EGENTLIG VÆRE AVVIST HER??? MÅ GRAVE LITT
             { assertNotNull(utbetalingOppdatert?.kvittering) },
             { assertNotNull(utbetalingOppdatert?.kvittering?.oppdrag?.mmel) },
             {

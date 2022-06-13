@@ -20,6 +20,7 @@ import java.math.BigDecimal
 import java.time.Clock
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.*
 
 internal class UtbetalingServiceTest {
 
@@ -40,7 +41,14 @@ internal class UtbetalingServiceTest {
      */
     @Test
     fun `skal stoppe opprettelse av utbetaling hvis vedtak finnes fra for`() {
-        every { utbetalingDao.hentUtbetaling(any()) } returns utbetaling()
+        every { utbetalingDao.hentUtbetaling(any()) } returns utbetaling(
+            utbetalingshendelser = listOf(
+                Utbetalingshendelse(
+                    utbetalingId = UUID.randomUUID(),
+                    status = UtbetalingStatus.GODKJENT
+                )
+            )
+        )
         every { utbetalingDao.hentDupliserteUtbetalingslinjer(any(), any()) } returns emptyList()
 
         val vedtak = vedtakLoepende()
@@ -100,12 +108,23 @@ internal class UtbetalingServiceTest {
      */
     @Test
     fun `skal opprette loepende utbetaling med en tidligere loepende utbetaling`() {
-        val eksisterendeUtbetaling = utbetaling(utbetalingslinjeId = 1)
+        val utbetalingId = UUID.randomUUID()
+        val eksisterendeUtbetaling = utbetaling(
+            id = utbetalingId,
+            utbetalingslinjeId = 1L,
+            utbetalingshendelser = listOf(
+                Utbetalingshendelse(
+                    utbetalingId = utbetalingId,
+                    status = UtbetalingStatus.GODKJENT
+                )
+            )
+        )
+        val utbetaling = utbetaling()
         every { utbetalingDao.hentUtbetaling(any()) } returns null
         every { utbetalingDao.hentDupliserteUtbetalingslinjer(any(), any()) } returns emptyList()
         every { utbetalingDao.hentUtbetalinger(any()) } returns listOf(eksisterendeUtbetaling)
-        every { utbetalingDao.opprettUtbetaling(any()) } returns utbetaling()
-        every { utbetalingDao.nyUtbetalingshendelse(any(), any()) } returns utbetaling()
+        every { utbetalingDao.opprettUtbetaling(any()) } returns utbetaling
+        every { utbetalingDao.nyUtbetalingshendelse(any(), any()) } returns utbetaling
         every { oppdragSender.sendOppdrag(any()) } returns ""
 
         val vedtak = vedtakLoepende()
@@ -130,7 +149,17 @@ internal class UtbetalingServiceTest {
      */
     @Test
     fun `skal opprette utbetaling med opphoer`() {
-        val eksisterendeUtbetaling = utbetaling(utbetalingslinjeId = 1L)
+        val utbetalingId = UUID.randomUUID()
+        val eksisterendeUtbetaling = utbetaling(
+            id = utbetalingId,
+            utbetalingslinjeId = 1L,
+            utbetalingshendelser = listOf(
+                Utbetalingshendelse(
+                    utbetalingId = utbetalingId,
+                    status = UtbetalingStatus.GODKJENT
+                )
+            )
+        )
         every { utbetalingDao.hentUtbetaling(any()) } returns null
         every { utbetalingDao.hentDupliserteUtbetalingslinjer(any(), any()) } returns emptyList()
         every { utbetalingDao.hentUtbetalinger(any()) } returns listOf(eksisterendeUtbetaling)

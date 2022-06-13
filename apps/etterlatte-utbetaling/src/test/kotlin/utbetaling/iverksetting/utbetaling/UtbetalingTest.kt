@@ -36,10 +36,6 @@ internal class UtbetalingTest {
                 utbetalingId = UUID.randomUUID(),
                 status = UtbetalingStatus.MOTTATT
             ),
-            utbetalingshendelse(
-                utbetalingId = UUID.randomUUID(),
-                status = UtbetalingStatus.INGEN_UTBETALINGSLINJER
-            )
         )
         val utbetalinger = utbetaling(utbetalingshendelser = utbetalingshendelser)
 
@@ -57,14 +53,13 @@ internal class UtbetalingTest {
             { assertEquals(3, UtbetalingStatus.FEILET.ordinal) },
             { assertEquals(4, UtbetalingStatus.SENDT.ordinal) },
             { assertEquals(5, UtbetalingStatus.MOTTATT.ordinal) },
-            { assertEquals(6, UtbetalingStatus.INGEN_UTBETALINGSLINJER.ordinal) },
         )
     }
 
     @Test
-    fun `utbetaling uten utbetalingshendelser skal ha status INGEN_UTBETALINGSLINJER`() {
+    fun `utbetaling uten utbetalingshendelser skal ha status MOTTATT`() {
         val utbetalinger = utbetaling(utbetalingshendelser = emptyList())
-        assertEquals(UtbetalingStatus.INGEN_UTBETALINGSLINJER, utbetalinger.status())
+        assertEquals(UtbetalingStatus.MOTTATT, utbetalinger.status())
     }
 
 }

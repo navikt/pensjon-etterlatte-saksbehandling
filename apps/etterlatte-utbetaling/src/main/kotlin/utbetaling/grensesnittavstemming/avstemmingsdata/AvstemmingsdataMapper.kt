@@ -104,7 +104,7 @@ class AvstemmingsdataMapper(
             UtbetalingStatus.GODKJENT_MED_FEIL -> DetaljType.VARS
             UtbetalingStatus.AVVIST -> DetaljType.AVVI
             UtbetalingStatus.FEILET -> DetaljType.AVVI
-            UtbetalingStatus.GODKJENT, UtbetalingStatus.MOTTATT, UtbetalingStatus.INGEN_UTBETALINGSLINJER -> null
+            UtbetalingStatus.GODKJENT, UtbetalingStatus.MOTTATT -> null
         }
 
     private fun grunnlagsdata() = Grunnlagsdata().apply {

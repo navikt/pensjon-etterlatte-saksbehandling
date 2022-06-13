@@ -61,15 +61,11 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 utbetaling.utbetalingslinjer.forEach { utbetalingslinje ->
                     opprettUtbetalingslinje(utbetalingslinje, tx)
                 }
-                opprettUtbetalingshendelse(
-                    Utbetalingshendelse(
-                        UUID.randomUUID(),
-                        utbetaling.id,
-                        utbetaling.opprettet,
-                        UtbetalingStatus.MOTTATT
-                    ),
-                    tx
-                )
+                utbetaling.utbetalingshendelser.forEach { utbetalingshendelse ->
+                    opprettUtbetalingshendelse(
+                        utbetalingshendelse, tx
+                    )
+                }
             }
         }.let { hentUtbetalingNonNull(utbetaling.vedtakId.value) }
 

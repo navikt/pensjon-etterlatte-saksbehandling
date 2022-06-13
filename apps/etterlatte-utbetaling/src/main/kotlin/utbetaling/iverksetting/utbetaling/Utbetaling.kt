@@ -17,7 +17,7 @@ data class Foedselsnummer(val value: String)
 data class NavIdent(val value: String)
 
 enum class UtbetalingStatus {
-    GODKJENT, GODKJENT_MED_FEIL, AVVIST, FEILET, SENDT, MOTTATT, INGEN_UTBETALINGSLINJER
+    GODKJENT, GODKJENT_MED_FEIL, AVVIST, FEILET, SENDT, MOTTATT
 }
 
 enum class Utbetalingslinjetype {
@@ -53,7 +53,7 @@ data class Utbetaling(
     val utbetalingshendelser: List<Utbetalingshendelse>
 ) {
     fun status() =
-        utbetalingshendelser.minByOrNull { it.status }?.status ?: UtbetalingStatus.INGEN_UTBETALINGSLINJER
+        utbetalingshendelser.minByOrNull { it.status }?.status ?: UtbetalingStatus.MOTTATT
 }
 
 data class Utbetalingslinje(
@@ -73,3 +73,5 @@ data class Utbetalingshendelse(
     val tidspunkt: Tidspunkt = Tidspunkt.now(),
     val status: UtbetalingStatus
 )
+
+

@@ -181,5 +181,5 @@ fun utbetalingshendelse(
     id: UUID = UUID.randomUUID(),
     utbetalingId: UUID = UUID.randomUUID(),
     tidspunkt: Tidspunkt = Tidspunkt.now(),
-    status: UtbetalingStatus = UtbetalingStatus.GODKJENT
+    status: UtbetalingStatus = UtbetalingStatus.MOTTATT
 ) = Utbetalingshendelse(id, utbetalingId, tidspunkt, status)

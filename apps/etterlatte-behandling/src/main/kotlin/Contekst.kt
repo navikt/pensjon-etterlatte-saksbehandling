@@ -31,6 +31,9 @@ class SystemUser(identifiedBy: TokenValidationContext): ExternalUser(identifiedB
 }
 
 class Saksbehandler(identifiedBy: TokenValidationContext): ExternalUser(identifiedBy) {
+    init {
+        println("""Groups: ${identifiedBy.getJwtToken("azure").jwtTokenClaims.getAsList("groups")}""")
+    }
     override fun name(): String {
         return identifiedBy.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")
     }

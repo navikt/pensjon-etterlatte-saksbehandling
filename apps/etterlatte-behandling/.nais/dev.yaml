@@ -33,8 +33,8 @@ spec:
       tenant: trygdeetaten.no
       claims:
         groups:
-          - id: "0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e" # 0000-GA-PENSJON_SAKSBEHANDLER
-          - id: "63f46f74-84a8-4d1c-87a8-78532ab3ae60" # Tror dette er 0000-GA-PENSJON_ATTESTERING
+          - id: 63f46f74-84a8-4d1c-87a8-78532ab3ae60 # Tror dette er 0000-GA-PENSJON_ATTESTERING
+          - id: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e # 0000-GA-PENSJON_SAKSBEHANDLER
         extra:
           - NAVident
   kafka:

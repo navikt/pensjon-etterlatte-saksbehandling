@@ -33,8 +33,15 @@ internal class FattVedtak(
             val behandlingId = packet["@behandlingId"].asUUID()
             val sakId = packet["@sakId"].longValue()
             val saksbehandler = packet["@saksbehandler"].textValue()
-            val fattetVedtak = try {
-                vedtaksvurderingService.fattVedtak(sakId.toString(), behandlingId, saksbehandler)
+           try {
+                val fattetVedtak = vedtaksvurderingService.fattVedtak(sakId.toString(), behandlingId, saksbehandler)
+                context.publish(JsonMessage.newMessage(
+                    mapOf(
+                        "@event" to "VEDTAK:FATTET",
+                        "@vedtak" to fattetVedtak,
+                        "@behanldingId" to behandlingId
+                    )
+                ).toJson())
             } catch (ex: Exception){
                 when(ex){
                     is KanIkkeEndreFattetVedtak,
@@ -45,11 +52,6 @@ internal class FattVedtak(
                     else -> throw ex
                 }
             }
-            context.publish(JsonMessage.newMessage(
-                mapOf(
-                    "@event" to "VEDTAK:FATTET",
-                    "@vedtak" to fattetVedtak
-                )
-            ).toJson())
+
         }
 }

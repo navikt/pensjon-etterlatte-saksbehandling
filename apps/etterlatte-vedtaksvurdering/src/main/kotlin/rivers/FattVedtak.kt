@@ -39,7 +39,7 @@ internal class FattVedtak(
                     mapOf(
                         "@event" to "VEDTAK:FATTET",
                         "@vedtak" to fattetVedtak,
-                        "@behanldingId" to behandlingId
+                        "@behandlingId" to behandlingId
                     )
                 ).toJson())
             } catch (ex: Exception){

@@ -35,7 +35,7 @@ internal class AttesterVedtak(
                 mapOf(
                     "@event" to "VEDTAK:ATTESTERT",
                     "@vedtak" to attestertVedtak,
-                    "@behanldingId" to behandlingId
+                    "@behandlingId" to behandlingId
                 )
             ).toJson())
         }

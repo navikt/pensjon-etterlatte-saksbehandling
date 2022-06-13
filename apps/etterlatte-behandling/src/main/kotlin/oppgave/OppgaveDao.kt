@@ -35,7 +35,9 @@ class OppgaveDao(private val datasource: DataSource) {
             val stmt =  it.prepareStatement("""
                 |SELECT b.id, b.sak_id, soekand_mottatt_dato, fnr, sakType, status 
                 |FROM behandling b inner join sak s on b.sak_id = s.id  
-                |where status in ${aktuelleStatuser.joinToString(separator = ", ", prefix = "(", postfix = ")") { "'${it.name}'" }}""".trimMargin()
+                |where status in ${aktuelleStatuser.joinToString(separator = ", ", prefix = "(", postfix = ")") { "'${it.name}'" }}""".trimMargin().also {
+                    println(it)
+            }
                 )
             return stmt.executeQuery().toList {
                 val mottattDato = getTimestamp("soekand_mottatt_dato").toLocalDateTime().atZone(ZoneId.of("UTC"))
@@ -45,6 +47,8 @@ class OppgaveDao(private val datasource: DataSource) {
                     mottattDato,
                     mottattDato.toLocalDate().plusMonths(1)
                     )
+            }.also {
+                println("""Hentet oppgaveliste for bruker med roller $roller. Fant ${it.size} oppgaver""")
             }
         }
     }

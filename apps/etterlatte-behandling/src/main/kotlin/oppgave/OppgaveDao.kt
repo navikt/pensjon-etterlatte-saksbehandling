@@ -2,6 +2,10 @@ package no.nav.etterlatte.oppgave
 
 import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.sak.Sak
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -12,7 +16,9 @@ enum class Rolle(){
 data class Oppgave(
     val behandlingId: UUID,
     val behandlingStatus: BehandlingStatus,
-    val sakId: Long
+    val sak: Sak,
+    val regdato: ZonedDateTime,
+    val fristDato: LocalDate,
 )
 
 class OppgaveDao(private val datasource: DataSource) {
@@ -26,12 +32,20 @@ class OppgaveDao(private val datasource: DataSource) {
         if (aktuelleStatuser.isEmpty()) return emptyList()
 
         datasource.connection.use {
-            val stmt =  it.prepareStatement(
-                    "SELECT id, sak_id, behandling_opprettet, sist_endret, " +
-                            "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
-                            "gyldighetssproving, status FROM behandling where status in ${aktuelleStatuser.joinToString(separator = ", ", prefix = "(", postfix = ")") { "'${it.name}'" }}"
+            val stmt =  it.prepareStatement("""
+                |SELECT b.id, b.sak_id, soekand_mottatt_dato, fnr, sakType, status 
+                |FROM behandling b inner join sak s on b.sak_id = s.id  
+                |where status in ${aktuelleStatuser.joinToString(separator = ", ", prefix = "(", postfix = ")") { "'${it.name}'" }}""".trimMargin()
                 )
-            return stmt.executeQuery().toList { Oppgave(getObject("id") as UUID, BehandlingStatus.valueOf(getString("status")), getLong("sak_id")) }
+            return stmt.executeQuery().toList {
+                val mottattDato = getTimestamp("soekand_mottatt_dato").toLocalDateTime().atZone(ZoneId.of("UTC"))
+                Oppgave(getObject("id") as UUID,
+                    BehandlingStatus.valueOf(getString("status")),
+                    Sak(getString("fnr"), getString("sakType"), getLong("sak_id")),
+                    mottattDato,
+                    mottattDato.toLocalDate().plusMonths(1)
+                    )
+            }
         }
     }
 

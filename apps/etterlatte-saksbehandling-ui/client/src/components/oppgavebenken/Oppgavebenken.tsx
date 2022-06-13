@@ -101,6 +101,8 @@ function mapOppgaveResponse(data: any): IOppgave {
 function mapStatus(status: string): StatusFilter {
   if (status === 'OPPRETTET') {
     return StatusFilter.NY
+  } else if (status === 'FATTET_VEDTAK' || status === 'ATTESTERT') {
+    return StatusFilter.FERDIG
   } else {
     return StatusFilter.UNDER_BEHANDLING
   }

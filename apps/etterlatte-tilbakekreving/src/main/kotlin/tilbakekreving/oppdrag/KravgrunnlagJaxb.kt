@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.tilbakekreving.oppdrag
+package no.nav.etterlatte.tilbakekreving.oppdrag
 
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import javax.xml.bind.JAXBContext

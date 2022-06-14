@@ -1,7 +1,12 @@
-package no.nav.etterlatte.tilbakekreving
+package no.nav.etterlatte
 
-import no.nav.etterlatte.tilbakekreving.tilbakekreving.config.ApplicationContext
+import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
 
 fun main() {
-    ApplicationContext()
+    startApplication(ApplicationContext())
+}
+
+fun startApplication(applicationContext: ApplicationContext) {
+    // TODO her må vi gjøre noe lurt - ønsker å lukke connections etc før applikasjonen lukkes
+    applicationContext.tilbakekrevingConsumer
 }

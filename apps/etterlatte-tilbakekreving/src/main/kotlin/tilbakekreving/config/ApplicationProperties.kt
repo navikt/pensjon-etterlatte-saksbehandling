@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.tilbakekreving.config
+package no.nav.etterlatte.tilbakekreving.config
 
 data class ApplicationProperties(
     val dbName: String,
@@ -10,7 +10,7 @@ data class ApplicationProperties(
     val mqPort: Int,
     val mqQueueManager: String,
     val mqChannel: String,
-    val mqSendQueue: String,
+    val mqKravgrunnlagQueue: String,
     val serviceUserUsername: String,
     val serviceUserPassword: String,
 ) {
@@ -26,7 +26,7 @@ data class ApplicationProperties(
                 mqPort = value("OPPDRAG_MQ_PORT").toInt(),
                 mqQueueManager = value("OPPDRAG_MQ_MANAGER"),
                 mqChannel = value("OPPDRAG_MQ_CHANNEL"),
-                mqSendQueue = value("OPPDRAG_SEND_MQ_NAME"),
+                mqKravgrunnlagQueue = value("OPPDRAG_KRAVGRUNNLAG_MQ_NAME"),
                 serviceUserUsername = value("srvuser"),
                 serviceUserPassword = value("srvpwd"),
             )

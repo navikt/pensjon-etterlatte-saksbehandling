@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.tilbakekreving.config
+package no.nav.etterlatte.tilbakekreving.config
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource

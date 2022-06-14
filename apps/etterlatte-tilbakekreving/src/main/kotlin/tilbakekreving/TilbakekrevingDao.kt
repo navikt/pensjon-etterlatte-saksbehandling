@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.tilbakekreving
+package no.nav.etterlatte.tilbakekreving
 
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import javax.sql.DataSource

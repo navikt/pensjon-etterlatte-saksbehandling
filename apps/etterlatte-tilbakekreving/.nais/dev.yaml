@@ -18,7 +18,7 @@ spec:
     enabled: true
     path: /metrics
   strategy:
-    type: Recreate
+    type: Recreate # denne trenger ikke være recreate hvis ikke r&r app
   gcp:
     sqlInstances:
       - type: POSTGRES_14
@@ -39,7 +39,7 @@ spec:
     max: 1
     min: 1
   env:
-    - name: OPPDRAG_SEND_MQ_NAME
+    - name: OPPDRAG_KRAVGRUNNLAG_MQ_NAME
       value: QA.Q2_231.OB04_OPPDRAG_XML
     - name: OPPDRAG_MQ_HOSTNAME
       value: b27apvl222.preprod.local

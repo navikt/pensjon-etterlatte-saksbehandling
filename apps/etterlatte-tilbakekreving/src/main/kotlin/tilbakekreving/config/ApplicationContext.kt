@@ -1,8 +1,8 @@
-package no.nav.etterlatte.tilbakekreving.tilbakekreving.config
+package no.nav.etterlatte.tilbakekreving.config
 
-import no.nav.etterlatte.tilbakekreving.config.JmsConnectionFactory
-import no.nav.etterlatte.tilbakekreving.tilbakekreving.TilbakekrevingDao
-import no.nav.etterlatte.tilbakekreving.tilbakekreving.TilbakekrevingService
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingConsumer
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingDao
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
 import java.time.Clock
 
 class ApplicationContext(
@@ -38,6 +38,14 @@ class ApplicationContext(
         tilbakekrevingDao = tilbakekrevingDao,
         clock = clock
     )
+
+    val tilbakekrevingConsumer by lazy {
+        TilbakekrevingConsumer(
+            tilbakekrevingService = tilbakekrevingService,
+            jmsConnectionFactory = jmsConnectionFactory,
+            queue = properties.mqKravgrunnlagQueue
+        )
+    }
 
     private fun jdbcUrl(host: String, port: Int, databaseName: String) =
         "jdbc:postgresql://${host}:$port/$databaseName"

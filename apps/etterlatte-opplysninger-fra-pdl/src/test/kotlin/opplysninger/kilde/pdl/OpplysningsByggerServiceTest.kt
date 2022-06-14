@@ -5,25 +5,16 @@ import io.mockk.mockk
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Adresse
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.person.Sivilstatus
-import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
-import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.opplysninger.kilde.pdl.OpplysningsByggerService
 import no.nav.etterlatte.opplysninger.kilde.pdl.Pdl
 import no.nav.etterlatte.opplysninger.kilde.pdl.lagOpplysning
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import java.io.FileNotFoundException
 import java.time.Instant
 import java.time.LocalDate
@@ -86,7 +77,9 @@ internal class OpplysningsByggerServiceTest {
             foedeland = foedeland,
             sivilstatus = sivilstatus,
             utland = utland,
-            familieRelasjon = familieRelasjon)
+            familieRelasjon = familieRelasjon,
+            vergemaalEllerFremtidsfullmakt = null
+            )
 
         fun readSoknadAsBarnepensjon(file: String): Barnepensjon {
             val skjemaInfo = objectMapper.writeValueAsString(

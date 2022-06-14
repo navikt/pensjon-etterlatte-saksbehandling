@@ -146,7 +146,7 @@ internal class BrevRepositoryIntegrationTest {
 
     private fun opprettBrev(behandlingId: String): Brev {
         return db.opprettBrev(
-            NyttBrev(
+            UlagretBrev(
                 behandlingId = behandlingId,
                 tittel = UUID.randomUUID().toString(),
                 mottaker = opprettMottaker(),

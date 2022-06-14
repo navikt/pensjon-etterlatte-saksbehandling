@@ -10,7 +10,10 @@ router.get('/behandling/:behandlingId', async (req: Request, res: Response) => {
   const path = `${apiUrl}/brev/behandling/${req.params.behandlingId}`
 
   const data = await fetch(path)
-      .then(res => res.json())
+      .then(res => {
+        console.log(res)
+        return res.json()
+      })
       .catch(() => res.sendStatus(500))
 
   res.send(await data)
@@ -25,8 +28,15 @@ router.delete('/:brevId', async (req: Request, res: Response) => {
 })
 
 router.get('/maler', async (req: Request, res: Response) => {
-  const data = await fetch(`${apiUrl}/brev/maler`)
-      .then(res => res.json())
+  console.log('\n\n/maler\n\n')
+  const data = await fetch(`${apiUrl}/brev/maler`, {headers: {
+      'Content-Type': 'application/json'
+    }})
+      .then(res => {
+        console.log("\n\n\n")
+        console.log(res)
+        return res.json()
+      })
       .catch(() => res.sendStatus(500))
 
   res.send(await data)
@@ -51,6 +61,21 @@ router.post('/behandling/:behandlingId', async (req: Request, res: Response) => 
     }
   })
       .then(res => res.json())
+      .catch(() => res.sendStatus(500))
+
+  res.send(await data)
+})
+
+router.post('/behandling/:behandlingId/vedtak', async (req: Request, res: Response) => {
+  const path = `${apiUrl}/brev/behandling/${req.params.behandlingId}/vedtak`
+
+  const data = await fetch(path, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+      .then(res => res.text())
       .catch(() => res.sendStatus(500))
 
   res.send(await data)

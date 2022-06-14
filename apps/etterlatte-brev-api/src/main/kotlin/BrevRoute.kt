@@ -44,6 +44,14 @@ fun Route.brevRoute(service: BrevService) {
             call.respond(brev)
         }
 
+        post("behandling/{behandlingId}/vedtak") {
+            val behandlingId = call.parameters["behandlingId"]!!
+
+            val brev = service.oppdaterVedtaksbrev(behandlingId)
+
+            call.respond(brev)
+        }
+
         post("{brevId}/pdf") {
             val brevId = call.parameters["brevId"]!!
             val innhold = service.hentBrevInnhold(brevId.toLong())

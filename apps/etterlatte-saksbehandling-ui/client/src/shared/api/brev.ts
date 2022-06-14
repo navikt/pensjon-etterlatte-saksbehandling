@@ -19,6 +19,14 @@ export const nyttBrevForBehandling = async (behandlingId: string, mottaker: Mott
       }
     }).then(res => res.json())
 
+export const opprettEllerOppdaterBrevForVedtak = async (behandlingId: string): Promise<any> =>
+    await fetch(`${path}/brev/behandling/${behandlingId}/vedtak`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(res => res.text())
+
 export const ferdigstillBrev = async (brevId: string): Promise<any> =>
     await fetch(`${path}/brev/${brevId}/ferdigstill`, {
       method: 'POST'

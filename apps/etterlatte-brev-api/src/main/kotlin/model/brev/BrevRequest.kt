@@ -11,12 +11,13 @@ abstract class BrevRequest {
     abstract fun templateName(): String
 }
 
+// TODO: Sikre non-nullable
 data class Mottaker(
-    val fornavn: String,
-    val etternavn: String,
-    val adresse: String,
-    val postnummer: String,
-    val poststed: String,
+    val fornavn: String? = null,
+    val etternavn: String? = null,
+    val adresse: String? = null,
+    val postnummer: String? = null,
+    val poststed: String? = null,
     val land: String? = null
 ) {
     companion object {

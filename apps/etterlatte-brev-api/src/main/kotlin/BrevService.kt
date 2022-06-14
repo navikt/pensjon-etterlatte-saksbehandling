@@ -17,7 +17,7 @@ import no.nav.etterlatte.vedtak.VedtakService
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import pdf.PdfGeneratorKlient
-import java.util.*
+import java.util.UUID
 import no.nav.etterlatte.model.brev.Mottaker as BrevMottaker
 
 class BrevService(
@@ -55,10 +55,42 @@ class BrevService(
 
         val pdf = pdfGenerator.genererPdf(request)
 
-        return db.opprettBrev(NyttBrev(behandlingId, mal.tittel, mottaker, false, pdf))
+        return db.opprettBrev(UlagretBrev(behandlingId, mal.tittel, mottaker, false, pdf))
     }
 
-    suspend fun opprettFraVedtak(vedtak: Vedtak): Brev {
+    suspend fun oppdaterVedtaksbrev(behandlingId: String): BrevID {
+        val vedtak = vedtakService.hentVedtak(behandlingId)
+        val nyttBrev = opprettNyttBrevFraVedtak(vedtak, behandlingId)
+
+        val vedtaksbrev = db.hentBrevForBehandling(behandlingId)
+            .find { it.erVedtaksbrev }
+
+        return if (vedtaksbrev == null)
+            db.opprettBrev(nyttBrev).id
+        else {
+            db.oppdaterBrev(vedtaksbrev.id, nyttBrev)
+            vedtaksbrev.id
+        }
+    }
+
+    // TODO: Undersøke om denne er nødvendig
+    suspend fun opprettFraVedtak(vedtak: Vedtak): Brev =
+        opprettNyttBrevFraVedtak(vedtak)
+            .let { db.opprettBrev(it) }
+
+    fun ferdigstillBrev(id: BrevID): Brev {
+        val brev: Brev = db.hentBrev(id)
+
+        // todo: vedtak må byttes ut med grunnlag for å fungere på behandlinger også.
+        val vedtak = vedtakService.hentVedtak(brev.behandlingId)
+
+        sendToRapid(opprettDistribusjonsmelding(brev, vedtak))
+        db.oppdaterStatus(id, Status.FERDIGSTILT)
+
+        return brev
+    }
+
+    private suspend fun opprettNyttBrevFraVedtak(vedtak: Vedtak, behandlingId: String? = null): UlagretBrev {
         val brevRequest = when (vedtak.type) {
             VedtakType.INNVILGELSE -> InnvilgetBrevRequest.fraVedtak(vedtak)
             VedtakType.AVSLAG -> AvslagBrevRequest.fraVedtak(vedtak)
@@ -71,19 +103,14 @@ class BrevService(
 
         val tittel = "Vedtak om ${vedtak.type.name.lowercase()}"
         val mottaker = Mottaker(Foedselsnummer.of(vedtak.finnBarn().fnr))
-        return db.opprettBrev(NyttBrev(vedtak.behandling.id.toString(), tittel, mottaker, true, pdf))
-    }
 
-    fun ferdigstillBrev(id: BrevID): Brev {
-        val brev: Brev = db.hentBrev(id)
-
-        // todo: vedtak må byttes ut med grunnlag for å fungere på behandlinger også.
-        val vedtak = vedtakService.hentVedtak(brev.behandlingId)
-
-        sendToRapid(opprettDistribusjonsmelding(brev, vedtak))
-        db.oppdaterStatus(id, Status.FERDIGSTILT)
-
-        return brev
+        return UlagretBrev(
+            behandlingId = behandlingId ?: vedtak.behandling.id.toString(),
+            tittel,
+            mottaker,
+            true,
+            pdf
+        )
     }
 
     private fun opprettDistribusjonsmelding(brev: Brev, vedtak: Vedtak): String =

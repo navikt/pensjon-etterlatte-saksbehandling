@@ -16,11 +16,11 @@ enum class Status {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Adresse(
-    val fornavn: String,
-    val etternavn: String,
-    val adresse: String,
-    val postnummer: String,
-    val poststed: String,
+    val fornavn: String? = null,
+    val etternavn: String? = null,
+    val adresse: String? = null,
+    val postnummer: String? = null,
+    val poststed: String? = null,
     val land: String? = null
 )
 
@@ -46,14 +46,14 @@ class Brev(
     val erVedtaksbrev: Boolean,
 ) {
     companion object {
-        fun fraNyttBrev(id: BrevID, nyttBrev: NyttBrev) =
+        fun fraUlagretBrev(id: BrevID, ulagretBrev: UlagretBrev) =
             Brev(
                 id = id,
-                behandlingId = nyttBrev.behandlingId,
-                tittel = nyttBrev.tittel,
-                status = nyttBrev.status,
-                mottaker = nyttBrev.mottaker,
-                erVedtaksbrev = nyttBrev.erVedtaksbrev
+                behandlingId = ulagretBrev.behandlingId,
+                tittel = ulagretBrev.tittel,
+                status = ulagretBrev.status,
+                mottaker = ulagretBrev.mottaker,
+                erVedtaksbrev = ulagretBrev.erVedtaksbrev
             )
     }
 }
@@ -64,7 +64,7 @@ class BrevInnhold(
     val data: ByteArray
 )
 
-class NyttBrev(
+class UlagretBrev(
     val behandlingId: String,
     val tittel: String,
     val mottaker: Mottaker,

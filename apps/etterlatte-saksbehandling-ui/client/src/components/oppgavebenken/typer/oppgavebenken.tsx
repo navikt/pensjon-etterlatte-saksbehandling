@@ -44,16 +44,24 @@ export const soeknadTypeFilter: Record<SoeknadTypeFilter, IPar> = {
 
 export enum StatusFilter {
   VELG = 'VELG',
-  NY = 'NY',
+  GYLDIG_SOEKNAD = 'GYLDIG_SOEKNAD',
+  IKKE_GYLDIG_SOEKNAD = 'IKKE_GYLDIG_SOEKNAD',
   UNDER_BEHANDLING = 'UNDER_BEHANDLING',
-  FERDIG = 'FERDIG',
+  FATTET_VEDTAK = 'FATTET_VEDTAK',
+  ATTESTERT = 'ATTESTERT',
+  IVERKSATT = 'IVERKSATT',
+  AVBRUTT = 'AVBRUTT',
 }
 
 export const statusFilter: Record<StatusFilter, IPar> = {
   VELG: { id: 'VELG', navn: 'Velg' },
-  NY: { id: 'NY', navn: 'Ikke påbegynt' },
+  GYLDIG_SOEKNAD: { id: 'GYLDIG_SOEKNAD', navn: 'Gyldig søknad' },
+  IKKE_GYLDIG_SOEKNAD: { id: 'IKKE_GYLDIG_SOEKNAD', navn: 'Ikke gyldig søknad' },
   UNDER_BEHANDLING: { id: 'UNDER_BEHANDLING', navn: 'Under behandling' },
-  FERDIG: { id: 'FERDIG', navn: 'Ferdig' },
+  FATTET_VEDTAK: { id: 'FATTET_VEDTAK', navn: 'Fattet vedtak' },
+  ATTESTERT: { id: 'ATTESTERT', navn: 'Attestert' },
+  IVERKSATT: { id: 'IVERKSATT', navn: 'Iverksatt' },
+  AVBRUTT: { id: 'AVBRUTT', navn: 'Avbrutt' },
 }
 
 export enum SaksbehandlerFilter {

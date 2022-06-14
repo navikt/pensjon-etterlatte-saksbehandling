@@ -91,21 +91,11 @@ function mapOppgaveResponse(data: any): IOppgave {
     fristdato: new Date(data.fristdato),
     fnr: data.fnr,
     beskrivelse: data.beskrivelse,
-    status: mapStatus(data.status.toUpperCase()),
+    status: data.status.toUpperCase() as StatusFilter,
     saksbehandler: data.saksbehandler,
     handling: data.handling.toUpperCase() as Handlinger,
   }
   return oppgave
-}
-
-function mapStatus(status: string): StatusFilter {
-  if (status === 'OPPRETTET') {
-    return StatusFilter.NY
-  } else if (status === 'FATTET_VEDTAK' || status === 'ATTESTERT') {
-    return StatusFilter.FERDIG
-  } else {
-    return StatusFilter.UNDER_BEHANDLING
-  }
 }
 
 export default Oppgavebenken

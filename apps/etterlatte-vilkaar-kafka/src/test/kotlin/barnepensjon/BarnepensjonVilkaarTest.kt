@@ -5,36 +5,20 @@ import no.nav.etterlatte.barnepensjon.setVikaarVurderingFraKriterier
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Forelder
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Verge
-import no.nav.etterlatte.libs.common.person.Adresse
-import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.*
+import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
-import no.nav.etterlatte.libs.common.vikaar.Kriterie
-import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
+import no.nav.etterlatte.libs.common.vikaar.*
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.Instant
-import java.time.LocalDate
-import org.junit.jupiter.api.Assertions.*
 import vilkaar.barnepensjon.barnIngenOppgittUtlandsadresse
 import vilkaar.barnepensjon.barnOgAvdoedSammeBostedsadresse
 import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
+import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 
@@ -369,7 +353,8 @@ internal class BarnepensjonVilkaarTest {
         sivilstatus = null,
         statsborgerskap = null,
         utland = null,
-        familieRelasjon = FamilieRelasjon(null, foreldre, null)
+        familieRelasjon = FamilieRelasjon(null, foreldre, null),
+        vergemaalEllerFremtidsfullmakt = null
     )
 
     val adresserNorgePdl = listOf(

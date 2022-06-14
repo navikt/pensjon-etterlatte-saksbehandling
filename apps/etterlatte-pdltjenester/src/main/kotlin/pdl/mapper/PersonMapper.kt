@@ -38,6 +38,7 @@ object PersonMapper {
             sivilstatus = sivilstand?.let { Sivilstatus.valueOf(it.type.name) } ?: Sivilstatus.UOPPGITT,
             utland = UtlandMapper.mapUtland(hentPerson),
             familieRelasjon = FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, personRolle),
+            vergemaalEllerFremtidsfullmakt = hentPerson.vergemaalEllerFremtidsfullmakt?.let{ VergeMapper.mapVerge(it)}
         )
     }
 

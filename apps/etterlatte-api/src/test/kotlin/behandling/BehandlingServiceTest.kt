@@ -14,13 +14,13 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.typer.Saker
-import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal class BehandlingServiceTest {
 
@@ -179,6 +179,7 @@ internal class BehandlingServiceTest {
             foedeland = "Norge",
             sivilstatus = null,
             utland = utland,
-            familieRelasjon = familieRelasjon
+            familieRelasjon = familieRelasjon,
+            vergemaalEllerFremtidsfullmakt = null
         )
 }

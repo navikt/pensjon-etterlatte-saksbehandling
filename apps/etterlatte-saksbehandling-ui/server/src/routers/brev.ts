@@ -32,6 +32,14 @@ router.get('/maler', async (req: Request, res: Response) => {
   res.send(await data)
 })
 
+router.get('/mottakere', async (req: Request, res: Response) => {
+  const data = await fetch(`${apiUrl}/brev/mottakere`)
+      .then(res => res.json())
+      .catch(() => res.sendStatus(500))
+
+  res.send(await data)
+})
+
 router.post('/behandling/:behandlingId', async (req: Request, res: Response) => {
   const path = `${apiUrl}/brev/behandling/${req.params.behandlingId}`
 

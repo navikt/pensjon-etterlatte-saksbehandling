@@ -135,13 +135,15 @@ class BrevRepository private constructor(private val ds: DataSource) {
         mottaker = Mottaker(
             foedselsnummer = getString("foedselsnummer")?.let { Foedselsnummer.of(it) },
             orgnummer = getString("orgnummer"),
-            adresse = Adresse(
-                fornavn = getString("fornavn"),
-                etternavn = getString("etternavn"),
-                adresse = getString("adresse"),
-                postnummer = getString("postnummer"),
-                poststed = getString("poststed")
-            )
+            adresse = getString("fornavn")?.let {
+                Adresse(
+                    fornavn = it,
+                    etternavn = getString("etternavn"),
+                    adresse = getString("adresse"),
+                    postnummer = getString("postnummer"),
+                    poststed = getString("poststed")
+                )
+            }
         ),
         erVedtaksbrev = getBoolean("vedtaksbrev")
     )

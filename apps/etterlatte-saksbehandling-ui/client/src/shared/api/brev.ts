@@ -3,11 +3,14 @@ const path = process.env.REACT_APP_VEDTAK_URL
 export const hentMaler = async (): Promise<any> =>
     await fetch(`${path}/brev/maler`).then(res => res.json())
 
+export const hentMottakere = async (): Promise<any> =>
+    await fetch(`${path}/brev/mottakere`).then(res => res.json())
+
 export const hentBrevForBehandling = async (behandlingId: string): Promise<any> =>
     await fetch(`${path}/brev/behandling/${behandlingId}`)
         .then(res => res.json())
 
-export const nyttBrevForBehandling = async (behandlingId: string, mottaker: any, mal: any): Promise<any> =>
+export const nyttBrevForBehandling = async (behandlingId: string, mottaker: Mottaker, mal: any): Promise<any> =>
     await fetch(`${path}/brev/behandling/${behandlingId}`, {
       method: 'POST',
       body: JSON.stringify({ mottaker, mal }),
@@ -36,3 +39,17 @@ export const genererPdf = async (brevId: string): Promise<Blob> =>
           }
         })
         .then(buffer => new Blob([buffer], { type: 'application/pdf' }))
+
+export interface Mottaker {
+    foedselsnummer?: string,
+    orgnummer?: string,
+    adresse?: Adresse
+}
+
+export interface Adresse {
+    fornavn?: string
+    etternavn?: string
+    adresse?: string
+    postnummer?: string
+    poststed?: string
+}

@@ -43,8 +43,10 @@ class BrevService(
 
     suspend fun opprett(behandlingId: String, mottaker: Mottaker, mal: Mal): Brev {
         val brevMottaker = when {
-            // mottaker.foedselsnummer != null -> BrevMottaker()
-            // mottaker.orgnummer != null -> BrevMottaker()
+            // todo: hent adresse fra pdl
+            mottaker.foedselsnummer != null -> BrevMottaker("Fornavn", "Fødselsnummer", "Veien 22", "0000", "Oslo")
+            // todo: hent adresse fra pdl og skriv om mottaker for brev til å støtte organisasjoner.
+            mottaker.orgnummer != null -> BrevMottaker("Fornavn", "Organisasjon", "Veien 22", "0000", "Oslo")
             mottaker.adresse != null -> BrevMottaker.fraAdresse(adresse = mottaker.adresse!!)
             else -> throw Exception("Ingen brevmottaker spesifisert")
         }

@@ -6,6 +6,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
+import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
 
 fun Route.brevRoute(service: BrevService) {
     route("brev") {
@@ -17,6 +18,15 @@ fun Route.brevRoute(service: BrevService) {
             )
 
             call.respond(maler)
+        }
+
+        get("mottakere") {
+            val mottakere = listOf(
+                AvsenderMottaker("974761319", idType = "ORGNR", navn = "Statsforvalteren i Oslo og Viken"),
+                AvsenderMottaker("974762501", idType = "ORGNR", navn = "Statsforvalteren i Vestfold og Telemark")
+            )
+
+            call.respond(mottakere)
         }
 
         get("behandling/{behandlingId}") {

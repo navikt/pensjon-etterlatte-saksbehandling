@@ -1,7 +1,7 @@
 package oppdrag
 
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.tilbakekreving.tilbakekreving.oppdrag.KravgrunnlagJaxb
+import no.nav.etterlatte.tilbakekreving.oppdrag.KravgrunnlagJaxb
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import readFile

@@ -19,6 +19,7 @@ include(
     "apps:etterlatte-vedtaksvurdering",
     "apps:etterlatte-grunnlag",
     "apps:etterlatte-avkorting",
+    "apps:etterlatte-tilbakekreving",
     "libs:ktorclient-auth-clientcredentials",
     "libs:common",
     "libs:ktorclient-onbehalfof",

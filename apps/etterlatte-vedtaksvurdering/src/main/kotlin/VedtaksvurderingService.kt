@@ -208,10 +208,13 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
     }
 
 
-    fun utbetalingsperioderFraVedtak(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak): List<Utbetalingsperiode> {
-        if(vedtak.type != VedtakType.INNVILGELSE) return listOf(Utbetalingsperiode(0, vedtak.virk.copy(tom = null), null, UtbetalingsperiodeType.OPPHOER))
+    fun utbetalingsperioderFraVedtak(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) =
+        utbetalingsperioderFraVedtak(vedtak.type, vedtak.virk, vedtak.beregning?.sammendrag?: emptyList())
 
-        val perioderFraBeregning = vedtak.beregning?.sammendrag?.map { Utbetalingsperiode(0, it.periode, it.beloep, UtbetalingsperiodeType.UTBETALING) }?.sortedBy { it.periode.fom } ?: emptyList()
+    fun utbetalingsperioderFraVedtak(vedtakType: VedtakType, virk:Periode, beregning: List<Beregningsperiode>): List<Utbetalingsperiode> {
+        if(vedtakType != VedtakType.INNVILGELSE) return listOf(Utbetalingsperiode(0, virk.copy(tom = null), null, UtbetalingsperiodeType.OPPHOER))
+
+        val perioderFraBeregning = beregning.map { Utbetalingsperiode(0, it.periode, it.beloep, UtbetalingsperiodeType.UTBETALING) }.sortedBy { it.periode.fom }
 
         val manglendePerioderMellomBeregninger = perioderFraBeregning
             .map { it.periode }
@@ -221,7 +224,7 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
             .map { Periode(it.first, it.second) }
             .map { Utbetalingsperiode(0, it, null, UtbetalingsperiodeType.OPPHOER) }
         val fomBeregninger = perioderFraBeregning.firstOrNull()?.periode?.fom
-        val manglendeStart = if (fomBeregninger == null || vedtak.virk.fom.isBefore(fomBeregninger)) Utbetalingsperiode(0, Periode(vedtak.virk.fom, null), null, UtbetalingsperiodeType.OPPHOER)  else null
+        val manglendeStart = if (fomBeregninger == null || virk.fom.isBefore(fomBeregninger)) Utbetalingsperiode(0, Periode(virk.fom, fomBeregninger?.minusMonths(1)), null, UtbetalingsperiodeType.OPPHOER)  else null
         val manglendeSlutt = perioderFraBeregning.lastOrNull()?.periode?.tom?.let { Utbetalingsperiode(0,Periode( it.plusMonths(1), null), null, UtbetalingsperiodeType.OPPHOER) }
 
         return (perioderFraBeregning + manglendePerioderMellomBeregninger + manglendeStart + manglendeSlutt).filterNotNull().sortedBy { it.periode.fom }

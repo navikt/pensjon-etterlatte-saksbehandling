@@ -5,6 +5,8 @@ import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.database.Vedtak
 import no.nav.etterlatte.database.VedtaksvurderingRepository
+import no.nav.etterlatte.domene.vedtak.Periode
+import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
 import no.nav.etterlatte.libs.common.avkorting.Endringskode
@@ -19,6 +21,7 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 

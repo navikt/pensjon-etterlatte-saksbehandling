@@ -42,7 +42,7 @@ jobs:
           context: apps/${APP_NAME}
           push: true
           tags: |
-            ${IMAGE}
+            ${{ IMAGE }}
 
   deploy-to-dev-gcp:
     name: Deploy to dev-gcp

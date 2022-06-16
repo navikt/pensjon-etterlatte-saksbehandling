@@ -29,20 +29,17 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '16.x'
-      - name: Login to GitHub Package Repository
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build container image
-        uses: docker/build-push-action@v2
-        with:
-          context: apps/${{ github.workflow }}
-          push: true
-          tags: |
-            ghrc.io/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
+      - name: Gradle test and build
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :apps:${APP_NAME}:test :apps:${APP_NAME}:build
+      - name: Build and publish docker image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker login  ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          docker build --tag ${IMAGE} apps/${APP_NAME}
+          docker push ${IMAGE}
 
   deploy-to-dev-gcp:
     name: Deploy to dev-gcp

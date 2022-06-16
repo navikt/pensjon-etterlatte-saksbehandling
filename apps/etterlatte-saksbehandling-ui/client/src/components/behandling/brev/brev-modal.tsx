@@ -1,10 +1,10 @@
-import { BodyLong, Button, Modal, Tag } from "@navikt/ds-react";
-import { useState } from "react";
-import { genererPdf } from "../../../shared/api/brev";
-import styled from "styled-components";
-import { Delete, Findout, Notes, Success } from "@navikt/ds-icons";
+import { BodyLong, Button, Modal, Tag } from '@navikt/ds-react'
+import { useState } from 'react'
+import { genererPdf } from '../../../shared/api/brev'
+import styled from 'styled-components'
+import { Delete, Findout, Notes, Success } from '@navikt/ds-icons'
 
-const PdfViewer = styled.iframe`
+export const PdfViewer = styled.iframe`
   //margin-top: 60px;
   margin-bottom: 20px;
   width: 800px;
@@ -18,7 +18,11 @@ const ButtonRow = styled.div`
   text-align: right;
 `
 
-export default function BrevModal({ brev, ferdigstill, slett }: {
+export default function BrevModal({
+  brev,
+  ferdigstill,
+  slett,
+}: {
   brev: any
   ferdigstill: (brevId: any) => Promise<void>
   slett: (brevId: any) => Promise<void>
@@ -33,12 +37,12 @@ export default function BrevModal({ brev, ferdigstill, slett }: {
     setIsOpen(true)
 
     genererPdf(brev.id)
-        .then(file => URL.createObjectURL(file))
-        .then(url => setFileURL(url))
-        .catch(e => setError(e.message))
-        .finally(() => {
-          if (fileURL) URL.revokeObjectURL(fileURL)
-        })
+      .then((file) => URL.createObjectURL(file))
+      .then((url) => setFileURL(url))
+      .catch((e) => setError(e.message))
+      .finally(() => {
+        if (fileURL) URL.revokeObjectURL(fileURL)
+      })
   }
 
   const ferdigstillBrev = () => ferdigstill(brev.id).then(() => setIsOpen(false))
@@ -46,54 +50,52 @@ export default function BrevModal({ brev, ferdigstill, slett }: {
   const slettBrev = () => slett(brev.id).then(() => setIsOpen(false))
 
   return (
-      <>
+    <>
         <Button variant={(isDone || brev.erVedtaksbrev) ? 'secondary' : 'primary'} size={'small'} onClick={open}>
           {(isDone || brev.erVedtaksbrev) ? <Findout/> : <Notes/>}
-        </Button>
-        &nbsp;&nbsp;
+      </Button>
+      &nbsp;&nbsp;
         {(!isDone && !brev.erVedtaksbrev) && (
-            <Button variant={'danger'} size={'small'} disabled={isDone} onClick={slettBrev}>
-              <Delete/>
-            </Button>
+      <Button variant={'danger'} size={'small'} disabled={isDone} onClick={slettBrev}>
+        <Delete />
+      </Button>
         )}
 
-        <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-          <Modal.Content>
-            <h2>{brev.tittel}</h2>
-            <h4>
-              <Tag variant={'info'} size={'small'}>
-                {brev.status}
-              </Tag>
-            </h4>
+      <Modal open={isOpen} onClose={() => setIsOpen(false)}>
+        <Modal.Content>
+          <h2>{brev.tittel}</h2>
+          <h4>
+            <Tag variant={'info'} size={'small'}>
+              {brev.status}
+            </Tag>
+          </h4>
 
-            {error && (
-                <BodyLong>
-                  En feil har oppstått ved henting av PDF:
-                  <br/>
-                  <code>{error}</code>
-                </BodyLong>
-            )}
+          {error && (
+            <BodyLong>
+              En feil har oppstått ved henting av PDF:
+              <br />
+              <code>{error}</code>
+            </BodyLong>
+          )}
 
-            <div>
-              {fileURL && <PdfViewer src={fileURL}/>}
-            </div>
+          <div>{fileURL && <PdfViewer src={fileURL} />}</div>
 
-            <ButtonRow>
-              <Button variant={'secondary'} onClick={() => setIsOpen(false)}>
+          <ButtonRow>
+            <Button variant={'secondary'} onClick={() => setIsOpen(false)}>
                 {(isDone || brev.erVedtaksbrev) ? 'Lukk' : 'Avbryt'}
-              </Button>
+            </Button>
 
               {(!isDone && !brev.erVedtaksbrev) && (
-                  <>
-                    &nbsp;&nbsp;
-                    <Button variant={'primary'} onClick={ferdigstillBrev}>
-                      Godkjenn <Success />
-                    </Button>
-                  </>
-              )}
-            </ButtonRow>
-          </Modal.Content>
-        </Modal>
-      </>
+              <>
+                &nbsp;&nbsp;
+                <Button variant={'primary'} onClick={ferdigstillBrev}>
+                  Godkjenn <Success />
+                </Button>
+              </>
+            )}
+          </ButtonRow>
+        </Modal.Content>
+      </Modal>
+    </>
   )
 }

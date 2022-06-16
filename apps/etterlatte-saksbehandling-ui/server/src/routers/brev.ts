@@ -10,11 +10,8 @@ router.get('/behandling/:behandlingId', async (req: Request, res: Response) => {
   const path = `${apiUrl}/brev/behandling/${req.params.behandlingId}`
 
   const data = await fetch(path)
-      .then(res => {
-        console.log(res)
-        return res.json()
-      })
-      .catch(() => res.sendStatus(500))
+    .then((res) => res.json())
+    .catch(() => res.sendStatus(500))
 
   res.send(await data)
 })
@@ -23,29 +20,22 @@ router.delete('/:brevId', async (req: Request, res: Response) => {
   const path = `${apiUrl}/brev/${req.params.brevId}`
 
   await fetch(path, { method: 'DELETE' })
-      .then(response => res.sendStatus(response.status))
-      .catch(() => res.sendStatus(500))
+    .then((response) => res.sendStatus(response.status))
+    .catch(() => res.sendStatus(500))
 })
 
 router.get('/maler', async (req: Request, res: Response) => {
-  console.log('\n\n/maler\n\n')
-  const data = await fetch(`${apiUrl}/brev/maler`, {headers: {
-      'Content-Type': 'application/json'
-    }})
-      .then(res => {
-        console.log("\n\n\n")
-        console.log(res)
-        return res.json()
-      })
-      .catch(() => res.sendStatus(500))
+  const data = await fetch(`${apiUrl}/brev/maler`)
+    .then((res) => res.json())
+    .catch(() => res.sendStatus(500))
 
   res.send(await data)
 })
 
 router.get('/mottakere', async (req: Request, res: Response) => {
   const data = await fetch(`${apiUrl}/brev/mottakere`)
-      .then(res => res.json())
-      .catch(() => res.sendStatus(500))
+    .then((res) => res.json())
+    .catch(() => res.sendStatus(500))
 
   res.send(await data)
 })
@@ -57,8 +47,8 @@ router.post('/behandling/:behandlingId', async (req: Request, res: Response) => 
     method: 'POST',
     body: JSON.stringify(req.body),
     headers: {
-      'Content-Type': 'application/json'
-    }
+      'Content-Type': 'application/json',
+    },
   })
       .then(res => res.json())
       .catch(() => res.sendStatus(500))
@@ -85,8 +75,8 @@ router.post('/:brevId/ferdigstill', async (req: Request, res: Response) => {
   const path = `${apiUrl}/brev/${req.params.brevId}/ferdigstill`
 
   const data = await fetch(path, { method: 'POST' })
-      .then(res => res.json())
-      .catch(() => res.sendStatus(500))
+    .then((res) => res.json())
+    .catch(() => res.sendStatus(500))
 
   res.send(await data)
 })
@@ -94,8 +84,32 @@ router.post('/:brevId/ferdigstill', async (req: Request, res: Response) => {
 router.post('/:brevId/pdf', async (req: Request, res: Response) => {
   const path = `${apiUrl}/brev/${req.params.brevId}/pdf`
 
-  const result = await fetch(path, { method: 'POST' })
-      .then(res => ({ status: res.status, data: res.buffer() }))
+  const result = await fetch(path, { method: 'POST' }).then((res) => ({ status: res.status, data: res.buffer() }))
+
+  if (result.status == 200) {
+    res.contentType('application/pdf')
+    res.send(await result.data)
+  } else {
+    res.sendStatus(result.status)
+  }
+})
+
+router.post('/forhaandsvisning', async (req: Request, res: Response) => {
+  const path = `${apiUrl}/brev/forhaandsvisning`
+
+  console.log(req.body)
+  console.log('hello')
+
+  const result = await fetch(path, {
+    method: 'POST',
+    body: JSON.stringify(req.body),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  }).then((res) => ({
+    status: res.status,
+    data: res.buffer(),
+  }))
 
   if (result.status == 200) {
     res.contentType('application/pdf')

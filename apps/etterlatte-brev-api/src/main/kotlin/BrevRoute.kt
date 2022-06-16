@@ -39,7 +39,8 @@ fun Route.brevRoute(service: BrevService) {
             val behandlingId = call.parameters["behandlingId"]!!
             val request = call.receive<OpprettBrevRequest>()
 
-            val brev = service.opprett(behandlingId, request.mottaker, request.mal)
+            val brevInnhold = service.opprett(request.mottaker, request.mal)
+            val brev = service.lagreAnnetBrev(behandlingId, request.mottaker, brevInnhold)
 
             call.respond(brev)
         }
@@ -50,6 +51,14 @@ fun Route.brevRoute(service: BrevService) {
             val brev = service.oppdaterVedtaksbrev(behandlingId)
 
             call.respond(brev)
+        }
+
+        post("forhaandsvisning") {
+            val request = call.receive<OpprettBrevRequest>()
+
+            val brev = service.opprett(request.mottaker, request.mal)
+
+            call.respond(brev.data)
         }
 
         post("{brevId}/pdf") {

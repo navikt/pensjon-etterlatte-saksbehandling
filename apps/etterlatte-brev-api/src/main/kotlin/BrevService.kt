@@ -17,7 +17,7 @@ import no.nav.etterlatte.vedtak.VedtakService
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import pdf.PdfGeneratorKlient
-import java.util.UUID
+import java.util.*
 import no.nav.etterlatte.model.brev.Mottaker as BrevMottaker
 
 class BrevService(
@@ -43,7 +43,7 @@ class BrevService(
         return db.slett(id)
     }
 
-    suspend fun opprett(behandlingId: String, mottaker: Mottaker, mal: Mal): Brev {
+    suspend fun opprett(mottaker: Mottaker, mal: Mal): BrevInnhold {
         val brevMottaker = when {
             // todo: hent adresse fra pdl
             mottaker.foedselsnummer != null -> BrevMottaker("Fornavn", "Fødselsnummer", "Veien 22", "0000", "Oslo")
@@ -55,9 +55,11 @@ class BrevService(
 
         val request = AnnetBrevRequest(mal, Spraak.NB, brevMottaker)
 
-        val pdf = pdfGenerator.genererPdf(request)
+        return BrevInnhold(mal.tittel, Spraak.NB.toString(), pdfGenerator.genererPdf(request))
+    }
 
-        return db.opprettBrev(UlagretBrev(behandlingId, mal.tittel, mottaker, false, pdf))
+    fun lagreAnnetBrev(behandlingId: String, mottaker: Mottaker, brevInnhold: BrevInnhold): Brev {
+        return db.opprettBrev(UlagretBrev(behandlingId, brevInnhold.mal, mottaker, false, brevInnhold.data))
     }
 
     suspend fun oppdaterVedtaksbrev(behandlingId: String): BrevID {

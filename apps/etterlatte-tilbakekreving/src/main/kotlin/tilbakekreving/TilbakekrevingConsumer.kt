@@ -3,7 +3,8 @@ package no.nav.etterlatte.tilbakekreving
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.tilbakekreving.config.JmsConnectionFactory
-import no.nav.etterlatte.tilbakekreving.oppdrag.KravgrunnlagJaxb
+import no.nav.etterlatte.tilbakekreving.domene.KravgrunnlagDto
+import no.nav.etterlatte.tilbakekreving.oppdrag.TilbakekrevingsmeldingMapper
 import org.slf4j.LoggerFactory
 import javax.jms.ExceptionListener
 import javax.jms.Message
@@ -36,7 +37,7 @@ class TilbakekrevingConsumer(
                 try {
                     logger.info("Tilbakekrevings grunnlagg mottatt ")
                     kravgrunnlagXml = message!!.getBody(String::class.java)
-                    val kravgrunnlag = KravgrunnlagJaxb.toKravgrunnlag(kravgrunnlagXml)
+                    val kravgrunnlag = TilbakekrevingsmeldingMapper().toTilbakekreving(kravgrunnlagXml)
                     tilbakekrevingService.lagreKravgrunnlag(kravgrunnlag)
                 } catch (e: Exception) {
                     logger.error("Feilet under mottak av tilbakekrevingsgrunnlag", e)

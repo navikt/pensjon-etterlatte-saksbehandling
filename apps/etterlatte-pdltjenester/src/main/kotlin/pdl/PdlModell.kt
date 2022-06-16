@@ -1,5 +1,6 @@
 package no.nav.etterlatte.pdl
 
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -19,7 +20,8 @@ data class PdlVariables(
     val kontaktadresseHistorikk: Boolean,
     val utland: Boolean,
     val sivilstand: Boolean,
-    val familieRelasjon: Boolean
+    val familieRelasjon: Boolean,
+    val vergemaal: Boolean
 )
 
 data class PdlPersonResponse(
@@ -69,7 +71,9 @@ data class PdlHentPerson(
     val statsborgerskap: List<PdlStatsborgerskap>?,
     val utflyttingFraNorge: List<PdlUtflyttingFraNorge>?,
     val foreldreansvar: List<PdlForelderAnsvar>?,
-    val forelderBarnRelasjon: List<PdlForelderBarnRelasjon>?
+    val forelderBarnRelasjon: List<PdlForelderBarnRelasjon>?,
+    var vergemaalEllerFremtidsfullmakt: List<PdlVergemaalEllerFremtidsfullmakt>?
+
 )
 
 data class PdlAdressebeskyttelse(
@@ -332,3 +336,16 @@ enum class PdlForelderBarnRelasjonRolle {
     MEDMOR,
     MOR
 }
+data class PdlVergemaalEllerFremtidsfullmakt(
+    val embete: String?,
+    val folkeregistermetadata: PdlFolkeregistermetadata? = null,
+    val metadata: PdlMetadata,
+    val type: String?,
+    val vergeEllerFullmektig: PdlVergeEllerFullmektig
+)
+data class PdlVergeEllerFullmektig (
+    val motpartsPersonident: Foedselsnummer?,
+    val navn: PdlPersonnavn?,
+    val omfang: String?,
+    val omfangetErInnenPersonligOmraade: Boolean
+)

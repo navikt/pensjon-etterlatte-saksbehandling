@@ -1,13 +1,57 @@
 import { IAction } from '../AppContext'
+import { IAdresse } from '../../components/behandling/types'
 
 export interface IDetaljertBehandling {
   id: string
   sak: number
-  grunnlag: IBehandlingsopplysning[]
   vilkårsprøving: IVilkaarResultat
   gyldighetsprøving: IGyldighetResultat
+  kommerSoekerTilgode: IKommerSoekerTilgode
   beregning: any
   fastsatt: boolean
+  soeknadMottattDato: string
+  virkningstidspunkt: string
+}
+
+export interface IKommerSoekerTilgode {
+  kommerSoekerTilgodeVurdering: IVilkaarResultat
+  familieforhold: IFamiliemedlemmer
+}
+
+export interface IFamiliemedlemmer {
+  avdoed: IPersoninfoAvdoed
+  soeker: IPersoninfoSoeker
+  gjenlevendeForelder: IPersoninfoGjenlevendeForelder
+}
+
+export interface IPersoninfoAvdoed {
+  navn: string
+  fnr: string
+  rolle: PersonRolle
+  bostedadresser: IAdresse[]
+  doedsdato: string
+}
+
+export interface IPersoninfoSoeker {
+  navn: string
+  fnr: string
+  rolle: PersonRolle
+  bostedadresser: IAdresse[]
+  soeknadAdresse: IUtlandsadresseSoeknad
+  foedselsdato: string
+}
+
+export interface IUtlandsadresseSoeknad {
+  adresseIUtlandet: string
+  land?: string
+  adresse?: string
+}
+
+export interface IPersoninfoGjenlevendeForelder {
+  navn: string
+  fnr: string
+  rolle: PersonRolle
+  bostedadresser: IAdresse[]
 }
 
 export interface IBehandlingsopplysning {
@@ -52,15 +96,14 @@ export interface IGyldighetResultat {
 }
 
 export interface IGyldighetproving {
-  navn: GyldighetType
+  navn: GyldigFramsattType
   resultat: VurderingsResultat
-  vurdertDato: string
+  basertPaaOpplysninger: any
 }
 
-export enum GyldighetType {
+export enum GyldigFramsattType {
   INNSENDER_ER_FORELDER = 'INNSENDER_ER_FORELDER',
   HAR_FORELDREANSVAR_FOR_BARNET = 'HAR_FORELDREANSVAR_FOR_BARNET',
-  BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL = 'BARN_GJENLEVENDE_SAMME_BOSTEDADRESSE_PDL',
 }
 
 export interface IVilkaarResultat {
@@ -68,6 +111,7 @@ export interface IVilkaarResultat {
   vilkaar: IVilkaarsproving[]
   vurdertDato: string
 }
+
 export interface IVilkaarsproving {
   navn: VilkaarsType
   resultat: VurderingsResultat
@@ -79,6 +123,9 @@ export enum VilkaarsType {
   DOEDSFALL_ER_REGISTRERT = 'DOEDSFALL_ER_REGISTRERT',
   AVDOEDES_FORUTGAAENDE_MEDLEMSKAP = 'AVDOEDES_FORUTGAAENDE_MEDLEMSKAP',
   BARNETS_MEDLEMSKAP = 'BARNETS_MEDLEMSKAP',
+  SAMME_ADRESSE = 'GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE',
+  BARN_BOR_PAA_AVDOEDES_ADRESSE = 'BARN_BOR_PAA_AVDOEDES_ADRESSE',
+  BARN_INGEN_OPPGITT_UTLANDSADRESSE = 'BARN_INGEN_OPPGITT_UTLANDSADRESSE',
 }
 
 export interface IKriterie {
@@ -128,14 +175,47 @@ export enum PersonType {
   FORELDER = 'FORELDER',
 }
 
+export enum PersonRolle {
+  BARN = 'BARN',
+  AVDOED = 'AVDOED',
+  GJENLEVENDE = 'GJENLEVENDE',
+}
+
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: '',
   sak: 0,
-  grunnlag: [],
   vilkårsprøving: { resultat: undefined, vilkaar: [], vurdertDato: '' },
   gyldighetsprøving: { resultat: undefined, vurderinger: [], vurdertDato: '' },
+  kommerSoekerTilgode: {
+    kommerSoekerTilgodeVurdering: { resultat: undefined, vilkaar: [], vurdertDato: '' },
+    familieforhold: {
+      avdoed: {
+        navn: '',
+        fnr: '',
+        rolle: PersonRolle.AVDOED,
+        bostedadresser: [],
+        doedsdato: '',
+      },
+      soeker: {
+        navn: '',
+        fnr: '',
+        rolle: PersonRolle.AVDOED,
+        bostedadresser: [],
+        soeknadAdresse: { adresseIUtlandet: '' },
+        foedselsdato: '',
+      },
+      gjenlevendeForelder: {
+        navn: '',
+        fnr: '',
+        rolle: PersonRolle.AVDOED,
+        bostedadresser: [],
+      },
+    },
+  },
   beregning: undefined,
   fastsatt: false,
+  soeknadMottattDato: '',
+  virkningstidspunkt: '',
 }
 
 export const behandlingReducer = (state = detaljertBehandlingInitialState, action: IAction): any => {

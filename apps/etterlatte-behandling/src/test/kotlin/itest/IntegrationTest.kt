@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.oppgave.OppgaveListeDto
 import no.nav.etterlatte.sak.Sak
 import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
 import org.apache.kafka.clients.CommonClientConfigs
@@ -149,6 +150,33 @@ class ApplicationTest {
                 assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving?.resultat)
 
             }
+            handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {
+                addAuthSaksbehandler()
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.response.status())
+            }
+            handleRequest(HttpMethod.Get, "/behandlinger/$behandlingId") {
+                addAuthSaksbehandler()
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.response.status())
+                val behandling: Behandling = (objectMapper.readValue(it.response.content!!))
+                assertNotNull(behandling.id)
+                assertEquals("FATTET_VEDTAK", behandling.status?.name)
+
+            }
+
+            handleRequest(HttpMethod.Get, "/oppgaver") {
+                addAuthAttesterer()
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.response.status())
+                val oppgaver: OppgaveListeDto = (objectMapper.readValue(it.response.content!!))
+                assertEquals(1,oppgaver.oppgaver.size)
+                assertEquals(behandlingId, oppgaver.oppgaver.first().behandlingId)
+            }
+
         }
 
         beans.behandlingHendelser().nyHendelse.close()
@@ -167,9 +195,14 @@ val clientCredentialTokenMedKanSetteKildeRolle =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImVuLWFwcCIsIm9pZCI6ImVuLWFwcCIsIm5hbWUiOiJKb2huIERvZSIsImlhdCI6MTUxNjIzOTAyMiwiTkFWaWRlbnQiOiJTYWtzYmVoYW5kbGVyMDEiLCJyb2xlcyI6WyJrYW4tc2V0dGUta2lsZGUiXX0.2ftwnoZiUfUa_J6WUkqj_Wdugb0CnvVXsEs-JYnQw_g"
 val saksbehandlerToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIGZvciBzYWtzYmVoYW5kbGVyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZWhhbmRsZXIwMSJ9.271mDij4YsO4Kk8w8AvX5BXxlEA8U-UAOtdG1Ix_kQY"
+val attestererToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIGZvciBzYWtzYmVoYW5kbGVyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZWhhbmRsZXIwMSIsImdyb3VwcyI6WyIwYWYzOTU1Zi1kZjg1LTRlYjAtYjViMi00NWJmMmM4YWViOWUiLCI2M2Y0NmY3NC04NGE4LTRkMWMtODdhOC03ODUzMmFiM2FlNjAiXX0.YzF4IXwaolgOCODNwkEKn43iZbwHpQuSmQObQm0co-A"
 
 fun TestApplicationRequest.addAuthSaksbehandler() {
     addHeader(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+}
+fun TestApplicationRequest.addAuthAttesterer() {
+    addHeader(HttpHeaders.Authorization, "Bearer $attestererToken")
 }
 
 fun TestApplicationRequest.addAuthServiceBruker() {

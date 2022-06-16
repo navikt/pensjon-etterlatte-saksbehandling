@@ -19,7 +19,7 @@ class VedtaksMottakerTest {
         @Test
         fun `sjekk mottak av vedtak og at publisert pakke har korrekt innhold`() {
 
-            val inspektør = inspector.apply { sendTestMessage(FATTET_VEDTAK) }.inspektør
+            val inspektør = inspector.apply { sendTestMessage(ATTESTERT_VEDTAK) }.inspektør
             val attestasjonTekst = inspektør.message(0).get("@attestasjon").toString()
             val attestasjonObj = objectMapper.readValue(attestasjonTekst, Attestasjon::class.java)
             assertEquals(attestasjonObj.attestantId, "Z123456")
@@ -27,7 +27,7 @@ class VedtaksMottakerTest {
         }
 
         companion object {
-            val FATTET_VEDTAK = readFile("vedtak.json")
+            val ATTESTERT_VEDTAK = readFile("vedtak.json")
         }
     }
 

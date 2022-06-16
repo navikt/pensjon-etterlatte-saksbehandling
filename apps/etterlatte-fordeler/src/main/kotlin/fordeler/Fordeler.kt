@@ -2,9 +2,7 @@ package no.nav.etterlatte.fordeler
 
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.fordeler.FordelerResultat.GyldigForBehandling
-import no.nav.etterlatte.fordeler.FordelerResultat.IkkeGyldigForBehandling
-import no.nav.etterlatte.fordeler.FordelerResultat.UgyldigHendelse
+import no.nav.etterlatte.fordeler.FordelerResultat.*
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -28,6 +26,7 @@ internal class Fordeler(
     private val fordelerMetricLogger: FordelerMetricLogger = FordelerMetricLogger()
 ) : River.PacketListener {
 
+
     private val logger = LoggerFactory.getLogger(Fordeler::class.java)
 
     init {
@@ -45,6 +44,7 @@ internal class Fordeler(
             validate { it.rejectKey("@dokarkivRetur") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
+
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =

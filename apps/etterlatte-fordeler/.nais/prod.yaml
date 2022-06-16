@@ -31,7 +31,7 @@ spec:
       value: etterlatte.etterlatteytelser
     - name: KAFKA_RESET_POLICY
       #sette tilbake til none senere
-      value: latest
+      value: earliest
     - name: PDL_URL
       value: http://etterlatte-pdltjenester/person
     - name: PDL_AZURE_SCOPE

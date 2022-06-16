@@ -1,7 +1,6 @@
 import styled from 'styled-components'
 
 export const Container = styled.div`
-  max-width: 60em;
   padding: 2rem;
 `
 
@@ -31,7 +30,7 @@ export const Content = styled.div`
 `
 
 export const ContentHeader = styled.div`
-  padding: 1em 5em;
+  padding: 1em 4em;
 `
 
 export const WarningText = styled.span`

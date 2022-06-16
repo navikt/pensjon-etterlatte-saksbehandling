@@ -5,11 +5,13 @@ import styled from 'styled-components'
 import { format } from 'date-fns'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { BeregningModal } from '../handlinger/sendTilAttesteringModal'
-import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
+import { useContext } from 'react'
+import { AppContext } from '../../../store/AppContext'
 import BrevModal from "./brev-modal";
 
 export const Beregne = () => {
-  const { virkningstidspunkt } = usePersonInfoFromBehandling()
+  const virkningstidspunkt = useContext(AppContext).state.behandlingReducer.virkningstidspunkt
+
   return (
     <Content>
       <ContentHeader>
@@ -21,8 +23,7 @@ export const Beregne = () => {
           </DetailWrapper>
 
           <div className="text">
-            Vilkårsresultat:{" "}
-            <strong>Innvilget fra {format(new Date(virkningstidspunkt), 'dd.MM.yyyy')}</strong>
+            Vilkårsresultat: <strong>Innvilget fra {format(new Date(virkningstidspunkt), 'dd.MM.yyyy')}</strong>
           </div>
         </InfoWrapper>
 

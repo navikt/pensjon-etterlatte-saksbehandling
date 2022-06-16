@@ -2,11 +2,14 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.database.VedtaksvurderingRepository
+import no.nav.etterlatte.rivers.*
 import no.nav.etterlatte.rivers.LagreAvkorting
 import no.nav.etterlatte.rivers.LagreBeregningsresultat
 import no.nav.etterlatte.rivers.LagreKommerSoekerTilgodeResultat
 import no.nav.etterlatte.rivers.LagreVilkaarsresultat
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidApplication
+import java.util.concurrent.atomic.AtomicReference
 
 fun main() {
 
@@ -14,7 +17,10 @@ fun main() {
     ds.migrate()
 
     val vedtakRepo = VedtaksvurderingRepository.using(ds.dataSource)
-    val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
+    val lateInitRapid: AtomicReference<MessageContext> = AtomicReference()
+
+    val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo, lateInitRapid)
+
 
     System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
@@ -23,10 +29,14 @@ fun main() {
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule{
             module(vedtaksvurderingService)
         }.build().apply {
+            lateInitRapid.set(this)
             LagreAvkorting(this, vedtaksvurderingService)
             LagreVilkaarsresultat(this, vedtaksvurderingService)
             LagreBeregningsresultat(this, vedtaksvurderingService)
             LagreKommerSoekerTilgodeResultat(this, vedtaksvurderingService)
+            FattVedtak(this, vedtaksvurderingService)
+            AttesterVedtak(this, vedtaksvurderingService)
+            UnderkjennVedtak(this, vedtaksvurderingService)
         }.start()
 
     }

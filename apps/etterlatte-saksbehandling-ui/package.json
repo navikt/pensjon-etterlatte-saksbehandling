@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@navikt/ds-icons": "^0.8.12"
+  }
+}

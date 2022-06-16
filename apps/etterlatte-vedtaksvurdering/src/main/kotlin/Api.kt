@@ -1,15 +1,18 @@
 package no.nav.etterlatte
 
 import io.ktor.application.call
+import io.ktor.auth.*
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.post
+import no.nav.security.token.support.ktor.TokenValidationContextPrincipal
 import java.util.*
 
 data class FattVedtakBody(val sakId: String, val behandlingId: String)
+data class UnderkjennVedtakBody(val sakId: String, val behandlingId: String, val kommentar:String, val valgtBegrunnelse: String)
 
 fun Route.Api(service: VedtaksvurderingService) {
     get("hentvedtak/{sakId}/{behandlingId}") {
@@ -25,9 +28,23 @@ fun Route.Api(service: VedtaksvurderingService) {
 
 
     post("fattVedtak") {
-        val saksbehandlerId = "AB234567"
+        val saksbehandlerId = call.principal<TokenValidationContextPrincipal>()!!.context.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")
+
         val vedtakBody = call.receive<FattVedtakBody>()
-        service.fattVedtak(vedtakBody.sakId, UUID.fromString(vedtakBody.behandlingId))
+        service.fattVedtakSaksbehandler(vedtakBody.sakId, UUID.fromString(vedtakBody.behandlingId), saksbehandlerId)
+        call.respond("ok")
+    }
+    post("attesterVedtak") {
+        val saksbehandlerId = call.principal<TokenValidationContextPrincipal>()!!.context.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")
+        val vedtakBody = call.receive<FattVedtakBody>()
+        service.attesterVedtakSaksbehandler(vedtakBody.sakId, UUID.fromString(vedtakBody.behandlingId), saksbehandlerId)
+        call.respond("ok")
+    }
+
+    post("underkjennVedtak") {
+        val saksbehandlerId = call.principal<TokenValidationContextPrincipal>()!!.context.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")
+        val vedtakBody = call.receive<UnderkjennVedtakBody>()
+        service.underkjennVedtakSaksbehandler(vedtakBody.sakId, UUID.fromString(vedtakBody.behandlingId), saksbehandlerId, vedtakBody.kommentar, vedtakBody.valgtBegrunnelse)
         call.respond("ok")
     }
 }

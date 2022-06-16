@@ -29,7 +29,7 @@ internal class LesBeregningsmeldingTest {
     @Test
     fun `skal lese melding`() {
         val beregningsres = slot<BeregningsResultat>()
-        every { vedtaksvurderingServiceMock.lagreBeregningsresultat(any(), any(), capture(beregningsres)) } returns Unit
+        every { vedtaksvurderingServiceMock.lagreBeregningsresultat(any(), any(), any(), capture(beregningsres)) } returns Unit
         inspector.apply { sendTestMessage(melding) }.inspektør
         Assertions.assertEquals(BeregningsResultatType.BEREGNET, beregningsres.captured.resultat)
     }

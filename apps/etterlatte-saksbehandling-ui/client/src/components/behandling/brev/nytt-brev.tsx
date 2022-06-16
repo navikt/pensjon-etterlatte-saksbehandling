@@ -1,12 +1,11 @@
 import { Button, Cell, Grid, Loader, Modal, Select, TextField } from '@navikt/ds-react'
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Add } from '@navikt/ds-icons'
 import styled from 'styled-components'
 import { Adresse, hentMaler, hentMottakere, Mottaker, nyttBrevForBehandling } from '../../../shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Border } from '../soeknadsoversikt/styled'
 import { IBehandlingsopplysning, OpplysningsType } from '../../../store/reducers/BehandlingReducer'
-import { AppContext } from '../../../store/AppContext'
 import { CheckboksPanel } from 'nav-frontend-skjema'
 
 const CustomModal = styled(Modal)`
@@ -22,7 +21,7 @@ interface DefaultMottaker {
 
 export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => void }) {
   const { behandlingId } = useParams()
-  const { state } = useContext(AppContext)
+  // const { state } = useContext(AppContext)
 
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [benyttAdresse, setBenyttAdresse] = useState<boolean>(false)
@@ -39,11 +38,13 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
     hentMottakere().then((res) => setMottakere(res))
   }, [])
 
-  const gyldigeTyper = [OpplysningsType.innsender, OpplysningsType.soeker_pdl, OpplysningsType.gjenlevende_forelder_pdl]
+  // const gyldigeTyper = [OpplysningsType.innsender, OpplysningsType.soeker_pdl, OpplysningsType.gjenlevende_forelder_pdl]
 
-  const grunnlagListe: IBehandlingsopplysning[] = state.behandlingReducer.grunnlag.filter((grunnlag) =>
-    gyldigeTyper.includes(grunnlag.opplysningType)
-  )
+  const grunnlagListe: IBehandlingsopplysning[] = []
+  // TODO: Må hente dette på et vis nå som grunnlag er fjernet
+      // state.behandlingReducer.grunnlag.filter((grunnlag) =>
+    // gyldigeTyper.includes(grunnlag.opplysningType)
+  // )
 
   const opprett = () => {
     if (!mal) return

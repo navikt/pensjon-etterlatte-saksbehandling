@@ -83,6 +83,13 @@ fragment relatertbiperson on RelatertBiPerson {
     statsborgerskap
 }
 
+fragment vergeEllerFullmektig on VergeEllerFullmektig {
+    motpartsPersonident
+    navn {...personnavn}
+    omfang
+    omfangetErInnenPersonligOmraade
+}
+
 query(
     $ident: ID!,
     $bostedsadresse: Boolean!,
@@ -95,6 +102,7 @@ query(
     $utland: Boolean!,
     $sivilstand: Boolean!,
     $familieRelasjon: Boolean!,
+    $vergemaal: Boolean!,
 ) {
     hentPerson(ident: $ident) {
         adressebeskyttelse(historikk: false) {
@@ -236,5 +244,13 @@ query(
                 ...metadata
             }
         }
+        vergemaalEllerFremtidsfullmakt @include(if: $vergemaal) {
+            embete
+            folkeregistermetadata {...folkeregistermetadata}
+            metadata {...metadata}
+            type
+            vergeEllerFullmektig {...vergeEllerFullmektig}
+        }
+
     }
 }

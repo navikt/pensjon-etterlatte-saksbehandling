@@ -41,6 +41,11 @@ class SakDao(private val connection: ()->Connection) {
             ident = getString(3),
             id = getLong(1)) }
     }
+    fun slettSak(id: Long) {
+        val statement = connection().prepareStatement("DELETE from sak where id = ?")
+        statement.setLong(1, id)
+        statement.executeUpdate()
+    }
 
 }
 

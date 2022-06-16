@@ -2,44 +2,32 @@ import { useState } from 'react'
 import { PersonDetailWrapper, Historikk } from '../../../styled'
 import { IAdresse } from '../../../../types'
 import { TextButton } from './TextButton'
-import { sjekkDataFraSoeknadMotPdl } from '../../../utils'
 import { Adressevisning } from '../../../../felles/Adressevisning'
 
 type Props = {
-  adresser: IAdresse[]
-  adresseFraSoeknadGjenlevende: string | undefined
-  gjeldendeAdresse: IAdresse | undefined
-  avodedPerson: boolean
+  adresser: IAdresse[] | undefined
+  visHistorikk: boolean
 }
 
-export const PersonInfoAdresse: React.FC<Props> = ({
-  adresser,
-  adresseFraSoeknadGjenlevende,
-  gjeldendeAdresse,
-  avodedPerson,
-}) => {
+export const PersonInfoAdresse: React.FC<Props> = ({ adresser, visHistorikk }) => {
   const [visAdresseHistorikk, setVisAdresseHistorikk] = useState(false)
+
+  const gjeldendeAdresse: IAdresse | undefined = adresser?.find((adresse: IAdresse) => adresse.aktiv)
+
   return (
     <PersonDetailWrapper adresse={true}>
       <div>
-        <strong>{avodedPerson ? 'Bostedadresse dødsfallstidspunkt' : 'Bostedadresse'}</strong>
+        <strong>{visHistorikk ? 'Bostedadresse' : 'Bostedadresse dødsfallstidspunkt'}</strong>
       </div>
       {gjeldendeAdresse ? (
-        adresseFraSoeknadGjenlevende ? (
-          sjekkDataFraSoeknadMotPdl(
-            `${gjeldendeAdresse.adresseLinje1}, ${gjeldendeAdresse.postnr} ${gjeldendeAdresse.poststed}`,
-            adresseFraSoeknadGjenlevende
-          )
-        ) : (
-          <span>
-            {gjeldendeAdresse.adresseLinje1}, {gjeldendeAdresse.postnr} {gjeldendeAdresse.poststed}
-          </span>
-        )
+        <span>
+          {gjeldendeAdresse.adresseLinje1}, {gjeldendeAdresse.postnr} {gjeldendeAdresse.poststed}
+        </span>
       ) : (
         <span>Ingen bostedadresse</span>
       )}
 
-      {adresser && !avodedPerson && (
+      {adresser && visHistorikk && (
         <Historikk>
           <TextButton isOpen={visAdresseHistorikk} setIsOpen={setVisAdresseHistorikk} />
           {visAdresseHistorikk && <Adressevisning adresser={adresser} soeknadsoversikt={true} />}

@@ -9,7 +9,7 @@ import { Column, GridContainer } from '../../shared/styled'
 import { AppContext } from '../../store/AppContext'
 import { IBehandlingsStatus } from './behandlings-status'
 import { IApiResponse } from '../../shared/api/types'
-import { IDetaljertBehandling, OpplysningsType } from '../../store/reducers/BehandlingReducer'
+import { IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
 import Spinner from '../../shared/Spinner'
 import { StatusBar, StatusBarTheme } from '../statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
@@ -33,13 +33,12 @@ export const Behandling = () => {
     }
   }, [match?.params.behandlingId])
 
-  const person: any = ctx.state.behandlingReducer?.grunnlag.find(
-    (g) => g.opplysningType === OpplysningsType.soeker_pdl
-  )?.opplysning
+  const soeker = ctx.state.behandlingReducer?.kommerSoekerTilgode.familieforhold.soeker
+  const soekerInfo = { navn: soeker?.navn, foedselsnummer: soeker?.fnr, type: 'Etterlatt' }
 
   return (
     <>
-      <StatusBar theme={StatusBarTheme.gray} personInfo={person} />
+      <StatusBar theme={StatusBarTheme.gray} personInfo={soekerInfo} />
       <Spinner visible={!loaded} label="Laster" />
       {loaded && (
         <GridContainer>

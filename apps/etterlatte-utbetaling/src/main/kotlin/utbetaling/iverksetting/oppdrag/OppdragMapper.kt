@@ -1,0 +1,94 @@
+package no.nav.etterlatte.utbetaling.iverksetting.oppdrag
+
+import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
+import no.nav.etterlatte.utbetaling.common.toXMLDate
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
+import no.trygdeetaten.skjema.oppdrag.Attestant180
+import no.trygdeetaten.skjema.oppdrag.Avstemming115
+import no.trygdeetaten.skjema.oppdrag.Oppdrag
+import no.trygdeetaten.skjema.oppdrag.Oppdrag110
+import no.trygdeetaten.skjema.oppdrag.OppdragsEnhet120
+import no.trygdeetaten.skjema.oppdrag.OppdragsLinje150
+import no.trygdeetaten.skjema.oppdrag.TfradragTillegg
+import no.trygdeetaten.skjema.oppdrag.TkodeStatusLinje
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
+
+object OppdragMapper {
+
+    private val tidspunktFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")
+
+    fun oppdragFraUtbetaling(utbetaling: Utbetaling, foerstegangsbehandling: Boolean): Oppdrag {
+        val oppdrag110 = Oppdrag110().apply {
+            kodeAksjon = "1"
+            kodeEndring = if (foerstegangsbehandling) "NY" else "ENDR"
+            kodeFagomraade = "BARNEPE"
+            fagsystemId = utbetaling.sakId.value.toString()
+            utbetFrekvens = "MND"
+            oppdragGjelderId = utbetaling.stoenadsmottaker.value
+            datoOppdragGjelderFom = LocalDate.parse("1900-01-01").toXMLDate()
+            saksbehId = utbetaling.saksbehandler.value
+
+            avstemming115 = Avstemming115().apply {
+                nokkelAvstemming = utbetaling.avstemmingsnoekkel.toNorskTid().format(tidspunktFormatter)
+                tidspktMelding = utbetaling.avstemmingsnoekkel.toNorskTid().format(tidspunktFormatter)
+                kodeKomponent = "ETTERLAT"
+            }
+
+            oppdragsEnhet120.add(
+                OppdragsEnhet120().apply {
+                    typeEnhet = "BOS"
+                    enhet = "4819"
+                    datoEnhetFom = LocalDate.parse("1900-01-01").toXMLDate()
+                }
+            )
+
+            oppdragsLinje150.addAll(
+                utbetaling.utbetalingslinjer.map {
+                    OppdragsLinje150().apply {
+                        kodeEndringLinje = "NY"
+                        if (it.erstatterId != null) {
+                            refFagsystemId = utbetaling.sakId.value.toString()
+                            refDelytelseId = it.erstatterId.value.toString()
+                        }
+                        when (it.type) {
+                            Utbetalingslinjetype.OPPHOER -> {
+                                kodeStatusLinje = TkodeStatusLinje.OPPH
+                                datoStatusFom = it.periode.fra.toXMLDate()
+                            }
+                            else -> {}
+                        }
+
+                        vedtakId = utbetaling.vedtakId.value.toString()
+                        delytelseId = it.id.value.toString()
+                        kodeKlassifik = "BARNEPENSJON-OPTP"
+                        datoVedtakFom = it.periode.fra.toXMLDate()
+                        datoVedtakTom = it.periode.til?.toXMLDate()
+                        sats = it.beloep
+                        fradragTillegg = TfradragTillegg.T
+                        typeSats = "MND"
+                        brukKjoreplan = "J"
+                        saksbehId = utbetaling.saksbehandler.value
+                        utbetalesTilId = utbetaling.stoenadsmottaker.value
+                        henvisning = utbetaling.behandlingId.shortValue.value
+
+                        attestant180.add(
+                            Attestant180().apply {
+                                attestantId = utbetaling.attestant.value
+                            }
+                        )
+                    }
+                }
+            )
+        }
+
+        return Oppdrag().apply {
+            this.oppdrag110 = oppdrag110
+        }
+    }
+}
+
+fun Oppdrag.vedtakId() = oppdrag110.oppdragsLinje150.first().vedtakId.toLong()
+fun Oppdrag.sakId() = oppdrag110.fagsystemId

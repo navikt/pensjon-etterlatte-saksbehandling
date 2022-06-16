@@ -8,13 +8,12 @@ import { AvdoedesForutMedlemskap } from './vilkaar/AvdoedesForutMedlemskap'
 import { useLocation } from 'react-router-dom'
 import { BarnetsMedlemskap } from './vilkaar/BarnetsMedlemskap'
 import { VilkaarResultat } from './vilkaar/VilkaarResultat'
-import { usePersonInfoFromBehandling } from '../usePersonInfoFromBehandling'
 
 export const Inngangsvilkaar = () => {
   const ctx = useContext(AppContext)
   const location = useLocation()
 
-  const { virkningstidspunkt } = usePersonInfoFromBehandling()
+  const virkningstidspunkt = ctx.state.behandlingReducer.virkningstidspunkt
   const vilkaar = ctx.state.behandlingReducer.vilkårsprøving.vilkaar
   const vilkaarResultat = ctx.state.behandlingReducer.vilkårsprøving.resultat
 

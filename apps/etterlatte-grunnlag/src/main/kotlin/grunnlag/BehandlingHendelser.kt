@@ -2,7 +2,6 @@ package no.nav.etterlatte.grunnlag
 
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory
 
 class BehandlingHendelser(
     rapidsConnection: RapidsConnection,
-    private val grunnlag: GrunnlagFactory,
 ) : River.PacketListener {
 
 
@@ -24,7 +22,6 @@ class BehandlingHendelser(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BEHANDLING:OPPRETTET") }
-            //TODO Finne ut hva denne er?
             validate { it.requireKey("innsender") }
             validate { it.requireKey("soeker") }
             validate { it.requireKey("gjenlevende") }
@@ -37,9 +34,6 @@ class BehandlingHendelser(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             if(Kontekst.get().AppUser !is Self){ logger.warn("AppUser i kontekst er ikke Self i R&R-flyten") }
-            inTransaction {
-                grunnlag.opprett(packet["sak"].asLong())
-            }
 
             //TODO dette må jeg gjøre smartere, ellers må Persongalleri restruktureres
             context.publish(
@@ -75,8 +69,7 @@ class BehandlingHendelser(
                             "rolle" to Opplysningstyper.AVDOED_PDL_V1.personRolle!!,
                             "@correlation_id" to packet["@correlation_id"]
                         )
-                    ).toJson()
-                )
+                    ).toJson())
             }
 
         }

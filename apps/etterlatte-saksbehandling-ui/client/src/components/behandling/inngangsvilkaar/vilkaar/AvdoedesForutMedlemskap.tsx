@@ -18,7 +18,6 @@ import { KildeDatoVilkaar } from './KildeDatoOpplysning'
 
 export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
-  console.log(vilkaar)
 
   return (
     <VilkaarBorder id={props.id}>

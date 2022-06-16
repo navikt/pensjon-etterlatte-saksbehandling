@@ -5,7 +5,7 @@ import { Tidsperiode } from './Tidsperiode'
 
 export const TidslinjeMedlemskap = () => {
   const doedsdato = format(Date.parse('2022-06-01'), 'yyyy-MM-dd')
-  const femAarTidligere = format(sub(Date.parse('2022-06-01'), {years: 5}), 'yyyy-MM-dd')
+  const femAarTidligere = format(sub(Date.parse('2022-06-01'), { years: 5 }), 'yyyy-MM-dd')
 
   const navnOgProsentPaaDatoer = aarIProsent(femAarTidligere, doedsdato)
 
@@ -43,7 +43,7 @@ export const TidslinjeMedlemskap = () => {
     <Tidslinje>
       <Grid>
         <GridBorder style={{ top: '10px' }}>&nbsp;</GridBorder>
-        <GridDatoer leftmargin={'0px'}>{femAarTidligere}</GridDatoer>
+        <GridDatoer leftmargin={'0px'}>{format(Date.parse(femAarTidligere), 'MM.yyyy')}</GridDatoer>
         {navnOgProsentPaaDatoer.map((aar) => (
           <GridDatoerWrapper prosent={aar[1]} key={aar[1].toString()}>
             <GridDatoer leftmargin={'-16px'}>{aar[0]}</GridDatoer>
@@ -51,7 +51,7 @@ export const TidslinjeMedlemskap = () => {
           </GridDatoerWrapper>
         ))}
         <GridDoedsdato>
-          <GridDatoer leftmargin={'-150px'}>dødsdato: {doedsdato}</GridDatoer>
+          <GridDatoer leftmargin={'-150px'}>dødsdato: {format(Date.parse(doedsdato), 'MM.yyyy')}</GridDatoer>
         </GridDoedsdato>
         <GridBorder style={{ bottom: '-30px' }}>&nbsp;</GridBorder>
       </Grid>

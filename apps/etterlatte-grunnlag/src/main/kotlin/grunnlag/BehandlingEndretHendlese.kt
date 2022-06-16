@@ -2,7 +2,6 @@ package no.nav.etterlatte.grunnlag
 
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -13,7 +12,7 @@ import org.slf4j.LoggerFactory
 
 class BehandlingEndretHendlese (
     rapidsConnection: RapidsConnection,
-    private val grunnlag: GrunnlagFactory,
+    private val grunnlag: GrunnlagService,
 ) : River.PacketListener {
 
 
@@ -24,6 +23,7 @@ class BehandlingEndretHendlese (
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("sak") }
             validate { it.rejectKey("grunnlag") }
+            validate { it.rejectKey("@grunnlag") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
@@ -31,9 +31,12 @@ class BehandlingEndretHendlese (
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             if(Kontekst.get().AppUser !is Self){ logger.warn("AppUser i kontekst er ikke Self i R&R-flyten") }
-            packet["grunnlag"]= inTransaction {
-                grunnlag.hent(packet["sak"].asLong())
-            }.serialiserbarUtgave().grunnlag
+            grunnlag.hentGrunnlag(packet["sak"].asLong())
+            .also {
+                packet["grunnlag"] = it.grunnlag //Kan fjernes når alle apper forstår @grunnlag
+                packet["@grunnlag"] = it
+            }
+
             context.publish(packet.toJson())
         }
 

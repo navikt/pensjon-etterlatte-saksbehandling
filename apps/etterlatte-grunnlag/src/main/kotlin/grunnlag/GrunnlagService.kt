@@ -2,44 +2,40 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.slf4j.LoggerFactory
 
 interface GrunnlagService {
-    fun hentGrunnlag(saksid: Long): Grunnlag?
+    fun hentGrunnlag(sak: Long): Grunnlag
     fun opprettGrunnlag(sak: Long, nyeOpplysninger: List<Grunnlagsopplysning<ObjectNode>>): Grunnlag
-    fun leggTilGrunnlagFraRegister(saksid: Long, opplysninger: List<Grunnlagsopplysning<ObjectNode>>)
 }
 
 class RealGrunnlagService(
-    //TODO stemmer det at jeg ikke trenger dette nå?
-    private val grunnlagFactory: GrunnlagFactory,
+    private val opplysninger: OpplysningDao
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
 
-    override fun hentGrunnlag(saksid: Long): Grunnlag {
-        return inTransaction { grunnlagFactory.hent(saksid).serialiserbarUtgave() }
+    override fun hentGrunnlag(sak: Long): Grunnlag {
+        return inTransaction { hentGrunnlagUtenTransaksjon(sak)}
     }
-
-    //TODO Lage nytt grunnlag og skrive om til å returnere grunnlag
     override fun opprettGrunnlag(sak: Long, nyeOpplysninger: List<Grunnlagsopplysning<ObjectNode>>): Grunnlag {
         logger.info("Oppretter et grunnlag")
         return inTransaction {
-            grunnlagFactory.opprett(sak)
-                .also { grunnlag ->
-                    grunnlag.leggTilGrunnlagListe(nyeOpplysninger)
+            val gjeldendeGrunnlag = opplysninger.finnHendelserIGrunnlag(sak).map { it.opplysning.id }
+
+            for (opplysning in nyeOpplysninger) {
+                if ( opplysning.id in gjeldendeGrunnlag ) {
+                    logger.warn("Forsøker å lagre opplysning ${opplysning.id} i sak $sak men den er allerede gjeldende")
+                } else {
+                    opplysninger.leggOpplysningTilGrunnlag(sak, opplysning)
                 }
-        }.serialiserbarUtgave()
+            }
+            hentGrunnlagUtenTransaksjon(sak)
+        }
     }
 
-    override fun leggTilGrunnlagFraRegister(
-        saksid: Long,
-        opplysninger: List<Grunnlagsopplysning<ObjectNode>>
-    ) {
-        inTransaction {
-            grunnlagFactory.hent(saksid).leggTilGrunnlagListe(
-                opplysninger
-            )
-        }
+    private fun hentGrunnlagUtenTransaksjon(sak: Long): Grunnlag {
+        return  opplysninger.finnHendelserIGrunnlag(sak).let { hendelser -> Grunnlag(saksId = sak, grunnlag = hendelser.map { it.opplysning }, hendelser.maxOfOrNull { it.hendelseNummer } ?: 0) }
     }
 }

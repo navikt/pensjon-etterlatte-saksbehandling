@@ -1,47 +1,48 @@
 import { Table } from '@navikt/ds-react'
+import styled from 'styled-components'
+import { Behandling } from './typer'
 
-interface BehandlingsKolonne {
-  col: string
-  value: string
-}
+const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Vedtaksdato', 'Resultat']
 
-interface Behandling {
-  kolonner: BehandlingsKolonne[]
-}
-interface Sak {
-  behandlinger: Behandling[]
-  name: string
-}
-export interface SakslisteProps {
-  saker: Sak[]
-}
-
-export const Saksliste = (props: SakslisteProps) => {
+export const Saksliste = ({
+  saksliste,
+  goToBehandling,
+}: {
+  saksliste: Behandling[]
+  goToBehandling: (behandlingsId: string) => void
+}) => {
   return (
     <div>
-      {props.saker.map((sak) => (
-        <>
-          <h2>{sak.name}</h2>
-          <Table>
-            <Table.Header>
-              <Table.Row>
-                {props.saker[0].behandlinger[0].kolonner.map((col) => (
-                  <Table.HeaderCell key={`header${col.col}`}>{col.col}</Table.HeaderCell>
-                ))}
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {sak.behandlinger.map((behandling: Behandling, i: number) => (
-                <Table.Row key={i}>
-                  {behandling.kolonner.map((col) => (
-                    <Table.DataCell key={col.col}>{col.value}</Table.DataCell>
-                  ))}
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
-        </>
-      ))}
+      <Table>
+        <Table.Header>
+          <Table.Row>
+            {colonner.map((col) => (
+              <Table.HeaderCell key={`header${col}`}>{col}</Table.HeaderCell>
+            ))}
+          </Table.Row>
+        </Table.Header>
+
+        {saksliste.map((behandling, i) => (
+          <Table.Body key={i}>
+            <Table.Row>
+              <Table.DataCell key={`data${behandling.opprettet}`}>{behandling.opprettet}</Table.DataCell>
+              <Table.DataCell key={`data${behandling.type}`}>{behandling.type}</Table.DataCell>
+              <Table.DataCell key={`data${behandling.årsak}`}>{behandling.årsak}</Table.DataCell>
+              <Table.DataCell key={`data${behandling.status}`}>{behandling.status}</Table.DataCell>
+              <Table.DataCell key={`data${behandling.vedtaksdato}`}>{behandling.vedtaksdato}</Table.DataCell>
+              <Table.DataCell key={i}>
+                <Link onClick={() => goToBehandling(behandling.id.toString())}>{behandling.resultat}</Link>
+              </Table.DataCell>
+            </Table.Row>
+          </Table.Body>
+        ))}
+      </Table>
     </div>
   )
 }
+
+export const Link = styled.div`
+  cursor: pointer;
+  text-decoration: underline;
+  color: #0067c5;
+`

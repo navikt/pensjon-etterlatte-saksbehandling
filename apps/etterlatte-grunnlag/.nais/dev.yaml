@@ -21,10 +21,14 @@ spec:
   #  periodSeconds: 5
   #  path: /started
   liveness:
-    initialDelay: 5
+    initialDelay: 7
+    failureThreshold: 10
+    periodSeconds: 5
     path: /isalive
   readiness:
-    initialDelay: 5
+    initialDelay: 7
+    failureThreshold: 10
+    periodSeconds: 5
     path: /isready
   azure:
     application:

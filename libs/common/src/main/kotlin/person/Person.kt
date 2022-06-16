@@ -21,6 +21,7 @@ data class Person(
     val statsborgerskap: String?,
     var utland: Utland?,
     var familieRelasjon: FamilieRelasjon?,
+    var vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>?
 )
 
 enum class Adressebeskyttelse {
@@ -92,6 +93,18 @@ data class FamilieRelasjon(
     val barn: List<Foedselsnummer>?
 )
 
+data class VergemaalEllerFremtidsfullmakt(
+    val embete: String?,
+    val type: String?,
+    val vergeEllerFullmektig: VergeEllerFullmektig
+)
+
+data class VergeEllerFullmektig (
+    val motpartsPersonident: Foedselsnummer?,
+    val navn: String?,
+    val omfang: String?,
+    val omfangetErInnenPersonligOmraade: Boolean
+    )
 
 fun Person.alder(): Int? {
     return foedselsdato?.let { Period.between(foedselsdato, LocalDate.now()).years }

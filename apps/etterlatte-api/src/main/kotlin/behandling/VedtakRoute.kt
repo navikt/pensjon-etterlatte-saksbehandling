@@ -21,5 +21,16 @@ fun Route.vedtakRoute(service: VedtakService) {
             }
         }
     }
+    route("iverksetting") {
+        post("{behandlingId}"){
+            val behandlingId = call.parameters["behandlingId"]
+            if (behandlingId == null) {
+                call.response.status(HttpStatusCode(400, "Bad request"))
+                call.respond("Behandlings-id mangler")
+            } else {
+                call.respond(service.sendTilIverksetting(behandlingId, getAccessToken(call)))
+            }
+        }
+    }
 
 }

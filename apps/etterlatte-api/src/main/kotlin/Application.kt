@@ -17,15 +17,15 @@ class ApplicationContext(configLocation: String? = null) {
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
 
     private val behandlingKlient = BehandlingKlient(config, httpClient())
+    private val vedtakKlient = VedtakKlient(config, httpClient())
     val behandlingService: BehandlingService = BehandlingService(
         behandlingKlient = behandlingKlient,
         pdlKlient = PdltjenesterKlient(config, httpClient()),
-        grunnlagKlient = GrunnlagKlient(config, httpClient()),
-        vedtakKlient = VedtakKlient(config, httpClient()),
+        vedtakKlient = vedtakKlient,
     )
 
     val oppgaveService: OppgaveService = OppgaveService(behandlingKlient)
-    val vedtakService = VedtakService(behandlingKlient)
+    val vedtakService = VedtakService(behandlingKlient, vedtakKlient)
 
     private fun httpClient() = HttpClient {
         install(JsonFeature) {

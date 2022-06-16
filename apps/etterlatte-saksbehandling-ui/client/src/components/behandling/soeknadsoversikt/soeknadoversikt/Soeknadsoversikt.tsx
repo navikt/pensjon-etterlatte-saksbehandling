@@ -1,56 +1,19 @@
-import { PropsOmSoeknad } from '../props'
-import styled from 'styled-components'
-import { SoeknadOversiktDel1 } from './SoeknadsoversiktDel1'
-import { SoeknadOversiktDel2 } from './SoeknadsoversiktDel2'
-import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { OversiktGyldigFramsatt } from './gyldigFramsattSoeknad/OversiktGyldigFramsatt'
+import { OversiktKommerSoekerTilgode } from './kommerBarnetTilgode/OversiktKommerSoekerTilgode'
+import { IDetaljertBehandling, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { Innhold } from '../styled'
 
-export const SoeknadOversikt: React.FC<PropsOmSoeknad> = ({
-  gyldighet,
-  avdoedPersonPdl,
-  innsender,
-  mottattDato,
-  gjenlevendePdl,
-  gjenlevendeHarForeldreansvar,
-  gjenlevendeOgSoekerLikAdresse,
-  innsenderHarForeldreAnsvar,
-}) => {
-  return (
-    <SoeknadOversiktWrapper>
-      <div>
-        <SoeknadOversiktDel1
-          innsender={innsender}
-          gjenlevendePdl={gjenlevendePdl}
-          gjenlevendeHarForeldreansvar={gjenlevendeHarForeldreansvar}
-          innsenderHarForeldreAnsvar={innsenderHarForeldreAnsvar}
-          gyldighet={gyldighet}
-        />
-
-        {gyldighet.resultat === VurderingsResultat.OPPFYLT && (
-          <SoeknadOversiktDel2
-            avdoedPersonPdl={avdoedPersonPdl}
-            mottattDato={mottattDato}
-            gjenlevendeOgSoekerLikAdresse={gjenlevendeOgSoekerLikAdresse}
-            gyldighet={gyldighet}
-          />
-        )}
-      </div>
-    </SoeknadOversiktWrapper>
-  )
+export interface PropsOmSoeknad {
+  behandling: IDetaljertBehandling
 }
 
-export const SoeknadOversiktWrapper = styled.div`
-  flex-wrap: wrap;
-  margin-bottom: 2em;
-  padding-left: 5em;
-`
-
-export const InfoWrapper = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-
-  > * {
-    width: 180px;
-  }
-  height: 120px;
-  flex-grow: 1;
-`
+export const SoeknadOversikt: React.FC<PropsOmSoeknad> = ({ behandling }) => {
+  return (
+    <Innhold>
+      <OversiktGyldigFramsatt gyldigFramsatt={behandling.gyldighetsprøving} />
+      {behandling.gyldighetsprøving.resultat === VurderingsResultat.OPPFYLT && (
+        <OversiktKommerSoekerTilgode kommerSoekerTilgode={behandling.kommerSoekerTilgode} />
+      )}
+    </Innhold>
+  )
+}

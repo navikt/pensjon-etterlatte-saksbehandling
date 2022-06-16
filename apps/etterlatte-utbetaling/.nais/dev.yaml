@@ -1,0 +1,61 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-utbetaling
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  liveness:
+    initialDelay: 5
+    path: /isalive
+  readiness:
+    initialDelay: 5
+    path: /isready
+  prometheus:
+    enabled: true
+    path: /metrics
+  leaderElection: true
+  strategy:
+    type: Recreate
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        name: etterlatte-utbetaling
+        cascadingDelete: true
+        databases:
+          - name: utbetaling
+            envVarPrefix: DB
+  kafka:
+    pool: nav-dev
+  azure:
+    application:
+      enabled: true
+  envFrom:
+    - secret: barnepensjon-secrets
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.dodsmelding
+    - name: KAFKA_RESET_POLICY
+      #sette tilbake til none senere
+      value: latest
+    - name: OPPDRAG_SEND_MQ_NAME
+      value: QA.Q2_231.OB04_OPPDRAG_XML
+    - name: OPPDRAG_AVSTEMMING_MQ_NAME
+      value: QA.Q2_234.OB29_AVSTEMMING_XML
+    - name: OPPDRAG_KVITTERING_MQ_NAME
+      value: QA.Q2_BARNEPENSJON.OPPDRAG_KVITTERING
+    - name: OPPDRAG_MQ_HOSTNAME
+      value: b27apvl222.preprod.local
+    - name: OPPDRAG_MQ_PORT
+      value: "1413"
+    - name: OPPDRAG_MQ_CHANNEL
+      value: Q2_BARNEPENSJON
+    - name: OPPDRAG_MQ_MANAGER
+      value: MQLS04

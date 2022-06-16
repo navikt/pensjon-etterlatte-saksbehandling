@@ -5,34 +5,20 @@ import no.nav.etterlatte.barnepensjon.setVikaarVurderingFraKriterier
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Forelder
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Verge
-import no.nav.etterlatte.libs.common.person.Adresse
-import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.*
+import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
-import no.nav.etterlatte.libs.common.vikaar.Kriterie
-import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
+import no.nav.etterlatte.libs.common.vikaar.*
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import vilkaar.barnepensjon.barnIngenOppgittUtlandsadresse
+import vilkaar.barnepensjon.barnOgAvdoedSammeBostedsadresse
+import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
 import java.time.Instant
 import java.time.LocalDate
-import org.junit.jupiter.api.Assertions.*
-import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
 import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 
@@ -188,19 +174,17 @@ internal class BarnepensjonVilkaarTest {
     @Test
     fun vuderSammeBostedsadresse() {
         val barnPdlNorge = lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresserNorgePdl, avdoedErForeldre)
-        val barnPdlDanmark =
-            lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresseDanmarkPdl, avdoedErForeldre)
         val gjenlevendePdlNorge = lagMockPersonPdl(null, fnrGjenlevende, null, adresserNorgePdl, null)
         val gjenlevendePdlDanmark = lagMockPersonPdl(null, fnrGjenlevende, null, adresseDanmarkPdl, null)
 
         val sammeAdresse = barnOgForelderSammeBostedsadresse(
-            Vilkaartyper.SAMME_ADRESSE,
+            Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlNorge)
         )
 
         val ulikeAdresse = barnOgForelderSammeBostedsadresse(
-            Vilkaartyper.SAMME_ADRESSE,
+            Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlDanmark)
         )
@@ -208,6 +192,49 @@ internal class BarnepensjonVilkaarTest {
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, ulikeAdresse.resultat)
 
     }
+
+    @Test
+    fun vurderBarnIngenUtlandsadresse() {
+        val barnSoeknadNorge = lagMockPersonSoekerSoeknad(UtenlandsadresseBarn(JaNeiVetIkke.NEI, null, null))
+        val barnSoeknadDanmark = lagMockPersonSoekerSoeknad(UtenlandsadresseBarn(JaNeiVetIkke.JA, null, null))
+
+        val ikkeUtland = barnIngenOppgittUtlandsadresse(
+            Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE,
+            mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge)
+        )
+
+        val utland = barnIngenOppgittUtlandsadresse(
+            Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE,
+            mapTilVilkaarstypeSoekerSoeknad(barnSoeknadDanmark)
+        )
+
+        assertEquals(VurderingsResultat.OPPFYLT, ikkeUtland.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, utland.resultat)
+
+    }
+
+    @Test
+    fun vurderBarnOgAvdoedSammeAdresse() {
+        val barnPdlNorge = lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresserNorgePdl, avdoedErForeldre)
+        val avdoedPdlNorge = lagMockPersonPdl(null, fnrAvdoed, null, adresserNorgePdl, null)
+        val avdoedPdlDanmark = lagMockPersonPdl(null, fnrAvdoed, null, adresseDanmarkPdl, null)
+
+        val sammeAdresse = barnOgAvdoedSammeBostedsadresse(
+            Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
+            mapTilVilkaarstypePerson(barnPdlNorge),
+            mapTilVilkaarstypePerson(avdoedPdlNorge)
+        )
+
+        val ulikeAdresse = barnOgAvdoedSammeBostedsadresse(
+            Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
+            mapTilVilkaarstypePerson(barnPdlNorge),
+            mapTilVilkaarstypePerson(avdoedPdlDanmark)
+        )
+        assertEquals(VurderingsResultat.OPPFYLT, sammeAdresse.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, ulikeAdresse.resultat)
+
+    }
+
 
     @Test
     fun vurderVilkaarsVurdering() {
@@ -326,7 +353,8 @@ internal class BarnepensjonVilkaarTest {
         sivilstatus = null,
         statsborgerskap = null,
         utland = null,
-        familieRelasjon = FamilieRelasjon(null, foreldre, null)
+        familieRelasjon = FamilieRelasjon(null, foreldre, null),
+        vergemaalEllerFremtidsfullmakt = null
     )
 
     val adresserNorgePdl = listOf(
@@ -346,7 +374,7 @@ internal class BarnepensjonVilkaarTest {
         ),
         Adresse(
             AdresseType.VEGADRESSE,
-            false,
+            true,
             null,
             null,
             null,

@@ -567,5 +567,6 @@
   ],
   "@event": "BEHANDLING:GRUNNLAGENDRET",
   "@vilkaarsvurdering": "vurdert",
-  "@gyldighetsvurdering": "gyldig"
+  "@gyldighetsvurdering": "gyldig",
+  "@virkningstidspunkt": "2022-07"
 }

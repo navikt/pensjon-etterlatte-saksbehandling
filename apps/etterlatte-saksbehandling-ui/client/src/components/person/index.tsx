@@ -2,101 +2,68 @@ import { useEffect, useRef, useState } from 'react'
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { getPerson, opprettBehandlingPaaSak, opprettSakPaaPerson } from '../../shared/api/person'
+import { getPerson, opprettBehandlingPaaSak } from '../../shared/api/person'
 import { StatusBar, StatusBarTheme } from '../statusbar'
 import { Container } from '../../shared/styled'
-import { Saksliste, SakslisteProps } from './saksliste'
+import { Dokumentoversikt } from './dokumentoversikt'
+import { Saksoversikt } from './saksoversikt'
+import { useNavigate } from 'react-router-dom'
+import { Dokumenter, PersonInfo, SakslisteProps } from './typer'
+
+//todo: typer
+const testDokumenter: Dokumenter = {
+  brev: [
+    {
+      dato: '13.05.2021',
+      tittel: 'Innvilgelsesbrev barnepensjon',
+      link: 'link',
+      status: 'Sendt ut',
+    },
+    {
+      dato: '09.05.2021',
+      tittel: 'Søknad barnepensjon - førstegangsbehandling',
+      link: 'link',
+      status: 'Motatt',
+    },
+  ],
+}
 
 const testdata: SakslisteProps = {
   saker: [
     {
-      name: 'Fagsak 1',
+      sakId: 1,
+      type: 'Barnepensjon',
+      sakstype: 'Nasjonal',
       behandlinger: [
         {
-          kolonner: [
-            {
-              col: 'Opprettet',
-              value: '12.01.2021',
-            },
-            {
-              col: 'Type',
-              value: 'Barnepensjon',
-            },
-            {
-              col: 'Status',
-              value: 'Opprettet',
-            },
-            {
-              col: 'Vedtaksdato',
-              value: '18.01.2021',
-            },
-            {
-              col: 'Resultat',
-              value: 'Vedtatt',
-            },
-          ],
+          id: 11,
+          opprettet: '12.01.2021',
+          type: 'Revurdering',
+          årsak: 'Søknad',
+          status: 'Utredes',
+          vedtaksdato: '18.01.20201',
+          resultat: 'Ikke satt',
         },
         {
-          kolonner: [
-            {
-              col: 'Opprettet',
-              value: '12.01.2021',
-            },
-            {
-              col: 'Type',
-              value: 'Barnepensjon',
-            },
-            {
-              col: 'Status',
-              value: 'Opprettet',
-            },
-            {
-              col: 'Vedtaksdato',
-              value: '18.01.2021',
-            },
-            {
-              col: 'Resultat',
-              value: 'Vedtatt',
-            },
-          ],
-        }
-      ],
-    },
-    {
-      name: 'Fagsak 2',
-      behandlinger: [
-        {
-          kolonner: [
-            {
-              col: 'Opprettet',
-              value: '12.01.2021',
-            },
-            {
-              col: 'Type',
-              value: 'Barnepensjon',
-            },
-            {
-              col: 'Status',
-              value: 'Opprettet',
-            },
-            {
-              col: 'Vedtaksdato',
-              value: '18.01.2021',
-            },
-            {
-              col: 'Resultat',
-              value: 'Vedtatt',
-            },
-          ],
-        }
+          id: 9,
+          opprettet: '01.01.2021',
+          type: 'Førstegangsbehandling',
+          årsak: 'Søknad',
+          status: 'Ferdigstilt',
+          vedtaksdato: '10.01.2021',
+          resultat: 'Innvilget',
+        },
       ],
     },
   ],
 }
 
 export const Person = () => {
+  const navigate = useNavigate()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [personData, setPersonData] = useState({})
+  const [personinfo, setPersoninfo] = useState<PersonInfo>()
+
   const match = useParams<{ fnr: string }>()
 
   const sakIdInput = useRef() as React.MutableRefObject<HTMLInputElement>
@@ -106,15 +73,14 @@ export const Person = () => {
       if (match.fnr) {
         const person = await getPerson(match.fnr)
         setPersonData(person)
+        setPersoninfo({
+          navn: person.data.person.fornavn + person.data.person.etternavn,
+          foedselsnummer: person.data.person.foedselsnummer,
+          type: 'Etterlatt',
+        })
       }
     })()
   }, [])
-
-  const opprettSak = () => {
-    if (match.fnr) {
-      opprettSakPaaPerson(match.fnr)
-    }
-  }
 
   const opprettBehandling = () => {
     if (sakIdInput.current.value) {
@@ -122,44 +88,25 @@ export const Person = () => {
     }
   }
 
+  const goToBehandling = (behandlingsId: string) => {
+    navigate(`/behandling/${behandlingsId}/soeknadsoversikt`)
+  }
+
   return (
     <>
-      <StatusBar theme={StatusBarTheme.gray} />
-
+      <StatusBar theme={StatusBarTheme.gray} personInfo={personinfo} />
       <Container>
         <Tabs>
           <Tlist>
-            <Tab>Personopplysninger</Tab>
-            <Tab>Behandlingsoversikt</Tab>
-            <Tab>Stønadshisstorikk</Tab>
-            <Tab>Modia meldinger</Tab>
-            <Tab>Dokumentoversikt</Tab>
-            <Tab>Testgreier</Tab>
+            <TabElement>Saksoversikt</TabElement>
+            <TabElement>Dokumentoversikt</TabElement>
           </Tlist>
 
           <TabPanel>
-            <h2>Innhold</h2>
+            <Saksoversikt saksliste={testdata} opprettBehandling={opprettBehandling} goToBehandling={goToBehandling} />
           </TabPanel>
           <TabPanel>
-            <Saksliste {...testdata} />
-          </TabPanel>
-          <TabPanel>
-            <h2>Any content 3</h2>
-          </TabPanel>
-          <TabPanel>
-            <h2>Any content 4</h2>
-          </TabPanel>
-          <TabPanel>
-            <h2>Any content 5</h2>
-          </TabPanel>
-          <TabPanel>
-            <p>
-              <button onClick={opprettSak}>Opprett/hent sak</button>
-            </p>
-            <p>
-              <input ref={sakIdInput} placeholder="sakid" name="sakid" />
-              <button onClick={opprettBehandling}>Opprett behandling på denne saken</button>
-            </p>
+            <Dokumentoversikt {...testDokumenter} />
           </TabPanel>
         </Tabs>
       </Container>
@@ -167,11 +114,15 @@ export const Person = () => {
   )
 }
 
+const TabElement = styled(Tab)`
+  margin-left: 10px;
+  margin-right: 10px;
+`
+
 const Tlist = styled(TabList)`
   display: flex;
   list-style-type: none;
   margin: 1em 0 0;
-  justify-content: space-between;
   li {
     color: var(--nav-blue);
     cursor: pointer;

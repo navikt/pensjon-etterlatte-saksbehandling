@@ -9,6 +9,8 @@ fun main() {
         AppBuilder(env).also { ab ->
             RapidApplication.create(env)
                 .also { OppdaterBehandling(it, ab.createBehandlingService()) }
+                .also { HendelserOmVedtak(it, ab.createBehandlingService()) }
+                .also { TestHendelser(it, ab.createBehandlingService()) }
                 .start()
         }
     }

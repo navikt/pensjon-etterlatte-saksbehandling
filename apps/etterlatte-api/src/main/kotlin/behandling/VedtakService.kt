@@ -4,14 +4,19 @@ import org.slf4j.LoggerFactory
 
 data class AttesteringResult(val response: String)
 
-class VedtakService(private val behandlingKlient: BehandlingKlient) {
+class VedtakService(private val behandlingKlient: BehandlingKlient, private val vedtakKlient: VedtakKlient) {
 
     private val logger = LoggerFactory.getLogger(VedtakService::class.java)
 
     suspend fun sendTilAttestering(behandlingId: String, token: String): AttesteringResult {
-
-        behandlingKlient.sendTilAttestering(behandlingId, token)
-        return AttesteringResult("Dette gikk nok ikke")
+        val behandling = behandlingKlient.hentBehandling(behandlingId, token)
+        vedtakKlient.fattVedtak(behandling.sak.toInt(), behandling.id.toString(), token)
+        return AttesteringResult("Fattet")
+    }
+    suspend fun sendTilIverksetting(behandlingId: String, token: String): AttesteringResult {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, token)
+        vedtakKlient.attesterVedtak(behandling.sak.toInt(), behandling.id.toString(), token)
+        return AttesteringResult("Attestert")
     }
 
 }

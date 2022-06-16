@@ -30,9 +30,10 @@ internal class LesAvkortingsmelding(
         withLogContext(packet.correlationId()) {
 
             //TODO her må jeg sikkert ha noe anna info
-            val grunnlagListe = packet["grunnlag"].toString()
+            val beregningsResultat = packet["@beregning"].toString()
             try {
-                val avkortingsResultat = avkorting.avkortingsResultat(objectMapper.readValue(grunnlagListe))
+                val avkortingsResultat = avkorting.avkortingsResultat(objectMapper.readValue(beregningsResultat))
+
                 packet["@avkorting"] = avkortingsResultat
                 context.publish(packet.toJson())
                 logger.info("Publisert en beregning")

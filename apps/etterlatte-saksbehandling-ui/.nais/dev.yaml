@@ -18,9 +18,10 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
+      allowAllUsers: false
       claims:
         groups:
-          - id: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e # Required for authorization
+          - id: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf # Required for authorization
         extra:
           - NAVident
     sidecar:

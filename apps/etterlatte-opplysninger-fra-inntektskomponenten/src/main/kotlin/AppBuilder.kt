@@ -7,7 +7,10 @@ import io.ktor.client.features.auth.Auth
 import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.request.header
 import io.ktor.http.takeFrom
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.InntektsKomponentenService
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.OpplysningsByggerService
@@ -20,7 +23,7 @@ class AppBuilder(private val props: Map<String, String>) {
     fun createInntektsKomponentService(): InntektsKomponenten {
         return InntektsKomponentenService(
             inntektsKomponentClient(),
-            config.getString("no.nav.etterlatte.tjenester.inntektskomponenten")
+            config.getString("no.nav.etterlatte.tjenester.inntektskomponenten.proxyUrl")
         )
     }
 
@@ -29,11 +32,12 @@ class AppBuilder(private val props: Map<String, String>) {
     }
 
     private fun inntektsKomponentClient() = HttpClient(OkHttp) {
+        val inntektsConfig = config.getConfig("no.nav.etterlatte.tjenester.inntektskomponenten")
         val env = mutableMapOf(
-            "AZURE_APP_CLIENT_ID" to config.getString("client_id"),
-            "AZURE_APP_WELL_KNOWN_URL" to config.getString("well_known_url"),
-            "AZURE_APP_OUTBOUND_SCOPE" to config.getString("outbound"),
-            "AZURE_APP_JWK" to config.getString("client_jwk")
+            "AZURE_APP_CLIENT_ID" to inntektsConfig.getString("clientId"),
+            "AZURE_APP_WELL_KNOWN_URL" to inntektsConfig.getString("wellKnownUrl"),
+            "AZURE_APP_OUTBOUND_SCOPE" to inntektsConfig.getString("outbound"),
+            "AZURE_APP_JWK" to inntektsConfig.getString("clientJwk")
         )
         install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
         install(Auth) {
@@ -42,7 +46,7 @@ class AppBuilder(private val props: Map<String, String>) {
             }
         }
         defaultRequest {
-            url.takeFrom(config.getString("url") + url.encodedPath)
+            header(X_CORRELATION_ID, getCorrelationId())
         }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 

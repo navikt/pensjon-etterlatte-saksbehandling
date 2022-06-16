@@ -1,10 +1,8 @@
 package no.nav.etterlatte.pdl
 
-import io.ktor.client.HttpClient
-import io.ktor.client.request.accept
-import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.content.TextContent
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.content.*
 import io.ktor.http.ContentType.Application.Json
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -55,7 +53,8 @@ class PdlKlient(private val httpClient: HttpClient) {
                     oppholdsadresseHistorikk = true,
                     utland = true,
                     sivilstand = false,
-                    familieRelasjon = true
+                    familieRelasjon = true,
+                    vergemaal = true
                 )
             PersonRolle.GJENLEVENDE ->
                 PdlVariables(
@@ -69,7 +68,8 @@ class PdlKlient(private val httpClient: HttpClient) {
                     oppholdsadresseHistorikk = false,
                     utland = true,
                     sivilstand = true,
-                    familieRelasjon = true
+                    familieRelasjon = true,
+                    vergemaal = false
                 )
             PersonRolle.AVDOED ->
                 PdlVariables(
@@ -83,7 +83,8 @@ class PdlKlient(private val httpClient: HttpClient) {
                     oppholdsadresseHistorikk = true,
                     utland = true,
                     sivilstand = true,
-                    familieRelasjon = true
+                    familieRelasjon = true,
+                    vergemaal = false
                 )
         }
 

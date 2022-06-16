@@ -1,5 +1,6 @@
 package no.nav.etterlatte.rivers
 
+import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -9,9 +10,9 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.time.YearMonth
 
-internal class LagreVilkaarsresultat(
+internal class  LagreVilkaarsresultat(
     rapidsConnection: RapidsConnection,
     val vedtaksvurderingService: VedtaksvurderingService
 ) : River.PacketListener {
@@ -22,6 +23,8 @@ internal class LagreVilkaarsresultat(
             validate { it.demandValue("@event","BEHANDLING:GRUNNLAGENDRET") }
             validate { it.requireKey("sak") }
             validate { it.requireKey("id") }
+            validate { it.requireKey("soeker") }
+            validate { it.requireKey("@virkningstidspunkt") }
             validate { it.requireKey("@vilkaarsvurdering") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
@@ -29,17 +32,23 @@ internal class LagreVilkaarsresultat(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            val behandlingId = UUID.fromString(packet["id"].asText())
+            val behandlingId = packet["id"].asUUID()
             val sakId = packet["sak"].toString()
             val vilkaarsResultat = objectMapper.readValue(packet["@vilkaarsvurdering"].toString(), VilkaarResultat::class.java)
             try {
-                vedtaksvurderingService.lagreVilkaarsresultat(sakId, behandlingId, vilkaarsResultat)
+                vedtaksvurderingService.lagreVilkaarsresultat(sakId, behandlingId, packet["soeker"].textValue(), vilkaarsResultat, YearMonth.parse(packet["@virkningstidspunkt"].textValue()).atDay(1) )
+            }catch (e: KanIkkeEndreFattetVedtak){
+                packet["@event"] = "VEDTAK:ENDRING_FORKASTET"
+                packet["@vedtakId"] = e.vedtakId
+                packet["@forklaring"] = "Vilkaarsvurdering forkastet fordi vedtak allerede er fattet"
+                context.publish(
+                    packet.toJson()
+                )
             } catch (e: Exception){
-                //TODO endre denne
-                println("spiser en melding fordi: " +e)
+                logger.warn("Kunne ikke oppdatere vedtak",e)
             }
 
         }
 }
 
-private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
+

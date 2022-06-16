@@ -1,5 +1,5 @@
 import { Content, ContentHeader } from '../../../shared/styled'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Alert, Button, ContentContainer, Heading, Table, Tag } from "@navikt/ds-react";
 import BrevModal from "./brev-modal";
 import { Information, Success } from '@navikt/ds-icons'
@@ -7,15 +7,15 @@ import NyttBrev from "./nytt-brev";
 import { Border, HeadingWrapper } from "../soeknadsoversikt/styled";
 import { BehandlingsStatusSmall, IBehandlingsStatus } from "../behandlings-status";
 import { BehandlingsTypeSmall, IBehandlingsType } from "../behandlings-type";
-import { Soeknadsdato } from "../soeknadsoversikt/soeknadoversikt/soeknadinfo/Soeknadsdato";
-import { usePersonInfoFromBehandling } from "../usePersonInfoFromBehandling";
 import { BehandlingHandlingKnapper } from "../handlinger/BehandlingHandlingKnapper";
 import { ferdigstillBrev, hentBrevForBehandling, slettBrev } from "../../../shared/api/brev";
 import { useParams } from "react-router-dom";
+import { Soeknadsdato } from "../soeknadsoversikt/soeknadoversikt/Soeknadsdato";
+import { AppContext } from "../../../store/AppContext";
 
 export const Brev = () => {
   const { behandlingId } = useParams()
-  const { mottattDato } = usePersonInfoFromBehandling()
+  const { soeknadMottattDato } = useContext(AppContext).state.behandlingReducer
 
   const [brevListe, setBrevListe] = useState<any[]>([])
   const [error, setError] = useState(false)
@@ -98,7 +98,7 @@ export const Brev = () => {
               <BehandlingsTypeSmall type={IBehandlingsType.BARNEPENSJON}/>
             </div>
           </HeadingWrapper>
-          <Soeknadsdato mottattDato={mottattDato}/>
+          <Soeknadsdato mottattDato={soeknadMottattDato}/>
         </ContentHeader>
 
         <ContentContainer>

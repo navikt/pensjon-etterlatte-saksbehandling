@@ -1,19 +1,7 @@
 package no.nav.etterlatte.fordeler
 
-import no.nav.etterlatte.FNR_2
-import no.nav.etterlatte.FNR_4
-import no.nav.etterlatte.FNR_5
-import no.nav.etterlatte.SVERIGE
-import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
-import no.nav.etterlatte.libs.common.person.Utland
-import no.nav.etterlatte.mockNorskAdresse
-import no.nav.etterlatte.mockPerson
-import no.nav.etterlatte.mockUgyldigAdresse
-import no.nav.etterlatte.readSoknad
+import no.nav.etterlatte.*
+import no.nav.etterlatte.libs.common.person.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -172,7 +160,12 @@ internal class FordelerKriterierTest {
             )
         )
         val gjenlevende = mockPerson(
-            bostedsadresse = mockNorskAdresse()
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                barn = listOf(Foedselsnummer.of(FNR_4)),
+                ansvarligeForeldre = null,
+                foreldre = null,
+            )
         )
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)

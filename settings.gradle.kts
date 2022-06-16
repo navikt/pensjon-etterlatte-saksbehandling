@@ -12,7 +12,7 @@ include(
     "apps:etterlatte-opplysninger-fra-soeknad",
     "apps:etterlatte-opplysninger-fra-pdl",
     "apps:etterlatte-testdata",
-    "apps:etterlatte-okonomi-vedtak",
+    "apps:etterlatte-utbetaling",
     "apps:etterlatte-opplysninger-fra-inntektskomponenten",
     "apps:etterlatte-oppdater-behandling",
     "apps:etterlatte-beregning",

@@ -37,7 +37,6 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
   const avdoedDoedsdato = hentKriterieOpplysning(soekerKriterie, KriterieOpplysningsType.DOEDSDATO)?.opplysning
   const adresserBarn = hentKriterieOpplysning(soekerKriterie, KriterieOpplysningsType.ADRESSER)
   const barnUtlandSoeknad = hentKriterieOpplysning(soekerKriterie, KriterieOpplysningsType.SOEKER_UTENLANDSOPPHOLD)
-  console.log(barnUtlandSoeknad)
 
   const bostedEtterDoedsdato = hentAdresserEtterDoedsdato(adresserBarn?.opplysning?.bostedadresse, avdoedDoedsdato)
   const oppholdEtterDoedsdato = hentAdresserEtterDoedsdato(adresserBarn?.opplysning?.oppholdadresse, avdoedDoedsdato)

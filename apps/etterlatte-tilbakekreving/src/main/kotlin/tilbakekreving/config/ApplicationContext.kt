@@ -3,6 +3,7 @@ package no.nav.etterlatte.tilbakekreving.config
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingConsumer
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
+import no.nav.etterlatte.tilbakekreving.domene.KravgrunnlagMapper
 import java.time.Clock
 
 class ApplicationContext(
@@ -34,9 +35,12 @@ class ApplicationContext(
 
     val tilbakekrevingDao = TilbakekrevingDao(dataSource)
 
+    val kravgrunnlagMapper = KravgrunnlagMapper()
+
     val tilbakekrevingService = TilbakekrevingService(
         tilbakekrevingDao = tilbakekrevingDao,
-        clock = clock
+        clock = clock,
+        kravgrunnlagMapper = kravgrunnlagMapper
     )
 
     val tilbakekrevingConsumer by lazy {

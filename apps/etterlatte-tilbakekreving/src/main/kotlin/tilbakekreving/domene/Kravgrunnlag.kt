@@ -13,7 +13,16 @@ data class Kravgrunnlag(
     val status: KravgrunnlagStatus,
     val saksbehandler: NavIdent,
     val sisteUtbetalingslinjeId: UUID30,
+    val behandlingId: BehandlingId?,
     val grunnlagsperioder: List<Grunnlagsperiode>
+    // val vedtakIdGjelder --> trengs denne?
+    // val utbetalesTilId --> trengs denne?
+    // val vedtakIdOmgjort --> trengs denne?
+    /*
+    ref. vedtakIdOmgjort: trenger ikke denne per nå. Dette er en referanse til
+    et tidligere tilbakekrevingsvedtak dersom en klage og etterfølgende anke
+    fører til at en tilbakekreving blir reversert / endret.
+     */
 ) {
 
     data class SakId(val value: Long)
@@ -22,6 +31,11 @@ data class Kravgrunnlag(
     data class Kontrollfelt(val value: String)
     data class NavIdent(val value: String)
     data class UUID30(val value: String)
+    data class BehandlingId(
+        val value: UUID,
+        val shortValue: UUID30
+    ) // trenger muligens bare UUID - TODO: finn ut om denne sendes til TBK
+
     enum class KravgrunnlagStatus {
         ANNU, ANOM, AVSL, BEHA, ENDR, FEIL, MANU, NY, SPER;
     }

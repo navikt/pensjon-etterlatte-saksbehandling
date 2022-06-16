@@ -1,12 +1,13 @@
 package no.nav.etterlatte.tilbakekreving
 
-import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.tilbakekreving.domene.Kravgrunnlag
 import javax.sql.DataSource
 
 class TilbakekrevingDao(
     val dataSource: DataSource
 ) {
-    fun lagreKravgrunnlag(kravgrunnlag: DetaljertKravgrunnlagDto) {
+    fun lagreKravgrunnlag(kravgrunnlag: Kravgrunnlag, tidspunkt: Tidspunkt) {
         TODO("Not yet implemented")
     }
 }

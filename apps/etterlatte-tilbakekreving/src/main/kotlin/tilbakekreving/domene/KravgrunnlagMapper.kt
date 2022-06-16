@@ -17,28 +17,30 @@ import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 
 class KravgrunnlagMapper {
 
-    fun toKravgrunnlag(grunnlag: DetaljertKravgrunnlagDto) = Kravgrunnlag(sakId = SakId(grunnlag.fagsystemId.toLong()),
+    fun toKravgrunnlag(grunnlag: DetaljertKravgrunnlagDto) = Kravgrunnlag(
+        sakId = SakId(grunnlag.fagsystemId.toLong()),
         kravgrunnlagId = KravgrunnlagId(grunnlag.kravgrunnlagId),
         vedtakId = VedtakId(grunnlag.vedtakId),
         kontrollFelt = Kontrollfelt(grunnlag.kontrollfelt),
         status = KravgrunnlagStatus.valueOf(grunnlag.kodeStatusKrav),
         saksbehandler = NavIdent(grunnlag.saksbehId),
         sisteUtbetalingslinjeId = UUID30(grunnlag.referanse),
-        grunnlagsperioder = grunnlag.tilbakekrevingsPeriode.map { it ->
+        behandlingId = null,
+        grunnlagsperioder = grunnlag.tilbakekrevingsPeriode.map { periode ->
             Grunnlagsperiode(
                 Periode(
-                    fraOgMed = it.periode.fom.toLocalDate(), tilOgMed = it.periode.tom.toLocalDate()
+                    fraOgMed = periode.periode.fom.toLocalDate(), tilOgMed = periode.periode.tom.toLocalDate()
                 ),
-                beloepSkattMnd = it.belopSkattMnd,
-                grunnlagsbeloep = it.tilbakekrevingsBelop.map { grunnlagsbeloep ->
+                beloepSkattMnd = periode.belopSkattMnd,
+                grunnlagsbeloep = periode.tilbakekrevingsBelop.map { beloep ->
                     Grunnlagsbeloep(
-                        kode = KlasseKode(grunnlagsbeloep.kodeKlasse),
-                        type = KlasseType.valueOf(grunnlagsbeloep.typeKlasse.value()),
-                        beloepTidligereUtbetaling = grunnlagsbeloep.belopOpprUtbet,
-                        beloepNyUtbetaling = grunnlagsbeloep.belopNy,
-                        beloepSkalTilbakekreves = grunnlagsbeloep.belopTilbakekreves,
-                        beloepSkalIkkeTilbakekreves = grunnlagsbeloep.belopUinnkrevd,
-                        skatteProsent = grunnlagsbeloep.skattProsent
+                        kode = KlasseKode(beloep.kodeKlasse),
+                        type = KlasseType.valueOf(beloep.typeKlasse.value()),
+                        beloepTidligereUtbetaling = beloep.belopOpprUtbet,
+                        beloepNyUtbetaling = beloep.belopNy,
+                        beloepSkalTilbakekreves = beloep.belopTilbakekreves,
+                        beloepSkalIkkeTilbakekreves = beloep.belopUinnkrevd,
+                        skatteProsent = beloep.skattProsent
                     )
                 },
             )

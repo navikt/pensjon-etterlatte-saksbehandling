@@ -1,1 +1,3 @@
--- Lagre ned en datamodell for mottatt oppdrag
+-- saksnummer kan ikke være unikt i databasen - det kan komme
+--  tilbakekreving på tilbakekreving. Primærnøkkel
+-- basert på vedtakid fra TBK i kombinasjon med Saksid?

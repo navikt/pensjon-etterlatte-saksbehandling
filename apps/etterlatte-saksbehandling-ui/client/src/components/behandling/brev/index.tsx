@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react'
 import { Alert, Button, ContentContainer, Heading, Table, Tag } from "@navikt/ds-react";
 import BrevModal from "./brev-modal";
 import { Information, Success } from '@navikt/ds-icons'
-import NyttBrev from "./nytt-brev";
+import NyttBrev from "./nytt-brev/nytt-brev";
 import { Border, HeadingWrapper } from "../soeknadsoversikt/styled";
 import { BehandlingsStatusSmall, IBehandlingsStatus } from "../behandlings-status";
 import { BehandlingsTypeSmall, IBehandlingsType } from "../behandlings-type";

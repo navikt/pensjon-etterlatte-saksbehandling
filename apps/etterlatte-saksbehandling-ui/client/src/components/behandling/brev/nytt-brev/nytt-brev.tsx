@@ -1,4 +1,4 @@
-import { BodyLong, Button, Cell, Grid, Loader, Modal, Select, TextField } from '@navikt/ds-react'
+import { BodyLong, Button, Loader, Modal, Select } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { Add } from '@navikt/ds-icons'
 import styled from 'styled-components'
@@ -9,12 +9,13 @@ import {
   hentMottakere,
   Mottaker,
   nyttBrevForBehandling,
-} from '../../../shared/api/brev'
+} from '../../../../shared/api/brev'
 import { useParams } from 'react-router-dom'
-import { Border } from '../soeknadsoversikt/styled'
-import { IBehandlingsopplysning, OpplysningsType } from '../../../store/reducers/BehandlingReducer'
+import { Border } from '../../soeknadsoversikt/styled'
+import { IBehandlingsopplysning, OpplysningsType } from '../../../../store/reducers/BehandlingReducer'
 import { CheckboksPanel } from 'nav-frontend-skjema'
-import { Column, GridContainer } from '../../../shared/styled'
+import { Column, GridContainer } from '../../../../shared/styled'
+import ManuellAdresse from "./manuell-adresse";
 
 const CustomModal = styled(Modal)`
   min-width: 540px;
@@ -224,78 +225,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
               <br />
 
               {adresse !== undefined && (
-                <>
-                  <Grid>
-                    <h3>Adresse</h3>
-                    <Cell xs={12}>
-                      <TextField
-                        label={'Fornavn'}
-                        value={adresse?.fornavn || ''}
-                        onChange={(e) =>
-                          setAdresse({
-                            ...adresse,
-                            fornavn: e.target.value,
-                          })
-                        }
-                      />
-                    </Cell>
-                    <Cell xs={12}>
-                      <TextField
-                        label={'Etternavn'}
-                        value={adresse?.etternavn || ''}
-                        onChange={(e) =>
-                          setAdresse({
-                            ...adresse,
-                            etternavn: e.target.value,
-                          })
-                        }
-                      />
-                    </Cell>
-                  </Grid>
-
-                  <br />
-
-                  <Grid>
-                    <Cell xs={12}>
-                      <TextField
-                        label={'Adresse'}
-                        value={adresse?.adresse || ''}
-                        onChange={(e) =>
-                          setAdresse({
-                            ...adresse,
-                            adresse: e.target.value,
-                          })
-                        }
-                      />
-                    </Cell>
-
-                    <Cell xs={4}>
-                      <TextField
-                        label={'Postnummer'}
-                        value={adresse?.postnummer || ''}
-                        onChange={(e) =>
-                          setAdresse({
-                            ...adresse,
-                            postnummer: e.target.value,
-                          })
-                        }
-                      />
-                    </Cell>
-
-                    <Cell xs={8}>
-                      <TextField
-                        label={'Poststed'}
-                        value={adresse?.poststed || ''}
-                        onChange={(e) =>
-                          setAdresse({
-                            ...adresse,
-                            poststed: e.target.value,
-                          })
-                        }
-                      />
-                    </Cell>
-                  </Grid>
-                </>
+                ManuellAdresse(adresse, setAdresse)
               )}
 
               <br />

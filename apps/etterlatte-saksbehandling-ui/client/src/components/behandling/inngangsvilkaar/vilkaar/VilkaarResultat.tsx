@@ -1,18 +1,20 @@
-import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { IBehandlingStatus, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import React from 'react'
 import { VilkaarBorder } from '../styled'
 import styled from 'styled-components'
 import { format } from 'date-fns'
 import { BehandlingHandlingKnapper } from '../../handlinger/BehandlingHandlingKnapper'
 import { VilkaarsVurderingKnapper } from '../../handlinger/vilkaarsvurderingKnapper'
+import { NesteOgTilbake } from '../../handlinger/NesteOgTilbake'
 
 type Props = {
   id: any
   resultat: VurderingsResultat | undefined
   dato: string
+  behandlingStatus: IBehandlingStatus
 }
 
-export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato }) => {
+export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato, behandlingStatus }) => {
   const datoFormatert = format(new Date(dato), 'dd.MM.yyyy')
 
   let tekst = ''
@@ -32,9 +34,13 @@ export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato }) => {
         </TekstWrapper>
       </VilkaarBorder>
 
-      <BehandlingHandlingKnapper>
-        <VilkaarsVurderingKnapper vilkaarResultat={resultat} />
-      </BehandlingHandlingKnapper>
+      {behandlingStatus === IBehandlingStatus.under_behandling ? (
+        <BehandlingHandlingKnapper>
+          <VilkaarsVurderingKnapper vilkaarResultat={resultat} />
+        </BehandlingHandlingKnapper>
+      ) : (
+        <NesteOgTilbake />
+      )}
     </>
   )
 }

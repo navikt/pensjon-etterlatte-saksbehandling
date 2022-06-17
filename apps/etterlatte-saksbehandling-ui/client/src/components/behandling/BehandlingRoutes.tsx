@@ -22,7 +22,7 @@ export const useBehandlingRoutes = () => {
   ]
 
   const firstPage = behandlingRoutes.findIndex((item) => item.path === currentRoute) === 0
-  const lastPage = behandlingRoutes.findIndex((item) => item.path === currentRoute) === 5
+  const lastPage = behandlingRoutes.findIndex((item) => item.path === currentRoute) === 3
 
   useEffect(() => {
     setCurrentRoute(match?.params.section)

@@ -1,6 +1,15 @@
 {
   "id": "9",
   "sak": 3,
+  "status": "attestering",
+  "saksbehandler": {
+    "ident": "",
+    "navn": "Truls Veileder"
+  },
+  "attestant": {
+    "ident": "",
+    "navn": "Linn Normann"
+  },
   "gyldighetsprøving": {
     "resultat": "OPPFYLT",
     "vurderinger": [
@@ -9,14 +18,8 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": [
-              "22128202440",
-              "03108718357"
-            ],
-            "foreldre": [
-              "22128202440",
-              "03108718357"
-            ],
+            "ansvarligeForeldre": ["22128202440", "03108718357"],
+            "foreldre": ["22128202440", "03108718357"],
             "barn": null
           },
           "innsender": {
@@ -36,14 +39,8 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": [
-              "22128202440",
-              "03108718357"
-            ],
-            "foreldre": [
-              "22128202440",
-              "03108718357"
-            ],
+            "ansvarligeForeldre": ["22128202440", "03108718357"],
+            "foreldre": ["22128202440", "03108718357"],
             "barn": null
           },
           "innsender": {
@@ -133,10 +130,7 @@
                   "type": "pdl"
                 },
                 "opplysning": {
-                  "foreldre": [
-                    "22128202440",
-                    "03108718357"
-                  ]
+                  "foreldre": ["22128202440", "03108718357"]
                 }
               },
               {

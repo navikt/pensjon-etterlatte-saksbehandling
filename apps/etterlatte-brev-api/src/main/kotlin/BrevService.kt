@@ -37,6 +37,8 @@ class BrevService(
 
         if (brev.status != Status.OPPRETTET && brev.status != Status.OPPDATERT)
             throw RuntimeException("Brev er ferdigstilt og kan ikke slettes!")
+        else if (brev.erVedtaksbrev)
+            throw RuntimeException("Vedtaksbrev kan ikke slettes!")
 
         return db.slett(id)
     }
@@ -80,6 +82,9 @@ class BrevService(
 
     fun ferdigstillBrev(id: BrevID): Brev {
         val brev: Brev = db.hentBrev(id)
+
+        if (brev.erVedtaksbrev)
+            throw RuntimeException("Vedtaksbrev skal ikke ferdigstilles manuelt!")
 
         // todo: vedtak må byttes ut med grunnlag for å fungere på behandlinger også.
         val vedtak = vedtakService.hentVedtak(brev.behandlingId)

@@ -47,13 +47,15 @@ export default function BrevModal({ brev, ferdigstill, slett }: {
 
   return (
       <>
-        <Button variant={isDone ? 'secondary' : 'primary'} size={'small'} onClick={open}>
-          {isDone ? <Findout /> : <Notes />}
+        <Button variant={(isDone || brev.erVedtaksbrev) ? 'secondary' : 'primary'} size={'small'} onClick={open}>
+          {(isDone || brev.erVedtaksbrev) ? <Findout/> : <Notes/>}
         </Button>
         &nbsp;&nbsp;
-        <Button variant={'danger'} size={'small'} disabled={isDone} onClick={slettBrev}>
-          <Delete />
-        </Button>
+        {(!isDone && !brev.erVedtaksbrev) && (
+            <Button variant={'danger'} size={'small'} disabled={isDone} onClick={slettBrev}>
+              <Delete/>
+            </Button>
+        )}
 
         <Modal open={isOpen} onClose={() => setIsOpen(false)}>
           <Modal.Content>
@@ -78,10 +80,10 @@ export default function BrevModal({ brev, ferdigstill, slett }: {
 
             <ButtonRow>
               <Button variant={'secondary'} onClick={() => setIsOpen(false)}>
-                {isDone ? 'Lukk' : 'Avbryt'}
+                {(isDone || brev.erVedtaksbrev) ? 'Lukk' : 'Avbryt'}
               </Button>
 
-              {!isDone && (
+              {(!isDone && !brev.erVedtaksbrev) && (
                   <>
                     &nbsp;&nbsp;
                     <Button variant={'primary'} onClick={ferdigstillBrev}>

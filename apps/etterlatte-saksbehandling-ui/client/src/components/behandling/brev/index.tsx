@@ -91,7 +91,7 @@ export const Brev = () => {
         <ContentHeader>
           <HeadingWrapper>
             <Heading spacing size={'xlarge'} level={'5'}>
-              Brev
+              Brev-oversikt
             </Heading>
             <div className="details">
               <BehandlingsStatusSmall status={IBehandlingsStatus.FORSTEGANG}/>

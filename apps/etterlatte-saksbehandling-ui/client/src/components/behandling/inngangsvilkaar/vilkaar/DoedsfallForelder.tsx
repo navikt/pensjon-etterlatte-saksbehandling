@@ -90,13 +90,15 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
             </VilkaarColumn>
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
-            <VilkaarVurderingContainer>
-              <VilkaarlisteTitle>
-                <StatusIcon status={props.vilkaar.resultat} large={true} /> {vilkaarErOppfylt(props.vilkaar.resultat)}
-              </VilkaarlisteTitle>
-              <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
-              <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
-            </VilkaarVurderingContainer>
+            {vilkaar != undefined && (
+              <VilkaarVurderingContainer>
+                <VilkaarlisteTitle>
+                  <StatusIcon status={vilkaar.resultat} large={true} /> {vilkaarErOppfylt(vilkaar.resultat)}
+                </VilkaarlisteTitle>
+                <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
+                <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
+              </VilkaarVurderingContainer>
+            )}
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
       </Innhold>

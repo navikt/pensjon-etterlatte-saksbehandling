@@ -31,6 +31,7 @@ export const Title = styled.div`
 `
 export const Lovtekst = styled.div`
   display: flex;
+  max-width: 300px;
 `
 
 export const VilkaarInfobokser = styled.div`
@@ -44,7 +45,11 @@ export const VilkaarInfobokser = styled.div`
 `
 
 export const VilkaarColumn = styled.div`
-  width: calc((100% / 3) - (40px / 3));
+  width: calc((100% / 4) - (60px / 4));
+
+  @media (max-width: 1900px) {
+    width: calc((100% / 3) - (40px / 3));
+  }
 
   @media (max-width: 1600px) {
     width: calc((100% / 2) - (20px / 2));

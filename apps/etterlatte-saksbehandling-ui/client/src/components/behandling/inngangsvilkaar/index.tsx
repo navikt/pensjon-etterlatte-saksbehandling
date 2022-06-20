@@ -8,6 +8,7 @@ import { AvdoedesForutMedlemskap } from './vilkaar/AvdoedesForutMedlemskap'
 import { useLocation } from 'react-router-dom'
 import { BarnetsMedlemskap } from './vilkaar/BarnetsMedlemskap'
 import { VilkaarResultat } from './vilkaar/VilkaarResultat'
+import { Virkningstidspunkt } from './vilkaar/Virkningstidspunkt'
 
 export const Inngangsvilkaar = () => {
   const ctx = useContext(AppContext)
@@ -40,6 +41,12 @@ export const Inngangsvilkaar = () => {
       <BarnetsMedlemskap
         id="barnetsmedlemskap"
         vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.BARNETS_MEDLEMSKAP)}
+      />
+      <Virkningstidspunkt
+        id="virkningstidspunkt"
+        vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.SOEKER_ER_UNDER_20)}
+        virkningsdato={virkningstidspunkt}
+        mottattdato={ctx.state.behandlingReducer.soeknadMottattDato}
       />
       <VilkaarResultat id="vilkaarResultat" resultat={vilkaarResultat} dato={virkningstidspunkt} />
     </Content>

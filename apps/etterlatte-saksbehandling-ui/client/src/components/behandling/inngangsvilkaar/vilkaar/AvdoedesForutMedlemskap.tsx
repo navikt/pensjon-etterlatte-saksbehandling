@@ -32,12 +32,14 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
             </VilkaarColumn>
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
-            <VilkaarVurderingContainer>
-              <VilkaarlisteTitle>
-                <StatusIcon status={VurderingsResultat.OPPFYLT} large={true} /> Vilkår er oppfylt
-              </VilkaarlisteTitle>
-              <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
-            </VilkaarVurderingContainer>
+            {vilkaar != undefined && (
+              <VilkaarVurderingContainer>
+                <VilkaarlisteTitle>
+                  <StatusIcon status={VurderingsResultat.OPPFYLT} large={true} /> Vilkår er oppfylt
+                </VilkaarlisteTitle>
+                <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
+              </VilkaarVurderingContainer>
+            )}
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
         <TidslinjeMedlemskap />

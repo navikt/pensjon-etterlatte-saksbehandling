@@ -141,14 +141,16 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
           </VilkaarInfobokser>
 
           <VilkaarVurderingColumn>
-            <VilkaarVurderingContainer>
-              <VilkaarlisteTitle>
-                <StatusIcon status={props.vilkaar.resultat} large={true} />{' '}
-                {props.vilkaar?.resultat && vilkaarErOppfylt(props.vilkaar.resultat)}
-              </VilkaarlisteTitle>
-              <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
-              {lagVilkaarVisning()}
-            </VilkaarVurderingContainer>
+            {vilkaar != undefined && (
+              <VilkaarVurderingContainer>
+                <VilkaarlisteTitle>
+                  <StatusIcon status={vilkaar.resultat} large={true} />{' '}
+                  {props.vilkaar?.resultat && vilkaarErOppfylt(props.vilkaar.resultat)}
+                </VilkaarlisteTitle>
+                <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
+                {lagVilkaarVisning()}
+              </VilkaarVurderingContainer>
+            )}
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
       </Innhold>

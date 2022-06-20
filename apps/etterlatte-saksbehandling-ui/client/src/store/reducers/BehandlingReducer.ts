@@ -115,7 +115,8 @@ export interface IVilkaarResultat {
 export interface IVilkaarsproving {
   navn: VilkaarsType
   resultat: VurderingsResultat
-  basertPaaOpplysninger: IKriterie[]
+  kriterier: IKriterie[]
+  vurdertDato: string
 }
 
 export enum VilkaarsType {

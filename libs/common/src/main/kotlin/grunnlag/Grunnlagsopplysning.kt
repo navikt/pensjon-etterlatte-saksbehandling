@@ -64,6 +64,12 @@ open class Grunnlagsopplysning<T>(
         }
     }
 
+    class Vilkaarskomponenten(val navn: String) : Kilde("vilkaarskomponenten") {
+        override fun toString(): String {
+            return navn
+        }
+    }
+
     class RegelKilde(val navn: String, val ts: Instant, val versjon: String) : Kilde("regel"){
         override fun toString(): String {
             return "beregningsregel  $navn"

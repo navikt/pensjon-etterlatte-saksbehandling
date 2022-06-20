@@ -1,7 +1,10 @@
-package vilkaar.barnepensjon
+package barnepensjon
 
+import no.nav.etterlatte.barnepensjon.setVikaarVurderingFraKriterier
 import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraVilkaar
 import no.nav.etterlatte.barnepensjon.setVurderingFraKommerBarnetTilGode
+import no.nav.etterlatte.libs.common.vikaar.Kriterie
+import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
@@ -42,8 +45,12 @@ internal class UtilsKtTest {
 
     @Test
     fun vilkarsvurderingKanIkkeVurderesOmMinstEtVilkårIkkeKanVurderes() {
-        assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, setVilkaarVurderingFraVilkaar(listOf(oppfyltVilkarAlder, oppfyltVilkarDoedsfall, manglerInfoVilkaarBarnetsMedlemskap)))
-        assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, setVilkaarVurderingFraVilkaar(listOf(oppfyltVilkarAlder, oppfyltVilkarDoedsfall, ikkeOppfyltVilkaarAvdodesMedlemskap, manglerInfoVilkaarBarnetsMedlemskap)))
+        assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, setVilkaarVurderingFraVilkaar(listOf(
+            oppfyltVilkarAlder, oppfyltVilkarDoedsfall, manglerInfoVilkaarBarnetsMedlemskap
+        )))
+        assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, setVilkaarVurderingFraVilkaar(listOf(
+            oppfyltVilkarAlder, oppfyltVilkarDoedsfall, ikkeOppfyltVilkaarAvdodesMedlemskap, manglerInfoVilkaarBarnetsMedlemskap
+        )))
     }
 
     @Test
@@ -55,25 +62,61 @@ internal class UtilsKtTest {
     @Test
     fun kommerBarnetTilGodeVurderingOppfylt() {
         assertEquals(VurderingsResultat.OPPFYLT, setVurderingFraKommerBarnetTilGode(listOf(
-            oppfyltGjenlevendeBarnSammeAdresse, oppfyltBarnIngenUtlandsadresse, ikkeOppfyltBarnAvdoedSammeAdresse)))
+            oppfyltGjenlevendeBarnSammeAdresse, oppfyltBarnIngenUtlandsadresse, ikkeOppfyltBarnAvdoedSammeAdresse
+        )))
     }
 
     @Test
     fun kommerBarnetTilGodeVurderingIkkeOppfylt() {
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, setVurderingFraKommerBarnetTilGode(listOf(
-            ikkeOppfyltGjenlevendeBarnSammeAdresse, oppfyltBarnIngenUtlandsadresse, ikkeOppfyltBarnAvdoedSammeAdresse)))
+            ikkeOppfyltGjenlevendeBarnSammeAdresse, oppfyltBarnIngenUtlandsadresse, ikkeOppfyltBarnAvdoedSammeAdresse
+        )))
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, setVurderingFraKommerBarnetTilGode(listOf(
-            ikkeOppfyltGjenlevendeBarnSammeAdresse, oppfyltBarnIngenUtlandsadresse, oppfyltBarnAvdoedSammeAdresse)))
+            ikkeOppfyltGjenlevendeBarnSammeAdresse, oppfyltBarnIngenUtlandsadresse, oppfyltBarnAvdoedSammeAdresse
+        )))
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, setVurderingFraKommerBarnetTilGode(listOf(
-            oppfyltGjenlevendeBarnSammeAdresse, ikkeOppfyltBarnIngenUtlandsadresse, ikkeOppfyltBarnAvdoedSammeAdresse)))
+            oppfyltGjenlevendeBarnSammeAdresse, ikkeOppfyltBarnIngenUtlandsadresse, ikkeOppfyltBarnAvdoedSammeAdresse
+        )))
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, setVurderingFraKommerBarnetTilGode(listOf(
-            ikkeOppfyltBarnAvdoedSammeAdresse, ikkeOppfyltBarnIngenUtlandsadresse, oppfyltBarnAvdoedSammeAdresse)))
+            ikkeOppfyltBarnAvdoedSammeAdresse, ikkeOppfyltBarnIngenUtlandsadresse, oppfyltBarnAvdoedSammeAdresse
+        )))
     }
 
     @Test
     fun kommerBarnetTilGodeVurderingManglerInfo() {
         assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, setVurderingFraKommerBarnetTilGode(listOf(
-            manglerInfoGjenlevendeBarnSammeAdresse, oppfyltBarnIngenUtlandsadresse, ikkeOppfyltBarnAvdoedSammeAdresse)))
+            manglerInfoGjenlevendeBarnSammeAdresse, oppfyltBarnIngenUtlandsadresse, ikkeOppfyltBarnAvdoedSammeAdresse
+        )))
+    }
+
+    @Test
+    fun vurderVilkaarsVurdering() {
+        val kriterieOppfylt =
+            Kriterie(Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO, VurderingsResultat.OPPFYLT, listOf())
+        val kriterieIkkeOppfylt =
+            Kriterie(
+                Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
+                VurderingsResultat.IKKE_OPPFYLT,
+                listOf()
+            )
+        val kriterieKanIkkeVurdere = Kriterie(
+            Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            listOf()
+        )
+
+        val vilkaarKriterierOppfylt = setVikaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieOppfylt))
+        val vilkaarEtKriterieIkkeOppfylt =
+            setVikaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieIkkeOppfylt, kriterieKanIkkeVurdere))
+        val vilkaarKriterierOppfyltOgKanIkkeHentesUt =
+            setVikaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieKanIkkeVurdere, kriterieOppfylt))
+
+        assertEquals(VurderingsResultat.OPPFYLT, vilkaarKriterierOppfylt)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, vilkaarEtKriterieIkkeOppfylt)
+        assertEquals(
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            vilkaarKriterierOppfyltOgKanIkkeHentesUt
+        )
     }
 
 }

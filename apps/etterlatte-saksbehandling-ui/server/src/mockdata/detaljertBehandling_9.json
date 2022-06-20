@@ -530,7 +530,7 @@
           }
         ],
         "soeknadAdresse": {
-          "adresseIUtlandet": "JA",
+          "adresseIUtlandet": "NEI",
           "land": "Costa Rica",
           "adresse": "Palmeveien 7, 1234 Susogdus"
         },

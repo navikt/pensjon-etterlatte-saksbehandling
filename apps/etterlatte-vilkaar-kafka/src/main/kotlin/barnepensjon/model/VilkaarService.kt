@@ -1,4 +1,4 @@
-package no.nav.etterlatte.model
+package no.nav.etterlatte.barnepensjon.model
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue

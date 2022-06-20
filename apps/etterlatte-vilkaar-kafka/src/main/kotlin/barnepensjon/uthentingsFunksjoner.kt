@@ -39,8 +39,9 @@ fun hentAdresser(
     val kontaktadresse = person.opplysning.kontaktadresse
 
     val adresser = Adresser(bostedadresse, oppholdadresse, kontaktadresse)
-    val ingenAdresser = bostedadresse?.isEmpty() == true && oppholdadresse?.isEmpty() == true && kontaktadresse?.isEmpty() == true
+    val ingenAdresser = bostedadresse == null && oppholdadresse == null && kontaktadresse == null
 
+    val test = 2
     return if (ingenAdresser) {
         throw OpplysningKanIkkeHentesUt()
     } else {

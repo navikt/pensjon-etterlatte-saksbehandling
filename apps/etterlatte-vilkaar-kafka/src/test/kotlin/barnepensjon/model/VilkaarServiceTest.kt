@@ -1,6 +1,6 @@
-package model
+package barnepensjon.model
 
-import no.nav.etterlatte.model.VilkaarService
+import no.nav.etterlatte.barnepensjon.model.VilkaarService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

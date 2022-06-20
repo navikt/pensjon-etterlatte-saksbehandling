@@ -1,3 +1,5 @@
+package no.nav.etterlatte.testsupport
+
 import java.io.FileNotFoundException
 
 object TestHelper

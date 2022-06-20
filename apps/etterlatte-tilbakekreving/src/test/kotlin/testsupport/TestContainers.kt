@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.testsupport
 
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.PostgreSQLContainer

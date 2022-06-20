@@ -23,7 +23,7 @@ CREATE TABLE grunnlagsperiode
     beloep_skatt_mnd DECIMAL
 );
 
-CREATE TABLE
+CREATE TABLE tilbakekrevingsbeloep
 (
     id                              UUID PRIMARY KEY,
     kode                            VARCHAR NOT NULL,

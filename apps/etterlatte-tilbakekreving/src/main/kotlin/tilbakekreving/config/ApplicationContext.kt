@@ -1,18 +1,21 @@
 package no.nav.etterlatte.tilbakekreving.config
 
-import no.nav.etterlatte.tilbakekreving.TilbakekrevingConsumer
-import no.nav.etterlatte.tilbakekreving.TilbakekrevingDao
-import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
-import no.nav.etterlatte.tilbakekreving.domene.KravgrunnlagMapper
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.TilbakekrevingDao
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.TilbakekrevingService
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
+import no.nav.helse.rapids_rivers.RapidApplication
+import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.Clock
 
 class ApplicationContext(
-    properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
+    val rapidsConnection: RapidsConnection = RapidApplication.create(System.getenv().withConsumerGroupId())
 ) {
 
-    val clock = Clock.systemUTC()
+    var clock = Clock.systemUTC()
 
-    val dataSourceBuilder = DataSourceBuilder(
+    var dataSourceBuilder = DataSourceBuilder(
         jdbcUrl = jdbcUrl(
             host = properties.dbHost,
             port = properties.dbPort,
@@ -22,9 +25,9 @@ class ApplicationContext(
         password = properties.dbPassword,
     )
 
-    val dataSource = dataSourceBuilder.dataSource()
+    var dataSource = dataSourceBuilder.dataSource()
 
-    val jmsConnectionFactory = JmsConnectionFactory(
+    var jmsConnectionFactory = JmsConnectionFactory(
         hostname = properties.mqHost,
         port = properties.mqPort,
         queueManager = properties.mqQueueManager,
@@ -33,24 +36,31 @@ class ApplicationContext(
         password = properties.serviceUserPassword
     )
 
-    val tilbakekrevingDao = TilbakekrevingDao(dataSource)
+    var tilbakekrevingDao = TilbakekrevingDao(dataSource)
 
-    val kravgrunnlagMapper = KravgrunnlagMapper()
+    var kravgrunnlagMapper = KravgrunnlagMapper()
 
-    val tilbakekrevingService = TilbakekrevingService(
+    var tilbakekrevingService = TilbakekrevingService(
         tilbakekrevingDao = tilbakekrevingDao,
         clock = clock,
         kravgrunnlagMapper = kravgrunnlagMapper
     )
 
-    val tilbakekrevingConsumer by lazy {
-        TilbakekrevingConsumer(
-            tilbakekrevingService = tilbakekrevingService,
-            jmsConnectionFactory = jmsConnectionFactory,
-            queue = properties.mqKravgrunnlagQueue
-        )
-    }
+    fun tilbakekrevingConsumer(
+        tilbakekrevingService: TilbakekrevingService,
+        jmsConnectionFactory: JmsConnectionFactory,
+    ) = KravgrunnlagConsumer(
+        tilbakekrevingService = tilbakekrevingService,
+        jmsConnectionFactory = jmsConnectionFactory,
+        queue = properties.mqKravgrunnlagQueue
+    )
 
     private fun jdbcUrl(host: String, port: Int, databaseName: String) =
         "jdbc:postgresql://${host}:$port/$databaseName"
+
 }
+
+private fun Map<String, String>.withConsumerGroupId() =
+    this.toMutableMap().apply {
+        put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
+    }

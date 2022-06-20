@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.domene
+package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -59,7 +59,7 @@ data class Kravgrunnlag(
         ) {
             data class KlasseKode(val value: String) // TODO: finne ut hvilke verdier klassekodene kan ha
             enum class KlasseType {
-                YTEL, SKAT, FEIL,
+                YTEL, SKAT, FEIL,JUST
             }
         }
 

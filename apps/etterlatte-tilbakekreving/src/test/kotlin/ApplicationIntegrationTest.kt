@@ -2,11 +2,16 @@ package no.nav.etterlatte
 
 import io.mockk.spyk
 import io.mockk.verify
-import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
+import no.nav.etterlatte.testsupport.TestContainers
+import no.nav.etterlatte.testsupport.TestRapid
+import no.nav.etterlatte.testsupport.readFile
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.TilbakekrevingService
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
 import no.nav.etterlatte.tilbakekreving.config.ApplicationProperties
 import no.nav.etterlatte.tilbakekreving.config.JmsConnectionFactory
-import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -28,6 +33,7 @@ class ApplicationIntegrationTest {
     private lateinit var connectionFactory: JmsConnectionFactory
     private lateinit var dataSource: DataSource
     private lateinit var tilbakekrevingService: TilbakekrevingService
+    private val rapidsConnection: TestRapid = spyk(TestRapid())
 
     @BeforeAll
     fun beforeAll() {
@@ -49,44 +55,44 @@ class ApplicationIntegrationTest {
             serviceUserPassword = "passw0rd",
         )
 
-        ApplicationContext(applicationProperties).also {
+        ApplicationContext(applicationProperties, rapidsConnection).also {
             connectionFactory = it.jmsConnectionFactory
             dataSource = it.dataSource
-            tilbakekrevingService = spyk(it.tilbakekrevingService)
-        }.also {
-            startApplication(it)
+            it.tilbakekrevingService = spyk(it.tilbakekrevingService).also { tks -> tilbakekrevingService = tks }
+
+            rapidApplication(it).start()
         }
     }
 
     @Test
-    fun `skal motta kravgrunnlag men feile fordi grunnlaget er null`() {
-        sendKravgrunnlagsmeldingFraOppdrag(null)
+    fun `skal motta og lagre kravgrunnlag`() {
+        sendKravgrunnlagsmeldingFraOppdrag()
 
-        verify(exactly = 0) {
+        verify(timeout = TIMEOUT, exactly = 1) {
             tilbakekrevingService.lagreKravgrunnlag(any())
         }
     }
 
-
     @AfterEach
     fun afterEach() {
-        /*using(sessionOf(dataSource)) {
-            it.run(queryOf("TRUNCATE utbetaling CASCADE").asExecute)
-        }*/
+        using(sessionOf(dataSource)) {
+            it.run(queryOf("TRUNCATE kravgrunnlag CASCADE").asExecute)
+        }
     }
 
     @AfterAll
     fun afterAll() {
-        connectionFactory.stop()
+        rapidsConnection.stop()
         ibmMQContainer.stop()
         postgreSQLContainer.stop()
     }
 
 
-    private fun sendKravgrunnlagsmeldingFraOppdrag(kravgrunnlag: DetaljertKravgrunnlagDto?) {
+    private fun sendKravgrunnlagsmeldingFraOppdrag() {
         connectionFactory.connection().createSession().use { session ->
             val producer = session.createProducer(session.createQueue("DEV.QUEUE.1"))
-            val message = session.createTextMessage("test")
+            val kravgrunnlag = readFile("/kravgrunnlag.xml")
+            val message = session.createTextMessage(kravgrunnlag)
             producer.send(message)
         }
     }

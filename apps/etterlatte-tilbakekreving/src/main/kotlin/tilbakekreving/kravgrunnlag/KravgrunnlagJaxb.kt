@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.oppdrag
+package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import java.io.StringReader

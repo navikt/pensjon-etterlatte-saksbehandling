@@ -932,7 +932,7 @@
         "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
         "kriterier": [
           {
-            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR",
+            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD",
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {

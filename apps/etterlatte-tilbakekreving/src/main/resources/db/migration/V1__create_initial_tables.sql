@@ -4,14 +4,15 @@
 
 CREATE TABLE kravgrunnlag
 (
-    kravgrunnlag_id        BIGINT PRIMARY KEY,
-    sak_id                 BIGINT      NOT NULL,
-    vedtak_id              BIGINT      NOT NULL,
-    behandling_id          UUID DEFAULT NULL,
-    kontrollfelt           VARCHAR     NOT NULL,
-    status                 VARCHAR(32) NOT NULL, -- enum?
-    saksbehandler          VARCHAR(32) NOT NULL,
-    siste_utbegalingslinje VARCHAR     NOT NULL  -- siste gjeldende utbetalingslinjeid?
+    kravgrunnlag_id             BIGINT      PRIMARY KEY,
+    sak_id                      BIGINT      NOT NULL,
+    vedtak_id                   BIGINT      NOT NULL,
+    kontrollfelt                VARCHAR     NOT NULL,
+    status                      VARCHAR(32) NOT NULL, -- enum?
+    saksbehandler               VARCHAR(32) NOT NULL,
+    siste_utbetalingslinje      VARCHAR     NOT NULL,  -- siste gjeldende utbetalingslinjeid?
+    mottatt_kravgrunnlag_xml    TEXT        NOT NULL
+--    behandling_id               VARCHAR DEFAULT NULL, denne bør vel flyttes ett hakk ut?
 );
 
 CREATE TABLE grunnlagsperiode

@@ -1,20 +1,21 @@
 package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 
 import java.math.BigDecimal
-import java.math.BigInteger
 import java.time.LocalDate
 import java.util.*
 
 data class Kravgrunnlag(
-    val sakId: SakId, //fagsystem-id
+    val sakId: SakId,
     val kravgrunnlagId: KravgrunnlagId,
     val vedtakId: VedtakId,
     val kontrollFelt: Kontrollfelt,
     val status: KravgrunnlagStatus,
     val saksbehandler: NavIdent,
     val sisteUtbetalingslinjeId: UUID30,
-    val behandlingId: BehandlingId?,
-    val grunnlagsperioder: List<Grunnlagsperiode>
+    val grunnlagsperioder: List<Grunnlagsperiode>,
+    val mottattKravgrunnlagXml: String,
+
+    // val behandlingId: BehandlingId?, denne burde nok heller være koblet på feks en tilbakekreving
     // val vedtakIdGjelder --> trengs denne?
     // val utbetalesTilId --> trengs denne?
     // val vedtakIdOmgjort --> trengs denne?
@@ -26,8 +27,8 @@ data class Kravgrunnlag(
 ) {
 
     data class SakId(val value: Long)
-    data class KravgrunnlagId(val value: BigInteger)
-    data class VedtakId(val value: BigInteger)
+    data class KravgrunnlagId(val value: Long)
+    data class VedtakId(val value: Long)
     data class Kontrollfelt(val value: String)
     data class NavIdent(val value: String)
     data class UUID30(val value: String)

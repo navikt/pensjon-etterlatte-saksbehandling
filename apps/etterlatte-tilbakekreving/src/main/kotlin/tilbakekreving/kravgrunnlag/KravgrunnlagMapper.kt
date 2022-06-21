@@ -19,15 +19,15 @@ import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriode
 
 class KravgrunnlagMapper {
 
-    fun toKravgrunnlag(grunnlag: DetaljertKravgrunnlagDto) = Kravgrunnlag(
+    fun toKravgrunnlag(grunnlag: DetaljertKravgrunnlagDto, kravgrunnlagXml: String) = Kravgrunnlag(
         sakId = SakId(grunnlag.fagsystemId.toLong()),
-        kravgrunnlagId = KravgrunnlagId(grunnlag.kravgrunnlagId),
-        vedtakId = VedtakId(grunnlag.vedtakId),
+        kravgrunnlagId = KravgrunnlagId(grunnlag.kravgrunnlagId.toLong()),
+        vedtakId = VedtakId(grunnlag.vedtakId.toLong()),
         kontrollFelt = Kontrollfelt(grunnlag.kontrollfelt),
         status = KravgrunnlagStatus.valueOf(grunnlag.kodeStatusKrav),
         saksbehandler = NavIdent(grunnlag.saksbehId),
         sisteUtbetalingslinjeId = UUID30(grunnlag.referanse),
-        behandlingId = null,
+        mottattKravgrunnlagXml = kravgrunnlagXml,
         grunnlagsperioder = grunnlag.tilbakekrevingsPeriode.map { periode ->
             toGrunnlagsperiode(periode)
         }

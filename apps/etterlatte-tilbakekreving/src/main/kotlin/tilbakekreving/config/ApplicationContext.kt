@@ -46,19 +46,17 @@ class ApplicationContext(
         kravgrunnlagMapper = kravgrunnlagMapper
     )
 
-    fun tilbakekrevingConsumer(
-        tilbakekrevingService: TilbakekrevingService,
-        jmsConnectionFactory: JmsConnectionFactory,
-    ) = KravgrunnlagConsumer(
-        tilbakekrevingService = tilbakekrevingService,
-        jmsConnectionFactory = jmsConnectionFactory,
-        queue = properties.mqKravgrunnlagQueue
-    )
-
-    private fun jdbcUrl(host: String, port: Int, databaseName: String) =
-        "jdbc:postgresql://${host}:$port/$databaseName"
-
+    val kravgrunnlagConsumer: KravgrunnlagConsumer by lazy {
+        KravgrunnlagConsumer(
+            tilbakekrevingService = tilbakekrevingService,
+            jmsConnectionFactory = jmsConnectionFactory,
+            queue = properties.mqKravgrunnlagQueue
+        )
+    }
 }
+
+private fun jdbcUrl(host: String, port: Int, databaseName: String) =
+    "jdbc:postgresql://${host}:$port/$databaseName"
 
 private fun Map<String, String>.withConsumerGroupId() =
     this.toMutableMap().apply {

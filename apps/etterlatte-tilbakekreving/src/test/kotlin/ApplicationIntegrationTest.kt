@@ -58,7 +58,8 @@ class ApplicationIntegrationTest {
         ApplicationContext(applicationProperties, rapidsConnection).also {
             connectionFactory = it.jmsConnectionFactory
             dataSource = it.dataSource
-            it.tilbakekrevingService = spyk(it.tilbakekrevingService).also { tks -> tilbakekrevingService = tks }
+            it.tilbakekrevingService = spyk(it.tilbakekrevingService)
+                .also { tks -> tilbakekrevingService = tks }
 
             rapidApplication(it).start()
         }
@@ -69,7 +70,7 @@ class ApplicationIntegrationTest {
         sendKravgrunnlagsmeldingFraOppdrag()
 
         verify(timeout = TIMEOUT, exactly = 1) {
-            tilbakekrevingService.lagreKravgrunnlag(any())
+            tilbakekrevingService.lagreKravgrunnlag(any(), any())
         }
     }
 

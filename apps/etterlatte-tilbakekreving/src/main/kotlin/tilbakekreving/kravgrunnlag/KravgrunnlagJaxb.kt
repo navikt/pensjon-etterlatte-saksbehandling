@@ -13,7 +13,7 @@ object KravgrunnlagJaxb {
     private val jaxbContext = JAXBContext.newInstance(DetaljertKravgrunnlagMelding::class.java)
     private val xmlInputFactory = XMLInputFactory.newInstance()
 
-    fun toKravgrunnlag(kravgrunnlagXml: String): DetaljertKravgrunnlagDto {
+    fun toDetaljertKravgrunnlagDto(kravgrunnlagXml: String): DetaljertKravgrunnlagDto {
         val kravgrunnlag = jaxbContext.createUnmarshaller().unmarshal(
             xmlInputFactory.createXMLStreamReader(StringReader(kravgrunnlagXml)),
             DetaljertKravgrunnlagMelding::class.java

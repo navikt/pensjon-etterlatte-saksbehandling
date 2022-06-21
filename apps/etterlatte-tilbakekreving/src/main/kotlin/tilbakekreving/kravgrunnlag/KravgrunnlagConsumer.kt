@@ -7,6 +7,7 @@ import javax.jms.ExceptionListener
 import javax.jms.Message
 import javax.jms.MessageListener
 import javax.jms.Session
+import kotlin.system.exitProcess
 
 class KravgrunnlagConsumer(
     private val tilbakekrevingService: TilbakekrevingService,
@@ -18,6 +19,7 @@ class KravgrunnlagConsumer(
         val connection = jmsConnectionFactory.connection().apply {
             exceptionListener = ExceptionListener {
                 logger.error("En feil oppstod med tilkobling mot MQ: ${it.message}", it)
+                exitProcess(-1) // Restarter appen
             }
         }.also { it.start() }
 
@@ -32,9 +34,9 @@ class KravgrunnlagConsumer(
             try {
                 logger.info("Kravgrunnlag mottatt")
                 kravgrunnlagXml = message.getBody(String::class.java)
-                val kravgrunnlag = KravgrunnlagJaxb.toKravgrunnlag(kravgrunnlagXml)
-                tilbakekrevingService.lagreKravgrunnlag(kravgrunnlag)
-            } catch (e: Throwable) {
+                val detaljertKravgrunnlag = KravgrunnlagJaxb.toDetaljertKravgrunnlagDto(kravgrunnlagXml)
+                tilbakekrevingService.lagreKravgrunnlag(detaljertKravgrunnlag, kravgrunnlagXml)
+            } catch (e: Exception) {
                 logger.error("Feilet under mottak av kravgrunnlag", e)
             }
         }

@@ -12,14 +12,10 @@ fun main() {
 fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
     applicationContext.rapidsConnection
         .apply {
-            applicationContext.tilbakekrevingConsumer(
-                tilbakekrevingService = applicationContext.tilbakekrevingService,
-                jmsConnectionFactory = applicationContext.jmsConnectionFactory
-            ).start()
-
             register(object : RapidsConnection.StatusListener {
                 override fun onStartup(rapidsConnection: RapidsConnection) {
                     applicationContext.dataSourceBuilder.migrate()
+                    applicationContext.kravgrunnlagConsumer.start()
                 }
 
                 override fun onShutdown(rapidsConnection: RapidsConnection) {

@@ -11,7 +11,7 @@ internal class KravgunnlagJaxbTest {
     @Test
     fun `should generate xml from oppdrag`() {
         val kravgrunnlagXml = readFile("/kravgrunnlag.xml")
-        val kravgrunnlag = KravgrunnlagJaxb.toKravgrunnlag(kravgrunnlagXml)
+        val kravgrunnlag = KravgrunnlagJaxb.toDetaljertKravgrunnlagDto(kravgrunnlagXml)
 
         assertNotNull(kravgrunnlag)
         assertEquals(BigInteger.valueOf(302004), kravgrunnlag.kravgrunnlagId)

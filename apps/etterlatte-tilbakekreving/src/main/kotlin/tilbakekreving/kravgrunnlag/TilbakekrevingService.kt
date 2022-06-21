@@ -9,9 +9,8 @@ class TilbakekrevingService(
     val kravgrunnlagMapper: KravgrunnlagMapper,
     val clock: Clock
 ) {
-    fun lagreKravgrunnlag(detaljertKravgrunnlag: DetaljertKravgrunnlagDto) {
-        val tidspunkt = Tidspunkt.now(clock)
-        val kravgrunnlag = kravgrunnlagMapper.toKravgrunnlag(detaljertKravgrunnlag)
-        tilbakekrevingDao.lagreKravgrunnlag(kravgrunnlag, tidspunkt)
+    fun lagreKravgrunnlag(detaljertKravgrunnlag: DetaljertKravgrunnlagDto, kravgrunnlagXml: String) {
+        val kravgrunnlag = kravgrunnlagMapper.toKravgrunnlag(detaljertKravgrunnlag, kravgrunnlagXml)
+        val lagretKravgrunnlag = tilbakekrevingDao.lagreKravgrunnlag(kravgrunnlag, Tidspunkt.now(clock))
     }
 }

@@ -97,9 +97,6 @@ router.post('/:brevId/pdf', async (req: Request, res: Response) => {
 router.post('/forhaandsvisning', async (req: Request, res: Response) => {
   const path = `${apiUrl}/brev/forhaandsvisning`
 
-  console.log(req.body)
-  console.log('hello')
-
   const result = await fetch(path, {
     method: 'POST',
     body: JSON.stringify(req.body),

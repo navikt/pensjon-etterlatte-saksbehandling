@@ -23,7 +23,9 @@ fun Route.brevRoute(service: BrevService) {
         get("mottakere") {
             val mottakere = listOf(
                 AvsenderMottaker("974761319", idType = "ORGNR", navn = "Statsforvalteren i Oslo og Viken"),
-                AvsenderMottaker("974762501", idType = "ORGNR", navn = "Statsforvalteren i Vestfold og Telemark")
+                AvsenderMottaker("974762501", idType = "ORGNR", navn = "Statsforvalteren i Vestfold og Telemark"),
+                AvsenderMottaker("11057523044", idType = "FNR", navn = "Stor Snerk"),
+                AvsenderMottaker("24116324268", idType = "FNR", navn = "Nobel Tøffeldyr")
             )
 
             call.respond(mottakere)

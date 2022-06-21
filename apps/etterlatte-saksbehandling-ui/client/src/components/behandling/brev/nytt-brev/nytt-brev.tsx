@@ -12,7 +12,6 @@ import {
 } from '../../../../shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Border } from '../../soeknadsoversikt/styled'
-import { IBehandlingsopplysning, OpplysningsType } from '../../../../store/reducers/BehandlingReducer'
 import { CheckboksPanel } from 'nav-frontend-skjema'
 import { Column, GridContainer } from '../../../../shared/styled'
 import { ManuellAdresse } from "./manuell-adresse";
@@ -31,7 +30,6 @@ interface DefaultMottaker {
 
 export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => void }) {
   const { behandlingId } = useParams()
-  // const { state } = useContext(AppContext)
 
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [benyttAdresse, setBenyttAdresse] = useState<boolean>(false)
@@ -50,14 +48,6 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
     hentMaler().then((res) => setMaler(res))
     hentMottakere().then((res) => setMottakere(res))
   }, [])
-
-  // const gyldigeTyper = [OpplysningsType.innsender, OpplysningsType.soeker_pdl, OpplysningsType.gjenlevende_forelder_pdl]
-
-  const grunnlagListe: IBehandlingsopplysning[] = []
-  // TODO: Må hente dette på et vis nå som grunnlag er fjernet
-  // state.behandlingReducer.grunnlag.filter((grunnlag) =>
-  // gyldigeTyper.includes(grunnlag.opplysningType)
-  // )
 
   const forhaandsvis = () => {
     if (!mal) return
@@ -127,19 +117,6 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
     setKlarforLagring(false)
   }
 
-  const type = (opplysningType: OpplysningsType): string => {
-    switch (opplysningType) {
-      case OpplysningsType.innsender:
-        return 'Innsender'
-      case OpplysningsType.gjenlevende_forelder_pdl:
-        return 'Forelder'
-      case OpplysningsType.soeker_pdl:
-        return 'Søker'
-      default:
-        return ''
-    }
-  }
-
   return (
     <>
       <Button variant={'secondary'} onClick={() => setIsOpen(true)}>
@@ -150,7 +127,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
       <CustomModal open={isOpen} onClose={() => setIsOpen(false)}>
         <Modal.Content>
           <GridContainer>
-            <Column style={{ minWidth: '500px', paddingRight: '20px' }}>
+            <Column style={{ width: '500px', paddingRight: '20px' }}>
               <h1>Opprett nytt brev</h1>
 
               <br />
@@ -184,10 +161,10 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
                     onChange={(e) => oppdaterMottaker(e.target.value, 'FNR')}
                   >
                     <option value={undefined}></option>
-                    {grunnlagListe.map((v, i) => (
-                      <option key={i} value={v.opplysning.foedselsnummer}>
-                        {v.opplysning.fornavn} {v.opplysning.etternavn} ({type(v.opplysningType)})
-                      </option>
+                    {mottakere.filter(m => m.idType === "FNR").map((m, i) => (
+                        <option key={i} value={m.id}>
+                          {m.navn} ({m.id})
+                        </option>
                     ))}
                   </Select>
                   <br />
@@ -198,7 +175,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
                     onChange={(e) => oppdaterMottaker(e.target.value, 'ORGNR')}
                   >
                     <option value={undefined}></option>
-                    {mottakere.map((m, i) => (
+                    {mottakere.filter(m => m.idType === "ORGNR").map((m, i) => (
                       <option key={i} value={m.id}>
                         {m.navn} ({m.id})
                       </option>

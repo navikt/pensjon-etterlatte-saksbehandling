@@ -1,13 +1,19 @@
 import {BodyLong} from "@navikt/ds-react";
-import {Column} from "../../../../shared/styled";
-import {PdfViewer} from "./nytt-brev";
+import styled from "styled-components";
 
-export const Forhaandsvisning = ({fileUrl, error}: {
+const PdfViewer = styled.iframe`
+  margin-bottom: 20px;
+  width: 800px;
+  height: 1080px;
+`
+
+
+export const PdfVisning = ({fileUrl, error}: {
     fileUrl?: string,
     error?: string
 }) => {
     return (
-        <Column style={{paddingLeft: '20px', marginTop: '100px'}}>
+        <>
             {error && (
                 <BodyLong>
                     En feil har oppstått ved henting av PDF:
@@ -17,6 +23,6 @@ export const Forhaandsvisning = ({fileUrl, error}: {
             )}
 
             <div>{fileUrl && <PdfViewer src={fileUrl}/>}</div>
-        </Column>
+        </>
     )
 }

@@ -15,7 +15,7 @@ import { Border } from '../../soeknadsoversikt/styled'
 import { CheckboksPanel } from 'nav-frontend-skjema'
 import { Column, GridContainer } from '../../../../shared/styled'
 import { ManuellAdresse } from "./manuell-adresse";
-import { Forhaandsvisning } from "./forhaandsvisning";
+import {PdfVisning} from "../pdf-visning";
 
 const CustomModal = styled(Modal)`
   min-width: 540px;
@@ -222,17 +222,12 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
               <br />
               <br />
             </Column>
-            <Forhaandsvisning fileUrl={fileURL} error={error}/>
+            <Column style={{paddingLeft: '20px', marginTop: '100px'}}>
+              <PdfVisning fileUrl={fileURL} error={error}/>
+            </Column>
           </GridContainer>
         </Modal.Content>
       </CustomModal>
     </>
   )
 }
-
-export const PdfViewer = styled.iframe`
-  //margin-top: 60px;
-  margin-bottom: 20px;
-  width: 800px;
-  height: 1080px;
-`

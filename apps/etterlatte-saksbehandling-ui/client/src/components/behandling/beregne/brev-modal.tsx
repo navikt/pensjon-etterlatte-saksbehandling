@@ -1,16 +1,10 @@
-import { BodyLong, Button, Modal } from "@navikt/ds-react";
+import { Button, Modal } from "@navikt/ds-react";
 import { useEffect, useState } from "react";
 import { genererPdf, opprettEllerOppdaterBrevForVedtak } from "../../../shared/api/brev";
 import styled from "styled-components";
 import { FileIcon } from "../../../shared/icons/fileIcon";
 import { useParams } from "react-router-dom";
-
-const PdfViewer = styled.iframe`
-  //margin-top: 60px;
-  margin-bottom: 20px;
-  width: 800px;
-  height: 1080px;
-`
+import {PdfVisning} from "../brev/pdf-visning";
 
 const ButtonRow = styled.div`
   background: white;
@@ -75,18 +69,7 @@ export default function BrevModal() {
               </Tag>
             </h4>*/}
 
-            {error && (
-                <BodyLong>
-                  En feil har oppstått ved henting av PDF:
-                  <br/>
-                  <code>{error}</code>
-                </BodyLong>
-            )}
-
-            <div>
-              {fileURL && <PdfViewer src={fileURL}/>}
-            </div>
-
+              <PdfVisning fileUrl={fileURL} error={error} />
             <ButtonRow>
               <Button variant={'secondary'} onClick={() => setIsOpen(false)}>
                 Lukk

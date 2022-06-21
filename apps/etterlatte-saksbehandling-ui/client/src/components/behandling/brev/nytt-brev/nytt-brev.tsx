@@ -1,4 +1,4 @@
-import { BodyLong, Button, Loader, Modal, Select } from '@navikt/ds-react'
+import { Button, Loader, Modal, Select } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { Add } from '@navikt/ds-icons'
 import styled from 'styled-components'
@@ -15,7 +15,8 @@ import { Border } from '../../soeknadsoversikt/styled'
 import { IBehandlingsopplysning, OpplysningsType } from '../../../../store/reducers/BehandlingReducer'
 import { CheckboksPanel } from 'nav-frontend-skjema'
 import { Column, GridContainer } from '../../../../shared/styled'
-import ManuellAdresse from "./manuell-adresse";
+import { ManuellAdresse } from "./manuell-adresse";
+import { Forhaandsvisning } from "./forhaandsvisning";
 
 const CustomModal = styled(Modal)`
   min-width: 540px;
@@ -225,7 +226,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
               <br />
 
               {adresse !== undefined && (
-                ManuellAdresse(adresse, setAdresse)
+                <ManuellAdresse adresse={adresse} setAdresse={setAdresse}/>
               )}
 
               <br />
@@ -244,20 +245,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
               <br />
               <br />
             </Column>
-            {error ||
-              (fileURL && (
-                <Column style={{ paddingLeft: '20px', marginTop: '100px' }}>
-                  {error && (
-                    <BodyLong>
-                      En feil har oppstått ved henting av PDF:
-                      <br />
-                      <code>{error}</code>
-                    </BodyLong>
-                  )}
-
-                  <div>{fileURL && <PdfViewer src={fileURL} />}</div>
-                </Column>
-              ))}
+            <Forhaandsvisning fileUrl={fileURL} error={error}/>
           </GridContainer>
         </Modal.Content>
       </CustomModal>

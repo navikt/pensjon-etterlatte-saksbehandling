@@ -2,7 +2,13 @@ import {Adresse} from "../../../../shared/api/brev";
 import {Cell, Grid, TextField} from "@navikt/ds-react";
 import {Dispatch, SetStateAction} from "react";
 
-export default function ManuellAdresse(adresse: Adresse, setAdresse: Dispatch<SetStateAction<Adresse | undefined>>) {
+export const ManuellAdresse = ({
+        adresse,
+        setAdresse
+    }: {
+        adresse: Adresse,
+        setAdresse: Dispatch<SetStateAction<Adresse | undefined>>
+    }) => {
 
     return (
         <>

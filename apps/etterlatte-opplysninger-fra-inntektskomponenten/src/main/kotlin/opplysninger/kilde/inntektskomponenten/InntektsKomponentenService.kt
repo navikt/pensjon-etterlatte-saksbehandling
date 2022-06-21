@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 
 class InntektsKomponentenService(private val inntektskomponentenClient: HttpClient, private val url: String) :
     InntektsKomponenten {

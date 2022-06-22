@@ -15,9 +15,14 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 class AaregService(private val aaregClient: HttpClient, private val url: String) : Aareg {
     override fun hentArbeidsforhold(fnr: Foedselsnummer): List<AaregResponse> {
         val result = runBlocking {
-            aaregClient.post<List<AaregResponse>>(url) {
-                contentType(ContentType.Application.Json)
-                header("Nav-Personident", fnr.value)
+            try {
+                aaregClient.post<List<AaregResponse>>(url) {
+                    contentType(ContentType.Application.Json)
+                    header("Nav-Personident", fnr.value)
+                }
+            } catch (e: Exception) {
+                print(e.message)
+                return@runBlocking emptyList()
             }
         }
         return result

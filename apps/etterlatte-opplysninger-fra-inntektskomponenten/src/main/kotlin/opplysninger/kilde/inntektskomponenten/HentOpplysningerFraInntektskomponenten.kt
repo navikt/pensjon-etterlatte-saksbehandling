@@ -43,7 +43,7 @@ internal class HentOpplysningerFraInntektskomponenten(
                     Opplysningstyper.AVDOED_INNTEKT_V1.name,
                 )
             ) {
-                val fnr = Foedselsnummer.of(packet["fnr"].asText())
+                val fnr = Foedselsnummer.of(packet["fnr"].asText()) // Todo feil fnr?
                 val doedsdato = LocalDate.parse(packet["doedsdato"].asText())
                 val arbeidsforhold = aaregService.hentArbeidsforhold(fnr)
                 val inntektliste = inntektsKomponentenService.hentInntektListe(fnr, doedsdato)

@@ -38,8 +38,6 @@ class InntektsKomponentenService(private val inntektskomponentenClient: HttpClie
                 }
         }
 
-        print(inntektsListe)
-
         return inntektsListe;
 
     }

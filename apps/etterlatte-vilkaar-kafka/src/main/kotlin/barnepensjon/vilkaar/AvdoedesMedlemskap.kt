@@ -196,7 +196,7 @@ fun kriterieHarMottattPensjonSisteFemAar(harMottattPensjonSisteFemAar: List<Innt
     )
 
     if (harMottattPensjonSisteFemAar == null) return opplysningsGrunnlagNull(
-        Kriterietyper.AVDOED_HAR_MOTTATT_TRYGD_SISTE_FEM_AAR,
+        Kriterietyper.AVDOED_HAR_MOTTATT_PENSJON_SISTE_FEM_AAR,
         opplysningsGrunnlag
     )
 

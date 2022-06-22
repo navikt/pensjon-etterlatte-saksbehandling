@@ -36,7 +36,7 @@ enum class InntektsBeskrivelse(val value: String) {
 }
 
 data class ArbeidsInntektInformasjon (
-    val inntektListe : List<Inntekt>
+    val inntektListe : List<Inntekt>?
 )
 
 data class Inntektsmottaker (

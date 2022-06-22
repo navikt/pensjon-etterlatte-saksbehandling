@@ -155,17 +155,18 @@
       },
       {
         "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
-        "resultat": "IKKE_OPPFYLT",
+        "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
         "kriterier": [
           {
-            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR",
+            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD",
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
+                "id": "d0669798-fb9b-45b7-8c95-5b7772dc7a51",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
+                  "tidspunktForInnhenting": "2022-06-20T13:03:15.784239934Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -175,6 +176,7 @@
                 }
               },
               {
+                "id": "551f5aeb-7ea7-4223-8dac-e735eb5ef840",
                 "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
                 "kilde": {
                   "fnr": "03108718357",
@@ -185,6 +187,65 @@
                   "harHattUtenlandsopphold": "NEI",
                   "opphold": null
                 }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "d0669798-fb9b-45b7-8c95-5b7772dc7a51",
+                "kriterieOpplysningsType": "ADRESSER",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-06-20T13:03:15.784239934Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "bostedadresse": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Bøveien 937",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "8475",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "1999-01-01T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ],
+                  "oppholdadresse": [],
+                  "kontaktadresse": []
+                }
+              },
+              {
+                "id": "d0669798-fb9b-45b7-8c95-5b7772dc7a51",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-06-20T13:03:15.784239934Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
+              },
+              {
+                "id": "2c833602-7564-48dc-b6d5-cb48030971ec",
+                "kriterieOpplysningsType": "ADRESSE_GAPS",
+                "kilde": {
+                  "navn": "vilkaarskomponenten",
+                  "type": "vilkaarskomponenten"
+                },
+                "opplysning": []
               }
             ]
           }

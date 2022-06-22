@@ -1,5 +1,4 @@
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
-import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import {
   Innhold,
   Lovtekst,
@@ -15,6 +14,7 @@ import {
 import { VilkaarProps } from '../types'
 import { TidslinjeMedlemskap } from './TidslinjeMedlemskap'
 import { KildeDatoVilkaar } from './KildeDatoOpplysning'
+import { vilkaarErOppfylt } from './utils'
 
 export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
@@ -25,9 +25,9 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
         <VilkaarWrapper>
           <VilkaarInfobokser>
             <VilkaarColumn>
-              <Title>Avdødes forutgående medlemskap</Title>
+              <Title> § 18-2: Avdødes forutgående medlemskap</Title>
               <Lovtekst>
-                § 18-2: Den avdøde var medlem av trygden eller mottok pensjon/uføretrygd de siste 5 årene før dødsfallet
+                Den avdøde var medlem av trygden eller mottok pensjon/uføretrygd de siste 5 årene før dødsfallet
               </Lovtekst>
             </VilkaarColumn>
           </VilkaarInfobokser>
@@ -35,14 +35,14 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
             {vilkaar != undefined && (
               <VilkaarVurderingContainer>
                 <VilkaarlisteTitle>
-                  <StatusIcon status={VurderingsResultat.OPPFYLT} large={true} /> Vilkår er oppfylt
+                  <StatusIcon status={vilkaar.resultat} large={true} /> {vilkaarErOppfylt(vilkaar.resultat)}
                 </VilkaarlisteTitle>
                 <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
               </VilkaarVurderingContainer>
             )}
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
-        <TidslinjeMedlemskap />
+        {vilkaar != undefined ? <TidslinjeMedlemskap vilkaar={vilkaar} /> : <div>Vilkår mangler</div>}
       </Innhold>
     </VilkaarBorder>
   )

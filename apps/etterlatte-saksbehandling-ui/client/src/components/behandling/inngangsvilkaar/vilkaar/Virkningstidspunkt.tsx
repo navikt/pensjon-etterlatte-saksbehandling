@@ -35,7 +35,7 @@ export const Virkningstidspunkt = (props: Props) => {
         <VilkaarWrapper>
           <VilkaarInfobokser>
             <VilkaarColumn>
-              <Title>§ 22-13 Virkningstidspunkt</Title>
+              <Title>§ 22-13: Virkningstidspunkt</Title>
               <Lovtekst>
                 Barnepensjonen innvilges som hovedregel fra og med måneden etter dødsfall, men kan gis for opptil tre år
                 før den måneden da kravet ble satt fram.
@@ -61,7 +61,7 @@ export const Virkningstidspunkt = (props: Props) => {
             </VilkaarColumn>
             <VilkaarColumn>
               <div>
-                <strong>Søknadstispunkt</strong>
+                <strong>Søknadstidspunkt</strong>
               </div>
               <div>{format(new Date(props.mottattdato), 'dd.MM.yyyy')}</div>
             </VilkaarColumn>

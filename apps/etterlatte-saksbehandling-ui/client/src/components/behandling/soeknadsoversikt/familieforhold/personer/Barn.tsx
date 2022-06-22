@@ -14,7 +14,7 @@ type Props = {
 }
 
 export const Barn: React.FC<Props> = ({ person, alderVedDoedsdato, doedsdato }) => {
-  const adresserEtterDoedsdato = hentAdresserEtterDoedsdato(person.bostedadresser, new Date(doedsdato))
+  const adresserEtterDoedsdato = hentAdresserEtterDoedsdato(person.bostedadresser, doedsdato)
 
   return (
     <PersonBorder>

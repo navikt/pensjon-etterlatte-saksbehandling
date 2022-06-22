@@ -2,48 +2,73 @@ import styled from 'styled-components'
 import { format, sub } from 'date-fns'
 import { aarIProsent } from './tidslinjeUtils'
 import { Tidsperiode } from './Tidsperiode'
+import {
+  IAdresser,
+  IKriterieOpplysning,
+  IVilkaarsproving,
+  KriterieOpplysningsType,
+  Kriterietype,
+} from '../../../../store/reducers/BehandlingReducer'
+import { hentKriterierMedOpplysning, mapTilPerioderSeksAarFoerDoedsdato } from '../../felles/utils'
 
-export const TidslinjeMedlemskap = () => {
-  const doedsdato = format(Date.parse('2022-06-01'), 'yyyy-MM-dd')
-  const femAarTidligere = format(sub(Date.parse('2022-06-01'), { years: 5 }), 'yyyy-MM-dd')
+export interface Periode {
+  periodeType: string
+  innhold: any
+  kilde: any
+}
 
-  const navnOgProsentPaaDatoer = aarIProsent(femAarTidligere, doedsdato)
+export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) => {
+  const avdoedDoedsdato: string | null = hentKriterierMedOpplysning(
+    vilkaar,
+    Kriterietype.AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR,
+    KriterieOpplysningsType.DOEDSDATO
+  )?.opplysning?.doedsdato
 
-  const mockdata = [
-    {
-      periodeType: 'jobb',
-      innhold: {
-        fraDato: '2019-02-01',
-        tilDato: '2021-01-11',
-        beskrivelse: 'Tonsenhagenskole, 100% stilling',
-        kilde: 'Folkeregisteret 11.11.2021',
-      },
-    },
-    {
-      periodeType: 'bosted',
-      innhold: {
-        fraDato: '2016-02-01',
-        tilDato: '2021-03-01',
-        beskrivelse: 'Plogveien 54, 0458 Oslo',
-        kilde: 'Folkeregisteret 11.11.2021',
-      },
-    },
-    {
-      periodeType: 'bosted',
-      innhold: {
-        fraDato: '2020-02-01',
-        tilDato: '2023-03-01',
-        beskrivelse: 'Plogveien 54, 0458 Oslo',
-        kilde: 'Folkeregisteret 11.11.2021',
-      },
-    },
-  ]
+  if (avdoedDoedsdato == null) {
+    return <div>Dødsdato manger, kan ikke lage tidslinje</div>
+  }
+
+  const doedsdato = format(Date.parse(avdoedDoedsdato), 'yyyy-MM-dd')
+  const seksAarTidligere = format(sub(Date.parse(doedsdato), { years: 6 }), 'yyyy-MM-dd')
+  const navnOgProsentPaaDatoer = aarIProsent(seksAarTidligere!!, doedsdato)
+
+  const adresseOpplysning: IKriterieOpplysning | undefined = hentKriterierMedOpplysning(
+    vilkaar,
+    Kriterietype.AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR,
+    KriterieOpplysningsType.ADRESSER
+  )
+  const adresser: IAdresser | undefined = adresseOpplysning?.opplysning?.adresser
+
+  const perioderBosted: Periode[] = mapTilPerioderSeksAarFoerDoedsdato(
+    adresser?.bostedadresse,
+    'Bostedsadresse',
+    seksAarTidligere,
+    adresseOpplysning?.kilde
+  )
+
+  const perioderOpphold: Periode[] = mapTilPerioderSeksAarFoerDoedsdato(
+    adresser?.oppholdadresse,
+    'Oppholdsadresse',
+    seksAarTidligere,
+    adresseOpplysning?.kilde
+  )
+
+  const perioderKontakt: Periode[] = mapTilPerioderSeksAarFoerDoedsdato(
+    adresser?.kontaktadresse,
+    'Kontaktadresse',
+    seksAarTidligere,
+    adresseOpplysning?.kilde
+  )
+
+  const adresseperioder = [perioderBosted, perioderOpphold, perioderKontakt].flat()
+
+  console.log(adresseperioder)
 
   return (
     <Tidslinje>
       <Grid>
         <GridBorder style={{ top: '10px' }}>&nbsp;</GridBorder>
-        <GridDatoer leftmargin={'0px'}>{format(Date.parse(femAarTidligere), 'MM.yyyy')}</GridDatoer>
+        <GridDatoer leftmargin={'0px'}>{format(Date.parse(seksAarTidligere), 'MM.yyyy')}</GridDatoer>
         {navnOgProsentPaaDatoer.map((aar) => (
           <GridDatoerWrapper prosent={aar[1]} key={aar[1].toString()}>
             <GridDatoer leftmargin={'-16px'}>{aar[0]}</GridDatoer>
@@ -56,14 +81,8 @@ export const TidslinjeMedlemskap = () => {
         <GridBorder style={{ bottom: '-30px' }}>&nbsp;</GridBorder>
       </Grid>
       <div>
-        {mockdata.map((periode, index) => (
-          <Tidsperiode
-            key={index}
-            doedsdato={doedsdato}
-            femAarTidligere={femAarTidligere}
-            periode={periode}
-            index={index}
-          />
+        {adresseperioder.map((periode, index) => (
+          <Tidsperiode key={index} doedsdato={doedsdato} seksAarTidligere={seksAarTidligere} periode={periode} />
         ))}
       </div>
     </Tidslinje>

@@ -47,8 +47,8 @@ export const AlderBarn = (props: VilkaarProps) => {
         <VilkaarWrapper>
           <VilkaarInfobokser>
             <VilkaarColumn>
-              <Title>Alder barn</Title>
-              <Lovtekst>§ 18-4: Barnet er under 18 år</Lovtekst>
+              <Title>§ 18-4: Alder barn</Title>
+              <Lovtekst>Barnet er under 18 år</Lovtekst>
             </VilkaarColumn>
             <VilkaarColumn>
               <div>

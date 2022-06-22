@@ -1,5 +1,4 @@
 import { IAction } from '../AppContext'
-import { IAdresse } from '../../components/behandling/types'
 
 export interface IDetaljertBehandling {
   id: string
@@ -39,6 +38,27 @@ export interface IPersoninfoSoeker {
   bostedadresser: IAdresse[]
   soeknadAdresse: IUtlandsadresseSoeknad
   foedselsdato: string
+}
+
+export interface IAdresser {
+  bostedadresse: IAdresse[]
+  oppholdadresse: IAdresse[]
+  kontaktadresse: IAdresse[]
+}
+
+export interface IAdresse {
+  adresseLinje1: string
+  adresseLinje2?: string
+  adresseLinje3?: string
+  aktiv: boolean
+  coAdresseNavn?: string
+  gyldigFraOgMed: string
+  gyldigTilOgMed?: string
+  kilde: string
+  land?: string
+  postnr: string
+  poststed?: string
+  type: string // adresseType
 }
 
 export interface IUtlandsadresseSoeknad {
@@ -141,6 +161,8 @@ export enum Kriterietype {
   SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO = 'SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO',
   SOEKER_IKKE_ADRESSE_I_UTLANDET = 'SOEKER_IKKE_ADRESSE_I_UTLANDET',
   GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET = 'GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET',
+  AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD = 'AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD',
+  AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR = 'AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR',
 }
 
 export interface IKriterieOpplysning {

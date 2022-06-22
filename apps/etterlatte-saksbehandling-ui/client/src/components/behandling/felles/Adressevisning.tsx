@@ -1,6 +1,6 @@
-import { IAdresse } from '../types'
 import { format } from 'date-fns'
 import { HistorikkElement } from '../soeknadsoversikt/styled'
+import { IAdresse } from '../../../store/reducers/BehandlingReducer'
 
 export const Adressevisning = ({
   adresser,
@@ -13,7 +13,7 @@ export const Adressevisning = ({
     <div>
       {adresser?.length > 0 ? (
         adresser
-          .sort((a, b) => (new Date(b.gyldigFraOgMed) > new Date(a.gyldigFraOgMed) ? 1 : -1))
+          .sort((a, b) => (new Date(b.gyldigFraOgMed!) > new Date(a.gyldigFraOgMed!) ? 1 : -1))
           .map((adresse, index) => (
             <Adresse
               adresse={adresse}
@@ -38,7 +38,7 @@ export const Adresse = ({
   soeknadsoversikt: boolean
   index: number
 }) => {
-  const fra = format(new Date(adresse.gyldigFraOgMed), 'dd.MM.yyyy')
+  const fra = format(new Date(adresse.gyldigFraOgMed!), 'dd.MM.yyyy')
   const til = adresse.aktiv ? 'nå' : format(new Date(adresse.gyldigTilOgMed!), 'dd.MM.yyyy')
 
   const padding = index > 0 ? '5px' : '0px'

@@ -15,6 +15,8 @@ import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import { capitalize, vilkaarErOppfylt } from './utils'
 import { VilkaarVurderingEnkeltElement, VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import {
+  IAdresse,
+  IKriterie,
   IKriterieOpplysning,
   KriterieOpplysningsType,
   Kriterietype,
@@ -28,37 +30,49 @@ import {
   hentUtenlandskAdresse,
 } from '../../felles/utils'
 import { KildeDatoOpplysning, KildeDatoVilkaar } from './KildeDatoOpplysning'
-import { IAdresse } from '../../types'
 
 export const BarnetsMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
 
-  const soekerKriterie = hentKriterie(vilkaar, Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET)
-  const avdoedDoedsdato = hentKriterieOpplysning(soekerKriterie, KriterieOpplysningsType.DOEDSDATO)?.opplysning
-  const adresserBarn = hentKriterieOpplysning(soekerKriterie, KriterieOpplysningsType.ADRESSER)
-  const barnUtlandSoeknad = hentKriterieOpplysning(soekerKriterie, KriterieOpplysningsType.SOEKER_UTENLANDSOPPHOLD)
+  const soekerKriterie: IKriterie | undefined = hentKriterie(vilkaar, Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET)
+  const avdoedDoedsdato: string | null = hentKriterieOpplysning(soekerKriterie, KriterieOpplysningsType.DOEDSDATO)
+    ?.opplysning?.doedsdato
+  const adresserBarn: IKriterieOpplysning | undefined = hentKriterieOpplysning(
+    soekerKriterie,
+    KriterieOpplysningsType.ADRESSER
+  )
+  const barnUtlandSoeknad: IKriterieOpplysning | undefined = hentKriterieOpplysning(
+    soekerKriterie,
+    KriterieOpplysningsType.SOEKER_UTENLANDSOPPHOLD
+  )
 
   const bostedEtterDoedsdato = hentAdresserEtterDoedsdato(adresserBarn?.opplysning?.bostedadresse, avdoedDoedsdato)
   const oppholdEtterDoedsdato = hentAdresserEtterDoedsdato(adresserBarn?.opplysning?.oppholdadresse, avdoedDoedsdato)
   const kontaktEtterDoedsdato = hentAdresserEtterDoedsdato(adresserBarn?.opplysning?.kontaktadresse, avdoedDoedsdato)
 
-  const gjenlevendeKriterie = hentKriterie(vilkaar, Kriterietype.GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET)
-  const adresserGjenlevendePdl = hentKriterieOpplysning(gjenlevendeKriterie, KriterieOpplysningsType.ADRESSER)
-  const gjenlevendeSkalVises = gjenlevendeKriterie.resultat !== VurderingsResultat.OPPFYLT
+  const gjenlevendeKriterie: IKriterie | undefined = hentKriterie(
+    vilkaar,
+    Kriterietype.GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET
+  )
+  const adresserGjenlevendePdl: IKriterieOpplysning | undefined = hentKriterieOpplysning(
+    gjenlevendeKriterie,
+    KriterieOpplysningsType.ADRESSER
+  )
+  const gjenlevendeSkalVises = gjenlevendeKriterie?.resultat !== VurderingsResultat.OPPFYLT
 
   const gjenlevendeBosted = hentUtenlandskAdresse(adresserGjenlevendePdl?.opplysning.bostedadresse, avdoedDoedsdato)
   const gjenlevendeOpphold = hentUtenlandskAdresse(adresserGjenlevendePdl?.opplysning.oppholdadresse, avdoedDoedsdato)
   const gjenlevendeKontakt = hentUtenlandskAdresse(adresserGjenlevendePdl?.opplysning.kontaktadresse, avdoedDoedsdato)
 
   function lagVilkaarVisning() {
-    if (gjenlevendeKriterie.resultat === VurderingsResultat.OPPFYLT) {
+    if (gjenlevendeKriterie?.resultat === VurderingsResultat.OPPFYLT && soekerKriterie) {
       return <VilkaarVurderingsliste kriterie={[soekerKriterie]} />
     } else {
       const tittel = 'Barnet er medlem i trygden'
       let svar
-      if (soekerKriterie.resultat === VurderingsResultat.OPPFYLT) {
+      if (soekerKriterie?.resultat === VurderingsResultat.OPPFYLT) {
         svar = 'Avklar. Gjenlevende har utenlandsk adresse'
-      } else if (soekerKriterie.resultat === VurderingsResultat.IKKE_OPPFYLT) {
+      } else if (soekerKriterie?.resultat === VurderingsResultat.IKKE_OPPFYLT) {
         svar = 'Nei. Barnet har utenlandsk bostedsadresse'
       } else {
         svar = 'Avklar. Barnet og gjenlevende har utenlandsk adresse'
@@ -73,8 +87,8 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
         <VilkaarWrapper>
           <VilkaarInfobokser>
             <VilkaarColumn>
-              <Title>Barnets medlemskap</Title>
-              <Lovtekst>§ 18-3: Barnet er medlem av trygden/bosatt i Norge fra dødsfalltidspunktet til i dag</Lovtekst>
+              <Title>§ 18-3: Barnets medlemskap</Title>
+              <Lovtekst>Barnet er medlem av trygden/bosatt i Norge fra dødsfalltidspunktet til i dag</Lovtekst>
             </VilkaarColumn>
             <VilkaarColumn>
               <div>

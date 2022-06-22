@@ -35,7 +35,7 @@ spec:
     - name: ETTERLATTE_PROXY_INNTEKT
       value: https://etterlatte-proxy.dev-fss-pub.nais.io/aad/inntektskomponenten
     - name: ETTERLATTE_PROXY_AAREG
-      value: https://etterlatte-proxy.dev-fss-pub.nais.io/sts/aareg/arbeidstaker/arbeidsforhold
+      value: https://etterlatte-proxy.dev-fss-pub.nais.io/aad/aareg/arbeidstaker/arbeidsforhold
     - name: ETTERLATTE_PROXY_AUDIENCE
       value: "dev-fss:etterlatte:etterlatte-proxy"
     - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE

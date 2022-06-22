@@ -49,10 +49,12 @@ fun vilkaarAvdoedesMedlemskap(
     val harMottattPensjonSisteFemAar =
         kriterieHarMottattPensjonSisteFemAar(pensjonUforeOpplysning?.opplysning?.mottattAlderspensjon)
 
+    val harHatt100prosentStillingSisteFemAar = false //todo
+
     return VurdertVilkaar(
         vilkaartype,
         VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, //endre når vi får inn flere opplysninger
-        listOf(utenlandsoppholdOppgittISoeknad, utenlandsoppholdSisteFemAarPdl),
+        listOf(utenlandsoppholdOppgittISoeknad, utenlandsoppholdSisteFemAarPdl, harMottattUforeTrygdSisteFemAar, harMottattPensjonSisteFemAar),
         LocalDateTime.now()
     )
 }

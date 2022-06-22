@@ -58,7 +58,7 @@ class OpplysningsByggerService : OpplysningsBygger {
         val inntektListe = arrayListOf<Inntekt>()
 
         arbeidsInntektListe.forEach { inntektMaaned ->
-            inntektMaaned.arbeidsInntektInformasjon.inntektListe.forEach{ inntekt ->
+            inntektMaaned.arbeidsInntektInformasjon.inntektListe?.forEach{ inntekt ->
                 if(inntekt.beskrivelse == InntektsBeskrivelse.ALDERSPENSJON) {
                     inntektListe.add(inntekt)
                 }
@@ -71,7 +71,7 @@ class OpplysningsByggerService : OpplysningsBygger {
     fun harFaattUforetrygd(arbeidsInntektListe: List<ArbeidsInntektMaaned>): List<Inntekt> {
         val inntektListe = arrayListOf<Inntekt>()
         arbeidsInntektListe.forEach { inntektMaaned ->
-            inntektMaaned.arbeidsInntektInformasjon.inntektListe.forEach{ inntekt ->
+            inntektMaaned.arbeidsInntektInformasjon.inntektListe?.forEach{ inntekt ->
                 if(inntekt.beskrivelse == InntektsBeskrivelse.UFORETRYGD) {
                     inntektListe.add(inntekt)
                 }

@@ -8,7 +8,7 @@ import kotliquery.using
 import no.nav.etterlatte.testsupport.TestContainers
 import no.nav.etterlatte.testsupport.TestRapid
 import no.nav.etterlatte.testsupport.readFile
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.TilbakekrevingService
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
 import no.nav.etterlatte.tilbakekreving.config.ApplicationProperties
 import no.nav.etterlatte.tilbakekreving.config.JmsConnectionFactory
@@ -77,7 +77,7 @@ class ApplicationIntegrationTest {
     @AfterEach
     fun afterEach() {
         using(sessionOf(dataSource)) {
-            it.run(queryOf("TRUNCATE kravgrunnlag CASCADE").asExecute)
+            it.run(queryOf("TRUNCATE tilbakekreving CASCADE").asExecute)
         }
     }
 

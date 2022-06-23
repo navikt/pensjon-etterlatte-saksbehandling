@@ -6,10 +6,7 @@ import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.Grunnlagsperio
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.Grunnlagsperiode.Grunnlagsbeloep.KlasseType
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.Grunnlagsperiode.Periode
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.Kontrollfelt
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.KravgrunnlagId
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.KravgrunnlagStatus
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.NavIdent
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.SakId
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.UUID30
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.Kravgrunnlag.VedtakId
 import no.nav.etterlatte.tilbakekreving.utils.toLocalDate

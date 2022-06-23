@@ -4,6 +4,15 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
+data class SakId(val value: Long)
+
+data class BehandlingId(
+    val value: UUID,
+    val shortValue: Kravgrunnlag.UUID30
+) // trenger muligens bare UUID - TODO: finn ut om denne sendes til TBK
+data class KravgrunnlagId(val value: Long)
+data class NavIdent(val value: String)
+
 data class Kravgrunnlag(
     val sakId: SakId,
     val kravgrunnlagId: KravgrunnlagId,
@@ -26,16 +35,12 @@ data class Kravgrunnlag(
      */
 ) {
 
-    data class SakId(val value: Long)
-    data class KravgrunnlagId(val value: Long)
+
+
     data class VedtakId(val value: Long)
     data class Kontrollfelt(val value: String)
-    data class NavIdent(val value: String)
     data class UUID30(val value: String)
-    data class BehandlingId(
-        val value: UUID,
-        val shortValue: UUID30
-    ) // trenger muligens bare UUID - TODO: finn ut om denne sendes til TBK
+
 
     enum class KravgrunnlagStatus {
         ANNU, ANOM, AVSL, BEHA, ENDR, FEIL, MANU, NY, SPER;

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.tilbakekreving.config.JmsConnectionFactory
 import org.slf4j.LoggerFactory
 import javax.jms.ExceptionListener
@@ -35,7 +36,9 @@ class KravgrunnlagConsumer(
                 logger.info("Kravgrunnlag mottatt")
                 kravgrunnlagXml = message.getBody(String::class.java)
                 val detaljertKravgrunnlag = KravgrunnlagJaxb.toDetaljertKravgrunnlagDto(kravgrunnlagXml)
-                tilbakekrevingService.lagreKravgrunnlag(detaljertKravgrunnlag, kravgrunnlagXml)
+                val mottattKravgrunnlag = tilbakekrevingService.lagreKravgrunnlag(detaljertKravgrunnlag, kravgrunnlagXml)
+                // TODO publiser til Kafka
+
             } catch (e: Exception) {
                 logger.error("Feilet under mottak av kravgrunnlag", e)
             }

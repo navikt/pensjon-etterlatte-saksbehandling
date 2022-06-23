@@ -1,9 +1,9 @@
 package no.nav.etterlatte.tilbakekreving.config
 
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.TilbakekrevingDao
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.TilbakekrevingService
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingDao
+import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.Clock

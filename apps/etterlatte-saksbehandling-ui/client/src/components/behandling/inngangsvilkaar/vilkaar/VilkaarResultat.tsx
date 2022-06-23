@@ -1,10 +1,11 @@
-import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { IBehandlingStatus, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import React from 'react'
 import { VilkaarBorder } from '../styled'
 import styled from 'styled-components'
 import { format } from 'date-fns'
 import { BehandlingHandlingKnapper } from '../../handlinger/BehandlingHandlingKnapper'
 import { VilkaarsVurderingKnapper } from '../../handlinger/vilkaarsvurderingKnapper'
+import { NesteOgTilbake } from '../../handlinger/NesteOgTilbake'
 
 type Props = {
   id: any
@@ -31,7 +32,6 @@ export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato }) => {
           Vilkårsresultat: &nbsp; <strong> {tekst}</strong>
         </TekstWrapper>
       </VilkaarBorder>
-
       <BehandlingHandlingKnapper>
         <VilkaarsVurderingKnapper vilkaarResultat={resultat} />
       </BehandlingHandlingKnapper>

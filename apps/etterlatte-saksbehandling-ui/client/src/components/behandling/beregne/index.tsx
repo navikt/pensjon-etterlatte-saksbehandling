@@ -8,9 +8,12 @@ import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapp
 import { BeregningModal } from '../handlinger/sendTilAttesteringModal'
 import { useContext } from 'react'
 import { AppContext } from '../../../store/AppContext'
+import { IBehandlingStatus } from '../../../store/reducers/BehandlingReducer'
+import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 
 export const Beregne = () => {
   const virkningstidspunkt = useContext(AppContext).state.behandlingReducer.virkningstidspunkt
+  const behandlingStatus = useContext(AppContext).state.behandlingReducer.status
 
   return (
     <Content>
@@ -34,9 +37,13 @@ export const Beregne = () => {
           <span className="text">Vis vedtaksbrev</span>
         </VedtaksbrevWrapper>
       </ContentHeader>
-      <BehandlingHandlingKnapper>
-        <BeregningModal />
-      </BehandlingHandlingKnapper>
+      {behandlingStatus === IBehandlingStatus.under_behandling ? (
+        <BehandlingHandlingKnapper>
+          <BeregningModal />
+        </BehandlingHandlingKnapper>
+      ) : (
+        <NesteOgTilbake />
+      )}
     </Content>
   )
 }

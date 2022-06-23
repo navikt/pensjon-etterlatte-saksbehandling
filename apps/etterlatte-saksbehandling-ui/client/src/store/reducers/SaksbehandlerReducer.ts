@@ -6,11 +6,17 @@ export const saksbehandlerReducerInitialState: ISaksbehandler = {
   fornavn: '',
   etternavn: '',
   enheter: [],
+  rolle: '', //test
 }
 
 interface IEnhet {
   enhetId: string
   navn: string
+}
+
+export enum IRolle {
+  saksbehandler = 'saksbehandler',
+  attestant = 'attestant',
 }
 
 export interface ISaksbehandler {
@@ -19,6 +25,7 @@ export interface ISaksbehandler {
   fornavn: string
   etternavn: string
   enheter: IEnhet[]
+  rolle: string //test
 }
 
 export const saksbehandlerReducer = (state: ISaksbehandler, action: IAction): ISaksbehandler => {
@@ -31,6 +38,7 @@ export const saksbehandlerReducer = (state: ISaksbehandler, action: IAction): IS
         fornavn: action.data.fornavn,
         etternavn: action.data.etternavn,
         enheter: action.data.enheter,
+        rolle: action.data.rolle, //test
       }
     default:
       return state

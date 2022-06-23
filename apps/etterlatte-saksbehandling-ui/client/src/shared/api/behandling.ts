@@ -5,7 +5,7 @@ const path = process.env.REACT_APP_VEDTAK_URL
 export const hentBehandling = async (id: string): Promise<IApiResponse<any>> => {
   try {
     const result: Response = await fetch(`${path}/api/behandling/${id}`)
-    const data: any = await result.json();
+    const data: any = await result.json()
 
     return {
       status: result.status,
@@ -34,6 +34,21 @@ export const avbrytBehandling = async (behandlingsid: string): Promise<IApiRespo
 export const sendTilAttestering = async (behandlingsId: string): Promise<IApiResponse<any>> => {
   try {
     const result: Response = await fetch(`${path}/api/attestering/${behandlingsId}`, {
+      method: 'post',
+    })
+    return {
+      status: result.status,
+      data: await result.json(),
+    }
+  } catch (e) {
+    console.log(e)
+    return { status: 500 }
+  }
+}
+
+export const iverksettVedtak = async (behandlingId: string): Promise<IApiResponse<any>> => {
+  try {
+    const result: Response = await fetch(`${path}/api/iverksetting/${behandlingId}`, {
       method: 'post',
     })
     return {

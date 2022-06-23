@@ -1,4 +1,4 @@
-import { Content } from '../../../shared/styled'
+import { Content, Header } from '../../../shared/styled'
 import { useContext, useEffect } from 'react'
 import { AppContext } from '../../../store/AppContext'
 import { AlderBarn } from './vilkaar/AlderBarn'
@@ -9,6 +9,7 @@ import { useLocation } from 'react-router-dom'
 import { BarnetsMedlemskap } from './vilkaar/BarnetsMedlemskap'
 import { VilkaarResultat } from './vilkaar/VilkaarResultat'
 import { Virkningstidspunkt } from './vilkaar/Virkningstidspunkt'
+import { VilkaarBorderTop } from './styled'
 
 export const Inngangsvilkaar = () => {
   const ctx = useContext(AppContext)
@@ -29,6 +30,10 @@ export const Inngangsvilkaar = () => {
 
   return (
     <Content>
+      <Header>
+        <h1>Vilkårsvurdering</h1>
+      </Header>
+      <VilkaarBorderTop />
       <AlderBarn id="alderbarn" vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.SOEKER_ER_UNDER_20)} />
       <DoedsFallForelder
         id="dodsfallforelder"

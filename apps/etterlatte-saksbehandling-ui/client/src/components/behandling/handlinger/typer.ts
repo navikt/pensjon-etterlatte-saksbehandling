@@ -1,6 +1,6 @@
 export const handlinger = {
   START: { id: 'start', navn: 'Start vilkårsvurdering' },
-  NESTE: { id: 'neste', navn: 'Neste' },
+  NESTE: { id: 'neste', navn: 'Neste side' },
   TILBAKE: { id: 'tilbake', navn: 'Tilbake' },
 
   VILKAARSVURDERING: {

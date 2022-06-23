@@ -1,6 +1,15 @@
 {
   "id": "9",
   "sak": 3,
+  "status": "attestering",
+  "saksbehandler": {
+    "ident": "",
+    "navn": "Truls Veileder"
+  },
+  "attestant": {
+    "ident": "",
+    "navn": "Linn Normann"
+  },
   "gyldighetsprøving": {
     "resultat": "OPPFYLT",
     "vurderinger": [

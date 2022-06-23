@@ -105,16 +105,15 @@ fun harKunNorskeAdresserEtterDato(adresser: List<Adresse>?, dato: LocalDate): Vu
 
 fun hentAdresseperioderINorge(adresser: List<Adresse>?, doedsdato: LocalDate): List<Periode>? {
     val femAarFoerDoedsdato = doedsdato.minusYears(5)
-    val adresserUtenNull =
-        adresser?.filter { it.gyldigFraOgMed != null }?.filter { it.gyldigTilOgMed != null || it.aktiv }
-
     val adresserEtterDato =
-        adresserUtenNull?.filter { it.gyldigTilOgMed?.toLocalDate()?.isAfter(femAarFoerDoedsdato) == true || it.aktiv }
+        adresser?.filter { it.gyldigTilOgMed?.toLocalDate()?.isAfter(femAarFoerDoedsdato) == true || it.aktiv }
     val norskeAdresserEtterDato =
         adresserEtterDato?.filter { it.type != AdresseType.UTENLANDSKADRESSE && it.type != AdresseType.UTENLANDSKADRESSEFRITTFORMAT }
 
+    val test = 2
     val adresseperioder = norskeAdresserEtterDato?.map { setPerioder(it, doedsdato, femAarFoerDoedsdato) }
 
+    val testt = 3
     return adresseperioder?.filterNotNull()?.sortedBy { it.gyldigFra }
 }
 
@@ -135,7 +134,10 @@ fun setPerioder(adresse: Adresse, doedsdato: LocalDate, femAarFoerDoedsdato: Loc
     fun hentGyldigTil(): LocalDate? {
         if (adresse.gyldigTilOgMed == null && adresse.aktiv == true) {
             return doedsdato
+        } else if (adresse.gyldigTilOgMed?.toLocalDate()?.isAfter(doedsdato) == true) {
+            return doedsdato
         } else {
+
             return adresse.gyldigTilOgMed?.toLocalDate()
         }
     }

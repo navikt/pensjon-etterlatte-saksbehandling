@@ -32,13 +32,13 @@ fun vilkaarAvdoedesMedlemskap(
     // ELLER :
     // 4. mottatt trydg / uføre eller pensjon siste 5 årene
 
-    val utenlandsoppholdOppgittISoeknad = kriterieIngenUtenlandsoppholdFraSoeknadSisteFemAar(
+    val ingenUtenlandsoppholdOppgittISoeknad = kriterieIngenUtenlandsoppholdFraSoeknadSisteFemAar(
         avdoedSoeknad,
         avdoedPdl,
         Kriterietyper.AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD
     )
 
-    val utenlandsoppholdSisteFemAarPdl =
+    val sammenhengendeAdresserINorgeSisteFemAar =
         kriterieSammenhengendeAdresserINorgeSisteFemAar(
             avdoedPdl,
             Kriterietyper.AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR
@@ -54,7 +54,12 @@ fun vilkaarAvdoedesMedlemskap(
     return VurdertVilkaar(
         vilkaartype,
         VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, //endre når vi får inn flere opplysninger
-        listOf(utenlandsoppholdOppgittISoeknad, utenlandsoppholdSisteFemAarPdl, harMottattUforeTrygdSisteFemAar, harMottattPensjonSisteFemAar),
+        listOf(
+            ingenUtenlandsoppholdOppgittISoeknad,
+            sammenhengendeAdresserINorgeSisteFemAar,
+            harMottattUforeTrygdSisteFemAar,
+            harMottattPensjonSisteFemAar
+        ),
         LocalDateTime.now()
     )
 }
@@ -92,27 +97,31 @@ fun kriterieSammenhengendeAdresserINorgeSisteFemAar(
         val doedsdato = hentDoedsdato(avdoedPdl)
         val femAarFoerDoedsdato = hentDoedsdato(avdoedPdl).minusYears(5)
 
-        val bostedperiode = hentAdresseperioderINorge(adresser.bostedadresse, doedsdato)
-        val oppholdperiode = hentAdresseperioderINorge(adresser.oppholdadresse, doedsdato)
-        //hva skal brukes som grunnlag?
-        val kombinertliste = listOf(bostedperiode).filterNotNull().flatten()
+        // Sjekk alle adresser for utenlandsopphold
+        val vurderingKunNorskeAdresserPdl = harKunNorskePdlAdresserEtterDato(adresser, femAarFoerDoedsdato)
 
-        val kombinerteperioder = kombinerPerioder(kombinertliste)
-        val periodeGaps = hentGaps(kombinerteperioder, femAarFoerDoedsdato, doedsdato)
+        //Sjekk for sammenhengende bostedsadresse og gaps
+        val bostedperiode = hentAdresseperioderINorge(adresser.bostedadresse, doedsdato)
+        val kombinerteBostedsperioder = kombinerPerioder(bostedperiode)
+        val periodeGaps = hentGaps(kombinerteBostedsperioder, femAarFoerDoedsdato, doedsdato)
 
         val vurderingBoddSammenhengendeINorge = if (periodeGaps.isEmpty()) {
             VurderingsResultat.OPPFYLT
         } else {
             VurderingsResultat.IKKE_OPPFYLT
         }
-        val vurderingKunNorskeAdresserPdl = harKunNorskePdlAdresserEtterDato(adresser, femAarFoerDoedsdato)
 
-        // wrappe i if om gaps finnes?
-        val oppdatertGrunnlag = opplysningsGrunnlag + Kriteriegrunnlag(
+        val gapGrunnlag = Kriteriegrunnlag(
             UUID.randomUUID(), KriterieOpplysningsType.ADRESSE_GAPS,
             Grunnlagsopplysning.Vilkaarskomponenten("vilkaarskomponenten"),
             periodeGaps
         )
+
+        val oppdatertGrunnlag = if (periodeGaps.isNotEmpty()) {
+            opplysningsGrunnlag + gapGrunnlag
+        } else {
+            opplysningsGrunnlag
+        }
 
         val resultat = hentVurdering(listOf(vurderingKunNorskeAdresserPdl, vurderingBoddSammenhengendeINorge))
 

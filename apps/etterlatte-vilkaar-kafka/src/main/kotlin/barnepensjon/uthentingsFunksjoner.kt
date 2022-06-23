@@ -41,7 +41,6 @@ fun hentAdresser(
     val adresser = Adresser(bostedadresse, oppholdadresse, kontaktadresse)
     val ingenAdresser = bostedadresse == null && oppholdadresse == null && kontaktadresse == null
 
-    val test = 2
     return if (ingenAdresser) {
         throw OpplysningKanIkkeHentesUt()
     } else {

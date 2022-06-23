@@ -113,12 +113,12 @@ fun adresserNorgePdl() =
             "Oslo",
             "NOR",
             "kilde",
-            LocalDateTime.parse("2025-01-26T00:00:00"),
+            LocalDateTime.parse("2020-01-26T00:00:00"),
             null
         ),
         Adresse(
             AdresseType.VEGADRESSE,
-            true,
+            false,
             null,
             null,
             null,
@@ -128,7 +128,7 @@ fun adresserNorgePdl() =
             "NOR",
             "kilde",
             LocalDateTime.parse("2010-01-25T00:00:00"),
-            LocalDateTime.parse("2025-01-30T00:00:00"),
+            LocalDateTime.parse("2021-04-30T00:00:00"),
         )
     )
 
@@ -144,7 +144,7 @@ fun adresseDanmarkPdl() = listOf(
         "København",
         "DAN",
         "kilde",
-        LocalDateTime.parse("2022-01-25T00:00:00"),
+        LocalDateTime.parse("2020-01-25T00:00:00"),
         null
     )
 )

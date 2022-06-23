@@ -11,10 +11,9 @@ type Props = {
   id: any
   resultat: VurderingsResultat | undefined
   dato: string
-  behandlingStatus: IBehandlingStatus
 }
 
-export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato, behandlingStatus }) => {
+export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato }) => {
   const datoFormatert = format(new Date(dato), 'dd.MM.yyyy')
 
   let tekst = ''
@@ -33,14 +32,9 @@ export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato, behandlin
           Vilkårsresultat: &nbsp; <strong> {tekst}</strong>
         </TekstWrapper>
       </VilkaarBorder>
-
-      {behandlingStatus === IBehandlingStatus.under_behandling ? (
-        <BehandlingHandlingKnapper>
-          <VilkaarsVurderingKnapper vilkaarResultat={resultat} />
-        </BehandlingHandlingKnapper>
-      ) : (
-        <NesteOgTilbake />
-      )}
+      <BehandlingHandlingKnapper>
+        <VilkaarsVurderingKnapper vilkaarResultat={resultat} />
+      </BehandlingHandlingKnapper>
     </>
   )
 }

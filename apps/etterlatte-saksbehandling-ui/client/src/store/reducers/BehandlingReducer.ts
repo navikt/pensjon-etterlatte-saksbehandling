@@ -25,11 +25,12 @@ export interface IDetaljertBehandling {
   virkningstidspunkt: string
 }
 
+//todo: synk med backend OG oppgavebenk her, og finn ut hva vi skal vise i frontend
 export enum IBehandlingStatus {
-    under_behandling = 'under_behandling',
-    attestering = 'attestering',
-    underkjent = 'underkjent',
-    innvilget = 'innvilget',
+  under_behandling = 'under_behandling',
+  attestering = 'attestering',
+  underkjent = 'underkjent',
+  innvilget = 'innvilget',
 }
 
 export interface IBeregning {

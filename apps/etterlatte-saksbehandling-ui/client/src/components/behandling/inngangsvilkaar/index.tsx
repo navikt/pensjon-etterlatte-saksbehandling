@@ -14,7 +14,6 @@ import { VilkaarBorderTop } from './styled'
 export const Inngangsvilkaar = () => {
   const ctx = useContext(AppContext)
   const location = useLocation()
-  const behandlingStatus = ctx.state.behandlingReducer.status
 
   const virkningstidspunkt = ctx.state.behandlingReducer.virkningstidspunkt
   const vilkaar = ctx.state.behandlingReducer.vilkårsprøving.vilkaar
@@ -55,12 +54,6 @@ export const Inngangsvilkaar = () => {
         mottattdato={ctx.state.behandlingReducer.soeknadMottattDato}
       />
       <VilkaarResultat id="vilkaarResultat" resultat={vilkaarResultat} dato={virkningstidspunkt} />
-        <VilkaarResultat
-            id="vilkaarResultat"
-            resultat={vilkaarResultat}
-            dato={virkningstidspunkt}
-            behandlingStatus={behandlingStatus}
-        />
     </Content>
   )
 }

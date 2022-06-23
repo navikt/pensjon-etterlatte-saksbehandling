@@ -1348,14 +1348,16 @@
         "type": "GP",
         "datoFOM": "2022-03",
         "datoTOM": "2022-04",
-        "belop": 8867
+        "grunnbelop": 111000,
+        "grunnbelopMnd": 8867
       },
       {
         "delytelsesId": "BP",
         "type": "GP",
         "datoFOM": "2022-05",
         "datoTOM": null,
-        "belop": 9290
+        "grunnbelop": 141000,
+        "grunnbelopMnd": 8867
       }
     ],
     "beregnetDato": "2022-06-14T15:44:05.414031233",

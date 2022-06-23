@@ -834,18 +834,20 @@
     "resultat": "BEREGNET",
     "beregningsperioder": [
       {
-        "delytelsesId": "First",
+        "delytelsesId": "BP",
         "type": "GP",
-        "datoFOM": "2022-02",
-        "datoTOM": "2030-01",
-        "belop": 1000
+        "datoFOM": "2022-03",
+        "datoTOM": "2022-04",
+        "grunnbelop": 111000,
+        "grunnbelopMnd": 8867
       },
       {
-        "delytelsesId": "First",
+        "delytelsesId": "BP",
         "type": "GP",
-        "datoFOM": "2030-02",
-        "datoTOM": "2035-01",
-        "belop": 1001
+        "datoFOM": "2022-05",
+        "datoTOM": null,
+        "grunnbelop": 141000,
+        "grunnbelopMnd": 8867
       }
     ],
     "beregnetDato": "2022-05-23T16:09:32.638024312"

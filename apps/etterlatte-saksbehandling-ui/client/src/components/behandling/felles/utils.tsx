@@ -7,7 +7,7 @@ import {
   KriterieOpplysningsType,
   Kriterietype,
 } from '../../../store/reducers/BehandlingReducer'
-import { Periode } from '../inngangsvilkaar/vilkaar/TidslinjeMedlemskap'
+import { IPeriode } from '../inngangsvilkaar/vilkaar/TidslinjeMedlemskap'
 
 export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: string | null): IAdresse[] {
   if (doedsdato == null) {
@@ -21,10 +21,11 @@ export function mapTilPerioderSeksAarFoerDoedsdato(
   periodetype: string,
   seksAarFoerDoedsdato: string,
   kilde: any
-): Periode[] {
+): IPeriode[] {
   if (adresser == null || adresser.length == 0) {
     return []
   }
+
   const seksAarFoerDoedsdatoEllerAktiv = adresser.filter(
     (adresse) => adresse.aktiv || isAfter(new Date(adresse.gyldigTilOgMed!), new Date(seksAarFoerDoedsdato))
   )

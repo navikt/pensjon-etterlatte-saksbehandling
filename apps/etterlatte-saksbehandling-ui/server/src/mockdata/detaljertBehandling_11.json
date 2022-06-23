@@ -237,11 +237,38 @@
                       "poststed": "København",
                       "land": "DAN",
                       "kilde": "FREG",
-                      "gyldigFraOgMed": "2022-01-25T00:00:00",
+                      "gyldigFraOgMed": "2021-06-25T00:00:00",
                       "gyldigTilOgMed": null
+                    },
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Osloveien 2A",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "0485",
+                      "poststed": "Oslo",
+                      "land": "NOR",
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2005-06-25T00:00:00",
+                      "gyldigTilOgMed": "2019-06-25T00:00:00"
                     }
                   ],
-                  "oppholdadresse": [],
+                  "oppholdadresse": [                    {
+                    "type": "UTENLANDSKADRESSE",
+                    "aktiv": true,
+                    "coAdresseNavn": null,
+                    "adresseLinje1": "Osloveien 2A",
+                    "adresseLinje2": null,
+                    "adresseLinje3": null,
+                    "postnr": "1234",
+                    "poststed": "Stockholm",
+                    "land": "Sverige",
+                    "kilde": "FREG",
+                    "gyldigFraOgMed": "2018-06-25T00:00:00",
+                    "gyldigTilOgMed": "2019-08-25T00:00:00"
+                  }],
                   "kontaktadresse": []
                 }
               },

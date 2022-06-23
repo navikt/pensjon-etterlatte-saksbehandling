@@ -134,7 +134,8 @@
                 "id": "d0669798-fb9b-45b7-8c95-5b7772dc7a51",
                 "kriterieOpplysningsType": "ADRESSER",
                 "kilde": null,
-                "opplysning": null,
+                "opplysning": null
+              },
               {
                 "id": "d0669798-fb9b-45b7-8c95-5b7772dc7a51",
                 "kriterieOpplysningsType": "DOEDSDATO",
@@ -144,10 +145,7 @@
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": {
-                  "doedsdato": "2022-02-10",
-                  "foedselsnummer": "22128202440"
-                }
+                "opplysning": null
               },
               {
                 "id": "2c833602-7564-48dc-b6d5-cb48030971ec",

@@ -3,7 +3,7 @@ import { OfficeIcon } from '../../../../shared/icons/officeIcon'
 import { HomeIcon } from '../../../../shared/icons/homeIcon'
 import styled from 'styled-components'
 import { InformationIcon } from '../../../../shared/icons/informationIcon'
-import { Periode } from './TidslinjeMedlemskap'
+import { IPeriode } from './TidslinjeMedlemskap'
 
 export const Tidsperiode = ({
   doedsdato,
@@ -12,7 +12,7 @@ export const Tidsperiode = ({
 }: {
   doedsdato: string
   seksAarTidligere: string
-  periode: Periode
+  periode: IPeriode
 }) => {
   const lengdePeriode = tidsperiodeProsent(
     periode.innhold.fraDato,

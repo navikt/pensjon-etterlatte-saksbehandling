@@ -1,9 +1,8 @@
 import { differenceInDays, add, startOfYear, format, differenceInMilliseconds } from 'date-fns'
 
 export function aarIProsent(seksAarTidligere: string, doedsdato: string): string[][] {
-  // const antallDagerMellomDatoer = moment.duration(doedsdato.diff(femAarTidligere)).asDays()
   const antallDagerMellomDatoer = differenceInDays(new Date(doedsdato), new Date(seksAarTidligere))
-  const antallAar = [1, 2, 3, 4, 5]
+  const antallAar = [1, 2, 3, 4, 5, 6]
 
   const aarstallMellomDatoerNavn = antallAar.map((aar) =>
     format(startOfYear(add(new Date(seksAarTidligere), { years: aar })), 'yyyy')
@@ -18,17 +17,17 @@ export function aarIProsent(seksAarTidligere: string, doedsdato: string): string
 
 export function tidsperiodeProsent(
   fraDato: string,
-  tilDato: string,
+  tilDato: string | undefined,
   doedsdato: string,
   femAarTidligere: string
 ): string {
-  const maxDate = differenceInMilliseconds(new Date(doedsdato), new Date(tilDato)) < 0 ? doedsdato : tilDato
+  const tilDatoNy = tilDato == undefined ? doedsdato : tilDato
+  const maxDate = differenceInMilliseconds(new Date(doedsdato), new Date(tilDatoNy)) < 0 ? doedsdato : tilDatoNy
   const minDate = differenceInMilliseconds(new Date(femAarTidligere), new Date(fraDato)) > 0 ? femAarTidligere : fraDato
 
   const periode = differenceInDays(new Date(maxDate), new Date(minDate))
 
   if (periode > 6 * 365) {
-    //antall dager på seks år?
     return '100%'
   } else {
     return prosentAvSeksAar(periode)

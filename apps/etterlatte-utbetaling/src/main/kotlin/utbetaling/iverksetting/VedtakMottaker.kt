@@ -25,7 +25,7 @@ data class KunneIkkeLeseVedtakException(val e: Exception) : RuntimeException(e)
 const val EVENT_NAME_OPPDATERT = "UTBETALING:OPPDATERT"
 
 data class UtbetalingEvent(
-    @JsonProperty("@event_name") val eventName: String = EVENT_NAME_OPPDATERT,
+    @JsonProperty("@event") val event: String = EVENT_NAME_OPPDATERT,
     @JsonProperty("@utbetaling_response") val utbetalingResponse: UtbetalingResponse,
 )
 
@@ -42,7 +42,7 @@ class VedtakMottaker(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event_name", "VEDTAK:ATTESTERT") }
+            validate { it.demandValue("@event", "VEDTAK:ATTESTERT") }
             validate { it.requireKey("@vedtak") }
             validate {
                 it.requireAny(
@@ -67,15 +67,16 @@ class VedtakMottaker(
                         sendUtbetalingSendtEvent(context, resultat.utbetaling)
                     }
                     is UtbetalingForVedtakEksisterer -> {
-                        val feilmelding = "Vedtak med vedtakId=${vedtak.vedtakId} eksisterer fra før"
-                        logger.error(feilmelding)
-                        sendUtbetalingFeiletEvent(context, vedtak.vedtakId, feilmelding)
+                        "Vedtak med vedtakId=${vedtak.vedtakId} eksisterer fra før".also {
+                            logger.error(it)
+                            sendUtbetalingFeiletEvent(context, vedtak.vedtakId, it)
+                        }
                     }
                     is UtbetalingslinjerForVedtakEksisterer -> {
-                        val ider = resultat.utbetalingslinjer.joinToString(",") { it.id.value.toString() }
-                        val feilmelding = "En eller flere utbetalingslinjer med id=[$ider] eksisterer fra før"
-                        logger.error(feilmelding)
-                        sendUtbetalingFeiletEvent(context, vedtak.vedtakId, feilmelding)
+                        "En eller flere utbetalingslinjer med id=[${resultat.utbetalingslinjeIDer()}] eksisterer fra før".also {
+                            logger.error(it)
+                            sendUtbetalingFeiletEvent(context, vedtak.vedtakId, it)
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -95,7 +96,6 @@ class VedtakMottaker(
         }
 
     private fun feilSkalKastesVidere(e: Exception): Boolean {
-        // TODO: håndtere PSQLException eller MQException?
         return e !is KunneIkkeLeseVedtakException
     }
 
@@ -115,13 +115,17 @@ class VedtakMottaker(
         context.publish(
             UtbetalingEvent(
                 utbetalingResponse = UtbetalingResponse(
-                    status = utbetaling.status,
+                    status = utbetaling.status(),
                     vedtakId = utbetaling.vedtakId.value
                 )
-            ).toJson())
+            ).toJson()
+        )
     }
 
     private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
+
+    private fun UtbetalingslinjerForVedtakEksisterer.utbetalingslinjeIDer() =
+        this.utbetalingslinjer.joinToString(",") { it.id.value.toString() }
 
     companion object {
         private val logger = LoggerFactory.getLogger(VedtakMottaker::class.java)

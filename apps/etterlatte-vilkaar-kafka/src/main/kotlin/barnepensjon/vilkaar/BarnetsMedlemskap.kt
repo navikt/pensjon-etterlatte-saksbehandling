@@ -3,11 +3,10 @@ package no.nav.etterlatte.vilkaar.barnepensjon
 import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.barnepensjon.hentAdresser
 import no.nav.etterlatte.barnepensjon.hentDoedsdato
+import no.nav.etterlatte.barnepensjon.harKunNorskePdlAdresserEtterDato
 import no.nav.etterlatte.barnepensjon.opplysningsGrunnlagNull
 import no.nav.etterlatte.barnepensjon.setVikaarVurderingFraKriterier
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
-import no.nav.etterlatte.libs.common.person.Adresse
-import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
@@ -19,7 +18,6 @@ import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 fun vilkaarBarnetsMedlemskap(
@@ -82,7 +80,11 @@ fun kriterieForeldreHarIkkeAdresseIUtlandet(
     if (gjenlevendePdl == null || avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
 
     val resultat = try {
-        kunNorskePdlAdresser(gjenlevendePdl, avdoedPdl, kriterietype)
+        val gjenlevendeAdresser = hentAdresser(gjenlevendePdl)
+        val doedsdato = hentDoedsdato(avdoedPdl)
+        val adresserResult = harKunNorskePdlAdresserEtterDato(gjenlevendeAdresser, doedsdato)
+        if (adresserResult == VurderingsResultat.IKKE_OPPFYLT) VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING else adresserResult
+
     } catch (ex: OpplysningKanIkkeHentesUt) {
         VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     }
@@ -97,8 +99,22 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
     kriterietype: Kriterietyper
 ): Kriterie {
     val opplysningsGrunnlag = listOfNotNull(
-        soekerPdl?.let { Kriteriegrunnlag(soekerPdl.id, KriterieOpplysningsType.ADRESSER, soekerPdl.kilde, hentAdresser(soekerPdl)) },
-        soekerSoknad?.let { Kriteriegrunnlag(soekerSoknad.id, KriterieOpplysningsType.SOEKER_UTENLANDSOPPHOLD, soekerSoknad.kilde, soekerSoknad.opplysning.utenlandsadresse) },
+        soekerPdl?.let {
+            Kriteriegrunnlag(
+                soekerPdl.id,
+                KriterieOpplysningsType.ADRESSER,
+                soekerPdl.kilde,
+                hentAdresser(soekerPdl)
+            )
+        },
+        soekerSoknad?.let {
+            Kriteriegrunnlag(
+                soekerSoknad.id,
+                KriterieOpplysningsType.SOEKER_UTENLANDSOPPHOLD,
+                soekerSoknad.kilde,
+                soekerSoknad.opplysning.utenlandsadresse
+            )
+        },
         avdoedPdl?.let {
             Kriteriegrunnlag(
                 avdoedPdl.id,
@@ -115,7 +131,9 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
     )
 
     val resultat = try {
-        val pdlResultat = kunNorskePdlAdresser(soekerPdl, avdoedPdl, kriterietype)
+        val doedsdato = hentDoedsdato(avdoedPdl)
+        val soekerAdresserPdl = hentAdresser(soekerPdl)
+        val pdlResultat = harKunNorskePdlAdresserEtterDato(soekerAdresserPdl, doedsdato)
         val soeknadResultat =
             if (soekerSoknad.opplysning.utenlandsadresse.adresseIUtlandet == JaNeiVetIkke.JA) {
                 VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
@@ -136,51 +154,5 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
 
     return Kriterie(kriterietype, resultat, opplysningsGrunnlag)
 }
-
-
-fun kunNorskePdlAdresser(
-    person: VilkaarOpplysning<Person>,
-    avdoedPdl: VilkaarOpplysning<Person>,
-    kriterietype: Kriterietyper
-): VurderingsResultat {
-    val adresserPdl = hentAdresser(person)
-    val doedsdatoPdl = hentDoedsdato(avdoedPdl)
-
-    val bostedResultat = harKunNorskeAdresserEtterDoedsdato(adresserPdl.bostedadresse, doedsdatoPdl)
-    val oppholdResultat = harKunNorskeAdresserEtterDoedsdato(adresserPdl.oppholdadresse, doedsdatoPdl)
-    val kontaktResultat = harKunNorskeAdresserEtterDoedsdato(adresserPdl.kontaktadresse, doedsdatoPdl)
-    return if (listOf(
-            bostedResultat,
-            oppholdResultat,
-            kontaktResultat
-        ).contains(VurderingsResultat.IKKE_OPPFYLT)
-    ) {
-        if (kriterietype == Kriterietyper.SOEKER_IKKE_ADRESSE_I_UTLANDET && bostedResultat == VurderingsResultat.IKKE_OPPFYLT) {
-            VurderingsResultat.IKKE_OPPFYLT
-        } else {
-            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-        }
-
-    } else {
-        VurderingsResultat.OPPFYLT
-    }
-}
-
-
-fun harKunNorskeAdresserEtterDoedsdato(adresser: List<Adresse>?, doedsdato: LocalDate): VurderingsResultat {
-    val adresserEtterDoedsdato =
-        adresser?.filter { it.gyldigTilOgMed?.toLocalDate()?.isAfter(doedsdato) == true || it.aktiv }
-    val harUtenlandskeAdresserIPdl =
-        adresserEtterDoedsdato?.any { it.type == AdresseType.UTENLANDSKADRESSE || it.type == AdresseType.UTENLANDSKADRESSEFRITTFORMAT }
-
-    return if (harUtenlandskeAdresserIPdl == true) {
-        VurderingsResultat.IKKE_OPPFYLT
-    } else {
-        VurderingsResultat.OPPFYLT
-    }
-}
-
-
-
 
 

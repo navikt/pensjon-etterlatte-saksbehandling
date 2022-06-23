@@ -8,6 +8,7 @@ import { AvdoedesForutMedlemskap } from './vilkaar/AvdoedesForutMedlemskap'
 import { useLocation } from 'react-router-dom'
 import { BarnetsMedlemskap } from './vilkaar/BarnetsMedlemskap'
 import { VilkaarResultat } from './vilkaar/VilkaarResultat'
+import { Virkningstidspunkt } from './vilkaar/Virkningstidspunkt'
 import { VilkaarBorderTop } from './styled'
 
 export const Inngangsvilkaar = () => {
@@ -47,12 +48,19 @@ export const Inngangsvilkaar = () => {
         id="barnetsmedlemskap"
         vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.BARNETS_MEDLEMSKAP)}
       />
-      <VilkaarResultat
-        id="vilkaarResultat"
-        resultat={vilkaarResultat}
-        dato={virkningstidspunkt}
-        behandlingStatus={behandlingStatus}
+      <Virkningstidspunkt
+        id="virkningstidspunkt"
+        vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.SOEKER_ER_UNDER_20)}
+        virkningsdato={virkningstidspunkt}
+        mottattdato={ctx.state.behandlingReducer.soeknadMottattDato}
       />
+      <VilkaarResultat id="vilkaarResultat" resultat={vilkaarResultat} dato={virkningstidspunkt} />
+        <VilkaarResultat
+            id="vilkaarResultat"
+            resultat={vilkaarResultat}
+            dato={virkningstidspunkt}
+            behandlingStatus={behandlingStatus}
+        />
     </Content>
   )
 }

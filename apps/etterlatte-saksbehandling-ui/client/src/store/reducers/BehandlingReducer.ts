@@ -1,5 +1,4 @@
 import { IAction } from '../AppContext'
-import { IAdresse } from '../../components/behandling/types'
 
 export interface IDetaljertBehandling {
   id: string
@@ -20,17 +19,36 @@ export interface IDetaljertBehandling {
   vilkårsprøving: IVilkaarResultat
   gyldighetsprøving: IGyldighetResultat
   kommerSoekerTilgode: IKommerSoekerTilgode
-  beregning: any
+  beregning?: IBeregning
   fastsatt: boolean
   soeknadMottattDato: string
   virkningstidspunkt: string
 }
 
 export enum IBehandlingStatus {
-  under_behandling = 'under_behandling',
-  attestering = 'attestering',
-  underkjent = 'underkjent',
-  innvilget = 'innvilget',
+    under_behandling = 'under_behandling',
+    attestering = 'attestering',
+    underkjent = 'underkjent',
+    innvilget = 'innvilget',
+}
+
+export interface IBeregning {
+  id: string
+  type: string
+  endringkode: string
+  resultat: string
+  beregningsperioder: IBeregningsperiode[]
+  beregnetDato: string
+  grunnlagVerson: number
+}
+
+export interface IBeregningsperiode {
+  delytelseId: string
+  type: string
+  datoFOM: string
+  datoTOM: string
+  grunnbelopMnd: number
+  grunnbelop: number
 }
 
 export interface IKommerSoekerTilgode {
@@ -59,6 +77,27 @@ export interface IPersoninfoSoeker {
   bostedadresser: IAdresse[]
   soeknadAdresse: IUtlandsadresseSoeknad
   foedselsdato: string
+}
+
+export interface IAdresser {
+  bostedadresse: IAdresse[]
+  oppholdadresse: IAdresse[]
+  kontaktadresse: IAdresse[]
+}
+
+export interface IAdresse {
+  adresseLinje1: string
+  adresseLinje2?: string
+  adresseLinje3?: string
+  aktiv: boolean
+  coAdresseNavn?: string
+  gyldigFraOgMed: string
+  gyldigTilOgMed?: string
+  kilde: string
+  land?: string
+  postnr: string
+  poststed?: string
+  type: string // adresseType
 }
 
 export interface IUtlandsadresseSoeknad {
@@ -135,7 +174,8 @@ export interface IVilkaarResultat {
 export interface IVilkaarsproving {
   navn: VilkaarsType
   resultat: VurderingsResultat
-  basertPaaOpplysninger: IKriterie[]
+  kriterier: IKriterie[]
+  vurdertDato: string
 }
 
 export enum VilkaarsType {
@@ -143,7 +183,9 @@ export enum VilkaarsType {
   DOEDSFALL_ER_REGISTRERT = 'DOEDSFALL_ER_REGISTRERT',
   AVDOEDES_FORUTGAAENDE_MEDLEMSKAP = 'AVDOEDES_FORUTGAAENDE_MEDLEMSKAP',
   BARNETS_MEDLEMSKAP = 'BARNETS_MEDLEMSKAP',
-  SAMME_ADRESSE = 'SAMME_ADRESSE',
+  SAMME_ADRESSE = 'GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE',
+  BARN_BOR_PAA_AVDOEDES_ADRESSE = 'BARN_BOR_PAA_AVDOEDES_ADRESSE',
+  BARN_INGEN_OPPGITT_UTLANDSADRESSE = 'BARN_INGEN_OPPGITT_UTLANDSADRESSE',
 }
 
 export interface IKriterie {
@@ -158,6 +200,8 @@ export enum Kriterietype {
   SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO = 'SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO',
   SOEKER_IKKE_ADRESSE_I_UTLANDET = 'SOEKER_IKKE_ADRESSE_I_UTLANDET',
   GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET = 'GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET',
+  AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD = 'AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD',
+  AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR = 'AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR',
 }
 
 export interface IKriterieOpplysning {

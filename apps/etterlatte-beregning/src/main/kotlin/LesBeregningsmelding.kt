@@ -8,7 +8,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
+import java.time.YearMonth
 
 internal class LesBeregningsmelding(
     rapidsConnection: RapidsConnection,
@@ -35,7 +35,7 @@ internal class LesBeregningsmelding(
             //TODO her må jeg sikkert ha noe anna info
             val grunnlagListe = packet["grunnlag"].toString()
             try {
-                val beregningsResultat = beregning.beregnResultat(objectMapper.readValue(grunnlagListe), LocalDate.parse(packet["@virkningstidspunkt"].asText()))
+                val beregningsResultat = beregning.beregnResultat(objectMapper.readValue(grunnlagListe), YearMonth.parse(packet["@virkningstidspunkt"].asText()))
                 packet["@beregning"] = beregningsResultat
                 context.publish(packet.toJson())
                 logger.info("Publisert en beregning")

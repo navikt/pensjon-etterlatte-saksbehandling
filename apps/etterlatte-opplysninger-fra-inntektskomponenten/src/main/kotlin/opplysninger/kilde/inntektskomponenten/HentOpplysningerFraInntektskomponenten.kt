@@ -1,5 +1,6 @@
 package no.nav.etterlatte.opplysninger.kilde.inntektskomponenten
 
+import no.nav.etterlatte.Aareg
 import no.nav.etterlatte.InntektsKomponenten
 import no.nav.etterlatte.OpplysningsBygger
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
@@ -13,10 +14,12 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 internal class HentOpplysningerFraInntektskomponenten(
     rapidsConnection: RapidsConnection,
     private val inntektsKomponentenService: InntektsKomponenten,
+    private val aaregService: Aareg,
     private val opplysningsBygger: OpplysningsBygger
 ) : River.PacketListener {
 
@@ -40,9 +43,11 @@ internal class HentOpplysningerFraInntektskomponenten(
                     Opplysningstyper.AVDOED_INNTEKT_V1.name,
                 )
             ) {
-                val fnr = Foedselsnummer.of(packet["fnr"].asText())
-                val doedsdato = packet["doedsdato"].toString()
-                val opplysninger = opplysningsBygger.byggOpplysninger(inntektsKomponentenService.hentInntektListe(fnr, doedsdato))
+                val fnr = Foedselsnummer.of(packet["fnr"].asText()) // Todo feil fnr?
+                val doedsdato = LocalDate.parse(packet["doedsdato"].asText())
+                val arbeidsforhold = aaregService.hentArbeidsforhold(fnr)
+                val inntektliste = inntektsKomponentenService.hentInntektListe(fnr, doedsdato)
+                val opplysninger = opplysningsBygger.byggOpplysninger(inntektliste, arbeidsforhold)
                 packet["opplysning"] = opplysninger
                 context.publish(packet.toJson())
             }

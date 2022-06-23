@@ -16,7 +16,6 @@ class DataSourceBuilder(
         it.transactionIsolation = "TRANSACTION_SERIALIZABLE"
         it.initializationFailTimeout = 6000
         it.maximumPoolSize = 3
-        it.maxLifetime = 30001
 
         it.validate()
     }

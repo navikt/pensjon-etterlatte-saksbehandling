@@ -1,11 +1,12 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.HentOpplysningerFraInntektskomponenten
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.InntektsKomponentenResponse
 import no.nav.helse.rapids_rivers.RapidApplication
+import java.time.LocalDate
 
 fun main() {
     System.getenv().toMutableMap().apply {
@@ -14,7 +15,7 @@ fun main() {
         AppBuilder(env).also { ab ->
             RapidApplication.create(env)
                 .also {
-                    HentOpplysningerFraInntektskomponenten(it, ab.createInntektsKomponentService(), ab.createOpplysningsbygger())
+                    HentOpplysningerFraInntektskomponenten(it, ab.createInntektsKomponentService(), ab.createAaregService(), ab.createOpplysningsbygger())
                 }
                 .start()
         }
@@ -22,9 +23,13 @@ fun main() {
 }
 
 interface InntektsKomponenten {
-    fun hentInntektListe(fnr: Foedselsnummer, doedsdato: String): InntektsKomponentenResponse
+    fun hentInntektListe(fnr: Foedselsnummer, doedsdato: LocalDate): InntektsKomponentenResponse
+}
+
+interface Aareg {
+    fun hentArbeidsforhold(fnr: Foedselsnummer): List<AaregResponse>
 }
 
 interface OpplysningsBygger {
-    fun byggOpplysninger(inntektsKomponentenResponse: InntektsKomponentenResponse):List<Grunnlagsopplysning<out Any>>
+    fun byggOpplysninger(inntektsKomponentenResponse: InntektsKomponentenResponse, arbeidsforhold: List<AaregResponse>): List<Grunnlagsopplysning<out Any>>
 }

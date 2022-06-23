@@ -9,6 +9,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.readFile
 import no.nav.etterlatte.utbetaling.utbetaling
+import no.nav.etterlatte.utbetaling.utbetalingshendelse
 import no.nav.etterlatte.utbetaling.utbetalingslinje
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,7 +28,10 @@ internal class VedtakMottakerTest {
 
     @Test
     fun `skal returnere event med SENDT status dersom utbetaling sendes til oppdrag`() {
-        val utbetaling = utbetaling(status = UtbetalingStatus.SENDT, vedtakId = 1)
+        val utbetaling = utbetaling(
+            utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.SENDT)),
+            vedtakId = 1
+        )
 
         every { utbetalingService.iverksettUtbetaling(any()) } returns IverksettResultat.SendtTilOppdrag(utbetaling)
 
@@ -35,15 +39,18 @@ internal class VedtakMottakerTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
-            assertEquals(EVENT_NAME_OPPDATERT, event.eventName)
-            assertEquals(utbetaling.status, event.utbetalingResponse.status)
+            assertEquals(EVENT_NAME_OPPDATERT, event.event)
+            assertEquals(utbetaling.status(), event.utbetalingResponse.status)
             assertEquals(utbetaling.vedtakId.value, event.utbetalingResponse.vedtakId)
         }
     }
 
     @Test
     fun `skal returnere event med FEILET status og feilmelding dersom utbetaling for vedtak eksisterer`() {
-        val utbetaling = utbetaling(status = UtbetalingStatus.GODKJENT, vedtakId = 1)
+        val utbetaling = utbetaling(
+            utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT)),
+            vedtakId = 1
+        )
 
         every { utbetalingService.iverksettUtbetaling(any()) } returns
                 IverksettResultat.UtbetalingForVedtakEksisterer(utbetaling)
@@ -52,7 +59,7 @@ internal class VedtakMottakerTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
-            assertEquals(EVENT_NAME_OPPDATERT, event.eventName)
+            assertEquals(EVENT_NAME_OPPDATERT, event.event)
             assertEquals(UtbetalingStatus.FEILET, event.utbetalingResponse.status)
             assertEquals(utbetaling.vedtakId.value, event.utbetalingResponse.vedtakId)
             assertEquals(
@@ -76,7 +83,7 @@ internal class VedtakMottakerTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
-            assertEquals(EVENT_NAME_OPPDATERT, event.eventName)
+            assertEquals(EVENT_NAME_OPPDATERT, event.event)
             assertEquals(UtbetalingStatus.FEILET, event.utbetalingResponse.status)
             assertEquals(1, event.utbetalingResponse.vedtakId)
             assertEquals(
@@ -93,7 +100,7 @@ internal class VedtakMottakerTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
-            assertEquals(EVENT_NAME_OPPDATERT, event.eventName)
+            assertEquals(EVENT_NAME_OPPDATERT, event.event)
             assertEquals(UtbetalingStatus.FEILET, event.utbetalingResponse.status)
             assertEquals(1, event.utbetalingResponse.vedtakId)
             assertEquals(

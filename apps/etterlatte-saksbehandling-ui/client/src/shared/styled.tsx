@@ -32,7 +32,7 @@ export const Content = styled.div`
 `
 
 export const ContentHeader = styled.div`
-  padding: 1em 5em;
+  padding: 1em 4em;
 `
 
 export const Header = styled.div`

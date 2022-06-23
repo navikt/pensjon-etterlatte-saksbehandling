@@ -34,7 +34,8 @@ internal class AttesterVedtak(
             context.publish(JsonMessage.newMessage(
                 mapOf(
                     "@event" to "VEDTAK:ATTESTERT",
-                    "@vedtak" to attestertVedtak
+                    "@vedtak" to attestertVedtak,
+                    "@behandlingId" to behandlingId
                 )
             ).toJson())
         }

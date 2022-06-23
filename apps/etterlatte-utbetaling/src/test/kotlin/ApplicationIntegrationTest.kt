@@ -81,7 +81,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.vedtakId == 1L &&
                                 this.utbetalingResponse.status == UtbetalingStatus.SENDT
                     }
@@ -98,7 +98,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
                                 this.utbetalingResponse.feilmelding
                                     ?.contains(
@@ -119,7 +119,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
                                 this.utbetalingResponse.feilmelding
                                     ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false
@@ -138,7 +138,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
                                 this.utbetalingResponse.feilmelding
                                     ?.contains(
@@ -159,7 +159,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.vedtakId == 1L &&
                                 this.utbetalingResponse.status == UtbetalingStatus.GODKJENT
                     }
@@ -176,7 +176,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.vedtakId == 1L &&
                                 this.utbetalingResponse.status == UtbetalingStatus.FEILET
                     }
@@ -195,7 +195,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.vedtakId == 1L &&
                                 this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
                                 this.utbetalingResponse.feilmelding == "Utbetalingen for vedtakId=1 har feil status (GODKJENT)"
@@ -214,7 +214,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
-                        this.eventName == EVENT_NAME_OPPDATERT &&
+                        this.event == EVENT_NAME_OPPDATERT &&
                                 this.utbetalingResponse.vedtakId == 1L &&
                                 this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
                                 this.utbetalingResponse.feilmelding == "KodeMelding Beskrivelse"

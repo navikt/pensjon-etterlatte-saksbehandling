@@ -16,6 +16,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Sak
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingshendelse
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
@@ -78,13 +79,23 @@ fun kvittering(oppdragMedKvittering: Oppdrag) =
         kode = oppdragMedKvittering.mmel.kodeMelding
     )
 
-fun oppdragMedGodkjentKvittering(utbetaling: Utbetaling = utbetaling(vedtakId = 1)) = oppdrag(utbetaling).apply {
+fun oppdragMedGodkjentKvittering(
+    utbetaling: Utbetaling = utbetaling(
+        vedtakId = 1,
+        utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT))
+    )
+) = oppdrag(utbetaling).apply {
     mmel = Mmel().apply {
         alvorlighetsgrad = "00"
     }
 }
 
-fun oppdragMedFeiletKvittering(utbetaling: Utbetaling = utbetaling(vedtakId = 1)) = oppdrag(utbetaling).apply {
+fun oppdragMedFeiletKvittering(
+    utbetaling: Utbetaling = utbetaling(
+        vedtakId = 1,
+        utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))
+    )
+) = oppdrag(utbetaling).apply {
     mmel = Mmel().apply {
         alvorlighetsgrad = "12"
         kodeMelding = "KodeMelding"
@@ -95,7 +106,6 @@ fun oppdragMedFeiletKvittering(utbetaling: Utbetaling = utbetaling(vedtakId = 1)
 fun utbetaling(
     id: UUID = UUID.randomUUID(),
     sakId: SakId = SakId(1),
-    status: UtbetalingStatus = UtbetalingStatus.GODKJENT,
     vedtakId: Long = 1,
     avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
     opprettet: Tidspunkt = Tidspunkt.now(),
@@ -109,14 +119,19 @@ fun utbetaling(
             periodeFra = periodeFra
         )
     ),
-    kvittering: Kvittering? = null
+    kvittering: Kvittering? = null,
+    utbetalingshendelser: List<Utbetalingshendelse> = listOf(
+        utbetalingshendelse(
+            utbetalingId = id,
+            tidspunkt = opprettet
+        )
+    )
 ) =
     Utbetaling(
         id = id,
         vedtakId = VedtakId(vedtakId),
         behandlingId = UUID.randomUUID().let { BehandlingId(it, it.toUUID30()) },
         sakId = sakId,
-        status = status,
         vedtak = utbetalingsvedtak(vedtakId),
         opprettet = opprettet,
         endret = Tidspunkt.now(),
@@ -125,7 +140,8 @@ fun utbetaling(
         saksbehandler = NavIdent("12345678"),
         attestant = NavIdent("87654321"),
         utbetalingslinjer = utbetalingslinjer,
-        kvittering = kvittering
+        kvittering = kvittering,
+        utbetalingshendelser = utbetalingshendelser
     )
 
 fun utbetalingslinje(
@@ -160,3 +176,10 @@ fun utbetalingMedOpphoer() = utbetaling(
         )
     )
 )
+
+fun utbetalingshendelse(
+    id: UUID = UUID.randomUUID(),
+    utbetalingId: UUID = UUID.randomUUID(),
+    tidspunkt: Tidspunkt = Tidspunkt.now(),
+    status: UtbetalingStatus = UtbetalingStatus.MOTTATT
+) = Utbetalingshendelse(id, utbetalingId, tidspunkt, status)

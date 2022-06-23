@@ -26,6 +26,10 @@ class KanIkkeEndreFattetVedtak(vedtak: Vedtak): Exception("Vedtak ${vedtak.id} k
     val vedtakId: Long = vedtak.id
 }
 
+class VedtakKanIkkeFattes(vedtak: Vedtak): Exception("Vedtak ${vedtak.id} kan ikke fattes"){
+    val vedtakId: Long = vedtak.id
+}
+
 class VedtaksvurderingService(private val repository: VedtaksvurderingRepository, private val rapid: AtomicReference<MessageContext> = AtomicReference()) {
     companion object{
         val logger: Logger = LoggerFactory.getLogger(VedtaksvurderingService::class.java)
@@ -106,12 +110,12 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
                 if(it.vilkaarsResultat?.resultat == VurderingsResultat.OPPFYLT) VedtakType.INNVILGELSE else VedtakType.AVSLAG, //Hvor skal vi bestemme vedtakstype?
                 emptyList(), //Ikke lenger aktuell
                 it.vilkaarsResultat, //Bør periodiseres
-                BilagMedSammendrag(objectMapper.valueToTree(it.beregningsResultat) as ObjectNode, it.beregningsResultat?.beregningsperioder?.map { Beregningsperiode(Periode(
-                    YearMonth.from(it.datoFOM), it.datoTOM?.takeIf { it.isBefore(LocalDateTime.MAX) }?.let(YearMonth::from)), BigDecimal.valueOf(it.belop.toLong())
-                ) }?: emptyList()), // sammendraget bør lages av beregning
-                BilagMedSammendrag(objectMapper.valueToTree(it.avkortingsResultat) as ObjectNode, it.avkortingsResultat?.beregningsperioder?.map { Beregningsperiode(Periode(
-                    YearMonth.from(it.datoFOM), it.datoTOM?.takeIf { it.isBefore(LocalDateTime.MAX) }?.let(YearMonth::from)), BigDecimal.valueOf(it.belop.toLong())
-                ) }?: emptyList()), // sammendraget bør lages av avkorting,
+                it.beregningsResultat?.let { bres -> BilagMedSammendrag(objectMapper.valueToTree(bres) as ObjectNode, bres.beregningsperioder.map { Beregningsperiode(Periode(
+                    YearMonth.from(it.datoFOM), it.datoTOM?.takeIf { it.isBefore(YearMonth.from(LocalDateTime.MAX)) }?.let(YearMonth::from)), BigDecimal.valueOf(it.grunnbelopMnd.toLong())
+                ) })}, // sammendraget bør lages av beregning
+                it.avkortingsResultat?.let { avkorting -> BilagMedSammendrag(objectMapper.valueToTree(avkorting) as ObjectNode, avkorting.beregningsperioder.map { Beregningsperiode(Periode(
+                    YearMonth.from(it.datoFOM), it.datoTOM?.takeIf { it.isBefore(YearMonth.from(LocalDateTime.MAX)) }?.let(YearMonth::from)), BigDecimal.valueOf(it.belop.toLong())
+                ) })}, // sammendraget bør lages av avkorting,
                 repository.hentUtbetalingsPerioder(it.id),
                 it.saksbehandlerId?.let { ansvarligSaksbehadnlier -> VedtakFattet(ansvarligSaksbehadnlier, "0000", it.datoFattet?.atZone(
                     ZoneOffset.UTC)!!) }, //logikk inn der fatting skjer. DB utvides med enhet og timestamp?
@@ -151,15 +155,36 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
 
     }
 
+    fun underkjennVedtakSaksbehandler(sakId: String, behandlingId: UUID, saksbehandler: String, kommentar: String, valgtBegrunnelse: String) {
+        val vedtak = requireNotNull( hentVedtak(sakId, behandlingId))
+        rapid.get().publish( vedtak.sakId,
+            newMessage(
+                mapOf(
+                    "@event" to "SAKSBEHANDLER:ATTESTER_VEDTAK",
+                    "@sakId" to sakId.toLong(),
+                    "@vedtakId" to vedtak.id,
+                    "@behandlingId" to behandlingId.toString(),
+                    "@saksbehandler" to saksbehandler,
+                    "@valgtBegrunnelse" to valgtBegrunnelse,
+                    "@kommentar" to kommentar,
+                )
+            ).toJson()
+        )
+
+    }
+
     fun fattVedtak(sakId: String, behandlingId: UUID, saksbehandler: String): no.nav.etterlatte.domene.vedtak.Vedtak {
-        requireNotNull( hentFellesVedtak(sakId, behandlingId)).also {
-            require(it.vedtakFattet == null)
-            require(it.type == VedtakType.INNVILGELSE)
-            require(it.vilkaarsvurdering != null)
-            require(it.beregning != null)
-            require(it.avkorting != null)
+        val v = requireNotNull(hentVedtak(sakId, behandlingId)).also {
+            if(it.vedtakFattet == true) throw KanIkkeEndreFattetVedtak(it)
         }
-        repository.fattVedtak(saksbehandler, sakId, behandlingId)
+
+        requireNotNull( hentFellesVedtak(sakId, behandlingId)).also {
+            if(it.type== VedtakType.INNVILGELSE){
+                if(it.beregning==null || it.avkorting == null) throw VedtakKanIkkeFattes(v)
+            }
+            if(it.vilkaarsvurdering==null) throw VedtakKanIkkeFattes(v)
+            repository.fattVedtak(saksbehandler, sakId, it.vedtakId, behandlingId)
+        }
         return requireNotNull( hentFellesVedtak(sakId, behandlingId))
     }
 
@@ -173,11 +198,23 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
         return requireNotNull( hentFellesVedtak(sakId, behandlingId))
 
     }
+    fun underkjennVedtak(sakId: String, behandlingId: UUID, saksbehandler: String, kommentar: String, valgtBegrunnelse: String) {
+        val vedtak = requireNotNull( hentFellesVedtak(sakId, behandlingId)).also {
+            require(it.vedtakFattet != null)
+            require(it.attestasjon == null)
+        }
+        repository.underkjennVedtak(saksbehandler, sakId, behandlingId, vedtak.vedtakId, kommentar, valgtBegrunnelse)
 
-    fun utbetalingsperioderFraVedtak(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak): List<Utbetalingsperiode> {
-        if(vedtak.type != VedtakType.INNVILGELSE) return listOf(Utbetalingsperiode(0, vedtak.virk.copy(tom = null), null, UtbetalingsperiodeType.OPPHOER))
+    }
 
-        val perioderFraBeregning = vedtak.beregning?.sammendrag?.map { Utbetalingsperiode(0, it.periode, it.beloep, UtbetalingsperiodeType.UTBETALING) }?.sortedBy { it.periode.fom } ?: emptyList()
+
+    fun utbetalingsperioderFraVedtak(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) =
+        utbetalingsperioderFraVedtak(vedtak.type, vedtak.virk, vedtak.beregning?.sammendrag?: emptyList())
+
+    fun utbetalingsperioderFraVedtak(vedtakType: VedtakType, virk:Periode, beregning: List<Beregningsperiode>): List<Utbetalingsperiode> {
+        if(vedtakType != VedtakType.INNVILGELSE) return listOf(Utbetalingsperiode(0, virk.copy(tom = null), null, UtbetalingsperiodeType.OPPHOER))
+
+        val perioderFraBeregning = beregning.map { Utbetalingsperiode(0, it.periode, it.beloep, UtbetalingsperiodeType.UTBETALING) }.sortedBy { it.periode.fom }
 
         val manglendePerioderMellomBeregninger = perioderFraBeregning
             .map { it.periode }
@@ -187,7 +224,7 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
             .map { Periode(it.first, it.second) }
             .map { Utbetalingsperiode(0, it, null, UtbetalingsperiodeType.OPPHOER) }
         val fomBeregninger = perioderFraBeregning.firstOrNull()?.periode?.fom
-        val manglendeStart = if (fomBeregninger == null || vedtak.virk.fom.isBefore(fomBeregninger)) Utbetalingsperiode(0, Periode(vedtak.virk.fom, null), null, UtbetalingsperiodeType.OPPHOER)  else null
+        val manglendeStart = if (fomBeregninger == null || virk.fom.isBefore(fomBeregninger)) Utbetalingsperiode(0, Periode(virk.fom, fomBeregninger?.minusMonths(1)), null, UtbetalingsperiodeType.OPPHOER)  else null
         val manglendeSlutt = perioderFraBeregning.lastOrNull()?.periode?.tom?.let { Utbetalingsperiode(0,Periode( it.plusMonths(1), null), null, UtbetalingsperiodeType.OPPHOER) }
 
         return (perioderFraBeregning + manglendePerioderMellomBeregninger + manglendeStart + manglendeSlutt).filterNotNull().sortedBy { it.periode.fom }

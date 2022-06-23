@@ -12,6 +12,8 @@ class OppdragSender(
 ) {
     fun sendOppdrag(oppdrag: Oppdrag): String {
         logger.info("Sender utbetaling til Oppdrag")
+        logger.info("Sender oppdrag for sakId=${oppdrag.oppdrag110.fagsystemId} med vedtakId=${oppdrag.oppdrag110.oppdragsLinje150.first().vedtakId} til oppdrag")
+
         val connection = jmsConnectionFactory.connection()
         return connection.createSession().use { session ->
             val producer = session.createProducer(session.createQueue(queue))

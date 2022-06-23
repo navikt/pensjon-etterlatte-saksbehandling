@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
+import no.nav.etterlatte.typer.OppgaveListe
 import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
@@ -20,6 +21,7 @@ interface EtterlatteBehandling {
     suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker
     suspend fun opprettSakForPerson(fnr: String, sakType: SoeknadType, accessToken: String): Sak
     suspend fun hentSaker(accessToken: String): Saker
+    suspend fun hentOppgaver(accessToken: String): OppgaveListe
     suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingListe
     suspend fun hentBehandling(behandlingId: String, accessToken: String): Any
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag
@@ -106,6 +108,28 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
             return objectMapper.readValue(json.toString(), Saker::class.java)
         } catch (e: Exception) {
             logger.error("Henting av saker fra behandling feilet", e)
+            throw e
+        }
+    }
+
+    override suspend fun hentOppgaver(accessToken: String): OppgaveListe {
+        try {
+            logger.info("Henter alle saker")
+
+            val json = downstreamResourceClient
+                .get(
+                    Resource(
+                        clientId,
+                        "$resourceUrl/oppgaver"
+                    ), accessToken
+                ).mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
+
+            return objectMapper.readValue(json.toString(), OppgaveListe::class.java)
+        } catch (e: Exception) {
+            logger.error("Henting av oppgaver fra behandling feilet", e)
             throw e
         }
     }

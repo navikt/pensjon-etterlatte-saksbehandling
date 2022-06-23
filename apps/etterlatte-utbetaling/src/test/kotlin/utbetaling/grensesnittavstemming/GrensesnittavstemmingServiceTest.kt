@@ -9,6 +9,7 @@ import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.Avstem
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.utbetaling
+import no.nav.etterlatte.utbetaling.utbetalingshendelse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.Clock
@@ -35,7 +36,8 @@ internal class GrensesnittavstemmingServiceTest {
             fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS)),
             til = Tidspunkt.now()
         )
-        val utbetaling = listOf(utbetaling(status = UtbetalingStatus.FEILET))
+        val utbetaling =
+            listOf(utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))))
 
         val grensesnittavstemming = Grensesnittavstemming(
             opprettet = Tidspunkt.now(),

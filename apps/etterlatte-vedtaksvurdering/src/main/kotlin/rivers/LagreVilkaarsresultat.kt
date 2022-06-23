@@ -10,9 +10,9 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
+import java.time.YearMonth
 
-internal class LagreVilkaarsresultat(
+internal class  LagreVilkaarsresultat(
     rapidsConnection: RapidsConnection,
     val vedtaksvurderingService: VedtaksvurderingService
 ) : River.PacketListener {
@@ -36,7 +36,7 @@ internal class LagreVilkaarsresultat(
             val sakId = packet["sak"].toString()
             val vilkaarsResultat = objectMapper.readValue(packet["@vilkaarsvurdering"].toString(), VilkaarResultat::class.java)
             try {
-                vedtaksvurderingService.lagreVilkaarsresultat(sakId, behandlingId, packet["soeker"].textValue(), vilkaarsResultat, LocalDate.parse(packet["@virkningstidspunkt"].textValue()) )
+                vedtaksvurderingService.lagreVilkaarsresultat(sakId, behandlingId, packet["soeker"].textValue(), vilkaarsResultat, YearMonth.parse(packet["@virkningstidspunkt"].textValue()).atDay(1) )
             }catch (e: KanIkkeEndreFattetVedtak){
                 packet["@event"] = "VEDTAK:ENDRING_FORKASTET"
                 packet["@vedtakId"] = e.vedtakId

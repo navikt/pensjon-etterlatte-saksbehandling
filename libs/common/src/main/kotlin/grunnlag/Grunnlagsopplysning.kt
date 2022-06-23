@@ -24,11 +24,6 @@ open class Grunnlagsopplysning<T>(
         return "Opplysning om ${opplysningType.name}: oppgitt av $kilde til å være: $opplysning"
     }
 
-    open fun opplysningerSomMåAttesteres():List<String>{
-        return if(kilde is Saksbehandler && attestering == null) listOf("!" + opplysningType.name) else emptyList()
-    }
-
-
     @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
@@ -38,7 +33,9 @@ open class Grunnlagsopplysning<T>(
         JsonSubTypes.Type(value = Saksbehandler::class, name = "saksbehandler"),
         JsonSubTypes.Type(value = Privatperson::class, name = "privatperson"),
         JsonSubTypes.Type(value = Pdl::class, name = "pdl"),
+        JsonSubTypes.Type(value = Inntektskomponenten::class, name = "inntektskomponenten"),
         JsonSubTypes.Type(value = RegelKilde::class, name = "regel"),
+        JsonSubTypes.Type(value = Vilkaarskomponenten::class, name = "vilkaarskomponenten")
     )
     sealed class Kilde(val type: String) {
         fun toJson() = objectMapperKilde.writeValueAsString(this)
@@ -52,6 +49,18 @@ open class Grunnlagsopplysning<T>(
     }
 
     class Pdl(val navn: String, val tidspunktForInnhenting: Instant, val registersReferanse: String?) : Kilde("pdl") {
+        override fun toString(): String {
+            return navn
+        }
+    }
+
+    class Inntektskomponenten(val navn: String) : Kilde("inntektskomponenten") {
+        override fun toString(): String {
+            return navn
+        }
+    }
+
+    class Vilkaarskomponenten(val navn: String) : Kilde("vilkaarskomponenten") {
         override fun toString(): String {
             return navn
         }

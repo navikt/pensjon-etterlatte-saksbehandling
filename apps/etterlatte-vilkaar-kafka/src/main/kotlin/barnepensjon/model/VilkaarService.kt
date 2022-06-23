@@ -1,4 +1,4 @@
-package no.nav.etterlatte.model
+package no.nav.etterlatte.barnepensjon.model
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -6,6 +6,7 @@ import no.nav.etterlatte.barnepensjon.*
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.inntekt.PensjonUforeOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -16,7 +17,7 @@ import vilkaar.barnepensjon.barnIngenOppgittUtlandsadresse
 import vilkaar.barnepensjon.barnOgAvdoedSammeBostedsadresse
 import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
 import java.time.LocalDate
-import java.time.temporal.TemporalAdjusters
+import java.time.YearMonth
 
 
 class VilkaarService {
@@ -30,6 +31,8 @@ class VilkaarService {
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
+        val pensjonUfore = finnOpplysning<PensjonUforeOpplysning>(opplysninger, Opplysningstyper.PENSJON_UFORE_V1)
+
 
         val vilkaar = listOf(
             vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, soekerPdl, avdoedPdl),
@@ -37,7 +40,8 @@ class VilkaarService {
             vilkaarAvdoedesMedlemskap(
                 Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
                 avdoedSoeknad,
-                avdoedPdl
+                avdoedPdl,
+                pensjonUfore
             ),
             vilkaarBarnetsMedlemskap(
                 Vilkaartyper.BARNETS_MEDLEMSKAP,
@@ -54,17 +58,17 @@ class VilkaarService {
         return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
     }
 
-    fun beregnVilkaarstidspunkt(opplysninger: List<VilkaarOpplysning<ObjectNode>>, opprettet: LocalDate): LocalDate? {
+    fun beregnVilkaarstidspunkt(opplysninger: List<VilkaarOpplysning<ObjectNode>>, opprettet: LocalDate): YearMonth? {
         logger.info("beregner virkningstidspunkt")
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
         return avdoedPdl?.opplysning?.doedsdato?.let { hentVirkningstidspunkt(it, opprettet) }
     }
 
-    fun hentVirkningstidspunkt(doedsdato: LocalDate, mottattDato: LocalDate): LocalDate {
+    fun hentVirkningstidspunkt(doedsdato: LocalDate, mottattDato: LocalDate): YearMonth {
         if (mottattDato.year - doedsdato.year > 3) {
-            return mottattDato.minusYears(3).with(TemporalAdjusters.firstDayOfMonth())
+            return YearMonth.of(mottattDato.year -3, mottattDato.month)
         }
-        return doedsdato.with(TemporalAdjusters.firstDayOfNextMonth())
+        return YearMonth.of(doedsdato.year, doedsdato.month+1)
     }
 
 

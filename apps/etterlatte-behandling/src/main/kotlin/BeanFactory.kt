@@ -25,6 +25,8 @@ interface BeanFactory {
     fun rapid(): KafkaProdusent<String, String>
     fun behandlingHendelser(): BehandlingsHendelser
     fun behandlingsFactory(): BehandlingFactory
+
+
 }
 
 abstract class CommonFactory : BeanFactory {

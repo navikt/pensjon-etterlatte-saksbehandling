@@ -22,6 +22,7 @@ enum class FordelerKriterie(val forklaring: String) {
     BARN_HAR_UTVANDRING("Barn har utvandring"),
     BARN_HAR_HUKET_AV_UTLANDSADRESSE("Det er huket av for utenlandsopphold for avdøde i søknaden"),
     BARN_HAR_VERGE("Barn er market med verge i søknaden"),
+    BARN_HAR_REGISTRERT_VERGE("Barn er registrert med verge i PDL"),
     BARN_ER_IKKE_BOSATT_I_NORGE("Barn er ikke bosatt i Norge"),
     BARN_ER_IKKE_ALENEBARN("Barn (søker) er ikke alenebarn"),
 
@@ -68,6 +69,7 @@ class FordelerKriterier {
         Kriterie(BARN_HAR_UTVANDRING) { harUtvandring(barn) },
         Kriterie(BARN_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(barn) },
         Kriterie(BARN_HAR_VERGE) { harHuketAvForVerge(it) },
+        Kriterie(BARN_HAR_REGISTRERT_VERGE) { harVergemaalPDL(barn) },
         Kriterie(BARN_ER_IKKE_ALENEBARN) { barnErIkkeAlenebarn(avdoed, barn, gjenlevende) },
 
         // Avdød
@@ -177,6 +179,14 @@ class FordelerKriterier {
 
     private fun harHuketAvForVerge(barnepensjon: Barnepensjon): Boolean {
         return barnepensjon.soeker.verge?.svar?.verdi == JaNeiVetIkke.JA
+    }
+
+    private fun harVergemaalPDL(barn: Person): Boolean {
+        return if (barn.vergemaalEllerFremtidsfullmakt != null){
+            barn.vergemaalEllerFremtidsfullmakt!!.isNotEmpty()
+        } else{
+            false
+        }
     }
 
     private fun harHuketAvForUtenlandsopphold(barnepensjon: Barnepensjon): Boolean {

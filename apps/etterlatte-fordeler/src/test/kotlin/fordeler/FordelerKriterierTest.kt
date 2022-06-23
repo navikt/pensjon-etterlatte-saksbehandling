@@ -58,6 +58,28 @@ internal class FordelerKriterierTest {
     }
 
     @Test
+    fun `barn som er registrert med vergemaal er ikke en gyldig kandidat`() {
+        val barn = mockPerson(
+            vergemaalEllerFremtidsfullmakt = listOf(VergemaalEllerFremtidsfullmakt(
+                embete = "tjoho",
+                type = "mindreaarig",
+                vergeEllerFullmektig = VergeEllerFullmektig(
+                    motpartsPersonident = Foedselsnummer.of("08026800685"),
+                    navn = "Birger",
+                    omfang = "personligeOgOekonomiskeInteresser",
+                    omfangetErInnenPersonligOmraade = true
+                )
+            ))
+        )
+        val avdoed = mockPerson()
+        val gjenlevende = mockPerson()
+
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_HAR_REGISTRERT_VERGE))
+    }
+
+    @Test
     fun `barn som ikke er norsk statsborger er ikke en gyldig kandidat`() {
         val barn = mockPerson(statsborgerskap = SVERIGE)
         val avdoed = mockPerson()

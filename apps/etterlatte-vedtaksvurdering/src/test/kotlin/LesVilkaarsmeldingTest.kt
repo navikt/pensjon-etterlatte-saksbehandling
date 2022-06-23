@@ -30,7 +30,7 @@ internal class LesVilkaarsmeldingTest {
         val vilkarsres = slot<VilkaarResultat>()
         every { vedtaksvurderingServiceMock.lagreVilkaarsresultat(any(), any(), any(), capture(vilkarsres), any()) } returns Unit
         inspector.apply { sendTestMessage(melding) }.inspektør
-        Assertions.assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, vilkarsres.captured.resultat)
+        Assertions.assertEquals(VurderingsResultat.OPPFYLT, vilkarsres.captured.resultat)
 
     }
 

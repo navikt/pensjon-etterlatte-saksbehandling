@@ -9,6 +9,7 @@ import no.nav.etterlatte.utbetaling.kvittering
 import no.nav.etterlatte.utbetaling.oppdrag
 import no.nav.etterlatte.utbetaling.oppdragMedFeiletKvittering
 import no.nav.etterlatte.utbetaling.utbetaling
+import no.nav.etterlatte.utbetaling.utbetalingshendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -28,12 +29,18 @@ internal class AvstemmingsdataJaxbTest {
         val til = now.toTidspunkt()
 
         val uuid = UUIDBase64()
+        val utbetalingId = UUID.randomUUID()
         val utbetaling = listOf(
             utbetaling(
-                id = UUID.randomUUID(),
-                status = UtbetalingStatus.FEILET,
+                id = utbetalingId,
                 avstemmingsnoekkel = til,
-                opprettet = til
+                opprettet = til,
+                utbetalingshendelser = listOf(
+                    utbetalingshendelse(
+                        utbetalingId = utbetalingId,
+                        status = UtbetalingStatus.FEILET
+                    )
+                )
             ).let { it.copy(oppdrag = oppdrag(it), kvittering = kvittering(oppdragMedFeiletKvittering())) }
         )
 

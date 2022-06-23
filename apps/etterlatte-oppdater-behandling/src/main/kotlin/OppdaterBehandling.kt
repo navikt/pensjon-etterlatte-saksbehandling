@@ -30,9 +30,4 @@ internal class OppdaterBehandling(
         }
 }
 
-
-interface Behandling {
-    fun grunnlagEndretISak(sak: Long)
-}
-
 private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

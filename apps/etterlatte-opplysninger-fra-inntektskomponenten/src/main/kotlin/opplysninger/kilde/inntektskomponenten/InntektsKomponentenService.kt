@@ -7,22 +7,25 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.InntektsKomponenten
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.YearMonth
 
 class InntektsKomponentenService(private val inntektskomponentenClient: HttpClient, private val url: String) :
     InntektsKomponenten {
     private val logger = LoggerFactory.getLogger(InntektsKomponentenService::class.java)
 
-    override fun hentInntektListe(fnr: Foedselsnummer, doedsdato: String): InntektsKomponentenResponse {
+    override fun hentInntektListe(fnr: Foedselsnummer, doedsdato: LocalDate): InntektsKomponentenResponse {
         logger.info("Henter inntektliste fra inntektskomponenten")
+
+        YearMonth.from(doedsdato)
 
         val hentInntektlisteRequest =
             HentInntektListeRequestBody(
                 InntektListeIdent(fnr.value, "NATURLIG_IDENT"),
                 "Etterlatteytelser",
-                "2015-02",
-                "2022-03",
+                YearMonth.from(doedsdato.minusYears(5)).toString(),
+                YearMonth.from(doedsdato).toString(),
                 "Etterlatteytelser"
             )
 
@@ -34,8 +37,6 @@ class InntektsKomponentenService(private val inntektskomponentenClient: HttpClie
                     body = hentInntektlisteRequest
                 }
         }
-
-        print(inntektsListe)
 
         return inntektsListe;
 

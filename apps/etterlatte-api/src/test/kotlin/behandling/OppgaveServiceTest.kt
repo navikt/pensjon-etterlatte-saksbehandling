@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import java.util.*
 
 internal class OppgaveServiceTest {
@@ -25,7 +26,7 @@ internal class OppgaveServiceTest {
     fun setUp() = MockKAnnotations.init(this)
     private val accessToken = UUID.randomUUID().toString()
 
-    @Test
+    @Test @Disabled
     fun hentAlleOppgaver() {
         coEvery { behandlingKlient.hentSaker(accessToken) } returns Saker(listOf(1,4,8).map { Sak("", "", it.toLong()) })
         coEvery { behandlingKlient.hentBehandlingerForSak(1, accessToken) } returns BehandlingListe(listOf(

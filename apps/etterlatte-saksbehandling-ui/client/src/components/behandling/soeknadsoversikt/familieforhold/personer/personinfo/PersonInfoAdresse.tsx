@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { PersonDetailWrapper, Historikk } from '../../../styled'
-import { IAdresse } from '../../../../types'
 import { TextButton } from './TextButton'
 import { Adressevisning } from '../../../../felles/Adressevisning'
+import { IAdresse } from '../../../../../../store/reducers/BehandlingReducer'
 
 type Props = {
   adresser: IAdresse[] | undefined

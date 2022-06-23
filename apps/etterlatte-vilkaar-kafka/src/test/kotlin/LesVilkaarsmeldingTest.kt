@@ -1,5 +1,5 @@
 
-import no.nav.etterlatte.model.VilkaarService
+import no.nav.etterlatte.barnepensjon.model.VilkaarService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

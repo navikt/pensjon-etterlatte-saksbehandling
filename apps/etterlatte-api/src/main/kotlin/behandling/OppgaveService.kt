@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
-import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.typer.Sak
@@ -36,38 +35,20 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient) {
     suspend fun hentAlleOppgaver(accessToken: String): Oppgaver {
         logger.info("Henter alle oppgaver")
 
-        val saker = behandlingKlient.hentSaker(accessToken).saker
-
-        val sakerMedBehandling: List<SakMedBehandling> = saker.flatMap {
-            mapBehandlingerTilSak(
-                it,
-                behandlingKlient.hentBehandlingerForSak(it.id.toInt(), accessToken)
+        return Oppgaver(behandlingKlient.hentOppgaver(accessToken).oppgaver.map {
+            Oppgave(
+                it.behandlingId,
+                it.sak.id,
+                it.behandlingStatus,
+                it.sak.sakType,
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+                it.regdato.toLocalDateTime().toString(),
+                it.fristDato.atStartOfDay().toString(),
+                it.sak.ident,
+                "",
+                "",
+                Handling.BEHANDLE
             )
-        }
-
-        val oppgaveListe: List<Oppgave> = sakerMedBehandling.map { mapTilOppgave(it) }
-        return Oppgaver(oppgaver = oppgaveListe)
-    }
-
-    companion object Utils {
-        fun mapBehandlingerTilSak(sak: Sak, behandlinger: BehandlingListe): List<SakMedBehandling> {
-            return behandlinger.behandlinger.map { SakMedBehandling(sak, it) }
-        }
-
-        fun mapTilOppgave(sakMedBehandling: SakMedBehandling): Oppgave {
-            return Oppgave(
-                behandlingsId = sakMedBehandling.behandling.id,
-                sakId = sakMedBehandling.sak.id,
-                status = sakMedBehandling.behandling.status,
-                soeknadType = sakMedBehandling.sak.sakType,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, //må hentes ut etterhvert
-                regdato = sakMedBehandling.behandling.soeknadMottattDato.toString(),
-                fristdato = sakMedBehandling.behandling.soeknadMottattDato?.plusMonths(1).toString(), //pluss intervall
-                fnr = sakMedBehandling.sak.ident,
-                beskrivelse = "",
-                saksbehandler = "",
-                handling = Handling.BEHANDLE //logikk basert på status her
-            )
-        }
+        })
     }
 }

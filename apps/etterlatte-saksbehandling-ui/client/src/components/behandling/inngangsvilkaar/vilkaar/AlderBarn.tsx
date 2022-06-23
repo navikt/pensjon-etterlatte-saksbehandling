@@ -47,8 +47,8 @@ export const AlderBarn = (props: VilkaarProps) => {
         <VilkaarWrapper>
           <VilkaarInfobokser>
             <VilkaarColumn>
-              <Title>Alder barn</Title>
-              <Lovtekst>§ 18-4: Barnet er under 18 år</Lovtekst>
+              <Title>§ 18-4: Alder barn</Title>
+              <Lovtekst>Barnet er under 18 år</Lovtekst>
             </VilkaarColumn>
             <VilkaarColumn>
               <div>
@@ -81,13 +81,15 @@ export const AlderBarn = (props: VilkaarProps) => {
             </VilkaarColumn>
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
-            <VilkaarVurderingContainer>
-              <VilkaarlisteTitle>
-                <StatusIcon status={props.vilkaar.resultat} large={true} /> {vilkaarErOppfylt(vilkaar.resultat)}
-              </VilkaarlisteTitle>
-              <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
-              <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
-            </VilkaarVurderingContainer>
+            {vilkaar != undefined && (
+              <VilkaarVurderingContainer>
+                <VilkaarlisteTitle>
+                  <StatusIcon status={vilkaar.resultat} large={true} /> {vilkaarErOppfylt(vilkaar.resultat)}
+                </VilkaarlisteTitle>
+                <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
+                <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
+              </VilkaarVurderingContainer>
+            )}
           </VilkaarVurderingColumn>
         </VilkaarWrapper>
       </Innhold>

@@ -6,10 +6,29 @@ export interface IDetaljertBehandling {
   vilkårsprøving: IVilkaarResultat
   gyldighetsprøving: IGyldighetResultat
   kommerSoekerTilgode: IKommerSoekerTilgode
-  beregning: any
+  beregning?: IBeregning
   fastsatt: boolean
   soeknadMottattDato: string
   virkningstidspunkt: string
+}
+
+export interface IBeregning {
+  id: string
+  type: string
+  endringkode: string
+  resultat: string
+  beregningsperioder: IBeregningsperiode[]
+  beregnetDato: string
+  grunnlagVerson: number
+}
+
+export interface IBeregningsperiode {
+  delytelseId: string
+  type: string
+  datoFOM: string
+  datoTOM: string
+  grunnbelopMnd: number
+  grunnbelop: number
 }
 
 export interface IKommerSoekerTilgode {

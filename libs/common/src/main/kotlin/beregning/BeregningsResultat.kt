@@ -34,6 +34,7 @@ data class Beregningsperiode(
     val type: Beregningstyper,
     val datoFOM: YearMonth,
     val datoTOM: YearMonth?,
-    val belop: Int
+    val grunnbelopMnd: Int,
+    val grunnbelop: Int,
 )
 

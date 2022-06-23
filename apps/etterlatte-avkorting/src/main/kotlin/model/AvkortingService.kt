@@ -42,7 +42,7 @@ class AvkortingService {
                 type = Avkortingstyper.INNTEKT,
                 datoFOM = periode.datoFOM,
                 datoTOM = periode.datoTOM,
-                belop = beregnAvkorting(periode.belop)
+                belop = beregnAvkorting(periode.grunnbelopMnd)
             )
         }
         return avkortingsperioder

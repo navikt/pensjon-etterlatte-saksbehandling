@@ -662,7 +662,33 @@
       }
     }
   },
-  "beregning": null,
+  "beregning": {
+    "id": "ad2bed67-153a-418a-8428-974b7fa2ce4c",
+    "type": "GP",
+    "endringskode": "NY",
+    "resultat": "BEREGNET",
+    "beregningsperioder": [
+      {
+        "delytelsesId": "BP",
+        "type": "GP",
+        "datoFOM": "2022-03",
+        "datoTOM": "2022-04",
+        "grunnbelopMnd": 8867,
+        "grunnbelop": 101352
+
+      },
+      {
+        "delytelsesId": "BP",
+        "type": "GP",
+        "datoFOM": "2022-05",
+        "datoTOM": null,
+        "grunnbelopMnd": 9290,
+        "grunnbelop": 111480
+      }
+    ],
+    "beregnetDato": "2022-06-21T12:35:17.19221918",
+    "grunnlagVerson": 0
+  },
   "fastsatt": false,
   "soeknadMottattDato": "2022-04-14T14:37:24.573613",
   "virkningstidspunkt": "2022-03-01"

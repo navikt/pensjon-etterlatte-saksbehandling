@@ -46,7 +46,8 @@ class BeregningService {
                 type = Beregningstyper.GP,
                 datoFOM = beregnFoersteFom(it.first,virkFOM),
                 datoTOM = it.second,
-                belop = Grunnbeloep.hentGjeldendeG(it.first).grunnbeløpPerMåned
+                grunnbelopMnd = Grunnbeloep.hentGjeldendeG(it.first).grunnbeløpPerMåned,
+                grunnbelop = Grunnbeloep.hentGjeldendeG(it.first).grunnbeløp
             ))
         }
     }

@@ -2,10 +2,18 @@ import { GyldigFramsattVurdering } from './GyldigFramsattVurdering'
 import { Foreldreansvar } from './Foreldreansvar'
 import { Innsender } from './Innsender'
 import { Verge } from './Verge'
-import { GyldigFramsattType, IGyldighetproving } from '../../../../../store/reducers/BehandlingReducer'
+import {
+  GyldigFramsattType,
+  IGyldighetproving,
+  IGyldighetResultat,
+} from '../../../../../store/reducers/BehandlingReducer'
 import { InfobokserWrapper, Header, VurderingsWrapper, SoeknadOversiktWrapper } from '../../styled'
 
-export const OversiktGyldigFramsatt: React.FC<any> = ({ gyldigFramsatt }) => {
+export const OversiktGyldigFramsatt = ({ gyldigFramsatt }: { gyldigFramsatt: IGyldighetResultat | undefined }) => {
+  if (gyldigFramsatt == null) {
+    return <div style={{ color: 'red' }}>Kunne ikke hente ut data om søkanden er gyldig framsatt</div>
+  }
+
   const innsenderHarForeldreansvar = gyldigFramsatt.vurderinger.find(
     (g: IGyldighetproving) => g.navn === GyldigFramsattType.HAR_FORELDREANSVAR_FOR_BARNET
   )

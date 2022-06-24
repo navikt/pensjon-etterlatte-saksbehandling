@@ -33,8 +33,8 @@ export const Behandling = () => {
     }
   }, [match?.params.behandlingId])
 
-  const soeker = ctx.state.behandlingReducer?.kommerSoekerTilgode.familieforhold.soeker
-  const soekerInfo = { navn: soeker?.navn, foedselsnummer: soeker?.fnr, type: 'Etterlatt' }
+  const soeker = ctx.state.behandlingReducer?.kommerSoekerTilgode?.familieforhold.soeker
+  const soekerInfo = soeker ? { navn: soeker.navn, foedselsnummer: soeker.fnr, type: 'Etterlatt' } : null
 
   const [behandlingsInfo, setBehandlingsinfo] = useState<IBehandlingInfo>()
 
@@ -46,8 +46,8 @@ export const Behandling = () => {
       setBehandlingsinfo({
         type: 'Førstegangsbehandling',
         status: behandling.status,
-        saksbehandler: behandling.saksbehandler && behandling.saksbehandler.navn,
-        attestant: behandling.attestant && behandling.attestant.navn,
+        saksbehandler: behandling.saksbehandlerId,
+        attestant: behandling.attestant,
         virkningsdato: behandling.virkningstidspunkt,
         //vedtaksdato: '',
         rolle: innlogget.rolle,
@@ -56,7 +56,8 @@ export const Behandling = () => {
 
   return (
     <>
-      <StatusBar theme={StatusBarTheme.gray} personInfo={soekerInfo} />
+      {soekerInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={soekerInfo} />}
+
       <Spinner visible={!loaded} label="Laster" />
       {loaded && (
         <GridContainer>

@@ -3,7 +3,6 @@ import { IAction } from '../AppContext'
 export interface IDetaljertBehandling {
   id: string
   sak: number
-  status: IBehandlingStatus //todo legg med fra behandling og evt map om?
   gyldighetsprøving?: IGyldighetResultat
   kommerSoekerTilgode?: IKommerSoekerTilgode
   vilkårsprøving?: IVilkaarResultat
@@ -16,10 +15,20 @@ export interface IDetaljertBehandling {
   attestant?: string
   soeknadMottattDato: string
   virkningstidspunkt: string
+  status: IBehandlingStatus //todo legg med fra behandling og evt map om?
 }
 
 //todo: synk med backend OG oppgavebenk her, og finn ut hva vi skal vise i frontend
 export enum IBehandlingStatus {
+  OPPRETTET = 'OPPRETTET',
+  GYLDIG_SOEKNAD = 'GYLDIG_SOEKNAD',
+  IKKE_GYLDIG_SOEKNAD = 'IKKE_GYLDIG_SOEKNAD',
+  UNDER_BEHANDLING = 'UNDER_BEHANDLING',
+  FATTET_VEDTAK = 'FATTET_VEDTAK',
+  ATTESTERT = 'ATTESTERT',
+  IVERKSATT = 'IVERKSATT',
+  AVBRUTT = 'AVBRUTT',
+
   under_behandling = 'under_behandling',
   attestering = 'attestering',
   underkjent = 'underkjent',

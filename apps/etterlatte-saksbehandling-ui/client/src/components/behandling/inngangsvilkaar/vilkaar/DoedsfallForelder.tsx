@@ -40,7 +40,7 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
     (forelder: IPerson) => forelder === avdoedDoedsdato?.opplysning.foedselsnummer
   )
 
-  const avdoedPersoninfo = ctx.state.behandlingReducer.kommerSoekerTilgode.familieforhold.avdoed
+  const avdoedPersoninfo = ctx.state.behandlingReducer.kommerSoekerTilgode?.familieforhold.avdoed
 
   const avdoedNavn = avdoedForelderFnr ? (
     <div>{avdoedPersoninfo?.navn}</div>

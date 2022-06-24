@@ -16,17 +16,19 @@ export const Inngangsvilkaar = () => {
   const location = useLocation()
 
   const virkningstidspunkt = ctx.state.behandlingReducer.virkningstidspunkt
-  const vilkaar = ctx.state.behandlingReducer.vilkårsprøving.vilkaar
-  const vilkaarResultat = ctx.state.behandlingReducer.vilkårsprøving.resultat
+  const vilkaarsproving = ctx.state.behandlingReducer.vilkårsprøving
+  const vilkaarResultat = ctx.state.behandlingReducer.vilkårsprøving?.resultat
 
   useEffect(() => {
     const hash = location.hash.slice(1)
     document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' })
   }, [location.hash])
 
-  if (vilkaar.length === 0) {
+  if (vilkaarsproving == null || vilkaarsproving?.vilkaar?.length === 0) {
     return <div>Mangler vilkår</div>
   }
+
+  const vilkaar = vilkaarsproving.vilkaar
 
   return (
     <Content>

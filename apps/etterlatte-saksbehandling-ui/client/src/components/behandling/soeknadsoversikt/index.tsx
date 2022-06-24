@@ -37,7 +37,7 @@ export const Soeknadsoversikt = () => {
       <Familieforhold behandling={behandling} />
       {behandlingStatus === IBehandlingStatus.under_behandling ? (
         <BehandlingHandlingKnapper>
-        <Start soeknadGyldigFremsatt={behandling.gyldighetsprøving.resultat === VurderingsResultat.OPPFYLT} />
+          <Start soeknadGyldigFremsatt={behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT} />
         </BehandlingHandlingKnapper>
       ) : (
         <NesteOgTilbake />

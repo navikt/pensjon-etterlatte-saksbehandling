@@ -31,7 +31,7 @@ export const Beslutning: React.FC<Props> = ({ beslutning, setBeslutning }) => {
       </RadioGroupWrapper>
 
       {beslutning === IBeslutning.godkjenn && <Godkjenn behandlingId={behandlingId} />}
-      {beslutning === IBeslutning.underkjenn && <Underkjenn />}
+      {beslutning === IBeslutning.underkjenn && <Underkjenn behandlingId={behandlingId} />}
     </>
   )
 }

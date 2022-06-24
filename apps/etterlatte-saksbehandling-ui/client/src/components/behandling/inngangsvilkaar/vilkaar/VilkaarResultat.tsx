@@ -1,11 +1,10 @@
-import { IBehandlingStatus, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import React from 'react'
 import { VilkaarBorder } from '../styled'
 import styled from 'styled-components'
 import { format } from 'date-fns'
 import { BehandlingHandlingKnapper } from '../../handlinger/BehandlingHandlingKnapper'
 import { VilkaarsVurderingKnapper } from '../../handlinger/vilkaarsvurderingKnapper'
-import { NesteOgTilbake } from '../../handlinger/NesteOgTilbake'
 
 type Props = {
   id: any

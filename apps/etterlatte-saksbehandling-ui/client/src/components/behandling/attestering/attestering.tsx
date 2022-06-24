@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import styled from 'styled-components'
 import { SynchronizeIcon } from '../../../shared/icons/synchronizeIcon'
-import { IBehandlingStatus } from '../../../store/reducers/BehandlingReducer'
-import { IRolle } from '../../../store/reducers/SaksbehandlerReducer'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { Behandlingsinfo } from '../SideMeny/behandlingsinfo'
 import { IBehandlingInfo } from '../SideMeny/types'

@@ -37,7 +37,8 @@ export const Beregne = () => {
           <span className="text">Vis vedtaksbrev</span>
         </VedtaksbrevWrapper>
       </ContentHeader>
-      {behandlingStatus === IBehandlingStatus.under_behandling ? (
+      {behandlingStatus === IBehandlingStatus.UNDER_BEHANDLING ||
+      behandlingStatus === IBehandlingStatus.GYLDIG_SOEKNAD ? (
         <BehandlingHandlingKnapper>
           <BeregningModal />
         </BehandlingHandlingKnapper>

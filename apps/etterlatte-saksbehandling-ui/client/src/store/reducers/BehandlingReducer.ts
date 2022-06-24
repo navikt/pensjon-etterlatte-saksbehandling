@@ -249,37 +249,12 @@ export enum PersonRolle {
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: '',
   sak: 0,
-  status: IBehandlingStatus.under_behandling, //test
+  status: IBehandlingStatus.UNDER_BEHANDLING, //test
   saksbehandlerId: '',
   attestant: '',
-  vilkårsprøving: { resultat: undefined, vilkaar: [], vurdertDato: '' },
-  gyldighetsprøving: { resultat: undefined, vurderinger: [], vurdertDato: '' },
-  kommerSoekerTilgode: {
-    kommerSoekerTilgodeVurdering: { resultat: undefined, vilkaar: [], vurdertDato: '' },
-    familieforhold: {
-      avdoed: {
-        navn: '',
-        fnr: '',
-        rolle: PersonRolle.AVDOED,
-        bostedadresser: [],
-        doedsdato: '',
-      },
-      soeker: {
-        navn: '',
-        fnr: '',
-        rolle: PersonRolle.AVDOED,
-        bostedadresser: [],
-        soeknadAdresse: { adresseIUtlandet: '' },
-        foedselsdato: '',
-      },
-      gjenlevendeForelder: {
-        navn: '',
-        fnr: '',
-        rolle: PersonRolle.AVDOED,
-        bostedadresser: [],
-      },
-    },
-  },
+  vilkårsprøving: undefined,
+  gyldighetsprøving: undefined,
+  kommerSoekerTilgode: undefined,
   beregning: undefined,
   fastsatt: false,
   soeknadMottattDato: '',

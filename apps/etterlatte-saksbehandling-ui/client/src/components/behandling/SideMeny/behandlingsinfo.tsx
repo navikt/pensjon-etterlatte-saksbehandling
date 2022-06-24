@@ -8,10 +8,10 @@ import { IBehandlingInfo } from './types'
 export const Behandlingsinfo = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const hentStatus = () => {
     switch (behandlingsInfo.status) {
-      case IBehandlingStatus.under_behandling:
+      case IBehandlingStatus.UNDER_BEHANDLING:
         return 'Under behandling'
 
-      case IBehandlingStatus.attestering:
+      case IBehandlingStatus.FATTET_VEDTAK:
         return 'To-trinnskontroll'
     }
   }
@@ -20,8 +20,10 @@ export const Behandlingsinfo = ({ behandlingsInfo }: { behandlingsInfo: IBehandl
     <>
       {behandlingsInfo.status === IBehandlingStatus.innvilget && <Innvilget behandlingsInfo={behandlingsInfo} />}
       {behandlingsInfo.status === IBehandlingStatus.underkjent && <Underkjent behandlingsInfo={behandlingsInfo} />}
-      {(behandlingsInfo.status === IBehandlingStatus.under_behandling ||
-        behandlingsInfo.status === IBehandlingStatus.attestering) && (
+
+      {(behandlingsInfo.status === IBehandlingStatus.GYLDIG_SOEKNAD ||
+        behandlingsInfo.status === IBehandlingStatus.UNDER_BEHANDLING ||
+        behandlingsInfo.status === IBehandlingStatus.FATTET_VEDTAK) && (
         <BehandlingsinfoContainer>
           <Overskrift>Førstegangsbehanling</Overskrift>
           <UnderOverskrift>{hentStatus()}</UnderOverskrift>

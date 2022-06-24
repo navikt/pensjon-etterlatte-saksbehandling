@@ -525,8 +525,40 @@
       }
     }
   },
-  "beregning": null,
-  "fastsatt": false,
-  "soeknadMottattDato": "2022-02-14T14:37:24.573613",
-  "virkningstidspunkt": "2022-07-01"
+  "beregning": {
+    "id": "ad2bed67-153a-418a-8428-974b7fa2ce4c",
+    "type": "GP",
+    "endringskode": "NY",
+    "resultat": "BEREGNET",
+    "beregningsperioder": [
+      {
+        "delytelsesId": "BP",
+        "type": "GP",
+        "datoFOM": "2022-03",
+        "datoTOM": "2022-04",
+        "grunnbelopMnd": 8867,
+        "grunnbelop": 101352
+
+      },
+      {
+        "delytelsesId": "BP",
+        "type": "GP",
+        "datoFOM": "2022-05",
+        "datoTOM": null,
+        "grunnbelopMnd": 9290,
+        "grunnbelop": 111480
+      }
+    ],
+    "beregnetDato": "2022-06-21T12:35:17.19221918",
+    "grunnlagVerson": 0
+  },
+  "avkortning": null,
+  "saksbehandlerId": "Z994641",
+  "fastsatt": true,
+  "datoFattet": "2022-06-24T08:04:51.224782Z",
+  "datoattestert": null,
+  "attestant": null,
+  "soeknadMottattDato": "2022-04-14T14:37:24.573613",
+  "virkningstidspunkt": "2022-03-01",
+  "status": "FATTET_VEDTAK"
 }

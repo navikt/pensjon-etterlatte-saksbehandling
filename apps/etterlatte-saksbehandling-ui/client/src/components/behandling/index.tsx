@@ -78,7 +78,7 @@ export const Behandling = () => {
             {behandlingsInfo && (
               <>
                 {behandlingsInfo.rolle === IRolle.attestant &&
-                behandlingsInfo.status === IBehandlingStatus.attestering ? (
+                behandlingsInfo.status === IBehandlingStatus.FATTET_VEDTAK ? (
                   <Attestering behandlingsInfo={behandlingsInfo} />
                 ) : (
                   <Behandlingsinfo behandlingsInfo={behandlingsInfo} />

@@ -674,7 +674,13 @@
     }
   },
   "beregning": null,
+  "avkortning": null,
+  "saksbehandlerId": null,
   "fastsatt": false,
-  "soeknadMottattDato": "2022-02-14T14:37:24.573613",
-  "virkningstidspunkt": "2022-07-01"
+  "datoFattet": null,
+  "datoattestert": null,
+  "attestant": null,
+  "soeknadMottattDato": "2022-04-14T14:37:24.573613",
+  "virkningstidspunkt": "2022-03-01",
+  "status": "attestering"
 }

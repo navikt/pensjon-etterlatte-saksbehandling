@@ -1,15 +1,7 @@
 {
   "id": "9",
   "sak": 3,
-  "status": "attestering",
-  "saksbehandler": {
-    "ident": "",
-    "navn": "Truls Veileder"
-  },
-  "attestant": {
-    "ident": "",
-    "navn": "Linn Normann"
-  },
+
   "gyldighetsprøving": {
     "resultat": "OPPFYLT",
     "vurderinger": [
@@ -698,7 +690,13 @@
     "beregnetDato": "2022-06-21T12:35:17.19221918",
     "grunnlagVerson": 0
   },
+  "avkortning": null,
+  "saksbehandlerId": null,
   "fastsatt": false,
+  "datoFattet": null,
+  "datoattestert": null,
+  "attestant": null,
   "soeknadMottattDato": "2022-04-14T14:37:24.573613",
-  "virkningstidspunkt": "2022-03-01"
+  "virkningstidspunkt": "2022-03-01",
+  "status": "UNDER_BEHANDLING"
 }

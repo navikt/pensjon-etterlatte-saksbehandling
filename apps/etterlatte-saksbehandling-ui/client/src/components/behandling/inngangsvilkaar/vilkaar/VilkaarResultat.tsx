@@ -26,6 +26,9 @@ export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato, behandlin
     tekst = 'Trenger avklaring'
   }
 
+  const behandles =
+    behandlingStatus === IBehandlingStatus.UNDER_BEHANDLING || behandlingStatus === IBehandlingStatus.GYLDIG_SOEKNAD
+
   return (
     <>
       <VilkaarBorder id={id}>
@@ -33,16 +36,13 @@ export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato, behandlin
           Vilkårsresultat: &nbsp; <strong> {tekst}</strong>
         </TekstWrapper>
       </VilkaarBorder>
-      {behandlingStatus === IBehandlingStatus.under_behandling ? (
+      {behandles ? (
         <BehandlingHandlingKnapper>
           <VilkaarsVurderingKnapper vilkaarResultat={resultat} />
         </BehandlingHandlingKnapper>
       ) : (
         <NesteOgTilbake />
       )}
-      <BehandlingHandlingKnapper>
-        <VilkaarsVurderingKnapper vilkaarResultat={resultat} />
-      </BehandlingHandlingKnapper>
     </>
   )
 }

@@ -71,7 +71,8 @@ class BehandlingService(
                 datoattestert = vedtak.await().datoattestert,
                 attestant = vedtak.await().attestant,
                 soeknadMottattDato = behandling.soeknadMottattDato,
-                virkningstidspunkt = vedtak.await().virkningsDato
+                virkningstidspunkt = vedtak.await().virkningsDato,
+                status = behandling.status
             )
         }
     }

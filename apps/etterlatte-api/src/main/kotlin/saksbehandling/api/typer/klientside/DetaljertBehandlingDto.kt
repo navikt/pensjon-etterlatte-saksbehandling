@@ -1,6 +1,7 @@
 package no.nav.etterlatte.saksbehandling.api.typer.klientside
 
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
@@ -24,5 +25,6 @@ data class DetaljertBehandlingDto(
     val datoattestert: Instant?,
     val attestant: String?,
     val soeknadMottattDato: LocalDateTime?,
-    val virkningstidspunkt: LocalDate?
+    val virkningstidspunkt: LocalDate?,
+    val status: BehandlingStatus?,
 )

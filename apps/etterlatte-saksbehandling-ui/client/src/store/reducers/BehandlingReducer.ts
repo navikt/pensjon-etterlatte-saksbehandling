@@ -3,24 +3,17 @@ import { IAction } from '../AppContext'
 export interface IDetaljertBehandling {
   id: string
   sak: number
-  status: IBehandlingStatus
-  saksbehandler: //for test
-  | {
-        ident: string
-        navn: string
-      }
-    | undefined
-  attestant: //for test
-  | {
-        ident: string
-        navn: string
-      }
-    | undefined
-  vilkårsprøving: IVilkaarResultat
-  gyldighetsprøving: IGyldighetResultat
-  kommerSoekerTilgode: IKommerSoekerTilgode
+  status: IBehandlingStatus //todo legg med fra behandling og evt map om?
+  gyldighetsprøving?: IGyldighetResultat
+  kommerSoekerTilgode?: IKommerSoekerTilgode
+  vilkårsprøving?: IVilkaarResultat
   beregning?: IBeregning
+  avkortning?: any //todo legg med type når denne er klar
+  saksbehandlerId?: string
   fastsatt: boolean
+  datoFattet?: string //kommer som Instant fra backend
+  datoattestert?: string //kommer som Instant fra backend
+  attestant?: string
   soeknadMottattDato: string
   virkningstidspunkt: string
 }
@@ -248,16 +241,8 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: '',
   sak: 0,
   status: IBehandlingStatus.under_behandling, //test
-  saksbehandler: {
-    // for test
-    ident: '',
-    navn: 'Truls Veileder',
-  },
-  attestant: {
-    // for test
-    ident: '',
-    navn: 'Linn Normann',
-  },
+  saksbehandlerId: '',
+  attestant: '',
   vilkårsprøving: { resultat: undefined, vilkaar: [], vurdertDato: '' },
   gyldighetsprøving: { resultat: undefined, vurderinger: [], vurdertDato: '' },
   kommerSoekerTilgode: {

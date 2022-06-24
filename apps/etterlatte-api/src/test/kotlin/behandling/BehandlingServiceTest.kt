@@ -112,7 +112,10 @@ internal class BehandlingServiceTest {
             VilkaarResultat(VurderingsResultat.OPPFYLT, null, LocalDateTime.now()),
             null,
             null,
-            null
+            null,
+            null,
+            null,
+            null,
         )
         coEvery { behandlingKlient.hentBehandling(behandlingid.toString(), accessToken) } returns detaljertBehandling
         coEvery { vedtakKlient.hentVedtak(4, behandlingid.toString(), accessToken) } returns vedtak

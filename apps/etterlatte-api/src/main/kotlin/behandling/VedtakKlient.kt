@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.time.LocalDate
 import java.util.*
 
@@ -108,7 +109,10 @@ data class Vedtak(
     val vilkaarsResultat: VilkaarResultat?,
     val kommerSoekerTilgodeResultat: KommerSoekerTilgode?,
     val virkningsDato: LocalDate?,
-    val vedtakFattet: Boolean?
-)
+    val vedtakFattet: Boolean?,
+    val datoFattet: Instant?,
+    val datoattestert: Instant?,
+    val attestant: String?,
+    )
 
 data class FattVedtakBody(val sakId: String, val behandlingId: String)

@@ -12,6 +12,7 @@ import no.nav.etterlatte.saksbehandling.api.typer.klientside.DetaljertBehandling
 import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
+import java.time.Instant
 
 
 data class PersonSakerResult(val person: Person, val saker: Saker)
@@ -60,9 +61,14 @@ class BehandlingService(
                 id = behandling.id,
                 sak = behandling.sak,
                 gyldighetsprøving = behandling.gyldighetsproeving,
-                vilkårsprøving = vedtak.await().vilkaarsResultat,
                 kommerSoekerTilgode = vedtak.await().kommerSoekerTilgodeResultat,
+                vilkårsprøving = vedtak.await().vilkaarsResultat,
                 beregning = vedtak.await().beregningsResultat,
+                avkortning = vedtak.await().avkortingsResultat,
+                fastsatt = vedtak.await().vedtakFattet,
+                datoFattet = vedtak.await().datoFattet,
+                datoattestert = vedtak.await().datoattestert,
+                attestant = vedtak.await().attestant,
                 soeknadMottattDato = behandling.soeknadMottattDato,
                 virkningstidspunkt = vedtak.await().virkningsDato
             )

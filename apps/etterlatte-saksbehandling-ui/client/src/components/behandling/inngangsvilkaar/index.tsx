@@ -53,7 +53,12 @@ export const Inngangsvilkaar = () => {
         virkningsdato={virkningstidspunkt}
         mottattdato={ctx.state.behandlingReducer.soeknadMottattDato}
       />
-      <VilkaarResultat id="vilkaarResultat" resultat={vilkaarResultat} dato={virkningstidspunkt} />
+      <VilkaarResultat
+        id="vilkaarResultat"
+        resultat={vilkaarResultat}
+        dato={virkningstidspunkt}
+        behandlingStatus={ctx.state.behandlingReducer.status}
+      />
     </Content>
   )
 }

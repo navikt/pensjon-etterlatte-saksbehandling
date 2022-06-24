@@ -65,6 +65,7 @@ class BehandlingService(
                 vilkårsprøving = vedtak.await().vilkaarsResultat,
                 beregning = vedtak.await().beregningsResultat,
                 avkortning = vedtak.await().avkortingsResultat,
+                saksbehandlerId = vedtak.await().saksbehandlerId,
                 fastsatt = vedtak.await().vedtakFattet,
                 datoFattet = vedtak.await().datoFattet,
                 datoattestert = vedtak.await().datoattestert,

@@ -18,6 +18,7 @@ data class DetaljertBehandlingDto(
     val vilkårsprøving: VilkaarResultat?,
     val beregning: BeregningsResultat?,
     val avkortning: AvkortingsResultat?,
+    val saksbehandlerId: String?,
     val fastsatt: Boolean?,
     val datoFattet: Instant?,
     val datoattestert: Instant?,

@@ -63,7 +63,7 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
 
 
     override suspend fun fattVedtak(sakId: Int, behandlingId: String, accessToken: String) {
-        logger.info("Sender til attestering")
+        logger.info("Fatter vedtak")
         try {
             downstreamResourceClient.post(
                 Resource(clientId, "$resourceUrl/api/fattVedtak"),
@@ -75,13 +75,13 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
         } catch (e: Exception) {
-            logger.error("Sending til attestering feilet", e)
+            logger.error("Fatting av vedtak feilet", e)
             throw e
         }
     }
 
     override suspend fun attesterVedtak(sakId: Int, behandlingId: String, accessToken: String) {
-        logger.info("Sender til attestering")
+        logger.info("Attesterer vedtak")
         try {
             downstreamResourceClient.post(
                 Resource(clientId, "$resourceUrl/api/attesterVedtak"),
@@ -93,7 +93,7 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
         } catch (e: Exception) {
-            logger.error("Sending til attestering feilet", e)
+            logger.error("Attestering av vedtak feilet", e)
             throw e
         }
     }

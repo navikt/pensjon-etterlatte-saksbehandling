@@ -1,6 +1,6 @@
 //import { Textarea } from '@navikt/ds-react'
 //import { useState } from 'react'
-import { IverksettVedtak } from './handinger/iverksettVedtak'
+import { AttesterVedtak } from './handinger/attesterVedtak'
 import { BeslutningWrapper /*Text*/ } from './styled'
 
 export type PropsIverksett = {
@@ -11,7 +11,7 @@ export const Godkjenn: React.FC<PropsIverksett> = ({ behandlingId }) => {
 
   return (
     <BeslutningWrapper>
-      {/** 
+      {/**
       <div className="textareaWrapper">
         <Text>Kommentar fra attestant</Text>
            <Textarea
@@ -23,10 +23,10 @@ export const Godkjenn: React.FC<PropsIverksett> = ({ behandlingId }) => {
           minRows={2}
           size="small"
         />
-       
+
       </div>
        */}
-      <IverksettVedtak behandlingId={behandlingId} />
+      <AttesterVedtak behandlingId={behandlingId} />
     </BeslutningWrapper>
   )
 }

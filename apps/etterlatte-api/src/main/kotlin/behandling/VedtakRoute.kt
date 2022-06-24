@@ -10,25 +10,37 @@ import no.nav.etterlatte.getAccessToken
 
 fun Route.vedtakRoute(service: VedtakService) {
 
-    route("attestering") {
+    route("fattvedtak") {
         post("{behandlingId}"){
             val behandlingId = call.parameters["behandlingId"]
             if (behandlingId == null) {
                 call.response.status(HttpStatusCode(400, "Bad request"))
                 call.respond("Behandlings-id mangler")
             } else {
-                call.respond(service.sendTilAttestering(behandlingId, getAccessToken(call)))
+                call.respond(service.fattVedtak(behandlingId, getAccessToken(call)))
             }
         }
     }
-    route("iverksetting") {
+    route("attestervedtak") {
         post("{behandlingId}"){
             val behandlingId = call.parameters["behandlingId"]
             if (behandlingId == null) {
                 call.response.status(HttpStatusCode(400, "Bad request"))
                 call.respond("Behandlings-id mangler")
             } else {
-                call.respond(service.sendTilIverksetting(behandlingId, getAccessToken(call)))
+                call.respond(service.attesterVedtak(behandlingId, getAccessToken(call)))
+            }
+        }
+    }
+
+    route("underkjennvedtak") {
+        post("{behandlingId}"){
+            val behandlingId = call.parameters["behandlingId"]
+            if (behandlingId == null) {
+                call.response.status(HttpStatusCode(400, "Bad request"))
+                call.respond("Behandlings-id mangler")
+            } else {
+                call.respond(service.underkjennVedtak(behandlingId, getAccessToken(call)))
             }
         }
     }

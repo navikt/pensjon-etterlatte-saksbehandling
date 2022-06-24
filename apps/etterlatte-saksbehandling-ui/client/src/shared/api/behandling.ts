@@ -31,9 +31,9 @@ export const avbrytBehandling = async (behandlingsid: string): Promise<IApiRespo
   }
 }
 
-export const sendTilAttestering = async (behandlingsId: string): Promise<IApiResponse<any>> => {
+export const fattVedtak = async (behandlingsId: string): Promise<IApiResponse<any>> => {
   try {
-    const result: Response = await fetch(`${path}/api/attestering/${behandlingsId}`, {
+    const result: Response = await fetch(`${path}/api/fattvedtak/${behandlingsId}`, {
       method: 'post',
     })
     return {
@@ -46,9 +46,24 @@ export const sendTilAttestering = async (behandlingsId: string): Promise<IApiRes
   }
 }
 
-export const iverksettVedtak = async (behandlingId: string): Promise<IApiResponse<any>> => {
+export const attesterVedtak = async (behandlingId: string): Promise<IApiResponse<any>> => {
   try {
-    const result: Response = await fetch(`${path}/api/iverksetting/${behandlingId}`, {
+    const result: Response = await fetch(`${path}/api/attestervedtak/${behandlingId}`, {
+      method: 'post',
+    })
+    return {
+      status: result.status,
+      data: await result.json(),
+    }
+  } catch (e) {
+    console.log(e)
+    return { status: 500 }
+  }
+}
+
+export const underkjennVedtak = async (behandlingId: string): Promise<IApiResponse<any>> => {
+  try {
+    const result: Response = await fetch(`${path}/api/underkjennvedtak/${behandlingId}`, {
       method: 'post',
     })
     return {

@@ -42,7 +42,7 @@ export const Behandlingsinfo = ({ behandlingsInfo }: { behandlingsInfo: IBehandl
             <div>
               <Info>Vedtaksdato</Info>
               <Tekst>
-                {behandlingsInfo.vedtaksdato ? formatterStringDato(behandlingsInfo.vedtaksdato) : 'Ikke satt'}
+                {behandlingsInfo.datoFattet ? formatterStringDato(behandlingsInfo.datoFattet) : 'Ikke satt'}
               </Tekst>
             </div>
           </div>

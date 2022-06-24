@@ -1,6 +1,6 @@
 import { Select, Textarea } from '@navikt/ds-react'
 import { useState } from 'react'
-import { SendIRetur } from './handinger/sendIRetur'
+import { UnderkjennVedtak } from './handinger/underkjennVedtak'
 import { BeslutningWrapper, Text } from './styled'
 import { IRetyrType } from './types'
 
@@ -40,7 +40,7 @@ export const Underkjenn = () => {
           size="small"
         />
       </div>
-      <SendIRetur />
+      <UnderkjennVedtak />
     </BeslutningWrapper>
   )
 }

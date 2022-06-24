@@ -49,7 +49,7 @@ export const Behandling = () => {
         saksbehandler: behandling.saksbehandlerId,
         attestant: behandling.attestant,
         virkningsdato: behandling.virkningstidspunkt,
-        //vedtaksdato: '',
+        datoFattet: behandling.datoFattet,
         rolle: innlogget.rolle,
       })
   }, [ctx.state])

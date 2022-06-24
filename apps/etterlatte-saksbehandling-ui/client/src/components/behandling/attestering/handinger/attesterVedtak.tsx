@@ -1,15 +1,15 @@
 import { Button } from '@navikt/ds-react'
 import { useState } from 'react'
-import { iverksettVedtak } from '../../../../shared/api/behandling'
+import { attesterVedtak } from '../../../../shared/api/behandling'
 import { ButtonWrapper } from '../styled'
 import { GeneriskModal } from '../modal'
 
-export const IverksettVedtak = ({ behandlingId }: { behandlingId?: string }) => {
+export const AttesterVedtak = ({ behandlingId }: { behandlingId?: string }) => {
   const [modalisOpen, setModalisOpen] = useState(false)
 
-  const iverksett = () => {
+  const attester = () => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
-    const result = iverksettVedtak(behandlingId).then((response) => {
+    const result = attesterVedtak(behandlingId).then((response) => {
       console.log(response)
       if (response.status === 200) {
         window.location.reload()
@@ -30,7 +30,7 @@ export const IverksettVedtak = ({ behandlingId }: { behandlingId?: string }) => 
           tekst="Er du sikker på at vil iverksette vedtaket?"
           tekstKnappJa="Ja, iverksett vedtak"
           tekstKnappNei=" Nei, gå tilbake"
-          funksjon={iverksett}
+          funksjon={attester}
           setModalisOpen={setModalisOpen}
         />
       )}

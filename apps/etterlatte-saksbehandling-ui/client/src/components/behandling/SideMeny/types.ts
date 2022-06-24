@@ -6,6 +6,6 @@ export interface IBehandlingInfo {
   saksbehandler?: string
   attestant?: string
   virkningsdato?: string
-  vedtaksdato?: string
+  datoFattet?: string
   rolle: string
 }

@@ -22,6 +22,7 @@ interface EtterlatteVedtak {
     suspend fun hentVedtak(sakId: Int, behandlingId: String, accessToken: String): Vedtak
     suspend fun fattVedtak(sakId: Int, behandlingId: String, accessToken: String)
     suspend fun attesterVedtak(sakId: Int, behandlingId: String, accessToken: String)
+    suspend fun underkjennVedtak(sakId: Int, behandlingId: String, accessToken: String)
 }
 
 class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
@@ -94,6 +95,24 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
                 ).response
         } catch (e: Exception) {
             logger.error("Attestering av vedtak feilet", e)
+            throw e
+        }
+    }
+
+    override suspend fun underkjennVedtak(sakId: Int, behandlingId: String, accessToken: String) {
+        logger.info("Underkjenner vedtak")
+        try {
+            downstreamResourceClient.post(
+                Resource(clientId, "$resourceUrl/api/underkjennVedtak"),
+                accessToken,
+                FattVedtakBody(sakId.toString(), behandlingId)
+            )
+                .mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
+        } catch (e: Exception) {
+            logger.error("Underkjenning av vedtak feilet", e)
             throw e
         }
     }

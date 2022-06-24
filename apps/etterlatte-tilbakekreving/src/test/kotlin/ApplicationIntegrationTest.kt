@@ -40,6 +40,8 @@ class ApplicationIntegrationTest {
         postgreSQLContainer.start()
         ibmMQContainer.start()
 
+        println(System.getenv().entries)
+
         val applicationProperties = ApplicationProperties(
             dbName = postgreSQLContainer.databaseName,
             dbHost = postgreSQLContainer.host,
@@ -55,13 +57,21 @@ class ApplicationIntegrationTest {
             serviceUserPassword = "passw0rd",
         )
 
-        ApplicationContext(applicationProperties, rapidsConnection).also {
+        // TODO: får feil her om at http://etterlatte.no ikke er en gyldig bootstrap server - må fikses eller
+        // finne en måte å mocke ut dette på.
+        val env = mapOf(
+            "KAFKA_RAPID_TOPIC" to "topic",
+            "KAFKA_BOOTSTRAP_SERVERS" to "http://etterlatte.no",
+            "KAFKA_CONSUMER_GROUP_ID" to "id"
+        )
+
+        ApplicationContext(applicationProperties).also {
             connectionFactory = it.jmsConnectionFactory
             dataSource = it.dataSource
             it.tilbakekrevingService = spyk(it.tilbakekrevingService)
                 .also { tks -> tilbakekrevingService = tks }
 
-            rapidApplication(it).start()
+            rapidApplication(it, env).start()
         }
     }
 

@@ -1,16 +1,14 @@
 package no.nav.etterlatte.tilbakekreving.config
 
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
-import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
-import no.nav.helse.rapids_rivers.RapidApplication
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.time.Clock
 
 class ApplicationContext(
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
-    val rapidsConnection: RapidsConnection = RapidApplication.create(System.getenv().withConsumerGroupId())
 ) {
 
     var clock = Clock.systemUTC()
@@ -46,19 +44,15 @@ class ApplicationContext(
         kravgrunnlagMapper = kravgrunnlagMapper
     )
 
-    val kravgrunnlagConsumer: KravgrunnlagConsumer by lazy {
+    fun kravgrunnlagConsumer(rapidsConnection: RapidsConnection) =
         KravgrunnlagConsumer(
             tilbakekrevingService = tilbakekrevingService,
             jmsConnectionFactory = jmsConnectionFactory,
             queue = properties.mqKravgrunnlagQueue
         )
-    }
 }
+
 
 private fun jdbcUrl(host: String, port: Int, databaseName: String) =
     "jdbc:postgresql://${host}:$port/$databaseName"
 
-private fun Map<String, String>.withConsumerGroupId() =
-    this.toMutableMap().apply {
-        put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
-    }

@@ -3,13 +3,24 @@ plugins {
     id("com.faire.gradle.analyze") version "1.0.9"
 }
 dependencies {
+    implementation(project(":libs:ktorclient-auth-clientcredentials"))
+
+    implementation(Ktor.ServerCore)
+    implementation(Ktor.ServerCio)
+    implementation(Ktor.ClientCioJvm)
     implementation(Ktor.OkHttp)
     implementation(Ktor.ClientCore)
     implementation(Ktor.ClientJackson)
+    implementation(Ktor.ClientAuth)
+    implementation(Ktor.Auth)
+    implementation(Ktor.Jackson)
     implementation(Jackson.DatatypeJsr310)
     implementation(Jackson.DatatypeJdk8)
     implementation(Jackson.ModuleKotlin)
     implementation(Jackson.Xml)
+
+    implementation(NavFelles.TokenClientCore)
+    implementation(NavFelles.TokenValidationKtor)
 
     implementation("org.jetbrains:annotations:13.0")
 

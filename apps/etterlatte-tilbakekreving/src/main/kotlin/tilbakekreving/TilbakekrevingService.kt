@@ -24,4 +24,13 @@ class TilbakekrevingService(
         )
         val lagretKravgrunnlag = tilbakekrevingDao.lagreMottattKravgrunnlag(mottattKravgrunnlag)
     }
+
+    fun hentTilbakekreving(kravgrunnlagId: Long): Tilbakekreving? = tilbakekrevingDao.hentTilbakekreving(
+        kravgrunnlagId
+    )
+
+    /*
+    TODO: Metode for å hente tilbakekreving enten basert på UUID eller UUID30, avhengig av hva vi ender opp med
+    fun hentTIlbakekreving(behandlingId: UUID)
+     */
 }

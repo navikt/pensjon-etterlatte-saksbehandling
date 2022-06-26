@@ -45,7 +45,7 @@ class TilbakekrevingDao(
                 ).let { tx.run(it.asUpdate) }
             }
         }
-            .let { hentTilbakekreving(mottattKravgrunnlag.kravgrunnlagId) as Tilbakekreving.MottattKravgrunnlag }
+            .let { hentTilbakekreving(mottattKravgrunnlag.kravgrunnlagId.value) as Tilbakekreving.MottattKravgrunnlag }
 
     fun lagreFattetVedtak(
         fattetVedtak: Tilbakekreving.FattetVedtak,
@@ -68,11 +68,11 @@ class TilbakekrevingDao(
                 ).let { tx.run(it.asUpdate) }
             }
         }
-            .let { hentTilbakekreving(fattetVedtak.kravgrunnlagId) as Tilbakekreving.FattetVedtak }
+            .let { hentTilbakekreving(fattetVedtak.kravgrunnlagId.value) as Tilbakekreving.FattetVedtak }
 
     // TODO lagre attestasjon
 
-    fun hentTilbakekreving(kravgrunnlagId: KravgrunnlagId): Tilbakekreving? =
+    fun hentTilbakekreving(kravgrunnlagId: Long): Tilbakekreving? =
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
@@ -80,7 +80,7 @@ class TilbakekrevingDao(
                     FROM tilbakekreving 
                     WHERE kravgrunnlag_id = :kravgrunnlag_id
                     """,
-                paramMap = mapOf("kravgrunnlag_id" to kravgrunnlagId.value.param<Long>())
+                paramMap = mapOf("kravgrunnlag_id" to kravgrunnlagId.param<Long>())
             )
                 .let {
                     session.run(it.map { row ->

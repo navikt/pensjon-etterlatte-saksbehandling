@@ -40,6 +40,7 @@ dependencies {
     implementation("com.github.seratch:kotliquery:1.7.0")
 
     testImplementation(Ktor.ClientMock)
+    testImplementation(Ktor.ServerTests)
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)
 

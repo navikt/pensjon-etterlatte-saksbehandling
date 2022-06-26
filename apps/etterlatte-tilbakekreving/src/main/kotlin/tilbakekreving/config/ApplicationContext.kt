@@ -1,10 +1,14 @@
 package no.nav.etterlatte.tilbakekreving.config
 
+import com.typesafe.config.ConfigFactory
+import io.ktor.auth.Authentication
+import io.ktor.config.HoconApplicationConfig
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagMapper
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.security.token.support.ktor.tokenValidationSupport
 import java.time.Clock
 
 class ApplicationContext(
@@ -43,6 +47,9 @@ class ApplicationContext(
         clock = clock,
         kravgrunnlagMapper = kravgrunnlagMapper
     )
+
+    var tokenValidering: Authentication.Configuration.() -> Unit =
+        { tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load())) }
 
     fun kravgrunnlagConsumer(rapidsConnection: RapidsConnection) =
         KravgrunnlagConsumer(

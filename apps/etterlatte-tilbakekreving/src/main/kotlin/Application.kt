@@ -1,25 +1,28 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.typesafe.config.ConfigFactory
 import io.ktor.application.Application
+import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.application.log
 import io.ktor.auth.Authentication
 import io.ktor.auth.authenticate
 import io.ktor.config.HoconApplicationConfig
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
-import io.ktor.jackson.jackson
+import io.ktor.features.StatusPages
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.jackson.JacksonConverter
 import io.ktor.request.header
 import io.ktor.request.httpMethod
 import io.ktor.request.path
+import io.ktor.response.respond
 import io.ktor.routing.IgnoreTrailingSlash
-import io.ktor.routing.Route
 import io.ktor.routing.routing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
 import no.nav.etterlatte.tilbakekreving.tilbakekreving
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -30,49 +33,56 @@ import java.util.*
 
 fun main() {
     ApplicationContext().also {
-        rapidApplication(it, System.getenv()).start()
+        rapidApplication(it).start()
     }
 }
 
-fun rapidApplication(applicationContext: ApplicationContext, env: Map<String, String>): RapidsConnection =
-    RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
-        .withKtorModule { restModule { tilbakekreving(applicationContext.tilbakekrevingService) } }
-        .build().also { rapidsConnection ->
-            rapidsConnection.register(object : RapidsConnection.StatusListener {
-                override fun onStartup(rapidsConnection: RapidsConnection) {
-                    applicationContext.dataSourceBuilder.migrate()
-                }
-
-                override fun onShutdown(rapidsConnection: RapidsConnection) {
-                    applicationContext.jmsConnectionFactory.stop()
-                }
-            })
+fun rapidApplication(
+    applicationContext: ApplicationContext,
+    rapidsConnection: RapidsConnection =
+        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(System.getenv().withConsumerGroupId()))
+            .withKtorModule { restModule(applicationContext) }
+            .build()
+): RapidsConnection {
+    rapidsConnection.register(object : RapidsConnection.StatusListener {
+        override fun onStartup(rapidsConnection: RapidsConnection) {
+            applicationContext.dataSourceBuilder.migrate()
+            applicationContext.kravgrunnlagConsumer(rapidsConnection).start()
         }
 
-fun Application.restModule(routes: Route.() -> Unit) {
+        override fun onShutdown(rapidsConnection: RapidsConnection) {
+            applicationContext.jmsConnectionFactory.stop()
+        }
+    })
+    return rapidsConnection
+}
+
+
+fun Application.restModule(applicationContext: ApplicationContext) {
     install(Authentication) {
-        tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
+        applicationContext.tokenValidering(this)
     }
     install(ContentNegotiation) {
-        jackson {
-            enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL)
-            disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            registerModule(JavaTimeModule())
-        }
+        register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
     install(IgnoreTrailingSlash)
     install(CallLogging) {
         level = Level.INFO
+        // TODO er denne aktuell for denne appen når r&r håndterer isready/isalive?
         filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive")) }
-        filter { call -> !call.request.path().startsWith("/internal") }
         format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
         mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
+    }
+    install(StatusPages) {
+        exception<Throwable> { cause ->
+            log.error("En feil oppstod: ${cause.message}", cause)
+            call.respond(HttpStatusCode.InternalServerError, "En feil oppstod: ${cause.message}")
+        }
     }
 
     routing {
         authenticate {
-            routes()
+            tilbakekreving(applicationContext.tilbakekrevingService)
         }
     }
 }

@@ -48,6 +48,7 @@ class ApplicationContext(
 
     val kravgrunnlagConsumer: KravgrunnlagConsumer by lazy {
         KravgrunnlagConsumer(
+            rapidsConnection = rapidsConnection,
             tilbakekrevingService = tilbakekrevingService,
             jmsConnectionFactory = jmsConnectionFactory,
             queue = properties.mqKravgrunnlagQueue

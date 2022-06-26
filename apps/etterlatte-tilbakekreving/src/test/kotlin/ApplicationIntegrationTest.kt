@@ -5,6 +5,7 @@ import io.mockk.verify
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.testsupport.TestContainers
 import no.nav.etterlatte.testsupport.TestRapid
 import no.nav.etterlatte.testsupport.readFile
@@ -12,6 +13,7 @@ import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
 import no.nav.etterlatte.tilbakekreving.config.ApplicationProperties
 import no.nav.etterlatte.tilbakekreving.config.JmsConnectionFactory
+import no.nav.etterlatte.tilbakekreving.kravgrunnlag.TilbakekrevingEvent
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -70,7 +72,15 @@ class ApplicationIntegrationTest {
         sendKravgrunnlagsmeldingFraOppdrag()
 
         verify(timeout = TIMEOUT, exactly = 1) {
-            tilbakekrevingService.lagreKravgrunnlag(any(), any())
+            tilbakekrevingService.opprettTilbakekrevingFraKravgrunnlag(any(), any())
+
+            rapidsConnection.publish(any(),
+                match {
+                    objectMapper.readValue(it, TilbakekrevingEvent::class.java).run {
+                        this.event == "TILBAKEKREVING:MOTTATT_KRAVGRUNNLAG"
+                    }
+                }
+            )
         }
     }
 

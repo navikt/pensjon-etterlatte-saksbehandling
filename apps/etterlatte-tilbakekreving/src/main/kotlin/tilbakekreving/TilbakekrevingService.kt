@@ -13,7 +13,8 @@ class TilbakekrevingService(
     val kravgrunnlagMapper: KravgrunnlagMapper,
     val clock: Clock
 ) {
-    fun lagreKravgrunnlag(detaljertKravgrunnlag: DetaljertKravgrunnlagDto, kravgrunnlagXml: String) {
+
+    fun opprettTilbakekrevingFraKravgrunnlag(detaljertKravgrunnlag: DetaljertKravgrunnlagDto, kravgrunnlagXml: String): Tilbakekreving.MottattKravgrunnlag {
         val kravgrunnlag = kravgrunnlagMapper.toKravgrunnlag(detaljertKravgrunnlag, kravgrunnlagXml)
         val mottattKravgrunnlag = Tilbakekreving.MottattKravgrunnlag(
             sakId = kravgrunnlag.sakId,
@@ -22,6 +23,7 @@ class TilbakekrevingService(
             opprettet = Tidspunkt.now(clock),
             kravgrunnlag = kravgrunnlag
         )
-        val lagretKravgrunnlag = tilbakekrevingDao.lagreMottattKravgrunnlag(mottattKravgrunnlag)
+
+        return tilbakekrevingDao.lagreMottattKravgrunnlag(mottattKravgrunnlag)
     }
 }

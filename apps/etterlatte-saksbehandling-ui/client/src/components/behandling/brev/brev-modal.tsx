@@ -26,7 +26,7 @@ export default function BrevModal({
   const [fileURL, setFileURL] = useState<string>()
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
-  const isDone = ['FERDIGSTILT', 'SENDT'].includes(brev.status)
+  const isDone = ['FERDIGSTILT', 'JOURNALFOERT', 'DISTRIBUERT'].includes(brev.status)
 
   const open = () => {
     setIsOpen(true)

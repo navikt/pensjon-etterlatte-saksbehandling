@@ -1,13 +1,11 @@
 package no.nav.etterlatte
 
-import com.typesafe.config.ConfigFactory
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.application.log
 import io.ktor.auth.Authentication
 import io.ktor.auth.authenticate
-import io.ktor.config.HoconApplicationConfig
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.StatusPages
@@ -27,7 +25,6 @@ import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
 import no.nav.etterlatte.tilbakekreving.tilbakekreving
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.security.token.support.ktor.tokenValidationSupport
 import org.slf4j.event.Level
 import java.util.*
 
@@ -43,19 +40,20 @@ fun rapidApplication(
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(System.getenv().withConsumerGroupId()))
             .withKtorModule { restModule(applicationContext) }
             .build()
-): RapidsConnection {
-    rapidsConnection.register(object : RapidsConnection.StatusListener {
-        override fun onStartup(rapidsConnection: RapidsConnection) {
-            applicationContext.dataSourceBuilder.migrate()
-            applicationContext.kravgrunnlagConsumer(rapidsConnection).start()
-        }
+): RapidsConnection =
+    with(applicationContext) {
+        rapidsConnection.register(object : RapidsConnection.StatusListener {
+            override fun onStartup(rapidsConnection: RapidsConnection) {
+                dataSourceBuilder.migrate()
+                kravgrunnlagConsumer(rapidsConnection).start()
+            }
 
-        override fun onShutdown(rapidsConnection: RapidsConnection) {
-            applicationContext.jmsConnectionFactory.stop()
-        }
-    })
-    return rapidsConnection
-}
+            override fun onShutdown(rapidsConnection: RapidsConnection) {
+                jmsConnectionFactory.stop()
+            }
+        })
+        rapidsConnection
+    }
 
 
 fun Application.restModule(applicationContext: ApplicationContext) {
@@ -68,7 +66,6 @@ fun Application.restModule(applicationContext: ApplicationContext) {
     install(IgnoreTrailingSlash)
     install(CallLogging) {
         level = Level.INFO
-        // TODO er denne aktuell for denne appen når r&r håndterer isready/isalive?
         filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive")) }
         format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
         mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }

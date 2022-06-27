@@ -5,6 +5,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.testing.TestApplicationRequest
 import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.withTestApplication
 import io.mockk.every
@@ -45,6 +46,7 @@ internal class TilbakekrevingRoutesTest {
         withTestApplication({ restModule(applicationContext) }) {
             handleRequest(HttpMethod.Get, "/tilbakekreving/1") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                addAuthSaksbehandler()
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 // TODO skriv ferdig test
@@ -56,6 +58,11 @@ internal class TilbakekrevingRoutesTest {
         readFile("/kravgrunnlag.xml").let {
             KravgrunnlagJaxb.toDetaljertKravgrunnlagDto(it).let { KravgrunnlagMapper().toKravgrunnlag(it, "") }
         }
+}
 
+val saksbehandlerToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIGZvciBzYWtzYmVoYW5kbGVyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZWhhbmRsZXIwMSJ9.271mDij4YsO4Kk8w8AvX5BXxlEA8U-UAOtdG1Ix_kQY"
 
+fun TestApplicationRequest.addAuthSaksbehandler() {
+    addHeader(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
 }

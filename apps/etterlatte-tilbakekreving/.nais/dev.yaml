@@ -20,7 +20,7 @@ spec:
   secureLogs:
     enabled: true
   strategy:
-    type: Recreate # denne trenger ikke være recreate hvis ikke r&r app
+    type: Recreate
   gcp:
     sqlInstances:
       - type: POSTGRES_14

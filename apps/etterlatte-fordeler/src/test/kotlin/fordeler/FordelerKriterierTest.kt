@@ -2,6 +2,7 @@ package no.nav.etterlatte.fordeler
 
 import no.nav.etterlatte.*
 import no.nav.etterlatte.libs.common.person.*
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -193,6 +194,48 @@ internal class FordelerKriterierTest {
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_ER_IKKE_ALENEBARN))
+    }
+
+    @Test
+    fun `barn med soesken (av avdoede) som er over 14 aar er ikke en gyldig kandidat`() {
+        val barn = mockPerson(
+            foedselsaar = now().year - 10,
+            foedselsdato = now().minusYears(10)
+        )
+        val avdoed = mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                barn = listOf(Foedselsnummer.of(barn.foedselsnummer.value), Foedselsnummer.of(FNR_1)),
+                ansvarligeForeldre = null,
+                foreldre = null,
+            )
+        )
+        val gjenlevende = mockPerson()
+
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_HAR_FOR_GAMLE_SOESKEN))
+    }
+
+    @Test
+    fun `barn med soesken (av avdoede) som er under 14 aar skal ikke utelukkes som gyldig kandidat`() {
+        val barn = mockPerson(
+            foedselsaar = now().year - 10,
+            foedselsdato = now().minusYears(10)
+        )
+        val avdoed = mockPerson(
+            bostedsadresse = mockNorskAdresse(),
+            familieRelasjon = FamilieRelasjon(
+                barn = listOf(Foedselsnummer.of(barn.foedselsnummer.value), Foedselsnummer.of("12101376212")),
+                ansvarligeForeldre = null,
+                foreldre = null,
+            )
+        )
+        val gjenlevende = mockPerson()
+
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
+
+        assertFalse(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_HAR_FOR_GAMLE_SOESKEN))
     }
 
     @Test
@@ -409,5 +452,4 @@ internal class FordelerKriterierTest {
         val BARNEPENSJON_SOKNAD_HUKET_AV_UTLAND = readSoknad("/fordeler/soknad_huket_av_utland.json")
         val BARNEPENSJON_SOKNAD_INNSENDER_IKKE_FORELDER = readSoknad("/fordeler/soknad_innsender_ikke_forelder.json")
     }
-
 }

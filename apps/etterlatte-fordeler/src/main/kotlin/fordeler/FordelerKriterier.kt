@@ -25,6 +25,7 @@ enum class FordelerKriterie(val forklaring: String) {
     BARN_HAR_REGISTRERT_VERGE("Barn er registrert med verge i PDL"),
     BARN_ER_IKKE_BOSATT_I_NORGE("Barn er ikke bosatt i Norge"),
     BARN_ER_IKKE_ALENEBARN("Barn (søker) er ikke alenebarn"),
+    BARN_HAR_FOR_GAMLE_SOESKEN("Det finnes barn av avdøde som er for gamle"),
 
     AVDOED_HAR_UTVANDRING("Avdoed har utvandring"),
     AVDOED_HAR_YRKESSKADE("Avdød er market med yrkesskade i søknaden"),
@@ -71,6 +72,7 @@ class FordelerKriterier {
         Kriterie(BARN_HAR_VERGE) { harHuketAvForVerge(it) },
         Kriterie(BARN_HAR_REGISTRERT_VERGE) { harVergemaalPDL(barn) },
         Kriterie(BARN_ER_IKKE_ALENEBARN) { barnErIkkeAlenebarn(avdoed, barn, gjenlevende) },
+        Kriterie(BARN_HAR_FOR_GAMLE_SOESKEN) { barnHarForGamleSoesken(barn, avdoed) },
 
         // Avdød
         Kriterie(AVDOED_ER_IKKE_REGISTRERT_SOM_DOED) { personErIkkeRegistrertDoed(avdoed) },
@@ -199,8 +201,13 @@ class FordelerKriterier {
         return barnepensjon.soeker.utenlandsAdresse?.svar?.verdi == JaNeiVetIkke.JA
     }
 
+    private fun barnHarForGamleSoesken(barn: Person, avdoed: Person, alder: Int = 14): Boolean {
+        return avdoed.familieRelasjon?.barn?.minus(barn.foedselsnummer)?.let { avdoedAndreBarn ->
+            avdoedAndreBarn.any { it.getAge() > alder }
+        } ?: false
+    }
+
     private class Kriterie(val fordelerKriterie: FordelerKriterie, private val sjekk: (Barnepensjon) -> Boolean) {
         fun blirOppfyltAv(soeknadBarnepensjon: Barnepensjon): Boolean = sjekk(soeknadBarnepensjon)
     }
-
 }

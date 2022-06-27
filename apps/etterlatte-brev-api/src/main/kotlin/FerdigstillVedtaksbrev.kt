@@ -1,36 +1,35 @@
+
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BrevService
 import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 
-internal class OpprettVedtaksbrev(rapidsConnection: RapidsConnection, private val brevService: BrevService) :
+internal class FerdigstillVedtaksbrev(rapidsConnection: RapidsConnection, private val brevService: BrevService) :
     River.PacketListener {
-    private val logger = LoggerFactory.getLogger(OpprettVedtaksbrev::class.java)
+    private val logger = LoggerFactory.getLogger(FerdigstillVedtaksbrev::class.java)
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", "vedtak_fattet") }
+            validate { it.demandValue("@event", "VEDTAK:ATTESTERT") }
             validate { it.requireKey("@vedtak") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext {
-            val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].asText())
-            logger.info("Nytt vedtak med id ${vedtak.vedtakId} er fattet. Oppretter vedtaksbrev.")
+            val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson())
+            logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
 
-            val brev = runBlocking {
-                brevService.opprettFraVedtak(vedtak)
-            }
+            val brev = brevService.ferdigstillAttestertVedtak(vedtak)
 
-            logger.info("Brev for vedtak med id ${vedtak.vedtakId} er opprettet med brevId ${brev.id}")
+            logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er ferdigstilt (brevId = ${brev.id})")
         }
     }
 }

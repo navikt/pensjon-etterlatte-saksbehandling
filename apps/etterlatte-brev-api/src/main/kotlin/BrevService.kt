@@ -77,10 +77,12 @@ class BrevService(
         }
     }
 
-    // TODO: Undersøke om denne er nødvendig
-    suspend fun opprettFraVedtak(vedtak: Vedtak): Brev =
-        opprettNyttBrevFraVedtak(vedtak)
-            .let { db.opprettBrev(it) }
+    fun ferdigstillAttestertVedtak(vedtak: Vedtak) = db.hentBrevForBehandling(vedtak.behandling.id.toString())
+        .find { it.erVedtaksbrev }
+        .let { brev ->
+            require(brev != null) { "Klarte ikke finne vedtaksbrev for attestert vedtak med vedtakId = ${vedtak.vedtakId}" }
+            ferdigstill(brev, vedtak)
+        }
 
     fun ferdigstillBrev(id: BrevID): Brev {
         val brev: Brev = db.hentBrev(id)
@@ -91,8 +93,12 @@ class BrevService(
         // todo: vedtak må byttes ut med grunnlag for å fungere på behandlinger også.
         val vedtak = vedtakService.hentVedtak(brev.behandlingId)
 
+        return ferdigstill(brev, vedtak)
+    }
+
+    private fun ferdigstill(brev: Brev, vedtak: Vedtak): Brev {
         sendToRapid(opprettDistribusjonsmelding(brev, vedtak))
-        db.oppdaterStatus(id, Status.FERDIGSTILT)
+        db.oppdaterStatus(brev.id, Status.FERDIGSTILT)
 
         return brev
     }

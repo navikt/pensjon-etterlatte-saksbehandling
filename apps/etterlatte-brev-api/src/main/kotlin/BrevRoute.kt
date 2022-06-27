@@ -5,10 +5,12 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import journalpost.JournalpostService
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
+import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 
-fun Route.brevRoute(service: BrevService) {
+fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService) {
     route("brev") {
         get("maler") {
             val maler = listOf(
@@ -85,6 +87,24 @@ fun Route.brevRoute(service: BrevService) {
             val brev = service.ferdigstillBrev(brevId.toLong())
 
             call.respond(brev)
+        }
+
+        get("innkommende") {
+            val accessToken = getAccessToken(call)
+
+            val innhold = journalpostService.hentInnkommendeBrev("29018322402", BrukerIdType.FNR, accessToken)
+
+            call.respond(innhold)
+        }
+
+        post("innkommende/{journalpostId}/{dokumentInfoId}") {
+            val accessToken = getAccessToken(call)
+
+            val journalpostId = call.parameters["journalpostId"]!!
+            val dokumentInfoId = call.parameters["dokumentInfoId"]!!
+            val innhold = journalpostService.hentInnkommendeBrevInnhold(journalpostId, dokumentInfoId, accessToken)
+
+            call.respond(innhold)
         }
     }
 }

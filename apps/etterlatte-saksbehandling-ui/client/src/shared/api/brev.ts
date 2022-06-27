@@ -7,6 +7,20 @@ export const hentMottakere = async (): Promise<any> => await fetch(`${path}/brev
 export const hentBrevForBehandling = async (behandlingId: string): Promise<any> =>
   await fetch(`${path}/brev/behandling/${behandlingId}`).then((res) => res.json())
 
+export const hentInnkommendeBrev = async (): Promise<any> =>
+    await fetch(`${path}/brev/innkommende`).then((res) => res.json())
+
+export const hentInnkommendeBrevInnhold = async (journalpostId: string, dokumentInfoId: string): Promise<Blob> =>
+    await fetch(`${path}/brev/innkommende/${journalpostId}/${dokumentInfoId}`, { method: 'POST' })
+        .then((res) => {
+            if (res.status == 200) {
+                return res.arrayBuffer()
+            } else {
+                throw Error(res.statusText)
+            }
+        })
+        .then((buffer) => new Blob([buffer], { type: 'application/pdf' }))
+
 export const nyttBrevForBehandling = async (behandlingId: string, mottaker: Mottaker, mal: any): Promise<any> =>
   await fetch(`${path}/brev/behandling/${behandlingId}`, {
     method: 'POST',

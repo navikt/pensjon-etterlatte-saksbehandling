@@ -16,6 +16,29 @@ router.get('/behandling/:behandlingId', async (req: Request, res: Response) => {
   res.send(await data)
 })
 
+router.get('/innkommende', async (req: Request, res: Response) => {
+    const path = `${apiUrl}/brev/innkommende`
+
+    const data = await fetch(path)
+        .then((res) => res.json())
+        .catch(() => res.send(500))
+
+    res.send(await data)
+})
+
+router.post('/innkommende/:journalpostId/:dokumentInfoId', async (req: Request, res: Response) => {
+    const path = `${apiUrl}/brev/innkommende/${req.params.journalpostId}/${req.params.dokumentInfoId}`
+    const result = await fetch(path, { method: 'POST' })
+        .then((res) => ({ status: res.status, data: res.buffer() }))
+
+    if (result.status == 200) {
+        res.contentType('application/pdf')
+        res.send(await result.data)
+    } else {
+        res.sendStatus(result.status)
+    }
+})
+
 router.delete('/:brevId', async (req: Request, res: Response) => {
   const path = `${apiUrl}/brev/${req.params.brevId}`
 

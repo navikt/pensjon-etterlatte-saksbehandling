@@ -70,3 +70,9 @@ enum class DokumentKategori(val type: String) {
     IB("IB")
 }
 
+enum class BrukerIdType() {
+    FNR,
+    AKTOERID,
+    ORGNR
+}
+

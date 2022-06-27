@@ -34,6 +34,7 @@ open class Grunnlagsopplysning<T>(
         JsonSubTypes.Type(value = Privatperson::class, name = "privatperson"),
         JsonSubTypes.Type(value = Pdl::class, name = "pdl"),
         JsonSubTypes.Type(value = Inntektskomponenten::class, name = "inntektskomponenten"),
+        JsonSubTypes.Type(value = Aregisteret::class, name = "Aareg"),
         JsonSubTypes.Type(value = RegelKilde::class, name = "regel"),
         JsonSubTypes.Type(value = Vilkaarskomponenten::class, name = "vilkaarskomponenten")
     )
@@ -55,6 +56,12 @@ open class Grunnlagsopplysning<T>(
     }
 
     class Inntektskomponenten(val navn: String) : Kilde("inntektskomponenten") {
+        override fun toString(): String {
+            return navn
+        }
+    }
+
+    class Aregisteret(val navn: String) : Kilde("Aareg") {
         override fun toString(): String {
             return navn
         }

@@ -9,5 +9,6 @@ data class ArbeidsForhold(
     val arbeidstaker: AaregArbeidstaker,
     val arbeidssted: AaregArbeidssted,
     val ansettelsesdetaljer: List<AaregAnsettelsesdetaljer>,
-    val bruksperiode: AaregBruksperiode
+    val bruksperiode: AaregBruksperiode,
+    val ansettelsesperiode: AaregAnsettelsesperiode
 )

@@ -3,6 +3,7 @@ package no.nav.etterlatte.barnepensjon.model
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.barnepensjon.*
+import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
@@ -32,6 +33,7 @@ class VilkaarService {
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
         val pensjonUfore = finnOpplysning<PensjonUforeOpplysning>(opplysninger, Opplysningstyper.PENSJON_UFORE_V1)
+        val arbeidsforhold = finnOpplysning<ArbeidsforholdOpplysning>(opplysninger, Opplysningstyper.ARBEIDSFORHOLD_V1)
 
 
         val vilkaar = listOf(
@@ -41,7 +43,8 @@ class VilkaarService {
                 Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
                 avdoedSoeknad,
                 avdoedPdl,
-                pensjonUfore
+                pensjonUfore,
+                arbeidsforhold
             ),
             vilkaarBarnetsMedlemskap(
                 Vilkaartyper.BARNETS_MEDLEMSKAP,

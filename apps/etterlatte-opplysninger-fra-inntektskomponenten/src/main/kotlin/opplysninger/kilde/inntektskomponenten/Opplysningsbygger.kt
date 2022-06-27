@@ -43,7 +43,8 @@ class OpplysningsByggerService : OpplysningsBygger {
                     t.arbeidstaker,
                     t.arbeidssted,
                     t.ansettelsesdetaljer,
-                    t.bruksperiode
+                    t.bruksperiode,
+                    t.ansettelsesperiode
                 )
             }
             val arbeidsForholdOpplysning = ArbeidsforholdOpplysning(arbeidsforhold)
@@ -53,7 +54,6 @@ class OpplysningsByggerService : OpplysningsBygger {
         return opplysninger
     }
 
-    // TODO - simpel sjekk. Vil vi ha ut noe mer?
     fun harFaattAlderspensjon(arbeidsInntektListe: List<ArbeidsInntektMaaned>): List<Inntekt> {
         val inntektListe = arrayListOf<Inntekt>()
 
@@ -67,7 +67,6 @@ class OpplysningsByggerService : OpplysningsBygger {
         return inntektListe
     }
 
-    // TODO - simpel sjekk. Vil vi ha ut noe mer?
     fun harFaattUforetrygd(arbeidsInntektListe: List<ArbeidsInntektMaaned>): List<Inntekt> {
         val inntektListe = arrayListOf<Inntekt>()
         arbeidsInntektListe.forEach { inntektMaaned ->

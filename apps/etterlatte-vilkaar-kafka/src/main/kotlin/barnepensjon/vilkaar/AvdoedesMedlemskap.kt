@@ -1,5 +1,8 @@
 package no.nav.etterlatte.barnepensjon
 
+import no.nav.etterlatte.libs.common.arbeidsforhold.AaregAnsettelsesdetaljer
+import no.nav.etterlatte.libs.common.arbeidsforhold.AaregAnsettelsesperiode
+import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
@@ -18,13 +21,15 @@ import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.collections.HashMap
 
 
 fun vilkaarAvdoedesMedlemskap(
     vilkaartype: Vilkaartyper,
     avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
     avdoedPdl: VilkaarOpplysning<Person>?,
-    pensjonUforeOpplysning: VilkaarOpplysning<PensjonUforeOpplysning>?
+    pensjonUforeOpplysning: VilkaarOpplysning<PensjonUforeOpplysning>?,
+    arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?
 ): VurdertVilkaar {
     // Kriterier: 1. bodd i norge siste 5 årene
     // 2. Arbeidet i norge siste 5 årene
@@ -45,11 +50,11 @@ fun vilkaarAvdoedesMedlemskap(
         )
 
     val harMottattUforeTrygdSisteFemAar =
-        kriterieHarMottattUforeTrygdSisteFemAar(pensjonUforeOpplysning?.opplysning?.mottattUforetrygd)
+        kriterieHarMottattUforeTrygdSisteFemAar(pensjonUforeOpplysning)
     val harMottattPensjonSisteFemAar =
-        kriterieHarMottattPensjonSisteFemAar(pensjonUforeOpplysning?.opplysning?.mottattAlderspensjon)
+        kriterieHarMottattPensjonSisteFemAar(pensjonUforeOpplysning)
 
-    val harHatt100prosentStillingSisteFemAar = false //todo
+    val harHatt100prosentStillingSisteFemAar = kritieeHarHatt100prosentStillingSisteFemAar(arbeidsforholdOpplysning)
 
     return VurdertVilkaar(
         vilkaartype,
@@ -58,9 +63,38 @@ fun vilkaarAvdoedesMedlemskap(
             ingenUtenlandsoppholdOppgittISoeknad,
             sammenhengendeAdresserINorgeSisteFemAar,
             harMottattUforeTrygdSisteFemAar,
-            harMottattPensjonSisteFemAar
+            harMottattPensjonSisteFemAar,
+            harHatt100prosentStillingSisteFemAar
         ),
         LocalDateTime.now()
+    )
+}
+
+data class DetaljerPeriode(
+    val periode: AaregAnsettelsesperiode,
+    val ansettelsesdetaljer: List<AaregAnsettelsesdetaljer>
+)
+
+fun kritieeHarHatt100prosentStillingSisteFemAar(arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?): Kriterie {
+
+    val perioder = arrayListOf<DetaljerPeriode>()
+    arbeidsforholdOpplysning?.opplysning?.arbeidsforhold?.forEach {
+        perioder.add(DetaljerPeriode(it.ansettelsesperiode, it.ansettelsesdetaljer))
+    }
+
+    val opplysningsGrunnlag = listOfNotNull(arbeidsforholdOpplysning?.let {
+        Kriteriegrunnlag(
+            arbeidsforholdOpplysning.id,
+            KriterieOpplysningsType.AVDOED_STILLINGSPROSENT,
+            arbeidsforholdOpplysning.kilde,
+            perioder
+        )
+    })
+
+    return Kriterie(
+        Kriterietyper.AVDOED_HAR_HATT_100PROSENT_STILLING_SISTE_FEM_AAR,
+        VurderingsResultat.OPPFYLT,
+        opplysningsGrunnlag
     )
 }
 
@@ -192,19 +226,19 @@ fun kriterieIngenUtenlandsoppholdFraSoeknadSisteFemAar(
     )
 }
 
-fun kriterieHarMottattPensjonSisteFemAar(harMottattPensjonSisteFemAar: List<Inntekt>?): Kriterie {
+fun kriterieHarMottattPensjonSisteFemAar(pensjonUforeOpplysning: VilkaarOpplysning<PensjonUforeOpplysning>?): Kriterie {
     val opplysningsGrunnlag = listOfNotNull(
-        harMottattPensjonSisteFemAar?.let {
+        pensjonUforeOpplysning?.opplysning?.mottattAlderspensjon?.let {
             Kriteriegrunnlag(
-                UUID.randomUUID(), //todo: må settes i grunnlag
+                pensjonUforeOpplysning.id,
                 KriterieOpplysningsType.AVDOED_UFORE_PENSJON,
                 Grunnlagsopplysning.Inntektskomponenten("inntektskomponenten"),
-                harMottattPensjonSisteFemAar
+                pensjonUforeOpplysning.opplysning.mottattAlderspensjon
             )
         }
     )
 
-    if (harMottattPensjonSisteFemAar == null) return opplysningsGrunnlagNull(
+    if (pensjonUforeOpplysning?.opplysning?.mottattAlderspensjon == null) return opplysningsGrunnlagNull(
         Kriterietyper.AVDOED_HAR_MOTTATT_PENSJON_SISTE_FEM_AAR,
         opplysningsGrunnlag
     )
@@ -219,19 +253,20 @@ fun kriterieHarMottattPensjonSisteFemAar(harMottattPensjonSisteFemAar: List<Innt
 }
 
 
-fun kriterieHarMottattUforeTrygdSisteFemAar(harMottattUforeTrygdSisteFemAar: List<Inntekt>?): Kriterie {
+fun kriterieHarMottattUforeTrygdSisteFemAar(pensjonUforeOpplysning: VilkaarOpplysning<PensjonUforeOpplysning>?): Kriterie {
+
     val opplysningsGrunnlag = listOfNotNull(
-        harMottattUforeTrygdSisteFemAar?.let {
+        pensjonUforeOpplysning?.opplysning?.mottattUforetrygd?.let {
             Kriteriegrunnlag(
-                UUID.randomUUID(), //todo: må settes i grunnlag
+                pensjonUforeOpplysning.id,
                 KriterieOpplysningsType.AVDOED_UFORE_PENSJON,
                 Grunnlagsopplysning.Inntektskomponenten("inntektskomponenten"),
-                harMottattUforeTrygdSisteFemAar
+                pensjonUforeOpplysning.opplysning.mottattUforetrygd
             )
         }
     )
 
-    if (harMottattUforeTrygdSisteFemAar == null) return opplysningsGrunnlagNull(
+    if (pensjonUforeOpplysning?.opplysning?.mottattUforetrygd == null) return opplysningsGrunnlagNull(
         Kriterietyper.AVDOED_HAR_MOTTATT_TRYGD_SISTE_FEM_AAR,
         opplysningsGrunnlag
     )

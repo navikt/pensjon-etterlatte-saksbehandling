@@ -41,6 +41,8 @@ data class AaregOpplysningspliktig(
 )
 data class AaregAnsettelsesperiode(
     val startdato: LocalDate,
+    val sluttdato: LocalDate
+
 )
 data class AaregAnsettelsesdetaljer(
     val type: String,

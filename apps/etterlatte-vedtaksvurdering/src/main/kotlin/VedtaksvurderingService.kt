@@ -160,7 +160,7 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
         rapid.get().publish( vedtak.sakId,
             newMessage(
                 mapOf(
-                    "@event" to "SAKSBEHANDLER:ATTESTER_VEDTAK",
+                    "@event" to "SAKSBEHANDLER:UNDERKJENT",
                     "@sakId" to sakId.toLong(),
                     "@vedtakId" to vedtak.id,
                     "@behandlingId" to behandlingId.toString(),

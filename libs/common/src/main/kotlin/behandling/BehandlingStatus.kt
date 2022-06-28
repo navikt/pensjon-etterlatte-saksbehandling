@@ -7,6 +7,7 @@ enum class BehandlingStatus {
     UNDER_BEHANDLING,
     FATTET_VEDTAK,
     ATTESTERT,
+    RETURNERT,
     IVERKSATT,
     AVBRUTT
 }

@@ -17,8 +17,6 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
-  secureLogs:
-    enabled: true
   strategy:
     type: Recreate
   gcp:
@@ -42,7 +40,7 @@ spec:
     min: 1
   env:
     - name: OPPDRAG_KRAVGRUNNLAG_MQ_NAME
-      value: QA.Q2_231.OB04_OPPDRAG_XML
+      value: TODO
     - name: OPPDRAG_MQ_HOSTNAME
       value: b27apvl222.preprod.local
     - name: OPPDRAG_MQ_PORT

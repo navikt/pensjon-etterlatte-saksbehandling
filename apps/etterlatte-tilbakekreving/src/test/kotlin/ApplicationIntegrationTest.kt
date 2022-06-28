@@ -14,9 +14,11 @@ import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
 import no.nav.etterlatte.tilbakekreving.config.ApplicationProperties
 import no.nav.etterlatte.tilbakekreving.config.JmsConnectionFactory
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.TilbakekrevingEvent
+import org.junit.Ignore
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
@@ -68,6 +70,7 @@ class ApplicationIntegrationTest {
     }
 
     @Test
+    @Disabled("har skrudd av consumer inntil vi får på plass kø")
     fun `skal motta og lagre kravgrunnlag`() {
         sendKravgrunnlagsmeldingFraOppdrag()
 

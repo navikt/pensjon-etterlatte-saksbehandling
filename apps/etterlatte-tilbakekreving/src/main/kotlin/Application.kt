@@ -45,7 +45,7 @@ fun rapidApplication(
         rapidsConnection.register(object : RapidsConnection.StatusListener {
             override fun onStartup(rapidsConnection: RapidsConnection) {
                 dataSourceBuilder.migrate()
-                kravgrunnlagConsumer(rapidsConnection).start()
+                // kravgrunnlagConsumer(rapidsConnection).start() TODO trenger å sette opp kø
             }
 
             override fun onShutdown(rapidsConnection: RapidsConnection) {

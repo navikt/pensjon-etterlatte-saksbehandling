@@ -29,12 +29,12 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingI
         </div>
         <div className="info">
           <Info>Årsak til retur</Info>
-          <Tekst>Inngangsvilkår er feilvurdert</Tekst>
+          <Tekst>Hardkodet: Inngangsvilkår er feilvurdert</Tekst>
         </div>
 
         <Tekst>
-          Vedtaket underkjennes da vilkår om avdødes forutgående medlemskap ser ut til å være tolket feil fordi adresse
-          .....
+          Harkodet: Vedtaket underkjennes da vilkår om avdødes forutgående medlemskap ser ut til å være tolket feil
+          fordi adresse .....
         </Tekst>
       </Wrapper>
     </>

@@ -1,6 +1,6 @@
 import { RadioGroup, Radio } from '@navikt/ds-react'
 import { useContext } from 'react'
-import { Underkjenn } from './underskjenn'
+import { Underkjenn } from './underkjenn'
 import { RadioGroupWrapper } from './styled'
 import { Godkjenn } from './godkjenn'
 import { AppContext } from '../../../store/AppContext'

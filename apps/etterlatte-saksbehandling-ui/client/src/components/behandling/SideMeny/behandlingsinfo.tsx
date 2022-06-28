@@ -18,7 +18,7 @@ export const Behandlingsinfo = ({ behandlingsInfo }: { behandlingsInfo: IBehandl
 
   return (
     <>
-      {behandlingsInfo.status === IBehandlingStatus.innvilget && <Innvilget behandlingsInfo={behandlingsInfo} />}
+      {behandlingsInfo.status === IBehandlingStatus.ATTESTERT && <Innvilget behandlingsInfo={behandlingsInfo} />}
       {behandlingsInfo.status === IBehandlingStatus.underkjent && <Underkjent behandlingsInfo={behandlingsInfo} />}
 
       {(behandlingsInfo.status === IBehandlingStatus.GYLDIG_SOEKNAD ||

@@ -59,6 +59,7 @@ class OpplysningsByggerService : OpplysningsBygger {
 
         arbeidsInntektListe.forEach { inntektMaaned ->
             inntektMaaned.arbeidsInntektInformasjon.inntektListe?.forEach{ inntekt ->
+                print(inntekt.beskrivelse)
                 if(inntekt.beskrivelse == "alderspensjon") {
                     inntektListe.add(inntekt)
                 }

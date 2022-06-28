@@ -12,7 +12,7 @@ data class Ident (
 )
 
 data class Inntekt (
-    val inntektType : String,
+    val inntektType : InntektType,
     val beloep : Int,
     val fordel : String,
     val inntektskilde : String,
@@ -29,6 +29,10 @@ data class Inntekt (
     val beskrivelse : String,
     val skatteOgAvgiftsregel : String?
 )
+
+enum class InntektType {
+     LOENNSINNTEKT, NAERINGSINNTEKT, PENSJON_ELLER_TRYGD, YTELSE_FRA_OFFENTLIGE
+ }
 
 data class ArbeidsInntektInformasjon (
     val inntektListe : List<Inntekt>?

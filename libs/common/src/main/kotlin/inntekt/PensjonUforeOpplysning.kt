@@ -27,7 +27,7 @@ data class Inntekt (
     val utloeserArbeidsgiveravgift : Boolean,
     val informasjonsstatus : String,
     val beskrivelse : String,
-    val skatteOgAvgiftsregel : String
+    val skatteOgAvgiftsregel : String?
 )
 
 data class ArbeidsInntektInformasjon (

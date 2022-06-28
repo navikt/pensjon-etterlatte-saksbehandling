@@ -27,7 +27,9 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingI
             <Tekst>{behandlingsInfo?.saksbehandler}</Tekst>
           </div>
         </div>
-        <div className="info">
+
+        {/*          todo: hentes fra logger og vises kun om data finnes
+       <div className="info">
           <Info>Årsak til retur</Info>
           <Tekst>Hardkodet: Inngangsvilkår er feilvurdert</Tekst>
         </div>
@@ -35,7 +37,7 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingI
         <Tekst>
           Harkodet: Vedtaket underkjennes da vilkår om avdødes forutgående medlemskap ser ut til å være tolket feil
           fordi adresse .....
-        </Tekst>
+        </Tekst>*/}
       </Wrapper>
     </>
   )

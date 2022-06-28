@@ -38,6 +38,7 @@ export const fattVedtak = async (behandlingsId: string): Promise<IApiResponse<an
     })
     return {
       status: result.status,
+      data: await result.json(),
     }
   } catch (e) {
     console.log(e)
@@ -52,6 +53,7 @@ export const attesterVedtak = async (behandlingId: string): Promise<IApiResponse
     })
     return {
       status: result.status,
+      data: await result.json(),
     }
   } catch (e) {
     console.log(e)
@@ -66,6 +68,7 @@ export const underkjennVedtak = async (behandlingId: string): Promise<IApiRespon
     })
     return {
       status: result.status,
+      data: await result.json(),
     }
   } catch (e) {
     console.log(e)

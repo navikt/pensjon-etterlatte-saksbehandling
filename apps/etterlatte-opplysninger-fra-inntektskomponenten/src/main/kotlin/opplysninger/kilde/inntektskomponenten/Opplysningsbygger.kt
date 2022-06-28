@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.inntekt.ArbeidsInntektMaaned
 import no.nav.etterlatte.libs.common.inntekt.Inntekt
-import no.nav.etterlatte.libs.common.inntekt.InntektsBeskrivelse
 import no.nav.etterlatte.libs.common.inntekt.PensjonUforeOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import java.time.Instant
@@ -60,7 +59,7 @@ class OpplysningsByggerService : OpplysningsBygger {
 
         arbeidsInntektListe.forEach { inntektMaaned ->
             inntektMaaned.arbeidsInntektInformasjon.inntektListe?.forEach{ inntekt ->
-                if(inntekt.beskrivelse == InntektsBeskrivelse.ALDERSPENSJON) {
+                if(inntekt.beskrivelse == "alderspensjon") {
                     inntektListe.add(inntekt)
                 }
             }
@@ -72,7 +71,7 @@ class OpplysningsByggerService : OpplysningsBygger {
         val inntektListe = arrayListOf<Inntekt>()
         arbeidsInntektListe.forEach { inntektMaaned ->
             inntektMaaned.arbeidsInntektInformasjon.inntektListe?.forEach{ inntekt ->
-                if(inntekt.beskrivelse == InntektsBeskrivelse.UFORETRYGD) {
+                if(inntekt.beskrivelse == "ufoeretrygd") {
                     inntektListe.add(inntekt)
                 }
             }

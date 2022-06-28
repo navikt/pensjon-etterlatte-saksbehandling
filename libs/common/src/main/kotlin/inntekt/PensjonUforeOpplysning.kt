@@ -26,14 +26,9 @@ data class Inntekt (
     val inngaarIGrunnlagForTrekk : Boolean,
     val utloeserArbeidsgiveravgift : Boolean,
     val informasjonsstatus : String,
-    val beskrivelse : InntektsBeskrivelse,
+    val beskrivelse : String,
     val skatteOgAvgiftsregel : String
 )
-
-enum class InntektsBeskrivelse(val value: String) {
-    UFORETRYGD("ufoeretrygd"),
-    ALDERSPENSJON("alderspensjon")
-}
 
 data class ArbeidsInntektInformasjon (
     val inntektListe : List<Inntekt>?

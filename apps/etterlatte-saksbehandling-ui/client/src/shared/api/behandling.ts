@@ -65,6 +65,13 @@ export const underkjennVedtak = async (behandlingId: string): Promise<IApiRespon
   try {
     const result: Response = await fetch(`${path}/api/underkjennvedtak/${behandlingId}`, {
       method: 'post',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        'kommentar': 'Ikkje bra',
+        'valgtBegrunnelse': 'Inngangsvilkår feilvurdert'
+      })
     })
     return {
       status: result.status,

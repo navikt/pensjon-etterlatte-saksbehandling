@@ -20,9 +20,9 @@ class VedtakService(private val behandlingKlient: BehandlingKlient, private val 
         return AttesteringResult("Attestert")
     }
 
-    suspend fun underkjennVedtak(behandlingId: String, token: String): AttesteringResult {
+    suspend fun underkjennVedtak(behandlingId: String, begrunnelse: String, kommentar: String, token: String): AttesteringResult {
         val behandling = behandlingKlient.hentBehandling(behandlingId, token)
-        vedtakKlient.underkjennVedtak(behandling.sak.toInt(), behandling.id.toString(), token)
+        vedtakKlient.underkjennVedtak(behandling.sak.toInt(), behandling.id.toString(), begrunnelse, kommentar, token)
         return AttesteringResult("Underkjent")
     }
 

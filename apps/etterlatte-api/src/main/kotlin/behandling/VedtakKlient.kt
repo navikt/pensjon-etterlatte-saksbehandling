@@ -22,7 +22,7 @@ interface EtterlatteVedtak {
     suspend fun hentVedtak(sakId: Int, behandlingId: String, accessToken: String): Vedtak
     suspend fun fattVedtak(sakId: Int, behandlingId: String, accessToken: String)
     suspend fun attesterVedtak(sakId: Int, behandlingId: String, accessToken: String)
-    suspend fun underkjennVedtak(sakId: Int, behandlingId: String, accessToken: String)
+    suspend fun underkjennVedtak(sakId: Int, behandlingId: String, begrunnelse: String, kommentar: String, accessToken: String)
 }
 
 class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
@@ -99,13 +99,13 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
         }
     }
 
-    override suspend fun underkjennVedtak(sakId: Int, behandlingId: String, accessToken: String) {
+    override suspend fun underkjennVedtak(sakId: Int, behandlingId: String, begrunnelse: String, kommentar: String, accessToken: String) {
         logger.info("Underkjenner vedtak")
         try {
             downstreamResourceClient.post(
                 Resource(clientId, "$resourceUrl/api/underkjennVedtak"),
                 accessToken,
-                FattVedtakBody(sakId.toString(), behandlingId)
+                UnderkjennVedtakBody(sakId.toString(), behandlingId, kommentar, begrunnelse)
             )
                 .mapBoth(
                     success = { json -> json },
@@ -135,3 +135,4 @@ data class Vedtak(
     )
 
 data class FattVedtakBody(val sakId: String, val behandlingId: String)
+data class UnderkjennVedtakBody(val sakId: String, val behandlingId: String, val kommentar:String, val valgtBegrunnelse: String)

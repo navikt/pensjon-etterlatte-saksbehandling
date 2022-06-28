@@ -4,6 +4,11 @@ import { HomeIcon } from '../../../../shared/icons/homeIcon'
 import styled from 'styled-components'
 import { InformationIcon } from '../../../../shared/icons/informationIcon'
 import { IPeriode } from './TidslinjeMedlemskap'
+import { useRef, useState } from 'react'
+import { Popover } from '@navikt/ds-react'
+import { formatterStringDato } from '../../../../utils'
+import { hentKildenavn } from './utils'
+import { CloseIcon } from '../../../../shared/icons/closeIcon'
 
 export const Tidsperiode = ({
   doedsdato,
@@ -21,9 +26,8 @@ export const Tidsperiode = ({
     seksAarTidligere
   )
   const startDatoOffset = startdatoOffsetProsent(periode.innhold.fraDato, seksAarTidligere)
-
-  //const colors = ['#a6cbdc', '#a5a5d7', '#c4adde', '#d7a9c6']
-  //backgroundColor: colors[index % colors.length]
+  const buttonRef = useRef(null)
+  const [open, setOpen] = useState(false)
 
   return (
     <Rad style={{ left: startDatoOffset, width: lengdePeriode, backgroundColor: '#CCE2F0' }}>
@@ -31,19 +35,31 @@ export const Tidsperiode = ({
         <Ikon>{periode.periodeType === 'jobb' ? <OfficeIcon /> : <HomeIcon />}</Ikon>
         <PeriodeType>{periode.periodeType}</PeriodeType>
       </InnholdWrapper>
-      <InfoIkonWrapper>
+      <InfoIkonWrapper ref={buttonRef} onClick={() => setOpen(true)}>
         <InformationIcon />
       </InfoIkonWrapper>
+
+      <Popover open={open} onClose={() => setOpen(false)} anchorEl={buttonRef.current} placement="top">
+        <Popover.Content>
+          <Close onClick={() => setOpen(false)}>
+            <CloseIcon />
+          </Close>
+          <InnholdTittel>Detaljer</InnholdTittel>
+          <InnholdKilde>
+            Kilde: {hentKildenavn(periode.kilde.type)} {formatterStringDato(periode.kilde.tidspunktForInnhenting)}
+          </InnholdKilde>
+          <div>
+            {periode.periodeType}: {periode.innhold.beskrivelse}
+          </div>
+          <div>
+            Periode: {formatterStringDato(periode.innhold.fraDato)} -{' '}
+            {periode.innhold.tilDato ? formatterStringDato(periode.innhold.tilDato) : ''}
+          </div>
+        </Popover.Content>
+      </Popover>
     </Rad>
   )
 }
-
-//<InnholdDatoFraTil>
-//    {format(new Date(periode.innhold.fraDato), 'MM.yyyy')} -{' '}
-//    {format(new Date(periode.innhold.tilDato), 'MM.yyyy')}
-//</InnholdDatoFraTil>
-//<InnholdBeskrivelse>{periode.innhold.beskrivelse}</InnholdBeskrivelse>
-//<InnholdKilde>{periode.innhold.kilde}</InnholdKilde>
 
 const Rad = styled.div`
   position: relative;
@@ -83,21 +99,23 @@ const InfoIkonWrapper = styled.div`
   svg {
     width: 1.2em;
     height: 1.2em;
+
+    :hover {
+      font-size: 1.2em;
+    }
   }
 `
 
-/*
-const InnholdDatoFraTil = styled.div`
-  padding-top: 5px;
-  padding-left: 5px;
-  font-weight: bold;
+const Close = styled.div`
+  align-self: flex-end;
+  cursor: pointer;
 `
-const InnholdBeskrivelse = styled.div`
-  padding-left: 5px;
+
+const InnholdTittel = styled.div`
+  font-weight: bold;
 `
 
 const InnholdKilde = styled.div`
-  padding-left: 5px;
   color: #676363;
+  margin-bottom: 10px;
 `
-*/

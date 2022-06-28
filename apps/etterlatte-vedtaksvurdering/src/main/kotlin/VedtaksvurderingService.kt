@@ -30,6 +30,13 @@ class VedtakKanIkkeFattes(vedtak: Vedtak): Exception("Vedtak ${vedtak.id} kan ik
     val vedtakId: Long = vedtak.id
 }
 
+class VedtakKanIkkeAttesteresAlleredeAttester(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak): Exception("Vedtak ${vedtak.vedtakId} kan ikke attesteres da det allerede er attester"){
+    val vedtakId: Long = vedtak.vedtakId
+}
+class VedtakKanIkkeAttesteresFoerDetFattes(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak): Exception("Vedtak ${vedtak.vedtakId} kan ikke attesteres da det ikke er fattet"){
+    val vedtakId: Long = vedtak.vedtakId
+}
+
 class VedtaksvurderingService(private val repository: VedtaksvurderingRepository, private val rapid: AtomicReference<MessageContext> = AtomicReference()) {
     companion object{
         val logger: Logger = LoggerFactory.getLogger(VedtaksvurderingService::class.java)
@@ -191,13 +198,18 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
 
     fun attesterVedtak(sakId: String, behandlingId: UUID, saksbehandler: String): no.nav.etterlatte.domene.vedtak.Vedtak {
         val vedtak = requireNotNull( hentFellesVedtak(sakId, behandlingId)).also {
-            require(it.vedtakFattet != null)
-            require(it.attestasjon == null)
+            requireThat(it.vedtakFattet != null){ VedtakKanIkkeAttesteresFoerDetFattes(it) }
+            requireThat(it.attestasjon == null){ VedtakKanIkkeAttesteresAlleredeAttester(it) }
         }
         repository.attesterVedtak(saksbehandler, sakId, behandlingId, vedtak.vedtakId, utbetalingsperioderFraVedtak(vedtak))
         return requireNotNull( hentFellesVedtak(sakId, behandlingId))
 
     }
+
+    private fun requireThat(b: Boolean, function: () -> Exception) {
+        if (!b) throw function()
+    }
+
     fun underkjennVedtak(sakId: String, behandlingId: UUID, saksbehandler: String, kommentar: String, valgtBegrunnelse: String) {
         val vedtak = requireNotNull( hentFellesVedtak(sakId, behandlingId)).also {
             require(it.vedtakFattet != null)

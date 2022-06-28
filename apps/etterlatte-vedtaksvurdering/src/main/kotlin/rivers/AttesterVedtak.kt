@@ -1,7 +1,11 @@
 package no.nav.etterlatte.rivers
 
+import no.nav.etterlatte.KanIkkeEndreFattetVedtak
+import no.nav.etterlatte.VedtakKanIkkeAttesteresAlleredeAttester
+import no.nav.etterlatte.VedtakKanIkkeAttesteresFoerDetFattes
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -21,6 +25,7 @@ internal class AttesterVedtak(
             validate { it.requireKey("@behandlingId") }
             validate { it.requireKey("@vedtakId") }
             validate { it.requireKey("@saksbehandler") }
+            validate { it.rejectKey("@feil") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
@@ -30,13 +35,23 @@ internal class AttesterVedtak(
             val behandlingId = packet["@behandlingId"].asUUID()
             val sakId = packet["@sakId"].longValue()
             val saksbehandler = packet["@saksbehandler"].textValue()
-            val attestertVedtak = vedtaksvurderingService.attesterVedtak(sakId.toString(), behandlingId, saksbehandler)
-            context.publish(JsonMessage.newMessage(
-                mapOf(
-                    "@event" to "VEDTAK:ATTESTERT",
-                    "@vedtak" to attestertVedtak,
-                    "@behandlingId" to behandlingId
+            try {
+                val attestertVedtak =
+                    vedtaksvurderingService.attesterVedtak(sakId.toString(), behandlingId, saksbehandler)
+
+                context.publish(
+                    JsonMessage.newMessage(
+                        mapOf(
+                            "@event" to "VEDTAK:ATTESTERT",
+                            "@vedtak" to attestertVedtak,
+                            "@behandlingId" to behandlingId
+                        )
+                    ).toJson()
                 )
-            ).toJson())
+            } catch (ex: Exception){
+                context.publish(packet.also {
+                    it["@feil"] = requireNotNull( ex.message )
+                }.toJson())
+            }
         }
 }

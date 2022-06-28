@@ -257,6 +257,8 @@ fun kriterieHarMottattUforeTrygdSisteFemAar(pensjonUforeOpplysning: VilkaarOpply
 
     val opplysningsGrunnlag = listOfNotNull(
         pensjonUforeOpplysning?.opplysning?.mottattUforetrygd?.let {
+            print("uforetrygd")
+            print(pensjonUforeOpplysning.opplysning.mottattUforetrygd)
             Kriteriegrunnlag(
                 pensjonUforeOpplysning.id,
                 KriterieOpplysningsType.AVDOED_UFORE_PENSJON,

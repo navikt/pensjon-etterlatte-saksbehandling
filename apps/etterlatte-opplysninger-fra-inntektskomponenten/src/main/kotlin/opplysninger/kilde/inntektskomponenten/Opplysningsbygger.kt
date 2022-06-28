@@ -24,8 +24,6 @@ class OpplysningsByggerService : OpplysningsBygger {
 
         val opplysninger = ArrayList<Grunnlagsopplysning<out Any>>()
 
-        print(inntektsKomponentenResponse)
-        // TODO: sjekk om det finnes inntekt for uføretrygd eller alderspensjon i løpet av de siste fem år
         val uforetrygd: List<Inntekt>
         val alderspensjon: List<Inntekt>
         if(inntektsKomponentenResponse.arbeidsInntektMaaned != null) {
@@ -36,6 +34,7 @@ class OpplysningsByggerService : OpplysningsBygger {
             )))
         }
 
+        print(arbeidsforholdListe)
         if(arbeidsforholdListe.isNotEmpty()){
             val arbeidsforhold = arbeidsforholdListe.map { t ->
                 ArbeidsForhold(

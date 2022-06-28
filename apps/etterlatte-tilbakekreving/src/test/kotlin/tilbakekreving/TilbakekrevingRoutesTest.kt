@@ -30,10 +30,10 @@ internal class TilbakekrevingRoutesTest {
     @Test
     fun `skal hente kravgrunnlag`() {
         withTestApplication({ restModule(applicationContext) }) {
-            handleRequest(HttpMethod.Get, "/tilbakekreving/${kravgrunnlagId.value}") {
+            with(handleRequest(HttpMethod.Get, "/tilbakekreving/${kravgrunnlagId.value}") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
-            }.apply {
+            }) {
                 assertEquals(HttpStatusCode.OK, response.status())
                 // TODO verifisere respons
             }
@@ -43,10 +43,10 @@ internal class TilbakekrevingRoutesTest {
     @Test
     fun `skal returnere 404 hvis kravgrunnlag mangler`() {
         withTestApplication({ restModule(applicationContext) }) {
-            handleRequest(HttpMethod.Get, "/tilbakekreving/2") {
+            with(handleRequest(HttpMethod.Get, "/tilbakekreving/2") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
-            }.apply {
+            }) {
                 assertEquals(HttpStatusCode.NotFound, response.status())
             }
         }
@@ -55,10 +55,10 @@ internal class TilbakekrevingRoutesTest {
     @Test
     fun `skal feile med 500 dersom id ikke er gyldig`() {
         withTestApplication({ restModule(applicationContext) }) {
-            handleRequest(HttpMethod.Get, "/tilbakekreving/ugyldig") {
+            with(handleRequest(HttpMethod.Get, "/tilbakekreving/ugyldig") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 addHeader(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
-            }.apply {
+            }) {
                 assertEquals(HttpStatusCode.InternalServerError, response.status())
                 assertEquals("En feil oppstod: For input string: \"ugyldig\"", response.content)
             }

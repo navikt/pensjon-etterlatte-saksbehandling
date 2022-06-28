@@ -40,17 +40,17 @@ data class ArbeidsInntektInformasjon (
 )
 
 data class Inntektsmottaker (
-    val identifikator : Int,
+    val identifikator : String,
     val aktoerType : String
 )
 
 data class Opplysningspliktig (
-    val identifikator : Int,
+    val identifikator : String,
     val aktoerType : String
 )
 
 data class Virksomhet (
-    val identifikator : Int,
+    val identifikator : String,
     val aktoerType : String
 )
 

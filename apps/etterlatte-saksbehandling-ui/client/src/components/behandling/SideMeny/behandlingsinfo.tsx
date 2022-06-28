@@ -4,13 +4,19 @@ import { formatterStringDato } from '../../../utils'
 import { Innvilget } from '../attestering/resultat/innvilget'
 import { Underkjent } from '../attestering/resultat/underkjent'
 import { IBehandlingInfo } from './types'
+import { useContext } from 'react'
+import { AppContext } from '../../../store/AppContext'
 
 export const Behandlingsinfo = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
+  const innloggetSaksbehandler = useContext(AppContext).state.saksbehandlerReducer.ident
+
   const hentStatus = () => {
     switch (behandlingsInfo.status) {
       case IBehandlingStatus.UNDER_BEHANDLING:
         return 'Under behandling'
 
+      case IBehandlingStatus.GYLDIG_SOEKNAD:
+        return 'Under behandling'
       case IBehandlingStatus.FATTET_VEDTAK:
         return 'To-trinnskontroll'
     }
@@ -25,12 +31,12 @@ export const Behandlingsinfo = ({ behandlingsInfo }: { behandlingsInfo: IBehandl
         behandlingsInfo.status === IBehandlingStatus.UNDER_BEHANDLING ||
         behandlingsInfo.status === IBehandlingStatus.FATTET_VEDTAK) && (
         <BehandlingsinfoContainer>
-          <Overskrift>Førstegangsbehanling</Overskrift>
+          <Overskrift>Førstegangsbehandling</Overskrift>
           <UnderOverskrift>{hentStatus()}</UnderOverskrift>
 
           <div className="info">
             <Info>Saksbehandler</Info>
-            <Tekst>{behandlingsInfo.saksbehandler}</Tekst>
+            <Tekst>{behandlingsInfo.saksbehandler ? behandlingsInfo.saksbehandler : innloggetSaksbehandler}</Tekst>
           </div>
           <div className="flex">
             <div>

@@ -37,7 +37,6 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ behandling }) =>
             <Heading spacing size="medium" level="5">
               Familieforhold
             </Heading>
-            ß
           </ContentHeader>
           <FamilieforholdWrapper>
             <DashedBorder />

@@ -17,7 +17,7 @@ export const Foreldreansvar = ({ innsenderHarForeldreansvar }: Props) => {
   function settTekst(vurdering: VurderingsResultat | undefined): string {
     switch (vurdering) {
       case VurderingsResultat.OPPFYLT:
-        return '(gjenlevende forelder)'
+        return ''
       case VurderingsResultat.IKKE_OPPFYLT:
         return 'Innsender har ikke foreldreansvar'
       default:

@@ -20,11 +20,12 @@ class OpplysningsByggerService : OpplysningsBygger {
 
     override fun byggOpplysninger(
         inntektsKomponentenResponse: InntektsKomponentenResponse,
-        arbeidsforholdResponse: List<AaregResponse>
+        arbeidsforholdListe: List<AaregResponse>
     ): List<Grunnlagsopplysning<out Any>> {
 
         val opplysninger = ArrayList<Grunnlagsopplysning<out Any>>()
 
+        print(inntektsKomponentenResponse)
         // TODO: sjekk om det finnes inntekt for uføretrygd eller alderspensjon i løpet av de siste fem år
         val uforetrygd: List<Inntekt>
         val alderspensjon: List<Inntekt>
@@ -36,8 +37,8 @@ class OpplysningsByggerService : OpplysningsBygger {
             )))
         }
 
-        if(arbeidsforholdResponse.isNotEmpty()){
-            val arbeidsforhold = arbeidsforholdResponse.map { t ->
+        if(arbeidsforholdListe.isNotEmpty()){
+            val arbeidsforhold = arbeidsforholdListe.map { t ->
                 ArbeidsForhold(
                     t.type,
                     t.arbeidstaker,

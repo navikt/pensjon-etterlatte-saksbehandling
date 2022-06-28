@@ -31,5 +31,5 @@ interface Aareg {
 }
 
 interface OpplysningsBygger {
-    fun byggOpplysninger(inntektsKomponentenResponse: InntektsKomponentenResponse, arbeidsforhold: List<AaregResponse>): List<Grunnlagsopplysning<out Any>>
+    fun byggOpplysninger(inntektsKomponentenResponse: InntektsKomponentenResponse, arbeidsforholdListe: List<AaregResponse>): List<Grunnlagsopplysning<out Any>>
 }

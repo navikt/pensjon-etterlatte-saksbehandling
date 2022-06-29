@@ -14,7 +14,7 @@ type Props = {
 }
 
 export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenlevendeForelder, doedsdato }) => {
-  const adresserEtterDoedsdato = hentAdresserEtterDoedsdato(person.bostedadresser, new Date(doedsdato))
+  const adresserEtterDoedsdato = hentAdresserEtterDoedsdato(person.bostedadresser, doedsdato)
 
   return (
     <PersonBorder>
@@ -24,7 +24,7 @@ export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenle
         </span>
         {person.navn}
         <span className="personRolle">
-          {innsenderErGjenlevendeForelder && PersonStatus.GJENLEVENDE_FORELDER + RelatertPersonsRolle.FORELDER}
+          {innsenderErGjenlevendeForelder && PersonStatus.GJENLEVENDE_FORELDER + ' ' + RelatertPersonsRolle.FORELDER}
         </span>
         {<ForelderWrap>Innsender av søknad</ForelderWrap>}
       </PersonHeader>

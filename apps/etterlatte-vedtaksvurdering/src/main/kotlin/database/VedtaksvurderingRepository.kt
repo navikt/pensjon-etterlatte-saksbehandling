@@ -298,6 +298,7 @@ data class Vedtak(
     val attestant: String?,
     val virkningsDato: LocalDate?,
 )
+
 data class AttesteringsHendelse(
     val hendelse: AttesteringsHendelseType,
     val opprettet: Tidspunkt,

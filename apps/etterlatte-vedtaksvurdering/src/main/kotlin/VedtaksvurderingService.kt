@@ -30,6 +30,13 @@ class VedtakKanIkkeFattes(vedtak: Vedtak): Exception("Vedtak ${vedtak.id} kan ik
     val vedtakId: Long = vedtak.id
 }
 
+class VedtakKanIkkeAttesteresAlleredeAttester(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak): Exception("Vedtak ${vedtak.vedtakId} kan ikke attesteres da det allerede er attester"){
+    val vedtakId: Long = vedtak.vedtakId
+}
+class VedtakKanIkkeAttesteresFoerDetFattes(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak): Exception("Vedtak ${vedtak.vedtakId} kan ikke attesteres da det ikke er fattet"){
+    val vedtakId: Long = vedtak.vedtakId
+}
+
 class VedtaksvurderingService(private val repository: VedtaksvurderingRepository, private val rapid: AtomicReference<MessageContext> = AtomicReference()) {
     companion object{
         val logger: Logger = LoggerFactory.getLogger(VedtaksvurderingService::class.java)
@@ -111,7 +118,7 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
                 emptyList(), //Ikke lenger aktuell
                 it.vilkaarsResultat, //Bør periodiseres
                 it.beregningsResultat?.let { bres -> BilagMedSammendrag(objectMapper.valueToTree(bres) as ObjectNode, bres.beregningsperioder.map { Beregningsperiode(Periode(
-                    YearMonth.from(it.datoFOM), it.datoTOM?.takeIf { it.isBefore(YearMonth.from(LocalDateTime.MAX)) }?.let(YearMonth::from)), BigDecimal.valueOf(it.belop.toLong())
+                    YearMonth.from(it.datoFOM), it.datoTOM?.takeIf { it.isBefore(YearMonth.from(LocalDateTime.MAX)) }?.let(YearMonth::from)), BigDecimal.valueOf(it.grunnbelopMnd.toLong())
                 ) })}, // sammendraget bør lages av beregning
                 it.avkortingsResultat?.let { avkorting -> BilagMedSammendrag(objectMapper.valueToTree(avkorting) as ObjectNode, avkorting.beregningsperioder.map { Beregningsperiode(Periode(
                     YearMonth.from(it.datoFOM), it.datoTOM?.takeIf { it.isBefore(YearMonth.from(LocalDateTime.MAX)) }?.let(YearMonth::from)), BigDecimal.valueOf(it.belop.toLong())
@@ -160,7 +167,7 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
         rapid.get().publish( vedtak.sakId,
             newMessage(
                 mapOf(
-                    "@event" to "SAKSBEHANDLER:ATTESTER_VEDTAK",
+                    "@event" to "SAKSBEHANDLER:UNDERKJENN_VEDTAK",
                     "@sakId" to sakId.toLong(),
                     "@vedtakId" to vedtak.id,
                     "@behandlingId" to behandlingId.toString(),
@@ -191,13 +198,18 @@ class VedtaksvurderingService(private val repository: VedtaksvurderingRepository
 
     fun attesterVedtak(sakId: String, behandlingId: UUID, saksbehandler: String): no.nav.etterlatte.domene.vedtak.Vedtak {
         val vedtak = requireNotNull( hentFellesVedtak(sakId, behandlingId)).also {
-            require(it.vedtakFattet != null)
-            require(it.attestasjon == null)
+            requireThat(it.vedtakFattet != null){ VedtakKanIkkeAttesteresFoerDetFattes(it) }
+            requireThat(it.attestasjon == null){ VedtakKanIkkeAttesteresAlleredeAttester(it) }
         }
         repository.attesterVedtak(saksbehandler, sakId, behandlingId, vedtak.vedtakId, utbetalingsperioderFraVedtak(vedtak))
         return requireNotNull( hentFellesVedtak(sakId, behandlingId))
 
     }
+
+    private fun requireThat(b: Boolean, function: () -> Exception) {
+        if (!b) throw function()
+    }
+
     fun underkjennVedtak(sakId: String, behandlingId: UUID, saksbehandler: String, kommentar: String, valgtBegrunnelse: String) {
         val vedtak = requireNotNull( hentFellesVedtak(sakId, behandlingId)).also {
             require(it.vedtakFattet != null)

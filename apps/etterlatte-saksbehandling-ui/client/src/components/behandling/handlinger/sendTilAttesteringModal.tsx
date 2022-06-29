@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Modal } from '../../../shared/modal/modal'
 import styled from 'styled-components'
 import { handlinger } from './typer'
-import { sendTilAttestering } from '../../../shared/api/behandling'
+import { fattVedtak } from '../../../shared/api/behandling'
 import { useMatch } from 'react-router'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 
@@ -12,15 +12,15 @@ export const BeregningModal: React.FC = () => {
 
   const [beregneModalisOpen, setBeregneModalisOpen] = useState(false)
   const match = useMatch('/behandling/:behandlingId/*')
-  
+
   const send = () => {
-    if(!match?.params.behandlingId) throw new Error("Mangler behandlingsid");
+    if (!match?.params.behandlingId) throw new Error('Mangler behandlingsid')
     console.log(match.params.behandlingId)
-    const result = sendTilAttestering(match.params.behandlingId);
-    console.log(result);
+    const result = fattVedtak(match.params.behandlingId)
+    console.log(result)
     // if success
     setBeregneModalisOpen(false)
-    next();
+    next()
     // if not, show error message
   }
 

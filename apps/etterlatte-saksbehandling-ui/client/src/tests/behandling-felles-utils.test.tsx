@@ -1,19 +1,25 @@
 import React from 'react'
 import { hentAdresserEtterDoedsdato, hentKriterierMedOpplysning } from '../components/behandling/felles/utils'
-import { IAdresse } from '../components/behandling/types'
-import { KriterieOpplysningsType, Kriterietype, OpplysningsType } from '../store/reducers/BehandlingReducer'
+import {
+  IAdresse,
+  IVilkaarsproving,
+  KriterieOpplysningsType,
+  Kriterietype,
+  VilkaarsType,
+  VurderingsResultat,
+} from '../store/reducers/BehandlingReducer'
 
 const adresserMock: IAdresse[] = [
   {
     type: 'VEGADRESSE',
     aktiv: false,
-    coAdresseNavn: null,
+    coAdresseNavn: undefined,
     adresseLinje1: 'Bøveien 937',
-    adresseLinje2: null,
-    adresseLinje3: null,
+    adresseLinje2: undefined,
+    adresseLinje3: undefined,
     postnr: '8475',
-    poststed: null,
-    land: null,
+    poststed: undefined,
+    land: undefined,
     kilde: 'FREG',
     gyldigFraOgMed: '1999-01-01',
     gyldigTilOgMed: '2003-01-03',
@@ -21,29 +27,29 @@ const adresserMock: IAdresse[] = [
   {
     type: 'VEGADRESSE',
     aktiv: true,
-    coAdresseNavn: null,
+    coAdresseNavn: undefined,
     adresseLinje1: 'Knallveien 7',
-    adresseLinje2: null,
-    adresseLinje3: null,
+    adresseLinje2: undefined,
+    adresseLinje3: undefined,
     postnr: '8475',
-    poststed: null,
-    land: null,
+    poststed: undefined,
+    land: undefined,
     kilde: 'FREG',
     gyldigFraOgMed: '1999-01-01',
-    gyldigTilOgMed: '2003-01-03',
+    gyldigTilOgMed: undefined,
   },
 ]
 
-const vilkaarMock = {
-  navn: 'DOEDSFALL_ER_REGISTRERT',
-  resultat: 'OPPFYLT',
+const vilkaarMock: IVilkaarsproving = {
+  navn: VilkaarsType.DOEDSFALL_ER_REGISTRERT,
+  resultat: VurderingsResultat.OPPFYLT,
   kriterier: [
     {
-      navn: 'DOEDSFALL_ER_REGISTRERT_I_PDL',
-      resultat: 'OPPFYLT',
+      navn: Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL,
+      resultat: VurderingsResultat.OPPFYLT,
       basertPaaOpplysninger: [
         {
-          kriterieOpplysningsType: 'DOEDSDATO',
+          kriterieOpplysningsType: KriterieOpplysningsType.DOEDSDATO,
           kilde: {
             navn: 'pdl',
             tidspunktForInnhenting: '2022-03-07T14:09:33.789469374Z',
@@ -58,11 +64,11 @@ const vilkaarMock = {
       ],
     },
     {
-      navn: 'AVDOED_ER_FORELDER',
-      resultat: 'OPPFYLT',
+      navn: Kriterietype.AVDOED_ER_FORELDER,
+      resultat: VurderingsResultat.OPPFYLT,
       basertPaaOpplysninger: [
         {
-          kriterieOpplysningsType: 'FORELDRE',
+          kriterieOpplysningsType: KriterieOpplysningsType.FORELDRE,
           kilde: {
             navn: 'pdl',
             tidspunktForInnhenting: '2022-03-07T14:09:34.766506822Z',
@@ -89,7 +95,7 @@ const vilkaarMock = {
           },
         },
         {
-          kriterieOpplysningsType: 'DOEDSDATO',
+          kriterieOpplysningsType: KriterieOpplysningsType.DOEDSDATO,
           kilde: {
             navn: 'pdl',
             tidspunktForInnhenting: '2022-03-07T14:09:33.789469374Z',
@@ -104,16 +110,17 @@ const vilkaarMock = {
       ],
     },
   ],
+  vurdertDato: '2022-03-30T14:36:17.984583465Z',
 }
 
 describe('Behandling-felles-utils', () => {
   it('Test at adresse ikke henter ut inaktiv adresse', () => {
-    const adresser = hentAdresserEtterDoedsdato(adresserMock, new Date('2015-01-01')) //
+    const adresser = hentAdresserEtterDoedsdato(adresserMock, '2015-01-01')
     expect(adresser.length).toBe(1)
   })
 
   it('Test at adresse er utgått men aktiv', () => {
-    const adresser = hentAdresserEtterDoedsdato(adresserMock, new Date('2015-01-01')) //
+    const adresser = hentAdresserEtterDoedsdato(adresserMock, '2015-01-01')
     expect(adresser.length).toBe(1)
     expect(adresser[0].adresseLinje1).toBe('Knallveien 7')
   })
@@ -124,6 +131,6 @@ describe('Behandling-felles-utils', () => {
       Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL,
       KriterieOpplysningsType.DOEDSDATO
     )
-    expect(vilkaarResult.kriterieOpplysningsType).toBe(KriterieOpplysningsType.DOEDSDATO)
+    expect(vilkaarResult?.kriterieOpplysningsType).toBe(KriterieOpplysningsType.DOEDSDATO)
   })
 })

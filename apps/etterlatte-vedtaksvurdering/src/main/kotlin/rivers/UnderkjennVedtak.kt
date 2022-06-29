@@ -36,11 +36,15 @@ internal class UnderkjennVedtak(
             context.publish(JsonMessage.newMessage(
                 mapOf(
                     "@event" to "VEDTAK:UNDERKJENT",
-                    "@vedtakId" to packet["@vedtakId"],
-                    "@behandlingId" to packet["@behandlingId"],
-                    "@sakId" to packet["@sakId"],
-                    "@correlation_id" to packet["@correlation_id"],
+                ) + packet.keep("@vedtakId",
+                    "@behandlingId",
+                    "@saksbehandler",
+                    "@sakId",
+                    "@correlation_id",
+                    "@valgtBegrunnelse",
+                    "@kommentar"
                 )
             ).toJson())
         }
 }
+

@@ -2,18 +2,19 @@ import { useContext, useEffect, useState } from 'react'
 import { Routes, Route, useMatch } from 'react-router-dom'
 import styled from 'styled-components'
 import { hentBehandling } from '../../shared/api/behandling'
-import { ClockIcon } from '../../shared/icons/clockIcon'
-import { DialogIcon } from '../../shared/icons/dialogIcon'
-import { FolderIcon } from '../../shared/icons/folderIcon'
 import { Column, GridContainer } from '../../shared/styled'
 import { AppContext } from '../../store/AppContext'
 import { IBehandlingsStatus } from './behandlings-status'
 import { IApiResponse } from '../../shared/api/types'
-import { IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
+import { IBehandlingStatus, IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
 import Spinner from '../../shared/Spinner'
 import { StatusBar, StatusBarTheme } from '../statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
+import { IBehandlingInfo } from './SideMeny/types'
+import { Attestering } from './attestering/attestering'
+import { Behandlingsinfo } from './SideMeny/behandlingsinfo'
+import { IRolle } from '../../store/reducers/SaksbehandlerReducer'
 
 const addBehandlingAction = (data: any) => ({ type: 'add_behandling', data })
 
@@ -21,7 +22,6 @@ export const Behandling = () => {
   const ctx = useContext(AppContext)
   const match = useMatch('/behandling/:behandlingId/*')
   const { behandlingRoutes } = useBehandlingRoutes()
-
   const [loaded, setLoaded] = useState<boolean>(false)
 
   useEffect(() => {
@@ -33,12 +33,31 @@ export const Behandling = () => {
     }
   }, [match?.params.behandlingId])
 
-  const soeker = ctx.state.behandlingReducer?.kommerSoekerTilgode.familieforhold.soeker
-  const soekerInfo = { navn: soeker?.navn, foedselsnummer: soeker?.fnr, type: 'Etterlatt' }
+  const soeker = ctx.state.behandlingReducer?.kommerSoekerTilgode?.familieforhold.soeker
+  const soekerInfo = soeker ? { navn: soeker.navn, foedselsnummer: soeker.fnr, type: 'Etterlatt' } : null
+
+  const [behandlingsInfo, setBehandlingsinfo] = useState<IBehandlingInfo>()
+
+  useEffect(() => {
+    const behandling = ctx.state.behandlingReducer
+    const innlogget = ctx.state.saksbehandlerReducer
+
+    behandling &&
+      setBehandlingsinfo({
+        type: 'Førstegangsbehandling',
+        status: behandling.status,
+        saksbehandler: behandling.saksbehandlerId,
+        attestant: behandling.attestant,
+        virkningsdato: behandling.virkningstidspunkt,
+        datoFattet: behandling.datoFattet,
+        rolle: innlogget.rolle,
+      })
+  }, [ctx.state])
 
   return (
     <>
-      <StatusBar theme={StatusBarTheme.gray} personInfo={soekerInfo} />
+      {soekerInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={soekerInfo} />}
+
       <Spinner visible={!loaded} label="Laster" />
       {loaded && (
         <GridContainer>
@@ -56,79 +75,23 @@ export const Behandling = () => {
             </Routes>
           </Column>
           <Column>
-            <Tab />
+            {behandlingsInfo && (
+              <>
+                {behandlingsInfo.rolle === IRolle.attestant &&
+                behandlingsInfo.status === IBehandlingStatus.FATTET_VEDTAK ? (
+                  <Attestering behandlingsInfo={behandlingsInfo} />
+                ) : (
+                  <Behandlingsinfo behandlingsInfo={behandlingsInfo} />
+                )}
+              </>
+            )}
+            {/*<Tab />*/}
           </Column>
         </GridContainer>
       )}
     </>
   )
 }
-
-const Tab = () => {
-  const [selected, setSelected] = useState('1')
-
-  const select = (e: any) => {
-    setSelected(e.currentTarget.dataset.value)
-  }
-
-  const isSelectedClass = (val: string): string => {
-    if (selected === val) {
-      return 'active'
-    }
-    return ''
-  }
-
-  const renderSubElement = () => {
-    switch (selected) {
-      case '1':
-        return <div>Hei</div>
-      case '2':
-        return <div>på</div>
-      case '3':
-        return <div>deg</div>
-    }
-    return
-  }
-
-  return (
-    <>
-      <MenuHead style={{ paddingTop: '14px', paddingLeft: 0, paddingRight: 0 }}>
-        <Tabs>
-          <IconButton data-value="1" onClick={select} className={isSelectedClass('1')}>
-            <ClockIcon />
-          </IconButton>
-          <IconButton data-value="2" onClick={select} className={isSelectedClass('2')}>
-            <DialogIcon />
-          </IconButton>
-          <IconButton data-value="3" onClick={select} className={isSelectedClass('3')}>
-            <FolderIcon />
-          </IconButton>
-        </Tabs>
-      </MenuHead>
-      {renderSubElement()}
-    </>
-  )
-}
-
-const Tabs = styled.div`
-  display: flex;
-
-  > div {
-    width: 33.333%;
-    height: 100%;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
-`
-const IconButton = styled.div`
-  cursor: pointer;
-  padding: 1em 1em 1.8em;
-
-  &.active {
-    border-bottom: 3px solid #0067c5;
-  }
-`
 
 const MenuHead = styled.div`
   padding: 2em 1em;

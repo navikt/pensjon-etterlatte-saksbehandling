@@ -7,10 +7,13 @@ import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapp
 import { BeregningModal } from '../handlinger/sendTilAttesteringModal'
 import { useContext } from 'react'
 import { AppContext } from '../../../store/AppContext'
+import { IBehandlingStatus } from '../../../store/reducers/BehandlingReducer'
+import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import BrevModal from "./brev-modal";
 
 export const Beregne = () => {
   const virkningstidspunkt = useContext(AppContext).state.behandlingReducer.virkningstidspunkt
+  const behandlingStatus = useContext(AppContext).state.behandlingReducer.status
 
   return (
     <Content>
@@ -31,9 +34,14 @@ export const Beregne = () => {
 
         <BrevModal />
       </ContentHeader>
-      <BehandlingHandlingKnapper>
-        <BeregningModal />
-      </BehandlingHandlingKnapper>
+      {behandlingStatus === IBehandlingStatus.UNDER_BEHANDLING ||
+      behandlingStatus === IBehandlingStatus.GYLDIG_SOEKNAD ? (
+        <BehandlingHandlingKnapper>
+          <BeregningModal />
+        </BehandlingHandlingKnapper>
+      ) : (
+        <NesteOgTilbake />
+      )}
     </Content>
   )
 }

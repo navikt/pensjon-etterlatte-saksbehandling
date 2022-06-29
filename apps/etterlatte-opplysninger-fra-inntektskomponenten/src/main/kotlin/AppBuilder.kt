@@ -8,10 +8,10 @@ import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.header
-import io.ktor.http.takeFrom
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.AaregService
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.InntektsKomponentenService
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.OpplysningsByggerService
 import no.nav.etterlatte.security.ktor.clientCredential
@@ -22,8 +22,15 @@ class AppBuilder(private val props: Map<String, String>) {
 
     fun createInntektsKomponentService(): InntektsKomponenten {
         return InntektsKomponentenService(
-            inntektsKomponentClient(),
-            config.getString("no.nav.etterlatte.tjenester.inntektskomponenten.proxyUrl")
+            proxyClient(),
+            config.getString("no.nav.etterlatte.tjenester.inntektskomponenten.proxyInntektUrl")
+        )
+    }
+
+    fun createAaregService(): Aareg {
+        return AaregService(
+            proxyClient(),
+            config.getString("no.nav.etterlatte.tjenester.inntektskomponenten.proxyAaregUrl")
         )
     }
 
@@ -31,7 +38,7 @@ class AppBuilder(private val props: Map<String, String>) {
         return OpplysningsByggerService()
     }
 
-    private fun inntektsKomponentClient() = HttpClient(OkHttp) {
+    private fun proxyClient() = HttpClient(OkHttp) {
         val inntektsConfig = config.getConfig("no.nav.etterlatte.tjenester.inntektskomponenten")
         val env = mutableMapOf(
             "AZURE_APP_CLIENT_ID" to inntektsConfig.getString("clientId"),

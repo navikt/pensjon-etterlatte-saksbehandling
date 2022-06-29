@@ -6,8 +6,8 @@ import { VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 
 export const StegMeny = () => {
   const ctx = useContext(AppContext)
-  const gyldighet = ctx.state.behandlingReducer.gyldighetsprøving.resultat === VurderingsResultat.OPPFYLT
-  const vilkaar = ctx.state.behandlingReducer.vilkårsprøving.resultat === VurderingsResultat.OPPFYLT
+  const gyldighet = ctx.state.behandlingReducer.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
+  const vilkaar = ctx.state.behandlingReducer.vilkårsprøving?.resultat === VurderingsResultat.OPPFYLT
 
   return (
     <StegMenyWrapper>
@@ -20,13 +20,14 @@ export const StegMeny = () => {
       <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
         <NavLink to="beregne">Beregning</NavLink>
       </li>
+      <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
+        <NavLink to="brev">Brev</NavLink>
+      </li>
       {/*
       <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
         <NavLink to="utbetalingsoversikt">Simulering til oppdrag</NavLink>
       </li>
-      <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
-        <NavLink to="brev">Brev</NavLink>
-      </li>
+
       */}
       {process.env.NODE_ENV !== 'production' && (
         <li>

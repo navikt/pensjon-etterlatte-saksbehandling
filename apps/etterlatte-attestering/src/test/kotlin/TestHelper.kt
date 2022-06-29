@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.vedtak.Vedtak
 import java.io.FileNotFoundException
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.*
 
 object TestHelper
 
@@ -36,7 +37,8 @@ fun vedtak(vedtakId: String = "1") = Vedtak(
             enhetsnummer = "9999",
             datoEnhetFOM = LocalDate.parse("1999-09-28")
         )
-    )
+    ),
+    Attestasjon(UUID.randomUUID().toString())
 )
 
 fun attestasjon() = Attestasjon(

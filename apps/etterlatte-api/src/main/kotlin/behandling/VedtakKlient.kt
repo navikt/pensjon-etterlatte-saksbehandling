@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.time.LocalDate
 import java.util.*
 
@@ -21,6 +22,7 @@ interface EtterlatteVedtak {
     suspend fun hentVedtak(sakId: Int, behandlingId: String, accessToken: String): Vedtak
     suspend fun fattVedtak(sakId: Int, behandlingId: String, accessToken: String)
     suspend fun attesterVedtak(sakId: Int, behandlingId: String, accessToken: String)
+    suspend fun underkjennVedtak(sakId: Int, behandlingId: String, begrunnelse: String, kommentar: String, accessToken: String)
 }
 
 class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
@@ -62,7 +64,7 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
 
 
     override suspend fun fattVedtak(sakId: Int, behandlingId: String, accessToken: String) {
-        logger.info("Sender til attestering")
+        logger.info("Fatter vedtak")
         try {
             downstreamResourceClient.post(
                 Resource(clientId, "$resourceUrl/api/fattVedtak"),
@@ -74,13 +76,13 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
         } catch (e: Exception) {
-            logger.error("Sending til attestering feilet", e)
+            logger.error("Fatting av vedtak feilet", e)
             throw e
         }
     }
 
     override suspend fun attesterVedtak(sakId: Int, behandlingId: String, accessToken: String) {
-        logger.info("Sender til attestering")
+        logger.info("Attesterer vedtak")
         try {
             downstreamResourceClient.post(
                 Resource(clientId, "$resourceUrl/api/attesterVedtak"),
@@ -92,7 +94,25 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
         } catch (e: Exception) {
-            logger.error("Sending til attestering feilet", e)
+            logger.error("Attestering av vedtak feilet", e)
+            throw e
+        }
+    }
+
+    override suspend fun underkjennVedtak(sakId: Int, behandlingId: String, begrunnelse: String, kommentar: String, accessToken: String) {
+        logger.info("Underkjenner vedtak")
+        try {
+            downstreamResourceClient.post(
+                Resource(clientId, "$resourceUrl/api/underkjennVedtak"),
+                accessToken,
+                UnderkjennVedtakBody(sakId.toString(), behandlingId, kommentar, begrunnelse)
+            )
+                .mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
+        } catch (e: Exception) {
+            logger.error("Underkjenning av vedtak feilet", e)
             throw e
         }
     }
@@ -108,7 +128,11 @@ data class Vedtak(
     val vilkaarsResultat: VilkaarResultat?,
     val kommerSoekerTilgodeResultat: KommerSoekerTilgode?,
     val virkningsDato: LocalDate?,
-    val vedtakFattet: Boolean?
-)
+    val vedtakFattet: Boolean?,
+    val datoFattet: Instant?,
+    val datoattestert: Instant?,
+    val attestant: String?,
+    )
 
 data class FattVedtakBody(val sakId: String, val behandlingId: String)
+data class UnderkjennVedtakBody(val sakId: String, val behandlingId: String, val kommentar:String, val valgtBegrunnelse: String)

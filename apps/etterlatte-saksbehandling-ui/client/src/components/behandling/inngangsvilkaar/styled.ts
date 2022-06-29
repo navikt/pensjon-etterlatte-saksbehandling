@@ -7,6 +7,13 @@ export const VilkaarBorder = styled.div`
   right: 0;
 `
 
+export const VilkaarBorderTop = styled.div`
+  padding: 1em 0;
+  border-top: 1px solid #ccc;
+  left: 0;
+  right: 0;
+`
+
 export const Innhold = styled.div`
   padding: 0 2em;
 `
@@ -31,6 +38,7 @@ export const Title = styled.div`
 `
 export const Lovtekst = styled.div`
   display: flex;
+  max-width: 300px;
 `
 
 export const VilkaarInfobokser = styled.div`
@@ -44,7 +52,11 @@ export const VilkaarInfobokser = styled.div`
 `
 
 export const VilkaarColumn = styled.div`
-  width: calc((100% / 3) - (40px / 3));
+  width: calc((100% / 4) - (60px / 4));
+
+  @media (max-width: 1900px) {
+    width: calc((100% / 3) - (40px / 3));
+  }
 
   @media (max-width: 1600px) {
     width: calc((100% / 2) - (20px / 2));

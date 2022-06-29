@@ -27,6 +27,7 @@ internal class  LagreVilkaarsresultat(
             validate { it.requireKey("@virkningstidspunkt") }
             validate { it.requireKey("@vilkaarsvurdering") }
             validate { it.interestedIn("@correlation_id") }
+            validate { it.rejectKey("@beregning") }
         }.register(this)
     }
 
@@ -37,6 +38,16 @@ internal class  LagreVilkaarsresultat(
             val vilkaarsResultat = objectMapper.readValue(packet["@vilkaarsvurdering"].toString(), VilkaarResultat::class.java)
             try {
                 vedtaksvurderingService.lagreVilkaarsresultat(sakId, behandlingId, packet["soeker"].textValue(), vilkaarsResultat, YearMonth.parse(packet["@virkningstidspunkt"].textValue()).atDay(1) )
+                requireNotNull( vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
+                    context.publish(JsonMessage.newMessage(
+                        mapOf(
+                            "@event" to "VEDTAK:VILKAARSVURDERT",
+                            "@sakId" to it.sakId.toLong(),
+                            "@behandlingId" to it.behandlingId.toString(),
+                            "@vedtakId" to it.id,
+                        )
+                    ).toJson())
+                }
             }catch (e: KanIkkeEndreFattetVedtak){
                 packet["@event"] = "VEDTAK:ENDRING_FORKASTET"
                 packet["@vedtakId"] = e.vedtakId

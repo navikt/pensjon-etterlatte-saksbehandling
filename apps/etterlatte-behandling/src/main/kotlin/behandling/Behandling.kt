@@ -18,4 +18,5 @@ data class Behandling(
     val soesken: List<String>?,
     val gyldighetsproeving: GyldighetsResultat?,
     val status: BehandlingStatus?,
+    //val vedtakstatus: VedtakStatus?
 )

@@ -30,6 +30,7 @@ fun mockPerson(
     utland: Utland? = null,
     bostedsadresse: Adresse? = null,
     familieRelasjon: FamilieRelasjon? = null,
+    vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>? = null,
 ) = Person(
     fornavn = "Ola",
     etternavn = "Nordmann",
@@ -47,7 +48,7 @@ fun mockPerson(
     sivilstatus = sivilstatus,
     utland = utland,
     familieRelasjon = familieRelasjon,
-    vergemaalEllerFremtidsfullmakt = null,
+    vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt,
 )
 
 fun mockNorskAdresse(adresseLinje1: String = "Testveien 4", gyldigTilOgMed: LocalDateTime? = null) = Adresse(

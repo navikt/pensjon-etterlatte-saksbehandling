@@ -17,6 +17,7 @@ enum class Opplysningstyper {
     SOEKNADSTYPE_V1,
 
     PENSJON_UFORE_V1,
+    ARBEIDSFORHOLD_V1,
 
     AVDOED_INNTEKT_V1
 }

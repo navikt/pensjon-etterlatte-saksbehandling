@@ -14,7 +14,7 @@ type Props = {
 }
 
 export const Barn: React.FC<Props> = ({ person, alderVedDoedsdato, doedsdato }) => {
-  const adresserEtterDoedsdato = hentAdresserEtterDoedsdato(person.bostedadresser, new Date(doedsdato))
+  const adresserEtterDoedsdato = hentAdresserEtterDoedsdato(person.bostedadresser, doedsdato)
 
   return (
     <PersonBorder>
@@ -23,7 +23,7 @@ export const Barn: React.FC<Props> = ({ person, alderVedDoedsdato, doedsdato }) 
           <ChildIcon />
         </span>
         {person.navn} <span className="personRolle">({RelatertPersonsRolle.BARN})</span>
-        <TypeStatusWrap type="barn">{alderVedDoedsdato} år</TypeStatusWrap>
+        <TypeStatusWrap type="barn">{alderVedDoedsdato} år på dødsdatoen</TypeStatusWrap>
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfoFnr fnr={person.fnr} />

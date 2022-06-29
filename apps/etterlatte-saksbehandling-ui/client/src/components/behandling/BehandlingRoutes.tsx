@@ -4,7 +4,6 @@ import { Beregne } from './beregne'
 import { Inngangsvilkaar } from './inngangsvilkaar'
 import { Soeknadsoversikt } from './soeknadsoversikt'
 import { Brev } from './brev'
-//import { Brev } from './brev'
 //import { Utbetalingsoversikt } from './utbetalingsoversikt'
 //import { Vedtak } from './vedtak'
 
@@ -23,7 +22,7 @@ export const useBehandlingRoutes = () => {
   ]
 
   const firstPage = behandlingRoutes.findIndex((item) => item.path === currentRoute) === 0
-  const lastPage = behandlingRoutes.findIndex((item) => item.path === currentRoute) === 5
+  const lastPage = behandlingRoutes.findIndex((item) => item.path === currentRoute) === 3
 
   useEffect(() => {
     setCurrentRoute(match?.params.section)

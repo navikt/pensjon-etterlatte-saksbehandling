@@ -1,15 +1,18 @@
 package no.nav.etterlatte.libs.ktorobo
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
+import io.ktor.client.call.*
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.statement.*
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
@@ -99,17 +102,21 @@ class DownstreamResourceClient(
         resource: Resource,
         oboAccessToken: AccessToken,
         postBody: Any
-    ): Result<JsonNode, ThrowableErrorMessage> =
+    ): Result<Any, ThrowableErrorMessage> =
 
         runCatching {
-            httpClient.post<JsonNode>(resource.url) {
+            httpClient.post<HttpResponse>(resource.url) {
                 header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
                 contentType(ContentType.Application.Json)
                 body = postBody
             }
         }.fold(
             onSuccess = { result ->
-                Ok(result)
+                if(result.contentType() == ContentType.Application.Json){
+                    Ok( result.receive<ObjectNode>() )
+                }else{
+                    Ok( result.status )
+                }
             },
             onFailure =
 

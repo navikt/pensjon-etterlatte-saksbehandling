@@ -19,14 +19,19 @@ export interface PropsFamilieforhold {
 
 export const Familieforhold: React.FC<PropsFamilieforhold> = ({ behandling }) => {
   const innsenderErGjenlevende =
-    behandling.gyldighetsprøving.vurderinger.find(
+    behandling.gyldighetsprøving?.vurderinger.find(
       (g: IGyldighetproving) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER
     )?.resultat === VurderingsResultat.OPPFYLT
+
+  if (behandling.kommerSoekerTilgode == null) {
+    return <div style={{ color: 'red' }}>Familieforhold kan ikke hentes ut</div>
+  }
+
   const doedsdato = behandling.kommerSoekerTilgode.familieforhold.avdoed.doedsdato
 
   return (
     <>
-      {behandling.gyldighetsprøving.resultat === VurderingsResultat.OPPFYLT ? (
+      {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT ? (
         <>
           <ContentHeader>
             <Heading spacing size="medium" level="5">

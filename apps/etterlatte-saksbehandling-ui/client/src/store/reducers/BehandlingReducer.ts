@@ -1,16 +1,57 @@
 import { IAction } from '../AppContext'
-import { IAdresse } from '../../components/behandling/types'
 
 export interface IDetaljertBehandling {
   id: string
   sak: number
-  vilkårsprøving: IVilkaarResultat
-  gyldighetsprøving: IGyldighetResultat
-  kommerSoekerTilgode: IKommerSoekerTilgode
-  beregning: any
+  gyldighetsprøving?: IGyldighetResultat
+  kommerSoekerTilgode?: IKommerSoekerTilgode
+  vilkårsprøving?: IVilkaarResultat
+  beregning?: IBeregning
+  avkortning?: any //todo legg med type når denne er klar
+  saksbehandlerId?: string
   fastsatt: boolean
+  datoFattet?: string //kommer som Instant fra backend
+  datoattestert?: string //kommer som Instant fra backend
+  attestant?: string
   soeknadMottattDato: string
   virkningstidspunkt: string
+  status: IBehandlingStatus //todo legg med fra behandling og evt map om?
+}
+
+//todo: synk med backend OG oppgavebenk her, og finn ut hva vi skal vise i frontend
+export enum IBehandlingStatus {
+  OPPRETTET = 'OPPRETTET',
+  GYLDIG_SOEKNAD = 'GYLDIG_SOEKNAD',
+  IKKE_GYLDIG_SOEKNAD = 'IKKE_GYLDIG_SOEKNAD',
+  UNDER_BEHANDLING = 'UNDER_BEHANDLING',
+  FATTET_VEDTAK = 'FATTET_VEDTAK',
+  ATTESTERT = 'ATTESTERT',
+  IVERKSATT = 'IVERKSATT',
+  AVBRUTT = 'AVBRUTT',
+
+  under_behandling = 'under_behandling',
+  attestering = 'attestering',
+  underkjent = 'underkjent',
+  innvilget = 'innvilget',
+}
+
+export interface IBeregning {
+  id: string
+  type: string
+  endringkode: string
+  resultat: string
+  beregningsperioder: IBeregningsperiode[]
+  beregnetDato: string
+  grunnlagVerson: number
+}
+
+export interface IBeregningsperiode {
+  delytelseId: string
+  type: string
+  datoFOM: string
+  datoTOM: string
+  grunnbelopMnd: number
+  grunnbelop: number
 }
 
 export interface IKommerSoekerTilgode {
@@ -39,6 +80,27 @@ export interface IPersoninfoSoeker {
   bostedadresser: IAdresse[]
   soeknadAdresse: IUtlandsadresseSoeknad
   foedselsdato: string
+}
+
+export interface IAdresser {
+  bostedadresse: IAdresse[]
+  oppholdadresse: IAdresse[]
+  kontaktadresse: IAdresse[]
+}
+
+export interface IAdresse {
+  adresseLinje1: string
+  adresseLinje2?: string
+  adresseLinje3?: string
+  aktiv: boolean
+  coAdresseNavn?: string
+  gyldigFraOgMed: string
+  gyldigTilOgMed?: string
+  kilde: string
+  land?: string
+  postnr: string
+  poststed?: string
+  type: string // adresseType
 }
 
 export interface IUtlandsadresseSoeknad {
@@ -115,7 +177,8 @@ export interface IVilkaarResultat {
 export interface IVilkaarsproving {
   navn: VilkaarsType
   resultat: VurderingsResultat
-  basertPaaOpplysninger: IKriterie[]
+  kriterier: IKriterie[]
+  vurdertDato: string
 }
 
 export enum VilkaarsType {
@@ -140,6 +203,8 @@ export enum Kriterietype {
   SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO = 'SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO',
   SOEKER_IKKE_ADRESSE_I_UTLANDET = 'SOEKER_IKKE_ADRESSE_I_UTLANDET',
   GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET = 'GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET',
+  AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD = 'AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD',
+  AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR = 'AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR',
 }
 
 export interface IKriterieOpplysning {
@@ -184,34 +249,12 @@ export enum PersonRolle {
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: '',
   sak: 0,
-  vilkårsprøving: { resultat: undefined, vilkaar: [], vurdertDato: '' },
-  gyldighetsprøving: { resultat: undefined, vurderinger: [], vurdertDato: '' },
-  kommerSoekerTilgode: {
-    kommerSoekerTilgodeVurdering: { resultat: undefined, vilkaar: [], vurdertDato: '' },
-    familieforhold: {
-      avdoed: {
-        navn: '',
-        fnr: '',
-        rolle: PersonRolle.AVDOED,
-        bostedadresser: [],
-        doedsdato: '',
-      },
-      soeker: {
-        navn: '',
-        fnr: '',
-        rolle: PersonRolle.AVDOED,
-        bostedadresser: [],
-        soeknadAdresse: { adresseIUtlandet: '' },
-        foedselsdato: '',
-      },
-      gjenlevendeForelder: {
-        navn: '',
-        fnr: '',
-        rolle: PersonRolle.AVDOED,
-        bostedadresser: [],
-      },
-    },
-  },
+  status: IBehandlingStatus.UNDER_BEHANDLING, //test
+  saksbehandlerId: '',
+  attestant: '',
+  vilkårsprøving: undefined,
+  gyldighetsprøving: undefined,
+  kommerSoekerTilgode: undefined,
   beregning: undefined,
   fastsatt: false,
   soeknadMottattDato: '',

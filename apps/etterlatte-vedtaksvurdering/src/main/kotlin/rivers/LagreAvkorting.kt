@@ -38,6 +38,16 @@ internal class LagreAvkorting(
 
             try {
                 vedtaksvurderingService.lagreAvkorting(sakId, behandlingId, packet["soeker"].textValue(), avkorting)
+                requireNotNull( vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
+                    context.publish(JsonMessage.newMessage(
+                        mapOf(
+                            "@event" to "VEDTAK:AVKORTET",
+                            "@sakId" to it.sakId.toLong(),
+                            "@behandlingId" to it.behandlingId.toString(),
+                            "@vedtakId" to it.id,
+                        )
+                    ).toJson())
+                }
             }catch (e: KanIkkeEndreFattetVedtak){
                 packet["@event"] = "VEDTAK:ENDRING_FORKASTET"
                 packet["@vedtakId"] = e.vedtakId

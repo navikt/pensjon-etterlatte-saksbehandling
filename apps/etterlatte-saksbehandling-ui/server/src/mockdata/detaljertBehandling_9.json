@@ -1,6 +1,7 @@
 {
   "id": "9",
   "sak": 3,
+
   "gyldighetsprøving": {
     "resultat": "OPPFYLT",
     "vurderinger": [
@@ -159,17 +160,18 @@
       },
       {
         "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
-        "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
+        "resultat": "OPPFYLT",
         "kriterier": [
           {
-            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_SISTE_FEM_AAR",
+            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD",
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
+                "id": "d0669798-fb9b-45b7-8c95-5b7772dc7a51",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
+                  "tidspunktForInnhenting": "2022-06-20T13:03:15.784239934Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -179,6 +181,7 @@
                 }
               },
               {
+                "id": "551f5aeb-7ea7-4223-8dac-e735eb5ef840",
                 "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
                 "kilde": {
                   "fnr": "03108718357",
@@ -189,6 +192,79 @@
                   "harHattUtenlandsopphold": "NEI",
                   "opphold": null
                 }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "d0669798-fb9b-45b7-8c95-5b7772dc7a51",
+                "kriterieOpplysningsType": "ADRESSER",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-06-20T13:03:15.784239934Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "bostedadresse": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Bøveien 937",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "8475",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2021-01-01T00:00:00",
+                      "gyldigTilOgMed": null
+                    },
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Buveien 123",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "0485",
+                      "poststed": "Oslo",
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "1999-01-01T00:00:00",
+                      "gyldigTilOgMed": "2021-01-01T00:00:00"
+                    }
+                  ],
+                  "oppholdadresse": [],
+                  "kontaktadresse": []
+                }
+              },
+              {
+                "id": "d0669798-fb9b-45b7-8c95-5b7772dc7a51",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-06-20T13:03:15.784239934Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
+              },
+              {
+                "id": "2c833602-7564-48dc-b6d5-cb48030971ec",
+                "kriterieOpplysningsType": "ADRESSE_GAPS",
+                "kilde": {
+                  "navn": "vilkaarskomponenten",
+                  "type": "vilkaarskomponenten"
+                },
+                "opplysning": []
               }
             ]
           }
@@ -530,7 +606,7 @@
           }
         ],
         "soeknadAdresse": {
-          "adresseIUtlandet": "JA",
+          "adresseIUtlandet": "NEI",
           "land": "Costa Rica",
           "adresse": "Palmeveien 7, 1234 Susogdus"
         },
@@ -566,7 +642,7 @@
             "poststed": "Oslo",
             "land": null,
             "kilde": "FREG",
-            "gyldigFraOgMed": "1999-01-01T00:00:00",
+            "gyldigFraOgMed": "2000-01-01T00:00:00",
             "gyldigTilOgMed": "2022-02-01T00:00:00"
           },
           {
@@ -587,8 +663,40 @@
       }
     }
   },
-  "beregning": null,
+  "beregning": {
+    "id": "ad2bed67-153a-418a-8428-974b7fa2ce4c",
+    "type": "GP",
+    "endringskode": "NY",
+    "resultat": "BEREGNET",
+    "beregningsperioder": [
+      {
+        "delytelsesId": "BP",
+        "type": "GP",
+        "datoFOM": "2022-03",
+        "datoTOM": "2022-04",
+        "grunnbelopMnd": 8867,
+        "grunnbelop": 101352
+
+      },
+      {
+        "delytelsesId": "BP",
+        "type": "GP",
+        "datoFOM": "2022-05",
+        "datoTOM": null,
+        "grunnbelopMnd": 9290,
+        "grunnbelop": 111480
+      }
+    ],
+    "beregnetDato": "2022-06-21T12:35:17.19221918",
+    "grunnlagVerson": 0
+  },
+  "avkortning": null,
+  "saksbehandlerId": null,
   "fastsatt": false,
-  "soeknadMottattDato": "2022-02-14T14:37:24.573613",
-  "virkningstidspunkt": "2022-07-01"
+  "datoFattet": null,
+  "datoattestert": null,
+  "attestant": null,
+  "soeknadMottattDato": "2022-04-14T14:37:24.573613",
+  "virkningstidspunkt": "2022-03-01",
+  "status": "UNDER_BEHANDLING"
 }

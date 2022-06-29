@@ -13,6 +13,7 @@ export interface ISaksbehandler {
   fornavn: string
   etternavn: string
   enheter: IEnhet[]
+  rolle: string //test
 }
 const getSaksbehandler = (req: Request): ISaksbehandler | null => {
   if (process.env.DEVELOPMENT === 'true') {
@@ -22,6 +23,7 @@ const getSaksbehandler = (req: Request): ISaksbehandler | null => {
       navn: 'Truls Veileder',
       fornavn: 'Truls',
       etternavn: 'Veileder',
+      rolle: 'attestant',
       enheter: [
         {
           enhetId: '0315',
@@ -48,6 +50,7 @@ const getSaksbehandler = (req: Request): ISaksbehandler | null => {
     navn: parsedToken.name,
     fornavn: parsedToken.name.split(', ')[1],
     etternavn: parsedToken.name.split(', ')[0],
+    rolle: 'attestant',
     enheter: [
       {
         enhetId: '0315',

@@ -16,9 +16,11 @@ export const Column = styled.div`
     flex-grow: 1;
     border-right: 1px solid #c6c2bf;
     border-left: 1px solid #c6c2bf;
+    width: 800px;
     min-width: 800px;
   }
   &:last-child {
+    width: 320px;
     border-right: none;
   }
 `
@@ -31,6 +33,10 @@ export const Content = styled.div`
 
 export const ContentHeader = styled.div`
   padding: 1em 4em;
+`
+
+export const Header = styled.div`
+  padding: 1em 2em;
 `
 
 export const WarningText = styled.span`

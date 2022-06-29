@@ -8,7 +8,9 @@ import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
 import no.nav.etterlatte.getAccessToken
+import org.slf4j.LoggerFactory
 
+val logger = LoggerFactory.getLogger("no.nav.etterlatte.behandling.VedtakRoute")
 fun Route.vedtakRoute(service: VedtakService) {
 
     route("fattvedtak") {
@@ -36,15 +38,28 @@ fun Route.vedtakRoute(service: VedtakService) {
 
     route("underkjennvedtak") {
         post("{behandlingId}"){
-            val behandlingId = call.parameters["behandlingId"]
-            val body = call.receive<UnderkjennVedtakClientRequest>()
-            if (behandlingId == null) {
-                call.response.status(HttpStatusCode(400, "Bad request"))
-                call.respond("Behandlings-id mangler")
-            } else {
-                call.respond(service.underkjennVedtak(behandlingId, body.valgtBegrunnelse, body.kommentar, getAccessToken(call)))
+            try {
+                val behandlingId = call.parameters["behandlingId"]
+                logger.info("Skal underkjenne vedtak i behandling $behandlingId")
+
+                val body = UnderkjennVedtakClientRequest("Ikkje bra", "Inngangsvilkår feilvurdert")
+                //val body = call.receive<UnderkjennVedtakClientRequest>()
+
+                logger.info("Underkjennes fordi $body")
+
+                if (behandlingId == null) {
+                    call.response.status(HttpStatusCode(400, "Bad request"))
+                    call.respond("Behandlings-id mangler")
+                } else {
+                    call.respond(service.underkjennVedtak(behandlingId, body.valgtBegrunnelse, body.kommentar, getAccessToken(call)))
+                    logger.info("Underkjenningsendepunkt kalt")
+                }
+            } catch (ex: Exception){
+                logger.error("underkjenning feilet", ex)
+                throw ex
             }
         }
+
     }
 
 }

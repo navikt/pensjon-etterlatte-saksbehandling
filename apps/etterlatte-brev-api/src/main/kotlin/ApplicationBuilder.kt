@@ -1,11 +1,9 @@
-
-import com.typesafe.config.Config
-import com.typesafe.config.ConfigFactory
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import io.ktor.client.request.*
+import journalpost.JournalpostClient
 import journalpost.JournalpostServiceMock
 import no.nav.etterlatte.BrevService
 import no.nav.etterlatte.DataSourceBuilder
@@ -18,7 +16,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import pdf.PdfGeneratorKlient
-import journalpost.JournalpostClient
 import vedtak.VedtakServiceMock
 
 class ApplicationBuilder {
@@ -31,15 +28,16 @@ class ApplicationBuilder {
     private val datasourceBuilder = DataSourceBuilder(env)
     private val db = BrevRepository.using(datasourceBuilder.dataSource)
     private val brevService = BrevService(db, pdfGenerator, vedtakService, ::sendToRapid)
-    private val journalpostService = JournalpostClient(pdfHttpClient(), env["HENT_DOKUMENT_URL"]!!) // TODO: Oppdater readme med env
-
-    private val journalpostServiceMock = JournalpostServiceMock();
+    private val journalpostService = // TODO: Oppdater readme og dev.yaml med env
+        if (localDevelopment) JournalpostServiceMock() else JournalpostClient(pdfHttpClient(), env["HENT_DOKUMENT_URL"]!!)
 
     private val rapidsConnection: RapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
-            .withKtorModule { apiModule(localDevelopment) {
-                brevRoute(brevService, journalpostServiceMock)
-            } }
+            .withKtorModule {
+                apiModule(localDevelopment) {
+                    brevRoute(brevService, journalpostService)
+                }
+            }
             .build()
             .apply {
                 register(object : RapidsConnection.StatusListener {

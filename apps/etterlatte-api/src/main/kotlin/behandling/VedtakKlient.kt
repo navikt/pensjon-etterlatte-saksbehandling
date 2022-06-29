@@ -100,7 +100,7 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
     }
 
     override suspend fun underkjennVedtak(sakId: Int, behandlingId: String, begrunnelse: String, kommentar: String, accessToken: String) {
-        logger.info("Underkjenner vedtak")
+        logger.info("Underkjenner vedtak med id ", behandlingId)
         try {
             downstreamResourceClient.post(
                 Resource(clientId, "$resourceUrl/api/underkjennVedtak"),
@@ -135,4 +135,4 @@ data class Vedtak(
     )
 
 data class FattVedtakBody(val sakId: String, val behandlingId: String)
-data class UnderkjennVedtakBody(val sakId: String, val behandlingId: String, val kommentar:String, val valgtBegrunnelse: String)
+data class UnderkjennVedtakBody(val sakId: String, val behandlingId: String, val kommentar: String, val valgtBegrunnelse: String)

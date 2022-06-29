@@ -28,8 +28,12 @@ class ApplicationBuilder {
     private val datasourceBuilder = DataSourceBuilder(env)
     private val db = BrevRepository.using(datasourceBuilder.dataSource)
     private val brevService = BrevService(db, pdfGenerator, vedtakService, ::sendToRapid)
-    private val journalpostService = // TODO: Oppdater dev.yaml med env
-        if (localDevelopment) JournalpostServiceMock() else JournalpostClient(pdfHttpClient(), env["HENT_DOKUMENT_URL"]!!, env["SAF_GRAPHQL_URL"]!!)
+    private val journalpostService =
+        if (localDevelopment) JournalpostServiceMock() else JournalpostClient(
+            pdfHttpClient(),
+            env["HENT_DOKUMENT_URL"]!!,
+            env["SAF_GRAPHQL_URL"]!!
+        )
 
     private val rapidsConnection: RapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))

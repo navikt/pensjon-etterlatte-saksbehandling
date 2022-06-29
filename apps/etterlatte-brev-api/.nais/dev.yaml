@@ -33,6 +33,10 @@ spec:
   env:
     - name: ETTERLATTE_PDFGEN_URL
       value: "http://ey-pdfgen/api/v1/genpdf/eypdfgen"
+    - name: HENT_DOKUMENT_URL
+      value: "https://saf-q1.dev.intern.nav.no/rest/hentdokument"
+    - name: SAF_GRAPHQL_URL
+      value: "https://saf-q1.dev.intern.nav.no/graphql"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
   accessPolicy:

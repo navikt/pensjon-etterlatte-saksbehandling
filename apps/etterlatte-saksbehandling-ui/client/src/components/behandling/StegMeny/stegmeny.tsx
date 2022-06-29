@@ -20,7 +20,7 @@ export const StegMeny = () => {
       <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
         <NavLink to="beregne">Beregning</NavLink>
       </li>
-      <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
+      <li>
         <NavLink to="brev">Brev</NavLink>
       </li>
       {/*
@@ -29,11 +29,6 @@ export const StegMeny = () => {
       </li>
 
       */}
-      {process.env.NODE_ENV !== 'production' && (
-        <li>
-          <NavLink to="brev">Brev</NavLink>
-        </li>
-      )}
     </StegMenyWrapper>
   )
 }

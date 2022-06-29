@@ -49,4 +49,4 @@ fun Route.vedtakRoute(service: VedtakService) {
 
 }
 
-data class UnderkjennVedtakClientRequest(val kommentar:String, val valgtBegrunnelse: String)
+data class UnderkjennVedtakClientRequest(val kommentar: String, val valgtBegrunnelse: String)

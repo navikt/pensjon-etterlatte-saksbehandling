@@ -4,7 +4,7 @@ import { logger } from "../utils/logger";
 
 
 const options: any = () => ({
-    parseReqBody: false,    
+    parseReqBody: true,
     proxyReqOptDecorator: async (options: any, req: any) => {
         const oboToken = await getOboToken(req.headers.authorization);
         options.headers.Authorization = `Bearer ${oboToken}`;

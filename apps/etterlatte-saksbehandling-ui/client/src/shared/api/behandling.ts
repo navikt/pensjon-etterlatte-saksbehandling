@@ -69,8 +69,8 @@ export const underkjennVedtak = async (behandlingId: string): Promise<IApiRespon
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        'kommentar': 'Ikkje bra',
-        'valgtBegrunnelse': 'Inngangsvilkår feilvurdert'
+        kommentar: 'Ikkje bra',
+        valgtBegrunnels: 'Inngangsvilkår feilvurdert'
       })
     })
     return {

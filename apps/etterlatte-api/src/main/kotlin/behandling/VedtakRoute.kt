@@ -14,7 +14,7 @@ val logger = LoggerFactory.getLogger("no.nav.etterlatte.behandling.VedtakRoute")
 fun Route.vedtakRoute(service: VedtakService) {
 
     route("fattvedtak") {
-        post("{behandlingId}"){
+        post("{behandlingId}") {
             val behandlingId = call.parameters["behandlingId"]
             if (behandlingId == null) {
                 call.response.status(HttpStatusCode(400, "Bad request"))
@@ -25,7 +25,7 @@ fun Route.vedtakRoute(service: VedtakService) {
         }
     }
     route("attestervedtak") {
-        post("{behandlingId}"){
+        post("{behandlingId}") {
             val behandlingId = call.parameters["behandlingId"]
             if (behandlingId == null) {
                 call.response.status(HttpStatusCode(400, "Bad request"))
@@ -37,13 +37,12 @@ fun Route.vedtakRoute(service: VedtakService) {
     }
 
     route("underkjennvedtak") {
-        post("{behandlingId}"){
+        post("{behandlingId}") {
             try {
                 val behandlingId = call.parameters["behandlingId"]
                 logger.info("Skal underkjenne vedtak i behandling $behandlingId")
 
-                val body = UnderkjennVedtakClientRequest("Ikkje bra", "Inngangsvilkår feilvurdert")
-                //val body = call.receive<UnderkjennVedtakClientRequest>()
+                val body = call.receive<UnderkjennVedtakClientRequest>()
 
                 logger.info("Underkjennes fordi $body")
 
@@ -51,10 +50,17 @@ fun Route.vedtakRoute(service: VedtakService) {
                     call.response.status(HttpStatusCode(400, "Bad request"))
                     call.respond("Behandlings-id mangler")
                 } else {
-                    call.respond(service.underkjennVedtak(behandlingId, body.valgtBegrunnelse, body.kommentar, getAccessToken(call)))
+                    call.respond(
+                        service.underkjennVedtak(
+                            behandlingId,
+                            body.valgtBegrunnelse,
+                            body.kommentar,
+                            getAccessToken(call)
+                        )
+                    )
                     logger.info("Underkjenningsendepunkt kalt")
                 }
-            } catch (ex: Exception){
+            } catch (ex: Exception) {
                 logger.error("underkjenning feilet", ex)
                 throw ex
             }

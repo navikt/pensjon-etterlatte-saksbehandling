@@ -30,7 +30,7 @@ const IngenInnkommendeBrevRad = styled.td`
 export const Brev = () => {
   const { behandlingId } = useParams()
   const { soeknadMottattDato, kommerSoekerTilgode} = useContext(AppContext).state.behandlingReducer
-  const fnr = kommerSoekerTilgode.familieforhold?.soeker?.fnr
+  const fnr = kommerSoekerTilgode?.familieforhold?.soeker?.fnr || ''
 
   const [brevListe, setBrevListe] = useState<any[]>([])
   const [innkommendeBrevListe, setInnkommendeBrevListe] = useState<Journalpost[]>([])

@@ -14,11 +14,12 @@ import java.util.*
 
 class JournalpostClient(
     private val httpClient: HttpClient,
-    private val apiUrl: String,
+    private val restApiUrl: String,
+    private val graphqlApiUrl: String
 ): JournalpostService {
 
     override suspend fun hentInnkommendeBrevInnhold(journalpostId: String, dokumentInfoId: String, accessToken: String): ByteArray = try {
-        httpClient.get("$apiUrl/$journalpostId/$dokumentInfoId/ARKIV") {
+        httpClient.get("$restApiUrl/$journalpostId/$dokumentInfoId/ARKIV") {
             header("Authorization", "Bearer $accessToken")
             header("Content-Type", "application/json")
             header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
@@ -40,7 +41,7 @@ class JournalpostClient(
         )
 
         return retry<JournalpostResponse> {
-            httpClient.post("https://saf-q1.dev.intern.nav.no/graphql") { // Bytt til dynamisk url
+            httpClient.post(graphqlApiUrl) {
                 header("Authorization", "Bearer $accessToken")
                 accept(ContentType.Application.Json)
                 body = TextContent(request.toJson(), ContentType.Application.Json)

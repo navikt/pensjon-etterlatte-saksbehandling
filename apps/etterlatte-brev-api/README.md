@@ -10,7 +10,7 @@ Ktor og Rapid app for å håndtere generering av brev, brevmaler og sende videre
 
 Legg f. eks til følgende environment variabler i IntelliJ:
 
-`DB_JDBC_URL=jdbc:postgresql://localhost:5432/postgres;DB_USERNAME=postgres;DB_PASSWORD=postgres;BREV_LOCAL_DEV=true;KAFKA_RAPID_TOPIC=brev;KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:51336;KAFKA_CONSUMER_GROUP_ID=0;NAIS_APP_NAME=etterlatte-brev-distribusjon;HTTP_PORT=8085;ETTERLATTE_PDFGEN_URL=http://localhost:8081/api/v1/genpdf/brev`
+`DB_JDBC_URL=jdbc:postgresql://localhost:5432/postgres;DB_USERNAME=postgres;DB_PASSWORD=postgres;BREV_LOCAL_DEV=true;KAFKA_RAPID_TOPIC=brev;KAFKA_BOOTSTRAP_SERVERS=127.0.0.1:51336;KAFKA_CONSUMER_GROUP_ID=0;NAIS_APP_NAME=etterlatte-brev-distribusjon;HTTP_PORT=8085;ETTERLATTE_PDFGEN_URL=http://localhost:8081/api/v1/genpdf/brev;HENT_DOKUMENT_URL=https://saf-q1.dev.intern.nav.no/rest/hentdokument;SAF_GRAPHQL_URL=https://saf-q1.dev.intern.nav.no/graphql;`
 
 #### Hvordan kjøre brev-api
 

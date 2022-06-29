@@ -1,3 +1,5 @@
+import { JournalpostResponse } from "../../components/behandling/types";
+
 const path = process.env.REACT_APP_VEDTAK_URL
 
 export const hentMaler = async (): Promise<any> => await fetch(`${path}/brev/maler`).then((res) => res.json())
@@ -7,8 +9,8 @@ export const hentMottakere = async (): Promise<any> => await fetch(`${path}/brev
 export const hentBrevForBehandling = async (behandlingId: string): Promise<any> =>
   await fetch(`${path}/brev/behandling/${behandlingId}`).then((res) => res.json())
 
-export const hentInnkommendeBrev = async (): Promise<any> =>
-    await fetch(`${path}/brev/innkommende`).then((res) => res.json())
+export const hentInnkommendeBrev = async (fnr: string): Promise<JournalpostResponse> =>
+    await fetch(`${path}/brev/innkommende/${fnr}`).then((res) => res.json())
 
 export const hentInnkommendeBrevInnhold = async (journalpostId: string, dokumentInfoId: string): Promise<Blob> =>
     await fetch(`${path}/brev/innkommende/${journalpostId}/${dokumentInfoId}`, { method: 'POST' })

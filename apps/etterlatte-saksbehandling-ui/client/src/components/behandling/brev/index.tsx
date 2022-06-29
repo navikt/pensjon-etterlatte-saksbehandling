@@ -1,29 +1,39 @@
 import { Content, ContentHeader } from '../../../shared/styled'
 import { useContext, useEffect, useState } from 'react'
-import { Alert, BodyLong, Button, ContentContainer, Heading, Modal, Table, Tag } from "@navikt/ds-react";
+import { Alert, Button, ContentContainer, Heading, Table, Tag } from "@navikt/ds-react";
 import BrevModal from "./brev-modal";
-import { Findout, Information, Notes, Success } from '@navikt/ds-icons'
+import {  Information, Success } from '@navikt/ds-icons'
 import NyttBrev from "./nytt-brev/nytt-brev";
 import { Border, HeadingWrapper } from "../soeknadsoversikt/styled";
 import { BehandlingsStatusSmall, IBehandlingsStatus } from "../behandlings-status";
 import { BehandlingsTypeSmall, IBehandlingsType } from "../behandlings-type";
 import { BehandlingHandlingKnapper } from "../handlinger/BehandlingHandlingKnapper";
 import {
-    ferdigstillBrev, genererPdf,
-    hentBrevForBehandling, hentInnkommendeBrev, hentInnkommendeBrevInnhold,
+    ferdigstillBrev,
+    hentBrevForBehandling, hentInnkommendeBrev,
     slettBrev
 } from "../../../shared/api/brev";
 import { useParams } from "react-router-dom";
 import { Soeknadsdato } from "../soeknadsoversikt/soeknadoversikt/Soeknadsdato";
 import { AppContext } from "../../../store/AppContext";
-import { PdfVisning } from "./pdf-visning";
+import { Journalpost } from "../types";
+import { formatterDato } from "../../../utils";
+import InnkommendeBrevModal from "./innkommende-brev-modal";
+import styled from 'styled-components'
+
+const IngenInnkommendeBrevRad = styled.td`
+  text-align: center;
+  padding-top: 16px;
+  font-style: italic;
+`
 
 export const Brev = () => {
   const { behandlingId } = useParams()
-  const { soeknadMottattDato } = useContext(AppContext).state.behandlingReducer
+  const { soeknadMottattDato, kommerSoekerTilgode} = useContext(AppContext).state.behandlingReducer
+  const fnr = kommerSoekerTilgode.familieforhold?.soeker?.fnr
 
   const [brevListe, setBrevListe] = useState<any[]>([])
-  const [innkommendeBrevListe, setInnkommendeBrevListe] = useState<any[]>([])
+  const [innkommendeBrevListe, setInnkommendeBrevListe] = useState<Journalpost[]>([])
   const [error, setError] = useState(false)
   const [innkommendeError, setInnkommendeError] = useState(false)
 
@@ -32,8 +42,8 @@ export const Brev = () => {
         .then(res => setBrevListe(res))
         .catch(() => setError(true))
 
-      hentInnkommendeBrev()
-        .then(rest => setInnkommendeBrevListe(rest.dokumentoversiktBruker.journalposter))
+    hentInnkommendeBrev(fnr)
+        .then(res => setInnkommendeBrevListe(res.data.dokumentoversiktBruker.journalposter))
         .catch(() => setInnkommendeError(true))
   }, [])
 
@@ -96,22 +106,6 @@ export const Brev = () => {
       )
     }
   }
-
-    const [fileURL, setFileURL] = useState<string>('')
-    const [fileError, setFileError] = useState<string>()
-    const [isOpen, setIsOpen] = useState<boolean>(false)
-
-    const open = (journalpostId: string, dokumentInfoId: string) => {
-        setIsOpen(true)
-
-        hentInnkommendeBrevInnhold(journalpostId, dokumentInfoId)
-            .then((file) => URL.createObjectURL(file))
-            .then((url) => setFileURL(url))
-            .catch((e) => setFileError(e.message))
-            .finally(() => {
-                if (fileError) URL.revokeObjectURL(fileURL)
-            })
-    }
 
   return (
       <Content>
@@ -188,7 +182,6 @@ export const Brev = () => {
                           <Table.HeaderCell>ID</Table.HeaderCell>
                           <Table.HeaderCell>Filnavn</Table.HeaderCell>
                           <Table.HeaderCell>Avsender</Table.HeaderCell>
-                          {/* TODO: Burde vi vise hvilken rolle mottakeren har? Søker, innsender, etc..? */}
                           <Table.HeaderCell>Mottatt</Table.HeaderCell>
                           <Table.HeaderCell>Handlinger</Table.HeaderCell>
                       </Table.Row>
@@ -200,18 +193,24 @@ export const Brev = () => {
                               <Table.DataCell>{brev.journalpostId}</Table.DataCell>
                               <Table.DataCell>{brev.tittel}</Table.DataCell>
                               <Table.DataCell>
-                                  {brev.journalposttype}
+                                  {brev.avsenderMottaker.navn}
                               </Table.DataCell>
                               <Table.DataCell>
-                                  {brev.tema}
+                                  {formatterDato(new Date(brev.datoOpprettet))}
                               </Table.DataCell>
                               <Table.DataCell>
-                                  <Button variant={'secondary'} size={'small'} onClick={() => open(brev.journalpostId, brev.dokumenter[0].dokumentInfoId)}>
-                                       <Findout/>
-                                  </Button>
+                                  <InnkommendeBrevModal tittel={brev.tittel} journalpostId={brev.journalpostId} dokumentInfoId={brev.dokumenter[0].dokumentInfoId} />
                               </Table.DataCell>
                           </Table.Row>
                       ))}
+
+                      {innkommendeBrevListe.length === 0 &&
+                          <Table.Row>
+                              <IngenInnkommendeBrevRad colSpan={5}>
+                                  Ingen innkommende brev ble funnet
+                              </IngenInnkommendeBrevRad>
+                          </Table.Row>
+                      }
                   </Table.Body>
               </Table>
 
@@ -222,20 +221,6 @@ export const Brev = () => {
               )}
           </ContentContainer>
         <Border/>
-          <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-              <Modal.Content>
-                  {error && (
-                      <BodyLong>
-                          En feil har oppstått ved henting av PDF:
-                          <br />
-                          <code>{error}</code>
-                      </BodyLong>
-                  )}
-
-                  <PdfVisning fileUrl={fileURL} error={fileError} />
-              </Modal.Content>
-          </Modal>
-
         <BehandlingHandlingKnapper>
           <Button variant={'primary'} disabled={true}>
             Fullfør behandling

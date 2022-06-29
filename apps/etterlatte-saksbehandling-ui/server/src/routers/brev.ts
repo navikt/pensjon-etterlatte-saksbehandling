@@ -16,14 +16,12 @@ router.get('/behandling/:behandlingId', async (req: Request, res: Response) => {
   res.send(await data)
 })
 
-router.get('/innkommende', async (req: Request, res: Response) => {
-    const path = `${apiUrl}/brev/innkommende`
-
-    const data = await fetch(path)
+router.get('/innkommende/:fnr', async (req: Request, res: Response) => {
+    const path = `${apiUrl}/brev/innkommende/${req.params.fnr}`
+    const response = await fetch(path)
         .then((res) => res.json())
         .catch(() => res.send(500))
-
-    res.send(await data)
+    res.send(await response)
 })
 
 router.post('/innkommende/:journalpostId/:dokumentInfoId', async (req: Request, res: Response) => {

@@ -90,7 +90,11 @@ fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService
         }
 
         get("innkommende") {
-            val accessToken = getAccessToken(call)
+            val accessToken = try {
+                getAccessToken(call)
+            } catch (ex: Exception) {
+                "TODO: Midlertidig fiks så appen ikke krasjer lokalt. Ikke tillatt kall uten access token..."
+            }
 
             val innhold = journalpostService.hentInnkommendeBrev("29018322402", BrukerIdType.FNR, accessToken)
 

@@ -11,10 +11,9 @@ type Props = {
 }
 
 export const Behandlingsoppsummering: React.FC<Props> = ({ behandlingsInfo, beslutning }) => {
-  const visOversikt = beslutning === undefined
-
   const visGodkjent = behandlingsInfo.status === IBehandlingStatus.ATTESTERT || beslutning === IBeslutning.godkjenn
   const visUnderkjent = behandlingsInfo.status === IBehandlingStatus.RETURNERT || beslutning === IBeslutning.underkjenn
+  const visOversikt = beslutning === undefined && visGodkjent === false && visUnderkjent === false
 
   return (
     <>

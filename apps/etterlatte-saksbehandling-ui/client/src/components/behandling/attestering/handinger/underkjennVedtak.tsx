@@ -4,18 +4,22 @@ import { ButtonWrapper } from '../styled'
 import { GeneriskModal } from '../modal'
 import { underkjennVedtak } from '../../../../shared/api/behandling'
 
-export const UnderkjennVedtak = ({ behandlingId }: { behandlingId?: string }) => {
+type Props = {
+  behandlingId: string
+  kommentar: string
+  valgtBegrunnelse: string
+}
+
+export const UnderkjennVedtak: React.FC<Props> = ({ behandlingId, kommentar, valgtBegrunnelse }) => {
   const [modalisOpen, setModalisOpen] = useState(false)
 
   const underkjenn = () => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
-    const result = underkjennVedtak(behandlingId).then((response) => {
-      console.log(response)
+    underkjennVedtak(behandlingId, kommentar, valgtBegrunnelse).then((response) => {
       if (response.status === 200) {
         window.location.reload()
       }
     })
-    console.log(result)
   }
 
   return (

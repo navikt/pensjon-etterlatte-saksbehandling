@@ -59,9 +59,11 @@ export const attesterVedtak = async (behandlingId: string): Promise<IApiResponse
   }
 }
 
-export const underkjennVedtak = async (behandlingId: string): Promise<IApiResponse<any>> => {
-  console.log('underkjennurl: ', `${path}/api/underkjennvedtak/${behandlingId}`)
-
+export const underkjennVedtak = async (
+  behandlingId: string,
+  kommentar: string,
+  valgtBegrunnelse: string
+): Promise<IApiResponse<any>> => {
   try {
     const result: Response = await fetch(`${path}/api/underkjennvedtak/${behandlingId}`, {
       method: 'post',
@@ -69,11 +71,10 @@ export const underkjennVedtak = async (behandlingId: string): Promise<IApiRespon
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        kommentar: 'Ikkje bra',
-        valgtBegrunnelse: 'Inngangsvilkår feilvurdert',
+        kommentar: kommentar,
+        valgtBegrunnelse: valgtBegrunnelse,
       }),
     })
-    console.log('result', result)
     return {
       status: result.status,
     }

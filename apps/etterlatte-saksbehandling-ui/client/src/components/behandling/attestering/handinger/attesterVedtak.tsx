@@ -9,13 +9,11 @@ export const AttesterVedtak = ({ behandlingId }: { behandlingId?: string }) => {
 
   const attester = () => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
-    const result = attesterVedtak(behandlingId).then((response) => {
-      console.log(response)
+    attesterVedtak(behandlingId).then((response) => {
       if (response.status === 200) {
         window.location.reload()
       }
     })
-    console.log(result)
   }
 
   return (

@@ -4,6 +4,7 @@ import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import io.ktor.client.request.*
+import journalpost.JournalpostClient
 import journalpost.JournalpostServiceMock
 import no.nav.etterlatte.BrevService
 import no.nav.etterlatte.DataSourceBuilder
@@ -28,12 +29,11 @@ class ApplicationBuilder {
     private val datasourceBuilder = DataSourceBuilder(env)
     private val db = BrevRepository.using(datasourceBuilder.dataSource)
     private val brevService = BrevService(db, pdfGenerator, vedtakService, ::sendToRapid)
-    private val journalpostService = JournalpostServiceMock()
-//        if (localDevelopment) JournalpostServiceMock() else JournalpostClient(
-//            pdfHttpClient(),
-//            env["HENT_DOKUMENT_URL"]!!,
-//            env["SAF_GRAPHQL_URL"]!!
-//        )
+    private val journalpostService = if (localDevelopment) JournalpostServiceMock() else JournalpostClient(
+        pdfHttpClient(),
+        env["HENT_DOKUMENT_URL"]!!,
+        env["SAF_GRAPHQL_URL"]!!
+    )
 
     private val rapidsConnection: RapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))

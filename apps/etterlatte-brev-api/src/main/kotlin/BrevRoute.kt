@@ -9,8 +9,12 @@ import journalpost.JournalpostService
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
+import org.slf4j.LoggerFactory
 
 fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService) {
+
+    val logger = LoggerFactory.getLogger(BrevService::class.java)
+
     route("brev") {
         get("maler") {
             val maler = listOf(
@@ -90,20 +94,30 @@ fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService
         }
 
         get("innkommende/{fnr}") {
-//            val accessToken = getAccessToken(call)
+            val accessToken = try {
+                getAccessToken(call)
+            } catch (ex: Exception){
+                logger.error("Bearer not found", ex)
+                throw ex
+            }
             val fnr = call.parameters["fnr"]!!
 
-            val innhold = journalpostService.hentInnkommendeBrev(fnr, BrukerIdType.FNR, "todo: benytt access token")
+            val innhold = journalpostService.hentInnkommendeBrev(fnr, BrukerIdType.FNR, accessToken)
 
             call.respond(innhold)
         }
 
         post("innkommende/{journalpostId}/{dokumentInfoId}") {
-//            val accessToken = getAccessToken(call)
+            val accessToken = try {
+                getAccessToken(call)
+            } catch (ex: Exception){
+                logger.error("Bearer not found", ex)
+                throw ex
+            }
 
             val journalpostId = call.parameters["journalpostId"]!!
             val dokumentInfoId = call.parameters["dokumentInfoId"]!!
-            val innhold = journalpostService.hentInnkommendeBrevInnhold(journalpostId, dokumentInfoId, "todo: benytt access token")
+            val innhold = journalpostService.hentInnkommendeBrevInnhold(journalpostId, dokumentInfoId, accessToken)
 
             call.respond(innhold)
         }

@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.typer.Sak
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -11,6 +12,7 @@ data class Oppgave(
     val behandlingsId: UUID,
     val sakId: Long,
     val status: BehandlingStatus?,
+    val oppgaveStatus: OppgaveStatus?,
     val soeknadType: String,
     val behandlingType: BehandlingType,
     val regdato: String,
@@ -40,6 +42,7 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient) {
                 it.behandlingId,
                 it.sak.id,
                 it.behandlingStatus,
+                it.oppgaveStatus,
                 it.sak.sakType,
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 it.regdato.toLocalDateTime().toString(),

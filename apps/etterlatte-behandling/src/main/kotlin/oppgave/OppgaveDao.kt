@@ -2,6 +2,7 @@ package no.nav.etterlatte.oppgave
 
 import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.sak.Sak
 import java.time.LocalDate
 import java.time.ZoneId
@@ -16,6 +17,7 @@ enum class Rolle(){
 data class Oppgave(
     val behandlingId: UUID,
     val behandlingStatus: BehandlingStatus,
+    val oppgaveStatus: OppgaveStatus,
     val sak: Sak,
     val regdato: ZonedDateTime,
     val fristDato: LocalDate,
@@ -33,7 +35,7 @@ class OppgaveDao(private val datasource: DataSource) {
 
         datasource.connection.use {
             val stmt =  it.prepareStatement("""
-                |SELECT b.id, b.sak_id, soekand_mottatt_dato, fnr, sakType, status 
+                |SELECT b.id, b.sak_id, soekand_mottatt_dato, fnr, sakType, status, oppgave_status
                 |FROM behandling b inner join sak s on b.sak_id = s.id  
                 |where status in ${aktuelleStatuser.joinToString(separator = ", ", prefix = "(", postfix = ")") { "'${it.name}'" }}""".trimMargin().also {
                     println(it)
@@ -43,6 +45,7 @@ class OppgaveDao(private val datasource: DataSource) {
                 val mottattDato = getTimestamp("soekand_mottatt_dato").toLocalDateTime().atZone(ZoneId.of("UTC"))
                 Oppgave(getObject("id") as UUID,
                     BehandlingStatus.valueOf(getString("status")),
+                    OppgaveStatus.valueOf(getString("oppgave_status")),
                     Sak(getString("fnr"), getString("sakType"), getLong("sak_id")),
                     mottattDato,
                     mottattDato.toLocalDate().plusMonths(1)
@@ -52,7 +55,5 @@ class OppgaveDao(private val datasource: DataSource) {
             }
         }
     }
-
-
 
 }

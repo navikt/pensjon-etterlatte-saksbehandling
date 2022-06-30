@@ -90,24 +90,20 @@ fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService
         }
 
         get("innkommende/{fnr}") {
-            val accessToken = try {
-                getAccessToken(call)
-            } catch (ex: Exception) {
-                "TODO: Midlertidig fiks så appen ikke krasjer lokalt. Ikke tillatt kall uten access token..."
-            }
+//            val accessToken = getAccessToken(call)
             val fnr = call.parameters["fnr"]!!
 
-            val innhold = journalpostService.hentInnkommendeBrev(fnr, BrukerIdType.FNR, accessToken)
+            val innhold = journalpostService.hentInnkommendeBrev(fnr, BrukerIdType.FNR, "todo: benytt access token")
 
             call.respond(innhold)
         }
 
         post("innkommende/{journalpostId}/{dokumentInfoId}") {
-            val accessToken = getAccessToken(call)
+//            val accessToken = getAccessToken(call)
 
             val journalpostId = call.parameters["journalpostId"]!!
             val dokumentInfoId = call.parameters["dokumentInfoId"]!!
-            val innhold = journalpostService.hentInnkommendeBrevInnhold(journalpostId, dokumentInfoId, accessToken)
+            val innhold = journalpostService.hentInnkommendeBrevInnhold(journalpostId, dokumentInfoId, "todo: benytt access token")
 
             call.respond(innhold)
         }

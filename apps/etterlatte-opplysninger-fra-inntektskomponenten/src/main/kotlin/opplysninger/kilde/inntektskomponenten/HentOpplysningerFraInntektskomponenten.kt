@@ -44,7 +44,7 @@ internal class HentOpplysningerFraInntektskomponenten(
                 )
             ) {
                 print("fnr ${packet["fnr"].asText()} - doedsdato ${packet["doedsdato"].asText()}")
-                if(!packet["doedsdato"].isNull && !packet["fnr"].isNull) {
+                try {
                     val fnr = Foedselsnummer.of(packet["fnr"].asText())
                     val doedsdato = LocalDate.parse(packet["doedsdato"].asText())
                     val arbeidsforhold = aaregService.hentArbeidsforhold(fnr)
@@ -52,10 +52,9 @@ internal class HentOpplysningerFraInntektskomponenten(
                     val opplysninger = opplysningsBygger.byggOpplysninger(inntektliste, arbeidsforhold)
                     packet["opplysning"] = opplysninger
                     context.publish(packet.toJson())
-                } else {
-                    logger.error("Kunne ikke hente opplysinger pga manglende fnr/doedsdato")
+                } catch(e: Exception) {
+                    logger.info(e.message)
                 }
-
             }
 
         }

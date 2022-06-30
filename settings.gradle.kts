@@ -2,7 +2,6 @@ rootProject.name = "pensjon-etterlatte-saksbehandling"
 
 include(
     "apps:etterlatte-fordeler",
-    "apps:etterlatte-attestering",
     "apps:etterlatte-overvaaking",
     "apps:etterlatte-pdltjenester",
     "apps:etterlatte-api",

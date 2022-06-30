@@ -7,9 +7,6 @@ Monorepo for ny saksbehandlingsløsning for ytelser til etterlatte
 [etterlatte-api](apps/etterlatte-api) \
 // TODO
 
-[etterlatte-attestering](apps/etterlatte-attestering) \
-// TODO
-
 [etterlatte-avkorting](apps/etterlatte-avkorting) \
 // TODO
 

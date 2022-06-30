@@ -13,7 +13,6 @@ import { ColorTag } from './styled'
 import SaksbehandlerTildelKnapp from './filtere/SaksbehandlerTildelKnapp'
 import HandlingerKnapp from './filtere/HandlingerKnapp'
 
-
 export const kolonner: ReadonlyArray<Column<IOppgave>> = [
   {
     Header: 'Reg. dato',
@@ -59,10 +58,12 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
   },
   {
     Header: 'Status',
-    accessor: 'status',
+    accessor: 'oppgaveStatus',
     filter: 'exact',
-    Cell: ({ value: status }) => {
-      return <span>{status ? statusFilter[status as StatusFilter]?.navn ?? status : 'Ukjent'}</span>
+    Cell: ({ value: oppgaveStatus }) => {
+      return (
+        <span>{oppgaveStatus ? statusFilter[oppgaveStatus as StatusFilter]?.navn ?? oppgaveStatus : 'Ukjent'}</span>
+      )
     },
   },
   {

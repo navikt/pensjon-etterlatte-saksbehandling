@@ -9,7 +9,7 @@ export function globalFilterFunction(rows: Row<IOppgave>[], columnIds: IdType<IO
       const rowValue = row.values[id]
       if (id === 'regdato' || id === 'fristdato') {
         return format(rowValue, 'dd.MM.yyyy') === filterValue
-      } else if (id === 'enhet' || id === 'status' || id === 'prioritet') {
+      } else if (id === 'enhet' || id === 'oppgaveStatus' || id === 'prioritet') {
         return getContainsSelectFilter(id, rowValue, filterValue)
       }
 

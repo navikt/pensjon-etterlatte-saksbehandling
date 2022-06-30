@@ -7,7 +7,7 @@ export interface IOppgave {
   soeknadType: SoeknadTypeFilter
   behandlingType: BehandlingTypeFilter
   beskrivelse: string
-  status: StatusFilter
+  oppgaveStatus: StatusFilter
   saksbehandler: string
   handling: Handlinger
 }
@@ -44,26 +44,16 @@ export const soeknadTypeFilter: Record<SoeknadTypeFilter, IPar> = {
 
 export enum StatusFilter {
   VELG = 'VELG',
-  GYLDIG_SOEKNAD = 'GYLDIG_SOEKNAD',
-  IKKE_GYLDIG_SOEKNAD = 'IKKE_GYLDIG_SOEKNAD',
-  UNDER_BEHANDLING = 'UNDER_BEHANDLING',
-  FATTET_VEDTAK = 'FATTET_VEDTAK',
+  NY = 'NY',
+  TIL_ATTESTERING = 'TIL_ATTESTERING',
   RETURNERT = 'RETURNERT',
-  ATTESTERT = 'ATTESTERT',
-  IVERKSATT = 'IVERKSATT',
-  AVBRUTT = 'AVBRUTT',
 }
 
 export const statusFilter: Record<StatusFilter, IPar> = {
   VELG: { id: 'VELG', navn: 'Velg' },
-  GYLDIG_SOEKNAD: { id: 'GYLDIG_SOEKNAD', navn: 'Gyldig søknad' },
-  IKKE_GYLDIG_SOEKNAD: { id: 'IKKE_GYLDIG_SOEKNAD', navn: 'Ikke gyldig søknad' },
-  UNDER_BEHANDLING: { id: 'UNDER_BEHANDLING', navn: 'Under behandling' },
-  FATTET_VEDTAK: { id: 'FATTET_VEDTAK', navn: 'Fattet vedtak' },
+  NY: { id: 'NY', navn: 'Ny' },
+  TIL_ATTESTERING: { id: 'TIL_ATTESTERING', navn: 'Til attestering' },
   RETURNERT: { id: 'RETURNERT', navn: 'Returnert' },
-  ATTESTERT: { id: 'ATTESTERT', navn: 'Attestert' },
-  IVERKSATT: { id: 'IVERKSATT', navn: 'Iverksatt' },
-  AVBRUTT: { id: 'AVBRUTT', navn: 'Avbrutt' },
 }
 
 export enum SaksbehandlerFilter {

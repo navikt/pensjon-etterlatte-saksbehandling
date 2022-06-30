@@ -24,13 +24,14 @@ export interface IOppgaveFelt {
 
 export interface IOppgaveFelter {
   [key: string]: IOppgaveFelt
+
   regdato: IOppgaveFelt
   fristdato: IOppgaveFelt
   fnr: IOppgaveFelt
   behandlingType: IOppgaveFelt
   soeknadType: IOppgaveFelt
   beskrivelse: IOppgaveFelt
-  status: IOppgaveFelt
+  oppgaveStatus: IOppgaveFelt
   saksbehandler: IOppgaveFelt
 }
 
@@ -95,8 +96,8 @@ export const initialOppgaveFelter = (saksbehandlerNavn: string): IOppgaveFelter 
       noekkel: 'beskrivelse',
       label: 'Beskrivelse',
     },
-    status: {
-      noekkel: 'status',
+    oppgaveStatus: {
+      noekkel: 'oppgaveStatus',
       label: 'Status',
       filter: {
         type: 'select',

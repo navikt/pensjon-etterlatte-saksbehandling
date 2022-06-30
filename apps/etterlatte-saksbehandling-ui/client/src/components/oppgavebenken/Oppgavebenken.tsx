@@ -91,7 +91,7 @@ function mapOppgaveResponse(data: any): IOppgave {
     fristdato: new Date(data.fristdato),
     fnr: data.fnr,
     beskrivelse: data.beskrivelse,
-    status: data.status.toUpperCase() as StatusFilter,
+    oppgaveStatus: data.oppgaveStatus.toUpperCase() as StatusFilter,
     saksbehandler: data.saksbehandler,
     handling: data.handling.toUpperCase() as Handlinger,
   }

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
@@ -34,7 +35,8 @@ class BehandlingAggregat(
                 null,
                 null,
                 null,
-                BehandlingStatus.OPPRETTET
+                BehandlingStatus.OPPRETTET,
+                OppgaveStatus.NY,
             )
                 .also {
                     behandlinger.opprett(it)
@@ -91,7 +93,8 @@ class BehandlingAggregat(
 
         lagretBehandling = lagretBehandling.copy(
             gyldighetsproeving = gyldighetsproeving,
-            status = status
+            status = status,
+            oppgaveStatus = OppgaveStatus.NY
         )
         behandlinger.lagreGyldighetsproving(lagretBehandling)
         logger.info("behandling ${lagretBehandling.id} i sak ${lagretBehandling.sak} er gyldighetsprøvd")
@@ -104,16 +107,26 @@ class BehandlingAggregat(
             }
     }
 
-
     fun serialiserbarUtgave() = lagretBehandling.copy()
+
     fun registrerVedtakHendelse(hendelse: String) {
-        lagretBehandling = lagretBehandling.copy(status = when(hendelse){
-            "FATTET" -> BehandlingStatus.FATTET_VEDTAK
-            "ATTESTERT" -> BehandlingStatus.ATTESTERT
-            "UNDERKJENT" -> BehandlingStatus.RETURNERT
-            "ENDRET" -> BehandlingStatus.UNDER_BEHANDLING
-            else -> throw IllegalStateException("Behandling ${lagretBehandling.id} forstår ikke vedtakhendelse $hendelse")
-        })
+        lagretBehandling = lagretBehandling.copy(
+            status = when (hendelse) {
+                "FATTET" -> BehandlingStatus.FATTET_VEDTAK
+                "ATTESTERT" -> BehandlingStatus.ATTESTERT
+                "UNDERKJENT" -> BehandlingStatus.RETURNERT
+                "ENDRET" -> BehandlingStatus.UNDER_BEHANDLING
+                else -> throw IllegalStateException("Behandling ${lagretBehandling.id} forstår ikke vedtakhendelse $hendelse")
+            },
+            oppgaveStatus = when (hendelse) {
+                "FATTET" -> OppgaveStatus.TIL_ATTESTERING
+                "UNDERKJENT" -> OppgaveStatus.RETURNERT
+                else -> throw IllegalStateException("Behandling ${lagretBehandling.id} forstår ikke vedtakhendelse $hendelse")
+            }
+        )
         behandlinger.lagreStatus(lagretBehandling)
+        behandlinger.lagreOppgaveStatus(lagretBehandling)
     }
+
+
 }

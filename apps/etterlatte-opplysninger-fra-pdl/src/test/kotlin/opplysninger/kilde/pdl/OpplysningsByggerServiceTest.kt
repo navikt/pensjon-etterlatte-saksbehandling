@@ -78,6 +78,7 @@ internal class OpplysningsByggerServiceTest {
             sivilstatus = sivilstatus,
             utland = utland,
             familieRelasjon = familieRelasjon,
+            avdoedesBarn = null,
             vergemaalEllerFremtidsfullmakt = null
             )
 

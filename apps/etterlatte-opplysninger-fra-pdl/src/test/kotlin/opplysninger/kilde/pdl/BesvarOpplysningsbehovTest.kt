@@ -48,6 +48,7 @@ class BesvarOpplysningsbehovTest {
                 sivilstatus = sivilstatus,
                 utland = utland,
                 familieRelasjon = familieRelasjon,
+                avdoedesBarn = null,
                 vergemaalEllerFremtidsfullmakt = null
                 )
 

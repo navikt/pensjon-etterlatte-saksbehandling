@@ -13,7 +13,7 @@ object Kotlinx {
 }
 
 object Ktor {
-    private const val version = "1.6.1"
+    private const val version = "1.6.8"
 
     const val OkHttp = "io.ktor:ktor-client-okhttp:$version"
     const val ServerNetty = "io.ktor:ktor-server-netty:$version"
@@ -82,4 +82,15 @@ object Kotest {
     private const val version = "4.6.3"
 
     const val AssertionsCore = "io.kotest:kotest-assertions-core:$version"
+}
+
+object Database {
+    const val HikariCP = "com.zaxxer:HikariCP:3.4.5"
+    const val FlywayDB = "org.flywaydb:flyway-core:8.5.10"
+    const val Postgresql = "org.postgresql:postgresql:42.2.5"
+}
+
+object TestContainer {
+    const val Jupiter = "org.testcontainers:junit-jupiter:1.15.3"
+    const val Postgresql = "org.testcontainers:postgresql:1.16.0"
 }

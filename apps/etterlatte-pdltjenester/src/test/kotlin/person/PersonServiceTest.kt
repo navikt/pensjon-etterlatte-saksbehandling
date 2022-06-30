@@ -9,18 +9,9 @@ import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.mockResponse
-import no.nav.etterlatte.pdl.ParallelleSannheterKlient
-import no.nav.etterlatte.pdl.PdlHentPerson
-import no.nav.etterlatte.pdl.PdlKlient
-import no.nav.etterlatte.pdl.PdlPersonResponse
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import no.nav.etterlatte.pdl.*
+import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.*
 
 internal class PersonServiceTest {
 
@@ -31,9 +22,11 @@ internal class PersonServiceTest {
     @BeforeEach
     fun beforeEach() {
         val personResponse: PdlPersonResponse = mockResponse("/pdl/person.json")
+        val personBolkResponse: PdlPersonResponseBolk = mockResponse("/pdl/personBolk.json")
         val hentPerson: PdlHentPerson = personResponse.data?.hentPerson!!
 
         coEvery { pdlKlient.hentPerson(any(), any()) } returns personResponse
+        coEvery { pdlKlient.hentPersonBolk(any(), any()) } returns personBolkResponse
         coEvery { ppsKlient.avklarNavn(any()) } returns hentPerson.navn.first()
         coEvery { ppsKlient.avklarAdressebeskyttelse(any()) } returns null
         coEvery { ppsKlient.avklarStatsborgerskap(any()) } returns hentPerson.statsborgerskap?.first()
@@ -48,6 +41,21 @@ internal class PersonServiceTest {
     @AfterEach
     fun afterEach() {
         clearAllMocks()
+    }
+
+    @Test
+    fun`skal mappe avdoed med barnekull`() {
+        val person = runBlocking {
+            personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.AVDOED))
+        }
+
+        val expectedBarnFnr = listOf("70078749472", "06067018735")
+
+        assertNotNull(person.avdoedesBarn)
+        assertEquals(2, person.avdoedesBarn?.size)
+        assertTrue(person.avdoedesBarn?.get(0)?.foedselsnummer?.value in expectedBarnFnr)
+        assertTrue(person.avdoedesBarn?.get(1)?.foedselsnummer?.value in expectedBarnFnr)
+
     }
 
     @Test

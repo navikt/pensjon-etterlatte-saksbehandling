@@ -40,7 +40,7 @@ internal class LesBereningsmeldingTest {
     }
     @Test
     fun beregnResultat() {
-        val beregningsperioder = BeregningService().beregnResultat(emptyList(), YearMonth.of(2021, 2)).beregningsperioder
+        val beregningsperioder = BeregningService().beregnResultat(null, YearMonth.of(2021, 2)).beregningsperioder
         beregningsperioder[0].also {
             Assertions.assertEquals(YearMonth.of(2021,2), it.datoFOM)
             Assertions.assertEquals(YearMonth.of(2021,4), it.datoTOM)

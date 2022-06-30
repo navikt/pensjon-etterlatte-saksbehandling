@@ -1,17 +1,7 @@
+
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Forelder
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Verge
-import no.nav.etterlatte.libs.common.person.Adresse
-import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.*
+import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -97,6 +87,7 @@ fun lagMockPersonPdl(
     statsborgerskap = null,
     utland = null,
     familieRelasjon = FamilieRelasjon(null, foreldre, null),
+    avdoedesBarn = null,
     vergemaalEllerFremtidsfullmakt = null
 )
 

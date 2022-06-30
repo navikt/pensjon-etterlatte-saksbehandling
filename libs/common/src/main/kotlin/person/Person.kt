@@ -21,6 +21,7 @@ data class Person(
     val statsborgerskap: String?,
     var utland: Utland?,
     var familieRelasjon: FamilieRelasjon?,
+    var avdoedesBarn: List<Person>?,
     var vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>?
 )
 
@@ -91,6 +92,10 @@ data class FamilieRelasjon(
     val ansvarligeForeldre: List<Foedselsnummer>?,
     val foreldre: List<Foedselsnummer>?,
     val barn: List<Foedselsnummer>?
+)
+
+data class AvdoedesBarn(
+    val avdoedesBarn: List<Person>?
 )
 
 data class VergemaalEllerFremtidsfullmakt(

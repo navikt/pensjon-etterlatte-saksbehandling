@@ -4,11 +4,13 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlHentPerson
+import no.nav.etterlatte.pdl.PdlKlient
 
 object PersonMapper {
 
     fun mapPerson(
         ppsKlient: ParallelleSannheterKlient,
+        pdlKlient: PdlKlient,
         fnr: Foedselsnummer,
         personRolle: PersonRolle,
         hentPerson: PdlHentPerson
@@ -38,8 +40,8 @@ object PersonMapper {
             sivilstatus = sivilstand?.let { Sivilstatus.valueOf(it.type.name) } ?: Sivilstatus.UOPPGITT,
             utland = UtlandMapper.mapUtland(hentPerson),
             familieRelasjon = FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, personRolle),
+            avdoedesBarn = if(personRolle == PersonRolle.AVDOED) BarnekullMapper.mapBarnekull(pdlKlient, ppsKlient, hentPerson) else null,
             vergemaalEllerFremtidsfullmakt = hentPerson.vergemaalEllerFremtidsfullmakt?.let{ VergeMapper.mapVerge(it)}
         )
     }
-
 }

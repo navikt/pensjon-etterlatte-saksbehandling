@@ -3,6 +3,7 @@ package no.nav.etterlatte.itest
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.behandling.*
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
@@ -62,7 +63,8 @@ internal class BehandlingDaoIntegrationTest {
             null,
             null,
             null,
-            BehandlingStatus.OPPRETTET
+            BehandlingStatus.OPPRETTET,
+            OppgaveStatus.NY
         )
 
         behandlingRepo.opprett(behandlingUtenPersongalleri)
@@ -126,7 +128,8 @@ internal class BehandlingDaoIntegrationTest {
             null,
             null,
             null,
-            BehandlingStatus.OPPRETTET
+            BehandlingStatus.OPPRETTET,
+            OppgaveStatus.NY
         )
 
         behandlingRepo.opprett(behandlingUtenPersongalleri)
@@ -161,7 +164,8 @@ internal class BehandlingDaoIntegrationTest {
                 )),
                 vurdertDato = LocalDateTime.now()
             ),
-            status = BehandlingStatus.GYLDIG_SOEKNAD
+            status = BehandlingStatus.GYLDIG_SOEKNAD,
+            oppgaveStatus = OppgaveStatus.NY
         )
 
         behandlingRepo.lagreGyldighetsproving(gyldighetsproevingBehanding)
@@ -192,7 +196,8 @@ internal class BehandlingDaoIntegrationTest {
                 null,
                 null,
                 null,
-                BehandlingStatus.OPPRETTET
+                BehandlingStatus.OPPRETTET,
+                OppgaveStatus.NY
             ),
             Behandling(
                 UUID.randomUUID(),
@@ -206,7 +211,8 @@ internal class BehandlingDaoIntegrationTest {
                 null,
                 null,
                 null,
-                BehandlingStatus.OPPRETTET
+                BehandlingStatus.OPPRETTET,
+                OppgaveStatus.NY
             ),
             Behandling(
                 UUID.randomUUID(),
@@ -220,7 +226,8 @@ internal class BehandlingDaoIntegrationTest {
                 null,
                 null,
                 null,
-                BehandlingStatus.OPPRETTET
+                BehandlingStatus.OPPRETTET,
+                OppgaveStatus.NY
             ),
         ).forEach { b ->
             behandlingRepo.opprett(b)
@@ -255,7 +262,8 @@ internal class BehandlingDaoIntegrationTest {
                 emptyList(),
                 emptyList(),
                 null,
-                BehandlingStatus.OPPRETTET
+                BehandlingStatus.OPPRETTET,
+                OppgaveStatus.NY
             )
         ).forEach { b ->
             behandlingRepo.opprett(b)

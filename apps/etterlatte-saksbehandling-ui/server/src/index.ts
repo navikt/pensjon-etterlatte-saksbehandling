@@ -44,7 +44,7 @@ if (process.env.DEVELOPMENT !== 'true') {
 
 app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
 
-app.use('/brev', brev)
+// app.use('/brev', brev)
 
 if (isDev) {
   app.use('/api', mockRouter)

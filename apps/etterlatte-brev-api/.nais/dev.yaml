@@ -34,7 +34,7 @@ spec:
     min: 1
   env:
     - name: ETTERLATTE_PDFGEN_URL
-      value: "http://ey-pdfgen/api/v1/genpdf/eypdfgen"
+      value: "http://ey-pdfgen/api/v1/genpdf/brev"
     - name: HENT_DOKUMENT_URL
       value: "https://saf-q1.dev.intern.nav.no/rest/hentdokument"
     - name: SAF_GRAPHQL_URL

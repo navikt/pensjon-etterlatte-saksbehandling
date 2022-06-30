@@ -38,7 +38,6 @@ export const fattVedtak = async (behandlingsId: string): Promise<IApiResponse<an
     })
     return {
       status: result.status,
-      data: await result.json(),
     }
   } catch (e) {
     console.log(e)
@@ -53,7 +52,6 @@ export const attesterVedtak = async (behandlingId: string): Promise<IApiResponse
     })
     return {
       status: result.status,
-      data: await result.json(),
     }
   } catch (e) {
     console.log(e)
@@ -62,20 +60,22 @@ export const attesterVedtak = async (behandlingId: string): Promise<IApiResponse
 }
 
 export const underkjennVedtak = async (behandlingId: string): Promise<IApiResponse<any>> => {
+  console.log('underkjennurl: ', `${path}/api/underkjennvedtak/${behandlingId}`)
+
   try {
     const result: Response = await fetch(`${path}/api/underkjennvedtak/${behandlingId}`, {
       method: 'post',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        'kommentar': 'Ikkje bra',
-        'valgtBegrunnelse': 'Inngangsvilkår feilvurdert'
-      })
+        kommentar: 'Ikkje bra',
+        valgtBegrunnelse: 'Inngangsvilkår feilvurdert',
+      }),
     })
+    console.log('result', result)
     return {
       status: result.status,
-      data: await result.json(),
     }
   } catch (e) {
     console.log(e)

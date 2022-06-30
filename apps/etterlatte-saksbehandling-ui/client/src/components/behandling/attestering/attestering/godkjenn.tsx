@@ -1,7 +1,7 @@
 //import { Textarea } from '@navikt/ds-react'
 //import { useState } from 'react'
-import { AttesterVedtak } from './handinger/attesterVedtak'
-import { BeslutningWrapper /*Text*/ } from './styled'
+import { AttesterVedtak } from '../handinger/attesterVedtak'
+import { BeslutningWrapper /*Text*/ } from '../styled'
 
 export type PropsIverksett = {
   behandlingId: string

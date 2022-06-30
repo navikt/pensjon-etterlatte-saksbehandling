@@ -15,3 +15,7 @@ export const formatterStringDato = (dato: string) => {
 export const formatterTidspunkt = (dato: Date) => {
   return format(dato, 'HH:mm').toString()
 }
+
+export const formatterStringTidspunkt = (dato: string) => {
+  return format(new Date(dato), 'HH:mm').toString()
+}

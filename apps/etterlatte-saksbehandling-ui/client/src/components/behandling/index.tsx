@@ -6,15 +6,12 @@ import { Column, GridContainer } from '../../shared/styled'
 import { AppContext } from '../../store/AppContext'
 import { IBehandlingsStatus } from './behandlings-status'
 import { IApiResponse } from '../../shared/api/types'
-import { IBehandlingStatus, IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
+import { IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
 import Spinner from '../../shared/Spinner'
 import { StatusBar, StatusBarTheme } from '../statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
-import { IBehandlingInfo } from './SideMeny/types'
-import { Attestering } from './attestering/attestering'
-import { Behandlingsinfo } from './SideMeny/behandlingsinfo'
-import { IRolle } from '../../store/reducers/SaksbehandlerReducer'
+import { SideMeny } from './SideMeny'
 
 const addBehandlingAction = (data: any) => ({ type: 'add_behandling', data })
 
@@ -35,24 +32,6 @@ export const Behandling = () => {
 
   const soeker = ctx.state.behandlingReducer?.kommerSoekerTilgode?.familieforhold.soeker
   const soekerInfo = soeker ? { navn: soeker.navn, foedselsnummer: soeker.fnr, type: 'Etterlatt' } : null
-
-  const [behandlingsInfo, setBehandlingsinfo] = useState<IBehandlingInfo>()
-
-  useEffect(() => {
-    const behandling = ctx.state.behandlingReducer
-    const innlogget = ctx.state.saksbehandlerReducer
-
-    behandling &&
-      setBehandlingsinfo({
-        type: 'Førstegangsbehandling',
-        status: behandling.status,
-        saksbehandler: behandling.saksbehandlerId,
-        attestant: behandling.attestant,
-        virkningsdato: behandling.virkningstidspunkt,
-        datoFattet: behandling.datoFattet,
-        rolle: innlogget.rolle,
-      })
-  }, [ctx.state])
 
   return (
     <>
@@ -75,17 +54,7 @@ export const Behandling = () => {
             </Routes>
           </Column>
           <Column>
-            {behandlingsInfo && (
-              <>
-                {behandlingsInfo.rolle === IRolle.attestant &&
-                behandlingsInfo.status === IBehandlingStatus.FATTET_VEDTAK ? (
-                  <Attestering behandlingsInfo={behandlingsInfo} />
-                ) : (
-                  <Behandlingsinfo behandlingsInfo={behandlingsInfo} />
-                )}
-              </>
-            )}
-            {/*<Tab />*/}
+            <SideMeny />
           </Column>
         </GridContainer>
       )}

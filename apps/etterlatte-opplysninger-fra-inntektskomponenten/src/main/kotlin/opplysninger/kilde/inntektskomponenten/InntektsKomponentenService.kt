@@ -38,7 +38,7 @@ class InntektsKomponentenService(private val inntektskomponentenClient: HttpClie
                 }
         }
 
-        return inntektsListe;
+        return inntektsListe
 
     }
 

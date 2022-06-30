@@ -11,14 +11,13 @@ export interface IDetaljertBehandling {
   saksbehandlerId?: string
   fastsatt: boolean
   datoFattet?: string //kommer som Instant fra backend
-  datoattestert?: string //kommer som Instant fra backend
+  datoAttestert?: string //kommer som Instant fra backend
   attestant?: string
   soeknadMottattDato: string
   virkningstidspunkt: string
-  status: IBehandlingStatus //todo legg med fra behandling og evt map om?
+  status: IBehandlingStatus
 }
 
-//todo: synk med backend OG oppgavebenk her, og finn ut hva vi skal vise i frontend
 export enum IBehandlingStatus {
   OPPRETTET = 'OPPRETTET',
   GYLDIG_SOEKNAD = 'GYLDIG_SOEKNAD',
@@ -26,13 +25,9 @@ export enum IBehandlingStatus {
   UNDER_BEHANDLING = 'UNDER_BEHANDLING',
   FATTET_VEDTAK = 'FATTET_VEDTAK',
   ATTESTERT = 'ATTESTERT',
+  RETURNERT = 'RETURNERT',
   IVERKSATT = 'IVERKSATT',
   AVBRUTT = 'AVBRUTT',
-
-  under_behandling = 'under_behandling',
-  attestering = 'attestering',
-  underkjent = 'underkjent',
-  innvilget = 'innvilget',
 }
 
 export interface IBeregning {

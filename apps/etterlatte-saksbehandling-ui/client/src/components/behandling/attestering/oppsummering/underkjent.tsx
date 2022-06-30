@@ -2,11 +2,9 @@ import { IBehandlingInfo } from '../../SideMeny/types'
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
 import { useContext } from 'react'
 import { AppContext } from '../../../../store/AppContext'
-import { formatterDato, formatterTidspunkt } from '../../../../utils'
 
 export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingInfo }) => {
   const innloggetId = useContext(AppContext).state.saksbehandlerReducer.ident
-  const dato = new Date()
 
   return (
     <>
@@ -14,7 +12,9 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingI
         <Overskrift>Førstegangsbehandling</Overskrift>
         <UnderOverskrift innvilget={false}>Underkjent</UnderOverskrift>
         <Tekst>
-          {formatterDato(dato)} kl: {formatterTidspunkt(dato)}
+          {
+            //formatterDato(dato)} kl: {formatterTidspunkt(dato) todo: legg inn tidspunk for returnering her
+          }
         </Tekst>
 
         <div className="flex">

@@ -18,6 +18,8 @@ include(
     "apps:etterlatte-beregning",
     "apps:etterlatte-vedtaksvurdering",
     "apps:etterlatte-grunnlag",
+    "apps:etterlatte-brev-api",
+    "apps:etterlatte-brev-distribusjon",
     "apps:etterlatte-avkorting",
     "apps:etterlatte-tilbakekreving",
     "libs:ktorclient-auth-clientcredentials",

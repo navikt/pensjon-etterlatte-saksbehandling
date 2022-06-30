@@ -7,6 +7,7 @@ import { mockRouter } from './routers/mockRouter'
 import { modiaRouter } from './routers/modia'
 import { expressProxy } from './routers/proxy'
 import { logger } from './utils/logger'
+import brev from './routers/brev'
 
 const app = express()
 
@@ -43,11 +44,14 @@ if (process.env.DEVELOPMENT !== 'true') {
 
 app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
 
+app.use('/brev', brev)
+
 if (isDev) {
   app.use('/api', mockRouter)
 } else {
   logger.info('Proxy-kall')
-  app.use('/api', expressProxy)
+  app.use('/api', expressProxy(`${process.env.API_URL}`))
+  app.use('/brev', expressProxy(`${process.env.BREV_API_URL}`))
 }
 
 app.use(/^(?!.*\/(internal|static)\/).*$/, (req: any, res: any) => {

@@ -19,7 +19,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     Header: 'Reg. dato',
     accessor: 'regdato',
     Cell: ({ value: dato }) => {
-      return format(dato, 'dd.MM.yyyy')
+      return <span>{format(dato, 'dd.MM.yyyy')}</span>
     },
     sortType: 'datetime',
   },
@@ -27,7 +27,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     Header: 'Frist',
     accessor: 'fristdato',
     Cell: ({ value: dato }) => {
-      return format(dato, 'dd.MM.yyyy')
+      return <span>{format(dato, 'dd.MM.yyyy')}</span>
     },
     sortType: 'datetime',
   },
@@ -62,7 +62,7 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
     accessor: 'status',
     filter: 'exact',
     Cell: ({ value: status }) => {
-      return status ? statusFilter[status as StatusFilter]?.navn ?? status : 'Ukjent'
+      return <span>{status ? statusFilter[status as StatusFilter]?.navn ?? status : 'Ukjent'}</span>
     },
   },
   {

@@ -48,6 +48,8 @@ spec:
   env:
     - name: API_URL
       value: http://etterlatte-api
+    - name: BREV_API_URL
+      value: http://etterlatte-brev-api
   accessPolicy:
     outbound:
       external:

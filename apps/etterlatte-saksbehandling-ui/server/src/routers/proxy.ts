@@ -19,4 +19,4 @@ const options: any = () => ({
     }
 });
 
-export const expressProxy = proxy(`${process.env.API_URL}`, options());
+export const expressProxy = (host: string) => proxy(host, options());

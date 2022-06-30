@@ -50,7 +50,8 @@ if (isDev) {
   app.use('/api', mockRouter)
 } else {
   logger.info('Proxy-kall')
-  app.use('/api', expressProxy)
+  app.use('/api', expressProxy(`${process.env.API_URL}`))
+  app.use('/brev', expressProxy(`${process.env.BREV_API_URL}`))
 }
 
 app.use(/^(?!.*\/(internal|static)\/).*$/, (req: any, res: any) => {

@@ -3,7 +3,7 @@ import fetch from 'node-fetch'
 
 const router = Router({ mergeParams: true })
 
-const apiUrl = process.env.API_URL || 'http://localhost:8085'
+const apiUrl = process.env.BREV_API_URL || 'http://localhost:8085'
 
 // Hent alle brev tilknyttet behandling ID
 router.get('/behandling/:behandlingId', async (req: Request, res: Response) => {

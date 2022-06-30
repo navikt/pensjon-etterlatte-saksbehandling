@@ -20,6 +20,8 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
+  kafka:
+    pool: nav-dev
   replicas:
     cpuThresholdPercentage: 90
     max: 1

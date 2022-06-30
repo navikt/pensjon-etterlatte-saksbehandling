@@ -94,6 +94,8 @@ fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService
         }
 
         get("innkommende/{fnr}") {
+            call.request.headers.forEach { s, strings -> logger.info("$s : $strings") }
+
             val accessToken = try {
                 getAccessToken(call)
             } catch (ex: Exception){

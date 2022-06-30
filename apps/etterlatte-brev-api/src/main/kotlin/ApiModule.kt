@@ -51,7 +51,7 @@ fun Application.apiModule(localDevelopment: Boolean, routes: Route.() -> Unit) {
         routing {
             healthApi()
             authenticate {
-                route("api") {
+                routing {
                     routes()
                 }
             }

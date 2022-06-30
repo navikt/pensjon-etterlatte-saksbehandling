@@ -45,12 +45,19 @@ internal class HentOpplysningerFraInntektskomponenten(
             ) {
                 val fnr = Foedselsnummer.of(packet["fnr"].asText()) // Todo feil fnr?
                 print("fnr ${packet["fnr"].asText()} - doedsdato ${packet["doedsdato"].asText()}")
+                if(packet["fnr"].asText() == null) {
+                    logger.error("Fødselsnummer mangler - kan ikke hente opplysninger")
+                }
+                if(packet["doedsdato"].asText() == null) {
+                    logger.error("Dødsdato mangler - kan ikke hente opplysninger")
+                }
                 val doedsdato = LocalDate.parse(packet["doedsdato"].asText())
                 val arbeidsforhold = aaregService.hentArbeidsforhold(fnr)
                 val inntektliste = inntektsKomponentenService.hentInntektListe(fnr, doedsdato)
                 val opplysninger = opplysningsBygger.byggOpplysninger(inntektliste, arbeidsforhold)
                 packet["opplysning"] = opplysninger
                 context.publish(packet.toJson())
+
             }
 
         }

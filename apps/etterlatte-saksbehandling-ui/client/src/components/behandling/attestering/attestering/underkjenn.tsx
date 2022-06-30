@@ -22,6 +22,7 @@ export const Underkjenn = ({ behandlingId }: { behandlingId: string }) => {
         <Text>Årsak til retur</Text>
         <Select
           label="Årsak til retur"
+          hideLabel={true}
           value={returType || ''}
           onChange={(e) => setReturType(e.target.value as IReturType)}
         >

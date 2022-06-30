@@ -24,6 +24,9 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingI
           </div>
           <div>
             <Info>Saksbehandler</Info>
+            {
+              // todo: få med opprinnelige saksbehandler fra loggene her?
+            }
             <Tekst>{behandlingsInfo?.saksbehandler}</Tekst>
           </div>
         </div>

@@ -48,6 +48,7 @@ fun mockPerson(
     sivilstatus = sivilstatus,
     utland = utland,
     familieRelasjon = familieRelasjon,
+    avdoedesBarn = null,
     vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt,
 )
 

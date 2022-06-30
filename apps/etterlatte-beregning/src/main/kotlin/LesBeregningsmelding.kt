@@ -18,7 +18,7 @@ internal class LesBeregningsmelding(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
-            validate { it.requireKey("grunnlag") }
+            validate { it.requireKey("@grunnlag") }
             validate { it.requireKey("@vilkaarsvurdering") }
             validate { it.requireKey("@virkningstidspunkt") }
             //TODO se på logikk for å 'samle' rivers
@@ -33,9 +33,9 @@ internal class LesBeregningsmelding(
         withLogContext(packet.correlationId()) {
 
             //TODO her må jeg sikkert ha noe anna info
-            val grunnlagListe = packet["grunnlag"].toString()
+            val grunnlag = packet["@grunnlag"].toString()
             try {
-                val beregningsResultat = beregning.beregnResultat(objectMapper.readValue(grunnlagListe), YearMonth.parse(packet["@virkningstidspunkt"].asText()))
+                val beregningsResultat = beregning.beregnResultat(objectMapper.readValue(grunnlag), YearMonth.parse(packet["@virkningstidspunkt"].asText()))
                 packet["@beregning"] = beregningsResultat
                 context.publish(packet.toJson())
                 logger.info("Publisert en beregning")

@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import model.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.*
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -17,7 +20,7 @@ class BeregningService {
     private val logger = LoggerFactory.getLogger(BeregningService::class.java)
 
 
-    fun beregnResultat(opplysninger: List<VilkaarOpplysning<ObjectNode>>, virkFOM: YearMonth): BeregningsResultat {
+    fun beregnResultat(grunnlag: Grunnlag?, virkFOM: YearMonth): BeregningsResultat {
         logger.info("Leverer en fake beregning")
 
 
@@ -33,6 +36,13 @@ class BeregningService {
             beregningsperioder = beregningsperioder,
             beregnetDato = LocalDateTime.now()
         )
+    }
+    // 40% av G til første barn, 25% til resten. Fordeles likt
+    // Adressesjekk på halvsøsken på dødsfallstidspunkt i første omgang
+    private fun finnBeregningsperioderSoesken(grunnlag: Grunnlag, virkFOM: YearMonth){//: List<Beregningsperiode> {
+
+        val avdoedPdl = finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.AVDOED_PDL_V1)
+        val avdoedbarn = avdoedPdl?.opplysning?.familieRelasjon?.barn
     }
 
     private fun finnBeregningsperioder(virkFOM: YearMonth): List<Beregningsperiode> {
@@ -60,7 +70,7 @@ class BeregningService {
     }
 
     companion object {
-        inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<ObjectNode>?): VilkaarOpplysning<T>? {
+        inline fun <reified T> setOpplysningType(opplysning: Grunnlagsopplysning<ObjectNode>?): VilkaarOpplysning<T>? {
             return opplysning?.let {
                 VilkaarOpplysning(
                     opplysning.id,
@@ -72,7 +82,7 @@ class BeregningService {
         }
 
         inline fun <reified T> finnOpplysning(
-            opplysninger: List<VilkaarOpplysning<ObjectNode>>,
+            opplysninger: List<Grunnlagsopplysning<ObjectNode>>,
             type: Opplysningstyper
         ): VilkaarOpplysning<T>? {
             return setOpplysningType(opplysninger.find { it.opplysningType == type })

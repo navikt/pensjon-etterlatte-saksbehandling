@@ -183,6 +183,7 @@ internal class BehandlingServiceTest {
             sivilstatus = null,
             utland = utland,
             familieRelasjon = familieRelasjon,
+            avdoedesBarn = null,
             vergemaalEllerFremtidsfullmakt = null
         )
 }

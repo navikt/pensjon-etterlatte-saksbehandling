@@ -8,6 +8,10 @@ data class PdlGraphqlRequest(
     val query: String,
     val variables: PdlVariables
 )
+data class PdlGraphqlBolkRequest(
+    val query: String,
+    val variables: PdlBolkVariables
+)
 
 data class PdlVariables(
     val ident: String,
@@ -24,8 +28,28 @@ data class PdlVariables(
     val vergemaal: Boolean
 )
 
+data class PdlBolkVariables(
+    val ident: List<String>,
+    val bostedsadresse: Boolean,
+    val bostedsadresseHistorikk: Boolean,
+    val deltBostedsadresse: Boolean,
+    val oppholdsadresse: Boolean,
+    val oppholdsadresseHistorikk: Boolean,
+    val kontaktadresse: Boolean,
+    val kontaktadresseHistorikk: Boolean,
+    val utland: Boolean,
+    val sivilstand: Boolean,
+    val familieRelasjon: Boolean,
+    val vergemaal: Boolean
+)
+
 data class PdlPersonResponse(
     val data: PdlPersonResponseData? = null,
+    val errors: List<PdlResponseError>? = null
+)
+
+data class PdlPersonResponseBolk(
+    val data: PdlPersonResponseBulkData? = null,
     val errors: List<PdlResponseError>? = null
 )
 
@@ -55,6 +79,14 @@ data class PdlErrorDetails(
 
 data class PdlPersonResponseData(
     val hentPerson: PdlHentPerson? = null
+)
+data class PdlPersonResponseBulkData(
+    val hentPersonBolk: List<PdlHentPersonBolkResult>? = null
+)
+data class PdlHentPersonBolkResult(
+    val code: String,
+    val ident: String,
+    val person: PdlHentPerson? = null
 )
 
 data class PdlHentPerson(

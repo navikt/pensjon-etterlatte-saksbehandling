@@ -1,0 +1,471 @@
+{
+  "data": {
+    "hentPersonBolk": [
+      {
+        "ident": "70078749472",
+        "person": {
+          "adressebeskyttelse": [],
+          "navn": [
+            {
+              "fornavn": "TRIVIELL",
+              "mellomnavn": null,
+              "etternavn": "SKILPADDE",
+              "forkortetNavn": "SKILPADDE TRIVIELL",
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "1f643eba-82e3-4128-81b7-b06eb944f15d",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-06-24T09:33:27",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              }
+            }
+          ],
+          "foedsel": [
+            {
+              "foedselsdato": "1987-07-30",
+              "foedeland": "FJI",
+              "foedested": "Fødested i/på FIJI",
+              "foedselsaar": 1987,
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "6a9e00f2-f7f4-4b14-a3c8-3df3a1f1949b",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-06-24T09:33:27",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              }
+            }
+          ],
+          "doedsfall": [],
+          "bostedsadresse": [],
+          "deltBosted": [],
+          "kontaktadresse": [
+            {
+              "coAdressenavn": null,
+              "folkeregistermetadata": {
+                "ajourholdstidspunkt": "2021-06-24T09:33:27",
+                "gyldighetstidspunkt": "2021-06-24T09:33:27",
+                "opphoerstidspunkt": null,
+                "kilde": "Dolly",
+                "aarsak": null,
+                "sekvens": null
+              },
+              "gyldigFraOgMed": "2021-06-24T09:33:27",
+              "gyldigTilOgMed": null,
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "f3801831-c9f5-422b-9183-577208bb90c5",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-06-24T09:33:27",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              },
+              "postadresseIFrittFormat": null,
+              "postboksadresse": null,
+              "type": "Utland",
+              "utenlandskAdresse": null,
+              "utenlandskAdresseIFrittFormat": {
+                "adresselinje1": "1KOLEJOWA 6/5",
+                "adresselinje2": "18-500 KOLNO",
+                "adresselinje3": "CAPITAL WEST 3000",
+                "byEllerStedsnavn": null,
+                "landkode": "FJI",
+                "postkode": null
+              },
+              "vegadresse": null
+            }
+          ],
+          "oppholdsadresse": [
+            {
+              "coAdressenavn": null,
+              "folkeregistermetadata": {
+                "ajourholdstidspunkt": "2021-06-24T09:33:27",
+                "gyldighetstidspunkt": "2021-06-24T09:33:27",
+                "opphoerstidspunkt": null,
+                "kilde": "Dolly",
+                "aarsak": null,
+                "sekvens": null
+              },
+              "gyldigFraOgMed": null,
+              "gyldigTilOgMed": null,
+              "matrikkeladresse": null,
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "70fdc926-405c-48dc-8baa-365a41364e87",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-06-24T09:33:27",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              },
+              "oppholdAnnetSted": null,
+              "utenlandskAdresse": {
+                "adressenavnNummer": "1KOLEJOWA 6/5, 18-500 KOLNO, CAPITAL WEST 3000",
+                "bygningEtasjeLeilighet": "",
+                "postboksNummerNavn": null,
+                "postkode": null,
+                "bySted": null,
+                "regionDistriktOmraade": "",
+                "landkode": "FJI"
+              },
+              "vegadresse": null
+            }
+          ],
+          "foreldreansvar": [],
+          "forelderBarnRelasjon": [],
+          "statsborgerskap": [
+            {
+              "land": "ARM",
+              "gyldigFraOgMed": "1987-07-30",
+              "gyldigTilOgMed": null,
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "f483ec0f-9f31-4d07-96a6-e231dac45f19",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-06-24T09:33:28",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              },
+              "folkeregistermetadata": {
+                "ajourholdstidspunkt": "2021-06-24T09:33:28",
+                "gyldighetstidspunkt": "1987-07-30T00:00",
+                "opphoerstidspunkt": null,
+                "kilde": "Dolly",
+                "aarsak": null,
+                "sekvens": null
+              }
+            }
+          ],
+          "utflyttingFraNorge": [],
+          "innflyttingTilNorge": [
+            {
+              "fraflyttingsland": "FJI",
+              "fraflyttingsstedIUtlandet": null,
+              "folkeregistermetadata": {
+                "ajourholdstidspunkt": "2021-06-24T09:33:27",
+                "gyldighetstidspunkt": "1987-07-30T00:00",
+                "opphoerstidspunkt": null,
+                "kilde": "Dolly",
+                "aarsak": null,
+                "sekvens": null
+              },
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "5dbb3d78-d3f9-43d3-aa7e-4c7012c7ff3d",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-06-24T09:33:27",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              }
+            }
+          ],
+          "vergemaalEllerFremtidsfullmakt": []
+        },
+        "code": "ok"
+      },
+      {
+        "ident": "06067018735",
+        "person": {
+          "adressebeskyttelse": [],
+          "navn": [
+            {
+              "fornavn": "ROBUST",
+              "mellomnavn": null,
+              "etternavn": "NORDMANN",
+              "forkortetNavn": "NORDMANN ROBUST",
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "90797d94-b2cb-4d7e-993d-fc50d8bdf855",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-08-05T15:10:59",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              }
+            }
+          ],
+          "foedsel": [
+            {
+              "foedselsdato": "1970-06-06",
+              "foedeland": "ESP",
+              "foedested": "Fødested i/på SPANIA",
+              "foedselsaar": 1970,
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "138a38a9-4b99-44a5-93c9-6fde683a8fd6",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-08-05T15:10:58",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              }
+            }
+          ],
+          "doedsfall": [
+            {
+              "doedsdato": "2021-04-14",
+              "folkeregistermetadata": {
+                "ajourholdstidspunkt": "2021-08-05T15:10:59",
+                "gyldighetstidspunkt": "2021-08-05T15:10:59",
+                "opphoerstidspunkt": null,
+                "kilde": "Dolly",
+                "aarsak": null,
+                "sekvens": null
+              },
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "4e4ccb6e-1da1-4221-889d-c2a4c02d0952",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-08-05T15:10:59",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              }
+            }
+          ],
+          "bostedsadresse": [
+            {
+              "coAdressenavn": null,
+              "vegadresse": {
+                "husbokstav": null,
+                "husnummer": "99",
+                "adressenavn": "BØLERLIA",
+                "postnummer": "0689",
+                "kommunenummer": "0301",
+                "bydelsnummer": null
+              },
+              "utenlandskAdresse": null,
+              "matrikkeladresse": null,
+              "ukjentBosted": null,
+              "gyldigFraOgMed": "1970-06-06T00:00",
+              "gyldigTilOgMed": null,
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "520fea42-a210-48aa-b614-0b6f575b698b",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-08-05T15:10:59",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              },
+              "folkeregistermetadata": {
+                "ajourholdstidspunkt": "2021-08-05T15:10:59",
+                "gyldighetstidspunkt": "1970-06-06T00:00",
+                "opphoerstidspunkt": null,
+                "kilde": "Dolly",
+                "aarsak": null,
+                "sekvens": null
+              }
+            }
+          ],
+          "deltBosted": [],
+          "kontaktadresse": [],
+          "oppholdsadresse": [],
+          "foreldreansvar": [
+            {
+              "ansvar": "felles",
+              "ansvarlig": null,
+              "ansvarligUtenIdentifikator": null,
+              "ansvarssubjekt": "18110776353",
+              "folkeregistermetadata": {
+                "ajourholdstidspunkt": "2021-08-05T15:11:02",
+                "gyldighetstidspunkt": "2021-08-05T15:11:02",
+                "opphoerstidspunkt": null,
+                "kilde": "Dolly",
+                "aarsak": null,
+                "sekvens": null
+              },
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "47441e26-db32-4422-8163-5195b5b2c794",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-08-05T15:11:02",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              }
+            },
+            {
+              "ansvar": "felles",
+              "ansvarlig": null,
+              "ansvarligUtenIdentifikator": null,
+              "ansvarssubjekt": "18110776353",
+              "folkeregistermetadata": {
+                "ajourholdstidspunkt": "2021-08-05T15:10:59",
+                "gyldighetstidspunkt": "2021-08-05T15:10:59",
+                "opphoerstidspunkt": null,
+                "kilde": "Dolly",
+                "aarsak": null,
+                "sekvens": null
+              },
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "3cdd5612-8bd0-4343-a4d4-b20ab4e8a96c",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-08-05T15:10:59",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              }
+            }
+          ],
+          "forelderBarnRelasjon": [
+            {
+              "folkeregistermetadata": {
+                "ajourholdstidspunkt": "2021-08-05T15:10:59",
+                "gyldighetstidspunkt": "2021-08-05T15:10:59",
+                "opphoerstidspunkt": null,
+                "kilde": "Dolly",
+                "aarsak": null,
+                "sekvens": null
+              },
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "b3d89263-740f-4d8e-a9eb-9220da743d45",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-08-05T15:10:59",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              },
+              "minRolleForPerson": "MOR",
+              "relatertPersonsIdent": "18110776353",
+              "relatertPersonsRolle": "BARN"
+            }
+          ],
+          "statsborgerskap": [
+            {
+              "land": "NOR",
+              "gyldigFraOgMed": "1970-06-06",
+              "gyldigTilOgMed": null,
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "6e9acbe9-c126-459d-84fd-a47e902d488e",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-08-05T15:10:59",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              },
+              "folkeregistermetadata": {
+                "ajourholdstidspunkt": "2021-08-05T15:10:59",
+                "gyldighetstidspunkt": "1970-06-06T00:00",
+                "opphoerstidspunkt": null,
+                "kilde": "Dolly",
+                "aarsak": null,
+                "sekvens": null
+              }
+            }
+          ],
+          "utflyttingFraNorge": [],
+          "innflyttingTilNorge": [
+            {
+              "fraflyttingsland": "ESP",
+              "fraflyttingsstedIUtlandet": null,
+              "folkeregistermetadata": {
+                "ajourholdstidspunkt": "2021-08-05T15:10:59",
+                "gyldighetstidspunkt": "1970-06-06T00:00",
+                "opphoerstidspunkt": null,
+                "kilde": "Dolly",
+                "aarsak": null,
+                "sekvens": null
+              },
+              "metadata": {
+                "master": "FREG",
+                "historisk": false,
+                "opplysningsId": "523c64d9-5b4f-4dc8-b8d0-65599f180051",
+                "endringer": [
+                  {
+                    "kilde": "Dolly",
+                    "registrert": "2021-08-05T15:10:59",
+                    "registrertAv": "Folkeregisteret",
+                    "systemkilde": "FREG",
+                    "type": "OPPRETT"
+                  }
+                ]
+              }
+            }
+          ],
+          "vergemaalEllerFremtidsfullmakt": []
+        },
+        "code": "ok"
+      }
+    ]
+  }
+}

@@ -32,6 +32,39 @@ class PdlKlient(private val httpClient: HttpClient) {
             }
         }
     }
+    //TODO utvide til rolleliste?
+    suspend fun hentPersonBolk(fnr: List<Foedselsnummer>, rolle: PersonRolle): PdlPersonResponseBolk {
+        val request = PdlGraphqlBolkRequest(
+            query = getQuery("/pdl/hentPersonBolk.graphql"),
+            variables = PdlBolkVariables(
+                ident = fnr.map { it.value },
+                bostedsadresse = true,
+                bostedsadresseHistorikk = true,
+                deltBostedsadresse = true,
+                kontaktadresse = true,
+                kontaktadresseHistorikk = true,
+                oppholdsadresse = true,
+                oppholdsadresseHistorikk = true,
+                utland = true,
+                sivilstand = false,
+                familieRelasjon = true,
+                vergemaal = true
+            )
+        )
+
+        return retry<PdlPersonResponseBolk> {
+            httpClient.post {
+                header("Tema", TEMA)
+                accept(Json)
+                body = TextContent(request.toJson(), Json)
+            }
+        }.let{
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> throw it.exceptions.last()
+            }
+        }
+    }
 
     private fun getQuery(name: String): String {
         return javaClass.getResource(name)!!

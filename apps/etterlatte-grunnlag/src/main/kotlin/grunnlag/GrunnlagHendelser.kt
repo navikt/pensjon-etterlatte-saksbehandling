@@ -54,7 +54,9 @@ class GrunnlagHendelser(
                 }
 
                 //TODO Her bør jeg vel lage en ny melding
-                packet["grunnlag"] = grunnlag.opprettGrunnlag(packet["sak"].asLong(), opplysninger)
+                val grunnlag = grunnlag.opprettGrunnlag(packet["sak"].asLong(), opplysninger)
+                packet["grunnlag"] = grunnlag
+                packet["@grunnlag"] = grunnlag
                 packet["@event_name"] = "GRUNNLAG:GRUNNLAGENDRET"
                 context.publish(packet.toJson())
                 logger.info("Lagt ut melding om grunnlagsendring")

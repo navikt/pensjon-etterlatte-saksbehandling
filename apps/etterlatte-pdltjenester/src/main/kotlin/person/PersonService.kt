@@ -27,6 +27,7 @@ class PersonService(
             } else {
                 PersonMapper.mapPerson(
                     ppsKlient = ppsKlient,
+                    pdlKlient =pdlKlient,
                     fnr = hentPersonRequest.foedselsnummer,
                     personRolle = hentPersonRequest.rolle,
                     hentPerson = it.data.hentPerson

@@ -2,7 +2,7 @@ import { Button } from '@navikt/ds-react'
 import { useState } from 'react'
 import { ButtonWrapper } from '../styled'
 import { GeneriskModal } from '../modal'
-import { underkjennVedtak } from '../../../../shared/api/behandling'
+import { hentBehandling, underkjennVedtak } from '../../../../shared/api/behandling'
 
 type Props = {
   behandlingId: string
@@ -15,9 +15,12 @@ export const UnderkjennVedtak: React.FC<Props> = ({ behandlingId, kommentar, val
 
   const underkjenn = () => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
+
     underkjennVedtak(behandlingId, kommentar, valgtBegrunnelse).then((response) => {
       if (response.status === 200) {
-        window.location.reload()
+        hentBehandling(behandlingId).then((response) => {
+          window.location.reload()
+        })
       }
     })
   }

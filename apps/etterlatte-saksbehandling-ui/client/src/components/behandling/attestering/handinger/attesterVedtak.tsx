@@ -1,6 +1,6 @@
 import { Button } from '@navikt/ds-react'
 import { useState } from 'react'
-import { attesterVedtak } from '../../../../shared/api/behandling'
+import { attesterVedtak, hentBehandling } from '../../../../shared/api/behandling'
 import { ButtonWrapper } from '../styled'
 import { GeneriskModal } from '../modal'
 
@@ -11,7 +11,9 @@ export const AttesterVedtak = ({ behandlingId }: { behandlingId?: string }) => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     attesterVedtak(behandlingId).then((response) => {
       if (response.status === 200) {
-        window.location.reload()
+        hentBehandling(behandlingId).then((response) => {
+          window.location.reload()
+        })
       }
     })
   }

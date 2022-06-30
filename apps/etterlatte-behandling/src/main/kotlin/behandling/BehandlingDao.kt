@@ -22,7 +22,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 "SELECT id, sak_id, behandling_opprettet, sist_endret, " +
                         "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
-                        "gyldighetssproving, status  FROM behandling where id = ?"
+                        "gyldighetssproving, status, oppgave_status FROM behandling where id = ?"
             )
         stmt.setObject(1, id)
 
@@ -34,7 +34,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 "SELECT id, sak_id, behandling_opprettet, sist_endret, " +
                         "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
-                        "gyldighetssproving, status  FROM behandling"
+                        "gyldighetssproving, status, oppgave_status  FROM behandling"
             )
         return stmt.executeQuery().toList { asBehandling(this) }
     }
@@ -44,7 +44,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 "SELECT id, sak_id, behandling_opprettet, sist_endret, " +
                         "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
-                        "gyldighetssproving, status  FROM behandling where sak_id = ?"
+                        "gyldighetssproving, status, oppgave_status  FROM behandling where sak_id = ?"
             )
         stmt.setLong(1, sakid)
         return stmt.executeQuery().toList { asBehandling(this) }
@@ -95,10 +95,11 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 
     fun lagreGyldighetsproving(behandling: Behandling) {
-        val stmt = connection().prepareStatement("UPDATE behandling SET gyldighetssproving = ?, status = ? WHERE id = ?")
+        val stmt = connection().prepareStatement("UPDATE behandling SET gyldighetssproving = ?, status = ?, oppgave_status = ? WHERE id = ?")
         stmt.setObject(1, objectMapper.writeValueAsString(behandling.gyldighetsproeving))
         stmt.setString(2, behandling.status?.name)
-        stmt.setObject(3, behandling.id)
+        stmt.setString(3, behandling.oppgaveStatus?.name)
+        stmt.setObject(4, behandling.id)
         require(stmt.executeUpdate() == 1)
     }
 
@@ -123,10 +124,10 @@ class BehandlingDao(private val connection: () -> Connection) {
         require(stmt.executeUpdate() == 1)
     }
 
-    fun lagreOppgaveStatus(behandling: UUID, oppgaveStatus: OppgaveStatus?) {
+    fun lagreOppgaveStatus(behandling: Behandling) {
         val stmt = connection().prepareStatement("UPDATE behandling SET oppgave_status = ? WHERE id = ?")
-        stmt.setString(1, oppgaveStatus?.name)
-        stmt.setObject(2, behandling)
+        stmt.setString(1, behandling.oppgaveStatus?.name)
+        stmt.setObject(2, behandling.id)
         require(stmt.executeUpdate() == 1)
     }
 }

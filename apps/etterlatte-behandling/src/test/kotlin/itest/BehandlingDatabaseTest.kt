@@ -164,7 +164,8 @@ internal class BehandlingDaoIntegrationTest {
                 )),
                 vurdertDato = LocalDateTime.now()
             ),
-            status = BehandlingStatus.GYLDIG_SOEKNAD
+            status = BehandlingStatus.GYLDIG_SOEKNAD,
+            oppgaveStatus = OppgaveStatus.NY
         )
 
         behandlingRepo.lagreGyldighetsproving(gyldighetsproevingBehanding)

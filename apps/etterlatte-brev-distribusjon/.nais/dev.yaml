@@ -41,8 +41,9 @@ spec:
       value: "api://dev-gcp.etterlatte.etterlatte-brev-api/.default"
     - name: BREV_API_URL
       value: "http://etterlatte-brev-api/brev"
+    - name: BREV_LOCAL_DEV
+      value: true
   accessPolicy:
     outbound:
       rules:
-        - application: etterlatte-brev-api
         - application: etterlatte-brev-api

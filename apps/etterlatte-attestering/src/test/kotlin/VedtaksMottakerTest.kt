@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class VedtaksMottakerTest {
@@ -17,6 +18,7 @@ class VedtaksMottakerTest {
         private val inspector = TestRapid().also { VedtaksMottaker(it, attestasjonService) }
 
         @Test
+        @Disabled
         fun `sjekk mottak av vedtak og at publisert pakke har korrekt innhold`() {
 
             val inspektør = inspector.apply { sendTestMessage(ATTESTERT_VEDTAK) }.inspektør

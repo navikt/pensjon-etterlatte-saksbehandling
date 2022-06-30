@@ -29,23 +29,26 @@ class GrunnlagHendelser(
         River(rapidsConnection).apply {
             validate { it.requireKey("opplysning") }
             validate { it.requireKey("sak") }
-            validate { it.rejectKey("grunnlag")}
-            validate { it.rejectKey("@event_name")}
+            validate { it.rejectKey("grunnlag") }
+            validate { it.rejectKey("@event_name") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
 
     override fun onPacket(packet: no.nav.helse.rapids_rivers.JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            if(Kontekst.get().AppUser !is Self){ logger.warn("AppUser i kontekst er ikke Self i R&R-flyten") }
+            if (Kontekst.get().AppUser !is Self) {
+                logger.warn("AppUser i kontekst er ikke Self i R&R-flyten")
+            }
 
             try {
 
-                val opplysninger: List<Grunnlagsopplysning<ObjectNode>> = objectMapper.readValue(packet["opplysning"].toJson())!!
+                val opplysninger: List<Grunnlagsopplysning<ObjectNode>> =
+                    objectMapper.readValue(packet["opplysning"].toJson())!!
 
                 // Send melding om behov som er avhengig av en anne opplysning
-                opplysninger.forEach{
-                    if(it.opplysningType === Opplysningstyper.AVDOED_PDL_V1) {
+                opplysninger.forEach {
+                    if (it.opplysningType === Opplysningstyper.AVDOED_PDL_V1) {
                         sendAvdoedInntektBehov(it, context, packet)
                     }
                 }
@@ -56,24 +59,30 @@ class GrunnlagHendelser(
                 context.publish(packet.toJson())
                 logger.info("Lagt ut melding om grunnlagsendring")
             } catch (e: Exception) {
-                logger.error("Spiser en melding fordi: " +e.message)
+                logger.error("Spiser en melding fordi: " + e.message)
             }
         }
 
     private fun no.nav.helse.rapids_rivers.JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 
-    private fun sendAvdoedInntektBehov(grunnlagsopplysning: Grunnlagsopplysning<ObjectNode>, context: MessageContext, packet: JsonMessage) {
+    private fun sendAvdoedInntektBehov(
+        grunnlagsopplysning: Grunnlagsopplysning<ObjectNode>,
+        context: MessageContext,
+        packet: JsonMessage
+    ) {
         val pdlopplysninger = objectMapper.readValue<Person>(grunnlagsopplysning.opplysning.toString())
-        val behov = JsonMessage.newMessage(mapOf(
-            "@behov" to Opplysningstyper.AVDOED_INNTEKT_V1,
-            "fnr" to pdlopplysninger.foedselsnummer.value,
-            "sak" to packet["sak"],
-            "doedsdato" to pdlopplysninger.doedsdato.toString(),
-            "@correlation_id" to packet["@correlation_id"]
-        ))
-
-        context.publish(behov.toJson())
+        if (pdlopplysninger.doedsdato != null) {
+            val behov = JsonMessage.newMessage(
+                mapOf(
+                    "@behov" to Opplysningstyper.AVDOED_INNTEKT_V1,
+                    "fnr" to pdlopplysninger.foedselsnummer.value,
+                    "sak" to packet["sak"],
+                    "doedsdato" to pdlopplysninger.doedsdato.toString(),
+                    "@correlation_id" to packet["@correlation_id"]
+                )
+            )
+            context.publish(behov.toJson())
+        }
     }
-
 }
 

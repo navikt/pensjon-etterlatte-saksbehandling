@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Modal } from '../../../shared/modal/modal'
 import styled from 'styled-components'
 import { handlinger } from './typer'
-import { fattVedtak, hentBehandling } from '../../../shared/api/behandling'
+import { fattVedtak } from '../../../shared/api/behandling'
 import { useMatch } from 'react-router'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 

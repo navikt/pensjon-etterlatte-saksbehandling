@@ -17,6 +17,7 @@ object BarnekullMapper {
             ?.map {
                 (Foedselsnummer.of(it.value?.relatertPersonsIdent))
             }
+        println("barnFnr: $barnFnr")
         return if (barnFnr != null) {
             pdlKlient.hentPersonBolk(barnFnr, PersonRolle.BARN).data?.hentPersonBolk?.map { mapBarn(ppsKlient,it.ident,it.person!!)}
         } else null

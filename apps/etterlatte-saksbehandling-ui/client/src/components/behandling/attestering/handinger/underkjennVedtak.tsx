@@ -19,7 +19,9 @@ export const UnderkjennVedtak: React.FC<Props> = ({ behandlingId, kommentar, val
     underkjennVedtak(behandlingId, kommentar, valgtBegrunnelse).then((response) => {
       if (response.status === 200) {
         hentBehandling(behandlingId).then((response) => {
-          window.location.reload()
+          if (response.status === 200) {
+            window.location.reload()
+          }
         })
       }
     })

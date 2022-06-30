@@ -9,9 +9,6 @@ import { Behandlingsoppsummering } from './oppsummering/oppsummering'
 export const BehandlingInfo = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const [beslutning, setBeslutning] = useState<IBeslutning>()
 
-  console.log('beslutning', beslutning)
-  console.log('status', behandlingsInfo.status)
-
   return (
     <>
       <Behandlingsoppsummering behandlingsInfo={behandlingsInfo} beslutning={beslutning} />

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
@@ -34,7 +35,8 @@ class BehandlingAggregat(
                 null,
                 null,
                 null,
-                BehandlingStatus.OPPRETTET
+                BehandlingStatus.OPPRETTET,
+                OppgaveStatus.NY,
             )
                 .also {
                     behandlinger.opprett(it)
@@ -104,8 +106,8 @@ class BehandlingAggregat(
             }
     }
 
-
     fun serialiserbarUtgave() = lagretBehandling.copy()
+
     fun registrerVedtakHendelse(hendelse: String) {
         lagretBehandling = lagretBehandling.copy(status = when(hendelse){
             "FATTET" -> BehandlingStatus.FATTET_VEDTAK

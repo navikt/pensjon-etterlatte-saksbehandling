@@ -9,6 +9,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -50,7 +51,8 @@ internal class RealBehandlingServiceTest {
             listOf("Avdoed"),
             emptyList(),
             null,
-            BehandlingStatus.OPPRETTET
+            BehandlingStatus.OPPRETTET,
+            OppgaveStatus.NY
         )
 
         Assertions.assertEquals("Ola Olsen", sut.hentBehandling(id).innsender)
@@ -77,7 +79,8 @@ internal class RealBehandlingServiceTest {
             listOf("Avdoed"),
             emptyList(),
             null,
-            BehandlingStatus.OPPRETTET
+            BehandlingStatus.OPPRETTET,
+            OppgaveStatus.NY
         )
 
         val persongalleri = Persongalleri(
@@ -97,7 +100,7 @@ internal class RealBehandlingServiceTest {
         every { behandlingerMock.opprett(capture(behandlingOpprettes)) } returns Unit
         every { behandlingerMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { behandlingerMock.lagreGyldighetsproving(any()) } returns Unit
-        every { behandlingerMock.lagrePersongalleriOgMottattdato(any())} returns Unit
+        every { behandlingerMock.lagrePersongalleriOgMottattdato(any()) } returns Unit
         coEvery { hendleseskanal.send(capture(hendelse)) } returns Unit
 
         val resultat = sut.startBehandling(1, persongalleri, datoNaa.toString())
@@ -140,7 +143,8 @@ internal class RealBehandlingServiceTest {
             listOf("Avdoed"),
             emptyList(),
             null,
-            BehandlingStatus.OPPRETTET
+            BehandlingStatus.OPPRETTET,
+            OppgaveStatus.NY
         )
 
         val sut = RealBehandlingService(
@@ -152,7 +156,7 @@ internal class RealBehandlingServiceTest {
         every { behandlingerMock.opprett(capture(behandlingOpprettes)) } returns Unit
         every { behandlingerMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { behandlingerMock.lagreGyldighetsproving(any()) } returns Unit
-        every { behandlingerMock.lagrePersongalleriOgMottattdato(any())} returns Unit
+        every { behandlingerMock.lagrePersongalleriOgMottattdato(any()) } returns Unit
         every { behandlingerMock.avbrytBehandling(capture(behandlingAvbrytes)) } returns Unit
         val resultat = sut.startBehandling(1, persongalleri, LocalDateTime.now().toString())
 

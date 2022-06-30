@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import java.time.LocalDateTime
 import java.util.*
@@ -18,5 +19,5 @@ data class Behandling(
     val soesken: List<String>?,
     val gyldighetsproeving: GyldighetsResultat?,
     val status: BehandlingStatus?,
-    //val vedtakstatus: VedtakStatus?
+    val oppgaveStatus: OppgaveStatus?,
 )

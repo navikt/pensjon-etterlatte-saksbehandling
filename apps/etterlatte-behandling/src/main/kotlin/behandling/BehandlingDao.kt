@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.database.singleOrNull
 import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.toJson
 import java.sql.Connection
 import java.sql.ResultSet
@@ -62,16 +63,18 @@ class BehandlingDao(private val connection: () -> Connection) {
         soesken = rs.getString("soesken")?.let { objectMapper.readValue<List<String>?>(it)?.toList() },
         gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
         status = rs.getString("status")?.let { BehandlingStatus.valueOf(it) },
+        oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) },
     )
 
     fun opprett(behandling: Behandling) {
         val stmt =
-            connection().prepareStatement("INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status) VALUES(?, ?, ?, ?, ?)")
+            connection().prepareStatement("INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, oppgave_status) VALUES(?, ?, ?, ?, ?, ?)")
         stmt.setObject(1, behandling.id)
         stmt.setLong(2, behandling.sak)
         stmt.setTimestamp(3, Timestamp.from(behandling.behandlingOpprettet.atZone(ZoneId.systemDefault()).toInstant()))
         stmt.setTimestamp(4, Timestamp.valueOf(behandling.sistEndret))
         stmt.setString(5, behandling.status?.name)
+        stmt.setString(6, behandling.oppgaveStatus?.name)
         stmt.executeUpdate()
     }
 
@@ -116,6 +119,13 @@ class BehandlingDao(private val connection: () -> Connection) {
     private fun lagreStatus(behandling: UUID, status: BehandlingStatus?){
         val stmt = connection().prepareStatement("UPDATE behandling SET status = ? WHERE id = ?")
         stmt.setString(1, status?.name)
+        stmt.setObject(2, behandling)
+        require(stmt.executeUpdate() == 1)
+    }
+
+    fun lagreOppgaveStatus(behandling: UUID, oppgaveStatus: OppgaveStatus?) {
+        val stmt = connection().prepareStatement("UPDATE behandling SET oppgave_status = ? WHERE id = ?")
+        stmt.setString(1, oppgaveStatus?.name)
         stmt.setObject(2, behandling)
         require(stmt.executeUpdate() == 1)
     }

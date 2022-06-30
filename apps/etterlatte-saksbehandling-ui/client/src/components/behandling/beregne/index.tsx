@@ -38,7 +38,7 @@ export const Beregne = () => {
         </VedtaksbrevWrapper>
       </ContentHeader>
       {behandlingStatus === IBehandlingStatus.UNDER_BEHANDLING ||
-      behandlingStatus === IBehandlingStatus.GYLDIG_SOEKNAD ? (
+      behandlingStatus === IBehandlingStatus.GYLDIG_SOEKNAD || IBehandlingStatus.RETURNERT ? (
         <BehandlingHandlingKnapper>
           <BeregningModal />
         </BehandlingHandlingKnapper>

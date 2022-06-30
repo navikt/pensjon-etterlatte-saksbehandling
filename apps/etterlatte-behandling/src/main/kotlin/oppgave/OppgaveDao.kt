@@ -25,7 +25,7 @@ class OppgaveDao(private val datasource: DataSource) {
 
     fun finnOppgaverForRoller(roller: List<Rolle>): List<Oppgave>{
         val aktuelleStatuser = roller.flatMap { when(it){
-            Rolle.SAKSBEHANDLER -> listOf(BehandlingStatus.UNDER_BEHANDLING, BehandlingStatus.GYLDIG_SOEKNAD)
+            Rolle.SAKSBEHANDLER -> listOf(BehandlingStatus.UNDER_BEHANDLING, BehandlingStatus.GYLDIG_SOEKNAD, BehandlingStatus.RETURNERT)
             Rolle.ATTESTANT -> listOf(BehandlingStatus.FATTET_VEDTAK)
         } }.distinct()
 

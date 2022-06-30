@@ -51,6 +51,7 @@ class BehandlingAggregat(
                 BehandlingStatus.GYLDIG_SOEKNAD,
                 BehandlingStatus.IKKE_GYLDIG_SOEKNAD,
                 BehandlingStatus.UNDER_BEHANDLING,
+                BehandlingStatus.RETURNERT,
             )
         }
     }
@@ -109,7 +110,7 @@ class BehandlingAggregat(
         lagretBehandling = lagretBehandling.copy(status = when(hendelse){
             "FATTET" -> BehandlingStatus.FATTET_VEDTAK
             "ATTESTERT" -> BehandlingStatus.ATTESTERT
-            "UNDERKJENT" -> BehandlingStatus.UNDER_BEHANDLING
+            "UNDERKJENT" -> BehandlingStatus.RETURNERT
             "ENDRET" -> BehandlingStatus.UNDER_BEHANDLING
             else -> throw IllegalStateException("Behandling ${lagretBehandling.id} forstår ikke vedtakhendelse $hendelse")
         })

@@ -27,7 +27,7 @@ export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato, behandlin
   }
 
   const behandles =
-    behandlingStatus === IBehandlingStatus.UNDER_BEHANDLING || behandlingStatus === IBehandlingStatus.GYLDIG_SOEKNAD
+    behandlingStatus === IBehandlingStatus.UNDER_BEHANDLING || behandlingStatus === IBehandlingStatus.GYLDIG_SOEKNAD || IBehandlingStatus.RETURNERT
 
   return (
     <>

@@ -36,7 +36,7 @@ export const Soeknadsoversikt = () => {
       <Border />
       <Familieforhold behandling={behandling} />
       {behandlingStatus === IBehandlingStatus.UNDER_BEHANDLING ||
-      behandlingStatus === IBehandlingStatus.GYLDIG_SOEKNAD ? (
+      behandlingStatus === IBehandlingStatus.GYLDIG_SOEKNAD || IBehandlingStatus.RETURNERT ? (
         <BehandlingHandlingKnapper>
           <Start soeknadGyldigFremsatt={behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT} />
         </BehandlingHandlingKnapper>

@@ -15,6 +15,8 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
 
       case IBehandlingStatus.GYLDIG_SOEKNAD:
         return 'Under behandling'
+        case IBehandlingStatus.RETURNERT:
+            return 'Returnert til behandling'
       case IBehandlingStatus.FATTET_VEDTAK:
         return 'To-trinnskontroll'
     }

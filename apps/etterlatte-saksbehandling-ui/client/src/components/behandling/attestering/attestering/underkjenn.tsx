@@ -1,8 +1,8 @@
 import { Select, Textarea } from '@navikt/ds-react'
 import { useState } from 'react'
-import { UnderkjennVedtak } from './handinger/underkjennVedtak'
-import { BeslutningWrapper, Text } from './styled'
-import { IRetyrType } from './types'
+import { UnderkjennVedtak } from '../handinger/underkjennVedtak'
+import { BeslutningWrapper, Text } from '../styled'
+import { IRetyrType } from '../types'
 
 export const Underkjenn = ({ behandlingId }: { behandlingId: string }) => {
   const [tilbakemeldingFraAttestant, setTilbakemeldingFraAttestant] = useState('')

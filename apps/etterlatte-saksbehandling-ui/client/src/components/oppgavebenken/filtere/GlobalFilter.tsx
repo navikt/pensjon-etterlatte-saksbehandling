@@ -9,7 +9,7 @@ export const GlobalFilter = ({
   setResetGlobalInput,
 }: {
   setGlobalFilter: (value: string | undefined) => void
-  setResetGlobalInput: (valuse: boolean) => void
+  setResetGlobalInput: (value: boolean) => void
   resetGlobalInput: boolean
 }) => {
   const [value, setValue] = useState('')

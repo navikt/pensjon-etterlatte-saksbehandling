@@ -7,5 +7,6 @@ export interface IBehandlingInfo {
   attestant?: string
   virkningsdato?: string
   datoFattet?: string
+  datoAttestert?: string
   rolle: string
 }

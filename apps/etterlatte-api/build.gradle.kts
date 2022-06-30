@@ -15,7 +15,6 @@ dependencies {
     implementation(Ktor.ClientLogging)
     implementation(Ktor.MetricsMicrometer)
     implementation(Ktor.Jackson)
-    implementation("io.ktor:ktor-serialization:1.6.1")
     implementation(Ktor.Auth)
     implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.14")
 

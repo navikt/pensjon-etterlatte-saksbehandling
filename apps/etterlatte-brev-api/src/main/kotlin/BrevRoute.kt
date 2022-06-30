@@ -94,6 +94,7 @@ fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService
         }
 
         get("innkommende/{fnr}") {
+            logger.info(call.request.authorization())
             call.request.headers.forEach { s, strings -> logger.info("$s : $strings") }
 
             val accessToken = try {

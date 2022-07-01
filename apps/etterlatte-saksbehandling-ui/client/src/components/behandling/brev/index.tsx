@@ -204,7 +204,7 @@ export const Brev = () => {
                           </Table.Row>
                       ))}
 
-                      {innkommendeBrevListe.length === 0 &&
+                      {innkommendeBrevListe.length === 0 && !innkommendeError &&
                           <Table.Row>
                               <IngenInnkommendeBrevRad colSpan={5}>
                                   Ingen innkommende brev ble funnet
@@ -216,7 +216,7 @@ export const Brev = () => {
 
               {innkommendeError && (
                   <Alert variant={'error'} style={{ marginTop: '10px'}}>
-                      Det har oppstått en feil...
+                      Det har oppstått en feil ved henting av innkommende brev...
                   </Alert>
               )}
           </ContentContainer>

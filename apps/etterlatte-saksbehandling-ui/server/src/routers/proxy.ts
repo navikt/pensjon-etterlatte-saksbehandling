@@ -3,10 +3,10 @@ import { getOboToken } from "../middleware/getOboToken";
 import { logger } from "../utils/logger";
 
 
-const options: any = () => ({
+const options: any = (scope: string) => ({
     parseReqBody: true,
     proxyReqOptDecorator: async (options: any, req: any) => {
-        const oboToken = await getOboToken(req.headers.authorization);
+        const oboToken = await getOboToken(req.headers.authorization, scope);
         options.headers.Authorization = `Bearer ${oboToken}`;
         return options;
     },
@@ -19,4 +19,4 @@ const options: any = () => ({
     }
 });
 
-export const expressProxy = (host: string) => proxy(host, options());
+export const expressProxy = (host: string, scope: string) => proxy(host, options(scope));

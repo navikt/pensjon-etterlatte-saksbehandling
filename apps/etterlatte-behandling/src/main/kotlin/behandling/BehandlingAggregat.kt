@@ -100,27 +100,38 @@ class BehandlingAggregat(
         logger.info("behandling ${lagretBehandling.id} i sak ${lagretBehandling.sak} er gyldighetsprøvd")
     }
 
-    fun avbrytBehandling(): Behandling {
-        behandlinger.avbrytBehandling(lagretBehandling)
-            .also { lagretBehandling = lagretBehandling.copy(status = BehandlingStatus.AVBRUTT) }.let {
-                return lagretBehandling
-            }
+    fun avbrytBehandling() {
+        lagretBehandling = lagretBehandling.copy(
+            status = BehandlingStatus.AVBRUTT,
+            oppgaveStatus = OppgaveStatus.LUKKET
+        )
+
+        behandlinger.lagreStatus(lagretBehandling)
+        behandlinger.lagreOppgaveStatus(lagretBehandling)
     }
 
     fun serialiserbarUtgave() = lagretBehandling.copy()
 
     fun registrerVedtakHendelse(hendelse: String) {
+        val ikkeSettUnderBehandling = lagretBehandling.status == BehandlingStatus.FATTET_VEDTAK
+                || lagretBehandling.status == BehandlingStatus.RETURNERT
+                || lagretBehandling.status == BehandlingStatus.ATTESTERT
+
+
         lagretBehandling = lagretBehandling.copy(
             status = when (hendelse) {
                 "FATTET" -> BehandlingStatus.FATTET_VEDTAK
                 "ATTESTERT" -> BehandlingStatus.ATTESTERT
                 "UNDERKJENT" -> BehandlingStatus.RETURNERT
-                "ENDRET" -> BehandlingStatus.UNDER_BEHANDLING
+                "VILKAARSVURDERT" -> if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
+                "BEREGNET" -> if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
+                "AVKORTET" -> if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
                 else -> throw IllegalStateException("Behandling ${lagretBehandling.id} forstår ikke vedtakhendelse $hendelse")
             },
             oppgaveStatus = when (hendelse) {
                 "FATTET" -> OppgaveStatus.TIL_ATTESTERING
                 "UNDERKJENT" -> OppgaveStatus.RETURNERT
+                "ATTESTERT" -> OppgaveStatus.LUKKET
                 else -> throw IllegalStateException("Behandling ${lagretBehandling.id} forstår ikke vedtakhendelse $hendelse")
             }
         )

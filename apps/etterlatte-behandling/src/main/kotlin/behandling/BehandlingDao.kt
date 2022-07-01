@@ -109,10 +109,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         statement.executeUpdate()
     }
 
-    fun avbrytBehandling(behandling: Behandling) {
-        lagreStatus(behandling.id, BehandlingStatus.AVBRUTT)
-    }
-
     fun lagreStatus(lagretBehandling: Behandling) {
         lagreStatus(lagretBehandling.id, lagretBehandling.status)
     }

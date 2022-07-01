@@ -273,7 +273,8 @@ internal class BehandlingDaoIntegrationTest {
         Assertions.assertEquals(1, behandling.size)
         Assertions.assertEquals(false, behandling.first().status == BehandlingStatus.AVBRUTT)
 
-        behandlingRepo.avbrytBehandling(behandling.first())
+        val avbruttbehandling = behandling.first().copy(status = BehandlingStatus.AVBRUTT)
+        behandlingRepo.lagreStatus(avbruttbehandling)
         behandling = behandlingRepo.alleBehandingerISak(sak1)
         Assertions.assertEquals(1, behandling.size)
         Assertions.assertEquals(true, behandling.first().status == BehandlingStatus.AVBRUTT)

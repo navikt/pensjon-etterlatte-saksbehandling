@@ -15,7 +15,7 @@ interface BehandlingService {
     fun startBehandling(sak: Long, persongalleri: Persongalleri, mottattDato: String): Behandling
     fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
     fun slettBehandlingerISak(sak: Long)
-    fun avbrytBehandling(behandling: UUID): Behandling
+    fun avbrytBehandling(behandling: UUID)
     fun grunnlagISakEndret(sak: Long)
     fun registrerVedtakHendelse(behandling: UUID, hendelse: String)
 }
@@ -70,8 +70,8 @@ class RealBehandlingService(
         }
     }
 
-    override fun avbrytBehandling(behandling: UUID): Behandling {
-        return inTransaction { behandlingFactory.hent(behandling).avbrytBehandling()}.also {
+    override fun avbrytBehandling(behandling: UUID) {
+        inTransaction { behandlingFactory.hent(behandling).avbrytBehandling()}.also {
             runBlocking {
                 behandlingHendelser.send(behandling to BehandlingHendelseType.AVBRUTT)
             }

@@ -15,7 +15,8 @@ import java.util.*
 fun Route.behandlingRoutes(service: BehandlingService) {
     get("/behandlinger") {
         call.respond(
-            service.hentBehandlinger().map { BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato, it.behandlingOpprettet) }
+            service.hentBehandlinger()
+                .map { BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato, it.behandlingOpprettet) }
                 .let { BehandlingListe(it) }
         )
     }
@@ -37,12 +38,12 @@ fun Route.behandlingRoutes(service: BehandlingService) {
     post("/behandlinger") { //Søk
         val behandlingsBehov = call.receive<BehandlingsBehov>()
 
-            service.startBehandling(
-                behandlingsBehov.sak,
-                behandlingsBehov.persongalleri,
-                behandlingsBehov.mottattDato,
-            )
-        .also { call.respondText(it.id.toString()) }
+        service.startBehandling(
+            behandlingsBehov.sak,
+            behandlingsBehov.persongalleri,
+            behandlingsBehov.mottattDato,
+        )
+            .also { call.respondText(it.id.toString()) }
     }
 
     post("/saker/{sakid}/hendelse/grunnlagendret") { //Søk
@@ -78,13 +79,12 @@ fun Route.behandlingRoutes(service: BehandlingService) {
 
 
         post("avbrytBehandling/{behandlingsid}") {
-             service.avbrytBehandling(behandlingsId)
+            service.avbrytBehandling(behandlingsId)
             call.respond(HttpStatusCode.OK)
         }
 
         post("hendelser/vedtak/{hendelse}") {
             service.registrerVedtakHendelse(behandlingsId, requireNotNull(call.parameters["hendelse"]))
-
 
             call.respond(HttpStatusCode.OK)
         }

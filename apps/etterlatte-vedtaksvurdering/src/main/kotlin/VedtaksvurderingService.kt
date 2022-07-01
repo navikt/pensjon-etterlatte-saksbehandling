@@ -60,7 +60,6 @@ class VedtaksvurderingService(
             }
             repository.oppdaterAvkorting(sakId, behandlingId, avkorting)
         }
-        lagreVedtakstatus(sakId, behandlingId, VedtakStatus.AVKORTET)
     }
 
     fun lagreVilkaarsresultat(
@@ -80,7 +79,6 @@ class VedtaksvurderingService(
             migrer(vedtak, fnr, virkningsDato)
             repository.oppdaterVilkaarsresultat(sakId, behandlingId, vilkaarResultat)
         }
-        lagreVedtakstatus(sakId, behandlingId, VedtakStatus.VILKAARSVURDERT)
     }
 
     private fun migrer(vedtak: Vedtak, fnr: String, virkningsDato: LocalDate) {
@@ -107,7 +105,6 @@ class VedtaksvurderingService(
             }
             repository.oppdaterBeregningsgrunnlag(sakId, behandlingId, beregningsResultat)
         }
-        lagreVedtakstatus(sakId, behandlingId, VedtakStatus.BEREGNET)
     }
 
     fun lagreKommerSoekerTilgodeResultat(
@@ -274,7 +271,6 @@ class VedtaksvurderingService(
             }
             if (it.vilkaarsvurdering == null) throw VedtakKanIkkeFattes(v)
             repository.fattVedtak(saksbehandler, sakId, it.vedtakId, behandlingId)
-            lagreVedtakstatus(sakId, behandlingId, VedtakStatus.FATTET_VEDTAK)
         }
         return requireNotNull(hentFellesVedtak(sakId, behandlingId))
     }
@@ -296,7 +292,6 @@ class VedtaksvurderingService(
             vedtak.vedtakId,
             utbetalingsperioderFraVedtak(vedtak)
         )
-        lagreVedtakstatus(sakId, behandlingId, VedtakStatus.ATTESTERT)
         return requireNotNull(hentFellesVedtak(sakId, behandlingId))
 
     }
@@ -317,9 +312,7 @@ class VedtaksvurderingService(
             require(it.attestasjon == null)
         }
         repository.underkjennVedtak(saksbehandler, sakId, behandlingId, vedtak.vedtakId, kommentar, valgtBegrunnelse)
-        lagreVedtakstatus(sakId, behandlingId, VedtakStatus.RETURNERT)
     }
-
 
     fun utbetalingsperioderFraVedtak(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) =
         utbetalingsperioderFraVedtak(vedtak.type, vedtak.virk, vedtak.beregning?.sammendrag ?: emptyList())

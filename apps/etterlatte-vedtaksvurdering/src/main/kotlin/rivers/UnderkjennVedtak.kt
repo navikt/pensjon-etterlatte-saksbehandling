@@ -1,6 +1,7 @@
 package no.nav.etterlatte.rivers
 
 import no.nav.etterlatte.VedtaksvurderingService
+import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -33,6 +34,7 @@ internal class UnderkjennVedtak(
             val sakId = packet["@sakId"].longValue()
             val saksbehandler = packet["@saksbehandler"].textValue()
             vedtaksvurderingService.underkjennVedtak(sakId.toString(), behandlingId, saksbehandler, packet["@kommentar"].textValue(), packet["@valgtBegrunnelse"].textValue() )
+            vedtaksvurderingService.lagreVedtakstatus(sakId.toString(), behandlingId, VedtakStatus.RETURNERT)
             context.publish(JsonMessage.newMessage(
                 mapOf(
                     "@event" to "VEDTAK:UNDERKJENT",

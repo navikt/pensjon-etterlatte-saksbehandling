@@ -3,6 +3,7 @@ package no.nav.etterlatte.rivers
 import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtakKanIkkeFattes
 import no.nav.etterlatte.VedtaksvurderingService
+import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -35,6 +36,8 @@ internal class FattVedtak(
             val saksbehandler = packet["@saksbehandler"].textValue()
            try {
                 val fattetVedtak = vedtaksvurderingService.fattVedtak(sakId.toString(), behandlingId, saksbehandler)
+               vedtaksvurderingService.lagreVedtakstatus(sakId.toString(), behandlingId, VedtakStatus.FATTET_VEDTAK)
+
                 context.publish(JsonMessage.newMessage(
                     mapOf(
                         "@event" to "VEDTAK:FATTET",

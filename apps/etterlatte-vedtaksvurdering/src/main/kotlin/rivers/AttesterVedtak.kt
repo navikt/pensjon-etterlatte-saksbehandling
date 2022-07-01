@@ -4,6 +4,7 @@ import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtakKanIkkeAttesteresAlleredeAttester
 import no.nav.etterlatte.VedtakKanIkkeAttesteresFoerDetFattes
 import no.nav.etterlatte.VedtaksvurderingService
+import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -38,7 +39,7 @@ internal class AttesterVedtak(
             try {
                 val attestertVedtak =
                     vedtaksvurderingService.attesterVedtak(sakId.toString(), behandlingId, saksbehandler)
-
+                vedtaksvurderingService.lagreVedtakstatus(sakId.toString(), behandlingId, VedtakStatus.ATTESTERT)
                 context.publish(
                     JsonMessage.newMessage(
                         mapOf(

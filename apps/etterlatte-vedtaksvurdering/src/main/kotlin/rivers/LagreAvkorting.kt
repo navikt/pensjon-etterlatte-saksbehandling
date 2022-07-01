@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
+import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -38,6 +39,7 @@ internal class LagreAvkorting(
 
             try {
                 vedtaksvurderingService.lagreAvkorting(sakId, behandlingId, packet["soeker"].textValue(), avkorting)
+                vedtaksvurderingService.lagreVedtakstatus(sakId, behandlingId, VedtakStatus.AVKORTET)
                 requireNotNull( vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
                     context.publish(JsonMessage.newMessage(
                         mapOf(

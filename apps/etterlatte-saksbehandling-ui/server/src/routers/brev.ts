@@ -20,7 +20,7 @@ router.get('/innkommende/:fnr', async (req: Request, res: Response) => {
     const path = `${apiUrl}/brev/innkommende/${req.params.fnr}`
     const response = await fetch(path)
         .then((res) => res.json())
-        .catch(() => res.send(500))
+        .catch(() => res.sendStatus(500))
     res.send(await response)
 })
 

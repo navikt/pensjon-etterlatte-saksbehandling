@@ -1,5 +1,7 @@
 package journalpost
 
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -8,6 +10,8 @@ import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.ktorobo.AzureAdClient
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import java.util.*
 
@@ -16,7 +20,13 @@ class JournalpostClient(
     private val restApiUrl: String,
     private val graphqlApiUrl: String
 ) : JournalpostService {
+    val logger = LoggerFactory.getLogger(JournalpostService::class.java)
 
+    val configLocation: String? = null
+    private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
+
+
+    val azureAdClient = AzureAdClient(config, httpClient)
     override suspend fun hentInnkommendeBrevInnhold(
         journalpostId: String,
         dokumentInfoId: String,
@@ -36,6 +46,11 @@ class JournalpostClient(
         idType: BrukerIdType,
         accessToken: String
     ): JournalpostResponse {
+        val token = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf("api://dev-fss.teamdokumenthandtering.saf/.default"), accessToken)
+
+        logger.info("token : $token")
+        logger.info("config : $config" )
+
         val request = GraphqlRequest(
             query = getQuery("/graphql/journalpost.graphql"),
             variables = dokumentOversiktBrukerVariables(

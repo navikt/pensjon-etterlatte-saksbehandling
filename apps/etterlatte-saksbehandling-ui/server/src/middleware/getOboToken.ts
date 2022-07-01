@@ -14,7 +14,7 @@ export const getOboToken = async (auth: any): Promise<string> => {
     const body: any = {
       client_id: process.env.AZURE_APP_CLIENT_ID,
       client_secret: process.env.AZURE_APP_CLIENT_SECRET,
-      scope: 'api://783cea60-43b5-459c-bdd3-de3325bd716a/.default',
+      scope: ['api://783cea60-43b5-459c-bdd3-de3325bd716a/.default', 'api://d6add52a-5807-49cd-a181-76908efee836'],
       grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
       assertion: bearerToken,
       requested_token_use: 'on_behalf_of',

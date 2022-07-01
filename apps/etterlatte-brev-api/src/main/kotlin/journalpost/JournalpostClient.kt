@@ -46,7 +46,7 @@ class JournalpostClient(
         idType: BrukerIdType,
         accessToken: String
     ): JournalpostResponse {
-        val token = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf("api://dev-fss.teamdokumenthandtering.saf/.default"), accessToken)
+        val token = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf("api://d6add52a-5807-49cd-a181-76908efee836"), accessToken)
 
         logger.info("token : $token")
         logger.info("config : $config" )

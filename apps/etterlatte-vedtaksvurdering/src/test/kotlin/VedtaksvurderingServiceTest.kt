@@ -49,7 +49,8 @@ internal class VedtaksvurderingServiceTest {
         null,
         null,
         null,
-        null)
+        null,
+        null,)
     private val fattetVedtak = vedtakSomIkkeErFattet.copy(vedtakFattet = true)
 
     @Test

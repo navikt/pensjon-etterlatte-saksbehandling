@@ -5,6 +5,7 @@ import no.nav.etterlatte.domene.vedtak.Periode
 import no.nav.etterlatte.domene.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.domene.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
+import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -127,6 +128,28 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
+    fun lagreVedtakstatus(sakId: String, behandlingsId: UUID, vedtakStatus: VedtakStatus) {
+        logger.info("Lagrer vedtakstatus")
+        connection.use {
+            val statement = it.prepareStatement(Queries.lagreVedtakstatus)
+            statement.setLong(1, sakId.toLong())
+            statement.setObject(2, behandlingsId)
+            statement.setString(3, vedtakStatus.name)
+            statement.execute()
+        }
+    }
+
+    fun oppdaterVedtakstatus(sakId: String, behandlingsId: UUID, vedtakStatus: VedtakStatus) {
+        logger.info("Lagrer vedtakstatus")
+        connection.use {
+            val statement = it.prepareStatement(Queries.oppdaterVedtakstatus)
+            statement.setString(1, vedtakStatus.name)
+            statement.setLong(2, sakId.toLong())
+            statement.setObject(3, behandlingsId)
+            statement.execute()
+        }
+    }
+
     fun hentVedtak(sakId: String, behandlingsId: UUID): Vedtak? {
         val resultat = connection.use { it ->
             val statement = it.prepareStatement(Queries.hentVedtak)
@@ -151,7 +174,8 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                     getTimestamp(11)?.toInstant(),
                     getTimestamp(12)?.toInstant(),
                     getString(13),
-                    getDate(14)?.toLocalDate()
+                    getDate(14)?.toLocalDate(),
+                    getString(15)?.let { VedtakStatus.valueOf(it) },
                 )
             }
         }
@@ -297,6 +321,7 @@ data class Vedtak(
     val datoattestert: Instant?,
     val attestant: String?,
     val virkningsDato: LocalDate?,
+    val vedtakStatus: VedtakStatus?,
 )
 
 data class AttesteringsHendelse(
@@ -324,11 +349,14 @@ private object Queries {
     val lagreAvkortingsresultat = "INSERT INTO vedtak(sakId, behandlingId, avkortingsresultat, fnr) VALUES (?, ?, ?, ?)"
     val oppdaterAvkortingsresultat = "UPDATE vedtak SET avkortingsresultat = ? WHERE sakId = ? AND behandlingId = ?"
 
+    val lagreVedtakstatus = "INSERT INTO vedtak(sakId, behandlingId, vedtakstatus) VALUES (?, ?, ?)"
+    val oppdaterVedtakstatus = "UPDATE vedtak SET vedtakstatus = ? WHERE sakId = ? AND behandlingId = ?"
+
     val fattVedtak = "UPDATE vedtak SET saksbehandlerId = ?, vedtakfattet = ?, datoFattet = now() WHERE sakId = ? AND behandlingId = ?"
     val attesterVedtak = "UPDATE vedtak SET attestant = ?, datoAttestert = now() WHERE sakId = ? AND behandlingId = ?"
     val underkjennVedtak = "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null WHERE sakId = ? AND behandlingId = ?"
 
-    val hentVedtak = "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom FROM vedtak WHERE sakId = ? AND behandlingId = ?"
+    val hentVedtak = "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus FROM vedtak WHERE sakId = ? AND behandlingId = ?"
 
     val lagreFnr = "UPDATE vedtak SET fnr = ? WHERE sakId = ? AND behandlingId = ?"
     val lagreDatoVirkFom = "UPDATE vedtak SET datoVirkFom = ? WHERE sakId = ? AND behandlingId = ?"

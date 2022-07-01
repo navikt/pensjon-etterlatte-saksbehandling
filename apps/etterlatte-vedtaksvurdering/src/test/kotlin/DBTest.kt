@@ -5,6 +5,7 @@ import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.database.VedtaksvurderingRepository
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
+import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -148,37 +149,46 @@ internal class DBTest {
 
     @Test
     fun testDB() {
-        leggtilavkortingsresultat()
-        leggtilvilkaarsresultat()
-        leggtilkommersoekertilgoderesultat()
-        leggtilberegningsresultat()
-
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
+        leggtilavkortingsresultat()
+        val avkortet = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
+        Assertions.assertEquals(VedtakStatus.AVKORTET, avkortet?.vedtakStatus)
+        leggtilvilkaarsresultat()
+        val vilkaarsvurdert = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
+        Assertions.assertEquals(VedtakStatus.VILKAARSVURDERT, vilkaarsvurdert?.vedtakStatus)
+        leggtilkommersoekertilgoderesultat()
+        leggtilberegningsresultat()
+        val beregnet = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
+        Assertions.assertEquals(VedtakStatus.BEREGNET, beregnet?.vedtakStatus)
+
+
         val vedtaket = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         assert(vedtaket?.beregningsResultat != null)
         assert(vedtaket?.avkortingsResultat != null)
         assert(vedtaket?.beregningsResultat?.grunnlagVerson == 0.toLong())
         assert(vedtaket?.vilkaarsResultat != null)
         assert(vedtaket?.kommerSoekerTilgodeResultat != null)
+        assert(vedtaket?.vedtakStatus != null)
         Assertions.assertNotNull(vedtaket?.virkningsDato)
-
 
         vedtaksvurderingService.fattVedtak("12321423523545", uuid, "saksbehandler")
         val fattetVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
-
-
+        Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
 
         vedtaksvurderingService.underkjennVedtak("12321423523545", uuid, "saksbehandler", "Ikke bra nok", "KODE_FOR_NOE")
-        vedtaksvurderingService.fattVedtak("12321423523545", uuid, "saksbehandler")
+        val underkjentVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
+        Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
 
+        vedtaksvurderingService.fattVedtak("12321423523545", uuid, "saksbehandler")
 
         vedtaksvurderingService.attesterVedtak("12321423523545", uuid, "attestant")
         val attestertVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         Assertions.assertNotNull(attestertVedtak?.attestant)
         Assertions.assertNotNull(attestertVedtak?.datoattestert)
         Assertions.assertNotNull(attestertVedtak?.virkningsDato)
+        Assertions.assertEquals(VedtakStatus.ATTESTERT, attestertVedtak?.vedtakStatus)
 
 
         val fulltvedtak = vedtaksvurderingService.hentFellesVedtak("12321423523545", uuid)

@@ -35,10 +35,15 @@ internal class HendelserOmVedtak(
             val hendelse = packet["@event"].textValue()
 
             logger.info("""Oppdaterer behandling $behandling med hendelse  $hendelse""")
-            behandlinger.vedtakHendelse(
-                UUID.fromString(packet["@behandlingId"].textValue()),
-                hendelse.split(":").last()
-            )
+            try {
+                behandlinger.vedtakHendelse(
+                    UUID.fromString(packet["@behandlingId"].textValue()),
+                    hendelse.split(":").last()
+                )
+            } catch (e: Exception){
+                //TODO endre denne
+                println("spiser en melding fordi: $e")
+            }
         }
 }
 

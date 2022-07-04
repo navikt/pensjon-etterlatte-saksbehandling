@@ -35,11 +35,10 @@ class PdlKlient(private val httpClient: HttpClient) {
     }
     //TODO utvide til rolleliste?
     suspend fun hentPersonBolk(fnr: List<Foedselsnummer>, rolle: PersonRolle): PdlPersonResponseBolk {
-        println(fnr.map { it.value })
         val request = PdlGraphqlBolkRequest(
             query = getQuery("/pdl/hentPersonBolk.graphql"),
             variables = PdlBolkVariables(
-                ident = fnr.map { it.value },
+                identer = fnr.map { it.value },
                 bostedsadresse = true,
                 bostedsadresseHistorikk = true,
                 deltBostedsadresse = true,
@@ -53,7 +52,7 @@ class PdlKlient(private val httpClient: HttpClient) {
                 vergemaal = true
             )
         )
-        logger.info("Bolkhenter personer med fnr=${request.variables.ident} fra PDL")
+        logger.info("Bolkhenter personer med fnr=${request.variables.identer} fra PDL")
         return retry<PdlPersonResponseBolk> {
             httpClient.post {
                 header("Tema", TEMA)

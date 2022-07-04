@@ -29,7 +29,7 @@ data class PdlVariables(
 )
 
 data class PdlBolkVariables(
-    val ident: List<String>,
+    val identer: List<String>,
     val bostedsadresse: Boolean,
     val bostedsadresseHistorikk: Boolean,
     val deltBostedsadresse: Boolean,

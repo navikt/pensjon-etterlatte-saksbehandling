@@ -32,13 +32,18 @@ internal class UnderkjennVedtak(
             val behandlingId = packet["@behandlingId"].asUUID()
             val sakId = packet["@sakId"].longValue()
             val saksbehandler = packet["@saksbehandler"].textValue()
-            vedtaksvurderingService.underkjennVedtak(
-                sakId.toString(),
-                behandlingId,
-                saksbehandler,
-                packet["@kommentar"].textValue(),
-                packet["@valgtBegrunnelse"].textValue()
-            )
+           try {
+               vedtaksvurderingService.underkjennVedtak(
+                   sakId.toString(),
+                   behandlingId,
+                   saksbehandler,
+                   packet["@kommentar"].textValue(),
+                   packet["@valgtBegrunnelse"].textValue()
+               )
+           } catch (e: Exception){
+               //TODO endre denne
+               println("spiser en melding fordi: $e")
+           }
             context.publish(
                 JsonMessage.newMessage(
                     mapOf(

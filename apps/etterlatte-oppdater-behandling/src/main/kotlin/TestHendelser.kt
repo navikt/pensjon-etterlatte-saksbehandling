@@ -30,7 +30,7 @@ internal class TestHendelser(
             val sak = packet["saksId"].textValue().toLong()
 
             logger.info("""Hail To the King, Baby!""")
-            logger.info("""Sletter sak med id $sak med tilhørende hendelser""")
+            logger.info("""Sletter sak med id $sak med tilhørende behandlinger""")
             behandlinger.slettSakOgBehandlinger(sak)
 
         }

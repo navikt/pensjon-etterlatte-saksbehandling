@@ -19,7 +19,9 @@ object BarnekullMapper {
             }
         println("barnFnr: $barnFnr")
         return if (barnFnr != null) {
-            pdlKlient.hentPersonBolk(barnFnr, PersonRolle.BARN).data?.hentPersonBolk?.map { mapBarn(ppsKlient,it.ident,it.person!!)}
+            val bah = pdlKlient.hentPersonBolk(barnFnr, PersonRolle.BARN)
+            println(bah)
+            return bah.data?.hentPersonBolk?.map { mapBarn(ppsKlient,it.ident,it.person!!)}
         } else null
     }
     private fun mapBarn(

@@ -1,12 +1,7 @@
 package no.nav.etterlatte.rivers
 
-import no.nav.etterlatte.KanIkkeEndreFattetVedtak
-import no.nav.etterlatte.VedtakKanIkkeAttesteresAlleredeAttester
-import no.nav.etterlatte.VedtakKanIkkeAttesteresFoerDetFattes
 import no.nav.etterlatte.VedtaksvurderingService
-import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -39,7 +34,6 @@ internal class AttesterVedtak(
             try {
                 val attestertVedtak =
                     vedtaksvurderingService.attesterVedtak(sakId.toString(), behandlingId, saksbehandler)
-                vedtaksvurderingService.lagreVedtakstatus(sakId.toString(), behandlingId, VedtakStatus.ATTESTERT)
                 context.publish(
                     JsonMessage.newMessage(
                         mapOf(
@@ -49,9 +43,9 @@ internal class AttesterVedtak(
                         )
                     ).toJson()
                 )
-            } catch (ex: Exception){
+            } catch (ex: Exception) {
                 context.publish(packet.also {
-                    it["@feil"] = requireNotNull( ex.message )
+                    it["@feil"] = requireNotNull(ex.message)
                 }.toJson())
             }
         }

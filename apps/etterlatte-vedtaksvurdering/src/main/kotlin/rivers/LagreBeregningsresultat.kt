@@ -2,7 +2,6 @@ package no.nav.etterlatte.rivers
 
 import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
-import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -38,7 +37,6 @@ internal class LagreBeregningsresultat(
 
             try {
                 vedtaksvurderingService.lagreBeregningsresultat(sakId, behandlingId, packet["soeker"].textValue(), beregningsResultat)
-                vedtaksvurderingService.lagreVedtakstatus(sakId, behandlingId, VedtakStatus.BEREGNET)
                 requireNotNull( vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
                     context.publish(JsonMessage.newMessage(
                         mapOf(

@@ -126,15 +126,6 @@ class VedtaksvurderingService(
 
     }
 
-    fun lagreVedtakstatus(sakId: String, behandlingId: UUID, vedtakstatus: VedtakStatus) {
-        val vedtak = repository.hentVedtak(sakId, behandlingId)
-        if (vedtak == null) {
-            repository.lagreVedtakstatus(sakId, behandlingId, vedtakstatus)
-        } else {
-            repository.oppdaterVedtakstatus(sakId, behandlingId, vedtakstatus)
-        }
-    }
-
     fun hentVedtak(sakId: String, behandlingId: UUID): Vedtak? {
         return repository.hentVedtak(sakId, behandlingId)
     }

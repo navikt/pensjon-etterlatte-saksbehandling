@@ -71,9 +71,6 @@ internal class DBTest {
                 now
             )
         )
-        vedtaksvurderingService.lagreVedtakstatus(
-            "12321423523545", uuid, VedtakStatus.BEREGNET
-        )
     }
 
     fun leggtilvilkaarsresultat() {
@@ -86,9 +83,6 @@ internal class DBTest {
                 emptyList(),
                 now
             ), LocalDate.now()
-        )
-        vedtaksvurderingService.lagreVedtakstatus(
-            "12321423523545", uuid, VedtakStatus.VILKAARSVURDERT
         )
     }
 
@@ -148,9 +142,6 @@ internal class DBTest {
                 LocalDateTime.now()
             )
         )
-        vedtaksvurderingService.lagreVedtakstatus(
-            "12321423523545", uuid, VedtakStatus.AVKORTET
-        )
     }
 
     @Test
@@ -179,20 +170,17 @@ internal class DBTest {
         Assertions.assertNotNull(vedtaket?.virkningsDato)
 
         vedtaksvurderingService.fattVedtak("12321423523545", uuid, "saksbehandler")
-        vedtaksvurderingService.lagreVedtakstatus("12321423523545", uuid, VedtakStatus.FATTET_VEDTAK)
         val fattetVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
         Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
 
         vedtaksvurderingService.underkjennVedtak("12321423523545", uuid, "saksbehandler", "Ikke bra nok", "KODE_FOR_NOE")
-        vedtaksvurderingService.lagreVedtakstatus("12321423523545", uuid, VedtakStatus.RETURNERT)
         val underkjentVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
 
         vedtaksvurderingService.fattVedtak("12321423523545", uuid, "saksbehandler")
 
         vedtaksvurderingService.attesterVedtak("12321423523545", uuid, "attestant")
-        vedtaksvurderingService.lagreVedtakstatus("12321423523545", uuid, VedtakStatus.ATTESTERT)
         val attestertVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         Assertions.assertNotNull(attestertVedtak?.attestant)
         Assertions.assertNotNull(attestertVedtak?.datoattestert)

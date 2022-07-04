@@ -132,7 +132,7 @@ class BehandlingAggregat(
                 "FATTET" -> OppgaveStatus.TIL_ATTESTERING
                 "UNDERKJENT" -> OppgaveStatus.RETURNERT
                 "ATTESTERT" -> OppgaveStatus.LUKKET
-                else -> throw IllegalStateException("Behandling ${lagretBehandling.id} forstår ikke vedtakhendelse $hendelse")
+                else -> lagretBehandling.oppgaveStatus
             }
         )
         behandlinger.lagreStatus(lagretBehandling)

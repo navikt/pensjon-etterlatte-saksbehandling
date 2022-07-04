@@ -26,13 +26,13 @@ class JournalpostClient(
     val configLocation: String? = null
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
 
-
     val azureAdClient = AzureAdClient(config, httpClient)
     override suspend fun hentInnkommendeBrevInnhold(
         journalpostId: String,
         dokumentInfoId: String,
         accessToken: String
     ): ByteArray = try {
+        // TODO: Må hente ut og bruke token her også
         httpClient.get("$restApiUrl/$journalpostId/$dokumentInfoId/ARKIV") {
             header("Authorization", "Bearer $accessToken")
             header("Content-Type", "application/json")
@@ -49,9 +49,6 @@ class JournalpostClient(
     ): JournalpostResponse {
         val token = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf("api://dev-fss.teamdokumenthandtering.saf/.default"), accessToken)
 
-        logger.info("token : ${token.get()?.accessToken}")
-        logger.info("config : $config" )
-
         val request = GraphqlRequest(
             query = getQuery("/graphql/journalpost.graphql"),
             variables = dokumentOversiktBrukerVariables(
@@ -63,6 +60,7 @@ class JournalpostClient(
             )
         )
 
+        // Bruker riktig token, men får "Remote host terminated the handshake"
         return retry<JournalpostResponse> {
             httpClient.post(graphqlApiUrl) {
                 header("Authorization", "Bearer ${token.get()?.accessToken}")
@@ -82,6 +80,8 @@ class JournalpostClient(
             .readText()
             .replace(Regex("[\n\t]"), "")
     }
+
+    // TODO: Lag funksjon for uthenting av token
 
 }
 

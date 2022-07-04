@@ -40,25 +40,26 @@ internal class UnderkjennVedtak(
                    packet["@kommentar"].textValue(),
                    packet["@valgtBegrunnelse"].textValue()
                )
+               context.publish(
+                   JsonMessage.newMessage(
+                       mapOf(
+                           "@event" to "VEDTAK:UNDERKJENT",
+                       ) + packet.keep(
+                           "@vedtakId",
+                           "@behandlingId",
+                           "@saksbehandler",
+                           "@sakId",
+                           "@correlation_id",
+                           "@valgtBegrunnelse",
+                           "@kommentar"
+                       )
+                   ).toJson()
+               )
            } catch (e: Exception){
                //TODO endre denne
                println("spiser en melding fordi: $e")
            }
-            context.publish(
-                JsonMessage.newMessage(
-                    mapOf(
-                        "@event" to "VEDTAK:UNDERKJENT",
-                    ) + packet.keep(
-                        "@vedtakId",
-                        "@behandlingId",
-                        "@saksbehandler",
-                        "@sakId",
-                        "@correlation_id",
-                        "@valgtBegrunnelse",
-                        "@kommentar"
-                    )
-                ).toJson()
-            )
+
         }
 }
 

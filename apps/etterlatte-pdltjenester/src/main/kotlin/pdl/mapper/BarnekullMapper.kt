@@ -34,7 +34,7 @@ object BarnekullMapper {
         val sivilstand = hentPerson.sivilstand?.let { ppsKlient.avklarSivilstand(it) }
         val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
         val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
-
+        println("Forsøker å mappe et barn")
         Person(
             fornavn = navn.fornavn,
             etternavn = navn.etternavn,

@@ -49,7 +49,7 @@ class JournalpostClient(
     ): JournalpostResponse {
         val token = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf("api://dev-fss.teamdokumenthandtering.saf/.default"), accessToken)
 
-        logger.info("token : $token")
+        logger.info("token : ${token.get()?.accessToken}")
         logger.info("config : $config" )
 
         val request = GraphqlRequest(
@@ -77,12 +77,12 @@ class JournalpostClient(
         }
     }
 
-
     private fun getQuery(name: String): String {
         return javaClass.getResource(name)!!
             .readText()
             .replace(Regex("[\n\t]"), "")
     }
+
 }
 
 class JournalpostException(msg: String, cause: Throwable) : Exception(msg, cause)

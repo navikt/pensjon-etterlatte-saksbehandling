@@ -3,7 +3,7 @@ import { AppContext } from '../../../store/AppContext'
 import { Content, ContentHeader } from '../../../shared/styled'
 import { SoeknadOversikt } from './soeknadoversikt/Soeknadsoversikt'
 import { Familieforhold } from './familieforhold/Familieforhold'
-import { IBehandlingStatus, VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 import { Border, HeadingWrapper } from './styled'
 import { BehandlingsStatusSmall, IBehandlingsStatus } from '../behandlings-status'
 import { BehandlingsTypeSmall, IBehandlingsType } from '../behandlings-type'
@@ -12,12 +12,12 @@ import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapp
 import { Start } from '../handlinger/start'
 import { Soeknadsdato } from './soeknadoversikt/Soeknadsdato'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
+import { hentBehandlesFraStatus } from '../felles/utils'
 
 export const Soeknadsoversikt = () => {
   const behandling = useContext(AppContext).state.behandlingReducer
+  const behandles = hentBehandlesFraStatus(behandling?.status)
 
-  const ctx = useContext(AppContext)
-  const behandlingStatus = ctx.state.behandlingReducer.status
   return (
     <Content>
       <ContentHeader>
@@ -35,8 +35,7 @@ export const Soeknadsoversikt = () => {
       <SoeknadOversikt behandling={behandling} />
       <Border />
       <Familieforhold behandling={behandling} />
-      {behandlingStatus === IBehandlingStatus.UNDER_BEHANDLING ||
-      behandlingStatus === IBehandlingStatus.GYLDIG_SOEKNAD || IBehandlingStatus.RETURNERT ? (
+      {behandles ? (
         <BehandlingHandlingKnapper>
           <Start soeknadGyldigFremsatt={behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT} />
         </BehandlingHandlingKnapper>

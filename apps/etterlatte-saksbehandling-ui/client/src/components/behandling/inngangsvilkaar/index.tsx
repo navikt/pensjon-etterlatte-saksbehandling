@@ -10,6 +10,7 @@ import { BarnetsMedlemskap } from './vilkaar/BarnetsMedlemskap'
 import { VilkaarResultat } from './vilkaar/VilkaarResultat'
 import { Virkningstidspunkt } from './vilkaar/Virkningstidspunkt'
 import { VilkaarBorderTop } from './styled'
+import { hentBehandlesFraStatus } from '../felles/utils'
 
 export const Inngangsvilkaar = () => {
   const ctx = useContext(AppContext)
@@ -17,7 +18,7 @@ export const Inngangsvilkaar = () => {
 
   const virkningstidspunkt = ctx.state.behandlingReducer.virkningstidspunkt
   const vilkaarsproving = ctx.state.behandlingReducer.vilkårsprøving
-  const vilkaarResultat = ctx.state.behandlingReducer.vilkårsprøving?.resultat
+  const behandles = hentBehandlesFraStatus(ctx.state.behandlingReducer?.status)
 
   useEffect(() => {
     const hash = location.hash.slice(1)
@@ -57,9 +58,9 @@ export const Inngangsvilkaar = () => {
       />
       <VilkaarResultat
         id="vilkaarResultat"
-        resultat={vilkaarResultat}
+        resultat={vilkaarsproving.resultat}
         dato={virkningstidspunkt}
-        behandlingStatus={ctx.state.behandlingReducer.status}
+        behandles={behandles}
       />
     </Content>
   )

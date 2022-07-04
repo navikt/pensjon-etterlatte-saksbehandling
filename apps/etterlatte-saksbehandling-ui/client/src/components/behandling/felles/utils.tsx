@@ -1,6 +1,7 @@
 import { isAfter } from 'date-fns'
 import {
   IAdresse,
+  IBehandlingStatus,
   IKriterie,
   IKriterieOpplysning,
   IVilkaarsproving,
@@ -82,4 +83,12 @@ export const hentKriterierMedOpplysning = (
   } catch (e: any) {
     console.error(e)
   }
+}
+
+export const hentBehandlesFraStatus = (status: IBehandlingStatus): boolean => {
+  return (
+    status === IBehandlingStatus.UNDER_BEHANDLING ||
+    status === IBehandlingStatus.GYLDIG_SOEKNAD ||
+    status === IBehandlingStatus.RETURNERT
+  )
 }

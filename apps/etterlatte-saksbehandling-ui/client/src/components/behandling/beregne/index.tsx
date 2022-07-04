@@ -2,18 +2,19 @@ import { Content, ContentHeader } from '../../../shared/styled'
 import { TypeStatusWrap } from '../soeknadsoversikt/styled'
 import { Sammendrag } from './sammendrag'
 import styled from 'styled-components'
-import { format } from 'date-fns'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { BeregningModal } from '../handlinger/sendTilAttesteringModal'
 import { useContext } from 'react'
 import { AppContext } from '../../../store/AppContext'
-import { IBehandlingStatus } from '../../../store/reducers/BehandlingReducer'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import BrevModal from "./brev-modal";
+import BrevModal from './brev-modal'
+import { hentBehandlesFraStatus } from '../felles/utils'
+import { formatterStringDato } from '../../../utils'
 
 export const Beregne = () => {
-  const virkningstidspunkt = useContext(AppContext).state.behandlingReducer.virkningstidspunkt
-  const behandlingStatus = useContext(AppContext).state.behandlingReducer.status
+  const behandling = useContext(AppContext).state.behandlingReducer
+  const virkningstidspunkt = formatterStringDato(behandling.virkningstidspunkt)
+  const behandles = hentBehandlesFraStatus(behandling?.status)
 
   return (
     <Content>
@@ -26,16 +27,13 @@ export const Beregne = () => {
           </DetailWrapper>
 
           <div className="text">
-            Vilkårsresultat: <strong>Innvilget fra {format(new Date(virkningstidspunkt), 'dd.MM.yyyy')}</strong>
+            Vilkårsresultat: <strong>Innvilget fra {virkningstidspunkt}</strong>
           </div>
         </InfoWrapper>
-
         <Sammendrag />
-
         <BrevModal />
       </ContentHeader>
-      {behandlingStatus === IBehandlingStatus.UNDER_BEHANDLING ||
-      behandlingStatus === IBehandlingStatus.GYLDIG_SOEKNAD || IBehandlingStatus.RETURNERT ? (
+      {behandles ? (
         <BehandlingHandlingKnapper>
           <BeregningModal />
         </BehandlingHandlingKnapper>

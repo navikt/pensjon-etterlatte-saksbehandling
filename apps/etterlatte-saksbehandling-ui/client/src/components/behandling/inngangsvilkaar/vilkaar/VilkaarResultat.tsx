@@ -1,4 +1,4 @@
-import { IBehandlingStatus, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import React from 'react'
 import { VilkaarBorder } from '../styled'
 import styled from 'styled-components'
@@ -11,10 +11,10 @@ type Props = {
   id: any
   resultat: VurderingsResultat | undefined
   dato: string
-  behandlingStatus: IBehandlingStatus
+  behandles: boolean
 }
 
-export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato, behandlingStatus }) => {
+export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato, behandles }) => {
   const datoFormatert = format(new Date(dato), 'dd.MM.yyyy')
 
   let tekst = ''
@@ -25,9 +25,6 @@ export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato, behandlin
   } else {
     tekst = 'Trenger avklaring'
   }
-
-  const behandles =
-    behandlingStatus === IBehandlingStatus.UNDER_BEHANDLING || behandlingStatus === IBehandlingStatus.GYLDIG_SOEKNAD || IBehandlingStatus.RETURNERT
 
   return (
     <>

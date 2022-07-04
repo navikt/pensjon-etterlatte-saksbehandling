@@ -5,7 +5,6 @@ import no.nav.etterlatte.database.Vedtak
 import no.nav.etterlatte.database.VedtaksvurderingRepository
 import no.nav.etterlatte.domene.vedtak.*
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
-import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.*
@@ -32,13 +31,23 @@ class VedtakKanIkkeFattes(vedtak: Vedtak) : Exception("Vedtak ${vedtak.id} kan i
     val vedtakId: Long = vedtak.id
 }
 
-class VedtakKanIkkeAttesteresAlleredeAttester(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) :
-    Exception("Vedtak ${vedtak.vedtakId} kan ikke attesteres da det allerede er attester") {
+class VedtakKanIkkeAttesteresAlleredeAttestert(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) :
+    Exception("Vedtak ${vedtak.vedtakId} kan ikke attesteres da det allerede er attestert") {
     val vedtakId: Long = vedtak.vedtakId
 }
 
 class VedtakKanIkkeAttesteresFoerDetFattes(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) :
     Exception("Vedtak ${vedtak.vedtakId} kan ikke attesteres da det ikke er fattet") {
+    val vedtakId: Long = vedtak.vedtakId
+}
+
+class VedtakKanIkkeUnderkjennesFoerDetFattes(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) :
+    Exception("Vedtak ${vedtak.vedtakId} kan ikke underkjennes da det ikke er fattet") {
+    val vedtakId: Long = vedtak.vedtakId
+}
+
+class VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) :
+    Exception("Vedtak ${vedtak.vedtakId} kan ikke underkjennes da det allerede er attestert") {
     val vedtakId: Long = vedtak.vedtakId
 }
 
@@ -175,9 +184,9 @@ class VedtaksvurderingService(
                         })
                 }, // sammendraget bør lages av avkorting,
                 repository.hentUtbetalingsPerioder(it.id),
-                it.saksbehandlerId?.let { ansvarligSaksbehadnlier ->
+                it.saksbehandlerId?.let { ansvarligSaksbehandler ->
                     VedtakFattet(
-                        ansvarligSaksbehadnlier, "0000", it.datoFattet?.atZone(
+                        ansvarligSaksbehandler, "0000", it.datoFattet?.atZone(
                             ZoneOffset.UTC
                         )!!
                     )
@@ -274,7 +283,7 @@ class VedtaksvurderingService(
     ): no.nav.etterlatte.domene.vedtak.Vedtak {
         val vedtak = requireNotNull(hentFellesVedtak(sakId, behandlingId)).also {
             requireThat(it.vedtakFattet != null) { VedtakKanIkkeAttesteresFoerDetFattes(it) }
-            requireThat(it.attestasjon == null) { VedtakKanIkkeAttesteresAlleredeAttester(it) }
+            requireThat(it.attestasjon == null) { VedtakKanIkkeAttesteresAlleredeAttestert(it) }
         }
         repository.attesterVedtak(
             saksbehandler,
@@ -299,8 +308,8 @@ class VedtaksvurderingService(
         valgtBegrunnelse: String
     ) {
         val vedtak = requireNotNull(hentFellesVedtak(sakId, behandlingId)).also {
-            require(it.vedtakFattet != null)
-            require(it.attestasjon == null)
+            require(it.vedtakFattet != null) { VedtakKanIkkeUnderkjennesFoerDetFattes(it) }
+            require(it.attestasjon == null) { VedtakKanIkkeUnderkjennesAlleredeAttestert(it) }
         }
         repository.underkjennVedtak(saksbehandler, sakId, behandlingId, vedtak.vedtakId, kommentar, valgtBegrunnelse)
     }

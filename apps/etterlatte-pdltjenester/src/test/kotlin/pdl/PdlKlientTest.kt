@@ -1,13 +1,9 @@
 package no.nav.etterlatte.pdl
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.http.ContentType
-import io.ktor.http.fullPath
-import io.ktor.http.headersOf
+import io.ktor.client.*
+import io.ktor.client.engine.mock.*
+import io.ktor.client.features.json.*
+import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.libs.common.objectMapper
@@ -31,6 +27,22 @@ internal class PdlKlientTest {
             assertEquals("HEST", hentPerson?.navn?.first()?.etternavn)
             assertEquals("2007-08-29", hentPerson?.foedsel?.first()?.foedselsdato?.toString())
             assertEquals("NIC", hentPerson?.foedsel?.first()?.foedeland)
+            // TODO sjekk flere relevante felter
+        }
+    }
+
+    @Test
+    fun `hentPersonBolk returnerer gyldige personer`() {
+        mockEndpoint("/pdl/personBolk.json")
+
+        runBlocking {
+            val personResponse = pdlKlient.hentPersonBolk(listOf(STOR_SNERK), PersonRolle.BARN)
+            val hentPerson = personResponse.data?.hentPersonBolk
+
+            assertEquals("TRIVIELL", hentPerson?.first()?.person?.navn?.first()?.fornavn)
+            assertEquals("SKILPADDE", hentPerson?.first()?.person?.navn?.first()?.etternavn)
+            assertEquals("1987-07-30", hentPerson?.first()?.person?.foedsel?.first()?.foedselsdato?.toString())
+            assertEquals("FJI", hentPerson?.first()?.person?.foedsel?.first()?.foedeland)
             // TODO sjekk flere relevante felter
         }
     }

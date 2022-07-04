@@ -1,5 +1,6 @@
 package journalpost
 
+import com.github.michaelbull.result.get
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.*
@@ -64,7 +65,7 @@ class JournalpostClient(
 
         return retry<JournalpostResponse> {
             httpClient.post(graphqlApiUrl) {
-                header("Authorization", "Bearer $accessToken")
+                header("Authorization", "Bearer ${token.get()?.accessToken}")
                 accept(ContentType.Application.Json)
                 body = TextContent(request.toJson(), ContentType.Application.Json)
             }

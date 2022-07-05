@@ -40,7 +40,6 @@ internal class AttesterVedtak(
                         it["@event"] = "VEDTAK:ATTESTERT"
                         it["@vedtak"] = attestertVedtak
                         it["@eventtimestamp"] = attestertVedtak.attestasjon?.tidspunkt?.toTidspunkt()!!
-
                     }.toJson()
                 )
             } catch (ex: Exception) {

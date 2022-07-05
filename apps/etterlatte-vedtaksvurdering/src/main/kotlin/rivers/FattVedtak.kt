@@ -42,6 +42,7 @@ internal class FattVedtak(
                         "@vedtak" to fattetVedtak,
                         "@behandlingId" to behandlingId,
                         "@sakId" to sakId,
+                        "@vedtakId" to fattetVedtak.vedtakId,
                         "@eventtimestamp" to fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
                         "@saksbehandler" to fattetVedtak.vedtakFattet?.ansvarligSaksbehandler!!
                     )

@@ -59,28 +59,35 @@ class GyldigSoeknadService(private val pdl: Pdl) {
         val personinfoInnsender = persongalleri.innsender?.let { hentNavnFraPdl(it) }
         val personinfoGjenlevende = persongalleri.gjenlevende.map { hentNavnFraPdl(it) }
 
-        val gyldighet = listOf(
-            innsenderErForelder(
-                GyldighetsTyper.INNSENDER_ER_FORELDER,
-                personinfoGjenlevende,
-                personinfoInnsender,
-                familieRelasjonSoeker
-            ),
-            innsenderHarForeldreansvar(
-                GyldighetsTyper.HAR_FORELDREANSVAR_FOR_BARNET,
-                personinfoInnsender,
-                familieRelasjonSoeker
-            ),
-            ingenAnnenVergeEnnForelder(
-                GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER,
-                soekerPdl,
-            ),
+
+        val innsenderErForelder = innsenderErForelder(
+            GyldighetsTyper.INNSENDER_ER_FORELDER,
+            personinfoGjenlevende,
+            personinfoInnsender,
+            familieRelasjonSoeker
         )
 
-        val gyldighetResultat = setVurdering(gyldighet)
+        val innsenderHarForeldreansvar = innsenderHarForeldreansvar(
+            GyldighetsTyper.HAR_FORELDREANSVAR_FOR_BARNET,
+            personinfoInnsender,
+            familieRelasjonSoeker
+        )
+
+        val ingenAnnenVergeEnnForelder = ingenAnnenVergeEnnForelder(
+            GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER,
+            soekerPdl,
+        )
+
+        val vurderingsliste = listOf(
+            innsenderErForelder,
+            innsenderHarForeldreansvar,
+            ingenAnnenVergeEnnForelder
+        )
+
+        val gyldighetResultat = setVurdering(vurderingsliste)
         val vurdertDato = LocalDateTime.now()
 
-        return GyldighetsResultat(gyldighetResultat, gyldighet, vurdertDato)
+        return GyldighetsResultat(gyldighetResultat, vurderingsliste, vurdertDato)
     }
 
 

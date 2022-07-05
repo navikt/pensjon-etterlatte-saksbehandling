@@ -22,6 +22,7 @@ interface BeanFactory {
     fun tokenValidering(): Authentication.Configuration.() -> Unit
     fun sakDao(): SakDao
     fun behandlingDao(): BehandlingDao
+    fun hendelseDao(): HendelseDao
     fun rapid(): KafkaProdusent<String, String>
     fun behandlingHendelser(): BehandlingsHendelser
     fun behandlingsFactory(): BehandlingFactory
@@ -43,25 +44,26 @@ abstract class CommonFactory : BeanFactory {
         return cached {
             BehandlingsHendelser(
                 rapid(),
-                BehandlingFactory(behandlingDao()),
+                behandlingsFactory(),
                 datasourceBuilder().dataSource
             )
         }
     }
 
     override fun behandlingsFactory(): BehandlingFactory {
-        return cached { BehandlingFactory(behandlingDao()) }
+        return cached { BehandlingFactory(behandlingDao(), hendelseDao()) }
     }
 
     override fun sakService(): SakService = RealSakService(sakDao())
     override fun behandlingService(): BehandlingService = RealBehandlingService(
         behandlingDao(),
-        BehandlingFactory(behandlingDao()),
+        behandlingsFactory(),
         behandlingHendelser().nyHendelse
     )
 
     override fun sakDao(): SakDao = SakDao { databaseContext().activeTx() }
     override fun behandlingDao(): BehandlingDao = BehandlingDao { databaseContext().activeTx() }
+    override fun hendelseDao(): HendelseDao = HendelseDao { databaseContext().activeTx() }
 }
 
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {

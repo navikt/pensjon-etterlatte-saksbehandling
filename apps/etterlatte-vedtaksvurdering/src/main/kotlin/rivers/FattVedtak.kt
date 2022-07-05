@@ -4,6 +4,7 @@ import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtakKanIkkeFattes
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -14,7 +15,6 @@ internal class FattVedtak(
     rapidsConnection: RapidsConnection,
     val vedtaksvurderingService: VedtaksvurderingService
 ) : River.PacketListener {
-    private val logger = LoggerFactory.getLogger(FattVedtak::class.java)
 
     init {
         River(rapidsConnection).apply {
@@ -40,7 +40,10 @@ internal class FattVedtak(
                     mapOf(
                         "@event" to "VEDTAK:FATTET",
                         "@vedtak" to fattetVedtak,
-                        "@behandlingId" to behandlingId
+                        "@behandlingId" to behandlingId,
+                        "@sakId" to sakId,
+                        "@eventtimestamp" to fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
+                        "@saksbehandler" to fattetVedtak.vedtakFattet?.ansvarligSaksbehandler!!
                     )
                 ).toJson())
             } catch (ex: Exception){

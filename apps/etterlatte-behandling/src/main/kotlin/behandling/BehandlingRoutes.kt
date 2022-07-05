@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
 
 fun Route.behandlingRoutes(service: BehandlingService) {
@@ -84,11 +85,11 @@ fun Route.behandlingRoutes(service: BehandlingService) {
         }
 
         post("hendelser/vedtak/{hendelse}") {
-            service.registrerVedtakHendelse(behandlingsId, requireNotNull(call.parameters["hendelse"]))
+            val body = call.receive<VedtakHendelse>()
+            service.registrerVedtakHendelse(behandlingsId, body.vedtakId, requireNotNull(call.parameters["hendelse"]), body.inntruffet, body.saksbehandler, body.kommentar, body.valgtBegrunnelse)
 
             call.respond(HttpStatusCode.OK)
         }
-
 
     }
 }
@@ -101,3 +102,10 @@ inline val PipelineContext<*, ApplicationCall>.behandlingsId
     }
 inline val PipelineContext<*, ApplicationCall>.sakId get() = requireNotNull(call.parameters["sakid"]).toLong()
 
+data class VedtakHendelse(
+    val vedtakId: Long,
+    val saksbehandler: String?,
+    val inntruffet: Tidspunkt,
+    val kommentar: String?,
+    val valgtBegrunnelse: String?,
+)

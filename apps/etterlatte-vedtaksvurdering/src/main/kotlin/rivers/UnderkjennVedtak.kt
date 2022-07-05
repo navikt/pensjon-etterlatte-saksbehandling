@@ -2,6 +2,7 @@ package no.nav.etterlatte.rivers
 
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -44,6 +45,7 @@ internal class UnderkjennVedtak(
                    JsonMessage.newMessage(
                        mapOf(
                            "@event" to "VEDTAK:UNDERKJENT",
+                           "@eventtimestamp" to Tidspunkt.now(),
                        ) + packet.keep(
                            "@vedtakId",
                            "@behandlingId",

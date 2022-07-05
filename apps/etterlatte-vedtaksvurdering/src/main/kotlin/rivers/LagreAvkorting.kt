@@ -6,6 +6,7 @@ import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -45,6 +46,7 @@ internal class LagreAvkorting(
                             "@sakId" to it.sakId.toLong(),
                             "@behandlingId" to it.behandlingId.toString(),
                             "@vedtakId" to it.id,
+                            "@eventtimestamp" to Tidspunkt.now()
                         )
                     ).toJson())
                 }

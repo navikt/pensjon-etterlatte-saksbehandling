@@ -2,6 +2,7 @@ package no.nav.etterlatte.rivers
 
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -35,13 +36,12 @@ internal class AttesterVedtak(
                 val attestertVedtak =
                     vedtaksvurderingService.attesterVedtak(sakId.toString(), behandlingId, saksbehandler)
                 context.publish(
-                    JsonMessage.newMessage(
-                        mapOf(
-                            "@event" to "VEDTAK:ATTESTERT",
-                            "@vedtak" to attestertVedtak,
-                            "@behandlingId" to behandlingId
-                        )
-                    ).toJson()
+                    packet.also {
+                        it["@event"] = "VEDTAK:ATTESTERT"
+                        it["@vedtak"] = attestertVedtak
+                        it["@eventtimestamp"] = attestertVedtak.attestasjon?.tidspunkt?.toTidspunkt()!!
+
+                    }.toJson()
                 )
             } catch (ex: Exception) {
                 context.publish(packet.also {

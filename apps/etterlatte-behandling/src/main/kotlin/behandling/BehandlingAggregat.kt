@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -13,14 +14,16 @@ class AvbruttBehandlingException(message: String) : RuntimeException(message) {}
 
 class BehandlingAggregat(
     id: UUID,
-    private val behandlinger: BehandlingDao
+    private val behandlinger: BehandlingDao,
+    private val hendelser: HendelseDao
 ) {
     companion object {
         private val logger = LoggerFactory.getLogger(BehandlingAggregat::class.java)
 
         fun opprett(
             sak: Long,
-            behandlinger: BehandlingDao
+            behandlinger: BehandlingDao,
+            hendelser: HendelseDao
         ): BehandlingAggregat {
             logger.info("Oppretter en behandling på ${sak}")
             return Behandling(
@@ -40,9 +43,10 @@ class BehandlingAggregat(
             )
                 .also {
                     behandlinger.opprett(it)
+                    hendelser.behandlingOpprettet(it)
                     logger.info("Opprettet behandling ${it.id} i sak ${it.sak}")
                 }
-                .let { BehandlingAggregat(it.id, behandlinger) }
+                .let { BehandlingAggregat(it.id, behandlinger, hendelser) }
         }
     }
 
@@ -112,11 +116,19 @@ class BehandlingAggregat(
 
     fun serialiserbarUtgave() = lagretBehandling.copy()
 
-    fun registrerVedtakHendelse(hendelse: String) {
+    fun registrerVedtakHendelse(vedtakId: Long, hendelse: String, inntruffet: Tidspunkt, saksbehandler: String?, kommentar: String?, begrunnelse: String?) {
         val ikkeSettUnderBehandling = lagretBehandling.status == BehandlingStatus.FATTET_VEDTAK
                 || lagretBehandling.status == BehandlingStatus.RETURNERT
                 || lagretBehandling.status == BehandlingStatus.ATTESTERT
 
+        if(hendelse in listOf("FATTET", "ATTESTERT","UNDERKJENT") ) {
+            requireNotNull(saksbehandler)
+        }
+
+        if(hendelse == "UNDERKJENT") {
+            requireNotNull(kommentar)
+            requireNotNull(begrunnelse)
+        }
 
         lagretBehandling = lagretBehandling.copy(
             status = when (hendelse) {
@@ -137,7 +149,7 @@ class BehandlingAggregat(
         )
         behandlinger.lagreStatus(lagretBehandling)
         behandlinger.lagreOppgaveStatus(lagretBehandling)
+        hendelser.vedtakHendelse(lagretBehandling, vedtakId, hendelse, inntruffet, saksbehandler, kommentar, begrunnelse)
     }
-
 
 }

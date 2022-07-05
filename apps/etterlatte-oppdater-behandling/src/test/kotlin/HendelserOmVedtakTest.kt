@@ -3,6 +3,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.BehandlingsService
 import no.nav.etterlatte.HendelserOmVedtak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -17,7 +18,10 @@ internal class HendelserOmVedtakTest{
 
     val fullMelding = """{
   "@event": "VEDTAK:$hendelse",
-  "@behandlingId": "$behandlingId"
+  "@behandlingId": "$behandlingId",
+  "@vedtakId": 1,
+  "@sakId": 2,
+  "@eventtimestamp": "${Tidspunkt.now().instant}"
 }"""
 
     @Test
@@ -25,7 +29,7 @@ internal class HendelserOmVedtakTest{
 
         val behandlingIdSlot = slot<UUID>()
         val hendelseSlot = slot<String>()
-        every { behandlingService.vedtakHendelse(capture(behandlingIdSlot), capture(hendelseSlot)) }.returns(Unit)
+        every { behandlingService.vedtakHendelse(capture(behandlingIdSlot), capture(hendelseSlot), any(), any(), any(), any(), any()) }.returns(Unit)
 
         inspector.sendTestMessage(fullMelding)
 

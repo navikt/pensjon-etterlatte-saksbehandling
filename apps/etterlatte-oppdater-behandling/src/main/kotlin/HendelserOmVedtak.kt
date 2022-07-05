@@ -1,6 +1,9 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -23,9 +26,13 @@ internal class HendelserOmVedtak(
     init {
         River(rapidsConnection).apply {
             validate { it.demandAny("@event", vedtakhendelser) }
+            validate { it.requireKey("@eventtimestamp") }
             validate { it.requireKey("@behandlingId") }
+            validate { it.requireKey("@vedtakId") }
+            validate { it.requireKey("@sakId") }
             validate { it.interestedIn("@correlation_id") }
-
+            validate { it.rejectKey("@feil") }
+            validate { it.interestedIn("@saksbehandler", "@kommentar", "@valgtBegrunnelse")}
         }.register(this)
     }
 
@@ -33,12 +40,25 @@ internal class HendelserOmVedtak(
         withLogContext(packet.correlationId()) {
             val behandling = UUID.fromString(packet["@behandlingId"].textValue())
             val hendelse = packet["@event"].textValue()
+            val vedtakId = packet["@vedtakId"].longValue()
+            val saksbehandler = packet["@saksbehandler"].textValue()
+            val kommentar = packet["@kommentar"].textValue()
+            val valgtBegrunnelse = packet["@valgtBegrunnelse"].textValue()
+            val inntruffet = objectMapper.treeToValue<Tidspunkt>(packet["@eventtimestamp"])
+
+
+
 
             logger.info("""Oppdaterer behandling $behandling med hendelse  $hendelse""")
             try {
                 behandlinger.vedtakHendelse(
                     UUID.fromString(packet["@behandlingId"].textValue()),
-                    hendelse.split(":").last()
+                    hendelse.split(":").last(),
+                    vedtakId,
+                    inntruffet,
+                    saksbehandler,
+                    kommentar,
+                    valgtBegrunnelse
                 )
             } catch (e: Exception){
                 //TODO endre denne
@@ -46,6 +66,5 @@ internal class HendelserOmVedtak(
             }
         }
 }
-
 
 private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

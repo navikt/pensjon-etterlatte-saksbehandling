@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -17,7 +18,7 @@ interface BehandlingService {
     fun slettBehandlingerISak(sak: Long)
     fun avbrytBehandling(behandling: UUID)
     fun grunnlagISakEndret(sak: Long)
-    fun registrerVedtakHendelse(behandling: UUID, hendelse: String)
+    fun registrerVedtakHendelse(behandling: UUID, vedtakId: Long, hendelse: String, inntruffet: Tidspunkt, saksbehandler: String?, kommentar: String?, begrunnelse: String?)
 }
 
 class RealBehandlingService(
@@ -90,8 +91,8 @@ class RealBehandlingService(
         }
     }
 
-    override fun registrerVedtakHendelse(behandling: UUID, hendelse: String) {
-        inTransaction { behandlingFactory.hent(behandling).registrerVedtakHendelse(hendelse)}
+    override fun registrerVedtakHendelse(behandling: UUID, vedtakId: Long, hendelse: String, inntruffet: Tidspunkt, saksbehandler: String?, kommentar: String?, begrunnelse: String?) {
+        inTransaction { behandlingFactory.hent(behandling).registrerVedtakHendelse(vedtakId, hendelse, inntruffet, saksbehandler, kommentar, begrunnelse)}
     }
 
 }

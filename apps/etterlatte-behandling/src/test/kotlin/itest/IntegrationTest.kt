@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.oppgave.OppgaveListeDto
 import no.nav.etterlatte.sak.Sak
@@ -153,9 +154,12 @@ class ApplicationTest {
             handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {
                 addAuthSaksbehandler()
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(objectMapper.writeValueAsString(VedtakHendelse(12L, "Saksbehandlier", Tidspunkt.now(), null, null)))
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {
                 assertEquals(HttpStatusCode.OK, it.response.status())
             }
+
             handleRequest(HttpMethod.Get, "/behandlinger/$behandlingId") {
                 addAuthSaksbehandler()
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -186,6 +190,12 @@ class ApplicationTest {
             assertEquals(behandlingOpprettet.toString(), it.key())
             assertEquals("BEHANDLING:OPPRETTET", objectMapper.readTree(it.value())["@event"].textValue())
         }
+        beans.datasourceBuilder().dataSource.connection.use {
+            HendelseDao{ it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }
+        }
+
+
+
 
         postgreSQLContainer.stop()
     }

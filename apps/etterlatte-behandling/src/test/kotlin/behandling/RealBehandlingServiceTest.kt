@@ -36,7 +36,8 @@ internal class RealBehandlingServiceTest {
     @Test
     fun hentBehandling() {
         val behandlingerMock = mockk<BehandlingDao>()
-        val sut = RealBehandlingService(behandlingerMock, BehandlingFactory(behandlingerMock), mockk())
+        val hendelserMock = mockk<HendelseDao>()
+        val sut = RealBehandlingService(behandlingerMock, BehandlingFactory(behandlingerMock, hendelserMock), mockk())
         val id = UUID.randomUUID()
 
         every { behandlingerMock.hentBehandling(id) } returns Behandling(
@@ -61,6 +62,7 @@ internal class RealBehandlingServiceTest {
     @Test
     fun startBehandling() {
         val behandlingerMock = mockk<BehandlingDao>()
+        val hendelserMock = mockk<HendelseDao>()
         val behandlingOpprettes = slot<Behandling>()
         val behandlingHentes = slot<UUID>()
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
@@ -93,7 +95,7 @@ internal class RealBehandlingServiceTest {
 
         val sut = RealBehandlingService(
             behandlingerMock,
-            BehandlingFactory(behandlingerMock),
+            BehandlingFactory(behandlingerMock, hendelserMock),
             hendleseskanal
         )
 
@@ -101,6 +103,8 @@ internal class RealBehandlingServiceTest {
         every { behandlingerMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { behandlingerMock.lagreGyldighetsproving(any()) } returns Unit
         every { behandlingerMock.lagrePersongalleriOgMottattdato(any()) } returns Unit
+        every { hendelserMock.behandlingOpprettet(any()) } returns Unit
+
         coEvery { hendleseskanal.send(capture(hendelse)) } returns Unit
 
         val resultat = sut.startBehandling(1, persongalleri, datoNaa.toString())
@@ -119,6 +123,7 @@ internal class RealBehandlingServiceTest {
     @Test
     fun `avbrutt behandling kan ikke endres`() {
         val behandlingerMock = mockk<BehandlingDao>()
+        val hendelserMock = mockk<HendelseDao>()
         val behandlingOpprettes = slot<Behandling>()
         val behandlingHentes = slot<UUID>()
         val behandlingAvbrytes = slot<Behandling>()
@@ -149,7 +154,7 @@ internal class RealBehandlingServiceTest {
 
         val sut = RealBehandlingService(
             behandlingerMock,
-            BehandlingFactory(behandlingerMock),
+            BehandlingFactory(behandlingerMock, hendelserMock),
             mockChannel()
         )
 
@@ -157,6 +162,7 @@ internal class RealBehandlingServiceTest {
         every { behandlingerMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { behandlingerMock.lagreGyldighetsproving(any()) } returns Unit
         every { behandlingerMock.lagrePersongalleriOgMottattdato(any()) } returns Unit
+        every { hendelserMock.behandlingOpprettet(any()) } returns Unit
 
         val resultat = sut.startBehandling(1, persongalleri, LocalDateTime.now().toString())
 

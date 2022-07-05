@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 import io.ktor.client.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
@@ -33,6 +34,7 @@ class BehandlingsService(
                                 valgtBegrunnelse: String?) {
         runBlocking {
             behandling_app.post<String>("$url/behandlinger/$behandlingid/hendelser/vedtak/$hendelse") {
+                contentType(ContentType.Application.Json)
                 body = VedtakHendelse(vedtakId, inntruffet, saksbehandler, kommentar, valgtBegrunnelse)
             }
         }

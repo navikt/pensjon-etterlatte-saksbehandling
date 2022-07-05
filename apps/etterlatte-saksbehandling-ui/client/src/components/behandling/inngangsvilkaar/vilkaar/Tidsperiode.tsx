@@ -28,12 +28,15 @@ export const Tidsperiode = ({
   const startDatoOffset = startdatoOffsetProsent(periode.innhold.fraDato, seksAarTidligere)
   const buttonRef = useRef(null)
   const [open, setOpen] = useState(false)
+  const land = periode.innhold.adresseINorge ? ' (Norge)' : ` (${periode.innhold.land})`
 
   return (
     <Rad style={{ left: startDatoOffset, width: lengdePeriode, backgroundColor: '#CCE2F0' }}>
       <InnholdWrapper>
         <Ikon>{periode.periodeType === 'jobb' ? <OfficeIcon /> : <HomeIcon />}</Ikon>
-        <PeriodeType>{periode.periodeType}</PeriodeType>
+        <PeriodeType>
+          {periode.periodeType} {land} og lengre tekst her
+        </PeriodeType>
       </InnholdWrapper>
       <InfoIkonWrapper ref={buttonRef} onClick={() => setOpen(true)}>
         <InformationIcon />
@@ -74,6 +77,7 @@ const InnholdWrapper = styled.div`
   display: flex;
   justify-content: left;
   align-items: center;
+  width: 85%;
 `
 
 const Ikon = styled.div`
@@ -90,6 +94,9 @@ const Ikon = styled.div`
 const PeriodeType = styled.div`
   padding: 5px;
   font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `
 
 const InfoIkonWrapper = styled.div`
@@ -107,7 +114,8 @@ const InfoIkonWrapper = styled.div`
 `
 
 const Close = styled.div`
-  align-self: flex-end;
+  display: flex;
+  justify-content: flex-end;
   cursor: pointer;
 `
 

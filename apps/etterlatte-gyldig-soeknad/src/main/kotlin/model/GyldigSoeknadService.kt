@@ -9,11 +9,13 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.IngenAnnenVergeEnnForelderGrunnlag
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.InnsenderHarForeldreansvarGrunnlag
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.PersonInfoGyldighet
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlagTyper.InnsenderErForelderGrunnlag
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
@@ -29,7 +31,7 @@ class GyldigSoeknadService(private val pdl: Pdl) {
     fun hentPersongalleriFraSoeknad(jsonNode: JsonNode): Persongalleri {
         logger.info("Hent persongalleri fra søknad")
 
-        val barnepensjon = objectMapper.treeToValue<Barnepensjon>(jsonNode)!!
+        val barnepensjon = objectMapper.treeToValue<Barnepensjon>(jsonNode)
 
         return Persongalleri(
             soeker = barnepensjon.soeker.foedselsnummer.svar.value,
@@ -41,9 +43,8 @@ class GyldigSoeknadService(private val pdl: Pdl) {
         )
     }
 
-    fun hentSoekerFraPdl(fnrSoeker: String): FamilieRelasjon? {
-        val soeker = pdl.hentPdlModell(fnrSoeker, PersonRolle.BARN)
-        return soeker.familieRelasjon
+    fun hentSoekerFraPdl(fnrSoeker: String): Person? {
+        return pdl.hentPdlModell(fnrSoeker, PersonRolle.BARN)
     }
 
     fun hentNavnFraPdl(fnr: String): PersonInfoGyldighet? {
@@ -53,7 +54,8 @@ class GyldigSoeknadService(private val pdl: Pdl) {
     }
 
     fun vurderGyldighet(persongalleri: Persongalleri): GyldighetsResultat {
-        val familieRelasjonSoeker = hentSoekerFraPdl(persongalleri.soeker)
+        val soekerPdl = hentSoekerFraPdl(persongalleri.soeker)
+        val familieRelasjonSoeker = soekerPdl?.familieRelasjon
         val personinfoInnsender = persongalleri.innsender?.let { hentNavnFraPdl(it) }
         val personinfoGjenlevende = persongalleri.gjenlevende.map { hentNavnFraPdl(it) }
 
@@ -68,7 +70,11 @@ class GyldigSoeknadService(private val pdl: Pdl) {
                 GyldighetsTyper.HAR_FORELDREANSVAR_FOR_BARNET,
                 personinfoInnsender,
                 familieRelasjonSoeker
-            )
+            ),
+            ingenAnnenVergeEnnForelder(
+                GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER,
+                soekerPdl,
+            ),
         )
 
         val gyldighetResultat = setVurdering(gyldighet)
@@ -115,6 +121,30 @@ class GyldigSoeknadService(private val pdl: Pdl) {
             gyldighetstype,
             resultat,
             InnsenderHarForeldreansvarGrunnlag(soekerPdlFamilieRelasjon, innsender)
+        )
+    }
+
+    fun ingenAnnenVergeEnnForelder(gyldighetstype: GyldighetsTyper, soekerPdl: Person?): VurdertGyldighet {
+        fun harVergemaalPdl(barn: Person?): Boolean {
+            return if (barn?.vergemaalEllerFremtidsfullmakt != null) {
+                barn.vergemaalEllerFremtidsfullmakt!!.isNotEmpty()
+            } else {
+                false
+            }
+        }
+
+        val soekerHarVergemaal = harVergemaalPdl(soekerPdl)
+
+        val resultat = if (soekerHarVergemaal == true) {
+            VurderingsResultat.IKKE_OPPFYLT
+        } else {
+            VurderingsResultat.OPPFYLT
+        }
+
+        return VurdertGyldighet(
+            gyldighetstype,
+            resultat,
+            IngenAnnenVergeEnnForelderGrunnlag(soekerPdl?.vergemaalEllerFremtidsfullmakt)
         )
     }
 

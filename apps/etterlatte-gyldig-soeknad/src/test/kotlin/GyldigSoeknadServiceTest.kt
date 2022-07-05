@@ -10,10 +10,16 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.PersonInfo
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlagTyper.InnsenderErForelderGrunnlag
 import org.junit.jupiter.api.Test
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions.*
+import java.time.LocalDate
 
 
 internal class GyldigSoeknadServiceTest {
@@ -113,4 +119,53 @@ internal class GyldigSoeknadServiceTest {
         assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, foreldreMangler.resultat)
     }
 
+    @Test
+    fun vurderIngenAnnenVergeEnnForelder() {
+        val soekerIngenVerge = lagMockPersonPdl(null)
+        val soekerHarVerge = lagMockPersonPdl(
+            listOf(
+                VergemaalEllerFremtidsfullmakt(
+                    "embete",
+                    "type",
+                    VergeEllerFullmektig(null, null, null, true)
+                )
+            )
+        )
+
+        val harIngenVerge = GyldigSoeknadService(pdl).ingenAnnenVergeEnnForelder(
+            GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER,
+            soekerIngenVerge,
+        )
+
+        val harVerge = GyldigSoeknadService(pdl).ingenAnnenVergeEnnForelder(
+            GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER,
+            soekerHarVerge,
+        )
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, harVerge.resultat)
+        assertEquals(VurderingsResultat.OPPFYLT, harIngenVerge.resultat)
+    }
+
 }
+
+fun lagMockPersonPdl(
+    vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>?
+) = Person(
+    fornavn = "Test",
+    etternavn = "Testulfsen",
+    foedselsnummer = Foedselsnummer.of("19078504903"),
+    foedselsdato = LocalDate.parse("2020-06-10"),
+    foedselsaar = 1985,
+    foedeland = null,
+    doedsdato = null,
+    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
+    bostedsadresse = null,
+    deltBostedsadresse = null,
+    kontaktadresse = null,
+    oppholdsadresse = null,
+    sivilstatus = null,
+    statsborgerskap = null,
+    utland = null,
+    familieRelasjon = FamilieRelasjon(null, null, null),
+    avdoedesBarn = null,
+    vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt
+)

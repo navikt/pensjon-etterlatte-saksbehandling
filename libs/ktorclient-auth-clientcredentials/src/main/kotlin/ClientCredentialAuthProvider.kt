@@ -7,6 +7,7 @@ import io.ktor.http.*
 import io.ktor.http.auth.*
 import no.nav.security.token.support.client.core.ClientAuthenticationProperties
 import no.nav.security.token.support.client.core.ClientProperties
+import no.nav.security.token.support.client.core.OAuth2CacheFactory
 import no.nav.security.token.support.client.core.OAuth2GrantType
 import no.nav.security.token.support.client.core.oauth2.ClientCredentialsTokenClient
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService
@@ -61,5 +62,7 @@ internal fun setupOAuth2AccessTokenService(httpClient: DefaultOAuth2HttpClient, 
         null,
         ClientCredentialsTokenClient(httpClient),
         null
-    )
+    ).also {
+        it.clientCredentialsGrantCache = OAuth2CacheFactory.accessTokenResponseCache(10, 3500)
+    }
 }

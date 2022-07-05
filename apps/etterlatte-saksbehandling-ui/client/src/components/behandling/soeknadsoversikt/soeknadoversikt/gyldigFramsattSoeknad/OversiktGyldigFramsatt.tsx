@@ -22,6 +22,10 @@ export const OversiktGyldigFramsatt = ({ gyldigFramsatt }: { gyldigFramsatt: IGy
     (g: IGyldighetproving) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER
   )
 
+  const ingenAnnenVergeEnnForelder = gyldigFramsatt.vurderinger.find(
+    (g: IGyldighetproving) => g.navn === GyldigFramsattType.INGEN_ANNEN_VERGE_ENN_FORELDER
+  )
+
   return (
     <>
       <Header>Gyldig fremsatt</Header>
@@ -29,13 +33,14 @@ export const OversiktGyldigFramsatt = ({ gyldigFramsatt }: { gyldigFramsatt: IGy
         <InfobokserWrapper>
           <Innsender innsenderErForelder={innsenderErForelder} />
           <Foreldreansvar innsenderHarForeldreansvar={innsenderHarForeldreansvar} />
-          <Verge />
+          <Verge ingenAnnenVergeEnnForelder={ingenAnnenVergeEnnForelder} />
         </InfobokserWrapper>
         <VurderingsWrapper>
           <GyldigFramsattVurdering
             gyldigFramsatt={gyldigFramsatt}
             innsenderErForelder={innsenderErForelder}
             innsenderHarForeldreansvar={innsenderHarForeldreansvar}
+            ingenAnnenVergeEnnForelder={ingenAnnenVergeEnnForelder}
           />
         </VurderingsWrapper>
       </SoeknadOversiktWrapper>

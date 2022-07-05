@@ -161,6 +161,7 @@ export interface IGyldighetproving {
 export enum GyldigFramsattType {
   INNSENDER_ER_FORELDER = 'INNSENDER_ER_FORELDER',
   HAR_FORELDREANSVAR_FOR_BARNET = 'HAR_FORELDREANSVAR_FOR_BARNET',
+  INGEN_ANNEN_VERGE_ENN_FORELDER = 'INGEN_ANNEN_VERGE_ENN_FORELDER',
 }
 
 export interface IVilkaarResultat {

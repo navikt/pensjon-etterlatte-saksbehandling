@@ -52,6 +52,13 @@
             "fnr": "03108718357"
           }
         }
+      },
+      {
+        "navn": "INGEN_ANNEN_VERGE_ENN_FORELDER",
+        "resultat": "OPPFYLT",
+        "basertPaaOpplysninger": {
+          "vergemaalEllerFremtidsfullmakt": []
+        }
       }
     ],
     "vurdertDato": "2022-05-23T16:09:19.403051468"

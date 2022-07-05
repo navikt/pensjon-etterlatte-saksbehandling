@@ -5,28 +5,29 @@ import {
 } from '../../../../../store/reducers/BehandlingReducer'
 import { format } from 'date-fns'
 import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
-import { mapGyldighetstyperTilTekst } from '../../utils'
+import { hentGyldighetsTekst } from '../../utils'
 import { VurderingsContainer, VurderingsTitle, Undertekst } from '../../styled'
 
 export const GyldigFramsattVurdering = ({
   gyldigFramsatt,
   innsenderHarForeldreansvar,
   innsenderErForelder,
+  ingenAnnenVergeEnnForelder,
 }: {
   gyldigFramsatt: IGyldighetResultat
   innsenderHarForeldreansvar: IGyldighetproving | undefined
   innsenderErForelder: IGyldighetproving | undefined
+  ingenAnnenVergeEnnForelder: IGyldighetproving | undefined
 }) => {
   const hentTekst = (): string | undefined => {
     if (gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT) {
       return undefined
     } else {
-      const harForeldreansvar = mapGyldighetstyperTilTekst(innsenderHarForeldreansvar)
-      const erForelder = mapGyldighetstyperTilTekst(innsenderErForelder)
-      const avklarSetning = 'Dette må avklares før du kan starte vilkårsvurderingen. '
-      const string = erForelder + harForeldreansvar + avklarSetning
-
-      return string
+      return hentGyldighetsTekst(
+        innsenderErForelder?.resultat,
+        innsenderHarForeldreansvar?.resultat,
+        ingenAnnenVergeEnnForelder?.resultat
+      )
     }
   }
 

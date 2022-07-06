@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brreg.enhetsregister
+package no.nav.etterlatte.enhetsregister
 
 data class Organisasjonsform(
     val kode: String,

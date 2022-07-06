@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brreg.enhetsregister
+package no.nav.etterlatte.enhetsregister
 
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brreg
+package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -18,8 +18,8 @@ import io.ktor.server.cio.CIO
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
-import no.nav.etterlatte.brreg.enhetsregister.enhetsregApi
-import no.nav.etterlatte.brreg.health.healthApi
+import no.nav.etterlatte.enhetsregister.enhetsregApi
+import no.nav.etterlatte.health.healthApi
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import org.slf4j.event.Level

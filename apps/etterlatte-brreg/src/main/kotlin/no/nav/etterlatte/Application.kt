@@ -1,12 +1,12 @@
-package no.nav.etterlatte.brreg
+package no.nav.etterlatte
 
 import io.ktor.client.HttpClient
 import io.ktor.client.features.defaultRequest
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.header
-import no.nav.etterlatte.brreg.enhetsregister.EnhetsregKlient
-import no.nav.etterlatte.brreg.enhetsregister.EnhetsregService
+import no.nav.etterlatte.enhetsregister.EnhetsregKlient
+import no.nav.etterlatte.enhetsregister.EnhetsregService
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper

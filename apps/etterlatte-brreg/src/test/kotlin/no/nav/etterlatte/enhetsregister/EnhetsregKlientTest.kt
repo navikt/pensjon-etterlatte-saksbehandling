@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brreg.enhetsregister
+package no.nav.etterlatte.enhetsregister
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient

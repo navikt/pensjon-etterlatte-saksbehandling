@@ -8,17 +8,14 @@ import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import org.slf4j.LoggerFactory
-import java.sql.Connection
 import java.sql.Date
 import java.sql.ResultSet
 import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.ZoneId
 import java.util.*
 import javax.sql.DataSource
 
@@ -26,7 +23,6 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
 
     private val logger = LoggerFactory.getLogger(VedtaksvurderingRepository::class.java)
     private val connection get() = datasource.connection
-    private val postgresTimeZone = ZoneId.of("UTC")
 
     companion object {
         fun using(datasource: DataSource): VedtaksvurderingRepository {
@@ -219,7 +215,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    fun fattVedtak(saksbehandlerId: String, sakId: String, vedtakId: Long, behandlingsId: UUID) {
+    fun fattVedtak(saksbehandlerId: String, sakId: String, behandlingsId: UUID) {
         connection.use {
             val statement = it.prepareStatement(Queries.fattVedtak)
             statement.setString(1, saksbehandlerId)
@@ -228,33 +224,6 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             statement.setLong(4, sakId.toLong())
             statement.setObject(5, behandlingsId)
             statement.execute()
-
-            loggAttesteringsHendelse(
-                AttesteringsHendelseType.SENDT_TIL_ATTESTERING,
-                vedtakId,
-                saksbehandlerId,
-                null,
-                null,
-                it
-            )
-        }
-    }
-
-    private fun loggAttesteringsHendelse(
-        hendelse: AttesteringsHendelseType,
-        vedtakId: Long,
-        saksbehandlerId: String,
-        kommentar: String?,
-        valgtBegrunnelse: String?,
-        connection: Connection
-    ) {
-        connection.prepareStatement(Queries.lagreAttesteringsHendelse).apply {
-            setLong(1, vedtakId)
-            setString(2, hendelse.name)
-            setString(3, saksbehandlerId)
-            setString(4, kommentar)
-            setString(5, valgtBegrunnelse)
-            executeUpdate().also { require(it == 1) }
         }
     }
 
@@ -286,18 +255,12 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             statement.setLong(3, sakId.toLong())
             statement.setObject(4, behandlingsId)
             statement.execute()
-
-            loggAttesteringsHendelse(AttesteringsHendelseType.ATTESTERT, vedtakId, saksbehandlerId, null, null, it)
         }
     }
 
     fun underkjennVedtak(
-        saksbehandlerId: String,
         sakId: String,
         behandlingsId: UUID,
-        vedtakId: Long,
-        kommentar: String,
-        valgtBegrunnelse: String
     ) {
         connection.use {
             val statement = it.prepareStatement(Queries.underkjennVedtak)
@@ -305,31 +268,6 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             statement.setLong(2, sakId.toLong())
             statement.setObject(3, behandlingsId)
             statement.execute()
-
-            loggAttesteringsHendelse(
-                AttesteringsHendelseType.UNDERKJENT,
-                vedtakId,
-                saksbehandlerId,
-                kommentar,
-                valgtBegrunnelse,
-                it
-            )
-        }
-    }
-
-    fun hentAttesteringHendelser(vedtakId: Long): List<AttesteringsHendelse> {
-        return connection.use {
-            val statement = it.prepareStatement(Queries.hentAttesteringsHendelse)
-            statement.setLong(1, vedtakId)
-            statement.executeQuery().toList {
-                AttesteringsHendelse(
-                    AttesteringsHendelseType.valueOf(getString("hendelse")),
-                    Tidspunkt(getTimestamp("opprettet").toInstant()),
-                    getString("ident"),
-                    getString("kommentar"),
-                    getString("valgtbegrunnelse")
-                )
-            }
         }
     }
 
@@ -372,18 +310,6 @@ data class Vedtak(
     val vedtakStatus: VedtakStatus?,
 )
 
-data class AttesteringsHendelse(
-    val hendelse: AttesteringsHendelseType,
-    val opprettet: Tidspunkt,
-    val ident: String,
-    val kommentar: String?,
-    val valgtbegrunnelse: String?
-)
-
-enum class AttesteringsHendelseType {
-    SENDT_TIL_ATTESTERING, UNDERKJENT, ATTESTERT
-}
-
 private object Queries {
     val lagreBeregningsresultat =
         "INSERT INTO vedtak(sakId, behandlingId, beregningsresultat, fnr, vedtakstatus  ) VALUES (?, ?, ?, ?, ?)"
@@ -421,11 +347,6 @@ private object Queries {
     val lagreUtbetalingsperiode =
         "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) VALUES (?, ?, ?, ?, ?)"
     val hentUtbetalingsperiode = "SELECT * FROM utbetalingsperiode WHERE vedtakid = ?"
-
-    val lagreAttesteringsHendelse =
-        "INSERT INTO attesteringshendelse(vedtakid, hendelse, ident, kommentar, valgtbegrunnelse) VALUES (?, ?, ?, ?, ?)"
-    val hentAttesteringsHendelse =
-        "SELECT hendelse, ident, kommentar, valgtbegrunnelse, opprettet FROM  attesteringshendelse WHERE vedtakid = ?"
 }
 
 fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {

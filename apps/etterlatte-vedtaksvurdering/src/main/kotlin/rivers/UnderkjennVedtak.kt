@@ -25,6 +25,7 @@ internal class UnderkjennVedtak(
             validate { it.requireKey("@kommentar") }
             validate { it.requireKey("@valgtBegrunnelse") }
             validate { it.interestedIn("@correlation_id") }
+            validate { it.rejectKey("@feil") }
         }.register(this)
     }
 
@@ -32,14 +33,10 @@ internal class UnderkjennVedtak(
         withLogContext(packet.correlationId()) {
             val behandlingId = packet["@behandlingId"].asUUID()
             val sakId = packet["@sakId"].longValue()
-            val saksbehandler = packet["@saksbehandler"].textValue()
            try {
                vedtaksvurderingService.underkjennVedtak(
                    sakId.toString(),
                    behandlingId,
-                   saksbehandler,
-                   packet["@kommentar"].textValue(),
-                   packet["@valgtBegrunnelse"].textValue()
                )
                context.publish(
                    JsonMessage.newMessage(
@@ -59,7 +56,7 @@ internal class UnderkjennVedtak(
                )
            } catch (e: Exception){
                //TODO endre denne
-               println("spiser en melding fordi: $e")
+               logger.warn("spiser en melding fordi ${e.message}", e)
            }
 
         }

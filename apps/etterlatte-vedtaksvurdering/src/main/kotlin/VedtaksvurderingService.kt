@@ -11,8 +11,6 @@ import no.nav.etterlatte.libs.common.vikaar.*
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.helse.rapids_rivers.JsonMessage.Companion.newMessage
 import no.nav.helse.rapids_rivers.MessageContext
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -55,9 +53,6 @@ class VedtaksvurderingService(
     private val repository: VedtaksvurderingRepository,
     private val rapid: AtomicReference<MessageContext> = AtomicReference()
 ) {
-    companion object {
-        val logger: Logger = LoggerFactory.getLogger(VedtaksvurderingService::class.java)
-    }
 
     fun lagreAvkorting(sakId: String, behandlingId: UUID, fnr: String, avkorting: AvkortingsResultat) {
         val vedtak = repository.hentVedtak(sakId, behandlingId)
@@ -270,7 +265,7 @@ class VedtaksvurderingService(
                 if (it.beregning == null || it.avkorting == null) throw VedtakKanIkkeFattes(v)
             }
             if (it.vilkaarsvurdering == null) throw VedtakKanIkkeFattes(v)
-            repository.fattVedtak(saksbehandler, sakId, it.vedtakId, behandlingId)
+            repository.fattVedtak(saksbehandler, sakId, behandlingId)
         }
         return requireNotNull(hentFellesVedtak(sakId, behandlingId))
     }
@@ -303,15 +298,12 @@ class VedtaksvurderingService(
     fun underkjennVedtak(
         sakId: String,
         behandlingId: UUID,
-        saksbehandler: String,
-        kommentar: String,
-        valgtBegrunnelse: String
     ) {
-        val vedtak = requireNotNull(hentFellesVedtak(sakId, behandlingId)).also {
+        requireNotNull(hentFellesVedtak(sakId, behandlingId)).also {
             require(it.vedtakFattet != null) { VedtakKanIkkeUnderkjennesFoerDetFattes(it) }
             require(it.attestasjon == null) { VedtakKanIkkeUnderkjennesAlleredeAttestert(it) }
         }
-        repository.underkjennVedtak(saksbehandler, sakId, behandlingId, vedtak.vedtakId, kommentar, valgtBegrunnelse)
+        repository.underkjennVedtak(sakId, behandlingId)
     }
 
     fun utbetalingsperioderFraVedtak(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) =

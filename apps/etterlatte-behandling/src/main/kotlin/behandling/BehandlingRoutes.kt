@@ -2,11 +2,13 @@ package no.nav.etterlatte.behandling
 
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
+import io.ktor.application.log
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.Route
+import io.ktor.routing.application
 import io.ktor.routing.delete
 import io.ktor.routing.get
 import io.ktor.routing.post
@@ -28,6 +30,8 @@ fun Route.behandlingRoutes(
     revurderingService: RevurderingService
 
 ) {
+    val logger = application.log
+
 
     route("/behandlinger") {
 
@@ -88,7 +92,10 @@ fun Route.behandlingRoutes(
                             }
                         }
                     }
-                }?.let { it1 -> call.respond(it1) } ?: HttpStatusCode.NotFound
+                }?.let { it1 ->
+                    call.respond(it1)
+                    logger.info("Henter detaljert for behandling: $behandlingsId: $it1")
+                } ?: HttpStatusCode.NotFound
             }
 
             route("/hendelser") {

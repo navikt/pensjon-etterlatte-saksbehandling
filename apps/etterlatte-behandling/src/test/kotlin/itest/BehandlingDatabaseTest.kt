@@ -359,7 +359,7 @@ internal class BehandlingDaoIntegrationTest {
 
         val behandlingFoerStatusendring =
             behandlingRepo.hentBehandling(behandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
-        val endretTidspunkt = LocalDateTime.now()
+        val endretTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
         val behandlingMedNyStatus =
             behandling.copy(status = BehandlingStatus.UNDER_BEHANDLING, sistEndret = endretTidspunkt)
         behandlingRepo.lagreStatus(behandlingMedNyStatus)
@@ -384,7 +384,7 @@ internal class BehandlingDaoIntegrationTest {
 
         val behandlingFoerStatusendring =
             behandlingRepo.hentBehandling(behandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
-        val endretTidspunkt = LocalDateTime.now()
+        val endretTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
         val behandlingMedNyStatus =
             behandling.copy(oppgaveStatus = OppgaveStatus.LUKKET, sistEndret = endretTidspunkt)
         behandlingRepo.lagreOppgaveStatus(behandlingMedNyStatus)

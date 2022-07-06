@@ -406,12 +406,10 @@ internal class BehandlingDaoIntegrationTest {
         val behandlingEtterStatusendring =
             behandlingRepo.hentBehandling(behandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
 
-        assertAll(
-            "Behandlingstatus og sistEndret skal endres i databasen",
-            { assertEquals(BehandlingStatus.OPPRETTET, behandlingFoerStatusendring!!.status) },
-            { assertEquals(BehandlingStatus.UNDER_BEHANDLING, behandlingEtterStatusendring!!.status) },
-            { assertEquals(endretTidspunkt, behandlingEtterStatusendring!!.sistEndret) }
-        )
+
+        assertEquals(BehandlingStatus.OPPRETTET, behandlingFoerStatusendring!!.status)
+        assertEquals(BehandlingStatus.UNDER_BEHANDLING, behandlingEtterStatusendring!!.status)
+        assertEquals(endretTidspunkt, behandlingEtterStatusendring!!.sistEndret)
         connection.close()
     }
 
@@ -437,12 +435,9 @@ internal class BehandlingDaoIntegrationTest {
         val behandlingEtterStatusendring =
             behandlingRepo.hentBehandling(behandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
 
-        assertAll(
-            "Behandlingstatus og sistEndret skal endres i databasen",
-            { assertEquals(OppgaveStatus.NY, behandlingFoerStatusendring!!.oppgaveStatus) },
-            { assertEquals(OppgaveStatus.LUKKET, behandlingEtterStatusendring!!.oppgaveStatus) },
-            { assertEquals(endretTidspunkt, behandlingEtterStatusendring!!.sistEndret) }
-        )
+        assertEquals(OppgaveStatus.NY, behandlingFoerStatusendring!!.oppgaveStatus)
+        assertEquals(OppgaveStatus.LUKKET, behandlingEtterStatusendring!!.oppgaveStatus)
+        assertEquals(endretTidspunkt, behandlingEtterStatusendring!!.sistEndret)
         connection.close()
 
     }

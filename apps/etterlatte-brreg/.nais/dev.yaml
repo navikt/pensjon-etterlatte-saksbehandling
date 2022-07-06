@@ -21,6 +21,7 @@ spec:
     cpuThresholdPercentage: 90
     max: 1
     min: 1
+  env:
     - name: BRREG_URL
       value: https://data.brreg.no
   accessPolicy:

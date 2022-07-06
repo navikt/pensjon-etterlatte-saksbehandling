@@ -1,7 +1,6 @@
 package no.nav.etterlatte.database
 
 import java.sql.ResultSet
-import java.time.LocalDateTime
 import java.time.ZoneId
 
 
@@ -23,3 +22,5 @@ fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
         else null
     }.toList()
 }
+
+

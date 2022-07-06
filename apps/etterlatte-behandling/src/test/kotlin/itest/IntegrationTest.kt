@@ -1,22 +1,34 @@
 package no.nav.etterlatte.itest
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.ktor.auth.*
-import io.ktor.http.*
-import io.ktor.server.testing.*
+import io.ktor.auth.Authentication
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.testing.TestApplicationRequest
+import io.ktor.server.testing.handleRequest
+import io.ktor.server.testing.setBody
+import io.ktor.server.testing.withTestApplication
 import no.nav.common.KafkaEnvironment
-import no.nav.etterlatte.*
-import no.nav.etterlatte.behandling.*
+import no.nav.etterlatte.CommonFactory
+import no.nav.etterlatte.DataSourceBuilder
+import no.nav.etterlatte.behandling.BehandlingsBehov
+import no.nav.etterlatte.behandling.HendelseDao
+import no.nav.etterlatte.behandling.VedtakHendelse
+import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.kafka.KafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.KafkaProdusentImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.module
 import no.nav.etterlatte.oppgave.OppgaveListeDto
 import no.nav.etterlatte.sak.Sak
 import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
@@ -27,7 +39,9 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import java.time.LocalDateTime
@@ -145,7 +159,7 @@ class ApplicationTest {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {
                 assertEquals(HttpStatusCode.OK, it.response.status())
-                val behandling: Behandling = (objectMapper.readValue(it.response.content!!))
+                val behandling: DetaljertBehandling = (objectMapper.readValue(it.response.content!!))
                 assertNotNull(behandling.id)
                 assertEquals("innsender", behandling.innsender)
                 assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving?.resultat)
@@ -154,7 +168,17 @@ class ApplicationTest {
             handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {
                 addAuthSaksbehandler()
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(objectMapper.writeValueAsString(VedtakHendelse(12L, "Saksbehandlier", Tidspunkt.now(), null, null)))
+                setBody(
+                    objectMapper.writeValueAsString(
+                        VedtakHendelse(
+                            12L,
+                            "Saksbehandlier",
+                            Tidspunkt.now(),
+                            null,
+                            null
+                        )
+                    )
+                )
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {
                 assertEquals(HttpStatusCode.OK, it.response.status())
@@ -165,7 +189,7 @@ class ApplicationTest {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {
                 assertEquals(HttpStatusCode.OK, it.response.status())
-                val behandling: Behandling = (objectMapper.readValue(it.response.content!!))
+                val behandling: DetaljertBehandling = (objectMapper.readValue(it.response.content!!))
                 assertNotNull(behandling.id)
                 assertEquals("FATTET_VEDTAK", behandling.status?.name)
 
@@ -177,7 +201,7 @@ class ApplicationTest {
             }.also {
                 assertEquals(HttpStatusCode.OK, it.response.status())
                 val oppgaver: OppgaveListeDto = (objectMapper.readValue(it.response.content!!))
-                assertEquals(1,oppgaver.oppgaver.size)
+                assertEquals(1, oppgaver.oppgaver.size)
                 assertEquals(behandlingId, oppgaver.oppgaver.first().behandlingId)
             }
 
@@ -191,7 +215,7 @@ class ApplicationTest {
             assertEquals("BEHANDLING:OPPRETTET", objectMapper.readTree(it.value())["@event"].textValue())
         }
         beans.datasourceBuilder().dataSource.connection.use {
-            HendelseDao{ it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }
+            HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }
         }
 
 
@@ -211,6 +235,7 @@ val attestererToken =
 fun TestApplicationRequest.addAuthSaksbehandler() {
     addHeader(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
 }
+
 fun TestApplicationRequest.addAuthAttesterer() {
     addHeader(HttpHeaders.Authorization, "Bearer $attestererToken")
 }

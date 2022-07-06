@@ -1,21 +1,32 @@
 package no.nav.etterlatte.itest
 
 import no.nav.etterlatte.DataSourceBuilder
-import no.nav.etterlatte.behandling.*
+import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.Revurdering
+import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.persongalleri
+import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakDao
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertAll
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
 import javax.sql.DataSource
 
 
@@ -38,72 +49,84 @@ internal class BehandlingDaoIntegrationTest {
         dsb.migrate()
     }
 
+    @AfterEach
+    fun afterEach() {
+        dataSource.connection.use {
+            it.prepareStatement("TRUNCATE behandling CASCADE;").execute()
+        }
+    }
+
     @AfterAll
     fun afterAll() {
         postgreSQLContainer.stop()
     }
 
     @Test
-    fun `skal opprette behandling og legge til persongalleri`() {
+    fun `skal opprette foerstegangsbehandling med persongalleri`() {
         val connection = dataSource.connection
         val sakrepo = SakDao { connection }
         val behandlingRepo = BehandlingDao { connection }
         val sak1 = sakrepo.opprettSak("123", "BP").id
         val behandlingOpprettet = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
 
-        val behandlingUtenPersongalleri = Behandling(
-            UUID.randomUUID(),
-            sak1,
-            behandlingOpprettet,
-            LocalDateTime.now(),
-            LocalDateTime.now(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            BehandlingStatus.OPPRETTET,
-            OppgaveStatus.NY
-        )
+        val persongalleri = persongalleri()
+        val behandlingMedPersongalleri = foerstegangsbehandling(sak = sak1, persongalleri = persongalleri)
 
-        behandlingRepo.opprett(behandlingUtenPersongalleri)
-        val opprettetBehandling = requireNotNull(behandlingRepo.hentBehandling(behandlingUtenPersongalleri.id))
-        Assertions.assertEquals(behandlingUtenPersongalleri.id, opprettetBehandling.id)
-        Assertions.assertEquals(behandlingUtenPersongalleri.avdoed, opprettetBehandling.avdoed)
-        Assertions.assertEquals(behandlingUtenPersongalleri.soesken, opprettetBehandling.soesken)
-        Assertions.assertEquals(
-            behandlingUtenPersongalleri.behandlingOpprettet,
+        behandlingRepo.opprettFoerstegangsbehandling(behandlingMedPersongalleri)
+        val opprettetBehandling =
+            requireNotNull(
+                behandlingRepo.hentBehandling(
+                    behandlingMedPersongalleri.id,
+                    BehandlingType.FØRSTEGANGSBEHANDLING
+                )
+            ) as Foerstegangsbehandling
+        assertEquals(behandlingMedPersongalleri.id, opprettetBehandling.id)
+        assertEquals(
+            behandlingMedPersongalleri.persongalleri.avdoed,
+            opprettetBehandling.persongalleri.avdoed
+        )
+        assertEquals(
+            behandlingMedPersongalleri.persongalleri.soesken,
+            opprettetBehandling.persongalleri.soesken
+        )
+        assertEquals(
+            behandlingMedPersongalleri.behandlingOpprettet,
             opprettetBehandling.behandlingOpprettet
         )
 
-        val persongalleri = Persongalleri(
-            "Soeker",
-            "Innsender",
-            listOf("søster", "bror"),
-            listOf("Avdoed"),
-            listOf("Gjenlevende"),
+        connection.close()
+    }
+
+
+    @Test
+    fun `skal opprette revurdering`() {
+        val connection = dataSource.connection
+        val sakrepo = SakDao { connection }
+        val behandlingRepo = BehandlingDao { connection }
+        val sak1 = sakrepo.opprettSak("123", "BP").id
+        val behandlingOpprettet = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
+
+        val behandling = revurdering(sak = sak1, behandlingOpprettet = behandlingOpprettet)
+        behandlingRepo.opprettRevurdering(behandling)
+        val opprettetBehandling =
+            requireNotNull(
+                behandlingRepo.hentBehandling(
+                    behandling.id,
+                    BehandlingType.REVURDERING
+                )
+            ) as Revurdering
+        assertEquals(behandling.id, opprettetBehandling.id)
+        assertEquals(
+            behandling.persongalleri.avdoed,
+            opprettetBehandling.persongalleri.avdoed
         )
-
-        val persongalleriBehandling = opprettetBehandling.copy(
-            sistEndret = LocalDateTime.now(),
-            soeknadMottattDato = LocalDateTime.parse(LocalDateTime.now().toString()),
-            innsender = persongalleri.innsender,
-            soeker = persongalleri.soeker,
-            gjenlevende = persongalleri.gjenlevende,
-            avdoed = persongalleri.avdoed,
-            soesken = persongalleri.soesken,
+        assertEquals(
+            behandling.persongalleri.soesken,
+            opprettetBehandling.persongalleri.soesken
         )
-
-        behandlingRepo.lagrePersongalleriOgMottattdato(persongalleriBehandling)
-        val lagretPersongalleriBehandling = requireNotNull(behandlingRepo.hentBehandling(persongalleriBehandling.id))
-
-        Assertions.assertEquals(persongalleriBehandling.id, lagretPersongalleriBehandling.id)
-        Assertions.assertEquals(persongalleriBehandling.avdoed, lagretPersongalleriBehandling.avdoed)
-        Assertions.assertEquals(persongalleriBehandling.soesken, lagretPersongalleriBehandling.soesken)
-        Assertions.assertEquals(
-            persongalleriBehandling.behandlingOpprettet,
-            lagretPersongalleriBehandling.behandlingOpprettet
+        assertEquals(
+            behandling.behandlingOpprettet,
+            opprettetBehandling.behandlingOpprettet
         )
 
         connection.close()
@@ -116,52 +139,28 @@ internal class BehandlingDaoIntegrationTest {
         val behandlingRepo = BehandlingDao { connection }
         val sak1 = sakrepo.opprettSak("123", "BP").id
 
-        val behandlingUtenPersongalleri = Behandling(
-            UUID.randomUUID(),
-            sak1,
-            LocalDateTime.now(),
-            LocalDateTime.now(),
-            LocalDateTime.now(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            BehandlingStatus.OPPRETTET,
-            OppgaveStatus.NY
-        )
+        val behandling = foerstegangsbehandling(sak = sak1)
 
-        behandlingRepo.opprett(behandlingUtenPersongalleri)
+        behandlingRepo.opprettFoerstegangsbehandling(behandling)
 
-        val persongalleri = Persongalleri(
-            "Soeker",
-            "Innsender",
-            listOf("søster", "bror"),
-            listOf("Avdoed"),
-            listOf("Gjenlevende"),
-        )
-
-        val persongalleriBehandling = behandlingUtenPersongalleri.copy(
-            sistEndret = LocalDateTime.now(),
-            soeknadMottattDato = LocalDateTime.parse(LocalDateTime.now().toString()),
-            innsender = persongalleri.innsender,
-            soeker = persongalleri.soeker,
-            gjenlevende = persongalleri.gjenlevende,
-            avdoed = persongalleri.avdoed,
-            soesken = persongalleri.soesken,
-        )
-        behandlingRepo.lagrePersongalleriOgMottattdato(persongalleriBehandling)
-        val lagretPersongalleriBehandling = requireNotNull(behandlingRepo.hentBehandling(persongalleriBehandling.id))
+        val lagretPersongalleriBehandling =
+            requireNotNull(
+                behandlingRepo.hentBehandling(
+                    behandling.id,
+                    BehandlingType.FØRSTEGANGSBEHANDLING
+                )
+            ) as Foerstegangsbehandling
 
         val gyldighetsproevingBehanding = lagretPersongalleriBehandling.copy(
             gyldighetsproeving = GyldighetsResultat(
                 resultat = VurderingsResultat.OPPFYLT,
-                vurderinger = listOf(VurdertGyldighet(
-                    navn = GyldighetsTyper.INNSENDER_ER_FORELDER,
-                    resultat = VurderingsResultat.OPPFYLT,
-                    basertPaaOpplysninger = "innsenderfnr"
-                )),
+                vurderinger = listOf(
+                    VurdertGyldighet(
+                        navn = GyldighetsTyper.INNSENDER_ER_FORELDER,
+                        resultat = VurderingsResultat.OPPFYLT,
+                        basertPaaOpplysninger = "innsenderfnr"
+                    )
+                ),
                 vurdertDato = LocalDateTime.now()
             ),
             status = BehandlingStatus.GYLDIG_SOEKNAD,
@@ -169,9 +168,21 @@ internal class BehandlingDaoIntegrationTest {
         )
 
         behandlingRepo.lagreGyldighetsproving(gyldighetsproevingBehanding)
-        val lagretGyldighetsproving = requireNotNull(behandlingRepo.hentBehandling(persongalleriBehandling.id))
+        val lagretGyldighetsproving =
+            requireNotNull(
+                behandlingRepo.hentBehandling(
+                    behandling.id,
+                    BehandlingType.FØRSTEGANGSBEHANDLING
+                )
+            ) as Foerstegangsbehandling
 
-        Assertions.assertEquals(gyldighetsproevingBehanding.gyldighetsproeving, lagretGyldighetsproving.gyldighetsproeving)
+        assertEquals(
+            gyldighetsproevingBehanding.gyldighetsproeving,
+            lagretGyldighetsproving.gyldighetsproeving
+        )
+
+        connection.close()
+
     }
 
     @Test
@@ -184,59 +195,17 @@ internal class BehandlingDaoIntegrationTest {
         val sak2 = sakrepo.opprettSak("321", "BP").id
 
         listOf(
-            Behandling(
-                UUID.randomUUID(),
-                sak1,
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                BehandlingStatus.OPPRETTET,
-                OppgaveStatus.NY
-            ),
-            Behandling(
-                UUID.randomUUID(),
-                sak1,
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                BehandlingStatus.OPPRETTET,
-                OppgaveStatus.NY
-            ),
-            Behandling(
-                UUID.randomUUID(),
-                sak2,
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                BehandlingStatus.OPPRETTET,
-                OppgaveStatus.NY
-            ),
+            foerstegangsbehandling(sak = sak1),
+            foerstegangsbehandling(sak = sak1),
+            foerstegangsbehandling(sak = sak2)
         ).forEach { b ->
-            behandlingRepo.opprett(b)
+            behandlingRepo.opprettFoerstegangsbehandling(b)
         }
 
-        Assertions.assertEquals(2, behandlingRepo.alleBehandingerISak(sak1).size)
+        assertEquals(2, behandlingRepo.alleBehandingerISak(sak1).size)
         behandlingRepo.slettBehandlingerISak(sak1)
-        Assertions.assertEquals(0, behandlingRepo.alleBehandingerISak(sak1).size)
-        Assertions.assertEquals(1, behandlingRepo.alleBehandingerISak(sak2).size)
+        assertEquals(0, behandlingRepo.alleBehandingerISak(sak1).size)
+        assertEquals(1, behandlingRepo.alleBehandingerISak(sak2).size)
 
         connection.close()
     }
@@ -250,36 +219,232 @@ internal class BehandlingDaoIntegrationTest {
 
         val sak1 = sakrepo.opprettSak("123", "BP").id
         listOf(
-            Behandling(
-                UUID.randomUUID(),
-                sak1,
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                null,
-                null,
-                emptyList(),
-                emptyList(),
-                emptyList(),
-                null,
-                BehandlingStatus.OPPRETTET,
-                OppgaveStatus.NY
-            )
+            foerstegangsbehandling(sak = sak1)
         ).forEach { b ->
-            behandlingRepo.opprett(b)
+            behandlingRepo.opprettFoerstegangsbehandling(b)
         }
 
         var behandling = behandlingRepo.alleBehandingerISak(sak1)
-        Assertions.assertEquals(1, behandling.size)
-        Assertions.assertEquals(false, behandling.first().status == BehandlingStatus.AVBRUTT)
+        assertEquals(1, behandling.size)
+        assertEquals(false, behandling.first().status == BehandlingStatus.AVBRUTT)
 
-        val avbruttbehandling = behandling.first().copy(status = BehandlingStatus.AVBRUTT)
+        val avbruttbehandling = (behandling.first() as Foerstegangsbehandling).copy(status = BehandlingStatus.AVBRUTT)
         behandlingRepo.lagreStatus(avbruttbehandling)
         behandling = behandlingRepo.alleBehandingerISak(sak1)
-        Assertions.assertEquals(1, behandling.size)
-        Assertions.assertEquals(true, behandling.first().status == BehandlingStatus.AVBRUTT)
+        assertEquals(1, behandling.size)
+        assertEquals(true, behandling.first().status == BehandlingStatus.AVBRUTT)
 
         connection.close()
     }
+
+    @Test
+    fun `skal returnere behandlingtype Foerstegangsbehandling`() {
+        val connection = dataSource.connection
+        val sakrepo = SakDao { connection }
+        val behandlingRepo = BehandlingDao { connection }
+
+        val sak1 = sakrepo.opprettSak("123", "BP").id
+
+        val foerstegangsbehandling = foerstegangsbehandling(sak = sak1)
+            .also {
+                behandlingRepo.opprettFoerstegangsbehandling(it)
+            }
+
+        val type = behandlingRepo.hentBehandlingType(foerstegangsbehandling.id)
+        assertEquals(BehandlingType.FØRSTEGANGSBEHANDLING, type)
+
+        connection.close()
+
+    }
+
+    @Test
+    fun `skal returnere behandlingtype Revurdering`() {
+        val connection = dataSource.connection
+        val sakrepo = SakDao { connection }
+        val behandlingRepo = BehandlingDao { connection }
+
+        val sak1 = sakrepo.opprettSak("123", "BP").id
+
+        val revurdering = revurdering(sak = sak1)
+            .also {
+                behandlingRepo.opprettRevurdering(it)
+            }
+
+        val type = behandlingRepo.hentBehandlingType(revurdering.id)
+        assertEquals(BehandlingType.REVURDERING, type)
+        connection.close()
+    }
+
+
+    @Test
+    fun `skal hente behandling av type Foerstegangsbehandling`() {
+        val connection = dataSource.connection
+        val sakrepo = SakDao { connection }
+        val behandlingRepo = BehandlingDao { connection }
+
+        val sak1 = sakrepo.opprettSak("123", "BP").id
+
+        val foerstegangsbehandling = foerstegangsbehandling(sak = sak1)
+            .also {
+                behandlingRepo.opprettFoerstegangsbehandling(it)
+            }
+
+        val behandling = behandlingRepo.hentBehandling(
+            id = foerstegangsbehandling.id,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING
+        )
+        assertTrue(behandling is Foerstegangsbehandling)
+        connection.close()
+    }
+
+
+    @Test
+    fun `skal returnere behandling av type Revurdering`() {
+        val connection = dataSource.connection
+        val sakrepo = SakDao { connection }
+        val behandlingRepo = BehandlingDao { connection }
+
+        val sak1 = sakrepo.opprettSak("123", "BP").id
+
+        val revurdering = revurdering(sak = sak1)
+            .also {
+                behandlingRepo.opprettRevurdering(it)
+            }
+
+        val behandling = behandlingRepo.hentBehandling(id = revurdering.id, type = BehandlingType.REVURDERING)
+        assertTrue(behandling is Revurdering)
+        connection.close()
+    }
+
+    @Test
+    fun `skal returnere liste med behandlinger av ulike typer`() {
+        val connection = dataSource.connection
+        val sakrepo = SakDao { connection }
+        val behandlingRepo = BehandlingDao { connection }
+
+        val sak1 = sakrepo.opprettSak("123", "BP").id
+
+        listOf(
+            revurdering(sak = sak1),
+            revurdering(sak = sak1)
+        ).forEach {
+            behandlingRepo.opprettRevurdering(it)
+        }
+        listOf(
+            foerstegangsbehandling(sak = sak1),
+            foerstegangsbehandling(sak = sak1)
+        ).forEach {
+            behandlingRepo.opprettFoerstegangsbehandling(it)
+        }
+
+        val behandlinger = behandlingRepo.alleBehandlinger()
+        assertAll(
+            "Skal hente ut to foerstegangsbehandlinger og to revurderinger",
+            { assertEquals(4, behandlinger.size) },
+            { assertEquals(2, behandlinger.filterIsInstance<Revurdering>().size) },
+            { assertEquals(2, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
+        )
+        connection.close()
+    }
+
+    @Test
+    fun `Skal bare hente behandlinger av en gitt type`() {
+
+        val connection = dataSource.connection
+        val sakrepo = SakDao { connection }
+        val behandlingRepo = BehandlingDao { connection }
+
+        val sak1 = sakrepo.opprettSak("1234", "BP").id
+
+        val rev = listOf(
+            revurdering(sak = sak1),
+            revurdering(sak = sak1)
+        ).forEach {
+            behandlingRepo.opprettRevurdering(it)
+        }
+        val foer = listOf(
+            foerstegangsbehandling(sak = sak1),
+            foerstegangsbehandling(sak = sak1)
+        ).forEach {
+            behandlingRepo.opprettFoerstegangsbehandling(it)
+        }
+
+        val foerstegangsbehandlinger = behandlingRepo.alleBehandlinger(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val revurderinger = behandlingRepo.alleBehandlinger(BehandlingType.REVURDERING)
+        assertAll(
+            "Skal hente ut to foerstegangsbehandlinger og to revurderinger",
+            { assertEquals(2, foerstegangsbehandlinger.size) },
+            { assertTrue(foerstegangsbehandlinger.all { it is Foerstegangsbehandling }) },
+            { assertEquals(2, revurderinger.size) },
+            {
+                assertTrue(revurderinger.all { it is Revurdering })
+            }
+        )
+        connection.close()
+    }
+
+    @Test
+    fun `skal lagre status og sette sistEndret for en behandling`() {
+        val connection = dataSource.connection
+        val sakrepo = SakDao { connection }
+        val behandlingRepo = BehandlingDao { connection }
+
+        val sak1 = sakrepo.opprettSak("123", "BP").id
+
+        val behandling = foerstegangsbehandling(sak = sak1)
+            .also {
+                behandlingRepo.opprettFoerstegangsbehandling(it)
+            }
+
+        val behandlingFoerStatusendring =
+            behandlingRepo.hentBehandling(behandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
+        val endretTidspunkt = LocalDateTime.now()
+        val behandlingMedNyStatus =
+            behandling.copy(status = BehandlingStatus.UNDER_BEHANDLING, sistEndret = endretTidspunkt)
+        behandlingRepo.lagreStatus(behandlingMedNyStatus)
+        val behandlingEtterStatusendring =
+            behandlingRepo.hentBehandling(behandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
+
+        assertAll(
+            "Behandlingstatus og sistEndret skal endres i databasen",
+            { assertEquals(BehandlingStatus.OPPRETTET, behandlingFoerStatusendring!!.status) },
+            { assertEquals(BehandlingStatus.UNDER_BEHANDLING, behandlingEtterStatusendring!!.status) },
+            { assertEquals(endretTidspunkt, behandlingEtterStatusendring!!.sistEndret) }
+        )
+        connection.close()
+    }
+
+    @Test
+    fun `skal lagre oppgavestatus for behandling`() {
+        val connection = dataSource.connection
+        val sakrepo = SakDao { connection }
+        val behandlingRepo = BehandlingDao { connection }
+
+        val sak1 = sakrepo.opprettSak("123", "BP").id
+
+        val behandling = foerstegangsbehandling(sak = sak1)
+            .also {
+                behandlingRepo.opprettFoerstegangsbehandling(it)
+            }
+
+        val behandlingFoerStatusendring =
+            behandlingRepo.hentBehandling(behandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
+        val endretTidspunkt = LocalDateTime.now()
+        val behandlingMedNyStatus =
+            behandling.copy(oppgaveStatus = OppgaveStatus.LUKKET, sistEndret = endretTidspunkt)
+        behandlingRepo.lagreOppgaveStatus(behandlingMedNyStatus)
+        val behandlingEtterStatusendring =
+            behandlingRepo.hentBehandling(behandling.id, BehandlingType.FØRSTEGANGSBEHANDLING)
+
+        assertAll(
+            "Behandlingstatus og sistEndret skal endres i databasen",
+            { assertEquals(OppgaveStatus.NY, behandlingFoerStatusendring!!.oppgaveStatus) },
+            { assertEquals(OppgaveStatus.LUKKET, behandlingEtterStatusendring!!.oppgaveStatus) },
+            { assertEquals(endretTidspunkt, behandlingEtterStatusendring!!.sistEndret) }
+        )
+        connection.close()
+
+    }
+
 
 }

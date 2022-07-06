@@ -1,45 +1,243 @@
 package no.nav.etterlatte.behandling
 
-import io.ktor.application.*
-import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
-import io.ktor.util.pipeline.*
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
+import io.ktor.application.ApplicationCall
+import io.ktor.application.call
+import io.ktor.http.HttpStatusCode
+import io.ktor.request.receive
+import io.ktor.response.respond
+import io.ktor.response.respondText
+import io.ktor.routing.Route
+import io.ktor.routing.delete
+import io.ktor.routing.get
+import io.ktor.routing.post
+import io.ktor.routing.route
+import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
 
-fun Route.behandlingRoutes(service: BehandlingService) {
-    get("/behandlinger") {
-        call.respond(
-            service.hentBehandlinger()
-                .map { BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato, it.behandlingOpprettet) }
-                .let { BehandlingListe(it) }
-        )
-    }
-    get("/sak/{sakid}/behandlinger") {
-        call.respond(
-            service.hentBehandlingerISak(sakId)
-                .map {
-                    BehandlingSammendrag(it.id, it.sak, it.status, it.soeknadMottattDato, it.behandlingOpprettet)
+fun Route.behandlingRoutes(
+    generellBehandlingService: GenerellBehandlingService,
+    foerstegangsbehandlingService: FoerstegangsbehandlingService,
+    revurderingService: RevurderingService
+
+) {
+
+    route("/behandlinger") {
+
+        get {
+            call.respond(
+                generellBehandlingService.hentBehandlinger()
+                    .map {
+                        BehandlingSammendrag(
+                            it.id,
+                            it.sak,
+                            it.status,
+                            it.soeknadMottattDato,
+                            it.behandlingOpprettet
+                        )
+                    }
+                    .let { BehandlingListe(it) }
+            )
+        }
+
+        route("/{behandlingsid}") {
+            get {
+                generellBehandlingService.hentBehandlingstype(behandlingsId)?.let { type ->
+                    when (type) {
+                        BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                            with(foerstegangsbehandlingService.hentBehandling(behandlingsId)!!) {
+                                DetaljertBehandling(
+                                    id,
+                                    sak,
+                                    behandlingOpprettet,
+                                    sistEndret,
+                                    soeknadMottattDato,
+                                    persongalleri.innsender,
+                                    persongalleri.soeker,
+                                    persongalleri.gjenlevende,
+                                    persongalleri.avdoed,
+                                    persongalleri.soesken,
+                                    gyldighetsproeving,
+                                    status,
+                                )
+                            }
+                        }
+                        BehandlingType.REVURDERING -> {
+                            with(revurderingService.hentRevurdering(behandlingsId)!!) {
+                                DetaljertBehandling(
+                                    id,
+                                    sak,
+                                    behandlingOpprettet,
+                                    sistEndret,
+                                    soeknadMottattDato,
+                                    persongalleri.innsender,
+                                    persongalleri.soeker,
+                                    persongalleri.gjenlevende,
+                                    persongalleri.avdoed,
+                                    persongalleri.soesken,
+                                    null,
+                                    status,
+                                )
+                            }
+                        }
+                    }
+                }?.let { it1 -> call.respond(it1) } ?: HttpStatusCode.NotFound
+            }
+
+            route("/hendelser") {
+
+                route("/vedtak") {
+
+                    post("/{hendelse}") {
+                        val body = call.receive<VedtakHendelse>()
+                        generellBehandlingService.registrerVedtakHendelse(
+                            behandlingsId,
+                            body.vedtakId,
+                            requireNotNull(call.parameters["hendelse"]),
+                            body.inntruffet,
+                            body.saksbehandler,
+                            body.kommentar,
+                            body.valgtBegrunnelse
+                        )
+                        call.respond(HttpStatusCode.OK)
+                    }
                 }
-                .let { BehandlingListe(it) }
-        )
+            }
+
+
+
+
+
+            post("/avbrytbehandling") {
+                generellBehandlingService.avbrytBehandling(behandlingsId)
+                call.respond(HttpStatusCode.OK)
+            }
+
+            post("/gyldigfremsatt") {
+                val body = call.receive<GyldighetsResultat>()
+                foerstegangsbehandlingService.lagreGyldighetsprøving(behandlingsId, body)
+                call.respond(HttpStatusCode.OK)
+            }
+
+
+        }
+
+        route("/sak") {
+
+            get("/{sakid}") {
+                call.respond(
+                    generellBehandlingService.hentBehandlingerISak(sakId)
+                        .map {
+                            BehandlingSammendrag(
+                                it.id,
+                                it.sak,
+                                it.status,
+                                it.soeknadMottattDato,
+                                it.behandlingOpprettet
+                            )
+                        }
+                        .let { BehandlingListe(it) }
+                )
+            }
+
+            delete("/{sakid}") {
+                generellBehandlingService.slettBehandlingerISak(sakId)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        // TODO: fases ut -> nytt endepunkt: /behandlinger/foerstegangsbehandling
+        post {
+            val behandlingsBehov = call.receive<BehandlingsBehov>()
+
+            foerstegangsbehandlingService.startFoerstegangsbehandling(
+                behandlingsBehov.sak,
+                behandlingsBehov.persongalleri,
+                behandlingsBehov.mottattDato,
+            )
+                .also { call.respondText(it.id.toString()) }
+        }
+
+        route("/foerstegangsbehandling") {
+
+            get {
+                call.respond(foerstegangsbehandlingService.hentBehandling(behandlingsId)?.let {
+                    DetaljertBehandling(
+                        it.id,
+                        it.sak,
+                        it.behandlingOpprettet,
+                        it.sistEndret,
+                        it.soeknadMottattDato,
+                        it.persongalleri.innsender,
+                        it.persongalleri.soeker,
+                        it.persongalleri.gjenlevende,
+                        it.persongalleri.avdoed,
+                        it.persongalleri.soesken,
+                        it.gyldighetsproeving,
+                        it.status,
+                    )
+                } ?: HttpStatusCode.NotFound)
+            }
+
+            post {
+                val behandlingsBehov = call.receive<BehandlingsBehov>()
+
+                foerstegangsbehandlingService.startFoerstegangsbehandling(
+                    behandlingsBehov.sak,
+                    behandlingsBehov.persongalleri,
+                    behandlingsBehov.mottattDato,
+                )
+                    .also { call.respondText(it.id.toString()) }
+            }
+        }
+
+
+        route("/revurdering") {
+            get {
+                call.respond(revurderingService.hentRevurdering(behandlingsId)?.let {
+                    DetaljertBehandling(
+                        it.id,
+                        it.sak,
+                        it.behandlingOpprettet,
+                        it.sistEndret,
+                        it.soeknadMottattDato,
+                        it.persongalleri.innsender,
+                        it.persongalleri.soeker,
+                        it.persongalleri.gjenlevende,
+                        it.persongalleri.avdoed,
+                        it.persongalleri.soesken,
+                        null,
+                        it.status,
+                    )
+                } ?: HttpStatusCode.NotFound)
+            }
+
+
+            post { //Søk
+                val behandlingsBehov = call.receive<BehandlingsBehov>()
+
+                revurderingService.startRevurdering(
+                    behandlingsBehov.sak,
+                    behandlingsBehov.persongalleri,
+                    behandlingsBehov.mottattDato,
+                )
+                    .also { call.respondText(it.id.toString()) }
+            }
+        }
     }
 
-    delete("/sak/{sakid}/behandlinger") {
-        service.slettBehandlingerISak(sakId)
-        call.respond(HttpStatusCode.OK)
-    }
-
-    post("/behandlinger") { //Søk
+    //TODO: fases ut -> nytt endepunkt: /behandlinger/foerstegangsbehandling
+    post {
         val behandlingsBehov = call.receive<BehandlingsBehov>()
 
-        service.startBehandling(
+        foerstegangsbehandlingService.startFoerstegangsbehandling(
             behandlingsBehov.sak,
             behandlingsBehov.persongalleri,
             behandlingsBehov.mottattDato,
@@ -47,51 +245,52 @@ fun Route.behandlingRoutes(service: BehandlingService) {
             .also { call.respondText(it.id.toString()) }
     }
 
+
+// TODO: fases ut -> nytt endepunkt: /behandlinger/sak/{sakid}
+    route("/sak") {
+
+        get("/{sakid}/behandlinger") {
+            call.respond(
+                generellBehandlingService.hentBehandlingerISak(sakId)
+                    .map {
+                        BehandlingSammendrag(
+                            it.id,
+                            it.sak,
+                            it.status,
+                            it.soeknadMottattDato,
+                            it.behandlingOpprettet
+                        )
+                    }
+                    .let { BehandlingListe(it) }
+            )
+        }
+
+        delete("/{sakid}/behandlinger") {
+            generellBehandlingService.slettBehandlingerISak(sakId)
+            call.respond(HttpStatusCode.OK)
+        }
+    }
+
+
     post("/saker/{sakid}/hendelse/grunnlagendret") { //Søk
-        service.grunnlagISakEndret(sakId)
+        generellBehandlingService.grunnlagISakEndret(sakId)
         call.respond(HttpStatusCode.OK)
     }
-    route("/behandlinger/{behandlingsid}") {
-        get {
-            call.respond(service.hentBehandling(behandlingsId)?.let {
-                DetaljertBehandling(
-                    it.id,
-                    it.sak,
-                    it.behandlingOpprettet,
-                    it.sistEndret,
-                    it.soeknadMottattDato,
-                    it.innsender,
-                    it.soeker,
-                    it.gjenlevende,
-                    it.avdoed,
-                    it.soesken,
-                    it.gyldighetsproeving,
-                    it.status,
-                )
-            } ?: HttpStatusCode.NotFound)
-        }
 
 
-        post("gyldigfremsatt") {
-            val body = call.receive<GyldighetsResultat>()
-            service.lagreGyldighetsprøving(behandlingsId, body)
-            call.respond(HttpStatusCode.OK)
-        }
-
-
-        post("avbrytBehandling/{behandlingsid}") {
-            service.avbrytBehandling(behandlingsId)
-            call.respond(HttpStatusCode.OK)
-        }
-
-        post("hendelser/vedtak/{hendelse}") {
-            val body = call.receive<VedtakHendelse>()
-            service.registrerVedtakHendelse(behandlingsId, body.vedtakId, requireNotNull(call.parameters["hendelse"]), body.inntruffet, body.saksbehandler, body.kommentar, body.valgtBegrunnelse)
-
-            call.respond(HttpStatusCode.OK)
-        }
-
+// TODO: fases ut -> nytt endepunkt: /foerstegangsbehandling/gyldigfremsatt
+    post("gyldigfremsatt") {
+        val body = call.receive<GyldighetsResultat>()
+        foerstegangsbehandlingService.lagreGyldighetsprøving(behandlingsId, body)
+        call.respond(HttpStatusCode.OK)
     }
+
+// TODO: fases ut -> nytt endepunkt: /behandlinger/{behandlingsid}/avbrytbehandling/
+    post("avbrytBehandling/{behandlingsid}") {
+        generellBehandlingService.avbrytBehandling(behandlingsId)
+        call.respond(HttpStatusCode.OK)
+    }
+
 }
 
 inline val PipelineContext<*, ApplicationCall>.behandlingsId

@@ -43,7 +43,7 @@ internal class HentOpplysningerFraInntektskomponenten(
                     Opplysningstyper.AVDOED_INNTEKT_V1.name,
                 )
             ) {
-                print("fnr ${packet["fnr"].asText()} - doedsdato ${packet["doedsdato"].asText()}")
+                //print("fnr ${packet["fnr"].asText()} - doedsdato ${packet["doedsdato"].asText()}")
                 try {
                     val fnr = Foedselsnummer.of(packet["fnr"].asText())
                     val doedsdato = LocalDate.parse(packet["doedsdato"].asText())

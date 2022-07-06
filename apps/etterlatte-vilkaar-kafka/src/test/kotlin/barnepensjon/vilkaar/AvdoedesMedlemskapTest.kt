@@ -3,24 +3,37 @@ package barnepensjon.vilkaar
 import adresseDanmarkPdl
 import adresseUtlandFoerFemAar
 import adresserNorgePdl
+import com.fasterxml.jackson.module.kotlin.readValue
 import lagMockPersonAvdoedSoeknad
 import lagMockPersonPdl
 import mapTilVilkaarstypeAvdoedSoeknad
 import mapTilVilkaarstypePerson
-import no.nav.etterlatte.barnepensjon.kriterieIngenUtenlandsoppholdFraSoeknadSisteFemAar
-import no.nav.etterlatte.barnepensjon.kriterieSammenhengendeAdresserINorgeSisteFemAar
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
+import no.nav.etterlatte.libs.common.inntekt.PensjonUforeOpplysning
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
+import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.io.FileNotFoundException
 import java.time.LocalDate
 
 class AvdoedesMedlemskapTest {
+
+    @Test
+    fun vurderMottattPensjonUforeSisteFemAar() {
+        val file = readFile("/inntektsopplysning.json")
+        val opplysning = objectMapper.readValue<VilkaarOpplysning<PensjonUforeOpplysning>>(file)
+        val pensjonufore = kriterieHarMottattPensjonEllerTrygdSisteFemAar(opplysning)
+        //print(pensjonufore)
+        assert(true)
+    }
 
     @Test
     fun vurderIngenUtelandsoppholdISoeknad() {
@@ -138,5 +151,9 @@ class AvdoedesMedlemskapTest {
             listOf()
         )
     }
+
+
+    fun readFile(file: String) = AvdoedesMedlemskapTest::class.java.getResource(file)?.readText()
+        ?: throw FileNotFoundException("Fant ikke filen $file")
 
 }

@@ -9,8 +9,10 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.inntekt.ArbeidsInntektMaaned
 import no.nav.etterlatte.libs.common.inntekt.Inntekt
 import no.nav.etterlatte.libs.common.inntekt.PensjonUforeOpplysning
+import no.nav.etterlatte.libs.common.inntekt.UtbetaltPeriode
 import no.nav.etterlatte.libs.common.objectMapper
 import java.time.Instant
+import java.time.YearMonth
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -24,17 +26,16 @@ class OpplysningsByggerService : OpplysningsBygger {
 
         val opplysninger = ArrayList<Grunnlagsopplysning<out Any>>()
 
-        val uforetrygd: List<Inntekt>
-        val alderspensjon: List<Inntekt>
+
         if(inntektsKomponentenResponse.arbeidsInntektMaaned != null) {
-            uforetrygd = harFaattUforetrygd(inntektsKomponentenResponse.arbeidsInntektMaaned)
-            alderspensjon = harFaattAlderspensjon(inntektsKomponentenResponse.arbeidsInntektMaaned)
+            val uforetrygd = mapToPeriode(harFaattUforetrygd(inntektsKomponentenResponse.arbeidsInntektMaaned))
+            val alderspensjon = mapToPeriode(harFaattAlderspensjon(inntektsKomponentenResponse.arbeidsInntektMaaned))
             opplysninger.add(lagOpplysning(Opplysningstyper.PENSJON_UFORE_V1,
-                PensjonUforeOpplysning(uforetrygd, alderspensjon
-            )))
+                Grunnlagsopplysning.Inntektskomponenten("Inntektskomponenten"),
+                PensjonUforeOpplysning(uforetrygd, alderspensjon)
+            ))
         }
 
-        print(arbeidsforholdListe)
         if(arbeidsforholdListe.isNotEmpty()){
             val arbeidsforhold = arbeidsforholdListe.map { t ->
                 ArbeidsForhold(
@@ -47,9 +48,8 @@ class OpplysningsByggerService : OpplysningsBygger {
                 )
             }
             val arbeidsForholdOpplysning = ArbeidsforholdOpplysning(arbeidsforhold)
-            opplysninger.add(lagOpplysning(Opplysningstyper.ARBEIDSFORHOLD_V1, arbeidsForholdOpplysning))
+            opplysninger.add(lagOpplysning(Opplysningstyper.ARBEIDSFORHOLD_V1, Grunnlagsopplysning.Aregisteret("Aareg"), arbeidsForholdOpplysning))
         }
-
         return opplysninger
     }
 
@@ -58,7 +58,6 @@ class OpplysningsByggerService : OpplysningsBygger {
 
         arbeidsInntektListe.forEach { inntektMaaned ->
             inntektMaaned.arbeidsInntektInformasjon.inntektListe?.forEach{ inntekt ->
-                print(inntekt.beskrivelse)
                 if(inntekt.beskrivelse == "alderspensjon") {
                     inntektListe.add(inntekt)
                 }
@@ -81,13 +80,18 @@ class OpplysningsByggerService : OpplysningsBygger {
 
 }
 
-fun <T> lagOpplysning(opplysningsType: Opplysningstyper, opplysning: T): Grunnlagsopplysning<T> {
+fun <T> lagOpplysning(opplysningsType: Opplysningstyper, kilde: Grunnlagsopplysning.Kilde, opplysning: T): Grunnlagsopplysning<T> {
     return Grunnlagsopplysning(
         UUID.randomUUID(),
-        Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
+        kilde,
         opplysningsType,
         objectMapper.createObjectNode(),
         opplysning
     )
 }
 
+fun mapToPeriode(liste: List<Inntekt>): List<UtbetaltPeriode> {
+    return liste.map {
+        UtbetaltPeriode(YearMonth.parse(it.utbetaltIMaaned), it.beloep )
+    }
+}

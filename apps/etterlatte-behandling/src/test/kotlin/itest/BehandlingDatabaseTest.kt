@@ -36,6 +36,8 @@ internal class BehandlingDaoIntegrationTest {
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
 
     private lateinit var dataSource: DataSource
+    lateinit var sakRepo: SakDao
+    lateinit var behandlingRepo: BehandlingDao
 
     @BeforeAll
     fun beforeAll() {
@@ -47,7 +49,13 @@ internal class BehandlingDaoIntegrationTest {
         dataSource = dsb.dataSource
 
         dsb.migrate()
+
+        val connection = dataSource.connection
+        sakRepo = SakDao { connection }
+        behandlingRepo = BehandlingDao { connection }
+
     }
+
 
     @AfterEach
     fun afterEach() {
@@ -63,10 +71,7 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `skal opprette foerstegangsbehandling med persongalleri`() {
-        val connection = dataSource.connection
-        val sakrepo = SakDao { connection }
-        val behandlingRepo = BehandlingDao { connection }
-        val sak1 = sakrepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", "BP").id
         val behandlingOpprettet = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
 
         val persongalleri = persongalleri()
@@ -95,16 +100,12 @@ internal class BehandlingDaoIntegrationTest {
             opprettetBehandling.behandlingOpprettet
         )
 
-        connection.close()
     }
 
 
     @Test
     fun `skal opprette revurdering`() {
-        val connection = dataSource.connection
-        val sakrepo = SakDao { connection }
-        val behandlingRepo = BehandlingDao { connection }
-        val sak1 = sakrepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", "BP").id
         val behandlingOpprettet = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
 
         val behandling = revurdering(sak = sak1, behandlingOpprettet = behandlingOpprettet)
@@ -130,15 +131,11 @@ internal class BehandlingDaoIntegrationTest {
             opprettetBehandling.behandlingOpprettet
         )
 
-        connection.close()
     }
 
     @Test
     fun `Skal legge til gyldighetsprøving til en opprettet behandling`() {
-        val connection = dataSource.connection
-        val sakrepo = SakDao { connection }
-        val behandlingRepo = BehandlingDao { connection }
-        val sak1 = sakrepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", "BP").id
 
         val behandling = foerstegangsbehandling(sak = sak1)
 
@@ -182,18 +179,13 @@ internal class BehandlingDaoIntegrationTest {
             lagretGyldighetsproving.gyldighetsproeving
         )
 
-        connection.close()
-
     }
 
     @Test
     fun `Sletting av alle behandlinger i en sak`() {
-        val connection = dataSource.connection
-        val sakrepo = SakDao { connection }
-        val behandlingRepo = BehandlingDao { connection }
 
-        val sak1 = sakrepo.opprettSak("123", "BP").id
-        val sak2 = sakrepo.opprettSak("321", "BP").id
+        val sak1 = sakRepo.opprettSak("123", "BP").id
+        val sak2 = sakRepo.opprettSak("321", "BP").id
 
         listOf(
             foerstegangsbehandling(sak = sak1),
@@ -208,17 +200,13 @@ internal class BehandlingDaoIntegrationTest {
         assertEquals(0, behandlingRepo.alleBehandingerISak(sak1).size)
         assertEquals(1, behandlingRepo.alleBehandingerISak(sak2).size)
 
-        connection.close()
     }
 
 
     @Test
     fun `avbryte sak`() {
-        val connection = dataSource.connection
-        val sakrepo = SakDao { connection }
-        val behandlingRepo = BehandlingDao { connection }
 
-        val sak1 = sakrepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", "BP").id
         listOf(
             foerstegangsbehandling(sak = sak1)
         ).forEach { b ->
@@ -235,16 +223,12 @@ internal class BehandlingDaoIntegrationTest {
         assertEquals(1, behandling.size)
         assertEquals(true, behandling.first().status == BehandlingStatus.AVBRUTT)
 
-        connection.close()
     }
 
     @Test
     fun `skal returnere behandlingtype Foerstegangsbehandling`() {
-        val connection = dataSource.connection
-        val sakrepo = SakDao { connection }
-        val behandlingRepo = BehandlingDao { connection }
 
-        val sak1 = sakrepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", "BP").id
 
         val foerstegangsbehandling = foerstegangsbehandling(sak = sak1)
             .also {
@@ -254,17 +238,13 @@ internal class BehandlingDaoIntegrationTest {
         val type = behandlingRepo.hentBehandlingType(foerstegangsbehandling.id)
         assertEquals(BehandlingType.FØRSTEGANGSBEHANDLING, type)
 
-        connection.close()
 
     }
 
     @Test
     fun `skal returnere behandlingtype Revurdering`() {
-        val connection = dataSource.connection
-        val sakrepo = SakDao { connection }
-        val behandlingRepo = BehandlingDao { connection }
 
-        val sak1 = sakrepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", "BP").id
 
         val revurdering = revurdering(sak = sak1)
             .also {
@@ -273,17 +253,13 @@ internal class BehandlingDaoIntegrationTest {
 
         val type = behandlingRepo.hentBehandlingType(revurdering.id)
         assertEquals(BehandlingType.REVURDERING, type)
-        connection.close()
     }
 
 
     @Test
     fun `skal hente behandling av type Foerstegangsbehandling`() {
-        val connection = dataSource.connection
-        val sakrepo = SakDao { connection }
-        val behandlingRepo = BehandlingDao { connection }
 
-        val sak1 = sakrepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", "BP").id
 
         val foerstegangsbehandling = foerstegangsbehandling(sak = sak1)
             .also {
@@ -295,17 +271,13 @@ internal class BehandlingDaoIntegrationTest {
             type = BehandlingType.FØRSTEGANGSBEHANDLING
         )
         assertTrue(behandling is Foerstegangsbehandling)
-        connection.close()
     }
 
 
     @Test
     fun `skal returnere behandling av type Revurdering`() {
-        val connection = dataSource.connection
-        val sakrepo = SakDao { connection }
-        val behandlingRepo = BehandlingDao { connection }
 
-        val sak1 = sakrepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", "BP").id
 
         val revurdering = revurdering(sak = sak1)
             .also {
@@ -314,16 +286,12 @@ internal class BehandlingDaoIntegrationTest {
 
         val behandling = behandlingRepo.hentBehandling(id = revurdering.id, type = BehandlingType.REVURDERING)
         assertTrue(behandling is Revurdering)
-        connection.close()
     }
 
     @Test
     fun `skal returnere liste med behandlinger av ulike typer`() {
-        val connection = dataSource.connection
-        val sakrepo = SakDao { connection }
-        val behandlingRepo = BehandlingDao { connection }
 
-        val sak1 = sakrepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", "BP").id
 
         listOf(
             revurdering(sak = sak1),
@@ -345,17 +313,13 @@ internal class BehandlingDaoIntegrationTest {
             { assertEquals(2, behandlinger.filterIsInstance<Revurdering>().size) },
             { assertEquals(2, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
         )
-        connection.close()
     }
 
     @Test
     fun `Skal bare hente behandlinger av en gitt type`() {
 
-        val connection = dataSource.connection
-        val sakrepo = SakDao { connection }
-        val behandlingRepo = BehandlingDao { connection }
 
-        val sak1 = sakrepo.opprettSak("1234", "BP").id
+        val sak1 = sakRepo.opprettSak("1234", "BP").id
 
         val rev = listOf(
             revurdering(sak = sak1),
@@ -381,16 +345,12 @@ internal class BehandlingDaoIntegrationTest {
                 assertTrue(revurderinger.all { it is Revurdering })
             }
         )
-        connection.close()
     }
 
     @Test
     fun `skal lagre status og sette sistEndret for en behandling`() {
-        val connection = dataSource.connection
-        val sakrepo = SakDao { connection }
-        val behandlingRepo = BehandlingDao { connection }
 
-        val sak1 = sakrepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", "BP").id
 
         val behandling = foerstegangsbehandling(sak = sak1)
             .also {
@@ -410,16 +370,12 @@ internal class BehandlingDaoIntegrationTest {
         assertEquals(BehandlingStatus.OPPRETTET, behandlingFoerStatusendring!!.status)
         assertEquals(BehandlingStatus.UNDER_BEHANDLING, behandlingEtterStatusendring!!.status)
         assertEquals(endretTidspunkt, behandlingEtterStatusendring!!.sistEndret)
-        connection.close()
     }
 
     @Test
     fun `skal lagre oppgavestatus for behandling`() {
-        val connection = dataSource.connection
-        val sakrepo = SakDao { connection }
-        val behandlingRepo = BehandlingDao { connection }
 
-        val sak1 = sakrepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", "BP").id
 
         val behandling = foerstegangsbehandling(sak = sak1)
             .also {
@@ -438,7 +394,6 @@ internal class BehandlingDaoIntegrationTest {
         assertEquals(OppgaveStatus.NY, behandlingFoerStatusendring!!.oppgaveStatus)
         assertEquals(OppgaveStatus.LUKKET, behandlingEtterStatusendring!!.oppgaveStatus)
         assertEquals(endretTidspunkt, behandlingEtterStatusendring!!.sistEndret)
-        connection.close()
 
     }
 

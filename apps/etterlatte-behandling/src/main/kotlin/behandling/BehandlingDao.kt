@@ -168,7 +168,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, oppgave_status)
+                INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, oppgave_status )
                  VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimIndent()
             )
         with(revurdering) {

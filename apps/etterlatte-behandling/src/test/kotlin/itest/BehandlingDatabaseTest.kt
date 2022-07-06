@@ -70,7 +70,8 @@ internal class BehandlingDaoIntegrationTest {
         val behandlingOpprettet = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
 
         val persongalleri = persongalleri()
-        val behandlingMedPersongalleri = foerstegangsbehandling(sak = sak1, persongalleri = persongalleri)
+        val behandlingMedPersongalleri =
+            foerstegangsbehandling(sak = sak1, persongalleri = persongalleri, behandlingOpprettet = behandlingOpprettet)
 
         behandlingRepo.opprettFoerstegangsbehandling(behandlingMedPersongalleri)
         val opprettetBehandling =

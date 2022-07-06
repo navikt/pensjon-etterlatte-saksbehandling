@@ -27,31 +27,22 @@ interface BeanFactory {
     fun behandlingHendelser(): BehandlingsHendelser
     fun behandlingsFactory(): BehandlingFactory
 
-
 }
 
 abstract class CommonFactory : BeanFactory {
-    internal var cache: MutableMap<Any, Any> = mutableMapOf()
-    internal inline fun <reified T> cached(creator: () -> T): T {
-        if (!cache.containsKey(T::class.java)) {
-            cache[T::class.java] = creator() as Any
-        }
-        return cache[T::class.java] as T
-
-    }
+    private val behandlingsHendelser: BehandlingsHendelser by lazy { BehandlingsHendelser(
+        rapid(),
+        behandlingsFactory(),
+        datasourceBuilder().dataSource
+    ) }
+    private val behandlingsFactory: BehandlingFactory by lazy { BehandlingFactory(behandlingDao(), hendelseDao()) }
 
     override fun behandlingHendelser(): BehandlingsHendelser {
-        return cached {
-            BehandlingsHendelser(
-                rapid(),
-                behandlingsFactory(),
-                datasourceBuilder().dataSource
-            )
-        }
+        return behandlingsHendelser
     }
 
     override fun behandlingsFactory(): BehandlingFactory {
-        return cached { BehandlingFactory(behandlingDao(), hendelseDao()) }
+        return behandlingsFactory
     }
 
     override fun sakService(): SakService = RealSakService(sakDao())
@@ -67,7 +58,8 @@ abstract class CommonFactory : BeanFactory {
 }
 
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
-    override fun datasourceBuilder(): DataSourceBuilder = cached { DataSourceBuilder(env) }
+    private val datasourceBuilder: DataSourceBuilder by lazy { DataSourceBuilder(env) }
+    override fun datasourceBuilder() = datasourceBuilder
     override fun tokenValidering(): Authentication.Configuration.() -> Unit =
         { tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load())) }
 

@@ -6,6 +6,7 @@ include(
     "apps:etterlatte-pdltjenester",
     "apps:etterlatte-api",
     "apps:etterlatte-behandling",
+    "apps:etterlatte-brreg",
     "apps:etterlatte-gyldig-soeknad",
     "apps:etterlatte-vilkaar-kafka",
     "apps:etterlatte-opplysninger-fra-soeknad",

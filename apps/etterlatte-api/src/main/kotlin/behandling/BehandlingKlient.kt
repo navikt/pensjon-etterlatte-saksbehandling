@@ -3,8 +3,8 @@ package no.nav.etterlatte.behandling
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
@@ -156,10 +156,13 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
             val json =
                 downstreamResourceClient.get(Resource(clientId, "$resourceUrl/behandlinger/$behandlingId"), accessToken)
                     .mapBoth(
-                        success = { json -> json },
+                        success = { json ->
+                            json
+                        },
                         failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                     ).response
 
+            logger.info("Behandling hentet for behandlingid $behandlingId: $json")
             return objectMapper.readValue(json.toString(), DetaljertBehandling::class.java)
         } catch (e: Exception) {
             logger.error("Henting av behandlinger feilet", e)
@@ -191,11 +194,11 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
     override suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean {
         logger.info("Sletter behandlinger på en sak")
         try {
-                downstreamResourceClient.delete(Resource(clientId, "$resourceUrl/sak/$sakId/behandlinger"), accessToken, "")
-                    .mapBoth(
-                        success = { json -> json },
-                        failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                    ).response
+            downstreamResourceClient.delete(Resource(clientId, "$resourceUrl/sak/$sakId/behandlinger"), accessToken, "")
+                .mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
             return true
         } catch (e: Exception) {
             logger.error("Henting av behandlinger feilet", e)

@@ -22,6 +22,7 @@ include(
     "apps:etterlatte-brev-distribusjon",
     "apps:etterlatte-avkorting",
     "apps:etterlatte-tilbakekreving",
+    "apps:etterlatte-hendelser-pdl",
     "libs:ktorclient-auth-clientcredentials",
     "libs:common",
     "libs:ktorclient-onbehalfof",

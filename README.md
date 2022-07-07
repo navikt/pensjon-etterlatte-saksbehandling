@@ -58,6 +58,59 @@ Appen består av en statisk frontend og en backend-for-frontends i NodeJS.
 [etterlatte-vilkaar-kafka](apps/etterlatte-vilkaar-kafka) \
 // TODO
 
+# Flytdiagram
+
+### Hvordan appene samarbeider
+
+```mermaid
+flowchart TD
+
+classDef front fill:#BA99D2FF,color:#000,stroke:#C488F0FF
+classDef app fill:#88AACC,color:#000,stroke:#335577
+classDef db fill:#D7AE69FF,color:#000,stroke:#F39D0CFF
+classDef kafka fill:#79ab6d,color:#000,stroke:#39ba15
+classDef msg fill:#555,color:#ddd,stroke:none
+
+fordeler:::kafka -.-> gyldig-soeknad
+
+gyldig-soeknad:::kafka -.- t1[/"S&oslash;knad med\n behandlingsId og saksId"/]:::msg -.-> opplysninger-fra-soeknad
+gyldig-soeknad -.-> behandling:::app
+gyldig-soeknad --> pdl
+
+behandling -.- t2[/"Behandling opprettet\n inkludert persongalleri\n fra s&oslash;knad"/]:::msg -.-> grunnlag
+behandling -.- t3[/"Behandling uten grunnlag"/]:::msg -.-> grunnlag
+behandling --> etterlatte-api:::app
+etterlatte-api --> frontend:::front
+
+subgraph registere["Registere"]
+    pdl["PDL-tjenester"]
+    inntektskomponenten
+    MEDL
+    BRREG
+end
+
+opplysninger-fra-soeknad:::kafka -.- t5[/"Ny opplysning"/]:::msg -.-> grunnlag:::app
+opplysninger-fra-pdl:::kafka --> pdl
+opplysninger-fra-pdl -- "(kommer)" --> inntektskomponenten
+opplysninger-fra-pdl -.->  t5 -.-> grunnlag
+
+oppdater-behandling -.-> behandling
+
+grunnlag -.- t6[/"Opplysningsbehov"/]:::msg -.-> opplysninger-fra-pdl
+grunnlag -.- t7[/"Grunnlagsendring p&aring; sak"/]:::msg -.-> oppdater-behandling:::kafka
+grunnlag -.- t8[/"Behandling med grunnlag"/]:::msg -.-> vilkaar:::kafka
+grunnlag --> database[(Database)]:::db
+
+vilkaar -.- t9[/"Vilkaarsvurdert behandling"/]:::msg -.-> vedtaksvurdering:::kafka
+t9 -.-> beregning:::kafka
+beregning -.- t11[/"Beregnet behandling"/]:::msg -.-> avkortning:::kafka
+t11 -.-> vedtaksvurdering
+avkortning -.- t12[/"Avkortet behandling"/]:::msg -.-> vedtaksvurdering
+
+vedtaksvurdering <--> db2[(Database)]:::db
+vedtaksvurdering -.-> etterlatte-api
+```
+
 # Bygg og deploy
 
 En app bygges og deployes automatisk når en endring legges til i `main`.

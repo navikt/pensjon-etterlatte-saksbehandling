@@ -1,6 +1,3 @@
-import org.codehaus.groovy.tools.shell.util.Logger.io
-import org.jetbrains.kotlin.com.google.gson.Gson
-
 object NavFelles {
     const val RapidAndRivers = "com.github.navikt:rapids-and-rivers:20210617121814-3e67e4d"
     const val TokenClientCore = "no.nav.security:token-client-core:1.3.3"
@@ -38,10 +35,10 @@ object Ktor {
 }
 
 object Kafka {
-    const val Clients = "org.apache.kafka:kafka-clients:2.5.0"
-    const val Avro = "org.apache.avro:avro:1.10.0"
-    const val AvroSerializer = "io.confluent:kafka-avro-serializer:5.0.0"
-    const val EmbeddedEnv = "no.nav:kafka-embedded-env:2.7.0"
+    const val Clients = "org.apache.kafka:kafka-clients:3.2.0"
+    const val Avro = "org.apache.avro:avro:1.11.0"
+    const val AvroSerializer = "io.confluent:kafka-avro-serializer:7.1.1"
+    const val EmbeddedEnv = "no.nav:kafka-embedded-env:3.1.6"
 }
 
 object Jackson {

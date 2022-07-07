@@ -1,0 +1,13 @@
+@namespace("no.nav.person.identhendelse.v1.familierelasjon")
+protocol FamilierelasjonV1 {
+  import idl "../common/RelatertBiPerson.avdl";
+
+  record Familierelasjon {
+    union { null, string } relatertPerson = null;
+
+    string relatertPersonsRolle;
+    union { null, string } minRolleForPerson = null;
+
+    union { null, no.nav.person.identhendelse.v1.common.RelatertBiPerson } relatertPersonUtenFolkeregisteridentifikator = null;
+  }
+}

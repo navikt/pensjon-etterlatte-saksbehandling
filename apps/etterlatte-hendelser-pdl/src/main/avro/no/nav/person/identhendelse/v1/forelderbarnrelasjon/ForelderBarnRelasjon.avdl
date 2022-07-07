@@ -1,0 +1,10 @@
+@namespace("no.nav.person.identhendelse.v1.forelderbarnrelasjon")
+protocol ForelderBarnRelasjonV1 {
+
+  record ForelderBarnRelasjon {
+    union { null, string } relatertPerson = null;
+
+    string relatertPersonsRolle;
+    union { null, string } minRolleForPerson = null;
+  }
+}

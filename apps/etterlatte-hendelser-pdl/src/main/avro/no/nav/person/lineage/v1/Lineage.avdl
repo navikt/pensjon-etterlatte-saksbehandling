@@ -1,0 +1,11 @@
+@namespace("no.nav.person.lineage.v1")
+protocol LineageV1 {
+
+  record Lineage {
+    string nodeId;
+    string source;
+    string location = "Unknown";
+    timestamp_ms processedAt;
+    array<string> previousNodeIds;
+  }
+}

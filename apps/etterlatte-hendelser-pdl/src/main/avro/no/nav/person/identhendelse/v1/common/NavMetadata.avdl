@@ -1,0 +1,15 @@
+@namespace("no.nav.person.identhendelse.v1.common")
+protocol Nav {
+
+  record Endring {
+    union { null, long } id = null;
+    union { null, string } referanse = null;
+  }
+
+  record NavMetadata {
+    string systemKilde;
+    string registrertAv;
+    string kilde;
+    union { null, Endring } endring = null;
+  }
+}

@@ -1,0 +1,99 @@
+@namespace("no.nav.person.identhendelse.v1.common.adresse")
+protocol AdresseV1 {
+  import idl "Adressegradering.avdl";
+  import idl "UkjentBosted.avdl";
+
+  record Adressenummer {
+    string husnummer;
+    union { null, string } husbokstav = null;
+  }
+
+  record Poststed {
+    union { null, string } poststedsnavn = null;
+    union { null, string } postnummer = null;
+  }
+
+  record Vegadresse {
+    string kommunenummer;
+    union { null, string } bruksenhetstype = null;
+    string adressenavn;
+    union { null, Adressenummer } adressenummer = null;
+    union { null, string } adressekode = null;
+    union { null, string } adressetilleggsnavn = null;
+    union { null, Poststed } poststed = null;
+  }
+
+  record Matrikkelnummer {
+    string kommunenummer;
+    int gaardsnummer;
+    int bruksnummer;
+    union { null, int } festenummer = null;
+  }
+
+  record Matrikkeladresse {
+    union { null, string } bruksenhetstype = null;
+    Matrikkelnummer matrikkelnummer;
+    union { null, int } undernummer = null;
+    union { null, string } adressetilleggsnavn = null;
+    union { null, Poststed } poststed = null;
+  }
+
+  record UtenlandskAdresse {
+    union { null, string } adressenavnNummer = null;
+    union { null, string } bygningEtasjeLeilighet = null;    // NAV-spesifikk. Dekker de neste 3 feltene.
+    union { null, string } bygning = null;
+    union { null, string } etasjenummer = null;
+    union { null, string } boenhet = null;
+    union { null, string } postboksNummerNavn = null;
+    union { null, string } postkode = null;
+    union { null, string } bySted = null;
+    union { null, string } regionDistriktOmraade = null;     // NAV-spesifikk. Dekker de neste 2 feltene.
+    union { null, string } distriktsnavn = null;
+    union { null, string } region = null;
+    string landkode;
+  }
+
+  record UtenlandskAdresseIFrittFormat {
+    array<string> adresselinje;
+    union { null, string } postkode = null;
+    union { null, string } byEllerStedsnavn = null;
+    string landkode;
+  }
+
+  record Postboksadresse {
+    union { null, string } postbokseier = null;
+    union { null, Poststed } poststed = null;
+    string postboks;
+  }
+
+  record VegadresseForPost {
+    union { null, string } adressenavn;
+    union { null, Adressenummer } adressenummer = null;
+    union { null, string } adressekode = null;
+    union { null, string } adressetilleggsnavn = null;
+    union { null, Poststed } poststed = null;
+  }
+
+  record PostadresseIFrittFormat {
+    array<string> adresselinje;
+    union { null, Poststed } poststed = null;
+  }
+
+  record Adresse {
+    union { null, no.nav.person.identhendelse.v1.common.adresse.Adressegradering } adressegradering = null;
+    union { null, string } adresseIdentifikatorFraMatrikkelen = null;
+    union { null, string } naerAdresseIdentifikatorFraMatrikkelen = null;
+    union { null, string } bruksenhetsnummer = null;
+    union { null, string } coAdressenavn = null;
+
+    union { null, long } grunnkrets = null;
+    union { null, Vegadresse } vegadresse = null;
+    union { null, Matrikkeladresse } matrikkeladresse = null;
+    union { null, no.nav.person.identhendelse.v1.common.adresse.UkjentBosted } ukjentBosted = null;
+    union { null, UtenlandskAdresse } utenlandskAdresse = null;
+    union { null, UtenlandskAdresseIFrittFormat } utenlandskAdresseIFrittFormat = null;
+    union { null, Postboksadresse } postboksadresse = null;
+    union { null, VegadresseForPost } vegadresseForPost = null;
+    union { null, PostadresseIFrittFormat } postadresseIFrittFormat = null;
+  }
+}

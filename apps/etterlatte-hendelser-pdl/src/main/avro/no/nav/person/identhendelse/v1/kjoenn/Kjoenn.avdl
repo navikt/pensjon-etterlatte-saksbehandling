@@ -1,0 +1,8 @@
+@namespace("no.nav.person.identhendelse.v1.kjoenn")
+protocol KjoennV1 {
+  import idl "../common/KjoennType.avdl";
+
+  record Kjoenn {
+    no.nav.person.identhendelse.v1.common.KjoennType kjoenn;
+  }
+}

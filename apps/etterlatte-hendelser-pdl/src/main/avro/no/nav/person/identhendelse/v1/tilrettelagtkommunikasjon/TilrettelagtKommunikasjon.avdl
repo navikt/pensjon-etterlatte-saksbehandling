@@ -1,0 +1,12 @@
+@namespace("no.nav.person.identhendelse.v1.tilrettelagtkommunikasjon")
+protocol TilrettelagtKommunikasjonV1 {
+
+  record Tolk {
+    union { null, string } spraak = null;
+  }
+
+  record TilrettelagtKommunikasjon {
+    union { null, Tolk } talespraaktolk = null;
+    union { null, Tolk } tegnspraaktolk = null;
+  }
+}

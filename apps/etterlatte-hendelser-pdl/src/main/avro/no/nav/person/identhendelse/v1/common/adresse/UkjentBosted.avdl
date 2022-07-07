@@ -1,0 +1,8 @@
+@namespace("no.nav.person.identhendelse.v1.common.adresse")
+protocol UkjentBostedV1 {
+// Usikker på om denne kan merges inn i Adresse pga bakover kompatiblilitet i Adresse.
+
+    record UkjentBosted {
+        union { null, string } bostedskommune = null;
+    }
+}

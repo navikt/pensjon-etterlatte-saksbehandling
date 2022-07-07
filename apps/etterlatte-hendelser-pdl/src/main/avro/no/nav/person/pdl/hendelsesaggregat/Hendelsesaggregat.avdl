@@ -1,0 +1,16 @@
+@namespace("no.nav.person.pdl.hendelsesaggregat")
+protocol HendelsesaggregatProto {
+
+  record Ident {
+    string ident;
+    boolean gjeldende;
+    string type;
+  }
+
+  record Hendelsesaggregat {
+    array<string> identer;
+    union { null, array<Ident> } identDetaljer = null;
+    array<bytes> hendelser;
+    string nodeId;
+  }
+}

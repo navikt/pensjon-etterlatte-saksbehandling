@@ -1,0 +1,14 @@
+@namespace("no.nav.person.identhendelse.v1.adressebeskyttelse")
+protocol AdressebeskyttelseV1 {
+
+  enum Gradering {
+    STRENGT_FORTROLIG_UTLAND,
+    STRENGT_FORTROLIG,
+    FORTROLIG,
+    UGRADERT
+  }
+
+  record Adressebeskyttelse {
+    Gradering gradering;
+  }
+}

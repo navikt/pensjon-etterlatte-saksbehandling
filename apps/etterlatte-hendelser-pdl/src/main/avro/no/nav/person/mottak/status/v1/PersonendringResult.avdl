@@ -1,0 +1,28 @@
+@namespace("no.nav.person.mottak.status.v1")
+protocol PersonendringResultV1 {
+
+  enum Status {
+    DONE,
+    PENDING,
+    ERROR,
+    IGNORED
+  }
+
+  record Details {
+    union { null, string } kode = null;
+    union { null, string } message = null;
+  }
+
+  record PersonopplysningStatus {
+    union { null, string } nyOpplysningId = null;
+    string referanse; // unik referanse fra PersonopplysningRequested
+    Status status;
+    union { null, Details } details = null;
+  }
+
+  record PersonendringResult {
+    long endringId;
+    array<PersonopplysningStatus> statuser;
+    string systemkilde;
+  }
+}

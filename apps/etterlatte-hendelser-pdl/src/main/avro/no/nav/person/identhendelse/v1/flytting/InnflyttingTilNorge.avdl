@@ -1,0 +1,8 @@
+@namespace("no.nav.person.identhendelse.v1.flytting")
+protocol InnflyttingTilNorgeV1 {
+
+  record InnflyttingTilNorge {
+    union { null, string } fraflyttingsland = null;
+    union { null, string } fraflyttingsstedIUtlandet = null;
+  }
+}

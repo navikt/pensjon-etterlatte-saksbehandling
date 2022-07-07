@@ -1,0 +1,10 @@
+@namespace("no.nav.person.identhendelse.v1.common.adresse")
+protocol AdressegraderingV1 {
+
+    enum Adressegradering {
+        UGRADERT,
+        KLIENTADRESSE,
+        FORTROLIG,
+        STRENGT_FORTROLIG
+    }
+}

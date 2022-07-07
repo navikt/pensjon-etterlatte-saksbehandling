@@ -1,0 +1,10 @@
+@namespace("no.nav.person.identhendelse.v1.fullmakt")
+protocol FullmaktV1 {
+
+  record Fullmakt {
+    string fullmektig;
+    array<string> omraader;
+    date gyldigFom;
+    date gyldigTom;
+  }
+}

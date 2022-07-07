@@ -1,0 +1,11 @@
+@namespace("no.nav.person.identhendelse.v1.deltbosted")
+protocol DeltBostedV1 {
+    import idl "../common/adresse/Adresse.avdl";
+
+    record DeltBosted {
+        date startdatoForKontrakt;
+        union { null, date } sluttdatoForKontrakt = null;
+
+        no.nav.person.identhendelse.v1.common.adresse.Adresse adresse;
+    }
+}

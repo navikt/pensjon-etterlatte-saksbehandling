@@ -1,0 +1,7 @@
+@namespace("no.nav.person.identhendelse.v1.personstatus")
+protocol FolkeregisterpersonstatusV1 {
+
+  record Folkeregisterpersonstatus {
+    string status;
+  }
+}

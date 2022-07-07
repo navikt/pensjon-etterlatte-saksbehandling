@@ -1,0 +1,20 @@
+@namespace("no.nav.person.identhendelse.v1.sivilstand")
+protocol SivilstandV1 {
+
+  record Sivilstand {
+
+    // FELLES
+    string type;
+    union { null, date } sivilstandsdato = null;
+    union { null, string } relatertVedSivilstand = null;
+
+    // FREG
+    union { null, string } myndighet = null;
+    union { null, string } kommune = null;
+    union { null, string } sted = null;
+    union { null, string } utland = null;
+
+    // PDL
+    union { null, date } bekreftelsesdato = null;
+  }
+}

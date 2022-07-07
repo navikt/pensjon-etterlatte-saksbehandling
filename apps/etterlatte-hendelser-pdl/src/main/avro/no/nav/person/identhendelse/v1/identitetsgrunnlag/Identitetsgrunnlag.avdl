@@ -1,0 +1,13 @@
+@namespace("no.nav.person.identhendelse.v1.identitetsgrunnlag")
+protocol IdentitetsgrunnlagV1 {
+
+  enum Identitetsgrunnlagsstatus {
+    INGEN_STATUS,
+    IKKE_KONTROLLERT,
+    KONTROLLERT
+  }
+
+  record Identitetsgrunnlag {
+    Identitetsgrunnlagsstatus status;
+  }
+}

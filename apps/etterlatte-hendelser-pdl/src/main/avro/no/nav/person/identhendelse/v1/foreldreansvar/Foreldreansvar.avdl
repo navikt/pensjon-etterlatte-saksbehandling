@@ -1,0 +1,10 @@
+@namespace("no.nav.person.identhendelse.v1.foreldreansvar")
+protocol ForeldreansvarV1 {
+  import idl "../common/RelatertBiPerson.avdl";
+
+  record Foreldreansvar {
+    string ansvar;
+    union { null, string } ansvarlig = null;
+    union { null, no.nav.person.identhendelse.v1.common.RelatertBiPerson } ansvarligUtenIdentifikator = null;
+  }
+}

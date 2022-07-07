@@ -1,0 +1,15 @@
+@namespace("no.nav.person.identhendelse.v1.opphold")
+protocol OppholdsadresseV1 {
+// MERK: Denne opplysningen ligger i feil namespace (riktig ville vært "oppholdsadresse"), men den kan ikke flyttes nå som
+// opplysningen er tatt i bruk fordi avro bruker namespace til serialisering.
+// Dvs at bytte av namespace vil bryte bakoverkompatibiliteten og gjøre tidligere hendelser uleselige.
+  import idl "../common/adresse/Adresse.avdl";
+
+  record Oppholdsadresse {
+    no.nav.person.identhendelse.v1.common.adresse.Adresse adresse;
+    union { null, date } gyldigFraOgMed = null;
+    union { null, date } gyldigTilOgMed = null;
+    union { null, date } oppholdsadressedato = null;
+    union { null, string } oppholdAnnetSted = null;
+  }
+}

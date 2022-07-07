@@ -1,0 +1,26 @@
+@namespace("no.nav.person.pdl.aktor.v1")
+protocol AktorProto {
+
+  enum Type {
+    FOLKEREGISTERIDENTIFIKATOR,
+    AKTOR_ID,
+    N_PID
+  }
+
+  record Identifikator {
+    string idnummer;
+    Type type;
+    boolean gjeldende;
+  }
+
+  record Relasjon {
+    string idnummer1;
+    string idnummer2;
+    string master;
+  }
+
+  record Aktor {
+    array<Identifikator> identifikatorer;
+    array<Relasjon> relasjoner;
+  }
+}

@@ -1,0 +1,7 @@
+@namespace("no.nav.person.identhendelse")
+protocol LineageProto {
+
+  record Lineage {
+    string nodeId;
+  }
+}

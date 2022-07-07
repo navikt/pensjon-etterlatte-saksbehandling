@@ -1,0 +1,9 @@
+@namespace("no.nav.person.identhendelse.v1.opphold")
+protocol OppholdV1 {
+
+  record Opphold {
+    string oppholdstillatelse;
+    union { null, date } oppholdFra = null;
+    union { null, date } oppholdTil = null;
+  }
+}

@@ -1,0 +1,6 @@
+@namespace("no.nav.person.prosesserte.identhendelser.v1")
+protocol ProsesserteIdenthendelserV1 {
+  record ProsesserteIdenthendelser {
+    array<string> hendelseIdList;
+  }
+}

@@ -1,0 +1,12 @@
+@namespace("no.nav.person.identhendelse.v1.common")
+protocol RelatertBiPersonV1 {
+  import idl "Personnavn.avdl";
+  import idl "KjoennType.avdl";
+
+  record RelatertBiPerson {
+    no.nav.person.identhendelse.v1.common.Personnavn navn;
+    union { null, date } foedselsdato = null;
+    union { null, string } statsborgerskap = null;
+    union { null, no.nav.person.identhendelse.v1.common.KjoennType } kjoenn = null;
+  }
+}

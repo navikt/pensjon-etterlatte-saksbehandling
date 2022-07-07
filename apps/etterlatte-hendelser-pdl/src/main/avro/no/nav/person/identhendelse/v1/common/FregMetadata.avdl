@@ -1,0 +1,13 @@
+@namespace("no.nav.person.identhendelse.v1.common")
+protocol Freg {
+
+  record FregMetadata {
+    union { null, timestamp_ms } ajourholdstidspunkt = null;
+    union { null, timestamp_ms } gyldighetstidspunkt = null;
+    union { null, timestamp_ms } opphoerstidspunkt = null;
+    union { null, string       } kilde = null;
+    union { null, string       } aarsak = null;
+    union { null, int          } sekvens = null;    // Brukes kun i særtilfeller
+    union { null, boolean      } gjeldende = null;  // Brukes kun i særtilfeller
+  }
+}

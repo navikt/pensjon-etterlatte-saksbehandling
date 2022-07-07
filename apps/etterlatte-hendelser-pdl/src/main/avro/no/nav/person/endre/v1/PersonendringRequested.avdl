@@ -1,0 +1,32 @@
+@namespace("no.nav.person.endre.v1")
+protocol PersonendringRequestedV1 {
+
+  enum Endringstype {
+    OPPRETT,
+    KORRIGER,
+    ANNULLER,
+    OPPHOER
+  }
+
+  record Metadata {
+    string registrertAv;
+    string systemKilde; // PDL, TPS, FREG
+  }
+
+  record PersonopplysningRequested {
+    union { null, string } opplysningsId = null;
+    string referanse; // unik referanse for denne opplysningen
+    Endringstype endringstype;
+    string opplysningstype;
+    union { null, string } content = null;
+  }
+
+  record PersonendringRequested {
+    long endringId;
+    string ident;
+    union { null, boolean } opprettNyPerson = null;
+    array<PersonopplysningRequested> endringer;
+    Metadata metadata;
+    union { null, string } lineageNodeId = null; // èn lineageNodeId for datasettet.
+  }
+}

@@ -1,0 +1,10 @@
+@namespace("no.nav.person.identhendelse.v1.personident")
+protocol UtenlandskIdentifikasjonsnummerV1 {
+
+  record UtenlandskIdentifikasjonsnummer {
+    string identifikasjonsnummer;
+    string utstederland;
+    boolean opphoert;
+    union { null, string } type = null; // Kun FREG opplysning
+  }
+}

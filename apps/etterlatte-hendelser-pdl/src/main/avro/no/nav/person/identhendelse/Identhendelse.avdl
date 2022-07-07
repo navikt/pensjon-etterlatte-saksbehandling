@@ -1,0 +1,90 @@
+@namespace("no.nav.person.identhendelse")
+protocol IdenthendelseProto {
+  import idl "Lineage.avdl";
+  import idl "v1/adressebeskyttelse/Adressebeskyttelse.avdl";
+  import idl "v1/bostedsadresse/Bostedsadresse.avdl";
+  import idl "v1/common/FregMetadata.avdl";
+  import idl "v1/common/NavMetadata.avdl";
+  import idl "v1/deltbosted/DeltBosted.avdl";
+  import idl "v1/doedfoedtbarn/DoedfoedtBarn.avdl";
+  import idl "v1/doedsfall/Doedsfall.avdl";
+  import idl "v1/falskidentitet/FalskIdentitet.avdl";
+  import idl "v1/familierelasjon/Familierelasjon.avdl";
+  import idl "v1/flytting/InnflyttingTilNorge.avdl";
+  import idl "v1/flytting/UtflyttingFraNorge.avdl";
+  import idl "v1/foedsel/Foedsel.avdl";
+  import idl "v1/foreldreansvar/Foreldreansvar.avdl";
+  import idl "v1/forelderbarnrelasjon/ForelderBarnRelasjon.avdl";
+  import idl "v1/fullmakt/Fullmakt.avdl";
+  import idl "v1/identitetsgrunnlag/Identitetsgrunnlag.avdl";
+  import idl "v1/kjoenn/Kjoenn.avdl";
+  import idl "v1/kontaktadresse/Kontaktadresse.avdl";
+  import idl "v1/kontaktinformasjonfordoedsbo/KontaktinformasjonForDoedsbo.avdl";
+  import idl "v1/navn/Navn.avdl";
+  import idl "v1/opphold/Opphold.avdl";
+  import idl "v1/opphold/Oppholdsadresse.avdl";
+  import idl "v1/personident/Folkeregisteridentifikator.avdl";
+  import idl "v1/personident/NavPersonident.avdl";
+  import idl "v1/personident/UtenlandskIdentifikasjonsnummer.avdl";
+  import idl "v1/personstatus/Folkeregisterpersonstatus.avdl";
+  import idl "v1/sikkerhetstiltak/Sikkerhetstiltak.avdl";
+  import idl "v1/sivilstand/Sivilstand.avdl";
+  import idl "v1/statsborgerskap/Statsborgerskap.avdl";
+  import idl "v1/telefonnummer/Telefonnummer.avdl";
+  import idl "v1/tilrettelagtkommunikasjon/TilrettelagtKommunikasjon.avdl";
+  import idl "v1/vergemaalellerfremtidsfullmakt/VergemaalEllerFremtidsfullmakt.avdl";
+
+  enum Endringstype {
+    OPPRETT,
+    KORRIGER,
+    OPPHOER,
+    ANNULLER
+  }
+
+  record Identhendelse {
+    string hendelseId;                                            // Alltids UUID.randomUuid().toString(). Unik identifikator for hendelsen
+    string personident;                                           // Subjektet for identhendelsen, f.eks gjeldende ident når vi får fra FREG
+    string master;                                                // Hittil kun FREG eller PDL, men sier hvem som eier opplysningen
+    timestamp_ms opprettet;                                       // LocalDateTime.now()
+    string opplysningstype;                                       // Opplysningstype i tekstlig format, f.eks UTENLANDSK_ID_V1. Skal være enum fra Opplysningstype java objektet
+    Endringstype endringstype;                                    // Den faglige aksjonen.
+    union { null, string } tidligereHendelseId = null;            // Peker til en tidligere identhendelse som denne erstatter. Brukt i forbindelse med korrigering, opphør og annullering.
+
+    union { null, no.nav.person.identhendelse.Lineage } lineage = null;
+
+    union { null, no.nav.person.identhendelse.v1.common.FregMetadata } fregMetadata = null;
+    union { null, no.nav.person.identhendelse.v1.common.NavMetadata } navMetadata = null;
+
+  // Identhendelsen kan inneholde én og bare én av følgende:
+    union { null, no.nav.person.identhendelse.v1.adressebeskyttelse.Adressebeskyttelse } adressebeskyttelse = null;
+    union { null, no.nav.person.identhendelse.v1.bostedsadresse.Bostedsadresse } bostedsadresse = null;
+    union { null, no.nav.person.identhendelse.v1.deltbosted.DeltBosted } deltBosted = null;
+    union { null, no.nav.person.identhendelse.v1.doedfoedtbarn.DoedfoedtBarn } doedfoedtBarn = null;
+    union { null, no.nav.person.identhendelse.v1.doedsfall.Doedsfall } doedsfall = null;
+    union { null, no.nav.person.identhendelse.v1.falskidentitet.FalskIdentitet } falskIdentitet = null;
+    union { null, no.nav.person.identhendelse.v1.familierelasjon.Familierelasjon } familierelasjon = null; // Blir DEPRECATED i fremtiden. Erstattes av forelderBarnRelasjon.
+    union { null, no.nav.person.identhendelse.v1.flytting.InnflyttingTilNorge } innflyttingTilNorge = null;
+    union { null, no.nav.person.identhendelse.v1.flytting.UtflyttingFraNorge } utflyttingFraNorge = null;
+    union { null, no.nav.person.identhendelse.v1.foedsel.Foedsel } foedsel = null;
+    union { null, no.nav.person.identhendelse.v1.foreldreansvar.Foreldreansvar } foreldreansvar = null;
+    union { null, no.nav.person.identhendelse.v1.forelderbarnrelasjon.ForelderBarnRelasjon } forelderbarnrelasjon = null;
+    union { null, no.nav.person.identhendelse.v1.fullmakt.Fullmakt } fullmakt = null;
+    union { null, no.nav.person.identhendelse.v1.identitetsgrunnlag.Identitetsgrunnlag } identitetsgrunnlag = null;
+    union { null, no.nav.person.identhendelse.v1.kjoenn.Kjoenn } kjoenn = null;
+    union { null, no.nav.person.identhendelse.v1.kontaktadresse.Kontaktadresse } kontaktadresse = null;
+    union { null, no.nav.person.identhendelse.v1.kontaktinformasjonfordoedsbo.KontaktinformasjonForDoedsbo } kontaktinformasjonForDoedsbo = null;
+    union { null, no.nav.person.identhendelse.v1.navn.Navn } navn = null;
+    union { null, no.nav.person.identhendelse.v1.opphold.Opphold } opphold = null;
+    union { null, no.nav.person.identhendelse.v1.opphold.Oppholdsadresse } oppholdsadresse = null;
+    union { null, no.nav.person.identhendelse.v1.personident.Folkeregisteridentifikator } folkeregisteridentifikator = null;
+    union { null, no.nav.person.identhendelse.v1.personident.NavPersonident } navPersonident = null;
+    union { null, no.nav.person.identhendelse.v1.personident.UtenlandskIdentifikasjonsnummer } utenlandskIdentifikasjonsnummer = null;
+    union { null, no.nav.person.identhendelse.v1.personstatus.Folkeregisterpersonstatus } folkeregisterpersonstatus = null;
+    union { null, no.nav.person.identhendelse.v1.sikkerhetstiltak.Sikkerhetstiltak } sikkerhetstiltak = null;
+    union { null, no.nav.person.identhendelse.v1.sivilstand.Sivilstand } sivilstand = null;
+    union { null, no.nav.person.identhendelse.v1.statsborgerskap.Statsborgerskap } statsborgerskap = null;
+    union { null, no.nav.person.identhendelse.v1.telefonnummer.Telefonnummer } telefonnummer = null;
+    union { null, no.nav.person.identhendelse.v1.tilrettelagtkommunikasjon.TilrettelagtKommunikasjon } tilrettelagtKommunikasjon = null;
+    union { null, no.nav.person.identhendelse.v1.vergemaalellerfremtidsfullmakt.VergemaalEllerFremtidsfullmakt } vergemaalellerfremtidsfullmakt = null;
+  }
+}

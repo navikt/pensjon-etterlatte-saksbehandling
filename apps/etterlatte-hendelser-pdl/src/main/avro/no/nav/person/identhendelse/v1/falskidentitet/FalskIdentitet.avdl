@@ -1,0 +1,22 @@
+@namespace("no.nav.person.identhendelse.v1.falskidentitet")
+protocol FalskIdentitetV1 {
+  import idl "../common/Personnavn.avdl";
+  import idl "../common/KjoennType.avdl";
+
+  record IdentifiserendeInformasjon {
+    no.nav.person.identhendelse.v1.common.Personnavn personnavn;
+    union { null, date } foedselsdato = null;
+    array<string> statsborgerskap;
+    union {null, no.nav.person.identhendelse.v1.common.KjoennType } kjoenn = null;
+  }
+
+  record FalskIdentitet {
+
+    // Rett identitet er gitt ved én og bare én av følgende:
+    union { null, IdentifiserendeInformasjon} rettIdentitetVedOpplysninger = null;
+    union { null, boolean } rettIdentitetErUkjent = null;
+    union { null, string } rettIdentitetVedIdentifikasjonsnummer = null;
+
+    boolean erFalsk;
+  }
+}

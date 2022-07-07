@@ -1,0 +1,122 @@
+@namespace("no.nav.pdl.adresse.v1")
+protocol AdresseProto {
+
+  record Krets {
+    long id;
+    string kretsnavn;
+    int kretsnummer;
+    string kretstype;
+  }
+
+  record Bydel {
+    int id;
+    string bydelsnavn;
+    int bydelsnummer;
+  }
+
+  record Fylke {
+    long id;
+    string fylkesnummer;
+    string fylkesnavn;
+    union { null, date } gyldigTilDato = null;
+    union { null, long } nyFylkeId = null;
+    array<long> kommuneIds;
+    timestamp_ms oppdateringsdato;
+    union { null, timestamp_ms } sluttdato = null;
+    string oppdatertAv;
+    union {null, string } avsluttetAv = null;
+  }
+
+  record Position {
+    double x;
+    double y;
+    union { null, double } z = null;
+  }
+
+  record Posisjonskvalitet {
+    int noyaktighet;
+  }
+
+  record Representasjonspunkt {
+    Position position;
+    union { null, Posisjonskvalitet } kvalitet = null;
+    boolean stedfestingVerifisert;
+  }
+
+  record MottakerAdresse {
+    union { null, string } adresselinje1 = null;
+    union { null, string } adresselinje2 = null;
+    union { null, string } adresselinje3 = null;
+    union { null, Krets } postnummeromraade = null;
+    union { null, long } landKodeId = null;
+  }
+
+  record Kommune {
+    long id;
+    string kommunenummer;
+    string kommunenavn;
+    Fylke fylke;
+    union { null, date } gyldigTilDato = null;
+    union { null, string } konverteringStatus = null;
+    boolean last;
+    union { null, Position } senterpunkt = null;
+    union { null, MottakerAdresse } postadresse = null;
+    array<long> naboKommuneIds;
+    boolean nedsattKonsesjonsgrense;
+    string brukteGardsnummer;
+  }
+
+  record Matrikkelnummer {
+    string kommunenummer;
+    int gardsnummer;
+    int bruksnummer;
+    int festenummer;
+    int seksjonsnummer;
+  }
+
+  record Matrikkelenhet {
+    long id;
+    Matrikkelnummer matrikkelnummer;
+  }
+
+  record Matrikkeladresse {
+    long id;
+    int undernummer;
+    Representasjonspunkt representasjonspunkt;
+    union { null, string } adressetilleggsnavn = null;
+    union { null, string } kortnavn = null;
+    Matrikkelenhet matrikkelenhet;
+    array<Krets> kretser;
+    union { null, Bydel } bydel = null;
+    timestamp_ms oppdateringsdato;
+    union { null, timestamp_ms } sluttdato = null;
+  }
+
+  record Veg {
+    long id;
+    Kommune kommune;
+    int adressekode;
+    string adressenavn;
+    string kortAdressenavn;
+    union { null, string } stedsnummer = null;
+  }
+
+  record Vegadresse {
+    long id;
+    Veg veg;
+    int nummer;
+    union { null, string } bokstav = null;
+    Representasjonspunkt representasjonspunkt;
+    union { null, string } adressetilleggsnavn = null;
+    union { null, string } kortnavn = null;
+    array<Krets> kretser;
+    union { null, Bydel } bydel = null;
+    timestamp_ms oppdateringsdato;
+    union { null, timestamp_ms } sluttdato = null;
+  }
+
+  record Adresse {
+    union { null, Vegadresse } vegadresse = null;
+    union { null, Matrikkeladresse } matrikkeladresse = null;
+  }
+}

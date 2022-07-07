@@ -1,0 +1,14 @@
+@namespace("no.nav.person.identhendelse.v1.personident")
+protocol FolkeregisteridentifikatorV1 {
+
+  enum Type {
+    DNR,
+    FNR
+  }
+
+  record Folkeregisteridentifikator {
+    string identifikasjonsnummer;
+    Type type;
+    string status;
+  }
+}

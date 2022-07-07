@@ -1,0 +1,8 @@
+@namespace("no.nav.person.identhendelse.v1.common")
+protocol KjoennTypeV1 {
+  enum KjoennType {
+    MANN,
+    KVINNE,
+    UKJENT
+  }
+}

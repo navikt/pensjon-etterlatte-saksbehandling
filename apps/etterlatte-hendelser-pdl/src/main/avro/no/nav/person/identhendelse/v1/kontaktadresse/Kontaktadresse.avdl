@@ -1,0 +1,10 @@
+@namespace("no.nav.person.identhendelse.v1.kontaktadresse")
+protocol KontaktadresseV1 {
+  import idl "../common/adresse/Adresse.avdl";
+
+  record Kontaktadresse {
+    union { null, date } gyldigFraOgMed = null;
+    union { null, date } gyldigTilOgMed = null;
+    no.nav.person.identhendelse.v1.common.adresse.Adresse adresse;
+  }
+}

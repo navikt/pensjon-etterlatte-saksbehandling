@@ -1,10 +1,8 @@
+package no.nav.etterlatte.hendelserpdl
+
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import no.nav.common.KafkaEnvironment
 import no.nav.etterlatte.JsonMessage
-import no.nav.etterlatte.hendelserpdl.Dodsmeldinger
-import no.nav.etterlatte.hendelserpdl.FinnDodsmeldinger
-import no.nav.etterlatte.hendelserpdl.MessageProblems
-import no.nav.etterlatte.hendelserpdl.TestConfig
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
@@ -21,7 +19,6 @@ import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.time.Instant
 
-@Disabled
 class IntegrationTest {
     companion object {
         val kafkaEnv = KafkaEnvironment(

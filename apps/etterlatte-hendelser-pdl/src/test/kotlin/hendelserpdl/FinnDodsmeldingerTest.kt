@@ -1,3 +1,5 @@
+package no.nav.etterlatte.hendelserpdl
+
 import no.nav.etterlatte.hendelserpdl.FinnDodsmeldinger
 import no.nav.etterlatte.hendelserpdl.IDodsmeldinger
 import no.nav.etterlatte.hendelserpdl.leesah.ILivetErEnStroemAvHendelser
@@ -8,7 +10,6 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 
-@Disabled
 internal class FinnDodsmeldingerTest {
 
     @Test

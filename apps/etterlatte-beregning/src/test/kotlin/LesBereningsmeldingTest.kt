@@ -1,6 +1,6 @@
 
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.model.BeregningService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
@@ -14,11 +14,11 @@ internal class LesBereningsmeldingTest {
     companion object {
         val melding = readFile("/Ny.json")
 
-        fun readmelding(file: String): Barnepensjon {
+        fun readmelding(file: String): Grunnlag {
             val skjemaInfo = objectMapper.writeValueAsString(
-                objectMapper.readTree(readFile(file)).get("@skjema_info")
+                objectMapper.readTree(readFile(file)).get("@grunnlag")
             )
-            return objectMapper.readValue(skjemaInfo, Barnepensjon::class.java)
+            return objectMapper.readValue(skjemaInfo, Grunnlag::class.java)
         }
 
         fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
@@ -40,7 +40,7 @@ internal class LesBereningsmeldingTest {
     }
     @Test
     fun beregnResultat() {
-        val beregningsperioder = BeregningService().beregnResultat(null, YearMonth.of(2021, 2)).beregningsperioder
+        val beregningsperioder = BeregningService().beregnResultat(readmelding( "/Ny.json"), YearMonth.of(2021, 2)).beregningsperioder
         beregningsperioder[0].also {
             Assertions.assertEquals(YearMonth.of(2021,2), it.datoFOM)
             Assertions.assertEquals(YearMonth.of(2021,4), it.datoTOM)

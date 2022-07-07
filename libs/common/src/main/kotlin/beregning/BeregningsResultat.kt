@@ -1,4 +1,5 @@
 package no.nav.etterlatte.libs.common.beregning
+import no.nav.etterlatte.libs.common.person.Person
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -34,7 +35,15 @@ data class Beregningsperiode(
     val type: Beregningstyper,
     val datoFOM: YearMonth,
     val datoTOM: YearMonth?,
+    val utbetaltBeloep: Double,
+    val soeskenFlokk: List<Person>?,
     val grunnbelopMnd: Int,
     val grunnbelop: Int,
+)
+
+data class SoeskenPeriode(
+    val datoFOM: YearMonth,
+    val datoTOM: YearMonth,
+    val soeskenFlokk: List<Person>?,
 )
 

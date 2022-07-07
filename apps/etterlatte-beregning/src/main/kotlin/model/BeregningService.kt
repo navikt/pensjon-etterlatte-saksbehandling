@@ -41,8 +41,19 @@ class BeregningService {
     // Adressesjekk på halvsøsken på dødsfallstidspunkt i første omgang
     private fun finnBeregningsperioderSoesken(grunnlag: Grunnlag, virkFOM: YearMonth){//: List<Beregningsperiode> {
 
-        val avdoedPdl = finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.AVDOED_PDL_V1)
-        val avdoedbarn = avdoedPdl?.opplysning?.familieRelasjon?.barn
+        val avdoedPdl = finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.AVDOED_PDL_V1)?.opplysning
+        val bruker = finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.SOEKER_PDL_V1)?.opplysning
+        //List compare?
+        val helsoesken = avdoedPdl?.avdoedesBarn?.filter { it.familieRelasjon?.foreldre == bruker?.familieRelasjon?.foreldre }
+        val halvsoesken = avdoedPdl?.avdoedesBarn?.filter { avdoedbarn ->
+            avdoedbarn.foedselsnummer !in (helsoesken?.map { helsoesken -> helsoesken.foedselsnummer } ?: emptyList())
+        }
+        //first skal være ok, siden PPS allerede har sortert
+        val halvsoeskenOppdrattSammen = halvsoesken?.filter { it.bostedsadresse?.first() == bruker?.bostedsadresse?.first() }
+        val kull: MutableList<Person> = ArrayList()
+        helsoesken?.let { kull.addAll(it) }
+        halvsoeskenOppdrattSammen?.let { kull.addAll(it) }
+
     }
 
     private fun finnBeregningsperioder(virkFOM: YearMonth): List<Beregningsperiode> {

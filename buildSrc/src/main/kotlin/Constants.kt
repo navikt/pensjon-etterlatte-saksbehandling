@@ -54,7 +54,7 @@ object Jackson {
 }
 
 object Jupiter {
-    private const val version = "5.7.2"
+    private const val version = "5.8.2"
 
     const val Api = "org.junit.jupiter:junit-jupiter-api:$version"
     const val Params = "org.junit.jupiter:junit-jupiter-params:$version"

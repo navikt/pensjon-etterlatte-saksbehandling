@@ -1,12 +1,9 @@
 package no.nav.etterlatte.hendelserpdl
 
-import no.nav.etterlatte.hendelserpdl.FinnDodsmeldinger
-import no.nav.etterlatte.hendelserpdl.IDodsmeldinger
 import no.nav.etterlatte.hendelserpdl.leesah.ILivetErEnStroemAvHendelser
 import no.nav.person.pdl.leesah.Personhendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 

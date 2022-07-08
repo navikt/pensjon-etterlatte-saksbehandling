@@ -32,7 +32,7 @@ jobs:
       - name: Gradle test and build
         run: |
           chmod +x ./gradlew
-          ./gradlew :apps:${APP_NAME}:test :apps:${APP_NAME}:build --stacktrace --debug --scan
+          ./gradlew :apps:${APP_NAME}:test :apps:${APP_NAME}:build
       - name: Build and publish docker image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

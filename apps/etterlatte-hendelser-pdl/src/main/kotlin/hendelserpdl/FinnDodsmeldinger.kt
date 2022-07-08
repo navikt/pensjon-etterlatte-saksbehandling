@@ -29,7 +29,7 @@ class FinnDodsmeldinger(
                     it.getPersonidenter()[0],
                     (it.getDoedsfall()?.getDoedsdato()?.format(DateTimeFormatter.ISO_DATE))
                 )
-                log.info("Doedsfall foedselsnummer avdoed: ${it.folkeregisteridentifikator}")
+                log.info("Doedshendelse getPersonidenter: ${it.getPersonidenter()}")
                 dodsmeldinger++
             } else {
                 log.info("Så opplysning om ${it.opplysningstype} opprettet ${it.opprettet}")

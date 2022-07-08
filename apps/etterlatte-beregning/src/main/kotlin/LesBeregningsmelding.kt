@@ -21,8 +21,6 @@ internal class LesBeregningsmelding(
             validate { it.requireKey("@grunnlag") }
             validate { it.requireKey("@vilkaarsvurdering") }
             validate { it.requireKey("@virkningstidspunkt") }
-            //TODO se på logikk for å 'samle' rivers
-            //validate { it.requireKey("@gyldighetsvurdering") }
             validate { it.rejectKey("@beregning") }
             validate { it.interestedIn("@correlation_id") }
 
@@ -32,10 +30,12 @@ internal class LesBeregningsmelding(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
 
-            //TODO her må jeg sikkert ha noe anna info
             val grunnlag = packet["@grunnlag"].toString()
             try {
-                val beregningsResultat = beregning.beregnResultat(objectMapper.readValue(grunnlag), YearMonth.parse(packet["@virkningstidspunkt"].asText()))
+                //TODO fremtidig funksjonalitet for å støtte periodisering av vilkaar
+                val tom = YearMonth.now().plusMonths(3)
+
+                val beregningsResultat = beregning.beregnResultat(objectMapper.readValue(grunnlag), YearMonth.parse(packet["@virkningstidspunkt"].asText()), tom)
                 packet["@beregning"] = beregningsResultat
                 context.publish(packet.toJson())
                 logger.info("Publisert en beregning")

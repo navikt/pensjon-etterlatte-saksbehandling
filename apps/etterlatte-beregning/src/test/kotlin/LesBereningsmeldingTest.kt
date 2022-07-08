@@ -40,18 +40,18 @@ internal class LesBereningsmeldingTest {
     }
     @Test
     fun beregnResultat() {
-        val beregningsperioder = BeregningService().beregnResultat(readmelding( "/Ny.json"), YearMonth.of(2021, 2)).beregningsperioder
+        val beregningsperioder = BeregningService().beregnResultat(readmelding( "/Ny.json"), YearMonth.of(2021, 2), YearMonth.of(2021, 9)).beregningsperioder
         beregningsperioder[0].also {
             Assertions.assertEquals(YearMonth.of(2021,2), it.datoFOM)
             Assertions.assertEquals(YearMonth.of(2021,4), it.datoTOM)
         }
         beregningsperioder[1].also {
             Assertions.assertEquals(YearMonth.of(2021,5), it.datoFOM)
-            Assertions.assertEquals(YearMonth.of(2022,4), it.datoTOM)
+            Assertions.assertEquals(YearMonth.of(2021,8), it.datoTOM)
         }
         beregningsperioder[2].also {
-            Assertions.assertEquals(YearMonth.of(2022,5), it.datoFOM)
-            Assertions.assertNull(it.datoTOM)
+            Assertions.assertEquals(YearMonth.of(2021,9), it.datoFOM)
+            Assertions.assertEquals(YearMonth.of(2022,4), it.datoTOM)
         }
     }
 }

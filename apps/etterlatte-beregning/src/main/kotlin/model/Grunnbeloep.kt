@@ -30,7 +30,6 @@ class Grunnbeloep {
             }
         }
 
-        //TODO virker denna?
         fun beregnTom(g: G): YearMonth? {
             return gListe.grunnbeløp.sortedBy { it.dato }.zipWithNext().find { it.first.dato == g.dato }?.second?.dato?.minusMonths(1)
         }

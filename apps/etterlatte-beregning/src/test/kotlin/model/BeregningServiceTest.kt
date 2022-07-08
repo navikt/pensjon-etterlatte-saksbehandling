@@ -3,8 +3,7 @@ package model
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.model.BeregningService
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 import java.time.YearMonth
@@ -25,18 +24,18 @@ internal class BeregningServiceTest {
     }
     @Test
     fun beregnResultat() {
-        val beregningsperioder = BeregningService().beregnResultat(readmelding("/Ny.json"), YearMonth.of(2021, 2)).beregningsperioder
+        val beregningsperioder = BeregningService().beregnResultat(readmelding("/Ny.json"), YearMonth.of(2021, 2), YearMonth.of(2021, 9)).beregningsperioder
         beregningsperioder[0].also {
-            assertEquals(YearMonth.of(2021,2,), it.datoFOM)
-            assertEquals(YearMonth.of(2021,4), it.datoTOM)
+            Assertions.assertEquals(YearMonth.of(2021,2), it.datoFOM)
+            Assertions.assertEquals(YearMonth.of(2021,4), it.datoTOM)
         }
         beregningsperioder[1].also {
-            assertEquals(YearMonth.of(2021,5), it.datoFOM)
-            assertEquals(YearMonth.of(2022,4), it.datoTOM)
+            Assertions.assertEquals(YearMonth.of(2021,5), it.datoFOM)
+            Assertions.assertEquals(YearMonth.of(2021,8), it.datoTOM)
         }
         beregningsperioder[2].also {
-            assertEquals(YearMonth.of(2022,5), it.datoFOM)
-            assertNull(it.datoTOM)
+            Assertions.assertEquals(YearMonth.of(2021,9), it.datoFOM)
+            Assertions.assertEquals(YearMonth.of(2022,4), it.datoTOM)
         }
     }
 }

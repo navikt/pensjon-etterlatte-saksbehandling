@@ -20,9 +20,9 @@ class BeregningService {
     private val logger = LoggerFactory.getLogger(BeregningService::class.java)
 
 
-    fun beregnResultat(grunnlag: Grunnlag, virkFOM: YearMonth): BeregningsResultat {
+    fun beregnResultat(grunnlag: Grunnlag, virkFOM: YearMonth, virkTOM: YearMonth): BeregningsResultat {
 
-        val beregningsperioder = finnBeregningsperioder(grunnlag,virkFOM)
+        val beregningsperioder = finnBeregningsperioder(grunnlag,virkFOM, virkTOM)
 
 
         return BeregningsResultat(
@@ -59,21 +59,24 @@ class BeregningService {
             ))
     }
 
-    private fun finnBeregningsperioder(grunnlag: Grunnlag, virkFOM: YearMonth): List<Beregningsperiode> {
+    private fun finnBeregningsperioder(grunnlag: Grunnlag, virkFOM: YearMonth, virkTOM: YearMonth): List<Beregningsperiode> {
         val grunnbeloep = Grunnbeloep.hentGforPeriode(virkFOM)
-        val perioder = grunnbeloep.map { Pair(it.dato, Grunnbeloep.beregnTom(it)) }
+        //val perioder = grunnbeloep.map { Pair(it.dato, Grunnbeloep.beregnTom(it)) }
         val soeskenPeriode = finnSoeskenperioder(grunnlag, virkFOM)
+        val perioderFOM = grunnbeloep.map {it.dato}
+        val sperioderFOM = soeskenPeriode.map { it.datoFOM }
+        val allefom = (perioderFOM + sperioderFOM + virkTOM).map { beregnFoersteFom(it, virkFOM) }.distinct().sorted().zipWithNext().
+        map{ Pair(it.first, it.second?.minusMonths(1))}
+        println("bah")
 
+        return allefom.map {
 
-        return perioder.map {
-
-            val ffom = beregnFoersteFom(it.first,virkFOM)
             val gjeldendeG = Grunnbeloep.hentGjeldendeG(it.first)
-            val flokkForPeriode = hentFlokkforPeriode(ffom,it.second,soeskenPeriode )
+            val flokkForPeriode = hentFlokkforPeriode(it.first,it.second,soeskenPeriode )
             (Beregningsperiode(
                 delytelsesId = "BP",
                 type = Beregningstyper.GP,
-                datoFOM = ffom,
+                datoFOM = it.first,
                 datoTOM = it.second,
                 grunnbelopMnd = gjeldendeG.grunnbeløpPerMåned,
                 grunnbelop = gjeldendeG.grunnbeløp,
@@ -84,17 +87,13 @@ class BeregningService {
         }
     }
     //TODO finne bedre måte å gjøre dette på
-    fun hentFlokkforPeriode(datoFOM: YearMonth, datoTOM: YearMonth?, soeskenPeriode: List<SoeskenPeriode>): List<Person> {
-        print("bah")
-        datoTOM?.let {
-            val flokk = soeskenPeriode.filter { !it.datoTOM.isBefore(datoFOM) }.filter { !it.datoFOM.isAfter(datoTOM) }
-                .first().soeskenFlokk
-            flokk?.let { return flokk } ?: return emptyList()
-        }
-        return emptyList()
+    fun hentFlokkforPeriode(datoFOM: YearMonth, datoTOM: YearMonth, soeskenPeriode: List<SoeskenPeriode>): List<Person> {
+        val flokk = soeskenPeriode.filter { !it.datoTOM.isBefore(datoFOM) && !it.datoFOM.isAfter(datoTOM) }
+        return if (flokk.isNotEmpty()) flokk[0].soeskenFlokk!! else emptyList()
+
     }
     fun beregnUtbetaling(flokkStoerrelse: Int, g: Int): Double {
-        return if (flokkStoerrelse == 0) g / 0.40
+        return if (flokkStoerrelse == 0) g * 0.40
         else (g * 0.40 + ( g *0.25)*flokkStoerrelse) / (flokkStoerrelse +1)
     }
     private fun beregnFoersteFom (first: YearMonth, virkFOM: YearMonth ): YearMonth {

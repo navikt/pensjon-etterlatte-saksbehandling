@@ -17,7 +17,7 @@ interface ILivetErEnStroemAvHendelser {
 }
 
 class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvHendelser {
-    val logger = LoggerFactory.getLogger("no.pensjon.etterlatte")
+    val logger = LoggerFactory.getLogger(LivetErEnStroemAvHendelser::class.java)
 
     val leesahtopic = "aapen-person-pdl-leesah-v1"
     private var consumer: KafkaConsumer<String, Personhendelse>? = null
@@ -60,7 +60,7 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
     }
 
     override fun poll(c: (Personhendelse) -> Unit): Int {
-        val meldinger = consumer?.poll(Duration.ofSeconds(5))
+        val meldinger = consumer?.poll(Duration.ofSeconds(10))
         meldinger?.forEach {
             c(it.value())
         }

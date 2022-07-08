@@ -9,7 +9,10 @@ import io.ktor.routing.routing
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import no.nav.etterlatte.hendelserpdl.DevConfig
+import no.nav.etterlatte.hendelserpdl.DodsmeldingerRapid
 import no.nav.etterlatte.hendelserpdl.FinnDodsmeldinger
+import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
 import no.nav.helse.rapids_rivers.RapidApplication
 
 var stream: FinnDodsmeldinger? = null
@@ -27,7 +30,7 @@ fun main() {
         .build()
         .apply {
             GlobalScope.launch {
-                //stream = FinnDodsmeldinger(LivetErEnStroemAvHendelser(DevConfig().env), DodsmeldingerRapid(this@apply))
+                stream = FinnDodsmeldinger(LivetErEnStroemAvHendelser(DevConfig().env), DodsmeldingerRapid(this@apply))
                 while (true) {
                     if (stream?.stopped == true) {
                         delay(200)
@@ -64,13 +67,12 @@ fun Application.module() {
             stream?.stop()
             call.respondText("Stopped reading messages", contentType = ContentType.Text.Plain)
         }
-        /*
+
         get("/fromstart") {
             stream?.fraStart()
             call.respondText("partition has been set to start", contentType = ContentType.Text.Plain)
         }
 
-         */
         get("/isAlive") {
             call.respondText("JADDA!", contentType = ContentType.Text.Plain)
         }

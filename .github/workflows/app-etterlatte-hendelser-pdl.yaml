@@ -28,7 +28,7 @@ jobs:
       - name: Setup Java v16.x
         uses: actions/setup-java@v1
         with:
-          java-version: '16.x'
+          java-version: '17.x'
       - name: Gradle test and build
         run: |
           chmod +x ./gradlew

@@ -8,7 +8,7 @@ import {
   KriterieOpplysningsType,
   Kriterietype,
 } from '../../../store/reducers/BehandlingReducer'
-import { IPeriode } from '../inngangsvilkaar/vilkaar/TidslinjeMedlemskap'
+import { IGap, IPeriode } from '../inngangsvilkaar/vilkaar/TidslinjeMedlemskap'
 
 export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: string | null): IAdresse[] {
   if (doedsdato == null) {
@@ -17,7 +17,7 @@ export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: stri
   return adresser?.filter((adresse) => adresse.aktiv || isAfter(new Date(adresse.gyldigTilOgMed!), new Date(doedsdato)))
 }
 
-export function mapTilPerioderSeksAarFoerDoedsdato(
+export function mapAdresseTilPerioderSeksAarFoerDoedsdato(
   adresser: IAdresse[] | undefined,
   periodetype: string,
   seksAarFoerDoedsdato: string,
@@ -31,7 +31,7 @@ export function mapTilPerioderSeksAarFoerDoedsdato(
     (adresse) => adresse.aktiv || isAfter(new Date(adresse.gyldigTilOgMed!), new Date(seksAarFoerDoedsdato))
   )
 
-  function mapTilPeriode(adresse: IAdresse) {
+  function mapTilPeriode(adresse: IAdresse): IPeriode {
     return {
       periodeType: periodetype,
       innhold: {
@@ -45,12 +45,48 @@ export function mapTilPerioderSeksAarFoerDoedsdato(
     }
   }
 
-  return seksAarFoerDoedsdatoEllerAktiv?.map((adresse: IAdresse) => mapTilPeriode(adresse))
+  return seksAarFoerDoedsdatoEllerAktiv
+    ?.map((adresse: IAdresse) => mapTilPeriode(adresse))
+    .sort((a, b) => (new Date(b.innhold.fraDato) < new Date(a.innhold.fraDato) ? 1 : -1))
 }
 
-export function hentUtenlandskAdresse(adresser: IAdresse[], doedsdato: string | null): IAdresse[] {
+export function mapGapsTilPerioder(gaps: IGap[], kilde: any): IPeriode[] {
+  if (gaps == null || gaps.length == 0) {
+    return []
+  }
+
+  function mapTilPeriode(gap: IGap): IPeriode {
+    return {
+      periodeType: 'Bostedgap',
+      innhold: {
+        fraDato: gap.gyldigFra,
+        tilDato: gap.gyldigTil,
+        beskrivelse: '',
+        adresseINorge: true,
+        land: undefined,
+      },
+      kilde: kilde,
+    }
+  }
+
+  return gaps?.map((gap: IGap) => mapTilPeriode(gap))
+}
+
+export function hentUtenlandskAdresseEtterDoedsdato(adresser: IAdresse[], doedsdato: string | null): IAdresse[] {
   const etterDoedsdato = hentAdresserEtterDoedsdato(adresser, doedsdato)
   return etterDoedsdato?.filter((ad) => ad.type === 'UTENLANDSKADRESSE' || ad.type === 'UTENLANDSKADRESSEFRITTFORMAT')
+}
+
+export function hentUtlandskeAdresser(adresser: IAdresse[] | undefined): IAdresse[] {
+  const utlandsadresser = adresser?.filter(
+    (ad) => ad.type === 'UTENLANDSKADRESSE' || ad.type === 'UTENLANDSKADRESSEFRITTFORMAT'
+  )
+  return utlandsadresser ? utlandsadresser : []
+}
+
+export function hentNorskeAdresser(adresser: IAdresse[] | undefined): IAdresse[] {
+  const norske = adresser?.filter((ad) => ad.type !== 'UTENLANDSKADRESSE' && ad.type !== 'UTENLANDSKADRESSEFRITTFORMAT')
+  return norske ? norske : []
 }
 
 export const hentKriterie = (

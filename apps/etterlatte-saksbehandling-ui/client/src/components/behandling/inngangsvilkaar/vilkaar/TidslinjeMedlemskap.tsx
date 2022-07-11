@@ -1,7 +1,6 @@
 import styled from 'styled-components'
 import { format, sub } from 'date-fns'
-import { aarIProsent, startdatoOffsetProsent } from './tidslinjeUtils'
-import { Tidsperiode } from './Tidsperiode'
+import { aarIProsent, numberToProsentString, startdatoOffsetProsent } from './tidslinjeUtils'
 import {
   IAdresser,
   IKriterieOpplysning,
@@ -9,7 +8,14 @@ import {
   KriterieOpplysningsType,
   Kriterietype,
 } from '../../../../store/reducers/BehandlingReducer'
-import { hentKriterierMedOpplysning, mapTilPerioderSeksAarFoerDoedsdato } from '../../felles/utils'
+import {
+  hentKriterierMedOpplysning,
+  hentNorskeAdresser,
+  hentUtlandskeAdresser,
+  mapAdresseTilPerioderSeksAarFoerDoedsdato,
+  mapGapsTilPerioder,
+} from '../../felles/utils'
+import { TidslinjeRad } from './TidslinjeRad'
 
 export interface IPeriode {
   periodeType: string
@@ -23,6 +29,11 @@ export interface IPeriodeInnhold {
   beskrivelse: string
   adresseINorge: boolean
   land?: string
+}
+
+export interface IGap {
+  gyldigFra: string
+  gyldigTil: string
 }
 
 export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) => {
@@ -40,46 +51,54 @@ export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) 
   const seksAarTidligere = format(sub(Date.parse(doedsdato), { years: 6 }), 'yyyy-MM-dd')
   const femAarTidligere = format(sub(Date.parse(doedsdato), { years: 5 }), 'yyyy-MM-dd')
   const navnOgProsentPaaDatoer = aarIProsent(seksAarTidligere, doedsdato)
-  const prosentStartDato = startdatoOffsetProsent(femAarTidligere, seksAarTidligere)
-
-  console.log(navnOgProsentPaaDatoer)
+  const prosentStartDato = numberToProsentString(startdatoOffsetProsent(femAarTidligere, seksAarTidligere))
 
   const adresseOpplysning: IKriterieOpplysning | undefined = hentKriterierMedOpplysning(
     vilkaar,
     Kriterietype.AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR,
     KriterieOpplysningsType.ADRESSER
   )
+
+  const adressegaps: IKriterieOpplysning | undefined = hentKriterierMedOpplysning(
+    vilkaar,
+    Kriterietype.AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR,
+    KriterieOpplysningsType.ADRESSE_GAPS
+  )
+
   const adresser: IAdresser | undefined = adresseOpplysning?.opplysning
+  const norskeBostedsadresser = hentNorskeAdresser(adresser?.bostedadresse)
+  const utlandskeBostedsadresser = hentUtlandskeAdresser(adresser?.bostedadresse)
+  const periodeNorskeBostedGaps: IPeriode[] = mapGapsTilPerioder(adressegaps?.opplysning, adressegaps?.kilde)
+  const perioderNorskeBosted: IPeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
+    norskeBostedsadresser,
+    'Bostedsadresse',
+    seksAarTidligere,
+    adresseOpplysning?.kilde
+  )
+  const perioderNorskeBostedMedGaps = [perioderNorskeBosted, periodeNorskeBostedGaps]
+    .flat()
+    .sort((a, b) => (new Date(b.innhold.fraDato) < new Date(a.innhold.fraDato) ? 1 : -1))
 
-  console.log('adresseOpplysning', adresseOpplysning)
-  console.log('bosted', adresser?.bostedadresse)
-
-  const perioderBosted: IPeriode[] = mapTilPerioderSeksAarFoerDoedsdato(
-    adresseOpplysning?.opplysning?.bostedadresse,
+  const perioderUtlandskeBosted: IPeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
+    utlandskeBostedsadresser,
     'Bostedsadresse',
     seksAarTidligere,
     adresseOpplysning?.kilde
   )
 
-  const perioderOpphold: IPeriode[] = mapTilPerioderSeksAarFoerDoedsdato(
+  const perioderOpphold: IPeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
     adresseOpplysning?.opplysning?.oppholdadresse,
     'Oppholdsadresse',
     seksAarTidligere,
     adresseOpplysning?.kilde
   )
 
-  const perioderKontakt: IPeriode[] = mapTilPerioderSeksAarFoerDoedsdato(
+  const perioderKontakt: IPeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
     adresseOpplysning?.opplysning?.kontaktadresse,
     'Kontaktadresse',
     seksAarTidligere,
     adresseOpplysning?.kilde
   )
-
-  const adresseperioder = [perioderBosted, perioderOpphold, perioderKontakt]
-    .flat()
-    .sort((a, b) => (new Date(b.innhold.fraDato) < new Date(a.innhold.fraDato) ? 1 : -1))
-
-  console.log(adresseperioder)
 
   return (
     <Tidslinje>
@@ -92,9 +111,7 @@ export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) 
           <GridDatoer leftmargin={'-30px'}>{format(Date.parse(doedsdato), 'MM.yyyy')}</GridDatoer>
           <GridSirkel>&nbsp;</GridSirkel>
         </GridStartSluttdato>
-
         <GridBorder style={{ top: '6px' }}>&nbsp;</GridBorder>
-
         <GridDatoer leftmargin={'0px'}>{format(Date.parse(seksAarTidligere), 'MM.yyyy')}</GridDatoer>
         {navnOgProsentPaaDatoer.map((aar) => (
           <GridDatoerAarstallWrapper prosent={aar[1]} key={aar[1].toString()}>
@@ -104,11 +121,10 @@ export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) 
 
         <GridBorder style={{ bottom: '-30px' }}>&nbsp;</GridBorder>
       </Grid>
-      <div>
-        {adresseperioder.map((periode, index) => (
-          <Tidsperiode key={index} doedsdato={doedsdato} seksAarTidligere={seksAarTidligere} periode={periode} />
-        ))}
-      </div>
+      <TidslinjeRad perioder={perioderNorskeBostedMedGaps} doedsdato={doedsdato} seksAarTidligere={seksAarTidligere} />
+      <TidslinjeRad perioder={perioderUtlandskeBosted} doedsdato={doedsdato} seksAarTidligere={seksAarTidligere} />
+      <TidslinjeRad perioder={perioderOpphold} doedsdato={doedsdato} seksAarTidligere={seksAarTidligere} />
+      <TidslinjeRad perioder={perioderKontakt} doedsdato={doedsdato} seksAarTidligere={seksAarTidligere} />
     </Tidslinje>
   )
 }

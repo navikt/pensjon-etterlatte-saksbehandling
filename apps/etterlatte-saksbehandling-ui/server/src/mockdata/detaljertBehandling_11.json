@@ -244,22 +244,36 @@
                       "poststed": "København",
                       "land": "DAN",
                       "kilde": "FREG",
-                      "gyldigFraOgMed": "2021-06-25T00:00:00",
+                      "gyldigFraOgMed": "2019-06-26",
                       "gyldigTilOgMed": null
                     },
                     {
                       "type": "VEGADRESSE",
-                      "aktiv": true,
+                      "aktiv": false,
                       "coAdresseNavn": null,
                       "adresseLinje1": "Osloveien 2A",
                       "adresseLinje2": null,
                       "adresseLinje3": null,
                       "postnr": "0485",
                       "poststed": "Oslo",
-                      "land": "NOR",
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2018-06-25T00:00:00",
+                      "gyldigTilOgMed": "2019-06-25T00:00:00"
+                    },
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Osloveien 2A",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "0485",
+                      "poststed": "Oslo",
+                      "land": null,
                       "kilde": "FREG",
                       "gyldigFraOgMed": "2005-06-25T00:00:00",
-                      "gyldigTilOgMed": "2019-06-25T00:00:00"
+                      "gyldigTilOgMed": "2018-02-25T00:00:00"
                     }
                   ],
                   "oppholdadresse": [                    {
@@ -302,12 +316,12 @@
                 },
                 "opplysning": [
                   {
-                    "gyldigFra": "2017-03-25",
-                    "gyldigTil": "2018-03-25"
+                    "gyldigFra": "2018-02-26",
+                    "gyldigTil": "2018-06-24"
                   },
                   {
-                    "gyldigFra": "2021-03-25",
-                    "gyldigTil": "2022-07-25"
+                    "gyldigFra": "2019-06-26",
+                    "gyldigTil": "2022-02-10"
                   }
                 ]
               }

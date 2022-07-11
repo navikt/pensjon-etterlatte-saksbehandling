@@ -20,7 +20,7 @@ export function tidsperiodeProsent(
   tilDato: string | undefined,
   doedsdato: string,
   femAarTidligere: string
-): string {
+): number {
   const tilDatoNy = tilDato == undefined ? doedsdato : tilDato
   const maxDate = differenceInMilliseconds(new Date(doedsdato), new Date(tilDatoNy)) < 0 ? doedsdato : tilDatoNy
   const minDate = differenceInMilliseconds(new Date(femAarTidligere), new Date(fraDato)) > 0 ? femAarTidligere : fraDato
@@ -28,20 +28,24 @@ export function tidsperiodeProsent(
   const periode = differenceInDays(new Date(maxDate), new Date(minDate))
 
   if (periode > 6 * 365) {
-    return '100%'
+    return 100
   } else {
     return prosentAvSeksAar(periode)
   }
 }
 
-export function startdatoOffsetProsent(fraDato: string, seksAarTidligere: string) {
+export function startdatoOffsetProsent(fraDato: string, seksAarTidligere: string): number {
   if (differenceInMilliseconds(new Date(fraDato), new Date(seksAarTidligere)) < 0) {
-    return '0%'
+    return 0
   } else {
     return prosentAvSeksAar(differenceInDays(new Date(fraDato), new Date(seksAarTidligere)))
   }
 }
 
-function prosentAvSeksAar(antallDager: number): string {
-  return ((antallDager / (6 * 365)) * 100).toString() + '%'
+function prosentAvSeksAar(antallDager: number): number {
+  return (antallDager / (6 * 365)) * 100
+}
+
+export function numberToProsentString(number: number): string {
+  return number.toString() + '%'
 }

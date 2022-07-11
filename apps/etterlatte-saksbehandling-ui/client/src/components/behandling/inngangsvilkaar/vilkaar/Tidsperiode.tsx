@@ -1,4 +1,3 @@
-import { startdatoOffsetProsent, tidsperiodeProsent } from './tidslinjeUtils'
 import { OfficeIcon } from '../../../../shared/icons/officeIcon'
 import { HomeIcon } from '../../../../shared/icons/homeIcon'
 import styled from 'styled-components'
@@ -9,51 +8,58 @@ import { Popover } from '@navikt/ds-react'
 import { formatterStringDato } from '../../../../utils'
 import { hentKildenavn } from './utils'
 import { CloseIcon } from '../../../../shared/icons/closeIcon'
+import '../../../../index.css'
 
 export const Tidsperiode = ({
-  doedsdato,
-  seksAarTidligere,
   periode,
+  lengde,
+  startOffset,
 }: {
-  doedsdato: string
-  seksAarTidligere: string
   periode: IPeriode
+  lengde: string
+  startOffset: string
 }) => {
-  const lengdePeriode = tidsperiodeProsent(
-    periode.innhold.fraDato,
-    periode.innhold.tilDato,
-    doedsdato,
-    seksAarTidligere
-  )
-  const startDatoOffset = startdatoOffsetProsent(periode.innhold.fraDato, seksAarTidligere)
   const buttonRef = useRef(null)
   const [open, setOpen] = useState(false)
   const land = periode.innhold.adresseINorge ? ' (Norge)' : ` (${periode.innhold.land})`
+  const isGap = periode.periodeType === 'Bostedgap'
 
   return (
-    <Rad style={{ left: startDatoOffset, width: lengdePeriode, backgroundColor: '#CCE2F0' }}>
-      <InnholdWrapper>
-        <Ikon>{periode.periodeType === 'jobb' ? <OfficeIcon /> : <HomeIcon />}</Ikon>
-        <PeriodeType>
-          {periode.periodeType} {land} og lengre tekst her
-        </PeriodeType>
-      </InnholdWrapper>
+    <Rad style={{ left: startOffset, width: lengde }} isGap={isGap}>
+      {!isGap && (
+        <InnholdWrapper>
+          <Ikon>{periode.periodeType === 'jobb' ? <OfficeIcon /> : <HomeIcon />}</Ikon>
+          <PeriodeType>
+            {periode.periodeType} {land}
+          </PeriodeType>
+        </InnholdWrapper>
+      )}
       <InfoIkonWrapper ref={buttonRef} onClick={() => setOpen(true)}>
         <InformationIcon />
       </InfoIkonWrapper>
 
-      <Popover open={open} onClose={() => setOpen(false)} anchorEl={buttonRef.current} placement="top">
+      <Popover
+        className={'breddepopover'}
+        open={open}
+        onClose={() => setOpen(false)}
+        anchorEl={buttonRef.current}
+        placement="top"
+      >
         <Popover.Content>
           <Close onClick={() => setOpen(false)}>
             <CloseIcon />
           </Close>
           <InnholdTittel>Detaljer</InnholdTittel>
-          <InnholdKilde>
-            Kilde: {hentKildenavn(periode.kilde.type)} {formatterStringDato(periode.kilde.tidspunktForInnhenting)}
-          </InnholdKilde>
+          {!isGap && (
+            <InnholdKilde>
+              Kilde: {hentKildenavn(periode.kilde.type)}{' '}
+              {periode.kilde.tidspunktForInnhenting && formatterStringDato(periode.kilde.tidspunktForInnhenting)}
+            </InnholdKilde>
+          )}
           <div>
-            {periode.periodeType}: {periode.innhold.beskrivelse}
+            {periode.periodeType} {!isGap && ': ' + periode.innhold.beskrivelse}
           </div>
+          <div>{periode.innhold.land}</div>
           <div>
             Periode: {formatterStringDato(periode.innhold.fraDato)} -{' '}
             {periode.innhold.tilDato ? formatterStringDato(periode.innhold.tilDato) : ''}
@@ -64,12 +70,14 @@ export const Tidsperiode = ({
   )
 }
 
-const Rad = styled.div`
+const Rad = styled.div<{ isGap: boolean }>`
+  background-color: ${(props) => (props.isGap ? '#E180714C' : '#CCE2F0')};
   position: relative;
   margin-bottom: 10px;
+  margin-right: 1px;
   border-radius: 4px;
   display: flex;
-  justify-content: space-between;
+  justify-content: ${(props) => (props.isGap ? 'center' : 'space-between')};
   align-items: center;
 `
 
@@ -102,6 +110,8 @@ const PeriodeType = styled.div`
 const InfoIkonWrapper = styled.div`
   display: flex;
   padding-right: 5px;
+  opacity: 1;
+  align-items: center;
 
   svg {
     width: 1.2em;

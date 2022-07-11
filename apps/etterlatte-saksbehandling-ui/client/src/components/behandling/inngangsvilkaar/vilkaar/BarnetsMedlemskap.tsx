@@ -27,7 +27,7 @@ import {
   hentAdresserEtterDoedsdato,
   hentKriterie,
   hentKriterieOpplysning,
-  hentUtenlandskAdresse,
+  hentUtenlandskAdresseEtterDoedsdato,
 } from '../../felles/utils'
 import { KildeDatoOpplysning, KildeDatoVilkaar } from './KildeDatoOpplysning'
 
@@ -60,9 +60,18 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
   )
   const gjenlevendeSkalVises = gjenlevendeKriterie?.resultat !== VurderingsResultat.OPPFYLT
 
-  const gjenlevendeBosted = hentUtenlandskAdresse(adresserGjenlevendePdl?.opplysning.bostedadresse, avdoedDoedsdato)
-  const gjenlevendeOpphold = hentUtenlandskAdresse(adresserGjenlevendePdl?.opplysning.oppholdadresse, avdoedDoedsdato)
-  const gjenlevendeKontakt = hentUtenlandskAdresse(adresserGjenlevendePdl?.opplysning.kontaktadresse, avdoedDoedsdato)
+  const gjenlevendeBosted = hentUtenlandskAdresseEtterDoedsdato(
+    adresserGjenlevendePdl?.opplysning.bostedadresse,
+    avdoedDoedsdato
+  )
+  const gjenlevendeOpphold = hentUtenlandskAdresseEtterDoedsdato(
+    adresserGjenlevendePdl?.opplysning.oppholdadresse,
+    avdoedDoedsdato
+  )
+  const gjenlevendeKontakt = hentUtenlandskAdresseEtterDoedsdato(
+    adresserGjenlevendePdl?.opplysning.kontaktadresse,
+    avdoedDoedsdato
+  )
 
   function lagVilkaarVisning() {
     if (gjenlevendeKriterie?.resultat === VurderingsResultat.OPPFYLT && soekerKriterie) {

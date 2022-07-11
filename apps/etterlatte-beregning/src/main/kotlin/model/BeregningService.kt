@@ -54,13 +54,18 @@ class BeregningService {
 
         val perioder = beregnSoeskenperioder(kull,virkFOM)
 
-        //TODO håndtere doedsfall - Muligens refaktorere hvordan jeg håndterer soesken
+        //TODO håndtere doedsfall
         return perioder.map { periode ->
             SoeskenPeriode(
                 periode.first,
                 periode.second,
-                kull.filter { YearMonth.of(it.foedselsdato!!.year, it.foedselsdato!!.month).isAfter(periode.first) })
+                beregnGyldigSoeskenForPeriode(kull,periode.first))
         }
+    }
+
+    private fun beregnGyldigSoeskenForPeriode (soesken: List<Person>, fra: YearMonth): List<Person> {
+        val foedsesdato = soesken.filter {it.foedselsdato != null }.map { Pair(YearMonth.of(it.foedselsdato!!.year, it.foedselsdato!!.month ), it)}
+        return foedsesdato.filter { it.first.isAfter(fra)}.filter{fra.year - it.first.year > 18 }.map { it.second }
     }
 
     private fun beregnSoeskenperioder (soesken: List<Person>, virkFOM: YearMonth):  List<Pair<YearMonth, YearMonth>> {
@@ -74,7 +79,7 @@ class BeregningService {
         val perioderFOM = grunnbeloep.map {it.dato}
         val sperioderFOM = soeskenPeriode.map { it.datoFOM }
         val allefom = (perioderFOM + sperioderFOM + virkTOM).map { beregnFoersteFom(it, virkFOM) }.distinct().sorted().zipWithNext().
-        map{ Pair(it.first, it.second?.minusMonths(1))}
+        map{ Pair(it.first, it.second.minusMonths(1))}
         println("bah")
 
         return allefom.map {

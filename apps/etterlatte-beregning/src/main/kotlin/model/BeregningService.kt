@@ -15,6 +15,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
+//TODO hvordan håndtere vedtakstidspunkt?
 
 class BeregningService {
     private val logger = LoggerFactory.getLogger(BeregningService::class.java)
@@ -34,7 +35,7 @@ class BeregningService {
             beregnetDato = LocalDateTime.now()
         )
     }
-    // 40% av G til første barn, 25% til resten. Fordeles likt
+
     // Adressesjekk på halvsøsken på dødsfallstidspunkt i første omgang
     private fun finnSoeskenperioder(grunnlag: Grunnlag, virkFOM: YearMonth): List<SoeskenPeriode> {
 
@@ -51,17 +52,24 @@ class BeregningService {
         helsoesken?.let { kull.addAll(it) }
         halvsoeskenOppdrattSammen?.let { kull.addAll(it) }
 
-        return listOf<SoeskenPeriode>(
+        val perioder = beregnSoeskenperioder(kull,virkFOM)
+
+        //TODO håndtere doedsfall - Muligens refaktorere hvordan jeg håndterer soesken
+        return perioder.map { periode ->
             SoeskenPeriode(
-                datoFOM = virkFOM,
-                datoTOM = virkFOM.plusMonths(3),
-            soeskenFlokk = kull
-            ))
+                periode.first,
+                periode.second,
+                kull.filter { YearMonth.of(it.foedselsdato!!.year, it.foedselsdato!!.month).isAfter(periode.first) })
+        }
+    }
+
+    private fun beregnSoeskenperioder (soesken: List<Person>, virkFOM: YearMonth):  List<Pair<YearMonth, YearMonth>> {
+        return soesken.asSequence().map { YearMonth.of(it.foedselsdato!!.year, it.foedselsdato!!.month) }.plus(virkFOM).plus(
+            YearMonth.now().plusMonths(3)).filter { it.isBefore(virkFOM) }.zipWithNext().toList()
     }
 
     private fun finnBeregningsperioder(grunnlag: Grunnlag, virkFOM: YearMonth, virkTOM: YearMonth): List<Beregningsperiode> {
         val grunnbeloep = Grunnbeloep.hentGforPeriode(virkFOM)
-        //val perioder = grunnbeloep.map { Pair(it.dato, Grunnbeloep.beregnTom(it)) }
         val soeskenPeriode = finnSoeskenperioder(grunnlag, virkFOM)
         val perioderFOM = grunnbeloep.map {it.dato}
         val sperioderFOM = soeskenPeriode.map { it.datoFOM }
@@ -92,6 +100,7 @@ class BeregningService {
         return if (flokk.isNotEmpty()) flokk[0].soeskenFlokk!! else emptyList()
 
     }
+    // 40% av G til første barn, 25% til resten. Fordeles likt
     fun beregnUtbetaling(flokkStoerrelse: Int, g: Int): Double {
         return if (flokkStoerrelse == 0) g * 0.40
         else (g * 0.40 + ( g *0.25)*flokkStoerrelse) / (flokkStoerrelse +1)

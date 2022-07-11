@@ -53,24 +53,25 @@ class BeregningService {
         halvsoeskenOppdrattSammen?.let { kull.addAll(it) }
 
         val perioder = beregnSoeskenperioder(kull,virkFOM)
-
+        println("bah")
         //TODO håndtere doedsfall
-        return perioder.map { periode ->
+        return perioder.map {
             SoeskenPeriode(
-                periode.first,
-                periode.second,
-                beregnGyldigSoeskenForPeriode(kull,periode.first))
+                it.first,
+                it.second,
+                beregnGyldigSoeskenForPeriode(kull,it.first))
         }
     }
 
     private fun beregnGyldigSoeskenForPeriode (soesken: List<Person>, fra: YearMonth): List<Person> {
-        val foedsesdato = soesken.filter {it.foedselsdato != null }.map { Pair(YearMonth.of(it.foedselsdato!!.year, it.foedselsdato!!.month ), it)}
-        return foedsesdato.filter { it.first.isAfter(fra)}.filter{fra.year - it.first.year > 18 }.map { it.second }
+        val foedselsdato = soesken.filter {it.foedselsdato != null }.map { Pair(YearMonth.of(it.foedselsdato!!.year, it.foedselsdato!!.month ), it)}
+        val hmm = foedselsdato.filter { !it.first.isAfter(fra)}.filter{(fra.year - it.first.year < 18) }.map { it.second }
+        return hmm
     }
 
     private fun beregnSoeskenperioder (soesken: List<Person>, virkFOM: YearMonth):  List<Pair<YearMonth, YearMonth>> {
         return soesken.asSequence().map { YearMonth.of(it.foedselsdato!!.year, it.foedselsdato!!.month) }.plus(virkFOM).plus(
-            YearMonth.now().plusMonths(3)).filter { it.isBefore(virkFOM) }.zipWithNext().toList()
+            YearMonth.now().plusMonths(3)).filter { !it.isBefore(virkFOM) }.zipWithNext().toList()
     }
 
     private fun finnBeregningsperioder(grunnlag: Grunnlag, virkFOM: YearMonth, virkTOM: YearMonth): List<Beregningsperiode> {

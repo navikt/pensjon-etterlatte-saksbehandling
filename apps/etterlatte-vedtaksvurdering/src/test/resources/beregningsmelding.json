@@ -1348,6 +1348,7 @@
         "type": "GP",
         "datoFOM": "2022-03",
         "datoTOM": "2022-04",
+        "utbetaltBeloep": 3546.8,
         "grunnbelop": 111000,
         "grunnbelopMnd": 8867
       },
@@ -1356,6 +1357,7 @@
         "type": "GP",
         "datoFOM": "2022-05",
         "datoTOM": null,
+        "utbetaltBeloep": 3546.8,
         "grunnbelop": 141000,
         "grunnbelopMnd": 8867
       }

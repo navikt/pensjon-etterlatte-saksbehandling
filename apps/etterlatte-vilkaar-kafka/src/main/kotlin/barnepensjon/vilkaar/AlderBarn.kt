@@ -17,6 +17,7 @@ fun vilkaarBrukerErUnder20(
     return VurdertVilkaar(
         vilkaartype,
         setVikaarVurderingFraKriterier(listOf(soekerErUnder20)),
+        null,
         listOf(soekerErUnder20),
         LocalDateTime.now()
     )

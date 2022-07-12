@@ -51,6 +51,7 @@ fun barnIngenOppgittUtlandsadresse(
     return VurdertVilkaar(
         vilkaartype,
         setVikaarVurderingFraKriterier(listOf(kriterie)),
+        null,
         listOf(kriterie),
         LocalDateTime.now()
     )

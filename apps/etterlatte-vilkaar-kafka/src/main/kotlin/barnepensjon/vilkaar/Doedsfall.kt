@@ -25,6 +25,7 @@ fun vilkaarDoedsfallErRegistrert(
     return VurdertVilkaar(
         vilkaartype,
         setVikaarVurderingFraKriterier(listOf(doedsdatoRegistrertIPdl, avdoedErForeldre)),
+        null,
         listOf(doedsdatoRegistrertIPdl, avdoedErForeldre),
         LocalDateTime.now()
     )

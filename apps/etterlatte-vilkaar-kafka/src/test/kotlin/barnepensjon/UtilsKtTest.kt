@@ -30,42 +30,49 @@ internal class UtilsKtTest {
         val oppfyltVilkarDoedsfall = VurdertVilkaar(
             Vilkaartyper.DOEDSFALL_ER_REGISTRERT,
             VurderingsResultat.OPPFYLT,
+            null,
             emptyList(),
             LocalDateTime.now()
         )
         val oppfyltVilkarAlder = VurdertVilkaar(
             Vilkaartyper.SOEKER_ER_UNDER_20,
             VurderingsResultat.OPPFYLT,
+            null,
             emptyList(),
             LocalDateTime.now()
         )
         val oppfyltVilkarBarnetsMedlemskap = VurdertVilkaar(
             Vilkaartyper.BARNETS_MEDLEMSKAP,
             VurderingsResultat.OPPFYLT,
+            null,
             emptyList(),
             LocalDateTime.now()
         )
         val ikkeOppfyltVilkaarBarnetsMedlemskap = VurdertVilkaar(
             Vilkaartyper.BARNETS_MEDLEMSKAP,
             VurderingsResultat.IKKE_OPPFYLT,
+            null,
             emptyList(),
             LocalDateTime.now()
         )
         val manglerInfoVilkaarBarnetsMedlemskap = VurdertVilkaar(
             Vilkaartyper.BARNETS_MEDLEMSKAP,
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            null,
             emptyList(),
             LocalDateTime.now()
         )
         val ikkeOppfyltVilkaarAvdodesMedlemskap = VurdertVilkaar(
             Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
             VurderingsResultat.IKKE_OPPFYLT,
+            null,
             emptyList(),
             LocalDateTime.now()
         )
         val manglerInfoVilkaarAvdodesMedlemskap = VurdertVilkaar(
             Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            null,
             emptyList(),
             LocalDateTime.now()
         )
@@ -73,42 +80,49 @@ internal class UtilsKtTest {
         val oppfyltGjenlevendeBarnSammeAdresse = VurdertVilkaar(
             Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
             VurderingsResultat.OPPFYLT,
+            null,
             emptyList(),
             LocalDateTime.now()
         )
         val ikkeOppfyltGjenlevendeBarnSammeAdresse = VurdertVilkaar(
             Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
             VurderingsResultat.IKKE_OPPFYLT,
+            null,
             emptyList(),
             LocalDateTime.now()
         )
         val manglerInfoGjenlevendeBarnSammeAdresse = VurdertVilkaar(
             Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            null,
             emptyList(),
             LocalDateTime.now()
         )
         val oppfyltBarnIngenUtlandsadresse = VurdertVilkaar(
             Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE,
             VurderingsResultat.OPPFYLT,
+            null,
             emptyList(),
             LocalDateTime.now()
         )
         val ikkeOppfyltBarnIngenUtlandsadresse = VurdertVilkaar(
             Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE,
             VurderingsResultat.IKKE_OPPFYLT,
+            null,
             emptyList(),
             LocalDateTime.now()
         )
         val oppfyltBarnAvdoedSammeAdresse = VurdertVilkaar(
             Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
             VurderingsResultat.OPPFYLT,
+            null,
             emptyList(),
             LocalDateTime.now()
         )
         val ikkeOppfyltBarnAvdoedSammeAdresse = VurdertVilkaar(
             Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
             VurderingsResultat.IKKE_OPPFYLT,
+            null,
             emptyList(),
             LocalDateTime.now()
         )

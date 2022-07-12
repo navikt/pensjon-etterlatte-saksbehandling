@@ -35,7 +35,6 @@ fun setVurderingFraKommerBarnetTilGode(vilkaar: List<VurdertVilkaar>): Vurdering
     } else {
         hentVurdering(listOf(gjenlevendeBarnSammeAdresse, barnIngenUtlandsadresse, avdoedAdresse))
     }
-
 }
 
 fun hentVurdering(resultat: List<VurderingsResultat?>): VurderingsResultat {
@@ -110,10 +109,8 @@ fun hentAdresseperioderINorge(adresser: List<Adresse>?, doedsdato: LocalDate): L
     val norskeAdresserEtterDato =
         adresserEtterDato?.filter { it.type != AdresseType.UTENLANDSKADRESSE && it.type != AdresseType.UTENLANDSKADRESSEFRITTFORMAT }
 
-    val test = 2
     val adresseperioder = norskeAdresserEtterDato?.map { setPerioder(it, doedsdato, femAarFoerDoedsdato) }
 
-    val testt = 3
     return adresseperioder?.filterNotNull()?.sortedBy { it.gyldigFra }
 }
 

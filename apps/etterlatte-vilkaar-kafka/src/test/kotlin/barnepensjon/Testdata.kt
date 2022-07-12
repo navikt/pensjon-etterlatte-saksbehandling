@@ -1,4 +1,3 @@
-
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.*
 import no.nav.etterlatte.libs.common.person.*
@@ -70,7 +69,9 @@ fun lagMockPersonPdl(
     foedselsnummer: Foedselsnummer = Foedselsnummer.of("19078504903"),
     doedsdato: LocalDate?,
     adresse: List<Adresse>?,
-    foreldre: List<Foedselsnummer>?
+    foreldre: List<Foedselsnummer>?,
+    statsborgerskap: String? = null,
+    utland: Utland? = null,
 ) = Person(
     fornavn = "Test",
     etternavn = "Testulfsen",
@@ -85,8 +86,8 @@ fun lagMockPersonPdl(
     kontaktadresse = adresse,
     oppholdsadresse = adresse,
     sivilstatus = null,
-    statsborgerskap = null,
-    utland = null,
+    statsborgerskap = statsborgerskap,
+    utland = utland,
     familieRelasjon = FamilieRelasjon(null, foreldre, null),
     avdoedesBarn = null,
     vergemaalEllerFremtidsfullmakt = null

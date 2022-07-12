@@ -26,6 +26,7 @@ fun barnOgForelderSammeBostedsadresse(
     return VurdertVilkaar(
         vilkaartype,
         setVikaarVurderingFraKriterier(listOf(sammeBostedsAdresse)),
+        null,
         listOf(sammeBostedsAdresse),
         LocalDateTime.now()
     )

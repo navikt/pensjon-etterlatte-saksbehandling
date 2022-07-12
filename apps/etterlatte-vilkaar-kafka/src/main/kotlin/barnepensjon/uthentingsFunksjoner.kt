@@ -55,3 +55,16 @@ fun hentBostedsAdresser(
         ?: throw OpplysningKanIkkeHentesUt()
 }
 
+fun hentOppholdsAdresser(
+    person: VilkaarOpplysning<Person>
+): List<Adresse> {
+    return person.opplysning.oppholdsadresse
+        ?: throw OpplysningKanIkkeHentesUt()
+}
+
+fun hentKontaktAdresser(
+    person: VilkaarOpplysning<Person>
+): List<Adresse> {
+    return person.opplysning.kontaktadresse
+        ?: throw OpplysningKanIkkeHentesUt()
+}

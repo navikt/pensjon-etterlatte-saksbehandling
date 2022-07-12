@@ -1,6 +1,6 @@
 package no.nav.etterlatte.barnepensjon.model
 
-import barnepensjon.vilkaar.vilkaarAvdoedesMedlemskap
+import barnepensjon.vilkaar.avdoedesmedlemskap.vilkaarAvdoedesMedlemskap
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.barnepensjon.*

@@ -23,4 +23,6 @@ enum class KriterieOpplysningsType {
     BOSTEDADRESSE_GJENLEVENDE,
     BOSTEDADRESSE_AVDOED,
     ADRESSE_GAPS,
+    STATSBORGERSKAP,
+    UTLAND,
 }

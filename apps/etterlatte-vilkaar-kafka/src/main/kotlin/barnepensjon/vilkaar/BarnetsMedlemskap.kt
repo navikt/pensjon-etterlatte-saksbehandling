@@ -45,6 +45,7 @@ fun vilkaarBarnetsMedlemskap(
     return VurdertVilkaar(
         vilkaartype,
         setVikaarVurderingFraKriterier(listOf(barnHarIkkeAdresseIUtlandet, foreldreHarIkkeAdresseIUtlandet)),
+        null,
         listOf(
             barnHarIkkeAdresseIUtlandet,
             foreldreHarIkkeAdresseIUtlandet

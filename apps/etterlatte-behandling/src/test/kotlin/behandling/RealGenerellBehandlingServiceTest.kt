@@ -48,7 +48,8 @@ class RealGenerellBehandlingServiceTest {
             behandlingerMock,
             hendleseskanal,
             FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
-            RevurderingFactory(behandlingerMock, hendelserMock)
+            RevurderingFactory(behandlingerMock, hendelserMock),
+            hendelserMock
         )
 
         val behandlinger = sut.hentBehandlinger()
@@ -73,7 +74,8 @@ class RealGenerellBehandlingServiceTest {
             behandlingerMock,
             hendleseskanal,
             FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
-            RevurderingFactory(behandlingerMock, hendelserMock)
+            RevurderingFactory(behandlingerMock, hendelserMock),
+            hendelserMock
         )
         val behandlingtype = sut.hentBehandlingstype(id)
         assertEquals(BehandlingType.REVURDERING, behandlingtype)
@@ -93,7 +95,8 @@ class RealGenerellBehandlingServiceTest {
             behandlingerMock,
             hendleseskanal,
             FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
-            RevurderingFactory(behandlingerMock, hendelserMock)
+            RevurderingFactory(behandlingerMock, hendelserMock),
+            hendelserMock
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)

@@ -60,7 +60,7 @@ class RealRevurderingServiceTest {
     @Test
     fun `skal hente alle revurderinger`() {
         val behandlingerMock = mockk<BehandlingDao> {
-            every { alleBehandlinger(type = BehandlingType.REVURDERING) } returns listOf(
+            every { alleBehandlingerAvType(type = BehandlingType.REVURDERING) } returns listOf(
                 revurdering(sak = 1),
                 revurdering(sak = 2),
                 revurdering(sak = 3),

@@ -48,7 +48,7 @@ class RealFoerstegangsbehandlingService(
     @Suppress("UNCHECKED_CAST")
     override fun hentFoerstegangsbehandlinger(): List<Foerstegangsbehandling> {
         return inTransaction {
-            behandlinger.alleBehandlinger(BehandlingType.FØRSTEGANGSBEHANDLING) as List<Foerstegangsbehandling>
+            behandlinger.alleBehandlingerAvType(BehandlingType.FØRSTEGANGSBEHANDLING) as List<Foerstegangsbehandling>
         }
     }
 

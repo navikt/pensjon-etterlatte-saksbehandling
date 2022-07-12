@@ -90,13 +90,14 @@ abstract class CommonFactory : BeanFactory {
             behandlingHendelser().nyHendelse
         )
 
-    override fun generellBehandlingService(): GenerellBehandlingService = RealGenerellBehandlingService(
-        behandlingDao(),
-        behandlingHendelser().nyHendelse,
-        foerstegangsbehandlingFactory(),
-        revurderingFactory()
-    )
-
+    override fun generellBehandlingService(): GenerellBehandlingService =
+        RealGenerellBehandlingService(
+            behandlingDao(),
+            behandlingHendelser().nyHendelse,
+            foerstegangsbehandlingFactory(),
+            revurderingFactory(),
+            hendelseDao()
+        )
 
     override fun sakDao(): SakDao = SakDao { databaseContext().activeTx() }
     override fun behandlingDao(): BehandlingDao = BehandlingDao { databaseContext().activeTx() }

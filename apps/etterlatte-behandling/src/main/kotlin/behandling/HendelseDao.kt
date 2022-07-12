@@ -14,11 +14,11 @@ import java.time.ZoneId
 import java.util.UUID
 
 class HendelseDao(private val connection: () -> Connection) {
-    companion object{
+    companion object {
         val logger: Logger = LoggerFactory.getLogger(HendelseDao::class.java)
     }
 
-    fun behandlingOpprettet(behandling: Behandling)  = lagreHendelse(
+    fun behandlingOpprettet(behandling: Behandling) = lagreHendelse(
         UlagretHendelse(
             "BEHANDLING:OPPRETTET",
             behandling.behandlingOpprettet.toTidspunkt(ZoneId.systemDefault()),
@@ -32,7 +32,15 @@ class HendelseDao(private val connection: () -> Connection) {
         )
     )
 
-    fun vedtakHendelse(behandling: Behandling, vedtakId: Long, hendelse: String, inntruffet: Tidspunkt, saksbehandler: String?, kommentar: String?, begrunnelse: String?)  = lagreHendelse(
+    fun vedtakHendelse(
+        behandling: Behandling,
+        vedtakId: Long,
+        hendelse: String,
+        inntruffet: Tidspunkt,
+        saksbehandler: String?,
+        kommentar: String?,
+        begrunnelse: String?
+    ) = lagreHendelse(
         UlagretHendelse(
             "VEDTAK:$hendelse",
             inntruffet,
@@ -48,37 +56,36 @@ class HendelseDao(private val connection: () -> Connection) {
 
 
     fun finnHendelserIBehandling(behandling: UUID): List<LagretHendelse> {
-            val stmt = connection().prepareStatement(
-                """
+        val stmt = connection().prepareStatement(
+            """
                 |SELECT id, hendelse, opprettet, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse 
                 |FROM behandlinghendelse
                 |where behandlingid = ?""".trimMargin()
+        )
+        stmt.setObject(1, behandling)
+        return stmt.executeQuery().toList {
+            LagretHendelse(
+                getLong("id"),
+                getString("hendelse"),
+                requireNotNull(getTidspunkt("opprettet")),
+                getTidspunkt("inntruffet"),
+                getLongOrNull("vedtakid"),
+                getUUID("behandlingid"),
+                getLong("sakid"),
+                getString("ident"),
+                getString("identType"),
+                getString("kommentar"),
+                getString("valgtBegrunnelse"),
             )
-            stmt.setObject(1, behandling)
-            return stmt.executeQuery().toList {
-                LagretHendelse(
-                    getLong("id"),
-                    getString("hendelse"),
-                    requireNotNull( getTidspunkt("opprettet")),
-                    getTidspunkt("inntruffet"),
-                    getLongOrNull("vedtakid"),
-                    getUUID("behandlingid"),
-                    getLong("sakid"),
-                    getString("ident"),
-                    getString("identType"),
-                    getString("kommentar"),
-                    getString("valgtBegrunnelse"),
-                    )
-            }
+        }
     }
 
-    fun lagreHendelse(hendelse: UlagretHendelse){
-
+    fun lagreHendelse(hendelse: UlagretHendelse) {
         val stmt = connection().prepareStatement(
-                """
+            """
             |INSERT INTO behandlinghendelse(hendelse, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse) 
             |VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimMargin()
-                )
+        )
         stmt.setString(1, hendelse.hendelse)
         stmt.setTidspunkt(2, hendelse.inntruffet)
         stmt.setLong(3, hendelse.vedtakId)
@@ -96,17 +103,18 @@ class HendelseDao(private val connection: () -> Connection) {
 
 }
 
-fun PreparedStatement.setTidspunkt(index: Int, value: Tidspunkt?) = setTimestamp(index, value?.instant?.let (Timestamp::from ))
-fun PreparedStatement.setLong(index: Int, value: Long?) = if(value == null) setNull(index, Types.BIGINT) else setLong(3, value)
+fun PreparedStatement.setTidspunkt(index: Int, value: Tidspunkt?) =
+    setTimestamp(index, value?.instant?.let(Timestamp::from))
+
+fun PreparedStatement.setLong(index: Int, value: Long?) =
+    if (value == null) setNull(index, Types.BIGINT) else setLong(3, value)
+
 fun ResultSet.getTidspunkt(name: String) = getTimestamp(name)?.toInstant()?.toTidspunkt()
 fun ResultSet.getUUID(name: String) = getObject(name) as UUID
 fun ResultSet.getLongOrNull(name: String) = getLong(name).takeIf { !wasNull() }
 
 
-
-
-
-data class LagretHendelse (
+data class LagretHendelse(
     val id: Long,
     val hendelse: String,
     val opprettet: Tidspunkt,
@@ -120,7 +128,7 @@ data class LagretHendelse (
     val valgtBegrunnelse: String?,
 )
 
-data class UlagretHendelse (
+data class UlagretHendelse(
     val hendelse: String,
     val inntruffet: Tidspunkt?,
     val vedtakId: Long?,

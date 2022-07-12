@@ -27,15 +27,16 @@ interface GenerellBehandlingService {
         kommentar: String?,
         begrunnelse: String?
     )
+    fun hentVedtaksHendelserIBehandling(behandling: UUID): List<LagretHendelse>
 }
 
 class RealGenerellBehandlingService(
     val behandlinger: BehandlingDao,
     private val behandlingHendelser: SendChannel<Pair<UUID, BehandlingHendelseType>>,
     private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory,
-    private val revurderingFactory: RevurderingFactory
+    private val revurderingFactory: RevurderingFactory,
+    private val hendelser: HendelseDao
 ) : GenerellBehandlingService {
-
 
     override fun hentBehandlinger(): List<Behandling> {
         return inTransaction { behandlinger.alleBehandlinger() }
@@ -126,5 +127,12 @@ class RealGenerellBehandlingService(
             }
         }
     }
+
+    override fun hentVedtaksHendelserIBehandling(behandlingId: UUID): List<LagretHendelse> {
+        return inTransaction {
+        hendelser.finnHendelserIBehandling(behandlingId)
+        }
+    }
+
 }
 

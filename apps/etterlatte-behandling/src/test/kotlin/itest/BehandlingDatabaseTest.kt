@@ -318,7 +318,6 @@ internal class BehandlingDaoIntegrationTest {
     @Test
     fun `Skal bare hente behandlinger av en gitt type`() {
 
-
         val sak1 = sakRepo.opprettSak("1234", "BP").id
 
         val rev = listOf(
@@ -334,8 +333,8 @@ internal class BehandlingDaoIntegrationTest {
             behandlingRepo.opprettFoerstegangsbehandling(it)
         }
 
-        val foerstegangsbehandlinger = behandlingRepo.alleBehandlinger(BehandlingType.FØRSTEGANGSBEHANDLING)
-        val revurderinger = behandlingRepo.alleBehandlinger(BehandlingType.REVURDERING)
+        val foerstegangsbehandlinger = behandlingRepo.alleBehandlingerAvType(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val revurderinger = behandlingRepo.alleBehandlingerAvType(BehandlingType.REVURDERING)
         assertAll(
             "Skal hente ut to foerstegangsbehandlinger og to revurderinger",
             { assertEquals(2, foerstegangsbehandlinger.size) },
@@ -396,6 +395,5 @@ internal class BehandlingDaoIntegrationTest {
         assertEquals(endretTidspunkt, behandlingEtterStatusendring!!.sistEndret)
 
     }
-
 
 }

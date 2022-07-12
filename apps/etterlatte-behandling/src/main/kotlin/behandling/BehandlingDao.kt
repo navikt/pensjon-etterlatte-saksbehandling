@@ -50,7 +50,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 
-    fun alleBehandlinger(type: BehandlingType): List<Behandling> {
+    fun alleBehandlingerAvType(type: BehandlingType): List<Behandling> {
         val stmt =
             connection().prepareStatement(
                 "SELECT id, sak_id, behandling_opprettet, sist_endret, " +

@@ -32,7 +32,7 @@ class RealRevurderingService(
     @Suppress("UNCHECKED_CAST")
     override fun hentRevurderinger(): List<Revurdering> {
         return inTransaction {
-            behandlinger.alleBehandlinger(BehandlingType.REVURDERING) as List<Revurdering>
+            behandlinger.alleBehandlingerAvType(BehandlingType.REVURDERING) as List<Revurdering>
         }
     }
 

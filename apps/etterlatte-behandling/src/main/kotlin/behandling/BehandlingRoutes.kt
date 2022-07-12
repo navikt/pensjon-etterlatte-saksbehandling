@@ -102,6 +102,12 @@ fun Route.behandlingRoutes(
 
                 route("/vedtak") {
 
+                    get {
+                        call.respond(
+                            generellBehandlingService.hentVedtaksHendelserIBehandling(behandlingsId)
+                        )
+                    }
+
                     post("/{hendelse}") {
                         val body = call.receive<VedtakHendelse>()
                         generellBehandlingService.registrerVedtakHendelse(
@@ -118,10 +124,6 @@ fun Route.behandlingRoutes(
                 }
             }
 
-
-
-
-
             post("/avbrytbehandling") {
                 generellBehandlingService.avbrytBehandling(behandlingsId)
                 call.respond(HttpStatusCode.OK)
@@ -132,7 +134,6 @@ fun Route.behandlingRoutes(
                 foerstegangsbehandlingService.lagreGyldighetsprøving(behandlingsId, body)
                 call.respond(HttpStatusCode.OK)
             }
-
 
         }
 

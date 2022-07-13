@@ -21,7 +21,7 @@ internal class  LagreVilkaarsresultat(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event","BEHANDLING:GRUNNLAGENDRET") }
+            validate { it.demandAny("@event", listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
             validate { it.requireKey("sak") }
             validate { it.requireKey("id") }
             validate { it.requireKey("soeker") }

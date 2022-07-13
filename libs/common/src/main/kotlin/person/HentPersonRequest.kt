@@ -6,6 +6,10 @@ data class HentPersonRequest(
     val rolle: PersonRolle
 )
 
+data class HentFolkeregisterIdentRequest(
+    val ident: String
+)
+
 enum class PersonRolle {
     BARN,
     AVDOED,

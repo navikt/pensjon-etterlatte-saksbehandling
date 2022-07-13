@@ -6,27 +6,41 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
+import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.mockResponse
-import no.nav.etterlatte.pdl.*
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.*
+import no.nav.etterlatte.pdl.ParallelleSannheterKlient
+import no.nav.etterlatte.pdl.PdlFolkeregisterIdentResponse
+import no.nav.etterlatte.pdl.PdlHentPerson
+import no.nav.etterlatte.pdl.PdlKlient
+import no.nav.etterlatte.pdl.PdlPersonResponse
+import no.nav.etterlatte.pdl.PdlPersonResponseBolk
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class PersonServiceTest {
 
     private val pdlKlient = mockk<PdlKlient>()
     private val ppsKlient = mockk<ParallelleSannheterKlient>()
-    private val personService = PersonService(pdlKlient, ppsKlient )
+    private val personService = PersonService(pdlKlient, ppsKlient)
 
     @BeforeEach
     fun beforeEach() {
         val personResponse: PdlPersonResponse = mockResponse("/pdl/person.json")
         val personBolkResponse: PdlPersonResponseBolk = mockResponse("/pdl/personBolk.json")
+        val personIdentResponse: PdlFolkeregisterIdentResponse = mockResponse("/pdl/folkeregisterident.json")
         val hentPerson: PdlHentPerson = personResponse.data?.hentPerson!!
 
         coEvery { pdlKlient.hentPerson(any(), any()) } returns personResponse
         coEvery { pdlKlient.hentPersonBolk(any(), any()) } returns personBolkResponse
+        coEvery { pdlKlient.hentFolkeregisterIdent(any()) } returns personIdentResponse
         coEvery { ppsKlient.avklarNavn(any()) } returns hentPerson.navn.first()
         coEvery { ppsKlient.avklarAdressebeskyttelse(any()) } returns null
         coEvery { ppsKlient.avklarStatsborgerskap(any()) } returns hentPerson.statsborgerskap?.first()
@@ -44,7 +58,7 @@ internal class PersonServiceTest {
     }
 
     @Test
-    fun`skal mappe avdoed med barnekull`() {
+    fun `skal mappe avdoed med barnekull`() {
         val person = runBlocking {
             personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.AVDOED))
         }
@@ -59,7 +73,7 @@ internal class PersonServiceTest {
     }
 
     @Test
-    fun`skal mappe person som inkluderer familierelasjon (foreldre)`() {
+    fun `skal mappe person som inkluderer familierelasjon (foreldre)`() {
         val person = runBlocking {
             personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
         }
@@ -73,7 +87,7 @@ internal class PersonServiceTest {
     }
 
     @Test
-    fun`skal mappe person som inkluderer familierelasjon (ansvarlige foreldre)`() {
+    fun `skal mappe person som inkluderer familierelasjon (ansvarlige foreldre)`() {
         val person = runBlocking {
             personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
         }
@@ -88,7 +102,7 @@ internal class PersonServiceTest {
 
     @Test
     @Disabled("TODO - få inn datagrunnlag for denne")
-    fun`skal mappe person som inkluderer familierelasjon (barn)`() {
+    fun `skal mappe person som inkluderer familierelasjon (barn)`() {
         val person = runBlocking {
             personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
         }
@@ -144,5 +158,25 @@ internal class PersonServiceTest {
             }
         }
     }
+
+    @Test
+    fun `Skal hente folkeregisterident for aktoerid`() {
+        val personIdentResponse =
+            runBlocking { personService.hentFolkeregisterIdent(HentFolkeregisterIdentRequest("2305469522806")) }
+        val expectedFolkeregisterIdent = "70078749472"
+        assertEquals(expectedFolkeregisterIdent, personIdentResponse.folkeregisterident.value)
+    }
+
+    @Test
+    fun `finner ikke folkeregisterident`() {
+        coEvery { pdlKlient.hentFolkeregisterIdent(any()) } returns mockResponse("/pdl/ident_ikke_funnet.json")
+        runBlocking {
+            assertThrows<PdlForesporselFeilet> {
+                personService.hentFolkeregisterIdent(HentFolkeregisterIdentRequest("1234"))
+            }
+        }
+
+    }
+
 
 }

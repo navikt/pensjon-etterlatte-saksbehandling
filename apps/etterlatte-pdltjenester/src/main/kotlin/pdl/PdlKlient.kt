@@ -1,8 +1,10 @@
 package no.nav.etterlatte.pdl
 
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.content.*
+import io.ktor.client.HttpClient
+import io.ktor.client.request.accept
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.content.TextContent
 import io.ktor.http.ContentType.Application.Json
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -26,13 +28,14 @@ class PdlKlient(private val httpClient: HttpClient) {
                 accept(Json)
                 body = TextContent(request.toJson(), Json)
             }
-        }.let{
+        }.let {
             when (it) {
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> throw it.exceptions.last()
             }
         }
     }
+
     //TODO utvide til rolleliste?
     suspend fun hentPersonBolk(fnr: List<Foedselsnummer>, rolle: PersonRolle): PdlPersonResponseBolk {
         val request = PdlGraphqlBolkRequest(
@@ -59,12 +62,38 @@ class PdlKlient(private val httpClient: HttpClient) {
                 accept(Json)
                 body = TextContent(request.toJson(), Json)
             }
-        }.let{
+        }.let {
             when (it) {
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> throw it.exceptions.last()
             }
         }
+    }
+
+    suspend fun hentFolkeregisterIdent(ident: String): PdlFolkeregisterIdentResponse {
+        val request = PdlFolkeregisterIdentRequest(
+            query = getQuery("/pdl/hentFolkeregisterIdent.graphql"),
+            variables = PdlFolkeregisterIdentVariables(
+                ident = ident,
+                grupper = listOf("FOLKEREGISTERIDENT"),
+                historisk = true
+            )
+        )
+        logger.info("Henter folkeregisterident for ident = $ident fra PDL")
+        return retry<PdlFolkeregisterIdentResponse> {
+            httpClient.post {
+                header("Tema", TEMA)
+                accept(Json)
+                body = TextContent(request.toJson(), Json)
+            }
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> throw it.exceptions.last()
+            }
+        }
+
+
     }
 
     private fun getQuery(name: String): String {

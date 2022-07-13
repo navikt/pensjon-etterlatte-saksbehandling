@@ -25,6 +25,9 @@ class FinnDodsmeldinger(
             meldinger++
 
             if (it.getOpplysningstype() == "DOEDSFALL_V1") {
+
+
+                // TODO: se svar i #pdl-kanalen for om personnummer alltid er på indeks 1 i denne listen.
                 dodshendelser.personErDod(
                     it.getPersonidenter()[0],
                     (it.getDoedsfall()?.getDoedsdato()?.format(DateTimeFormatter.ISO_DATE))
@@ -58,6 +61,5 @@ class FinnDodsmeldinger(
     fun start() {
         stopped = false
     }
-
 
 }

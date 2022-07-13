@@ -15,9 +15,11 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.SecurityContextMediatorStub
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
+import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.mockFolkeregisterident
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -52,7 +54,27 @@ class PersonRouteTest {
     }
 
     @Test
-    fun `skal returne 500 naar kall mot service feiler`() {
+    fun `skal returnere folkeregisterIdent`() {
+        val hentFolkeregisterIdentRequest = HentFolkeregisterIdentRequest(
+            ident = "2305469522806"
+        )
+        coEvery { personService.hentFolkeregisterIdent(hentFolkeregisterIdentRequest) } returns mockFolkeregisterident("70078749472")
+
+        withTestApplication({ module(securityContextMediator, personService) }) {
+            handleRequest(HttpMethod.Post, FOLKEREGISTERIDENT_ENDEPUNKT) {
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(hentFolkeregisterIdentRequest.toJson())
+            }.apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+                coVerify { personService.hentFolkeregisterIdent(any()) }
+                verify { securityContextMediator.secureRoute(any(), any()) }
+                confirmVerified(personService)
+            }
+        }
+    }
+
+    @Test
+    fun `skal returne 500 naar kall mot person feiler`() {
         val hentPersonRequest = HentPersonRequest(
             foedselsnummer = TRIVIELL_MIDTPUNKT,
             rolle = PersonRolle.BARN
@@ -74,7 +96,30 @@ class PersonRouteTest {
         }
     }
 
+    @Test
+    fun `skal returne 500 naar kall mot folkeregisterident feiler`() {
+        val hentFolkeregisterIdentReq = HentFolkeregisterIdentRequest(
+            ident = "2305469522806"
+        )
+
+        coEvery { personService.hentFolkeregisterIdent(hentFolkeregisterIdentReq) } throws PdlForesporselFeilet("Noe feilet")
+
+        withTestApplication({ module(securityContextMediator, personService) }) {
+            handleRequest(HttpMethod.Post, FOLKEREGISTERIDENT_ENDEPUNKT) {
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(hentFolkeregisterIdentReq.toJson())
+            }.apply {
+                assertEquals(HttpStatusCode.InternalServerError, response.status())
+                assertEquals("En feil oppstod: Noe feilet", response.content)
+                coVerify { personService.hentFolkeregisterIdent(any()) }
+                verify { securityContextMediator.secureRoute(any(), any()) }
+                confirmVerified(personService)
+            }
+        }
+    }
+
     companion object {
         const val PERSON_ENDEPUNKT = "/person"
+        const val FOLKEREGISTERIDENT_ENDEPUNKT = "/folkeregisterident"
     }
 }

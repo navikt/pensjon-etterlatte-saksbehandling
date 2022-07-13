@@ -1,9 +1,13 @@
 package no.nav.etterlatte.pdl
 
-import io.ktor.client.*
-import io.ktor.client.engine.mock.*
-import io.ktor.client.features.json.*
-import io.ktor.http.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.client.features.json.JacksonSerializer
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.http.ContentType
+import io.ktor.http.fullPath
+import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.libs.common.objectMapper
@@ -53,6 +57,30 @@ internal class PdlKlientTest {
 
         runBlocking {
             val personResponse = pdlKlient.hentPerson(STOR_SNERK, PersonRolle.BARN)
+            val errors = personResponse.errors
+
+            assertEquals("Fant ikke person", errors?.first()?.message)
+        }
+    }
+
+    @Test
+    fun `hentFolkeregisterIdent returnerer folkeresiterident`() {
+        mockEndpoint("/pdl/folkeregisterident.json")
+
+        runBlocking {
+            val identResponse = pdlKlient.hentFolkeregisterIdent("2305469522806")
+            assertEquals("70078749472", identResponse.data?.hentIdenter?.identer?.first()?.ident)
+            assertEquals(false, identResponse.data?.hentIdenter?.identer?.first()?.historisk)
+            assertEquals("FOLKEREGISTERIDENT", identResponse.data?.hentIdenter?.identer?.first()?.gruppe)
+        }
+    }
+
+    @Test
+    fun `hentFolkeregisterIdent returnerer ikke funnet`() {
+        mockEndpoint("/pdl/ident_ikke_funnet.json")
+
+        runBlocking {
+            val personResponse = pdlKlient.hentFolkeregisterIdent("1234")
             val errors = personResponse.errors
 
             assertEquals("Fant ikke person", errors?.first()?.message)

@@ -1,5 +1,8 @@
 package no.nav.etterlatte.person
 
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
+import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
@@ -27,7 +30,7 @@ class PersonService(
             } else {
                 PersonMapper.mapPerson(
                     ppsKlient = ppsKlient,
-                    pdlKlient =pdlKlient,
+                    pdlKlient = pdlKlient,
                     fnr = hentPersonRequest.foedselsnummer,
                     personRolle = hentPersonRequest.rolle,
                     hentPerson = it.data.hentPerson
@@ -35,5 +38,29 @@ class PersonService(
             }
         }
     }
+
+    suspend fun hentFolkeregisterIdent(hentFolkeregisterIdentRequest: HentFolkeregisterIdentRequest): FolkeregisterIdent {
+        logger.info("Henter folkeregisterident for ident=${hentFolkeregisterIdentRequest.ident} fra PDL")
+
+        return pdlKlient.hentFolkeregisterIdent(hentFolkeregisterIdentRequest.ident).let {
+            if (it.data?.hentIdenter == null) {
+                val pdlFeil = it.errors?.joinToString(", ")
+                throw PdlForesporselFeilet(
+                    "Kunne ikke hente folkeregisterident for ident=${hentFolkeregisterIdentRequest.ident} fra PDL: $pdlFeil"
+                )
+            } else {
+                try {
+                    val folkeregisterIdent: String = it.data.hentIdenter.identer
+                        .filter { it.gruppe == "FOLKEREGISTERIDENT" }
+                        .first { !it.historisk }.ident
+                    FolkeregisterIdent(folkeregisterident = Foedselsnummer.of(folkeregisterIdent))
+                } catch (e: Exception) {
+                    throw PdlForesporselFeilet("Fant ingen folkeregisterident for ident=${hentFolkeregisterIdentRequest.ident} fra PDL")
+                }
+
+            }
+        }
+    }
+
 
 }

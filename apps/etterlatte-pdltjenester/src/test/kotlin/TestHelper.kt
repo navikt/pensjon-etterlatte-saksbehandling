@@ -1,11 +1,19 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import io.ktor.application.*
-import io.ktor.routing.*
+import io.ktor.application.Application
+import io.ktor.routing.Route
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.AdresseType
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -22,7 +30,8 @@ inline fun <reified T> mockResponse(fil: String): T {
 fun mockPerson(
     utland: Utland? = null,
     familieRelasjon: FamilieRelasjon? = null,
-    vergemaal: List<VergemaalEllerFremtidsfullmakt>? = null) =
+    vergemaal: List<VergemaalEllerFremtidsfullmakt>? = null
+) =
 
     Person(
         fornavn = "Ola",
@@ -59,6 +68,8 @@ fun mockPerson(
         avdoedesBarn = null,
         vergemaalEllerFremtidsfullmakt = vergemaal,
     )
+
+fun mockFolkeregisterident(fnr: String) = FolkeregisterIdent(Foedselsnummer.of(fnr))
 
 object SecurityContextMediatorStub : SecurityContextMediator {
     override fun outgoingToken(audience: String): suspend () -> String = { "token" }

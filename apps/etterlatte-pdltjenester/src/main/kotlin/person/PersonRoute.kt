@@ -8,6 +8,7 @@ import io.ktor.routing.Route
 import io.ktor.routing.application
 import io.ktor.routing.post
 import io.ktor.routing.route
+import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 
 
@@ -21,6 +22,19 @@ fun Route.personApi(service: PersonService) {
 
             service.hentPerson(hentPersonRequest)
                 .let { call.respond(it) }
+        }
+    }
+
+    route("folkeregisterident") {
+        val logger = application.log
+
+        post {
+            val hentFolkeregisterIdentRequest = call.receive<HentFolkeregisterIdentRequest>()
+            logger.info("Henter identer for ident=${hentFolkeregisterIdentRequest.ident}")
+
+            service.hentFolkeregisterIdent(hentFolkeregisterIdentRequest).let {
+                call.respond(it)
+            }
         }
     }
 }

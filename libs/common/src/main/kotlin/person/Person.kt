@@ -104,12 +104,16 @@ data class VergemaalEllerFremtidsfullmakt(
     val vergeEllerFullmektig: VergeEllerFullmektig
 )
 
-data class VergeEllerFullmektig (
+data class VergeEllerFullmektig(
     val motpartsPersonident: Foedselsnummer?,
     val navn: String?,
     val omfang: String?,
     val omfangetErInnenPersonligOmraade: Boolean
-    )
+)
+
+data class FolkeregisterIdent(
+    val folkeregisterident: Foedselsnummer
+)
 
 fun Person.alder(): Int? {
     return foedselsdato?.let { Period.between(foedselsdato, LocalDate.now()).years }

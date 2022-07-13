@@ -24,7 +24,7 @@ internal class  LagreVilkaarsresultat(
             validate { it.demandAny("@event", listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
             validate { it.requireKey("sak") }
             validate { it.requireKey("id") }
-            validate { it.requireKey("soeker") }
+            validate { it.requireKey("persongalleri.soeker") }
             validate { it.requireKey("@virkningstidspunkt") }
             validate { it.requireKey("@vilkaarsvurdering") }
             validate { it.interestedIn("@correlation_id") }
@@ -38,7 +38,7 @@ internal class  LagreVilkaarsresultat(
             val sakId = packet["sak"].toString()
             val vilkaarsResultat = objectMapper.readValue(packet["@vilkaarsvurdering"].toString(), VilkaarResultat::class.java)
             try {
-                vedtaksvurderingService.lagreVilkaarsresultat(sakId, behandlingId, packet["soeker"].textValue(), vilkaarsResultat, YearMonth.parse(packet["@virkningstidspunkt"].textValue()).atDay(1) )
+                vedtaksvurderingService.lagreVilkaarsresultat(sakId, behandlingId, packet["persongalleri.soeker"].textValue(), vilkaarsResultat, YearMonth.parse(packet["@virkningstidspunkt"].textValue()).atDay(1) )
                 requireNotNull( vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
                     context.publish(JsonMessage.newMessage(
                         mapOf(

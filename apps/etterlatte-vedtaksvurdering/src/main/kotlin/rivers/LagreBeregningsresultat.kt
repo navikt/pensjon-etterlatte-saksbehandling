@@ -23,7 +23,7 @@ internal class LagreBeregningsresultat(
             validate { it.demandAny("@event", listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
             validate { it.requireKey("sak") }
             validate { it.requireKey("id") }
-            validate { it.requireKey("soeker") }
+            validate { it.requireKey("persongalleri.soeker") }
             validate { it.requireKey("@beregning") }
             validate { it.interestedIn("@correlation_id") }
             validate { it.rejectKey("@avkorting") }
@@ -37,7 +37,7 @@ internal class LagreBeregningsresultat(
             val beregningsResultat = objectMapper.readValue(packet["@beregning"].toString(), BeregningsResultat::class.java)
 
             try {
-                vedtaksvurderingService.lagreBeregningsresultat(sakId, behandlingId, packet["soeker"].textValue(), beregningsResultat)
+                vedtaksvurderingService.lagreBeregningsresultat(sakId, behandlingId, packet["persongalleri.soeker"].textValue(), beregningsResultat)
                 requireNotNull( vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
                     context.publish(JsonMessage.newMessage(
                         mapOf(

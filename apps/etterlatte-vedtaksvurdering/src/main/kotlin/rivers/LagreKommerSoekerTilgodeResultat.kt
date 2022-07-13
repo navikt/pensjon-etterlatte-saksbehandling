@@ -22,7 +22,7 @@ internal class LagreKommerSoekerTilgodeResultat(
             validate { it.demandAny("@event", listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
             validate { it.requireKey("sak") }
             validate { it.requireKey("id") }
-            validate { it.requireKey("soeker") }
+            validate { it.requireKey("persongalleri.soeker") }
 
             validate { it.requireKey("@kommersoekertilgode") }
             validate { it.interestedIn("@correlation_id") }
@@ -36,7 +36,7 @@ internal class LagreKommerSoekerTilgodeResultat(
             val sakId = packet["sak"].toString()
             val kommerSoekerTilgodeResultat = objectMapper.readValue(packet["@kommersoekertilgode"].toString(), KommerSoekerTilgode::class.java)
             try {
-                vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(sakId, behandlingId, packet["soeker"].textValue(), kommerSoekerTilgodeResultat)
+                vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(sakId, behandlingId, packet["persongalleri.soeker"].textValue(), kommerSoekerTilgodeResultat)
             } catch (e: KanIkkeEndreFattetVedtak){
                 packet["@event"] = "VEDTAK:ENDRING_FORKASTET"
                 packet["@vedtakId"] = e.vedtakId

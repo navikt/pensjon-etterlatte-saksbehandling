@@ -25,7 +25,7 @@ internal class LagreAvkorting(
             validate { it.requireKey("sak") }
             validate { it.requireKey("id") }
             validate { it.requireKey("@avkorting") }
-            validate { it.requireKey("soeker") }
+            validate { it.requireKey("persongalleri.soeker") }
             validate { it.requireKey("@avkorting") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
@@ -38,7 +38,7 @@ internal class LagreAvkorting(
             val avkorting = objectMapper.readValue<AvkortingsResultat>(packet["@avkorting"].toString())
 
             try {
-                vedtaksvurderingService.lagreAvkorting(sakId, behandlingId, packet["soeker"].textValue(), avkorting)
+                vedtaksvurderingService.lagreAvkorting(sakId, behandlingId, packet["persongalleri.soeker"].textValue(), avkorting)
                 requireNotNull( vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
                     context.publish(JsonMessage.newMessage(
                         mapOf(

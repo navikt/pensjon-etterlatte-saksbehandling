@@ -4,15 +4,16 @@
   "behandlingOpprettet": "2022-06-14T15:44:02.427522",
   "sistEndret": "2022-06-14T15:44:02.433757",
   "soeknadMottattDato": "2022-02-14T14:37:24.573613",
-  "innsender": "03108718357",
-  "soeker": "12101376212",
-  "gjenlevende": [
-    "03108718357"
-  ],
-  "avdoed": [
-    "22128202440"
-  ],
-  "soesken": [],
+  "persongalleri":{
+    "soeker": "12101376212",
+    "gjenlevende": [
+      "03108718357"
+    ],
+    "avdoed": [
+      "22128202440"
+    ],
+    "soesken": []
+  },
   "gyldighetsproeving": {
     "resultat": "OPPFYLT",
     "vurderinger": [

@@ -37,6 +37,10 @@ class TestRapid : RapidsConnection() {
         messages.add(key to message)
     }
 
+    override fun rapidName(): String {
+        return "test-rapid"
+    }
+
     override fun start() {
         notifyStartup()
     }

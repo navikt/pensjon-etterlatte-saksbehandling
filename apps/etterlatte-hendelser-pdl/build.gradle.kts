@@ -24,3 +24,5 @@ dependencies {
     testImplementation(Ktor.ServerTests)
 
 }
+
+tasks.named("compileKotlin").configure { dependsOn(":apps:etterlatte-hendelser-pdl:generateAvroJava") }

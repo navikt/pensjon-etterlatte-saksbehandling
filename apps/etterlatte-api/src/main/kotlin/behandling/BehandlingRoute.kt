@@ -87,9 +87,19 @@ fun Route.behandlingRoute(service: BehandlingService) {
             val behandlingId = call.parameters["behandlingId"]?.toString()
             if (behandlingId == null) {
                 call.response.status(HttpStatusCode(400, "Bad request"))
-                call.respond("SakId mangler")
+                call.respond("BehandlingsId mangler")
             } else {
                 call.respond(service.hentBehandling(behandlingId, getAccessToken(call)))
+            }
+        }
+
+        get("hendelser") {
+            val behandlingId = call.parameters["behandlingId"]
+            if (behandlingId == null) {
+                call.response.status(HttpStatusCode(400, "Bad request"))
+                call.respond("BehandlingsId mangler")
+            } else {
+                call.respond(service.hentHendelserForBehandling(behandlingId, getAccessToken(call)))
             }
         }
 

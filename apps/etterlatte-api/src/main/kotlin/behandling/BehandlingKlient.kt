@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.typer.OppgaveListe
 import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
+import no.nav.etterlatte.typer.LagretVedtakHendelser
 import org.slf4j.LoggerFactory
 
 
@@ -26,6 +27,7 @@ interface EtterlatteBehandling {
     suspend fun hentBehandling(behandlingId: String, accessToken: String): Any
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag
     suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean
+    suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretVedtakHendelser
 }
 
 class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehandling {
@@ -202,6 +204,24 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
             return true
         } catch (e: Exception) {
             logger.error("Henting av behandlinger feilet", e)
+            throw e
+        }
+    }
+
+    override suspend fun hentHendelserForBehandling(behandlingId: String,  accessToken: String): LagretVedtakHendelser {
+        logger.info("Henter hendelser for en behandling")
+        try {
+            val json =
+                downstreamResourceClient.get(Resource(clientId, "$resourceUrl/behandlinger/$behandlingId/vedtak"), accessToken)
+                    .mapBoth(
+                        success = { json -> json },
+                        failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                    ).response
+
+            logger.info("Vedtakhendelser hentet for behandlingid $behandlingId: $json")
+            return objectMapper.readValue(json.toString(), LagretVedtakHendelser::class.java)
+        } catch (e: Exception) {
+            logger.error("Henting av vedtakhendelser feilet", e)
             throw e
         }
     }

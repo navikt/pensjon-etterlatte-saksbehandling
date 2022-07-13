@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import no.nav.etterlatte.typer.LagretVedtakHendelse
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -27,4 +28,5 @@ data class DetaljertBehandlingDto(
     val soeknadMottattDato: LocalDateTime?,
     val virkningstidspunkt: LocalDate?,
     val status: BehandlingStatus?,
+    val vedtakhendelser: List<LagretVedtakHendelse>?
 )

@@ -18,4 +18,5 @@ data class BehandlingsOppgave(
     val regdato: ZonedDateTime,
     val fristDato: LocalDate,
 )
+
 data class OppgaveListe ( val oppgaver: List<BehandlingsOppgave> )

@@ -11,8 +11,8 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.DetaljertBehandlingDto
 import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
+import no.nav.etterlatte.typer.LagretVedtakHendelser
 import org.slf4j.LoggerFactory
-import java.time.Instant
 
 
 data class PersonSakerResult(val person: Person, val saker: Saker)
@@ -57,6 +57,7 @@ class BehandlingService(
         logger.info("Henter behandling")
         behandlingKlient.hentBehandling(behandlingId, accessToken).let { behandling ->
             val vedtak = async { vedtakKlient.hentVedtak(behandling.sak.toInt(), behandlingId, accessToken) }
+            val hendelser = async { behandlingKlient.hentHendelserForBehandling(behandling.id.toString(), accessToken) }
             DetaljertBehandlingDto(
                 id = behandling.id,
                 sak = behandling.sak,
@@ -72,7 +73,8 @@ class BehandlingService(
                 attestant = vedtak.await().attestant,
                 soeknadMottattDato = behandling.soeknadMottattDato,
                 virkningstidspunkt = vedtak.await().virkningsDato,
-                status = behandling.status
+                status = behandling.status,
+                vedtakhendelser = hendelser.await().hendelser,
             )
         }
     }
@@ -84,6 +86,11 @@ class BehandlingService(
 
     suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean {
         return behandlingKlient.slettBehandlinger(sakId, accessToken)
+    }
+
+    suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretVedtakHendelser {
+        logger.info("Henter hendelser for behandling $behandlingId")
+        return behandlingKlient.hentHendelserForBehandling(behandlingId, accessToken)
     }
 
 }

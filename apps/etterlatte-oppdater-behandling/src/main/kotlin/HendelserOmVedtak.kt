@@ -46,9 +46,6 @@ internal class HendelserOmVedtak(
             val valgtBegrunnelse = packet["@valgtBegrunnelse"].textValue()
             val inntruffet = objectMapper.treeToValue<Tidspunkt>(packet["@eventtimestamp"])
 
-
-
-
             logger.info("""Oppdaterer behandling $behandling med hendelse  $hendelse""")
             try {
                 behandlinger.vedtakHendelse(

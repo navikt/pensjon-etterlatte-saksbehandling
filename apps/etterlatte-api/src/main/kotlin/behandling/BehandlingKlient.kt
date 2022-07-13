@@ -212,7 +212,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         logger.info("Henter hendelser for en behandling")
         try {
             val json =
-                downstreamResourceClient.get(Resource(clientId, "$resourceUrl/behandlinger/$behandlingId/vedtak"), accessToken)
+                downstreamResourceClient.get(Resource(clientId, "$resourceUrl/behandlinger/$behandlingId/hendelser/vedtak"), accessToken)
                     .mapBoth(
                         success = { json -> json },
                         failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }

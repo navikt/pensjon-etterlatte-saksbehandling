@@ -11,8 +11,11 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.typer.LagretVedtakHendelse
+import no.nav.etterlatte.typer.LagretVedtakHendelser
 import no.nav.etterlatte.typer.Saker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
@@ -117,9 +120,24 @@ internal class BehandlingServiceTest {
             null,
             null,
         )
+        val hendelser = LagretVedtakHendelser(
+            hendelser = listOf(LagretVedtakHendelse(
+                1,
+                "hendelse",
+                Tidspunkt.now(),
+                null,
+                19,
+                behandlingid,
+                4,
+                null,
+                null,
+                null,
+                null
+            ))
+        )
         coEvery { behandlingKlient.hentBehandling(behandlingid.toString(), accessToken) } returns detaljertBehandling
         coEvery { vedtakKlient.hentVedtak(4, behandlingid.toString(), accessToken) } returns vedtak
-
+        coEvery { behandlingKlient.hentHendelserForBehandling(behandlingid.toString(), accessToken) } returns hendelser
 
         val respons = runBlocking { service.hentBehandling(behandlingid.toString(), accessToken) }
 

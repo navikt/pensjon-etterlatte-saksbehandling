@@ -1,5 +1,5 @@
 object NavFelles {
-    const val RapidAndRivers = "com.github.navikt:rapids-and-rivers:20210617121814-3e67e4d"
+    const val RapidAndRivers = "com.github.navikt:rapids-and-rivers:2022.04.20-09.43.9ad89f533b41"
     const val TokenClientCore = "no.nav.security:token-client-core:1.3.3"
     const val TokenValidationKtor = "no.nav.security:token-validation-ktor:1.3.3"
     const val MockOauth2Server = "no.nav.security:mock-oauth2-server:0.3.1"
@@ -35,7 +35,7 @@ object Ktor {
 }
 
 object Kafka {
-    const val Clients = "org.apache.kafka:kafka-clients:3.2.0"
+    const val Clients = "org.apache.kafka:kafka-clients:3.1.1"
     const val Avro = "org.apache.avro:avro:1.11.0"
     const val AvroSerializer = "io.confluent:kafka-avro-serializer:7.1.1"
     const val EmbeddedEnv = "no.nav:kafka-embedded-env:3.1.6"

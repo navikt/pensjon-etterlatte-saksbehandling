@@ -15,9 +15,7 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.features.StatusPages
 import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.jackson
-import io.ktor.request.header
-import io.ktor.request.httpMethod
-import io.ktor.request.path
+import io.ktor.request.*
 import io.ktor.response.respond
 import io.ktor.routing.route
 import io.ktor.routing.routing
@@ -35,9 +33,12 @@ fun Application.module(vedtaksvurderingService: VedtaksvurderingService) {
                 disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             }
         }
+
         install(CallLogging) {
             level = Level.INFO
-            filter { call -> !call.request.path().startsWith("/health") }
+            val naisEndepunkt = listOf("isalive", "isready", "metrics")
+            filter { call -> call.request.document().let { !naisEndepunkt.contains(it) }
+            }
             format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
             mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
         }

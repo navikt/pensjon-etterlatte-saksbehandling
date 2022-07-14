@@ -24,13 +24,13 @@ fun setVilkaarVurderingFraVilkaar(vilkaar: List<VurdertVilkaar>): VurderingsResu
 
 fun setVurderingFraKommerBarnetTilGode(vilkaar: List<VurdertVilkaar>): VurderingsResultat {
     val gjenlevendeBarnSammeAdresse =
-        vilkaar.find { it.navn === Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE }?.resultat
+        vilkaar.find { it.navn == Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE }?.resultat
     val barnIngenUtlandsadresse =
-        vilkaar.find { it.navn === Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE }?.resultat
+        vilkaar.find { it.navn == Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE }?.resultat
     val avdoedAdresse =
-        vilkaar.find { it.navn === Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE }?.resultat
+        vilkaar.find { it.navn == Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE }?.resultat
 
-    return if (gjenlevendeBarnSammeAdresse !== VurderingsResultat.IKKE_OPPFYLT) {
+    return if (gjenlevendeBarnSammeAdresse != VurderingsResultat.IKKE_OPPFYLT) {
         hentVurdering(listOf(gjenlevendeBarnSammeAdresse, barnIngenUtlandsadresse))
     } else {
         hentVurdering(listOf(gjenlevendeBarnSammeAdresse, barnIngenUtlandsadresse, avdoedAdresse))

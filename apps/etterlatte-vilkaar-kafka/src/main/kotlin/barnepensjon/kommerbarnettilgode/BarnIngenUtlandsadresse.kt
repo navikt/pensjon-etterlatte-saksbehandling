@@ -35,7 +35,7 @@ fun barnIngenOppgittUtlandsadresse(
         if (soekerSoeknad == null) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
-            val ikkeAdresseIUtland = soekerSoeknad.opplysning.utenlandsadresse.adresseIUtlandet === JaNeiVetIkke.NEI
+            val ikkeAdresseIUtland = soekerSoeknad.opplysning.utenlandsadresse.adresseIUtlandet == JaNeiVetIkke.NEI
             vurderOpplysning { ikkeAdresseIUtland }
         }
     } catch (ex: OpplysningKanIkkeHentesUt) {

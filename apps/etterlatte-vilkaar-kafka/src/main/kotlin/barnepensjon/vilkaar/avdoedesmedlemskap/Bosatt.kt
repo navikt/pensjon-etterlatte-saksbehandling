@@ -178,9 +178,9 @@ fun kriterieIngenUtenlandsoppholdFraSoeknad(
     val utenlandsoppholdSoeknad = avdoedSoeknad.opplysning.utenlandsopphold
 
     val ingenOppholdUtlandetFraSoeknad =
-        if (utenlandsoppholdSoeknad.harHattUtenlandsopphold === JaNeiVetIkke.NEI) {
+        if (utenlandsoppholdSoeknad.harHattUtenlandsopphold == JaNeiVetIkke.NEI) {
             VurderingsResultat.OPPFYLT
-        } else if (utenlandsoppholdSoeknad.harHattUtenlandsopphold === JaNeiVetIkke.VET_IKKE) {
+        } else if (utenlandsoppholdSoeknad.harHattUtenlandsopphold == JaNeiVetIkke.VET_IKKE) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
             VurderingsResultat.IKKE_OPPFYLT

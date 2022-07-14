@@ -112,7 +112,7 @@ fun kriterieNorskStatsborger(avdoedPdl: VilkaarOpplysning<Person>?, kriterietype
                 avdoedPdl.id,
                 KriterieOpplysningsType.STATSBORGERSKAP,
                 avdoedPdl.kilde,
-                avdoedPdl.opplysning.statsborgerskap.toString(),
+                avdoedPdl.opplysning,
             )
         })
 

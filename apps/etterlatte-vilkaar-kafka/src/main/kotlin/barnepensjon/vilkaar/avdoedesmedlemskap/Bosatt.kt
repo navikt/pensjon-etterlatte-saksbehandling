@@ -112,7 +112,7 @@ fun kriterieNorskStatsborger(avdoedPdl: VilkaarOpplysning<Person>?, kriterietype
                 avdoedPdl.id,
                 KriterieOpplysningsType.STATSBORGERSKAP,
                 avdoedPdl.kilde,
-                avdoedPdl.opplysning,
+                avdoedPdl.opplysning.statsborgerskap.toString(),
             )
         })
 
@@ -120,9 +120,11 @@ fun kriterieNorskStatsborger(avdoedPdl: VilkaarOpplysning<Person>?, kriterietype
 
     val resultat = if (avdoedPdl.opplysning.statsborgerskap == null) {
         VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-    } else if (avdoedPdl.opplysning.statsborgerskap.toString() === "NOR") {
+    } else if (avdoedPdl.opplysning.statsborgerskap == "NOR") {
         VurderingsResultat.OPPFYLT
-    } else VurderingsResultat.IKKE_OPPFYLT
+    } else  {
+        VurderingsResultat.IKKE_OPPFYLT
+    }
 
     return Kriterie(kriterietype, resultat, opplysningsGrunnlag)
 }

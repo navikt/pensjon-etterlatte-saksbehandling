@@ -36,7 +36,7 @@ fun vilkaarAvdoedesMedlemskap(
     // 4. mottatt trydg / uføre eller pensjon siste 5 årene
 
     val bosattNorge = metakriterieBosattNorge(avdoedSoeknad, avdoedPdl)
-    // 4 outcomes: 1. oppfylt, 2. ikke oppfylt, 3. send til psys, 4. trenger avklaring/manuelt input, 5? kan ikke vurdere
+    // utfall: 1. oppfylt,  2. send til psys, 3. trenger avklaring/manuelt input
 
     // fjernes
     val harMottattUforeTrygdSisteFemAar =
@@ -45,21 +45,15 @@ fun vilkaarAvdoedesMedlemskap(
         kriterieHarMottattPensjonSisteFemAar(pensjonUforeOpplysning)
 
     val harMottattPensjonEllerTrygdSisteFemAar = kriterieHarMottattPensjonEllerTrygdSisteFemAar(pensjonUforeOpplysning)
-
-
     val harHatt100prosentStillingSisteFemAar = kritieeHarHatt100prosentStillingSisteFemAar(arbeidsforholdOpplysning)
+
+    val kriterier = bosattNorge.kriterie + harMottattPensjonEllerTrygdSisteFemAar + harHatt100prosentStillingSisteFemAar
 
     return VurdertVilkaar(
         vilkaartype,
         VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, //endre når vi får inn flere opplysninger
-        null,
-        listOf(
-           // ingenUtenlandsoppholdOppgittISoeknad,
-           // sammenhengendeAdresserINorgeSisteFemAar,
-            harMottattUforeTrygdSisteFemAar,
-            harMottattPensjonSisteFemAar,
-            harHatt100prosentStillingSisteFemAar
-        ),
+        bosattNorge.utfall,
+        kriterier,
         LocalDateTime.now()
     )
 }

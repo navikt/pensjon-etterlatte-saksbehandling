@@ -84,7 +84,7 @@ fun metakriterieBosattNorge(
         Utfall.OPPFYLT
     }
 
-    val kriterieliste = listOf(
+    val kriterieliste = listOf<Kriterie>(
         norskStatsborger,
         ingenInnUtvandring,
         ingenUtenlandsoppholdOppgittISoeknad,

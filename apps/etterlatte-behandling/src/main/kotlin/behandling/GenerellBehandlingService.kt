@@ -27,7 +27,7 @@ interface GenerellBehandlingService {
         kommentar: String?,
         begrunnelse: String?
     )
-    fun hentVedtaksHendelserIBehandling(behandling: UUID): List<LagretHendelse>
+    fun hentHendelserIBehandling(behandling: UUID): List<LagretHendelse>
 }
 
 class RealGenerellBehandlingService(
@@ -128,7 +128,7 @@ class RealGenerellBehandlingService(
         }
     }
 
-    override fun hentVedtaksHendelserIBehandling(behandlingId: UUID): List<LagretHendelse> {
+    override fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse> {
         return inTransaction {
         hendelser.finnHendelserIBehandling(behandlingId)
         }

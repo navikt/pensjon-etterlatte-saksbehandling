@@ -104,7 +104,7 @@ fun Route.behandlingRoutes(
 
                     get {
                         call.respond(
-                            generellBehandlingService.hentVedtaksHendelserIBehandling(behandlingsId).let { LagretVedtakHendelser(it) }
+                            generellBehandlingService.hentHendelserIBehandling(behandlingsId).let { LagretHendelser(it) }
                         )
                     }
 
@@ -317,6 +317,6 @@ data class VedtakHendelse(
     val valgtBegrunnelse: String?,
 )
 
-data class LagretVedtakHendelser(
+data class LagretHendelser(
     val hendelser: List<LagretHendelse>,
 )

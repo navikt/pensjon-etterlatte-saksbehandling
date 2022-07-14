@@ -3,7 +3,7 @@ package no.nav.etterlatte.typer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
 
-data class LagretVedtakHendelse(
+data class LagretHendelse(
     val id: Long,
     val hendelse: String,
     val opprettet: Tidspunkt,
@@ -17,6 +17,6 @@ data class LagretVedtakHendelse(
     val valgtBegrunnelse: String?,
 )
 
-data class LagretVedtakHendelser(
-    val hendelser: List<LagretVedtakHendelse>
+data class LagretHendelser(
+    val hendelser: List<LagretHendelse>
 )

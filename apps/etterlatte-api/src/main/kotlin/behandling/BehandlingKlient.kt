@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.typer.OppgaveListe
 import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
-import no.nav.etterlatte.typer.LagretVedtakHendelser
+import no.nav.etterlatte.typer.LagretHendelser
 import org.slf4j.LoggerFactory
 
 
@@ -27,7 +27,7 @@ interface EtterlatteBehandling {
     suspend fun hentBehandling(behandlingId: String, accessToken: String): Any
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag
     suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean
-    suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretVedtakHendelser
+    suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretHendelser
 }
 
 class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehandling {
@@ -208,7 +208,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         }
     }
 
-    override suspend fun hentHendelserForBehandling(behandlingId: String,  accessToken: String): LagretVedtakHendelser {
+    override suspend fun hentHendelserForBehandling(behandlingId: String,  accessToken: String): LagretHendelser {
         logger.info("Henter hendelser for en behandling")
         try {
             val json =
@@ -218,10 +218,10 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                         failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                     ).response
 
-            logger.info("Vedtakhendelser hentet for behandlingid $behandlingId: $json")
-            return objectMapper.readValue(json.toString(), LagretVedtakHendelser::class.java)
+            logger.info("Hendelser hentet for behandlingid $behandlingId: $json")
+            return objectMapper.readValue(json.toString(), LagretHendelser::class.java)
         } catch (e: Exception) {
-            logger.error("Henting av vedtakhendelser feilet", e)
+            logger.error("Henting av hendelser feilet", e)
             throw e
         }
     }

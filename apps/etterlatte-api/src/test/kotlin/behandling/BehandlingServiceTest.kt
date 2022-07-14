@@ -14,8 +14,8 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-import no.nav.etterlatte.typer.LagretVedtakHendelse
-import no.nav.etterlatte.typer.LagretVedtakHendelser
+import no.nav.etterlatte.typer.LagretHendelse
+import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.Saker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
@@ -120,8 +120,8 @@ internal class BehandlingServiceTest {
             null,
             null,
         )
-        val hendelser = LagretVedtakHendelser(
-            hendelser = listOf(LagretVedtakHendelse(
+        val hendelser = LagretHendelser(
+            hendelser = listOf(LagretHendelse(
                 1,
                 "hendelse",
                 Tidspunkt.now(),

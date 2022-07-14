@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.DetaljertBehandlingDto
 import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
-import no.nav.etterlatte.typer.LagretVedtakHendelser
+import no.nav.etterlatte.typer.LagretHendelser
 import org.slf4j.LoggerFactory
 
 
@@ -74,7 +74,7 @@ class BehandlingService(
                 soeknadMottattDato = behandling.soeknadMottattDato,
                 virkningstidspunkt = vedtak.await().virkningsDato,
                 status = behandling.status,
-                vedtakhendelser = hendelser.await().hendelser,
+                hendelser = hendelser.await().hendelser,
             )
         }
     }
@@ -88,7 +88,7 @@ class BehandlingService(
         return behandlingKlient.slettBehandlinger(sakId, accessToken)
     }
 
-    suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretVedtakHendelser {
+    suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretHendelser {
         logger.info("Henter hendelser for behandling $behandlingId")
         return behandlingKlient.hentHendelserForBehandling(behandlingId, accessToken)
     }

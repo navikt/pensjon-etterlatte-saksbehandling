@@ -2,7 +2,7 @@
 ij_javascript_spaces_within_imports = true
 
 [{*.ats,*.ts,*.tsx}]
-ij_continuation_indent_size = 4
+ij_continuation_indent_size = 2
 ij_typescript_align_imports = false
 ij_typescript_align_multiline_array_initializer_expression = false
 ij_typescript_align_multiline_binary_operation = false
@@ -21,7 +21,7 @@ ij_typescript_array_initializer_wrap = off
 ij_typescript_assignment_wrap = off
 ij_typescript_binary_operation_sign_on_next_line = false
 ij_typescript_binary_operation_wrap = off
-ij_typescript_blacklist_imports = rxjs/Rx,node_modules/**,**/node_modules/**,@angular/material,@angular/material/typings/**
+ij_typescript_blacklist_imports = rxjs/Rx, node_modules/**, **/node_modules/**, @angular/material, @angular/material/typings/**
 ij_typescript_blank_lines_after_imports = 1
 ij_typescript_blank_lines_around_class = 1
 ij_typescript_blank_lines_around_field = 0

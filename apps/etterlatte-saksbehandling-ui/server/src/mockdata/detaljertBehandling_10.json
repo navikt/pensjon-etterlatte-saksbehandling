@@ -545,7 +545,6 @@
         "datoTOM": "2022-04",
         "grunnbelopMnd": 8867,
         "grunnbelop": 101352
-
       },
       {
         "delytelsesId": "BP",
@@ -567,5 +566,85 @@
   "attestant": null,
   "soeknadMottattDato": "2022-04-14T14:37:24.573613",
   "virkningstidspunkt": "2022-03-01",
-  "status": "FATTET_VEDTAK"
+  "status": "RETURNERT",
+  "hendelser": [
+    {
+      "id": 168,
+      "hendelse": "BEHANDLING:OPPRETTET",
+      "opprettet": "2022-07-14T09:10:48.422308Z",
+      "inntruffet": "2022-07-14T09:10:48.420618Z",
+      "vedtakId": null,
+      "behandlingId": "31f96b76-199a-472b-8cdf-7187c5392254",
+      "sakId": 3,
+      "ident": null,
+      "identType": null,
+      "kommentar": null,
+      "valgtBegrunnelse": null
+    },
+    {
+      "id": 193,
+      "hendelse": "VEDTAK:VILKAARSVURDERT",
+      "opprettet": "2022-07-14T09:10:55.121163Z",
+      "inntruffet": "2022-07-14T09:10:54.662364Z",
+      "vedtakId": 107,
+      "behandlingId": "31f96b76-199a-472b-8cdf-7187c5392254",
+      "sakId": 3,
+      "ident": null,
+      "identType": null,
+      "kommentar": null,
+      "valgtBegrunnelse": null
+    },
+    {
+      "id": 194,
+      "hendelse": "VEDTAK:BEREGNET",
+      "opprettet": "2022-07-14T09:10:55.145618Z",
+      "inntruffet": "2022-07-14T09:10:54.750503Z",
+      "vedtakId": 107,
+      "behandlingId": "31f96b76-199a-472b-8cdf-7187c5392254",
+      "sakId": 3,
+      "ident": null,
+      "identType": null,
+      "kommentar": null,
+      "valgtBegrunnelse": null
+    },
+    {
+      "id": 195,
+      "hendelse": "VEDTAK:AVKORTET",
+      "opprettet": "2022-07-14T09:10:55.221277Z",
+      "inntruffet": "2022-07-14T09:10:54.765925Z",
+      "vedtakId": 107,
+      "behandlingId": "31f96b76-199a-472b-8cdf-7187c5392254",
+      "sakId": 3,
+      "ident": null,
+      "identType": null,
+      "kommentar": null,
+      "valgtBegrunnelse": null
+    },
+    {
+      "id": 196,
+      "hendelse": "VEDTAK:FATTET",
+      "opprettet": "2022-07-14T09:13:51.685383Z",
+      "inntruffet": "2022-07-14T09:13:51.405052Z",
+      "vedtakId": 107,
+      "behandlingId": "31f96b76-199a-472b-8cdf-7187c5392254",
+      "sakId": 3,
+      "ident": "Z994398",
+      "identType": "SAKSBEHANDLER",
+      "kommentar": null,
+      "valgtBegrunnelse": null
+    },
+    {
+      "id": 197,
+      "hendelse": "VEDTAK:UNDERKJENT",
+      "opprettet": "2022-07-14T09:14:23.432868Z",
+      "inntruffet": "2022-07-14T09:14:23.416962Z",
+      "vedtakId": 107,
+      "behandlingId": "31f96b76-199a-472b-8cdf-7187c5392254",
+      "sakId": 3,
+      "ident": "Z994398",
+      "identType": "SAKSBEHANDLER",
+      "kommentar": "Masse masse feil i alle vurderingene! ",
+      "valgtBegrunnelse": "Inngangsvilkår feilvurdert"
+    }
+  ]
 }

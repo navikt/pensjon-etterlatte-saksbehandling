@@ -1,4 +1,4 @@
-import { IAction } from '../AppContext'
+import {IAction} from '../AppContext'
 
 export interface IDetaljertBehandling {
   id: string
@@ -16,6 +16,26 @@ export interface IDetaljertBehandling {
   soeknadMottattDato: string
   virkningstidspunkt: string
   status: IBehandlingStatus
+  hendelser: IHendelse[]
+}
+
+export interface IHendelse {
+  id: number
+  hendelse: IHendelseType
+  opprettet: string
+  ident?: string,
+  identType?: null
+  kommentar: string
+  valgtBegrunnelse: string
+}
+
+export enum IHendelseType {
+  BEHANDLING_OPPRETTET = "BEHANDLING:OPPRETTET",
+  VEDTAK_VILKAARSVURDERT = "VEDTAK:VILKAARSVURDERT",
+  VEDTAK_BEREGNET = "VEDTAK:BEREGNET",
+  VEDTAK_AVKORTET = "VEDTAK:AVKORTET",
+  VEDTAK_FATTET = "VEDTAK:FATTET",
+  VEDTAK_UNDERKJENT = "VEDTAK:UNDERKJENT",
 }
 
 export enum IBehandlingStatus {
@@ -256,6 +276,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   fastsatt: false,
   soeknadMottattDato: '',
   virkningstidspunkt: '',
+  hendelser: [],
 }
 
 export const behandlingReducer = (state = detaljertBehandlingInitialState, action: IAction): any => {

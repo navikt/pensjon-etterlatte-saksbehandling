@@ -1,4 +1,4 @@
-import { IBehandlingStatus } from '../../../store/reducers/BehandlingReducer'
+import {IBehandlingStatus, IHendelse} from '../../../store/reducers/BehandlingReducer'
 
 export interface IBehandlingInfo {
   type: string
@@ -8,5 +8,7 @@ export interface IBehandlingInfo {
   virkningsdato?: string
   datoFattet?: string
   datoAttestert?: string
+  underkjentLogg?: IHendelse[]
+  fattetLogg?: IHendelse[]
   rolle: string
 }

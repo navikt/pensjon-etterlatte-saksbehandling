@@ -1,46 +1,50 @@
-import { IBehandlingInfo } from '../../SideMeny/types'
-import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
-import { useContext } from 'react'
-import { AppContext } from '../../../../store/AppContext'
+import {IBehandlingInfo} from '../../SideMeny/types'
+import {Info, Overskrift, Tekst, UnderOverskrift, Wrapper} from '../styled'
+import {useContext} from 'react'
+import {AppContext} from '../../../../store/AppContext'
+import {formatterStringDato, formatterStringTidspunkt} from "../../../../utils";
+import {IBehandlingStatus} from "../../../../store/reducers/BehandlingReducer";
 
-export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingInfo }) => {
+export const Underkjent = ({behandlingsInfo}: { behandlingsInfo?: IBehandlingInfo }) => {
   const innloggetId = useContext(AppContext).state.saksbehandlerReducer.ident
+
+  const underkjentSiste = behandlingsInfo?.underkjentLogg?.slice(-1)[0]
+  const fattetSiste = behandlingsInfo?.fattetLogg?.slice(-1)[0]
+
+  const erReturnert = behandlingsInfo?.status === IBehandlingStatus.RETURNERT
+  const saksbehandler = fattetSiste?.ident
+  const attestant = erReturnert ? underkjentSiste?.ident : innloggetId
 
   return (
     <>
       <Wrapper innvilget={false}>
         <Overskrift>Førstegangsbehandling</Overskrift>
         <UnderOverskrift innvilget={false}>Underkjent</UnderOverskrift>
-        <Tekst>
-          {
-            //formatterDato(dato)} kl: {formatterTidspunkt(dato) todo: legg inn tidspunk for returnering her
-          }
-        </Tekst>
-
+        {underkjentSiste &&
+          <Tekst>
+            {formatterStringDato(underkjentSiste.opprettet)} kl: {formatterStringTidspunkt(underkjentSiste.opprettet)}
+          </Tekst>
+        }
         <div className="flex">
           <div>
             <Info>Attestant</Info>
-            <Tekst>{innloggetId}</Tekst>
+            <Tekst>{attestant}</Tekst>
           </div>
           <div>
             <Info>Saksbehandler</Info>
-            {
-              // todo: få med opprinnelige saksbehandler fra loggene her?
-            }
-            <Tekst>{behandlingsInfo?.saksbehandler}</Tekst>
+            <Tekst>{saksbehandler}</Tekst>
           </div>
         </div>
 
-        {/*          todo: hentes fra logger og vises kun om data finnes
-       <div className="info">
-          <Info>Årsak til retur</Info>
-          <Tekst>Hardkodet: Inngangsvilkår er feilvurdert</Tekst>
-        </div>
-
-        <Tekst>
-          Harkodet: Vedtaket underkjennes da vilkår om avdødes forutgående medlemskap ser ut til å være tolket feil
-          fordi adresse .....
-        </Tekst>*/}
+        {erReturnert && underkjentSiste &&
+          <>
+            <div className="info">
+              <Info>Årsak til retur</Info>
+              <Tekst>{underkjentSiste.valgtBegrunnelse}</Tekst>
+            </div>
+            <Tekst>{underkjentSiste.kommentar}</Tekst>
+          </>
+        }
       </Wrapper>
     </>
   )

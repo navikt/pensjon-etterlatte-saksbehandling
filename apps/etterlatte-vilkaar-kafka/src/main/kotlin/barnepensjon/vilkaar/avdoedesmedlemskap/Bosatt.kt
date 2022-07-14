@@ -120,7 +120,7 @@ fun kriterieNorskStatsborger(avdoedPdl: VilkaarOpplysning<Person>?, kriterietype
 
     val resultat = if (avdoedPdl.opplysning.statsborgerskap == null) {
         VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-    } else if (avdoedPdl.opplysning.statsborgerskap === "NOR") {
+    } else if (avdoedPdl.opplysning.statsborgerskap.toString() === "NOR") {
         VurderingsResultat.OPPFYLT
     } else VurderingsResultat.IKKE_OPPFYLT
 
@@ -128,9 +128,6 @@ fun kriterieNorskStatsborger(avdoedPdl: VilkaarOpplysning<Person>?, kriterietype
 }
 
 fun kriterieIngenInnUtvandring(avdoedPdl: VilkaarOpplysning<Person>?, kriterietype: Kriterietyper): Kriterie {
-    val ingenInnUtvandring = avdoedPdl?.opplysning?.utland?.innflyttingTilNorge.isNullOrEmpty()
-            && avdoedPdl?.opplysning?.utland?.utflyttingFraNorge.isNullOrEmpty()
-
     val opplysningsGrunnlag = listOfNotNull(
         avdoedPdl?.let {
             Kriteriegrunnlag(
@@ -146,6 +143,9 @@ fun kriterieIngenInnUtvandring(avdoedPdl: VilkaarOpplysning<Person>?, kriteriety
     )
 
     if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
+
+    val ingenInnUtvandring = avdoedPdl.opplysning.utland?.innflyttingTilNorge.isNullOrEmpty()
+            && avdoedPdl.opplysning.utland?.utflyttingFraNorge.isNullOrEmpty()
 
     return Kriterie(
         kriterietype,

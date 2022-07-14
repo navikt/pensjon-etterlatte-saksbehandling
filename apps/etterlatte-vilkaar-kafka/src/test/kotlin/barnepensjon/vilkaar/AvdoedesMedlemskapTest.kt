@@ -65,7 +65,7 @@ class AvdoedesMedlemskapTest {
 
     @Test
     fun vurderInnOgUtvandring() {
-        val avdoedPdlIngen = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, adresserNorgePdl(), null)
+        val avdoedPdlIngenUtland = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, adresserNorgePdl(), null)
         val avdoedPdlInnvandring = lagMockPersonPdl(
             null, fnrAvdoed, doedsdatoPdl, adresserNorgePdl(), null, utland = Utland(
                 innflyttingTilNorge = listOf(InnflyttingTilNorge("DAN", LocalDate.now())),
@@ -73,14 +73,24 @@ class AvdoedesMedlemskapTest {
             )
         )
 
+        val avdoedPdlHarIkke = lagMockPersonPdl(
+            null, fnrAvdoed, doedsdatoPdl, adresserNorgePdl(), null, utland = Utland(
+                innflyttingTilNorge = emptyList(),
+                utflyttingFraNorge = emptyList()
+            )
+        )
+
+        val ingenUtland =
+            kriterieIngenInnUtvandring(mapTilVilkaarstypePerson(avdoedPdlIngenUtland), Kriterietyper.AVDOED_NORSK_STATSBORGER)
         val ingenInnOgUtvandring =
-            kriterieIngenInnUtvandring(mapTilVilkaarstypePerson(avdoedPdlIngen), Kriterietyper.AVDOED_NORSK_STATSBORGER)
+            kriterieIngenInnUtvandring(mapTilVilkaarstypePerson(avdoedPdlHarIkke), Kriterietyper.AVDOED_NORSK_STATSBORGER)
         val harInnOgUtvandring =
             kriterieIngenInnUtvandring(
                 mapTilVilkaarstypePerson(avdoedPdlInnvandring),
                 Kriterietyper.AVDOED_NORSK_STATSBORGER
             )
 
+        Assertions.assertEquals(VurderingsResultat.OPPFYLT, ingenUtland.resultat)
         Assertions.assertEquals(VurderingsResultat.OPPFYLT, ingenInnOgUtvandring.resultat)
         Assertions.assertEquals(VurderingsResultat.IKKE_OPPFYLT, harInnOgUtvandring.resultat)
     }

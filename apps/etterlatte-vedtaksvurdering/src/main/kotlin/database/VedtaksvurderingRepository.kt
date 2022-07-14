@@ -317,12 +317,14 @@ private object Queries {
         "UPDATE vedtak SET beregningsresultat = ?, vedtakstatus = ? WHERE sakId = ? AND behandlingId = ?"
 
     val lagreVilkaarResultat =
-        "INSERT INTO vedtak(sakId, behandlingId, vilkaarsresultat, datoVirkFom, vedtakstatus ) VALUES (?, ?, ?, ?, ?, ?) "
+        "INSERT INTO vedtak(sakId, behandlingId, vilkaarsresultat, fnr, datoVirkFom, vedtakstatus ) VALUES (?, ?, ?, ?, ?, ?) "
+
     val oppdaterVilkaarResultat =
         "UPDATE vedtak SET vilkaarsresultat = ?, vedtakstatus = ? WHERE sakId = ? AND behandlingId = ?"
 
     val lagreKommerSoekerTilgodeResultat =
         "INSERT INTO vedtak(sakId, behandlingId, kommersoekertilgoderesultat, fnr) VALUES (?, ?, ?, ?)"
+
     val oppdatereKommerSoekerTilgodeResultat =
         "UPDATE vedtak SET kommersoekertilgoderesultat = ? WHERE sakId = ? AND behandlingId = ?"
 

@@ -4,7 +4,7 @@
   "behandlingOpprettet": "2022-06-14T15:44:02.427522",
   "sistEndret": "2022-06-14T15:44:02.433757",
   "soeknadMottattDato": "2022-02-14T14:37:24.573613",
-  "persongalleri":{
+  "persongalleri": {
     "soeker": "12101376212",
     "gjenlevende": [
       "03108718357"
@@ -827,17 +827,18 @@
       {
         "navn": "SOEKER_ER_UNDER_20",
         "resultat": "OPPFYLT",
+        "utfall": null,
         "kriterier": [
           {
             "navn": "SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO",
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "871c3904-b52b-4f93-8f05-95e5e960dc46",
+                "id": "0964f06f-cc7d-4cc4-80e9-bf83fb19f949",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-06-14T13:44:04.156013229Z",
+                  "tidspunktForInnhenting": "2022-07-05T10:37:08.471621561Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -847,11 +848,11 @@
                 }
               },
               {
-                "id": "95a89b6f-3c26-429f-aac8-648672b919c9",
+                "id": "cf21dc75-e2aa-4920-a45d-4fb49764c6aa",
                 "kriterieOpplysningsType": "FOEDSELSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-06-14T13:44:03.256394553Z",
+                  "tidspunktForInnhenting": "2022-07-05T10:37:07.163183658Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -863,22 +864,23 @@
             ]
           }
         ],
-        "vurdertDato": "2022-06-14T15:44:05.356402248"
+        "vurdertDato": "2022-07-13T14:50:52.528570324"
       },
       {
         "navn": "DOEDSFALL_ER_REGISTRERT",
         "resultat": "OPPFYLT",
+        "utfall": null,
         "kriterier": [
           {
             "navn": "DOEDSFALL_ER_REGISTRERT_I_PDL",
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "871c3904-b52b-4f93-8f05-95e5e960dc46",
+                "id": "0964f06f-cc7d-4cc4-80e9-bf83fb19f949",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-06-14T13:44:04.156013229Z",
+                  "tidspunktForInnhenting": "2022-07-05T10:37:08.471621561Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -894,11 +896,11 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "95a89b6f-3c26-429f-aac8-648672b919c9",
+                "id": "cf21dc75-e2aa-4920-a45d-4fb49764c6aa",
                 "kriterieOpplysningsType": "FORELDRE",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-06-14T13:44:03.256394553Z",
+                  "tidspunktForInnhenting": "2022-07-05T10:37:07.163183658Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -910,11 +912,11 @@
                 }
               },
               {
-                "id": "871c3904-b52b-4f93-8f05-95e5e960dc46",
+                "id": "0964f06f-cc7d-4cc4-80e9-bf83fb19f949",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-06-14T13:44:04.156013229Z",
+                  "tidspunktForInnhenting": "2022-07-05T10:37:08.471621561Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -926,62 +928,66 @@
             ]
           }
         ],
-        "vurdertDato": "2022-06-14T15:44:05.356431358"
+        "vurdertDato": "2022-07-13T14:50:52.52860449"
       },
       {
         "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
         "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
+        "utfall": null,
         "kriterier": [
           {
-            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD",
+            "navn": "AVDOED_HAR_MOTTATT_TRYGD_SISTE_FEM_AAR",
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "871c3904-b52b-4f93-8f05-95e5e960dc46",
-                "kriterieOpplysningsType": "DOEDSDATO",
+                "id": "b217ba39-3863-4ce1-8b44-50b915a4c7ff",
+                "kriterieOpplysningsType": "AVDOED_UFORE_PENSJON",
                 "kilde": {
-                  "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-06-14T13:44:04.156013229Z",
-                  "registersReferanse": null,
-                  "type": "pdl"
+                  "navn": "inntektskomponenten",
+                  "type": "inntektskomponenten"
                 },
-                "opplysning": {
-                  "doedsdato": "2022-02-10",
-                  "foedselsnummer": "22128202440"
-                }
-              },
-              {
-                "id": "bd5b7456-eb0c-4f1e-b912-301aff91270f",
-                "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
-                "kilde": {
-                  "fnr": "03108718357",
-                  "mottatDato": "2022-02-14T14:37:24.573612786Z",
-                  "type": "privatperson"
-                },
-                "opplysning": {
-                  "harHattUtenlandsopphold": "NEI",
-                  "opphold": null
-                }
+                "opplysning": []
               }
             ]
+          },
+          {
+            "navn": "AVDOED_HAR_MOTTATT_PENSJON_SISTE_FEM_AAR",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "b217ba39-3863-4ce1-8b44-50b915a4c7ff",
+                "kriterieOpplysningsType": "AVDOED_UFORE_PENSJON",
+                "kilde": {
+                  "navn": "inntektskomponenten",
+                  "type": "inntektskomponenten"
+                },
+                "opplysning": []
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_HAR_HATT_100PROSENT_STILLING_SISTE_FEM_AAR",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": []
           }
         ],
-        "vurdertDato": "2022-06-14T15:44:05.356445848"
+        "vurdertDato": "2022-07-13T14:50:52.528815243"
       },
       {
         "navn": "BARNETS_MEDLEMSKAP",
         "resultat": "OPPFYLT",
+        "utfall": null,
         "kriterier": [
           {
             "navn": "SOEKER_IKKE_ADRESSE_I_UTLANDET",
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "95a89b6f-3c26-429f-aac8-648672b919c9",
+                "id": "cf21dc75-e2aa-4920-a45d-4fb49764c6aa",
                 "kriterieOpplysningsType": "ADRESSER",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-06-14T13:44:03.256394553Z",
+                  "tidspunktForInnhenting": "2022-07-05T10:37:07.163183658Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -1007,7 +1013,7 @@
                 }
               },
               {
-                "id": "462ff323-dc6c-4a00-900b-2d4b2ff0b290",
+                "id": "4cce7dd8-6c0e-4da9-bce6-68d0a35b82b0",
                 "kriterieOpplysningsType": "SOEKER_UTENLANDSOPPHOLD",
                 "kilde": {
                   "fnr": "03108718357",
@@ -1021,11 +1027,11 @@
                 }
               },
               {
-                "id": "871c3904-b52b-4f93-8f05-95e5e960dc46",
+                "id": "0964f06f-cc7d-4cc4-80e9-bf83fb19f949",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-06-14T13:44:04.156013229Z",
+                  "tidspunktForInnhenting": "2022-07-05T10:37:08.471621561Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -1041,11 +1047,11 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "06da3e1e-724b-4ce3-a1c8-ef5bf01c82f8",
+                "id": "452f68eb-ae27-48dd-bc63-8189f314c0df",
                 "kriterieOpplysningsType": "ADRESSER",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-06-14T13:44:03.710616845Z",
+                  "tidspunktForInnhenting": "2022-07-05T10:37:07.668186638Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -1071,11 +1077,11 @@
                 }
               },
               {
-                "id": "871c3904-b52b-4f93-8f05-95e5e960dc46",
+                "id": "0964f06f-cc7d-4cc4-80e9-bf83fb19f949",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-06-14T13:44:04.156013229Z",
+                  "tidspunktForInnhenting": "2022-07-05T10:37:08.471621561Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -1087,10 +1093,10 @@
             ]
           }
         ],
-        "vurdertDato": "2022-06-14T15:44:05.356473651"
+        "vurdertDato": "2022-07-13T14:50:52.528852359"
       }
     ],
-    "vurdertDato": "2022-06-14T15:44:05.356473651"
+    "vurdertDato": "2022-07-13T14:50:52.528852359"
   },
   "@vilkaarsvurderingGrunnlagRef": 48,
   "@kommersoekertilgode": {

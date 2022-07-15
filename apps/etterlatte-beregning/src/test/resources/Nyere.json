@@ -957,6 +957,54 @@
               },
               "avdoedesBarn": null,
               "vergemaalEllerFremtidsfullmakt": []
+            },
+            {
+              "fornavn": "DAARLIG",
+              "etternavn": "BLYANT",
+              "foedselsnummer": "29080775995",
+              "foedselsdato": "2003-12-12",
+              "foedselsaar": 2003,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Bøveien 937",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "8475",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "1999-01-01T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "22128202440",
+                  "03108718357"
+                ],
+                "foreldre": [
+                  "22128202440",
+                  "03108718357"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
             }
           ],
           "vergemaalEllerFremtidsfullmakt": null

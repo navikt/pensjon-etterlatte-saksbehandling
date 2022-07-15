@@ -51,6 +51,10 @@ internal class LesBereningsmeldingTest {
         }
         beregningsperioder[2].also {
             Assertions.assertEquals(YearMonth.of(2021,9), it.datoFOM)
+            Assertions.assertEquals(YearMonth.of(2021,11), it.datoTOM)
+        }
+        beregningsperioder[3].also {
+            Assertions.assertEquals(YearMonth.of(2021,12), it.datoFOM)
             Assertions.assertEquals(YearMonth.of(2022,4), it.datoTOM)
         }
     }

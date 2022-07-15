@@ -41,11 +41,13 @@ open class Grunnlagsopplysning<T>(
     sealed class Kilde(val type: String) {
         fun toJson() = objectMapperKilde.writeValueAsString(this)
     }
-    class Saksbehandler(val ident: String) : Kilde("saksbehandler"){
+
+    class Saksbehandler(val ident: String, tidspunkt: Instant) : Kilde("saksbehandler") {
         override fun toString(): String {
             return "saksbehandler $ident"
         }
     }
+
     class Privatperson(val fnr: String, val mottatDato: Instant) : Kilde("privatperson") {
     }
 
@@ -73,7 +75,7 @@ open class Grunnlagsopplysning<T>(
         }
     }
 
-    class RegelKilde(val navn: String, val ts: Instant, val versjon: String) : Kilde("regel"){
+    class RegelKilde(val navn: String, val ts: Instant, val versjon: String) : Kilde("regel") {
         override fun toString(): String {
             return "beregningsregel  $navn"
         }

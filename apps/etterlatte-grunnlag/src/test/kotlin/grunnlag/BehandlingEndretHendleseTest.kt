@@ -19,9 +19,10 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import testutils.TestDbKontekst
 import java.io.FileNotFoundException
+import java.time.Instant
 import java.util.*
 
-internal class BehandlingEndretHendleseTest{
+internal class BehandlingEndretHendleseTest {
     companion object {
         val melding = readFile("/behandlinggrunnlagendret.json")
         val opplysningerMock = mockk<OpplysningDao>()
@@ -39,28 +40,27 @@ internal class BehandlingEndretHendleseTest{
         val grunnlagshendelser = listOf(
             OpplysningDao.GrunnlagHendelse(Grunnlagsopplysning(
                 UUID.randomUUID(),
-                Grunnlagsopplysning.Saksbehandler("S01"),
+                Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
                 Opplysningstyper.SOEKER_SOEKNAD_V1,
                 objectMapper.createObjectNode(),
                 objectMapper.createObjectNode()
-            ), 2, 1)
-            ,OpplysningDao.GrunnlagHendelse( Grunnlagsopplysning(
+            ), 2, 1),
+            OpplysningDao.GrunnlagHendelse(Grunnlagsopplysning(
                 UUID.randomUUID(),
-                Grunnlagsopplysning.Saksbehandler("S01"),
+                Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
                 Opplysningstyper.AVDOED_SOEKNAD_V1,
                 objectMapper.createObjectNode(),
                 objectMapper.createObjectNode()
-            ), 2, 2)
-            ,
+            ), 2, 2),
         )
 
-        every { opplysningerMock.finnHendelserIGrunnlag(any())} returns grunnlagshendelser
-        every { opplysningerMock.leggOpplysningTilGrunnlag(any(),any())} returns 1L
+        every { opplysningerMock.finnHendelserIGrunnlag(any()) } returns grunnlagshendelser
+        every { opplysningerMock.leggOpplysningTilGrunnlag(any(), any()) } returns 1L
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
 
         assertEquals(1, inspector.size)
-        assertEquals(2,  inspector.message(0).get("grunnlag").size())
+        assertEquals(2, inspector.message(0).get("grunnlag").size())
         val grunnlag = objectMapper.readValue<List<Grunnlagsopplysning<ObjectNode>>>(inspector.message(0).get("grunnlag").toJson())
         assertEquals(2, grunnlag.size)
         assertEquals(grunnlagshendelser[0].opplysning.id, grunnlag.find { it.opplysningType == Opplysningstyper.SOEKER_SOEKNAD_V1 }?.id)

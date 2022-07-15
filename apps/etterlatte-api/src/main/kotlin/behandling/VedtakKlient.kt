@@ -34,13 +34,11 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
     private val clientId = config.getString("vedtak.client.id")
     private val resourceUrl = config.getString("vedtak.resource.url")
 
-
     companion object {
         fun serialize(data: Any): String {
             return objectMapper.writeValueAsString(data)
         }
     }
-
 
     override suspend fun hentVedtak(sakId: Int, behandlingId: String, accessToken: String): Vedtak {
         logger.info("Henter vedtak for en behandling")
@@ -88,11 +86,10 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
                 Resource(clientId, "$resourceUrl/api/attesterVedtak"),
                 accessToken,
                 FattVedtakBody(sakId.toString(), behandlingId)
-            )
-                .mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
+            ).mapBoth(
+                success = { json -> json },
+                failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+            ).response
         } catch (e: Exception) {
             logger.error("Attestering av vedtak feilet", e)
             throw e
@@ -106,11 +103,10 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
                 Resource(clientId, "$resourceUrl/api/underkjennVedtak"),
                 accessToken,
                 UnderkjennVedtakBody(sakId.toString(), behandlingId, kommentar, begrunnelse)
-            )
-                .mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
+            ).mapBoth(
+                success = { json -> json },
+                failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+            ).response
         } catch (e: Exception) {
             logger.error("Underkjenning av vedtak feilet", e)
             throw e
@@ -132,7 +128,7 @@ data class Vedtak(
     val datoFattet: Instant?,
     val datoattestert: Instant?,
     val attestant: String?,
-    )
+)
 
 data class FattVedtakBody(val sakId: String, val behandlingId: String)
 data class UnderkjennVedtakBody(val sakId: String, val behandlingId: String, val kommentar: String, val valgtBegrunnelse: String)

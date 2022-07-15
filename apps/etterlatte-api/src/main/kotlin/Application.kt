@@ -18,14 +18,16 @@ class ApplicationContext(configLocation: String? = null) {
 
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val vedtakKlient = VedtakKlient(config, httpClient())
+    private val grunnlagKlient = GrunnlagKlient(config, httpClient())
+
     val behandlingService: BehandlingService = BehandlingService(
         behandlingKlient = behandlingKlient,
         pdlKlient = PdltjenesterKlient(config, httpClient()),
         vedtakKlient = vedtakKlient,
     )
-
     val oppgaveService: OppgaveService = OppgaveService(behandlingKlient)
     val vedtakService = VedtakService(behandlingKlient, vedtakKlient)
+    val grunnlagService = GrunnlagService(behandlingKlient, grunnlagKlient)
 
     private fun httpClient() = HttpClient {
         install(JsonFeature) {

@@ -41,7 +41,7 @@ spec:
     - name: LEESAH_KAFKA_GROUP_ID
       value: "etterlatte-v1"
     - name: PDL_AZURE_SCOPE
-        value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
+      value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
   accessPolicy:
     outbound:
       rules:

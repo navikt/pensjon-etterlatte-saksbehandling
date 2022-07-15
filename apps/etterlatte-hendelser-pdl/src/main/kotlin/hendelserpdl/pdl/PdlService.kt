@@ -7,6 +7,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
+import org.slf4j.LoggerFactory
 
 interface Pdl {
     suspend fun hentFolkeregisterIdentifikator(ident: String): FolkeregisterIdent
@@ -17,11 +18,23 @@ class PdlService(
     private val url: String
 ) : Pdl {
 
-    override suspend fun hentFolkeregisterIdentifikator(ident: String) =
-        runBlocking {
-            pdl_app.post<FolkeregisterIdent>("$url/personident") {
-                contentType(ContentType.Application.Json)
-                body = HentFolkeregisterIdentRequest(ident)
+    companion object {
+        val logger = LoggerFactory.getLogger(PdlService::class.java)
+    }
+
+    override suspend fun hentFolkeregisterIdentifikator(ident: String): FolkeregisterIdent {
+        logger.info("Henter folkeregisteridentifikator")
+        return runBlocking {
+            try {
+                pdl_app.post("$url/personident") {
+                    contentType(ContentType.Application.Json)
+                    body = HentFolkeregisterIdentRequest(ident)
+                }
+            } catch (e: Exception) {
+                logger.info("Kunne ikke hente folkeregisteridentifikator: ${e.message}")
+                throw e
             }
         }
+    }
+
 }

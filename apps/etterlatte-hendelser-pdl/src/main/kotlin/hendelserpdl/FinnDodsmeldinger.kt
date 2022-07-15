@@ -27,17 +27,22 @@ class FinnDodsmeldinger(
             meldinger++
 
             if (it.getOpplysningstype() == "DOEDSFALL_V1") {
+                log.info("Doedshendelse mottatt for : ${it.personidenter}")
+                try {
+                    val personnummer =
+                        runBlocking { pdlService.hentFolkeregisterIdentifikator(it.personidenter.first()) }
 
-                val personnummer = runBlocking { pdlService.hentFolkeregisterIdentifikator(it.personidenter.first()) }
-
-                dodshendelser.personErDod(
-                    personnummer.folkeregisterident.value,
-                    (it.getDoedsfall()?.getDoedsdato()?.format(DateTimeFormatter.ISO_DATE))
-                )
-                log.info("Doedshendelse getPersonidenter: ${it.getPersonidenter()}")
+                    dodshendelser.personErDod(
+                        personnummer.folkeregisterident.value,
+                        (it.getDoedsfall()?.getDoedsdato()?.format(DateTimeFormatter.ISO_DATE))
+                    )
+                    log.info("Doedshendelse getPersonidenter: ${it.getPersonidenter()}")
+                } catch (e: Exception) {
+                    log.error("kunne ikke hente folkeregisterident for ${it.personidenter.first()}. Går til neste melding")
+                }
                 dodsmeldinger++
             } else {
-                log.info("Så opplysning om ${it.opplysningstype} opprettet ${it.opprettet}")
+                //log.info("Så opplysning om ${it.opplysningstype} opprettet ${it.opprettet}")
             }
 
         }
@@ -46,9 +51,8 @@ class FinnDodsmeldinger(
         runBlocking {
             if (antallMeldingerLest == 0) delay(500)
         }
-
-
     }
+
 
     fun fraStart() {
         livshendelser.fraStart()

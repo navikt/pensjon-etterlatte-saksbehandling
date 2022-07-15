@@ -84,8 +84,7 @@ export const KommerBarnetTilGodeVurdering =
             <GyldighetIcon status={kommerSoekerTilgodeVurdering.resultat} large={true}/>
           )}
         </div>
-        {redigeringsModus ?
-          (
+
             <div>
               <VurderingsTitle>Trenger avklaring</VurderingsTitle>
               <Undertekst gray={false}>
@@ -140,7 +139,7 @@ export const KommerBarnetTilGodeVurdering =
               </Button>
             </div>
 
-          ) : (
+
             <div>
               <VurderingsTitle>{tittel}</VurderingsTitle>
               <Undertekst gray={true}>
@@ -156,8 +155,7 @@ export const KommerBarnetTilGodeVurdering =
               )}
             </div>
 
-          )
-        }
+
 
       </VurderingsContainer>
     )

@@ -54,7 +54,7 @@ export const InfoWrapper = styled.div`
 
 export const Undertekst = styled.div<{ gray: boolean }>`
   display: flex;
-  margin-bottom: ${(props) => (props.gray ? '1em;' : '0em')};
+  margin-bottom: 1em;
   margin-top: 0.3em;
   max-width: 250px;
   color: ${(props) => (props.gray ? '#707070' : '#000000')};

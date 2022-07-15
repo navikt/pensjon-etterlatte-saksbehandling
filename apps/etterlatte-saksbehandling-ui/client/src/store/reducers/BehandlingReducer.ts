@@ -1,4 +1,4 @@
-import {IAction} from '../AppContext'
+import { IAction } from '../AppContext'
 
 export interface IDetaljertBehandling {
   id: string
@@ -36,6 +36,7 @@ export enum IHendelseType {
   VEDTAK_AVKORTET = "VEDTAK:AVKORTET",
   VEDTAK_FATTET = "VEDTAK:FATTET",
   VEDTAK_UNDERKJENT = "VEDTAK:UNDERKJENT",
+  VEDTAK_ATTESTERT = "VEDTAK:ATTESTERT",
 }
 
 export enum IBehandlingStatus {

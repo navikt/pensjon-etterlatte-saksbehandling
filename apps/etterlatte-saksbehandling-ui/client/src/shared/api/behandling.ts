@@ -12,7 +12,7 @@ export const hentBehandling = async (id: string): Promise<IApiResponse<any>> => 
       data: data,
     }
   } catch (e) {
-    return { status: 500 }
+    return {status: 500}
   }
 }
 
@@ -27,7 +27,7 @@ export const avbrytBehandling = async (behandlingsid: string): Promise<IApiRespo
     }
   } catch (e) {
     console.log(e)
-    return { status: 500 }
+    return {status: 500}
   }
 }
 
@@ -41,7 +41,7 @@ export const fattVedtak = async (behandlingsId: string): Promise<IApiResponse<an
     }
   } catch (e) {
     console.log(e)
-    return { status: 500 }
+    return {status: 500}
   }
 }
 
@@ -55,7 +55,7 @@ export const attesterVedtak = async (behandlingId: string): Promise<IApiResponse
     }
   } catch (e) {
     console.log(e)
-    return { status: 500 }
+    return {status: 500}
   }
 }
 
@@ -80,6 +80,27 @@ export const underkjennVedtak = async (
     }
   } catch (e) {
     console.log(e)
-    return { status: 500 }
+    return {status: 500}
+  }
+}
+
+export const lagreBegrunnelseKommerBarnetTilgode = async (behandlingsId: string, begrunnelse: string, svar: string): Promise<IApiResponse<any>> => {
+  try {
+    const result: Response = await fetch(`${path}/api/lagrebegrunnelsekommertilgode/${behandlingsId}`, {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        begrunnelse: begrunnelse,
+        valgtBegrunnelse: svar,
+      }),
+    })
+    return {
+      status: result.status,
+    }
+  } catch (e) {
+    console.log(e)
+    return {status: 500}
   }
 }

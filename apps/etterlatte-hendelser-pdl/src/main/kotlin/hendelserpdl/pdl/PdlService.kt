@@ -26,7 +26,7 @@ class PdlService(
         logger.info("Henter folkeregisteridentifikator")
         return runBlocking {
             try {
-                pdl_app.post("$url/personident") {
+                pdl_app.post("$url/folkeregisterident") {
                     contentType(ContentType.Application.Json)
                     body = HentFolkeregisterIdentRequest(ident)
                 }

@@ -158,7 +158,7 @@ class IntegrationTest {
             install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
         }
 
-        pdlService = PdlService(httpClient, "http://etterlatte-behandling")
+        pdlService = PdlService(httpClient, "http://etterlatte-pdltjenester")
 
     }
 }

@@ -24,6 +24,7 @@ import io.ktor.server.cio.CIO
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
+import no.nav.etterlatte.behandling.grunnlagRoute
 import no.nav.etterlatte.behandling.vedtakRoute
 import no.nav.etterlatte.health.healthApi
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
@@ -65,6 +66,7 @@ class Server(applicationContext: ApplicationContext) {
                         behandlingRoute(applicationContext.behandlingService)
                         oppgaveRoute(applicationContext.oppgaveService)
                         vedtakRoute(applicationContext.vedtakService)
+                        grunnlagRoute(applicationContext.grunnlagService)
                     }
                 }
             }

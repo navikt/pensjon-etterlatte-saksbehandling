@@ -52,7 +52,7 @@ data class PdlBolkVariables(
 data class PdlFolkeregisterIdentVariables(
     val ident: String,
     val grupper: List<String>,
-    val historisk: Boolean
+    val historikk: Boolean
 )
 
 data class PdlPersonResponse(

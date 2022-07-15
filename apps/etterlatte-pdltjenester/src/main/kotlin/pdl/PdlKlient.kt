@@ -76,7 +76,7 @@ class PdlKlient(private val httpClient: HttpClient) {
             variables = PdlFolkeregisterIdentVariables(
                 ident = ident,
                 grupper = listOf("FOLKEREGISTERIDENT"),
-                historisk = true
+                historikk = true
             )
         )
         logger.info("Henter folkeregisterident for ident = $ident fra PDL")

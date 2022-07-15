@@ -18,6 +18,9 @@ spec:
     type: Recreate
   kafka:
     pool: nav-dev
+  azure:
+    application:
+      enabled: true
   envFrom:
     - secret: barnepensjon-secrets
   replicas:
@@ -37,7 +40,11 @@ spec:
       value: "https://kafka-schema-registry.nais-q.adeo.no/"
     - name: LEESAH_KAFKA_GROUP_ID
       value: "etterlatte-v1"
+    - name: PDL_AZURE_SCOPE
+        value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
   accessPolicy:
     outbound:
+      rules:
+        - application: etterlatte-pdltjenester
       external:
         - host: "kafka-schema-registry.nais-q.adeo.no"

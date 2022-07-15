@@ -1,6 +1,11 @@
 package no.nav.etterlatte.hendelserpdl
 
+import io.mockk.coEvery
+import io.mockk.mockk
 import no.nav.etterlatte.hendelserpdl.leesah.ILivetErEnStroemAvHendelser
+import no.nav.etterlatte.hendelserpdl.pdl.PdlService
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.person.pdl.leesah.Personhendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
@@ -11,22 +16,28 @@ internal class FinnDodsmeldingerTest {
 
     @Test
     fun ikkeDodsmelding() {
+        val pdlMock = mockk<PdlService>()
         val subject =
-            FinnDodsmeldinger(LeesahMock(listOf(Personhendelse().apply { put("opplysningstype", "Ikke dodsmelding") })),
-                DodsMock { _, _ -> fail() })
+            FinnDodsmeldinger(
+                LeesahMock(listOf(Personhendelse().apply { put("opplysningstype", "Ikke dodsmelding") })),
+                DodsMock { _, _ -> fail() }, pdlMock
+            )
         subject.stream()
     }
 
     @Test
     fun dodsmelding() {
+        val pdlMock = mockk<PdlService>() {
+            coEvery { hentFolkeregisterIdentifikator("123") } returns FolkeregisterIdent(Foedselsnummer.of("70078749472"))
+        }
         val dodsmeldinger = mutableListOf<String>()
         val subject = FinnDodsmeldinger(LeesahMock(listOf(Personhendelse().apply {
             put("opplysningstype", "DOEDSFALL_V1")
             put("personidenter", listOf("123"))
-        })), DodsMock { it, _ -> dodsmeldinger += it })
+        })), DodsMock { it, _ -> dodsmeldinger += it }, pdlMock)
         subject.stream()
         assertEquals(1, dodsmeldinger.size)
-        assertEquals("123", dodsmeldinger[0])
+        assertEquals("70078749472", dodsmeldinger[0])
     }
 
 }

@@ -3,6 +3,7 @@ package no.nav.etterlatte.hendelserpdl
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.hendelserpdl.leesah.ILivetErEnStroemAvHendelser
+import no.nav.etterlatte.hendelserpdl.pdl.Pdl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.format.DateTimeFormatter
@@ -10,13 +11,14 @@ import java.time.format.DateTimeFormatter
 
 class FinnDodsmeldinger(
     private val livshendelser: ILivetErEnStroemAvHendelser,
-    private val dodshendelser: IDodsmeldinger
+    private val dodshendelser: IDodsmeldinger,
+    private val pdlService: Pdl
 ) {
     val log: Logger = LoggerFactory.getLogger(FinnDodsmeldinger::class.java)
     var iterasjoner = 0
     var dodsmeldinger = 0
     var meldinger = 0
-    var stopped = true
+    var stopped = false
 
     fun stream() {
         iterasjoner++
@@ -26,10 +28,10 @@ class FinnDodsmeldinger(
 
             if (it.getOpplysningstype() == "DOEDSFALL_V1") {
 
+                val personnummer = runBlocking { pdlService.hentFolkeregisterIdentifikator(it.personidenter.first()) }
 
-                // TODO: se svar i #pdl-kanalen for om personnummer alltid er på indeks 1 i denne listen.
                 dodshendelser.personErDod(
-                    it.getPersonidenter()[0],
+                    personnummer.folkeregisterident.value,
                     (it.getDoedsfall()?.getDoedsdato()?.format(DateTimeFormatter.ISO_DATE))
                 )
                 log.info("Doedshendelse getPersonidenter: ${it.getPersonidenter()}")

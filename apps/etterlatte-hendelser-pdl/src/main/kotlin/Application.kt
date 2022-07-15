@@ -1,11 +1,13 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.application.Application
-import io.ktor.application.call
-import io.ktor.http.ContentType
-import io.ktor.response.respondText
-import io.ktor.routing.get
-import io.ktor.routing.routing
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.features.auth.Auth
+import io.ktor.client.features.json.JacksonSerializer
+import io.ktor.client.features.json.JsonFeature
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -13,7 +15,13 @@ import no.nav.etterlatte.hendelserpdl.DevConfig
 import no.nav.etterlatte.hendelserpdl.DodsmeldingerRapid
 import no.nav.etterlatte.hendelserpdl.FinnDodsmeldinger
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
+import no.nav.etterlatte.hendelserpdl.module
+import no.nav.etterlatte.hendelserpdl.pdl.PdlService
+import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
+import org.slf4j.LoggerFactory
+import kotlin.collections.set
+import kotlin.system.exitProcess
 
 var stream: FinnDodsmeldinger? = null
 
@@ -25,59 +33,51 @@ fun main() {
     env["NAV_TRUSTSTORE_PASSWORD"] = env["KAFKA_CREDSTORE_PASSWORD"]
     env["KAFKA_KEYSTORE_PASSWORD"] = env["KAFKA_CREDSTORE_PASSWORD"]
 
+    val logger = LoggerFactory.getLogger(Application::class.java)
+    val pdlService by lazy {
+        PdlService(pdlHttpClient(System.getenv()), "http://etterlatte-behandling")
+    }
+
     RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
         .withKtorModule(Application::module)
         .build()
         .apply {
             GlobalScope.launch {
-                stream = FinnDodsmeldinger(LivetErEnStroemAvHendelser(DevConfig().env), DodsmeldingerRapid(this@apply))
-                while (true) {
-                    if (stream?.stopped == true) {
-                        delay(200)
-                    } else {
-                        stream?.stream()
+                try {
+                    stream =
+                        FinnDodsmeldinger(
+                            LivetErEnStroemAvHendelser(DevConfig().env),
+                            DodsmeldingerRapid(this@apply),
+                            pdlService
+                        )
+
+                    while (true) {
+                        if (stream?.stopped == true) {
+                            delay(200)
+                        } else {
+                            stream?.stream()
+                        }
                     }
+                } catch (e: Exception) {
+                    logger.error("App avsluttet med en feil: ", e.message)
+                    exitProcess(1)
                 }
             }
         }.start()
-
 }
 
-@Suppress("unused") // Referenced in application.conf
-fun Application.module() {
 
-    routing {
-        get("/") {
-            call.respondText(
-                "Environment: " + System.getenv().keys.joinToString(","),
-                contentType = ContentType.Text.Plain
-            )
-        }
-        get("/start") {
-            stream?.start()
-            call.respondText("Starting leesah stream", contentType = ContentType.Text.Plain)
-        }
-        get("/status") {
-            call.respondText(
-                "Iterasjoner: ${stream?.iterasjoner}, Dødsmeldinger ${stream?.dodsmeldinger} av ${stream?.meldinger}",
-                contentType = ContentType.Text.Plain
-            )
-        }
-        get("/stop") {
-            stream?.stop()
-            call.respondText("Stopped reading messages", contentType = ContentType.Text.Plain)
-        }
-
-        get("/fromstart") {
-            stream?.fraStart()
-            call.respondText("partition has been set to start", contentType = ContentType.Text.Plain)
-        }
-
-        get("/isAlive") {
-            call.respondText("JADDA!", contentType = ContentType.Text.Plain)
-        }
-        get("/isReady") {
-            call.respondText("JADDA!", contentType = ContentType.Text.Plain)
+fun pdlHttpClient(props: Map<String, String>) = HttpClient(OkHttp) {
+    install(JsonFeature) {
+        serializer = JacksonSerializer {
+            registerModule(JavaTimeModule())
+            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         }
     }
-}
+    install(Auth) {
+        clientCredential {
+            config = props.toMutableMap()
+                .apply { put("AZURE_APP_OUTBOUND_SCOPE", requireNotNull(get("PDL_AZURE_SCOPE"))) }
+        }
+    }
+}.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }

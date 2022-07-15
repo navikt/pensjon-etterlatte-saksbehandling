@@ -1,9 +1,19 @@
 package no.nav.etterlatte.hendelserpdl
 
 import io.confluent.kafka.serializers.KafkaAvroSerializer
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.client.features.json.JacksonSerializer
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.http.ContentType
+import io.ktor.http.fullPath
+import io.ktor.http.headersOf
 import no.nav.common.KafkaEnvironment
 import no.nav.etterlatte.JsonMessage
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
+import no.nav.etterlatte.hendelserpdl.pdl.PdlService
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -19,6 +29,9 @@ import java.time.Duration
 import java.time.Instant
 
 class IntegrationTest {
+
+    private lateinit var pdlService: PdlService
+
     companion object {
         val kafkaEnv = KafkaEnvironment(
             noOfBrokers = 1,
@@ -41,6 +54,7 @@ class IntegrationTest {
 
         val leesahTopic: KafkaProducer<String, Personhendelse> = producerForLeesah()
         val rapid: KafkaConsumer<String, String> = consumerForRapid()
+        mockEndpoint("/personidentresponse.json")
 
         val app = testApp()
 
@@ -87,7 +101,7 @@ class IntegrationTest {
             val msg = JsonMessage(it.value(), MessageProblems(it.value()))
             println(it.value())
             msg.interestedIn("@avdod_ident", "@event_name", "system_read_count")
-            assertEquals("1234567", msg["@avdod_ident"].textValue())
+            assertEquals("70078749472", msg["@avdod_ident"].textValue())
             assertEquals("person_dod", msg["@event_name"].textValue())
             assertEquals(1, msg["system_read_count"].asInt())
         }
@@ -101,7 +115,9 @@ class IntegrationTest {
                 "LEESAH_KAFKA_GROUP_ID" to "leesah-consumer",
                 "LEESAH_KAFKA_SCHEMA_REGISTRY" to kafkaEnv.schemaRegistry?.url!!
             )
-        ), Dodsmeldinger(TestConfig(true, mapOf("KAFKA_BROKERS" to kafkaEnv.brokersURL)))
+        ),
+        Dodsmeldinger(TestConfig(true, mapOf("KAFKA_BROKERS" to kafkaEnv.brokersURL))),
+        pdlService
     )
 
 
@@ -125,4 +141,24 @@ class IntegrationTest {
             ProducerConfig.ACKS_CONFIG to "all",
         )
     )
+
+    private fun mockEndpoint(jsonUrl: String) {
+        val httpClient = HttpClient(MockEngine) {
+            engine {
+                addHandler { request ->
+                    if (request.url.fullPath.startsWith("/")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        val json = javaClass.getResource(jsonUrl)!!.readText()
+                        respond(json, headers = headers)
+                    } else {
+                        error(request.url.fullPath)
+                    }
+                }
+            }
+            install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
+        }
+
+        pdlService = PdlService(httpClient, "http://etterlatte-behandling")
+
+    }
 }

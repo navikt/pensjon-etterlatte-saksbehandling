@@ -31,8 +31,8 @@ export const KommerBarnetTilGodeVurdering =
 
     function lagreBegrunnelseKlikket() {
       if (!behandlingId) throw new Error('Mangler behandlingsid')
-      !svar ? setRadioError('Du må velge et svar') : setRadioError(undefined)
-      begrunnelse.length < 20 ? setBegrunnelseError('Begrunnelsen må være minst 20 tegn') : setBegrunnelseError(undefined)
+      !svar ? setRadioError('Du må velge et svar'):setRadioError(undefined)
+      begrunnelse.length < 20 ? setBegrunnelseError('Begrunnelsen må være minst 20 tegn'):setBegrunnelseError(undefined)
 
       if (radioError === undefined && begrunnelseError === undefined && svar !== undefined)
         lagreBegrunnelseKommerBarnetTilgode(behandlingId, begrunnelse, svar.toString()).then((response) => {
@@ -75,7 +75,7 @@ export const KommerBarnetTilGodeVurdering =
     const tittel =
       kommerSoekerTilgodeVurdering.resultat !== VurderingsResultat.OPPFYLT
         ? 'Ikke sannsynlig pensjonen kommer barnet til gode'
-        : 'Sannsynlig pensjonen kommer barnet til gode'
+        :'Sannsynlig pensjonen kommer barnet til gode'
 
     return (
       <VurderingsContainer>
@@ -84,78 +84,77 @@ export const KommerBarnetTilGodeVurdering =
             <GyldighetIcon status={kommerSoekerTilgodeVurdering.resultat} large={true}/>
           )}
         </div>
-
-            <div>
-              <VurderingsTitle>Trenger avklaring</VurderingsTitle>
-              <Undertekst gray={false}>
-                Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
-              </Undertekst>
-              <RadioGroupWrapper>
-                <RadioGroup
-                  legend=""
-                  size="small"
-                  className="radioGroup"
-                  onChange={(event) => {
-                    setSvar(ISvar[event as ISvar])
-                    setRadioError(undefined)
-                  }}
-                  error={radioError ? radioError : false}
-                >
-                  <div className="flex">
-                    <Radio value={ISvar.JA.toString()}>Ja</Radio>
-                    <Radio value={ISvar.NEI.toString()}>Nei</Radio>
-                  </div>
-                </RadioGroup>
-              </RadioGroupWrapper>
-              <Textarea
-                style={{padding: '10px', marginBottom: '10px'}}
-                label="Begrunnelse"
-                hideLabel={false}
-                placeholder="Forklar begrunnelsen"
-                value={begrunnelse}
-                onChange={(e) => {
-                  setBegrunnelse(e.target.value)
-                  begrunnelse.length > 19 && setBegrunnelseError(undefined)
-                }}
-                minRows={3}
+        {redigeringsModus ? (
+          <div>
+            <VurderingsTitle>Trenger avklaring</VurderingsTitle>
+            <Undertekst gray={false}>
+              Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
+            </Undertekst>
+            <RadioGroupWrapper>
+              <RadioGroup
+                legend=""
                 size="small"
-                error={begrunnelseError ? begrunnelseError : false}
-              />
-              <Button
-                style={{marginTop: '10px'}}
-                variant={"primary"}
-                size={"small"}
-                onClick={() => lagreBegrunnelseKlikket()}
+                className="radioGroup"
+                onChange={(event) => {
+                  setSvar(ISvar[event as ISvar])
+                  setRadioError(undefined)
+                }}
+                error={radioError ? radioError:false}
               >
-                Lagre
-              </Button>
-              <Button
-                style={{marginTop: '10px', marginLeft: '10px'}}
-                variant={"secondary"}
-                size={"small"}
-                onClick={() => reset()}
-              >
-                Avbryt
-              </Button>
-            </div>
-
-
-            <div>
-              <VurderingsTitle>{tittel}</VurderingsTitle>
-              <Undertekst gray={true}>
-                Automatisk {format(new Date(kommerSoekerTilgodeVurdering.vurdertDato), 'dd.MM.yyyy')}
-              </Undertekst>
-              {kommerSoekerTilgodeVurdering?.resultat !== VurderingsResultat.OPPFYLT && (
-                <>
-                  <Undertekst gray={false}>{hentTekst()}</Undertekst>
-                  <RedigerWrapper onClick={() => setRedigeringsModus(true)}>
-                    <CaseworkerfilledIcon/> <span className={"text"}>Legg til vurdering</span>
-                  </RedigerWrapper>
-                </>
-              )}
-            </div>
-
-
+                <div className="flex">
+                  <Radio value={ISvar.JA.toString()}>Ja</Radio>
+                  <Radio value={ISvar.NEI.toString()}>Nei</Radio>
+                </div>
+              </RadioGroup>
+            </RadioGroupWrapper>
+            <Textarea
+              style={{padding: '10px', marginBottom: '10px'}}
+              label="Begrunnelse"
+              hideLabel={false}
+              placeholder="Forklar begrunnelsen"
+              value={begrunnelse}
+              onChange={(e) => {
+                setBegrunnelse(e.target.value)
+                begrunnelse.length > 19 && setBegrunnelseError(undefined)
+              }}
+              minRows={3}
+              size="small"
+              error={begrunnelseError ? begrunnelseError:false}
+            />
+            <Button
+              style={{marginTop: '10px'}}
+              variant={"primary"}
+              size={"small"}
+              onClick={() => lagreBegrunnelseKlikket()}
+            >
+              Lagre
+            </Button>
+            <Button
+              style={{marginTop: '10px', marginLeft: '10px'}}
+              variant={"secondary"}
+              size={"small"}
+              onClick={() => reset()}
+            >
+              Avbryt
+            </Button>
+          </div>
+        ):(
+          <div>
+            <VurderingsTitle>{tittel}</VurderingsTitle>
+            <Undertekst gray={true}>
+              Automatisk {format(new Date(kommerSoekerTilgodeVurdering.vurdertDato), 'dd.MM.yyyy')}
+            </Undertekst>
+            {kommerSoekerTilgodeVurdering?.resultat === VurderingsResultat.OPPFYLT && (
+              <>
+                <Undertekst gray={false}>{hentTekst()}</Undertekst>
+                <RedigerWrapper onClick={() => setRedigeringsModus(true)}>
+                  <CaseworkerfilledIcon/> <span
+                  className={"text"}>Legg til vurdering</span>
+                </RedigerWrapper>
+              </>
+            )}
+          </div>
+        )}
 
       </VurderingsContainer>
     )

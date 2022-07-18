@@ -27,7 +27,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnla
         logger.info("Lagrer resultat om pensjon kommer barnet tilgode med behandlingsId: $behandlingsId")
         try {
             downstreamResourceClient.post(
-                Resource(clientId, "$resourceUrl/api/kommerbarnettilgode"),
+                Resource(clientId, "$resourceUrl/kommerbarnettilgode"),
                 accessToken,
                 SaksbehandlerOpplysning(sakId.toString(), behandlingsId, opplysning)
 

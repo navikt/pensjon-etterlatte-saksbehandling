@@ -10,7 +10,6 @@ import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
 import no.nav.etterlatte.getAccessToken
-import no.nav.security.token.support.ktor.TokenValidationContextPrincipal
 
 fun Route.grunnlagRoute(service: GrunnlagService) {
 

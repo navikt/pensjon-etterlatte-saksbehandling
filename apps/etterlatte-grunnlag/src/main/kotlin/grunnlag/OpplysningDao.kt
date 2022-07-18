@@ -16,6 +16,7 @@ class OpplysningDao(private val connection: () -> Connection) {
         val sakId: Long,
         val hendelseNummer: Long
     )
+
     private fun ResultSet.asBehandlingOpplysning(): Grunnlagsopplysning<ObjectNode> {
         return Grunnlagsopplysning(
             getObject("opplysning_id") as UUID,
@@ -32,7 +33,6 @@ class OpplysningDao(private val connection: () -> Connection) {
             getLong("sak_id"),
             getLong("hendelsenummer"),
         )
-
     }
 
     fun finnHendelserIGrunnlag(sakId: Long): List<GrunnlagHendelse> {

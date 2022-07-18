@@ -42,7 +42,7 @@ open class Grunnlagsopplysning<T>(
         fun toJson() = objectMapperKilde.writeValueAsString(this)
     }
 
-    class Saksbehandler(val ident: String, tidspunkt: Instant?) : Kilde("saksbehandler") {
+    class Saksbehandler(val ident: String, val tidspunkt: Instant) : Kilde("saksbehandler") {
         override fun toString(): String {
             return "saksbehandler $ident"
         }

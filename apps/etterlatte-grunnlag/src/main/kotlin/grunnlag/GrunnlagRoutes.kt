@@ -38,7 +38,7 @@ fun Route.grunnlagRoutes(service: GrunnlagService) {
 
     post("/kommerbarnettilgode") {
         val body = call.receive<SaksbehandlerOpplysning>()
-        service.opprettGrunnlag(body.sakId.toLong(), body.opplysning)
+        service.opplysningFraSaksbehandler(body.sakId.toLong(), body.opplysning)
         call.respond("ok")
     }
 

@@ -65,7 +65,7 @@ class GrunnlagHendelser(
             }
         }
 
-    private fun no.nav.helse.rapids_rivers.JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
+    private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 
     private fun sendAvdoedInntektBehov(
         grunnlagsopplysning: Grunnlagsopplysning<ObjectNode>,

@@ -19,7 +19,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
 
             try {
                 val behandlingId = call.parameters["behandlingId"]
-                val saksbehandlerId = call.principal<TokenValidationContextPrincipal>()!!.context.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")
+                val saksbehandlerId = "Z1234567" //call.principal<TokenValidationContextPrincipal>()!!.context.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")
                 val body = call.receive<KommerBarnetTilgodeClientRequest>()
 
                 if (behandlingId == null) {
@@ -37,7 +37,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
                     )
                 }
             } catch (ex: Exception) {
-                logger.error("underkjenning feilet", ex)
+                logger.error("kommer barnet tilgode feilet", ex)
                 throw ex
             }
         }

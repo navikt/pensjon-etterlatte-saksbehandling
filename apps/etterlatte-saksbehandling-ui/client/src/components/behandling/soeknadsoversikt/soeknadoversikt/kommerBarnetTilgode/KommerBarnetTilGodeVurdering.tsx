@@ -31,8 +31,8 @@ export const KommerBarnetTilGodeVurdering =
 
     function lagreBegrunnelseKlikket() {
       if (!behandlingId) throw new Error('Mangler behandlingsid')
-      !svar ? setRadioError('Du må velge et svar'):setRadioError(undefined)
-      begrunnelse.length < 20 ? setBegrunnelseError('Begrunnelsen må være minst 20 tegn'):setBegrunnelseError(undefined)
+      !svar ? setRadioError('Du må velge et svar') : setRadioError(undefined)
+      begrunnelse.length < 20 ? setBegrunnelseError('Begrunnelsen må være minst 20 tegn') : setBegrunnelseError(undefined)
 
       if (radioError === undefined && begrunnelseError === undefined && svar !== undefined)
         lagreBegrunnelseKommerBarnetTilgode(behandlingId, begrunnelse, svar.toString()).then((response) => {
@@ -75,7 +75,7 @@ export const KommerBarnetTilGodeVurdering =
     const tittel =
       kommerSoekerTilgodeVurdering.resultat !== VurderingsResultat.OPPFYLT
         ? 'Ikke sannsynlig pensjonen kommer barnet til gode'
-        :'Sannsynlig pensjonen kommer barnet til gode'
+        : 'Sannsynlig pensjonen kommer barnet til gode'
 
     return (
       <VurderingsContainer>
@@ -99,7 +99,7 @@ export const KommerBarnetTilGodeVurdering =
                   setSvar(ISvar[event as ISvar])
                   setRadioError(undefined)
                 }}
-                error={radioError ? radioError:false}
+                error={radioError ? radioError : false}
               >
                 <div className="flex">
                   <Radio value={ISvar.JA.toString()}>Ja</Radio>
@@ -119,7 +119,7 @@ export const KommerBarnetTilGodeVurdering =
               }}
               minRows={3}
               size="small"
-              error={begrunnelseError ? begrunnelseError:false}
+              error={begrunnelseError ? begrunnelseError : false}
             />
             <Button
               style={{marginTop: '10px'}}
@@ -138,7 +138,7 @@ export const KommerBarnetTilGodeVurdering =
               Avbryt
             </Button>
           </div>
-        ):(
+        ) : (
           <div>
             <VurderingsTitle>{tittel}</VurderingsTitle>
             <Undertekst gray={true}>

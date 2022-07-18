@@ -2,6 +2,7 @@ object NavFelles {
     const val RapidAndRivers = "com.github.navikt:rapids-and-rivers:2022.04.20-09.43.9ad89f533b41"
     const val TokenClientCore = "no.nav.security:token-client-core:1.3.3"
     const val TokenValidationKtor = "no.nav.security:token-validation-ktor:1.3.3"
+    const val TokenValidationKtor2 = "no.nav.security:token-validation-ktor-v2:2.1.2"
     const val MockOauth2Server = "no.nav.security:mock-oauth2-server:0.3.1"
 }
 
@@ -29,6 +30,35 @@ object Ktor {
     const val AuthJwt = "io.ktor:ktor-auth-jwt:$version"
     const val Jackson = "io.ktor:ktor-jackson:$version"
     const val MetricsMicrometer = "io.ktor:ktor-metrics-micrometer:$version"
+
+    const val ClientMock = "io.ktor:ktor-client-mock:$version"
+    const val ServerTests = "io.ktor:ktor-server-tests:$version"
+}
+
+object Ktor2 {
+    private const val version = "2.0.3"
+
+    const val OkHttp = "io.ktor:ktor-client-okhttp:$version"
+    const val ServerNetty = "io.ktor:ktor-server-netty:$version"
+    const val ClientCore = "io.ktor:ktor-client-core:$version"
+    const val ClientCoreJvm = "io.ktor:ktor-client-core-jvm:$version"
+    const val ClientLoggingJvm = "io.ktor:ktor-client-logging-jvm:$version"
+    const val ClientAuth = "io.ktor:ktor-client-auth:$version"
+    const val ClientAuthJvm = "io.ktor:ktor-client-auth-jvm:$version"
+    const val ClientApache = "io.ktor:ktor-client-apache:$version"
+    const val ClientJackson = "io.ktor:ktor-client-jackson:$version"
+    const val ClientLogging = "io.ktor:ktor-client-logging:$version"
+    const val ClientCioJvm = "io.ktor:ktor-client-cio-jvm:$version"
+    const val ServerCore = "io.ktor:ktor-server-core:$version"
+    const val ServerCio = "io.ktor:ktor-server-cio:$version"
+    const val Auth = "io.ktor:ktor-server-auth:$version"
+    const val AuthJwt = "io.ktor:ktor-server-auth-jwt:$version"
+    const val ServerContentNegotiation = "io.ktor:ktor-server-content-negotiation:$version"
+    const val ClientContentNegotiation = "io.ktor:ktor-client-content-negotiation:$version"
+    const val Jackson = "io.ktor:ktor-serialization-jackson:$version"
+    const val CallLogging = "io.ktor:ktor-server-call-logging:$version"
+    const val StatusPages = "io.ktor:ktor-server-status-pages:$version"
+    const val MetricsMicrometer = "io.ktor:ktor-server-metrics-micrometer:$version"
 
     const val ClientMock = "io.ktor:ktor-client-mock:$version"
     const val ServerTests = "io.ktor:ktor-server-tests:$version"

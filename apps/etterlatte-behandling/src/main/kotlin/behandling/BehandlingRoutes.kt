@@ -1,18 +1,10 @@
 package no.nav.etterlatte.behandling
 
-import io.ktor.application.ApplicationCall
-import io.ktor.application.call
-import io.ktor.application.log
 import io.ktor.http.HttpStatusCode
-import io.ktor.request.receive
-import io.ktor.response.respond
-import io.ktor.response.respondText
-import io.ktor.routing.Route
-import io.ktor.routing.application
-import io.ktor.routing.delete
-import io.ktor.routing.get
-import io.ktor.routing.post
-import io.ktor.routing.route
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService

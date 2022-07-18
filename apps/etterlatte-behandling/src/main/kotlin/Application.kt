@@ -2,32 +2,22 @@ package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.ktor.application.Application
-import io.ktor.application.ApplicationCallPipeline
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.application.log
-import io.ktor.auth.Authentication
-import io.ktor.auth.authenticate
-import io.ktor.auth.principal
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
-import io.ktor.features.StatusPages
+import com.typesafe.config.ConfigFactory
 import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.jackson
-import io.ktor.request.header
-import io.ktor.request.httpMethod
-import io.ktor.request.path
-import io.ktor.response.respond
-import io.ktor.response.respondText
-import io.ktor.routing.Route
-import io.ktor.routing.get
-import io.ktor.routing.route
-import io.ktor.routing.routing
+import io.ktor.serialization.jackson.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.cio.CIO
+import io.ktor.server.config.*
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.delay
@@ -40,6 +30,8 @@ import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakRoutes
+import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
 import java.util.*
 import javax.sql.DataSource
@@ -57,6 +49,12 @@ fun appFromBeanfactory(env: BeanFactory): App {
     return App(env)
 }
 
+
+fun Application.sikkerhetsModul(){
+    install(Authentication) {
+        tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
+    }
+}
 fun Application.module(beanFactory: BeanFactory) {
     val ds = beanFactory.datasourceBuilder().apply {
         migrate()
@@ -69,10 +67,6 @@ fun Application.module(beanFactory: BeanFactory) {
         }
     }
 
-    install(Authentication) {
-        beanFactory.tokenValidering()()
-    }
-
     install(CallLogging) {
         level = Level.INFO
         filter { call -> !call.request.path().startsWith("/internal") }
@@ -81,8 +75,8 @@ fun Application.module(beanFactory: BeanFactory) {
     }
 
     install(StatusPages) {
-        exception<Throwable> { cause ->
-            log.error("En feil oppstod: ${cause.message}", cause)
+        exception<Throwable> { call, cause ->
+            call.application.log.error("En feil oppstod: ${cause.message}", cause)
             call.respond(HttpStatusCode.InternalServerError, "En feil oppstod: ${cause.message}")
         }
     }
@@ -106,7 +100,7 @@ fun Application.module(beanFactory: BeanFactory) {
 
 private fun Route.attachContekst(ds: DataSource) {
     intercept(ApplicationCallPipeline.Call) {
-        val requestContekst = Context(decideUser(call.principal()!!), DatabaseContext(ds))
+        val requestContekst = Context(decideUser(call.principal<TokenValidationContextPrincipal>()!!), DatabaseContext(ds))
         withContext(
             Dispatchers.Default + Kontekst.asContextElement(
                 value = requestContekst
@@ -122,6 +116,7 @@ class App(private val beanFactory: BeanFactory) {
     fun run() {
         embeddedServer(CIO, applicationEngineEnvironment {
             modules.add { module(beanFactory) }
+            modules.add { sikkerhetsModul() }
             connector { port = 8080 }
         }).start(true)
         beanFactory.behandlingHendelser().nyHendelse.close()

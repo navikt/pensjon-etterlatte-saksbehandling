@@ -1,15 +1,13 @@
 package no.nav.etterlatte.itest
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import io.ktor.auth.Authentication
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.TestApplicationRequest
-import io.ktor.server.testing.handleRequest
-import io.ktor.server.testing.setBody
-import io.ktor.server.testing.withTestApplication
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
+import io.ktor.server.auth.*
+import io.ktor.server.testing.*
 import no.nav.common.KafkaEnvironment
 import no.nav.etterlatte.CommonFactory
 import no.nav.etterlatte.DataSourceBuilder
@@ -78,65 +76,72 @@ class ApplicationTest {
 
         var behandlingOpprettet: UUID? = null
         val beans = TestBeanFactory(postgreSQLContainer.jdbcUrl, kafkaConfig, topicname)
-        withTestApplication({
-            module(beans)
-        }) {
 
-            handleRequest(HttpMethod.Get, "/saker/123") {
-                addAuthSaksbehandler()
-            }.apply {
-                assertEquals(HttpStatusCode.NotFound, response.status())
+        testApplication {
+
+            val client = createClient {
+                install(ContentNegotiation) {
+                    jackson{
+                        registerModule(JavaTimeModule())
+                    }
+                }
             }
-
-            val sak: Sak = handleRequest(HttpMethod.Get, "/personer/$fnr/saker/BP") {
+            install(Authentication){
+                tokenTestSupportAcceptsAllTokens()
+            }
+            application { module(beans) }
+            client.get("/saker/123"){
                 addAuthSaksbehandler()
             }.apply {
-                assertEquals(HttpStatusCode.OK, response.status())
-            }.response.content!!.let { objectMapper.readValue(it) }
+                assertEquals(HttpStatusCode.NotFound, status)
+            }
+            val sak: Sak = client.get("/personer/$fnr/saker/BP") {
+                addAuthSaksbehandler()
+            }.apply {
+                assertEquals(HttpStatusCode.OK, status)
+            }.body()
 
-            handleRequest(HttpMethod.Get, "/saker/${sak.id}") {
+            client.get( "/saker/${sak.id}") {
                 addAuthSaksbehandler()
             }.also {
-                assertEquals(HttpStatusCode.OK, it.response.status())
-                val lestSak: Sak = objectMapper.readValue(it.response.content!!)
+                assertEquals(HttpStatusCode.OK, it.status)
+                val lestSak: Sak = it.body()
                 assertEquals("123", lestSak.ident)
                 assertEquals("BP", lestSak.sakType)
 
             }
 
-            val behandlingId = handleRequest(HttpMethod.Post, "/behandlinger") {
+            val behandlingId = client.post( "/behandlinger") {
                 addAuthServiceBruker()
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
-                    no.nav.etterlatte.libs.common.objectMapper.writeValueAsString(
                         BehandlingsBehov(
                             1,
                             Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
                             LocalDateTime.now().toString()
                         )
-                    )
+
                 )
             }.let {
-                assertEquals(HttpStatusCode.OK, it.response.status())
-                UUID.fromString(it.response.content)
+                assertEquals(HttpStatusCode.OK, it.status)
+                UUID.fromString(it.body())
             }
             behandlingOpprettet = behandlingId
 
-            handleRequest(HttpMethod.Get, "/sak/1/behandlinger") {
+            client.get( "/sak/1/behandlinger") {
                 addAuthSaksbehandler()
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.let {
-                assertEquals(HttpStatusCode.OK, it.response.status())
-                objectMapper.readValue<BehandlingListe>(it.response.content!!)
+                assertEquals(HttpStatusCode.OK, it.status)
+                it.body<BehandlingListe>()
             }.also {
                 assertEquals(1, it.behandlinger.size)
             }
 
-            handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/gyldigfremsatt") {
+            client.post( "/behandlinger/$behandlingId/gyldigfremsatt") {
                 addAuthSaksbehandler()
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
-                    no.nav.etterlatte.libs.common.objectMapper.writeValueAsString(
                         GyldighetsResultat(
                             VurderingsResultat.OPPFYLT,
                             listOf(
@@ -149,27 +154,26 @@ class ApplicationTest {
                             LocalDateTime.now()
                         )
                     )
-                )
+
             }.let {
-                assertEquals(HttpStatusCode.OK, it.response.status())
+                assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            handleRequest(HttpMethod.Get, "/behandlinger/$behandlingId") {
+            client.get( "/behandlinger/$behandlingId") {
                 addAuthSaksbehandler()
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {
-                assertEquals(HttpStatusCode.OK, it.response.status())
-                val behandling: DetaljertBehandling = (objectMapper.readValue(it.response.content!!))
+                assertEquals(HttpStatusCode.OK, it.status)
+                val behandling: DetaljertBehandling = it.body()
                 assertNotNull(behandling.id)
                 assertEquals("innsender", behandling.innsender)
                 assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving?.resultat)
 
             }
-            handleRequest(HttpMethod.Post, "/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {
+            client.post( "/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {
                 addAuthSaksbehandler()
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
-                    objectMapper.writeValueAsString(
                         VedtakHendelse(
                             12L,
                             "Saksbehandlier",
@@ -178,33 +182,31 @@ class ApplicationTest {
                             null
                         )
                     )
-                )
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {
-                assertEquals(HttpStatusCode.OK, it.response.status())
+                assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            handleRequest(HttpMethod.Get, "/behandlinger/$behandlingId") {
+            client.get( "/behandlinger/$behandlingId") {
                 addAuthSaksbehandler()
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {
-                assertEquals(HttpStatusCode.OK, it.response.status())
-                val behandling: DetaljertBehandling = (objectMapper.readValue(it.response.content!!))
+                assertEquals(HttpStatusCode.OK, it.status)
+                val behandling: DetaljertBehandling = it.body()
                 assertNotNull(behandling.id)
                 assertEquals("FATTET_VEDTAK", behandling.status?.name)
 
             }
 
-            handleRequest(HttpMethod.Get, "/oppgaver") {
+            client.get( "/oppgaver") {
                 addAuthAttesterer()
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.also {
-                assertEquals(HttpStatusCode.OK, it.response.status())
-                val oppgaver: OppgaveListeDto = (objectMapper.readValue(it.response.content!!))
+                assertEquals(HttpStatusCode.OK, it.status)
+                val oppgaver: OppgaveListeDto = it.body()
                 assertEquals(1, oppgaver.oppgaver.size)
                 assertEquals(behandlingId, oppgaver.oppgaver.first().behandlingId)
             }
-
         }
 
         beans.behandlingHendelser().nyHendelse.close()
@@ -232,16 +234,15 @@ val saksbehandlerToken =
 val attestererToken =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIGZvciBzYWtzYmVoYW5kbGVyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZWhhbmRsZXIwMSIsImdyb3VwcyI6WyIwYWYzOTU1Zi1kZjg1LTRlYjAtYjViMi00NWJmMmM4YWViOWUiLCI2M2Y0NmY3NC04NGE4LTRkMWMtODdhOC03ODUzMmFiM2FlNjAiXX0.YzF4IXwaolgOCODNwkEKn43iZbwHpQuSmQObQm0co-A"
 
-fun TestApplicationRequest.addAuthSaksbehandler() {
-    addHeader(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+fun HttpRequestBuilder.addAuthSaksbehandler() {
+    header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+}
+fun HttpRequestBuilder.addAuthAttesterer() {
+    header(HttpHeaders.Authorization, "Bearer $attestererToken")
 }
 
-fun TestApplicationRequest.addAuthAttesterer() {
-    addHeader(HttpHeaders.Authorization, "Bearer $attestererToken")
-}
-
-fun TestApplicationRequest.addAuthServiceBruker() {
-    addHeader(HttpHeaders.Authorization, "Bearer $clientCredentialTokenMedKanSetteKildeRolle")
+fun HttpRequestBuilder.addAuthServiceBruker() {
+    header(HttpHeaders.Authorization, "Bearer $clientCredentialTokenMedKanSetteKildeRolle")
 }
 
 
@@ -251,8 +252,6 @@ class TestBeanFactory(
     private val rapidtopic: String
 ) : CommonFactory() {
     override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
-    override fun tokenValidering(): Authentication.Configuration.() -> Unit =
-        Authentication.Configuration::tokenTestSupportAcceptsAllTokens
 
     override fun rapid(): KafkaProdusent<String, String> = KafkaProdusentImpl(
         KafkaProducer(kafkaConfig.producerConfig(), StringSerializer(), StringSerializer()),

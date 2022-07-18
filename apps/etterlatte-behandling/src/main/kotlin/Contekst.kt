@@ -1,7 +1,7 @@
 package no.nav.etterlatte
 
 import no.nav.security.token.support.core.context.TokenValidationContext
-import no.nav.security.token.support.ktor.TokenValidationContextPrincipal
+import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.sql.Connection
 
 object Kontekst : ThreadLocal<Context>()

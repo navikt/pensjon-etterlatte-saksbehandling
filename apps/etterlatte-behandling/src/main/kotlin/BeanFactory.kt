@@ -1,8 +1,5 @@
 package no.nav.etterlatte
 
-import com.typesafe.config.ConfigFactory
-import io.ktor.auth.Authentication
-import io.ktor.config.HoconApplicationConfig
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingsHendelser
 import no.nav.etterlatte.behandling.GenerellBehandlingService
@@ -21,7 +18,6 @@ import no.nav.etterlatte.kafka.KafkaProdusentImpl
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
-import no.nav.security.token.support.ktor.tokenValidationSupport
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.common.serialization.StringSerializer
 
@@ -31,7 +27,6 @@ interface BeanFactory {
     fun foerstegangsbehandlingService(): FoerstegangsbehandlingService
     fun revurderingService(): RevurderingService
     fun generellBehandlingService(): GenerellBehandlingService
-    fun tokenValidering(): Authentication.Configuration.() -> Unit
     fun sakDao(): SakDao
     fun behandlingDao(): BehandlingDao
     fun hendelseDao(): HendelseDao
@@ -107,8 +102,6 @@ abstract class CommonFactory : BeanFactory {
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     private val datasourceBuilder: DataSourceBuilder by lazy { DataSourceBuilder(env) }
     override fun datasourceBuilder() = datasourceBuilder
-    override fun tokenValidering(): Authentication.Configuration.() -> Unit =
-        { tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load())) }
 
     override fun rapid(): KafkaProdusent<String, String> {
         return KafkaProdusentImpl(

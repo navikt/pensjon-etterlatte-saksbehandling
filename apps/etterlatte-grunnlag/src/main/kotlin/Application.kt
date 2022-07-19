@@ -6,7 +6,6 @@ import no.nav.etterlatte.grunnlag.*
 import no.nav.helse.rapids_rivers.RapidApplication
 
 suspend fun main() {
-    ventPaaNettverk()
     val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
     }
@@ -28,7 +27,4 @@ suspend fun main() {
     }
 }
 
-private fun ventPaaNettverk() {
-    runBlocking { delay(5000) }
-}
 

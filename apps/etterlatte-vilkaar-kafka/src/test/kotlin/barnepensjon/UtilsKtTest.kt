@@ -126,6 +126,22 @@ internal class UtilsKtTest {
             emptyList(),
             LocalDateTime.now()
         )
+        val oppfyltSaksbehandlerResultat = VurdertVilkaar(
+            Vilkaartyper.SAKSBEHANDLER_RESULTAT,
+            VurderingsResultat.OPPFYLT,
+            null,
+            emptyList(),
+            LocalDateTime.now()
+        )
+        val ikkeOppfyltSaksbehandlerResultat = VurdertVilkaar(
+            Vilkaartyper.SAKSBEHANDLER_RESULTAT,
+            VurderingsResultat.IKKE_OPPFYLT,
+            null,
+            emptyList(),
+            LocalDateTime.now()
+        )
+
+
     }
 
     @Test
@@ -159,14 +175,16 @@ internal class UtilsKtTest {
     @Test
     fun vilkarsvurderingKanIkkeVurderesOmMinstEtVilkårIkkeKanVurderes() {
         assertEquals(
-            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, setVilkaarVurderingFraVilkaar(
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            setVilkaarVurderingFraVilkaar(
                 listOf(
                     oppfyltVilkarAlder, oppfyltVilkarDoedsfall, manglerInfoVilkaarBarnetsMedlemskap
                 )
             )
         )
         assertEquals(
-            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, setVilkaarVurderingFraVilkaar(
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            setVilkaarVurderingFraVilkaar(
                 listOf(
                     oppfyltVilkarAlder,
                     oppfyltVilkarDoedsfall,
@@ -206,7 +224,8 @@ internal class UtilsKtTest {
     @Test
     fun kommerBarnetTilGodeVurderingOppfylt() {
         assertEquals(
-            VurderingsResultat.OPPFYLT, setVurderingFraKommerBarnetTilGode(
+            VurderingsResultat.OPPFYLT,
+            setVurderingFraKommerBarnetTilGode(
                 listOf(
                     oppfyltGjenlevendeBarnSammeAdresse,
                     oppfyltBarnIngenUtlandsadresse,
@@ -219,7 +238,8 @@ internal class UtilsKtTest {
     @Test
     fun kommerBarnetTilGodeVurderingIkkeOppfylt() {
         assertEquals(
-            VurderingsResultat.IKKE_OPPFYLT, setVurderingFraKommerBarnetTilGode(
+            VurderingsResultat.IKKE_OPPFYLT,
+            setVurderingFraKommerBarnetTilGode(
                 listOf(
                     ikkeOppfyltGjenlevendeBarnSammeAdresse,
                     oppfyltBarnIngenUtlandsadresse,
@@ -228,7 +248,8 @@ internal class UtilsKtTest {
             )
         )
         assertEquals(
-            VurderingsResultat.IKKE_OPPFYLT, setVurderingFraKommerBarnetTilGode(
+            VurderingsResultat.IKKE_OPPFYLT,
+            setVurderingFraKommerBarnetTilGode(
                 listOf(
                     ikkeOppfyltGjenlevendeBarnSammeAdresse,
                     oppfyltBarnIngenUtlandsadresse,
@@ -237,7 +258,8 @@ internal class UtilsKtTest {
             )
         )
         assertEquals(
-            VurderingsResultat.IKKE_OPPFYLT, setVurderingFraKommerBarnetTilGode(
+            VurderingsResultat.IKKE_OPPFYLT,
+            setVurderingFraKommerBarnetTilGode(
                 listOf(
                     oppfyltGjenlevendeBarnSammeAdresse,
                     ikkeOppfyltBarnIngenUtlandsadresse,
@@ -246,7 +268,8 @@ internal class UtilsKtTest {
             )
         )
         assertEquals(
-            VurderingsResultat.IKKE_OPPFYLT, setVurderingFraKommerBarnetTilGode(
+            VurderingsResultat.IKKE_OPPFYLT,
+            setVurderingFraKommerBarnetTilGode(
                 listOf(
                     ikkeOppfyltBarnAvdoedSammeAdresse, ikkeOppfyltBarnIngenUtlandsadresse, oppfyltBarnAvdoedSammeAdresse
                 )
@@ -255,9 +278,48 @@ internal class UtilsKtTest {
     }
 
     @Test
+    fun saksbehandlerResultatSkalGjelde() {
+        assertEquals(
+            VurderingsResultat.IKKE_OPPFYLT,
+            setVurderingFraKommerBarnetTilGode(
+                listOf(
+                    oppfyltGjenlevendeBarnSammeAdresse,
+                    oppfyltBarnIngenUtlandsadresse,
+                    ikkeOppfyltBarnAvdoedSammeAdresse,
+                    ikkeOppfyltSaksbehandlerResultat
+                )
+            )
+        )
+
+        assertEquals(
+            VurderingsResultat.OPPFYLT,
+            setVurderingFraKommerBarnetTilGode(
+                listOf(
+                    ikkeOppfyltGjenlevendeBarnSammeAdresse,
+                    oppfyltBarnIngenUtlandsadresse,
+                    ikkeOppfyltBarnAvdoedSammeAdresse,
+                    oppfyltSaksbehandlerResultat
+                )
+            )
+        )
+
+        assertEquals(
+            VurderingsResultat.OPPFYLT,
+            setVurderingFraKommerBarnetTilGode(
+                listOf(
+                    oppfyltGjenlevendeBarnSammeAdresse,
+                    oppfyltBarnIngenUtlandsadresse,
+                    ikkeOppfyltBarnAvdoedSammeAdresse
+                )
+            )
+        )
+    }
+
+    @Test
     fun kommerBarnetTilGodeVurderingManglerInfo() {
         assertEquals(
-            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, setVurderingFraKommerBarnetTilGode(
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            setVurderingFraKommerBarnetTilGode(
                 listOf(
                     manglerInfoGjenlevendeBarnSammeAdresse,
                     oppfyltBarnIngenUtlandsadresse,

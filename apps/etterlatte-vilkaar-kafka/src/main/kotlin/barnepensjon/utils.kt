@@ -29,8 +29,12 @@ fun setVurderingFraKommerBarnetTilGode(vilkaar: List<VurdertVilkaar>): Vurdering
         vilkaar.find { it.navn == Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE }?.resultat
     val avdoedAdresse =
         vilkaar.find { it.navn == Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE }?.resultat
+    val saksbehandlerResultat =
+        vilkaar.find { it.navn == Vilkaartyper.SAKSBEHANDLER_RESULTAT }?.resultat
 
-    return if (gjenlevendeBarnSammeAdresse != VurderingsResultat.IKKE_OPPFYLT) {
+    return if (saksbehandlerResultat != null) {
+        saksbehandlerResultat
+    } else if (gjenlevendeBarnSammeAdresse != VurderingsResultat.IKKE_OPPFYLT) {
         hentVurdering(listOf(gjenlevendeBarnSammeAdresse, barnIngenUtlandsadresse))
     } else {
         hentVurdering(listOf(gjenlevendeBarnSammeAdresse, barnIngenUtlandsadresse, avdoedAdresse))

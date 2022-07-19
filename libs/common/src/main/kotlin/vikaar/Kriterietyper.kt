@@ -24,6 +24,7 @@ enum class Kriterietyper {
     SOEKER_IKKE_ADRESSE_I_UTLANDET,
     GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET,
     SAMME_BOSTEDSADRESSE,
+    SAKSBEHANDLER_RESULTAT,
 }
 
 enum class Metakriterietyper {

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.barnepensjon.model
 
+import barnepensjon.kommerbarnettilgode.saksbehandlerResultat
 import barnepensjon.vilkaar.avdoedesmedlemskap.vilkaarAvdoedesMedlemskap
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -12,6 +13,7 @@ import no.nav.etterlatte.libs.common.inntekt.PensjonUforeOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
 import no.nav.etterlatte.libs.common.vikaar.*
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
 import org.slf4j.LoggerFactory
@@ -35,7 +37,6 @@ class VilkaarService {
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
         val pensjonUfore = finnOpplysning<PensjonUforeOpplysning>(opplysninger, Opplysningstyper.PENSJON_UFORE_V1)
         val arbeidsforhold = finnOpplysning<ArbeidsforholdOpplysning>(opplysninger, Opplysningstyper.ARBEIDSFORHOLD_V1)
-
 
         val vilkaar = listOf(
             vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, soekerPdl, avdoedPdl),
@@ -70,9 +71,9 @@ class VilkaarService {
 
     fun hentVirkningstidspunkt(doedsdato: LocalDate, mottattDato: LocalDate): YearMonth {
         if (mottattDato.year - doedsdato.year > 3) {
-            return YearMonth.of(mottattDato.year -3, mottattDato.month)
+            return YearMonth.of(mottattDato.year - 3, mottattDato.month)
         }
-        return YearMonth.of(doedsdato.year, doedsdato.month+1)
+        return YearMonth.of(doedsdato.year, doedsdato.month + 1)
     }
 
 
@@ -83,6 +84,7 @@ class VilkaarService {
         val soekerSoeknad =
             finnOpplysning<SoekerBarnSoeknad>(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1)
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
+        val saksbehandlerKommerBarnetTilgode = finnOpplysning<ResultatKommerBarnetTilgode>(opplysninger, Opplysningstyper.SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1)
 
         val kommerBarnetTilGode = listOf(
             barnOgForelderSammeBostedsadresse(
@@ -95,12 +97,16 @@ class VilkaarService {
                 Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
                 soekerPdl,
                 avdoedPdl
+            ),
+            saksbehandlerResultat(
+                Vilkaartyper.SAKSBEHANDLER_RESULTAT,
+                saksbehandlerKommerBarnetTilgode
             )
         )
 
-        val vilkaarResultat = setVurderingFraKommerBarnetTilGode(kommerBarnetTilGode)
-        val vurdertDato = hentSisteVurderteDato(kommerBarnetTilGode)
-        val vurdering = VilkaarResultat(vilkaarResultat, kommerBarnetTilGode, vurdertDato)
+        val vilkaarResultat = setVurderingFraKommerBarnetTilGode(kommerBarnetTilGode.filterNotNull())
+        val vurdertDato = hentSisteVurderteDato(kommerBarnetTilGode.filterNotNull())
+        val vurdering = VilkaarResultat(vilkaarResultat, kommerBarnetTilGode.filterNotNull(), vurdertDato)
 
         val familieforhold = mapFamiliemedlemmer(soekerPdl, soekerSoeknad, gjenlevendePdl, avdoedPdl)
 

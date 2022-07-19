@@ -25,4 +25,5 @@ enum class KriterieOpplysningsType {
     ADRESSE_GAPS,
     STATSBORGERSKAP,
     UTLAND,
+    SAKSBEHANDLER_RESULTAT
 }

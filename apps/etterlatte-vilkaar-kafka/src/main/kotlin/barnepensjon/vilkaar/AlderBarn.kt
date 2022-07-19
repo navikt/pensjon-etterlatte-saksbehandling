@@ -47,8 +47,12 @@ fun kriterieSoekerErILive(soekerPdl: VilkaarOpplysning<Person>?, avdoedPdl: Vilk
             Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
         )
     )
-    // TODO ai: Sjekk om det er vits att søker med dødsdato fortsatt har oppfyllt vurdering
-    val resultat = vurderOpplysning { soekerPdl.opplysning.doedsdato == null || (soekerPdl.opplysning.doedsdato!!.isAfter(hentVirkningsdato(avdoedPdl))) }
+
+    fun VilkaarOpplysning<Person>.lever() = opplysning.doedsdato == null
+    fun VilkaarOpplysning<Person>.doedeEtterVirk() = opplysning.doedsdato?.isAfter(hentVirkningsdato(avdoedPdl))?: false
+    fun VilkaarOpplysning<Person>.levdePaaVirkningsdato() = lever() || doedeEtterVirk()
+
+    val resultat = vurderOpplysning { soekerPdl.levdePaaVirkningsdato() }
 
     return Kriterie(Kriterietyper.SOEKER_ER_I_LIVE, resultat, opplysningsGrunnlag)
 }

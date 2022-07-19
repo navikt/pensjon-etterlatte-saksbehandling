@@ -68,7 +68,6 @@ class AlderBarnTest {
         Assertions.assertEquals(VurderingsResultat.OPPFYLT, vurdering.resultat)
     }
 
-    // TODO ai: Dobbelsjekk denne regelen
     @Test
     fun `søker med dødsdato må ha dødsdato etter virkningsdato for oppfyllt vurdering`() {
         val personMedDødsdato = personBarnUnder20.copy(doedsdato = hentVirkningsdato(mapTilVilkaarstypePerson(personAvdoedMedDoedsdato)).plusDays(1))

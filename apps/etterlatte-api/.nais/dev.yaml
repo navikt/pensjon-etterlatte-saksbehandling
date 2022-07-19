@@ -20,6 +20,11 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
+      claims:
+        extra:
+          - NAVident
+  kafka:
+    pool: nav-dev
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -41,6 +46,8 @@ spec:
       value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.dodsmelding
 
   accessPolicy:
     outbound:

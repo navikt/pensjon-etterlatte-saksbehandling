@@ -10,6 +10,7 @@ import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
 import no.nav.etterlatte.getAccessToken
+import no.nav.security.token.support.ktor.TokenValidationContextPrincipal
 
 fun Route.grunnlagRoute(service: GrunnlagService) {
 
@@ -18,7 +19,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
 
             try {
                 val behandlingId = call.parameters["behandlingId"]
-                val saksbehandlerId = "Z1234567" //call.principal<TokenValidationContextPrincipal>()!!.context.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")
+                val saksbehandlerId = call.principal<TokenValidationContextPrincipal>()!!.context.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")
                 val body = call.receive<KommerBarnetTilgodeClientRequest>()
 
                 if (behandlingId == null) {

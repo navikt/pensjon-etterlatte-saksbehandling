@@ -2,18 +2,15 @@ import io.mockk.mockk
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.database.VedtaksvurderingRepository
 import no.nav.etterlatte.domene.vedtak.*
-import no.nav.helse.rapids_rivers.MessageContext
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.YearMonth
-import java.util.concurrent.atomic.AtomicReference
 
 
 internal class UtledeUtbetalingsperioderTest {
     private val repositoryMock: VedtaksvurderingRepository = mockk()
-    private val rapid: MessageContext = mockk()
-    private val service = VedtaksvurderingService(repositoryMock, AtomicReference(rapid))
+    private val service = VedtaksvurderingService(repositoryMock)
 
     @Test
     fun `vedtak med sluttdato uten beregninger skal ha en opphørsperiode`(){

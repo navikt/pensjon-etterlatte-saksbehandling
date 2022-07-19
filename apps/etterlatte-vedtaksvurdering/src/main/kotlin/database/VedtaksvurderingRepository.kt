@@ -184,6 +184,39 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         return resultat
     }
 
+    fun hentVedtak(behandlingsId: UUID): Vedtak? {
+        val resultat = connection.use { it ->
+            val statement = it.prepareStatement(Queries.hentVedtakForBehandling)
+            statement.setObject(1, behandlingsId)
+            statement.executeQuery().singleOrNull {
+                Vedtak(
+                    getLong(9),
+                    getString(1),
+                    getObject(2) as UUID,
+                    getString(3),
+                    getString(4)?.let {
+                        try {
+                            objectMapper.readValue(it)
+                        } catch (ex: Exception) {
+                            null
+                        }
+                    },
+                    getJsonObject(5),
+                    getJsonObject(6),
+                    getJsonObject(7),
+                    getBoolean(8),
+                    getString(10),
+                    getTimestamp(11)?.toInstant(),
+                    getTimestamp(12)?.toInstant(),
+                    getString(13),
+                    getDate(14)?.toLocalDate(),
+                    getString(15)?.let { VedtakStatus.valueOf(it) },
+                )
+            }
+        }
+        return resultat
+    }
+
     fun hentUtbetalingsPerioder(vedtakId: Long): List<Utbetalingsperiode> {
         val resultat = connection.use { it ->
             val statement = it.prepareStatement(Queries.hentUtbetalingsperiode)
@@ -342,6 +375,8 @@ private object Queries {
 
     val hentVedtak =
         "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus FROM vedtak WHERE sakId = ? AND behandlingId = ?"
+    val hentVedtakForBehandling =
+        "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus FROM vedtak WHERE behandlingId = ?"
 
     val lagreFnr = "UPDATE vedtak SET fnr = ? WHERE sakId = ? AND behandlingId = ?"
     val lagreDatoVirkFom = "UPDATE vedtak SET datoVirkFom = ? WHERE sakId = ? AND behandlingId = ?"

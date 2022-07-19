@@ -9,8 +9,6 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.*
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
-import no.nav.helse.rapids_rivers.JsonMessage.Companion.newMessage
-import no.nav.helse.rapids_rivers.MessageContext
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -18,7 +16,6 @@ import java.time.YearMonth
 import java.time.ZoneOffset
 import java.time.temporal.TemporalAdjusters
 import java.util.*
-import java.util.concurrent.atomic.AtomicReference
 
 class KanIkkeEndreFattetVedtak(vedtak: Vedtak) :
     Exception("Vedtak ${vedtak.id} kan ikke oppdateres fordi det allerede er fattet") {
@@ -51,7 +48,6 @@ class VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak: no.nav.etterlatte.domen
 
 class VedtaksvurderingService(
     private val repository: VedtaksvurderingRepository,
-    private val rapid: AtomicReference<MessageContext> = AtomicReference()
 ) {
 
     fun lagreAvkorting(sakId: String, behandlingId: UUID, fnr: String, avkorting: AvkortingsResultat) {
@@ -133,12 +129,15 @@ class VedtaksvurderingService(
     fun hentVedtak(sakId: String, behandlingId: UUID): Vedtak? {
         return repository.hentVedtak(sakId, behandlingId)
     }
+    fun hentVedtak(behandlingId: UUID): Vedtak? {
+        return repository.hentVedtak(behandlingId)
+    }
 
-    fun hentFellesVedtak(sakId: String, behandlingId: UUID): no.nav.etterlatte.domene.vedtak.Vedtak? {
+    fun hentFellesVedtak(behandlingId: UUID): no.nav.etterlatte.domene.vedtak.Vedtak? {
         //Placeholder for tingene som må inn for å fylle vedtaksmodellen
-        return repository.hentVedtak(sakId, behandlingId)?.let {
+        return repository.hentVedtak(behandlingId)?.let {
             Vedtak(
-                it.id, //må få med vedtak-id fra databasen
+                it.id,
                 Periode(
                     it.virkningsDato?.let(YearMonth::from)
                         ?: (it.vilkaarsResultat?.vilkaar?.
@@ -149,7 +148,7 @@ class VedtaksvurderingService(
                             TemporalAdjusters.firstDayOfNextMonth()
                         )?.let { YearMonth.of(it.year, it.month) }) ?: YearMonth.now(), null
                 ), //må få inn dette på toppnivå?
-                Sak(it.fnr!!, "BARNEPENSJON", sakId.toLong()), //mer sakinfo inn i prosess og vedtaksammendrag
+                Sak(it.fnr!!, "BARNEPENSJON", it.sakId.toLong()), //mer sakinfo inn i prosess og vedtaksammendrag
                 Behandling(BehandlingType.FORSTEGANGSBEHANDLING, behandlingId), // Behandlingsinfo må lagres
                 if (it.vilkaarsResultat?.resultat == VurderingsResultat.OPPFYLT) VedtakType.INNVILGELSE else VedtakType.AVSLAG, //Hvor skal vi bestemme vedtakstype?
                 emptyList(), //Ikke lenger aktuell
@@ -197,97 +196,38 @@ class VedtaksvurderingService(
         }
     }
 
-    fun fattVedtakSaksbehandler(sakId: String, behandlingId: UUID, saksbehandler: String) {
-        val vedtak = requireNotNull(hentVedtak(sakId, behandlingId))
-        rapid.get().publish(
-            vedtak.sakId,
-            newMessage(
-                mapOf(
-                    "@event" to "SAKSBEHANDLER:FATT_VEDTAK",
-                    "@sakId" to sakId.toLong(),
-                    "@vedtakId" to vedtak.id,
-                    "@behandlingId" to behandlingId.toString(),
-                    "@saksbehandler" to saksbehandler,
-                )
-            ).toJson()
-        )
-    }
-
-    fun attesterVedtakSaksbehandler(sakId: String, behandlingId: UUID, saksbehandler: String) {
-        val vedtak = requireNotNull(hentVedtak(sakId, behandlingId))
-        rapid.get().publish(
-            vedtak.sakId,
-            newMessage(
-                mapOf(
-                    "@event" to "SAKSBEHANDLER:ATTESTER_VEDTAK",
-                    "@sakId" to sakId.toLong(),
-                    "@vedtakId" to vedtak.id,
-                    "@behandlingId" to behandlingId.toString(),
-                    "@saksbehandler" to saksbehandler,
-                )
-            ).toJson()
-        )
-
-    }
-
-    fun underkjennVedtakSaksbehandler(
-        sakId: String,
-        behandlingId: UUID,
-        saksbehandler: String,
-        kommentar: String,
-        valgtBegrunnelse: String
-    ) {
-        val vedtak = requireNotNull(hentVedtak(sakId, behandlingId))
-        rapid.get().publish(
-            vedtak.sakId,
-            newMessage(
-                mapOf(
-                    "@event" to "SAKSBEHANDLER:UNDERKJENN_VEDTAK",
-                    "@sakId" to sakId.toLong(),
-                    "@vedtakId" to vedtak.id,
-                    "@behandlingId" to behandlingId.toString(),
-                    "@saksbehandler" to saksbehandler,
-                    "@valgtBegrunnelse" to valgtBegrunnelse,
-                    "@kommentar" to kommentar,
-                )
-            ).toJson()
-        )
-
-    }
-
-    fun fattVedtak(sakId: String, behandlingId: UUID, saksbehandler: String): no.nav.etterlatte.domene.vedtak.Vedtak {
-        val v = requireNotNull(hentVedtak(sakId, behandlingId)).also {
+    fun fattVedtak(behandlingId: UUID, saksbehandler: String): no.nav.etterlatte.domene.vedtak.Vedtak {
+        val v = requireNotNull(hentVedtak(behandlingId)).also {
             if (it.vedtakFattet == true) throw KanIkkeEndreFattetVedtak(it)
         }
 
-        requireNotNull(hentFellesVedtak(sakId, behandlingId)).also {
+        requireNotNull(hentFellesVedtak(behandlingId)).also {
             if (it.type == VedtakType.INNVILGELSE) {
                 if (it.beregning == null || it.avkorting == null) throw VedtakKanIkkeFattes(v)
             }
             if (it.vilkaarsvurdering == null) throw VedtakKanIkkeFattes(v)
-            repository.fattVedtak(saksbehandler, sakId, behandlingId)
+            repository.fattVedtak(saksbehandler, v.sakId, behandlingId)
         }
-        return requireNotNull(hentFellesVedtak(sakId, behandlingId))
+        return requireNotNull(hentFellesVedtak(behandlingId))
     }
 
 
     fun attesterVedtak(
-        sakId: String,
         behandlingId: UUID,
         saksbehandler: String
     ): no.nav.etterlatte.domene.vedtak.Vedtak {
-        val vedtak = requireNotNull(hentFellesVedtak(sakId, behandlingId)).also {
+        val vedtak = requireNotNull(hentFellesVedtak(behandlingId)).also {
             requireThat(it.vedtakFattet != null) { VedtakKanIkkeAttesteresFoerDetFattes(it) }
             requireThat(it.attestasjon == null) { VedtakKanIkkeAttesteresAlleredeAttestert(it) }
         }
         repository.attesterVedtak(
             saksbehandler,
-            sakId,
+            vedtak.sak.id.toString(),
             behandlingId,
             vedtak.vedtakId,
             utbetalingsperioderFraVedtak(vedtak)
         )
-        return requireNotNull(hentFellesVedtak(sakId, behandlingId))
+        return requireNotNull(hentFellesVedtak(behandlingId))
 
     }
 
@@ -296,14 +236,14 @@ class VedtaksvurderingService(
     }
 
     fun underkjennVedtak(
-        sakId: String,
         behandlingId: UUID,
-    ) {
-        requireNotNull(hentFellesVedtak(sakId, behandlingId)).also {
+    ): Vedtak {
+        val vedtak = requireNotNull(hentFellesVedtak(behandlingId)).also {
             require(it.vedtakFattet != null) { VedtakKanIkkeUnderkjennesFoerDetFattes(it) }
             require(it.attestasjon == null) { VedtakKanIkkeUnderkjennesAlleredeAttestert(it) }
         }
-        repository.underkjennVedtak(sakId, behandlingId)
+        repository.underkjennVedtak(vedtak.sak.id.toString(), behandlingId)
+        return repository.hentVedtak(behandlingId)!!
     }
 
     fun utbetalingsperioderFraVedtak(vedtak: no.nav.etterlatte.domene.vedtak.Vedtak) =

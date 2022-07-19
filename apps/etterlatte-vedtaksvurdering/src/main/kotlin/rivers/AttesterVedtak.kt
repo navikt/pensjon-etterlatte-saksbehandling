@@ -7,20 +7,16 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import org.slf4j.LoggerFactory
 
 internal class AttesterVedtak(
     rapidsConnection: RapidsConnection,
     val vedtaksvurderingService: VedtaksvurderingService
 ) : River.PacketListener {
-    private val logger = LoggerFactory.getLogger(AttesterVedtak::class.java)
 
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "SAKSBEHANDLER:ATTESTER_VEDTAK") }
-            validate { it.requireKey("@sakId") }
             validate { it.requireKey("@behandlingId") }
-            validate { it.requireKey("@vedtakId") }
             validate { it.requireKey("@saksbehandler") }
             validate { it.rejectKey("@feil") }
             validate { it.interestedIn("@correlation_id") }
@@ -30,15 +26,16 @@ internal class AttesterVedtak(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             val behandlingId = packet["@behandlingId"].asUUID()
-            val sakId = packet["@sakId"].longValue()
             val saksbehandler = packet["@saksbehandler"].textValue()
             try {
                 val attestertVedtak =
-                    vedtaksvurderingService.attesterVedtak(sakId.toString(), behandlingId, saksbehandler)
+                    vedtaksvurderingService.attesterVedtak(behandlingId, saksbehandler)
                 context.publish(
                     packet.also {
                         it["@event"] = "VEDTAK:ATTESTERT"
                         it["@vedtak"] = attestertVedtak
+                        it["@vedtakId"] = attestertVedtak.vedtakId
+                        it["@sakId"] = attestertVedtak.sak.id
                         it["@eventtimestamp"] = attestertVedtak.attestasjon?.tidspunkt?.toTidspunkt()!!
                     }.toJson()
                 )

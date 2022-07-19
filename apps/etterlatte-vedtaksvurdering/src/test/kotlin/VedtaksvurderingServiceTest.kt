@@ -5,8 +5,6 @@ import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.database.Vedtak
 import no.nav.etterlatte.database.VedtaksvurderingRepository
-import no.nav.etterlatte.domene.vedtak.Periode
-import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
 import no.nav.etterlatte.libs.common.avkorting.Endringskode
@@ -14,22 +12,18 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
-import no.nav.helse.rapids_rivers.MessageContext
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
-import java.util.concurrent.atomic.AtomicReference
 
 internal class VedtaksvurderingServiceTest {
 
     private val repositoryMock: VedtaksvurderingRepository = mockk()
-    private val rapid: MessageContext = mockk()
-    private val service = VedtaksvurderingService(repositoryMock, AtomicReference(rapid))
+    private val service = VedtaksvurderingService(repositoryMock)
 
     private val sakId = "5"
     private val behandlingId = UUID.randomUUID()

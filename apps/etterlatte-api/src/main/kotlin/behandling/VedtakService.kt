@@ -1,25 +1,48 @@
 package no.nav.etterlatte.behandling
 
+import no.nav.etterlatte.kafka.JsonMessage
+import no.nav.etterlatte.kafka.KafkaProdusent
+
 
 data class AttesteringResult(val response: String)
 
-class VedtakService(private val behandlingKlient: BehandlingKlient, private val vedtakKlient: VedtakKlient) {
+class VedtakService(private val rapid: KafkaProdusent<String, String>) {
 
-    suspend fun fattVedtak(behandlingId: String, token: String): AttesteringResult {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, token)
-        vedtakKlient.fattVedtak(behandling.sak.toInt(), behandling.id.toString(), token)
+    fun fattVedtak(behandlingId: String, saksbehandler: String): AttesteringResult {
+            rapid.publiser(behandlingId, JsonMessage.newMessage(
+                mapOf(
+                    "@event" to "SAKSBEHANDLER:FATT_VEDTAK",
+                    "@behandlingId" to behandlingId,
+                    "@saksbehandler" to saksbehandler,
+
+            )
+        ).toJson())
         return AttesteringResult("Fattet")
     }
 
-    suspend fun attesterVedtak(behandlingId: String, token: String): AttesteringResult {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, token)
-        vedtakKlient.attesterVedtak(behandling.sak.toInt(), behandling.id.toString(), token)
+    fun attesterVedtak(behandlingId: String, saksbehandler: String): AttesteringResult {
+        rapid.publiser(behandlingId, JsonMessage.newMessage(
+            mapOf(
+                "@event" to "SAKSBEHANDLER:ATTESTER_VEDTAK",
+                "@behandlingId" to behandlingId,
+                "@saksbehandler" to saksbehandler,
+
+                )
+        ).toJson())
         return AttesteringResult("Attestert")
     }
 
-    suspend fun underkjennVedtak(behandlingId: String, begrunnelse: String, kommentar: String, token: String): AttesteringResult {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, token)
-        vedtakKlient.underkjennVedtak(behandling.sak.toInt(), behandling.id.toString(), begrunnelse, kommentar, token)
+    fun underkjennVedtak(behandlingId: String, begrunnelse: String, kommentar: String, saksbehandler: String): AttesteringResult {
+        rapid.publiser(behandlingId, JsonMessage.newMessage(
+            mapOf(
+                "@event" to "SAKSBEHANDLER:UNDERKJENN_VEDTAK",
+                "@behandlingId" to behandlingId,
+                "@saksbehandler" to saksbehandler,
+                "@valgtBegrunnelse" to begrunnelse,
+                "@kommentar" to kommentar,
+
+                )
+        ).toJson())
         return AttesteringResult("Underkjent")
     }
 

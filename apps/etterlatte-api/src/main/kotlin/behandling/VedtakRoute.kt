@@ -1,13 +1,14 @@
 package no.nav.etterlatte.behandling
 
-import io.ktor.application.call
+import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.*
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
-import no.nav.etterlatte.getAccessToken
+import no.nav.security.token.support.ktor.TokenValidationContextPrincipal
 import org.slf4j.LoggerFactory
 
 val logger = LoggerFactory.getLogger("no.nav.etterlatte.behandling.VedtakRoute")
@@ -20,7 +21,7 @@ fun Route.vedtakRoute(service: VedtakService) {
                 call.response.status(HttpStatusCode(400, "Bad request"))
                 call.respond("Behandlings-id mangler")
             } else {
-                call.respond(service.fattVedtak(behandlingId, getAccessToken(call)))
+                call.respond(service.fattVedtak(behandlingId, call.navIdent))
             }
         }
     }
@@ -31,7 +32,7 @@ fun Route.vedtakRoute(service: VedtakService) {
                 call.response.status(HttpStatusCode(400, "Bad request"))
                 call.respond("Behandlings-id mangler")
             } else {
-                call.respond(service.attesterVedtak(behandlingId, getAccessToken(call)))
+                call.respond(service.attesterVedtak(behandlingId, call.navIdent))
             }
         }
     }
@@ -53,7 +54,7 @@ fun Route.vedtakRoute(service: VedtakService) {
                             behandlingId,
                             body.valgtBegrunnelse,
                             body.kommentar,
-                            getAccessToken(call)
+                            call.navIdent
                         )
                     )
                 }
@@ -65,4 +66,5 @@ fun Route.vedtakRoute(service: VedtakService) {
     }
 }
 
+val ApplicationCall.navIdent: String get() = principal<TokenValidationContextPrincipal>()!!.context.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")!!
 data class UnderkjennVedtakClientRequest(val kommentar: String, val valgtBegrunnelse: String)

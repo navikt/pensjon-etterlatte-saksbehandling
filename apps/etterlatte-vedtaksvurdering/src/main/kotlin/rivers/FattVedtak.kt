@@ -9,7 +9,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import org.slf4j.LoggerFactory
 
 internal class FattVedtak(
     rapidsConnection: RapidsConnection,
@@ -19,9 +18,7 @@ internal class FattVedtak(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "SAKSBEHANDLER:FATT_VEDTAK") }
-            validate { it.requireKey("@sakId") }
             validate { it.requireKey("@behandlingId") }
-            validate { it.requireKey("@vedtakId") }
             validate { it.requireKey("@saksbehandler") }
             validate { it.rejectKey("@feil") }
             validate { it.interestedIn("@correlation_id") }
@@ -31,17 +28,16 @@ internal class FattVedtak(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             val behandlingId = packet["@behandlingId"].asUUID()
-            val sakId = packet["@sakId"].longValue()
             val saksbehandler = packet["@saksbehandler"].textValue()
            try {
-                val fattetVedtak = vedtaksvurderingService.fattVedtak(sakId.toString(), behandlingId, saksbehandler)
+                val fattetVedtak = vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler)
 
                 context.publish(JsonMessage.newMessage(
                     mapOf(
                         "@event" to "VEDTAK:FATTET",
                         "@vedtak" to fattetVedtak,
                         "@behandlingId" to behandlingId,
-                        "@sakId" to sakId,
+                        "@sakId" to fattetVedtak.sak.id,
                         "@vedtakId" to fattetVedtak.vedtakId,
                         "@eventtimestamp" to fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
                         "@saksbehandler" to fattetVedtak.vedtakFattet?.ansvarligSaksbehandler!!

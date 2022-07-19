@@ -55,13 +55,13 @@ class BehandlingService(
 
     suspend fun hentBehandling(behandlingId: String, accessToken: String) = coroutineScope {
         logger.info("Henter behandling")
-        behandlingKlient.hentBehandling(behandlingId, accessToken).let { behandling ->
-            val vedtak = async { vedtakKlient.hentVedtak(behandling.sak.toInt(), behandlingId, accessToken) }
-            val hendelser = async { behandlingKlient.hentHendelserForBehandling(behandling.id.toString(), accessToken) }
+        val behandling = async { behandlingKlient.hentBehandling(behandlingId, accessToken) }
+        val vedtak = async { vedtakKlient.hentVedtak(behandlingId, accessToken) }
+        val hendelser = async { behandlingKlient.hentHendelserForBehandling(behandlingId, accessToken) }
             DetaljertBehandlingDto(
-                id = behandling.id,
-                sak = behandling.sak,
-                gyldighetsprøving = behandling.gyldighetsproeving,
+                id = behandling.await().id,
+                sak = behandling.await().sak,
+                gyldighetsprøving = behandling.await().gyldighetsproeving,
                 kommerSoekerTilgode = vedtak.await().kommerSoekerTilgodeResultat,
                 vilkårsprøving = vedtak.await().vilkaarsResultat,
                 beregning = vedtak.await().beregningsResultat,
@@ -71,12 +71,12 @@ class BehandlingService(
                 datoFattet = vedtak.await().datoFattet,
                 datoattestert = vedtak.await().datoattestert,
                 attestant = vedtak.await().attestant,
-                soeknadMottattDato = behandling.soeknadMottattDato,
+                soeknadMottattDato = behandling.await().soeknadMottattDato,
                 virkningstidspunkt = vedtak.await().virkningsDato,
-                status = behandling.status,
+                status = behandling.await().status,
                 hendelser = hendelser.await().hendelser,
             )
-        }
+
     }
 
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag {

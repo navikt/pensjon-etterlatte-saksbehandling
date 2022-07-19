@@ -168,18 +168,18 @@ internal class DBTest {
         assert(vedtaket?.vedtakStatus != null)
         Assertions.assertNotNull(vedtaket?.virkningsDato)
 
-        vedtaksvurderingService.fattVedtak("12321423523545", uuid, "saksbehandler")
+        vedtaksvurderingService.fattVedtak(uuid, "saksbehandler")
         val fattetVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
         Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
 
-        vedtaksvurderingService.underkjennVedtak("12321423523545", uuid)
+        vedtaksvurderingService.underkjennVedtak( uuid)
         val underkjentVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
 
-        vedtaksvurderingService.fattVedtak("12321423523545", uuid, "saksbehandler")
+        vedtaksvurderingService.fattVedtak( uuid, "saksbehandler")
 
-        vedtaksvurderingService.attesterVedtak("12321423523545", uuid, "attestant")
+        vedtaksvurderingService.attesterVedtak( uuid, "attestant")
         val attestertVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         Assertions.assertNotNull(attestertVedtak?.attestant)
         Assertions.assertNotNull(attestertVedtak?.datoattestert)

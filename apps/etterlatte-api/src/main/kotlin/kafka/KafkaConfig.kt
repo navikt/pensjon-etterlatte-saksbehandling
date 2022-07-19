@@ -16,10 +16,19 @@ class GcpKafkaConfig(
     private val keystoreLocation: String,
     private val keystorePassword: String
 ): KafkaConfig {
-
+    companion object{
+        fun fromEnv(env: Map<String, String>): KafkaConfig = GcpKafkaConfig(
+            bootstrapServers = env.getValue("KAFKA_BROKERS"),
+            truststore = env.getValue("KAFKA_TRUSTSTORE_PATH"),
+            truststorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD"),
+            keystoreLocation = env.getValue("KAFKA_KEYSTORE_PATH"),
+            keystorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD")
+        )
+        fun fromEnv(): KafkaConfig = fromEnv(System.getenv())
+    }
     override fun producerConfig() = kafkaBaseConfig().apply {
-        put(ProducerConfig.ACKS_CONFIG, "1")
-        put(ProducerConfig.CLIENT_ID_CONFIG, "etterlatte-behandling")
+        put(ProducerConfig.ACKS_CONFIG, "all")
+        put(ProducerConfig.CLIENT_ID_CONFIG, "etterlatte-api")
         put(ProducerConfig.LINGER_MS_CONFIG, "0")
         put(ProducerConfig.RETRIES_CONFIG, Int.MAX_VALUE)
         put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1")

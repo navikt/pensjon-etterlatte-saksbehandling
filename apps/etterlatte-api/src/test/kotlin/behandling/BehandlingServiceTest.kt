@@ -136,7 +136,7 @@ internal class BehandlingServiceTest {
             ))
         )
         coEvery { behandlingKlient.hentBehandling(behandlingid.toString(), accessToken) } returns detaljertBehandling
-        coEvery { vedtakKlient.hentVedtak(4, behandlingid.toString(), accessToken) } returns vedtak
+        coEvery { vedtakKlient.hentVedtak(behandlingid.toString(), accessToken) } returns vedtak
         coEvery { behandlingKlient.hentHendelserForBehandling(behandlingid.toString(), accessToken) } returns hendelser
 
         val respons = runBlocking { service.hentBehandling(behandlingid.toString(), accessToken) }

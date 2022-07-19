@@ -18,9 +18,7 @@ internal class UnderkjennVedtak(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("@event", "SAKSBEHANDLER:UNDERKJENN_VEDTAK") }
-            validate { it.requireKey("@sakId") }
             validate { it.requireKey("@behandlingId") }
-            validate { it.requireKey("@vedtakId") }
             validate { it.requireKey("@saksbehandler") }
             validate { it.requireKey("@kommentar") }
             validate { it.requireKey("@valgtBegrunnelse") }
@@ -32,22 +30,18 @@ internal class UnderkjennVedtak(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             val behandlingId = packet["@behandlingId"].asUUID()
-            val sakId = packet["@sakId"].longValue()
            try {
-               vedtaksvurderingService.underkjennVedtak(
-                   sakId.toString(),
-                   behandlingId,
-               )
+               val vedtak = vedtaksvurderingService.underkjennVedtak(behandlingId)
                context.publish(
                    JsonMessage.newMessage(
                        mapOf(
                            "@event" to "VEDTAK:UNDERKJENT",
                            "@eventtimestamp" to Tidspunkt.now(),
+                           "@vedtakId" to vedtak.id,
+                           "@sakId" to vedtak.sakId.toLong()
                        ) + packet.keep(
-                           "@vedtakId",
                            "@behandlingId",
                            "@saksbehandler",
-                           "@sakId",
                            "@correlation_id",
                            "@valgtBegrunnelse",
                            "@kommentar"

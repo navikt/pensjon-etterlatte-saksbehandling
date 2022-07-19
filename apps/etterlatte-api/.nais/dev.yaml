@@ -54,7 +54,6 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester
-        - application: etterlatte-grunnlag
         - application: etterlatte-vedtaksvurdering
     inbound:
       rules:

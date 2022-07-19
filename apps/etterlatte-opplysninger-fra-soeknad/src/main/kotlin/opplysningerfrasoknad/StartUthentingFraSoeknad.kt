@@ -33,7 +33,6 @@ internal class StartUthentingFraSoeknad(
 
             JsonMessage.newMessage(
                 mapOf(
-                    //"@event_name" to "opplysninger_soeknad",
                     "sak" to packet["@sak_id"],
                     "@behandling_id" to packet["@behandling_id"],
                     "@gyldig_innsender" to packet["@gyldig_innsender"],
@@ -49,6 +48,6 @@ internal class StartUthentingFraSoeknad(
             }
             logger.info("Opplysninger hentet fra søknad")
         }
-    }
+}
 
 private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

@@ -29,7 +29,6 @@ class Opplysningsuthenter {
             samtykke(barnepensjonssoknad, Opplysningstyper.SAMTYKKE),
             soeknadMottattDato(barnepensjonssoknad, Opplysningstyper.SOEKNAD_MOTTATT_DATO),
             soeknadsType(barnepensjonssoknad, Opplysningstyper.SOEKNADSTYPE_V1),
-            //TODO: skal vi kun ha personGalleri i gyldig søknad? eg slettes her, eller fint med dobblet opp?
             personGalleri(barnepensjonssoknad)
         ).filterNotNull()
     }
@@ -41,9 +40,9 @@ class Opplysningsuthenter {
     ): Grunnlagsopplysning<T> {
         return Grunnlagsopplysning(
             UUID.randomUUID(), Grunnlagsopplysning.Privatperson(
-                barnepensjon.innsender.foedselsnummer.svar.value,
-                barnepensjon.mottattDato.toInstant(ZoneOffset.UTC)
-            ), opplysningsType, objectMapper.createObjectNode(),
+            barnepensjon.innsender.foedselsnummer.svar.value,
+            barnepensjon.mottattDato.toInstant(ZoneOffset.UTC)
+        ), opplysningsType, objectMapper.createObjectNode(),
             data
         )
     }

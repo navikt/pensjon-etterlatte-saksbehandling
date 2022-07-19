@@ -10,11 +10,10 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class BehandlingEndretHendlese (
+class BehandlingEndretHendlese(
     rapidsConnection: RapidsConnection,
     private val grunnlag: GrunnlagService,
 ) : River.PacketListener {
-
 
     private val logger: Logger = LoggerFactory.getLogger(GrunnlagHendelser::class.java)
 

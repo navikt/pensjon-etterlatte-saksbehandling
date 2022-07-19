@@ -27,97 +27,37 @@ import java.util.*
 
 fun Application.module(vedtaksvurderingService: VedtaksvurderingService) {
 
-        install(ContentNegotiation) {
-            jackson {
-                registerModule(JavaTimeModule())
-                disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            }
+    install(ContentNegotiation) {
+        jackson {
+            registerModule(JavaTimeModule())
+            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         }
+    }
 
-        install(CallLogging) {
-            level = Level.INFO
-            val naisEndepunkt = listOf("isalive", "isready", "metrics")
-            filter { call -> call.request.document().let { !naisEndepunkt.contains(it) }
-            }
-            format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
-            mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
+    install(CallLogging) {
+        level = Level.INFO
+        val naisEndepunkt = listOf("isalive", "isready", "metrics")
+        filter { call -> call.request.document().let { !naisEndepunkt.contains(it) } }
+        format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
+        mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
+    }
+
+    install(StatusPages) {
+        exception<Throwable> { cause ->
+            log.error("En feil oppstod: ${cause.message}", cause)
+            call.respond(HttpStatusCode.InternalServerError, "En feil oppstod: ${cause.message}")
         }
-        install(StatusPages) {
-            exception<Throwable> { cause ->
-                log.error("En feil oppstod: ${cause.message}", cause)
-                call.respond(HttpStatusCode.InternalServerError, "En feil oppstod: ${cause.message}")
+    }
+
+    install(Authentication) {
+        tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
+    }
+
+    routing {
+        authenticate {
+            route("api") {
+                Api(vedtaksvurderingService)
             }
-        }
-
-        install(Authentication) {
-            tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
-        }
-
-        routing {
-            authenticate {
-                route("api") {
-                    Api(vedtaksvurderingService)
-                }
-            }
-        }
-}
-
-
-
-/*
-class Server(val vedtaksvurderingService: VedtaksvurderingService) {
-    private val engine = embeddedServer(CIO, environment = applicationEngineEnvironment {
-        module {
-            install(ContentNegotiation) {
-                jackson {
-                    registerModule(JavaTimeModule())
-                    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                }
-            }
-            install(CallLogging) {
-                level = Level.INFO
-                filter { call -> !call.request.path().startsWith("/health") }
-                format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
-                mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
-            }
-            install(StatusPages) {
-                exception<Throwable> { cause ->
-                    log.error("En feil oppstod: ${cause.message}", cause)
-                    call.respond(HttpStatusCode.InternalServerError, "En feil oppstod: ${cause.message}")
-                }
-            }
-
-            install(Authentication) {
-                tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
-            }
-
-            routing {
-                naisprobes()
-                authenticate {
-                    route("api") {
-                        Api(vedtaksvurderingService)
-                    }
-                }
-            }
-        }
-        connector { port = 8080 }
-    })
-
-    fun run() = engine.start(true)
-}
-
-fun Route.naisprobes(){
-    route("internal"){
-        get("isalive"){
-            call.respondText { "OK" }
-        }
-        get("isready"){
-            call.respondText { "OK" }
-        }
-        get("started"){
-            call.respondText { "OK" }
         }
     }
 }
-
- */

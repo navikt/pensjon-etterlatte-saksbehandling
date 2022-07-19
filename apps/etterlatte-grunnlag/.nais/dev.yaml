@@ -43,8 +43,4 @@ spec:
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
-  accessPolicy:
-    inbound:
-      rules:
-        - application: etterlatte-api
 

@@ -22,7 +22,6 @@ class GrunnlagHendelser(
     private val grunnlag: GrunnlagService,
 ) : River.PacketListener {
 
-
     private val logger: Logger = LoggerFactory.getLogger(GrunnlagHendelser::class.java)
 
     init {

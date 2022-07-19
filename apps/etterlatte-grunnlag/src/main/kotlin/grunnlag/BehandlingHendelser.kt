@@ -16,7 +16,6 @@ class BehandlingHendelser(
     rapidsConnection: RapidsConnection,
 ) : River.PacketListener {
 
-
     private val logger: Logger = LoggerFactory.getLogger(GrunnlagHendelser::class.java)
 
     init {
@@ -33,20 +32,22 @@ class BehandlingHendelser(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
-            if(Kontekst.get().AppUser !is Self){ logger.warn("AppUser i kontekst er ikke Self i R&R-flyten") }
+            if (Kontekst.get().AppUser !is Self) {
+                logger.warn("AppUser i kontekst er ikke Self i R&R-flyten")
+            }
 
             //TODO dette må jeg gjøre smartere, ellers må Persongalleri restruktureres
             context.publish(
                 JsonMessage.newMessage(
-                mapOf(
-                    "@behov" to Opplysningstyper.SOEKER_PDL_V1,
-                    "sak" to packet["sak"],
-                    "fnr" to packet["soeker"],
-                    "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
-                    "@correlation_id" to packet["@correlation_id"]
-                )
-            ).toJson())
-             packet["gjenlevende"].forEach { fnr ->
+                    mapOf(
+                        "@behov" to Opplysningstyper.SOEKER_PDL_V1,
+                        "sak" to packet["sak"],
+                        "fnr" to packet["soeker"],
+                        "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
+                        "@correlation_id" to packet["@correlation_id"]
+                    )
+                ).toJson())
+            packet["gjenlevende"].forEach { fnr ->
                 context.publish(
                     JsonMessage.newMessage(
                         mapOf(
@@ -76,10 +77,12 @@ class BehandlingHendelser(
 
     private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 }
-private val Opplysningstyper.personRolle: PersonRolle? get() = when(this){
-    Opplysningstyper.AVDOED_SOEKNAD_V1, Opplysningstyper.AVDOED_PDL_V1 -> PersonRolle.AVDOED
-    Opplysningstyper.SOEKER_SOEKNAD_V1, Opplysningstyper.SOEKER_PDL_V1 -> PersonRolle.BARN
-    Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1 -> PersonRolle.GJENLEVENDE
-    else -> null
-}
+
+private val Opplysningstyper.personRolle: PersonRolle?
+    get() = when (this) {
+        Opplysningstyper.AVDOED_SOEKNAD_V1, Opplysningstyper.AVDOED_PDL_V1 -> PersonRolle.AVDOED
+        Opplysningstyper.SOEKER_SOEKNAD_V1, Opplysningstyper.SOEKER_PDL_V1 -> PersonRolle.BARN
+        Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1 -> PersonRolle.GJENLEVENDE
+        else -> null
+    }
 

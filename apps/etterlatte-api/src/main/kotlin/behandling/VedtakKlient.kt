@@ -19,7 +19,6 @@ import java.util.*
 
 
 interface EtterlatteVedtak {
-    suspend fun hentVedtak(sakId: Int, behandlingId: String, accessToken: String): Vedtak
     suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak
 }
 
@@ -31,27 +30,6 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
 
     private val clientId = config.getString("vedtak.client.id")
     private val resourceUrl = config.getString("vedtak.resource.url")
-
-    override suspend fun hentVedtak(sakId: Int, behandlingId: String, accessToken: String): Vedtak {
-        logger.info("Henter vedtak for en behandling")
-
-        try {
-            val json =
-                downstreamResourceClient.get(
-                    Resource(clientId, "$resourceUrl/api/hentvedtak/$sakId/$behandlingId"),
-                    accessToken
-                )
-                    .mapBoth(
-                        success = { json -> json },
-                        failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                    ).response
-            return objectMapper.readValue(json.toString())
-        } catch (e: Exception) {
-            logger.error("Henting  vedtak for en behandling feilet", e)
-            throw e
-        }
-    }
-
 
     override suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak {
         logger.info("Henter vedtak for en behandling")

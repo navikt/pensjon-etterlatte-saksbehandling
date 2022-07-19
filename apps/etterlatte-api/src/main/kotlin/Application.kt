@@ -23,7 +23,6 @@ class ApplicationContext(configLocation: String? = null) {
 
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val vedtakKlient = VedtakKlient(config, httpClient())
-    private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val rapid: KafkaProdusent<String, String> = KafkaProdusentImpl(
         KafkaProducer(GcpKafkaConfig.fromEnv().producerConfig(), StringSerializer(), StringSerializer()), System.getenv().getValue("KAFKA_RAPID_TOPIC")
     )
@@ -35,7 +34,7 @@ class ApplicationContext(configLocation: String? = null) {
     )
     val oppgaveService: OppgaveService = OppgaveService(behandlingKlient)
     val vedtakService = VedtakService(rapid)
-    val grunnlagService = GrunnlagService(behandlingKlient, grunnlagKlient)
+    val grunnlagService = GrunnlagService(behandlingKlient, rapid)
 
     private fun httpClient() = HttpClient {
         install(JsonFeature) {

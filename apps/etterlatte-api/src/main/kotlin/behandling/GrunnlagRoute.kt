@@ -1,16 +1,13 @@
 package no.nav.etterlatte.behandling
 
 
-import io.ktor.application.call
-import io.ktor.auth.*
+import io.ktor.application.*
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.*
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
-import no.nav.etterlatte.getAccessToken
-import no.nav.security.token.support.ktor.TokenValidationContextPrincipal
 
 fun Route.grunnlagRoute(service: GrunnlagService) {
 
@@ -19,7 +16,6 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
 
             try {
                 val behandlingId = call.parameters["behandlingId"]
-                val saksbehandlerId = call.principal<TokenValidationContextPrincipal>()!!.context.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")
                 val body = call.receive<KommerBarnetTilgodeClientRequest>()
 
                 if (behandlingId == null) {
@@ -31,8 +27,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
                             behandlingId,
                             body.svar,
                             body.begrunnelse,
-                            saksbehandlerId,
-                            getAccessToken(call)
+                            call.navIdent,
                         )
                     )
                 }
@@ -43,6 +38,5 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
         }
     }
 }
-
 
 data class KommerBarnetTilgodeClientRequest(val svar: String, val begrunnelse: String)

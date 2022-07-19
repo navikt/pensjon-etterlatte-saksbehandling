@@ -8,6 +8,7 @@ import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
+import no.nav.etterlatte.getAccessToken
 
 fun Route.grunnlagRoute(service: GrunnlagService) {
 
@@ -28,6 +29,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
                             body.svar,
                             body.begrunnelse,
                             call.navIdent,
+                            getAccessToken(call)
                         )
                     )
                 }

@@ -13,10 +13,19 @@ import kotlin.collections.ArrayList
 
 data class GrunnlagResult(val response: String)
 
-class GrunnlagService(private val behandlingKlient: BehandlingKlient, private val rapid: KafkaProdusent<String, String>) {
+class GrunnlagService(
+    private val behandlingKlient: BehandlingKlient,
+    private val rapid: KafkaProdusent<String, String>
+) {
 
-    suspend fun lagreResultatKommerBarnetTilgode(behandlingId: String, svar: String, begrunnelse: String, saksbehandlerId: String): GrunnlagResult {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, saksbehandlerId)
+    suspend fun lagreResultatKommerBarnetTilgode(
+        behandlingId: String,
+        svar: String,
+        begrunnelse: String,
+        saksbehandlerId: String,
+        token: String
+    ): GrunnlagResult {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, token)
         val opplysning = byggOpplysninger(svar, begrunnelse, saksbehandlerId)
 
         rapid.publiser(behandlingId, JsonMessage.newMessage(
@@ -24,7 +33,8 @@ class GrunnlagService(private val behandlingKlient: BehandlingKlient, private va
                 "opplysning" to opplysning,
                 "sak" to behandling.sak,
             )
-        ).toJson())
+        ).toJson()
+        )
         return GrunnlagResult("Lagret")
     }
 }
@@ -43,12 +53,10 @@ fun byggOpplysninger(svar: String, begrunnelse: String, saksbehandlerId: String)
 }
 
 
-fun <T> lagOpplysning(opplysningsType: Opplysningstyper, kilde: Grunnlagsopplysning.Kilde, opplysning: T): Grunnlagsopplysning<T> {
-    return Grunnlagsopplysning(
-        UUID.randomUUID(),
-        kilde,
-        opplysningsType,
-        objectMapper.createObjectNode(),
-        opplysning
-    )
+fun <T> lagOpplysning(
+    opplysningsType: Opplysningstyper,
+    kilde: Grunnlagsopplysning.Kilde,
+    opplysning: T
+): Grunnlagsopplysning<T> {
+    return Grunnlagsopplysning(UUID.randomUUID(), kilde, opplysningsType, objectMapper.createObjectNode(), opplysning)
 }

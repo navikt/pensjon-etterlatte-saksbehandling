@@ -26,7 +26,12 @@ class GrunnlagService(
         token: String
     ): GrunnlagResult {
         val behandling = behandlingKlient.hentBehandling(behandlingId, token)
-        val opplysning = byggOpplysninger(svar, begrunnelse, saksbehandlerId)
+
+        val opplysning : List<Grunnlagsopplysning<out Any>> = listOf(lagOpplysning(
+            Opplysningstyper.SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1,
+            Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
+            ResultatKommerBarnetTilgode(svar, begrunnelse)
+        ))
 
         rapid.publiser(behandlingId, JsonMessage.newMessage(
             mapOf(
@@ -38,20 +43,6 @@ class GrunnlagService(
         return GrunnlagResult("Lagret")
     }
 }
-
-
-fun byggOpplysninger(svar: String, begrunnelse: String, saksbehandlerId: String): List<Grunnlagsopplysning<out Any>> {
-    val opplysninger = ArrayList<Grunnlagsopplysning<out Any>>()
-
-    opplysninger.add(lagOpplysning(
-        Opplysningstyper.SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1,
-        Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
-        ResultatKommerBarnetTilgode(svar, begrunnelse)
-    ))
-
-    return opplysninger
-}
-
 
 fun <T> lagOpplysning(
     opplysningsType: Opplysningstyper,

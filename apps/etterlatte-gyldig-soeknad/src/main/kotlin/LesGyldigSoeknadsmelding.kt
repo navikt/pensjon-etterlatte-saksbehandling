@@ -4,6 +4,8 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -21,17 +23,16 @@ internal class LesGyldigSoeknadsmelding(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event_name", "FORDELER:FORDELT") }
-            validate { it.demandValue("@soeknad_fordelt", true) }
-            validate { it.interestedIn("@correlation_id") }
+            eventName("FORDELER:FORDELT")
+            correlationId()
+            validate { it.demandValue("soeknadFordelt", true) }
             validate { it.requireKey("@skjema_info") }
             validate { it.requireKey("@fnr_soeker") } //TODO: sjekk at dette er riktig verdi
-            validate { it.rejectKey("@gyldig_innsender") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
+        withLogContext(packet.correlationId) {
             logger.info("Gyldighetsvurdering av mottat søknad fra fordeler starter")
 
             try {
@@ -45,10 +46,10 @@ internal class LesGyldigSoeknadsmelding(
                     sak, packet["@skjema_info"]["mottattDato"].asText(), personGalleri
                 )
                 behandling.lagreGyldighetsVurdering(behandlingsid, gyldighetsVurdering)
-
-                packet["@sak_id"] = sak
-                packet["@behandling_id"] = behandlingsid
-                packet["@gyldig_innsender"] = erGyldigFramsatt
+                packet.eventName = "GYLDIG_SOEKNAD:VURDERT"
+                packet["sakId"] = sak
+                packet["behandlingId"] = behandlingsid
+                packet["gyldigInnsender"] = erGyldigFramsatt
 
                 context.publish(packet.toJson())
                 logger.info("Vurdert gyldighet av søknad")
@@ -72,5 +73,3 @@ interface Behandling {
     fun skaffSak(person: String, saktype: String): Long
     fun lagreGyldighetsVurdering(behandlingsId: UUID, gyldighetsVurdering: GyldighetsResultat)
 }
-
-private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

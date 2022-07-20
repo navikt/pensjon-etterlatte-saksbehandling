@@ -27,14 +27,13 @@ class GrunnlagHendelser(
     init {
         River(rapidsConnection).apply {
             validate { it.requireKey("opplysning") }
-            validate { it.requireKey("sak") }
+            validate { it.requireKey("sakId") }
             validate { it.rejectKey("grunnlag") }
-            validate { it.rejectKey("@event_name") }
             validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
 
-    override fun onPacket(packet: no.nav.helse.rapids_rivers.JsonMessage, context: MessageContext) =
+    override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             if (Kontekst.get().AppUser !is Self) {
                 logger.warn("AppUser i kontekst er ikke Self i R&R-flyten")

@@ -23,7 +23,7 @@ internal class FordelerTest {
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
         assertEquals("FORDELER:FORDELT", inspector.message(0).get("@event_name").asText())
-        assertEquals("true", inspector.message(0).get("@soeknad_fordelt").asText())
+        assertEquals("true", inspector.message(0).get("soeknadFordelt").asText())
 
         verify { fordelerMetricLogger.logMetricFordelt() }
     }

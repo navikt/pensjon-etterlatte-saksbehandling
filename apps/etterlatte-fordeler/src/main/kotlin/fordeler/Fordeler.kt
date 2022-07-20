@@ -41,7 +41,6 @@ internal class Fordeler(
             validate { it.requireKey("@hendelse_gyldig_til") }
             validate { it.requireKey("@adressebeskyttelse") }
             validate { it.requireKey("@fnr_soeker") }
-            validate { it.rejectKey("@soeknad_fordelt") }
             validate { it.rejectKey("@dokarkivRetur") }
             correlationId()
         }.register(this)
@@ -49,7 +48,7 @@ internal class Fordeler(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
+        withLogContext(packet.correlationId) {
             try {
                 logger.info("Sjekker om soknad (${packet.soeknadId()}) er gyldig for fordeling")
 
@@ -79,7 +78,7 @@ internal class Fordeler(
         )
 
     private fun JsonMessage.leggPaaFordeltStatus(): JsonMessage {
-             this["@soeknad_fordelt"] = true
+             this["soeknadFordelt"] = true
              eventName = "FORDELER:FORDELT"
              correlationId = getCorrelationId()
              return this

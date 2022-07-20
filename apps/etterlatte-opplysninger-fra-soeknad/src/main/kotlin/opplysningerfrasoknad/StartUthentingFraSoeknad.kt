@@ -1,6 +1,9 @@
 package no.nav.etterlatte.opplysningerfrasoknad
 
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -17,26 +20,25 @@ internal class StartUthentingFraSoeknad(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event_name", "FORDELER:FORDELT") }
-            validate { it.requireValue("@soeknad_fordelt", true) }
+            eventName("GYLDIG_SOEKNAD:VURDERT")
+            correlationId()
             validate { it.requireKey("@skjema_info") }
-            validate { it.requireKey("@sak_id") }
-            validate { it.requireKey("@behandling_id") }
-            validate { it.requireKey("@gyldig_innsender") }
-            validate { it.interestedIn("@correlation_id") }
+            validate { it.requireKey("sakId") }
+            validate { it.requireKey("behandlingId") }
+            validate { it.requireKey("gyldigInnsender") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
+        withLogContext(packet.correlationId) {
             val opplysninger = opplysningsuthenter.lagOpplysningsListe(packet["@skjema_info"])
 
-            JsonMessage.newMessage(
+            JsonMessage.newMessage("OPPLYSNING:NY",
                 mapOf(
-                    "sak" to packet["@sak_id"],
-                    "@behandling_id" to packet["@behandling_id"],
-                    "@gyldig_innsender" to packet["@gyldig_innsender"],
-                    "@correlation_id" to packet["@correlation_id"],
+                    "sakId" to packet["sakId"],
+                    "behandlingId" to packet["behandlingId"],
+                    "gyldigInnsender" to packet["gyldigInnsender"],
+                    correlationIdKey to packet[correlationIdKey],
                     "opplysning" to opplysninger
                 )
             ).apply {
@@ -49,5 +51,3 @@ internal class StartUthentingFraSoeknad(
             logger.info("Opplysninger hentet fra søknad")
         }
 }
-
-private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

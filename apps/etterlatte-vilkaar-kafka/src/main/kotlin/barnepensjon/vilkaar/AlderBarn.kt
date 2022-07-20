@@ -26,11 +26,7 @@ fun vilkaarBrukerErUnder20(
 
 fun kriterieSoekerErILive(soekerPdl: VilkaarOpplysning<Person>?, avdoedPdl: VilkaarOpplysning<Person>?): Kriterie {
     if (soekerPdl == null || avdoedPdl == null) {
-        return Kriterie(
-            Kriterietyper.SOEKER_ER_I_LIVE,
-            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
-            emptyList()
-        )
+        return opplysningsGrunnlagNull(Kriterietyper.SOEKER_ER_I_LIVE, emptyList())
     }
 
     val opplysningsGrunnlag = listOf(

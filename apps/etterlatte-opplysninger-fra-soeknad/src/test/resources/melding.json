@@ -1,9 +1,8 @@
 {
-  "@event_name": "FORDELER:FORDELT",
-  "": true,
-  "@behandling_id": "f525f2f7-e246-43d7-b61a-5f0757472916",
-  "@sak_id": 1,
-  "@gyldig_innsender": true,
+  "@event_name": "GYLDIG_SOEKNAD:VURDERT",
+  "gyldigInnsender": true,
+  "behandlingId": "f525f2f7-e246-43d7-b61a-5f0757472916",
+  "sakId": 1,
   "@skjema_info": {
     "imageTag": "9f1f95b2472742227b37d19dd2d735ac9001995e",
     "spraak": "nb",

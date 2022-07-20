@@ -62,10 +62,10 @@ internal class LesVilkaarsmeldingTest {
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-        Assertions.assertEquals("FORDELER:FORDELT", inspector.message(0).get("@event_name").asText())
-        Assertions.assertEquals(4, inspector.message(0).get("@sak_id").longValue())
-        Assertions.assertEquals(id.toString(), inspector.message(0).get("@behandling_id").asText())
-        Assertions.assertEquals(true, inspector.message(0).get("@gyldig_innsender").asBoolean())
+        Assertions.assertEquals("GYLDIG_SOEKNAD:VURDERT", inspector.message(0).get("@event_name").asText())
+        Assertions.assertEquals(4, inspector.message(0).get("sakId").longValue())
+        Assertions.assertEquals(id.toString(), inspector.message(0).get("behandlingId").asText())
+        Assertions.assertEquals(true, inspector.message(0).get("gyldigInnsender").asBoolean())
 
     }
 }

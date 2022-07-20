@@ -35,14 +35,14 @@ internal class StartUthentingFraSoeknadTest {
                 objectMapper.readTree(
                     javaClass.getResource("/melding.json")!!.readText()
                 )!!["@skjema_info"]
-            )!!
+            )
         )
         every { opplysningsuthenterMock.lagOpplysningsListe(any()) } returns opplysninger
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-        assertEquals(1, inspector.message(0).get("sak").intValue())
-        assertEquals("f525f2f7-e246-43d7-b61a-5f0757472916", inspector.message(0).get("@behandling_id").asText())
-        assertEquals(true, inspector.message(0).get("@gyldig_innsender").asBoolean())
+        assertEquals(1, inspector.message(0).get("sakId").intValue())
+        assertEquals("f525f2f7-e246-43d7-b61a-5f0757472916", inspector.message(0).get("behandlingId").asText())
+        assertEquals(true, inspector.message(0).get("gyldigInnsender").asBoolean())
         assertEquals(9, inspector.message(0).get("opplysning").size())
 
     }

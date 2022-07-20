@@ -206,6 +206,7 @@ export enum VilkaarsType {
   SAMME_ADRESSE = 'GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE',
   BARN_BOR_PAA_AVDOEDES_ADRESSE = 'BARN_BOR_PAA_AVDOEDES_ADRESSE',
   BARN_INGEN_OPPGITT_UTLANDSADRESSE = 'BARN_INGEN_OPPGITT_UTLANDSADRESSE',
+  SAKSBEHANDLER_RESULTAT = 'SAKSBEHANDLER_RESULTAT',
 }
 
 export interface IKriterie {
@@ -222,6 +223,7 @@ export enum Kriterietype {
   GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET = 'GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET',
   AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD = 'AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD',
   AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR = 'AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR',
+  SAKSBEHANDLER_RESULTAT = 'SAKSBEHANDLER_RESULTAT',
 }
 
 export interface IKriterieOpplysning {
@@ -238,6 +240,7 @@ export enum KriterieOpplysningsType {
   AVDOED_UTENLANDSOPPHOLD = 'AVDOED_UTENLANDSOPPHOLD',
   SOEKER_UTENLANDSOPPHOLD = 'SOEKER_UTENLANDSOPPHOLD',
   ADRESSE_GAPS = 'ADRESSE_GAPS',
+  SAKSBEHANDLER_RESULTAT = 'SAKSBEHANDLER_RESULTAT',
 }
 
 export interface IPerson {
@@ -264,6 +267,11 @@ export enum PersonRolle {
   GJENLEVENDE = 'GJENLEVENDE',
 }
 
+export enum ISvar {
+  JA = 'JA',
+  NEI = 'NEI',
+}
+
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   id: '',
   sak: 0,
@@ -284,8 +292,7 @@ export const behandlingReducer = (state = detaljertBehandlingInitialState, actio
   switch (action.type) {
     case 'add_behandling':
       return {
-        ...state,
-        ...action.data,
+        ...state, ...action.data,
       }
     default:
       state

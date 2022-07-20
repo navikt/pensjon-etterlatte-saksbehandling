@@ -29,10 +29,8 @@ export function hentGyldighetsTekst(
         svar =
           'Innsender er ikke gjenlevende forelder, men har foreldreansvar. Dette må avklares før du kan starte vilkårsvurderingen.'
       }
-    } else if (
-      innsenderHarForeldreansvar === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ||
-      innsenderHarForeldreansvar === undefined
-    ) {
+    } else if (innsenderHarForeldreansvar === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ||
+      innsenderHarForeldreansvar === undefined) {
       svar =
         'Innsender er ikke gjenlevende forelder, og mangler info om innsender har forelderansvar. Dette må avklares før du kan starte vilkårsvurderingen.'
     }
@@ -52,26 +50,20 @@ export function hentGyldighetsTekst(
       } else if (ingenAnnenVergeEnnForelder === VurderingsResultat.OPPFYLT) {
         svar = ''
       }
-    } else if (
-      innsenderHarForeldreansvar === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ||
-      innsenderHarForeldreansvar === undefined
-    ) {
+    } else if (innsenderHarForeldreansvar === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ||
+      innsenderHarForeldreansvar === undefined) {
       svar = 'Mangler info om innsender har forelderansvar. Dette må avklares før du kan starte vilkårsvurderingen.'
     }
-  } else if (
-    innsenderErForelder === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ||
-    innsenderErForelder === undefined
-  ) {
+  } else if (innsenderErForelder === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ||
+    innsenderErForelder === undefined) {
     if (innsenderHarForeldreansvar === VurderingsResultat.OPPFYLT) {
       svar =
         'Mangler info om innsender er gjenlevende forelder. Dette må avklares før du kan starte vilkårsvurderingen.'
     } else if (innsenderHarForeldreansvar === VurderingsResultat.IKKE_OPPFYLT) {
       svar =
         'Mangler info om innsender er gjenlevende forelder og innsender har ikke forelderansvar. Dette må avklares før du kan starte vilkårsvurderingen.'
-    } else if (
-      innsenderHarForeldreansvar === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ||
-      innsenderHarForeldreansvar === undefined
-    ) {
+    } else if (innsenderHarForeldreansvar === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ||
+      innsenderHarForeldreansvar === undefined) {
       svar = 'Mangler info om innsender er gjenlevende forelder eller har foreldreansvar. '
     }
   }
@@ -81,11 +73,15 @@ export function hentGyldighetsTekst(
 export function hentKommerBarnetTilgodeTekst(
   sammeAdresse: VurderingsResultat | undefined,
   barnIngenUtland: VurderingsResultat | undefined,
-  sammeAdresseAvdoed: VurderingsResultat | undefined
-): string | undefined {
+  sammeAdresseAvdoed: VurderingsResultat | undefined,
+  saksbehandlerVurdering: VurderingsResultat | undefined,
+): string {
   let svar
-
-  if (sammeAdresse === VurderingsResultat.IKKE_OPPFYLT) {
+  if (saksbehandlerVurdering === VurderingsResultat.OPPFYLT) {
+    svar = 'Saksbehandler har vurdert at det er sannsynlig at pensjonen kommer barnet til gode.'
+  } else if (saksbehandlerVurdering === VurderingsResultat.IKKE_OPPFYLT) {
+    svar = 'Saksbehandler har vurdert at det ikke er sannsynlig at pensjonen kommer barnet til gode.'
+  } else if (sammeAdresse === VurderingsResultat.IKKE_OPPFYLT) {
     if (barnIngenUtland === VurderingsResultat.IKKE_OPPFYLT) {
       if (sammeAdresseAvdoed === VurderingsResultat.IKKE_OPPFYLT) {
         svar =
@@ -94,33 +90,31 @@ export function hentKommerBarnetTilgodeTekst(
         svar =
           'Barnet bor ikke på samme adresse som gjenlevende, men har samme adresse som avdøde og har oppgitt adresse i utlandet.'
       }
-    } else if (barnIngenUtland === VurderingsResultat.OPPFYLT)
-      if (sammeAdresseAvdoed === VurderingsResultat.IKKE_OPPFYLT) {
-        svar = 'Barnet bor ikke på samme adresse som gjenlevende forelder eller avdøde.'
-      } else if (sammeAdresseAvdoed === VurderingsResultat.OPPFYLT) {
-        svar = 'Barnet bor ikke på samme adresse som gjenlevende, men har samme adresse som avdøde.'
-      }
+    } else if (barnIngenUtland === VurderingsResultat.OPPFYLT) if (sammeAdresseAvdoed ===
+      VurderingsResultat.IKKE_OPPFYLT) {
+      svar = 'Barnet bor ikke på samme adresse som gjenlevende forelder eller avdøde.'
+    } else if (sammeAdresseAvdoed === VurderingsResultat.OPPFYLT) {
+      svar = 'Barnet bor ikke på samme adresse som gjenlevende, men har samme adresse som avdøde.'
+    }
   } else if (sammeAdresse === VurderingsResultat.OPPFYLT) {
     if (barnIngenUtland === VurderingsResultat.IKKE_OPPFYLT) {
       svar = 'Barnet bor på samme adresse som gjenlevende forelder, men har oppgitt adresse i utlandet.'
     } else {
       svar = 'Barn bor på samme adresse som gjenlevende forelder.'
     }
-  } else if (
-    sammeAdresse === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ||
-    sammeAdresse == undefined
-  ) {
+  } else if (sammeAdresse === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING || sammeAdresse ==
+    undefined) {
     svar = 'Mangler info.'
   }
 
-  return svar
+  return svar ? svar : ''
 }
 
 export function hentKommerBarnetTilgodeVurderingsTekst(
   sammeAdresse: VurderingsResultat | undefined,
   barnIngenUtland: VurderingsResultat | undefined,
-  sammeAdresseAvdoed: VurderingsResultat | undefined
-): String | undefined {
+  sammeAdresseAvdoed: VurderingsResultat | undefined,
+): string {
   let svar
 
   if (sammeAdresse === VurderingsResultat.IKKE_OPPFYLT) {
@@ -133,10 +127,8 @@ export function hentKommerBarnetTilgodeVurderingsTekst(
       svar =
         'Ulik adresse for barn og gjenlevende forelder. Kontakt forelder og evt statsforvalter for å avklare hvorfor barnet ikke bor med vedkommende. '
     }
-  } else if (
-    sammeAdresse === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING ||
-    sammeAdresse == undefined
-  ) {
+  } else if (sammeAdresse === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING || sammeAdresse ==
+    undefined) {
     svar = 'Mangler info. Kontakt forelder for å avklare hvem barnet bor med. '
   } else {
     if (barnIngenUtland === VurderingsResultat.IKKE_OPPFYLT) {
@@ -144,5 +136,5 @@ export function hentKommerBarnetTilgodeVurderingsTekst(
         'Barn har oppgitt at de bor på utenlandsadresse i søknaden. Kontakt forelder for å avklare hvor barnet bor.'
     }
   }
-  return svar
+  return svar ? svar : ''
 }

@@ -373,7 +373,7 @@
   },
   "kommerSoekerTilgode": {
     "kommerSoekerTilgodeVurdering": {
-      "resultat": "IKKE_OPPFYLT",
+      "resultat": "OPPFYLT",
       "vilkaar": [
         {
           "navn": "GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE",
@@ -539,6 +539,33 @@
             }
           ],
           "vurdertDato": "2022-06-09T14:55:02.300217685"
+        },
+        {
+          "navn": "SAKSBEHANDLER_RESULTAT",
+          "resultat": "OPPFYLT",
+          "utfall": null,
+          "kriterier": [
+            {
+              "navn": "SAKSBEHANDLER_RESULTAT",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "3612a2e0-f106-432e-9af6-61314c5ac2d1",
+                  "kriterieOpplysningsType": "SAKSBEHANDLER_RESULTAT",
+                  "kilde": {
+                    "ident": "Z994398",
+                    "tidspunkt": "2022-07-19T12:30:40.570581604Z",
+                    "type": "saksbehandler"
+                  },
+                  "opplysning": {
+                    "svar": "JA",
+                    "kommentar": "sefsaefasefasefsefsefsef"
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-07-19T14:30:51.620939163"
         }
       ],
       "vurdertDato": "2022-05-31T12:53:36.206922854"

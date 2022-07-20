@@ -78,9 +78,8 @@ export const underkjennVedtak = async (behandlingId: string,
   }
 }
 
-export const lagreBegrunnelseKommerBarnetTilgode = async (
-  behandlingsId: string,
-  begrunnelse: string,
+export const lagreBegrunnelseKommerBarnetTilgode = async (behandlingsId: string,
+  kommentar: string,
   svar: string
 ): Promise<IApiResponse<any>> => {
   try {
@@ -88,7 +87,7 @@ export const lagreBegrunnelseKommerBarnetTilgode = async (
       method: 'post', headers: {
         'Content-Type': 'application/json',
       }, body: JSON.stringify({
-        svar: svar, begrunnelse: begrunnelse,
+        svar: svar, begrunnelse: kommentar,
       }),
     })
     return {

@@ -1,169 +1,89 @@
-import { IVilkaarResultat, VilkaarsType, VurderingsResultat } from '../../../../../store/reducers/BehandlingReducer'
-import { format } from 'date-fns'
+import {
+  ISvar, IVilkaarResultat, KriterieOpplysningsType, Kriterietype, VilkaarsType, VurderingsResultat
+} from '../../../../../store/reducers/BehandlingReducer'
 import { GyldighetIcon } from '../../../../../shared/icons/gyldigIcon'
-import { hentKommerBarnetTilgodeVurderingsTekst } from '../../utils'
 import { VurderingsTitle, Undertekst, VurderingsContainer } from '../../styled'
 import { CaseworkerfilledIcon } from "../../../../../shared/icons/caseworkerfilledIcon";
 import styled from "styled-components";
-import { useContext, useState } from "react";
-import { Button, Radio, RadioGroup, Textarea } from "@navikt/ds-react";
-import { hentBehandling, lagreBegrunnelseKommerBarnetTilgode } from "../../../../../shared/api/behandling";
-import { AppContext } from "../../../../../store/AppContext";
+import { useState } from "react";
+import { EndreVurdering } from "./EndreVurdering";
+import { hentKriterierMedOpplysning } from "../../../felles/utils";
+import { formatterStringDato } from "../../../../../utils";
 
-export const KommerBarnetTilGodeVurdering =
-  ({
-     kommerSoekerTilgodeVurdering,
-   }: {
-    kommerSoekerTilgodeVurdering: IVilkaarResultat
-  }) => {
-    const behandlingId = useContext(AppContext).state.behandlingReducer.id
+export const KommerBarnetTilGodeVurdering = ({
+  kommerSoekerTilgodeVurdering, automatiskTekst
+}: {
+  kommerSoekerTilgodeVurdering: IVilkaarResultat
+  automatiskTekst: string
+}) => {
 
-    const [redigeringsModus, setRedigeringsModus] = useState(false)
-    const [svar, setSvar] = useState<ISvar>()
-    const [radioError, setRadioError] = useState<string>()
-    const [begrunnelse, setBegrunnelse] = useState<string>('')
-    const [begrunnelseError, setBegrunnelseError] = useState<string>()
+  const [redigeringsModus, setRedigeringsModus] = useState(false)
+  const vilkaar = kommerSoekerTilgodeVurdering?.vilkaar
+  const saksbehandlerVurdering = vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.SAKSBEHANDLER_RESULTAT)
+  const saksbehandlerKriterie = hentKriterierMedOpplysning(saksbehandlerVurdering,
+    Kriterietype.SAKSBEHANDLER_RESULTAT,
+    KriterieOpplysningsType.SAKSBEHANDLER_RESULTAT
+  )
 
-    enum ISvar {
-      JA = 'JA',
-      NEI = 'NEI',
-    }
+  const saksbehandlerOpplysning: SaksbehandlerOpplysning = saksbehandlerKriterie?.opplysning
 
-    function lagreBegrunnelseKlikket() {
-      if (!behandlingId) throw new Error('Mangler behandlingsid')
-      !svar ? setRadioError('Du må velge et svar') : setRadioError(undefined)
-      begrunnelse.length < 20 ? setBegrunnelseError('Begrunnelsen må være minst 20 tegn') : setBegrunnelseError(undefined)
-
-      if (radioError === undefined && begrunnelseError === undefined && svar !== undefined)
-        lagreBegrunnelseKommerBarnetTilgode(behandlingId, begrunnelse, svar.toString()).then((response) => {
-          if (response.status === 200) {
-            hentBehandling(behandlingId).then((response) => {
-              if (response.status === 200) {
-                window.location.reload()
-              }
-            })
-          }
-        })
-    }
-
-    function reset() {
-      setRedigeringsModus(false)
-      setSvar(undefined)
-      setRadioError(undefined)
-      setBegrunnelse('')
-      setBegrunnelseError(undefined)
-    }
-
-    const hentTekst = (): any => {
-      const sammeAdresse = kommerSoekerTilgodeVurdering?.vilkaar.find(
-        (vilkaar) => vilkaar.navn === VilkaarsType.SAMME_ADRESSE
-      )
-      const barnIngenUtland = kommerSoekerTilgodeVurdering?.vilkaar.find(
-        (vilkaar) => vilkaar.navn === VilkaarsType.BARN_INGEN_OPPGITT_UTLANDSADRESSE
-      )
-      const sammeAdresseAvdoed = kommerSoekerTilgodeVurdering?.vilkaar.find(
-        (vilkaar) => vilkaar.navn === VilkaarsType.BARN_BOR_PAA_AVDOEDES_ADRESSE
-      )
-
-      return hentKommerBarnetTilgodeVurderingsTekst(
-        sammeAdresse?.resultat,
-        barnIngenUtland?.resultat,
-        sammeAdresseAvdoed?.resultat
-      )
-    }
-
-    const tittel =
-      kommerSoekerTilgodeVurdering.resultat !== VurderingsResultat.OPPFYLT
-        ? 'Ikke sannsynlig pensjonen kommer barnet til gode'
-        : 'Sannsynlig pensjonen kommer barnet til gode'
-
-    return (
-      <VurderingsContainer>
-        <div>
-          {kommerSoekerTilgodeVurdering.resultat && (
-            <GyldighetIcon status={kommerSoekerTilgodeVurdering.resultat} large={true}/>
-          )}
-        </div>
-        {redigeringsModus ? (
-          <div>
-            <VurderingsTitle>Trenger avklaring</VurderingsTitle>
-            <Undertekst gray={false}>
-              Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
-            </Undertekst>
-            <RadioGroupWrapper>
-              <RadioGroup
-                legend=""
-                size="small"
-                className="radioGroup"
-                onChange={(event) => {
-                  setSvar(ISvar[event as ISvar])
-                  setRadioError(undefined)
-                }}
-                error={radioError ? radioError : false}
-              >
-                <div className="flex">
-                  <Radio value={ISvar.JA.toString()}>Ja</Radio>
-                  <Radio value={ISvar.NEI.toString()}>Nei</Radio>
-                </div>
-              </RadioGroup>
-            </RadioGroupWrapper>
-            <Textarea
-              style={{padding: '10px', marginBottom: '10px'}}
-              label="Begrunnelse"
-              hideLabel={false}
-              placeholder="Forklar begrunnelsen"
-              value={begrunnelse}
-              onChange={(e) => {
-                setBegrunnelse(e.target.value)
-                begrunnelse.length > 19 && setBegrunnelseError(undefined)
-              }}
-              minRows={3}
-              size="small"
-              error={begrunnelseError ? begrunnelseError : false}
-            />
-            <Button
-              style={{marginTop: '10px'}}
-              variant={"primary"}
-              size={"small"}
-              onClick={() => lagreBegrunnelseKlikket()}
-            >
-              Lagre
-            </Button>
-            <Button
-              style={{marginTop: '10px', marginLeft: '10px'}}
-              variant={"secondary"}
-              size={"small"}
-              onClick={() => reset()}
-            >
-              Avbryt
-            </Button>
-          </div>
-        ) : (
-          <div>
-            <VurderingsTitle>{tittel}</VurderingsTitle>
-            <Undertekst gray={true}>
-              Automatisk {format(new Date(kommerSoekerTilgodeVurdering.vurdertDato), 'dd.MM.yyyy')}
-            </Undertekst>
-            {kommerSoekerTilgodeVurdering?.resultat === VurderingsResultat.OPPFYLT && (
-              <>
-                <Undertekst gray={false}>{hentTekst()}</Undertekst>
-                <RedigerWrapper onClick={() => setRedigeringsModus(true)}>
-                  <CaseworkerfilledIcon/> <span
-                  className={"text"}>Legg til vurdering</span>
-                </RedigerWrapper>
-              </>
-            )}
-          </div>
-        )}
-
-      </VurderingsContainer>
-    )
+  interface SaksbehandlerOpplysning {
+    svar: ISvar,
+    kommentar: string
   }
+
+  const harSaksbehandlerOpplysning = saksbehandlerKriterie !== undefined
+
+  const tittel = kommerSoekerTilgodeVurdering.resultat !== VurderingsResultat.OPPFYLT ?
+    'Ikke sannsynlig pensjonen kommer barnet til gode' : 'Sannsynlig pensjonen kommer barnet til gode'
+
+  const typeVurdering = saksbehandlerVurdering ? 'Vurdert av ' + saksbehandlerKriterie?.kilde.ident : 'Automatisk '
+  const redigerTekst = saksbehandlerVurdering ? 'Rediger vurdering' : 'Legg til vurdering'
+
+  return (
+    <VurderingsContainer>
+      <div>
+        {kommerSoekerTilgodeVurdering.resultat && (
+          <GyldighetIcon status={kommerSoekerTilgodeVurdering.resultat} large={true}/>
+        )}
+      </div>
+      {redigeringsModus ? (
+        <EndreVurdering setRedigeringsModusFalse={() => setRedigeringsModus(false)}/>
+      ) : (
+        <div>
+          <VurderingsTitle>{tittel}</VurderingsTitle>
+          <Undertekst gray={true}>
+            {typeVurdering} {formatterStringDato(kommerSoekerTilgodeVurdering.vurdertDato)}
+          </Undertekst>
+          {harSaksbehandlerOpplysning ? (
+            <div>
+              <Undertekst gray={false}>
+                Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
+              </Undertekst>
+              <div>{saksbehandlerOpplysning.svar}</div>
+              <BegrunnelseWrapper>
+                <div style={{fontWeight: "bold"}}>Begrunnelse</div>
+                <div>{saksbehandlerOpplysning.kommentar}</div>
+              </BegrunnelseWrapper>
+            </div>
+          ) : (
+            <Undertekst gray={false}>{automatiskTekst}</Undertekst>
+          )}
+          <RedigerWrapper onClick={() => setRedigeringsModus(true)}>
+            <CaseworkerfilledIcon/> <span
+            className={"text"}> {redigerTekst}</span>
+          </RedigerWrapper>
+        </div>
+      )}
+    </VurderingsContainer>
+  )
+}
 
 const RedigerWrapper = styled.div`
   display: inline-flex;
   cursor: pointer;
   color: #0056b4;
+  margin-top: 10px;
 
   .text {
     margin-left: 0.3em;
@@ -182,4 +102,11 @@ export const RadioGroupWrapper = styled.div`
     display: flex;
     gap: 20px;
   }
+`
+const BegrunnelseWrapper = styled.div`
+  background-color: ${'#EFECF4'};
+  color: ;
+  padding: 0.1em 0.5em;
+  border-radius: 4px;
+  margin-right: 0.9em;
 `

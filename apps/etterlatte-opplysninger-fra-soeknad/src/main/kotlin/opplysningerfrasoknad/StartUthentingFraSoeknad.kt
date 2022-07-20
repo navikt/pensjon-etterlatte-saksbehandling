@@ -17,7 +17,7 @@ internal class StartUthentingFraSoeknad(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event_name", "ey_fordelt") }
+            validate { it.demandValue("@event_name", "FORDELER:FORDELT") }
             validate { it.requireValue("@soeknad_fordelt", true) }
             validate { it.requireKey("@skjema_info") }
             validate { it.requireKey("@sak_id") }

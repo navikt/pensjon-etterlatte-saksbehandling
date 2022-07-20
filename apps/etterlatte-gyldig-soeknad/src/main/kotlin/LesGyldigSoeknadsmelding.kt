@@ -21,7 +21,7 @@ internal class LesGyldigSoeknadsmelding(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event_name", "ey_fordelt") }
+            validate { it.demandValue("@event_name", "FORDELER:FORDELT") }
             validate { it.demandValue("@soeknad_fordelt", true) }
             validate { it.interestedIn("@correlation_id") }
             validate { it.requireKey("@skjema_info") }

@@ -6,6 +6,8 @@ import no.nav.etterlatte.fordeler.FordelerResultat.*
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -19,7 +21,6 @@ data class FordelerEvent(
     val soeknad: Barnepensjon,
     val hendelseGyldigTil: OffsetDateTime,
 )
-
 internal class Fordeler(
     rapidsConnection: RapidsConnection,
     private val fordelerService: FordelerService,
@@ -30,8 +31,8 @@ internal class Fordeler(
     private val logger = LoggerFactory.getLogger(Fordeler::class.java)
 
     init {
-        River(rapidsConnection).apply {
-            validate { it.demandValue("@event_name", "soeknad_innsendt") }
+        River(rapidsConnection).apply{
+            eventName("soeknad_innsendt")
             validate { it.demandValue("@skjema_info.type", "BARNEPENSJON") }
             validate { it.demandValue("@skjema_info.versjon", "2") }
             validate { it.requireKey("@skjema_info") }
@@ -42,7 +43,7 @@ internal class Fordeler(
             validate { it.requireKey("@fnr_soeker") }
             validate { it.rejectKey("@soeknad_fordelt") }
             validate { it.rejectKey("@dokarkivRetur") }
-            validate { it.interestedIn("@correlation_id") }
+            correlationId()
         }.register(this)
 
     }
@@ -55,7 +56,7 @@ internal class Fordeler(
                 when (val resultat = fordelerService.sjekkGyldighetForBehandling(packet.toFordelerEvent())) {
                     is GyldigForBehandling -> {
                         logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling")
-                        context.publish(packet.toFordeltEvent().toJson())
+                        context.publish(packet.leggPaaFordeltStatus().toJson())
                         fordelerMetricLogger.logMetricFordelt()
                     }
                     is IkkeGyldigForBehandling -> {
@@ -77,13 +78,12 @@ internal class Fordeler(
             hendelseGyldigTil = get("@hendelse_gyldig_til").textValue().let(OffsetDateTime::parse)
         )
 
-    private fun JsonMessage.toFordeltEvent() =
-        apply {
-            this["@soeknad_fordelt"] = true
-            this["@event_name"] = "ey_fordelt"
-            this["@correlation_id"] = getCorrelationId()
+    private fun JsonMessage.leggPaaFordeltStatus(): JsonMessage {
+             this["@soeknad_fordelt"] = true
+             eventName = "FORDELER:FORDELT"
+             correlationId = getCorrelationId()
+             return this
         }
 
-    private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
     private fun JsonMessage.soeknadId(): Int = get("@lagret_soeknad_id").intValue()
 }

@@ -11,6 +11,7 @@ dependencies {
     implementation(Ktor.ClientJackson)
 
     implementation(project(":libs:ktorclient-auth-clientcredentials"))
+    implementation(project(":libs:rapidsandrivers-extras"))
     implementation(project(":libs:common"))
 
 

@@ -28,5 +28,6 @@ plugins {
     "libs:ktorclient-auth-clientcredentials",
     "libs:common",
     "libs:ktorclient-onbehalfof",
+    "libs:rapidsandrivers-extras",
     "jobs:test-fordeler",
 )

@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -18,7 +17,7 @@ import java.util.*
 //TODO hvordan håndtere vedtakstidspunkt?
 
 class BeregningService {
-    private val logger = LoggerFactory.getLogger(BeregningService::class.java)
+    //private val logger = LoggerFactory.getLogger(BeregningService::class.java)
 
 
     fun beregnResultat(grunnlag: Grunnlag, virkFOM: YearMonth, virkTOM: YearMonth): BeregningsResultat {

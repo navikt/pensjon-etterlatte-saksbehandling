@@ -29,5 +29,6 @@ plugins {
     "libs:common",
     "libs:ktorclient-onbehalfof",
     "libs:rapidsandrivers-extras",
+    "libs:etterlatte-kafka",
     "jobs:test-fordeler",
 )

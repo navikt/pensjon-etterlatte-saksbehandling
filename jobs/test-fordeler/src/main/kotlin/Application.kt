@@ -6,13 +6,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.batch.JsonMessage
-import no.nav.etterlatte.batch.KafkaConfig
 import no.nav.etterlatte.batch.payload
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.Producer
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.serialization.StringSerializer
+import no.nav.etterlatte.kafka.GcpKafkaConfig
+import no.nav.etterlatte.kafka.JsonMessage
+import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.kafka.standardProducer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.OffsetDateTime
@@ -30,22 +28,14 @@ fun main() {
     logger.info("Batch startet")
     val env = System.getenv()
 
-    val config = KafkaConfig(
-        bootstrapServers = env.getValue("KAFKA_BROKERS"),
-        truststore = env.getValue("KAFKA_TRUSTSTORE_PATH"),
-        truststorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD"),
-        keystoreLocation = env.getValue("KAFKA_KEYSTORE_PATH"),
-        keystorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD")
-    )
     val topic = env.getValue("KAFKA_TARGET_TOPIC")
     logger.info("Konfig lest, oppretter kafka-produsent")
 
-    val producer = KafkaProducer(config.producerConfig(), StringSerializer(), StringSerializer())
+    val producer = GcpKafkaConfig.fromEnv().standardProducer(topic)
 
     sendMelding(
         payload(aremark_person),
         producer,
-        topic
     )
     logger.info("Batch avslutter")
     exitProcess(0)
@@ -53,29 +43,21 @@ fun main() {
 
 internal fun sendMelding(
     melding: String,
-    producer: Producer<String, String>,
-    topic: String
+    producer: KafkaProdusent<String, String>,
 ) {
     val startMillis = System.currentTimeMillis()
     logger.info("Publiserer melding")
-
-    producer.send(createRecord(melding, topic)).get()
-
-
-    producer.flush()
+    producer.publiser("0", createRecord(melding))
     producer.close()
 
     logger.info("melding publisert på ${(System.currentTimeMillis() - startMillis) / 1000}s")
 }
 
-private fun createRecord(input: String, topic: String): ProducerRecord<String, String> {
-    val message = JsonMessage.newMessage(mapOf(
+private fun createRecord(input: String) = JsonMessage.newMessage(mapOf(
         "@event_name" to "soeknad_innsendt",
         "@skjema_info" to objectMapper.readValue<ObjectNode>(input),
         "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
         "@template" to "soeknad",
         "@fnr_soeker" to aremark_person,
         "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L).toString()
-    ))
-    return ProducerRecord(topic, "0", message.toJson())
-}
+    )).toJson()

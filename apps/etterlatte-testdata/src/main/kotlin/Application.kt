@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import KafkaProdusent
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -23,12 +22,12 @@ import io.ktor.server.engine.*
 import io.ktor.util.pipeline.*
 import kotlinx.html.*
 import no.nav.etterlatte.batch.JsonMessage
-import no.nav.etterlatte.batch.KafkaConfig
 import no.nav.etterlatte.batch.payload
+import no.nav.etterlatte.kafka.GcpKafkaConfig
+import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.kafka.standardProducer
 import no.nav.security.token.support.ktor.TokenValidationContextPrincipal
 import no.nav.security.token.support.ktor.tokenValidationSupport
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.OffsetDateTime
@@ -44,21 +43,10 @@ val logger: Logger = LoggerFactory.getLogger("BEY001")
 fun main() {
 
     val env = System.getenv()
-
-    val config = KafkaConfig(
-        bootstrapServers = env.getValue("KAFKA_BROKERS"),
-        truststore = env.getValue("KAFKA_TRUSTSTORE_PATH"),
-        truststorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD"),
-        keystoreLocation = env.getValue("KAFKA_KEYSTORE_PATH"),
-        keystorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD")
-    )
     val topic = env.getValue("KAFKA_TARGET_TOPIC")
     logger.info("Konfig lest, oppretter kafka-produsent")
 
-    val producer = KafkaProdusent<String, String>(
-        KafkaProducer(config.producerConfig(), StringSerializer(), StringSerializer()),
-        topic
-    )
+    val producer = GcpKafkaConfig.fromEnv(env).standardProducer(topic)
 
 
 

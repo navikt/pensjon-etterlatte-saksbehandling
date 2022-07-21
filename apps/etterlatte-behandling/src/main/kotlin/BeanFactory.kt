@@ -11,15 +11,10 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehan
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
-import no.nav.etterlatte.kafka.GcpKafkaConfig
-import no.nav.etterlatte.kafka.KafkaConfig
-import no.nav.etterlatte.kafka.KafkaProdusent
-import no.nav.etterlatte.kafka.KafkaProdusentImpl
+import no.nav.etterlatte.kafka.*
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.common.serialization.StringSerializer
 
 interface BeanFactory {
     fun datasourceBuilder(): DataSourceBuilder
@@ -104,17 +99,8 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
     override fun datasourceBuilder() = datasourceBuilder
 
     override fun rapid(): KafkaProdusent<String, String> {
-        return KafkaProdusentImpl(
-            KafkaProducer(kafkaConfig().producerConfig(), StringSerializer(), StringSerializer()),
-            env.getValue("KAFKA_RAPID_TOPIC")
-        )
+        return kafkaConfig().standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
     }
 
-    private fun kafkaConfig(): KafkaConfig = GcpKafkaConfig(
-        bootstrapServers = env.getValue("KAFKA_BROKERS"),
-        truststore = env.getValue("KAFKA_TRUSTSTORE_PATH"),
-        truststorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD"),
-        keystoreLocation = env.getValue("KAFKA_KEYSTORE_PATH"),
-        keystorePassword = env.getValue("KAFKA_CREDSTORE_PASSWORD")
-    )
+    private fun kafkaConfig(): KafkaConfig = GcpKafkaConfig.fromEnv(env)
 }

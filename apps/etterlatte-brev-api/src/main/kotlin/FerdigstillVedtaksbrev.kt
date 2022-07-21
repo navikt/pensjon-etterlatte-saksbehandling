@@ -24,7 +24,7 @@ internal class FerdigstillVedtaksbrev(rapidsConnection: RapidsConnection, privat
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext(packet.correlationId) {
+        withLogContext {
             val vedtak: Vedtak = objectMapper.readValue(packet["vedtak"].toJson())
             logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
 

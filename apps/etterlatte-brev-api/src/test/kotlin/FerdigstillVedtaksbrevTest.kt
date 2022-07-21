@@ -1,4 +1,3 @@
-
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.verify
@@ -7,6 +6,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import vedtak.VedtakServiceMock
+import java.util.*
 
 class FerdigstillVedtaksbrevTest {
     private val service = mockk<BrevService>(relaxed = true)
@@ -15,8 +15,8 @@ class FerdigstillVedtaksbrevTest {
     @Test
     fun `Skal ferdigstille vedtaksbrev naar et vedtak blir attestert`() {
         val melding = JsonMessage.newMessage(mapOf(
-            "@event" to "VEDTAK:ATTESTERT",
-            "@vedtak" to VedtakServiceMock().hentVedtak("ABCD"),
+            "@event_name" to "VEDTAK:ATTESTERT",
+            "vedtak" to VedtakServiceMock().hentVedtak("ABCD")
         ))
 
         inspector.apply { sendTestMessage(melding.toJson()) }.inspektør

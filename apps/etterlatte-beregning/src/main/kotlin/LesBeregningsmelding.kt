@@ -17,6 +17,7 @@ internal class LesBeregningsmelding(
     private val beregning: BeregningService
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(LesBeregningsmelding::class.java)
+
     init {
         River(rapidsConnection).apply {
             eventName("BEHANDLING:GRUNNLAGENDRET")
@@ -37,7 +38,9 @@ internal class LesBeregningsmelding(
                 //TODO fremtidig funksjonalitet for å støtte periodisering av vilkaar
                 val tom = YearMonth.now().plusMonths(3)
 
-                val beregningsResultat = beregning.beregnResultat(objectMapper.readValue(grunnlag), YearMonth.parse(packet["virkningstidspunkt"].asText()), tom)
+                val beregningsResultat = beregning.beregnResultat(objectMapper.readValue(grunnlag),
+                    YearMonth.parse(packet["virkningstidspunkt"].asText()),
+                    tom)
                 packet["beregning"] = beregningsResultat
                 context.publish(packet.toJson())
                 logger.info("Publisert en beregning")

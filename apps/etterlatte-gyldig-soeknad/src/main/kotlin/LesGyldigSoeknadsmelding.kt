@@ -27,7 +27,7 @@ internal class LesGyldigSoeknadsmelding(
             correlationId()
             validate { it.demandValue("soeknadFordelt", true) }
             validate { it.requireKey("@skjema_info") }
-            validate { it.requireKey("@fnr_soeker") } //TODO: sjekk at dette er riktig verdi
+            validate { it.requireKey("@fnr_soeker") }
         }.register(this)
     }
 

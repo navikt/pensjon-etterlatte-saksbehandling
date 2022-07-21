@@ -341,7 +341,6 @@
       }
     ]
   },
-
   "vilkårsprøving": [
     {
       "navn": "SOEKER_ER_UNDER_20",
@@ -573,3 +572,4 @@
   "@event_name": "BEHANDLING:GRUNNLAGENDRET",
   "behandlingOpprettet": "2022-05-23T16:09:19.717707"
 }
+

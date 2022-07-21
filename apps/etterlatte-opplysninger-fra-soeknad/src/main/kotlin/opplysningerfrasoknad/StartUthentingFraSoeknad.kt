@@ -43,7 +43,7 @@ internal class StartUthentingFraSoeknad(
                 )
             ).apply {
                 try {
-                    rapid.publish("OpplysningerFraSoeknad", toJson())
+                    rapid.publish(packet["behandlingId"].toString(), toJson())
                 } catch (err: Exception) {
                     logger.error("Kunne ikke publisere opplysninger fra soeknad", err)
                 }

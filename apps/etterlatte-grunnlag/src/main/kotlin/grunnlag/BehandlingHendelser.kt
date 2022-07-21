@@ -5,6 +5,10 @@ import no.nav.etterlatte.Self
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -20,18 +24,18 @@ class BehandlingHendelser(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", "BEHANDLING:OPPRETTET") }
+            eventName("BEHANDLING:OPPRETTET")
+            correlationId()
             validate { it.requireKey("innsender") }
             validate { it.requireKey("soeker") }
             validate { it.requireKey("gjenlevende") }
             validate { it.requireKey("avdoed") }
-            validate { it.requireKey("sak") }
-            validate { it.interestedIn("@correlation_id") }
+            validate { it.requireKey("sakId") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
+        withLogContext(packet.correlationId) {
             if (Kontekst.get().AppUser !is Self) {
                 logger.warn("AppUser i kontekst er ikke Self i R&R-flyten")
             }
@@ -40,42 +44,41 @@ class BehandlingHendelser(
             context.publish(
                 JsonMessage.newMessage(
                     mapOf(
-                        "@behov" to Opplysningstyper.SOEKER_PDL_V1,
-                        "sak" to packet["sak"],
+                        behovNameKey to Opplysningstyper.SOEKER_PDL_V1,
+                        "sakId" to packet["sakId"],
                         "fnr" to packet["soeker"],
                         "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
-                        "@correlation_id" to packet["@correlation_id"]
+                        correlationIdKey to packet[correlationIdKey]
                     )
                 ).toJson())
+
             packet["gjenlevende"].forEach { fnr ->
                 context.publish(
                     JsonMessage.newMessage(
                         mapOf(
-                            "@behov" to Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1,
-                            "sak" to packet["sak"],
+                            behovNameKey to Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1,
+                            "sakId" to packet["sakId"],
                             "fnr" to fnr.asText(),
                             "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
-                            "@correlation_id" to packet["@correlation_id"]
+                            correlationIdKey to packet[correlationIdKey]
                         )
                     ).toJson()
                 )
             }
+
             packet["avdoed"].forEach { fnr ->
                 context.publish(
                     JsonMessage.newMessage(
                         mapOf(
-                            "@behov" to Opplysningstyper.AVDOED_PDL_V1,
-                            "sak" to packet["sak"],
+                            behovNameKey to Opplysningstyper.AVDOED_PDL_V1,
+                            "sakId" to packet["sakId"],
                             "fnr" to fnr.asText(),
                             "rolle" to Opplysningstyper.AVDOED_PDL_V1.personRolle!!,
-                            "@correlation_id" to packet["@correlation_id"]
+                            correlationIdKey to packet[correlationIdKey]
                         )
                     ).toJson())
             }
-
         }
-
-    private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 }
 
 private val Opplysningstyper.personRolle: PersonRolle?

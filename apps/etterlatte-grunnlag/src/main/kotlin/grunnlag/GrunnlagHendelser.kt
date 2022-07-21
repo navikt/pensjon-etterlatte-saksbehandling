@@ -9,6 +9,10 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -21,49 +25,50 @@ class GrunnlagHendelser(
     rapidsConnection: RapidsConnection,
     private val grunnlag: GrunnlagService,
 ) : River.PacketListener {
-
     private val logger: Logger = LoggerFactory.getLogger(GrunnlagHendelser::class.java)
 
     init {
         River(rapidsConnection).apply {
+            eventName("OPPLYSNING:NY")
+            correlationId()
             validate { it.requireKey("opplysning") }
             validate { it.requireKey("sakId") }
             validate { it.rejectKey("grunnlag") }
-            validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
+        withLogContext(packet.correlationId) {
             if (Kontekst.get().AppUser !is Self) {
                 logger.warn("AppUser i kontekst er ikke Self i R&R-flyten")
             }
 
             try {
-
                 val opplysninger: List<Grunnlagsopplysning<ObjectNode>> =
                     objectMapper.readValue(packet["opplysning"].toJson())!!
 
-                // Send melding om behov som er avhengig av en anne opplysning
+                // Send melding om behov som er avhengig av en annen opplysning
                 opplysninger.forEach {
                     if (it.opplysningType === Opplysningstyper.AVDOED_PDL_V1) {
                         sendAvdoedInntektBehov(it, context, packet)
                     }
                 }
 
-                //TODO Her bør jeg vel lage en ny melding
                 val grunnlag = grunnlag.opprettGrunnlag(packet["sakId"].asLong(), opplysninger)
-                packet["grunnlag"] = grunnlag
-                packet["@grunnlag"] = grunnlag
-                packet["@event_name"] = "GRUNNLAG:GRUNNLAGENDRET"
-                context.publish(packet.toJson())
-                logger.info("Lagt ut melding om grunnlagsendring")
+                JsonMessage.newMessage("GRUNNLAG:GRUNNLAGENDRET",
+                    mapOf(
+                        "grunnlag" to grunnlag,
+                        correlationIdKey to packet[correlationIdKey]
+                    )
+                ).apply {
+                    context.publish(packet.toJson())
+                    logger.info("Lagt ut melding om grunnlagsendring")
+                }
             } catch (e: Exception) {
                 logger.error("Spiser en melding fordi: " + e.message)
             }
         }
 
-    private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 
     private fun sendAvdoedInntektBehov(
         grunnlagsopplysning: Grunnlagsopplysning<ObjectNode>,
@@ -74,11 +79,11 @@ class GrunnlagHendelser(
         if (pdlopplysninger.doedsdato != null) {
             val behov = JsonMessage.newMessage(
                 mapOf(
-                    "@behov" to Opplysningstyper.AVDOED_INNTEKT_V1,
+                    behovNameKey to Opplysningstyper.AVDOED_INNTEKT_V1,
                     "fnr" to pdlopplysninger.foedselsnummer.value,
-                    "sak" to packet["sak"],
+                    "sakId" to packet["sakId"],
                     "doedsdato" to pdlopplysninger.doedsdato.toString(),
-                    "@correlation_id" to packet["@correlation_id"]
+                    correlationIdKey to packet[correlationIdKey]
                 )
             )
             context.publish(behov.toJson())

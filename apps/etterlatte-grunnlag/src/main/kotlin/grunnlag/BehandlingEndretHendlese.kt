@@ -3,6 +3,8 @@ package no.nav.etterlatte.grunnlag
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -19,25 +21,27 @@ class BehandlingEndretHendlese(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
-            validate { it.requireKey("sak") }
+            eventName("BEHANDLING:GRUNNLAGENDRET")
+            correlationId()
+            validate { it.requireKey("sakId") }
             validate { it.rejectKey("grunnlag") }
-            validate { it.rejectKey("@grunnlag") }
-            validate { it.interestedIn("@correlation_id") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
-            if(Kontekst.get().AppUser !is Self){ logger.warn("AppUser i kontekst er ikke Self i R&R-flyten") }
-            grunnlag.hentGrunnlag(packet["sak"].asLong())
-            .also {
-                packet["grunnlag"] = it.grunnlag //Kan fjernes når alle apper forstår @grunnlag
-                packet["@grunnlag"] = it
+        withLogContext(packet.correlationId) {
+            if (Kontekst.get().AppUser !is Self) {
+                logger.warn("AppUser i kontekst er ikke Self i R&R-flyten")
             }
+            try {
+                grunnlag.hentGrunnlag(packet["sakId"].asLong())
+                    .also {
+                        packet["grunnlag"] = it
+                    }
 
-            context.publish(packet.toJson())
+                context.publish(packet.toJson())
+            } catch (e: Exception) {
+                logger.error("Feil ved henting av grunnlag", e)
+            }
         }
-
-    private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 }

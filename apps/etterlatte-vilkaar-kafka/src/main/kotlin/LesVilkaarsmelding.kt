@@ -56,3 +56,4 @@ internal class LesVilkaarsmelding(
 }
 
 private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
+

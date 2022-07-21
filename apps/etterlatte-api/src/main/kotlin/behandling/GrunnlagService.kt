@@ -27,13 +27,13 @@ class GrunnlagService(
     ): GrunnlagResult {
         val behandling = behandlingKlient.hentBehandling(behandlingId, token)
 
-        val opplysning : List<Grunnlagsopplysning<out Any>> = listOf(lagOpplysning(
+        val opplysning: List<Grunnlagsopplysning<out Any>> = listOf(lagOpplysning(
             Opplysningstyper.SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1,
             Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
             ResultatKommerBarnetTilgode(svar, begrunnelse)
         ))
 
-        rapid.publiser("OpplysningFraSaksbehandler", JsonMessage.newMessage(
+        rapid.publiser(behandlingId, JsonMessage.newMessage(
             mapOf(
                 "opplysning" to opplysning,
                 "sakId" to behandling.sak,

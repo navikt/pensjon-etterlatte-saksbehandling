@@ -26,6 +26,7 @@ plugins {
     "apps:etterlatte-tilbakekreving",
     "apps:etterlatte-hendelser-pdl",
     "libs:ktorclient-auth-clientcredentials",
+    "libs:ktor2client-auth-clientcredentials",
     "libs:common",
     "libs:ktorclient-onbehalfof",
     "libs:ktor2client-onbehalfof",

@@ -1,8 +1,8 @@
 package no.nav.etterlatte.enhetsregister
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.receive
-import io.ktor.client.features.ResponseException
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import org.slf4j.LoggerFactory
@@ -16,12 +16,13 @@ class EnhetsregKlient(
     suspend fun hentEnheter(navn: String): List<Enhet> {
         return try {
             httpClient
-                .get<ResponseWrapper>("$host/enhetsregisteret/api/enheter?navn=$navn&konkurs=false&underAvvikling=false")
+                .get("$host/enhetsregisteret/api/enheter?navn=$navn&konkurs=false&underAvvikling=false")
+                .body<ResponseWrapper>()
                 ._embedded
                 ?.enheter
                 ?: emptyList()
         } catch (re: ResponseException) {
-            val feilmelding = re.response.receive<Feilmelding>()
+            val feilmelding = re.response.body<Feilmelding>()
 
             logger.warn("Feilmelding fra brreg: $feilmelding")
 
@@ -31,12 +32,12 @@ class EnhetsregKlient(
 
     suspend fun hentEnhet(orgnr: String): Enhet? {
         return try {
-            httpClient.get("$host/enhetsregisteret/api/enheter/$orgnr")
+            httpClient.get("$host/enhetsregisteret/api/enheter/$orgnr").body()
         } catch (re: ResponseException) {
             if (re.response.status == HttpStatusCode.NotFound)
                 return null
 
-            val feilmelding = re.response.receive<Feilmelding>()
+            val feilmelding = re.response.body<Feilmelding>()
 
             logger.warn("Feilmelding fra brreg: $feilmelding")
 

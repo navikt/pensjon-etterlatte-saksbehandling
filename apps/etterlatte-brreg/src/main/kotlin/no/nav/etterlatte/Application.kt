@@ -1,10 +1,11 @@
 package no.nav.etterlatte
 
 import io.ktor.client.HttpClient
-import io.ktor.client.features.defaultRequest
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.header
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import no.nav.etterlatte.enhetsregister.EnhetsregKlient
 import no.nav.etterlatte.enhetsregister.EnhetsregService
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
@@ -17,8 +18,9 @@ class ApplicationContext {
     val service = EnhetsregService(EnhetsregKlient(env["BRREG_URL"]!!, httpClient()))
 
     private fun httpClient() = HttpClient {
-        install(JsonFeature) {
-            serializer = JacksonSerializer(objectMapper)
+        expectSuccess = true
+        install(ContentNegotiation) {
+            register(ContentType.Application.Json,  JacksonConverter(objectMapper))
         }
 
         defaultRequest {

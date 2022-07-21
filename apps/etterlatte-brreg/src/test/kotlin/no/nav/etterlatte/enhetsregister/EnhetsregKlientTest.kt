@@ -5,13 +5,13 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockRequestHandleScope
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.HttpResponseData
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
+import io.ktor.serialization.jackson.*
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -88,7 +88,8 @@ internal class EnhetsregKlientTest {
                     }
                 }
             }
-            install(JsonFeature) { serializer = JacksonSerializer() }
+            expectSuccess = true
+            install(ContentNegotiation) { jackson {  } }
         }
 
         return EnhetsregKlient("", httpClient)

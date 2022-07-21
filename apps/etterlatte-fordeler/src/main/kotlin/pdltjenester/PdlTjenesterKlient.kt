@@ -1,8 +1,8 @@
 package no.nav.etterlatte.pdltjenester
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.accept
-import io.ktor.client.request.post
+import io.ktor.client.call.*
+import io.ktor.client.request.*
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
@@ -21,8 +21,8 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
             client.post(apiUrl){
                 accept(Json)
                 contentType(Json)
-                body = hentPersonRequest
-            }
+                setBody(hentPersonRequest)
+            }.body()
         }.let{
             when (it) {
                 is RetryResult.Success -> it.content

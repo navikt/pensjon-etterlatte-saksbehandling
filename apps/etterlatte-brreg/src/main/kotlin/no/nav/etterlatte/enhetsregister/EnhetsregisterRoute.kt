@@ -1,11 +1,9 @@
 package no.nav.etterlatte.enhetsregister
 
-import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
-import io.ktor.response.respond
-import io.ktor.routing.Route
-import io.ktor.routing.get
-import io.ktor.routing.route
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 
 fun Route.enhetsregApi(service: EnhetsregService) {
     route("enheter") {

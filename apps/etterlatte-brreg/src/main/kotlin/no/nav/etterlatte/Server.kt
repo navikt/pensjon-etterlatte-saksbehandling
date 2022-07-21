@@ -1,23 +1,18 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
-import io.ktor.features.StatusPages
 import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.jackson
-import io.ktor.request.header
-import io.ktor.request.httpMethod
-import io.ktor.request.path
-import io.ktor.response.respond
-import io.ktor.routing.routing
-import io.ktor.server.cio.CIO
-import io.ktor.server.engine.applicationEngineEnvironment
-import io.ktor.server.engine.connector
-import io.ktor.server.engine.embeddedServer
+import io.ktor.serialization.jackson.*
+import io.ktor.server.application.*
+import io.ktor.server.cio.*
+import io.ktor.server.engine.*
+import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.etterlatte.enhetsregister.enhetsregApi
 import no.nav.etterlatte.health.healthApi
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
@@ -41,8 +36,8 @@ class Server(context: ApplicationContext) {
                 mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
             }
             install(StatusPages) {
-                exception<Throwable> { cause ->
-                    log.error("En feil oppstod: ${cause.message}", cause)
+                exception<Throwable> { call, cause ->
+                    call.application.log.error("En feil oppstod: ${cause.message}", cause)
                     call.respond(HttpStatusCode.InternalServerError, "En feil oppstod: ${cause.message}")
                 }
             }
@@ -56,7 +51,7 @@ class Server(context: ApplicationContext) {
                 healthApi()
                 // TODO: Trenger vi egentlig auth på denne appen... ?
 //                authenticate {
-                    enhetsregApi(context.service)
+                enhetsregApi(context.service)
 //                }
             }
         }

@@ -3,10 +3,12 @@ package no.nav.etterlatte
 
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.auth.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.auth.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import no.nav.etterlatte.fordeler.Fordeler
 import no.nav.etterlatte.fordeler.FordelerKriterier
 import no.nav.etterlatte.fordeler.FordelerService
@@ -36,7 +38,10 @@ private fun pdlTjenesterKlient(env: MutableMap<String, String>) = PdlTjenesterKl
 )
 
 private fun pdlTjenesterHttpClient(env: MutableMap<String, String>) = HttpClient(OkHttp) {
-    install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
+    expectSuccess = true
+    install(ContentNegotiation) {
+        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+    }
     install(Auth) {
         clientCredential {
             config =

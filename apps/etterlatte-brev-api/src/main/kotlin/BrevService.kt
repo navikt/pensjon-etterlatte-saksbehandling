@@ -11,6 +11,8 @@ import no.nav.etterlatte.libs.common.brev.model.*
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import no.nav.etterlatte.libs.common.journalpost.Bruker
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Spraak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.vedtak.VedtakService
@@ -142,9 +144,9 @@ class BrevService(
 
             JsonMessage.newMessage(
                 mapOf(
-                    "@event" to BrevEventTypes.FERDIGSTILT.toString(),
+                    eventNameKey to BrevEventTypes.FERDIGSTILT.toString(),
                     "@brevId" to it.brevId,
-                    "@correlation_id" to correlationId,
+                    correlationIdKey to correlationId,
                     "payload" to it.toJson()
                 )
             ).toJson()

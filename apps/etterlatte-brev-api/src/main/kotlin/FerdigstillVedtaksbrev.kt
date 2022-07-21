@@ -1,9 +1,10 @@
-
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.BrevService
 import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -17,14 +18,14 @@ internal class FerdigstillVedtaksbrev(rapidsConnection: RapidsConnection, privat
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", "VEDTAK:ATTESTERT") }
-            validate { it.requireKey("@vedtak") }
+            eventName("VEDTAK:ATTESTERT")
+            validate { it.requireKey("vedtak") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext {
-            val vedtak: Vedtak = objectMapper.readValue(packet["@vedtak"].toJson())
+        withLogContext(packet.correlationId) {
+            val vedtak: Vedtak = objectMapper.readValue(packet["vedtak"].toJson())
             logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
 
             val brev = brevService.ferdigstillAttestertVedtak(vedtak)

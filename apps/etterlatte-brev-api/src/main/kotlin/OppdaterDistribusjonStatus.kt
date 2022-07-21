@@ -1,4 +1,3 @@
-
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes.DISTRIBUERT
@@ -7,6 +6,9 @@ import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -20,18 +22,18 @@ internal class OppdaterDistribusjonStatus(rapidsConnection: RapidsConnection, pr
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandAny("@event", listOf(JOURNALFOERT.toString(), DISTRIBUERT.toString())) }
-            validate { it.requireKey("@brevId", "@correlation_id", "@journalpostResponse") }
+            validate { it.demandAny(eventNameKey, listOf(JOURNALFOERT.toString(), DISTRIBUERT.toString())) }
+            validate { it.requireKey("@brevId", correlationIdKey, "@journalpostResponse") }
             validate { it.interestedIn("@bestillingId") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext(packet["@correlation_id"].asText()) {
+        withLogContext(packet.correlationId) {
             val brevId = packet["@brevId"].longValue()
             logger.info("Mottatt oppdatering fra brev-distribusjon for brev med id ${brevId}.")
 
-            if (packet["@event"].asText() == DISTRIBUERT.toString()) {
+            if (packet[eventNameKey].asText() == DISTRIBUERT.toString()) {
                 val bestillingId = packet["@bestillingId"].asText()
                 db.oppdaterStatus(brevId, Status.DISTRIBUERT, """{"bestillingId": "$bestillingId"}""")
                 db.setBestillingId(brevId, bestillingId)

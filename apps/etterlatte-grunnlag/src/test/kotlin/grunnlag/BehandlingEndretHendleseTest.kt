@@ -58,13 +58,15 @@ internal class BehandlingEndretHendleseTest {
         every { opplysningerMock.leggOpplysningTilGrunnlag(any(), any()) } returns 1L
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-
         assertEquals(1, inspector.size)
-        assertEquals(2, inspector.message(0).get("grunnlag").size())
-        val grunnlag = objectMapper.readValue<List<Grunnlagsopplysning<ObjectNode>>>(inspector.message(0).get("grunnlag").toJson())
+        assertEquals(2, inspector.message(0).get("grunnlag").get("grunnlag").size())
+        val grunnlag = objectMapper.readValue<List<Grunnlagsopplysning<ObjectNode>>>(inspector.message(0)
+            .get("grunnlag").get("grunnlag").toJson())
         assertEquals(2, grunnlag.size)
-        assertEquals(grunnlagshendelser[0].opplysning.id, grunnlag.find { it.opplysningType == Opplysningstyper.SOEKER_SOEKNAD_V1 }?.id)
-        assertEquals(grunnlagshendelser[1].opplysning.id, grunnlag.find { it.opplysningType == Opplysningstyper.AVDOED_SOEKNAD_V1 }?.id)
+        assertEquals(grunnlagshendelser[0].opplysning.id,
+            grunnlag.find { it.opplysningType == Opplysningstyper.SOEKER_SOEKNAD_V1 }?.id)
+        assertEquals(grunnlagshendelser[1].opplysning.id,
+            grunnlag.find { it.opplysningType == Opplysningstyper.AVDOED_SOEKNAD_V1 }?.id)
 
     }
 }

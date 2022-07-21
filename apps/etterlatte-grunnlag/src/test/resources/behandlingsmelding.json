@@ -1,6 +1,6 @@
 {
   "id": "f525f2f7-e246-43d7-b61a-5f0757472916",
-  "sak": 1,
+  "sakId": 1,
   "behandlingOpprettet": "2022-05-12T11:09:06.103964",
   "sistEndret": "2022-05-12T11:09:06.128951",
   "soeknadMottattDato": "2022-02-14T14:37:24.573613",
@@ -24,5 +24,5 @@
       "time": "2022-05-12T11:09:08.607306872"
     }
   ],
-  "@event": "BEHANDLING:OPPRETTET"
+  "@event_name": "BEHANDLING:OPPRETTET"
 }

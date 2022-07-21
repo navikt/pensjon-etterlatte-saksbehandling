@@ -1,9 +1,11 @@
 
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import journalpost.JournalpostClient
 import journalpost.JournalpostServiceMock
 import no.nav.etterlatte.BrevService
@@ -57,8 +59,9 @@ class ApplicationBuilder {
     fun start() = rapidsConnection.start()
 
     private fun pdfHttpClient() = HttpClient(OkHttp) {
-        install(JsonFeature) {
-            serializer = JacksonSerializer(objectMapper)
+        expectSuccess = true
+        install(ContentNegotiation) {
+            register(ContentType.Application.Json, JacksonConverter(objectMapper))
         }
         defaultRequest {
             header(X_CORRELATION_ID, getCorrelationId())

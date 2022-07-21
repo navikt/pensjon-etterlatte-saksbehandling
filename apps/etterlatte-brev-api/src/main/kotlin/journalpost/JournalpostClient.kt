@@ -4,6 +4,7 @@ import com.github.michaelbull.result.get
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.http.content.*
@@ -37,7 +38,7 @@ class JournalpostClient(
             header("Authorization", "Bearer $accessToken")
             header("Content-Type", "application/json")
             header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
-        }
+        }.body()
     } catch (ex: Exception) {
         throw JournalpostException("Feil ved kall til hentdokument", ex)
     }
@@ -65,8 +66,8 @@ class JournalpostClient(
             httpClient.post(graphqlApiUrl) {
                 header("Authorization", "Bearer ${token.get()?.accessToken}")
                 accept(ContentType.Application.Json)
-                body = TextContent(request.toJson(), ContentType.Application.Json)
-            }
+                setBody(TextContent(request.toJson(), ContentType.Application.Json))
+            }.body()
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content

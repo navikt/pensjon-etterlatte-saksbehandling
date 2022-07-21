@@ -2,8 +2,8 @@ package pdf
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
-import io.ktor.client.request.header
-import io.ktor.client.request.post
+import io.ktor.client.call.*
+import io.ktor.client.request.*
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.model.brev.BrevRequest
@@ -15,8 +15,8 @@ class PdfGeneratorKlient(private val client: HttpClient, private val apiUrl: Str
         client.post(apiUrl + brevRequest.brevMalUrl()) {
             header("Content-Type", "application/json")
             header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
-            body = brevRequest.toJsonNode()
-        }
+            setBody(brevRequest.toJsonNode())
+        }.body()
     } catch (ex: Exception) {
         throw PdfGeneratorException("Feil ved kall til pdfgen", ex)
     }

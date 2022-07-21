@@ -3,8 +3,10 @@ package no.nav.etterlatte
 import JournalpostServiceMock
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.auth.*
-import io.ktor.client.features.json.*
+import io.ktor.client.plugins.auth.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import journalpost.JournalpostService
 import journalpost.JournalpostServiceImpl
 import no.nav.etterlatte.brev.BrevServiceImpl
@@ -39,7 +41,8 @@ class AppBuilder {
     }
 
     private fun httpClient(scope: String) = HttpClient(OkHttp) {
-        install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
+        expectSuccess = true
+        install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
 
         install(Auth) {
             clientCredential {

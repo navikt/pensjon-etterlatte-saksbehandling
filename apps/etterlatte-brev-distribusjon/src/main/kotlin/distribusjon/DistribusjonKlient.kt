@@ -1,6 +1,7 @@
 package no.nav.etterlatte.distribusjon
 
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import no.nav.etterlatte.libs.common.distribusjon.DistribuerJournalpostRequest
@@ -19,8 +20,8 @@ class DistribusjonKlient(private val client: HttpClient, private val url: String
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             header(X_CORRELATION_ID, getXCorrelationId())
-            body = request.toJson()
-        }
+            setBody(request.toJson())
+        }.body()
     } catch (exception: Exception) {
         logger.error("Feil i kall mot dokumentdistribusjon: ", exception)
         throw DistribusjonException("Feil i kall mot dokumentdistribusjon", exception)

@@ -1,7 +1,8 @@
 package no.nav.etterlatte.journalpost
 
 import io.ktor.client.*
-import io.ktor.client.features.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
@@ -10,8 +11,6 @@ import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
-import java.util.*
 
 class JournalpostKlient(private val client: HttpClient, private val url: String) {
     private val logger = LoggerFactory.getLogger(JournalpostKlient::class.java)
@@ -21,8 +20,8 @@ class JournalpostKlient(private val client: HttpClient, private val url: String)
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
             header(X_CORRELATION_ID, getXCorrelationId())
-            body = request.toJson()
-        }
+            setBody(request.toJson())
+        }.body()
     } catch (responseException: ResponseException) {
         logger.error("Feil i kall mot Dokarkiv: ", responseException)
 

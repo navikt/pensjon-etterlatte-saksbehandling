@@ -4,18 +4,21 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.typesafe.config.ConfigFactory
 import health.healthApi
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.config.*
-import io.ktor.features.*
 import io.ktor.http.*
-import io.ktor.jackson.*
-import io.ktor.request.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.serialization.jackson.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.Authentication
+import io.ktor.server.config.*
+import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.security.token.support.ktor.tokenValidationSupport
+import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
 import java.util.*
 
@@ -35,8 +38,8 @@ fun Application.apiModule(localDevelopment: Boolean, routes: Route.() -> Unit) {
     }
 
     install(StatusPages) {
-        exception<Throwable> { cause ->
-            log.error("En feil oppstod: ${cause.message}", cause)
+        exception<Throwable> { call, cause ->
+            call.application.log.error("En feil oppstod: ${cause.message}", cause)
             call.respond(HttpStatusCode.InternalServerError, "En intern feil har oppstått")
         }
     }
@@ -51,9 +54,7 @@ fun Application.apiModule(localDevelopment: Boolean, routes: Route.() -> Unit) {
         routing {
             healthApi()
             authenticate {
-                routing {
-                    routes()
-                }
+                routes()
             }
         }
     }

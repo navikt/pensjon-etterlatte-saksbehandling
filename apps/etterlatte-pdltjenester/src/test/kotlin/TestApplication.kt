@@ -2,8 +2,9 @@ package no.nav.etterlatte
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -17,7 +18,8 @@ fun main() {
         pdlKlient = mockk { coEvery { hentPerson(any(), any()) } returns mockResponse("/pdl/person.json") },
         ppsKlient = ParallelleSannheterKlient(
             httpClient = HttpClient(OkHttp) {
-                install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
+                expectSuccess = true
+                install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             },
             apiUrl = "https://pensjon-parallelle-sannheter.dev.intern.nav.no"
         )

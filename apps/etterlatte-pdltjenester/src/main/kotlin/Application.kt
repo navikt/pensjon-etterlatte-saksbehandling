@@ -4,11 +4,11 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.features.auth.Auth
-import io.ktor.client.features.defaultRequest
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.http.takeFrom
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.auth.*
+import io.ktor.http.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.jackson.*
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediatorFactory
 import no.nav.etterlatte.libs.common.objectMapper
@@ -28,13 +28,14 @@ class ApplicationContext(configLocation: String? = null) {
     )
 
     private fun pdlhttpclient(aad: Config) = HttpClient(OkHttp) {
+        expectSuccess = true
         val env = mutableMapOf(
             "AZURE_APP_CLIENT_ID" to aad.getString("client_id"),
             "AZURE_APP_WELL_KNOWN_URL" to aad.getString("well_known_url"),
             "AZURE_APP_OUTBOUND_SCOPE" to aad.getString("outbound"),
             "AZURE_APP_JWK" to aad.getString("client_jwk")
         )
-        install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
+        install(ContentNegotiation) {register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
         install(Auth) {
             clientCredential {
                 config = env
@@ -46,7 +47,8 @@ class ApplicationContext(configLocation: String? = null) {
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 
     private fun ppsHttpClient() = HttpClient(OkHttp) {
-        install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
+        expectSuccess = true
+        install(ContentNegotiation) {register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 }
 

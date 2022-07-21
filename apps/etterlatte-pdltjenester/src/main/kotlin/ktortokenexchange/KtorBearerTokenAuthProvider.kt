@@ -1,7 +1,6 @@
 package no.nav.etterlatte.ktortokenexchange
 
-import io.ktor.client.features.auth.Auth
-import io.ktor.client.features.auth.AuthProvider
+import io.ktor.client.plugins.auth.*
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
@@ -27,7 +26,7 @@ class BearerTokenAuthProvider(
         return true
     }
 
-    override suspend fun addRequestHeaders(request: HttpRequestBuilder) {
+    override suspend fun addRequestHeaders(request: HttpRequestBuilder, authHeader: HttpAuthHeader?) {
         tokenAuthProvider().also { request.header(HttpHeaders.Authorization, "Bearer $it") }
     }
 }

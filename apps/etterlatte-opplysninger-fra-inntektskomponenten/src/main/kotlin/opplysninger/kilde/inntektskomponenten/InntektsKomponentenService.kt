@@ -1,7 +1,8 @@
 package no.nav.etterlatte.opplysninger.kilde.inntektskomponenten
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.post
+import io.ktor.client.call.*
+import io.ktor.client.request.*
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
@@ -32,10 +33,10 @@ class InntektsKomponentenService(private val inntektskomponentenClient: HttpClie
 
         // Her må det muligens gjøres ett kall pr år. PGA tregheter mot eksterne systemer. Vi får bare teste
         val inntektsListe = runBlocking {
-                inntektskomponentenClient.post<InntektsKomponentenResponse>(url) {
+                inntektskomponentenClient.post(url) {
                     contentType(ContentType.Application.Json)
-                    body = hentInntektlisteRequest
-                }
+                    setBody( hentInntektlisteRequest)
+                }.body<InntektsKomponentenResponse>()
         }
 
         return inntektsListe

@@ -3,11 +3,12 @@ package no.nav.etterlatte
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.features.auth.Auth
-import io.ktor.client.features.defaultRequest
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.auth.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.header
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
@@ -39,6 +40,7 @@ class AppBuilder(private val props: Map<String, String>) {
     }
 
     private fun proxyClient() = HttpClient(OkHttp) {
+        expectSuccess = true
         val inntektsConfig = config.getConfig("no.nav.etterlatte.tjenester.inntektskomponenten")
         val env = mutableMapOf(
             "AZURE_APP_CLIENT_ID" to inntektsConfig.getString("clientId"),
@@ -46,7 +48,7 @@ class AppBuilder(private val props: Map<String, String>) {
             "AZURE_APP_OUTBOUND_SCOPE" to inntektsConfig.getString("outbound"),
             "AZURE_APP_JWK" to inntektsConfig.getString("clientJwk")
         )
-        install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
+        install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
         install(Auth) {
             clientCredential {
                 config = env

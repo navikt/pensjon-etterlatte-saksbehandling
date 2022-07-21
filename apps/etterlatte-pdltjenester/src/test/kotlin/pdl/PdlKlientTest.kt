@@ -3,11 +3,11 @@ package no.nav.etterlatte.pdl
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.ContentType
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
+import io.ktor.serialization.jackson.*
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.libs.common.objectMapper
@@ -89,10 +89,11 @@ internal class PdlKlientTest {
 
     private fun mockEndpoint(jsonUrl: String) {
         val httpClient = HttpClient(MockEngine) {
+            expectSuccess = true
             engine {
                 addHandler { request ->
                     when (request.url.fullPath) {
-                        "/" -> {
+                        "" -> {
                             val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                             val json = javaClass.getResource(jsonUrl)!!.readText()
                             respond(json, headers = headers)
@@ -101,7 +102,7 @@ internal class PdlKlientTest {
                     }
                 }
             }
-            install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
+            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
         }
 
         pdlKlient = PdlKlient(httpClient)

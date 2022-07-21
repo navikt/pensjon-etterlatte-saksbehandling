@@ -23,7 +23,7 @@ class BehandlingsService(
 ) : Behandling {
     override fun grunnlagEndretISak(sak: Long) {
         runBlocking {
-            behandling_app.post<String>("$url/saker/$sak/hendelse/grunnlagendret") {}
+            behandling_app.post("$url/saker/$sak/hendelse/grunnlagendret") {}
         }
     }
     override fun vedtakHendelse(behandlingid: UUID, hendelse: String,
@@ -33,17 +33,17 @@ class BehandlingsService(
                                 kommentar: String?,
                                 valgtBegrunnelse: String?) {
         runBlocking {
-            behandling_app.post<String>("$url/behandlinger/$behandlingid/hendelser/vedtak/$hendelse") {
+            behandling_app.post("$url/behandlinger/$behandlingid/hendelser/vedtak/$hendelse") {
                 contentType(ContentType.Application.Json)
-                body = VedtakHendelse(vedtakId, inntruffet, saksbehandler, kommentar, valgtBegrunnelse)
+                setBody(VedtakHendelse(vedtakId, inntruffet, saksbehandler, kommentar, valgtBegrunnelse))
             }
         }
     }
 
     override fun slettSakOgBehandlinger(sakId: Long) {
         runBlocking {
-            behandling_app.delete<String>("$url/sak/$sakId/behandlinger")
-            behandling_app.delete<String>("$url/saker/$sakId/")
+            behandling_app.delete("$url/sak/$sakId/behandlinger")
+            behandling_app.delete("$url/saker/$sakId/")
         }
     }
 

@@ -1,8 +1,8 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import io.ktor.application.Application
-import io.ktor.routing.Route
+import io.ktor.server.application.*
+import io.ktor.server.routing.*
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse

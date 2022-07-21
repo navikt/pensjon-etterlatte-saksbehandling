@@ -1,12 +1,12 @@
 package no.nav.etterlatte.person
 
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.handleRequest
-import io.ktor.server.testing.setBody
-import io.ktor.server.testing.withTestApplication
+import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
@@ -104,13 +104,17 @@ class PersonRouteTest {
 
         coEvery { personService.hentFolkeregisterIdent(hentFolkeregisterIdentReq) } throws PdlForesporselFeilet("Noe feilet")
 
-        withTestApplication({ module(securityContextMediator, personService) }) {
-            handleRequest(HttpMethod.Post, FOLKEREGISTERIDENT_ENDEPUNKT) {
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+
+        testApplication {
+            application {
+                module(securityContextMediator, personService)
+            }
+            client.post(FOLKEREGISTERIDENT_ENDEPUNKT){
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(hentFolkeregisterIdentReq.toJson())
             }.apply {
-                assertEquals(HttpStatusCode.InternalServerError, response.status())
-                assertEquals("En feil oppstod: Noe feilet", response.content)
+                assertEquals(HttpStatusCode.InternalServerError, status)
+                assertEquals("En feil oppstod: Noe feilet", bodyAsText())
                 coVerify { personService.hentFolkeregisterIdent(any()) }
                 verify { securityContextMediator.secureRoute(any(), any()) }
                 confirmVerified(personService)

@@ -1,13 +1,9 @@
 package no.nav.etterlatte.person
 
-import io.ktor.application.call
-import io.ktor.application.log
-import io.ktor.request.receive
-import io.ktor.response.respond
-import io.ktor.routing.Route
-import io.ktor.routing.application
-import io.ktor.routing.post
-import io.ktor.routing.route
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 

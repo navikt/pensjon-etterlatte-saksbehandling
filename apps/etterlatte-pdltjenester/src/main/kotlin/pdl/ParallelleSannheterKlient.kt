@@ -3,8 +3,8 @@ package no.nav.etterlatte.pdl
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
-import io.ktor.client.request.accept
-import io.ktor.client.request.post
+import io.ktor.client.call.*
+import io.ktor.client.request.*
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.content.TextContent
 import no.nav.etterlatte.libs.common.RetryResult
@@ -61,10 +61,10 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
             else -> {
                 logger.info("Felt av typen ${avklaring.feltnavn} har ${list.size} elementer, sjekker mot PPS")
                 val responseAsJsonNode = retry {
-                    httpClient.post<JsonNode>("$apiUrl/api/${avklaring.feltnavn}") {
+                    httpClient.post("$apiUrl/api/${avklaring.feltnavn}") {
                         accept(Json)
-                        body = TextContent(nodeWithFieldName.toJson(), Json)
-                    }
+                        setBody(TextContent(nodeWithFieldName.toJson(), Json))
+                    }.body<JsonNode>()
                 }.let{
                     when (it) {
                         is RetryResult.Success -> it.content

@@ -1,9 +1,8 @@
 package no.nav.etterlatte.pdl
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.accept
-import io.ktor.client.request.header
-import io.ktor.client.request.post
+import io.ktor.client.call.*
+import io.ktor.client.request.*
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType.Application.Json
 import no.nav.etterlatte.libs.common.RetryResult
@@ -26,8 +25,8 @@ class PdlKlient(private val httpClient: HttpClient) {
             httpClient.post {
                 header("Tema", TEMA)
                 accept(Json)
-                body = TextContent(request.toJson(), Json)
-            }
+                setBody(TextContent(request.toJson(), Json))
+            }.body()
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
@@ -60,8 +59,8 @@ class PdlKlient(private val httpClient: HttpClient) {
             httpClient.post {
                 header("Tema", TEMA)
                 accept(Json)
-                body = TextContent(request.toJson(), Json)
-            }
+                setBody( TextContent(request.toJson(), Json))
+            }.body()
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
@@ -84,8 +83,8 @@ class PdlKlient(private val httpClient: HttpClient) {
             httpClient.post {
                 header("Tema", TEMA)
                 accept(Json)
-                body = TextContent(request.toJson(), Json)
-            }
+                setBody(  TextContent(request.toJson(), Json))
+            }.body()
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content

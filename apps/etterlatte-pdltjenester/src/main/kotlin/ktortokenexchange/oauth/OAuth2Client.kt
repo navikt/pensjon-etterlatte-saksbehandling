@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod
 import io.ktor.client.HttpClient
+import io.ktor.client.call.*
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -29,7 +30,7 @@ class OAuth2Client(
     private val clientAuthProperties: ClientAuthenticationProperties,
     private val cacheConfig: OAuth2CacheConfig = OAuth2CacheConfig(enabled = true, maximumSize = 1000, evictSkew = 5)
 ) {
-    private val wellKnown: WellKnown = runBlocking { httpClient.get(wellKnownUrl) }
+    private val wellKnown: WellKnown = runBlocking { httpClient.get(wellKnownUrl).body() }
 
     private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
@@ -127,7 +128,7 @@ internal suspend fun HttpClient.tokenRequest(
                 "Basic ${basicAuth(clientAuthProperties.clientId, clientAuthProperties.clientSecret)}"
             )
         }
-    }
+    }.body()
 
 private fun ParametersBuilder.appendClientAuthParams(
     tokenEndpointUrl: String,

@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.features.auth.Auth
-import io.ktor.client.features.defaultRequest
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.auth.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.header
+import io.ktor.serialization.jackson.*
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.security.ktor.clientCredential
@@ -26,7 +26,8 @@ class AppBuilder(private val props: Map<String, String>) {
     }
 
     private fun pdlTjenesterHttpClient() = HttpClient(OkHttp) {
-        install(JsonFeature) { serializer = JacksonSerializer{
+        expectSuccess = true
+        install(ContentNegotiation) { jackson{
             registerModule(JavaTimeModule())
             disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         } }

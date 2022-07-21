@@ -1,6 +1,8 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -16,9 +18,9 @@ internal class OppdaterBehandling(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event_name", "GRUNNLAG:GRUNNLAGENDRET") }
+            eventName("GRUNNLAG:GRUNNLAGENDRET")
+            correlationId()
             validate { it.requireKey("sakId") }
-            validate { it.interestedIn("@correlation_id") }
 
         }.register(this)
     }

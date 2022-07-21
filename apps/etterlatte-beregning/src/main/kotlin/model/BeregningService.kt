@@ -85,12 +85,11 @@ class BeregningService {
     }
 
     private fun beregnGyldigSoeskenForPeriode (soesken: List<Person>, fra: YearMonth): List<Person> {
-        val bah = soesken.filter {it.foedselsdato != null }
+        return soesken.filter {it.foedselsdato != null }
             .map { Pair(YearMonth.of(it.foedselsdato!!.year, it.foedselsdato!!.month ), it)}
             .filter { !it.first.isAfter(fra) }
             .filter{((fra.year - it.first.year) * 12 + (fra.month.value - it.first.month.value))/12 < 18}
             .map { it.second }
-        return bah
     }
 
 

@@ -1617,36 +1617,6 @@
       }
     }
   },
-  "@beregning": {
-    "id": "4afabb17-f3d9-4561-aa60-5a0197935e5b",
-    "type": "GP",
-    "endringskode": "NY",
-    "resultat": "BEREGNET",
-    "beregningsperioder": [
-      {
-        "delytelsesId": "BP",
-        "type": "GP",
-        "datoFOM": "2022-03",
-        "datoTOM": "2022-04",
-        "utbetaltBeloep": 3546.8,
-        "soeskenFlokk": [],
-        "grunnbelopMnd": 8867,
-        "grunnbelop": 106399
-      },
-      {
-        "delytelsesId": "BP",
-        "type": "GP",
-        "datoFOM": "2022-05",
-        "datoTOM": "2022-09",
-        "utbetaltBeloep": 3716,
-        "soeskenFlokk": [],
-        "grunnbelopMnd": 9290,
-        "grunnbelop": 111477
-      }
-    ],
-    "beregnetDato": "2022-07-11T13:12:59.734411619",
-    "grunnlagVerson": 0
-  },
   "@avkorting": {
     "id": "372559ea-4276-4759-99f7-041e1d1344db",
     "type": "GP",

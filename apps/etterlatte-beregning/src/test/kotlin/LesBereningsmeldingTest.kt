@@ -7,12 +7,11 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
-import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class LesBereningsmeldingTest {
     companion object {
-        val melding = readFile("/Ny.json")
+        val melding = readFile("/Nyere.json")
 
         fun readmelding(file: String): Grunnlag {
             val skjemaInfo = objectMapper.writeValueAsString(
@@ -28,34 +27,13 @@ internal class LesBereningsmeldingTest {
     private val inspector = TestRapid().apply { LesBeregningsmelding(this, BeregningService()) }
 
     @Test
-    fun `skal vurdere viklaar til gyldig`() {
+    fun `skal beregne en melding som er vilkaarsvurdert`() {
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get("@event").asText())
-        //TODO oppdatere testen
-        //Assertions.assertEquals(3, inspector.message(0).get("@vilkaarsvurdering").size())
+        Assertions.assertEquals("BEREGNET", inspector.message(0).get("@beregning").get("resultat").asText())
+        println("bah")
 
-        //verify { fordelerMetricLogger.logMetricFordelt() }
-    }
-    @Test
-    fun beregnResultat() {
-        val beregningsperioder = BeregningService().beregnResultat(readmelding( "/Nyere.json"), YearMonth.of(2021, 2), YearMonth.of(2021, 9)).beregningsperioder
-        beregningsperioder[0].also {
-            Assertions.assertEquals(YearMonth.of(2021,2), it.datoFOM)
-            Assertions.assertEquals(YearMonth.of(2021,4), it.datoTOM)
-        }
-        beregningsperioder[1].also {
-            Assertions.assertEquals(YearMonth.of(2021,5), it.datoFOM)
-            Assertions.assertEquals(YearMonth.of(2021,8), it.datoTOM)
-        }
-        beregningsperioder[2].also {
-            Assertions.assertEquals(YearMonth.of(2021,9), it.datoFOM)
-            Assertions.assertEquals(YearMonth.of(2021,11), it.datoTOM)
-        }
-        beregningsperioder[3].also {
-            Assertions.assertEquals(YearMonth.of(2021,12), it.datoFOM)
-            Assertions.assertEquals(YearMonth.of(2022,4), it.datoTOM)
-        }
     }
 }

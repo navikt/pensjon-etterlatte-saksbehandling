@@ -24,7 +24,7 @@ internal class BeregningServiceTest {
     }
     @Test
     fun beregnResultat() {
-        val beregningsperioder = BeregningService().beregnResultat(readmelding("/Ny.json"), YearMonth.of(2021, 2), YearMonth.of(2021, 9)).beregningsperioder
+        val beregningsperioder = BeregningService().beregnResultat(readmelding("/Nyere.json"), YearMonth.of(2021, 2), YearMonth.of(2021, 9)).beregningsperioder
         beregningsperioder[0].also {
             Assertions.assertEquals(YearMonth.of(2021,2), it.datoFOM)
             Assertions.assertEquals(YearMonth.of(2021,4), it.datoTOM)
@@ -35,6 +35,10 @@ internal class BeregningServiceTest {
         }
         beregningsperioder[2].also {
             Assertions.assertEquals(YearMonth.of(2021,9), it.datoFOM)
+            Assertions.assertEquals(YearMonth.of(2021,11), it.datoTOM)
+        }
+        beregningsperioder[3].also {
+            Assertions.assertEquals(YearMonth.of(2021,12), it.datoFOM)
             Assertions.assertEquals(YearMonth.of(2022,4), it.datoTOM)
         }
     }

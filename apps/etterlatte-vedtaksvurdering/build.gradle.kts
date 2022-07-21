@@ -11,11 +11,6 @@ dependencies {
     implementation(Ktor2.ServerContentNegotiation)
     implementation(Ktor2.CallLogging)
     implementation(Ktor2.StatusPages)
-    implementation(Ktor2.ClientCore)
-    implementation(Ktor2.ClientJackson)
-    implementation(Ktor2.ClientCioJvm)
-    implementation(Ktor2.ClientAuth)
-    implementation(Ktor2.ClientLogging)
     implementation(Ktor2.MetricsMicrometer)
     implementation(Ktor2.Jackson)
     implementation(Ktor2.Auth)
@@ -28,7 +23,5 @@ dependencies {
     implementation(NavFelles.TokenValidationKtor2)
 
     testImplementation(MockK.MockK)
-    testImplementation(Ktor2.ClientMock)
-    testImplementation(Ktor2.ServerTests)
     testImplementation(Kotlinx.CoroutinesCore)
 }

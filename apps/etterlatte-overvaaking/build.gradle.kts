@@ -1,17 +1,11 @@
 
 plugins {
-    id("etterlatte.rapids-and-rivers")
+    id("etterlatte.rapids-and-rivers-ktor2")
 }
 
 dependencies {
-    implementation(Ktor.OkHttp)
-    implementation(Ktor.ClientCore)
-    implementation(Ktor.ClientLoggingJvm)
-    implementation(Ktor.ClientAuth)
-    implementation(Ktor.ClientJackson)
-    implementation(NavFelles.TokenClientCore)
-    implementation(NavFelles.TokenValidationKtor)
-    implementation("io.ktor:ktor-html-builder:1.6.1")
+    implementation(NavFelles.TokenValidationKtor2)
+    implementation(Ktor2.ServerHtmlBuilder)
 
     testImplementation(Ktor.ClientMock)
     testImplementation(MockK.MockK)

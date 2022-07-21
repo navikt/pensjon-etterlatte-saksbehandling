@@ -5,17 +5,13 @@ plugins {
 dependencies {
     api(kotlin("reflect"))
 
-    implementation(Ktor.ServerCore)
-    implementation(Ktor.ServerCio)
-    implementation(Ktor.ClientCore)
-    implementation(Ktor.ClientJackson)
-    implementation(Ktor.ClientCioJvm)
-    implementation(Ktor.ClientAuth)
-    implementation(Ktor.ClientLogging)
-    implementation(Ktor.MetricsMicrometer)
-    implementation(Ktor.Jackson)
-    implementation(Ktor.Auth)
-    implementation("io.ktor:ktor-html-builder:1.6.1")
+    implementation(Ktor2.ServerCore)
+    implementation(Ktor2.ServerCio)
+    implementation(Ktor2.ServerContentNegotiation)
+    implementation(Ktor2.MetricsMicrometer)
+    implementation(Ktor2.Jackson)
+    implementation(Ktor2.Auth)
+    implementation(Ktor2.ServerHtmlBuilder)
 
     implementation(Micrometer.Prometheus)
     implementation(Jackson.DatatypeJsr310)
@@ -23,7 +19,7 @@ dependencies {
     implementation(Jackson.ModuleKotlin)
 
     implementation(NavFelles.TokenClientCore)
-    implementation(NavFelles.TokenValidationKtor)
+    implementation(NavFelles.TokenValidationKtor2)
 
     implementation(Logging.LogbackClassic)
     implementation(Logging.LogstashLogbackEncoder) {
@@ -33,8 +29,7 @@ dependencies {
 
     implementation(Jackson.Core)
     implementation(Jackson.Databind)
-    implementation(Jackson.ModuleKotlin)
-    implementation(Jackson.DatatypeJsr310)
+
 
     testImplementation(MockK.MockK)
 }

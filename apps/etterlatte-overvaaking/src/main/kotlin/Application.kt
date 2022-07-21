@@ -1,20 +1,20 @@
 package no.nav.etterlatte
 
 import com.typesafe.config.ConfigFactory
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.config.*
-import io.ktor.html.*
 import io.ktor.http.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.config.*
+import io.ktor.server.html.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import io.ktor.util.pipeline.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.html.*
 import no.nav.helse.rapids_rivers.*
-import no.nav.security.token.support.ktor.TokenValidationContextPrincipal
-import no.nav.security.token.support.ktor.tokenValidationSupport
+import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import no.nav.security.token.support.v2.tokenValidationSupport
 import java.time.LocalDateTime
 
 val appMap: MutableMap<String, MutableMap<String, Pair<AppEvent?, PongEvent?>>> = mutableMapOf()
@@ -127,9 +127,7 @@ internal class PongListener(
        PongEvent(
            packet["instance_id"].asText(),
            packet["app_name"].asText(),
-           LocalDateTime.parse(packet["pong_time"].asText()),
-           packet["@id"].asText() ,
-           LocalDateTime.parse(packet["ping_time"].asText())
+           LocalDateTime.parse(packet["pong_time"].asText())
        ).also {
            appMap.computeIfAbsent(it.app){ mutableMapOf()}.compute(it.appinstance){ _, current:Pair<AppEvent?, PongEvent?>? -> Pair(current?.first, it) }
        }
@@ -156,6 +154,4 @@ class PongEvent(
     override val appinstance: String,
     override val app: String,
     override val opprettet: LocalDateTime,
-    val pingId: String,
-    val pingOpprettet:LocalDateTime
     ): Event by AppEvent("pong",appinstance,app,opprettet)

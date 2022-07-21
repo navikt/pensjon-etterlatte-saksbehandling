@@ -56,6 +56,7 @@ object Ktor2 {
     const val AuthJwt = "io.ktor:ktor-server-auth-jwt:$version"
     const val ServerContentNegotiation = "io.ktor:ktor-server-content-negotiation:$version"
     const val ClientContentNegotiation = "io.ktor:ktor-client-content-negotiation:$version"
+    const val ServerHtmlBuilder = "io.ktor:ktor-server-html-builder:$version"
     const val Jackson = "io.ktor:ktor-serialization-jackson:$version"
     const val CallLogging = "io.ktor:ktor-server-call-logging:$version"
     const val StatusPages = "io.ktor:ktor-server-status-pages:$version"

@@ -1,13 +1,9 @@
 package no.nav.etterlatte.tilbakekreving
 
-import io.ktor.application.call
-import io.ktor.application.log
 import io.ktor.http.HttpStatusCode
-import io.ktor.response.respond
-import io.ktor.routing.Route
-import io.ktor.routing.application
-import io.ktor.routing.get
-import io.ktor.routing.route
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 
 fun Route.tilbakekreving(tilbakekrevingService: TilbakekrevingService) {
     route("tilbakekreving") {

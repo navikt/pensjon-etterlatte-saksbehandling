@@ -3,10 +3,9 @@ package no.nav.etterlatte.utbetaling.config
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.fullPath
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import no.nav.etterlatte.libs.common.objectMapper
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -19,6 +18,7 @@ internal class LeaderElectionTest {
         private val localHostName = "localhost"
 
         fun httpClient(response: String) = HttpClient(MockEngine) {
+            expectSuccess = true
             engine {
                 addHandler { request ->
                     when (request.url.fullPath) {
@@ -27,7 +27,7 @@ internal class LeaderElectionTest {
                     }
                 }
             }
-            install(JsonFeature) { serializer = JacksonSerializer(objectMapper) }
+            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
         }
 
     }

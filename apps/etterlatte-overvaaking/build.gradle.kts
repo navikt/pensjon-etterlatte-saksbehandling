@@ -7,7 +7,7 @@ dependencies {
     implementation(NavFelles.TokenValidationKtor2)
     implementation(Ktor2.ServerHtmlBuilder)
 
-    testImplementation(Ktor.ClientMock)
+    testImplementation(Ktor2.ClientMock)
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)
 }

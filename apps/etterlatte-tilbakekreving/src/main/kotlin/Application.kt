@@ -1,23 +1,17 @@
 package no.nav.etterlatte
 
-import io.ktor.application.Application
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.application.log
-import io.ktor.auth.Authentication
-import io.ktor.auth.authenticate
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
-import io.ktor.features.StatusPages
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.JacksonConverter
-import io.ktor.request.header
-import io.ktor.request.httpMethod
-import io.ktor.request.path
-import io.ktor.response.respond
-import io.ktor.routing.IgnoreTrailingSlash
-import io.ktor.routing.routing
+import io.ktor.http.content.*
+import io.ktor.serialization.jackson.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
@@ -56,7 +50,7 @@ fun rapidApplication(
     }
 
 
-fun Application.restModule(applicationContext: ApplicationContext) {
+fun io.ktor.server.application.Application.restModule(applicationContext: ApplicationContext) {
     install(Authentication) {
         applicationContext.tokenValidering(this)
     }
@@ -71,9 +65,9 @@ fun Application.restModule(applicationContext: ApplicationContext) {
         mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
     }
     install(StatusPages) {
-        exception<Throwable> { cause ->
-            log.error("En feil oppstod: ${cause.message}", cause)
-            call.respond(HttpStatusCode.InternalServerError, "En feil oppstod: ${cause.message}")
+        exception<Throwable> { call, cause ->
+            call.application.log.error("En feil oppstod: ${cause.message}", cause)
+            call.respond(TextContent( "En feil oppstod: ${cause.message}", ContentType.Text.Plain, HttpStatusCode.InternalServerError))
         }
     }
 

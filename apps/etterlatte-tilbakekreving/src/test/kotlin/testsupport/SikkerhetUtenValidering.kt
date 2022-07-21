@@ -1,22 +1,17 @@
 package no.nav.etterlatte.testsupport
 
-import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.http.*
+import io.ktor.server.auth.*
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
-import no.nav.security.token.support.ktor.TokenValidationContextPrincipal
+import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.util.*
 import java.util.stream.Collectors
 
-class TokenSupportAcceptAllProvider : AuthenticationProvider(ProviderConfiguration()) {
-    class ProviderConfiguration : Configuration(null)
 
-    init {
-        pipeline.intercept(AuthenticationPipeline.RequestAuthentication) { context ->
-            context.principal(TokenValidationContextPrincipal(TokenValidationContext(getTokensFromHeader(call.request.headers).associateBy { it.issuer })))
-        }
-    }
+class TokenSupportAcceptAllProvider : AuthenticationProvider(ProviderConfiguration(null)) {
+
+    class ProviderConfiguration internal constructor(name: String?) : AuthenticationProvider.Config(name)
 
     private fun getTokensFromHeader(request: Headers): List<JwtToken> {
         try {
@@ -56,6 +51,10 @@ class TokenSupportAcceptAllProvider : AuthenticationProvider(ProviderConfigurati
             }
             .collect(Collectors.toList())
     }
+
+    override suspend fun onAuthenticate(context: AuthenticationContext) {
+        context.principal(TokenValidationContextPrincipal(TokenValidationContext(getTokensFromHeader(context.call.request.headers).associateBy { it.issuer })))
+    }
 }
 
-fun Authentication.Configuration.tokenTestSupportAcceptsAllTokens() = register(TokenSupportAcceptAllProvider())
+fun AuthenticationConfig.tokenTestSupportAcceptsAllTokens() = register(TokenSupportAcceptAllProvider())

@@ -1,10 +1,10 @@
 package no.nav.etterlatte.tilbakekreving
 
-import io.ktor.auth.Authentication
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.auth.*
 import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.withTestApplication
 import io.mockk.every
@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test
 internal class TilbakekrevingRoutesTest {
 
     private val applicationContext: ApplicationContext = mockk {
-        every { tokenValidering } returns Authentication.Configuration::tokenTestSupportAcceptsAllTokens
+        every { tokenValidering } returns AuthenticationConfig::tokenTestSupportAcceptsAllTokens
         every { tilbakekrevingService } returns mockk {
             every { hentTilbakekreving(1) } returns mottattKravgrunnlag()
             every { hentTilbakekreving(2) } returns null

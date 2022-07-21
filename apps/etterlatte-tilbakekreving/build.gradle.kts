@@ -1,26 +1,30 @@
 plugins {
-    id("etterlatte.rapids-and-rivers")
+    id("etterlatte.rapids-and-rivers-ktor2")
     id("com.faire.gradle.analyze") version "1.0.9"
 }
 dependencies {
     implementation(project(":libs:ktorclient-auth-clientcredentials"))
 
-    implementation(Ktor.ServerCore)
-    implementation(Ktor.ServerCio)
-    implementation(Ktor.ClientCioJvm)
-    implementation(Ktor.OkHttp)
-    implementation(Ktor.ClientCore)
-    implementation(Ktor.ClientJackson)
-    implementation(Ktor.ClientAuth)
-    implementation(Ktor.Auth)
-    implementation(Ktor.Jackson)
+    implementation(Ktor2.ServerCore)
+    implementation(Ktor2.ServerCio)
+    implementation(Ktor2.ClientCioJvm)
+    implementation(Ktor2.OkHttp)
+    implementation(Ktor2.ClientCore)
+    implementation(Ktor2.ClientJackson)
+    implementation(Ktor2.ClientAuth)
+    implementation(Ktor2.Auth)
+    implementation(Ktor2.Jackson)
+    implementation(Ktor2.CallLogging)
+    implementation(Ktor2.StatusPages)
+    implementation(Ktor2.ClientContentNegotiation)
+    implementation(Ktor2.ServerContentNegotiation)
     implementation(Jackson.DatatypeJsr310)
     implementation(Jackson.DatatypeJdk8)
     implementation(Jackson.ModuleKotlin)
     implementation(Jackson.Xml)
 
     implementation(NavFelles.TokenClientCore)
-    implementation(NavFelles.TokenValidationKtor)
+    implementation(NavFelles.TokenValidationKtor2)
 
     implementation("org.jetbrains:annotations:13.0")
 
@@ -39,8 +43,8 @@ dependencies {
     implementation("org.postgresql:postgresql:42.3.3")
     implementation("com.github.seratch:kotliquery:1.7.0")
 
-    testImplementation(Ktor.ClientMock)
-    testImplementation(Ktor.ServerTests)
+    testImplementation(Ktor2.ClientMock)
+    testImplementation(Ktor2.ServerTests)
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)
 

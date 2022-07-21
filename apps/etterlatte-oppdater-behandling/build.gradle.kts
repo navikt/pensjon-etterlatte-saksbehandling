@@ -15,7 +15,7 @@ dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:rapidsandrivers-extras"))
 
-    testImplementation(Ktor.ClientMock)
+    testImplementation(Ktor2.ClientMock)
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)
 }

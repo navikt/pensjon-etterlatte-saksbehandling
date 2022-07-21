@@ -22,10 +22,10 @@ internal class LesVilkaarsmeldingTest {
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-        Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get("@event").asText())
-        Assertions.assertEquals(3, inspector.message(0).get("@vilkaarsvurdering").size())
-        Assertions.assertEquals(2, inspector.message(0).get("@kommersoekertilgode").size())
-        Assertions.assertEquals(8, inspector.message(0).get("@vilkaarsvurderingGrunnlagRef").intValue())
+        Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get("@event_name").asText())
+        Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
+        Assertions.assertEquals(2, inspector.message(0).get("kommerSoekerTilGode").size())
+        Assertions.assertEquals(8, inspector.message(0).get("vilkaarsvurderingGrunnlagRef").intValue())
 
     }
 }

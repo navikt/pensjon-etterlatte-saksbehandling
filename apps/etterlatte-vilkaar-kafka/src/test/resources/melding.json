@@ -1,7 +1,7 @@
 {
   "id": "dbbd9a01-3e5d-4ec1-819c-1781d1f6a440",
   "sak": 6,
-  "@grunnlag":{
+  "grunnlag":{
     "versjon": 8,
     "saksId": 6,
     "grunnlag": [
@@ -570,6 +570,6 @@
       "time": "2022-03-21T15:26:22.994195102"
     }
   ],
-  "@event": "BEHANDLING:GRUNNLAGENDRET",
+  "@event_name": "BEHANDLING:GRUNNLAGENDRET",
   "behandlingOpprettet": "2022-05-23T16:09:19.717707"
 }

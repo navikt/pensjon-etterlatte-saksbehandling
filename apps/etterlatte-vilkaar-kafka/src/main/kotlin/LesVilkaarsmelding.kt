@@ -1,9 +1,12 @@
+
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.barnepensjon.model.VilkaarService
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import no.nav.etterlatte.barnepensjon.model.VilkaarService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -19,13 +22,13 @@ internal class LesVilkaarsmelding(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
-            validate { it.requireKey("@grunnlag") }
+            eventName("BEHANDLING:GRUNNLAGENDRET")
+            validate { it.requireKey("grunnlag") }
             validate { it.requireKey("behandlingOpprettet") }
-            validate { it.rejectKey("@vilkaarsvurdering") }
-            validate { it.rejectKey("@kommersoekertilgode") }
-            validate { it.rejectKey("@gyldighetsvurdering") }
-            validate { it.interestedIn("@correlation_id") }
+            validate { it.rejectKey("vilkaarsvurdering") }
+            validate { it.rejectKey("kommerSoekerTilGode") }
+            validate { it.rejectKey("gyldighetsvurdering") }
+            correlationId()
 
         }.register(this)
     }
@@ -33,16 +36,16 @@ internal class LesVilkaarsmelding(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
             try {
-                val grunnlag = requireNotNull(objectMapper.treeToValue<Grunnlag>(packet["@grunnlag"]))
+                val grunnlag = requireNotNull(objectMapper.treeToValue<Grunnlag>(packet["grunnlag"]))
                 val grunnlagForVilkaar = grunnlag.grunnlag.map { VilkaarOpplysning(it.id, it.opplysningType, it.kilde, it.opplysning) }
                 val vilkaarsVurdering = vilkaar.mapVilkaar(grunnlagForVilkaar)
                 val kommerSoekerTilGodeVurdering = vilkaar.mapKommerSoekerTilGode(grunnlagForVilkaar)
                 val behandlingopprettet = LocalDateTime.parse(packet["behandlingOpprettet"].asText()).toLocalDate()
 
                 packet["@virkningstidspunkt"] = vilkaar.beregnVilkaarstidspunkt(grunnlagForVilkaar, behandlingopprettet).toString()
-                packet["@vilkaarsvurdering"] = vilkaarsVurdering
-                packet["@vilkaarsvurderingGrunnlagRef"] = grunnlag.versjon
-                packet["@kommersoekertilgode"] = kommerSoekerTilGodeVurdering
+                packet["vilkaarsvurdering"] = vilkaarsVurdering
+                packet["vilkaarsvurderingGrunnlagRef"] = grunnlag.versjon
+                packet["kommerSoekerTilGode"] = kommerSoekerTilGodeVurdering
                 context.publish(packet.toJson())
 
                 logger.info("Vurdert Vilkår")

@@ -3,24 +3,11 @@ package barnepensjon
 import adresseDanmarkPdl
 import adresseUtlandFoerFemAar
 import adresserNorgePdl
-import no.nav.etterlatte.barnepensjon.Periode
-import no.nav.etterlatte.barnepensjon.harKunNorskeAdresserEtterDato
-import no.nav.etterlatte.barnepensjon.harKunNorskePdlAdresserEtterDato
-import no.nav.etterlatte.barnepensjon.hentAdresseperioderINorge
-import no.nav.etterlatte.barnepensjon.hentGaps
-import no.nav.etterlatte.barnepensjon.kombinerPerioder
-import no.nav.etterlatte.barnepensjon.setVikaarVurderingFraKriterier
-import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraVilkaar
-import no.nav.etterlatte.barnepensjon.setVurderingFraKommerBarnetTilGode
+import no.nav.etterlatte.barnepensjon.*
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
-import no.nav.etterlatte.libs.common.vikaar.Kriterie
-import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
-import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
+import no.nav.etterlatte.libs.common.vikaar.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -487,7 +474,7 @@ internal class UtilsKtTest {
         val ingenGaps = hentGaps(stackUtenGaps, femAarFoerDoedsdato, doedsdato)
         val gaps = hentGaps(stackMedGaps, femAarFoerDoedsdato, doedsdato)
 
-        assertEquals(0, ingenGaps?.size)
+        assertEquals(0, ingenGaps.size)
 
         assertEquals(3, gaps.size)
         assertEquals(femAarFoerDoedsdato, gaps.first().gyldigFra)

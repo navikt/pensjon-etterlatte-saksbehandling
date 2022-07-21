@@ -28,6 +28,7 @@ plugins {
     "libs:ktorclient-auth-clientcredentials",
     "libs:common",
     "libs:ktorclient-onbehalfof",
+    "libs:ktor2client-onbehalfof",
     "libs:rapidsandrivers-extras",
     "libs:etterlatte-kafka",
     "jobs:test-fordeler",

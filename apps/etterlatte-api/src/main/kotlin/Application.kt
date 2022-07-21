@@ -4,10 +4,11 @@ package no.nav.etterlatte
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
-import io.ktor.client.features.defaultRequest
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.header
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import no.nav.etterlatte.behandling.*
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
@@ -34,8 +35,8 @@ class ApplicationContext(configLocation: String? = null) {
     val grunnlagService = GrunnlagService(behandlingKlient, rapid)
 
     private fun httpClient() = HttpClient {
-        install(JsonFeature) {
-            serializer = JacksonSerializer(objectMapper)
+        install(ContentNegotiation) {
+            register(ContentType.Application.Json, JacksonConverter(objectMapper))
         }
         defaultRequest {
             header(X_CORRELATION_ID, getCorrelationId())

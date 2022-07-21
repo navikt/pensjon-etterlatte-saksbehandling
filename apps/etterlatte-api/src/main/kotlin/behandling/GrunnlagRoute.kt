@@ -1,13 +1,12 @@
 package no.nav.etterlatte.behandling
 
 
-import io.ktor.application.*
 import io.ktor.http.HttpStatusCode
-import io.ktor.request.*
-import io.ktor.response.respond
-import io.ktor.routing.Route
-import io.ktor.routing.post
-import io.ktor.routing.route
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+
 import no.nav.etterlatte.getAccessToken
 
 fun Route.grunnlagRoute(service: GrunnlagService) {

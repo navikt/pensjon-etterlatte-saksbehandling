@@ -9,10 +9,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.*
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -29,46 +26,57 @@ class GrunnlagHendelser(
 
     init {
         River(rapidsConnection).apply {
-            eventName("OPPLYSNING:NY")
             correlationId()
+            validate { it.interestedIn(eventNameKey) }
+            validate { it.interestedIn(behovNameKey) }
             validate { it.requireKey("opplysning") }
             validate { it.requireKey("sakId") }
             validate { it.rejectKey("grunnlag") }
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId) {
-            if (Kontekst.get().AppUser !is Self) {
-                logger.warn("AppUser i kontekst er ikke Self i R&R-flyten")
-            }
+    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+        val opplysninger = Opplysningstyper.values().map { it.name }
 
-            try {
-                val opplysninger: List<Grunnlagsopplysning<ObjectNode>> =
-                    objectMapper.readValue(packet["opplysning"].toJson())!!
+        if ((packet[eventNameKey].asText() == "OPPLYSNING:NY")
+            || (opplysninger.contains(packet[behovNameKey].asText()))) {
 
-                // Send melding om behov som er avhengig av en annen opplysning
-                opplysninger.forEach {
-                    if (it.opplysningType === Opplysningstyper.AVDOED_PDL_V1) {
-                        sendAvdoedInntektBehov(it, context, packet)
+            withLogContext(packet.correlationId) {
+                if (Kontekst.get().AppUser !is Self) {
+                    logger.warn("AppUser i kontekst er ikke Self i R&R-flyten")
+                }
+
+                try {
+                    val opplysninger: List<Grunnlagsopplysning<ObjectNode>> = objectMapper.readValue(packet["opplysning"].toJson())!!
+
+                    // Send melding om behov som er avhengig av en annen opplysning
+                    opplysninger.forEach {
+                        if (it.opplysningType === Opplysningstyper.AVDOED_PDL_V1) {
+                            sendAvdoedInntektBehov(it, context, packet)
+                        }
                     }
-                }
 
-                val grunnlag = grunnlag.opprettGrunnlag(packet["sakId"].asLong(), opplysninger)
-                JsonMessage.newMessage("GRUNNLAG:GRUNNLAGENDRET",
-                    mapOf(
-                        "grunnlag" to grunnlag,
-                        correlationIdKey to packet[correlationIdKey]
-                    )
-                ).apply {
-                    context.publish(packet.toJson())
-                    logger.info("Lagt ut melding om grunnlagsendring")
+                    val grunnlag = grunnlag.opprettGrunnlag(packet["sakId"].asLong(), opplysninger)
+
+                    JsonMessage.newMessage("GRUNNLAG:GRUNNLAGENDRET",
+                        mapOf(
+                            "grunnlag" to grunnlag,
+                            correlationIdKey to packet[correlationIdKey],
+                            "sakId" to packet["sakId"],
+                        )
+                    ).apply {
+                        context.publish(toJson())
+                        logger.info("Lagt ut melding om grunnlagsendring")
+                    }
+                } catch (e: Exception) {
+                    logger.error("Spiser en melding fordi: " + e.message)
                 }
-            } catch (e: Exception) {
-                logger.error("Spiser en melding fordi: " + e.message)
             }
-        }
 
+        } else {
+            return
+        }
+    }
 
     private fun sendAvdoedInntektBehov(
         grunnlagsopplysning: Grunnlagsopplysning<ObjectNode>,

@@ -27,7 +27,6 @@ class GrunnlagHendelserTest {
             ?: throw FileNotFoundException("Fant ikke filen $file")
     }
 
-
     private val inspector = TestRapid().apply { GrunnlagHendelser(this, RealGrunnlagService(opplysningerMock)) }
 
     @Test
@@ -54,7 +53,7 @@ class GrunnlagHendelserTest {
         every { opplysningerMock.finnHendelserIGrunnlag(any()) } returns grunnlagshendelser
         every { opplysningerMock.leggOpplysningTilGrunnlag(any(), any()) } returns 1L
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
-
+        val test = inspector.message(0)
         Assertions.assertEquals("GRUNNLAG:GRUNNLAGENDRET", inspector.message(0).get("@event_name").asText())
         Assertions.assertEquals(2, inspector.message(0).get("grunnlag").get("grunnlag").size())
         Assertions.assertEquals(2L, inspector.message(0).get("grunnlag").get("versjon").longValue())

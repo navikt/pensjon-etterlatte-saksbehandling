@@ -3,25 +3,20 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.typesafe.config.ConfigFactory
-import io.ktor.application.Application
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.application.log
-import io.ktor.auth.Authentication
-import io.ktor.auth.authenticate
-import io.ktor.config.HoconApplicationConfig
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
-import io.ktor.features.StatusPages
-import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.jackson
-import io.ktor.request.*
-import io.ktor.response.respond
-import io.ktor.routing.route
-import io.ktor.routing.routing
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.config.*
+import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.security.token.support.ktor.tokenValidationSupport
+import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
 import java.util.*
 
@@ -43,8 +38,8 @@ fun Application.module(vedtaksvurderingService: VedtaksvurderingService) {
     }
 
     install(StatusPages) {
-        exception<Throwable> { cause ->
-            log.error("En feil oppstod: ${cause.message}", cause)
+        exception<Throwable> { call, cause ->
+            call.application.log.error("En feil oppstod: ${cause.message}", cause)
             call.respond(HttpStatusCode.InternalServerError, "En feil oppstod: ${cause.message}")
         }
     }

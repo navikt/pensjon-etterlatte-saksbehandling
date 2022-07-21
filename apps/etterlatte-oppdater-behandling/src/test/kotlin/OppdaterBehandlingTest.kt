@@ -11,7 +11,6 @@ import java.io.FileNotFoundException
 internal class OppdaterBehandlingTest {
 
     private val behandlingService = mockk<BehandlingsService>()
-
     private val inspector = TestRapid().apply { OppdaterBehandling(this, behandlingService) }
 
     @Test
@@ -32,5 +31,6 @@ internal class OppdaterBehandlingTest {
 
     }
 }
+
 fun readFile(file: String) = OppdaterBehandlingTest::class.java.getResource(file)?.readText()
     ?: throw FileNotFoundException("Fant ikke filen $file")

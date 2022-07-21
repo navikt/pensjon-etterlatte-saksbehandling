@@ -23,12 +23,12 @@ internal class OppdaterBehandlingTest {
 
         inspector.sendTestMessage(fullMelding)
 
-        Assertions.assertEquals(1L, sakIdSlot.captured)
+        Assertions.assertEquals(3L, sakIdSlot.captured)
     }
 
 
     companion object {
-        val fullMelding = readFile("/fullMelding.json")
+        val fullMelding = readFile("/nyere.json")
 
     }
 }

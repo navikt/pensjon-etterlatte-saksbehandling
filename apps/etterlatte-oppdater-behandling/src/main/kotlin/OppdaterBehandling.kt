@@ -21,7 +21,6 @@ internal class OppdaterBehandling(
             eventName("GRUNNLAG:GRUNNLAGENDRET")
             correlationId()
             validate { it.requireKey("sakId") }
-
         }.register(this)
     }
 

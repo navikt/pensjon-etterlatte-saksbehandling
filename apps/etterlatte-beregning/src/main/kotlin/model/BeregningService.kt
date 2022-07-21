@@ -36,8 +36,30 @@ class BeregningService {
         )
     }
 
+    private fun finnBeregningsperioder(grunnlag: Grunnlag, virkFOM: YearMonth, virkTOM: YearMonth): List<Beregningsperiode> {
+        val grunnbeloep = Grunnbeloep.hentGforPeriode(virkFOM)
+        val soeskenPeriode = finnSoeskenperioder(grunnlag, virkFOM)
+        val alleFOM = (grunnbeloep.map {it.dato} + soeskenPeriode.map { it.datoFOM } + virkTOM).map { beregnFoersteFom(it, virkFOM) }.distinct().sorted().zipWithNext()
+            .map{ Pair(it.first, it.second.minusMonths(1))}
+
+        return alleFOM.map {
+            val gjeldendeG = Grunnbeloep.hentGjeldendeG(it.first)
+            val flokkForPeriode = hentFlokkforPeriode(it.first,it.second,soeskenPeriode )
+            (Beregningsperiode(
+                delytelsesId = "BP",
+                type = Beregningstyper.GP,
+                datoFOM = it.first,
+                datoTOM = it.second,
+                grunnbelopMnd = gjeldendeG.grunnbeløpPerMåned,
+                grunnbelop = gjeldendeG.grunnbeløp,
+                soeskenFlokk = flokkForPeriode,
+                utbetaltBeloep = beregnUtbetaling(flokkForPeriode.size, gjeldendeG.grunnbeløpPerMåned)
+
+            ))
+        }
+    }
+
     // Adressesjekk på halvsøsken på dødsfallstidspunkt i første omgang
-    //TODO skrive om denne til å returnere kun liste med virkfom?
     private fun finnSoeskenperioder(grunnlag: Grunnlag, virkFOM: YearMonth): List<SoeskenPeriode> {
 
         val avdoedPdl = finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.AVDOED_PDL_V1)?.opplysning
@@ -54,7 +76,6 @@ class BeregningService {
         halvsoeskenOppdrattSammen?.let { kull.addAll(it) }
 
         val perioder = beregnSoeskenperioder(kull,virkFOM)
-        println("bah")
         //TODO håndtere doedsfall
         return perioder.map {
             SoeskenPeriode(
@@ -64,7 +85,6 @@ class BeregningService {
         }
     }
 
-    //TODO denne må sjekkes
     private fun beregnGyldigSoeskenForPeriode (soesken: List<Person>, fra: YearMonth): List<Person> {
         val bah = soesken.filter {it.foedselsdato != null }
             .map { Pair(YearMonth.of(it.foedselsdato!!.year, it.foedselsdato!!.month ), it)}
@@ -83,37 +103,10 @@ class BeregningService {
             .filter { !it.isBefore(virkFOM) }
             .filter { !it.isAfter(YearMonth.now().plusMonths(3)) }
             .sorted()
-            .zipWithNext()//.toList()
-
-        //return soesken.asSequence().map { YearMonth.of(it.foedselsdato!!.year, it.foedselsdato!!.month) }.plus(virkFOM).plus(
-        //    YearMonth.now().plusMonths(3)).filter { !it.isBefore(virkFOM) }.zipWithNext().toList()
+            .zipWithNext()
     }
 
-    private fun finnBeregningsperioder(grunnlag: Grunnlag, virkFOM: YearMonth, virkTOM: YearMonth): List<Beregningsperiode> {
-        val grunnbeloep = Grunnbeloep.hentGforPeriode(virkFOM)
-        val soeskenPeriode = finnSoeskenperioder(grunnlag, virkFOM)
-        val perioderFOM = grunnbeloep.map {it.dato}
-        val sperioderFOM = soeskenPeriode.map { it.datoFOM }
-        val allefom = (perioderFOM + sperioderFOM + virkTOM).map { beregnFoersteFom(it, virkFOM) }.distinct().sorted().zipWithNext().
-        map{ Pair(it.first, it.second.minusMonths(1))}
 
-        return allefom.map {
-
-            val gjeldendeG = Grunnbeloep.hentGjeldendeG(it.first)
-            val flokkForPeriode = hentFlokkforPeriode(it.first,it.second,soeskenPeriode )
-            (Beregningsperiode(
-                delytelsesId = "BP",
-                type = Beregningstyper.GP,
-                datoFOM = it.first,
-                datoTOM = it.second,
-                grunnbelopMnd = gjeldendeG.grunnbeløpPerMåned,
-                grunnbelop = gjeldendeG.grunnbeløp,
-                soeskenFlokk = flokkForPeriode,
-                utbetaltBeloep = beregnUtbetaling(flokkForPeriode.size, gjeldendeG.grunnbeløpPerMåned)
-
-            ))
-        }
-    }
     //TODO finne bedre måte å gjøre dette på
     fun hentFlokkforPeriode(datoFOM: YearMonth, datoTOM: YearMonth, soeskenPeriode: List<SoeskenPeriode>): List<Person> {
         val flokk = soeskenPeriode.filter { !it.datoTOM.isBefore(datoFOM)}
@@ -147,7 +140,6 @@ class BeregningService {
                 )
             }
         }
-
         inline fun <reified T> finnOpplysning(
             opplysninger: List<Grunnlagsopplysning<ObjectNode>>,
             type: Opplysningstyper

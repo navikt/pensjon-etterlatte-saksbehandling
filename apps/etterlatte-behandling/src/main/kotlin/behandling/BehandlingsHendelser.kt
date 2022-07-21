@@ -1,13 +1,8 @@
 package no.nav.etterlatte.behandling
 
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.asContextElement
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
@@ -49,7 +44,7 @@ class BehandlingsHendelser(
                                 hendelse.first
                             )
                         }.serialiserbarUtgave())).also {
-                            it["@event"] = "BEHANDLING:${hendelse.second.name}"
+                            it["@event_name"] = "BEHANDLING:${hendelse.second.name}"
                         }.toJson()
                     ).also {
                         logger.info("Posted event ${hendelse.second.name} for behandling ${hendelse.first} to partiton ${it.first}, offset ${it.second}")

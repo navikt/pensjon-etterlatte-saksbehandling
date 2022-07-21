@@ -184,7 +184,7 @@ class ApplicationTest {
         val rapid = beans.rapidSingleton
         rapid.publiserteMeldinger
         assertEquals(1, rapid.publiserteMeldinger.size)
-        assertEquals("BEHANDLING:OPPRETTET", objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event"].textValue())
+        assertEquals("BEHANDLING:OPPRETTET", objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue())
 
         beans.datasourceBuilder().dataSource.connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }

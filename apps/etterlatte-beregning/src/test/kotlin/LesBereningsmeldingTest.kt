@@ -22,8 +22,8 @@ internal class LesBereningsmeldingTest {
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-        Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get("@event").asText())
-        Assertions.assertEquals("BEREGNET", inspector.message(0).get("@beregning").get("resultat").asText())
+        Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get("@event_name").asText())
+        Assertions.assertEquals("BEREGNET", inspector.message(0).get("beregning").get("resultat").asText())
         println("bah")
 
     }

@@ -10,11 +10,11 @@ import java.time.YearMonth
 
 internal class BeregningServiceTest {
     companion object {
-        val melding = readFile("/Ny.json")
+        val melding = readFile("/Nyere.json")
 
         fun readmelding(file: String): Grunnlag {
             val skjemaInfo = objectMapper.writeValueAsString(
-                objectMapper.readTree(readFile(file)).get("@grunnlag")
+                objectMapper.readTree(readFile(file)).get("grunnlag")
             )
             return objectMapper.readValue(skjemaInfo, Grunnlag::class.java)
         }

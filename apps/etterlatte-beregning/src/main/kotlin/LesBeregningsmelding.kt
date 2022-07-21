@@ -2,6 +2,8 @@
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.model.BeregningService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -17,12 +19,12 @@ internal class LesBeregningsmelding(
     private val logger = LoggerFactory.getLogger(LesBeregningsmelding::class.java)
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
-            validate { it.requireKey("@grunnlag") }
-            validate { it.requireKey("@vilkaarsvurdering") }
-            validate { it.requireKey("@virkningstidspunkt") }
-            validate { it.rejectKey("@beregning") }
-            validate { it.interestedIn("@correlation_id") }
+            eventName("BEHANDLING:GRUNNLAGENDRET")
+            validate { it.requireKey("grunnlag") }
+            validate { it.requireKey("vilkaarsvurdering") }
+            validate { it.requireKey("virkningstidspunkt") }
+            validate { it.rejectKey("beregning") }
+            correlationId()
 
         }.register(this)
     }
@@ -30,13 +32,13 @@ internal class LesBeregningsmelding(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId()) {
 
-            val grunnlag = packet["@grunnlag"].toString()
+            val grunnlag = packet["grunnlag"].toString()
             try {
                 //TODO fremtidig funksjonalitet for å støtte periodisering av vilkaar
                 val tom = YearMonth.now().plusMonths(3)
 
-                val beregningsResultat = beregning.beregnResultat(objectMapper.readValue(grunnlag), YearMonth.parse(packet["@virkningstidspunkt"].asText()), tom)
-                packet["@beregning"] = beregningsResultat
+                val beregningsResultat = beregning.beregnResultat(objectMapper.readValue(grunnlag), YearMonth.parse(packet["virkningstidspunkt"].asText()), tom)
+                packet["beregning"] = beregningsResultat
                 context.publish(packet.toJson())
                 logger.info("Publisert en beregning")
             } catch (e: Exception){

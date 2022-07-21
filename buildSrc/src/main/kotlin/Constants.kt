@@ -1,5 +1,6 @@
 object NavFelles {
     const val RapidAndRivers = "com.github.navikt:rapids-and-rivers:2022.04.20-09.43.9ad89f533b41"
+    const val RapidAndRiversKtor2 = "com.github.navikt:rapids-and-rivers:2022061809451655538329.d6deccc62862"
     const val TokenClientCore = "no.nav.security:token-client-core:1.3.3"
     const val TokenValidationKtor = "no.nav.security:token-validation-ktor:1.3.3"
     const val TokenValidationKtor2 = "no.nav.security:token-validation-ktor-v2:2.1.2"

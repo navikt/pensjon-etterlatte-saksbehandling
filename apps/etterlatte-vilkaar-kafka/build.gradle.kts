@@ -1,6 +1,6 @@
 
 plugins {
-    id("etterlatte.rapids-and-rivers")
+    id("etterlatte.rapids-and-rivers-ktor2")
 }
 
 dependencies {

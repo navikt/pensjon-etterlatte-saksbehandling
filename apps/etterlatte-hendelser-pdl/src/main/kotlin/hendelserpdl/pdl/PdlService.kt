@@ -1,7 +1,8 @@
 package no.nav.etterlatte.hendelserpdl.pdl
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.post
+import io.ktor.client.call.*
+import io.ktor.client.request.*
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
@@ -28,8 +29,8 @@ class PdlService(
             try {
                 pdl_app.post("$url/folkeregisterident") {
                     contentType(ContentType.Application.Json)
-                    body = HentFolkeregisterIdentRequest(ident)
-                }
+                    setBody(HentFolkeregisterIdentRequest(ident))
+                }.body()
             } catch (e: Exception) {
                 logger.info("Kunne ikke hente folkeregisteridentifikator: ${e.message}")
                 throw e

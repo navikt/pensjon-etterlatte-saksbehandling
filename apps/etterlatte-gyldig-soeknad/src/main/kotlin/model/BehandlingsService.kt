@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
@@ -17,10 +18,10 @@ class BehandlingsService(
         persongalleri: Persongalleri
     ): UUID {
         return runBlocking {
-            behandling_app.post<String>("$url/behandlinger") {
+            behandling_app.post("$url/behandlinger") {
                 contentType(ContentType.Application.Json)
-                body = NyBehandlingRequest(sak, persongalleri, mottattDato)
-            }
+                setBody(NyBehandlingRequest(sak, persongalleri, mottattDato))
+            }.body<String>()
         }.let {
             UUID.fromString(it)
         }
@@ -28,16 +29,16 @@ class BehandlingsService(
 
     override fun skaffSak(person: String, saktype: String): Long {
         return runBlocking {
-            behandling_app.get<ObjectNode>("$url/personer/$person/saker/$saktype")["id"].longValue()
+            behandling_app.get("$url/personer/$person/saker/$saktype").body<ObjectNode>()["id"].longValue()
         }
     }
 
     override fun lagreGyldighetsVurdering(behandlingsId: UUID, gyldighet: GyldighetsResultat) {
         return runBlocking {
-            behandling_app.post<String>("$url/behandlinger/$behandlingsId/gyldigfremsatt") {
+            behandling_app.post("$url/behandlinger/$behandlingsId/gyldigfremsatt") {
                 contentType(ContentType.Application.Json)
-                body = gyldighet
-            }
+                setBody(gyldighet)
+            }.body<String>()
         }
     }
 }

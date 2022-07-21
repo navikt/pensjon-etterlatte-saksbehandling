@@ -4,18 +4,17 @@ import BehandlingsService
 import NyBehandlingRequest
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
-import io.ktor.client.features.json.JacksonSerializer
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.engine.mock.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.HttpRequestData
-import io.ktor.content.TextContent
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import io.ktor.serialization.jackson.*
 import io.ktor.utils.io.ByteReadChannel
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import model.GyldigSoeknadService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import org.junit.jupiter.api.Test
@@ -37,7 +36,7 @@ internal class BehandlingsServiceTest {
                 headers = headersOf(HttpHeaders.ContentType, "text/plain"),
             )
         }) {
-            install(JsonFeature) { serializer = JacksonSerializer() }
+            install(ContentNegotiation) { jackson{} }
         }
         val persongalleri = mockk<GyldigSoeknadService>()
         val behandlingsservice = BehandlingsService(httpClient, "")
@@ -57,7 +56,7 @@ internal class BehandlingsServiceTest {
         )
 
         assertEquals(randomUUID, hentetSaksid)
-        assertEquals(1, objectMapper.readValue<NyBehandlingRequest>((requestList[0].body as TextContent).text).sak)
+        assertEquals(1, objectMapper.readValue<NyBehandlingRequest>((runBlocking { String(requestList[0].body.toByteArray())})).sak)
     }
 
     @Test
@@ -71,7 +70,7 @@ internal class BehandlingsServiceTest {
                 headers = headersOf(HttpHeaders.ContentType, "application/json"),
             )
         }) {
-            install(JsonFeature) { serializer = JacksonSerializer() }
+            install(ContentNegotiation) { jackson{} }
         }
 
         val behandlingsservice = BehandlingsService(httpClient, "http://behandlingsservice")

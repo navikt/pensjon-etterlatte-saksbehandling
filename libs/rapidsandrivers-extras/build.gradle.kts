@@ -17,7 +17,7 @@ dependencies {
     api(Jackson.DatatypeJsr310)
     api(Jackson.DatatypeJdk8)
     api(Jackson.ModuleKotlin)
-    api(NavFelles.RapidAndRivers)
+    api(NavFelles.RapidAndRiversKtor2)
 
     compileOnly(Slf4jApi)
 

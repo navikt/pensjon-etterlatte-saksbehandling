@@ -1,35 +1,29 @@
 
 plugins {
     id("etterlatte.common")
-    id("etterlatte.rapids-and-rivers")
+    id("etterlatte.rapids-and-rivers-ktor2")
 }
 
 dependencies {
-    implementation(Ktor.OkHttp)
-    implementation(project(":libs:ktorclient-auth-clientcredentials"))
+    implementation(Ktor2.OkHttp)
+    implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:rapidsandrivers-extras"))
     implementation(project(":libs:common"))
-    implementation(Ktor.ServerCore)
-    implementation(Ktor.ServerCio)
-    implementation(Ktor.ClientCore)
-    implementation(Ktor.ClientJackson)
-    implementation(Ktor.ClientCioJvm)
-    implementation(Ktor.ClientAuth)
-    implementation(Ktor.ClientLogging)
-    implementation(Ktor.MetricsMicrometer)
-    implementation(Ktor.Jackson)
-    implementation(Ktor.Auth)
+    implementation(Ktor2.ClientCore)
+    implementation(Ktor2.ClientContentNegotiation)
+    implementation(Ktor2.ClientCioJvm)
+    implementation(Ktor2.ClientAuth)
+    implementation(Ktor2.ClientLogging)
+    implementation(Ktor2.Jackson)
 
-    implementation(Micrometer.Prometheus)
     implementation(Jackson.DatatypeJsr310)
     implementation(Jackson.DatatypeJdk8)
     implementation(Jackson.ModuleKotlin)
 
     implementation(NavFelles.TokenClientCore)
-    implementation(NavFelles.TokenValidationKtor)
 
     testImplementation(MockK.MockK)
-    testImplementation(Ktor.ClientMock)
-    testImplementation(Ktor.ServerTests)
+    testImplementation(Ktor2.ClientMock)
+    testImplementation(Ktor2.ServerTests)
     testImplementation(Kotlinx.CoroutinesCore)
 }

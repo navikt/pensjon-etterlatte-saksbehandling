@@ -33,10 +33,10 @@ class GrunnlagService(
             ResultatKommerBarnetTilgode(svar, begrunnelse)
         ))
 
-        rapid.publiser(behandlingId, JsonMessage.newMessage(
+        rapid.publiser("OpplysningFraSaksbehandler", JsonMessage.newMessage(
             mapOf(
                 "opplysning" to opplysning,
-                "sak" to behandling.sak,
+                "sakId" to behandling.sak,
             )
         ).toJson()
         )

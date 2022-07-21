@@ -566,7 +566,7 @@
     }
   ],
   "@event": "BEHANDLING:GRUNNLAGENDRET",
-  "@vilkaarsvurdering": "vurdert",
+  "vilkaarsvurdering": "vurdert",
   "@gyldighetsvurdering": "gyldig",
-  "@beregning": "Beregnet"
+  "beregning": "Beregnet"
 }

@@ -2,6 +2,8 @@
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.model.AvkortingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -16,12 +18,12 @@ internal class LesAvkortingsmelding(
     private val logger = LoggerFactory.getLogger(LesAvkortingsmelding::class.java)
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", "BEHANDLING:GRUNNLAGENDRET") }
+            eventName("BEHANDLING:GRUNNLAGENDRET")
             validate { it.requireKey("grunnlag") }
-            validate { it.requireKey("@vilkaarsvurdering") }
-            validate { it.requireKey("@beregning") }
-            validate { it.rejectKey("@avkorting")}
-            validate { it.interestedIn("@correlation_id") }
+            validate { it.requireKey("vilkaarsvurdering") }
+            validate { it.requireKey("beregning") }
+            validate { it.rejectKey("avkorting")}
+            correlationId()
 
         }.register(this)
     }
@@ -30,11 +32,11 @@ internal class LesAvkortingsmelding(
         withLogContext(packet.correlationId()) {
 
             //TODO her må jeg sikkert ha noe anna info
-            val beregningsResultat = packet["@beregning"].toString()
+            val beregningsResultat = packet["beregning"].toString()
             try {
                 val avkortingsResultat = avkorting.avkortingsResultat(objectMapper.readValue(beregningsResultat))
 
-                packet["@avkorting"] = avkortingsResultat
+                packet["avkorting"] = avkortingsResultat
                 context.publish(packet.toJson())
                 logger.info("Publisert en beregning")
             } catch (e: Exception){

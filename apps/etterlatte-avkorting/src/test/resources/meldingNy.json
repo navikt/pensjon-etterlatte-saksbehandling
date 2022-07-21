@@ -453,7 +453,7 @@
       "attestering": null
     }
   ],
-  "@vilkaarsvurdering": {
+  "vilkaarsvurdering": {
     "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
     "vilkaar": [
       {
@@ -827,7 +827,7 @@
       }
     ]
   },
-  "@beregning": {
+  "beregning": {
     "id": "901c3b91-1aad-4258-a396-468642a7d43c",
     "type": "GP",
     "endringskode": "NY",

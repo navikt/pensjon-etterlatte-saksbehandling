@@ -25,23 +25,23 @@ internal class LagreAvkorting(
         River(rapidsConnection).apply {
             validate { it.demandAny(eventNameKey, listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
             validate { it.requireKey("sakId") }
-            validate { it.requireKey("id") }
+            validate { it.requireKey("behandlingId") }
+            validate { it.requireKey("fnrSoeker") }
             validate { it.requireKey("avkorting") }
-            validate { it.requireKey("persongalleri.soeker") }
             correlationId()
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val behandlingId = packet["id"].asUUID()
+            val behandlingId = packet["behandlingId"].asUUID()
             val sakId = packet["sakId"].toString()
             val avkorting = objectMapper.readValue<AvkortingsResultat>(packet["avkorting"].toString())
 
             try {
                 vedtaksvurderingService.lagreAvkorting(sakId,
                     behandlingId,
-                    packet["persongalleri.soeker"].textValue(),
+                    packet["fnrSoeker"].textValue(),
                     avkorting)
                 requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
                     context.publish(JsonMessage.newMessage(

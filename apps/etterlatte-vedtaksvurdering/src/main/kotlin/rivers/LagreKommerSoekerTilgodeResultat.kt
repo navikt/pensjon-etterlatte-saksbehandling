@@ -23,9 +23,8 @@ internal class LagreKommerSoekerTilgodeResultat(
         River(rapidsConnection).apply {
             validate { it.demandAny(eventNameKey, listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
             validate { it.requireKey("sakId") }
-            validate { it.requireKey("id") }
-            validate { it.requireKey("persongalleri.soeker") }
-
+            validate { it.requireKey("behandlingId") }
+            validate { it.requireKey("fnrSoeker") }
             validate { it.requireKey("kommersoekertilgode") }
             correlationId()
             validate { it.rejectKey("beregning") }
@@ -34,14 +33,14 @@ internal class LagreKommerSoekerTilgodeResultat(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val behandlingId = packet["id"].asUUID()
+            val behandlingId = packet["behandlingId"].asUUID()
             val sakId = packet["sakId"].toString()
             val kommerSoekerTilgodeResultat = objectMapper.readValue(packet["kommersoekertilgode"].toString(),
                 KommerSoekerTilgode::class.java)
             try {
                 vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(sakId,
                     behandlingId,
-                    packet["persongalleri.soeker"].textValue(),
+                    packet["fnrSoeker"].textValue(),
                     kommerSoekerTilgodeResultat)
             } catch (e: KanIkkeEndreFattetVedtak) {
                 packet[eventNameKey] = "VEDTAK:ENDRING_FORKASTET"

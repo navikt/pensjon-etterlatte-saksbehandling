@@ -24,6 +24,8 @@ internal class LesVilkaarsmelding(
             eventName("BEHANDLING:GRUNNLAGENDRET")
             validate { it.requireKey("grunnlag") }
             validate { it.requireKey("behandlingOpprettet") }
+            validate { it.requireKey("behandlingId") }
+            validate { it.requireKey("fnrSoeker") }
             validate { it.rejectKey("vilkaarsvurdering") }
             validate { it.rejectKey("kommerSoekerTilGode") }
             validate { it.rejectKey("gyldighetsvurdering") }

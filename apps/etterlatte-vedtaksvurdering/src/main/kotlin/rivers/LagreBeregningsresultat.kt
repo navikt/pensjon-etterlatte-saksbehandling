@@ -24,8 +24,8 @@ internal class LagreBeregningsresultat(
         River(rapidsConnection).apply {
             validate { it.demandAny(eventNameKey, listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
             validate { it.requireKey("sakId") }
-            validate { it.requireKey("id") }
-            validate { it.requireKey("persongalleri.soeker") }
+            validate { it.requireKey("behandlingId") }
+            validate { it.requireKey("fnrSoeker") }
             validate { it.requireKey("beregning") }
             correlationId()
             validate { it.rejectKey("avkorting") }
@@ -34,7 +34,7 @@ internal class LagreBeregningsresultat(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val behandlingId = packet["id"].asUUID()
+            val behandlingId = packet["behandlingId"].asUUID()
             val sakId = packet["sakId"].toString()
             val beregningsResultat = objectMapper.readValue(packet["beregning"].toString(),
                 BeregningsResultat::class.java)
@@ -42,7 +42,7 @@ internal class LagreBeregningsresultat(
             try {
                 vedtaksvurderingService.lagreBeregningsresultat(sakId,
                     behandlingId,
-                    packet["persongalleri.soeker"].textValue(),
+                    packet["fnrSoeker"].textValue(),
                     beregningsResultat)
                 requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
                     context.publish(JsonMessage.newMessage(

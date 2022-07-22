@@ -1,52 +1,21 @@
 object NavFelles {
-    const val RapidAndRivers = "com.github.navikt:rapids-and-rivers:2022.04.20-09.43.9ad89f533b41"
     const val RapidAndRiversKtor2 = "com.github.navikt:rapids-and-rivers:2022061809451655538329.d6deccc62862"
-    const val TokenClientCore = "no.nav.security:token-client-core:1.3.3"
-    const val TokenValidationKtor = "no.nav.security:token-validation-ktor:1.3.3"
+    const val TokenClientCore = "no.nav.security:token-client-core:2.1.2"
     const val TokenValidationKtor2 = "no.nav.security:token-validation-ktor-v2:2.1.2"
     const val MockOauth2Server = "no.nav.security:mock-oauth2-server:0.3.1"
 }
 
 object Kotlinx {
-    const val CoroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2"
-}
-
-object Ktor {
-    private const val version = "1.6.8"
-
-    const val OkHttp = "io.ktor:ktor-client-okhttp:$version"
-    const val ServerNetty = "io.ktor:ktor-server-netty:$version"
-    const val ClientCore = "io.ktor:ktor-client-core:$version"
-    const val ClientCoreJvm = "io.ktor:ktor-client-core-jvm:$version"
-    const val ClientLoggingJvm = "io.ktor:ktor-client-logging-jvm:$version"
-    const val ClientAuth = "io.ktor:ktor-client-auth:$version"
-    const val ClientAuthJvm = "io.ktor:ktor-client-auth-jvm:$version"
-    const val ClientApache = "io.ktor:ktor-client-apache:$version"
-    const val ClientJackson = "io.ktor:ktor-client-jackson:$version"
-    const val ClientLogging = "io.ktor:ktor-client-logging:$version"
-    const val ClientCioJvm = "io.ktor:ktor-client-cio-jvm:$version"
-    const val ServerCore = "io.ktor:ktor-server-core:$version"
-    const val ServerCio = "io.ktor:ktor-server-cio:$version"
-    const val Auth = "io.ktor:ktor-auth:$version"
-    const val AuthJwt = "io.ktor:ktor-auth-jwt:$version"
-    const val Jackson = "io.ktor:ktor-jackson:$version"
-    const val MetricsMicrometer = "io.ktor:ktor-metrics-micrometer:$version"
-
-    const val ClientMock = "io.ktor:ktor-client-mock:$version"
-    const val ServerTests = "io.ktor:ktor-server-tests:$version"
+    const val CoroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 }
 
 object Ktor2 {
     private const val version = "2.0.3"
 
     const val OkHttp = "io.ktor:ktor-client-okhttp:$version"
-    const val ServerNetty = "io.ktor:ktor-server-netty:$version"
     const val ClientCore = "io.ktor:ktor-client-core:$version"
-    const val ClientCoreJvm = "io.ktor:ktor-client-core-jvm:$version"
     const val ClientLoggingJvm = "io.ktor:ktor-client-logging-jvm:$version"
     const val ClientAuth = "io.ktor:ktor-client-auth:$version"
-    const val ClientAuthJvm = "io.ktor:ktor-client-auth-jvm:$version"
-    const val ClientApache = "io.ktor:ktor-client-apache:$version"
     const val ClientJackson = "io.ktor:ktor-client-jackson:$version"
     const val ClientLogging = "io.ktor:ktor-client-logging:$version"
     const val ClientCioJvm = "io.ktor:ktor-client-cio-jvm:$version"
@@ -74,7 +43,7 @@ object Kafka {
 }
 
 object Jackson {
-    private const val version = "2.12.3"
+    private const val version = "2.13.3"
 
     const val DatatypeJsr310 = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$version"
     const val DatatypeJdk8 = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$version"
@@ -114,12 +83,12 @@ object Kotest {
 }
 
 object Database {
-    const val HikariCP = "com.zaxxer:HikariCP:3.4.5"
-    const val FlywayDB = "org.flywaydb:flyway-core:8.5.11"
-    const val Postgresql = "org.postgresql:postgresql:42.2.5"
+    const val HikariCP = "com.zaxxer:HikariCP:5.0.0"
+    const val FlywayDB = "org.flywaydb:flyway-core:8.5.13"
+    const val Postgresql = "org.postgresql:postgresql:42.2.25"
 }
 
 object TestContainer {
-    const val Jupiter = "org.testcontainers:junit-jupiter:1.15.3"
-    const val Postgresql = "org.testcontainers:postgresql:1.16.0"
+    const val Jupiter = "org.testcontainers:junit-jupiter:1.17.3"
+    const val Postgresql = "org.testcontainers:postgresql:1.17.3"
 }

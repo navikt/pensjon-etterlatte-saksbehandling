@@ -3,7 +3,7 @@ plugins {
     id("com.faire.gradle.analyze") version "1.0.9"
 }
 dependencies {
-    implementation(project(":libs:ktorclient-auth-clientcredentials"))
+    implementation(project(":libs:ktor2client-auth-clientcredentials"))
 
     implementation(Ktor2.ServerCore)
     implementation(Ktor2.ServerCio)

@@ -1,6 +1,6 @@
 {
   "@event_name": "okonomi_vedtak_oppgave",
-  "@oppgave": {
+  "oppgave": {
     "oppgavetype": "SETT_KVITTERING_MANUELT",
     "vedtakId": "1"
   }

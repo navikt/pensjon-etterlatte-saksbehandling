@@ -6,6 +6,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -21,27 +23,27 @@ internal class BesvarOpplysningsbehov(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.requireKey("@behov") }
-            validate { it.requireKey("sak") }
+            validate { it.requireKey(behovNameKey) }
+            validate { it.requireKey("sakId") }
             validate { it.requireKey("fnr") }
             validate { it.requireKey("rolle") }
             validate { it.rejectKey("opplysning") }
-            validate { it.interestedIn("@correlation_id") }
+            correlationId()
 
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
+        withLogContext(packet.correlationId) {
 
-            if (packet["@behov"].asText() in listOf(
+            if (packet[behovNameKey].asText() in listOf(
                     Opplysningstyper.AVDOED_PDL_V1.name,
                     Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1.name,
                     Opplysningstyper.SOEKER_PDL_V1.name
                 )
             ) {
                 val personRolle = objectMapper.treeToValue(packet["rolle"], PersonRolle::class.java)!!
-                val behandling = objectMapper.treeToValue(packet["@behov"], Opplysningstyper::class.java)!!
+                val behandling = objectMapper.treeToValue(packet[behovNameKey], Opplysningstyper::class.java)!!
                 val pdlInfo = pdl.hentPdlModell(packet["fnr"].asText(), personRolle)
                 packet["opplysning"] = listOf(personOpplysning(pdlInfo, behandling))
                 context.publish(packet.toJson())
@@ -53,7 +55,6 @@ internal class BesvarOpplysningsbehov(
         }
 }
 
-private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 
 fun personOpplysning(
     personPdl: Person,
@@ -67,6 +68,6 @@ interface Pdl {
 }
 
 interface OpplysningsBygger {
-    fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl):List<Grunnlagsopplysning<out Any>>
+    fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl): List<Grunnlagsopplysning<out Any>>
 }
 

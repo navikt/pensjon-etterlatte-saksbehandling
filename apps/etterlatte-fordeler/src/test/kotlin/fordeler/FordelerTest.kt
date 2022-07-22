@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_HAR_YRKESSKADE
 import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_FOR_GAMMELT
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.readFile
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -22,7 +23,7 @@ internal class FordelerTest {
 
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
-        assertEquals("FORDELER:FORDELT", inspector.message(0).get("@event_name").asText())
+        assertEquals("FORDELER:FORDELT", inspector.message(0).get(eventNameKey).asText())
         assertEquals("true", inspector.message(0).get("soeknadFordelt").asText())
 
         verify { fordelerMetricLogger.logMetricFordelt() }
@@ -31,7 +32,7 @@ internal class FordelerTest {
     @Test
     fun `skal ikke fordele ugyldig soknad til behandling`() {
         every { fordelerService.sjekkGyldighetForBehandling(any()) } returns
-                FordelerResultat.UgyldigHendelse("Ikke gyldig for behandling")
+            FordelerResultat.UgyldigHendelse("Ikke gyldig for behandling")
 
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
@@ -41,15 +42,17 @@ internal class FordelerTest {
     @Test
     fun `skal ikke fordele soknad som ikke oppfyller alle kriterier til behandling`() {
         every { fordelerService.sjekkGyldighetForBehandling(any()) } returns
-                FordelerResultat.IkkeGyldigForBehandling(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
+            FordelerResultat.IkkeGyldigForBehandling(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
 
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
         assertEquals(0, inspector.size)
 
-        verify(exactly = 1) { fordelerMetricLogger.logMetricIkkeFordelt(match {
-            it.ikkeOppfylteKriterier.containsAll(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
-        }) }
+        verify(exactly = 1) {
+            fordelerMetricLogger.logMetricIkkeFordelt(match {
+                it.ikkeOppfylteKriterier.containsAll(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
+            })
+        }
     }
 
     @Test

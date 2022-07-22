@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -52,7 +53,7 @@ internal class LesVilkaarsmeldingTest {
             ),
             LocalDateTime.now()
         )
-        val id  = UUID.randomUUID()
+        val id = UUID.randomUUID()
 
         every { gyldigSoeknadServiceMock.hentPersongalleriFraSoeknad(any()) } returns persongalleri
         every { gyldigSoeknadServiceMock.vurderGyldighet(persongalleri) } returns gyldighetsResultat
@@ -62,7 +63,7 @@ internal class LesVilkaarsmeldingTest {
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-        Assertions.assertEquals("GYLDIG_SOEKNAD:VURDERT", inspector.message(0).get("@event_name").asText())
+        Assertions.assertEquals("GYLDIG_SOEKNAD:VURDERT", inspector.message(0).get(eventNameKey).asText())
         Assertions.assertEquals(4, inspector.message(0).get("sakId").longValue())
         Assertions.assertEquals(id.toString(), inspector.message(0).get("behandlingId").asText())
         Assertions.assertEquals(true, inspector.message(0).get("gyldigInnsender").asBoolean())

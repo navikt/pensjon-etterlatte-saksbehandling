@@ -2,6 +2,7 @@ package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
@@ -15,8 +16,8 @@ import javax.jms.Session
 import kotlin.system.exitProcess
 
 data class TilbakekrevingEvent(
-    @JsonProperty("@event") val event: String,
-    @JsonProperty("@tilbakekreving") val tilbakekreving: Map<String, Any>, // TODO finne ut hva som bør sendes her
+    @JsonProperty(eventNameKey) val event: String,
+    @JsonProperty("tilbakekreving") val tilbakekreving: Map<String, Any>, // TODO finne ut hva som bør sendes her
 )
 
 class KravgrunnlagConsumer(

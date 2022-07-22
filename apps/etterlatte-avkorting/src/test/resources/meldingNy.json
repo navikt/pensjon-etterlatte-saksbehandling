@@ -96,7 +96,7 @@
       "time": "2022-05-23T16:09:36.874044709"
     }
   ],
-  "@event": "BEHANDLING:GRUNNLAGENDRET",
+  "@event_name": "BEHANDLING:GRUNNLAGENDRET",
   "grunnlag": [
     {
       "id": "69bbed52-2a95-42f2-acca-4ad5d7c9bba1",
@@ -724,7 +724,7 @@
     ],
     "vurdertDato": "2022-05-23T16:09:31.484891164"
   },
-  "@kommersoekertilgode": {
+  "kommersoekertilgode": {
     "kommerSoekerTilgodeVurdering": {
       "resultat": "OPPFYLT",
       "vilkaar": [
@@ -805,22 +805,23 @@
         "navn": "Mamma Mia",
         "fnr": "22128202440",
         "rolle": "GJENLEVENDE",
-        "adresser":
-        {
-          "bostedadresse": [{
-            "type": "VEGADRESSE",
-            "aktiv": true,
-            "coAdresseNavn": null,
-            "adresseLinje1": "Bøveien 937",
-            "adresseLinje2": null,
-            "adresseLinje3": null,
-            "postnr": "8475",
-            "poststed": null,
-            "land": null,
-            "kilde": "FREG",
-            "gyldigFraOgMed": "1999-01-01T00:00:00",
-            "gyldigTilOgMed": null
-          }],
+        "adresser": {
+          "bostedadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Bøveien 937",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "8475",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "1999-01-01T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
           "oppholdadresse": null,
           "kontaktadresse": null
         }

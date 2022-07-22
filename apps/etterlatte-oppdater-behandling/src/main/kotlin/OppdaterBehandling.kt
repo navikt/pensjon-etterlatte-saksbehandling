@@ -25,10 +25,8 @@ internal class OppdaterBehandling(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
+        withLogContext(packet.correlationId) {
             logger.info("Oppdaterer behandling med at grunnlag er endret i sak ${packet["sakId"].longValue()}")
             behandlinger.grunnlagEndretISak(packet["sakId"].longValue())
         }
 }
-
-private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

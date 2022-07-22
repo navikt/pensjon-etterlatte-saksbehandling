@@ -4,7 +4,6 @@ import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import java.io.FileNotFoundException
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime

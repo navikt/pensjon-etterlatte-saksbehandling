@@ -3,6 +3,9 @@ package no.nav.etterlatte.utbetaling.common
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
@@ -20,15 +23,15 @@ class Oppgavetrigger(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event_name", "okonomi_vedtak_oppgave") }
-            validate { it.interestedIn("@correlation_id") }
-            validate { it.interestedIn("@oppgave") }
+            eventName("okonomi_vedtak_oppgave")
+            correlationId()
+            validate { it.interestedIn("oppgave") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
-            val oppgave: Oppgave = objectMapper.readValue(packet["@oppgave"].toJson())
+        withLogContext(packet.correlationId) {
+            val oppgave: Oppgave = objectMapper.readValue(packet["oppgave"].toJson())
             try {
                 when (oppgave.oppgavetype) {
                     Oppgavetype.START_GRENSESNITTAVSTEMMING -> {
@@ -49,8 +52,6 @@ class Oppgavetrigger(
                 logger.info("Kunne ikke utfoere oppgave ${oppgave.oppgavetype.name}: ${e.message}", e)
             }
         }
-
-    private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 
     companion object {
         private val logger = LoggerFactory.getLogger(Oppgavetrigger::class.java)

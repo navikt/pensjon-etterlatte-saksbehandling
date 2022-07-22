@@ -5,6 +5,8 @@ import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -20,47 +22,50 @@ internal class LagreBeregningsresultat(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandAny("@event", listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
-            validate { it.requireKey("sak") }
+            validate { it.demandAny(eventNameKey, listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
+            validate { it.requireKey("sakId") }
             validate { it.requireKey("id") }
             validate { it.requireKey("persongalleri.soeker") }
-            validate { it.requireKey("@beregning") }
-            validate { it.interestedIn("@correlation_id") }
-            validate { it.rejectKey("@avkorting") }
+            validate { it.requireKey("beregning") }
+            correlationId()
+            validate { it.rejectKey("avkorting") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
+        withLogContext(packet.correlationId) {
             val behandlingId = packet["id"].asUUID()
-            val sakId = packet["sak"].toString()
-            val beregningsResultat = objectMapper.readValue(packet["@beregning"].toString(), BeregningsResultat::class.java)
+            val sakId = packet["sakId"].toString()
+            val beregningsResultat = objectMapper.readValue(packet["beregning"].toString(),
+                BeregningsResultat::class.java)
 
             try {
-                vedtaksvurderingService.lagreBeregningsresultat(sakId, behandlingId, packet["persongalleri.soeker"].textValue(), beregningsResultat)
-                requireNotNull( vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
+                vedtaksvurderingService.lagreBeregningsresultat(sakId,
+                    behandlingId,
+                    packet["persongalleri.soeker"].textValue(),
+                    beregningsResultat)
+                requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
                     context.publish(JsonMessage.newMessage(
                         mapOf(
-                            "@event" to "VEDTAK:BEREGNET",
-                            "@sakId" to it.sakId.toLong(),
-                            "@behandlingId" to it.behandlingId.toString(),
-                            "@vedtakId" to it.id,
-                            "@eventtimestamp" to Tidspunkt.now(),
+                            eventNameKey to "VEDTAK:BEREGNET",
+                            "sakId" to it.sakId.toLong(),
+                            "behandlingId" to it.behandlingId.toString(),
+                            "vedtakId" to it.id,
+                            "eventtimestamp" to Tidspunkt.now(),
                         )
                     ).toJson())
                 }
 
-            } catch (e: KanIkkeEndreFattetVedtak){
-                packet["@event"] = "VEDTAK:ENDRING_FORKASTET"
-                packet["@vedtakId"] = e.vedtakId
-                packet["@forklaring"] = "Beregning forkastet fordi vedtak allerede er fattet"
+            } catch (e: KanIkkeEndreFattetVedtak) {
+                packet[eventNameKey] = "VEDTAK:ENDRING_FORKASTET"
+                packet["vedtakId"] = e.vedtakId
+                packet["forklaring"] = "Beregning forkastet fordi vedtak allerede er fattet"
                 context.publish(
                     packet.toJson()
                 )
-            } catch (e: Exception){
-                logger.warn("Kunne ikke oppdatere vedtak",e)
+            } catch (e: Exception) {
+                logger.warn("Kunne ikke oppdatere vedtak", e)
             }
-
 
         }
 }

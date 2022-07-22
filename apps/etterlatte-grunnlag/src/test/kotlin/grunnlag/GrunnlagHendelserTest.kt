@@ -11,6 +11,7 @@ import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -54,7 +55,7 @@ class GrunnlagHendelserTest {
         every { opplysningerMock.leggOpplysningTilGrunnlag(any(), any()) } returns 1L
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
         val test = inspector.message(0)
-        Assertions.assertEquals("GRUNNLAG:GRUNNLAGENDRET", inspector.message(0).get("@event_name").asText())
+        Assertions.assertEquals("GRUNNLAG:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
         Assertions.assertEquals(2, inspector.message(0).get("grunnlag").get("grunnlag").size())
         Assertions.assertEquals(2L, inspector.message(0).get("grunnlag").get("versjon").longValue())
     }

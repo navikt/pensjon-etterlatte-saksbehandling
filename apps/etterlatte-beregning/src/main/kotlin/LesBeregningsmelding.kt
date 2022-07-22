@@ -1,4 +1,3 @@
-
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -31,7 +30,7 @@ internal class LesBeregningsmelding(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
+        withLogContext(packet.correlationId) {
 
             val grunnlag = packet["grunnlag"].toString()
             try {
@@ -44,7 +43,7 @@ internal class LesBeregningsmelding(
                 packet["beregning"] = beregningsResultat
                 context.publish(packet.toJson())
                 logger.info("Publisert en beregning")
-            } catch (e: Exception){
+            } catch (e: Exception) {
                 //TODO endre denne
                 println("spiser en melding fordi: $e")
             }
@@ -53,4 +52,3 @@ internal class LesBeregningsmelding(
         }
 }
 
-private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()

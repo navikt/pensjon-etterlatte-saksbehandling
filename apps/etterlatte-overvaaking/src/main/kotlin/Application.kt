@@ -12,6 +12,7 @@ import io.ktor.util.pipeline.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.html.*
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.*
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import no.nav.security.token.support.v2.tokenValidationSupport
@@ -30,12 +31,12 @@ fun main() {
                     tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
                 }
                 routing {
-                    get("/started"){
+                    get("/started") {
                         call.respondText("STARTED", ContentType.Text.Plain)
                     }
 
                     authenticate {
-                        get ("/"){
+                        get("/") {
                             call.respondHtml {
                                 this.head {
                                     title {
@@ -55,13 +56,13 @@ fun main() {
 
                                             it.value.forEach {
                                                 li {
-                                                    +("${it.key}: " + (it.value.first?.let { """Reported ${it.type} at ${it.opprettet}. """ }?:"") + (it.value.second?.let { """Responded to ping at ${it.opprettet}.""" }?:"") )
+                                                    +("${it.key}: " + (it.value.first?.let { """Reported ${it.type} at ${it.opprettet}. """ }
+                                                        ?: "") + (it.value.second?.let { """Responded to ping at ${it.opprettet}.""" }
+                                                        ?: ""))
                                                 }
                                             }
 
                                         }
-
-
 
 
                                     }
@@ -96,19 +97,20 @@ internal class AppEventRiver(
 ) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
-            validate { it.demandAny("@event_name", appEventTypes) }
-            validate { it.interestedIn("@opprettet", "app_name", "instance_id") }
+            validate { it.demandAny(eventNameKey, appEventTypes) }
+            validate { it.interestedIn("opprettet", "app_name", "instance_id") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         AppEvent(
-            packet["@event_name"].asText(),
+            packet[eventNameKey].asText(),
             packet["instance_id"].asText(),
             packet["app_name"].asText(),
-            LocalDateTime.parse(packet["@opprettet"].asText())
+            LocalDateTime.parse(packet["opprettet"].asText())
         ).also {
-            appMap.computeIfAbsent(it.app){ mutableMapOf()}.compute(it.appinstance){ _, current:Pair<AppEvent?, PongEvent?>? -> Pair(it, current?.second) }
+            appMap.computeIfAbsent(it.app) { mutableMapOf() }
+                .compute(it.appinstance) { _, current: Pair<AppEvent?, PongEvent?>? -> Pair(it, current?.second) }
         }
     }
 }
@@ -118,19 +120,20 @@ internal class PongListener(
 ) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event_name", "pong") }
-            validate { it.interestedIn("@id","ping_time","pong_time", "app_name", "instance_id") }
+            validate { it.demandValue(eventNameKey, "pong") }
+            validate { it.interestedIn("@id", "ping_time", "pong_time", "app_name", "instance_id") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-       PongEvent(
-           packet["instance_id"].asText(),
-           packet["app_name"].asText(),
-           LocalDateTime.parse(packet["pong_time"].asText())
-       ).also {
-           appMap.computeIfAbsent(it.app){ mutableMapOf()}.compute(it.appinstance){ _, current:Pair<AppEvent?, PongEvent?>? -> Pair(current?.first, it) }
-       }
+        PongEvent(
+            packet["instance_id"].asText(),
+            packet["app_name"].asText(),
+            LocalDateTime.parse(packet["pong_time"].asText())
+        ).also {
+            appMap.computeIfAbsent(it.app) { mutableMapOf() }
+                .compute(it.appinstance) { _, current: Pair<AppEvent?, PongEvent?>? -> Pair(current?.first, it) }
+        }
     }
 }
 
@@ -140,18 +143,20 @@ interface Event {
     val app: String
     val opprettet: LocalDateTime
 }
+
 class AppEvent(
     override val type: String,
     override val appinstance: String,
     override val app: String,
     override val opprettet: LocalDateTime
-    ): Event{
+) : Event {
     override fun toString(): String {
         return """$opprettet: Instance $appinstance of app $app reporting: $type"""
     }
 }
+
 class PongEvent(
     override val appinstance: String,
     override val app: String,
     override val opprettet: LocalDateTime,
-    ): Event by AppEvent("pong",appinstance,app,opprettet)
+) : Event by AppEvent("pong", appinstance, app, opprettet)

@@ -198,8 +198,8 @@ fun genererEtterfolgendeUtbetalingsperioder(
 
 fun vedtakEvent(vedtak: Vedtak) = """
     {
-      "@event": "VEDTAK:ATTESTERT",
-      "@vedtak": ${vedtak.toJson()}
+      "@event_name": "VEDTAK:ATTESTERT",
+      "vedtak": ${vedtak.toJson()}
     }
 """
 

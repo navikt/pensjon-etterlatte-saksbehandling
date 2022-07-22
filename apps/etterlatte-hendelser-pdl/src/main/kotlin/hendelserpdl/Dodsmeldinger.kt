@@ -1,6 +1,7 @@
 package no.nav.etterlatte.hendelserpdl
 
 import no.nav.etterlatte.JsonMessage
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -25,14 +26,14 @@ class Dodsmeldinger(config: AppConfig) : IDodsmeldinger {
         logger.info("Poster at person $ident er død")
         producer.send(ProducerRecord("etterlatte.dodsmelding",
             UUID.randomUUID().toString(), JsonMessage("{}", MessageProblems("{}"))
-                .apply {
-                    set("@event_name", "person_dod")
-                    set("@avdod_ident", ident)
-                    doedsdato?.also {
-                        set("@avdod_doedsdato", it)
-                    }
+            .apply {
+                set(eventNameKey, "person_dod")
+                set("avdod_ident", ident)
+                doedsdato?.also {
+                    set("avdod_doedsdato", it)
                 }
-                .toJson()))
+            }
+            .toJson()))
     }
 
 }
@@ -45,10 +46,10 @@ class DodsmeldingerRapid(private val context: RapidsConnection) : IDodsmeldinger
         logger.info("Poster at person $ident er død")
         context.publish(UUID.randomUUID().toString(), JsonMessage("{}", MessageProblems("{}"))
             .apply {
-                set("@event_name", "person_dod")
-                set("@avdod_ident", ident)
+                set(eventNameKey, "person_dod")
+                set("avdod_ident", ident)
                 doedsdato?.also {
-                    set("@avdod_doedsdato", it)
+                    set("avdod_doedsdato", it)
                 }
             }
             .toJson())

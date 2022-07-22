@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class HendelserOmVedtakTest{
+internal class HendelserOmVedtakTest {
     private val behandlingService = mockk<BehandlingsService>()
 
     private val inspector = TestRapid().apply { HendelserOmVedtak(this, behandlingService) }
@@ -17,19 +17,27 @@ internal class HendelserOmVedtakTest{
     private val hendelse = "FATTET"
 
     val fullMelding = """{
-  "@event": "VEDTAK:$hendelse",
-  "@behandlingId": "$behandlingId",
-  "@vedtakId": 1,
-  "@sakId": 2,
-  "@eventtimestamp": "${Tidspunkt.now().instant}"
+  "@event_name": "VEDTAK:$hendelse",
+  "behandlingId": "$behandlingId",
+  "vedtakId": 1,
+  "sakId": 2,
+  "eventtimestamp": "${Tidspunkt.now().instant}"
 }"""
 
     @Test
-    fun skalLeseVedtakHendelser(){
+    fun skalLeseVedtakHendelser() {
 
         val behandlingIdSlot = slot<UUID>()
         val hendelseSlot = slot<String>()
-        every { behandlingService.vedtakHendelse(capture(behandlingIdSlot), capture(hendelseSlot), any(), any(), any(), any(), any()) }.returns(Unit)
+        every {
+            behandlingService.vedtakHendelse(capture(behandlingIdSlot),
+                capture(hendelseSlot),
+                any(),
+                any(),
+                any(),
+                any(),
+                any())
+        }.returns(Unit)
 
         inspector.sendTestMessage(fullMelding)
 

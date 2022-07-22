@@ -6,6 +6,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.SendtTilOppdrag
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingForVedtakEksisterer
@@ -25,8 +28,8 @@ data class KunneIkkeLeseVedtakException(val e: Exception) : RuntimeException(e)
 const val EVENT_NAME_OPPDATERT = "UTBETALING:OPPDATERT"
 
 data class UtbetalingEvent(
-    @JsonProperty("@event") val event: String = EVENT_NAME_OPPDATERT,
-    @JsonProperty("@utbetaling_response") val utbetalingResponse: UtbetalingResponse,
+    @JsonProperty(eventNameKey) val event: String = EVENT_NAME_OPPDATERT,
+    @JsonProperty("utbetaling_response") val utbetalingResponse: UtbetalingResponse,
 )
 
 data class UtbetalingResponse(
@@ -42,20 +45,20 @@ class VedtakMottaker(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", "VEDTAK:ATTESTERT") }
-            validate { it.requireKey("@vedtak") }
+            eventName("VEDTAK:ATTESTERT")
+            validate { it.requireKey("vedtak") }
             validate {
                 it.requireAny(
-                    "@vedtak.type",
+                    "vedtak.type",
                     listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name, VedtakType.ENDRING.name)
                 )
             }
-            validate { it.interestedIn("@correlation_id") }
+            correlationId()
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
+        withLogContext(packet.correlationId) {
             var vedtakId: Long? = null
             try {
                 val vedtak: Utbetalingsvedtak = lesVedtak(packet).also { vedtakId = it.vedtakId }
@@ -90,7 +93,7 @@ class VedtakMottaker(
 
     private fun lesVedtak(packet: JsonMessage): Utbetalingsvedtak =
         try {
-            objectMapper.readValue(packet["@vedtak"].toJson())
+            objectMapper.readValue(packet["vedtak"].toJson())
         } catch (e: Exception) {
             throw KunneIkkeLeseVedtakException(e)
         }
@@ -121,8 +124,6 @@ class VedtakMottaker(
             ).toJson()
         )
     }
-
-    private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 
     private fun UtbetalingslinjerForVedtakEksisterer.utbetalingslinjeIDer() =
         this.utbetalingslinjer.joinToString(",") { it.id.value.toString() }

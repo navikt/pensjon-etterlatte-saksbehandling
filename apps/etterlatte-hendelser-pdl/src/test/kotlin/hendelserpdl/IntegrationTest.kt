@@ -14,6 +14,7 @@ import no.nav.etterlatte.JsonMessage
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.pdl.PdlService
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -100,9 +101,9 @@ class IntegrationTest {
         }.forEach {
             val msg = JsonMessage(it.value(), MessageProblems(it.value()))
             println(it.value())
-            msg.interestedIn("@avdod_ident", "@event_name", "system_read_count")
-            assertEquals("70078749472", msg["@avdod_ident"].textValue())
-            assertEquals("person_dod", msg["@event_name"].textValue())
+            msg.interestedIn("avdod_ident", eventNameKey, "system_read_count")
+            assertEquals("70078749472", msg["avdod_ident"].textValue())
+            assertEquals("person_dod", msg[eventNameKey].textValue())
             assertEquals(1, msg["system_read_count"].asInt())
         }
 

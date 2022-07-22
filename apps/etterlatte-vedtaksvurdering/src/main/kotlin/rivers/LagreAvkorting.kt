@@ -6,6 +6,8 @@ import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -21,45 +23,46 @@ internal class LagreAvkorting(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandAny("@event", listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
-            validate { it.requireKey("sak") }
+            validate { it.demandAny(eventNameKey, listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
+            validate { it.requireKey("sakId") }
             validate { it.requireKey("id") }
-            validate { it.requireKey("@avkorting") }
+            validate { it.requireKey("avkorting") }
             validate { it.requireKey("persongalleri.soeker") }
-            validate { it.requireKey("@avkorting") }
-            validate { it.interestedIn("@correlation_id") }
+            correlationId()
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
+        withLogContext(packet.correlationId) {
             val behandlingId = packet["id"].asUUID()
-            val sakId = packet["sak"].toString()
-            val avkorting = objectMapper.readValue<AvkortingsResultat>(packet["@avkorting"].toString())
+            val sakId = packet["sakId"].toString()
+            val avkorting = objectMapper.readValue<AvkortingsResultat>(packet["avkorting"].toString())
 
             try {
-                vedtaksvurderingService.lagreAvkorting(sakId, behandlingId, packet["persongalleri.soeker"].textValue(), avkorting)
-                requireNotNull( vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
+                vedtaksvurderingService.lagreAvkorting(sakId,
+                    behandlingId,
+                    packet["persongalleri.soeker"].textValue(),
+                    avkorting)
+                requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
                     context.publish(JsonMessage.newMessage(
                         mapOf(
-                            "@event" to "VEDTAK:AVKORTET",
-                            "@sakId" to it.sakId.toLong(),
-                            "@behandlingId" to it.behandlingId.toString(),
-                            "@vedtakId" to it.id,
-                            "@eventtimestamp" to Tidspunkt.now()
+                            eventNameKey to "VEDTAK:AVKORTET",
+                            "sakId" to it.sakId.toLong(),
+                            "behandlingId" to it.behandlingId.toString(),
+                            "vedtakId" to it.id,
+                            "eventtimestamp" to Tidspunkt.now()
                         )
                     ).toJson())
                 }
-            }catch (e: KanIkkeEndreFattetVedtak){
-                packet["@event"] = "VEDTAK:ENDRING_FORKASTET"
-                packet["@vedtakId"] = e.vedtakId
-                packet["@forklaring"] = "Avkorting forkastet fordi vedtak allerede er fattet"
+            } catch (e: KanIkkeEndreFattetVedtak) {
+                packet[eventNameKey] = "VEDTAK:ENDRING_FORKASTET"
+                packet["vedtakId"] = e.vedtakId
+                packet["forklaring"] = "Avkorting forkastet fordi vedtak allerede er fattet"
                 context.publish(
                     packet.toJson()
                 )
-            }
-            catch (e: Exception){
-                logger.warn("Kunne ikke oppdatere vedtak",e)
+            } catch (e: Exception) {
+                logger.warn("Kunne ikke oppdatere vedtak", e)
             }
 
         }

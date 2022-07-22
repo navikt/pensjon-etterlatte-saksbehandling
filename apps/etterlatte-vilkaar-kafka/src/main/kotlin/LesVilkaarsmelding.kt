@@ -1,4 +1,3 @@
-
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.barnepensjon.model.VilkaarService
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -34,15 +33,21 @@ internal class LesVilkaarsmelding(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
+        withLogContext(packet.correlationId) {
             try {
                 val grunnlag = requireNotNull(objectMapper.treeToValue<Grunnlag>(packet["grunnlag"]))
-                val grunnlagForVilkaar = grunnlag.grunnlag.map { VilkaarOpplysning(it.id, it.opplysningType, it.kilde, it.opplysning) }
+                val grunnlagForVilkaar = grunnlag.grunnlag.map {
+                    VilkaarOpplysning(it.id,
+                        it.opplysningType,
+                        it.kilde,
+                        it.opplysning)
+                }
                 val vilkaarsVurdering = vilkaar.mapVilkaar(grunnlagForVilkaar)
                 val kommerSoekerTilGodeVurdering = vilkaar.mapKommerSoekerTilGode(grunnlagForVilkaar)
                 val behandlingopprettet = LocalDateTime.parse(packet["behandlingOpprettet"].asText()).toLocalDate()
 
-                packet["@virkningstidspunkt"] = vilkaar.beregnVilkaarstidspunkt(grunnlagForVilkaar, behandlingopprettet).toString()
+                packet["virkningstidspunkt"] = vilkaar.beregnVilkaarstidspunkt(grunnlagForVilkaar, behandlingopprettet)
+                    .toString()
                 packet["vilkaarsvurdering"] = vilkaarsVurdering
                 packet["vilkaarsvurderingGrunnlagRef"] = grunnlag.versjon
                 packet["kommerSoekerTilGode"] = kommerSoekerTilGodeVurdering
@@ -55,5 +60,4 @@ internal class LesVilkaarsmelding(
         }
 }
 
-private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 

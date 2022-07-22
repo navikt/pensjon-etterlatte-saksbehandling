@@ -1,6 +1,6 @@
 {
-  "@event": "VEDTAK:ATTESTERT",
-  "@vedtak": {
+  "@event_name": "VEDTAK:ATTESTERT",
+  "vedtak": {
     "vedtakId": 1,
     "virk": {
       "fom": "2022-01",

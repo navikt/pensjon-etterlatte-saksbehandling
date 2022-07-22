@@ -1,6 +1,6 @@
 {
   "id": "77826f44-fc2b-4bd4-a029-c48c1fa92378",
-  "sak": 3,
+  "sakId": 3,
   "behandlingOpprettet": "2022-06-14T15:44:02.427522",
   "sistEndret": "2022-06-14T15:44:02.433757",
   "soeknadMottattDato": "2022-02-14T14:37:24.573613",
@@ -97,7 +97,7 @@
       "time": "2022-06-14T15:44:05.423761027"
     }
   ],
-  "@event": "BEHANDLING:GRUNNLAGENDRET",
+  "@event_name": "BEHANDLING:GRUNNLAGENDRET",
   "grunnlag": [
     {
       "id": "54a5a0bc-f15e-4353-af97-010e2b822b4e",
@@ -820,8 +820,8 @@
     ],
     "versjon": 48
   },
-  "@virkningstidspunkt": "2022-03",
-  "@vilkaarsvurdering": {
+  "virkningstidspunkt": "2022-03",
+  "vilkaarsvurdering": {
     "resultat": "OPPFYLT",
     "vilkaar": [
       {
@@ -1098,8 +1098,8 @@
     ],
     "vurdertDato": "2022-07-13T14:50:52.528852359"
   },
-  "@vilkaarsvurderingGrunnlagRef": 48,
-  "@kommersoekertilgode": {
+  "vilkaarsvurderingGrunnlagRef": 48,
+  "kommersoekertilgode": {
     "kommerSoekerTilgodeVurdering": {
       "resultat": "OPPFYLT",
       "vilkaar": [

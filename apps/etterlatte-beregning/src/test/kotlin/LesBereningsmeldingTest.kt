@@ -1,4 +1,4 @@
-
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.model.BeregningService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
@@ -22,7 +22,7 @@ internal class LesBereningsmeldingTest {
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-        Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get("@event_name").asText())
+        Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
         Assertions.assertEquals("BEREGNET", inspector.message(0).get("beregning").get("resultat").asText())
         println("bah")
 

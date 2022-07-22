@@ -27,7 +27,7 @@ internal class OppdaterBehandlingTest {
 
 
     companion object {
-        val fullMelding = readFile("/nyere.json")
+        val fullMelding = readFile("/fullMelding.json")
 
     }
 }

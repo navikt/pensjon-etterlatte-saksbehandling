@@ -14,7 +14,7 @@ import java.io.FileNotFoundException
 internal class LesAvkortingsmeldingTest {
 
     companion object {
-        val melding = readFile("/meldingNy.json")
+        val melding = readFile("/avkortingsmelding.json")
 
         fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")

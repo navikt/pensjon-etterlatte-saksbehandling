@@ -565,7 +565,7 @@
       "time": "2022-03-21T15:26:22.994195102"
     }
   ],
-  "@event": "BEHANDLING:GRUNNLAGENDRET",
+  "@event_name": "BEHANDLING:GRUNNLAGENDRET",
   "vilkaarsvurdering": "vurdert",
   "@gyldighetsvurdering": "gyldig",
   "beregning": "Beregnet"

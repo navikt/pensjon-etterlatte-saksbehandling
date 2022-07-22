@@ -7,6 +7,9 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.rapidsandrivers.behov
+import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -27,17 +30,17 @@ internal class HentOpplysningerFraInntektskomponenten(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.requireKey("@behov") }
-            validate { it.requireKey("sak") }
+            validate { it.requireKey(behovNameKey) }
+            validate { it.requireKey("sakId") }
             validate { it.requireKey("fnr") }
-            validate { it.requireKey("doedsdato")}
+            validate { it.requireKey("doedsdato") }
             validate { it.rejectKey("opplysning") }
-            validate { it.interestedIn("@correlation_id") }
+            correlationId()
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
+        withLogContext(packet.correlationId) {
 
             if (packet["@behov"].asText() in listOf(
                     Opplysningstyper.AVDOED_INNTEKT_V1.name,
@@ -52,12 +55,11 @@ internal class HentOpplysningerFraInntektskomponenten(
                     val opplysninger = opplysningsBygger.byggOpplysninger(inntektliste, arbeidsforhold)
                     packet["opplysning"] = opplysninger
                     context.publish(packet.toJson())
-                } catch(e: Exception) {
+                } catch (e: Exception) {
                     logger.info(e.message)
                 }
             }
 
         }
 
-    private fun JsonMessage.correlationId(): String? = get("@correlation_id").textValue()
 }

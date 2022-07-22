@@ -4,6 +4,8 @@ import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -19,33 +21,37 @@ internal class LagreKommerSoekerTilgodeResultat(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandAny("@event", listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
-            validate { it.requireKey("sak") }
+            validate { it.demandAny(eventNameKey, listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
+            validate { it.requireKey("sakId") }
             validate { it.requireKey("id") }
             validate { it.requireKey("persongalleri.soeker") }
 
-            validate { it.requireKey("@kommersoekertilgode") }
-            validate { it.interestedIn("@correlation_id") }
-            validate { it.rejectKey("@beregning") }
+            validate { it.requireKey("kommersoekertilgode") }
+            correlationId()
+            validate { it.rejectKey("beregning") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId()) {
+        withLogContext(packet.correlationId) {
             val behandlingId = packet["id"].asUUID()
-            val sakId = packet["sak"].toString()
-            val kommerSoekerTilgodeResultat = objectMapper.readValue(packet["@kommersoekertilgode"].toString(), KommerSoekerTilgode::class.java)
+            val sakId = packet["sakId"].toString()
+            val kommerSoekerTilgodeResultat = objectMapper.readValue(packet["kommersoekertilgode"].toString(),
+                KommerSoekerTilgode::class.java)
             try {
-                vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(sakId, behandlingId, packet["persongalleri.soeker"].textValue(), kommerSoekerTilgodeResultat)
-            } catch (e: KanIkkeEndreFattetVedtak){
-                packet["@event"] = "VEDTAK:ENDRING_FORKASTET"
-                packet["@vedtakId"] = e.vedtakId
-                packet["@forklaring"] = "Kommer søker tilgode forkastet fordi vedtak allerede er fattet"
+                vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(sakId,
+                    behandlingId,
+                    packet["persongalleri.soeker"].textValue(),
+                    kommerSoekerTilgodeResultat)
+            } catch (e: KanIkkeEndreFattetVedtak) {
+                packet[eventNameKey] = "VEDTAK:ENDRING_FORKASTET"
+                packet["vedtakId"] = e.vedtakId
+                packet["forklaring"] = "Kommer søker tilgode forkastet fordi vedtak allerede er fattet"
                 context.publish(
                     packet.toJson()
                 )
-            } catch (e: Exception){
-                logger.warn("Kunne ikke oppdatere vedtak",e)
+            } catch (e: Exception) {
+                logger.warn("Kunne ikke oppdatere vedtak", e)
             }
 
         }

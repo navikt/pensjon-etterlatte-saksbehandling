@@ -1,6 +1,6 @@
 {
   "id": "a2f9dfbd-22f6-4c29-bb84-a49e2fe499a3",
-  "sak": 3,
+  "sakId": 3,
   "behandlingOpprettet": "2022-07-11T13:12:39.16726",
   "sistEndret": "2022-07-11T13:12:39.563561",
   "status": "GYLDIG_SOEKNAD",
@@ -945,7 +945,7 @@
     "vurdertDato": "2022-07-11T13:12:55.291339319"
   },
   "vilkaarsvurderingGrunnlagRef": 833,
-  "@kommersoekertilgode": {
+  "kommersoekertilgode": {
     "kommerSoekerTilgodeVurdering": {
       "resultat": "OPPFYLT",
       "vilkaar": [

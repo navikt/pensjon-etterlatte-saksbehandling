@@ -8,4 +8,5 @@ repositories {
 
 dependencies {
     implementation(NavFelles.RapidAndRiversKtor2)
+    implementation(project(":libs:rapidsandrivers-extras"))
 }

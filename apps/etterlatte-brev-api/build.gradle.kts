@@ -5,7 +5,6 @@ plugins {
 dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:ktor2client-onbehalfof"))
-    implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation(Database.HikariCP)
     implementation(Database.FlywayDB)

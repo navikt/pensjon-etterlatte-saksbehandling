@@ -13,7 +13,6 @@ dependencies {
     implementation(Ktor2.Jackson)
 
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
-    implementation(project(":libs:rapidsandrivers-extras"))
     implementation(project(":libs:common"))
 
 

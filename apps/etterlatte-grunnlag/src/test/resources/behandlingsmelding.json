@@ -1,27 +1,31 @@
 {
-  "id": "f525f2f7-e246-43d7-b61a-5f0757472916",
-  "sakId": 1,
-  "behandlingOpprettet": "2022-05-12T11:09:06.103964",
-  "sistEndret": "2022-05-12T11:09:06.128951",
-  "soeknadMottattDato": "2022-02-14T14:37:24.573613",
-  "innsender": "03108718357",
-  "soeker": "12101376212",
-  "gjenlevende": [
-    "03108718357",
-    "03108718353"
-  ],
-  "avdoed": [
-    "22128202440"
-  ],
-  "soesken": [],
-  "gyldighetsproeving": null,
+  "id": "afa44e72-015d-4361-a03c-9ed3e255fe32",
+  "sak": 3,
+  "behandlingOpprettet": "2022-07-22T11:25:38.238065",
+  "sistEndret": "2022-07-22T11:25:38.238411",
   "status": "OPPRETTET",
+  "oppgaveStatus": "NY",
+  "type": "FØRSTEGANGSBEHANDLING",
+  "soeknadMottattDato": "2022-02-14T14:37:24.573613",
+  "persongalleri": {
+    "soeker": "12101376212",
+    "innsender": "03108718357",
+    "soesken": [],
+    "avdoed": [
+      "22128202440"
+    ],
+    "gjenlevende": [
+      "03108718357",
+      "03108718353"
+    ]
+  },
+  "gyldighetsproeving": null,
   "system_read_count": 0,
   "system_participating_services": [
     {
       "service": "etterlatte-behandling",
-      "instance": "etterlatte-behandling-f979bc968-dfl6j",
-      "time": "2022-05-12T11:09:08.607306872"
+      "instance": "etterlatte-behandling-6b74b998f5-cqfcc",
+      "time": "2022-07-22T11:25:38.262609645"
     }
   ],
   "@event_name": "BEHANDLING:OPPRETTET"

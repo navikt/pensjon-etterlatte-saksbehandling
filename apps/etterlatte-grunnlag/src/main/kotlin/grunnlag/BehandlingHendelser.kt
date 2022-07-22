@@ -43,13 +43,13 @@ class BehandlingHendelser(
                     mapOf(
                         behovNameKey to Opplysningstyper.SOEKER_PDL_V1,
                         "sakId" to packet["sak"],
-                        "fnr" to packet["persongalleri.soeker"],
+                        "fnr" to packet["persongalleri"]["soeker"],
                         "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
                         correlationIdKey to packet[correlationIdKey]
                     )
                 ).toJson())
 
-            packet["persongalleri.gjenlevende"].forEach { fnr ->
+            packet["persongalleri"]["gjenlevende"].forEach { fnr ->
                 context.publish(
                     JsonMessage.newMessage(
                         mapOf(
@@ -63,7 +63,7 @@ class BehandlingHendelser(
                 )
             }
 
-            packet["persongalleri.avdoed"].forEach { fnr ->
+            packet["persongalleri"]["avdoed"].forEach { fnr ->
                 context.publish(
                     JsonMessage.newMessage(
                         mapOf(

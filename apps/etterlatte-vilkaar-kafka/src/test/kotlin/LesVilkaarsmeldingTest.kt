@@ -18,7 +18,7 @@ internal class LesVilkaarsmeldingTest {
     private val inspector = TestRapid().apply { LesVilkaarsmelding(this, VilkaarService()) }
 
     @Test
-    fun `skal vurdere vilkaar til gyldig`() {
+    fun `skal lese og lage melding`() {
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 

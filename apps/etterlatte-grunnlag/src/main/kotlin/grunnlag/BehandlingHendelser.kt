@@ -26,11 +26,8 @@ class BehandlingHendelser(
         River(rapidsConnection).apply {
             eventName("BEHANDLING:OPPRETTET")
             correlationId()
-            validate { it.requireKey("innsender") }
-            validate { it.requireKey("soeker") }
-            validate { it.requireKey("gjenlevende") }
-            validate { it.requireKey("avdoed") }
-            validate { it.requireKey("sakId") }
+            validate { it.requireKey("persongalleri") }
+            validate { it.requireKey("sak") }
         }.register(this)
     }
 
@@ -45,19 +42,19 @@ class BehandlingHendelser(
                 JsonMessage.newMessage(
                     mapOf(
                         behovNameKey to Opplysningstyper.SOEKER_PDL_V1,
-                        "sakId" to packet["sakId"],
-                        "fnr" to packet["soeker"],
+                        "sakId" to packet["sak"],
+                        "fnr" to packet["persongalleri.soeker"],
                         "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
                         correlationIdKey to packet[correlationIdKey]
                     )
                 ).toJson())
 
-            packet["gjenlevende"].forEach { fnr ->
+            packet["persongalleri.gjenlevende"].forEach { fnr ->
                 context.publish(
                     JsonMessage.newMessage(
                         mapOf(
                             behovNameKey to Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1,
-                            "sakId" to packet["sakId"],
+                            "sakId" to packet["sak"],
                             "fnr" to fnr.asText(),
                             "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
                             correlationIdKey to packet[correlationIdKey]
@@ -66,12 +63,12 @@ class BehandlingHendelser(
                 )
             }
 
-            packet["avdoed"].forEach { fnr ->
+            packet["persongalleri.avdoed"].forEach { fnr ->
                 context.publish(
                     JsonMessage.newMessage(
                         mapOf(
                             behovNameKey to Opplysningstyper.AVDOED_PDL_V1,
-                            "sakId" to packet["sakId"],
+                            "sakId" to packet["sak"],
                             "fnr" to fnr.asText(),
                             "rolle" to Opplysningstyper.AVDOED_PDL_V1.personRolle!!,
                             correlationIdKey to packet[correlationIdKey]

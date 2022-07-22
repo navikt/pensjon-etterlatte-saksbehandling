@@ -4,6 +4,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -23,7 +24,7 @@ class BehandlingEndretHendlese(
         River(rapidsConnection).apply {
             eventName("BEHANDLING:GRUNNLAGENDRET")
             correlationId()
-            validate { it.requireKey("sakId") }
+            validate { it.requireKey("sak") }
             validate { it.rejectKey("grunnlag") }
         }.register(this)
     }
@@ -33,13 +34,19 @@ class BehandlingEndretHendlese(
             if (Kontekst.get().AppUser !is Self) {
                 logger.warn("AppUser i kontekst er ikke Self i R&R-flyten")
             }
-            try {
-                grunnlag.hentGrunnlag(packet["sakId"].asLong())
-                    .also {
-                        packet["grunnlag"] = it
-                    }
 
-                context.publish(packet.toJson())
+            try {
+                val grunnlag = grunnlag.hentGrunnlag(packet["sak"].asLong())
+                context.publish(
+                    JsonMessage.newMessage(
+                        mapOf(
+                            "grunnlag" to grunnlag,
+                            "sakId" to packet["sak"],
+                            correlationIdKey to packet[correlationIdKey]
+                        )
+                    ).toJson()
+                )
+
             } catch (e: Exception) {
                 logger.error("Feil ved henting av grunnlag", e)
             }

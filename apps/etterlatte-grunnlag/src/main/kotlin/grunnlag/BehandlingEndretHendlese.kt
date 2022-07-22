@@ -48,7 +48,7 @@ class BehandlingEndretHendlese(
                             "grunnlag" to grunnlag,
                             "sakId" to packet["sak"],
                             "behandlingId" to packet["id"],
-                            "fnrSoeker" to packet["persongalleri"]["soeker"],
+                            "fnrSoeker" to packet["persongalleri.soeker"],
                             "behandlingOpprettet" to packet["behandlingOpprettet"],
                         )
                     ).toJson()

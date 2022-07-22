@@ -11,7 +11,8 @@
     "fnr": "29081276127",
     "beskrivelse": "OPPRETTET",
     "saksbehandler": "Truls Veileder",
-    "handling": "BEHANDLE"
+    "handling": "BEHANDLE",
+    "antallSoesken": 1
   },
   {
     "behandlingsId": "10",
@@ -25,7 +26,8 @@
     "fnr": "29081276127",
     "beskrivelse": "",
     "saksbehandler": "",
-    "handling": "BEHANDLE"
+    "handling": "BEHANDLE",
+    "antallSoesken": 2
   },
   {
     "behandlingsId": "11",
@@ -39,6 +41,7 @@
     "fnr": "29081276127",
     "beskrivelse": "",
     "saksbehandler": "",
-    "handling": "BEHANDLE"
+    "handling": "BEHANDLE",
+    "antallSoesken": null
   }
 ]

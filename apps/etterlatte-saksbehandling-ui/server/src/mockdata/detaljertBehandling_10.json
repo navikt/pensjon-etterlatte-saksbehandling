@@ -9,12 +9,8 @@
         "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": [
-              "22128202440"
-            ],
-            "foreldre": [
-              "22128202440"
-            ],
+            "ansvarligeForeldre": ["22128202440"],
+            "foreldre": ["22128202440"],
             "barn": null
           },
           "innsender": {
@@ -34,12 +30,8 @@
         "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": [
-              "22128202440"
-            ],
-            "foreldre": [
-              "22128202440"
-            ],
+            "ansvarligeForeldre": ["22128202440"],
+            "foreldre": ["22128202440"],
             "barn": null
           },
           "innsender": {

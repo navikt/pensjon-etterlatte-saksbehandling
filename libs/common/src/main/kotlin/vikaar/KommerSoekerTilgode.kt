@@ -31,6 +31,7 @@ data class PersoninfoAvdoed(
     val rolle: PersonRolle,
     val bostedadresser: List<Adresse>?,
     val doedsdato: LocalDate?,
+    val barn: List<Foedselsnummer>?,
 )
 
 

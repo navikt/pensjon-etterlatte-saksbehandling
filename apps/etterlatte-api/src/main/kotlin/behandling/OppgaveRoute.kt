@@ -7,7 +7,6 @@ import no.nav.etterlatte.behandling.OppgaveService
 
 
 fun Route.oppgaveRoute(service: OppgaveService) {
-
     route("oppgaver") {
         // hent liste med oppgaver til oppgavelista
 

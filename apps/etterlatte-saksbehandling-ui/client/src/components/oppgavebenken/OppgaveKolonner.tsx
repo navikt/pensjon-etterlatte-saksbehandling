@@ -50,11 +50,18 @@ export const kolonner: ReadonlyArray<Column<IOppgave>> = [
       return <ColorTag type={soeknadstype} label={soeknadTypeFilter[soeknadstype as SoeknadTypeFilter]?.navn} />
     },
   },
-
   {
     Header: 'Beskrivelse',
     accessor: 'beskrivelse',
     disableSortBy: true,
+  },
+  {
+    Header: 'Søsken',
+    accessor: 'antallSoesken',
+    disableSortBy: true,
+    Cell: ({ value: antallSoesken }) => {
+      return <span>{antallSoesken ?? '-'}</span>
+    },
   },
   {
     Header: 'Status',

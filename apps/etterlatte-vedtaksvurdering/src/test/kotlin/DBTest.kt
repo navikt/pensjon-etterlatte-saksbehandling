@@ -105,6 +105,7 @@ internal class DBTest {
                         PersonRolle.AVDOED,
                         listOf(),
                         LocalDate.of(2020, 1, 1),
+                        barn = listOf(Foedselsnummer.of("03108718357"))
                     ),
                     soeker = PersoninfoSoeker(
                         "Navn",

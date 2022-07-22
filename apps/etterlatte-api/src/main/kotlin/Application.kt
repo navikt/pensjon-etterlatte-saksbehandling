@@ -30,7 +30,7 @@ class ApplicationContext(configLocation: String? = null) {
         pdlKlient = PdltjenesterKlient(config, httpClient()),
         vedtakKlient = vedtakKlient,
     )
-    val oppgaveService: OppgaveService = OppgaveService(behandlingKlient)
+    val oppgaveService: OppgaveService = OppgaveService(behandlingKlient, vedtakKlient)
     val vedtakService = VedtakService(rapid)
     val grunnlagService = GrunnlagService(behandlingKlient, rapid)
 

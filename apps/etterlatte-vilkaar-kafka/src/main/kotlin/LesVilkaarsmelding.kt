@@ -33,7 +33,6 @@ internal class LesVilkaarsmelding(
 
         }.register(this)
     }
-
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             try {

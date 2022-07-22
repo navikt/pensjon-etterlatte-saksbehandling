@@ -2,6 +2,7 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.BrevService
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
@@ -15,7 +16,7 @@ class FerdigstillVedtaksbrevTest {
     @Test
     fun `Skal ferdigstille vedtaksbrev naar et vedtak blir attestert`() {
         val melding = JsonMessage.newMessage(mapOf(
-            "@event_name" to "VEDTAK:ATTESTERT",
+            eventNameKey to "VEDTAK:ATTESTERT",
             "vedtak" to VedtakServiceMock().hentVedtak("ABCD")
         ))
 

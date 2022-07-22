@@ -9,6 +9,10 @@ import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -23,14 +27,15 @@ internal class DistribuerBrev(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", BrevEventTypes.JOURNALFOERT.toString()) }
-            validate { it.requireKey("@brevId", "payload", "@correlation_id", "@journalpostResponse") }
-            validate { it.rejectKey("@bestillingId") }
+            eventName(BrevEventTypes.JOURNALFOERT.toString())
+            validate { it.requireKey("brevId", "payload", "journalpostResponse") }
+            validate { it.rejectKey("bestillingId") }
+            correlationId()
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext(packet["@correlation_id"].asText()) {
+        withLogContext(packet[correlationIdKey].asText()) {
             logger.info("Starter distribuering av brev.")
             val distMelding = packet.distribusjonsMelding()
 
@@ -46,7 +51,7 @@ internal class DistribuerBrev(
     }
 
     private fun JsonMessage.journalpostId(): String = try {
-        objectMapper.readValue<JournalpostResponse>(this["@journalpostResponse"].asText()).journalpostId
+        objectMapper.readValue<JournalpostResponse>(this["journalpostResponse"].asText()).journalpostId
     } catch (ex: Exception) {
         logger.error("Klarte ikke hente ut journalpostId:", ex)
         throw ex
@@ -62,8 +67,8 @@ internal class DistribuerBrev(
     private fun RapidsConnection.svarSuksess(packet: JsonMessage, bestillingId: BestillingID) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
 
-        packet["@event"] = BrevEventTypes.DISTRIBUERT.toString()
-        packet["@bestillingId"] = bestillingId
+        packet[eventNameKey] = BrevEventTypes.DISTRIBUERT.toString()
+        packet["bestillingId"] = bestillingId
 
         publish(packet.toJson())
     }

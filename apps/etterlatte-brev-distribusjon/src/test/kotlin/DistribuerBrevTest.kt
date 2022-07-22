@@ -1,4 +1,3 @@
-
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.DistribuerBrev
@@ -10,6 +9,8 @@ import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import no.nav.etterlatte.libs.common.journalpost.Bruker
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -35,16 +36,16 @@ class DistribuerBrevTest {
         )
         val melding = JsonMessage.newMessage(
             mapOf(
-                "@event" to BrevEventTypes.JOURNALFOERT.toString(),
-                "@brevId" to brevId,
-                "@correlation_id" to UUID.randomUUID().toString(),
-                "@journalpostResponse" to journalpostResponse.toJson(),
+                eventNameKey to BrevEventTypes.JOURNALFOERT.toString(),
+                "brevId" to brevId,
+                correlationIdKey to UUID.randomUUID().toString(),
+                "journalpostResponse" to journalpostResponse.toJson(),
                 "payload" to distribusjonMelding.toJson()
-        ))
+            ))
         val inspector = inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        inspector.message(0).get("@event").asText() shouldBe BrevEventTypes.DISTRIBUERT.toString()
-        inspector.message(0).get("@brevId").asLong() shouldBe brevId
-        inspector.message(0).get("@bestillingId").asText() shouldNotBe null
+        inspector.message(0).get(eventNameKey).asText() shouldBe BrevEventTypes.DISTRIBUERT.toString()
+        inspector.message(0).get("brevId").asLong() shouldBe brevId
+        inspector.message(0).get("bestillingId").asText() shouldNotBe null
     }
 }

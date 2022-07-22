@@ -145,7 +145,7 @@ class BrevService(
             JsonMessage.newMessage(
                 mapOf(
                     eventNameKey to BrevEventTypes.FERDIGSTILT.toString(),
-                    "@brevId" to it.brevId,
+                    "brevId" to it.brevId,
                     correlationIdKey to correlationId,
                     "payload" to it.toJson()
                 )

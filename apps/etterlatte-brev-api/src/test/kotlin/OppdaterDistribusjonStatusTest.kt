@@ -6,6 +6,8 @@ import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -26,10 +28,10 @@ class OppdaterDistribusjonStatusTest {
     @Test
     fun `Skal lagre ned journalpost-detaljer ved svar fra brev-distribusjon`() {
         val melding = JsonMessage.newMessage(mapOf(
-            "@event_name" to BrevEventTypes.JOURNALFOERT.toString(),
-            "@brevId" to brevId,
-            "@correlation_id" to UUID.randomUUID().toString(),
-            "@journalpostResponse" to journalpostResponse.toJson()
+            eventNameKey to BrevEventTypes.JOURNALFOERT.toString(),
+            "brevId" to brevId,
+            correlationIdKey to UUID.randomUUID().toString(),
+            "journalpostResponse" to journalpostResponse.toJson()
         ))
 
         inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
@@ -46,11 +48,11 @@ class OppdaterDistribusjonStatusTest {
     fun `Skal lagre ned distribusjons-detaljer ved svar fra brev-distribusjon`() {
         val bestillingId = UUID.randomUUID().toString()
         val melding = JsonMessage.newMessage(mapOf(
-            "@event_name" to BrevEventTypes.DISTRIBUERT.toString(),
-            "@brevId" to brevId,
-            "@correlation_id" to UUID.randomUUID().toString(),
-            "@journalpostResponse" to journalpostResponse.toJson(),
-            "@bestillingId" to bestillingId
+            eventNameKey to BrevEventTypes.DISTRIBUERT.toString(),
+            "brevId" to brevId,
+            correlationIdKey to UUID.randomUUID().toString(),
+            "journalpostResponse" to journalpostResponse.toJson(),
+            "bestillingId" to bestillingId
         ))
 
         inspector.apply { sendTestMessage(melding.toJson()) }.inspektør

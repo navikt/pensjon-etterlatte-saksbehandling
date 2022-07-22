@@ -7,6 +7,9 @@ import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -22,14 +25,15 @@ internal class JournalfoerBrev(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("@event", BrevEventTypes.FERDIGSTILT.toString()) }
-            validate { it.requireKey("@brevId", "@correlation_id", "payload") }
-            validate { it.rejectKey("@bestillingId", "@journalpostResponse") }
+            eventName(BrevEventTypes.FERDIGSTILT.toString())
+            validate { it.requireKey("brevId", "payload") }
+            validate { it.rejectKey("bestillingId", "journalpostResponse") }
+            correlationId()
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        withLogContext(packet["@correlation_id"].asText()) {
+        withLogContext(packet.correlationId) {
             logger.info("Starter journalføring av brev.")
 
             val melding = packet.distribusjonsmelding()
@@ -49,8 +53,8 @@ internal class JournalfoerBrev(
     private fun RapidsConnection.svarSuksess(packet: JsonMessage, journalpostResponse: JournalpostResponse) {
         logger.info("Brev har blitt journalført. Svarer tilbake med bekreftelse.")
 
-        packet["@event"] = BrevEventTypes.JOURNALFOERT.toString()
-        packet["@journalpostResponse"] = journalpostResponse.toJson()
+        packet[eventNameKey] = BrevEventTypes.JOURNALFOERT.toString()
+        packet["journalpostResponse"] = journalpostResponse.toJson()
 
         publish(packet.toJson())
     }

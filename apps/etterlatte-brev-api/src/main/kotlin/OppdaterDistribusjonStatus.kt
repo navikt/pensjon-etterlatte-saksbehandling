@@ -23,22 +23,22 @@ internal class OppdaterDistribusjonStatus(rapidsConnection: RapidsConnection, pr
     init {
         River(rapidsConnection).apply {
             validate { it.demandAny(eventNameKey, listOf(JOURNALFOERT.toString(), DISTRIBUERT.toString())) }
-            validate { it.requireKey("@brevId", correlationIdKey, "@journalpostResponse") }
-            validate { it.interestedIn("@bestillingId") }
+            validate { it.requireKey("brevId", correlationIdKey, "journalpostResponse") }
+            validate { it.interestedIn("bestillingId") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext(packet.correlationId) {
-            val brevId = packet["@brevId"].longValue()
+            val brevId = packet["brevId"].longValue()
             logger.info("Mottatt oppdatering fra brev-distribusjon for brev med id ${brevId}.")
 
             if (packet[eventNameKey].asText() == DISTRIBUERT.toString()) {
-                val bestillingId = packet["@bestillingId"].asText()
+                val bestillingId = packet["bestillingId"].asText()
                 db.oppdaterStatus(brevId, Status.DISTRIBUERT, """{"bestillingId": "$bestillingId"}""")
                 db.setBestillingId(brevId, bestillingId)
             } else {
-                val response: JournalpostResponse = objectMapper.readValue(packet["@journalpostResponse"].asText())
+                val response: JournalpostResponse = objectMapper.readValue(packet["journalpostResponse"].asText())
                 db.oppdaterStatus(brevId, Status.JOURNALFOERT, response.toJson())
                 db.setJournalpostId(brevId, response.journalpostId)
             }

@@ -1,4 +1,3 @@
-
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -11,6 +10,8 @@ import no.nav.etterlatte.libs.common.journalpost.Bruker
 import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -34,17 +35,17 @@ class JournalfoerBrevTest {
         )
         val melding = JsonMessage.newMessage(
             mapOf(
-                "@event" to BrevEventTypes.FERDIGSTILT.toString(),
-                "@brevId" to distribusjonMelding.brevId,
-                "@correlation_id" to UUID.randomUUID().toString(),
+                eventNameKey to BrevEventTypes.FERDIGSTILT.toString(),
+                "brevId" to distribusjonMelding.brevId,
+                correlationIdKey to UUID.randomUUID().toString(),
                 "payload" to distribusjonMelding.toJson()
             )
         )
         val inspector = inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        inspector.message(0).get("@event").asText() shouldBe BrevEventTypes.JOURNALFOERT.toString()
-        inspector.message(0).get("@brevId").asLong() shouldBe distribusjonMelding.brevId
-        objectMapper.readValue<JournalpostResponse>(inspector.message(0).get("@journalpostResponse").asText()).let {
+        inspector.message(0).get(eventNameKey).asText() shouldBe BrevEventTypes.JOURNALFOERT.toString()
+        inspector.message(0).get("brevId").asLong() shouldBe distribusjonMelding.brevId
+        objectMapper.readValue<JournalpostResponse>(inspector.message(0).get("journalpostResponse").asText()).let {
             it.journalpostId shouldNotBe null
             it.journalpoststatus shouldBe "OK"
             it.journalpostferdigstilt shouldBe true

@@ -26,6 +26,7 @@ class BehandlingEndretHendlese(
             eventName("BEHANDLING:GRUNNLAGENDRET")
             correlationId()
             validate { it.requireKey("sak") }
+            validate { it.requireKey("behandlingOpprettet")}
             validate { it.rejectKey("grunnlag") }
         }.register(this)
     }
@@ -44,7 +45,7 @@ class BehandlingEndretHendlese(
                             eventNameKey to packet[eventNameKey],
                             "grunnlag" to grunnlag,
                             "sakId" to packet["sak"],
-                            correlationIdKey to packet[correlationIdKey]
+                            "behandlingOpprettet" to packet["behandlingOpprettet"],
                         )
                     ).toJson()
                 )

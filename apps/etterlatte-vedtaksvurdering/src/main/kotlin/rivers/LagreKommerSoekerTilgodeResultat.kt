@@ -25,7 +25,7 @@ internal class LagreKommerSoekerTilgodeResultat(
             validate { it.requireKey("sakId") }
             validate { it.requireKey("behandlingId") }
             validate { it.requireKey("fnrSoeker") }
-            validate { it.requireKey("kommersoekertilgode") }
+            validate { it.requireKey("kommerSoekerTilGode") }
             correlationId()
             validate { it.rejectKey("beregning") }
         }.register(this)
@@ -35,7 +35,7 @@ internal class LagreKommerSoekerTilgodeResultat(
         withLogContext(packet.correlationId) {
             val behandlingId = packet["behandlingId"].asUUID()
             val sakId = packet["sakId"].toString()
-            val kommerSoekerTilgodeResultat = objectMapper.readValue(packet["kommersoekertilgode"].toString(),
+            val kommerSoekerTilgodeResultat = objectMapper.readValue(packet["kommerSoekerTilGode"].toString(),
                 KommerSoekerTilgode::class.java)
             try {
                 vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(sakId,

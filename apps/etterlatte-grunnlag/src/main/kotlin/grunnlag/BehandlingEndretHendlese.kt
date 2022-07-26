@@ -24,8 +24,8 @@ class BehandlingEndretHendlese(
         River(rapidsConnection).apply {
             eventName("BEHANDLING:GRUNNLAGENDRET")
             correlationId()
-            validate { it.requireKey("sakId") }
-            validate { it.requireKey("behandlingId") }
+            validate { it.requireKey("sak") } //TODO endre til sakId
+            validate { it.requireKey("id") }  //TODO endre til behandlingId
             validate { it.requireKey("persongalleri.soeker") }
             validate { it.requireKey("behandlingOpprettet") }
             validate { it.rejectKey("grunnlag") }
@@ -39,14 +39,14 @@ class BehandlingEndretHendlese(
             }
 
             try {
-                val grunnlag = grunnlag.hentGrunnlag(packet["sakId"].asLong())
+                val grunnlag = grunnlag.hentGrunnlag(packet["sak"].asLong())
                 context.publish(
                     JsonMessage.newMessage(
                         mapOf(
                             eventNameKey to packet[eventNameKey],
                             "grunnlag" to grunnlag,
-                            "sakId" to packet["sakId"],
-                            "behandlingId" to packet["behandlingId"],
+                            "sakId" to packet["sak"],
+                            "behandlingId" to packet["id"],
                             "fnrSoeker" to packet["persongalleri.soeker"],
                             "behandlingOpprettet" to packet["behandlingOpprettet"],
                         )

@@ -4,7 +4,6 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -25,8 +24,8 @@ class BehandlingEndretHendlese(
         River(rapidsConnection).apply {
             eventName("BEHANDLING:GRUNNLAGENDRET")
             correlationId()
-            validate { it.requireKey("sak") }
-            validate { it.requireKey("id") }
+            validate { it.requireKey("sakId") }
+            validate { it.requireKey("behandlingId") }
             validate { it.requireKey("persongalleri.soeker") }
             validate { it.requireKey("behandlingOpprettet") }
             validate { it.rejectKey("grunnlag") }
@@ -40,14 +39,14 @@ class BehandlingEndretHendlese(
             }
 
             try {
-                val grunnlag = grunnlag.hentGrunnlag(packet["sak"].asLong())
+                val grunnlag = grunnlag.hentGrunnlag(packet["sakId"].asLong())
                 context.publish(
                     JsonMessage.newMessage(
                         mapOf(
                             eventNameKey to packet[eventNameKey],
                             "grunnlag" to grunnlag,
-                            "sakId" to packet["sak"],
-                            "behandlingId" to packet["id"],
+                            "sakId" to packet["sakId"],
+                            "behandlingId" to packet["behandlingId"],
                             "fnrSoeker" to packet["persongalleri.soeker"],
                             "behandlingOpprettet" to packet["behandlingOpprettet"],
                         )

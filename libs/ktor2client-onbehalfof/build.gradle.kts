@@ -25,5 +25,17 @@ dependencies {
 
     api("com.natpryce:konfig:1.6.10.0")
     api("com.michael-bull.kotlin-result:kotlin-result:1.1.14")
+    api("com.github.ben-manes.caffeine:caffeine:3.1.1")
 
+    testImplementation("com.github.tomakehurst:wiremock-jre8:2.33.2")
+    testImplementation(Jupiter.Engine)
+    testImplementation(Jupiter.Api)
+    testImplementation(Ktor2.ClientMock)
+    testImplementation(Kotest.AssertionsCore)
+
+    tasks {
+        withType<Test> {
+            useJUnitPlatform()
+        }
+    }
 }

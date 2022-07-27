@@ -4,10 +4,13 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.benmanes.caffeine.cache.Cache
+import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.*
@@ -22,6 +25,7 @@ import io.ktor.http.Parameters
 import io.ktor.serialization.jackson.*
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import java.util.concurrent.TimeUnit
 
 private val logger = LoggerFactory.getLogger(AzureAdClient::class.java)
 
@@ -48,10 +52,14 @@ data class AzureAdOpenIdConfiguration(
 
 class AzureAdClient(
     private val config: Config,
-    private val httpClient: HttpClient = defaultHttpClient
+    private val httpClient: HttpClient = defaultHttpClient,
+    private val cache: Cache<String, AccessToken> = Caffeine
+        .newBuilder()
+        .expireAfterAccess(5, TimeUnit.SECONDS)
+        .build()
 ) {
-    val openIdConfiguration: AzureAdOpenIdConfiguration = runBlocking {
-        defaultHttpClient.get(config.getString("azure.app.well.known.url")).body()
+    private val openIdConfiguration: AzureAdOpenIdConfiguration = runBlocking {
+        httpClient.get(config.getString("azure.app.well.known.url")).body()
     }
 
     private suspend inline fun fetchAccessToken(formParameters: Parameters): Result<AccessToken, ThrowableErrorMessage> =
@@ -77,7 +85,7 @@ class AzureAdClient(
 
     private suspend fun Throwable.handleError(message: String): Err<ThrowableErrorMessage> {
         val responseBody: String? = when (this) {
-            is ResponseException -> this.response?.bodyAsText()
+            is ResponseException -> this.response.bodyAsText()
             else -> null
         }
         return "$message. response body: $responseBody"
@@ -97,8 +105,12 @@ class AzureAdClient(
         )
 
     // Service-to-service access token request (on-behalf-of flow)
-    suspend fun getOnBehalfOfAccessTokenForResource(scopes: List<String>, accessToken: String): Result<AccessToken, ThrowableErrorMessage> =
-        fetchAccessToken(
+    suspend fun getOnBehalfOfAccessTokenForResource(scopes: List<String>, accessToken: String): Result<AccessToken, ThrowableErrorMessage> {
+        cache.getIfPresent(accessToken)?.let {
+            return Ok(it)
+        }
+
+        return fetchAccessToken(
             Parameters.build {
                 append("client_id", config.getString("azure.app.client.id"))
                 append("client_secret", config.getString("azure.app.client.secret"))
@@ -108,7 +120,15 @@ class AzureAdClient(
                 append("assertion", accessToken)
                 append("assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
             }
+        ).also { result -> cacheAccessTokenVedOk(accessToken, result) }
+    }
+
+    private fun cacheAccessTokenVedOk(accessToken: String, result: Result<AccessToken, ThrowableErrorMessage>) {
+        result.mapBoth(
+            success = { cache.put(accessToken, it) },
+            failure = { null }
         )
+    }
 
     // Graph API lookup (on-behalf-of flow)
     suspend fun getUserInfoFromGraph(accessToken: String): Result<JsonNode, ThrowableErrorMessage> {

@@ -98,7 +98,7 @@ internal class AppEventRiver(
     init {
         River(rapidsConnection).apply {
             validate { it.demandAny(eventNameKey, appEventTypes) }
-            validate { it.interestedIn("opprettet", "app_name", "instance_id") }
+            validate { it.interestedIn("@opprettet", "app_name", "instance_id") }
         }.register(this)
     }
 
@@ -107,7 +107,7 @@ internal class AppEventRiver(
             packet[eventNameKey].asText(),
             packet["instance_id"].asText(),
             packet["app_name"].asText(),
-            LocalDateTime.parse(packet["opprettet"].asText())
+            LocalDateTime.parse(packet["@opprettet"].asText())
         ).also {
             appMap.computeIfAbsent(it.app) { mutableMapOf() }
                 .compute(it.appinstance) { _, current: Pair<AppEvent?, PongEvent?>? -> Pair(it, current?.second) }

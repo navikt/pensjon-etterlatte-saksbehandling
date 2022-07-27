@@ -2,10 +2,11 @@ package no.nav.etterlatte.grunnlag
 
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
+import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
+import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -22,13 +23,10 @@ class BehandlingEndretHendlese(
 
     init {
         River(rapidsConnection).apply {
-            eventName("BEHANDLING:GRUNNLAGENDRET")
+            eventName(BehandlingGrunnlagEndret.eventName)
             correlationId()
-            validate { it.requireKey("sak") } //TODO endre til sakId
-            validate { it.requireKey("id") }  //TODO endre til behandlingId
-            validate { it.requireKey("persongalleri.soeker") }
-            validate { it.requireKey("behandlingOpprettet") }
-            validate { it.rejectKey("grunnlag") }
+            validate {  it.requireKey(BehandlingGrunnlagEndret.sakIdKey) }
+            validate {  it.rejectKey(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey) }
         }.register(this)
     }
 
@@ -39,18 +37,10 @@ class BehandlingEndretHendlese(
             }
 
             try {
-                val grunnlag = grunnlag.hentGrunnlag(packet["sak"].asLong())
+                val grunnlag = grunnlag.hentGrunnlag(packet[BehandlingGrunnlagEndret.sakIdKey].asLong())
+                packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey] = grunnlag
                 context.publish(
-                    JsonMessage.newMessage(
-                        mapOf(
-                            eventNameKey to packet[eventNameKey],
-                            "grunnlag" to grunnlag,
-                            "sakId" to packet["sak"],
-                            "behandlingId" to packet["id"],
-                            "fnrSoeker" to packet["persongalleri.soeker"],
-                            "behandlingOpprettet" to packet["behandlingOpprettet"],
-                        )
-                    ).toJson()
+                    packet.toJson()
                 )
 
             } catch (e: Exception) {

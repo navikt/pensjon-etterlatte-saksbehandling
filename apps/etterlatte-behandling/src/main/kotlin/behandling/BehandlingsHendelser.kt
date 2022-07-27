@@ -11,6 +11,7 @@ import no.nav.etterlatte.database.DatabaseContext
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -38,14 +39,22 @@ class BehandlingsHendelser(
                 )
             ) {
                 for (hendelse in kanal) {
+                    val behandling = inTransaction {
+                        behandlinger.hentFoerstegangsbehandling(
+                            hendelse.first
+                        )
+                    }.serialiserbarUtgave()
+
                     rapid.publiser(hendelse.first.toString(),
-                        JsonMessage(objectMapper.writeValueAsString(inTransaction {
-                            behandlinger.hentFoerstegangsbehandling(
-                                hendelse.first
+                        JsonMessage.newMessage("BEHANDLING:${hendelse.second.name}",
+                            mapOf(
+                                BehandlingGrunnlagEndret.behandlingObjectKey to behandling,
+                                BehandlingGrunnlagEndret.sakIdKey to behandling.sak,
+                                BehandlingGrunnlagEndret.behandlingIdKey to behandling.id,
+                                BehandlingGrunnlagEndret.fnrSoekerKey to behandling.persongalleri.soeker,
+                                BehandlingGrunnlagEndret.behandlingOpprettetKey to behandling.behandlingOpprettet
                             )
-                        }.serialiserbarUtgave())).also {
-                            it["@event_name"] = "BEHANDLING:${hendelse.second.name}"
-                        }.toJson()
+                        ).toJson()
                     ).also {
                         logger.info("Posted event ${hendelse.second.name} for behandling ${hendelse.first} to partiton ${it.first}, offset ${it.second}")
                     }

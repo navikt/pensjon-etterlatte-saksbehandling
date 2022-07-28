@@ -1,4 +1,5 @@
 import WireMockBase.Companion.mockServer
+import com.github.benmanes.caffeine.cache.AsyncCache
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.michaelbull.result.Ok
@@ -7,14 +8,21 @@ import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.typesafe.config.ConfigFactory
+import io.kotest.inspectors.runTests
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import no.nav.etterlatte.libs.ktorobo.AccessToken
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktorobo.OboTokenRequest
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 internal class AzureAdClientTest {
@@ -58,34 +66,59 @@ internal class AzureAdClientTest {
 
     @Test
     fun `lagrer access token i cache ved api-kall`() {
-        val cache: Cache<String, AccessToken> = Caffeine
+        val cache: AsyncCache<OboTokenRequest, AccessToken> = Caffeine
             .newBuilder()
             .expireAfterAccess(5, TimeUnit.SECONDS)
-            .build()
+            .buildAsync()
 
         runBlocking {
-            AzureAdClient(config, mockHttpClient, cache).getOnBehalfOfAccessTokenForResource(listOf(), "saksbehandlerToken")
+            AzureAdClient(config, mockHttpClient, cache).getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")
         }
 
-        cache.estimatedSize() shouldBe 1
-        cache.getIfPresent("saksbehandlerToken") shouldNotBe null
+        val cachedValue = cache.getIfPresent(OboTokenRequest(listOf("testScope"), "saksbehandlerToken"))!!.get()
+
+        cachedValue.accessToken shouldBe "token"
+        cachedValue.expiresIn shouldBe 60
+        cachedValue.tokenType shouldBe "testToken"
     }
     @Test
     fun `bruker cachet access token ved påfølgende kall`() {
-        val cache: Cache<String, AccessToken> = Caffeine
+        val cache: AsyncCache<OboTokenRequest, AccessToken> = Caffeine
             .newBuilder()
             .expireAfterAccess(5, TimeUnit.SECONDS)
-            .build()
+            .buildAsync()
 
         runBlocking {
             AzureAdClient(config, mockHttpClient, cache).run {
-                getOnBehalfOfAccessTokenForResource(emptyList(), "saksbehandlerToken")
-                getOnBehalfOfAccessTokenForResource(emptyList(), "saksbehandlerToken")
-                getOnBehalfOfAccessTokenForResource(emptyList(), "saksbehandlerToken")
+                getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")
+                getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")
+                getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")
             }
         }
 
         mockServer.verify(1, postRequestedFor(urlEqualTo("/token_endpoint")))
+    }
+
+    @Test
+    fun `bruker cachet access token ved parallele kall`() {
+        return runTest {
+            val cache: AsyncCache<OboTokenRequest, AccessToken> = Caffeine
+                .newBuilder()
+                .expireAfterAccess(5, TimeUnit.SECONDS)
+                .buildAsync()
+
+            val client1 = AzureAdClient(config, mockHttpClient, cache)
+            val client2 = AzureAdClient(config, mockHttpClient, cache)
+            val client3 = AzureAdClient(config, mockHttpClient, cache)
+
+            val result1 = async {client1.getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")}
+            val result2 = async {client2.getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")}
+            val result3 = async {client3.getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")}
+
+            awaitAll(result1, result2, result3)
+
+            mockServer.verify(1, postRequestedFor(urlEqualTo("/token_endpoint")))
+        }
     }
 }
 

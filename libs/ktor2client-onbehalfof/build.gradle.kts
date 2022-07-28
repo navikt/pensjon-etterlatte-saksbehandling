@@ -27,6 +27,7 @@ dependencies {
     api("com.michael-bull.kotlin-result:kotlin-result:1.1.14")
     api("com.github.ben-manes.caffeine:caffeine:3.1.1")
 
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
     testImplementation("com.github.tomakehurst:wiremock-jre8:2.33.2")
     testImplementation(Jupiter.Engine)
     testImplementation(Jupiter.Api)

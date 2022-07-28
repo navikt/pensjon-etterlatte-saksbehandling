@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.inntekt.PensjonUforeOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
@@ -147,24 +148,25 @@ fun mapFamiliemedlemmer(
                 fnr = it?.foedselsnummer,
                 rolle = PersonRolle.AVDOED,
                 bostedadresser = it?.bostedsadresse,
-                doedsdato = it?.doedsdato
+                doedsdato = it?.doedsdato,
+                barn = it?.familieRelasjon?.barn
             )
         },
         soeker = soeker?.opplysning.let {
             PersoninfoSoeker(
                 navn = it?.fornavn + " " + it?.etternavn,
                 fnr = it?.foedselsnummer,
-                rolle = PersonRolle.AVDOED,
+                rolle = PersonRolle.BARN,
                 bostedadresser = it?.bostedsadresse,
                 soeknadAdresse = soekerSoeknad?.opplysning?.utenlandsadresse,
-                foedselsdato = it?.foedselsdato
+                foedselsdato = it?.foedselsdato,
             )
         },
         gjenlevendeForelder = gjenlevende?.opplysning.let {
             PersoninfoGjenlevendeForelder(
                 navn = it?.fornavn + " " + it?.etternavn,
                 fnr = it?.foedselsnummer,
-                rolle = PersonRolle.AVDOED,
+                rolle = PersonRolle.GJENLEVENDE,
                 bostedadresser = it?.bostedsadresse,
             )
         })

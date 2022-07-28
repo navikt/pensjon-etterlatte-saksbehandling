@@ -94,6 +94,7 @@ function mapOppgaveResponse(data: any): IOppgave {
     oppgaveStatus: data.oppgaveStatus.toUpperCase() as StatusFilter,
     saksbehandler: data.saksbehandler,
     handling: data.handling.toUpperCase() as Handlinger,
+    antallSoesken: data.antallSoesken,
   }
   return oppgave
 }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.benmanes.caffeine.cache.AsyncCache
+import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -20,8 +22,12 @@ import io.ktor.client.statement.*
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Parameters
 import io.ktor.serialization.jackson.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+import kotlinx.coroutines.future.asDeferred
+import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
+import java.util.concurrent.TimeUnit
+import kotlin.coroutines.CoroutineContext
 
 private val logger = LoggerFactory.getLogger(AzureAdClient::class.java)
 
@@ -46,24 +52,37 @@ data class AzureAdOpenIdConfiguration(
     val authorizationEndpoint: String
 )
 
+data class OboTokenRequest(
+    val scopes: List<String>,
+    val accessToken: String,
+)
+
 class AzureAdClient(
     private val config: Config,
-    private val httpClient: HttpClient = defaultHttpClient
+    private val httpClient: HttpClient = defaultHttpClient,
+    private val cache: AsyncCache<OboTokenRequest, AccessToken> = Caffeine
+        .newBuilder()
+        .expireAfterAccess(5, TimeUnit.SECONDS)
+        .buildAsync()
 ) {
-    val openIdConfiguration: AzureAdOpenIdConfiguration = runBlocking {
-        defaultHttpClient.get(config.getString("azure.app.well.known.url")).body()
+    private val openIdConfiguration: AzureAdOpenIdConfiguration = runBlocking {
+        httpClient.get(config.getString("azure.app.well.known.url")).body()
     }
 
-    private suspend inline fun fetchAccessToken(formParameters: Parameters): Result<AccessToken, ThrowableErrorMessage> =
-        runCatching {
+    private suspend inline fun fetchAccessToken(formParameters: Parameters): AccessToken =
+        try {
             httpClient.submitForm(
                 url = openIdConfiguration.tokenEndpoint,
                 formParameters = formParameters
-            ).body<AccessToken>()
-        }.fold(
-            onSuccess = { result -> Ok(result) },
-            onFailure = { error -> error.handleError("Could not fetch access token from authority endpoint") }
-        )
+            ).body()
+        } catch (ex: Throwable){
+            val responseBody: String? = when (ex) {
+                is ResponseException -> ex.response.bodyAsText()
+                else -> null
+            }
+            throw RuntimeException("Could not fetch access token from authority endpoint. response body: $responseBody", ex)
+        }
+
 
     private suspend inline fun get(url: String, oboAccessToken: AccessToken): Result<JsonNode, ThrowableErrorMessage> =
         runCatching {
@@ -77,7 +96,7 @@ class AzureAdClient(
 
     private suspend fun Throwable.handleError(message: String): Err<ThrowableErrorMessage> {
         val responseBody: String? = when (this) {
-            is ResponseException -> this.response?.bodyAsText()
+            is ResponseException -> this.response.bodyAsText()
             else -> null
         }
         return "$message. response body: $responseBody"
@@ -86,7 +105,7 @@ class AzureAdClient(
     }
 
     // Service-to-service access token request (client credentials grant)
-    suspend fun getAccessTokenForResource(scopes: List<String>): Result<AccessToken, ThrowableErrorMessage> =
+    suspend fun getAccessTokenForResource(scopes: List<String>): AccessToken =
         fetchAccessToken(
             Parameters.build {
                 append("client_id", config.getString("azure.app.client.id"))
@@ -97,18 +116,35 @@ class AzureAdClient(
         )
 
     // Service-to-service access token request (on-behalf-of flow)
-    suspend fun getOnBehalfOfAccessTokenForResource(scopes: List<String>, accessToken: String): Result<AccessToken, ThrowableErrorMessage> =
-        fetchAccessToken(
-            Parameters.build {
-                append("client_id", config.getString("azure.app.client.id"))
-                append("client_secret", config.getString("azure.app.client.secret"))
-                append("scope", scopes.joinToString(separator = " "))
-                append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
-                append("requested_token_use", "on_behalf_of")
-                append("assertion", accessToken)
-                append("assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+    suspend fun getOnBehalfOfAccessTokenForResource(
+        scopes: List<String>,
+        accessToken: String
+    ): Result<AccessToken, ThrowableErrorMessage> {
+        val context = currentCoroutineContext()
+
+        val value = cache.get(OboTokenRequest(scopes, accessToken)) { req, _ ->
+            CoroutineScope(context).future {
+                fetchAccessToken(Parameters.build {
+                    append("client_id", config.getString("azure.app.client.id"))
+                    append("client_secret", config.getString("azure.app.client.secret"))
+                    append("scope", req.scopes.joinToString(separator = " "))
+                    append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                    append("requested_token_use", "on_behalf_of")
+                    append("assertion", req.accessToken)
+                    append("assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+                })
             }
-        )
+        }
+
+        return value.handle { token, exception ->
+            if (exception != null) {
+                Err(ThrowableErrorMessage("Henting av token feilet", exception))
+            } else {
+                Ok(token)
+            }
+        }.asDeferred()
+            .await()
+    }
 
     // Graph API lookup (on-behalf-of flow)
     suspend fun getUserInfoFromGraph(accessToken: String): Result<JsonNode, ThrowableErrorMessage> {
@@ -119,7 +155,6 @@ class AzureAdClient(
             .andThen { oboAccessToken -> get(url, oboAccessToken) }
     }
 }
-
 data class AccessToken(
     @JsonProperty("access_token")
     val accessToken: String,

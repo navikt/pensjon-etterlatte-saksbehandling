@@ -1,3 +1,4 @@
+
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.barnepensjon.model.VilkaarService
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -47,8 +48,7 @@ internal class LesVilkaarsmelding(
                 val kommerSoekerTilGodeVurdering = vilkaar.mapKommerSoekerTilGode(grunnlagForVilkaar)
                 val behandlingopprettet = LocalDateTime.parse(packet["behandlingOpprettet"].asText()).toLocalDate()
 
-                packet["virkningstidspunkt"] = vilkaar.beregnVilkaarstidspunkt(grunnlagForVilkaar, behandlingopprettet)
-                    .toString()
+                packet["virkningstidspunkt"] = vilkaar.beregnVilkaarstidspunkt(grunnlagForVilkaar, behandlingopprettet)?: objectMapper.nullNode()
                 packet["vilkaarsvurdering"] = vilkaarsVurdering
                 packet["vilkaarsvurderingGrunnlagRef"] = grunnlag.versjon
                 packet["kommerSoekerTilGode"] = kommerSoekerTilGodeVurdering

@@ -25,11 +25,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Setup Java v16.x
-        uses: actions/setup-java@v1
+        uses: actions/checkout@v3
+      - name: Setup Java v17.x
+        uses: actions/setup-java@v3
         with:
-          java-version: '16.x'
+          distribution: temurin
+          java-version: 17.x
+          cache: gradle
       - name: Gradle test and build
         run: |
           chmod +x ./gradlew

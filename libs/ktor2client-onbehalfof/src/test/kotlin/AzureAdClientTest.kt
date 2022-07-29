@@ -1,6 +1,5 @@
 import WireMockBase.Companion.mockServer
 import com.github.benmanes.caffeine.cache.AsyncCache
-import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.michaelbull.result.Ok
 import com.github.tomakehurst.wiremock.client.WireMock
@@ -8,21 +7,14 @@ import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.typesafe.config.ConfigFactory
-import io.kotest.inspectors.runTests
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import kotlinx.coroutines.test.runTest
 import no.nav.etterlatte.libs.ktorobo.AccessToken
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.OboTokenRequest
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 internal class AzureAdClientTest {
@@ -107,17 +99,12 @@ internal class AzureAdClientTest {
                 .expireAfterAccess(5, TimeUnit.SECONDS)
                 .buildAsync()
 
-            val client1 = AzureAdClient(config, mockHttpClient, cache)
-            val client2 = AzureAdClient(config, mockHttpClient, cache)
-            val client3 = AzureAdClient(config, mockHttpClient, cache)
+            val client = AzureAdClient(config, mockHttpClient, cache)
+            generateSequence {
+                async { client.getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")}
+            }.take(3).toList().awaitAll()
 
-            val result1 = async {client1.getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")}
-            val result2 = async {client2.getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")}
-            val result3 = async {client3.getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")}
-
-            awaitAll(result1, result2, result3)
-
-            mockServer.verify(1, postRequestedFor(urlEqualTo("/token_endpoint")))
+           mockServer.verify(1, postRequestedFor(urlEqualTo("/token_endpoint")))
         }
     }
 }

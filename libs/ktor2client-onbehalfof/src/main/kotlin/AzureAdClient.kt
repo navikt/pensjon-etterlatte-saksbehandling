@@ -5,19 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.benmanes.caffeine.cache.AsyncCache
-import com.github.benmanes.caffeine.cache.AsyncCacheLoader
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache
-import com.github.benmanes.caffeine.cache.Cache
-import com.github.benmanes.caffeine.cache.CacheLoader
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
-import com.github.michaelbull.result.getOrThrow
-import com.github.michaelbull.result.mapBoth
-import com.github.michaelbull.result.mapError
-import com.github.michaelbull.result.toResultOr
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.*
@@ -30,11 +22,12 @@ import io.ktor.client.statement.*
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Parameters
 import io.ktor.serialization.jackson.*
+import kotlinx.coroutines.*
 import kotlinx.coroutines.future.asDeferred
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.CoroutineContext
 
 private val logger = LoggerFactory.getLogger(AzureAdClient::class.java)
 
@@ -76,16 +69,20 @@ class AzureAdClient(
         httpClient.get(config.getString("azure.app.well.known.url")).body()
     }
 
-    private suspend inline fun fetchAccessToken(formParameters: Parameters): Result<AccessToken, ThrowableErrorMessage> =
-        runCatching {
+    private suspend inline fun fetchAccessToken(formParameters: Parameters): AccessToken =
+        try {
             httpClient.submitForm(
                 url = openIdConfiguration.tokenEndpoint,
                 formParameters = formParameters
-            ).body<AccessToken>()
-        }.fold(
-            onSuccess = { result -> Ok(result) },
-            onFailure = { error -> error.handleError("Could not fetch access token from authority endpoint") }
-        )
+            ).body()
+        } catch (ex: Throwable){
+            val responseBody: String? = when (ex) {
+                is ResponseException -> ex.response.bodyAsText()
+                else -> null
+            }
+            throw RuntimeException("Could not fetch access token from authority endpoint. response body: $responseBody", ex)
+        }
+
 
     private suspend inline fun get(url: String, oboAccessToken: AccessToken): Result<JsonNode, ThrowableErrorMessage> =
         runCatching {
@@ -108,7 +105,7 @@ class AzureAdClient(
     }
 
     // Service-to-service access token request (client credentials grant)
-    suspend fun getAccessTokenForResource(scopes: List<String>): Result<AccessToken, ThrowableErrorMessage> =
+    suspend fun getAccessTokenForResource(scopes: List<String>): AccessToken =
         fetchAccessToken(
             Parameters.build {
                 append("client_id", config.getString("azure.app.client.id"))
@@ -123,36 +120,25 @@ class AzureAdClient(
         scopes: List<String>,
         accessToken: String
     ): Result<AccessToken, ThrowableErrorMessage> {
-        // Failed futures klarer kun å hålle på exceptions
-        var errorMsg = ""
+        val context = currentCoroutineContext()
 
         val value = cache.get(OboTokenRequest(scopes, accessToken)) { req, _ ->
-            // TODO ai: 27.07.2022 - Se på alternativer til runBlocking her
-            runBlocking {
-                fetchAccessToken(
-                    Parameters.build {
-                        append("client_id", config.getString("azure.app.client.id"))
-                        append("client_secret", config.getString("azure.app.client.secret"))
-                        append("scope", req.scopes.joinToString(separator = " "))
-                        append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
-                        append("requested_token_use", "on_behalf_of")
-                        append("assertion", req.accessToken)
-                        append("assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-                    }
-                )
-                    .mapBoth(
-                        success = { CompletableFuture.completedFuture(it) },
-                        failure = {
-                            errorMsg = it.message
-                            CompletableFuture.failedFuture(it.throwable)
-                        }
-                    )
+            CoroutineScope(context).future {
+                fetchAccessToken(Parameters.build {
+                    append("client_id", config.getString("azure.app.client.id"))
+                    append("client_secret", config.getString("azure.app.client.secret"))
+                    append("scope", req.scopes.joinToString(separator = " "))
+                    append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                    append("requested_token_use", "on_behalf_of")
+                    append("assertion", req.accessToken)
+                    append("assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+                })
             }
         }
 
         return value.handle { token, exception ->
             if (exception != null) {
-                Err(ThrowableErrorMessage(errorMsg, exception))
+                Err(ThrowableErrorMessage("Henting av token feilet", exception))
             } else {
                 Ok(token)
             }
@@ -169,7 +155,6 @@ class AzureAdClient(
             .andThen { oboAccessToken -> get(url, oboAccessToken) }
     }
 }
-
 data class AccessToken(
     @JsonProperty("access_token")
     val accessToken: String,

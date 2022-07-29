@@ -67,7 +67,7 @@ class VedtaksvurderingService(
         behandlingId: UUID,
         fnr: String,
         vilkaarResultat: VilkaarResultat,
-        virkningsDato: LocalDate
+        virkningsDato: LocalDate?
     ) {
         val vedtak = repository.hentVedtak(sakId, behandlingId)
         if (vedtak == null) {
@@ -81,7 +81,7 @@ class VedtaksvurderingService(
         }
     }
 
-    private fun migrer(vedtak: Vedtak, fnr: String, virkningsDato: LocalDate) {
+    private fun migrer(vedtak: Vedtak, fnr: String, virkningsDato: LocalDate?) {
         if (vedtak.fnr == null) { //Migrere v2 til v3
             repository.lagreFnr(vedtak.sakId, vedtak.behandlingId, fnr)
         }

@@ -35,7 +35,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         behandlingsId: UUID,
         fnr: String,
         vilkaarsresultat: VilkaarResultat,
-        virkningsDato: LocalDate
+        virkningsDato: LocalDate?
     ) {
         logger.info("Lagrer vilkaarsresultat")
         connection.use {
@@ -44,7 +44,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             statement.setObject(2, behandlingsId)
             statement.setString(3, objectMapper.writeValueAsString(vilkaarsresultat))
             statement.setString(4, fnr)
-            statement.setDate(5, Date.valueOf(virkningsDato))
+            statement.setDate(5, virkningsDato?.let {Date.valueOf(virkningsDato)})
             statement.setString(6, VedtakStatus.VILKAARSVURDERT.name)
             statement.execute()
         }
@@ -314,10 +314,10 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    fun lagreDatoVirk(sakId: String, behandlingId: UUID, datoVirk: LocalDate) {
+    fun lagreDatoVirk(sakId: String, behandlingId: UUID, datoVirk: LocalDate?) {
         connection.use {
             val statement = it.prepareStatement(Queries.lagreDatoVirkFom)
-            statement.setDate(1, Date.valueOf(datoVirk))
+            statement.setDate(1, datoVirk?.let { Date.valueOf(datoVirk) })
             statement.setLong(2, sakId.toLong())
             statement.setObject(3, behandlingId)
             statement.execute()

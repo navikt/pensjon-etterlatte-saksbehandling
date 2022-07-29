@@ -40,12 +40,15 @@ internal class LagreVilkaarsresultat(
             val sakId = packet["sakId"].toString()
             val vilkaarsResultat = objectMapper.readValue(packet["vilkaarsvurdering"].toString(),
                 VilkaarResultat::class.java)
+            val virkningstidspunktFraMelding = packet["virkningstidspunkt"].textValue()
+            val virkningstidspunkt = if (virkningstidspunktFraMelding != null) YearMonth.parse(virkningstidspunktFraMelding).atDay(1) else null
+
             try {
                 vedtaksvurderingService.lagreVilkaarsresultat(sakId,
                     behandlingId,
                     packet["fnrSoeker"].textValue(),
                     vilkaarsResultat,
-                    YearMonth.parse(packet["virkningstidspunkt"].textValue()).atDay(1))
+                    virkningstidspunkt)
                 requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
                     context.publish(JsonMessage.newMessage(
                         mapOf(

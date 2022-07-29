@@ -24,7 +24,8 @@ enum class FordelerKriterie(val forklaring: String) {
     BARN_HAR_VERGE("Barn er market med verge i søknaden"),
     BARN_HAR_REGISTRERT_VERGE("Barn er registrert med verge i PDL"),
     BARN_ER_IKKE_BOSATT_I_NORGE("Barn er ikke bosatt i Norge"),
-    BARN_ER_IKKE_ALENEBARN("Barn (søker) er ikke alenebarn"),
+    //Kommentert ut for å teste søskenjustering
+    //BARN_ER_IKKE_ALENEBARN("Barn (søker) er ikke alenebarn"),
     BARN_HAR_FOR_GAMLE_SOESKEN("Det finnes barn av avdøde som er for gamle"),
 
     AVDOED_HAR_UTVANDRING("Avdoed har utvandring"),
@@ -71,7 +72,8 @@ class FordelerKriterier {
         Kriterie(BARN_HAR_ADRESSEBESKYTTELSE) { harAdressebeskyttelse(barn) },
         Kriterie(BARN_HAR_VERGE) { harHuketAvForVerge(it) },
         Kriterie(BARN_HAR_REGISTRERT_VERGE) { harVergemaalPDL(barn) },
-        Kriterie(BARN_ER_IKKE_ALENEBARN) { barnErIkkeAlenebarn(avdoed, barn, gjenlevende) },
+        //Kommentert ut for å teste søskenjustering
+        //Kriterie(BARN_ER_IKKE_ALENEBARN) { barnErIkkeAlenebarn(avdoed, barn, gjenlevende) },
         Kriterie(BARN_HAR_FOR_GAMLE_SOESKEN) { barnHarForGamleSoesken(barn, avdoed) },
 
         // Avdød

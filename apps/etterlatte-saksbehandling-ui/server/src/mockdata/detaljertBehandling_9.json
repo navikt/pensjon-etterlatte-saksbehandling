@@ -9,14 +9,8 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": [
-              "22128202440",
-              "03108718357"
-            ],
-            "foreldre": [
-              "22128202440",
-              "03108718357"
-            ],
+            "ansvarligeForeldre": ["22128202440", "03108718357"],
+            "foreldre": ["22128202440", "03108718357"],
             "barn": null
           },
           "innsender": {
@@ -36,14 +30,8 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": [
-              "22128202440",
-              "03108718357"
-            ],
-            "foreldre": [
-              "22128202440",
-              "03108718357"
-            ],
+            "ansvarligeForeldre": ["22128202440", "03108718357"],
+            "foreldre": ["22128202440", "03108718357"],
             "barn": null
           },
           "innsender": {
@@ -71,6 +59,38 @@
         "kriterier": [
           {
             "navn": "SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
+              },
+              {
+                "kriterieOpplysningsType": "FOEDSELSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984597914Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "foedselsdato": "2013-10-12",
+                  "foedselsnummer": "12101376212"
+                }
+              }
+            ]
+          },
+          {
+            "navn": "SOEKER_ER_I_LIVE",
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
@@ -140,10 +160,7 @@
                   "type": "pdl"
                 },
                 "opplysning": {
-                  "foreldre": [
-                    "22128202440",
-                    "03108718357"
-                  ]
+                  "foreldre": ["22128202440", "03108718357"]
                 }
               },
               {

@@ -23,20 +23,20 @@ export interface IHendelse {
   id: number
   hendelse: IHendelseType
   opprettet: string
-  ident?: string,
+  ident?: string
   identType?: null
   kommentar: string
   valgtBegrunnelse: string
 }
 
 export enum IHendelseType {
-  BEHANDLING_OPPRETTET = "BEHANDLING:OPPRETTET",
-  VEDTAK_VILKAARSVURDERT = "VEDTAK:VILKAARSVURDERT",
-  VEDTAK_BEREGNET = "VEDTAK:BEREGNET",
-  VEDTAK_AVKORTET = "VEDTAK:AVKORTET",
-  VEDTAK_FATTET = "VEDTAK:FATTET",
-  VEDTAK_UNDERKJENT = "VEDTAK:UNDERKJENT",
-  VEDTAK_ATTESTERT = "VEDTAK:ATTESTERT",
+  BEHANDLING_OPPRETTET = 'BEHANDLING:OPPRETTET',
+  VEDTAK_VILKAARSVURDERT = 'VEDTAK:VILKAARSVURDERT',
+  VEDTAK_BEREGNET = 'VEDTAK:BEREGNET',
+  VEDTAK_AVKORTET = 'VEDTAK:AVKORTET',
+  VEDTAK_FATTET = 'VEDTAK:FATTET',
+  VEDTAK_UNDERKJENT = 'VEDTAK:UNDERKJENT',
+  VEDTAK_ATTESTERT = 'VEDTAK:ATTESTERT',
 }
 
 export enum IBehandlingStatus {
@@ -219,6 +219,7 @@ export enum Kriterietype {
   AVDOED_ER_FORELDER = 'AVDOED_ER_FORELDER',
   DOEDSFALL_ER_REGISTRERT_I_PDL = 'DOEDSFALL_ER_REGISTRERT_I_PDL',
   SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO = 'SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO',
+  SOEKER_ER_I_LIVE = 'SOEKER_ER_I_LIVE',
   SOEKER_IKKE_ADRESSE_I_UTLANDET = 'SOEKER_IKKE_ADRESSE_I_UTLANDET',
   GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET = 'GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET',
   AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD = 'AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD',
@@ -292,7 +293,8 @@ export const behandlingReducer = (state = detaljertBehandlingInitialState, actio
   switch (action.type) {
     case 'add_behandling':
       return {
-        ...state, ...action.data,
+        ...state,
+        ...action.data,
       }
     default:
       state

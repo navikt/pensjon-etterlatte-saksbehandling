@@ -17,33 +17,29 @@ export interface VilkaarTittelSvar {
 }
 
 export function mapKriterietyperTilTekst(krit: IKriterie): VilkaarTittelSvar {
-  let tittel
-  let svar
+  switch (krit.navn) {
+    case Kriterietype.AVDOED_ER_FORELDER:
+      return { tittel: 'Avdøde er barnets forelder', svar: mapEnkeltSvarTilTekst(krit) }
+    case Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL:
+      return { tittel: 'Dødsfallet er dokumentert', svar: mapEnkeltSvarTilTekst(krit) }
+    case Kriterietype.SOEKER_ER_I_LIVE:
+      return { tittel: 'Søker var i live på virkningsdato', svar: mapEnkeltSvarTilTekst(krit) }
 
-  if (krit.navn === Kriterietype.AVDOED_ER_FORELDER) {
-    tittel = 'Avdøde er barnets forelder'
-    svar = mapEnkeltSvarTilTekst(krit)
-  } else if (krit.navn === Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL) {
-    tittel = 'Dødsfallet er dokumentert'
-    svar = mapEnkeltSvarTilTekst(krit)
-  } else if (krit.navn === Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO) {
-    tittel = 'Barnet er under 18 år på virkningsdato'
-    svar = mapEnkeltSvarTilTekst(krit)
-  } else if (krit.navn === Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET) {
-    tittel = 'Barnet er medlem i trygden'
-    if (krit.resultat === VurderingsResultat.OPPFYLT) {
-      svar = 'Ja. Barnet har bostedsadresse i Norge'
-    } else if (krit.resultat === VurderingsResultat.IKKE_OPPFYLT) {
-      svar = 'Nei. Barnet har utenlandsk bostedsadresse'
-    } else {
-      svar = 'Avklar. Barnet har registrert utenlandsk adresse'
+    case Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO:
+      return { tittel: 'Barnet er under 18 år på virkningsdato', svar: mapEnkeltSvarTilTekst(krit) }
+
+    case Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET: {
+      const tittel = 'Barnet er medlem i trygden'
+      if (krit.resultat === VurderingsResultat.OPPFYLT) return { tittel, svar: 'Ja. Barnet har bostedsadresse i Norge' }
+      if (krit.resultat === VurderingsResultat.IKKE_OPPFYLT)
+        return { tittel, svar: 'Nei. Barnet har utenlandsk bostedsadresse' }
+
+      return { tittel, svar: 'Avklar. Barnet har registrert utenlandsk adresse' }
     }
-  } else {
-    tittel = ''
-    svar = ''
+    default: {
+      return { tittel: '', svar: '' }
+    }
   }
-
-  return { tittel: tittel, svar: svar }
 }
 
 export function mapEnkeltSvarTilTekst(krit: IKriterie): String {

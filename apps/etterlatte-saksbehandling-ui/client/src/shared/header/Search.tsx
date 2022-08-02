@@ -1,7 +1,6 @@
 import styled from 'styled-components'
-import { SearchField } from '@navikt/ds-react'
+import { Search as SearchField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
-import { SearchIcon } from '../icons/searchIcon'
 import { useNavigate } from 'react-router-dom'
 import { getPerson, IPersonResult, opprettSakPaaPerson } from '../api/person'
 import { ErrorIcon } from '../icons/errorIcon'
@@ -16,7 +15,7 @@ export const Search = () => {
   const [feilInput, setFeilInput] = useState(false)
 
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       if (regBokstaver.test(searchInput) || searchInput.length > 11) {
         setFeilInput(true)
         setSearchResult(null)
@@ -25,17 +24,13 @@ export const Search = () => {
       }
       if (searchInput.length === 11) {
         const personResult: any = await getPerson(searchInput)
-        const person = personResult.data;
+        const person = personResult.data
         setSearchResult(person)
       } else if (searchInput.length < 11) {
         setSearchResult(null)
       }
     })()
   }, [searchInput])
-
-  const onChange = (e: any) => {
-    setSearchInput(e.target.value)
-  }
 
   const goToPerson = () => {
     navigate(`/person/${searchInput}`)
@@ -56,11 +51,14 @@ export const Search = () => {
 
   return (
     <>
-      <SearchField label="" style={{ paddingBottom: '8px', width: '300px' }}>
-        <SearchField.Input type="tel" placeholder="Fødselsnummer" onKeyUp={onEnter} onChange={onChange} />
-        <SearchField.Button>
-          <SearchIcon />
-        </SearchField.Button>
+      <SearchField
+        placeholder="Fødselsnummer"
+        label="Tast inn fødselsnummer"
+        hideLabel
+        onChange={setSearchInput}
+        onKeyUp={onEnter}
+      >
+        <SearchField.Button />
       </SearchField>
       {searchResult && !feilInput && (
         <Dropdown>
@@ -76,13 +74,12 @@ export const Search = () => {
                 Ingen fagsak. Trykk for å opprette {'>'}
               </div>
             ) : (
-              <div className="sak">
-                Sak {console.log(searchResult.saker)} {searchResult.saker.saker[0].sakType}
-              </div>
+              <div className="sak">Sak {searchResult.saker.saker[0].sakType}</div>
             )}
           </SearchResult>
         </Dropdown>
       )}
+
       {feilInput && (
         <Dropdown info={true}>
           <span className="icon">

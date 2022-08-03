@@ -79,7 +79,6 @@ export const Search = () => {
           </SearchResult>
         </Dropdown>
       )}
-
       {feilInput && (
         <Dropdown info={true}>
           <span className="icon">

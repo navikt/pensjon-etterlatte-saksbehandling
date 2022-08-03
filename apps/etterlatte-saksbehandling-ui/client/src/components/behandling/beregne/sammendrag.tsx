@@ -1,12 +1,53 @@
-import { Table } from '@navikt/ds-react'
+import { BodyShort, Button, Label, Popover, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { Heading } from '@navikt/ds-react'
 import format from 'date-fns/format'
-import { useContext } from 'react'
+import { useContext, useRef, useState } from 'react'
 import { AppContext } from '../../../store/AppContext'
+import { InformationColored } from '@navikt/ds-icons'
+import { IPerson } from '../../../store/reducers/BehandlingReducer'
+import { differenceInYears } from 'date-fns'
 
 export const Sammendrag = () => {
   const beregningsperioder = useContext(AppContext).state.behandlingReducer.beregning?.beregningsperioder
+
+  const GjelderTooltip = ({ soeskenFlokk }: { soeskenFlokk: Array<IPerson> }) => {
+    const [isOpen, setIsOpen] = useState(false)
+    const ref = useRef(null)
+
+    return (
+      <>
+        {soeskenFlokk.length} barn
+        <IconButton size="small" ref={ref} onClick={() => setIsOpen(true)}>
+          <InformationColored title="Få mer informasjon om beregningsgrunnlaget" />
+        </IconButton>
+        <Popover anchorEl={ref.current} open={isOpen} onClose={() => setIsOpen(false)} placement="top">
+          <PopoverContent>
+            <Heading level="1" size="small">
+              Søskenjustering
+            </Heading>
+            <BodyShort spacing>
+              <strong>§18-5</strong> En forelder død: 40% av G til første barn, 25% av G til resterende. Beløpene slås
+              sammen og fordeles likt.
+            </BodyShort>
+            <Label>Beregningen gjelder:</Label>
+            <ul>
+              {soeskenFlokk.map((soesken) => {
+                return (
+                  <ListWithoutBullet key={soesken.foedselsnummer}>
+                    {`${soesken.fornavn} ${soesken.etternavn} / ${soesken.foedselsnummer} / ${differenceInYears(
+                      new Date(),
+                      new Date(soesken.foedselsdato)
+                    )} år`}
+                  </ListWithoutBullet>
+                )
+              })}
+            </ul>
+          </PopoverContent>
+        </Popover>
+      </>
+    )
+  }
 
   return (
     <TableWrapper>
@@ -34,7 +75,9 @@ export const Sammendrag = () => {
               <Table.DataCell>{beregning.type == 'GP' ? 'Grunnpensjon' : beregning.type}</Table.DataCell>
               <Table.DataCell>Mangler</Table.DataCell>
               <Table.DataCell>{beregning.grunnbelop} kr</Table.DataCell>
-              <Table.DataCell>1 barn (hardkodet)</Table.DataCell>
+              <Table.DataCell>
+                {beregning.soeskenFlokk?.length ? <GjelderTooltip soeskenFlokk={beregning.soeskenFlokk} /> : '-'}
+              </Table.DataCell>
               <Table.DataCell>{beregning.grunnbelopMnd} kr</Table.DataCell>
             </Table.Row>
           ))}
@@ -55,4 +98,19 @@ export const TableWrapper = styled.div`
       max-width: 100px;
     }
   }
+`
+
+const PopoverContent = styled(Popover.Content)`
+  max-width: 500px;
+`
+
+const IconButton = styled(Button)`
+  border-radius: 50%;
+  padding: 0;
+  min-width: 0;
+  vertical-align: sub;
+  margin-left: 4px;
+`
+const ListWithoutBullet = styled.li`
+  list-style-type: none;
 `

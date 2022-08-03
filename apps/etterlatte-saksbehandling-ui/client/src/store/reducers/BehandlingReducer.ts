@@ -68,6 +68,7 @@ export interface IBeregningsperiode {
   datoTOM: string
   grunnbelopMnd: number
   grunnbelop: number
+  soeskenFlokk: IPerson[] | null
 }
 
 export interface IKommerSoekerTilgode {
@@ -249,6 +250,7 @@ export interface IPerson {
   fornavn: string
   etternavn: string
   foedselsnummer: string
+  foedselsdato: string
 }
 
 export enum PersonType {

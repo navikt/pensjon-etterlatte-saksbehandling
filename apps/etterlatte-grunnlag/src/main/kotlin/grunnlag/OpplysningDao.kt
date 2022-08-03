@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.database.singleOrNull
 import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
@@ -37,12 +38,25 @@ class OpplysningDao(private val connection: () -> Connection) {
 
     fun finnHendelserIGrunnlag(sakId: Long): List<GrunnlagHendelse> {
         return connection().prepareStatement("""
-            SELECT sak_id, opplysning_id, kilde,  opplysning_type, opplysning, hendelsenummer   
+            SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer   
             FROM grunnlagshendelse hendelse 
             WHERE hendelse.sak_id = ? AND NOT EXISTS(SELECT 1 FROM grunnlagshendelse annen where annen.sak_id = hendelse.sak_id AND hendelse.opplysning_type = annen.opplysning_type AND annen.hendelsenummer > hendelse.hendelsenummer)""".trimIndent())
             .apply {
                 setLong(1, sakId)
             }.executeQuery().toList { asGrunnlagshendelse() }
+    }
+
+    fun finnNyesteGrunnlag(sakId: Long, opplysningType: Opplysningstyper): GrunnlagHendelse? {
+        return connection().prepareStatement(
+            """
+            SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer   
+            FROM grunnlagshendelse hendelse 
+            WHERE hendelse.sak_id = ? AND hendelse.opplysning_type = ? AND NOT EXISTS(SELECT 1 FROM grunnlagshendelse annen where annen.sak_id = hendelse.sak_id AND hendelse.opplysning_type = annen.opplysning_type AND annen.hendelsenummer > hendelse.hendelsenummer)""".trimIndent()
+        )
+            .apply {
+                setLong(1, sakId)
+                setString(2, opplysningType.name)
+            }.executeQuery().singleOrNull { asGrunnlagshendelse() }
     }
 
     fun leggOpplysningTilGrunnlag(sakId: Long, behandlingsopplysning: Grunnlagsopplysning<ObjectNode>): Long {

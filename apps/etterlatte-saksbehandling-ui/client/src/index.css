@@ -1,45 +1,40 @@
-@import "~nav-frontend-skjema-style/dist/main.css";
-@import "~nav-frontend-typografi-style/dist/main.css";
-@import "~nav-frontend-core/dist/main.css";
-@import "~@navikt/ds-css";
-
+@import '~@navikt/ds-css';
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 /**
     Felles-variabler
 **/
 :root {
-    /* Colors */
-    --nav-blue: #0067C5;
-    --nav-dark-gray: #262626;
-    --nav-error-bg: #F9D2CC;
-    --nav-error-border: #BA3A26;
+  /* Colors */
+  --nav-blue: #0067c5;
+  --nav-dark-gray: #262626;
+  --nav-error-bg: #f9d2cc;
+  --nav-error-border: #ba3a26;
 }
 
 body {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 #fullbredde .dekorator__container {
-    max-width: 100%;
-    margin: 0 2rem;
+  max-width: 100%;
+  margin: 0 2rem;
 }
 
 code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
 ul,
 li {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
-
 .breddepopover {
-    min-width: 270px;
+  min-width: 270px;
 }

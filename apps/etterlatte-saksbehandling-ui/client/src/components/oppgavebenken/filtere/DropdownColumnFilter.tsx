@@ -1,9 +1,9 @@
 import { IOppgaveFelt, IOppgaveFelter } from '../typer/oppgavefelter'
 import { IPar } from '../typer/oppgavebenken'
-import { Select } from 'nav-frontend-skjema'
 import React from 'react'
 import { FilterElement } from '../styled'
 import { settFilterVerdi } from './setFilterVerdi'
+import { Select } from '@navikt/ds-react'
 
 type Props = {
   oppgaveFelt: IOppgaveFelt

@@ -9,10 +9,10 @@ const HandlingerKnapp: React.FC<{ saksbehandler: string; handling: Handlinger; b
   handling,
   behandlingsId,
 }) => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const innloggetSaksbehandler = useContext(AppContext).state.saksbehandlerReducer.navn
   const sakErTildeltInnloggetSaksbehandler = innloggetSaksbehandler === saksbehandler
-  console.log(sakErTildeltInnloggetSaksbehandler);
+  console.log(sakErTildeltInnloggetSaksbehandler)
 
   const goToBehandling = () => {
     navigate(`behandling/${behandlingsId}/soeknadsoversikt`)

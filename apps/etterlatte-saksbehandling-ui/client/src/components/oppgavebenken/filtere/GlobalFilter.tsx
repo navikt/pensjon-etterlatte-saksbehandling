@@ -29,7 +29,6 @@ export const GlobalFilter = ({
     <FilterWrapper>
       <FilterElement>
         <TextField
-          size="small"
           label={'Søk: '}
           value={value}
           onChange={(e) => {

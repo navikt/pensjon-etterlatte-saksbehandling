@@ -15,7 +15,6 @@ const StringColumnFilter: React.FC<Props> = ({ oppgaveFelt, oppgaveFelter, setOp
     <FilterWrapper>
       <FilterElement>
         <TextField
-          size={'small'}
           label={oppgaveFelt.label}
           value={oppgaveFelt.filter?.selectedValue}
           onChange={(e) => {

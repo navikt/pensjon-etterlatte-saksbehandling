@@ -20,7 +20,6 @@ export const AvbrytBehandling = () => {
         if (response.status !== 500) {
           navigate('/')
         } else {
-          console.log(response)
           setError(true)
         }
       })

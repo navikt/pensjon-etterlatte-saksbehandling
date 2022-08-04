@@ -36,7 +36,6 @@ class FinnDodsmeldinger(
                         personnummer.folkeregisterident.value,
                         (it.getDoedsfall()?.getDoedsdato()?.format(DateTimeFormatter.ISO_DATE))
                     )
-                    log.info("Doedshendelse getPersonidenter: ${it.getPersonidenter()}")
                 } catch (e: Exception) {
                     log.error("kunne ikke hente folkeregisterident for ${it.personidenter.first()}. Går til neste melding")
                 }

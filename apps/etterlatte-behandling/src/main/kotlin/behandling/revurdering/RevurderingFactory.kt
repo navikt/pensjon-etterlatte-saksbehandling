@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.revurdering
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.HendelseDao
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import java.util.*
 
 class RevurderingFactory(private val behandlinger: BehandlingDao, private val hendelser: HendelseDao) {
@@ -12,7 +13,13 @@ class RevurderingFactory(private val behandlinger: BehandlingDao, private val he
     fun opprettRevurdering(
         sakId: Long,
         persongalleri: Persongalleri,
-        mottattDato: String
+        revurderingAarsak: RevurderingAarsak
     ): RevurderingAggregat =
-        RevurderingAggregat.opprettRevurdering(sakId, persongalleri, mottattDato, behandlinger, hendelser)
+        RevurderingAggregat.opprettRevurdering(
+            sakId,
+            persongalleri,
+            revurderingAarsak,
+            behandlinger,
+            hendelser
+        )
 }

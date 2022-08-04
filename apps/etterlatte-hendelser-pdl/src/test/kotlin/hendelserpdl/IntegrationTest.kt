@@ -4,11 +4,11 @@ import io.confluent.kafka.serializers.KafkaAvroSerializer
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.*
+import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.common.KafkaEnvironment
 import no.nav.etterlatte.JsonMessage
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
@@ -101,9 +101,9 @@ class IntegrationTest {
         }.forEach {
             val msg = JsonMessage(it.value(), MessageProblems(it.value()))
             println(it.value())
-            msg.interestedIn("avdod_ident", eventNameKey, "system_read_count")
-            assertEquals("70078749472", msg["avdod_ident"].textValue())
-            assertEquals("person_dod", msg[eventNameKey].textValue())
+            msg.interestedIn("avdoed_fnr", eventNameKey, "system_read_count")
+            assertEquals("70078749472", msg["avdoed_fnr"].textValue())
+            assertEquals("PDL:PERSONHENDELSE", msg[eventNameKey].textValue())
             assertEquals(1, msg["system_read_count"].asInt())
         }
 

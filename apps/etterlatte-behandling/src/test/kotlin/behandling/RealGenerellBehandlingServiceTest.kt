@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.Foerstegangsbehandlin
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.revurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -37,9 +38,9 @@ class RealGenerellBehandlingServiceTest {
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlinger() } returns listOf(
-                revurdering(sak = 1),
+                revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
                 foerstegangsbehandling(sak = 2),
-                revurdering(sak = 3),
+                revurdering(sak = 3, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
                 foerstegangsbehandling(sak = 4)
             )
         }
@@ -86,7 +87,7 @@ class RealGenerellBehandlingServiceTest {
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandingerISak(1) } returns listOf(
-                revurdering(sak = 1),
+                revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
                 foerstegangsbehandling(sak = 1),
             )
         }

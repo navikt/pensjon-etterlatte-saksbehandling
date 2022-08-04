@@ -2,19 +2,26 @@ package no.nav.etterlatte.behandling.revurdering
 
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.Behandling
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
+import no.nav.etterlatte.behandling.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.Revurdering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelse
 import java.util.*
 
 
 interface RevurderingService {
     fun hentRevurdering(behandling: UUID): Revurdering?
     fun hentRevurderinger(): List<Revurdering>
-    fun startRevurdering(sak: Long, persongalleri: Persongalleri, mottattDato: String): Revurdering
+    fun startRevurdering(
+        forrigeBehandling: Behandling,
+        pdlHendelse: PdlHendelse,
+        revurderingAarsak: RevurderingAarsak
+    ): Revurdering
 }
 
 class RealRevurderingService(
@@ -36,9 +43,24 @@ class RealRevurderingService(
         }
     }
 
-    override fun startRevurdering(sak: Long, persongalleri: Persongalleri, mottattDato: String): Revurdering {
+    override fun startRevurdering(
+        forrigeBehandling: Behandling,
+        pdlHendelse: PdlHendelse,
+        revurderingAarsak: RevurderingAarsak
+    ): Revurdering {
         return inTransaction {
-            revurderingFactory.opprettRevurdering(sak, persongalleri, mottattDato)
+            when (forrigeBehandling) {
+                is Foerstegangsbehandling -> revurderingFactory.opprettRevurdering(
+                    forrigeBehandling.sak,
+                    forrigeBehandling.persongalleri,
+                    revurderingAarsak
+                )
+                is Revurdering -> revurderingFactory.opprettRevurdering(
+                    forrigeBehandling.sak,
+                    forrigeBehandling.persongalleri,
+                    revurderingAarsak
+                )
+            }
         }
             .also {
                 runBlocking {

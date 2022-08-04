@@ -11,7 +11,10 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehan
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
-import no.nav.etterlatte.kafka.*
+import no.nav.etterlatte.kafka.GcpKafkaConfig
+import no.nav.etterlatte.kafka.KafkaConfig
+import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
@@ -37,7 +40,9 @@ abstract class CommonFactory : BeanFactory {
     private val behandlingsHendelser: BehandlingsHendelser by lazy {
         BehandlingsHendelser(
             rapid(),
+            behandlingDao(),
             foerstegangsbehandlingFactory(),
+            revurderingFactory(),
             datasourceBuilder().dataSource
         )
     }

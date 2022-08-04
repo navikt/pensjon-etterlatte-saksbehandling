@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.toJson
 import java.sql.Connection
 import java.sql.ResultSet
@@ -25,7 +26,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 "SELECT id, sak_id, behandling_opprettet, sist_endret, " +
                         "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
-                        "gyldighetssproving, status, oppgave_status, behandlingstype FROM behandling where id = ? AND behandlingstype = ?"
+                        "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak FROM behandling where id = ? AND behandlingstype = ?"
             )
         stmt.setObject(1, id)
         stmt.setString(2, type.name)
@@ -55,7 +56,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 "SELECT id, sak_id, behandling_opprettet, sist_endret, " +
                         "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
-                        "gyldighetssproving, status, oppgave_status, behandlingstype  FROM behandling where behandlingstype = ?"
+                        "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak FROM behandling where behandlingstype = ?"
             )
         stmt.setString(1, type.name)
         return stmt.executeQuery().toList {
@@ -71,7 +72,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 "SELECT id, sak_id, behandling_opprettet, sist_endret, " +
                         "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
-                        "gyldighetssproving, status, oppgave_status, behandlingstype  FROM behandling"
+                        "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak FROM behandling"
             )
         return stmt.executeQuery().behandlingsListe()
     }
@@ -81,11 +82,21 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 "SELECT id, sak_id, behandling_opprettet, sist_endret, " +
                         "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
-                        "gyldighetssproving, status, oppgave_status, behandlingstype  FROM behandling where sak_id = ?"
+                        "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak FROM behandling where sak_id = ?"
             )
         stmt.setLong(1, sakid)
         return stmt.executeQuery().behandlingsListe()
+    }
 
+    fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling> {
+        val stmt =
+            connection().prepareStatement(
+                "SELECT id, sak_id, behandling_opprettet, sist_endret, " +
+                        "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
+                        "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak FROM behandling where soeker = ?"
+            )
+        stmt.setString(1, fnr)
+        return stmt.executeQuery().behandlingsListe()
     }
 
     private fun asFoerstegangsbehandling(rs: ResultSet) = Foerstegangsbehandling(
@@ -114,7 +125,6 @@ class BehandlingDao(private val connection: () -> Connection) {
         behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toInstant().atZone(ZoneId.systemDefault())
             .toLocalDateTime(),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
-        soeknadMottattDato = rs.getTimestamp("soekand_mottatt_dato").toLocalDateTime(),
         persongalleri = Persongalleri(
             innsender = rs.getString("innsender"),
             soeker = rs.getString("soeker"),
@@ -125,6 +135,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         type = rs.getString("behandlingstype").let { BehandlingType.valueOf(it) },
         oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) },
+        revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) }
     )
 
     fun opprettFoerstegangsbehandling(foerstegangsbehandling: Foerstegangsbehandling) {
@@ -168,7 +179,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 """
-                INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, oppgave_status )
+                INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype , innsender, soeker, gjenlevende, avdoed, soesken, oppgave_status, revurdering_aarsak )
                  VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimIndent()
             )
         with(revurdering) {
@@ -184,20 +195,17 @@ class BehandlingDao(private val connection: () -> Connection) {
             )
             stmt.setString(5, status.name)
             stmt.setString(6, type.name)
-            stmt.setTimestamp(
-                7,
-                Timestamp.from(soeknadMottattDato.atZone(ZoneId.systemDefault()).toInstant())
-            )
             with(persongalleri) {
-                stmt.setString(8, innsender)
-                stmt.setString(9, soeker)
-                stmt.setString(10, gjenlevende.toJson())
-                stmt.setString(11, avdoed.toJson())
-                stmt.setString(12, soesken.toJson())
+                stmt.setString(7, innsender)
+                stmt.setString(8, soeker)
+                stmt.setString(9, gjenlevende.toJson())
+                stmt.setString(10, avdoed.toJson())
+                stmt.setString(11, soesken.toJson())
             }
-            stmt.setString(13, oppgaveStatus?.name)
+            stmt.setString(12, oppgaveStatus?.name)
+            stmt.setString(13, revurderingsaarsak.name)
         }
-        stmt.executeUpdate()
+        require(stmt.executeUpdate() == 1)
     }
 
 

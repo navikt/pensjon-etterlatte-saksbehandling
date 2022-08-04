@@ -10,8 +10,10 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
+import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.persongalleri
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.revurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -19,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import java.sql.Connection
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -41,7 +44,11 @@ class RealRevurderingServiceTest {
     fun `skal hente revurdering`() {
         val id = UUID.randomUUID()
         val behandlingerMock = mockk<BehandlingDao> {
-            every { hentBehandling(id = id, type = BehandlingType.REVURDERING) } returns revurdering(id = id, sak = 1)
+            every { hentBehandling(id = id, type = BehandlingType.REVURDERING) } returns revurdering(
+                id = id,
+                sak = 1,
+                revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+            )
         }
         val hendelserMock = mockk<HendelseDao>() {
             every { behandlingOpprettet(any()) } returns Unit
@@ -61,11 +68,11 @@ class RealRevurderingServiceTest {
     fun `skal hente alle revurderinger`() {
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandlingerAvType(type = BehandlingType.REVURDERING) } returns listOf(
-                revurdering(sak = 1),
-                revurdering(sak = 2),
-                revurdering(sak = 3),
-                revurdering(sak = 4),
-                revurdering(sak = 5)
+                revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                revurdering(sak = 2, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                revurdering(sak = 3, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                revurdering(sak = 4, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+                revurdering(sak = 5, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
             )
         }
         val hendelserMock = mockk<HendelseDao>()
@@ -85,7 +92,10 @@ class RealRevurderingServiceTest {
         val mottattDato = LocalDateTime.now()
         val behandlingOpprettes = slot<Revurdering>()
         val behandlingHentes = slot<UUID>()
-        val revurdering = revurdering(sak = 1, soeknadMottattDato = mottattDato)
+        val forrigeBehandling = foerstegangsbehandling(sak = 1)
+        val doedsHendelse = Doedshendelse("12345678911", LocalDate.of(2022, 1, 1))
+        val revurdering =
+            revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
         val behandlingerMock = mockk<BehandlingDao> {
             every { opprettRevurdering(capture(behandlingOpprettes)) } returns Unit
@@ -102,17 +112,18 @@ class RealRevurderingServiceTest {
             behandlingerMock, RevurderingFactory(behandlingerMock, hendelserMock), hendelsesKanal
         )
 
-        val opprettetRevurdering = sut.startRevurdering(1, persongalleri(), mottattDato.toString())
+        val opprettetRevurdering =
+            sut.startRevurdering(forrigeBehandling, doedsHendelse, RevurderingAarsak.SOEKER_DOD)
 
         assertAll(
             "skal starte revurdering",
             { assertEquals(revurdering.sak, opprettetRevurdering.sak) },
             { assertEquals(revurdering.id, opprettetRevurdering.id) },
             { assertEquals(revurdering.persongalleri, opprettetRevurdering.persongalleri) },
-            { assertEquals(revurdering.soeknadMottattDato, opprettetRevurdering.soeknadMottattDato) },
             { assertEquals(revurdering.behandlingOpprettet, opprettetRevurdering.behandlingOpprettet) },
             { assertEquals(revurdering.status, opprettetRevurdering.status) },
             { assertEquals(revurdering.oppgaveStatus, opprettetRevurdering.oppgaveStatus) },
+            { assertEquals(revurdering.revurderingsaarsak, opprettetRevurdering.revurderingsaarsak) },
             { assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id) },
             { assertEquals(1, behandlingOpprettes.captured.sak) },
             { assertEquals(opprettetRevurdering.id, hendelse.captured.first) },

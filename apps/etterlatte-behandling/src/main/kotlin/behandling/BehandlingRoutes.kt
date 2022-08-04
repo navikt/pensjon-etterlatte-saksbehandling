@@ -1,18 +1,29 @@
 package no.nav.etterlatte.behandling
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
+import io.ktor.server.application.log
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.application
+import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
 
@@ -35,7 +46,7 @@ fun Route.behandlingRoutes(
                             it.id,
                             it.sak,
                             it.status,
-                            it.soeknadMottattDato,
+                            if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
                             it.behandlingOpprettet
                         )
                     }
@@ -50,36 +61,36 @@ fun Route.behandlingRoutes(
                         BehandlingType.FØRSTEGANGSBEHANDLING -> {
                             with(foerstegangsbehandlingService.hentBehandling(behandlingsId)!!) {
                                 DetaljertBehandling(
-                                    id,
-                                    sak,
-                                    behandlingOpprettet,
-                                    sistEndret,
-                                    soeknadMottattDato,
-                                    persongalleri.innsender,
-                                    persongalleri.soeker,
-                                    persongalleri.gjenlevende,
-                                    persongalleri.avdoed,
-                                    persongalleri.soesken,
-                                    gyldighetsproeving,
-                                    status,
+                                    id = id,
+                                    sak = sak,
+                                    behandlingOpprettet = behandlingOpprettet,
+                                    sistEndret = sistEndret,
+                                    soeknadMottattDato = soeknadMottattDato,
+                                    innsender = persongalleri.innsender,
+                                    soeker = persongalleri.soeker,
+                                    gjenlevende = persongalleri.gjenlevende,
+                                    avdoed = persongalleri.avdoed,
+                                    soesken = persongalleri.soesken,
+                                    gyldighetsproeving = gyldighetsproeving,
+                                    status = status,
                                 )
                             }
                         }
                         BehandlingType.REVURDERING -> {
                             with(revurderingService.hentRevurdering(behandlingsId)!!) {
                                 DetaljertBehandling(
-                                    id,
-                                    sak,
-                                    behandlingOpprettet,
-                                    sistEndret,
-                                    soeknadMottattDato,
-                                    persongalleri.innsender,
-                                    persongalleri.soeker,
-                                    persongalleri.gjenlevende,
-                                    persongalleri.avdoed,
-                                    persongalleri.soesken,
-                                    null,
-                                    status,
+                                    id = id,
+                                    sak = sak,
+                                    behandlingOpprettet = behandlingOpprettet,
+                                    sistEndret = sistEndret,
+                                    soeknadMottattDato = behandlingOpprettet,
+                                    innsender = persongalleri.innsender,
+                                    soeker = persongalleri.soeker,
+                                    gjenlevende = persongalleri.gjenlevende,
+                                    avdoed = persongalleri.avdoed,
+                                    soesken = persongalleri.soesken,
+                                    gyldighetsproeving = null,
+                                    status = status,
                                 )
                             }
                         }
@@ -96,7 +107,8 @@ fun Route.behandlingRoutes(
 
                     get {
                         call.respond(
-                            generellBehandlingService.hentHendelserIBehandling(behandlingsId).let { LagretHendelser(it) }
+                            generellBehandlingService.hentHendelserIBehandling(behandlingsId)
+                                .let { LagretHendelser(it) }
                         )
                     }
 
@@ -139,7 +151,7 @@ fun Route.behandlingRoutes(
                                 it.id,
                                 it.sak,
                                 it.status,
-                                it.soeknadMottattDato,
+                                if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
                                 it.behandlingOpprettet
                             )
                         }
@@ -207,7 +219,7 @@ fun Route.behandlingRoutes(
                         it.sak,
                         it.behandlingOpprettet,
                         it.sistEndret,
-                        it.soeknadMottattDato,
+                        it.behandlingOpprettet,
                         it.persongalleri.innsender,
                         it.persongalleri.soeker,
                         it.persongalleri.gjenlevende,
@@ -219,21 +231,41 @@ fun Route.behandlingRoutes(
                 } ?: HttpStatusCode.NotFound)
             }
 
+            route("/pdlhendelse") {
 
-            post { //Søk
-                val behandlingsBehov = call.receive<BehandlingsBehov>()
+                // TODO: finne ut av hva som skal gjøres dersom det allerede finnes en revurdering som er under behandling når det kommer inn en hendelse
+                route("/doedshendelse") {
+                    post {
+                        val doedshendelse = call.receive<Doedshendelse>()
 
-                revurderingService.startRevurdering(
-                    behandlingsBehov.sak,
-                    behandlingsBehov.persongalleri,
-                    behandlingsBehov.mottattDato,
-                )
-                    .also { call.respondText(it.id.toString()) }
+                        call.respond(
+                            generellBehandlingService.alleBehandlingerForSoekerMedFnr(doedshendelse.avdoedFnr)
+                                .sortedByDescending { it.behandlingOpprettet }
+                                .takeUnless { it.any { it.type == BehandlingType.REVURDERING && (it as Revurdering).revurderingsaarsak == RevurderingAarsak.SOEKER_DOD } }// TODO: fjern denne naar problemet med flere dødshendelser postet er løst
+                                ?.takeIf {
+                                    it.isNotEmpty()
+                                }?.first {
+                                    it.status in listOf(
+                                        BehandlingStatus.OPPRETTET,
+                                        BehandlingStatus.GYLDIG_SOEKNAD,
+                                        BehandlingStatus.UNDER_BEHANDLING,
+                                        BehandlingStatus.FATTET_VEDTAK,
+                                        BehandlingStatus.ATTESTERT,
+                                        BehandlingStatus.RETURNERT,
+                                        BehandlingStatus.IVERKSATT,
+                                    )
+                                }?.let {
+                                    revurderingService.startRevurdering(it, doedshendelse, RevurderingAarsak.SOEKER_DOD)
+                                }
+                                ?: HttpStatusCode.OK)
+                    }
+                }
+
             }
         }
     }
 
-    //TODO: fases ut -> nytt endepunkt: /behandlinger/foerstegangsbehandling
+//TODO: fases ut -> nytt endepunkt: /behandlinger/foerstegangsbehandling
     post {
         val behandlingsBehov = call.receive<BehandlingsBehov>()
 
@@ -257,7 +289,7 @@ fun Route.behandlingRoutes(
                             it.id,
                             it.sak,
                             it.status,
-                            it.soeknadMottattDato,
+                            if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
                             it.behandlingOpprettet
                         )
                     }

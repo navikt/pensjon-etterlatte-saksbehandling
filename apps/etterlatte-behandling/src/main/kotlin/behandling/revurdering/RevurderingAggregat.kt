@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -26,7 +27,7 @@ class RevurderingAggregat(
         fun opprettRevurdering(
             sak: Long,
             persongalleri: Persongalleri,
-            mottattDato: String,
+            revurderingAarsak: RevurderingAarsak,
             behandlinger: BehandlingDao,
             hendelser: HendelseDao
         ): RevurderingAggregat {
@@ -37,10 +38,10 @@ class RevurderingAggregat(
                 behandlingOpprettet = LocalDateTime.now(),
                 sistEndret = LocalDateTime.now(),
                 status = BehandlingStatus.OPPRETTET,
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                soeknadMottattDato = LocalDateTime.parse(mottattDato),
+                type = BehandlingType.REVURDERING,
                 persongalleri = persongalleri,
-                oppgaveStatus = OppgaveStatus.NY
+                oppgaveStatus = OppgaveStatus.NY,
+                revurderingsaarsak = revurderingAarsak
             )
                 .also {
                     behandlinger.opprettRevurdering(it)
@@ -51,8 +52,6 @@ class RevurderingAggregat(
         }
     }
 
-    var lagretBehandling: Revurdering =
-        requireNotNull(behandlinger.hentBehandling(id, BehandlingType.REVURDERING) as Revurdering)
 
     private object TilgangDao {
         fun sjekkOmBehandlingTillatesEndret(behandling: Behandling): Boolean {
@@ -65,6 +64,9 @@ class RevurderingAggregat(
             )
         }
     }
+
+    var lagretBehandling: Revurdering =
+        requireNotNull(behandlinger.hentBehandling(id, BehandlingType.REVURDERING) as Revurdering)
 
     fun avbrytBehandling() {
         lagretBehandling = lagretBehandling.copy(

@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.Revurdering
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import java.time.LocalDateTime
 import java.util.*
@@ -38,8 +39,8 @@ fun revurdering(
     sistEndret: LocalDateTime = LocalDateTime.now(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     oppgaveStatus: OppgaveStatus = OppgaveStatus.NY,
-    soeknadMottattDato: LocalDateTime = LocalDateTime.now(),
     persongalleri: Persongalleri = persongalleri(),
+    revurderingAarsak: RevurderingAarsak
 ) = Revurdering(
     id = id,
     sak = sak,
@@ -47,8 +48,8 @@ fun revurdering(
     sistEndret = sistEndret,
     status = status,
     oppgaveStatus = oppgaveStatus,
-    soeknadMottattDato = soeknadMottattDato,
-    persongalleri = persongalleri
+    persongalleri = persongalleri,
+    revurderingsaarsak = revurderingAarsak
 )
 
 fun persongalleri(

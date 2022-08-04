@@ -66,7 +66,7 @@ class FoerstegangsbehandlingAggregat(
         }
     }
 
-    var lagretBehandling =
+    var lagretBehandling: Foerstegangsbehandling =
         requireNotNull(behandlinger.hentBehandling(id, BehandlingType.FØRSTEGANGSBEHANDLING) as Foerstegangsbehandling)
 
     fun lagreGyldighetprøving(gyldighetsproeving: GyldighetsResultat) {

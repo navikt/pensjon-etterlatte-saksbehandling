@@ -23,17 +23,18 @@ class Dodsmeldinger(config: AppConfig) : IDodsmeldinger {
     }
 
     override fun personErDod(ident: String, doedsdato: String?) {
-        logger.info("Poster at person $ident er død")
+        logger.info("Poster at person $ident er doed")
         producer.send(ProducerRecord("etterlatte.dodsmelding",
             UUID.randomUUID().toString(), JsonMessage("{}", MessageProblems("{}"))
-            .apply {
-                set(eventNameKey, "person_dod")
-                set("avdod_ident", ident)
-                doedsdato?.also {
-                    set("avdod_doedsdato", it)
+                .apply {
+                    set(eventNameKey, "PDL:PERSONHENDELSE")
+                    set("hendelse", "DOEDSFALL_V1")
+                    set("avdoed_fnr", ident)
+                    doedsdato?.also {
+                        set("avdoed_doedsdato", it)
+                    }
                 }
-            }
-            .toJson()))
+                .toJson()))
     }
 
 }
@@ -43,13 +44,14 @@ class DodsmeldingerRapid(private val context: RapidsConnection) : IDodsmeldinger
     val logger = LoggerFactory.getLogger(this.javaClass)
 
     override fun personErDod(ident: String, doedsdato: String?) {
-        logger.info("Poster at person $ident er død")
+        logger.info("Poster at person $ident er doed")
         context.publish(UUID.randomUUID().toString(), JsonMessage("{}", MessageProblems("{}"))
             .apply {
-                set(eventNameKey, "person_dod")
-                set("avdod_ident", ident)
+                set(eventNameKey, "PDL:PERSONHENDELSE")
+                set("hendelse", "DOEDSFALL_V1")
+                set("avdoed_fnr", ident)
                 doedsdato?.also {
-                    set("avdod_doedsdato", it)
+                    set("avdoed_doedsdato", it)
                 }
             }
             .toJson())

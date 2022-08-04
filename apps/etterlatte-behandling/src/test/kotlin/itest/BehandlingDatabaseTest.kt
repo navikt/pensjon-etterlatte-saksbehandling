@@ -8,6 +8,7 @@ import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
@@ -108,7 +109,11 @@ internal class BehandlingDaoIntegrationTest {
         val sak1 = sakRepo.opprettSak("123", "BP").id
         val behandlingOpprettet = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
 
-        val behandling = revurdering(sak = sak1, behandlingOpprettet = behandlingOpprettet)
+        val behandling = revurdering(
+            sak = sak1,
+            behandlingOpprettet = behandlingOpprettet,
+            revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+        )
         behandlingRepo.opprettRevurdering(behandling)
         val opprettetBehandling =
             requireNotNull(
@@ -246,7 +251,7 @@ internal class BehandlingDaoIntegrationTest {
 
         val sak1 = sakRepo.opprettSak("123", "BP").id
 
-        val revurdering = revurdering(sak = sak1)
+        val revurdering = revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
             .also {
                 behandlingRepo.opprettRevurdering(it)
             }
@@ -279,7 +284,7 @@ internal class BehandlingDaoIntegrationTest {
 
         val sak1 = sakRepo.opprettSak("123", "BP").id
 
-        val revurdering = revurdering(sak = sak1)
+        val revurdering = revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
             .also {
                 behandlingRepo.opprettRevurdering(it)
             }
@@ -294,8 +299,8 @@ internal class BehandlingDaoIntegrationTest {
         val sak1 = sakRepo.opprettSak("123", "BP").id
 
         listOf(
-            revurdering(sak = sak1),
-            revurdering(sak = sak1)
+            revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+            revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
         ).forEach {
             behandlingRepo.opprettRevurdering(it)
         }
@@ -321,8 +326,8 @@ internal class BehandlingDaoIntegrationTest {
         val sak1 = sakRepo.opprettSak("1234", "BP").id
 
         val rev = listOf(
-            revurdering(sak = sak1),
-            revurdering(sak = sak1)
+            revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+            revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
         ).forEach {
             behandlingRepo.opprettRevurdering(it)
         }

@@ -14,7 +14,6 @@ import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
 import no.nav.etterlatte.tilbakekreving.config.ApplicationProperties
 import no.nav.etterlatte.tilbakekreving.config.JmsConnectionFactory
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.TilbakekrevingEvent
-import org.junit.Ignore
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll

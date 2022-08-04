@@ -1,22 +1,33 @@
 package no.nav.etterlatte
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.http.*
+
+import io.ktor.client.HttpClient
+import io.ktor.client.request.delete
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
 
 
 interface Behandling {
     fun grunnlagEndretISak(sak: Long)
-    fun vedtakHendelse(behandlingid: UUID, hendelse: String,
-                       vedtakId: Long,
-                       inntruffet: Tidspunkt,
-                       saksbehandler: String?,
-                       kommentar: String?,
-                       valgtBegrunnelse: String?)
+    fun vedtakHendelse(
+        behandlingid: UUID, hendelse: String,
+        vedtakId: Long,
+        inntruffet: Tidspunkt,
+        saksbehandler: String?,
+        kommentar: String?,
+        valgtBegrunnelse: String?
+    )
+
     fun slettSakOgBehandlinger(sakId: Long)
+
+    fun sendDoedshendelse(doedshendelse: Doedshendelse)
 }
+
 class BehandlingsService(
     private val behandling_app: HttpClient,
     private val url: String,
@@ -26,12 +37,15 @@ class BehandlingsService(
             behandling_app.post("$url/saker/$sak/hendelse/grunnlagendret") {}
         }
     }
-    override fun vedtakHendelse(behandlingid: UUID, hendelse: String,
-                                vedtakId: Long,
-                                inntruffet: Tidspunkt,
-                                saksbehandler: String?,
-                                kommentar: String?,
-                                valgtBegrunnelse: String?) {
+
+    override fun vedtakHendelse(
+        behandlingid: UUID, hendelse: String,
+        vedtakId: Long,
+        inntruffet: Tidspunkt,
+        saksbehandler: String?,
+        kommentar: String?,
+        valgtBegrunnelse: String?
+    ) {
         runBlocking {
             behandling_app.post("$url/behandlinger/$behandlingid/hendelser/vedtak/$hendelse") {
                 contentType(ContentType.Application.Json)
@@ -47,6 +61,16 @@ class BehandlingsService(
         }
     }
 
+    override fun sendDoedshendelse(doedshendelse: Doedshendelse) {
+        runBlocking {
+            behandling_app.post("$url/behandlinger/revurdering/pdlhendelse/doedshendelse") {
+                contentType(ContentType.Application.Json)
+                setBody(doedshendelse)
+            }
+        }
+    }
+
+
 }
 
 
@@ -57,3 +81,6 @@ data class VedtakHendelse(
     val kommentar: String?,
     val valgtBegrunnelse: String?,
 )
+
+data class Sak(val ident: String, val sakType: String, val id: Long)
+data class Saker(val saker: List<Sak>)

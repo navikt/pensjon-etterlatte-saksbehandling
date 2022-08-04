@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 
 interface EtterlatteGrunnlag {
     suspend fun finnOpplysning(
-        sakId: String,
+        sakId: Long,
         opplysningsType: Opplysningstyper,
         accessToken: String
     ): Grunnlagsopplysning<ObjectNode>
@@ -31,7 +31,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnla
     private val resourceUrl = config.getString("grunnlag.resource.url")
 
     override suspend fun finnOpplysning(
-        sakId: String,
+        sakId: Long,
         opplysningsType: Opplysningstyper,
         accessToken: String
     ): Grunnlagsopplysning<ObjectNode> {

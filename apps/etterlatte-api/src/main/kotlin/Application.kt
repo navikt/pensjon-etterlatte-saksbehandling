@@ -30,10 +30,11 @@ class ApplicationContext(configLocation: String? = null) {
         behandlingKlient = behandlingKlient,
         pdlKlient = PdltjenesterKlient(config, httpClient()),
         vedtakKlient = vedtakKlient,
+        grunnlagKlient = grunnlagKlient
     )
     val oppgaveService: OppgaveService = OppgaveService(behandlingKlient, vedtakKlient)
     val vedtakService = VedtakService(rapid)
-    val grunnlagService = GrunnlagService(grunnlagKlient, behandlingKlient, rapid)
+    val grunnlagService = GrunnlagService(behandlingKlient, rapid)
 
     private fun httpClient() = HttpClient {
         install(ContentNegotiation) {

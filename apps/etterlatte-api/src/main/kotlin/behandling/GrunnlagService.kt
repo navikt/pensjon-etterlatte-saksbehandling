@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -15,18 +14,9 @@ import java.util.*
 data class GrunnlagResult(val response: String)
 
 class GrunnlagService(
-    private val grunnlagKlient: EtterlatteGrunnlag,
     private val behandlingKlient: BehandlingKlient,
     private val rapid: KafkaProdusent<String, String>
 ) {
-    suspend fun finnOpplysning(
-        sakId: String,
-        opplysningsType: Opplysningstyper,
-        accessToken: String
-    ): Grunnlagsopplysning<ObjectNode> {
-        return grunnlagKlient.finnOpplysning(sakId, opplysningsType, accessToken)
-    }
-
     suspend fun lagreResultatKommerBarnetTilgode(
         behandlingId: String,
         svar: String,

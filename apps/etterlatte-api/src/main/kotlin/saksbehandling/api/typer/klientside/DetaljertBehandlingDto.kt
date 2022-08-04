@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.typer.LagretHendelse
@@ -28,5 +29,6 @@ data class DetaljertBehandlingDto(
     val soeknadMottattDato: LocalDateTime?,
     val virkningstidspunkt: LocalDate?,
     val status: BehandlingStatus?,
-    val hendelser: List<LagretHendelse>?
+    val hendelser: List<LagretHendelse>?,
+    val avdoedesBarn: List<Person> = emptyList()
 )

@@ -1,17 +1,20 @@
 package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
+import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.DetaljertBehandlingDto
+import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
-import no.nav.etterlatte.typer.LagretHendelser
 import org.slf4j.LoggerFactory
 
 
@@ -25,7 +28,8 @@ data class BehandlingsBehov(
 class BehandlingService(
     private val behandlingKlient: BehandlingKlient,
     private val pdlKlient: PdltjenesterKlient,
-    private val vedtakKlient: EtterlatteVedtak
+    private val vedtakKlient: EtterlatteVedtak,
+    private val grunnlagKlient: EtterlatteGrunnlag
 ) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
 
@@ -58,25 +62,29 @@ class BehandlingService(
         val behandling = async { behandlingKlient.hentBehandling(behandlingId, accessToken) }
         val vedtak = async { vedtakKlient.hentVedtak(behandlingId, accessToken) }
         val hendelser = async { behandlingKlient.hentHendelserForBehandling(behandlingId, accessToken) }
-            DetaljertBehandlingDto(
-                id = behandling.await().id,
-                sak = behandling.await().sak,
-                gyldighetsprøving = behandling.await().gyldighetsproeving,
-                kommerSoekerTilgode = vedtak.await().kommerSoekerTilgodeResultat,
-                vilkårsprøving = vedtak.await().vilkaarsResultat,
-                beregning = vedtak.await().beregningsResultat,
-                avkortning = vedtak.await().avkortingsResultat,
-                saksbehandlerId = vedtak.await().saksbehandlerId,
-                fastsatt = vedtak.await().vedtakFattet,
-                datoFattet = vedtak.await().datoFattet,
-                datoattestert = vedtak.await().datoattestert,
-                attestant = vedtak.await().attestant,
-                soeknadMottattDato = behandling.await().soeknadMottattDato,
-                virkningstidspunkt = vedtak.await().virkningsDato,
-                status = behandling.await().status,
-                hendelser = hendelser.await().hendelser,
-            )
+        val avdoed = async { // todo: tar ikke høyde for at to foreldre kan være døde.
+            grunnlagKlient.finnOpplysning(behandling.await().sak, Opplysningstyper.AVDOED_PDL_V1, accessToken)
+        }
 
+        DetaljertBehandlingDto(
+            id = behandling.await().id,
+            sak = behandling.await().sak,
+            gyldighetsprøving = behandling.await().gyldighetsproeving,
+            kommerSoekerTilgode = vedtak.await().kommerSoekerTilgodeResultat,
+            vilkårsprøving = vedtak.await().vilkaarsResultat,
+            beregning = vedtak.await().beregningsResultat,
+            avkortning = vedtak.await().avkortingsResultat,
+            saksbehandlerId = vedtak.await().saksbehandlerId,
+            fastsatt = vedtak.await().vedtakFattet,
+            datoFattet = vedtak.await().datoFattet,
+            datoattestert = vedtak.await().datoattestert,
+            attestant = vedtak.await().attestant,
+            soeknadMottattDato = behandling.await().soeknadMottattDato,
+            virkningstidspunkt = vedtak.await().virkningsDato,
+            status = behandling.await().status,
+            hendelser = hendelser.await().hendelser,
+            avdoedesBarn = avdoed.await().finnAvdoedesBarn()
+        )
     }
 
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag {
@@ -99,3 +107,6 @@ class BehandlingService(
     }
 
 }
+
+fun Grunnlagsopplysning<ObjectNode>.finnAvdoedesBarn(): List<Person> =
+    objectMapper.readValue<Person>(this.opplysning.toString()).avdoedesBarn ?: emptyList()

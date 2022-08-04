@@ -7,21 +7,10 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.etterlatte.getAccessToken
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 
 fun Route.grunnlagRoute(service: GrunnlagService) {
 
     route("/grunnlag") {
-        get("{sakId}/opplysning/{opplysningType}") {
-            val sakId = requireNotNull(call.parameters["sakId"])
-            val opplysningType = requireNotNull(call.parameters["opplysningType"])
-            val accessToken = getAccessToken(call)
-
-            val opplysning = service.finnOpplysning(sakId, Opplysningstyper.valueOf(opplysningType), accessToken)
-
-            call.respond(opplysning)
-        }
-
         post("/kommertilgode/{behandlingId}") {
 
             try {

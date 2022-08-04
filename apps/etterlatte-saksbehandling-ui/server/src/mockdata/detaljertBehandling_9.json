@@ -844,5 +844,69 @@
       "kommentar": "Masse masse feil i alle vurderingene! ",
       "valgtBegrunnelse": "Inngangsvilkår feilvurdert"
     }
+  ],
+  "avdoedesBarn": [
+    {
+      "fornavn": "BRÅKETE",
+      "etternavn": "SØSTER",
+      "foedselsnummer": "03108718357",
+      "foedselsdato": "2019-10-03",
+      "foedselsaar": 1987,
+      "foedeland": "NOR",
+      "doedsdato": null,
+      "adressebeskyttelse": "UGRADERT",
+      "bostedsadresse": [
+        {
+          "type": "VEGADRESSE",
+          "aktiv": true,
+          "coAdresseNavn": null,
+          "adresseLinje1": "Jernbaneveien 22",
+          "adresseLinje2": null,
+          "adresseLinje3": null,
+          "postnr": "1400",
+          "poststed": null,
+          "land": null,
+          "kilde": "FREG",
+          "gyldigFraOgMed": "1999-01-01T00:00:00",
+          "gyldigTilOgMed": null
+        }
+      ],
+      "deltBostedsadresse": null,
+      "kontaktadresse": null,
+      "oppholdsadresse": [],
+      "sivilstatus": "UGIFT",
+      "statsborgerskap": "NOR"
+    },
+    {
+      "fornavn": "ROLIG",
+      "etternavn": "BROR",
+      "foedselsnummer": "03108718357",
+      "foedselsdato": "2015-10-03",
+      "foedselsaar": 1987,
+      "foedeland": "NOR",
+      "doedsdato": null,
+      "adressebeskyttelse": "UGRADERT",
+      "bostedsadresse": [
+        {
+          "type": "VEGADRESSE",
+          "aktiv": true,
+          "coAdresseNavn": null,
+          "adresseLinje1": "Fyrstikkalleen 1",
+          "adresseLinje2": null,
+          "adresseLinje3": null,
+          "postnr": "0620",
+          "poststed": null,
+          "land": null,
+          "kilde": "FREG",
+          "gyldigFraOgMed": "1999-01-01T00:00:00",
+          "gyldigTilOgMed": null
+        }
+      ],
+      "deltBostedsadresse": null,
+      "kontaktadresse": null,
+      "oppholdsadresse": [],
+      "sivilstatus": "UGIFT",
+      "statsborgerskap": "NOR"
+    }
   ]
 }

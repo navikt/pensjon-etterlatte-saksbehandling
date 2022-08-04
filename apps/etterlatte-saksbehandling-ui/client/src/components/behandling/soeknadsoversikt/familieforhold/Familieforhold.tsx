@@ -12,6 +12,7 @@ import {
   IGyldighetproving,
   VurderingsResultat,
 } from '../../../../store/reducers/BehandlingReducer'
+import {Soesken} from "./personer/Soesken";
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
@@ -56,6 +57,12 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ behandling }) =>
             />
             <DashedBorder />
             <AvdoedForelder person={behandling.kommerSoekerTilgode.familieforhold.avdoed} />
+            <DashedBorder/>
+            <Soesken
+              soeker={behandling.kommerSoekerTilgode.familieforhold.soeker}
+              avdoedesBarn={behandling.avdoedesBarn}
+              avdoed={behandling.kommerSoekerTilgode.familieforhold.avdoed}
+            />
           </FamilieforholdWrapper>
           <Border />
         </>

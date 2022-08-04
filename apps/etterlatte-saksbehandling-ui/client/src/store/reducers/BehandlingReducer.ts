@@ -17,6 +17,7 @@ export interface IDetaljertBehandling {
   virkningstidspunkt: string
   status: IBehandlingStatus
   hendelser: IHendelse[]
+  avdoedesBarn: IPdlPerson[]
 }
 
 export interface IHendelse {
@@ -253,6 +254,18 @@ export interface IPerson {
   foedselsdato: string
 }
 
+export interface IPdlPerson {
+  fornavn: string
+  etternavn: string
+  foedselsnummer: string
+  foedselsdato: Date
+  bostedsadresse?: IAdresse[]
+  deltBostedsadresse?: IAdresse[]
+  kontaktadresse?: IAdresse[]
+  oppholdsadresse?: IAdresse[]
+  // ...
+}
+
 export enum PersonType {
   INNSENDER = 'INNSENDER',
   GJENLEVENDE = ' GJENLEVENDE',
@@ -289,6 +302,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   soeknadMottattDato: '',
   virkningstidspunkt: '',
   hendelser: [],
+  avdoedesBarn: []
 }
 
 export const behandlingReducer = (state = detaljertBehandlingInitialState, action: IAction): any => {

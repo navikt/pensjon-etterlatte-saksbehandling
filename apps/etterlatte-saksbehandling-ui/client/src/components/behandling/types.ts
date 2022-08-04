@@ -1,6 +1,7 @@
 export enum RelatertPersonsRolle {
   BARN = 'barn',
   FORELDER = 'forelder',
+  SOESKEN = 'søsken'
 }
 
 export enum PersonStatus {

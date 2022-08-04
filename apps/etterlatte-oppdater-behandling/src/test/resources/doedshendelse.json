@@ -1,0 +1,7 @@
+{
+  "system_read_count": 0,
+  "@event_name": "PDL:PERSONHENDELSE",
+  "hendelse": "DOEDSFALL_V1",
+  "avdoed_fnr": "12101376212",
+  "avdoed_doedsdato": "2022-01-01"
+}

@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
+import no.nav.person.pdl.leesah.doedsfall.Doedsfall
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
 
 class IntegrationTest {
 
@@ -74,7 +76,7 @@ class IntegrationTest {
                     null,
                     null,
                     null,
-                    null,
+                    Doedsfall(LocalDate.of(2022, 1, 1)),
                     null,
                     null,
                     null,
@@ -101,7 +103,7 @@ class IntegrationTest {
         }.forEach {
             val msg = JsonMessage(it.value(), MessageProblems(it.value()))
             println(it.value())
-            msg.interestedIn("avdoed_fnr", eventNameKey, "system_read_count")
+            msg.interestedIn("avdoed_fnr", "avdoed_doedsdato", eventNameKey, "system_read_count")
             assertEquals("70078749472", msg["avdoed_fnr"].textValue())
             assertEquals("PDL:PERSONHENDELSE", msg[eventNameKey].textValue())
             assertEquals(1, msg["system_read_count"].asInt())

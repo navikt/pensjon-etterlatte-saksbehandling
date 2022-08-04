@@ -31,9 +31,11 @@ internal class PdlHendelser(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             logger.info("Mottatt hendelse fra pdl: ${packet["hendelse"]}")
-            val avdoedFnr = packet["avdoed_fnr"].toString()
+            val avdoedFnr = packet["avdoed_fnr"].asText()
             val avdoedDoedsdato: LocalDate? =
-                packet["avdoed_doedsdato"]?.let { LocalDate.parse(it.toString(), DateTimeFormatter.ISO_LOCAL_DATE) }
+                packet["avdoed_doedsdato"]?.let {
+                    LocalDate.parse(it.asText(), DateTimeFormatter.ISO_LOCAL_DATE)
+                }
             val doedshendelse = Doedshendelse(avdoedFnr, avdoedDoedsdato)
             behandlinger.sendDoedshendelse(doedshendelse)
         }

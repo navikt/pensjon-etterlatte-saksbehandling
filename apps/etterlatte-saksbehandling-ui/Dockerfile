@@ -6,9 +6,9 @@ COPY ./client/build ./client
 COPY ./server/build ./server
 COPY ./server/package.json ./server
 
-RUN cd ./server && npm install --production
-
 ENV NODE_ENV="production"
+
+RUN cd ./server && yarn install --frozen-lockfile
 
 EXPOSE 4000
 

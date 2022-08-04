@@ -31,8 +31,8 @@ jobs:
       - name: Install and build
         working-directory: apps/${{ env.APP_NAME }}
         run: |
-          yarn --cwd client install && yarn --cwd client build
-          yarn --cwd server install && yarn --cwd server build
+          yarn --cwd client install --frozen-lockfile && yarn --cwd client build
+          yarn --cwd server install --frozen-lockfile && yarn --cwd server build
       - name: Run tests
         working-directory: apps/${{ env.APP_NAME }}/client
         run: |

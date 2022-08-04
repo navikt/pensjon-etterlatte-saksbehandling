@@ -1,11 +1,11 @@
 import { IOppgaveFelt, IOppgaveFelter } from '../typer/oppgavefelter'
 import React, { useRef } from 'react'
-import { Label } from 'nav-frontend-skjema'
 import DatePicker from 'react-datepicker'
 import { parse } from 'date-fns'
 import styled from 'styled-components'
 import { FilterElement } from '../styled'
 import { settFilterVerdi } from './setFilterVerdi'
+import { Label } from '@navikt/ds-react'
 
 type Props = {
   oppgaveFelt: IOppgaveFelt
@@ -23,7 +23,7 @@ const DateColumnFilter: React.FC<Props> = ({ oppgaveFelt, oppgaveFelter, setOppg
   return (
     <FilterElement>
       <section>
-        <Label htmlFor={oppgaveFelt.label}>{oppgaveFelt.label}</Label>
+        <Label size="small">{oppgaveFelt.label}</Label>
 
         <Datovelger>
           <DatePicker
@@ -63,7 +63,7 @@ const DateColumnFilter: React.FC<Props> = ({ oppgaveFelt, oppgaveFelter, setOppg
 
 const parseDate = (dato?: Date | string) => {
   if (!dato) return
-  else if (typeof dato === 'string') return parse(dato, "dd.MM.yyyy", new Date())
+  else if (typeof dato === 'string') return parse(dato, 'dd.MM.yyyy', new Date())
   else return dato
 }
 
@@ -75,6 +75,7 @@ const Datovelger = styled.div`
     border-right: none;
     border-radius: 4px 0 0 4px;
     width: 154px;
+    height: 40px;
   }
 `
 const KalenderIkon = styled.div`

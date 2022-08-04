@@ -1,8 +1,8 @@
 import { FilterElement, FilterWrapper } from '../styled'
-import { Input } from 'nav-frontend-skjema'
 import React from 'react'
 import { IOppgaveFelt, IOppgaveFelter } from '../typer/oppgavefelter'
 import { settFilterVerdi } from './setFilterVerdi'
+import { TextField } from '@navikt/ds-react'
 
 type Props = {
   oppgaveFelt: IOppgaveFelt
@@ -14,14 +14,14 @@ const StringColumnFilter: React.FC<Props> = ({ oppgaveFelt, oppgaveFelter, setOp
   return (
     <FilterWrapper>
       <FilterElement>
-        <Input
-          bredde={'L'}
+        <TextField
+          size={'small'}
           label={oppgaveFelt.label}
           value={oppgaveFelt.filter?.selectedValue}
           onChange={(e) => {
             settFilterVerdi(oppgaveFelt, e.target.value, oppgaveFelter, setOppgaveFelter)
           }}
-          placeholder={'Søk '}
+          placeholder={'Søk'}
         />
       </FilterElement>
     </FilterWrapper>

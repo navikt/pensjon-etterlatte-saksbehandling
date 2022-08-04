@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import { TextField } from '@navikt/ds-react'
+import { useEffect, useState } from 'react'
 import { useAsyncDebounce } from 'react-table'
-import { Input } from 'nav-frontend-skjema'
 import { FilterElement, FilterWrapper } from '../styled'
 
 export const GlobalFilter = ({
@@ -28,8 +28,8 @@ export const GlobalFilter = ({
   return (
     <FilterWrapper>
       <FilterElement>
-        <Input
-          bredde={'L'}
+        <TextField
+          size="small"
           label={'Søk: '}
           value={value}
           onChange={(e) => {

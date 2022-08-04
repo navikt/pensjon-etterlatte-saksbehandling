@@ -1,4 +1,4 @@
-import { Button, Loader, Modal, Select } from '@navikt/ds-react'
+import { Button, Checkbox, Loader, Modal, Panel, Select } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { Add } from '@navikt/ds-icons'
 import styled from 'styled-components'
@@ -12,10 +12,9 @@ import {
 } from '../../../../shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Border } from '../../soeknadsoversikt/styled'
-import { CheckboksPanel } from 'nav-frontend-skjema'
 import { Column, GridContainer } from '../../../../shared/styled'
-import { ManuellAdresse } from "./manuell-adresse";
-import {PdfVisning} from "../pdf-visning";
+import { ManuellAdresse } from './manuell-adresse'
+import { PdfVisning } from '../pdf-visning'
 
 const CustomModal = styled(Modal)`
   min-width: 540px;
@@ -161,11 +160,13 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
                     onChange={(e) => oppdaterMottaker(e.target.value, 'FNR')}
                   >
                     <option value={undefined}></option>
-                    {mottakere.filter(m => m.idType === "FNR").map((m, i) => (
+                    {mottakere
+                      .filter((m) => m.idType === 'FNR')
+                      .map((m, i) => (
                         <option key={i} value={m.id}>
                           {m.navn} ({m.id})
                         </option>
-                    ))}
+                      ))}
                   </Select>
                   <br />
 
@@ -175,11 +176,13 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
                     onChange={(e) => oppdaterMottaker(e.target.value, 'ORGNR')}
                   >
                     <option value={undefined}></option>
-                    {mottakere.filter(m => m.idType === "ORGNR").map((m, i) => (
-                      <option key={i} value={m.id}>
-                        {m.navn} ({m.id})
-                      </option>
-                    ))}
+                    {mottakere
+                      .filter((m) => m.idType === 'ORGNR')
+                      .map((m, i) => (
+                        <option key={i} value={m.id}>
+                          {m.navn} ({m.id})
+                        </option>
+                      ))}
                   </Select>
                 </>
               )}
@@ -187,24 +190,25 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
               <br />
               <Border />
 
-              <CheckboksPanel
-                label={'Skriv inn mottaker og adresse manuelt'}
-                checked={benyttAdresse}
-                onChange={(event) => {
-                  const benyttAdresse = event.target.checked
-                  setAdresse(benyttAdresse ? {} : undefined)
-                  setOrgMottaker(undefined)
-                  setFnrMottaker(undefined)
-                  setBenyttAdresse(benyttAdresse)
-                  setKlarforLagring(false)
-                }}
-              />
+              <Panel border>
+                <Checkbox
+                  checked={benyttAdresse}
+                  onChange={(event) => {
+                    const benyttAdresse = event.target.checked
+                    setAdresse(benyttAdresse ? {} : undefined)
+                    setOrgMottaker(undefined)
+                    setFnrMottaker(undefined)
+                    setBenyttAdresse(benyttAdresse)
+                    setKlarforLagring(false)
+                  }}
+                >
+                  Skriv inn mottaker og adresse manuelt
+                </Checkbox>
+              </Panel>
               <br />
               <br />
 
-              {adresse !== undefined && (
-                <ManuellAdresse adresse={adresse} setAdresse={setAdresse}/>
-              )}
+              {adresse !== undefined && <ManuellAdresse adresse={adresse} setAdresse={setAdresse} />}
 
               <br />
               <br />
@@ -222,8 +226,8 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
               <br />
               <br />
             </Column>
-            <Column style={{paddingLeft: '20px', marginTop: '100px'}}>
-              <PdfVisning fileUrl={fileURL} error={error}/>
+            <Column style={{ paddingLeft: '20px', marginTop: '100px' }}>
+              <PdfVisning fileUrl={fileURL} error={error} />
             </Column>
           </GridContainer>
         </Modal.Content>

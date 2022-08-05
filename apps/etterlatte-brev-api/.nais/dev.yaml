@@ -49,3 +49,5 @@ spec:
       rules:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-brev-distribusjon
+      external:
+        - host: saf.dev-fss-pub.nais.io

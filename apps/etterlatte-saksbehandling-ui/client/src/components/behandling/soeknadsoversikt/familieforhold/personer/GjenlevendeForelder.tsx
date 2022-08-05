@@ -24,9 +24,10 @@ export const GjenlevendeForelder: React.FC<Props> = ({ person, innsenderErGjenle
         </span>
         {person.navn}
         <span className="personRolle">
-          {innsenderErGjenlevendeForelder && PersonStatus.GJENLEVENDE_FORELDER + ' ' + RelatertPersonsRolle.FORELDER}
+          ({innsenderErGjenlevendeForelder && PersonStatus.GJENLEVENDE_FORELDER + ' ' + RelatertPersonsRolle.FORELDER})
         </span>
-        {<ForelderWrap>Innsender av søknad</ForelderWrap>}
+        <br />
+        <ForelderWrap>Innsender av søknad</ForelderWrap>
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfoFnr fnr={person.fnr} />

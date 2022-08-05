@@ -1,14 +1,12 @@
-import {RelatertPersonsRolle} from '../../../types'
 import {PersonInfoFnr} from './personinfo/PersonInfoFnr'
 import {PersonBorder, PersonHeader, PersonInfoWrapper} from '../styled'
 import {ChildIcon} from '../../../../../shared/icons/childIcon'
-import {DashedBorder, TypeStatusWrap} from '../../styled'
 import {IPdlPerson, IPersoninfoAvdoed, IPersoninfoSoeker} from '../../../../../store/reducers/BehandlingReducer'
 import {PersonInfoAdresse} from './personinfo/PersonInfoAdresse'
 import {hentAdresserEtterDoedsdato} from '../../../felles/utils'
 import {Heading} from "@navikt/ds-react";
-import {hentAlderVedDoedsdato} from "../../utils";
 import React from "react";
+import differenceInYears from "date-fns/differenceInYears";
 
 type Props = {
     soeker: IPersoninfoSoeker
@@ -21,22 +19,21 @@ export const Soesken: React.FC<Props> = ({soeker, avdoedesBarn, avdoed}) => {
 
     return (
         <>
-            <br />
+            <br/>
             <Heading spacing size="small" level="5">
-                Søsken (avdødes barn)
+                Søsken <span style={{fontWeight: "normal"}}>(avdødes barn)</span>
             </Heading>
 
             {soesken?.map(person => (
                 <>
                     <PersonBorder key={person.foedselsnummer}>
                         <PersonHeader>
-                        <span className="icon">
-                          <ChildIcon/>
-                        </span>
-                            {`${person.fornavn} ${person.etternavn}`} <span className="personRolle">({RelatertPersonsRolle.SOESKEN})</span>
-                            <TypeStatusWrap type="barn">
-                                {hentAlderVedDoedsdato(person.foedselsdato.toString(), avdoed.doedsdato)} år på dødsdatoen
-                            </TypeStatusWrap>
+                            <span className="icon">
+                              <ChildIcon/>
+                            </span>
+                            {`${person.fornavn} ${person.etternavn}`} <span className={"personRolle"}>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>
+                            <br/>
+                            {/*<span className={"personInfo"}>Helsøsken/Halvsøsken</span>*/}
                         </PersonHeader>
                         <PersonInfoWrapper>
                             <PersonInfoFnr fnr={person.foedselsnummer}/>
@@ -45,7 +42,6 @@ export const Soesken: React.FC<Props> = ({soeker, avdoedesBarn, avdoed}) => {
                                 visHistorikk={true}/>
                         </PersonInfoWrapper>
                     </PersonBorder>
-                    <DashedBorder />
                 </>
             ))}
 

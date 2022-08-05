@@ -15,7 +15,6 @@ import java.time.LocalDateTime
 
 
 fun vilkaarDoedsfallErRegistrert(
-    vilkaartype: Vilkaartyper,
     avdoed: VilkaarOpplysning<Person>?,
     soeker: VilkaarOpplysning<Person>?,
 ): VurdertVilkaar {
@@ -23,8 +22,8 @@ fun vilkaarDoedsfallErRegistrert(
     val avdoedErForeldre = kriterieAvdoedErForelder(soeker, avdoed)
 
     return VurdertVilkaar(
-        vilkaartype,
-        setVikaarVurderingFraKriterier(listOf(doedsdatoRegistrertIPdl, avdoedErForeldre)),
+        Vilkaartyper.DOEDSFALL_ER_REGISTRERT,
+        setVilkaarVurderingFraKriterier(listOf(doedsdatoRegistrertIPdl, avdoedErForeldre)),
         null,
         listOf(doedsdatoRegistrertIPdl, avdoedErForeldre),
         LocalDateTime.now()

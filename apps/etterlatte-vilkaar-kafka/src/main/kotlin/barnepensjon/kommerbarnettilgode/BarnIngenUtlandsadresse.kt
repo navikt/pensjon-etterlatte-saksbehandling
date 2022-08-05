@@ -1,7 +1,7 @@
 package vilkaar.barnepensjon
 
 import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
-import no.nav.etterlatte.barnepensjon.setVikaarVurderingFraKriterier
+import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraKriterier
 import no.nav.etterlatte.barnepensjon.vurderOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
@@ -16,8 +16,7 @@ import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
 fun barnIngenOppgittUtlandsadresse(
-    vilkaartype: Vilkaartyper,
-    soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
+        soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
 ): VurdertVilkaar {
 
     val opplysningsGrunnlag = listOfNotNull(
@@ -49,8 +48,8 @@ fun barnIngenOppgittUtlandsadresse(
     )
 
     return VurdertVilkaar(
-        vilkaartype,
-        setVikaarVurderingFraKriterier(listOf(kriterie)),
+        Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE,
+        setVilkaarVurderingFraKriterier(listOf(kriterie)),
         null,
         listOf(kriterie),
         LocalDateTime.now()

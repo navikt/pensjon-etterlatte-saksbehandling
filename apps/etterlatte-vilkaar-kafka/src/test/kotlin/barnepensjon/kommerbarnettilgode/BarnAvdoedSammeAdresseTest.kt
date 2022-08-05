@@ -5,7 +5,6 @@ import adresserNorgePdl
 import lagMockPersonPdl
 import mapTilVilkaarstypePerson
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -20,13 +19,11 @@ class BarnAvdoedSammeAdresseTest {
         val avdoedPdlDanmark = lagMockPersonPdl(null, fnrAvdoed, null, adresseDanmarkPdl(), null)
 
         val sammeAdresse = barnOgAvdoedSammeBostedsadresse(
-            Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypePerson(avdoedPdlNorge)
         )
 
         val ulikeAdresse = barnOgAvdoedSammeBostedsadresse(
-            Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypePerson(avdoedPdlDanmark)
         )

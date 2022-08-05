@@ -2,7 +2,7 @@ package vilkaar.barnepensjon
 
 import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.barnepensjon.hentBostedsAdresser
-import no.nav.etterlatte.barnepensjon.setVikaarVurderingFraKriterier
+import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraKriterier
 import no.nav.etterlatte.barnepensjon.vurderOpplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Bostedadresser
 import no.nav.etterlatte.libs.common.person.Adresse
@@ -18,15 +18,14 @@ import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
 fun barnOgAvdoedSammeBostedsadresse(
-    vilkaartype: Vilkaartyper,
-    soekerPdl: VilkaarOpplysning<Person>?,
-    avdoedPdl: VilkaarOpplysning<Person>?
+        soekerPdl: VilkaarOpplysning<Person>?,
+        avdoedPdl: VilkaarOpplysning<Person>?
 ) : VurdertVilkaar {
     val sammeBostedsAdresse = kriterieSammeBostedsadresseSomAvdoed(soekerPdl, avdoedPdl)
 
     return VurdertVilkaar(
-        vilkaartype,
-        setVikaarVurderingFraKriterier(listOf(sammeBostedsAdresse)),
+        Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
+        setVilkaarVurderingFraKriterier(listOf(sammeBostedsAdresse)),
         null,
         listOf(sammeBostedsAdresse),
         LocalDateTime.now()

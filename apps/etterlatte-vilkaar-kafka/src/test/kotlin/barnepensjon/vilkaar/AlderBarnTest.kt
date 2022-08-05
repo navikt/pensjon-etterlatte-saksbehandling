@@ -3,14 +3,13 @@ package barnepensjon.vilkaar
 import adresserNorgePdl
 import lagMockPersonPdl
 import mapTilVilkaarstypePerson
-import no.nav.etterlatte.barnepensjon.hentVirkningsdato
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 
 class AlderBarnTest {
     private val personBarnOver20 = lagMockPersonPdl(
@@ -27,29 +26,23 @@ class AlderBarnTest {
             fnrAvdoed,
             doedsdatoPdl, adresserNorgePdl(), null
         )
-    private val personAvdoedUtenDoedsdato =
-        lagMockPersonPdl(
-            foedselsdatoBarnUnder20,
-            fnrAvdoed, null, adresserNorgePdl(), null
-        )
+
+    private val virkningsdataPersonAvdoed = YearMonth.from(personAvdoedMedDoedsdato.doedsdato).plusMonths(1)
 
     @Test
     fun vurderAlderErUnder20() {
         val vurderingBarnOver20 = vilkaarBrukerErUnder20(
-            Vilkaartyper.SOEKER_ER_UNDER_20,
             mapTilVilkaarstypePerson(personBarnOver20),
-            mapTilVilkaarstypePerson(personAvdoedMedDoedsdato)
+            virkningstidspunkt = virkningsdataPersonAvdoed.atDay(1)
         )
         val vurderingBarnUnder20 = vilkaarBrukerErUnder20(
-            Vilkaartyper.SOEKER_ER_UNDER_20,
             mapTilVilkaarstypePerson(personBarnUnder20),
-            mapTilVilkaarstypePerson(personAvdoedMedDoedsdato)
+            virkningstidspunkt = virkningsdataPersonAvdoed.atDay(1)
         )
 
         val vurderingBarnUnder20UtenDoedsdato = vilkaarBrukerErUnder20(
-            Vilkaartyper.SOEKER_ER_UNDER_20,
             mapTilVilkaarstypePerson(personBarnUnder20),
-            mapTilVilkaarstypePerson(personAvdoedUtenDoedsdato)
+            virkningstidspunkt = null
         )
 
         Assertions.assertEquals(vurderingBarnOver20.resultat, VurderingsResultat.IKKE_OPPFYLT)
@@ -63,23 +56,23 @@ class AlderBarnTest {
 
     @Test
     fun `søker i live oppfyller vurdering`() {
-        val vurdering = vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, mapTilVilkaarstypePerson(personBarnUnder20), mapTilVilkaarstypePerson(personAvdoedMedDoedsdato))
+        val vurdering = vilkaarBrukerErUnder20(mapTilVilkaarstypePerson(personBarnUnder20), virkningstidspunkt = virkningsdataPersonAvdoed.atDay(1))
 
         Assertions.assertEquals(VurderingsResultat.OPPFYLT, vurdering.resultat)
     }
 
     @Test
     fun `søker med dødsdato må ha dødsdato etter virkningsdato for oppfyllt vurdering`() {
-        val personMedDødsdato = personBarnUnder20.copy(doedsdato = hentVirkningsdato(mapTilVilkaarstypePerson(personAvdoedMedDoedsdato)).plusDays(1))
-        val vurdering = vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, mapTilVilkaarstypePerson(personMedDødsdato), mapTilVilkaarstypePerson(personAvdoedMedDoedsdato))
+        val personMedDødsdato = personBarnUnder20.copy(doedsdato = YearMonth.from(personAvdoedMedDoedsdato.doedsdato).atEndOfMonth())
+        val vurdering = vilkaarBrukerErUnder20( mapTilVilkaarstypePerson(personMedDødsdato), virkningstidspunkt = virkningsdataPersonAvdoed.minusMonths(1).atDay(1))
 
         Assertions.assertEquals(VurderingsResultat.OPPFYLT, vurdering.resultat)
     }
 
     @Test
     fun `søker med dødsdato tidligere enn virkningsdato oppfyller ikke vurdering`() {
-        val personMedDødsdato = personBarnUnder20.copy(doedsdato = hentVirkningsdato(mapTilVilkaarstypePerson(personAvdoedMedDoedsdato)).minusDays(1))
-        val vurdering = vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, mapTilVilkaarstypePerson(personMedDødsdato), mapTilVilkaarstypePerson(personAvdoedMedDoedsdato))
+        val personMedDødsdato = personBarnUnder20.copy(doedsdato = YearMonth.from(personAvdoedMedDoedsdato.doedsdato).atEndOfMonth())
+        val vurdering = vilkaarBrukerErUnder20(mapTilVilkaarstypePerson(personMedDødsdato), virkningstidspunkt = virkningsdataPersonAvdoed.atDay(1))
 
         Assertions.assertEquals(VurderingsResultat.IKKE_OPPFYLT, vurdering.resultat)
     }

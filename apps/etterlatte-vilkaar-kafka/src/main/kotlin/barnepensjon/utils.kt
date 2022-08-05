@@ -8,9 +8,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-class OpplysningKanIkkeHentesUt : IllegalStateException()
+class OpplysningKanIkkeHentesUt constructor(override val message: String? = null) : IllegalStateException(message)
 
-fun setVikaarVurderingFraKriterier(kriterie: List<Kriterie>): VurderingsResultat {
+fun setVilkaarVurderingFraKriterier(kriterie: List<Kriterie>): VurderingsResultat {
     val resultat = kriterie.map { it.resultat }
     return hentVurdering(resultat)
 }

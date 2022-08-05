@@ -11,7 +11,7 @@ import no.nav.etterlatte.barnepensjon.hentKontaktAdresser
 import no.nav.etterlatte.barnepensjon.hentOppholdsAdresser
 import no.nav.etterlatte.barnepensjon.kombinerPerioder
 import no.nav.etterlatte.barnepensjon.opplysningsGrunnlagNull
-import no.nav.etterlatte.barnepensjon.setVikaarVurderingFraKriterier
+import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraKriterier
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Bostedadresser
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -94,7 +94,7 @@ fun metakriterieBosattNorge(
         kunNorskeKontaktadresserSisteFemAar,
     )
 
-    val resultat = setVikaarVurderingFraKriterier(kriterieliste)
+    val resultat = setVilkaarVurderingFraKriterier(kriterieliste)
 
     return Metakriterie(
         Metakriterietyper.AVDOED_MEDLEMSKAP_BOSTED,

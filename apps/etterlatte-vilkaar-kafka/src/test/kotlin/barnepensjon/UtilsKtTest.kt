@@ -128,7 +128,6 @@ internal class UtilsKtTest {
             LocalDateTime.now()
         )
 
-
     }
 
     @Test
@@ -332,11 +331,11 @@ internal class UtilsKtTest {
             listOf()
         )
 
-        val vilkaarKriterierOppfylt = setVikaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieOppfylt))
+        val vilkaarKriterierOppfylt = setVilkaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieOppfylt))
         val vilkaarEtKriterieIkkeOppfylt =
-            setVikaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieIkkeOppfylt, kriterieKanIkkeVurdere))
+            setVilkaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieIkkeOppfylt, kriterieKanIkkeVurdere))
         val vilkaarKriterierOppfyltOgKanIkkeHentesUt =
-            setVikaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieKanIkkeVurdere, kriterieOppfylt))
+            setVilkaarVurderingFraKriterier(listOf(kriterieOppfylt, kriterieKanIkkeVurdere, kriterieOppfylt))
 
         assertEquals(VurderingsResultat.OPPFYLT, vilkaarKriterierOppfylt)
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, vilkaarEtKriterieIkkeOppfylt)

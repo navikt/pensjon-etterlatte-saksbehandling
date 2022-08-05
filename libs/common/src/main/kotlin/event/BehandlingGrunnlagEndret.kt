@@ -7,6 +7,8 @@ interface IBehandlingGrunnlagEndret {
     val sakIdKey get() = "sakId"
     val fnrSoekerKey get() = "fnrSoeker"
     val behandlingOpprettetKey get() = "behandlingOpprettet"
+    val persongalleriKey get() = "persongalleri"
+    val revurderingAarsakKey get() = "revurderingsaarsak"
 }
 interface IMedGrunnlag {
     val grunnlagKey get() = "grunnlag"

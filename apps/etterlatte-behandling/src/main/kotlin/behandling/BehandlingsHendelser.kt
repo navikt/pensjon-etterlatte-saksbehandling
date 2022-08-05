@@ -66,7 +66,8 @@ class BehandlingsHendelser(
                                         BehandlingGrunnlagEndret.sakIdKey to behandling.sak,
                                         BehandlingGrunnlagEndret.behandlingIdKey to behandling.id,
                                         BehandlingGrunnlagEndret.fnrSoekerKey to behandling.persongalleri.soeker,
-                                        BehandlingGrunnlagEndret.behandlingOpprettetKey to behandling.behandlingOpprettet
+                                        BehandlingGrunnlagEndret.behandlingOpprettetKey to behandling.behandlingOpprettet,
+                                        BehandlingGrunnlagEndret.persongalleriKey to behandling.persongalleri
                                     )
                                 ).toJson()
                             ).also {
@@ -88,7 +89,9 @@ class BehandlingsHendelser(
                                         BehandlingGrunnlagEndret.sakIdKey to behandling.sak,
                                         BehandlingGrunnlagEndret.behandlingIdKey to behandling.id,
                                         BehandlingGrunnlagEndret.fnrSoekerKey to behandling.persongalleri.soeker,
-                                        BehandlingGrunnlagEndret.behandlingOpprettetKey to behandling.behandlingOpprettet
+                                        BehandlingGrunnlagEndret.behandlingOpprettetKey to behandling.behandlingOpprettet,
+                                        BehandlingGrunnlagEndret.persongalleriKey to behandling.persongalleri,
+                                        BehandlingGrunnlagEndret.revurderingAarsakKey to behandling.revurderingsaarsak
                                     )
                                 ).toJson()
 

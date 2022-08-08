@@ -3,6 +3,9 @@
 info() {
   echo -e "\n\033[0;36m\t--------\n$1\n\t--------\033[0m\n"
 }
+info "Setting up network"
+
+docker network create kafka
 
 info "Setting up postgres"
 
@@ -19,20 +22,21 @@ docker run \
     --rm \
     postgres
 
-info "Setting up redpanda"
-
+info "Setting up Zookeeper"
 echo "Stopping and removing current container"
-docker stop brev-distribusjon; docker rm brev-distribusjon
+docker stop kafka; docker rm kafka
+docker stop zookeeper; docker rm zookeeper
 
-echo "Starting redpanda docker image"
-docker pull vectorized/redpanda
+echo "Starting zookeeper docker image"
+docker pull confluentinc/cp-zookeeper:latest
 docker run \
-    --name brev-distribusjon \
-    -e NAIS_APP_NAME=etterlatte-brev-distribusjon \
-    -p 51336:51336 \
+    --name zookeeper \
+    --net kafka \
+    --env-file zookeeper.env \
     -d \
     --rm \
-    vectorized/redpanda
+    confluentinc/cp-zookeeper:latest
+
 
 info "Setting up ey-pdfgen"
 
@@ -58,6 +62,20 @@ docker run \
 #sleep 2
 
 #docker exec etterlatte-brev psql -U postgres -c "CREATE DATABASE \"postgres\";" 2>/dev/null
+
+#Starter kafka til slutt så zookeeper får tid til å starte her så
+info "Setting up Kafka"
+
+echo "Starting kafka docker image"
+docker pull confluentinc/cp-kafka:latest
+docker run \
+    --name kafka \
+    --net kafka \
+    --env-file kafka.env \
+    -p 9092:9092 \
+    -d \
+    --rm \
+    confluentinc/cp-kafka:latest
 
 echo "Run Kotlin application with the following env variables:"
 echo -e "\033[0;36mDB_HOST=localhost;DB_PORT=5432;DB_DATABASE=postgres;DB_USERNAME=postgres;DB_PASSWORD=postgres\033[0m"

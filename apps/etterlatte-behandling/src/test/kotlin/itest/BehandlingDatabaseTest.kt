@@ -207,6 +207,37 @@ internal class BehandlingDaoIntegrationTest {
 
     }
 
+    @Test
+    fun `Sletting av alle revurderinger i en sak`() {
+        val sak1 = sakRepo.opprettSak("123", "BP").id
+        val sak2 = sakRepo.opprettSak("321", "BP").id
+
+        listOf(
+            foerstegangsbehandling(sak = sak1),
+            foerstegangsbehandling(sak = sak1),
+            foerstegangsbehandling(sak = sak2)
+        ).forEach { b ->
+            behandlingRepo.opprettFoerstegangsbehandling(b)
+        }
+
+        val rev = listOf(
+            revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+            revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+            revurdering(sak = sak2, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
+        ).forEach {
+            behandlingRepo.opprettRevurdering(it)
+        }
+
+        assertEquals(6, behandlingRepo.alleBehandlinger().size)
+        behandlingRepo.slettRevurderingerISak(sak1)
+        assertEquals(2, behandlingRepo.alleBehandingerISak(sak2).size)
+        assertEquals(4, behandlingRepo.alleBehandlinger().size)
+        behandlingRepo.slettRevurderingerISak(sak2)
+        assertEquals(2, behandlingRepo.alleBehandingerISak(sak1).size)
+        assertEquals(1, behandlingRepo.alleBehandingerISak(sak2).size)
+
+    }
+
 
     @Test
     fun `avbryte sak`() {

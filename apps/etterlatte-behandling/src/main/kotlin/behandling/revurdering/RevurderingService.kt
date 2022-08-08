@@ -22,6 +22,7 @@ interface RevurderingService {
         pdlHendelse: PdlHendelse,
         revurderingAarsak: RevurderingAarsak
     ): Revurdering
+    fun slettRevurderingISak(sakId: Long)
 }
 
 class RealRevurderingService(
@@ -29,6 +30,13 @@ class RealRevurderingService(
     private val revurderingFactory: RevurderingFactory,
     private val behandlingHendelser: SendChannel<Pair<UUID, BehandlingHendelseType>>
 ) : RevurderingService {
+
+
+    override fun slettRevurderingISak(sakId: Long) {
+        return inTransaction {
+            behandlinger.slettRevurderingerISak(sakId)
+        }
+    }
 
     override fun hentRevurdering(behandling: UUID): Revurdering {
         return inTransaction {

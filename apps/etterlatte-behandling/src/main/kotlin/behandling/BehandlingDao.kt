@@ -264,6 +264,12 @@ class BehandlingDao(private val connection: () -> Connection) {
                 else -> null
             }
         }.filterNotNull()
+
+    fun slettRevurderingerISak(sakId: Long) {
+        val statement = connection().prepareStatement("DELETE from behandling where sak_id = ? AND behandlingstype = 'REVURDERING'")
+        statement.setLong(1, sakId)
+        statement.executeUpdate()
+    }
 }
 
 val objectMapper =

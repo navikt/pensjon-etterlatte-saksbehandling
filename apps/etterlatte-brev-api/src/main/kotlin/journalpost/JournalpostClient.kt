@@ -61,11 +61,13 @@ class JournalpostClient(
             )
         )
 
+        logger.info("Henter journalposter for fnr: $fnr på url: $graphqlApiUrl")
+
         // Bruker riktig token, men får "Remote host terminated the handshake"
         return retry<JournalpostResponse> {
             httpClient.post(graphqlApiUrl) {
                 header("Authorization", "Bearer ${token.get()?.accessToken}")
-                accept(ContentType.Application.Json)
+                // accept(ContentType.Application.Json)
                 setBody(TextContent(request.toJson(), ContentType.Application.Json))
             }.body()
         }.let {

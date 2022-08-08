@@ -231,7 +231,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         logger.info("sletter revurderinger for en sakId")
         return try {
             val json =
-                downstreamResourceClient.delete(Resource(clientId, "$resourceUrl/sak/$sakId/revurderinger"), accessToken, "")
+                downstreamResourceClient.delete(Resource(clientId, "$resourceUrl/behandlinger/revurdering/$sakId/"), accessToken, "")
                     .mapBoth(
                         success = { true },
                         failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message, throwableErrorMessage.throwable) }

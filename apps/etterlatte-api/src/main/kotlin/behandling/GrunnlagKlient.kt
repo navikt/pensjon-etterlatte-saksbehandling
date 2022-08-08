@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
@@ -14,11 +13,11 @@ import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
 
 interface EtterlatteGrunnlag {
-    suspend fun finnOpplysning(
+    suspend fun <T> finnOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstyper,
         accessToken: String
-    ): Grunnlagsopplysning<ObjectNode>
+    ): Grunnlagsopplysning<T>
 }
 
 class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnlag {
@@ -30,11 +29,11 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnla
     private val clientId = config.getString("grunnlag.client.id")
     private val resourceUrl = config.getString("grunnlag.resource.url")
 
-    override suspend fun finnOpplysning(
+    override suspend fun <T> finnOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstyper,
         accessToken: String
-    ): Grunnlagsopplysning<ObjectNode> {
+    ): Grunnlagsopplysning<T> {
         try {
             logger.info("Henter opplysning ($opplysningsType) fra grunnlag for sak med id $sakId.")
 

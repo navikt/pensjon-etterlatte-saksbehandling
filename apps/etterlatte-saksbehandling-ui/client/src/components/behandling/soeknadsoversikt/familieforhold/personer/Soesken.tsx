@@ -1,7 +1,10 @@
 import {PersonInfoFnr} from './personinfo/PersonInfoFnr'
 import {PersonBorder, PersonHeader, PersonInfoWrapper} from '../styled'
 import {ChildIcon} from '../../../../../shared/icons/childIcon'
-import {IPdlPerson, IPersoninfoAvdoed, IPersoninfoSoeker} from '../../../../../store/reducers/BehandlingReducer'
+import {
+    IFamilieforhold,
+    IPersoninfoSoeker
+} from '../../../../../store/reducers/BehandlingReducer'
 import {PersonInfoAdresse} from './personinfo/PersonInfoAdresse'
 import {hentAdresserEtterDoedsdato} from '../../../felles/utils'
 import {Heading} from "@navikt/ds-react";
@@ -10,12 +13,13 @@ import differenceInYears from "date-fns/differenceInYears";
 
 type Props = {
     soeker: IPersoninfoSoeker
-    avdoedesBarn: IPdlPerson[]
-    avdoed: IPersoninfoAvdoed
+    familieforhold: IFamilieforhold
 }
 
-export const Soesken: React.FC<Props> = ({soeker, avdoedesBarn, avdoed}) => {
-    const soesken = avdoedesBarn?.filter(barn => barn.foedselsnummer !== soeker.fnr)
+export const Soesken: React.FC<Props> = ({soeker, familieforhold}) => {
+    const soesken = familieforhold.avdoede?.opplysning.avdoedesBarn?.filter(barn => barn.foedselsnummer !== soeker.fnr)
+
+    const erHelsoesken = (fnr: string) => familieforhold.gjenlevende?.opplysning.familieRelasjon?.barn?.includes(fnr)
 
     return (
         <>
@@ -33,12 +37,12 @@ export const Soesken: React.FC<Props> = ({soeker, avdoedesBarn, avdoed}) => {
                             </span>
                             {`${person.fornavn} ${person.etternavn}`} <span className={"personRolle"}>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>
                             <br/>
-                            {/*<span className={"personInfo"}>Helsøsken/Halvsøsken</span>*/}
+                            <span className={"personInfo"}>{erHelsoesken(person.foedselsnummer) ? "Helsøsken" : "Halvsøsken"}</span>
                         </PersonHeader>
                         <PersonInfoWrapper>
                             <PersonInfoFnr fnr={person.foedselsnummer}/>
                             <PersonInfoAdresse
-                                adresser={hentAdresserEtterDoedsdato(person.bostedsadresse!!, avdoed.doedsdato)}
+                                adresser={hentAdresserEtterDoedsdato(person.bostedsadresse!!, familieforhold.avdoede.opplysning.doedsdato.toString())}
                                 visHistorikk={true}/>
                         </PersonInfoWrapper>
                     </PersonBorder>

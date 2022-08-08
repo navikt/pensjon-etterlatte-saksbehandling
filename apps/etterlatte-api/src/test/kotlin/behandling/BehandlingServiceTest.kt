@@ -1,7 +1,5 @@
 package behandling
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.impl.annotations.InjectMockKs
@@ -17,7 +15,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.typer.LagretHendelse
@@ -157,27 +154,43 @@ internal class BehandlingServiceTest {
                 mockPerson().copy(fornavn = "TestOla")
             )
         )
+
+        val gjenlevende = mockPerson().copy(
+            avdoedesBarn = listOf(
+                mockPerson().copy(fornavn = "TestKari"),
+            )
+        )
         val avdoedOpplysning = Grunnlagsopplysning(
             UUID.randomUUID(),
             Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
             Opplysningstyper.AVDOED_PDL_V1,
             objectMapper.createObjectNode(),
-            objectMapper.readValue<ObjectNode>(avdoed.toJson()),
+            avdoed,
+        )
+        val gjenlevendeOpplysning = Grunnlagsopplysning(
+            UUID.randomUUID(),
+            Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
+            Opplysningstyper.AVDOED_PDL_V1,
+            objectMapper.createObjectNode(),
+            gjenlevende,
         )
 
         coEvery { behandlingKlient.hentBehandling(behandlingid.toString(), accessToken) } returns detaljertBehandling
         coEvery { vedtakKlient.hentVedtak(behandlingid.toString(), accessToken) } returns vedtak
         coEvery { behandlingKlient.hentHendelserForBehandling(behandlingid.toString(), accessToken) } returns hendelser
-        coEvery { grunnlagKlient.finnOpplysning(4L, Opplysningstyper.AVDOED_PDL_V1, accessToken) } returns avdoedOpplysning
+        coEvery { grunnlagKlient.finnOpplysning<Person>(4L, Opplysningstyper.AVDOED_PDL_V1, accessToken) } returns avdoedOpplysning
+        coEvery { grunnlagKlient.finnOpplysning<Person>(4L, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1, accessToken) } returns gjenlevendeOpplysning
 
         val respons = runBlocking { service.hentBehandling(behandlingid.toString(), accessToken) }
 
         assertEquals(behandlingid, respons.id)
         assertEquals(4, respons.sak)
         assertEquals(VurderingsResultat.OPPFYLT, respons.vilkårsprøving?.resultat)
-        assertEquals(2, respons.avdoedesBarn.size)
-        assertEquals("TestKari", respons.avdoedesBarn[0].fornavn)
-        assertEquals("TestOla", respons.avdoedesBarn[1].fornavn)
+        assertEquals(2, respons.familieforhold?.avdoede?.opplysning?.avdoedesBarn?.size)
+        assertEquals("TestKari", respons.familieforhold?.avdoede?.opplysning?.avdoedesBarn?.get(0)!!.fornavn)
+        assertEquals("TestOla", respons.familieforhold?.avdoede?.opplysning?.avdoedesBarn?.get(1)!!.fornavn)
+        assertEquals(1, respons.familieforhold?.gjenlevende?.opplysning?.avdoedesBarn?.size)
+        assertEquals("TestKari", respons.familieforhold?.gjenlevende?.opplysning?.avdoedesBarn?.get(0)!!.fornavn)
     }
 
     @Test

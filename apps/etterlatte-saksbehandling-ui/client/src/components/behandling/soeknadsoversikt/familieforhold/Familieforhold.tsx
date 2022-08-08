@@ -54,8 +54,7 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ behandling }) =>
             <DashedBorder />
             <Soesken
               soeker={behandling.kommerSoekerTilgode.familieforhold.soeker}
-              avdoedesBarn={behandling.avdoedesBarn}
-              avdoed={behandling.kommerSoekerTilgode.familieforhold.avdoed}
+              familieforhold={behandling.familieforhold!!}
             />
           </FamilieforholdWrapper>
           <Border />

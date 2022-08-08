@@ -28,6 +28,7 @@ interface EtterlatteBehandling {
     suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag
     suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean
     suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretHendelser
+    suspend fun slettRevurderinger(sakId: Int, accessToken: String): Boolean
 }
 
 class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehandling {
@@ -223,6 +224,23 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         } catch (e: Exception) {
             logger.error("Henting av hendelser feilet", e)
             throw e
+        }
+    }
+
+    override suspend fun slettRevurderinger(sakId: Int, accessToken: String): Boolean {
+        logger.info("sletter revurderinger for en sakId")
+        return try {
+            val json =
+                downstreamResourceClient.delete(Resource(clientId, "$resourceUrl/sak/$sakId/revurderinger"), accessToken, "")
+                    .mapBoth(
+                        success = { true },
+                        failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message, throwableErrorMessage.throwable) }
+                    )
+            logger.info("Slettet revurderinger for sak med id $sakId")
+            json
+        } catch (e: Exception) {
+            logger.error("Sletting av revurderinger for sak med id $sakId feilet.", e)
+            false
         }
     }
 

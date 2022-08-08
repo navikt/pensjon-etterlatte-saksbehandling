@@ -38,7 +38,7 @@ spec:
     - name: HENT_DOKUMENT_URL
       value: "https://saf-q1.dev.intern.nav.no/rest/hentdokument"
     - name: SAF_GRAPHQL_URL
-      value: "https://saf-q1.dev.intern.nav.no/graphql"
+      value: "https://saf.dev-fss-pub.nais.io/graphql"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
   accessPolicy:

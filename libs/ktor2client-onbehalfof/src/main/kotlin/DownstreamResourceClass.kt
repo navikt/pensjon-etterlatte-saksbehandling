@@ -112,9 +112,13 @@ class DownstreamResourceClient(
             }
         }.fold(
             onSuccess = { result ->
-                val body = result.body<String>()
-                logger.info("fikk resultat med status ${result.status} og body $body. Responsen har contenttype ${result.contentType()}")
+                val body = try {
+                    result.body<ObjectNode>()
+                } catch (e: Exception) {
+                    logger.warn("Kunne ikke lese post-body som en objectNode. Dette er stress")
+                }
 
+                logger.info("fikk resultat med status ${result.status} og body $body. Responsen har contenttype ${result.contentType()}")
                 if(result.contentType() == ContentType.Application.Json){
                     Ok(body)
                 }else{

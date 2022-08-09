@@ -108,9 +108,10 @@ class DownstreamResourceClient(
             }
         }.fold(
             onSuccess = { result ->
-                if (result.contentType() == ContentType.Application.Json){
+                if (ContentType.Application.Json.toString().equals(result.contentType().toString(), ignoreCase = true)) {
                     Ok(result.body<ObjectNode>())
                 }else{
+                    logger.info("Mottok content-type: ${result.contentType()}")
                     Ok( result.status )
                 }
             },

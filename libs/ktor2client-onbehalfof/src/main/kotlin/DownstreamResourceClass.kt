@@ -1,7 +1,9 @@
 package no.nav.etterlatte.libs.ktorobo
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -110,8 +112,11 @@ class DownstreamResourceClient(
             }
         }.fold(
             onSuccess = { result ->
+                val body = result.body<String>()
+                logger.info("fikk resultat med status ${result.status} og body $body. Responsen har contenttype ${result.contentType()}")
+
                 if(result.contentType() == ContentType.Application.Json){
-                    Ok( result.body<ObjectNode>() )
+                    Ok(body)
                 }else{
                     Ok( result.status )
                 }

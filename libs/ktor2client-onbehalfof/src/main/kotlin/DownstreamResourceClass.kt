@@ -1,9 +1,7 @@
 package no.nav.etterlatte.libs.ktorobo
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -11,8 +9,6 @@ import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.client.utils.EmptyContent.contentType
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
@@ -112,15 +108,8 @@ class DownstreamResourceClient(
             }
         }.fold(
             onSuccess = { result ->
-                val body = try {
-                    result.body<ObjectNode>()
-                } catch (e: Exception) {
-                    logger.warn("Kunne ikke lese post-body som en objectNode. Dette er stress")
-                }
-
-                logger.info("fikk resultat med status ${result.status} og body $body. Responsen har contenttype ${result.contentType() == ContentType.Application.Json}")
-                if(body != Unit){
-                    Ok(body)
+                if (result.contentType() == ContentType.Application.Json){
+                    Ok(result.body<ObjectNode>())
                 }else{
                     Ok( result.status )
                 }

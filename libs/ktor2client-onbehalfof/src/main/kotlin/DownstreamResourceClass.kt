@@ -112,6 +112,7 @@ class DownstreamResourceClient(
             }
         }.fold(
             onSuccess = { result ->
+                logger.info("Fikk response på post-melding med content-type ${result.contentType()}")
                 val body = try {
                     result.body<ObjectNode>()
                 } catch (e: Exception) {

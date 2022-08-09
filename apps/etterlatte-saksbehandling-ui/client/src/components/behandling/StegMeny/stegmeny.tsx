@@ -18,6 +18,9 @@ export const StegMeny = () => {
         <NavLink to="inngangsvilkaar">Vilkårsvurdering</NavLink>
       </li>
       <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
+        <NavLink to="beregningsgrunnlag">Beregningsgrunnlag</NavLink>
+      </li>
+      <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
         <NavLink to="beregne">Beregning</NavLink>
       </li>
       <li>

@@ -4,6 +4,7 @@ import { Beregne } from './beregne'
 import { Inngangsvilkaar } from './inngangsvilkaar'
 import { Soeknadsoversikt } from './soeknadsoversikt'
 import { Brev } from './brev'
+import Beregningsgrunnlag from './beregningsgrunnlag'
 //import { Utbetalingsoversikt } from './utbetalingsoversikt'
 //import { Vedtak } from './vedtak'
 
@@ -15,6 +16,7 @@ export const useBehandlingRoutes = () => {
   const behandlingRoutes = [
     { path: 'soeknadsoversikt', element: <Soeknadsoversikt /> },
     { path: 'inngangsvilkaar', element: <Inngangsvilkaar /> },
+    { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag /> },
     { path: 'beregne', element: <Beregne /> },
     //{ path: 'vedtak', element: <Vedtak /> },
     //{ path: 'utbetalingsoversikt', element: <Utbetalingsoversikt /> },

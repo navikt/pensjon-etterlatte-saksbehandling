@@ -46,4 +46,3 @@ data class SoeskenPeriode(
     val datoTOM: YearMonth,
     val soeskenFlokk: List<Person>?,
 )
-

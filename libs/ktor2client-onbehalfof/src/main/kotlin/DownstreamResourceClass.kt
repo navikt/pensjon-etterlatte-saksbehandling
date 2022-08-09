@@ -9,8 +9,10 @@ import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMessage
 import io.ktor.http.contentType
 import org.slf4j.LoggerFactory
 
@@ -20,8 +22,7 @@ class DownstreamResourceClient(
     private val azureAdClient: AzureAdClient,
     private val httpClient: HttpClient = defaultHttpClient
 ) {
-    suspend fun
-            get(
+    suspend fun get(
         resource: Resource,
         accessToken: String
     ): Result<Resource, ThrowableErrorMessage> {
@@ -36,8 +37,7 @@ class DownstreamResourceClient(
             }
     }
 
-    suspend fun
-            post(
+    suspend fun post(
         resource: Resource,
         accessToken: String,
         postBody: Any
@@ -53,8 +53,7 @@ class DownstreamResourceClient(
             }
     }
 
-    suspend fun
-            delete(
+    suspend fun delete(
         resource: Resource,
         accessToken: String,
         postBody: String
@@ -71,9 +70,7 @@ class DownstreamResourceClient(
     }
 
 
-    private suspend fun
-
-            fetchFromDownstreamApi(
+    private suspend fun fetchFromDownstreamApi(
         resource: Resource,
         oboAccessToken: AccessToken
     ): Result<JsonNode, ThrowableErrorMessage> =
@@ -86,9 +83,7 @@ class DownstreamResourceClient(
             onSuccess = { result ->
                 Ok(result)
             },
-            onFailure =
-
-            { error ->
+            onFailure = { error ->
                 logger.error("received error from downstream api", error)
                 Err(ThrowableErrorMessage(message = "Error response from '${resource.url}'", throwable = error))
             }
@@ -108,16 +103,14 @@ class DownstreamResourceClient(
             }
         }.fold(
             onSuccess = { result ->
-                if (ContentType.Application.Json.toString().equals(result.contentType().toString(), ignoreCase = true)) {
+                if (result.harContentType(ContentType.Application.Json)) {
                     Ok(result.body<ObjectNode>())
-                }else{
-                    logger.info("Mottok content-type: ${result.contentType()}")
-                    Ok( result.status )
+                } else {
+                    logger.info("Mottok content-type: ${result.contentType()} som ikke var JSON")
+                    Ok(result.status)
                 }
             },
-            onFailure =
-
-            { error ->
+            onFailure = { error ->
                 logger.error("received error from downstream api", error)
                 Err(ThrowableErrorMessage(message = "Error response from '${resource.url}'", throwable = error))
             }
@@ -139,11 +132,21 @@ class DownstreamResourceClient(
             onSuccess = { result ->
                 Ok(result)
             },
-            onFailure =
-
-            { error ->
+            onFailure = { error ->
                 logger.error("received error from downstream api", error)
                 Err(ThrowableErrorMessage(message = "Error response from '${resource.url}'", throwable = error))
             }
         )
+}
+
+/**
+ * Ktor med content negotiation serialiserer content-type med parametere (som charset), slik at en
+ * naiv sammenligning ikke fungerer. Denne metoden sammenligner uten parametere.
+ */
+private fun HttpMessage?.harContentType(contentType: ContentType): Boolean {
+    return contentTypeErLik(this?.contentType(), contentType)
+}
+
+fun contentTypeErLik(contentEn: ContentType?, contentTo: ContentType?): Boolean {
+    return contentEn?.withoutParameters() == contentTo?.withoutParameters()
 }

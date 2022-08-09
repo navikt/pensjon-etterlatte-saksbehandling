@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-api/**
       - libs/common/**
+      - libs/ktor2client-onbehalfof/**
 
 jobs:
   build-and-publish:

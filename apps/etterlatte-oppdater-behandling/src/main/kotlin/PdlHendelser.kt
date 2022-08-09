@@ -34,11 +34,9 @@ internal class PdlHendelser(
             val avdoedFnr = packet["avdoed_fnr"].asText()
 
             val avdoedDoedsdato: LocalDate? = try {
-
                 packet["avdoed_doedsdato"].let {
                     LocalDate.parse(it.asText(), DateTimeFormatter.ISO_LOCAL_DATE)
                 }
-
             } catch (e: Exception) {
                 logger.warn("Kunne ikke parse dødsdato for hendelse med correlation id='${packet.correlationId}': " +
                         "$packet på grunn av feil. Vi bruker null som dødsdato for denne hendelsen, men dette er " +

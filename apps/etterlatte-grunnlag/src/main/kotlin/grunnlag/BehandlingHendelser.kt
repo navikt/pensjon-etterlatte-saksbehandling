@@ -27,7 +27,7 @@ class BehandlingHendelser(
             eventName("BEHANDLING:OPPRETTET")
             correlationId()
             validate { it.requireKey("persongalleri") }
-            validate { it.requireKey("sak") }
+            validate { it.requireKey("sakId") }
         }.register(this)
     }
 
@@ -42,7 +42,7 @@ class BehandlingHendelser(
                 JsonMessage.newMessage(
                     mapOf(
                         behovNameKey to Opplysningstyper.SOEKER_PDL_V1,
-                        "sakId" to packet["sak"],
+                        "sakId" to packet["sakId"],
                         "fnr" to packet["persongalleri"]["soeker"],
                         "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
                         correlationIdKey to packet[correlationIdKey]
@@ -54,7 +54,7 @@ class BehandlingHendelser(
                     JsonMessage.newMessage(
                         mapOf(
                             behovNameKey to Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1,
-                            "sakId" to packet["sak"],
+                            "sakId" to packet["sakId"],
                             "fnr" to fnr.asText(),
                             "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
                             correlationIdKey to packet[correlationIdKey]
@@ -68,7 +68,7 @@ class BehandlingHendelser(
                     JsonMessage.newMessage(
                         mapOf(
                             behovNameKey to Opplysningstyper.AVDOED_PDL_V1,
-                            "sakId" to packet["sak"],
+                            "sakId" to packet["sakId"],
                             "fnr" to fnr.asText(),
                             "rolle" to Opplysningstyper.AVDOED_PDL_V1.personRolle!!,
                             correlationIdKey to packet[correlationIdKey]

@@ -40,9 +40,6 @@ class ApplicationContext(configLocation: String? = null) {
         install(ContentNegotiation) {
             register(ContentType.Application.Json, JacksonConverter(objectMapper))
         }
-        install(Logging) {
-            level = LogLevel.HEADERS
-        }
         defaultRequest {
             header(X_CORRELATION_ID, getCorrelationId())
         }

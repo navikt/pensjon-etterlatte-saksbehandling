@@ -6,6 +6,8 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
@@ -37,6 +39,9 @@ class ApplicationContext(configLocation: String? = null) {
     private fun httpClient() = HttpClient {
         install(ContentNegotiation) {
             register(ContentType.Application.Json, JacksonConverter(objectMapper))
+        }
+        install(Logging) {
+            level = LogLevel.HEADERS
         }
         defaultRequest {
             header(X_CORRELATION_ID, getCorrelationId())

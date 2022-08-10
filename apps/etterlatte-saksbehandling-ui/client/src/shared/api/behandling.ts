@@ -8,10 +8,11 @@ export const hentBehandling = async (id: string): Promise<IApiResponse<any>> => 
     const data: any = await result.json()
 
     return {
-      status: result.status, data: data,
+      status: result.status,
+      data: data,
     }
   } catch (e) {
-    return {status: 500}
+    return { status: 500 }
   }
 }
 
@@ -21,11 +22,12 @@ export const avbrytBehandling = async (behandlingsid: string): Promise<IApiRespo
       method: 'post',
     })
     return {
-      status: result.status, data: await result.json(),
+      status: result.status,
+      data: await result.json(),
     }
   } catch (e) {
     console.log(e)
-    return {status: 500}
+    return { status: 500 }
   }
 }
 
@@ -39,7 +41,7 @@ export const fattVedtak = async (behandlingsId: string): Promise<IApiResponse<an
     }
   } catch (e) {
     console.log(e)
-    return {status: 500}
+    return { status: 500 }
   }
 }
 
@@ -53,20 +55,24 @@ export const attesterVedtak = async (behandlingId: string): Promise<IApiResponse
     }
   } catch (e) {
     console.log(e)
-    return {status: 500}
+    return { status: 500 }
   }
 }
 
-export const underkjennVedtak = async (behandlingId: string,
+export const underkjennVedtak = async (
+  behandlingId: string,
   kommentar: string,
   valgtBegrunnelse: string
 ): Promise<IApiResponse<any>> => {
   try {
     const result: Response = await fetch(`${path}/api/underkjennvedtak/${behandlingId}`, {
-      method: 'post', headers: {
+      method: 'post',
+      headers: {
         'Content-Type': 'application/json',
-      }, body: JSON.stringify({
-        kommentar: kommentar, valgtBegrunnelse: valgtBegrunnelse,
+      },
+      body: JSON.stringify({
+        kommentar: kommentar,
+        valgtBegrunnelse: valgtBegrunnelse,
       }),
     })
     return {
@@ -74,20 +80,24 @@ export const underkjennVedtak = async (behandlingId: string,
     }
   } catch (e) {
     console.log(e)
-    return {status: 500}
+    return { status: 500 }
   }
 }
 
-export const lagreBegrunnelseKommerBarnetTilgode = async (behandlingsId: string,
+export const lagreBegrunnelseKommerBarnetTilgode = async (
+  behandlingsId: string,
   kommentar: string,
   svar: string
 ): Promise<IApiResponse<any>> => {
   try {
     const result: Response = await fetch(`${path}/api/grunnlag/kommertilgode/${behandlingsId}`, {
-      method: 'post', headers: {
+      method: 'post',
+      headers: {
         'Content-Type': 'application/json',
-      }, body: JSON.stringify({
-        svar: svar, begrunnelse: kommentar,
+      },
+      body: JSON.stringify({
+        svar: svar,
+        begrunnelse: kommentar,
       }),
     })
     return {
@@ -95,6 +105,27 @@ export const lagreBegrunnelseKommerBarnetTilgode = async (behandlingsId: string,
     }
   } catch (e) {
     console.log(e)
-    return {status: 500}
+    return { status: 500 }
+  }
+}
+
+export const lagreSoeskenMedIBeregning = async (
+  behandlingsId: string,
+  soeskenMedIBeregning: { foedselsnummer: string; skalBrukes: boolean }[]
+): Promise<IApiResponse<any>> => {
+  try {
+    const result: Response = await fetch(`${path}/api/grunnlag/beregningsgrunnlag/${behandlingsId}`, {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(soeskenMedIBeregning),
+    })
+    return {
+      status: result.status,
+    }
+  } catch (e) {
+    console.log(e)
+    return { status: 500 }
   }
 }

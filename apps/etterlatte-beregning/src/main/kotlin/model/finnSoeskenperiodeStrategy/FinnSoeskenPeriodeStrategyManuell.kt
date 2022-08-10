@@ -12,7 +12,6 @@ import java.time.YearMonth
 data class FinnSoeskenPeriodeStrategyManuell(
     private val grunnlag: Grunnlag,
     private val datoFOM: YearMonth,
-    private val datoTOM: YearMonth
 ) : FinnSoeskenPeriodeStrategy() {
     private val vilkaarOpplysning = BeregningService.finnOpplysning<List<SoeskenMedIBeregning>>(
         grunnlag.grunnlag,

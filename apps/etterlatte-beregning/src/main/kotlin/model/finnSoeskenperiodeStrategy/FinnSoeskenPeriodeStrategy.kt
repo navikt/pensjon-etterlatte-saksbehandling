@@ -15,7 +15,7 @@ sealed class FinnSoeskenPeriodeStrategy {
             val saksbehandlerHarValgtSoeskenPeriode = grunnlag.grunnlag.find { it.opplysningType === Opplysningstyper.SAKSBEHANDLER_SOESKEN_I_BEREGNINGEN } != null
 
             return when {
-                saksbehandlerHarValgtSoeskenPeriode  -> FinnSoeskenPeriodeStrategyManuell(grunnlag, virkFOM, virkTOM)
+                saksbehandlerHarValgtSoeskenPeriode  -> FinnSoeskenPeriodeStrategyManuell(grunnlag, virkFOM)
                 else -> {
                     val avdoedPdl = BeregningService.finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.AVDOED_PDL_V1)?.opplysning
                     val bruker = BeregningService.finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.SOEKER_PDL_V1)?.opplysning

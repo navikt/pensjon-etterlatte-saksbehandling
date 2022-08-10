@@ -60,11 +60,11 @@ class GrunnlagService(
 
         rapid.publiser(
             behandlingId, JsonMessage.newMessage(
-                mapOf(
-                    eventNameKey to "OPPLYSNING:NY",
+                eventName = "OPPLYSNING:NY",
+                map = mapOf(
                     "opplysning" to opplysning,
-                    "sakId" to behandling.sak,
-                )
+                    "sakId" to behandling.sak
+                ),
             ).toJson()
         )
 

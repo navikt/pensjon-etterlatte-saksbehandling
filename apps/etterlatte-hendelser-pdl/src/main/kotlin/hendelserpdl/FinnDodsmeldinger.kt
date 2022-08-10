@@ -27,7 +27,7 @@ class FinnDodsmeldinger(
             meldinger++
 
             if (it.getOpplysningstype() == "DOEDSFALL_V1") {
-                log.info("Doedshendelse mottatt for : ${it.personidenter} med hendelsesId: ${it.hendelseId} ")
+                log.info("Doedshendelse mottatt for : ${it.personidenter} med hendelsesId: ${it.hendelseId} og endringstype ${it.endringstype}. Evt. tidligere henselsesid: ${it.tidligereHendelseId}")
                 log.info("Fullstendig doedshendelse: $it")
                 try {
                     val personnummer =
@@ -42,7 +42,7 @@ class FinnDodsmeldinger(
                 }
                 dodsmeldinger++
             } else {
-                log.info("Så opplysning om ${it.opplysningstype} opprettet ${it.opprettet}")
+                log.info("Så opplysning om ${it.opplysningstype} opprettet ${it.opprettet} for ident ${it.personidenter} med endringstype ${it.endringstype} og hendelsesid: ${it.hendelseId}")
             }
 
         }

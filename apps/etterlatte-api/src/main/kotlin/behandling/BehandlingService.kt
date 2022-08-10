@@ -70,6 +70,12 @@ class BehandlingService(
         logger.info("gjenlevende: " + objectMapper.writeValueAsString(gjenlevende))
         logger.info("avdoed: " + objectMapper.writeValueAsString(avdoed))
 
+        val familieforhold = try {
+            Familieforhold(avdoed, gjenlevende)
+        } catch (ex: Exception) {
+            logger.error("Klarte ikke opprette familieforhold?", ex)
+            null
+        }
 
         DetaljertBehandlingDto(
             id = behandling.await().id,
@@ -88,7 +94,7 @@ class BehandlingService(
             virkningstidspunkt = vedtak.await().virkningsDato,
             status = behandling.await().status,
             hendelser = hendelser.await().hendelser,
-            familieforhold = Familieforhold(avdoed, gjenlevende)
+            familieforhold = familieforhold
         )
     }
 

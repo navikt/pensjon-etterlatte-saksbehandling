@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.DetaljertBehandlingDto
@@ -64,18 +63,8 @@ class BehandlingService(
         val vedtak = async { vedtakKlient.hentVedtak(behandlingId, accessToken) }
         val hendelser = async { behandlingKlient.hentHendelserForBehandling(behandlingId, accessToken) }
         val sakId = behandling.await().sak
-        val avdoed = grunnlagKlient.finnOpplysning(sakId, AVDOED_PDL_V1, accessToken)
-        val gjenlevende = grunnlagKlient.finnOpplysning(sakId, GJENLEVENDE_FORELDER_PDL_V1, accessToken)
-
-        logger.info("gjenlevende: " + objectMapper.writeValueAsString(gjenlevende))
-        logger.info("avdoed: " + objectMapper.writeValueAsString(avdoed))
-
-        val familieforhold = try {
-            Familieforhold(avdoed, gjenlevende)
-        } catch (ex: Exception) {
-            logger.error("Klarte ikke opprette familieforhold?", ex)
-            null
-        }
+        val avdoed = async { grunnlagKlient.finnPersonOpplysning(sakId, AVDOED_PDL_V1, accessToken) }
+        val gjenlevende = async { grunnlagKlient.finnPersonOpplysning(sakId, GJENLEVENDE_FORELDER_PDL_V1, accessToken) }
 
         DetaljertBehandlingDto(
             id = behandling.await().id,
@@ -94,7 +83,7 @@ class BehandlingService(
             virkningstidspunkt = vedtak.await().virkningsDato,
             status = behandling.await().status,
             hendelser = hendelser.await().hendelser,
-            familieforhold = familieforhold
+            familieforhold = Familieforhold(avdoed.await(), gjenlevende.await())
         )
     }
 

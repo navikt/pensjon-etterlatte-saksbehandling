@@ -1,6 +1,5 @@
 package behandling
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.impl.annotations.InjectMockKs
@@ -52,16 +51,6 @@ internal class BehandlingServiceTest {
     fun setUp() = MockKAnnotations.init(this)
     private val accessToken = UUID.randomUUID().toString()
     private val fnr = "11057523044"
-
-    @Test
-    fun test() {
-        val grunnlag: Grunnlagsopplysning<Person> = """
-            {"id":"f01e58a1-c22d-416d-bb0b-367a0df0d0a7","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-08-09T14:27:33.240040018Z","registersReferanse":null,"type":"pdl"},"opplysningType":"AVDOED_PDL_V1","meta":{},"opplysning":{"fornavn":"VAKKER","etternavn":"LAPP","foedselsnummer":"22128202440","foedselsdato":"1982-12-22","foedselsaar":1982,"foedeland":"NOR","doedsdato":"2022-02-10","adressebeskyttelse":"UGRADERT","bostedsadresse":[{"type":"VEGADRESSE","aktiv":true,"coAdresseNavn":null,"adresseLinje1":"Bøveien 937","adresseLinje2":null,"adresseLinje3":null,"postnr":"8475","poststed":null,"land":null,"kilde":"FREG","gyldigFraOgMed":"1999-01-01T00:00:00","gyldigTilOgMed":null}],"deltBostedsadresse":null,"kontaktadresse":[],"oppholdsadresse":[],"sivilstatus":"UGIFT","statsborgerskap":"NOR","utland":{"innflyttingTilNorge":[],"utflyttingFraNorge":[]},"familieRelasjon":{"ansvarligeForeldre":null,"foreldre":null,"barn":["12101376212"]},"avdoedesBarn":[{"fornavn":"TALENTFULL","etternavn":"BLYANT","foedselsnummer":"12101376212","foedselsdato":"2013-10-12","foedselsaar":2013,"foedeland":"NOR","doedsdato":null,"adressebeskyttelse":"UGRADERT","bostedsadresse":[{"type":"VEGADRESSE","aktiv":true,"coAdresseNavn":null,"adresseLinje1":"Bøveien 937","adresseLinje2":null,"adresseLinje3":null,"postnr":"8475","poststed":null,"land":null,"kilde":"FREG","gyldigFraOgMed":"1999-01-01T00:00:00","gyldigTilOgMed":null}],"deltBostedsadresse":null,"kontaktadresse":[],"oppholdsadresse":[],"sivilstatus":"UOPPGITT","statsborgerskap":"NOR","utland":{"innflyttingTilNorge":[],"utflyttingFraNorge":[]},"familieRelasjon":{"ansvarligeForeldre":["22128202440","03108718357"],"foreldre":["22128202440","03108718357"],"barn":null},"avdoedesBarn":null,"vergemaalEllerFremtidsfullmakt":[]}],"vergemaalEllerFremtidsfullmakt":null},"attestering":null}
-        """.trimIndent().let {
-            objectMapper.readValue(it)
-        }
-        println(objectMapper.writeValueAsString(grunnlag))
-    }
 
     @Test
     fun hentPerson() {
@@ -189,14 +178,14 @@ internal class BehandlingServiceTest {
         coEvery { vedtakKlient.hentVedtak(behandlingid.toString(), accessToken) } returns vedtak
         coEvery { behandlingKlient.hentHendelserForBehandling(behandlingid.toString(), accessToken) } returns hendelser
         coEvery {
-            grunnlagKlient.finnOpplysning(
+            grunnlagKlient.finnPersonOpplysning(
                 4L,
                 Opplysningstyper.AVDOED_PDL_V1,
                 accessToken
             )
         } returns avdoedOpplysning
         coEvery {
-            grunnlagKlient.finnOpplysning(
+            grunnlagKlient.finnPersonOpplysning(
                 4L,
                 Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1,
                 accessToken

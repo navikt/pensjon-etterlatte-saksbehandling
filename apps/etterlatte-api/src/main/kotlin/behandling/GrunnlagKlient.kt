@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
 
 interface EtterlatteGrunnlag {
-    suspend fun finnOpplysning(
+    suspend fun finnPersonOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstyper,
         accessToken: String
@@ -30,7 +30,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnla
     private val clientId = config.getString("grunnlag.client.id")
     private val resourceUrl = config.getString("grunnlag.resource.url")
 
-    override suspend fun finnOpplysning(
+    override suspend fun finnPersonOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstyper,
         accessToken: String
@@ -51,7 +51,6 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnla
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
 
-            logger.info("svar fra grunnlag: $json")
             return objectMapper.readValue(json.toString())
         } catch (e: Exception) {
             logger.error("Henting av opplysning ($opplysningsType) fra grunnlag for sak med id $sakId feilet.")

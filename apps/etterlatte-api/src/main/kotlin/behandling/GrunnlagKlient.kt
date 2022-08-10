@@ -17,7 +17,7 @@ interface EtterlatteGrunnlag {
         sakId: Long,
         opplysningsType: Opplysningstyper,
         accessToken: String
-    ): Grunnlagsopplysning<T>
+    ): Grunnlagsopplysning<T>?
 }
 
 class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnlag {
@@ -33,7 +33,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnla
         sakId: Long,
         opplysningsType: Opplysningstyper,
         accessToken: String
-    ): Grunnlagsopplysning<T> {
+    ): Grunnlagsopplysning<T>? {
         try {
             logger.info("Henter opplysning ($opplysningsType) fra grunnlag for sak med id $sakId.")
 
@@ -49,6 +49,8 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnla
                     success = { json -> json },
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
+
+            logger.info("svar fra grunnlag: $json")
             return objectMapper.readValue(json.toString())
         } catch (e: Exception) {
             logger.error("Henting av opplysning ($opplysningsType) fra grunnlag for sak med id $sakId feilet.")

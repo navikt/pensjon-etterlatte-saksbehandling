@@ -63,8 +63,21 @@ class BehandlingService(
         val vedtak = async { vedtakKlient.hentVedtak(behandlingId, accessToken) }
         val hendelser = async { behandlingKlient.hentHendelserForBehandling(behandlingId, accessToken) }
         val sakId = behandling.await().sak
-        val avdoed = async { grunnlagKlient.finnOpplysning<Person>(sakId, AVDOED_PDL_V1, accessToken) }
-        val gjenlevende = async { grunnlagKlient.finnOpplysning<Person>(sakId, GJENLEVENDE_FORELDER_PDL_V1, accessToken) }
+        val avdoed = async {
+            try {
+                grunnlagKlient.finnOpplysning<Person>(sakId, AVDOED_PDL_V1, accessToken)
+            } catch (ex: Exception) {
+                null
+            }
+        }
+        val gjenlevende =
+            async {
+                try {
+                    grunnlagKlient.finnOpplysning<Person>(sakId, GJENLEVENDE_FORELDER_PDL_V1, accessToken)
+                } catch (ex: Exception) {
+                    null
+                }
+            }
 
 
         DetaljertBehandlingDto(

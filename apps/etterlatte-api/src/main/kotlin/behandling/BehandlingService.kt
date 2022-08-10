@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.DetaljertBehandlingDto
@@ -69,7 +70,7 @@ class BehandlingService(
             } catch (ex: Exception) {
                 null
             }
-        }
+        }.await()
         val gjenlevende =
             async {
                 try {
@@ -77,7 +78,10 @@ class BehandlingService(
                 } catch (ex: Exception) {
                     null
                 }
-            }
+            }.await()
+
+        logger.info("gjenlevende: " + objectMapper.writeValueAsString(gjenlevende))
+        logger.info("avdoed: " + objectMapper.writeValueAsString(avdoed))
 
 
         DetaljertBehandlingDto(
@@ -97,7 +101,7 @@ class BehandlingService(
             virkningstidspunkt = vedtak.await().virkningsDato,
             status = behandling.await().status,
             hendelser = hendelser.await().hendelser,
-            familieforhold = Familieforhold(avdoed.await(), gjenlevende.await())
+            familieforhold = Familieforhold(avdoed, gjenlevende)
         )
     }
 

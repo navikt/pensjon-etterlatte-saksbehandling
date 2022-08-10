@@ -2,14 +2,15 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Self
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.rapidsandrivers.*
+import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -36,16 +37,12 @@ class GrunnlagHendelser(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val opplysninger = Opplysningstyper.values().map { it.name }
+        val opplysningsTyper = Opplysningstyper.values().map { it.name }
 
         if ((packet[eventNameKey].asText() == "OPPLYSNING:NY")
-            || (opplysninger.contains(packet[behovNameKey].asText()))) {
+            || (opplysningsTyper.contains(packet[behovNameKey].asText()))) {
 
             withLogContext(packet.correlationId) {
-                if (Kontekst.get().AppUser !is Self) {
-                    logger.warn("AppUser i kontekst er ikke Self i R&R-flyten")
-                }
-
                 try {
                     val opplysninger: List<Grunnlagsopplysning<ObjectNode>> = objectMapper.readValue(packet["opplysning"].toJson())!!
 

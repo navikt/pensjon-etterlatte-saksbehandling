@@ -149,6 +149,7 @@ export const TypeStatusWrap = styled.div<{ type: string }>`
   font-size: 14px;
   height: 25px;
   margin-right: ${(props) => (props.type === 'barn' ? '1em;' : '0.5em')};
+  display: inline-block;
 `
 
 export const ForelderWrap = styled.div<{ avdoed?: boolean }>`
@@ -161,4 +162,5 @@ export const ForelderWrap = styled.div<{ avdoed?: boolean }>`
   font-weight: normal;
   font-size: 14px;
   margin-right: 0.9em;
+  display: inline-block;
 `

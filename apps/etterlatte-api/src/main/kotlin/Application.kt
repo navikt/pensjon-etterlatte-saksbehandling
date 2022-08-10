@@ -3,10 +3,10 @@ package no.nav.etterlatte
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import io.ktor.client.HttpClient
+import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.header
+import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import no.nav.etterlatte.behandling.*
@@ -22,13 +22,15 @@ class ApplicationContext(configLocation: String? = null) {
 
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val vedtakKlient = VedtakKlient(config, httpClient())
+    private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val rapid: KafkaProdusent<String, String> =
-        GcpKafkaConfig.fromEnv().standardProducer( System.getenv().getValue("KAFKA_RAPID_TOPIC"))
+        GcpKafkaConfig.fromEnv().standardProducer(System.getenv().getValue("KAFKA_RAPID_TOPIC"))
 
     val behandlingService: BehandlingService = BehandlingService(
         behandlingKlient = behandlingKlient,
         pdlKlient = PdltjenesterKlient(config, httpClient()),
         vedtakKlient = vedtakKlient,
+        grunnlagKlient = grunnlagKlient
     )
     val oppgaveService: OppgaveService = OppgaveService(behandlingKlient, vedtakKlient)
     val vedtakService = VedtakService(rapid)

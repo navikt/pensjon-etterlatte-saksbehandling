@@ -17,6 +17,7 @@ export interface IDetaljertBehandling {
   virkningstidspunkt: string
   status: IBehandlingStatus
   hendelser: IHendelse[]
+  familieforhold?: IFamilieforhold
 }
 
 export interface IHendelse {
@@ -253,6 +254,39 @@ export interface IPerson {
   foedselsdato: string
 }
 
+export interface IFamilieforhold {
+  avdoede: Grunnlagsopplysning<IPdlPerson>
+  gjenlevende: Grunnlagsopplysning<IPdlPerson>
+}
+
+export interface IFamilieRelasjon {
+  ansvarligeForeldre?: string[]
+  foreldre?: string[]
+  barn?: string[]
+}
+
+export interface Grunnlagsopplysning<T> {
+  id: string
+  kilde: string
+  opplysningsType: string
+  opplysning: T
+}
+
+export interface IPdlPerson {
+  fornavn: string
+  etternavn: string
+  foedselsnummer: string
+  foedselsdato: Date
+  doedsdato: Date
+  bostedsadresse?: IAdresse[]
+  deltBostedsadresse?: IAdresse[]
+  kontaktadresse?: IAdresse[]
+  oppholdsadresse?: IAdresse[]
+  avdoedesBarn?: IPdlPerson[]
+  familieRelasjon?: IFamilieRelasjon,
+  // ...
+}
+
 export enum PersonType {
   INNSENDER = 'INNSENDER',
   GJENLEVENDE = ' GJENLEVENDE',
@@ -289,6 +323,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   soeknadMottattDato: '',
   virkningstidspunkt: '',
   hendelser: [],
+  familieforhold: undefined
 }
 
 export const behandlingReducer = (state = detaljertBehandlingInitialState, action: IAction): any => {

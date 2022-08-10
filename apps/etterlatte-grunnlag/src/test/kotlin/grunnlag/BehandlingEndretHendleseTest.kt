@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Self
 import no.nav.etterlatte.grunnlag.BehandlingEndretHendlese
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
@@ -17,7 +14,6 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import testutils.TestDbKontekst
 import java.io.FileNotFoundException
 import java.time.Instant
 import java.util.*
@@ -34,9 +30,7 @@ internal class BehandlingEndretHendleseTest {
     private val inspector = TestRapid().apply { BehandlingEndretHendlese(this, RealGrunnlagService(opplysningerMock)) }
 
     @Test
-    fun `skal legge på grunnlag når behandling er endret`() {
-        Kontekst.set(Context(Self("testApp"), TestDbKontekst))
-
+    fun `skal legge paa grunnlag naar behandling er endret`() {
         val grunnlagshendelser = listOf(
             OpplysningDao.GrunnlagHendelse(Grunnlagsopplysning(
                 UUID.randomUUID(),

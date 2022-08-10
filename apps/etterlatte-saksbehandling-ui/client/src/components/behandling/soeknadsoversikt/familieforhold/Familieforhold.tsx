@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 import { Heading } from '@navikt/ds-react'
-import { hentAlderVedDoedsdato } from '../utils'
 import { AvdoedForelder } from './personer/AvdoedForelder'
 import { GjenlevendeForelder } from './personer/GjenlevendeForelder'
 import { Barn } from './personer/Barn'
@@ -12,6 +11,7 @@ import {
   IGyldighetproving,
   VurderingsResultat,
 } from '../../../../store/reducers/BehandlingReducer'
+import {Soesken} from "./personer/Soesken";
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
@@ -39,13 +39,8 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ behandling }) =>
             </Heading>
           </ContentHeader>
           <FamilieforholdWrapper>
-            <DashedBorder />
             <Barn
               person={behandling.kommerSoekerTilgode.familieforhold.soeker}
-              alderVedDoedsdato={hentAlderVedDoedsdato(
-                behandling.kommerSoekerTilgode.familieforhold.soeker.foedselsdato,
-                doedsdato
-              )}
               doedsdato={doedsdato}
             />
             <DashedBorder />
@@ -54,8 +49,13 @@ export const Familieforhold: React.FC<PropsFamilieforhold> = ({ behandling }) =>
               innsenderErGjenlevendeForelder={innsenderErGjenlevende}
               doedsdato={doedsdato}
             />
-            <DashedBorder />
             <AvdoedForelder person={behandling.kommerSoekerTilgode.familieforhold.avdoed} />
+            <br />
+            <DashedBorder />
+            <Soesken
+              soeker={behandling.kommerSoekerTilgode.familieforhold.soeker}
+              familieforhold={behandling.familieforhold!!}
+            />
           </FamilieforholdWrapper>
           <Border />
         </>

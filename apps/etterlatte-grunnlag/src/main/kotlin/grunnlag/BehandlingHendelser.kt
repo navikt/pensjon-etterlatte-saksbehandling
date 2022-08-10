@@ -1,7 +1,5 @@
 package no.nav.etterlatte.grunnlag
 
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Self
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -13,15 +11,10 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 class BehandlingHendelser(
     rapidsConnection: RapidsConnection,
 ) : River.PacketListener {
-
-    private val logger: Logger = LoggerFactory.getLogger(GrunnlagHendelser::class.java)
-
     init {
         River(rapidsConnection).apply {
             eventName("BEHANDLING:OPPRETTET")
@@ -33,10 +26,6 @@ class BehandlingHendelser(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            if (Kontekst.get().AppUser !is Self) {
-                logger.warn("AppUser i kontekst er ikke Self i R&R-flyten")
-            }
-
             //TODO dette må jeg gjøre smartere, ellers må Persongalleri restruktureres
             context.publish(
                 JsonMessage.newMessage(

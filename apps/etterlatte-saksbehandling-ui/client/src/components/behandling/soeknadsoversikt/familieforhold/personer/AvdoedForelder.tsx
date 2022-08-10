@@ -22,6 +22,7 @@ export const AvdoedForelder: React.FC<Props> = ({ person }) => {
         <span className="personRolle">
           ({PersonStatus.AVDOED} {RelatertPersonsRolle.FORELDER})
         </span>
+        <br />
         <ForelderWrap avdoed={true}>Død {format(new Date(person.doedsdato), 'dd.MM.yyyy')}</ForelderWrap>
       </PersonHeader>
       <PersonInfoWrapper>

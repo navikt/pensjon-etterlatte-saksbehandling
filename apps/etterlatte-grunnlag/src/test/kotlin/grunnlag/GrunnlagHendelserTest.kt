@@ -2,9 +2,6 @@ package grunnlag
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Self
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
@@ -15,7 +12,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import testutils.TestDbKontekst
 import java.io.FileNotFoundException
 import java.time.Instant
 import java.util.*
@@ -32,8 +28,6 @@ class GrunnlagHendelserTest {
 
     @Test
     fun `skal lese opplysningsbehov og legge til opplysning`() {
-        Kontekst.set(Context(Self("testApp"), TestDbKontekst))
-
         val grunnlagshendelser = listOf(
             OpplysningDao.GrunnlagHendelse(Grunnlagsopplysning(
                 UUID.randomUUID(),
@@ -54,7 +48,6 @@ class GrunnlagHendelserTest {
         every { opplysningerMock.finnHendelserIGrunnlag(any()) } returns grunnlagshendelser
         every { opplysningerMock.leggOpplysningTilGrunnlag(any(), any()) } returns 1L
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
-        val test = inspector.message(0)
         Assertions.assertEquals("GRUNNLAG:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
         Assertions.assertEquals(2, inspector.message(0).get("grunnlag").get("grunnlag").size())
         Assertions.assertEquals(2L, inspector.message(0).get("grunnlag").get("versjon").longValue())

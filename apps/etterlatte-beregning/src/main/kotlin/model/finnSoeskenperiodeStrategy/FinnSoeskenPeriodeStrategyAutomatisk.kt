@@ -1,27 +1,18 @@
 package model.finnSoeskenperiodeStrategy
 
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.model.BeregningService
 import java.time.YearMonth
-import java.util.ArrayList
 
 // Adressesjekk på halvsøsken på dødsfallstidspunkt i første omgang
-data class FinnSoeskenPeriodeStrategyAutomatisk(private val grunnlag: Grunnlag, private val virkFOM: YearMonth) : FinnSoeskenPeriodeStrategy() {
+data class FinnSoeskenPeriodeStrategyAutomatisk(val avdoedesBarn: List<Person>?, val bruker: Person?, private val virkFOM: YearMonth) : FinnSoeskenPeriodeStrategy() {
     override val soeskenperioder: List<SoeskenPeriode>
-        get() = finnSoeskenperioder(grunnlag, virkFOM)
+        get() = finnSoeskenperioder(avdoedesBarn, bruker, virkFOM)
 
-    private fun finnSoeskenperioder(grunnlag: Grunnlag, virkFOM: YearMonth): List<SoeskenPeriode> {
-        val avdoedPdl =
-            BeregningService.finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.AVDOED_PDL_V1)?.opplysning
-        val bruker =
-            BeregningService.finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.SOEKER_PDL_V1)?.opplysning
+    private fun finnSoeskenperioder(avdoedesBarn: List<Person>?, bruker: Person?, virkFOM: YearMonth): List<SoeskenPeriode> {
         //List compare?
-        val helsoesken =
-            avdoedPdl?.avdoedesBarn?.filter { it.familieRelasjon?.foreldre == bruker?.familieRelasjon?.foreldre }
-        val halvsoesken = avdoedPdl?.avdoedesBarn?.filter { avdoedbarn ->
+        val helsoesken = avdoedesBarn?.filter { it.familieRelasjon?.foreldre == bruker?.familieRelasjon?.foreldre }
+        val halvsoesken = avdoedesBarn?.filter { avdoedbarn ->
             avdoedbarn.foedselsnummer !in (helsoesken?.map { helsoesken -> helsoesken.foedselsnummer } ?: emptyList())
         }
         //first skal være ok, siden PPS allerede har sortert

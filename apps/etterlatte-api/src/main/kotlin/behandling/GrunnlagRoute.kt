@@ -57,7 +57,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
                     )
                 }
             } catch (ex: Exception) {
-                logger.error("kommer barnet tilgode feilet", ex)
+                logger.error("beregningsgrunnlag feilet", ex)
                 throw ex
             }
         }

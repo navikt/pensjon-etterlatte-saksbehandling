@@ -3,6 +3,8 @@ package model.finnSoeskenperiodeStrategy
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.model.BeregningService
 import java.time.YearMonth
 
 sealed class FinnSoeskenPeriodeStrategy {
@@ -14,11 +16,12 @@ sealed class FinnSoeskenPeriodeStrategy {
 
             return when {
                 saksbehandlerHarValgtSoeskenPeriode  -> FinnSoeskenPeriodeStrategyManuell(grunnlag, virkFOM, virkTOM)
-                else -> FinnSoeskenPeriodeStrategyAutomatisk(grunnlag, virkFOM)
+                else -> {
+                    val avdoedPdl = BeregningService.finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.AVDOED_PDL_V1)?.opplysning
+                    val bruker = BeregningService.finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.SOEKER_PDL_V1)?.opplysning
+                    FinnSoeskenPeriodeStrategyAutomatisk(avdoedPdl?.avdoedesBarn, bruker, virkFOM)
+                }
             }
         }
     }
 }
-
-
-

@@ -69,7 +69,7 @@ class BeregningService {
 
     }
     // 40% av G til første barn, 25% til resten. Fordeles likt
-    fun beregnUtbetaling(flokkStoerrelse: Int, g: Int): Double {
+    private fun beregnUtbetaling(flokkStoerrelse: Int, g: Int): Double {
         return if (flokkStoerrelse == 0) g * 0.40
         else (g * 0.40 + ( g *0.25)*flokkStoerrelse) / (flokkStoerrelse +1)
     }

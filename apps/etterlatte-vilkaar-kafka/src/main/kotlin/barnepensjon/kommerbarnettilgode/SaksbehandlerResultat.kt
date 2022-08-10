@@ -5,8 +5,7 @@ import no.nav.etterlatte.libs.common.vikaar.*
 import java.time.LocalDateTime
 
 fun saksbehandlerResultat(
-    vilkaartype: Vilkaartyper,
-    saksbehandlerVurdering: VilkaarOpplysning<ResultatKommerBarnetTilgode>?
+        saksbehandlerVurdering: VilkaarOpplysning<ResultatKommerBarnetTilgode>?
 ): VurdertVilkaar? {
     if (saksbehandlerVurdering == null) {
         return null
@@ -36,7 +35,7 @@ fun saksbehandlerResultat(
     )
 
     return VurdertVilkaar(
-        vilkaartype,
+        Vilkaartyper.SAKSBEHANDLER_RESULTAT,
         resultat,
         null,
         listOf(kriterie),

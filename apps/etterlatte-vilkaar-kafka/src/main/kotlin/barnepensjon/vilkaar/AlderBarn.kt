@@ -4,28 +4,28 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.*
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 
 fun vilkaarBrukerErUnder20(
-    vilkaartype: Vilkaartyper,
     soekerPdl: VilkaarOpplysning<Person>?,
-    avdoedPdl: VilkaarOpplysning<Person>?,
+    virkningstidspunkt: LocalDate?,
 ): VurdertVilkaar {
-    val soekerErUnder20 = kriterieSoekerErUnder20(soekerPdl, avdoedPdl)
-    val soekerErILive = kriterieSoekerErILive(soekerPdl, avdoedPdl)
+    val soekerErUnder20 = kriterieSoekerErUnder20(soekerPdl, virkningstidspunkt)
+    val soekerErILive = kriterieSoekerErILive(soekerPdl, virkningstidspunkt)
 
     return VurdertVilkaar(
-        vilkaartype,
-        setVikaarVurderingFraKriterier(listOf(soekerErILive, soekerErUnder20)),
+        Vilkaartyper.SOEKER_ER_UNDER_20,
+        setVilkaarVurderingFraKriterier(listOf(soekerErUnder20, soekerErILive)),
         null,
-        listOf(soekerErILive, soekerErUnder20),
+        listOf(soekerErUnder20),
         LocalDateTime.now()
     )
 }
 
-fun kriterieSoekerErILive(soekerPdl: VilkaarOpplysning<Person>?, avdoedPdl: VilkaarOpplysning<Person>?): Kriterie {
-    if (soekerPdl == null || avdoedPdl == null) {
+fun kriterieSoekerErILive(soekerPdl: VilkaarOpplysning<Person>?, virkningstidspunkt: LocalDate?): Kriterie {
+    if (soekerPdl == null || virkningstidspunkt == null) {
         return opplysningsGrunnlagNull(Kriterietyper.SOEKER_ER_I_LIVE, emptyList())
     }
 
@@ -35,17 +35,11 @@ fun kriterieSoekerErILive(soekerPdl: VilkaarOpplysning<Person>?, avdoedPdl: Vilk
             KriterieOpplysningsType.DOEDSDATO,
             soekerPdl.kilde,
             Doedsdato(soekerPdl.opplysning.doedsdato, soekerPdl.opplysning.foedselsnummer)
-        ),
-        Kriteriegrunnlag(
-            avdoedPdl.id,
-            KriterieOpplysningsType.DOEDSDATO,
-            avdoedPdl.kilde,
-            Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
         )
     )
 
     fun VilkaarOpplysning<Person>.lever() = opplysning.doedsdato == null
-    fun VilkaarOpplysning<Person>.doedeEtterVirk() = opplysning.doedsdato?.isAfter(hentVirkningsdato(avdoedPdl))?: false
+    fun VilkaarOpplysning<Person>.doedeEtterVirk() = opplysning.doedsdato?.isAfter(virkningstidspunkt)?: false
     fun VilkaarOpplysning<Person>.levdePaaVirkningsdato() = lever() || doedeEtterVirk()
 
     val resultat = vurderOpplysning { soekerPdl.levdePaaVirkningsdato() }
@@ -55,17 +49,9 @@ fun kriterieSoekerErILive(soekerPdl: VilkaarOpplysning<Person>?, avdoedPdl: Vilk
 
 fun kriterieSoekerErUnder20(
     soekerPdl: VilkaarOpplysning<Person>?,
-    avdoedPdl: VilkaarOpplysning<Person>?
+    virkningstidspunkt: LocalDate?
 ): Kriterie {
     val opplysningsGrunnlag = listOfNotNull(
-        avdoedPdl?.let {
-            Kriteriegrunnlag(
-                avdoedPdl.id,
-                KriterieOpplysningsType.DOEDSDATO,
-                avdoedPdl.kilde,
-                Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
-            )
-        },
         soekerPdl?.let {
             Kriteriegrunnlag(
                 soekerPdl.id,
@@ -76,10 +62,10 @@ fun kriterieSoekerErUnder20(
         },
     )
 
-    val resultat = if (soekerPdl == null || avdoedPdl == null) {
+    val resultat = if (soekerPdl == null || virkningstidspunkt == null) {
         VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     } else {
-        vurderOpplysning { hentFoedselsdato(soekerPdl).plusYears(18) > hentVirkningsdato(avdoedPdl) }
+        vurderOpplysning { hentFoedselsdato(soekerPdl).plusYears(18) > virkningstidspunkt }
     }
 
     return Kriterie(

@@ -4,7 +4,6 @@ import lagMockPersonPdl
 import mapTilVilkaarstypePerson
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -21,21 +20,18 @@ class DoedfallTest {
 
         val doedsdatoIkkeIPdl =
             vilkaarDoedsfallErRegistrert(
-                Vilkaartyper.DOEDSFALL_ER_REGISTRERT,
                 mapTilVilkaarstypePerson(avdoedIngenDoedsdato),
                 mapTilVilkaarstypePerson(barnAvdoedErForeldre)
             )
 
         val avdoedErForelder =
             vilkaarDoedsfallErRegistrert(
-                Vilkaartyper.DOEDSFALL_ER_REGISTRERT,
                 mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
                 mapTilVilkaarstypePerson(barnAvdoedErForeldre)
             )
 
         val avdoedIkkeForelder =
             vilkaarDoedsfallErRegistrert(
-                Vilkaartyper.DOEDSFALL_ER_REGISTRERT,
                 mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
                 mapTilVilkaarstypePerson(barnAvdoedErIkkeForeldre)
             )

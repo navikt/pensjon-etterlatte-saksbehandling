@@ -6,12 +6,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.barnepensjon.*
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.inntekt.PensjonUforeOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
@@ -28,8 +28,11 @@ import java.time.YearMonth
 class VilkaarService {
     private val logger = LoggerFactory.getLogger(VilkaarService::class.java)
 
-    fun mapVilkaar(opplysninger: List<VilkaarOpplysning<ObjectNode>>): VilkaarResultat {
-        logger.info("Map vilkaar")
+    fun mapVilkaarForstegangsbehandling(
+        opplysninger: List<VilkaarOpplysning<ObjectNode>>,
+        virkningstidspunkt: LocalDate,
+    ): VilkaarResultat {
+        logger.info("Mapper vilkaar fra grunnlagsdata for virkningstidspunkt $virkningstidspunkt for førstegangsbehandling")
 
         val avdoedSoeknad = finnOpplysning<AvdoedSoeknad>(opplysninger, Opplysningstyper.AVDOED_SOEKNAD_V1)
         val soekerSoeknad = finnOpplysning<SoekerBarnSoeknad>(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1)
@@ -38,25 +41,22 @@ class VilkaarService {
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
         val pensjonUfore = finnOpplysning<PensjonUforeOpplysning>(opplysninger, Opplysningstyper.PENSJON_UFORE_V1)
         val arbeidsforhold = finnOpplysning<ArbeidsforholdOpplysning>(opplysninger, Opplysningstyper.ARBEIDSFORHOLD_V1)
-
         val vilkaar = listOf(
-            vilkaarBrukerErUnder20(Vilkaartyper.SOEKER_ER_UNDER_20, soekerPdl, avdoedPdl),
-            vilkaarDoedsfallErRegistrert(Vilkaartyper.DOEDSFALL_ER_REGISTRERT, avdoedPdl, soekerPdl),
-            vilkaarAvdoedesMedlemskap(
-                Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
-                avdoedSoeknad,
-                avdoedPdl,
-                pensjonUfore,
-                arbeidsforhold
-            ),
-            vilkaarBarnetsMedlemskap(
-                Vilkaartyper.BARNETS_MEDLEMSKAP,
-                soekerPdl,
-                soekerSoeknad,
-                gjenlevendePdl,
-                avdoedPdl,
+                vilkaarBrukerErUnder20(soekerPdl, virkningstidspunkt),
+                vilkaarDoedsfallErRegistrert(avdoedPdl, soekerPdl),
+                vilkaarAvdoedesMedlemskap(
+                    avdoedSoeknad,
+                    avdoedPdl,
+                    pensjonUfore,
+                    arbeidsforhold
+                ),
+                vilkaarBarnetsMedlemskap(
+                    soekerPdl,
+                    soekerSoeknad,
+                    gjenlevendePdl,
+                    avdoedPdl,
+                )
             )
-        )
 
         val vilkaarResultat = setVilkaarVurderingFraVilkaar(vilkaar)
         val vurdertDato = hentSisteVurderteDato(vilkaar)
@@ -64,17 +64,67 @@ class VilkaarService {
         return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
     }
 
-    fun beregnVilkaarstidspunkt(opplysninger: List<VilkaarOpplysning<ObjectNode>>, opprettet: LocalDate): YearMonth? {
-        logger.info("beregner virkningstidspunkt")
-        val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
-        return avdoedPdl?.opplysning?.doedsdato?.let { hentVirkningstidspunkt(it, opprettet) }
+    fun mapVilkaarRevurdering(opplysninger: List<VilkaarOpplysning<ObjectNode>>, virkningstidspunkt: LocalDate, revurderingAarsak: RevurderingAarsak): VilkaarResultat {
+
+        logger.info("Mapper vilkaar fra grunnlagsdata for virkningstidspunkt $virkningstidspunkt for revurdering med årsak $revurderingAarsak")
+        val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
+        val vilkaar = when (revurderingAarsak) {
+            RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarBrukerErUnder20(soekerPdl, virkningstidspunkt))
+            RevurderingAarsak.MANUELT_OPPHOER -> TODO("Ikke implementert vurdering av denne enda")
+        }
+
+        val vilkaarResultat = setVilkaarVurderingFraVilkaar(vilkaar)
+        val vurdertDato = hentSisteVurderteDato(vilkaar)
+
+        return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
     }
 
-    fun hentVirkningstidspunkt(doedsdato: LocalDate, mottattDato: LocalDate): YearMonth {
+    fun beregnVirkningstidspunktFoerstegangsbehandling(
+        opplysninger: List<VilkaarOpplysning<ObjectNode>>,
+        soeknadMottattDato: LocalDate,
+    ): YearMonth {
+        val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
+        return hentVirkningstidspunktFoerstegangssoeknad(avdoedPdl?.opplysning?.doedsdato, soeknadMottattDato)
+    }
+
+    fun beregnVirkningstidspunktRevurdering(
+        opplysninger: List<VilkaarOpplysning<ObjectNode>>,
+        revurderingAarsak: RevurderingAarsak
+    ): YearMonth {
+        return when (revurderingAarsak) {
+            RevurderingAarsak.SOEKER_DOD -> {
+                val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
+                hentVirkningstidspunktRevurderingSoekerDoedsfall(soekerPdl?.opplysning?.doedsdato)
+            }
+            RevurderingAarsak.MANUELT_OPPHOER -> TODO("Ikke implementert")
+        }
+    }
+
+    fun hentVirkningstidspunktRevurderingSoekerDoedsfall(soekerDoedsdato: LocalDate?): YearMonth {
+        if (soekerDoedsdato == null) {
+            throw OpplysningKanIkkeHentesUt(
+                """
+                Vi har en revurdering av en avdød mottaker, men mottaker er ikke død i grunnlagsdata fra PDL. 
+                Vi kan dermed ikke sette riktig virkningstidspunkt og vilkårsvurdere revurderingen.
+                """.trimIndent()
+            )
+        }
+        return YearMonth.from(soekerDoedsdato).plusMonths(1)
+    }
+
+    fun hentVirkningstidspunktFoerstegangssoeknad(doedsdato: LocalDate?, mottattDato: LocalDate): YearMonth {
+        if (doedsdato == null) {
+            throw OpplysningKanIkkeHentesUt(
+                """
+                Vi har en førstegangssøknad der vi ikke kan hente ut avdød sin dødsdato. 
+                Vi kan dermed heller ikke beslutte virkningstidspunkt og vilkårsvurdere
+                """.trimIndent()
+            )
+        }
         if (mottattDato.year - doedsdato.year > 3) {
             return YearMonth.of(mottattDato.year - 3, mottattDato.month)
         }
-        return YearMonth.of(doedsdato.year, doedsdato.month + 1)
+        return YearMonth.from(doedsdato).plusMonths(1)
     }
 
 
@@ -85,22 +135,22 @@ class VilkaarService {
         val soekerSoeknad =
             finnOpplysning<SoekerBarnSoeknad>(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1)
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
-        val saksbehandlerKommerBarnetTilgode = finnOpplysning<ResultatKommerBarnetTilgode>(opplysninger, Opplysningstyper.SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1)
+        val saksbehandlerKommerBarnetTilgode = finnOpplysning<ResultatKommerBarnetTilgode>(
+            opplysninger,
+            Opplysningstyper.SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1
+        )
 
         val kommerBarnetTilGode = listOf(
             barnOgForelderSammeBostedsadresse(
-                Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
                 soekerPdl,
                 gjenlevendePdl
             ),
-            barnIngenOppgittUtlandsadresse(Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE, soekerSoeknad),
+            barnIngenOppgittUtlandsadresse(soekerSoeknad),
             barnOgAvdoedSammeBostedsadresse(
-                Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
                 soekerPdl,
                 avdoedPdl
             ),
             saksbehandlerResultat(
-                Vilkaartyper.SAKSBEHANDLER_RESULTAT,
                 saksbehandlerKommerBarnetTilgode
             )
         )

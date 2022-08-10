@@ -5,7 +5,7 @@ import no.nav.etterlatte.barnepensjon.hentAdresser
 import no.nav.etterlatte.barnepensjon.hentDoedsdato
 import no.nav.etterlatte.barnepensjon.harKunNorskePdlAdresserEtterDato
 import no.nav.etterlatte.barnepensjon.opplysningsGrunnlagNull
-import no.nav.etterlatte.barnepensjon.setVikaarVurderingFraKriterier
+import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraKriterier
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
@@ -21,7 +21,6 @@ import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import java.time.LocalDateTime
 
 fun vilkaarBarnetsMedlemskap(
-    vilkaartype: Vilkaartyper,
     soekerPdl: VilkaarOpplysning<Person>?,
     soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
     gjenlevendePdl: VilkaarOpplysning<Person>?,
@@ -43,8 +42,8 @@ fun vilkaarBarnetsMedlemskap(
     )
 
     return VurdertVilkaar(
-        vilkaartype,
-        setVikaarVurderingFraKriterier(listOf(barnHarIkkeAdresseIUtlandet, foreldreHarIkkeAdresseIUtlandet)),
+        Vilkaartyper.BARNETS_MEDLEMSKAP,
+        setVilkaarVurderingFraKriterier(listOf(barnHarIkkeAdresseIUtlandet, foreldreHarIkkeAdresseIUtlandet)),
         null,
         listOf(
             barnHarIkkeAdresseIUtlandet,

@@ -18,16 +18,14 @@ import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
-import java.util.*
 import kotlin.collections.ArrayList
 
 
 fun vilkaarAvdoedesMedlemskap(
-    vilkaartype: Vilkaartyper,
-    avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
-    avdoedPdl: VilkaarOpplysning<Person>?,
-    pensjonUforeOpplysning: VilkaarOpplysning<PensjonUforeOpplysning>?,
-    arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?
+        avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
+        avdoedPdl: VilkaarOpplysning<Person>?,
+        pensjonUforeOpplysning: VilkaarOpplysning<PensjonUforeOpplysning>?,
+        arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?
 ): VurdertVilkaar {
     // Kriterier: 1. bodd i norge siste 5 årene
     // 2. Arbeidet i norge siste 5 årene
@@ -50,7 +48,7 @@ fun vilkaarAvdoedesMedlemskap(
     val kriterier = bosattNorge.kriterie + harMottattPensjonEllerTrygdSisteFemAar + harHatt100prosentStillingSisteFemAar
 
     return VurdertVilkaar(
-        vilkaartype,
+        Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
         VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, //endre når vi får inn flere opplysninger
         bosattNorge.utfall,
         kriterier,
@@ -125,19 +123,6 @@ fun kriterieHarMottattPensjonEllerTrygdSisteFemAar(pensjonUforeOpplysning: Vilka
             )
         }
     )
-/*
-val uforetrygd = listOfNotNull(
-    pensjonUforeOpplysning?.opplysning?.mottattUforetrygd?.let {
-        Kriteriegrunnlag(
-            pensjonUforeOpplysning.id,
-            KriterieOpplysningsType.AVDOED_UFORE_PENSJON,
-            Grunnlagsopplysning.Inntektskomponenten("inntektskomponenten"),
-            pensjonUforeOpplysning.opplysning.mottattUforetrygd
-        )
-    }
-)
-*/
-
     return Kriterie(
         Kriterietyper.AVDOED_HAR_MOTTATT_PENSJON_TRYGD_SISTE_FEM_AAR,
         VurderingsResultat.OPPFYLT,
@@ -177,8 +162,6 @@ fun kriterieHarMottattUforeTrygdSisteFemAar(pensjonUforeOpplysning: VilkaarOpply
 
     val opplysningsGrunnlag = listOfNotNull(
         pensjonUforeOpplysning?.opplysning?.mottattUforetrygd?.let {
-            print("uforetrygd")
-            print(pensjonUforeOpplysning.opplysning.mottattUforetrygd)
             Kriteriegrunnlag(
                 pensjonUforeOpplysning.id,
                 KriterieOpplysningsType.AVDOED_UFORE_PENSJON,

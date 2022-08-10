@@ -4,8 +4,9 @@
   "fnrSoeker": "03108718357",
   "behandling": {
     "id": "dbbd9a01-3e5d-4ec1-819c-1781d1f6a440",
-    "type": "FORSTEGANGSBEHANDLING"
+    "type": "REVURDERING"
   },
+  "revurderingsaarsak": "SOEKER_DOD",
   "grunnlag": {
     "versjon": 8,
     "saksId": 6,
@@ -303,7 +304,7 @@
           "foedselsdato": "2013-10-12",
           "foedselsaar": 2013,
           "foedeland": "NOR",
-          "doedsdato": null,
+          "doedsdato": "2022-06-06",
           "adressebeskyttelse": "UGRADERT",
           "bostedsadresse": [
             {

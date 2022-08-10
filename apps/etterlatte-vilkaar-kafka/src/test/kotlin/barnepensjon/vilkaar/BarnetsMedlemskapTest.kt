@@ -9,7 +9,6 @@ import mapTilVilkaarstypeSoekerSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
-import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
 import org.junit.jupiter.api.Assertions
@@ -37,7 +36,6 @@ class BarnetsMedlemskapTest {
         val barnSoeknadDanmark = lagMockPersonSoekerSoeknad(UtenlandsadresseBarn(JaNeiVetIkke.JA, null, null))
 
         val ingenUtenlandsAdresser = vilkaarBarnetsMedlemskap(
-            Vilkaartyper.BARNETS_MEDLEMSKAP,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlNorge),
@@ -45,7 +43,6 @@ class BarnetsMedlemskapTest {
         )
 
         val barnUtenlandsAdresserPdl = vilkaarBarnetsMedlemskap(
-            Vilkaartyper.BARNETS_MEDLEMSKAP,
             mapTilVilkaarstypePerson(barnPdlDanmark),
             mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlNorge),
@@ -53,7 +50,6 @@ class BarnetsMedlemskapTest {
         )
 
         val barnUtenlandsAdresserSoeknad = vilkaarBarnetsMedlemskap(
-            Vilkaartyper.BARNETS_MEDLEMSKAP,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypeSoekerSoeknad(barnSoeknadDanmark),
             mapTilVilkaarstypePerson(gjenlevendePdlNorge),
@@ -61,7 +57,6 @@ class BarnetsMedlemskapTest {
         )
 
         val gjenlevendeUtenlandsAdresserPdl = vilkaarBarnetsMedlemskap(
-            Vilkaartyper.BARNETS_MEDLEMSKAP,
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlDanmark),

@@ -10,6 +10,7 @@ import java.io.FileNotFoundException
 internal class LesVilkaarsmeldingTest {
     companion object {
         val melding = readFile("/melding.json")
+        val meldingRevurderingDoedsfall = readFile("/melding_revurdering_doedsfall.json")
 
         fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")
@@ -27,5 +28,13 @@ internal class LesVilkaarsmeldingTest {
         Assertions.assertEquals(2, inspector.message(0).get("kommerSoekerTilGode").size())
         Assertions.assertEquals(8, inspector.message(0).get("vilkaarsvurderingGrunnlagRef").intValue())
 
+    }
+
+    @Test
+    fun `skal lese og lage en melding for revurdering dødsfall`() {
+        val inspector = inspector.apply { sendTestMessage(meldingRevurderingDoedsfall) }.inspektør
+        Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
+        Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
+        Assertions.assertEquals(8, inspector.message(0).get("vilkaarsvurderingGrunnlagRef").intValue())
     }
 }

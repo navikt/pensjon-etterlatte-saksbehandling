@@ -4,7 +4,6 @@ import lagMockPersonSoekerSoeknad
 import mapTilVilkaarstypeSoekerSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
-import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -18,12 +17,10 @@ class BarnIngenUtlandsadresseTest {
         val barnSoeknadDanmark = lagMockPersonSoekerSoeknad(UtenlandsadresseBarn(JaNeiVetIkke.JA, null, null))
 
         val ikkeUtland = barnIngenOppgittUtlandsadresse(
-            Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE,
             mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge)
         )
 
         val utland = barnIngenOppgittUtlandsadresse(
-            Vilkaartyper.BARN_INGEN_OPPGITT_UTLANDSADRESSE,
             mapTilVilkaarstypeSoekerSoeknad(barnSoeknadDanmark)
         )
 

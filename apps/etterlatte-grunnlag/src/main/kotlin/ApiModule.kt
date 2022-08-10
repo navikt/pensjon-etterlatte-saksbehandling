@@ -25,7 +25,8 @@ fun Application.apiModule(routes: Route.() -> Unit) {
 
     install(CallLogging) {
         level = Level.INFO
-        filter { call -> !call.request.path().startsWith("/internal") }
+        val naisEndepunkt = listOf("isalive", "isready", "metrics")
+        filter { call -> !naisEndepunkt.contains(call.request.document()) }
         format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
         mdc(no.nav.etterlatte.libs.common.logging.CORRELATION_ID) { call ->
             call.request.header(no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID) ?: java.util.UUID.randomUUID()
@@ -45,25 +46,10 @@ fun Application.apiModule(routes: Route.() -> Unit) {
     }
 
     routing {
-        healthApi()
         authenticate {
             route("api") {
                 routes()
             }
-        }
-    }
-}
-
-fun Route.healthApi() {
-    route("internal") {
-        get("isalive") {
-            call.respondText { "OK" }
-        }
-        get("isready") {
-            call.respondText { "OK" }
-        }
-        get("started") {
-            call.respondText { "OK" }
         }
     }
 }

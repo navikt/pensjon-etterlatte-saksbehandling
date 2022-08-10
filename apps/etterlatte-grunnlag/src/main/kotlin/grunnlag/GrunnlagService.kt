@@ -1,7 +1,6 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
@@ -19,16 +18,21 @@ class RealGrunnlagService(private val opplysninger: OpplysningDao) : GrunnlagSer
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
 
     override fun hentGrunnlag(sak: Long): Grunnlag {
-        return inTransaction { hentGrunnlagUtenTransaksjon(sak) }
+        return opplysninger.finnHendelserIGrunnlag(sak).let { hendelser ->
+            Grunnlag(
+                saksId = sak,
+                grunnlag = hendelser.map { it.opplysning },
+                hendelser.maxOfOrNull { it.hendelseNummer }
+                    ?: 0)
+        }
     }
 
     override fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstyper): Grunnlagsopplysning<ObjectNode>? {
-        return inTransaction { opplysninger.finnNyesteGrunnlag(sak, opplysningstype)?.opplysning }
+        return opplysninger.finnNyesteGrunnlag(sak, opplysningstype)?.opplysning
     }
 
     override fun opprettGrunnlag(sak: Long, nyeOpplysninger: List<Grunnlagsopplysning<ObjectNode>>): Grunnlag {
         logger.info("Oppretter et grunnlag")
-        return inTransaction {
             val gjeldendeGrunnlag = opplysninger.finnHendelserIGrunnlag(sak).map { it.opplysning.id }
 
             for (opplysning in nyeOpplysninger) {
@@ -38,17 +42,6 @@ class RealGrunnlagService(private val opplysninger: OpplysningDao) : GrunnlagSer
                     opplysninger.leggOpplysningTilGrunnlag(sak, opplysning)
                 }
             }
-            hentGrunnlagUtenTransaksjon(sak)
-        }
-    }
-
-    private fun hentGrunnlagUtenTransaksjon(sak: Long): Grunnlag {
-        return opplysninger.finnHendelserIGrunnlag(sak).let { hendelser ->
-            Grunnlag(
-                saksId = sak,
-                grunnlag = hendelser.map { it.opplysning },
-                hendelser.maxOfOrNull { it.hendelseNummer }
-                    ?: 0)
-        }
+            return hentGrunnlag(sak)
     }
 }

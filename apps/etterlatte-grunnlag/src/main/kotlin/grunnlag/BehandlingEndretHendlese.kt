@@ -1,7 +1,5 @@
 package no.nav.etterlatte.grunnlag
 
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Self
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -32,9 +30,6 @@ class BehandlingEndretHendlese(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            if (Kontekst.get().AppUser !is Self) {
-                logger.warn("AppUser i kontekst er ikke Self i R&R-flyten")
-            }
 
             try {
                 val grunnlag = grunnlag.hentGrunnlag(packet[BehandlingGrunnlagEndret.sakIdKey].asLong())

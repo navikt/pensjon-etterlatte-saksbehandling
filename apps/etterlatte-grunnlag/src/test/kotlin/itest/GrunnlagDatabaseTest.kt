@@ -19,14 +19,13 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.Month
 import java.util.*
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagDaoIntegrationTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
 
-    private lateinit var dataSource: DataSource
+    private lateinit var opplysningRepo: OpplysningDao
 
     @BeforeAll
     fun beforeAll() {
@@ -35,9 +34,8 @@ internal class GrunnlagDaoIntegrationTest {
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
         val dsb = DataSourceBuilder(mapOf("DB_JDBC_URL" to postgreSQLContainer.jdbcUrl))
-        dataSource = dsb.dataSource
-
         dsb.migrate()
+        opplysningRepo = OpplysningDao(dsb.dataSource)
     }
 
     @AfterAll
@@ -46,9 +44,7 @@ internal class GrunnlagDaoIntegrationTest {
     }
 
     @Test
-    fun `Legge til opplysning og hente den etterpå`() {
-        val connection = dataSource.connection
-        val opplysningRepo = OpplysningDao { connection }
+    fun `Legge til opplysning og hente den etterpaa`() {
         val datoMottat = LocalDate.of(2022, Month.MAY, 3).atStartOfDay()
 
         Grunnlagsopplysning(
@@ -82,17 +78,12 @@ internal class GrunnlagDaoIntegrationTest {
         assertEquals(uuid, opplysningRepo.finnHendelserIGrunnlag(2).first().opplysning.id)
         assertEquals(datoMottat,
             opplysningRepo.finnHendelserIGrunnlag(1)
-                .first().opplysning.let { objectMapper.treeToValue<SoeknadMottattDato>(it.opplysning) }?.mottattDato
+                .first().opplysning.let { objectMapper.treeToValue<SoeknadMottattDato>(it.opplysning) }.mottattDato
         )
-
-        connection.close()
     }
 
     @Test
     fun `Skal hente opplysning fra nyeste hendelse basert paa sakId og opplysningType`() {
-        val connection = dataSource.connection
-        val opplysningRepo = OpplysningDao { connection }
-
         Grunnlagsopplysning(
             UUID.randomUUID(),
             Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
@@ -118,9 +109,6 @@ internal class GrunnlagDaoIntegrationTest {
 
     @Test
     fun `Ny opplysning skal overskrive gammel, new way`() {
-        val connection = dataSource.connection
-        val opplysningRepo = OpplysningDao { connection }
-
         Grunnlagsopplysning(
             UUID.randomUUID(),
             Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
@@ -143,8 +131,5 @@ internal class GrunnlagDaoIntegrationTest {
             assertEquals(1, it.size)
             assertEquals(uuid, it.first().opplysning.id)
         }
-
-        connection.close()
     }
-
 }

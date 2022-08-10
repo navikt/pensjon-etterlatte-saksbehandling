@@ -44,10 +44,12 @@ if (process.env.DEVELOPMENT !== 'true') {
 
 app.use('/modiacontextholder/api/', modiaRouter) // bytte ut med etterlatte-innlogget?
 
-// app.use('/brev', brev)
-
 if (isDev) {
   app.use('/api', mockRouter)
+
+  if (process.env.BREV_DEV) {
+    app.use('/brev', brev)
+  }
 } else {
   logger.info('Proxy-kall')
   app.use('/api', expressProxy(`${process.env.API_URL}`, 'api://783cea60-43b5-459c-bdd3-de3325bd716a/.default'))

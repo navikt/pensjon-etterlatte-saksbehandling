@@ -24,6 +24,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "DEVELOPMENT=true ts-node-dev ./src/index.ts",
+    "dev:brev": "DEVELOPMENT=true BREV_DEV=true ts-node-dev ./src/index.ts",
     "test": "mocha -r ts-node/register './src/tests/**/*.test.ts'"
   }
 }

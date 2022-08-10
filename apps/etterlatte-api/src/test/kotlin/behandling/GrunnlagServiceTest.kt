@@ -49,7 +49,7 @@ internal class GrunnlagServiceTest {
             			},
             			"opplysningType":"SAKSBEHANDLER_SOESKEN_I_BEREGNINGEN",
             			"meta":{},
-            			"opplysning":[
+            			"opplysning": {"beregningsgrunnlag" : [
             				{
             					"foedselsnummer":"18057404783",
             					"skalBrukes":true
@@ -58,7 +58,7 @@ internal class GrunnlagServiceTest {
             					"foedselsnummer":"26017921265",
             					"skalBrukes":false
             				}
-            			],
+            			]},
             			"attestering":null
             		}
             	]

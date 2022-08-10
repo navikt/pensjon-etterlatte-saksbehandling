@@ -43,6 +43,7 @@ class GrunnlagService(
         return GrunnlagResult("Lagret")
     }
 
+    internal data class Beregningsgrunnlag(val beregningsgrunnlag: List<SoeskenMedIBeregning>)
     suspend fun lagreSoeskenMedIBeregning(
         behandlingId: String,
         soeskenMedIBeregning: List<SoeskenMedIBeregning>,
@@ -50,11 +51,11 @@ class GrunnlagService(
         token: String
     ): GrunnlagResult {
         val behandling = behandlingKlient.hentBehandling(behandlingId, token)
-        val opplysning : List<Grunnlagsopplysning<List<SoeskenMedIBeregning>>> = listOf(
+        val opplysning : List<Grunnlagsopplysning<Beregningsgrunnlag>> = listOf(
             lagOpplysning(
                 opplysningsType = Opplysningstyper.SAKSBEHANDLER_SOESKEN_I_BEREGNINGEN,
                 kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
-                opplysning = soeskenMedIBeregning
+                opplysning = Beregningsgrunnlag(soeskenMedIBeregning)
             )
         )
 

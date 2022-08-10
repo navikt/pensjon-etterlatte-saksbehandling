@@ -19,20 +19,24 @@ interface SoeskenMedIBeregning {
 
 const Beregningsgrunnlag = () => {
   const behandling = useContext(AppContext).state.behandlingReducer
-  const { next } = useBehandlingRoutes()
-  const { control, handleSubmit } = useForm<{ beregningsgrunnlag: SoeskenMedIBeregning[] }>({
-    defaultValues: {
-      beregningsgrunnlag:
-        behandling.familieforhold?.avdoede.opplysning.avdoedesBarn?.map((soesken) => ({
-          foedselsnummer: soesken.foedselsnummer,
-          skalBrukes: true,
-        })) ?? [],
-    },
-  })
 
   if (behandling.kommerSoekerTilgode == null || behandling.familieforhold?.avdoede == null) {
     return <div style={{ color: 'red' }}>Familieforhold kan ikke hentes ut</div>
   }
+
+  const soeker = behandling.kommerSoekerTilgode.familieforhold.soeker
+  const { next } = useBehandlingRoutes()
+  const { control, handleSubmit } = useForm<{ beregningsgrunnlag: SoeskenMedIBeregning[] }>({
+    defaultValues: {
+      beregningsgrunnlag:
+        behandling.familieforhold?.avdoede.opplysning.avdoedesBarn
+          ?.filter((barn) => barn.foedselsnummer !== soeker.fnr)
+          ?.map((soesken) => ({
+            foedselsnummer: soesken.foedselsnummer,
+            skalBrukes: true,
+          })) ?? [],
+    },
+  })
 
   const doedsdato = behandling.kommerSoekerTilgode.familieforhold.avdoed.doedsdato
 

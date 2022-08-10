@@ -42,7 +42,7 @@ class FinnDodsmeldinger(
                 }
                 dodsmeldinger++
             } else {
-                log.info("Så opplysning om ${it.opplysningstype} opprettet ${it.opprettet} for ident ${it.personidenter} med endringstype ${it.endringstype} og hendelsesid: ${it.hendelseId}")
+                //log.info("Så opplysning om ${it.opplysningstype} opprettet ${it.opprettet} for ident ${it.personidenter} med endringstype ${it.endringstype} og hendelsesid: ${it.hendelseId}")
             }
 
         }

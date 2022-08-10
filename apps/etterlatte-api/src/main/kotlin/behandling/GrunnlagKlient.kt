@@ -7,17 +7,18 @@ import io.ktor.client.*
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
 
 interface EtterlatteGrunnlag {
-    suspend fun <T> finnOpplysning(
+    suspend fun finnOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstyper,
         accessToken: String
-    ): Grunnlagsopplysning<T>?
+    ): Grunnlagsopplysning<Person>?
 }
 
 class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnlag {
@@ -29,11 +30,11 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnla
     private val clientId = config.getString("grunnlag.client.id")
     private val resourceUrl = config.getString("grunnlag.resource.url")
 
-    override suspend fun <T> finnOpplysning(
+    override suspend fun finnOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstyper,
         accessToken: String
-    ): Grunnlagsopplysning<T>? {
+    ): Grunnlagsopplysning<Person>? {
         try {
             logger.info("Henter opplysning ($opplysningsType) fra grunnlag for sak med id $sakId.")
 

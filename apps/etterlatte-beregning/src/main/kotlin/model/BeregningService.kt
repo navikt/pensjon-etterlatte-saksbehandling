@@ -38,7 +38,7 @@ class BeregningService {
 
     private fun finnBeregningsperioder(grunnlag: Grunnlag, virkFOM: YearMonth, virkTOM: YearMonth): List<Beregningsperiode> {
         val grunnbeloep = Grunnbeloep.hentGforPeriode(virkFOM)
-        val soeskenPerioder = FinnSoeskenPeriodeStrategy.create(grunnlag, virkFOM, virkTOM).soeskenperioder
+        val soeskenPerioder = FinnSoeskenPeriodeStrategy.create(grunnlag, virkFOM).soeskenperioder
         val alleFOM = (grunnbeloep.map {it.dato} + soeskenPerioder.map { it.datoFOM } + virkTOM).map { beregnFoersteFom(it, virkFOM) }.distinct().sorted().zipWithNext()
             .map{ Pair(it.first, it.second.minusMonths(1))}
 

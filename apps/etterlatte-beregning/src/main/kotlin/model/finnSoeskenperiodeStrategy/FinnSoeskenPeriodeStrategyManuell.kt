@@ -2,6 +2,7 @@ package model.finnSoeskenperiodeStrategy
 
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -13,7 +14,7 @@ data class FinnSoeskenPeriodeStrategyManuell(
     private val grunnlag: Grunnlag,
     private val datoFOM: YearMonth,
 ) : FinnSoeskenPeriodeStrategy() {
-    private val vilkaarOpplysning = BeregningService.finnOpplysning<List<SoeskenMedIBeregning>>(
+    private val vilkaarOpplysning = BeregningService.finnOpplysning<Beregningsgrunnlag>(
         grunnlag.grunnlag,
         Opplysningstyper.SAKSBEHANDLER_SOESKEN_I_BEREGNINGEN
     )
@@ -22,7 +23,7 @@ data class FinnSoeskenPeriodeStrategyManuell(
     private val avdoedesBarn: Map<Foedselsnummer, Person> = hentAvdoedesBarn()
 
     override val soeskenperioder: List<SoeskenPeriode> =
-        vilkaarOpplysning!!.opplysning
+        vilkaarOpplysning!!.opplysning.beregningsgrunnlag
             .filter { it.skalBrukes }
             .mapNotNull { soesken -> avdoedesBarn[soesken.foedselsnummer] }
             .let { FinnSoeskenPeriodeStrategyAutomatisk(it, bruker, datoFOM) }

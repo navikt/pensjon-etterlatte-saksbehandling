@@ -5,8 +5,8 @@ services:
     image: postgres
     ports:
       - '5432:5432'
-#    environment:
-#      - POSTGRES_PASSWORD=
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
   pdfgen:
     container_name: ey-pdfgen
     image: 'ghcr.io/navikt/pdfgen:1.5.0'

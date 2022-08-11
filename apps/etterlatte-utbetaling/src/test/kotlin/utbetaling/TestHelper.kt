@@ -1,12 +1,12 @@
 package no.nav.etterlatte.utbetaling
 
+import no.nav.etterlatte.domene.vedtak.Behandling
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.toUUID30
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Attestasjon
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Behandling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.BehandlingId
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.BehandlingType
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Foedselsnummer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Kvittering
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.NavIdent
@@ -53,7 +53,7 @@ fun utbetalingsvedtak(
     vedtakId = vedtakId,
     behandling = Behandling(
         id = UUID.randomUUID(),
-        type = BehandlingType.FORSTEGANGSBEHANDLING
+        type = BehandlingType.FØRSTEGANGSBEHANDLING
     ),
     sak = Sak(
         id = 1,

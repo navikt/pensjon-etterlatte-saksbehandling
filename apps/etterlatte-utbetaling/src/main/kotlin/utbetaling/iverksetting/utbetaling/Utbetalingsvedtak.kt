@@ -1,8 +1,8 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
+import no.nav.etterlatte.domene.vedtak.Behandling
 import java.math.BigDecimal
 import java.time.YearMonth
-import java.util.*
 
 data class Utbetalingsvedtak(
     val vedtakId: Long,
@@ -15,8 +15,6 @@ data class Utbetalingsvedtak(
 
 data class Sak(val ident: String, val id: Long)
 
-data class Behandling(val type: BehandlingType, val id: UUID)
-
 data class Attestasjon(val attestant: String)
 
 data class Utbetalingsperiode(
@@ -24,9 +22,6 @@ data class Utbetalingsperiode(
 )
 
 data class VedtakFattet(val ansvarligSaksbehandler: String)
-
-enum class BehandlingType { REVURDERING, FORSTEGANGSBEHANDLING }
-
 data class Periode(
     val fom: YearMonth, val tom: YearMonth?
 )

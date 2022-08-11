@@ -59,12 +59,13 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient, private val
                             beskrivelse = "",
                             saksbehandler = "",
                             handling = Handling.BEHANDLE,
-                            antallSoesken = vedtakKlient.hentVedtak(
-                                oppgave.behandlingId.toString(),
-                                accessToken
-                            ).kommerSoekerTilgodeResultat?.familieforhold?.let { familieforhold ->
-                                hentAntallSøsken(familieforhold)
-                            }
+                            antallSoesken = 2 // midlertidig kommentert ut for å komme videre i DEV.
+//                            vedtakKlient.hentVedtak(
+//                                oppgave.behandlingId.toString(),
+//                                accessToken
+//                            ).kommerSoekerTilgodeResultat?.familieforhold?.let { familieforhold ->
+//                                hentAntallSøsken(familieforhold)
+//                            }
                         )
                     }
                 }

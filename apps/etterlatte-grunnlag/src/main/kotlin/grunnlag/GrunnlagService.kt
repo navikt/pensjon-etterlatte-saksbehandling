@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import org.slf4j.LoggerFactory
+import rapidsandrivers.vedlikehold.VedlikeholdService
 
 interface GrunnlagService {
     fun hentGrunnlag(sak: Long): Grunnlag
@@ -14,7 +15,7 @@ interface GrunnlagService {
     fun opprettGrunnlag(sak: Long, nyeOpplysninger: List<Grunnlagsopplysning<ObjectNode>>): Grunnlag
 }
 
-class RealGrunnlagService(private val opplysninger: OpplysningDao) : GrunnlagService {
+class RealGrunnlagService(private val opplysninger: OpplysningDao) : GrunnlagService, VedlikeholdService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
 
     override fun hentGrunnlag(sak: Long): Grunnlag {
@@ -43,5 +44,9 @@ class RealGrunnlagService(private val opplysninger: OpplysningDao) : GrunnlagSer
                 }
             }
             return hentGrunnlag(sak)
+    }
+
+    override fun slettSak(sakId: Long) {
+        opplysninger.slettAlleOpplysningerISak(sakId)
     }
 }

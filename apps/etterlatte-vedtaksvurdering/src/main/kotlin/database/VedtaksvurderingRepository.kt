@@ -323,6 +323,19 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             statement.execute()
         }
     }
+
+    fun slettSak(sakId: Long){
+        connection.use {
+            it.prepareStatement(Queries.slettUtbetalingsperioderISak).apply {
+                setLong(1, sakId)
+                execute()
+            }
+            it.prepareStatement(Queries.slettVedtakISak).apply {
+                setLong(1, sakId)
+                execute()
+            }
+        }
+    }
 }
 
 data class Vedtak(
@@ -384,6 +397,8 @@ private object Queries {
     val lagreUtbetalingsperiode =
         "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) VALUES (?, ?, ?, ?, ?)"
     val hentUtbetalingsperiode = "SELECT * FROM utbetalingsperiode WHERE vedtakid = ?"
+    val slettUtbetalingsperioderISak = "DELETE FROM utbetalingsperiode WHERE vedtakid in (SELECT id from vedtak where sakid = ?)"
+    val slettVedtakISak = "DELETE FROM vedtak WHERE sakid = ?"
 }
 
 fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {

@@ -186,6 +186,8 @@ internal class DBTest {
         Assertions.assertNotNull(attestertVedtak?.datoattestert)
         Assertions.assertNotNull(attestertVedtak?.virkningsDato)
         Assertions.assertEquals(VedtakStatus.ATTESTERT, attestertVedtak?.vedtakStatus)
+        vedtaksvurderingService.slettSak(12321423523545)
+        Assertions.assertNull(vedtaksvurderingService.hentVedtak("12321423523545", uuid))
 
     }
 }

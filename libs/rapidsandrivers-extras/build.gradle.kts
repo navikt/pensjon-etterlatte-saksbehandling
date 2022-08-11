@@ -1,5 +1,4 @@
 import Logging.Slf4jApi
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
@@ -21,6 +20,7 @@ dependencies {
 
     compileOnly(Slf4jApi)
 
+    testImplementation(MockK.MockK)
     testImplementation(Jupiter.Api)
     testImplementation(Jupiter.Params)
     testRuntimeOnly(Jupiter.Engine)

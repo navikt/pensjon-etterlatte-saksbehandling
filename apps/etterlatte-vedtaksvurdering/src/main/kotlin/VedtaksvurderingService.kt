@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.*
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
+import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -49,7 +50,7 @@ class VedtakKanIkkeUnderkjennesAlleredeAttestert(vedtak: no.nav.etterlatte.domen
 
 class VedtaksvurderingService(
     private val repository: VedtaksvurderingRepository,
-) {
+): VedlikeholdService {
 
     fun lagreAvkorting(sakId: String, behandlingId: UUID, fnr: String, avkorting: AvkortingsResultat) {
         val vedtak = repository.hentVedtak(sakId, behandlingId)
@@ -293,5 +294,9 @@ class VedtaksvurderingService(
 
         return (perioderFraBeregning + manglendePerioderMellomBeregninger + manglendeStart + manglendeSlutt).filterNotNull()
             .sortedBy { it.periode.fom }
+    }
+
+    override fun slettSak(sakId: Long) {
+        repository.slettSak(sakId)
     }
 }

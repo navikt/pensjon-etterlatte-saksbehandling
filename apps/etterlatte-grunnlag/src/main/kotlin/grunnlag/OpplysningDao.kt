@@ -80,6 +80,13 @@ class OpplysningDao(private val datasource: DataSource) {
                     setLong(6, sakId)
                 }.executeQuery().apply { next() }.getLong("hendelsenummer")
         }
+    fun slettAlleOpplysningerISak(sakId: Long) =
+        connection.use {
+            it.prepareStatement("""DELETE FROM grunnlagshendelse where sak_id = ?""")
+                .apply {
+                    setLong(1, sakId)
+                }.execute()
+        }
 }
 
 fun ObjectNode?.serialize() = this?.let { objectMapper.writeValueAsString(it) }

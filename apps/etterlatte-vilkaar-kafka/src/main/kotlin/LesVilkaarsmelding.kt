@@ -1,7 +1,7 @@
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.barnepensjon.model.VilkaarService
 import no.nav.etterlatte.domene.vedtak.Behandling
-import no.nav.etterlatte.domene.vedtak.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -56,7 +56,7 @@ internal class LesVilkaarsmelding(
                 val behandlingopprettet = packet["behandlingOpprettet"].asLocalDateTime().toLocalDate()
 
                 when (behandling.type) {
-                    BehandlingType.FORSTEGANGSBEHANDLING -> {
+                    BehandlingType.FØRSTEGANGSBEHANDLING -> {
                         // TODO behandlingopprettet er feil dato å basere seg på, vi bør bruke søknad mottatt
                         val virkningstidspunkt = vilkaar.beregnVirkningstidspunktFoerstegangsbehandling(
                             grunnlagForVilkaar,

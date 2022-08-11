@@ -65,6 +65,6 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
 }
 
 data class KommerBarnetTilgodeClientRequest(val svar: String, val begrunnelse: String)
-private data class SoeskenMedIBeregning(val foedselsnummer: Foedselsnummer, val skalbrukes: Boolean) {
-    fun toDomain() = no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning(this.foedselsnummer, this.skalbrukes)
+private data class SoeskenMedIBeregning(val foedselsnummer: Foedselsnummer, val skalBrukes: Boolean) {
+    fun toDomain() = no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning(this.foedselsnummer, this.skalBrukes)
 }

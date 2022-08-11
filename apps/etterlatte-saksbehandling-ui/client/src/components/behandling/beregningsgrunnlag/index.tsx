@@ -18,6 +18,7 @@ interface SoeskenMedIBeregning {
 }
 
 const Beregningsgrunnlag = () => {
+  const { next } = useBehandlingRoutes()
   const behandling = useContext(AppContext).state.behandlingReducer
 
   if (behandling.kommerSoekerTilgode == null || behandling.familieforhold?.avdoede == null) {
@@ -25,16 +26,16 @@ const Beregningsgrunnlag = () => {
   }
 
   const soeker = behandling.kommerSoekerTilgode.familieforhold.soeker
-  const { next } = useBehandlingRoutes()
+  const soesken = behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
+    (barn) => barn.foedselsnummer !== soeker.fnr
+  )
   const { control, handleSubmit } = useForm<{ beregningsgrunnlag: SoeskenMedIBeregning[] }>({
     defaultValues: {
       beregningsgrunnlag:
-        behandling.familieforhold?.avdoede.opplysning.avdoedesBarn
-          ?.filter((barn) => barn.foedselsnummer !== soeker.fnr)
-          ?.map((soesken) => ({
-            foedselsnummer: soesken.foedselsnummer,
-            skalBrukes: true,
-          })) ?? [],
+        soesken?.map((soesken) => ({
+          foedselsnummer: soesken.foedselsnummer,
+          skalBrukes: true,
+        })) ?? [],
     },
   })
 
@@ -55,13 +56,15 @@ const Beregningsgrunnlag = () => {
       <FamilieforholdWrapper
         id="form"
         onSubmit={handleSubmit(async (formValues) => {
-          await lagreSoeskenMedIBeregning(behandling.id, formValues.beregningsgrunnlag)
+          if (formValues.beregningsgrunnlag.length !== 0) {
+            await lagreSoeskenMedIBeregning(behandling.id, formValues.beregningsgrunnlag)
+          }
           next()
         })}
       >
         <Barn person={behandling.kommerSoekerTilgode.familieforhold.soeker} doedsdato={doedsdato} />
         <Border />
-        {behandling.familieforhold?.avdoede.opplysning.avdoedesBarn?.map((barn, index) => (
+        {soesken?.map((barn, index) => (
           <SoeskenContainer key={barn.foedselsnummer}>
             <Soesken person={barn} familieforhold={behandling.familieforhold!} />
             <Controller

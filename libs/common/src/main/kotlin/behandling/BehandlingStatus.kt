@@ -9,5 +9,17 @@ enum class BehandlingStatus {
     ATTESTERT,
     RETURNERT,
     IVERKSATT,
-    AVBRUTT
+    AVBRUTT;
+
+    companion object {
+        fun loependeBehandlinger() = listOf(
+            OPPRETTET,
+            GYLDIG_SOEKNAD,
+            UNDER_BEHANDLING,
+            RETURNERT,
+            FATTET_VEDTAK,
+        )
+    }
 }
+
+

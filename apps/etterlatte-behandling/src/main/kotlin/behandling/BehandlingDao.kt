@@ -88,6 +88,28 @@ class BehandlingDao(private val connection: () -> Connection) {
         return stmt.executeQuery().behandlingsListe()
     }
 
+    fun alleLoependeBehandlingerISak(sakid: Long): List<Behandling> {
+        with(connection()) {
+            val stmt =
+                prepareStatement(
+                    """SELECT id, sak_id, behandling_opprettet, sist_endret, 
+                            soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, 
+                            gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak 
+                        FROM behandling 
+                        WHERE sak_id = ?
+                            AND status = ANY(?)
+                        """
+                )
+            stmt.setLong(1, sakid)
+            stmt.setArray(
+                2,
+                createArrayOf("text", BehandlingStatus.loependeBehandlinger().map { it.name }.toTypedArray())
+            )
+            return stmt.executeQuery().behandlingsListe()
+        }
+    }
+
+
     fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling> {
         val stmt =
             connection().prepareStatement(
@@ -266,7 +288,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         }.filterNotNull()
 
     fun slettRevurderingerISak(sakId: Long) {
-        val statement = connection().prepareStatement("DELETE from behandling where sak_id = ? AND behandlingstype = 'REVURDERING'")
+        val statement =
+            connection().prepareStatement("DELETE from behandling where sak_id = ? AND behandlingstype = 'REVURDERING'")
         statement.setLong(1, sakId)
         statement.executeUpdate()
     }

@@ -82,7 +82,7 @@ class RealGenerellBehandlingService(
 
     override fun grunnlagISakEndret(sak: Long) {
         inTransaction {
-            behandlinger.alleBehandingerISak(sak)
+            behandlinger.alleLoependeBehandlingerISak(sak)
         }.also {
             runBlocking {
                 it.forEach {

@@ -183,6 +183,7 @@ export const Brev = () => {
                           <Table.HeaderCell>Filnavn</Table.HeaderCell>
                           <Table.HeaderCell>Avsender</Table.HeaderCell>
                           <Table.HeaderCell>Mottatt</Table.HeaderCell>
+                          <Table.HeaderCell>Status</Table.HeaderCell>
                           <Table.HeaderCell>Handlinger</Table.HeaderCell>
                       </Table.Row>
                   </Table.Header>
@@ -197,6 +198,9 @@ export const Brev = () => {
                               </Table.DataCell>
                               <Table.DataCell>
                                   {formatterDato(new Date(brev.datoOpprettet))}
+                              </Table.DataCell>
+                              <Table.DataCell>
+                                  {brev.journalstatus}
                               </Table.DataCell>
                               <Table.DataCell>
                                   <InnkommendeBrevModal tittel={brev.tittel} journalpostId={brev.journalpostId} dokumentInfoId={brev.dokumenter[0].dokumentInfoId} />

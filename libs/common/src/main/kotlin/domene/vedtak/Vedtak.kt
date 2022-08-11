@@ -1,6 +1,7 @@
 package no.nav.etterlatte.domene.vedtak
 
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import java.math.BigDecimal
@@ -72,10 +73,6 @@ data class Attestasjon(
     val attesterendeEnhet: String, //aktuell?
     val tidspunkt: ZonedDateTime
 )
-
-enum class BehandlingType {
-    REVURDERING, FORSTEGANGSBEHANDLING
-}
 
 enum class BehandlingAarsak {
     SOEKNAD

@@ -3,6 +3,7 @@ package vedtak
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.domene.vedtak.*
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
@@ -20,7 +21,7 @@ class VedtakServiceMock : VedtakService {
         vedtakId = Random.nextLong(),
         virk = Periode(YearMonth.of(2022, 1), null),
         sak = Sak("11057523044", "barnepensjon", 100L),
-        behandling = Behandling(BehandlingType.FORSTEGANGSBEHANDLING, id = UUID.randomUUID()),
+        behandling = Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, id = UUID.randomUUID()),
         type = VedtakType.INNVILGELSE,
         grunnlag = grunnlag(),
         vilkaarsvurdering = VilkaarResultat(

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
@@ -43,7 +44,7 @@ class UtbetalingService(
 
                 oppdragMapper.oppdragFraUtbetaling(
                     utbetaling = utbetaling,
-                    foerstegangsbehandling = vedtak.behandling.type == BehandlingType.FORSTEGANGSBEHANDLING
+                    foerstegangsbehandling = vedtak.behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING
                 )
                     .also {
                         utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = it))

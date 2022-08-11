@@ -5,6 +5,7 @@ import no.nav.etterlatte.database.Vedtak
 import no.nav.etterlatte.database.VedtaksvurderingRepository
 import no.nav.etterlatte.domene.vedtak.*
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.*
@@ -149,7 +150,7 @@ class VedtaksvurderingService(
                         )?.let { YearMonth.of(it.year, it.month) }) ?: YearMonth.now(), null
                 ), //må få inn dette på toppnivå?
                 Sak(it.fnr!!, "BARNEPENSJON", it.sakId.toLong()), //mer sakinfo inn i prosess og vedtaksammendrag
-                Behandling(BehandlingType.FORSTEGANGSBEHANDLING, behandlingId), // Behandlingsinfo må lagres
+                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId), // Behandlingsinfo må lagres
                 if (it.vilkaarsResultat?.resultat == VurderingsResultat.OPPFYLT) VedtakType.INNVILGELSE else VedtakType.AVSLAG, //Hvor skal vi bestemme vedtakstype?
                 emptyList(), //Ikke lenger aktuell
                 it.vilkaarsResultat, //Bør periodiseres

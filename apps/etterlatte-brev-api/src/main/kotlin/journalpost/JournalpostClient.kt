@@ -26,16 +26,15 @@ class JournalpostClient(
 
     val configLocation: String? = null
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
-
     val azureAdClient = AzureAdClient(config, httpClient)
+
     override suspend fun hentInnkommendeBrevInnhold(
         journalpostId: String,
         dokumentInfoId: String,
         accessToken: String
     ): ByteArray = try {
-        // TODO: Må hente ut og bruke token her også
         httpClient.get("$restApiUrl/$journalpostId/$dokumentInfoId/ARKIV") {
-            header("Authorization", "Bearer $accessToken")
+            header("Authorization", "Bearer ${getToken(accessToken)}")
             header("Content-Type", "application/json")
             header("X-Correlation-ID", MDC.get("X-Correlation-ID") ?: UUID.randomUUID().toString())
         }.body()
@@ -48,7 +47,6 @@ class JournalpostClient(
         idType: BrukerIdType,
         accessToken: String
     ): JournalpostResponse {
-        val token = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf("api://dev-fss.teamdokumenthandtering.saf/.default"), accessToken)
 
         val request = GraphqlRequest(
             query = getQuery("/graphql/journalpost.graphql"),
@@ -63,11 +61,10 @@ class JournalpostClient(
 
         logger.info("Henter journalposter for fnr: $fnr på url: $graphqlApiUrl")
 
-        // Bruker riktig token, men får "Remote host terminated the handshake"
         return retry<JournalpostResponse> {
             httpClient.post(graphqlApiUrl) {
-                header("Authorization", "Bearer ${token.get()?.accessToken}")
-                // accept(ContentType.Application.Json)
+                header("Authorization", "Bearer ${getToken(accessToken)}")
+                accept(ContentType.Application.Json)
                 setBody(TextContent(request.toJson(), ContentType.Application.Json))
             }.body()
         }.let {
@@ -84,8 +81,10 @@ class JournalpostClient(
             .replace(Regex("[\n\t]"), "")
     }
 
-    // TODO: Lag funksjon for uthenting av token
-
+    private suspend fun getToken(accessToken: String): String {
+        val token = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf("api://dev-fss.teamdokumenthandtering.saf/.default"), accessToken)
+        return token.get()?.accessToken ?: ""
+    }
 }
 
 class JournalpostException(msg: String, cause: Throwable) : Exception(msg, cause)

@@ -36,7 +36,7 @@ spec:
     - name: ETTERLATTE_PDFGEN_URL
       value: "http://ey-pdfgen/api/v1/genpdf/brev"
     - name: HENT_DOKUMENT_URL
-      value: "https://saf-q1.dev.intern.nav.no/rest/hentdokument"
+      value: "https://saf.dev-fss-pub.nais.io/rest/hentdokument"
     - name: SAF_GRAPHQL_URL
       value: "https://saf.dev-fss-pub.nais.io/graphql"
     - name: KAFKA_RAPID_TOPIC

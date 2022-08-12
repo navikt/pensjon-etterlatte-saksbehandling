@@ -20,6 +20,7 @@ import { Journalpost } from "../types";
 import { formatterDato } from "../../../utils";
 import InnkommendeBrevModal from "./innkommende-brev-modal";
 import styled from 'styled-components'
+import Spinner from "../../../shared/Spinner";
 
 const IngenInnkommendeBrevRad = styled.td`
   text-align: center;
@@ -36,6 +37,7 @@ export const Brev = () => {
   const [innkommendeBrevListe, setInnkommendeBrevListe] = useState<Journalpost[]>([])
   const [error, setError] = useState(false)
   const [innkommendeError, setInnkommendeError] = useState(false)
+  const [innkommendeHentet, setInnkommendeHentet] = useState(false)
 
   useEffect(() => {
     hentBrevForBehandling(behandlingId!!)
@@ -45,6 +47,7 @@ export const Brev = () => {
     hentInnkommendeBrev(fnr)
         .then(res => setInnkommendeBrevListe(res.data.dokumentoversiktBruker.journalposter))
         .catch(() => setInnkommendeError(true))
+        .finally(() => setInnkommendeHentet(true))
   }, [])
 
   const ferdigstill = (brevId: any): Promise<void> => {
@@ -155,6 +158,14 @@ export const Brev = () => {
                     </Table.DataCell>
                   </Table.Row>
               ))}
+
+              {brevListe.length === 0 && !error &&
+                  <Table.Row>
+                      <IngenInnkommendeBrevRad colSpan={5}>
+                          Ingen brev er opprettet
+                      </IngenInnkommendeBrevRad>
+                  </Table.Row>
+              }
             </Table.Body>
           </Table>
 
@@ -223,6 +234,8 @@ export const Brev = () => {
                       Det har oppstått en feil ved henting av innkommende brev...
                   </Alert>
               )}
+
+              <Spinner visible={!innkommendeHentet} label="Henter innkommende brev" />
           </ContentContainer>
         <Border/>
         <BehandlingHandlingKnapper>

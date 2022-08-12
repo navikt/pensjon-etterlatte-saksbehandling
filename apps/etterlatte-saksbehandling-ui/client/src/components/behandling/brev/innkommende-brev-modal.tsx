@@ -4,6 +4,7 @@ import { hentInnkommendeBrevInnhold } from '../../../shared/api/brev'
 import styled from 'styled-components'
 import { Findout } from '@navikt/ds-icons'
 import {PdfVisning} from "./pdf-visning";
+import Spinner from "../../../shared/Spinner";
 
 const ButtonRow = styled.div`
   background: white;
@@ -24,6 +25,7 @@ export default function InnkommendeBrevModal({
     const [error, setError] = useState<string>()
     const [fileURL, setFileURL] = useState<string>('')
     const [isOpen, setIsOpen] = useState<boolean>(false)
+    const [hasLoaded, setHasLoaded] = useState<boolean>(false)
 
     const open = (journalpostId: string, dokumentInfoId: string) => {
         setIsOpen(true)
@@ -34,6 +36,7 @@ export default function InnkommendeBrevModal({
             .catch((e) => setError(e.message))
             .finally(() => {
                 if (error) URL.revokeObjectURL(fileURL)
+                setHasLoaded(true)
             })
     }
 
@@ -48,6 +51,7 @@ export default function InnkommendeBrevModal({
                     <h2>{tittel}</h2>
 
                     <PdfVisning fileUrl={fileURL} error={error} />
+                    <Spinner visible={!hasLoaded} label="Laster inn PDF" />
 
                     <ButtonRow>
                         <Button variant={'secondary'} onClick={() => setIsOpen(false)}>

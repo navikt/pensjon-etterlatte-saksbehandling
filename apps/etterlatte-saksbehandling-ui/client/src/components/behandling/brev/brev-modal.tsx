@@ -4,6 +4,7 @@ import { genererPdf } from '../../../shared/api/brev'
 import styled from 'styled-components'
 import { Delete, Findout, Notes, Success } from '@navikt/ds-icons'
 import {PdfVisning} from "./pdf-visning";
+import Spinner from "../../../shared/Spinner";
 
 
 const ButtonRow = styled.div`
@@ -25,6 +26,8 @@ export default function BrevModal({
   const [error, setError] = useState<string>()
   const [fileURL, setFileURL] = useState<string>()
   const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [hasLoaded, setHasLoaded] = useState<boolean>(false)
+
 
   const isDone = ['FERDIGSTILT', 'JOURNALFOERT', 'DISTRIBUERT'].includes(brev.status)
 
@@ -37,6 +40,7 @@ export default function BrevModal({
       .catch((e) => setError(e.message))
       .finally(() => {
         if (fileURL) URL.revokeObjectURL(fileURL)
+        setHasLoaded(true)
       })
   }
 
@@ -66,6 +70,7 @@ export default function BrevModal({
           </h4>
 
           <PdfVisning fileUrl={fileURL} error={error} />
+          <Spinner visible={!hasLoaded} label="Laster inn PDF" />
 
           <ButtonRow>
             <Button variant={'secondary'} onClick={() => setIsOpen(false)}>

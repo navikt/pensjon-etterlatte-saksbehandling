@@ -22,14 +22,12 @@ object SlettsakFeature: TestDataFeature {
     override val routes: Route.() -> Unit
         get() = {
             get {
-                call.respond(
-                    MustacheContent(
-                        "slett/slett-sak.hbs", mapOf(
-                            "beskrivelse" to beskrivelse,
-                            "path" to path
-                        )
-                    )
+                val model = mapOf(
+                    "beskrivelse" to beskrivelse,
+                    "path" to path
                 )
+
+                call.respond(MustacheContent("slett/slett-sak.hbs", model))
             }
 
             post {
@@ -66,21 +64,17 @@ object SlettsakFeature: TestDataFeature {
             }
 
             get("slettet") {
-                val sakId = call.request.queryParameters["sakId"]!!
-                val partisjon = call.request.queryParameters["partisjon"]!!
-                val offset = call.request.queryParameters["offset"]!!
-
-                call.respond(
-                    MustacheContent(
-                        "slett/sletting-sendt.hbs", mapOf(
-                            "sakId" to sakId,
-                            "path" to path,
-                            "beskrivelse" to beskrivelse,
-                            "partisjon" to partisjon,
-                            "offset" to offset
-                        )
+                val model = call.request.queryParameters.let {
+                    mapOf(
+                        "path" to path,
+                        "beskrivelse" to beskrivelse,
+                        "sakId" to it["sakId"]!!,
+                        "partisjon" to it["partisjon"]!!,
+                        "offset" to it["offset"]!!
                     )
-                )
+                }
+
+                call.respond(MustacheContent("slett/sletting-sendt.hbs", model))
             }
         }
 

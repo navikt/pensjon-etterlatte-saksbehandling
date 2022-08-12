@@ -221,7 +221,7 @@ export const Brev = () => {
 
                       {innkommendeBrevListe.length === 0 && !innkommendeError && innkommendeHentet &&
                           <Table.Row>
-                              <IngenInnkommendeBrevRad colSpan={5}>
+                              <IngenInnkommendeBrevRad colSpan={6}>
                                   Ingen innkommende brev ble funnet
                               </IngenInnkommendeBrevRad>
                           </Table.Row>

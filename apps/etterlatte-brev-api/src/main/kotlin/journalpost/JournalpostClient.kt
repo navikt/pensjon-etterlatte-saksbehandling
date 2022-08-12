@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import java.util.*
 
@@ -22,7 +21,6 @@ class JournalpostClient(
     private val restApiUrl: String,
     private val graphqlApiUrl: String
 ) : JournalpostService {
-    val logger = LoggerFactory.getLogger(JournalpostService::class.java)
 
     val configLocation: String? = null
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
@@ -55,11 +53,9 @@ class JournalpostClient(
                     id = fnr,
                     type = idType
                 ),
-                3 // TODO: Finn en grense
+                10 // TODO: Finn en grense eller fiks paginering
             )
         )
-
-        logger.info("Henter journalposter for fnr: $fnr på url: $graphqlApiUrl")
 
         return retry<JournalpostResponse> {
             httpClient.post(graphqlApiUrl) {

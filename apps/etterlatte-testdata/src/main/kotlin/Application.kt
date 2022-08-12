@@ -88,6 +88,9 @@ fun main() {
                 }
 
                 routing {
+                    get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
+                    get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
+
                     authenticate {
                         api()
                     }
@@ -99,9 +102,6 @@ fun main() {
 }
 
 private fun Route.api() {
-    get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
-    get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
-
     features.forEach {
         route(it.path) {
             apply(it.routes)

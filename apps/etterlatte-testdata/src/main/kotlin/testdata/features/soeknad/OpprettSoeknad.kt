@@ -16,6 +16,7 @@ import no.nav.etterlatte.logger
 import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.producer
+import java.io.File
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -85,32 +86,7 @@ object OpprettSoeknadFeature : TestDataFeature {
 }
 
 private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFnr: String): String {
-    val skjemaInfo = """
-        {
-            "soeker": {
-              "foedselsnummer": {
-                "svar": "$barnFnr"
-              },
-              "type": "BARN"
-            },
-            "foreldre": [
-              {
-                "foedselsnummer": {
-                  "svar": "$gjenlevendeFnr"
-                },
-                "type": "GJENLEVENDE_FORELDER"
-              },
-              {
-                "foedselsnummer": {
-                  "svar": "$avdoedFnr"
-                },
-                "type": "AVDOED"
-              }
-            ],
-            "type": "BARNEPENSJON",
-            "versjon": "2"
-          }
-    """.trimIndent()
+    val skjemaInfo = opprettSkjemaInfo(gjenlevendeFnr, barnFnr, avdoedFnr)
 
     return JsonMessage.newMessage(
         mapOf(
@@ -124,3 +100,249 @@ private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFn
         )
     ).toJson()
 }
+
+private fun opprettSkjemaInfo(
+    gjenlevendeFnr: String,
+    barnFnr: String,
+    avdoedFnr: String
+) = """
+    {
+      "imageTag": "ce3542f9645d280bfff9936bdd0e7efc32424de2",
+      "spraak": "nb",
+      "innsender": {
+        "fornavn": {
+          "svar": "DUMMY FORNAVN",
+          "spoersmaal": ""
+        },
+        "etternavn": {
+          "svar": "DUMMY ETTERNAVN",
+          "spoersmaal": ""
+        },
+        "foedselsnummer": {
+          "svar": "$gjenlevendeFnr",
+          "spoersmaal": ""
+        },
+        "type": "INNSENDER"
+      },
+      "harSamtykket": {
+        "svar": true,
+        "spoersmaal": ""
+      },
+      "utbetalingsInformasjon": {
+        "svar": {
+          "verdi": "NORSK",
+          "innhold": "Norsk"
+        },
+        "spoersmaal": "",
+        "opplysning": {
+          "kontonummer": {
+            "svar": {
+              "innhold": "1351.35.13513"
+            },
+            "spoersmaal": ""
+          },
+          "utenlandskBankNavn": null,
+          "utenlandskBankAdresse": null,
+          "iban": null,
+          "swift": null,
+          "skattetrekk": {
+            "svar": {
+              "verdi": "JA",
+              "innhold": "Ja"
+            },
+            "spoersmaal": "",
+            "opplysning": {
+              "svar": {
+                "innhold": "21%"
+              },
+              "spoersmaal": ""
+            }
+          }
+        }
+      },
+      "soeker": {
+        "fornavn": {
+          "svar": "TEST",
+          "spoersmaal": ""
+        },
+        "etternavn": {
+          "svar": "SOEKER",
+          "spoersmaal": ""
+        },
+        "foedselsnummer": {
+          "svar": "$barnFnr",
+          "spoersmaal": ""
+        },
+        "statsborgerskap": {
+          "svar": "Norsk",
+          "spoersmaal": ""
+        },
+        "utenlandsAdresse": {
+          "svar": {
+            "verdi": "NEI",
+            "innhold": "Nei"
+          },
+          "spoersmaal": "",
+          "opplysning": null
+        },
+        "foreldre": [
+          {
+            "fornavn": {
+              "svar": "Levende",
+              "spoersmaal": ""
+            },
+            "etternavn": {
+              "svar": "Testperson",
+              "spoersmaal": ""
+            },
+            "foedselsnummer": {
+              "svar": "$gjenlevendeFnr",
+              "spoersmaal": ""
+            },
+            "type": "FORELDER"
+          },
+          {
+            "fornavn": {
+              "svar": "Død",
+              "spoersmaal": ""
+            },
+            "etternavn": {
+              "svar": "Testperson",
+              "spoersmaal": ""
+            },
+            "foedselsnummer": {
+              "svar": "$avdoedFnr",
+              "spoersmaal": ""
+            },
+            "type": "FORELDER"
+          }
+        ],
+        "verge": {
+          "svar": {
+            "verdi": "NEI",
+            "innhold": "Nei"
+          },
+          "spoersmaal": "",
+          "opplysning": null
+        },
+        "dagligOmsorg": null,
+        "type": "BARN"
+      },
+      "foreldre": [
+        {
+          "fornavn": {
+            "svar": "LEVENDE",
+            "spoersmaal": ""
+          },
+          "etternavn": {
+            "svar": "TESTPERSON",
+            "spoersmaal": ""
+          },
+          "foedselsnummer": {
+            "svar": "$gjenlevendeFnr",
+            "spoersmaal": ""
+          },
+          "adresse": {
+            "svar": "TESTVEIEN 123, 0123 TEST",
+            "spoersmaal": ""
+          },
+          "statsborgerskap": {
+            "svar": "Norge",
+            "spoersmaal": ""
+          },
+          "kontaktinfo": {
+            "telefonnummer": {
+              "svar": {
+                "innhold": "11111111"
+              },
+              "spoersmaal": ""
+            }
+          },
+          "type": "GJENLEVENDE_FORELDER"
+        },
+        {
+          "fornavn": {
+            "svar": "DØD",
+            "spoersmaal": ""
+          },
+          "etternavn": {
+            "svar": "TESTPERSON",
+            "spoersmaal": ""
+          },
+          "foedselsnummer": {
+            "svar": "$avdoedFnr",
+            "spoersmaal": ""
+          },
+          "datoForDoedsfallet": {
+            "svar": {
+              "innhold": "2021-07-27"
+            },
+            "spoersmaal": ""
+          },
+          "statsborgerskap": {
+            "svar": {
+              "innhold": "Norsk"
+            },
+            "spoersmaal": ""
+          },
+          "utenlandsopphold": {
+            "svar": {
+              "verdi": "NEI",
+              "innhold": "Nei"
+            },
+            "spoersmaal": "",
+            "opplysning": []
+          },
+          "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": {
+            "svar": {
+              "verdi": "NEI",
+              "innhold": "Nei"
+            },
+            "spoersmaal": ""
+          },
+          "naeringsInntekt": {
+            "svar": {
+              "verdi": "JA",
+              "innhold": "Ja"
+            },
+            "spoersmaal": "",
+            "opplysning": {
+              "naeringsinntektPrAarFoerDoedsfall": {
+                "svar": {
+                  "innhold": "150 000"
+                },
+                "spoersmaal": ""
+              },
+              "naeringsinntektVedDoedsfall": {
+                "svar": {
+                  "verdi": "NEI",
+                  "innhold": "Nei"
+                },
+                "spoersmaal": ""
+              }
+            }
+          },
+          "militaertjeneste": {
+            "svar": {
+              "verdi": "JA",
+              "innhold": "Ja"
+            },
+            "spoersmaal": "",
+            "opplysning": {
+              "svar": {
+                "innhold": "1984"
+              },
+              "spoersmaal": ""
+            }
+          },
+          "type": "AVDOED"
+        }
+      ],
+      "soesken": [],
+      "versjon": "2",
+      "type": "BARNEPENSJON",
+      "mottattDato": "2022-02-10T10:51:12.298943803",
+      "template": "barnepensjon_v2"
+    }
+""".trimIndent()
+

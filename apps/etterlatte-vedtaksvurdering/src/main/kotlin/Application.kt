@@ -8,6 +8,7 @@ import no.nav.etterlatte.rivers.LagreBeregningsresultat
 import no.nav.etterlatte.rivers.LagreKommerSoekerTilgodeResultat
 import no.nav.etterlatte.rivers.LagreVilkaarsresultat
 import no.nav.helse.rapids_rivers.RapidApplication
+import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 
 fun main() {
 
@@ -33,6 +34,7 @@ fun main() {
             FattVedtak(this, vedtaksvurderingService)
             AttesterVedtak(this, vedtaksvurderingService)
             UnderkjennVedtak(this, vedtaksvurderingService)
+            registrerVedlikeholdsriver(vedtaksvurderingService)
         }.start()
 
     }

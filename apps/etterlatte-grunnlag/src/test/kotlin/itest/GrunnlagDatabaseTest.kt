@@ -132,4 +132,30 @@ internal class GrunnlagDaoIntegrationTest {
             assertEquals(uuid, it.first().opplysning.id)
         }
     }
+
+    @Test
+    fun `Det er mulig å slette alle opplysninger i en sak`() {
+        Grunnlagsopplysning(
+            UUID.randomUUID(),
+            Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
+            Opplysningstyper.SOEKNAD_MOTTATT_DATO,
+            objectMapper.createObjectNode(),
+            objectMapper.createObjectNode()
+        ).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
+        val uuid = UUID.randomUUID()
+        Grunnlagsopplysning(
+            uuid,
+            Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
+            Opplysningstyper.SAKSBEHANDLER_SOESKEN_I_BEREGNINGEN,
+            objectMapper.createObjectNode(),
+            objectMapper.createObjectNode()
+        ).also {
+            opplysningRepo.leggOpplysningTilGrunnlag(2, it)
+        }
+
+        opplysningRepo.slettAlleOpplysningerISak(2)
+        opplysningRepo.finnHendelserIGrunnlag(2).also {
+            assertEquals(0, it.size)
+        }
+    }
 }

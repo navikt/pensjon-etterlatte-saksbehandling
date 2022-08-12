@@ -9,10 +9,11 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*
 
 
-interface Behandling {
+interface Behandling: VedlikeholdService {
     fun grunnlagEndretISak(sak: Long)
     fun vedtakHendelse(
         behandlingid: UUID, hendelse: String,
@@ -22,9 +23,6 @@ interface Behandling {
         kommentar: String?,
         valgtBegrunnelse: String?
     )
-
-    fun slettSakOgBehandlinger(sakId: Long)
-
     fun sendDoedshendelse(doedshendelse: Doedshendelse)
 }
 
@@ -54,7 +52,7 @@ class BehandlingsService(
         }
     }
 
-    override fun slettSakOgBehandlinger(sakId: Long) {
+    override fun slettSak(sakId: Long) {
         runBlocking {
             behandling_app.delete("$url/sak/$sakId/behandlinger")
             behandling_app.delete("$url/saker/$sakId/")

@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.grunnlag.*
 import no.nav.helse.rapids_rivers.RapidApplication
+import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 
 fun main() {
     val env = System.getenv().toMutableMap().apply {
@@ -19,5 +20,6 @@ fun main() {
             GrunnlagHendelser(this, grunnlagService)
             BehandlingHendelser(this)
             BehandlingEndretHendlese(this, grunnlagService)
+            registrerVedlikeholdsriver(grunnlagService)
         }.also { it.start() }
 }

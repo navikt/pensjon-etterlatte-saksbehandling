@@ -221,13 +221,12 @@ export const Brev = () => {
 
                       {innkommendeBrevListe.length === 0 && !innkommendeError && innkommendeHentet &&
                           <Table.Row>
-                              <IngenInnkommendeBrevRad colSpan={6}>
-                                  Ingen innkommende brev ble funnet
-                              </IngenInnkommendeBrevRad>
+                                <IngenInnkommendeBrevRad colSpan={6}>
+                                    {innkommendeHentet ? "Ingen innkommende brev ble funnet" : <Spinner visible={!innkommendeHentet} label="Henter innkommende brev" />}
+                                </IngenInnkommendeBrevRad>
                           </Table.Row>
                       }
 
-                      <Spinner visible={!innkommendeHentet} label="Henter innkommende brev" />
                   </Table.Body>
               </Table>
 

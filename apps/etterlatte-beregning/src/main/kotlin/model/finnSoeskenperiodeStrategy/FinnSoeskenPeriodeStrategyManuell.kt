@@ -26,6 +26,7 @@ data class FinnSoeskenPeriodeStrategyManuell(
         vilkaarOpplysning!!.opplysning.beregningsgrunnlag
             .filter { it.skalBrukes }
             .mapNotNull { soesken -> avdoedesBarn[soesken.foedselsnummer] }
+            .proevLeggeTilBruker()
             .let { FinnSoeskenPeriodeStrategyAutomatisk(it, bruker, datoFOM) }
             .soeskenperioder
 
@@ -34,4 +35,6 @@ data class FinnSoeskenPeriodeStrategyManuell(
             BeregningService.finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.AVDOED_PDL_V1)?.opplysning
         return avdoedPdl!!.avdoedesBarn!!.associateBy { it.foedselsnummer }
     }
+
+    private fun List<Person>.proevLeggeTilBruker(): List<Person> = bruker?.let { this.plus(bruker) } ?: this
 }

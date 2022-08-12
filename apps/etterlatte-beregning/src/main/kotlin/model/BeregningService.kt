@@ -54,7 +54,6 @@ class BeregningService {
                 grunnbelop = gjeldendeG.grunnbeløp,
                 soeskenFlokk = flokkForPeriode,
                 utbetaltBeloep = beregnUtbetaling(flokkForPeriode.size, gjeldendeG.grunnbeløpPerMåned)
-
             ))
         }
     }

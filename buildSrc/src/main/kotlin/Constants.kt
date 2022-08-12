@@ -30,6 +30,7 @@ object Ktor2 {
     const val CallLogging = "io.ktor:ktor-server-call-logging:$version"
     const val StatusPages = "io.ktor:ktor-server-status-pages:$version"
     const val MetricsMicrometer = "io.ktor:ktor-server-metrics-micrometer:$version"
+    const val Mustache = "io.ktor:ktor-server-mustache:$version"
 
     const val ClientMock = "io.ktor:ktor-client-mock:$version"
     const val ServerTests = "io.ktor:ktor-server-tests:$version"

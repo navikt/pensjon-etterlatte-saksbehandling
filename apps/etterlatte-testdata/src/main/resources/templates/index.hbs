@@ -1,0 +1,38 @@
+{{>_fragments/header}}
+
+<div class="row mb-5 justify-content-center text-center">
+    <div class="col mb-3">
+        <h1>Post meldinger til Kafka</h1>
+    </div>
+
+    <div class="w-100"></div>
+
+    <div class="col-6">
+        <div class="alert alert-info" role="alert">
+            Innlogget som <strong>{{navIdent}}</strong>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-1 justify-content-center text-center">
+</div>
+
+<div class="row justify-content-center text-center">
+    <div class="col">
+        <h4>Meny</h4>
+    </div>
+
+    <div class="w-100"></div>
+
+    <div class="col-6 align-self-center">
+        <ul class="nav flex-column">
+            {{#features}}
+                <li class="nav-item">
+                    <a class="nav-link" href="/{{path}}">{{beskrivelse}}</a>
+                </li>
+            {{/features}}
+        </ul>
+    </div>
+</div>
+
+{{>_fragments/footer}}

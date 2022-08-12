@@ -1,9 +1,10 @@
 package testdata.features.index
 
-import io.ktor.server.application.*
-import io.ktor.server.html.*
-import io.ktor.server.routing.*
-import kotlinx.html.*
+import io.ktor.server.application.call
+import io.ktor.server.mustache.MustacheContent
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.features
 import no.nav.etterlatte.navIdentFraToken
@@ -16,31 +17,20 @@ object IndexFeature: TestDataFeature {
     override val routes: Route.() -> Unit
         get() = {
             get {
-            call.respondHtml {
-                this.head {
-                    title { +"TestData" }
-                }
-                body {
-                    h2 {
-                        +"Etterlatte testdata"
-                    }
-                    p {
-                        +"Innlogget som ${navIdentFraToken() ?: "Anonym"}"
-                    }
-                    h4 {
-                        +"Meny"
-                    }
-                    ul {
-                        features.filter { it != IndexFeature }.forEach{
-                            li {
-                                a {
-                                    href = "/${it.path}"
-                                    +it.beskrivelse
-                                }
+                call.respond(
+                    MustacheContent(
+                        "index.hbs",
+                        mapOf(
+                            "navIdent" to (navIdentFraToken() ?: "Anonym"),
+                            "features" to features.filter { it != IndexFeature }.map {
+                                mapOf(
+                                    "path" to it.path,
+                                    "beskrivelse" to it.beskrivelse
+                                )
                             }
-                        }
-                    }
-                }
+                        )
+                    )
+                )
             }
-        }}
+        }
 }

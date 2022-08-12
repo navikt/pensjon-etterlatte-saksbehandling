@@ -11,7 +11,7 @@ dependencies {
     implementation(Ktor2.MetricsMicrometer)
     implementation(Ktor2.Jackson)
     implementation(Ktor2.Auth)
-    implementation(Ktor2.ServerHtmlBuilder)
+    implementation(Ktor2.Mustache)
 
     implementation(Micrometer.Prometheus)
     implementation(Jackson.DatatypeJsr310)
@@ -29,7 +29,6 @@ dependencies {
 
     implementation(Jackson.Core)
     implementation(Jackson.Databind)
-
 
     testImplementation(MockK.MockK)
 }

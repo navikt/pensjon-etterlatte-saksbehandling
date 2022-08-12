@@ -1,0 +1,77 @@
+{{> ../_fragments/header }}
+
+<div class="row gy-5">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Forsiden</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Post søknad</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center gy-5">
+    <div class="col-12 col-md-6">
+        <div class="alert alert-info">
+            Liste over testbrukere finner du her:
+            <a href="https://confluence.adeo.no/pages/viewpage.action?pageId=419511776">
+                https://confluence.adeo.no/pages/viewpage.action?pageId=419511776
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center gy-5">
+    <div class="col-12 col-md-6">
+        <form action="/{{ path }}" method="post">
+            <div class="mb-3">
+                <label for="key" class="form-label">Nøkkel:</label>
+                <input type="text" name="key" id="key" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="fnrGjenlevende" class="form-label">Gjenlevende (fnr):</label>
+                <input type="tel"
+                       pattern="[0-9]+"
+                       minlength="11"
+                       maxlength="11"
+                       name="fnrGjenlevende"
+                       id="fnrGjenlevende"
+                       class="form-control"
+                       required
+                />
+            </div>
+
+            <div class="mb-3">
+                <label for="fnrAvdoed" class="form-label">Avdød (fnr):</label>
+                <input type="tel"
+                       pattern="[0-9]+"
+                       minlength="11"
+                       maxlength="11"
+                       name="fnrAvdoed"
+                       id="fnrAvdoed"
+                       class="form-control"
+                       required
+                />
+            </div>
+
+            <div class="mb-3">
+                <label for="fnrBarn" class="form-label">Barn (fnr):</label>
+                <input type="tel"
+                       pattern="[0-9]+"
+                       minlength="11"
+                       maxlength="11"
+                       name="fnrBarn"
+                       id="fnrBarn"
+                       class="form-control"
+                       required
+                />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+</div>
+
+{{> ../_fragments/footer }}

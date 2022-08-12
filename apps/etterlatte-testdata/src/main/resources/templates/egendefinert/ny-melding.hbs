@@ -1,0 +1,53 @@
+{{> ../_fragments/header }}
+
+<div class="row">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Forsiden</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ beskrivelse }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-12 col-lg-8">
+        <form action="/{{ path }}" method="post">
+            <div class="mb-3">
+                <label for="key" class="form-label">Nøkkel:</label>
+                <input type="text" name="key" id="key" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="json" class="form-label">Melding:</label>
+                <textarea name="json" style="min-height: 50vh" id="json" class="form-control" onblur="prettify()"
+                          required></textarea>
+            </div>
+
+            <div class="alert alert-danger" id="error" style="visibility: hidden"><!-- js magic --></div>
+
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function prettify() {
+        const errorDiv = document.getElementById('error')
+
+        try {
+            const rawJson = document.getElementById('json').value;
+            const obj = JSON.parse(rawJson);
+
+            document.getElementById('json').value = JSON.stringify(obj, undefined, 4);
+            errorDiv.style.visibility = 'hidden'
+        } catch (e) {
+            console.log(e.message)
+            errorDiv.style.visibility = 'visible'
+            errorDiv.innerText = e.message
+        }
+    }
+</script>
+
+{{> ../_fragments/footer }}

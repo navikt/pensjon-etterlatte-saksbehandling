@@ -1,0 +1,30 @@
+{{>_fragments/header}}
+
+<div class="row">
+    <div class="col">
+        <ul>
+        </ul>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Forsiden</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Error</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="alert alert-danger">
+            <h4 class="alert-heading">
+                {{errorMessage}}
+            </h4>
+
+            <code>
+                {{stacktrace}}
+            </code>
+        </div>
+    </div>
+</div>
+
+{{>_fragments/footer}}

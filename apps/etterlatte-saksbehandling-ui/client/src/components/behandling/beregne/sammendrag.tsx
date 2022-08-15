@@ -78,7 +78,7 @@ export const Sammendrag = () => {
               <Table.DataCell>
                 {beregning.soeskenFlokk?.length ? <GjelderTooltip soeskenFlokk={beregning.soeskenFlokk} /> : '-'}
               </Table.DataCell>
-              <Table.DataCell>{beregning.grunnbelopMnd} kr</Table.DataCell>
+              <Table.DataCell>{beregning.utbetaltBeloep} kr</Table.DataCell>
             </Table.Row>
           ))}
         </Table.Body>

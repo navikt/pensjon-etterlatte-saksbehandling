@@ -70,6 +70,7 @@ export interface IBeregningsperiode {
   grunnbelopMnd: number
   grunnbelop: number
   soeskenFlokk: IPerson[] | null
+  utbetaltBeloep: number
 }
 
 export interface IKommerSoekerTilgode {
@@ -283,7 +284,7 @@ export interface IPdlPerson {
   kontaktadresse?: IAdresse[]
   oppholdsadresse?: IAdresse[]
   avdoedesBarn?: IPdlPerson[]
-  familieRelasjon?: IFamilieRelasjon,
+  familieRelasjon?: IFamilieRelasjon
   // ...
 }
 
@@ -323,7 +324,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   soeknadMottattDato: '',
   virkningstidspunkt: '',
   hendelser: [],
-  familieforhold: undefined
+  familieforhold: undefined,
 }
 
 export const behandlingReducer = (state = detaljertBehandlingInitialState, action: IAction): any => {

@@ -45,7 +45,7 @@ class BehandlingHendelser(
                             behovNameKey to Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1,
                             "sakId" to packet["sakId"],
                             "fnr" to fnr.asText(),
-                            "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
+                            "rolle" to Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1.personRolle!!,
                             correlationIdKey to packet[correlationIdKey]
                         )
                     ).toJson()

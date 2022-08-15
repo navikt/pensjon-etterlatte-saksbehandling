@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import model.Grunnbeloep
 import model.finnSoeskenperiodeStrategy.FinnSoeskenPeriodeStrategy
-import model.finnSoeskenperiodeStrategy.FinnSoeskenPeriodeStrategyAutomatisk
-import no.nav.etterlatte.libs.common.beregning.*
+import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
+import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
+import no.nav.etterlatte.libs.common.beregning.Beregningstyper
+import no.nav.etterlatte.libs.common.beregning.Endringskode
+import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
@@ -53,7 +57,14 @@ class BeregningService {
                 grunnbelopMnd = gjeldendeG.grunnbeløpPerMåned,
                 grunnbelop = gjeldendeG.grunnbeløp,
                 soeskenFlokk = flokkForPeriode,
-                utbetaltBeloep = beregnUtbetaling(flokkForPeriode.size, gjeldendeG.grunnbeløpPerMåned)
+                utbetaltBeloep = beregnUtbetaling(
+                    antallSoesken = hentSoeker(grunnlag)?.let { soeker ->
+                        flokkForPeriode
+                            .filter { barn -> barn.foedselsnummer != soeker.foedselsnummer }
+                            .size
+                    } ?: flokkForPeriode.size,
+                    g = gjeldendeG.grunnbeløpPerMåned
+                )
             ))
         }
     }
@@ -68,9 +79,9 @@ class BeregningService {
 
     }
     // 40% av G til første barn, 25% til resten. Fordeles likt
-    private fun beregnUtbetaling(flokkStoerrelse: Int, g: Int): Double {
-        return if (flokkStoerrelse == 0) g * 0.40
-        else (g * 0.40 + ( g *0.25)*flokkStoerrelse) / (flokkStoerrelse +1)
+    private fun beregnUtbetaling(antallSoesken: Int, g: Int): Double {
+        return if (antallSoesken == 0) g * 0.40
+        else (g * 0.40 + ( g *0.25)*antallSoesken) / (antallSoesken +1)
     }
     private fun beregnFoersteFom (first: YearMonth, virkFOM: YearMonth ): YearMonth {
         return if(first.isBefore(virkFOM)) {
@@ -79,6 +90,9 @@ class BeregningService {
             first
         }
     }
+
+    private fun hentSoeker(grunnlag: Grunnlag): Person? =
+        finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.SOEKER_PDL_V1)?.opplysning
 
     companion object {
         inline fun <reified T> setOpplysningType(opplysning: Grunnlagsopplysning<ObjectNode>?): VilkaarOpplysning<T>? {

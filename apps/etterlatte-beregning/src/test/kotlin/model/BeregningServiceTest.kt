@@ -42,4 +42,5 @@ internal class BeregningServiceTest {
             Assertions.assertEquals(YearMonth.of(2022,4), it.datoTOM)
         }
     }
+
 }

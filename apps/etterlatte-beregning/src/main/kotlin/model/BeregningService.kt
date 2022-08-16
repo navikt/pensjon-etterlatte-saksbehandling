@@ -48,7 +48,8 @@ class BeregningService {
 
         return alleFOM.map {
             val gjeldendeG = Grunnbeloep.hentGjeldendeG(it.first)
-            val flokkForPeriode = hentFlokkforPeriode(it.first,it.second,soeskenPerioder )
+            val flokkForPeriode = hentFlokkforPeriode(it.first, it.second, soeskenPerioder)
+
             (Beregningsperiode(
                 delytelsesId = "BP",
                 type = Beregningstyper.GP,
@@ -58,11 +59,7 @@ class BeregningService {
                 grunnbelop = gjeldendeG.grunnbeløp,
                 soeskenFlokk = flokkForPeriode,
                 utbetaltBeloep = beregnUtbetaling(
-                    antallSoesken = hentSoeker(grunnlag)?.let { soeker ->
-                        flokkForPeriode
-                            .filter { barn -> barn.foedselsnummer != soeker.foedselsnummer }
-                            .size
-                    } ?: flokkForPeriode.size,
+                    soeskenFlokk = flokkForPeriode.size,
                     g = gjeldendeG.grunnbeløpPerMåned
                 )
             ))
@@ -79,9 +76,11 @@ class BeregningService {
 
     }
     // 40% av G til første barn, 25% til resten. Fordeles likt
-    private fun beregnUtbetaling(antallSoesken: Int, g: Int): Double {
-        return if (antallSoesken == 0) g * 0.40
-        else (g * 0.40 + ( g *0.25)*antallSoesken) / (antallSoesken +1)
+    private fun beregnUtbetaling(soeskenFlokk: Int, g: Int): Double {
+        if(soeskenFlokk == 0) return 0.0
+        val antallSoesken = soeskenFlokk - 1
+
+        return (g * 0.40 + (g * 0.25 * antallSoesken)) / (soeskenFlokk)
     }
     private fun beregnFoersteFom (first: YearMonth, virkFOM: YearMonth ): YearMonth {
         return if(first.isBefore(virkFOM)) {
@@ -90,9 +89,6 @@ class BeregningService {
             first
         }
     }
-
-    private fun hentSoeker(grunnlag: Grunnlag): Person? =
-        finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.SOEKER_PDL_V1)?.opplysning
 
     companion object {
         inline fun <reified T> setOpplysningType(opplysning: Grunnlagsopplysning<ObjectNode>?): VilkaarOpplysning<T>? {

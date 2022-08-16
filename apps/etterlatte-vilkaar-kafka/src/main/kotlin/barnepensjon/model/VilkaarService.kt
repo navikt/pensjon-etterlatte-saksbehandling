@@ -42,7 +42,7 @@ class VilkaarService {
         val pensjonUfore = finnOpplysning<PensjonUforeOpplysning>(opplysninger, Opplysningstyper.PENSJON_UFORE_V1)
         val arbeidsforhold = finnOpplysning<ArbeidsforholdOpplysning>(opplysninger, Opplysningstyper.ARBEIDSFORHOLD_V1)
         val vilkaar = listOf(
-                vilkaarBrukerErUnder20(soekerPdl, virkningstidspunkt),
+                vilkaarBrukerErUnder20(soekerPdl, avdoedPdl, virkningstidspunkt),
                 vilkaarDoedsfallErRegistrert(avdoedPdl, soekerPdl),
                 vilkaarAvdoedesMedlemskap(
                     avdoedSoeknad,
@@ -68,8 +68,9 @@ class VilkaarService {
 
         logger.info("Mapper vilkaar fra grunnlagsdata for virkningstidspunkt $virkningstidspunkt for revurdering med årsak $revurderingAarsak")
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
+        val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
         val vilkaar = when (revurderingAarsak) {
-            RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarBrukerErUnder20(soekerPdl, virkningstidspunkt))
+            RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarBrukerErUnder20(soekerPdl, avdoedPdl, virkningstidspunkt))
             RevurderingAarsak.MANUELT_OPPHOER -> TODO("Ikke implementert vurdering av denne enda")
         }
 

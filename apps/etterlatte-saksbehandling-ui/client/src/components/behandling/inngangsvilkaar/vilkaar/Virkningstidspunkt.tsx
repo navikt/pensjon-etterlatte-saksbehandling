@@ -25,7 +25,7 @@ export const Virkningstidspunkt = (props: Props) => {
 
   const avdoedDoedsdato = hentKriterierMedOpplysning(
     vilkaar,
-    Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL,
+    Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
     KriterieOpplysningsType.DOEDSDATO
   )
 

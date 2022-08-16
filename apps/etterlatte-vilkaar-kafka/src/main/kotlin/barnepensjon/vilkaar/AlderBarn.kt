@@ -10,16 +10,17 @@ import java.time.LocalDateTime
 
 fun vilkaarBrukerErUnder20(
     soekerPdl: VilkaarOpplysning<Person>?,
+    avdoedPdl: VilkaarOpplysning<Person>?,
     virkningstidspunkt: LocalDate?,
 ): VurdertVilkaar {
-    val soekerErUnder20 = kriterieSoekerErUnder20(soekerPdl, virkningstidspunkt)
+    val soekerErUnder20 = kriterieSoekerErUnder20(soekerPdl, avdoedPdl, virkningstidspunkt)
     val soekerErILive = kriterieSoekerErILive(soekerPdl, virkningstidspunkt)
 
     return VurdertVilkaar(
         Vilkaartyper.SOEKER_ER_UNDER_20,
         setVilkaarVurderingFraKriterier(listOf(soekerErUnder20, soekerErILive)),
         null,
-        listOf(soekerErUnder20),
+        listOf(soekerErUnder20, soekerErILive),
         LocalDateTime.now()
     )
 }
@@ -49,6 +50,7 @@ fun kriterieSoekerErILive(soekerPdl: VilkaarOpplysning<Person>?, virkningstidspu
 
 fun kriterieSoekerErUnder20(
     soekerPdl: VilkaarOpplysning<Person>?,
+    avdoedPdl: VilkaarOpplysning<Person>?,
     virkningstidspunkt: LocalDate?
 ): Kriterie {
     val opplysningsGrunnlag = listOfNotNull(
@@ -60,6 +62,14 @@ fun kriterieSoekerErUnder20(
                 Foedselsdato(soekerPdl.opplysning.foedselsdato, soekerPdl.opplysning.foedselsnummer)
             )
         },
+        avdoedPdl?.let {
+            Kriteriegrunnlag(
+                avdoedPdl.id,
+                KriterieOpplysningsType.DOEDSDATO,
+                avdoedPdl.kilde,
+                Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
+            )
+        }
     )
 
     val resultat = if (soekerPdl == null || virkningstidspunkt == null) {

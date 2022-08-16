@@ -3,7 +3,8 @@ package no.nav.etterlatte.libs.common.event
 interface IBehandlingGrunnlagEndret {
     val eventName get() = "BEHANDLING:GRUNNLAGENDRET"
     val behandlingObjectKey get() = "behandling"
-    val behandlingIdKey get() = "behandlingId"
+    val sakObjectKey get() = "sak"
+    val behandlingIdKey get() = "behandling.id"
     val sakIdKey get() = "sakId"
     val fnrSoekerKey get() = "fnrSoeker"
     val behandlingOpprettetKey get() = "behandlingOpprettet"

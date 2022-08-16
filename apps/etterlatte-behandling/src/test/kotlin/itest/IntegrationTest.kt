@@ -209,7 +209,6 @@ class ApplicationTest {
 
         assertNotNull(behandlingOpprettet)
         val rapid = beans.rapidSingleton
-        rapid.publiserteMeldinger
         assertEquals(2, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",

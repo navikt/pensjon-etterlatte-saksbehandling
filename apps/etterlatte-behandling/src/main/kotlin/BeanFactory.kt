@@ -43,7 +43,8 @@ abstract class CommonFactory : BeanFactory {
             behandlingDao(),
             foerstegangsbehandlingFactory(),
             revurderingFactory(),
-            datasourceBuilder().dataSource
+            datasourceBuilder().dataSource,
+            sakService()
         )
     }
     private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory by lazy {

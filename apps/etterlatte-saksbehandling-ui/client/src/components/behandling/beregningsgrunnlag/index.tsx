@@ -29,12 +29,14 @@ const Beregningsgrunnlag = () => {
   const soesken = behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
     (barn) => barn.foedselsnummer !== soeker.fnr
   )
+  const beregningsperiode = behandling.beregning?.beregningsperioder ?? []
+
   const { control, handleSubmit } = useForm<{ beregningsgrunnlag: SoeskenMedIBeregning[] }>({
     defaultValues: {
       beregningsgrunnlag:
-        soesken?.map((soesken) => ({
-          foedselsnummer: soesken.foedselsnummer,
-          skalBrukes: true,
+        soesken?.map((person) => ({
+          foedselsnummer: person.foedselsnummer,
+          skalBrukes: !!beregningsperiode[0]?.soeskenFlokk?.find(p => p.foedselsnummer === person.foedselsnummer),
         })) ?? [],
     },
   })

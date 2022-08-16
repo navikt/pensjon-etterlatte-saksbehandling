@@ -28,7 +28,7 @@ export const OversiktKommerSoekerTilgode = ({
   const kommerBarnetTilgodeTekst = hentKommerBarnetTilgodeTekst(sammeAdresse?.resultat,
     barnIngenUtland?.resultat,
     sammeAdresseAvdoed?.resultat,
-    saksbehandlerResultat
+    saksbehandlerOpplysning ? saksbehandlerResultat : undefined
   )
 
   const kommerBarnetTilgodeVurderingsTekst = hentKommerBarnetTilgodeVurderingsTekst(sammeAdresse?.resultat,

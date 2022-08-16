@@ -87,7 +87,7 @@ class BehandlingsHendelser(
                 JsonMessage.newMessage(
                     "BEHANDLING:${hendelse.second.name}",
                     mapOf(
-                        "behandling.id" to behandling.id,
+                        "behandlingId" to behandling.id,
                         BehandlingGrunnlagEndret.behandlingObjectKey to behandling,
                         BehandlingGrunnlagEndret.sakIdKey to behandling.sak,
                         BehandlingGrunnlagEndret.sakObjectKey to sak,

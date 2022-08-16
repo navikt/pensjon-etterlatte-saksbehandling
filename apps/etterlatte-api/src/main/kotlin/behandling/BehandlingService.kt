@@ -9,16 +9,14 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.DetaljertBehandlingDto
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.Familieforhold
 import no.nav.etterlatte.typer.LagretHendelser
-import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
 
 
-data class PersonSakerResult(val person: Person, val saker: Saker)
+data class PersonSakerResult(val person: Person, val sakerMedBehandling: Saker)
 
 data class BehandlingsBehov(
     val sak: Long,
@@ -40,11 +38,6 @@ class BehandlingService(
         val saker = behandlingKlient.hentSakerForPerson(fnr, accessToken)
 
         return PersonSakerResult(person, saker)
-    }
-
-    suspend fun opprettSak(fnr: String, sakType: SoeknadType, accessToken: String): Sak {
-        logger.info("Oppretter sak for en person")
-        return behandlingKlient.opprettSakForPerson(fnr, sakType, accessToken)
     }
 
     suspend fun hentSaker(accessToken: String): Saker {
@@ -85,11 +78,6 @@ class BehandlingService(
             hendelser = hendelser.await().hendelser,
             familieforhold = Familieforhold(avdoed.await(), gjenlevende.await())
         )
-    }
-
-    suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag {
-        logger.info("Opprett en behandling på en sak")
-        return behandlingKlient.opprettBehandling(behandlingsBehov, accessToken)
     }
 
     suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean {

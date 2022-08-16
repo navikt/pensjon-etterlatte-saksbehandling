@@ -62,19 +62,7 @@ internal class BehandlingServiceTest {
         val respons = runBlocking { service.hentPerson(fnr, accessToken) }
 
         assertSame(person, respons.person)
-        assertSame(sakliste, respons.saker)
-    }
-
-    @Test
-    fun opprettSak() {
-        val sak = no.nav.etterlatte.typer.Sak(fnr, SoeknadType.BARNEPENSJON.name, 43)
-        coEvery { behandlingKlient.opprettSakForPerson(fnr, SoeknadType.BARNEPENSJON, accessToken) } returns sak
-
-        val respons = runBlocking { service.opprettSak(fnr, SoeknadType.BARNEPENSJON, accessToken) }
-
-        assertEquals(sak.id, respons.id)
-        assertEquals(sak.sakType, respons.sakType)
-        assertEquals(sak.ident, respons.ident)
+        assertSame(sakliste, respons.sakerMedBehandling)
     }
 
     @Test
@@ -202,24 +190,6 @@ internal class BehandlingServiceTest {
         assertEquals("TestOla", respons.familieforhold?.avdoede?.opplysning?.avdoedesBarn?.get(1)!!.fornavn)
         assertEquals(1, respons.familieforhold?.gjenlevende?.opplysning?.avdoedesBarn?.size)
         assertEquals("TestKari", respons.familieforhold?.gjenlevende?.opplysning?.avdoedesBarn?.get(0)!!.fornavn)
-    }
-
-    @Test
-    fun opprettBehandling() {
-        val behandlingbehov = BehandlingsBehov(4, null)
-        val behandlingId = UUID.randomUUID()
-        coEvery { behandlingKlient.opprettBehandling(behandlingbehov, accessToken) } returns BehandlingSammendrag(
-            behandlingId,
-            4,
-            null,
-            null,
-            null
-        )
-
-        val respons = runBlocking { service.opprettBehandling(BehandlingsBehov(4, null), accessToken) }
-
-        assertEquals(4, respons.sak)
-        assertEquals(behandlingId, respons.id)
     }
 
     private fun mockPerson(

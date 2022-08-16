@@ -20,12 +20,10 @@ import org.slf4j.LoggerFactory
 
 interface EtterlatteBehandling {
     suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker
-    suspend fun opprettSakForPerson(fnr: String, sakType: SoeknadType, accessToken: String): Sak
     suspend fun hentSaker(accessToken: String): Saker
     suspend fun hentOppgaver(accessToken: String): OppgaveListe
     suspend fun hentBehandlingerForSak(sakId: Int, accessToken: String): BehandlingListe
     suspend fun hentBehandling(behandlingId: String, accessToken: String): Any
-    suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag
     suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean
     suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretHendelser
     suspend fun slettRevurderinger(sakId: Int, accessToken: String): Boolean
@@ -66,28 +64,6 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
             return objectMapper.readValue(json.toString(), Saker::class.java)
         } catch (e: Exception) {
             logger.error("Henting av person fra behandling feilet", e)
-            throw e
-        }
-    }
-
-    override suspend fun opprettSakForPerson(fnr: String, sakType: SoeknadType, accessToken: String): Sak {
-        try {
-            logger.info("Oppretter sak i behandling")
-            val json = downstreamResourceClient
-                .get(
-                    Resource(
-                        clientId,
-                        "$resourceUrl/personer/$fnr/saker/$sakType"
-                    ), accessToken
-                ).mapBoth(
-                    success = { json -> json },
-                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                ).response
-
-            return objectMapper.readValue(json.toString(), Sak::class.java)
-
-        } catch (e: Exception) {
-            logger.error("Oppretting av sak feilet", e)
             throw e
         }
     }
@@ -173,27 +149,6 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         }
     }
 
-    override suspend fun opprettBehandling(
-        behandlingsBehov: BehandlingsBehov,
-        accessToken: String
-    ): BehandlingSammendrag {
-        logger.info("Oppretter behandling på en sak")
-
-        val postBody = serialize(behandlingsBehov)
-        try {
-            val json =
-                downstreamResourceClient.post(Resource(clientId, "$resourceUrl/behandlinger"), accessToken, postBody)
-                    .mapBoth(
-                        success = { json -> json },
-                        failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                    ).response
-            return objectMapper.readValue(json.toString(), BehandlingSammendrag::class.java)
-        } catch (e: Exception) {
-            logger.error("Henting av behandlinger feilet", e)
-            throw e
-        }
-    }
-
     override suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean {
         logger.info("Sletter behandlinger på en sak")
         try {
@@ -209,11 +164,12 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         }
     }
 
-    override suspend fun hentHendelserForBehandling(behandlingId: String,  accessToken: String): LagretHendelser {
+    override suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretHendelser {
         logger.info("Henter hendelser for en behandling")
         try {
             val json =
-                downstreamResourceClient.get(Resource(clientId, "$resourceUrl/behandlinger/$behandlingId/hendelser/vedtak"), accessToken)
+                downstreamResourceClient.get(Resource(clientId,
+                    "$resourceUrl/behandlinger/$behandlingId/hendelser/vedtak"), accessToken)
                     .mapBoth(
                         success = { json -> json },
                         failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
@@ -231,10 +187,15 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         logger.info("sletter revurderinger for en sakId")
         return try {
             val json =
-                downstreamResourceClient.delete(Resource(clientId, "$resourceUrl/behandlinger/revurdering/$sakId"), accessToken, "")
+                downstreamResourceClient.delete(Resource(clientId, "$resourceUrl/behandlinger/revurdering/$sakId"),
+                    accessToken,
+                    "")
                     .mapBoth(
                         success = { true },
-                        failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message, throwableErrorMessage.throwable) }
+                        failure = { throwableErrorMessage ->
+                            throw Error(throwableErrorMessage.message,
+                                throwableErrorMessage.throwable)
+                        }
                     )
             logger.info("Slettet revurderinger for sak med id $sakId")
             json

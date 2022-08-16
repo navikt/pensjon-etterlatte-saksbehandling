@@ -32,11 +32,7 @@ function App() {
               <Route path="/person/:fnr" element={<Person />} />
               <Route
                 path="/behandling/:behandlingId/*"
-                element={
-                  <>
-                    <Behandling />
-                  </>
-                }
+                element={<Behandling />}
               />
               <Route path="/test" element={<Testside />} />
             </Routes>

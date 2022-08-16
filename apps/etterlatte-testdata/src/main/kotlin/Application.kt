@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.mustachejava.DefaultMustacheFactory
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -19,7 +20,7 @@ import io.ktor.server.cio.*
 import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import io.ktor.server.mustache.*
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -29,6 +30,7 @@ import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
@@ -120,7 +122,8 @@ private fun Route.api() {
     }
 }
 
-private fun httpClient() = HttpClient {
+private fun httpClient() = HttpClient(OkHttp) {
+    expectSuccess = true
     install(ClientContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }

@@ -2,9 +2,15 @@ package testdata.features.soeknad
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.mustache.*
 import io.ktor.server.request.*
@@ -12,9 +18,9 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.etterlatte.*
 import no.nav.etterlatte.batch.JsonMessage
+import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
-import no.nav.etterlatte.libs.ktorobo.Resource
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -38,30 +44,25 @@ class OpprettSoeknadFeature(val config: Config, val httpClient: HttpClient) : Te
 
             post {
                 try {
-                    try {
+                    val res: String = try {
                         // todo: tester ut integrasjon mot Dolly.
-                        val azureAdClient = AzureAdClient(config)
-                        val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
+                        val httpClient = httpClient()
+                        val azureAdClient = AzureAdClient(config, httpClient)
+                        val token = azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))
 
-                        val clientId = config.getString("dolly.client.id")
-                        val resourceUrl = config.getString("dolly.resource.url")
+                        val res = httpClient.get("https://dolly-backend.dev-fss-pub.nais.io/api/v1/bruker") {
+                            header("Authorization", "Bearer ${token.accessToken}")
+                            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                            header("Nav-Consumer-Id", "etterlatte-testdata")
+                            header("Nav-Call-Id", UUID.randomUUID().toString())
+                        }
 
-                        val json = downstreamResourceClient
-                            .get(
-                                resource = Resource(
-                                    clientId = clientId,
-                                    url = "$resourceUrl/bestilling/malbestilling"
-                                ),
-                                accessToken = getAccessToken(call)
-                            )
-                            .mapBoth(
-                                success = { json -> json },
-                                failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                            ).response
+                        logger.info(res.bodyAsText())
 
-                        logger.info(json.toString())
+                        res.bodyAsText()
                     } catch (ex: Exception) {
-                        logger.error("Klarte ikke hente mal")
+                        logger.error("Klarte ikke hente mal", ex)
+                        ex.toString() + ex.stackTraceToString()
                     }
 
                     val (partisjon, offset) = call.receiveParameters().let {
@@ -70,7 +71,8 @@ class OpprettSoeknadFeature(val config: Config, val httpClient: HttpClient) : Te
                             opprettSoeknadJson(
                                 gjenlevendeFnr = it["fnrGjenlevende"]!!,
                                 avdoedFnr = it["fnrAvdoed"]!!,
-                                barnFnr = it["fnrBarn"]!!
+                                barnFnr = it["fnrBarn"]!!,
+                                result = res
                             ),
                             mapOf("NavIdent" to (navIdentFraToken()!!.toByteArray()))
                         )
@@ -106,10 +108,19 @@ class OpprettSoeknadFeature(val config: Config, val httpClient: HttpClient) : Te
                 )
             }
         }
-
 }
 
-private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFnr: String): String {
+private fun httpClient() = HttpClient(OkHttp) {
+    expectSuccess = true
+    install(ContentNegotiation) {
+        register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+    }
+    defaultRequest {
+        header(X_CORRELATION_ID, getCorrelationId())
+    }
+}.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
+
+private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFnr: String, result: String): String {
     val skjemaInfo = opprettSkjemaInfo(gjenlevendeFnr, barnFnr, avdoedFnr)
 
     return JsonMessage.newMessage(
@@ -120,7 +131,8 @@ private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFn
             "@template" to "soeknad",
             "@fnr_soeker" to barnFnr,
             "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
-            "@adressebeskyttelse" to "UGRADERT"
+            "@adressebeskyttelse" to "UGRADERT",
+            "@behandlinger" to result
         )
     ).toJson()
 }

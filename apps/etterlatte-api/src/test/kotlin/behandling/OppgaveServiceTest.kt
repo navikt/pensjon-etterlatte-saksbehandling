@@ -20,26 +20,31 @@ import java.util.*
 internal class OppgaveServiceTest {
     @MockK
     lateinit var behandlingKlient: BehandlingKlient
+
     @InjectMockKs
     lateinit var service: OppgaveService
+
     @BeforeEach
     fun setUp() = MockKAnnotations.init(this)
     private val accessToken = UUID.randomUUID().toString()
 
-    @Test @Disabled
+    @Test
+    @Disabled
     fun hentAlleOppgaver() {
-        coEvery { behandlingKlient.hentSaker(accessToken) } returns Saker(listOf(1,4,8).map { Sak("", "", it.toLong()) })
+        coEvery { behandlingKlient.hentSaker(accessToken) } returns Saker(listOf(1, 4, 8).map {
+            Sak("",
+                "",
+                it.toLong())
+        })
         coEvery { behandlingKlient.hentBehandlingerForSak(1, accessToken) } returns BehandlingListe(listOf(
-            BehandlingSammendrag(UUID.randomUUID(), 1, null, null, null)
+            BehandlingSammendrag(UUID.randomUUID(), 1, null, null, null, null)
         ))
         coEvery { behandlingKlient.hentBehandlingerForSak(4, accessToken) } returns BehandlingListe(emptyList())
         coEvery { behandlingKlient.hentBehandlingerForSak(8, accessToken) } returns BehandlingListe(listOf(
-            BehandlingSammendrag(UUID.randomUUID(), 8, null, null, null),
-            BehandlingSammendrag(UUID.randomUUID(), 8, null, null, null)
+            BehandlingSammendrag(UUID.randomUUID(), 8, null, null, null, null),
+            BehandlingSammendrag(UUID.randomUUID(), 8, null, null, null, null)
         ))
         val resultat = runBlocking { service.hentAlleOppgaver(accessToken) }
 
-        assertEquals(3, resultat.oppgaver.size)
-        assertEquals(2, resultat.oppgaver.filter { it.sakId == 8.toLong() }.size)
     }
 }

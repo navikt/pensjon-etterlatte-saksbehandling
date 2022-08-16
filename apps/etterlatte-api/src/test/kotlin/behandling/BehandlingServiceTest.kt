@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.typer.LagretHendelse
 import no.nav.etterlatte.typer.LagretHendelser
+import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
@@ -55,14 +56,17 @@ internal class BehandlingServiceTest {
     @Test
     fun hentPerson() {
         val person = mockPerson()
-        val sakliste = Saker(emptyList())
+        val sakliste = Saker(listOf(Sak("fnr", "", 1)))
+        val behandlingsListe = BehandlingListe(behandlinger = emptyList())
+
         coEvery { pdlKlient.hentPerson(fnr, accessToken) } returns person
         coEvery { behandlingKlient.hentSakerForPerson(fnr, accessToken) } returns sakliste
+        coEvery { behandlingKlient.hentBehandlingerForSak(1, accessToken) } returns BehandlingListe(emptyList())
 
-        val respons = runBlocking { service.hentPerson(fnr, accessToken) }
+        val respons = runBlocking { service.hentPersonOgSaker(fnr, accessToken) }
 
         assertSame(person, respons.person)
-        assertSame(sakliste, respons.sakerMedBehandling)
+        assertEquals(behandlingsListe, respons.behandlingListe)
     }
 
     @Test
@@ -78,7 +82,7 @@ internal class BehandlingServiceTest {
 
     @Test
     fun hentBehandlingerForSak() {
-        val behandling = BehandlingSammendrag(UUID.randomUUID(), 4, null, null, null)
+        val behandling = BehandlingSammendrag(UUID.randomUUID(), 4, null, null, null, null)
         coEvery { behandlingKlient.hentBehandlingerForSak(4, accessToken) } returns BehandlingListe(listOf(behandling))
 
         val respons = runBlocking { service.hentBehandlingerForSak(4, accessToken) }
@@ -96,6 +100,7 @@ internal class BehandlingServiceTest {
             LocalDateTime.now(),
             LocalDateTime.now(),
             LocalDateTime.now(),
+            null,
             null,
             null,
             null,

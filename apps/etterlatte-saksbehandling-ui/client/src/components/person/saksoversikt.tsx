@@ -1,11 +1,10 @@
 import { Saksliste } from './saksliste'
 import styled from 'styled-components'
 import { Next } from '@navikt/ds-icons'
-import { Button } from '@navikt/ds-react'
 import { Behandling, Sak, SakslisteProps } from './typer'
 
 export const Saksoversikt = ({
-  saksliste, opprettBehandling, goToBehandling,
+  saksliste, goToBehandling,
 }: {
   saksliste: SakslisteProps
   opprettBehandling: any

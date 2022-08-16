@@ -1,11 +1,9 @@
 package no.nav.etterlatte.behandling
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
 import no.nav.etterlatte.libs.common.person.Person
@@ -16,12 +14,7 @@ import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
 
 
-data class PersonSakerResult(val person: Person, val sakerMedBehandling: Saker)
-
-data class BehandlingsBehov(
-    val sak: Long,
-    val opplysninger: List<Grunnlagsopplysning<ObjectNode>>?
-)
+data class PersonSakerResult(val person: Person, val behandlingListe: BehandlingListe)
 
 class BehandlingService(
     private val behandlingKlient: BehandlingKlient,
@@ -31,13 +24,19 @@ class BehandlingService(
 ) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
 
-    suspend fun hentPerson(fnr: String, accessToken: String): PersonSakerResult {
-        logger.info("Henter person fra behandling")
+    suspend fun hentPersonOgSaker(fnr: String, accessToken: String): PersonSakerResult {
+        logger.info("Henter person med tilhørende behandlinger")
 
         val person = pdlKlient.hentPerson(fnr, accessToken)
         val saker = behandlingKlient.hentSakerForPerson(fnr, accessToken)
+        val sakIder = saker.saker.map { it.id }.distinct()
 
-        return PersonSakerResult(person, saker)
+        val behandlinger = sakIder.map { behandlingKlient.hentBehandlingerForSak(it.toInt(), accessToken) }
+            .flatMap { it.behandlinger }
+
+        val behandlingsListe = BehandlingListe(behandlinger)
+
+        return PersonSakerResult(person, behandlingsListe)
     }
 
     suspend fun hentSaker(accessToken: String): Saker {

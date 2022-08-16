@@ -11,7 +11,8 @@ data class BehandlingSammendrag(
     val sak: Long,
     val status: BehandlingStatus?,
     val soeknadMottattDato: LocalDateTime?,
-    val behandlingOpprettet: LocalDateTime?
+    val behandlingOpprettet: LocalDateTime?,
+    val behandlingType: BehandlingType?,
 )
 
 data class DetaljertBehandling(
@@ -27,4 +28,5 @@ data class DetaljertBehandling(
     val soesken: List<String>?,
     val gyldighetsproeving: GyldighetsResultat?,
     val status: BehandlingStatus?,
+    val behandlingType: BehandlingType?
 )

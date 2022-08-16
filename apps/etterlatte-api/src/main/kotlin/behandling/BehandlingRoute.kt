@@ -5,14 +5,6 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.BehandlingsBehov
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
 
 
 // /api
@@ -107,7 +99,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
             } else {
                 try {
                     val accessToken = getAccessToken(call)
-                    val list = service.hentPerson(fnr, accessToken)
+                    val list = service.hentPersonOgSaker(fnr, accessToken)
                     call.respond(list)
                 } catch (e: Exception) {
                     throw e

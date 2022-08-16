@@ -35,7 +35,6 @@ fun Route.behandlingRoutes(
 ) {
     val logger = application.log
 
-
     route("/behandlinger") {
 
         get {
@@ -47,7 +46,8 @@ fun Route.behandlingRoutes(
                             it.sak,
                             it.status,
                             if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
-                            it.behandlingOpprettet
+                            it.behandlingOpprettet,
+                            it.type
                         )
                     }
                     .let { BehandlingListe(it) }
@@ -73,6 +73,7 @@ fun Route.behandlingRoutes(
                                     soesken = persongalleri.soesken,
                                     gyldighetsproeving = gyldighetsproeving,
                                     status = status,
+                                    behandlingType = type,
                                 )
                             }
                         }
@@ -91,6 +92,7 @@ fun Route.behandlingRoutes(
                                     soesken = persongalleri.soesken,
                                     gyldighetsproeving = null,
                                     status = status,
+                                    behandlingType = type,
                                 )
                             }
                         }
@@ -152,7 +154,8 @@ fun Route.behandlingRoutes(
                                 it.sak,
                                 it.status,
                                 if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
-                                it.behandlingOpprettet
+                                it.behandlingOpprettet,
+                                it.type
                             )
                         }
                         .let { BehandlingListe(it) }
@@ -194,6 +197,7 @@ fun Route.behandlingRoutes(
                         it.persongalleri.soesken,
                         it.gyldighetsproeving,
                         it.status,
+                        BehandlingType.FØRSTEGANGSBEHANDLING
                     )
                 } ?: HttpStatusCode.NotFound)
             }
@@ -227,6 +231,7 @@ fun Route.behandlingRoutes(
                         it.persongalleri.soesken,
                         null,
                         it.status,
+                        BehandlingType.REVURDERING
                     )
                 } ?: HttpStatusCode.NotFound)
             }
@@ -299,7 +304,8 @@ fun Route.behandlingRoutes(
                             it.sak,
                             it.status,
                             if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
-                            it.behandlingOpprettet
+                            it.behandlingOpprettet,
+                            it.type
                         )
                     }
                     .let { BehandlingListe(it) }

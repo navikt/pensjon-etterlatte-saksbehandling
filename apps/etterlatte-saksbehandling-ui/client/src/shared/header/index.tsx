@@ -14,7 +14,7 @@ export const Header = () => {
   return (
     <>
       <HeaderWrapper>
-        <Title>Etterlatte-sakbehandling</Title>
+        <Title>Etterlatte - saksbehandling</Title>
         <RightWrap>
           <Search />
           <Menu onClick={toggleMenu}>

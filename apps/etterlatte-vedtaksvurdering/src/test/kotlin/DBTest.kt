@@ -77,7 +77,7 @@ internal class DBTest {
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
         val now = LocalDateTime.now()
         vedtaksvurderingService.lagreVilkaarsresultat(
-            "12321423523545", uuid, "fnr", VilkaarResultat(
+            "12321423523545", "BARNEPENSJON", uuid, "fnr", VilkaarResultat(
                 VurderingsResultat.OPPFYLT,
                 emptyList(),
                 now

@@ -87,21 +87,20 @@ class BehandlingsHendelser(
                 JsonMessage.newMessage(
                     "BEHANDLING:${hendelse.second.name}",
                     mapOf(
+                        BehandlingGrunnlagEndret.behandlingIdKey to behandling.id,
                         BehandlingGrunnlagEndret.behandlingObjectKey to behandling,
                         BehandlingGrunnlagEndret.sakIdKey to behandling.sak,
                         BehandlingGrunnlagEndret.sakObjectKey to sak,
-
+                        BehandlingGrunnlagEndret.behandlingOpprettetKey to behandling.behandlingOpprettet
                         )
                 ).also {
                     when(behandling){
                         is Foerstegangsbehandling -> {
                             it[BehandlingGrunnlagEndret.fnrSoekerKey] = behandling.persongalleri.soeker
-                            it[BehandlingGrunnlagEndret.behandlingOpprettetKey] = behandling.behandlingOpprettet
                             it[BehandlingGrunnlagEndret.persongalleriKey] = behandling.persongalleri
                         }
                         is Revurdering -> {
                             it[BehandlingGrunnlagEndret.fnrSoekerKey] = behandling.persongalleri.soeker
-                            it[BehandlingGrunnlagEndret.behandlingOpprettetKey] = behandling.behandlingOpprettet
                             it[BehandlingGrunnlagEndret.persongalleriKey] = behandling.persongalleri
                             it[BehandlingGrunnlagEndret.revurderingAarsakKey] = behandling.revurderingsaarsak
                         }

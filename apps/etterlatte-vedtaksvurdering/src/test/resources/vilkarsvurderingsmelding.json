@@ -1,6 +1,10 @@
 {
   "behandlingId": "77826f44-fc2b-4bd4-a029-c48c1fa92378",
   "sakId": 3,
+  "sak": {
+    "id": 3,
+    "sakType": "BARNEPENSJON"
+  },
   "behandlingOpprettet": "2022-06-14T15:44:02.427522",
   "sistEndret": "2022-06-14T15:44:02.433757",
   "soeknadMottattDato": "2022-02-14T14:37:24.573613",

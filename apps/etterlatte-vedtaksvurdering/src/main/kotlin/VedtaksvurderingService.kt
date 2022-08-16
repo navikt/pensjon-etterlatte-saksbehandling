@@ -66,6 +66,7 @@ class VedtaksvurderingService(
 
     fun lagreVilkaarsresultat(
         sakId: String,
+        sakType: String,
         behandlingId: UUID,
         fnr: String,
         vilkaarResultat: VilkaarResultat,
@@ -73,13 +74,13 @@ class VedtaksvurderingService(
     ) {
         val vedtak = repository.hentVedtak(sakId, behandlingId)
         if (vedtak == null) {
-            repository.lagreVilkaarsresultat(sakId, behandlingId, fnr, vilkaarResultat, virkningsDato)
+            repository.lagreVilkaarsresultat(sakId, sakType, behandlingId, fnr, vilkaarResultat, virkningsDato)
         } else {
             if (vedtak.vedtakFattet == true) {
                 throw KanIkkeEndreFattetVedtak(vedtak)
             }
             migrer(vedtak, fnr, virkningsDato)
-            repository.oppdaterVilkaarsresultat(sakId, behandlingId, vilkaarResultat)
+            repository.oppdaterVilkaarsresultat(sakId, sakType, behandlingId, vilkaarResultat)
         }
     }
 
@@ -150,7 +151,7 @@ class VedtaksvurderingService(
                             TemporalAdjusters.firstDayOfNextMonth()
                         )?.let { YearMonth.of(it.year, it.month) }) ?: YearMonth.now(), null
                 ), //må få inn dette på toppnivå?
-                Sak(it.fnr!!, "BARNEPENSJON", it.sakId.toLong()), //mer sakinfo inn i prosess og vedtaksammendrag
+                Sak(it.fnr!!, it.sakType!!, it.sakId.toLong()),
                 Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId), // Behandlingsinfo må lagres
                 if (it.vilkaarsResultat?.resultat == VurderingsResultat.OPPFYLT) VedtakType.INNVILGELSE else VedtakType.AVSLAG, //Hvor skal vi bestemme vedtakstype?
                 emptyList(), //Ikke lenger aktuell

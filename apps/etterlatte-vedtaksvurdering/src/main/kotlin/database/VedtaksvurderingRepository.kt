@@ -32,6 +32,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
 
     fun lagreVilkaarsresultat(
         sakId: String,
+        saktype: String,
         behandlingsId: UUID,
         fnr: String,
         vilkaarsresultat: VilkaarResultat,
@@ -46,18 +47,20 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             statement.setString(4, fnr)
             statement.setDate(5, virkningsDato?.let {Date.valueOf(virkningsDato)})
             statement.setString(6, VedtakStatus.VILKAARSVURDERT.name)
+            statement.setString(7, saktype)
             statement.execute()
         }
     }
 
-    fun oppdaterVilkaarsresultat(sakId: String, behandlingsId: UUID, vilkaarsresultat: VilkaarResultat) {
+    fun oppdaterVilkaarsresultat(sakId: String, saktype: String, behandlingsId: UUID, vilkaarsresultat: VilkaarResultat) {
         logger.info("Lagrer vilkaarsresultat")
         connection.use {
             val statement = it.prepareStatement(Queries.oppdaterVilkaarResultat)
             statement.setString(1, objectMapper.writeValueAsString(vilkaarsresultat))
+            statement.setObject(3, saktype)
             statement.setString(2, VedtakStatus.VILKAARSVURDERT.name)
-            statement.setLong(3, sakId.toLong())
-            statement.setObject(4, behandlingsId)
+            statement.setLong(4, sakId.toLong())
+            statement.setObject(5, behandlingsId)
             statement.execute()
         }
     }
@@ -159,6 +162,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                 Vedtak(
                     getLong(9),
                     getString(1),
+                    getString(16),
                     getObject(2) as UUID,
                     getString(3),
                     getString(4)?.let {
@@ -192,6 +196,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
                 Vedtak(
                     getLong(9),
                     getString(1),
+                    getString(16),
                     getObject(2) as UUID,
                     getString(3),
                     getString(4)?.let {
@@ -341,6 +346,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
 data class Vedtak(
     val id: Long,
     val sakId: String,
+    val sakType: String?,
     val behandlingId: UUID,
     val saksbehandlerId: String?,
     val avkortingsResultat: AvkortingsResultat?,
@@ -363,10 +369,10 @@ private object Queries {
         "UPDATE vedtak SET beregningsresultat = ?, vedtakstatus = ? WHERE sakId = ? AND behandlingId = ?"
 
     val lagreVilkaarResultat =
-        "INSERT INTO vedtak(sakId, behandlingId, vilkaarsresultat, fnr, datoVirkFom, vedtakstatus ) VALUES (?, ?, ?, ?, ?, ?) "
+        "INSERT INTO vedtak(sakId, behandlingId, vilkaarsresultat, fnr, datoVirkFom, vedtakstatus, saktype) VALUES (?, ?, ?, ?, ?, ?, ?) "
 
     val oppdaterVilkaarResultat =
-        "UPDATE vedtak SET vilkaarsresultat = ?, vedtakstatus = ? WHERE sakId = ? AND behandlingId = ?"
+        "UPDATE vedtak SET vilkaarsresultat = ?, vedtakstatus = ?, saktype = ? WHERE sakId = ? AND behandlingId = ?"
 
     val lagreKommerSoekerTilgodeResultat =
         "INSERT INTO vedtak(sakId, behandlingId, kommersoekertilgoderesultat, fnr) VALUES (?, ?, ?, ?)"
@@ -387,9 +393,9 @@ private object Queries {
         "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = ? WHERE sakId = ? AND behandlingId = ?"
 
     val hentVedtak =
-        "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus FROM vedtak WHERE sakId = ? AND behandlingId = ?"
+        "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype FROM vedtak WHERE sakId = ? AND behandlingId = ?"
     val hentVedtakForBehandling =
-        "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus FROM vedtak WHERE behandlingId = ?"
+        "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype FROM vedtak WHERE behandlingId = ?"
 
     val lagreFnr = "UPDATE vedtak SET fnr = ? WHERE sakId = ? AND behandlingId = ?"
     val lagreDatoVirkFom = "UPDATE vedtak SET datoVirkFom = ? WHERE sakId = ? AND behandlingId = ?"

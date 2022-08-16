@@ -30,7 +30,7 @@ export const AlderBarn = (props: VilkaarProps) => {
   )
   const avdoedDoedsdato = hentKriterierMedOpplysning(
     vilkaar,
-    Kriterietype.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
+    Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL,
     KriterieOpplysningsType.DOEDSDATO
   )
 

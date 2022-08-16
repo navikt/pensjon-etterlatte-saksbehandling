@@ -39,7 +39,7 @@ export interface IGap {
 export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) => {
   const avdoedDoedsdato: string | null = hentKriterierMedOpplysning(
     vilkaar,
-    Kriterietype.AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR,
+    Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL,
     KriterieOpplysningsType.DOEDSDATO
   )?.opplysning?.doedsdato
 

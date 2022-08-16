@@ -1,15 +1,21 @@
 plugins {
+    id("etterlatte.common")
     id("etterlatte.kafka")
 }
 
 dependencies {
     api(kotlin("reflect"))
 
+    implementation(project(":libs:common"))
+    implementation(project(":libs:ktor2client-onbehalfof"))
+
     implementation(Ktor2.ServerCore)
     implementation(Ktor2.ServerCio)
     implementation(Ktor2.ServerContentNegotiation)
+    implementation(Ktor2.ClientContentNegotiation)
     implementation(Ktor2.MetricsMicrometer)
     implementation(Ktor2.Jackson)
+    implementation(Ktor2.ClientJackson)
     implementation(Ktor2.Auth)
     implementation(Ktor2.Mustache)
 

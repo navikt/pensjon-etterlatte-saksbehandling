@@ -2,25 +2,23 @@ package testdata.features.soeknad
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.ktor.server.application.call
-import io.ktor.server.mustache.MustacheContent
-import io.ktor.server.request.receiveParameters
-import io.ktor.server.response.respond
-import io.ktor.server.response.respondRedirect
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
-import no.nav.etterlatte.TestDataFeature
+import com.github.michaelbull.result.mapBoth
+import com.typesafe.config.Config
+import io.ktor.client.*
+import io.ktor.server.application.*
+import io.ktor.server.mustache.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import no.nav.etterlatte.*
 import no.nav.etterlatte.batch.JsonMessage
-import no.nav.etterlatte.logger
-import no.nav.etterlatte.navIdentFraToken
-import no.nav.etterlatte.objectMapper
-import no.nav.etterlatte.producer
-import java.io.File
+import no.nav.etterlatte.libs.ktorobo.AzureAdClient
+import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
+import no.nav.etterlatte.libs.ktorobo.Resource
 import java.time.OffsetDateTime
-import java.util.UUID
+import java.util.*
 
-object OpprettSoeknadFeature : TestDataFeature {
+class OpprettSoeknadFeature(val config: Config, val httpClient: HttpClient) : TestDataFeature {
     override val beskrivelse: String
         get() = "Opprett søknad"
     override val path: String
@@ -40,6 +38,32 @@ object OpprettSoeknadFeature : TestDataFeature {
 
             post {
                 try {
+                    try {
+                        // todo: tester ut integrasjon mot Dolly.
+                        val azureAdClient = AzureAdClient(config)
+                        val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
+
+                        val clientId = config.getString("dolly.client.id")
+                        val resourceUrl = config.getString("dolly.resource.url")
+
+                        val json = downstreamResourceClient
+                            .get(
+                                resource = Resource(
+                                    clientId = clientId,
+                                    url = "$resourceUrl/bestilling/malbestilling"
+                                ),
+                                accessToken = getAccessToken(call)
+                            )
+                            .mapBoth(
+                                success = { json -> json },
+                                failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                            ).response
+
+                        logger.info(json.toString())
+                    } catch (ex: Exception) {
+                        logger.error("Klarte ikke hente mal")
+                    }
+
                     val (partisjon, offset) = call.receiveParameters().let {
                         producer.publiser(
                             requireNotNull(it["key"]),

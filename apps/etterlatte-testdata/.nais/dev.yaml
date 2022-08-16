@@ -37,3 +37,12 @@ spec:
   env:
     - name: KAFKA_TARGET_TOPIC
       value: etterlatte.dodsmelding
+    - name: DOLLY_CLIENT_ID
+      value: dev-fss.dolly.dolly-backend
+    - name: DOLLY_RESOURCE_URL
+      value: https://dolly-backend.dev.intern.nav.no/api/v1
+  accessPolicy:
+    outbound:
+      rules:
+        - application: dolly-backend
+          cluster: dev-fss

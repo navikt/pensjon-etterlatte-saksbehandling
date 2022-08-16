@@ -5,16 +5,16 @@ import { Button } from '@navikt/ds-react'
 import { Behandling, Sak, SakslisteProps } from './typer'
 
 export const Saksoversikt = ({
-  saksliste,
-  opprettBehandling,
-  goToBehandling,
+  saksliste, opprettBehandling, goToBehandling,
 }: {
   saksliste: SakslisteProps
   opprettBehandling: any
   goToBehandling: (behandlingsId: string) => void
 }) => {
   const sisteBehandlingISak = (sak: Sak): Behandling => {
-    return sak.behandlinger.reduce((a, b) => (a.opprettet > b.opprettet ? a : b))
+    return sak.behandlinger.reduce((a, b) => (
+      a.opprettet > b.opprettet ? a : b
+    ))
   }
 
   return (
@@ -40,17 +40,14 @@ export const Saksoversikt = ({
             </div>
 
             <IconButton onClick={() => goToBehandling(sisteBehandlingISak(sak).id.toString())}>
-              <Next fontSize={30} />
+              <Next fontSize={30}/>
             </IconButton>
           </InfoWrapper>
 
           <div className="behandlinger">
             <h2>Behandlinger</h2>
-            <Saksliste saksliste={sak.behandlinger} goToBehandling={goToBehandling} />
+            <Saksliste saksliste={sak.behandlinger} goToBehandling={goToBehandling}/>
           </div>
-          <Button variant="secondary" size="medium" className="button" onClick={opprettBehandling}>
-            Opprett ny behandling
-          </Button>
         </SaksoversiktWrapper>
       ))}
     </>

@@ -12,50 +12,36 @@ import { Dokumenter, PersonInfo, SakslisteProps } from './typer'
 
 //todo: typer
 const testDokumenter: Dokumenter = {
-  brev: [
-    {
-      dato: '13.05.2021',
-      tittel: 'Innvilgelsesbrev barnepensjon',
-      link: 'link',
-      status: 'Sendt ut',
-    },
-    {
-      dato: '09.05.2021',
-      tittel: 'Søknad barnepensjon - førstegangsbehandling',
-      link: 'link',
-      status: 'Motatt',
-    },
-  ],
+  brev: [{
+    dato: 'Mock 13.05.2021', tittel: 'Mock Innvilgelsesbrev barnepensjon', link: 'link', status: 'Mock Sendt ut',
+  }, {
+    dato: 'Mock 09.05.2021',
+    tittel: 'Mock Søknad barnepensjon - førstegangsbehandling',
+    link: 'link',
+    status: 'Mock Motatt',
+  },],
 }
 
 const testdata: SakslisteProps = {
-  saker: [
-    {
-      sakId: 1,
-      type: 'Barnepensjon',
-      sakstype: 'Nasjonal',
-      behandlinger: [
-        {
-          id: 11,
-          opprettet: '12.01.2021',
-          type: 'Revurdering',
-          årsak: 'Søknad',
-          status: 'Utredes',
-          vedtaksdato: '18.01.20201',
-          resultat: 'Ikke satt',
-        },
-        {
-          id: 9,
-          opprettet: '01.01.2021',
-          type: 'Førstegangsbehandling',
-          årsak: 'Søknad',
-          status: 'Ferdigstilt',
-          vedtaksdato: '10.01.2021',
-          resultat: 'Innvilget',
-        },
-      ],
-    },
-  ],
+  saker: [{
+    sakId: 1, type: 'Mock Barnepensjon', sakstype: 'Mock Nasjonal', behandlinger: [{
+      id: 11,
+      opprettet: 'Mock 12.01.2021',
+      type: 'Mock Revurdering',
+      årsak: 'Mock Søknad',
+      status: 'Mock Utredes',
+      vedtaksdato: 'Mock 18.01.20201',
+      resultat: 'Mock Ikke satt',
+    }, {
+      id: 9,
+      opprettet: 'Mock 01.01.2021',
+      type: 'Mock Førstegangsbehandling',
+      årsak: 'Mock Søknad',
+      status: 'Mock Ferdigstilt',
+      vedtaksdato: 'Mock 10.01.2021',
+      resultat: 'Mock Innvilget',
+    },],
+  },],
 }
 
 export const Person = () => {
@@ -64,22 +50,24 @@ export const Person = () => {
   const [personData, setPersonData] = useState({})
   const [personinfo, setPersoninfo] = useState<PersonInfo>()
 
-  const match = useParams<{ fnr: string }>()
+  const match = useParams<{fnr: string}>()
 
   const sakIdInput = useRef() as React.MutableRefObject<HTMLInputElement>
 
   useEffect(() => {
-    ;(async () => {
-      if (match.fnr) {
-        const person = await getPerson(match.fnr)
-        setPersonData(person)
-        setPersoninfo({
-          navn: person.data.person.fornavn + person.data.person.etternavn,
-          foedselsnummer: person.data.person.foedselsnummer,
-          type: 'Etterlatt',
-        })
+    ;(
+      async () => {
+        if (match.fnr) {
+          const person = await getPerson(match.fnr)
+          setPersonData(person)
+          setPersoninfo({
+            navn: person.data.person.fornavn + person.data.person.etternavn,
+            foedselsnummer: person.data.person.foedselsnummer,
+            type: 'Etterlatt',
+          })
+        }
       }
-    })()
+    )()
   }, [])
 
   const opprettBehandling = () => {
@@ -94,16 +82,15 @@ export const Person = () => {
 
   return (
     <>
-      <StatusBar theme={StatusBarTheme.gray} personInfo={personinfo} />
+      <StatusBar theme={StatusBarTheme.gray} personInfo={personinfo}/>
       <Container>
         <Tabs>
           <Tlist>
             <TabElement>Saksoversikt</TabElement>
             <TabElement>Dokumentoversikt</TabElement>
           </Tlist>
-
           <TabPanel>
-            <Saksoversikt saksliste={testdata} opprettBehandling={opprettBehandling} goToBehandling={goToBehandling} />
+            <Saksoversikt saksliste={testdata} opprettBehandling={opprettBehandling} goToBehandling={goToBehandling}/>
           </TabPanel>
           <TabPanel>
             <Dokumentoversikt {...testDokumenter} />

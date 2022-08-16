@@ -34,8 +34,6 @@ enum class Handling {
     BEHANDLE
 }
 
-data class SakMedBehandling(val sak: Sak, val behandling: BehandlingSammendrag)
-
 class OppgaveService(private val behandlingKlient: BehandlingKlient, private val vedtakKlient: VedtakKlient) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
 
@@ -52,7 +50,7 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient, private val
                             status = oppgave.behandlingStatus,
                             oppgaveStatus = oppgave.oppgaveStatus,
                             soeknadType = oppgave.sak.sakType,
-                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, //todo dette kan nå hentes fra behandling
                             regdato = oppgave.regdato.toLocalDateTime().toString(),
                             fristdato = oppgave.fristDato.atStartOfDay().toString(),
                             fnr = oppgave.sak.ident,

@@ -8,7 +8,7 @@ import styled from "styled-components";
 import { useState } from "react";
 import { EndreVurdering } from "./EndreVurdering";
 import { hentKriterierMedOpplysning } from "../../../felles/utils";
-import { formatterStringDato } from "../../../../../utils";
+import { formatterStringDato } from "../../../../../utils/formattering";
 
 export const KommerBarnetTilGodeVurdering = ({
   kommerSoekerTilgodeVurdering, automatiskTekst

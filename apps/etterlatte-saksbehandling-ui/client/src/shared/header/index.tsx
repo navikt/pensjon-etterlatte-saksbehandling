@@ -5,26 +5,17 @@ import { Bruker } from './Bruker'
 import { Search } from './Search'
 
 export const Header = () => {
-  const [menuOpen, setMenuOpen] = useState(false)
-
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen)
-  }
 
   return (
     <>
       <HeaderWrapper>
         <Title>Etterlatte - saksbehandling</Title>
         <RightWrap>
-          <Search />
-          <Menu onClick={toggleMenu}>
-            <SystemIcon />
-          </Menu>
-          <Bruker />
+          <Search/>
+          <Bruker/>
         </RightWrap>
       </HeaderWrapper>
 
-      {menuOpen && <MenuContent>Her kommer det innhold kanskje</MenuContent>}
     </>
   )
 }

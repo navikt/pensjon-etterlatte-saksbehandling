@@ -1,3 +1,6 @@
+import { IBehandlingStatus } from "../../store/reducers/BehandlingReducer";
+import { IBehandlingsType } from "../behandling/behandlingsType";
+
 export interface Behandling {
   id: number
   opprettet: string
@@ -7,15 +10,7 @@ export interface Behandling {
   vedtaksdato: string
   resultat: string
 }
-export interface Sak {
-  sakId: number
-  type: string
-  sakstype: string
-  behandlinger: Behandling[]
-}
-export interface SakslisteProps {
-  saker: Sak[]
-}
+
 
 export interface Dokument {
   dato: string
@@ -28,8 +23,28 @@ export interface Dokumenter {
   brev: Dokument[]
 }
 
-export interface PersonInfo {
+export interface IPersonInfo {
   navn: string
-  foedselsnummer: string
+  fnr: string
   type: string
+}
+
+export interface IPersonResult {
+  person: {
+    fornavn: string
+    etternavn: string
+    foedselsnummer: string
+  }
+  behandlingListe: {
+    behandlinger: IBehandlingsammendrag[]
+  }
+}
+
+export interface IBehandlingsammendrag {
+  id: string,
+  sak: number,
+  status: IBehandlingStatus,
+  soeknadMottattDato: string,
+  behandlingOpprettet: string,
+  behandlingType: IBehandlingsType
 }

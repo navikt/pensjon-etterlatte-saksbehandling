@@ -9,7 +9,7 @@ import { AppContext } from '../../../store/AppContext'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import BrevModal from './brev-modal'
 import { hentBehandlesFraStatus } from '../felles/utils'
-import { formatterStringDato } from '../../../utils'
+import { formatterStringDato } from '../../../utils/formattering'
 
 export const Beregne = () => {
   const behandling = useContext(AppContext).state.behandlingReducer
@@ -30,15 +30,15 @@ export const Beregne = () => {
             Vilkårsresultat: <strong>Innvilget fra {virkningstidspunkt}</strong>
           </div>
         </InfoWrapper>
-        <Sammendrag />
-        <BrevModal />
+        <Sammendrag/>
+        <BrevModal/>
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>
-          <BeregningModal />
+          <BeregningModal/>
         </BehandlingHandlingKnapper>
       ) : (
-        <NesteOgTilbake />
+        <NesteOgTilbake/>
       )}
     </Content>
   )

@@ -1,7 +1,9 @@
 import { format } from 'date-fns'
 
 export const upperCaseFirst = (string: string): string => {
-  return string.charAt(0).toUpperCase() + string.slice(1)
+  const lower = string.toLowerCase()
+  const storForbokstav = lower.charAt(0).toUpperCase() + lower.slice(1)
+  return storForbokstav.replace('_', ' ')
 }
 
 export const formatterDato = (dato: Date) => {

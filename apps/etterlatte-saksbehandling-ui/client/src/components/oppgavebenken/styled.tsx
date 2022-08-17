@@ -18,19 +18,19 @@ export const FilterWrapper = styled.div`
 const colors = {
   [BehandlingTypeFilter.VELG]: '#ffffff',
   [BehandlingTypeFilter.FØRSTEGANGSBEHANDLING]: '#826ba1',
+  [BehandlingTypeFilter.REVURDERING]: '#a18dbb',
   [SoeknadTypeFilter.VELG]: '#ffffff',
   [SoeknadTypeFilter.GJENLEVENDEPENSJON]: '#337885',
   [SoeknadTypeFilter.BARNEPENSJON]: '#5da499',
 }
 
-export const ColorTag: React.FC<{ type: BehandlingTypeFilter | SoeknadTypeFilter; label: string }> = ({
-  type,
-  label,
+export const ColorTag: React.FC<{type: BehandlingTypeFilter | SoeknadTypeFilter; label: string}> = ({
+  type, label,
 }) => {
   return <ColorTagWrap type={type}>{label}</ColorTagWrap>
 }
 
-const ColorTagWrap = styled.div<{ type: BehandlingTypeFilter | SoeknadTypeFilter }>`
+const ColorTagWrap = styled.div<{type: BehandlingTypeFilter | SoeknadTypeFilter}>`
   background-color: ${(props) => colors[props.type]};
   padding: 0.2em 1em;
   color: #fff;

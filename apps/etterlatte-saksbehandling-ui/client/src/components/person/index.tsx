@@ -1,16 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { getPerson, opprettBehandlingPaaSak } from '../../shared/api/person'
+import { getPerson } from '../../shared/api/person'
 import { StatusBar, StatusBarTheme } from '../statusbar'
 import { Container } from '../../shared/styled'
 import { Dokumentoversikt } from './dokumentoversikt'
 import { Saksoversikt } from './saksoversikt'
-import { useNavigate } from 'react-router-dom'
-import { Dokumenter, PersonInfo, SakslisteProps } from './typer'
+import { Dokumenter, IPersonResult } from './typer'
+import { IApiResponse } from "../../shared/api/types";
 
-//todo: typer
 const testDokumenter: Dokumenter = {
   brev: [{
     dato: 'Mock 13.05.2021', tittel: 'Mock Innvilgelsesbrev barnepensjon', link: 'link', status: 'Mock Sendt ut',
@@ -22,81 +21,43 @@ const testDokumenter: Dokumenter = {
   },],
 }
 
-const testdata: SakslisteProps = {
-  saker: [{
-    sakId: 1, type: 'Mock Barnepensjon', sakstype: 'Mock Nasjonal', behandlinger: [{
-      id: 11,
-      opprettet: 'Mock 12.01.2021',
-      type: 'Mock Revurdering',
-      årsak: 'Mock Søknad',
-      status: 'Mock Utredes',
-      vedtaksdato: 'Mock 18.01.20201',
-      resultat: 'Mock Ikke satt',
-    }, {
-      id: 9,
-      opprettet: 'Mock 01.01.2021',
-      type: 'Mock Førstegangsbehandling',
-      årsak: 'Mock Søknad',
-      status: 'Mock Ferdigstilt',
-      vedtaksdato: 'Mock 10.01.2021',
-      resultat: 'Mock Innvilget',
-    },],
-  },],
-}
-
 export const Person = () => {
-  const navigate = useNavigate()
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [personData, setPersonData] = useState({})
-  const [personinfo, setPersoninfo] = useState<PersonInfo>()
+  const [personData, setPersonData] = useState<IPersonResult | undefined>(undefined)
+  const [loaded, setLoaded] = useState<boolean>(false)
 
   const match = useParams<{fnr: string}>()
 
-  const sakIdInput = useRef() as React.MutableRefObject<HTMLInputElement>
-
   useEffect(() => {
-    ;(
-      async () => {
-        if (match.fnr) {
-          const person = await getPerson(match.fnr)
-          setPersonData(person)
-          setPersoninfo({
-            navn: person.data.person.fornavn + person.data.person.etternavn,
-            foedselsnummer: person.data.person.foedselsnummer,
-            type: 'Etterlatt',
-          })
-        }
-      }
-    )()
+    if (match.fnr) {
+      getPerson(match.fnr).then((result: IApiResponse<IPersonResult>) => {
+        setPersonData(result?.data)
+        setLoaded(true)
+      })
+    }
   }, [])
 
-  const opprettBehandling = () => {
-    if (sakIdInput.current.value) {
-      opprettBehandlingPaaSak(Number(sakIdInput.current.value))
-    }
-  }
-
-  const goToBehandling = (behandlingsId: string) => {
-    navigate(`/behandling/${behandlingsId}/soeknadsoversikt`)
-  }
+  const navn = personData?.person.fornavn + ' ' + personData?.person.etternavn
+  const personInfo = personData ? {navn: navn, fnr: personData?.person.foedselsnummer, type: 'Etterlatt'} : null
 
   return (
     <>
-      <StatusBar theme={StatusBarTheme.gray} personInfo={personinfo}/>
-      <Container>
-        <Tabs>
-          <Tlist>
-            <TabElement>Saksoversikt</TabElement>
-            <TabElement>Dokumentoversikt</TabElement>
-          </Tlist>
-          <TabPanel>
-            <Saksoversikt saksliste={testdata} opprettBehandling={opprettBehandling} goToBehandling={goToBehandling}/>
-          </TabPanel>
-          <TabPanel>
-            <Dokumentoversikt {...testDokumenter} />
-          </TabPanel>
-        </Tabs>
-      </Container>
+      {personInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={personInfo}/>}
+      {loaded && (
+        <Container>
+          <Tabs>
+            <Tlist>
+              <TabElement>Saksoversikt</TabElement>
+              <TabElement>Dokumentoversikt</TabElement>
+            </Tlist>
+            <TabPanel>
+              <Saksoversikt behandlingliste={personData?.behandlingListe.behandlinger}/>
+            </TabPanel>
+            <TabPanel>
+              <Dokumentoversikt {...testDokumenter} />
+            </TabPanel>
+          </Tabs>
+        </Container>
+      )}
     </>
   )
 }

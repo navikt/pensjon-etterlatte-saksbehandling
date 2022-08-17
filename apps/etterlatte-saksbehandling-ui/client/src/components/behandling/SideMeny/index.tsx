@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react'
 import { IBehandlingInfo } from './types'
-import { IBehandlingsStatus } from '../behandlings-status'
+import { IBehandlingsType } from '../behandlingsType'
 import { AppContext } from '../../../store/AppContext'
 import { BehandlingInfo } from '../attestering'
 import { IHendelseType } from "../../../store/reducers/BehandlingReducer";
@@ -12,11 +12,12 @@ export const SideMeny = () => {
   useEffect(() => {
     const behandling = ctx.state.behandlingReducer
     const innlogget = ctx.state.saksbehandlerReducer
-    const underkjentHendelser = behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_UNDERKJENT)
+    const underkjentHendelser = behandling.hendelser.filter((hendelse) => hendelse.hendelse ===
+      IHendelseType.VEDTAK_UNDERKJENT)
     const fattetHendelser = behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_FATTET)
 
     behandling && setBehandlingsinfo({
-      type: IBehandlingsStatus.FORSTEGANG,
+      type: IBehandlingsType.FØRSTEGANGSBEHANDLING,
       status: behandling.status,
       saksbehandler: behandling.saksbehandlerId,
       attestant: behandling.attestant,

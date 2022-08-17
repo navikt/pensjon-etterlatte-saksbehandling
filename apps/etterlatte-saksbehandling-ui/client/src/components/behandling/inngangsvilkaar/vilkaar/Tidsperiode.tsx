@@ -5,15 +5,13 @@ import { InformationIcon } from '../../../../shared/icons/informationIcon'
 import { IPeriode } from './TidslinjeMedlemskap'
 import { useRef, useState } from 'react'
 import { Popover } from '@navikt/ds-react'
-import { formatterStringDato } from '../../../../utils'
+import { formatterStringDato } from '../../../../utils/formattering'
 import { hentKildenavn } from './utils'
 import { CloseIcon } from '../../../../shared/icons/closeIcon'
 import '../../../../index.css'
 
 export const Tidsperiode = ({
-  periode,
-  lengde,
-  startOffset,
+  periode, lengde, startOffset,
 }: {
   periode: IPeriode
   lengde: string
@@ -25,17 +23,17 @@ export const Tidsperiode = ({
   const isGap = periode.periodeType === 'Bostedgap'
 
   return (
-    <Rad style={{ left: startOffset, width: lengde }} isGap={isGap}>
+    <Rad style={{left: startOffset, width: lengde}} isGap={isGap}>
       {!isGap && (
         <InnholdWrapper>
-          <Ikon>{periode.periodeType === 'jobb' ? <OfficeIcon /> : <HomeIcon />}</Ikon>
+          <Ikon>{periode.periodeType === 'jobb' ? <OfficeIcon/> : <HomeIcon/>}</Ikon>
           <PeriodeType>
             {periode.periodeType} {land}
           </PeriodeType>
         </InnholdWrapper>
       )}
       <InfoIkonWrapper ref={buttonRef} onClick={() => setOpen(true)}>
-        <InformationIcon />
+        <InformationIcon/>
       </InfoIkonWrapper>
 
       <Popover
@@ -47,7 +45,7 @@ export const Tidsperiode = ({
       >
         <Popover.Content>
           <Close onClick={() => setOpen(false)}>
-            <CloseIcon />
+            <CloseIcon/>
           </Close>
           <InnholdTittel>Detaljer</InnholdTittel>
           {!isGap && (
@@ -70,14 +68,18 @@ export const Tidsperiode = ({
   )
 }
 
-const Rad = styled.div<{ isGap: boolean }>`
-  background-color: ${(props) => (props.isGap ? '#E180714C' : '#CCE2F0')};
+const Rad = styled.div<{isGap: boolean}>`
+  background-color: ${(props) => (
+  props.isGap ? '#E180714C' : '#CCE2F0'
+)};
   position: relative;
   margin-bottom: 10px;
   margin-right: 1px;
   border-radius: 4px;
   display: flex;
-  justify-content: ${(props) => (props.isGap ? 'center' : 'space-between')};
+  justify-content: ${(props) => (
+  props.isGap ? 'center' : 'space-between'
+)};
   align-items: center;
 `
 

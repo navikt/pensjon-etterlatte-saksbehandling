@@ -6,16 +6,12 @@ import { Column, GridContainer } from '../../shared/styled'
 import { AppContext } from '../../store/AppContext'
 import { IBehandlingsType } from './behandlingsType'
 import { IApiResponse } from '../../shared/api/types'
-import { IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
+import { addBehandlingAction, IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
 import Spinner from '../../shared/Spinner'
 import { StatusBar, StatusBarTheme } from '../statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny'
-
-const addBehandlingAction = (data: any) => (
-  {type: 'add_behandling', data}
-)
 
 export const Behandling = () => {
   const ctx = useContext(AppContext)
@@ -26,8 +22,10 @@ export const Behandling = () => {
   useEffect(() => {
     if (match?.params.behandlingId) {
       hentBehandling(match.params.behandlingId).then((response: IApiResponse<IDetaljertBehandling>) => {
-        ctx.dispatch(addBehandlingAction(response.data))
-        setLoaded(true)
+        if(response.data) {
+          ctx.dispatch(addBehandlingAction(response.data))
+          setLoaded(true)
+        }
       })
     }
   }, [match?.params.behandlingId])

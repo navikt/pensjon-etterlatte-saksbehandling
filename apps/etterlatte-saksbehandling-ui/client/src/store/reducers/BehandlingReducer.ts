@@ -327,6 +327,8 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   familieforhold: undefined,
 }
 
+export const addBehandlingAction = (data: IDetaljertBehandling) => ({ type: 'add_behandling', data });
+
 export const behandlingReducer = (state = detaljertBehandlingInitialState, action: IAction): any => {
   switch (action.type) {
     case 'add_behandling':

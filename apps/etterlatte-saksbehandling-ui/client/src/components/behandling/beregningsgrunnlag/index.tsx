@@ -7,10 +7,11 @@ import { Soesken } from '../soeknadsoversikt/familieforhold/personer/Soesken'
 import { AppContext } from '../../../store/AppContext'
 import styled from 'styled-components'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { lagreSoeskenMedIBeregning } from '../../../shared/api/behandling'
+import { hentBehandling, lagreSoeskenMedIBeregning } from '../../../shared/api/behandling'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { Controller, useForm } from 'react-hook-form'
 import { formatterStringDato } from '../../../utils/formattering'
+import { addBehandlingAction } from "../../../store/reducers/BehandlingReducer";
 
 interface SoeskenMedIBeregning {
   foedselsnummer: string
@@ -19,7 +20,8 @@ interface SoeskenMedIBeregning {
 
 const Beregningsgrunnlag = () => {
   const {next} = useBehandlingRoutes()
-  const behandling = useContext(AppContext).state.behandlingReducer
+  const ctx = useContext(AppContext)
+  const behandling = ctx.state.behandlingReducer
 
   if (behandling.kommerSoekerTilgode == null || behandling.familieforhold?.avdoede == null) {
     return <div style={{color: 'red'}}>Familieforhold kan ikke hentes ut</div>
@@ -61,7 +63,15 @@ const Beregningsgrunnlag = () => {
           if (formValues.beregningsgrunnlag.length !== 0) {
             await lagreSoeskenMedIBeregning(behandling.id, formValues.beregningsgrunnlag)
           }
-          next()
+          await hentBehandling(behandling.id).then((response) => {
+              if (response.status === 200 && response.data) {
+                  ctx.dispatch(addBehandlingAction(response.data))
+                  next()
+              }
+              else {
+                  console.error({response})
+              }
+          })
         })}
       >
         <Barn person={behandling.kommerSoekerTilgode.familieforhold.soeker} doedsdato={doedsdato}/>

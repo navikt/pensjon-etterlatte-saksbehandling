@@ -10,8 +10,10 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.http.auth.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.mustache.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -46,6 +48,8 @@ class OpprettSoeknadFeature(val config: Config, val httpClient: HttpClient) : Te
                 try {
                     val res: String = try {
                         // todo: tester ut integrasjon mot Dolly.
+
+                        logger.info(getAccessToken(call))
                         val httpClient = httpClient()
                         val azureAdClient = AzureAdClient(config, httpClient)
                         val token = azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))
@@ -382,3 +386,13 @@ private fun opprettSkjemaInfo(
     }
 """.trimIndent()
 
+fun getAccessToken(call: ApplicationCall): String {
+    val authHeader = call.request.parseAuthorizationHeader()
+    if (!(authHeader == null
+                || authHeader !is HttpAuthHeader.Single
+                || authHeader.authScheme != "Bearer")
+    ) {
+        return authHeader.blob
+    }
+    throw Exception("Missing authorization header")
+}

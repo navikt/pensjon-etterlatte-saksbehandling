@@ -19,11 +19,8 @@
     </div>
 </div>
 
-{{#if gruppeId}}
-    <button type="button" onclick="hentFamilie()" class="btn btn-primary">Opprett familie i gruppe {{gruppeId}}</button>
-{{else}}
-    <div>Mangler gruppe, lag en på dolly.com</div>
-{{/if}}
+<button type="button" onclick="hentFamilie()" class="btn btn-primary" id="btnOpprettFamilie">Opprett familie i gruppe</button>
+
 
 <div class="row justify-content-center gy-5">
     <div class="col-12 col-md-6">
@@ -83,8 +80,13 @@
 
 <script>
 
+    const opprettBtn = document.querySelector('#btnOpprettFamilie')
+
+    if (!"{{gruppeId}}") opprettBtn.disabled = true
+
     function hentFamilie() {
         console.log("Henter familie")
+        console.log("{{gruppeId}}")
 
         try {
             fetch('dolly/hent-familie').then(res => res.json()).then(data => console.log(data))

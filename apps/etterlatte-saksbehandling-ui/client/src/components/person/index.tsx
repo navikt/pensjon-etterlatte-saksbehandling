@@ -9,6 +9,7 @@ import { Dokumentoversikt } from './dokumentoversikt'
 import { Saksoversikt } from './saksoversikt'
 import { Dokumenter, IPersonResult } from './typer'
 import { IApiResponse } from "../../shared/api/types";
+import Spinner from "../../shared/Spinner";
 
 const testDokumenter: Dokumenter = {
   brev: [{
@@ -23,7 +24,7 @@ const testDokumenter: Dokumenter = {
 
 export const Person = () => {
   const [personData, setPersonData] = useState<IPersonResult | undefined>(undefined)
-  const [loaded, setLoaded] = useState<boolean>(false)
+  const [lastet, setLastet] = useState<boolean>(false)
 
   const match = useParams<{fnr: string}>()
 
@@ -31,7 +32,7 @@ export const Person = () => {
     if (match.fnr) {
       getPerson(match.fnr).then((result: IApiResponse<IPersonResult>) => {
         setPersonData(result?.data)
-        setLoaded(true)
+        setLastet(true)
       })
     }
   }, [])
@@ -42,7 +43,8 @@ export const Person = () => {
   return (
     <>
       {personInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={personInfo}/>}
-      {loaded && (
+      <Spinner visible={!lastet} label={"Laster"}/>
+      {lastet && (
         <Container>
           <Tabs>
             <Tlist>

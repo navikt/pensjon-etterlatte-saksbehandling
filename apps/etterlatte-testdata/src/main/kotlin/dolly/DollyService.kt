@@ -1,6 +1,8 @@
 package dolly
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.logger
 
 class DollyService(
     private val dollyClient: DollyClient
@@ -12,10 +14,16 @@ class DollyService(
      * Returnerer ID-en på testgruppen dersom den eksisterer. Hvis ikke må gruppen opprettes manuelt.
      */
     fun hentTestGruppe(username: String, accessToken: String): Long? = runBlocking {
-        val bruker = dollyClient.hentDollyBrukere(accessToken)
+        val brukere = dollyClient.hentDollyBrukere(accessToken)
+
+        logger.info(brukere.toJson())
+
+        val bruker = brukere
             .filter { bruker -> bruker.brukerId != null }
             .find { it.epost == username }
             ?: throw Exception("Bruker med epost = $username finnes ikke i Dolly.")
+
+        logger.info("Bruker: ", bruker.toJson())
 
         dollyClient.hentBrukersGrupper(bruker.brukerId!!, accessToken)
             .find { it.navn == testdataGruppe.navn }?.id

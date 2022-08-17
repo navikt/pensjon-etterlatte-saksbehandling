@@ -3,9 +3,8 @@ import { useState } from 'react'
 import { genererPdf } from '../../../shared/api/brev'
 import styled from 'styled-components'
 import { Delete, Findout, Notes, Success } from '@navikt/ds-icons'
-import {PdfVisning} from "./pdf-visning";
-import Spinner from "../../../shared/Spinner";
-
+import { PdfVisning } from './pdf-visning'
+import Spinner from '../../../shared/Spinner'
 
 const ButtonRow = styled.div`
   background: white;
@@ -28,7 +27,6 @@ export default function BrevModal({
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [hasLoaded, setHasLoaded] = useState<boolean>(false)
 
-
   const isDone = ['FERDIGSTILT', 'JOURNALFOERT', 'DISTRIBUERT'].includes(brev.status)
 
   const open = () => {
@@ -50,16 +48,15 @@ export default function BrevModal({
 
   return (
     <>
-        <Button variant={(isDone || brev.erVedtaksbrev) ? 'secondary' : 'primary'} size={'small'} onClick={open}>
-          {(isDone || brev.erVedtaksbrev) ? <Findout/> : <Notes/>}
+      <Button variant={isDone || brev.erVedtaksbrev ? 'secondary' : 'primary'} size={'small'} onClick={open}>
+        {isDone || brev.erVedtaksbrev ? <Findout /> : <Notes />}
       </Button>
       &nbsp;&nbsp;
-        {(!isDone && !brev.erVedtaksbrev) && (
-      <Button variant={'danger'} size={'small'} disabled={isDone} onClick={slettBrev}>
-        <Delete />
-      </Button>
-        )}
-
+      {!isDone && !brev.erVedtaksbrev && (
+        <Button variant={'danger'} size={'small'} disabled={isDone} onClick={slettBrev}>
+          <Delete />
+        </Button>
+      )}
       <Modal open={isOpen} onClose={() => setIsOpen(false)}>
         <Modal.Content>
           <h2>{brev.tittel}</h2>
@@ -74,10 +71,10 @@ export default function BrevModal({
 
           <ButtonRow>
             <Button variant={'secondary'} onClick={() => setIsOpen(false)}>
-                {(isDone || brev.erVedtaksbrev) ? 'Lukk' : 'Avbryt'}
+              {isDone || brev.erVedtaksbrev ? 'Lukk' : 'Avbryt'}
             </Button>
 
-              {(!isDone && !brev.erVedtaksbrev) && (
+            {!isDone && !brev.erVedtaksbrev && (
               <>
                 &nbsp;&nbsp;
                 <Button variant={'primary'} onClick={ferdigstillBrev}>

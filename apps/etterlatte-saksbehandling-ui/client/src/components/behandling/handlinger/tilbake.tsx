@@ -4,7 +4,7 @@ import { handlinger } from './typer'
 
 export const Tilbake = () => {
   const { back, firstPage } = useBehandlingRoutes()
- 
+
   return (
     <>
       {!firstPage && (
@@ -15,4 +15,3 @@ export const Tilbake = () => {
     </>
   )
 }
-

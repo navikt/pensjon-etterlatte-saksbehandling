@@ -1,11 +1,16 @@
 import { Adresse } from './Adresse'
 import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
 import {
-  IKommerSoekerTilgode, ISvar, KriterieOpplysningsType, Kriterietype, VilkaarsType, VurderingsResultat
+  IKommerSoekerTilgode,
+  ISvar,
+  KriterieOpplysningsType,
+  Kriterietype,
+  VilkaarsType,
+  VurderingsResultat,
 } from '../../../../../store/reducers/BehandlingReducer'
 import { InfobokserWrapper, Header, InfoWrapper, SoeknadOversiktWrapper, VurderingsWrapper } from '../../styled'
-import { hentKriterierMedOpplysning } from "../../../felles/utils";
-import { hentKommerBarnetTilgodeTekst, hentKommerBarnetTilgodeVurderingsTekst } from "../../utils";
+import { hentKriterierMedOpplysning } from '../../../felles/utils'
+import { hentKommerBarnetTilgodeTekst, hentKommerBarnetTilgodeVurderingsTekst } from '../../utils'
 
 export const OversiktKommerSoekerTilgode = ({
   kommerSoekerTilgode,
@@ -18,22 +23,27 @@ export const OversiktKommerSoekerTilgode = ({
   const barnIngenUtland = vilkaar?.find((vilkaar) => vilkaar.navn === VilkaarsType.BARN_INGEN_OPPGITT_UTLANDSADRESSE)
   const sammeAdresseAvdoed = vilkaar?.find((vilkaar) => vilkaar.navn === VilkaarsType.BARN_BOR_PAA_AVDOEDES_ADRESSE)
   const saksbehandlerVurdering = vilkaar?.find((vilkaar) => vilkaar.navn === VilkaarsType.SAKSBEHANDLER_RESULTAT)
-  const saksbehandlerOpplysning = hentKriterierMedOpplysning(saksbehandlerVurdering,
+  const saksbehandlerOpplysning = hentKriterierMedOpplysning(
+    saksbehandlerVurdering,
     Kriterietype.SAKSBEHANDLER_RESULTAT,
     KriterieOpplysningsType.SAKSBEHANDLER_RESULTAT
   )
-  const saksbehandlerResultat = saksbehandlerOpplysning?.opplysning?.svar === ISvar.JA ? VurderingsResultat.OPPFYLT :
-    VurderingsResultat.IKKE_OPPFYLT
+  const saksbehandlerResultat =
+    saksbehandlerOpplysning?.opplysning?.svar === ISvar.JA
+      ? VurderingsResultat.OPPFYLT
+      : VurderingsResultat.IKKE_OPPFYLT
 
-  const kommerBarnetTilgodeTekst = hentKommerBarnetTilgodeTekst(sammeAdresse?.resultat,
+  const kommerBarnetTilgodeTekst = hentKommerBarnetTilgodeTekst(
+    sammeAdresse?.resultat,
     barnIngenUtland?.resultat,
     sammeAdresseAvdoed?.resultat,
     saksbehandlerOpplysning ? saksbehandlerResultat : undefined
   )
 
-  const kommerBarnetTilgodeVurderingsTekst = hentKommerBarnetTilgodeVurderingsTekst(sammeAdresse?.resultat,
+  const kommerBarnetTilgodeVurderingsTekst = hentKommerBarnetTilgodeVurderingsTekst(
+    sammeAdresse?.resultat,
     barnIngenUtland?.resultat,
-    sammeAdresseAvdoed?.resultat,
+    sammeAdresseAvdoed?.resultat
   )
 
   return (
@@ -45,7 +55,8 @@ export const OversiktKommerSoekerTilgode = ({
             <InfoWrapper>
               <Adresse
                 resultat={kommerSoekerTilgode.kommerSoekerTilgodeVurdering.resultat}
-                tekst={kommerBarnetTilgodeTekst}/>
+                tekst={kommerBarnetTilgodeTekst}
+              />
             </InfoWrapper>
           </InfobokserWrapper>
           <VurderingsWrapper>
@@ -56,7 +67,7 @@ export const OversiktKommerSoekerTilgode = ({
           </VurderingsWrapper>
         </SoeknadOversiktWrapper>
       ) : (
-        <div style={{color: 'red'}}>Kunne ikke hente ut data om pensjon kommer barnet tilgode</div>
+        <div style={{ color: 'red' }}>Kunne ikke hente ut data om pensjon kommer barnet tilgode</div>
       )}
     </>
   )

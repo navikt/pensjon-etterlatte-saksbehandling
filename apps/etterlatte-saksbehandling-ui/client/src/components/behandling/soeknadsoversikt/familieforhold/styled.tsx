@@ -31,7 +31,7 @@ export const PersonHeader = styled.div`
     margin-left: 0.5em;
     margin-right: 0.7em;
   }
-  
+
   .personInfo {
     font-weight: normal;
   }

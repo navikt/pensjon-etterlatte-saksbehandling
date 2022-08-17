@@ -1,6 +1,6 @@
 import { IApiResponse } from './types'
 
-const path = process.env.REACT_APP_VEDTAK_URL;
+const path = process.env.REACT_APP_VEDTAK_URL
 
 console.log('path', path)
 

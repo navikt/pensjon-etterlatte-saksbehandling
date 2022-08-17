@@ -1,4 +1,4 @@
-import {IBehandlingStatus, IHendelse} from '../../../store/reducers/BehandlingReducer'
+import { IBehandlingStatus, IHendelse } from '../../../store/reducers/BehandlingReducer'
 
 export interface IBehandlingInfo {
   type: string

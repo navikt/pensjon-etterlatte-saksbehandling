@@ -12,7 +12,6 @@ import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.http.auth.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -39,7 +38,6 @@ import testdata.features.SlettsakFeature
 import testdata.features.dolly.DollyFeature
 import testdata.features.egendefinert.EgendefinertMeldingFeature
 import testdata.features.index.IndexFeature
-import testdata.features.soeknad.OpprettSoeknadFeature
 import testdata.features.standardmelding.StandardMeldingFeature
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 
@@ -124,26 +122,21 @@ private fun Route.api() {
     }
 }
 
-private fun httpClient() = HttpClient(OkHttp) {
+fun httpClient() = HttpClient(OkHttp) {
     expectSuccess = true
     install(ClientContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
     defaultRequest {
         header(X_CORRELATION_ID, getCorrelationId())
+        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+        header("Nav-Consumer-Id", "etterlatte-testdata")
+        header("Nav-Call-Id", getCorrelationId())
     }
 }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 
 fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<TokenValidationContextPrincipal>()
     ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("NAVident")?.toString()
 
-fun getAccessToken(call: ApplicationCall): String {
-    val authHeader = call.request.parseAuthorizationHeader()
-    if (!(authHeader == null
-                || authHeader !is HttpAuthHeader.Single
-                || authHeader.authScheme != "Bearer")
-    ) {
-        return authHeader.blob
-    }
-    throw Exception("Missing authorization header")
-}
+fun PipelineContext<Unit, ApplicationCall>.usernameFraToken() = call.principal<TokenValidationContextPrincipal>()
+    ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("preferred_username")?.toString()

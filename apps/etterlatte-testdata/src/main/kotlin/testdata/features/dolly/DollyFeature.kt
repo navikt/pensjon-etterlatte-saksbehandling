@@ -113,8 +113,8 @@ class DollyFeature(val config: Config) : TestDataFeature {
                     logger.error("Klarte ikke hente mal", ex)
                     ex.toString() + ex.stackTraceToString()
                 }
-                
-                call.respond(Familie(3,"test").toJson())
+
+                call.respond(res.toJson())
             }
         }
 }

@@ -9,8 +9,12 @@
         "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": ["22128202440"],
-            "foreldre": ["22128202440"],
+            "ansvarligeForeldre": [
+              "22128202440"
+            ],
+            "foreldre": [
+              "22128202440"
+            ],
             "barn": null
           },
           "innsender": {
@@ -30,8 +34,12 @@
         "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": ["22128202440"],
-            "foreldre": ["22128202440"],
+            "ansvarligeForeldre": [
+              "22128202440"
+            ],
+            "foreldre": [
+              "22128202440"
+            ],
             "barn": null
           },
           "innsender": {
@@ -99,19 +107,38 @@
       {
         "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
         "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
+        "utfall": "OPPFYLT",
         "kriterier": [
           {
-            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD",
+            "navn": "AVDOED_NORSK_STATSBORGER",
             "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
             "basertPaaOpplysninger": [
               {
-                "id": "d0669798-fb9b-45b7-8c95-5b7772dc7a51",
-                "kriterieOpplysningsType": "DOEDSDATO",
+                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "kriterieOpplysningsType": "STATSBORGERSKAP",
                 "kilde": null,
                 "opplysning": null
-              },
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_INGEN_INN_ELLER_UTVANDRING",
+            "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
+            "basertPaaOpplysninger": [
               {
-                "id": "551f5aeb-7ea7-4223-8dac-e735eb5ef840",
+                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "kriterieOpplysningsType": "UTLAND",
+                "kilde": null,
+                "opplysning": null
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "df53e17e-d725-433d-978c-b9731d3a2295",
                 "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
                 "kilde": {
                   "fnr": "03108718357",
@@ -126,39 +153,129 @@
             ]
           },
           {
-            "navn": "AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR",
-            "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
+            "navn": "AVDOED_KUN_NORSKE_BOSTEDSADRESSER",
+            "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "d0669798-fb9b-45b7-8c95-5b7772dc7a51",
+                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
                 "kriterieOpplysningsType": "ADRESSER",
-                "kilde": null,
-                "opplysning": null
-              },
-              {
-                "id": "d0669798-fb9b-45b7-8c95-5b7772dc7a51",
-                "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-06-20T13:03:15.784239934Z",
+                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": null
+                "opplysning": {
+                  "bostedadresse": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Bøveien 937",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "8475",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "1999-01-01T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "kriterieOpplysningsType": "ADRESSER",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "bostedadresse": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Bøveien 937",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "8475",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "1999-01-01T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ],
+                  "oppholdadresse": [],
+                  "kontaktadresse": []
+                }
               },
               {
-                "id": "2c833602-7564-48dc-b6d5-cb48030971ec",
-                "kriterieOpplysningsType": "ADRESSE_GAPS",
+                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
-                  "navn": "vilkaarskomponenten",
-                  "type": "vilkaarskomponenten"
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
                 },
-                "opplysning": []
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_KUN_NORSKE_OPPHOLDSSADRESSER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "kriterieOpplysningsType": "ADRESSER",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": [
+                  []
+                ]
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_KUN_NORSKE_KONTAKTADRESSER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "kriterieOpplysningsType": "ADRESSER",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": [
+                  []
+                ]
               }
             ]
           }
         ],
-        "vurdertDato": "2022-03-30T14:36:17.984583465Z"
+        "vurdertDato": "2022-08-15T09:27:46.092452916"
       },
       {
         "navn": "BARNETS_MEDLEMSKAP",

@@ -36,6 +36,7 @@ import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import testdata.features.SlettsakFeature
+import testdata.features.dolly.DollyFeature
 import testdata.features.egendefinert.EgendefinertMeldingFeature
 import testdata.features.index.IndexFeature
 import testdata.features.soeknad.OpprettSoeknadFeature
@@ -67,7 +68,8 @@ val features: List<TestDataFeature> = listOf(
     EgendefinertMeldingFeature,
     StandardMeldingFeature,
     SlettsakFeature,
-    OpprettSoeknadFeature(ConfigFactory.load(), httpClient()),
+    // OpprettSoeknadFeature(ConfigFactory.load(), httpClient()),
+    DollyFeature(ConfigFactory.load())
 )
 
 fun main() {

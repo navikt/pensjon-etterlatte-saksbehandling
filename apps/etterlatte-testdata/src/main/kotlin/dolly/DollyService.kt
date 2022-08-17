@@ -13,10 +13,11 @@ class DollyService(
      */
     fun hentTestGruppe(username: String, accessToken: String): Long? = runBlocking {
         val bruker = dollyClient.hentDollyBrukere(accessToken)
+            .filter { bruker -> bruker.brukerId != null }
             .find { it.epost == username }
             ?: throw Exception("Bruker med epost = $username finnes ikke i Dolly.")
 
-        dollyClient.hentBrukersGrupper(bruker.brukerId, accessToken)
+        dollyClient.hentBrukersGrupper(bruker.brukerId!!, accessToken)
             .find { it.navn == testdataGruppe.navn }?.id
     }
 

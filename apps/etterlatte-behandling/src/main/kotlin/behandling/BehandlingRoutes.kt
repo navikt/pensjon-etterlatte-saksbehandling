@@ -47,7 +47,8 @@ fun Route.behandlingRoutes(
                             it.status,
                             if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
                             it.behandlingOpprettet,
-                            it.type
+                            it.type,
+                            if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD"
                         )
                     }
                     .let { BehandlingListe(it) }
@@ -155,7 +156,8 @@ fun Route.behandlingRoutes(
                                 it.status,
                                 if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
                                 it.behandlingOpprettet,
-                                it.type
+                                it.type,
+                                if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD"
                             )
                         }
                         .let { BehandlingListe(it) }
@@ -305,7 +307,8 @@ fun Route.behandlingRoutes(
                             it.status,
                             if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
                             it.behandlingOpprettet,
-                            it.type
+                            it.type,
+                            if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD"
                         )
                     }
                     .let { BehandlingListe(it) }

@@ -37,12 +37,12 @@ internal class OppgaveServiceTest {
                 it.toLong())
         })
         coEvery { behandlingKlient.hentBehandlingerForSak(1, accessToken) } returns BehandlingListe(listOf(
-            BehandlingSammendrag(UUID.randomUUID(), 1, null, null, null, null)
+            BehandlingSammendrag(UUID.randomUUID(), 1, null, null, null, null, null)
         ))
         coEvery { behandlingKlient.hentBehandlingerForSak(4, accessToken) } returns BehandlingListe(emptyList())
         coEvery { behandlingKlient.hentBehandlingerForSak(8, accessToken) } returns BehandlingListe(listOf(
-            BehandlingSammendrag(UUID.randomUUID(), 8, null, null, null, null),
-            BehandlingSammendrag(UUID.randomUUID(), 8, null, null, null, null)
+            BehandlingSammendrag(UUID.randomUUID(), 8, null, null, null, null, null),
+            BehandlingSammendrag(UUID.randomUUID(), 8, null, null, null, null, null)
         ))
         val resultat = runBlocking { service.hentAlleOppgaver(accessToken) }
 

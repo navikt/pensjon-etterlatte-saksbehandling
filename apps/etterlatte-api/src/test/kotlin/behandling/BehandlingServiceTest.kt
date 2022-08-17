@@ -82,7 +82,7 @@ internal class BehandlingServiceTest {
 
     @Test
     fun hentBehandlingerForSak() {
-        val behandling = BehandlingSammendrag(UUID.randomUUID(), 4, null, null, null, null)
+        val behandling = BehandlingSammendrag(UUID.randomUUID(), 4, null, null, null, null, null)
         coEvery { behandlingKlient.hentBehandlingerForSak(4, accessToken) } returns BehandlingListe(listOf(behandling))
 
         val respons = runBlocking { service.hentBehandlingerForSak(4, accessToken) }

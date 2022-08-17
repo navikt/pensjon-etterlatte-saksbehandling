@@ -13,6 +13,7 @@ data class BehandlingSammendrag(
     val soeknadMottattDato: LocalDateTime?,
     val behandlingOpprettet: LocalDateTime?,
     val behandlingType: BehandlingType?,
+    val aarsak: String?,
 )
 
 data class DetaljertBehandling(

@@ -12,14 +12,10 @@ export const Saksoversikt = ({
 }) => {
   const navigate = useNavigate()
   const behandlinger = behandlingliste ? behandlingliste : []
-  console.log('behandlingliste', behandlingliste)
+
   const sortertListe = behandlinger.sort((a, b) => new Date(b.behandlingOpprettet!) > new Date(a.behandlingOpprettet!) ?
     1 : -1)
-
   const sisteBehandling = sortertListe[0]
-  console.log(sortertListe)
-  console.log(upperCaseFirst(sisteBehandling.behandlingType))
-
 
   const goToBehandling = (behandlingsId: string) => {
     navigate(`/behandling/${behandlingsId}/soeknadsoversikt`)

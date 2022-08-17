@@ -2,6 +2,9 @@ package testdata.features.dolly
 
 
 import com.typesafe.config.Config
+import dolly.DollyClient
+import dolly.DollyClientImpl
+import dolly.DollyService
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
@@ -23,6 +26,11 @@ import no.nav.etterlatte.logger
 import java.util.*
 
 class DollyFeature(val config: Config) : TestDataFeature {
+
+    val dollyService = DollyService(
+        dollyClient = DollyClientImpl(config, httpClient())
+    )
+
     override val beskrivelse: String
         get() = "Opprett søknad"
     override val path: String
@@ -30,11 +38,20 @@ class DollyFeature(val config: Config) : TestDataFeature {
     override val routes: Route.() -> Unit
         get() = {
             get {
+
+                // Sjekk om gruppe finnes
+                val httpClient = httpClient()
+                val azureAdClient = AzureAdClient(config, httpClient)
+                val token = azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))
+
+                val gruppeId = dollyService.hentTestGruppe("emil.schroder@nav.no", token.accessToken)
+
                 call.respond(
                     MustacheContent(
                         "soeknad/dolly.hbs", mapOf(
                             "beskrivelse" to beskrivelse,
-                            "path" to path
+                            "path" to path,
+                            "gruppeId" to gruppeId
                         )
                     )
                 )
@@ -74,7 +91,7 @@ class DollyFeature(val config: Config) : TestDataFeature {
             get("hent-familie") {
                 val res: String = try {
                     // todo: tester ut integrasjon mot Dolly.
-                    val httpClient = testdata.features.dolly.httpClient()
+                    val httpClient = httpClient()
                     val azureAdClient = AzureAdClient(config, httpClient)
                     val token = azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))
 

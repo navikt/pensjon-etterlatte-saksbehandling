@@ -19,7 +19,11 @@
     </div>
 </div>
 
-<button type="button" onclick="hentFamilie()" class="btn btn-primary">Opprett familie</button>
+{{#if gruppeId}}
+    <button type="button" onclick="hentFamilie()" class="btn btn-primary">Opprett familie i gruppe {{gruppeId}}</button>
+{{else}}
+    <div>Mangler gruppe, lag en på dolly.com</div>
+{{/if}}
 
 <div class="row justify-content-center gy-5">
     <div class="col-12 col-md-6">
@@ -78,6 +82,9 @@
 </form>
 
 <script>
+
+    console.log(path)
+
     function hentFamilie() {
         console.log("Henter familie")
 

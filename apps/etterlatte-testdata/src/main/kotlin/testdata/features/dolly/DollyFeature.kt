@@ -26,11 +26,6 @@ import no.nav.etterlatte.logger
 import java.util.*
 
 class DollyFeature(val config: Config) : TestDataFeature {
-
-    val dollyService = DollyService(
-        dollyClient = DollyClientImpl(config, httpClient())
-    )
-
     override val beskrivelse: String
         get() = "Opprett søknad"
     override val path: String
@@ -38,6 +33,9 @@ class DollyFeature(val config: Config) : TestDataFeature {
     override val routes: Route.() -> Unit
         get() = {
             get {
+                val dollyService = DollyService(
+                    dollyClient = DollyClientImpl(config, httpClient())
+                )
 
                 // Sjekk om gruppe finnes
                 val httpClient = httpClient()

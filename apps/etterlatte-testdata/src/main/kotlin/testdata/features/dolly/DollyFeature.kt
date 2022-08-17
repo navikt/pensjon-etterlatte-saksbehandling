@@ -43,7 +43,7 @@ class DollyFeature(val config: Config) : TestDataFeature {
                 val azureAdClient = AzureAdClient(config, httpClient)
                 val token = azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))
 
-                val gruppeId = dollyService.hentTestGruppe("emil.schroder@nav.no", token.accessToken)
+                val gruppeId = dollyService.hentTestGruppe("Emil.Schroder@nav.no", token.accessToken)
 
 
 

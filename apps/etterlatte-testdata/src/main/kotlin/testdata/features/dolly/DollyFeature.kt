@@ -45,7 +45,7 @@ class DollyFeature(val config: Config) : TestDataFeature {
 
                 val gruppeId = dollyService.hentTestGruppe("Emil.Schroder@nav.no", token.accessToken)
 
-
+                logger.info(gruppeId.toString())
 
                 call.respond(
                     MustacheContent(

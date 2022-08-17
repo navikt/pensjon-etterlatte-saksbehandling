@@ -8,7 +8,10 @@ class DollyService(
     // val scopes = listOf("api://${config.getString("dolly.client.id")}/.default")
     // val accessToken = azureAdClient.getAccessTokenForResource(scopes).accessToken
 
-    fun finnesTestGruppe(username: String, accessToken: String): Long? = runBlocking {
+    /**
+     * Returnerer ID-en på testgruppen dersom den eksisterer. Hvis ikke må gruppen opprettes manuelt.
+     */
+    fun hentTestGruppe(username: String, accessToken: String): Long? = runBlocking {
         val bruker = dollyClient.hentDollyBrukere(accessToken)
             .find { it.epost == username }
             ?: throw Exception("Bruker med epost = $username finnes ikke i Dolly.")
@@ -17,8 +20,11 @@ class DollyService(
             .find { it.navn == testdataGruppe.navn }?.id
     }
 
-    fun opprettBestilling(gruppeId: Long, accessToken: String): BestillingStatus = runBlocking {
-        dollyClient.opprettBestilling("", gruppeId, accessToken)
+    /**
+     * Oppretter en ny bestilling i gruppen som er spesifisert.
+     */
+    fun opprettBestilling(bestilling: String, gruppeId: Long, accessToken: String): BestillingStatus = runBlocking {
+        dollyClient.opprettBestilling(bestilling, gruppeId, accessToken)
     }
 
     companion object {

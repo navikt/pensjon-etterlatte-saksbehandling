@@ -33,6 +33,7 @@ class DollyFeature(val config: Config) : TestDataFeature {
     override val routes: Route.() -> Unit
         get() = {
             get {
+                /*
                 val dollyService = DollyService(
                     dollyClient = DollyClientImpl(config, httpClient())
                 )
@@ -44,12 +45,13 @@ class DollyFeature(val config: Config) : TestDataFeature {
 
                 val gruppeId = dollyService.hentTestGruppe("emil.schroder@nav.no", token.accessToken)
 
+                * */
                 call.respond(
                     MustacheContent(
                         "soeknad/dolly.hbs", mapOf(
                             "beskrivelse" to beskrivelse,
                             "path" to path,
-                            "gruppeId" to gruppeId
+                            "gruppeId" to "gruppeId"
                         )
                     )
                 )

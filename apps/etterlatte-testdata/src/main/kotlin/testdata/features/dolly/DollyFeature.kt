@@ -1,8 +1,6 @@
 package testdata.features.dolly
 
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.typesafe.config.Config
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -14,16 +12,14 @@ import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.mustache.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import no.nav.etterlatte.*
-import no.nav.etterlatte.batch.JsonMessage
+import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import java.time.OffsetDateTime
+import no.nav.etterlatte.logger
 import java.util.*
 
 class DollyFeature(val config: Config) : TestDataFeature {
@@ -81,6 +77,8 @@ class DollyFeature(val config: Config) : TestDataFeature {
                     val httpClient = testdata.features.dolly.httpClient()
                     val azureAdClient = AzureAdClient(config, httpClient)
                     val token = azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))
+
+                    logger.info("client access token: " + token.accessToken)
 
                     val res = httpClient.get("https://dolly-backend.dev-fss-pub.nais.io/api/v1/bruker") {
                         header("Authorization", "Bearer ${token.accessToken}")

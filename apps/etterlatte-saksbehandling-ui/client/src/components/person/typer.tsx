@@ -1,16 +1,6 @@
 import { IBehandlingStatus } from "../../store/reducers/BehandlingReducer";
 import { IBehandlingsType } from "../behandling/behandlingsType";
 
-export interface Behandling {
-  id: number
-  opprettet: string
-  type: string
-  årsak: string
-  status: string
-  vedtaksdato: string
-  resultat: string
-}
-
 
 export interface Dokument {
   dato: string
@@ -46,5 +36,10 @@ export interface IBehandlingsammendrag {
   status: IBehandlingStatus,
   soeknadMottattDato: string,
   behandlingOpprettet: string,
-  behandlingType: IBehandlingsType
+  behandlingType: IBehandlingsType,
+  aarsak: AarsaksTyper
+}
+
+export enum AarsaksTyper {
+  SOEKER_DOD = 'SOEKER_DOD', MANUELT_OPPHOER = 'MANUELT_OPPHOER', SOEKNAD = 'SOEKNAD',
 }

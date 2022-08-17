@@ -1,6 +1,6 @@
 import { Table } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { IBehandlingsammendrag } from './typer'
+import { AarsaksTyper, IBehandlingsammendrag } from './typer'
 import { formatterStringDato, upperCaseFirst } from "../../utils/formattering";
 
 const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Vedtaksdato', 'Resultat']
@@ -29,7 +29,7 @@ export const Saksliste = ({
                 key={`data${behandling.behandlingOpprettet}`}>{formatterStringDato(behandling.behandlingOpprettet)}</Table.DataCell>
               <Table.DataCell
                 key={`data${behandling.behandlingType}`}>{upperCaseFirst(behandling.behandlingType)}</Table.DataCell>
-              <Table.DataCell key={'aarsak'}>Årsak her?</Table.DataCell>
+              <Table.DataCell key={`data${behandling.aarsak}`}>{mapAarrsak(behandling.aarsak)}</Table.DataCell>
               <Table.DataCell key={`data${behandling.status}`}>{upperCaseFirst(behandling.status)}</Table.DataCell>
               <Table.DataCell key={'vedtaksdato'}>Vedtaksdato her</Table.DataCell>
               <Table.DataCell key={i}>
@@ -41,6 +41,18 @@ export const Saksliste = ({
       </Table>
     </div>
   )
+}
+
+function mapAarrsak(aarsak: AarsaksTyper) {
+  switch (aarsak) {
+    case AarsaksTyper.MANUELT_OPPHOER:
+      return 'Manuelt opphør'
+    case AarsaksTyper.SOEKER_DOD:
+      return 'Søker er død'
+    case AarsaksTyper.SOEKNAD:
+      return 'Søknad'
+  }
+
 }
 
 export const Link = styled.div`

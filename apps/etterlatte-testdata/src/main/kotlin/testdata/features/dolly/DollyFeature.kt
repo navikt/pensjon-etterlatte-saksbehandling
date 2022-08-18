@@ -26,7 +26,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
 
                 call.respond(
                     MustacheContent(
-                        "soeknad/dolly.hbs", mapOf(
+                        "dolly/dolly.hbs", mapOf(
                             "beskrivelse" to beskrivelse,
                             "path" to path,
                             "gruppeId" to gruppeId

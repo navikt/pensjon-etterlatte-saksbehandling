@@ -13,7 +13,7 @@ import styled from 'styled-components'
 import { useState } from 'react'
 import { EndreVurdering } from './EndreVurdering'
 import { hentKriterierMedOpplysning } from '../../../felles/utils'
-import { formatterStringDato } from '../../../../../utils/formattering'
+import { formaterStringDato } from '../../../../../utils/formattering'
 
 export const KommerBarnetTilGodeVurdering = ({
   kommerSoekerTilgodeVurdering,
@@ -61,7 +61,7 @@ export const KommerBarnetTilGodeVurdering = ({
         <div>
           <VurderingsTitle>{tittel}</VurderingsTitle>
           <Undertekst gray={true}>
-            {typeVurdering} {formatterStringDato(kommerSoekerTilgodeVurdering.vurdertDato)}
+            {typeVurdering} {formaterStringDato(kommerSoekerTilgodeVurdering.vurdertDato)}
           </Undertekst>
           {harSaksbehandlerOpplysning ? (
             <div>

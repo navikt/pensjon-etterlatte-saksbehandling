@@ -6,18 +6,18 @@ export const upperCaseFirst = (string: string): string => {
   return storForbokstav.replace('_', ' ')
 }
 
-export const formatterDato = (dato: Date) => {
+export const formaterDato = (dato: Date) => {
   return format(dato, 'dd.MM.yyyy').toString()
 }
 
-export const formatterStringDato = (dato: string) => {
+export const formaterStringDato = (dato: string) => {
   return format(new Date(dato), 'dd.MM.yyyy').toString()
 }
 
-export const formatterTidspunkt = (dato: Date) => {
+export const formaterTidspunkt = (dato: Date) => {
   return format(dato, 'HH:mm').toString()
 }
 
-export const formatterStringTidspunkt = (dato: string) => {
+export const formaterStringTidspunkt = (dato: string) => {
   return format(new Date(dato), 'HH:mm').toString()
 }

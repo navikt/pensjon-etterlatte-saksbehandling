@@ -2,7 +2,7 @@ import { IBehandlingInfo } from '../../SideMeny/types'
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
 import { useContext } from 'react'
 import { AppContext } from '../../../../store/AppContext'
-import { formatterStringDato, formatterStringTidspunkt } from '../../../../utils/formattering'
+import { formaterStringDato, formaterStringTidspunkt } from '../../../../utils/formattering'
 import { IBehandlingStatus } from '../../../../store/reducers/BehandlingReducer'
 
 export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingInfo }) => {
@@ -22,7 +22,7 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingI
         <UnderOverskrift innvilget={false}>Underkjent</UnderOverskrift>
         {underkjentSiste && (
           <Tekst>
-            {formatterStringDato(underkjentSiste.opprettet)} kl: {formatterStringTidspunkt(underkjentSiste.opprettet)}
+            {formaterStringDato(underkjentSiste.opprettet)} kl: {formaterStringTidspunkt(underkjentSiste.opprettet)}
           </Tekst>
         )}
         <div className="flex">

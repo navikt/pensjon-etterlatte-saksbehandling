@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { IBehandlingStatus } from '../../../../store/reducers/BehandlingReducer'
-import { formatterStringDato, formatterStringTidspunkt } from '../../../../utils/formattering'
+import { formaterStringDato, formaterStringTidspunkt } from '../../../../utils/formattering'
 import { IBehandlingInfo } from '../../SideMeny/types'
 import { useContext } from 'react'
 import { AppContext } from '../../../../store/AppContext'
@@ -20,7 +20,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
   }
 
   const fattetDato = behandlingsInfo.datoFattet
-    ? formatterStringDato(behandlingsInfo.datoFattet) + ' kl. ' + formatterStringTidspunkt(behandlingsInfo.datoFattet)
+    ? formaterStringDato(behandlingsInfo.datoFattet) + ' kl. ' + formaterStringTidspunkt(behandlingsInfo.datoFattet)
     : null
 
   return (
@@ -36,13 +36,13 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         <div>
           <Info>Virkningstidspunkt</Info>
           <Tekst>
-            {behandlingsInfo.virkningsdato ? formatterStringDato(behandlingsInfo.virkningsdato) : 'Ikke satt'}
+            {behandlingsInfo.virkningsdato ? formaterStringDato(behandlingsInfo.virkningsdato) : 'Ikke satt'}
           </Tekst>
         </div>
         <div>
           <Info>Vedtaksdato</Info>
           <Tekst>
-            {behandlingsInfo.datoAttestert ? formatterStringDato(behandlingsInfo.datoAttestert) : 'Ikke satt'}
+            {behandlingsInfo.datoAttestert ? formaterStringDato(behandlingsInfo.datoAttestert) : 'Ikke satt'}
           </Tekst>
         </div>
       </div>

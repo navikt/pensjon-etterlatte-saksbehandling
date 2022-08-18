@@ -25,17 +25,17 @@
     <div class="row justify-content-center gy-5">
         <div class="col-12 col-md-6">
             <div class="alert alert-info">
-                Steg 1: Opprett testpersoner i Dolly
+                Velg testfamilie for søknaden, eller opprett en ny.
             </div>
         </div>
     </div>
 
     <button
         type="button"
-        onclick="hentFamilie()"
+        onclick="opprettFamilie()"
         class="btn btn-primary"
     >
-        Opprett familie i gruppe
+        Opprett ny familie.
     </button>
 
     <div class="row justify-content-center gy-5">
@@ -46,53 +46,6 @@
         </div>
     </div>
 
-    <form action="/{{ path }}" method="post">
-        <div class="mb-3">
-            <label for="key" class="form-label">Nøkkel:</label>
-            <input type="text" name="key" id="key" class="form-control" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="fnrGjenlevende" class="form-label">Gjenlevende (fnr):</label>
-            <input type="tel"
-                   pattern="[0-9]+"
-                   minlength="11"
-                   maxlength="11"
-                   name="fnrGjenlevende"
-                   id="fnrGjenlevende"
-                   class="form-control"
-                   required
-            />
-        </div>
-
-        <div class="mb-3">
-            <label for="fnrAvdoed" class="form-label">Avdød (fnr):</label>
-            <input type="tel"
-                   pattern="[0-9]+"
-                   minlength="11"
-                   maxlength="11"
-                   name="fnrAvdoed"
-                   id="fnrAvdoed"
-                   class="form-control"
-                   required
-            />
-        </div>
-
-        <div class="mb-3">
-            <label for="fnrBarn" class="form-label">Barn (fnr):</label>
-            <input type="tel"
-                   pattern="[0-9]+"
-                   minlength="11"
-                   maxlength="11"
-                   name="fnrBarn"
-                   id="fnrBarn"
-                   class="form-control"
-                   required
-            />
-        </div>
-
-        <button type="submit" class="btn btn-primary">Send</button>
-    </form>
 </div>
 <script>
 
@@ -105,6 +58,14 @@
     } else {
         opprettGruppeInfo.style.visibility = 'hidden'
         mainContent.style.visibility = 'visible'
+    }
+
+    function opprettFamilie() {
+        try {
+            fetch('dolly/opprett-familie').then(res => res.json()).then(data => console.log(data))
+        } catch (e) {
+            console.log(e.message)
+        }
     }
 
 </script>

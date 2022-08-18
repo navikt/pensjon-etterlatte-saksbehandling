@@ -13,7 +13,7 @@
 
 <div class="col-12 col-md-6" id="opprettGruppeInfo">
     <div class="alert alert-warning">
-        For å kunne bruke tjenesten må du først gå inn på Dolly og opprette en gruppe med navn <bold>etterlatte-testdata</bold> <br>
+        For å kunne bruke tjenesten må du først gå inn på Dolly og opprette en gruppe med navn <b>etterlatte-testdata</b> <br>
         Du kan logge inn på Dolly via:
         <a href="https://dolly.ekstern.dev.nav.no/login">
             https://dolly.ekstern.dev.nav.no/login
@@ -22,6 +22,20 @@
 </div>
 
 <div id="main-content">
+
+    <div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Gjenlevende</th>
+                    <th>Avdød</th>
+                    <th>Barn</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
     <div class="row justify-content-center gy-5">
         <div class="col-12 col-md-6">
             <div class="alert alert-info">
@@ -68,6 +82,54 @@
         } catch (e) {
             console.log(e.message)
         }
+    }
+
+    const hentPersoner = async () => {
+        try {
+            const res = await fetch('dolly/hent-personer').then(res => res.json()).then(data => JSON.parse(data))
+            const table = document.querySelector('tbody')
+
+            res.forEach((data) => {
+                const avdoed = data.person.ident
+                const gjenlevende = data.relasjoner[2].relatertPerson.ident
+                const barn = data.relasjoner[0].relatertPerson.ident
+
+                const tableRow = document.createElement('tr')
+
+                const avdoedTableElement = document.createElement('td')
+                const gjenlevendeTableElement = document.createElement('td')
+                const barnTableElement = document.createElement('td')
+                const buttonTableElement = document.createElement('td')
+
+                const button = document.createElement('button')
+                button.classList.add('btn')
+                button.classList.add('btn-primary')
+                button.innerHTML = 'Send inn søknad for denne familien'
+                button.type = 'button'
+                button.onclick = () => sendSoeknad(avdoed, gjenlevende, barn)
+
+                avdoedTableElement.innerHTML = avdoed
+                tableRow.appendChild(avdoedTableElement)
+
+                gjenlevendeTableElement.innerHTML = gjenlevende
+                tableRow.appendChild(gjenlevendeTableElement)
+
+                barnTableElement.innerHTML = barn
+                tableRow.appendChild(barnTableElement)
+
+                buttonTableElement.appendChild(button)
+                buttonTableElement.style.textAlign = 'center'
+                tableRow.appendChild(buttonTableElement)
+
+                table.appendChild(tableRow)
+            })
+        } catch (e) {
+            console.log(e.message)
+        }
+    }
+
+    const sendSoeknad = (avdoed, gjenlevende, barn) => {
+        console.log(`Sender inn søknad for avdød: ${avdoed}, gjenlevende: ${gjenlevende} og barn: ${barn}`)
     }
 
 </script>

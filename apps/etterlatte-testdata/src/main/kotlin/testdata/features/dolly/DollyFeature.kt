@@ -23,27 +23,40 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
             get {
                 val accessToken = getClientAccessToken()
                 val gruppeId = dollyService.hentTestGruppe(usernameFraToken()!!, accessToken)
-                val personer = gruppeId?.let {
-                    try {
-                        dollyService.hentFamilier(gruppeId, accessToken)
-                    } catch (ex: Exception) {
-                        logger.error("Klarte ikke hente familier", ex)
-                        null
-                    }
-                }
-
-                logger.info("Personer: ${personer?.toJson()}} ")
 
                 call.respond(
                     MustacheContent(
                         "soeknad/dolly.hbs", mapOf(
                             "beskrivelse" to beskrivelse,
                             "path" to path,
-                            "gruppeId" to gruppeId,
-                            "personer" to personer?.toJson()
+                            "gruppeId" to gruppeId
                         )
                     )
                 )
+            }
+
+            get("hent-familier") {
+                try {
+                    val accessToken = getClientAccessToken()
+                    val gruppeId = call.request.queryParameters["gruppeId"]!!.toLong()
+
+                    val familier = try {
+                        dollyService.hentFamilier(gruppeId, accessToken)
+                    } catch (ex: Exception) {
+                        logger.error("Klarte ikke hente familier", ex)
+                        emptyList()
+                    }
+
+                    call.respond(familier.toJson())
+                } catch (e: Exception) {
+                    logger.error("En feil har oppstått! ", e)
+                    call.respond(
+                        MustacheContent(
+                            "error.hbs",
+                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString())
+                        )
+                    )
+                }
             }
 
             get("opprett-familie") {

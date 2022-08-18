@@ -13,7 +13,8 @@
 
 <div class="col-12 col-md-6" id="opprettGruppeInfo">
     <div class="alert alert-warning">
-        For å kunne bruke tjenesten må du først gå inn på Dolly og opprette en gruppe med navn <b>etterlatte-testdata</b> <br>
+        For å kunne bruke tjenesten må du først gå inn på Dolly og opprette en gruppe med navn
+        <b>etterlatte-testdata</b> <br>
         Du kan logge inn på Dolly via:
         <a href="https://dolly.ekstern.dev.nav.no/login">
             https://dolly.ekstern.dev.nav.no/login
@@ -26,11 +27,11 @@
     <div>
         <table class="table table-striped">
             <thead>
-                <tr>
-                    <th>Gjenlevende</th>
-                    <th>Avdød</th>
-                    <th>Barn</th>
-                </tr>
+            <tr>
+                <th>Gjenlevende</th>
+                <th>Avdød</th>
+                <th>Barn</th>
+            </tr>
             </thead>
             <tbody></tbody>
         </table>
@@ -45,9 +46,9 @@
     </div>
 
     <button
-        type="button"
-        onclick="opprettFamilie()"
-        class="btn btn-primary"
+            type="button"
+            onclick="opprettFamilie()"
+            class="btn btn-primary"
     >
         Opprett ny familie
     </button>
@@ -72,57 +73,58 @@
     } else {
         opprettGruppeInfo.style.visibility = 'hidden'
         mainContent.style.visibility = 'visible'
+        hentFamilier({{gruppeId}})
     }
-
-    console.log("Personer: {{personer}}")
 
     function opprettFamilie() {
         try {
-            fetch('dolly/opprett-familie').then(res => res.json()).then(data => console.log(data))
+            fetch("dolly/opprett-familie").then(res => res.json()).then(data => console.log(data))
         } catch (e) {
             console.log(e.message)
         }
     }
 
-    if ("{{personer}}") {
-        const table = document.querySelector('tbody')
+    function hentFamilier(gruppeId) {
+        fetch(`dolly/hent-familier?gruppeId=${gruppeId}`).then(res => res.json()).then(data => {
+            console.log(data)
 
-        {{personer}}.forEach((data) => {
-            const avdoed = data.avdoed
-            const gjenlevende = data.gjenlevende
-            const barn = data.barn[0]
+            const table = document.querySelector('tbody')
+            data.forEach((familie) => {
+                const avdoed = familie.avdoed
+                const gjenlevende = familie.gjenlevende
+                const barn = familie.barn[0]
 
-            const tableRow = document.createElement('tr')
+                const tableRow = document.createElement('tr')
 
-            const avdoedTableElement = document.createElement('td')
-            const gjenlevendeTableElement = document.createElement('td')
-            const barnTableElement = document.createElement('td')
-            const buttonTableElement = document.createElement('td')
+                const avdoedTableElement = document.createElement('td')
+                const gjenlevendeTableElement = document.createElement('td')
+                const barnTableElement = document.createElement('td')
+                const buttonTableElement = document.createElement('td')
 
-            const button = document.createElement('button')
-            button.classList.add('btn')
-            button.classList.add('btn-primary')
-            button.innerHTML = 'Send inn søknad for denne familien'
-            button.type = 'button'
-            button.onclick = () => sendSoeknad(avdoed, gjenlevende, barn)
+                const button = document.createElement('button')
+                button.classList.add('btn')
+                button.classList.add('btn-primary')
+                button.innerHTML = 'Send inn søknad for denne familien'
+                button.type = 'button'
+                button.onclick = () => sendSoeknad(avdoed, gjenlevende, barn)
 
-            avdoedTableElement.innerHTML = avdoed
-            tableRow.appendChild(avdoedTableElement)
+                avdoedTableElement.innerHTML = avdoed
+                tableRow.appendChild(avdoedTableElement)
 
-            gjenlevendeTableElement.innerHTML = gjenlevende
-            tableRow.appendChild(gjenlevendeTableElement)
+                gjenlevendeTableElement.innerHTML = gjenlevende
+                tableRow.appendChild(gjenlevendeTableElement)
 
-            barnTableElement.innerHTML = barn
-            tableRow.appendChild(barnTableElement)
+                barnTableElement.innerHTML = barn
+                tableRow.appendChild(barnTableElement)
 
-            buttonTableElement.appendChild(button)
-            buttonTableElement.style.textAlign = 'center'
-            tableRow.appendChild(buttonTableElement)
+                buttonTableElement.appendChild(button)
+                buttonTableElement.style.textAlign = 'center'
+                tableRow.appendChild(buttonTableElement)
 
-            table.appendChild(tableRow)
+                table.appendChild(tableRow)
+            })
         })
     }
-
 
     const sendSoeknad = (avdoed, gjenlevende, barn) => {
         console.log(`Sender inn søknad for avdød: ${avdoed}, gjenlevende: ${gjenlevende} og barn: ${barn}`)

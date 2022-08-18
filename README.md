@@ -1,5 +1,9 @@
 # pensjon-etterlatte-saksbehandling
 
+Monorepoet bruker `husky` for pre-commit-hooks. Denne kjører `Prettier` for frontend og `ktlint` for backend.
+Før man starter å kode er det derfor viktig å kjøre `bash get-started.sh` fra Root. Da vil alle de tre overnevnte bli 
+installert.
+
 Monorepo for ny saksbehandlingsløsning for ytelser til etterlatte
 
 ## Apper

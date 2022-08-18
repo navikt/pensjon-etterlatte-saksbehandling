@@ -4,7 +4,7 @@
   },
   "scripts": {
     "postinstall": "yarn --cwd server install && yarn --cwd client install",
-    "prepare": "cd ../../ && husky install apps/etterlatte-saksbehandling-ui/.husky"
+    "prepare": "cd ../../ && husky install .husky"
   },
   "devDependencies": {
     "eslint": "^8.22.0",

@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.mustachejava.DefaultMustacheFactory
+import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import dolly.DollyClientImpl
+import dolly.DollyService
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
@@ -24,12 +27,14 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.pipeline.*
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
@@ -49,6 +54,9 @@ val objectMapper: ObjectMapper = jacksonObjectMapper()
 
 val logger: Logger = LoggerFactory.getLogger("BEY001")
 val localDevelopment = env["DEV"].toBoolean()
+val httpClient = httpClient()
+val config: Config = ConfigFactory.load()
+val azureAdClient = AzureAdClient(config, httpClient)
 
 val producer = if (localDevelopment) {
     LocalKafkaConfig(env["KAFKA_BROKERS"]!!).standardProducer(env["KAFKA_TARGET_TOPIC"]!!)
@@ -56,18 +64,19 @@ val producer = if (localDevelopment) {
     GcpKafkaConfig.fromEnv(System.getenv()).standardProducer(System.getenv().getValue("KAFKA_TARGET_TOPIC"))
 }
 
-interface TestDataFeature{
+interface TestDataFeature {
     val beskrivelse: String
     val path: String
-    val routes: Route.()->Unit
+    val routes: Route.() -> Unit
 }
+
 val features: List<TestDataFeature> = listOf(
     IndexFeature,
     EgendefinertMeldingFeature,
     StandardMeldingFeature,
     SlettsakFeature,
     // OpprettSoeknadFeature(ConfigFactory.load(), httpClient()),
-    DollyFeature(ConfigFactory.load())
+    DollyFeature(DollyService(DollyClientImpl(config, httpClient)))
 )
 
 fun main() {
@@ -140,3 +149,7 @@ fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<T
 
 fun PipelineContext<Unit, ApplicationCall>.usernameFraToken() = call.principal<TokenValidationContextPrincipal>()
     ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("preferred_username")?.toString()
+
+fun getClientAccessToken(): String = runBlocking {
+    azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default")).accessToken
+}

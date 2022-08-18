@@ -69,8 +69,7 @@ export const Sammendrag = () => {
           {beregningsperioder?.map((beregning, key) => (
             <Table.Row key={key}>
               <Table.DataCell>
-                {formatterStringDato(beregning.datoFOM)} -{' '}
-                {beregning.datoTOM && formatterDato(lastDayOfMonth(new Date(beregning.datoTOM)))}
+                {`${formatterStringDato(beregning.datoFOM)} - ${beregning.datoTOM ? formatterDato(lastDayOfMonth(new Date(beregning.datoTOM))) : ''}`}
               </Table.DataCell>
               <Table.DataCell>{beregning.type == 'GP' ? 'Grunnpensjon' : beregning.type}</Table.DataCell>
               <Table.DataCell>Mangler</Table.DataCell>

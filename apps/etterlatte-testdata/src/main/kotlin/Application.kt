@@ -43,6 +43,7 @@ import testdata.features.SlettsakFeature
 import testdata.features.dolly.DollyFeature
 import testdata.features.egendefinert.EgendefinertMeldingFeature
 import testdata.features.index.IndexFeature
+import testdata.features.soeknad.OpprettSoeknadFeature
 import testdata.features.standardmelding.StandardMeldingFeature
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 
@@ -75,7 +76,7 @@ val features: List<TestDataFeature> = listOf(
     EgendefinertMeldingFeature,
     StandardMeldingFeature,
     SlettsakFeature,
-    // OpprettSoeknadFeature(ConfigFactory.load(), httpClient()),
+    OpprettSoeknadFeature,
     DollyFeature(DollyService(DollyClientImpl(config, httpClient)))
 )
 

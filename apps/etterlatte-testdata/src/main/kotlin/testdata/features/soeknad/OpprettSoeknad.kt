@@ -2,33 +2,19 @@ package testdata.features.soeknad
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.typesafe.config.Config
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.http.auth.*
-import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.mustache.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.etterlatte.*
 import no.nav.etterlatte.batch.JsonMessage
-import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
-import no.nav.etterlatte.libs.common.logging.getCorrelationId
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import java.time.OffsetDateTime
 import java.util.*
 
-class OpprettSoeknadFeature(val config: Config, val httpClient: HttpClient) : TestDataFeature {
+object OpprettSoeknadFeature : TestDataFeature {
     override val beskrivelse: String
-        get() = "Opprett søknad"
+        get() = "Opprett søknad manuelt"
     override val path: String
         get() = "soeknad"
     override val routes: Route.() -> Unit
@@ -46,37 +32,13 @@ class OpprettSoeknadFeature(val config: Config, val httpClient: HttpClient) : Te
 
             post {
                 try {
-                    val res: String = try {
-                        // todo: tester ut integrasjon mot Dolly.
-
-                        logger.info(getAccessToken(call))
-                        val httpClient = httpClient()
-                        val azureAdClient = AzureAdClient(config, httpClient)
-                        val token = azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))
-
-                        val res = httpClient.get("https://dolly-backend.dev-fss-pub.nais.io/api/v1/bruker") {
-                            header("Authorization", "Bearer ${token.accessToken}")
-                            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                            header("Nav-Consumer-Id", "etterlatte-testdata")
-                            header("Nav-Call-Id", UUID.randomUUID().toString())
-                        }
-
-                        logger.info(res.bodyAsText())
-
-                        res.bodyAsText()
-                    } catch (ex: Exception) {
-                        logger.error("Klarte ikke hente mal", ex)
-                        ex.toString() + ex.stackTraceToString()
-                    }
-
                     val (partisjon, offset) = call.receiveParameters().let {
                         producer.publiser(
                             requireNotNull(it["key"]),
                             opprettSoeknadJson(
                                 gjenlevendeFnr = it["fnrGjenlevende"]!!,
                                 avdoedFnr = it["fnrAvdoed"]!!,
-                                barnFnr = it["fnrBarn"]!!,
-                                result = res
+                                barnFnr = it["fnrBarn"]!!
                             ),
                             mapOf("NavIdent" to (navIdentFraToken()!!.toByteArray()))
                         )
@@ -112,19 +74,10 @@ class OpprettSoeknadFeature(val config: Config, val httpClient: HttpClient) : Te
                 )
             }
         }
+
 }
 
-private fun httpClient() = HttpClient(OkHttp) {
-    expectSuccess = true
-    install(ContentNegotiation) {
-        register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
-    }
-    defaultRequest {
-        header(X_CORRELATION_ID, getCorrelationId())
-    }
-}.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
-
-private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFnr: String, result: String): String {
+private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFnr: String): String {
     val skjemaInfo = opprettSkjemaInfo(gjenlevendeFnr, barnFnr, avdoedFnr)
 
     return JsonMessage.newMessage(
@@ -135,8 +88,7 @@ private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFn
             "@template" to "soeknad",
             "@fnr_soeker" to barnFnr,
             "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
-            "@adressebeskyttelse" to "UGRADERT",
-            "@behandlinger" to result
+            "@adressebeskyttelse" to "UGRADERT"
         )
     ).toJson()
 }
@@ -385,14 +337,3 @@ private fun opprettSkjemaInfo(
       "template": "barnepensjon_v2"
     }
 """.trimIndent()
-
-fun getAccessToken(call: ApplicationCall): String {
-    val authHeader = call.request.parseAuthorizationHeader()
-    if (!(authHeader == null
-                || authHeader !is HttpAuthHeader.Single
-                || authHeader.authScheme != "Bearer")
-    ) {
-        return authHeader.blob
-    }
-    throw Exception("Missing authorization header")
-}

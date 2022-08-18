@@ -14,7 +14,7 @@ import no.nav.etterlatte.usernameFraToken
 
 class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
     override val beskrivelse: String
-        get() = "Opprett søknad"
+        get() = "Opprett søknad automatisk via Dolly"
     override val path: String
         get() = "dolly"
 

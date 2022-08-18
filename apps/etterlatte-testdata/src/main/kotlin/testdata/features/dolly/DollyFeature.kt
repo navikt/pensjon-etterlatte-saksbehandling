@@ -38,6 +38,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                     dollyService.hentTestGruppe(usernameFraToken()!!, accessToken)?.let { id ->
                         dollyService.opprettBestilling(bestilling, id, accessToken).also { bestilling ->
                             logger.info("Bestilling med id ${bestilling.id} har status ${bestilling.ferdig}")
+                            call.respond(bestilling)
                         }
                     }
                 } catch (e: Exception) {

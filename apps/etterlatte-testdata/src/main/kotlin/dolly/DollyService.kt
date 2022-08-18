@@ -34,6 +34,7 @@ class DollyService(
      */
     fun hentFamilier(gruppeId: Long, accessToken: String): List<DollyPersonResponse> = runBlocking {
         dollyClient.hentTestGruppeBestillinger(gruppeId, accessToken, 0, 10).let { bestillinger ->
+            logger.info("Funnet bestillinger: ${objectMapper.writeValueAsString(bestillinger)}")
             dollyClient.hentPersonInfo(bestillinger.identer.map { it.ident }, accessToken)
                 .also { logger.info("Hentet ut følgende gruppe med personer: ${objectMapper.writeValueAsString(it)}") }
         }

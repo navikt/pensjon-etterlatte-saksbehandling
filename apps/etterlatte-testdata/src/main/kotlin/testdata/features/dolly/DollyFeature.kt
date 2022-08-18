@@ -24,7 +24,12 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                 val accessToken = getClientAccessToken()
                 val gruppeId = dollyService.hentTestGruppe(usernameFraToken()!!, accessToken)
                 val personer = gruppeId?.let {
-                    dollyService.hentFamilier(gruppeId, accessToken)
+                    try {
+                        dollyService.hentFamilier(gruppeId, accessToken)
+                    } catch (ex: Exception) {
+                        logger.error("Klarte ikke hente familier", ex)
+                        null
+                    }
                 }
 
                 call.respond(

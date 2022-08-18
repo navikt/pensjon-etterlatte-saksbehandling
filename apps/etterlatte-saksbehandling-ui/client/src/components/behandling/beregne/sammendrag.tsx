@@ -1,12 +1,12 @@
 import { BodyShort, Button, Label, Popover, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { Heading } from '@navikt/ds-react'
-import format from 'date-fns/format'
 import { useContext, useRef, useState } from 'react'
 import { AppContext } from '../../../store/AppContext'
 import { InformationColored } from '@navikt/ds-icons'
 import { IPerson } from '../../../store/reducers/BehandlingReducer'
-import { differenceInYears } from 'date-fns'
+import { differenceInYears, lastDayOfMonth } from 'date-fns'
+import { formatterDato, formatterStringDato } from '../../../utils/formattering'
 
 export const Sammendrag = () => {
   const beregningsperioder = useContext(AppContext).state.behandlingReducer.beregning?.beregningsperioder
@@ -69,8 +69,8 @@ export const Sammendrag = () => {
           {beregningsperioder?.map((beregning, key) => (
             <Table.Row key={key}>
               <Table.DataCell>
-                {format(new Date(beregning.datoFOM), 'dd.MM.yyyy')} -{' '}
-                {beregning.datoTOM && format(new Date(beregning.datoTOM), 'dd.MM.yyyy')}
+                {formatterStringDato(beregning.datoFOM)} -{' '}
+                {beregning.datoTOM && formatterDato(lastDayOfMonth(new Date(beregning.datoTOM)))}
               </Table.DataCell>
               <Table.DataCell>{beregning.type == 'GP' ? 'Grunnpensjon' : beregning.type}</Table.DataCell>
               <Table.DataCell>Mangler</Table.DataCell>

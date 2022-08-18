@@ -20,7 +20,7 @@ class DollyService(
 
         val bruker = brukere
             .filter { bruker -> bruker.brukerId != null }
-            .find { it.epost == username }
+            .find { it.epost?.uppercase() == username.uppercase() }
             ?: throw Exception("Bruker med epost = $username finnes ikke i Dolly.")
 
         logger.info("Bruker: ", bruker.toJson())

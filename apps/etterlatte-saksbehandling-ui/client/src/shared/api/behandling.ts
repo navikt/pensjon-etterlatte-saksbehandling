@@ -1,5 +1,5 @@
 import { IApiResponse } from './types'
-import { IDetaljertBehandling } from "../../store/reducers/BehandlingReducer";
+import { IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
 
 const path = process.env.REACT_APP_VEDTAK_URL
 
@@ -13,7 +13,7 @@ export const hentBehandling = async (id: string): Promise<IApiResponse<IDetaljer
       data: data,
     }
   } catch (e) {
-    return {status: 500 }
+    return { status: 500 }
   }
 }
 

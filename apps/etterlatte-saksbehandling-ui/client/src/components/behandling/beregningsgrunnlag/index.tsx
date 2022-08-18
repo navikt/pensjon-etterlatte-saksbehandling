@@ -11,7 +11,7 @@ import { hentBehandling, lagreSoeskenMedIBeregning } from '../../../shared/api/b
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { Controller, useForm } from 'react-hook-form'
 import { formatterStringDato } from '../../../utils/formattering'
-import { addBehandlingAction } from "../../../store/reducers/BehandlingReducer";
+import { addBehandlingAction } from '../../../store/reducers/BehandlingReducer'
 
 interface SoeskenMedIBeregning {
   foedselsnummer: string
@@ -64,13 +64,12 @@ const Beregningsgrunnlag = () => {
             await lagreSoeskenMedIBeregning(behandling.id, formValues.beregningsgrunnlag)
           }
           await hentBehandling(behandling.id).then((response) => {
-              if (response.status === 200 && response.data) {
-                  ctx.dispatch(addBehandlingAction(response.data))
-                  next()
-              }
-              else {
-                  console.error({response})
-              }
+            if (response.status === 200 && response.data) {
+              ctx.dispatch(addBehandlingAction(response.data))
+              next()
+            } else {
+              console.error({ response })
+            }
           })
         })}
       >

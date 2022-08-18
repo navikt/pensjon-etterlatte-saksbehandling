@@ -11,102 +11,102 @@
     </div>
 </div>
 
-<div class="row justify-content-center gy-5">
-    <div class="col-12 col-md-6">
-        <div class="alert alert-info">
-            Steg 1: Opprett testpersoner i Dolly
-        </div>
-    </div>
-    
-    <div class="col-12 col-md-6" id="opprettFamilieInfo">
-        <div class="alert alert-warning">
-            Husk og opprett gruppe i dolly med navn etterlatte-testdata!
-        </div>
-    </div>
-
-</div>
-
-<button type="button" onclick="hentFamilie()" class="btn btn-primary" id="btnOpprettFamilie">Opprett familie i gruppe</button>
-
-
-<div class="row justify-content-center gy-5">
-    <div class="col-12 col-md-6">
-        <div class="alert alert-info">
-            Steg 2: Post søknad med familien på kafka
-        </div>
+<div class="col-12 col-md-6" id="opprettGruppeInfo">
+    <div class="alert alert-warning">
+        For å kunne bruke tjenesten må du først gå inn på Dolly og opprette en gruppe med navn <bold>etterlatte-testdata</bold> <br>
+        Du kan logge inn på Dolly via:
+        <a href="https://dolly.ekstern.dev.nav.no/login">
+            https://dolly.ekstern.dev.nav.no/login
+        </a>
     </div>
 </div>
 
-<form action="/{{ path }}" method="post">
-    <div class="mb-3">
-        <label for="key" class="form-label">Nøkkel:</label>
-        <input type="text" name="key" id="key" class="form-control" required>
+<div id="main-content">
+    <div class="row justify-content-center gy-5">
+        <div class="col-12 col-md-6">
+            <div class="alert alert-info">
+                Steg 1: Opprett testpersoner i Dolly
+            </div>
+        </div>
     </div>
 
-    <div class="mb-3">
-        <label for="fnrGjenlevende" class="form-label">Gjenlevende (fnr):</label>
-        <input type="tel"
-               pattern="[0-9]+"
-               minlength="11"
-               maxlength="11"
-               name="fnrGjenlevende"
-               id="fnrGjenlevende"
-               class="form-control"
-               required
-        />
+    <button
+        type="button"
+        onclick="hentFamilie()"
+        class="btn btn-primary"
+    >
+        Opprett familie i gruppe
+    </button>
+
+    <div class="row justify-content-center gy-5">
+        <div class="col-12 col-md-6">
+            <div class="alert alert-info">
+                Steg 2: Post søknad med familien på kafka
+            </div>
+        </div>
     </div>
 
-    <div class="mb-3">
-        <label for="fnrAvdoed" class="form-label">Avdød (fnr):</label>
-        <input type="tel"
-               pattern="[0-9]+"
-               minlength="11"
-               maxlength="11"
-               name="fnrAvdoed"
-               id="fnrAvdoed"
-               class="form-control"
-               required
-        />
-    </div>
+    <form action="/{{ path }}" method="post">
+        <div class="mb-3">
+            <label for="key" class="form-label">Nøkkel:</label>
+            <input type="text" name="key" id="key" class="form-control" required>
+        </div>
 
-    <div class="mb-3">
-        <label for="fnrBarn" class="form-label">Barn (fnr):</label>
-        <input type="tel"
-               pattern="[0-9]+"
-               minlength="11"
-               maxlength="11"
-               name="fnrBarn"
-               id="fnrBarn"
-               class="form-control"
-               required
-        />
-    </div>
+        <div class="mb-3">
+            <label for="fnrGjenlevende" class="form-label">Gjenlevende (fnr):</label>
+            <input type="tel"
+                   pattern="[0-9]+"
+                   minlength="11"
+                   maxlength="11"
+                   name="fnrGjenlevende"
+                   id="fnrGjenlevende"
+                   class="form-control"
+                   required
+            />
+        </div>
 
-    <button type="submit" class="btn btn-primary">Send</button>
-</form>
+        <div class="mb-3">
+            <label for="fnrAvdoed" class="form-label">Avdød (fnr):</label>
+            <input type="tel"
+                   pattern="[0-9]+"
+                   minlength="11"
+                   maxlength="11"
+                   name="fnrAvdoed"
+                   id="fnrAvdoed"
+                   class="form-control"
+                   required
+            />
+        </div>
 
+        <div class="mb-3">
+            <label for="fnrBarn" class="form-label">Barn (fnr):</label>
+            <input type="tel"
+                   pattern="[0-9]+"
+                   minlength="11"
+                   maxlength="11"
+                   name="fnrBarn"
+                   id="fnrBarn"
+                   class="form-control"
+                   required
+            />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+</div>
 <script>
 
-    const opprettBtn = document.querySelector('#btnOpprettFamilie')
-    const opprettInfo = document.querySelector('#opprettFamilieInfo')
+    const opprettGruppeInfo = document.querySelector('#opprettGruppeInfo')
+    const mainContent = document.querySelector('#main-content')
 
     if (!"{{gruppeId}}") {
-        opprettBtn.disabled = true
-        opprettInfo.style.visibility = 'visible'
+        opprettGruppeInfo.style.visibility = 'visible'
+        mainContent.style.visibility = 'hidden'
     } else {
-        opprettInfo.style.visibility = 'hidden'
+        opprettGruppeInfo.style.visibility = 'hidden'
+        mainContent.style.visibility = 'visible'
     }
 
-    function hentFamilie() {
-        console.log("Henter familie")
-        console.log("{{gruppeId}}")
-
-        try {
-            fetch('dolly/hent-familie').then(res => res.json()).then(data => console.log(data))
-        } catch (e) {
-            console.log(e.message)
-        }
-    }
 </script>
 
 {{> ../_fragments/footer }}

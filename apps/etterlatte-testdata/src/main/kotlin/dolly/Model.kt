@@ -15,22 +15,34 @@ data class BestillingStatus(val id: Long, val ferdig: Boolean)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TestGruppeBestillinger(val identer: List<TestGruppeBestilling>)
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TestGruppeBestilling(val ident: String, val bestillingId: List<Long>)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class DollyPersonResponse(val id: Long, val person: DollyPerson, val relasjoner: Relasjoner)
+data class DollyPersonResponse(val ident: String, val person: DollyPerson)
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class DollyPerson(val doedsfall: List<Doedsfall>, val foedsel: List<Foedsel>, val navn: List<Navn>)
+data class DollyPerson(
+    val doedsfall: List<Doedsfall>,
+    val foedsel: List<Foedsel>,
+    val navn: List<Navn>,
+    val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
+    val sivilstand: List<Sivilstand>
+)
+
+data class ForelderBarnRelasjon(
+    val relatertPersonsIdent: String,
+    val barn: Boolean,
+)
+
+data class Sivilstand(val type: String, val relatertVedSivilstand: String)
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Doedsfall(val doedsdato: String)
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Foedsel(val foedselsdato: String, val foedselsaar: Int)
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Navn(val fornavn: String, val etternavn: String)
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Relasjoner(val relasjon: List<Relasjon>)
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Relasjon(val relasjonType: String, val relatertPerson: RelatertPerson)
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class RelatertPerson(val navn: List<Navn>, val ident: String)

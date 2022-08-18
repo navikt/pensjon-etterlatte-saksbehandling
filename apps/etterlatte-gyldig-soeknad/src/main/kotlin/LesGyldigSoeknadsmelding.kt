@@ -17,7 +17,7 @@ import java.util.*
 internal class LesGyldigSoeknadsmelding(
     rapidsConnection: RapidsConnection,
     private val gyldigSoeknad: GyldigSoeknadService,
-    private val behandling: Behandling,
+    private val behandling: Behandling
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(LesGyldigSoeknadsmelding::class.java)
 
@@ -43,7 +43,9 @@ internal class LesGyldigSoeknadsmelding(
 
                 val sak = behandling.skaffSak(packet["@fnr_soeker"].asText(), packet["@skjema_info"]["type"].asText())
                 val behandlingsid = behandling.initierBehandling(
-                    sak, packet["@skjema_info"]["mottattDato"].asText(), personGalleri
+                    sak,
+                    packet["@skjema_info"]["mottattDato"].asText(),
+                    personGalleri
                 )
                 behandling.lagreGyldighetsVurdering(behandlingsid, gyldighetsVurdering)
                 packet.eventName = "GYLDIG_SOEKNAD:VURDERT"

@@ -45,14 +45,14 @@ sealed class DokumentVariant {
     abstract val variantformat: String
 
     data class ArkivPDF(
-        override val fysiskDokument: String,
+        override val fysiskDokument: String
     ) : DokumentVariant() {
         override val filtype: String = "PDFA"
         override val variantformat: String = "ARKIV"
     }
 
     data class OriginalJson(
-        override val fysiskDokument: String,
+        override val fysiskDokument: String
     ) : DokumentVariant() {
         override val filtype: String = "JSON"
         override val variantformat: String = "ORIGINAL"
@@ -75,4 +75,3 @@ enum class BrukerIdType() {
     AKTOERID,
     ORGNR
 }
-

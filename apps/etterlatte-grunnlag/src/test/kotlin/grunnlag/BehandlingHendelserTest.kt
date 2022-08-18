@@ -7,15 +7,12 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 
-
-
 class BehandlingHendelserTest {
     companion object {
         val melding = readFile("/behandlingsmelding.json")
         fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")
     }
-
 
     private val inspector = TestRapid().apply { BehandlingHendelser(this) }
 
@@ -24,7 +21,10 @@ class BehandlingHendelserTest {
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         Assertions.assertEquals(Opplysningstyper.SOEKER_PDL_V1.name, inspector.message(0).get("@behov").asText())
-        Assertions.assertEquals(Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1.name, inspector.message(1).get("@behov").asText())
+        Assertions.assertEquals(
+            Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1.name,
+            inspector.message(1).get("@behov").asText()
+        )
         Assertions.assertEquals(4, inspector.size)
     }
 }

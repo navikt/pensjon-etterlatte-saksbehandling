@@ -3,9 +3,21 @@ package barnepensjon
 import adresseDanmarkPdl
 import adresseUtlandFoerFemAar
 import adresserNorgePdl
-import no.nav.etterlatte.barnepensjon.*
+import no.nav.etterlatte.barnepensjon.Periode
+import no.nav.etterlatte.barnepensjon.harKunNorskeAdresserEtterDato
+import no.nav.etterlatte.barnepensjon.harKunNorskePdlAdresserEtterDato
+import no.nav.etterlatte.barnepensjon.hentAdresseperioderINorge
+import no.nav.etterlatte.barnepensjon.hentGaps
+import no.nav.etterlatte.barnepensjon.kombinerPerioder
+import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraKriterier
+import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraVilkaar
+import no.nav.etterlatte.barnepensjon.setVurderingFraKommerBarnetTilGode
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
-import no.nav.etterlatte.libs.common.vikaar.*
+import no.nav.etterlatte.libs.common.vikaar.Kriterie
+import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
+import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -127,7 +139,6 @@ internal class UtilsKtTest {
             emptyList(),
             LocalDateTime.now()
         )
-
     }
 
     @Test
@@ -164,7 +175,9 @@ internal class UtilsKtTest {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
             setVilkaarVurderingFraVilkaar(
                 listOf(
-                    oppfyltVilkarAlder, oppfyltVilkarDoedsfall, manglerInfoVilkaarBarnetsMedlemskap
+                    oppfyltVilkarAlder,
+                    oppfyltVilkarDoedsfall,
+                    manglerInfoVilkaarBarnetsMedlemskap
                 )
             )
         )
@@ -257,7 +270,9 @@ internal class UtilsKtTest {
             VurderingsResultat.IKKE_OPPFYLT,
             setVurderingFraKommerBarnetTilGode(
                 listOf(
-                    ikkeOppfyltBarnAvdoedSammeAdresse, ikkeOppfyltBarnIngenUtlandsadresse, oppfyltBarnAvdoedSammeAdresse
+                    ikkeOppfyltBarnAvdoedSammeAdresse,
+                    ikkeOppfyltBarnIngenUtlandsadresse,
+                    oppfyltBarnAvdoedSammeAdresse
                 )
             )
         )
@@ -364,7 +379,6 @@ internal class UtilsKtTest {
 
         assertEquals(VurderingsResultat.OPPFYLT, kunNorskeAdresserResultat)
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, utenlandskeAdresserResultat)
-
     }
 
     @Test
@@ -378,7 +392,6 @@ internal class UtilsKtTest {
         assertEquals(VurderingsResultat.OPPFYLT, kunNorskeAdresserResultat)
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, utenlandskeAdresserResultat)
         assertEquals(VurderingsResultat.OPPFYLT, utenlandskeAdresserForFemAarResultat)
-
     }
 
     @Test
@@ -395,7 +408,6 @@ internal class UtilsKtTest {
         assertEquals(LocalDate.parse("2020-01-26"), kunNorskeAdressePerioder?.get(1)?.gyldigFra)
         assertEquals(doedsdato, kunNorskeAdressePerioder?.get(1)?.gyldigTil)
         assertEquals(0, utenlandskeAdressePerioder?.size)
-
     }
 
     @Test
@@ -411,7 +423,7 @@ internal class UtilsKtTest {
             Periode(
                 gyldigFra = LocalDate.parse("2020-01-26"),
                 gyldigTil = doedsdato
-            ),
+            )
         )
 
         val perioderMedGaps = listOf(
@@ -422,7 +434,7 @@ internal class UtilsKtTest {
             Periode(
                 gyldigFra = LocalDate.parse("2021-01-26"),
                 gyldigTil = doedsdato
-            ),
+            )
         )
 
         val kombinertePerioder = kombinerPerioder(perioderUtenGaps)
@@ -437,7 +449,6 @@ internal class UtilsKtTest {
         assertEquals(LocalDate.parse("2020-04-30"), kombinertePerioderMedGaps?.first()?.gyldigTil)
         assertEquals(LocalDate.parse("2021-01-26"), kombinertePerioderMedGaps?.get(1)?.gyldigFra)
         assertEquals(doedsdato, kombinertePerioderMedGaps?.get(1)?.gyldigTil)
-
     }
 
     @Test
@@ -453,7 +464,7 @@ internal class UtilsKtTest {
             Periode(
                 gyldigFra = LocalDate.parse("2020-01-26"),
                 gyldigTil = doedsdato
-            ),
+            )
         )
 
         val perioderMedGaps = listOf(
@@ -464,7 +475,7 @@ internal class UtilsKtTest {
             Periode(
                 gyldigFra = LocalDate.parse("2021-01-26"),
                 gyldigTil = doedsdato.minusMonths(3)
-            ),
+            )
         )
 
         val stackUtenGaps = kombinerPerioder(perioderUtenGaps)
@@ -484,7 +495,5 @@ internal class UtilsKtTest {
 
         assertEquals(doedsdato.minusMonths(3).plusDays(1), gaps.get(2).gyldigFra)
         assertEquals(doedsdato, gaps.get(2).gyldigTil)
-
     }
-
 }

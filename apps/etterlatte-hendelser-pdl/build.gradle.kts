@@ -28,7 +28,6 @@ dependencies {
     testImplementation(Ktor2.ClientMock)
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:common"))
-
 }
 
 tasks.named("compileKotlin").configure { dependsOn(":apps:etterlatte-hendelser-pdl:generateAvroJava") }

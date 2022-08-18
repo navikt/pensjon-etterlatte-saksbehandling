@@ -4,12 +4,11 @@ import no.nav.etterlatte.appMap
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class AppEventRiverTest {
-
 
     @Test
     fun skalReagerePaaAppEvents() {
@@ -17,12 +16,16 @@ internal class AppEventRiverTest {
         appMap.clear()
         AppEventRiver(rapid)
         appEventTypes.forEach {
-            rapid.sendTestMessage(JsonMessage.newMessage(mapOf(
-                eventNameKey to it,
-                "opprettet" to LocalDate.of(2021, 11, 12).atTime(13, 32),
-                "app_name" to "app",
-                "instance_id" to "instance"
-            )).toJson())
+            rapid.sendTestMessage(
+                JsonMessage.newMessage(
+                    mapOf(
+                        eventNameKey to it,
+                        "opprettet" to LocalDate.of(2021, 11, 12).atTime(13, 32),
+                        "app_name" to "app",
+                        "instance_id" to "instance"
+                    )
+                ).toJson()
+            )
         }
 
         assertEquals(appEventTypes.last(), appMap["app"]?.get("instance")?.first?.type)

@@ -2,7 +2,7 @@ package no.nav.etterlatte.opplysninger.kilde.pdl
 
 import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.*
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
@@ -13,7 +13,6 @@ import java.util.*
 class OpplysningsByggerService : OpplysningsBygger {
 
     override fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl): List<Grunnlagsopplysning<out Any>> {
-
         val soekersFnr = barnepensjon.soeker.foedselsnummer.svar.value
         val avdoedFnr = hentAvdoedFnr(barnepensjon)
         val gjenlevendeForelderFnr = hentGjenlevendeForelderFnr(barnepensjon)
@@ -25,15 +24,15 @@ class OpplysningsByggerService : OpplysningsBygger {
         return listOf(
             personOpplysning(avdoedPdl, Opplysningstyper.AVDOED_PDL_V1),
             personOpplysning(gjenlevendeForelderPdl, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1),
-            personOpplysning(soekerPdl, Opplysningstyper.SOEKER_PDL_V1),
-            )
+            personOpplysning(soekerPdl, Opplysningstyper.SOEKER_PDL_V1)
+        )
     }
 
     fun personOpplysning(
         personPdl: Person,
-        opplysningsType: Opplysningstyper,
+        opplysningsType: Opplysningstyper
     ): Grunnlagsopplysning<Person> {
-        return lagOpplysning(opplysningsType, personPdl )
+        return lagOpplysning(opplysningsType, personPdl)
     }
 
     fun hentAvdoedFnr(barnepensjon: Barnepensjon): String {

@@ -3,18 +3,21 @@ package no.nav.etterlatte
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.*
-import io.ktor.server.application.*
+import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.install
+import io.ktor.server.application.log
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
-import io.ktor.server.plugins.callloging.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.header
+import io.ktor.server.request.httpMethod
+import io.ktor.server.request.path
+import io.ktor.server.response.respond
+import io.ktor.server.routing.routing
 import no.nav.etterlatte.health.healthApi
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
 import no.nav.etterlatte.ktortokenexchange.installAuthUsing
@@ -29,22 +32,25 @@ import java.util.*
 
 class Server(applicationContext: ApplicationContext) {
 
-    private val engine = embeddedServer(CIO, environment = applicationEngineEnvironment {
-        module {
-            module(
-                securityContextMediator = applicationContext.securityMediator,
-                personService = applicationContext.personService,
-            )
+    private val engine = embeddedServer(
+        CIO,
+        environment = applicationEngineEnvironment {
+            module {
+                module(
+                    securityContextMediator = applicationContext.securityMediator,
+                    personService = applicationContext.personService
+                )
+            }
+            connector { port = 8080 }
         }
-        connector { port = 8080 }
-    })
+    )
 
     fun run() = engine.start(true)
 }
 
 fun io.ktor.server.application.Application.module(
     securityContextMediator: SecurityContextMediator,
-    personService: PersonService,
+    personService: PersonService
 ) {
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
@@ -58,7 +64,13 @@ fun io.ktor.server.application.Application.module(
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             call.application.log.error("En feil oppstod: ${cause.message}", cause)
-            call.respond(TextContent("En feil oppstod: ${cause.message}", ContentType.Text.Plain, HttpStatusCode.InternalServerError))
+            call.respond(
+                TextContent(
+                    "En feil oppstod: ${cause.message}",
+                    ContentType.Text.Plain,
+                    HttpStatusCode.InternalServerError
+                )
+            )
         }
     }
     installAuthUsing(securityContextMediator)
@@ -70,4 +82,3 @@ fun io.ktor.server.application.Application.module(
         }
     }
 }
-

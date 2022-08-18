@@ -31,7 +31,7 @@ internal class OppdaterDistribusjonStatus(rapidsConnection: RapidsConnection, pr
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         withLogContext(packet.correlationId) {
             val brevId = packet["brevId"].longValue()
-            logger.info("Mottatt oppdatering fra brev-distribusjon for brev med id ${brevId}.")
+            logger.info("Mottatt oppdatering fra brev-distribusjon for brev med id $brevId.")
 
             if (packet[eventNameKey].asText() == DISTRIBUERT.toString()) {
                 val bestillingId = packet["bestillingId"].asText()

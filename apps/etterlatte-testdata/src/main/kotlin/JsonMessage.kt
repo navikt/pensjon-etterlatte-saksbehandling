@@ -1,5 +1,3 @@
-package no.nav.etterlatte.batch
-
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -12,7 +10,7 @@ import java.time.LocalDateTime
 
 // Stripped down version of JsonMessage from rapids and rivers
 open class JsonMessage(
-    originalMessage: String,
+    originalMessage: String
 ) {
     companion object {
         private val objectMapper = jacksonObjectMapper()
@@ -34,7 +32,7 @@ open class JsonMessage(
     private val recognizedKeys = mutableMapOf<String, JsonNode>()
 
     init {
-        json =  objectMapper.readTree(originalMessage)
+        json = objectMapper.readTree(originalMessage)
         set(ReadCountKey, json.path(ReadCountKey).asInt(-1) + 1)
 
         if (serviceName != null && serviceHostname != null) {
@@ -43,19 +41,26 @@ open class JsonMessage(
                 "instance" to serviceHostname,
                 "time" to LocalDateTime.now()
             )
-            if (json.path(ParticipatingServicesKey).isMissingOrNull()) set(ParticipatingServicesKey, listOf(entry))
-            else (json.path(ParticipatingServicesKey) as ArrayNode).add(objectMapper.valueToTree<JsonNode>(entry))
+            if (json.path(ParticipatingServicesKey).isMissingOrNull()) {
+                set(ParticipatingServicesKey, listOf(entry))
+            } else {
+                (json.path(ParticipatingServicesKey) as ArrayNode).add(objectMapper.valueToTree<JsonNode>(entry))
+            }
         }
     }
 
-
     operator fun get(key: String): JsonNode =
-        requireNotNull(recognizedKeys[key]) { "$key is unknown; keys must be declared as required, forbidden, or interesting" }
+        requireNotNull(recognizedKeys[key]) {
+            "$key is unknown; keys must be declared as required, forbidden, or interesting"
+        }
 
     operator fun set(key: String, value: Any) {
-        (json as ObjectNode).replace(key, objectMapper.valueToTree<JsonNode>(value).also {
-            recognizedKeys[key] = it
-        })
+        (json as ObjectNode).replace(
+            key,
+            objectMapper.valueToTree<JsonNode>(value).also {
+                recognizedKeys[key] = it
+            }
+        )
     }
 
     fun toJson(): String = objectMapper.writeValueAsString(json)

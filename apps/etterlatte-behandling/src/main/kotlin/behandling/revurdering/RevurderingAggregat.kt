@@ -31,7 +31,7 @@ class RevurderingAggregat(
             behandlinger: BehandlingDao,
             hendelser: HendelseDao
         ): RevurderingAggregat {
-            logger.info("Oppretter en behandling på ${sak}")
+            logger.info("Oppretter en behandling på $sak")
             return Revurdering(
                 id = UUID.randomUUID(),
                 sak = sak,
@@ -52,7 +52,6 @@ class RevurderingAggregat(
         }
     }
 
-
     private object TilgangDao {
         fun sjekkOmBehandlingTillatesEndret(behandling: Behandling): Boolean {
             return behandling.status in listOf(
@@ -60,7 +59,7 @@ class RevurderingAggregat(
                 BehandlingStatus.GYLDIG_SOEKNAD,
                 BehandlingStatus.IKKE_GYLDIG_SOEKNAD,
                 BehandlingStatus.UNDER_BEHANDLING,
-                BehandlingStatus.RETURNERT,
+                BehandlingStatus.RETURNERT
             )
         }
     }
@@ -87,9 +86,9 @@ class RevurderingAggregat(
         kommentar: String?,
         begrunnelse: String?
     ) {
-        val ikkeSettUnderBehandling = lagretBehandling.status == BehandlingStatus.FATTET_VEDTAK
-                || lagretBehandling.status == BehandlingStatus.RETURNERT
-                || lagretBehandling.status == BehandlingStatus.ATTESTERT
+        val ikkeSettUnderBehandling = lagretBehandling.status == BehandlingStatus.FATTET_VEDTAK ||
+            lagretBehandling.status == BehandlingStatus.RETURNERT ||
+            lagretBehandling.status == BehandlingStatus.ATTESTERT
 
         if (hendelse in listOf("FATTET", "ATTESTERT", "UNDERKJENT")) {
             requireNotNull(saksbehandler)
@@ -105,10 +104,15 @@ class RevurderingAggregat(
                 "FATTET" -> BehandlingStatus.FATTET_VEDTAK
                 "ATTESTERT" -> BehandlingStatus.ATTESTERT
                 "UNDERKJENT" -> BehandlingStatus.RETURNERT
-                "VILKAARSVURDERT" -> if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
-                "BEREGNET" -> if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
-                "AVKORTET" -> if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
-                else -> throw IllegalStateException("Behandling ${lagretBehandling.id} forstår ikke vedtakhendelse $hendelse")
+                "VILKAARSVURDERT" ->
+                    if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
+                "BEREGNET" ->
+                    if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
+                "AVKORTET" ->
+                    if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
+                else -> throw IllegalStateException(
+                    "Behandling ${lagretBehandling.id} forstår ikke vedtakhendelse $hendelse"
+                )
             },
             oppgaveStatus = when (hendelse) {
                 "FATTET" -> OppgaveStatus.TIL_ATTESTERING
@@ -130,7 +134,6 @@ class RevurderingAggregat(
             begrunnelse
         )
     }
-
 
     fun serialiserbarUtgave() = lagretBehandling.copy()
 }

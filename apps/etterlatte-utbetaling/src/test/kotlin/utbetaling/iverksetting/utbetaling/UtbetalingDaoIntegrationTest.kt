@@ -58,7 +58,6 @@ internal class UtbetalingDaoIntegrationTest {
 
     @Test
     fun `skal opprette og hente utbetaling`() {
-
         val utbetaling = utbetaling(avstemmingsnoekkel = Tidspunkt.now())
         val oppdrag = oppdrag(utbetaling)
 
@@ -98,7 +97,7 @@ internal class UtbetalingDaoIntegrationTest {
             { assertNotNull(opprettetUtbetaling?.vedtak) },
             { assertNotNull(opprettetUtbetaling?.oppdrag) },
             { assertNull(opprettetUtbetaling?.kvittering) },
-            { assertEquals(UtbetalingStatus.MOTTATT, opprettetUtbetaling?.status()) },
+            { assertEquals(UtbetalingStatus.MOTTATT, opprettetUtbetaling?.status()) }
         )
     }
 
@@ -123,11 +122,39 @@ internal class UtbetalingDaoIntegrationTest {
             { assertTrue(utbetalingFraDatabase.utbetalingslinjer.any { it.id.value == 1L }) },
             { assertTrue(utbetalingFraDatabase.utbetalingslinjer.any { it.id.value == 2L }) },
             { assertTrue(utbetalingFraDatabase.utbetalingslinjer.any { it.id.value == 3L }) },
-            { assertTrue(utbetalingFraDatabase.utbetalingslinjer.all { it.type == utbetaling.utbetalingslinjer.first().type }) },
-            { assertTrue(utbetalingFraDatabase.utbetalingslinjer.all { it.sakId == utbetaling.utbetalingslinjer.first().sakId }) },
-            { assertTrue(utbetalingFraDatabase.utbetalingslinjer.all { it.periode.fra == utbetaling.utbetalingslinjer.first().periode.fra }) },
-            { assertTrue(utbetalingFraDatabase.utbetalingslinjer.all { it.periode.til == utbetaling.utbetalingslinjer.first().periode.til }) },
-            { assertTrue(utbetalingFraDatabase.utbetalingslinjer.all { it.beloep == utbetaling.utbetalingslinjer.first().beloep }) },
+            {
+                assertTrue(
+                    utbetalingFraDatabase.utbetalingslinjer.all { it.type == utbetaling.utbetalingslinjer.first().type }
+                )
+            },
+            {
+                assertTrue(
+                    utbetalingFraDatabase.utbetalingslinjer.all {
+                        it.sakId == utbetaling.utbetalingslinjer.first().sakId
+                    }
+                )
+            },
+            {
+                assertTrue(
+                    utbetalingFraDatabase.utbetalingslinjer.all {
+                        it.periode.fra == utbetaling.utbetalingslinjer.first().periode.fra
+                    }
+                )
+            },
+            {
+                assertTrue(
+                    utbetalingFraDatabase.utbetalingslinjer.all {
+                        it.periode.til == utbetaling.utbetalingslinjer.first().periode.til
+                    }
+                )
+            },
+            {
+                assertTrue(
+                    utbetalingFraDatabase.utbetalingslinjer.all {
+                        it.beloep == utbetaling.utbetalingslinjer.first().beloep
+                    }
+                )
+            }
         )
     }
 
@@ -183,7 +210,7 @@ internal class UtbetalingDaoIntegrationTest {
             { assertEquals(3, utbetalinger.size) },
             { assertTrue(utbetalinger.any { it.vedtak.vedtakId == 2L }) },
             { assertTrue(utbetalinger.any { it.vedtak.vedtakId == 3L }) },
-            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == 4L }) },
+            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == 4L }) }
         )
     }
 
@@ -203,7 +230,8 @@ internal class UtbetalingDaoIntegrationTest {
         utbetalingDao.oppdaterKvittering(oppdragMedKvittering, Tidspunkt.now(), utbetaling.id)
         val utbetalingOppdatert = utbetalingDao.hentUtbetaling(oppdrag.vedtakId())
 
-        assertAll("skal sjekke at kvittering er opprettet korrekt på utbetaling",
+        assertAll(
+            "skal sjekke at kvittering er opprettet korrekt på utbetaling",
             {
                 assertEquals(
                     UtbetalingStatus.AVVIST,
@@ -217,7 +245,8 @@ internal class UtbetalingDaoIntegrationTest {
                     oppdragMedKvittering.mmel?.alvorlighetsgrad,
                     utbetalingOppdatert?.kvittering?.oppdrag?.mmel?.alvorlighetsgrad
                 )
-            })
+            }
+        )
     }
 
     @Test
@@ -230,7 +259,7 @@ internal class UtbetalingDaoIntegrationTest {
             utbetalingslinjer = listOf(
                 utbetalingslinje(utbetalingId, SakId(1L), 1),
                 utbetalingslinje(utbetalingId, SakId(1L), 2),
-                utbetalingslinje(utbetalingId, SakId(1L), 3),
+                utbetalingslinje(utbetalingId, SakId(1L), 3)
             )
         )
         val oppdrag = oppdrag(utbetaling)
@@ -255,7 +284,7 @@ internal class UtbetalingDaoIntegrationTest {
             { assertEquals(3, utbetalingslinjer.size) },
             { assertTrue(utbetalingslinjer.any { it.id.value == 1L }) },
             { assertTrue(utbetalingslinjer.any { it.id.value == 2L }) },
-            { assertTrue(utbetalingslinjer.any { it.id.value == 3L }) },
+            { assertTrue(utbetalingslinjer.any { it.id.value == 3L }) }
         )
     }
 
@@ -268,7 +297,7 @@ internal class UtbetalingDaoIntegrationTest {
             utbetalingslinjer = listOf(
                 utbetalingslinje(utbetalingId, SakId(1L), 1),
                 utbetalingslinje(utbetalingId, SakId(1L), 2),
-                utbetalingslinje(utbetalingId, SakId(1L), 3),
+                utbetalingslinje(utbetalingId, SakId(1L), 3)
             )
         )
         val oppdrag = oppdrag(utbetaling)
@@ -287,10 +316,8 @@ internal class UtbetalingDaoIntegrationTest {
                 )
             },
             { assertEquals(utbetalingshendelse.status, oppdatertUtbetaling.utbetalingshendelser.last().status) },
-            { assertEquals(utbetalingshendelse.tidspunkt, oppdatertUtbetaling.utbetalingshendelser.last().tidspunkt) },
+            { assertEquals(utbetalingshendelse.tidspunkt, oppdatertUtbetaling.utbetalingshendelser.last().tidspunkt) }
         )
-
-
     }
 
     @AfterEach

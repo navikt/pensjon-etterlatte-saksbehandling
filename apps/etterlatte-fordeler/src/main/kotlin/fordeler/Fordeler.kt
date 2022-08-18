@@ -1,8 +1,7 @@
 package no.nav.etterlatte.fordeler
 
-
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.fordeler.FordelerResultat.*
+import no.nav.etterlatte.fordeler.FordelerResultat.GyldigForBehandling
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -19,7 +18,7 @@ import java.time.OffsetDateTime
 
 data class FordelerEvent(
     val soeknad: Barnepensjon,
-    val hendelseGyldigTil: OffsetDateTime,
+    val hendelseGyldigTil: OffsetDateTime
 )
 internal class Fordeler(
     rapidsConnection: RapidsConnection,
@@ -27,11 +26,10 @@ internal class Fordeler(
     private val fordelerMetricLogger: FordelerMetricLogger = FordelerMetricLogger()
 ) : River.PacketListener {
 
-
     private val logger = LoggerFactory.getLogger(Fordeler::class.java)
 
     init {
-        River(rapidsConnection).apply{
+        River(rapidsConnection).apply {
             eventName("soeknad_innsendt")
             validate { it.demandValue("@skjema_info.type", "BARNEPENSJON") }
             validate { it.demandValue("@skjema_info.versjon", "2") }
@@ -44,7 +42,6 @@ internal class Fordeler(
             validate { it.rejectKey("@dokarkivRetur") }
             correlationId()
         }.register(this)
-
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
@@ -58,11 +55,11 @@ internal class Fordeler(
                         context.publish(packet.leggPaaFordeltStatus().toJson())
                         fordelerMetricLogger.logMetricFordelt()
                     }
-                    is IkkeGyldigForBehandling -> {
+                    is FordelerResultat.IkkeGyldigForBehandling -> {
                         logger.info("Avbrutt fordeling: ${resultat.ikkeOppfylteKriterier}")
                         fordelerMetricLogger.logMetricIkkeFordelt(resultat)
                     }
-                    is UgyldigHendelse -> {
+                    is FordelerResultat.UgyldigHendelse -> {
                         logger.error("Avbrutt fordeling: ${resultat.message}")
                     }
                 }
@@ -78,11 +75,11 @@ internal class Fordeler(
         )
 
     private fun JsonMessage.leggPaaFordeltStatus(): JsonMessage {
-             this["soeknadFordelt"] = true
-             eventName = "FORDELER:FORDELT"
-             correlationId = getCorrelationId()
-             return this
-        }
+        this["soeknadFordelt"] = true
+        eventName = "FORDELER:FORDELT"
+        correlationId = getCorrelationId()
+        return this
+    }
 
     private fun JsonMessage.soeknadId(): Int = get("@lagret_soeknad_id").intValue()
 }

@@ -1,8 +1,9 @@
 package no.nav.etterlatte.brev
 
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.header
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import org.slf4j.LoggerFactory
@@ -10,7 +11,6 @@ import org.slf4j.LoggerFactory
 interface BrevService {
     suspend fun hentBrevInnhold(id: Long): ByteArray
 }
-
 
 class BrevServiceImpl(private val client: HttpClient, private val url: String) : BrevService {
     private val logger = LoggerFactory.getLogger(BrevServiceImpl::class.java)

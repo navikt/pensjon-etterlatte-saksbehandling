@@ -30,15 +30,20 @@ class RealRevurderingServiceTest {
 
     @BeforeEach
     fun before() {
-        Kontekst.set(Context(mockk(), object : DatabaseKontekst {
-            override fun activeTx(): Connection {
-                throw IllegalArgumentException()
-            }
+        Kontekst.set(
+            Context(
+                mockk(),
+                object : DatabaseKontekst {
+                    override fun activeTx(): Connection {
+                        throw IllegalArgumentException()
+                    }
 
-            override fun <T> inTransaction(block: () -> T): T {
-                return block()
-            }
-        }))
+                    override fun <T> inTransaction(block: () -> T): T {
+                        return block()
+                    }
+                }
+            )
+        )
     }
 
     @Test
@@ -56,13 +61,17 @@ class RealRevurderingServiceTest {
         }
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val sut = RealRevurderingService(
-            behandlingerMock, RevurderingFactory(behandlingerMock, hendelserMock), hendleseskanal
+            behandlingerMock,
+            RevurderingFactory(behandlingerMock, hendelserMock),
+            hendleseskanal
         )
 
         val revurdering = sut.hentRevurdering(id)
-        assertAll("skal hente revurdering",
+        assertAll(
+            "skal hente revurdering",
             { assertEquals(id, revurdering.id) },
-            { assertTrue(revurdering is Revurdering) })
+            { assertTrue(revurdering is Revurdering) }
+        )
     }
 
     @Test
@@ -79,13 +88,17 @@ class RealRevurderingServiceTest {
         val hendelserMock = mockk<HendelseDao>()
         val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val sut = RealRevurderingService(
-            behandlingerMock, RevurderingFactory(behandlingerMock, hendelserMock), hendelsesKanal
+            behandlingerMock,
+            RevurderingFactory(behandlingerMock, hendelserMock),
+            hendelsesKanal
         )
 
         val revurderinger = sut.hentRevurderinger()
-        assertAll("skal hente revurderinger",
+        assertAll(
+            "skal hente revurderinger",
             { assertEquals(5, revurderinger.size) },
-            { assertTrue(revurderinger.all { it is Revurdering }) })
+            { assertTrue(revurderinger.all { it is Revurdering }) }
+        )
     }
 
     @Test
@@ -110,7 +123,9 @@ class RealRevurderingServiceTest {
             coEvery { send(capture(hendelse)) } returns Unit
         }
         val sut = RealRevurderingService(
-            behandlingerMock, RevurderingFactory(behandlingerMock, hendelserMock), hendelsesKanal
+            behandlingerMock,
+            RevurderingFactory(behandlingerMock, hendelserMock),
+            hendelsesKanal
         )
 
         val opprettetRevurdering =

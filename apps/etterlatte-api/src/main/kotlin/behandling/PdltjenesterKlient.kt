@@ -4,7 +4,11 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -27,17 +31,20 @@ class PdltjenesterKlient(config: Config, httpClient: HttpClient) : EtterlattePdl
     private val resourceUrl = config.getString("pdl.resource.url")
 
     override suspend fun hentPerson(fnr: String, accessToken: String): Person {
-
         try {
             logger.info("Henter persondata fra pdl")
-            val hentPersonRequest = HentPersonRequest(Foedselsnummer.of(fnr),
-                PersonRolle.BARN) // TODO rolle må kanskje sendes med fra api-kallet?
+            val hentPersonRequest = HentPersonRequest(
+                Foedselsnummer.of(fnr),
+                PersonRolle.BARN
+            ) // ktlint-disable max-line-length TODO rolle må kanskje sendes med fra api-kallet?
             val json = downstreamResourceClient
                 .post(
                     Resource(
                         clientId,
                         "$resourceUrl/person"
-                    ), accessToken, hentPersonRequest
+                    ),
+                    accessToken,
+                    hentPersonRequest
                 ).mapBoth(
                     success = { json -> json },
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
@@ -51,7 +58,5 @@ class PdltjenesterKlient(config: Config, httpClient: HttpClient) : EtterlattePdl
             logger.error("Henting av person fra pdl feilet", e)
             throw e
         }
-
     }
-
 }

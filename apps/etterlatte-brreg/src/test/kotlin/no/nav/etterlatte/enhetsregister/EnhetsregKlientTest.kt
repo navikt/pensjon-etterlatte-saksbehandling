@@ -5,13 +5,13 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.MockRequestHandleScope
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.HttpResponseData
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.*
+import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -49,7 +49,7 @@ internal class EnhetsregKlientTest {
         val orgnr = "123456789"
 
         val klient = mockHttpClient("/enhetsregisteret/api/enheter/$orgnr") {
-            respond("", HttpStatusCode.NotFound )
+            respond("", HttpStatusCode.NotFound)
         }
 
         val enhet = runBlocking {
@@ -89,10 +89,9 @@ internal class EnhetsregKlientTest {
                 }
             }
             expectSuccess = true
-            install(ContentNegotiation) { jackson {  } }
+            install(ContentNegotiation) { jackson { } }
         }
 
         return EnhetsregKlient("", httpClient)
     }
-
 }

@@ -3,8 +3,10 @@ package no.nav.etterlatte.pdl
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.HttpClient
-import io.ktor.client.call.*
-import io.ktor.client.request.*
+import io.ktor.client.call.body
+import io.ktor.client.request.accept
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.content.TextContent
 import no.nav.etterlatte.libs.common.RetryResult
@@ -13,7 +15,6 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
 
 class ParallelleSannheterException(override val message: String) : RuntimeException(message)
 
@@ -37,7 +38,7 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
     suspend fun avklarBostedsadresse(pdlBostedsadresse: List<PdlBostedsadresse>) =
         avklarNullable(pdlBostedsadresse, Avklaring.BOSTEDSADRESSE)
 
-    //TODO PPS skal implementere delt bostedsadresse - bruker samme endepunkt som bostedsadresse inntil videre
+    // TODO PPS skal implementere delt bostedsadresse - bruker samme endepunkt som bostedsadresse inntil videre
     suspend fun avklarDeltBostedsadresse(pdlDeltBostedsadresse: List<PdlDeltBostedsadresse>) =
         avklarNullable(pdlDeltBostedsadresse, Avklaring.BOSTEDSADRESSE)
 
@@ -65,7 +66,7 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
                         accept(Json)
                         setBody(TextContent(nodeWithFieldName.toJson(), Json))
                     }.body<JsonNode>()
-                }.let{
+                }.let {
                     when (it) {
                         is RetryResult.Success -> it.content
                         is RetryResult.Failure -> throw it.exceptions.last()
@@ -73,8 +74,9 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
                 }
 
                 // Svar fra parallelle sannheter skal kun inneholde ett element
-                if (responseAsJsonNode.size() != 1)
+                if (responseAsJsonNode.size() != 1) {
                     logger.warn("Parallelle sannheter returnerte mer enn et element for felt ${avklaring.feltnavn}")
+                }
 
                 objectMapper.readValue(responseAsJsonNode.get(avklaring.feltnavn).first().toJson())
             }
@@ -97,5 +99,4 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(ParallelleSannheterKlient::class.java)
     }
-
 }

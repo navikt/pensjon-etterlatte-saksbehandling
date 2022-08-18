@@ -20,5 +20,4 @@ object AvstemmingsdataJaxb {
         )
         return stringWriter.toString()
     }
-
 }

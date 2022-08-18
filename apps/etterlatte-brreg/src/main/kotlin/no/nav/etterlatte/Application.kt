@@ -1,11 +1,11 @@
 package no.nav.etterlatte
 
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
-import io.ktor.http.*
-import io.ktor.serialization.jackson.*
+import io.ktor.http.ContentType
+import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.enhetsregister.EnhetsregKlient
 import no.nav.etterlatte.enhetsregister.EnhetsregService
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
@@ -20,7 +20,7 @@ class ApplicationContext {
     private fun httpClient() = HttpClient {
         expectSuccess = true
         install(ContentNegotiation) {
-            register(ContentType.Application.Json,  JacksonConverter(objectMapper))
+            register(ContentType.Application.Json, JacksonConverter(objectMapper))
         }
 
         defaultRequest {

@@ -16,9 +16,8 @@ import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
 fun barnIngenOppgittUtlandsadresse(
-        soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
+    soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?
 ): VurdertVilkaar {
-
     val opplysningsGrunnlag = listOfNotNull(
         soekerSoeknad?.let {
             Kriteriegrunnlag(

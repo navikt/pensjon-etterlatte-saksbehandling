@@ -2,7 +2,6 @@ package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
 
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.BankkontoType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Svar
 
 data class Utbetalingsinformasjon(
     val bankkontoType: BankkontoType?,
@@ -12,5 +11,5 @@ data class Utbetalingsinformasjon(
     val iban: String?,
     val swift: String?,
     val oenskerSkattetrekk: JaNeiVetIkke?,
-    val oensketSkattetrekkProsent: String?,
+    val oensketSkattetrekkProsent: String?
 )

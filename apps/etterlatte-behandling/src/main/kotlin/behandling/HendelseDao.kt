@@ -54,13 +54,13 @@ class HendelseDao(private val connection: () -> Connection) {
         )
     )
 
-
     fun finnHendelserIBehandling(behandling: UUID): List<LagretHendelse> {
         val stmt = connection().prepareStatement(
             """
                 |SELECT id, hendelse, opprettet, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse 
                 |FROM behandlinghendelse
-                |where behandlingid = ?""".trimMargin()
+                |where behandlingid = ?
+            """.trimMargin()
         )
         stmt.setObject(1, behandling)
         return stmt.executeQuery().toList {
@@ -75,7 +75,7 @@ class HendelseDao(private val connection: () -> Connection) {
                 getString("ident"),
                 getString("identType"),
                 getString("kommentar"),
-                getString("valgtBegrunnelse"),
+                getString("valgtBegrunnelse")
             )
         }
     }
@@ -84,7 +84,8 @@ class HendelseDao(private val connection: () -> Connection) {
         val stmt = connection().prepareStatement(
             """
             |INSERT INTO behandlinghendelse(hendelse, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse) 
-            |VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimMargin()
+            |VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """.trimMargin()
         )
         stmt.setString(1, hendelse.hendelse)
         stmt.setTidspunkt(2, hendelse.inntruffet)
@@ -100,7 +101,6 @@ class HendelseDao(private val connection: () -> Connection) {
 
         logger.info("lagret hendelse: $hendelse")
     }
-
 }
 
 fun PreparedStatement.setTidspunkt(index: Int, value: Tidspunkt?) =
@@ -113,7 +113,6 @@ fun ResultSet.getTidspunkt(name: String) = getTimestamp(name)?.toInstant()?.toTi
 fun ResultSet.getUUID(name: String) = getObject(name) as UUID
 fun ResultSet.getLongOrNull(name: String) = getLong(name).takeIf { !wasNull() }
 
-
 data class LagretHendelse(
     val id: Long,
     val hendelse: String,
@@ -125,7 +124,7 @@ data class LagretHendelse(
     val ident: String?,
     val identType: String?,
     val kommentar: String?,
-    val valgtBegrunnelse: String?,
+    val valgtBegrunnelse: String?
 )
 
 data class UlagretHendelse(
@@ -137,5 +136,5 @@ data class UlagretHendelse(
     val ident: String?,
     val identType: String?,
     val kommentar: String?,
-    val valgtBegrunnelse: String?,
+    val valgtBegrunnelse: String?
 )

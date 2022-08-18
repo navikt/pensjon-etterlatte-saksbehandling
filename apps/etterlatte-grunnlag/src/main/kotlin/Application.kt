@@ -1,6 +1,11 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.grunnlag.*
+import no.nav.etterlatte.grunnlag.BehandlingEndretHendlese
+import no.nav.etterlatte.grunnlag.BehandlingHendelser
+import no.nav.etterlatte.grunnlag.GrunnlagHendelser
+import no.nav.etterlatte.grunnlag.OpplysningDao
+import no.nav.etterlatte.grunnlag.RealGrunnlagService
+import no.nav.etterlatte.grunnlag.grunnlagRoute
 import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 

@@ -25,11 +25,9 @@ internal class LesAvkortingsmeldingTest {
 
     @Test
     fun `skal lese melding`() {
-        //TODO her må vi kanskje endre til avkortingsresultat
+        // TODO her må vi kanskje endre til avkortingsresultat
         val avkortningsres = slot<AvkortingsResultat>()
         every { vedtaksvurderingServiceMock.lagreAvkorting(any(), any(), any(), capture(avkortningsres)) } returns Unit
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
-
     }
-
 }

@@ -1,10 +1,20 @@
 package db
 
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertTrue
+import junit.framework.TestCase.fail
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.db.BrevRepository
-import no.nav.etterlatte.libs.common.brev.model.*
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.*
+import no.nav.etterlatte.libs.common.brev.model.Adresse
+import no.nav.etterlatte.libs.common.brev.model.Brev
+import no.nav.etterlatte.libs.common.brev.model.Mottaker
+import no.nav.etterlatte.libs.common.brev.model.Status
+import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.util.*
@@ -19,7 +29,6 @@ internal class BrevRepositoryIntegrationTest {
     private lateinit var dataSource: DataSource
 
     private val connection get() = dataSource.connection
-
 
     @BeforeAll
     fun beforeAll() {
@@ -135,8 +144,11 @@ internal class BrevRepositoryIntegrationTest {
             it.prepareStatement("SELECT COUNT(*) FROM hendelse WHERE brev_id = ${opprettetBrev.id}")
                 .executeQuery()
                 .let { rs ->
-                    if (rs.next()) rs.getInt("count")
-                    else fail()
+                    if (rs.next()) {
+                        rs.getInt("count")
+                    } else {
+                        fail()
+                    }
                 }
         }
 

@@ -2,7 +2,15 @@ package vedtak
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.domene.vedtak.*
+import no.nav.etterlatte.domene.vedtak.Attestasjon
+import no.nav.etterlatte.domene.vedtak.Behandling
+import no.nav.etterlatte.domene.vedtak.Periode
+import no.nav.etterlatte.domene.vedtak.Sak
+import no.nav.etterlatte.domene.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.domene.vedtak.UtbetalingsperiodeType
+import no.nav.etterlatte.domene.vedtak.Vedtak
+import no.nav.etterlatte.domene.vedtak.VedtakFattet
+import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -382,4 +390,3 @@ fun grunnlag(): List<Grunnlagsopplysning<ObjectNode>> = """
         }
       ]
 """.trimIndent().let { objectMapper.readValue(it) }
-

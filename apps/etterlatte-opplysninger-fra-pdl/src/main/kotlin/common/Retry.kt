@@ -24,7 +24,10 @@ private suspend fun <T> retryInner(times: Int, exceptions: List<Exception>, bloc
     return try {
         Success(block(), exceptions)
     } catch (ex: Exception) {
-        if (times < 1) Failure(exceptions + ex)
-        else retryInner(times - 1, exceptions + ex, block)
+        if (times < 1) {
+            Failure(exceptions + ex)
+        } else {
+            retryInner(times - 1, exceptions + ex, block)
+        }
     }
 }

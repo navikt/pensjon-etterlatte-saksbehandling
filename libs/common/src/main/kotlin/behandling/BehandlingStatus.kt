@@ -17,16 +17,14 @@ enum class BehandlingStatus {
             GYLDIG_SOEKNAD,
             UNDER_BEHANDLING,
             RETURNERT,
-            FATTET_VEDTAK,
+            FATTET_VEDTAK
         )
 
         fun iverksattEllerAttestert() = listOf(
             IVERKSATT,
-            ATTESTERT,
+            ATTESTERT
         )
 
         fun ikkeAvbrutt() = iverksattEllerAttestert() + underBehandling()
     }
 }
-
-

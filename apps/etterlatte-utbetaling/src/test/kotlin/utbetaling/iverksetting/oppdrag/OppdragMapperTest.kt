@@ -12,5 +12,4 @@ internal class OppdragMapperTest {
 
         assertNotNull(oppdrag)
     }
-
 }

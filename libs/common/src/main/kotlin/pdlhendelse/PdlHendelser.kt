@@ -2,7 +2,6 @@ package no.nav.etterlatte.libs.common.pdlhendelse
 
 import java.time.LocalDate
 
-
 sealed interface PdlHendelse
 
 data class Doedshendelse(

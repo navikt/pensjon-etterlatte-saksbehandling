@@ -42,7 +42,7 @@ class IntegrationTest {
             noOfBrokers = 1,
             topicNames = listOf("etterlatte.dodsmelding", "aapen-person-pdl-leesah-v1"),
             withSecurity = false,
-            //users = listOf(JAASCredential("myP1", "myP1p"),JAASCredential("myC1", "myC1p")),
+            // users = listOf(JAASCredential("myP1", "myP1p"),JAASCredential("myC1", "myC1p")),
             autoStart = true,
             withSchemaRegistry = true
         )
@@ -56,7 +56,6 @@ class IntegrationTest {
 
     @Test
     fun test() {
-
         val leesahTopic: KafkaProducer<String, Personhendelse> = producerForLeesah()
         val rapid: KafkaConsumer<String, String> = consumerForRapid()
         mockEndpoint("/personidentresponse.json")
@@ -115,7 +114,6 @@ class IntegrationTest {
             assertEquals("PDL:PERSONHENDELSE", msg[eventNameKey].textValue())
             assertEquals(1, msg["system_read_count"].asInt())
         }
-
     }
 
     private fun testApp() = FinnDodsmeldinger(
@@ -130,7 +128,6 @@ class IntegrationTest {
         pdlService
     )
 
-
     private fun consumerForRapid() = KafkaConsumer(
         mapOf(
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaEnv.brokersURL,
@@ -139,7 +136,9 @@ class IntegrationTest {
             ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to "false",
             ConsumerConfig.MAX_POLL_RECORDS_CONFIG to "10",
             ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG to "100"
-        ), StringDeserializer(), StringDeserializer()
+        ),
+        StringDeserializer(),
+        StringDeserializer()
     )
 
     private fun producerForLeesah() = KafkaProducer<String, Personhendelse>(
@@ -148,7 +147,7 @@ class IntegrationTest {
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to KafkaAvroSerializer::class.java.canonicalName,
             ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to KafkaAvroSerializer::class.java.canonicalName,
             "schema.registry.url" to kafkaEnv.schemaRegistry?.url,
-            ProducerConfig.ACKS_CONFIG to "all",
+            ProducerConfig.ACKS_CONFIG to "all"
         )
     )
 
@@ -169,6 +168,5 @@ class IntegrationTest {
         }
 
         pdlService = PdlService(httpClient, "http://etterlatte-pdltjenester")
-
     }
 }

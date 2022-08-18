@@ -1,9 +1,9 @@
 package no.nav.etterlatte.enhetsregister
 
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.http.*
-import io.ktor.serialization.jackson.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.http.ContentType
+import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.objectMapper
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -14,7 +14,7 @@ internal class EnhetsregServiceIT {
 
     private val httpClient = HttpClient {
         install(ContentNegotiation) {
-            register(ContentType.Application.Json,JacksonConverter(objectMapper))
+            register(ContentType.Application.Json, JacksonConverter(objectMapper))
         }
     }.also {
         Runtime.getRuntime().addShutdownHook(Thread { it.close() })

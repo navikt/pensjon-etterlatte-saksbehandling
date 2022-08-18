@@ -59,7 +59,6 @@ class GyldigSoeknadService(private val pdl: Pdl) {
         val personinfoInnsender = persongalleri.innsender?.let { hentNavnFraPdl(it) }
         val personinfoGjenlevende = persongalleri.gjenlevende.map { hentNavnFraPdl(it) }
 
-
         val innsenderErForelder = innsenderErForelder(
             GyldighetsTyper.INNSENDER_ER_FORELDER,
             personinfoGjenlevende,
@@ -75,7 +74,7 @@ class GyldigSoeknadService(private val pdl: Pdl) {
 
         val ingenAnnenVergeEnnForelder = ingenAnnenVergeEnnForelder(
             GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER,
-            soekerPdl,
+            soekerPdl
         )
 
         val vurderingsliste = listOf(
@@ -90,7 +89,6 @@ class GyldigSoeknadService(private val pdl: Pdl) {
         return GyldighetsResultat(gyldighetResultat, vurderingsliste, vurdertDato)
     }
 
-
     fun innsenderErForelder(
         gyldighetstype: GyldighetsTyper,
         gjenlevende: List<PersonInfoGyldighet?>,
@@ -102,7 +100,7 @@ class GyldigSoeknadService(private val pdl: Pdl) {
         } else {
             vurderOpplysning {
                 gjenlevende.map { it?.fnr }.contains(innsender.fnr) &&
-                        hentFnrForeldre(soekerFamilieRelasjonPdl).contains(innsender.fnr)
+                    hentFnrForeldre(soekerFamilieRelasjonPdl).contains(innsender.fnr)
             }
         }
 
@@ -154,5 +152,4 @@ class GyldigSoeknadService(private val pdl: Pdl) {
             IngenAnnenVergeEnnForelderGrunnlag(soekerPdl?.vergemaalEllerFremtidsfullmakt)
         )
     }
-
 }

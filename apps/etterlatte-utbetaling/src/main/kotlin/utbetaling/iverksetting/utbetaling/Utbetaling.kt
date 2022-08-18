@@ -1,13 +1,11 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
-
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.utbetaling.common.UUID30
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
-
 
 data class VedtakId(val value: Long)
 data class SakId(val value: Long)
@@ -25,14 +23,15 @@ enum class Utbetalingslinjetype {
 }
 
 data class PeriodeForUtbetaling(
-    val fra: LocalDate, val til: LocalDate? = null
+    val fra: LocalDate,
+    val til: LocalDate? = null
 )
 
 data class Kvittering(
     val oppdrag: Oppdrag,
     val alvorlighetsgrad: String,
     val beskrivelse: String? = null,
-    val kode: String? = null,
+    val kode: String? = null
 )
 
 data class Utbetaling(
@@ -64,7 +63,7 @@ data class Utbetalingslinje(
     val opprettet: Tidspunkt,
     val sakId: SakId,
     val periode: PeriodeForUtbetaling,
-    val beloep: BigDecimal? = null,
+    val beloep: BigDecimal? = null
 )
 
 data class Utbetalingshendelse(
@@ -73,5 +72,3 @@ data class Utbetalingshendelse(
     val tidspunkt: Tidspunkt = Tidspunkt.now(),
     val status: UtbetalingStatus
 )
-
-

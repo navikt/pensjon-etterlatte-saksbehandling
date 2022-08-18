@@ -21,12 +21,12 @@ import io.ktor.serialization.jackson.jackson
 import io.ktor.server.auth.Authentication
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.CommonFactory
-import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.behandling.HendelseDao
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.objectMapper
+import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
@@ -64,7 +64,6 @@ class ApplicationTest {
         val beans = TestBeanFactory(postgreSQLContainer.jdbcUrl)
 
         testApplication {
-
             val client = createClient {
                 install(ContentNegotiation) {
                     jackson {
@@ -94,7 +93,6 @@ class ApplicationTest {
                 val lestSak: Sak = it.body()
                 assertEquals("123", lestSak.ident)
                 assertEquals("BP", lestSak.sakType)
-
             }
 
             val behandlingId = client.post("/behandlinger") {
@@ -140,7 +138,6 @@ class ApplicationTest {
                         LocalDateTime.now()
                     )
                 )
-
             }.let {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -154,7 +151,6 @@ class ApplicationTest {
                 assertNotNull(behandling.id)
                 assertEquals("innsender", behandling.innsender)
                 assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving?.resultat)
-
             }
             client.post("/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {
                 addAuthSaksbehandler()
@@ -181,7 +177,6 @@ class ApplicationTest {
                 val behandling: DetaljertBehandling = it.body()
                 assertNotNull(behandling.id)
                 assertEquals("FATTET_VEDTAK", behandling.status?.name)
-
             }
 
             client.get("/oppgaver") {
@@ -229,11 +224,11 @@ class ApplicationTest {
 }
 
 val clientCredentialTokenMedKanSetteKildeRolle =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImVuLWFwcCIsIm9pZCI6ImVuLWFwcCIsIm5hbWUiOiJKb2huIERvZSIsImlhdCI6MTUxNjIzOTAyMiwiTkFWaWRlbnQiOiJTYWtzYmVoYW5kbGVyMDEiLCJyb2xlcyI6WyJrYW4tc2V0dGUta2lsZGUiXX0.2ftwnoZiUfUa_J6WUkqj_Wdugb0CnvVXsEs-JYnQw_g"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImVuLWFwcCIsIm9pZCI6ImVuLWFwcCIsIm5hbWUiOiJKb2huIERvZSIsImlhdCI6MTUxNjIzOTAyMiwiTkFWaWRlbnQiOiJTYWtzYmVoYW5kbGVyMDEiLCJyb2xlcyI6WyJrYW4tc2V0dGUta2lsZGUiXX0.2ftwnoZiUfUa_J6WUkqj_Wdugb0CnvVXsEs-JYnQw_g" // ktlint-disable max-line-length
 val saksbehandlerToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIGZvciBzYWtzYmVoYW5kbGVyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZWhhbmRsZXIwMSJ9.271mDij4YsO4Kk8w8AvX5BXxlEA8U-UAOtdG1Ix_kQY"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIGZvciBzYWtzYmVoYW5kbGVyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZWhhbmRsZXIwMSJ9.271mDij4YsO4Kk8w8AvX5BXxlEA8U-UAOtdG1Ix_kQY" // ktlint-disable max-line-length
 val attestererToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIGZvciBzYWtzYmVoYW5kbGVyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZWhhbmRsZXIwMSIsImdyb3VwcyI6WyIwYWYzOTU1Zi1kZjg1LTRlYjAtYjViMi00NWJmMmM4YWViOWUiLCI2M2Y0NmY3NC04NGE4LTRkMWMtODdhOC03ODUzMmFiM2FlNjAiXX0.YzF4IXwaolgOCODNwkEKn43iZbwHpQuSmQObQm0co-A"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIGZvciBzYWtzYmVoYW5kbGVyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZWhhbmRsZXIwMSIsImdyb3VwcyI6WyIwYWYzOTU1Zi1kZjg1LTRlYjAtYjViMi00NWJmMmM4YWViOWUiLCI2M2Y0NmY3NC04NGE4LTRkMWMtODdhOC03ODUzMmFiM2FlNjAiXX0.YzF4IXwaolgOCODNwkEKn43iZbwHpQuSmQObQm0co-A" // ktlint-disable max-line-length
 
 fun HttpRequestBuilder.addAuthSaksbehandler() {
     header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
@@ -247,9 +242,8 @@ fun HttpRequestBuilder.addAuthServiceBruker() {
     header(HttpHeaders.Authorization, "Bearer $clientCredentialTokenMedKanSetteKildeRolle")
 }
 
-
 class TestBeanFactory(
-    private val jdbcUrl: String,
+    private val jdbcUrl: String
 ) : CommonFactory() {
     val rapidSingleton: TestProdusent<String, String> by lazy { TestProdusent() }
     override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
@@ -287,10 +281,8 @@ class TestBeanFactory(
                         error(req.url.fullPath)
                     }
                 }
-
             }
         },
         me = "me"
     )
-
 }

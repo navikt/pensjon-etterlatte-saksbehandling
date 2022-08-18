@@ -35,17 +35,19 @@ internal class FattVedtak(
             try {
                 val fattetVedtak = vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler)
 
-                context.publish(JsonMessage.newMessage(
-                    mapOf(
-                        eventNameKey to "VEDTAK:FATTET",
-                        "vedtak" to fattetVedtak,
-                        "behandlingId" to behandlingId,
-                        "sakId" to fattetVedtak.sak.id,
-                        "vedtakId" to fattetVedtak.vedtakId,
-                        "eventtimestamp" to fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
-                        "saksbehandler" to fattetVedtak.vedtakFattet?.ansvarligSaksbehandler!!
-                    )
-                ).toJson())
+                context.publish(
+                    JsonMessage.newMessage(
+                        mapOf(
+                            eventNameKey to "VEDTAK:FATTET",
+                            "vedtak" to fattetVedtak,
+                            "behandlingId" to behandlingId,
+                            "sakId" to fattetVedtak.sak.id,
+                            "vedtakId" to fattetVedtak.vedtakId,
+                            "eventtimestamp" to fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
+                            "saksbehandler" to fattetVedtak.vedtakFattet?.ansvarligSaksbehandler!!
+                        )
+                    ).toJson()
+                )
             } catch (ex: Exception) {
                 when (ex) {
                     is KanIkkeEndreFattetVedtak,

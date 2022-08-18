@@ -1,10 +1,11 @@
 package no.nav.etterlatte
 
-import io.ktor.server.application.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.application.call
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.OppgaveService
-
 
 fun Route.oppgaveRoute(service: OppgaveService) {
     route("oppgaver") {
@@ -19,7 +20,5 @@ fun Route.oppgaveRoute(service: OppgaveService) {
                 throw e
             }
         }
-
     }
-
 }

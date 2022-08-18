@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory
 
 class GrunnlagHendelser(
     rapidsConnection: RapidsConnection,
-    private val grunnlag: GrunnlagService,
+    private val grunnlag: GrunnlagService
 ) : River.PacketListener {
     private val logger: Logger = LoggerFactory.getLogger(GrunnlagHendelser::class.java)
 
@@ -39,12 +39,14 @@ class GrunnlagHendelser(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val opplysningsTyper = Opplysningstyper.values().map { it.name }
 
-        if ((packet[eventNameKey].asText() == "OPPLYSNING:NY")
-            || (opplysningsTyper.contains(packet[behovNameKey].asText()))) {
-
+        if ((packet[eventNameKey].asText() == "OPPLYSNING:NY") ||
+            (opplysningsTyper.contains(packet[behovNameKey].asText()))
+        ) {
             withLogContext(packet.correlationId) {
                 try {
-                    val opplysninger: List<Grunnlagsopplysning<ObjectNode>> = objectMapper.readValue(packet["opplysning"].toJson())!!
+                    val opplysninger: List<Grunnlagsopplysning<ObjectNode>> = objectMapper.readValue(
+                        packet["opplysning"].toJson()
+                    )!!
 
                     // Send melding om behov som er avhengig av en annen opplysning
                     opplysninger.forEach {
@@ -55,11 +57,12 @@ class GrunnlagHendelser(
 
                     val grunnlag = grunnlag.opprettGrunnlag(packet["sakId"].asLong(), opplysninger)
 
-                    JsonMessage.newMessage("GRUNNLAG:GRUNNLAGENDRET",
+                    JsonMessage.newMessage(
+                        "GRUNNLAG:GRUNNLAGENDRET",
                         mapOf(
                             "grunnlag" to grunnlag,
                             correlationIdKey to packet[correlationIdKey],
-                            "sakId" to packet["sakId"],
+                            "sakId" to packet["sakId"]
                         )
                     ).apply {
                         context.publish(toJson())
@@ -69,7 +72,6 @@ class GrunnlagHendelser(
                     logger.error("Spiser en melding fordi: " + e.message)
                 }
             }
-
         } else {
             return
         }
@@ -95,4 +97,3 @@ class GrunnlagHendelser(
         }
     }
 }
-

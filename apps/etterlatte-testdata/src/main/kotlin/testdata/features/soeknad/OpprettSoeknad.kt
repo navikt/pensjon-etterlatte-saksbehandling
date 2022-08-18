@@ -1,20 +1,28 @@
 package testdata.features.soeknad
 
+import JsonMessage
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
-import io.ktor.client.*
-import io.ktor.server.application.*
-import io.ktor.server.mustache.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import no.nav.etterlatte.*
-import no.nav.etterlatte.batch.JsonMessage
+import io.ktor.client.HttpClient
+import io.ktor.server.application.call
+import io.ktor.server.mustache.MustacheContent
+import io.ktor.server.request.receiveParameters
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondRedirect
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import no.nav.etterlatte.TestDataFeature
+import no.nav.etterlatte.getAccessToken
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
+import no.nav.etterlatte.logger
+import no.nav.etterlatte.navIdentFraToken
+import no.nav.etterlatte.objectMapper
+import no.nav.etterlatte.producer
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -28,7 +36,8 @@ class OpprettSoeknadFeature(val config: Config, val httpClient: HttpClient) : Te
             get {
                 call.respond(
                     MustacheContent(
-                        "soeknad/ny-soeknad.hbs", mapOf(
+                        "soeknad/ny-soeknad.hbs",
+                        mapOf(
                             "beskrivelse" to beskrivelse,
                             "path" to path
                         )
@@ -96,7 +105,8 @@ class OpprettSoeknadFeature(val config: Config, val httpClient: HttpClient) : Te
 
                 call.respond(
                     MustacheContent(
-                        "soeknad/soeknad-sendt.hbs", mapOf(
+                        "soeknad/soeknad-sendt.hbs",
+                        mapOf(
                             "path" to path,
                             "beskrivelse" to beskrivelse,
                             "partisjon" to partisjon,
@@ -106,7 +116,6 @@ class OpprettSoeknadFeature(val config: Config, val httpClient: HttpClient) : Te
                 )
             }
         }
-
 }
 
 private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFnr: String): String {
@@ -369,4 +378,3 @@ private fun opprettSkjemaInfo(
       "template": "barnepensjon_v2"
     }
 """.trimIndent()
-

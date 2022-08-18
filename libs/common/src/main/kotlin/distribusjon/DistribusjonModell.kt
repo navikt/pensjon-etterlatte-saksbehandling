@@ -9,7 +9,7 @@ data class DistribuerJournalpostRequest(
     val bestillendeFagsystem: String,
     val dokumentProdApp: String,
     val distribusjonstype: DistribusjonsType,
-    val distribusjonstidspunkt: DistribusjonsTidspunktType,
+    val distribusjonstidspunkt: DistribusjonsTidspunktType
 )
 
 data class Adresse(

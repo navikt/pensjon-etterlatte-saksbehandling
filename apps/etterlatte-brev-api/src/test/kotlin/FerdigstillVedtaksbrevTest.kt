@@ -15,10 +15,12 @@ class FerdigstillVedtaksbrevTest {
 
     @Test
     fun `Skal ferdigstille vedtaksbrev naar et vedtak blir attestert`() {
-        val melding = JsonMessage.newMessage(mapOf(
-            eventNameKey to "VEDTAK:ATTESTERT",
-            "vedtak" to VedtakServiceMock().hentVedtak("ABCD")
-        ))
+        val melding = JsonMessage.newMessage(
+            mapOf(
+                eventNameKey to "VEDTAK:ATTESTERT",
+                "vedtak" to VedtakServiceMock().hentVedtak("ABCD")
+            )
+        )
 
         inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 

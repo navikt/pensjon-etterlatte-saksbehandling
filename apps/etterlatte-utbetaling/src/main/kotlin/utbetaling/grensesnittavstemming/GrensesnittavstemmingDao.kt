@@ -24,7 +24,7 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
                     "periode_fra" to Timestamp.from(grensesnittavstemming.periode.fraOgMed.instant).param<Timestamp>(),
                     "periode_til" to Timestamp.from(grensesnittavstemming.periode.til.instant).param<Timestamp>(),
                     "antall_oppdrag" to grensesnittavstemming.antallOppdrag.param<Int>(),
-                    "avstemmingsdata" to grensesnittavstemming.avstemmingsdata.param<String>(),
+                    "avstemmingsdata" to grensesnittavstemming.avstemmingsdata.param<String>()
                 )
             )
                 .let { session.run(it.asUpdate) }
@@ -50,9 +50,9 @@ class GrensesnittavstemmingDao(private val dataSource: DataSource) {
             opprettet = row.instant("opprettet").toTidspunkt(),
             periode = Avstemmingsperiode(
                 fraOgMed = row.instant("periode_fra").toTidspunkt(),
-                til = row.instant("periode_til").toTidspunkt(),
+                til = row.instant("periode_til").toTidspunkt()
             ),
             antallOppdrag = row.int("antall_oppdrag"),
-            avstemmingsdata = row.string("avstemmingsdata"),
+            avstemmingsdata = row.string("avstemmingsdata")
         )
 }

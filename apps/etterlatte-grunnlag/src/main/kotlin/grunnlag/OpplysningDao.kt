@@ -27,7 +27,7 @@ class OpplysningDao(private val datasource: DataSource) {
             objectMapper.readValue(getString("kilde")),
             Opplysningstyper.valueOf(getString("opplysning_type")),
             objectMapper.createObjectNode(),
-            getString("opplysning").deSerialize()!!,
+            getString("opplysning").deSerialize()!!
         )
     }
 
@@ -35,7 +35,7 @@ class OpplysningDao(private val datasource: DataSource) {
         return GrunnlagHendelse(
             asBehandlingOpplysning(),
             getLong("sak_id"),
-            getLong("hendelsenummer"),
+            getLong("hendelsenummer")
         )
     }
 
@@ -44,7 +44,8 @@ class OpplysningDao(private val datasource: DataSource) {
             """
             SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer   
             FROM grunnlagshendelse hendelse 
-            WHERE hendelse.sak_id = ? AND NOT EXISTS(SELECT 1 FROM grunnlagshendelse annen where annen.sak_id = hendelse.sak_id AND hendelse.opplysning_type = annen.opplysning_type AND annen.hendelsenummer > hendelse.hendelsenummer)""".trimIndent()
+            WHERE hendelse.sak_id = ? AND NOT EXISTS(SELECT 1 FROM grunnlagshendelse annen where annen.sak_id = hendelse.sak_id AND hendelse.opplysning_type = annen.opplysning_type AND annen.hendelsenummer > hendelse.hendelsenummer)
+            """.trimIndent()
         )
             .apply {
                 setLong(1, sakId)
@@ -57,7 +58,8 @@ class OpplysningDao(private val datasource: DataSource) {
                 """
                 SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer   
                 FROM grunnlagshendelse hendelse 
-                WHERE hendelse.sak_id = ? AND hendelse.opplysning_type = ? AND NOT EXISTS(SELECT 1 FROM grunnlagshendelse annen where annen.sak_id = hendelse.sak_id AND hendelse.opplysning_type = annen.opplysning_type AND annen.hendelsenummer > hendelse.hendelsenummer)""".trimIndent()
+                WHERE hendelse.sak_id = ? AND hendelse.opplysning_type = ? AND NOT EXISTS(SELECT 1 FROM grunnlagshendelse annen where annen.sak_id = hendelse.sak_id AND hendelse.opplysning_type = annen.opplysning_type AND annen.hendelsenummer > hendelse.hendelsenummer)
+                """.trimIndent()
             )
                 .apply {
                     setLong(1, sakId)
@@ -69,7 +71,8 @@ class OpplysningDao(private val datasource: DataSource) {
         connection.use {
             it.prepareStatement(
                 """INSERT INTO grunnlagshendelse(opplysning_id, sak_id, opplysning, kilde, opplysning_type, hendelsenummer)
-                | VALUES(?, ?, ?, ?, ?, COALESCE((select max (hendelsenummer) + 1 from grunnlagshendelse where sak_id = ?), 1)) returning hendelsenummer """.trimMargin()
+                | VALUES(?, ?, ?, ?, ?, COALESCE((select max (hendelsenummer) + 1 from grunnlagshendelse where sak_id = ?), 1)) returning hendelsenummer 
+                """.trimMargin()
             )
                 .apply {
                     setObject(1, behandlingsopplysning.id)

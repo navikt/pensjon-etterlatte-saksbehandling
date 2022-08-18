@@ -9,11 +9,10 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
+import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.OppgaveListe
 import no.nav.etterlatte.typer.Saker
-import no.nav.etterlatte.typer.LagretHendelser
 import org.slf4j.LoggerFactory
-
 
 interface EtterlatteBehandling {
     suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker
@@ -35,13 +34,11 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
 
-
     companion object {
         fun serialize(data: Any): String {
             return objectMapper.writeValueAsString(data)
         }
     }
-
 
     @Suppress("UNCHECKED_CAST")
     override suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker {
@@ -52,7 +49,8 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                     Resource(
                         clientId,
                         "$resourceUrl/personer/$fnr/saker"
-                    ), accessToken
+                    ),
+                    accessToken
                 ).mapBoth(
                     success = { json -> json },
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
@@ -74,7 +72,8 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                     Resource(
                         clientId,
                         "$resourceUrl/saker"
-                    ), accessToken
+                    ),
+                    accessToken
                 ).mapBoth(
                     success = { json -> json },
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
@@ -96,7 +95,8 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                     Resource(
                         clientId,
                         "$resourceUrl/oppgaver"
-                    ), accessToken
+                    ),
+                    accessToken
                 ).mapBoth(
                     success = { json -> json },
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
@@ -165,8 +165,13 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         logger.info("Henter hendelser for en behandling")
         try {
             val json =
-                downstreamResourceClient.get(Resource(clientId,
-                    "$resourceUrl/behandlinger/$behandlingId/hendelser/vedtak"), accessToken)
+                downstreamResourceClient.get(
+                    Resource(
+                        clientId,
+                        "$resourceUrl/behandlinger/$behandlingId/hendelser/vedtak"
+                    ),
+                    accessToken
+                )
                     .mapBoth(
                         success = { json -> json },
                         failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
@@ -184,14 +189,18 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         logger.info("sletter revurderinger for en sakId")
         return try {
             val json =
-                downstreamResourceClient.delete(Resource(clientId, "$resourceUrl/behandlinger/revurdering/$sakId"),
+                downstreamResourceClient.delete(
+                    Resource(clientId, "$resourceUrl/behandlinger/revurdering/$sakId"),
                     accessToken,
-                    "")
+                    ""
+                )
                     .mapBoth(
                         success = { true },
                         failure = { throwableErrorMessage ->
-                            throw Error(throwableErrorMessage.message,
-                                throwableErrorMessage.throwable)
+                            throw Error(
+                                throwableErrorMessage.message,
+                                throwableErrorMessage.throwable
+                            )
                         }
                     )
             logger.info("Slettet revurderinger for sak med id $sakId")
@@ -201,6 +210,4 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
             false
         }
     }
-
 }
-

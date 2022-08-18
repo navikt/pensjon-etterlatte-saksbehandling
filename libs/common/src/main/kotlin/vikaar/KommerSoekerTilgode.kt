@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 data class KommerSoekerTilgode(
     val kommerSoekerTilgodeVurdering: VilkaarResultat,
-    val familieforhold: Familiemedlemmer,
+    val familieforhold: Familiemedlemmer
 )
 data class Familiemedlemmer(
     val avdoed: PersoninfoAvdoed,
@@ -22,7 +22,7 @@ data class PersoninfoSoeker(
     val rolle: PersonRolle,
     val bostedadresser: List<Adresse>?,
     val soeknadAdresse: UtenlandsadresseBarn?,
-    val foedselsdato: LocalDate?,
+    val foedselsdato: LocalDate?
 )
 
 data class PersoninfoAvdoed(
@@ -31,13 +31,12 @@ data class PersoninfoAvdoed(
     val rolle: PersonRolle,
     val bostedadresser: List<Adresse>?,
     val doedsdato: LocalDate?,
-    val barn: List<Foedselsnummer>?,
+    val barn: List<Foedselsnummer>?
 )
-
 
 data class PersoninfoGjenlevendeForelder(
     val navn: String,
     val fnr: Foedselsnummer?,
     val rolle: PersonRolle,
-    val bostedadresser: List<Adresse>?,
+    val bostedadresser: List<Adresse>?
 )

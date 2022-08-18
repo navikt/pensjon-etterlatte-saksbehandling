@@ -27,12 +27,14 @@ class OppdaterDistribusjonStatusTest {
 
     @Test
     fun `Skal lagre ned journalpost-detaljer ved svar fra brev-distribusjon`() {
-        val melding = JsonMessage.newMessage(mapOf(
-            eventNameKey to BrevEventTypes.JOURNALFOERT.toString(),
-            "brevId" to brevId,
-            correlationIdKey to UUID.randomUUID().toString(),
-            "journalpostResponse" to journalpostResponse.toJson()
-        ))
+        val melding = JsonMessage.newMessage(
+            mapOf(
+                eventNameKey to BrevEventTypes.JOURNALFOERT.toString(),
+                "brevId" to brevId,
+                correlationIdKey to UUID.randomUUID().toString(),
+                "journalpostResponse" to journalpostResponse.toJson()
+            )
+        )
 
         inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 
@@ -47,13 +49,15 @@ class OppdaterDistribusjonStatusTest {
     @Test
     fun `Skal lagre ned distribusjons-detaljer ved svar fra brev-distribusjon`() {
         val bestillingId = UUID.randomUUID().toString()
-        val melding = JsonMessage.newMessage(mapOf(
-            eventNameKey to BrevEventTypes.DISTRIBUERT.toString(),
-            "brevId" to brevId,
-            correlationIdKey to UUID.randomUUID().toString(),
-            "journalpostResponse" to journalpostResponse.toJson(),
-            "bestillingId" to bestillingId
-        ))
+        val melding = JsonMessage.newMessage(
+            mapOf(
+                eventNameKey to BrevEventTypes.DISTRIBUERT.toString(),
+                "brevId" to brevId,
+                correlationIdKey to UUID.randomUUID().toString(),
+                "journalpostResponse" to journalpostResponse.toJson(),
+                "bestillingId" to bestillingId
+            )
+        )
 
         inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 

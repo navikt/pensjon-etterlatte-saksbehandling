@@ -11,7 +11,7 @@ import java.util.*
 import java.util.Objects.isNull
 
 data class Vedtak(
-    val vedtakId: Long, //Løpenummer (BIGSERIAL)
+    val vedtakId: Long, // Løpenummer (BIGSERIAL)
     val virk: Periode,
     val sak: Sak,
     val behandling: Behandling,
@@ -22,12 +22,12 @@ data class Vedtak(
     val avkorting: BilagMedSammendrag<List<Beregningsperiode>>?,
     val pensjonTilUtbetaling: List<Utbetalingsperiode>?,
     val vedtakFattet: VedtakFattet?,
-    val attestasjon: Attestasjon?,
+    val attestasjon: Attestasjon?
 )
 
 data class Behandling(
     val type: BehandlingType,
-    val id: UUID,
+    val id: UUID
 )
 
 data class Sak(val ident: String, val sakType: String, val id: Long)
@@ -54,7 +54,7 @@ data class VedtakFattet(
 
 data class Beregningsperiode(
     val periode: Periode,
-    val beloep: BigDecimal,
+    val beloep: BigDecimal
 )
 
 data class Utbetalingsperiode(
@@ -65,12 +65,12 @@ data class Utbetalingsperiode(
 )
 
 enum class UtbetalingsperiodeType {
-    OPPHOER, UTBETALING  // TODO: trenger vi en ENDRING-type her?
+    OPPHOER, UTBETALING // TODO: trenger vi en ENDRING-type her?
 }
 
 data class Attestasjon(
     val attestant: String,
-    val attesterendeEnhet: String, //aktuell?
+    val attesterendeEnhet: String, // aktuell?
     val tidspunkt: ZonedDateTime
 )
 

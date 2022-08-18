@@ -5,17 +5,25 @@ import no.nav.etterlatte.libs.common.person.Person
 import java.time.YearMonth
 
 // Adressesjekk på halvsøsken på dødsfallstidspunkt i første omgang
-data class FinnSoeskenPeriodeStrategyAutomatisk(val avdoedesBarn: List<Person>?, val bruker: Person?, private val virkFOM: YearMonth) : FinnSoeskenPeriodeStrategy() {
+data class FinnSoeskenPeriodeStrategyAutomatisk(
+    val avdoedesBarn: List<Person>?,
+    val bruker: Person?,
+    private val virkFOM: YearMonth
+) : FinnSoeskenPeriodeStrategy() {
     override val soeskenperioder: List<SoeskenPeriode>
         get() = finnSoeskenperioder(avdoedesBarn, bruker, virkFOM)
 
-    private fun finnSoeskenperioder(avdoedesBarn: List<Person>?, bruker: Person?, virkFOM: YearMonth): List<SoeskenPeriode> {
-        //List compare?
+    private fun finnSoeskenperioder(
+        avdoedesBarn: List<Person>?,
+        bruker: Person?,
+        virkFOM: YearMonth
+    ): List<SoeskenPeriode> {
+        // List compare?
         val helsoesken = avdoedesBarn?.filter { it.familieRelasjon?.foreldre == bruker?.familieRelasjon?.foreldre }
         val halvsoesken = avdoedesBarn?.filter { avdoedbarn ->
             avdoedbarn.foedselsnummer !in (helsoesken?.map { helsoesken -> helsoesken.foedselsnummer } ?: emptyList())
         }
-        //first skal være ok, siden PPS allerede har sortert
+        // first skal være ok, siden PPS allerede har sortert
         val halvsoeskenOppdrattSammen =
             halvsoesken?.filter { it.bostedsadresse?.first() == bruker?.bostedsadresse?.first() }
         val kull: MutableList<Person> = ArrayList()
@@ -23,7 +31,7 @@ data class FinnSoeskenPeriodeStrategyAutomatisk(val avdoedesBarn: List<Person>?,
         halvsoeskenOppdrattSammen?.let { kull.addAll(it) }
 
         val perioder = beregnSoeskenperioder(kull, virkFOM)
-        //TODO håndtere doedsfall
+        // TODO håndtere doedsfall
         return perioder.map {
             SoeskenPeriode(
                 it.first,
@@ -51,5 +59,4 @@ data class FinnSoeskenPeriodeStrategyAutomatisk(val avdoedesBarn: List<Person>?,
             .filter { ((fra.year - it.first.year) * 12 + (fra.month.value - it.first.month.value)) / 12 < 18 }
             .map { it.second }
     }
-
 }

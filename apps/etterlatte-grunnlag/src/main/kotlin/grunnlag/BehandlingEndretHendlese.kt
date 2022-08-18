@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 
 class BehandlingEndretHendlese(
     rapidsConnection: RapidsConnection,
-    private val grunnlag: GrunnlagService,
+    private val grunnlag: GrunnlagService
 ) : River.PacketListener {
 
     private val logger: Logger = LoggerFactory.getLogger(GrunnlagHendelser::class.java)
@@ -23,21 +23,19 @@ class BehandlingEndretHendlese(
         River(rapidsConnection).apply {
             eventName(BehandlingGrunnlagEndret.eventName)
             correlationId()
-            validate {  it.requireKey(BehandlingGrunnlagEndret.sakIdKey) }
-            validate {  it.rejectKey(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey) }
+            validate { it.requireKey(BehandlingGrunnlagEndret.sakIdKey) }
+            validate { it.rejectKey(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey) }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-
             try {
                 val grunnlag = grunnlag.hentGrunnlag(packet[BehandlingGrunnlagEndret.sakIdKey].asLong())
                 packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey] = grunnlag
                 context.publish(
                     packet.toJson()
                 )
-
             } catch (e: Exception) {
                 logger.error("Feil ved henting av grunnlag", e)
             }

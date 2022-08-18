@@ -29,7 +29,7 @@ data class Foerstegangsbehandling(
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     val soeknadMottattDato: LocalDateTime,
     val persongalleri: Persongalleri,
-    val gyldighetsproeving: GyldighetsResultat?,
+    val gyldighetsproeving: GyldighetsResultat?
 ) : Behandling
 
 data class Revurdering(

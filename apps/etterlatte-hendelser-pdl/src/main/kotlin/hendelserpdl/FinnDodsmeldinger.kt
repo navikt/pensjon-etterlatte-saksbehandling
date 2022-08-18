@@ -9,7 +9,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.format.DateTimeFormatter
 
-
 class FinnDodsmeldinger(
     private val livshendelser: ILivetErEnStroemAvHendelser,
     private val dodshendelser: IDodsmeldinger,
@@ -28,7 +27,10 @@ class FinnDodsmeldinger(
             meldinger++
 
             if (it.getOpplysningstype() == "DOEDSFALL_V1") {
-                log.info("Doedshendelse mottatt for : ${it.personidenter} med hendelsesId: ${it.hendelseId} og endringstype ${it.endringstype}. Evt. tidligere henselsesid: ${it.tidligereHendelseId}")
+                log.info(
+                    "Doedshendelse mottatt for : ${it.personidenter} med hendelsesId: ${it.hendelseId} og " +
+                        "endringstype ${it.endringstype}. Evt. tidligere henselsesid: ${it.tidligereHendelseId}"
+                )
                 log.info("Fullstendig doedshendelse: $it")
                 try {
                     val personnummer =
@@ -41,34 +43,31 @@ class FinnDodsmeldinger(
                         endringstype
                     )
                 } catch (e: Exception) {
-                    log.error("kunne ikke hente folkeregisterident for ${it.personidenter.first()}. Går til neste melding")
+                    log.error(
+                        "kunne ikke hente folkeregisterident for ${it.personidenter.first()}. Går til neste melding"
+                    )
                 }
                 dodsmeldinger++
             } else {
-                //log.info("Så opplysning om ${it.opplysningstype} opprettet ${it.opprettet} for ident ${it.personidenter} med endringstype ${it.endringstype} og hendelsesid: ${it.hendelseId}")
+                // log.info("Så opplysning om ${it.opplysningstype} opprettet ${it.opprettet} for ident ${it.personidenter} med endringstype ${it.endringstype} og hendelsesid: ${it.hendelseId}")
             }
-
         }
-
 
         runBlocking {
             if (antallMeldingerLest == 0) delay(500)
         }
     }
 
-
     fun fraStart() {
         livshendelser.fraStart()
     }
 
-
     fun stop() {
-        //livshendelser.stop()
+        // livshendelser.stop()
         stopped = true
     }
 
     fun start() {
         stopped = false
     }
-
 }

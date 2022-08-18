@@ -22,16 +22,22 @@ internal class LesVilkaarsmeldingTest {
             ?: throw FileNotFoundException("Fant ikke filen $file")
     }
 
-
     private val inspector = TestRapid().apply { LagreVilkaarsresultat(this, vedtaksvurderingServiceMock) }
 
     @Test
     fun `skal lese melding`() {
         val vilkarsres = slot<VilkaarResultat>()
-        every { vedtaksvurderingServiceMock.lagreVilkaarsresultat(any(), any(), any(), any(), capture(vilkarsres), any()) } returns Unit
+        every {
+            vedtaksvurderingServiceMock.lagreVilkaarsresultat(
+                any(),
+                any(),
+                any(),
+                any(),
+                capture(vilkarsres),
+                any()
+            )
+        } returns Unit
         inspector.apply { sendTestMessage(melding) }.inspektør
         Assertions.assertEquals(VurderingsResultat.OPPFYLT, vilkarsres.captured.resultat)
-
     }
-
 }

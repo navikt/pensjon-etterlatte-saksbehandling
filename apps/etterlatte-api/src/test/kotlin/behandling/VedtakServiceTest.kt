@@ -4,9 +4,8 @@ import no.nav.etterlatte.behandling.VedtakService
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
 
 internal class VedtakServiceTest {
 

@@ -23,7 +23,10 @@ class GrunnlagsendringshendelseJob(
             period = periode.toMillis()
         ) {
             try {
-                logger.info("Forbereder GrunnlagsendringshendelseJob med jobbavn: ${jobbNavn}, initialDelay: $initialDelay og periode i ms: ${periode.toMillis()}")
+                logger.info(
+                    "Forbereder GrunnlagsendringshendelseJob med jobbavn: $jobbNavn, initialDelay: $initialDelay og " +
+                        "periode i ms: ${periode.toMillis()}"
+                )
                 SjekkKlareGrunnlagsendringshendelser(
                     grunnlagsendringshendelseService = grunnlagsendringshendelseService,
                     leaderElection = leaderElection,
@@ -54,5 +57,4 @@ class GrunnlagsendringshendelseJob(
             }
         }
     }
-
 }

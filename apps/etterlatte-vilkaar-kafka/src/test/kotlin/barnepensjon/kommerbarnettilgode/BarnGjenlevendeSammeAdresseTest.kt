@@ -14,7 +14,13 @@ import java.time.LocalDate
 class BarnGjenlevendeSammeAdresseTest {
     @Test
     fun vuderBarnGjenlevndeSammeBostedsadresse() {
-        val barnPdlNorge = lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresserNorgePdl(), avdoedErForeldre)
+        val barnPdlNorge = lagMockPersonPdl(
+            foedselsdatoBarnUnder20,
+            fnrBarn,
+            null,
+            adresserNorgePdl(),
+            avdoedErForeldre
+        )
         val gjenlevendePdlNorge = lagMockPersonPdl(null, fnrGjenlevende, null, adresserNorgePdl(), null)
         val gjenlevendePdlDanmark = lagMockPersonPdl(null, fnrGjenlevende, null, adresseDanmarkPdl(), null)
 
@@ -29,7 +35,6 @@ class BarnGjenlevendeSammeAdresseTest {
         )
         Assertions.assertEquals(VurderingsResultat.OPPFYLT, sammeAdresse.resultat)
         Assertions.assertEquals(VurderingsResultat.IKKE_OPPFYLT, ulikeAdresse.resultat)
-
     }
 
     companion object {

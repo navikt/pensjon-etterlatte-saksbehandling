@@ -35,13 +35,17 @@ internal class LagreKommerSoekerTilgodeResultat(
         withLogContext(packet.correlationId) {
             val behandlingId = packet["behandlingId"].asUUID()
             val sakId = packet["sakId"].toString()
-            val kommerSoekerTilgodeResultat = objectMapper.readValue(packet["kommerSoekerTilGode"].toString(),
-                KommerSoekerTilgode::class.java)
+            val kommerSoekerTilgodeResultat = objectMapper.readValue(
+                packet["kommerSoekerTilGode"].toString(),
+                KommerSoekerTilgode::class.java
+            )
             try {
-                vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(sakId,
+                vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(
+                    sakId,
                     behandlingId,
                     packet["fnrSoeker"].textValue(),
-                    kommerSoekerTilgodeResultat)
+                    kommerSoekerTilgodeResultat
+                )
             } catch (e: KanIkkeEndreFattetVedtak) {
                 packet[eventNameKey] = "VEDTAK:ENDRING_FORKASTET"
                 packet["vedtakId"] = e.vedtakId
@@ -52,6 +56,5 @@ internal class LagreKommerSoekerTilgodeResultat(
             } catch (e: Exception) {
                 logger.warn("Kunne ikke oppdatere vedtak", e)
             }
-
         }
 }

@@ -1,9 +1,9 @@
 package no.nav.etterlatte.vilkaar.barnepensjon
 
 import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
+import no.nav.etterlatte.barnepensjon.harKunNorskePdlAdresserEtterDato
 import no.nav.etterlatte.barnepensjon.hentAdresser
 import no.nav.etterlatte.barnepensjon.hentDoedsdato
-import no.nav.etterlatte.barnepensjon.harKunNorskePdlAdresserEtterDato
 import no.nav.etterlatte.barnepensjon.opplysningsGrunnlagNull
 import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraKriterier
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
@@ -14,8 +14,8 @@ import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import java.time.LocalDateTime
@@ -24,9 +24,8 @@ fun vilkaarBarnetsMedlemskap(
     soekerPdl: VilkaarOpplysning<Person>?,
     soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
     gjenlevendePdl: VilkaarOpplysning<Person>?,
-    avdoedPdl: VilkaarOpplysning<Person>?,
+    avdoedPdl: VilkaarOpplysning<Person>?
 ): VurdertVilkaar {
-
     val barnHarIkkeAdresseIUtlandet =
         kriterieSoekerHarIkkeAdresseIUtlandet(
             soekerPdl,
@@ -83,8 +82,11 @@ fun kriterieForeldreHarIkkeAdresseIUtlandet(
         val gjenlevendeAdresser = hentAdresser(gjenlevendePdl)
         val doedsdato = hentDoedsdato(avdoedPdl)
         val adresserResult = harKunNorskePdlAdresserEtterDato(gjenlevendeAdresser, doedsdato)
-        if (adresserResult == VurderingsResultat.IKKE_OPPFYLT) VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING else adresserResult
-
+        if (adresserResult == VurderingsResultat.IKKE_OPPFYLT) {
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        } else {
+            adresserResult
+        }
     } catch (ex: OpplysningKanIkkeHentesUt) {
         VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     }
@@ -125,10 +127,12 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
         }
     )
 
-    if (soekerPdl == null || avdoedPdl == null || soekerSoknad == null) return opplysningsGrunnlagNull(
-        kriterietype,
-        opplysningsGrunnlag
-    )
+    if (soekerPdl == null || avdoedPdl == null || soekerSoknad == null) {
+        return opplysningsGrunnlagNull(
+            kriterietype,
+            opplysningsGrunnlag
+        )
+    }
 
     val resultat = try {
         val doedsdato = hentDoedsdato(avdoedPdl)
@@ -137,7 +141,9 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
         val soeknadResultat =
             if (soekerSoknad.opplysning.utenlandsadresse.adresseIUtlandet == JaNeiVetIkke.JA) {
                 VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-            } else VurderingsResultat.OPPFYLT
+            } else {
+                VurderingsResultat.OPPFYLT
+            }
         val resultater = listOf(pdlResultat, soeknadResultat)
 
         if (resultater.all { it == VurderingsResultat.OPPFYLT }) {
@@ -147,12 +153,9 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
         } else {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         }
-
     } catch (ex: OpplysningKanIkkeHentesUt) {
         VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     }
 
     return Kriterie(kriterietype, resultat, opplysningsGrunnlag)
 }
-
-

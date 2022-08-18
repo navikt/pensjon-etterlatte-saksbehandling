@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 
 class AvstemmingsdataSender(
     private val jmsConnectionFactory: JmsConnectionFactory,
-    private val queue: String,
+    private val queue: String
 ) {
     fun sendAvstemming(avstemmingsdata: Avstemmingsdata): String {
         logger.info("Sender avstemmingsdata til Oppdrag")

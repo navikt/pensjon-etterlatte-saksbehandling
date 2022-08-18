@@ -29,12 +29,12 @@ internal class FordelerServiceTest {
         val avdoedFnr = Foedselsnummer.of(FNR_2)
         val etterlattFnr = Foedselsnummer.of(FNR_3)
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr } ) } returns mockPerson(
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(etterlattFnr, avdoedFnr),
                 foreldre = listOf(etterlattFnr, avdoedFnr),
-                barn = null,
+                barn = null
             )
         )
 
@@ -48,7 +48,7 @@ internal class FordelerServiceTest {
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(etterlattFnr),
                 foreldre = null,
-                barn = listOf(barnFnr),
+                barn = listOf(barnFnr)
             )
         )
 
@@ -70,12 +70,12 @@ internal class FordelerServiceTest {
         val avdoedFnr = Foedselsnummer.of(FNR_2)
         val etterlattFnr = Foedselsnummer.of(FNR_3)
 
-        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr } ) } returns mockPerson(
+        coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns mockPerson(
             bostedsadresse = mockNorskAdresse(),
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(etterlattFnr, avdoedFnr),
                 foreldre = listOf(etterlattFnr, avdoedFnr),
-                barn = null,
+                barn = null
             )
         )
 
@@ -88,15 +88,17 @@ internal class FordelerServiceTest {
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(etterlattFnr),
                 foreldre = null,
-                barn = listOf(barnFnr),
+                barn = listOf(barnFnr)
             )
         )
 
         val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent())
 
-        assertTrue(resultat is FordelerResultat.IkkeGyldigForBehandling && resultat.ikkeOppfylteKriterier.contains(
-            AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
-        ))
+        assertTrue(
+            resultat is FordelerResultat.IkkeGyldigForBehandling && resultat.ikkeOppfylteKriterier.contains(
+                AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
+            )
+        )
     }
 
     @Test
@@ -114,5 +116,4 @@ internal class FordelerServiceTest {
     companion object {
         val GYLDIG_BARNEPENSJON_SOKNAD = readSoknad("/fordeler/soknad_barnepensjon.json")
     }
-
 }

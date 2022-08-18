@@ -10,7 +10,6 @@ interface JournalpostService {
         dokumentInfoId: String,
         accessToken: String
     ): ByteArray
-
 }
 
 data class Journalpost(
@@ -27,7 +26,7 @@ data class Journalpost(
 data class Dokumenter(
     val dokumentInfoId: String,
     val tittel: String,
-    val dokumentvarianter: List<Dokumentvarianter>,
+    val dokumentvarianter: List<Dokumentvarianter>
 )
 
 data class Dokumentvarianter(

@@ -49,7 +49,7 @@ class GrunnlagsendringshendelseService(
                                 sakId = sakId,
                                 type = GrunnlagsendringsType.SOEKER_DOED,
                                 opprettet = LocalDateTime.now(),
-                                data = Grunnlagsinformasjon.SoekerDoed(hendelse = doedshendelse),
+                                data = Grunnlagsinformasjon.SoekerDoed(hendelse = doedshendelse)
                             )
                         )
                     }
@@ -72,7 +72,10 @@ class GrunnlagsendringshendelseService(
                         endringsHendelse.data.hendelse.avdoedFnr,
                         PersonRolle.BARN
                     ).doedsdato?.let { doedsdato ->
-                        logger.info("Person med fnr ${endringsHendelse.data.hendelse.avdoedFnr} er doed i pdl med doedsdato: $doedsdato")
+                        logger.info(
+                            "Person med fnr ${endringsHendelse.data.hendelse.avdoedFnr} er doed i pdl " +
+                                "med doedsdato: $doedsdato"
+                        )
                         generellBehandlingService.hentBehandlingerISak(endringsHendelse.sakId)
                             .sortedByDescending { it.behandlingOpprettet }
                             // TODO: naar vi faar med komplekse saker i saksbehandlingssystemet: vurder hvilken behandling som skal brukes videre
@@ -80,7 +83,10 @@ class GrunnlagsendringshendelseService(
                             .also { behandling ->
                                 when (behandling.status) {
                                     in BehandlingStatus.underBehandling() -> {
-                                        logger.info("Behandling ${behandling.id} med status ${behandling.status} er under behandling -> setter status til GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING.")
+                                        logger.info(
+                                            "Behandling ${behandling.id} med status ${behandling.status} er under " +
+                                                "behandling -> setter status til GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING."
+                                        )
                                         inTransaction {
                                             grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
                                                 listOf(endringsHendelse.sakId),
@@ -91,7 +97,10 @@ class GrunnlagsendringshendelseService(
                                         }
                                     }
                                     in BehandlingStatus.iverksattEllerAttestert() -> {
-                                        logger.info("Behandling ${behandling.id} med status ${behandling.status} er iverksatt eller attestert -> Starter revurdering.")
+                                        logger.info(
+                                            "Behandling ${behandling.id} med status ${behandling.status} er " +
+                                                "iverksatt eller attestert -> Starter revurdering."
+                                        )
                                         revurderingService.startRevurdering(
                                             behandling,
                                             endringsHendelse.data.hendelse,
@@ -115,7 +124,10 @@ class GrunnlagsendringshendelseService(
                     TODO: naa forkastes alle grunnlagsendringer hvor bruker ikke er doed. Vurder etterhvert om det er aktuelt
                     aa ta hensyn til grunnlagsendringer hvor endringstype er annullert, som eventuelt kan trigge en revurdering
                      */
-                        ?: logger.info("Person med fnr ${endringsHendelse.data.hendelse.avdoedFnr} er ikke doed i Pdl. Forkaster hendelse")
+                        ?: logger.info(
+                            "Person med fnr ${endringsHendelse.data.hendelse.avdoedFnr} er ikke doed i Pdl. " +
+                                "Forkaster hendelse"
+                        )
                             .also {
                                 grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
                                     listOf(endringsHendelse.sakId),
@@ -130,8 +142,3 @@ class GrunnlagsendringshendelseService(
         }
     }
 }
-
-
-
-
-

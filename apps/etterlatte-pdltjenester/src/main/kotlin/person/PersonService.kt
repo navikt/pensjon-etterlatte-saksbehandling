@@ -39,14 +39,17 @@ class PersonService(
         }
     }
 
-    suspend fun hentFolkeregisterIdent(hentFolkeregisterIdentRequest: HentFolkeregisterIdentRequest): FolkeregisterIdent {
+    suspend fun hentFolkeregisterIdent(
+        hentFolkeregisterIdentRequest: HentFolkeregisterIdentRequest
+    ): FolkeregisterIdent {
         logger.info("Henter folkeregisterident for ident=${hentFolkeregisterIdentRequest.ident} fra PDL")
 
         return pdlKlient.hentFolkeregisterIdent(hentFolkeregisterIdentRequest.ident).let {
             if (it.data?.hentIdenter == null) {
                 val pdlFeil = it.errors?.joinToString(", ")
                 throw PdlForesporselFeilet(
-                    "Kunne ikke hente folkeregisterident for ident=${hentFolkeregisterIdentRequest.ident} fra PDL: $pdlFeil"
+                    "Kunne ikke hente folkeregisterident for ident=${hentFolkeregisterIdentRequest.ident} " +
+                        "fra PDL: $pdlFeil"
                 )
             } else {
                 try {
@@ -55,12 +58,11 @@ class PersonService(
                         .first { !it.historisk }.ident
                     FolkeregisterIdent(folkeregisterident = Foedselsnummer.of(folkeregisterIdent))
                 } catch (e: Exception) {
-                    throw PdlForesporselFeilet("Fant ingen folkeregisterident for ident=${hentFolkeregisterIdentRequest.ident} fra PDL")
+                    throw PdlForesporselFeilet(
+                        "Fant ingen folkeregisterident for ident=${hentFolkeregisterIdentRequest.ident} fra PDL"
+                    )
                 }
-
             }
         }
     }
-
-
 }

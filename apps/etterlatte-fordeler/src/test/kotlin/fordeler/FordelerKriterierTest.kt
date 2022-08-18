@@ -1,7 +1,22 @@
 package no.nav.etterlatte.fordeler
 
-import no.nav.etterlatte.*
-import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.FNR_1
+import no.nav.etterlatte.FNR_2
+import no.nav.etterlatte.FNR_4
+import no.nav.etterlatte.FNR_5
+import no.nav.etterlatte.SVERIGE
+import no.nav.etterlatte.libs.common.person.AdresseType
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
+import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import no.nav.etterlatte.mockNorskAdresse
+import no.nav.etterlatte.mockPerson
+import no.nav.etterlatte.mockUgyldigAdresse
+import no.nav.etterlatte.readSoknad
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -20,7 +35,7 @@ internal class FordelerKriterierTest {
             familieRelasjon = FamilieRelasjon(
                 barn = null,
                 ansvarligeForeldre = null,
-                foreldre = listOf(Foedselsnummer.of(FNR_2)),
+                foreldre = listOf(Foedselsnummer.of(FNR_2))
             )
         )
         val avdoed = mockPerson(
@@ -32,7 +47,7 @@ internal class FordelerKriterierTest {
             familieRelasjon = FamilieRelasjon(
                 barn = listOf(barn.foedselsnummer),
                 ansvarligeForeldre = null,
-                foreldre = listOf(Foedselsnummer.of(FNR_2)),
+                foreldre = listOf(Foedselsnummer.of(FNR_2))
             )
         )
         val gjenlevende = mockPerson(
@@ -61,16 +76,18 @@ internal class FordelerKriterierTest {
     @Test
     fun `barn som er registrert med vergemaal er ikke en gyldig kandidat`() {
         val barn = mockPerson(
-            vergemaalEllerFremtidsfullmakt = listOf(VergemaalEllerFremtidsfullmakt(
-                embete = "tjoho",
-                type = "mindreaarig",
-                vergeEllerFullmektig = VergeEllerFullmektig(
-                    motpartsPersonident = Foedselsnummer.of("08026800685"),
-                    navn = "Birger",
-                    omfang = "personligeOgOekonomiskeInteresser",
-                    omfangetErInnenPersonligOmraade = true
+            vergemaalEllerFremtidsfullmakt = listOf(
+                VergemaalEllerFremtidsfullmakt(
+                    embete = "tjoho",
+                    type = "mindreaarig",
+                    vergeEllerFullmektig = VergeEllerFullmektig(
+                        motpartsPersonident = Foedselsnummer.of("08026800685"),
+                        navn = "Birger",
+                        omfang = "personligeOgOekonomiskeInteresser",
+                        omfangetErInnenPersonligOmraade = true
+                    )
                 )
-            ))
+            )
         )
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
@@ -108,7 +125,12 @@ internal class FordelerKriterierTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_UTENLANDSADRESSE)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(
+            barn,
+            avdoed,
+            gjenlevende,
+            BARNEPENSJON_SOKNAD_UTENLANDSADRESSE
+        )
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_HAR_HUKET_AV_UTLANDSADRESSE))
     }
@@ -130,9 +152,9 @@ internal class FordelerKriterierTest {
             utland = Utland(
                 utflyttingFraNorge = listOf(
                     UtflyttingFraNorge(
-                    tilflyttingsland = SVERIGE,
-                    dato = LocalDate.parse("2010-01-01")
-                )
+                        tilflyttingsland = SVERIGE,
+                        dato = LocalDate.parse("2010-01-01")
+                    )
                 ),
                 innflyttingTilNorge = null
             )
@@ -169,8 +191,8 @@ internal class FordelerKriterierTest {
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_ER_IKKE_BOSATT_I_NORGE))
     }
 
-    //@Test
-    //Kommentert ut for å teste søskenjustering
+    // @Test
+    // Kommentert ut for å teste søskenjustering
     fun `barn med sosken er ikke en gyldig kandidat`() {
         val barn = mockPerson(
             bostedsadresse = mockNorskAdresse()
@@ -180,7 +202,7 @@ internal class FordelerKriterierTest {
             familieRelasjon = FamilieRelasjon(
                 barn = listOf(Foedselsnummer.of(FNR_4)),
                 ansvarligeForeldre = null,
-                foreldre = null,
+                foreldre = null
             )
         )
         val gjenlevende = mockPerson(
@@ -188,13 +210,13 @@ internal class FordelerKriterierTest {
             familieRelasjon = FamilieRelasjon(
                 barn = listOf(Foedselsnummer.of(FNR_4)),
                 ansvarligeForeldre = null,
-                foreldre = null,
+                foreldre = null
             )
         )
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
 
-        //assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_ER_IKKE_ALENEBARN))
+        // assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.BARN_ER_IKKE_ALENEBARN))
     }
 
     @Test
@@ -208,7 +230,7 @@ internal class FordelerKriterierTest {
             familieRelasjon = FamilieRelasjon(
                 barn = listOf(Foedselsnummer.of(barn.foedselsnummer.value), Foedselsnummer.of(FNR_1)),
                 ansvarligeForeldre = null,
-                foreldre = null,
+                foreldre = null
             )
         )
         val gjenlevende = mockPerson()
@@ -229,7 +251,7 @@ internal class FordelerKriterierTest {
             familieRelasjon = FamilieRelasjon(
                 barn = listOf(Foedselsnummer.of(barn.foedselsnummer.value), Foedselsnummer.of("12101376212")),
                 ansvarligeForeldre = null,
-                foreldre = null,
+                foreldre = null
             )
         )
         val gjenlevende = mockPerson()
@@ -246,7 +268,7 @@ internal class FordelerKriterierTest {
             familieRelasjon = FamilieRelasjon(
                 barn = null,
                 ansvarligeForeldre = null,
-                foreldre = listOf(Foedselsnummer.of(FNR_2)),
+                foreldre = listOf(Foedselsnummer.of(FNR_2))
             )
         )
         val avdoed = mockPerson(
@@ -254,7 +276,7 @@ internal class FordelerKriterierTest {
             doedsdato = now()
         )
         val gjenlevende = mockPerson(
-            bostedsadresse = mockNorskAdresse(),
+            bostedsadresse = mockNorskAdresse()
         )
 
         val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
@@ -267,10 +289,12 @@ internal class FordelerKriterierTest {
         val barn = mockPerson()
         val avdoed = mockPerson(
             utland = Utland(
-                utflyttingFraNorge = listOf(UtflyttingFraNorge(
-                    tilflyttingsland = SVERIGE,
-                    dato = LocalDate.parse("2010-01-01")
-                )),
+                utflyttingFraNorge = listOf(
+                    UtflyttingFraNorge(
+                        tilflyttingsland = SVERIGE,
+                        dato = LocalDate.parse("2010-01-01")
+                    )
+                ),
                 innflyttingTilNorge = null
             )
         )
@@ -287,7 +311,12 @@ internal class FordelerKriterierTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_YRKESSKADE)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(
+            barn,
+            avdoed,
+            gjenlevende,
+            BARNEPENSJON_SOKNAD_YRKESSKADE
+        )
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_HAR_YRKESSKADE))
     }
@@ -296,7 +325,7 @@ internal class FordelerKriterierTest {
     fun `avdod som ikke er registrert som dod er ikke en gyldig kandidat`() {
         val barn = mockPerson()
         val avdoed = mockPerson(
-            doedsdato = null,
+            doedsdato = null
         )
         val gjenlevende = mockPerson()
 
@@ -311,7 +340,12 @@ internal class FordelerKriterierTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_HUKET_AV_UTLAND)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(
+            barn,
+            avdoed,
+            gjenlevende,
+            BARNEPENSJON_SOKNAD_HUKET_AV_UTLAND
+        )
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_HAR_HATT_UTLANDSOPPHOLD))
     }
@@ -382,7 +416,12 @@ internal class FordelerKriterierTest {
         val avdoed = mockPerson()
         val gjenlevende = mockPerson()
 
-        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD_INNSENDER_IKKE_FORELDER)
+        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(
+            barn,
+            avdoed,
+            gjenlevende,
+            BARNEPENSJON_SOKNAD_INNSENDER_IKKE_FORELDER
+        )
 
         assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.INNSENDER_ER_IKKE_FORELDER))
     }
@@ -423,7 +462,7 @@ internal class FordelerKriterierTest {
             familieRelasjon = FamilieRelasjon(
                 ansvarligeForeldre = listOf(Foedselsnummer.of(FNR_5)),
                 foreldre = null,
-                barn = null,
+                barn = null
             )
         )
         val avdoed = mockPerson()

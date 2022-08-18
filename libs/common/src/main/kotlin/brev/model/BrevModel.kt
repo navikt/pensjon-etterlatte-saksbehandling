@@ -28,7 +28,7 @@ data class Adresse(
 data class Mottaker(
     val foedselsnummer: Foedselsnummer? = null,
     val orgnummer: String? = null,
-    val adresse: Adresse? = null,
+    val adresse: Adresse? = null
 ) {
     init {
         if (foedselsnummer == null && orgnummer == null && adresse == null) {
@@ -43,7 +43,7 @@ class Brev(
     val tittel: String,
     val status: Status,
     val mottaker: Mottaker,
-    val erVedtaksbrev: Boolean,
+    val erVedtaksbrev: Boolean
 ) {
     companion object {
         fun fraUlagretBrev(id: BrevID, ulagretBrev: UlagretBrev) =

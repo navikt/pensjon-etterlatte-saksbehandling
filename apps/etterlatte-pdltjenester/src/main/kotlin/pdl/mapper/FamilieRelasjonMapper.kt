@@ -9,8 +9,8 @@ import no.nav.etterlatte.pdl.PdlHentPerson
 object FamilieRelasjonMapper {
 
     fun mapFamilieRelasjon(hentPerson: PdlHentPerson, personRolle: PersonRolle): FamilieRelasjon =
-        //TODO tar kun med foreldreAnsvar med fnr nå
-        //TODO finn ut om det er riktig å hente ut basert på sisteRegistrertDato
+        // TODO tar kun med foreldreAnsvar med fnr nå
+        // TODO finn ut om det er riktig å hente ut basert på sisteRegistrertDato
         FamilieRelasjon(
             ansvarligeForeldre = when (personRolle) {
                 PersonRolle.BARN ->

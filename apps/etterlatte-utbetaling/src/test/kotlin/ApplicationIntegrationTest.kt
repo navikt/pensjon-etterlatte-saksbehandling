@@ -29,7 +29,6 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
 import javax.sql.DataSource
 
-
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApplicationIntegrationTest {
 
@@ -63,7 +62,7 @@ class ApplicationIntegrationTest {
             mqAvstemmingQueue = "DEV.QUEUE.1",
             serviceUserUsername = "admin",
             serviceUserPassword = "passw0rd",
-            leaderElectorPath = "",
+            leaderElectorPath = ""
         )
 
         ApplicationContext(applicationProperties, rapidsConnection).also {
@@ -82,8 +81,8 @@ class ApplicationIntegrationTest {
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
-                                this.utbetalingResponse.vedtakId == 1L &&
-                                this.utbetalingResponse.status == UtbetalingStatus.SENDT
+                            this.utbetalingResponse.vedtakId == 1L &&
+                            this.utbetalingResponse.status == UtbetalingStatus.SENDT
                     }
                 }
             )
@@ -99,11 +98,11 @@ class ApplicationIntegrationTest {
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
-                                this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
-                                this.utbetalingResponse.feilmelding
-                                    ?.contains(
-                                        "En feil oppstod under prosessering av vedtak med vedtakId=null"
-                                    ) != false
+                            this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                            this.utbetalingResponse.feilmelding
+                            ?.contains(
+                                "En feil oppstod under prosessering av vedtak med vedtakId=null"
+                            ) != false
                     }
                 }
             )
@@ -120,9 +119,9 @@ class ApplicationIntegrationTest {
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
-                                this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
-                                this.utbetalingResponse.feilmelding
-                                    ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false
+                            this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                            this.utbetalingResponse.feilmelding
+                            ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false
                     }
                 }
             )
@@ -139,11 +138,11 @@ class ApplicationIntegrationTest {
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
-                                this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
-                                this.utbetalingResponse.feilmelding
-                                    ?.contains(
-                                        "En eller flere utbetalingslinjer med id=[1] eksisterer fra før"
-                                    ) != false
+                            this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                            this.utbetalingResponse.feilmelding
+                            ?.contains(
+                                "En eller flere utbetalingslinjer med id=[1] eksisterer fra før"
+                            ) != false
                     }
                 }
             )
@@ -156,12 +155,13 @@ class ApplicationIntegrationTest {
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering())
 
         verify(timeout = TIMEOUT) {
-            rapidsConnection.publish(any(),
+            rapidsConnection.publish(
+                any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
-                                this.utbetalingResponse.vedtakId == 1L &&
-                                this.utbetalingResponse.status == UtbetalingStatus.GODKJENT
+                            this.utbetalingResponse.vedtakId == 1L &&
+                            this.utbetalingResponse.status == UtbetalingStatus.GODKJENT
                     }
                 }
             )
@@ -173,12 +173,13 @@ class ApplicationIntegrationTest {
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering())
 
         verify(timeout = TIMEOUT) {
-            rapidsConnection.publish(any(),
+            rapidsConnection.publish(
+                any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
-                                this.utbetalingResponse.vedtakId == 1L &&
-                                this.utbetalingResponse.status == UtbetalingStatus.FEILET
+                            this.utbetalingResponse.vedtakId == 1L &&
+                            this.utbetalingResponse.status == UtbetalingStatus.FEILET
                     }
                 }
             )
@@ -192,13 +193,15 @@ class ApplicationIntegrationTest {
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering()) // forventer at status skal være SENDT
 
         verify(timeout = TIMEOUT) {
-            rapidsConnection.publish(any(),
+            rapidsConnection.publish(
+                any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
-                                this.utbetalingResponse.vedtakId == 1L &&
-                                this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
-                                this.utbetalingResponse.feilmelding == "Utbetalingen for vedtakId=1 har feil status (GODKJENT)"
+                            this.utbetalingResponse.vedtakId == 1L &&
+                            this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                            this.utbetalingResponse.feilmelding ==
+                            "Utbetalingen for vedtakId=1 har feil status (GODKJENT)"
                     }
                 }
             )
@@ -211,13 +214,14 @@ class ApplicationIntegrationTest {
         simulerKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering())
 
         verify(timeout = TIMEOUT) {
-            rapidsConnection.publish(any(),
+            rapidsConnection.publish(
+                any(),
                 match {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
-                                this.utbetalingResponse.vedtakId == 1L &&
-                                this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
-                                this.utbetalingResponse.feilmelding == "KodeMelding Beskrivelse"
+                            this.utbetalingResponse.vedtakId == 1L &&
+                            this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                            this.utbetalingResponse.feilmelding == "KodeMelding Beskrivelse"
                     }
                 }
             )

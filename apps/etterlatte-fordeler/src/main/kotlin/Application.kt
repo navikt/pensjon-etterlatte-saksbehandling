@@ -1,14 +1,13 @@
 package no.nav.etterlatte
 
-
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.auth.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.serialization.jackson.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
+import io.ktor.http.ContentType
+import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.fordeler.Fordeler
 import no.nav.etterlatte.fordeler.FordelerKriterier
 import no.nav.etterlatte.fordeler.FordelerService
@@ -25,16 +24,19 @@ fun main() {
     }
 
     RapidApplication.create(env) { _, kafkaRapid ->
-        kafkaRapid.seekToBeginning()}
-            .also {
+        kafkaRapid.seekToBeginning()
+    }
+        .also {
             Fordeler(
-                rapidsConnection = it, fordelerService = FordelerService(FordelerKriterier(), pdlTjenesterKlient(env))
+                rapidsConnection = it,
+                fordelerService = FordelerService(FordelerKriterier(), pdlTjenesterKlient(env))
             )
         }.start()
 }
 
 private fun pdlTjenesterKlient(env: MutableMap<String, String>) = PdlTjenesterKlient(
-    client = pdlTjenesterHttpClient(env), apiUrl = requireNotNull(env["PDL_URL"])
+    client = pdlTjenesterHttpClient(env),
+    apiUrl = requireNotNull(env["PDL_URL"])
 )
 
 private fun pdlTjenesterHttpClient(env: MutableMap<String, String>) = HttpClient(OkHttp) {
@@ -54,5 +56,3 @@ private fun pdlTjenesterHttpClient(env: MutableMap<String, String>) = HttpClient
 }.also {
     Runtime.getRuntime().addShutdownHook(Thread { it.close() })
 }
-
-

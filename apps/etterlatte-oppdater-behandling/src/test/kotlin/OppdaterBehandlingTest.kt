@@ -25,10 +25,8 @@ internal class OppdaterBehandlingTest {
         Assertions.assertEquals(3L, sakIdSlot.captured)
     }
 
-
     companion object {
         val fullMelding = readFile("/fullMelding.json")
-
     }
 }
 

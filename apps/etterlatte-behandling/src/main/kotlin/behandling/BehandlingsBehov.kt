@@ -5,5 +5,5 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 data class BehandlingsBehov(
     val sak: Long,
     val persongalleri: Persongalleri,
-    val mottattDato: String,
+    val mottattDato: String
 )

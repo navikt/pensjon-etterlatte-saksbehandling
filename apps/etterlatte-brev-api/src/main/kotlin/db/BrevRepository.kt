@@ -8,7 +8,13 @@ import no.nav.etterlatte.db.BrevRepository.Queries.OPPDATER_MOTTAKER_QUERY
 import no.nav.etterlatte.db.BrevRepository.Queries.OPPDATER_STATUS_QUERY
 import no.nav.etterlatte.db.BrevRepository.Queries.OPPRETT_BREV_QUERY
 import no.nav.etterlatte.db.BrevRepository.Queries.OPPRETT_INNHOLD_QUERY
-import no.nav.etterlatte.libs.common.brev.model.*
+import no.nav.etterlatte.libs.common.brev.model.Adresse
+import no.nav.etterlatte.libs.common.brev.model.Brev
+import no.nav.etterlatte.libs.common.brev.model.BrevID
+import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
+import no.nav.etterlatte.libs.common.brev.model.Mottaker
+import no.nav.etterlatte.libs.common.brev.model.Status
+import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import java.sql.ResultSet
 import javax.sql.DataSource
@@ -110,8 +116,11 @@ class BrevRepository private constructor(private val ds: DataSource) {
                 }
                 .executeUpdate()
 
-            if (inserted < 1) throw RuntimeException()
-            else id
+            if (inserted < 1) {
+                throw RuntimeException()
+            } else {
+                id
+            }
         }
 
         oppdaterStatus(id, ulagretBrev.status)
@@ -165,8 +174,11 @@ class BrevRepository private constructor(private val ds: DataSource) {
 
     private fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
         return generateSequence {
-            if (next()) block()
-            else null
+            if (next()) {
+                block()
+            } else {
+                null
+            }
         }.toList()
     }
 

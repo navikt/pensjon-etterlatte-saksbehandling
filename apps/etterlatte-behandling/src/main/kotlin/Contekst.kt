@@ -11,26 +11,26 @@ class Context(
     val databasecontxt: DatabaseKontekst
 )
 
-interface User{
-    fun name():String
-    fun kanSetteKilde():Boolean = false
+interface User {
+    fun name(): String
+    fun kanSetteKilde(): Boolean = false
 }
-abstract class ExternalUser(val identifiedBy: TokenValidationContext): User
+abstract class ExternalUser(val identifiedBy: TokenValidationContext) : User
 
-class Self(val prosess: String): User{
+class Self(val prosess: String) : User {
     override fun name() = prosess
     override fun kanSetteKilde() = true
 }
-class SystemUser(identifiedBy: TokenValidationContext): ExternalUser(identifiedBy) {
+class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identifiedBy) {
     override fun name(): String {
         throw IllegalArgumentException("Støtter ikke navn på systembruker")
     }
-    override fun kanSetteKilde(): Boolean{
+    override fun kanSetteKilde(): Boolean {
         return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim("roles", "kan-sette-kilde")
     }
 }
 
-class Saksbehandler(identifiedBy: TokenValidationContext): ExternalUser(identifiedBy) {
+class Saksbehandler(identifiedBy: TokenValidationContext) : ExternalUser(identifiedBy) {
     init {
         println("""Groups: ${identifiedBy.getJwtToken("azure").jwtTokenClaims.getAsList("groups")}""")
     }
@@ -38,37 +38,43 @@ class Saksbehandler(identifiedBy: TokenValidationContext): ExternalUser(identifi
         return identifiedBy.getJwtToken("azure").jwtTokenClaims.getStringClaim("NAVident")
     }
 
-    fun harRolleSaksbehandler(): Boolean{
-        return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim("groups", "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf")
+    fun harRolleSaksbehandler(): Boolean {
+        return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim(
+            "groups",
+            "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
+        )
     }
-    fun harRolleAttestant(): Boolean{
-        return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim("groups", "63f46f74-84a8-4d1c-87a8-78532ab3ae60")
+    fun harRolleAttestant(): Boolean {
+        return identifiedBy.getJwtToken("azure").jwtTokenClaims.containsClaim(
+            "groups",
+            "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
+        )
     }
 }
 
-class Kunde(identifiedBy: TokenValidationContext): ExternalUser(identifiedBy){
+class Kunde(identifiedBy: TokenValidationContext) : ExternalUser(identifiedBy) {
     override fun name(): String {
         return identifiedBy.getJwtToken("tokenx").jwtTokenClaims.getStringClaim("pid")
     }
 }
 
-
-fun decideUser(principal: TokenValidationContextPrincipal): ExternalUser{
-    return if(principal.context.issuers.contains("tokenx")){
+fun decideUser(principal: TokenValidationContextPrincipal): ExternalUser {
+    return if (principal.context.issuers.contains("tokenx")) {
         Kunde(principal.context)
-    } else if(principal.context.issuers.contains("azure")) {
-        if(principal.context.getJwtToken("azure").jwtTokenClaims.let { it.getStringClaim("oid") == it.subject }){
+    } else if (principal.context.issuers.contains("azure")) {
+        if (principal.context.getJwtToken("azure").jwtTokenClaims.let { it.getStringClaim("oid") == it.subject }) {
             SystemUser(principal.context)
-        }else{
+        } else {
             Saksbehandler(principal.context)
         }
-    } else throw IllegalStateException("no token from preapproved issuers")
+    } else {
+        throw IllegalStateException("no token from preapproved issuers")
+    }
 }
 
-
-interface DatabaseKontekst{
+interface DatabaseKontekst {
     fun activeTx(): Connection
-    fun <T> inTransaction(block: ()->T): T
+    fun <T> inTransaction(block: () -> T): T
 }
 fun <T> inTransaction(block: () -> T): T = Kontekst.get().databasecontxt.inTransaction {
     block()

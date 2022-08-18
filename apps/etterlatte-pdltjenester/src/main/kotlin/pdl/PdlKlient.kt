@@ -1,8 +1,11 @@
 package no.nav.etterlatte.pdl
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.*
-import io.ktor.client.request.*
+import io.ktor.client.call.body
+import io.ktor.client.request.accept
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType.Application.Json
 import no.nav.etterlatte.libs.common.RetryResult
@@ -11,7 +14,6 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
-
 
 class PdlKlient(private val httpClient: HttpClient) {
     private val logger = LoggerFactory.getLogger(PdlKlient::class.java)
@@ -35,7 +37,7 @@ class PdlKlient(private val httpClient: HttpClient) {
         }
     }
 
-    //TODO utvide til rolleliste?
+    // TODO utvide til rolleliste?
     suspend fun hentPersonBolk(fnr: List<Foedselsnummer>, rolle: PersonRolle): PdlPersonResponseBolk {
         val request = PdlGraphqlBolkRequest(
             query = getQuery("/pdl/hentPersonBolk.graphql"),
@@ -59,7 +61,7 @@ class PdlKlient(private val httpClient: HttpClient) {
             httpClient.post {
                 header("Tema", TEMA)
                 accept(Json)
-                setBody( TextContent(request.toJson(), Json))
+                setBody(TextContent(request.toJson(), Json))
             }.body()
         }.let {
             when (it) {
@@ -83,7 +85,7 @@ class PdlKlient(private val httpClient: HttpClient) {
             httpClient.post {
                 header("Tema", TEMA)
                 accept(Json)
-                setBody(  TextContent(request.toJson(), Json))
+                setBody(TextContent(request.toJson(), Json))
             }.body()
         }.let {
             when (it) {
@@ -91,8 +93,6 @@ class PdlKlient(private val httpClient: HttpClient) {
                 is RetryResult.Failure -> throw it.exceptions.last()
             }
         }
-
-
     }
 
     private fun getQuery(name: String): String {

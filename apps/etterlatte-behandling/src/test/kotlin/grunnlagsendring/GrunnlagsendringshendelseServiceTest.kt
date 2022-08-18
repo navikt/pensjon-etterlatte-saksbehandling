@@ -35,15 +35,20 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @BeforeEach
     fun before() {
-        Kontekst.set(Context(mockk(), object : DatabaseKontekst {
-            override fun activeTx(): Connection {
-                throw IllegalArgumentException()
-            }
+        Kontekst.set(
+            Context(
+                mockk(),
+                object : DatabaseKontekst {
+                    override fun activeTx(): Connection {
+                        throw IllegalArgumentException()
+                    }
 
-            override fun <T> inTransaction(block: () -> T): T {
-                return block()
-            }
-        }))
+                    override fun <T> inTransaction(block: () -> T): T {
+                        return block()
+                    }
+                }
+            )
+        )
     }
 
     @Test
@@ -51,7 +56,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val sakId = 1L
         val foerstegangsbehandlinger = listOf(
             foerstegangsbehandling(sak = sakId, status = BehandlingStatus.IVERKSATT),
-            foerstegangsbehandling(sak = sakId, status = BehandlingStatus.FATTET_VEDTAK),
+            foerstegangsbehandling(sak = sakId, status = BehandlingStatus.FATTET_VEDTAK)
         )
         val grunnlagsendringshendelse =
             grunnlagsendringshendelse(
@@ -64,7 +69,9 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
             every { oppdaterGrunnlagsendringStatusForType(any(), any(), any(), any()) } returns Unit
-            every { opprettGrunnlagsendringshendelse(capture(opprettGrunnlagsendringshendelse)) } returns grunnlagsendringshendelse
+            every {
+                opprettGrunnlagsendringshendelse(capture(opprettGrunnlagsendringshendelse))
+            } returns grunnlagsendringshendelse
         }
         val generellBehandlingService = mockk<GenerellBehandlingService> {
             every { alleBehandlingerForSoekerMedFnr("Soeker") } returns foerstegangsbehandlinger
@@ -99,12 +106,12 @@ internal class GrunnlagsendringshendelseServiceTest {
             { assertEquals(grunnlagsendringshendelse.sakId, lagredeGrunnlagsendringshendelser.first().sakId) },
             { assertEquals(grunnlagsendringshendelse.type, lagredeGrunnlagsendringshendelser.first().type) },
             { assertEquals(grunnlagsendringshendelse.opprettet, lagredeGrunnlagsendringshendelser.first().opprettet) },
-            { assertEquals(grunnlagsendringshendelse.status, lagredeGrunnlagsendringshendelser.first().status) },
+            { assertEquals(grunnlagsendringshendelse.status, lagredeGrunnlagsendringshendelser.first().status) }
         )
     }
 
     @Test
-    fun `sjekkKlareDoedshendelser skal oppdatere ikke-vurderte-grunnlagsendringshendelser til status forkastet på ikke-avbrutte saker`() {
+    fun `sjekkKlareDoedshendelser skal oppdatere ikke-vurderte-grunnlagsendringshendelser til status forkastet på ikke-avbrutte saker`() { // ktlint-disable max-line-length
         val sakId1 = 1L
         val sakId2 = 2L
         val sakId3 = 3L
@@ -153,7 +160,6 @@ internal class GrunnlagsendringshendelseServiceTest {
         assertEquals(GrunnlagsendringsType.SOEKER_DOED, typeArg.captured)
     }
 
-
     @Test
     fun `skal forkaste doedshendelser hvor soeker ikke er doed i pdl`() {
         val minutter = 60L
@@ -164,7 +170,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 sakId = sakId,
                 opprettet = LocalDateTime.now().minusHours(1),
                 data = grunnlagsinformasjonDoedshendelse(avdoedFnr = avdoedFnr)
-            ),
+            )
         )
         val sakerArg = slot<List<Long>>()
         val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
@@ -213,7 +219,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 sakId = sakId,
                 opprettet = LocalDateTime.now().minusHours(1),
                 data = grunnlagsinformasjonDoedshendelse(avdoedFnr = avdoedFnr)
-            ),
+            )
         )
         val sakerArg = slot<List<Long>>()
         val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
@@ -239,10 +245,12 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
         val behandlingId = UUID.randomUUID()
         val generellBehandlingService = mockk<GenerellBehandlingService>() {
-            every { hentBehandlingerISak(sakId) } returns listOf(mockk<Behandling>() {
-                every { status } returns BehandlingStatus.IVERKSATT
-                every { id } returns behandlingId
-            })
+            every { hentBehandlingerISak(sakId) } returns listOf(
+                mockk<Behandling>() {
+                    every { status } returns BehandlingStatus.IVERKSATT
+                    every { id } returns behandlingId
+                }
+            )
         }
         val behandlingArg = slot<Behandling>()
         val endringshendelseArg = slot<PdlHendelse>()
@@ -270,9 +278,8 @@ internal class GrunnlagsendringshendelseServiceTest {
         assertEquals(RevurderingAarsak.SOEKER_DOD, revurderingAarsakArg.captured)
     }
 
-
     @Test
-    fun `skal ikke opprette revurdering, men sette status til GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING, for saker med aktive behandlinger`() {
+    fun `skal ikke opprette revurdering, men sette status til GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING, for saker med aktive behandlinger`() { // ktlint-disable max-line-length
         val minutter = 60L
         val avdoedFnr = "soeker"
         val sakId = 1L
@@ -281,7 +288,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 sakId = sakId,
                 opprettet = LocalDateTime.now().minusHours(1),
                 data = grunnlagsinformasjonDoedshendelse(avdoedFnr = avdoedFnr)
-            ),
+            )
         )
         val sakerArg = slot<List<Long>>()
         val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
@@ -307,10 +314,12 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
         val behandlingId = UUID.randomUUID()
         val generellBehandlingService = mockk<GenerellBehandlingService>() {
-            every { hentBehandlingerISak(sakId) } returns listOf(mockk<Behandling>() {
-                every { status } returns BehandlingStatus.UNDER_BEHANDLING
-                every { id } returns behandlingId
-            })
+            every { hentBehandlingerISak(sakId) } returns listOf(
+                mockk<Behandling>() {
+                    every { status } returns BehandlingStatus.UNDER_BEHANDLING
+                    every { id } returns behandlingId
+                }
+            )
         }
         val revurderingService = mockk<RevurderingService>()
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
@@ -324,6 +333,4 @@ internal class GrunnlagsendringshendelseServiceTest {
         assertEquals(sakId, sakerArg.captured.first())
         verify(exactly = 0) { revurderingService.startRevurdering(any(), any(), any()) }
     }
-
-
 }

@@ -1,4 +1,4 @@
-        import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     kotlin("jvm")
@@ -38,8 +38,9 @@ tasks {
         doLast {
             configurations.runtimeClasspath.get().forEach {
                 val file = File("$buildDir/libs/${it.name}")
-                if (!file.exists())
+                if (!file.exists()) {
                     it.copyTo(file)
+                }
             }
         }
     }

@@ -39,7 +39,6 @@ class DoedfallTest {
         Assertions.assertEquals(doedsdatoIkkeIPdl.resultat, VurderingsResultat.IKKE_OPPFYLT)
         Assertions.assertEquals(avdoedErForelder.resultat, VurderingsResultat.OPPFYLT)
         Assertions.assertEquals(avdoedIkkeForelder.resultat, VurderingsResultat.IKKE_OPPFYLT)
-
     }
 
     companion object {

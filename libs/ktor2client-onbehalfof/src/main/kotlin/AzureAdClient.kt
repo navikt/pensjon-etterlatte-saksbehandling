@@ -12,28 +12,29 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import io.ktor.client.call.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.statement.*
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Parameters
-import io.ktor.serialization.jackson.*
-import kotlinx.coroutines.*
+import io.ktor.serialization.jackson.jackson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.future.asDeferred
 import kotlinx.coroutines.future.future
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
-import kotlin.coroutines.CoroutineContext
 
 private val logger = LoggerFactory.getLogger(AzureAdClient::class.java)
 
 internal val defaultHttpClient = HttpClient() {
     expectSuccess = true
-    install(ContentNegotiation){
+    install(ContentNegotiation) {
         jackson {
             configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             setSerializationInclusion(JsonInclude.Include.NON_NULL)
@@ -54,7 +55,7 @@ data class AzureAdOpenIdConfiguration(
 
 data class OboTokenRequest(
     val scopes: List<String>,
-    val accessToken: String,
+    val accessToken: String
 )
 
 class AzureAdClient(
@@ -75,14 +76,16 @@ class AzureAdClient(
                 url = openIdConfiguration.tokenEndpoint,
                 formParameters = formParameters
             ).body()
-        } catch (ex: Throwable){
+        } catch (ex: Throwable) {
             val responseBody: String? = when (ex) {
                 is ResponseException -> ex.response.bodyAsText()
                 else -> null
             }
-            throw RuntimeException("Could not fetch access token from authority endpoint. response body: $responseBody", ex)
+            throw RuntimeException(
+                "Could not fetch access token from authority endpoint. response body: $responseBody",
+                ex
+            )
         }
-
 
     private suspend inline fun get(url: String, oboAccessToken: AccessToken): Result<JsonNode, ThrowableErrorMessage> =
         runCatching {
@@ -124,15 +127,17 @@ class AzureAdClient(
 
         val value = cache.get(OboTokenRequest(scopes, accessToken)) { req, _ ->
             CoroutineScope(context).future {
-                fetchAccessToken(Parameters.build {
-                    append("client_id", config.getString("azure.app.client.id"))
-                    append("client_secret", config.getString("azure.app.client.secret"))
-                    append("scope", req.scopes.joinToString(separator = " "))
-                    append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
-                    append("requested_token_use", "on_behalf_of")
-                    append("assertion", req.accessToken)
-                    append("assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-                })
+                fetchAccessToken(
+                    Parameters.build {
+                        append("client_id", config.getString("azure.app.client.id"))
+                        append("client_secret", config.getString("azure.app.client.secret"))
+                        append("scope", req.scopes.joinToString(separator = " "))
+                        append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                        append("requested_token_use", "on_behalf_of")
+                        append("assertion", req.accessToken)
+                        append("assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+                    }
+                )
             }
         }
 
@@ -148,7 +153,8 @@ class AzureAdClient(
 
     // Graph API lookup (on-behalf-of flow)
     suspend fun getUserInfoFromGraph(accessToken: String): Result<JsonNode, ThrowableErrorMessage> {
-        val queryProperties = "onPremisesSamAccountName,displayName,givenName,mail,officeLocation,surname,userPrincipalName,id,jobTitle"
+        val queryProperties =
+            "onPremisesSamAccountName,displayName,givenName,mail,officeLocation,surname,userPrincipalName,id,jobTitle"
         val url = "https://graph.microsoft.com/v1.0/me?\$select=$queryProperties"
         val scopes = listOf("https://graph.microsoft.com/.default")
         return getOnBehalfOfAccessTokenForResource(scopes, accessToken)

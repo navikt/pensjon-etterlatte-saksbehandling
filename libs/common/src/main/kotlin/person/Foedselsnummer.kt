@@ -32,7 +32,6 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
             FoedselsnummerValidator.isValid(fnr!!.replace(Regex("[^0-9]"), ""))
     }
 
-
     /**
      * @return birthdate as [LocalDate]
      */

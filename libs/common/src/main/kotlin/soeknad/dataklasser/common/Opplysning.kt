@@ -4,13 +4,13 @@ import java.time.LocalDate
 
 data class Opplysning<T>(
     val svar: T,
-    val spoersmaal: String? = null,
+    val spoersmaal: String? = null
 )
 
 data class BetingetOpplysning<T, R>(
     val svar: T,
     val spoersmaal: String? = null,
-    val opplysning: R?,
+    val opplysning: R?
 )
 
 interface Svar {
@@ -19,15 +19,15 @@ interface Svar {
 
 data class FritekstSvar(
     override val innhold: String
-): Svar
+) : Svar
 
 data class DatoSvar(
     override val innhold: LocalDate
-): Svar
+) : Svar
 
-data class EnumSvar<E: Enum<E>>(
+data class EnumSvar<E : Enum<E>>(
     val verdi: E,
     override val innhold: String
-): Svar
+) : Svar
 
 enum class JaNeiVetIkke { JA, NEI, VET_IKKE }

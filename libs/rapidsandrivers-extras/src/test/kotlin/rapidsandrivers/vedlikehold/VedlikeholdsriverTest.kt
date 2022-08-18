@@ -11,16 +11,21 @@ import org.junit.jupiter.api.Test
 class VedlikeholdsriverTest {
 
     @Test
-    fun `river skal lese medlinger om sletteing av sak`(){
+    fun `river skal lese medlinger om sletteing av sak`() {
         val service: VedlikeholdService = mockk()
         val rapid = TestRapid().apply {
             registrerVedlikeholdsriver(service)
         }
 
         every { service.slettSak(34) } returns Unit
-        rapid.sendTestMessage(JsonMessage.newMessage(Vedlikeholdsriver.slettSakEventName, mapOf(
-            "sakId" to 34,
-        )).toJson())
+        rapid.sendTestMessage(
+            JsonMessage.newMessage(
+                Vedlikeholdsriver.slettSakEventName,
+                mapOf(
+                    "sakId" to 34
+                )
+            ).toJson()
+        )
 
         Assertions.assertEquals(1, rapid.inspektør.size)
         Assertions.assertNull(rapid.inspektør.message(0)["@feil"])
@@ -28,16 +33,21 @@ class VedlikeholdsriverTest {
     }
 
     @Test
-    fun `river skal poste feilmelding ved feil`(){
+    fun `river skal poste feilmelding ved feil`() {
         val service: VedlikeholdService = mockk()
         val rapid = TestRapid().apply {
             registrerVedlikeholdsriver(service)
         }
 
         every { service.slettSak(34) } throws IllegalArgumentException()
-        rapid.sendTestMessage(JsonMessage.newMessage(Vedlikeholdsriver.slettSakEventName, mapOf(
-            "sakId" to 34,
-        )).toJson())
+        rapid.sendTestMessage(
+            JsonMessage.newMessage(
+                Vedlikeholdsriver.slettSakEventName,
+                mapOf(
+                    "sakId" to 34
+                )
+            ).toJson()
+        )
 
         Assertions.assertEquals(1, rapid.inspektør.size)
         Assertions.assertNull(rapid.inspektør.message(0)["@resultat"])

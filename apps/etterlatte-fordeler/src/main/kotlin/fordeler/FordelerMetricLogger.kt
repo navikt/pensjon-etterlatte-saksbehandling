@@ -20,7 +20,7 @@ enum class FordelerStatus {
 
 internal class FordelerMetricLogger(
     private val kriterierIkkeOppfyltMetric: Counter = defaultKriterierIkkeOppfyltMetric.register(),
-    private val fordelerStatusMetric: Counter = defaultFordelerStatusMetric.register(),
+    private val fordelerStatusMetric: Counter = defaultFordelerStatusMetric.register()
 ) {
 
     fun logMetricFordelt() {
@@ -33,5 +33,4 @@ internal class FordelerMetricLogger(
         }
         fordelerStatusMetric.labels(FordelerStatus.IKKE_GYLDIG_FOR_BEHANDLING.name).inc()
     }
-
 }

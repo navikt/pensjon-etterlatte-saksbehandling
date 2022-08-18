@@ -62,7 +62,6 @@ fun appFromBeanfactory(env: BeanFactory): App {
     return App(env)
 }
 
-
 fun Application.sikkerhetsModul() {
     install(Authentication) {
         tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
@@ -108,7 +107,6 @@ fun Application.module(beanFactory: BeanFactory) {
             oppgaveRoutes(OppgaveDao(ds.dataSource))
             grunnlagsendringshendelseRoute(beanFactory.grunnlagsendringshendelseService())
         }
-
     }
     beanFactory.behandlingHendelser().start()
 }
@@ -116,7 +114,10 @@ fun Application.module(beanFactory: BeanFactory) {
 private fun Route.attachContekst(ds: DataSource) {
     intercept(ApplicationCallPipeline.Call) {
         val requestContekst =
-            Context(decideUser(call.principal<TokenValidationContextPrincipal>()!!), DatabaseContext(ds))
+            Context(
+                decideUser(call.principal<TokenValidationContextPrincipal>()!!),
+                DatabaseContext(ds)
+            )
         withContext(
             Dispatchers.Default + Kontekst.asContextElement(
                 value = requestContekst
@@ -130,11 +131,14 @@ private fun Route.attachContekst(ds: DataSource) {
 
 class App(private val beanFactory: BeanFactory) {
     fun run() {
-        embeddedServer(CIO, applicationEngineEnvironment {
-            modules.add { module(beanFactory) }
-            modules.add { sikkerhetsModul() }
-            connector { port = 8080 }
-        }).start(true)
+        embeddedServer(
+            CIO,
+            applicationEngineEnvironment {
+                modules.add { module(beanFactory) }
+                modules.add { sikkerhetsModul() }
+                connector { port = 8080 }
+            }
+        ).start(true)
         beanFactory.behandlingHendelser().nyHendelse.close()
     }
 }

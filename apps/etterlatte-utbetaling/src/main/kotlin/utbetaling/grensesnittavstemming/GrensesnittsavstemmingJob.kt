@@ -11,7 +11,7 @@ class GrensesnittsavstemmingJob(
     private val grensesnittsavstemmingService: GrensesnittsavstemmingService,
     private val leaderElection: LeaderElection,
     private val starttidspunkt: Date,
-    private val periode: Duration,
+    private val periode: Duration
 ) {
     private val jobbNavn = this::class.simpleName
 
@@ -26,7 +26,7 @@ class GrensesnittsavstemmingJob(
                 Grensesnittsavstemming(
                     grensesnittsavstemmingService = grensesnittsavstemmingService,
                     leaderElection = leaderElection,
-                    jobbNavn = jobbNavn!!,
+                    jobbNavn = jobbNavn!!
                 ).run()
             } catch (throwable: Throwable) {
                 logger.error("Avstemming feilet", throwable)
@@ -36,7 +36,7 @@ class GrensesnittsavstemmingJob(
     class Grensesnittsavstemming(
         val grensesnittsavstemmingService: GrensesnittsavstemmingService,
         val leaderElection: LeaderElection,
-        val jobbNavn: String,
+        val jobbNavn: String
     ) {
         private val log = LoggerFactory.getLogger(this::class.java)
 

@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory
 
 internal class PdlHendelser(
     rapidsConnection: RapidsConnection,
-    private val behandlinger: Behandling,
+    private val behandlinger: Behandling
 
-    ) : River.PacketListener {
+) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(OppdaterBehandling::class.java)
 
     init {

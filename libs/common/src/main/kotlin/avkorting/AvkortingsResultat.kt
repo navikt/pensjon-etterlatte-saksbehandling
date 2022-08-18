@@ -4,14 +4,14 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
 
-//TODO denne klassen må gås igjennom
+// TODO denne klassen må gås igjennom
 enum class Avkortingstyper {
-    INNTEKT,
+    INNTEKT
 }
 
 enum class Endringskode {
     NY,
-    REVURDERING,
+    REVURDERING
 }
 
 enum class AvkortingsResultatType {
@@ -34,4 +34,3 @@ data class Avkortingsperiode(
     val datoTOM: YearMonth?,
     val belop: Int
 )
-

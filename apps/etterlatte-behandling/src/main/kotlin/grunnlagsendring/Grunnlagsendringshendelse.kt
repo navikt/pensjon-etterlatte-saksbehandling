@@ -11,7 +11,7 @@ data class Grunnlagsendringshendelse(
     val opprettet: LocalDateTime,
     val data: Grunnlagsinformasjon?,
     val status: GrunnlagsendringStatus = GrunnlagsendringStatus.IKKE_VURDERT,
-    val behandlingId: UUID? = null,
+    val behandlingId: UUID? = null
 )
 
 sealed class Grunnlagsinformasjon {
@@ -19,11 +19,10 @@ sealed class Grunnlagsinformasjon {
     data class SoekerDoed(
         val hendelse: Doedshendelse
     ) : Grunnlagsinformasjon()
-
 }
 
 enum class GrunnlagsendringsType {
-    SOEKER_DOED,
+    SOEKER_DOED
 }
 
 enum class GrunnlagsendringStatus {

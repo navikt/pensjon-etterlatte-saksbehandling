@@ -53,7 +53,7 @@ class BehandlingsHendelser(
                 for (hendelse in kanal) {
                     try {
                         handleEnHendelse(hendelse)
-                    }catch (ex: Exception){
+                    } catch (ex: Exception) {
                         logger.warn("Handtering av behandlingshendelse feilet", ex)
                     }
                 }
@@ -68,9 +68,9 @@ class BehandlingsHendelser(
             }
         }
     }
-    private fun handleEnHendelse(hendelse: Pair<UUID, BehandlingHendelseType>){
+    private fun handleEnHendelse(hendelse: Pair<UUID, BehandlingHendelseType>) {
         inTransaction {
-            val behandling: Behandling = when ( behandlingDao.hentBehandlingType(hendelse.first) ) {
+            val behandling: Behandling = when (behandlingDao.hentBehandlingType(hendelse.first)) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
                     foerstegangsbehandlingFactory.hentFoerstegangsbehandling(hendelse.first).serialiserbarUtgave()
                 }
@@ -78,7 +78,11 @@ class BehandlingsHendelser(
                     revurderingFactory.hentRevurdering(hendelse.first)
                         .serialiserbarUtgave()
                 }
-                else -> {throw IllegalArgumentException("kan ikke poste melding om at grunnlag er endret for behandling ${hendelse.first}")}
+                else -> {
+                    throw IllegalArgumentException(
+                        "kan ikke poste melding om at grunnlag er endret for behandling ${hendelse.first}"
+                    )
+                }
             }
             val sak = requireNotNull(sakService.finnSak(behandling.sak))
 
@@ -92,9 +96,9 @@ class BehandlingsHendelser(
                         BehandlingGrunnlagEndret.sakIdKey to behandling.sak,
                         BehandlingGrunnlagEndret.sakObjectKey to sak,
                         BehandlingGrunnlagEndret.behandlingOpprettetKey to behandling.behandlingOpprettet
-                        )
+                    )
                 ).also {
-                    when(behandling){
+                    when (behandling) {
                         is Foerstegangsbehandling -> {
                             it[BehandlingGrunnlagEndret.fnrSoekerKey] = behandling.persongalleri.soeker
                             it[BehandlingGrunnlagEndret.persongalleriKey] = behandling.persongalleri
@@ -107,7 +111,10 @@ class BehandlingsHendelser(
                     }
                 }.toJson()
             ).also {
-                logger.info("Posted event ${hendelse.second.name} for behandling ${hendelse.first} to partiton ${it.first}, offset ${it.second}")
+                logger.info(
+                    "Posted event ${hendelse.second.name} for behandling ${hendelse.first} to partiton ${it.first}, " +
+                        "offset ${it.second}"
+                )
             }
         }
     }

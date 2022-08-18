@@ -16,8 +16,10 @@ fun Route.sakRoutes(sakService: SakService) {
     }
 
     get("/saker/{id}") {
-        call.respond(inTransaction { sakService.finnSak(requireNotNull(call.parameters["id"]).toLong()) }
-            ?: HttpStatusCode.NotFound)
+        call.respond(
+            inTransaction { sakService.finnSak(requireNotNull(call.parameters["id"]).toLong()) }
+                ?: HttpStatusCode.NotFound
+        )
     }
     delete("/saker/{id}/") {
         no.nav.etterlatte.sak.inTransaction { sakService.slettSak(requireNotNull(call.parameters["id"]).toLong()) }
@@ -26,9 +28,13 @@ fun Route.sakRoutes(sakService: SakService) {
 
     route("personer/{id}") {
         get("saker") {
-            call.respond(Saker(inTransaction {
-                sakService.finnSaker(requireNotNull(call.parameters["id"]))
-            }))
+            call.respond(
+                Saker(
+                    inTransaction {
+                        sakService.finnSaker(requireNotNull(call.parameters["id"]))
+                    }
+                )
+            )
         }
 
         route("saker/{type}") {
@@ -47,6 +53,3 @@ private fun <T> inTransaction(block: () -> T): T = Kontekst.get().databasecontxt
 
 data class Sak(val ident: String, val sakType: String, val id: Long)
 data class Saker(val saker: List<Sak>)
-
-
-

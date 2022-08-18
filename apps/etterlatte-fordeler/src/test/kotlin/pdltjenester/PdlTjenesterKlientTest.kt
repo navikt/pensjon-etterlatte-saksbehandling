@@ -3,12 +3,12 @@ package no.nav.etterlatte.pdltjenester
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
-import io.ktor.serialization.jackson.*
+import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.FNR_1
 import no.nav.etterlatte.libs.common.objectMapper
@@ -31,7 +31,7 @@ class PdlTjenesterKlientTest {
                 addHandler { request ->
                     if (request.url.fullPath == "/person" && request.method == HttpMethod.Post) {
                         val headers = headersOf(
-                            "Content-Type" to listOf(ContentType.Application.Json.toString()),
+                            "Content-Type" to listOf(ContentType.Application.Json.toString())
                         )
                         respond(content = readFile(file), headers = headers)
                     } else {
@@ -52,10 +52,12 @@ class PdlTjenesterKlientTest {
         mockEndpoint("/pdltjenester/person.json")
 
         val person = runBlocking {
-            pdlTjenesterKlient.hentPerson(HentPersonRequest(
-                foedselsnummer = Foedselsnummer.of(FNR_1),
-                rolle = PersonRolle.BARN
-            ))
+            pdlTjenesterKlient.hentPerson(
+                HentPersonRequest(
+                    foedselsnummer = Foedselsnummer.of(FNR_1),
+                    rolle = PersonRolle.BARN
+                )
+            )
         }
 
         assertNotNull(person)

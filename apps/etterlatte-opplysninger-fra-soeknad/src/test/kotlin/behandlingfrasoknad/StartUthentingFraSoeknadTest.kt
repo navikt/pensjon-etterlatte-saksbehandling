@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
 
-
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class StartUthentingFraSoeknadTest {
 
@@ -22,14 +21,12 @@ internal class StartUthentingFraSoeknadTest {
 
         fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")
-
     }
 
     private val inspector = TestRapid().apply { StartUthentingFraSoeknad(this, opplysningsuthenterMock) }
 
     @Test
     fun `skal lese inn melding og lage message med opplysninger`() {
-
         val opplysninger = Opplysningsuthenter().lagOpplysningsListe(
             objectMapper.treeToValue(
                 objectMapper.readTree(
@@ -44,6 +41,5 @@ internal class StartUthentingFraSoeknadTest {
         assertEquals("f525f2f7-e246-43d7-b61a-5f0757472916", inspector.message(0).get("behandlingId").asText())
         assertEquals(true, inspector.message(0).get("gyldigInnsender").asBoolean())
         assertEquals(9, inspector.message(0).get("opplysning").size())
-
     }
 }

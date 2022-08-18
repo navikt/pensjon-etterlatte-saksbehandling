@@ -1,6 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
-import no.nav.etterlatte.DataSourceBuilder
+import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.grunnlagsendringshendelse
 import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
 import no.nav.etterlatte.sak.SakDao
@@ -18,7 +18,6 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
-
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagsendringshendelseDaoTest {
@@ -45,7 +44,6 @@ internal class GrunnlagsendringshendelseDaoTest {
         sakRepo = SakDao { connection }
         grunnlagsendringshendelsesRepo = GrunnlagsendringshendelseDao { connection }
     }
-
 
     @AfterEach
     fun afterEach() {
@@ -79,7 +77,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             { assertEquals(hendelse.sakId, hendelseFraDatabase!!.sakId) },
             { assertEquals(hendelse.type, hendelseFraDatabase!!.type) },
             { assertEquals(hendelse.opprettet, hendelseFraDatabase!!.opprettet) },
-            { assertEquals(hendelse.data, hendelseFraDatabase!!.data) },
+            { assertEquals(hendelse.data, hendelseFraDatabase!!.data) }
         )
     }
 
@@ -88,7 +86,9 @@ internal class GrunnlagsendringshendelseDaoTest {
         val sakid = sakRepo.opprettSak("1234", "BP").id
         listOf(
             grunnlagsendringshendelse(
-                sakId = sakid, opprettet = LocalDateTime.now(), data = grunnlagsinformasjonDoedshendelse()
+                sakId = sakid,
+                opprettet = LocalDateTime.now(),
+                data = grunnlagsinformasjonDoedshendelse()
             ),
             grunnlagsendringshendelse(
                 sakId = sakid,
@@ -96,41 +96,52 @@ internal class GrunnlagsendringshendelseDaoTest {
                 data = grunnlagsinformasjonDoedshendelse()
             ),
             grunnlagsendringshendelse(
-                sakId = sakid, opprettet = LocalDateTime.now().minusHours(1), data = grunnlagsinformasjonDoedshendelse()
+                sakId = sakid,
+                opprettet = LocalDateTime.now().minusHours(1),
+                data = grunnlagsinformasjonDoedshendelse()
             ),
             grunnlagsendringshendelse(
-                sakId = sakid, opprettet = LocalDateTime.now().minusDays(4), data = grunnlagsinformasjonDoedshendelse()
+                sakId = sakid,
+                opprettet = LocalDateTime.now().minusDays(4),
+                data = grunnlagsinformasjonDoedshendelse()
             ),
             grunnlagsendringshendelse(
-                sakId = sakid, opprettet = LocalDateTime.now().minusYears(1), data = grunnlagsinformasjonDoedshendelse()
-            ),
+                sakId = sakid,
+                opprettet = LocalDateTime.now().minusYears(1),
+                data = grunnlagsinformasjonDoedshendelse()
+            )
         ).forEach {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
         val hendelserEldreEnn1Time = grunnlagsendringshendelsesRepo.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
-            60, GrunnlagsendringsType.SOEKER_DOED
+            60,
+            GrunnlagsendringsType.SOEKER_DOED
         )
-        assertAll("henter kun grunnlagsendringshendelser som er eldre enn 1 time",
+        assertAll(
+            "henter kun grunnlagsendringshendelser som er eldre enn 1 time",
             { assertEquals(3, hendelserEldreEnn1Time.size) },
-            { assertTrue { hendelserEldreEnn1Time.all { it.opprettet <= LocalDateTime.now().minusHours(1) } } })
+            { assertTrue { hendelserEldreEnn1Time.all { it.opprettet <= LocalDateTime.now().minusHours(1) } } }
+        )
     }
 
     @Test
     fun `oppdaterGrunnlagsendringStatuForType skal oppdatere status for grunnlagsendringshendelser`() {
-
         val sak1 = sakRepo.opprettSak("1234", "BP").id
         val sak2 = sakRepo.opprettSak("4321", "BP").id
 
         listOf(
             grunnlagsendringshendelse(
-                sakId = sak1, data = grunnlagsinformasjonDoedshendelse()
+                sakId = sak1,
+                data = grunnlagsinformasjonDoedshendelse()
             ),
             grunnlagsendringshendelse(
-                sakId = sak1, data = grunnlagsinformasjonDoedshendelse()
+                sakId = sak1,
+                data = grunnlagsinformasjonDoedshendelse()
             ),
             grunnlagsendringshendelse(
-                sakId = sak2, data = grunnlagsinformasjonDoedshendelse()
-            ),
+                sakId = sak2,
+                data = grunnlagsinformasjonDoedshendelse()
+            )
         ).forEach {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
@@ -147,8 +158,8 @@ internal class GrunnlagsendringshendelseDaoTest {
             "skal oppdatere statuser for grunnlagsendringshendelser",
             { assertEquals(hendelserFoerOppdatertStatus.size, hendelserEtterOppdatertStatus.size) },
             { assertTrue(hendelserFoerOppdatertStatus.all { it.status == GrunnlagsendringStatus.IKKE_VURDERT }) },
-            { assertTrue(hendelserEtterOppdatertStatus.all { it.status == GrunnlagsendringStatus.FORKASTET }) },
+            { assertTrue(hendelserEtterOppdatertStatus.all { it.status == GrunnlagsendringStatus.FORKASTET }) }
 
-            )
+        )
     }
 }

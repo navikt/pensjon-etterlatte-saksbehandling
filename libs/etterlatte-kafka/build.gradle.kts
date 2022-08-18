@@ -1,5 +1,4 @@
 import Logging.Slf4jApi
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
@@ -8,7 +7,7 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://packages.confluent.io/maven/")
-    maven ("https://jitpack.io")
+    maven("https://jitpack.io")
 }
 
 dependencies {

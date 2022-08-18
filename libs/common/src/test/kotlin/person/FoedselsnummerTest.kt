@@ -12,7 +12,12 @@ internal class FoedselsnummerTest {
     @Test
     fun `Sjekk diverse gyldige test fnr`() {
         val gyldigeFnrListe = listOf(
-            "11057523044", "26117512737", "26104500284", "24116324268", "04096222195", "05126307952"
+            "11057523044",
+            "26117512737",
+            "26104500284",
+            "24116324268",
+            "04096222195",
+            "05126307952"
         )
 
         assertAll(

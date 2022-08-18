@@ -55,7 +55,9 @@ class TestRapid : RapidsConnection() {
 
         fun key(index: Int) = messages[index].first
         fun message(index: Int) = jsonMessages.getOrPut(index) { objectMapper.readTree(messages[index].second) }
-        fun field(index: Int, field: String) = requireNotNull(message(index).path(field).takeUnless(JsonNode::isMissingOrNull)) {
+        fun field(index: Int, field: String) = requireNotNull(
+            message(index).path(field).takeUnless(JsonNode::isMissingOrNull)
+        ) {
             "Message does not contain field '$field'"
         }
     }

@@ -3,9 +3,11 @@ package no.nav.etterlatte.utbetaling.config
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.http.*
-import io.ktor.serialization.jackson.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.fullPath
+import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.libs.common.objectMapper
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -29,12 +31,10 @@ internal class LeaderElectionTest {
             }
             install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
         }
-
     }
 
     @Test
     fun `sier ja når leader elector-pod svarer at vårt hostname er leader`() {
-
         val response = """{"name":"$localHostName"}"""
         val httpClient = httpClient(
             response
@@ -50,6 +50,4 @@ internal class LeaderElectionTest {
         val leaderElection = LeaderElection(localHostName, httpClient, "localhost")
         assertFalse(leaderElection.isLeader())
     }
-
 }
-

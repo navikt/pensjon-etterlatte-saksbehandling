@@ -8,6 +8,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.getClientAccessToken
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.usernameFraToken
 
@@ -38,7 +39,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                     dollyService.hentTestGruppe(usernameFraToken()!!, accessToken)?.let { id ->
                         dollyService.opprettBestilling(bestilling, id, accessToken).also { bestilling ->
                             logger.info("Bestilling med id ${bestilling.id} har status ${bestilling.ferdig}")
-                            call.respond(bestilling)
+                            call.respond(bestilling.toJson())
                         }
                     }
                 } catch (e: Exception) {

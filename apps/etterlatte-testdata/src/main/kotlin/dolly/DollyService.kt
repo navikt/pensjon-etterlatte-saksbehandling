@@ -32,11 +32,17 @@ class DollyService(
     /**
      * Hent testfamilier som kan benyttes for å sende inn søknad.
      */
-    fun hentFamilier(gruppeId: Long, accessToken: String): List<DollyPersonResponse> = runBlocking {
+    fun hentFamilier(gruppeId: Long, accessToken: String): List<ForenkletFamilieModell> = runBlocking {
         dollyClient.hentTestGruppeBestillinger(gruppeId, accessToken, 0, 10).let { bestillinger ->
             logger.info("Funnet bestillinger: ${objectMapper.writeValueAsString(bestillinger)}")
-            dollyClient.hentPersonInfo(bestillinger.identer.map { it.ident }, accessToken)
-                .also { logger.info("Hentet ut følgende gruppe med personer: ${objectMapper.writeValueAsString(it)}") }
+            dollyClient.hentPersonInfo(bestillinger.identer.map { it.ident }, accessToken).map { personResponse ->
+                ForenkletFamilieModell(
+                    avdoed = personResponse.ident,
+                    gjenlevende = personResponse.person.sivilstand.first().relatertVedSivilstand,
+                    barn = personResponse.person.forelderBarnRelasjon
+                        .filter { it.barn }
+                        .map { it.relatertPersonsIdent })
+            }
         }
     }
 

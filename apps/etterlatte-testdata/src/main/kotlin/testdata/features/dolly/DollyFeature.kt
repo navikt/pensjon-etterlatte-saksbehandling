@@ -32,13 +32,15 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                     }
                 }
 
+                logger.info("Personer: ${personer?.toJson()}} ")
+
                 call.respond(
                     MustacheContent(
                         "soeknad/dolly.hbs", mapOf(
                             "beskrivelse" to beskrivelse,
                             "path" to path,
                             "gruppeId" to gruppeId,
-                            "personer" to personer
+                            "personer" to personer?.toJson()
                         )
                     )
                 )

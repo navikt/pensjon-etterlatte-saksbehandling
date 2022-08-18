@@ -46,3 +46,5 @@ data class Foedsel(val foedselsdato: String, val foedselsaar: Int)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Navn(val fornavn: String, val etternavn: String)
+
+data class ForenkletFamilieModell(val avdoed: String, val gjenlevende: String, val barn: List<String>)

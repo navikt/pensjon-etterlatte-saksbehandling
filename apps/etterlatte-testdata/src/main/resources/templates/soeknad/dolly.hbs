@@ -88,9 +88,9 @@
         const table = document.querySelector('tbody')
 
         {{personer}}.forEach((data) => {
-            const avdoed = data.person.ident
-            const gjenlevende = data.relasjoner[2].relatertPerson.ident
-            const barn = data.relasjoner[0].relatertPerson.ident
+            const avdoed = data.avdoed
+            const gjenlevende = data.gjenlevende
+            const barn = data.barn[0]
 
             const tableRow = document.createElement('tr')
 

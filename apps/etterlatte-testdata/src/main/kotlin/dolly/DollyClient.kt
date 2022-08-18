@@ -4,9 +4,11 @@ import com.typesafe.config.Config
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.logger
 
 interface DollyClient {
     suspend fun hentDollyBrukere(accessToken: String): List<Bruker>
@@ -56,5 +58,8 @@ class DollyClientImpl(config: Config, private val httpClient: HttpClient) : Doll
     override suspend fun hentPersonInfo(identer: List<String>, accessToken: String): List<DollyPersonResponse> =
         httpClient.get("$dollyUrl/pdlperson/identer?identer=${identer.joinToString(",")}") {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
-        }.body()
+        }.let {
+            logger.info(it.bodyAsText())
+            it.body()
+        }
 }

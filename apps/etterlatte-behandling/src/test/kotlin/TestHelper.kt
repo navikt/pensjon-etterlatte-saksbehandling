@@ -36,7 +36,7 @@ fun foerstegangsbehandling(
     oppgaveStatus = oppgaveStatus,
     soeknadMottattDato = soeknadMottattDato,
     persongalleri = persongalleri,
-    gyldighetsproeving = gyldighetsproeving,
+    gyldighetsproeving = gyldighetsproeving
 )
 
 fun revurdering(
@@ -70,7 +70,7 @@ fun persongalleri(
     innsender = innsender,
     soesken = soesken,
     avdoed = avdoed,
-    gjenlevende = gjenlevende,
+    gjenlevende = gjenlevende
 )
 
 fun grunnlagsendringshendelse(

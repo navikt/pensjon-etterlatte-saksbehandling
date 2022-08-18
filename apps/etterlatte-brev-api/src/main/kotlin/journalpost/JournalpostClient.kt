@@ -3,11 +3,15 @@ package journalpost
 import com.github.michaelbull.result.get
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.http.content.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.accept
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.content.TextContent
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.retry
@@ -45,7 +49,6 @@ class JournalpostClient(
         idType: BrukerIdType,
         accessToken: String
     ): JournalpostResponse {
-
         val request = GraphqlRequest(
             query = getQuery("/graphql/journalpost.graphql"),
             variables = dokumentOversiktBrukerVariables(
@@ -78,7 +81,10 @@ class JournalpostClient(
     }
 
     private suspend fun getToken(accessToken: String): String {
-        val token = azureAdClient.getOnBehalfOfAccessTokenForResource(listOf("api://dev-fss.teamdokumenthandtering.saf/.default"), accessToken)
+        val token = azureAdClient.getOnBehalfOfAccessTokenForResource(
+            listOf("api://dev-fss.teamdokumenthandtering.saf/.default"),
+            accessToken
+        )
         return token.get()?.accessToken ?: ""
     }
 }
@@ -128,5 +134,5 @@ data class dokumentOversiktBrukerVariables(
 
 data class BrukerId(
     val id: String,
-    val type: BrukerIdType,
+    val type: BrukerIdType
 )

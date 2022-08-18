@@ -7,7 +7,14 @@ import model.brev.mapper.finnBarn
 import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.domene.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.brev.model.*
+import no.nav.etterlatte.libs.common.brev.model.Brev
+import no.nav.etterlatte.libs.common.brev.model.BrevEventTypes
+import no.nav.etterlatte.libs.common.brev.model.BrevID
+import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
+import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
+import no.nav.etterlatte.libs.common.brev.model.Mottaker
+import no.nav.etterlatte.libs.common.brev.model.Status
+import no.nav.etterlatte.libs.common.brev.model.UlagretBrev
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import no.nav.etterlatte.libs.common.journalpost.Bruker
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -37,10 +44,11 @@ class BrevService(
     fun slettBrev(id: BrevID): Boolean {
         val brev = db.hentBrev(id)
 
-        if (brev.status != Status.OPPRETTET && brev.status != Status.OPPDATERT)
+        if (brev.status != Status.OPPRETTET && brev.status != Status.OPPDATERT) {
             throw RuntimeException("Brev er ferdigstilt og kan ikke slettes!")
-        else if (brev.erVedtaksbrev)
+        } else if (brev.erVedtaksbrev) {
             throw RuntimeException("Vedtaksbrev kan ikke slettes!")
+        }
 
         return db.slett(id)
     }
@@ -71,9 +79,9 @@ class BrevService(
         val vedtaksbrev = db.hentBrevForBehandling(behandlingId)
             .find { it.erVedtaksbrev }
 
-        return if (vedtaksbrev == null)
+        return if (vedtaksbrev == null) {
             db.opprettBrev(nyttBrev).id
-        else {
+        } else {
             db.oppdaterBrev(vedtaksbrev.id, nyttBrev)
             vedtaksbrev.id
         }
@@ -82,15 +90,18 @@ class BrevService(
     fun ferdigstillAttestertVedtak(vedtak: Vedtak) = db.hentBrevForBehandling(vedtak.behandling.id.toString())
         .find { it.erVedtaksbrev }
         .let { brev ->
-            require(brev != null) { "Klarte ikke finne vedtaksbrev for attestert vedtak med vedtakId = ${vedtak.vedtakId}" }
+            require(brev != null) {
+                "Klarte ikke finne vedtaksbrev for attestert vedtak med vedtakId = ${vedtak.vedtakId}"
+            }
             ferdigstill(brev, vedtak)
         }
 
     fun ferdigstillBrev(id: BrevID): Brev {
         val brev: Brev = db.hentBrev(id)
 
-        if (brev.erVedtaksbrev)
+        if (brev.erVedtaksbrev) {
             throw RuntimeException("Vedtaksbrev skal ikke ferdigstilles manuelt!")
+        }
 
         // todo: vedtak må byttes ut med grunnlag for å fungere på behandlinger også.
         val vedtak = vedtakService.hentVedtak(brev.behandlingId)

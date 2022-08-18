@@ -3,17 +3,28 @@ package no.nav.etterlatte.opplysningerfrasoknad
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.common.objectMapper
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Samtykke
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.*
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Forelder
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.GjenlevendeForelderSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Samtykke
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadstypeOpplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utbetalingsinformasjon
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Verge
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.*
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.GjenlevendeForelder
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import java.time.ZoneOffset
-import java.util.*
+import java.util.UUID
 
 class Opplysningsuthenter {
 
@@ -39,10 +50,13 @@ class Opplysningsuthenter {
         data: T
     ): Grunnlagsopplysning<T> {
         return Grunnlagsopplysning(
-            UUID.randomUUID(), Grunnlagsopplysning.Privatperson(
-            barnepensjon.innsender.foedselsnummer.svar.value,
-            barnepensjon.mottattDato.toInstant(ZoneOffset.UTC)
-        ), opplysningsType, objectMapper.createObjectNode(),
+            UUID.randomUUID(),
+            Grunnlagsopplysning.Privatperson(
+                barnepensjon.innsender.foedselsnummer.svar.value,
+                barnepensjon.mottattDato.toInstant(ZoneOffset.UTC)
+            ),
+            opplysningsType,
+            objectMapper.createObjectNode(),
             data
         )
     }
@@ -61,7 +75,9 @@ class Opplysningsuthenter {
         opplysningsType: Opplysningstyper
     ): Grunnlagsopplysning<out AvdoedSoeknad>? {
         return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
-            setBehandlingsopplysninger(barnepensjon, opplysningsType,
+            setBehandlingsopplysninger(
+                barnepensjon,
+                opplysningsType,
                 AvdoedSoeknad(
                     type = PersonType.AVDOED,
                     fornavn = avdoed.fornavn.svar,
@@ -82,7 +98,8 @@ class Opplysningsuthenter {
                             )
                         }
                     ),
-                    doedsaarsakSkyldesYrkesskadeEllerYrkessykdom = avdoed.doedsaarsakSkyldesYrkesskadeEllerYrkessykdom.svar.verdi
+                    doedsaarsakSkyldesYrkesskadeEllerYrkessykdom = avdoed
+                        .doedsaarsakSkyldesYrkesskadeEllerYrkessykdom.svar.verdi
                 )
             )
         }
@@ -95,7 +112,8 @@ class Opplysningsuthenter {
         val adresse = barnepensjon.soeker.utenlandsAdresse
 
         return setBehandlingsopplysninger(
-            barnepensjon, opplysningsType,
+            barnepensjon,
+            opplysningsType,
             SoekerBarnSoeknad(
                 type = PersonType.BARN,
                 fornavn = barnepensjon.soeker.fornavn.svar,
@@ -132,7 +150,8 @@ class Opplysningsuthenter {
     ): Grunnlagsopplysning<out GjenlevendeForelderSoeknad>? {
         return hentGjenlevendeForelder(barnepensjon)?.let { forelder ->
             setBehandlingsopplysninger(
-                barnepensjon, opplysningsType,
+                barnepensjon,
+                opplysningsType,
                 GjenlevendeForelderSoeknad(
                     PersonType.GJENLEVENDE_FORELDER,
                     forelder.fornavn.svar,
@@ -151,12 +170,13 @@ class Opplysningsuthenter {
         opplysningsType: Opplysningstyper
     ): Grunnlagsopplysning<out InnsenderSoeknad> {
         return setBehandlingsopplysninger(
-            barnepensjon, opplysningsType,
+            barnepensjon,
+            opplysningsType,
             InnsenderSoeknad(
                 PersonType.INNSENDER,
                 barnepensjon.innsender.fornavn.svar,
                 barnepensjon.innsender.etternavn.svar,
-                barnepensjon.innsender.foedselsnummer.svar,
+                barnepensjon.innsender.foedselsnummer.svar
             )
         )
     }
@@ -171,7 +191,8 @@ class Opplysningsuthenter {
     ): Grunnlagsopplysning<out Utbetalingsinformasjon>? {
         return barnepensjon.utbetalingsInformasjon?.let {
             setBehandlingsopplysninger(
-                barnepensjon, opplysningsType,
+                barnepensjon,
+                opplysningsType,
                 Utbetalingsinformasjon(
                     it.svar.verdi,
                     it.opplysning?.kontonummer?.svar?.innhold,
@@ -191,7 +212,8 @@ class Opplysningsuthenter {
         opplysningsType: Opplysningstyper
     ): Grunnlagsopplysning<out SoeknadMottattDato> {
         return setBehandlingsopplysninger(
-            barnepensjon, opplysningsType,
+            barnepensjon,
+            opplysningsType,
             SoeknadMottattDato(barnepensjon.mottattDato)
         )
     }
@@ -206,13 +228,20 @@ class Opplysningsuthenter {
     fun personGalleri(
         barnepensjon: Barnepensjon
     ): Grunnlagsopplysning<out Persongalleri> {
-        return setBehandlingsopplysninger(barnepensjon, Opplysningstyper.PERSONGALLERI_V1, Persongalleri(
-            soeker = barnepensjon.soeker.foedselsnummer.svar.value,
-            innsender = barnepensjon.innsender.foedselsnummer.svar.value,
-            soesken = barnepensjon.soesken.map { it.foedselsnummer.svar.value },
-            avdoed = barnepensjon.foreldre.filter { it.type == PersonType.AVDOED }.map { it.foedselsnummer.svar.value },
-            gjenlevende = barnepensjon.foreldre.filter { it.type == PersonType.GJENLEVENDE_FORELDER }.map { it.foedselsnummer.svar.value }
-        ))
+        return setBehandlingsopplysninger(
+            barnepensjon,
+            Opplysningstyper.PERSONGALLERI_V1,
+            Persongalleri(
+                soeker = barnepensjon.soeker.foedselsnummer.svar.value,
+                innsender = barnepensjon.innsender.foedselsnummer.svar.value,
+                soesken = barnepensjon.soesken.map { it.foedselsnummer.svar.value },
+                avdoed = barnepensjon.foreldre
+                    .filter { it.type == PersonType.AVDOED }
+                    .map { it.foedselsnummer.svar.value },
+                gjenlevende = barnepensjon.foreldre
+                    .filter { it.type == PersonType.GJENLEVENDE_FORELDER }
+                    .map { it.foedselsnummer.svar.value }
+            )
+        )
     }
-
 }

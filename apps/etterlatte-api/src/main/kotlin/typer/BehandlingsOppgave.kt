@@ -12,7 +12,7 @@ data class BehandlingsOppgave(
     val oppgaveStatus: OppgaveStatus,
     val sak: Sak,
     val regdato: ZonedDateTime,
-    val fristDato: LocalDate,
+    val fristDato: LocalDate
 )
 
 data class OppgaveListe(val oppgaver: List<BehandlingsOppgave>)

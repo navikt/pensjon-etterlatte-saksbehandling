@@ -26,9 +26,7 @@ class PdlService(
         val logger = LoggerFactory.getLogger(PdlService::class.java)
     }
 
-
     override fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): Person {
-
         logger.info("Henter Pdl-modell for ${rolle.name}")
         val personRequest = HentPersonRequest(Foedselsnummer.of(foedselsnummer), rolle)
         val response = runBlocking {

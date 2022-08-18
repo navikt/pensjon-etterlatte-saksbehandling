@@ -1,17 +1,23 @@
 package no.nav.etterlatte.barnepensjon
 
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.vikaar.*
+import no.nav.etterlatte.libs.common.vikaar.Kriterie
+import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
+import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
+import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
+import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
+import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-
 fun vilkaarBrukerErUnder20(
     soekerPdl: VilkaarOpplysning<Person>?,
     avdoedPdl: VilkaarOpplysning<Person>?,
-    virkningstidspunkt: LocalDate?,
+    virkningstidspunkt: LocalDate?
 ): VurdertVilkaar {
     val soekerErUnder20 = kriterieSoekerErUnder20(soekerPdl, avdoedPdl, virkningstidspunkt)
     val soekerErILive = kriterieSoekerErILive(soekerPdl, virkningstidspunkt)
@@ -40,7 +46,7 @@ fun kriterieSoekerErILive(soekerPdl: VilkaarOpplysning<Person>?, virkningstidspu
     )
 
     fun VilkaarOpplysning<Person>.lever() = opplysning.doedsdato == null
-    fun VilkaarOpplysning<Person>.doedeEtterVirk() = opplysning.doedsdato?.isAfter(virkningstidspunkt)?: false
+    fun VilkaarOpplysning<Person>.doedeEtterVirk() = opplysning.doedsdato?.isAfter(virkningstidspunkt) ?: false
     fun VilkaarOpplysning<Person>.levdePaaVirkningsdato() = lever() || doedeEtterVirk()
 
     val resultat = vurderOpplysning { soekerPdl.levdePaaVirkningsdato() }
@@ -79,9 +85,8 @@ fun kriterieSoekerErUnder20(
     }
 
     return Kriterie(
-            Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
-            resultat,
-            opplysningsGrunnlag
-        )
+        Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
+        resultat,
+        opplysningsGrunnlag
+    )
 }
-

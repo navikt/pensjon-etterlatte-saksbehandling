@@ -14,14 +14,13 @@ import java.util.*
 
 class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
 
-
     fun opprettGrunnlagsendringshendelse(hendelse: Grunnlagsendringshendelse): Grunnlagsendringshendelse {
         with(connection()) {
             val stmt = prepareStatement(
                 """
                 INSERT INTO grunnlagsendringshendelse(id, sak_id, type, opprettet, data, status)
                 VALUES(?, ?, ?, ?, to_json(?::json), ?)
-            """.trimIndent()
+                """.trimIndent()
             )
             with(hendelse) {
                 stmt.setObject(1, id)
@@ -35,7 +34,6 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         }.let {
             return hentGrunnlagsendringshendelse(hendelse.id)
                 ?: throw Exception("Kunne ikke hente nettopp lagret Grunnlagsendringshendelse med id: ${hendelse.id}")
-
         }
     }
 
@@ -50,7 +48,6 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             )
             stmt.setObject(1, id)
             return stmt.executeQuery().singleOrNull { asGrunnlagsendringshendelse() }
-
         }
     }
 
@@ -63,7 +60,6 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                 """.trimIndent()
             )
             return stmt.executeQuery().toList { asGrunnlagsendringshendelse() }
-
         }
     }
 
@@ -81,7 +77,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                    WHERE sak_id = ANY(?)
                    AND status = ?
                    AND type = ?
-               """.trimIndent()
+                """.trimIndent()
             ).use {
                 it.setString(1, etterStatus.name)
                 it.setArray(2, createArrayOf("bigint", saker.toTypedArray()))
@@ -129,6 +125,4 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
             }
         }
     }
-
-
 }

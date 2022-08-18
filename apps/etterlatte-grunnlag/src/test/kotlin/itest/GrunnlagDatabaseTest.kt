@@ -72,11 +72,11 @@ internal class GrunnlagDaoIntegrationTest {
             opplysningRepo.leggOpplysningTilGrunnlag(2, it)
         }
 
-
         assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(1).size)
         assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(2).size)
         assertEquals(uuid, opplysningRepo.finnHendelserIGrunnlag(2).first().opplysning.id)
-        assertEquals(datoMottat,
+        assertEquals(
+            datoMottat,
             opplysningRepo.finnHendelserIGrunnlag(1)
                 .first().opplysning.let { objectMapper.treeToValue<SoeknadMottattDato>(it.opplysning) }.mottattDato
         )

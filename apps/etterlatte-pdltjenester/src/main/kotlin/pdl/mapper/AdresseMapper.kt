@@ -3,7 +3,12 @@ package no.nav.etterlatte.pdl.mapper
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.pdl.*
+import no.nav.etterlatte.pdl.ParallelleSannheterKlient
+import no.nav.etterlatte.pdl.PdlBostedsadresse
+import no.nav.etterlatte.pdl.PdlDeltBostedsadresse
+import no.nav.etterlatte.pdl.PdlKontaktadresse
+import no.nav.etterlatte.pdl.PdlOppholdsadresse
+import no.nav.etterlatte.pdl.PdlVegadresse
 
 object AdresseMapper {
 
@@ -11,13 +16,11 @@ object AdresseMapper {
         ppsKlient: ParallelleSannheterKlient,
         bostedsadresse: List<PdlBostedsadresse>
     ): List<Adresse> = runBlocking {
-
         val aktivBostedsadresse = bostedsadresse
             .filterNot { it.metadata.historisk }
             .let { ppsKlient.avklarBostedsadresse(it) }
 
         bostedsadresse.map {
-
             fun toAdresse(
                 type: AdresseType,
                 adresseLinje1: String? = null,
@@ -27,33 +30,33 @@ object AdresseMapper {
                 poststed: String? = null,
                 land: String? = null
             ) = Adresse(
-                    aktiv = it == aktivBostedsadresse,
-                    type = type,
-                    coAdresseNavn = it.coAdressenavn,
-                    adresseLinje1 = adresseLinje1,
-                    adresseLinje2 = adresseLinje2,
-                    adresseLinje3 = adresseLinje3,
-                    postnr = postnr,
-                    poststed = poststed,
-                    land = land,
-                    kilde = it.metadata.master,
-                    gyldigFraOgMed = it.gyldigFraOgMed,
-                    gyldigTilOgMed = it.gyldigTilOgMed,
-                )
+                aktiv = it == aktivBostedsadresse,
+                type = type,
+                coAdresseNavn = it.coAdressenavn,
+                adresseLinje1 = adresseLinje1,
+                adresseLinje2 = adresseLinje2,
+                adresseLinje3 = adresseLinje3,
+                postnr = postnr,
+                poststed = poststed,
+                land = land,
+                kilde = it.metadata.master,
+                gyldigFraOgMed = it.gyldigFraOgMed,
+                gyldigTilOgMed = it.gyldigTilOgMed
+            )
 
             when {
                 it.vegadresse != null -> {
                     toAdresse(
                         type = AdresseType.VEGADRESSE,
-                        adresseLinje1 =  vegAdresseAsAdresseLinje(it.vegadresse),
-                        postnr = it.vegadresse.postnummer,
+                        adresseLinje1 = vegAdresseAsAdresseLinje(it.vegadresse),
+                        postnr = it.vegadresse.postnummer
                     )
                 }
 
                 it.utenlandskAdresse != null -> {
                     toAdresse(
                         type = AdresseType.UTENLANDSKADRESSE,
-                        adresseLinje1 =  it.utenlandskAdresse.adressenavnNummer,
+                        adresseLinje1 = it.utenlandskAdresse.adressenavnNummer,
                         adresseLinje2 = listOfNotNull(
                             it.utenlandskAdresse.bygningEtasjeLeilighet,
                             it.utenlandskAdresse.postboksNummerNavn
@@ -67,20 +70,20 @@ object AdresseMapper {
                 it.ukjentBosted != null -> {
                     toAdresse(
                         type = AdresseType.UKJENT_BOSTED,
-                        adresseLinje1 = it.ukjentBosted.bostedskommune,
+                        adresseLinje1 = it.ukjentBosted.bostedskommune
                     )
                 }
 
                 it.matrikkeladresse != null -> {
                     toAdresse(
                         type = AdresseType.MATRIKKELADRESSE,
-                        postnr = it.matrikkeladresse.postnummer,
+                        postnr = it.matrikkeladresse.postnummer
                     )
                 }
 
                 else -> {
                     toAdresse(
-                        type = AdresseType.UKJENT,
+                        type = AdresseType.UKJENT
                     )
                 }
             }
@@ -91,13 +94,11 @@ object AdresseMapper {
         ppsKlient: ParallelleSannheterKlient,
         deltbostedsadresse: List<PdlDeltBostedsadresse>
     ): List<Adresse> = runBlocking {
-
         val aktivBostedsadresse = deltbostedsadresse
             .filterNot { it.metadata.historisk }
             .let { ppsKlient.avklarDeltBostedsadresse(it) }
 
         deltbostedsadresse.map {
-
             fun toAdresse(
                 type: AdresseType,
                 adresseLinje1: String? = null,
@@ -118,22 +119,22 @@ object AdresseMapper {
                 land = land,
                 kilde = it.metadata.master,
                 gyldigFraOgMed = it.startdatoForKontrakt,
-                gyldigTilOgMed = it.sluttdatoForKontrakt,
+                gyldigTilOgMed = it.sluttdatoForKontrakt
             )
 
             when {
                 it.vegadresse != null -> {
                     toAdresse(
                         type = AdresseType.VEGADRESSE,
-                        adresseLinje1 =  vegAdresseAsAdresseLinje(it.vegadresse),
-                        postnr = it.vegadresse.postnummer,
+                        adresseLinje1 = vegAdresseAsAdresseLinje(it.vegadresse),
+                        postnr = it.vegadresse.postnummer
                     )
                 }
 
                 it.utenlandskAdresse != null -> {
                     toAdresse(
                         type = AdresseType.UTENLANDSKADRESSE,
-                        adresseLinje1 =  it.utenlandskAdresse.adressenavnNummer,
+                        adresseLinje1 = it.utenlandskAdresse.adressenavnNummer,
                         adresseLinje2 = listOfNotNull(
                             it.utenlandskAdresse.bygningEtasjeLeilighet,
                             it.utenlandskAdresse.postboksNummerNavn
@@ -147,20 +148,20 @@ object AdresseMapper {
                 it.ukjentBosted != null -> {
                     toAdresse(
                         type = AdresseType.UKJENT_BOSTED,
-                        adresseLinje1 = it.ukjentBosted.bostedskommune,
+                        adresseLinje1 = it.ukjentBosted.bostedskommune
                     )
                 }
 
                 it.matrikkeladresse != null -> {
                     toAdresse(
                         type = AdresseType.MATRIKKELADRESSE,
-                        postnr = it.matrikkeladresse.postnummer,
+                        postnr = it.matrikkeladresse.postnummer
                     )
                 }
 
                 else -> {
                     toAdresse(
-                        type = AdresseType.UKJENT,
+                        type = AdresseType.UKJENT
                     )
                 }
             }
@@ -171,13 +172,11 @@ object AdresseMapper {
         ppsKlient: ParallelleSannheterKlient,
         oppholdsadresse: List<PdlOppholdsadresse>
     ): List<Adresse> = runBlocking {
-
         val aktivOppholdsadresse = oppholdsadresse
             .filterNot { it.metadata.historisk }
             .let { ppsKlient.avklarOppholdsadresse(it) }
 
         oppholdsadresse.map {
-
             fun toAdresse(
                 type: AdresseType,
                 adresseLinje1: String? = null,
@@ -198,7 +197,7 @@ object AdresseMapper {
                 land = land,
                 kilde = it.metadata.master,
                 gyldigFraOgMed = it.gyldigFraOgMed,
-                gyldigTilOgMed = it.gyldigTilOgMed,
+                gyldigTilOgMed = it.gyldigTilOgMed
             )
 
             when {
@@ -206,7 +205,7 @@ object AdresseMapper {
                     toAdresse(
                         type = AdresseType.VEGADRESSE,
                         adresseLinje1 = vegAdresseAsAdresseLinje(it.vegadresse),
-                        postnr = it.vegadresse.postnummer,
+                        postnr = it.vegadresse.postnummer
                     )
                 }
 
@@ -227,20 +226,20 @@ object AdresseMapper {
                 it.oppholdAnnetSted != null -> {
                     toAdresse(
                         type = AdresseType.OPPHOLD_ANNET_STED,
-                        adresseLinje1 = it.oppholdAnnetSted,
+                        adresseLinje1 = it.oppholdAnnetSted
                     )
                 }
 
                 it.matrikkeladresse != null -> {
                     toAdresse(
                         type = AdresseType.MATRIKKELADRESSE,
-                        postnr = it.matrikkeladresse.postnummer,
+                        postnr = it.matrikkeladresse.postnummer
                     )
                 }
 
                 else -> {
                     toAdresse(
-                        type = AdresseType.UKJENT,
+                        type = AdresseType.UKJENT
                     )
                 }
             }
@@ -251,13 +250,11 @@ object AdresseMapper {
         ppsKlient: ParallelleSannheterKlient,
         kontaktadresse: List<PdlKontaktadresse>
     ): List<Adresse> = runBlocking {
-
         val aktivOppholdsadresse = kontaktadresse
             .filterNot { it.metadata.historisk }
             .let { ppsKlient.avklarKontaktadresse(it) }
 
         kontaktadresse.map {
-
             fun toAdresse(
                 type: AdresseType,
                 adresseLinje1: String? = null,
@@ -265,7 +262,7 @@ object AdresseMapper {
                 adresseLinje3: String? = null,
                 postnr: String? = null,
                 poststed: String? = null,
-                land: String? = null,
+                land: String? = null
             ) = Adresse(
                 aktiv = it == aktivOppholdsadresse,
                 type = type,
@@ -278,7 +275,7 @@ object AdresseMapper {
                 land = land,
                 kilde = it.metadata.master,
                 gyldigFraOgMed = it.gyldigFraOgMed,
-                gyldigTilOgMed = it.gyldigTilOgMed,
+                gyldigTilOgMed = it.gyldigTilOgMed
             )
 
             when {
@@ -286,7 +283,7 @@ object AdresseMapper {
                     toAdresse(
                         type = AdresseType.VEGADRESSE,
                         adresseLinje1 = vegAdresseAsAdresseLinje(it.vegadresse),
-                        postnr = it.vegadresse.postnummer,
+                        postnr = it.vegadresse.postnummer
                     )
                 }
 
@@ -319,7 +316,7 @@ object AdresseMapper {
                         adresseLinje1 = it.postadresseIFrittFormat.adresselinje1,
                         adresseLinje2 = it.postadresseIFrittFormat.adresselinje2,
                         adresseLinje3 = it.postadresseIFrittFormat.adresselinje3,
-                        postnr = it.postadresseIFrittFormat.postnummer,
+                        postnr = it.postadresseIFrittFormat.postnummer
                     )
                 }
 
@@ -337,19 +334,16 @@ object AdresseMapper {
 
                 else -> {
                     toAdresse(
-                        type = AdresseType.UKJENT,
+                        type = AdresseType.UKJENT
                     )
                 }
             }
         }
     }
 
-
     private fun vegAdresseAsAdresseLinje(vegadresse: PdlVegadresse) = listOfNotNull(
         vegadresse.adressenavn,
         vegadresse.husnummer,
         vegadresse.husbokstav
     ).joinToString(" ")
-
 }
-

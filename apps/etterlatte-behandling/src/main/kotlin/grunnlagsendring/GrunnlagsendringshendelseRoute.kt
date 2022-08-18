@@ -14,17 +14,14 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 fun Route.grunnlagsendringshendelseRoute(
     grunnlagsendringshendelseService: GrunnlagsendringshendelseService
 ) {
-
     val logger = application.log
 
     route("/grunnlagsendringshendelse") {
-
         post("/doedshendelse/") {
             val doedshendelse = call.receive<Doedshendelse>()
             logger.info("Mottar doedshendelse: $doedshendelse")
             grunnlagsendringshendelseService.opprettSoekerDoedHendelse(doedshendelse)
             call.respond(HttpStatusCode.OK)
         }
-
     }
 }

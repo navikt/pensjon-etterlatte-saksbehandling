@@ -1,8 +1,8 @@
 package no.nav.etterlatte.tilbakekreving.config
 
 import com.typesafe.config.ConfigFactory
-import io.ktor.server.auth.*
-import io.ktor.server.config.*
+import io.ktor.server.auth.AuthenticationConfig
+import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
@@ -12,7 +12,7 @@ import no.nav.security.token.support.v2.tokenValidationSupport
 import java.time.Clock
 
 class ApplicationContext(
-    val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
 ) {
 
     var clock = Clock.systemUTC()
@@ -24,7 +24,7 @@ class ApplicationContext(
             databaseName = properties.dbName
         ),
         username = properties.dbUsername,
-        password = properties.dbPassword,
+        password = properties.dbPassword
     )
 
     var dataSource = dataSourceBuilder.dataSource()
@@ -60,7 +60,5 @@ class ApplicationContext(
         )
 }
 
-
 private fun jdbcUrl(host: String, port: Int, databaseName: String) =
-    "jdbc:postgresql://${host}:$port/$databaseName"
-
+    "jdbc:postgresql://$host:$port/$databaseName"

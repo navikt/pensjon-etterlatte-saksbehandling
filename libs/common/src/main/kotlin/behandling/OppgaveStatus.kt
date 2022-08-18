@@ -4,5 +4,5 @@ enum class OppgaveStatus {
     NY,
     TIL_ATTESTERING,
     RETURNERT,
-    LUKKET,
+    LUKKET
 }

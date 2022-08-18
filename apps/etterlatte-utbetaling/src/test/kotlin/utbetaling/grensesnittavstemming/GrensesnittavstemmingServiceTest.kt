@@ -55,9 +55,11 @@ internal class GrensesnittavstemmingServiceTest {
 
         verify(exactly = 3) { avstemmingsdataSender.sendAvstemming(any()) }
         verify {
-            grensesnittavstemmingDao.opprettAvstemming(match {
-                it.antallOppdrag == 1 && it.periode.fraOgMed == periode.fraOgMed
-            })
+            grensesnittavstemmingDao.opprettAvstemming(
+                match {
+                    it.antallOppdrag == 1 && it.periode.fraOgMed == periode.fraOgMed
+                }
+            )
         }
     }
 
@@ -72,7 +74,7 @@ internal class GrensesnittavstemmingServiceTest {
                 til = midnattIdag
             ),
             antallOppdrag = 1,
-            avstemmingsdata = "",
+            avstemmingsdata = ""
         )
 
         assertThrows<IllegalArgumentException> {

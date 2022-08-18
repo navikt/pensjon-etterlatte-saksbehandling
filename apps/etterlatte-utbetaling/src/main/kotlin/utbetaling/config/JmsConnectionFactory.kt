@@ -7,7 +7,6 @@ import com.ibm.msg.client.wmq.WMQConstants
 import org.messaginghub.pooled.jms.JmsPoolConnectionFactory
 import javax.jms.Connection
 
-
 private const val UTF_8_WITH_PUA = 1208
 
 class JmsConnectionFactory(
@@ -16,7 +15,7 @@ class JmsConnectionFactory(
     private val queueManager: String,
     private val channel: String,
     private val username: String,
-    private val password: String,
+    private val password: String
 ) {
     private val connectionFactory = MQConnectionFactory().also {
         it.hostName = hostname
@@ -27,11 +26,10 @@ class JmsConnectionFactory(
         it.ccsid = UTF_8_WITH_PUA
 
         // TODO fjernet disse da de gjorde at ting ikke fungerte i tester
-        //it.clientReconnectOptions =
+        // it.clientReconnectOptions =
         //    WMQConstants.WMQ_CLIENT_RECONNECT // https://www.ibm.com/docs/en/ibm-mq/7.5?topic=objects-clientreconnectoptions
-        //it.clientReconnectTimeout =
+        // it.clientReconnectTimeout =
         //    600 // default 1800 - https://www.ibm.com/docs/en/ibm-mq/7.5?topic=objects-clientreconnecttimeout
-
 
         it.setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, true)
         it.setIntProperty(WMQConstants.JMS_IBM_CHARACTER_SET, UTF_8_WITH_PUA)

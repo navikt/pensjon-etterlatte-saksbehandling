@@ -13,7 +13,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 
 class BehandlingHendelser(
-    rapidsConnection: RapidsConnection,
+    rapidsConnection: RapidsConnection
 ) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
@@ -26,7 +26,7 @@ class BehandlingHendelser(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            //TODO dette må jeg gjøre smartere, ellers må Persongalleri restruktureres
+            // TODO dette må jeg gjøre smartere, ellers må Persongalleri restruktureres
             context.publish(
                 JsonMessage.newMessage(
                     mapOf(
@@ -36,7 +36,8 @@ class BehandlingHendelser(
                         "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
                         correlationIdKey to packet[correlationIdKey]
                     )
-                ).toJson())
+                ).toJson()
+            )
 
             packet["persongalleri"]["gjenlevende"].forEach { fnr ->
                 context.publish(
@@ -62,7 +63,8 @@ class BehandlingHendelser(
                             "rolle" to Opplysningstyper.AVDOED_PDL_V1.personRolle!!,
                             correlationIdKey to packet[correlationIdKey]
                         )
-                    ).toJson())
+                    ).toJson()
+                )
             }
         }
 }
@@ -74,4 +76,3 @@ private val Opplysningstyper.personRolle: PersonRolle?
         Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1 -> PersonRolle.GJENLEVENDE
         else -> null
     }
-

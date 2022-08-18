@@ -1,6 +1,5 @@
 package behandlingfrasoknad
 
-
 import Behandling
 import LesGyldigSoeknadsmelding
 import io.mockk.every
@@ -12,7 +11,6 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -39,7 +37,7 @@ internal class LesVilkaarsmeldingTest {
     fun `skal lage nye messages for sakid, behandlingid, og gyldig framsatt`() {
         val persongalleri = Persongalleri(
             "soeker",
-            "innsender",
+            "innsender"
         )
 
         val gyldighetsResultat = GyldighetsResultat(
@@ -67,6 +65,5 @@ internal class LesVilkaarsmeldingTest {
         Assertions.assertEquals(4, inspector.message(0).get("sakId").longValue())
         Assertions.assertEquals(id.toString(), inspector.message(0).get("behandlingId").asText())
         Assertions.assertEquals(true, inspector.message(0).get("gyldigInnsender").asBoolean())
-
     }
 }

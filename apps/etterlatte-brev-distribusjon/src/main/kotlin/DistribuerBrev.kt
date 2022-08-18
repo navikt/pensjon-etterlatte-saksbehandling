@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory
 
 internal class DistribuerBrev(
     private val rapidsConnection: RapidsConnection,
-    private val distribusjonService: DistribusjonService,
+    private val distribusjonService: DistribusjonService
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(DistribuerBrev::class.java)
 

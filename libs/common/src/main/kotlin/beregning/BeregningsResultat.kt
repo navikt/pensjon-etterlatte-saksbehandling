@@ -13,7 +13,7 @@ enum class Beregningstyper {
 
 enum class Endringskode {
     NY,
-    REVURDERING,
+    REVURDERING
 }
 
 enum class BeregningsResultatType {
@@ -38,11 +38,11 @@ data class Beregningsperiode(
     val utbetaltBeloep: Double,
     val soeskenFlokk: List<Person>?,
     val grunnbelopMnd: Int,
-    val grunnbelop: Int,
+    val grunnbelop: Int
 )
 
 data class SoeskenPeriode(
     val datoFOM: YearMonth,
     val datoTOM: YearMonth,
-    val soeskenFlokk: List<Person>?,
+    val soeskenFlokk: List<Person>?
 )

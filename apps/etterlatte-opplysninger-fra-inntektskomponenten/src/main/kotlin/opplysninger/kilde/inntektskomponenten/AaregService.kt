@@ -1,7 +1,7 @@
 package no.nav.etterlatte.opplysninger.kilde.inntektskomponenten
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.*
+import io.ktor.client.call.body
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.http.ContentType
@@ -10,8 +10,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Aareg
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-
-
 
 class AaregService(private val aaregClient: HttpClient, private val url: String) : Aareg {
     override fun hentArbeidsforhold(fnr: Foedselsnummer): List<AaregResponse> {

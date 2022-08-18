@@ -1,10 +1,15 @@
 package no.nav.etterlatte
 
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.call
+import io.ktor.server.request.authorization
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
 import journalpost.JournalpostService
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
@@ -12,7 +17,6 @@ import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import org.slf4j.LoggerFactory
 
 fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService) {
-
     val logger = LoggerFactory.getLogger(BrevService::class.java)
 
     route("brev") {
@@ -81,8 +85,11 @@ fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService
 
             val brev = service.slettBrev(brevId.toLong())
 
-            if (brev) call.respond("OK")
-            else call.respond(HttpStatusCode.BadRequest)
+            if (brev) {
+                call.respond("OK")
+            } else {
+                call.respond(HttpStatusCode.BadRequest)
+            }
         }
 
         post("{brevId}/ferdigstill") {
@@ -99,7 +106,7 @@ fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService
 
             val accessToken = try {
                 getAccessToken(call)
-            } catch (ex: Exception){
+            } catch (ex: Exception) {
                 logger.error("Bearer not found", ex)
                 throw ex
             }
@@ -113,7 +120,7 @@ fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService
         post("innkommende/{journalpostId}/{dokumentInfoId}") {
             val accessToken = try {
                 getAccessToken(call)
-            } catch (ex: Exception){
+            } catch (ex: Exception) {
                 logger.error("Bearer not found", ex)
                 throw ex
             }

@@ -1,14 +1,13 @@
 package no.nav.etterlatte.kafka
 
 import org.apache.kafka.clients.CommonClientConfigs
-import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.config.SslConfigs
 import java.net.InetAddress
 import java.util.*
 
-interface KafkaConfig{
-    fun producerConfig():Properties
+interface KafkaConfig {
+    fun producerConfig(): Properties
 }
 
 class GcpKafkaConfig(
@@ -17,9 +16,9 @@ class GcpKafkaConfig(
     private val truststorePassword: String,
     private val keystoreLocation: String,
     private val keystorePassword: String,
-    private val clientId: String,
-): KafkaConfig {
-    companion object{
+    private val clientId: String
+) : KafkaConfig {
+    companion object {
         private fun generateInstanceId(env: Map<String, String>): String {
             if (env.containsKey("NAIS_APP_NAME")) return InetAddress.getLocalHost().hostName
             return UUID.randomUUID().toString()
@@ -54,7 +53,7 @@ class GcpKafkaConfig(
 }
 
 class LocalKafkaConfig(
-    private val bootstrapServers: String,
+    private val bootstrapServers: String
 ) : KafkaConfig {
     override fun producerConfig() = kafkaBaseConfig().apply {
         put(ProducerConfig.ACKS_CONFIG, "1")

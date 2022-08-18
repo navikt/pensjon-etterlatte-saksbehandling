@@ -9,12 +9,12 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.behandling.common.LeaderElection
+import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.objectMapper
 import org.testcontainers.containers.PostgreSQLContainer
 
 fun main() {
-
     /*
     Krever kjørende docker
     Spinner opp appen uten sikkerhet (inkommende token blir godtatt uten validering)
@@ -28,7 +28,6 @@ fun main() {
 
     appFromBeanfactory(LocalAppBeanFactory(postgreSQLContainer.jdbcUrl)).run()
     postgreSQLContainer.stop()
-
 }
 
 class LocalAppBeanFactory(val jdbcUrl: String) : CommonFactory() {
@@ -68,10 +67,8 @@ class LocalAppBeanFactory(val jdbcUrl: String) : CommonFactory() {
                         error(req.url.fullPath)
                     }
                 }
-
             }
         },
         me = "me"
     )
-
 }

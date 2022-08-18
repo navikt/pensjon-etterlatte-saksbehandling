@@ -2,16 +2,21 @@ package no.nav.etterlatte
 
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.*
-import io.ktor.serialization.jackson.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.plugins.callloging.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.content.TextContent
+import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.install
+import io.ktor.server.application.log
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.authenticate
+import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.header
+import io.ktor.server.request.httpMethod
+import io.ktor.server.request.path
+import io.ktor.server.response.respond
+import io.ktor.server.routing.IgnoreTrailingSlash
+import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
@@ -49,7 +54,6 @@ fun rapidApplication(
         rapidsConnection
     }
 
-
 fun io.ktor.server.application.Application.restModule(applicationContext: ApplicationContext) {
     install(Authentication) {
         applicationContext.tokenValidering(this)
@@ -67,7 +71,13 @@ fun io.ktor.server.application.Application.restModule(applicationContext: Applic
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             call.application.log.error("En feil oppstod: ${cause.message}", cause)
-            call.respond(TextContent( "En feil oppstod: ${cause.message}", ContentType.Text.Plain, HttpStatusCode.InternalServerError))
+            call.respond(
+                TextContent(
+                    "En feil oppstod: ${cause.message}",
+                    ContentType.Text.Plain,
+                    HttpStatusCode.InternalServerError
+                )
+            )
         }
     }
 

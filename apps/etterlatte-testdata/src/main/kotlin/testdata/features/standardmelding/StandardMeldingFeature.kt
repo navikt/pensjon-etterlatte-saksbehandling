@@ -1,5 +1,6 @@
 package testdata.features.standardmelding
 
+import JsonMessage
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.server.application.call
@@ -8,7 +9,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import no.nav.etterlatte.TestDataFeature
-import no.nav.etterlatte.batch.JsonMessage
 import no.nav.etterlatte.batch.payload
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.logger
@@ -32,17 +32,22 @@ object StandardMeldingFeature : TestDataFeature {
                     producer
                 )
 
-                call.respond(MustacheContent("ny-standardmelding.hbs", mapOf(
-                    "beskrivelse" to beskrivelse,
-                    "path" to path
-                )))
+                call.respond(
+                    MustacheContent(
+                        "ny-standardmelding.hbs",
+                        mapOf(
+                            "beskrivelse" to beskrivelse,
+                            "path" to path
+                        )
+                    )
+                )
             }
         }
 }
 
 internal fun sendMelding(
     melding: String,
-    producer: KafkaProdusent<String, String>,
+    producer: KafkaProdusent<String, String>
 ) {
     val startMillis = System.currentTimeMillis()
     logger.info("Publiserer melding")

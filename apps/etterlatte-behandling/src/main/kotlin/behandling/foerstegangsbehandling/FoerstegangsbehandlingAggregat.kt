@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
-class AvbruttBehandlingException(message: String) : RuntimeException(message) {}
+class AvbruttBehandlingException(message: String) : RuntimeException(message)
 
 class FoerstegangsbehandlingAggregat(
     id: UUID,
@@ -32,7 +32,7 @@ class FoerstegangsbehandlingAggregat(
             behandlinger: BehandlingDao,
             hendelser: HendelseDao
         ): FoerstegangsbehandlingAggregat {
-            logger.info("Oppretter en behandling på ${sak}")
+            logger.info("Oppretter en behandling på $sak")
             return Foerstegangsbehandling(
                 id = UUID.randomUUID(),
                 sak = sak,
@@ -61,7 +61,7 @@ class FoerstegangsbehandlingAggregat(
                 BehandlingStatus.GYLDIG_SOEKNAD,
                 BehandlingStatus.IKKE_GYLDIG_SOEKNAD,
                 BehandlingStatus.UNDER_BEHANDLING,
-                BehandlingStatus.RETURNERT,
+                BehandlingStatus.RETURNERT
             )
         }
     }
@@ -72,11 +72,16 @@ class FoerstegangsbehandlingAggregat(
     fun lagreGyldighetprøving(gyldighetsproeving: GyldighetsResultat) {
         if (!TilgangDao.sjekkOmBehandlingTillatesEndret(lagretBehandling)) {
             throw AvbruttBehandlingException(
-                "Det tillates ikke å gyldighetsprøve Behandling med id ${lagretBehandling.id} og status: ${lagretBehandling.status}"
+                "Det tillates ikke å gyldighetsprøve Behandling med id ${lagretBehandling.id} " +
+                    "og status: ${lagretBehandling.status}"
             )
         }
         val status =
-            if (gyldighetsproeving.resultat == VurderingsResultat.OPPFYLT) BehandlingStatus.GYLDIG_SOEKNAD else BehandlingStatus.IKKE_GYLDIG_SOEKNAD
+            if (gyldighetsproeving.resultat == VurderingsResultat.OPPFYLT) {
+                BehandlingStatus.GYLDIG_SOEKNAD
+            } else {
+                BehandlingStatus.IKKE_GYLDIG_SOEKNAD
+            }
 
         lagretBehandling = lagretBehandling.copy(
             gyldighetsproeving = gyldighetsproeving,
@@ -109,9 +114,9 @@ class FoerstegangsbehandlingAggregat(
         kommentar: String?,
         begrunnelse: String?
     ) {
-        val ikkeSettUnderBehandling = lagretBehandling.status == BehandlingStatus.FATTET_VEDTAK
-                || lagretBehandling.status == BehandlingStatus.RETURNERT
-                || lagretBehandling.status == BehandlingStatus.ATTESTERT
+        val ikkeSettUnderBehandling = lagretBehandling.status == BehandlingStatus.FATTET_VEDTAK ||
+            lagretBehandling.status == BehandlingStatus.RETURNERT ||
+            lagretBehandling.status == BehandlingStatus.ATTESTERT
 
         if (hendelse in listOf("FATTET", "ATTESTERT", "UNDERKJENT")) {
             requireNotNull(saksbehandler)
@@ -127,10 +132,15 @@ class FoerstegangsbehandlingAggregat(
                 "FATTET" -> BehandlingStatus.FATTET_VEDTAK
                 "ATTESTERT" -> BehandlingStatus.ATTESTERT
                 "UNDERKJENT" -> BehandlingStatus.RETURNERT
-                "VILKAARSVURDERT" -> if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
-                "BEREGNET" -> if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
-                "AVKORTET" -> if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
-                else -> throw IllegalStateException("Behandling ${lagretBehandling.id} forstår ikke vedtakhendelse $hendelse")
+                "VILKAARSVURDERT" ->
+                    if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
+                "BEREGNET" ->
+                    if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
+                "AVKORTET" ->
+                    if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
+                else -> throw IllegalStateException(
+                    "Behandling ${lagretBehandling.id} forstår ikke vedtakhendelse $hendelse"
+                )
             },
             oppgaveStatus = when (hendelse) {
                 "FATTET" -> OppgaveStatus.TIL_ATTESTERING
@@ -152,5 +162,4 @@ class FoerstegangsbehandlingAggregat(
             begrunnelse
         )
     }
-
 }

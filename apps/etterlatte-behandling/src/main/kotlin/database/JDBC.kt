@@ -3,7 +3,6 @@ package no.nav.etterlatte.database
 import java.sql.ResultSet
 import java.time.ZoneId
 
-
 private val postgresTimeZone = ZoneId.of("UTC")
 
 fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
@@ -18,9 +17,10 @@ fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
 
 fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
     return generateSequence {
-        if (next()) block()
-        else null
+        if (next()) {
+            block()
+        } else {
+            null
+        }
     }.toList()
 }
-
-

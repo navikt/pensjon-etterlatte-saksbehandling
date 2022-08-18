@@ -1,12 +1,14 @@
 package no.nav.etterlatte.person
 
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.*
+import io.ktor.server.testing.* // ktlint-disable no-wildcard-imports
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
@@ -24,7 +26,6 @@ import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-
 
 class PersonRouteTest {
 
@@ -58,7 +59,9 @@ class PersonRouteTest {
         val hentFolkeregisterIdentRequest = HentFolkeregisterIdentRequest(
             ident = "2305469522806"
         )
-        coEvery { personService.hentFolkeregisterIdent(hentFolkeregisterIdentRequest) } returns mockFolkeregisterident("70078749472")
+        coEvery { personService.hentFolkeregisterIdent(hentFolkeregisterIdentRequest) } returns mockFolkeregisterident(
+            "70078749472"
+        )
 
         withTestApplication({ module(securityContextMediator, personService) }) {
             handleRequest(HttpMethod.Post, FOLKEREGISTERIDENT_ENDEPUNKT) {
@@ -102,14 +105,15 @@ class PersonRouteTest {
             ident = "2305469522806"
         )
 
-        coEvery { personService.hentFolkeregisterIdent(hentFolkeregisterIdentReq) } throws PdlForesporselFeilet("Noe feilet")
-
+        coEvery { personService.hentFolkeregisterIdent(hentFolkeregisterIdentReq) } throws PdlForesporselFeilet(
+            "Noe feilet"
+        )
 
         testApplication {
             application {
                 module(securityContextMediator, personService)
             }
-            client.post(FOLKEREGISTERIDENT_ENDEPUNKT){
+            client.post(FOLKEREGISTERIDENT_ENDEPUNKT) {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(hentFolkeregisterIdentReq.toJson())
             }.apply {

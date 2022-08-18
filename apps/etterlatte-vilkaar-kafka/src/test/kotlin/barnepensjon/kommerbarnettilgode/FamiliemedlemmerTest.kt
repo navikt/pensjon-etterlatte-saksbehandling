@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.PersoninfoAvdoed
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

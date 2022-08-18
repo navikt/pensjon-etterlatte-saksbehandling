@@ -25,30 +25,27 @@ internal class LesBeregningsmelding(
             validate { it.requireKey("virkningstidspunkt") }
             validate { it.rejectKey("beregning") }
             correlationId()
-
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-
             val grunnlag = packet["grunnlag"].toString()
             try {
-                //TODO fremtidig funksjonalitet for å støtte periodisering av vilkaar
+                // TODO fremtidig funksjonalitet for å støtte periodisering av vilkaar
                 val tom = YearMonth.now().plusMonths(3)
 
-                val beregningsResultat = beregning.beregnResultat(objectMapper.readValue(grunnlag),
+                val beregningsResultat = beregning.beregnResultat(
+                    objectMapper.readValue(grunnlag),
                     YearMonth.parse(packet["virkningstidspunkt"].asText()),
-                    tom)
+                    tom
+                )
                 packet["beregning"] = beregningsResultat
                 context.publish(packet.toJson())
                 logger.info("Publisert en beregning")
             } catch (e: Exception) {
-                //TODO endre denne
+                // TODO endre denne
                 println("spiser en melding fordi: $e")
             }
-
-
         }
 }
-

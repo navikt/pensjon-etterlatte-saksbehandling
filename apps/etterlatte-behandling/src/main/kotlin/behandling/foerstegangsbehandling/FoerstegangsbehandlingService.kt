@@ -19,11 +19,10 @@ interface FoerstegangsbehandlingService {
     fun startFoerstegangsbehandling(
         sak: Long,
         persongalleri: Persongalleri,
-        mottattDato: String,
+        mottattDato: String
     ): Foerstegangsbehandling
 
     fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat)
-
 }
 
 class RealFoerstegangsbehandlingService(
@@ -52,11 +51,10 @@ class RealFoerstegangsbehandlingService(
         }
     }
 
-
     override fun startFoerstegangsbehandling(
         sak: Long,
         persongalleri: Persongalleri,
-        mottattDato: String,
+        mottattDato: String
     ): Foerstegangsbehandling {
         logger.info("Starter en behandling")
         return inTransaction {
@@ -68,12 +66,10 @@ class RealFoerstegangsbehandlingService(
         }.serialiserbarUtgave()
     }
 
-
     override fun lagreGyldighetsprøving(behandling: UUID, gyldighetsproeving: GyldighetsResultat) {
         inTransaction {
             foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling)
                 .lagreGyldighetprøving(gyldighetsproeving)
         }
     }
-
 }

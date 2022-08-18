@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBar
 import java.time.Instant
 import java.util.*
 
-
 data class GrunnlagResult(val response: String)
 
 class GrunnlagService(
@@ -35,7 +34,8 @@ class GrunnlagService(
         )
 
         rapid.publiser(
-            behandlingId, JsonMessage.newMessage(
+            behandlingId,
+            JsonMessage.newMessage(
                 eventName = "OPPLYSNING:NY",
                 map = mapOf("opplysning" to opplysning, "sakId" to behandling.sak)
             ).toJson()
@@ -51,7 +51,7 @@ class GrunnlagService(
         token: String
     ): GrunnlagResult {
         val behandling = behandlingKlient.hentBehandling(behandlingId, token)
-        val opplysning : List<Grunnlagsopplysning<Beregningsgrunnlag>> = listOf(
+        val opplysning: List<Grunnlagsopplysning<Beregningsgrunnlag>> = listOf(
             lagOpplysning(
                 opplysningsType = Opplysningstyper.SAKSBEHANDLER_SOESKEN_I_BEREGNINGEN,
                 kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
@@ -60,12 +60,13 @@ class GrunnlagService(
         )
 
         rapid.publiser(
-            behandlingId, JsonMessage.newMessage(
+            behandlingId,
+            JsonMessage.newMessage(
                 eventName = "OPPLYSNING:NY",
                 map = mapOf(
                     "opplysning" to opplysning,
                     "sakId" to behandling.sak
-                ),
+                )
             ).toJson()
         )
 

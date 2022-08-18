@@ -39,20 +39,24 @@ internal class LagreAvkorting(
             val avkorting = objectMapper.readValue<AvkortingsResultat>(packet["avkorting"].toString())
 
             try {
-                vedtaksvurderingService.lagreAvkorting(sakId,
+                vedtaksvurderingService.lagreAvkorting(
+                    sakId,
                     behandlingId,
                     packet["fnrSoeker"].textValue(),
-                    avkorting)
+                    avkorting
+                )
                 requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
-                    context.publish(JsonMessage.newMessage(
-                        mapOf(
-                            eventNameKey to "VEDTAK:AVKORTET",
-                            "sakId" to it.sakId.toLong(),
-                            "behandlingId" to it.behandlingId.toString(),
-                            "vedtakId" to it.id,
-                            "eventtimestamp" to Tidspunkt.now()
-                        )
-                    ).toJson())
+                    context.publish(
+                        JsonMessage.newMessage(
+                            mapOf(
+                                eventNameKey to "VEDTAK:AVKORTET",
+                                "sakId" to it.sakId.toLong(),
+                                "behandlingId" to it.behandlingId.toString(),
+                                "vedtakId" to it.id,
+                                "eventtimestamp" to Tidspunkt.now()
+                            )
+                        ).toJson()
+                    )
                 }
             } catch (e: KanIkkeEndreFattetVedtak) {
                 packet[eventNameKey] = "VEDTAK:ENDRING_FORKASTET"
@@ -64,6 +68,5 @@ internal class LagreAvkorting(
             } catch (e: Exception) {
                 logger.warn("Kunne ikke oppdatere vedtak", e)
             }
-
         }
 }

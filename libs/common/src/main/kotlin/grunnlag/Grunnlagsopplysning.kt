@@ -7,10 +7,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-
 import java.time.Instant
 import java.util.*
-
 
 open class Grunnlagsopplysning<T>(
     val id: UUID,
@@ -48,8 +46,7 @@ open class Grunnlagsopplysning<T>(
         }
     }
 
-    class Privatperson(val fnr: String, val mottatDato: Instant) : Kilde("privatperson") {
-    }
+    class Privatperson(val fnr: String, val mottatDato: Instant) : Kilde("privatperson")
 
     class Pdl(val navn: String, val tidspunktForInnhenting: Instant, val registersReferanse: String?) : Kilde("pdl") {
         override fun toString(): String {
@@ -82,5 +79,6 @@ open class Grunnlagsopplysning<T>(
     }
 }
 
-val objectMapperKilde = jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
+val objectMapperKilde = jacksonObjectMapper().registerModule(JavaTimeModule()).disable(
+    SerializationFeature.WRITE_DATES_AS_TIMESTAMPS
+)

@@ -20,12 +20,11 @@ import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 import kotlin.collections.ArrayList
 
-
 fun vilkaarAvdoedesMedlemskap(
-        avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
-        avdoedPdl: VilkaarOpplysning<Person>?,
-        pensjonUforeOpplysning: VilkaarOpplysning<PensjonUforeOpplysning>?,
-        arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?
+    avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
+    avdoedPdl: VilkaarOpplysning<Person>?,
+    pensjonUforeOpplysning: VilkaarOpplysning<PensjonUforeOpplysning>?,
+    arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?
 ): VurdertVilkaar {
     // Kriterier: 1. bodd i norge siste 5 årene
     // 2. Arbeidet i norge siste 5 årene
@@ -49,7 +48,7 @@ fun vilkaarAvdoedesMedlemskap(
 
     return VurdertVilkaar(
         Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
-        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, //endre når vi får inn flere opplysninger
+        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, // endre når vi får inn flere opplysninger
         bosattNorge.utfall,
         kriterier,
         LocalDateTime.now()
@@ -61,21 +60,24 @@ data class DetaljerPeriode(
     val ansettelsesdetaljer: List<AaregAnsettelsesdetaljer>
 )
 
-fun kritieeHarHatt100prosentStillingSisteFemAar(arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?): Kriterie {
-
+fun kritieeHarHatt100prosentStillingSisteFemAar(
+    arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?
+): Kriterie {
     val perioder = arrayListOf<DetaljerPeriode>()
     arbeidsforholdOpplysning?.opplysning?.arbeidsforhold?.forEach {
         perioder.add(DetaljerPeriode(it.ansettelsesperiode, it.ansettelsesdetaljer))
     }
 
-    val opplysningsGrunnlag = listOfNotNull(arbeidsforholdOpplysning?.let {
-        Kriteriegrunnlag(
-            arbeidsforholdOpplysning.id,
-            KriterieOpplysningsType.AVDOED_STILLINGSPROSENT,
-            arbeidsforholdOpplysning.kilde,
-            perioder
-        )
-    })
+    val opplysningsGrunnlag = listOfNotNull(
+        arbeidsforholdOpplysning?.let {
+            Kriteriegrunnlag(
+                arbeidsforholdOpplysning.id,
+                KriterieOpplysningsType.AVDOED_STILLINGSPROSENT,
+                arbeidsforholdOpplysning.kilde,
+                perioder
+            )
+        }
+    )
 
     return Kriterie(
         Kriterietyper.AVDOED_HAR_HATT_100PROSENT_STILLING_SISTE_FEM_AAR,
@@ -84,11 +86,10 @@ fun kritieeHarHatt100prosentStillingSisteFemAar(arbeidsforholdOpplysning: Vilkaa
     )
 }
 
-
-
-fun kriterieHarMottattPensjonEllerTrygdSisteFemAar(pensjonUforeOpplysning: VilkaarOpplysning<PensjonUforeOpplysning>?): Kriterie {
+fun kriterieHarMottattPensjonEllerTrygdSisteFemAar(
+    pensjonUforeOpplysning: VilkaarOpplysning<PensjonUforeOpplysning>?
+): Kriterie {
     val inntekter = ArrayList<UtbetaltPeriode>()
-
 
     pensjonUforeOpplysning?.opplysning?.mottattUforetrygd?.forEach {
         inntekter.add(it)
@@ -111,7 +112,6 @@ fun kriterieHarMottattPensjonEllerTrygdSisteFemAar(pensjonUforeOpplysning: Vilka
             )
         }
     )
-
 
     val alderspensjon = listOfNotNull(
         pensjonUforeOpplysning?.opplysning?.mottattAlderspensjon?.let {
@@ -142,13 +142,15 @@ fun kriterieHarMottattPensjonSisteFemAar(pensjonUforeOpplysning: VilkaarOpplysni
         }
     )
 
-    if (pensjonUforeOpplysning?.opplysning?.mottattAlderspensjon == null) return opplysningsGrunnlagNull(
-        Kriterietyper.AVDOED_HAR_MOTTATT_PENSJON_SISTE_FEM_AAR,
-        opplysningsGrunnlag
-    )
+    if (pensjonUforeOpplysning?.opplysning?.mottattAlderspensjon == null) {
+        return opplysningsGrunnlagNull(
+            Kriterietyper.AVDOED_HAR_MOTTATT_PENSJON_SISTE_FEM_AAR,
+            opplysningsGrunnlag
+        )
+    }
 
     pensjonUforeOpplysning.opplysning.mottattUforetrygd
-    val resultat = VurderingsResultat.OPPFYLT //TODO logikk her
+    val resultat = VurderingsResultat.OPPFYLT // TODO logikk her
 
     return Kriterie(
         Kriterietyper.AVDOED_HAR_MOTTATT_PENSJON_SISTE_FEM_AAR,
@@ -157,9 +159,9 @@ fun kriterieHarMottattPensjonSisteFemAar(pensjonUforeOpplysning: VilkaarOpplysni
     )
 }
 
-
-fun kriterieHarMottattUforeTrygdSisteFemAar(pensjonUforeOpplysning: VilkaarOpplysning<PensjonUforeOpplysning>?): Kriterie {
-
+fun kriterieHarMottattUforeTrygdSisteFemAar(
+    pensjonUforeOpplysning: VilkaarOpplysning<PensjonUforeOpplysning>?
+): Kriterie {
     val opplysningsGrunnlag = listOfNotNull(
         pensjonUforeOpplysning?.opplysning?.mottattUforetrygd?.let {
             Kriteriegrunnlag(
@@ -171,12 +173,14 @@ fun kriterieHarMottattUforeTrygdSisteFemAar(pensjonUforeOpplysning: VilkaarOpply
         }
     )
 
-    if (pensjonUforeOpplysning?.opplysning?.mottattUforetrygd == null) return opplysningsGrunnlagNull(
-        Kriterietyper.AVDOED_HAR_MOTTATT_TRYGD_SISTE_FEM_AAR,
-        opplysningsGrunnlag
-    )
+    if (pensjonUforeOpplysning?.opplysning?.mottattUforetrygd == null) {
+        return opplysningsGrunnlagNull(
+            Kriterietyper.AVDOED_HAR_MOTTATT_TRYGD_SISTE_FEM_AAR,
+            opplysningsGrunnlag
+        )
+    }
 
-    val resultat = VurderingsResultat.OPPFYLT //TODO logikk her
+    val resultat = VurderingsResultat.OPPFYLT // TODO logikk her
 
     return Kriterie(
         Kriterietyper.AVDOED_HAR_MOTTATT_TRYGD_SISTE_FEM_AAR,

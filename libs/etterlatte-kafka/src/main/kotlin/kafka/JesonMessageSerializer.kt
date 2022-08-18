@@ -4,7 +4,7 @@ import no.nav.etterlatte.kafka.JsonMessage
 import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.Serializer
 
-class JsonMessageSerializer: Serializer<JsonMessage> {
+class JsonMessageSerializer : Serializer<JsonMessage> {
     private val stringSerializer = org.apache.kafka.common.serialization.StringSerializer()
 
     override fun configure(configs: Map<String?, *>, isKey: Boolean) {
@@ -16,7 +16,7 @@ class JsonMessageSerializer: Serializer<JsonMessage> {
     }
 }
 
-class JsonMessageDeserializer: Deserializer<JsonMessage> {
+class JsonMessageDeserializer : Deserializer<JsonMessage> {
     private val stringDeserializer = org.apache.kafka.common.serialization.StringDeserializer()
 
     override fun configure(configs: Map<String?, *>, isKey: Boolean) {
@@ -26,6 +26,4 @@ class JsonMessageDeserializer: Deserializer<JsonMessage> {
     override fun deserialize(topic: String?, data: ByteArray?): JsonMessage {
         return JsonMessage(stringDeserializer.deserialize(topic, data))
     }
-
-
 }

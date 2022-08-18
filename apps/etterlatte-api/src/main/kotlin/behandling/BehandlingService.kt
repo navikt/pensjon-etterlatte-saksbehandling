@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
@@ -13,7 +12,6 @@ import no.nav.etterlatte.saksbehandling.api.typer.klientside.Familieforhold
 import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
-
 
 data class PersonSakerResult(val person: Person, val behandlingListe: BehandlingListe)
 
@@ -101,5 +99,4 @@ class BehandlingService(
         logger.error("Ikke bruk dette i prod, slett endepunktet så raskt som mulig! Slett revurderinger er ban")
         return behandlingKlient.slettRevurderinger(sakId, accessToken)
     }
-
 }

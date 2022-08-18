@@ -7,12 +7,11 @@ import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagId
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.NavIdent
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.SakId
 
-
 object Tilbakekrevingsvedtak
 
 class Attestasjon(
     val attestant: NavIdent,
-    val attestertTidspunkt: Tidspunkt,
+    val attestertTidspunkt: Tidspunkt
 )
 
 enum class TilbakekrevingHendelse {
@@ -34,7 +33,7 @@ sealed interface Tilbakekreving {
         override val behandlingId: BehandlingId,
         override val kravgrunnlagId: KravgrunnlagId,
         override val opprettet: Tidspunkt,
-        override val kravgrunnlag: Kravgrunnlag,
+        override val kravgrunnlag: Kravgrunnlag
     ) : Tilbakekreving
 
     data class FattetVedtak(
@@ -53,6 +52,6 @@ sealed interface Tilbakekreving {
         override val opprettet: Tidspunkt,
         override val kravgrunnlag: Kravgrunnlag,
         val vedtak: Tilbakekrevingsvedtak,
-        val attestasjon: Attestasjon,
+        val attestasjon: Attestasjon
     ) : Tilbakekreving
 }

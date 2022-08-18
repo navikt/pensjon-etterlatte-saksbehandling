@@ -41,7 +41,8 @@ class DistribuerBrevTest {
                 correlationIdKey to UUID.randomUUID().toString(),
                 "journalpostResponse" to journalpostResponse.toJson(),
                 "payload" to distribusjonMelding.toJson()
-            ))
+            )
+        )
         val inspector = inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         inspector.message(0).get(eventNameKey).asText() shouldBe BrevEventTypes.DISTRIBUERT.toString()

@@ -43,9 +43,11 @@ internal class AttesterVedtak(
                     }.toJson()
                 )
             } catch (ex: Exception) {
-                context.publish(packet.also {
-                    it["feil"] = requireNotNull(ex.message)
-                }.toJson())
+                context.publish(
+                    packet.also {
+                        it["feil"] = requireNotNull(ex.message)
+                    }.toJson()
+                )
             }
         }
 }

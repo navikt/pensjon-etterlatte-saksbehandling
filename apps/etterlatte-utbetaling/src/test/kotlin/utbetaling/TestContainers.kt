@@ -8,9 +8,8 @@ object TestContainers {
     val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
 
     val ibmMQContainer = GenericContainer<Nothing>("ibmcom/mq").apply {
-        withEnv("LICENSE","accept")
-        withEnv("MQ_QMGR_NAME","QM1")
+        withEnv("LICENSE", "accept")
+        withEnv("MQ_QMGR_NAME", "QM1")
         withExposedPorts(1414)
     }
-
 }

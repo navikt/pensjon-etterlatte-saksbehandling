@@ -36,7 +36,6 @@ internal class LesVilkaarsmelding(
             validate { it.rejectKey("kommerSoekerTilGode") }
             validate { it.rejectKey("gyldighetsvurdering") }
             correlationId()
-
         }.register(this)
     }
 
@@ -94,14 +93,14 @@ internal class LesVilkaarsmelding(
                 packet["vilkaarsvurderingGrunnlagRef"] = grunnlag.versjon
                 context.publish(packet.toJson())
 
-                logger.info("Vurdert vilkår for behandling med id=${behandling.id} og korrelasjonsid=${packet.correlationId}")
+                logger.info(
+                    "Vurdert vilkår for behandling med id=${behandling.id} og korrelasjonsid=${packet.correlationId}"
+                )
             } catch (e: Exception) {
                 logger.error(
-                    "Vilkår kunne ikke vurderes på grunn av feil. Dette betyr at det ikke blir fylt ut en vilkårsvurdering for behandlingen for korrelasjonsid'en ${packet.correlationId}",
+                    "Vilkår kunne ikke vurderes på grunn av feil. Dette betyr at det ikke blir fylt ut en vilkårsvurdering for behandlingen for korrelasjonsid'en ${packet.correlationId}", // ktlint-disable max-line-length
                     e
                 )
             }
         }
 }
-
-

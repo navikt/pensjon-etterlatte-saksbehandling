@@ -17,7 +17,6 @@ import java.time.YearMonth
 import java.time.ZonedDateTime
 import java.util.*
 
-
 fun vedtak(
     vedtakId: Long = 1,
     utbetalingsperioder: List<Utbetalingsperiode> = listOf(
@@ -62,7 +61,7 @@ fun vedtak(
 )
 
 fun ugyldigVedtakTilUtbetaling(
-    vedtakId: Long = 1,
+    vedtakId: Long = 1
 ): Vedtak = Vedtak(
     vedtakId = vedtakId,
     behandling = Behandling(
@@ -177,7 +176,7 @@ fun genererEtterfolgendeUtbetalingsperioder(
             id = forrigeId + index,
             periode = Periode(
                 fom = startPeriode.plusMonths(((index - 1) * intervallMnd).toLong()),
-                tom = startPeriode.plusMonths(((index * intervallMnd) - 1).toLong()),
+                tom = startPeriode.plusMonths(((index * intervallMnd) - 1).toLong())
             ),
             beloep = BigDecimal(startBelop.toLong() + index * 1000),
             type = UtbetalingsperiodeType.UTBETALING
@@ -187,14 +186,13 @@ fun genererEtterfolgendeUtbetalingsperioder(
             id = forrigeId + index,
             periode = Periode(
                 fom = startPeriode.plusMonths(((index - 1) * intervallMnd).toLong()),
-                tom = null,
+                tom = null
             ),
             beloep = BigDecimal(startBelop.toLong() + index * 1000),
             type = UtbetalingsperiodeType.UTBETALING
         )
     }
 }
-
 
 fun vedtakEvent(vedtak: Vedtak) = """
     {
@@ -240,6 +238,4 @@ fun main() {
     println(revurderingsvedtakEvent)
     println("OPPHOER: ")
     println(opphoersVedtak)
-
-
 }

@@ -9,7 +9,7 @@ fun main() {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }.also { env ->
         RapidApplication.create(env)
-            .also { StartUthentingFraSoeknad(it, Opplysningsuthenter() ) }
+            .also { StartUthentingFraSoeknad(it, Opplysningsuthenter()) }
             .start()
     }
 }

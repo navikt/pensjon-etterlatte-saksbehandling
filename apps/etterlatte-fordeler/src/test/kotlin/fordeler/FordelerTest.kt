@@ -49,9 +49,11 @@ internal class FordelerTest {
         assertEquals(0, inspector.size)
 
         verify(exactly = 1) {
-            fordelerMetricLogger.logMetricIkkeFordelt(match {
-                it.ikkeOppfylteKriterier.containsAll(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
-            })
+            fordelerMetricLogger.logMetricIkkeFordelt(
+                match {
+                    it.ikkeOppfylteKriterier.containsAll(listOf(BARN_ER_FOR_GAMMELT, AVDOED_HAR_YRKESSKADE))
+                }
+            )
         }
     }
 

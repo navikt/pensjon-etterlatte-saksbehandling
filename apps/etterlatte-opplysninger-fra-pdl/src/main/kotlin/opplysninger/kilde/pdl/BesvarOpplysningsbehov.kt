@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 
 internal class BesvarOpplysningsbehov(
     rapidsConnection: RapidsConnection,
-    private val pdl: Pdl,
+    private val pdl: Pdl
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(BesvarOpplysningsbehov::class.java)
 
@@ -29,13 +29,11 @@ internal class BesvarOpplysningsbehov(
             validate { it.requireKey("rolle") }
             validate { it.rejectKey("opplysning") }
             correlationId()
-
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-
             if (packet[behovNameKey].asText() in listOf(
                     Opplysningstyper.AVDOED_PDL_V1.name,
                     Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1.name,
@@ -51,14 +49,12 @@ internal class BesvarOpplysningsbehov(
             } else {
                 logger.info("Så et behov jeg ikke kunne svare på")
             }
-
         }
 }
 
-
 fun personOpplysning(
     personPdl: Person,
-    opplysningsType: Opplysningstyper,
+    opplysningsType: Opplysningstyper
 ): Grunnlagsopplysning<Person> {
     return lagOpplysning(opplysningsType, personPdl)
 }
@@ -70,4 +66,3 @@ interface Pdl {
 interface OpplysningsBygger {
     fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl): List<Grunnlagsopplysning<out Any>>
 }
-

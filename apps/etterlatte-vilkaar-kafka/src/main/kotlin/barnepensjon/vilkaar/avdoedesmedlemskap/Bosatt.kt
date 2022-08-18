@@ -33,9 +33,9 @@ import java.util.*
 
 fun metakriterieBosattNorge(
     avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
-    avdoedPdl: VilkaarOpplysning<Person>?,
+    avdoedPdl: VilkaarOpplysning<Person>?
 ): Metakriterie {
-    //val ikkeRegistrertIMedl = kriterieIkkeRegistrertIMedl(avdoedPdl) //todo legg til når vi har kobla til register
+    // val ikkeRegistrertIMedl = kriterieIkkeRegistrertIMedl(avdoedPdl) //todo legg til når vi har kobla til register
     val norskStatsborger = kriterieNorskStatsborger(avdoedPdl, Kriterietyper.AVDOED_NORSK_STATSBORGER)
     val ingenInnUtvandring = kriterieIngenInnUtvandring(avdoedPdl, Kriterietyper.AVDOED_INGEN_INN_ELLER_UTVANDRING)
     val ingenUtenlandsoppholdOppgittISoeknad = kriterieIngenUtenlandsoppholdFraSoeknad(
@@ -91,7 +91,7 @@ fun metakriterieBosattNorge(
         kunNorskeBostedsadresserSisteFemAar,
         sammenhengendeBostedsadresserINorgeSisteFemAar,
         kunNorskeOppholdsadresserSisteFemAar,
-        kunNorskeKontaktadresserSisteFemAar,
+        kunNorskeKontaktadresserSisteFemAar
     )
 
     val resultat = setVilkaarVurderingFraKriterier(kriterieliste)
@@ -102,7 +102,6 @@ fun metakriterieBosattNorge(
         utfall,
         kriterieliste
     )
-
 }
 
 fun kriterieNorskStatsborger(avdoedPdl: VilkaarOpplysning<Person>?, kriterietype: Kriterietyper): Kriterie {
@@ -112,9 +111,10 @@ fun kriterieNorskStatsborger(avdoedPdl: VilkaarOpplysning<Person>?, kriterietype
                 avdoedPdl.id,
                 KriterieOpplysningsType.STATSBORGERSKAP,
                 avdoedPdl.kilde,
-                avdoedPdl.opplysning.statsborgerskap.toString(),
+                avdoedPdl.opplysning.statsborgerskap.toString()
             )
-        })
+        }
+    )
 
     if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
 
@@ -122,7 +122,7 @@ fun kriterieNorskStatsborger(avdoedPdl: VilkaarOpplysning<Person>?, kriterietype
         VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     } else if (avdoedPdl.opplysning.statsborgerskap == "NOR") {
         VurderingsResultat.OPPFYLT
-    } else  {
+    } else {
         VurderingsResultat.IKKE_OPPFYLT
     }
 
@@ -139,29 +139,27 @@ fun kriterieIngenInnUtvandring(avdoedPdl: VilkaarOpplysning<Person>?, kriteriety
                 Utland(
                     avdoedPdl.opplysning.utland?.innflyttingTilNorge,
                     avdoedPdl.opplysning.utland?.utflyttingFraNorge
-                ),
+                )
             )
         }
     )
 
     if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
 
-    val ingenInnUtvandring = avdoedPdl.opplysning.utland?.innflyttingTilNorge.isNullOrEmpty()
-            && avdoedPdl.opplysning.utland?.utflyttingFraNorge.isNullOrEmpty()
+    val ingenInnUtvandring = avdoedPdl.opplysning.utland?.innflyttingTilNorge.isNullOrEmpty() &&
+        avdoedPdl.opplysning.utland?.utflyttingFraNorge.isNullOrEmpty()
 
     return Kriterie(
         kriterietype,
         if (ingenInnUtvandring) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT,
         opplysningsGrunnlag
     )
-
 }
 
 fun kriterieIngenUtenlandsoppholdFraSoeknad(
     avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
     kriterietype: Kriterietyper
 ): Kriterie {
-
     val opplysningsGrunnlag = listOfNotNull(
         avdoedSoeknad?.let {
             Kriteriegrunnlag(
@@ -187,7 +185,9 @@ fun kriterieIngenUtenlandsoppholdFraSoeknad(
         }
 
     return Kriterie(
-        kriterietype, ingenOppholdUtlandetFraSoeknad, opplysningsGrunnlag
+        kriterietype,
+        ingenOppholdUtlandetFraSoeknad,
+        opplysningsGrunnlag
     )
 }
 
@@ -203,7 +203,8 @@ fun kriterieKunNorskeBostedsadresserSisteFemAar(
                 avdoedPdl.kilde,
                 Bostedadresser(it.opplysning.bostedsadresse)
             )
-        })
+        }
+    )
 
     if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
 
@@ -230,7 +231,8 @@ fun kriterieKunNorskeOppholdsadresserSisteFemAar(
                 avdoedPdl.kilde,
                 listOf(it.opplysning.oppholdsadresse)
             )
-        })
+        }
+    )
 
     if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
 
@@ -257,7 +259,8 @@ fun kriterieKunNorskeKontaktadresserSisteFemAar(
                 avdoedPdl.kilde,
                 listOf(it.opplysning.kontaktadresse)
             )
-        })
+        }
+    )
 
     if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
 
@@ -292,7 +295,7 @@ fun kriterieSammenhengendeAdresserINorgeSisteFemAar(
                 avdoedPdl.kilde,
                 Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
             )
-        },
+        }
     )
 
     if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
@@ -313,7 +316,8 @@ fun kriterieSammenhengendeAdresserINorgeSisteFemAar(
         }
 
         val gapGrunnlag = Kriteriegrunnlag(
-            UUID.randomUUID(), KriterieOpplysningsType.ADRESSE_GAPS,
+            UUID.randomUUID(),
+            KriterieOpplysningsType.ADRESSE_GAPS,
             Grunnlagsopplysning.Vilkaarskomponenten("vilkaarskomponenten"),
             periodeGaps
         )

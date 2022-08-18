@@ -41,7 +41,7 @@ enum class AdresseType {
     UKJENT,
     POSTBOKSADRESSE,
     POSTADRESSEFRITTFORMAT,
-    UTENLANDSKADRESSEFRITTFORMAT,
+    UTENLANDSKADRESSEFRITTFORMAT
 }
 
 data class Adresse(
@@ -56,7 +56,7 @@ data class Adresse(
     val land: String?,
     val kilde: String,
     val gyldigFraOgMed: LocalDateTime?,
-    val gyldigTilOgMed: LocalDateTime?,
+    val gyldigTilOgMed: LocalDateTime?
 )
 
 enum class Sivilstatus {
@@ -79,13 +79,13 @@ data class Utland(
 
 data class InnflyttingTilNorge(
     val fraflyttingsland: String?,
-    val dato: LocalDate?,
+    val dato: LocalDate?
 
-    )
+)
 
 data class UtflyttingFraNorge(
     val tilflyttingsland: String?,
-    val dato: LocalDate?,
+    val dato: LocalDate?
 )
 
 data class FamilieRelasjon(
@@ -125,4 +125,3 @@ fun List<Adresse>.aktiv(): Adresse? = firstOrNull { it.aktiv }
 
 fun List<Adresse>.nyeste(inkluderInaktiv: Boolean = false): Adresse? =
     sortedByDescending { it.gyldigFraOgMed }.firstOrNull { if (inkluderInaktiv) true else it.gyldigTilOgMed == null }
-

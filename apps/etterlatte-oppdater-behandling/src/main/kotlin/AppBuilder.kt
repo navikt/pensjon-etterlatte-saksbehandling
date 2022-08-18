@@ -4,15 +4,14 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.auth.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.jackson.*
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.security.ktor.clientCredential
 
 class AppBuilder(private val props: Map<String, String>) {
 
     private val behandling_app = behandlingHttpClient()
-
 
     fun createBehandlingService(): Behandling {
         return BehandlingsService(behandling_app, "http://etterlatte-behandling")
@@ -20,10 +19,12 @@ class AppBuilder(private val props: Map<String, String>) {
 
     private fun behandlingHttpClient() = HttpClient(OkHttp) {
         expectSuccess = true
-        install(ContentNegotiation) { jackson{
-            registerModule(JavaTimeModule())
-            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        } }
+        install(ContentNegotiation) {
+            jackson {
+                registerModule(JavaTimeModule())
+                disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            }
+        }
         install(Auth) {
             clientCredential {
                 config = props.toMutableMap()
@@ -32,5 +33,3 @@ class AppBuilder(private val props: Map<String, String>) {
         }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 }
-
-

@@ -24,7 +24,8 @@ class RealGrunnlagService(private val opplysninger: OpplysningDao) : GrunnlagSer
                 saksId = sak,
                 grunnlag = hendelser.map { it.opplysning },
                 hendelser.maxOfOrNull { it.hendelseNummer }
-                    ?: 0)
+                    ?: 0
+            )
         }
     }
 
@@ -34,16 +35,16 @@ class RealGrunnlagService(private val opplysninger: OpplysningDao) : GrunnlagSer
 
     override fun opprettGrunnlag(sak: Long, nyeOpplysninger: List<Grunnlagsopplysning<ObjectNode>>): Grunnlag {
         logger.info("Oppretter et grunnlag")
-            val gjeldendeGrunnlag = opplysninger.finnHendelserIGrunnlag(sak).map { it.opplysning.id }
+        val gjeldendeGrunnlag = opplysninger.finnHendelserIGrunnlag(sak).map { it.opplysning.id }
 
-            for (opplysning in nyeOpplysninger) {
-                if (opplysning.id in gjeldendeGrunnlag) {
-                    logger.warn("Forsøker å lagre opplysning ${opplysning.id} i sak $sak men den er allerede gjeldende")
-                } else {
-                    opplysninger.leggOpplysningTilGrunnlag(sak, opplysning)
-                }
+        for (opplysning in nyeOpplysninger) {
+            if (opplysning.id in gjeldendeGrunnlag) {
+                logger.warn("Forsøker å lagre opplysning ${opplysning.id} i sak $sak men den er allerede gjeldende")
+            } else {
+                opplysninger.leggOpplysningTilGrunnlag(sak, opplysning)
             }
-            return hentGrunnlag(sak)
+        }
+        return hentGrunnlag(sak)
     }
 
     override fun slettSak(sakId: Long) {

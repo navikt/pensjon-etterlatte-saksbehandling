@@ -10,7 +10,6 @@ import java.net.InetAddress
 import java.time.Duration
 import java.util.*
 
-
 interface ILivetErEnStroemAvHendelser {
     fun poll(c: (Personhendelse) -> Unit): Int
     fun fraStart()
@@ -29,8 +28,11 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
                 KafkaConfig(
                     bootstrapServers = env["LEESAH_KAFKA_BROKERS"]!!,
                     consumerGroupId = env["LEESAH_KAFKA_GROUP_ID"]!!,
-                    clientId = if (env.containsKey("NAIS_APP_NAME")) InetAddress.getLocalHost().hostName else UUID.randomUUID()
-                        .toString(),
+                    clientId = if (env.containsKey("NAIS_APP_NAME")) {
+                        InetAddress.getLocalHost().hostName
+                    } else {
+                        UUID.randomUUID().toString()
+                    },
                     username = env["srvuser"],
                     password = env["srvpwd"],
                     autoCommit = env["KAFKA_AUTO_COMMIT"]?.let { "true" == it.lowercase() },
@@ -50,13 +52,10 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
                 delay(30L * 1000L)
                 logger.info("starter kafka consumer")
                 startuptask()
-
             }
         } else {
             startuptask()
         }
-
-
     }
 
     override fun poll(c: (Personhendelse) -> Unit): Int {
@@ -73,4 +72,3 @@ class LivetErEnStroemAvHendelser(env: Map<String, String>) : ILivetErEnStroemAvH
         consumer?.commitSync()
     }
 }
-

@@ -8,9 +8,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.InnsenderHarForeldreansvarGrunnlag
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.PersonInfoGyldighet
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlagTyper.InnsenderErForelderGrunnlag
-import org.junit.jupiter.api.Test
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -18,9 +16,9 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
-
 
 internal class GyldigSoeknadServiceTest {
 
@@ -40,7 +38,6 @@ internal class GyldigSoeknadServiceTest {
         val foreldreFnrUtenGjenlevende = listOf(Foedselsnummer.of("22128202440"))
         val gjenlevende = listOf(PersonInfoGyldighet("navn navnulfsen", gjenlevendeFnr))
         val innsender = PersonInfoGyldighet("innsendernavn", "03108718357")
-
     }
 
     @Test
@@ -81,11 +78,11 @@ internal class GyldigSoeknadServiceTest {
                 FamilieRelasjon(listOf(), foreldreFnrMedGjenlevende, null),
                 innsender,
                 gjenlevende
-            ), innsenderErForelder.basertPaaOpplysninger
+            ),
+            innsenderErForelder.basertPaaOpplysninger
         )
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, innsenderErIkkeForelder.resultat)
         assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, foreldreMangler.resultat)
-
     }
 
     @Test
@@ -112,8 +109,9 @@ internal class GyldigSoeknadServiceTest {
         assertEquals(
             InnsenderHarForeldreansvarGrunnlag(
                 FamilieRelasjon(foreldreFnrMedGjenlevende, foreldreFnrMedGjenlevende, null),
-                innsender,
-            ), innsenderErForelder.basertPaaOpplysninger
+                innsender
+            ),
+            innsenderErForelder.basertPaaOpplysninger
         )
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, innsenderErIkkeForelder.resultat)
         assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, foreldreMangler.resultat)
@@ -134,17 +132,16 @@ internal class GyldigSoeknadServiceTest {
 
         val harIngenVerge = GyldigSoeknadService(pdl).ingenAnnenVergeEnnForelder(
             GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER,
-            soekerIngenVerge,
+            soekerIngenVerge
         )
 
         val harVerge = GyldigSoeknadService(pdl).ingenAnnenVergeEnnForelder(
             GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER,
-            soekerHarVerge,
+            soekerHarVerge
         )
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, harVerge.resultat)
         assertEquals(VurderingsResultat.OPPFYLT, harIngenVerge.resultat)
     }
-
 }
 
 fun lagMockPersonPdl(

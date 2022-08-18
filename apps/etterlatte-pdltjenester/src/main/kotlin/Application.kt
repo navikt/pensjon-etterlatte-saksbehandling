@@ -4,11 +4,13 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.auth.*
-import io.ktor.http.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.jackson.*
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.http.ContentType
+import io.ktor.http.encodedPath
+import io.ktor.http.takeFrom
+import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediatorFactory
 import no.nav.etterlatte.libs.common.objectMapper
@@ -16,7 +18,6 @@ import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.person.PersonService
 import no.nav.etterlatte.security.ktor.clientCredential
-
 
 class ApplicationContext(configLocation: String? = null) {
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
@@ -35,7 +36,7 @@ class ApplicationContext(configLocation: String? = null) {
             "AZURE_APP_OUTBOUND_SCOPE" to aad.getString("outbound"),
             "AZURE_APP_JWK" to aad.getString("client_jwk")
         )
-        install(ContentNegotiation) {register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+        install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
         install(Auth) {
             clientCredential {
                 config = env
@@ -48,7 +49,7 @@ class ApplicationContext(configLocation: String? = null) {
 
     private fun ppsHttpClient() = HttpClient(OkHttp) {
         expectSuccess = true
-        install(ContentNegotiation) {register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+        install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 }
 

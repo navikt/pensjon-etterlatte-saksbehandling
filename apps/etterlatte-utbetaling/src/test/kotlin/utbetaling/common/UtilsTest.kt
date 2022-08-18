@@ -34,7 +34,8 @@ internal class UtilsTest {
         val jan2022 = YearMonth.of(2022, Month.JANUARY)
         val foersteJanuar2022 = forsteDagIMaaneden(jan2022)
 
-        assertAll("skal finne foerste dag i maaneden",
+        assertAll(
+            "skal finne foerste dag i maaneden",
             { assertEquals(jan2022.year, foersteJanuar2022.year) },
             { assertEquals(jan2022.month, foersteJanuar2022.month) },
             { assertEquals(1, foersteJanuar2022.dayOfMonth) }
@@ -52,7 +53,8 @@ internal class UtilsTest {
         val april2022 = YearMonth.of(2022, Month.APRIL)
         val sisteDagApril = sisteDagIMaaneden(april2022)
 
-        assertAll("Skal returnere siste dag i maaneden for januar, februar og april",
+        assertAll(
+            "Skal returnere siste dag i maaneden for januar, februar og april",
             { assertEquals(jan2022.year, sisteDagJanuar.year) },
             { assertEquals(jan2022.month, sisteDagJanuar.month) },
             { assertEquals(31, sisteDagJanuar.dayOfMonth) },

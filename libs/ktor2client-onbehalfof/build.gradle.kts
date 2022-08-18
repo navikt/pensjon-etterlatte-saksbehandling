@@ -1,7 +1,6 @@
 
 plugins {
     kotlin("jvm")
-
 }
 
 repositories {
@@ -21,7 +20,6 @@ dependencies {
     api(Ktor2.Jackson)
     api(Ktor2.Auth)
     api(Ktor2.AuthJwt)
-
 
     api("com.natpryce:konfig:1.6.10.0")
     api("com.michael-bull.kotlin-result:kotlin-result:1.1.14")

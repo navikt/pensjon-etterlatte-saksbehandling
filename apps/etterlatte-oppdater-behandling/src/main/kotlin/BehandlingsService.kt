@@ -12,11 +12,11 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*
 
-
 interface Behandling : VedlikeholdService {
     fun grunnlagEndretISak(sak: Long)
     fun vedtakHendelse(
-        behandlingid: UUID, hendelse: String,
+        behandlingid: UUID,
+        hendelse: String,
         vedtakId: Long,
         inntruffet: Tidspunkt,
         saksbehandler: String?,
@@ -29,7 +29,7 @@ interface Behandling : VedlikeholdService {
 
 class BehandlingsService(
     private val behandling_app: HttpClient,
-    private val url: String,
+    private val url: String
 ) : Behandling {
     override fun grunnlagEndretISak(sak: Long) {
         runBlocking {
@@ -38,7 +38,8 @@ class BehandlingsService(
     }
 
     override fun vedtakHendelse(
-        behandlingid: UUID, hendelse: String,
+        behandlingid: UUID,
+        hendelse: String,
         vedtakId: Long,
         inntruffet: Tidspunkt,
         saksbehandler: String?,
@@ -68,17 +69,14 @@ class BehandlingsService(
             }
         }
     }
-
-
 }
-
 
 data class VedtakHendelse(
     val vedtakId: Long,
     val inntruffet: Tidspunkt,
     val saksbehandler: String?,
     val kommentar: String?,
-    val valgtBegrunnelse: String?,
+    val valgtBegrunnelse: String?
 )
 
 data class Sak(val ident: String, val sakType: String, val id: Long)

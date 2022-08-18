@@ -56,5 +56,4 @@ class GrensesnittsavstemmingService(
         private val MIN_INSTANT = Tidspunkt(Instant.EPOCH)
         private val logger = LoggerFactory.getLogger(AvstemmingsdataSender::class.java)
     }
-
 }

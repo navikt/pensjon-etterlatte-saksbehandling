@@ -1,6 +1,5 @@
 package no.nav.etterlatte.hendelserpdl.leesah
 
-
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -48,22 +47,20 @@ class KafkaConfig(
             put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer::class.java)
             put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer::class.java)
             put("specific.avro.reader", true)
-
         }
-
     }
 
     private fun kafkaBaseConfig() = Properties().apply {
-
         put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
         put(SaslConfigs.SASL_MECHANISM, "PLAIN")
-        //put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
+        // put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT")
         if (username != null) {
             put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL")
 
             put(
                 SaslConfigs.SASL_JAAS_CONFIG,
-                "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"$username\" password=\"$password\";"
+                "org.apache.kafka.common.security.plain.PlainLoginModule " +
+                    "required username=\"$username\" password=\"$password\";"
             )
         }
         if (!truststore.isNullOrBlank()) {
@@ -78,4 +75,3 @@ class KafkaConfig(
         }
     }
 }
-

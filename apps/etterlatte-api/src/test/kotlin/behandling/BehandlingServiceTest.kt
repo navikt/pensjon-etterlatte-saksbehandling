@@ -5,14 +5,25 @@ import io.mockk.coEvery
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.*
+import no.nav.etterlatte.behandling.BehandlingKlient
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.EtterlatteGrunnlag
+import no.nav.etterlatte.behandling.EtterlatteVedtak
+import no.nav.etterlatte.behandling.PdltjenesterKlient
+import no.nav.etterlatte.behandling.Vedtak
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.AdresseType
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
@@ -31,7 +42,6 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal class BehandlingServiceTest {
-
 
     @MockK
     lateinit var behandlingKlient: BehandlingKlient
@@ -121,7 +131,7 @@ internal class BehandlingServiceTest {
             null,
             null,
             null,
-            null,
+            null
         )
         val hendelser = LagretHendelser(
             hendelser = listOf(
@@ -149,7 +159,7 @@ internal class BehandlingServiceTest {
 
         val gjenlevende = mockPerson().copy(
             avdoedesBarn = listOf(
-                mockPerson().copy(fornavn = "TestKari"),
+                mockPerson().copy(fornavn = "TestKari")
             )
         )
         val avdoedOpplysning = Grunnlagsopplysning(
@@ -157,14 +167,14 @@ internal class BehandlingServiceTest {
             Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
             Opplysningstyper.AVDOED_PDL_V1,
             objectMapper.createObjectNode(),
-            avdoed,
+            avdoed
         )
         val gjenlevendeOpplysning = Grunnlagsopplysning(
             UUID.randomUUID(),
             Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
             Opplysningstyper.AVDOED_PDL_V1,
             objectMapper.createObjectNode(),
-            gjenlevende,
+            gjenlevende
         )
 
         coEvery { behandlingKlient.hentBehandling(behandlingid.toString(), accessToken) } returns detaljertBehandling

@@ -22,7 +22,6 @@ class Dodsmeldinger(config: AppConfig) : IDodsmeldinger {
 
     init {
         Runtime.getRuntime().addShutdownHook(Thread { producer.close() })
-
     }
 
     override fun personErDod(ident: String, doedsdato: String?, endringstype: Endringstype) {
@@ -31,26 +30,31 @@ class Dodsmeldinger(config: AppConfig) : IDodsmeldinger {
             doedsdato?.let { LocalDate.parse(it) }
         } catch (e: Exception) {
             logger.warn(
-                "Kunne ikke parse doedsdato for person med ident $ident. Verdien for doedsdato er: ${doedsdato}. Vi bruker null som dødsdato.",
+                "Kunne ikke parse doedsdato for person med ident $ident. " +
+                    "Verdien for doedsdato er: $doedsdato. Vi bruker null som dødsdato.",
                 e
             )
             null
         }
         val doedshendelse = Doedshendelse(avdoedFnr = ident, doedsdato = avdoedDoedsdato, endringstype = endringstype)
-        producer.send(ProducerRecord("etterlatte.dodsmelding",
-            UUID.randomUUID().toString(), JsonMessage("{}", MessageProblems("{}"))
-                .apply {
-                    set(eventNameKey, "PDL:PERSONHENDELSE")
-                    set("hendelse", "DOEDSFALL_V1")
-                    set(
-                        "hendelse_data", doedshendelse
-                    )
-                }
-                .toJson()))
+        producer.send(
+            ProducerRecord(
+                "etterlatte.dodsmelding",
+                UUID.randomUUID().toString(),
+                JsonMessage("{}", MessageProblems("{}"))
+                    .apply {
+                        set(eventNameKey, "PDL:PERSONHENDELSE")
+                        set("hendelse", "DOEDSFALL_V1")
+                        set(
+                            "hendelse_data",
+                            doedshendelse
+                        )
+                    }
+                    .toJson()
+            )
+        )
     }
-
 }
-
 
 class DodsmeldingerRapid(private val context: RapidsConnection) : IDodsmeldinger {
     val logger = LoggerFactory.getLogger(this.javaClass)
@@ -61,21 +65,25 @@ class DodsmeldingerRapid(private val context: RapidsConnection) : IDodsmeldinger
             doedsdato?.let { LocalDate.parse(it) }
         } catch (e: Exception) {
             logger.warn(
-                "Kunne ikke parse doedsdato for person med ident $ident. Verdien for doedsdato er: ${doedsdato}. Vi bruker null som dødsdato.",
+                "Kunne ikke parse doedsdato for person med ident $ident. " +
+                    "Verdien for doedsdato er: $doedsdato. Vi bruker null som dødsdato.",
                 e
             )
             null
         }
         val doedshendelse = Doedshendelse(avdoedFnr = ident, doedsdato = avdoedDoedsdato, endringstype = endringstype)
-        context.publish(UUID.randomUUID().toString(), JsonMessage("{}", MessageProblems("{}"))
-            .apply {
-                set(eventNameKey, "PDL:PERSONHENDELSE")
-                set("hendelse", "DOEDSFALL_V1")
-                set(
-                    "hendelse_data", doedshendelse
-                )
-            }
-            .toJson())
+        context.publish(
+            UUID.randomUUID().toString(),
+            JsonMessage("{}", MessageProblems("{}"))
+                .apply {
+                    set(eventNameKey, "PDL:PERSONHENDELSE")
+                    set("hendelse", "DOEDSFALL_V1")
+                    set(
+                        "hendelse_data",
+                        doedshendelse
+                    )
+                }
+                .toJson()
+        )
     }
-
 }

@@ -11,7 +11,6 @@ object VergeMapper {
         vergemaalsListe: List<PdlVergemaalEllerFremtidsfullmakt>
     ): List<VergemaalEllerFremtidsfullmakt> =
         vergemaalsListe.map {
-
             fun toVergeEllerFullmektig(
                 pdlV: PdlVergeEllerFullmektig
             ) = VergeEllerFullmektig(
@@ -37,6 +36,4 @@ object VergeMapper {
                 vergeEllerErFullmektig = it.vergeEllerFullmektig
             )
         }
-
 }
-

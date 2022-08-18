@@ -1,8 +1,12 @@
-package no.nav.etterlatte.model
+package model
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.libs.common.avkorting.*
+import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
+import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
+import no.nav.etterlatte.libs.common.avkorting.Avkortingsperiode
+import no.nav.etterlatte.libs.common.avkorting.Avkortingstyper
+import no.nav.etterlatte.libs.common.avkorting.Endringskode
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
@@ -12,14 +16,13 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
 
-
 class AvkortingService {
     private val logger = LoggerFactory.getLogger(AvkortingService::class.java)
 
     fun avkortingsResultat(beregningsResultat: BeregningsResultat): AvkortingsResultat {
         logger.info("Leverer en fake beregning")
         return AvkortingsResultat(
-            //TODO se på hvordan denne initieres
+            // TODO se på hvordan denne initieres
             id = UUID.randomUUID(),
             type = beregningsResultat.type,
             endringskode = Endringskode.NY,
@@ -28,7 +31,8 @@ class AvkortingService {
             beregnetDato = LocalDateTime.now()
         )
     }
-    //TODO implementere avkortning (må ha inn inntekt)
+
+    // TODO implementere avkortning (må ha inn inntekt)
     private fun beregnAvkorting(belop: Int): Int {
         return belop - 5
     }
@@ -68,4 +72,3 @@ class AvkortingService {
         }
     }
 }
-

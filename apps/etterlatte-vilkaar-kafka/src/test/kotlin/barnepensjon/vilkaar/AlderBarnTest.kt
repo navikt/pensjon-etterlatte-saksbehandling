@@ -14,17 +14,25 @@ import java.time.YearMonth
 class AlderBarnTest {
     private val personBarnOver20 = lagMockPersonPdl(
         foedselsdatoBarnOver20,
-        fnrBarn, null, adresserNorgePdl(), null
+        fnrBarn,
+        null,
+        adresserNorgePdl(),
+        null
     )
     private val personBarnUnder20 = lagMockPersonPdl(
         foedselsdatoBarnUnder20,
-        fnrBarn, null, adresserNorgePdl(), null
+        fnrBarn,
+        null,
+        adresserNorgePdl(),
+        null
     )
     private val personAvdoedMedDoedsdato =
         lagMockPersonPdl(
             foedselsdatoBarnUnder20,
             fnrAvdoed,
-            doedsdatoPdl, adresserNorgePdl(), null
+            doedsdatoPdl,
+            adresserNorgePdl(),
+            null
         )
 
     private val virkningsdataPersonAvdoed = YearMonth.from(personAvdoedMedDoedsdato.doedsdato).plusMonths(1)
@@ -54,7 +62,6 @@ class AlderBarnTest {
             vurderingBarnUnder20UtenDoedsdato.resultat,
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         )
-
     }
 
     @Test
@@ -70,7 +77,9 @@ class AlderBarnTest {
 
     @Test
     fun `søker med dødsdato må ha dødsdato etter virkningsdato for oppfyllt vurdering`() {
-        val personMedDødsdato = personBarnUnder20.copy(doedsdato = YearMonth.from(personAvdoedMedDoedsdato.doedsdato).atEndOfMonth())
+        val personMedDødsdato = personBarnUnder20.copy(
+            doedsdato = YearMonth.from(personAvdoedMedDoedsdato.doedsdato).atEndOfMonth()
+        )
         val vurdering = vilkaarBrukerErUnder20(
             mapTilVilkaarstypePerson(personMedDødsdato),
             mapTilVilkaarstypePerson(personAvdoedMedDoedsdato),
@@ -82,7 +91,9 @@ class AlderBarnTest {
 
     @Test
     fun `søker med dødsdato tidligere enn virkningsdato oppfyller ikke vurdering`() {
-        val personMedDødsdato = personBarnUnder20.copy(doedsdato = YearMonth.from(personAvdoedMedDoedsdato.doedsdato).atEndOfMonth())
+        val personMedDødsdato = personBarnUnder20.copy(
+            doedsdato = YearMonth.from(personAvdoedMedDoedsdato.doedsdato).atEndOfMonth()
+        )
         val vurdering = vilkaarBrukerErUnder20(
             mapTilVilkaarstypePerson(personMedDødsdato),
             mapTilVilkaarstypePerson(personAvdoedMedDoedsdato),

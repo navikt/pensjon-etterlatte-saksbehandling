@@ -1,19 +1,34 @@
 package no.nav.etterlatte
 
 import com.typesafe.config.ConfigFactory
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.config.*
-import io.ktor.server.html.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.util.pipeline.*
+import io.ktor.http.ContentType
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
+import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.principal
+import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.html.respondHtml
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.get
+import io.ktor.server.routing.routing
+import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlinx.html.*
+import kotlinx.html.body
+import kotlinx.html.h1
+import kotlinx.html.h2
+import kotlinx.html.head
+import kotlinx.html.li
+import kotlinx.html.title
+import kotlinx.html.ul
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
-import no.nav.helse.rapids_rivers.*
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.RapidApplication
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import no.nav.security.token.support.v2.tokenValidationSupport
 import java.time.LocalDateTime
@@ -53,25 +68,27 @@ fun main() {
                                         }
 
                                         ul {
-
                                             it.value.forEach {
                                                 li {
-                                                    +("${it.key}: " + (it.value.first?.let { """Reported ${it.type} at ${it.opprettet}. """ }
-                                                        ?: "") + (it.value.second?.let { """Responded to ping at ${it.opprettet}.""" }
-                                                        ?: ""))
+                                                    +(
+                                                        "${it.key}: " + (
+                                                            it.value.first?.let {
+                                                                """Reported ${it.type} at ${it.opprettet}. """
+                                                            } ?: ""
+                                                            ) + (
+                                                            it.value.second?.let {
+                                                                """Responded to ping at ${it.opprettet}."""
+                                                            } ?: ""
+                                                            )
+                                                        )
                                                 }
                                             }
-
                                         }
-
-
                                     }
                                 }
                             }
-
                         }
                     }
-
                 }
             }
             .build()
@@ -93,7 +110,7 @@ fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<T
     ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("NAVident")?.toString()
 
 internal class AppEventRiver(
-    rapidsConnection: RapidsConnection,
+    rapidsConnection: RapidsConnection
 ) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
@@ -116,7 +133,7 @@ internal class AppEventRiver(
 }
 
 internal class PongListener(
-    rapidsConnection: RapidsConnection,
+    rapidsConnection: RapidsConnection
 ) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
@@ -158,5 +175,5 @@ class AppEvent(
 class PongEvent(
     override val appinstance: String,
     override val app: String,
-    override val opprettet: LocalDateTime,
+    override val opprettet: LocalDateTime
 ) : Event by AppEvent("pong", appinstance, app, opprettet)

@@ -15,7 +15,12 @@ fun main() {
         AppBuilder(env).also { ab ->
             RapidApplication.create(env)
                 .also {
-                    HentOpplysningerFraInntektskomponenten(it, ab.createInntektsKomponentService(), ab.createAaregService(), ab.createOpplysningsbygger())
+                    HentOpplysningerFraInntektskomponenten(
+                        it,
+                        ab.createInntektsKomponentService(),
+                        ab.createAaregService(),
+                        ab.createOpplysningsbygger()
+                    )
                 }
                 .start()
         }
@@ -31,5 +36,8 @@ interface Aareg {
 }
 
 interface OpplysningsBygger {
-    fun byggOpplysninger(inntektsKomponentenResponse: InntektsKomponentenResponse, arbeidsforholdListe: List<AaregResponse>): List<Grunnlagsopplysning<out Any>>
+    fun byggOpplysninger(
+        inntektsKomponentenResponse: InntektsKomponentenResponse,
+        arbeidsforholdListe: List<AaregResponse>
+    ): List<Grunnlagsopplysning<out Any>>
 }

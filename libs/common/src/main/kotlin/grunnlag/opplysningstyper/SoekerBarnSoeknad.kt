@@ -5,7 +5,6 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OmsorgspersonType
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 
-
 data class SoekerBarnSoeknad(
     val type: PersonType,
     val fornavn: String,
@@ -21,14 +20,14 @@ data class SoekerBarnSoeknad(
 data class UtenlandsadresseBarn(
     val adresseIUtlandet: JaNeiVetIkke?,
     val land: String?,
-    val adresse: String?,
+    val adresse: String?
 )
 
 data class Forelder(
     val type: PersonType,
     val fornavn: String,
     val etternavn: String,
-    val foedselsnummer: Foedselsnummer,
+    val foedselsnummer: Foedselsnummer
 )
 
 data class Verge(

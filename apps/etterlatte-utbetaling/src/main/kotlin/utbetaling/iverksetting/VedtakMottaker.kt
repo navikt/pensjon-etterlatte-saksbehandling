@@ -1,6 +1,5 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
-
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.domene.vedtak.VedtakType
@@ -29,18 +28,18 @@ const val EVENT_NAME_OPPDATERT = "UTBETALING:OPPDATERT"
 
 data class UtbetalingEvent(
     @JsonProperty(eventNameKey) val event: String = EVENT_NAME_OPPDATERT,
-    @JsonProperty("utbetaling_response") val utbetalingResponse: UtbetalingResponse,
+    @JsonProperty("utbetaling_response") val utbetalingResponse: UtbetalingResponse
 )
 
 data class UtbetalingResponse(
     val status: UtbetalingStatus,
     val vedtakId: Long? = null,
-    val feilmelding: String? = null,
+    val feilmelding: String? = null
 )
 
 class VedtakMottaker(
     rapidsConnection: RapidsConnection,
-    private val utbetalingService: UtbetalingService,
+    private val utbetalingService: UtbetalingService
 ) : River.PacketListener {
 
     init {
@@ -76,7 +75,10 @@ class VedtakMottaker(
                         }
                     }
                     is UtbetalingslinjerForVedtakEksisterer -> {
-                        "En eller flere utbetalingslinjer med id=[${resultat.utbetalingslinjeIDer()}] eksisterer fra før".also {
+                        (
+                            "En eller flere utbetalingslinjer med id=[${resultat.utbetalingslinjeIDer()}] " +
+                                "eksisterer fra før"
+                            ).also {
                             logger.error(it)
                             sendUtbetalingFeiletEvent(context, vedtak.vedtakId, it)
                         }

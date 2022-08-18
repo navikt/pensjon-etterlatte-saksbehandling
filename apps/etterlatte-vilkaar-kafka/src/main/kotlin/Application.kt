@@ -2,7 +2,6 @@ package no.nav.etterlatte
 
 import LesVilkaarsmelding
 import no.nav.etterlatte.barnepensjon.model.VilkaarService
-
 import no.nav.helse.rapids_rivers.RapidApplication
 
 fun main() {

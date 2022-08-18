@@ -21,7 +21,6 @@ import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
-
 data class UtbetalingNotFoundException(override val message: String) : RuntimeException(message)
 
 class UtbetalingDao(private val dataSource: DataSource) {
@@ -54,7 +53,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                         "stoenadsmottaker" to utbetaling.stoenadsmottaker.value.param<String>(),
                         "saksbehandler" to utbetaling.saksbehandler.value.param<String>(),
                         "attestant" to utbetaling.attestant.value.param<String>(),
-                        "oppdrag" to utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) }.param<String>(),
+                        "oppdrag" to utbetaling.oppdrag?.let { o -> OppdragJaxb.toXml(o) }.param<String>()
                     )
                 ).let { tx.run(it.asUpdate) }
 
@@ -63,7 +62,8 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 }
                 utbetaling.utbetalingshendelser.forEach { utbetalingshendelse ->
                     opprettUtbetalingshendelse(
-                        utbetalingshendelse, tx
+                        utbetalingshendelse,
+                        tx
                     )
                 }
             }
@@ -89,7 +89,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 "sak_id" to utbetalingslinje.sakId.value.param<Long>(),
                 "periode_fra" to utbetalingslinje.periode.fra.param<LocalDate>(),
                 "periode_til" to utbetalingslinje.periode.til.param<LocalDate>(),
-                "beloep" to utbetalingslinje.beloep.param<BigDecimal>(),
+                "beloep" to utbetalingslinje.beloep.param<BigDecimal>()
             )
         ).let { tx.run(it.asUpdate) }
     }
@@ -137,11 +137,13 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 paramMap = mapOf("vedtakId" to vedtakId.param<Long>())
             )
                 .let {
-                    session.run(it.map { row ->
-                        val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
-                        val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
-                        toUtbetaling(row, utbetalingslinjer, utbetalingshendelser)
-                    }.asSingle)
+                    session.run(
+                        it.map { row ->
+                            val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
+                            val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
+                            toUtbetaling(row, utbetalingslinjer, utbetalingshendelser)
+                        }.asSingle
+                    )
                 }
         }
 
@@ -196,7 +198,6 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 .let { session.run(it.map(::toUtbetalingslinje).asList) }
         }
 
-
     fun hentUtbetalinger(fraOgMed: Tidspunkt, til: Tidspunkt): List<Utbetaling> =
         using(sessionOf(dataSource)) { session ->
             queryOf(
@@ -213,11 +214,13 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 )
             )
                 .let {
-                    session.run(it.map { row ->
-                        val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
-                        val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
-                        toUtbetaling(row, utbetalingslinjer, utbetalingshendelser)
-                    }.asList)
+                    session.run(
+                        it.map { row ->
+                            val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
+                            val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
+                            toUtbetaling(row, utbetalingslinjer, utbetalingshendelser)
+                        }.asList
+                    )
                 }
         }
 
@@ -232,15 +235,17 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     WHERE sak_id = :sakId
                     """,
                 paramMap = mapOf(
-                    "sakId" to sakId.param<Long>(),
+                    "sakId" to sakId.param<Long>()
                 )
             )
                 .let {
-                    session.run(it.map { row ->
-                        val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
-                        val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
-                        toUtbetaling(row, utbetalingslinjer, utbetalingshendelser)
-                    }.asList)
+                    session.run(
+                        it.map { row ->
+                            val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
+                            val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
+                            toUtbetaling(row, utbetalingslinjer, utbetalingshendelser)
+                        }.asList
+                    )
                 }
         }
 
@@ -277,7 +282,6 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     ),
                     tx
                 )
-
             }
                 .let { hentUtbetalingNonNull(oppdragMedKvittering.vedtakId()) }
         }
@@ -332,9 +336,9 @@ class UtbetalingDao(private val dataSource: DataSource) {
                 sakId = SakId(long("sak_id")),
                 periode = PeriodeForUtbetaling(
                     fra = localDate("periode_fra"),
-                    til = localDateOrNull("periode_til"),
+                    til = localDateOrNull("periode_til")
                 ),
-                beloep = bigDecimalOrNull("beloep"),
+                beloep = bigDecimalOrNull("beloep")
             )
         }
 

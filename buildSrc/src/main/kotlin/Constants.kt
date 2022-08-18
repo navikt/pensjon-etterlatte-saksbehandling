@@ -52,7 +52,6 @@ object Jackson {
     const val Databind = "com.fasterxml.jackson.core:jackson-databind:$version"
     const val Core = "com.fasterxml.jackson.core:jackson-core:$version"
     const val Xml = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$version"
-
 }
 
 object Jupiter {

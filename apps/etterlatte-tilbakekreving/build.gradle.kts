@@ -32,7 +32,6 @@ dependencies {
     implementation("org.messaginghub:pooled-jms:2.0.5")
     implementation("com.github.navikt.tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon:2589.e85bf84")
 
-
     implementation("javax.xml.bind:jaxb-api:2.3.0")
     implementation("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 

@@ -31,7 +31,7 @@ data class DetaljertBehandlingDto(
     val virkningstidspunkt: LocalDate?,
     val status: BehandlingStatus?,
     val hendelser: List<LagretHendelse>?,
-    val familieforhold: Familieforhold?,
+    val familieforhold: Familieforhold?
 )
 
 data class Familieforhold(

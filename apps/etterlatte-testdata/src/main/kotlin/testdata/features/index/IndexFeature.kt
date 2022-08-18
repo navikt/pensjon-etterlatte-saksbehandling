@@ -9,7 +9,7 @@ import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.features
 import no.nav.etterlatte.navIdentFraToken
 
-object IndexFeature: TestDataFeature {
+object IndexFeature : TestDataFeature {
     override val beskrivelse: String
         get() = ""
     override val path: String

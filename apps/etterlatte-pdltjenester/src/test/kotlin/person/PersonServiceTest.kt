@@ -69,7 +69,6 @@ internal class PersonServiceTest {
         assertEquals(2, person.avdoedesBarn?.size)
         assertTrue(person.avdoedesBarn?.get(0)?.foedselsnummer?.value in expectedBarnFnr)
         assertTrue(person.avdoedesBarn?.get(1)?.foedselsnummer?.value in expectedBarnFnr)
-
     }
 
     @Test
@@ -175,8 +174,5 @@ internal class PersonServiceTest {
                 personService.hentFolkeregisterIdent(HentFolkeregisterIdentRequest("1234"))
             }
         }
-
     }
-
-
 }

@@ -7,23 +7,35 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.mustachejava.DefaultMustacheFactory
 import com.typesafe.config.ConfigFactory
-import io.ktor.client.*
-import io.ktor.client.plugins.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.http.auth.*
-import io.ktor.serialization.jackson.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.cio.*
-import io.ktor.server.config.*
-import io.ktor.server.engine.*
-import io.ktor.server.mustache.*
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
+import io.ktor.http.ContentType
+import io.ktor.http.auth.HttpAuthHeader
+import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.serialization.jackson.jackson
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
+import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.parseAuthorizationHeader
+import io.ktor.server.auth.principal
+import io.ktor.server.cio.CIO
+import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.connector
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.mustache.Mustache
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.util.pipeline.*
+import io.ktor.server.request.receive
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
+import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.standardProducer
@@ -55,47 +67,50 @@ val producer = if (localDevelopment) {
     GcpKafkaConfig.fromEnv(System.getenv()).standardProducer(System.getenv().getValue("KAFKA_TARGET_TOPIC"))
 }
 
-interface TestDataFeature{
+interface TestDataFeature {
     val beskrivelse: String
     val path: String
-    val routes: Route.()->Unit
+    val routes: Route.() -> Unit
 }
 val features: List<TestDataFeature> = listOf(
     IndexFeature,
     EgendefinertMeldingFeature,
     StandardMeldingFeature,
     SlettsakFeature,
-    OpprettSoeknadFeature(ConfigFactory.load(), httpClient()),
+    OpprettSoeknadFeature(ConfigFactory.load(), httpClient())
 )
 
 fun main() {
-    embeddedServer(CIO, applicationEngineEnvironment {
-        module {
-            install(Mustache) {
-                mustacheFactory = DefaultMustacheFactory("templates")
-            }
-
-            if (localDevelopment) {
-                routing {
-                    api()
-                }
-            } else {
-                install(Authentication) {
-                    tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
+    embeddedServer(
+        CIO,
+        applicationEngineEnvironment {
+            module {
+                install(Mustache) {
+                    mustacheFactory = DefaultMustacheFactory("templates")
                 }
 
-                routing {
-                    get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
-                    get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
-
-                    authenticate {
+                if (localDevelopment) {
+                    routing {
                         api()
+                    }
+                } else {
+                    install(Authentication) {
+                        tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
+                    }
+
+                    routing {
+                        get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
+                        get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
+
+                        authenticate {
+                            api()
+                        }
                     }
                 }
             }
+            connector { port = 8080 }
         }
-        connector { port = 8080 }
-    }).start(true)
+    ).start(true)
 }
 
 private fun Route.api() {
@@ -134,9 +149,11 @@ fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<T
 
 fun getAccessToken(call: ApplicationCall): String {
     val authHeader = call.request.parseAuthorizationHeader()
-    if (!(authHeader == null
-                || authHeader !is HttpAuthHeader.Single
-                || authHeader.authScheme != "Bearer")
+    if (!(
+        authHeader == null ||
+            authHeader !is HttpAuthHeader.Single ||
+            authHeader.authScheme != "Bearer"
+        )
     ) {
         return authHeader.blob
     }

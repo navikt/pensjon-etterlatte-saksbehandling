@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehan
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -115,7 +116,6 @@ abstract class CommonFactory : BeanFactory {
             hendelseDao()
         )
 
-
     override fun sakDao(): SakDao = SakDao { databaseContext().activeTx() }
     override fun behandlingDao(): BehandlingDao = BehandlingDao { databaseContext().activeTx() }
     override fun hendelseDao(): HendelseDao = HendelseDao { databaseContext().activeTx() }
@@ -139,7 +139,6 @@ abstract class CommonFactory : BeanFactory {
         periode = Duration.of(1, ChronoUnit.MINUTES),
         minutterGamleHendelser = 1L
     ).schedule()
-
 }
 
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
@@ -177,6 +176,4 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
         periode = Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES),
         minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()
     ).schedule()
-
-
 }

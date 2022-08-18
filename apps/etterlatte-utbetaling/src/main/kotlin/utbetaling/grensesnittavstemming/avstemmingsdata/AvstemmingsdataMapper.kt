@@ -160,7 +160,9 @@ class AvstemmingsdataMapper(
         }
 
     private fun periode(liste: List<Utbetaling>): ClosedRange<Instant>? {
-        return if (liste.isEmpty()) null else {
+        return if (liste.isEmpty()) {
+            null
+        } else {
             object : ClosedRange<Instant> {
                 override val start = liste.minOf { it.avstemmingsnoekkel.instant }
                 override val endInclusive = liste.maxOf { it.avstemmingsnoekkel.instant }

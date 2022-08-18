@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod
 import io.ktor.client.HttpClient
-import io.ktor.client.call.*
+import io.ktor.client.call.body
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -98,7 +98,7 @@ data class GrantRequest(
             GrantRequest(
                 grantType = OAuth2GrantType.CLIENT_CREDENTIALS,
                 params = mapOf(
-                    OAuth2ParameterNames.SCOPE to scope,
+                    OAuth2ParameterNames.SCOPE to scope
                 )
             )
     }

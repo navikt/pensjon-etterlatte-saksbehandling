@@ -1,9 +1,16 @@
 package no.nav.etterlatte
 
-
 import no.nav.etterlatte.fordeler.FordelerServiceTest
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.AdresseType
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import java.io.FileNotFoundException
 import java.time.LocalDate
@@ -30,7 +37,7 @@ fun mockPerson(
     utland: Utland? = null,
     bostedsadresse: Adresse? = null,
     familieRelasjon: FamilieRelasjon? = null,
-    vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>? = null,
+    vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>? = null
 ) = Person(
     fornavn = "Ola",
     etternavn = "Nordmann",
@@ -49,7 +56,7 @@ fun mockPerson(
     utland = utland,
     familieRelasjon = familieRelasjon,
     avdoedesBarn = null,
-    vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt,
+    vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt
 )
 
 fun mockNorskAdresse(adresseLinje1: String = "Testveien 4", gyldigTilOgMed: LocalDateTime? = null) = Adresse(

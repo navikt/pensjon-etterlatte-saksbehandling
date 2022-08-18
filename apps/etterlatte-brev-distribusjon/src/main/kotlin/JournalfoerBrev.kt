@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 
 internal class JournalfoerBrev(
     private val rapidsConnection: RapidsConnection,
-    private val journalpostService: JournalpostService,
+    private val journalpostService: JournalpostService
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(JournalfoerBrev::class.java)
 

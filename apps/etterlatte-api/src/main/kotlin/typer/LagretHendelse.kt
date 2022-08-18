@@ -14,7 +14,7 @@ data class LagretHendelse(
     val ident: String?,
     val identType: String?,
     val kommentar: String?,
-    val valgtBegrunnelse: String?,
+    val valgtBegrunnelse: String?
 )
 
 data class LagretHendelser(

@@ -10,7 +10,7 @@ data class Utbetalingsvedtak(
     val behandling: Behandling,
     val pensjonTilUtbetaling: List<Utbetalingsperiode>,
     val vedtakFattet: VedtakFattet,
-    val attestasjon: Attestasjon,
+    val attestasjon: Attestasjon
 )
 
 data class Sak(val ident: String, val id: Long)
@@ -18,14 +18,18 @@ data class Sak(val ident: String, val id: Long)
 data class Attestasjon(val attestant: String)
 
 data class Utbetalingsperiode(
-    val id: Long, val periode: Periode, val beloep: BigDecimal?, val type: UtbetalingsperiodeType
+    val id: Long,
+    val periode: Periode,
+    val beloep: BigDecimal?,
+    val type: UtbetalingsperiodeType
 )
 
 data class VedtakFattet(val ansvarligSaksbehandler: String)
 data class Periode(
-    val fom: YearMonth, val tom: YearMonth?
+    val fom: YearMonth,
+    val tom: YearMonth?
 )
 
 enum class UtbetalingsperiodeType {
-    OPPHOER, UTBETALING  // TODO: trenger vi en ENDRING-type her?
+    OPPHOER, UTBETALING // TODO: trenger vi en ENDRING-type her?
 }

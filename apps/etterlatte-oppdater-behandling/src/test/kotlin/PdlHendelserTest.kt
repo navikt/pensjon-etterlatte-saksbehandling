@@ -11,7 +11,6 @@ import java.time.LocalDate
 
 class PdlHendelserTest {
 
-
     private val behandlingService = mockk<BehandlingsService>()
     private val inspector = TestRapid().apply { PdlHendelser(this, behandlingService) }
 
@@ -28,7 +27,6 @@ class PdlHendelserTest {
         Assertions.assertEquals(LocalDate.of(2022, 1, 1), doedshendelse.captured.doedsdato)
         Assertions.assertEquals("OPPRETTET", doedshendelse.captured.endringstype.name)
     }
-
 
     companion object {
         val doedshendelse_hendelse = readFile("/doedshendelse.json")

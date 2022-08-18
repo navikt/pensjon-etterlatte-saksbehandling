@@ -5,13 +5,17 @@ import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.journalpost.JournalpostKlient
 import no.nav.etterlatte.libs.common.brev.model.DistribusjonMelding
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
-import no.nav.etterlatte.libs.common.journalpost.*
+import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
+import no.nav.etterlatte.libs.common.journalpost.DokumentVariant
+import no.nav.etterlatte.libs.common.journalpost.JournalPostType
+import no.nav.etterlatte.libs.common.journalpost.JournalpostDokument
+import no.nav.etterlatte.libs.common.journalpost.JournalpostRequest
+import no.nav.etterlatte.libs.common.journalpost.JournalpostResponse
 import org.slf4j.LoggerFactory
 
 interface JournalpostService {
     fun journalfoer(melding: DistribusjonMelding): JournalpostResponse
 }
-
 
 class JournalpostServiceImpl(
     private val client: JournalpostKlient,

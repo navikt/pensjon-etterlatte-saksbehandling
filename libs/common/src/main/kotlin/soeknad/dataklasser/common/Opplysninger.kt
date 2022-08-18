@@ -32,7 +32,7 @@ enum class SivilstatusType { ENSLIG, EKTESKAP, SAMBOERSKAP }
 
 data class SamboerInntekt(
     val inntektstype: Opplysning<List<EnumSvar<InntektType>>>,
-    val samletBruttoinntektPrAar: Opplysning<FritekstSvar>,
+    val samletBruttoinntektPrAar: Opplysning<FritekstSvar>
 )
 data class ForholdTilAvdoede(
     val relasjon: Opplysning<EnumSvar<ForholdTilAvdoedeType>>,
@@ -45,7 +45,7 @@ data class ForholdTilAvdoede(
     val tidligereGift: Opplysning<EnumSvar<JaNeiVetIkke>>? = null,
     val omsorgForBarn: Opplysning<EnumSvar<JaNeiVetIkke>>? = null,
     val mottokBidrag: Opplysning<EnumSvar<JaNeiVetIkke>>? = null, // Finner ikke igjen
-    val mottokEktefelleBidrag: Opplysning<EnumSvar<JaNeiVetIkke>>? = null, // Finner ikke igjen?
+    val mottokEktefelleBidrag: Opplysning<EnumSvar<JaNeiVetIkke>>? = null // Finner ikke igjen?
 )
 
 data class Utenlandsopphold(
@@ -69,7 +69,7 @@ data class ArbeidOgUtdanning(
     val arbeidsforhold: Opplysning<List<Arbeidstaker>>?,
     val selvstendig: Opplysning<List<SelvstendigNaeringsdrivende>>?,
     val utdanning: Opplysning<Utdanning>?,
-    val annet: Opplysning<FritekstSvar>?,
+    val annet: Opplysning<FritekstSvar>?
 )
 
 data class Utdanning(
@@ -130,7 +130,7 @@ data class AndreYtelser(
 data class PensjonUtland(
     val pensjonsType: Opplysning<FritekstSvar>?,
     val land: Opplysning<FritekstSvar>?,
-    val bruttobeloepPrAar: Opplysning<FritekstSvar>?,
+    val bruttobeloepPrAar: Opplysning<FritekstSvar>?
 )
 
 data class OppholdUtland(

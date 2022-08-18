@@ -1,15 +1,21 @@
 package no.nav.etterlatte
 
-
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import io.ktor.client.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.serialization.jackson.*
-import no.nav.etterlatte.behandling.*
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
+import io.ktor.http.ContentType
+import io.ktor.serialization.jackson.JacksonConverter
+import no.nav.etterlatte.behandling.BehandlingKlient
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.GrunnlagKlient
+import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.behandling.OppgaveService
+import no.nav.etterlatte.behandling.PdltjenesterKlient
+import no.nav.etterlatte.behandling.VedtakKlient
+import no.nav.etterlatte.behandling.VedtakService
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.standardProducer
@@ -45,7 +51,6 @@ class ApplicationContext(configLocation: String? = null) {
         }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 }
-
 
 fun main() {
     ApplicationContext()

@@ -18,9 +18,9 @@ import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
 fun barnOgAvdoedSammeBostedsadresse(
-        soekerPdl: VilkaarOpplysning<Person>?,
-        avdoedPdl: VilkaarOpplysning<Person>?
-) : VurdertVilkaar {
+    soekerPdl: VilkaarOpplysning<Person>?,
+    avdoedPdl: VilkaarOpplysning<Person>?
+): VurdertVilkaar {
     val sammeBostedsAdresse = kriterieSammeBostedsadresseSomAvdoed(soekerPdl, avdoedPdl)
 
     return VurdertVilkaar(
@@ -62,10 +62,10 @@ fun kriterieSammeBostedsadresseSomAvdoed(
             val adresseBarn = hentBostedsAdresser(soekerPdl).find { it.aktiv }
             val adresserAvdoed = hentBostedsAdresser(avdoedPdl)
 
-            fun hentAktivEllerSisteAdresse() : Adresse? {
-                if (adresserAvdoed.find { it.aktiv } != null)
+            fun hentAktivEllerSisteAdresse(): Adresse? {
+                if (adresserAvdoed.find { it.aktiv } != null) {
                     return adresserAvdoed.find { it.aktiv }
-                else {
+                } else {
                     return adresserAvdoed.sortedByDescending { it.gyldigFraOgMed?.toLocalDate() }.first()
                 }
             }

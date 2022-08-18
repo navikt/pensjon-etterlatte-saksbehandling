@@ -8,7 +8,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import no.nav.etterlatte.libs.ktorobo.AccessToken
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -39,7 +41,6 @@ internal class AzureAdClientTest {
         )
     }
 
-
     @Test
     fun `henter open id configuration fra well known url i config ved oppstart`() {
         AzureAdClient(config, mockHttpClient)
@@ -64,7 +65,10 @@ internal class AzureAdClientTest {
             .buildAsync()
 
         runBlocking {
-            AzureAdClient(config, mockHttpClient, cache).getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")
+            AzureAdClient(config, mockHttpClient, cache).getOnBehalfOfAccessTokenForResource(
+                listOf("testScope"),
+                "saksbehandlerToken"
+            )
         }
 
         val cachedValue = cache.getIfPresent(OboTokenRequest(listOf("testScope"), "saksbehandlerToken"))!!.get()
@@ -73,6 +77,7 @@ internal class AzureAdClientTest {
         cachedValue.expiresIn shouldBe 60
         cachedValue.tokenType shouldBe "testToken"
     }
+
     @Test
     fun `bruker cachet access token ved påfølgende kall`() {
         val cache: AsyncCache<OboTokenRequest, AccessToken> = Caffeine
@@ -101,10 +106,10 @@ internal class AzureAdClientTest {
 
             val client = AzureAdClient(config, mockHttpClient, cache)
             generateSequence {
-                async { client.getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken")}
+                async { client.getOnBehalfOfAccessTokenForResource(listOf("testScope"), "saksbehandlerToken") }
             }.take(3).toList().awaitAll()
 
-           mockServer.verify(1, postRequestedFor(urlEqualTo("/token_endpoint")))
+            mockServer.verify(1, postRequestedFor(urlEqualTo("/token_endpoint")))
         }
     }
 }
@@ -116,7 +121,7 @@ private fun openIdConfigurationMockResponse() = """
         "token_endpoint": "token_endpoint",
         "authorization_endpoint": "authorization_endpoint"
     }
-    """.trimIndent()
+""".trimIndent()
 
 private fun accessTokenMockResponse() = """
        {

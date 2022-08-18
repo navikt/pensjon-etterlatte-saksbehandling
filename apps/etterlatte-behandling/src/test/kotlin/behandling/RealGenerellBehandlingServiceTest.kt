@@ -22,15 +22,20 @@ import java.util.*
 class RealGenerellBehandlingServiceTest {
     @BeforeEach
     fun before() {
-        Kontekst.set(Context(mockk(), object : DatabaseKontekst {
-            override fun activeTx(): Connection {
-                throw IllegalArgumentException()
-            }
+        Kontekst.set(
+            Context(
+                mockk(),
+                object : DatabaseKontekst {
+                    override fun activeTx(): Connection {
+                        throw IllegalArgumentException()
+                    }
 
-            override fun <T> inTransaction(block: () -> T): T {
-                return block()
-            }
-        }))
+                    override fun <T> inTransaction(block: () -> T): T {
+                        return block()
+                    }
+                }
+            )
+        )
     }
 
     @Test
@@ -59,7 +64,7 @@ class RealGenerellBehandlingServiceTest {
             "skal hente behandlinger",
             { assertEquals(4, behandlinger.size) },
             { assertEquals(2, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
-            { assertEquals(2, behandlinger.filterIsInstance<Revurdering>().size) },
+            { assertEquals(2, behandlinger.filterIsInstance<Revurdering>().size) }
         )
     }
 
@@ -88,7 +93,7 @@ class RealGenerellBehandlingServiceTest {
         val behandlingerMock = mockk<BehandlingDao> {
             every { alleBehandingerISak(1) } returns listOf(
                 revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
-                foerstegangsbehandling(sak = 1),
+                foerstegangsbehandling(sak = 1)
             )
         }
         val hendelserMock = mockk<HendelseDao>()
@@ -106,9 +111,7 @@ class RealGenerellBehandlingServiceTest {
             "skal hente behandlinger",
             { assertEquals(2, behandlinger.size) },
             { assertEquals(1, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
-            { assertEquals(1, behandlinger.filterIsInstance<Revurdering>().size) },
+            { assertEquals(1, behandlinger.filterIsInstance<Revurdering>().size) }
         )
     }
-
-
 }

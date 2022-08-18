@@ -5,7 +5,7 @@ import no.nav.etterlatte.BehandlingsService
 import no.nav.etterlatte.HendelserOmVedtak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -26,17 +26,18 @@ internal class HendelserOmVedtakTest {
 
     @Test
     fun skalLeseVedtakHendelser() {
-
         val behandlingIdSlot = slot<UUID>()
         val hendelseSlot = slot<String>()
         every {
-            behandlingService.vedtakHendelse(capture(behandlingIdSlot),
+            behandlingService.vedtakHendelse(
+                capture(behandlingIdSlot),
                 capture(hendelseSlot),
                 any(),
                 any(),
                 any(),
                 any(),
-                any())
+                any()
+            )
         }.returns(Unit)
 
         inspector.sendTestMessage(fullMelding)

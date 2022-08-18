@@ -44,11 +44,11 @@ internal class GrensesnittavstemmingDaoIntegrationTest {
         val grensesnittavstemming = Grensesnittavstemming(
             periode = Avstemmingsperiode(
                 fraOgMed = Tidspunkt(Instant.now().minus(1, ChronoUnit.DAYS)),
-                til = Tidspunkt.now(),
+                til = Tidspunkt.now()
             ),
             antallOppdrag = 1,
             opprettet = Tidspunkt.now(),
-            avstemmingsdata = "",
+            avstemmingsdata = ""
         )
 
         val antallRaderOppdatert = grensesnittavstemmingDao.opprettAvstemming(grensesnittavstemming)
@@ -67,27 +67,27 @@ internal class GrensesnittavstemmingDaoIntegrationTest {
                 til = now
             ),
             antallOppdrag = 1,
-            avstemmingsdata = "",
+            avstemmingsdata = ""
         )
 
         val grensesnittavstemming2 = Grensesnittavstemming(
             opprettet = now.minus(1, ChronoUnit.DAYS),
             periode = Avstemmingsperiode(
                 fraOgMed = now.minus(2, ChronoUnit.DAYS),
-                til = now.minus(1, ChronoUnit.DAYS),
+                til = now.minus(1, ChronoUnit.DAYS)
             ),
             antallOppdrag = 2,
-            avstemmingsdata = "",
+            avstemmingsdata = ""
         )
 
         val grensesnittavstemming3 = Grensesnittavstemming(
             opprettet = now.minus(2, ChronoUnit.DAYS),
             periode = Avstemmingsperiode(
                 fraOgMed = now.minus(3, ChronoUnit.DAYS),
-                til = now.minus(2, ChronoUnit.DAYS),
+                til = now.minus(2, ChronoUnit.DAYS)
             ),
             antallOppdrag = 3,
-            avstemmingsdata = "",
+            avstemmingsdata = ""
         )
 
         grensesnittavstemmingDao.opprettAvstemming(grensesnittavstemming1)
@@ -118,5 +118,4 @@ internal class GrensesnittavstemmingDaoIntegrationTest {
     fun afterAll() {
         postgreSQLContainer.stop()
     }
-
 }

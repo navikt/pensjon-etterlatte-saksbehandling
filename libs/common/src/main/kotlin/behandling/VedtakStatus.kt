@@ -7,5 +7,5 @@ enum class VedtakStatus {
     FATTET_VEDTAK,
     ATTESTERT,
     RETURNERT,
-    IVERKSATT,
+    IVERKSATT
 }

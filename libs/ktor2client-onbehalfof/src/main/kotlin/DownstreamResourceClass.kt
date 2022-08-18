@@ -7,8 +7,12 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import io.ktor.client.HttpClient
-import io.ktor.client.call.*
-import io.ktor.client.request.*
+import io.ktor.client.call.body
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
@@ -67,7 +71,6 @@ class DownstreamResourceClient(
                 Ok(resource.addResponse(response))
             }
     }
-
 
     private suspend fun fetchFromDownstreamApi(
         resource: Resource,

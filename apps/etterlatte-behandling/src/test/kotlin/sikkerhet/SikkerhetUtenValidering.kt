@@ -1,7 +1,9 @@
 package no.nav.etterlatte.sikkerhet
 
-import io.ktor.http.*
-import io.ktor.server.auth.*
+import io.ktor.http.Headers
+import io.ktor.server.auth.AuthenticationConfig
+import io.ktor.server.auth.AuthenticationContext
+import io.ktor.server.auth.AuthenticationProvider
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
@@ -26,11 +28,10 @@ class TokenSupportAcceptAllProvider : AuthenticationProvider(ProviderConfigurati
                     .collect(Collectors.toList())
             }
         } catch (e: java.lang.Exception) {
-            //Ingen sikkerhet
+            // Ingen sikkerhet
         }
         return emptyList()
     }
-
 
     private fun extractBearerTokens(vararg headerValues: String): List<String> {
         return Arrays.stream(headerValues)
@@ -51,7 +52,11 @@ class TokenSupportAcceptAllProvider : AuthenticationProvider(ProviderConfigurati
     }
 
     override suspend fun onAuthenticate(context: AuthenticationContext) {
-        context.principal(TokenValidationContextPrincipal(TokenValidationContext(getTokensFromHeader(context.call.request.headers).associateBy { it.issuer })))
+        context.principal(
+            TokenValidationContextPrincipal(
+                TokenValidationContext(getTokensFromHeader(context.call.request.headers).associateBy { it.issuer })
+            )
+        )
     }
 }
 

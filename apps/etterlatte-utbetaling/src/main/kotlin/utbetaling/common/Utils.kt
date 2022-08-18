@@ -23,14 +23,14 @@ fun ZonedDateTime.next(atTime: LocalTime): Date {
                 .withHour(atTime.hour)
                 .withMinute(atTime.minute)
                 .withSecond(atTime.second)
-                .toInstant(),
+                .toInstant()
         )
     } else {
         Date.from(
             this.withHour(atTime.hour)
                 .withMinute(atTime.minute)
                 .withSecond(atTime.second)
-                .toInstant(),
+                .toInstant()
         )
     }
 }
@@ -41,13 +41,11 @@ fun tidspunktMidnattIdag(clock: Clock = Clock.systemUTC()): Tidspunkt =
         .truncatedTo(ChronoUnit.DAYS) // 00.00 norsk tid
         .toTidspunkt()
 
-
 fun forsteDagIMaaneden(yearMonth: YearMonth) =
     LocalDate.of(yearMonth.year, yearMonth.month, 1)
 
 fun sisteDagIMaaneden(yearMonth: YearMonth) =
     forsteDagIMaaneden(yearMonth).with(TemporalAdjusters.lastDayOfMonth())
-
 
 fun LocalDate.toXMLDate(): XMLGregorianCalendar {
     return DatatypeFactory.newInstance()

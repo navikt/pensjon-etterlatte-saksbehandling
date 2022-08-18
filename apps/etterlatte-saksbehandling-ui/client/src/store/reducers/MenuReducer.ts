@@ -1,22 +1,21 @@
-import { IAction } from "../AppContext";
+import { IAction } from '../AppContext'
 
 export interface IMenuReducer {
-  open: boolean;
+  open: boolean
 }
 
 export const menuReducerInitialState: IMenuReducer = {
   open: false,
-};
+}
 
 export const menuReducer = (state: IMenuReducer, action: IAction) => {
   switch (action.type) {
-   
-    case "toggle":
+    case 'toggle':
       return {
         ...state,
-        open: !state.open
-      };
+        open: !state.open,
+      }
     default:
-      return state;
+      return state
   }
-};
+}

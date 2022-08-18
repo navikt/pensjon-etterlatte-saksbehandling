@@ -3,9 +3,9 @@ import { hentKildenavn } from './utils'
 import styled from 'styled-components'
 import { formatterStringDato } from '../../../../utils/formattering'
 
-export const KildeDatoOpplysning = ({type, dato}: {type: String; dato: string}) => {
+export const KildeDatoOpplysning = ({ type, dato }: { type: String; dato: string }) => {
   if (!dato) {
-    return <div/>
+    return <div />
   }
   const dataDato = format(new Date(dato), 'dd.MM.yyyy')
   const kilde = hentKildenavn(type)
@@ -23,7 +23,7 @@ export const KildeOppysning = styled.div`
   margin-top: 5px;
 `
 
-export const KildeDatoVilkaar = ({type, dato}: {type: String; dato: string}) => {
+export const KildeDatoVilkaar = ({ type, dato }: { type: String; dato: string }) => {
   const dataDato = formatterStringDato(dato)
   const kilde = hentKildenavn(type)
 

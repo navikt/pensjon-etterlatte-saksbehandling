@@ -26,21 +26,21 @@ export const Soeknadsoversikt = () => {
             Søknadsoversikt
           </Heading>
           <div className="details">
-            <BehandlingsTypeSmall status={IBehandlingsType.FØRSTEGANGSBEHANDLING}/>
-            <SaksTypeSmall type={ISaksType.BARNEPENSJON}/>
+            <BehandlingsTypeSmall status={IBehandlingsType.FØRSTEGANGSBEHANDLING} />
+            <SaksTypeSmall type={ISaksType.BARNEPENSJON} />
           </div>
         </HeadingWrapper>
-        <Soeknadsdato mottattDato={behandling.soeknadMottattDato}/>
+        <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />
       </ContentHeader>
-      <SoeknadOversikt behandling={behandling}/>
-      <Border/>
-      <Familieforhold behandling={behandling}/>
+      <SoeknadOversikt behandling={behandling} />
+      <Border />
+      <Familieforhold behandling={behandling} />
       {behandles ? (
         <BehandlingHandlingKnapper>
-          <Start soeknadGyldigFremsatt={behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT}/>
+          <Start soeknadGyldigFremsatt={behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT} />
         </BehandlingHandlingKnapper>
       ) : (
-        <NesteOgTilbake/>
+        <NesteOgTilbake />
       )}
     </Content>
   )

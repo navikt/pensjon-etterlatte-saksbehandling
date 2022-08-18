@@ -1,4 +1,3 @@
-import React from 'react'
 import { hentAdresserEtterDoedsdato, hentKriterierMedOpplysning } from '../components/behandling/felles/utils'
 import {
   IAdresse,

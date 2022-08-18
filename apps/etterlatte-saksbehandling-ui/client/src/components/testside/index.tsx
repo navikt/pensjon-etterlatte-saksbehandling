@@ -15,9 +15,9 @@ export const Testside = () => {
     try {
       const result = await fetch(`${process.env.REACT_APP_VEDTAK_URL}/api/saker/${input}/behandlinger`, {
         method: 'delete',
-      });
-      console.log(result);
-      setLoadingDelete(false);
+      })
+      console.log(result)
+      setLoadingDelete(false)
     } catch (e) {
       console.log(e)
       setLoadingDelete(false)

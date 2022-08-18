@@ -4,11 +4,12 @@ import { useContext } from 'react'
 import { AppContext } from '../../../../store/AppContext'
 import { formatterDato, formatterStringDato } from '../../../../utils/formattering'
 
-export const Innvilget = ({behandlingsInfo}: {behandlingsInfo?: IBehandlingInfo}) => {
+export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingInfo }) => {
   const innloggetId = useContext(AppContext).state.saksbehandlerReducer.ident
   const virkningsdato = behandlingsInfo?.virkningsdato ? formatterStringDato(behandlingsInfo?.virkningsdato) : '-'
-  const attestertDato = behandlingsInfo?.datoAttestert ? formatterStringDato(behandlingsInfo?.datoAttestert) :
-    formatterDato(new Date())
+  const attestertDato = behandlingsInfo?.datoAttestert
+    ? formatterStringDato(behandlingsInfo?.datoAttestert)
+    : formatterDato(new Date())
 
   return (
     <>

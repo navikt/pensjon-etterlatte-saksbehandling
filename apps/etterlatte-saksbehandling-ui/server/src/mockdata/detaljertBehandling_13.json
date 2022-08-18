@@ -9,14 +9,8 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": [
-              "22128202440",
-              "03108718357"
-            ],
-            "foreldre": [
-              "22128202440",
-              "03108718357"
-            ],
+            "ansvarligeForeldre": ["22128202440", "03108718357"],
+            "foreldre": ["22128202440", "03108718357"],
             "barn": null
           },
           "innsender": {
@@ -36,14 +30,8 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": [
-              "22128202440",
-              "03108718357"
-            ],
-            "foreldre": [
-              "22128202440",
-              "03108718357"
-            ],
+            "ansvarligeForeldre": ["22128202440", "03108718357"],
+            "foreldre": ["22128202440", "03108718357"],
             "barn": null
           },
           "innsender": {

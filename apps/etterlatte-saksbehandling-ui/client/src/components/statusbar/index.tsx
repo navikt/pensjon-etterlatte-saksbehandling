@@ -1,13 +1,14 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../../shared/icons/genderIcon'
 import { Fnr } from './fnr'
-import { IPersonInfo } from "../person/typer";
+import { IPersonInfo } from '../person/typer'
 
 export enum StatusBarTheme {
-  gray = 'gray', white = 'white',
+  gray = 'gray',
+  white = 'white',
 }
 
-export const StatusBar = (props: {theme?: StatusBarTheme; personInfo?: IPersonInfo}) => {
+export const StatusBar = (props: { theme?: StatusBarTheme; personInfo?: IPersonInfo }) => {
   const gender = (): GenderList => {
     const genderNum = Number(props.personInfo?.fnr[8])
     if (genderNum % 2 === 0) {
@@ -20,10 +21,10 @@ export const StatusBar = (props: {theme?: StatusBarTheme; personInfo?: IPersonIn
     <StatusBarWrapper theme={props.theme}>
       {props.personInfo?.fnr && (
         <UserInfo>
-          <GenderIcon gender={gender()}/>
+          <GenderIcon gender={gender()} />
           <Name>{props.personInfo?.navn}</Name>
           <Skilletegn>|</Skilletegn>
-          <Fnr copy value={props.personInfo?.fnr || 'N/A'}/>
+          <Fnr copy value={props.personInfo?.fnr || 'N/A'} />
           {/** <Status value={{ status: PersonStatus.BARN, dato: '19.05.2011' }} />*/}
         </UserInfo>
       )}
@@ -31,10 +32,8 @@ export const StatusBar = (props: {theme?: StatusBarTheme; personInfo?: IPersonIn
   )
 }
 
-const StatusBarWrapper = styled.div<{theme: StatusBarTheme}>`
-  background-color: ${(props) => (
-  props.theme === StatusBarTheme.gray ? '#F8F8F8' : '#fff'
-)};
+const StatusBarWrapper = styled.div<{ theme: StatusBarTheme }>`
+  background-color: ${(props) => (props.theme === StatusBarTheme.gray ? '#F8F8F8' : '#fff')};
   padding: 0.6em 0em;
   line-height: 30px;
   border-bottom: 1px solid #c6c2bf;

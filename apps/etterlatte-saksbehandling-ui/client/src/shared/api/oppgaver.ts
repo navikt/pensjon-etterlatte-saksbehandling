@@ -1,6 +1,6 @@
 import { IApiResponse } from './types'
 
-const path = process.env.REACT_APP_VEDTAK_URL;
+const path = process.env.REACT_APP_VEDTAK_URL
 
 //ikke sikkert vi trenger denne etter mapping til oppgaver, lar stå enn så lenge
 export const hentSaker = async (): Promise<IApiResponse<any>> => {

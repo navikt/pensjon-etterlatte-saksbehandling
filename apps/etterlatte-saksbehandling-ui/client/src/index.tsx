@@ -1,9 +1,9 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import { ContextProvider } from './store/AppContext';
-import { Modal } from "@navikt/ds-react";
+import React from 'react'
+import ReactDOM from 'react-dom'
+import './index.css'
+import App from './App'
+import { ContextProvider } from './store/AppContext'
+import { Modal } from '@navikt/ds-react'
 
 Modal.setAppElement?.('#root')
 
@@ -14,4 +14,4 @@ ReactDOM.render(
     </ContextProvider>
   </React.StrictMode>,
   document.getElementById('root')
-);
+)

@@ -1,35 +1,33 @@
-import { Undertekst, VurderingsTitle } from "../../styled";
-import { Button, Radio, RadioGroup, Textarea } from "@navikt/ds-react";
-import { RadioGroupWrapper } from "./KommerBarnetTilGodeVurdering";
-import { hentBehandling, lagreBegrunnelseKommerBarnetTilgode } from "../../../../../shared/api/behandling";
-import { useContext, useState } from "react";
-import { AppContext } from "../../../../../store/AppContext";
-import { ISvar } from "../../../../../store/reducers/BehandlingReducer";
+import { Undertekst, VurderingsTitle } from '../../styled'
+import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { RadioGroupWrapper } from './KommerBarnetTilGodeVurdering'
+import { hentBehandling, lagreBegrunnelseKommerBarnetTilgode } from '../../../../../shared/api/behandling'
+import { useContext, useState } from 'react'
+import { AppContext } from '../../../../../store/AppContext'
+import { ISvar } from '../../../../../store/reducers/BehandlingReducer'
 
-
-export const EndreVurdering = ({setRedigeringsModusFalse}: {setRedigeringsModusFalse: () => void}) => {
+export const EndreVurdering = ({ setRedigeringsModusFalse }: { setRedigeringsModusFalse: () => void }) => {
   const behandlingId = useContext(AppContext).state.behandlingReducer.id
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
   const [kommentar, setKommentar] = useState<string>('')
   const [begrunnelseError, setBegrunnelseError] = useState<string>()
 
-
   function lagreBegrunnelseKlikket() {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     !svar ? setRadioError('Du må velge et svar') : setRadioError(undefined)
     kommentar.length < 11 ? setBegrunnelseError('Begrunnelsen må være minst 10 tegn') : setBegrunnelseError(undefined)
 
-    if (radioError === undefined && begrunnelseError === undefined && svar !==
-      undefined) lagreBegrunnelseKommerBarnetTilgode(behandlingId, kommentar, svar.toString()).then((response) => {
-      if (response.status === 200) {
-        hentBehandling(behandlingId).then((response) => {
-          if (response.status === 200) {
-            window.location.reload()
-          }
-        })
-      }
-    })
+    if (radioError === undefined && begrunnelseError === undefined && svar !== undefined)
+      lagreBegrunnelseKommerBarnetTilgode(behandlingId, kommentar, svar.toString()).then((response) => {
+        if (response.status === 200) {
+          hentBehandling(behandlingId).then((response) => {
+            if (response.status === 200) {
+              window.location.reload()
+            }
+          })
+        }
+      })
   }
 
   function reset() {
@@ -64,7 +62,7 @@ export const EndreVurdering = ({setRedigeringsModusFalse}: {setRedigeringsModusF
         </RadioGroup>
       </RadioGroupWrapper>
       <Textarea
-        style={{padding: '10px', marginBottom: '10px'}}
+        style={{ padding: '10px', marginBottom: '10px' }}
         label="Begrunnelse"
         hideLabel={false}
         placeholder="Forklar begrunnelsen"
@@ -78,22 +76,21 @@ export const EndreVurdering = ({setRedigeringsModusFalse}: {setRedigeringsModusF
         error={begrunnelseError ? begrunnelseError : false}
       />
       <Button
-        style={{marginTop: '10px'}}
-        variant={"primary"}
-        size={"small"}
+        style={{ marginTop: '10px' }}
+        variant={'primary'}
+        size={'small'}
         onClick={() => lagreBegrunnelseKlikket()}
       >
         Lagre
       </Button>
       <Button
-        style={{marginTop: '10px', marginLeft: '10px'}}
-        variant={"secondary"}
-        size={"small"}
+        style={{ marginTop: '10px', marginLeft: '10px' }}
+        variant={'secondary'}
+        size={'small'}
         onClick={() => reset()}
       >
         Avbryt
       </Button>
     </div>
-
   )
 }

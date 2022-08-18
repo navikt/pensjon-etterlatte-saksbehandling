@@ -5,7 +5,7 @@ import { PersonDetailWrapper, TypeStatusWrap } from '../../styled'
 import { IPersoninfoSoeker } from '../../../../../store/reducers/BehandlingReducer'
 import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import { hentAdresserEtterDoedsdato } from '../../../felles/utils'
-import differenceInYears from "date-fns/differenceInYears";
+import differenceInYears from 'date-fns/differenceInYears'
 
 type Props = {
   person: IPersoninfoSoeker
@@ -21,7 +21,8 @@ export const Barn: React.FC<Props> = ({ person, doedsdato }) => {
         <span className="icon">
           <ChildIcon />
         </span>
-        {person.navn} <span className={"personRolle"}>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>
+        {person.navn}{' '}
+        <span className={'personRolle'}>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>
         <br />
         <TypeStatusWrap type="barn">Mottaker av pensjon</TypeStatusWrap>
       </PersonHeader>

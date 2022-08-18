@@ -9,12 +9,8 @@
         "resultat": "IKKE_OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": [
-              "22128202440"
-            ],
-            "foreldre": [
-              "22128202440"
-            ],
+            "ansvarligeForeldre": ["22128202440"],
+            "foreldre": ["22128202440"],
             "barn": null
           },
           "innsender": {
@@ -34,12 +30,8 @@
         "resultat": "IKKE_OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": [
-              "22128202440"
-            ],
-            "foreldre": [
-              "22128202440"
-            ],
+            "ansvarligeForeldre": ["22128202440"],
+            "foreldre": ["22128202440"],
             "barn": null
           },
           "innsender": {
@@ -136,10 +128,7 @@
                   "type": "pdl"
                 },
                 "opplysning": {
-                  "foreldre": [
-                    "22128202440",
-                    "03108718357"
-                  ]
+                  "foreldre": ["22128202440", "03108718357"]
                 }
               },
               {
@@ -221,9 +210,7 @@
                       "land": "Uganda",
                       "fraDato": "2020-02-10",
                       "tilDato": "2022-02-10",
-                      "oppholdsType": [
-                        "BODD"
-                      ],
+                      "oppholdsType": ["BODD"],
                       "medlemFolketrygd": "VET_IKKE",
                       "pensjonsutbetaling": null
                     },
@@ -231,9 +218,7 @@
                       "land": "Colombia",
                       "fraDato": "2010-02-10",
                       "tilDato": null,
-                      "oppholdsType": [
-                        "BODD"
-                      ],
+                      "oppholdsType": ["BODD"],
                       "medlemFolketrygd": "VET_IKKE",
                       "pensjonsutbetaling": null
                     }
@@ -411,9 +396,7 @@
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": [
-                  []
-                ]
+                "opplysning": [[]]
               }
             ]
           },
@@ -430,9 +413,7 @@
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": [
-                  []
-                ]
+                "opplysning": [[]]
               }
             ]
           }

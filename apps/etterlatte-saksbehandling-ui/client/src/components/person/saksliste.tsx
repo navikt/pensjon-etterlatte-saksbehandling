@@ -1,12 +1,13 @@
 import { Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { AarsaksTyper, IBehandlingsammendrag } from './typer'
-import { formatterStringDato, upperCaseFirst } from "../../utils/formattering";
+import { formatterStringDato, upperCaseFirst } from '../../utils/formattering'
 
 const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Vedtaksdato', 'Resultat']
 
 export const Saksliste = ({
-  behandlinger, goToBehandling,
+  behandlinger,
+  goToBehandling,
 }: {
   behandlinger: IBehandlingsammendrag[]
   goToBehandling: (behandlingsId: string) => void
@@ -25,10 +26,12 @@ export const Saksliste = ({
         {behandlinger.map((behandling, i) => (
           <Table.Body key={i}>
             <Table.Row>
-              <Table.DataCell
-                key={`data${behandling.behandlingOpprettet}`}>{formatterStringDato(behandling.behandlingOpprettet)}</Table.DataCell>
-              <Table.DataCell
-                key={`data${behandling.behandlingType}`}>{upperCaseFirst(behandling.behandlingType)}</Table.DataCell>
+              <Table.DataCell key={`data${behandling.behandlingOpprettet}`}>
+                {formatterStringDato(behandling.behandlingOpprettet)}
+              </Table.DataCell>
+              <Table.DataCell key={`data${behandling.behandlingType}`}>
+                {upperCaseFirst(behandling.behandlingType)}
+              </Table.DataCell>
               <Table.DataCell key={`data${behandling.aarsak}`}>{mapAarrsak(behandling.aarsak)}</Table.DataCell>
               <Table.DataCell key={`data${behandling.status}`}>{upperCaseFirst(behandling.status)}</Table.DataCell>
               <Table.DataCell key={'vedtaksdato'}>Vedtaksdato her</Table.DataCell>
@@ -52,7 +55,6 @@ function mapAarrsak(aarsak: AarsaksTyper) {
     case AarsaksTyper.SOEKNAD:
       return 'Søknad'
   }
-
 }
 
 export const Link = styled.div`

@@ -6,8 +6,8 @@ import { getPerson } from '../api/person'
 import { ErrorIcon } from '../icons/errorIcon'
 import { InformationIcon } from '../icons/informationIcon'
 import { PeopleIcon } from '../icons/peopleIcon'
-import { IApiResponse } from "../api/types";
-import { IPersonResult } from "../../components/person/typer";
+import { IApiResponse } from '../api/types'
+import { IPersonResult } from '../../components/person/typer'
 
 export const Search = () => {
   const navigate = useNavigate()
@@ -17,24 +17,22 @@ export const Search = () => {
   const [feilInput, setFeilInput] = useState(false)
 
   useEffect(() => {
-    (
-      async () => {
-        if (regBokstaver.test(searchInput) || searchInput.length > 11) {
-          setFeilInput(true)
-          setSearchResult(null)
-        } else {
-          setFeilInput(false)
-        }
-
-        if (searchInput.length === 11) {
-          getPerson(searchInput).then((result: IApiResponse<IPersonResult>) => {
-            setSearchResult(result?.data)
-          })
-        } else if (searchInput.length < 11) {
-          setSearchResult(null)
-        }
+    ;(async () => {
+      if (regBokstaver.test(searchInput) || searchInput.length > 11) {
+        setFeilInput(true)
+        setSearchResult(null)
+      } else {
+        setFeilInput(false)
       }
-    )()
+
+      if (searchInput.length === 11) {
+        getPerson(searchInput).then((result: IApiResponse<IPersonResult>) => {
+          setSearchResult(result?.data)
+        })
+      } else if (searchInput.length < 11) {
+        setSearchResult(null)
+      }
+    })()
   }, [searchInput])
 
   const goToPerson = () => {
@@ -57,12 +55,12 @@ export const Search = () => {
         onChange={setSearchInput}
         onKeyUp={onEnter}
       >
-        <SearchField.Button/>
+        <SearchField.Button />
       </SearchField>
       {searchResult && !feilInput && (
         <Dropdown>
           <span className="icon">
-            <PeopleIcon/>
+            <PeopleIcon />
           </span>
           <SearchResult onClick={goToPerson}>
             <div className="text">
@@ -74,7 +72,7 @@ export const Search = () => {
       {feilInput && (
         <Dropdown info={true}>
           <span className="icon">
-            <InformationIcon/>
+            <InformationIcon />
           </span>
           <SearchResult>
             <div className="text">Tast inn fødselsnummer</div>
@@ -85,7 +83,7 @@ export const Search = () => {
       {searchResult === undefined && (
         <Dropdown error={true}>
           <span className="icon">
-            <ErrorIcon/>
+            <ErrorIcon />
           </span>
           <SearchResult>
             <div className="text">En feil har oppstått.</div>
@@ -96,17 +94,13 @@ export const Search = () => {
   )
 }
 
-const Dropdown = styled.div<{error?: boolean; info?: boolean}>`
+const Dropdown = styled.div<{ error?: boolean; info?: boolean }>`
   display: flex;
-  background-color: ${(props) => (
-  props.error ? '#f9d2cc' : props.info ? '#cce1ff' : '#fff'
-)};
+  background-color: ${(props) => (props.error ? '#f9d2cc' : props.info ? '#cce1ff' : '#fff')};
   width: 300px;
   height: fit-content;
   top: 53px;
-  border: 1px solid ${(props) => (
-  props.error ? '#ba3a26' : props.info ? '#368da8' : '#000'
-)};
+  border: 1px solid ${(props) => (props.error ? '#ba3a26' : props.info ? '#368da8' : '#000')};
   position: absolute;
   color: #000;
 

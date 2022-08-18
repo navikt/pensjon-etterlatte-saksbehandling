@@ -3,17 +3,15 @@ import { Bruker } from './Bruker'
 import { Search } from './Search'
 
 export const Header = () => {
-
   return (
     <>
       <HeaderWrapper>
         <Title>Etterlatte - saksbehandling</Title>
         <RightWrap>
-          <Search/>
-          <Bruker/>
+          <Search />
+          <Bruker />
         </RightWrap>
       </HeaderWrapper>
-
     </>
   )
 }

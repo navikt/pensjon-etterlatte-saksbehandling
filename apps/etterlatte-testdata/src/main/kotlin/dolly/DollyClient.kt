@@ -13,6 +13,8 @@ interface DollyClient {
     suspend fun hentBrukersGrupper(brukerId: String, accessToken: String): List<Gruppe>
     suspend fun opprettTestGruppe(gruppe: OpprettGruppeRequest, accessToken: String): Gruppe
     suspend fun opprettBestilling(bestilling: String, gruppeId: Long, accessToken: String): BestillingStatus
+    suspend fun hentTestGruppeBestillinger(gruppeId: Long, accessToken: String, pageNo: Int, pageSize: Int): TestGruppeBestillinger
+    suspend fun hentPersonInfo(identer: List<String>, accessToken: String): List<DollyPersonResponse>
 }
 
 class DollyClientImpl(config: Config, private val httpClient: HttpClient) : DollyClient {
@@ -39,5 +41,20 @@ class DollyClientImpl(config: Config, private val httpClient: HttpClient) : Doll
         httpClient.post("$dollyUrl/gruppe/$gruppeId/bestilling") {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
             setBody(objectMapper.readTree(bestilling))
+        }.body()
+
+    override suspend fun hentTestGruppeBestillinger(
+        gruppeId: Long,
+        accessToken: String,
+        pageNo: Int,
+        pageSize: Int
+    ): TestGruppeBestillinger =
+        httpClient.get("$dollyUrl/gruppe/$gruppeId/page/$pageNo?pageSize=$pageSize") {
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
+        }.body()
+
+    override suspend fun hentPersonInfo(identer: List<String>, accessToken: String): List<DollyPersonResponse> =
+        httpClient.get("$dollyUrl/pdlperson/identer?identer=${identer.joinToString(",")}") {
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
         }.body()
 }

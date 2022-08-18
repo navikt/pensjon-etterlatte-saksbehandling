@@ -21,13 +21,19 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
     override val routes: Route.() -> Unit
         get() = {
             get {
-                val gruppeId = dollyService.hentTestGruppe(usernameFraToken()!!, getClientAccessToken())
+                val accessToken = getClientAccessToken()
+                val gruppeId = dollyService.hentTestGruppe(usernameFraToken()!!, accessToken)
+                val personer = gruppeId?.let {
+                    dollyService.hentFamilier(gruppeId, accessToken)
+                }
+
                 call.respond(
                     MustacheContent(
                         "soeknad/dolly.hbs", mapOf(
                             "beskrivelse" to beskrivelse,
                             "path" to path,
-                            "gruppeId" to gruppeId
+                            "gruppeId" to gruppeId,
+                            "personer" to personer
                         )
                     )
                 )

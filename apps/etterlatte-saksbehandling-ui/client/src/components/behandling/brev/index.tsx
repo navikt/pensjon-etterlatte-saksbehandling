@@ -13,7 +13,7 @@ import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 import { AppContext } from '../../../store/AppContext'
 import { Journalpost } from '../types'
-import { formatterDato } from '../../../utils/formattering'
+import { formaterDato } from '../../../utils/formattering'
 import InnkommendeBrevModal from './innkommende-brev-modal'
 import styled from 'styled-components'
 import Spinner from '../../../shared/Spinner'
@@ -196,7 +196,7 @@ export const Brev = () => {
                 <Table.DataCell>{brev.journalpostId}</Table.DataCell>
                 <Table.DataCell>{brev.tittel}</Table.DataCell>
                 <Table.DataCell>{brev.avsenderMottaker.navn}</Table.DataCell>
-                <Table.DataCell>{formatterDato(new Date(brev.datoOpprettet))}</Table.DataCell>
+                <Table.DataCell>{formaterDato(new Date(brev.datoOpprettet))}</Table.DataCell>
                 <Table.DataCell>{brev.journalstatus}</Table.DataCell>
                 <Table.DataCell>
                   <InnkommendeBrevModal

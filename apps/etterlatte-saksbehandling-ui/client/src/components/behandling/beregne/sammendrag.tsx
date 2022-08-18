@@ -6,7 +6,7 @@ import { AppContext } from '../../../store/AppContext'
 import { InformationColored } from '@navikt/ds-icons'
 import { IPerson } from '../../../store/reducers/BehandlingReducer'
 import { differenceInYears, lastDayOfMonth } from 'date-fns'
-import { formatterDato, formatterStringDato } from '../../../utils/formattering'
+import { formaterDato, formaterStringDato } from '../../../utils/formattering'
 
 export const Sammendrag = () => {
   const beregningsperioder = useContext(AppContext).state.behandlingReducer.beregning?.beregningsperioder
@@ -69,7 +69,9 @@ export const Sammendrag = () => {
           {beregningsperioder?.map((beregning, key) => (
             <Table.Row key={key}>
               <Table.DataCell>
-                {`${formatterStringDato(beregning.datoFOM)} - ${beregning.datoTOM ? formatterDato(lastDayOfMonth(new Date(beregning.datoTOM))) : ''}`}
+                {`${formaterStringDato(beregning.datoFOM)} - ${
+                  beregning.datoTOM ? formaterDato(lastDayOfMonth(new Date(beregning.datoTOM))) : ''
+                }`}
               </Table.DataCell>
               <Table.DataCell>{beregning.type == 'GP' ? 'Grunnpensjon' : beregning.type}</Table.DataCell>
               <Table.DataCell>Mangler</Table.DataCell>

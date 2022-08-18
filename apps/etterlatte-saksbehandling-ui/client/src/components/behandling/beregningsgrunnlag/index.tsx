@@ -10,7 +10,7 @@ import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapp
 import { hentBehandling, lagreSoeskenMedIBeregning } from '../../../shared/api/behandling'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { Controller, useForm } from 'react-hook-form'
-import { formatterStringDato } from '../../../utils/formattering'
+import { formaterStringDato } from '../../../utils/formattering'
 import { addBehandlingAction } from '../../../store/reducers/BehandlingReducer'
 
 interface SoeskenMedIBeregning {
@@ -50,7 +50,7 @@ const Beregningsgrunnlag = () => {
       <Header>
         <h1>Beregningsgrunnlag</h1>
         <BodyShort spacing>
-          Vilkårsresultat: <strong>Innvilget fra {formatterStringDato(behandling.virkningstidspunkt)}</strong>
+          Vilkårsresultat: <strong>Innvilget fra {formaterStringDato(behandling.virkningstidspunkt)}</strong>
         </BodyShort>
         <Heading level="2" size="small">
           Søskenjustering

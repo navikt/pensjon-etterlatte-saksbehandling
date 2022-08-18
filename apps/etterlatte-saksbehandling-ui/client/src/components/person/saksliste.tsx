@@ -1,7 +1,7 @@
 import { Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { AarsaksTyper, IBehandlingsammendrag } from './typer'
-import { formatterStringDato, upperCaseFirst } from '../../utils/formattering'
+import { formaterStringDato, upperCaseFirst } from '../../utils/formattering'
 
 const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Vedtaksdato', 'Resultat']
 
@@ -27,7 +27,7 @@ export const Saksliste = ({
           <Table.Body key={i}>
             <Table.Row>
               <Table.DataCell key={`data${behandling.behandlingOpprettet}`}>
-                {formatterStringDato(behandling.behandlingOpprettet)}
+                {formaterStringDato(behandling.behandlingOpprettet)}
               </Table.DataCell>
               <Table.DataCell key={`data${behandling.behandlingType}`}>
                 {upperCaseFirst(behandling.behandlingType)}

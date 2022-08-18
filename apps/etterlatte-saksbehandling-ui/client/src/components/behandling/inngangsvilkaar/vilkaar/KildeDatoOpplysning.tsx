@@ -1,7 +1,7 @@
 import { format } from 'date-fns'
 import { hentKildenavn } from './utils'
 import styled from 'styled-components'
-import { formatterStringDato } from '../../../../utils/formattering'
+import { formaterStringDato } from '../../../../utils/formattering'
 
 export const KildeDatoOpplysning = ({ type, dato }: { type: String; dato: string }) => {
   if (!dato) {
@@ -24,7 +24,7 @@ export const KildeOppysning = styled.div`
 `
 
 export const KildeDatoVilkaar = ({ type, dato }: { type: String; dato: string }) => {
-  const dataDato = formatterStringDato(dato)
+  const dataDato = formaterStringDato(dato)
   const kilde = hentKildenavn(type)
 
   return (

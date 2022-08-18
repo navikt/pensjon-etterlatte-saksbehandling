@@ -8,25 +8,31 @@ import { Container } from '../../shared/styled'
 import { Dokumentoversikt } from './dokumentoversikt'
 import { Saksoversikt } from './saksoversikt'
 import { Dokumenter, IPersonResult } from './typer'
-import { IApiResponse } from "../../shared/api/types";
-import Spinner from "../../shared/Spinner";
+import { IApiResponse } from '../../shared/api/types'
+import Spinner from '../../shared/Spinner'
 
 const testDokumenter: Dokumenter = {
-  brev: [{
-    dato: 'Mock 13.05.2021', tittel: 'Mock Innvilgelsesbrev barnepensjon', link: 'link', status: 'Mock Sendt ut',
-  }, {
-    dato: 'Mock 09.05.2021',
-    tittel: 'Mock Søknad barnepensjon - førstegangsbehandling',
-    link: 'link',
-    status: 'Mock Motatt',
-  },],
+  brev: [
+    {
+      dato: 'Mock 13.05.2021',
+      tittel: 'Mock Innvilgelsesbrev barnepensjon',
+      link: 'link',
+      status: 'Mock Sendt ut',
+    },
+    {
+      dato: 'Mock 09.05.2021',
+      tittel: 'Mock Søknad barnepensjon - førstegangsbehandling',
+      link: 'link',
+      status: 'Mock Motatt',
+    },
+  ],
 }
 
 export const Person = () => {
   const [personData, setPersonData] = useState<IPersonResult | undefined>(undefined)
   const [lastet, setLastet] = useState<boolean>(false)
 
-  const match = useParams<{fnr: string}>()
+  const match = useParams<{ fnr: string }>()
 
   useEffect(() => {
     if (match.fnr) {
@@ -38,12 +44,12 @@ export const Person = () => {
   }, [])
 
   const navn = personData?.person.fornavn + ' ' + personData?.person.etternavn
-  const personInfo = personData ? {navn: navn, fnr: personData?.person.foedselsnummer, type: 'Etterlatt'} : null
+  const personInfo = personData ? { navn: navn, fnr: personData?.person.foedselsnummer, type: 'Etterlatt' } : null
 
   return (
     <>
-      {personInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={personInfo}/>}
-      <Spinner visible={!lastet} label={"Laster"}/>
+      {personInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={personInfo} />}
+      <Spinner visible={!lastet} label={'Laster'} />
       {lastet && (
         <Container>
           <Tabs>
@@ -52,7 +58,7 @@ export const Person = () => {
               <TabElement>Dokumentoversikt</TabElement>
             </Tlist>
             <TabPanel>
-              <Saksoversikt behandlingliste={personData?.behandlingListe.behandlinger}/>
+              <Saksoversikt behandlingliste={personData?.behandlingListe.behandlinger} />
             </TabPanel>
             <TabPanel>
               <Dokumentoversikt {...testDokumenter} />

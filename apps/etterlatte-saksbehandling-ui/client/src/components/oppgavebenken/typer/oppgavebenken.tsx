@@ -18,50 +18,60 @@ export enum Handlinger {
 }
 
 export const handlinger: Record<Handlinger, IPar> = {
-  BEHANDLE: {id: 'BEHANDLE', navn: 'Start behandling'},
+  BEHANDLE: { id: 'BEHANDLE', navn: 'Start behandling' },
 }
 
 export enum BehandlingTypeFilter {
-  VELG = 'VELG', FØRSTEGANGSBEHANDLING = 'FØRSTEGANGSBEHANDLING', REVURDERING = 'REVURDERING',
+  VELG = 'VELG',
+  FØRSTEGANGSBEHANDLING = 'FØRSTEGANGSBEHANDLING',
+  REVURDERING = 'REVURDERING',
 }
 
 export const behandlingTypeFilter: Record<BehandlingTypeFilter, IPar> = {
-  VELG: {id: 'VELG', navn: 'Velg'},
-  FØRSTEGANGSBEHANDLING: {id: 'FØRSTEGANGSBEHANDLING', navn: 'Førstegangsbehandling'},
-  REVURDERING: {id: 'REVURDERING', navn: 'Revurdering'},
+  VELG: { id: 'VELG', navn: 'Velg' },
+  FØRSTEGANGSBEHANDLING: { id: 'FØRSTEGANGSBEHANDLING', navn: 'Førstegangsbehandling' },
+  REVURDERING: { id: 'REVURDERING', navn: 'Revurdering' },
 }
 
 export enum SoeknadTypeFilter {
-  VELG = 'VELG', BARNEPENSJON = 'BARNEPENSJON', GJENLEVENDEPENSJON = 'GJENLEVENDEPENSJON',
+  VELG = 'VELG',
+  BARNEPENSJON = 'BARNEPENSJON',
+  GJENLEVENDEPENSJON = 'GJENLEVENDEPENSJON',
 }
 
 export const soeknadTypeFilter: Record<SoeknadTypeFilter, IPar> = {
-  VELG: {id: 'VELG', navn: 'Velg'},
-  BARNEPENSJON: {id: 'BARNEPENSJON', navn: 'Barnepensjon'},
-  GJENLEVENDEPENSJON: {id: 'GJENLEVENDEPENSJON', navn: 'Gjenlevendepensjon'},
+  VELG: { id: 'VELG', navn: 'Velg' },
+  BARNEPENSJON: { id: 'BARNEPENSJON', navn: 'Barnepensjon' },
+  GJENLEVENDEPENSJON: { id: 'GJENLEVENDEPENSJON', navn: 'Gjenlevendepensjon' },
 }
 
 export enum StatusFilter {
-  VELG = 'VELG', NY = 'NY', TIL_ATTESTERING = 'TIL_ATTESTERING', RETURNERT = 'RETURNERT',
+  VELG = 'VELG',
+  NY = 'NY',
+  TIL_ATTESTERING = 'TIL_ATTESTERING',
+  RETURNERT = 'RETURNERT',
 }
 
 export const statusFilter: Record<StatusFilter, IPar> = {
-  VELG: {id: 'VELG', navn: 'Velg'},
-  NY: {id: 'NY', navn: 'Ny'},
-  TIL_ATTESTERING: {id: 'TIL_ATTESTERING', navn: 'Til attestering'},
-  RETURNERT: {id: 'RETURNERT', navn: 'Returnert'},
+  VELG: { id: 'VELG', navn: 'Velg' },
+  NY: { id: 'NY', navn: 'Ny' },
+  TIL_ATTESTERING: { id: 'TIL_ATTESTERING', navn: 'Til attestering' },
+  RETURNERT: { id: 'RETURNERT', navn: 'Returnert' },
 }
 
 export enum SaksbehandlerFilter {
-  INNLOGGET = 'INNLOGGET', ALLE = 'ALLE', FORDELTE = 'FORDELTE', UFORDELTE = 'UFORDELTE',
+  INNLOGGET = 'INNLOGGET',
+  ALLE = 'ALLE',
+  FORDELTE = 'FORDELTE',
+  UFORDELTE = 'UFORDELTE',
 }
 
 export const saksbehandlerFilter = (innloggetSaksbehandler: string): Record<SaksbehandlerFilter, IPar> => {
   return {
-    INNLOGGET: {id: 'INNLOGGET', navn: innloggetSaksbehandler},
-    ALLE: {id: 'ALLE', navn: 'Alle'},
-    FORDELTE: {id: 'FORDELTE', navn: 'Fordelte'},
-    UFORDELTE: {id: 'UFORDELTE', navn: 'Ufordelte'},
+    INNLOGGET: { id: 'INNLOGGET', navn: innloggetSaksbehandler },
+    ALLE: { id: 'ALLE', navn: 'Alle' },
+    FORDELTE: { id: 'FORDELTE', navn: 'Fordelte' },
+    UFORDELTE: { id: 'UFORDELTE', navn: 'Ufordelte' },
   }
 }
 

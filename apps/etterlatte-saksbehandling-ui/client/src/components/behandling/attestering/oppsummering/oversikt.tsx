@@ -5,7 +5,7 @@ import { IBehandlingInfo } from '../../SideMeny/types'
 import { useContext } from 'react'
 import { AppContext } from '../../../../store/AppContext'
 
-export const Oversikt = ({behandlingsInfo}: {behandlingsInfo: IBehandlingInfo}) => {
+export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const innloggetSaksbehandler = useContext(AppContext).state.saksbehandlerReducer.ident
 
   const hentStatus = () => {
@@ -19,9 +19,9 @@ export const Oversikt = ({behandlingsInfo}: {behandlingsInfo: IBehandlingInfo}) 
     }
   }
 
-  const fattetDato = behandlingsInfo.datoFattet ?
-    formatterStringDato(behandlingsInfo.datoFattet) + ' kl. ' + formatterStringTidspunkt(behandlingsInfo.datoFattet) :
-    null
+  const fattetDato = behandlingsInfo.datoFattet
+    ? formatterStringDato(behandlingsInfo.datoFattet) + ' kl. ' + formatterStringTidspunkt(behandlingsInfo.datoFattet)
+    : null
 
   return (
     <BehandlingsinfoContainer>

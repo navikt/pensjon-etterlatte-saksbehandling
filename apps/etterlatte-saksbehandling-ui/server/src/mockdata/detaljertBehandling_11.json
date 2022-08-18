@@ -396,9 +396,7 @@
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": [
-                  []
-                ]
+                "opplysning": [[]]
               }
             ]
           },
@@ -415,9 +413,7 @@
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": [
-                  []
-                ]
+                "opplysning": [[]]
               }
             ]
           }

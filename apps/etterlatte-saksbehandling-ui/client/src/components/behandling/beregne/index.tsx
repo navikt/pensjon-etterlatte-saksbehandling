@@ -30,15 +30,15 @@ export const Beregne = () => {
             Vilkårsresultat: <strong>Innvilget fra {virkningstidspunkt}</strong>
           </div>
         </InfoWrapper>
-        <Sammendrag/>
-        <BrevModal/>
+        <Sammendrag />
+        <BrevModal />
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>
-          <BeregningModal/>
+          <BeregningModal />
         </BehandlingHandlingKnapper>
       ) : (
-        <NesteOgTilbake/>
+        <NesteOgTilbake />
       )}
     </Content>
   )

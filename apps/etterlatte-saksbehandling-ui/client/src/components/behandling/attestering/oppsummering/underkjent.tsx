@@ -2,10 +2,10 @@ import { IBehandlingInfo } from '../../SideMeny/types'
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
 import { useContext } from 'react'
 import { AppContext } from '../../../../store/AppContext'
-import { formatterStringDato, formatterStringTidspunkt } from "../../../../utils/formattering";
-import { IBehandlingStatus } from "../../../../store/reducers/BehandlingReducer";
+import { formatterStringDato, formatterStringTidspunkt } from '../../../../utils/formattering'
+import { IBehandlingStatus } from '../../../../store/reducers/BehandlingReducer'
 
-export const Underkjent = ({behandlingsInfo}: {behandlingsInfo?: IBehandlingInfo}) => {
+export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingInfo }) => {
   const innloggetId = useContext(AppContext).state.saksbehandlerReducer.ident
 
   const underkjentSiste = behandlingsInfo?.underkjentLogg?.slice(-1)[0]
@@ -20,9 +20,11 @@ export const Underkjent = ({behandlingsInfo}: {behandlingsInfo?: IBehandlingInfo
       <Wrapper innvilget={false}>
         <Overskrift>Førstegangsbehandling</Overskrift>
         <UnderOverskrift innvilget={false}>Underkjent</UnderOverskrift>
-        {underkjentSiste && <Tekst>
-          {formatterStringDato(underkjentSiste.opprettet)} kl: {formatterStringTidspunkt(underkjentSiste.opprettet)}
-        </Tekst>}
+        {underkjentSiste && (
+          <Tekst>
+            {formatterStringDato(underkjentSiste.opprettet)} kl: {formatterStringTidspunkt(underkjentSiste.opprettet)}
+          </Tekst>
+        )}
         <div className="flex">
           <div>
             <Info>Attestant</Info>
@@ -34,13 +36,15 @@ export const Underkjent = ({behandlingsInfo}: {behandlingsInfo?: IBehandlingInfo
           </div>
         </div>
 
-        {erReturnert && underkjentSiste && <>
-          <div className="info">
-            <Info>Årsak til retur</Info>
-            <Tekst>{underkjentSiste.valgtBegrunnelse}</Tekst>
-          </div>
-          <Tekst>{underkjentSiste.kommentar}</Tekst>
-        </>}
+        {erReturnert && underkjentSiste && (
+          <>
+            <div className="info">
+              <Info>Årsak til retur</Info>
+              <Tekst>{underkjentSiste.valgtBegrunnelse}</Tekst>
+            </div>
+            <Tekst>{underkjentSiste.kommentar}</Tekst>
+          </>
+        )}
       </Wrapper>
     </>
   )

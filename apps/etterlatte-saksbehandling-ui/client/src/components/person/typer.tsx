@@ -1,6 +1,5 @@
-import { IBehandlingStatus } from "../../store/reducers/BehandlingReducer";
-import { IBehandlingsType } from "../behandling/behandlingsType";
-
+import { IBehandlingStatus } from '../../store/reducers/BehandlingReducer'
+import { IBehandlingsType } from '../behandling/behandlingsType'
 
 export interface Dokument {
   dato: string
@@ -31,15 +30,17 @@ export interface IPersonResult {
 }
 
 export interface IBehandlingsammendrag {
-  id: string,
-  sak: number,
-  status: IBehandlingStatus,
-  soeknadMottattDato: string,
-  behandlingOpprettet: string,
-  behandlingType: IBehandlingsType,
+  id: string
+  sak: number
+  status: IBehandlingStatus
+  soeknadMottattDato: string
+  behandlingOpprettet: string
+  behandlingType: IBehandlingsType
   aarsak: AarsaksTyper
 }
 
 export enum AarsaksTyper {
-  SOEKER_DOD = 'SOEKER_DOD', MANUELT_OPPHOER = 'MANUELT_OPPHOER', SOEKNAD = 'SOEKNAD',
+  SOEKER_DOD = 'SOEKER_DOD',
+  MANUELT_OPPHOER = 'MANUELT_OPPHOER',
+  SOEKNAD = 'SOEKNAD',
 }

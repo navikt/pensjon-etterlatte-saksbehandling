@@ -2,19 +2,16 @@ import { Saksliste } from './saksliste'
 import styled from 'styled-components'
 import { Next } from '@navikt/ds-icons'
 import { IBehandlingsammendrag } from './typer'
-import { useNavigate } from "react-router-dom";
-import { upperCaseFirst } from "../../utils/formattering";
+import { useNavigate } from 'react-router-dom'
+import { upperCaseFirst } from '../../utils/formattering'
 
-export const Saksoversikt = ({
-  behandlingliste,
-}: {
-  behandlingliste: IBehandlingsammendrag[] | undefined,
-}) => {
+export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandlingsammendrag[] | undefined }) => {
   const navigate = useNavigate()
   const behandlinger = behandlingliste ? behandlingliste : []
 
-  const sortertListe = behandlinger.sort((a, b) => new Date(b.behandlingOpprettet!) > new Date(a.behandlingOpprettet!) ?
-    1 : -1)
+  const sortertListe = behandlinger.sort((a, b) =>
+    new Date(b.behandlingOpprettet!) > new Date(a.behandlingOpprettet!) ? 1 : -1
+  )
   const sisteBehandling = sortertListe[0]
 
   const goToBehandling = (behandlingsId: string) => {
@@ -39,19 +36,17 @@ export const Saksoversikt = ({
 
           <div>
             <Col>Status</Col>
-            <Value>{(
-              upperCaseFirst(sisteBehandling.status)
-            )}</Value>
+            <Value>{upperCaseFirst(sisteBehandling.status)}</Value>
           </div>
 
           <IconButton onClick={() => goToBehandling(sisteBehandling.id.toString())}>
-            <Next fontSize={30}/>
+            <Next fontSize={30} />
           </IconButton>
         </InfoWrapper>
 
         <div className="behandlinger">
           <h2>Behandlinger</h2>
-          <Saksliste behandlinger={behandlinger} goToBehandling={goToBehandling}/>
+          <Saksliste behandlinger={behandlinger} goToBehandling={goToBehandling} />
         </div>
       </SaksoversiktWrapper>
     </>

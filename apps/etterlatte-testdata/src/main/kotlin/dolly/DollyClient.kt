@@ -35,7 +35,7 @@ class DollyClientImpl(config: Config, private val httpClient: HttpClient) : Doll
         }.body()
 
     override suspend fun opprettBestilling(bestilling: String, gruppeId: Long, accessToken: String): BestillingStatus =
-        httpClient.post("$dollyUrl/gruppe/$gruppeId/bestilling)") {
+        httpClient.post("$dollyUrl/gruppe/$gruppeId/bestilling") {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
             setBody(bestilling.toJson())
         }.body()

@@ -11,20 +11,23 @@
     </div>
 </div>
 
-<div class="col-12 col-md-6" id="opprettGruppeInfo">
-    <div class="alert alert-warning">
-        For å kunne bruke tjenesten må du først gå inn på Dolly og opprette en gruppe med navn
-        <b>etterlatte-testdata</b> <br>
-        Du kan logge inn på Dolly via:
-        <a href="https://dolly.ekstern.dev.nav.no/login">
-            https://dolly.ekstern.dev.nav.no/login
-        </a>
+<div class="row justify-content-center">
+    <div class="col-12 col-md-6" id="opprettGruppeInfo">
+        <div class="alert alert-warning">
+            For å kunne bruke tjenesten må du først gå inn på Dolly og opprette en gruppe med navn
+            <b>etterlatte-testdata</b> <br>
+            Du kan logge inn på Dolly via:
+            <a href="https://dolly.ekstern.dev.nav.no/login">
+                https://dolly.ekstern.dev.nav.no/login
+            </a>
+        </div>
     </div>
 </div>
 
-<div class="col-12 col-md-6" id="soeknadInnsendtAlert">
-    <div class="alert alert-success">
-
+<div class="row justify-content-center">
+    <div class="col-12 col-md-6" id="soeknadInnsendtAlert">
+        <div class="alert alert-success">
+        </div>
     </div>
 </div>
 
@@ -44,19 +47,70 @@
                 <th>Avdød</th>
                 <th>Gjenlevende (innsender)</th>
                 <th>Barn</th>
+                <th></th>
             </tr>
             </thead>
             <tbody></tbody>
         </table>
     </div>
 
-    <button
-            type="button"
-            onclick="opprettFamilie()"
-            class="btn btn-primary"
-    >
-        Opprett ny familie
-    </button>
+    <div class="border rounded p-4 mt-4">
+        <form action="/{{ path }}" method="post" onsubmit="event.preventDefault(); opprettFamilie(event);">
+            <div class="mb-3">
+                En standard familie består av en avdød, en gjenlevende og et barn som vil gå gjennom fordeleren.
+            </div>
+
+            <h4 class="mb-0">Søsken</h4>
+            <small class="form-text text-muted mb-3">Du kan legge til variasjoner av søsken til barnet, men det er ikke garantert at det vil gå gjennom fordeleren.</small>
+
+            <div class="row mt-3">
+                <div class="mb-3 col-md-3 form-group">
+                    <label for="helsoesken" class="form-label">Helsøsken</label>
+                    <input type="number"
+                           pattern="[0-9]+"
+                           minlength="11"
+                           maxlength="11"
+                           name="helsoesken"
+                           id="helsoesken"
+                           class="form-control"
+                           value=0
+                           required
+                    />
+                </div>
+
+                <div class="mb-3 col-md-3 form-group">
+                    <label for="halvsoeskenAvdoed" class="form-label">Halvsøsken (avdød)</label>
+                    <input type="number"
+                           pattern="[0-9]+"
+                           minlength="11"
+                           maxlength="11"
+                           name="halvsoeskenAvdoed"
+                           id="halvsoeskenAvdoed"
+                           class="form-control"
+                           value=0
+                           required
+                    />
+                </div>
+
+                <div class="mb-4 col-md-3 form-group">
+                    <label for="halvsoeskenGjenlevende" class="form-label">Halvsøsken (gjenlevende)</label>
+                    <input type="number"
+                           pattern="[0-9]+"
+                           minlength="11"
+                           maxlength="11"
+                           name="halvsoeskenGjenlevende"
+                           id="halvsoeskenGjenlevende"
+                           class="form-control"
+                           value=0
+                           required
+                    />
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Opprett ny familie</button>
+        </form>
+    </div>
+
 </div>
 <script>
 
@@ -75,16 +129,26 @@
         hentFamilier({{gruppeId}})
     }
 
-    function opprettFamilie() {
+    function opprettFamilie(e) {
         try {
-            fetch("dolly/opprett-familie").then(res => res.json()).then(data => console.log(data))
-            soeknadInnsendtAlert.firstElementChild.innerHTML = `Familie opprettet! Familien vil bli hentet ut om 45 sekunder, så bare å ta seg en kaffe &#9749;`
-            soeknadInnsendtAlert.style.display = "block"
+            const formInputs = e.target
+            fetch('dolly/opprett-familie', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `helsoesken=${formInputs.elements['helsoesken'].value}&halvsoeskenAvdoed=${formInputs.elements['halvsoeskenAvdoed'].value}&halvsoeskenGjenlevende=${formInputs.elements['halvsoeskenGjenlevende'].value}&gruppeId={{gruppeId}}`
+            }).then(() => {
+                soeknadInnsendtAlert.firstElementChild.innerHTML = `Familie opprettet! Familien vil bli hentet ut om 45 sekunder, så bare å ta seg en kaffe &#9749;`
+                soeknadInnsendtAlert.style.display = "block"
+            })
+
             setTimeout(() => {
                 hentFamilier({{gruppeId}})
                 soeknadInnsendtAlert.style.display = "none"
             }, 45000)
         } catch (e) {
+            soeknadInnsendtAlert.style.display = "none"
             console.log(e.message)
         }
     }

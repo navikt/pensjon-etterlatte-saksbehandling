@@ -4,10 +4,7 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.HentPersonRequest
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.*
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -33,7 +30,8 @@ class PdltjenesterKlient(config: Config, httpClient: HttpClient) : EtterlattePdl
 
         try {
             logger.info("Henter persondata fra pdl")
-            val hentPersonRequest = HentPersonRequest(Foedselsnummer.of(fnr), PersonRolle.BARN) // TODO rolle må kanskje sendes med fra api-kallet?
+            val hentPersonRequest = HentPersonRequest(Foedselsnummer.of(fnr),
+                PersonRolle.BARN) // TODO rolle må kanskje sendes med fra api-kallet?
             val json = downstreamResourceClient
                 .post(
                     Resource(
@@ -46,10 +44,14 @@ class PdltjenesterKlient(config: Config, httpClient: HttpClient) : EtterlattePdl
                 ).response
 
             return objectMapper.readValue(json.toString(), Person::class.java)
+        } catch (e: InvalidFoedselsnummer) {
+            logger.error("Henting av person fra pdl feilet pga ugyldig fødselsnummer", e)
+            throw e
         } catch (e: Exception) {
             logger.error("Henting av person fra pdl feilet", e)
             throw e
         }
+
     }
 
 }

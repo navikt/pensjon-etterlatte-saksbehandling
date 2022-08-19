@@ -1,15 +1,13 @@
-import { IApiResponse } from './types'
-
 const path = process.env.REACT_APP_VEDTAK_URL
 
-export const getPerson = async (fnr: string): Promise<IApiResponse<any>> => {
+export const getPerson = async (fnr: string) => {
   try {
     const result: Response = await fetch(`${path}/api/personer/${fnr}`)
-    return {
-      status: result.status, data: await result.json(),
+    if (result.ok) {
+      return { status: result.status, data: await result.json() }
     }
   } catch (e) {
-    console.log('response error', e)
-    return {status: 500, data: e}
+    console.log('response errorrrrrr', e)
+    throw new Error('Det skjedde en feil')
   }
 }

@@ -6,9 +6,11 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.logger
+import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
+import org.slf4j.LoggerFactory
 
 
-// /api
+val logger = LoggerFactory.getLogger("no.nav.etterlatte.behandling.BehandlingRoute")
 fun Route.behandlingRoute(service: BehandlingService) {
 
     route("saker") {
@@ -97,13 +99,14 @@ fun Route.behandlingRoute(service: BehandlingService) {
             } else {
                 try {
                     call.respond(service.hentPersonOgSaker(fnr, getAccessToken(call)))
+                } catch (e: InvalidFoedselsnummer) {
+                    logger.error("Ugyldig fødselsnummer", e)
+                    throw e
                 } catch (e: Exception) {
-                    logger.info("Feil ved henting av person og saker med melding", e)
+                    logger.error("Henting av person med tilhørende behandlinger feilet", e)
                     throw e
                 }
             }
         }
-
     }
-
 }

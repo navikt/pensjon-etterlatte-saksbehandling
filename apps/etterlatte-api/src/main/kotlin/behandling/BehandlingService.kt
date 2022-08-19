@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
+import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.DetaljertBehandlingDto
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.Familieforhold
@@ -38,11 +39,13 @@ class BehandlingService(
             val behandlingsListe = BehandlingListe(behandlinger)
 
             return PersonSakerResult(person, behandlingsListe)
+        } catch (e: InvalidFoedselsnummer) {
+            logger.error("Henting av person fra pdl feilet pga ugyldig fødselsnummer", e)
+            throw e
         } catch (e: Exception) {
-            logger.error("Feil ved henting av person med tilhørende behandlinger", e)
+            logger.error("Henting av person med tilhørende behandlinger feilet", e)
             throw e
         }
-
     }
 
     suspend fun hentSaker(accessToken: String): Saker {

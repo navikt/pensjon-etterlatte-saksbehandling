@@ -12,13 +12,20 @@ enum class BehandlingStatus {
     AVBRUTT;
 
     companion object {
-        fun loependeBehandlinger() = listOf(
+        fun underBehandling() = listOf(
             OPPRETTET,
             GYLDIG_SOEKNAD,
             UNDER_BEHANDLING,
             RETURNERT,
             FATTET_VEDTAK,
         )
+
+        fun iverksattEllerAttestert() = listOf(
+            IVERKSATT,
+            ATTESTERT,
+        )
+
+        fun ikkeAvbrutt() = iverksattEllerAttestert() + underBehandling()
     }
 }
 

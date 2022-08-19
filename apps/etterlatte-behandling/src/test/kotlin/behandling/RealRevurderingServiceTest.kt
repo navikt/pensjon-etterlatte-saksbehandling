@@ -14,6 +14,7 @@ import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.revurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -60,7 +61,7 @@ class RealRevurderingServiceTest {
 
         val revurdering = sut.hentRevurdering(id)
         assertAll("skal hente revurdering",
-            { assertEquals(id, revurdering!!.id) },
+            { assertEquals(id, revurdering.id) },
             { assertTrue(revurdering is Revurdering) })
     }
 
@@ -93,7 +94,7 @@ class RealRevurderingServiceTest {
         val behandlingOpprettes = slot<Revurdering>()
         val behandlingHentes = slot<UUID>()
         val forrigeBehandling = foerstegangsbehandling(sak = 1)
-        val doedsHendelse = Doedshendelse("12345678911", LocalDate.of(2022, 1, 1))
+        val doedsHendelse = Doedshendelse("12345678911", LocalDate.of(2022, 1, 1), Endringstype.OPPRETTET)
         val revurdering =
             revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()

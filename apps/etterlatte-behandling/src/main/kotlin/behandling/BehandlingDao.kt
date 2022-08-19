@@ -88,7 +88,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         return stmt.executeQuery().behandlingsListe()
     }
 
-    fun alleLoependeBehandlingerISak(sakid: Long): List<Behandling> {
+    fun alleAktiveBehandlingerISak(sakid: Long): List<Behandling> {
         with(connection()) {
             val stmt =
                 prepareStatement(
@@ -103,7 +103,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setLong(1, sakid)
             stmt.setArray(
                 2,
-                createArrayOf("text", BehandlingStatus.loependeBehandlinger().map { it.name }.toTypedArray())
+                createArrayOf("text", BehandlingStatus.underBehandling().map { it.name }.toTypedArray())
             )
             return stmt.executeQuery().behandlingsListe()
         }

@@ -4,6 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.hendelserpdl.leesah.ILivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.pdl.Pdl
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.format.DateTimeFormatter
@@ -32,10 +33,12 @@ class FinnDodsmeldinger(
                 try {
                     val personnummer =
                         runBlocking { pdlService.hentFolkeregisterIdentifikator(it.personidenter.first()) }
+                    val endringstype = Endringstype.valueOf(it.endringstype.name)
 
                     dodshendelser.personErDod(
                         personnummer.folkeregisterident.value,
-                        (it.doedsfall?.doedsdato?.format(DateTimeFormatter.ISO_DATE))
+                        (it.doedsfall?.doedsdato?.format(DateTimeFormatter.ISO_DATE)),
+                        endringstype
                     )
                 } catch (e: Exception) {
                     log.error("kunne ikke hente folkeregisterident for ${it.personidenter.first()}. Går til neste melding")

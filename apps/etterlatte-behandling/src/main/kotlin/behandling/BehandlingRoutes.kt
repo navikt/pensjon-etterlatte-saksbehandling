@@ -18,12 +18,9 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.Foerstegangsbehandlin
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
 
@@ -245,38 +242,6 @@ fun Route.behandlingRoutes(
                     revurderingService.slettRevurderingISak(sakId)
                     call.respond(HttpStatusCode.OK)
                 }
-            }
-
-            route("/pdlhendelse") {
-
-                // TODO: finne ut av hva som skal gjøres dersom det allerede finnes en revurdering som er under behandling når det kommer inn en hendelse
-                route("/doedshendelse") {
-                    post {
-                        val doedshendelse = call.receive<Doedshendelse>()
-
-                        call.respond(
-                            generellBehandlingService.alleBehandlingerForSoekerMedFnr(doedshendelse.avdoedFnr)
-                                .sortedByDescending { it.behandlingOpprettet }
-                                .takeUnless { it.any { it.type == BehandlingType.REVURDERING && (it as Revurdering).revurderingsaarsak == RevurderingAarsak.SOEKER_DOD } }// TODO: fjern denne naar problemet med flere dødshendelser postet er løst
-                                ?.takeIf {
-                                    it.isNotEmpty()
-                                }?.first {
-                                    it.status in listOf(
-                                        BehandlingStatus.OPPRETTET,
-                                        BehandlingStatus.GYLDIG_SOEKNAD,
-                                        BehandlingStatus.UNDER_BEHANDLING,
-                                        BehandlingStatus.FATTET_VEDTAK,
-                                        BehandlingStatus.ATTESTERT,
-                                        BehandlingStatus.RETURNERT,
-                                        BehandlingStatus.IVERKSATT,
-                                    )
-                                }?.let {
-                                    revurderingService.startRevurdering(it, doedshendelse, RevurderingAarsak.SOEKER_DOD)
-                                }
-                                ?: HttpStatusCode.OK)
-                    }
-                }
-
             }
         }
     }

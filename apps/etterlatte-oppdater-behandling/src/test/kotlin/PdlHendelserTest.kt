@@ -24,8 +24,9 @@ class PdlHendelserTest {
 
         inspector.sendTestMessage(doedshendelse_hendelse)
 
-        Assertions.assertEquals("12101376212", doedshendelse.captured.avdoedFnr)
+        Assertions.assertEquals("70078749472", doedshendelse.captured.avdoedFnr)
         Assertions.assertEquals(LocalDate.of(2022, 1, 1), doedshendelse.captured.doedsdato)
+        Assertions.assertEquals("OPPRETTET", doedshendelse.captured.endringstype.name)
     }
 
 

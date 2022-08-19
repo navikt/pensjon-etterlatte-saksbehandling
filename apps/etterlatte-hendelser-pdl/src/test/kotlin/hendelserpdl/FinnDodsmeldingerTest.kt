@@ -4,6 +4,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.hendelserpdl.leesah.ILivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.pdl.PdlService
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.person.pdl.leesah.Personhendelse
@@ -34,6 +35,7 @@ internal class FinnDodsmeldingerTest {
         val subject = FinnDodsmeldinger(LeesahMock(listOf(Personhendelse().apply {
             put("opplysningstype", "DOEDSFALL_V1")
             put("personidenter", listOf("123"))
+            put("endringstype", no.nav.person.pdl.leesah.Endringstype.valueOf("OPPRETTET"))
         })), DodsMock { it, _ -> dodsmeldinger += it }, pdlMock)
         subject.stream()
         assertEquals(1, dodsmeldinger.size)
@@ -54,6 +56,6 @@ class LeesahMock(val mockData: List<Personhendelse>) : ILivetErEnStroemAvHendels
 }
 
 class DodsMock(val c: (String, String?) -> Unit) : IDodsmeldinger {
-    override fun personErDod(ident: String, doedsdato: String?) = c(ident, doedsdato)
+    override fun personErDod(ident: String, doedsdato: String?, endringstype: Endringstype) = c(ident, doedsdato)
 
 }

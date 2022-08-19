@@ -13,7 +13,7 @@ import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*
 
 
-interface Behandling: VedlikeholdService {
+interface Behandling : VedlikeholdService {
     fun grunnlagEndretISak(sak: Long)
     fun vedtakHendelse(
         behandlingid: UUID, hendelse: String,
@@ -23,6 +23,7 @@ interface Behandling: VedlikeholdService {
         kommentar: String?,
         valgtBegrunnelse: String?
     )
+
     fun sendDoedshendelse(doedshendelse: Doedshendelse)
 }
 
@@ -61,7 +62,7 @@ class BehandlingsService(
 
     override fun sendDoedshendelse(doedshendelse: Doedshendelse) {
         runBlocking {
-            behandling_app.post("$url/behandlinger/revurdering/pdlhendelse/doedshendelse") {
+            behandling_app.post("$url/grunnlagsendringshendelse/doedshendelse") {
                 contentType(ContentType.Application.Json)
                 setBody(doedshendelse)
             }

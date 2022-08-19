@@ -11,6 +11,7 @@ dependencies {
     implementation(Ktor2.ClientAuth)
     implementation(Ktor2.ClientJackson)
     implementation(Ktor2.ClientContentNegotiation)
+    implementation(Ktor2.ServerContentNegotiation)
     implementation(Ktor2.Jackson)
     implementation(Jackson.Databind)
     implementation(Jackson.ModuleKotlin)

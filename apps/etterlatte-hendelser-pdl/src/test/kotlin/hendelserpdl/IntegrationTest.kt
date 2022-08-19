@@ -1,5 +1,6 @@
 package no.nav.etterlatte.hendelserpdl
 
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -14,6 +15,7 @@ import no.nav.etterlatte.JsonMessage
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.pdl.PdlService
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
@@ -58,6 +60,7 @@ class IntegrationTest {
         val leesahTopic: KafkaProducer<String, Personhendelse> = producerForLeesah()
         val rapid: KafkaConsumer<String, String> = consumerForRapid()
         mockEndpoint("/personidentresponse.json")
+        val doedsfall = Doedsfall(LocalDate.of(2022, 1, 1))
 
         val app = testApp()
 
@@ -76,7 +79,7 @@ class IntegrationTest {
                     null,
                     null,
                     null,
-                    Doedsfall(LocalDate.of(2022, 1, 1)),
+                    doedsfall,
                     null,
                     null,
                     null,
@@ -103,8 +106,12 @@ class IntegrationTest {
         }.forEach {
             val msg = JsonMessage(it.value(), MessageProblems(it.value()))
             println(it.value())
-            msg.interestedIn("avdoed_fnr", "avdoed_doedsdato", eventNameKey, "system_read_count")
-            assertEquals("70078749472", msg["avdoed_fnr"].textValue())
+            msg.interestedIn("hendelse", "hendelse_data", eventNameKey, "system_read_count")
+            val doedshendelse = objectMapper.treeToValue<Doedshendelse>(msg["hendelse_data"])
+            assertEquals("DOEDSFALL_V1", msg["hendelse"].textValue())
+            assertEquals("70078749472", doedshendelse.avdoedFnr)
+            assertEquals(doedsfall.doedsdato, doedshendelse.doedsdato)
+            assertEquals(no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET, doedshendelse.endringstype)
             assertEquals("PDL:PERSONHENDELSE", msg[eventNameKey].textValue())
             assertEquals(1, msg["system_read_count"].asInt())
         }

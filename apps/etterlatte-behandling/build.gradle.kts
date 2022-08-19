@@ -1,4 +1,3 @@
-
 plugins {
     id("etterlatte.kafka")
     id("etterlatte.postgres")
@@ -6,7 +5,8 @@ plugins {
 
 dependencies {
     implementation(project(":libs:common"))
-
+    implementation(project(":libs:ktor2client-auth-clientcredentials"))
+    implementation(Ktor2.OkHttp)
     implementation(Ktor2.ServerCore)
     implementation(Ktor2.ServerCio)
     implementation(Ktor2.ClientCore)
@@ -15,6 +15,7 @@ dependencies {
     implementation(Ktor2.ClientAuth)
     implementation(Ktor2.ClientLogging)
     implementation(Ktor2.MetricsMicrometer)
+    implementation(Ktor2.ClientContentNegotiation)
     implementation(Ktor2.ServerContentNegotiation)
     implementation(Ktor2.Jackson)
     implementation(Ktor2.Auth)

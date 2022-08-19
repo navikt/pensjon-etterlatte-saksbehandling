@@ -27,6 +27,7 @@ spec:
   readiness:
     initialDelay: 5
     path: /internal/isready
+  leaderElection: true
   azure:
     application:
       enabled: true
@@ -46,10 +47,17 @@ spec:
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
+    - name: PDL_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
+    - name: HENDELSE_JOB_FREKVENS
+      value: 1
+    - name: HENDELSE_MINUTTER_GAMLE_HENDELSER
+      value: 1
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-vilkaar
+        - application: etterlatte-pdltjenester
     inbound:
       rules:
         - application: etterlatte-api

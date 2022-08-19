@@ -1,7 +1,10 @@
 package no.nav.etterlatte.itest
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
@@ -11,6 +14,9 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.fullPath
+import io.ktor.http.headersOf
+import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.auth.Authentication
 import io.ktor.server.testing.testApplication
@@ -19,6 +25,7 @@ import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.behandling.HendelseDao
 import no.nav.etterlatte.behandling.VedtakHendelse
+import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
@@ -29,6 +36,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.module
@@ -186,39 +194,32 @@ class ApplicationTest {
                 assertEquals(behandlingId, oppgaver.oppgaver.first().behandlingId)
             }
 
-            client.post("/behandlinger/revurdering/pdlhendelse/doedshendelse") {
+            client.post("/grunnlagsendringshendelse/doedshendelse/") {
                 addAuthServiceBruker()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(Doedshendelse("søker", LocalDate.now()))
+                setBody(Doedshendelse("søker", LocalDate.now(), Endringstype.OPPRETTET))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            // For denne skal det ikke opprettes en revurdring siden det allerede eksisterer en revurdering for dette fnr med samme aarsakstype; doedshendelse
-            client.post("/behandlinger/revurdering/pdlhendelse/doedshendelse") {
+            client.post("/grunnlagsendringshendelse/doedshendelse/") {
                 addAuthServiceBruker()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(Doedshendelse("søker", LocalDate.now()))
+                setBody(Doedshendelse("søker", LocalDate.now(), Endringstype.OPPRETTET))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
-
         }
 
         beans.behandlingHendelser().nyHendelse.close()
 
         assertNotNull(behandlingOpprettet)
         val rapid = beans.rapidSingleton
-        assertEquals(2, rapid.publiserteMeldinger.size)
+        assertEquals(1, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue()
         )
-        assertEquals(
-            "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue()
-        )
-
         beans.datasourceBuilder().dataSource.connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }
         }
@@ -253,5 +254,43 @@ class TestBeanFactory(
     val rapidSingleton: TestProdusent<String, String> by lazy { TestProdusent() }
     override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
     override fun rapid(): KafkaProdusent<String, String> = rapidSingleton
+
+    override fun pdlHttpClient(): HttpClient =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler { request ->
+                    if (request.url.fullPath.startsWith("/")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        val json = javaClass.getResource("")!!.readText() // TODO: endre name
+                        respond(json, headers = headers)
+                    } else {
+                        error(request.url.fullPath)
+                    }
+                }
+            }
+            install(ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(no.nav.etterlatte.libs.common.objectMapper)
+                )
+            }
+        }
+
+    override fun leaderElection() = LeaderElection(
+        electorPath = "electorPath",
+        httpClient = HttpClient(MockEngine) {
+            engine {
+                addHandler { req ->
+                    if (req.url.fullPath == "electorPath") {
+                        respond("me")
+                    } else {
+                        error(req.url.fullPath)
+                    }
+                }
+
+            }
+        },
+        me = "me"
+    )
 
 }

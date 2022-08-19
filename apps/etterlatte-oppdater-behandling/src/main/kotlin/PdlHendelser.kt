@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -8,9 +9,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import no.nav.helse.rapids_rivers.asLocalDate
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 
 internal class PdlHendelser(
     rapidsConnection: RapidsConnection,
@@ -24,26 +23,23 @@ internal class PdlHendelser(
             eventName("PDL:PERSONHENDELSE")
             correlationId()
             validate { it.requireKey("hendelse") }
-            validate { it.interestedIn("avdoed_fnr", "avdoed_doedsdato") }
+            validate { it.interestedIn("hendelse_data") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             logger.info("Mottatt hendelse fra pdl: ${packet["hendelse"]}")
-            val avdoedFnr = packet["avdoed_fnr"].asText()
-
-            val avdoedDoedsdato: LocalDate? = try {
-                packet["avdoed_doedsdato"].asLocalDate()
+            try {
+                if (packet["hendelse"].asText() == "DOEDSFALL_V1") {
+                    logger.info("Doedshendelse mottatt")
+                    val doedshendelse = objectMapper.treeToValue(packet["hendelse_data"], Doedshendelse::class.java)
+                    behandlinger.sendDoedshendelse(doedshendelse)
+                } else {
+                    logger.info("Pdl-hendelsestypen mottatt håndteres ikke av applikasjonen")
+                }
             } catch (e: Exception) {
-                logger.warn(
-                    "Kunne ikke parse dødsdato for hendelse med correlation id='${packet.correlationId}': " +
-                            "$packet på grunn av feil. Verdien for avdoed_doedsdato er: ${packet["avdoed_doedsdato"].asText()} Vi bruker null som dødsdato for denne hendelsen, men dette er " +
-                            "sannsynligvis en bug.", e
-                )
-                null
+                logger.error("kunne ikke deserialisere pdl-hendelse: ", e)
             }
-            val doedshendelse = Doedshendelse(avdoedFnr, avdoedDoedsdato)
-            behandlinger.sendDoedshendelse(doedshendelse)
         }
 }

@@ -48,3 +48,10 @@ data class Foedsel(val foedselsdato: String, val foedselsaar: Int)
 data class Navn(val fornavn: String, val etternavn: String)
 
 data class ForenkletFamilieModell(val avdoed: String, val gjenlevende: String, val barn: List<String>)
+
+data class BestillingRequest(
+    val helsoesken: Int,
+    val halvsoeskenAvdoed: Int,
+    val halvsoeskenGjenlevende: Int,
+    val gruppeId: Long
+)

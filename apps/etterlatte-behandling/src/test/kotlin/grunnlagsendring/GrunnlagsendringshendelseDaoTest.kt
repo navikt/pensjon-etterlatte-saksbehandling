@@ -15,6 +15,7 @@ import org.junit.jupiter.api.assertAll
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.sql.DataSource
 
@@ -63,7 +64,12 @@ internal class GrunnlagsendringshendelseDaoTest {
         val uuid = UUID.randomUUID()
         val sakid = sakRepo.opprettSak("1234", "BP").id
         val grunnlagsinformasjon = grunnlagsinformasjonDoedshendelse()
-        val hendelse = grunnlagsendringshendelse(id = uuid, sakId = sakid, data = grunnlagsinformasjon)
+        val hendelse = grunnlagsendringshendelse(
+            id = uuid,
+            sakId = sakid,
+            data = grunnlagsinformasjon,
+            opprettet = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
+        )
         grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(hendelse)
         val hendelseFraDatabase = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(uuid)
 

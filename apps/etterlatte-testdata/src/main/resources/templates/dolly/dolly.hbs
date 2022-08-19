@@ -64,7 +64,7 @@
     const mainContent = document.querySelector('#main-content')
     const soeknadInnsendtAlert = document.querySelector('#soeknadInnsendtAlert')
 
-    soeknadInnsendtAlert.style.display = "none"
+    soeknadInnsendtAlert.style.display = 'none'
 
     if (!"{{gruppeId}}") {
         opprettGruppeInfo.style.display = 'block'
@@ -78,6 +78,12 @@
     function opprettFamilie() {
         try {
             fetch("dolly/opprett-familie").then(res => res.json()).then(data => console.log(data))
+            soeknadInnsendtAlert.firstElementChild.innerHTML = `Familie opprettet! Familien vil bli hentet ut om 45 sekunder, så bare å ta seg en kaffe &#9749;`
+            soeknadInnsendtAlert.style.display = "block"
+            setTimeout(() => {
+                hentFamilier({{gruppeId}})
+                soeknadInnsendtAlert.style.display = "none"
+            }, 45000)
         } catch (e) {
             console.log(e.message)
         }
@@ -88,6 +94,7 @@
             console.log(data)
 
             const table = document.querySelector('tbody')
+            table.innerHTML = ""
             data.forEach((familie) => {
                 const avdoed = familie.avdoed
                 const gjenlevende = familie.gjenlevende
@@ -126,7 +133,7 @@
     }
 
     const sendSoeknad = async (fnrAvdoed, fnrGjenlevende, fnrBarn) => {
-        console.log(`Sender inn søknad for avdød: ${fnrAvdoed}, fnrGjenlevende: ${fnrGjenlevende} og fnrBarn: ${fnrBarn}`)
+        soeknadInnsendtAlert.style.display = "none"
         await fetch('dolly/send-soeknad', {
             method: 'POST',
             headers: {
@@ -134,18 +141,11 @@
             },
             body: `fnrAvdoed=${fnrAvdoed}&fnrGjenlevende=${fnrGjenlevende}&fnrBarn=${fnrBarn}`
         }).then(res => res.json()).then(data => {
-            console.log('Data fra søknad' + data)
-            if ((data.status === 200)) soeknadInnsendtAlertController(data.noekkel)
+            if ((data.status === 200)) {
+                soeknadInnsendtAlert.firstElementChild.innerHTML = `Søknad er innsendt og registrert med nøkkel: ${noekkel}`
+                soeknadInnsendtAlert.style.display = "block"
+            }
         });
-    }
-
-    const soeknadInnsendtAlertController = (noekkel) => {
-        soeknadInnsendtAlert.firstElementChild.innerHTML += `Søknad er innsendt og registrert med nøkkel: ${noekkel}`
-        soeknadInnsendtAlert.style.display = "block"
-        setTimeout(() => {
-            soeknadInnsendtAlert.style.display = "none"
-            soeknadInnsendtAlert.firstElementChild.innerHTML = ""
-        }, 5000)
     }
 
 </script>

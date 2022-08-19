@@ -5,6 +5,7 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.logger
 
 
 // /api
@@ -97,6 +98,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 try {
                     call.respond(service.hentPersonOgSaker(fnr, getAccessToken(call)))
                 } catch (e: Exception) {
+                    logger.info("Feil ved henting av person og saker med melding", e)
                     throw e
                 }
             }

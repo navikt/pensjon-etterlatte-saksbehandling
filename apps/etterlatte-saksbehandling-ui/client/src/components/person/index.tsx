@@ -33,10 +33,11 @@ export const Person = () => {
   useEffect(() => {
     if (match.fnr) {
       getPerson(match.fnr).then((result: IApiResponse<IPersonResult>) => {
+        console.log(result)
         setPersonData(result?.data)
         setLastet(true)
       }).catch((e) => {
-        console.log('error e', e)
+        console.log('error eeee og test', e)
         setErrorMessage(e)
         setError(true)
         setLastet(true)

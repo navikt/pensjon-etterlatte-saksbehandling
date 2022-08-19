@@ -50,9 +50,9 @@ spec:
     - name: PDL_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: HENDELSE_JOB_FREKVENS
-      value: 1
+      value: "1"
     - name: HENDELSE_MINUTTER_GAMLE_HENDELSER
-      value: 1
+      value: "1"
   accessPolicy:
     outbound:
       rules:

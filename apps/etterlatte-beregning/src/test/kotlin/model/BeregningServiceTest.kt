@@ -51,9 +51,9 @@ internal class BeregningServiceTest {
 
     @Test
     fun `beregningsperiodene får riktig beløp`() {
-        Assertions.assertEquals(2744.95, beregningsperioder[0].utbetaltBeloep)
-        Assertions.assertEquals(2881.775, beregningsperioder[1].utbetaltBeloep)
-        Assertions.assertEquals(2881.775, beregningsperioder[2].utbetaltBeloep)
-        Assertions.assertEquals(3546.8, beregningsperioder[3].utbetaltBeloep)
+        Assertions.assertEquals(2745, beregningsperioder[0].utbetaltBeloep)
+        Assertions.assertEquals(2882, beregningsperioder[1].utbetaltBeloep)
+        Assertions.assertEquals(2882, beregningsperioder[2].utbetaltBeloep)
+        Assertions.assertEquals(3547, beregningsperioder[3].utbetaltBeloep)
     }
 }

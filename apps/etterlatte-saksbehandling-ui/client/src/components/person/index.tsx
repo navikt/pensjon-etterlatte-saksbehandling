@@ -12,14 +12,20 @@ import { IApiResponse } from '../../shared/api/types'
 import Spinner from '../../shared/Spinner'
 
 const testDokumenter: Dokumenter = {
-  brev: [{
-    dato: 'Mock 13.05.2021', tittel: 'Mock Innvilgelsesbrev barnepensjon', link: 'link', status: 'Mock Sendt ut',
-  }, {
-    dato: 'Mock 09.05.2021',
-    tittel: 'Mock Søknad barnepensjon - førstegangsbehandling',
-    link: 'link',
-    status: 'Mock Motatt',
-  },],
+  brev: [
+    {
+      dato: 'Mock 13.05.2021',
+      tittel: 'Mock Innvilgelsesbrev barnepensjon',
+      link: 'link',
+      status: 'Mock Sendt ut',
+    },
+    {
+      dato: 'Mock 09.05.2021',
+      tittel: 'Mock Søknad barnepensjon - førstegangsbehandling',
+      link: 'link',
+      status: 'Mock Motatt',
+    },
+  ],
 }
 
 export const Person = () => {
@@ -28,20 +34,22 @@ export const Person = () => {
   const [error, setError] = useState<boolean>(false)
   const [errorMessage, setErrorMessage] = useState<string>('')
 
-  const match = useParams<{fnr: string}>()
+  const match = useParams<{ fnr: string }>()
 
   useEffect(() => {
     if (match.fnr) {
-      getPerson(match.fnr).then((result: IApiResponse<IPersonResult>) => {
-        console.log(result)
-        setPersonData(result?.data)
-        setLastet(true)
-      }).catch((e) => {
-        console.log('error eeee og test', e)
-        setErrorMessage(e)
-        setError(true)
-        setLastet(true)
-      })
+      getPerson(match.fnr)
+        .then((result: IApiResponse<IPersonResult>) => {
+          console.log(result)
+          setPersonData(result?.data)
+          setLastet(true)
+        })
+        .catch((e) => {
+          console.log('error eeee og test', e)
+          setErrorMessage(e)
+          setError(true)
+          setLastet(true)
+        })
     }
   }, [])
 
@@ -54,12 +62,12 @@ export const Person = () => {
   }
 
   const navn = personData?.person.fornavn + ' ' + personData?.person.etternavn
-  const personInfo = personData ? {navn: navn, fnr: personData?.person.foedselsnummer, type: 'Etterlatt'} : null
+  const personInfo = personData ? { navn: navn, fnr: personData?.person.foedselsnummer, type: 'Etterlatt' } : null
 
   return (
     <>
-      {personInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={personInfo}/>}
-      <Spinner visible={!lastet} label={'Laster'}/>
+      {personInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={personInfo} />}
+      <Spinner visible={!lastet} label={'Laster'} />
       {lastet && (
         <Container>
           <Tabs>
@@ -68,7 +76,7 @@ export const Person = () => {
               <TabElement>Dokumentoversikt</TabElement>
             </Tlist>
             <TabPanel>
-              <Saksoversikt behandlingliste={personData?.behandlingListe.behandlinger}/>
+              <Saksoversikt behandlingliste={personData?.behandlingListe.behandlinger} />
             </TabPanel>
             <TabPanel>
               <Dokumentoversikt {...testDokumenter} />

@@ -19,8 +19,10 @@ internal class PdlHendelser(
     private val logger = LoggerFactory.getLogger(OppdaterBehandling::class.java)
 
     init {
+        logger.info("initierer rapid for pdlHendelser")
         River(rapidsConnection).apply {
             eventName("PDL:PERSONHENDELSE")
+
             correlationId()
             validate { it.requireKey("hendelse") }
             validate { it.interestedIn("hendelse_data") }

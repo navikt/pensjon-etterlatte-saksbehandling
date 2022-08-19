@@ -26,6 +26,7 @@ export const Person = () => {
   const [personData, setPersonData] = useState<IPersonResult | undefined>(undefined)
   const [lastet, setLastet] = useState<boolean>(false)
   const [error, setError] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string>('')
 
   const match = useParams<{fnr: string}>()
 
@@ -35,17 +36,19 @@ export const Person = () => {
         setPersonData(result?.data)
         setLastet(true)
       }).catch((e) => {
-        console.log('error', e)
+        console.log('error e', e)
+        setErrorMessage(e)
         setError(true)
         setLastet(true)
       })
     }
   }, [])
 
+  console.log('errorMessage', errorMessage)
   console.log('error', error)
   console.log('lastet', lastet)
 
-  if (error !== null) {
+  if (error === true) {
     return <div>Det oppstod en feil</div>
   }
 

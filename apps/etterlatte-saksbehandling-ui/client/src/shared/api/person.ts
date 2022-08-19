@@ -6,11 +6,10 @@ export const getPerson = async (fnr: string): Promise<IApiResponse<any>> => {
   try {
     const result: Response = await fetch(`${path}/api/personer/${fnr}`)
     return {
-      status: result.status,
-      data: await result.json(),
+      status: result.status, data: await result.json(),
     }
   } catch (e) {
-    console.log(e)
-    return {status: 500}
+    console.log('response error', e)
+    return {status: 500, data: e}
   }
 }

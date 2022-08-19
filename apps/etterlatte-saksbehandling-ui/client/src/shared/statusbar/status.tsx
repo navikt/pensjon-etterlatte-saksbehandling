@@ -1,13 +1,13 @@
 import styled from 'styled-components'
 import { upperCaseFirst } from '../../utils/formattering'
-import { PersonStatus } from '../behandling/types'
+import { PersonStatus } from '../../components/behandling/types'
 
 export interface IStatus {
   status: PersonStatus
   dato: String
 }
 
-export const Status = (props: { value: IStatus }) => {
+export const Status = (props: {value: IStatus}) => {
   return (
     <StatusWrap>
       {upperCaseFirst(props.value.status)} {props.value.dato}

@@ -46,7 +46,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
     @Suppress("UNCHECKED_CAST")
     override suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker {
         try {
-            logger.info("Henter saker fra behandling")
+            logger.info("Henter saker for en person fra behandling")
             val json = downstreamResourceClient
                 .get(
                     Resource(
@@ -60,7 +60,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
 
             return objectMapper.readValue(json.toString(), Saker::class.java)
         } catch (e: Exception) {
-            logger.error("Henting av person fra behandling feilet", e)
+            logger.error("Henting av saker for en person feilet", e)
             throw e
         }
     }

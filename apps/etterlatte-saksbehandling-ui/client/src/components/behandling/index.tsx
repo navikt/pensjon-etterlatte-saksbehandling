@@ -8,7 +8,7 @@ import { IBehandlingsType } from './behandlingsType'
 import { IApiResponse } from '../../shared/api/types'
 import { addBehandlingAction, IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
 import Spinner from '../../shared/Spinner'
-import { StatusBar, StatusBarTheme } from '../statusbar'
+import { StatusBar, StatusBarTheme } from '../../shared/statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny'
@@ -16,7 +16,7 @@ import { SideMeny } from './SideMeny'
 export const Behandling = () => {
   const ctx = useContext(AppContext)
   const match = useMatch('/behandling/:behandlingId/*')
-  const { behandlingRoutes } = useBehandlingRoutes()
+  const {behandlingRoutes} = useBehandlingRoutes()
   const [loaded, setLoaded] = useState<boolean>(false)
 
   useEffect(() => {
@@ -31,30 +31,30 @@ export const Behandling = () => {
   }, [match?.params.behandlingId])
 
   const soeker = ctx.state.behandlingReducer?.kommerSoekerTilgode?.familieforhold.soeker
-  const soekerInfo = soeker ? { navn: soeker.navn, fnr: soeker.fnr, type: 'Etterlatt' } : null
+  const soekerInfo = soeker ? {navn: soeker.navn, fnr: soeker.fnr, type: 'Etterlatt'} : null
 
   return (
     <>
-      {soekerInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={soekerInfo} />}
+      {soekerInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={soekerInfo}/>}
 
-      <Spinner visible={!loaded} label="Laster" />
+      <Spinner visible={!loaded} label="Laster"/>
       {loaded && (
         <GridContainer>
           <Column>
             <MenuHead>
               <Title>{IBehandlingsType.FØRSTEGANGSBEHANDLING}</Title>
             </MenuHead>
-            <StegMeny />
+            <StegMeny/>
           </Column>
           <Column>
             <Routes>
               {behandlingRoutes.map((route) => {
-                return <Route key={route.path} path={route.path} element={route.element} />
+                return <Route key={route.path} path={route.path} element={route.element}/>
               })}
             </Routes>
           </Column>
           <Column>
-            <SideMeny />
+            <SideMeny/>
           </Column>
         </GridContainer>
       )}

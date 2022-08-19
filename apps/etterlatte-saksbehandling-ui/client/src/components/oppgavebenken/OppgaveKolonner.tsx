@@ -10,82 +10,48 @@ import {
 } from './typer/oppgavebenken'
 import { format } from 'date-fns'
 import { ColorTag } from './styled'
-import SaksbehandlerTildelKnapp from './filtere/SaksbehandlerTildelKnapp'
-import HandlingerKnapp from './filtere/HandlingerKnapp'
+import SaksbehandlerTildelKnapp from './handlinger/SaksbehandlerTildelKnapp'
+import HandlingerKnapp from './handlinger/HandlingerKnapp'
+import BrukeroversiktLenke from "./handlinger/BrukeroversiktKnapp";
 
-export const kolonner: ReadonlyArray<Column<IOppgave>> = [
-  {
-    Header: 'Reg. dato',
-    accessor: 'regdato',
-    Cell: ({ value: dato }) => {
-      return <span>{format(dato, 'dd.MM.yyyy')}</span>
-    },
-    sortType: 'datetime',
+export const kolonner: ReadonlyArray<Column<IOppgave>> = [{
+  Header: 'Reg. dato', accessor: 'regdato', Cell: ({value: dato}) => {
+    return <span>{format(dato, 'dd.MM.yyyy')}</span>
+  }, sortType: 'datetime',
+}, {
+  Header: 'Frist', accessor: 'fristdato', Cell: ({value: dato}) => {
+    return <span>{format(dato, 'dd.MM.yyyy')}</span>
+  }, sortType: 'datetime',
+}, {
+  Header: 'Fødselsnummer', accessor: 'fnr', Cell: ({value: fnr}) => {
+    return <BrukeroversiktLenke fnr={fnr}/>
+  }
+}, {
+  Header: 'Behandlingstype', accessor: 'behandlingType', filter: 'exact', Cell: ({value: oppgavetype}) => {
+    return <ColorTag type={oppgavetype} label={behandlingTypeFilter[oppgavetype as BehandlingTypeFilter]?.navn}/>
   },
-  {
-    Header: 'Frist',
-    accessor: 'fristdato',
-    Cell: ({ value: dato }) => {
-      return <span>{format(dato, 'dd.MM.yyyy')}</span>
-    },
-    sortType: 'datetime',
+}, {
+  Header: 'Ytelse', accessor: 'soeknadType', filter: 'exact', Cell: ({value: soeknadstype}) => {
+    return <ColorTag type={soeknadstype} label={soeknadTypeFilter[soeknadstype as SoeknadTypeFilter]?.navn}/>
   },
-  {
-    Header: 'Fødselsnummer',
-    accessor: 'fnr',
+}, {
+  Header: 'Beskrivelse', accessor: 'beskrivelse', disableSortBy: true,
+}, {
+  Header: 'Søsken', accessor: 'antallSoesken', disableSortBy: true, Cell: ({value: antallSoesken}) => {
+    return <span>{antallSoesken ?? '-'}</span>
   },
-  {
-    Header: 'Behandlingstype',
-    accessor: 'behandlingType',
-    filter: 'exact',
-    Cell: ({ value: oppgavetype }) => {
-      return <ColorTag type={oppgavetype} label={behandlingTypeFilter[oppgavetype as BehandlingTypeFilter]?.navn} />
-    },
+}, {
+  Header: 'Status', accessor: 'oppgaveStatus', filter: 'exact', Cell: ({value: oppgaveStatus}) => {
+    return (
+      <span>{oppgaveStatus ? statusFilter[oppgaveStatus as StatusFilter]?.navn ?? oppgaveStatus : 'Ukjent'}</span>
+    )
   },
-  {
-    Header: 'Ytelse',
-    accessor: 'soeknadType',
-    filter: 'exact',
-    Cell: ({ value: soeknadstype }) => {
-      return <ColorTag type={soeknadstype} label={soeknadTypeFilter[soeknadstype as SoeknadTypeFilter]?.navn} />
-    },
+}, {
+  Header: 'Saksbehandler', accessor: 'saksbehandler', filter: 'tildeltFilter', Cell: ({value: saksbehandler}) => {
+    return <SaksbehandlerTildelKnapp value={saksbehandler}/>
   },
-  {
-    Header: 'Beskrivelse',
-    accessor: 'beskrivelse',
-    disableSortBy: true,
+}, {
+  Header: 'Handlinger', accessor: 'handling', Cell: ({row, value: handling}) => {
+    return <HandlingerKnapp handling={handling} behandlingsId={row.original.behandlingsId}/>
   },
-  {
-    Header: 'Søsken',
-    accessor: 'antallSoesken',
-    disableSortBy: true,
-    Cell: ({ value: antallSoesken }) => {
-      return <span>{antallSoesken ?? '-'}</span>
-    },
-  },
-  {
-    Header: 'Status',
-    accessor: 'oppgaveStatus',
-    filter: 'exact',
-    Cell: ({ value: oppgaveStatus }) => {
-      return (
-        <span>{oppgaveStatus ? statusFilter[oppgaveStatus as StatusFilter]?.navn ?? oppgaveStatus : 'Ukjent'}</span>
-      )
-    },
-  },
-  {
-    Header: 'Saksbehandler',
-    accessor: 'saksbehandler',
-    filter: 'tildeltFilter',
-    Cell: ({ value: saksbehandler }) => {
-      return <SaksbehandlerTildelKnapp value={saksbehandler} />
-    },
-  },
-  {
-    Header: 'Handlinger',
-    accessor: 'handling',
-    Cell: ({ row, value: handling }) => {
-      return <HandlingerKnapp handling={handling} behandlingsId={row.original.behandlingsId} />
-    },
-  },
-]
+},]

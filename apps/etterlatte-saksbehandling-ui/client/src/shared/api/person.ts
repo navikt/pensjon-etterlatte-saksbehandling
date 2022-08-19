@@ -10,14 +10,14 @@ export const getPerson = async (fnr: string): Promise<IApiResponse<any>> => {
       return { status: result.status, data: data }
     } else {
       console.log('error i fetch', result)
-      if (data.contains('Ugyldig fødselsnummer')) {
+      if (data.includes('Ugyldig fødselsnummer')) {
         return { status: 500, data: data }
       } else {
         return { status: result.status, data: 'Det skjedde en feil' }
       }
     }
   } catch (e) {
-    console.log('response errorrrrrr', e)
-    return { status: 500, data: e }
+    console.log('error', e)
+    return { status: 500 }
   }
 }

@@ -39,7 +39,6 @@ export const Person = () => {
     if (match.fnr) {
       getPerson(match.fnr)
         .then((result: IApiResponse<IPersonResult>) => {
-          console.log(result)
           if (result.status === 200) {
             setPersonData(result?.data)
           } else {
@@ -48,14 +47,18 @@ export const Person = () => {
           setLastet(true)
         })
         .catch((e) => {
-          console.log('error eeee og test', e)
+          console.log('error', e)
           setLastet(true)
         })
     }
   }, [])
 
   if (error && personData === undefined) {
-    return <div>{error}</div>
+    return (
+      <Container>
+        <div>{error}</div>
+      </Container>
+    )
   }
 
   const navn = personData?.person.fornavn + ' ' + personData?.person.etternavn

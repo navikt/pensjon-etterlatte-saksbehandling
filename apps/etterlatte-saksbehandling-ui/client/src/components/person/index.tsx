@@ -31,8 +31,7 @@ const testDokumenter: Dokumenter = {
 export const Person = () => {
   const [personData, setPersonData] = useState<IPersonResult | undefined>(undefined)
   const [lastet, setLastet] = useState<boolean>(false)
-  const [error, setError] = useState<boolean>(false)
-  const [errorMessage, setErrorMessage] = useState<string>('')
+  const [error, setError] = useState<IPersonResult | undefined>(undefined)
 
   const match = useParams<{ fnr: string }>()
 
@@ -41,24 +40,22 @@ export const Person = () => {
       getPerson(match.fnr)
         .then((result: IApiResponse<IPersonResult>) => {
           console.log(result)
-          setPersonData(result?.data)
+          if (result.status === 200) {
+            setPersonData(result?.data)
+          } else {
+            setError(result?.data)
+          }
           setLastet(true)
         })
         .catch((e) => {
           console.log('error eeee og test', e)
-          setErrorMessage(e)
-          setError(true)
           setLastet(true)
         })
     }
   }, [])
 
-  console.log('errorMessage', errorMessage)
-  console.log('error', error)
-  console.log('lastet', lastet)
-
-  if (error === true) {
-    return <div>Det oppstod en feil</div>
+  if (error && personData === undefined) {
+    return <div>{error}</div>
   }
 
   const navn = personData?.person.fornavn + ' ' + personData?.person.etternavn

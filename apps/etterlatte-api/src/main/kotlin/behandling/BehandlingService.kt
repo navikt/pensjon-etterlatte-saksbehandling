@@ -27,16 +27,22 @@ class BehandlingService(
     suspend fun hentPersonOgSaker(fnr: String, accessToken: String): PersonSakerResult {
         logger.info("Henter person med tilhørende behandlinger")
 
-        val person = pdlKlient.hentPerson(fnr, accessToken)
-        val saker = behandlingKlient.hentSakerForPerson(fnr, accessToken)
-        val sakIder = saker.saker.map { it.id }.distinct()
+        try {
+            val person = pdlKlient.hentPerson(fnr, accessToken)
+            val saker = behandlingKlient.hentSakerForPerson(fnr, accessToken)
+            val sakIder = saker.saker.map { it.id }.distinct()
 
-        val behandlinger = sakIder.map { behandlingKlient.hentBehandlingerForSak(it.toInt(), accessToken) }
-            .flatMap { it.behandlinger }
+            val behandlinger = sakIder.map { behandlingKlient.hentBehandlingerForSak(it.toInt(), accessToken) }
+                .flatMap { it.behandlinger }
 
-        val behandlingsListe = BehandlingListe(behandlinger)
+            val behandlingsListe = BehandlingListe(behandlinger)
 
-        return PersonSakerResult(person, behandlingsListe)
+            return PersonSakerResult(person, behandlingsListe)
+        } catch (e: Exception) {
+            logger.error("Feil ved henting av person med tilhørende behandlinger", e)
+            throw e
+        }
+
     }
 
     suspend fun hentSaker(accessToken: String): Saker {

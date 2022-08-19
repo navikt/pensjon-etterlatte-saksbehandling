@@ -90,6 +90,9 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
 
             post("send-soeknad") {
                 try {
+
+                    logger.error(call.receiveParameters().toString())
+
                     val (partisjon, offset) = call.receiveParameters().let {
                         producer.publiser(
                             requireNotNull(UUID.randomUUID().toString()),
@@ -103,7 +106,9 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                     }
                     logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
 
-                    call.respondRedirect("/$path/sendt?partisjon=$partisjon&offset=$offset")
+                    // call.respondRedirect("/$path/sendt?partisjon=$partisjon&offset=$offset")
+                    call.respond("Søknad er sendt")
+
                 } catch (e: Exception) {
                     logger.error("En feil har oppstått! ", e)
 

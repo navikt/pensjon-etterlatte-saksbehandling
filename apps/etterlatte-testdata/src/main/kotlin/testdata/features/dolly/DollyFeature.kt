@@ -90,9 +90,12 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
 
             post("send-soeknad") {
                 try {
+
+                    val noekkel = UUID.randomUUID().toString()
+
                     val (partisjon, offset) = call.receiveParameters().let {
                         producer.publiser(
-                            requireNotNull(UUID.randomUUID().toString()),
+                            noekkel,
                             opprettSoeknadJson(
                                 gjenlevendeFnr = it["fnrGjenlevende"]!!,
                                 avdoedFnr = it["fnrAvdoed"]!!,
@@ -104,7 +107,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                     logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
 
                     // call.respondRedirect("/$path/sendt?partisjon=$partisjon&offset=$offset")
-                    call.respond("Søknad er sendt")
+                    call.respond(SoeknadResponse(200, noekkel).toJson())
 
                 } catch (e: Exception) {
                     logger.error("En feil har oppstått! ", e)
@@ -119,6 +122,11 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
             }
         }
 }
+
+data class SoeknadResponse (
+    val status: Number,
+    val noekkel: String
+)
 
 private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFnr: String): String {
     val skjemaInfo = opprettSkjemaInfo(gjenlevendeFnr, barnFnr, avdoedFnr)

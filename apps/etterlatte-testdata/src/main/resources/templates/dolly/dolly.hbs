@@ -22,6 +22,12 @@
     </div>
 </div>
 
+<div class="col-12 col-md-6" id="soeknadInnsendt">
+    <div class="alert alert-success">
+
+    </div>
+</div>
+
 <div id="main-content">
     <div class="row justify-content-center gy-5">
         <div class="col-12 col-md-6">
@@ -56,12 +62,15 @@
 
     const opprettGruppeInfo = document.querySelector('#opprettGruppeInfo')
     const mainContent = document.querySelector('#main-content')
+    const soeknadInnsendtAlert = document.querySelector('#soeknadInnsendtAlert')
+
+    soeknadInnsendtAlert.style.display = "none"
 
     if (!"{{gruppeId}}") {
-        opprettGruppeInfo.style.visibility = 'visible'
+        opprettGruppeInfo.style.display = 'block'
         mainContent.style.visibility = 'hidden'
     } else {
-        opprettGruppeInfo.style.visibility = 'hidden'
+        opprettGruppeInfo.style.display = 'none'
         mainContent.style.visibility = 'visible'
         hentFamilier({{gruppeId}})
     }
@@ -124,7 +133,19 @@
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: `fnrAvdoed=${fnrAvdoed}&fnrGjenlevende=${fnrGjenlevende}&fnrBarn=${fnrBarn}`
-        }).then(res => res.json()).then(data => console.log(data));
+        }).then(res => res.json()).then(data => {
+            console.log('Data fra søknad' + data)
+            if ((data.status === 200)) soeknadInnsendtAlertController(data.noekkel)
+        });
+    }
+
+    const soeknadInnsendtAlertController = (noekkel) => {
+        soeknadInnsendtAlert.firstElementChild.innerHTML += `Søknad er innsendt og registrert med nøkkel: ${noekkel}`
+        soeknadInnsendtAlert.style.display = "block"
+        setTimeout(() => {
+            soeknadInnsendtAlert.style.display = "none"
+            soeknadInnsendtAlert.firstElementChild.innerHTML = ""
+        }, 5000)
     }
 
 </script>

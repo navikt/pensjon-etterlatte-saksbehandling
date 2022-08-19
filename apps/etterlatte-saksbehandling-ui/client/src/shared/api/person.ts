@@ -10,7 +10,6 @@ export const getPerson = async (fnr: string): Promise<IApiResponse<any>> => {
       data: await result.json(),
     }
   } catch (e) {
-    console.log(e)
-    return {status: 500}
+    return { status: 500 }
   }
 }

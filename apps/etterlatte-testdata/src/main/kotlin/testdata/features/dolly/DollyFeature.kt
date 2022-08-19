@@ -90,9 +90,6 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
 
             post("send-soeknad") {
                 try {
-
-                    logger.error(call.receiveParameters().toString())
-
                     val (partisjon, offset) = call.receiveParameters().let {
                         producer.publiser(
                             requireNotNull(UUID.randomUUID().toString()),

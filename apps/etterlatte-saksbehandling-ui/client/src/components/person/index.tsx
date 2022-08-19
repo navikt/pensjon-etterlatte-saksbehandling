@@ -3,7 +3,7 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { getPerson } from '../../shared/api/person'
-import { StatusBar, StatusBarTheme } from '../statusbar'
+import { StatusBar, StatusBarTheme } from '../../shared/statusbar'
 import { Container } from '../../shared/styled'
 import { Dokumentoversikt } from './dokumentoversikt'
 import { Saksoversikt } from './saksoversikt'
@@ -12,44 +12,50 @@ import { IApiResponse } from '../../shared/api/types'
 import Spinner from '../../shared/Spinner'
 
 const testDokumenter: Dokumenter = {
-  brev: [
-    {
-      dato: 'Mock 13.05.2021',
-      tittel: 'Mock Innvilgelsesbrev barnepensjon',
-      link: 'link',
-      status: 'Mock Sendt ut',
-    },
-    {
-      dato: 'Mock 09.05.2021',
-      tittel: 'Mock Søknad barnepensjon - førstegangsbehandling',
-      link: 'link',
-      status: 'Mock Motatt',
-    },
-  ],
+  brev: [{
+    dato: 'Mock 13.05.2021', tittel: 'Mock Innvilgelsesbrev barnepensjon', link: 'link', status: 'Mock Sendt ut',
+  }, {
+    dato: 'Mock 09.05.2021',
+    tittel: 'Mock Søknad barnepensjon - førstegangsbehandling',
+    link: 'link',
+    status: 'Mock Motatt',
+  },],
 }
 
 export const Person = () => {
   const [personData, setPersonData] = useState<IPersonResult | undefined>(undefined)
   const [lastet, setLastet] = useState<boolean>(false)
+  const [error, setError] = useState<boolean>(false)
 
-  const match = useParams<{ fnr: string }>()
+  const match = useParams<{fnr: string}>()
 
   useEffect(() => {
     if (match.fnr) {
       getPerson(match.fnr).then((result: IApiResponse<IPersonResult>) => {
         setPersonData(result?.data)
         setLastet(true)
+      }).catch((e) => {
+        console.log('error', e)
+        setError(true)
+        setLastet(true)
       })
     }
   }, [])
 
+  console.log('error', error)
+  console.log('lastet', lastet)
+
+  if (error !== null) {
+    return <div>Det oppstod en feil</div>
+  }
+
   const navn = personData?.person.fornavn + ' ' + personData?.person.etternavn
-  const personInfo = personData ? { navn: navn, fnr: personData?.person.foedselsnummer, type: 'Etterlatt' } : null
+  const personInfo = personData ? {navn: navn, fnr: personData?.person.foedselsnummer, type: 'Etterlatt'} : null
 
   return (
     <>
-      {personInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={personInfo} />}
-      <Spinner visible={!lastet} label={'Laster'} />
+      {personInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={personInfo}/>}
+      <Spinner visible={!lastet} label={'Laster'}/>
       {lastet && (
         <Container>
           <Tabs>
@@ -58,7 +64,7 @@ export const Person = () => {
               <TabElement>Dokumentoversikt</TabElement>
             </Tlist>
             <TabPanel>
-              <Saksoversikt behandlingliste={personData?.behandlingListe.behandlinger} />
+              <Saksoversikt behandlingliste={personData?.behandlingListe.behandlinger}/>
             </TabPanel>
             <TabPanel>
               <Dokumentoversikt {...testDokumenter} />

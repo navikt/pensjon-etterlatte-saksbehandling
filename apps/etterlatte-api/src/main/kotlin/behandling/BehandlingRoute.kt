@@ -24,7 +24,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
         }
 
         route("{sakId}") {
-            // hent spesifikk sak (alle behandlinger?)
+            // hent spesifikk sak med tilhørende behandlinger
             get {
                 val sakId = call.parameters["sakId"]?.toInt()
                 if (sakId == null) {
@@ -86,21 +86,16 @@ fun Route.behandlingRoute(service: BehandlingService) {
         }
     }
 
-    /*
-    Skal hente persondata og sakene for denne personen?
-     */
+
     route("personer") {
         get("{fnr}") {
-
             val fnr = call.parameters["fnr"]
             if (fnr == null) {
                 call.response.status(HttpStatusCode(400, "Bad request"))
                 call.respond("Fødselsnummer mangler")
             } else {
                 try {
-                    val accessToken = getAccessToken(call)
-                    val list = service.hentPersonOgSaker(fnr, accessToken)
-                    call.respond(list)
+                    call.respond(service.hentPersonOgSaker(fnr, getAccessToken(call)))
                 } catch (e: Exception) {
                     throw e
                 }

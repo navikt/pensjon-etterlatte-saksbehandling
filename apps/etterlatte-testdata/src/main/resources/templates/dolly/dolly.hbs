@@ -40,6 +40,8 @@
         </div>
     </div>
 
+    <h2>Oversikt over familier</h2>
+
     <div>
         <table class="table table-striped">
             <thead>
@@ -50,12 +52,19 @@
                 <th></th>
             </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                <tr>
+                    <td colspan="4" class="text-center">
+                        Du har ingen familier, vennligst opprett en nedenfor &#128106;
+                    </td>
+                </tr>
+            </tbody>
         </table>
     </div>
 
     <div class="border rounded p-4 mt-4">
         <form action="/{{ path }}" method="post" onsubmit="event.preventDefault(); opprettFamilie(event);">
+            <h3>Opprett familie &#129328;</h3>
             <div class="mb-3">
                 En standard familie består av en avdød, en gjenlevende og et barn som vil gå gjennom fordeleren.
             </div>
@@ -210,7 +219,7 @@
             body: `fnrAvdoed=${fnrAvdoed}&fnrGjenlevende=${fnrGjenlevende}&fnrBarn=${fnrBarn}`
         }).then(res => res.json()).then(data => {
             if ((data.status === 200)) {
-                soeknadInnsendtAlert.firstElementChild.innerHTML = `Søknad er innsendt og registrert med nøkkel: ${noekkel}`
+                soeknadInnsendtAlert.firstElementChild.innerHTML = `Søknad er innsendt og registrert med nøkkel: ${data.noekkel}`
                 soeknadInnsendtAlert.style.display = "block"
             }
         });

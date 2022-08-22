@@ -32,6 +32,7 @@ import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.security.ktor.clientCredential
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -142,6 +143,7 @@ abstract class CommonFactory : BeanFactory {
 }
 
 class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
+    private val logger = LoggerFactory.getLogger(this::class.java)
     private val datasourceBuilder: DataSourceBuilder by lazy { DataSourceBuilder(env) }
     override fun datasourceBuilder() = datasourceBuilder
 
@@ -169,11 +171,23 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
 
     override fun leaderElection() = LeaderElection(env.getValue("ELECTOR_PATH"))
 
-    override fun grunnlagsendringshendelseJob() = GrunnlagsendringshendelseJob(
-        grunnlagsendringshendelseService = grunnlagsendringshendelseService(),
-        leaderElection = leaderElection(),
-        initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
-        periode = Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES),
-        minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()
-    ).schedule()
+    override fun grunnlagsendringshendelseJob(): Timer {
+        logger.info(
+            "Setter opp GrunnlagsendringshendelseJob. LeaderElection: ${leaderElection().isLeader()} , initialDelay: ${
+                Duration.of(
+                    1,
+                    ChronoUnit.MINUTES
+                ).toMillis()
+            }" +
+                    ", periode: ${Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES)}" +
+                    ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "
+        )
+        return GrunnlagsendringshendelseJob(
+            grunnlagsendringshendelseService = grunnlagsendringshendelseService(),
+            leaderElection = leaderElection(),
+            initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES),
+            minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()
+        ).schedule()
+    }
 }

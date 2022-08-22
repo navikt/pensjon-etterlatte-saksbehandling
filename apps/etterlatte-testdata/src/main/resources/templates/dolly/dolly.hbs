@@ -144,13 +144,10 @@
             const formInputs = e.target
             fetch('dolly/opprett-familie', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    helsoesken: formInputs.elements['helsoesken'].value,
-                    halvsoeskenAvdoed: formInputs.elements['halvsoeskenAvdoed'].value,
-                    halvsoeskenGjenlevende: formInputs.elements['halvsoeskenGjenlevende'],
-                    gruppeId: {{gruppeId}}
-                })
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `helsoesken=${formInputs.elements['helsoesken'].value}&halvsoeskenAvdoed=${formInputs.elements['halvsoeskenAvdoed'].value}&halvsoeskenGjenlevende=${formInputs.elements['halvsoeskenGjenlevende'].value}&gruppeId={{gruppeId}}`
             }).then(() => {
                 soeknadInnsendtAlert.firstElementChild.innerHTML = `Familie opprettet! Familien vil bli hentet ut om 45 sekunder, så bare å ta seg en kaffe &#9749;`
                 soeknadInnsendtAlert.style.display = "block"

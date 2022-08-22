@@ -64,28 +64,35 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
             }
 
             post("opprett-familie") {
-                val bestillingReq = call.receive<BestillingRequest>()
-                try {
-                    val accessToken = getClientAccessToken()
-                    dollyService.opprettBestilling(generererBestilling(bestillingReq), bestillingReq.gruppeId, accessToken)
-                        .also { bestilling ->
-                            logger.info("Bestilling med id ${bestilling.id} har status ${bestilling.ferdig}")
-                            call.respond(bestilling.toJson())
-                        }
-                } catch (e: Exception) {
-                    logger.error("En feil har oppstått! ", e)
-                    call.respond(
-                        MustacheContent(
-                            "error.hbs",
-                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString())
+                call.receiveParameters().let {
+                    try {
+                        val accessToken = getClientAccessToken()
+                        val req = BestillingRequest(
+                            it["helsoesken"]!!.toInt(),
+                            it["halvsoeskenAvdoed"]!!.toInt(),
+                            it["halvsoeskenGjenlevende"]!!.toInt(),
+                            it["gruppeId"]!!.toLong()
                         )
-                    )
+
+                        dollyService.opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
+                            .also { bestilling ->
+                                logger.info("Bestilling med id ${bestilling.id} har status ${bestilling.ferdig}")
+                                call.respond(bestilling.toJson())
+                            }
+                    } catch (e: Exception) {
+                        logger.error("En feil har oppstått! ", e)
+                        call.respond(
+                            MustacheContent(
+                                "error.hbs",
+                                mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString())
+                            )
+                        )
+                    }
                 }
             }
 
             post("send-soeknad") {
                 try {
-
                     val noekkel = UUID.randomUUID().toString()
 
                     val (partisjon, offset) = call.receiveParameters().let {

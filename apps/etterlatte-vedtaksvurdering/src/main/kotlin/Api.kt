@@ -18,6 +18,7 @@ fun Route.Api(service: VedtaksvurderingService) {
             call.respond(vedtaksresultat)
         }
     }
+
     get("behandlinger/{behandlingId}/vedtak") {
         val behandlingId = UUID.fromString(call.parameters["behandlingId"])
         val vedtaksresultat = service.hentVedtak(behandlingId)
@@ -26,5 +27,9 @@ fun Route.Api(service: VedtaksvurderingService) {
         } else {
             call.respond(vedtaksresultat)
         }
+    }
+
+    get("/vedtak") {
+        call.respond(service.hentAlleVedtak())
     }
 }

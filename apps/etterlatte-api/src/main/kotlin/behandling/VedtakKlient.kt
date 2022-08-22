@@ -19,6 +19,7 @@ import java.util.*
 
 interface EtterlatteVedtak {
     suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak
+    suspend fun hentAlleVedtak(accessToken: String): List<Vedtak>
 }
 
 class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
@@ -38,14 +39,27 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
                 downstreamResourceClient.get(
                     Resource(clientId, "$resourceUrl/api/behandlinger/$behandlingId/vedtak"),
                     accessToken
-                )
-                    .mapBoth(
-                        success = { json -> json },
-                        failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                    ).response
+                ).mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
             return objectMapper.readValue(json.toString())
         } catch (e: Exception) {
             logger.error("Henting  vedtak for en behandling feilet", e)
+            throw e
+        }
+    }
+
+    override suspend fun hentAlleVedtak(accessToken: String): List<Vedtak> {
+        try {
+            val json = downstreamResourceClient.get(Resource(clientId, "$resourceUrl/api/vedtak"), accessToken)
+                .mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
+            return objectMapper.readValue(json.toString())
+        } catch (e: Exception) {
+            logger.error("Henting av alle vedtak feilet", e)
             throw e
         }
     }

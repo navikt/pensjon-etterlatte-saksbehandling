@@ -108,7 +108,6 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                     }
                     logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
 
-                    // call.respondRedirect("/$path/sendt?partisjon=$partisjon&offset=$offset")
                     call.respond(SoeknadResponse(200, noekkel).toJson())
 
                 } catch (e: Exception) {

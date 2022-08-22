@@ -21,10 +21,7 @@ import java.time.YearMonth
 import java.util.*
 
 // TODO hvordan håndtere vedtakstidspunkt?
-
 class BeregningService {
-    // private val logger = LoggerFactory.getLogger(BeregningService::class.java)
-
     fun beregnResultat(grunnlag: Grunnlag, virkFOM: YearMonth, virkTOM: YearMonth): BeregningsResultat {
         val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)
 
@@ -56,6 +53,7 @@ class BeregningService {
         return alleFOM.map {
             val gjeldendeG = Grunnbeloep.hentGjeldendeG(it.first)
             val flokkForPeriode = hentFlokkforPeriode(it.first, it.second, soeskenPerioder)
+            val utbetaltBeloep = Soeskenjustering(flokkForPeriode.size, gjeldendeG.grunnbeløp).beloep
 
             (
                 Beregningsperiode(
@@ -66,10 +64,7 @@ class BeregningService {
                     grunnbelopMnd = gjeldendeG.grunnbeløpPerMåned,
                     grunnbelop = gjeldendeG.grunnbeløp,
                     soeskenFlokk = flokkForPeriode,
-                    utbetaltBeloep = beregnUtbetaling(
-                        soeskenFlokk = flokkForPeriode.size,
-                        g = gjeldendeG.grunnbeløpPerMåned
-                    )
+                    utbetaltBeloep = utbetaltBeloep
                 )
                 )
         }
@@ -86,14 +81,6 @@ class BeregningService {
             .filter { !it.datoFOM.isAfter(datoTOM) }
             .filter { it.datoFOM != datoTOM }
         return if (flokk.isNotEmpty()) flokk[0].soeskenFlokk!! else emptyList()
-    }
-
-    // 40% av G til første barn, 25% til resten. Fordeles likt
-    private fun beregnUtbetaling(soeskenFlokk: Int, g: Int): Double {
-        if (soeskenFlokk == 0) return 0.0
-        val antallSoesken = soeskenFlokk - 1
-
-        return (g * 0.40 + (g * 0.25 * antallSoesken)) / (soeskenFlokk)
     }
     private fun beregnFoersteFom(first: YearMonth, virkFOM: YearMonth): YearMonth {
         return if (first.isBefore(virkFOM)) {

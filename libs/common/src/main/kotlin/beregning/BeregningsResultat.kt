@@ -35,7 +35,7 @@ data class Beregningsperiode(
     val type: Beregningstyper,
     val datoFOM: YearMonth,
     val datoTOM: YearMonth?,
-    val utbetaltBeloep: Double,
+    val utbetaltBeloep: Int,
     val soeskenFlokk: List<Person>?,
     val grunnbelopMnd: Int,
     val grunnbelop: Int

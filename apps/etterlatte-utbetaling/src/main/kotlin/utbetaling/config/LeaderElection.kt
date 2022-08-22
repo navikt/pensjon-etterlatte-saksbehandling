@@ -3,7 +3,7 @@ package no.nav.etterlatte.utbetaling.config
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import io.ktor.client.statement.*
+import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.net.InetAddress

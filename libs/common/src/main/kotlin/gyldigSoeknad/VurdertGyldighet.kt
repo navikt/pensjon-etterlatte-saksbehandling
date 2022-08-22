@@ -9,7 +9,6 @@ data class VurdertGyldighet(
     val basertPaaOpplysninger: Any?
 )
 
-
 data class GyldighetsResultat(
     val resultat: VurderingsResultat?,
     val vurderinger: List<VurdertGyldighet>,

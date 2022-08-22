@@ -35,12 +35,11 @@ internal class UtbetalingTest {
             utbetalingshendelse(
                 utbetalingId = UUID.randomUUID(),
                 status = UtbetalingStatus.MOTTATT
-            ),
+            )
         )
         val utbetalinger = utbetaling(utbetalingshendelser = utbetalingshendelser)
 
         assertEquals(UtbetalingStatus.GODKJENT, utbetalinger.status())
-
     }
 
     @Test
@@ -52,7 +51,7 @@ internal class UtbetalingTest {
             { assertEquals(2, UtbetalingStatus.AVVIST.ordinal) },
             { assertEquals(3, UtbetalingStatus.FEILET.ordinal) },
             { assertEquals(4, UtbetalingStatus.SENDT.ordinal) },
-            { assertEquals(5, UtbetalingStatus.MOTTATT.ordinal) },
+            { assertEquals(5, UtbetalingStatus.MOTTATT.ordinal) }
         )
     }
 
@@ -61,5 +60,4 @@ internal class UtbetalingTest {
         val utbetalinger = utbetaling(utbetalingshendelser = emptyList())
         assertEquals(UtbetalingStatus.MOTTATT, utbetalinger.status())
     }
-
 }

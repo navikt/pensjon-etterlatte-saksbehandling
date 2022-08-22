@@ -7,10 +7,9 @@ interface SakService {
     fun finnSak(person: String, type: String): Sak?
     fun finnSak(id: Long): Sak?
     fun slettSak(id: Long)
-
 }
 
-class RealSakService(private val dao: SakDao) :SakService{
+class RealSakService(private val dao: SakDao) : SakService {
     override fun hentSaker(): List<Sak> {
         return dao.hentSaker()
     }
@@ -25,7 +24,7 @@ class RealSakService(private val dao: SakDao) :SakService{
 
     override fun finnEllerOpprettSak(person: String, type: String): Sak {
         val eksisterendeSak = finnSak(person, type)
-        return eksisterendeSak?: dao.opprettSak(person, type)
+        return eksisterendeSak ?: dao.opprettSak(person, type)
     }
 
     override fun finnSak(person: String, type: String): Sak? {
@@ -33,9 +32,6 @@ class RealSakService(private val dao: SakDao) :SakService{
     }
 
     override fun finnSak(id: Long): Sak? {
-
         return dao.hentSak(id)
     }
-
-
 }

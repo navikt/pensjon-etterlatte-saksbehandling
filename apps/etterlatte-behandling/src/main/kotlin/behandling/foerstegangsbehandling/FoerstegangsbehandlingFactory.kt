@@ -12,7 +12,7 @@ class FoerstegangsbehandlingFactory(private val behandlinger: BehandlingDao, pri
     fun opprettFoerstegangsbehandling(
         sakId: Long,
         mottattDato: String,
-        persongalleri: Persongalleri,
+        persongalleri: Persongalleri
     ): FoerstegangsbehandlingAggregat =
         FoerstegangsbehandlingAggregat.opprettFoerstegangsbehandling(
             sakId,

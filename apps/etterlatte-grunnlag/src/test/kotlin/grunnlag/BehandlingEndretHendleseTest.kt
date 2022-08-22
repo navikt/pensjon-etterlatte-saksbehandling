@@ -26,26 +26,33 @@ internal class BehandlingEndretHendleseTest {
             ?: throw FileNotFoundException("Fant ikke filen $file")
     }
 
-
     private val inspector = TestRapid().apply { BehandlingEndretHendlese(this, RealGrunnlagService(opplysningerMock)) }
 
     @Test
     fun `skal legge paa grunnlag naar behandling er endret`() {
         val grunnlagshendelser = listOf(
-            OpplysningDao.GrunnlagHendelse(Grunnlagsopplysning(
-                UUID.randomUUID(),
-                Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
-                Opplysningstyper.SOEKER_SOEKNAD_V1,
-                objectMapper.createObjectNode(),
-                objectMapper.createObjectNode()
-            ), 2, 1),
-            OpplysningDao.GrunnlagHendelse(Grunnlagsopplysning(
-                UUID.randomUUID(),
-                Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
-                Opplysningstyper.AVDOED_SOEKNAD_V1,
-                objectMapper.createObjectNode(),
-                objectMapper.createObjectNode()
-            ), 2, 2),
+            OpplysningDao.GrunnlagHendelse(
+                Grunnlagsopplysning(
+                    UUID.randomUUID(),
+                    Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
+                    Opplysningstyper.SOEKER_SOEKNAD_V1,
+                    objectMapper.createObjectNode(),
+                    objectMapper.createObjectNode()
+                ),
+                2,
+                1
+            ),
+            OpplysningDao.GrunnlagHendelse(
+                Grunnlagsopplysning(
+                    UUID.randomUUID(),
+                    Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
+                    Opplysningstyper.AVDOED_SOEKNAD_V1,
+                    objectMapper.createObjectNode(),
+                    objectMapper.createObjectNode()
+                ),
+                2,
+                2
+            )
         )
 
         every { opplysningerMock.finnHendelserIGrunnlag(any()) } returns grunnlagshendelser
@@ -54,13 +61,18 @@ internal class BehandlingEndretHendleseTest {
 
         assertEquals(1, inspector.size)
         assertEquals(2, inspector.message(0).get("grunnlag").get("grunnlag").size())
-        val grunnlag = objectMapper.readValue<List<Grunnlagsopplysning<ObjectNode>>>(inspector.message(0)
-            .get("grunnlag").get("grunnlag").toJson())
+        val grunnlag = objectMapper.readValue<List<Grunnlagsopplysning<ObjectNode>>>(
+            inspector.message(0)
+                .get("grunnlag").get("grunnlag").toJson()
+        )
         assertEquals(2, grunnlag.size)
-        assertEquals(grunnlagshendelser[0].opplysning.id,
-            grunnlag.find { it.opplysningType == Opplysningstyper.SOEKER_SOEKNAD_V1 }?.id)
-        assertEquals(grunnlagshendelser[1].opplysning.id,
-            grunnlag.find { it.opplysningType == Opplysningstyper.AVDOED_SOEKNAD_V1 }?.id)
-
+        assertEquals(
+            grunnlagshendelser[0].opplysning.id,
+            grunnlag.find { it.opplysningType == Opplysningstyper.SOEKER_SOEKNAD_V1 }?.id
+        )
+        assertEquals(
+            grunnlagshendelser[1].opplysning.id,
+            grunnlag.find { it.opplysningType == Opplysningstyper.AVDOED_SOEKNAD_V1 }?.id
+        )
     }
 }

@@ -5,7 +5,16 @@ import io.mockk.mockk
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
+import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.opplysninger.kilde.pdl.OpplysningsByggerService
 import no.nav.etterlatte.opplysninger.kilde.pdl.Pdl
@@ -18,7 +27,6 @@ import org.junit.jupiter.api.assertThrows
 import java.io.FileNotFoundException
 import java.time.Instant
 import java.time.LocalDate
-
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OpplysningsByggerServiceTest {
@@ -61,8 +69,9 @@ internal class OpplysningsByggerServiceTest {
             sivilstatus: Sivilstatus = Sivilstatus.UGIFT,
             utland: Utland? = null,
             bostedsadresse: Adresse? = null,
-            familieRelasjon: FamilieRelasjon? = null,
-        ) = Person(fornavn = "Ola",
+            familieRelasjon: FamilieRelasjon? = null
+        ) = Person(
+            fornavn = "Ola",
             etternavn = "Nordmann",
             foedselsnummer = Foedselsnummer.of(fnr),
             foedselsaar = foedselsaar,
@@ -80,7 +89,7 @@ internal class OpplysningsByggerServiceTest {
             familieRelasjon = familieRelasjon,
             avdoedesBarn = null,
             vergemaalEllerFremtidsfullmakt = null
-            )
+        )
 
         fun readSoknadAsBarnepensjon(file: String): Barnepensjon {
             val skjemaInfo = objectMapper.writeValueAsString(
@@ -127,7 +136,7 @@ internal class OpplysningsByggerServiceTest {
         every {
             pdlMock.hentPdlModell(
                 "22128202440",
-                PersonRolle.AVDOED,
+                PersonRolle.AVDOED
             )
         } returns mockPerson(GYLDIG_FNR_AVDOED, doedsdato = LocalDate.parse("2022-01-02"))
         every {
@@ -142,12 +151,14 @@ internal class OpplysningsByggerServiceTest {
         val opplysningstyper = listOf(
             Opplysningstyper.SOEKER_PDL_V1,
             Opplysningstyper.AVDOED_PDL_V1,
-            Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1,
+            Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
         )
 
-        assertTrue(opplysninger.map {
-            it.opplysningType
-        }.containsAll(opplysningstyper))
+        assertTrue(
+            opplysninger.map {
+                it.opplysningType
+            }.containsAll(opplysningstyper)
+        )
     }
 
     @Test
@@ -169,7 +180,8 @@ internal class OpplysningsByggerServiceTest {
     @Test
     fun `skal lage opplysning om gjenlevende forelder`() {
         val opplysningGjenlevendeForelder = opplysningsByggerService.personOpplysning(
-            gjenlevendeForelderPdlMock, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
+            gjenlevendeForelderPdlMock,
+            Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
         )
         opplysningGjenlevendeForelder.apply {
             assertEquals(Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1, opplysningType)
@@ -192,7 +204,7 @@ internal class OpplysningsByggerServiceTest {
             assertEquals(avdoedPdlMock.etternavn, opplysning.etternavn)
             assertEquals(Foedselsnummer.of(GYLDIG_FNR_AVDOED), opplysning.foedselsnummer)
             assertEquals(avdoedPdlMock.doedsdato, opplysning.doedsdato)
-            assertEquals(avdoedPdlMock.utland, opplysning.utland )
+            assertEquals(avdoedPdlMock.utland, opplysning.utland)
         }
     }
 

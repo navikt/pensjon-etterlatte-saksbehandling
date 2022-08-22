@@ -5,7 +5,6 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
@@ -18,7 +17,7 @@ import org.slf4j.LoggerFactory
 class Oppgavetrigger(
     private val rapidsConnection: RapidsConnection,
     private val utbetalingService: UtbetalingService,
-    private val grensesnittsavstemmingService: GrensesnittsavstemmingService,
+    private val grensesnittsavstemmingService: GrensesnittsavstemmingService
 ) : River.PacketListener {
 
     init {

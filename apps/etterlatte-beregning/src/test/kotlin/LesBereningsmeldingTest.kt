@@ -19,12 +19,10 @@ internal class LesBereningsmeldingTest {
 
     @Test
     fun `skal beregne en melding som er vilkaarsvurdert`() {
-
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
         Assertions.assertEquals("BEREGNET", inspector.message(0).get("beregning").get("resultat").asText())
         println("bah")
-
     }
 }

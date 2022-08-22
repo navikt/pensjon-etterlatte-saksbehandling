@@ -1,6 +1,5 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
-
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -23,12 +22,11 @@ import javax.jms.Message
 import javax.jms.MessageListener
 import javax.jms.Session
 
-
 class KvitteringMottaker(
     private val rapidsConnection: RapidsConnection,
     private val utbetalingService: UtbetalingService,
     jmsConnectionFactory: JmsConnectionFactory,
-    queue: String,
+    queue: String
 ) : MessageListener {
 
     init {
@@ -75,7 +73,6 @@ class KvitteringMottaker(
                     }
 
                     logger.info("Melding med id=${message.jmsMessageID} er lest og behandlet")
-
                 } catch (e: Exception) {
                     "En feil oppstod under prosessering av kvittering fra Oppdrag".also {
                         logger.error(it, kv("oppdragXml", oppdragXml), e)
@@ -148,4 +145,3 @@ class KvitteringMottaker(
         private val logger = LoggerFactory.getLogger(KvitteringMottaker::class.java)
     }
 }
-

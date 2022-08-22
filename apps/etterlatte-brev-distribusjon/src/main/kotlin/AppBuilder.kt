@@ -1,12 +1,12 @@
 package no.nav.etterlatte
 
 import JournalpostServiceMock
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.plugins.auth.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.http.*
-import io.ktor.serialization.jackson.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.http.ContentType
+import io.ktor.serialization.jackson.JacksonConverter
 import journalpost.JournalpostService
 import journalpost.JournalpostServiceImpl
 import no.nav.etterlatte.brev.BrevServiceImpl
@@ -28,7 +28,10 @@ class AppBuilder {
         true -> JournalpostServiceMock()
         false -> {
             val klient = JournalpostKlient(httpClient("AZURE_DOKARKIV_SCOPE"), requireNotNull(env["JOURNALPOST_URL"]))
-            JournalpostServiceImpl(klient, BrevServiceImpl(httpClient("BREV_API_SCOPE"), requireNotNull("BREV_API_URL")))
+            JournalpostServiceImpl(
+                klient,
+                BrevServiceImpl(httpClient("BREV_API_SCOPE"), requireNotNull("BREV_API_URL"))
+            )
         }
     }
 

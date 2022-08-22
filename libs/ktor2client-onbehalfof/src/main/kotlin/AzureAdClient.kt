@@ -12,15 +12,17 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.typesafe.config.Config
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.serialization.jackson.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.forms.submitForm
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpHeaders
+import io.ktor.http.Parameters
+import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.future.asDeferred
@@ -55,7 +57,7 @@ data class AzureAdOpenIdConfiguration(
 
 data class OboTokenRequest(
     val scopes: List<String>,
-    val accessToken: String,
+    val accessToken: String
 )
 
 class AzureAdClient(
@@ -86,7 +88,6 @@ class AzureAdClient(
                 ex
             )
         }
-
 
     private suspend inline fun get(url: String, oboAccessToken: AccessToken): Result<JsonNode, ThrowableErrorMessage> =
         runCatching {
@@ -128,15 +129,17 @@ class AzureAdClient(
 
         val value = cache.get(OboTokenRequest(scopes, accessToken)) { req, _ ->
             CoroutineScope(context).future {
-                fetchAccessToken(Parameters.build {
-                    append("client_id", config.getString("azure.app.client.id"))
-                    append("client_secret", config.getString("azure.app.client.secret"))
-                    append("scope", req.scopes.joinToString(separator = " "))
-                    append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
-                    append("requested_token_use", "on_behalf_of")
-                    append("assertion", req.accessToken)
-                    append("assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-                })
+                fetchAccessToken(
+                    Parameters.build {
+                        append("client_id", config.getString("azure.app.client.id"))
+                        append("client_secret", config.getString("azure.app.client.secret"))
+                        append("scope", req.scopes.joinToString(separator = " "))
+                        append("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer")
+                        append("requested_token_use", "on_behalf_of")
+                        append("assertion", req.accessToken)
+                        append("assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+                    }
+                )
             }
         }
 

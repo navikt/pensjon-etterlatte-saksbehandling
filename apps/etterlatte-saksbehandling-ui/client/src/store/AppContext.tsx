@@ -6,7 +6,7 @@ import { ISaksbehandler, saksbehandlerReducerInitialState, saksbehandlerReducer 
 
 export interface IAppState {
   menuReducer: IMenuReducer
-  saksbehandlerReducer: ISaksbehandler,
+  saksbehandlerReducer: ISaksbehandler
   behandlingReducer: IDetaljertBehandling
 }
 
@@ -23,10 +23,8 @@ export interface IAppContext {
 export const initialState: IAppState = {
   menuReducer: menuReducerInitialState,
   saksbehandlerReducer: saksbehandlerReducerInitialState,
-  behandlingReducer: detaljertBehandlingInitialState
+  behandlingReducer: detaljertBehandlingInitialState,
 }
-
-
 
 export const reducer = combineReducers({ menuReducer, saksbehandlerReducer, behandlingReducer })
 

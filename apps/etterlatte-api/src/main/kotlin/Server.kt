@@ -4,19 +4,26 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.typesafe.config.ConfigFactory
-import io.ktor.http.*
-import io.ktor.serialization.jackson.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.cio.*
-import io.ktor.server.config.*
-import io.ktor.server.engine.*
-import io.ktor.server.plugins.callloging.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.jackson.jackson
+import io.ktor.server.application.install
+import io.ktor.server.application.log
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.authenticate
+import io.ktor.server.cio.CIO
+import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.connector
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.header
+import io.ktor.server.request.httpMethod
+import io.ktor.server.request.path
+import io.ktor.server.response.respond
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
 import no.nav.etterlatte.behandling.grunnlagRoute
 import no.nav.etterlatte.behandling.vedtakRoute
 import no.nav.etterlatte.health.healthApi
@@ -27,47 +34,53 @@ import org.slf4j.event.Level
 import java.util.*
 
 class Server(applicationContext: ApplicationContext) {
-    private val engine = embeddedServer(CIO, environment = applicationEngineEnvironment {
-        module {
-            install(ContentNegotiation) {
-                jackson {
-                    registerModule(JavaTimeModule())
-                    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    private val engine = embeddedServer(
+        CIO,
+        environment = applicationEngineEnvironment {
+            module {
+                install(ContentNegotiation) {
+                    jackson {
+                        registerModule(JavaTimeModule())
+                        disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    }
                 }
-            }
-            install(CallLogging) {
-                level = Level.INFO
-                filter { call -> !call.request.path().startsWith("/health") }
-                format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
-                mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
-            }
-            install(StatusPages) {
-                exception<Throwable> { call, cause ->
-                    call.application.log.error("En feil oppstod: ${cause.message}", cause)
-                    call.respond(HttpStatusCode.InternalServerError, "En feil oppstod: ${cause.message}")
+                install(CallLogging) {
+                    level = Level.INFO
+                    filter { call -> !call.request.path().startsWith("/health") }
+                    format { call ->
+                        "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}"
+                    }
+                    mdc(CORRELATION_ID) { call ->
+                        call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString()
+                    }
                 }
-            }
+                install(StatusPages) {
+                    exception<Throwable> { call, cause ->
+                        call.application.log.error("En feil oppstod: ${cause.message}", cause)
+                        call.respond(HttpStatusCode.InternalServerError, "En feil oppstod: ${cause.message}")
+                    }
+                }
 
-            install(Authentication) {
-                tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
-            }
+                install(Authentication) {
+                    tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
+                }
 
-            routing {
-                healthApi()
-                authenticate {
-                    route("api") {
-                        behandlingRoute(applicationContext.behandlingService)
-                        oppgaveRoute(applicationContext.oppgaveService)
-                        vedtakRoute(applicationContext.vedtakService)
-                        grunnlagRoute(applicationContext.grunnlagService)
+                routing {
+                    healthApi()
+                    authenticate {
+                        route("api") {
+                            behandlingRoute(applicationContext.behandlingService)
+                            oppgaveRoute(applicationContext.oppgaveService)
+                            vedtakRoute(applicationContext.vedtakService)
+                            grunnlagRoute(applicationContext.grunnlagService)
+                        }
                     }
                 }
             }
+            connector { port = 8080 }
         }
-        connector { port = 8080 }
-    })
+    )
 
     fun run() = engine.start(true)
 }
-

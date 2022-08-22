@@ -25,8 +25,9 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 "SELECT id, sak_id, behandling_opprettet, sist_endret, " +
-                        "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
-                        "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak FROM behandling where id = ? AND behandlingstype = ?"
+                    "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
+                    "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak " +
+                    "FROM behandling where id = ? AND behandlingstype = ?"
             )
         stmt.setObject(1, id)
         stmt.setString(2, type.name)
@@ -55,8 +56,9 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 "SELECT id, sak_id, behandling_opprettet, sist_endret, " +
-                        "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
-                        "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak FROM behandling where behandlingstype = ?"
+                    "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
+                    "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak " +
+                    "FROM behandling where behandlingstype = ?"
             )
         stmt.setString(1, type.name)
         return stmt.executeQuery().toList {
@@ -71,8 +73,8 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 "SELECT id, sak_id, behandling_opprettet, sist_endret, " +
-                        "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
-                        "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak FROM behandling"
+                    "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
+                    "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak FROM behandling"
             )
         return stmt.executeQuery().behandlingsListe()
     }
@@ -81,14 +83,15 @@ class BehandlingDao(private val connection: () -> Connection) {
         val stmt =
             connection().prepareStatement(
                 "SELECT id, sak_id, behandling_opprettet, sist_endret, " +
-                        "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
-                        "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak FROM behandling where sak_id = ?"
+                    "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
+                    "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak " +
+                    "FROM behandling where sak_id = ?"
             )
         stmt.setLong(1, sakid)
         return stmt.executeQuery().behandlingsListe()
     }
 
-    fun alleLoependeBehandlingerISak(sakid: Long): List<Behandling> {
+    fun alleAktiveBehandlingerISak(sakid: Long): List<Behandling> {
         with(connection()) {
             val stmt =
                 prepareStatement(
@@ -103,19 +106,19 @@ class BehandlingDao(private val connection: () -> Connection) {
             stmt.setLong(1, sakid)
             stmt.setArray(
                 2,
-                createArrayOf("text", BehandlingStatus.loependeBehandlinger().map { it.name }.toTypedArray())
+                createArrayOf("text", BehandlingStatus.underBehandling().map { it.name }.toTypedArray())
             )
             return stmt.executeQuery().behandlingsListe()
         }
     }
 
-
     fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling> {
         val stmt =
             connection().prepareStatement(
                 "SELECT id, sak_id, behandling_opprettet, sist_endret, " +
-                        "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
-                        "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak FROM behandling where soeker = ?"
+                    "soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, " +
+                    "gyldighetssproving, status, oppgave_status, behandlingstype, revurdering_aarsak " +
+                    "FROM behandling where soeker = ?"
             )
         stmt.setString(1, fnr)
         return stmt.executeQuery().behandlingsListe()
@@ -133,12 +136,12 @@ class BehandlingDao(private val connection: () -> Connection) {
             soeker = rs.getString("soeker"),
             gjenlevende = rs.getString("gjenlevende").let { objectMapper.readValue(it) },
             avdoed = rs.getString("avdoed").let { objectMapper.readValue(it) },
-            soesken = rs.getString("soesken").let { objectMapper.readValue(it) },
+            soesken = rs.getString("soesken").let { objectMapper.readValue(it) }
         ),
         gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         type = rs.getString("behandlingstype").let { BehandlingType.valueOf(it) },
-        oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) },
+        oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) }
     )
 
     private fun asRevurdering(rs: ResultSet) = Revurdering(
@@ -152,7 +155,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             soeker = rs.getString("soeker"),
             gjenlevende = rs.getString("gjenlevende").let { objectMapper.readValue(it) },
             avdoed = rs.getString("avdoed").let { objectMapper.readValue(it) },
-            soesken = rs.getString("soesken").let { objectMapper.readValue(it) },
+            soesken = rs.getString("soesken").let { objectMapper.readValue(it) }
         ),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         type = rs.getString("behandlingstype").let { BehandlingType.valueOf(it) },
@@ -165,7 +168,8 @@ class BehandlingDao(private val connection: () -> Connection) {
             connection().prepareStatement(
                 """
                 INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, soekand_mottatt_dato, innsender, soeker, gjenlevende, avdoed, soesken, oppgave_status)
-                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimIndent()
+                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """.trimIndent()
             )
         with(foerstegangsbehandling) {
             stmt.setObject(1, id)
@@ -196,13 +200,13 @@ class BehandlingDao(private val connection: () -> Connection) {
         stmt.executeUpdate()
     }
 
-
     fun opprettRevurdering(revurdering: Revurdering) {
         val stmt =
             connection().prepareStatement(
                 """
                 INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype , innsender, soeker, gjenlevende, avdoed, soesken, oppgave_status, revurdering_aarsak )
-                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""".trimIndent()
+                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """.trimIndent()
             )
         with(revurdering) {
             stmt.setObject(1, id)
@@ -230,10 +234,13 @@ class BehandlingDao(private val connection: () -> Connection) {
         require(stmt.executeUpdate() == 1)
     }
 
-
     fun lagreGyldighetsproving(behandling: Foerstegangsbehandling) {
         val stmt =
-            connection().prepareStatement("UPDATE behandling SET gyldighetssproving = ?, status = ?, oppgave_status = ?, sist_endret = ? WHERE id = ?")
+            connection().prepareStatement(
+                "UPDATE behandling " +
+                    "SET gyldighetssproving = ?, status = ?, oppgave_status = ?, sist_endret = ? " +
+                    "WHERE id = ?"
+            )
         stmt.setObject(1, objectMapper.writeValueAsString(behandling.gyldighetsproeving))
         stmt.setString(2, behandling.status.name)
         stmt.setString(3, behandling.oppgaveStatus?.name)
@@ -297,4 +304,3 @@ class BehandlingDao(private val connection: () -> Connection) {
 
 val objectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-

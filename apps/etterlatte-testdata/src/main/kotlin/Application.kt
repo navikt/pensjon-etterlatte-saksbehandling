@@ -22,7 +22,7 @@ import io.ktor.server.cio.*
 import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import io.ktor.server.mustache.*
-import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -81,33 +81,36 @@ val features: List<TestDataFeature> = listOf(
 )
 
 fun main() {
-    embeddedServer(CIO, applicationEngineEnvironment {
-        module {
-            install(Mustache) {
-                mustacheFactory = DefaultMustacheFactory("templates")
-            }
-
-            if (localDevelopment) {
-                routing {
-                    api()
-                }
-            } else {
-                install(Authentication) {
-                    tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
+    embeddedServer(
+        CIO,
+        applicationEngineEnvironment {
+            module {
+                install(Mustache) {
+                    mustacheFactory = DefaultMustacheFactory("templates")
                 }
 
-                routing {
-                    get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
-                    get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
-
-                    authenticate {
+                if (localDevelopment) {
+                    routing {
                         api()
+                    }
+                } else {
+                    install(Authentication) {
+                        tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
+                    }
+
+                    routing {
+                        get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
+                        get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
+
+                        authenticate {
+                            api()
+                        }
                     }
                 }
             }
+            connector { port = 8080 }
         }
-        connector { port = 8080 }
-    }).start(true)
+    ).start(true)
 }
 
 private fun Route.api() {

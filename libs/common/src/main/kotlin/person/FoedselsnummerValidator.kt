@@ -13,10 +13,10 @@ class FoedselsnummerValidator {
          * Control digits are valid.
          */
         fun isValid(value: String): Boolean {
-            return !Regex("[0]{11}").matches(value)
-                    && value.length == 11
-                    && value.toBigIntegerOrNull() != null
-                    && validateControlDigits(value)
+            return !Regex("[0]{11}").matches(value) &&
+                value.length == 11 &&
+                value.toBigIntegerOrNull() != null &&
+                validateControlDigits(value)
         }
 
         /**

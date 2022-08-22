@@ -17,14 +17,14 @@ import kotlin.system.exitProcess
 
 data class TilbakekrevingEvent(
     @JsonProperty(eventNameKey) val event: String,
-    @JsonProperty("tilbakekreving") val tilbakekreving: Map<String, Any>, // TODO finne ut hva som bør sendes her
+    @JsonProperty("tilbakekreving") val tilbakekreving: Map<String, Any> // TODO finne ut hva som bør sendes her
 )
 
 class KravgrunnlagConsumer(
     private val rapidsConnection: RapidsConnection,
     private val tilbakekrevingService: TilbakekrevingService,
     private val jmsConnectionFactory: JmsConnectionFactory,
-    private val queue: String,
+    private val queue: String
 ) : MessageListener {
 
     fun start() {
@@ -80,5 +80,4 @@ class KravgrunnlagConsumer(
     companion object {
         private val logger = LoggerFactory.getLogger(KravgrunnlagConsumer::class.java)
     }
-
 }

@@ -1,11 +1,12 @@
 import { IApiResponse } from './types'
+import { IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
 
 const path = process.env.REACT_APP_VEDTAK_URL
 
-export const hentBehandling = async (id: string): Promise<IApiResponse<any>> => {
+export const hentBehandling = async (id: string): Promise<IApiResponse<IDetaljertBehandling>> => {
   try {
     const result: Response = await fetch(`${path}/api/behandling/${id}`)
-    const data: any = await result.json()
+    const data: IDetaljertBehandling = await result.json()
 
     return {
       status: result.status,

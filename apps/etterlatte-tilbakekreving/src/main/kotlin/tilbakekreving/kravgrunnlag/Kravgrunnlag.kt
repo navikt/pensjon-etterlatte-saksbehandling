@@ -22,7 +22,7 @@ data class Kravgrunnlag(
     val saksbehandler: NavIdent,
     val sisteUtbetalingslinjeId: UUID30,
     val grunnlagsperioder: List<Grunnlagsperiode>,
-    val mottattKravgrunnlagXml: String,
+    val mottattKravgrunnlagXml: String
 
     // val behandlingId: BehandlingId?, denne burde nok heller være koblet på feks en tilbakekreving
     // val vedtakIdGjelder --> trengs denne?
@@ -35,12 +35,9 @@ data class Kravgrunnlag(
      */
 ) {
 
-
-
     data class VedtakId(val value: Long)
     data class Kontrollfelt(val value: String)
     data class UUID30(val value: String)
-
 
     enum class KravgrunnlagStatus {
         ANNU, ANOM, AVSL, BEHA, ENDR, FEIL, MANU, NY, SPER;
@@ -49,7 +46,7 @@ data class Kravgrunnlag(
     data class Grunnlagsperiode(
         val periode: Periode,
         val beloepSkattMnd: BigDecimal,
-        val grunnlagsbeloep: List<Grunnlagsbeloep>,
+        val grunnlagsbeloep: List<Grunnlagsbeloep>
     ) {
 
         data class Periode(val fraOgMed: LocalDate, val tilOgMed: LocalDate)
@@ -61,19 +58,14 @@ data class Kravgrunnlag(
             val beloepNyUtbetaling: BigDecimal,
             val beloepSkalTilbakekreves: BigDecimal,
             val beloepSkalIkkeTilbakekreves: BigDecimal,
-            val skatteProsent: BigDecimal,
+            val skatteProsent: BigDecimal
         ) {
             data class KlasseKode(val value: String) // TODO: finne ut hvilke verdier klassekodene kan ha
             enum class KlasseType {
-                YTEL, SKAT, FEIL,JUST
+                YTEL, SKAT, FEIL, JUST
             }
         }
 
         fun UUID.toUUID30() = this.toString().replace("-", "").substring(0, 30).let { UUID30(it) }
     }
 }
-
-
-
-
-

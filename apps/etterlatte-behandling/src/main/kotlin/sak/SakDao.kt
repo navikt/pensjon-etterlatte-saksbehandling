@@ -26,8 +26,6 @@ class SakDao(private val connection: () -> Connection) {
                 id = getLong(1)
             )
         }
-
-
     }
 
     fun opprettSak(fnr: String, type: String): Sak {
@@ -35,13 +33,15 @@ class SakDao(private val connection: () -> Connection) {
             connection().prepareStatement("INSERT INTO sak(sakType, fnr) VALUES(?, ?) RETURNING id, sakType, fnr")
         statement.setString(1, type)
         statement.setString(2, fnr)
-        return requireNotNull(statement.executeQuery().singleOrNull {
-            Sak(
-                sakType = getString(2),
-                ident = getString(3),
-                id = getLong(1)
-            )
-        })
+        return requireNotNull(
+            statement.executeQuery().singleOrNull {
+                Sak(
+                    sakType = getString(2),
+                    ident = getString(3),
+                    id = getLong(1)
+                )
+            }
+        )
     }
 
     // TODO: høre med Lars Erik om det kan returneres en liste av saker her, mtp at hver person kun kan ha
@@ -63,7 +63,4 @@ class SakDao(private val connection: () -> Connection) {
         statement.setLong(1, id)
         statement.executeUpdate()
     }
-
 }
-
-

@@ -19,7 +19,11 @@ import no.nav.etterlatte.libs.common.vikaar.PersoninfoGjenlevendeForelder
 import no.nav.etterlatte.libs.common.vikaar.PersoninfoSoeker
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
@@ -61,7 +65,10 @@ internal class DBTest {
         val now = LocalDateTime.now()
         val beregningsperiode = listOf<Beregningsperiode>()
         vedtaksvurderingService.lagreBeregningsresultat(
-            "12321423523545", uuid, "", BeregningsResultat(
+            "12321423523545",
+            uuid,
+            "",
+            BeregningsResultat(
                 UUID.randomUUID(),
                 Beregningstyper.BPGP,
                 Endringskode.NY,
@@ -77,11 +84,16 @@ internal class DBTest {
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
         val now = LocalDateTime.now()
         vedtaksvurderingService.lagreVilkaarsresultat(
-            "12321423523545", uuid, "fnr", VilkaarResultat(
+            "12321423523545",
+            "BARNEPENSJON",
+            uuid,
+            "fnr",
+            VilkaarResultat(
                 VurderingsResultat.OPPFYLT,
                 emptyList(),
                 now
-            ), LocalDate.now()
+            ),
+            LocalDate.now()
         )
     }
 
@@ -91,7 +103,10 @@ internal class DBTest {
         val now = LocalDateTime.now()
 
         vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(
-            "12321423523545", uuid, "fnr", KommerSoekerTilgode(
+            "12321423523545",
+            uuid,
+            "fnr",
+            KommerSoekerTilgode(
                 VilkaarResultat(
                     VurderingsResultat.OPPFYLT,
                     emptyList(),
@@ -113,7 +128,7 @@ internal class DBTest {
                         PersonRolle.BARN,
                         listOf(),
                         null,
-                        LocalDate.of(2010, 1, 1),
+                        LocalDate.of(2010, 1, 1)
                     ),
                     gjenlevendeForelder = PersoninfoGjenlevendeForelder(
                         "Navn",
@@ -159,7 +174,6 @@ internal class DBTest {
         val beregnet = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         Assertions.assertEquals(VedtakStatus.BEREGNET, beregnet?.vedtakStatus)
 
-
         val vedtaket = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         assert(vedtaket?.beregningsResultat != null)
         assert(vedtaket?.avkortingsResultat != null)
@@ -174,13 +188,13 @@ internal class DBTest {
         Assertions.assertTrue(fattetVedtak?.vedtakFattet!!)
         Assertions.assertEquals(VedtakStatus.FATTET_VEDTAK, fattetVedtak.vedtakStatus)
 
-        vedtaksvurderingService.underkjennVedtak( uuid)
+        vedtaksvurderingService.underkjennVedtak(uuid)
         val underkjentVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         Assertions.assertEquals(VedtakStatus.RETURNERT, underkjentVedtak?.vedtakStatus)
 
-        vedtaksvurderingService.fattVedtak( uuid, "saksbehandler")
+        vedtaksvurderingService.fattVedtak(uuid, "saksbehandler")
 
-        vedtaksvurderingService.attesterVedtak( uuid, "attestant")
+        vedtaksvurderingService.attesterVedtak(uuid, "attestant")
         val attestertVedtak = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         Assertions.assertNotNull(attestertVedtak?.attestant)
         Assertions.assertNotNull(attestertVedtak?.datoattestert)
@@ -188,6 +202,5 @@ internal class DBTest {
         Assertions.assertEquals(VedtakStatus.ATTESTERT, attestertVedtak?.vedtakStatus)
         vedtaksvurderingService.slettSak(12321423523545)
         Assertions.assertNull(vedtaksvurderingService.hentVedtak("12321423523545", uuid))
-
     }
 }

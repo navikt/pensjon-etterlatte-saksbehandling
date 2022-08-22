@@ -7,7 +7,7 @@ import org.flywaydb.core.Flyway
 class DataSourceBuilder(
     private val jdbcUrl: String,
     private val username: String,
-    private val password: String,
+    private val password: String
 ) {
     private val hikariConfig = HikariConfig().also {
         it.jdbcUrl = jdbcUrl
@@ -29,5 +29,4 @@ class DataSourceBuilder(
             .dataSource(dataSource)
             .load()
             .migrate()
-
 }

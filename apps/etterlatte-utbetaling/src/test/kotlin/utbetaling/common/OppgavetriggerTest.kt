@@ -33,9 +33,7 @@ internal class OppgavetriggerTest {
     }
     private val grensesnittsavstemmingService = mockk<GrensesnittsavstemmingService>() {
         every { startGrensesnittsavstemming() } returns Unit
-
     }
-
 
     private val inspector = TestRapid().apply {
         Oppgavetrigger(
@@ -44,7 +42,6 @@ internal class OppgavetriggerTest {
             grensesnittsavstemmingService = grensesnittsavstemmingService
         )
     }
-
 
     @Test
     fun `melding skal starte grensesnittavstemming`() {
@@ -68,5 +65,4 @@ internal class OppgavetriggerTest {
         val oppgave_grensesnittavstemming = readFile("/oppgave_grensesnittavstemming.json")
         val oppgave_sett_kvittering = readFile("/oppgave_sett_kvittering_manuelt.json")
     }
-
 }

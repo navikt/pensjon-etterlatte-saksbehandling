@@ -38,7 +38,6 @@ object TestHelper
 fun readFile(file: String) = TestHelper::class.java.getResource(file)?.readText()
     ?: throw FileNotFoundException("Fant ikke filen $file")
 
-
 fun utbetalingsvedtak(
     vedtakId: Long = 1,
     utbetalingsperioder: List<Utbetalingsperiode> = listOf(
@@ -57,15 +56,15 @@ fun utbetalingsvedtak(
     ),
     sak = Sak(
         id = 1,
-        ident = "12345678913",
+        ident = "12345678913"
     ),
     vedtakFattet = VedtakFattet(
-        ansvarligSaksbehandler = "12345678",
+        ansvarligSaksbehandler = "12345678"
     ),
     attestasjon = Attestasjon(
-        attestant = "87654321",
+        attestant = "87654321"
     ),
-    pensjonTilUtbetaling = utbetalingsperioder,
+    pensjonTilUtbetaling = utbetalingsperioder
 )
 
 fun oppdrag(utbetaling: Utbetaling, foerstegangsbehandling: Boolean = true) =
@@ -160,9 +159,9 @@ fun utbetalingslinje(
         opprettet = Tidspunkt.now(),
         sakId = sakId,
         periode = PeriodeForUtbetaling(
-            fra = periodeFra,
+            fra = periodeFra
         ),
-        beloep = beloep,
+        beloep = beloep
     )
 
 fun utbetalingMedOpphoer() = utbetaling(

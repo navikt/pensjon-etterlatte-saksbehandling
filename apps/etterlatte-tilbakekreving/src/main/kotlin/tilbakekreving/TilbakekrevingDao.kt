@@ -22,7 +22,7 @@ class TilbakekrevingDao(
     val dataSource: DataSource
 ) {
     fun lagreMottattKravgrunnlag(
-        mottattKravgrunnlag: Tilbakekreving.MottattKravgrunnlag,
+        mottattKravgrunnlag: Tilbakekreving.MottattKravgrunnlag
     ): Tilbakekreving.MottattKravgrunnlag =
         using(sessionOf(dataSource)) { session ->
             session.transaction { tx ->
@@ -39,7 +39,7 @@ class TilbakekrevingDao(
                             "behandling_id" to behandlingId.value.param<UUID>(),
                             "kravgrunnlag_id" to kravgrunnlagId.value.param<Long>(),
                             "opprettet" to Timestamp.from(mottattKravgrunnlag.opprettet.instant).param<Timestamp>(),
-                            "kravgrunnlag" to kravgrunnlag.toJson().param<String>(),
+                            "kravgrunnlag" to kravgrunnlag.toJson().param<String>()
                         )
                     }
                 ).let { tx.run(it.asUpdate) }
@@ -63,7 +63,7 @@ class TilbakekrevingDao(
                         """,
                     paramMap =
                     mapOf(
-                        "kravgrunnlag_id" to fattetVedtak.kravgrunnlagId.value,
+                        "kravgrunnlag_id" to fattetVedtak.kravgrunnlagId.value
                     )
                 ).let { tx.run(it.asUpdate) }
             }
@@ -83,9 +83,11 @@ class TilbakekrevingDao(
                 paramMap = mapOf("kravgrunnlag_id" to kravgrunnlagId.param<Long>())
             )
                 .let {
-                    session.run(it.map { row ->
-                        toTilbakekreving(row)
-                    }.asSingle)
+                    session.run(
+                        it.map { row ->
+                            toTilbakekreving(row)
+                        }.asSingle
+                    )
                 }
         }
 
@@ -103,7 +105,7 @@ class TilbakekrevingDao(
                         opprettet = Tidspunkt(sqlTimestamp("opprettet").toInstant()),
                         kravgrunnlag = objectMapper.readValue(string("kravgrunnlag")),
                         vedtak = objectMapper.readValue(vedtak),
-                        attestasjon = objectMapper.readValue(attestasjon),
+                        attestasjon = objectMapper.readValue(attestasjon)
                     )
                 }
                 vedtak != null -> {
@@ -113,7 +115,7 @@ class TilbakekrevingDao(
                         kravgrunnlagId = KravgrunnlagId(row.long("kravgrunnlag_id")),
                         opprettet = Tidspunkt(sqlTimestamp("opprettet").toInstant()),
                         kravgrunnlag = objectMapper.readValue(string("kravgrunnlag")),
-                        vedtak = objectMapper.readValue(vedtak),
+                        vedtak = objectMapper.readValue(vedtak)
                     )
                 }
                 kravgrunnlag != null -> {
@@ -122,7 +124,7 @@ class TilbakekrevingDao(
                         behandlingId = BehandlingId(row.uuid("behandling_id"), Kravgrunnlag.UUID30("")), // TODO
                         kravgrunnlagId = KravgrunnlagId(row.long("kravgrunnlag_id")),
                         opprettet = Tidspunkt(sqlTimestamp("opprettet").toInstant()),
-                        kravgrunnlag = objectMapper.readValue(kravgrunnlag),
+                        kravgrunnlag = objectMapper.readValue(kravgrunnlag)
                     )
                 }
                 else -> throw RuntimeException("Kunne ikke mappe tilbakekreving")

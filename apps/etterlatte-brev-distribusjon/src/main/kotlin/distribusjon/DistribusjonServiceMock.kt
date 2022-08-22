@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.libs.common.distribusjon.DistribusjonsType
 import java.util.*
 
-
 class DistribusjonServiceMock : DistribusjonService {
     override fun distribuerJournalpost(
         journalpostId: String,

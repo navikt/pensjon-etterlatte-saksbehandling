@@ -13,7 +13,9 @@ dependencies {
 
     implementation("com.ibm.mq:com.ibm.mq.allclient:9.2.5.0")
     implementation("org.messaginghub:pooled-jms:2.0.5")
-    implementation("com.github.navikt.tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon:1.4201aa")
+    implementation(
+        "com.github.navikt.tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon:1.4201aa"
+    )
     implementation("com.github.navikt.tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon:1.4201aa")
 
     implementation("javax.xml.bind:jaxb-api:2.3.0")

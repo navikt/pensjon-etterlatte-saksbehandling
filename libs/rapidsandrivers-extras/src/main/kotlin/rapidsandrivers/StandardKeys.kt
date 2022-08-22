@@ -28,7 +28,6 @@ var JsonMessage.correlationId: String?
             ?: throw IllegalArgumentException("Kan ikke sette correlationId til null")
     }
 
-
 fun River.behov(behov: String) {
     validate { it.demandValue(behovNameKey, behov) }
 }

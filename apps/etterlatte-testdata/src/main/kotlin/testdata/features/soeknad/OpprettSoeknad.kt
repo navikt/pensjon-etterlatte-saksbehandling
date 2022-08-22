@@ -1,5 +1,6 @@
 package testdata.features.soeknad
 
+import JsonMessage
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.server.application.*
@@ -8,7 +9,6 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.etterlatte.*
-import no.nav.etterlatte.batch.JsonMessage
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -22,7 +22,8 @@ object OpprettSoeknadFeature : TestDataFeature {
             get {
                 call.respond(
                     MustacheContent(
-                        "soeknad/ny-soeknad.hbs", mapOf(
+                        "soeknad/ny-soeknad.hbs",
+                        mapOf(
                             "beskrivelse" to beskrivelse,
                             "path" to path
                         )
@@ -64,7 +65,8 @@ object OpprettSoeknadFeature : TestDataFeature {
 
                 call.respond(
                     MustacheContent(
-                        "soeknad/soeknad-sendt.hbs", mapOf(
+                        "soeknad/soeknad-sendt.hbs",
+                        mapOf(
                             "path" to path,
                             "beskrivelse" to beskrivelse,
                             "partisjon" to partisjon,
@@ -74,7 +76,6 @@ object OpprettSoeknadFeature : TestDataFeature {
                 )
             }
         }
-
 }
 
 private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFnr: String): String {

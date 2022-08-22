@@ -5,20 +5,32 @@ import io.mockk.coEvery
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.*
+import no.nav.etterlatte.behandling.BehandlingKlient
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.EtterlatteGrunnlag
+import no.nav.etterlatte.behandling.EtterlatteVedtak
+import no.nav.etterlatte.behandling.PdltjenesterKlient
+import no.nav.etterlatte.behandling.Vedtak
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.AdresseType
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.typer.LagretHendelse
 import no.nav.etterlatte.typer.LagretHendelser
+import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
@@ -30,7 +42,6 @@ import java.time.LocalDateTime
 import java.util.*
 
 internal class BehandlingServiceTest {
-
 
     @MockK
     lateinit var behandlingKlient: BehandlingKlient
@@ -55,26 +66,17 @@ internal class BehandlingServiceTest {
     @Test
     fun hentPerson() {
         val person = mockPerson()
-        val sakliste = Saker(emptyList())
+        val sakliste = Saker(listOf(Sak("fnr", "", 1)))
+        val behandlingsListe = BehandlingListe(behandlinger = emptyList())
+
         coEvery { pdlKlient.hentPerson(fnr, accessToken) } returns person
         coEvery { behandlingKlient.hentSakerForPerson(fnr, accessToken) } returns sakliste
+        coEvery { behandlingKlient.hentBehandlingerForSak(1, accessToken) } returns BehandlingListe(emptyList())
 
-        val respons = runBlocking { service.hentPerson(fnr, accessToken) }
+        val respons = runBlocking { service.hentPersonOgSaker(fnr, accessToken) }
 
         assertSame(person, respons.person)
-        assertSame(sakliste, respons.saker)
-    }
-
-    @Test
-    fun opprettSak() {
-        val sak = no.nav.etterlatte.typer.Sak(fnr, SoeknadType.BARNEPENSJON.name, 43)
-        coEvery { behandlingKlient.opprettSakForPerson(fnr, SoeknadType.BARNEPENSJON, accessToken) } returns sak
-
-        val respons = runBlocking { service.opprettSak(fnr, SoeknadType.BARNEPENSJON, accessToken) }
-
-        assertEquals(sak.id, respons.id)
-        assertEquals(sak.sakType, respons.sakType)
-        assertEquals(sak.ident, respons.ident)
+        assertEquals(behandlingsListe, respons.behandlingListe)
     }
 
     @Test
@@ -90,7 +92,7 @@ internal class BehandlingServiceTest {
 
     @Test
     fun hentBehandlingerForSak() {
-        val behandling = BehandlingSammendrag(UUID.randomUUID(), 4, null, null, null)
+        val behandling = BehandlingSammendrag(UUID.randomUUID(), 4, null, null, null, null, null)
         coEvery { behandlingKlient.hentBehandlingerForSak(4, accessToken) } returns BehandlingListe(listOf(behandling))
 
         val respons = runBlocking { service.hentBehandlingerForSak(4, accessToken) }
@@ -114,6 +116,7 @@ internal class BehandlingServiceTest {
             null,
             null,
             null,
+            null,
             null
         )
         val vedtak = Vedtak(
@@ -128,7 +131,7 @@ internal class BehandlingServiceTest {
             null,
             null,
             null,
-            null,
+            null
         )
         val hendelser = LagretHendelser(
             hendelser = listOf(
@@ -156,7 +159,7 @@ internal class BehandlingServiceTest {
 
         val gjenlevende = mockPerson().copy(
             avdoedesBarn = listOf(
-                mockPerson().copy(fornavn = "TestKari"),
+                mockPerson().copy(fornavn = "TestKari")
             )
         )
         val avdoedOpplysning = Grunnlagsopplysning(
@@ -164,14 +167,14 @@ internal class BehandlingServiceTest {
             Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
             Opplysningstyper.AVDOED_PDL_V1,
             objectMapper.createObjectNode(),
-            avdoed,
+            avdoed
         )
         val gjenlevendeOpplysning = Grunnlagsopplysning(
             UUID.randomUUID(),
             Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
             Opplysningstyper.AVDOED_PDL_V1,
             objectMapper.createObjectNode(),
-            gjenlevende,
+            gjenlevende
         )
 
         coEvery { behandlingKlient.hentBehandling(behandlingid.toString(), accessToken) } returns detaljertBehandling
@@ -202,24 +205,6 @@ internal class BehandlingServiceTest {
         assertEquals("TestOla", respons.familieforhold?.avdoede?.opplysning?.avdoedesBarn?.get(1)!!.fornavn)
         assertEquals(1, respons.familieforhold?.gjenlevende?.opplysning?.avdoedesBarn?.size)
         assertEquals("TestKari", respons.familieforhold?.gjenlevende?.opplysning?.avdoedesBarn?.get(0)!!.fornavn)
-    }
-
-    @Test
-    fun opprettBehandling() {
-        val behandlingbehov = BehandlingsBehov(4, null)
-        val behandlingId = UUID.randomUUID()
-        coEvery { behandlingKlient.opprettBehandling(behandlingbehov, accessToken) } returns BehandlingSammendrag(
-            behandlingId,
-            4,
-            null,
-            null,
-            null
-        )
-
-        val respons = runBlocking { service.opprettBehandling(BehandlingsBehov(4, null), accessToken) }
-
-        assertEquals(4, respons.sak)
-        assertEquals(behandlingId, respons.id)
     }
 
     private fun mockPerson(

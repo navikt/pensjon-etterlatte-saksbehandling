@@ -22,7 +22,7 @@ internal class VedtakMottakerTest {
     private val inspector = TestRapid().apply {
         VedtakMottaker(
             rapidsConnection = this,
-            utbetalingService = utbetalingService,
+            utbetalingService = utbetalingService
         )
     }
 
@@ -53,7 +53,7 @@ internal class VedtakMottakerTest {
         )
 
         every { utbetalingService.iverksettUtbetaling(any()) } returns
-                IverksettResultat.UtbetalingForVedtakEksisterer(utbetaling)
+            IverksettResultat.UtbetalingForVedtakEksisterer(utbetaling)
 
         inspector.apply { sendTestMessage(ATTESTERT_VEDTAK) }
 
@@ -77,7 +77,7 @@ internal class VedtakMottakerTest {
         )
 
         every { utbetalingService.iverksettUtbetaling(any()) } returns
-                IverksettResultat.UtbetalingslinjerForVedtakEksisterer(utbetalingslinjer)
+            IverksettResultat.UtbetalingslinjerForVedtakEksisterer(utbetalingslinjer)
 
         inspector.apply { sendTestMessage(ATTESTERT_VEDTAK) }
 

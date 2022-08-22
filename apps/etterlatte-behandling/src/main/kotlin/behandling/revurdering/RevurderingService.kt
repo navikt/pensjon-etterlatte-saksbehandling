@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelse
 import java.util.*
 
-
 interface RevurderingService {
     fun hentRevurdering(behandling: UUID): Revurdering?
     fun hentRevurderinger(): List<Revurdering>
@@ -30,7 +29,6 @@ class RealRevurderingService(
     private val revurderingFactory: RevurderingFactory,
     private val behandlingHendelser: SendChannel<Pair<UUID, BehandlingHendelseType>>
 ) : RevurderingService {
-
 
     override fun slettRevurderingISak(sakId: Long) {
         return inTransaction {

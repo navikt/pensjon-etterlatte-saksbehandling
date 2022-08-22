@@ -4,7 +4,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.nio.ByteBuffer
 import java.util.*
 
-
 data class UUIDBase64(val value: String = encodeUUIDBase64(UUID.randomUUID())) {
     companion object {
         private fun encodeUUIDBase64(uuid: UUID): String {
@@ -30,5 +29,5 @@ data class Grensesnittavstemming(
     val opprettet: Tidspunkt,
     val periode: Avstemmingsperiode,
     val antallOppdrag: Int,
-    val avstemmingsdata: String,
+    val avstemmingsdata: String
 )

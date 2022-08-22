@@ -3,7 +3,12 @@ package no.nav.etterlatte.barnepensjon
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.vikaar.*
+import no.nav.etterlatte.libs.common.vikaar.Kriterie
+import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
+import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
+import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -75,7 +80,7 @@ fun opplysningsGrunnlagNull(
 
 fun harKunNorskePdlAdresserEtterDato(
     adresserPdl: Adresser,
-    dato: LocalDate,
+    dato: LocalDate
 ): VurderingsResultat {
     val bostedResultat = harKunNorskeAdresserEtterDato(adresserPdl.bostedadresse, dato)
     val oppholdResultat = harKunNorskeAdresserEtterDato(adresserPdl.oppholdadresse, dato)
@@ -97,7 +102,9 @@ fun harKunNorskeAdresserEtterDato(adresser: List<Adresse>?, dato: LocalDate): Vu
     val adresserEtterDato =
         adresser?.filter { it.gyldigTilOgMed?.toLocalDate()?.isAfter(dato) == true || it.aktiv }
     val harUtenlandskeAdresserIPdl =
-        adresserEtterDato?.any { it.type == AdresseType.UTENLANDSKADRESSE || it.type == AdresseType.UTENLANDSKADRESSEFRITTFORMAT }
+        adresserEtterDato?.any {
+            it.type == AdresseType.UTENLANDSKADRESSE || it.type == AdresseType.UTENLANDSKADRESSEFRITTFORMAT
+        }
 
     return if (harUtenlandskeAdresserIPdl == true) {
         VurderingsResultat.IKKE_OPPFYLT
@@ -111,7 +118,9 @@ fun hentAdresseperioderINorge(adresser: List<Adresse>?, doedsdato: LocalDate): L
     val adresserEtterDato =
         adresser?.filter { it.gyldigTilOgMed?.toLocalDate()?.isAfter(femAarFoerDoedsdato) == true || it.aktiv }
     val norskeAdresserEtterDato =
-        adresserEtterDato?.filter { it.type != AdresseType.UTENLANDSKADRESSE && it.type != AdresseType.UTENLANDSKADRESSEFRITTFORMAT }
+        adresserEtterDato?.filter {
+            it.type != AdresseType.UTENLANDSKADRESSE && it.type != AdresseType.UTENLANDSKADRESSEFRITTFORMAT
+        }
 
     val adresseperioder = norskeAdresserEtterDato?.map { setPerioder(it, doedsdato, femAarFoerDoedsdato) }
 
@@ -138,7 +147,6 @@ fun setPerioder(adresse: Adresse, doedsdato: LocalDate, femAarFoerDoedsdato: Loc
         } else if (adresse.gyldigTilOgMed?.toLocalDate()?.isAfter(doedsdato) == true) {
             return doedsdato
         } else {
-
             return adresse.gyldigTilOgMed?.toLocalDate()
         }
     }
@@ -151,7 +159,6 @@ fun setPerioder(adresse: Adresse, doedsdato: LocalDate, femAarFoerDoedsdato: Loc
     } else {
         null
     }
-
 }
 
 fun kombinerPerioder(perioder: List<Periode>?): Stack<Periode>? {
@@ -185,7 +192,6 @@ fun hentGaps(stack: Stack<Periode>?, femAarFoerDoedsdato: LocalDate, doedsdato: 
     } else {
         val liste = stack.toList().sortedBy { it.gyldigFra }
         val listeDes = liste.sortedByDescending { it.gyldigTil }
-
 
         if (liste.first().gyldigFra.isAfter(femAarFoerDoedsdato)) {
             val gap = Periode(femAarFoerDoedsdato, liste[0].gyldigFra.minusDays(1))

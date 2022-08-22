@@ -12,7 +12,7 @@ data class ApplicationProperties(
     val mqChannel: String,
     val mqKravgrunnlagQueue: String,
     val serviceUserUsername: String,
-    val serviceUserPassword: String,
+    val serviceUserPassword: String
 ) {
     companion object {
         fun fromEnv(env: Map<String, String>) = env.run {
@@ -28,7 +28,7 @@ data class ApplicationProperties(
                 mqChannel = value("OPPDRAG_MQ_CHANNEL"),
                 mqKravgrunnlagQueue = value("OPPDRAG_KRAVGRUNNLAG_MQ_NAME"),
                 serviceUserUsername = value("srvuser"),
-                serviceUserPassword = value("srvpwd"),
+                serviceUserPassword = value("srvpwd")
             )
         }
 

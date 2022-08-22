@@ -1,5 +1,6 @@
 package testdata.features.egendefinert
 
+import JsonMessage
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.request.receiveParameters
@@ -9,7 +10,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
-import no.nav.etterlatte.batch.JsonMessage
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.producer
@@ -22,10 +22,15 @@ object EgendefinertMeldingFeature : TestDataFeature {
     override val routes: Route.() -> Unit
         get() = {
             get {
-                call.respond(MustacheContent("egendefinert/ny-melding.hbs", mapOf(
-                    "path" to path,
-                    "beskrivelse" to beskrivelse
-                )))
+                call.respond(
+                    MustacheContent(
+                        "egendefinert/ny-melding.hbs",
+                        mapOf(
+                            "path" to path,
+                            "beskrivelse" to beskrivelse
+                        )
+                    )
+                )
             }
 
             post {
@@ -62,7 +67,8 @@ object EgendefinertMeldingFeature : TestDataFeature {
 
                 call.respond(
                     MustacheContent(
-                        "egendefinert/melding-sendt.hbs", mapOf(
+                        "egendefinert/melding-sendt.hbs",
+                        mapOf(
                             "path" to path,
                             "beskrivelse" to beskrivelse,
                             "partisjon" to partisjon,

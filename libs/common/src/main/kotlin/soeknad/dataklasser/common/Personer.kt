@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.Gjenlevende
     JsonSubTypes.Type(value = Verge::class, name = "VERGE"),
     JsonSubTypes.Type(value = Barn::class, name = "BARN"),
     JsonSubTypes.Type(value = Forelder::class, name = "FORELDER"),
-    JsonSubTypes.Type(value = Innsender::class, name = "INNSENDER"),
+    JsonSubTypes.Type(value = Innsender::class, name = "INNSENDER")
 )
 interface Person {
     val type: PersonType
@@ -53,11 +53,10 @@ data class GjenlevendeForelder(
 
     val adresse: Opplysning<String>,
     val statsborgerskap: Opplysning<String>,
-    val kontaktinfo: Kontaktinfo,
+    val kontaktinfo: Kontaktinfo
 ) : Person {
     override val type = PersonType.GJENLEVENDE_FORELDER
 }
-
 
 data class Forelder(
     override val fornavn: Opplysning<String>,
@@ -101,7 +100,7 @@ data class Avdoed(
 data class Verge(
     override val fornavn: Opplysning<String>,
     override val etternavn: Opplysning<String>,
-    override val foedselsnummer: Opplysning<Foedselsnummer>,
+    override val foedselsnummer: Opplysning<Foedselsnummer>
 ) : Person {
     override val type = PersonType.VERGE
 }
@@ -112,7 +111,7 @@ data class Samboer(
     override val foedselsnummer: Opplysning<Foedselsnummer>,
 
     val fellesBarnEllertidligereGift: Opplysning<EnumSvar<JaNeiVetIkke>>,
-    val inntekt: BetingetOpplysning<EnumSvar<JaNeiVetIkke>, SamboerInntekt?>?,
+    val inntekt: BetingetOpplysning<EnumSvar<JaNeiVetIkke>, SamboerInntekt?>?
 ) : Person {
     override val type = PersonType.SAMBOER
 }

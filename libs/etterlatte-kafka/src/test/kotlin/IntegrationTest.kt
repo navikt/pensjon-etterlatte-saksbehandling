@@ -1,7 +1,6 @@
 package no.nav.etterlatte.kafka
 
 import no.nav.common.KafkaEnvironment
-
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -12,7 +11,6 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
-
 import java.util.*
 
 class ApplicationTest {
@@ -28,7 +26,7 @@ class ApplicationTest {
             brokerConfigOverrides = Properties().apply {
                 this["auto.leader.rebalance.enable"] = "false"
                 this["group.initial.rebalance.delay.ms"] =
-                    "1" //Avoid waiting for new consumers to join group before first rebalancing (default 3000ms)
+                    "1" // Avoid waiting for new consumers to join group before first rebalancing (default 3000ms)
             }
         )
 
@@ -38,10 +36,12 @@ class ApplicationTest {
         val consumer = KafkaConsumer(kafkaConfig.consumer(), StringDeserializer(), StringDeserializer())
         consumer.subscribe(mutableListOf(topicname))
 
-        val kafkaProducer = KafkaProdusentImpl<String, String>(KafkaProducer(kafkaConfig.producerConfig(), StringSerializer(), StringSerializer()), topicname)
+        val kafkaProducer = KafkaProdusentImpl<String, String>(
+            KafkaProducer(kafkaConfig.producerConfig(), StringSerializer(), StringSerializer()),
+            topicname
+        )
 
         val offset = kafkaProducer.publiser("nøkkel", "verdi")
-
 
         consumer.poll(2000).also { assertFalse(it.isEmpty) }.forEach {
             assertEquals("nøkkel", it.key())
@@ -49,12 +49,11 @@ class ApplicationTest {
             assertEquals(offset.second, it.offset())
             assertEquals(offset.first, it.partition())
         }
-
     }
 }
 
 class EmbeddedKafkaConfig(
-    private val bootstrapServers: String,
+    private val bootstrapServers: String
 ) : KafkaConfig {
     override fun producerConfig() = kafkaBaseConfig().apply {
         put(ProducerConfig.ACKS_CONFIG, "1")
@@ -74,4 +73,3 @@ class EmbeddedKafkaConfig(
         put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
     }
 }
-

@@ -21,7 +21,6 @@ import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
-
 class ApplicationContext(
     private val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
     val rapidsConnection: RapidsConnection = RapidApplication.create(System.getenv().withConsumerGroupId())
@@ -35,7 +34,7 @@ class ApplicationContext(
             databaseName = properties.dbName
         ),
         username = properties.dbUsername,
-        password = properties.dbPassword,
+        password = properties.dbPassword
     )
 
     val dataSource = dataSourceBuilder.dataSource()
@@ -52,7 +51,7 @@ class ApplicationContext(
     val oppdragSender = OppdragSender(
         jmsConnectionFactory = jmsConnectionFactory,
         queue = properties.mqSendQueue,
-        replyQueue = properties.mqKvitteringQueue,
+        replyQueue = properties.mqKvitteringQueue
     )
 
     val utbetalingDao = UtbetalingDao(dataSource)
@@ -86,14 +85,14 @@ class ApplicationContext(
             grensesnittsavstemmingService = grensesnittsavstemmingService,
             leaderElection = leaderElection,
             starttidspunkt = ZonedDateTime.now(norskTidssone).next(LocalTime.of(3, 0, 0)),
-            periode = Duration.of(1, ChronoUnit.DAYS),
+            periode = Duration.of(1, ChronoUnit.DAYS)
         )
 
     val oppgavetrigger by lazy {
         Oppgavetrigger(
             rapidsConnection = rapidsConnection,
             utbetalingService = utbetalingService,
-            grensesnittsavstemmingService = grensesnittsavstemmingService,
+            grensesnittsavstemmingService = grensesnittsavstemmingService
         )
     }
 
@@ -114,7 +113,7 @@ class ApplicationContext(
     }
 
     private fun jdbcUrl(host: String, port: Int, databaseName: String) =
-        "jdbc:postgresql://${host}:$port/$databaseName"
+        "jdbc:postgresql://$host:$port/$databaseName"
 }
 
 private fun Map<String, String>.withConsumerGroupId() =

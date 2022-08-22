@@ -15,7 +15,6 @@ import no.trygdeetaten.skjema.oppdrag.TkodeStatusLinje
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-
 object OppdragMapper {
 
     private val tidspunktFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH.mm.ss.SSSSSS")

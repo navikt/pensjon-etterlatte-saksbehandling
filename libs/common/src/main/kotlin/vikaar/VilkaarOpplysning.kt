@@ -10,4 +10,3 @@ open class VilkaarOpplysning<T>(
     val kilde: Grunnlagsopplysning.Kilde,
     val opplysning: T
 )
-

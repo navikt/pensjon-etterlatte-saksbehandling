@@ -1,8 +1,8 @@
 package no.nav.etterlatte.enhetsregister
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.*
-import io.ktor.client.plugins.*
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import org.slf4j.LoggerFactory
@@ -34,8 +34,9 @@ class EnhetsregKlient(
         return try {
             httpClient.get("$host/enhetsregisteret/api/enheter/$orgnr").body()
         } catch (re: ResponseException) {
-            if (re.response.status == HttpStatusCode.NotFound)
+            if (re.response.status == HttpStatusCode.NotFound) {
                 return null
+            }
 
             val feilmelding = re.response.body<Feilmelding>()
 

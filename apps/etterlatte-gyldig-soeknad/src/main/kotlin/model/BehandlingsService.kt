@@ -1,8 +1,11 @@
 import com.fasterxml.jackson.databind.node.ObjectNode
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.http.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -10,7 +13,7 @@ import java.util.*
 
 class BehandlingsService(
     private val behandling_app: HttpClient,
-    private val url: String,
+    private val url: String
 ) : Behandling {
     override fun initierBehandling(
         sak: Long,
@@ -48,4 +51,3 @@ data class NyBehandlingRequest(
     val persongalleri: Persongalleri,
     val mottattDato: String
 )
-

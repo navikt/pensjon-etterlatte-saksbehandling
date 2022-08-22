@@ -50,7 +50,7 @@ internal class AvstemmingsdataMapperTest {
         val utbetalinger = listOf(
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
@@ -73,7 +73,7 @@ internal class AvstemmingsdataMapperTest {
         val utbetalinger = listOf(
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
@@ -102,7 +102,7 @@ internal class AvstemmingsdataMapperTest {
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT))),
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT_MED_FEIL))),
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64())
@@ -145,15 +145,19 @@ internal class AvstemmingsdataMapperTest {
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.AVVIST))),
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.SENDT))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
         )
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalinger, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = UUIDBase64()
+            utbetalinger = utbetalinger,
+            periodeFraOgMed = fraOgMed,
+            periodeTil = til,
+            avstemmingId = UUIDBase64()
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
 
-        assertAll("Skal telle opp rett antall godkjent, varsel, avvist og mangler",
+        assertAll(
+            "Skal telle opp rett antall godkjent, varsel, avvist og mangler",
             { assertEquals(2, dataMelding.grunnlag.godkjentAntall) },
             { assertEquals(BigDecimal(20_000), dataMelding.grunnlag.godkjentBelop) },
             { assertEquals(Fortegn.T, dataMelding.grunnlag.godkjentFortegn) },
@@ -180,16 +184,21 @@ internal class AvstemmingsdataMapperTest {
         val utbetalinger = emptyList<Utbetaling>()
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalinger, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = UUIDBase64()
+            utbetalinger = utbetalinger,
+            periodeFraOgMed = fraOgMed,
+            periodeTil = til,
+            avstemmingId = UUIDBase64()
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
 
-        assertAll("Antall i grunnlagsdato skal vaere 0 for alle statuser",
+        assertAll(
+            "Antall i grunnlagsdato skal vaere 0 for alle statuser",
             { assertEquals(0, dataMelding.grunnlag.godkjentAntall) },
             { assertEquals(0, dataMelding.grunnlag.varselAntall) },
             { assertEquals(0, dataMelding.grunnlag.avvistAntall) },
-            { assertEquals(0, dataMelding.grunnlag.manglerAntall) })
+            { assertEquals(0, dataMelding.grunnlag.manglerAntall) }
+        )
     }
 
     @Test
@@ -200,7 +209,10 @@ internal class AvstemmingsdataMapperTest {
         val utbetalinger = emptyList<Utbetaling>()
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalinger, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = UUIDBase64("1")
+            utbetalinger = utbetalinger,
+            periodeFraOgMed = fraOgMed,
+            periodeTil = til,
+            avstemmingId = UUIDBase64("1")
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
@@ -216,7 +228,10 @@ internal class AvstemmingsdataMapperTest {
         val utbetalinger = emptyList<Utbetaling>()
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalinger, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = UUIDBase64()
+            utbetalinger = utbetalinger,
+            periodeFraOgMed = fraOgMed,
+            periodeTil = til,
+            avstemmingId = UUIDBase64()
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (startmelding, dataMelding, sluttmelding) = avstemmingsmelding
@@ -228,57 +243,96 @@ internal class AvstemmingsdataMapperTest {
             { assertEquals("0", dataMelding.aksjon.nokkelFom) },
             { assertEquals("0", dataMelding.aksjon.nokkelFom) },
             { assertEquals("0", sluttmelding.aksjon.nokkelTom) },
-            { assertEquals("0", sluttmelding.aksjon.nokkelTom) },
+            { assertEquals("0", sluttmelding.aksjon.nokkelTom) }
         )
     }
-
 
     @Test
     fun `foerste og siste avstemmingsnoekkel skal finnes fra utbetalinger`() {
         val fraOgMed = LocalDateTime.of(
-            2020, Month.APRIL, 10, 14, 0, 0
+            2020,
+            Month.APRIL,
+            10,
+            14,
+            0,
+            0
         ).minusDays(1).toTidspunkt(norskTidssone)
 
         val til = LocalDateTime.of(
-            2022, Month.JANUARY, 24, 22, 0, 0
+            2022,
+            Month.JANUARY,
+            24,
+            22,
+            0,
+            0
         ).plusHours(1).toTidspunkt(norskTidssone)
 
         val utbetalinger = listOf(
             utbetaling(
                 avstemmingsnoekkel = LocalDateTime.of(
-                    2020, Month.APRIL, 10, 14, 0, 0
+                    2020,
+                    Month.APRIL,
+                    10,
+                    14,
+                    0,
+                    0
                 ).toTidspunkt(norskTidssone)
             ),
             utbetaling(
                 avstemmingsnoekkel = LocalDateTime.of(
-                    2020, Month.APRIL, 10, 14, 0, 0
+                    2020,
+                    Month.APRIL,
+                    10,
+                    14,
+                    0,
+                    0
                 ).plusDays(1).toTidspunkt(norskTidssone)
             ),
             utbetaling(
                 avstemmingsnoekkel = LocalDateTime.of(
-                    2022, Month.JANUARY, 24, 22, 0, 0
+                    2022,
+                    Month.JANUARY,
+                    24,
+                    22,
+                    0,
+                    0
                 ).toTidspunkt(norskTidssone)
             ),
             utbetaling(
                 avstemmingsnoekkel = LocalDateTime.of(
-                    2020, Month.APRIL, 10, 14, 0, 0
+                    2020,
+                    Month.APRIL,
+                    10,
+                    14,
+                    0,
+                    0
                 ).plusHours(1).toTidspunkt(norskTidssone)
             ),
             utbetaling(
                 avstemmingsnoekkel = LocalDateTime.of(
-                    2020, Month.APRIL, 10, 14, 0, 0
+                    2020,
+                    Month.APRIL,
+                    10,
+                    14,
+                    0,
+                    0
                 )
                     .plusMinutes(2).toTidspunkt(norskTidssone)
-            ),
+            )
         )
 
         val avstemmingsdataMapper = AvstemmingsdataMapper(
-            utbetalinger = utbetalinger, periodeFraOgMed = fraOgMed, periodeTil = til, avstemmingId = UUIDBase64()
+            utbetalinger = utbetalinger,
+            periodeFraOgMed = fraOgMed,
+            periodeTil = til,
+            avstemmingId = UUIDBase64()
         )
         val avstemmingsmelding = avstemmingsdataMapper.opprettAvstemmingsmelding()
         val (_, dataMelding, _) = avstemmingsmelding
-        assertAll("skal finne forste og siste avstemmingsnoekkel i liste",
+        assertAll(
+            "skal finne forste og siste avstemmingsnoekkel i liste",
             { assertEquals("2020040914", dataMelding.periode.datoAvstemtFom) },
-            { assertEquals("2022012422", dataMelding.periode.datoAvstemtTom) })
+            { assertEquals("2022012422", dataMelding.periode.datoAvstemtTom) }
+        )
     }
 }

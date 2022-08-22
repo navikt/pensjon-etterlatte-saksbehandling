@@ -13,7 +13,6 @@ import java.time.Clock
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
-
 sealed class FordelerResultat {
     object GyldigForBehandling : FordelerResultat()
     class UgyldigHendelse(val message: String) : FordelerResultat()
@@ -41,8 +40,11 @@ class FordelerService(
                 val gjenlevende = pdlTjenesterKlient.hentPerson(hentGjenlevendeRequest(soeknad))
 
                 fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad).let {
-                    if (it.kandidat) GyldigForBehandling
-                    else IkkeGyldigForBehandling(it.forklaring)
+                    if (it.kandidat) {
+                        GyldigForBehandling
+                    } else {
+                        IkkeGyldigForBehandling(it.forklaring)
+                    }
                 }
             }
         }

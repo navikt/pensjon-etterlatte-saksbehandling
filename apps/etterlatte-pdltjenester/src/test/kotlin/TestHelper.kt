@@ -1,8 +1,8 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import io.ktor.server.application.*
-import io.ktor.server.routing.*
+import io.ktor.server.application.Application
+import io.ktor.server.routing.Route
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse
@@ -66,7 +66,7 @@ fun mockPerson(
         utland = utland,
         familieRelasjon = familieRelasjon,
         avdoedesBarn = null,
-        vergemaalEllerFremtidsfullmakt = vergemaal,
+        vergemaalEllerFremtidsfullmakt = vergemaal
     )
 
 fun mockFolkeregisterident(fnr: String) = FolkeregisterIdent(Foedselsnummer.of(fnr))

@@ -4,7 +4,12 @@ import barnepensjon.kommerbarnettilgode.saksbehandlerResultat
 import barnepensjon.vilkaar.avdoedesmedlemskap.vilkaarAvdoedesMedlemskap
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.barnepensjon.*
+import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
+import no.nav.etterlatte.barnepensjon.hentSisteVurderteDato
+import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraVilkaar
+import no.nav.etterlatte.barnepensjon.setVurderingFraKommerBarnetTilGode
+import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
+import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
@@ -15,7 +20,13 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
-import no.nav.etterlatte.libs.common.vikaar.*
+import no.nav.etterlatte.libs.common.vikaar.Familiemedlemmer
+import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
+import no.nav.etterlatte.libs.common.vikaar.PersoninfoAvdoed
+import no.nav.etterlatte.libs.common.vikaar.PersoninfoGjenlevendeForelder
+import no.nav.etterlatte.libs.common.vikaar.PersoninfoSoeker
+import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
+import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
 import org.slf4j.LoggerFactory
 import vilkaar.barnepensjon.barnIngenOppgittUtlandsadresse
@@ -24,15 +35,16 @@ import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
 import java.time.LocalDate
 import java.time.YearMonth
 
-
 class VilkaarService {
     private val logger = LoggerFactory.getLogger(VilkaarService::class.java)
 
     fun mapVilkaarForstegangsbehandling(
         opplysninger: List<VilkaarOpplysning<ObjectNode>>,
-        virkningstidspunkt: LocalDate,
+        virkningstidspunkt: LocalDate
     ): VilkaarResultat {
-        logger.info("Mapper vilkaar fra grunnlagsdata for virkningstidspunkt $virkningstidspunkt for førstegangsbehandling")
+        logger.info(
+            "Mapper vilkaar fra grunnlagsdata for virkningstidspunkt $virkningstidspunkt for førstegangsbehandling"
+        )
 
         val avdoedSoeknad = finnOpplysning<AvdoedSoeknad>(opplysninger, Opplysningstyper.AVDOED_SOEKNAD_V1)
         val soekerSoeknad = finnOpplysning<SoekerBarnSoeknad>(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1)
@@ -42,21 +54,21 @@ class VilkaarService {
         val pensjonUfore = finnOpplysning<PensjonUforeOpplysning>(opplysninger, Opplysningstyper.PENSJON_UFORE_V1)
         val arbeidsforhold = finnOpplysning<ArbeidsforholdOpplysning>(opplysninger, Opplysningstyper.ARBEIDSFORHOLD_V1)
         val vilkaar = listOf(
-                vilkaarBrukerErUnder20(soekerPdl, virkningstidspunkt),
-                vilkaarDoedsfallErRegistrert(avdoedPdl, soekerPdl),
-                vilkaarAvdoedesMedlemskap(
-                    avdoedSoeknad,
-                    avdoedPdl,
-                    pensjonUfore,
-                    arbeidsforhold
-                ),
-                vilkaarBarnetsMedlemskap(
-                    soekerPdl,
-                    soekerSoeknad,
-                    gjenlevendePdl,
-                    avdoedPdl,
-                )
+            vilkaarBrukerErUnder20(soekerPdl, avdoedPdl, virkningstidspunkt),
+            vilkaarDoedsfallErRegistrert(avdoedPdl, soekerPdl),
+            vilkaarAvdoedesMedlemskap(
+                avdoedSoeknad,
+                avdoedPdl,
+                pensjonUfore,
+                arbeidsforhold
+            ),
+            vilkaarBarnetsMedlemskap(
+                soekerPdl,
+                soekerSoeknad,
+                gjenlevendePdl,
+                avdoedPdl
             )
+        )
 
         val vilkaarResultat = setVilkaarVurderingFraVilkaar(vilkaar)
         val vurdertDato = hentSisteVurderteDato(vilkaar)
@@ -64,12 +76,19 @@ class VilkaarService {
         return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
     }
 
-    fun mapVilkaarRevurdering(opplysninger: List<VilkaarOpplysning<ObjectNode>>, virkningstidspunkt: LocalDate, revurderingAarsak: RevurderingAarsak): VilkaarResultat {
-
-        logger.info("Mapper vilkaar fra grunnlagsdata for virkningstidspunkt $virkningstidspunkt for revurdering med årsak $revurderingAarsak")
+    fun mapVilkaarRevurdering(
+        opplysninger: List<VilkaarOpplysning<ObjectNode>>,
+        virkningstidspunkt: LocalDate,
+        revurderingAarsak: RevurderingAarsak
+    ): VilkaarResultat {
+        logger.info(
+            "Mapper vilkaar fra grunnlagsdata for virkningstidspunkt $virkningstidspunkt for revurdering " +
+                "med årsak $revurderingAarsak"
+        )
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
+        val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
         val vilkaar = when (revurderingAarsak) {
-            RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarBrukerErUnder20(soekerPdl, virkningstidspunkt))
+            RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarBrukerErUnder20(soekerPdl, avdoedPdl, virkningstidspunkt))
             RevurderingAarsak.MANUELT_OPPHOER -> TODO("Ikke implementert vurdering av denne enda")
         }
 
@@ -81,7 +100,7 @@ class VilkaarService {
 
     fun beregnVirkningstidspunktFoerstegangsbehandling(
         opplysninger: List<VilkaarOpplysning<ObjectNode>>,
-        soeknadMottattDato: LocalDate,
+        soeknadMottattDato: LocalDate
     ): YearMonth {
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
         return hentVirkningstidspunktFoerstegangssoeknad(avdoedPdl?.opplysning?.doedsdato, soeknadMottattDato)
@@ -126,7 +145,6 @@ class VilkaarService {
         }
         return YearMonth.from(doedsdato).plusMonths(1)
     }
-
 
     fun mapKommerSoekerTilGode(opplysninger: List<VilkaarOpplysning<ObjectNode>>): KommerSoekerTilgode {
         logger.info("Map opplysninger for å vurdere om penger kommer søker til gode")
@@ -189,7 +207,7 @@ fun mapFamiliemedlemmer(
     soeker: VilkaarOpplysning<Person>?,
     soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
     gjenlevende: VilkaarOpplysning<Person>?,
-    avdoed: VilkaarOpplysning<Person>?,
+    avdoed: VilkaarOpplysning<Person>?
 ): Familiemedlemmer {
     return Familiemedlemmer(
         avdoed = avdoed?.opplysning.let {
@@ -209,7 +227,7 @@ fun mapFamiliemedlemmer(
                 rolle = PersonRolle.BARN,
                 bostedadresser = it?.bostedsadresse,
                 soeknadAdresse = soekerSoeknad?.opplysning?.utenlandsadresse,
-                foedselsdato = it?.foedselsdato,
+                foedselsdato = it?.foedselsdato
             )
         },
         gjenlevendeForelder = gjenlevende?.opplysning.let {
@@ -217,7 +235,8 @@ fun mapFamiliemedlemmer(
                 navn = it?.fornavn + " " + it?.etternavn,
                 fnr = it?.foedselsnummer,
                 rolle = PersonRolle.GJENLEVENDE,
-                bostedadresser = it?.bostedsadresse,
+                bostedadresser = it?.bostedsadresse
             )
-        })
+        }
+    )
 }

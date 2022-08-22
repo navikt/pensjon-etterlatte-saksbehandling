@@ -5,7 +5,7 @@ import { InformationIcon } from '../../../../shared/icons/informationIcon'
 import { IPeriode } from './TidslinjeMedlemskap'
 import { useRef, useState } from 'react'
 import { Popover } from '@navikt/ds-react'
-import { formatterStringDato } from '../../../../utils'
+import { formaterStringDato } from '../../../../utils/formattering'
 import { hentKildenavn } from './utils'
 import { CloseIcon } from '../../../../shared/icons/closeIcon'
 import '../../../../index.css'
@@ -53,7 +53,7 @@ export const Tidsperiode = ({
           {!isGap && (
             <InnholdKilde>
               Kilde: {hentKildenavn(periode.kilde.type)}{' '}
-              {periode.kilde.tidspunktForInnhenting && formatterStringDato(periode.kilde.tidspunktForInnhenting)}
+              {periode.kilde.tidspunktForInnhenting && formaterStringDato(periode.kilde.tidspunktForInnhenting)}
             </InnholdKilde>
           )}
           <div>
@@ -61,8 +61,8 @@ export const Tidsperiode = ({
           </div>
           <div>{periode.innhold.land}</div>
           <div>
-            Periode: {formatterStringDato(periode.innhold.fraDato)} -{' '}
-            {periode.innhold.tilDato ? formatterStringDato(periode.innhold.tilDato) : ''}
+            Periode: {formaterStringDato(periode.innhold.fraDato)} -{' '}
+            {periode.innhold.tilDato ? formaterStringDato(periode.innhold.tilDato) : ''}
           </div>
         </Popover.Content>
       </Popover>

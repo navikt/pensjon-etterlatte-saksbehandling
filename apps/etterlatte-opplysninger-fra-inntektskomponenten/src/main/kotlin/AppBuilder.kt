@@ -3,12 +3,12 @@ package no.nav.etterlatte
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.auth.*
-import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
-import io.ktor.http.*
-import io.ktor.serialization.jackson.*
+import io.ktor.http.ContentType
+import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
@@ -58,6 +58,4 @@ class AppBuilder(private val props: Map<String, String>) {
             header(X_CORRELATION_ID, getCorrelationId())
         }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
-
 }
-

@@ -41,7 +41,7 @@ class AvdoedesMedlemskapTest {
         val file = readFile("/inntektsopplysning.json")
         val opplysning = objectMapper.readValue<VilkaarOpplysning<PensjonUforeOpplysning>>(file)
         val pensjonufore = kriterieHarMottattPensjonEllerTrygdSisteFemAar(opplysning)
-        //print(pensjonufore)
+        // print(pensjonufore)
         assert(true)
     }
 
@@ -67,23 +67,39 @@ class AvdoedesMedlemskapTest {
     fun vurderInnOgUtvandring() {
         val avdoedPdlIngenUtland = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, adresserNorgePdl(), null)
         val avdoedPdlInnvandring = lagMockPersonPdl(
-            null, fnrAvdoed, doedsdatoPdl, adresserNorgePdl(), null, utland = Utland(
+            null,
+            fnrAvdoed,
+            doedsdatoPdl,
+            adresserNorgePdl(),
+            null,
+            utland = Utland(
                 innflyttingTilNorge = listOf(InnflyttingTilNorge("DAN", LocalDate.now())),
                 utflyttingFraNorge = listOf(UtflyttingFraNorge("USA", LocalDate.now()))
             )
         )
 
         val avdoedPdlHarIkke = lagMockPersonPdl(
-            null, fnrAvdoed, doedsdatoPdl, adresserNorgePdl(), null, utland = Utland(
+            null,
+            fnrAvdoed,
+            doedsdatoPdl,
+            adresserNorgePdl(),
+            null,
+            utland = Utland(
                 innflyttingTilNorge = emptyList(),
                 utflyttingFraNorge = emptyList()
             )
         )
 
         val ingenUtland =
-            kriterieIngenInnUtvandring(mapTilVilkaarstypePerson(avdoedPdlIngenUtland), Kriterietyper.AVDOED_NORSK_STATSBORGER)
+            kriterieIngenInnUtvandring(
+                mapTilVilkaarstypePerson(avdoedPdlIngenUtland),
+                Kriterietyper.AVDOED_NORSK_STATSBORGER
+            )
         val ingenInnOgUtvandring =
-            kriterieIngenInnUtvandring(mapTilVilkaarstypePerson(avdoedPdlHarIkke), Kriterietyper.AVDOED_NORSK_STATSBORGER)
+            kriterieIngenInnUtvandring(
+                mapTilVilkaarstypePerson(avdoedPdlHarIkke),
+                Kriterietyper.AVDOED_NORSK_STATSBORGER
+            )
         val harInnOgUtvandring =
             kriterieIngenInnUtvandring(
                 mapTilVilkaarstypePerson(avdoedPdlInnvandring),
@@ -164,7 +180,6 @@ class AvdoedesMedlemskapTest {
                 Kriterietyper.AVDOED_KUN_NORSKE_BOSTEDSADRESSER
             )
 
-
         val ingenAdresser =
             kriterieKunNorskeBostedsadresserSisteFemAar(
                 mapTilVilkaarstypePerson(avdoedPdlUtenAdresse),
@@ -181,7 +196,6 @@ class AvdoedesMedlemskapTest {
 
         Assertions.assertEquals(VurderingsResultat.OPPFYLT, utenlandsoppholdFoerFemAar.resultat)
         Assertions.assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, ingenAdresser.resultat)
-
     }
 
     @Test
@@ -208,7 +222,6 @@ class AvdoedesMedlemskapTest {
                 mapTilVilkaarstypePerson(avdoedPdlUtlandFoerFemAar),
                 Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
             )
-
 
         val ingenAdresser =
             kriterieSammenhengendeAdresserINorgeSisteFemAar(
@@ -244,7 +257,7 @@ class AvdoedesMedlemskapTest {
                     listOf(OppholdUtlandType.ARBEIDET),
                     JaNeiVetIkke.NEI,
                     null
-                ),
+                )
             )
         )
 
@@ -254,8 +267,6 @@ class AvdoedesMedlemskapTest {
         )
     }
 
-
     fun readFile(file: String) = AvdoedesMedlemskapTest::class.java.getResource(file)?.readText()
         ?: throw FileNotFoundException("Fant ikke filen $file")
-
 }

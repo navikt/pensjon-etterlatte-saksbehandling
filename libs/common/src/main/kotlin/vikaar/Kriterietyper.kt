@@ -1,6 +1,5 @@
 package no.nav.etterlatte.libs.common.vikaar
 
-
 enum class Kriterietyper {
     AVDOED_ER_FORELDER,
     DOEDSFALL_ER_REGISTRERT_I_PDL,
@@ -25,7 +24,7 @@ enum class Kriterietyper {
     SOEKER_IKKE_ADRESSE_I_UTLANDET,
     GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET,
     SAMME_BOSTEDSADRESSE,
-    SAKSBEHANDLER_RESULTAT,
+    SAKSBEHANDLER_RESULTAT
 }
 
 enum class Metakriterietyper {

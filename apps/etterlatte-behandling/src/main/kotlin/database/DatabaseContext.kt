@@ -6,40 +6,43 @@ import java.sql.Connection
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.sql.DataSource
 
-class DatabaseContext (private val ds: DataSource ): DatabaseKontekst {
-    companion object{
+class DatabaseContext(private val ds: DataSource) : DatabaseKontekst {
+    companion object {
         val logger = LoggerFactory.getLogger(DatabaseContext::class.java)
     }
+
     private val transaktionOpen = AtomicBoolean(false)
 
     private var transactionalConnection: Connection? = null
 
-    override fun activeTx(): Connection = transactionalConnection?: throw IllegalStateException("No currently open transaction")
+    override fun activeTx(): Connection =
+        transactionalConnection ?: throw IllegalStateException(
+            "No currently open transaction"
+        )
 
-    override fun <T> inTransaction(block: ()->T): T{
-        if(transaktionOpen.getAndSet(true)){
+    override fun <T> inTransaction(block: () -> T): T {
+        if (transaktionOpen.getAndSet(true)) {
             throw IllegalStateException("Støtter ikke nøstede transactsjoner")
         }
         val c = ds.connection
         val autocommit = c.autoCommit
-        return try{
+        return try {
             c.autoCommit = false
             transactionalConnection = c
             val retur = block()
             c.commit()
             println("committed")
             retur
-        }catch (ex:Throwable){
+        } catch (ex: Throwable) {
             c.rollback()
             println("rolled back")
             logger.warn("Reason for rollback", ex)
             throw ex
-        }finally {
+        } finally {
             transactionalConnection = null
             c.autoCommit = autocommit
             c.close()
             transaktionOpen.set(false)
         }
     }
-
 }

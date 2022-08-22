@@ -2,7 +2,7 @@ rootProject.name = "pensjon-etterlatte-saksbehandling"
 plugins {
     kotlin("jvm") version "1.7.0" apply false
 }
-    include(
+include(
     "apps:etterlatte-fordeler",
     "apps:etterlatte-overvaaking",
     "apps:etterlatte-pdltjenester",
@@ -30,5 +30,5 @@ plugins {
     "libs:ktor2client-onbehalfof",
     "libs:rapidsandrivers-extras",
     "libs:etterlatte-kafka",
-    "jobs:test-fordeler",
+    "jobs:test-fordeler"
 )

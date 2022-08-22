@@ -1,14 +1,15 @@
 import { Table } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { Behandling } from './typer'
+import { AarsaksTyper, IBehandlingsammendrag } from './typer'
+import { formaterStringDato, upperCaseFirst } from '../../utils/formattering'
 
 const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Vedtaksdato', 'Resultat']
 
 export const Saksliste = ({
-  saksliste,
+  behandlinger,
   goToBehandling,
 }: {
-  saksliste: Behandling[]
+  behandlinger: IBehandlingsammendrag[]
   goToBehandling: (behandlingsId: string) => void
 }) => {
   return (
@@ -22,16 +23,20 @@ export const Saksliste = ({
           </Table.Row>
         </Table.Header>
 
-        {saksliste.map((behandling, i) => (
+        {behandlinger.map((behandling, i) => (
           <Table.Body key={i}>
             <Table.Row>
-              <Table.DataCell key={`data${behandling.opprettet}`}>{behandling.opprettet}</Table.DataCell>
-              <Table.DataCell key={`data${behandling.type}`}>{behandling.type}</Table.DataCell>
-              <Table.DataCell key={`data${behandling.årsak}`}>{behandling.årsak}</Table.DataCell>
-              <Table.DataCell key={`data${behandling.status}`}>{behandling.status}</Table.DataCell>
-              <Table.DataCell key={`data${behandling.vedtaksdato}`}>{behandling.vedtaksdato}</Table.DataCell>
+              <Table.DataCell key={`data${behandling.behandlingOpprettet}`}>
+                {formaterStringDato(behandling.behandlingOpprettet)}
+              </Table.DataCell>
+              <Table.DataCell key={`data${behandling.behandlingType}`}>
+                {upperCaseFirst(behandling.behandlingType)}
+              </Table.DataCell>
+              <Table.DataCell key={`data${behandling.aarsak}`}>{mapAarrsak(behandling.aarsak)}</Table.DataCell>
+              <Table.DataCell key={`data${behandling.status}`}>{upperCaseFirst(behandling.status)}</Table.DataCell>
+              <Table.DataCell key={'vedtaksdato'}>Vedtaksdato her</Table.DataCell>
               <Table.DataCell key={i}>
-                <Link onClick={() => goToBehandling(behandling.id.toString())}>{behandling.resultat}</Link>
+                <Link onClick={() => goToBehandling(behandling.id.toString())}>Gå til behandling</Link>
               </Table.DataCell>
             </Table.Row>
           </Table.Body>
@@ -39,6 +44,17 @@ export const Saksliste = ({
       </Table>
     </div>
   )
+}
+
+function mapAarrsak(aarsak: AarsaksTyper) {
+  switch (aarsak) {
+    case AarsaksTyper.MANUELT_OPPHOER:
+      return 'Manuelt opphør'
+    case AarsaksTyper.SOEKER_DOD:
+      return 'Søker er død'
+    case AarsaksTyper.SOEKNAD:
+      return 'Søknad'
+  }
 }
 
 export const Link = styled.div`

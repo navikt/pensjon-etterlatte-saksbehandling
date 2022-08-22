@@ -1,25 +1,21 @@
 package no.nav.etterlatte
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.application.call
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
+import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.BehandlingsBehov
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
+import no.nav.etterlatte.behandling.logger
+import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
+import org.slf4j.LoggerFactory
 
-
-// /api
+val logger = LoggerFactory.getLogger("no.nav.etterlatte.behandling.BehandlingRoute")
 fun Route.behandlingRoute(service: BehandlingService) {
-
     route("saker") {
-        //hent alle saker
+        // hent alle saker
 
         get {
             try {
@@ -32,7 +28,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
         }
 
         route("{sakId}") {
-            // hent spesifikk sak (alle behandlinger?)
+            // hent spesifikk sak med tilhørende behandlinger
             get {
                 val sakId = call.parameters["sakId"]?.toInt()
                 if (sakId == null) {
@@ -43,34 +39,14 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 }
             }
 
-            // Opprett behandling på sak
-            post("behandlinger") {
-                val sakId = call.parameters["sakId"]?.toLong()
-                if (sakId == null) {
-                    call.response.status(HttpStatusCode(400, "Bad request"))
-                    call.respond("SakId mangler")
-                } else {
-                    val testBehandlingsopplysning = Grunnlagsopplysning(
-                        UUID.randomUUID(), Grunnlagsopplysning.Privatperson(
-                            "11057523044",
-                            LocalDateTime.now().toInstant(ZoneOffset.UTC)
-
-                        ), Opplysningstyper.SOEKNAD_MOTTATT_DATO, objectMapper.createObjectNode(), objectMapper.createObjectNode()
-                    )
-                    val behandlingsBehov = BehandlingsBehov(sakId, listOf(testBehandlingsopplysning))
-                    call.respond(service.opprettBehandling(behandlingsBehov, getAccessToken(call)))
-                }
-            }
-
             // Slett alle behandlinger på en sak
             delete("behandlinger") {
                 val sakId = call.parameters["sakId"]?.toInt()
                 if (sakId == null) {
                     call.response.status(HttpStatusCode(400, "Bad request"))
                     call.respond("SakId mangler")
-                }
-                else {
-                   if(service.slettBehandlinger(sakId, getAccessToken(call))){
+                } else {
+                    if (service.slettBehandlinger(sakId, getAccessToken(call))) {
                         call.respond(HttpStatusCode.OK)
                     }
                 }
@@ -112,54 +88,25 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 call.respond(service.hentHendelserForBehandling(behandlingId, getAccessToken(call)))
             }
         }
-
     }
 
-
-    /*
-    Skal hente persondata og sakene for denne personen?
-     */
     route("personer") {
         get("{fnr}") {
-
             val fnr = call.parameters["fnr"]
             if (fnr == null) {
                 call.response.status(HttpStatusCode(400, "Bad request"))
                 call.respond("Fødselsnummer mangler")
             } else {
                 try {
-                    val accessToken = getAccessToken(call)
-                    val list = service.hentPerson(fnr, accessToken)
-                    call.respond(list)
-                } catch (e: Exception) {
+                    call.respond(service.hentPersonOgSaker(fnr, getAccessToken(call)))
+                } catch (e: InvalidFoedselsnummer) {
+                    logger.error("Ugyldig fødselsnummer", e)
                     throw e
-                }
-            }
-        }
-
-        /*
-        Hente alle saker med metadata om saken
-         */
-        // Opprette saker på en person
-        post("{fnr}/saker") {
-            val fnr = call.parameters["fnr"]
-            if (fnr == null) {
-                call.response.status(HttpStatusCode(400, "Bad request"))
-                call.respond("Fødselsnummer mangler")
-            } else {
-                try {
-                    val accessToken = getAccessToken(call)
-                    service.opprettSak(
-                        fnr,
-                        SoeknadType.GJENLEVENDEPENSJON,
-                        accessToken
-                    ) // sakType blir nok en enum etter hvert
-                    call.respond("Ok");
                 } catch (e: Exception) {
+                    logger.error("Henting av person med tilhørende behandlinger feilet", e)
                     throw e
                 }
             }
         }
     }
-
 }

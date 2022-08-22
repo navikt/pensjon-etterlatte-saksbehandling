@@ -17,8 +17,8 @@ import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
 fun barnOgForelderSammeBostedsadresse(
-        soekerPdl: VilkaarOpplysning<Person>?,
-        gjenlevendePdl: VilkaarOpplysning<Person>?
+    soekerPdl: VilkaarOpplysning<Person>?,
+    gjenlevendePdl: VilkaarOpplysning<Person>?
 ): VurdertVilkaar {
     val sammeBostedsAdresse = kriterieSammeBostedsadresse(soekerPdl, gjenlevendePdl)
 
@@ -76,5 +76,3 @@ fun kriterieSammeBostedsadresse(
         opplysningsGrunnlag
     )
 }
-
-

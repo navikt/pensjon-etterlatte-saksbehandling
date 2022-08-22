@@ -2,7 +2,7 @@ package no.nav.etterlatte.oauth
 
 import com.nimbusds.oauth2.sdk.auth.ClientAuthenticationMethod
 import io.ktor.client.HttpClient
-import io.ktor.server.config.*
+import io.ktor.server.config.ApplicationConfig
 import no.nav.security.token.support.client.core.ClientAuthenticationProperties
 
 class ClientConfig(
@@ -40,8 +40,8 @@ class ClientConfig(
 
     companion object CommonConfigurationAttributes {
         const val COMMON_PREFIX = "no.nav.security.jwt.client.registration"
-        const val CLIENTS_PATH = "${COMMON_PREFIX}.clients"
-        const val CACHE_PATH = "${COMMON_PREFIX}.cache"
+        const val CLIENTS_PATH = "$COMMON_PREFIX.clients"
+        const val CACHE_PATH = "$COMMON_PREFIX.cache"
         const val CLIENT_NAME = "client_name"
     }
 }

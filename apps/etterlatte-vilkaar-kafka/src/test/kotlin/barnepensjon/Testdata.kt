@@ -1,6 +1,18 @@
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.*
-import no.nav.etterlatte.libs.common.person.*
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Forelder
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Verge
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.AdresseType
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -70,7 +82,7 @@ fun lagMockPersonPdl(
     adresse: List<Adresse>?,
     foreldre: List<Foedselsnummer>?,
     statsborgerskap: String? = null,
-    utland: Utland? = null,
+    utland: Utland? = null
 ) = Person(
     fornavn = "Test",
     etternavn = "Testulfsen",
@@ -120,7 +132,7 @@ fun adresserNorgePdl() =
             "NOR",
             "kilde",
             LocalDateTime.parse("2010-01-25T00:00:00"),
-            LocalDateTime.parse("2021-04-30T00:00:00"),
+            LocalDateTime.parse("2021-04-30T00:00:00")
         )
     )
 
@@ -168,6 +180,6 @@ fun adresseUtlandFoerFemAar() = listOf(
         "DAN",
         "kilde",
         LocalDateTime.parse("2012-01-25T00:00:00"),
-        LocalDateTime.parse("2017-01-25T00:00:00"),
+        LocalDateTime.parse("2017-01-25T00:00:00")
     )
 )

@@ -4,20 +4,32 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.typesafe.config.ConfigFactory
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
+import io.ktor.serialization.jackson.jackson
+import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.call
+import io.ktor.server.application.install
+import io.ktor.server.application.log
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.principal
 import io.ktor.server.cio.CIO
-import io.ktor.server.config.*
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
-import io.ktor.server.plugins.callloging.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.header
+import io.ktor.server.request.httpMethod
+import io.ktor.server.request.path
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.delay
@@ -25,6 +37,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.database.DatabaseContext
+import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.oppgave.OppgaveDao
@@ -49,12 +62,12 @@ fun appFromBeanfactory(env: BeanFactory): App {
     return App(env)
 }
 
-
-fun Application.sikkerhetsModul(){
+fun Application.sikkerhetsModul() {
     install(Authentication) {
         tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
     }
 }
+
 fun Application.module(beanFactory: BeanFactory) {
     val ds = beanFactory.datasourceBuilder().apply {
         migrate()
@@ -92,15 +105,19 @@ fun Application.module(beanFactory: BeanFactory) {
                 beanFactory.revurderingService()
             )
             oppgaveRoutes(OppgaveDao(ds.dataSource))
+            grunnlagsendringshendelseRoute(beanFactory.grunnlagsendringshendelseService())
         }
-
     }
     beanFactory.behandlingHendelser().start()
 }
 
 private fun Route.attachContekst(ds: DataSource) {
     intercept(ApplicationCallPipeline.Call) {
-        val requestContekst = Context(decideUser(call.principal<TokenValidationContextPrincipal>()!!), DatabaseContext(ds))
+        val requestContekst =
+            Context(
+                decideUser(call.principal<TokenValidationContextPrincipal>()!!),
+                DatabaseContext(ds)
+            )
         withContext(
             Dispatchers.Default + Kontekst.asContextElement(
                 value = requestContekst
@@ -114,11 +131,15 @@ private fun Route.attachContekst(ds: DataSource) {
 
 class App(private val beanFactory: BeanFactory) {
     fun run() {
-        embeddedServer(CIO, applicationEngineEnvironment {
-            modules.add { module(beanFactory) }
-            modules.add { sikkerhetsModul() }
-            connector { port = 8080 }
-        }).start(true)
+        beanFactory.grunnlagsendringshendelseJob()
+        embeddedServer(
+            CIO,
+            applicationEngineEnvironment {
+                modules.add { module(beanFactory) }
+                modules.add { sikkerhetsModul() }
+                connector { port = 8080 }
+            }
+        ).start(true)
         beanFactory.behandlingHendelser().nyHendelse.close()
     }
 }

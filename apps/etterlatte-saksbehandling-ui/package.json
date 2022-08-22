@@ -1,5 +1,15 @@
 {
   "dependencies": {
     "@navikt/ds-icons": "^0.8.12"
+  },
+  "scripts": {
+    "postinstall": "yarn --cwd server install && yarn --cwd client install",
+    "prepare": "cd ../../ && husky install .husky"
+  },
+  "devDependencies": {
+    "eslint": "^8.22.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.3",
+    "prettier": "^2.7.1"
   }
 }

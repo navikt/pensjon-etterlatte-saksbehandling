@@ -2,15 +2,17 @@ import styled from 'styled-components'
 import { Search as SearchField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getPerson, IPersonResult, opprettSakPaaPerson } from '../api/person'
+import { getPerson } from '../api/person'
 import { ErrorIcon } from '../icons/errorIcon'
 import { InformationIcon } from '../icons/informationIcon'
 import { PeopleIcon } from '../icons/peopleIcon'
+import { IApiResponse } from '../api/types'
+import { IPersonResult } from '../../components/person/typer'
 
 export const Search = () => {
   const navigate = useNavigate()
   const [searchInput, setSearchInput] = useState('')
-  const [searchResult, setSearchResult] = useState<IPersonResult | null>(null)
+  const [searchResult, setSearchResult] = useState<IPersonResult | undefined | null>(null)
   const regBokstaver = /[a-zA-Z]/g
   const [feilInput, setFeilInput] = useState(false)
 
@@ -22,10 +24,11 @@ export const Search = () => {
       } else {
         setFeilInput(false)
       }
+
       if (searchInput.length === 11) {
-        const personResult: any = await getPerson(searchInput)
-        const person = personResult.data
-        setSearchResult(person)
+        getPerson(searchInput).then((result: IApiResponse<IPersonResult>) => {
+          setSearchResult(result?.data)
+        })
       } else if (searchInput.length < 11) {
         setSearchResult(null)
       }
@@ -40,12 +43,6 @@ export const Search = () => {
   const onEnter = (e: any) => {
     if (e.key === 'Enter') {
       goToPerson()
-    }
-  }
-
-  const opprettSak = (fnr: string) => {
-    if (fnr) {
-      opprettSakPaaPerson(fnr)
     }
   }
 
@@ -69,13 +66,6 @@ export const Search = () => {
             <div className="text">
               {searchResult.person.fornavn} {searchResult.person.etternavn}
             </div>
-            {searchResult.saker.saker.length === 0 ? (
-              <div className="sak" onClick={() => opprettSak(searchInput)}>
-                Ingen fagsak. Trykk for å opprette {'>'}
-              </div>
-            ) : (
-              <div className="sak">Sak {searchResult.saker.saker[0].sakType}</div>
-            )}
           </SearchResult>
         </Dropdown>
       )}

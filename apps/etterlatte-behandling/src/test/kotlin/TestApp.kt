@@ -1,10 +1,20 @@
 package no.nav.etterlatte
 
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.http.ContentType
+import io.ktor.http.fullPath
+import io.ktor.http.headersOf
+import io.ktor.serialization.jackson.JacksonConverter
+import no.nav.etterlatte.behandling.common.LeaderElection
+import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.objectMapper
 import org.testcontainers.containers.PostgreSQLContainer
 
-fun main(){
-
+fun main() {
     /*
     Krever kjørende docker
     Spinner opp appen uten sikkerhet (inkommende token blir godtatt uten validering)
@@ -18,16 +28,47 @@ fun main(){
 
     appFromBeanfactory(LocalAppBeanFactory(postgreSQLContainer.jdbcUrl)).run()
     postgreSQLContainer.stop()
-
 }
 
-class LocalAppBeanFactory(val jdbcUrl: String): CommonFactory(){
+class LocalAppBeanFactory(val jdbcUrl: String) : CommonFactory() {
     override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
     override fun rapid(): KafkaProdusent<String, String> {
-        return object: KafkaProdusent<String, String>{
+        return object : KafkaProdusent<String, String> {
             override fun publiser(noekkel: String, verdi: String, headers: Map<String, ByteArray>): Pair<Int, Long> {
                 return 0 to 0
             }
         }
     }
+
+    override fun pdlHttpClient(): HttpClient =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler { request ->
+                    if (request.url.fullPath.startsWith("/")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        val json = javaClass.getResource("")!!.readText() // TODO: endre name
+                        respond(json, headers = headers)
+                    } else {
+                        error(request.url.fullPath)
+                    }
+                }
+            }
+            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+        }
+
+    override fun leaderElection() = LeaderElection(
+        electorPath = "electorPath",
+        httpClient = HttpClient(MockEngine) {
+            engine {
+                addHandler { req ->
+                    if (req.url.fullPath == "electorPath") {
+                        respond("me")
+                    } else {
+                        error(req.url.fullPath)
+                    }
+                }
+            }
+        },
+        me = "me"
+    )
 }

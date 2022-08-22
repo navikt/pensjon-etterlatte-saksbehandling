@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 
 internal class StartUthentingFraSoeknad(
     rapidsConnection: RapidsConnection,
-    private val opplysningsuthenter: Opplysningsuthenter,
+    private val opplysningsuthenter: Opplysningsuthenter
 ) : River.PacketListener {
     private val logger: Logger = LoggerFactory.getLogger(StartUthentingFraSoeknad::class.java)
     private val rapid = rapidsConnection
@@ -33,7 +33,8 @@ internal class StartUthentingFraSoeknad(
         withLogContext(packet.correlationId) {
             val opplysninger = opplysningsuthenter.lagOpplysningsListe(packet["@skjema_info"])
 
-            JsonMessage.newMessage("OPPLYSNING:NY",
+            JsonMessage.newMessage(
+                "OPPLYSNING:NY",
                 mapOf(
                     "sakId" to packet["sakId"],
                     "behandlingId" to packet["behandlingId"],

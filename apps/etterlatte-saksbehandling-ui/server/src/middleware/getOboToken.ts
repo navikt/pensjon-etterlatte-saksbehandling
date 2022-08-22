@@ -1,6 +1,5 @@
 import fetch from 'node-fetch'
 import { logger } from '../utils/logger'
-import { parseJwt } from '../utils/parsejwt'
 
 export const getOboToken = async (auth: any, scope: string): Promise<string> => {
   try {
@@ -35,7 +34,7 @@ export const getOboToken = async (auth: any, scope: string): Promise<string> => 
     const json = await response.json()
     return json.access_token
   } catch (e) {
-    logger.info('Feil ved henting av obo-token: ',e)
+    logger.info('Feil ved henting av obo-token: ', e)
     throw new Error('Det skjedde en feil ved henting av obo-token')
   }
 }

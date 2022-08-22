@@ -22,7 +22,6 @@ data class AaregResponse(
     val bruksperiode: AaregBruksperiode
 )
 
-
 data class AaregArbeidstaker(
     val identer: List<AaregIdent>
 )

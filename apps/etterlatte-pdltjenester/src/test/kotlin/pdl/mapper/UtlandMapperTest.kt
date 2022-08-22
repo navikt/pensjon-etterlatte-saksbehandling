@@ -48,5 +48,4 @@ internal class UtlandMapperTest {
         assertEquals("FRA", utland.innflyttingTilNorge?.first()?.fraflyttingsland)
         assertEquals("2021-07-01", utland.innflyttingTilNorge?.first()?.dato.toString())
     }
-
 }

@@ -5,8 +5,8 @@ import { SoeknadOversikt } from './soeknadoversikt/Soeknadsoversikt'
 import { Familieforhold } from './familieforhold/Familieforhold'
 import { VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 import { Border, HeadingWrapper } from './styled'
-import { BehandlingsStatusSmall, IBehandlingsStatus } from '../behandlings-status'
-import { BehandlingsTypeSmall, IBehandlingsType } from '../behandlings-type'
+import { BehandlingsTypeSmall, IBehandlingsType } from '../behandlingsType'
+import { SaksTypeSmall, ISaksType } from '../saksType'
 import { Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { Start } from '../handlinger/start'
@@ -26,8 +26,8 @@ export const Soeknadsoversikt = () => {
             Søknadsoversikt
           </Heading>
           <div className="details">
-            <BehandlingsStatusSmall status={IBehandlingsStatus.FORSTEGANG} />
-            <BehandlingsTypeSmall type={IBehandlingsType.BARNEPENSJON} />
+            <BehandlingsTypeSmall status={IBehandlingsType.FØRSTEGANGSBEHANDLING} />
+            <SaksTypeSmall type={ISaksType.BARNEPENSJON} />
           </div>
         </HeadingWrapper>
         <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />

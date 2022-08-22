@@ -1,115 +1,89 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { getPerson, opprettBehandlingPaaSak } from '../../shared/api/person'
-import { StatusBar, StatusBarTheme } from '../statusbar'
+import { getPerson } from '../../shared/api/person'
+import { StatusBar, StatusBarTheme } from '../../shared/statusbar'
 import { Container } from '../../shared/styled'
 import { Dokumentoversikt } from './dokumentoversikt'
 import { Saksoversikt } from './saksoversikt'
-import { useNavigate } from 'react-router-dom'
-import { Dokumenter, PersonInfo, SakslisteProps } from './typer'
+import { Dokumenter, IPersonResult } from './typer'
+import { IApiResponse } from '../../shared/api/types'
+import Spinner from '../../shared/Spinner'
 
-//todo: typer
 const testDokumenter: Dokumenter = {
   brev: [
     {
-      dato: '13.05.2021',
-      tittel: 'Innvilgelsesbrev barnepensjon',
+      dato: 'Mock 13.05.2021',
+      tittel: 'Mock Innvilgelsesbrev barnepensjon',
       link: 'link',
-      status: 'Sendt ut',
+      status: 'Mock Sendt ut',
     },
     {
-      dato: '09.05.2021',
-      tittel: 'Søknad barnepensjon - førstegangsbehandling',
+      dato: 'Mock 09.05.2021',
+      tittel: 'Mock Søknad barnepensjon - førstegangsbehandling',
       link: 'link',
-      status: 'Motatt',
-    },
-  ],
-}
-
-const testdata: SakslisteProps = {
-  saker: [
-    {
-      sakId: 1,
-      type: 'Barnepensjon',
-      sakstype: 'Nasjonal',
-      behandlinger: [
-        {
-          id: 11,
-          opprettet: '12.01.2021',
-          type: 'Revurdering',
-          årsak: 'Søknad',
-          status: 'Utredes',
-          vedtaksdato: '18.01.20201',
-          resultat: 'Ikke satt',
-        },
-        {
-          id: 9,
-          opprettet: '01.01.2021',
-          type: 'Førstegangsbehandling',
-          årsak: 'Søknad',
-          status: 'Ferdigstilt',
-          vedtaksdato: '10.01.2021',
-          resultat: 'Innvilget',
-        },
-      ],
+      status: 'Mock Motatt',
     },
   ],
 }
 
 export const Person = () => {
-  const navigate = useNavigate()
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [personData, setPersonData] = useState({})
-  const [personinfo, setPersoninfo] = useState<PersonInfo>()
+  const [personData, setPersonData] = useState<IPersonResult | undefined>(undefined)
+  const [lastet, setLastet] = useState<boolean>(false)
+  const [error, setError] = useState<IPersonResult | undefined>(undefined)
 
   const match = useParams<{ fnr: string }>()
 
-  const sakIdInput = useRef() as React.MutableRefObject<HTMLInputElement>
-
   useEffect(() => {
-    ;(async () => {
-      if (match.fnr) {
-        const person = await getPerson(match.fnr)
-        setPersonData(person)
-        setPersoninfo({
-          navn: person.data.person.fornavn + person.data.person.etternavn,
-          foedselsnummer: person.data.person.foedselsnummer,
-          type: 'Etterlatt',
+    if (match.fnr) {
+      getPerson(match.fnr)
+        .then((result: IApiResponse<IPersonResult>) => {
+          if (result.status === 200) {
+            setPersonData(result?.data)
+          } else {
+            setError(result?.data)
+          }
+          setLastet(true)
         })
-      }
-    })()
+        .catch((e) => {
+          console.log('error', e)
+          setLastet(true)
+        })
+    }
   }, [])
 
-  const opprettBehandling = () => {
-    if (sakIdInput.current.value) {
-      opprettBehandlingPaaSak(Number(sakIdInput.current.value))
-    }
+  if (error && personData === undefined) {
+    return (
+      <Container>
+        <div>{error}</div>
+      </Container>
+    )
   }
 
-  const goToBehandling = (behandlingsId: string) => {
-    navigate(`/behandling/${behandlingsId}/soeknadsoversikt`)
-  }
+  const navn = personData?.person.fornavn + ' ' + personData?.person.etternavn
+  const personInfo = personData ? { navn: navn, fnr: personData?.person.foedselsnummer, type: 'Etterlatt' } : null
 
   return (
     <>
-      <StatusBar theme={StatusBarTheme.gray} personInfo={personinfo} />
-      <Container>
-        <Tabs>
-          <Tlist>
-            <TabElement>Saksoversikt</TabElement>
-            <TabElement>Dokumentoversikt</TabElement>
-          </Tlist>
-
-          <TabPanel>
-            <Saksoversikt saksliste={testdata} opprettBehandling={opprettBehandling} goToBehandling={goToBehandling} />
-          </TabPanel>
-          <TabPanel>
-            <Dokumentoversikt {...testDokumenter} />
-          </TabPanel>
-        </Tabs>
-      </Container>
+      {personInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={personInfo} />}
+      <Spinner visible={!lastet} label={'Laster'} />
+      {lastet && (
+        <Container>
+          <Tabs>
+            <Tlist>
+              <TabElement>Saksoversikt</TabElement>
+              <TabElement>Dokumentoversikt</TabElement>
+            </Tlist>
+            <TabPanel>
+              <Saksoversikt behandlingliste={personData?.behandlingListe.behandlinger} />
+            </TabPanel>
+            <TabPanel>
+              <Dokumentoversikt {...testDokumenter} />
+            </TabPanel>
+          </Tabs>
+        </Container>
+      )}
     </>
   )
 }

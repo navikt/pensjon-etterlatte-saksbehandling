@@ -1,10 +1,10 @@
-import { Button, Modal } from "@navikt/ds-react";
-import { useEffect, useState } from "react";
-import { genererPdf, opprettEllerOppdaterBrevForVedtak } from "../../../shared/api/brev";
-import styled from "styled-components";
-import { FileIcon } from "../../../shared/icons/fileIcon";
-import { useParams } from "react-router-dom";
-import {PdfVisning} from "../brev/pdf-visning";
+import { Button, Modal } from '@navikt/ds-react'
+import { useEffect, useState } from 'react'
+import { genererPdf, opprettEllerOppdaterBrevForVedtak } from '../../../shared/api/brev'
+import styled from 'styled-components'
+import { FileIcon } from '../../../shared/icons/fileIcon'
+import { useParams } from 'react-router-dom'
+import { PdfVisning } from '../brev/pdf-visning'
 
 const ButtonRow = styled.div`
   background: white;
@@ -40,43 +40,42 @@ export default function BrevModal() {
     setIsOpen(true)
 
     genererPdf(brevId!!)
-        .then(file => URL.createObjectURL(file))
-        .then(url => setFileURL(url))
-        .catch(e => setError(e.message))
-        .finally(() => {
-          if (fileURL) URL.revokeObjectURL(fileURL)
-        })
+      .then((file) => URL.createObjectURL(file))
+      .then((url) => setFileURL(url))
+      .catch((e) => setError(e.message))
+      .finally(() => {
+        if (fileURL) URL.revokeObjectURL(fileURL)
+      })
   }
 
   useEffect(() => {
-    opprettEllerOppdaterBrevForVedtak(behandlingId!!)
-        .then((id) => setBrevId(id))
+    opprettEllerOppdaterBrevForVedtak(behandlingId!!).then((id) => setBrevId(id))
   }, [])
 
   return (
-      <>
-        <VedtaksbrevWrapper onClick={preview}>
-          <FileIcon/>
-          <span className="text">Vis vedtaksbrev</span>
-        </VedtaksbrevWrapper>
+    <>
+      <VedtaksbrevWrapper onClick={preview}>
+        <FileIcon />
+        <span className="text">Vis vedtaksbrev</span>
+      </VedtaksbrevWrapper>
 
-        <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-          <Modal.Content>
-            {/*<h2>{brev.tittel}</h2>
+      <Modal open={isOpen} onClose={() => setIsOpen(false)}>
+        <Modal.Content>
+          {/*<h2>{brev.tittel}</h2>
             <h4>
               <Tag variant={'info'} size={'small'}>
                 {brev.status}
               </Tag>
             </h4>*/}
 
-              <PdfVisning fileUrl={fileURL} error={error} />
-            <ButtonRow>
-              <Button variant={'secondary'} onClick={() => setIsOpen(false)}>
-                Lukk
-              </Button>
-            </ButtonRow>
-          </Modal.Content>
-        </Modal>
-      </>
+          <PdfVisning fileUrl={fileURL} error={error} />
+          <ButtonRow>
+            <Button variant={'secondary'} onClick={() => setIsOpen(false)}>
+              Lukk
+            </Button>
+          </ButtonRow>
+        </Modal.Content>
+      </Modal>
+    </>
   )
-};
+}

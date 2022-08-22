@@ -23,7 +23,6 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
 import javax.sql.DataSource
 
-
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApplicationIntegrationTest {
 
@@ -55,7 +54,7 @@ class ApplicationIntegrationTest {
             mqChannel = "DEV.ADMIN.SVRCONN",
             mqKravgrunnlagQueue = "DEV.QUEUE.1",
             serviceUserUsername = "admin",
-            serviceUserPassword = "passw0rd",
+            serviceUserPassword = "passw0rd"
         )
 
         ApplicationContext(applicationProperties).also {
@@ -76,7 +75,8 @@ class ApplicationIntegrationTest {
         verify(timeout = TIMEOUT, exactly = 1) {
             tilbakekrevingService.opprettTilbakekrevingFraKravgrunnlag(any(), any())
 
-            rapidsConnection.publish(any(),
+            rapidsConnection.publish(
+                any(),
                 match {
                     objectMapper.readValue(it, TilbakekrevingEvent::class.java).run {
                         this.event == "TILBAKEKREVING:MOTTATT_KRAVGRUNNLAG"
@@ -99,7 +99,6 @@ class ApplicationIntegrationTest {
         ibmMQContainer.stop()
         postgreSQLContainer.stop()
     }
-
 
     private fun sendKravgrunnlagsmeldingFraOppdrag() {
         connectionFactory.connection().createSession().use { session ->

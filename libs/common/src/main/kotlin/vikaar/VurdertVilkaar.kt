@@ -21,4 +21,3 @@ data class VilkaarResultat(
     val vilkaar: List<VurdertVilkaar>?,
     val vurdertDato: LocalDateTime
 )
-

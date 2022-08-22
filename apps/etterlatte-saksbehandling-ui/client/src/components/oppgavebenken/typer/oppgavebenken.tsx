@@ -24,11 +24,13 @@ export const handlinger: Record<Handlinger, IPar> = {
 export enum BehandlingTypeFilter {
   VELG = 'VELG',
   FØRSTEGANGSBEHANDLING = 'FØRSTEGANGSBEHANDLING',
+  REVURDERING = 'REVURDERING',
 }
 
 export const behandlingTypeFilter: Record<BehandlingTypeFilter, IPar> = {
   VELG: { id: 'VELG', navn: 'Velg' },
   FØRSTEGANGSBEHANDLING: { id: 'FØRSTEGANGSBEHANDLING', navn: 'Førstegangsbehandling' },
+  REVURDERING: { id: 'REVURDERING', navn: 'Revurdering' },
 }
 
 export enum SoeknadTypeFilter {

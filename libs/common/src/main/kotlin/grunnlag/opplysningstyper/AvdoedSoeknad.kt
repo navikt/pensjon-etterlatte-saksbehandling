@@ -14,12 +14,12 @@ data class AvdoedSoeknad(
     val doedsdato: LocalDate,
     val statsborgerskap: String,
     val utenlandsopphold: Utenlandsopphold,
-    val doedsaarsakSkyldesYrkesskadeEllerYrkessykdom: JaNeiVetIkke,
-    )
+    val doedsaarsakSkyldesYrkesskadeEllerYrkessykdom: JaNeiVetIkke
+)
 
 data class Utenlandsopphold(
     val harHattUtenlandsopphold: JaNeiVetIkke,
-    val opphold: List<UtenlandsoppholdOpplysninger>?,
+    val opphold: List<UtenlandsoppholdOpplysninger>?
 )
 
 data class UtenlandsoppholdOpplysninger(

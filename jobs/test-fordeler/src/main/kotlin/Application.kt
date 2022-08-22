@@ -22,7 +22,7 @@ val objectMapper: ObjectMapper = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 val aremark_person = "12101376212"
-val logger:Logger = LoggerFactory.getLogger("BEY001")
+val logger: Logger = LoggerFactory.getLogger("BEY001")
 
 fun main() {
     logger.info("Batch startet")
@@ -35,7 +35,7 @@ fun main() {
 
     sendMelding(
         payload(aremark_person),
-        producer,
+        producer
     )
     logger.info("Batch avslutter")
     exitProcess(0)
@@ -43,7 +43,7 @@ fun main() {
 
 internal fun sendMelding(
     melding: String,
-    producer: KafkaProdusent<String, String>,
+    producer: KafkaProdusent<String, String>
 ) {
     val startMillis = System.currentTimeMillis()
     logger.info("Publiserer melding")
@@ -53,11 +53,13 @@ internal fun sendMelding(
     logger.info("melding publisert på ${(System.currentTimeMillis() - startMillis) / 1000}s")
 }
 
-private fun createRecord(input: String) = JsonMessage.newMessage(mapOf(
+private fun createRecord(input: String) = JsonMessage.newMessage(
+    mapOf(
         "@event_name" to "soeknad_innsendt",
         "@skjema_info" to objectMapper.readValue<ObjectNode>(input),
         "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
         "@template" to "soeknad",
         "@fnr_soeker" to aremark_person,
         "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L).toString()
-    )).toJson()
+    )
+).toJson()

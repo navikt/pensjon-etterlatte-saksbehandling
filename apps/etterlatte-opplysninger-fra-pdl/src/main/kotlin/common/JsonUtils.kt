@@ -17,7 +17,10 @@ fun Any.toJson(): String = jacksonObjectMapper().writeValueAsString(this)
 
 inline fun <reified T : Any> mapJsonToAny(json: String, failonunknown: Boolean = false): T {
     return objectMapper.let {
-        if (failonunknown) it.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-        else it
+        if (failonunknown) {
+            it.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+        } else {
+            it
+        }
     }.readValue(json)
 }

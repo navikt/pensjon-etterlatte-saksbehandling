@@ -51,5 +51,4 @@ class JournalpostServiceMock : JournalpostService {
 
     fun readFile(file: String) = JournalpostServiceMock::class.java.getResource(file)?.readBytes()
         ?: throw FileNotFoundException("Fant ikke filen $file")
-
 }

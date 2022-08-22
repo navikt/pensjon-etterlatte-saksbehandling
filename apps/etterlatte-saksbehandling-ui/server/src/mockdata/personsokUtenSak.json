@@ -18,7 +18,7 @@
     "utland": null,
     "rolle": null
   },
-  "saker": {
-    "saker": []
+  "behandlingListe": {
+    "behandlinger": []
   }
 }

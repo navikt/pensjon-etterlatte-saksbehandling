@@ -57,8 +57,8 @@ if (isDev) {
 }
 
 app.use(/^(?!.*\/(internal|static)\/).*$/, (req: any, res: any) => {
-  return res.sendFile(`${clientPath}/index.html`);
-});
+  return res.sendFile(`${clientPath}/index.html`)
+})
 
 app.listen(appConf.port, () => {
   logger.info(`Server running on port ${appConf.port}`)

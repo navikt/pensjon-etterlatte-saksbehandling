@@ -1,24 +1,23 @@
 package no.nav.etterlatte.ktortokenexchange
 
 import com.typesafe.config.Config
-import io.ktor.auth.LolSecMediator
-import io.ktor.server.application.*
-import io.ktor.server.config.*
-import io.ktor.server.routing.*
+import io.ktor.server.application.Application
+import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.routing.Route
 
 object ThreadBoundSecCtx : ThreadLocal<SecurityContext>()
 
-interface SecurityContext{
+interface SecurityContext {
     fun user(): String?
 }
 
-interface SecurityContextMediator{
-    fun outgoingToken(audience: String): suspend ()->String
+interface SecurityContextMediator {
+    fun outgoingToken(audience: String): suspend () -> String
     fun installSecurity(ktor: Application)
-    fun secureRoute(ctx: Route, block: Route.()->Unit)
+    fun secureRoute(ctx: Route, block: Route.() -> Unit)
 }
 
-object SecurityContextMediatorFactory{
+object SecurityContextMediatorFactory {
     fun from(config: Config): SecurityContextMediator {
         return when (config.getStringSafely("no.nav.etterlatte.sikkerhet")) {
             "ingen" -> LolSecMediator()
@@ -27,14 +26,13 @@ object SecurityContextMediatorFactory{
     }
 }
 
-private fun Config.getStringSafely(path: String): String?{
+private fun Config.getStringSafely(path: String): String? {
     return if (hasPath(path)) getString(path) else null
 }
 
-fun Route.secureRoutUsing(ctx: SecurityContextMediator, route: Route.()->Unit){
+fun Route.secureRoutUsing(ctx: SecurityContextMediator, route: Route.() -> Unit) {
     ctx.secureRoute(this, route)
 }
-fun Application.installAuthUsing(ctx: SecurityContextMediator){
+fun Application.installAuthUsing(ctx: SecurityContextMediator) {
     ctx.installSecurity(this)
 }
-

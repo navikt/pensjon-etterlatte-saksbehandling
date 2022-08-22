@@ -1,7 +1,7 @@
 import CopyToClipboard from 'react-copy-to-clipboard'
-import { CopyIcon } from '../../shared/icons/copyIcon'
+import { CopyIcon } from '../icons/copyIcon'
 
-export const Fnr = (props: { value: string; copy?: boolean }) => {
+export const Fnr = (props: {value: string; copy?: boolean}) => {
   return (
     <div>
       {props.value}{' '}
@@ -9,14 +9,11 @@ export const Fnr = (props: { value: string; copy?: boolean }) => {
         <CopyToClipboard text={props.value}>
           <span
             style={{
-              verticalAlign: 'middle',
-              cursor: 'pointer',
-              marginLeft: '1em',
-              marginRight: '1em',
+              verticalAlign: 'middle', cursor: 'pointer', marginLeft: '1em', marginRight: '1em',
             }}
             aria-label="kopier fødselsnummer"
           >
-            <CopyIcon />
+            <CopyIcon/>
           </span>
         </CopyToClipboard>
       )}

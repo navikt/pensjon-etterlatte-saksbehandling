@@ -9,11 +9,11 @@ import { AppContext } from '../../../store/AppContext'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import BrevModal from './brev-modal'
 import { hentBehandlesFraStatus } from '../felles/utils'
-import { formatterStringDato } from '../../../utils'
+import { formaterStringDato } from '../../../utils/formattering'
 
 export const Beregne = () => {
   const behandling = useContext(AppContext).state.behandlingReducer
-  const virkningstidspunkt = formatterStringDato(behandling.virkningstidspunkt)
+  const virkningstidspunkt = formaterStringDato(behandling.virkningstidspunkt)
   const behandles = hentBehandlesFraStatus(behandling?.status)
 
   return (

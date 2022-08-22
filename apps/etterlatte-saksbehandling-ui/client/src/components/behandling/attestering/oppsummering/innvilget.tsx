@@ -2,14 +2,14 @@ import { IBehandlingInfo } from '../../SideMeny/types'
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
 import { useContext } from 'react'
 import { AppContext } from '../../../../store/AppContext'
-import { formatterDato, formatterStringDato } from '../../../../utils'
+import { formaterDato, formaterStringDato } from '../../../../utils/formattering'
 
 export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingInfo }) => {
   const innloggetId = useContext(AppContext).state.saksbehandlerReducer.ident
-  const virkningsdato = behandlingsInfo?.virkningsdato ? formatterStringDato(behandlingsInfo?.virkningsdato) : '-'
+  const virkningsdato = behandlingsInfo?.virkningsdato ? formaterStringDato(behandlingsInfo?.virkningsdato) : '-'
   const attestertDato = behandlingsInfo?.datoAttestert
-    ? formatterStringDato(behandlingsInfo?.datoAttestert)
-    : formatterDato(new Date())
+    ? formaterStringDato(behandlingsInfo?.datoAttestert)
+    : formaterDato(new Date())
 
   return (
     <>

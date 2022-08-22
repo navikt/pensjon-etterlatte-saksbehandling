@@ -1,9 +1,11 @@
 package no.nav.etterlatte.oppgave
 
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.call
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Saksbehandler
 
@@ -17,10 +19,12 @@ fun Route.oppgaveRoutes(repo: OppgaveDao) {
             val bruker = Kontekst.get().AppUser
 
             if (bruker is Saksbehandler) {
-                repo.finnOppgaverForRoller(listOfNotNull(
-                    Rolle.SAKSBEHANDLER.takeIf { bruker.harRolleSaksbehandler() },
-                    Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() }
-                )).let { OppgaveListeDto(it) }
+                repo.finnOppgaverForRoller(
+                    listOfNotNull(
+                        Rolle.SAKSBEHANDLER.takeIf { bruker.harRolleSaksbehandler() },
+                        Rolle.ATTESTANT.takeIf { bruker.harRolleAttestant() }
+                    )
+                ).let { OppgaveListeDto(it) }
                     .also { call.respond(it) }
             } else {
                 call.respond(HttpStatusCode.Forbidden)
@@ -28,4 +32,3 @@ fun Route.oppgaveRoutes(repo: OppgaveDao) {
         }
     }
 }
-

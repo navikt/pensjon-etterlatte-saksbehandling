@@ -5,56 +5,19 @@ const path = process.env.REACT_APP_VEDTAK_URL
 export const getPerson = async (fnr: string): Promise<IApiResponse<any>> => {
   try {
     const result: Response = await fetch(`${path}/api/personer/${fnr}`)
-    return {
-      status: result.status,
-      data: await result.json(),
+    const data = await result.json()
+    if (result.ok) {
+      return { status: result.status, data: data }
+    } else {
+      console.log('error i fetch', result)
+      if (data.includes('Ugyldig fødselsnummer')) {
+        return { status: 500, data: data }
+      } else {
+        return { status: result.status, data: 'Det skjedde en feil' }
+      }
     }
   } catch (e) {
-    return { status: 500 }
-  }
-}
-
-interface Sak {
-  id: number
-  ident: string
-  sakType: string
-}
-export interface IPersonResult {
-  person: {
-    fornavn: string
-    etternavn: string
-    foedselsnummer: string
-  }
-  saker: { saker: Sak[] }
-}
-
-export const opprettSakPaaPerson = async (fnr: string): Promise<IApiResponse<IPersonResult>> => {
-  try {
-    const result: Response = await fetch(`${path}/api/personer/${fnr}/saker`, {
-      method: 'post',
-    })
-
-    return {
-      status: result.status,
-      data: await result.json(),
-    }
-  } catch (e) {
-    console.log(e)
-    return { status: 500 }
-  }
-}
-
-export const opprettBehandlingPaaSak = async (sakId: number): Promise<IApiResponse<any>> => {
-  try {
-    const result: Response = await fetch(`${path}/api/saker/${sakId}/behandlinger`, {
-      method: 'post',
-    })
-    return {
-      status: result.status,
-      data: await result.json(),
-    }
-  } catch (e) {
-    console.log(e)
+    console.log('error', e)
     return { status: 500 }
   }
 }

@@ -46,11 +46,26 @@ open class JsonMessage(
 
         fun newMessage(map: Map<String, Any> = emptyMap(), randomIdGenerator: RandomIdGenerator? = null) =
             objectMapper.writeValueAsString(map).let { JsonMessage(it, randomIdGenerator) }
-        fun newMessage(eventName: String, map: Map<String, Any> = emptyMap(), randomIdGenerator: RandomIdGenerator? = null) = newMessage(mapOf(EventNameKey to eventName) + map, randomIdGenerator)
-        fun newNeed(behov: Collection<String>, map: Map<String, Any> = emptyMap(), randomIdGenerator: RandomIdGenerator? = null) = newMessage("behov", mapOf(
-            "@behovId" to UUID.randomUUID(),
-            NeedKey to behov
-        ) + map, randomIdGenerator)
+        fun newMessage(
+            eventName: String,
+            map: Map<String, Any> = emptyMap(),
+            randomIdGenerator: RandomIdGenerator? = null
+        ) = newMessage(
+            mapOf(EventNameKey to eventName) + map,
+            randomIdGenerator
+        )
+        fun newNeed(
+            behov: Collection<String>,
+            map: Map<String, Any> = emptyMap(),
+            randomIdGenerator: RandomIdGenerator? = null
+        ) = newMessage(
+            "behov",
+            mapOf(
+                "@behovId" to UUID.randomUUID(),
+                NeedKey to behov
+            ) + map,
+            randomIdGenerator
+        )
 
         private fun initializeOrSetParticipatingServices(node: JsonNode, id: String, opprettet: LocalDateTime) {
             val entry = mutableMapOf(
@@ -61,8 +76,13 @@ open class JsonMessage(
                 compute("instance") { _, _ -> serviceHostname }
                 compute("image") { _, _ -> serviceImage }
             }
-            if (node.path(ParticipatingServicesKey).isMissingOrNull()) (node as ObjectNode).putArray(ParticipatingServicesKey).add(objectMapper.valueToTree<ObjectNode>(entry))
-            else (node.path(ParticipatingServicesKey) as ArrayNode).add(objectMapper.valueToTree<JsonNode>(entry))
+            if (node.path(ParticipatingServicesKey).isMissingOrNull()) {
+                (node as ObjectNode).putArray(
+                    ParticipatingServicesKey
+                ).add(objectMapper.valueToTree<ObjectNode>(entry))
+            } else {
+                (node.path(ParticipatingServicesKey) as ArrayNode).add(objectMapper.valueToTree<JsonNode>(entry))
+            }
         }
     }
 
@@ -81,7 +101,6 @@ open class JsonMessage(
         initializeOrSetParticipatingServices(json, id, opprettet)
     }
 
-
     private fun node(path: String): JsonNode {
         if (!path.contains(nestedKeySeparator)) return json.path(path)
         return path.split(nestedKeySeparator).fold(json) { result, key ->
@@ -90,12 +109,17 @@ open class JsonMessage(
     }
 
     operator fun get(key: String): JsonNode =
-        requireNotNull(recognizedKeys[key]) { "$key is unknown; keys must be declared as required, forbidden, or interesting" }
+        requireNotNull(recognizedKeys[key]) {
+            "$key is unknown; keys must be declared as required, forbidden, or interesting"
+        }
 
     operator fun set(key: String, value: Any) {
-        (json as ObjectNode).replace(key, objectMapper.valueToTree<JsonNode>(value).also {
-            recognizedKeys[key] = it
-        })
+        (json as ObjectNode).replace(
+            key,
+            objectMapper.valueToTree<JsonNode>(value).also {
+                recognizedKeys[key] = it
+            }
+        )
     }
 
     fun toJson(): String = objectMapper.writeValueAsString(json)

@@ -3,12 +3,10 @@ package no.nav.etterlatte.behandling
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.vikaar.Familiemedlemmer
-import no.nav.etterlatte.typer.Sak
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -25,7 +23,7 @@ data class Oppgave(
     val beskrivelse: String,
     val saksbehandler: String,
     val handling: Handling,
-    val antallSoesken: Int?,
+    val antallSoesken: Int?
 )
 
 data class Oppgaver(val oppgaver: List<Oppgave>)
@@ -50,7 +48,7 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient, private val
                             status = oppgave.behandlingStatus,
                             oppgaveStatus = oppgave.oppgaveStatus,
                             soeknadType = oppgave.sak.sakType,
-                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, //todo dette kan nå hentes fra behandling
+                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, // ktlint-disable max-line-length TODO: dette kan nå hentes fra behandling
                             regdato = oppgave.regdato.toLocalDateTime().toString(),
                             fristdato = oppgave.fristDato.atStartOfDay().toString(),
                             fnr = oppgave.sak.ident,

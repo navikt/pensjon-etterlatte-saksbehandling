@@ -1,7 +1,7 @@
 export enum RelatertPersonsRolle {
   BARN = 'barn',
   FORELDER = 'forelder',
-  SOESKEN = 'søsken'
+  SOESKEN = 'søsken',
 }
 
 export enum PersonStatus {
@@ -12,33 +12,33 @@ export enum PersonStatus {
 }
 
 export interface JournalpostResponse {
-    data: {
-        dokumentoversiktBruker: {
-            journalposter: Journalpost[]
-        }
+  data: {
+    dokumentoversiktBruker: {
+      journalposter: Journalpost[]
     }
-    errors: any;
+  }
+  errors: any
 }
 
 export interface Journalpost {
-    journalpostId: string;
-    tittel: string;
-    journalposttype: string;
-    journalstatus: string;
-    dokumenter: Dokument[];
-    avsenderMottaker: {
-        id: string;
-        navn: string;
-        erLikBruker: boolean;
-    };
-    kanal: string;
-    datoOpprettet: string;
+  journalpostId: string
+  tittel: string
+  journalposttype: string
+  journalstatus: string
+  dokumenter: Dokument[]
+  avsenderMottaker: {
+    id: string
+    navn: string
+    erLikBruker: boolean
+  }
+  kanal: string
+  datoOpprettet: string
 }
 
 interface Dokument {
-    dokumentInfoId: string;
-    tittel: string;
-    dokumentvarianter: {
-        saksbehandlerHarTilgang: boolean;
-    }[]
+  dokumentInfoId: string
+  tittel: string
+  dokumentvarianter: {
+    saksbehandlerHarTilgang: boolean
+  }[]
 }

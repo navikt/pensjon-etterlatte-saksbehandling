@@ -3,7 +3,6 @@ package no.nav.etterlatte
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 
-
 fun main() {
     ApplicationContext().also {
         jobs(it)

@@ -10,7 +10,7 @@ class UtbetalingMapper(
     val tidligereUtbetalinger: List<Utbetaling>,
     val vedtak: Utbetalingsvedtak,
     val utbetalingId: UUID = UUID.randomUUID(),
-    val opprettet: Tidspunkt = Tidspunkt.now(),
+    val opprettet: Tidspunkt = Tidspunkt.now()
 ) {
 
     private val utbetalingsperioder = vedtak.pensjonTilUtbetaling.sortedBy { it.periode.fom }
@@ -20,7 +20,6 @@ class UtbetalingMapper(
             utbetalingsperioder.size == 1 &&
             utbetalingsperioder.first().type == UtbetalingsperiodeType.OPPHOER
         ) {
-
             throw IngenEksisterendeUtbetalingException()
         }
         return utbetaling()
@@ -90,7 +89,6 @@ class UtbetalingMapper(
 
     private fun indeksForUtbetalingslinje(utbetalingslinjeId: Long) =
         utbetalingsperioder.indexOfFirst { it.id == utbetalingslinjeId }
-
 }
 
 class IngenEksisterendeUtbetalingException : RuntimeException()

@@ -226,7 +226,7 @@ export enum Kriterietype {
   SOEKER_IKKE_ADRESSE_I_UTLANDET = 'SOEKER_IKKE_ADRESSE_I_UTLANDET',
   GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET = 'GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET',
   AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD = 'AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD',
-  AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR = 'AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR',
+  AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR = 'AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR',
   SAKSBEHANDLER_RESULTAT = 'SAKSBEHANDLER_RESULTAT',
 }
 
@@ -326,6 +326,8 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   hendelser: [],
   familieforhold: undefined,
 }
+
+export const addBehandlingAction = (data: IDetaljertBehandling) => ({ type: 'add_behandling', data })
 
 export const behandlingReducer = (state = detaljertBehandlingInitialState, action: IAction): any => {
   switch (action.type) {

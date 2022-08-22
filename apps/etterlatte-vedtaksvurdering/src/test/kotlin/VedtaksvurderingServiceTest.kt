@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
-
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -28,10 +27,12 @@ internal class VedtaksvurderingServiceTest {
     private val sakId = "5"
     private val behandlingId = UUID.randomUUID()
     private val fnr = "fnr"
+    private val sakType = "BARNEPENSJON"
 
     private val vedtakSomIkkeErFattet = Vedtak(
         0,
         sakId,
+        sakType,
         behandlingId,
         null,
         null,
@@ -44,7 +45,8 @@ internal class VedtaksvurderingServiceTest {
         null,
         null,
         null,
-        null,)
+        null
+    )
     private val fattetVedtak = vedtakSomIkkeErFattet.copy(vedtakFattet = true)
 
     @Test
@@ -78,7 +80,7 @@ internal class VedtaksvurderingServiceTest {
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns null
         every { repositoryMock.lagreAvkorting(sakId, behandlingId, fnr, any()) } returns Unit
         service.lagreAvkorting(sakId, behandlingId, fnr, avkorting)
-        verify { repositoryMock.lagreAvkorting(sakId, behandlingId, fnr, any())  }
+        verify { repositoryMock.lagreAvkorting(sakId, behandlingId, fnr, any()) }
     }
 
     @Test
@@ -95,7 +97,6 @@ internal class VedtaksvurderingServiceTest {
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns fattetVedtak
         assertThrows<KanIkkeEndreFattetVedtak> { service.lagreAvkorting(sakId, behandlingId, fnr, avkorting) }
     }
-
 
     @Test
     fun `når beregning lagres og vedtak finnes fra før, så skal vedtaket oppdateres`() {
@@ -128,7 +129,7 @@ internal class VedtaksvurderingServiceTest {
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns null
         every { repositoryMock.lagreBeregningsresultat(sakId, behandlingId, fnr, any()) } returns Unit
         service.lagreBeregningsresultat(sakId, behandlingId, fnr, beregning)
-        verify { repositoryMock.lagreBeregningsresultat(sakId, behandlingId, fnr, any())  }
+        verify { repositoryMock.lagreBeregningsresultat(sakId, behandlingId, fnr, any()) }
     }
 
     @Test
@@ -156,12 +157,12 @@ internal class VedtaksvurderingServiceTest {
         val virkingsDato = LocalDate.now()
 
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns vedtakSomIkkeErFattet
-        every { repositoryMock.oppdaterVilkaarsresultat(sakId, behandlingId, any()) } returns Unit
+        every { repositoryMock.oppdaterVilkaarsresultat(sakId, sakType, behandlingId, any()) } returns Unit
         every { repositoryMock.lagreFnr(sakId, behandlingId, fnr) } returns Unit
         every { repositoryMock.lagreDatoVirk(sakId, behandlingId, virkingsDato) } returns Unit
 
-        service.lagreVilkaarsresultat(sakId, behandlingId, fnr, vilkårsresultat, virkingsDato)
-        verify { repositoryMock.oppdaterVilkaarsresultat(sakId, behandlingId, vilkårsresultat) }
+        service.lagreVilkaarsresultat(sakId, sakType, behandlingId, fnr, vilkårsresultat, virkingsDato)
+        verify { repositoryMock.oppdaterVilkaarsresultat(sakId, sakType, behandlingId, vilkårsresultat) }
     }
 
     @Test
@@ -174,9 +175,11 @@ internal class VedtaksvurderingServiceTest {
         val virkingsDato = LocalDate.now()
 
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns null
-        every { repositoryMock.lagreVilkaarsresultat(sakId, behandlingId, fnr, any(), any()) } returns Unit
-        service.lagreVilkaarsresultat(sakId, behandlingId, fnr, vilkårsresultat, virkingsDato)
-        verify { repositoryMock.lagreVilkaarsresultat(sakId, behandlingId, fnr, vilkårsresultat, virkingsDato)  }
+        every { repositoryMock.lagreVilkaarsresultat(sakId, sakType, behandlingId, fnr, any(), any()) } returns Unit
+        service.lagreVilkaarsresultat(sakId, sakType, behandlingId, fnr, vilkårsresultat, virkingsDato)
+        verify {
+            repositoryMock.lagreVilkaarsresultat(sakId, sakType, behandlingId, fnr, vilkårsresultat, virkingsDato)
+        }
     }
 
     @Test
@@ -188,7 +191,16 @@ internal class VedtaksvurderingServiceTest {
         )
         val virkingsDato = LocalDate.now()
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns fattetVedtak
-        assertThrows<KanIkkeEndreFattetVedtak> { service.lagreVilkaarsresultat(sakId, behandlingId, fnr, vilkårsresultat, virkingsDato) }
+        assertThrows<KanIkkeEndreFattetVedtak> {
+            service.lagreVilkaarsresultat(
+                sakId,
+                sakType,
+                behandlingId,
+                fnr,
+                vilkårsresultat,
+                virkingsDato
+            )
+        }
     }
 
     @Test

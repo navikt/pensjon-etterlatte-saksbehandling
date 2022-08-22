@@ -1,11 +1,11 @@
 package no.nav.etterlatte.ktortokenexchange
 
-import io.ktor.client.plugins.auth.*
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.AuthProvider
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.http.auth.HttpAuthHeader
-
 
 fun Auth.bearerToken(block: BearerTokenAuthConfig.() -> Unit) {
     with(BearerTokenAuthConfig().apply(block)) {

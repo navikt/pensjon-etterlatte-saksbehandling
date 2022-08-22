@@ -11,6 +11,7 @@ dependencies {
     implementation(Ktor2.ClientAuth)
     implementation(Ktor2.ClientJackson)
     implementation(Ktor2.ClientContentNegotiation)
+    implementation(Ktor2.ServerContentNegotiation)
     implementation(Ktor2.Jackson)
     implementation(Jackson.Databind)
     implementation(Jackson.ModuleKotlin)
@@ -27,7 +28,6 @@ dependencies {
     testImplementation(Ktor2.ClientMock)
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:common"))
-
 }
 
 tasks.named("compileKotlin").configure { dependsOn(":apps:etterlatte-hendelser-pdl:generateAvroJava") }

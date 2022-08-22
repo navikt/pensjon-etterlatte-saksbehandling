@@ -5,13 +5,9 @@ import no.nav.etterlatte.InntektsKomponenten
 import no.nav.etterlatte.OpplysningsBygger
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.rapidsandrivers.behov
 import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -41,12 +37,11 @@ internal class HentOpplysningerFraInntektskomponenten(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-
             if (packet["@behov"].asText() in listOf(
-                    Opplysningstyper.AVDOED_INNTEKT_V1.name,
+                    Opplysningstyper.AVDOED_INNTEKT_V1.name
                 )
             ) {
-                //print("fnr ${packet["fnr"].asText()} - doedsdato ${packet["doedsdato"].asText()}")
+                // print("fnr ${packet["fnr"].asText()} - doedsdato ${packet["doedsdato"].asText()}")
                 try {
                     val fnr = Foedselsnummer.of(packet["fnr"].asText())
                     val doedsdato = LocalDate.parse(packet["doedsdato"].asText())
@@ -59,7 +54,5 @@ internal class HentOpplysningerFraInntektskomponenten(
                     logger.info(e.message)
                 }
             }
-
         }
-
 }

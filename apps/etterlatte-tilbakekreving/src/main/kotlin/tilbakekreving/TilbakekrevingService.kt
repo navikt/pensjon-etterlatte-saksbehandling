@@ -14,7 +14,10 @@ class TilbakekrevingService(
     val clock: Clock
 ) {
 
-    fun opprettTilbakekrevingFraKravgrunnlag(detaljertKravgrunnlag: DetaljertKravgrunnlagDto, kravgrunnlagXml: String): Tilbakekreving.MottattKravgrunnlag {
+    fun opprettTilbakekrevingFraKravgrunnlag(
+        detaljertKravgrunnlag: DetaljertKravgrunnlagDto,
+        kravgrunnlagXml: String
+    ): Tilbakekreving.MottattKravgrunnlag {
         val kravgrunnlag = kravgrunnlagMapper.toKravgrunnlag(detaljertKravgrunnlag, kravgrunnlagXml)
         val mottattKravgrunnlag = Tilbakekreving.MottattKravgrunnlag(
             sakId = kravgrunnlag.sakId,

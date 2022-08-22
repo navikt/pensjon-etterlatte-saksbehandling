@@ -25,15 +25,20 @@ internal class RealFoerstegangsbehandlingServiceTest {
 
     @BeforeEach
     fun before() {
-        Kontekst.set(Context(mockk(), object : DatabaseKontekst {
-            override fun activeTx(): Connection {
-                throw IllegalArgumentException()
-            }
+        Kontekst.set(
+            Context(
+                mockk(),
+                object : DatabaseKontekst {
+                    override fun activeTx(): Connection {
+                        throw IllegalArgumentException()
+                    }
 
-            override fun <T> inTransaction(block: () -> T): T {
-                return block()
-            }
-        }))
+                    override fun <T> inTransaction(block: () -> T): T {
+                        return block()
+                    }
+                }
+            )
+        )
     }
 
     @Test
@@ -65,7 +70,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "Soeker",
                 listOf("Gjenlevende"),
                 listOf("Avdoed"),
-                emptyList(),
+                emptyList()
             ),
             gyldighetsproeving = null,
             oppgaveStatus = OppgaveStatus.NY
@@ -97,7 +102,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "Soeker",
                 listOf("Gjenlevende"),
                 listOf("Avdoed"),
-                emptyList(),
+                emptyList()
             ),
             gyldighetsproeving = null,
             oppgaveStatus = OppgaveStatus.NY
@@ -108,7 +113,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
             "Innsender",
             emptyList(),
             listOf("Avdoed"),
-            listOf("Gjenlevende"),
+            listOf("Gjenlevende")
         )
 
         val sut = RealFoerstegangsbehandlingService(
@@ -140,7 +145,6 @@ internal class RealFoerstegangsbehandlingServiceTest {
         assertEquals(resultat.id, hendelse.captured.first)
         assertEquals(BehandlingHendelseType.OPPRETTET, hendelse.captured.second)
 
-
         @Test
         fun `avbrutt behandling kan ikke endres`() {
             val behandlingerMock = mockk<BehandlingDao>()
@@ -154,7 +158,7 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 "Innsender",
                 emptyList(),
                 listOf("Avdoed"),
-                listOf("Gjenlevende"),
+                listOf("Gjenlevende")
             )
 
             val opprettetBehandling = Foerstegangsbehandling(
@@ -190,12 +194,11 @@ internal class RealFoerstegangsbehandlingServiceTest {
             // behandlingen avbrytes
             assertEquals(false, resultat.status === BehandlingStatus.AVBRUTT)
 
-
-            //val behandlingEtterAvbrutt = sut.avbrytBehandling(resultat.id)
+            // val behandlingEtterAvbrutt = sut.avbrytBehandling(resultat.id)
             //     Assertions.assertEquals(BehandlingStatus.AVBRUTT, behandlingEtterAvbrutt)
 
-            //val behandlingEtterVilkårsvurdering = slot<UUID>()
-            //every { behandlingerMock.hentBehandling(capture(behandlingEtterVilkårsvurdering)) } returns behandlingEtterAvbrutt
+            // val behandlingEtterVilkårsvurdering = slot<UUID>()
+            // every { behandlingerMock.hentBehandling(capture(behandlingEtterVilkårsvurdering)) } returns behandlingEtterAvbrutt
         }
     }
 

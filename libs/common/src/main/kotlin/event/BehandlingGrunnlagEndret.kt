@@ -15,6 +15,5 @@ interface IMedGrunnlag {
     val grunnlagKey get() = "grunnlag"
 }
 
-
-object BehandlingGrunnlagEndret: IBehandlingGrunnlagEndret
-object BehandlingGrunnlagEndretMedGrunnlag: IBehandlingGrunnlagEndret, IMedGrunnlag
+object BehandlingGrunnlagEndret : IBehandlingGrunnlagEndret
+object BehandlingGrunnlagEndretMedGrunnlag : IBehandlingGrunnlagEndret, IMedGrunnlag

@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
 data class OAuth2CacheConfig(
     val enabled: Boolean,
     val maximumSize: Long = 1000,
-    val evictSkew: Long = 5,
+    val evictSkew: Long = 5
 ) {
     fun cache(
         cacheContext: CoroutineScope,
@@ -30,23 +30,32 @@ data class OAuth2CacheConfig(
         return object : Expiry<GrantRequest, OAuth2AccessTokenResponse> {
 
             override fun expireAfterCreate(
-                key: GrantRequest, response: OAuth2AccessTokenResponse,
+                key: GrantRequest,
+                response: OAuth2AccessTokenResponse,
                 currentTime: Long
             ): Long {
                 val seconds =
-                    if (response.expiresIn > skewInSeconds) response.expiresIn - skewInSeconds else response.expiresIn
-                        .toLong()
+                    if (response.expiresIn > skewInSeconds) {
+                        response.expiresIn - skewInSeconds
+                    } else {
+                        response.expiresIn
+                            .toLong()
+                    }
                 return TimeUnit.SECONDS.toNanos(seconds)
             }
 
             override fun expireAfterUpdate(
-                key: GrantRequest, response: OAuth2AccessTokenResponse,
-                currentTime: Long, currentDuration: Long
+                key: GrantRequest,
+                response: OAuth2AccessTokenResponse,
+                currentTime: Long,
+                currentDuration: Long
             ): Long = currentDuration
 
-
             override fun expireAfterRead(
-                key: GrantRequest, response: OAuth2AccessTokenResponse, currentTime: Long, currentDuration: Long
+                key: GrantRequest,
+                response: OAuth2AccessTokenResponse,
+                currentTime: Long,
+                currentDuration: Long
             ): Long = currentDuration
         }
     }

@@ -12,23 +12,24 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*
 
-
-interface Behandling: VedlikeholdService {
+interface Behandling : VedlikeholdService {
     fun grunnlagEndretISak(sak: Long)
     fun vedtakHendelse(
-        behandlingid: UUID, hendelse: String,
+        behandlingid: UUID,
+        hendelse: String,
         vedtakId: Long,
         inntruffet: Tidspunkt,
         saksbehandler: String?,
         kommentar: String?,
         valgtBegrunnelse: String?
     )
+
     fun sendDoedshendelse(doedshendelse: Doedshendelse)
 }
 
 class BehandlingsService(
     private val behandling_app: HttpClient,
-    private val url: String,
+    private val url: String
 ) : Behandling {
     override fun grunnlagEndretISak(sak: Long) {
         runBlocking {
@@ -37,7 +38,8 @@ class BehandlingsService(
     }
 
     override fun vedtakHendelse(
-        behandlingid: UUID, hendelse: String,
+        behandlingid: UUID,
+        hendelse: String,
         vedtakId: Long,
         inntruffet: Tidspunkt,
         saksbehandler: String?,
@@ -61,23 +63,20 @@ class BehandlingsService(
 
     override fun sendDoedshendelse(doedshendelse: Doedshendelse) {
         runBlocking {
-            behandling_app.post("$url/behandlinger/revurdering/pdlhendelse/doedshendelse") {
+            behandling_app.post("$url/grunnlagsendringshendelse/doedshendelse") {
                 contentType(ContentType.Application.Json)
                 setBody(doedshendelse)
             }
         }
     }
-
-
 }
-
 
 data class VedtakHendelse(
     val vedtakId: Long,
     val inntruffet: Tidspunkt,
     val saksbehandler: String?,
     val kommentar: String?,
-    val valgtBegrunnelse: String?,
+    val valgtBegrunnelse: String?
 )
 
 data class Sak(val ident: String, val sakType: String, val id: Long)

@@ -18,12 +18,9 @@ import no.nav.etterlatte.behandling.foerstegangsbehandling.Foerstegangsbehandlin
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
 
@@ -35,9 +32,7 @@ fun Route.behandlingRoutes(
 ) {
     val logger = application.log
 
-
     route("/behandlinger") {
-
         get {
             call.respond(
                 generellBehandlingService.hentBehandlinger()
@@ -47,7 +42,9 @@ fun Route.behandlingRoutes(
                             it.sak,
                             it.status,
                             if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
-                            it.behandlingOpprettet
+                            it.behandlingOpprettet,
+                            it.type,
+                            if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD"
                         )
                     }
                     .let { BehandlingListe(it) }
@@ -73,6 +70,7 @@ fun Route.behandlingRoutes(
                                     soesken = persongalleri.soesken,
                                     gyldighetsproeving = gyldighetsproeving,
                                     status = status,
+                                    behandlingType = type
                                 )
                             }
                         }
@@ -91,6 +89,7 @@ fun Route.behandlingRoutes(
                                     soesken = persongalleri.soesken,
                                     gyldighetsproeving = null,
                                     status = status,
+                                    behandlingType = type
                                 )
                             }
                         }
@@ -102,9 +101,7 @@ fun Route.behandlingRoutes(
             }
 
             route("/hendelser") {
-
                 route("/vedtak") {
-
                     get {
                         call.respond(
                             generellBehandlingService.hentHendelserIBehandling(behandlingsId)
@@ -138,11 +135,9 @@ fun Route.behandlingRoutes(
                 foerstegangsbehandlingService.lagreGyldighetsprøving(behandlingsId, body)
                 call.respond(HttpStatusCode.OK)
             }
-
         }
 
         route("/sak") {
-
             get("/{sakid}") {
                 call.respond(
                     generellBehandlingService.hentBehandlingerISak(sakId)
@@ -152,7 +147,9 @@ fun Route.behandlingRoutes(
                                 it.sak,
                                 it.status,
                                 if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
-                                it.behandlingOpprettet
+                                it.behandlingOpprettet,
+                                it.type,
+                                if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD"
                             )
                         }
                         .let { BehandlingListe(it) }
@@ -172,30 +169,32 @@ fun Route.behandlingRoutes(
             foerstegangsbehandlingService.startFoerstegangsbehandling(
                 behandlingsBehov.sak,
                 behandlingsBehov.persongalleri,
-                behandlingsBehov.mottattDato,
+                behandlingsBehov.mottattDato
             )
                 .also { call.respondText(it.id.toString()) }
         }
 
         route("/foerstegangsbehandling") {
-
             get {
-                call.respond(foerstegangsbehandlingService.hentBehandling(behandlingsId)?.let {
-                    DetaljertBehandling(
-                        it.id,
-                        it.sak,
-                        it.behandlingOpprettet,
-                        it.sistEndret,
-                        it.soeknadMottattDato,
-                        it.persongalleri.innsender,
-                        it.persongalleri.soeker,
-                        it.persongalleri.gjenlevende,
-                        it.persongalleri.avdoed,
-                        it.persongalleri.soesken,
-                        it.gyldighetsproeving,
-                        it.status,
-                    )
-                } ?: HttpStatusCode.NotFound)
+                call.respond(
+                    foerstegangsbehandlingService.hentBehandling(behandlingsId)?.let {
+                        DetaljertBehandling(
+                            it.id,
+                            it.sak,
+                            it.behandlingOpprettet,
+                            it.sistEndret,
+                            it.soeknadMottattDato,
+                            it.persongalleri.innsender,
+                            it.persongalleri.soeker,
+                            it.persongalleri.gjenlevende,
+                            it.persongalleri.avdoed,
+                            it.persongalleri.soesken,
+                            it.gyldighetsproeving,
+                            it.status,
+                            BehandlingType.FØRSTEGANGSBEHANDLING
+                        )
+                    } ?: HttpStatusCode.NotFound
+                )
             }
 
             post {
@@ -204,33 +203,34 @@ fun Route.behandlingRoutes(
                 foerstegangsbehandlingService.startFoerstegangsbehandling(
                     behandlingsBehov.sak,
                     behandlingsBehov.persongalleri,
-                    behandlingsBehov.mottattDato,
+                    behandlingsBehov.mottattDato
                 )
                     .also { call.respondText(it.id.toString()) }
             }
         }
 
-
         route("/revurdering") {
             get {
-                call.respond(revurderingService.hentRevurdering(behandlingsId)?.let {
-                    DetaljertBehandling(
-                        it.id,
-                        it.sak,
-                        it.behandlingOpprettet,
-                        it.sistEndret,
-                        it.behandlingOpprettet,
-                        it.persongalleri.innsender,
-                        it.persongalleri.soeker,
-                        it.persongalleri.gjenlevende,
-                        it.persongalleri.avdoed,
-                        it.persongalleri.soesken,
-                        null,
-                        it.status,
-                    )
-                } ?: HttpStatusCode.NotFound)
+                call.respond(
+                    revurderingService.hentRevurdering(behandlingsId)?.let {
+                        DetaljertBehandling(
+                            it.id,
+                            it.sak,
+                            it.behandlingOpprettet,
+                            it.sistEndret,
+                            it.behandlingOpprettet,
+                            it.persongalleri.innsender,
+                            it.persongalleri.soeker,
+                            it.persongalleri.gjenlevende,
+                            it.persongalleri.avdoed,
+                            it.persongalleri.soesken,
+                            null,
+                            it.status,
+                            BehandlingType.REVURDERING
+                        )
+                    } ?: HttpStatusCode.NotFound
+                )
             }
-
 
             // TODO: SLETT! DENNE!! DETTE ER KUN TIL TESTING! IKKE KJØR I PROD MED MINDRE DU VIL HA SPARKEN
             route("/{sakid}") {
@@ -239,57 +239,23 @@ fun Route.behandlingRoutes(
                     call.respond(HttpStatusCode.OK)
                 }
             }
-
-            route("/pdlhendelse") {
-
-                // TODO: finne ut av hva som skal gjøres dersom det allerede finnes en revurdering som er under behandling når det kommer inn en hendelse
-                route("/doedshendelse") {
-                    post {
-                        val doedshendelse = call.receive<Doedshendelse>()
-
-                        call.respond(
-                            generellBehandlingService.alleBehandlingerForSoekerMedFnr(doedshendelse.avdoedFnr)
-                                .sortedByDescending { it.behandlingOpprettet }
-                                .takeUnless { it.any { it.type == BehandlingType.REVURDERING && (it as Revurdering).revurderingsaarsak == RevurderingAarsak.SOEKER_DOD } }// TODO: fjern denne naar problemet med flere dødshendelser postet er løst
-                                ?.takeIf {
-                                    it.isNotEmpty()
-                                }?.first {
-                                    it.status in listOf(
-                                        BehandlingStatus.OPPRETTET,
-                                        BehandlingStatus.GYLDIG_SOEKNAD,
-                                        BehandlingStatus.UNDER_BEHANDLING,
-                                        BehandlingStatus.FATTET_VEDTAK,
-                                        BehandlingStatus.ATTESTERT,
-                                        BehandlingStatus.RETURNERT,
-                                        BehandlingStatus.IVERKSATT,
-                                    )
-                                }?.let {
-                                    revurderingService.startRevurdering(it, doedshendelse, RevurderingAarsak.SOEKER_DOD)
-                                }
-                                ?: HttpStatusCode.OK)
-                    }
-                }
-
-            }
         }
     }
 
-//TODO: fases ut -> nytt endepunkt: /behandlinger/foerstegangsbehandling
+// TODO: fases ut -> nytt endepunkt: /behandlinger/foerstegangsbehandling
     post {
         val behandlingsBehov = call.receive<BehandlingsBehov>()
 
         foerstegangsbehandlingService.startFoerstegangsbehandling(
             behandlingsBehov.sak,
             behandlingsBehov.persongalleri,
-            behandlingsBehov.mottattDato,
+            behandlingsBehov.mottattDato
         )
             .also { call.respondText(it.id.toString()) }
     }
 
-
 // TODO: fases ut -> nytt endepunkt: /behandlinger/sak/{sakid}
     route("/sak") {
-
         get("/{sakid}/behandlinger") {
             call.respond(
                 generellBehandlingService.hentBehandlingerISak(sakId)
@@ -299,7 +265,9 @@ fun Route.behandlingRoutes(
                             it.sak,
                             it.status,
                             if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
-                            it.behandlingOpprettet
+                            it.behandlingOpprettet,
+                            it.type,
+                            if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD"
                         )
                     }
                     .let { BehandlingListe(it) }
@@ -312,12 +280,10 @@ fun Route.behandlingRoutes(
         }
     }
 
-
-    post("/saker/{sakid}/hendelse/grunnlagendret") { //Søk
+    post("/saker/{sakid}/hendelse/grunnlagendret") { // Søk
         generellBehandlingService.grunnlagISakEndret(sakId)
         call.respond(HttpStatusCode.OK)
     }
-
 
 // TODO: fases ut -> nytt endepunkt: /foerstegangsbehandling/gyldigfremsatt
     post("gyldigfremsatt") {
@@ -331,7 +297,6 @@ fun Route.behandlingRoutes(
         generellBehandlingService.avbrytBehandling(behandlingsId)
         call.respond(HttpStatusCode.OK)
     }
-
 }
 
 inline val PipelineContext<*, ApplicationCall>.behandlingsId
@@ -347,9 +312,9 @@ data class VedtakHendelse(
     val saksbehandler: String?,
     val inntruffet: Tidspunkt,
     val kommentar: String?,
-    val valgtBegrunnelse: String?,
+    val valgtBegrunnelse: String?
 )
 
 data class LagretHendelser(
-    val hendelser: List<LagretHendelse>,
+    val hendelser: List<LagretHendelse>
 )

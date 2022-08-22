@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.auth.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.jackson.*
-import io.ktor.server.application.*
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.jackson.jackson
+import io.ktor.server.application.Application
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -24,7 +24,6 @@ import kotlin.collections.set
 import kotlin.system.exitProcess
 
 var stream: FinnDodsmeldinger? = null
-
 
 fun main() {
     val env = System.getenv().toMutableMap()
@@ -65,7 +64,6 @@ fun main() {
             }
         }.start()
 }
-
 
 fun pdlHttpClient(props: Map<String, String>) = HttpClient(OkHttp) {
     expectSuccess = true

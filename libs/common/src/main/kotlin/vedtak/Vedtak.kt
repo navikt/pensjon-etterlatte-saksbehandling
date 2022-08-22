@@ -13,7 +13,7 @@ data class Vedtak(
     val behandlingstype: Endringskode,
     val beregningsperioder: List<Beregningsperiode>,
     val oppdragsenheter: List<Oppdragsenhet>,
-    val attestasjon: Attestasjon,
+    val attestasjon: Attestasjon
 )
 
 data class Oppdragsenhet(
@@ -27,7 +27,7 @@ enum class Endringskode() {
     ENDRING
 }
 
-enum class Enhetstype(s: String) { //TODO finne ut forkortelse til Behandlende og evt. andre enhetstyper
+enum class Enhetstype(s: String) { // TODO finne ut forkortelse til Behandlende og evt. andre enhetstyper
     BOSTED("BOS")
 }
 
@@ -36,5 +36,5 @@ data class Beregningsperiode(
     val ytelseskomponent: String,
     val datoFOM: LocalDate,
     val datoTOM: LocalDate,
-    val belop: BigDecimal,
+    val belop: BigDecimal
 )

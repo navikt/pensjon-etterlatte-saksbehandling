@@ -9,5 +9,5 @@ data class Adresser(
 )
 
 data class Bostedadresser(
-    val bostedadresse: List<Adresse>?,
+    val bostedadresse: List<Adresse>?
 )

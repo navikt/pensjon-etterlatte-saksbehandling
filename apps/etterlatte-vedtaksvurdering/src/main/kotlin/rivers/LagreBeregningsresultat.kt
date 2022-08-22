@@ -36,26 +36,31 @@ internal class LagreBeregningsresultat(
         withLogContext(packet.correlationId) {
             val behandlingId = packet["behandlingId"].asUUID()
             val sakId = packet["sakId"].toString()
-            val beregningsResultat = objectMapper.readValue(packet["beregning"].toString(),
-                BeregningsResultat::class.java)
+            val beregningsResultat = objectMapper.readValue(
+                packet["beregning"].toString(),
+                BeregningsResultat::class.java
+            )
 
             try {
-                vedtaksvurderingService.lagreBeregningsresultat(sakId,
+                vedtaksvurderingService.lagreBeregningsresultat(
+                    sakId,
                     behandlingId,
                     packet["fnrSoeker"].textValue(),
-                    beregningsResultat)
+                    beregningsResultat
+                )
                 requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
-                    context.publish(JsonMessage.newMessage(
-                        mapOf(
-                            eventNameKey to "VEDTAK:BEREGNET",
-                            "sakId" to it.sakId.toLong(),
-                            "behandlingId" to it.behandlingId.toString(),
-                            "vedtakId" to it.id,
-                            "eventtimestamp" to Tidspunkt.now(),
-                        )
-                    ).toJson())
+                    context.publish(
+                        JsonMessage.newMessage(
+                            mapOf(
+                                eventNameKey to "VEDTAK:BEREGNET",
+                                "sakId" to it.sakId.toLong(),
+                                "behandlingId" to it.behandlingId.toString(),
+                                "vedtakId" to it.id,
+                                "eventtimestamp" to Tidspunkt.now()
+                            )
+                        ).toJson()
+                    )
                 }
-
             } catch (e: KanIkkeEndreFattetVedtak) {
                 packet[eventNameKey] = "VEDTAK:ENDRING_FORKASTET"
                 packet["vedtakId"] = e.vedtakId
@@ -66,6 +71,5 @@ internal class LagreBeregningsresultat(
             } catch (e: Exception) {
                 logger.warn("Kunne ikke oppdatere vedtak", e)
             }
-
         }
 }

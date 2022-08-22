@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -16,14 +15,18 @@ import java.util.*
 
 internal class HendelserOmVedtak(
     rapidsConnection: RapidsConnection,
-    private val behandlinger: Behandling,
+    private val behandlinger: Behandling
 
-    ) : River.PacketListener {
+) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(OppdaterBehandling::class.java)
 
     private val vedtakhendelser = listOf(
-        "VEDTAK:FATTET", "VEDTAK:ATTESTERT", "VEDTAK:UNDERKJENT", "VEDTAK:AVKORTET",
-        "VEDTAK:BEREGNET", "VEDTAK:VILKAARSVURDERT"
+        "VEDTAK:FATTET",
+        "VEDTAK:ATTESTERT",
+        "VEDTAK:UNDERKJENT",
+        "VEDTAK:AVKORTET",
+        "VEDTAK:BEREGNET",
+        "VEDTAK:VILKAARSVURDERT"
     )
 
     init {
@@ -61,7 +64,7 @@ internal class HendelserOmVedtak(
                     valgtBegrunnelse
                 )
             } catch (e: Exception) {
-                //TODO endre denne
+                // TODO endre denne
                 println("spiser en melding fordi: $e")
             }
         }

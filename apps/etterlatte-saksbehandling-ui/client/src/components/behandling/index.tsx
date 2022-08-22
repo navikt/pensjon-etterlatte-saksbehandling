@@ -4,57 +4,57 @@ import styled from 'styled-components'
 import { hentBehandling } from '../../shared/api/behandling'
 import { Column, GridContainer } from '../../shared/styled'
 import { AppContext } from '../../store/AppContext'
-import { IBehandlingsStatus } from './behandlings-status'
+import { IBehandlingsType } from './behandlingsType'
 import { IApiResponse } from '../../shared/api/types'
-import { IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
+import { addBehandlingAction, IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
 import Spinner from '../../shared/Spinner'
-import { StatusBar, StatusBarTheme } from '../statusbar'
+import { StatusBar, StatusBarTheme } from '../../shared/statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny'
 
-const addBehandlingAction = (data: any) => ({ type: 'add_behandling', data })
-
 export const Behandling = () => {
   const ctx = useContext(AppContext)
   const match = useMatch('/behandling/:behandlingId/*')
-  const { behandlingRoutes } = useBehandlingRoutes()
+  const {behandlingRoutes} = useBehandlingRoutes()
   const [loaded, setLoaded] = useState<boolean>(false)
 
   useEffect(() => {
     if (match?.params.behandlingId) {
       hentBehandling(match.params.behandlingId).then((response: IApiResponse<IDetaljertBehandling>) => {
-        ctx.dispatch(addBehandlingAction(response.data))
-        setLoaded(true)
+        if (response.data) {
+          ctx.dispatch(addBehandlingAction(response.data))
+          setLoaded(true)
+        }
       })
     }
   }, [match?.params.behandlingId])
 
   const soeker = ctx.state.behandlingReducer?.kommerSoekerTilgode?.familieforhold.soeker
-  const soekerInfo = soeker ? { navn: soeker.navn, foedselsnummer: soeker.fnr, type: 'Etterlatt' } : null
+  const soekerInfo = soeker ? {navn: soeker.navn, fnr: soeker.fnr, type: 'Etterlatt'} : null
 
   return (
     <>
-      {soekerInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={soekerInfo} />}
+      {soekerInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={soekerInfo}/>}
 
-      <Spinner visible={!loaded} label="Laster" />
+      <Spinner visible={!loaded} label="Laster"/>
       {loaded && (
         <GridContainer>
           <Column>
             <MenuHead>
-              <Title>{IBehandlingsStatus.FORSTEGANG}</Title>
+              <Title>{IBehandlingsType.FØRSTEGANGSBEHANDLING}</Title>
             </MenuHead>
-            <StegMeny />
+            <StegMeny/>
           </Column>
           <Column>
             <Routes>
               {behandlingRoutes.map((route) => {
-                return <Route key={route.path} path={route.path} element={route.element} />
+                return <Route key={route.path} path={route.path} element={route.element}/>
               })}
             </Routes>
           </Column>
           <Column>
-            <SideMeny />
+            <SideMeny/>
           </Column>
         </GridContainer>
       )}

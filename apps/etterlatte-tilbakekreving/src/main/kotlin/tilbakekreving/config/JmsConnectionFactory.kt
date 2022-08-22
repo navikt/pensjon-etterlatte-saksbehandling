@@ -7,7 +7,6 @@ import com.ibm.msg.client.wmq.WMQConstants
 import org.messaginghub.pooled.jms.JmsPoolConnectionFactory
 import javax.jms.Connection
 
-
 private const val UTF_8_WITH_PUA = 1208
 
 class JmsConnectionFactory(
@@ -16,7 +15,7 @@ class JmsConnectionFactory(
     private val queueManager: String,
     private val channel: String,
     private val username: String,
-    private val password: String,
+    private val password: String
 ) {
     private val connectionFactory = MQConnectionFactory().also {
         it.hostName = hostname

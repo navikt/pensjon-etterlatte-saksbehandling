@@ -1,22 +1,21 @@
 package no.nav.etterlatte.barnepensjon
 
-import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foreldre
 import java.time.LocalDateTime
 
-
 fun vilkaarDoedsfallErRegistrert(
     avdoed: VilkaarOpplysning<Person>?,
-    soeker: VilkaarOpplysning<Person>?,
+    soeker: VilkaarOpplysning<Person>?
 ): VurdertVilkaar {
     val doedsdatoRegistrertIPdl = kriterieDoedsdatoRegistrertIPdl(avdoed)
     val avdoedErForeldre = kriterieAvdoedErForelder(soeker, avdoed)
@@ -55,7 +54,7 @@ fun kriterieDoedsdatoRegistrertIPdl(avdoed: VilkaarOpplysning<Person>?): Kriteri
 
 fun kriterieAvdoedErForelder(
     soeker: VilkaarOpplysning<Person>?,
-    avdoed: VilkaarOpplysning<Person>?,
+    avdoed: VilkaarOpplysning<Person>?
 ): Kriterie {
     val opplsyningsGrunnlag = listOfNotNull(
         soeker?.let {
@@ -84,7 +83,3 @@ fun kriterieAvdoedErForelder(
 
     return Kriterie(Kriterietyper.AVDOED_ER_FORELDER, resultat, opplsyningsGrunnlag)
 }
-
-
-
-

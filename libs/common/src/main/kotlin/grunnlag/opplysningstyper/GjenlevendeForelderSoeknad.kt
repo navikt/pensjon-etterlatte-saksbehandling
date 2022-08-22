@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
 
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Kontaktinfo
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 
 data class GjenlevendeForelderSoeknad(
@@ -14,4 +13,3 @@ data class GjenlevendeForelderSoeknad(
     val telefonnummer: String
 
 )
-

@@ -1,5 +1,5 @@
-import {BodyLong} from "@navikt/ds-react";
-import styled from "styled-components";
+import { BodyLong } from '@navikt/ds-react'
+import styled from 'styled-components'
 
 const PdfViewer = styled.iframe`
   margin-bottom: 20px;
@@ -7,22 +7,18 @@ const PdfViewer = styled.iframe`
   height: 1080px;
 `
 
+export const PdfVisning = ({ fileUrl, error }: { fileUrl?: string; error?: string }) => {
+  return (
+    <>
+      {error && (
+        <BodyLong>
+          En feil har oppstått ved henting av PDF:
+          <br />
+          <code>{error}</code>
+        </BodyLong>
+      )}
 
-export const PdfVisning = ({fileUrl, error}: {
-    fileUrl?: string,
-    error?: string
-}) => {
-    return (
-        <>
-            {error && (
-                <BodyLong>
-                    En feil har oppstått ved henting av PDF:
-                    <br/>
-                    <code>{error}</code>
-                </BodyLong>
-            )}
-
-            <div>{fileUrl && <PdfViewer src={fileUrl}/>}</div>
-        </>
-    )
+      <div>{fileUrl && <PdfViewer src={fileUrl} />}</div>
+    </>
+  )
 }

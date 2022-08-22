@@ -33,12 +33,13 @@ class KravgrunnlagMapper {
     private fun toGrunnlagsperiode(periode: DetaljertKravgrunnlagPeriodeDto) =
         Grunnlagsperiode(
             Periode(
-                fraOgMed = periode.periode.fom.toLocalDate(), tilOgMed = periode.periode.tom.toLocalDate()
+                fraOgMed = periode.periode.fom.toLocalDate(),
+                tilOgMed = periode.periode.tom.toLocalDate()
             ),
             beloepSkattMnd = periode.belopSkattMnd,
             grunnlagsbeloep = periode.tilbakekrevingsBelop.map { beloep ->
                 toGrunnlagsbeloep(beloep)
-            },
+            }
         )
 
     private fun toGrunnlagsbeloep(beloep: DetaljertKravgrunnlagBelopDto) =
@@ -52,4 +53,3 @@ class KravgrunnlagMapper {
             skatteProsent = beloep.skattProsent
         )
 }
-

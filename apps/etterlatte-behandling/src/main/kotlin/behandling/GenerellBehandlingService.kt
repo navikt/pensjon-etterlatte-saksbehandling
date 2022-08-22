@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
 
-
 interface GenerellBehandlingService {
 
     fun hentBehandlinger(): List<Behandling>
@@ -82,7 +81,7 @@ class RealGenerellBehandlingService(
 
     override fun grunnlagISakEndret(sak: Long) {
         inTransaction {
-            behandlinger.alleLoependeBehandlingerISak(sak)
+            behandlinger.alleAktiveBehandlingerISak(sak)
         }.also {
             runBlocking {
                 it.forEach {
@@ -141,6 +140,4 @@ class RealGenerellBehandlingService(
             behandlinger.alleBehandlingerForSoekerMedFnr(fnr)
         }
     }
-
 }
-

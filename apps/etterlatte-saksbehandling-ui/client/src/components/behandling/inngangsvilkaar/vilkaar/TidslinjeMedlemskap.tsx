@@ -39,7 +39,7 @@ export interface IGap {
 export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) => {
   const avdoedDoedsdato: string | null = hentKriterierMedOpplysning(
     vilkaar,
-    Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL,
+    Kriterietype.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR,
     KriterieOpplysningsType.DOEDSDATO
   )?.opplysning?.doedsdato
 
@@ -55,13 +55,13 @@ export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) 
 
   const adresseOpplysning: IKriterieOpplysning | undefined = hentKriterierMedOpplysning(
     vilkaar,
-    Kriterietype.AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR,
+    Kriterietype.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR,
     KriterieOpplysningsType.ADRESSER
   )
 
   const adressegaps: IKriterieOpplysning | undefined = hentKriterierMedOpplysning(
     vilkaar,
-    Kriterietype.AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR,
+    Kriterietype.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR,
     KriterieOpplysningsType.ADRESSE_GAPS
   )
 

@@ -1,7 +1,10 @@
 package no.nav.etterlatte.itest
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
@@ -11,15 +14,19 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.fullPath
+import io.ktor.http.headersOf
+import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.auth.Authentication
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.CommonFactory
-import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.behandling.HendelseDao
 import no.nav.etterlatte.behandling.VedtakHendelse
+import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.objectMapper
+import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
@@ -29,6 +36,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.module
@@ -56,7 +64,6 @@ class ApplicationTest {
         val beans = TestBeanFactory(postgreSQLContainer.jdbcUrl)
 
         testApplication {
-
             val client = createClient {
                 install(ContentNegotiation) {
                     jackson {
@@ -86,7 +93,6 @@ class ApplicationTest {
                 val lestSak: Sak = it.body()
                 assertEquals("123", lestSak.ident)
                 assertEquals("BP", lestSak.sakType)
-
             }
 
             val behandlingId = client.post("/behandlinger") {
@@ -132,7 +138,6 @@ class ApplicationTest {
                         LocalDateTime.now()
                     )
                 )
-
             }.let {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -146,7 +151,6 @@ class ApplicationTest {
                 assertNotNull(behandling.id)
                 assertEquals("innsender", behandling.innsender)
                 assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving?.resultat)
-
             }
             client.post("/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {
                 addAuthSaksbehandler()
@@ -173,7 +177,6 @@ class ApplicationTest {
                 val behandling: DetaljertBehandling = it.body()
                 assertNotNull(behandling.id)
                 assertEquals("FATTET_VEDTAK", behandling.status?.name)
-
             }
 
             client.get("/oppgaver") {
@@ -186,39 +189,32 @@ class ApplicationTest {
                 assertEquals(behandlingId, oppgaver.oppgaver.first().behandlingId)
             }
 
-            client.post("/behandlinger/revurdering/pdlhendelse/doedshendelse") {
+            client.post("/grunnlagsendringshendelse/doedshendelse/") {
                 addAuthServiceBruker()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(Doedshendelse("søker", LocalDate.now()))
+                setBody(Doedshendelse("søker", LocalDate.now(), Endringstype.OPPRETTET))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            // For denne skal det ikke opprettes en revurdring siden det allerede eksisterer en revurdering for dette fnr med samme aarsakstype; doedshendelse
-            client.post("/behandlinger/revurdering/pdlhendelse/doedshendelse") {
+            client.post("/grunnlagsendringshendelse/doedshendelse/") {
                 addAuthServiceBruker()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(Doedshendelse("søker", LocalDate.now()))
+                setBody(Doedshendelse("søker", LocalDate.now(), Endringstype.OPPRETTET))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
-
         }
 
         beans.behandlingHendelser().nyHendelse.close()
 
         assertNotNull(behandlingOpprettet)
         val rapid = beans.rapidSingleton
-        assertEquals(2, rapid.publiserteMeldinger.size)
+        assertEquals(1, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue()
         )
-        assertEquals(
-            "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue()
-        )
-
         beans.datasourceBuilder().dataSource.connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }
         }
@@ -228,11 +224,11 @@ class ApplicationTest {
 }
 
 val clientCredentialTokenMedKanSetteKildeRolle =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImVuLWFwcCIsIm9pZCI6ImVuLWFwcCIsIm5hbWUiOiJKb2huIERvZSIsImlhdCI6MTUxNjIzOTAyMiwiTkFWaWRlbnQiOiJTYWtzYmVoYW5kbGVyMDEiLCJyb2xlcyI6WyJrYW4tc2V0dGUta2lsZGUiXX0.2ftwnoZiUfUa_J6WUkqj_Wdugb0CnvVXsEs-JYnQw_g"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImVuLWFwcCIsIm9pZCI6ImVuLWFwcCIsIm5hbWUiOiJKb2huIERvZSIsImlhdCI6MTUxNjIzOTAyMiwiTkFWaWRlbnQiOiJTYWtzYmVoYW5kbGVyMDEiLCJyb2xlcyI6WyJrYW4tc2V0dGUta2lsZGUiXX0.2ftwnoZiUfUa_J6WUkqj_Wdugb0CnvVXsEs-JYnQw_g" // ktlint-disable max-line-length
 val saksbehandlerToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIGZvciBzYWtzYmVoYW5kbGVyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZWhhbmRsZXIwMSJ9.271mDij4YsO4Kk8w8AvX5BXxlEA8U-UAOtdG1Ix_kQY"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIGZvciBzYWtzYmVoYW5kbGVyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZWhhbmRsZXIwMSJ9.271mDij4YsO4Kk8w8AvX5BXxlEA8U-UAOtdG1Ix_kQY" // ktlint-disable max-line-length
 val attestererToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIGZvciBzYWtzYmVoYW5kbGVyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZWhhbmRsZXIwMSIsImdyb3VwcyI6WyIwYWYzOTU1Zi1kZjg1LTRlYjAtYjViMi00NWJmMmM4YWViOWUiLCI2M2Y0NmY3NC04NGE4LTRkMWMtODdhOC03ODUzMmFiM2FlNjAiXX0.YzF4IXwaolgOCODNwkEKn43iZbwHpQuSmQObQm0co-A"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIGZvciBzYWtzYmVoYW5kbGVyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZWhhbmRsZXIwMSIsImdyb3VwcyI6WyIwYWYzOTU1Zi1kZjg1LTRlYjAtYjViMi00NWJmMmM4YWViOWUiLCI2M2Y0NmY3NC04NGE4LTRkMWMtODdhOC03ODUzMmFiM2FlNjAiXX0.YzF4IXwaolgOCODNwkEKn43iZbwHpQuSmQObQm0co-A" // ktlint-disable max-line-length
 
 fun HttpRequestBuilder.addAuthSaksbehandler() {
     header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
@@ -246,12 +242,47 @@ fun HttpRequestBuilder.addAuthServiceBruker() {
     header(HttpHeaders.Authorization, "Bearer $clientCredentialTokenMedKanSetteKildeRolle")
 }
 
-
 class TestBeanFactory(
-    private val jdbcUrl: String,
+    private val jdbcUrl: String
 ) : CommonFactory() {
     val rapidSingleton: TestProdusent<String, String> by lazy { TestProdusent() }
     override fun datasourceBuilder(): DataSourceBuilder = DataSourceBuilder(mapOf("DB_JDBC_URL" to jdbcUrl))
     override fun rapid(): KafkaProdusent<String, String> = rapidSingleton
 
+    override fun pdlHttpClient(): HttpClient =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler { request ->
+                    if (request.url.fullPath.startsWith("/")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        val json = javaClass.getResource("")!!.readText() // TODO: endre name
+                        respond(json, headers = headers)
+                    } else {
+                        error(request.url.fullPath)
+                    }
+                }
+            }
+            install(ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(no.nav.etterlatte.libs.common.objectMapper)
+                )
+            }
+        }
+
+    override fun leaderElection() = LeaderElection(
+        electorPath = "electorPath",
+        httpClient = HttpClient(MockEngine) {
+            engine {
+                addHandler { req ->
+                    if (req.url.fullPath == "electorPath") {
+                        respond("me")
+                    } else {
+                        error(req.url.fullPath)
+                    }
+                }
+            }
+        },
+        me = "me"
+    )
 }

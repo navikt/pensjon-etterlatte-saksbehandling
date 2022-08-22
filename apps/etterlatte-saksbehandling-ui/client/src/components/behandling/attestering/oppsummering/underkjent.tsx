@@ -1,11 +1,11 @@
-import {IBehandlingInfo} from '../../SideMeny/types'
-import {Info, Overskrift, Tekst, UnderOverskrift, Wrapper} from '../styled'
-import {useContext} from 'react'
-import {AppContext} from '../../../../store/AppContext'
-import {formatterStringDato, formatterStringTidspunkt} from "../../../../utils";
-import {IBehandlingStatus} from "../../../../store/reducers/BehandlingReducer";
+import { IBehandlingInfo } from '../../SideMeny/types'
+import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
+import { useContext } from 'react'
+import { AppContext } from '../../../../store/AppContext'
+import { formaterStringDato, formaterStringTidspunkt } from '../../../../utils/formattering'
+import { IBehandlingStatus } from '../../../../store/reducers/BehandlingReducer'
 
-export const Underkjent = ({behandlingsInfo}: { behandlingsInfo?: IBehandlingInfo }) => {
+export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingInfo }) => {
   const innloggetId = useContext(AppContext).state.saksbehandlerReducer.ident
 
   const underkjentSiste = behandlingsInfo?.underkjentLogg?.slice(-1)[0]
@@ -20,11 +20,11 @@ export const Underkjent = ({behandlingsInfo}: { behandlingsInfo?: IBehandlingInf
       <Wrapper innvilget={false}>
         <Overskrift>Førstegangsbehandling</Overskrift>
         <UnderOverskrift innvilget={false}>Underkjent</UnderOverskrift>
-        {underkjentSiste &&
+        {underkjentSiste && (
           <Tekst>
-            {formatterStringDato(underkjentSiste.opprettet)} kl: {formatterStringTidspunkt(underkjentSiste.opprettet)}
+            {formaterStringDato(underkjentSiste.opprettet)} kl: {formaterStringTidspunkt(underkjentSiste.opprettet)}
           </Tekst>
-        }
+        )}
         <div className="flex">
           <div>
             <Info>Attestant</Info>
@@ -36,7 +36,7 @@ export const Underkjent = ({behandlingsInfo}: { behandlingsInfo?: IBehandlingInf
           </div>
         </div>
 
-        {erReturnert && underkjentSiste &&
+        {erReturnert && underkjentSiste && (
           <>
             <div className="info">
               <Info>Årsak til retur</Info>
@@ -44,7 +44,7 @@ export const Underkjent = ({behandlingsInfo}: { behandlingsInfo?: IBehandlingInf
             </div>
             <Tekst>{underkjentSiste.kommentar}</Tekst>
           </>
-        }
+        )}
       </Wrapper>
     </>
   )

@@ -39,7 +39,7 @@ internal class AvstemmingsdataSenderIntegrationTest {
 
         avstemmingsdataSender = AvstemmingsdataSender(
             jmsConnectionFactory = jmsConnectionFactory,
-            queue = "DEV.QUEUE.1",
+            queue = "DEV.QUEUE.1"
         )
     }
 
@@ -51,7 +51,7 @@ internal class AvstemmingsdataSenderIntegrationTest {
         val utbetalinger = listOf(
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
             utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
-            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))),
+            utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET)))
         )
         val avstemmingsdataMapper = AvstemmingsdataMapper(utbetalinger, fraOgMed, til, UUIDBase64(), 2)
         val avstemmingsdata = avstemmingsdataMapper.opprettAvstemmingsmelding()

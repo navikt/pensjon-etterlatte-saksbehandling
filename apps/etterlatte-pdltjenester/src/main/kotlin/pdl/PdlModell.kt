@@ -312,7 +312,7 @@ data class PdlUtenlandskAdresseIFrittFormat(
     val adresselinje3: String?,
     val byEllerStedsnavn: String?,
     val landkode: String,
-    val postkode: String?,
+    val postkode: String?
 )
 
 data class PdlPostadresseIFrittFormat(
@@ -332,7 +332,7 @@ data class PdlVegadresse(
     val koordinater: PdlKoordinater?,
     val matrikkelId: Long?,
     val postnummer: String?,
-    val tilleggsnavn: String?,
+    val tilleggsnavn: String?
 )
 
 data class PdlUkjentBosted(
@@ -371,7 +371,7 @@ data class PdlForelderAnsvar(
     val ansvarligUtenIdentifikator: PdlRelatertBiPerson? = null,
     val ansvarssubjekt: String? = null,
     val folkeregistermetadata: PdlFolkeregistermetadata? = null,
-    val metadata: PdlMetadata,
+    val metadata: PdlMetadata
 )
 
 data class PdlRelatertBiPerson(

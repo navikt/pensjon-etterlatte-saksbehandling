@@ -1,58 +1,54 @@
 import { Saksliste } from './saksliste'
 import styled from 'styled-components'
 import { Next } from '@navikt/ds-icons'
-import { Button } from '@navikt/ds-react'
-import { Behandling, Sak, SakslisteProps } from './typer'
+import { IBehandlingsammendrag } from './typer'
+import { useNavigate } from 'react-router-dom'
+import { upperCaseFirst } from '../../utils/formattering'
 
-export const Saksoversikt = ({
-  saksliste,
-  opprettBehandling,
-  goToBehandling,
-}: {
-  saksliste: SakslisteProps
-  opprettBehandling: any
-  goToBehandling: (behandlingsId: string) => void
-}) => {
-  const sisteBehandlingISak = (sak: Sak): Behandling => {
-    return sak.behandlinger.reduce((a, b) => (a.opprettet > b.opprettet ? a : b))
+export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandlingsammendrag[] | undefined }) => {
+  const navigate = useNavigate()
+  const behandlinger = behandlingliste ? behandlingliste : []
+
+  const sortertListe = behandlinger.sort((a, b) =>
+    new Date(b.behandlingOpprettet!) > new Date(a.behandlingOpprettet!) ? 1 : -1
+  )
+  const sisteBehandling = sortertListe[0]
+
+  const goToBehandling = (behandlingsId: string) => {
+    navigate(`/behandling/${behandlingsId}/soeknadsoversikt`)
   }
 
   return (
     <>
-      {saksliste.saker.map((sak) => (
-        <SaksoversiktWrapper key={sak.sakId}>
-          <h1>{sak.type}</h1>
+      <SaksoversiktWrapper>
+        <h1>Barnepensjon</h1>
 
-          <InfoWrapper>
-            <div>
-              <Col>Sakstype</Col>
-              <Value>{sak.sakstype}</Value>
-            </div>
-
-            <div>
-              <Col>Gjelder</Col>
-              <Value>{sisteBehandlingISak(sak).type}</Value>
-            </div>
-
-            <div>
-              <Col>Status</Col>
-              <Value>{sisteBehandlingISak(sak).status}</Value>
-            </div>
-
-            <IconButton onClick={() => goToBehandling(sisteBehandlingISak(sak).id.toString())}>
-              <Next fontSize={30} />
-            </IconButton>
-          </InfoWrapper>
-
-          <div className="behandlinger">
-            <h2>Behandlinger</h2>
-            <Saksliste saksliste={sak.behandlinger} goToBehandling={goToBehandling} />
+        <InfoWrapper>
+          <div>
+            <Col>Sakstype</Col>
+            <Value>Nasjonal</Value>
           </div>
-          <Button variant="secondary" size="medium" className="button" onClick={opprettBehandling}>
-            Opprett ny behandling
-          </Button>
-        </SaksoversiktWrapper>
-      ))}
+
+          <div>
+            <Col>Gjelder</Col>
+            <Value>{upperCaseFirst(sisteBehandling?.behandlingType)}</Value>
+          </div>
+
+          <div>
+            <Col>Status</Col>
+            <Value>{upperCaseFirst(sisteBehandling.status)}</Value>
+          </div>
+
+          <IconButton onClick={() => goToBehandling(sisteBehandling.id.toString())}>
+            <Next fontSize={30} />
+          </IconButton>
+        </InfoWrapper>
+
+        <div className="behandlinger">
+          <h2>Behandlinger</h2>
+          <Saksliste behandlinger={behandlinger} goToBehandling={goToBehandling} />
+        </div>
+      </SaksoversiktWrapper>
     </>
   )
 }

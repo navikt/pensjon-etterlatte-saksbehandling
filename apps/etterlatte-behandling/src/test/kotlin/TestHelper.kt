@@ -2,11 +2,18 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.behandling.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.Revurdering
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringStatus
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsType
+import no.nav.etterlatte.grunnlagsendring.Grunnlagsendringshendelse
+import no.nav.etterlatte.grunnlagsendring.Grunnlagsinformasjon
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -29,7 +36,7 @@ fun foerstegangsbehandling(
     oppgaveStatus = oppgaveStatus,
     soeknadMottattDato = soeknadMottattDato,
     persongalleri = persongalleri,
-    gyldighetsproeving = gyldighetsproeving,
+    gyldighetsproeving = gyldighetsproeving
 )
 
 fun revurdering(
@@ -63,5 +70,32 @@ fun persongalleri(
     innsender = innsender,
     soesken = soesken,
     avdoed = avdoed,
-    gjenlevende = gjenlevende,
+    gjenlevende = gjenlevende
 )
+
+fun grunnlagsendringshendelse(
+    id: UUID = UUID.randomUUID(),
+    sakId: Long = 1,
+    type: GrunnlagsendringsType = GrunnlagsendringsType.SOEKER_DOED,
+    opprettet: LocalDateTime = LocalDateTime.now(),
+    data: Grunnlagsinformasjon,
+    status: GrunnlagsendringStatus = GrunnlagsendringStatus.IKKE_VURDERT,
+    behandlingId: UUID? = null
+) = Grunnlagsendringshendelse(
+    id = id,
+    sakId = sakId,
+    type = type,
+    opprettet = opprettet,
+    data = data,
+    status = status,
+    behandlingId = behandlingId
+)
+
+fun grunnlagsinformasjonDoedshendelse(
+    avdoedFnr: String = "12345678911",
+    doedsdato: LocalDate = LocalDate.of(2022, 1, 1),
+    endringstype: Endringstype = Endringstype.OPPRETTET
+) =
+    Grunnlagsinformasjon.SoekerDoed(
+        Doedshendelse(avdoedFnr = avdoedFnr, doedsdato = doedsdato, endringstype = endringstype)
+    )

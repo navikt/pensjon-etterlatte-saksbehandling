@@ -24,8 +24,10 @@ internal class FordelerMetricLoggerTest {
         every { metricKriterieIkkeOppfylt.labels(FordelerKriterie.AVDOED_HAR_YRKESSKADE.name).inc() } just runs
         every { metricFordelerStatus.labels(FordelerStatus.IKKE_GYLDIG_FOR_BEHANDLING.name).inc() } just runs
 
-        fordelerMetricLogger.logMetricIkkeFordelt(FordelerResultat.IkkeGyldigForBehandling(
-            listOf(FordelerKriterie.BARN_ER_FOR_GAMMELT, FordelerKriterie.AVDOED_HAR_YRKESSKADE))
+        fordelerMetricLogger.logMetricIkkeFordelt(
+            FordelerResultat.IkkeGyldigForBehandling(
+                listOf(FordelerKriterie.BARN_ER_FOR_GAMMELT, FordelerKriterie.AVDOED_HAR_YRKESSKADE)
+            )
         )
 
         verify(exactly = 1) { metricKriterieIkkeOppfylt.labels(FordelerKriterie.BARN_ER_FOR_GAMMELT.name).inc() }
@@ -43,5 +45,4 @@ internal class FordelerMetricLoggerTest {
         verify(exactly = 1) { metricFordelerStatus.labels(FordelerStatus.GYLDIG_FOR_BEHANDLING.name).inc() }
         confirmVerified()
     }
-
 }

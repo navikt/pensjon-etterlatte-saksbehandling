@@ -1,16 +1,16 @@
 import styled from 'styled-components'
-import { GenderIcon, GenderList } from '../../shared/icons/genderIcon'
+import { GenderIcon, GenderList } from '../icons/genderIcon'
 import { Fnr } from './fnr'
-import { PersonInfo } from '../person/typer'
+import { IPersonInfo } from '../../components/person/typer'
+import { Link } from "@navikt/ds-react";
 
 export enum StatusBarTheme {
-  gray = 'gray',
-  white = 'white',
+  gray = 'gray', white = 'white',
 }
 
-export const StatusBar = (props: { theme?: StatusBarTheme; personInfo?: PersonInfo }) => {
+export const StatusBar = (props: {theme?: StatusBarTheme; personInfo?: IPersonInfo}) => {
   const gender = (): GenderList => {
-    const genderNum = Number(props.personInfo?.foedselsnummer[8])
+    const genderNum = Number(props.personInfo?.fnr[8])
     if (genderNum % 2 === 0) {
       return GenderList.female
     }
@@ -19,12 +19,12 @@ export const StatusBar = (props: { theme?: StatusBarTheme; personInfo?: PersonIn
 
   return (
     <StatusBarWrapper theme={props.theme}>
-      {props.personInfo?.foedselsnummer && (
+      {props.personInfo?.fnr && (
         <UserInfo>
-          <GenderIcon gender={gender()} />
-          <Name>{props.personInfo?.navn}</Name>
+          <GenderIcon gender={gender()}/>
+          <Name><Link href={`/person/${props.personInfo?.fnr}`}>{props.personInfo?.navn}</Link> </Name>
           <Skilletegn>|</Skilletegn>
-          <Fnr copy value={props.personInfo?.foedselsnummer || 'N/A'} />
+          <Fnr copy value={props.personInfo?.fnr || 'N/A'}/>
           {/** <Status value={{ status: PersonStatus.BARN, dato: '19.05.2011' }} />*/}
         </UserInfo>
       )}
@@ -32,8 +32,10 @@ export const StatusBar = (props: { theme?: StatusBarTheme; personInfo?: PersonIn
   )
 }
 
-const StatusBarWrapper = styled.div<{ theme: StatusBarTheme }>`
-  background-color: ${(props) => (props.theme === StatusBarTheme.gray ? '#F8F8F8' : '#fff')};
+const StatusBarWrapper = styled.div<{theme: StatusBarTheme}>`
+  background-color: ${(props) => (
+  props.theme === StatusBarTheme.gray ? '#F8F8F8' : '#fff'
+)};
   padding: 0.6em 0em;
   line-height: 30px;
   border-bottom: 1px solid #c6c2bf;

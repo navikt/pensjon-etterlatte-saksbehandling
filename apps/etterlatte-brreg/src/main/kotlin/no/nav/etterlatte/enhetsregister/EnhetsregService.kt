@@ -15,8 +15,11 @@ class EnhetsregService(private val klient: EnhetsregKlient) {
     suspend fun hentEnhet(orgnr: String): Enhet? {
         val enhet = klient.hentEnhet(orgnr)
 
-        if (enhet == null) logger.info("Fant ingen enhet med orgnr: $orgnr")
-        else logger.info("Fant enhet \"${enhet.navn}\" med orgnr: $orgnr")
+        if (enhet == null) {
+            logger.info("Fant ingen enhet med orgnr: $orgnr")
+        } else {
+            logger.info("Fant enhet \"${enhet.navn}\" med orgnr: $orgnr")
+        }
 
         return enhet
     }

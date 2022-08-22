@@ -14,6 +14,7 @@ import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.revurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -29,15 +30,20 @@ class RealRevurderingServiceTest {
 
     @BeforeEach
     fun before() {
-        Kontekst.set(Context(mockk(), object : DatabaseKontekst {
-            override fun activeTx(): Connection {
-                throw IllegalArgumentException()
-            }
+        Kontekst.set(
+            Context(
+                mockk(),
+                object : DatabaseKontekst {
+                    override fun activeTx(): Connection {
+                        throw IllegalArgumentException()
+                    }
 
-            override fun <T> inTransaction(block: () -> T): T {
-                return block()
-            }
-        }))
+                    override fun <T> inTransaction(block: () -> T): T {
+                        return block()
+                    }
+                }
+            )
+        )
     }
 
     @Test
@@ -55,13 +61,17 @@ class RealRevurderingServiceTest {
         }
         val hendleseskanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val sut = RealRevurderingService(
-            behandlingerMock, RevurderingFactory(behandlingerMock, hendelserMock), hendleseskanal
+            behandlingerMock,
+            RevurderingFactory(behandlingerMock, hendelserMock),
+            hendleseskanal
         )
 
         val revurdering = sut.hentRevurdering(id)
-        assertAll("skal hente revurdering",
-            { assertEquals(id, revurdering!!.id) },
-            { assertTrue(revurdering is Revurdering) })
+        assertAll(
+            "skal hente revurdering",
+            { assertEquals(id, revurdering.id) },
+            { assertTrue(revurdering is Revurdering) }
+        )
     }
 
     @Test
@@ -78,13 +88,17 @@ class RealRevurderingServiceTest {
         val hendelserMock = mockk<HendelseDao>()
         val hendelsesKanal = mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>()
         val sut = RealRevurderingService(
-            behandlingerMock, RevurderingFactory(behandlingerMock, hendelserMock), hendelsesKanal
+            behandlingerMock,
+            RevurderingFactory(behandlingerMock, hendelserMock),
+            hendelsesKanal
         )
 
         val revurderinger = sut.hentRevurderinger()
-        assertAll("skal hente revurderinger",
+        assertAll(
+            "skal hente revurderinger",
             { assertEquals(5, revurderinger.size) },
-            { assertTrue(revurderinger.all { it is Revurdering }) })
+            { assertTrue(revurderinger.all { it is Revurdering }) }
+        )
     }
 
     @Test
@@ -93,7 +107,7 @@ class RealRevurderingServiceTest {
         val behandlingOpprettes = slot<Revurdering>()
         val behandlingHentes = slot<UUID>()
         val forrigeBehandling = foerstegangsbehandling(sak = 1)
-        val doedsHendelse = Doedshendelse("12345678911", LocalDate.of(2022, 1, 1))
+        val doedsHendelse = Doedshendelse("12345678911", LocalDate.of(2022, 1, 1), Endringstype.OPPRETTET)
         val revurdering =
             revurdering(sak = 1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
         val hendelse = slot<Pair<UUID, BehandlingHendelseType>>()
@@ -109,7 +123,9 @@ class RealRevurderingServiceTest {
             coEvery { send(capture(hendelse)) } returns Unit
         }
         val sut = RealRevurderingService(
-            behandlingerMock, RevurderingFactory(behandlingerMock, hendelserMock), hendelsesKanal
+            behandlingerMock,
+            RevurderingFactory(behandlingerMock, hendelserMock),
+            hendelsesKanal
         )
 
         val opprettetRevurdering =

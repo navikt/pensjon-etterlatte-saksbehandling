@@ -12,7 +12,6 @@ fun main() {
             RapidApplication.create(env)
                 .also {
                     BesvarOpplysningsbehov(it, ab.createPdlService())
-
                 }.start()
         }
     }

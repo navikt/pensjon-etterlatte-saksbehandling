@@ -26,6 +26,5 @@ class BarnIngenUtlandsadresseTest {
 
         Assertions.assertEquals(VurderingsResultat.OPPFYLT, ikkeUtland.resultat)
         Assertions.assertEquals(VurderingsResultat.IKKE_OPPFYLT, utland.resultat)
-
     }
 }

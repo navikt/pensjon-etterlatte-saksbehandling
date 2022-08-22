@@ -54,8 +54,11 @@ open class JsonMessage(
                 "instance" to serviceHostname,
                 "time" to LocalDateTime.now()
             )
-            if (json.path(ParticipatingServicesKey).isMissingOrNull()) set(ParticipatingServicesKey, listOf(entry))
-            else (json.path(ParticipatingServicesKey) as ArrayNode).add(objectMapper.valueToTree<JsonNode>(entry))
+            if (json.path(ParticipatingServicesKey).isMissingOrNull()) {
+                set(ParticipatingServicesKey, listOf(entry))
+            } else {
+                (json.path(ParticipatingServicesKey) as ArrayNode).add(objectMapper.valueToTree<JsonNode>(entry))
+            }
         }
     }
 
@@ -94,8 +97,10 @@ open class JsonMessage(
         val node = node(key)
         if (node.isMissingNode) problems.severe("Missing demanded key $key")
         if (!node.isArray || !node.map(JsonNode::asText)
-                .containsAll(values)
-        ) problems.severe("Demanded $key does not contains $values")
+            .containsAll(values)
+        ) {
+            problems.severe("Demanded $key does not contains $values")
+        }
         accessor(key)
     }
 
@@ -103,8 +108,10 @@ open class JsonMessage(
         val node = node(key)
         if (node.isMissingNode) problems.severe("Missing demanded key $key")
         if (!node.isArray || node.map(JsonNode::asText)
-                .none { it in values }
-        ) problems.severe("Demanded array $key does not contain one of $values")
+            .none { it in values }
+        ) {
+            problems.severe("Demanded array $key does not contain one of $values")
+        }
         accessor(key)
     }
 
@@ -119,7 +126,11 @@ open class JsonMessage(
     fun requireValue(key: String, value: Boolean) {
         val node = node(key)
         if (node.isMissingNode) return problems.error("Missing required key $key")
-        if (!node.isBoolean || node.booleanValue() != value) return problems.error("Required $key is not boolean $value")
+        if (!node.isBoolean || node.booleanValue() != value) {
+            return problems.error(
+                "Required $key is not boolean $value"
+            )
+        }
         accessor(key)
     }
 
@@ -146,10 +157,12 @@ open class JsonMessage(
                 val elementJson = element.toString()
                 val elementProblems = MessageProblems(elementJson)
                 JsonMessage(elementJson, elementProblems).apply(elementsValidation)
-                if (elementProblems.hasErrors()) problems.error(
-                    "Array element #$index at $key did not pass validation:",
-                    elementProblems
-                )
+                if (elementProblems.hasErrors()) {
+                    problems.error(
+                        "Array element #$index at $key did not pass validation:",
+                        elementProblems
+                    )
+                }
             }
         }
         if (!problems.hasErrors()) accessor(key)
@@ -235,12 +248,17 @@ open class JsonMessage(
     }
 
     operator fun get(key: String): JsonNode =
-        requireNotNull(recognizedKeys[key]) { "$key is unknown; keys must be declared as required, forbidden, or interesting" }
+        requireNotNull(recognizedKeys[key]) {
+            "$key is unknown; keys must be declared as required, forbidden, or interesting"
+        }
 
     operator fun set(key: String, value: Any) {
-        (json as ObjectNode).replace(key, objectMapper.valueToTree<JsonNode>(value).also {
-            recognizedKeys[key] = it
-        })
+        (json as ObjectNode).replace(
+            key,
+            objectMapper.valueToTree<JsonNode>(value).also {
+                recognizedKeys[key] = it
+            }
+        )
     }
 
     fun toJson(): String = objectMapper.writeValueAsString(json)

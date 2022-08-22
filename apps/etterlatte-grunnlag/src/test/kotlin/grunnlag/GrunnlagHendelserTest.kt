@@ -29,20 +29,28 @@ class GrunnlagHendelserTest {
     @Test
     fun `skal lese opplysningsbehov og legge til opplysning`() {
         val grunnlagshendelser = listOf(
-            OpplysningDao.GrunnlagHendelse(Grunnlagsopplysning(
-                UUID.randomUUID(),
-                Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
-                Opplysningstyper.SOEKER_SOEKNAD_V1,
-                objectMapper.createObjectNode(),
-                objectMapper.createObjectNode()
-            ), 2, 1),
-            OpplysningDao.GrunnlagHendelse(Grunnlagsopplysning(
-                UUID.randomUUID(),
-                Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
-                Opplysningstyper.AVDOED_SOEKNAD_V1,
-                objectMapper.createObjectNode(),
-                objectMapper.createObjectNode()
-            ), 2, 2),
+            OpplysningDao.GrunnlagHendelse(
+                Grunnlagsopplysning(
+                    UUID.randomUUID(),
+                    Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
+                    Opplysningstyper.SOEKER_SOEKNAD_V1,
+                    objectMapper.createObjectNode(),
+                    objectMapper.createObjectNode()
+                ),
+                2,
+                1
+            ),
+            OpplysningDao.GrunnlagHendelse(
+                Grunnlagsopplysning(
+                    UUID.randomUUID(),
+                    Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
+                    Opplysningstyper.AVDOED_SOEKNAD_V1,
+                    objectMapper.createObjectNode(),
+                    objectMapper.createObjectNode()
+                ),
+                2,
+                2
+            )
         )
 
         every { opplysningerMock.finnHendelserIGrunnlag(any()) } returns grunnlagshendelser

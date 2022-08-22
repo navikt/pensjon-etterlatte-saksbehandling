@@ -1,5 +1,5 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import ca.cutterslade.gradle.analyze.AnalyzeDependenciesTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `kotlin-dsl`
@@ -12,7 +12,7 @@ version = "unspecified"
 repositories {
     gradlePluginPortal()
     maven(
-        //name = "JCenter Gradle Plugins",
+        // name = "JCenter Gradle Plugins",
         url = "https://dl.bintray.com/gradle/gradle-plugins"
     )
 }

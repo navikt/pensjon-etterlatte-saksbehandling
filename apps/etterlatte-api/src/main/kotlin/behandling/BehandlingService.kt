@@ -1,29 +1,19 @@
 package no.nav.etterlatte.behandling
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
+import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.DetaljertBehandlingDto
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.Familieforhold
 import no.nav.etterlatte.typer.LagretHendelser
-import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
 
-
-data class PersonSakerResult(val person: Person, val saker: Saker)
-
-data class BehandlingsBehov(
-    val sak: Long,
-    val opplysninger: List<Grunnlagsopplysning<ObjectNode>>?
-)
+data class PersonSakerResult(val person: Person, val behandlingListe: BehandlingListe)
 
 class BehandlingService(
     private val behandlingKlient: BehandlingKlient,
@@ -33,18 +23,27 @@ class BehandlingService(
 ) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
 
-    suspend fun hentPerson(fnr: String, accessToken: String): PersonSakerResult {
-        logger.info("Henter person fra behandling")
+    suspend fun hentPersonOgSaker(fnr: String, accessToken: String): PersonSakerResult {
+        logger.info("Henter person med tilhørende behandlinger")
 
-        val person = pdlKlient.hentPerson(fnr, accessToken)
-        val saker = behandlingKlient.hentSakerForPerson(fnr, accessToken)
+        try {
+            val person = pdlKlient.hentPerson(fnr, accessToken)
+            val saker = behandlingKlient.hentSakerForPerson(fnr, accessToken)
+            val sakIder = saker.saker.map { it.id }.distinct()
 
-        return PersonSakerResult(person, saker)
-    }
+            val behandlinger = sakIder.map { behandlingKlient.hentBehandlingerForSak(it.toInt(), accessToken) }
+                .flatMap { it.behandlinger }
 
-    suspend fun opprettSak(fnr: String, sakType: SoeknadType, accessToken: String): Sak {
-        logger.info("Oppretter sak for en person")
-        return behandlingKlient.opprettSakForPerson(fnr, sakType, accessToken)
+            val behandlingsListe = BehandlingListe(behandlinger)
+
+            return PersonSakerResult(person, behandlingsListe)
+        } catch (e: InvalidFoedselsnummer) {
+            logger.error("Henting av person fra pdl feilet pga ugyldig fødselsnummer", e)
+            throw e
+        } catch (e: Exception) {
+            logger.error("Henting av person med tilhørende behandlinger feilet", e)
+            throw e
+        }
     }
 
     suspend fun hentSaker(accessToken: String): Saker {
@@ -87,11 +86,6 @@ class BehandlingService(
         )
     }
 
-    suspend fun opprettBehandling(behandlingsBehov: BehandlingsBehov, accessToken: String): BehandlingSammendrag {
-        logger.info("Opprett en behandling på en sak")
-        return behandlingKlient.opprettBehandling(behandlingsBehov, accessToken)
-    }
-
     suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean {
         return behandlingKlient.slettBehandlinger(sakId, accessToken)
     }
@@ -105,5 +99,4 @@ class BehandlingService(
         logger.error("Ikke bruk dette i prod, slett endepunktet så raskt som mulig! Slett revurderinger er ban")
         return behandlingKlient.slettRevurderinger(sakId, accessToken)
     }
-
 }

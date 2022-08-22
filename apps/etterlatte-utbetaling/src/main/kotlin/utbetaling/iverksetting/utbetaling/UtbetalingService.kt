@@ -39,7 +39,7 @@ class UtbetalingService(
             else -> {
                 val utbetaling = UtbetalingMapper(
                     tidligereUtbetalinger = utbetalingDao.hentUtbetalinger(vedtak.sak.id),
-                    vedtak = vedtak,
+                    vedtak = vedtak
                 ).opprettUtbetaling()
 
                 oppdragMapper.oppdragFraUtbetaling(
@@ -55,7 +55,6 @@ class UtbetalingService(
                             utbetaling.sendtUtbetalingshendelse(clock)
                         ).let { SendtTilOppdrag(it) }
                     }
-
             }
         }
     }
@@ -101,7 +100,6 @@ class UtbetalingService(
 
     fun Utbetaling.ugyldigStatus() =
         this.status() != UtbetalingStatus.SENDT && this.status() != UtbetalingStatus.MOTTATT
-
 
     fun Utbetaling?.utbetalingEksisterer() =
         this != null && this.status() != UtbetalingStatus.MOTTATT

@@ -17,7 +17,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.*
 
-
 interface EtterlatteVedtak {
     suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak
 }
@@ -50,7 +49,6 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
             throw e
         }
     }
-
 }
 
 data class Vedtak(
@@ -65,5 +63,5 @@ data class Vedtak(
     val vedtakFattet: Boolean?,
     val datoFattet: Instant?,
     val datoattestert: Instant?,
-    val attestant: String?,
+    val attestant: String?
 )

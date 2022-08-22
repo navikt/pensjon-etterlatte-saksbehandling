@@ -29,7 +29,13 @@ class BarnetsMedlemskapTest {
         val gjenlevendePdlNorge = lagMockPersonPdl(null, fnrGjenlevende, null, adresserNorgePdl(), null)
         val gjenlevendePdlDanmark = lagMockPersonPdl(null, fnrGjenlevende, null, adresseDanmarkPdl(), null)
 
-        val barnPdlNorge = lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresserNorgePdl(), avdoedErForeldre)
+        val barnPdlNorge = lagMockPersonPdl(
+            foedselsdatoBarnUnder20,
+            fnrBarn,
+            null,
+            adresserNorgePdl(),
+            avdoedErForeldre
+        )
         val barnPdlDanmark =
             lagMockPersonPdl(foedselsdatoBarnUnder20, fnrBarn, null, adresseDanmarkPdl(), avdoedErForeldre)
         val barnSoeknadNorge = lagMockPersonSoekerSoeknad(UtenlandsadresseBarn(JaNeiVetIkke.NEI, null, null))
@@ -39,28 +45,28 @@ class BarnetsMedlemskapTest {
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlNorge),
-            mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
+            mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato)
         )
 
         val barnUtenlandsAdresserPdl = vilkaarBarnetsMedlemskap(
             mapTilVilkaarstypePerson(barnPdlDanmark),
             mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlNorge),
-            mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
+            mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato)
         )
 
         val barnUtenlandsAdresserSoeknad = vilkaarBarnetsMedlemskap(
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypeSoekerSoeknad(barnSoeknadDanmark),
             mapTilVilkaarstypePerson(gjenlevendePdlNorge),
-            mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
+            mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato)
         )
 
         val gjenlevendeUtenlandsAdresserPdl = vilkaarBarnetsMedlemskap(
             mapTilVilkaarstypePerson(barnPdlNorge),
             mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge),
             mapTilVilkaarstypePerson(gjenlevendePdlDanmark),
-            mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
+            mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato)
         )
 
         Assertions.assertEquals(VurderingsResultat.OPPFYLT, ingenUtenlandsAdresser.resultat)
@@ -74,5 +80,4 @@ class BarnetsMedlemskapTest {
             barnUtenlandsAdresserSoeknad.resultat
         )
     }
-
 }

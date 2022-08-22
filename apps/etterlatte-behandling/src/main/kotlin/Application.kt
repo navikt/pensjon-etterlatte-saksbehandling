@@ -131,6 +131,7 @@ private fun Route.attachContekst(ds: DataSource) {
 
 class App(private val beanFactory: BeanFactory) {
     fun run() {
+        beanFactory.grunnlagsendringshendelseJob()
         embeddedServer(
             CIO,
             applicationEngineEnvironment {

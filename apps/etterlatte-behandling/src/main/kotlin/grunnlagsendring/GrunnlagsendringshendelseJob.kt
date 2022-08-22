@@ -14,7 +14,7 @@ class GrunnlagsendringshendelseJob(
     private val minutterGamleHendelser: Long
 ) {
     private val jobbNavn = this::class.simpleName
-
+    private val logger = LoggerFactory.getLogger(this::class.java)
     fun schedule() =
         fixedRateTimer(
             name = jobbNavn,
@@ -23,6 +23,7 @@ class GrunnlagsendringshendelseJob(
             period = periode.toMillis()
         ) {
             try {
+                logger.info("Forbereder GrunnlagsendringshendelseJob med jobbavn: ${jobbNavn}, initialDelay: $initialDelay og periode i ms: ${periode.toMillis()}")
                 SjekkKlareGrunnlagsendringshendelser(
                     grunnlagsendringshendelseService = grunnlagsendringshendelseService,
                     leaderElection = leaderElection,
@@ -30,7 +31,7 @@ class GrunnlagsendringshendelseJob(
                     minutterGamleHendelser = minutterGamleHendelser
                 ).run()
             } catch (throwable: Throwable) {
-                logger.error("Avstemming feilet", throwable)
+                logger.error("Jobb for aa sjekke klare grunnlagsendringshendelser feilet", throwable)
             }
         }
 
@@ -47,12 +48,11 @@ class GrunnlagsendringshendelseJob(
                 if (leaderElection.isLeader()) {
                     log.info("Starter jobb: $jobbNavn")
                     grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(minutterGamleHendelser)
+                } else {
+                    log.info("Ikke leader, saa kjoerer ikke jobb.")
                 }
             }
         }
     }
 
-    companion object {
-        private val logger = LoggerFactory.getLogger(GrunnlagsendringshendelseJob::class.java)
-    }
 }

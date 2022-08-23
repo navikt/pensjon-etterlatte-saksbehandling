@@ -20,6 +20,7 @@ export const Search = () => {
 
   function search() {
     setSearchResult(undefined)
+    setError(undefined)
     if (ugyldigInput()) {
       setFeilInput(true)
     } else {
@@ -43,6 +44,7 @@ export const Search = () => {
   useEffect(() => {
     ;(async () => {
       setSearchResult(undefined)
+      setError(undefined)
       if (searchInput.length === 0) {
         setFeilInput(false)
       } else if (feilInput && ugyldigInput()) {

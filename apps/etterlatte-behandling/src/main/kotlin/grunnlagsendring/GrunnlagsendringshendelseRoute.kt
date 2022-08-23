@@ -17,7 +17,7 @@ fun Route.grunnlagsendringshendelseRoute(
     val logger = application.log
 
     route("/grunnlagsendringshendelse") {
-        post("/doedshendelse/") {
+        post("/doedshendelse") {
             val doedshendelse = call.receive<Doedshendelse>()
             logger.info("Mottar doedshendelse: $doedshendelse")
             grunnlagsendringshendelseService.opprettSoekerDoedHendelse(doedshendelse)

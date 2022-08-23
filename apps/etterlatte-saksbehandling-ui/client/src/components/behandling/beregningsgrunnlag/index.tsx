@@ -1,6 +1,6 @@
 import { BodyShort, Button, Heading, Radio, RadioGroup } from '@navikt/ds-react'
 import { Content, Header } from '../../../shared/styled'
-import { useContext } from 'react'
+import React, { useContext } from 'react'
 import { Border } from '../soeknadsoversikt/styled'
 import { Barn } from '../soeknadsoversikt/familieforhold/personer/Barn'
 import { Soesken } from '../soeknadsoversikt/familieforhold/personer/Soesken'
@@ -12,6 +12,8 @@ import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { Controller, useForm } from 'react-hook-form'
 import { formaterStringDato } from '../../../utils/formattering'
 import { addBehandlingAction } from '../../../store/reducers/BehandlingReducer'
+import { hentBehandlesFraStatus } from '../felles/utils'
+import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 
 interface SoeskenMedIBeregning {
   foedselsnummer: string
@@ -22,6 +24,7 @@ const Beregningsgrunnlag = () => {
   const { next } = useBehandlingRoutes()
   const ctx = useContext(AppContext)
   const behandling = ctx.state.behandlingReducer
+  const behandles = hentBehandlesFraStatus(ctx.state.behandlingReducer?.status)
 
   if (behandling.kommerSoekerTilgode == null || behandling.familieforhold?.avdoede == null) {
     return <div style={{ color: 'red' }}>Familieforhold kan ikke hentes ut</div>
@@ -95,12 +98,15 @@ const Beregningsgrunnlag = () => {
           </SoeskenContainer>
         ))}
       </FamilieforholdWrapper>
-
-      <BehandlingHandlingKnapper>
-        <Button variant="primary" size="medium" form="form">
-          Beregne og fatte vedtak
-        </Button>
-      </BehandlingHandlingKnapper>
+      {behandles ? (
+        <BehandlingHandlingKnapper>
+          <Button variant="primary" size="medium" form="form">
+            Beregne og fatte vedtak
+          </Button>
+        </BehandlingHandlingKnapper>
+      ) : (
+        <NesteOgTilbake />
+      )}
     </Content>
   )
 }

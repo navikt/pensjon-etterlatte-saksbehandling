@@ -88,6 +88,30 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         }
     }
 
+    fun settBehandlingIdForTattMedIBehandling(
+        sak: Long,
+        behandlingId: UUID,
+        type: GrunnlagsendringsType
+    ) {
+        with(connection()) {
+            prepareStatement(
+                """
+                   UPDATE grunnlagsendringshendelse
+                   SET behandling_id = ?
+                   WHERE sak_id = ?
+                   AND status = ?
+                   AND type = ?
+                """.trimIndent()
+            ).use {
+                it.setObject(1, behandlingId)
+                it.setLong(2, sak)
+                it.setString(3, GrunnlagsendringStatus.TATT_MED_I_BEHANDLING.name)
+                it.setString(4, type.name)
+                it.executeUpdate()
+            }
+        }
+    }
+
     fun hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
         minutter: Long,
         type: GrunnlagsendringsType

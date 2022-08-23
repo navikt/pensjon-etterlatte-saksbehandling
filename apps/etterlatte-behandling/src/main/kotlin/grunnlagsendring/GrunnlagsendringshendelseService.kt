@@ -115,6 +115,11 @@ class GrunnlagsendringshendelseService(
                                                     GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
                                                     GrunnlagsendringsType.SOEKER_DOED
                                                 )
+                                                grunnlagsendringshendelseDao.settBehandlingIdForTattMedIBehandling(
+                                                    endringsHendelse.sakId,
+                                                    it.id,
+                                                    GrunnlagsendringsType.SOEKER_DOED
+                                                )
                                             }
                                         }
                                     }

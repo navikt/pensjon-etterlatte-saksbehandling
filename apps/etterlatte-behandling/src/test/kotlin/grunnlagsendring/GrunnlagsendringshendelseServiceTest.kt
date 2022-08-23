@@ -222,6 +222,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             )
         )
         val sakerArg = slot<List<Long>>()
+        val behandlingReferanse = slot<UUID>()
         val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
             every {
                 hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
@@ -234,6 +235,13 @@ internal class GrunnlagsendringshendelseServiceTest {
                     capture(sakerArg),
                     GrunnlagsendringStatus.IKKE_VURDERT,
                     GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
+                    GrunnlagsendringsType.SOEKER_DOED
+                )
+            } returns Unit
+            every {
+                settBehandlingIdForTattMedIBehandling(
+                    any(),
+                    capture(behandlingReferanse),
                     GrunnlagsendringsType.SOEKER_DOED
                 )
             } returns Unit
@@ -262,7 +270,9 @@ internal class GrunnlagsendringshendelseServiceTest {
                     capture(endringshendelseArg),
                     capture(revurderingAarsakArg)
                 )
-            } returns mockk()
+            } returns mockk() {
+                every { id } returns behandlingId
+            }
         }
         val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
             grunnlagshendelsesDao,
@@ -276,6 +286,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         assertEquals(behandlingId, behandlingArg.captured.id)
         assertTrue(endringshendelseArg.captured is Doedshendelse)
         assertEquals(RevurderingAarsak.SOEKER_DOD, revurderingAarsakArg.captured)
+        assertEquals(behandlingReferanse.captured, behandlingArg.captured.id)
     }
 
     @Test

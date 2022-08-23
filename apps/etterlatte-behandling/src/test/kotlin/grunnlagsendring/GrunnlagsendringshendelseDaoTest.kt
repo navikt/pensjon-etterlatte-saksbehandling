@@ -1,8 +1,11 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.grunnlagsendringshendelse
 import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -28,6 +31,7 @@ internal class GrunnlagsendringshendelseDaoTest {
     private lateinit var dataSource: DataSource
     lateinit var sakRepo: SakDao
     lateinit var grunnlagsendringshendelsesRepo: GrunnlagsendringshendelseDao
+    lateinit var behandlingRepo: BehandlingDao
 
     @BeforeAll
     fun beforeAll() {
@@ -42,6 +46,7 @@ internal class GrunnlagsendringshendelseDaoTest {
 
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
+        behandlingRepo = BehandlingDao { connection }
         grunnlagsendringshendelsesRepo = GrunnlagsendringshendelseDao { connection }
     }
 
@@ -161,5 +166,29 @@ internal class GrunnlagsendringshendelseDaoTest {
             { assertTrue(hendelserEtterOppdatertStatus.all { it.status == GrunnlagsendringStatus.FORKASTET }) }
 
         )
+    }
+
+    @Test
+    fun `settBehandlingIdForTattMedIBehandling skal sette referanse til behandling`() {
+        val hendelseId = UUID.randomUUID()
+        val sak1 = sakRepo.opprettSak("1234", "BP").id
+        val grunnlagsendringstype = GrunnlagsendringsType.SOEKER_DOED
+        val revurderingId = UUID.randomUUID()
+        val revurdering = revurdering(id = revurderingId, sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
+        behandlingRepo.opprettRevurdering(revurdering)
+        listOf(
+            grunnlagsendringshendelse(
+                id = hendelseId,
+                sakId = sak1,
+                data = grunnlagsinformasjonDoedshendelse(),
+                type = grunnlagsendringstype,
+                status = GrunnlagsendringStatus.TATT_MED_I_BEHANDLING
+            )
+        ).forEach {
+            grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
+        }
+        grunnlagsendringshendelsesRepo.settBehandlingIdForTattMedIBehandling(sak1, revurderingId, grunnlagsendringstype)
+        val lagretHendelse = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(hendelseId)
+        assertEquals(revurderingId, lagretHendelse?.behandlingId)
     }
 }

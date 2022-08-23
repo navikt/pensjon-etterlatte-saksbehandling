@@ -10,8 +10,10 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Aareg
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import org.slf4j.LoggerFactory
 
 class AaregService(private val aaregClient: HttpClient, private val url: String) : Aareg {
+    private val logger = LoggerFactory.getLogger(AaregService::class.java)
     override fun hentArbeidsforhold(fnr: Foedselsnummer): List<AaregResponse> = runBlocking {
         try {
             aaregClient.post(url) {
@@ -19,7 +21,7 @@ class AaregService(private val aaregClient: HttpClient, private val url: String)
                 header("Nav-Personident", fnr.value)
             }.body()
         } catch (e: Exception) {
-            print(e.message)
+            logger.error("Klarte ikke å hente ut arbeidsforhold", e)
             return@runBlocking emptyList()
         }
     }

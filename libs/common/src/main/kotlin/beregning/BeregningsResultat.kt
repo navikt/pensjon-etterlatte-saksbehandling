@@ -44,5 +44,8 @@ data class Beregningsperiode(
 data class SoeskenPeriode(
     val datoFOM: YearMonth,
     val datoTOM: YearMonth,
-    val soeskenFlokk: List<Person>?
+    val soeskenFlokk: List<Person>
 )
+
+fun SoeskenPeriode.erInklusiv(FOM: YearMonth, TOM: YearMonth) =
+    !FOM.isBefore(this.datoFOM) && !TOM.isAfter(this.datoTOM)

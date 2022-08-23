@@ -1,3 +1,6 @@
+package no.nav.etterlatte
+
+import LesAvkortingsmelding
 import model.AvkortingService
 import no.nav.helse.rapids_rivers.RapidApplication
 

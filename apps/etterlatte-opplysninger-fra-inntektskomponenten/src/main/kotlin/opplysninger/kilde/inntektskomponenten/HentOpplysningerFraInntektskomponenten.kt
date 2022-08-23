@@ -47,7 +47,7 @@ internal class HentOpplysningerFraInntektskomponenten(
                     packet["opplysning"] = opplysninger
                     context.publish(packet.toJson())
                 } catch (e: Exception) {
-                    logger.info(e.message)
+                    logger.error("Klarte ikke hente inntektsopplysninger", e)
                 }
             }
         }

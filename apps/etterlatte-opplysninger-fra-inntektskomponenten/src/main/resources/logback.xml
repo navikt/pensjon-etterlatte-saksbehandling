@@ -13,4 +13,8 @@
         <appender-ref ref="STDOUT_JSON"/>
     </root>
 
+    <logger name="org.eclipse.jetty" level="INFO"/>
+    <logger name="org.apache.kafka" level="INFO"/>
+    <logger name="io.netty" level="INFO"/>
+    <logger name="no.nav.helse.rapids_rivers.PingPong" level="DEBUG"/>
 </configuration>

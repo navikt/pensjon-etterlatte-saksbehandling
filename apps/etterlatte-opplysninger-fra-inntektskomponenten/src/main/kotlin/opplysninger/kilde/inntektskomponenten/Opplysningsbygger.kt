@@ -47,7 +47,9 @@ class OpplysningsByggerService : OpplysningsBygger {
                 Grunnlagsopplysning.Aregisteret("Aareg"),
                 ArbeidsforholdOpplysning(arbeidsforhold)
             )
-        } else null
+        } else {
+            null
+        }
 
         return listOfNotNull(pensjonUforeOpplysning, arbeidsforholdOpplysning)
     }

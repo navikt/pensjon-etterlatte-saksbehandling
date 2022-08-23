@@ -41,7 +41,8 @@ class DollyService(
                     gjenlevende = personResponse.person.sivilstand.first().relatertVedSivilstand,
                     barn = personResponse.person.forelderBarnRelasjon
                         .filter { it.barn }
-                        .map { it.relatertPersonsIdent })
+                        .map { it.relatertPersonsIdent }
+                )
             }
         }
     }

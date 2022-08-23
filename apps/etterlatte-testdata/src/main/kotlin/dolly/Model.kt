@@ -33,7 +33,7 @@ data class DollyPerson(
 
 data class ForelderBarnRelasjon(
     val relatertPersonsIdent: String,
-    val barn: Boolean,
+    val barn: Boolean
 )
 
 data class Sivilstand(val type: String, val relatertVedSivilstand: String)

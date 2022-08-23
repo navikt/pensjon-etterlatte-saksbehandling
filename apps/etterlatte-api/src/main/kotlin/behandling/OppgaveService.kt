@@ -1,8 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
@@ -38,36 +35,32 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient, private val
     suspend fun hentAlleOppgaver(accessToken: String): Oppgaver {
         logger.info("Henter alle oppgaver")
 
-        return coroutineScope {
-            behandlingKlient.hentOppgaver(accessToken).oppgaver
-                .map { oppgave ->
-                    async {
-                        Oppgave(
-                            behandlingsId = oppgave.behandlingId,
-                            sakId = oppgave.sak.id,
-                            status = oppgave.behandlingStatus,
-                            oppgaveStatus = oppgave.oppgaveStatus,
-                            soeknadType = oppgave.sak.sakType,
-                            behandlingType = oppgave.behandlingsType,
-                            regdato = oppgave.regdato.toLocalDateTime().toString(),
-                            fristdato = oppgave.fristDato.atStartOfDay().toString(),
-                            fnr = oppgave.sak.ident,
-                            beskrivelse = "",
-                            saksbehandler = "",
-                            handling = Handling.BEHANDLE,
-                            antallSoesken = 2 // midlertidig kommentert ut for å komme videre i DEV.
-//                            vedtakKlient.hentVedtak(
-//                                oppgave.behandlingId.toString(),
-//                                accessToken
-//                            ).kommerSoekerTilgodeResultat?.familieforhold?.let { familieforhold ->
-//                                hentAntallSøsken(familieforhold)
-//                            }
-                        )
-                    }
-                }
-                .awaitAll()
-                .let { Oppgaver(it) }
-        }
+        val behandlingsoppgaver = behandlingKlient.hentOppgaver(accessToken).oppgaver
+        val vedtakListe = vedtakKlient.hentVedtakBolk(
+            behandlingsidenter = behandlingsoppgaver.map { it.behandlingId.toString() },
+            accessToken = accessToken
+        ).associateBy { it.behandlingId }
+
+        return Oppgaver(
+            behandlingsoppgaver.map {
+                Oppgave(
+                    behandlingsId = it.behandlingId,
+                    sakId = it.sak.id,
+                    status = it.behandlingStatus,
+                    oppgaveStatus = it.oppgaveStatus,
+                    soeknadType = it.sak.sakType,
+                    behandlingType = it.behandlingsType,
+                    regdato = it.regdato.toLocalDateTime().toString(),
+                    fristdato = it.fristDato.atStartOfDay().toString(),
+                    fnr = it.sak.ident,
+                    beskrivelse = "",
+                    saksbehandler = "",
+                    handling = Handling.BEHANDLE,
+                    antallSoesken = vedtakListe[it.behandlingId]?.kommerSoekerTilgodeResultat?.familieforhold
+                        ?.let { familieforhold -> hentAntallSøsken(familieforhold) }
+                )
+            }
+        )
     }
 }
 

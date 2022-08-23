@@ -55,10 +55,11 @@ internal class OppgaveServiceTest {
             null,
             null
         )
+        val behandlingId = UUID.randomUUID()
         coEvery { behandlingKlient.hentOppgaver(accessToken) } returns OppgaveListe(
             oppgaver = listOf(
                 BehandlingsOppgave(
-                    UUID.randomUUID(),
+                    behandlingId,
                     BehandlingStatus.UNDER_BEHANDLING,
                     OppgaveStatus.NY,
                     Sak("ident", "saktype", 1),
@@ -69,6 +70,7 @@ internal class OppgaveServiceTest {
             )
         )
         coEvery { vedtakKlient.hentVedtak(UUID.randomUUID().toString(), accessToken) } returns vedtak
+        coEvery { vedtakKlient.hentVedtakBolk(listOf(behandlingId.toString()), accessToken) } returns listOf(vedtak)
 
         val resultat = runBlocking { service.hentAlleOppgaver(accessToken) }
 

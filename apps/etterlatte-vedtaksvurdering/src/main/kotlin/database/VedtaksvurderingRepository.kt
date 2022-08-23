@@ -158,36 +158,23 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
+    fun hentVedtakBolk(behandlingsidenter: List<UUID>): List<Vedtak> {
+        logger.info("Henter alle vedtak")
+
+        return connection.use {
+            val identer = it.createArrayOf("uuid", behandlingsidenter.toTypedArray())
+            val statement = it.prepareStatement(Queries.hentVedtakBolk)
+            statement.setArray(1, identer)
+            statement.executeQuery().toList { toVedtak() }
+        }
+    }
     fun hentVedtak(sakId: String, behandlingsId: UUID): Vedtak? {
         val resultat = connection.use { it ->
             val statement = it.prepareStatement(Queries.hentVedtak)
             statement.setLong(1, sakId.toLong())
             statement.setObject(2, behandlingsId)
             statement.executeQuery().singleOrNull {
-                Vedtak(
-                    getLong(9),
-                    getString(1),
-                    getString(16),
-                    getObject(2) as UUID,
-                    getString(3),
-                    getString(4)?.let {
-                        try {
-                            objectMapper.readValue(it)
-                        } catch (ex: Exception) {
-                            null
-                        }
-                    },
-                    getJsonObject(5),
-                    getJsonObject(6),
-                    getJsonObject(7),
-                    getBoolean(8),
-                    getString(10),
-                    getTimestamp(11)?.toInstant(),
-                    getTimestamp(12)?.toInstant(),
-                    getString(13),
-                    getDate(14)?.toLocalDate(),
-                    getString(15)?.let { VedtakStatus.valueOf(it) }
-                )
+                toVedtak()
             }
         }
         return resultat
@@ -198,30 +185,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             val statement = it.prepareStatement(Queries.hentVedtakForBehandling)
             statement.setObject(1, behandlingsId)
             statement.executeQuery().singleOrNull {
-                Vedtak(
-                    getLong(9),
-                    getString(1),
-                    getString(16),
-                    getObject(2) as UUID,
-                    getString(3),
-                    getString(4)?.let {
-                        try {
-                            objectMapper.readValue(it)
-                        } catch (ex: Exception) {
-                            null
-                        }
-                    },
-                    getJsonObject(5),
-                    getJsonObject(6),
-                    getJsonObject(7),
-                    getBoolean(8),
-                    getString(10),
-                    getTimestamp(11)?.toInstant(),
-                    getTimestamp(12)?.toInstant(),
-                    getString(13),
-                    getDate(14)?.toLocalDate(),
-                    getString(15)?.let { VedtakStatus.valueOf(it) }
-                )
+                toVedtak()
             }
         }
         return resultat
@@ -347,6 +311,31 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             }
         }
     }
+
+    private fun ResultSet.toVedtak() = Vedtak(
+        id = getLong(9),
+        sakId = getString(1),
+        sakType = getString(16),
+        behandlingId = getObject(2) as UUID,
+        saksbehandlerId = getString(3),
+        avkortingsResultat = getString(4)?.let {
+            try {
+                objectMapper.readValue(it)
+            } catch (ex: Exception) {
+                null
+            }
+        },
+        beregningsResultat = getJsonObject(5),
+        vilkaarsResultat = getJsonObject(6),
+        kommerSoekerTilgodeResultat = getJsonObject(7),
+        vedtakFattet = getBoolean(8),
+        fnr = getString(10),
+        datoFattet = getTimestamp(11)?.toInstant(),
+        datoattestert = getTimestamp(12)?.toInstant(),
+        attestant = getString(13),
+        virkningsDato = getDate(14)?.toLocalDate(),
+        vedtakStatus = getString(15)?.let { VedtakStatus.valueOf(it) }
+    )
 }
 
 data class Vedtak(
@@ -398,6 +387,10 @@ private object Queries {
     val underkjennVedtak =
         "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = ? WHERE sakId = ? AND behandlingId = ?" // ktlint-disable max-line-length
 
+    val hentVedtakBolk =
+        "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat," +
+            "kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant," +
+            "datoVirkFom, vedtakstatus, saktype FROM vedtak where behandlingId = ANY(?)"
     val hentVedtak =
         "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype FROM vedtak WHERE sakId = ? AND behandlingId = ?" // ktlint-disable max-line-length
     val hentVedtakForBehandling =
@@ -414,7 +407,7 @@ private object Queries {
     val slettVedtakISak = "DELETE FROM vedtak WHERE sakid = ?"
 }
 
-fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
+private fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
     return if (next()) {
         block().also {
             require(!next()) { "Skal være unik" }

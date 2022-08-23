@@ -19,6 +19,7 @@ import java.util.*
 
 interface EtterlatteVedtak {
     suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak
+    suspend fun hentVedtakBolk(behandlingsidenter: List<String>, accessToken: String): List<Vedtak>
 }
 
 class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
@@ -38,14 +39,32 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
                 downstreamResourceClient.get(
                     Resource(clientId, "$resourceUrl/api/behandlinger/$behandlingId/vedtak"),
                     accessToken
-                )
-                    .mapBoth(
-                        success = { json -> json },
-                        failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
-                    ).response
+                ).mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
             return objectMapper.readValue(json.toString())
         } catch (e: Exception) {
             logger.error("Henting  vedtak for en behandling feilet", e)
+            throw e
+        }
+    }
+
+    override suspend fun hentVedtakBolk(behandlingsidenter: List<String>, accessToken: String): List<Vedtak> {
+        logger.info("Henter vedtak bolk")
+        try {
+            val json = downstreamResourceClient.post(
+                Resource(clientId, "$resourceUrl/api/vedtak"),
+                accessToken,
+                VedtakBolkRequest(behandlingsidenter)
+            )
+                .mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
+            return objectMapper.readValue<VedtakBolkResponse>(json.toString()).vedtak
+        } catch (e: Exception) {
+            logger.error("Henting av vedtak bolk feilet", e)
             throw e
         }
     }
@@ -65,3 +84,6 @@ data class Vedtak(
     val datoattestert: Instant?,
     val attestant: String?
 )
+
+private data class VedtakBolkRequest(val behandlingsidenter: List<String>)
+private data class VedtakBolkResponse(val vedtak: List<Vedtak>)

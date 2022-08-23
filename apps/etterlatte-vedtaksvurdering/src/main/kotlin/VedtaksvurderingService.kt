@@ -142,6 +142,9 @@ class VedtaksvurderingService(
         }
     }
 
+    fun hentVedtakBolk(behandlingsidenter: List<UUID>): List<Vedtak> {
+        return repository.hentVedtakBolk(behandlingsidenter)
+    }
     fun hentVedtak(sakId: String, behandlingId: UUID): Vedtak? {
         return repository.hentVedtak(sakId, behandlingId)
     }

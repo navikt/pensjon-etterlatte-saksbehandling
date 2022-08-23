@@ -203,4 +203,34 @@ internal class DBTest {
         vedtaksvurderingService.slettSak(12321423523545)
         Assertions.assertNull(vedtaksvurderingService.hentVedtak("12321423523545", uuid))
     }
+
+    @Test
+    fun `kan lagre å hente alle vedtak`() {
+        val vedtakRepo = VedtaksvurderingRepository(dataSource)
+        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
+
+        val uuid1 = UUID.randomUUID()
+        val uuid2 = UUID.randomUUID()
+        val uuid3 = UUID.randomUUID()
+
+        lagreNyttVilkaarsresultat(vedtaksvurderingService, "1", uuid1)
+        lagreNyttVilkaarsresultat(vedtaksvurderingService, "2", uuid2)
+        lagreNyttVilkaarsresultat(vedtaksvurderingService, "3", uuid3)
+
+        Assertions.assertEquals(3, vedtaksvurderingService.hentVedtakBolk(listOf(uuid1, uuid2, uuid3)).size)
+    }
+    private fun lagreNyttVilkaarsresultat(service: VedtaksvurderingService, sakId: String, behandlingId: UUID) {
+        service.lagreVilkaarsresultat(
+            sakId,
+            "BARNEPENSJON",
+            behandlingId,
+            "fnr",
+            VilkaarResultat(
+                VurderingsResultat.OPPFYLT,
+                emptyList(),
+                LocalDateTime.now()
+            ),
+            LocalDate.now()
+        )
+    }
 }

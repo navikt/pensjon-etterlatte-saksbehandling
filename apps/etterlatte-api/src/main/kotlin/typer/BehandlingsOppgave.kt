@@ -1,6 +1,7 @@
 package no.nav.etterlatte.typer
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -12,7 +13,8 @@ data class BehandlingsOppgave(
     val oppgaveStatus: OppgaveStatus,
     val sak: Sak,
     val regdato: ZonedDateTime,
-    val fristDato: LocalDate
+    val fristDato: LocalDate,
+    val behandlingsType: BehandlingType
 )
 
 data class OppgaveListe(val oppgaver: List<BehandlingsOppgave>)

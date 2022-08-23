@@ -2,6 +2,7 @@ package no.nav.etterlatte.oppgave
 
 import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.sak.Sak
 import java.time.LocalDate
@@ -10,7 +11,7 @@ import java.time.ZonedDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-enum class Rolle() {
+enum class Rolle {
     SAKSBEHANDLER, ATTESTANT
 }
 
@@ -20,7 +21,8 @@ data class Oppgave(
     val oppgaveStatus: OppgaveStatus,
     val sak: Sak,
     val regdato: ZonedDateTime,
-    val fristDato: LocalDate
+    val fristDato: LocalDate,
+    val behandlingsType: BehandlingType
 )
 
 class OppgaveDao(private val datasource: DataSource) {
@@ -42,9 +44,16 @@ class OppgaveDao(private val datasource: DataSource) {
         datasource.connection.use {
             val stmt = it.prepareStatement(
                 """
-                |SELECT b.id, b.sak_id, soekand_mottatt_dato, fnr, sakType, status, oppgave_status, behandling_opprettet
+                |SELECT b.id, b.sak_id, soekand_mottatt_dato, fnr, sakType, status, oppgave_status, behandling_opprettet,
+                |behandlingstype
                 |FROM behandling b inner join sak s on b.sak_id = s.id  
-                |where status in ${aktuelleStatuser.joinToString(separator = ", ", prefix = "(", postfix = ")") { "'${it.name}'" }}
+                |where status in ${
+                aktuelleStatuser.joinToString(
+                    separator = ", ",
+                    prefix = "(",
+                    postfix = ")"
+                ) { "'${it.name}'" }
+                }
                 """.trimMargin().also {
                     println(it)
                 }
@@ -61,7 +70,8 @@ class OppgaveDao(private val datasource: DataSource) {
                     OppgaveStatus.valueOf(getString("oppgave_status")),
                     Sak(getString("fnr"), getString("sakType"), getLong("sak_id")),
                     mottattDato,
-                    mottattDato.toLocalDate().plusMonths(1)
+                    mottattDato.toLocalDate().plusMonths(1),
+                    BehandlingType.valueOf(getString("behandlingstype"))
                 )
             }.also {
                 println("""Hentet oppgaveliste for bruker med roller $roller. Fant ${it.size} oppgaver""")

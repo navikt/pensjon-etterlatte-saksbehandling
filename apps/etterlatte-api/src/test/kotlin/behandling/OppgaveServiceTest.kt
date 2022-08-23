@@ -6,19 +6,31 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingKlient
+import no.nav.etterlatte.behandling.EtterlatteVedtak
 import no.nav.etterlatte.behandling.OppgaveService
-import no.nav.etterlatte.libs.common.behandling.BehandlingListe
-import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
+import no.nav.etterlatte.behandling.Vedtak
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
+import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.typer.BehandlingsOppgave
+import no.nav.etterlatte.typer.OppgaveListe
 import no.nav.etterlatte.typer.Sak
-import no.nav.etterlatte.typer.Saker
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.*
 
 internal class OppgaveServiceTest {
     @MockK
     lateinit var behandlingKlient: BehandlingKlient
+
+    @MockK
+    lateinit var vedtakKlient: EtterlatteVedtak
 
     @InjectMockKs
     lateinit var service: OppgaveService
@@ -28,29 +40,40 @@ internal class OppgaveServiceTest {
     private val accessToken = UUID.randomUUID().toString()
 
     @Test
-    @Disabled
     fun hentAlleOppgaver() {
-        coEvery { behandlingKlient.hentSaker(accessToken) } returns Saker(
-            listOf(1, 4, 8).map {
-                Sak(
-                    "",
-                    "",
-                    it.toLong()
+        val vedtak = Vedtak(
+            "4",
+            UUID.randomUUID(),
+            null,
+            null,
+            null,
+            VilkaarResultat(VurderingsResultat.OPPFYLT, null, LocalDateTime.now()),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+        coEvery { behandlingKlient.hentOppgaver(accessToken) } returns OppgaveListe(
+            oppgaver = listOf(
+                BehandlingsOppgave(
+                    UUID.randomUUID(),
+                    BehandlingStatus.UNDER_BEHANDLING,
+                    OppgaveStatus.NY,
+                    Sak("ident", "saktype", 1),
+                    ZonedDateTime.now(),
+                    LocalDate.now(),
+                    BehandlingType.REVURDERING
                 )
-            }
-        )
-        coEvery { behandlingKlient.hentBehandlingerForSak(1, accessToken) } returns BehandlingListe(
-            listOf(
-                BehandlingSammendrag(UUID.randomUUID(), 1, null, null, null, null, null)
             )
         )
-        coEvery { behandlingKlient.hentBehandlingerForSak(4, accessToken) } returns BehandlingListe(emptyList())
-        coEvery { behandlingKlient.hentBehandlingerForSak(8, accessToken) } returns BehandlingListe(
-            listOf(
-                BehandlingSammendrag(UUID.randomUUID(), 8, null, null, null, null, null),
-                BehandlingSammendrag(UUID.randomUUID(), 8, null, null, null, null, null)
-            )
-        )
+        coEvery { vedtakKlient.hentVedtak(UUID.randomUUID().toString(), accessToken) } returns vedtak
+
         val resultat = runBlocking { service.hentAlleOppgaver(accessToken) }
+
+        assertEquals(BehandlingStatus.UNDER_BEHANDLING, resultat.oppgaver.first().status)
+        assertEquals(BehandlingType.REVURDERING, resultat.oppgaver.first().behandlingType)
+        assertEquals(OppgaveStatus.NY, resultat.oppgaver.first().oppgaveStatus)
     }
 }

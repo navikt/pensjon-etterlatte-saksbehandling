@@ -88,7 +88,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
 
     override suspend fun hentOppgaver(accessToken: String): OppgaveListe {
         try {
-            logger.info("Henter alle saker")
+            logger.info("Henter alle oppgaver")
 
             val json = downstreamResourceClient
                 .get(

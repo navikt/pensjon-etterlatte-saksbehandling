@@ -32,7 +32,7 @@ enum class Handling {
     BEHANDLE
 }
 
-class OppgaveService(private val behandlingKlient: BehandlingKlient, private val vedtakKlient: VedtakKlient) {
+class OppgaveService(private val behandlingKlient: BehandlingKlient, private val vedtakKlient: EtterlatteVedtak) {
     private val logger = LoggerFactory.getLogger(BehandlingService::class.java)
 
     suspend fun hentAlleOppgaver(accessToken: String): Oppgaver {
@@ -48,7 +48,7 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient, private val
                             status = oppgave.behandlingStatus,
                             oppgaveStatus = oppgave.oppgaveStatus,
                             soeknadType = oppgave.sak.sakType,
-                            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, // ktlint-disable max-line-length TODO: dette kan nå hentes fra behandling
+                            behandlingType = oppgave.behandlingsType,
                             regdato = oppgave.regdato.toLocalDateTime().toString(),
                             fristdato = oppgave.fristDato.atStartOfDay().toString(),
                             fnr = oppgave.sak.ident,

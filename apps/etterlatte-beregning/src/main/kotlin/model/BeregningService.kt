@@ -10,12 +10,14 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
+import no.nav.etterlatte.libs.common.beregning.erInklusiv
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -43,24 +45,29 @@ class BeregningService {
         val grunnbeloep = Grunnbeloep.hentGforPeriode(virkFOM)
         val soeskenPerioder = FinnSoeskenPeriodeStrategy.create(grunnlag, virkFOM).soeskenperioder
         val alleFOM = (grunnbeloep.map { it.dato } + soeskenPerioder.map { it.datoFOM } + virkTOM).map {
-            beregnFoersteFom(
-                it,
-                virkFOM
-            )
+            beregnFoersteFom(it, virkFOM)
         }.distinct().sorted().zipWithNext()
             .map { Pair(it.first, it.second.minusMonths(1)) }
 
-        return alleFOM.map {
-            val gjeldendeG = Grunnbeloep.hentGjeldendeG(it.first)
-            val flokkForPeriode = hentFlokkforPeriode(it.first, it.second, soeskenPerioder)
+        val beregningsperioder = alleFOM.mapIndexed { index, (fom, tom) ->
+            val gjeldendeG = Grunnbeloep.hentGjeldendeG(fom)
+            val flokkForPeriode = hentFlokkforPeriode(fom, tom, soeskenPerioder)
             val utbetaltBeloep = Soeskenjustering(flokkForPeriode.size, gjeldendeG.grunnbeløp).beloep
+            val søkersFødselsdato =
+                finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.SOEKER_PDL_V1)?.opplysning?.foedselsdato
+
+            val datoTom = if (index == alleFOM.lastIndex && søkersFødselsdato != null) {
+                beregnSisteTom(søkersFødselsdato, tom)
+            } else {
+                tom
+            }
 
             (
                 Beregningsperiode(
                     delytelsesId = "BP",
                     type = Beregningstyper.GP,
-                    datoFOM = it.first,
-                    datoTOM = it.second,
+                    datoFOM = fom,
+                    datoTOM = datoTom,
                     grunnbelopMnd = gjeldendeG.grunnbeløpPerMåned,
                     grunnbelop = gjeldendeG.grunnbeløp,
                     soeskenFlokk = flokkForPeriode,
@@ -68,27 +75,18 @@ class BeregningService {
                 )
                 )
         }
+
+        return beregningsperioder
     }
 
-    // TODO finne bedre måte å gjøre dette på
     fun hentFlokkforPeriode(
         datoFOM: YearMonth,
         datoTOM: YearMonth,
         soeskenPeriode: List<SoeskenPeriode>
-    ): List<Person> {
-        val flokk = soeskenPeriode.filter { !it.datoTOM.isBefore(datoFOM) }
-            .filter { it.datoTOM != datoFOM }
-            .filter { !it.datoFOM.isAfter(datoTOM) }
-            .filter { it.datoFOM != datoTOM }
-        return if (flokk.isNotEmpty()) flokk[0].soeskenFlokk!! else emptyList()
-    }
-    private fun beregnFoersteFom(first: YearMonth, virkFOM: YearMonth): YearMonth {
-        return if (first.isBefore(virkFOM)) {
-            virkFOM
-        } else {
-            first
-        }
-    }
+    ): List<Person> = soeskenPeriode.firstOrNull { it.erInklusiv(datoFOM, datoTOM) }?.soeskenFlokk ?: emptyList()
+
+    private fun beregnFoersteFom(fom: YearMonth, virkFOM: YearMonth): YearMonth =
+        if (fom.isBefore(virkFOM)) virkFOM else fom
 
     companion object {
         inline fun <reified T> setOpplysningType(opplysning: Grunnlagsopplysning<ObjectNode>?): VilkaarOpplysning<T>? {
@@ -101,6 +99,7 @@ class BeregningService {
                 )
             }
         }
+
         inline fun <reified T> finnOpplysning(
             opplysninger: List<Grunnlagsopplysning<ObjectNode>>,
             type: Opplysningstyper
@@ -108,4 +107,9 @@ class BeregningService {
             return setOpplysningType(opplysninger.find { it.opplysningType == type })
         }
     }
+}
+
+fun beregnSisteTom(fødselsdato: LocalDate, tom: YearMonth): YearMonth? {
+    val fyller18YearMonth = YearMonth.from(fødselsdato).plusYears(18)
+    return if (fyller18YearMonth.isAfter(tom)) null else fyller18YearMonth
 }

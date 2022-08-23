@@ -82,8 +82,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
         get("hendelser") {
             val behandlingId = call.parameters["behandlingId"]
             if (behandlingId == null) {
-                call.response.status(HttpStatusCode(400, "Bad request"))
-                call.respond("BehandlingsId mangler")
+                call.respond(HttpStatusCode.BadRequest, "BehandlingsId mangler")
             } else {
                 call.respond(service.hentHendelserForBehandling(behandlingId, getAccessToken(call)))
             }
@@ -101,10 +100,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
                     call.respond(service.hentPersonOgSaker(fnr, getAccessToken(call)))
                 } catch (e: InvalidFoedselsnummer) {
                     logger.error("Ugyldig fødselsnummer", e)
-                    throw e
-                } catch (e: Exception) {
-                    logger.error("Henting av person med tilhørende behandlinger feilet", e)
-                    throw e
+                    call.respond(HttpStatusCode.BadRequest, "Ugyldig fødselsnummer")
                 }
             }
         }

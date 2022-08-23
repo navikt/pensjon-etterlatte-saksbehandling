@@ -48,7 +48,6 @@ export const Person = () => {
         })
         .catch((e) => {
           console.log('error', e)
-          setLastet(true)
         })
     }
   }, [])

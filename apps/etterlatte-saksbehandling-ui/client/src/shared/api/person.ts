@@ -9,9 +9,8 @@ export const getPerson = async (fnr: string): Promise<IApiResponse<any>> => {
     if (result.ok) {
       return { status: result.status, data: data }
     } else {
-      console.log('error i fetch', result)
-      if (data.includes('Ugyldig fødselsnummer')) {
-        return { status: 500, data: data }
+      if (result.status === 400) {
+        return { status: result.status, data: data }
       } else {
         return { status: result.status, data: 'Det skjedde en feil' }
       }

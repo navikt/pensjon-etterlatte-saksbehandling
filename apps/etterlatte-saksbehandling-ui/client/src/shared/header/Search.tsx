@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Search as SearchField } from '@navikt/ds-react'
+import { Loader, Search as SearchField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getPerson } from '../api/person'
@@ -12,37 +12,55 @@ import { IPersonResult } from '../../components/person/typer'
 export const Search = () => {
   const navigate = useNavigate()
   const [searchInput, setSearchInput] = useState('')
-  const [searchResult, setSearchResult] = useState<IPersonResult | undefined | null>(null)
+  const [searchResult, setSearchResult] = useState<IPersonResult | undefined>(undefined)
+  const [error, setError] = useState<IPersonResult | undefined>(undefined)
+  const [laster, setLaster] = useState<boolean>(false)
   const regBokstaver = /[a-zA-Z]/g
   const [feilInput, setFeilInput] = useState(false)
 
+  function search() {
+    setSearchResult(undefined)
+    if (ugyldigInput()) {
+      setFeilInput(true)
+    } else {
+      setLaster(true)
+      setFeilInput(false)
+      getPerson(searchInput).then((result: IApiResponse<IPersonResult>) => {
+        setLaster(false)
+        if (result.status === 200) {
+          setSearchResult(result?.data)
+        } else {
+          setError(result?.data)
+        }
+      })
+    }
+  }
+
+  function ugyldigInput(): boolean {
+    return regBokstaver.test(searchInput) || searchInput.length !== 11
+  }
+
   useEffect(() => {
     ;(async () => {
-      if (regBokstaver.test(searchInput) || searchInput.length > 11) {
+      setSearchResult(undefined)
+      if (searchInput.length === 0) {
+        setFeilInput(false)
+      } else if (feilInput && ugyldigInput()) {
         setFeilInput(true)
-        setSearchResult(null)
       } else {
         setFeilInput(false)
-      }
-
-      if (searchInput.length === 11) {
-        getPerson(searchInput).then((result: IApiResponse<IPersonResult>) => {
-          setSearchResult(result?.data)
-        })
-      } else if (searchInput.length < 11) {
-        setSearchResult(null)
       }
     })()
   }, [searchInput])
 
   const goToPerson = () => {
     navigate(`/person/${searchInput}`)
-    setSearchResult(null)
+    setSearchResult(undefined)
   }
 
   const onEnter = (e: any) => {
     if (e.key === 'Enter') {
-      goToPerson()
+      search()
     }
   }
 
@@ -55,38 +73,49 @@ export const Search = () => {
         onChange={setSearchInput}
         onKeyUp={onEnter}
       >
-        <SearchField.Button />
+        <SearchField.Button onClick={search} />
       </SearchField>
-      {searchResult && !feilInput && (
+
+      {laster && (
         <Dropdown>
-          <span className="icon">
-            <PeopleIcon />
-          </span>
-          <SearchResult onClick={goToPerson}>
-            <div className="text">
-              {searchResult.person.fornavn} {searchResult.person.etternavn}
-            </div>
-          </SearchResult>
+          <SpinnerContent>
+            <Loader />
+            <span>Søker...</span>
+          </SpinnerContent>
         </Dropdown>
       )}
+
       {feilInput && (
         <Dropdown info={true}>
           <span className="icon">
             <InformationIcon />
           </span>
           <SearchResult>
-            <div className="text">Tast inn fødselsnummer</div>
+            <div className="text">Tast inn gyldig fødselsnummer</div>
           </SearchResult>
         </Dropdown>
       )}
 
-      {searchResult === undefined && (
+      {searchResult && !feilInput && (
+        <Dropdown>
+          <span className="icon">
+            <PeopleIcon />
+          </span>
+          <SearchResult link={true} onClick={goToPerson}>
+            <div className="text">
+              {searchResult.person.fornavn} {searchResult.person.etternavn}
+            </div>
+          </SearchResult>
+        </Dropdown>
+      )}
+
+      {error && (
         <Dropdown error={true}>
           <span className="icon">
             <ErrorIcon />
           </span>
           <SearchResult>
-            <div className="text">En feil har oppstått.</div>
+            <div className="text">{error}</div>
           </SearchResult>
         </Dropdown>
       )}
@@ -111,8 +140,9 @@ const Dropdown = styled.div<{ error?: boolean; info?: boolean }>`
   }
 `
 
-const SearchResult = styled.div`
-  cursor: pointer;
+const SearchResult = styled.div<{ link?: boolean }>`
+  cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
+
   padding: 0.5em;
   padding-left: 1em;
   align-self: center;
@@ -125,4 +155,10 @@ const SearchResult = styled.div`
   .sak {
     color: gray;
   }
+`
+
+const SpinnerContent = styled.div`
+  display: flex;
+  gap: 0.5em;
+  margin: 1em;
 `

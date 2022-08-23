@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.ktorobo
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
@@ -42,6 +43,7 @@ internal val defaultHttpClient = HttpClient() {
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class AzureAdOpenIdConfiguration(
     @JsonProperty("jwks_uri")
     val jwksUri: String,
@@ -161,6 +163,8 @@ class AzureAdClient(
             .andThen { oboAccessToken -> get(url, oboAccessToken) }
     }
 }
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class AccessToken(
     @JsonProperty("access_token")
     val accessToken: String,

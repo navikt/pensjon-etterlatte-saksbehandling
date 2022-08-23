@@ -1,41 +1,103 @@
-package testdata.features.soeknad
+package testdata.features.dolly
 
-import JsonMessage
+
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import dolly.BestillingRequest
+import dolly.DollyService
 import io.ktor.server.application.*
 import io.ktor.server.mustache.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.etterlatte.*
+import no.nav.etterlatte.batch.JsonMessage
+import no.nav.etterlatte.libs.common.toJson
 import java.time.OffsetDateTime
 import java.util.*
 
-object OpprettSoeknadFeature : TestDataFeature {
+class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
     override val beskrivelse: String
-        get() = "Opprett søknad manuelt"
+        get() = "Opprett søknad automatisk via Dolly"
     override val path: String
-        get() = "soeknad"
+        get() = "dolly"
+
     override val routes: Route.() -> Unit
         get() = {
             get {
+                val accessToken = getClientAccessToken()
+                val gruppeId = dollyService.hentTestGruppe(usernameFraToken()!!, accessToken)
+
                 call.respond(
                     MustacheContent(
-                        "soeknad/ny-soeknad.hbs",
-                        mapOf(
+                        "dolly/dolly.hbs", mapOf(
                             "beskrivelse" to beskrivelse,
-                            "path" to path
+                            "path" to path,
+                            "gruppeId" to gruppeId
                         )
                     )
                 )
             }
 
-            post {
+            get("hent-familier") {
                 try {
+                    val accessToken = getClientAccessToken()
+                    val gruppeId = call.request.queryParameters["gruppeId"]!!.toLong()
+
+                    val familier = try {
+                        dollyService.hentFamilier(gruppeId, accessToken)
+                    } catch (ex: Exception) {
+                        logger.error("Klarte ikke hente familier", ex)
+                        emptyList()
+                    }
+
+                    call.respond(familier.toJson())
+                } catch (e: Exception) {
+                    logger.error("En feil har oppstått! ", e)
+                    call.respond(
+                        MustacheContent(
+                            "error.hbs",
+                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString())
+                        )
+                    )
+                }
+            }
+
+            post("opprett-familie") {
+                call.receiveParameters().let {
+                    try {
+                        val accessToken = getClientAccessToken()
+                        val req = BestillingRequest(
+                            it["helsoesken"]!!.toInt(),
+                            it["halvsoeskenAvdoed"]!!.toInt(),
+                            it["halvsoeskenGjenlevende"]!!.toInt(),
+                            it["gruppeId"]!!.toLong()
+                        )
+
+                        dollyService.opprettBestilling(generererBestilling(req), req.gruppeId, accessToken)
+                            .also { bestilling ->
+                                logger.info("Bestilling med id ${bestilling.id} har status ${bestilling.ferdig}")
+                                call.respond(bestilling.toJson())
+                            }
+                    } catch (e: Exception) {
+                        logger.error("En feil har oppstått! ", e)
+                        call.respond(
+                            MustacheContent(
+                                "error.hbs",
+                                mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString())
+                            )
+                        )
+                    }
+                }
+            }
+
+            post("send-soeknad") {
+                try {
+                    val noekkel = UUID.randomUUID().toString()
+
                     val (partisjon, offset) = call.receiveParameters().let {
                         producer.publiser(
-                            requireNotNull(it["key"]),
+                            noekkel,
                             opprettSoeknadJson(
                                 gjenlevendeFnr = it["fnrGjenlevende"]!!,
                                 avdoedFnr = it["fnrAvdoed"]!!,
@@ -46,7 +108,8 @@ object OpprettSoeknadFeature : TestDataFeature {
                     }
                     logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
 
-                    call.respondRedirect("/$path/sendt?partisjon=$partisjon&offset=$offset")
+                    call.respond(SoeknadResponse(200, noekkel).toJson())
+
                 } catch (e: Exception) {
                     logger.error("En feil har oppstått! ", e)
 
@@ -58,25 +121,13 @@ object OpprettSoeknadFeature : TestDataFeature {
                     )
                 }
             }
-
-            get("sendt") {
-                val partisjon = call.request.queryParameters["partisjon"]!!
-                val offset = call.request.queryParameters["offset"]!!
-
-                call.respond(
-                    MustacheContent(
-                        "soeknad/soeknad-sendt.hbs",
-                        mapOf(
-                            "path" to path,
-                            "beskrivelse" to beskrivelse,
-                            "partisjon" to partisjon,
-                            "offset" to offset
-                        )
-                    )
-                )
-            }
         }
 }
+
+data class SoeknadResponse(
+    val status: Number,
+    val noekkel: String
+)
 
 private fun opprettSoeknadJson(gjenlevendeFnr: String, avdoedFnr: String, barnFnr: String): String {
     val skjemaInfo = opprettSkjemaInfo(gjenlevendeFnr, barnFnr, avdoedFnr)

@@ -1,0 +1,230 @@
+{{> ../_fragments/header }}
+
+<div class="row gy-5">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Forsiden</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Post søknad</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-6" id="opprettGruppeInfo">
+        <div class="alert alert-warning">
+            For å kunne bruke tjenesten må du først gå inn på Dolly og opprette en gruppe med navn
+            <b>etterlatte-testdata</b> <br>
+            Du kan logge inn på Dolly via:
+            <a href="https://dolly.ekstern.dev.nav.no/login">
+                https://dolly.ekstern.dev.nav.no/login
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-6" id="soeknadInnsendtAlert">
+        <div class="alert alert-success">
+        </div>
+    </div>
+</div>
+
+<div id="main-content">
+    <div class="row justify-content-center gy-5">
+        <div class="col-12 col-md-6">
+            <div class="alert alert-info">
+                Velg testfamilie for søknaden, eller opprett en ny.
+            </div>
+        </div>
+    </div>
+
+    <h2>Oversikt over familier</h2>
+
+    <div>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Avdød</th>
+                <th>Gjenlevende (innsender)</th>
+                <th>Barn</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td colspan="4" class="text-center">
+                    Du har ingen familier, vennligst opprett en nedenfor &#128106;
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="border rounded p-4 mt-4">
+        <form action="/{{ path }}" method="post" onsubmit="event.preventDefault(); opprettFamilie(event);">
+            <h3>Opprett familie &#129328;</h3>
+            <div class="mb-3">
+                En standard familie består av en avdød, en gjenlevende og et barn som vil gå gjennom fordeleren.
+            </div>
+
+            <h4 class="mb-0">Søsken</h4>
+            <small class="form-text text-muted mb-3">Du kan legge til variasjoner av søsken til barnet.</small>
+
+            <div class="row mt-3">
+                <div class="mb-3 col-md-3 form-group">
+                    <label for="helsoesken" class="form-label">Helsøsken</label>
+                    <input type="number"
+                           pattern="[0-9]+"
+                           minlength="11"
+                           maxlength="11"
+                           name="helsoesken"
+                           id="helsoesken"
+                           class="form-control"
+                           value=0
+                           required
+                    />
+                </div>
+
+                <div class="mb-3 col-md-3 form-group">
+                    <label for="halvsoeskenAvdoed" class="form-label">Halvsøsken (avdød)</label>
+                    <input type="number"
+                           pattern="[0-9]+"
+                           minlength="11"
+                           maxlength="11"
+                           name="halvsoeskenAvdoed"
+                           id="halvsoeskenAvdoed"
+                           class="form-control"
+                           value=0
+                           required
+                    />
+                </div>
+
+                <!--<div class="mb-4 col-md-3 form-group">
+                    <label for="halvsoeskenGjenlevende" class="form-label">Halvsøsken (gjenlevende)</label>
+                    <input type="number"
+                           pattern="[0-9]+"
+                           minlength="11"
+                           maxlength="11"
+                           name="halvsoeskenGjenlevende"
+                           id="halvsoeskenGjenlevende"
+                           class="form-control"
+                           value=0
+                           required
+                    />
+                </div>-->
+            </div>
+
+            <button type="submit" class="btn btn-primary">Opprett ny familie</button>
+        </form>
+    </div>
+
+</div>
+<script>
+
+    const opprettGruppeInfo = document.querySelector('#opprettGruppeInfo')
+    const mainContent = document.querySelector('#main-content')
+    const soeknadInnsendtAlert = document.querySelector('#soeknadInnsendtAlert')
+
+    soeknadInnsendtAlert.style.display = 'none'
+
+    if (!"{{gruppeId}}") {
+        opprettGruppeInfo.style.display = 'block'
+        mainContent.style.visibility = 'hidden'
+    } else {
+        opprettGruppeInfo.style.display = 'none'
+        mainContent.style.visibility = 'visible'
+        hentFamilier({{gruppeId}})
+    }
+
+    function opprettFamilie(e) {
+        try {
+            const formInputs = e.target
+            fetch('dolly/opprett-familie', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `helsoesken=${formInputs.elements['helsoesken'].value}&halvsoeskenAvdoed=${formInputs.elements['halvsoeskenAvdoed'].value}&halvsoeskenGjenlevende=0&gruppeId={{gruppeId}}`
+            }).then(() => {
+                soeknadInnsendtAlert.firstElementChild.innerHTML = `Familie opprettet! Familien vil bli hentet ut om 45 sekunder, så bare å ta seg en kaffe &#9749;`
+                soeknadInnsendtAlert.style.display = "block"
+            })
+
+            setTimeout(() => {
+                hentFamilier({{gruppeId}})
+                soeknadInnsendtAlert.style.display = "none"
+            }, 45000)
+        } catch (e) {
+            soeknadInnsendtAlert.style.display = "none"
+            console.log(e.message)
+        }
+    }
+
+    function hentFamilier(gruppeId) {
+        fetch(`dolly/hent-familier?gruppeId=${gruppeId}`).then(res => res.json()).then(data => {
+            console.log(data)
+
+            const table = document.querySelector('tbody')
+            table.innerHTML = ""
+            data.forEach((familie) => {
+                const avdoed = familie.avdoed
+                const gjenlevende = familie.gjenlevende
+                const barn = familie.barn[0]
+
+                const tableRow = document.createElement('tr')
+
+                const avdoedTableElement = document.createElement('td')
+                const gjenlevendeTableElement = document.createElement('td')
+                const barnTableElement = document.createElement('td')
+                const buttonTableElement = document.createElement('td')
+
+                const button = document.createElement('button')
+                button.classList.add('btn')
+                button.classList.add('btn-primary')
+                button.innerHTML = 'Send inn søknad for denne familien'
+                button.type = 'button'
+                button.onclick = () => sendSoeknad(avdoed, gjenlevende, barn)
+
+                avdoedTableElement.innerHTML = avdoed
+                avdoedTableElement.style.width = '300px'
+                tableRow.appendChild(avdoedTableElement)
+
+                gjenlevendeTableElement.innerHTML = gjenlevende
+                gjenlevendeTableElement.style.width = '300px'
+                tableRow.appendChild(gjenlevendeTableElement)
+
+                barnTableElement.innerHTML = barn
+                barnTableElement.style.width = '300px'
+                tableRow.appendChild(barnTableElement)
+
+                buttonTableElement.appendChild(button)
+                buttonTableElement.style.textAlign = 'center'
+                buttonTableElement.style.width = '300px'
+                tableRow.appendChild(buttonTableElement)
+
+                table.appendChild(tableRow)
+            })
+        })
+    }
+
+    const sendSoeknad = async (fnrAvdoed, fnrGjenlevende, fnrBarn) => {
+        soeknadInnsendtAlert.style.display = "none"
+        await fetch('dolly/send-soeknad', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `fnrAvdoed=${fnrAvdoed}&fnrGjenlevende=${fnrGjenlevende}&fnrBarn=${fnrBarn}`
+        }).then(res => res.json()).then(data => {
+            if ((data.status === 200)) {
+                soeknadInnsendtAlert.firstElementChild.innerHTML = `Søknad er innsendt og registrert med nøkkel: ${data.noekkel}`
+                soeknadInnsendtAlert.style.display = "block"
+            }
+        });
+    }
+
+</script>
+
+{{> ../_fragments/footer }}

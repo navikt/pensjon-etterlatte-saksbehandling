@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { formaterEnumTilLesbarString } from '../../utils/formattering'
 
 export enum ISaksType {
   BARNEPENSJON = 'barnepensjon',
@@ -6,21 +7,21 @@ export enum ISaksType {
 }
 
 const colors = {
-  [ISaksType.BARNEPENSJON]: '#CCE1FF',
-  [ISaksType.GJENLEVENDEPENSJON]: '66A3C4',
+  [ISaksType.BARNEPENSJON]: '#5da499',
+  [ISaksType.GJENLEVENDEPENSJON]: '#337885',
 }
 
-export const SaksTypeSmall: React.FC<{ type: ISaksType }> = ({ type }) => {
-  return <SaksTypeWrapSmall type={type}>{type}</SaksTypeWrapSmall>
+export const SaksType: React.FC<{ type: ISaksType }> = ({ type }) => {
+  return <SaksTypeColorTag type={type}>{formaterEnumTilLesbarString(type)}</SaksTypeColorTag>
 }
 
-export const SaksTypeWrapSmall = styled.div<{ type: ISaksType }>`
+export const SaksTypeColorTag = styled.div<{ type: ISaksType }>`
   background-color: ${(props) => colors[props.type]};
-  padding: 0.1em 0.5em;
-  text-align: center;
+  padding: 0.2em 1em;
+  color: #fff;
   border-radius: 15px;
-  font-size: 14px;
-  text-transform: capitalize;
+  font-size: 0.8em;
+  width: fit-content;
   float: right;
   margin-left: 0.7em;
   margin-right: 0.5em;

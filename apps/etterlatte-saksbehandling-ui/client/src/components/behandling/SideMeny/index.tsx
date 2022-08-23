@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
 import { IBehandlingInfo } from './types'
-import { IBehandlingsType } from '../behandlingsType'
 import { AppContext } from '../../../store/AppContext'
 import { BehandlingInfo } from '../attestering'
 import { IHendelseType } from '../../../store/reducers/BehandlingReducer'
@@ -19,7 +18,7 @@ export const SideMeny = () => {
 
     behandling &&
       setBehandlingsinfo({
-        type: IBehandlingsType.FØRSTEGANGSBEHANDLING,
+        type: behandling.behandlingType,
         status: behandling.status,
         saksbehandler: behandling.saksbehandlerId,
         attestant: behandling.attestant,

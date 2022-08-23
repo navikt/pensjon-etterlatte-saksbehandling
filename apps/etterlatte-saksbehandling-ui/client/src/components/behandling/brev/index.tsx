@@ -5,8 +5,8 @@ import BrevModal from './brev-modal'
 import { Information, Success } from '@navikt/ds-icons'
 import NyttBrev from './nytt-brev/nytt-brev'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
-import { BehandlingsTypeSmall, IBehandlingsType } from '../behandlingsType'
-import { SaksTypeSmall, ISaksType } from '../saksType'
+import { BehandlingsType } from '../behandlingsType'
+import { SaksType, ISaksType } from '../saksType'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { ferdigstillBrev, hentBrevForBehandling, hentInnkommendeBrev, slettBrev } from '../../../shared/api/brev'
 import { useParams } from 'react-router-dom'
@@ -26,7 +26,7 @@ const IngenInnkommendeBrevRad = styled.td`
 
 export const Brev = () => {
   const { behandlingId } = useParams()
-  const { soeknadMottattDato, kommerSoekerTilgode } = useContext(AppContext).state.behandlingReducer
+  const { soeknadMottattDato, kommerSoekerTilgode, behandlingType } = useContext(AppContext).state.behandlingReducer
   const fnr = kommerSoekerTilgode?.familieforhold?.soeker?.fnr || ''
 
   const [brevListe, setBrevListe] = useState<any[]>([])
@@ -117,8 +117,8 @@ export const Brev = () => {
             Brev-oversikt
           </Heading>
           <div className="details">
-            <BehandlingsTypeSmall status={IBehandlingsType.FØRSTEGANGSBEHANDLING} />
-            <SaksTypeSmall type={ISaksType.BARNEPENSJON} />
+            <BehandlingsType type={behandlingType} />
+            <SaksType type={ISaksType.BARNEPENSJON} />
           </div>
         </HeadingWrapper>
         <Soeknadsdato mottattDato={soeknadMottattDato} />

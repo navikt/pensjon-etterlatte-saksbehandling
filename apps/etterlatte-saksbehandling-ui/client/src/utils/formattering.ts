@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 
-export const upperCaseFirst = (string: string): string => {
+export const formaterEnumTilLesbarString = (string: string): string => {
   const lower = string.toLowerCase()
   const storForbokstav = lower.charAt(0).toUpperCase() + lower.slice(1)
   return storForbokstav.replace('_', ' ')

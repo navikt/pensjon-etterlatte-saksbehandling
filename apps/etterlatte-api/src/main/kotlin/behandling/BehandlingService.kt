@@ -82,7 +82,8 @@ class BehandlingService(
             virkningstidspunkt = vedtak.await().virkningsDato,
             status = behandling.await().status,
             hendelser = hendelser.await().hendelser,
-            familieforhold = Familieforhold(avdoed.await(), gjenlevende.await())
+            familieforhold = Familieforhold(avdoed.await(), gjenlevende.await()),
+            behandlingType = behandling.await().behandlingType
         )
     }
 

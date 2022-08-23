@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Next } from '@navikt/ds-icons'
 import { IBehandlingsammendrag } from './typer'
 import { useNavigate } from 'react-router-dom'
-import { upperCaseFirst } from '../../utils/formattering'
+import { formaterEnumTilLesbarString } from '../../utils/formattering'
 
 export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandlingsammendrag[] | undefined }) => {
   const navigate = useNavigate()
@@ -31,12 +31,12 @@ export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandling
 
           <div>
             <Col>Gjelder</Col>
-            <Value>{upperCaseFirst(sisteBehandling?.behandlingType)}</Value>
+            <Value>{formaterEnumTilLesbarString(sisteBehandling?.behandlingType)}</Value>
           </div>
 
           <div>
             <Col>Status</Col>
-            <Value>{upperCaseFirst(sisteBehandling.status)}</Value>
+            <Value>{formaterEnumTilLesbarString(sisteBehandling.status)}</Value>
           </div>
 
           <IconButton onClick={() => goToBehandling(sisteBehandling.id.toString())}>

@@ -1,40 +1,22 @@
 import styled from 'styled-components'
-
-export enum IBehandlingsType {
-  FØRSTEGANGSBEHANDLING = 'FØRSTEGANGSBEHANDLING',
-  REVURDERING = 'REVURDERING',
-}
+import { formaterEnumTilLesbarString } from '../../utils/formattering'
+import { IBehandlingsType } from '../../store/reducers/BehandlingReducer'
 
 const colors = {
-  [IBehandlingsType.FØRSTEGANGSBEHANDLING]: '#99DEAD',
-  [IBehandlingsType.REVURDERING]: '#A18DBB',
+  [IBehandlingsType.FØRSTEGANGSBEHANDLING]: '#826ba1',
+  [IBehandlingsType.REVURDERING]: '#c48bbf',
 }
 
-export const BehandlingsType: React.FC<{ status: IBehandlingsType }> = ({ status }) => {
-  return <BehandlingsTypeWrap status={status}>{status}</BehandlingsTypeWrap>
+export const BehandlingsType: React.FC<{ type: IBehandlingsType }> = ({ type }) => {
+  return <BehandlingsTypeColorTag type={type}>{formaterEnumTilLesbarString(type)}</BehandlingsTypeColorTag>
 }
 
-const BehandlingsTypeWrap = styled.div<{ status: IBehandlingsType }>`
-  background-color: ${(props) => colors[props.status]};
-  padding: 0.2em 2em;
+export const BehandlingsTypeColorTag = styled.div<{ type: IBehandlingsType }>`
+  background-color: ${(props) => colors[props.type]};
+  padding: 0.2em 1em;
   color: #fff;
-  text-align: center;
   border-radius: 15px;
-  text-transform: uppercase;
   font-size: 0.8em;
-`
-
-export const BehandlingsTypeSmall: React.FC<{ status: IBehandlingsType }> = ({ status }) => {
-  return <BehandlingsTypeWrapSmall status={status}>{status}</BehandlingsTypeWrapSmall>
-}
-
-export const BehandlingsTypeWrapSmall = styled.div<{ status: IBehandlingsType }>`
-  background-color: ${(props) => colors[props.status]};
-  padding: 0.1em 0.5em;
-  text-align: center;
-  border-radius: 15px;
-  font-size: 14px;
-  text-transform: capitalize;
-
+  width: fit-content;
   float: right;
 `

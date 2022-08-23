@@ -18,6 +18,7 @@ export interface IDetaljertBehandling {
   status: IBehandlingStatus
   hendelser: IHendelse[]
   familieforhold?: IFamilieforhold
+  behandlingType: IBehandlingsType
 }
 
 export interface IHendelse {
@@ -38,6 +39,11 @@ export enum IHendelseType {
   VEDTAK_FATTET = 'VEDTAK:FATTET',
   VEDTAK_UNDERKJENT = 'VEDTAK:UNDERKJENT',
   VEDTAK_ATTESTERT = 'VEDTAK:ATTESTERT',
+}
+
+export enum IBehandlingsType {
+  FØRSTEGANGSBEHANDLING = 'FØRSTEGANGSBEHANDLING',
+  REVURDERING = 'REVURDERING',
 }
 
 export enum IBehandlingStatus {
@@ -325,6 +331,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   virkningstidspunkt: '',
   hendelser: [],
   familieforhold: undefined,
+  behandlingType: IBehandlingsType.FØRSTEGANGSBEHANDLING,
 }
 
 export const addBehandlingAction = (data: IDetaljertBehandling) => ({ type: 'add_behandling', data })

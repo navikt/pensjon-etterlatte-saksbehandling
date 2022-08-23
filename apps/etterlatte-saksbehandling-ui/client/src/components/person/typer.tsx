@@ -1,5 +1,4 @@
-import { IBehandlingStatus } from '../../store/reducers/BehandlingReducer'
-import { IBehandlingsType } from '../behandling/behandlingsType'
+import { IBehandlingStatus, IBehandlingsType } from '../../store/reducers/BehandlingReducer'
 
 export interface Dokument {
   dato: string

@@ -2,6 +2,7 @@ package no.nav.etterlatte.saksbehandling.api.typer.klientside
 
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -31,7 +32,8 @@ data class DetaljertBehandlingDto(
     val virkningstidspunkt: LocalDate?,
     val status: BehandlingStatus?,
     val hendelser: List<LagretHendelse>?,
-    val familieforhold: Familieforhold?
+    val familieforhold: Familieforhold?,
+    val behandlingType: BehandlingType?
 )
 
 data class Familieforhold(

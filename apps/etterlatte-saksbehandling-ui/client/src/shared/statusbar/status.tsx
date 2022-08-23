@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { upperCaseFirst } from '../../utils/formattering'
+import { formaterEnumTilLesbarString } from '../../utils/formattering'
 import { PersonStatus } from '../../components/behandling/types'
 
 export interface IStatus {
@@ -7,10 +7,10 @@ export interface IStatus {
   dato: String
 }
 
-export const Status = (props: {value: IStatus}) => {
+export const Status = (props: { value: IStatus }) => {
   return (
     <StatusWrap>
-      {upperCaseFirst(props.value.status)} {props.value.dato}
+      {formaterEnumTilLesbarString(props.value.status)} {props.value.dato}
     </StatusWrap>
   )
 }

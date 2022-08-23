@@ -1,7 +1,7 @@
 import { Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { AarsaksTyper, IBehandlingsammendrag } from './typer'
-import { formaterStringDato, upperCaseFirst } from '../../utils/formattering'
+import { formaterStringDato, formaterEnumTilLesbarString } from '../../utils/formattering'
 
 const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Vedtaksdato', 'Resultat']
 
@@ -30,10 +30,12 @@ export const Saksliste = ({
                 {formaterStringDato(behandling.behandlingOpprettet)}
               </Table.DataCell>
               <Table.DataCell key={`data${behandling.behandlingType}`}>
-                {upperCaseFirst(behandling.behandlingType)}
+                {formaterEnumTilLesbarString(behandling.behandlingType)}
               </Table.DataCell>
               <Table.DataCell key={`data${behandling.aarsak}`}>{mapAarrsak(behandling.aarsak)}</Table.DataCell>
-              <Table.DataCell key={`data${behandling.status}`}>{upperCaseFirst(behandling.status)}</Table.DataCell>
+              <Table.DataCell key={`data${behandling.status}`}>
+                {formaterEnumTilLesbarString(behandling.status)}
+              </Table.DataCell>
               <Table.DataCell key={'vedtaksdato'}>Vedtaksdato her</Table.DataCell>
               <Table.DataCell key={i}>
                 <Link onClick={() => goToBehandling(behandling.id.toString())}>Gå til behandling</Link>

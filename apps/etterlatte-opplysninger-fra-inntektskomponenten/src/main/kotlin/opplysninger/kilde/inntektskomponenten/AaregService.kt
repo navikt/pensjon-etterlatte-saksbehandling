@@ -2,8 +2,8 @@ package no.nav.etterlatte.opplysninger.kilde.inntektskomponenten
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
@@ -16,7 +16,7 @@ class AaregService(private val aaregClient: HttpClient, private val url: String)
     private val logger = LoggerFactory.getLogger(AaregService::class.java)
     override fun hentArbeidsforhold(fnr: Foedselsnummer): List<AaregResponse> = runBlocking {
         try {
-            aaregClient.post(url) {
+            aaregClient.get(url) {
                 contentType(ContentType.Application.Json)
                 header("Nav-Personident", fnr.value)
             }.body()

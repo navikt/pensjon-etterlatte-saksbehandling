@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.inntekt.UtbetaltPeriode
 import no.nav.etterlatte.libs.common.objectMapper
 import java.time.YearMonth
 import java.util.*
-import kotlin.collections.ArrayList
 
 class OpplysningsByggerService : OpplysningsBygger {
 
@@ -21,21 +20,18 @@ class OpplysningsByggerService : OpplysningsBygger {
         inntektsKomponentenResponse: InntektsKomponentenResponse,
         arbeidsforholdListe: List<AaregResponse>
     ): List<Grunnlagsopplysning<out Any>> {
-        val opplysninger = ArrayList<Grunnlagsopplysning<out Any>>()
+        val pensjonUforeOpplysning = inntektsKomponentenResponse.arbeidsInntektMaaned?.let { inntekter ->
+            val uforetrygd = mapToPeriode(inntekter.filtrertPaaType("ufoeretrygd"))
+            val alderspensjon = mapToPeriode(inntekter.filtrertPaaType("alderspensjon"))
 
-        if (inntektsKomponentenResponse.arbeidsInntektMaaned != null) {
-            val uforetrygd = mapToPeriode(harFaattUforetrygd(inntektsKomponentenResponse.arbeidsInntektMaaned))
-            val alderspensjon = mapToPeriode(harFaattAlderspensjon(inntektsKomponentenResponse.arbeidsInntektMaaned))
-            opplysninger.add(
-                lagOpplysning(
-                    Opplysningstyper.PENSJON_UFORE_V1,
-                    Grunnlagsopplysning.Inntektskomponenten("Inntektskomponenten"),
-                    PensjonUforeOpplysning(uforetrygd, alderspensjon)
-                )
+            lagOpplysning(
+                opplysningsType = Opplysningstyper.PENSJON_UFORE_V1,
+                kilde = Grunnlagsopplysning.Inntektskomponenten("Inntektskomponenten"),
+                opplysning = PensjonUforeOpplysning(uforetrygd, alderspensjon)
             )
         }
 
-        if (arbeidsforholdListe.isNotEmpty()) {
+        val arbeidsforholdOpplysning = if (arbeidsforholdListe.isNotEmpty()) {
             val arbeidsforhold = arbeidsforholdListe.map { t ->
                 ArbeidsForhold(
                     t.type,
@@ -46,43 +42,20 @@ class OpplysningsByggerService : OpplysningsBygger {
                     t.ansettelsesperiode
                 )
             }
-            val arbeidsForholdOpplysning = ArbeidsforholdOpplysning(arbeidsforhold)
-            opplysninger.add(
-                lagOpplysning(
-                    Opplysningstyper.ARBEIDSFORHOLD_V1,
-                    Grunnlagsopplysning.Aregisteret("Aareg"),
-                    arbeidsForholdOpplysning
-                )
+            lagOpplysning(
+                Opplysningstyper.ARBEIDSFORHOLD_V1,
+                Grunnlagsopplysning.Aregisteret("Aareg"),
+                ArbeidsforholdOpplysning(arbeidsforhold)
             )
-        }
-        return opplysninger
-    }
+        } else null
 
-    fun harFaattAlderspensjon(arbeidsInntektListe: List<ArbeidsInntektMaaned>): List<Inntekt> {
-        val inntektListe = arrayListOf<Inntekt>()
-
-        arbeidsInntektListe.forEach { inntektMaaned ->
-            inntektMaaned.arbeidsInntektInformasjon.inntektListe?.forEach { inntekt ->
-                if (inntekt.beskrivelse == "alderspensjon") {
-                    inntektListe.add(inntekt)
-                }
-            }
-        }
-        return inntektListe
-    }
-
-    fun harFaattUforetrygd(arbeidsInntektListe: List<ArbeidsInntektMaaned>): List<Inntekt> {
-        val inntektListe = arrayListOf<Inntekt>()
-        arbeidsInntektListe.forEach { inntektMaaned ->
-            inntektMaaned.arbeidsInntektInformasjon.inntektListe?.forEach { inntekt ->
-                if (inntekt.beskrivelse == "ufoeretrygd") {
-                    inntektListe.add(inntekt)
-                }
-            }
-        }
-        return inntektListe
+        return listOfNotNull(pensjonUforeOpplysning, arbeidsforholdOpplysning)
     }
 }
+
+fun List<ArbeidsInntektMaaned>.filtrertPaaType(beskrivelse: String) = this.mapNotNull { arbeidsinntekt ->
+    arbeidsinntekt.arbeidsInntektInformasjon.inntektListe?.filter { it.beskrivelse == beskrivelse }
+}.flatten()
 
 fun <T> lagOpplysning(
     opplysningsType: Opplysningstyper,
@@ -98,8 +71,6 @@ fun <T> lagOpplysning(
     )
 }
 
-fun mapToPeriode(liste: List<Inntekt>): List<UtbetaltPeriode> {
-    return liste.map {
-        UtbetaltPeriode(YearMonth.parse(it.utbetaltIMaaned), it.beloep)
-    }
+fun mapToPeriode(liste: List<Inntekt>): List<UtbetaltPeriode> = liste.map {
+    UtbetaltPeriode(YearMonth.parse(it.utbetaltIMaaned), it.beloep)
 }

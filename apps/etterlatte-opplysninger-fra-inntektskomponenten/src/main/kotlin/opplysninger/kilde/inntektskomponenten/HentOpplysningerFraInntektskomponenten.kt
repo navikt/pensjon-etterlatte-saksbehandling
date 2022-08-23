@@ -37,11 +37,7 @@ internal class HentOpplysningerFraInntektskomponenten(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            if (packet["@behov"].asText() in listOf(
-                    Opplysningstyper.AVDOED_INNTEKT_V1.name
-                )
-            ) {
-                // print("fnr ${packet["fnr"].asText()} - doedsdato ${packet["doedsdato"].asText()}")
+            if (packet["@behov"].asText() in listOf(Opplysningstyper.AVDOED_INNTEKT_V1.name)) {
                 try {
                     val fnr = Foedselsnummer.of(packet["fnr"].asText())
                     val doedsdato = LocalDate.parse(packet["doedsdato"].asText())

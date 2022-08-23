@@ -13,32 +13,29 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 
-class InntektsKomponentenService(private val inntektskomponentenClient: HttpClient, private val url: String) :
-    InntektsKomponenten {
+class InntektsKomponentenService(
+    private val inntektskomponentenClient: HttpClient,
+    private val url: String
+) : InntektsKomponenten {
     private val logger = LoggerFactory.getLogger(InntektsKomponentenService::class.java)
 
     override fun hentInntektListe(fnr: Foedselsnummer, doedsdato: LocalDate): InntektsKomponentenResponse {
         logger.info("Henter inntektliste fra inntektskomponenten")
 
-        YearMonth.from(doedsdato)
-
-        val hentInntektlisteRequest =
-            HentInntektListeRequestBody(
-                InntektListeIdent(fnr.value, "NATURLIG_IDENT"),
-                "Etterlatteytelser",
-                YearMonth.from(doedsdato.minusYears(5)).toString(),
-                YearMonth.from(doedsdato).toString(),
-                "Etterlatteytelser"
-            )
+        val hentInntektlisteRequest = HentInntektListeRequestBody(
+            ident = InntektListeIdent(fnr.value, "NATURLIG_IDENT"),
+            ainntektsfilter = "Etterlatteytelser",
+            maanedFom = YearMonth.from(doedsdato.minusYears(5)).toString(),
+            maanedTom = YearMonth.from(doedsdato).toString(),
+            formaal = "Etterlatteytelser"
+        )
 
         // Her må det muligens gjøres ett kall pr år. PGA tregheter mot eksterne systemer. Vi får bare teste
-        val inntektsListe = runBlocking {
+        return runBlocking {
             inntektskomponentenClient.post(url) {
                 contentType(ContentType.Application.Json)
                 setBody(hentInntektlisteRequest)
-            }.body<InntektsKomponentenResponse>()
+            }.body()
         }
-
-        return inntektsListe
     }
 }

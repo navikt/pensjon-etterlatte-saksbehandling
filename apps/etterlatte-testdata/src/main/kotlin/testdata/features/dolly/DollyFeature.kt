@@ -11,7 +11,6 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.etterlatte.*
-import no.nav.etterlatte.batch.JsonMessage
 import no.nav.etterlatte.libs.common.toJson
 import java.time.OffsetDateTime
 import java.util.*

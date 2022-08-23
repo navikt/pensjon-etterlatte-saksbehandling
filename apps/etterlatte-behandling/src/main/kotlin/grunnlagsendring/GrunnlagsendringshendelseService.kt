@@ -131,12 +131,14 @@ class GrunnlagsendringshendelseService(
                                 "Forkaster hendelse"
                         )
                             .also {
-                                grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
-                                    listOf(endringsHendelse.sakId),
-                                    GrunnlagsendringStatus.IKKE_VURDERT,
-                                    GrunnlagsendringStatus.FORKASTET,
-                                    GrunnlagsendringsType.SOEKER_DOED
-                                )
+                                inTransaction {
+                                    grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
+                                        listOf(endringsHendelse.sakId),
+                                        GrunnlagsendringStatus.IKKE_VURDERT,
+                                        GrunnlagsendringStatus.FORKASTET,
+                                        GrunnlagsendringsType.SOEKER_DOED
+                                    )
+                                }
                             }
                 }
                 else -> {} // ikke haandtert

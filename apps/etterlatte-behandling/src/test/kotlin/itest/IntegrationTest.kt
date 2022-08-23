@@ -189,7 +189,7 @@ class ApplicationTest {
                 assertEquals(behandlingId, oppgaver.oppgaver.first().behandlingId)
             }
 
-            client.post("/grunnlagsendringshendelse/doedshendelse/") {
+            client.post("/grunnlagsendringshendelse/doedshendelse") {
                 addAuthServiceBruker()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(Doedshendelse("søker", LocalDate.now(), Endringstype.OPPRETTET))
@@ -197,7 +197,7 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.post("/grunnlagsendringshendelse/doedshendelse/") {
+            client.post("/grunnlagsendringshendelse/doedshendelse") {
                 addAuthServiceBruker()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(Doedshendelse("søker", LocalDate.now(), Endringstype.OPPRETTET))

@@ -4,6 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
@@ -32,10 +33,14 @@ class InntektsKomponentenService(
 
         // Her må det muligens gjøres ett kall pr år. PGA tregheter mot eksterne systemer. Vi får bare teste
         return runBlocking {
-            inntektskomponentenClient.post(url) {
+            val response = inntektskomponentenClient.post(url) {
                 contentType(ContentType.Application.Json)
                 setBody(hentInntektlisteRequest)
-            }.body()
+            }
+
+            logger.info("hentInntektListe: " + response.bodyAsText())
+
+            response.body()
         }
     }
 }

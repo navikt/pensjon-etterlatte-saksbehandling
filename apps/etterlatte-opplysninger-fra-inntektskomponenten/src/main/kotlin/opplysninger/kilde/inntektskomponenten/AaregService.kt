@@ -4,6 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
@@ -16,10 +17,14 @@ class AaregService(private val aaregClient: HttpClient, private val url: String)
     private val logger = LoggerFactory.getLogger(AaregService::class.java)
     override fun hentArbeidsforhold(fnr: Foedselsnummer): List<AaregResponse> = runBlocking {
         try {
-            aaregClient.get(url) {
+            val response = aaregClient.get(url) {
                 contentType(ContentType.Application.Json)
                 header("Nav-Personident", fnr.value)
-            }.body()
+            }
+
+            logger.info("hentArbeidsforhold: " + response.bodyAsText())
+
+            response.body()
         } catch (e: Exception) {
             logger.error("Klarte ikke å hente ut arbeidsforhold", e)
             return@runBlocking emptyList()

@@ -1,12 +1,24 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asContextElement
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.common.LeaderElection
+import no.nav.etterlatte.database.DatabaseContext
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import org.slf4j.LoggerFactory
 import java.time.Duration
+import javax.sql.DataSource
 import kotlin.concurrent.fixedRateTimer
 
 class GrunnlagsendringshendelseJob(
+    private val datasource: DataSource,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     private val leaderElection: LeaderElection,
     private val initialDelay: Long,
@@ -27,12 +39,16 @@ class GrunnlagsendringshendelseJob(
                     "Forbereder GrunnlagsendringshendelseJob med jobbavn: $jobbNavn, initialDelay: $initialDelay og " +
                         "periode i ms: ${periode.toMillis()}"
                 )
-                SjekkKlareGrunnlagsendringshendelser(
-                    grunnlagsendringshendelseService = grunnlagsendringshendelseService,
-                    leaderElection = leaderElection,
-                    jobbNavn = jobbNavn!!,
-                    minutterGamleHendelser = minutterGamleHendelser
-                ).run()
+
+                runBlocking {
+                    SjekkKlareGrunnlagsendringshendelser(
+                        grunnlagsendringshendelseService = grunnlagsendringshendelseService,
+                        leaderElection = leaderElection,
+                        jobbNavn = jobbNavn!!,
+                        minutterGamleHendelser = minutterGamleHendelser,
+                        datasource = datasource
+                    ).run()
+                }
             } catch (throwable: Throwable) {
                 logger.error("Jobb for aa sjekke klare grunnlagsendringshendelser feilet", throwable)
             }
@@ -42,18 +58,33 @@ class GrunnlagsendringshendelseJob(
         val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
         val leaderElection: LeaderElection,
         val jobbNavn: String,
-        val minutterGamleHendelser: Long
+        val minutterGamleHendelser: Long,
+        val datasource: DataSource
     ) {
         private val log = LoggerFactory.getLogger(this::class.java)
 
-        fun run() {
-            withLogContext {
-                if (leaderElection.isLeader()) {
+        suspend fun run() {
+            if (leaderElection.isLeader()) {
+                withLogContext {
                     log.info("Starter jobb: $jobbNavn")
-                    grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(minutterGamleHendelser)
-                } else {
-                    log.info("Ikke leader, saa kjoerer ikke jobb.")
                 }
+                coroutineScope {
+                    launch {
+                        withContext(
+                            Dispatchers.Default + Kontekst.asContextElement(
+                                value = Context(Self("GrunnlagsendringshendelseJob"), DatabaseContext(datasource))
+                            )
+                        ) {
+                            withLogContext {
+                                grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(
+                                    minutterGamleHendelser
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                withLogContext { log.info("Ikke leader, saa kjoerer ikke jobb.") }
             }
         }
     }

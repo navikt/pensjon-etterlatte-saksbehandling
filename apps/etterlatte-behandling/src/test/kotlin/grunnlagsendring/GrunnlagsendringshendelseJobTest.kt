@@ -1,8 +1,10 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import com.zaxxer.hikari.HikariDataSource
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.common.LeaderElection
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -14,20 +16,22 @@ internal class GrunnlagsendringshendelseJobTest {
         every { sjekkKlareGrunnlagsendringshendelser(any()) } returns Unit
     }
     private val leaderElection: LeaderElection = mockk()
+    private val dataSource = mockk<HikariDataSource>()
     private val grunnlagsendringshendelseJob = GrunnlagsendringshendelseJob.SjekkKlareGrunnlagsendringshendelser(
         grunnlagsendringshendelseService = grunnlagsendringshendelseService,
         leaderElection = leaderElection,
         jobbNavn = "jobb",
-        minutterGamleHendelser = 1L
+        minutterGamleHendelser = 1L,
+        datasource = dataSource
     )
 
     @Test
     fun `skal ikke utfoere jobb siden pod ikke er leader`() {
         every { leaderElection.isLeader() } returns false
 
-        grunnlagsendringshendelseJob.run()
+        runBlocking { grunnlagsendringshendelseJob.run() }
 
-        verify(exactly = 0) { grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(any()) }
+        coVerify(exactly = 0) { grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(any()) }
         assertFalse(leaderElection.isLeader())
     }
 
@@ -36,9 +40,9 @@ internal class GrunnlagsendringshendelseJobTest {
         every { leaderElection.isLeader() } returns true
         every { grunnlagsendringshendelseService.sjekkKlareDoedshendelser(any()) } returns Unit
 
-        grunnlagsendringshendelseJob.run()
+        runBlocking { grunnlagsendringshendelseJob.run() }
 
-        verify(exactly = 1) { grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(any()) }
+        coVerify(exactly = 1) { grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(any()) }
         assertTrue(leaderElection.isLeader())
     }
 }

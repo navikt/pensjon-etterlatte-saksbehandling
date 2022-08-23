@@ -22,6 +22,7 @@ class DataSourceBuilder(private val env: Map<String, String>) {
     }
 
     val dataSource: DataSource
+
     init {
         if (!env.containsKey("DB_JDBC_URL")) {
             checkNotNull(env["DB_USERNAME"]) { "username must be set when vault is disabled" }

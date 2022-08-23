@@ -134,6 +134,7 @@ abstract class CommonFactory : BeanFactory {
         )
 
     override fun grunnlagsendringshendelseJob() = GrunnlagsendringshendelseJob(
+        datasource = datasourceBuilder().dataSource,
         grunnlagsendringshendelseService = grunnlagsendringshendelseService(),
         leaderElection = leaderElection(),
         initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
@@ -183,6 +184,7 @@ class EnvBasedBeanFactory(val env: Map<String, String>) : CommonFactory() {
                 ", minutterGamleHendelser: ${env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong()} "
         )
         return GrunnlagsendringshendelseJob(
+            datasource = datasourceBuilder().dataSource,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService(),
             leaderElection = leaderElection(),
             initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),

@@ -208,10 +208,16 @@ internal class DBTest {
     fun `kan lagre å hente alle vedtak`() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
-        lagreNyttVilkaarsresultat(vedtaksvurderingService, "1", UUID.randomUUID())
-        lagreNyttVilkaarsresultat(vedtaksvurderingService, "2", UUID.randomUUID())
-        lagreNyttVilkaarsresultat(vedtaksvurderingService, "3", UUID.randomUUID())
-        Assertions.assertEquals(vedtaksvurderingService.hentAlleVedtak().size, 3)
+
+        val uuid1 = UUID.randomUUID()
+        val uuid2 = UUID.randomUUID()
+        val uuid3 = UUID.randomUUID()
+
+        lagreNyttVilkaarsresultat(vedtaksvurderingService, "1", uuid1)
+        lagreNyttVilkaarsresultat(vedtaksvurderingService, "2", uuid2)
+        lagreNyttVilkaarsresultat(vedtaksvurderingService, "3", uuid3)
+
+        Assertions.assertEquals(3, vedtaksvurderingService.hentVedtakBolk(listOf(uuid1, uuid2, uuid3)).size)
     }
     private fun lagreNyttVilkaarsresultat(service: VedtaksvurderingService, sakId: String, behandlingId: UUID) {
         service.lagreVilkaarsresultat(

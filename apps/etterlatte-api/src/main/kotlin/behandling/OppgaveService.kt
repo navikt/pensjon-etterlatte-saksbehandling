@@ -35,28 +35,32 @@ class OppgaveService(private val behandlingKlient: BehandlingKlient, private val
     suspend fun hentAlleOppgaver(accessToken: String): Oppgaver {
         logger.info("Henter alle oppgaver")
 
-        val vedtakListe = vedtakKlient.hentAlleVedtak(accessToken).associateBy { it.behandlingId }
-        val oppgaver = behandlingKlient.hentOppgaver(accessToken).oppgaver
-            .map { oppgave ->
+        val behandlingsoppgaver = behandlingKlient.hentOppgaver(accessToken).oppgaver
+        val vedtakListe = vedtakKlient.hentVedtakBolk(
+            behandlingsidenter = behandlingsoppgaver.map { it.behandlingId.toString() },
+            accessToken = accessToken
+        ).associateBy { it.behandlingId }
+
+        return Oppgaver(
+            behandlingsoppgaver.map {
                 Oppgave(
-                    behandlingsId = oppgave.behandlingId,
-                    sakId = oppgave.sak.id,
-                    status = oppgave.behandlingStatus,
-                    oppgaveStatus = oppgave.oppgaveStatus,
-                    soeknadType = oppgave.sak.sakType,
-                    behandlingType = oppgave.behandlingsType,
-                    regdato = oppgave.regdato.toLocalDateTime().toString(),
-                    fristdato = oppgave.fristDato.atStartOfDay().toString(),
-                    fnr = oppgave.sak.ident,
+                    behandlingsId = it.behandlingId,
+                    sakId = it.sak.id,
+                    status = it.behandlingStatus,
+                    oppgaveStatus = it.oppgaveStatus,
+                    soeknadType = it.sak.sakType,
+                    behandlingType = it.behandlingsType,
+                    regdato = it.regdato.toLocalDateTime().toString(),
+                    fristdato = it.fristDato.atStartOfDay().toString(),
+                    fnr = it.sak.ident,
                     beskrivelse = "",
                     saksbehandler = "",
                     handling = Handling.BEHANDLE,
-                    antallSoesken = vedtakListe[oppgave.behandlingId]!!.kommerSoekerTilgodeResultat?.familieforhold
+                    antallSoesken = vedtakListe[it.behandlingId]?.kommerSoekerTilgodeResultat?.familieforhold
                         ?.let { familieforhold -> hentAntallSøsken(familieforhold) }
                 )
             }
-
-        return Oppgaver(oppgaver)
+        )
     }
 }
 

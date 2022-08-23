@@ -158,10 +158,13 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
-    fun hentAlleVedtak(): List<Vedtak> {
+    fun hentVedtakBolk(behandlingsidenter: List<UUID>): List<Vedtak> {
         logger.info("Henter alle vedtak")
+
         return connection.use {
-            val statement = it.prepareStatement(Queries.hentAlleVedtak)
+            val identer = it.createArrayOf("uuid", behandlingsidenter.toTypedArray())
+            val statement = it.prepareStatement(Queries.hentVedtakBolk)
+            statement.setArray(1, identer)
             statement.executeQuery().toList { toVedtak() }
         }
     }
@@ -384,10 +387,10 @@ private object Queries {
     val underkjennVedtak =
         "UPDATE vedtak SET attestant = null, datoAttestert = null, saksbehandlerId = null, vedtakfattet = false, datoFattet = null, vedtakstatus = ? WHERE sakId = ? AND behandlingId = ?" // ktlint-disable max-line-length
 
-    val hentAlleVedtak =
+    val hentVedtakBolk =
         "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat," +
             "kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant," +
-            "datoVirkFom, vedtakstatus, saktype FROM vedtak"
+            "datoVirkFom, vedtakstatus, saktype FROM vedtak where behandlingId = ANY(?)"
     val hentVedtak =
         "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype FROM vedtak WHERE sakId = ? AND behandlingId = ?" // ktlint-disable max-line-length
     val hentVedtakForBehandling =

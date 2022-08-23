@@ -19,7 +19,7 @@ import java.util.*
 
 interface EtterlatteVedtak {
     suspend fun hentVedtak(behandlingId: String, accessToken: String): Vedtak
-    suspend fun hentAlleVedtak(accessToken: String): List<Vedtak>
+    suspend fun hentVedtakBolk(behandlingsidenter: List<String>, accessToken: String): List<Vedtak>
 }
 
 class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
@@ -50,16 +50,21 @@ class VedtakKlient(config: Config, httpClient: HttpClient) : EtterlatteVedtak {
         }
     }
 
-    override suspend fun hentAlleVedtak(accessToken: String): List<Vedtak> {
+    override suspend fun hentVedtakBolk(behandlingsidenter: List<String>, accessToken: String): List<Vedtak> {
+        logger.info("Henter vedtak bolk")
         try {
-            val json = downstreamResourceClient.get(Resource(clientId, "$resourceUrl/api/vedtak"), accessToken)
+            val json = downstreamResourceClient.post(
+                Resource(clientId, "$resourceUrl/api/vedtak"),
+                accessToken,
+                VedtakBolkRequest(behandlingsidenter)
+            )
                 .mapBoth(
                     success = { json -> json },
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
-            return objectMapper.readValue(json.toString())
+            return objectMapper.readValue<VedtakBolkResponse>(json.toString()).vedtak
         } catch (e: Exception) {
-            logger.error("Henting av alle vedtak feilet", e)
+            logger.error("Henting av vedtak bolk feilet", e)
             throw e
         }
     }
@@ -79,3 +84,6 @@ data class Vedtak(
     val datoattestert: Instant?,
     val attestant: String?
 )
+
+private data class VedtakBolkRequest(val behandlingsidenter: List<String>)
+private data class VedtakBolkResponse(val vedtak: List<Vedtak>)

@@ -61,7 +61,6 @@ class GrunnlagsendringshendelseService(
     }
 
     fun sjekkKlareDoedshendelser(minutterGamle: Long) {
-        logger.info("Sjekker for klare Doedshendelser")
         inTransaction {
             grunnlagsendringshendelseDao.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
                 minutterGamle,

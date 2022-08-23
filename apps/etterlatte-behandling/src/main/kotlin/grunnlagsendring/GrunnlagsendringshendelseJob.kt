@@ -35,11 +35,6 @@ class GrunnlagsendringshendelseJob(
             period = periode.toMillis()
         ) {
             try {
-                logger.info(
-                    "Forbereder GrunnlagsendringshendelseJob med jobbavn: $jobbNavn, initialDelay: $initialDelay og " +
-                        "periode i ms: ${periode.toMillis()}"
-                )
-
                 runBlocking {
                     SjekkKlareGrunnlagsendringshendelser(
                         grunnlagsendringshendelseService = grunnlagsendringshendelseService,

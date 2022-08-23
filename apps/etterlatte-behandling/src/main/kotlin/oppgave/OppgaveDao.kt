@@ -8,7 +8,7 @@ import no.nav.etterlatte.sak.Sak
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 enum class Rolle {
@@ -54,9 +54,7 @@ class OppgaveDao(private val datasource: DataSource) {
                     postfix = ")"
                 ) { "'${it.name}'" }
                 }
-                """.trimMargin().also {
-                    println(it)
-                }
+                """.trimMargin()
             )
             return stmt.executeQuery().toList {
                 val mottattDato = getTimestamp("soekand_mottatt_dato")?.toLocalDateTime()?.atZone(ZoneId.of("UTC"))

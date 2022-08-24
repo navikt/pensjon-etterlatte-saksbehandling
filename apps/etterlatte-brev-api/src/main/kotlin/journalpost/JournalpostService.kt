@@ -11,30 +11,3 @@ interface JournalpostService {
         accessToken: String
     ): ByteArray
 }
-
-data class Journalpost(
-    val journalpostId: String,
-    val tittel: String,
-    val journalposttype: String,
-    val journalstatus: String,
-    val dokumenter: List<Dokumenter>,
-    val avsenderMottaker: AvsenderMottaker,
-    val kanal: String,
-    val datoOpprettet: String // Mulig Dato?
-)
-
-data class Dokumenter(
-    val dokumentInfoId: String,
-    val tittel: String,
-    val dokumentvarianter: List<Dokumentvarianter>
-)
-
-data class Dokumentvarianter(
-    val saksbehandlerHarTilgang: Boolean
-)
-
-data class AvsenderMottaker(
-    val id: String,
-    val navn: String,
-    val erLikBruker: Boolean
-)

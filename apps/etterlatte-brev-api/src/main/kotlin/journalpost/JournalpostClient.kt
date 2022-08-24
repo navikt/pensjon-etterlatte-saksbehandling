@@ -51,7 +51,7 @@ class JournalpostClient(
     ): JournalpostResponse {
         val request = GraphqlRequest(
             query = getQuery("/graphql/journalpost.graphql"),
-            variables = dokumentOversiktBrukerVariables(
+            variables = DokumentOversiktBrukerVariables(
                 brukerId = BrukerId(
                     id = fnr,
                     type = idType
@@ -90,49 +90,3 @@ class JournalpostClient(
 }
 
 class JournalpostException(msg: String, cause: Throwable) : Exception(msg, cause)
-
-data class JournalpostResponse(
-    val data: DokumentoversiktBruker? = null,
-    val errors: List<JournalpostResponseError>? = null
-)
-
-data class DokumentoversiktBruker(
-    val dokumentoversiktBruker: Journalposter
-)
-
-data class Journalposter(
-    val journalposter: List<Journalpost>
-)
-
-data class JournalpostResponseError(
-    val message: String?,
-    val locations: List<PdlErrorLocation>? = null,
-    val path: List<String>? = null,
-    val extensions: PdlErrorExtension? = null
-)
-
-data class PdlErrorLocation(
-    val line: String?,
-    val column: String?
-)
-
-data class PdlErrorExtension(
-    val code: String?,
-    val details: String?,
-    val classification: String?
-)
-
-data class GraphqlRequest(
-    val query: String,
-    val variables: dokumentOversiktBrukerVariables
-)
-
-data class dokumentOversiktBrukerVariables(
-    val brukerId: BrukerId,
-    val foerste: Int
-)
-
-data class BrukerId(
-    val id: String,
-    val type: BrukerIdType
-)

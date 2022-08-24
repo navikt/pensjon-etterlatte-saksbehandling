@@ -13,7 +13,6 @@ val logger = LoggerFactory.getLogger("no.nav.etterlatte.behandling.BehandlingRou
 fun Route.behandlingRoute(service: BehandlingService) {
     route("saker") {
         // hent alle saker
-
         get {
             try {
                 val accessToken = getAccessToken(call)

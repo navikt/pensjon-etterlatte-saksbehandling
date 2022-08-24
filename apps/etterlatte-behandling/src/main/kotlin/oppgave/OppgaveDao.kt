@@ -68,7 +68,7 @@ class OppgaveDao(private val datasource: DataSource) {
                     getObject("id") as UUID,
                     BehandlingStatus.valueOf(getString("status")),
                     OppgaveStatus.valueOf(getString("oppgave_status")),
-                    Sak(getString("fnr"), getString("sakType"), getLong("sak_id")),
+                    Sak(getString("fnr"), enumValueOf(getString("sakType")), getLong("sak_id")),
                     mottattDato,
                     mottattDato.toLocalDate().plusMonths(1),
                     BehandlingType.valueOf(getString("behandlingstype"))

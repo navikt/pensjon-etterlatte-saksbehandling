@@ -42,6 +42,7 @@ import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.module
 import no.nav.etterlatte.oppgave.OppgaveListeDto
 import no.nav.etterlatte.sak.Sak
+import no.nav.etterlatte.sak.SakType
 import no.nav.etterlatte.sikkerhet.tokenTestSupportAcceptsAllTokens
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -92,7 +93,7 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.OK, it.status)
                 val lestSak: Sak = it.body()
                 assertEquals("123", lestSak.ident)
-                assertEquals("BP", lestSak.sakType)
+                assertEquals(SakType.BP, lestSak.sakType)
             }
 
             val behandlingId = client.post("/behandlinger") {

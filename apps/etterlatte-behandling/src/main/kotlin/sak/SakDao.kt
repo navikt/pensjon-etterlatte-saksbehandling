@@ -9,7 +9,7 @@ class SakDao(private val connection: () -> Connection) {
         val statement = connection().prepareStatement("SELECT id, sakType, fnr from sak")
         return statement.executeQuery().toList {
             Sak(
-                sakType = getString(2),
+                sakType = enumValueOf(getString(2)),
                 ident = getString(3),
                 id = getLong(1)
             )
@@ -21,22 +21,22 @@ class SakDao(private val connection: () -> Connection) {
         statement.setLong(1, id)
         return statement.executeQuery().singleOrNull {
             Sak(
-                sakType = getString(2),
+                sakType = enumValueOf(getString(2)),
                 ident = getString(3),
                 id = getLong(1)
             )
         }
     }
 
-    fun opprettSak(fnr: String, type: String): Sak {
+    fun opprettSak(fnr: String, type: SakType): Sak {
         val statement =
             connection().prepareStatement("INSERT INTO sak(sakType, fnr) VALUES(?, ?) RETURNING id, sakType, fnr")
-        statement.setString(1, type)
+        statement.setString(1, type.name)
         statement.setString(2, fnr)
         return requireNotNull(
             statement.executeQuery().singleOrNull {
                 Sak(
-                    sakType = getString(2),
+                    sakType = enumValueOf(getString(2)),
                     ident = getString(3),
                     id = getLong(1)
                 )
@@ -51,7 +51,7 @@ class SakDao(private val connection: () -> Connection) {
         statement.setString(1, fnr)
         return statement.executeQuery().toList {
             Sak(
-                sakType = getString(2),
+                sakType = enumValueOf(getString(2)),
                 ident = getString(3),
                 id = getLong(1)
             )

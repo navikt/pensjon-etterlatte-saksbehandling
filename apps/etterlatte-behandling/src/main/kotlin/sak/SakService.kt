@@ -3,8 +3,8 @@ package no.nav.etterlatte.sak
 interface SakService {
     fun hentSaker(): List<Sak>
     fun finnSaker(person: String): List<Sak>
-    fun finnEllerOpprettSak(person: String, type: String): Sak
-    fun finnSak(person: String, type: String): Sak?
+    fun finnEllerOpprettSak(person: String, type: SakType): Sak
+    fun finnSak(person: String, type: SakType): Sak?
     fun finnSak(id: Long): Sak?
     fun slettSak(id: Long)
 }
@@ -22,12 +22,12 @@ class RealSakService(private val dao: SakDao) : SakService {
         dao.slettSak(id)
     }
 
-    override fun finnEllerOpprettSak(person: String, type: String): Sak {
+    override fun finnEllerOpprettSak(person: String, type: SakType): Sak {
         val eksisterendeSak = finnSak(person, type)
         return eksisterendeSak ?: dao.opprettSak(person, type)
     }
 
-    override fun finnSak(person: String, type: String): Sak? {
+    override fun finnSak(person: String, type: SakType): Sak? {
         return finnSaker(person).find { it.sakType == type }
     }
 

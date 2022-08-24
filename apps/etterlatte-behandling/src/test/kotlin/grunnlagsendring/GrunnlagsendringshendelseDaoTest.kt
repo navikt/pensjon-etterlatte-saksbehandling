@@ -4,6 +4,7 @@ import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.grunnlagsendringshendelse
 import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakType
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -60,7 +61,7 @@ internal class GrunnlagsendringshendelseDaoTest {
     @Test
     fun `skal lagre grunnlagsendringshendelse i database og hente ut hendelsen fra databasen`() {
         val uuid = UUID.randomUUID()
-        val sakid = sakRepo.opprettSak("1234", "BP").id
+        val sakid = sakRepo.opprettSak("1234", SakType.BP).id
         val grunnlagsinformasjon = grunnlagsinformasjonDoedshendelse()
         val hendelse = grunnlagsendringshendelse(
             id = uuid,
@@ -83,7 +84,7 @@ internal class GrunnlagsendringshendelseDaoTest {
 
     @Test
     fun `skal hente grunnlagsendringshendelser som er eldre enn en time`() {
-        val sakid = sakRepo.opprettSak("1234", "BP").id
+        val sakid = sakRepo.opprettSak("1234", SakType.BP).id
         listOf(
             grunnlagsendringshendelse(
                 sakId = sakid,
@@ -126,8 +127,8 @@ internal class GrunnlagsendringshendelseDaoTest {
 
     @Test
     fun `oppdaterGrunnlagsendringStatuForType skal oppdatere status for grunnlagsendringshendelser`() {
-        val sak1 = sakRepo.opprettSak("1234", "BP").id
-        val sak2 = sakRepo.opprettSak("4321", "BP").id
+        val sak1 = sakRepo.opprettSak("1234", SakType.BP).id
+        val sak2 = sakRepo.opprettSak("4321", SakType.BP).id
 
         listOf(
             grunnlagsendringshendelse(

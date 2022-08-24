@@ -4,6 +4,10 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.logger
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
@@ -12,7 +16,7 @@ import org.slf4j.LoggerFactory
 val logger = LoggerFactory.getLogger("no.nav.etterlatte.behandling.BehandlingRoute")
 fun Route.behandlingRoute(service: BehandlingService) {
     route("saker") {
-        // hent alle saker
+        // hent alle sakerª
         get {
             try {
                 val accessToken = getAccessToken(call)

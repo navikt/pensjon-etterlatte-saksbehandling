@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import { FileIcon } from '../../../shared/icons/fileIcon'
 import { useParams } from 'react-router-dom'
 import { PdfVisning } from '../brev/pdf-visning'
+import Spinner from '../../../shared/Spinner'
 
 const ButtonRow = styled.div`
   background: white;
@@ -34,6 +35,7 @@ export default function BrevModal() {
   const [error, setError] = useState<string>()
   const [fileURL, setFileURL] = useState<string>()
   const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [isLoadingBrev, setIsLoadingBrev] = useState<boolean>(false)
   const [brevId, setBrevId] = useState<string>()
 
   const preview = () => {
@@ -49,14 +51,21 @@ export default function BrevModal() {
   }
 
   useEffect(() => {
-    opprettEllerOppdaterBrevForVedtak(behandlingId!!).then((id) => setBrevId(id))
+    setIsLoadingBrev(true)
+    opprettEllerOppdaterBrevForVedtak(behandlingId!!)
+      .then((id) => setBrevId(id))
+      .finally(() => setIsLoadingBrev(false))
   }, [])
 
   return (
     <>
       <VedtaksbrevWrapper onClick={preview}>
         <FileIcon />
-        <span className="text">Vis vedtaksbrev</span>
+        {isLoadingBrev ? (
+          <Spinner visible={isLoadingBrev} label={''} margin={'0'} />
+        ) : (
+          <span className="text">Vis vedtaksbrev</span>
+        )}
       </VedtaksbrevWrapper>
 
       <Modal open={isOpen} onClose={() => setIsOpen(false)}>

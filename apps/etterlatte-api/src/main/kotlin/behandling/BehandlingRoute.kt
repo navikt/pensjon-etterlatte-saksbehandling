@@ -4,9 +4,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.delete
-import io.ktor.server.routing.get
-import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.logger
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
@@ -85,6 +82,15 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 call.respond(HttpStatusCode.BadRequest, "BehandlingsId mangler")
             } else {
                 call.respond(service.hentHendelserForBehandling(behandlingId, getAccessToken(call)))
+            }
+        }
+
+        post("avbryt") {
+            val behandlingId = call.parameters["behandlingId"]
+            if (behandlingId == null) {
+                call.respond(HttpStatusCode.BadRequest, "BehandlingsId mangler")
+            } else {
+                call.respond(service.avbrytBehanding(behandlingId, getAccessToken(call)))
             }
         }
     }

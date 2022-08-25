@@ -38,10 +38,10 @@ spec:
     - name: KAFKA_TARGET_TOPIC
       value: etterlatte.dodsmelding
     - name: DOLLY_CLIENT_ID
-      value: 787eb670-2731-49b4-8be1-2385990370a9
+      value: cf878fa5-aa6b-4bc5-bb2e-40b27e6c0149
     - name: DOLLY_RESOURCE_URL
-      value: https://dolly-backend.dev-fss-pub.nais.io/api/v1
+      value: https://dolly-backend.dev.intern.nav.no/api/v1
   accessPolicy:
     outbound:
-      external:
-        - host: https://dolly-backend.dev-fss-pub.nais.io
+      rules:
+        - application: dolly-backend

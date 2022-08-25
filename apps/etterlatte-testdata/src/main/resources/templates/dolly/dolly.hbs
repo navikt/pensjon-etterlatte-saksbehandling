@@ -164,8 +164,6 @@
 
     function hentFamilier(gruppeId) {
         fetch(`dolly/hent-familier?gruppeId=${gruppeId}`).then(res => res.json()).then(data => {
-            console.log(data)
-
             const table = document.querySelector('tbody')
             table.innerHTML = ""
             data.forEach((familie) => {

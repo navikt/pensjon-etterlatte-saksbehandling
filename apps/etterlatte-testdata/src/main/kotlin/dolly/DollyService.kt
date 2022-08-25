@@ -1,8 +1,6 @@
 package dolly
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.logger
-import no.nav.etterlatte.objectMapper
 
 class DollyService(
     private val dollyClient: DollyClient
@@ -34,7 +32,6 @@ class DollyService(
      */
     fun hentFamilier(gruppeId: Long, accessToken: String): List<ForenkletFamilieModell> = runBlocking {
         dollyClient.hentTestGruppeBestillinger(gruppeId, accessToken, 0, 10).let { bestillinger ->
-            logger.info("Funnet bestillinger: ${objectMapper.writeValueAsString(bestillinger)}")
             dollyClient.hentPersonInfo(bestillinger.identer.map { it.ident }, accessToken).map { personResponse ->
                 ForenkletFamilieModell(
                     avdoed = personResponse.ident,

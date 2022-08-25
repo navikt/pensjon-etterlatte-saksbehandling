@@ -106,7 +106,8 @@ internal class VedtaksvurderingServiceTest {
             no.nav.etterlatte.libs.common.beregning.Endringskode.NY,
             BeregningsResultatType.BEREGNET,
             emptyList(),
-            LocalDateTime.now()
+            LocalDateTime.now(),
+            0L
         )
 
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns vedtakSomIkkeErFattet
@@ -123,7 +124,8 @@ internal class VedtaksvurderingServiceTest {
             no.nav.etterlatte.libs.common.beregning.Endringskode.NY,
             BeregningsResultatType.BEREGNET,
             emptyList(),
-            LocalDateTime.now()
+            LocalDateTime.now(),
+            0L
         )
 
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns null
@@ -140,7 +142,8 @@ internal class VedtaksvurderingServiceTest {
             no.nav.etterlatte.libs.common.beregning.Endringskode.NY,
             BeregningsResultatType.BEREGNET,
             emptyList(),
-            LocalDateTime.now()
+            LocalDateTime.now(),
+            0L
         )
 
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns fattetVedtak

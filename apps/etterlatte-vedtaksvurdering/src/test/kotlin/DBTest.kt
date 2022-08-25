@@ -74,7 +74,8 @@ internal class DBTest {
                 Endringskode.NY,
                 BeregningsResultatType.BEREGNET,
                 beregningsperiode,
-                now
+                now,
+                0L
             )
         )
     }
@@ -177,7 +178,7 @@ internal class DBTest {
         val vedtaket = vedtaksvurderingService.hentVedtak("12321423523545", uuid)
         assert(vedtaket?.beregningsResultat != null)
         assert(vedtaket?.avkortingsResultat != null)
-        assert(vedtaket?.beregningsResultat?.grunnlagVerson == 0.toLong())
+        assert(vedtaket?.beregningsResultat?.grunnlagVersjon == 0.toLong())
         assert(vedtaket?.vilkaarsResultat != null)
         assert(vedtaket?.kommerSoekerTilgodeResultat != null)
         assert(vedtaket?.vedtakStatus != null)

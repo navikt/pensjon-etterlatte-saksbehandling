@@ -9,6 +9,13 @@ data class PensjonUforeOpplysning(
     val mottattAlderspensjon: List<UtbetaltPeriode>
 )
 
+data class InntektsOpplysning(
+    val pensjonEllerTrygd: List<Inntekt>,
+    val ytelseFraOffentlig: List<Inntekt>,
+    val loennsinntekt: List<Inntekt>,
+    val naeringsinntekt: List<Inntekt>
+)
+
 data class Ident(
     val identifikator: String,
     val aktoerType: String

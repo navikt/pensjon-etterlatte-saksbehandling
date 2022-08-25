@@ -9,10 +9,10 @@ data class AaregResponse(
     val type: AaregKodeBeskrivelse,
     val arbeidstaker: AaregArbeidstaker,
     val arbeidssted: AaregArbeidssted,
-    val opplysningsPliktig: AaregOpplysningspliktig,
+    val opplysningspliktig: AaregOpplysningspliktig,
     val ansettelsesperiode: AaregAnsettelsesperiode,
     val ansettelsesdetaljer: List<AaregAnsettelsesdetaljer>,
-    val rapporteringsordning: List<AaregKodeBeskrivelse>,
+    val rapporteringsordning: AaregKodeBeskrivelse,
     val navArbeidsforholdId: Int,
     val navVersjon: Int,
     val navUuid: String,
@@ -28,7 +28,7 @@ data class AaregArbeidstaker(
 data class AaregIdent(
     val type: String,
     val ident: String,
-    val gjeldende: Boolean
+    val gjeldende: Boolean?
 )
 data class AaregArbeidssted(
     val type: String,
@@ -40,7 +40,7 @@ data class AaregOpplysningspliktig(
 )
 data class AaregAnsettelsesperiode(
     val startdato: LocalDate,
-    val sluttdato: LocalDate
+    val sluttdato: LocalDate?
 
 )
 data class AaregAnsettelsesdetaljer(
@@ -57,9 +57,9 @@ data class AaregKodeBeskrivelse(
 )
 data class AaregFraTil(
     val fra: YearMonth,
-    val til: YearMonth
+    val til: YearMonth?
 )
 data class AaregBruksperiode(
     val fom: LocalDateTime,
-    val tom: LocalDateTime
+    val tom: LocalDateTime?
 )

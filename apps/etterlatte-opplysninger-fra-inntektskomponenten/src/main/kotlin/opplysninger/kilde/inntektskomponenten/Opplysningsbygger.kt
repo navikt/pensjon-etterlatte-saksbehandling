@@ -7,11 +7,9 @@ import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.inntekt.ArbeidsInntektMaaned
-import no.nav.etterlatte.libs.common.inntekt.Inntekt
-import no.nav.etterlatte.libs.common.inntekt.PensjonUforeOpplysning
-import no.nav.etterlatte.libs.common.inntekt.UtbetaltPeriode
+import no.nav.etterlatte.libs.common.inntekt.InntektType
+import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
-import java.time.YearMonth
 import java.util.*
 
 class OpplysningsByggerService : OpplysningsBygger {
@@ -20,14 +18,16 @@ class OpplysningsByggerService : OpplysningsBygger {
         inntektsKomponentenResponse: InntektsKomponentenResponse,
         arbeidsforholdListe: List<AaregResponse>
     ): List<Grunnlagsopplysning<out Any>> {
-        val pensjonUforeOpplysning = inntektsKomponentenResponse.arbeidsInntektMaaned?.let { inntekter ->
-            val uforetrygd = mapToPeriode(inntekter.filtrertPaaType("ufoeretrygd"))
-            val alderspensjon = mapToPeriode(inntekter.filtrertPaaType("alderspensjon"))
+        val inntektsOpplysning = inntektsKomponentenResponse.arbeidsInntektMaaned?.let { inntekter ->
+            val pensjonEllerTrygd = inntekter.filtrertPaaInntektsType(InntektType.PENSJON_ELLER_TRYGD)
+            val ytelseFraOffentlig = inntekter.filtrertPaaInntektsType(InntektType.YTELSE_FRA_OFFENTLIGE)
+            val loennsinntekt = inntekter.filtrertPaaInntektsType(InntektType.LOENNSINNTEKT)
+            val naeringsinntekt = inntekter.filtrertPaaInntektsType(InntektType.NAERINGSINNTEKT)
 
             lagOpplysning(
-                opplysningsType = Opplysningstyper.PENSJON_UFORE_V1,
+                opplysningsType = Opplysningstyper.AVDOED_INNTEKT_V1,
                 kilde = Grunnlagsopplysning.Inntektskomponenten("Inntektskomponenten"),
-                opplysning = PensjonUforeOpplysning(uforetrygd, alderspensjon)
+                opplysning = InntektsOpplysning(pensjonEllerTrygd, ytelseFraOffentlig, loennsinntekt, naeringsinntekt)
             )
         }
 
@@ -51,12 +51,12 @@ class OpplysningsByggerService : OpplysningsBygger {
             null
         }
 
-        return listOfNotNull(pensjonUforeOpplysning, arbeidsforholdOpplysning)
+        return listOfNotNull(inntektsOpplysning, arbeidsforholdOpplysning)
     }
 }
 
-fun List<ArbeidsInntektMaaned>.filtrertPaaType(beskrivelse: String) = this.mapNotNull { arbeidsinntekt ->
-    arbeidsinntekt.arbeidsInntektInformasjon.inntektListe?.filter { it.beskrivelse == beskrivelse }
+fun List<ArbeidsInntektMaaned>.filtrertPaaInntektsType(inntektType: InntektType) = this.mapNotNull { arbeidsinntekt ->
+    arbeidsinntekt.arbeidsInntektInformasjon.inntektListe?.filter { it.inntektType == inntektType }
 }.flatten()
 
 fun <T> lagOpplysning(
@@ -71,8 +71,4 @@ fun <T> lagOpplysning(
         objectMapper.createObjectNode(),
         opplysning
     )
-}
-
-fun mapToPeriode(liste: List<Inntekt>): List<UtbetaltPeriode> = liste.map {
-    UtbetaltPeriode(YearMonth.parse(it.utbetaltIMaaned), it.beloep)
 }

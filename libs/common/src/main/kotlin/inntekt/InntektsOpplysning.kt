@@ -1,14 +1,5 @@
 package no.nav.etterlatte.libs.common.inntekt
 
-import java.time.YearMonth
-
-data class UtbetaltPeriode(val gyldigFraOgMed: YearMonth, val beloep: Int)
-
-data class PensjonUforeOpplysning(
-    val mottattUforetrygd: List<UtbetaltPeriode>,
-    val mottattAlderspensjon: List<UtbetaltPeriode>
-)
-
 data class InntektsOpplysning(
     val pensjonEllerTrygd: List<Inntekt>,
     val ytelseFraOffentlig: List<Inntekt>,

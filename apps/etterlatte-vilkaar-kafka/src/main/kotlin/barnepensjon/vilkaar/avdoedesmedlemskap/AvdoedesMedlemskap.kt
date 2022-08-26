@@ -1,12 +1,12 @@
 package barnepensjon.vilkaar.avdoedesmedlemskap
 
+import no.nav.etterlatte.barnepensjon.opplysningsGrunnlagNull
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregAnsettelsesdetaljer
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregAnsettelsesperiode
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
-import no.nav.etterlatte.libs.common.inntekt.UtbetaltPeriode
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
@@ -31,7 +31,7 @@ fun vilkaarAvdoedesMedlemskap(
     val bosattNorge = metakriterieBosattNorge(avdoedSoeknad, avdoedPdl).kriterie
     // 2. Arbeidet i norge siste 5 årene
     // Kriterie A2-1 (men skal være 80%)
-    val harHatt100prosentStillingSisteFemAar = kritieeHarHatt100prosentStillingSisteFemAar(arbeidsforholdOpplysning)
+    val harHatt100prosentStillingSisteFemAar = kriterieHarHatt100prosentStillingSisteFemAar(arbeidsforholdOpplysning)
     // 3. ingen opphold utenfor Norge
     // ELLER :
     val kriterier: List<Kriterie> = listOf(
@@ -53,7 +53,7 @@ data class DetaljerPeriode(
     val ansettelsesdetaljer: List<AaregAnsettelsesdetaljer>
 )
 
-fun kritieeHarHatt100prosentStillingSisteFemAar(
+fun kriterieHarHatt100prosentStillingSisteFemAar(
     arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?
 ): Kriterie {
     val perioder = arrayListOf<DetaljerPeriode>()
@@ -106,10 +106,11 @@ fun kriterieHarMottattPensjonEllerTrygdSisteFemAar(
             basertPaaOpplysninger = grunnlag
         )
     } else {
-        return Kriterie(
-            navn = Kriterietyper.AVDOED_HAR_MOTTATT_PENSJON_TRYGD_SISTE_FEM_AAR,
-            resultat = VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
-            basertPaaOpplysninger = emptyList()
+        opplysningsGrunnlagNull(
+            kriterietype = Kriterietyper.AVDOED_HAR_MOTTATT_PENSJON_TRYGD_SISTE_FEM_AAR,
+            opplysningsGrunnlag = emptyList()
         )
     }
 }
+
+data class UtbetaltPeriode(val gyldigFraOgMed: YearMonth, val beloep: Int)

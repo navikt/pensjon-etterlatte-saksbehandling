@@ -18,7 +18,7 @@ import mapTilVilkaarstypeAvdoedSoeknad
 import mapTilVilkaarstypePerson
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
-import no.nav.etterlatte.libs.common.inntekt.PensjonUforeOpplysning
+import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
@@ -39,9 +39,9 @@ class AvdoedesMedlemskapTest {
     @Test
     fun vurderMottattPensjonUforeSisteFemAar() {
         val file = readFile("/inntektsopplysning.json")
-        val opplysning = objectMapper.readValue<VilkaarOpplysning<PensjonUforeOpplysning>>(file)
+        val opplysning = objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(file)
         val pensjonufore = kriterieHarMottattPensjonEllerTrygdSisteFemAar(opplysning)
-        // print(pensjonufore)
+
         assert(true)
     }
 

@@ -27,7 +27,7 @@ data class BeregningsResultat(
     val resultat: BeregningsResultatType,
     val beregningsperioder: List<Beregningsperiode>,
     val beregnetDato: LocalDateTime,
-    val grunnlagVersjon: Long
+    val grunnlagVersjon: Long = 0L
 )
 
 data class Beregningsperiode(

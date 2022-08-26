@@ -66,35 +66,35 @@ class VedtaksvurderingService(
     private val repository: VedtaksvurderingRepository
 ) : VedlikeholdService {
 
-    fun lagreAvkorting(sakId: String, behandlingId: UUID, fnr: String, avkorting: AvkortingsResultat) {
-        val vedtak = repository.hentVedtak(sakId, behandlingId)
+    fun lagreAvkorting(sakId: String, behandling: Behandling, fnr: String, avkorting: AvkortingsResultat) {
+        val vedtak = repository.hentVedtak(sakId, behandling.id)
         if (vedtak == null) {
-            repository.lagreAvkorting(sakId, behandlingId, fnr, avkorting)
+            repository.lagreAvkorting(sakId, behandling, fnr, avkorting)
         } else {
             if (vedtak.vedtakFattet == true) {
                 throw KanIkkeEndreFattetVedtak(vedtak)
             }
-            repository.oppdaterAvkorting(sakId, behandlingId, avkorting)
+            repository.oppdaterAvkorting(sakId, behandling.id, avkorting)
         }
     }
 
     fun lagreVilkaarsresultat(
         sakId: String,
         sakType: String,
-        behandlingId: UUID,
+        behandling: Behandling,
         fnr: String,
         vilkaarResultat: VilkaarResultat,
         virkningsDato: LocalDate?
     ) {
-        val vedtak = repository.hentVedtak(sakId, behandlingId)
+        val vedtak = repository.hentVedtak(sakId, behandling.id)
         if (vedtak == null) {
-            repository.lagreVilkaarsresultat(sakId, sakType, behandlingId, fnr, vilkaarResultat, virkningsDato)
+            repository.lagreVilkaarsresultat(sakId, sakType, behandling, fnr, vilkaarResultat, virkningsDato)
         } else {
             if (vedtak.vedtakFattet == true) {
                 throw KanIkkeEndreFattetVedtak(vedtak)
             }
             migrer(vedtak, fnr, virkningsDato)
-            repository.oppdaterVilkaarsresultat(sakId, sakType, behandlingId, vilkaarResultat)
+            repository.oppdaterVilkaarsresultat(sakId, sakType, behandling.id, vilkaarResultat)
         }
     }
 
@@ -109,36 +109,36 @@ class VedtaksvurderingService(
 
     fun lagreBeregningsresultat(
         sakId: String,
-        behandlingId: UUID,
+        behandling: Behandling,
         fnr: String,
         beregningsResultat: BeregningsResultat
     ) {
-        val vedtak = repository.hentVedtak(sakId, behandlingId)
+        val vedtak = repository.hentVedtak(sakId, behandling.id)
         if (vedtak == null) {
-            repository.lagreBeregningsresultat(sakId, behandlingId, fnr, beregningsResultat)
+            repository.lagreBeregningsresultat(sakId, behandling, fnr, beregningsResultat)
         } else {
             if (vedtak.vedtakFattet == true) {
                 throw KanIkkeEndreFattetVedtak(vedtak)
             }
-            repository.oppdaterBeregningsgrunnlag(sakId, behandlingId, beregningsResultat)
+            repository.oppdaterBeregningsgrunnlag(sakId, behandling.id, beregningsResultat)
         }
     }
 
     fun lagreKommerSoekerTilgodeResultat(
         sakId: String,
-        behandlingId: UUID,
+        behandling: Behandling,
         fnr: String,
         kommerSoekerTilgodeResultat: KommerSoekerTilgode
     ) {
-        val vedtak = repository.hentVedtak(sakId, behandlingId)
+        val vedtak = repository.hentVedtak(sakId, behandling.id)
 
         if (vedtak == null) {
-            repository.lagreKommerSoekerTilgodeResultat(sakId, behandlingId, fnr, kommerSoekerTilgodeResultat)
+            repository.lagreKommerSoekerTilgodeResultat(sakId, behandling, fnr, kommerSoekerTilgodeResultat)
         } else {
             if (vedtak.vedtakFattet == true) {
                 throw KanIkkeEndreFattetVedtak(vedtak)
             }
-            repository.oppdaterKommerSoekerTilgodeResultat(sakId, behandlingId, kommerSoekerTilgodeResultat)
+            repository.oppdaterKommerSoekerTilgodeResultat(sakId, behandling.id, kommerSoekerTilgodeResultat)
         }
     }
 
@@ -154,13 +154,13 @@ class VedtaksvurderingService(
 
     fun hentFellesVedtak(behandlingId: UUID): no.nav.etterlatte.domene.vedtak.Vedtak? {
         // Placeholder for tingene som må inn for å fylle vedtaksmodellen
-        return repository.hentVedtak(behandlingId)?.let {
+        return repository.hentVedtak(behandlingId)?.let { vedtak ->
             no.nav.etterlatte.domene.vedtak.Vedtak(
-                it.id,
+                vedtak.id,
                 Periode(
-                    it.virkningsDato?.let(YearMonth::from)
+                    vedtak.virkningsDato?.let(YearMonth::from)
                         ?: (
-                            it.vilkaarsResultat?.vilkaar
+                            vedtak.vilkaarsResultat?.vilkaar
                                 ?.find { it.navn == Vilkaartyper.DOEDSFALL_ER_REGISTRERT }?.kriterier
                                 ?.find { it.navn == Kriterietyper.DOEDSFALL_ER_REGISTRERT_I_PDL }?.basertPaaOpplysninger
                                 ?.find { it.kriterieOpplysningsType == KriterieOpplysningsType.DOEDSDATO }?.opplysning
@@ -170,16 +170,18 @@ class VedtaksvurderingService(
                             ) ?: YearMonth.now(),
                     null
                 ), // må få inn dette på toppnivå?
-                Sak(it.fnr!!, it.sakType!!, it.sakId.toLong()),
-                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId), // Behandlingsinfo må lagres
-                if (it.vilkaarsResultat?.resultat == VurderingsResultat.OPPFYLT) {
+                Sak(vedtak.fnr!!, vedtak.sakType!!, vedtak.sakId.toLong()),
+                Behandling(vedtak.behandlingType, behandlingId),
+                if (vedtak.vilkaarsResultat?.resultat == VurderingsResultat.OPPFYLT) {
                     VedtakType.INNVILGELSE
+                } else if (vedtak.behandlingType == BehandlingType.REVURDERING) {
+                    VedtakType.OPPHOER
                 } else {
                     VedtakType.AVSLAG
                 }, // Hvor skal vi bestemme vedtakstype?
                 emptyList(), // Ikke lenger aktuell
-                it.vilkaarsResultat, // Bør periodiseres
-                it.beregningsResultat?.let { bres ->
+                vedtak.vilkaarsResultat, // Bør periodiseres
+                vedtak.beregningsResultat?.let { bres ->
                     BilagMedSammendrag(
                         objectMapper.valueToTree(bres) as ObjectNode,
                         bres.beregningsperioder.map {
@@ -194,7 +196,7 @@ class VedtaksvurderingService(
                         }
                     )
                 }, // sammendraget bør lages av beregning
-                it.avkortingsResultat?.let { avkorting ->
+                vedtak.avkortingsResultat?.let { avkorting ->
                     BilagMedSammendrag(
                         objectMapper.valueToTree(avkorting) as ObjectNode,
                         avkorting.beregningsperioder.map {
@@ -209,21 +211,21 @@ class VedtaksvurderingService(
                         }
                     )
                 }, // sammendraget bør lages av avkorting,
-                repository.hentUtbetalingsPerioder(it.id),
-                it.saksbehandlerId?.let { ansvarligSaksbehandler ->
+                repository.hentUtbetalingsPerioder(vedtak.id),
+                vedtak.saksbehandlerId?.let { ansvarligSaksbehandler ->
                     VedtakFattet(
                         ansvarligSaksbehandler,
                         "0000",
-                        it.datoFattet?.atZone(
+                        vedtak.datoFattet?.atZone(
                             ZoneOffset.UTC
                         )!!
                     )
                 }, // logikk inn der fatting skjer. DB utvides med enhet og timestamp?
-                it.attestant?.let { attestant ->
+                vedtak.attestant?.let { attestant ->
                     Attestasjon(
                         attestant,
                         "0000",
-                        it.datoattestert!!.atZone(ZoneOffset.UTC)
+                        vedtak.datoattestert!!.atZone(ZoneOffset.UTC)
                     )
                 }
             )

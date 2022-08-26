@@ -1,7 +1,9 @@
 package no.nav.etterlatte.rivers
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
+import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -24,7 +26,7 @@ internal class LagreBeregningsresultat(
         River(rapidsConnection).apply {
             validate { it.demandAny(eventNameKey, listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
             validate { it.requireKey("sakId") }
-            validate { it.requireKey("behandlingId") }
+            validate { it.requireKey("behandling") }
             validate { it.requireKey("fnrSoeker") }
             validate { it.requireKey("beregning") }
             correlationId()
@@ -34,7 +36,7 @@ internal class LagreBeregningsresultat(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val behandlingId = packet["behandlingId"].asUUID()
+            val behandling = objectMapper.readValue<Behandling>(packet["behandling"].toString())
             val sakId = packet["sakId"].toString()
             val beregningsResultat = objectMapper.readValue(
                 packet["beregning"].toString(),
@@ -44,11 +46,11 @@ internal class LagreBeregningsresultat(
             try {
                 vedtaksvurderingService.lagreBeregningsresultat(
                     sakId,
-                    behandlingId,
+                    behandling,
                     packet["fnrSoeker"].textValue(),
                     beregningsResultat
                 )
-                requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
+                requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandling.id)).also {
                     context.publish(
                         JsonMessage.newMessage(
                             mapOf(

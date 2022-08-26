@@ -1,5 +1,9 @@
 {
   "behandlingId": "77826f44-fc2b-4bd4-a029-c48c1fa92378",
+  "behandling": {
+    "id": "77826f44-fc2b-4bd4-a029-c48c1fa92378",
+    "type": "FØRSTEGANGSBEHANDLING"
+  },
   "sakId": 3,
   "behandlingOpprettet": "2022-06-14T15:44:02.427522",
   "sistEndret": "2022-06-14T15:44:02.433757",

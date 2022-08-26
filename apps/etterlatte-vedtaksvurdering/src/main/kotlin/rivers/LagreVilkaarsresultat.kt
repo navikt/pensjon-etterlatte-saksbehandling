@@ -1,7 +1,9 @@
 package no.nav.etterlatte.rivers
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
+import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -26,7 +28,7 @@ internal class LagreVilkaarsresultat(
             validate { it.demandAny(eventNameKey, listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
             validate { it.requireKey("sak.id") }
             validate { it.requireKey("sak.sakType") }
-            validate { it.requireKey("behandlingId") }
+            validate { it.requireKey("behandling") }
             validate { it.requireKey("fnrSoeker") }
             validate { it.requireKey("virkningstidspunkt") }
             validate { it.requireKey("vilkaarsvurdering") }
@@ -37,7 +39,8 @@ internal class LagreVilkaarsresultat(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val behandlingId = packet["behandlingId"].asUUID()
+            val behandling = objectMapper.readValue<Behandling>(packet["behandling"].toString())
+
             val sakId = packet["sak.id"].toString()
             val sakType = packet["sak.sakType"].textValue()
             val vilkaarsResultat = objectMapper.readValue(
@@ -56,12 +59,12 @@ internal class LagreVilkaarsresultat(
                 vedtaksvurderingService.lagreVilkaarsresultat(
                     sakId,
                     sakType,
-                    behandlingId,
+                    behandling,
                     packet["fnrSoeker"].textValue(),
                     vilkaarsResultat,
                     virkningstidspunkt
                 )
-                requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
+                requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandling.id)).also {
                     context.publish(
                         JsonMessage.newMessage(
                             mapOf(

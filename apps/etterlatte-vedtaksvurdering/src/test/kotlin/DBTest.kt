@@ -2,8 +2,10 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.database.VedtaksvurderingRepository
+import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.VedtakStatus
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
@@ -66,7 +68,7 @@ internal class DBTest {
         val beregningsperiode = listOf<Beregningsperiode>()
         vedtaksvurderingService.lagreBeregningsresultat(
             "12321423523545",
-            uuid,
+            Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, uuid),
             "",
             BeregningsResultat(
                 UUID.randomUUID(),
@@ -86,7 +88,7 @@ internal class DBTest {
         vedtaksvurderingService.lagreVilkaarsresultat(
             "12321423523545",
             "BARNEPENSJON",
-            uuid,
+            Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, uuid),
             "fnr",
             VilkaarResultat(
                 VurderingsResultat.OPPFYLT,
@@ -104,7 +106,7 @@ internal class DBTest {
 
         vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(
             "12321423523545",
-            uuid,
+            Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, uuid),
             "fnr",
             KommerSoekerTilgode(
                 VilkaarResultat(
@@ -146,7 +148,7 @@ internal class DBTest {
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
         vedtaksvurderingService.lagreAvkorting(
             "12321423523545",
-            uuid,
+            Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, uuid),
             "fnr",
             AvkortingsResultat(
                 UUID.randomUUID(),
@@ -223,7 +225,7 @@ internal class DBTest {
         service.lagreVilkaarsresultat(
             sakId,
             "BARNEPENSJON",
-            behandlingId,
+            Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
             "fnr",
             VilkaarResultat(
                 VurderingsResultat.OPPFYLT,

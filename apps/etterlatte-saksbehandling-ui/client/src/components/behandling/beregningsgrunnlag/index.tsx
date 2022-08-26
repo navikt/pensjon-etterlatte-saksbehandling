@@ -1,6 +1,6 @@
-import { BodyShort, Button, Heading, Radio, RadioGroup } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Loader, Radio, RadioGroup } from '@navikt/ds-react'
 import { Content, Header } from '../../../shared/styled'
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { Border } from '../soeknadsoversikt/styled'
 import { Barn } from '../soeknadsoversikt/familieforhold/personer/Barn'
 import { Soesken } from '../soeknadsoversikt/familieforhold/personer/Soesken'
@@ -25,6 +25,7 @@ const Beregningsgrunnlag = () => {
   const ctx = useContext(AppContext)
   const behandling = ctx.state.behandlingReducer
   const behandles = hentBehandlesFraStatus(ctx.state.behandlingReducer?.status)
+  const [isLoading, setIsLoading] = useState(false)
 
   if (behandling.kommerSoekerTilgode == null || behandling.familieforhold?.avdoede == null) {
     return <div style={{ color: 'red' }}>Familieforhold kan ikke hentes ut</div>
@@ -64,9 +65,11 @@ const Beregningsgrunnlag = () => {
         id="form"
         onSubmit={handleSubmit(async (formValues) => {
           if (formValues.beregningsgrunnlag.length !== 0) {
+            setIsLoading(true)
             await lagreSoeskenMedIBeregning(behandling.id, formValues.beregningsgrunnlag)
           }
           await hentBehandling(behandling.id).then((response) => {
+            setIsLoading(false)
             if (response.status === 200 && response.data) {
               ctx.dispatch(addBehandlingAction(response.data))
               next()
@@ -101,7 +104,7 @@ const Beregningsgrunnlag = () => {
       {behandles ? (
         <BehandlingHandlingKnapper>
           <Button variant="primary" size="medium" form="form">
-            Beregne og fatte vedtak
+            Beregne og fatte vedtak {isLoading && <Loader />}
           </Button>
         </BehandlingHandlingKnapper>
       ) : (

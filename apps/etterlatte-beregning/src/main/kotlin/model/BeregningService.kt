@@ -33,7 +33,8 @@ class BeregningService {
             endringskode = Endringskode.NY,
             resultat = BeregningsResultatType.BEREGNET,
             beregningsperioder = beregningsperioder,
-            beregnetDato = LocalDateTime.now()
+            beregnetDato = LocalDateTime.now(),
+            grunnlagVersjon = grunnlag.versjon
         )
     }
 

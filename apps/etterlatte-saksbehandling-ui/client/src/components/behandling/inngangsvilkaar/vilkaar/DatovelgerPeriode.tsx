@@ -1,4 +1,4 @@
-import { Label } from '@navikt/ds-react'
+import { ErrorMessage, Label } from '@navikt/ds-react'
 import DatePicker from 'react-datepicker'
 import { Calender } from '@navikt/ds-icons'
 import React, { useRef } from 'react'
@@ -8,9 +8,11 @@ type Props = {
   label: string
   dato: Date | null
   setDato: (dato: Date | null) => void
+  error: string | undefined
+  setErrorUndefined: () => void
 }
 
-export const DatovelgerPeriode: React.FC<Props> = ({ label, dato, setDato }) => {
+export const DatovelgerPeriode: React.FC<Props> = ({ label, dato, setDato, error, setErrorUndefined }) => {
   const ref: any = useRef(null)
   const toggleDatepicker = () => {
     ref.current.setOpen(true)
@@ -30,7 +32,10 @@ export const DatovelgerPeriode: React.FC<Props> = ({ label, dato, setDato }) => 
             dateFormat={'dd.MM.yyyy'}
             placeholderText={'dd.mm.åååå'}
             selected={dato}
-            onChange={(date) => setDato(date)}
+            onChange={(date) => {
+              setDato(date)
+              date !== null && setErrorUndefined()
+            }}
             autoComplete="off"
             preventOpenOnFocus={true}
             className={'skjemaelement__input'}
@@ -46,6 +51,7 @@ export const DatovelgerPeriode: React.FC<Props> = ({ label, dato, setDato }) => 
             <Calender color="white" />
           </KalenderIkon>
         </Datovelger>
+        {error && <ErrorMessage size={'small'}>{error}</ErrorMessage>}
       </section>
     </Wrapper>
   )
@@ -60,6 +66,7 @@ export const Wrapper = styled.div`
 const Datovelger = styled.div`
   display: flex;
   align-items: flex-end;
+  margin-bottom: 0.5rem;
 
   input {
     border-right: none;

@@ -7,9 +7,38 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
   const [arbeidsgiver, setArbeidsgiver] = useState('')
   const [begrunnelse, setBegrunnelse] = useState('')
   const [kilde, setKilde] = useState('')
-
   const [fraDato, setFraDato] = useState<Date | null>(null)
   const [tilDato, setTilDato] = useState<Date | null>(null)
+
+  const [arbeidsgiverError, setArbeidsgiverError] = useState<string | undefined>(undefined)
+  const [kildeError, setKildeError] = useState<string | undefined>(undefined)
+  const [fraDatoError, setFraDatoError] = useState<string | undefined>(undefined)
+  const [tilDatoError, setTilDatoError] = useState<string | undefined>(undefined)
+
+  function valider() {
+    if (arbeidsgiver === '') {
+      setArbeidsgiverError('Du må skrive inn navnet på arbeidsgiver')
+    } else {
+      setArbeidsgiverError(undefined)
+    }
+    if (kilde === '') {
+      setKildeError('Du må skrive inn kilden til perioden')
+    } else {
+      setKildeError(undefined)
+    }
+    if (fraDato === null) setFraDatoError('Du må velge en startdato')
+    if (tilDato === null) setTilDatoError('Du må velge en sluttdato')
+
+    if (arbeidsgiver !== '' && kilde !== '' && fraDato !== null && tilDato !== null) {
+      return true
+    }
+  }
+
+  function leggTilPeriodeTrykket() {
+    if (valider()) {
+      console.log('Legger til periode')
+    }
+  }
 
   return (
     <div>
@@ -21,13 +50,29 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
               style={{ padding: '10px' }}
               label="Navn på arbeidsgiver"
               value={arbeidsgiver}
-              onChange={(e) => setArbeidsgiver(e.target.value)}
+              onChange={(e) => {
+                setArbeidsgiver(e.target.value)
+                valider()
+              }}
               size="small"
+              error={arbeidsgiverError ? arbeidsgiverError : false}
             />
 
             <DatoWrapper>
-              <DatovelgerPeriode label={'Fra'} dato={fraDato} setDato={(dato) => setFraDato(dato)} />
-              <DatovelgerPeriode label={'Til'} dato={tilDato} setDato={(dato) => setTilDato(dato)} />
+              <DatovelgerPeriode
+                label={'Fra'}
+                dato={fraDato}
+                setDato={(dato) => setFraDato(dato)}
+                error={fraDatoError}
+                setErrorUndefined={() => setFraDatoError(undefined)}
+              />
+              <DatovelgerPeriode
+                label={'Til'}
+                dato={tilDato}
+                setDato={(dato) => setTilDato(dato)}
+                error={tilDatoError}
+                setErrorUndefined={() => setTilDatoError(undefined)}
+              />
             </DatoWrapper>
 
             <Textarea
@@ -43,12 +88,18 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
               style={{ padding: '10px' }}
               label="Kilde"
               value={kilde}
-              onChange={(e) => setKilde(e.target.value)}
+              onChange={(e) => {
+                setKilde(e.target.value)
+                valider()
+              }}
               size="small"
+              error={kildeError ? kildeError : false}
             />
 
             <ButtonWrapper>
-              <Button variant={'primary'}>Legg til periode</Button>
+              <Button variant={'primary'} onClick={leggTilPeriodeTrykket}>
+                Legg til periode
+              </Button>
               <Button variant={'tertiary'} onClick={() => setIsOpen(false)}>
                 Avbryt
               </Button>

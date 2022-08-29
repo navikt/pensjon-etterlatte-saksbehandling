@@ -145,9 +145,11 @@ class VedtaksvurderingService(
     fun hentVedtakBolk(behandlingsidenter: List<UUID>): List<Vedtak> {
         return repository.hentVedtakBolk(behandlingsidenter)
     }
+
     fun hentVedtak(sakId: String, behandlingId: UUID): Vedtak? {
         return repository.hentVedtak(sakId, behandlingId)
     }
+
     fun hentVedtak(behandlingId: UUID): Vedtak? {
         return repository.hentVedtak(behandlingId)
     }
@@ -156,8 +158,8 @@ class VedtaksvurderingService(
         // Placeholder for tingene som må inn for å fylle vedtaksmodellen
         return repository.hentVedtak(behandlingId)?.let { vedtak ->
             no.nav.etterlatte.domene.vedtak.Vedtak(
-                vedtak.id,
-                Periode(
+                vedtakId = vedtak.id,
+                virk = Periode(
                     vedtak.virkningsDato?.let(YearMonth::from)
                         ?: (
                             vedtak.vilkaarsResultat?.vilkaar
@@ -170,18 +172,18 @@ class VedtaksvurderingService(
                             ) ?: YearMonth.now(),
                     null
                 ), // må få inn dette på toppnivå?
-                Sak(vedtak.fnr!!, vedtak.sakType!!, vedtak.sakId.toLong()),
-                Behandling(vedtak.behandlingType, behandlingId),
-                if (vedtak.vilkaarsResultat?.resultat == VurderingsResultat.OPPFYLT) {
+                sak = Sak(vedtak.fnr!!, vedtak.sakType!!, vedtak.sakId.toLong()),
+                behandling = Behandling(vedtak.behandlingType, behandlingId),
+                type = if (vedtak.vilkaarsResultat?.resultat == VurderingsResultat.OPPFYLT) {
                     VedtakType.INNVILGELSE
                 } else if (vedtak.behandlingType == BehandlingType.REVURDERING) {
                     VedtakType.OPPHOER
                 } else {
                     VedtakType.AVSLAG
                 }, // Hvor skal vi bestemme vedtakstype?
-                emptyList(), // Ikke lenger aktuell
-                vedtak.vilkaarsResultat, // Bør periodiseres
-                vedtak.beregningsResultat?.let { bres ->
+                grunnlag = emptyList(), // Ikke lenger aktuell
+                vilkaarsvurdering = vedtak.vilkaarsResultat, // Bør periodiseres
+                beregning = vedtak.beregningsResultat?.let { bres ->
                     BilagMedSammendrag(
                         objectMapper.valueToTree(bres) as ObjectNode,
                         bres.beregningsperioder.map {
@@ -196,7 +198,7 @@ class VedtaksvurderingService(
                         }
                     )
                 }, // sammendraget bør lages av beregning
-                vedtak.avkortingsResultat?.let { avkorting ->
+                avkorting = vedtak.avkortingsResultat?.let { avkorting ->
                     BilagMedSammendrag(
                         objectMapper.valueToTree(avkorting) as ObjectNode,
                         avkorting.beregningsperioder.map {
@@ -211,8 +213,8 @@ class VedtaksvurderingService(
                         }
                     )
                 }, // sammendraget bør lages av avkorting,
-                repository.hentUtbetalingsPerioder(vedtak.id),
-                vedtak.saksbehandlerId?.let { ansvarligSaksbehandler ->
+                pensjonTilUtbetaling = repository.hentUtbetalingsPerioder(vedtak.id),
+                vedtakFattet = vedtak.saksbehandlerId?.let { ansvarligSaksbehandler ->
                     VedtakFattet(
                         ansvarligSaksbehandler,
                         "0000",
@@ -221,7 +223,7 @@ class VedtaksvurderingService(
                         )!!
                     )
                 }, // logikk inn der fatting skjer. DB utvides med enhet og timestamp?
-                vedtak.attestant?.let { attestant ->
+                attestasjon = vedtak.attestant?.let { attestant ->
                     Attestasjon(
                         attestant,
                         "0000",

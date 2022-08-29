@@ -21,6 +21,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+import java.util.*
 
 data class KunneIkkeLeseVedtakException(val e: Exception) : RuntimeException(e)
 
@@ -34,6 +35,7 @@ data class UtbetalingEvent(
 data class UtbetalingResponse(
     val status: UtbetalingStatus,
     val vedtakId: Long? = null,
+    val behandlingId: UUID? = null,
     val feilmelding: String? = null
 )
 
@@ -69,9 +71,19 @@ class VedtakMottaker(
                         sendUtbetalingSendtEvent(context, resultat.utbetaling)
                     }
                     is UtbetalingForVedtakEksisterer -> {
-                        "Vedtak med vedtakId=${vedtak.vedtakId} eksisterer fra før".also {
+                        val feilmelding =
+                            "Vedtak med vedtakId=${vedtak.vedtakId} eksisterer fra før. " +
+                                "behandlingId for nytt vedtak: ${vedtak.behandling.id} - " +
+                                "behandlingId for tidligere utbetaling: " +
+                                "${resultat.eksisterendeUtbetaling.behandlingId.value}"
+                        feilmelding.let {
                             logger.error(it)
-                            sendUtbetalingFeiletEvent(context, vedtak.vedtakId, it)
+                            sendUtbetalingFeiletEvent(
+                                context,
+                                vedtak.vedtakId,
+                                vedtak.behandling.id,
+                                it
+                            )
                         }
                     }
                     is UtbetalingslinjerForVedtakEksisterer -> {
@@ -80,14 +92,19 @@ class VedtakMottaker(
                                 "eksisterer fra før"
                             ).also {
                             logger.error(it)
-                            sendUtbetalingFeiletEvent(context, vedtak.vedtakId, it)
+                            sendUtbetalingFeiletEvent(
+                                context,
+                                vedtak.vedtakId,
+                                vedtak.behandling.id,
+                                it
+                            )
                         }
                     }
                 }
             } catch (e: Exception) {
                 val feilmelding = "En feil oppstod under prosessering av vedtak med vedtakId=$vedtakId: ${e.message}"
                 logger.error(feilmelding, e)
-                sendUtbetalingFeiletEvent(context, vedtakId, feilmelding)
+                sendUtbetalingFeiletEvent(context, vedtakId, null, feilmelding)
 
                 if (feilSkalKastesVidere(e)) throw e
             }
@@ -104,12 +121,18 @@ class VedtakMottaker(
         return e !is KunneIkkeLeseVedtakException
     }
 
-    private fun sendUtbetalingFeiletEvent(context: MessageContext, vedtakId: Long? = null, beskrivelse: String) {
+    private fun sendUtbetalingFeiletEvent(
+        context: MessageContext,
+        vedtakId: Long? = null,
+        behandlingId: UUID?,
+        beskrivelse: String
+    ) {
         context.publish(
             UtbetalingEvent(
                 utbetalingResponse = UtbetalingResponse(
                     status = UtbetalingStatus.FEILET,
                     vedtakId = vedtakId,
+                    behandlingId = behandlingId,
                     feilmelding = beskrivelse
                 )
             ).toJson()
@@ -121,7 +144,8 @@ class VedtakMottaker(
             UtbetalingEvent(
                 utbetalingResponse = UtbetalingResponse(
                     status = utbetaling.status(),
-                    vedtakId = utbetaling.vedtakId.value
+                    vedtakId = utbetaling.vedtakId.value,
+                    behandlingId = utbetaling.behandlingId.value
                 )
             ).toJson()
         )

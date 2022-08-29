@@ -28,14 +28,15 @@ fun vedtak(
         )
     ),
     ident: String = "12345678913",
-    sakId: Long = 1
+    sakId: Long = 1,
+    behandling: Behandling = Behandling(
+        id = UUID.randomUUID(),
+        type = BehandlingType.FØRSTEGANGSBEHANDLING
+    )
 
 ): Vedtak = Vedtak(
     vedtakId = vedtakId,
-    behandling = Behandling(
-        id = UUID.randomUUID(),
-        type = BehandlingType.FØRSTEGANGSBEHANDLING
-    ),
+    behandling = behandling,
     sak = Sak(
         id = sakId,
         ident = ident,
@@ -61,13 +62,14 @@ fun vedtak(
 )
 
 fun ugyldigVedtakTilUtbetaling(
-    vedtakId: Long = 1
-): Vedtak = Vedtak(
-    vedtakId = vedtakId,
-    behandling = Behandling(
+    vedtakId: Long = 1,
+    behandling: Behandling = Behandling(
         id = UUID.randomUUID(),
         type = BehandlingType.FØRSTEGANGSBEHANDLING
-    ),
+    )
+): Vedtak = Vedtak(
+    vedtakId = vedtakId,
+    behandling = behandling,
     sak = Sak(
         id = 1,
         ident = "12345678913",

@@ -64,7 +64,7 @@ internal class UtbetalingServiceTest {
      */
     @Test
     fun `skal stoppe opprettelse av utbetaling hvis en eller flere utbetalingslinje-IDer finnes fra for`() {
-        every { utbetalingDao.hentUtbetaling(any()) } returns null
+        every { utbetalingDao.hentUtbetaling(any()) } returns utbetaling()
         every { utbetalingDao.hentDupliserteUtbetalingslinjer(any(), any()) } returns listOf(utbetalingslinje())
 
         val vedtak = vedtakLoepende()

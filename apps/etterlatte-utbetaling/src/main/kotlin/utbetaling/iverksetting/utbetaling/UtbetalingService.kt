@@ -30,12 +30,11 @@ class UtbetalingService(
             utbetalingDao.hentDupliserteUtbetalingslinjer(vedtak.pensjonTilUtbetaling, vedtak.vedtakId)
 
         return when {
-            utbetalingForVedtak.utbetalingEksisterer() ->
-                UtbetalingForVedtakEksisterer(utbetalingForVedtak!!)
-
-            dupliserteUtbetalingslinjer.isNotEmpty() ->
-                UtbetalingslinjerForVedtakEksisterer(dupliserteUtbetalingslinjer)
-
+            utbetalingForVedtak.utbetalingEksisterer() -> UtbetalingForVedtakEksisterer(utbetalingForVedtak!!)
+            dupliserteUtbetalingslinjer.isNotEmpty() -> UtbetalingslinjerForVedtakEksisterer(
+                utbetalingForVedtak,
+                dupliserteUtbetalingslinjer
+            )
             else -> {
                 val utbetaling = UtbetalingMapper(
                     tidligereUtbetalinger = utbetalingDao.hentUtbetalinger(vedtak.sak.id),
@@ -45,16 +44,15 @@ class UtbetalingService(
                 oppdragMapper.oppdragFraUtbetaling(
                     utbetaling = utbetaling,
                     foerstegangsbehandling = vedtak.behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING
-                )
-                    .also {
-                        utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = it))
-                        oppdragSender.sendOppdrag(it)
-                    }.let {
-                        utbetalingDao.nyUtbetalingshendelse(
-                            utbetaling.vedtakId.value,
-                            utbetaling.sendtUtbetalingshendelse(clock)
-                        ).let { SendtTilOppdrag(it) }
-                    }
+                ).also {
+                    utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = it))
+                    oppdragSender.sendOppdrag(it)
+                }.let {
+                    utbetalingDao.nyUtbetalingshendelse(
+                        utbetaling.vedtakId.value,
+                        utbetaling.sendtUtbetalingshendelse(clock)
+                    ).let { SendtTilOppdrag(it) }
+                }
             }
         }
     }
@@ -66,7 +64,8 @@ class UtbetalingService(
             utbetaling == null -> UtbetalingFinnesIkke(oppdrag.vedtakId())
             utbetaling.ugyldigStatus() -> {
                 UgyldigStatus(
-                    utbetaling.status()
+                    utbetaling.status(),
+                    utbetaling
                 )
             }
             else -> {
@@ -101,8 +100,7 @@ class UtbetalingService(
     fun Utbetaling.ugyldigStatus() =
         this.status() != UtbetalingStatus.SENDT && this.status() != UtbetalingStatus.MOTTATT
 
-    fun Utbetaling?.utbetalingEksisterer() =
-        this != null && this.status() != UtbetalingStatus.MOTTATT
+    fun Utbetaling?.utbetalingEksisterer() = this != null && this.status() != UtbetalingStatus.MOTTATT
 
     companion object {
         private val logger = LoggerFactory.getLogger(UtbetalingService::class.java)
@@ -111,12 +109,16 @@ class UtbetalingService(
 
 sealed class IverksettResultat {
     class SendtTilOppdrag(val utbetaling: Utbetaling) : IverksettResultat()
-    class UtbetalingslinjerForVedtakEksisterer(val utbetalingslinjer: List<Utbetalingslinje>) : IverksettResultat()
-    class UtbetalingForVedtakEksisterer(val utbetaling: Utbetaling) : IverksettResultat()
+    class UtbetalingslinjerForVedtakEksisterer(
+        val utbetaling: Utbetaling?,
+        val utbetalingslinjer: List<Utbetalingslinje>
+    ) : IverksettResultat()
+
+    class UtbetalingForVedtakEksisterer(val eksisterendeUtbetaling: Utbetaling) : IverksettResultat()
 }
 
 sealed class OppdaterKvitteringResultat {
     class KvitteringOppdatert(val utbetaling: Utbetaling) : OppdaterKvitteringResultat()
     class UtbetalingFinnesIkke(val vedtakId: Long) : OppdaterKvitteringResultat()
-    class UgyldigStatus(val status: UtbetalingStatus) : OppdaterKvitteringResultat()
+    class UgyldigStatus(val status: UtbetalingStatus, val utbetaling: Utbetaling) : OppdaterKvitteringResultat()
 }

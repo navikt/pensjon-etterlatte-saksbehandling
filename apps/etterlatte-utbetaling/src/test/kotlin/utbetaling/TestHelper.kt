@@ -124,12 +124,13 @@ fun utbetaling(
             utbetalingId = id,
             tidspunkt = opprettet
         )
-    )
+    ),
+    behandlingId: UUID = UUID.randomUUID()
 ) =
     Utbetaling(
         id = id,
         vedtakId = VedtakId(vedtakId),
-        behandlingId = UUID.randomUUID().let { BehandlingId(it, it.toUUID30()) },
+        behandlingId = BehandlingId(behandlingId, behandlingId.toUUID30()),
         sakId = sakId,
         vedtak = utbetalingsvedtak(vedtakId),
         opprettet = opprettet,

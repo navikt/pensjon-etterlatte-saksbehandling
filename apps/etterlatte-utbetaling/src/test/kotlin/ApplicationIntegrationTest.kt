@@ -5,6 +5,8 @@ import io.mockk.verify
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
+import no.nav.etterlatte.domene.vedtak.Behandling
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
@@ -16,7 +18,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.oppdragMedFeiletKvittering
 import no.nav.etterlatte.utbetaling.oppdragMedGodkjentKvittering
-import no.nav.etterlatte.utbetaling.readFile
 import no.nav.etterlatte.utbetaling.ugyldigVedtakTilUtbetaling
 import no.nav.etterlatte.utbetaling.vedtak
 import no.nav.etterlatte.utbetaling.vedtakEvent
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.junit.jupiter.Container
+import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -74,7 +76,17 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal sende utbetaling til oppdrag`() {
-        sendFattetVedtakEvent(vedtakEvent(vedtak()))
+        val behandlingId = UUID.randomUUID()
+        sendFattetVedtakEvent(
+            vedtakEvent(
+                vedtak(
+                    behandling = Behandling(
+                        id = behandlingId,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING
+                    )
+                )
+            )
+        )
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish(
@@ -82,7 +94,8 @@ class ApplicationIntegrationTest {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.vedtakId == 1L &&
-                            this.utbetalingResponse.status == UtbetalingStatus.SENDT
+                            this.utbetalingResponse.status == UtbetalingStatus.SENDT &&
+                            this.utbetalingResponse.behandlingId == behandlingId
                     }
                 }
             )
@@ -102,7 +115,8 @@ class ApplicationIntegrationTest {
                             this.utbetalingResponse.feilmelding
                             ?.contains(
                                 "En feil oppstod under prosessering av vedtak med vedtakId=null"
-                            ) != false
+                            ) != false &&
+                            this.utbetalingResponse.behandlingId == null
                     }
                 }
             )
@@ -111,8 +125,28 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal feile dersom det finnes utbetaling for vedtaket allerede`() {
-        sendFattetVedtakEvent(vedtakEvent(vedtak()))
-        sendFattetVedtakEvent(vedtakEvent(vedtak()))
+        val behandlingId_forste = UUID.randomUUID()
+        val behandlingId_andre = UUID.randomUUID()
+        sendFattetVedtakEvent(
+            vedtakEvent(
+                vedtak(
+                    behandling = Behandling(
+                        id = behandlingId_forste,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING
+                    )
+                )
+            )
+        )
+        sendFattetVedtakEvent(
+            vedtakEvent(
+                vedtak(
+                    behandling = Behandling(
+                        id = behandlingId_andre,
+                        type = BehandlingType.FØRSTEGANGSBEHANDLING
+                    )
+                )
+            )
+        )
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish(
@@ -121,7 +155,12 @@ class ApplicationIntegrationTest {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
                             this.utbetalingResponse.feilmelding
-                            ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false
+                            ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false &&
+                            this.utbetalingResponse.feilmelding
+                            ?.contains("behandlingId for nytt vedtak: $behandlingId_andre") == true &&
+                            this.utbetalingResponse.feilmelding
+                            ?.contains("behandlingId for tidligere utbetaling: $behandlingId_forste") == true &&
+                            this.utbetalingResponse.behandlingId == behandlingId_andre
                     }
                 }
             )
@@ -130,8 +169,23 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal feile dersom det eksisterer utbetalingslinjer med samme id som i nytt vedtak`() {
-        sendFattetVedtakEvent(vedtakEvent(vedtak()))
-        sendFattetVedtakEvent(vedtakEvent(vedtak(vedtakId = 2)))
+        sendFattetVedtakEvent(
+            vedtakEvent(
+                vedtak()
+            )
+        )
+        val behandlingId = UUID.randomUUID()
+        sendFattetVedtakEvent(
+            vedtakEvent(
+                vedtak(
+                    vedtakId = 2,
+                    behandling = Behandling(
+                        BehandlingType.FØRSTEGANGSBEHANDLING,
+                        behandlingId
+                    )
+                )
+            )
+        )
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish(
@@ -142,7 +196,8 @@ class ApplicationIntegrationTest {
                             this.utbetalingResponse.feilmelding
                             ?.contains(
                                 "En eller flere utbetalingslinjer med id=[1] eksisterer fra før"
-                            ) != false
+                            ) != false &&
+                            this.utbetalingResponse.behandlingId == behandlingId
                     }
                 }
             )
@@ -151,7 +206,17 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal motta kvittering fra oppdrag som er godkjent`() {
-        sendFattetVedtakEvent(ATTESTERT_VEDTAK)
+        val behandlingId = UUID.randomUUID()
+        sendFattetVedtakEvent(
+            vedtakEvent(
+                vedtak(
+                    behandling = Behandling(
+                        BehandlingType.FØRSTEGANGSBEHANDLING,
+                        behandlingId
+                    )
+                )
+            )
+        )
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering())
 
         verify(timeout = TIMEOUT) {
@@ -161,7 +226,8 @@ class ApplicationIntegrationTest {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.vedtakId == 1L &&
-                            this.utbetalingResponse.status == UtbetalingStatus.GODKJENT
+                            this.utbetalingResponse.status == UtbetalingStatus.GODKJENT &&
+                            this.utbetalingResponse.behandlingId == behandlingId
                     }
                 }
             )
@@ -179,7 +245,8 @@ class ApplicationIntegrationTest {
                     objectMapper.readValue(it, UtbetalingEvent::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.vedtakId == 1L &&
-                            this.utbetalingResponse.status == UtbetalingStatus.FEILET
+                            this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                            this.utbetalingResponse.behandlingId == null
                     }
                 }
             )
@@ -188,7 +255,17 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal motta kvittering fra oppdrag som er godkjent men feiler fordi status for utbetaling er ugyldig`() {
-        sendFattetVedtakEvent(ATTESTERT_VEDTAK)
+        val behandlingId = UUID.randomUUID()
+        sendFattetVedtakEvent(
+            vedtakEvent(
+                vedtak(
+                    behandling = Behandling(
+                        BehandlingType.FØRSTEGANGSBEHANDLING,
+                        behandlingId
+                    )
+                )
+            )
+        )
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering()) // setter status til GODKJENT
         simulerKvitteringsmeldingFraOppdrag(oppdragMedGodkjentKvittering()) // forventer at status skal være SENDT
 
@@ -201,7 +278,8 @@ class ApplicationIntegrationTest {
                             this.utbetalingResponse.vedtakId == 1L &&
                             this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
                             this.utbetalingResponse.feilmelding ==
-                            "Utbetalingen for vedtakId=1 har feil status (GODKJENT)"
+                            "Utbetalingen for vedtakId=1 har feil status (GODKJENT)" &&
+                            this.utbetalingResponse.behandlingId == behandlingId
                     }
                 }
             )
@@ -210,7 +288,17 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal motta kvittering fra oppdrag som har feilet`() {
-        sendFattetVedtakEvent(ATTESTERT_VEDTAK)
+        val behandlingId = UUID.randomUUID()
+        sendFattetVedtakEvent(
+            vedtakEvent(
+                vedtak(
+                    behandling = Behandling(
+                        BehandlingType.FØRSTEGANGSBEHANDLING,
+                        behandlingId
+                    )
+                )
+            )
+        )
         simulerKvitteringsmeldingFraOppdrag(oppdragMedFeiletKvittering())
 
         verify(timeout = TIMEOUT) {
@@ -221,7 +309,8 @@ class ApplicationIntegrationTest {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.vedtakId == 1L &&
                             this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
-                            this.utbetalingResponse.feilmelding == "KodeMelding Beskrivelse"
+                            this.utbetalingResponse.feilmelding == "KodeMelding Beskrivelse" &&
+                            this.utbetalingResponse.behandlingId == behandlingId
                     }
                 }
             )
@@ -257,7 +346,6 @@ class ApplicationIntegrationTest {
     }
 
     companion object {
-        val ATTESTERT_VEDTAK = readFile("/vedtak.json")
         const val TIMEOUT: Long = 5000
     }
 }

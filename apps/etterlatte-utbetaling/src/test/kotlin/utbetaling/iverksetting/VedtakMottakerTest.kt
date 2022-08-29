@@ -13,6 +13,7 @@ import no.nav.etterlatte.utbetaling.utbetalingshendelse
 import no.nav.etterlatte.utbetaling.utbetalingslinje
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -42,6 +43,7 @@ internal class VedtakMottakerTest {
             assertEquals(EVENT_NAME_OPPDATERT, event.event)
             assertEquals(utbetaling.status(), event.utbetalingResponse.status)
             assertEquals(utbetaling.vedtakId.value, event.utbetalingResponse.vedtakId)
+            assertEquals(utbetaling.behandlingId.value, event.utbetalingResponse.behandlingId)
         }
     }
 
@@ -62,9 +64,10 @@ internal class VedtakMottakerTest {
             assertEquals(EVENT_NAME_OPPDATERT, event.event)
             assertEquals(UtbetalingStatus.FEILET, event.utbetalingResponse.status)
             assertEquals(utbetaling.vedtakId.value, event.utbetalingResponse.vedtakId)
-            assertEquals(
-                "Vedtak med vedtakId=${utbetaling.vedtakId.value} eksisterer fra før",
-                event.utbetalingResponse.feilmelding
+            assertTrue(
+                event.utbetalingResponse.feilmelding!!.contains(
+                    "Vedtak med vedtakId=${utbetaling.vedtakId.value} eksisterer fra før"
+                )
             )
         }
     }
@@ -75,9 +78,10 @@ internal class VedtakMottakerTest {
             utbetalingslinje(utbetalingslinjeId = 1),
             utbetalingslinje(utbetalingslinjeId = 2)
         )
+        val utbetaling = utbetaling()
 
         every { utbetalingService.iverksettUtbetaling(any()) } returns
-            IverksettResultat.UtbetalingslinjerForVedtakEksisterer(utbetalingslinjer)
+            IverksettResultat.UtbetalingslinjerForVedtakEksisterer(utbetaling, utbetalingslinjer)
 
         inspector.apply { sendTestMessage(ATTESTERT_VEDTAK) }
 

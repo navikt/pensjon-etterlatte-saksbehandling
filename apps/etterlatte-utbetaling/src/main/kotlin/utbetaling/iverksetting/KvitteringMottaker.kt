@@ -60,14 +60,14 @@ class KvitteringMottaker(
                         is UtbetalingFinnesIkke -> {
                             "Finner ingen utbetaling for vedtakId=${resultat.vedtakId}".also {
                                 logger.error(it)
-                                sendUtbetalingFeiletEvent(it, oppdrag)
+                                sendUtbetalingFeiletEvent(it, oppdrag, null)
                             }
                         }
                         is UgyldigStatus -> {
                             """Utbetalingen for vedtakId=${oppdrag.vedtakId()} har feil status (${resultat.status})
                             """.trimIndent().also {
                                 logger.error(it)
-                                sendUtbetalingFeiletEvent(it, oppdrag)
+                                sendUtbetalingFeiletEvent(it, oppdrag, resultat.utbetaling)
                             }
                         }
                     }
@@ -110,18 +110,24 @@ class KvitteringMottaker(
                 utbetalingResponse = UtbetalingResponse(
                     status = utbetaling.status(),
                     vedtakId = utbetaling.vedtakId.value,
+                    behandlingId = utbetaling.behandlingId.value,
                     feilmelding = utbetaling.kvitteringFeilmelding()
                 )
             ).toJson()
         )
 
-    private fun sendUtbetalingFeiletEvent(feilmelding: String, oppdrag: Oppdrag? = null) =
+    private fun sendUtbetalingFeiletEvent(
+        feilmelding: String,
+        oppdrag: Oppdrag? = null,
+        utbetaling: Utbetaling? = null
+    ) =
         rapidsConnection.publish(
             oppdrag?.sakId() ?: "",
             UtbetalingEvent(
                 utbetalingResponse = UtbetalingResponse(
                     status = UtbetalingStatus.FEILET,
                     vedtakId = oppdrag?.vedtakId(),
+                    behandlingId = utbetaling?.behandlingId?.value,
                     feilmelding = feilmelding
                 )
             ).toJson()

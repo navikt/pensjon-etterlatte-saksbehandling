@@ -1,3 +1,4 @@
+import { apiClient, ApiResponse } from './apiClient'
 import { IApiResponse } from './types'
 
 const path = process.env.REACT_APP_VEDTAK_URL
@@ -16,20 +17,24 @@ export const hentSaker = async (): Promise<IApiResponse<any>> => {
   }
 }
 
-interface OppgaveResponse {
-  oppgaver: ReadonlyArray<any>
+export interface OppgaveDTO {
+  sakId: number
+  behandlingsId: string
+  regdato: Date
+  fristdato: Date
+  fnr: string
+  soeknadType: string
+  behandlingType: string
+  beskrivelse: string
+  oppgaveStatus: string
+  saksbehandler: string
+  handling: string
+  antallSoesken: number | null
+}
+export interface OppgaveResponse {
+  oppgaver: ReadonlyArray<OppgaveDTO>
 }
 
-export const hentOppgaver = async (): Promise<IApiResponse<any>> => {
-  try {
-    const result: Response = await fetch(`${path}/api/oppgaver`)
-    const data: OppgaveResponse = await result.json()
-    return {
-      status: result.status,
-      data: data.oppgaver,
-    }
-  } catch (e) {
-    console.log(e)
-    return { status: 500 }
-  }
+export const hentOppgaver = async (): Promise<ApiResponse<OppgaveResponse>> => {
+  return apiClient<OppgaveResponse>({ url: '/oppgaver', method: 'GET' })
 }

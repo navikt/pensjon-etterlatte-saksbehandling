@@ -13,10 +13,9 @@ import {
 import { Column } from 'react-table'
 import { kolonner } from './OppgaveKolonner'
 import { initialOppgaveFelter, IOppgaveFelter } from './typer/oppgavefelter'
-import { hentOppgaver } from '../../shared/api/oppgaver'
+import { hentOppgaver, OppgaveDTO } from '../../shared/api/oppgaver'
 import Spinner from '../../shared/Spinner'
 import { AppContext, IAppContext } from '../../store/AppContext'
-import { IApiResponse } from '../../shared/api/types'
 
 const OppgavebenkContainer = styled.div`
   max-width: 60em;
@@ -47,17 +46,18 @@ const Oppgavebenken = () => {
   }
 
   useEffect(() => {
-    setLasterOppgaver(true)
+    const lastOppgaver = async () => {
+      const response = await hentOppgaver()
 
-    hentOppgaver()
-      .then((response: IApiResponse<any>) => {
-        const mappedResponse = response.data.map((oppgave: any) => mapOppgaveResponse(oppgave))
-        setOppgaver(mappedResponse)
-        setLasterOppgaver(false)
-      })
-      .catch(() => {
-        setLasterOppgaver(false)
-      })
+      if (response.status === 'ok') {
+        setOppgaver(response.data.oppgaver.map(mapOppgaveResponse))
+      }
+
+      setLasterOppgaver(false)
+    }
+
+    setLasterOppgaver(true)
+    lastOppgaver()
   }, [toggleHentOppgaver])
 
   const data: ReadonlyArray<IOppgave> = React.useMemo(() => oppgaver, [oppgaver])
@@ -81,7 +81,7 @@ const Oppgavebenken = () => {
   )
 }
 
-function mapOppgaveResponse(data: any): IOppgave {
+function mapOppgaveResponse(data: OppgaveDTO): IOppgave {
   const oppgave: IOppgave = {
     sakId: data.sakId,
     behandlingsId: data.behandlingsId,

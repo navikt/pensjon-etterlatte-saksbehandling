@@ -3,12 +3,14 @@ import no.nav.etterlatte.gyldigsoeknad.barnepensjon.GyldigSoeknadService
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.SoeknadType
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat.OPPFYLT
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -29,6 +31,7 @@ internal class FordeltSoeknadRiver(
             correlationId()
             validate { it.demandValue(FordelerFordelt.soeknadFordeltKey, true) }
             validate { it.requireKey(FordelerFordelt.skjemaInfoKey) }
+            validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.BARNEPENSJON.name) }
         }.register(this)
     }
 
@@ -42,7 +45,7 @@ internal class FordeltSoeknadRiver(
                 val gyldighetsVurdering = gyldigSoeknadService.vurderGyldighet(personGalleri)
                 logger.info("Gyldighetsvurdering utført: {}", gyldighetsVurdering)
 
-                val sakId = behandlingClient.skaffSak(personGalleri.soeker, soeknad.type.name)
+                val sakId = behandlingClient.skaffSak(personGalleri.soeker, "BARNEPENSJON")
                 val behandlingId = behandlingClient.initierBehandling(sakId, soeknad.mottattDato, personGalleri)
                 behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)
                 logger.info("Behandling {} startet på sak {}", behandlingId, sakId)

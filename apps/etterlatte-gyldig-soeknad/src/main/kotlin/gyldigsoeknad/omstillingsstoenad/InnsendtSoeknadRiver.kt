@@ -21,7 +21,7 @@ internal class InnsendtSoeknadRiver(
             eventName(SoeknadInnsendt.eventName)
             correlationId()
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
-            validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, "OMSTILLINGSSTOENAD") }
+            validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, "OMSTILLINGSSTOENAD") } // TODO endre til typet verdi når denne finnes
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "1") }
             validate { it.requireKey(SoeknadInnsendt.lagretSoeknadIdKey) }
             validate { it.requireKey(SoeknadInnsendt.hendelseGyldigTilKey) }

@@ -13,7 +13,7 @@ interface options {
   body?: Record<string, unknown>
 }
 
-export async function apiClient<T>(props: options): Promise<ApiResponse<T>> {
+async function apiFetcher<T>(props: options): Promise<ApiResponse<T>> {
   const { url, method, body } = props
 
   const trimmedUrl = url.startsWith('/') ? url.slice(1) : url
@@ -34,3 +34,8 @@ export async function apiClient<T>(props: options): Promise<ApiResponse<T>> {
   console.error(response)
   return { status: 'error', statusCode: response.status }
 }
+
+export const apiClient = {
+  get: <T>(url: string) => apiFetcher<T>({ url, method: 'GET' }),
+  post: <T>(url: string, body: Record<string, unknown>) => apiFetcher<T>({ url, body, method: 'POST' }),
+} as const

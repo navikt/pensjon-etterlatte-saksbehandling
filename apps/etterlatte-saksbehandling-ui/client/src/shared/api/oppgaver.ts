@@ -35,6 +35,5 @@ export interface OppgaveResponse {
   oppgaver: ReadonlyArray<OppgaveDTO>
 }
 
-export const hentOppgaver = async (): Promise<ApiResponse<OppgaveResponse>> => {
-  return apiClient<OppgaveResponse>({ url: '/oppgaver', method: 'GET' })
-}
+export const hentOppgaver = async (): Promise<ApiResponse<OppgaveResponse>> =>
+  apiClient.get<OppgaveResponse>('/oppgaver')

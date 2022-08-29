@@ -208,14 +208,14 @@ fun kriterieKunNorskeBostedsadresserSisteFemAar(
 
     if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
 
-    try {
+    return try {
         val adresser = hentBostedsAdresser(avdoedPdl)
         val femAarFoerDoedsdato = hentDoedsdato(avdoedPdl).minusYears(5)
         val vurderingKunNorskeBostedadresser = harKunNorskeAdresserEtterDato(adresser, femAarFoerDoedsdato)
 
-        return Kriterie(kriterietype, vurderingKunNorskeBostedadresser, opplysningsGrunnlag)
+        Kriterie(kriterietype, vurderingKunNorskeBostedadresser, opplysningsGrunnlag)
     } catch (ex: OpplysningKanIkkeHentesUt) {
-        return Kriterie(kriterietype, VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, opplysningsGrunnlag)
+        Kriterie(kriterietype, VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, opplysningsGrunnlag)
     }
 }
 

@@ -1,11 +1,15 @@
 package barnepensjon.vilkaar.avdoedesmedlemskap
 
-import no.nav.etterlatte.barnepensjon.opplysningsGrunnlagNull
+import no.nav.etterlatte.barnepensjon.Periode
+import no.nav.etterlatte.barnepensjon.hentDoedsdato
+import no.nav.etterlatte.barnepensjon.hentGaps
+import no.nav.etterlatte.barnepensjon.kombinerPerioder
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregAnsettelsesdetaljer
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregAnsettelsesperiode
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
+import no.nav.etterlatte.libs.common.inntekt.Inntekt
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
@@ -17,8 +21,10 @@ import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.time.temporal.TemporalAdjusters.firstDayOfNextMonth
 
 fun vilkaarAvdoedesMedlemskap(
     avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
@@ -26,17 +32,23 @@ fun vilkaarAvdoedesMedlemskap(
     inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>?,
     arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?
 ): VurdertVilkaar {
-    // Kriterier:
-    // 1. bodd i norge siste 5 årene
+    if (listOf(avdoedSoeknad, avdoedPdl, inntektsOpplysning, arbeidsforholdOpplysning).any { it == null }) {
+        return VurdertVilkaar(
+            Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            Utfall.TRENGER_AVKLARING,
+            emptyList(),
+            LocalDateTime.now()
+        )
+    }
+
     val bosattNorge = metakriterieBosattNorge(avdoedSoeknad, avdoedPdl).kriterie
-    // 2. Arbeidet i norge siste 5 årene
-    // Kriterie A2-1 (men skal være 80%)
-    val harHatt100prosentStillingSisteFemAar = kriterieHarHatt100prosentStillingSisteFemAar(arbeidsforholdOpplysning)
-    // 3. ingen opphold utenfor Norge
-    // ELLER :
-    val kriterier: List<Kriterie> = listOf(
+
+    val kriterier: List<Kriterie> = listOfNotNull(
         // kriterie A1-1: AP eller uføretrygd i hele 5-årsperioden
-        kriterieHarMottattPensjonEllerTrygdSisteFemAar(inntektsOpplysning)
+        kriterieHarMottattPensjonEllerTrygdSisteFemAar(avdoedPdl!!, inntektsOpplysning!!),
+        // Kriterie A2-1 (todo: skal være 80%)
+        kriterieHarHatt100prosentStillingSisteFemAar(arbeidsforholdOpplysning!!)
     )
 
     return VurdertVilkaar(
@@ -54,63 +66,63 @@ data class DetaljerPeriode(
 )
 
 fun kriterieHarHatt100prosentStillingSisteFemAar(
-    arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?
+    arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>
 ): Kriterie {
-    val perioder = arrayListOf<DetaljerPeriode>()
-    arbeidsforholdOpplysning?.opplysning?.arbeidsforhold?.forEach {
-        perioder.add(DetaljerPeriode(it.ansettelsesperiode, it.ansettelsesdetaljer))
+    val perioder = arbeidsforholdOpplysning.opplysning.arbeidsforhold.map {
+        DetaljerPeriode(it.ansettelsesperiode, it.ansettelsesdetaljer)
     }
 
-    val opplysningsGrunnlag = listOfNotNull(
-        arbeidsforholdOpplysning?.let {
-            Kriteriegrunnlag(
-                arbeidsforholdOpplysning.id,
-                KriterieOpplysningsType.AVDOED_STILLINGSPROSENT,
-                arbeidsforholdOpplysning.kilde,
-                perioder
-            )
-        }
+    val opplysningsGrunnlag = Kriteriegrunnlag(
+        arbeidsforholdOpplysning.id,
+        KriterieOpplysningsType.AVDOED_STILLINGSPROSENT,
+        arbeidsforholdOpplysning.kilde,
+        perioder
     )
 
     return Kriterie(
         Kriterietyper.AVDOED_HAR_HATT_100PROSENT_STILLING_SISTE_FEM_AAR,
         VurderingsResultat.OPPFYLT,
-        opplysningsGrunnlag
+        listOf(opplysningsGrunnlag)
     )
 }
 
 fun kriterieHarMottattPensjonEllerTrygdSisteFemAar(
-    inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>?
+    avdoedPdl: VilkaarOpplysning<Person>,
+    inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>
 ): Kriterie {
-    val grunnlag = inntektsOpplysning?.opplysning?.pensjonEllerTrygd?.let { inntekter ->
+    val grunnlag = opprettGrunnlag(inntektsOpplysning)
+    val doedsdato = hentDoedsdato(avdoedPdl)
+    val gaps = finnGapsIUtbetalinger(grunnlag.first().opplysning, doedsdato.minusYears(5), doedsdato)
+
+    return Kriterie(
+        navn = Kriterietyper.AVDOED_HAR_MOTTATT_PENSJON_TRYGD_SISTE_FEM_AAR,
+        resultat = if (gaps.isEmpty()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT,
+        basertPaaOpplysninger = grunnlag
+    )
+}
+
+fun opprettGrunnlag(inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>) =
+    inntektsOpplysning.opplysning.pensjonEllerTrygd.let { inntekter ->
         inntekter.filter { listOf("ufoeretrygd", "alderspensjon").contains(it.beskrivelse) }
-            .map { UtbetaltPeriode(YearMonth.parse(it.utbetaltIMaaned), it.beloep) }
-            .sortedBy { it.gyldigFraOgMed }
-            .let { utbetalingsPerioder ->
+            .sortedBy { YearMonth.parse(it.utbetaltIMaaned) }
+            .let { utbetalinger ->
                 listOf(
                     Kriteriegrunnlag(
                         inntektsOpplysning.id,
                         KriterieOpplysningsType.AVDOED_UFORE_PENSJON,
                         Grunnlagsopplysning.Inntektskomponenten("inntektskomponenten"),
-                        utbetalingsPerioder
+                        utbetalinger
                     )
                 )
             }
     }
 
-    // todo: vurder vilkåret ved å se på periodene.
-    return if (grunnlag != null) {
-        Kriterie(
-            navn = Kriterietyper.AVDOED_HAR_MOTTATT_PENSJON_TRYGD_SISTE_FEM_AAR,
-            resultat = VurderingsResultat.OPPFYLT,
-            basertPaaOpplysninger = grunnlag
-        )
-    } else {
-        opplysningsGrunnlagNull(
-            kriterietype = Kriterietyper.AVDOED_HAR_MOTTATT_PENSJON_TRYGD_SISTE_FEM_AAR,
-            opplysningsGrunnlag = emptyList()
-        )
-    }
-}
+fun finnGapsIUtbetalinger(utbetalinger: List<Inntekt>, fra: LocalDate, til: LocalDate): List<Periode> =
+    utbetalinger.map {
+        val utbetaltIMaaned = YearMonth.parse(it.utbetaltIMaaned)
+        val gyldigFra = LocalDate.of(utbetaltIMaaned.year, utbetaltIMaaned.month, 1)
 
-data class UtbetaltPeriode(val gyldigFraOgMed: YearMonth, val beloep: Int)
+        Periode(gyldigFra, gyldigFra.with(firstDayOfNextMonth()))
+    }.let {
+        hentGaps(kombinerPerioder(it), fra, til)
+    }

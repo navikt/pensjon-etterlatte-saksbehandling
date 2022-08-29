@@ -81,7 +81,7 @@ class ApplicationTest {
             }.apply {
                 assertEquals(HttpStatusCode.NotFound, status)
             }
-            val sak: Sak = client.get("/personer/$fnr/saker/BP") {
+            val sak: Sak = client.get("/personer/$fnr/saker/BARNEPENSJON") {
                 addAuthSaksbehandler()
             }.apply {
                 assertEquals(HttpStatusCode.OK, status)
@@ -93,7 +93,7 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.OK, it.status)
                 val lestSak: Sak = it.body()
                 assertEquals("123", lestSak.ident)
-                assertEquals(SakType.BP, lestSak.sakType)
+                assertEquals(SakType.BARNEPENSJON, lestSak.sakType)
             }
 
             val behandlingId = client.post("/behandlinger") {

@@ -53,4 +53,4 @@ private fun <T> inTransaction(block: () -> T): T = Kontekst.get().databasecontxt
 
 data class Sak(val ident: String, val sakType: SakType, val id: Long)
 data class Saker(val saker: List<Sak>)
-enum class SakType { BP, OMS }
+enum class SakType { BARNEPENSJON, OMSTILLINGSSTOENAD }

@@ -133,7 +133,7 @@ export const Tidslinje = styled.div`
   margin-top: 110px;
   width: 100%;
   position: relative;
-  margin-bottom: 30px;
+  margin-bottom: 50px;
 `
 
 export const GridSirkel = styled.div`

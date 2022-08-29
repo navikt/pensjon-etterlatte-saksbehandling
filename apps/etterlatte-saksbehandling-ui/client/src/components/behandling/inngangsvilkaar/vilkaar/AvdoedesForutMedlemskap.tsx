@@ -15,9 +15,13 @@ import { VilkaarProps } from '../types'
 import { TidslinjeMedlemskap } from './TidslinjeMedlemskap'
 import { KildeDatoVilkaar } from './KildeDatoOpplysning'
 import { vilkaarErOppfylt } from './utils'
+import { Button } from '@navikt/ds-react'
+import { useState } from 'react'
+import { PeriodeModal } from './PeriodeModal'
 
 export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <VilkaarBorder id={props.id}>
@@ -31,19 +35,29 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
               </Lovtekst>
             </VilkaarColumn>
           </VilkaarInfobokser>
-          <VilkaarVurderingColumn>
-            {vilkaar != undefined && (
+          {vilkaar != undefined && (
+            <VilkaarVurderingColumn>
               <VilkaarVurderingContainer>
                 <VilkaarlisteTitle>
                   <StatusIcon status={vilkaar.resultat} large={true} /> {vilkaarErOppfylt(vilkaar.resultat)}
                 </VilkaarlisteTitle>
                 <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
               </VilkaarVurderingContainer>
-            )}
-          </VilkaarVurderingColumn>
+            </VilkaarVurderingColumn>
+          )}
         </VilkaarWrapper>
-        {vilkaar != undefined ? <TidslinjeMedlemskap vilkaar={vilkaar} /> : <div>Vilkår mangler</div>}
+        {vilkaar != undefined ? (
+          <>
+            <TidslinjeMedlemskap vilkaar={vilkaar} />
+            <Button variant={'secondary'} size={'small'} onClick={() => setIsOpen(true)}>
+              + Legg til periode
+            </Button>
+          </>
+        ) : (
+          <div>Vilkår mangler</div>
+        )}
       </Innhold>
+      {isOpen && <PeriodeModal isOpen={isOpen} setIsOpen={(value: boolean) => setIsOpen(value)} />}
     </VilkaarBorder>
   )
 }

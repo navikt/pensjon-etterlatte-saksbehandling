@@ -1,5 +1,6 @@
 package no.nav.etterlatte.opplysningerfrasoknad
 
+import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
@@ -20,25 +21,25 @@ internal class StartUthentingFraSoeknad(
 
     init {
         River(rapidsConnection).apply {
-            eventName("GYLDIG_SOEKNAD:VURDERT")
+            eventName(GyldigSoeknadVurdert.eventName)
             correlationId()
-            validate { it.requireKey("@skjema_info") }
-            validate { it.requireKey("sakId") }
-            validate { it.requireKey("behandlingId") }
-            validate { it.requireKey("gyldigInnsender") }
+            validate { it.requireKey(GyldigSoeknadVurdert.skjemaInfoKey) }
+            validate { it.requireKey(GyldigSoeknadVurdert.sakIdKey) }
+            validate { it.requireKey(GyldigSoeknadVurdert.behandlingIdKey) }
+            validate { it.requireKey(GyldigSoeknadVurdert.gyldigInnsenderKey) }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val opplysninger = opplysningsuthenter.lagOpplysningsListe(packet["@skjema_info"])
+            val opplysninger = opplysningsuthenter.lagOpplysningsListe(packet[GyldigSoeknadVurdert.skjemaInfoKey])
 
             JsonMessage.newMessage(
                 "OPPLYSNING:NY",
                 mapOf(
-                    "sakId" to packet["sakId"],
-                    "behandlingId" to packet["behandlingId"],
-                    "gyldigInnsender" to packet["gyldigInnsender"],
+                    "sakId" to packet[GyldigSoeknadVurdert.sakIdKey],
+                    "behandlingId" to packet[GyldigSoeknadVurdert.behandlingIdKey],
+                    "gyldigInnsender" to packet[GyldigSoeknadVurdert.gyldigInnsenderKey],
                     correlationIdKey to packet[correlationIdKey],
                     "opplysning" to opplysninger
                 )

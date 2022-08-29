@@ -2,6 +2,8 @@ package no.nav.etterlatte.fordeler
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.fordeler.FordelerResultat.GyldigForBehandling
+import no.nav.etterlatte.libs.common.event.FordelerFordelt
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -70,16 +72,16 @@ internal class Fordeler(
 
     private fun JsonMessage.toFordelerEvent() =
         FordelerEvent(
-            soeknad = get("@skjema_info").toJson().let(objectMapper::readValue),
-            hendelseGyldigTil = get("@hendelse_gyldig_til").textValue().let(OffsetDateTime::parse)
+            soeknad = get(SoeknadInnsendt.skjemaInfoKey).toJson().let(objectMapper::readValue),
+            hendelseGyldigTil = get(SoeknadInnsendt.hendelseGyldigTilKey).textValue().let(OffsetDateTime::parse)
         )
 
     private fun JsonMessage.leggPaaFordeltStatus(): JsonMessage {
-        this["soeknadFordelt"] = true
-        eventName = "FORDELER:FORDELT"
+        this[FordelerFordelt.soeknadFordeltKey] = true
+        eventName = FordelerFordelt.eventName
         correlationId = getCorrelationId()
         return this
     }
 
-    private fun JsonMessage.soeknadId(): Int = get("@lagret_soeknad_id").intValue()
+    private fun JsonMessage.soeknadId(): Int = get(SoeknadInnsendt.lagretSoeknadIdKey).intValue()
 }

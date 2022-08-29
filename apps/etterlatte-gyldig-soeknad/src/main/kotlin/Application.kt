@@ -1,8 +1,8 @@
 package no.nav.etterlatte
 
-import AppBuilder
-import LesGyldigSoeknadsmelding
-import model.GyldigSoeknadService
+import FordeltSoeknadRiver
+import no.nav.etterlatte.gyldigsoeknad.barnepensjon.GyldigSoeknadService
+import no.nav.etterlatte.gyldigsoeknad.config.AppBuilder
 import no.nav.helse.rapids_rivers.RapidApplication
 
 fun main() {
@@ -12,10 +12,10 @@ fun main() {
         AppBuilder(env).also { ab ->
             RapidApplication.create(env)
                 .also {
-                    LesGyldigSoeknadsmelding(
+                    FordeltSoeknadRiver(
                         it,
-                        GyldigSoeknadService(ab.createPdlService()),
-                        ab.createBehandlingService()
+                        GyldigSoeknadService(ab.createPdlClient()),
+                        ab.createBehandlingClient()
                     )
                 }.start()
         }

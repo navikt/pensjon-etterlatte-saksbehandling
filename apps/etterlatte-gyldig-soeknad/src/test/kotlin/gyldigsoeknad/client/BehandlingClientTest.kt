@@ -1,8 +1,7 @@
-package behandlingfrasoknad
+package no.nav.etterlatte.gyldigsoeknad.client
 
-import BehandlingsService
-import NyBehandlingRequest
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -17,14 +16,16 @@ import io.ktor.utils.io.ByteReadChannel
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import model.GyldigSoeknadService
+import no.nav.etterlatte.gyldigsoeknad.barnepensjon.GyldigSoeknadService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
 
-internal class BehandlingsServiceTest {
+internal class BehandlingClientTest {
 
     @Test
     fun testInitierBehandling() {
@@ -43,7 +44,7 @@ internal class BehandlingsServiceTest {
             install(ContentNegotiation) { jackson {} }
         }
         val persongalleri = mockk<GyldigSoeknadService>()
-        val behandlingsservice = BehandlingsService(httpClient, "")
+        val behandlingsservice = BehandlingClient(httpClient, "")
         every { persongalleri.hentPersongalleriFraSoeknad(any()) } returns Persongalleri(
             "",
             "",
@@ -53,10 +54,11 @@ internal class BehandlingsServiceTest {
         )
 
         val hendelseJson = objectMapper.readTree(javaClass.getResource("/fordeltmelding.json")!!.readText())
+        val soeknad = objectMapper.treeToValue<Barnepensjon>(hendelseJson[FordelerFordelt.skjemaInfoKey])
         val hentetSaksid = behandlingsservice.initierBehandling(
             1,
-            hendelseJson["@skjema_info"]["mottattDato"].asText(),
-            persongalleri.hentPersongalleriFraSoeknad(hendelseJson["@skjema_info"])
+            soeknad.mottattDato,
+            persongalleri.hentPersongalleriFraSoeknad(soeknad)
         )
 
         assertEquals(randomUUID, hentetSaksid)
@@ -82,7 +84,7 @@ internal class BehandlingsServiceTest {
             install(ContentNegotiation) { jackson {} }
         }
 
-        val behandlingsservice = BehandlingsService(httpClient, "http://behandlingsservice")
+        val behandlingsservice = BehandlingClient(httpClient, "http://behandlingsservice")
         val skaffSakResultat = behandlingsservice.skaffSak("22", "barnepensjon")
 
         assertEquals(1, skaffSakResultat)

@@ -1,10 +1,6 @@
-package model
+package no.nav.etterlatte.gyldigsoeknad.barnepensjon
 
-import Pdl
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.treeToValue
-import hentFnrForeldre
-import hentFnrForeldreAnsvar
+import no.nav.etterlatte.gyldigsoeknad.client.PdlClient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
@@ -13,7 +9,6 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.IngenAnnen
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.InnsenderHarForeldreansvarGrunnlag
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.PersonInfoGyldighet
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlagTyper.InnsenderErForelderGrunnlag
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -21,36 +16,24 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.slf4j.LoggerFactory
-import setVurdering
-import vurderOpplysning
 import java.time.LocalDateTime
 
-class GyldigSoeknadService(private val pdl: Pdl) {
+class OpplysningKanIkkeHentesUt : IllegalStateException()
+
+class GyldigSoeknadService(private val pdlClient: PdlClient) {
     private val logger = LoggerFactory.getLogger(GyldigSoeknadService::class.java)
 
-    fun hentPersongalleriFraSoeknad(jsonNode: JsonNode): Persongalleri {
+    fun hentPersongalleriFraSoeknad(soeknad: Barnepensjon): Persongalleri {
         logger.info("Hent persongalleri fra søknad")
 
-        val barnepensjon = objectMapper.treeToValue<Barnepensjon>(jsonNode)
-
         return Persongalleri(
-            soeker = barnepensjon.soeker.foedselsnummer.svar.value,
-            innsender = barnepensjon.innsender.foedselsnummer.svar.value,
-            soesken = barnepensjon.soesken.map { it.foedselsnummer.svar.value },
-            avdoed = barnepensjon.foreldre.filter { it.type == PersonType.AVDOED }.map { it.foedselsnummer.svar.value },
-            gjenlevende = barnepensjon.foreldre.filter { it.type == PersonType.GJENLEVENDE_FORELDER }
+            soeker = soeknad.soeker.foedselsnummer.svar.value,
+            innsender = soeknad.innsender.foedselsnummer.svar.value,
+            soesken = soeknad.soesken.map { it.foedselsnummer.svar.value },
+            avdoed = soeknad.foreldre.filter { it.type == PersonType.AVDOED }.map { it.foedselsnummer.svar.value },
+            gjenlevende = soeknad.foreldre.filter { it.type == PersonType.GJENLEVENDE_FORELDER }
                 .map { it.foedselsnummer.svar.value }
         )
-    }
-
-    fun hentSoekerFraPdl(fnrSoeker: String): Person? {
-        return pdl.hentPdlModell(fnrSoeker, PersonRolle.BARN)
-    }
-
-    fun hentNavnFraPdl(fnr: String): PersonInfoGyldighet? {
-        val person = pdl.hentPdlModell(fnr, PersonRolle.GJENLEVENDE)
-        val navn = person.let { it.fornavn + " " + it.etternavn }
-        return PersonInfoGyldighet(navn, fnr)
     }
 
     fun vurderGyldighet(persongalleri: Persongalleri): GyldighetsResultat {
@@ -87,6 +70,16 @@ class GyldigSoeknadService(private val pdl: Pdl) {
         val vurdertDato = LocalDateTime.now()
 
         return GyldighetsResultat(gyldighetResultat, vurderingsliste, vurdertDato)
+    }
+
+    private fun hentSoekerFraPdl(fnrSoeker: String): Person? {
+        return pdlClient.hentPerson(fnrSoeker, PersonRolle.BARN)
+    }
+
+    private fun hentNavnFraPdl(fnr: String): PersonInfoGyldighet? {
+        val person = pdlClient.hentPerson(fnr, PersonRolle.GJENLEVENDE)
+        val navn = person.let { it.fornavn + " " + it.etternavn }
+        return PersonInfoGyldighet(navn, fnr)
     }
 
     fun innsenderErForelder(
@@ -151,5 +144,36 @@ class GyldigSoeknadService(private val pdl: Pdl) {
             resultat,
             IngenAnnenVergeEnnForelderGrunnlag(soekerPdl?.vergemaalEllerFremtidsfullmakt)
         )
+    }
+
+    private fun hentFnrForeldre(familieRelasjon: FamilieRelasjon): List<String> {
+        return familieRelasjon.foreldre?.map { it.value }
+            ?: throw OpplysningKanIkkeHentesUt()
+    }
+
+    private fun hentFnrForeldreAnsvar(familieRelasjon: FamilieRelasjon): List<String> {
+        return familieRelasjon.ansvarligeForeldre?.map { it.value }
+            ?: throw OpplysningKanIkkeHentesUt()
+    }
+
+    private fun vurderOpplysning(vurdering: () -> Boolean): VurderingsResultat = try {
+        if (vurdering()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT
+    } catch (ex: OpplysningKanIkkeHentesUt) {
+        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+    }
+
+    private fun setVurdering(liste: List<VurdertGyldighet>): VurderingsResultat {
+        val resultat = liste.map { it.resultat }
+        return hentVurdering(resultat)
+    }
+
+    private fun hentVurdering(resultat: List<VurderingsResultat>): VurderingsResultat {
+        return if (resultat.all { it == VurderingsResultat.OPPFYLT }) {
+            VurderingsResultat.OPPFYLT
+        } else if (resultat.any { it == VurderingsResultat.IKKE_OPPFYLT }) {
+            VurderingsResultat.IKKE_OPPFYLT
+        } else {
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        }
     }
 }

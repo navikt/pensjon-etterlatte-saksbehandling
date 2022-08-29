@@ -3,6 +3,7 @@ package no.nav.etterlatte.rivers
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
+import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -25,7 +26,7 @@ internal class LagreAvkorting(
         River(rapidsConnection).apply {
             validate { it.demandAny(eventNameKey, listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
             validate { it.requireKey("sakId") }
-            validate { it.requireKey("behandlingId") }
+            validate { it.requireKey("behandling") }
             validate { it.requireKey("fnrSoeker") }
             validate { it.requireKey("avkorting") }
             correlationId()
@@ -34,18 +35,17 @@ internal class LagreAvkorting(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val behandlingId = packet["behandlingId"].asUUID()
             val sakId = packet["sakId"].toString()
             val avkorting = objectMapper.readValue<AvkortingsResultat>(packet["avkorting"].toString())
-
+            val behandling = objectMapper.readValue<Behandling>(packet["behandling"].toString())
             try {
                 vedtaksvurderingService.lagreAvkorting(
                     sakId,
-                    behandlingId,
+                    behandling,
                     packet["fnrSoeker"].textValue(),
                     avkorting
                 )
-                requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandlingId)).also {
+                requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandling.id)).also {
                     context.publish(
                         JsonMessage.newMessage(
                             mapOf(

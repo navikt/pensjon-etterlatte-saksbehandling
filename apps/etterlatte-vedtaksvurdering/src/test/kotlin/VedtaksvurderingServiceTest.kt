@@ -5,9 +5,11 @@ import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.database.Vedtak
 import no.nav.etterlatte.database.VedtaksvurderingRepository
+import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
 import no.nav.etterlatte.libs.common.avkorting.Endringskode
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningstyper
@@ -45,7 +47,8 @@ internal class VedtaksvurderingServiceTest {
         null,
         null,
         null,
-        null
+        null,
+        BehandlingType.FØRSTEGANGSBEHANDLING
     )
     private val fattetVedtak = vedtakSomIkkeErFattet.copy(vedtakFattet = true)
 
@@ -62,7 +65,7 @@ internal class VedtaksvurderingServiceTest {
 
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns vedtakSomIkkeErFattet
         every { repositoryMock.oppdaterAvkorting(sakId, behandlingId, any()) } returns Unit
-        service.lagreAvkorting(sakId, behandlingId, fnr, avkorting)
+        service.lagreAvkorting(sakId, Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId), fnr, avkorting)
         verify { repositoryMock.oppdaterAvkorting(sakId, behandlingId, avkorting) }
     }
 
@@ -78,9 +81,23 @@ internal class VedtaksvurderingServiceTest {
         )
 
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns null
-        every { repositoryMock.lagreAvkorting(sakId, behandlingId, fnr, any()) } returns Unit
-        service.lagreAvkorting(sakId, behandlingId, fnr, avkorting)
-        verify { repositoryMock.lagreAvkorting(sakId, behandlingId, fnr, any()) }
+        every {
+            repositoryMock.lagreAvkorting(
+                sakId,
+                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
+                fnr,
+                any()
+            )
+        } returns Unit
+        service.lagreAvkorting(sakId, Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId), fnr, avkorting)
+        verify {
+            repositoryMock.lagreAvkorting(
+                sakId,
+                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
+                fnr,
+                any()
+            )
+        }
     }
 
     @Test
@@ -95,7 +112,14 @@ internal class VedtaksvurderingServiceTest {
         )
 
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns fattetVedtak
-        assertThrows<KanIkkeEndreFattetVedtak> { service.lagreAvkorting(sakId, behandlingId, fnr, avkorting) }
+        assertThrows<KanIkkeEndreFattetVedtak> {
+            service.lagreAvkorting(
+                sakId,
+                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
+                fnr,
+                avkorting
+            )
+        }
     }
 
     @Test
@@ -112,7 +136,12 @@ internal class VedtaksvurderingServiceTest {
 
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns vedtakSomIkkeErFattet
         every { repositoryMock.oppdaterBeregningsgrunnlag(sakId, behandlingId, any()) } returns Unit
-        service.lagreBeregningsresultat(sakId, behandlingId, fnr, beregning)
+        service.lagreBeregningsresultat(
+            sakId,
+            Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
+            fnr,
+            beregning
+        )
         verify { repositoryMock.oppdaterBeregningsgrunnlag(sakId, behandlingId, beregning) }
     }
 
@@ -129,9 +158,28 @@ internal class VedtaksvurderingServiceTest {
         )
 
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns null
-        every { repositoryMock.lagreBeregningsresultat(sakId, behandlingId, fnr, any()) } returns Unit
-        service.lagreBeregningsresultat(sakId, behandlingId, fnr, beregning)
-        verify { repositoryMock.lagreBeregningsresultat(sakId, behandlingId, fnr, any()) }
+        every {
+            repositoryMock.lagreBeregningsresultat(
+                sakId,
+                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
+                fnr,
+                any()
+            )
+        } returns Unit
+        service.lagreBeregningsresultat(
+            sakId,
+            Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
+            fnr,
+            beregning
+        )
+        verify {
+            repositoryMock.lagreBeregningsresultat(
+                sakId,
+                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
+                fnr,
+                any()
+            )
+        }
     }
 
     @Test
@@ -147,7 +195,14 @@ internal class VedtaksvurderingServiceTest {
         )
 
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns fattetVedtak
-        assertThrows<KanIkkeEndreFattetVedtak> { service.lagreBeregningsresultat(sakId, behandlingId, fnr, beregning) }
+        assertThrows<KanIkkeEndreFattetVedtak> {
+            service.lagreBeregningsresultat(
+                sakId,
+                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
+                fnr,
+                beregning
+            )
+        }
     }
 
     @Test
@@ -164,7 +219,14 @@ internal class VedtaksvurderingServiceTest {
         every { repositoryMock.lagreFnr(sakId, behandlingId, fnr) } returns Unit
         every { repositoryMock.lagreDatoVirk(sakId, behandlingId, virkingsDato) } returns Unit
 
-        service.lagreVilkaarsresultat(sakId, sakType, behandlingId, fnr, vilkårsresultat, virkingsDato)
+        service.lagreVilkaarsresultat(
+            sakId,
+            sakType,
+            Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
+            fnr,
+            vilkårsresultat,
+            virkingsDato
+        )
         verify { repositoryMock.oppdaterVilkaarsresultat(sakId, sakType, behandlingId, vilkårsresultat) }
     }
 
@@ -178,10 +240,33 @@ internal class VedtaksvurderingServiceTest {
         val virkingsDato = LocalDate.now()
 
         every { repositoryMock.hentVedtak(sakId, behandlingId) } returns null
-        every { repositoryMock.lagreVilkaarsresultat(sakId, sakType, behandlingId, fnr, any(), any()) } returns Unit
-        service.lagreVilkaarsresultat(sakId, sakType, behandlingId, fnr, vilkårsresultat, virkingsDato)
+        every {
+            repositoryMock.lagreVilkaarsresultat(
+                sakId,
+                sakType,
+                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
+                fnr,
+                any(),
+                any()
+            )
+        } returns Unit
+        service.lagreVilkaarsresultat(
+            sakId,
+            sakType,
+            Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
+            fnr,
+            vilkårsresultat,
+            virkingsDato
+        )
         verify {
-            repositoryMock.lagreVilkaarsresultat(sakId, sakType, behandlingId, fnr, vilkårsresultat, virkingsDato)
+            repositoryMock.lagreVilkaarsresultat(
+                sakId,
+                sakType,
+                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
+                fnr,
+                vilkårsresultat,
+                virkingsDato
+            )
         }
     }
 
@@ -198,7 +283,7 @@ internal class VedtaksvurderingServiceTest {
             service.lagreVilkaarsresultat(
                 sakId,
                 sakType,
-                behandlingId,
+                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, behandlingId),
                 fnr,
                 vilkårsresultat,
                 virkingsDato

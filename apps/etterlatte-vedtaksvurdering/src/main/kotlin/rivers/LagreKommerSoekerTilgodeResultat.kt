@@ -1,7 +1,9 @@
 package no.nav.etterlatte.rivers
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.KanIkkeEndreFattetVedtak
 import no.nav.etterlatte.VedtaksvurderingService
+import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -23,7 +25,7 @@ internal class LagreKommerSoekerTilgodeResultat(
         River(rapidsConnection).apply {
             validate { it.demandAny(eventNameKey, listOf("BEHANDLING:OPPRETTET", "BEHANDLING:GRUNNLAGENDRET")) }
             validate { it.requireKey("sakId") }
-            validate { it.requireKey("behandlingId") }
+            validate { it.requireKey("behandling") }
             validate { it.requireKey("fnrSoeker") }
             validate { it.requireKey("kommerSoekerTilGode") }
             correlationId()
@@ -33,8 +35,8 @@ internal class LagreKommerSoekerTilgodeResultat(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val behandlingId = packet["behandlingId"].asUUID()
             val sakId = packet["sakId"].toString()
+            val behandling = objectMapper.readValue<Behandling>(packet["behandling"].toString())
             val kommerSoekerTilgodeResultat = objectMapper.readValue(
                 packet["kommerSoekerTilGode"].toString(),
                 KommerSoekerTilgode::class.java
@@ -42,7 +44,7 @@ internal class LagreKommerSoekerTilgodeResultat(
             try {
                 vedtaksvurderingService.lagreKommerSoekerTilgodeResultat(
                     sakId,
-                    behandlingId,
+                    behandling,
                     packet["fnrSoeker"].textValue(),
                     kommerSoekerTilgodeResultat
                 )

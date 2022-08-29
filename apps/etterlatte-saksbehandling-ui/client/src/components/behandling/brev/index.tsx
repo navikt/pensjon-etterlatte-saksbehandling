@@ -17,6 +17,7 @@ import { formaterDato } from '../../../utils/formattering'
 import InnkommendeBrevModal from './innkommende-brev-modal'
 import styled from 'styled-components'
 import Spinner from '../../../shared/Spinner'
+import LastOppBrev from "./nytt-brev/last-opp";
 
 const IngenInnkommendeBrevRad = styled.td`
   text-align: center;
@@ -61,7 +62,6 @@ export const Brev = () => {
     nyListe.push(brev)
     setBrevListe(nyListe)
   }
-
   const slett = (brevId: any): Promise<void> => {
     return slettBrev(brevId).then(() => {
       const nyListe = brevListe?.filter((brev) => brev.id !== brevId)
@@ -169,6 +169,7 @@ export const Brev = () => {
 
       <ContentContainer>
         <NyttBrev leggTilNytt={leggTilNytt} />
+        <LastOppBrev leggTilNytt={leggTilNytt} />
       </ContentContainer>
 
       <Border />

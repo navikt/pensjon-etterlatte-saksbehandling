@@ -172,7 +172,7 @@ internal class GrunnlagsendringshendelseDaoTest {
     @Test
     fun `settBehandlingIdForTattMedIBehandling skal sette referanse til behandling`() {
         val hendelseId = UUID.randomUUID()
-        val sak1 = sakRepo.opprettSak("1234", "BP").id
+        val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON).id
         val grunnlagsendringstype = GrunnlagsendringsType.SOEKER_DOED
         val revurderingId = UUID.randomUUID()
         val revurdering = revurdering(id = revurderingId, sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)

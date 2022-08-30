@@ -40,7 +40,7 @@ fun Route.sakRoutes(sakService: SakService) {
         route("saker/{type}") {
             get {
                 val ident = requireNotNull(call.parameters["id"])
-                val type = requireNotNull(call.parameters["type"])
+                val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
                 call.respond(inTransaction { sakService.finnEllerOpprettSak(ident, type) })
             }
         }
@@ -51,5 +51,6 @@ private fun <T> inTransaction(block: () -> T): T = Kontekst.get().databasecontxt
     block()
 }
 
-data class Sak(val ident: String, val sakType: String, val id: Long)
+data class Sak(val ident: String, val sakType: SakType, val id: Long)
 data class Saker(val saker: List<Sak>)
+enum class SakType { BARNEPENSJON, OMSTILLINGSSTOENAD }

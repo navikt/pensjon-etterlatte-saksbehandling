@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakType
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -69,7 +70,7 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `skal opprette foerstegangsbehandling med persongalleri`() {
-        val sak1 = sakRepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
         val behandlingOpprettet = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
 
         val persongalleri = persongalleri()
@@ -100,7 +101,7 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `skal opprette revurdering`() {
-        val sak1 = sakRepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
         val behandlingOpprettet = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS)
 
         val behandling = revurdering(
@@ -132,7 +133,7 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `Skal legge til gyldighetsprøving til en opprettet behandling`() {
-        val sak1 = sakRepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
 
         val behandling = foerstegangsbehandling(sak = sak1)
 
@@ -177,8 +178,8 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `Sletting av alle behandlinger i en sak`() {
-        val sak1 = sakRepo.opprettSak("123", "BP").id
-        val sak2 = sakRepo.opprettSak("321", "BP").id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
+        val sak2 = sakRepo.opprettSak("321", SakType.BARNEPENSJON).id
 
         listOf(
             foerstegangsbehandling(sak = sak1),
@@ -196,8 +197,8 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `Sletting av alle revurderinger i en sak`() {
-        val sak1 = sakRepo.opprettSak("123", "BP").id
-        val sak2 = sakRepo.opprettSak("321", "BP").id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
+        val sak2 = sakRepo.opprettSak("321", SakType.BARNEPENSJON).id
 
         listOf(
             foerstegangsbehandling(sak = sak1),
@@ -226,7 +227,7 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `avbryte sak`() {
-        val sak1 = sakRepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
         listOf(
             foerstegangsbehandling(sak = sak1)
         ).forEach { b ->
@@ -246,7 +247,7 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `skal returnere behandlingtype Foerstegangsbehandling`() {
-        val sak1 = sakRepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
 
         val foerstegangsbehandling = foerstegangsbehandling(sak = sak1).also {
             behandlingRepo.opprettFoerstegangsbehandling(it)
@@ -258,7 +259,7 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `skal returnere behandlingtype Revurdering`() {
-        val sak1 = sakRepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
 
         val revurdering = revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD).also {
             behandlingRepo.opprettRevurdering(it)
@@ -270,7 +271,7 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `skal hente behandling av type Foerstegangsbehandling`() {
-        val sak1 = sakRepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
 
         val foerstegangsbehandling = foerstegangsbehandling(sak = sak1).also {
             behandlingRepo.opprettFoerstegangsbehandling(it)
@@ -285,7 +286,7 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `skal returnere behandling av type Revurdering`() {
-        val sak1 = sakRepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
 
         val revurdering = revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD).also {
             behandlingRepo.opprettRevurdering(it)
@@ -297,7 +298,7 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `skal returnere liste med behandlinger av ulike typer`() {
-        val sak1 = sakRepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
 
         listOf(
             revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
@@ -323,7 +324,7 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `Skal bare hente behandlinger av en gitt type`() {
-        val sak1 = sakRepo.opprettSak("1234", "BP").id
+        val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON).id
 
         val rev = listOf(
             revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
@@ -353,7 +354,7 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `skal lagre status og sette sistEndret for en behandling`() {
-        val sak1 = sakRepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
 
         val behandling = foerstegangsbehandling(sak = sak1).also {
             behandlingRepo.opprettFoerstegangsbehandling(it)
@@ -375,7 +376,7 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `skal lagre oppgavestatus for behandling`() {
-        val sak1 = sakRepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
 
         val behandling = foerstegangsbehandling(sak = sak1).also {
             behandlingRepo.opprettFoerstegangsbehandling(it)
@@ -396,7 +397,7 @@ internal class BehandlingDaoIntegrationTest {
 
     @Test
     fun `skal hente alle loepende behandlinger i en sak`() {
-        val sak1 = sakRepo.opprettSak("123", "BP").id
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
 
         listOf(
             foerstegangsbehandling(sak = sak1, status = BehandlingStatus.GYLDIG_SOEKNAD),

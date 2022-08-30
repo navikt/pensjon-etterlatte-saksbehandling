@@ -8,6 +8,7 @@ enum class VurderingsResultat {
 enum class Utfall {
     OPPFYLT, BEHANDLE_I_PSYS, TRENGER_AVKLARING
 }
+
 data class VurdertVilkaar(
     val navn: Vilkaartyper,
     val resultat: VurderingsResultat,

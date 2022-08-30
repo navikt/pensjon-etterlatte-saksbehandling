@@ -42,7 +42,7 @@ fun vilkaarAvdoedesMedlemskap(
         )
     }
 
-    val bosattNorge = metakriterieBosattNorge(avdoedSoeknad, avdoedPdl).kriterie
+    val bosattNorge = metakriterieBosattNorge(avdoedSoeknad, avdoedPdl)
 
     val kriterier: List<Kriterie> = listOfNotNull(
         // kriterie A1-1: AP eller uføretrygd i hele 5-årsperioden
@@ -51,13 +51,24 @@ fun vilkaarAvdoedesMedlemskap(
         kriterieHarHatt100prosentStillingSisteFemAar(arbeidsforholdOpplysning!!)
     )
 
+    val vurderingsResultat = when (bosattNorge.utfall) {
+        Utfall.OPPFYLT -> kriterier.minBy { it.resultat.ordinal }.resultat
+        else -> bosattNorge.resultat
+    }
+
     return VurdertVilkaar(
         Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
-        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, // endre når vi får inn flere opplysninger
-        Utfall.TRENGER_AVKLARING, // endre når vi får inn flere opplysninger
+        vurderingsResultat,
+        vurderingsResultat.tilUtfall(),
         kriterier,
         LocalDateTime.now()
     )
+}
+
+private fun VurderingsResultat.tilUtfall() = when (this) {
+    VurderingsResultat.OPPFYLT -> Utfall.OPPFYLT
+    VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING -> Utfall.TRENGER_AVKLARING
+    VurderingsResultat.IKKE_OPPFYLT -> Utfall.BEHANDLE_I_PSYS
 }
 
 data class DetaljerPeriode(

@@ -3,6 +3,7 @@ package barnepensjon.vilkaar
 import adresseDanmarkPdl
 import adresseUtlandFoerFemAar
 import adresserNorgePdl
+import barnepensjon.vilkaar.avdoedesmedlemskap.MedlemskapsPeriode
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieHarHatt80prosentStillingSisteFemAar
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieHarMottattPensjonEllerTrygdSisteFemAar
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieIngenInnUtvandring
@@ -40,18 +41,25 @@ import java.time.LocalDate
 class AvdoedesMedlemskapTest {
 
     @Test
-    fun vurderMottattPensjonUforeSisteFemAar() {
+    fun `Oppfyller kriteriet for pensjon-ufoere siste 5 aar hvis det er utbetalinger i hele perioden`() {
         val file = readFile("/inntektsopplysning.json")
         val opplysning = objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(file)
 
-        kriterieHarMottattPensjonEllerTrygdSisteFemAar(
-            LocalDate.parse("2022-07-01"),
-            opplysning
-        ).let { assertEquals(it.resultat, VurderingsResultat.OPPFYLT) }
-        kriterieHarMottattPensjonEllerTrygdSisteFemAar(
-            LocalDate.parse("2021-07-01"),
-            opplysning
-        ).let { assertEquals(it.resultat, VurderingsResultat.IKKE_OPPFYLT) }
+        kriterieHarMottattPensjonEllerTrygdSisteFemAar(LocalDate.parse("2022-07-01"), opplysning).let {
+            assertEquals(it.resultat, VurderingsResultat.OPPFYLT)
+        }
+    }
+
+    @Test
+    fun `Oppfyller ikke kriteriet for pensjon-ufoere siste 5 aar hvis det er gaps i perioden`() {
+        val file = readFile("/inntektsopplysning.json")
+        val inntektsOpplysning = objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(file)
+
+        kriterieHarMottattPensjonEllerTrygdSisteFemAar(LocalDate.parse("2021-07-01"), inntektsOpplysning).let {
+            assertEquals(it.resultat, VurderingsResultat.IKKE_OPPFYLT)
+            val opplysning = it.basertPaaOpplysninger[0].opplysning as MedlemskapsPeriode
+            assertEquals(1, opplysning.gaps?.size)
+        }
     }
 
     @Test
@@ -102,13 +110,10 @@ class AvdoedesMedlemskapTest {
 
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, kriterie.resultat)
         kriterie.basertPaaOpplysninger.let {
-            val opplysninger = it[0].opplysning as List<*>
-            assertEquals(3, opplysninger.size)
-            val arbeidsforholdListe = opplysninger[0] as List<*>
-            assertEquals(2, arbeidsforholdListe.size)
-            val gaps = opplysninger[2] as List<*>
-            assertEquals(1, gaps.size)
-            assertEquals(Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31)), gaps.first())
+            val opplysning = it[0].opplysning as MedlemskapsPeriode
+            assertEquals(2, opplysning.arbeidsforhold?.size)
+            assertEquals(1, opplysning.gaps?.size)
+            assertEquals(Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31)), opplysning.gaps?.first())
         }
     }
 

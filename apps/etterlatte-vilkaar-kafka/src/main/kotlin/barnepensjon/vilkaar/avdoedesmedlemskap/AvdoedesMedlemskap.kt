@@ -89,17 +89,21 @@ fun kriterieHarHatt80prosentStillingSisteFemAar(
         .filter { it.beloep > 0 }
     val ansettelsesGaps = finnGapsIArbeidsforhold(perioder, doedsdato.minusYears(5), doedsdato)
 
-    val opplysningsGrunnlag = Kriteriegrunnlag(
-        arbeidsforholdOpplysning.id,
-        KriterieOpplysningsType.AVDOED_STILLINGSPROSENT,
-        arbeidsforholdOpplysning.kilde,
-        listOf(perioder, inntekt, ansettelsesGaps)
+    val grunnlag = Kriteriegrunnlag(
+        id = arbeidsforholdOpplysning.id,
+        kriterieOpplysningsType = KriterieOpplysningsType.AVDOED_STILLINGSPROSENT,
+        kilde = arbeidsforholdOpplysning.kilde,
+        opplysning = MedlemskapsPeriode(
+            inntekter = inntekt,
+            gaps = ansettelsesGaps,
+            arbeidsforhold = perioder
+        )
     )
 
     return Kriterie(
-        Kriterietyper.AVDOED_HAR_HATT_100PROSENT_STILLING_SISTE_FEM_AAR,
-        if (ansettelsesGaps.isEmpty()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT,
-        listOf(opplysningsGrunnlag)
+        navn = Kriterietyper.AVDOED_HAR_HATT_100PROSENT_STILLING_SISTE_FEM_AAR,
+        resultat = if (ansettelsesGaps.isEmpty()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT,
+        basertPaaOpplysninger = listOf(grunnlag)
     )
 }
 
@@ -107,27 +111,26 @@ fun kriterieHarMottattPensjonEllerTrygdSisteFemAar(
     doedsdato: LocalDate,
     inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>
 ): Kriterie {
-    val grunnlag = opprettAlderUfoereGrunnlag(inntektsOpplysning)
-    val gaps = finnGapsIUtbetalinger(grunnlag.first().opplysning, doedsdato.minusYears(5), doedsdato)
+    val inntekter = inntektsOpplysning.opplysning.pensjonEllerTrygd
+        .filter { listOf("ufoeretrygd", "alderspensjon").contains(it.beskrivelse) }
+    val inntektsGaps = finnGapsIUtbetalinger(inntekter, doedsdato.minusYears(5), doedsdato)
+
+    val grunnlag = Kriteriegrunnlag(
+        id = inntektsOpplysning.id,
+        kriterieOpplysningsType = KriterieOpplysningsType.AVDOED_UFORE_PENSJON,
+        kilde = Grunnlagsopplysning.Inntektskomponenten("inntektskomponenten"),
+        opplysning = MedlemskapsPeriode(
+            inntekter = inntekter,
+            gaps = inntektsGaps
+        )
+    )
 
     return Kriterie(
         navn = Kriterietyper.AVDOED_HAR_MOTTATT_PENSJON_TRYGD_SISTE_FEM_AAR,
-        resultat = if (gaps.isEmpty()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT,
-        basertPaaOpplysninger = grunnlag
+        resultat = if (inntektsGaps.isEmpty()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT,
+        basertPaaOpplysninger = listOf(grunnlag)
     )
 }
-
-fun opprettAlderUfoereGrunnlag(inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>) =
-    inntektsOpplysning.opplysning.pensjonEllerTrygd.let { inntekter ->
-        listOf(
-            Kriteriegrunnlag(
-                inntektsOpplysning.id,
-                KriterieOpplysningsType.AVDOED_UFORE_PENSJON,
-                Grunnlagsopplysning.Inntektskomponenten("inntektskomponenten"),
-                inntekter.filter { listOf("ufoeretrygd", "alderspensjon").contains(it.beskrivelse) }
-            )
-        )
-    }
 
 fun finnGapsIUtbetalinger(utbetalinger: List<Inntekt>, fra: LocalDate, til: LocalDate): List<Periode> =
     utbetalinger.map {
@@ -141,3 +144,10 @@ fun finnGapsIArbeidsforhold(arbeidsforhold: List<DetaljerPeriode>, fra: LocalDat
     arbeidsforhold.map { Periode(it.periode.startdato, it.periode.sluttdato ?: til) }
         .sortedBy { it.gyldigFra }
         .let { hentGaps(kombinerPerioder(it), fra, til) }
+
+data class MedlemskapsPeriode(
+    val inntekter: List<Inntekt>,
+    val gyldigePerioder: List<Periode>? = null,
+    val gaps: List<Periode>? = null,
+    val arbeidsforhold: List<DetaljerPeriode>? = null
+)

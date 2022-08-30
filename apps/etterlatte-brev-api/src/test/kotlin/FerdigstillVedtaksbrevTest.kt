@@ -7,7 +7,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import vedtak.VedtakServiceMock
-import java.util.*
 
 class FerdigstillVedtaksbrevTest {
     private val service = mockk<BrevService>(relaxed = true)

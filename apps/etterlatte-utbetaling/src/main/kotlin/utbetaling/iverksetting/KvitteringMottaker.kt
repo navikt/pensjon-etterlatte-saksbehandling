@@ -4,6 +4,9 @@ import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
+import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
+import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.sakId
@@ -13,7 +16,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringRe
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.OppdaterKvitteringResultat.UtbetalingFinnesIkke
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
@@ -86,6 +88,7 @@ class KvitteringMottaker(
     private fun oppdragGodkjent(utbetaling: Utbetaling) {
         logger.info("Utbetaling med vedtakId=${utbetaling.vedtakId.value} godkjent")
         sendUtbetalingEvent(utbetaling)
+        // sendVedtakHendelseIverksatt(utbetaling)
     }
 
     private fun oppdragGodkjentMedFeil(utbetaling: Utbetaling) {
@@ -103,35 +106,33 @@ class KvitteringMottaker(
         sendUtbetalingEvent(utbetaling)
     }
 
-    private fun sendUtbetalingEvent(utbetaling: Utbetaling) =
-        rapidsConnection.publish(
-            utbetaling.sakId.value.toString(),
-            UtbetalingEvent(
-                utbetalingResponse = UtbetalingResponse(
-                    status = utbetaling.status(),
-                    vedtakId = utbetaling.vedtakId.value,
-                    behandlingId = utbetaling.behandlingId.value,
-                    feilmelding = utbetaling.kvitteringFeilmelding()
-                )
-            ).toJson()
-        )
+    private fun sendUtbetalingEvent(utbetaling: Utbetaling) = rapidsConnection.publish(
+        utbetaling.sakId.value.toString(),
+        UtbetalingEventDto(
+            utbetalingResponse = UtbetalingResponseDto(
+                status = UtbetalingStatusDto.valueOf(utbetaling.status().name),
+                vedtakId = utbetaling.vedtakId.value,
+                behandlingId = utbetaling.behandlingId.value,
+                feilmelding = utbetaling.kvitteringFeilmelding()
+            )
+        ).toJson()
+    )
 
     private fun sendUtbetalingFeiletEvent(
         feilmelding: String,
         oppdrag: Oppdrag? = null,
         utbetaling: Utbetaling? = null
-    ) =
-        rapidsConnection.publish(
-            oppdrag?.sakId() ?: "",
-            UtbetalingEvent(
-                utbetalingResponse = UtbetalingResponse(
-                    status = UtbetalingStatus.FEILET,
-                    vedtakId = oppdrag?.vedtakId(),
-                    behandlingId = utbetaling?.behandlingId?.value,
-                    feilmelding = feilmelding
-                )
-            ).toJson()
-        )
+    ) = rapidsConnection.publish(
+        oppdrag?.sakId() ?: "",
+        UtbetalingEventDto(
+            utbetalingResponse = UtbetalingResponseDto(
+                status = UtbetalingStatusDto.FEILET,
+                vedtakId = oppdrag?.vedtakId(),
+                behandlingId = utbetaling?.behandlingId?.value,
+                feilmelding = feilmelding
+            )
+        ).toJson()
+    )
 
     private fun Utbetaling.kvitteringFeilmelding() = when (this.kvittering?.alvorlighetsgrad) {
         "00" -> null

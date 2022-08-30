@@ -8,14 +8,14 @@ import kotliquery.using
 import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.utbetaling.EVENT_NAME_OPPDATERT
+import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
+import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.etterlatte.utbetaling.config.ApplicationProperties
 import no.nav.etterlatte.utbetaling.config.JmsConnectionFactory
-import no.nav.etterlatte.utbetaling.iverksetting.EVENT_NAME_OPPDATERT
-import no.nav.etterlatte.utbetaling.iverksetting.UtbetalingEvent
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.oppdragMedFeiletKvittering
 import no.nav.etterlatte.utbetaling.oppdragMedGodkjentKvittering
 import no.nav.etterlatte.utbetaling.ugyldigVedtakTilUtbetaling
@@ -91,10 +91,10 @@ class ApplicationIntegrationTest {
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish(
                 match {
-                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                    objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.vedtakId == 1L &&
-                            this.utbetalingResponse.status == UtbetalingStatus.SENDT &&
+                            this.utbetalingResponse.status == UtbetalingStatusDto.SENDT &&
                             this.utbetalingResponse.behandlingId == behandlingId
                     }
                 }
@@ -109,9 +109,9 @@ class ApplicationIntegrationTest {
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish(
                 match {
-                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                    objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
-                            this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                            this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
                             ?.contains(
                                 "En feil oppstod under prosessering av vedtak med vedtakId=null"
@@ -151,9 +151,9 @@ class ApplicationIntegrationTest {
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish(
                 match {
-                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                    objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
-                            this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                            this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
                             ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false &&
                             this.utbetalingResponse.feilmelding
@@ -190,9 +190,9 @@ class ApplicationIntegrationTest {
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish(
                 match {
-                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                    objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
-                            this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                            this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
                             ?.contains(
                                 "En eller flere utbetalingslinjer med id=[1] eksisterer fra før"
@@ -223,10 +223,10 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 any(),
                 match {
-                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                    objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.vedtakId == 1L &&
-                            this.utbetalingResponse.status == UtbetalingStatus.GODKJENT &&
+                            this.utbetalingResponse.status == UtbetalingStatusDto.GODKJENT &&
                             this.utbetalingResponse.behandlingId == behandlingId
                     }
                 }
@@ -242,10 +242,10 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 any(),
                 match {
-                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                    objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.vedtakId == 1L &&
-                            this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                            this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.behandlingId == null
                     }
                 }
@@ -273,10 +273,10 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 any(),
                 match {
-                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                    objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.vedtakId == 1L &&
-                            this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                            this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding ==
                             "Utbetalingen for vedtakId=1 har feil status (GODKJENT)" &&
                             this.utbetalingResponse.behandlingId == behandlingId
@@ -305,10 +305,10 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 any(),
                 match {
-                    objectMapper.readValue(it, UtbetalingEvent::class.java).run {
+                    objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
                         this.event == EVENT_NAME_OPPDATERT &&
                             this.utbetalingResponse.vedtakId == 1L &&
-                            this.utbetalingResponse.status == UtbetalingStatus.FEILET &&
+                            this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding == "KodeMelding Beskrivelse" &&
                             this.utbetalingResponse.behandlingId == behandlingId
                     }

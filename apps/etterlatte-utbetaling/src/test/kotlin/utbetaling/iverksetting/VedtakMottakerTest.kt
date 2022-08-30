@@ -4,6 +4,9 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.utbetaling.EVENT_NAME_OPPDATERT
+import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
+import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
@@ -39,9 +42,9 @@ internal class VedtakMottakerTest {
         inspector.apply { sendTestMessage(ATTESTERT_VEDTAK) }
 
         inspector.inspektør.message(0).run {
-            val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
+            val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
             assertEquals(EVENT_NAME_OPPDATERT, event.event)
-            assertEquals(utbetaling.status(), event.utbetalingResponse.status)
+            assertEquals(UtbetalingStatusDto.valueOf(utbetaling.status().name), event.utbetalingResponse.status)
             assertEquals(utbetaling.vedtakId.value, event.utbetalingResponse.vedtakId)
             assertEquals(utbetaling.behandlingId.value, event.utbetalingResponse.behandlingId)
         }
@@ -60,9 +63,9 @@ internal class VedtakMottakerTest {
         inspector.apply { sendTestMessage(ATTESTERT_VEDTAK) }
 
         inspector.inspektør.message(0).run {
-            val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
+            val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
             assertEquals(EVENT_NAME_OPPDATERT, event.event)
-            assertEquals(UtbetalingStatus.FEILET, event.utbetalingResponse.status)
+            assertEquals(UtbetalingStatusDto.FEILET, event.utbetalingResponse.status)
             assertEquals(utbetaling.vedtakId.value, event.utbetalingResponse.vedtakId)
             assertTrue(
                 event.utbetalingResponse.feilmelding!!.contains(
@@ -86,9 +89,9 @@ internal class VedtakMottakerTest {
         inspector.apply { sendTestMessage(ATTESTERT_VEDTAK) }
 
         inspector.inspektør.message(0).run {
-            val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
+            val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
             assertEquals(EVENT_NAME_OPPDATERT, event.event)
-            assertEquals(UtbetalingStatus.FEILET, event.utbetalingResponse.status)
+            assertEquals(UtbetalingStatusDto.FEILET, event.utbetalingResponse.status)
             assertEquals(1, event.utbetalingResponse.vedtakId)
             assertEquals(
                 "En eller flere utbetalingslinjer med id=[1,2] eksisterer fra før",
@@ -103,9 +106,9 @@ internal class VedtakMottakerTest {
         assertThrows<RuntimeException> { inspector.apply { sendTestMessage(ATTESTERT_VEDTAK) } }
 
         inspector.inspektør.message(0).run {
-            val event = objectMapper.readValue(this.toJson(), UtbetalingEvent::class.java)
+            val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
             assertEquals(EVENT_NAME_OPPDATERT, event.event)
-            assertEquals(UtbetalingStatus.FEILET, event.utbetalingResponse.status)
+            assertEquals(UtbetalingStatusDto.FEILET, event.utbetalingResponse.status)
             assertEquals(1, event.utbetalingResponse.vedtakId)
             assertEquals(
                 "En feil oppstod under prosessering av vedtak med vedtakId=1: Noe feilet",

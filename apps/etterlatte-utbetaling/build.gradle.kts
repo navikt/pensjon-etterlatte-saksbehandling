@@ -1,8 +1,9 @@
 plugins {
     id("etterlatte.rapids-and-rivers-ktor2")
+    id("etterlatte.common")
+    id("etterlatte.kafka")
     id("com.faire.gradle.analyze") version "1.0.9"
 }
-
 dependencies {
     implementation(Ktor2.OkHttp)
     implementation(Ktor2.ClientCore)

@@ -1,20 +1,20 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.utbetaling.UtbetalingEventDto
+import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
+import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.SendtTilOppdrag
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingForVedtakEksisterer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingslinjerForVedtakEksisterer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -24,20 +24,6 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 data class KunneIkkeLeseVedtakException(val e: Exception) : RuntimeException(e)
-
-const val EVENT_NAME_OPPDATERT = "UTBETALING:OPPDATERT"
-
-data class UtbetalingEvent(
-    @JsonProperty(eventNameKey) val event: String = EVENT_NAME_OPPDATERT,
-    @JsonProperty("utbetaling_response") val utbetalingResponse: UtbetalingResponse
-)
-
-data class UtbetalingResponse(
-    val status: UtbetalingStatus,
-    val vedtakId: Long? = null,
-    val behandlingId: UUID? = null,
-    val feilmelding: String? = null
-)
 
 class VedtakMottaker(
     rapidsConnection: RapidsConnection,
@@ -128,9 +114,9 @@ class VedtakMottaker(
         beskrivelse: String
     ) {
         context.publish(
-            UtbetalingEvent(
-                utbetalingResponse = UtbetalingResponse(
-                    status = UtbetalingStatus.FEILET,
+            UtbetalingEventDto(
+                utbetalingResponse = UtbetalingResponseDto(
+                    status = UtbetalingStatusDto.FEILET,
                     vedtakId = vedtakId,
                     behandlingId = behandlingId,
                     feilmelding = beskrivelse
@@ -141,9 +127,9 @@ class VedtakMottaker(
 
     private fun sendUtbetalingSendtEvent(context: MessageContext, utbetaling: Utbetaling) {
         context.publish(
-            UtbetalingEvent(
-                utbetalingResponse = UtbetalingResponse(
-                    status = utbetaling.status(),
+            UtbetalingEventDto(
+                utbetalingResponse = UtbetalingResponseDto(
+                    status = UtbetalingStatusDto.valueOf(utbetaling.status().name),
                     vedtakId = utbetaling.vedtakId.value,
                     behandlingId = utbetaling.behandlingId.value
                 )

@@ -64,45 +64,6 @@ class AlderBarnTest {
         )
     }
 
-    @Test
-    fun `søker i live oppfyller vurdering`() {
-        val vurdering = vilkaarBrukerErUnder20(
-            mapTilVilkaarstypePerson(personBarnUnder20),
-            mapTilVilkaarstypePerson(personAvdoedMedDoedsdato),
-            virkningstidspunkt = virkningsdataPersonAvdoed.atDay(1)
-        )
-
-        Assertions.assertEquals(VurderingsResultat.OPPFYLT, vurdering.resultat)
-    }
-
-    @Test
-    fun `søker med dødsdato må ha dødsdato etter virkningsdato for oppfyllt vurdering`() {
-        val personMedDødsdato = personBarnUnder20.copy(
-            doedsdato = YearMonth.from(personAvdoedMedDoedsdato.doedsdato).atEndOfMonth()
-        )
-        val vurdering = vilkaarBrukerErUnder20(
-            mapTilVilkaarstypePerson(personMedDødsdato),
-            mapTilVilkaarstypePerson(personAvdoedMedDoedsdato),
-            virkningstidspunkt = virkningsdataPersonAvdoed.minusMonths(1).atDay(1)
-        )
-
-        Assertions.assertEquals(VurderingsResultat.OPPFYLT, vurdering.resultat)
-    }
-
-    @Test
-    fun `søker med dødsdato tidligere enn virkningsdato oppfyller ikke vurdering`() {
-        val personMedDødsdato = personBarnUnder20.copy(
-            doedsdato = YearMonth.from(personAvdoedMedDoedsdato.doedsdato).atEndOfMonth()
-        )
-        val vurdering = vilkaarBrukerErUnder20(
-            mapTilVilkaarstypePerson(personMedDødsdato),
-            mapTilVilkaarstypePerson(personAvdoedMedDoedsdato),
-            virkningstidspunkt = virkningsdataPersonAvdoed.atDay(1)
-        )
-
-        Assertions.assertEquals(VurderingsResultat.IKKE_OPPFYLT, vurdering.resultat)
-    }
-
     companion object {
         val foedselsdatoBarnOver20 = LocalDate.parse("2000-08-29")
         val foedselsdatoBarnUnder20 = LocalDate.parse("2020-06-10")

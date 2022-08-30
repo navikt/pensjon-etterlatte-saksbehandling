@@ -2,6 +2,7 @@ package no.nav.etterlatte.barnepensjon.model
 
 import barnepensjon.kommerbarnettilgode.saksbehandlerResultat
 import barnepensjon.vilkaar.avdoedesmedlemskap.vilkaarAvdoedesMedlemskap
+import barnepensjon.vilkaarFormaalForYtelsen
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
@@ -54,6 +55,7 @@ class VilkaarService {
         val pensjonUfore = finnOpplysning<PensjonUforeOpplysning>(opplysninger, Opplysningstyper.PENSJON_UFORE_V1)
         val arbeidsforhold = finnOpplysning<ArbeidsforholdOpplysning>(opplysninger, Opplysningstyper.ARBEIDSFORHOLD_V1)
         val vilkaar = listOf(
+            vilkaarFormaalForYtelsen(soekerPdl, virkningstidspunkt),
             vilkaarBrukerErUnder20(soekerPdl, avdoedPdl, virkningstidspunkt),
             vilkaarDoedsfallErRegistrert(avdoedPdl, soekerPdl),
             vilkaarAvdoedesMedlemskap(
@@ -86,9 +88,9 @@ class VilkaarService {
                 "med årsak $revurderingAarsak"
         )
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
-        val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
+
         val vilkaar = when (revurderingAarsak) {
-            RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarBrukerErUnder20(soekerPdl, avdoedPdl, virkningstidspunkt))
+            RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarFormaalForYtelsen(soekerPdl, virkningstidspunkt))
             RevurderingAarsak.MANUELT_OPPHOER -> TODO("Ikke implementert vurdering av denne enda")
         }
 

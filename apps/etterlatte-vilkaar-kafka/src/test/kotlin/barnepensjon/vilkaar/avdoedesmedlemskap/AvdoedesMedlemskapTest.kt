@@ -84,7 +84,7 @@ class AvdoedesMedlemskapTest {
         private val avdoedPdl = VilkaarOpplysning(
             UUID.randomUUID(),
             Opplysningstyper.AVDOED_PDL_V1,
-            Grunnlagsopplysning.Pdl("PDL", Instant.now(), null),
+            Grunnlagsopplysning.Pdl("PDL", Instant.now(), null, "opplysningId"),
             lagMockPersonPdl(
                 null,
                 BosattTest.fnrAvdoed,

@@ -25,7 +25,7 @@ fun mapTilVilkaarstypePerson(person: Person): VilkaarOpplysning<Person> {
     return VilkaarOpplysning(
         UUID.randomUUID(),
         Opplysningstyper.SOEKER_PDL_V1,
-        Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
+        Grunnlagsopplysning.Pdl("pdl", Instant.now(), null, "opplysningId"),
         person
     )
 }

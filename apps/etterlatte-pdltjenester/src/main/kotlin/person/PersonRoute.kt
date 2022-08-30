@@ -19,8 +19,16 @@ fun Route.personApi(service: PersonService) {
             val hentPersonRequest = call.receive<HentPersonRequest>()
             logger.info("Henter person med fnr=${hentPersonRequest.foedselsnummer}")
 
-            service.hentPerson(hentPersonRequest)
-                .let { call.respond(it) }
+            service.hentPerson(hentPersonRequest).let { call.respond(it) }
+        }
+
+        route("/v2") {
+            post {
+                val hentPersonRequest = call.receive<HentPersonRequest>()
+                logger.info("Henter personopplysning med fnr=${hentPersonRequest.foedselsnummer}")
+
+                service.hentOpplysningsperson(hentPersonRequest).let { call.respond(it) }
+            }
         }
     }
 

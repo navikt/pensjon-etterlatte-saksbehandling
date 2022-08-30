@@ -1,6 +1,6 @@
 package no.nav.etterlatte.model
 
-import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import model.Grunnbeloep
 import model.finnSoeskenperiodeStrategy.FinnSoeskenPeriodeStrategy
@@ -141,7 +141,7 @@ class BeregningService {
         if (fom.isBefore(virkFOM)) virkFOM else fom
 
     companion object {
-        inline fun <reified T> setOpplysningType(opplysning: Grunnlagsopplysning<ObjectNode>?): VilkaarOpplysning<T>? {
+        inline fun <reified T> setOpplysningType(opplysning: Grunnlagsopplysning<JsonNode>?): VilkaarOpplysning<T>? {
             return opplysning?.let {
                 VilkaarOpplysning(
                     opplysning.id,
@@ -153,7 +153,7 @@ class BeregningService {
         }
 
         inline fun <reified T> finnOpplysning(
-            opplysninger: List<Grunnlagsopplysning<ObjectNode>>,
+            opplysninger: List<Grunnlagsopplysning<JsonNode>>,
             type: Opplysningstyper
         ): VilkaarOpplysning<T>? {
             return setOpplysningType(opplysninger.find { it.opplysningType == type })

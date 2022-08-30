@@ -1,11 +1,12 @@
 package no.nav.etterlatte.grunnlag
 
-import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory
 
 class GrunnlagHendelser(
     rapidsConnection: RapidsConnection,
-    private val grunnlag: GrunnlagService
+    private val grunnlagService: GrunnlagService
 ) : River.PacketListener {
     private val logger: Logger = LoggerFactory.getLogger(GrunnlagHendelser::class.java)
 
@@ -30,6 +31,7 @@ class GrunnlagHendelser(
             correlationId()
             validate { it.interestedIn(eventNameKey) }
             validate { it.interestedIn(behovNameKey) }
+            validate { it.interestedIn("fnr") }
             validate { it.requireKey("opplysning") }
             validate { it.requireKey("sakId") }
             validate { it.rejectKey("grunnlag") }
@@ -44,7 +46,8 @@ class GrunnlagHendelser(
         ) {
             withLogContext(packet.correlationId) {
                 try {
-                    val opplysninger: List<Grunnlagsopplysning<ObjectNode>> = objectMapper.readValue(
+                    val sakId = packet["sakId"].asLong()
+                    val opplysninger: List<Grunnlagsopplysning<JsonNode>> = objectMapper.readValue(
                         packet["opplysning"].toJson()
                     )!!
 
@@ -55,30 +58,38 @@ class GrunnlagHendelser(
                         }
                     }
 
-                    val grunnlag = grunnlag.opprettGrunnlag(packet["sakId"].asLong(), opplysninger)
+                    grunnlagService.lagreNyeOpplysninger(
+                        sakId,
+                        Foedselsnummer.of(packet["fnr"].textValue()),
+                        opplysninger
+                    )
+
+                    val grunnlag = grunnlagService.hentGrunnlag(sakId)
+                    val grunnlagv2 = grunnlagService.hentOpplysningsgrunnlag(sakId)
 
                     JsonMessage.newMessage(
-                        "GRUNNLAG:GRUNNLAGENDRET",
-                        mapOf(
-                            "grunnlag" to grunnlag,
-                            correlationIdKey to packet[correlationIdKey],
-                            "sakId" to packet["sakId"]
-                        )
-                    ).apply {
-                        context.publish(toJson())
+                        eventName = "GRUNNLAG:GRUNNLAGENDRET",
+                        map = lagGrunnlagsmeldingMap(grunnlag, grunnlagv2, packet[correlationIdKey], sakId)
+                    ).also {
+                        context.publish(it.toJson())
                         logger.info("Lagt ut melding om grunnlagsendring")
                     }
                 } catch (e: Exception) {
                     logger.error("Spiser en melding fordi: " + e.message)
                 }
             }
-        } else {
-            return
         }
     }
 
+    private fun lagGrunnlagsmeldingMap(grunnlag: Any, grunnlagv2: Any, correlationId: JsonNode, sakId: Long) = mapOf(
+        "grunnlag" to grunnlag,
+        "grunnlagV2" to grunnlagv2,
+        correlationIdKey to correlationId,
+        "sakId" to sakId
+    )
+
     private fun sendAvdoedInntektBehov(
-        grunnlagsopplysning: Grunnlagsopplysning<ObjectNode>,
+        grunnlagsopplysning: Grunnlagsopplysning<JsonNode>,
         context: MessageContext,
         packet: JsonMessage
     ) {

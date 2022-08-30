@@ -26,6 +26,7 @@ import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import personTestData
 
 class PersonRouteTest {
 
@@ -39,7 +40,7 @@ class PersonRouteTest {
             rolle = PersonRolle.BARN
         )
 
-        coEvery { personService.hentPerson(hentPersonRequest) } returns mockPerson()
+        coEvery { personService.hentPerson(hentPersonRequest) } returns personTestData()
 
         withTestApplication({ module(securityContextMediator, personService) }) {
             handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT) {
@@ -48,6 +49,28 @@ class PersonRouteTest {
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 coVerify { personService.hentPerson(any()) }
+                verify { securityContextMediator.secureRoute(any(), any()) }
+                confirmVerified(personService)
+            }
+        }
+    }
+
+    @Test
+    fun `skal returnere personopplysninger paa version 2`() {
+        val hentPersonRequest = HentPersonRequest(
+            foedselsnummer = TRIVIELL_MIDTPUNKT,
+            rolle = PersonRolle.BARN
+        )
+
+        coEvery { personService.hentOpplysningsperson(hentPersonRequest) } returns mockPerson()
+
+        withTestApplication({ module(securityContextMediator, personService) }) {
+            handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT_V2) {
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(hentPersonRequest.toJson())
+            }.apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+                coVerify { personService.hentOpplysningsperson(any()) }
                 verify { securityContextMediator.secureRoute(any(), any()) }
                 confirmVerified(personService)
             }
@@ -128,6 +151,7 @@ class PersonRouteTest {
 
     companion object {
         const val PERSON_ENDEPUNKT = "/person"
+        const val PERSON_ENDEPUNKT_V2 = "/person/v2"
         const val FOLKEREGISTERIDENT_ENDEPUNKT = "/folkeregisterident"
     }
 }

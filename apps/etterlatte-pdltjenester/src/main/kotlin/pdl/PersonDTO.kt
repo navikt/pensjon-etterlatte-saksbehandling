@@ -1,0 +1,33 @@
+package no.nav.etterlatte.pdl
+
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import java.time.LocalDate
+
+data class PersonDTO(
+    val fornavn: OpplysningDTO<String>,
+    val etternavn: OpplysningDTO<String>,
+    val foedselsnummer: OpplysningDTO<Foedselsnummer>,
+    val foedselsdato: OpplysningDTO<LocalDate>?,
+    val foedselsaar: OpplysningDTO<Int>,
+    val foedeland: OpplysningDTO<String>?,
+    val doedsdato: OpplysningDTO<LocalDate>?,
+    val adressebeskyttelse: OpplysningDTO<Adressebeskyttelse>?,
+    var bostedsadresse: List<OpplysningDTO<Adresse>>?,
+    var deltBostedsadresse: List<OpplysningDTO<Adresse>>?,
+    var kontaktadresse: List<OpplysningDTO<Adresse>>?,
+    var oppholdsadresse: List<OpplysningDTO<Adresse>>?,
+    val sivilstatus: OpplysningDTO<Sivilstatus>?,
+    val statsborgerskap: OpplysningDTO<String>?,
+    var utland: OpplysningDTO<Utland>?,
+    var familieRelasjon: OpplysningDTO<FamilieRelasjon>?,
+    var avdoedesBarn: List<Person>?,
+    var vergemaalEllerFremtidsfullmakt: List<OpplysningDTO<VergemaalEllerFremtidsfullmakt>>?
+)
+open class OpplysningDTO<T>(val verdi: T, val opplysningsid: String?)

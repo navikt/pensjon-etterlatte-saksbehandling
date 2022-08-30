@@ -1,14 +1,13 @@
 package no.nav.etterlatte.opplysninger.kilde.pdl
 
 import no.nav.etterlatte.common.objectMapper
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -40,11 +39,16 @@ internal class BesvarOpplysningsbehov(
                     Opplysningstyper.SOEKER_PDL_V1.name
                 )
             ) {
+                val fnr = packet["fnr"].textValue()
                 val personRolle = objectMapper.treeToValue(packet["rolle"], PersonRolle::class.java)!!
                 val behandling = objectMapper.treeToValue(packet[behovNameKey], Opplysningstyper::class.java)!!
-                val pdlInfo = pdl.hentPdlModell(packet["fnr"].asText(), personRolle)
-                packet["opplysning"] = listOf(personOpplysning(pdlInfo, behandling))
+                val person = pdl.hentPerson(fnr, personRolle)
+                val opplysningsperson = pdl.hentOpplysningsperson(fnr, personRolle)
+
+                packet["opplysning"] = listOf(lagOpplysning(behandling, person)) +
+                    lagOpplysninger(opplysningsperson, behovNameTilPersonRolle(behandling), Foedselsnummer.of(fnr))
                 context.publish(packet.toJson())
+
                 logger.info("Svarte på et behov av type: " + behandling.name)
             } else {
                 logger.info("Så et behov jeg ikke kunne svare på")
@@ -52,17 +56,14 @@ internal class BesvarOpplysningsbehov(
         }
 }
 
-fun personOpplysning(
-    personPdl: Person,
-    opplysningsType: Opplysningstyper
-): Grunnlagsopplysning<Person> {
-    return lagOpplysning(opplysningsType, personPdl)
+private fun behovNameTilPersonRolle(opplysningstyper: Opplysningstyper): PersonRolle = when (opplysningstyper) {
+    Opplysningstyper.AVDOED_PDL_V1 -> PersonRolle.AVDOED
+    Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1 -> PersonRolle.GJENLEVENDE
+    Opplysningstyper.SOEKER_PDL_V1 -> PersonRolle.BARN
+    else -> throw Exception("Ugyldig opplysningsbehov")
 }
 
 interface Pdl {
-    fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle): Person
-}
-
-interface OpplysningsBygger {
-    fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl): List<Grunnlagsopplysning<out Any>>
+    fun hentPerson(foedselsnummer: String, rolle: PersonRolle): Person
+    fun hentOpplysningsperson(foedselsnummer: String, rolle: PersonRolle): PersonDTO
 }

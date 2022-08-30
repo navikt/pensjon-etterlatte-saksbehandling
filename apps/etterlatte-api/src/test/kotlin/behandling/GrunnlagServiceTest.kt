@@ -66,7 +66,7 @@ internal class GrunnlagServiceTest {
         """.trimIndent()
 
         val actual = JSONObject(testprodusent.publiserteMeldinger.first().verdi).getString("opplysning")
-        assertRapidMessage(actual, expected)
+        assertRapidMessage(expected = expected, actual = actual)
     }
 }
 

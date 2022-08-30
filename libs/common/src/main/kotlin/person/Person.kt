@@ -12,7 +12,7 @@ data class Person(
     val foedselsaar: Int,
     val foedeland: String?,
     val doedsdato: LocalDate?,
-    val adressebeskyttelse: Adressebeskyttelse,
+    val adressebeskyttelse: Adressebeskyttelse?,
     var bostedsadresse: List<Adresse>?,
     var deltBostedsadresse: List<Adresse>?,
     var kontaktadresse: List<Adresse>?,

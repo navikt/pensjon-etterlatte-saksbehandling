@@ -32,6 +32,8 @@ object BarnekullMapper {
             null
         }
     }
+
+    /* TODO ai: Bruk mapPerson for å lagre opplysninger og */
     private fun mapBarn(
         ppsKlient: ParallelleSannheterKlient,
         fnr: String,

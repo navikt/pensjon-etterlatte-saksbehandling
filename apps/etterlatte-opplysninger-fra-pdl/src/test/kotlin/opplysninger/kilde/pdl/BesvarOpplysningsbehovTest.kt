@@ -4,20 +4,20 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.person.Adresse
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.Sivilstatus
-import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
 import no.nav.etterlatte.opplysninger.kilde.pdl.BesvarOpplysningsbehov
+import no.nav.etterlatte.opplysninger.kilde.pdl.OpplysningDTO
 import no.nav.etterlatte.opplysninger.kilde.pdl.Pdl
+import no.nav.etterlatte.opplysninger.kilde.pdl.PersonDTO
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 class BesvarOpplysningsbehovTest {
     companion object {
@@ -28,34 +28,42 @@ class BesvarOpplysningsbehovTest {
             ?: throw FileNotFoundException("Fant ikke filen $file")
 
         fun mockPerson(
-            fnr: String = "11057523044",
-            foedselsaar: Int = 2010,
-            foedselsdato: LocalDate? = LocalDate.parse("2010-04-19"),
-            doedsdato: LocalDate? = null,
-            adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.UGRADERT,
-            statsborgerskap: String = "NOR",
-            foedeland: String = "NOR",
-            sivilstatus: Sivilstatus = Sivilstatus.UGIFT,
-            utland: Utland? = null,
-            bostedsadresse: Adresse? = null,
-            familieRelasjon: FamilieRelasjon? = null
-        ) = Person(
-            fornavn = "Ola",
-            etternavn = "Nordmann",
-            foedselsnummer = Foedselsnummer.of(fnr),
-            foedselsaar = foedselsaar,
-            foedselsdato = foedselsdato,
-            doedsdato = doedsdato,
-            adressebeskyttelse = adressebeskyttelse,
-            bostedsadresse = bostedsadresse?.let { listOf(bostedsadresse) } ?: emptyList(),
-            deltBostedsadresse = emptyList(),
-            oppholdsadresse = emptyList(),
-            kontaktadresse = emptyList(),
-            statsborgerskap = statsborgerskap,
-            foedeland = foedeland,
-            sivilstatus = sivilstatus,
-            utland = utland,
-            familieRelasjon = familieRelasjon,
+            fnr: String = "11057523044"
+        ) = PersonDTO(
+            fornavn = OpplysningDTO(verdi = "Ola", opplysningsid = null),
+            etternavn = OpplysningDTO(verdi = "Nordmann", opplysningsid = null),
+            foedselsnummer = OpplysningDTO(Foedselsnummer.of(fnr), null),
+            foedselsdato = OpplysningDTO(LocalDate.now().minusYears(20), UUID.randomUUID().toString()),
+            foedselsaar = OpplysningDTO(verdi = 2000, opplysningsid = null),
+            foedeland = OpplysningDTO("Norge", UUID.randomUUID().toString()),
+            doedsdato = null,
+            adressebeskyttelse = null,
+            bostedsadresse = listOf(
+                OpplysningDTO(
+                    Adresse(
+                        type = AdresseType.VEGADRESSE,
+                        aktiv = true,
+                        coAdresseNavn = "Hos Geir",
+                        adresseLinje1 = "Testveien 4",
+                        adresseLinje2 = null,
+                        adresseLinje3 = null,
+                        postnr = "1234",
+                        poststed = null,
+                        land = "NOR",
+                        kilde = "FREG",
+                        gyldigFraOgMed = LocalDateTime.now().minusYears(1),
+                        gyldigTilOgMed = null
+                    ),
+                    UUID.randomUUID().toString()
+                )
+            ),
+            deltBostedsadresse = listOf(),
+            kontaktadresse = listOf(),
+            oppholdsadresse = listOf(),
+            sivilstatus = null,
+            statsborgerskap = OpplysningDTO("Norsk", UUID.randomUUID().toString()),
+            utland = null,
+            familieRelasjon = null,
             avdoedesBarn = null,
             vergemaalEllerFremtidsfullmakt = null
         )
@@ -65,7 +73,8 @@ class BesvarOpplysningsbehovTest {
 
     @Test
     fun `skal lese melding om opplysningsbehov og returnere info fra PDL`() {
-        every { pdlMock.hentPdlModell(any(), any()) } answers { mockPerson(fnr = firstArg()) }
+        every { pdlMock.hentPerson(any(), any()) } answers { mockPerson(fnr = firstArg()).tilPerson() }
+        every { pdlMock.hentOpplysningsperson(any(), any()) } answers { mockPerson(fnr = firstArg()) }
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         Assertions.assertEquals(Opplysningstyper.SOEKER_PDL_V1.name, inspector.message(0).get(behovNameKey).asText())

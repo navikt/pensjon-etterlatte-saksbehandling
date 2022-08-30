@@ -31,5 +31,6 @@ include(
     "libs:ktor2client-onbehalfof",
     "libs:rapidsandrivers-extras",
     "libs:etterlatte-kafka",
+    "libs:testdata",
     "jobs:test-fordeler"
 )

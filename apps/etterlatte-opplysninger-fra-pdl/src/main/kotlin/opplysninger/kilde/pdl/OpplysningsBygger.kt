@@ -3,60 +3,89 @@ package no.nav.etterlatte.opplysninger.kilde.pdl
 import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import java.time.Instant
 import java.util.*
 
-class OpplysningsByggerService : OpplysningsBygger {
+fun lagOpplysninger(
+    person: PersonDTO,
+    personRolle: PersonRolle,
+    fnr: Foedselsnummer
+): List<Grunnlagsopplysning<out Any>> {
+    val bostedsadresse = person.bostedsadresse?.map {
+        lagPersonOpplysning(Opplysningstyper.BOSTEDSADRESSE, it, fnr)
+    } ?: emptyList()
+    val deltBostedsadresse = person.deltBostedsadresse?.map {
+        lagPersonOpplysning(Opplysningstyper.DELTBOSTEDSADRESSE, it, fnr)
+    } ?: emptyList()
+    val kontaktadresse = person.kontaktadresse?.map {
+        lagPersonOpplysning(Opplysningstyper.KONTAKTADRESSE, it, fnr)
+    } ?: emptyList()
+    val oppholdsadresse = person.oppholdsadresse?.map {
+        lagPersonOpplysning(Opplysningstyper.OPPHOLDSADRESSE, it, fnr)
+    } ?: emptyList()
+    val vergemaal = person.vergemaalEllerFremtidsfullmakt?.map {
+        lagPersonOpplysning(Opplysningstyper.VERGEMAALELLERFREMTIDSFULLMAKT, it, fnr)
+    } ?: emptyList()
 
-    override fun byggOpplysninger(barnepensjon: Barnepensjon, pdl: Pdl): List<Grunnlagsopplysning<out Any>> {
-        val soekersFnr = barnepensjon.soeker.foedselsnummer.svar.value
-        val avdoedFnr = hentAvdoedFnr(barnepensjon)
-        val gjenlevendeForelderFnr = hentGjenlevendeForelderFnr(barnepensjon)
+    val periodiserteOpplysninger = bostedsadresse + deltBostedsadresse + kontaktadresse + oppholdsadresse + vergemaal
 
-        val soekerPdl = pdl.hentPdlModell(soekersFnr, PersonRolle.BARN)
-        val avdoedPdl = pdl.hentPdlModell(avdoedFnr, PersonRolle.AVDOED)
-        val gjenlevendeForelderPdl = pdl.hentPdlModell(gjenlevendeForelderFnr, PersonRolle.GJENLEVENDE)
+    val statiskeOpplysninger = listOfNotNull(
+        lagPersonOpplysning(
+            Opplysningstyper.NAVN,
 
-        return listOf(
-            personOpplysning(avdoedPdl, Opplysningstyper.AVDOED_PDL_V1),
-            personOpplysning(gjenlevendeForelderPdl, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1),
-            personOpplysning(soekerPdl, Opplysningstyper.SOEKER_PDL_V1)
-        )
-    }
+            OpplysningDTO(
+                OpplysningNavn(fornavn = person.fornavn.verdi, etternavn = person.etternavn.verdi),
+                person.fornavn.opplysningsid
+            ),
+            fnr
+        ),
+        lagPersonOpplysning(Opplysningstyper.FOEDSELSNUMMER, person.foedselsnummer, fnr),
+        lagPersonOpplysning(Opplysningstyper.FOEDSELSAAR, person.foedselsaar, fnr),
+        person.foedselsdato?.let { lagPersonOpplysning(Opplysningstyper.FOEDSELSDATO, it, fnr) },
+        person.foedeland?.let { lagPersonOpplysning(Opplysningstyper.FOEDELAND, it, fnr) },
+        person.doedsdato?.let { lagPersonOpplysning(Opplysningstyper.DOEDSDATO, it, fnr) },
+        person.sivilstatus?.let { lagPersonOpplysning(Opplysningstyper.SIVILSTATUS, it, fnr) },
+        person.statsborgerskap?.let { lagPersonOpplysning(Opplysningstyper.STATSBORGERSKAP, it, fnr) },
+        person.utland?.let { lagPersonOpplysning(Opplysningstyper.UTLAND, it, fnr) },
+        person.familieRelasjon?.let { lagPersonOpplysning(Opplysningstyper.FAMILIERELASJON, it, fnr) },
+        lagPersonOpplysning(Opplysningstyper.PERSONROLLE, OpplysningDTO(personRolle, null), fnr)
+        // person.avdoedesBarn?.let { lagOpplysning(Opplysningstyper.AVDOEDESBARN, personRolle, it) },
+    )
 
-    fun personOpplysning(
-        personPdl: Person,
-        opplysningsType: Opplysningstyper
-    ): Grunnlagsopplysning<Person> {
-        return lagOpplysning(opplysningsType, personPdl)
-    }
+    return periodiserteOpplysninger + statiskeOpplysninger
+}
 
-    fun hentAvdoedFnr(barnepensjon: Barnepensjon): String {
-        val fnr = barnepensjon.foreldre.find { it.type === PersonType.AVDOED }?.foedselsnummer?.svar?.value
-        if (fnr != null) {
-            return fnr
-        }
-        throw Exception("Mangler fødselsnummer")
-    }
+data class OpplysningNavn(
+    val fornavn: String,
+    val etternavn: String
+)
 
-    fun hentGjenlevendeForelderFnr(barnepensjon: Barnepensjon): String {
-        val fnr =
-            barnepensjon.foreldre.find { it.type === PersonType.GJENLEVENDE_FORELDER }?.foedselsnummer?.svar?.value
-        if (fnr != null) {
-            return fnr
-        }
-        throw Exception("Mangler fødselsnummer på gjenlevende forelder")
-    }
+fun <T> lagPersonOpplysning(
+    opplysningsType: Opplysningstyper,
+    opplysning: OpplysningDTO<T>,
+    fnr: Foedselsnummer
+): Grunnlagsopplysning<T> {
+    return Grunnlagsopplysning(
+        id = UUID.randomUUID(),
+        kilde = Grunnlagsopplysning.Pdl(
+            navn = "pdl",
+            tidspunktForInnhenting = Instant.now(),
+            registersReferanse = null,
+            opplysningId = opplysning.opplysningsid.toString()
+        ),
+        opplysningType = opplysningsType,
+        meta = objectMapper.valueToTree(opplysning), // TODO ai: sjekk at denne er riktig
+        opplysning = opplysning.verdi,
+        fnr = fnr
+    )
 }
 
 fun <T> lagOpplysning(opplysningsType: Opplysningstyper, opplysning: T): Grunnlagsopplysning<T> {
     return Grunnlagsopplysning(
         UUID.randomUUID(),
-        Grunnlagsopplysning.Pdl("pdl", Instant.now(), null),
+        Grunnlagsopplysning.Pdl("pdl", Instant.now(), null, null),
         opplysningsType,
         objectMapper.createObjectNode(),
         opplysning

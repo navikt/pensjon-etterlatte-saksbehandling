@@ -21,10 +21,6 @@ class AppBuilder(private val props: Map<String, String>) {
         return PdlService(pdlTjenester, "http://etterlatte-pdltjenester")
     }
 
-    fun createOpplysningsbygger(): OpplysningsBygger {
-        return OpplysningsByggerService()
-    }
-
     private fun pdlTjenesterHttpClient() = HttpClient(OkHttp) {
         expectSuccess = true
         install(ContentNegotiation) {

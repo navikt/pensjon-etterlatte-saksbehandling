@@ -4,7 +4,7 @@ import barnepensjon.kommerbarnettilgode.mapFamiliemedlemmer
 import barnepensjon.kommerbarnettilgode.saksbehandlerResultat
 import barnepensjon.vilkaar.avdoedesmedlemskap.vilkaarAvdoedesMedlemskap
 import barnepensjon.vilkaarFormaalForYtelsen
-import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.barnepensjon.hentSisteVurderteDato
@@ -37,7 +37,7 @@ class VilkaarService {
     private val logger = LoggerFactory.getLogger(VilkaarService::class.java)
 
     fun mapVilkaarForstegangsbehandling(
-        opplysninger: List<VilkaarOpplysning<ObjectNode>>,
+        opplysninger: List<VilkaarOpplysning<JsonNode>>,
         virkningstidspunkt: LocalDate
     ): VilkaarResultat {
         logger.info(
@@ -83,7 +83,7 @@ class VilkaarService {
     }
 
     fun mapVilkaarRevurdering(
-        opplysninger: List<VilkaarOpplysning<ObjectNode>>,
+        opplysninger: List<VilkaarOpplysning<JsonNode>>,
         virkningstidspunkt: LocalDate,
         revurderingAarsak: RevurderingAarsak
     ): VilkaarResultat {
@@ -105,7 +105,7 @@ class VilkaarService {
     }
 
     fun beregnVirkningstidspunktFoerstegangsbehandling(
-        opplysninger: List<VilkaarOpplysning<ObjectNode>>,
+        opplysninger: List<VilkaarOpplysning<JsonNode>>,
         soeknadMottattDato: LocalDate
     ): YearMonth {
         val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
@@ -113,7 +113,7 @@ class VilkaarService {
     }
 
     fun beregnVirkningstidspunktRevurdering(
-        opplysninger: List<VilkaarOpplysning<ObjectNode>>,
+        opplysninger: List<VilkaarOpplysning<JsonNode>>,
         revurderingAarsak: RevurderingAarsak
     ): YearMonth {
         return when (revurderingAarsak) {
@@ -152,7 +152,7 @@ class VilkaarService {
         return YearMonth.from(doedsdato).plusMonths(1)
     }
 
-    fun mapKommerSoekerTilGode(opplysninger: List<VilkaarOpplysning<ObjectNode>>): KommerSoekerTilgode {
+    fun mapKommerSoekerTilGode(opplysninger: List<VilkaarOpplysning<JsonNode>>): KommerSoekerTilgode {
         logger.info("Map opplysninger for å vurdere om penger kommer søker til gode")
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
         val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
@@ -189,7 +189,7 @@ class VilkaarService {
     }
 
     companion object {
-        inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<ObjectNode>?): VilkaarOpplysning<T>? {
+        inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<JsonNode>?): VilkaarOpplysning<T>? {
             return opplysning?.let {
                 VilkaarOpplysning(
                     opplysning.id,
@@ -201,7 +201,7 @@ class VilkaarService {
         }
 
         inline fun <reified T> finnOpplysning(
-            opplysninger: List<VilkaarOpplysning<ObjectNode>>,
+            opplysninger: List<VilkaarOpplysning<JsonNode>>,
             type: Opplysningstyper
         ): VilkaarOpplysning<T>? {
             return setOpplysningType(opplysninger.find { it.opplysningType == type })

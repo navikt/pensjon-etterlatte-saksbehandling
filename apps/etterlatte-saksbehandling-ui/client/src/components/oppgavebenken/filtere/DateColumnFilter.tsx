@@ -57,8 +57,11 @@ const DateColumnFilter: React.FC<Props> = ({ oppgaveFelt, oppgaveFelter, setOppg
 
 const parseDate = (dato?: Date | string) => {
   if (!dato) return
-  else if (typeof dato === 'string') return parse(dato, 'dd.MM.yyyy', new Date())
-  else return dato
+  if (typeof dato === 'string') {
+    return parse(dato, 'dd.MM.yyyy', new Date())
+  } else {
+    return dato
+  }
 }
 
 const Datovelger = styled.div`
@@ -73,6 +76,7 @@ const Datovelger = styled.div`
     text-indent: 4px;
   }
 `
+
 const KalenderIkon = styled.div`
   padding: 4px 10px;
   cursor: pointer;

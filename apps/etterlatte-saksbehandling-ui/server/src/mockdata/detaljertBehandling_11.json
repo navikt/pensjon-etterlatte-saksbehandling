@@ -54,6 +54,32 @@
     "resultat": "IKKE_OPPFYLT",
     "vilkaar": [
       {
+        "navn": "FORMAAL_FOR_YTELSEN",
+        "resultat": "IKKE_OPPFYLT",
+        "kriterier": [
+          {
+            "navn": "SOEKER_ER_I_LIVE",
+            "resultat": "IKKE_OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-03-22T14:36:17.984583465Z",
+                  "registersReferanse": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-02-10",
+                  "foedselsnummer": "22128202440"
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-03-30T14:36:17.984583465Z"
+      },
+      {
         "navn": "SOEKER_ER_UNDER_20",
         "resultat": "IKKE_OPPFYLT",
         "kriterier": [

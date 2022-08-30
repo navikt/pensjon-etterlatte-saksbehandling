@@ -11,6 +11,7 @@ import { VilkaarResultat } from './vilkaar/VilkaarResultat'
 import { Virkningstidspunkt } from './vilkaar/Virkningstidspunkt'
 import { VilkaarBorderTop } from './styled'
 import { hentBehandlesFraStatus } from '../felles/utils'
+import { Formaal } from './vilkaar/Formaal'
 
 export const Inngangsvilkaar = () => {
   const ctx = useContext(AppContext)
@@ -37,6 +38,7 @@ export const Inngangsvilkaar = () => {
         <h1>Vilkårsvurdering</h1>
       </Header>
       <VilkaarBorderTop />
+      <Formaal id="formaal" vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.FORMAAL_FOR_YTELSEN)} />
       <AlderBarn id="alderbarn" vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.SOEKER_ER_UNDER_20)} />
       <DoedsFallForelder
         id="dodsfallforelder"

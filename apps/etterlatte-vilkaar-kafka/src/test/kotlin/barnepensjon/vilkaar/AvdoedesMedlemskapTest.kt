@@ -3,6 +3,7 @@ package barnepensjon.vilkaar
 import adresseDanmarkPdl
 import adresseUtlandFoerFemAar
 import adresserNorgePdl
+import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieHarHatt80prosentStillingSisteFemAar
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieHarMottattPensjonEllerTrygdSisteFemAar
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieIngenInnUtvandring
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieIngenUtenlandsoppholdFraSoeknad
@@ -16,6 +17,8 @@ import lagMockPersonAvdoedSoeknad
 import lagMockPersonPdl
 import mapTilVilkaarstypeAvdoedSoeknad
 import mapTilVilkaarstypePerson
+import no.nav.etterlatte.barnepensjon.Periode
+import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
@@ -40,19 +43,73 @@ class AvdoedesMedlemskapTest {
     fun vurderMottattPensjonUforeSisteFemAar() {
         val file = readFile("/inntektsopplysning.json")
         val opplysning = objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(file)
-        val avdoed5AarsOpptjening =
-            lagMockPersonPdl(null, fnrAvdoed, LocalDate.parse("2022-07-01"), adresserNorgePdl(), null, "NOR")
-        val avdoed4AarsOpptjening =
-            lagMockPersonPdl(null, fnrAvdoed, LocalDate.parse("2021-07-01"), adresserNorgePdl(), null, "NOR")
 
         kriterieHarMottattPensjonEllerTrygdSisteFemAar(
-            mapTilVilkaarstypePerson(avdoed5AarsOpptjening),
+            LocalDate.parse("2022-07-01"),
             opplysning
         ).let { assertEquals(it.resultat, VurderingsResultat.OPPFYLT) }
         kriterieHarMottattPensjonEllerTrygdSisteFemAar(
-            mapTilVilkaarstypePerson(avdoed4AarsOpptjening),
+            LocalDate.parse("2021-07-01"),
             opplysning
         ).let { assertEquals(it.resultat, VurderingsResultat.IKKE_OPPFYLT) }
+    }
+
+    @Test
+    fun `Arbeidsforhold siste fem aar oppfylt naar man har arbeidsforhold hele perioden`() {
+        val inntekter =
+            objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(readFile("/inntektsopplysning.json"))
+        val arbeidsforhold =
+            objectMapper.readValue<VilkaarOpplysning<ArbeidsforholdOpplysning>>(readFile("/arbeidsforhold100.json"))
+
+        val kriterie = kriterieHarHatt80prosentStillingSisteFemAar(
+            doedsdato = LocalDate.parse("2022-07-01"),
+            arbeidsforholdOpplysning = arbeidsforhold,
+            inntektsOpplysning = inntekter
+        )
+
+        assertEquals(VurderingsResultat.OPPFYLT, kriterie.resultat)
+    }
+
+    @Test
+    fun `Arbeidsforhold siste fem aar ikke oppfylt dersom man har under 80 prosent stilling`() {
+        val inntekter =
+            objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(readFile("/inntektsopplysning.json"))
+        val arbeidsforhold =
+            objectMapper.readValue<VilkaarOpplysning<ArbeidsforholdOpplysning>>(readFile("/arbeidsforhold75.json"))
+
+        val kriterie = kriterieHarHatt80prosentStillingSisteFemAar(
+            doedsdato = LocalDate.parse("2022-07-01"),
+            arbeidsforholdOpplysning = arbeidsforhold,
+            inntektsOpplysning = inntekter
+        )
+
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, kriterie.resultat)
+    }
+
+    @Test
+    fun `Arbeidsforhold siste fem aar ikke oppfylt dersom man har opphold i arbeidsforhold`() {
+        val inntekter =
+            objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(readFile("/inntektsopplysning.json"))
+        val arbeidsforhold = objectMapper.readValue<VilkaarOpplysning<ArbeidsforholdOpplysning>>(
+            readFile("/arbeidsforholdMedOpphold.json")
+        )
+
+        val kriterie = kriterieHarHatt80prosentStillingSisteFemAar(
+            doedsdato = LocalDate.parse("2022-07-01"),
+            arbeidsforholdOpplysning = arbeidsforhold,
+            inntektsOpplysning = inntekter
+        )
+
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, kriterie.resultat)
+        kriterie.basertPaaOpplysninger.let {
+            val opplysninger = it[0].opplysning as List<*>
+            assertEquals(3, opplysninger.size)
+            val arbeidsforholdListe = opplysninger[0] as List<*>
+            assertEquals(2, arbeidsforholdListe.size)
+            val gaps = opplysninger[2] as List<*>
+            assertEquals(1, gaps.size)
+            assertEquals(Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31)), gaps.first())
+        }
     }
 
     @Test

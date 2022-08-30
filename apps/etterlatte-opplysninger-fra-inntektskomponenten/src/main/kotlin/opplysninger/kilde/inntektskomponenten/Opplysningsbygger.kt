@@ -2,7 +2,6 @@ package no.nav.etterlatte.opplysninger.kilde.inntektskomponenten
 
 import no.nav.etterlatte.OpplysningsBygger
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
-import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsForhold
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
@@ -31,26 +30,11 @@ class OpplysningsByggerService : OpplysningsBygger {
             )
         }
 
-        val arbeidsforholdOpplysning = if (arbeidsforholdListe.isNotEmpty()) {
-            val arbeidsforhold = arbeidsforholdListe.map { t ->
-                ArbeidsForhold(
-                    t.type,
-                    t.arbeidstaker,
-                    t.arbeidssted,
-                    t.ansettelsesdetaljer,
-                    t.bruksperiode,
-                    t.ansettelsesperiode
-                )
-            }
-            lagOpplysning(
-                Opplysningstyper.ARBEIDSFORHOLD_V1,
-                Grunnlagsopplysning.Aregisteret("Aareg"),
-                ArbeidsforholdOpplysning(arbeidsforhold)
-            )
-        } else {
-            null
-        }
-
+        val arbeidsforholdOpplysning = lagOpplysning(
+            Opplysningstyper.ARBEIDSFORHOLD_V1,
+            Grunnlagsopplysning.Aregisteret("Aareg"),
+            ArbeidsforholdOpplysning(arbeidsforholdListe)
+        )
         return listOfNotNull(inntektsOpplysning, arbeidsforholdOpplysning)
     }
 }

@@ -22,7 +22,7 @@ class OpplysningsbyggerTest {
 
         val opplysninger = service.byggOpplysninger(inntektsKomponentenResponse, emptyList())
 
-        assertEquals(opplysninger.size, 1)
+        assertEquals(opplysninger.size, 2)
         assertEquals(opplysninger[0].opplysningType, Opplysningstyper.AVDOED_INNTEKT_V1)
         val inntektsOpplysning = (opplysninger[0].opplysning) as InntektsOpplysning
         assertEquals(inntektsOpplysning.pensjonEllerTrygd.size, 177)

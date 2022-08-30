@@ -6,15 +6,7 @@ import { IReturType } from '../types'
 
 export const Underkjenn = ({ behandlingId }: { behandlingId: string }) => {
   const [tilbakemeldingFraAttestant, setTilbakemeldingFraAttestant] = useState('')
-  const [returType, setReturType] = useState<IReturType>(IReturType.inngangsvilkår_feilvurdert)
-
-  const options: IReturType[] = [
-    IReturType.inngangsvilkår_feilvurdert,
-    IReturType.feil_i_beregning,
-    IReturType.feil_i_brev,
-    IReturType.dokumentasjon_mangler,
-    IReturType.annet,
-  ]
+  const [returType, setReturType] = useState<IReturType>(IReturType.velg)
 
   return (
     <BeslutningWrapper>
@@ -26,7 +18,7 @@ export const Underkjenn = ({ behandlingId }: { behandlingId: string }) => {
           value={returType || ''}
           onChange={(e) => setReturType(e.target.value as IReturType)}
         >
-          {options.map((option) => (
+          {Object.keys(IReturType).map((option) => (
             <option key={option} value={option}>
               {option}
             </option>

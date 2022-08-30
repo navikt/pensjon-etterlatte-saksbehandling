@@ -34,7 +34,7 @@ export const DatovelgerPeriode: React.FC<Props> = ({ label, dato, setDato, error
             selected={dato}
             onChange={(date) => {
               setDato(date)
-              date !== null && setErrorUndefined()
+              date !== undefined && setErrorUndefined()
             }}
             autoComplete="off"
             preventOpenOnFocus={true}

@@ -34,4 +34,5 @@ dependencies {
     testImplementation(Ktor2.ServerTests)
     testImplementation(Kotlinx.CoroutinesCore)
     testImplementation(NavFelles.MockOauth2Server)
+    testImplementation(project(":libs:testdata"))
 }

@@ -31,7 +31,7 @@ class Opplysningsuthenter {
     fun lagOpplysningsListe(jsonNode: JsonNode): List<Grunnlagsopplysning<out Any>> {
         val barnepensjonssoknad = objectMapper.treeToValue<Barnepensjon>(jsonNode)!!
 
-        return listOf<Grunnlagsopplysning<out Any>?>(
+        return listOfNotNull(
             avdoed(barnepensjonssoknad, Opplysningstyper.AVDOED_SOEKNAD_V1),
             soeker(barnepensjonssoknad, Opplysningstyper.SOEKER_SOEKNAD_V1),
             gjenlevendeForelder(barnepensjonssoknad, Opplysningstyper.GJENLEVENDE_FORELDER_SOEKNAD_V1),
@@ -41,10 +41,10 @@ class Opplysningsuthenter {
             soeknadMottattDato(barnepensjonssoknad, Opplysningstyper.SOEKNAD_MOTTATT_DATO),
             soeknadsType(barnepensjonssoknad, Opplysningstyper.SOEKNADSTYPE_V1),
             personGalleri(barnepensjonssoknad)
-        ).filterNotNull()
+        )
     }
 
-    fun <T> setBehandlingsopplysninger(
+    private fun <T> setBehandlingsopplysninger(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper,
         data: T
@@ -61,16 +61,16 @@ class Opplysningsuthenter {
         )
     }
 
-    fun hentAvdoedForelder(barnepensjon: Barnepensjon): Avdoed? {
+    private fun hentAvdoedForelder(barnepensjon: Barnepensjon): Avdoed? {
         return barnepensjon.foreldre.find { it.type === PersonType.AVDOED }?.let { it as Avdoed }
     }
 
-    fun hentGjenlevendeForelder(barnepensjon: Barnepensjon): GjenlevendeForelder? {
+    private fun hentGjenlevendeForelder(barnepensjon: Barnepensjon): GjenlevendeForelder? {
         return barnepensjon.foreldre.find { it.type === PersonType.GJENLEVENDE_FORELDER }
             ?.let { it as GjenlevendeForelder }
     }
 
-    fun avdoed(
+    private fun avdoed(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper
     ): Grunnlagsopplysning<out AvdoedSoeknad>? {
@@ -207,7 +207,7 @@ class Opplysningsuthenter {
         }
     }
 
-    fun soeknadMottattDato(
+    private fun soeknadMottattDato(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper
     ): Grunnlagsopplysning<out SoeknadMottattDato> {
@@ -218,14 +218,14 @@ class Opplysningsuthenter {
         )
     }
 
-    fun soeknadsType(
+    private fun soeknadsType(
         barnepensjon: Barnepensjon,
         opplysningsType: Opplysningstyper
     ): Grunnlagsopplysning<out SoeknadstypeOpplysning> {
         return setBehandlingsopplysninger(barnepensjon, opplysningsType, SoeknadstypeOpplysning(barnepensjon.type))
     }
 
-    fun personGalleri(
+    private fun personGalleri(
         barnepensjon: Barnepensjon
     ): Grunnlagsopplysning<out Persongalleri> {
         return setBehandlingsopplysninger(

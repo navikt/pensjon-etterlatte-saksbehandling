@@ -74,66 +74,66 @@ internal class PersonServiceTest {
     @Test
     fun `skal mappe person som inkluderer familierelasjon (foreldre)`() {
         val person = runBlocking {
-            personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
+            personService.hentOpplysningsperson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
         }
 
         val expectedForeldreFnr = listOf("26117512737", "14097030880")
 
-        assertNotNull(person.familieRelasjon?.foreldre)
-        assertEquals(2, person.familieRelasjon?.foreldre?.size)
-        assertTrue(person.familieRelasjon?.foreldre?.get(0)?.value in expectedForeldreFnr)
-        assertTrue(person.familieRelasjon?.foreldre?.get(1)?.value in expectedForeldreFnr)
+        assertNotNull(person.familieRelasjon?.verdi?.foreldre)
+        assertEquals(2, person.familieRelasjon?.verdi?.foreldre?.size)
+        assertTrue(person.familieRelasjon?.verdi?.foreldre?.get(0)?.value in expectedForeldreFnr)
+        assertTrue(person.familieRelasjon?.verdi?.foreldre?.get(1)?.value in expectedForeldreFnr)
     }
 
     @Test
     fun `skal mappe person som inkluderer familierelasjon (ansvarlige foreldre)`() {
         val person = runBlocking {
-            personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
+            personService.hentOpplysningsperson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
         }
 
         val expectedForeldreFnr = listOf("26117512737", "14097030880")
 
-        assertNotNull(person.familieRelasjon?.ansvarligeForeldre)
-        assertEquals(2, person.familieRelasjon?.ansvarligeForeldre?.size)
-        assertTrue(person.familieRelasjon?.foreldre?.get(0)?.value in expectedForeldreFnr)
-        assertTrue(person.familieRelasjon?.foreldre?.get(1)?.value in expectedForeldreFnr)
+        assertNotNull(person.familieRelasjon?.verdi?.ansvarligeForeldre)
+        assertEquals(2, person.familieRelasjon?.verdi?.ansvarligeForeldre?.size)
+        assertTrue(person.familieRelasjon?.verdi?.foreldre?.get(0)?.value in expectedForeldreFnr)
+        assertTrue(person.familieRelasjon?.verdi?.foreldre?.get(1)?.value in expectedForeldreFnr)
     }
 
     @Test
     @Disabled("TODO - få inn datagrunnlag for denne")
     fun `skal mappe person som inkluderer familierelasjon (barn)`() {
         val person = runBlocking {
-            personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
+            personService.hentOpplysningsperson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
         }
 
         val foreldreFnr = listOf("26117512737", "14097030880")
 
-        assertNotNull(person.familieRelasjon?.barn)
-        assertEquals(2, person.familieRelasjon?.barn?.size)
-        assertTrue(person.familieRelasjon?.barn?.get(0)?.value in foreldreFnr)
-        assertTrue(person.familieRelasjon?.barn?.get(1)?.value in foreldreFnr)
+        assertNotNull(person.familieRelasjon?.verdi?.barn)
+        assertEquals(2, person.familieRelasjon?.verdi?.barn?.size)
+        assertTrue(person.familieRelasjon?.verdi?.barn?.get(0)?.value in foreldreFnr)
+        assertTrue(person.familieRelasjon?.verdi?.barn?.get(1)?.value in foreldreFnr)
     }
 
     @Test
     fun `Hent utland med innflytting mappes korrekt`() {
         val person = runBlocking {
-            personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
+            personService.hentOpplysningsperson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
         }
 
-        assertEquals(2, person.utland?.innflyttingTilNorge?.size)
-        assertEquals("NIC", person.utland?.innflyttingTilNorge?.get(0)?.fraflyttingsland)
-        assertEquals("1970-09-14", person.utland?.innflyttingTilNorge?.get(0)?.dato.toString())
+        assertEquals(2, person.utland?.verdi?.innflyttingTilNorge?.size)
+        assertEquals("NIC", person.utland?.verdi?.innflyttingTilNorge?.get(0)?.fraflyttingsland)
+        assertEquals("1970-09-14", person.utland?.verdi?.innflyttingTilNorge?.get(0)?.dato.toString())
     }
 
     @Test
     fun `Hent utland med utflytting mappes korrekt`() {
         val person = runBlocking {
-            personService.hentPerson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
+            personService.hentOpplysningsperson(HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN))
         }
 
-        assertEquals(1, person.utland?.utflyttingFraNorge?.size)
-        assertEquals("FRA", person.utland?.utflyttingFraNorge?.get(0)?.tilflyttingsland)
-        assertEquals("2021-07-01", person.utland?.utflyttingFraNorge?.get(0)?.dato.toString())
+        assertEquals(1, person.utland?.verdi?.utflyttingFraNorge?.size)
+        assertEquals("FRA", person.utland?.verdi?.utflyttingFraNorge?.get(0)?.tilflyttingsland)
+        assertEquals("2021-07-01", person.utland?.verdi?.utflyttingFraNorge?.get(0)?.dato.toString())
     }
 
     @Test

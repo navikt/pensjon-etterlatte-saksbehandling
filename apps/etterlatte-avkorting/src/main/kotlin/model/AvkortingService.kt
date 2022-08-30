@@ -1,6 +1,6 @@
 package model
 
-import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
@@ -53,7 +53,7 @@ class AvkortingService {
     }
 
     companion object {
-        inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<ObjectNode>?): VilkaarOpplysning<T>? {
+        inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<JsonNode>?): VilkaarOpplysning<T>? {
             return opplysning?.let {
                 VilkaarOpplysning(
                     opplysning.id,
@@ -65,7 +65,7 @@ class AvkortingService {
         }
 
         inline fun <reified T> finnOpplysning(
-            opplysninger: List<VilkaarOpplysning<ObjectNode>>,
+            opplysninger: List<VilkaarOpplysning<JsonNode>>,
             type: Opplysningstyper
         ): VilkaarOpplysning<T>? {
             return setOpplysningType(opplysninger.find { it.opplysningType == type })

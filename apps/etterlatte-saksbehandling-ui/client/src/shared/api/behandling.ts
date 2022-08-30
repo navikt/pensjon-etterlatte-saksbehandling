@@ -1,5 +1,7 @@
 import { IApiResponse } from './types'
 import { IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
+import { apiClient, ApiResponse } from './apiClient'
+import { IPeriodeInput } from '../../components/behandling/inngangsvilkaar/types'
 
 const path = process.env.REACT_APP_VEDTAK_URL
 
@@ -130,3 +132,9 @@ export const lagreSoeskenMedIBeregning = async (
     return { status: 500 }
   }
 }
+
+export const lagrePeriodeForAvdoedesMedlemskap = async (
+  behandlingsId: string,
+  periode: IPeriodeInput
+): Promise<ApiResponse<string>> =>
+  apiClient.post<string>(`/grunnlag/saksbehandler/${behandlingsId}`, { periode: periode })

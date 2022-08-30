@@ -53,7 +53,7 @@ fun vilkaarAvdoedesMedlemskap(
     )
 
     val vurderingsResultat = when (bosattNorge.utfall) {
-        Utfall.OPPFYLT -> kriterier.minBy { it.resultat.ordinal }.resultat
+        Utfall.OPPFYLT -> kriterier.minBy { it.resultat.prioritet }.resultat
         else -> bosattNorge.resultat
     }
 

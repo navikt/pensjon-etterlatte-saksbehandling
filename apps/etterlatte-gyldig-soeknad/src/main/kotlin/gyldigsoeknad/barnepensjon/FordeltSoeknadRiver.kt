@@ -1,5 +1,6 @@
+package no.nav.etterlatte.gyldigsoeknad.barnepensjon
+
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import no.nav.etterlatte.gyldigsoeknad.barnepensjon.GyldigSoeknadService
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert

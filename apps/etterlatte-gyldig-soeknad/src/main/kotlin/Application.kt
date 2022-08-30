@@ -1,8 +1,9 @@
 package no.nav.etterlatte
 
-import FordeltSoeknadRiver
+import no.nav.etterlatte.gyldigsoeknad.barnepensjon.FordeltSoeknadRiver
 import no.nav.etterlatte.gyldigsoeknad.barnepensjon.GyldigSoeknadService
 import no.nav.etterlatte.gyldigsoeknad.config.AppBuilder
+import no.nav.etterlatte.gyldigsoeknad.omstillingsstoenad.InnsendtSoeknadRiver
 import no.nav.helse.rapids_rivers.RapidApplication
 
 fun main() {
@@ -16,6 +17,9 @@ fun main() {
                         it,
                         GyldigSoeknadService(ab.createPdlClient()),
                         ab.createBehandlingClient()
+                    )
+                    InnsendtSoeknadRiver(
+                        it,
                     )
                 }.start()
         }

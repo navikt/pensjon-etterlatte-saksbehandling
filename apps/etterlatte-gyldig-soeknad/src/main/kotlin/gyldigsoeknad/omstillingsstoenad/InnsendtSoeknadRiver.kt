@@ -1,6 +1,5 @@
 package no.nav.etterlatte.gyldigsoeknad.omstillingsstoenad
 
-import FordeltSoeknadRiver
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -14,7 +13,7 @@ import org.slf4j.LoggerFactory
 internal class InnsendtSoeknadRiver(
     rapidsConnection: RapidsConnection,
 ) : River.PacketListener {
-    private val logger = LoggerFactory.getLogger(FordeltSoeknadRiver::class.java)
+    private val logger = LoggerFactory.getLogger(InnsendtSoeknadRiver::class.java)
 
     init {
         River(rapidsConnection).apply {

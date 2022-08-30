@@ -1,6 +1,5 @@
 package no.nav.etterlatte.gyldigsoeknad.barnepensjon
 
-import FordeltSoeknadRiver
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient

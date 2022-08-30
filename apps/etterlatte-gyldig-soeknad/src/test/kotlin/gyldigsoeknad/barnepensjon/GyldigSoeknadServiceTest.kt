@@ -1,9 +1,7 @@
-package behandlingfrasoknad
+package no.nav.etterlatte.gyldigsoeknad.barnepensjon
 
-import Pdl
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.mockk.mockk
-import model.GyldigSoeknadService
+import no.nav.etterlatte.gyldigsoeknad.client.PdlClient
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.InnsenderHarForeldreansvarGrunnlag
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.PersonInfoGyldighet
@@ -15,33 +13,22 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.io.FileNotFoundException
 import java.time.LocalDate
 
 internal class GyldigSoeknadServiceTest {
 
-    companion object {
-        val pdl = mockk<Pdl>()
-
-        val persongalleri = GyldigSoeknadService(pdl).hentPersongalleriFraSoeknad(
-            objectMapper.treeToValue(
-                objectMapper.readTree(
-                    javaClass.getResource("/fordeltmelding.json")!!.readText()
-                )!!["@skjema_info"]
-            )!!
-        )
-
-        val gjenlevendeFnr = "03108718357"
-        val foreldreFnrMedGjenlevende = listOf(Foedselsnummer.of(gjenlevendeFnr), Foedselsnummer.of("22128202440"))
-        val foreldreFnrUtenGjenlevende = listOf(Foedselsnummer.of("22128202440"))
-        val gjenlevende = listOf(PersonInfoGyldighet("navn navnulfsen", gjenlevendeFnr))
-        val innsender = PersonInfoGyldighet("innsendernavn", "03108718357")
-    }
+    private val pdlClient = mockk<PdlClient>()
+    private val gyldigSoeknadService = GyldigSoeknadService(pdlClient)
 
     @Test
-    fun hentPersongalleriFraSoeknad() {
+    fun `skal hente persongalleri fra søknad`() {
+        val persongalleri = gyldigSoeknadService.hentPersongalleriFraSoeknad(soeknad)
+
         assertEquals("12101376212", persongalleri.soeker)
         assertEquals(listOf("03108718357"), persongalleri.gjenlevende)
         assertEquals("03108718357", persongalleri.innsender)
@@ -51,21 +38,21 @@ internal class GyldigSoeknadServiceTest {
 
     @Test
     fun vurderInnsenderErForelder() {
-        val innsenderErForelder = GyldigSoeknadService(pdl).innsenderErForelder(
+        val innsenderErForelder = gyldigSoeknadService.innsenderErForelder(
             GyldighetsTyper.INNSENDER_ER_FORELDER,
             gjenlevende,
             innsender,
             FamilieRelasjon(listOf(), foreldreFnrMedGjenlevende, null)
         )
 
-        val innsenderErIkkeForelder = GyldigSoeknadService(pdl).innsenderErForelder(
+        val innsenderErIkkeForelder = gyldigSoeknadService.innsenderErForelder(
             GyldighetsTyper.INNSENDER_ER_FORELDER,
             gjenlevende,
             innsender,
             FamilieRelasjon(listOf(), foreldreFnrUtenGjenlevende, null)
         )
 
-        val foreldreMangler = GyldigSoeknadService(pdl).innsenderErForelder(
+        val foreldreMangler = gyldigSoeknadService.innsenderErForelder(
             GyldighetsTyper.INNSENDER_ER_FORELDER,
             gjenlevende,
             innsender,
@@ -87,19 +74,19 @@ internal class GyldigSoeknadServiceTest {
 
     @Test
     fun vurderInnsenderHarForeldreansvar() {
-        val innsenderErForelder = GyldigSoeknadService(pdl).innsenderHarForeldreansvar(
+        val innsenderErForelder = GyldigSoeknadService(pdlClient).innsenderHarForeldreansvar(
             GyldighetsTyper.INNSENDER_ER_FORELDER,
             innsender,
             FamilieRelasjon(foreldreFnrMedGjenlevende, foreldreFnrMedGjenlevende, null)
         )
 
-        val innsenderErIkkeForelder = GyldigSoeknadService(pdl).innsenderHarForeldreansvar(
+        val innsenderErIkkeForelder = GyldigSoeknadService(pdlClient).innsenderHarForeldreansvar(
             GyldighetsTyper.INNSENDER_ER_FORELDER,
             innsender,
             FamilieRelasjon(foreldreFnrUtenGjenlevende, foreldreFnrUtenGjenlevende, null)
         )
 
-        val foreldreMangler = GyldigSoeknadService(pdl).innsenderHarForeldreansvar(
+        val foreldreMangler = GyldigSoeknadService(pdlClient).innsenderHarForeldreansvar(
             GyldighetsTyper.INNSENDER_ER_FORELDER,
             innsender,
             null
@@ -119,8 +106,8 @@ internal class GyldigSoeknadServiceTest {
 
     @Test
     fun vurderIngenAnnenVergeEnnForelder() {
-        val soekerIngenVerge = lagMockPersonPdl(null)
-        val soekerHarVerge = lagMockPersonPdl(
+        val soekerIngenVerge = mockPerson(null)
+        val soekerHarVerge = mockPerson(
             listOf(
                 VergemaalEllerFremtidsfullmakt(
                     "embete",
@@ -130,22 +117,36 @@ internal class GyldigSoeknadServiceTest {
             )
         )
 
-        val harIngenVerge = GyldigSoeknadService(pdl).ingenAnnenVergeEnnForelder(
+        val harIngenVerge = GyldigSoeknadService(pdlClient).ingenAnnenVergeEnnForelder(
             GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER,
             soekerIngenVerge
         )
 
-        val harVerge = GyldigSoeknadService(pdl).ingenAnnenVergeEnnForelder(
+        val harVerge = GyldigSoeknadService(pdlClient).ingenAnnenVergeEnnForelder(
             GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER,
             soekerHarVerge
         )
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, harVerge.resultat)
         assertEquals(VurderingsResultat.OPPFYLT, harIngenVerge.resultat)
     }
+
+    companion object {
+        private val skjemaInfo = objectMapper.writeValueAsString(objectMapper.readTree(readFile("/fordeltmelding.json")).get("@skjema_info"))
+        val soeknad = objectMapper.readValue(skjemaInfo, Barnepensjon::class.java)
+
+        val gjenlevendeFnr = "03108718357"
+        val foreldreFnrMedGjenlevende = listOf(Foedselsnummer.of(gjenlevendeFnr), Foedselsnummer.of("22128202440"))
+        val foreldreFnrUtenGjenlevende = listOf(Foedselsnummer.of("22128202440"))
+        val gjenlevende = listOf(PersonInfoGyldighet("navn navnulfsen", gjenlevendeFnr))
+        val innsender = PersonInfoGyldighet("innsendernavn", "03108718357")
+
+        fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
+            ?: throw FileNotFoundException("Fant ikke filen $file")
+    }
 }
 
-fun lagMockPersonPdl(
-    vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>?
+private fun mockPerson(
+    vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>? = null
 ) = Person(
     fornavn = "Test",
     etternavn = "Testulfsen",

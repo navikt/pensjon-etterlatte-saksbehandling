@@ -1,3 +1,5 @@
+package no.nav.etterlatte.gyldigsoeknad.client
+
 import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -9,36 +11,37 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import java.time.LocalDateTime
 import java.util.*
 
-class BehandlingsService(
-    private val behandling_app: HttpClient,
+class BehandlingClient(
+    private val sakOgBehandlingApp: HttpClient,
     private val url: String
-) : Behandling {
-    override fun initierBehandling(
+) {
+    fun initierBehandling(
         sak: Long,
-        mottattDato: String,
+        mottattDato: LocalDateTime,
         persongalleri: Persongalleri
     ): UUID {
         return runBlocking {
-            behandling_app.post("$url/behandlinger") {
+            sakOgBehandlingApp.post("$url/behandlinger") {
                 contentType(ContentType.Application.Json)
-                setBody(NyBehandlingRequest(sak, persongalleri, mottattDato))
+                setBody(NyBehandlingRequest(sak, persongalleri, mottattDato.toString()))
             }.body<String>()
         }.let {
             UUID.fromString(it)
         }
     }
 
-    override fun skaffSak(person: String, saktype: String): Long {
+    fun skaffSak(person: String, saktype: String): Long {
         return runBlocking {
-            behandling_app.get("$url/personer/$person/saker/$saktype").body<ObjectNode>()["id"].longValue()
+            sakOgBehandlingApp.get("$url/personer/$person/saker/$saktype").body<ObjectNode>()["id"].longValue()
         }
     }
 
-    override fun lagreGyldighetsVurdering(behandlingsId: UUID, gyldighet: GyldighetsResultat) {
+    fun lagreGyldighetsVurdering(behandlingsId: UUID, gyldighet: GyldighetsResultat) {
         return runBlocking {
-            behandling_app.post("$url/behandlinger/$behandlingsId/gyldigfremsatt") {
+            sakOgBehandlingApp.post("$url/behandlinger/$behandlingsId/gyldigfremsatt") {
                 contentType(ContentType.Application.Json)
                 setBody(gyldighet)
             }.body<String>()

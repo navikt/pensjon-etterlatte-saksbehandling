@@ -93,7 +93,7 @@ fun kriterieHarHatt80prosentStillingSisteFemAar(
         id = arbeidsforholdOpplysning.id,
         kriterieOpplysningsType = KriterieOpplysningsType.AVDOED_STILLINGSPROSENT,
         kilde = arbeidsforholdOpplysning.kilde,
-        opplysning = MedlemskapsPeriode(
+        opplysning = AvdoedesMedlemskapGrunnlag(
             inntekter = inntekt,
             gaps = ansettelsesGaps,
             arbeidsforhold = perioder
@@ -119,7 +119,7 @@ fun kriterieHarMottattPensjonEllerTrygdSisteFemAar(
         id = inntektsOpplysning.id,
         kriterieOpplysningsType = KriterieOpplysningsType.AVDOED_UFORE_PENSJON,
         kilde = Grunnlagsopplysning.Inntektskomponenten("inntektskomponenten"),
-        opplysning = MedlemskapsPeriode(
+        opplysning = AvdoedesMedlemskapGrunnlag(
             inntekter = inntekter,
             gaps = inntektsGaps
         )
@@ -145,7 +145,7 @@ fun finnGapsIArbeidsforhold(arbeidsforhold: List<DetaljerPeriode>, fra: LocalDat
         .sortedBy { it.gyldigFra }
         .let { hentGaps(kombinerPerioder(it), fra, til) }
 
-data class MedlemskapsPeriode(
+data class AvdoedesMedlemskapGrunnlag(
     val inntekter: List<Inntekt>,
     val gyldigePerioder: List<Periode>? = null,
     val gaps: List<Periode>? = null,

@@ -131,7 +131,9 @@ internal class GyldigSoeknadServiceTest {
     }
 
     companion object {
-        private val skjemaInfo = objectMapper.writeValueAsString(objectMapper.readTree(readFile("/fordeltmelding.json")).get("@skjema_info"))
+        private val skjemaInfo = objectMapper.writeValueAsString(
+            objectMapper.readTree(readFile("/fordeltmelding.json")).get("@skjema_info")
+        )
         val soeknad = objectMapper.readValue(skjemaInfo, Barnepensjon::class.java)
 
         val gjenlevendeFnr = "03108718357"

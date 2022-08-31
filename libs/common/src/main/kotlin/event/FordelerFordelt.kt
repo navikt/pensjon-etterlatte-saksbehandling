@@ -7,6 +7,3 @@ interface IFordelerFordelt {
 object FordelerFordelt : ISoeknadInnsendt, IFordelerFordelt {
     val eventName: String get() = "FORDELER:FORDELT"
 }
-
-
-

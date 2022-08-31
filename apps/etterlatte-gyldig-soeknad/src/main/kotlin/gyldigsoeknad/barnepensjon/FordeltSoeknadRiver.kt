@@ -66,6 +66,9 @@ internal class FordeltSoeknadRiver(
             }
         }
 
-    private fun JsonMessage.soeknad() = this[FordelerFordelt.skjemaInfoKey].let { objectMapper.treeToValue<Barnepensjon>(it) }
-
+    private fun JsonMessage.soeknad() = this[FordelerFordelt.skjemaInfoKey].let {
+        objectMapper.treeToValue<Barnepensjon>(
+            it
+        )
+    }
 }

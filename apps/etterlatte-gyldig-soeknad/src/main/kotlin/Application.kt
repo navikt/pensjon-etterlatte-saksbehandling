@@ -19,7 +19,7 @@ fun main() {
                         ab.createBehandlingClient()
                     )
                     InnsendtSoeknadRiver(
-                        it,
+                        it
                     )
                 }.start()
         }

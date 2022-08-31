@@ -15,6 +15,7 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
   const [periode, setPeriode] = useState<IPeriodeInput>({
     periodeType: IPeriodeType.velg,
     arbeidsgiver: undefined,
+    stillingsprosent: undefined,
     begrunnelse: '',
     kilde: '',
     fraDato: null,
@@ -24,32 +25,43 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
   const [periodeErrors, setPeriodeErrors] = useState<IPeriodeInputErros>({
     periodeType: undefined,
     arbeidsgiver: undefined,
+    stillingsprosent: undefined,
     kilde: undefined,
     fraDato: undefined,
     tilDato: undefined,
   })
 
+  function prosentValid(input: string | undefined) {
+    return input === undefined || /^(100|[1-9]?\d)%?$/.test(input)
+  }
+
   function valider() {
     let errorObject: IPeriodeInputErros = periodeErrors
-    const arbeidIkkeValidert = periode.arbeidsgiver === undefined && periode.periodeType === IPeriodeType.arbeidsperiode
+    const arbeidValid = periode.periodeType === IPeriodeType.arbeidsperiode && periode.arbeidsgiver !== undefined
+    const stillingsprosentValid =
+      periode.periodeType === IPeriodeType.arbeidsperiode && prosentValid(periode.stillingsprosent)
 
     if (periode.periodeType === IPeriodeType.velg) {
-      errorObject = { ...errorObject, kilde: 'Du må velge type periode' }
+      errorObject = { ...errorObject, kilde: 'Velg type periode' }
     }
     if (periode.kilde === '') {
-      errorObject = { ...errorObject, kilde: 'Du må skrive inn kilden til perioden' }
+      errorObject = { ...errorObject, kilde: 'Skriv inn kilden til perioden' }
     }
-    if (arbeidIkkeValidert) {
-      errorObject = { ...errorObject, arbeidsgiver: 'Du må skrive inn navn på arbeidsgiver' }
+    if (!arbeidValid) {
+      errorObject = { ...errorObject, arbeidsgiver: 'Skriv inn navn på arbeidsgiver' }
     }
-    if (periode.fraDato === null) errorObject = { ...errorObject, fraDato: 'Du må velge en startdato' }
-    if (periode.tilDato === null) errorObject = { ...errorObject, tilDato: 'Du må velge en sluttdato' }
+    if (!stillingsprosentValid) {
+      errorObject = { ...errorObject, stillingsprosent: 'Skriv inn en gyldig prosent (1-100)' }
+    }
+    if (periode.fraDato === null) errorObject = { ...errorObject, fraDato: 'Velg en startdato' }
+    if (periode.tilDato === null) errorObject = { ...errorObject, tilDato: 'Velg en sluttdato' }
 
     setPeriodeErrors(errorObject)
 
     if (
       periode.periodeType !== IPeriodeType.velg &&
-      !arbeidIkkeValidert &&
+      !arbeidValid &&
+      !stillingsprosentValid &&
       periode.kilde !== '' &&
       periode.fraDato !== null &&
       periode.tilDato !== null
@@ -103,17 +115,32 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
                 </Select>
 
                 {periode.periodeType === IPeriodeType.arbeidsperiode && (
-                  <TextField
-                    style={{ padding: '10px' }}
-                    label="Navn på arbeidsgiver"
-                    value={periode.arbeidsgiver}
-                    onChange={(e) => {
-                      setPeriode({ ...periode, arbeidsgiver: e.target.value })
-                      !periode.arbeidsgiver && setPeriodeErrors({ ...periodeErrors, arbeidsgiver: undefined })
-                    }}
-                    size="small"
-                    error={periodeErrors.arbeidsgiver ? periodeErrors.arbeidsgiver : false}
-                  />
+                  <>
+                    <TextField
+                      style={{ padding: '10px' }}
+                      label="Navn på arbeidsgiver"
+                      value={periode.arbeidsgiver}
+                      onChange={(e) => {
+                        setPeriode({ ...periode, arbeidsgiver: e.target.value })
+                        !periode.arbeidsgiver && setPeriodeErrors({ ...periodeErrors, arbeidsgiver: undefined })
+                      }}
+                      size="small"
+                      error={periodeErrors.arbeidsgiver ? periodeErrors.arbeidsgiver : false}
+                    />
+
+                    <TextField
+                      style={{ padding: '10px', maxWidth: '100px' }}
+                      label="Stillingsprosent"
+                      value={periode.stillingsprosent}
+                      onChange={(e) => {
+                        setPeriode({ ...periode, stillingsprosent: e.target.value })
+                        prosentValid(e.target.value) &&
+                          setPeriodeErrors({ ...periodeErrors, stillingsprosent: undefined })
+                      }}
+                      size="small"
+                      error={periodeErrors.stillingsprosent ? periodeErrors.stillingsprosent : false}
+                    />
+                  </>
                 )}
 
                 <DatoWrapper>

@@ -14,6 +14,7 @@ export enum IPeriodeType {
 export interface IPeriodeInput {
   periodeType: IPeriodeType
   arbeidsgiver?: string
+  stillingsprosent?: string
   begrunnelse?: string
   kilde?: string
   fraDato: Date | null
@@ -23,6 +24,7 @@ export interface IPeriodeInput {
 export interface IPeriodeInputErros {
   periodeType?: string
   arbeidsgiver?: string
+  stillingsprosent?: string
   kilde?: string
   fraDato?: string
   tilDato?: string

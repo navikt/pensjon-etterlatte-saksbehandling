@@ -11,7 +11,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 
 internal class InnsendtSoeknadRiver(
-    rapidsConnection: RapidsConnection,
+    rapidsConnection: RapidsConnection
 ) : River.PacketListener {
     private val logger = LoggerFactory.getLogger(InnsendtSoeknadRiver::class.java)
 
@@ -20,7 +20,8 @@ internal class InnsendtSoeknadRiver(
             eventName(SoeknadInnsendt.eventName)
             correlationId()
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
-            validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, "OMSTILLINGSSTOENAD") } // TODO endre til typet verdi når denne finnes
+            validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, "OMSTILLINGSSTOENAD") }
+            // TODO endre til typet verdi når denne finnes
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "1") }
             validate { it.requireKey(SoeknadInnsendt.lagretSoeknadIdKey) }
             validate { it.requireKey(SoeknadInnsendt.hendelseGyldigTilKey) }

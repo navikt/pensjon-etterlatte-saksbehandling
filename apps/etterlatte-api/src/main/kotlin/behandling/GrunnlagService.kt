@@ -23,13 +23,13 @@ class GrunnlagService(
         saksbehandlerId: String,
         token: String
     ): GrunnlagResult {
-/*        val behandling = behandlingKlient.hentBehandling(behandlingId, token)
+        val behandling = behandlingKlient.hentBehandling(behandlingId, token)
 
         val opplysning: List<Grunnlagsopplysning<out Any>> = listOf(
             lagOpplysning(
                 Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
                 Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
-                Test(periode)
+                periode
             )
         )
 
@@ -39,7 +39,8 @@ class GrunnlagService(
                 eventName = "OPPLYSNING:NY",
                 map = mapOf("opplysning" to opplysning, "sakId" to behandling.sak)
             ).toJson()
-        )*/
+        )
+
         return GrunnlagResult("Lagret")
     }
 
@@ -109,7 +110,3 @@ fun <T> lagOpplysning(
 ): Grunnlagsopplysning<T> {
     return Grunnlagsopplysning(UUID.randomUUID(), kilde, opplysningsType, objectMapper.createObjectNode(), opplysning)
 }
-
-data class Test(
-    val periode: String
-)

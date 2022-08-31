@@ -3,6 +3,8 @@ package barnepensjon.vilkaar
 import adresseDanmarkPdl
 import adresseUtlandFoerFemAar
 import adresserNorgePdl
+import barnepensjon.vilkaar.avdoedesmedlemskap.AvdoedesMedlemskapGrunnlag
+import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieHarHatt80prosentStillingSisteFemAar
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieHarMottattPensjonEllerTrygdSisteFemAar
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieIngenInnUtvandring
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieIngenUtenlandsoppholdFraSoeknad
@@ -16,9 +18,11 @@ import lagMockPersonAvdoedSoeknad
 import lagMockPersonPdl
 import mapTilVilkaarstypeAvdoedSoeknad
 import mapTilVilkaarstypePerson
+import no.nav.etterlatte.barnepensjon.Periode
+import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
-import no.nav.etterlatte.libs.common.inntekt.PensjonUforeOpplysning
+import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
@@ -29,7 +33,7 @@ import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandTyp
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 import java.time.LocalDate
@@ -37,12 +41,80 @@ import java.time.LocalDate
 class AvdoedesMedlemskapTest {
 
     @Test
-    fun vurderMottattPensjonUforeSisteFemAar() {
+    fun `Oppfyller kriteriet for pensjon-ufoere siste 5 aar hvis det er utbetalinger i hele perioden`() {
         val file = readFile("/inntektsopplysning.json")
-        val opplysning = objectMapper.readValue<VilkaarOpplysning<PensjonUforeOpplysning>>(file)
-        val pensjonufore = kriterieHarMottattPensjonEllerTrygdSisteFemAar(opplysning)
-        // print(pensjonufore)
-        assert(true)
+        val opplysning = objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(file)
+
+        kriterieHarMottattPensjonEllerTrygdSisteFemAar(LocalDate.parse("2022-07-01"), opplysning).let {
+            assertEquals(it.resultat, VurderingsResultat.OPPFYLT)
+        }
+    }
+
+    @Test
+    fun `Oppfyller ikke kriteriet for pensjon-ufoere siste 5 aar hvis det er gaps i perioden`() {
+        val file = readFile("/inntektsopplysning.json")
+        val inntektsOpplysning = objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(file)
+
+        kriterieHarMottattPensjonEllerTrygdSisteFemAar(LocalDate.parse("2021-07-01"), inntektsOpplysning).let {
+            assertEquals(it.resultat, VurderingsResultat.IKKE_OPPFYLT)
+            val opplysning = it.basertPaaOpplysninger[0].opplysning as AvdoedesMedlemskapGrunnlag
+            assertEquals(1, opplysning.gaps?.size)
+        }
+    }
+
+    @Test
+    fun `Arbeidsforhold siste fem aar oppfylt naar man har arbeidsforhold hele perioden`() {
+        val inntekter =
+            objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(readFile("/inntektsopplysning.json"))
+        val arbeidsforhold =
+            objectMapper.readValue<VilkaarOpplysning<ArbeidsforholdOpplysning>>(readFile("/arbeidsforhold100.json"))
+
+        val kriterie = kriterieHarHatt80prosentStillingSisteFemAar(
+            doedsdato = LocalDate.parse("2022-07-01"),
+            arbeidsforholdOpplysning = arbeidsforhold,
+            inntektsOpplysning = inntekter
+        )
+
+        assertEquals(VurderingsResultat.OPPFYLT, kriterie.resultat)
+    }
+
+    @Test
+    fun `Arbeidsforhold siste fem aar ikke oppfylt dersom man har under 80 prosent stilling`() {
+        val inntekter =
+            objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(readFile("/inntektsopplysning.json"))
+        val arbeidsforhold =
+            objectMapper.readValue<VilkaarOpplysning<ArbeidsforholdOpplysning>>(readFile("/arbeidsforhold75.json"))
+
+        val kriterie = kriterieHarHatt80prosentStillingSisteFemAar(
+            doedsdato = LocalDate.parse("2022-07-01"),
+            arbeidsforholdOpplysning = arbeidsforhold,
+            inntektsOpplysning = inntekter
+        )
+
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, kriterie.resultat)
+    }
+
+    @Test
+    fun `Arbeidsforhold siste fem aar ikke oppfylt dersom man har opphold i arbeidsforhold`() {
+        val inntekter =
+            objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(readFile("/inntektsopplysning.json"))
+        val arbeidsforhold = objectMapper.readValue<VilkaarOpplysning<ArbeidsforholdOpplysning>>(
+            readFile("/arbeidsforholdMedOpphold.json")
+        )
+
+        val kriterie = kriterieHarHatt80prosentStillingSisteFemAar(
+            doedsdato = LocalDate.parse("2022-07-01"),
+            arbeidsforholdOpplysning = arbeidsforhold,
+            inntektsOpplysning = inntekter
+        )
+
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, kriterie.resultat)
+        kriterie.basertPaaOpplysninger.let {
+            val opplysning = it[0].opplysning as AvdoedesMedlemskapGrunnlag
+            assertEquals(2, opplysning.arbeidsforhold?.size)
+            assertEquals(1, opplysning.gaps?.size)
+            assertEquals(Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31)), opplysning.gaps?.first())
+        }
     }
 
     @Test
@@ -58,9 +130,9 @@ class AvdoedesMedlemskapTest {
         val mangler =
             kriterieNorskStatsborger(mapTilVilkaarstypePerson(avdoedPdlMangler), Kriterietyper.AVDOED_NORSK_STATSBORGER)
 
-        Assertions.assertEquals(VurderingsResultat.OPPFYLT, norsk.resultat)
-        Assertions.assertEquals(VurderingsResultat.IKKE_OPPFYLT, dansk.resultat)
-        Assertions.assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, mangler.resultat)
+        assertEquals(VurderingsResultat.OPPFYLT, norsk.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, dansk.resultat)
+        assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, mangler.resultat)
     }
 
     @Test
@@ -106,9 +178,9 @@ class AvdoedesMedlemskapTest {
                 Kriterietyper.AVDOED_NORSK_STATSBORGER
             )
 
-        Assertions.assertEquals(VurderingsResultat.OPPFYLT, ingenUtland.resultat)
-        Assertions.assertEquals(VurderingsResultat.OPPFYLT, ingenInnOgUtvandring.resultat)
-        Assertions.assertEquals(VurderingsResultat.IKKE_OPPFYLT, harInnOgUtvandring.resultat)
+        assertEquals(VurderingsResultat.OPPFYLT, ingenUtland.resultat)
+        assertEquals(VurderingsResultat.OPPFYLT, ingenInnOgUtvandring.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, harInnOgUtvandring.resultat)
     }
 
     @Test
@@ -128,8 +200,8 @@ class AvdoedesMedlemskapTest {
                 Kriterietyper.AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD
             )
 
-        Assertions.assertEquals(VurderingsResultat.IKKE_OPPFYLT, utenlandsopphold.resultat)
-        Assertions.assertEquals(VurderingsResultat.OPPFYLT, ingenUtenlandsopphold.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, utenlandsopphold.resultat)
+        assertEquals(VurderingsResultat.OPPFYLT, ingenUtenlandsopphold.resultat)
     }
 
     @Test
@@ -186,16 +258,16 @@ class AvdoedesMedlemskapTest {
                 Kriterietyper.AVDOED_KUN_NORSKE_BOSTEDSADRESSER
             )
 
-        Assertions.assertEquals(VurderingsResultat.OPPFYLT, ingenUtenlandsoppholdBosted.resultat)
-        Assertions.assertEquals(VurderingsResultat.OPPFYLT, ingenUtenlandsoppholdOpphold.resultat)
-        Assertions.assertEquals(VurderingsResultat.OPPFYLT, ingenUtenlandsoppholdKontakt.resultat)
+        assertEquals(VurderingsResultat.OPPFYLT, ingenUtenlandsoppholdBosted.resultat)
+        assertEquals(VurderingsResultat.OPPFYLT, ingenUtenlandsoppholdOpphold.resultat)
+        assertEquals(VurderingsResultat.OPPFYLT, ingenUtenlandsoppholdKontakt.resultat)
 
-        Assertions.assertEquals(VurderingsResultat.IKKE_OPPFYLT, utenlandsoppholdBosted.resultat)
-        Assertions.assertEquals(VurderingsResultat.IKKE_OPPFYLT, utenlandsoppholdOpphold.resultat)
-        Assertions.assertEquals(VurderingsResultat.IKKE_OPPFYLT, utenlandsoppholdKontakt.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, utenlandsoppholdBosted.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, utenlandsoppholdOpphold.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, utenlandsoppholdKontakt.resultat)
 
-        Assertions.assertEquals(VurderingsResultat.OPPFYLT, utenlandsoppholdFoerFemAar.resultat)
-        Assertions.assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, ingenAdresser.resultat)
+        assertEquals(VurderingsResultat.OPPFYLT, utenlandsoppholdFoerFemAar.resultat)
+        assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, ingenAdresser.resultat)
     }
 
     @Test
@@ -229,15 +301,15 @@ class AvdoedesMedlemskapTest {
                 Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
             )
 
-        Assertions.assertEquals(VurderingsResultat.IKKE_OPPFYLT, utenlandsopphold.resultat)
-        Assertions.assertEquals(VurderingsResultat.OPPFYLT, ingenUtenlandsopphold.resultat)
-        Assertions.assertEquals(VurderingsResultat.OPPFYLT, utenlandsoppholdFoerFemAar.resultat)
-        Assertions.assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, ingenAdresser.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, utenlandsopphold.resultat)
+        assertEquals(VurderingsResultat.OPPFYLT, ingenUtenlandsopphold.resultat)
+        assertEquals(VurderingsResultat.OPPFYLT, utenlandsoppholdFoerFemAar.resultat)
+        assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, ingenAdresser.resultat)
     }
 
     companion object {
         val fnrAvdoed = Foedselsnummer.of("19078504903")
-        val doedsdatoPdl = LocalDate.parse("2022-03-25")
+        val doedsdatoPdl: LocalDate = LocalDate.parse("2022-03-25")
 
         val utenlandsoppholdAvdoedSoeknad = Utenlandsopphold(
             JaNeiVetIkke.JA,
@@ -267,6 +339,6 @@ class AvdoedesMedlemskapTest {
         )
     }
 
-    fun readFile(file: String) = AvdoedesMedlemskapTest::class.java.getResource(file)?.readText()
+    private fun readFile(file: String) = AvdoedesMedlemskapTest::class.java.getResource(file)?.readText()
         ?: throw FileNotFoundException("Fant ikke filen $file")
 }

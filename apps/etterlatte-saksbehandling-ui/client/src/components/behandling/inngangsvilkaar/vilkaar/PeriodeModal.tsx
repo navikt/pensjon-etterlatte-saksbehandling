@@ -15,7 +15,7 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
   const [periode, setPeriode] = useState<IPeriodeInput>({
     periodeType: IPeriodeType.velg,
     arbeidsgiver: undefined,
-    stillingsprosent: undefined,
+    stillingsprosent: '',
     begrunnelse: '',
     kilde: '',
     fraDato: null,
@@ -32,7 +32,7 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
   })
 
   function prosentValid(input: string | undefined) {
-    return input === undefined || /^(100|[1-9]?\d)%?$/.test(input)
+    return input !== '' || /^(100|[1-9]?\d)%?$/.test(input)
   }
 
   function valider() {
@@ -59,18 +59,19 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
     setPeriodeErrors(errorObject)
 
     if (
-      periode.periodeType !== IPeriodeType.velg &&
-      arbeidValid &&
-      stillingsprosentValid &&
-      periode.kilde !== '' &&
-      periode.fraDato !== null &&
-      periode.tilDato !== null
+      periodeErrors.periodeType === undefined &&
+      periodeErrors.arbeidsgiver === undefined &&
+      periodeErrors.stillingsprosent === undefined &&
+      periodeErrors.kilde === undefined &&
+      periodeErrors.fraDato === undefined &&
+      periodeErrors.tilDato === undefined
     ) {
       return true
     }
   }
 
   function leggTilPeriodeTrykket() {
+    console.log('valider er', valider())
     if (valider()) {
       if (!behandlingId) throw new Error('Mangler behandlingsid')
       setLagrer(true)
@@ -122,7 +123,11 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
                       value={periode.arbeidsgiver}
                       onChange={(e) => {
                         setPeriode({ ...periode, arbeidsgiver: e.target.value })
-                        !periode.arbeidsgiver && setPeriodeErrors({ ...periodeErrors, arbeidsgiver: undefined })
+                        !periode.arbeidsgiver &&
+                          setPeriodeErrors({
+                            ...periodeErrors,
+                            arbeidsgiver: undefined,
+                          })
                       }}
                       size="small"
                       error={periodeErrors.arbeidsgiver ? periodeErrors.arbeidsgiver : false}

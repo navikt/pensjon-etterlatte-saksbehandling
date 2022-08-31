@@ -935,7 +935,7 @@
         "utfall": null,
         "kriterier": [
           {
-            "navn": "AVDOED_HAR_MOTTATT_TRYGD_SISTE_FEM_AAR",
+            "navn": "AVDOED_HAR_MOTTATT_PENSJON_TRYGD_SISTE_FEM_AAR",
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
@@ -950,7 +950,7 @@
             ]
           },
           {
-            "navn": "AVDOED_HAR_MOTTATT_PENSJON_SISTE_FEM_AAR",
+            "navn": "AVDOED_HAR_MOTTATT_PENSJON_TRYGD_SISTE_FEM_AAR",
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
@@ -965,7 +965,7 @@
             ]
           },
           {
-            "navn": "AVDOED_HAR_HATT_100PROSENT_STILLING_SISTE_FEM_AAR",
+            "navn": "AVDOED_HAR_HATT_MINST_80_PROSENT_STILLING_SISTE_FEM_AAR",
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": []
           }

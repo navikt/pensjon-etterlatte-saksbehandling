@@ -19,7 +19,7 @@ class GrunnlagService(
 
     suspend fun lagreAvdoedMedlemskapPeriode(
         behandlingId: String,
-        periode: MedlemskapsPeriode,
+        periode: String,
         saksbehandlerId: String,
         token: String
     ): GrunnlagResult {

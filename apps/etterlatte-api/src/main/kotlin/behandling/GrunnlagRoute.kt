@@ -91,7 +91,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
     }
 }
 
-private data class MedlemskapsPeriodeClientRequest(val periode: MedlemskapsPeriode)
+private data class MedlemskapsPeriodeClientRequest(val periode: String)
 data class MedlemskapsPeriode(
     val periodeType: String?,
     val arbeidsgiver: String?,

@@ -136,6 +136,28 @@ export const lagreSoeskenMedIBeregning = async (
 export const lagrePeriodeForAvdoedesMedlemskap = async (
   behandlingsId: string,
   periode: IPeriodeInput
+): Promise<IApiResponse<any>> => {
+  console.log(periode)
+  try {
+    const result: Response = await fetch(`${path}/api/grunnlag/saksbehandler/periode//${behandlingsId}`, {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ periode: 'test' }),
+    })
+    return {
+      status: result.status,
+    }
+  } catch (e) {
+    console.log(e)
+    return { status: 500 }
+  }
+}
+
+export const lagrePeriodeForAvdoedesMedlemskap2 = async (
+  behandlingsId: string,
+  periode: IPeriodeInput
 ): Promise<ApiResponse<any>> => {
   console.log(periode)
   return apiClient.post<string>(`/grunnlag/saksbehandler/periode/${behandlingsId}`, { periode: 'test' })

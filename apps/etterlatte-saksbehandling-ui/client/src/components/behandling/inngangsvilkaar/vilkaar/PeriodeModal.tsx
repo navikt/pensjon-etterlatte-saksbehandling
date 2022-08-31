@@ -81,7 +81,7 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
       if (!behandlingId) throw new Error('Mangler behandlingsid')
       setLagrer(true)
       lagrePeriodeForAvdoedesMedlemskap(behandlingId, periode).then((response) => {
-        if (response.status === 'ok') {
+        if (response.status === 200) {
           hentBehandling(behandlingId).then((response) => {
             if (response.status === 200) {
               window.location.reload()

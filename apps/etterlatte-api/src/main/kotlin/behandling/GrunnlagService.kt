@@ -4,7 +4,6 @@ import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
@@ -17,9 +16,10 @@ class GrunnlagService(
     private val behandlingKlient: BehandlingKlient,
     private val rapid: KafkaProdusent<String, String>
 ) {
+
     suspend fun lagreAvdoedMedlemskapPeriode(
         behandlingId: String,
-        periode: SaksbehandlerMedlemskapsperiode,
+        periode: MedlemskapsPeriode,
         saksbehandlerId: String,
         token: String
     ): GrunnlagResult {

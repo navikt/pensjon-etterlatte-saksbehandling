@@ -8,14 +8,17 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.getAccessToken
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import org.slf4j.LoggerFactory
 
 fun Route.grunnlagRoute(service: GrunnlagService) {
+    val logger = LoggerFactory.getLogger(GrunnlagService::class.java)
+
     route("/grunnlag") {
         post("/saksbehandler/periode/{behandlingId}") {
             try {
                 val behandlingId = call.parameters["behandlingId"]
+                logger.info("Henter ut periode med body ", call.receive())
                 val body = call.receive<MedlemskapsPeriodeClientRequest>()
 
                 if (behandlingId == null) {
@@ -88,7 +91,17 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
     }
 }
 
-private data class MedlemskapsPeriodeClientRequest(val periode: SaksbehandlerMedlemskapsperiode)
+private data class MedlemskapsPeriodeClientRequest(val periode: MedlemskapsPeriode)
+data class MedlemskapsPeriode(
+    val periodeType: String?,
+    val arbeidsgiver: String?,
+    val stillingsprosent: String?,
+    val begrunnelse: String?,
+    val kilde: String?,
+    val fraDato: String?,
+    val tilDato: String?
+)
+
 private data class KommerBarnetTilgodeClientRequest(val svar: String, val begrunnelse: String)
 private data class SoeskenMedIBeregning(val foedselsnummer: Foedselsnummer, val skalBrukes: Boolean) {
     fun toDomain() = no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning(

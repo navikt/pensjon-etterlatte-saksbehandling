@@ -35,6 +35,8 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
     return input !== '' || /^(100|[1-9]?\d)%?$/.test(input)
   }
 
+  console.log(periodeErrors)
+
   function valider() {
     let errorObject: IPeriodeInputErros = periodeErrors
     const arbeidValid = periode.periodeType === IPeriodeType.arbeidsperiode && periode.arbeidsgiver !== undefined
@@ -42,8 +44,9 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
       periode.periodeType === IPeriodeType.arbeidsperiode && prosentValid(periode.stillingsprosent)
 
     if (periode.periodeType === IPeriodeType.velg) {
-      errorObject = { ...errorObject, kilde: 'Velg type periode' }
+      errorObject = { ...errorObject, periodeType: 'Velg type periode' }
     }
+
     if (periode.kilde === '') {
       errorObject = { ...errorObject, kilde: 'Skriv inn kilden til perioden' }
     }
@@ -59,14 +62,16 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
     setPeriodeErrors(errorObject)
 
     if (
-      periodeErrors.periodeType === undefined &&
-      periodeErrors.arbeidsgiver === undefined &&
-      periodeErrors.stillingsprosent === undefined &&
-      periodeErrors.kilde === undefined &&
-      periodeErrors.fraDato === undefined &&
-      periodeErrors.tilDato === undefined
+      errorObject.periodeType === undefined &&
+      errorObject.arbeidsgiver === undefined &&
+      errorObject.stillingsprosent === undefined &&
+      errorObject.kilde === undefined &&
+      errorObject.fraDato === undefined &&
+      errorObject.tilDato === undefined
     ) {
       return true
+    } else {
+      return false
     }
   }
 
@@ -107,6 +112,8 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
                     setPeriode({ ...periode, periodeType: e.target.value as IPeriodeType })
                     setPeriodeErrors({ ...periodeErrors, periodeType: undefined })
                   }}
+                  error={periodeErrors.periodeType ? periodeErrors.periodeType : false}
+                  size="small"
                 >
                   {Object.values(IPeriodeType).map((option) => (
                     <option key={option} value={option}>

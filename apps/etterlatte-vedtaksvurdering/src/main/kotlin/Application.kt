@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte // ktlint-disable filename
 
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.database.VedtaksvurderingRepository
@@ -6,6 +6,7 @@ import no.nav.etterlatte.rivers.AttesterVedtak
 import no.nav.etterlatte.rivers.FattVedtak
 import no.nav.etterlatte.rivers.LagreAvkorting
 import no.nav.etterlatte.rivers.LagreBeregningsresultat
+import no.nav.etterlatte.rivers.LagreIverksattVedtak
 import no.nav.etterlatte.rivers.LagreKommerSoekerTilgodeResultat
 import no.nav.etterlatte.rivers.LagreVilkaarsresultat
 import no.nav.etterlatte.rivers.UnderkjennVedtak
@@ -34,6 +35,7 @@ fun main() {
             FattVedtak(this, vedtaksvurderingService)
             AttesterVedtak(this, vedtaksvurderingService)
             UnderkjennVedtak(this, vedtaksvurderingService)
+            LagreIverksattVedtak(this, vedtaksvurderingService)
             registrerVedlikeholdsriver(vedtaksvurderingService)
         }.start()
     }

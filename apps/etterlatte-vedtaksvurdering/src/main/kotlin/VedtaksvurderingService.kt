@@ -142,6 +142,12 @@ class VedtaksvurderingService(
         }
     }
 
+    fun lagreIverksattVedtak(behandlingId: UUID) {
+        repository.hentVedtak(behandlingId)?.also {
+            repository.lagreIverksattVedtak(behandlingId)
+        }
+    }
+
     fun hentVedtakBolk(behandlingsidenter: List<UUID>): List<Vedtak> {
         return repository.hentVedtakBolk(behandlingsidenter)
     }

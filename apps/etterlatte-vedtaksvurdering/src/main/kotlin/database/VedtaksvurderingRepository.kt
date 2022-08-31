@@ -106,6 +106,20 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
         }
     }
 
+    // Kan det finnes flere vedtak for en behandling? Hør med Henrik
+    fun lagreIverksattVedtak(
+        behandlingsId: UUID
+    ) {
+        logger.info("Lagrer iverksatt vedtak")
+        connection.use {
+            val statement = it.prepareStatement(Queries.lagreIverksattVedtak).run {
+                setString(1, VedtakStatus.IVERKSATT.name)
+                setObject(2, behandlingsId)
+                require(executeUpdate() == 1)
+            }
+        }
+    }
+
     fun lagreBeregningsresultat(
         sakId: String,
         behandling: Behandling,
@@ -174,6 +188,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
             statement.executeQuery().toList { toVedtak() }
         }
     }
+
     fun hentVedtak(sakId: String, behandlingsId: UUID): Vedtak? {
         val resultat = connection.use { it ->
             val statement = it.prepareStatement(Queries.hentVedtak)
@@ -414,6 +429,7 @@ private object Queries {
     val slettUtbetalingsperioderISak =
         "DELETE FROM utbetalingsperiode WHERE vedtakid in (SELECT id from vedtak where sakid = ?)"
     val slettVedtakISak = "DELETE FROM vedtak WHERE sakid = ?"
+    val lagreIverksattVedtak = "UPDATE vedtak SET vedtakstatus = ? WHERE behandlingId = ?"
 }
 
 private fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {

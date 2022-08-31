@@ -162,6 +162,12 @@ internal class DBTest {
         )
     }
 
+    fun lagreIverksattVedtak() {
+        val vedtakRepo = VedtaksvurderingRepository(dataSource)
+        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
+        vedtaksvurderingService.lagreIverksattVedtak(uuid)
+    }
+
     @Test
     fun testDB() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
@@ -203,12 +209,17 @@ internal class DBTest {
         Assertions.assertNotNull(attestertVedtak?.datoattestert)
         Assertions.assertNotNull(attestertVedtak?.virkningsDato)
         Assertions.assertEquals(VedtakStatus.ATTESTERT, attestertVedtak?.vedtakStatus)
+
+        lagreIverksattVedtak()
+        val iverksattVedtak = vedtaksvurderingService.hentVedtak(uuid)
+        Assertions.assertEquals(VedtakStatus.IVERKSATT, iverksattVedtak?.vedtakStatus)
+
         vedtaksvurderingService.slettSak(12321423523545)
         Assertions.assertNull(vedtaksvurderingService.hentVedtak("12321423523545", uuid))
     }
 
     @Test
-    fun `kan lagre å hente alle vedtak`() {
+    fun `kan lagre og hente alle vedtak`() {
         val vedtakRepo = VedtaksvurderingRepository(dataSource)
         val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
 
@@ -222,6 +233,7 @@ internal class DBTest {
 
         Assertions.assertEquals(3, vedtaksvurderingService.hentVedtakBolk(listOf(uuid1, uuid2, uuid3)).size)
     }
+
     private fun lagreNyttVilkaarsresultat(service: VedtaksvurderingService, sakId: String, behandlingId: UUID) {
         service.lagreVilkaarsresultat(
             sakId,

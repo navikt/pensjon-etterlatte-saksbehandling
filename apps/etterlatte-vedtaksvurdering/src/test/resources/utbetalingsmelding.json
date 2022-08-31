@@ -1,0 +1,9 @@
+{
+  "@event_name": "UTBETALING:OPPDATERT",
+  "utbetaling_response": {
+    "status": "GODKJENT",
+    "vedtakId": 1,
+    "behandlingId": "45dc0f0e-dbd0-465c-880b-f20ddb8e3789",
+    "feilmelding": null
+  }
+}

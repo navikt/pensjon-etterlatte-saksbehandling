@@ -23,7 +23,7 @@ class GrunnlagService(
         saksbehandlerId: String,
         token: String
     ): GrunnlagResult {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, token)
+/*        val behandling = behandlingKlient.hentBehandling(behandlingId, token)
 
         val opplysning: List<Grunnlagsopplysning<out Any>> = listOf(
             lagOpplysning(
@@ -39,7 +39,7 @@ class GrunnlagService(
                 eventName = "OPPLYSNING:NY",
                 map = mapOf("opplysning" to opplysning, "sakId" to behandling.sak)
             ).toJson()
-        )
+        )*/
         return GrunnlagResult("Lagret")
     }
 

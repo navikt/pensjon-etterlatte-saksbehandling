@@ -18,7 +18,6 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
         post("/saksbehandler/periode/{behandlingId}") {
             try {
                 val behandlingId = call.parameters["behandlingId"]
-                logger.info("Henter ut periode med body ", call.receive())
                 val body = call.receive<MedlemskapsPeriodeClientRequest>()
 
                 if (behandlingId == null) {

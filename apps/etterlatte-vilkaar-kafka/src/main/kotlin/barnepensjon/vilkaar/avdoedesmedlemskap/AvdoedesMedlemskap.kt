@@ -101,7 +101,7 @@ fun kriterieHarHatt80prosentStillingSisteFemAar(
     )
 
     return Kriterie(
-        navn = Kriterietyper.AVDOED_HAR_HATT_100PROSENT_STILLING_SISTE_FEM_AAR,
+        navn = Kriterietyper.AVDOED_HAR_HATT_MINST_80_PROSENT_STILLING_SISTE_FEM_AAR,
         resultat = if (ansettelsesGaps.isEmpty()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT,
         basertPaaOpplysninger = listOf(grunnlag)
     )

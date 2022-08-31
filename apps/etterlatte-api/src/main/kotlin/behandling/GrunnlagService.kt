@@ -4,6 +4,7 @@ import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
@@ -16,6 +17,32 @@ class GrunnlagService(
     private val behandlingKlient: BehandlingKlient,
     private val rapid: KafkaProdusent<String, String>
 ) {
+    suspend fun lagreAvdoedMedlemskapPeriode(
+        behandlingId: String,
+        periode: SaksbehandlerMedlemskapsperiode,
+        saksbehandlerId: String,
+        token: String
+    ): GrunnlagResult {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, token)
+
+        val opplysning: List<Grunnlagsopplysning<out Any>> = listOf(
+            lagOpplysning(
+                Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
+                Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
+                periode
+            )
+        )
+
+        rapid.publiser(
+            behandlingId,
+            JsonMessage.newMessage(
+                eventName = "OPPLYSNING:NY",
+                map = mapOf("opplysning" to opplysning, "sakId" to behandling.sak)
+            ).toJson()
+        )
+        return GrunnlagResult("Lagret")
+    }
+
     suspend fun lagreResultatKommerBarnetTilgode(
         behandlingId: String,
         svar: String,
@@ -44,6 +71,7 @@ class GrunnlagService(
     }
 
     internal data class Beregningsgrunnlag(val beregningsgrunnlag: List<SoeskenMedIBeregning>)
+
     suspend fun lagreSoeskenMedIBeregning(
         behandlingId: String,
         soeskenMedIBeregning: List<SoeskenMedIBeregning>,

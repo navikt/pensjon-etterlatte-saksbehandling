@@ -8,10 +8,35 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.getAccessToken
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 
 fun Route.grunnlagRoute(service: GrunnlagService) {
     route("/grunnlag") {
+        post("/saksbehandler/periode/{behandlingId}") {
+            try {
+                val behandlingId = call.parameters["behandlingId"]
+                val body = call.receive<MedlemskapsPeriodeClientRequest>()
+
+                if (behandlingId == null) {
+                    call.response.status(HttpStatusCode(400, "Bad request"))
+                    call.respond("Behandlings-id mangler")
+                } else {
+                    call.respond(
+                        service.lagreAvdoedMedlemskapPeriode(
+                            behandlingId,
+                            body.periode,
+                            call.navIdent,
+                            getAccessToken(call)
+                        )
+                    )
+                }
+            } catch (ex: Exception) {
+                logger.error("lagring av medlemskapsperiode feilet", ex)
+                throw ex
+            }
+        }
+
         post("/kommertilgode/{behandlingId}") {
             try {
                 val behandlingId = call.parameters["behandlingId"]
@@ -63,7 +88,8 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
     }
 }
 
-data class KommerBarnetTilgodeClientRequest(val svar: String, val begrunnelse: String)
+private data class MedlemskapsPeriodeClientRequest(val periode: SaksbehandlerMedlemskapsperiode)
+private data class KommerBarnetTilgodeClientRequest(val svar: String, val begrunnelse: String)
 private data class SoeskenMedIBeregning(val foedselsnummer: Foedselsnummer, val skalBrukes: Boolean) {
     fun toDomain() = no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning(
         this.foedselsnummer,

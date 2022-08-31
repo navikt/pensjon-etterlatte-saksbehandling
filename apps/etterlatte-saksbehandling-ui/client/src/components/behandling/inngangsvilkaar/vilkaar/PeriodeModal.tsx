@@ -56,6 +56,8 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
     if (periode.fraDato === null) errorObject = { ...errorObject, fraDato: 'Velg en startdato' }
     if (periode.tilDato === null) errorObject = { ...errorObject, tilDato: 'Velg en sluttdato' }
 
+    console.log(periode.fraDato)
+
     setPeriodeErrors(errorObject)
 
     if (

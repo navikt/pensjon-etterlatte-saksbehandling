@@ -144,7 +144,7 @@ export const lagrePeriodeForAvdoedesMedlemskap = async (
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ periode: 'test' }),
+      body: JSON.stringify({ periode: periode }),
     })
     return {
       status: result.status,

@@ -3,9 +3,6 @@ package barnepensjon.vilkaar
 import adresseDanmarkPdl
 import adresseUtlandFoerFemAar
 import adresserNorgePdl
-import barnepensjon.vilkaar.avdoedesmedlemskap.AvdoedesMedlemskapGrunnlag
-import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieHarHatt80prosentStillingSisteFemAar
-import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieHarMottattPensjonEllerTrygdSisteFemAar
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieIngenInnUtvandring
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieIngenUtenlandsoppholdFraSoeknad
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieKunNorskeBostedsadresserSisteFemAar
@@ -13,17 +10,12 @@ import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieKunNorskeKontaktadresserS
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieKunNorskeOppholdsadresserSisteFemAar
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieNorskStatsborger
 import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieSammenhengendeAdresserINorgeSisteFemAar
-import com.fasterxml.jackson.module.kotlin.readValue
 import lagMockPersonAvdoedSoeknad
 import lagMockPersonPdl
 import mapTilVilkaarstypeAvdoedSoeknad
 import mapTilVilkaarstypePerson
-import no.nav.etterlatte.barnepensjon.Periode
-import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
-import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
@@ -31,91 +23,12 @@ import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.io.FileNotFoundException
 import java.time.LocalDate
 
 class AvdoedesMedlemskapTest {
-
-    @Test
-    fun `Oppfyller kriteriet for pensjon-ufoere siste 5 aar hvis det er utbetalinger i hele perioden`() {
-        val file = readFile("/inntektsopplysning.json")
-        val opplysning = objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(file)
-
-        kriterieHarMottattPensjonEllerTrygdSisteFemAar(LocalDate.parse("2022-07-01"), opplysning).let {
-            assertEquals(it.resultat, VurderingsResultat.OPPFYLT)
-        }
-    }
-
-    @Test
-    fun `Oppfyller ikke kriteriet for pensjon-ufoere siste 5 aar hvis det er gaps i perioden`() {
-        val file = readFile("/inntektsopplysning.json")
-        val inntektsOpplysning = objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(file)
-
-        kriterieHarMottattPensjonEllerTrygdSisteFemAar(LocalDate.parse("2021-07-01"), inntektsOpplysning).let {
-            assertEquals(it.resultat, VurderingsResultat.IKKE_OPPFYLT)
-            val opplysning = it.basertPaaOpplysninger[0].opplysning as AvdoedesMedlemskapGrunnlag
-            assertEquals(1, opplysning.gaps?.size)
-        }
-    }
-
-    @Test
-    fun `Arbeidsforhold siste fem aar oppfylt naar man har arbeidsforhold hele perioden`() {
-        val inntekter =
-            objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(readFile("/inntektsopplysning.json"))
-        val arbeidsforhold =
-            objectMapper.readValue<VilkaarOpplysning<ArbeidsforholdOpplysning>>(readFile("/arbeidsforhold100.json"))
-
-        val kriterie = kriterieHarHatt80prosentStillingSisteFemAar(
-            doedsdato = LocalDate.parse("2022-07-01"),
-            arbeidsforholdOpplysning = arbeidsforhold,
-            inntektsOpplysning = inntekter
-        )
-
-        assertEquals(VurderingsResultat.OPPFYLT, kriterie.resultat)
-    }
-
-    @Test
-    fun `Arbeidsforhold siste fem aar ikke oppfylt dersom man har under 80 prosent stilling`() {
-        val inntekter =
-            objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(readFile("/inntektsopplysning.json"))
-        val arbeidsforhold =
-            objectMapper.readValue<VilkaarOpplysning<ArbeidsforholdOpplysning>>(readFile("/arbeidsforhold75.json"))
-
-        val kriterie = kriterieHarHatt80prosentStillingSisteFemAar(
-            doedsdato = LocalDate.parse("2022-07-01"),
-            arbeidsforholdOpplysning = arbeidsforhold,
-            inntektsOpplysning = inntekter
-        )
-
-        assertEquals(VurderingsResultat.IKKE_OPPFYLT, kriterie.resultat)
-    }
-
-    @Test
-    fun `Arbeidsforhold siste fem aar ikke oppfylt dersom man har opphold i arbeidsforhold`() {
-        val inntekter =
-            objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(readFile("/inntektsopplysning.json"))
-        val arbeidsforhold = objectMapper.readValue<VilkaarOpplysning<ArbeidsforholdOpplysning>>(
-            readFile("/arbeidsforholdMedOpphold.json")
-        )
-
-        val kriterie = kriterieHarHatt80prosentStillingSisteFemAar(
-            doedsdato = LocalDate.parse("2022-07-01"),
-            arbeidsforholdOpplysning = arbeidsforhold,
-            inntektsOpplysning = inntekter
-        )
-
-        assertEquals(VurderingsResultat.IKKE_OPPFYLT, kriterie.resultat)
-        kriterie.basertPaaOpplysninger.let {
-            val opplysning = it[0].opplysning as AvdoedesMedlemskapGrunnlag
-            assertEquals(2, opplysning.arbeidsforhold?.size)
-            assertEquals(1, opplysning.gaps?.size)
-            assertEquals(Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31)), opplysning.gaps?.first())
-        }
-    }
 
     @Test
     fun vurderNorskStatsborgerskap() {
@@ -338,7 +251,4 @@ class AvdoedesMedlemskapTest {
             listOf()
         )
     }
-
-    private fun readFile(file: String) = AvdoedesMedlemskapTest::class.java.getResource(file)?.readText()
-        ?: throw FileNotFoundException("Fant ikke filen $file")
 }

@@ -110,6 +110,7 @@ class RevurderingAggregat(
                     if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
                 "AVKORTET" ->
                     if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
+                "IVERKSATT" -> BehandlingStatus.IVERKSATT
                 else -> throw IllegalStateException(
                     "Behandling ${lagretBehandling.id} forstår ikke vedtakhendelse $hendelse"
                 )

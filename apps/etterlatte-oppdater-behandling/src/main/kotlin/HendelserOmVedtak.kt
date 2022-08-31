@@ -26,7 +26,8 @@ internal class HendelserOmVedtak(
         "VEDTAK:UNDERKJENT",
         "VEDTAK:AVKORTET",
         "VEDTAK:BEREGNET",
-        "VEDTAK:VILKAARSVURDERT"
+        "VEDTAK:VILKAARSVURDERT",
+        "VEDTAK:IVERKSATT"
     )
 
     init {
@@ -55,13 +56,13 @@ internal class HendelserOmVedtak(
             logger.info("""Oppdaterer behandling $behandling med hendelse  $hendelse""")
             try {
                 behandlinger.vedtakHendelse(
-                    UUID.fromString(packet["behandlingId"].textValue()),
-                    hendelse.split(":").last(),
-                    vedtakId,
-                    inntruffet,
-                    saksbehandler,
-                    kommentar,
-                    valgtBegrunnelse
+                    behandlingid = UUID.fromString(packet["behandlingId"].textValue()),
+                    hendelse = hendelse.split(":").last(),
+                    vedtakId = vedtakId,
+                    inntruffet = inntruffet,
+                    saksbehandler = saksbehandler,
+                    kommentar = kommentar,
+                    valgtBegrunnelse = valgtBegrunnelse
                 )
             } catch (e: Exception) {
                 // TODO endre denne

@@ -29,7 +29,7 @@ class GrunnlagService(
             lagOpplysning(
                 Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
                 Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
-                periode
+                Test(periode)
             )
         )
 
@@ -109,3 +109,7 @@ fun <T> lagOpplysning(
 ): Grunnlagsopplysning<T> {
     return Grunnlagsopplysning(UUID.randomUUID(), kilde, opplysningsType, objectMapper.createObjectNode(), opplysning)
 }
+
+data class Test(
+    val periode: String
+)

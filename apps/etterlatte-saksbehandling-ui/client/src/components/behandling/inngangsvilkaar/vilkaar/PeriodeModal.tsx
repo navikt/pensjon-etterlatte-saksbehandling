@@ -39,14 +39,13 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
 
   function valider() {
     let errorObject: IPeriodeInputErros = periodeErrors
-    const arbeidValid = periode.periodeType === IPeriodeType.arbeidsperiode && periode.arbeidsgiver !== undefined
-    const stillingsprosentValid =
-      periode.periodeType === IPeriodeType.arbeidsperiode && prosentValid(periode.stillingsprosent)
+    const arbeidSelektert = periode.periodeType === IPeriodeType.arbeidsperiode
+    const arbeidValid = (arbeidSelektert && periode.arbeidsgiver !== undefined) || !arbeidSelektert
+    const stillingsprosentValid = (arbeidSelektert && prosentValid(periode.stillingsprosent)) || !arbeidSelektert
 
     if (periode.periodeType === IPeriodeType.velg) {
       errorObject = { ...errorObject, periodeType: 'Velg type periode' }
     }
-
     if (periode.kilde === '') {
       errorObject = { ...errorObject, kilde: 'Skriv inn kilden til perioden' }
     }

@@ -1,15 +1,8 @@
-package barnepensjon.vilkaar
+package barnepensjon.vilkaar.avdoedesmedlemskap
 
 import adresseDanmarkPdl
 import adresseUtlandFoerFemAar
 import adresserNorgePdl
-import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieIngenInnUtvandring
-import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieIngenUtenlandsoppholdFraSoeknad
-import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieKunNorskeBostedsadresserSisteFemAar
-import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieKunNorskeKontaktadresserSisteFemAar
-import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieKunNorskeOppholdsadresserSisteFemAar
-import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieNorskStatsborger
-import barnepensjon.vilkaar.avdoedesmedlemskap.kriterieSammenhengendeAdresserINorgeSisteFemAar
 import lagMockPersonAvdoedSoeknad
 import lagMockPersonPdl
 import mapTilVilkaarstypeAvdoedSoeknad
@@ -28,7 +21,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class AvdoedesMedlemskapTest {
+class BosattTest {
 
     @Test
     fun vurderNorskStatsborgerskap() {

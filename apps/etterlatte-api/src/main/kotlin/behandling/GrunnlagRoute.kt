@@ -8,8 +8,11 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.getAccessToken
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapsperiode
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 
 fun Route.grunnlagRoute(service: GrunnlagService) {
     val logger = LoggerFactory.getLogger(GrunnlagService::class.java)
@@ -27,7 +30,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
                     call.respond(
                         service.lagreAvdoedMedlemskapPeriode(
                             behandlingId,
-                            body.periode,
+                            body.toDomain(),
                             call.navIdent,
                             getAccessToken(call)
                         )
@@ -90,15 +93,26 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
     }
 }
 
-data class MedlemskapsPeriodeClientRequest(val periode: MedlemskapsPeriode)
-data class MedlemskapsPeriode(
+data class MedlemskapsPeriodeClientRequest(val periode: AvdoedesMedlemskapsperiodeClientRequest) {
+    fun toDomain() = AvdoedesMedlemskapsperiode(
+        PeriodeType.valueOf(this.periode.periodeType.uppercase()),
+        this.periode.arbeidsgiver,
+        this.periode.stillingsprosent,
+        this.periode.begrunnelse,
+        this.periode.kilde,
+        this.periode.fraDato,
+        this.periode.tilDato
+    )
+}
+
+data class AvdoedesMedlemskapsperiodeClientRequest(
     val periodeType: String,
     val arbeidsgiver: String?,
     val stillingsprosent: String?,
     val begrunnelse: String?,
     val kilde: String,
-    val fraDato: String,
-    val tilDato: String
+    val fraDato: LocalDate,
+    val tilDato: LocalDate
 )
 
 private data class KommerBarnetTilgodeClientRequest(val svar: String, val begrunnelse: String)

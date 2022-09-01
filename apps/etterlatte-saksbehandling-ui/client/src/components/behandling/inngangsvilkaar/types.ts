@@ -8,7 +8,12 @@ export interface VilkaarProps {
 export enum IPeriodeType {
   velg = 'Velg',
   arbeidsperiode = 'Arbeidsperiode',
+  alderspensjon = 'Alderspensjon',
+  uføretrygd = 'Uføretrygd',
+  foreldrepenger = 'Foreldrepenger',
+  sykepenger = 'Sykepenger',
   dagpenger = 'Dagpenger',
+  arbeidsavklaringspenger = 'Arbeidsavklaringspenger',
 }
 
 export interface IPeriodeInput {

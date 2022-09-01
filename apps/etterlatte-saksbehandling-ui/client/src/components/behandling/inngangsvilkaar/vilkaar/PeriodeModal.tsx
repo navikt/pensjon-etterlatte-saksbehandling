@@ -74,7 +74,6 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
   }
 
   function leggTilPeriodeTrykket() {
-    console.log('valider er', valider())
     if (valider()) {
       if (!behandlingId) throw new Error('Mangler behandlingsid')
       setLagrer(true)
@@ -92,6 +91,9 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
       })
     }
   }
+
+  console.log(periode.periodeType.valueOf())
+  console.log(periode.periodeType.toString())
 
   return (
     <div>

@@ -40,9 +40,9 @@ class OpplysningsbyggerTest {
 
         val opplysninger = service.byggOpplysninger(InntektsKomponentenResponse(null, Ident("", "NA")), aaregResponse)
 
-        assertEquals(opplysninger.size, 1)
-        assertEquals(opplysninger[0].opplysningType, Opplysningstyper.ARBEIDSFORHOLD_V1)
-        val arbeidsforholdOpplysning = (opplysninger[0].opplysning) as ArbeidsforholdOpplysning
+        assertEquals(opplysninger.size, 2)
+        assertEquals(opplysninger[1].opplysningType, Opplysningstyper.ARBEIDSFORHOLD_V1)
+        val arbeidsforholdOpplysning = (opplysninger[1].opplysning) as ArbeidsforholdOpplysning
         assertEquals(arbeidsforholdOpplysning.arbeidsforhold.size, 1)
         assertEquals(arbeidsforholdOpplysning.arbeidsforhold[0].type.beskrivelse, "Ordinært arbeidsforhold")
     }

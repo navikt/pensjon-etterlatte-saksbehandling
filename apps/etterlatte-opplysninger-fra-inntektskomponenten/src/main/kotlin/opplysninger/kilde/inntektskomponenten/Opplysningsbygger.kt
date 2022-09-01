@@ -17,25 +17,27 @@ class OpplysningsByggerService : OpplysningsBygger {
         inntektsKomponentenResponse: InntektsKomponentenResponse,
         arbeidsforholdListe: List<AaregResponse>
     ): List<Grunnlagsopplysning<out Any>> {
-        val inntektsOpplysning = inntektsKomponentenResponse.arbeidsInntektMaaned?.let { inntekter ->
+        val inntekter = inntektsKomponentenResponse.arbeidsInntektMaaned?.let { inntekter ->
             val pensjonEllerTrygd = inntekter.filtrertPaaInntektsType(InntektType.PENSJON_ELLER_TRYGD)
             val ytelseFraOffentlig = inntekter.filtrertPaaInntektsType(InntektType.YTELSE_FRA_OFFENTLIGE)
             val loennsinntekt = inntekter.filtrertPaaInntektsType(InntektType.LOENNSINNTEKT)
             val naeringsinntekt = inntekter.filtrertPaaInntektsType(InntektType.NAERINGSINNTEKT)
 
-            lagOpplysning(
-                opplysningsType = Opplysningstyper.AVDOED_INNTEKT_V1,
-                kilde = Grunnlagsopplysning.Inntektskomponenten("Inntektskomponenten"),
-                opplysning = InntektsOpplysning(pensjonEllerTrygd, ytelseFraOffentlig, loennsinntekt, naeringsinntekt)
-            )
-        }
+            InntektsOpplysning(pensjonEllerTrygd, ytelseFraOffentlig, loennsinntekt, naeringsinntekt)
+        } ?: InntektsOpplysning(emptyList(), emptyList(), emptyList(), emptyList())
+
+        val inntektsOpplysning = lagOpplysning(
+            opplysningsType = Opplysningstyper.AVDOED_INNTEKT_V1,
+            kilde = Grunnlagsopplysning.Inntektskomponenten("Inntektskomponenten"),
+            opplysning = inntekter
+        )
 
         val arbeidsforholdOpplysning = lagOpplysning(
             Opplysningstyper.ARBEIDSFORHOLD_V1,
             Grunnlagsopplysning.Aregisteret("Aareg"),
             ArbeidsforholdOpplysning(arbeidsforholdListe)
         )
-        return listOfNotNull(inntektsOpplysning, arbeidsforholdOpplysning)
+        return listOf(inntektsOpplysning, arbeidsforholdOpplysning)
     }
 }
 

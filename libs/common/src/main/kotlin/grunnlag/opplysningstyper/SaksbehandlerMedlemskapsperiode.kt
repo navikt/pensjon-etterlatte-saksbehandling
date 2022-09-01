@@ -13,8 +13,6 @@ data class AvdoedesMedlemskapsperiode(
 )
 
 enum class PeriodeType {
-    UFOERETRYGD,
-    ALDERSPENSJON,
     ARBEIDSPERIODE,
     ALDERSPENSJON,
     UFØRETRYGD,

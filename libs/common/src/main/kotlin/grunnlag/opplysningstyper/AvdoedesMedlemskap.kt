@@ -25,7 +25,7 @@ data class VurdertMedlemskapsPeriode(
 data class AvdoedesMedlemskapGrunnlag(
     val inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>,
     val arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>,
-    val saksbehandlerMedlemsPerioder: List<VilkaarOpplysning<SaksbehandlerMedlemskapsperiode>>,
+    val saksbehandlerMedlemsPerioder: List<VilkaarOpplysning<AvdoedesMedlemskapsperiode>>,
     val doedsdato: LocalDate,
     val bosattNorge: Metakriterie
 )

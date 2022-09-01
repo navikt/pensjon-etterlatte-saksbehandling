@@ -16,10 +16,11 @@ enum class Kriterietyper {
     AVDOED_KUN_NORSKE_KONTAKTADRESSER,
     AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD,
 
+    AVDOED_OPPFYLLER_MEDLEMSKAP,
+
+    // De neste er deprecated. Lar de stå for at ikke parsing av gamle saker skal krasje.
     AVDOED_HAR_MOTTATT_PENSJON_TRYGD_SISTE_FEM_AAR,
     AVDOED_HAR_HATT_MINST_80_PROSENT_STILLING_SISTE_FEM_AAR,
-
-    // De tre neste er deprecated. Lar de stå for at ikke parsing av gamle saker skal krasje.
     AVDOED_HAR_MOTTATT_PENSJON_SISTE_FEM_AAR,
     AVDOED_HAR_MOTTATT_TRYGD_SISTE_FEM_AAR,
     AVDOED_HAR_HATT_100PROSENT_STILLING_SISTE_FEM_AAR,

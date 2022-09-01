@@ -63,7 +63,8 @@ class VilkaarService {
                 avdoedSoeknad,
                 avdoedPdl,
                 avdoedeInntektsOpplysning,
-                arbeidsforhold
+                arbeidsforhold,
+                null
             ),
             vilkaarBarnetsMedlemskap(
                 soekerPdl,

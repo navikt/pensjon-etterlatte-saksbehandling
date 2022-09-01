@@ -22,6 +22,9 @@ import { KildeDatoOpplysning, KildeDatoVilkaar } from './KildeDatoOpplysning'
 
 export const AlderBarn = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
+  if (!vilkaar) {
+    return null
+  }
 
   const barnetsFoedselsdato = hentKriterierMedOpplysning(
     vilkaar,

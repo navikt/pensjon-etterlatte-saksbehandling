@@ -22,6 +22,9 @@ import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 
 export const Formaal = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
+  if (!vilkaar) {
+    return null
+  }
   const soekerDoedsdato = hentKriterierMedOpplysning(
     vilkaar,
     Kriterietype.SOEKER_ER_I_LIVE,

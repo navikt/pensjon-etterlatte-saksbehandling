@@ -1,16 +1,17 @@
 import { handlinger } from './typer'
 import { Button } from '@navikt/ds-react'
-import { VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { useState } from 'react'
+import { useVedtaksResultat } from '../useVedtaksResultat'
 
-export const VilkaarsVurderingKnapper = ({ vilkaarResultat }: { vilkaarResultat: VurderingsResultat | undefined }) => {
+export const VilkaarsVurderingKnapper = () => {
   const { next } = useBehandlingRoutes()
-  const [ventNanv, setVentNavn] = useState<string>(handlinger.VILKAARSVURDERING.VENT.navn)
+  const [ventNavn, setVentNavn] = useState<string>(handlinger.VILKAARSVURDERING.VENT.navn)
+  const vedtaksresultat = useVedtaksResultat()
 
   function toggleVentNavn() {
     const navn =
-      ventNanv === handlinger.VILKAARSVURDERING.VENT.navn
+      ventNavn === handlinger.VILKAARSVURDERING.VENT.navn
         ? handlinger.VILKAARSVURDERING.GJENNOPPTA.navn
         : handlinger.VILKAARSVURDERING.VENT.navn
     setVentNavn(navn)
@@ -19,22 +20,29 @@ export const VilkaarsVurderingKnapper = ({ vilkaarResultat }: { vilkaarResultat:
   return (
     <>
       {(() => {
-        switch (vilkaarResultat) {
-          case VurderingsResultat.IKKE_OPPFYLT:
+        switch (vedtaksresultat) {
+          case 'avslag':
             return (
               //TODO - Avslag
               <Button variant="primary" size="medium" className="button" onClick={() => console.log('Avslag')}>
                 {handlinger.VILKAARSVURDERING.AVSLAG.navn}
               </Button>
             )
-          case VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING:
+          case 'uavklart':
             return (
               //TODO - oppdatere sak med Status "satt på vent" og Handlinger "Gjenoppta saken" i oppgavebenken
-              <Button variant="primary" size="medium" className="button" onClick={() => toggleVentNavn()}>
-                {ventNanv}
+              <Button variant="primary" size="medium" className="button" onClick={toggleVentNavn}>
+                {ventNavn}
               </Button>
             )
-          case VurderingsResultat.OPPFYLT:
+          case 'opphoer':
+            return (
+              <Button variant="primary" size="medium" className="button" onClick={next}>
+                {handlinger.VILKAARSVURDERING.OPPHOER.navn}
+              </Button>
+            )
+          case 'innvilget':
+          case 'endring':
             return (
               <Button variant="primary" size="medium" className="button" onClick={next}>
                 {handlinger.VILKAARSVURDERING.BEREGNE.navn}

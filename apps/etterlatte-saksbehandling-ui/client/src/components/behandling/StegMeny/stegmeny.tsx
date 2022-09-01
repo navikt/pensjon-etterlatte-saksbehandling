@@ -2,24 +2,32 @@ import styled from 'styled-components'
 import { NavLink } from 'react-router-dom'
 import { useContext } from 'react'
 import { AppContext } from '../../../store/AppContext'
-import { VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
+import { IBehandlingsType, VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 
 export const StegMeny = () => {
   const ctx = useContext(AppContext)
-  const gyldighet = ctx.state.behandlingReducer.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
-  const vilkaar = ctx.state.behandlingReducer.vilkårsprøving?.resultat === VurderingsResultat.OPPFYLT
+  const gyldighet =
+    ctx.state.behandlingReducer.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING ||
+    ctx.state.behandlingReducer.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
+  const vilkaar =
+    ctx.state.behandlingReducer.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING ||
+    ctx.state.behandlingReducer.vilkårsprøving?.resultat === VurderingsResultat.OPPFYLT
 
   return (
     <StegMenyWrapper>
-      <li>
-        <NavLink to="soeknadsoversikt">Søknadsoversikt</NavLink>
-      </li>
+      {ctx.state.behandlingReducer.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING ? (
+        <li>
+          <NavLink to="soeknadsoversikt">Søknadsoversikt</NavLink>
+        </li>
+      ) : null}
       <li className={!gyldighet ? 'disabled' : ''}>
         <NavLink to="inngangsvilkaar">Vilkårsvurdering</NavLink>
       </li>
-      <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
-        <NavLink to="beregningsgrunnlag">Beregningsgrunnlag</NavLink>
-      </li>
+      {ctx.state.behandlingReducer.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING ? (
+        <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
+          <NavLink to="beregningsgrunnlag">Beregningsgrunnlag</NavLink>
+        </li>
+      ) : null}
       <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
         <NavLink to="beregne">Beregning</NavLink>
       </li>

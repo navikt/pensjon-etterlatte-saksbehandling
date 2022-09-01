@@ -22,7 +22,7 @@ export const VilkaarVurderingsliste = ({ kriterie }: { kriterie: IKriterie[] }) 
   )
 }
 
-export const VilkaarVurderingEnkeltElement = ({ tittel, svar }: { tittel: String; svar: String }) => {
+export const VilkaarVurderingEnkeltElement = ({ tittel, svar }: { tittel: string; svar: string }) => {
   return (
     <div style={{ display: 'flex', marginTop: '10px', paddingLeft: '55px' }}>
       <div>

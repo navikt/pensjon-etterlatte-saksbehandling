@@ -5,11 +5,16 @@ import {
   Title,
   VilkaarBorder,
   VilkaarColumn,
-  VilkaarVurderingColumn,
   VilkaarInfobokser,
+  VilkaarVurderingColumn,
   VilkaarWrapper,
 } from '../styled'
-import { IVilkaarsproving, KriterieOpplysningsType, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
+import {
+  IBehandlingsType,
+  IVilkaarsproving,
+  KriterieOpplysningsType,
+  Kriterietype,
+} from '../../../../store/reducers/BehandlingReducer'
 import { hentKriterierMedOpplysning } from '../../felles/utils'
 import { KildeDatoOpplysning } from './KildeDatoOpplysning'
 
@@ -18,6 +23,20 @@ type Props = {
   vilkaar: IVilkaarsproving | undefined
   virkningsdato: string
   mottattdato: string
+  behandlingType: IBehandlingsType
+}
+
+const lovtekst: Record<IBehandlingsType, Record<'tittel' | 'tekst', string>> = {
+  [IBehandlingsType.FØRSTEGANGSBEHANDLING]: {
+    tittel: '§ 22-13: Virkningstidspunkt',
+    tekst:
+      'Barnepensjonen innvilges som hovedregel fra og med måneden etter dødsfall, men kan gis for opptil tre år før den måneden da kravet ble satt fram.',
+  },
+  [IBehandlingsType.REVURDERING]: {
+    tittel: '§ 22-12: Virkningstidspunkt',
+    tekst:
+      'Det følger av paragrafens sjette ledd at utbetalingen av en ytelse som gis pr. måned, stanses ved utgangen av den måneden retten til ytelsen faller bort.',
+  },
 }
 
 export const Virkningstidspunkt = (props: Props) => {
@@ -35,36 +54,37 @@ export const Virkningstidspunkt = (props: Props) => {
         <VilkaarWrapper>
           <VilkaarInfobokser>
             <VilkaarColumn>
-              <Title>§ 22-13: Virkningstidspunkt</Title>
-              <Lovtekst>
-                Barnepensjonen innvilges som hovedregel fra og med måneden etter dødsfall, men kan gis for opptil tre år
-                før den måneden da kravet ble satt fram.
-              </Lovtekst>
+              <Title>{lovtekst[props.behandlingType].tittel}</Title>
+              <Lovtekst>{lovtekst[props.behandlingType].tekst}</Lovtekst>
             </VilkaarColumn>
-            <VilkaarColumn>
-              <div>
-                <strong>Dødsdato</strong>
-              </div>
-              <div>
-                {avdoedDoedsdato ? (
-                  <>
-                    <div>{format(new Date(avdoedDoedsdato?.opplysning.doedsdato), 'dd.MM.yyyy')}</div>
-                    <KildeDatoOpplysning
-                      type={avdoedDoedsdato?.kilde.type}
-                      dato={avdoedDoedsdato?.kilde.tidspunktForInnhenting}
-                    />
-                  </>
-                ) : (
-                  <span className="missing">mangler</span>
-                )}
-              </div>
-            </VilkaarColumn>
-            <VilkaarColumn>
-              <div>
-                <strong>Søknadstidspunkt</strong>
-              </div>
-              <div>{format(new Date(props.mottattdato), 'dd.MM.yyyy')}</div>
-            </VilkaarColumn>
+            {props.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING ? (
+              <>
+                <VilkaarColumn>
+                  <div>
+                    <strong>Dødsdato</strong>
+                  </div>
+                  <div>
+                    {avdoedDoedsdato ? (
+                      <>
+                        <div>{format(new Date(avdoedDoedsdato?.opplysning.doedsdato), 'dd.MM.yyyy')}</div>
+                        <KildeDatoOpplysning
+                          type={avdoedDoedsdato?.kilde.type}
+                          dato={avdoedDoedsdato?.kilde.tidspunktForInnhenting}
+                        />
+                      </>
+                    ) : (
+                      <span className="missing">mangler</span>
+                    )}
+                  </div>
+                </VilkaarColumn>
+                <VilkaarColumn>
+                  <div>
+                    <strong>Søknadstidspunkt</strong>
+                  </div>
+                  <div>{format(new Date(props.mottattdato), 'dd.MM.yyyy')}</div>
+                </VilkaarColumn>
+              </>
+            ) : null}
             <VilkaarColumn>
               <div>
                 <strong>Virkningstidspunkt</strong>

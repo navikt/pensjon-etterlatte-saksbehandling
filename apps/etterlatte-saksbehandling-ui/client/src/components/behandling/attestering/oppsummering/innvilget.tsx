@@ -2,19 +2,19 @@ import { IBehandlingInfo } from '../../SideMeny/types'
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
 import { useContext } from 'react'
 import { AppContext } from '../../../../store/AppContext'
-import { formaterDato, formaterStringDato } from '../../../../utils/formattering'
+import { formaterDato, formaterEnumTilLesbarString, formaterStringDato } from '../../../../utils/formattering'
 
-export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingInfo }) => {
+export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const innloggetId = useContext(AppContext).state.saksbehandlerReducer.ident
-  const virkningsdato = behandlingsInfo?.virkningsdato ? formaterStringDato(behandlingsInfo?.virkningsdato) : '-'
-  const attestertDato = behandlingsInfo?.datoAttestert
-    ? formaterStringDato(behandlingsInfo?.datoAttestert)
+  const virkningsdato = behandlingsInfo.virkningsdato ? formaterStringDato(behandlingsInfo.virkningsdato) : '-'
+  const attestertDato = behandlingsInfo.datoAttestert
+    ? formaterStringDato(behandlingsInfo.datoAttestert)
     : formaterDato(new Date())
 
   return (
     <>
       <Wrapper innvilget={true}>
-        <Overskrift>Førstegangsbehandling</Overskrift>
+        <Overskrift>{formaterEnumTilLesbarString(behandlingsInfo.type)}</Overskrift>
         <UnderOverskrift innvilget={true}>Innvilget</UnderOverskrift>
         <div className="flex">
           <div>
@@ -23,7 +23,7 @@ export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingIn
           </div>
           <div>
             <Info>Saksbehandler</Info>
-            <Tekst>{behandlingsInfo?.saksbehandler}</Tekst>
+            <Tekst>{behandlingsInfo.saksbehandler}</Tekst>
           </div>
         </div>
         <div className="flex">

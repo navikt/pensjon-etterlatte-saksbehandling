@@ -37,6 +37,9 @@ export interface IGap {
 }
 
 export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) => {
+  if (!vilkaar) {
+    return null
+  }
   const avdoedDoedsdato: string | null = hentKriterierMedOpplysning(
     vilkaar,
     Kriterietype.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR,

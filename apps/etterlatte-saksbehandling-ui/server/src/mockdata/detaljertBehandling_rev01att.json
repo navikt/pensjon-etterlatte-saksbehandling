@@ -1,0 +1,434 @@
+{
+  "id" : "f2d78334-074b-443b-bf4b-3a8d357edf3b",
+  "sak" : 21,
+  "gyldighetsprøving" : null,
+  "kommerSoekerTilgode" : null,
+  "vilkårsprøving" : {
+    "resultat" : "IKKE_OPPFYLT",
+    "vilkaar" : [
+      {
+        "navn" : "FORMAAL_FOR_YTELSEN",
+        "resultat" : "IKKE_OPPFYLT",
+        "utfall" : null,
+        "kriterier" : [
+          {
+            "navn" : "SOEKER_ER_I_LIVE",
+            "resultat" : "IKKE_OPPFYLT",
+            "basertPaaOpplysninger" : [
+              {
+                "id" : "eb2f4636-cdaf-47ba-8a93-697ee9f8ad17",
+                "kriterieOpplysningsType" : "DOEDSDATO",
+                "kilde" : {
+                  "navn" : "pdl",
+                  "tidspunktForInnhenting" : "2022-09-02T07:39:13.229103476Z",
+                  "registersReferanse" : null,
+                  "type" : "pdl"
+                },
+                "opplysning" : {
+                  "doedsdato" : "2022-08-18",
+                  "foedselsnummer" : "05441588854"
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato" : "2022-09-02T10:42:44.554514901"
+      }
+    ],
+    "vurdertDato" : "2022-09-02T10:42:44.554514901"
+  },
+  "beregning" : {
+    "id" : "c529f498-5edc-4bae-bf13-991ba4fb4b9e",
+    "type" : "GP",
+    "endringskode" : "REVURDERING",
+    "resultat" : "BEREGNET",
+    "beregningsperioder" : [
+      {
+        "delytelsesId" : "BP",
+        "type" : "GP",
+        "datoFOM" : "2022-09",
+        "datoTOM" : null,
+        "utbetaltBeloep" : 0,
+        "soeskenFlokk" : [],
+        "grunnbelopMnd" : 0,
+        "grunnbelop" : 0
+      }
+    ],
+    "beregnetDato" : "2022-09-02T10:42:47.605700014",
+    "grunnlagVersjon" : 20
+  },
+  "avkortning" : {
+    "id" : "f11728ae-4ed9-45d7-8e33-010497f0939b",
+    "type" : "GP",
+    "endringskode" : "NY",
+    "resultat" : "BEREGNET",
+    "beregningsperioder" : [
+      {
+        "avkortingsId" : "1",
+        "type" : "INNTEKT",
+        "datoFOM" : "2022-09",
+        "datoTOM" : null,
+        "belop" : 0
+      }
+    ],
+    "beregnetDato" : "2022-09-02T10:42:51.676530797"
+  },
+  "saksbehandlerId" : "Z994985",
+  "fastsatt" : true,
+  "datoFattet" : "2022-09-02T09:51:05.019679Z",
+  "datoattestert" : "2022-09-02T09:52:22.313731Z",
+  "attestant" : "Z994985",
+  "soeknadMottattDato" : "2022-09-02T09:39:12.53732",
+  "virkningstidspunkt" : "2022-09-01",
+  "status" : "ATTESTERT",
+  "hendelser" : [
+    {
+      "id" : 5178,
+      "hendelse" : "BEHANDLING:OPPRETTET",
+      "opprettet" : "2022-09-02T07:39:12.538809Z",
+      "inntruffet" : "2022-09-02T07:39:12.537320Z",
+      "vedtakId" : null,
+      "behandlingId" : "f2d78334-074b-443b-bf4b-3a8d357edf3b",
+      "sakId" : 21,
+      "ident" : null,
+      "identType" : null,
+      "kommentar" : null,
+      "valgtBegrunnelse" : null
+    },
+    {
+      "id" : 5179,
+      "hendelse" : "VEDTAK:VILKAARSVURDERT",
+      "opprettet" : "2022-09-02T07:39:13.468508Z",
+      "inntruffet" : "2022-09-02T07:39:13.426369Z",
+      "vedtakId" : 182,
+      "behandlingId" : "f2d78334-074b-443b-bf4b-3a8d357edf3b",
+      "sakId" : 21,
+      "ident" : null,
+      "identType" : null,
+      "kommentar" : null,
+      "valgtBegrunnelse" : null
+    },
+    {
+      "id" : 5180,
+      "hendelse" : "VEDTAK:VILKAARSVURDERT",
+      "opprettet" : "2022-09-02T07:39:13.786532Z",
+      "inntruffet" : "2022-09-02T07:39:13.770861Z",
+      "vedtakId" : 182,
+      "behandlingId" : "f2d78334-074b-443b-bf4b-3a8d357edf3b",
+      "sakId" : 21,
+      "ident" : null,
+      "identType" : null,
+      "kommentar" : null,
+      "valgtBegrunnelse" : null
+    },
+    {
+      "id" : 5181,
+      "hendelse" : "VEDTAK:VILKAARSVURDERT",
+      "opprettet" : "2022-09-02T07:39:14.370588Z",
+      "inntruffet" : "2022-09-02T07:39:14.358854Z",
+      "vedtakId" : 182,
+      "behandlingId" : "f2d78334-074b-443b-bf4b-3a8d357edf3b",
+      "sakId" : 21,
+      "ident" : null,
+      "identType" : null,
+      "kommentar" : null,
+      "valgtBegrunnelse" : null
+    },
+    {
+      "id" : 5182,
+      "hendelse" : "VEDTAK:VILKAARSVURDERT",
+      "opprettet" : "2022-09-02T07:39:18.288857Z",
+      "inntruffet" : "2022-09-02T07:39:18.275446Z",
+      "vedtakId" : 182,
+      "behandlingId" : "f2d78334-074b-443b-bf4b-3a8d357edf3b",
+      "sakId" : 21,
+      "ident" : null,
+      "identType" : null,
+      "kommentar" : null,
+      "valgtBegrunnelse" : null
+    },
+    {
+      "id" : 5187,
+      "hendelse" : "VEDTAK:VILKAARSVURDERT",
+      "opprettet" : "2022-09-02T08:42:44.609726Z",
+      "inntruffet" : "2022-09-02T08:42:44.590076Z",
+      "vedtakId" : 182,
+      "behandlingId" : "f2d78334-074b-443b-bf4b-3a8d357edf3b",
+      "sakId" : 21,
+      "ident" : null,
+      "identType" : null,
+      "kommentar" : null,
+      "valgtBegrunnelse" : null
+    },
+    {
+      "id" : 5188,
+      "hendelse" : "VEDTAK:BEREGNET",
+      "opprettet" : "2022-09-02T08:42:49.652895Z",
+      "inntruffet" : "2022-09-02T08:42:49.611682Z",
+      "vedtakId" : 182,
+      "behandlingId" : "f2d78334-074b-443b-bf4b-3a8d357edf3b",
+      "sakId" : 21,
+      "ident" : null,
+      "identType" : null,
+      "kommentar" : null,
+      "valgtBegrunnelse" : null
+    },
+    {
+      "id" : 5189,
+      "hendelse" : "VEDTAK:AVKORTET",
+      "opprettet" : "2022-09-02T08:42:52.126803Z",
+      "inntruffet" : "2022-09-02T08:42:52.110992Z",
+      "vedtakId" : 182,
+      "behandlingId" : "f2d78334-074b-443b-bf4b-3a8d357edf3b",
+      "sakId" : 21,
+      "ident" : null,
+      "identType" : null,
+      "kommentar" : null,
+      "valgtBegrunnelse" : null
+    },
+    {
+      "id" : 5190,
+      "hendelse" : "VEDTAK:FATTET",
+      "opprettet" : "2022-09-02T09:51:07.286344Z",
+      "inntruffet" : "2022-09-02T09:51:05.019679Z",
+      "vedtakId" : 182,
+      "behandlingId" : "f2d78334-074b-443b-bf4b-3a8d357edf3b",
+      "sakId" : 21,
+      "ident" : "Z994985",
+      "identType" : "SAKSBEHANDLER",
+      "kommentar" : null,
+      "valgtBegrunnelse" : null
+    },
+    {
+      "id" : 5191,
+      "hendelse" : "VEDTAK:ATTESTERT",
+      "opprettet" : "2022-09-02T09:52:22.351897Z",
+      "inntruffet" : "2022-09-02T09:52:22.313731Z",
+      "vedtakId" : 182,
+      "behandlingId" : "f2d78334-074b-443b-bf4b-3a8d357edf3b",
+      "sakId" : 21,
+      "ident" : "Z994985",
+      "identType" : "SAKSBEHANDLER",
+      "kommentar" : null,
+      "valgtBegrunnelse" : null
+    }
+  ],
+  "familieforhold" : {
+    "avdoede" : {
+      "id" : "b3d33612-85f8-4469-bd06-bcc406c44517",
+      "kilde" : {
+        "navn" : "pdl",
+        "tidspunktForInnhenting" : "2022-09-02T07:39:14.249567009Z",
+        "registersReferanse" : null,
+        "type" : "pdl"
+      },
+      "opplysningType" : "AVDOED_PDL_V1",
+      "meta" : {},
+      "opplysning" : {
+        "fornavn" : "Sofistikert",
+        "etternavn" : "Frekvens",
+        "foedselsnummer" : "23427249697",
+        "foedselsdato" : "1972-02-23",
+        "foedselsaar" : 1972,
+        "foedeland" : "NOR",
+        "doedsdato" : "2022-08-15",
+        "adressebeskyttelse" : "UGRADERT",
+        "bostedsadresse" : [
+          {
+            "type" : "VEGADRESSE",
+            "aktiv" : true,
+            "coAdresseNavn" : null,
+            "adresseLinje1" : "Kviåsen 11",
+            "adresseLinje2" : null,
+            "adresseLinje3" : null,
+            "postnr" : "4994",
+            "poststed" : null,
+            "land" : null,
+            "kilde" : "FREG",
+            "gyldigFraOgMed" : "1972-02-23T00:00:00",
+            "gyldigTilOgMed" : null
+          },
+          {
+            "type" : "VEGADRESSE",
+            "aktiv" : false,
+            "coAdresseNavn" : null,
+            "adresseLinje1" : "Kviåsen 11",
+            "adresseLinje2" : null,
+            "adresseLinje3" : null,
+            "postnr" : "4994",
+            "poststed" : null,
+            "land" : null,
+            "kilde" : "FREG",
+            "gyldigFraOgMed" : "1972-02-23T00:00:00",
+            "gyldigTilOgMed" : null
+          }
+        ],
+        "deltBostedsadresse" : null,
+        "kontaktadresse" : [],
+        "oppholdsadresse" : [],
+        "sivilstatus" : "GIFT",
+        "statsborgerskap" : "NOR",
+        "utland" : {
+          "innflyttingTilNorge" : [],
+          "utflyttingFraNorge" : []
+        },
+        "familieRelasjon" : {
+          "ansvarligeForeldre" : null,
+          "foreldre" : null,
+          "barn" : [
+            "05441588854"
+          ]
+        },
+        "avdoedesBarn" : [
+          {
+            "fornavn" : "Momentan",
+            "etternavn" : "Appell",
+            "foedselsnummer" : "05441588854",
+            "foedselsdato" : "2015-04-05",
+            "foedselsaar" : 2015,
+            "foedeland" : "NOR",
+            "doedsdato" : "2022-08-18",
+            "adressebeskyttelse" : "UGRADERT",
+            "bostedsadresse" : [
+              {
+                "type" : "VEGADRESSE",
+                "aktiv" : true,
+                "coAdresseNavn" : null,
+                "adresseLinje1" : "Kviåsen 7",
+                "adresseLinje2" : null,
+                "adresseLinje3" : null,
+                "postnr" : "4994",
+                "poststed" : null,
+                "land" : null,
+                "kilde" : "FREG",
+                "gyldigFraOgMed" : "2015-04-05T00:00:00",
+                "gyldigTilOgMed" : null
+              }
+            ],
+            "deltBostedsadresse" : null,
+            "kontaktadresse" : [],
+            "oppholdsadresse" : [],
+            "sivilstatus" : "UOPPGITT",
+            "statsborgerskap" : "NOR",
+            "utland" : {
+              "innflyttingTilNorge" : [],
+              "utflyttingFraNorge" : []
+            },
+            "familieRelasjon" : {
+              "ansvarligeForeldre" : [],
+              "foreldre" : [
+                "23427249697",
+                "18458822782"
+              ],
+              "barn" : null
+            },
+            "avdoedesBarn" : null,
+            "vergemaalEllerFremtidsfullmakt" : []
+          }
+        ],
+        "vergemaalEllerFremtidsfullmakt" : null
+      },
+      "attestering" : null
+    },
+    "gjenlevende" : {
+      "id" : "59e18716-e46f-4c7a-821e-36bda70aa687",
+      "kilde" : {
+        "navn" : "pdl",
+        "tidspunktForInnhenting" : "2022-09-02T07:39:13.639011901Z",
+        "registersReferanse" : null,
+        "type" : "pdl"
+      },
+      "opplysningType" : "GJENLEVENDE_FORELDER_PDL_V1",
+      "meta" : {},
+      "opplysning" : {
+        "fornavn" : "Dyr",
+        "etternavn" : "Bakkerekord",
+        "foedselsnummer" : "18458822782",
+        "foedselsdato" : "1988-05-18",
+        "foedselsaar" : 1988,
+        "foedeland" : "NOR",
+        "doedsdato" : null,
+        "adressebeskyttelse" : "UGRADERT",
+        "bostedsadresse" : [
+          {
+            "type" : "VEGADRESSE",
+            "aktiv" : false,
+            "coAdresseNavn" : null,
+            "adresseLinje1" : "Håkon Herdebreis veg 2",
+            "adresseLinje2" : null,
+            "adresseLinje3" : null,
+            "postnr" : "7046",
+            "poststed" : null,
+            "land" : null,
+            "kilde" : "FREG",
+            "gyldigFraOgMed" : "1988-05-18T00:00:00",
+            "gyldigTilOgMed" : "2008-05-16T00:00:00"
+          },
+          {
+            "type" : "VEGADRESSE",
+            "aktiv" : false,
+            "coAdresseNavn" : null,
+            "adresseLinje1" : "Håkon Herdebreis veg 2",
+            "adresseLinje2" : null,
+            "adresseLinje3" : null,
+            "postnr" : "7046",
+            "poststed" : null,
+            "land" : null,
+            "kilde" : "FREG",
+            "gyldigFraOgMed" : "1988-05-18T00:00:00",
+            "gyldigTilOgMed" : "2008-05-16T00:00:00"
+          },
+          {
+            "type" : "VEGADRESSE",
+            "aktiv" : true,
+            "coAdresseNavn" : null,
+            "adresseLinje1" : "Kviåsen 7",
+            "adresseLinje2" : null,
+            "adresseLinje3" : null,
+            "postnr" : "4994",
+            "poststed" : null,
+            "land" : null,
+            "kilde" : "FREG",
+            "gyldigFraOgMed" : "2008-05-17T00:00:00",
+            "gyldigTilOgMed" : null
+          },
+          {
+            "type" : "VEGADRESSE",
+            "aktiv" : false,
+            "coAdresseNavn" : null,
+            "adresseLinje1" : "Kviåsen 7",
+            "adresseLinje2" : null,
+            "adresseLinje3" : null,
+            "postnr" : "4994",
+            "poststed" : null,
+            "land" : null,
+            "kilde" : "FREG",
+            "gyldigFraOgMed" : "2008-05-17T00:00:00",
+            "gyldigTilOgMed" : null
+          }
+        ],
+        "deltBostedsadresse" : null,
+        "kontaktadresse" : null,
+        "oppholdsadresse" : [],
+        "sivilstatus" : "GIFT",
+        "statsborgerskap" : "NOR",
+        "utland" : {
+          "innflyttingTilNorge" : [],
+          "utflyttingFraNorge" : []
+        },
+        "familieRelasjon" : {
+          "ansvarligeForeldre" : null,
+          "foreldre" : null,
+          "barn" : [
+            "05441588854"
+          ]
+        },
+        "avdoedesBarn" : null,
+        "vergemaalEllerFremtidsfullmakt" : null
+      },
+      "attestering" : null
+    }
+  },
+  "behandlingType" : "REVURDERING"
+}
+

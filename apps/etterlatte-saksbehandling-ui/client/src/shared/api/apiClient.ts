@@ -7,13 +7,13 @@ export type ApiResponse<T> = Success<T> | Error
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH'
 
-interface options {
+interface Options {
   url: string
   method: Method
   body?: Record<string, unknown>
 }
 
-async function apiFetcher<T>(props: options): Promise<ApiResponse<T>> {
+async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
   const { url, method, body } = props
 
   const trimmedUrl = url.startsWith('/') ? url.slice(1) : url

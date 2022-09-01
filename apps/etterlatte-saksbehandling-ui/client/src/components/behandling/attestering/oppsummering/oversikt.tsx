@@ -1,6 +1,10 @@
 import styled from 'styled-components'
 import { IBehandlingStatus } from '../../../../store/reducers/BehandlingReducer'
-import { formaterStringDato, formaterStringTidspunkt } from '../../../../utils/formattering'
+import {
+  formaterEnumTilLesbarString,
+  formaterStringDato,
+  formaterStringTidspunkt,
+} from '../../../../utils/formattering'
 import { IBehandlingInfo } from '../../SideMeny/types'
 import { useContext } from 'react'
 import { AppContext } from '../../../../store/AppContext'
@@ -25,7 +29,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
 
   return (
     <BehandlingsinfoContainer>
-      <Overskrift>Førstegangsbehandling</Overskrift>
+      <Overskrift>{formaterEnumTilLesbarString(behandlingsInfo?.type ?? '')}</Overskrift>
       <UnderOverskrift>{hentStatus()}</UnderOverskrift>
       {fattetDato && <Tekst>{fattetDato}</Tekst>}
       <div className="info">

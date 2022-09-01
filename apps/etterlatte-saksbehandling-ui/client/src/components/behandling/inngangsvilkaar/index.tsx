@@ -1,5 +1,5 @@
 import { Content, Header } from '../../../shared/styled'
-import { useContext, useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { AppContext } from '../../../store/AppContext'
 import { AlderBarn } from './vilkaar/AlderBarn'
 import { DoedsFallForelder } from './vilkaar/DoedsfallForelder'
@@ -53,17 +53,13 @@ export const Inngangsvilkaar = () => {
         vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.BARNETS_MEDLEMSKAP)}
       />
       <Virkningstidspunkt
+        behandlingType={ctx.state.behandlingReducer.behandlingType}
         id="virkningstidspunkt"
         vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.SOEKER_ER_UNDER_20)}
         virkningsdato={virkningstidspunkt}
         mottattdato={ctx.state.behandlingReducer.soeknadMottattDato}
       />
-      <VilkaarResultat
-        id="vilkaarResultat"
-        resultat={vilkaarsproving.resultat}
-        dato={virkningstidspunkt}
-        behandles={behandles}
-      />
+      <VilkaarResultat id="vilkaarResultat" dato={virkningstidspunkt} behandles={behandles} />
     </Content>
   )
 }

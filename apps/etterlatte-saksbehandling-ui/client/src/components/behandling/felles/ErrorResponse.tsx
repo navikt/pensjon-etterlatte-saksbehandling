@@ -15,4 +15,5 @@ export const ErrorResponse = ({ error = 'Det skjedde en feil' }: Props) => {
 
 const ErrorContainer = styled.div`
   padding: 2rem;
+  border: 2px solid var(--navds-error-message-color-text);
 `

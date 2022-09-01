@@ -38,6 +38,7 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
   console.log(periodeErrors)
 
   function valider() {
+    setLagreError(false)
     let errorObject: IPeriodeInputErros = periodeErrors
     const arbeidSelektert = periode.periodeType === IPeriodeType.arbeidsperiode
     const arbeidValid = (arbeidSelektert && periode.arbeidsgiver !== undefined) || !arbeidSelektert
@@ -80,7 +81,7 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
       if (!behandlingId) throw new Error('Mangler behandlingsid')
       setLagrer(true)
       lagrePeriodeForAvdoedesMedlemskap(behandlingId, periode).then((response) => {
-        if (response.status === 200) {
+        if (response.status === 'ok') {
           hentBehandling(behandlingId).then((response) => {
             if (response.status === 200) {
               window.location.reload()

@@ -34,7 +34,7 @@ class AvkortingService {
 
     // TODO implementere avkortning (må ha inn inntekt)
     private fun beregnAvkorting(belop: Int): Int {
-        return belop - 5
+        return belop
     }
 
     private fun avkortPerioder(beregningsperioder: List<Beregningsperiode>): List<Avkortingsperiode> {

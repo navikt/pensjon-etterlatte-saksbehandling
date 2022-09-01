@@ -92,13 +92,13 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
 
 data class MedlemskapsPeriodeClientRequest(val periode: MedlemskapsPeriode)
 data class MedlemskapsPeriode(
-    val periodeType: String?,
+    val periodeType: String,
     val arbeidsgiver: String?,
     val stillingsprosent: String?,
     val begrunnelse: String?,
-    val kilde: String?,
-    val fraDato: String?,
-    val tilDato: String?
+    val kilde: String,
+    val fraDato: String,
+    val tilDato: String
 )
 
 private data class KommerBarnetTilgodeClientRequest(val svar: String, val begrunnelse: String)

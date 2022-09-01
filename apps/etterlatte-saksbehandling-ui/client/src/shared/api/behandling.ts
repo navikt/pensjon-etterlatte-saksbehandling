@@ -133,9 +133,12 @@ export const lagreSoeskenMedIBeregning = async (
   }
 }
 
+export interface GrunnlagResponse {
+  response: string
+}
+
 export const lagrePeriodeForAvdoedesMedlemskap = async (
   behandlingsId: string,
   periode: IPeriodeInput
-): Promise<ApiResponse<any>> => {
-  return apiClient.post<string>(`/grunnlag/saksbehandler/periode/${behandlingsId}`, { periode: periode })
-}
+): Promise<ApiResponse<GrunnlagResponse>> =>
+  apiClient.post<GrunnlagResponse>(`/grunnlag/saksbehandler/periode/${behandlingsId}`, { periode: periode })

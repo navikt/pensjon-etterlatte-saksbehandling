@@ -35,8 +35,6 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
     return input !== '' || /^(100|[1-9]?\d)%?$/.test(input)
   }
 
-  console.log(periodeErrors)
-
   function valider() {
     setLagreError(false)
     let errorObject: IPeriodeInputErros = periodeErrors

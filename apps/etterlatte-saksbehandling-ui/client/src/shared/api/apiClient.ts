@@ -20,6 +20,9 @@ async function apiFetcher<T>(props: options): Promise<ApiResponse<T>> {
 
   const response = await fetch(`${path}/api/${trimmedUrl}`, {
     method: method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
     body: body ? JSON.stringify(body) : undefined,
   })
 
@@ -37,5 +40,5 @@ async function apiFetcher<T>(props: options): Promise<ApiResponse<T>> {
 
 export const apiClient = {
   get: <T>(url: string) => apiFetcher<T>({ url, method: 'GET' }),
-  post: <T>(url: string, body: Record<string, unknown>) => apiFetcher<T>({ url, body, method: 'POST' }),
+  post: <T>(url: string, body: Record<string, unknown>) => apiFetcher<T>({ url: url, body: body, method: 'POST' }),
 } as const

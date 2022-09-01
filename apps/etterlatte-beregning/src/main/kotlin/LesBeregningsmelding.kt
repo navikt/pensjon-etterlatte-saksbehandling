@@ -23,6 +23,7 @@ internal class LesBeregningsmelding(
             validate { it.requireKey("grunnlag") }
             validate { it.requireKey("vilkaarsvurdering") }
             validate { it.requireKey("virkningstidspunkt") }
+            validate { it.requireKey("type") }
             validate { it.rejectKey("beregning") }
             correlationId()
         }.register(this)
@@ -34,11 +35,12 @@ internal class LesBeregningsmelding(
             try {
                 // TODO fremtidig funksjonalitet for å støtte periodisering av vilkaar
                 val tom = YearMonth.now().plusMonths(3)
-
                 val beregningsResultat = beregning.beregnResultat(
-                    objectMapper.readValue(grunnlag),
-                    YearMonth.parse(packet["virkningstidspunkt"].asText()),
-                    tom
+                    grunnlag = objectMapper.readValue(grunnlag),
+                    virkFOM = YearMonth.parse(packet["virkningstidspunkt"].asText()),
+                    virkTOM = tom,
+                    vilkaarsvurdering = objectMapper.readValue(packet["vilkaarsvurdering"].toString()),
+                    behandlingType = objectMapper.readValue(packet["type"].toString())
                 )
                 packet["beregning"] = beregningsResultat
                 context.publish(packet.toJson())

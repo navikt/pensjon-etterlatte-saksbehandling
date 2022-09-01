@@ -1,7 +1,13 @@
 package model
 
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.model.BeregningService
 import no.nav.etterlatte.model.beregnSisteTom
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -9,12 +15,11 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 internal class BeregningServiceTest {
     companion object {
-        val melding = readFile("/Nyere.json")
-
         fun readmelding(file: String): Grunnlag {
             val skjemaInfo = objectMapper.writeValueAsString(
                 objectMapper.readTree(readFile(file)).get("grunnlag")
@@ -26,10 +31,17 @@ internal class BeregningServiceTest {
             ?: throw FileNotFoundException("Fant ikke filen $file")
     }
 
+    private val vilkaarsvurdering = mockk<VilkaarResultat>() {
+        every { resultat } returns VurderingsResultat.OPPFYLT
+    }
+    private val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
     private val beregningsperioder = BeregningService().beregnResultat(
         readmelding("/Nyere.json"),
         YearMonth.of(2021, 2),
-        YearMonth.of(2021, 9)
+        YearMonth.of(2021, 9),
+        vilkaarsvurdering,
+        behandlingType
+
     ).beregningsperioder
 
     @Test
@@ -53,7 +65,32 @@ internal class BeregningServiceTest {
     }
 
     @Test
-    fun `beregningsperiodene får riktig beløp`() {
+    fun `ved revurdering og ikke oppfylte vilkaar skal beregningsresultat settes til kr 0`() {
+        val virkFOM = YearMonth.of(2022, 5)
+        val virkTOM = YearMonth.of(2022, 10)
+        val resultat = BeregningService().beregnResultat(
+            grunnlag = Grunnlag(
+                saksId = 1,
+                grunnlag = listOf(),
+                versjon = 1
+            ),
+            virkFOM = virkFOM,
+            virkTOM = virkTOM,
+            vilkaarsvurdering = VilkaarResultat(
+                resultat = VurderingsResultat.IKKE_OPPFYLT,
+                vilkaar = listOf(),
+                vurdertDato = LocalDateTime.now()
+            ),
+            behandlingType = BehandlingType.REVURDERING
+        )
+        assertEquals(virkFOM, resultat.beregningsperioder.first().datoFOM)
+        assertEquals(null, resultat.beregningsperioder.first().datoTOM)
+        assertEquals(0, resultat.beregningsperioder.first().utbetaltBeloep)
+        assertEquals(Endringskode.REVURDERING, resultat.endringskode)
+    }
+
+    @Test
+    fun `beregningsperiodene får riktig beloep`() {
         assertEquals(2745, beregningsperioder[0].utbetaltBeloep)
         assertEquals(2882, beregningsperioder[1].utbetaltBeloep)
         assertEquals(2882, beregningsperioder[2].utbetaltBeloep)
@@ -63,18 +100,18 @@ internal class BeregningServiceTest {
     @Nested
     class beregnSisteTom {
         @Test
-        fun `skal returnere fødselsdato om søker blir 18 i løpet av perioden`() {
-            val fødselsdato = LocalDate.of(2004, 3, 23)
-            assertEquals(YearMonth.of(2022, 3), beregnSisteTom(fødselsdato, YearMonth.of(2022, 3)))
+        fun `skal returnere foedselsdato om soeker blir 18 i loepet av perioden`() {
+            val foedselsdato = LocalDate.of(2004, 3, 23)
+            assertEquals(YearMonth.of(2022, 3), beregnSisteTom(foedselsdato, YearMonth.of(2022, 3)))
 
-            val fødselsdato2 = LocalDate.of(2004, 2, 23)
-            assertEquals(YearMonth.of(2022, 2), beregnSisteTom(fødselsdato2, YearMonth.of(2022, 3)))
+            val foedselsdato2 = LocalDate.of(2004, 2, 23)
+            assertEquals(YearMonth.of(2022, 2), beregnSisteTom(foedselsdato2, YearMonth.of(2022, 3)))
         }
 
         @Test
-        fun `skal returnere null om søker er under 18 i hele perioden`() {
-            val fødselsdato = LocalDate.of(2004, 4, 23)
-            assertEquals(null, beregnSisteTom(fødselsdato, YearMonth.of(2022, 3)))
+        fun `skal returnere null om soeker er under 18 i hele perioden`() {
+            val foedselsdato = LocalDate.of(2004, 4, 23)
+            assertEquals(null, beregnSisteTom(foedselsdato, YearMonth.of(2022, 3)))
         }
     }
 }

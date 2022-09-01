@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import model.Grunnbeloep
 import model.finnSoeskenperiodeStrategy.FinnSoeskenPeriodeStrategy
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -17,6 +18,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
+import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -24,18 +27,66 @@ import java.util.*
 
 // TODO hvordan håndtere vedtakstidspunkt?
 class BeregningService {
-    fun beregnResultat(grunnlag: Grunnlag, virkFOM: YearMonth, virkTOM: YearMonth): BeregningsResultat {
-        val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)
+    fun beregnResultat(
+        grunnlag: Grunnlag,
+        virkFOM: YearMonth,
+        virkTOM: YearMonth,
+        vilkaarsvurdering: VilkaarResultat,
+        behandlingType: BehandlingType
+    ): BeregningsResultat {
+        return when (behandlingType) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)
+                BeregningsResultat(
+                    id = UUID.randomUUID(),
+                    type = Beregningstyper.GP,
+                    endringskode = Endringskode.NY,
+                    resultat = BeregningsResultatType.BEREGNET,
+                    beregningsperioder = beregningsperioder,
+                    beregnetDato = LocalDateTime.now(),
+                    grunnlagVersjon = grunnlag.versjon
+                )
+            }
+            BehandlingType.REVURDERING -> {
+                when (vilkaarsvurdering.resultat) {
+                    VurderingsResultat.IKKE_OPPFYLT -> {
+                        BeregningsResultat(
+                            id = UUID.randomUUID(),
+                            type = Beregningstyper.GP,
+                            endringskode = Endringskode.REVURDERING,
+                            resultat = BeregningsResultatType.BEREGNET,
+                            beregningsperioder = listOf(
+                                Beregningsperiode(
+                                    delytelsesId = "BP",
+                                    type = Beregningstyper.GP,
+                                    datoFOM = virkFOM,
+                                    datoTOM = null,
+                                    utbetaltBeloep = 0,
+                                    soeskenFlokk = listOf(),
+                                    grunnbelopMnd = 0,
+                                    grunnbelop = 0
 
-        return BeregningsResultat(
-            id = UUID.randomUUID(),
-            type = Beregningstyper.GP,
-            endringskode = Endringskode.NY,
-            resultat = BeregningsResultatType.BEREGNET,
-            beregningsperioder = beregningsperioder,
-            beregnetDato = LocalDateTime.now(),
-            grunnlagVersjon = grunnlag.versjon
-        )
+                                )
+                            ),
+                            beregnetDato = LocalDateTime.now(),
+                            grunnlagVersjon = grunnlag.versjon
+                        )
+                    }
+                    else -> {
+                        val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)
+                        BeregningsResultat(
+                            id = UUID.randomUUID(),
+                            type = Beregningstyper.GP,
+                            endringskode = Endringskode.NY,
+                            resultat = BeregningsResultatType.BEREGNET,
+                            beregningsperioder = beregningsperioder,
+                            beregnetDato = LocalDateTime.now(),
+                            grunnlagVersjon = grunnlag.versjon
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private fun finnBeregningsperioder(

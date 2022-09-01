@@ -733,7 +733,7 @@
             ]
           },
           {
-            "navn": "AVDOED_SAMMENHENGENDE_ADRESSE_NORGE_SISTE_FEM_AAR",
+            "navn": "AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR",
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {

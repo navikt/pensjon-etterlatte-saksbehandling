@@ -5,8 +5,11 @@
   "sistEndret": "2022-07-11T13:12:39.563561",
   "status": "GYLDIG_SOEKNAD",
   "oppgaveStatus": "NY",
-  "type": "FØRSTEGANGSBEHANDLING",
   "soeknadMottattDato": "2022-02-14T14:37:24.573613",
+  "behandling": {
+    "id": "a2f9dfbd-22f6-4c29-bb84-a49e2fe499a3",
+    "type": "FØRSTEGANGSBEHANDLING"
+  },
   "persongalleri": {
     "soeker": "12101376212",
     "innsender": "03108718357",

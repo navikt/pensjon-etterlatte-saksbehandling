@@ -23,7 +23,7 @@ internal class LesBeregningsmelding(
             validate { it.requireKey("grunnlag") }
             validate { it.requireKey("vilkaarsvurdering") }
             validate { it.requireKey("virkningstidspunkt") }
-            validate { it.requireKey("type") }
+            validate { it.requireKey("behandling.type") }
             validate { it.rejectKey("beregning") }
             correlationId()
         }.register(this)
@@ -40,7 +40,7 @@ internal class LesBeregningsmelding(
                     virkFOM = YearMonth.parse(packet["virkningstidspunkt"].asText()),
                     virkTOM = tom,
                     vilkaarsvurdering = objectMapper.readValue(packet["vilkaarsvurdering"].toString()),
-                    behandlingType = objectMapper.readValue(packet["type"].toString())
+                    behandlingType = objectMapper.readValue(packet["behandling.type"].toString())
                 )
                 packet["beregning"] = beregningsResultat
                 context.publish(packet.toJson())

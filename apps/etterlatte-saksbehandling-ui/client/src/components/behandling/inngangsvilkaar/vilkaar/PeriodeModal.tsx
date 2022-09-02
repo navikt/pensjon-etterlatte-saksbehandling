@@ -92,9 +92,6 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
     }
   }
 
-  console.log(periode.periodeType.valueOf())
-  console.log(periode.periodeType.toString())
-
   return (
     <div>
       <Modal open={isOpen} onClose={() => setIsOpen(false)}>

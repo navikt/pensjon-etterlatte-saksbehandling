@@ -1,5 +1,6 @@
 package no.nav.etterlatte.barnepensjon.model
 
+import barnepensjon.kommerbarnettilgode.mapFamiliemedlemmer
 import barnepensjon.kommerbarnettilgode.saksbehandlerResultat
 import barnepensjon.vilkaar.avdoedesmedlemskap.vilkaarAvdoedesMedlemskap
 import barnepensjon.vilkaarFormaalForYtelsen
@@ -14,18 +15,14 @@ import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
-import no.nav.etterlatte.libs.common.vikaar.Familiemedlemmer
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
-import no.nav.etterlatte.libs.common.vikaar.PersoninfoAvdoed
-import no.nav.etterlatte.libs.common.vikaar.PersoninfoGjenlevendeForelder
-import no.nav.etterlatte.libs.common.vikaar.PersoninfoSoeker
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
@@ -55,6 +52,12 @@ class VilkaarService {
         val avdoedeInntektsOpplysning =
             finnOpplysning<InntektsOpplysning>(opplysninger, Opplysningstyper.AVDOED_INNTEKT_V1)
         val arbeidsforhold = finnOpplysning<ArbeidsforholdOpplysning>(opplysninger, Opplysningstyper.ARBEIDSFORHOLD_V1)
+        val saksbehandlerPerioder = finnOpplysning<AvdoedesMedlemskapsperiode>(
+            opplysninger,
+            Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE
+        )
+        // todo finn ut av hvordan vi kan lagre flere opplysninger av samme type til grunnlag
+
         val vilkaar = listOf(
             vilkaarFormaalForYtelsen(soekerPdl, virkningstidspunkt),
             vilkaarBrukerErUnder20(soekerPdl, avdoedPdl, virkningstidspunkt),
@@ -205,42 +208,4 @@ class VilkaarService {
             return setOpplysningType(opplysninger.find { it.opplysningType == type })
         }
     }
-}
-
-fun mapFamiliemedlemmer(
-    soeker: VilkaarOpplysning<Person>?,
-    soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
-    gjenlevende: VilkaarOpplysning<Person>?,
-    avdoed: VilkaarOpplysning<Person>?
-): Familiemedlemmer {
-    return Familiemedlemmer(
-        avdoed = avdoed?.opplysning.let {
-            PersoninfoAvdoed(
-                navn = it?.fornavn + " " + it?.etternavn,
-                fnr = it?.foedselsnummer,
-                rolle = PersonRolle.AVDOED,
-                bostedadresser = it?.bostedsadresse,
-                doedsdato = it?.doedsdato,
-                barn = it?.familieRelasjon?.barn
-            )
-        },
-        soeker = soeker?.opplysning.let {
-            PersoninfoSoeker(
-                navn = it?.fornavn + " " + it?.etternavn,
-                fnr = it?.foedselsnummer,
-                rolle = PersonRolle.BARN,
-                bostedadresser = it?.bostedsadresse,
-                soeknadAdresse = soekerSoeknad?.opplysning?.utenlandsadresse,
-                foedselsdato = it?.foedselsdato
-            )
-        },
-        gjenlevendeForelder = gjenlevende?.opplysning.let {
-            PersoninfoGjenlevendeForelder(
-                navn = it?.fornavn + " " + it?.etternavn,
-                fnr = it?.foedselsnummer,
-                rolle = PersonRolle.GJENLEVENDE,
-                bostedadresser = it?.bostedsadresse
-            )
-        }
-    )
 }

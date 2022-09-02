@@ -11,8 +11,8 @@ fun finnSaksbehandlerMedlemsPerioder(grunnlag: AvdoedesMedlemskapGrunnlag): List
                 periodeType = periode.periodeType,
                 beskrivelse = null,
                 kilde = opplysning.kilde,
-                fraDato = periode.fraDato!!,
-                tilDato = periode.tilDato!!,
-                godkjentPeriode = periode.stillingsprosent?.toDoubleOrNull()?.let { it > 80 } ?: true
+                fraDato = periode.fraDato,
+                tilDato = periode.tilDato,
+                godkjentPeriode = true
             )
         }

@@ -6,6 +6,7 @@ import barnepensjon.vilkaar.avdoedesmedlemskap.perioder.finnSaksbehandlerMedlems
 import no.nav.etterlatte.barnepensjon.Periode
 import no.nav.etterlatte.barnepensjon.hentDoedsdato
 import no.nav.etterlatte.barnepensjon.hentGaps
+import no.nav.etterlatte.barnepensjon.hentVurdering
 import no.nav.etterlatte.barnepensjon.kombinerPerioder
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -81,24 +82,15 @@ fun vilkaarAvdoedesMedlemskap(
         resultat = if (opplysning.gaps.isEmpty()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT,
         basertPaaOpplysninger = listOf(grunnlag)
     )
-    val vurderingsResultat = when (bosattNorge.utfall) {
-        Utfall.OPPFYLT -> kriterie.resultat
-        else -> bosattNorge.resultat
-    }
+    val vurderingsResultat = hentVurdering(listOf(kriterie.resultat, bosattNorge.resultat))
 
     return VurdertVilkaar(
         Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
         vurderingsResultat,
-        vurderingsResultat.tilUtfall(),
+        bosattNorge.utfall,
         listOf(kriterie),
         LocalDateTime.now()
     )
-}
-
-private fun VurderingsResultat.tilUtfall() = when (this) {
-    VurderingsResultat.OPPFYLT -> Utfall.OPPFYLT
-    VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING -> Utfall.TRENGER_AVKLARING
-    VurderingsResultat.IKKE_OPPFYLT -> Utfall.BEHANDLE_I_PSYS
 }
 
 fun finnGapsIGodkjentePerioder(

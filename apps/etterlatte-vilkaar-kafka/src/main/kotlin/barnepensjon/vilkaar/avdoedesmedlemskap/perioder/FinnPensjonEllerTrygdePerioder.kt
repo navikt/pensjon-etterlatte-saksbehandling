@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsPeriode
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.temporal.TemporalAdjusters.firstDayOfNextMonth
+import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 
 fun finnPensjonEllerTrygdePerioder(
     grunnlag: AvdoedesMedlemskapGrunnlag,
@@ -20,7 +20,7 @@ fun finnPensjonEllerTrygdePerioder(
             val utbetaltIMaaned = YearMonth.parse(it.utbetaltIMaaned)
             val gyldigFra = LocalDate.of(utbetaltIMaaned.year, utbetaltIMaaned.month, 1)
 
-            Periode(gyldigFra, gyldigFra.with(firstDayOfNextMonth()))
+            Periode(gyldigFra, gyldigFra.with(lastDayOfMonth()))
         }
         .sortedBy { it.gyldigFra }
         .let { kombinerPerioder(it) } ?: emptyList()

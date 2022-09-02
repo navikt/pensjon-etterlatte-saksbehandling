@@ -426,6 +426,17 @@ internal class UtilsKtTest {
             )
         )
 
+        val etterfoelgendePerioder = listOf(
+            Periode(
+                gyldigFra = femAarFoerDoedsdato,
+                gyldigTil = LocalDate.parse("2021-01-25")
+            ),
+            Periode(
+                gyldigFra = LocalDate.parse("2021-01-26"),
+                gyldigTil = doedsdato
+            )
+        )
+
         val perioderMedGaps = listOf(
             Periode(
                 gyldigFra = femAarFoerDoedsdato,
@@ -438,11 +449,16 @@ internal class UtilsKtTest {
         )
 
         val kombinertePerioder = kombinerPerioder(perioderUtenGaps)
+        val kombinerteEtterfoelgendePerioder = kombinerPerioder(etterfoelgendePerioder)
         val kombinertePerioderMedGaps = kombinerPerioder(perioderMedGaps)
 
         assertEquals(1, kombinertePerioder?.size)
         assertEquals(femAarFoerDoedsdato, kombinertePerioder?.first()?.gyldigFra)
         assertEquals(doedsdato, kombinertePerioder?.first()?.gyldigTil)
+
+        assertEquals(1, kombinerteEtterfoelgendePerioder?.size)
+        assertEquals(femAarFoerDoedsdato, kombinerteEtterfoelgendePerioder?.first()?.gyldigFra)
+        assertEquals(doedsdato, kombinerteEtterfoelgendePerioder?.first()?.gyldigTil)
 
         assertEquals(2, kombinertePerioderMedGaps?.size)
         assertEquals(femAarFoerDoedsdato, kombinertePerioderMedGaps?.first()?.gyldigFra)

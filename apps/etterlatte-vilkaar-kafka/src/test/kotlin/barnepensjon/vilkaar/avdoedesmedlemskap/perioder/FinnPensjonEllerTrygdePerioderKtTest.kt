@@ -41,7 +41,7 @@ internal class FinnPensjonEllerTrygdePerioderKtTest {
         vurdertePerioder.first().let {
             assertTrue(it.godkjentPeriode)
             assertEquals(it.fraDato, LocalDate.of(2017, 7, 1))
-            assertEquals(it.tilDato, LocalDate.of(2022, 7, 1))
+            assertEquals(it.tilDato, LocalDate.of(2022, 6, 30))
         }
     }
 

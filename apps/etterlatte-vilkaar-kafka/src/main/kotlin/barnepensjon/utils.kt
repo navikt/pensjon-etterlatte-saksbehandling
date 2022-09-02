@@ -169,7 +169,7 @@ fun kombinerPerioder(perioder: List<Periode>?): Stack<Periode>? {
         for (periode in perioder) {
             val top: Periode = stack.peek()
 
-            if (top.gyldigTil.isBefore(periode.gyldigFra)) {
+            if (top.gyldigTil.isBefore(periode.gyldigFra.minusDays(1))) {
                 stack.push(periode)
             } else if (top.gyldigTil.isBefore(periode.gyldigTil)) {
                 top.gyldigTil = periode.gyldigTil

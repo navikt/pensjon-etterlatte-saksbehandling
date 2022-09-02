@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.vikaar.Metakriterie
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -72,7 +73,7 @@ internal class FinnSaksbehandlerMedlemsPerioderKtTest {
             assertEquals(PeriodeType.DAGPENGER, it.periodeType)
         }
         vurdertePerioder.last().let {
-            assertTrue(it.godkjentPeriode)
+            assertFalse(it.godkjentPeriode)
             assertEquals(PeriodeType.ARBEIDSPERIODE, it.periodeType)
         }
     }

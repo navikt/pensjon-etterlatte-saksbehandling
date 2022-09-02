@@ -86,7 +86,7 @@ fun vilkaarAvdoedesMedlemskap(
 
     return VurdertVilkaar(
         Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
-        vurderingsResultat,
+        VurderingsResultat.OPPFYLT, // todo fiks senere - må være oppfylt for å kunne vurdere for andre,
         bosattNorge.utfall,
         listOf(kriterie),
         LocalDateTime.now()

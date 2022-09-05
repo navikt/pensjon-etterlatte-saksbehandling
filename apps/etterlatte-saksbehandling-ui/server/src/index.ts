@@ -26,6 +26,9 @@ app.use((req, res, next) => {
   next()
 })
 
+app.use(express.json())
+
+// cors-middleware
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', 'http://localhost:3000') //Todo: fikse domene
   res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE')

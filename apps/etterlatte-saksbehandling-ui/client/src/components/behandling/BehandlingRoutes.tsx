@@ -52,11 +52,6 @@ export const useBehandlingRoutes = () => {
   const firstPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === 0
   const lastPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === aktuelleRoutes.length - 1
 
-  const gotoPath = (path: typeof behandlingRoutes[number]['path']) => {
-    const routeForPath = aktuelleRoutes.find((item) => item.path === path) ?? behandlingRoutes[0]
-    goto(routeForPath.path)
-  }
-
   const next = () => {
     const index = aktuelleRoutes.findIndex((item) => item.path === currentRoute)
     const nextPath = aktuelleRoutes[index + 1].path
@@ -69,5 +64,5 @@ export const useBehandlingRoutes = () => {
     goto(previousPath)
   }
 
-  return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, navigateTo: gotoPath }
+  return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute }
 }

@@ -107,12 +107,14 @@ class AvdoedesMedlemskapTest {
                 opplysningType = Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
                 opplysning = AvdoedesMedlemskapsperiode(
                     periodeType = PeriodeType.DAGPENGER,
+                    id = UUID.randomUUID().toString(),
+                    kilde = Grunnlagsopplysning.Saksbehandler("zid122", Instant.now()),
                     fraDato = LocalDate.of(2021, 1, 1),
                     tilDato = LocalDate.of(2022, 1, 1),
                     stillingsprosent = null,
                     arbeidsgiver = null,
                     begrunnelse = "Sykdom",
-                    kilde = "NAV"
+                    oppgittKilde = "NAV"
                 )
             ),
             VilkaarOpplysning(
@@ -121,12 +123,14 @@ class AvdoedesMedlemskapTest {
                 opplysningType = Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
                 opplysning = AvdoedesMedlemskapsperiode(
                     periodeType = PeriodeType.ARBEIDSPERIODE,
+                    id = UUID.randomUUID().toString(),
+                    kilde = Grunnlagsopplysning.Saksbehandler("zid122", Instant.now()),
                     fraDato = LocalDate.of(2021, 1, 1),
                     tilDato = LocalDate.of(2022, 1, 1),
                     stillingsprosent = "70.0",
                     arbeidsgiver = null,
                     begrunnelse = "Annen jobb",
-                    kilde = "NAV"
+                    oppgittKilde = "NAV"
                 )
             )
         )

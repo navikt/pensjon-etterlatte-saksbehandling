@@ -61,7 +61,7 @@ fun vilkaarAvdoedesMedlemskap(
         bosattNorge = bosattNorge
     )
 
-    val ufoere = finnPensjonEllerTrygdePerioder(avdoedesMedlemskapGrunnlag, PeriodeType.UFØRETRYGD, "ufoeretrygd")
+    val ufoere = finnPensjonEllerTrygdePerioder(avdoedesMedlemskapGrunnlag, PeriodeType.UFOERETRYGD, "ufoeretrygd")
     val alder = finnPensjonEllerTrygdePerioder(avdoedesMedlemskapGrunnlag, PeriodeType.ALDERSPENSJON, "alderspensjon")
     val arbeidsforhold = finnArbeidsforholdPerioder(avdoedesMedlemskapGrunnlag)
     val saksbehandlerPerioder = finnSaksbehandlerMedlemsPerioder(avdoedesMedlemskapGrunnlag)

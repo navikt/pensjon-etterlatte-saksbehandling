@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.Instant
 import java.time.LocalDate
 import java.util.*
 
@@ -33,12 +34,14 @@ internal class FinnSaksbehandlerMedlemsPerioderKtTest {
                     opplysningType = Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
                     opplysning = AvdoedesMedlemskapsperiode(
                         periodeType = PeriodeType.DAGPENGER,
+                        id = UUID.randomUUID().toString(),
+                        kilde = Grunnlagsopplysning.Saksbehandler("zid122", Instant.now()),
                         fraDato = LocalDate.of(2021, 1, 1),
                         tilDato = LocalDate.of(2022, 1, 1),
                         stillingsprosent = null,
                         arbeidsgiver = null,
                         begrunnelse = "Sykdom",
-                        kilde = "NAV"
+                        oppgittKilde = "NAV"
                     )
                 ),
                 VilkaarOpplysning(
@@ -49,10 +52,12 @@ internal class FinnSaksbehandlerMedlemsPerioderKtTest {
                         periodeType = PeriodeType.ARBEIDSPERIODE,
                         fraDato = LocalDate.of(2021, 1, 1),
                         tilDato = LocalDate.of(2022, 1, 1),
+                        id = UUID.randomUUID().toString(),
+                        kilde = Grunnlagsopplysning.Saksbehandler("zid122", Instant.now()),
                         stillingsprosent = "70.0",
                         arbeidsgiver = null,
                         begrunnelse = "Sykdom",
-                        kilde = "NAV"
+                        oppgittKilde = "NAV"
                     )
                 )
             ),

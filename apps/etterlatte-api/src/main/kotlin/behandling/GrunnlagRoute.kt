@@ -8,11 +8,14 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.getAccessToken
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.time.LocalDate
+import java.util.*
 
 fun Route.grunnlagRoute(service: GrunnlagService) {
     val logger = LoggerFactory.getLogger(GrunnlagService::class.java)
@@ -30,7 +33,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
                     call.respond(
                         service.lagreAvdoedMedlemskapPeriode(
                             behandlingId,
-                            body.toDomain(),
+                            body.toDomain(call.navIdent),
                             call.navIdent,
                             getAccessToken(call)
                         )
@@ -94,23 +97,27 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
 }
 
 data class MedlemskapsPeriodeClientRequest(val periode: AvdoedesMedlemskapsperiodeClientRequest) {
-    fun toDomain() = AvdoedesMedlemskapsperiode(
-        PeriodeType.valueOf(this.periode.periodeType.uppercase()),
-        this.periode.arbeidsgiver,
-        this.periode.stillingsprosent,
-        this.periode.begrunnelse,
-        this.periode.kilde,
-        this.periode.fraDato,
-        this.periode.tilDato
+
+    fun toDomain(saksbehandlerId: String) = AvdoedesMedlemskapsperiode(
+        periodeType = PeriodeType.valueOf(this.periode.periodeType.uppercase()),
+        id = periode.id ?: UUID.randomUUID().toString(),
+        kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
+        arbeidsgiver = periode.arbeidsgiver,
+        stillingsprosent = periode.stillingsprosent,
+        begrunnelse = this.periode.begrunnelse,
+        oppgittKilde = this.periode.oppgittKilde,
+        fraDato = this.periode.fraDato,
+        tilDato = this.periode.tilDato
     )
 }
 
 data class AvdoedesMedlemskapsperiodeClientRequest(
+    val id: String?,
     val periodeType: String,
     val arbeidsgiver: String?,
     val stillingsprosent: String?,
     val begrunnelse: String?,
-    val kilde: String,
+    val oppgittKilde: String,
     val fraDato: LocalDate,
     val tilDato: LocalDate
 )

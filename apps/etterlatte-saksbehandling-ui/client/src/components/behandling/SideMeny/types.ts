@@ -1,7 +1,7 @@
-import { IBehandlingStatus, IHendelse } from '../../../store/reducers/BehandlingReducer'
+import { IBehandlingStatus, IBehandlingsType, IHendelse } from '../../../store/reducers/BehandlingReducer'
 
 export interface IBehandlingInfo {
-  type: string
+  type: IBehandlingsType
   status: IBehandlingStatus
   saksbehandler?: string
   attestant?: string

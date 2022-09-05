@@ -1,50 +1,68 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useMatch, useNavigate } from 'react-router'
 import { Beregne } from './beregne'
 import { Inngangsvilkaar } from './inngangsvilkaar'
 import { Soeknadsoversikt } from './soeknadsoversikt'
 import { Brev } from './brev'
 import Beregningsgrunnlag from './beregningsgrunnlag'
-//import { Utbetalingsoversikt } from './utbetalingsoversikt'
-//import { Vedtak } from './vedtak'
+import { IBehandlingsType } from '../../store/reducers/BehandlingReducer'
+import { AppContext } from '../../store/AppContext'
+// import { Utbetalingsoversikt } from './utbetalingsoversikt'
+// import { Vedtak } from './vedtak'
 
-export const useBehandlingRoutes = () => {
+const behandlingRoutes = [
+  { path: 'soeknadsoversikt', element: <Soeknadsoversikt />, erRevurderingRoute: false },
+  { path: 'inngangsvilkaar', element: <Inngangsvilkaar />, erRevurderingRoute: true },
+  { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag />, erRevurderingRoute: false },
+  { path: 'beregne', element: <Beregne />, erRevurderingRoute: true },
+  // { path: 'vedtak', element: <Vedtak /> },
+  // { path: 'utbetalingsoversikt', element: <Utbetalingsoversikt /> },
+  { path: 'brev', element: <Brev />, erRevurderingRoute: true },
+] as const
+
+const revurderingBehandlingRoutes = behandlingRoutes.filter((route) => route.erRevurderingRoute)
+const foerstegangBehandlingRoutes = behandlingRoutes
+
+function useRouteNavigation() {
   const [currentRoute, setCurrentRoute] = useState<string | undefined>()
   const navigate = useNavigate()
   const match = useMatch('/behandling/:behandlingId/:section')
 
-  const behandlingRoutes = [
-    { path: 'soeknadsoversikt', element: <Soeknadsoversikt /> },
-    { path: 'inngangsvilkaar', element: <Inngangsvilkaar /> },
-    { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag /> },
-    { path: 'beregne', element: <Beregne /> },
-    //{ path: 'vedtak', element: <Vedtak /> },
-    //{ path: 'utbetalingsoversikt', element: <Utbetalingsoversikt /> },
-    { path: 'brev', element: <Brev /> },
-  ]
-
-  const firstPage = behandlingRoutes.findIndex((item) => item.path === currentRoute) === 0
-  const lastPage = behandlingRoutes.findIndex((item) => item.path === currentRoute) === 4
-
   useEffect(() => {
-    setCurrentRoute(match?.params.section)
+    setCurrentRoute(match?.params?.section)
   }, [match])
 
-  const next = () => {
-    const index = behandlingRoutes.findIndex((item) => item.path === currentRoute)
-    const nextPath = behandlingRoutes[index + 1].path
-    setCurrentRoute(nextPath)
-    navigate(`/behandling/${match?.params.behandlingId}/${nextPath}`)
+  const goto = (path: typeof behandlingRoutes[number]['path']) => {
+    setCurrentRoute(path)
+    navigate(`/behandling/${match?.params?.behandlingId}/${path}`)
     window.scrollTo(0, 0)
+  }
+
+  return { currentRoute, goto }
+}
+
+export const useBehandlingRoutes = () => {
+  const { currentRoute, goto } = useRouteNavigation()
+  const { state } = useContext(AppContext)
+  const aktuelleRoutes =
+    state.behandlingReducer?.behandlingType === IBehandlingsType.REVURDERING
+      ? revurderingBehandlingRoutes
+      : foerstegangBehandlingRoutes
+
+  const firstPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === 0
+  const lastPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === aktuelleRoutes.length - 1
+
+  const next = () => {
+    const index = aktuelleRoutes.findIndex((item) => item.path === currentRoute)
+    const nextPath = aktuelleRoutes[index + 1].path
+    goto(nextPath)
   }
 
   const back = () => {
-    const index = behandlingRoutes.findIndex((item) => item.path === currentRoute)
-    const previousPath = behandlingRoutes[index - 1].path
-    setCurrentRoute(previousPath)
-    navigate(`/behandling/${match?.params.behandlingId}/${previousPath}`)
-    window.scrollTo(0, 0)
+    const index = aktuelleRoutes.findIndex((item) => item.path === currentRoute)
+    const previousPath = aktuelleRoutes[index - 1].path
+    goto(previousPath)
   }
 
-  return { next, back, lastPage, firstPage, behandlingRoutes, currentRoute }
+  return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute }
 }

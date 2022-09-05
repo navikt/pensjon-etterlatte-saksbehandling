@@ -7,7 +7,7 @@ const HandlingerKnapp: React.FC<{ handling: Handlinger; behandlingsId: string }>
   const navigate = useNavigate()
 
   const goToBehandling = () => {
-    navigate(`behandling/${behandlingsId}/soeknadsoversikt`)
+    navigate(`behandling/${behandlingsId}`)
   }
 
   //TODO skru på denne funksjonaliteten etter oppgavhåndteringer avklart

@@ -1,5 +1,6 @@
 import React from 'react'
 import {
+  Innhold,
   Lovtekst,
   Title,
   VilkaarBorder,
@@ -9,7 +10,6 @@ import {
   VilkaarVurderingColumn,
   VilkaarVurderingContainer,
   VilkaarWrapper,
-  Innhold,
 } from '../styled'
 import { VilkaarProps } from '../types'
 import { format } from 'date-fns'

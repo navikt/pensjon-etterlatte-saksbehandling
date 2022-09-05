@@ -2,7 +2,11 @@ import { IBehandlingInfo } from '../../SideMeny/types'
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
 import { useContext } from 'react'
 import { AppContext } from '../../../../store/AppContext'
-import { formaterStringDato, formaterStringTidspunkt } from '../../../../utils/formattering'
+import {
+  formaterEnumTilLesbarString,
+  formaterStringDato,
+  formaterStringTidspunkt,
+} from '../../../../utils/formattering'
 import { IBehandlingStatus } from '../../../../store/reducers/BehandlingReducer'
 
 export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingInfo }) => {
@@ -18,7 +22,7 @@ export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo?: IBehandlingI
   return (
     <>
       <Wrapper innvilget={false}>
-        <Overskrift>Førstegangsbehandling</Overskrift>
+        <Overskrift>{formaterEnumTilLesbarString(behandlingsInfo?.type ?? '')}</Overskrift>
         <UnderOverskrift innvilget={false}>Underkjent</UnderOverskrift>
         {underkjentSiste && (
           <Tekst>

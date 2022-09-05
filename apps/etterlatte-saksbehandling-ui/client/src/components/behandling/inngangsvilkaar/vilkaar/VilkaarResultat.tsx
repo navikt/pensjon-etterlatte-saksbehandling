@@ -1,4 +1,3 @@
-import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 import React from 'react'
 import { VilkaarBorder } from '../styled'
 import styled from 'styled-components'
@@ -6,25 +5,18 @@ import { format } from 'date-fns'
 import { BehandlingHandlingKnapper } from '../../handlinger/BehandlingHandlingKnapper'
 import { VilkaarsVurderingKnapper } from '../../handlinger/vilkaarsvurderingKnapper'
 import { NesteOgTilbake } from '../../handlinger/NesteOgTilbake'
+import { formaterVedtaksResultat, useVedtaksResultat } from '../../useVedtaksResultat'
 
 type Props = {
   id: any
-  resultat: VurderingsResultat | undefined
   dato: string
   behandles: boolean
 }
 
-export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato, behandles }) => {
+export const VilkaarResultat: React.FC<Props> = ({ id, dato, behandles }) => {
+  const vedtaksresultat = useVedtaksResultat()
   const datoFormatert = format(new Date(dato), 'dd.MM.yyyy')
-
-  let tekst = ''
-  if (resultat === VurderingsResultat.OPPFYLT) {
-    tekst = 'Innvilget fra ' + datoFormatert
-  } else if (resultat === VurderingsResultat.IKKE_OPPFYLT) {
-    tekst = 'Avslag fra ' + datoFormatert
-  } else {
-    tekst = 'Trenger avklaring'
-  }
+  const tekst = formaterVedtaksResultat(vedtaksresultat, datoFormatert)
 
   return (
     <>
@@ -35,7 +27,7 @@ export const VilkaarResultat: React.FC<Props> = ({ id, resultat, dato, behandles
       </VilkaarBorder>
       {behandles ? (
         <BehandlingHandlingKnapper>
-          <VilkaarsVurderingKnapper vilkaarResultat={resultat} />
+          <VilkaarsVurderingKnapper />
         </BehandlingHandlingKnapper>
       ) : (
         <NesteOgTilbake />

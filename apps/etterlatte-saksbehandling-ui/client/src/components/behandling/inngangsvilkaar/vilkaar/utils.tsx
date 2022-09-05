@@ -12,8 +12,8 @@ export function vilkaarErOppfylt(resultat: VurderingsResultat) {
 }
 
 export interface VilkaarTittelSvar {
-  tittel: String
-  svar: String
+  tittel: string
+  svar: string
 }
 
 export function mapKriterietyperTilTekst(krit: IKriterie): VilkaarTittelSvar {
@@ -42,7 +42,7 @@ export function mapKriterietyperTilTekst(krit: IKriterie): VilkaarTittelSvar {
   }
 }
 
-export function mapEnkeltSvarTilTekst(krit: IKriterie): String {
+export function mapEnkeltSvarTilTekst(krit: IKriterie): string {
   switch (krit.resultat) {
     case VurderingsResultat.OPPFYLT:
       return 'Ja'
@@ -53,7 +53,7 @@ export function mapEnkeltSvarTilTekst(krit: IKriterie): String {
   }
 }
 
-export function hentKildenavn(type: String): String {
+export function hentKildenavn(type?: string): string {
   switch (type) {
     case 'pdl':
       return 'PDL'
@@ -66,6 +66,7 @@ export function hentKildenavn(type: String): String {
   }
 }
 
-export const capitalize = (s: string) => {
+export const capitalize = (s?: string) => {
+  if (!s) return ''
   return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
 }

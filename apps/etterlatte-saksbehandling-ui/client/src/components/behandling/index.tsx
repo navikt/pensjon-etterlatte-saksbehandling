@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from 'react'
-import { Routes, Route, useMatch } from 'react-router-dom'
+import React, { useContext, useEffect, useState } from 'react'
+import { Routes, Route, useMatch, Navigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { hentBehandling } from '../../shared/api/behandling'
 import { Column, GridContainer } from '../../shared/styled'
@@ -12,6 +12,7 @@ import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny'
 import { formaterEnumTilLesbarString } from '../../utils/formattering'
+import { RevurderingsAarsakModal } from './inngangsvilkaar/revurderingInfo/RevurderingInfoModal'
 
 export const Behandling = () => {
   const ctx = useContext(AppContext)
@@ -46,11 +47,13 @@ export const Behandling = () => {
             </MenuHead>
             <StegMeny />
           </Column>
+          <RevurderingsAarsakModal />
           <Column>
             <Routes>
               {behandlingRoutes.map((route) => {
                 return <Route key={route.path} path={route.path} element={route.element} />
               })}
+              <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
             </Routes>
           </Column>
           <Column>

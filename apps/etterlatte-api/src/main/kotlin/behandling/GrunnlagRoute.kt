@@ -9,8 +9,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.getAccessToken
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -98,7 +98,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
 
 data class MedlemskapsPeriodeClientRequest(val periode: AvdoedesMedlemskapsperiodeClientRequest) {
 
-    fun toDomain(saksbehandlerId: String) = AvdoedesMedlemskapsperiode(
+    fun toDomain(saksbehandlerId: String) = SaksbehandlerMedlemskapsperiode(
         periodeType = PeriodeType.valueOf(this.periode.periodeType.uppercase()),
         id = periode.id ?: UUID.randomUUID().toString(),
         kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),

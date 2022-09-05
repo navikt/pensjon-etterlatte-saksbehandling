@@ -4,9 +4,9 @@ import io.mockk.mockk
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.vikaar.Metakriterie
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -32,7 +32,7 @@ internal class FinnSaksbehandlerMedlemsPerioderKtTest {
                     id = UUID.randomUUID(),
                     kilde = Grunnlagsopplysning.Vilkaarskomponenten("vilkaar"),
                     opplysningType = Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
-                    opplysning = AvdoedesMedlemskapsperiode(
+                    opplysning = SaksbehandlerMedlemskapsperiode(
                         periodeType = PeriodeType.DAGPENGER,
                         id = UUID.randomUUID().toString(),
                         kilde = Grunnlagsopplysning.Saksbehandler("zid122", Instant.now()),
@@ -48,7 +48,7 @@ internal class FinnSaksbehandlerMedlemsPerioderKtTest {
                     id = UUID.randomUUID(),
                     kilde = Grunnlagsopplysning.Vilkaarskomponenten("vilkaar"),
                     opplysningType = Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
-                    opplysning = AvdoedesMedlemskapsperiode(
+                    opplysning = SaksbehandlerMedlemskapsperiode(
                         periodeType = PeriodeType.ARBEIDSPERIODE,
                         fraDato = LocalDate.of(2021, 1, 1),
                         tilDato = LocalDate.of(2022, 1, 1),

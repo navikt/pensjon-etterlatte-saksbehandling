@@ -15,10 +15,10 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapVurdering
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Gap
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsPeriode
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsperiode
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
@@ -39,7 +39,7 @@ fun vilkaarAvdoedesMedlemskap(
     avdoedPdl: VilkaarOpplysning<Person>?,
     inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>?,
     arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?,
-    saksbehandlerMedlemskapsPerioder: List<VilkaarOpplysning<AvdoedesMedlemskapsperiode>>?
+    saksbehandlerMedlemskapsPerioder: List<VilkaarOpplysning<SaksbehandlerMedlemskapsperiode>>?
 ): VurdertVilkaar {
     if (listOf(avdoedSoeknad, avdoedPdl, inntektsOpplysning, arbeidsforholdOpplysning).any { it == null }) {
         return VurdertVilkaar(
@@ -68,7 +68,7 @@ fun vilkaarAvdoedesMedlemskap(
     val inntektsperioder = finnArbeidsinntektPerioder(avdoedesMedlemskapGrunnlag)
     val offentligYtelserPerioder = finnOffentligeYtelserPerioder(avdoedesMedlemskapGrunnlag)
 
-    val perioder: List<VurdertMedlemskapsPeriode> =
+    val perioder: List<VurdertMedlemskapsperiode> =
         ufoere + alder + arbeidsforhold + saksbehandlerPerioder + inntektsperioder + offentligYtelserPerioder
 
     val opplysning = AvdoedesMedlemskapVurdering(
@@ -99,13 +99,13 @@ fun vilkaarAvdoedesMedlemskap(
 }
 
 fun finnGapsIGodkjentePerioder(
-    perioder: List<VurdertMedlemskapsPeriode>,
+    perioder: List<VurdertMedlemskapsperiode>,
     fra: LocalDate,
     til: LocalDate
 ): List<Gap> =
     perioder
         .filter { it.godkjentPeriode }
-        .map { Periode(it.fraDato, it.tilDato ?: til) }
+        .map { Periode(it.fraDato, it.tilDato) }
         .sortedBy { it.gyldigFra }
         .let { hentGaps(kombinerPerioder(it), fra, til) }
         .map { Gap(it.gyldigFra, it.gyldigTil) }

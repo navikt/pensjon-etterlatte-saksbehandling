@@ -13,7 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import no.nav.etterlatte.hendelserpdl.DevConfig
 import no.nav.etterlatte.hendelserpdl.DodsmeldingerRapid
-import no.nav.etterlatte.hendelserpdl.FinnDodsmeldinger
+import no.nav.etterlatte.hendelserpdl.LyttPaaHendelser
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.module
 import no.nav.etterlatte.hendelserpdl.pdl.PdlService
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory
 import kotlin.collections.set
 import kotlin.system.exitProcess
 
-var stream: FinnDodsmeldinger? = null
+var stream: LyttPaaHendelser? = null
 
 fun main() {
     val env = System.getenv().toMutableMap()
@@ -44,7 +44,7 @@ fun main() {
             GlobalScope.launch {
                 try {
                     stream =
-                        FinnDodsmeldinger(
+                        LyttPaaHendelser(
                             LivetErEnStroemAvHendelser(DevConfig().env),
                             DodsmeldingerRapid(this@apply),
                             pdlService

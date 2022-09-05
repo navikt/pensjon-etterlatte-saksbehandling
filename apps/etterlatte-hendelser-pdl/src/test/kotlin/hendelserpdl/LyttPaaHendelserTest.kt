@@ -12,13 +12,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
-internal class FinnDodsmeldingerTest {
+internal class LyttPaaHendelserTest {
 
     @Test
     fun ikkeDodsmelding() {
         val pdlMock = mockk<PdlService>()
         val subject =
-            FinnDodsmeldinger(
+            LyttPaaHendelser(
                 LeesahMock(listOf(Personhendelse().apply { put("opplysningstype", "Ikke dodsmelding") })),
                 DodsMock { _, _ -> fail() },
                 pdlMock
@@ -34,7 +34,7 @@ internal class FinnDodsmeldingerTest {
             )
         }
         val dodsmeldinger = mutableListOf<String>()
-        val subject = FinnDodsmeldinger(
+        val subject = LyttPaaHendelser(
             LeesahMock(
                 listOf(
                     Personhendelse().apply {

@@ -36,7 +36,11 @@ class Dodsmeldinger(config: AppConfig) : IDodsmeldinger {
             )
             null
         }
-        val doedshendelse = Doedshendelse(avdoedFnr = ident, doedsdato = avdoedDoedsdato, endringstype = endringstype)
+        val doedshendelse = Doedshendelse(
+            avdoedFnr = ident,
+            doedsdato = avdoedDoedsdato,
+            endringstype = endringstype
+        )
         producer.send(
             ProducerRecord(
                 "etterlatte.dodsmelding",

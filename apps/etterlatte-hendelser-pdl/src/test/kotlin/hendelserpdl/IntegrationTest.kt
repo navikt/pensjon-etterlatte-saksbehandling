@@ -116,7 +116,7 @@ class IntegrationTest {
         }
     }
 
-    private fun testApp() = FinnDodsmeldinger(
+    private fun testApp() = LyttPaaHendelser(
         LivetErEnStroemAvHendelser(
             mapOf(
                 "LEESAH_KAFKA_BROKERS" to kafkaEnv.brokersURL,

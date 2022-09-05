@@ -104,10 +104,10 @@ data class MedlemskapsPeriodeClientRequest(val periode: AvdoedesMedlemskapsperio
         kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
         arbeidsgiver = periode.arbeidsgiver,
         stillingsprosent = periode.stillingsprosent,
-        begrunnelse = this.periode.begrunnelse,
-        oppgittKilde = this.periode.oppgittKilde,
-        fraDato = this.periode.fraDato,
-        tilDato = this.periode.tilDato
+        begrunnelse = periode.begrunnelse,
+        oppgittKilde = periode.kilde,
+        fraDato = periode.fraDato,
+        tilDato = periode.tilDato
     )
 }
 
@@ -117,7 +117,7 @@ data class AvdoedesMedlemskapsperiodeClientRequest(
     val arbeidsgiver: String?,
     val stillingsprosent: String?,
     val begrunnelse: String?,
-    val oppgittKilde: String,
+    val kilde: String,
     val fraDato: LocalDate,
     val tilDato: LocalDate
 )

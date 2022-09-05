@@ -17,6 +17,7 @@ export enum IPeriodeType {
 }
 
 export interface IPeriodeInput {
+  id?: string
   periodeType: IPeriodeType
   arbeidsgiver?: string
   stillingsprosent?: string

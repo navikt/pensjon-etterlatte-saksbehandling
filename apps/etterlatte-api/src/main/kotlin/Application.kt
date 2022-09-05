@@ -40,7 +40,7 @@ class ApplicationContext(configLocation: String? = null) {
     )
     val oppgaveService: OppgaveService = OppgaveService(behandlingKlient, vedtakKlient)
     val vedtakService = VedtakService(rapid)
-    val grunnlagService = GrunnlagService(behandlingKlient, rapid)
+    val grunnlagService = GrunnlagService(behandlingKlient, rapid, grunnlagKlient)
 
     private fun httpClient() = HttpClient {
         install(ContentNegotiation) {

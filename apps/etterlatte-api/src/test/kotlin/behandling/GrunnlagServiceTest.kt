@@ -4,6 +4,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.nav.etterlatte.behandling.BehandlingKlient
+import no.nav.etterlatte.behandling.GrunnlagKlient
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -26,9 +27,10 @@ internal class GrunnlagServiceTest {
         coEvery { mockedBehandling.sak }.returns(100L)
         val mockClient = mockk<BehandlingKlient>()
         coEvery { mockClient.hentBehandling(any(), any()) }.returns(mockedBehandling)
+        val mockGrunnlagClient = mockk<GrunnlagKlient>()
 
         val testprodusent = TestProdusent<String, String>()
-        val grunnlagService = GrunnlagService(mockClient, testprodusent)
+        val grunnlagService = GrunnlagService(mockClient, testprodusent, mockGrunnlagClient)
 
         val behandlingId = "behandlingId"
         val soeskenMedIBeregning = listOf(

@@ -5,6 +5,7 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
@@ -19,6 +20,12 @@ interface EtterlatteGrunnlag {
         opplysningsType: Opplysningstyper,
         accessToken: String
     ): Grunnlagsopplysning<Person>?
+
+    suspend fun finnPerioder(
+        sakId: Long,
+        opplysningsType: Opplysningstyper,
+        accessToken: String
+    ): Grunnlagsopplysning<AvdoedesMedlemskapsperiode>?
 }
 
 class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnlag {
@@ -35,6 +42,34 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnla
         opplysningsType: Opplysningstyper,
         accessToken: String
     ): Grunnlagsopplysning<Person>? {
+        try {
+            logger.info("Henter opplysning ($opplysningsType) fra grunnlag for sak med id $sakId.")
+
+            val json = downstreamResourceClient
+                .get(
+                    resource = Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/grunnlag/$sakId/$opplysningsType"
+                    ),
+                    accessToken = accessToken
+                )
+                .mapBoth(
+                    success = { json -> json },
+                    failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
+                ).response
+
+            return objectMapper.readValue(json.toString())
+        } catch (e: Exception) {
+            logger.error("Henting av opplysning ($opplysningsType) fra grunnlag for sak med id $sakId feilet.")
+            throw e
+        }
+    }
+
+    override suspend fun finnPerioder(
+        sakId: Long,
+        opplysningsType: Opplysningstyper,
+        accessToken: String
+    ): Grunnlagsopplysning<AvdoedesMedlemskapsperiode>? {
         try {
             logger.info("Henter opplysning ($opplysningsType) fra grunnlag for sak med id $sakId.")
 

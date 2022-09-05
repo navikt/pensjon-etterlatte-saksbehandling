@@ -63,8 +63,8 @@ class BeregningService {
                                     datoTOM = null,
                                     utbetaltBeloep = 0,
                                     soeskenFlokk = listOf(),
-                                    grunnbelopMnd = 0,
-                                    grunnbelop = 0
+                                    grunnbelopMnd = Grunnbeloep.hentGjeldendeG(virkFOM).grunnbeløpPerMåned,
+                                    grunnbelop = Grunnbeloep.hentGjeldendeG(virkFOM).grunnbeløp
 
                                 )
                             ),

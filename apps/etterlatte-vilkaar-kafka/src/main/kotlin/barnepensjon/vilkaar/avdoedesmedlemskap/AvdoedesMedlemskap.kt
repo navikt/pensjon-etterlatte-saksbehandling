@@ -1,6 +1,8 @@
 package barnepensjon.vilkaar.avdoedesmedlemskap
 
 import barnepensjon.vilkaar.avdoedesmedlemskap.perioder.finnArbeidsforholdPerioder
+import barnepensjon.vilkaar.avdoedesmedlemskap.perioder.finnArbeidsinntektPerioder
+import barnepensjon.vilkaar.avdoedesmedlemskap.perioder.finnOffentligeYtelserPerioder
 import barnepensjon.vilkaar.avdoedesmedlemskap.perioder.finnPensjonEllerTrygdePerioder
 import barnepensjon.vilkaar.avdoedesmedlemskap.perioder.finnSaksbehandlerMedlemsPerioder
 import no.nav.etterlatte.barnepensjon.Periode
@@ -63,8 +65,11 @@ fun vilkaarAvdoedesMedlemskap(
     val alder = finnPensjonEllerTrygdePerioder(avdoedesMedlemskapGrunnlag, PeriodeType.ALDERSPENSJON, "alderspensjon")
     val arbeidsforhold = finnArbeidsforholdPerioder(avdoedesMedlemskapGrunnlag)
     val saksbehandlerPerioder = finnSaksbehandlerMedlemsPerioder(avdoedesMedlemskapGrunnlag)
+    val inntektsperioder = finnArbeidsinntektPerioder(avdoedesMedlemskapGrunnlag)
+    val offentligYtelserPerioder = finnOffentligeYtelserPerioder(avdoedesMedlemskapGrunnlag)
 
-    val perioder: List<VurdertMedlemskapsPeriode> = ufoere + alder + arbeidsforhold + saksbehandlerPerioder
+    val perioder: List<VurdertMedlemskapsPeriode> =
+        ufoere + alder + arbeidsforhold + saksbehandlerPerioder + inntektsperioder + offentligYtelserPerioder
 
     val opplysning = AvdoedesMedlemskapVurdering(
         grunnlag = avdoedesMedlemskapGrunnlag,

@@ -1,0 +1,125 @@
+{
+  "id": "a34fc29a-5692-4cd2-8284-02b2690d944e",
+  "kilde": {
+    "navn": "Inntektskomponenten",
+    "type": "inntektskomponenten"
+  },
+  "opplysningType": "AVDOED_INNTEKT_V1",
+  "meta": {},
+  "opplysning": {
+    "pensjonEllerTrygd": [],
+    "ytelseFraOffentlig": [
+      {
+        "inntektType": "YTELSE_FRA_OFFENTLIGE",
+        "beloep": 24000,
+        "fordel": "kontantytelse",
+        "inntektskilde": "A-ordningen",
+        "inntektsperiodetype": "Maaned",
+        "inntektsstatus": "LoependeInnrapportert",
+        "leveringstidspunkt": "2022-08",
+        "utbetaltIMaaned": "2022-01",
+        "opplysningspliktig": {
+          "identifikator": "928497704",
+          "aktoerType": "ORGANISASJON"
+        },
+        "virksomhet": {
+          "identifikator": "805824352",
+          "aktoerType": "ORGANISASJON"
+        },
+        "inntektsmottaker": {
+          "identifikator": "21517314541",
+          "aktoerType": "NATURLIG_IDENT"
+        },
+        "inngaarIGrunnlagForTrekk": true,
+        "utloeserArbeidsgiveravgift": false,
+        "informasjonsstatus": "InngaarAlltid",
+        "beskrivelse": "sykepenger",
+        "skatteOgAvgiftsregel": null
+      },
+      {
+        "inntektType": "YTELSE_FRA_OFFENTLIGE",
+        "beloep": 24000,
+        "fordel": "kontantytelse",
+        "inntektskilde": "A-ordningen",
+        "inntektsperiodetype": "Maaned",
+        "inntektsstatus": "LoependeInnrapportert",
+        "leveringstidspunkt": "2022-08",
+        "utbetaltIMaaned": "2022-02",
+        "opplysningspliktig": {
+          "identifikator": "928497704",
+          "aktoerType": "ORGANISASJON"
+        },
+        "virksomhet": {
+          "identifikator": "805824352",
+          "aktoerType": "ORGANISASJON"
+        },
+        "inntektsmottaker": {
+          "identifikator": "21517314541",
+          "aktoerType": "NATURLIG_IDENT"
+        },
+        "inngaarIGrunnlagForTrekk": true,
+        "utloeserArbeidsgiveravgift": false,
+        "informasjonsstatus": "InngaarAlltid",
+        "beskrivelse": "sykepenger",
+        "skatteOgAvgiftsregel": null
+      },
+      {
+        "inntektType": "YTELSE_FRA_OFFENTLIGE",
+        "beloep": 24000,
+        "fordel": "kontantytelse",
+        "inntektskilde": "A-ordningen",
+        "inntektsperiodetype": "Maaned",
+        "inntektsstatus": "LoependeInnrapportert",
+        "leveringstidspunkt": "2022-08",
+        "utbetaltIMaaned": "2022-05",
+        "opplysningspliktig": {
+          "identifikator": "928497704",
+          "aktoerType": "ORGANISASJON"
+        },
+        "virksomhet": {
+          "identifikator": "805824352",
+          "aktoerType": "ORGANISASJON"
+        },
+        "inntektsmottaker": {
+          "identifikator": "21517314541",
+          "aktoerType": "NATURLIG_IDENT"
+        },
+        "inngaarIGrunnlagForTrekk": true,
+        "utloeserArbeidsgiveravgift": false,
+        "informasjonsstatus": "InngaarAlltid",
+        "beskrivelse": "foreldrepenger",
+        "skatteOgAvgiftsregel": null
+      },
+      {
+        "inntektType": "YTELSE_FRA_OFFENTLIGE",
+        "beloep": 24000,
+        "fordel": "kontantytelse",
+        "inntektskilde": "A-ordningen",
+        "inntektsperiodetype": "Maaned",
+        "inntektsstatus": "LoependeInnrapportert",
+        "leveringstidspunkt": "2022-08",
+        "utbetaltIMaaned": "2022-06",
+        "opplysningspliktig": {
+          "identifikator": "928497704",
+          "aktoerType": "ORGANISASJON"
+        },
+        "virksomhet": {
+          "identifikator": "805824352",
+          "aktoerType": "ORGANISASJON"
+        },
+        "inntektsmottaker": {
+          "identifikator": "21517314541",
+          "aktoerType": "NATURLIG_IDENT"
+        },
+        "inngaarIGrunnlagForTrekk": true,
+        "utloeserArbeidsgiveravgift": false,
+        "informasjonsstatus": "InngaarAlltid",
+        "beskrivelse": "foreldrepenger",
+        "skatteOgAvgiftsregel": null
+      }
+    ],
+    "loennsinntekt": [],
+    "naeringsinntekt": []
+  },
+  "attestering": null
+}

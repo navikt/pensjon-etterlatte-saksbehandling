@@ -9,12 +9,12 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.format.DateTimeFormatter
 
-class FinnDodsmeldinger(
+class LyttPaaHendelser(
     private val livshendelser: ILivetErEnStroemAvHendelser,
     private val dodshendelser: IDodsmeldinger,
     private val pdlService: Pdl
 ) {
-    val log: Logger = LoggerFactory.getLogger(FinnDodsmeldinger::class.java)
+    val log: Logger = LoggerFactory.getLogger(LyttPaaHendelser::class.java)
     var iterasjoner = 0
     var dodsmeldinger = 0
     var meldinger = 0
@@ -49,7 +49,10 @@ class FinnDodsmeldinger(
                 }
                 dodsmeldinger++
             } else {
-                // log.info("Så opplysning om ${it.opplysningstype} opprettet ${it.opprettet} for ident ${it.personidenter} med endringstype ${it.endringstype} og hendelsesid: ${it.hendelseId}")
+                log.info(
+                    "Så opplysning om ${it.opplysningstype} opprettet ${it.opprettet} for ident ${it.personidenter}: " +
+                        "$it"
+                )
             }
         }
 

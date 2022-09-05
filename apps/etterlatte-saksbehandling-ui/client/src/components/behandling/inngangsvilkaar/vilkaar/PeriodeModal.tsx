@@ -13,7 +13,7 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
   const [lagrer, setLagrer] = useState<boolean>(false)
   const [lagreError, setLagreError] = useState<boolean>(false)
   const [periode, setPeriode] = useState<IPeriodeInput>({
-    id: undefined,
+    id: '',
     periodeType: IPeriodeType.velg,
     arbeidsgiver: undefined,
     stillingsprosent: '',

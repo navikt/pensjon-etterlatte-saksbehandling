@@ -92,9 +92,9 @@ const RevurderingOpplysninger = ({ opplysninger }: { opplysninger: RevurderingOp
     </Heading>
     <UstiletListe>
       {opplysninger.map((opplysning) => (
-        <li key={`${opplysning}-${opplysning.kilde?.tidspunktForInnhenting}`}>
+        <li key={`${opplysning.opplysning}-${opplysning.kilde?.tidspunktForInnhenting}`}>
           <OpplysningMedIkon>
-            <StatusIcon status={VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING} large={true} />
+            <StatusIcon status={VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING} large />
             <div>
               <span>{opplysning.opplysning}</span>
               <KildeDatoOpplysning type={opplysning?.kilde?.type} dato={opplysning?.kilde?.tidspunktForInnhenting} />

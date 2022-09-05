@@ -3,7 +3,7 @@ import React, { useContext, useEffect } from 'react'
 import { AppContext } from '../../../store/AppContext'
 import { AlderBarn } from './vilkaar/AlderBarn'
 import { DoedsFallForelder } from './vilkaar/DoedsfallForelder'
-import { VilkaarsType } from '../../../store/reducers/BehandlingReducer'
+import { IBehandlingsType, VilkaarsType } from '../../../store/reducers/BehandlingReducer'
 import { AvdoedesForutMedlemskap } from './vilkaar/AvdoedesForutMedlemskap'
 import { useLocation } from 'react-router-dom'
 import { BarnetsMedlemskap } from './vilkaar/BarnetsMedlemskap'
@@ -16,6 +16,7 @@ import { Formaal } from './vilkaar/Formaal'
 export const Inngangsvilkaar = () => {
   const ctx = useContext(AppContext)
   const location = useLocation()
+  const erFoerstegangsbehandling = ctx.state.behandlingReducer.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
 
   const virkningstidspunkt = ctx.state.behandlingReducer.virkningstidspunkt
   const vilkaarsproving = ctx.state.behandlingReducer.vilkårsprøving
@@ -38,20 +39,33 @@ export const Inngangsvilkaar = () => {
         <h1>Vilkårsvurdering</h1>
       </Header>
       <VilkaarBorderTop />
-      <Formaal id="formaal" vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.FORMAAL_FOR_YTELSEN)} />
-      <AlderBarn id="alderbarn" vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.SOEKER_ER_UNDER_20)} />
-      <DoedsFallForelder
-        id="dodsfallforelder"
-        vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.DOEDSFALL_ER_REGISTRERT)}
-      />
-      <AvdoedesForutMedlemskap
-        id="avdodesmedlemskap"
-        vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP)}
-      />
-      <BarnetsMedlemskap
-        id="barnetsmedlemskap"
-        vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.BARNETS_MEDLEMSKAP)}
-      />
+      {erFoerstegangsbehandling ? (
+        <>
+          <Formaal
+            id="formaal"
+            vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.FORMAAL_FOR_YTELSEN)}
+          />
+          <AlderBarn
+            id="alderbarn"
+            vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.SOEKER_ER_UNDER_20)}
+          />
+          <DoedsFallForelder
+            id="dodsfallforelder"
+            vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.DOEDSFALL_ER_REGISTRERT)}
+          />
+          <AvdoedesForutMedlemskap
+            id="avdodesmedlemskap"
+            vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP)}
+          />
+          <BarnetsMedlemskap
+            id="barnetsmedlemskap"
+            vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.BARNETS_MEDLEMSKAP)}
+          />
+        </>
+      ) : (
+        <Formaal id="formaal" vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.FORMAAL_FOR_YTELSEN)} />
+      )}
+
       <Virkningstidspunkt
         behandlingType={ctx.state.behandlingReducer.behandlingType}
         id="virkningstidspunkt"

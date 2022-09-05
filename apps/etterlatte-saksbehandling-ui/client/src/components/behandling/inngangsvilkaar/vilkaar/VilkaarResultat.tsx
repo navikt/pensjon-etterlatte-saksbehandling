@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { BehandlingHandlingKnapper } from '../../handlinger/BehandlingHandlingKnapper'
 import { VilkaarsVurderingKnapper } from '../../handlinger/vilkaarsvurderingKnapper'
 import { NesteOgTilbake } from '../../handlinger/NesteOgTilbake'
-import { useVedtaksResultat, VedtakResultat } from '../../useVedtaksResultat'
+import { formaterVedtaksResultat, useVedtaksResultat } from '../../useVedtaksResultat'
 
 type Props = {
   id: any
@@ -13,25 +13,10 @@ type Props = {
   behandles: boolean
 }
 
-const vurderingsresultatTilResultatTekst = (vedtaksresultat: VedtakResultat, dato: string): string => {
-  const datoFormatert = format(new Date(dato), 'dd.MM.yyyy')
-  switch (vedtaksresultat) {
-    case 'innvilget':
-      return `Innvilget fra ${datoFormatert}`
-    case 'avslag':
-      return `Avslag`
-    case 'opphoer':
-      return `Opphør fra ${datoFormatert}`
-    case 'uavklart':
-      return `Mangler opplysninger`
-    case 'endring':
-      return `Endring fra ${datoFormatert}`
-  }
-}
-
 export const VilkaarResultat: React.FC<Props> = ({ id, dato, behandles }) => {
   const vedtaksresultat = useVedtaksResultat()
-  const tekst = vurderingsresultatTilResultatTekst(vedtaksresultat, dato)
+  const datoFormatert = format(new Date(dato), 'dd.MM.yyyy')
+  const tekst = formaterVedtaksResultat(vedtaksresultat, datoFormatert)
 
   return (
     <>

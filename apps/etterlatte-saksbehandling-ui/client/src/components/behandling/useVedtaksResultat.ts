@@ -23,3 +23,18 @@ export function useVedtaksResultat(): VedtakResultat {
       return behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING ? 'avslag' : 'opphoer'
   }
 }
+
+export function formaterVedtaksResultat(resultat: VedtakResultat, virkningsdatoFormatert?: string): string {
+  switch (resultat) {
+    case 'innvilget':
+      return `Innvilget fra ${virkningsdatoFormatert}`
+    case 'avslag':
+      return `Avslag`
+    case 'opphoer':
+      return `Opphør fra ${virkningsdatoFormatert}`
+    case 'uavklart':
+      return `Mangler opplysninger`
+    case 'endring':
+      return `Endring fra ${virkningsdatoFormatert}`
+  }
+}

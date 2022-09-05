@@ -33,9 +33,6 @@ import { KildeDatoOpplysning, KildeDatoVilkaar } from './KildeDatoOpplysning'
 
 export const BarnetsMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
-  if (!vilkaar) {
-    return null
-  }
 
   const soekerKriterie: IKriterie | undefined = hentKriterie(vilkaar, Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET)
   const avdoedDoedsdato: string | null = hentKriterieOpplysning(soekerKriterie, KriterieOpplysningsType.DOEDSDATO)

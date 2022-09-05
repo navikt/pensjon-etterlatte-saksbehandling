@@ -10,22 +10,7 @@ import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import BrevModal from './brev-modal'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { formaterStringDato } from '../../../utils/formattering'
-import { useVedtaksResultat, VedtakResultat } from '../useVedtaksResultat'
-
-const tekstForVedtaksresultat = (vedtaksresultat: VedtakResultat, formatertVirkningstidspunkt: string): string => {
-  switch (vedtaksresultat) {
-    case 'avslag':
-      return 'Avslag'
-    case 'endring':
-      return `Endring fra ${formatertVirkningstidspunkt}`
-    case 'innvilget':
-      return `Innvilget fra ${formatertVirkningstidspunkt}`
-    case 'opphoer':
-      return `Opphør fra ${formatertVirkningstidspunkt}`
-    case 'uavklart':
-      return `Ikke avklart`
-  }
-}
+import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResultat'
 
 export const Beregne = () => {
   const behandling = useContext(AppContext).state.behandlingReducer
@@ -44,7 +29,7 @@ export const Beregne = () => {
           </DetailWrapper>
 
           <div className="text">
-            Vilkårsresultat: <strong>{tekstForVedtaksresultat(vedtaksresultat, virkningstidspunkt)}</strong>
+            Vilkårsresultat: <strong>{formaterVedtaksResultat(vedtaksresultat, virkningstidspunkt)}</strong>
           </div>
         </InfoWrapper>
         <Sammendrag />

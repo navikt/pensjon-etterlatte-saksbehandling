@@ -24,9 +24,6 @@ import { AppContext } from '../../../../store/AppContext'
 export const DoedsFallForelder = (props: VilkaarProps) => {
   const ctx = useContext(AppContext)
   const vilkaar = props.vilkaar
-  if (!vilkaar) {
-    return null
-  }
 
   const avdoedDoedsdato: any = hentKriterierMedOpplysning(
     vilkaar,

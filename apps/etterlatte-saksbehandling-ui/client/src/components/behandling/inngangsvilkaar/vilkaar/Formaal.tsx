@@ -1,5 +1,6 @@
 import React from 'react'
 import {
+  Innhold,
   Lovtekst,
   Title,
   VilkaarBorder,
@@ -9,7 +10,6 @@ import {
   VilkaarVurderingColumn,
   VilkaarVurderingContainer,
   VilkaarWrapper,
-  Innhold,
 } from '../styled'
 import { VilkaarProps } from '../types'
 import { format } from 'date-fns'
@@ -22,9 +22,6 @@ import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 
 export const Formaal = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
-  if (!vilkaar) {
-    return null
-  }
   const soekerDoedsdato = hentKriterierMedOpplysning(
     vilkaar,
     Kriterietype.SOEKER_ER_I_LIVE,

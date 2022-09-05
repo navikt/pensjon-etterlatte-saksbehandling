@@ -22,9 +22,6 @@ import { PeriodeModal } from './PeriodeModal'
 export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
   const [isOpen, setIsOpen] = useState(false)
-  if (!vilkaar) {
-    return null
-  }
 
   return (
     <VilkaarBorder id={props.id}>

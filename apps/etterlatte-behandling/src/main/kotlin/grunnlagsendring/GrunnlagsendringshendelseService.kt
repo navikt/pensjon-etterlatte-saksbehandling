@@ -63,15 +63,15 @@ class GrunnlagsendringshendelseService(
     fun sjekkKlareDoedshendelser(minutterGamle: Long) {
         inTransaction {
             grunnlagsendringshendelseDao.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
-                minutterGamle,
-                GrunnlagsendringsType.SOEKER_DOED
+                minutter = minutterGamle,
+                type = GrunnlagsendringsType.SOEKER_DOED
             )
         }.forEach { endringsHendelse ->
             when (endringsHendelse.data) {
                 is Grunnlagsinformasjon.SoekerDoed -> {
                     pdlService.hentPdlModell(
-                        endringsHendelse.data.hendelse.avdoedFnr,
-                        PersonRolle.BARN
+                        foedselsnummer = endringsHendelse.data.hendelse.avdoedFnr,
+                        rolle = PersonRolle.BARN
                     ).doedsdato?.let { doedsdato ->
                         logger.info(
                             "Person med fnr ${endringsHendelse.data.hendelse.avdoedFnr} er doed i pdl " +
@@ -90,10 +90,10 @@ class GrunnlagsendringshendelseService(
                                         )
                                         inTransaction {
                                             grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
-                                                listOf(endringsHendelse.sakId),
-                                                GrunnlagsendringStatus.IKKE_VURDERT,
-                                                GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING,
-                                                GrunnlagsendringsType.SOEKER_DOED
+                                                saker = listOf(endringsHendelse.sakId),
+                                                foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
+                                                etterStatus = GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING,
+                                                type = GrunnlagsendringsType.SOEKER_DOED
                                             )
                                         }
                                     }
@@ -103,21 +103,21 @@ class GrunnlagsendringshendelseService(
                                                 "iverksatt eller attestert -> Starter revurdering."
                                         )
                                         revurderingService.startRevurdering(
-                                            behandling,
-                                            endringsHendelse.data.hendelse,
-                                            RevurderingAarsak.SOEKER_DOD
+                                            forrigeBehandling = behandling,
+                                            pdlHendelse = endringsHendelse.data.hendelse,
+                                            revurderingAarsak = RevurderingAarsak.SOEKER_DOD
                                         ).also {
                                             inTransaction {
                                                 grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
-                                                    listOf(endringsHendelse.sakId),
-                                                    GrunnlagsendringStatus.IKKE_VURDERT,
-                                                    GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
-                                                    GrunnlagsendringsType.SOEKER_DOED
+                                                    saker = listOf(endringsHendelse.sakId),
+                                                    foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
+                                                    etterStatus = GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
+                                                    type = GrunnlagsendringsType.SOEKER_DOED
                                                 )
                                                 grunnlagsendringshendelseDao.settBehandlingIdForTattMedIBehandling(
-                                                    endringsHendelse.sakId,
-                                                    it.id,
-                                                    GrunnlagsendringsType.SOEKER_DOED
+                                                    sak = endringsHendelse.sakId,
+                                                    behandlingId = it.id,
+                                                    type = GrunnlagsendringsType.SOEKER_DOED
                                                 )
                                             }
                                         }
@@ -137,10 +137,10 @@ class GrunnlagsendringshendelseService(
                             .also {
                                 inTransaction {
                                     grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
-                                        listOf(endringsHendelse.sakId),
-                                        GrunnlagsendringStatus.IKKE_VURDERT,
-                                        GrunnlagsendringStatus.FORKASTET,
-                                        GrunnlagsendringsType.SOEKER_DOED
+                                        saker = listOf(endringsHendelse.sakId),
+                                        foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
+                                        etterStatus = GrunnlagsendringStatus.FORKASTET,
+                                        type = GrunnlagsendringsType.SOEKER_DOED
                                     )
                                 }
                             }

@@ -1,9 +1,14 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.PartData
+import io.ktor.http.content.readAllParts
+import io.ktor.http.content.streamProvider
 import io.ktor.server.application.call
 import io.ktor.server.request.authorization
 import io.ktor.server.request.receive
+import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
@@ -11,10 +16,15 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import journalpost.JournalpostService
+import no.nav.etterlatte.libs.common.brev.model.BrevID
+import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
+import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
+import no.nav.etterlatte.libs.common.objectMapper
 import org.slf4j.LoggerFactory
+import java.sql.Blob
 
 fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService) {
     val logger = LoggerFactory.getLogger(BrevService::class.java)
@@ -71,6 +81,31 @@ fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService
             val brev = service.opprett(request.mottaker, request.mal)
 
             call.respond(brev.data)
+        }
+
+        post("pdf/{behandlingId}") {
+            val behandlingId = call.parameters["behandlingId"]!!
+
+            try {
+                val mp = call.receiveMultipart().readAllParts()
+
+                val mottaker = mp.first { it is PartData.FormItem }
+                    .let { objectMapper.readValue<Mottaker>((it as PartData.FormItem).value) }
+
+                val fileItem = mp.first { it is PartData.FileItem } as PartData.FileItem
+
+                val fileBytes = fileItem.streamProvider().readBytes()
+                val fileName = fileItem.originalFileName ?: "No filename"
+
+                val brevInnhold = BrevInnhold(fileName, "nb", fileBytes)
+
+                val brev = service.lagreAnnetBrev(behandlingId, mottaker, brevInnhold)
+
+                call.respond(brev)
+            } catch (e: Exception) {
+                logger.error("Getting multipart error ${e}")
+                call.respond(HttpStatusCode.BadRequest, "Null value")
+            }
         }
 
         post("{brevId}/pdf") {

@@ -2,14 +2,7 @@ import { Button, Checkbox, Loader, Modal, Panel, Select } from '@navikt/ds-react
 import { useEffect, useState } from 'react'
 import { Add } from '@navikt/ds-icons'
 import styled from 'styled-components'
-import {
-  Adresse,
-  hentForhaandsvisning,
-  hentMaler,
-  hentMottakere,
-  Mottaker,
-  nyttBrevForBehandling,
-} from '../../../../shared/api/brev'
+import { Adresse, hentMottakere, Mottaker, opprettBrevFraPDF } from '../../../../shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Border } from '../../soeknadsoversikt/styled'
 import { Column, GridContainer } from '../../../../shared/styled'
@@ -53,15 +46,15 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: any) 
       adresse: benyttAdresse ? adresse : undefined,
     }
 
-    leggTilNytt({
-      behandlingId,
-      id: 99,
-      mottaker: brevMottaker,
-      status: 'OPPRETTET',
-      tittel: selectedFile.name.replace('.pdf', ''),
-    })
+    const formData = new FormData()
 
-    setIsOpen(false)
+    formData.append('file', selectedFile, selectedFile.name)
+    formData.append('mottaker', JSON.stringify(brevMottaker))
+
+    opprettBrevFraPDF(behandlingId!!, brevMottaker, formData)
+      .then((data) => leggTilNytt(data))
+      .catch((error) => console.error(error))
+      .finally(() => setIsOpen(false))
   }
 
   const oppdaterMottaker = (id: string, idType: string) => {
@@ -79,17 +72,6 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: any) 
     setSelectedFile(file)
     const pdfUrl = URL.createObjectURL(file)
     setFileURL(pdfUrl)
-  }
-
-  const onFileUpload = () => {
-    // Create an object of formData
-    const formData = new FormData()
-
-    // Update the formData object
-    formData.append('myFile', selectedFile, selectedFile.name)
-
-    // Request made to the backend api
-    // Send formData object
   }
 
   const fileData = () => {
@@ -132,7 +114,6 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: any) 
 
               <div>
                 <input type="file" onChange={onFileChange} accept={'application/pdf'} />
-                <button onClick={onFileUpload}>Upload!</button>
               </div>
               {fileData()}
 

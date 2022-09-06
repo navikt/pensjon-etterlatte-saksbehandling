@@ -10,6 +10,14 @@ data class Doedshendelse(
     val endringstype: Endringstype
 ) : PdlHendelse
 
+data class UtflyttingsHendelse(
+    val fnr: String,
+    val tilflyttingsLand: String?,
+    val tilflyttingsstedIUtlandet: String?,
+    val utflyttingsdato: LocalDate?,
+    val endringstype: Endringstype
+)
+
 enum class Endringstype {
     OPPRETTET, KORRIGERT, ANNULLERT, OPPHOERT
 }

@@ -124,7 +124,7 @@ class IntegrationTest {
                 "LEESAH_KAFKA_SCHEMA_REGISTRY" to kafkaEnv.schemaRegistry?.url!!
             )
         ),
-        Dodsmeldinger(TestConfig(true, mapOf("KAFKA_BROKERS" to kafkaEnv.brokersURL))),
+        LivsHendelser(TestConfig(true, mapOf("KAFKA_BROKERS" to kafkaEnv.brokersURL))),
         pdlService
     )
 

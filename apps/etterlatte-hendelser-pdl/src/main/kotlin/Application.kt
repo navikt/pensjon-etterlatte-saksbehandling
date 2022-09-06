@@ -12,7 +12,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import no.nav.etterlatte.hendelserpdl.DevConfig
-import no.nav.etterlatte.hendelserpdl.DodsmeldingerRapid
+import no.nav.etterlatte.hendelserpdl.LivsHendelserRapid
 import no.nav.etterlatte.hendelserpdl.LyttPaaHendelser
 import no.nav.etterlatte.hendelserpdl.leesah.LivetErEnStroemAvHendelser
 import no.nav.etterlatte.hendelserpdl.module
@@ -46,7 +46,7 @@ fun main() {
                     stream =
                         LyttPaaHendelser(
                             LivetErEnStroemAvHendelser(DevConfig().env),
-                            DodsmeldingerRapid(this@apply),
+                            LivsHendelserRapid(this@apply),
                             pdlService
                         )
 

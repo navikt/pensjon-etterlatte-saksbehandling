@@ -15,25 +15,28 @@ import org.junit.jupiter.api.Test
 internal class LyttPaaHendelserTest {
 
     @Test
-    fun ikkeDodsmelding() {
+    fun hendelserSomIkkeLyttesPaa() {
         val pdlMock = mockk<PdlService>()
         val subject =
             LyttPaaHendelser(
                 LeesahMock(listOf(Personhendelse().apply { put("opplysningstype", "Ikke dodsmelding") })),
-                DodsMock { _, _ -> fail() },
+                DodsMock { _ -> fail() },
                 pdlMock
             )
         subject.stream()
     }
 
     @Test
-    fun dodsmelding() {
+    fun hendelserSomLyttesPaa() {
         val pdlMock = mockk<PdlService>() {
             coEvery { hentFolkeregisterIdentifikator("123") } returns FolkeregisterIdent(
                 Foedselsnummer.of("70078749472")
             )
+            coEvery { hentFolkeregisterIdentifikator("321") } returns FolkeregisterIdent(
+                Foedselsnummer.of("12345678911")
+            )
         }
-        val dodsmeldinger = mutableListOf<String>()
+        val hendelser = mutableListOf<Pair<String, String>>()
         val subject = LyttPaaHendelser(
             LeesahMock(
                 listOf(
@@ -41,15 +44,23 @@ internal class LyttPaaHendelserTest {
                         put("opplysningstype", "DOEDSFALL_V1")
                         put("personidenter", listOf("123"))
                         put("endringstype", no.nav.person.pdl.leesah.Endringstype.valueOf("OPPRETTET"))
+                    },
+                    Personhendelse().apply {
+                        put("opplysningstype", "UTFLYTTING_FRA_NORGE")
+                        put("personidenter", listOf("321"))
+                        put("endringstype", no.nav.person.pdl.leesah.Endringstype.valueOf("OPPRETTET"))
                     }
                 )
             ),
-            DodsMock { it, _ -> dodsmeldinger += it },
+            DodsMock { hendelser += it },
             pdlMock
         )
         subject.stream()
-        assertEquals(1, dodsmeldinger.size)
-        assertEquals("70078749472", dodsmeldinger[0])
+        assertEquals(2, hendelser.size)
+        assertEquals("70078749472", hendelser[0].first)
+        assertEquals("person er doed", hendelser[0].second)
+        assertEquals("12345678911", hendelser[1].first)
+        assertEquals("person flyttet ut", hendelser[1].second)
     }
 }
 
@@ -63,6 +74,17 @@ class LeesahMock(val mockData: List<Personhendelse>) : ILivetErEnStroemAvHendels
     }
 }
 
-class DodsMock(val c: (String, String?) -> Unit) : IDodsmeldinger {
-    override fun personErDod(ident: String, doedsdato: String?, endringstype: Endringstype) = c(ident, doedsdato)
+class DodsMock(val c: (Pair<String, String>) -> Unit) : ILivsHendelser {
+    override fun personErDod(fnr: String, doedsdato: String?, endringstype: Endringstype) =
+        c(Pair(fnr, "person er doed"))
+
+    override fun personUtflyttingFraNorge(
+        fnr: String,
+        tilflyttingsLand: String?,
+        tilflyttingsstedIUtlandet: String?,
+        utflyttingsdato: String?,
+        endringstype: Endringstype
+    ) {
+        c(Pair(fnr, "person flyttet ut"))
+    }
 }

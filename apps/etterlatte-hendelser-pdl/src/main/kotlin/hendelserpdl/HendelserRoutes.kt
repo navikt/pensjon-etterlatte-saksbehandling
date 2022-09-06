@@ -1,4 +1,4 @@
-package no.nav.etterlatte.hendelserpdl
+package no.nav.etterlatte.hendelserpdl // ktlint-disable filename
 
 import io.ktor.http.ContentType
 import io.ktor.server.application.Application

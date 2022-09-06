@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -86,7 +87,18 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnla
                     failure = { throwableErrorMessage -> throw Error(throwableErrorMessage.message) }
                 ).response
 
-            return objectMapper.readValue(json.toString())
+            logger.info("Response fra grunnlag: $json")
+
+            val response = try {
+                objectMapper.readValue<Grunnlagsopplysning<SaksbehandlerMedlemskapsperioder>>(json.toString())
+            } catch (ex: Exception) {
+                logger.error("Klarte ikke parse response fra grunnlag", ex)
+                null
+            }
+
+            logger.info("Parset response: ${response?.toJson()}")
+
+            return response
         } catch (e: Exception) {
             logger.error("Henting av opplysning ($opplysningsType) fra grunnlag for sak med id $sakId feilet.")
             throw e

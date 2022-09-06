@@ -97,9 +97,8 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
 }
 
 data class MedlemskapsPeriodeClientRequest(val periode: AvdoedesMedlemskapsperiodeClientRequest) {
-
     fun toDomain(saksbehandlerId: String) = SaksbehandlerMedlemskapsperiode(
-        periodeType = PeriodeType.valueOf(this.periode.periodeType.uppercase()),
+        periodeType = renameEnum(this.periode.periodeType.uppercase()).let { PeriodeType.valueOf(it) },
         id = periode.id ?: UUID.randomUUID().toString(),
         kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
         arbeidsgiver = periode.arbeidsgiver,
@@ -109,6 +108,14 @@ data class MedlemskapsPeriodeClientRequest(val periode: AvdoedesMedlemskapsperio
         fraDato = periode.fraDato,
         tilDato = periode.tilDato
     )
+
+    private fun renameEnum(name: String): String {
+        return if (name == "UFØRETRYGD") {
+            "UFOERETRYGD"
+        } else {
+            name
+        }
+    }
 }
 
 data class AvdoedesMedlemskapsperiodeClientRequest(

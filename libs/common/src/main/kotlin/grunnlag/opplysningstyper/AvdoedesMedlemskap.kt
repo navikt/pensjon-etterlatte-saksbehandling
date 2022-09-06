@@ -32,6 +32,10 @@ data class SaksbehandlerMedlemskapsperiode(
     override val tilDato: LocalDate
 ) : AvdoedesMedlemskapsperiode
 
+data class SaksbehandlerMedlemskapsperioder(
+    val perioder: List<SaksbehandlerMedlemskapsperiode>
+)
+
 data class VurdertMedlemskapsperiode(
     override val id: String = UUID.randomUUID().toString(),
     override val periodeType: PeriodeType,

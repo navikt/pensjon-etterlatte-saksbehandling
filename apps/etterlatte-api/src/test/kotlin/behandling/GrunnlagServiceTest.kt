@@ -16,10 +16,57 @@ import org.skyscreamer.jsonassert.Customization
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
 import org.skyscreamer.jsonassert.comparator.CustomComparator
+import java.util.*
 
 internal class GrunnlagServiceTest {
     private val saksbehandlerId = "saksbehandlerId"
     private val token = "token"
+
+/*    @Test
+    fun hentOpplysningstypePeriode() {
+        val grunnlag: Grunnlagsopplysning<SaksbehandlerMedlemskapsperioder>? =
+            Grunnlagsopplysning(
+                id = UUID.randomUUID(),
+                opplysningType = Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
+                opplysning = SaksbehandlerMedlemskapsperioder(
+                    perioder = listOf(
+                        SaksbehandlerMedlemskapsperiode(
+                            id = UUID.randomUUID().toString(),
+                            periodeType = PeriodeType.SYKEPENGER,
+                            kilde = Grunnlagsopplysning.Saksbehandler("id", Instant.now()),
+                            oppgittKilde = "kilde",
+                            fraDato = LocalDate.now(),
+                            tilDato = LocalDate.now(),
+                        )
+                    )
+                ),
+                kilde = Grunnlagsopplysning.Saksbehandler("id", Instant.now()),
+                meta = objectMapper.createObjectNode()
+            )
+
+        val periode = listOf(
+            SaksbehandlerMedlemskapsperiode(
+                id = UUID.randomUUID().toString(),
+                periodeType = PeriodeType.LOENNSINNTEKT,
+                kilde = Grunnlagsopplysning.Saksbehandler("id2", Instant.now()),
+                oppgittKilde = "kilde2",
+                fraDato = LocalDate.now(),
+                tilDato = LocalDate.now(),
+            )
+        )
+
+        val grunnlagPerioder: List<SaksbehandlerMedlemskapsperiode>? = grunnlag?.opplysning?.perioder
+        val grunnlagMedNyPeriode: List<SaksbehandlerMedlemskapsperiode> =
+            if (grunnlagPerioder != null) periode.plus(grunnlagPerioder) else periode
+
+        val ingenGrunnlagPerioder: Grunnlagsopplysning<SaksbehandlerMedlemskapsperioder>? = null
+        val nyPeriodeUtenGrunnlag: List<SaksbehandlerMedlemskapsperiode> = listOf(periode, ingenGrunnlagPerioder)
+
+
+        val test = "test"
+        Assertions.assertEquals(2, grunnlagMedNyPeriode.size)
+        Assertions.assertEquals(1, nyPeriodeUtenGrunnlag.size)
+    }*/
 
     @Test
     fun `sender ut opplysning om soesken i beregning på riktig format`() = runTest {

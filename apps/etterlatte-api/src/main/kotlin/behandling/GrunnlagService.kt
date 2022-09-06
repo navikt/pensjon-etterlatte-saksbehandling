@@ -7,6 +7,7 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
@@ -28,17 +29,20 @@ class GrunnlagService(
         token: String
     ): GrunnlagResult {
         val behandling = behandlingKlient.hentBehandling(behandlingId, token)
-/*        val grunnlag: Grunnlagsopplysning<AvdoedesMedlemskapsperiode>? = grunnlagKlient.finnPersonOpplysning(
+        val grunnlag: Grunnlagsopplysning<SaksbehandlerMedlemskapsperioder>? = grunnlagKlient.finnPerioder(
             behandling.sak,
             Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
             token
-        ).let { setOpplysningType(it) }*/
+        )
+
+        val grunnlagMedNyPeriode = grunnlag?.opplysning?.perioder?.plus(periode)
+            ?: SaksbehandlerMedlemskapsperioder(listOf(periode))
 
         val opplysning: List<Grunnlagsopplysning<out Any>> = listOf(
             lagOpplysning(
                 Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
                 Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
-                periode
+                grunnlagMedNyPeriode
             )
         )
 

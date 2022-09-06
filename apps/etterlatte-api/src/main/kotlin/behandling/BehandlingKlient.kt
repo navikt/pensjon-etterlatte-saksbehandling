@@ -35,12 +35,6 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
 
-    companion object {
-        fun serialize(data: Any): String {
-            return objectMapper.writeValueAsString(data)
-        }
-    }
-
     @Suppress("UNCHECKED_CAST")
     override suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker {
         try {

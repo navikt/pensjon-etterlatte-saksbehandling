@@ -5,8 +5,8 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -25,7 +25,7 @@ interface EtterlatteGrunnlag {
         sakId: Long,
         opplysningsType: Opplysningstyper,
         accessToken: String
-    ): Grunnlagsopplysning<AvdoedesMedlemskapsperiode>?
+    ): Grunnlagsopplysning<SaksbehandlerMedlemskapsperioder>?
 }
 
 class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnlag {
@@ -69,7 +69,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) : EtterlatteGrunnla
         sakId: Long,
         opplysningsType: Opplysningstyper,
         accessToken: String
-    ): Grunnlagsopplysning<AvdoedesMedlemskapsperiode>? {
+    ): Grunnlagsopplysning<SaksbehandlerMedlemskapsperioder>? {
         try {
             logger.info("Henter opplysning ($opplysningsType) fra grunnlag for sak med id $sakId.")
 

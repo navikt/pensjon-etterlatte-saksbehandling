@@ -9,9 +9,9 @@ import lagMockPersonPdl
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapVurdering
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
@@ -105,7 +105,7 @@ class AvdoedesMedlemskapTest {
                 id = UUID.randomUUID(),
                 kilde = Grunnlagsopplysning.Vilkaarskomponenten("vilkaar"),
                 opplysningType = Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
-                opplysning = AvdoedesMedlemskapsperiode(
+                opplysning = SaksbehandlerMedlemskapsperiode(
                     periodeType = PeriodeType.DAGPENGER,
                     id = UUID.randomUUID().toString(),
                     kilde = Grunnlagsopplysning.Saksbehandler("zid122", Instant.now()),
@@ -121,7 +121,7 @@ class AvdoedesMedlemskapTest {
                 id = UUID.randomUUID(),
                 kilde = Grunnlagsopplysning.Vilkaarskomponenten("vilkaar"),
                 opplysningType = Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
-                opplysning = AvdoedesMedlemskapsperiode(
+                opplysning = SaksbehandlerMedlemskapsperiode(
                     periodeType = PeriodeType.ARBEIDSPERIODE,
                     id = UUID.randomUUID().toString(),
                     kilde = Grunnlagsopplysning.Saksbehandler("zid122", Instant.now()),

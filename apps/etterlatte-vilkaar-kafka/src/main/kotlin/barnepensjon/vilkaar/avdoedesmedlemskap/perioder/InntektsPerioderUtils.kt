@@ -1,7 +1,7 @@
 import no.nav.etterlatte.barnepensjon.Periode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsPeriode
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsperiode
 import no.nav.etterlatte.libs.common.inntekt.Inntekt
 import java.time.LocalDate
 import java.time.YearMonth
@@ -12,7 +12,7 @@ fun List<Periode>.tilVurderteMedlemskapsPerioder(
     kilde: Grunnlagsopplysning.Kilde,
     beskrivelse: String? = null
 ) = this.map {
-    VurdertMedlemskapsPeriode(
+    VurdertMedlemskapsperiode(
         periodeType = type,
         beskrivelse = beskrivelse,
         kilde = kilde,

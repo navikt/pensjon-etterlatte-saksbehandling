@@ -15,8 +15,8 @@ import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -52,7 +52,7 @@ class VilkaarService {
         val avdoedeInntektsOpplysning =
             finnOpplysning<InntektsOpplysning>(opplysninger, Opplysningstyper.AVDOED_INNTEKT_V1)
         val arbeidsforhold = finnOpplysning<ArbeidsforholdOpplysning>(opplysninger, Opplysningstyper.ARBEIDSFORHOLD_V1)
-        val saksbehandlerPerioder = finnOpplysning<AvdoedesMedlemskapsperiode>(
+        val saksbehandlerPerioder = finnOpplysning<SaksbehandlerMedlemskapsperiode>(
             opplysninger,
             Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE
         )

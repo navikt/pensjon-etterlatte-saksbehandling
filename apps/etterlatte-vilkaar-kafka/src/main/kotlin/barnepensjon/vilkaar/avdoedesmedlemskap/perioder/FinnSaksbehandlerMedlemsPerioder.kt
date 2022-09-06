@@ -3,16 +3,20 @@ package barnepensjon.vilkaar.avdoedesmedlemskap.perioder
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsPeriode
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsperiode
 
-fun finnSaksbehandlerMedlemsPerioder(grunnlag: AvdoedesMedlemskapGrunnlag): List<VurdertMedlemskapsPeriode> =
+fun finnSaksbehandlerMedlemsPerioder(grunnlag: AvdoedesMedlemskapGrunnlag): List<VurdertMedlemskapsperiode> =
     grunnlag.saksbehandlerMedlemsPerioder
         .map { opplysning ->
             val periode = opplysning.opplysning
-            VurdertMedlemskapsPeriode(
+            VurdertMedlemskapsperiode(
                 periodeType = periode.periodeType,
-                beskrivelse = null,
-                kilde = opplysning.kilde,
+                id = periode.id,
+                arbeidsgiver = periode.arbeidsgiver,
+                stillingsprosent = periode.stillingsprosent,
+                begrunnelse = periode.begrunnelse,
+                kilde = periode.kilde,
+                oppgittKilde = periode.oppgittKilde,
                 fraDato = periode.fraDato,
                 tilDato = periode.tilDato,
                 godkjentPeriode = periode.erGodkjent()

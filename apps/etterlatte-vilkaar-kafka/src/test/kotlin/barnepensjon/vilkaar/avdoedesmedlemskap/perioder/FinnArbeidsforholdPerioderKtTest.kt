@@ -25,7 +25,7 @@ internal class FinnArbeidsforholdPerioderKtTest {
         return AvdoedesMedlemskapGrunnlag(
             inntekt,
             arbeidsforhold,
-            emptyList(),
+            null,
             LocalDate.parse("2022-07-01"),
             bosattNorge
         )

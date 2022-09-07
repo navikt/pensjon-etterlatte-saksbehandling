@@ -81,7 +81,7 @@ class GrunnlagKlient(config: Config, private val httpClient: HttpClient) : Etter
             logger.info("Henter opplysning ($opplysningsType) fra grunnlag for sak med id $sakId.")
 
             val token = azureAdClient.getOnBehalfOfAccessTokenForResource(
-                listOf("api://ce96a301-13db-4409-b277-5b27f464d08b/.default"),
+                listOf("api://$clientId/.default"),
                 accessToken
             ).get()?.accessToken ?: ""
 

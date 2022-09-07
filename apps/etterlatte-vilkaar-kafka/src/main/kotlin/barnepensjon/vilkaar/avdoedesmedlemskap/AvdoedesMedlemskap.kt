@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemska
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapVurdering
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Gap
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsperiode
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.person.Person
@@ -39,7 +39,7 @@ fun vilkaarAvdoedesMedlemskap(
     avdoedPdl: VilkaarOpplysning<Person>?,
     inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>?,
     arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?,
-    saksbehandlerMedlemskapsPerioder: List<VilkaarOpplysning<SaksbehandlerMedlemskapsperiode>>?
+    saksbehandlerMedlemskapsPerioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?
 ): VurdertVilkaar {
     if (listOf(avdoedSoeknad, avdoedPdl, inntektsOpplysning, arbeidsforholdOpplysning).any { it == null }) {
         return VurdertVilkaar(
@@ -56,7 +56,7 @@ fun vilkaarAvdoedesMedlemskap(
     val avdoedesMedlemskapGrunnlag = AvdoedesMedlemskapGrunnlag(
         inntektsOpplysning = inntektsOpplysning!!,
         arbeidsforholdOpplysning = arbeidsforholdOpplysning!!,
-        saksbehandlerMedlemsPerioder = saksbehandlerMedlemskapsPerioder ?: emptyList(),
+        saksbehandlerMedlemsPerioder = saksbehandlerMedlemskapsPerioder,
         doedsdato = doedsdato,
         bosattNorge = bosattNorge
     )

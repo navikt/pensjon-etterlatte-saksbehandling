@@ -11,8 +11,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 
 fun Route.medlemsregisterApi(klient: MedlRegisterKlient) {
-    route("medl") {
-        get("medlemsunntak") {
+    route("api") {
+        get("medlemsunntak/{ident}") {
             val ident = call.parameters["ident"]!!
             val token = getAccessToken(call)
 

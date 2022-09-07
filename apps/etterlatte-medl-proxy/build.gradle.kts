@@ -4,6 +4,8 @@ plugins {
 }
 
 dependencies {
+    implementation(Ktor2.Auth)
+    implementation(Ktor2.ClientAuth)
     implementation(Ktor2.ClientCore)
     implementation(Ktor2.ClientLoggingJvm)
     implementation(Ktor2.ClientAuth)

@@ -51,7 +51,7 @@ interface FileMeta {
   filNavn: string
 }
 
-const isEmptyAddressObject = (object?: Adresse): boolean => {
+export const isEmptyAddressObject = (object?: Adresse): boolean => {
   if (object === undefined) return true
   if (JSON.stringify(object) === '{}') return true
   if (Object.values(object).every((value) => !value.length)) return true
@@ -61,7 +61,7 @@ const isEmptyAddressObject = (object?: Adresse): boolean => {
 export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => void }) {
   const { behandlingId } = useParams()
 
-  const [isOpen, setIsOpen] = useState<boolean>(true)
+  const [isOpen, setIsOpen] = useState<boolean>(false)
   const [klarForLagring, setKlarforLagring] = useState<boolean>(false)
   const [adresse, setAdresse] = useState<Adresse | undefined>(undefined)
   const [fnrMottaker, setFnrMottaker] = useState<string | undefined>(undefined)

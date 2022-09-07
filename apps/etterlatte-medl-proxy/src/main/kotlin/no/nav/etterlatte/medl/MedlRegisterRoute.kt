@@ -14,18 +14,18 @@ fun Route.medlemsregisterApi(klient: MedlRegisterKlient) {
     route("medl") {
         get("medlemsunntak") {
             val ident = call.parameters["ident"]!!
-            val tokenxToken = getAccessToken(call)
+            val token = getAccessToken(call)
 
-            val medlemskapsunntak = klient.hentMedlemskapsunntak(ident, tokenxToken)
+            val medlemskapsunntak = klient.hentMedlemskapsunntak(ident, token)
 
             call.respond(medlemskapsunntak ?: HttpStatusCode.NotFound)
         }
 
         get("innsyn/person/{ident}") {
             val ident = call.parameters["ident"]!!
-            val tokenxToken = getAccessToken(call)
+            val token = getAccessToken(call)
 
-            val innsyn = klient.hentInnsyn(ident, tokenxToken)
+            val innsyn = klient.hentInnsyn(ident, token)
 
             call.respond(innsyn ?: HttpStatusCode.NotFound)
         }

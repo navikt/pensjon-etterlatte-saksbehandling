@@ -26,8 +26,10 @@ spec:
   env:
     - name: MEDL_URL
       value: https://medlemskap-medl-api.dev.intern.nav.no
-  tokenx:
-    enabled: true
+  azure:
+    application:
+      enabled: true
+      tenant: trygdeetaten.no
   accessPolicy:
     rules:
       - application: medlemskap-medl-api

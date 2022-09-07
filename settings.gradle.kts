@@ -9,6 +9,7 @@ include(
     "apps:etterlatte-api",
     "apps:etterlatte-behandling",
     "apps:etterlatte-brreg",
+    "apps:etterlatte-medl-proxy",
     "apps:etterlatte-gyldig-soeknad",
     "apps:etterlatte-vilkaar-kafka",
     "apps:etterlatte-opplysninger-fra-soeknad",

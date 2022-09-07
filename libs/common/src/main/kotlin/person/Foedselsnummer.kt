@@ -101,7 +101,7 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
 
     private fun isFhNumber(): Boolean = Character.getNumericValue(value[0]) in 8..9
 
-    override fun equals(other: Any?): Boolean = this.value == (other as Foedselsnummer?)?.value
+    override fun equals(other: Any?): Boolean = this.value == (other as? Foedselsnummer)?.value
 
     override fun hashCode(): Int = this.value.hashCode()
 

@@ -18,9 +18,9 @@ export const Underkjenn = ({ behandlingId }: { behandlingId: string }) => {
           value={returType || ''}
           onChange={(e) => setReturType(e.target.value as IReturType)}
         >
-          {Object.keys(IReturType).map((option) => (
+          {(Object.keys(IReturType) as Array<keyof typeof IReturType>).map((option) => (
             <option key={option} value={option}>
-              {option}
+              {IReturType[option]}
             </option>
           ))}
         </Select>

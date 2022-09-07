@@ -2,17 +2,19 @@ import React, { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppContext } from '../../../../store/AppContext'
 import {
+  IBehandlingStatus,
   IBehandlingsType,
   KriterieOpplysningsType,
   Kriterietype,
   VilkaarsType,
   VurderingsResultat,
 } from '../../../../store/reducers/BehandlingReducer'
-import { hentKriterierMedOpplysning } from '../../felles/utils'
+import { hentBehandlesFraStatus, hentKriterierMedOpplysning } from '../../felles/utils'
 import { BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import { KildeDatoOpplysning } from '../vilkaar/KildeDatoOpplysning'
 import styled from 'styled-components'
+import { formaterStringDato } from '../../../../utils/formattering'
 
 const useGrunnlagForRevurdering = (): RevurderingOpplysningType[] => {
   // Enn så lenge er dette hardkodet til å hente mottaker av ytelsens dødsdato fra vilkåret formaal.
@@ -34,14 +36,27 @@ const useGrunnlagForRevurdering = (): RevurderingOpplysningType[] => {
   return [
     {
       kilde: soekerDoedsdato?.kilde,
-      opplysning: 'Registrert dødsfall mottaker av ytelsen',
+      opplysning: `Registrert dødsfall bruker ${formaterStringDato(soekerDoedsdato?.opplysning?.doedsdato)}`,
     },
   ]
 }
 
-export const RevurderingsAarsakModal = () => {
+const knapptekstForStatus = (status: IBehandlingStatus): string => {
+  switch (status) {
+    case IBehandlingStatus.UNDER_BEHANDLING:
+    case IBehandlingStatus.RETURNERT:
+      return 'Start revurdering'
+    case IBehandlingStatus.GYLDIG_SOEKNAD:
+      return 'Attester revurdering'
+    default:
+      return 'Se revurdering'
+  }
+}
+
+export const RevurderingsAarsakModal = ({ behandlingStatus }: { behandlingStatus: IBehandlingStatus }) => {
   const [open, setOpen] = useState(true)
   const navigate = useNavigate()
+  const behandles = hentBehandlesFraStatus(behandlingStatus)
 
   const grunnlagForRevurdering = useGrunnlagForRevurdering()
   if (grunnlagForRevurdering.length === 0) {
@@ -59,13 +74,22 @@ export const RevurderingsAarsakModal = () => {
           <Heading spacing level="2" size="medium">
             Revurdering
           </Heading>
-          <BodyShort spacing>
-            Se over vilkårsvurderingen og kontrollér nye opplysninger som har kommet inn i saken.
-          </BodyShort>
-          <RevurderingOpplysninger opplysninger={grunnlagForRevurdering} />
+          {behandles ? (
+            <BodyShort spacing>
+              Se over vilkårsvurderingen og kontrollér nye opplysninger som har kommet inn i saken.
+            </BodyShort>
+          ) : null}
+          <RevurderingOpplysningWrapper>
+            <Heading spacing size="xsmall">
+              {behandles
+                ? 'Nye opplysninger som er årsak til revurdering'
+                : 'Opplysninger som var årsak til revurdering'}
+            </Heading>
+            <RevurderingOpplysninger opplysninger={grunnlagForRevurdering} />
+          </RevurderingOpplysningWrapper>
           <ButtonGroup>
             <Button variant="primary" onClick={onClose}>
-              Start revurdering
+              {knapptekstForStatus(behandlingStatus)}
             </Button>
             <Button variant="tertiary" onClick={() => navigate('/')}>
               Avbryt
@@ -86,24 +110,19 @@ interface RevurderingOpplysningType {
 }
 
 const RevurderingOpplysninger = ({ opplysninger }: { opplysninger: RevurderingOpplysningType[] }) => (
-  <RevurderingOpplysningWrapper>
-    <Heading spacing size="xsmall">
-      Nye opplysninger som er årsak til revurdering
-    </Heading>
-    <UstiletListe>
-      {opplysninger.map((opplysning) => (
-        <li key={`${opplysning.opplysning}-${opplysning.kilde?.tidspunktForInnhenting}`}>
-          <OpplysningMedIkon>
-            <StatusIcon status={VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING} large />
-            <div>
-              <span>{opplysning.opplysning}</span>
-              <KildeDatoOpplysning type={opplysning?.kilde?.type} dato={opplysning?.kilde?.tidspunktForInnhenting} />
-            </div>
-          </OpplysningMedIkon>
-        </li>
-      ))}
-    </UstiletListe>
-  </RevurderingOpplysningWrapper>
+  <UstiletListe>
+    {opplysninger.map((opplysning) => (
+      <li key={`${opplysning.opplysning}-${opplysning.kilde?.tidspunktForInnhenting}`}>
+        <OpplysningMedIkon>
+          <StatusIcon status={VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING} large />
+          <div>
+            <span>{opplysning.opplysning}</span>
+            <KildeDatoOpplysning type={opplysning?.kilde?.type} dato={opplysning?.kilde?.tidspunktForInnhenting} />
+          </div>
+        </OpplysningMedIkon>
+      </li>
+    ))}
+  </UstiletListe>
 )
 
 const UstiletListe = styled.ul`

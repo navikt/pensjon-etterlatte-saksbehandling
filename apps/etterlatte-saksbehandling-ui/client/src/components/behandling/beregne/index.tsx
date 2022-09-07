@@ -11,12 +11,14 @@ import BrevModal from './brev-modal'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { formaterStringDato } from '../../../utils/formattering'
 import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResultat'
+import { IBehandlingsType } from '../../../store/reducers/BehandlingReducer'
 
 export const Beregne = () => {
   const behandling = useContext(AppContext).state.behandlingReducer
   const virkningstidspunkt = formaterStringDato(behandling.virkningstidspunkt)
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const vedtaksresultat = useVedtaksResultat()
+  const harVedtaksbrev = behandling.behandlingType !== IBehandlingsType.REVURDERING
 
   return (
     <Content>
@@ -33,7 +35,7 @@ export const Beregne = () => {
           </div>
         </InfoWrapper>
         <Sammendrag />
-        <BrevModal />
+        {harVedtaksbrev ? <BrevModal /> : null}
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>

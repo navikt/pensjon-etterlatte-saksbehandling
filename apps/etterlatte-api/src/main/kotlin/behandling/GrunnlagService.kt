@@ -35,14 +35,14 @@ class GrunnlagService(
             token
         )
 
-        val grunnlagMedNyPeriode = grunnlag?.opplysning?.perioder?.plus(periode)
-            ?: SaksbehandlerMedlemskapsperioder(listOf(periode))
+        val grunnlagMedNyPeriode: List<SaksbehandlerMedlemskapsperiode> =
+            grunnlag?.opplysning?.perioder?.plus(periode) ?: listOf(periode)
 
         val opplysning: List<Grunnlagsopplysning<out Any>> = listOf(
             lagOpplysning(
                 Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
                 Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
-                grunnlagMedNyPeriode
+                SaksbehandlerMedlemskapsperioder(perioder = grunnlagMedNyPeriode)
             )
         )
 

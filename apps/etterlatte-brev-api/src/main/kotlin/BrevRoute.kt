@@ -89,17 +89,15 @@ fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService
             try {
                 val mp = call.receiveMultipart().readAllParts()
 
-                val mottaker = mp.first { it is PartData.FormItem }
-                    .let { objectMapper.readValue<Mottaker>((it as PartData.FormItem).value) }
+                val fileMeta = mp.first { it is PartData.FormItem }
+                    .let { objectMapper.readValue<FileMeta>((it as PartData.FormItem).value) }
 
-                val fileItem = mp.first { it is PartData.FileItem } as PartData.FileItem
+                val fileBytes: ByteArray = mp.first { it is PartData.FileItem }
+                    .let { (it as PartData.FileItem).streamProvider().readBytes() }
 
-                val fileBytes = fileItem.streamProvider().readBytes()
-                val fileName = fileItem.originalFileName ?: "No filename"
+                val brevInnhold = BrevInnhold(fileMeta.filNavn, "nb", fileBytes)
 
-                val brevInnhold = BrevInnhold(fileName, "nb", fileBytes)
-
-                val brev = service.lagreAnnetBrev(behandlingId, mottaker, brevInnhold)
+                val brev = service.lagreAnnetBrev(behandlingId, fileMeta.mottaker, brevInnhold)
 
                 call.respond(brev)
             } catch (e: Exception) {
@@ -176,4 +174,9 @@ data class Mal(
 data class OpprettBrevRequest(
     val mal: Mal,
     val mottaker: Mottaker
+)
+
+data class FileMeta(
+    val mottaker: Mottaker,
+    val filNavn: String
 )

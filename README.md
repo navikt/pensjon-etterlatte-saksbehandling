@@ -41,7 +41,7 @@ Tjeneste som holder styr på behandlinger.
 [etterlatte-hendelser-pdl](apps/etterlatte-hendelser-pdl) \
 Lytter på hendelser fra Livet er en strøm av hendelser
 
-etterlatte-medl-proxy](apps/etterlatte-medl-proxy) \
+[etterlatte-medl-proxy](apps/etterlatte-medl-proxy) \
 Oppslagstjeneste mot medlemskapsregistret (folketrygden).
 
 [etterlatte-oppdater-behandling](apps/etterlatte-oppdater-behandling) \

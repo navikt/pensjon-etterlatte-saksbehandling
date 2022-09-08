@@ -16,15 +16,12 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import journalpost.JournalpostService
-import no.nav.etterlatte.libs.common.brev.model.BrevID
 import no.nav.etterlatte.libs.common.brev.model.BrevInnhold
 import no.nav.etterlatte.libs.common.brev.model.Mottaker
-import no.nav.etterlatte.libs.common.brev.model.Status
 import no.nav.etterlatte.libs.common.journalpost.AvsenderMottaker
 import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.objectMapper
 import org.slf4j.LoggerFactory
-import java.sql.Blob
 
 fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService) {
     val logger = LoggerFactory.getLogger(BrevService::class.java)
@@ -89,15 +86,15 @@ fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService
             try {
                 val mp = call.receiveMultipart().readAllParts()
 
-                val fileMeta = mp.first { it is PartData.FormItem }
-                    .let { objectMapper.readValue<FileMeta>((it as PartData.FormItem).value) }
+                val filData = mp.first { it is PartData.FormItem }
+                    .let { objectMapper.readValue<FilData>((it as PartData.FormItem).value) }
 
-                val fileBytes: ByteArray = mp.first { it is PartData.FileItem }
+                val fil: ByteArray = mp.first { it is PartData.FileItem }
                     .let { (it as PartData.FileItem).streamProvider().readBytes() }
 
-                val brevInnhold = BrevInnhold(fileMeta.filNavn, "nb", fileBytes)
+                val brevInnhold = BrevInnhold(filData.filNavn, "nb", fil)
 
-                val brev = service.lagreAnnetBrev(behandlingId, fileMeta.mottaker, brevInnhold)
+                val brev = service.lagreAnnetBrev(behandlingId, filData.mottaker, brevInnhold)
 
                 call.respond(brev)
             } catch (e: Exception) {
@@ -176,7 +173,8 @@ data class OpprettBrevRequest(
     val mottaker: Mottaker
 )
 
-data class FileMeta(
+data class FilData(
     val mottaker: Mottaker,
     val filNavn: String
 )
+

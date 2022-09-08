@@ -46,7 +46,7 @@ export interface DefaultMottaker {
   land?: string
 }
 
-interface FileMeta {
+interface FilData {
   mottaker: Mottaker
   filNavn: string
 }
@@ -69,10 +69,10 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: any) 
   const [mottakere, setMottakere] = useState<DefaultMottaker[]>([])
   const [laster, setLaster] = useState(false)
   const [error, setError] = useState<string>()
-  const [fileURL, setFileURL] = useState<string>()
-  const [selectedFile, setSelectedFile] = useState<any>()
-  const [fileTitle, setFileTitle] = useState<string>('')
-  const [fileName, setFileName] = useState<string>('')
+  const [filURL, setFilURL] = useState<string>()
+  const [valgtFil, setValgtFil] = useState<any>()
+  const [filTittel, setFilTittel] = useState<string>('')
+  const [filNavn, setFilNavn] = useState<string>('')
 
   useEffect(() => {
     hentMottakere().then((res) => setMottakere(res))
@@ -80,20 +80,20 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: any) 
 
   const opprett = () => {
     const brevMottaker: Mottaker = {
-      foedselsnummer: fnrMottaker,
-      orgnummer: orgMottaker,
+      foedselsnummer: fnrMottaker?.length ? fnrMottaker : undefined,
+      orgnummer: orgMottaker?.length ? orgMottaker : undefined,
       adresse: isEmptyAddressObject(adresse) ? undefined : adresse,
     }
 
-    const fileMeta: FileMeta = {
+    const filData: FilData = {
       mottaker: brevMottaker,
-      filNavn: fileTitle,
+      filNavn: filTittel,
     }
 
     const formData = new FormData()
 
-    formData.append('file', selectedFile, selectedFile.name)
-    formData.append('fileMeta', JSON.stringify(fileMeta))
+    formData.append('fil', valgtFil, valgtFil.name)
+    formData.append('filData', JSON.stringify(filData))
 
     opprettBrevFraPDF(behandlingId!!, brevMottaker, formData)
       .then((data) => leggTilNytt(data))
@@ -106,64 +106,55 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: any) 
         setIsOpen(false)
         setKlarforLagring(false)
         setError(undefined)
-        setFileURL(undefined)
-        setFileName('')
-        setFileTitle('')
-        setSelectedFile(null)
+        setFilURL(undefined)
+        setFilNavn('')
+        setFilTittel('')
+        setValgtFil(null)
       })
   }
 
   const onFileChange = (event: any) => {
-    const file = event.target.files[0]
-    setSelectedFile(file)
-    setFileTitle(file.name.replace('.pdf', ''))
-    setFileName(file.name)
-    const pdfUrl = URL.createObjectURL(file)
-    setFileURL(pdfUrl)
+    const fil = event.target.files[0]
+    setValgtFil(fil)
+    setFilTittel(fil.name.replace('.pdf', ''))
+    setFilNavn(fil.name)
+    const pdfUrl = URL.createObjectURL(fil)
+    setFilURL(pdfUrl)
   }
 
   const oppdaterMottaker = (value: string, id: string, section?: string) => {
-    if (id === 'ORGNR') {
-      setFnrMottaker('')
-      setOrgMottaker(value)
-      setAdresse({})
-    }
-
-    if (id === 'FNR') {
-      setOrgMottaker('')
-      setFnrMottaker(value)
-      setAdresse({})
-    }
+    setFnrMottaker(id === 'FNR' ? value : '')
+    setOrgMottaker(id === 'ORGNR' ? value : '')
 
     if (id === 'ADRESSE') {
-      setOrgMottaker('')
-      setFnrMottaker('')
       if (section === 'fornavn') setAdresse({ ...adresse, fornavn: value })
       if (section === 'etternavn') setAdresse({ ...adresse, etternavn: value })
       if (section === 'adresse') setAdresse({ ...adresse, adresse: value })
       if (section === 'postnummer') setAdresse({ ...adresse, postnummer: value })
       if (section === 'poststed') setAdresse({ ...adresse, poststed: value })
+    } else {
+      setAdresse({})
     }
   }
 
   useEffect(() => {
-    if (fileURL && (fnrMottaker || orgMottaker || !isEmptyAddressObject(adresse))) {
+    if (filURL && (fnrMottaker || orgMottaker || !isEmptyAddressObject(adresse))) {
       setKlarforLagring(true)
     } else {
       setKlarforLagring(false)
     }
-  }, [fileURL, fnrMottaker, orgMottaker, adresse])
+  }, [filURL, fnrMottaker, orgMottaker, adresse])
 
-  const fileData = () => {
-    if (selectedFile) {
+  const opplastetFilInfo = () => {
+    if (valgtFil) {
       return (
         <div>
           <h2>Brev detaljer</h2>
           <TextField
             label={'Tittel på filen'}
             description={'Vil vises i oversikten over brev'}
-            value={fileTitle}
-            onChange={(e) => setFileTitle(e.target.value)}
+            value={filTittel}
+            onChange={(e) => setFilTittel(e.target.value)}
           />
           <br />
           <Border />
@@ -197,15 +188,12 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: any) 
           <Add />
         </Button>
       </LastOppKnapp>
-      {
-        // TODO: legg til informasjon om at adresse må ligge i dokumentet
-      }
       <CustomModal open={isOpen} onClose={() => setIsOpen(false)}>
         <Modal.Content>
           <GridContainer>
             <Column style={{ width: '500px', paddingRight: '20px' }}>
               <h1>Last opp brev</h1>
-              <Alert variant={"warning"} size={'small'}>
+              <Alert variant={'warning'} size={'small'}>
                 Filen som lastes opp må inneholde adresse og annen relevant informasjon om mottakeren da det vil bli
                 sendt som brev.
               </Alert>
@@ -217,9 +205,9 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: any) 
                   <FileInput type="file" name="file" id="file" onChange={onFileChange} accept={'application/pdf'} />
                   Velg fil
                 </FileButton>
-                {fileName ? fileName : 'Ingen fil valgt'}
+                {filNavn ? filNavn : 'Ingen fil valgt'}
               </div>
-              {fileData()}
+              {opplastetFilInfo()}
 
               <br />
               <Border />
@@ -236,7 +224,7 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: any) 
               <br />
             </Column>
             <Column style={{ paddingLeft: '20px', marginTop: '100px' }}>
-              <PdfVisning fileUrl={fileURL} error={error} />
+              <PdfVisning fileUrl={filURL} error={error} />
             </Column>
           </GridContainer>
         </Modal.Content>

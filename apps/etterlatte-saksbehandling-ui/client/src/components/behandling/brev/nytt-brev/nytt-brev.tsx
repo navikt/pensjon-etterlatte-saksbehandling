@@ -54,8 +54,8 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
     setLaster(true)
 
     const brevMottaker: Mottaker = {
-      foedselsnummer: fnrMottaker,
-      orgnummer: orgMottaker,
+      foedselsnummer: fnrMottaker?.length ? fnrMottaker : undefined,
+      orgnummer: orgMottaker?.length ? orgMottaker : undefined,
       adresse: isEmptyAddressObject(adresse) ? undefined : adresse,
     }
 
@@ -84,8 +84,8 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
     setLaster(true)
 
     const brevMottaker: Mottaker = {
-      foedselsnummer: fnrMottaker,
-      orgnummer: orgMottaker,
+      foedselsnummer: fnrMottaker?.length ? fnrMottaker : undefined,
+      orgnummer: orgMottaker?.length ? orgMottaker : undefined,
       adresse: isEmptyAddressObject(adresse) ? undefined : adresse,
     }
 
@@ -108,26 +108,17 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
   }
 
   const oppdaterMottaker = (value: string, id: string, section?: string) => {
-    if (id === 'ORGNR') {
-      setFnrMottaker('')
-      setOrgMottaker(value)
-      setAdresse({})
-    }
-
-    if (id === 'FNR') {
-      setOrgMottaker('')
-      setFnrMottaker(value)
-      setAdresse({})
-    }
+    setFnrMottaker(id === 'FNR' ? value : '')
+    setOrgMottaker(id === 'ORGNR' ? value : '')
 
     if (id === 'ADRESSE') {
-      setOrgMottaker('')
-      setFnrMottaker('')
       if (section === 'fornavn') setAdresse({ ...adresse, fornavn: value })
       if (section === 'etternavn') setAdresse({ ...adresse, etternavn: value })
       if (section === 'adresse') setAdresse({ ...adresse, adresse: value })
       if (section === 'postnummer') setAdresse({ ...adresse, postnummer: value })
       if (section === 'poststed') setAdresse({ ...adresse, poststed: value })
+    } else {
+      setAdresse({})
     }
   }
 

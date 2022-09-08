@@ -78,7 +78,6 @@ data class Medlemsskapsunntak(
     val studieinformasjon: Studieinformasjon
 )
 
-
 data class Sporingsinformasjon(
     /*
     Versjonsnummeret på dette medlemskapsunntaket. Dette sier noe om hvor mange ganger unntaket har blitt endret.",
@@ -127,7 +126,6 @@ data class Sporingsinformasjon(
     */
     val sistEndretAv: String? = null
 )
-
 
 data class Studieinformasjon(
     /*

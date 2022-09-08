@@ -30,6 +30,9 @@ spec:
     application:
       enabled: true
       tenant: trygdeetaten.no
+      claims:
+        extra:
+          - NAVident
   accessPolicy:
     rules:
       - application: medlemskap-medl-api

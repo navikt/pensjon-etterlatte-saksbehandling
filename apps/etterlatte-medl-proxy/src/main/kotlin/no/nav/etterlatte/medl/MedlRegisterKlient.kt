@@ -46,5 +46,4 @@ class MedlRegisterKlient(
             throw e
         }
     }
-
 }

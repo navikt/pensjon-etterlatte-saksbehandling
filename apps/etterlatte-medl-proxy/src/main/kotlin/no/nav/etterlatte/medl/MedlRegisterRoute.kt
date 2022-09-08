@@ -29,7 +29,6 @@ fun Route.medlemsregisterApi(klient: MedlRegisterKlient) {
 
             call.respond(innsyn ?: HttpStatusCode.NotFound)
         }
-
     }
 }
 

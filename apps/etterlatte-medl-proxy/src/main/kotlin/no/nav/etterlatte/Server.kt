@@ -31,42 +31,49 @@ import org.slf4j.event.Level
 import java.util.UUID
 
 class Server(context: ApplicationContext) {
-    private val engine = embeddedServer(CIO, environment = applicationEngineEnvironment {
-        module {
-            install(ContentNegotiation) {
-                jackson {
-                    registerModule(JavaTimeModule())
-                    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    private val engine = embeddedServer(
+        CIO,
+        environment = applicationEngineEnvironment {
+            module {
+                install(ContentNegotiation) {
+                    jackson {
+                        registerModule(JavaTimeModule())
+                        disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                    }
+                }
+
+                install(CallLogging) {
+                    level = Level.INFO
+                    filter { call -> !call.request.path().startsWith("/health") }
+                    format { call ->
+                        "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}"
+                    }
+                    mdc(CORRELATION_ID) { call ->
+                        call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString()
+                    }
+                }
+
+                install(StatusPages) {
+                    exception<Throwable> { call, cause ->
+                        call.application.log.error("En feil oppstod: ${cause.message}", cause)
+                        call.respond(HttpStatusCode.InternalServerError, "En feil oppstod: ${cause.message}")
+                    }
+                }
+
+                install(Authentication) {
+                    tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
+                }
+
+                routing {
+                    healthApi()
+                    authenticate {
+                        medlemsregisterApi(context.medlService)
+                    }
                 }
             }
-
-            install(CallLogging) {
-                level = Level.INFO
-                filter { call -> !call.request.path().startsWith("/health") }
-                format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
-                mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
-            }
-
-            install(StatusPages) {
-                exception<Throwable> { call, cause ->
-                    call.application.log.error("En feil oppstod: ${cause.message}", cause)
-                    call.respond(HttpStatusCode.InternalServerError, "En feil oppstod: ${cause.message}")
-                }
-            }
-
-            install(Authentication) {
-                tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
-            }
-
-            routing {
-                healthApi()
-                authenticate {
-                    medlemsregisterApi(context.medlService)
-                }
-            }
+            connector { port = 8080 }
         }
-        connector { port = 8080 }
-    })
+    )
 
     fun run() = engine.start(true)
 }

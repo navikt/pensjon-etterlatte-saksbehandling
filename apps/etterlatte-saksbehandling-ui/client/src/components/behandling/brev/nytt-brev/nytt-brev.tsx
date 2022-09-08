@@ -7,6 +7,7 @@ import {
   hentForhaandsvisning,
   hentMaler,
   hentMottakere,
+  Mal,
   Mottaker,
   nyttBrevForBehandling,
 } from '../../../../shared/api/brev'
@@ -16,6 +17,7 @@ import { Column, GridContainer } from '../../../../shared/styled'
 import { PdfVisning } from '../pdf-visning'
 import { MottakerComponent } from './mottaker'
 import { isEmptyAddressObject } from './last-opp'
+import { IBrev } from '../index'
 
 const CustomModal = styled(Modal)`
   min-width: 540px;
@@ -28,7 +30,7 @@ interface DefaultMottaker {
   land?: string
 }
 
-export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => void }) {
+export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) => void }) {
   const { behandlingId } = useParams()
 
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -37,8 +39,8 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
   const [fnrMottaker, setFnrMottaker] = useState<string | undefined>(undefined)
   const [orgMottaker, setOrgMottaker] = useState<string | undefined>(undefined)
   const [mottakere, setMottakere] = useState<DefaultMottaker[]>([])
-  const [mal, setMal] = useState<any>(undefined)
-  const [maler, setMaler] = useState<any>([])
+  const [mal, setMal] = useState<string>()
+  const [maler, setMaler] = useState<Mal[]>([])
   const [laster, setLaster] = useState(false)
   const [error, setError] = useState<string>()
   const [fileURL, setFileURL] = useState<string>()
@@ -60,7 +62,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
     }
 
     hentForhaandsvisning(brevMottaker, {
-      tittel: maler.find((m: any) => m.navn === mal).tittel,
+      tittel: maler.find((m: Mal) => m.navn === mal)?.tittel,
       navn: mal,
     })
       .then((file) => URL.createObjectURL(file))
@@ -80,6 +82,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
 
   const opprett = () => {
     if (!mal) return
+    if (!maler) return
 
     setLaster(true)
 
@@ -90,7 +93,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
     }
 
     nyttBrevForBehandling(behandlingId!!, brevMottaker, {
-      tittel: maler.find((m: any) => m.navn === mal).tittel,
+      tittel: maler.find((m: Mal) => m.navn === mal)?.tittel,
       navn: mal,
     })
       .then((brev) => leggTilNytt(brev))
@@ -101,7 +104,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
         setLaster(false)
         setIsOpen(false)
         setKlarforLagring(false)
-        setMal(undefined)
+        setMal('')
         setError(undefined)
         setFileURL(undefined)
       })
@@ -141,12 +144,12 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
                 label={'Mal'}
                 size={'medium'}
                 onChange={(e) => {
-                  setMal(e.target.value)
+                  setMal(e.target.value ? e.target.value : '')
                   setKlarforLagring(false)
                 }}
               >
                 <option value={undefined} label={'Velg mal ...'} />
-                {maler.map((mal: any, i: number) => (
+                {maler.map((mal: Mal, i: number) => (
                   <option key={i} value={mal.navn}>
                     {mal.tittel}
                   </option>

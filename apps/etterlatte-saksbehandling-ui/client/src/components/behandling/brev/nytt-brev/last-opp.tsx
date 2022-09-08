@@ -8,6 +8,7 @@ import { Border } from '../../soeknadsoversikt/styled'
 import { Column, GridContainer } from '../../../../shared/styled'
 import { PdfVisning } from '../pdf-visning'
 import { MottakerComponent } from './mottaker'
+import { IBrev } from "../index";
 
 const CustomModal = styled(Modal)`
   min-width: 540px;
@@ -58,7 +59,7 @@ export const isEmptyAddressObject = (object?: Adresse): boolean => {
   return false
 }
 
-export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => void }) {
+export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) => void }) {
   const { behandlingId } = useParams()
 
   const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -70,7 +71,7 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: any) 
   const [laster, setLaster] = useState(false)
   const [error, setError] = useState<string>()
   const [filURL, setFilURL] = useState<string>()
-  const [valgtFil, setValgtFil] = useState<any>()
+  const [valgtFil, setValgtFil] = useState<undefined | File>()
   const [filTittel, setFilTittel] = useState<string>('')
   const [filNavn, setFilNavn] = useState<string>('')
 
@@ -92,7 +93,7 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: any) 
 
     const formData = new FormData()
 
-    formData.append('fil', valgtFil, valgtFil.name)
+    formData.append('fil', (valgtFil as Blob), valgtFil!!.name)
     formData.append('filData', JSON.stringify(filData))
 
     opprettBrevFraPDF(behandlingId!!, brevMottaker, formData)
@@ -109,7 +110,7 @@ export default function LastOppBrev({ leggTilNytt }: { leggTilNytt: (brev: any) 
         setFilURL(undefined)
         setFilNavn('')
         setFilTittel('')
-        setValgtFil(null)
+        setValgtFil(undefined)
       })
   }
 

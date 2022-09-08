@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemska
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vikaar.Metakriterie
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -19,14 +18,12 @@ internal class FinnOffentligeYtelserPerioderKtTest {
         val inntekter =
             objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(readFile(arbeidOpplysning))
         val arbeidsforhold = mockk<VilkaarOpplysning<ArbeidsforholdOpplysning>>()
-        val bosattNorge = mockk<Metakriterie>()
 
         return AvdoedesMedlemskapGrunnlag(
             inntekter,
             arbeidsforhold,
             null,
-            LocalDate.parse("2022-07-01"),
-            bosattNorge
+            LocalDate.parse("2022-07-01")
         )
     }
 

@@ -56,7 +56,6 @@ class VilkaarService {
             opplysninger,
             Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE
         )
-        // todo finn ut av hvordan vi kan lagre flere opplysninger av samme type til grunnlag
 
         val vilkaar = listOf(
             vilkaarFormaalForYtelsen(soekerPdl, virkningstidspunkt),

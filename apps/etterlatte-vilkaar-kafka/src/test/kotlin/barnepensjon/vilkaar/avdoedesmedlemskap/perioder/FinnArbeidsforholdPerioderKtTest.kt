@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vikaar.Metakriterie
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -20,14 +19,12 @@ internal class FinnArbeidsforholdPerioderKtTest {
         val arbeidsforhold =
             objectMapper.readValue<VilkaarOpplysning<ArbeidsforholdOpplysning>>(readFile(arbeidOpplysning))
         val inntekt = mockk<VilkaarOpplysning<InntektsOpplysning>>()
-        val bosattNorge = mockk<Metakriterie>()
 
         return AvdoedesMedlemskapGrunnlag(
             inntekt,
             arbeidsforhold,
             null,
-            LocalDate.parse("2022-07-01"),
-            bosattNorge
+            LocalDate.parse("2022-07-01")
         )
     }
 

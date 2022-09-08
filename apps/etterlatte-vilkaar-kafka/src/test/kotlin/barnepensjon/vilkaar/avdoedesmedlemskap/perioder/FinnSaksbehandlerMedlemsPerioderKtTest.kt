@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
-import no.nav.etterlatte.libs.common.vikaar.Metakriterie
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -23,7 +22,6 @@ internal class FinnSaksbehandlerMedlemsPerioderKtTest {
     private fun grunnlag(): AvdoedesMedlemskapGrunnlag {
         val arbeidsforhold = mockk<VilkaarOpplysning<ArbeidsforholdOpplysning>>()
         val inntekt = mockk<VilkaarOpplysning<InntektsOpplysning>>()
-        val bosattNorge = mockk<Metakriterie>()
 
         return AvdoedesMedlemskapGrunnlag(
             inntekt,
@@ -59,8 +57,7 @@ internal class FinnSaksbehandlerMedlemsPerioderKtTest {
                     )
                 )
             ),
-            LocalDate.parse("2022-07-01"),
-            bosattNorge
+            LocalDate.parse("2022-07-01")
         )
     }
 

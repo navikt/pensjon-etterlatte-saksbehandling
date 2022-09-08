@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
-import no.nav.etterlatte.libs.common.vikaar.Utfall
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
@@ -45,20 +44,46 @@ fun vilkaarAvdoedesMedlemskap(
         return VurdertVilkaar(
             Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
-            Utfall.TRENGER_AVKLARING,
+            null,
             emptyList(),
             LocalDateTime.now()
         )
     }
-    val doedsdato = hentDoedsdato(avdoedPdl!!)
-    val bosattNorge = metakriterieBosattNorge(avdoedSoeknad, avdoedPdl)
+
+    val bosattNorgeMetakriterie = metakriterieBosattNorge(avdoedSoeknad, avdoedPdl)
+
+    val medlemskapOffentligOgInntektKriterie = kriterieMedlemskapOffentligOgInntekt(
+        avdoedPdl!!,
+        inntektsOpplysning!!,
+        arbeidsforholdOpplysning!!,
+        saksbehandlerMedlemskapsPerioder
+    )
+
+    val vurderingsResultat =
+        hentVurdering(listOf(medlemskapOffentligOgInntektKriterie.resultat, bosattNorgeMetakriterie.resultat))
+
+    return VurdertVilkaar(
+        Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
+        vurderingsResultat,
+        bosattNorgeMetakriterie.utfall,
+        bosattNorgeMetakriterie.kriterie.plus(medlemskapOffentligOgInntektKriterie),
+        LocalDateTime.now()
+    )
+}
+
+fun kriterieMedlemskapOffentligOgInntekt(
+    avdoedPdl: VilkaarOpplysning<Person>,
+    inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>,
+    arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>,
+    saksbehandlerMedlemskapsperioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?
+): Kriterie {
+    val doedsdato = hentDoedsdato(avdoedPdl)
 
     val avdoedesMedlemskapGrunnlag = AvdoedesMedlemskapGrunnlag(
-        inntektsOpplysning = inntektsOpplysning!!,
-        arbeidsforholdOpplysning = arbeidsforholdOpplysning!!,
-        saksbehandlerMedlemsPerioder = saksbehandlerMedlemskapsPerioder,
-        doedsdato = doedsdato,
-        bosattNorge = bosattNorge
+        inntektsOpplysning = inntektsOpplysning,
+        arbeidsforholdOpplysning = arbeidsforholdOpplysning,
+        saksbehandlerMedlemsPerioder = saksbehandlerMedlemskapsperioder,
+        doedsdato = doedsdato
     )
 
     val ufoere = finnPensjonEllerTrygdePerioder(avdoedesMedlemskapGrunnlag, PeriodeType.UFOERETRYGD, "ufoeretrygd")
@@ -87,15 +112,8 @@ fun vilkaarAvdoedesMedlemskap(
         resultat = if (opplysning.gaps.isEmpty()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT,
         basertPaaOpplysninger = listOf(grunnlag)
     )
-    val vurderingsResultat = hentVurdering(listOf(kriterie.resultat, bosattNorge.resultat))
 
-    return VurdertVilkaar(
-        Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
-        VurderingsResultat.OPPFYLT, // todo fiks senere - må være oppfylt for å kunne vurdere for andre,
-        bosattNorge.utfall,
-        listOf(kriterie),
-        LocalDateTime.now()
-    )
+    return kriterie
 }
 
 fun finnGapsIGodkjentePerioder(

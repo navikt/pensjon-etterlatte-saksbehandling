@@ -3,7 +3,6 @@ package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
-import no.nav.etterlatte.libs.common.vikaar.Metakriterie
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import java.time.LocalDate
 import java.util.*
@@ -74,8 +73,7 @@ data class AvdoedesMedlemskapGrunnlag(
     val inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>,
     val arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>,
     val saksbehandlerMedlemsPerioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?,
-    val doedsdato: LocalDate,
-    val bosattNorge: Metakriterie
+    val doedsdato: LocalDate
 )
 
 data class Gap(

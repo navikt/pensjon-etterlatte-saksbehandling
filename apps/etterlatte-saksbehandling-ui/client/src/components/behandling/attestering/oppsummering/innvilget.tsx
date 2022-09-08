@@ -3,10 +3,33 @@ import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
 import { useContext } from 'react'
 import { AppContext } from '../../../../store/AppContext'
 import { formaterDato, formaterEnumTilLesbarString, formaterStringDato } from '../../../../utils/formattering'
+import { useVedtaksResultat, VedtakResultat } from '../../useVedtaksResultat'
+
+function innvilgelsestekst(vedtaksresultat: VedtakResultat): string {
+  switch (vedtaksresultat) {
+    case 'innvilget':
+      return 'Innvilget'
+    case 'opphoer':
+      return 'Opphørt'
+    case 'avslag':
+      return 'Avslått'
+    case 'endring':
+      return 'Revurdert'
+    case 'uavklart':
+      return 'Uavklart'
+  }
+}
+
+function Resultat({ vedtaksresultat }: { vedtaksresultat: VedtakResultat }) {
+  const tekst = innvilgelsestekst(vedtaksresultat)
+  const erInnvilget = vedtaksresultat !== 'uavklart' && vedtaksresultat !== 'avslag'
+  return <UnderOverskrift innvilget={erInnvilget}>{tekst}</UnderOverskrift>
+}
 
 export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const innloggetId = useContext(AppContext).state.saksbehandlerReducer.ident
   const virkningsdato = behandlingsInfo.virkningsdato ? formaterStringDato(behandlingsInfo.virkningsdato) : '-'
+  const vedtaksResultat = useVedtaksResultat()
   const attestertDato = behandlingsInfo.datoAttestert
     ? formaterStringDato(behandlingsInfo.datoAttestert)
     : formaterDato(new Date())
@@ -15,7 +38,7 @@ export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInf
     <>
       <Wrapper innvilget={true}>
         <Overskrift>{formaterEnumTilLesbarString(behandlingsInfo.type)}</Overskrift>
-        <UnderOverskrift innvilget={true}>Innvilget</UnderOverskrift>
+        <Resultat vedtaksresultat={vedtaksResultat} />
         <div className="flex">
           <div>
             <Info>Attestant</Info>

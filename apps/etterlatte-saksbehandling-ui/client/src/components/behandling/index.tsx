@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Routes, Route, useMatch, Navigate } from 'react-router-dom'
+import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import styled from 'styled-components'
 import { hentBehandling } from '../../shared/api/behandling'
 import { Column, GridContainer } from '../../shared/styled'
@@ -31,8 +31,9 @@ export const Behandling = () => {
     }
   }, [match?.params.behandlingId])
 
-  const soeker = ctx.state.behandlingReducer?.kommerSoekerTilgode?.familieforhold.soeker
+  const soeker = ctx.state.behandlingReducer?.kommerSoekerTilgode?.familieforhold?.soeker
   const soekerInfo = soeker ? { navn: soeker.navn, fnr: soeker.fnr, type: 'Etterlatt' } : null
+  const behandlingStatus = ctx.state.behandlingReducer?.status
 
   return (
     <>
@@ -47,7 +48,7 @@ export const Behandling = () => {
             </MenuHead>
             <StegMeny />
           </Column>
-          <RevurderingsAarsakModal />
+          <RevurderingsAarsakModal behandlingStatus={behandlingStatus} />
           <Column>
             <Routes>
               {behandlingRoutes.map((route) => {

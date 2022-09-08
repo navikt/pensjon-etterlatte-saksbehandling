@@ -40,11 +40,11 @@ class AvdoedesMedlemskapTest {
 
         assertEquals(VurderingsResultat.OPPFYLT, vurdertVilkaar.resultat)
         assertEquals(Utfall.OPPFYLT, vurdertVilkaar.utfall)
-        assertEquals(1, vurdertVilkaar.kriterier.size)
-        assertEquals(Kriterietyper.AVDOED_OPPFYLLER_MEDLEMSKAP, vurdertVilkaar.kriterier.first().navn)
-        assertEquals(VurderingsResultat.OPPFYLT, vurdertVilkaar.kriterier.first().resultat)
+        assertEquals(8, vurdertVilkaar.kriterier.size)
+        assertEquals(Kriterietyper.AVDOED_OPPFYLLER_MEDLEMSKAP, vurdertVilkaar.kriterier.last().navn)
+        assertEquals(VurderingsResultat.OPPFYLT, vurdertVilkaar.kriterier.last().resultat)
         val opplysning =
-            vurdertVilkaar.kriterier.first().basertPaaOpplysninger.first().opplysning as AvdoedesMedlemskapVurdering
+            vurdertVilkaar.kriterier.last().basertPaaOpplysninger.first().opplysning as AvdoedesMedlemskapVurdering
         assertEquals(0, opplysning.gaps.size)
         assertTrue(opplysning.perioder.isNotEmpty())
         assertTrue(opplysning.gaps.isEmpty())

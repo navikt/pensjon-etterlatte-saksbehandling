@@ -46,7 +46,7 @@ const knapptekstForStatus = (status: IBehandlingStatus): string => {
     case IBehandlingStatus.UNDER_BEHANDLING:
     case IBehandlingStatus.RETURNERT:
       return 'Start revurdering'
-    case IBehandlingStatus.GYLDIG_SOEKNAD:
+    case IBehandlingStatus.FATTET_VEDTAK:
       return 'Attester revurdering'
     default:
       return 'Se revurdering'

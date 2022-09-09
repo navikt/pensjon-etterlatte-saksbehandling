@@ -36,10 +36,11 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
      * @return birthdate as [LocalDate]
      */
     fun getBirthDate(): LocalDate {
-        val month = value.slice(2 until 4).toInt()
+        val fnrMonth = value.slice(2 until 4).toInt()
 
         val fnrDay = value.slice(0 until 2).toInt()
         val day = if (isDNumber()) fnrDay - 40 else fnrDay
+        val month = if (isHNumber()) fnrMonth - 40 else fnrMonth
 
         return LocalDate.of(getYearOfBirth(), month, day)
     }
@@ -67,7 +68,6 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
             in 0..499,
             in 900..999 -> "19"
             in 500..999 -> "20"
-            in 500..749 -> "18"
             else -> {
                 throw IllegalArgumentException("Ingen gyldig årstall funnet for individnummer $individnummer")
             }
@@ -87,6 +87,8 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
      *
      * H-nummer er et hjelpenummer, en virksomhetsintern, unik identifikasjon av en person som
      * ikke har fødselsnummer eller D-nummer eller hvor dette er ukjent.
+     *
+     * Brukes også for identer i test som er opprettet som "NAV syntetisk" i Dolly
      */
     private fun isHNumber(): Boolean = Character.getNumericValue(value[2]) >= 4
 
@@ -99,7 +101,7 @@ class Foedselsnummer private constructor(@JsonValue val value: String) {
 
     private fun isFhNumber(): Boolean = Character.getNumericValue(value[0]) in 8..9
 
-    override fun equals(other: Any?): Boolean = this.value == (other as Foedselsnummer?)?.value
+    override fun equals(other: Any?): Boolean = this.value == (other as? Foedselsnummer)?.value
 
     override fun hashCode(): Int = this.value.hashCode()
 

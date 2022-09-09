@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 internal class FoedselsnummerTest {
 
@@ -57,6 +58,14 @@ internal class FoedselsnummerTest {
                 { assertThrows<InvalidFoedselsnummer> { Foedselsnummer.of(it) } }
             }
         )
+    }
+
+    @Test
+    fun `fødselsmåned for H-identer finner fødselsdatoer riktig`() {
+        val hident = Foedselsnummer.of("18528117224")
+        val hidentForDnummer = Foedselsnummer.of("51447721728")
+        assertEquals(LocalDate.of(1981, 12, 18), hident.getBirthDate())
+        assertEquals(LocalDate.of(1977, 4, 11), hidentForDnummer.getBirthDate())
     }
 
     @Test

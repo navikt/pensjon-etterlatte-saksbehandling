@@ -42,6 +42,7 @@ const adresserMock: IAdresse[] = [
 const vilkaarMock: IVilkaarsproving = {
   navn: VilkaarsType.DOEDSFALL_ER_REGISTRERT,
   resultat: VurderingsResultat.OPPFYLT,
+  utfall: undefined,
   kriterier: [
     {
       navn: Kriterietype.DOEDSFALL_ER_REGISTRERT_I_PDL,

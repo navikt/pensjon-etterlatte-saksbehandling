@@ -8,7 +8,7 @@ import {
   KriterieOpplysningsType,
   Kriterietype,
 } from '../../../store/reducers/BehandlingReducer'
-import { IGap, IPeriode } from '../inngangsvilkaar/vilkaar/TidslinjeMedlemskap'
+import { IGap, IPeriode } from '../inngangsvilkaar/vilkaar/avdoedes_medlemskap/TidslinjeMedlemskap'
 
 export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: string | null): IAdresse[] {
   if (doedsdato == null) {

@@ -7,14 +7,14 @@ import {
   IVilkaarsproving,
   KriterieOpplysningsType,
   Kriterietype,
-} from '../../../../store/reducers/BehandlingReducer'
+} from '../../../../../store/reducers/BehandlingReducer'
 import {
   hentKriterierMedOpplysning,
   hentNorskeAdresser,
   hentUtlandskeAdresser,
   mapAdresseTilPerioderSeksAarFoerDoedsdato,
   mapGapsTilPerioder,
-} from '../../felles/utils'
+} from '../../../felles/utils'
 import { TidslinjeRad } from './TidslinjeRad'
 
 export interface IPeriode {
@@ -52,6 +52,14 @@ export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) 
   const femAarTidligere = format(sub(Date.parse(doedsdato), { years: 5 }), 'yyyy-MM-dd')
   const navnOgProsentPaaDatoer = aarIProsent(seksAarTidligere, doedsdato)
   const prosentStartDato = numberToProsentString(startdatoOffsetProsent(femAarTidligere, seksAarTidligere))
+
+  /*
+  const medlemskap: string | null = hentKriterierMedOpplysning(
+    vilkaar,
+    Kriterietype.AVDOED_OPPFYLLER_MEDLEMSKAP,
+    KriterieOpplysningsType.DOEDSDATO
+  )?.opplysning
+*/
 
   const adresseOpplysning: IKriterieOpplysning | undefined = hentKriterierMedOpplysning(
     vilkaar,

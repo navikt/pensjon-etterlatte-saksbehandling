@@ -1,12 +1,12 @@
 import { Button, Modal, Select, Textarea, TextField } from '@navikt/ds-react'
 import { useContext, useState } from 'react'
 import styled from 'styled-components'
-import { DatovelgerPeriode } from './DatovelgerPeriode'
-import { IPeriodeInput, IPeriodeInputErros, IPeriodeType } from '../types'
-import { hentBehandling, lagrePeriodeForAvdoedesMedlemskap } from '../../../../shared/api/behandling'
-import { AppContext } from '../../../../store/AppContext'
-import Spinner from '../../../../shared/Spinner'
-import { ErrorResponse } from '../../felles/ErrorResponse'
+import { DatovelgerPeriode } from '../DatovelgerPeriode'
+import { IPeriodeInput, IPeriodeInputErros, IPeriodeType } from '../../types'
+import { hentBehandling, lagrePeriodeForAvdoedesMedlemskap } from '../../../../../shared/api/behandling'
+import { AppContext } from '../../../../../store/AppContext'
+import Spinner from '../../../../../shared/Spinner'
+import { ErrorResponse } from '../../../felles/ErrorResponse'
 
 export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (value: boolean) => void }) => {
   const behandlingId = useContext(AppContext).state.behandlingReducer.id

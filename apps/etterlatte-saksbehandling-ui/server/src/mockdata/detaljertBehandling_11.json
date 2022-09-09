@@ -9,8 +9,12 @@
         "resultat": "IKKE_OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": ["22128202440"],
-            "foreldre": ["22128202440"],
+            "ansvarligeForeldre": [
+              "22128202440"
+            ],
+            "foreldre": [
+              "22128202440"
+            ],
             "barn": null
           },
           "innsender": {
@@ -30,8 +34,12 @@
         "resultat": "IKKE_OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": ["22128202440"],
-            "foreldre": ["22128202440"],
+            "ansvarligeForeldre": [
+              "22128202440"
+            ],
+            "foreldre": [
+              "22128202440"
+            ],
             "barn": null
           },
           "innsender": {
@@ -154,7 +162,10 @@
                   "type": "pdl"
                 },
                 "opplysning": {
-                  "foreldre": ["22128202440", "03108718357"]
+                  "foreldre": [
+                    "22128202440",
+                    "03108718357"
+                  ]
                 }
               },
               {
@@ -182,18 +193,18 @@
         "kriterier": [
           {
             "navn": "AVDOED_NORSK_STATSBORGER",
-            "resultat": "IKKE_OPPFYLT",
+            "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
                 "kriterieOpplysningsType": "STATSBORGERSKAP",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": "DAN"
+                "opplysning": "NOR"
               }
             ]
           },
@@ -202,51 +213,33 @@
             "resultat": "IKKE_OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
                 "kriterieOpplysningsType": "UTLAND",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
                 "opplysning": {
-                  "innflyttingTilNorge": [],
-                  "utflyttingFraNorge": []
-                }
-              }
-            ]
-          },
-          {
-            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD",
-            "resultat": "IKKE_OPPFYLT",
-            "basertPaaOpplysninger": [
-              {
-                "id": "551f5aeb-7ea7-4223-8dac-e735eb5ef840",
-                "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
-                "kilde": {
-                  "fnr": "03108718357",
-                  "mottatDato": "2022-02-14T14:37:24.573612786Z",
-                  "type": "privatperson"
-                },
-                "opplysning": {
-                  "harHattUtenlandsopphold": "JA",
-                  "opphold": [
+                  "innflyttingTilNorge": [
                     {
-                      "land": "Uganda",
-                      "fraDato": "2020-02-10",
-                      "tilDato": "2022-02-10",
-                      "oppholdsType": ["BODD"],
-                      "medlemFolketrygd": "VET_IKKE",
-                      "pensjonsutbetaling": null
+                      "fraflyttingsland": "SWE",
+                      "dato": "2012-12-23"
                     },
                     {
-                      "land": "Colombia",
-                      "fraDato": "2010-02-10",
-                      "tilDato": null,
-                      "oppholdsType": ["BODD"],
-                      "medlemFolketrygd": "VET_IKKE",
-                      "pensjonsutbetaling": null
+                      "fraflyttingsland": "Singapore",
+                      "dato": "2019-12-23"
+                    }
+                  ],
+                  "utflyttingFraNorge": [
+                    {
+                      "tilflyttingsland": "SWE",
+                      "dato": "2010-12-01"
+                    },
+                    {
+                      "tilflyttingsland": "Singapore",
+                      "dato": "2017-03-23"
                     }
                   ]
                 }
@@ -254,61 +247,52 @@
             ]
           },
           {
-            "navn": "AVDOED_KUN_NORSKE_BOSTEDSADRESSER",
-            "resultat": "IKKE_OPPFYLT",
+            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD",
+            "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "id": "50c6b495-ddd2-4fa5-8863-6d8ba865eb81",
+                "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
+                "kilde": {
+                  "fnr": "03108718357",
+                  "mottatDato": "2022-02-14T14:37:24.573612786Z",
+                  "type": "privatperson"
+                },
+                "opplysning": {
+                  "harHattUtenlandsopphold": "NEI",
+                  "opphold": null
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_KUN_NORSKE_BOSTEDSADRESSER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
                 "kriterieOpplysningsType": "ADRESSER",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
                 "opplysning": {
                   "bostedadresse": [
                     {
-                      "type": "UTENLANDSKADRESSE",
+                      "type": "VEGADRESSE",
                       "aktiv": true,
                       "coAdresseNavn": null,
-                      "adresseLinje1": "Danmarkveien 2A",
+                      "adresseLinje1": "Bøveien 937",
                       "adresseLinje2": null,
                       "adresseLinje3": null,
                       "postnr": "8475",
-                      "poststed": "København",
-                      "land": "DAN",
+                      "poststed": null,
+                      "land": null,
                       "kilde": "FREG",
-                      "gyldigFraOgMed": "2019-06-26",
+                      "gyldigFraOgMed": "1999-01-01T00:00:00",
                       "gyldigTilOgMed": null
-                    },
-                    {
-                      "type": "VEGADRESSE",
-                      "aktiv": false,
-                      "coAdresseNavn": null,
-                      "adresseLinje1": "Osloveien 2A",
-                      "adresseLinje2": null,
-                      "adresseLinje3": null,
-                      "postnr": "0485",
-                      "poststed": "Oslo",
-                      "land": null,
-                      "kilde": "FREG",
-                      "gyldigFraOgMed": "2018-06-25T00:00:00",
-                      "gyldigTilOgMed": "2019-06-25T00:00:00"
-                    },
-                    {
-                      "type": "VEGADRESSE",
-                      "aktiv": false,
-                      "coAdresseNavn": null,
-                      "adresseLinje1": "Osloveien 2A",
-                      "adresseLinje2": null,
-                      "adresseLinje3": null,
-                      "postnr": "0485",
-                      "poststed": "Oslo",
-                      "land": null,
-                      "kilde": "FREG",
-                      "gyldigFraOgMed": "2005-06-25T00:00:00",
-                      "gyldigTilOgMed": "2018-02-25T00:00:00"
                     }
                   ]
                 }
@@ -317,70 +301,44 @@
           },
           {
             "navn": "AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR",
-            "resultat": "IKKE_OPPFYLT",
+            "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
                 "kriterieOpplysningsType": "ADRESSER",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
                 "opplysning": {
                   "bostedadresse": [
                     {
-                      "type": "UTENLANDSKADRESSE",
+                      "type": "VEGADRESSE",
                       "aktiv": true,
                       "coAdresseNavn": null,
-                      "adresseLinje1": "Danmarkveien 2A",
+                      "adresseLinje1": "Bøveien 937",
                       "adresseLinje2": null,
                       "adresseLinje3": null,
                       "postnr": "8475",
-                      "poststed": "København",
-                      "land": "DAN",
+                      "poststed": null,
+                      "land": null,
                       "kilde": "FREG",
-                      "gyldigFraOgMed": "2019-06-26",
+                      "gyldigFraOgMed": "1999-01-01T00:00:00",
                       "gyldigTilOgMed": null
-                    },
-                    {
-                      "type": "VEGADRESSE",
-                      "aktiv": false,
-                      "coAdresseNavn": null,
-                      "adresseLinje1": "Osloveien 2A",
-                      "adresseLinje2": null,
-                      "adresseLinje3": null,
-                      "postnr": "0485",
-                      "poststed": "Oslo",
-                      "land": null,
-                      "kilde": "FREG",
-                      "gyldigFraOgMed": "2018-06-25T00:00:00",
-                      "gyldigTilOgMed": "2019-06-25T00:00:00"
-                    },
-                    {
-                      "type": "VEGADRESSE",
-                      "aktiv": false,
-                      "coAdresseNavn": null,
-                      "adresseLinje1": "Osloveien 2A",
-                      "adresseLinje2": null,
-                      "adresseLinje3": null,
-                      "postnr": "0485",
-                      "poststed": "Oslo",
-                      "land": null,
-                      "kilde": "FREG",
-                      "gyldigFraOgMed": "2005-06-25T00:00:00",
-                      "gyldigTilOgMed": "2018-02-25T00:00:00"
                     }
-                  ]
+                  ],
+                  "oppholdadresse": [],
+                  "kontaktadresse": []
                 }
               },
               {
-                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -388,24 +346,6 @@
                   "doedsdato": "2022-02-10",
                   "foedselsnummer": "22128202440"
                 }
-              },
-              {
-                "id": "2c833602-7564-48dc-b6d5-cb48030971ec",
-                "kriterieOpplysningsType": "ADRESSE_GAPS",
-                "kilde": {
-                  "navn": "vilkaarskomponenten",
-                  "type": "vilkaarskomponenten"
-                },
-                "opplysning": [
-                  {
-                    "gyldigFra": "2018-02-26",
-                    "gyldigTil": "2018-06-24"
-                  },
-                  {
-                    "gyldigFra": "2019-06-26",
-                    "gyldigTil": "2022-02-10"
-                  }
-                ]
               }
             ]
           },
@@ -414,15 +354,17 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
                 "kriterieOpplysningsType": "ADRESSER",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": [[]]
+                "opplysning": [
+                  []
+                ]
               }
             ]
           },
@@ -431,20 +373,123 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
                 "kriterieOpplysningsType": "ADRESSER",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": [[]]
+                "opplysning": [
+                  []
+                ]
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_OPPFYLLER_MEDLEMSKAP",
+            "resultat": "IKKE_OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "cfd162ff-e961-46c7-ae05-c54fcd01b0b1",
+                "kriterieOpplysningsType": "AVDOED_MEDLEMSKAP",
+                "kilde": {
+                  "navn": "vilkaarskomponenten",
+                  "type": "vilkaarskomponenten"
+                },
+                "opplysning": {
+                  "grunnlag": {
+                    "inntektsOpplysning": {
+                      "id": "7b45afd5-7724-41e9-8411-79813d7b442b",
+                      "opplysningType": "AVDOED_INNTEKT_V1",
+                      "kilde": {
+                        "navn": "Inntektskomponenten",
+                        "type": "inntektskomponenten"
+                      },
+                      "opplysning": {
+                        "pensjonEllerTrygd": [],
+                        "ytelseFraOffentlig": [],
+                        "loennsinntekt": [],
+                        "naeringsinntekt": []
+                      }
+                    },
+                    "arbeidsforholdOpplysning": {
+                      "id": "77f59425-7f0b-4a0f-b729-336e1c184fc0",
+                      "opplysningType": "ARBEIDSFORHOLD_V1",
+                      "kilde": {
+                        "navn": "Aareg",
+                        "type": "Aareg"
+                      },
+                      "opplysning": {
+                        "arbeidsforhold": []
+                      }
+                    },
+                    "saksbehandlerMedlemsPerioder": {
+                      "id": "ba18ad60-9459-4bfa-8d3d-b601f79fc8d3",
+                      "opplysningType": "SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE",
+                      "kilde": {
+                        "ident": "Z994641",
+                        "tidspunkt": "2022-09-09T08:14:46.061583360Z",
+                        "type": "saksbehandler"
+                      },
+                      "opplysning": {
+                        "perioder": [
+                          {
+                            "id": "",
+                            "periodeType": "ALDERSPENSJON",
+                            "kilde": {
+                              "ident": "Z994641",
+                              "tidspunkt": "2022-09-09T08:14:45.259402121Z",
+                              "type": "saksbehandler"
+                            },
+                            "arbeidsgiver": null,
+                            "stillingsprosent": "",
+                            "begrunnelse": "",
+                            "oppgittKilde": "register",
+                            "fraDato": "2020-05-31",
+                            "tilDato": "2021-09-06"
+                          }
+                        ]
+                      }
+                    },
+                    "doedsdato": "2022-02-10"
+                  },
+                  "perioder": [
+                    {
+                      "id": "",
+                      "periodeType": "ALDERSPENSJON",
+                      "kilde": {
+                        "ident": "Z994641",
+                        "tidspunkt": "2022-09-09T08:14:45.259402121Z",
+                        "type": "saksbehandler"
+                      },
+                      "arbeidsgiver": null,
+                      "stillingsprosent": "",
+                      "begrunnelse": "",
+                      "oppgittKilde": "register",
+                      "fraDato": "2020-05-31",
+                      "tilDato": "2021-09-06",
+                      "beskrivelse": null,
+                      "godkjentPeriode": true
+                    }
+                  ],
+                  "gaps": [
+                    {
+                      "fraDato": "2017-02-10",
+                      "tilDato": "2020-05-30"
+                    },
+                    {
+                      "fraDato": "2021-09-07",
+                      "tilDato": "2022-02-10"
+                    }
+                  ]
+                }
               }
             ]
           }
         ],
-        "vurdertDato": "2022-08-15T09:27:46.092452916"
+        "vurdertDato": "2022-09-09T10:14:46.451435982"
       },
       {
         "navn": "BARNETS_MEDLEMSKAP",

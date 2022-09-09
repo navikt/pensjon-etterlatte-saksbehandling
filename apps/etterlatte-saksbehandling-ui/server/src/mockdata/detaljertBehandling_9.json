@@ -9,8 +9,14 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": ["22128202440", "03108718357"],
-            "foreldre": ["22128202440", "03108718357"],
+            "ansvarligeForeldre": [
+              "22128202440",
+              "03108718357"
+            ],
+            "foreldre": [
+              "22128202440",
+              "03108718357"
+            ],
             "barn": null
           },
           "innsender": {
@@ -30,8 +36,14 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": ["22128202440", "03108718357"],
-            "foreldre": ["22128202440", "03108718357"],
+            "ansvarligeForeldre": [
+              "22128202440",
+              "03108718357"
+            ],
+            "foreldre": [
+              "22128202440",
+              "03108718357"
+            ],
             "barn": null
           },
           "innsender": {
@@ -160,7 +172,10 @@
                   "type": "pdl"
                 },
                 "opplysning": {
-                  "foreldre": ["22128202440", "03108718357"]
+                  "foreldre": [
+                    "22128202440",
+                    "03108718357"
+                  ]
                 }
               },
               {
@@ -183,7 +198,7 @@
       },
       {
         "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
-        "resultat": "OPPFYLT",
+        "resultat": "IKKE_OPPFYLT",
         "utfall": "OPPFYLT",
         "kriterier": [
           {
@@ -191,11 +206,11 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
                 "kriterieOpplysningsType": "STATSBORGERSKAP",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -208,11 +223,11 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
                 "kriterieOpplysningsType": "UTLAND",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -228,7 +243,7 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "df53e17e-d725-433d-978c-b9731d3a2295",
+                "id": "50c6b495-ddd2-4fa5-8863-6d8ba865eb81",
                 "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
                 "kilde": {
                   "fnr": "03108718357",
@@ -247,11 +262,11 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
                 "kriterieOpplysningsType": "ADRESSER",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -281,11 +296,11 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
                 "kriterieOpplysningsType": "ADRESSER",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -311,11 +326,11 @@
                 }
               },
               {
-                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
                 "kriterieOpplysningsType": "DOEDSDATO",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
@@ -331,15 +346,17 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
                 "kriterieOpplysningsType": "ADRESSER",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": [[]]
+                "opplysning": [
+                  []
+                ]
               }
             ]
           },
@@ -348,20 +365,123 @@
             "resultat": "OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "6283f52f-4a16-4018-be82-62f2545c1258",
+                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
                 "kriterieOpplysningsType": "ADRESSER",
                 "kilde": {
                   "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-08-15T07:27:43.064100895Z",
+                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": [[]]
+                "opplysning": [
+                  []
+                ]
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_OPPFYLLER_MEDLEMSKAP",
+            "resultat": "IKKE_OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "cfd162ff-e961-46c7-ae05-c54fcd01b0b1",
+                "kriterieOpplysningsType": "AVDOED_MEDLEMSKAP",
+                "kilde": {
+                  "navn": "vilkaarskomponenten",
+                  "type": "vilkaarskomponenten"
+                },
+                "opplysning": {
+                  "grunnlag": {
+                    "inntektsOpplysning": {
+                      "id": "7b45afd5-7724-41e9-8411-79813d7b442b",
+                      "opplysningType": "AVDOED_INNTEKT_V1",
+                      "kilde": {
+                        "navn": "Inntektskomponenten",
+                        "type": "inntektskomponenten"
+                      },
+                      "opplysning": {
+                        "pensjonEllerTrygd": [],
+                        "ytelseFraOffentlig": [],
+                        "loennsinntekt": [],
+                        "naeringsinntekt": []
+                      }
+                    },
+                    "arbeidsforholdOpplysning": {
+                      "id": "77f59425-7f0b-4a0f-b729-336e1c184fc0",
+                      "opplysningType": "ARBEIDSFORHOLD_V1",
+                      "kilde": {
+                        "navn": "Aareg",
+                        "type": "Aareg"
+                      },
+                      "opplysning": {
+                        "arbeidsforhold": []
+                      }
+                    },
+                    "saksbehandlerMedlemsPerioder": {
+                      "id": "ba18ad60-9459-4bfa-8d3d-b601f79fc8d3",
+                      "opplysningType": "SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE",
+                      "kilde": {
+                        "ident": "Z994641",
+                        "tidspunkt": "2022-09-09T08:14:46.061583360Z",
+                        "type": "saksbehandler"
+                      },
+                      "opplysning": {
+                        "perioder": [
+                          {
+                            "id": "",
+                            "periodeType": "ALDERSPENSJON",
+                            "kilde": {
+                              "ident": "Z994641",
+                              "tidspunkt": "2022-09-09T08:14:45.259402121Z",
+                              "type": "saksbehandler"
+                            },
+                            "arbeidsgiver": null,
+                            "stillingsprosent": "",
+                            "begrunnelse": "",
+                            "oppgittKilde": "register",
+                            "fraDato": "2020-05-31",
+                            "tilDato": "2021-09-06"
+                          }
+                        ]
+                      }
+                    },
+                    "doedsdato": "2022-02-10"
+                  },
+                  "perioder": [
+                    {
+                      "id": "",
+                      "periodeType": "ALDERSPENSJON",
+                      "kilde": {
+                        "ident": "Z994641",
+                        "tidspunkt": "2022-09-09T08:14:45.259402121Z",
+                        "type": "saksbehandler"
+                      },
+                      "arbeidsgiver": null,
+                      "stillingsprosent": "",
+                      "begrunnelse": "",
+                      "oppgittKilde": "register",
+                      "fraDato": "2020-05-31",
+                      "tilDato": "2021-09-06",
+                      "beskrivelse": null,
+                      "godkjentPeriode": true
+                    }
+                  ],
+                  "gaps": [
+                    {
+                      "fraDato": "2017-02-10",
+                      "tilDato": "2020-05-30"
+                    },
+                    {
+                      "fraDato": "2021-09-07",
+                      "tilDato": "2022-02-10"
+                    }
+                  ]
+                }
               }
             ]
           }
         ],
-        "vurdertDato": "2022-08-15T09:27:46.092452916"
+        "vurdertDato": "2022-09-09T10:14:46.451435982"
       },
       {
         "navn": "BARNETS_MEDLEMSKAP",
@@ -804,8 +924,14 @@
               "utflyttingFraNorge": []
             },
             "familieRelasjon": {
-              "ansvarligeForeldre": ["22128202440", "03108718357"],
-              "foreldre": ["22128202440", "03108718357"],
+              "ansvarligeForeldre": [
+                "22128202440",
+                "03108718357"
+              ],
+              "foreldre": [
+                "22128202440",
+                "03108718357"
+              ],
               "barn": null
             },
             "avdoedesBarn": null,
@@ -1072,7 +1198,10 @@
         "familieRelasjon": {
           "ansvarligeForeldre": null,
           "foreldre": null,
-          "barn": ["12101376212", "03108718357"]
+          "barn": [
+            "12101376212",
+            "03108718357"
+          ]
         }
       }
     }

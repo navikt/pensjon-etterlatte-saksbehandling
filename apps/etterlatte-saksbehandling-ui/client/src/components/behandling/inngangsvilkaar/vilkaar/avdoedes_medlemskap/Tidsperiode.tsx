@@ -1,14 +1,14 @@
-import { OfficeIcon } from '../../../../shared/icons/officeIcon'
-import { HomeIcon } from '../../../../shared/icons/homeIcon'
+import { OfficeIcon } from '../../../../../shared/icons/officeIcon'
+import { HomeIcon } from '../../../../../shared/icons/homeIcon'
 import styled from 'styled-components'
-import { InformationIcon } from '../../../../shared/icons/informationIcon'
+import { InformationIcon } from '../../../../../shared/icons/informationIcon'
 import { IPeriode } from './TidslinjeMedlemskap'
 import { useRef, useState } from 'react'
 import { Popover } from '@navikt/ds-react'
-import { formaterStringDato } from '../../../../utils/formattering'
-import { hentKildenavn } from './utils'
-import { CloseIcon } from '../../../../shared/icons/closeIcon'
-import '../../../../index.css'
+import { formaterStringDato } from '../../../../../utils/formattering'
+import { hentKildenavn } from '../utils'
+import { CloseIcon } from '../../../../../shared/icons/closeIcon'
+import '../../../../../index.css'
 
 export const Tidsperiode = ({
   periode,

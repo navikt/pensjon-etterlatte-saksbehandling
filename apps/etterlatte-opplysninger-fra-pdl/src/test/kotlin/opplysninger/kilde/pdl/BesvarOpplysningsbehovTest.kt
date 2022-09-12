@@ -3,14 +3,14 @@ package opplysninger.kilde.pdl
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
 import no.nav.etterlatte.opplysninger.kilde.pdl.BesvarOpplysningsbehov
-import no.nav.etterlatte.opplysninger.kilde.pdl.OpplysningDTO
 import no.nav.etterlatte.opplysninger.kilde.pdl.Pdl
-import no.nav.etterlatte.opplysninger.kilde.pdl.PersonDTO
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

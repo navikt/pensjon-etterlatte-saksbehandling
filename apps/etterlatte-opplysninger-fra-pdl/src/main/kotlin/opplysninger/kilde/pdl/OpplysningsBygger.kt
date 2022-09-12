@@ -2,7 +2,10 @@ package no.nav.etterlatte.opplysninger.kilde.pdl
 
 import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import java.time.Instant
@@ -36,7 +39,7 @@ fun lagOpplysninger(
             Opplysningstyper.NAVN,
 
             OpplysningDTO(
-                OpplysningNavn(fornavn = person.fornavn.verdi, etternavn = person.etternavn.verdi),
+                Navn(fornavn = person.fornavn.verdi, etternavn = person.etternavn.verdi),
                 person.fornavn.opplysningsid
             ),
             fnr
@@ -56,11 +59,6 @@ fun lagOpplysninger(
 
     return periodiserteOpplysninger + statiskeOpplysninger
 }
-
-data class OpplysningNavn(
-    val fornavn: String,
-    val etternavn: String
-)
 
 fun <T> lagPersonOpplysning(
     opplysningsType: Opplysningstyper,

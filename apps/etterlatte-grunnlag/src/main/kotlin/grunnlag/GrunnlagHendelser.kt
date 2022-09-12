@@ -60,7 +60,7 @@ class GrunnlagHendelser(
 
                     grunnlagService.lagreNyeOpplysninger(
                         sakId,
-                        Foedselsnummer.of(packet["fnr"].textValue()),
+                        packet["fnr"].textValue()?.let { Foedselsnummer.of(it) },
                         opplysninger
                     )
 

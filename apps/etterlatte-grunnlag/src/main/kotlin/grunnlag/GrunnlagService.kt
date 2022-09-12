@@ -14,7 +14,7 @@ import rapidsandrivers.vedlikehold.VedlikeholdService
 interface GrunnlagService {
     fun hentGrunnlag(sak: Long): Grunnlag
     fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstyper): Grunnlagsopplysning<JsonNode>?
-    fun lagreNyeOpplysninger(sak: Long, fnr: Foedselsnummer, nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>)
+    fun lagreNyeOpplysninger(sak: Long, fnr: Foedselsnummer?, nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>)
     fun hentOpplysningsgrunnlag(sak: Long): Opplysningsgrunnlag
 }
 
@@ -49,7 +49,7 @@ class RealGrunnlagService(private val opplysninger: OpplysningDao) : GrunnlagSer
 
     override fun lagreNyeOpplysninger(
         sak: Long,
-        fnr: Foedselsnummer,
+        fnr: Foedselsnummer?,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>
     ) {
         logger.info("Oppretter et grunnlag")

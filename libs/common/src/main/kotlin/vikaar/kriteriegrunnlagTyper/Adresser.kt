@@ -11,3 +11,7 @@ data class Adresser(
 data class Bostedadresser(
     val bostedadresse: List<Adresse>?
 )
+
+data class AdresseListe(
+    val adresser: List<Adresse>?
+)

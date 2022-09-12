@@ -12,6 +12,7 @@ data class Kriteriegrunnlag<T>(
 
 enum class KriterieOpplysningsType {
     ADRESSER,
+    ADRESSELISTE,
     DOEDSDATO,
     FOEDSELSDATO,
     FORELDRE,

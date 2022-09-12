@@ -12,8 +12,8 @@ import no.nav.etterlatte.barnepensjon.hentOppholdsAdresser
 import no.nav.etterlatte.barnepensjon.kombinerPerioder
 import no.nav.etterlatte.barnepensjon.opplysningsGrunnlagNull
 import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraKriterier
+import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AdresseListe
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Bostedadresser
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.person.Person
@@ -46,7 +46,7 @@ fun metakriterieBosattNorge(
         kriterieKunNorskeBostedsadresserSisteFemAar(avdoedPdl, Kriterietyper.AVDOED_KUN_NORSKE_BOSTEDSADRESSER)
 
     val sammenhengendeBostedsadresserINorgeSisteFemAar =
-        kriterieSammenhengendeAdresserINorgeSisteFemAar(
+        kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
             avdoedPdl,
             Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
         )
@@ -199,9 +199,9 @@ fun kriterieKunNorskeBostedsadresserSisteFemAar(
         avdoedPdl?.let {
             Kriteriegrunnlag(
                 avdoedPdl.id,
-                KriterieOpplysningsType.ADRESSER,
+                KriterieOpplysningsType.ADRESSELISTE,
                 avdoedPdl.kilde,
-                Bostedadresser(it.opplysning.bostedsadresse)
+                AdresseListe(it.opplysning.bostedsadresse)
             )
         }
     )
@@ -227,9 +227,9 @@ fun kriterieKunNorskeOppholdsadresserSisteFemAar(
         avdoedPdl?.let {
             Kriteriegrunnlag(
                 avdoedPdl.id,
-                KriterieOpplysningsType.ADRESSER,
+                KriterieOpplysningsType.ADRESSELISTE,
                 avdoedPdl.kilde,
-                listOf(it.opplysning.oppholdsadresse)
+                AdresseListe(it.opplysning.oppholdsadresse)
             )
         }
     )
@@ -255,9 +255,9 @@ fun kriterieKunNorskeKontaktadresserSisteFemAar(
         avdoedPdl?.let {
             Kriteriegrunnlag(
                 avdoedPdl.id,
-                KriterieOpplysningsType.ADRESSER,
+                KriterieOpplysningsType.ADRESSELISTE,
                 avdoedPdl.kilde,
-                listOf(it.opplysning.kontaktadresse)
+                AdresseListe(it.opplysning.kontaktadresse)
             )
         }
     )
@@ -275,7 +275,7 @@ fun kriterieKunNorskeKontaktadresserSisteFemAar(
     }
 }
 
-fun kriterieSammenhengendeAdresserINorgeSisteFemAar(
+fun kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
     avdoedPdl: VilkaarOpplysning<Person>?,
     kriterietype: Kriterietyper
 ): Kriterie {
@@ -285,7 +285,7 @@ fun kriterieSammenhengendeAdresserINorgeSisteFemAar(
                 avdoedPdl.id,
                 KriterieOpplysningsType.ADRESSER,
                 avdoedPdl.kilde,
-                Adresser(it.opplysning.bostedsadresse, it.opplysning.oppholdsadresse, it.opplysning.kontaktadresse)
+                Adresser(it.opplysning.bostedsadresse, null, null)
             )
         },
         avdoedPdl?.let {

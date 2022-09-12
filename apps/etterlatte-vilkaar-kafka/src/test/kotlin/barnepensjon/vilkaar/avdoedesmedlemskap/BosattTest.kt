@@ -184,25 +184,25 @@ class BosattTest {
         val avdoedPdlUtlandFoerFemAar = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, adresseUtlandFoerFemAar(), null)
 
         val utenlandsopphold =
-            kriterieSammenhengendeAdresserINorgeSisteFemAar(
+            kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
                 mapTilVilkaarstypePerson(avdoedPdlMedUtland),
                 Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
             )
 
         val ingenUtenlandsopphold =
-            kriterieSammenhengendeAdresserINorgeSisteFemAar(
+            kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
                 mapTilVilkaarstypePerson(avdoedPdlUtenUtland),
                 Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
             )
 
         val utenlandsoppholdFoerFemAar =
-            kriterieSammenhengendeAdresserINorgeSisteFemAar(
+            kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
                 mapTilVilkaarstypePerson(avdoedPdlUtlandFoerFemAar),
                 Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
             )
 
         val ingenAdresser =
-            kriterieSammenhengendeAdresserINorgeSisteFemAar(
+            kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
                 mapTilVilkaarstypePerson(avdoedPdlUtenAdresse),
                 Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
             )

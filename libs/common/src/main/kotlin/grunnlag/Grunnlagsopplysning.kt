@@ -31,6 +31,8 @@ open class Grunnlagsopplysning<T>(
         JsonSubTypes.Type(value = Saksbehandler::class, name = "saksbehandler"),
         JsonSubTypes.Type(value = Privatperson::class, name = "privatperson"),
         JsonSubTypes.Type(value = Pdl::class, name = "pdl"),
+        JsonSubTypes.Type(value = Aordningen::class, name = "a-ordningen"),
+        JsonSubTypes.Type(value = AAregisteret::class, name = "aa-registeret"),
         JsonSubTypes.Type(value = Inntektskomponenten::class, name = "inntektskomponenten"),
         JsonSubTypes.Type(value = Aregisteret::class, name = "Aareg"),
         JsonSubTypes.Type(value = RegelKilde::class, name = "regel"),
@@ -54,12 +56,18 @@ open class Grunnlagsopplysning<T>(
         }
     }
 
+    class Aordningen(val tidspunkt: Instant) : Kilde("a-ordningen")
+
+    class AAregisteret(val tidspunkt: Instant) : Kilde("aa-registeret")
+
+    // Depricated: Beholdes litt for å ikke brekke gamle saker/behandlinger.
     class Inntektskomponenten(val navn: String) : Kilde("inntektskomponenten") {
         override fun toString(): String {
             return navn
         }
     }
 
+    // Depricated: Beholdes litt for å ikke brekke gamle saker/behandlinger.
     class Aregisteret(val navn: String) : Kilde("Aareg") {
         override fun toString(): String {
             return navn

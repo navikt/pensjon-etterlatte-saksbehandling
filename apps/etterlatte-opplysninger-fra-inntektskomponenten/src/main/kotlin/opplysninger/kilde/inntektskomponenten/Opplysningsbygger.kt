@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.inntekt.ArbeidsInntektMaaned
 import no.nav.etterlatte.libs.common.inntekt.InntektType
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
+import java.time.Instant
 import java.util.*
 
 class OpplysningsByggerService : OpplysningsBygger {
@@ -28,13 +29,13 @@ class OpplysningsByggerService : OpplysningsBygger {
 
         val inntektsOpplysning = lagOpplysning(
             opplysningsType = Opplysningstyper.AVDOED_INNTEKT_V1,
-            kilde = Grunnlagsopplysning.Inntektskomponenten("Inntektskomponenten"),
+            kilde = Grunnlagsopplysning.Aordningen(Instant.now()),
             opplysning = inntekter
         )
 
         val arbeidsforholdOpplysning = lagOpplysning(
             Opplysningstyper.ARBEIDSFORHOLD_V1,
-            Grunnlagsopplysning.Aregisteret("Aareg"),
+            Grunnlagsopplysning.AAregisteret(Instant.now()),
             ArbeidsforholdOpplysning(arbeidsforholdListe)
         )
         return listOf(inntektsOpplysning, arbeidsforholdOpplysning)

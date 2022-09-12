@@ -1,16 +1,16 @@
 package no.nav.etterlatte.pdl.mapper
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
-import no.nav.etterlatte.pdl.OpplysningDTO
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlKlient
-import no.nav.etterlatte.pdl.PersonDTO
 
 object PersonMapper {
 

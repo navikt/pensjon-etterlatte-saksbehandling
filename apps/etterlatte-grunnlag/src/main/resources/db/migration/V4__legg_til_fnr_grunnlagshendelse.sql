@@ -1,2 +1,2 @@
 ALTER TABLE grunnlagshendelse
-ADD fnr text
+ADD if not exists fnr text

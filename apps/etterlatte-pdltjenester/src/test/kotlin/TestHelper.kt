@@ -5,6 +5,8 @@ import io.ktor.server.application.Application
 import io.ktor.server.routing.Route
 import no.nav.etterlatte.ktortokenexchange.SecurityContextMediator
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
@@ -12,8 +14,6 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
-import no.nav.etterlatte.pdl.OpplysningDTO
-import no.nav.etterlatte.pdl.PersonDTO
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*

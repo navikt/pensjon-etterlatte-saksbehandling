@@ -14,7 +14,7 @@ import java.util.*
 open class Grunnlagsopplysning<T>(
     val id: UUID,
     val kilde: Kilde,
-    val opplysningType: Opplysningstyper, // Navn
+    val opplysningType: Opplysningstyper,
     val meta: ObjectNode,
     val opplysning: T,
     val attestering: Kilde? = null,

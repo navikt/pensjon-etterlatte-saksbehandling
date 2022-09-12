@@ -1,5 +1,6 @@
 package no.nav.etterlatte.person
 
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdentRequest
@@ -7,7 +8,6 @@ import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
-import no.nav.etterlatte.pdl.PersonDTO
 import no.nav.etterlatte.pdl.mapper.PersonMapper
 import org.slf4j.LoggerFactory
 

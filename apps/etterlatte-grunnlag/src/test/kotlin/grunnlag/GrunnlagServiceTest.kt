@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -34,7 +35,7 @@ internal class GrunnlagServiceTest {
                     Opplysningstyper.NAVN,
                     kilde1,
                     fnr = søker.foedselsnummer,
-                    verdi = objectMapper.valueToTree(søker.fornavn)
+                    verdi = objectMapper.valueToTree(Navn(søker.fornavn, søker.etternavn))
                 ),
                 1,
                 1
@@ -59,7 +60,7 @@ internal class GrunnlagServiceTest {
                 søker = mapOf(
                     Opplysningstyper.NAVN to Opplysning.Konstant(
                         kilde = kilde1,
-                        verdi = objectMapper.valueToTree(søker.fornavn)
+                        verdi = objectMapper.valueToTree(Navn(søker.fornavn, søker.etternavn))
                     ),
                     Opplysningstyper.FOEDSELSDATO to Opplysning.Konstant(
                         kilde = kilde2,

@@ -26,6 +26,7 @@ import {
 } from '../../../../../store/reducers/BehandlingReducer'
 import { hentKriterie, hentKriterierMedOpplysning } from '../../../felles/utils'
 import { InnOgUtvandring } from './InnOgUtvandring'
+import { VilkaarVurderingEnkeltElement } from '../VilkaarVurderingsliste'
 
 export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
@@ -43,6 +44,29 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
     KriterieOpplysningsType.AVDOED_UTENLANDSOPPHOLD
   )
 
+  function lagVilkaarVisningUtland() {
+    //todo: legg til MEDL her når det er klart
+    const utlandKriterierResultater: VurderingsResultat[] = [
+      hentKriterie(vilkaar, Kriterietype.AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD),
+      hentKriterie(vilkaar, Kriterietype.AVDOED_NORSK_STATSBORGER),
+      hentKriterie(vilkaar, Kriterietype.AVDOED_INGEN_INN_ELLER_UTVANDRING),
+      hentKriterie(vilkaar, Kriterietype.AVDOED_KUN_NORSKE_BOSTEDSADRESSER),
+    ]
+      .map((kriterie) => kriterie?.resultat)
+      .filter((kriterie) => kriterie !== undefined) as VurderingsResultat[]
+
+    const tittel = 'Utlandsopphold'
+    let svar
+    if (utlandKriterierResultater.includes(VurderingsResultat.IKKE_OPPFYLT)) {
+      svar = 'Avdøde har indikasjoner på utlandsopphold. Må behandles i psys. '
+    } else if (utlandKriterierResultater.includes(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING)) {
+      svar = 'Mangler opplysninger om utlandsopphold. Må avklares. '
+    } else {
+      svar = 'Avdøde har ingen indikasjoner på utlandsopphold. '
+    }
+    return <VilkaarVurderingEnkeltElement tittel={tittel} svar={svar} />
+  }
+
   return (
     <VilkaarBorder id={props.id}>
       <Innhold>
@@ -57,11 +81,17 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
             <VilkaarColumn>
               <div>
                 <strong>Statsborgerskap</strong>
-                <div>{statsborgerskap?.opplysning}</div>
-                <KildeDatoOpplysning
-                  type={statsborgerskap?.kilde.type}
-                  dato={statsborgerskap?.kilde.tidspunktForInnhenting}
-                />
+                {statsborgerskap?.opplysning ? (
+                  <>
+                    <div>{statsborgerskap?.opplysning}</div>
+                    <KildeDatoOpplysning
+                      type={statsborgerskap?.kilde.type}
+                      dato={statsborgerskap?.kilde.tidspunktForInnhenting}
+                    />
+                  </>
+                ) : (
+                  <div className="missing">Mangler</div>
+                )}
               </div>
             </VilkaarColumn>
 
@@ -79,6 +109,7 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
               </VilkaarColumn>
             )}
           </VilkaarInfobokser>
+
           {vilkaar != undefined && (
             <VilkaarVurderingColumn>
               <VilkaarVurderingContainer>
@@ -86,10 +117,12 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
                   <StatusIcon status={vilkaar.resultat} large={true} /> {vilkaarErOppfylt(vilkaar.resultat)}
                 </VilkaarlisteTitle>
                 <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
+                {lagVilkaarVisningUtland()}
               </VilkaarVurderingContainer>
             </VilkaarVurderingColumn>
           )}
         </VilkaarWrapper>
+
         {vilkaar != undefined ? (
           <>
             <TidslinjeMedlemskap vilkaar={vilkaar} />

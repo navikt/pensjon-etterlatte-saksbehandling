@@ -106,12 +106,12 @@
       },
       {
         "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
-        "resultat": "IKKE_OPPFYLT",
+        "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
         "utfall": "OPPFYLT",
         "kriterier": [
           {
             "navn": "AVDOED_NORSK_STATSBORGER",
-            "resultat": "OPPFYLT",
+            "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
             "basertPaaOpplysninger": [
               {
                 "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
@@ -122,29 +122,14 @@
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": "NOR"
+                "opplysning": null
               }
             ]
           },
           {
             "navn": "AVDOED_INGEN_INN_ELLER_UTVANDRING",
-            "resultat": "OPPFYLT",
-            "basertPaaOpplysninger": [
-              {
-                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
-                "kriterieOpplysningsType": "UTLAND",
-                "kilde": {
-                  "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
-                  "registersReferanse": null,
-                  "type": "pdl"
-                },
-                "opplysning": {
-                  "innflyttingTilNorge": [],
-                  "utflyttingFraNorge": []
-                }
-              }
-            ]
+            "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
+            "basertPaaOpplysninger": []
           },
           {
             "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD",

@@ -37,19 +37,28 @@ export const InnOgUtvandring = ({ vilkaar }: { vilkaar: IVilkaarsproving | undef
     <VilkaarColumn>
       <div>
         <strong>Inn- og utvanding</strong>
-        <div>
-          Utflytting fra Norge:{' '}
-          {utflytting.map((dato, i) => (
-            <div key={i}>{dato}</div>
-          ))}
-        </div>
-        <div>
-          Innfytting til Norge:{' '}
-          {innflytting.map((dato, i) => (
-            <div key={i}>{dato}</div>
-          ))}
-        </div>
-        <KildeDatoOpplysning type={innOgUtvandring?.kilde.type} dato={innOgUtvandring?.kilde.tidspunktForInnhenting} />
+        {innOgUtvandring?.opplysning ? (
+          <>
+            <div>
+              Utflytting fra Norge:{' '}
+              {utflytting.map((dato, i) => (
+                <div key={i}>{dato}</div>
+              ))}
+            </div>
+            <div>
+              Innfytting til Norge:{' '}
+              {innflytting.map((dato, i) => (
+                <div key={i}>{dato}</div>
+              ))}
+            </div>
+            <KildeDatoOpplysning
+              type={innOgUtvandring?.kilde.type}
+              dato={innOgUtvandring?.kilde.tidspunktForInnhenting}
+            />
+          </>
+        ) : (
+          <div className="missing">Mangler</div>
+        )}
       </div>
     </VilkaarColumn>
   )

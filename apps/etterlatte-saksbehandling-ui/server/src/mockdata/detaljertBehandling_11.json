@@ -267,11 +267,11 @@
           },
           {
             "navn": "AVDOED_KUN_NORSKE_BOSTEDSADRESSER",
-            "resultat": "OPPFYLT",
+            "resultat": "IKKE_OPPFYLT",
             "basertPaaOpplysninger": [
               {
                 "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
-                "kriterieOpplysningsType": "ADRESSER",
+                "kriterieOpplysningsType": "ADRESSELISTE",
                 "kilde": {
                   "navn": "pdl",
                   "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
@@ -279,20 +279,48 @@
                   "type": "pdl"
                 },
                 "opplysning": {
-                  "bostedadresse": [
+                  "adresser": [
                     {
-                      "type": "VEGADRESSE",
+                      "type": "UTENLANDSKADRESSE",
                       "aktiv": true,
                       "coAdresseNavn": null,
-                      "adresseLinje1": "Bøveien 937",
+                      "adresseLinje1": "Danmarkveien 2A",
                       "adresseLinje2": null,
                       "adresseLinje3": null,
                       "postnr": "8475",
-                      "poststed": null,
+                      "poststed": "København",
+                      "land": "DAN",
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2019-06-26",
+                      "gyldigTilOgMed": null
+                    },
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Osloveien 2A",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "0485",
+                      "poststed": "Oslo",
                       "land": null,
                       "kilde": "FREG",
-                      "gyldigFraOgMed": "1999-01-01T00:00:00",
-                      "gyldigTilOgMed": null
+                      "gyldigFraOgMed": "2018-06-25T00:00:00",
+                      "gyldigTilOgMed": "2019-06-25T00:00:00"
+                    },
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Osloveien 2A",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "0485",
+                      "poststed": "Oslo",
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2005-06-25T00:00:00",
+                      "gyldigTilOgMed": "2018-02-25T00:00:00"
                     }
                   ]
                 }
@@ -301,11 +329,11 @@
           },
           {
             "navn": "AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR",
-            "resultat": "OPPFYLT",
+            "resultat": "IKKE_OPPFYLT",
             "basertPaaOpplysninger": [
               {
-                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
-                "kriterieOpplysningsType": "ADRESSER",
+                "id": "025a6b21-d460-4e5b-9de1-ADRESSELISTE",
+                "kriterieOpplysningsType": "ADRESSELISTE",
                 "kilde": {
                   "navn": "pdl",
                   "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
@@ -313,24 +341,50 @@
                   "type": "pdl"
                 },
                 "opplysning": {
-                  "bostedadresse": [
+                  "adresser": [
                     {
-                      "type": "VEGADRESSE",
+                      "type": "UTENLANDSKADRESSE",
                       "aktiv": true,
                       "coAdresseNavn": null,
-                      "adresseLinje1": "Bøveien 937",
+                      "adresseLinje1": "Danmarkveien 2A",
                       "adresseLinje2": null,
                       "adresseLinje3": null,
                       "postnr": "8475",
-                      "poststed": null,
+                      "poststed": "København",
+                      "land": "DAN",
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2019-06-26",
+                      "gyldigTilOgMed": null
+                    },
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Osloveien 2A",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "0485",
+                      "poststed": "Oslo",
                       "land": null,
                       "kilde": "FREG",
-                      "gyldigFraOgMed": "1999-01-01T00:00:00",
-                      "gyldigTilOgMed": null
+                      "gyldigFraOgMed": "2018-06-25T00:00:00",
+                      "gyldigTilOgMed": "2019-06-25T00:00:00"
+                    },
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Osloveien 2A",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "0485",
+                      "poststed": "Oslo",
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2005-06-25T00:00:00",
+                      "gyldigTilOgMed": "2018-02-25T00:00:00"
                     }
-                  ],
-                  "oppholdadresse": [],
-                  "kontaktadresse": []
+                  ]
                 }
               },
               {
@@ -346,25 +400,58 @@
                   "doedsdato": "2022-02-10",
                   "foedselsnummer": "22128202440"
                 }
+              },
+              {
+                "id": "2c833602-7564-48dc-b6d5-cb48030971ec",
+                "kriterieOpplysningsType": "ADRESSE_GAPS",
+                "kilde": {
+                  "navn": "vilkaarskomponenten",
+                  "type": "vilkaarskomponenten"
+                },
+                "opplysning": [
+                  {
+                    "gyldigFra": "2018-02-26",
+                    "gyldigTil": "2018-06-24"
+                  },
+                  {
+                    "gyldigFra": "2019-06-26",
+                    "gyldigTil": "2022-02-10"
+                  }
+                ]
               }
             ]
           },
           {
             "navn": "AVDOED_KUN_NORSKE_OPPHOLDSSADRESSER",
-            "resultat": "OPPFYLT",
+            "resultat": "IKKE_OPPFYLT",
             "basertPaaOpplysninger": [
               {
                 "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
-                "kriterieOpplysningsType": "ADRESSER",
+                "kriterieOpplysningsType": "ADRESSELISTE",
                 "kilde": {
                   "navn": "pdl",
                   "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": [
-                  []
-                ]
+                "opplysning": {
+                  "adresser": [
+                    {
+                      "type": "UTENLANDSKADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Danmarkveien 2A",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "8475",
+                      "poststed": "København",
+                      "land": "DAN",
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2017-06-26",
+                      "gyldigTilOgMed": "2018-01-26"
+                    }
+                  ]
+                }
               }
             ]
           },
@@ -374,16 +461,31 @@
             "basertPaaOpplysninger": [
               {
                 "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
-                "kriterieOpplysningsType": "ADRESSER",
+                "kriterieOpplysningsType": "ADRESSELISTE",
                 "kilde": {
                   "navn": "pdl",
                   "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": [
-                  []
-                ]
+                "opplysning": {
+                  "adresser": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Danmarkveien 2A",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "8475",
+                      "poststed": "Alta",
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2014-06-26",
+                      "gyldigTilOgMed": "2017-01-26"
+                    }
+                  ]
+                }
               }
             ]
           },

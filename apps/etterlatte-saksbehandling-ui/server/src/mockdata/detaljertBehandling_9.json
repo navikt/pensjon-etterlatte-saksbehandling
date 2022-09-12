@@ -198,7 +198,7 @@
       },
       {
         "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
-        "resultat": "IKKE_OPPFYLT",
+        "resultat": "OPPFYLT",
         "utfall": "OPPFYLT",
         "kriterier": [
           {
@@ -263,7 +263,7 @@
             "basertPaaOpplysninger": [
               {
                 "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
-                "kriterieOpplysningsType": "ADRESSER",
+                "kriterieOpplysningsType": "ADRESSELISTE",
                 "kilde": {
                   "navn": "pdl",
                   "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
@@ -271,7 +271,7 @@
                   "type": "pdl"
                 },
                 "opplysning": {
-                  "bostedadresse": [
+                  "adresser": [
                     {
                       "type": "VEGADRESSE",
                       "aktiv": true,
@@ -297,7 +297,7 @@
             "basertPaaOpplysninger": [
               {
                 "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
-                "kriterieOpplysningsType": "ADRESSER",
+                "kriterieOpplysningsType": "ADRESSELISTE",
                 "kilde": {
                   "navn": "pdl",
                   "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
@@ -305,7 +305,7 @@
                   "type": "pdl"
                 },
                 "opplysning": {
-                  "bostedadresse": [
+                  "adresser": [
                     {
                       "type": "VEGADRESSE",
                       "aktiv": true,
@@ -320,9 +320,7 @@
                       "gyldigFraOgMed": "1999-01-01T00:00:00",
                       "gyldigTilOgMed": null
                     }
-                  ],
-                  "oppholdadresse": [],
-                  "kontaktadresse": []
+                  ]
                 }
               },
               {
@@ -347,16 +345,31 @@
             "basertPaaOpplysninger": [
               {
                 "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
-                "kriterieOpplysningsType": "ADRESSER",
+                "kriterieOpplysningsType": "ADRESSELISTE",
                 "kilde": {
                   "navn": "pdl",
                   "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": [
-                  []
-                ]
+                "opplysning": {
+                  "adresser": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Liljeveien 7",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "1234",
+                      "poststed": "Mandal",
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2017-06-25T00:00:00",
+                      "gyldigTilOgMed": "2017-11-25T00:00:00"
+                    }
+                  ]
+                }
               }
             ]
           },
@@ -366,7 +379,7 @@
             "basertPaaOpplysninger": [
               {
                 "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
-                "kriterieOpplysningsType": "ADRESSER",
+                "kriterieOpplysningsType": "ADRESSELISTE",
                 "kilde": {
                   "navn": "pdl",
                   "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
@@ -374,7 +387,22 @@
                   "type": "pdl"
                 },
                 "opplysning": [
-                  []
+                  [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Fiolveien 3",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "5629",
+                      "poststed": "Kongsberg",
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2018-06-25T00:00:00",
+                      "gyldigTilOgMed": "2019-06-25T00:00:00"
+                    }
+                  ]
                 ]
               }
             ]

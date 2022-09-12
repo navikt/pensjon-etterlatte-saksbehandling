@@ -85,7 +85,7 @@ const InnholdWrapper = styled.div`
   display: flex;
   justify-content: left;
   align-items: center;
-  width: 85%;
+  width: 80%;
 `
 
 const Ikon = styled.div`

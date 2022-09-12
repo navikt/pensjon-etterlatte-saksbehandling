@@ -13,7 +13,6 @@ import no.nav.etterlatte.barnepensjon.kombinerPerioder
 import no.nav.etterlatte.barnepensjon.opplysningsGrunnlagNull
 import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraKriterier
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AdresseListe
-import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.person.Person
@@ -283,9 +282,9 @@ fun kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
         avdoedPdl?.let {
             Kriteriegrunnlag(
                 avdoedPdl.id,
-                KriterieOpplysningsType.ADRESSER,
+                KriterieOpplysningsType.ADRESSELISTE,
                 avdoedPdl.kilde,
-                Adresser(it.opplysning.bostedsadresse, null, null)
+                AdresseListe(it.opplysning.bostedsadresse)
             )
         },
         avdoedPdl?.let {

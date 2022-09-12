@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { format, sub } from 'date-fns'
 import { aarIProsent, numberToProsentString, startdatoOffsetProsent } from './tidslinjeUtils'
 import {
-  IAdresser,
+  IAdresse,
   IKriterieOpplysning,
   IVilkaarsproving,
   KriterieOpplysningsType,
@@ -53,18 +53,10 @@ export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) 
   const navnOgProsentPaaDatoer = aarIProsent(seksAarTidligere, doedsdato)
   const prosentStartDato = numberToProsentString(startdatoOffsetProsent(femAarTidligere, seksAarTidligere))
 
-  /*
-  const medlemskap: string | null = hentKriterierMedOpplysning(
-    vilkaar,
-    Kriterietype.AVDOED_OPPFYLLER_MEDLEMSKAP,
-    KriterieOpplysningsType.DOEDSDATO
-  )?.opplysning
-*/
-
-  const adresseOpplysning: IKriterieOpplysning | undefined = hentKriterierMedOpplysning(
+  const bostedsadresseOpplysning: IKriterieOpplysning | undefined = hentKriterierMedOpplysning(
     vilkaar,
     Kriterietype.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR,
-    KriterieOpplysningsType.ADRESSER
+    KriterieOpplysningsType.ADRESSELISTE
   )
 
   const adressegaps: IKriterieOpplysning | undefined = hentKriterierMedOpplysning(
@@ -73,15 +65,15 @@ export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) 
     KriterieOpplysningsType.ADRESSE_GAPS
   )
 
-  const adresser: IAdresser | undefined = adresseOpplysning?.opplysning
-  const norskeBostedsadresser = hentNorskeAdresser(adresser?.bostedadresse)
-  const utlandskeBostedsadresser = hentUtlandskeAdresser(adresser?.bostedadresse)
+  const bostedadresser: IAdresse[] | undefined = bostedsadresseOpplysning?.opplysning?.adresser
+  const norskeBostedsadresser = hentNorskeAdresser(bostedadresser)
+  const utlandskeBostedsadresser = hentUtlandskeAdresser(bostedadresser)
   const periodeNorskeBostedGaps: IPeriode[] = mapGapsTilPerioder(adressegaps?.opplysning, adressegaps?.kilde)
   const perioderNorskeBosted: IPeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
     norskeBostedsadresser,
     'Bostedsadresse',
     seksAarTidligere,
-    adresseOpplysning?.kilde
+    bostedsadresseOpplysning?.kilde
   )
   const perioderNorskeBostedMedGaps = [perioderNorskeBosted, periodeNorskeBostedGaps]
     .flat()
@@ -91,21 +83,33 @@ export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) 
     utlandskeBostedsadresser,
     'Bostedsadresse',
     seksAarTidligere,
-    adresseOpplysning?.kilde
+    bostedsadresseOpplysning?.kilde
+  )
+
+  const oppholdsadresseOpplysning: IKriterieOpplysning | undefined = hentKriterierMedOpplysning(
+    vilkaar,
+    Kriterietype.AVDOED_KUN_NORSKE_OPPHOLDSSADRESSER,
+    KriterieOpplysningsType.ADRESSELISTE
+  )
+
+  const kontaktadresseOpplysning: IKriterieOpplysning | undefined = hentKriterierMedOpplysning(
+    vilkaar,
+    Kriterietype.AVDOED_KUN_NORSKE_KONTAKTADRESSER,
+    KriterieOpplysningsType.ADRESSELISTE
   )
 
   const perioderOpphold: IPeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
-    adresseOpplysning?.opplysning?.oppholdadresse,
+    oppholdsadresseOpplysning?.opplysning?.adresser,
     'Oppholdsadresse',
     seksAarTidligere,
-    adresseOpplysning?.kilde
+    oppholdsadresseOpplysning?.kilde
   )
 
   const perioderKontakt: IPeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
-    adresseOpplysning?.opplysning?.kontaktadresse,
+    kontaktadresseOpplysning?.opplysning?.adresser,
     'Kontaktadresse',
     seksAarTidligere,
-    adresseOpplysning?.kilde
+    kontaktadresseOpplysning?.kilde
   )
 
   return (

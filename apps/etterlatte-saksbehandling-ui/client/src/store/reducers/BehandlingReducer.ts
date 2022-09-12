@@ -203,9 +203,15 @@ export interface IVilkaarResultat {
 export interface IVilkaarsproving {
   navn: VilkaarsType
   resultat: VurderingsResultat
-  utfall: string | undefined
+  utfall: Utfall | undefined
   kriterier: IKriterie[]
   vurdertDato: string
+}
+
+export enum Utfall {
+  OPPFYLT = 'OPPFYLT',
+  BEHANDLE_I_PSYS = 'BEHANDLE_I_PSYS',
+  TRENGER_AVKLARING = 'TRENGER_AVKLARING',
 }
 
 export enum VilkaarsType {
@@ -253,6 +259,7 @@ export interface IKriterieOpplysning {
 
 export enum KriterieOpplysningsType {
   ADRESSER = 'ADRESSER',
+  ADRESSELISTE = 'ADRESSELISTE',
   DOEDSDATO = 'DOEDSDATO',
   FOEDSELSDATO = 'FOEDSELSDATO',
   FORELDRE = 'FORELDRE',

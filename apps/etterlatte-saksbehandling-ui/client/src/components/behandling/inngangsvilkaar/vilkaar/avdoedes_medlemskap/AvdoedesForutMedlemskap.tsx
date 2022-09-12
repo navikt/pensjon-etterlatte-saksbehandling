@@ -22,11 +22,12 @@ import {
   IKriterieOpplysning,
   KriterieOpplysningsType,
   Kriterietype,
+  Utfall,
   VurderingsResultat,
 } from '../../../../../store/reducers/BehandlingReducer'
 import { hentKriterie, hentKriterierMedOpplysning } from '../../../felles/utils'
 import { InnOgUtvandring } from './InnOgUtvandring'
-import { VilkaarVurderingEnkeltElement } from '../VilkaarVurderingsliste'
+import { lagVilkaarVisningAvklaring, lagVilkaarVisningUtland } from './vilkaarVurderingTekst'
 
 export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
@@ -43,29 +44,6 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
     Kriterietype.AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD,
     KriterieOpplysningsType.AVDOED_UTENLANDSOPPHOLD
   )
-
-  function lagVilkaarVisningUtland() {
-    //todo: legg til MEDL her når det er klart
-    const utlandKriterierResultater: VurderingsResultat[] = [
-      hentKriterie(vilkaar, Kriterietype.AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD),
-      hentKriterie(vilkaar, Kriterietype.AVDOED_NORSK_STATSBORGER),
-      hentKriterie(vilkaar, Kriterietype.AVDOED_INGEN_INN_ELLER_UTVANDRING),
-      hentKriterie(vilkaar, Kriterietype.AVDOED_KUN_NORSKE_BOSTEDSADRESSER),
-    ]
-      .map((kriterie) => kriterie?.resultat)
-      .filter((kriterie) => kriterie !== undefined) as VurderingsResultat[]
-
-    const tittel = 'Utlandsopphold'
-    let svar
-    if (utlandKriterierResultater.includes(VurderingsResultat.IKKE_OPPFYLT)) {
-      svar = 'Avdøde har indikasjoner på utlandsopphold. Må behandles i psys. '
-    } else if (utlandKriterierResultater.includes(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING)) {
-      svar = 'Mangler opplysninger om utlandsopphold. Må avklares. '
-    } else {
-      svar = 'Avdøde har ingen indikasjoner på utlandsopphold. '
-    }
-    return <VilkaarVurderingEnkeltElement tittel={tittel} svar={svar} />
-  }
 
   return (
     <VilkaarBorder id={props.id}>
@@ -117,7 +95,8 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
                   <StatusIcon status={vilkaar.resultat} large={true} /> {vilkaarErOppfylt(vilkaar.resultat)}
                 </VilkaarlisteTitle>
                 <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
-                {lagVilkaarVisningUtland()}
+                {lagVilkaarVisningUtland(vilkaar)}
+                {lagVilkaarVisningAvklaring(vilkaar)}
               </VilkaarVurderingContainer>
             </VilkaarVurderingColumn>
           )}
@@ -133,7 +112,13 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
         ) : (
           <div>Vilkår mangler</div>
         )}
+        {vilkaar?.utfall === Utfall.BEHANDLE_I_PSYS && (
+          <Button variant={'primary'} size={'medium'}>
+            Behandle i psys (mock)
+          </Button>
+        )}
       </Innhold>
+
       {isOpen && <PeriodeModal isOpen={isOpen} setIsOpen={(value: boolean) => setIsOpen(value)} />}
     </VilkaarBorder>
   )

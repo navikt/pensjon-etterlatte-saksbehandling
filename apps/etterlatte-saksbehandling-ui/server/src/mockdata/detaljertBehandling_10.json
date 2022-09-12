@@ -133,30 +133,21 @@
           },
           {
             "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD",
-            "resultat": "OPPFYLT",
-            "basertPaaOpplysninger": [
-              {
-                "id": "50c6b495-ddd2-4fa5-8863-6d8ba865eb81",
-                "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
-                "kilde": {
-                  "fnr": "03108718357",
-                  "mottatDato": "2022-02-14T14:37:24.573612786Z",
-                  "type": "privatperson"
-                },
-                "opplysning": {
-                  "harHattUtenlandsopphold": "NEI",
-                  "opphold": null
-                }
-              }
-            ]
+            "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
+            "basertPaaOpplysninger": []
           },
           {
             "navn": "AVDOED_KUN_NORSKE_BOSTEDSADRESSER",
-            "resultat": "OPPFYLT",
+            "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
+            "basertPaaOpplysninger": []
+          },
+          {
+            "navn": "AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR",
+            "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
             "basertPaaOpplysninger": [
               {
                 "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
-                "kriterieOpplysningsType": "ADRESSER",
+                "kriterieOpplysningsType": "ADRESSELISTE",
                 "kilde": {
                   "navn": "pdl",
                   "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
@@ -164,7 +155,7 @@
                   "type": "pdl"
                 },
                 "opplysning": {
-                  "bostedadresse": [
+                  "adresser": [
                     {
                       "type": "VEGADRESSE",
                       "aktiv": true,
@@ -180,42 +171,6 @@
                       "gyldigTilOgMed": null
                     }
                   ]
-                }
-              }
-            ]
-          },
-          {
-            "navn": "AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR",
-            "resultat": "OPPFYLT",
-            "basertPaaOpplysninger": [
-              {
-                "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
-                "kriterieOpplysningsType": "ADRESSER",
-                "kilde": {
-                  "navn": "pdl",
-                  "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
-                  "registersReferanse": null,
-                  "type": "pdl"
-                },
-                "opplysning": {
-                  "bostedadresse": [
-                    {
-                      "type": "VEGADRESSE",
-                      "aktiv": true,
-                      "coAdresseNavn": null,
-                      "adresseLinje1": "Bøveien 937",
-                      "adresseLinje2": null,
-                      "adresseLinje3": null,
-                      "postnr": "8475",
-                      "poststed": null,
-                      "land": null,
-                      "kilde": "FREG",
-                      "gyldigFraOgMed": "1999-01-01T00:00:00",
-                      "gyldigTilOgMed": null
-                    }
-                  ],
-                  "oppholdadresse": [],
-                  "kontaktadresse": []
                 }
               },
               {
@@ -240,16 +195,16 @@
             "basertPaaOpplysninger": [
               {
                 "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
-                "kriterieOpplysningsType": "ADRESSER",
+                "kriterieOpplysningsType": "ADRESSELISTE",
                 "kilde": {
                   "navn": "pdl",
                   "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": [
-                  []
-                ]
+                "opplysning": {
+                  "adresser": []
+                }
               }
             ]
           },
@@ -259,16 +214,16 @@
             "basertPaaOpplysninger": [
               {
                 "id": "025a6b21-d460-4e5b-9de1-c5ec76333ff8",
-                "kriterieOpplysningsType": "ADRESSER",
+                "kriterieOpplysningsType": "ADRESSELISTE",
                 "kilde": {
                   "navn": "pdl",
                   "tidspunktForInnhenting": "2022-09-09T08:10:20.189449317Z",
                   "registersReferanse": null,
                   "type": "pdl"
                 },
-                "opplysning": [
-                  []
-                ]
+                "opplysning": {
+                  "adresser": []
+                }
               }
             ]
           },

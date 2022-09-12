@@ -25,7 +25,7 @@ import {
   VurderingsResultat,
 } from '../../../../../store/reducers/BehandlingReducer'
 import { hentKriterie, hentKriterierMedOpplysning } from '../../../felles/utils'
-import { formaterStringDato } from '../../../../../utils/formattering'
+import { InnOgUtvandring } from './InnOgUtvandring'
 
 export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
@@ -37,17 +37,10 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
     KriterieOpplysningsType.STATSBORGERSKAP
   )
 
-  const innOgUtvandring: IKriterieOpplysning | undefined = hentKriterierMedOpplysning(
+  const utlandSoeknad = hentKriterierMedOpplysning(
     vilkaar,
-    Kriterietype.AVDOED_INGEN_INN_ELLER_UTVANDRING,
-    KriterieOpplysningsType.UTLAND
-  )
-
-  const utflytting: string[] = innOgUtvandring?.opplysning.utflyttingFraNorge.map(
-    (utflytting: { fraflyttingsland: string; dato: string }) => formaterStringDato(utflytting.dato)
-  )
-  const innflytting: string[] = innOgUtvandring?.opplysning.innflyttingTilNorge.map(
-    (innflytting: { tilflyttingsland: string; dato: string }) => formaterStringDato(innflytting.dato)
+    Kriterietype.AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD,
+    KriterieOpplysningsType.AVDOED_UTENLANDSOPPHOLD
   )
 
   return (
@@ -71,27 +64,17 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
                 />
               </div>
             </VilkaarColumn>
+
             {hentKriterie(vilkaar, Kriterietype.AVDOED_INGEN_INN_ELLER_UTVANDRING)?.resultat !=
+              VurderingsResultat.OPPFYLT && <InnOgUtvandring vilkaar={vilkaar} />}
+
+            {hentKriterie(vilkaar, Kriterietype.AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD)?.resultat !=
               VurderingsResultat.OPPFYLT && (
               <VilkaarColumn>
                 <div>
-                  <strong>Inn- og utvanding</strong>
-                  <div>
-                    Utflytting fra Norge:{' '}
-                    {utflytting.map((dato, i) => (
-                      <div key={i}>{dato}</div>
-                    ))}
-                  </div>
-                  <div>
-                    Innfytting til Norge:{' '}
-                    {innflytting.map((dato, i) => (
-                      <div key={i}>{dato}</div>
-                    ))}
-                  </div>
-                  <KildeDatoOpplysning
-                    type={innOgUtvandring?.kilde.type}
-                    dato={innOgUtvandring?.kilde.tidspunktForInnhenting}
-                  />
+                  <strong>Utlandshopphold fra søknad</strong>
+                  <div>{utlandSoeknad?.opplysning?.harHattUtenlandsopphold}</div>
+                  <KildeDatoOpplysning type={utlandSoeknad?.kilde.type} dato={utlandSoeknad?.kilde.mottatDato} />
                 </div>
               </VilkaarColumn>
             )}

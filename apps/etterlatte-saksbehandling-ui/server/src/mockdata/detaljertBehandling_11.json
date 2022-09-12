@@ -248,7 +248,7 @@
           },
           {
             "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD",
-            "resultat": "OPPFYLT",
+            "resultat": "IKKE_OPPFYLT",
             "basertPaaOpplysninger": [
               {
                 "id": "50c6b495-ddd2-4fa5-8863-6d8ba865eb81",
@@ -259,7 +259,7 @@
                   "type": "privatperson"
                 },
                 "opplysning": {
-                  "harHattUtenlandsopphold": "NEI",
+                  "harHattUtenlandsopphold": "JA",
                   "opphold": null
                 }
               }

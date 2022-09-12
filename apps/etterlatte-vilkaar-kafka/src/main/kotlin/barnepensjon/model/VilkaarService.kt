@@ -3,6 +3,7 @@ package no.nav.etterlatte.barnepensjon.model
 import barnepensjon.kommerbarnettilgode.mapFamiliemedlemmer
 import barnepensjon.kommerbarnettilgode.saksbehandlerResultat
 import barnepensjon.vilkaar.avdoedesmedlemskap.vilkaarAvdoedesMedlemskap
+import barnepensjon.vilkaar.vilkaarKanBehandleSakenISystemet
 import barnepensjon.vilkaarFormaalForYtelsen
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -95,7 +96,8 @@ class VilkaarService {
 
         val vilkaar = when (revurderingAarsak) {
             RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarFormaalForYtelsen(soekerPdl, virkningstidspunkt))
-            RevurderingAarsak.MANUELT_OPPHOER -> TODO("Ikke implementert vurdering av denne enda")
+            // TODO: få inn opphørsgrunner her
+            RevurderingAarsak.MANUELT_OPPHOER -> listOf(vilkaarKanBehandleSakenISystemet(listOf("MANUELT_OPPHOER")))
         }
 
         val vilkaarResultat = setVilkaarVurderingFraVilkaar(vilkaar)
@@ -114,14 +116,18 @@ class VilkaarService {
 
     fun beregnVirkningstidspunktRevurdering(
         opplysninger: List<VilkaarOpplysning<JsonNode>>,
-        revurderingAarsak: RevurderingAarsak
+        revurderingAarsak: RevurderingAarsak,
+        soeknadMottattDato: LocalDate
     ): YearMonth {
         return when (revurderingAarsak) {
             RevurderingAarsak.SOEKER_DOD -> {
                 val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
                 hentVirkningstidspunktRevurderingSoekerDoedsfall(soekerPdl?.opplysning?.doedsdato)
             }
-            RevurderingAarsak.MANUELT_OPPHOER -> TODO("Ikke implementert")
+            RevurderingAarsak.MANUELT_OPPHOER -> {
+                val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
+                hentVirkningstidspunktFoerstegangssoeknad(avdoedPdl?.opplysning?.doedsdato, soeknadMottattDato)
+            }
         }
     }
 

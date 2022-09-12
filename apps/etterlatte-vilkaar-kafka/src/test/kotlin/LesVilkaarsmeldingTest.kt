@@ -11,6 +11,7 @@ internal class LesVilkaarsmeldingTest {
     companion object {
         val melding = readFile("/melding.json")
         val meldingRevurderingDoedsfall = readFile("/melding_revurdering_doedsfall.json")
+        val meldingRevurderingManueltOpphoer = readFile("/melding_revurdering_manuelt_opphoer.json")
 
         fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")
@@ -31,6 +32,14 @@ internal class LesVilkaarsmeldingTest {
     @Test
     fun `skal lese og lage en melding for revurdering dødsfall`() {
         val inspector = inspector.apply { sendTestMessage(meldingRevurderingDoedsfall) }.inspektør
+        Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
+        Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
+        Assertions.assertEquals(8, inspector.message(0).get("vilkaarsvurderingGrunnlagRef").intValue())
+    }
+
+    @Test
+    fun `skal lese og lage en melding for revurdering manuelt opphør`() {
+        val inspector = inspector.apply { sendTestMessage(meldingRevurderingManueltOpphoer) }.inspektør
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
         Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
         Assertions.assertEquals(8, inspector.message(0).get("vilkaarsvurderingGrunnlagRef").intValue())

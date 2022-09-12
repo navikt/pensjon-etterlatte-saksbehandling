@@ -79,7 +79,11 @@ internal class LesVilkaarsmelding(
                             throw IllegalStateException(e)
                         }
                         val virkningstidspunkt =
-                            vilkaar.beregnVirkningstidspunktRevurdering(grunnlagForVilkaar, revurderingAarsak)
+                            vilkaar.beregnVirkningstidspunktRevurdering(
+                                grunnlagForVilkaar,
+                                revurderingAarsak,
+                                behandlingopprettet
+                            )
                         val vilkaarsVurdering = vilkaar.mapVilkaarRevurdering(
                             grunnlagForVilkaar,
                             virkningstidspunkt.atDay(1),

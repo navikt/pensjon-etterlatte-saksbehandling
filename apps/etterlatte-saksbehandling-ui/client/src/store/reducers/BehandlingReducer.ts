@@ -166,8 +166,12 @@ export enum OpplysningsType {
 }
 
 export enum KildeType {
-  pdl = 'pdl',
+  saksbehandler = 'saksbehandler',
   privatperson = 'privatperson',
+  a_ordningen = 'a-ordningen',
+  aa_registeret = 'aa-registeret',
+  vilkaarskomponenten = 'vilkaarskomponenten',
+  pdl = 'pdl',
 }
 
 export enum VurderingsResultat {

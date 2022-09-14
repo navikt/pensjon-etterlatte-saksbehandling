@@ -1,9 +1,10 @@
 import { format } from 'date-fns'
-import { hentKildenavn } from './utils'
+import { hentKildenavn } from './tekstUtils'
 import styled from 'styled-components'
 import { formaterStringDato } from '../../../../utils/formattering'
+import { KildeType } from '../../../../store/reducers/BehandlingReducer'
 
-export const KildeDatoOpplysning = ({ type, dato }: { type?: string; dato?: string }) => {
+export const KildeDatoOpplysning = ({ type, dato }: { type?: KildeType; dato?: string }) => {
   if (!dato) {
     return <div />
   }
@@ -23,9 +24,9 @@ export const KildeOppysning = styled.div`
   margin-top: 5px;
 `
 
-export const KildeDatoVilkaar = ({ type, dato }: { type?: string; dato: string }) => {
+export const KildeDatoVilkaar = ({ isHelautomatisk, dato }: { isHelautomatisk: boolean; dato: string }) => {
   const dataDato = formaterStringDato(dato)
-  const kilde = hentKildenavn(type)
+  const kilde = isHelautomatisk ? 'Automatisk' : 'Delautomatisk'
 
   return (
     <KildeVilkaar>
@@ -33,6 +34,7 @@ export const KildeDatoVilkaar = ({ type, dato }: { type?: string; dato: string }
     </KildeVilkaar>
   )
 }
+
 export const KildeVilkaar = styled.div`
   color: grey;
   font-size: 0.9em;

@@ -1,5 +1,5 @@
 import { IKriterie, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
-import { mapKriterietyperTilTekst } from './utils'
+import { mapKriterietyperTilTekst } from './tekstUtils'
 
 export const VilkaarVurderingsliste = ({ kriterie }: { kriterie: IKriterie[] }) => {
   const oppfylt = kriterie.filter((krit) => krit.resultat === VurderingsResultat.OPPFYLT)

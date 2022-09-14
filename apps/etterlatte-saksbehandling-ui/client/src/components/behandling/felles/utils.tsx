@@ -1,4 +1,3 @@
-import { isAfter } from 'date-fns'
 import {
   IAdresse,
   IBehandlingStatus,
@@ -8,7 +7,7 @@ import {
   KriterieOpplysningsType,
   Kriterietype,
 } from '../../../store/reducers/BehandlingReducer'
-import { IGap, IPeriode } from '../inngangsvilkaar/vilkaar/avdoedes_medlemskap/TidslinjeMedlemskap'
+import { isAfter } from 'date-fns'
 
 export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: string | null): IAdresse[] {
   if (doedsdato == null) {
@@ -17,59 +16,12 @@ export function hentAdresserEtterDoedsdato(adresser: IAdresse[], doedsdato: stri
   return adresser?.filter((adresse) => adresse.aktiv || isAfter(new Date(adresse.gyldigTilOgMed!), new Date(doedsdato)))
 }
 
-export function mapAdresseTilPerioderSeksAarFoerDoedsdato(
-  adresser: IAdresse[] | undefined,
-  periodetype: string,
-  seksAarFoerDoedsdato: string,
-  kilde: any
-): IPeriode[] {
-  if (adresser == null || adresser.length == 0) {
-    return []
-  }
-
-  const seksAarFoerDoedsdatoEllerAktiv = adresser.filter(
-    (adresse) => adresse.aktiv || isAfter(new Date(adresse.gyldigTilOgMed!), new Date(seksAarFoerDoedsdato))
+export const hentBehandlesFraStatus = (status: IBehandlingStatus): boolean => {
+  return (
+    status === IBehandlingStatus.UNDER_BEHANDLING ||
+    status === IBehandlingStatus.GYLDIG_SOEKNAD ||
+    status === IBehandlingStatus.RETURNERT
   )
-
-  function mapTilPeriode(adresse: IAdresse): IPeriode {
-    return {
-      periodeType: periodetype,
-      innhold: {
-        fraDato: adresse.gyldigFraOgMed,
-        tilDato: adresse.gyldigTilOgMed,
-        beskrivelse: adresse.adresseLinje1 + ', ' + adresse.postnr + ' ' + (adresse.poststed ? adresse.poststed : ''),
-        adresseINorge: adresse.type != 'UTENLANDSKADRESSE' && adresse.type != 'UTENLANDSKADRESSEFRITTFORMAT',
-        land: adresse.land,
-      },
-      kilde: kilde,
-    }
-  }
-
-  return seksAarFoerDoedsdatoEllerAktiv
-    ?.map((adresse: IAdresse) => mapTilPeriode(adresse))
-    .sort((a, b) => (new Date(b.innhold.fraDato) < new Date(a.innhold.fraDato) ? 1 : -1))
-}
-
-export function mapGapsTilPerioder(gaps: IGap[], kilde: any): IPeriode[] {
-  if (gaps == null || gaps.length == 0) {
-    return []
-  }
-
-  function mapTilPeriode(gap: IGap): IPeriode {
-    return {
-      periodeType: 'Bostedgap',
-      innhold: {
-        fraDato: gap.gyldigFra,
-        tilDato: gap.gyldigTil,
-        beskrivelse: '',
-        adresseINorge: true,
-        land: undefined,
-      },
-      kilde: kilde,
-    }
-  }
-
-  return gaps?.map((gap: IGap) => mapTilPeriode(gap))
 }
 
 export function hentUtenlandskAdresseEtterDoedsdato(adresser: IAdresse[], doedsdato: string | null): IAdresse[] {
@@ -119,12 +71,4 @@ export const hentKriterierMedOpplysning = (
   } catch (e: any) {
     console.error(e)
   }
-}
-
-export const hentBehandlesFraStatus = (status: IBehandlingStatus): boolean => {
-  return (
-    status === IBehandlingStatus.UNDER_BEHANDLING ||
-    status === IBehandlingStatus.GYLDIG_SOEKNAD ||
-    status === IBehandlingStatus.RETURNERT
-  )
 }

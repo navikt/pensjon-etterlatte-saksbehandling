@@ -1,4 +1,3 @@
-import { hentAdresserEtterDoedsdato, hentKriterierMedOpplysning } from '../components/behandling/felles/utils'
 import {
   IAdresse,
   IVilkaarsproving,
@@ -7,6 +6,7 @@ import {
   VilkaarsType,
   VurderingsResultat,
 } from '../store/reducers/BehandlingReducer'
+import { hentAdresserEtterDoedsdato, hentKriterierMedOpplysning } from '../components/behandling/felles/utils'
 
 const adresserMock: IAdresse[] = [
   {

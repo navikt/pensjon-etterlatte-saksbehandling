@@ -8,33 +8,15 @@ import {
   KriterieOpplysningsType,
   Kriterietype,
 } from '../../../../../store/reducers/BehandlingReducer'
+
+import { TidslinjeRad } from './TidslinjeRad'
+import { ITidslinjePeriode, IVurdertPeriode } from '../../types'
 import {
-  hentKriterierMedOpplysning,
-  hentNorskeAdresser,
-  hentUtlandskeAdresser,
   mapAdresseTilPerioderSeksAarFoerDoedsdato,
   mapGapsTilPerioder,
-} from '../../../felles/utils'
-import { TidslinjeRad } from './TidslinjeRad'
-
-export interface IPeriode {
-  periodeType: string
-  innhold: IPeriodeInnhold
-  kilde: any
-}
-
-export interface IPeriodeInnhold {
-  fraDato: string
-  tilDato?: string
-  beskrivelse: string
-  adresseINorge: boolean
-  land?: string
-}
-
-export interface IGap {
-  gyldigFra: string
-  gyldigTil: string
-}
+  mapYtelseTilPerioderSeksAarFoerDoedsdato,
+} from '../../utils'
+import { hentKriterierMedOpplysning, hentNorskeAdresser, hentUtlandskeAdresser } from '../../../felles/utils'
 
 export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) => {
   const avdoedDoedsdato: string | null = hentKriterierMedOpplysning(
@@ -65,11 +47,17 @@ export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) 
     KriterieOpplysningsType.ADRESSE_GAPS
   )
 
+  const perioderOpplysning: IVurdertPeriode[] = hentKriterierMedOpplysning(
+    vilkaar,
+    Kriterietype.AVDOED_OPPFYLLER_MEDLEMSKAP,
+    KriterieOpplysningsType.AVDOED_MEDLEMSKAP
+  )?.opplysning?.perioder
+
   const bostedadresser: IAdresse[] | undefined = bostedsadresseOpplysning?.opplysning?.adresser
   const norskeBostedsadresser = hentNorskeAdresser(bostedadresser)
   const utlandskeBostedsadresser = hentUtlandskeAdresser(bostedadresser)
-  const periodeNorskeBostedGaps: IPeriode[] = mapGapsTilPerioder(adressegaps?.opplysning, adressegaps?.kilde)
-  const perioderNorskeBosted: IPeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
+  const periodeNorskeBostedGaps: ITidslinjePeriode[] = mapGapsTilPerioder(adressegaps?.opplysning, adressegaps?.kilde)
+  const perioderNorskeBosted: ITidslinjePeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
     norskeBostedsadresser,
     'Bostedsadresse',
     seksAarTidligere,
@@ -79,7 +67,7 @@ export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) 
     .flat()
     .sort((a, b) => (new Date(b.innhold.fraDato) < new Date(a.innhold.fraDato) ? 1 : -1))
 
-  const perioderUtlandskeBosted: IPeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
+  const perioderUtlandskeBosted: ITidslinjePeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
     utlandskeBostedsadresser,
     'Bostedsadresse',
     seksAarTidligere,
@@ -98,18 +86,23 @@ export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) 
     KriterieOpplysningsType.ADRESSELISTE
   )
 
-  const perioderOpphold: IPeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
+  const perioderOpphold: ITidslinjePeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
     oppholdsadresseOpplysning?.opplysning?.adresser,
     'Oppholdsadresse',
     seksAarTidligere,
     oppholdsadresseOpplysning?.kilde
   )
 
-  const perioderKontakt: IPeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
+  const perioderKontakt: ITidslinjePeriode[] = mapAdresseTilPerioderSeksAarFoerDoedsdato(
     kontaktadresseOpplysning?.opplysning?.adresser,
     'Kontaktadresse',
     seksAarTidligere,
     kontaktadresseOpplysning?.kilde
+  )
+
+  const medlemskapsPerioder: ITidslinjePeriode[] = mapYtelseTilPerioderSeksAarFoerDoedsdato(
+    perioderOpplysning,
+    seksAarTidligere
   )
 
   return (
@@ -137,6 +130,9 @@ export const TidslinjeMedlemskap = ({ vilkaar }: { vilkaar: IVilkaarsproving }) 
       <TidslinjeRad perioder={perioderUtlandskeBosted} doedsdato={doedsdato} seksAarTidligere={seksAarTidligere} />
       <TidslinjeRad perioder={perioderOpphold} doedsdato={doedsdato} seksAarTidligere={seksAarTidligere} />
       <TidslinjeRad perioder={perioderKontakt} doedsdato={doedsdato} seksAarTidligere={seksAarTidligere} />
+      {medlemskapsPerioder.map((periode, index) => (
+        <TidslinjeRad perioder={[periode]} doedsdato={doedsdato} seksAarTidligere={seksAarTidligere} key={index} />
+      ))}
     </Tidslinje>
   )
 }

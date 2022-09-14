@@ -1,9 +1,9 @@
 import { format } from 'date-fns'
-import { capitalize } from '../components/behandling/inngangsvilkaar/vilkaar/utils'
+import { capitalize } from '../components/behandling/inngangsvilkaar/vilkaar/tekstUtils'
 
 export const formaterEnumTilLesbarString = (string: string): string => {
   const storForbokstav = capitalize(string.toLowerCase())
-  return storForbokstav.replace('_', '')
+  return storForbokstav.replace('_', ' ')
 }
 
 export const formaterDato = (dato: Date) => format(dato, 'dd.MM.yyyy').toString()

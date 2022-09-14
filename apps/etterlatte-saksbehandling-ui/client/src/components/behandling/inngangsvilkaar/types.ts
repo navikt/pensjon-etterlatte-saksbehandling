@@ -95,4 +95,7 @@ export enum IReturnertPeriodeType {
   sykepenger = 'SYKEPENGER',
   dagpenger = 'DAGPENGER',
   arbeidsavklaringspenger = 'ARBEIDSAVKLARINGSPENGER',
+  offentlig_ytelse = 'OFFENTLIG_YTELSE',
+  naerlings_inntekst = 'NAERINGSINNTEKT',
+  loennsinntekt = 'LOENNSINNTEKT',
 }

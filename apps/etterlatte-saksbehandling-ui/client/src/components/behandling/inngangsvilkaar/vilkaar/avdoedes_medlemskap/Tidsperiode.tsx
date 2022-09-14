@@ -11,6 +11,7 @@ import { CloseIcon } from '../../../../../shared/icons/closeIcon'
 import '../../../../../index.css'
 import {
   IAdresseTidslinjePeriodeInnhold,
+  IReturnertPeriodeType,
   ISaksbehandlerKilde,
   ITidslinjePeriode,
   IVurdertPeriode,
@@ -35,7 +36,8 @@ export const Tidsperiode = ({
   const innholdAdresse = periode.innhold as IAdresseTidslinjePeriodeInnhold
   const innholdYtelse = periode.innhold as IVurdertPeriode
   const isGap = periode.type === TidslinjePeriodeType.GAP
-  const periodeType = formaterEnumTilLesbarString(periode.type)
+  const periodeType = formaterEnumTilLesbarString(isAdresseInnhold ? periode.type : innholdYtelse.periodeType)
+  const isSaksbehandlerPeriode = isYtelseInnhold ? innholdYtelse.kilde.type === KildeType.saksbehandler : false
 
   return (
     <Rad style={{ left: startOffset, width: lengde }} isGap={isGap}>
@@ -77,19 +79,43 @@ export const Tidsperiode = ({
 
           {isAdresseInnhold && isGap && <div>Bostedsgap</div>}
 
-          {isYtelseInnhold && (
+          {isYtelseInnhold && isSaksbehandlerPeriode && (
             <>
               <InnholdKilde>
                 Kilde: {hentKildenavn(innholdYtelse.kilde.type)}{' '}
                 {innholdYtelse.kilde.tidspunkt && formaterStringDato(innholdYtelse.kilde.tidspunkt)}
-                {innholdYtelse.kilde.type === KildeType.saksbehandler && (
-                  <div>Lagt inn av {(innholdYtelse.kilde as ISaksbehandlerKilde).ident}</div>
-                )}
+                <div>Lagt inn av {(innholdYtelse.kilde as ISaksbehandlerKilde).ident}</div>
               </InnholdKilde>
-              <div>
-                {periodeType} {innholdAdresse.beskrivelse}
-              </div>
-              <div>{innholdAdresse?.land}</div>
+              <div>{periodeType}</div>
+              {innholdYtelse.periodeType === IReturnertPeriodeType.arbeidsperiode && (
+                <>
+                  <div>Arbeidsgiver: {innholdYtelse.arbeidsgiver} </div>
+                  <div>Stillingsprosent: {innholdYtelse.stillingsprosent} </div>
+                </>
+              )}
+              <div>Begrunnelse: {innholdYtelse.begrunnelse}</div>
+              <div>Oppgitt kilde: {innholdYtelse.oppgittKilde}</div>
+              <div>Perioden teller for medlemskap: {innholdYtelse.godkjentPeriode ? 'Ja' : 'Nei'}</div>
+            </>
+          )}
+
+          {isYtelseInnhold && !isSaksbehandlerPeriode && (
+            <>
+              <InnholdKilde>
+                Kilde: {hentKildenavn(innholdYtelse.kilde.type)}{' '}
+                {innholdYtelse.kilde.tidspunkt && formaterStringDato(innholdYtelse.kilde.tidspunkt)}
+              </InnholdKilde>
+              <div>{periodeType}</div>
+              {innholdYtelse.periodeType === IReturnertPeriodeType.arbeidsperiode && (
+                <>
+                  <div>Arbeidsgiver: {innholdYtelse.arbeidsgiver} </div>
+                  <div>Stillingsprosent: {innholdYtelse.stillingsprosent} </div>
+                </>
+              )}
+              {innholdYtelse.periodeType === IReturnertPeriodeType.offentlig_ytelse && (
+                <div>Type ytelse: {innholdYtelse.beskrivelse}</div>
+              )}
+              <div>Perioden teller for medlemskap: {innholdYtelse.godkjentPeriode ? 'Ja' : 'Nei'}</div>
             </>
           )}
 

@@ -102,7 +102,7 @@ data class MedlemskapsPeriodeClientRequest(val periode: AvdoedesMedlemskapsperio
         id = periode.id ?: UUID.randomUUID().toString(),
         kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
         arbeidsgiver = periode.arbeidsgiver,
-        stillingsprosent = periode.stillingsprosent,
+        stillingsprosent = periode.stillingsprosent?.replace("%", ""),
         begrunnelse = periode.begrunnelse,
         oppgittKilde = periode.kilde,
         fraDato = periode.fraDato,

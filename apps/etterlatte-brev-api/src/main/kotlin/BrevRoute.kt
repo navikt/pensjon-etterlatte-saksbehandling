@@ -99,7 +99,7 @@ fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService
                 call.respond(brev)
             } catch (e: Exception) {
                 logger.error("Getting multipart error ${e}")
-                call.respond(HttpStatusCode.BadRequest, "Null value")
+                call.respond(HttpStatusCode.BadRequest)
             }
         }
 

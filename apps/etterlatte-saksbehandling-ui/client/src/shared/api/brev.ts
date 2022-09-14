@@ -2,7 +2,7 @@ import { JournalpostResponse } from '../../components/behandling/types'
 
 const path = process.env.REACT_APP_VEDTAK_URL
 
-export const hentMaler = async (): Promise<any> => await fetch(`${path}/brev/maler`).then((res) => res.json())
+export const hentMaler = async (): Promise<Mal[]> => await fetch(`${path}/brev/maler`).then((res) => res.json())
 
 export const hentMottakere = async (): Promise<any> => await fetch(`${path}/brev/mottakere`).then((res) => res.json())
 
@@ -31,6 +31,19 @@ export const nyttBrevForBehandling = async (behandlingId: string, mottaker: Mott
       'Content-Type': 'application/json',
     },
   }).then((res) => res.json())
+
+export const opprettBrevFraPDF = async (behandlingId: string, mottaker: Mottaker, pdf: FormData): Promise<any> => {
+  return await fetch(`${path}/brev/pdf/${behandlingId}`, {
+    method: 'POST',
+    body: pdf,
+  }).then((res) => {
+    if (res.status == 200) {
+      return res.json()
+    } else {
+      throw Error(res.statusText)
+    }
+  })
+}
 
 export const opprettEllerOppdaterBrevForVedtak = async (behandlingId: string): Promise<any> =>
   await fetch(`${path}/brev/behandling/${behandlingId}/vedtak`, {
@@ -90,4 +103,9 @@ export interface Adresse {
   adresse?: string
   postnummer?: string
   poststed?: string
+}
+
+export interface Mal {
+    tittel: string
+    navn: string
 }

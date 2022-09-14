@@ -9,7 +9,7 @@ Monorepo for ny saksbehandlingsløsning for ytelser til etterlatte
 ## Apper
 
 [etterlatte-api](apps/etterlatte-api) \
-// TODO
+Tjeneste som kobler frontend og backend sammen. Kallene gjøres i hovedsak via REST, med unntak av posting av data til grunnlag som lager en kafka-melding.
 
 [etterlatte-avkorting](apps/etterlatte-avkorting) \
 // TODO
@@ -20,6 +20,15 @@ Tjeneste som holder styr på behandlinger.
 [etterlatte-beregning](apps/etterlatte-beregning) \
 // TODO
 
+[etterlatte-brev-api](apps/etterlatte-brev-api) \
+Ktor og Rapid app for å håndtere generering av brev, brevmaler og sende videre til distribusjon.
+
+[etterlatte-brev-distribusjon](apps/etterlatte-brev-distribusjon) \
+Rapid app for å distribuere brev. Håndterer journalføring og distribusjon.
+
+[etterlatte-brreg](apps/etterlatte-brreg) \
+App med API for å hente data fra enhetsregisteret.
+
 [etterlatte-fordeler](apps/etterlatte-fordeler) \
 Fordeler aktuelle saker inn til behandling i ny applikasjon.
 
@@ -29,8 +38,11 @@ Tjeneste som holder styr på behandlinger.
 [etterlatte-gyldig-soeknad](apps/etterlatte-gyldig-soeknad) \
 // TODO
 
-[etterlatte-utbetaling](apps/etterlatte-utbetaling) \
-Oversetter vedtak til et format som kan oversendes til oppdrag.
+[etterlatte-hendelser-pdl](apps/etterlatte-hendelser-pdl) \
+Lytter på hendelser fra Livet er en strøm av hendelser
+
+[etterlatte-medl-proxy](apps/etterlatte-medl-proxy) \
+Oppslagstjeneste mot medlemskapsregistret (folketrygden).
 
 [etterlatte-oppdater-behandling](apps/etterlatte-oppdater-behandling) \
 // TODO
@@ -54,7 +66,13 @@ Oversetter vedtak til et format som kan oversendes til oppdrag.
 Appen består av en statisk frontend og en backend-for-frontends i NodeJS.
 
 [etterlatte-testdata](apps/etterlatte-testdata) \
-// TODO
+App for forenkling av manuell testing.
+
+[etterlatte-tilbakekreving](apps/etterlatte-tilbakekreving) \
+Mottar tilbakekrevingsvedtak fra Tilbakekrevingskomponenten til Oppdrag
+
+[etterlatte-utbetaling](apps/etterlatte-utbetaling) \
+Oversetter vedtak til et format som kan oversendes til oppdrag.
 
 [etterlatte-vedtaksvurdering](apps/etterlatte-vedtaksvurdering) \
 // TODO

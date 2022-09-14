@@ -1,4 +1,4 @@
-import { Button, Checkbox, Loader, Modal, Panel, Select } from '@navikt/ds-react'
+import { Button, Loader, Modal, Select } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { Add } from '@navikt/ds-icons'
 import styled from 'styled-components'
@@ -7,14 +7,17 @@ import {
   hentForhaandsvisning,
   hentMaler,
   hentMottakere,
+  Mal,
   Mottaker,
   nyttBrevForBehandling,
 } from '../../../../shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Border } from '../../soeknadsoversikt/styled'
 import { Column, GridContainer } from '../../../../shared/styled'
-import { ManuellAdresse } from './manuell-adresse'
 import { PdfVisning } from '../pdf-visning'
+import { MottakerComponent } from './mottaker'
+import { isEmptyAddressObject } from './last-opp'
+import { IBrev } from '../index'
 
 const CustomModal = styled(Modal)`
   min-width: 540px;
@@ -27,18 +30,17 @@ interface DefaultMottaker {
   land?: string
 }
 
-export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => void }) {
+export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) => void }) {
   const { behandlingId } = useParams()
 
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [benyttAdresse, setBenyttAdresse] = useState<boolean>(false)
   const [klarForLagring, setKlarforLagring] = useState<boolean>(false)
   const [adresse, setAdresse] = useState<Adresse | undefined>(undefined)
   const [fnrMottaker, setFnrMottaker] = useState<string | undefined>(undefined)
   const [orgMottaker, setOrgMottaker] = useState<string | undefined>(undefined)
   const [mottakere, setMottakere] = useState<DefaultMottaker[]>([])
-  const [mal, setMal] = useState<any>(undefined)
-  const [maler, setMaler] = useState<any>([])
+  const [mal, setMal] = useState<string>()
+  const [maler, setMaler] = useState<Mal[]>([])
   const [laster, setLaster] = useState(false)
   const [error, setError] = useState<string>()
   const [fileURL, setFileURL] = useState<string>()
@@ -54,13 +56,13 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
     setLaster(true)
 
     const brevMottaker: Mottaker = {
-      foedselsnummer: fnrMottaker,
-      orgnummer: orgMottaker,
-      adresse: benyttAdresse ? adresse : undefined,
+      foedselsnummer: fnrMottaker?.length ? fnrMottaker : undefined,
+      orgnummer: orgMottaker?.length ? orgMottaker : undefined,
+      adresse: isEmptyAddressObject(adresse) ? undefined : adresse,
     }
 
     hentForhaandsvisning(brevMottaker, {
-      tittel: maler.find((m: any) => m.navn === mal).tittel,
+      tittel: maler.find((m: Mal) => m.navn === mal)?.tittel,
       navn: mal,
     })
       .then((file) => URL.createObjectURL(file))
@@ -84,13 +86,13 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
     setLaster(true)
 
     const brevMottaker: Mottaker = {
-      foedselsnummer: fnrMottaker,
-      orgnummer: orgMottaker,
-      adresse: benyttAdresse ? adresse : undefined,
+      foedselsnummer: fnrMottaker?.length ? fnrMottaker : undefined,
+      orgnummer: orgMottaker?.length ? orgMottaker : undefined,
+      adresse: isEmptyAddressObject(adresse) ? undefined : adresse,
     }
 
     nyttBrevForBehandling(behandlingId!!, brevMottaker, {
-      tittel: maler.find((m: any) => m.navn === mal).tittel,
+      tittel: maler.find((m: Mal) => m.navn === mal)?.tittel,
       navn: mal,
     })
       .then((brev) => leggTilNytt(brev))
@@ -101,19 +103,25 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
         setLaster(false)
         setIsOpen(false)
         setKlarforLagring(false)
-        setMal(undefined)
+        setMal('')
         setError(undefined)
         setFileURL(undefined)
       })
   }
 
-  const oppdaterMottaker = (id: string, idType: string) => {
-    //todo: fiks at man ikke kan velge org og fnr samtidig.
-    setFnrMottaker(idType === 'FNR' ? id : undefined)
-    setOrgMottaker(idType === 'ORGNR' ? id : undefined)
-    setBenyttAdresse(false)
-    setAdresse(undefined)
-    setKlarforLagring(false)
+  const oppdaterMottaker = (value: string, id: string, section?: string) => {
+    setFnrMottaker(id === 'FNR' ? value : '')
+    setOrgMottaker(id === 'ORGNR' ? value : '')
+
+    if (id === 'ADRESSE') {
+      if (section === 'fornavn') setAdresse({ ...adresse, fornavn: value })
+      if (section === 'etternavn') setAdresse({ ...adresse, etternavn: value })
+      if (section === 'adresse') setAdresse({ ...adresse, adresse: value })
+      if (section === 'postnummer') setAdresse({ ...adresse, postnummer: value })
+      if (section === 'poststed') setAdresse({ ...adresse, poststed: value })
+    } else {
+      setAdresse({})
+    }
   }
 
   return (
@@ -135,12 +143,12 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
                 label={'Mal'}
                 size={'medium'}
                 onChange={(e) => {
-                  setMal(e.target.value)
+                  setMal(e.target.value ? e.target.value : '')
                   setKlarforLagring(false)
                 }}
               >
                 <option value={undefined} label={'Velg mal ...'} />
-                {maler.map((mal: any, i: number) => (
+                {maler.map((mal: Mal, i: number) => (
                   <option key={i} value={mal.navn}>
                     {mal.tittel}
                   </option>
@@ -148,67 +156,17 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
               </Select>
 
               <br />
-              {!benyttAdresse && (
-                <>
-                  <Border />
-                  <br />
-                  <h2>Mottaker</h2>
-
-                  <Select
-                    label={'Velg person fra behandlingen'}
-                    value={fnrMottaker}
-                    onChange={(e) => oppdaterMottaker(e.target.value, 'FNR')}
-                  >
-                    <option value={undefined}></option>
-                    {mottakere
-                      .filter((m) => m.idType === 'FNR')
-                      .map((m, i) => (
-                        <option key={i} value={m.id}>
-                          {m.navn} ({m.id})
-                        </option>
-                      ))}
-                  </Select>
-                  <br />
-
-                  <Select
-                    label={'Velg organisasjon'}
-                    value={orgMottaker}
-                    onChange={(e) => oppdaterMottaker(e.target.value, 'ORGNR')}
-                  >
-                    <option value={undefined}></option>
-                    {mottakere
-                      .filter((m) => m.idType === 'ORGNR')
-                      .map((m, i) => (
-                        <option key={i} value={m.id}>
-                          {m.navn} ({m.id})
-                        </option>
-                      ))}
-                  </Select>
-                </>
-              )}
+              <h3>Mottaker</h3>
+              <MottakerComponent
+                oppdaterMottaker={oppdaterMottaker}
+                fnrMottaker={fnrMottaker}
+                orgMottaker={orgMottaker}
+                mottakere={mottakere}
+                adresse={adresse}
+              />
 
               <br />
               <Border />
-
-              <Panel border>
-                <Checkbox
-                  checked={benyttAdresse}
-                  onChange={(event) => {
-                    const benyttAdresse = event.target.checked
-                    setAdresse(benyttAdresse ? {} : undefined)
-                    setOrgMottaker(undefined)
-                    setFnrMottaker(undefined)
-                    setBenyttAdresse(benyttAdresse)
-                    setKlarforLagring(false)
-                  }}
-                >
-                  Skriv inn mottaker og adresse manuelt
-                </Checkbox>
-              </Panel>
-              <br />
-              <br />
-
-              {adresse !== undefined && <ManuellAdresse adresse={adresse} setAdresse={setAdresse} />}
 
               <br />
               <br />
@@ -228,6 +186,11 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: any) => 
             </Column>
             <Column style={{ paddingLeft: '20px', marginTop: '100px' }}>
               <PdfVisning fileUrl={fileURL} error={error} />
+              {!fileURL && (
+                <p>
+                  Vennligst velg mal og mottaker. <br /> Deretter trykk forhåndsvis for å se dokumentet.
+                </p>
+              )}
             </Column>
           </GridContainer>
         </Modal.Content>

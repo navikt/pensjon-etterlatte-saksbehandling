@@ -1,5 +1,6 @@
 import { Request, Response, Router } from 'express'
 import fetch from 'node-fetch'
+import request from 'request'
 
 const router = Router({ mergeParams: true })
 
@@ -112,6 +113,12 @@ router.post('/:brevId/pdf', async (req: Request, res: Response) => {
   } else {
     res.sendStatus(result.status)
   }
+})
+
+router.post('/pdf/:behandlingId', async (req: Request, res: Response, body) => {
+  const path = `${apiUrl}/brev/pdf/${req.params.behandlingId}`
+
+  req.pipe(request.post(path, body)).pipe(res)
 })
 
 router.post('/forhaandsvisning', async (req: Request, res: Response) => {

@@ -8,7 +8,13 @@ import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingsType } from '../behandlingsType'
 import { SaksType, ISaksType } from '../saksType'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { ferdigstillBrev, hentBrevForBehandling, hentInnkommendeBrev, slettBrev } from '../../../shared/api/brev'
+import {
+    ferdigstillBrev,
+    hentBrevForBehandling,
+    hentInnkommendeBrev,
+    Mottaker,
+    slettBrev
+} from '../../../shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 import { AppContext } from '../../../store/AppContext'
@@ -17,6 +23,7 @@ import { formaterDato } from '../../../utils/formattering'
 import InnkommendeBrevModal from './innkommende-brev-modal'
 import styled from 'styled-components'
 import Spinner from '../../../shared/Spinner'
+import LastOppBrev from "./nytt-brev/last-opp";
 
 const IngenInnkommendeBrevRad = styled.td`
   text-align: center;
@@ -24,12 +31,21 @@ const IngenInnkommendeBrevRad = styled.td`
   font-style: italic;
 `
 
+export interface IBrev {
+    id: number
+    behandlingId: string
+    tittel: string
+    status: string
+    mottaker: Mottaker
+    erVedtaksbrev: boolean
+}
+
 export const Brev = () => {
   const { behandlingId } = useParams()
   const { soeknadMottattDato, kommerSoekerTilgode, behandlingType } = useContext(AppContext).state.behandlingReducer
   const fnr = kommerSoekerTilgode?.familieforhold?.soeker?.fnr || ''
 
-  const [brevListe, setBrevListe] = useState<any[]>([])
+  const [brevListe, setBrevListe] = useState<IBrev[]>([])
   const [innkommendeBrevListe, setInnkommendeBrevListe] = useState<Journalpost[]>([])
   const [error, setError] = useState(false)
   const [innkommendeError, setInnkommendeError] = useState(false)
@@ -46,9 +62,9 @@ export const Brev = () => {
       .finally(() => setInnkommendeHentet(true))
   }, [])
 
-  const ferdigstill = (brevId: any): Promise<void> => {
-    return ferdigstillBrev(brevId).then((brev: any) => {
-      const nyListe: any[] = brevListe.filter((v: any) => v.id !== brevId)
+  const ferdigstill = (brevId: number): Promise<void> => {
+    return ferdigstillBrev(String(brevId)).then((brev: IBrev) => {
+      const nyListe: IBrev[] = brevListe.filter((v: IBrev) => v.id !== brevId)
 
       nyListe.push(brev)
 
@@ -56,14 +72,13 @@ export const Brev = () => {
     })
   }
 
-  const leggTilNytt = (brev: any) => {
+  const leggTilNytt = (brev: IBrev) => {
     const nyListe = [...brevListe]
     nyListe.push(brev)
     setBrevListe(nyListe)
   }
-
-  const slett = (brevId: any): Promise<void> => {
-    return slettBrev(brevId).then(() => {
+  const slett = (brevId: number): Promise<void> => {
+    return slettBrev(String(brevId)).then(() => {
       const nyListe = brevListe?.filter((brev) => brev.id !== brevId)
 
       setBrevListe(nyListe)
@@ -143,7 +158,8 @@ export const Brev = () => {
                 <Table.DataCell>{brev.id}</Table.DataCell>
                 <Table.DataCell>{brev.tittel}</Table.DataCell>
                 <Table.DataCell>
-                  {brev.mottaker.fornavn} {brev.mottaker.etternavn}
+                    {/*{brev.mottaker.fornavn} {brev.mottaker.etternavn}*/}
+                    - Kommer navn her -
                 </Table.DataCell>
                 <Table.DataCell>{hentStatusTag(brev.status)}</Table.DataCell>
                 <Table.DataCell>
@@ -169,6 +185,7 @@ export const Brev = () => {
 
       <ContentContainer>
         <NyttBrev leggTilNytt={leggTilNytt} />
+        <LastOppBrev leggTilNytt={leggTilNytt} />
       </ContentContainer>
 
       <Border />

@@ -82,7 +82,6 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
 
   const opprett = () => {
     if (!mal) return
-    if (!maler) return
 
     setLaster(true)
 

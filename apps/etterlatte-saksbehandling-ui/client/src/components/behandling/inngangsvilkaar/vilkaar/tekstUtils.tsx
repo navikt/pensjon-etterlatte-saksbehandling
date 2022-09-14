@@ -1,4 +1,4 @@
-import { IKriterie, Kriterietype, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { IKriterie, KildeType, Kriterietype, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
 
 export function vilkaarErOppfylt(resultat: VurderingsResultat) {
   switch (resultat) {
@@ -30,7 +30,11 @@ export function mapKriterietyperTilTekst(krit: IKriterie): VilkaarTittelSvar {
 
     case Kriterietype.SOEKER_IKKE_ADRESSE_I_UTLANDET: {
       const tittel = 'Barnet er medlem i trygden'
-      if (krit.resultat === VurderingsResultat.OPPFYLT) return { tittel, svar: 'Ja. Barnet har bostedsadresse i Norge' }
+      if (krit.resultat === VurderingsResultat.OPPFYLT)
+        return {
+          tittel,
+          svar: 'Ja. Barnet har bostedsadresse i Norge',
+        }
       if (krit.resultat === VurderingsResultat.IKKE_OPPFYLT)
         return { tittel, svar: 'Nei. Barnet har utenlandsk bostedsadresse' }
 
@@ -53,14 +57,20 @@ export function mapEnkeltSvarTilTekst(krit: IKriterie): string {
   }
 }
 
-export function hentKildenavn(type?: string): string {
+export function hentKildenavn(type?: KildeType): string {
   switch (type) {
-    case 'pdl':
+    case KildeType.pdl:
       return 'PDL'
-    case 'privatperson':
+    case KildeType.privatperson:
       return 'Søknad'
-    case 'automatisk':
-      return 'Automatisk'
+    case KildeType.a_ordningen:
+      return 'A-ordningen'
+    case KildeType.aa_registeret:
+      return 'AA-registeret'
+    case KildeType.vilkaarskomponenten:
+      return 'Vilkårskomponenten'
+    case KildeType.saksbehandler:
+      return 'Saksbehandler'
     default:
       return 'Ukjent kilde'
   }

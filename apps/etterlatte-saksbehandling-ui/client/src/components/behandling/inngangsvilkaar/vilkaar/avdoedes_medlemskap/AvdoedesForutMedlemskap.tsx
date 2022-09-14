@@ -14,7 +14,7 @@ import {
 import { VilkaarProps } from '../../types'
 import { TidslinjeMedlemskap } from './TidslinjeMedlemskap'
 import { KildeDatoOpplysning, KildeDatoVilkaar } from '../KildeDatoOpplysning'
-import { vilkaarErOppfylt } from '../utils'
+import { vilkaarErOppfylt } from '../tekstUtils'
 import { Button } from '@navikt/ds-react'
 import { useState } from 'react'
 import { PeriodeModal } from './PeriodeModal'
@@ -44,6 +44,14 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
     Kriterietype.AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD,
     KriterieOpplysningsType.AVDOED_UTENLANDSOPPHOLD
   )
+
+  const saksbehandlerinfo = hentKriterierMedOpplysning(
+    vilkaar,
+    Kriterietype.AVDOED_OPPFYLLER_MEDLEMSKAP,
+    KriterieOpplysningsType.AVDOED_MEDLEMSKAP
+  )?.opplysning?.grunnlag?.saksbehandlerMedlemsPerioder
+
+  const isHelautomatisk = saksbehandlerinfo === null || saksbehandlerinfo?.opplysning?.perioder?.length === 0
 
   return (
     <VilkaarBorder id={props.id}>
@@ -94,7 +102,7 @@ export const AvdoedesForutMedlemskap = (props: VilkaarProps) => {
                 <VilkaarlisteTitle>
                   <StatusIcon status={vilkaar.resultat} large={true} /> {vilkaarErOppfylt(vilkaar.resultat)}
                 </VilkaarlisteTitle>
-                <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
+                <KildeDatoVilkaar isHelautomatisk={isHelautomatisk} dato={vilkaar.vurdertDato} />
                 {lagVilkaarVisningUtland(vilkaar)}
                 {lagVilkaarVisningAvklaring(vilkaar)}
               </VilkaarVurderingContainer>

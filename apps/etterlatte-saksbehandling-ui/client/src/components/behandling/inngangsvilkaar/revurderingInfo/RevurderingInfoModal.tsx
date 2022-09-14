@@ -4,6 +4,7 @@ import { AppContext } from '../../../../store/AppContext'
 import {
   IBehandlingStatus,
   IBehandlingsType,
+  KildeType,
   KriterieOpplysningsType,
   Kriterietype,
   VilkaarsType,
@@ -103,7 +104,7 @@ export const RevurderingsAarsakModal = ({ behandlingStatus }: { behandlingStatus
 
 interface RevurderingOpplysningType {
   kilde?: {
-    type: string
+    type: KildeType
     tidspunktForInnhenting: string
   }
   opplysning: string

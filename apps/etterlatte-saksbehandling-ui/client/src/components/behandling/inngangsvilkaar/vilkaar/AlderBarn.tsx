@@ -15,7 +15,7 @@ import {
 } from '../styled'
 import { VilkaarProps } from '../types'
 import { KriterieOpplysningsType, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
-import { vilkaarErOppfylt } from './utils'
+import { vilkaarErOppfylt } from './tekstUtils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import { hentKriterierMedOpplysning } from '../../felles/utils'
 import { KildeDatoOpplysning, KildeDatoVilkaar } from './KildeDatoOpplysning'
@@ -86,7 +86,7 @@ export const AlderBarn = (props: VilkaarProps) => {
                 <VilkaarlisteTitle>
                   <StatusIcon status={vilkaar.resultat} large={true} /> {vilkaarErOppfylt(vilkaar.resultat)}
                 </VilkaarlisteTitle>
-                <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
+                <KildeDatoVilkaar isHelautomatisk={true} dato={vilkaar.vurdertDato} />
                 <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
               </VilkaarVurderingContainer>
             )}

@@ -16,7 +16,7 @@ import { format } from 'date-fns'
 import { hentKriterierMedOpplysning } from '../../felles/utils'
 import { KriterieOpplysningsType, Kriterietype } from '../../../../store/reducers/BehandlingReducer'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
-import { vilkaarErOppfylt } from './utils'
+import { vilkaarErOppfylt } from './tekstUtils'
 import { KildeDatoOpplysning, KildeDatoVilkaar } from './KildeDatoOpplysning'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 
@@ -69,7 +69,7 @@ export const Formaal = (props: VilkaarProps) => {
                   <VilkaarlisteTitle>
                     <StatusIcon status={vilkaar.resultat} large /> {vilkaarErOppfylt(vilkaar.resultat)}
                   </VilkaarlisteTitle>
-                  <KildeDatoVilkaar type="automatisk" dato={vilkaar.vurdertDato} />
+                  <KildeDatoVilkaar isHelautomatisk={true} dato={vilkaar.vurdertDato} />
                   <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
                 </>
               ) : null}

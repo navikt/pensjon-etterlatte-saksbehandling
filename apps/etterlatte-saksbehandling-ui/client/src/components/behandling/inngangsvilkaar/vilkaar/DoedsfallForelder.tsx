@@ -15,7 +15,7 @@ import {
   VilkaarWrapper,
 } from '../styled'
 import { VilkaarProps } from '../types'
-import { vilkaarErOppfylt } from './utils'
+import { vilkaarErOppfylt } from './tekstUtils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import { KildeDatoOpplysning, KildeDatoVilkaar } from './KildeDatoOpplysning'
 import { useContext } from 'react'
@@ -95,7 +95,7 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
                 <VilkaarlisteTitle>
                   <StatusIcon status={vilkaar.resultat} large={true} /> {vilkaarErOppfylt(vilkaar.resultat)}
                 </VilkaarlisteTitle>
-                <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
+                <KildeDatoVilkaar isHelautomatisk={true} dato={vilkaar.vurdertDato} />
                 <VilkaarVurderingsliste kriterie={vilkaar.kriterier} />
               </VilkaarVurderingContainer>
             )}

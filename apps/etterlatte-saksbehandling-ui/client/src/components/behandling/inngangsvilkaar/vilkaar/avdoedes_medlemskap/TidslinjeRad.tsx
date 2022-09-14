@@ -1,14 +1,14 @@
-import { IPeriode } from './TidslinjeMedlemskap'
 import { Tidsperiode } from './Tidsperiode'
 import styled from 'styled-components'
 import { numberToProsentString, startdatoOffsetProsent, tidsperiodeProsent } from './tidslinjeUtils'
+import { ITidslinjePeriode } from '../../types'
 
 export const TidslinjeRad = ({
   perioder,
   doedsdato,
   seksAarTidligere,
 }: {
-  perioder: IPeriode[]
+  perioder: ITidslinjePeriode[]
   doedsdato: string
   seksAarTidligere: string
 }) => {

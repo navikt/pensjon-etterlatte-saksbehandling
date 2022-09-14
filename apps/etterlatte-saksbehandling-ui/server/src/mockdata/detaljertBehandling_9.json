@@ -424,7 +424,7 @@
                       "id": "7b45afd5-7724-41e9-8411-79813d7b442b",
                       "opplysningType": "AVDOED_INNTEKT_V1",
                       "kilde": {
-                        "navn": "Inntektskomponenten",
+                        "tidspunkt": "2022-09-09T08:14:45.259402121Z",
                         "type": "inntektskomponenten"
                       },
                       "opplysning": {
@@ -438,8 +438,8 @@
                       "id": "77f59425-7f0b-4a0f-b729-336e1c184fc0",
                       "opplysningType": "ARBEIDSFORHOLD_V1",
                       "kilde": {
-                        "navn": "Aareg",
-                        "type": "Aareg"
+                        "tidspunkt": "2022-09-09T08:14:45.259402121Z",
+                        "type": "aa-registeret"
                       },
                       "opplysning": {
                         "arbeidsforhold": []
@@ -468,7 +468,8 @@
                             "begrunnelse": "",
                             "oppgittKilde": "register",
                             "fraDato": "2020-05-31",
-                            "tilDato": "2021-09-06"
+                            "tilDato": "2021-09-06",
+                            "godkjentPeriode": true
                           }
                         ]
                       }
@@ -477,20 +478,100 @@
                   },
                   "perioder": [
                     {
+                      "id": "740290af-d402-4a30-84ba-17901baf5af1",
+                      "periodeType": "ARBEIDSPERIODE",
+                      "kilde": {
+                        "tidspunkt": "2022-09-09T08:14:45.259402121Z",
+                        "type": "aa-registeret"
+                      },
+                      "arbeidsgiver": "896929119",
+                      "stillingsprosent": "[100.0]",
+                      "begrunnelse": null,
+                      "oppgittKilde": null,
+                      "fraDato": "2002-09-12",
+                      "tilDato": "2022-08-17",
+                      "beskrivelse": null,
+                      "godkjentPeriode": true
+                    },
+                    {
                       "id": "",
                       "periodeType": "ALDERSPENSJON",
                       "kilde": {
                         "ident": "Z994641",
-                        "tidspunkt": "2022-09-09T08:14:45.259402121Z",
+                        "tidspunkt": "2022-09-12T13:17:52.173868271Z",
                         "type": "saksbehandler"
                       },
                       "arbeidsgiver": null,
                       "stillingsprosent": "",
-                      "begrunnelse": "",
-                      "oppgittKilde": "register",
-                      "fraDato": "2020-05-31",
-                      "tilDato": "2021-09-06",
+                      "begrunnelse": "etterbetalt",
+                      "oppgittKilde": "areg",
+                      "fraDato": "2021-12-31",
+                      "tilDato": "2022-01-29",
                       "beskrivelse": null,
+                      "godkjentPeriode": true
+                    },
+                    {
+                      "id": "f33add6e-0f1a-444d-a482-53113a107298",
+                      "periodeType": "LOENNSINNTEKT",
+                      "kilde": {
+                        "tidspunkt": "2022-09-09T08:14:45.259402121Z",
+                        "type": "a-ordningen"
+                      },
+                      "arbeidsgiver": null,
+                      "stillingsprosent": null,
+                      "begrunnelse": null,
+                      "oppgittKilde": null,
+                      "fraDato": "2018-02-01",
+                      "tilDato": "2021-01-31",
+                      "beskrivelse": null,
+                      "godkjentPeriode": true
+                    },
+                    {
+                      "id": "3e80c7ea-b3df-4723-b3fe-1a38c9c4a7c7",
+                      "periodeType": "NAERINGSINNTEKT",
+                      "kilde": {
+                        "tidspunkt": "2022-09-09T08:14:45.259402121Z",
+                        "type": "a-ordningen"
+                      },
+                      "arbeidsgiver": null,
+                      "stillingsprosent": null,
+                      "begrunnelse": null,
+                      "oppgittKilde": null,
+                      "fraDato": "2019-01-01",
+                      "tilDato": "2019-01-31",
+                      "beskrivelse": null,
+                      "godkjentPeriode": true
+                    },
+                    {
+                      "id": "04270247-6709-43d4-833c-725b9dd96a74",
+                      "periodeType": "OFFENTLIG_YTELSE",
+                      "kilde": {
+                        "tidspunkt": "2022-09-09T08:14:45.259402121Z",
+                        "type": "a-ordningen"
+                      },
+                      "arbeidsgiver": null,
+                      "stillingsprosent": null,
+                      "begrunnelse": null,
+                      "oppgittKilde": null,
+                      "fraDato": "2018-02-01",
+                      "tilDato": "2021-01-31",
+                      "beskrivelse": "sykepenger",
+                      "godkjentPeriode": true
+                    },
+                    {
+                      "id": "facc5434-6fbb-4d16-b60b-2593e94fb454",
+                      "periodeType": "OFFENTLIG_YTELSE",
+                      "kilde": {
+                        "tidspunkt": "2022-09-09T08:14:45.259402121Z",
+                        "type": "a-ordningen"
+                      },
+                      "arbeidsgiver": null,
+                      "stillingsprosent": null,
+                      "begrunnelse": null,
+                      "oppgittKilde": null,
+                      "fraDato": "2018-02-01",
+                      "tilDato": "2021-01-31",
+                      "beskrivelse": "foreldrepenger",
                       "godkjentPeriode": true
                     }
                   ],

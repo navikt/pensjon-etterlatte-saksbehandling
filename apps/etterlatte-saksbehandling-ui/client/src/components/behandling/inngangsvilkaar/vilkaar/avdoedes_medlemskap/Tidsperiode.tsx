@@ -2,36 +2,47 @@ import { OfficeIcon } from '../../../../../shared/icons/officeIcon'
 import { HomeIcon } from '../../../../../shared/icons/homeIcon'
 import styled from 'styled-components'
 import { InformationIcon } from '../../../../../shared/icons/informationIcon'
-import { IPeriode } from './TidslinjeMedlemskap'
+
 import { useRef, useState } from 'react'
 import { Popover } from '@navikt/ds-react'
-import { formaterStringDato } from '../../../../../utils/formattering'
-import { hentKildenavn } from '../utils'
+import { formaterEnumTilLesbarString, formaterStringDato } from '../../../../../utils/formattering'
+import { hentKildenavn } from '../tekstUtils'
 import { CloseIcon } from '../../../../../shared/icons/closeIcon'
 import '../../../../../index.css'
+import {
+  IAdresseTidslinjePeriodeInnhold,
+  ISaksbehandlerKilde,
+  ITidslinjePeriode,
+  IVurdertPeriode,
+  TidslinjePeriodeType,
+} from '../../types'
+import { KildeType } from '../../../../../store/reducers/BehandlingReducer'
 
 export const Tidsperiode = ({
   periode,
   lengde,
   startOffset,
 }: {
-  periode: IPeriode
+  periode: ITidslinjePeriode
   lengde: string
   startOffset: string
 }) => {
   const buttonRef = useRef(null)
   const [open, setOpen] = useState(false)
-  const land = periode.innhold.adresseINorge ? ' (Norge)' : ` (${periode.innhold.land})`
-  const isGap = periode.periodeType === 'Bostedgap'
+
+  const isAdresseInnhold = 'land' in periode.innhold
+  const isYtelseInnhold = 'godkjentPeriode' in periode.innhold
+  const innholdAdresse = periode.innhold as IAdresseTidslinjePeriodeInnhold
+  const innholdYtelse = periode.innhold as IVurdertPeriode
+  const isGap = periode.type === TidslinjePeriodeType.GAP
+  const periodeType = formaterEnumTilLesbarString(periode.type)
 
   return (
     <Rad style={{ left: startOffset, width: lengde }} isGap={isGap}>
       {!isGap && (
         <InnholdWrapper>
-          <Ikon>{periode.periodeType === 'jobb' ? <OfficeIcon /> : <HomeIcon />}</Ikon>
-          <PeriodeType>
-            {periode.periodeType} {land}
-          </PeriodeType>
+          <Ikon>{periode.type !== TidslinjePeriodeType.ADRESSE ? <OfficeIcon /> : <HomeIcon />}</Ikon>
+          <PeriodeType>{periodeType}</PeriodeType>
         </InnholdWrapper>
       )}
       <InfoIkonWrapper ref={buttonRef} onClick={() => setOpen(true)}>
@@ -50,16 +61,38 @@ export const Tidsperiode = ({
             <CloseIcon />
           </Close>
           <InnholdTittel>Detaljer</InnholdTittel>
-          {!isGap && (
-            <InnholdKilde>
-              Kilde: {hentKildenavn(periode.kilde.type)}{' '}
-              {periode.kilde.tidspunktForInnhenting && formaterStringDato(periode.kilde.tidspunktForInnhenting)}
-            </InnholdKilde>
+
+          {isAdresseInnhold && !isGap && (
+            <>
+              <InnholdKilde>
+                Kilde: {hentKildenavn(periode.kilde.type)}{' '}
+                {periode.kilde.tidspunktForInnhenting && formaterStringDato(periode.kilde.tidspunktForInnhenting)}
+              </InnholdKilde>
+              <div>
+                {periodeType} {innholdAdresse.beskrivelse}
+              </div>
+              <div>{innholdAdresse?.land}</div>
+            </>
           )}
-          <div>
-            {periode.periodeType} {!isGap && ': ' + periode.innhold.beskrivelse}
-          </div>
-          <div>{periode.innhold.land}</div>
+
+          {isAdresseInnhold && isGap && <div>Bostedsgap</div>}
+
+          {isYtelseInnhold && (
+            <>
+              <InnholdKilde>
+                Kilde: {hentKildenavn(innholdYtelse.kilde.type)}{' '}
+                {innholdYtelse.kilde.tidspunkt && formaterStringDato(innholdYtelse.kilde.tidspunkt)}
+                {innholdYtelse.kilde.type === KildeType.saksbehandler && (
+                  <div>Lagt inn av {(innholdYtelse.kilde as ISaksbehandlerKilde).ident}</div>
+                )}
+              </InnholdKilde>
+              <div>
+                {periodeType} {innholdAdresse.beskrivelse}
+              </div>
+              <div>{innholdAdresse?.land}</div>
+            </>
+          )}
+
           <div>
             Periode: {formaterStringDato(periode.innhold.fraDato)} -{' '}
             {periode.innhold.tilDato ? formaterStringDato(periode.innhold.tilDato) : ''}

@@ -12,7 +12,7 @@ import {
   VilkaarWrapper,
 } from '../styled'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
-import { capitalize, vilkaarErOppfylt } from './utils'
+import { capitalize, vilkaarErOppfylt } from './tekstUtils'
 import { VilkaarVurderingEnkeltElement, VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import {
   IAdresse,
@@ -170,7 +170,7 @@ export const BarnetsMedlemskap = (props: VilkaarProps) => {
                   <StatusIcon status={vilkaar.resultat} large={true} />{' '}
                   {props.vilkaar?.resultat && vilkaarErOppfylt(props.vilkaar.resultat)}
                 </VilkaarlisteTitle>
-                <KildeDatoVilkaar type={'automatisk'} dato={vilkaar.vurdertDato} />
+                <KildeDatoVilkaar isHelautomatisk={true} dato={vilkaar.vurdertDato} />
                 {lagVilkaarVisning()}
               </VilkaarVurderingContainer>
             )}

@@ -6,7 +6,18 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.AdresseType
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.model.BeregningService
@@ -14,7 +25,9 @@ import no.nav.etterlatte.model.beregnSisteTom
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import personTestData
 import java.io.FileNotFoundException
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -32,12 +45,93 @@ internal class BeregningServiceTest {
             ?: throw FileNotFoundException("Fant ikke filen $file")
     }
 
-    private val vilkaarsvurdering = mockk<VilkaarResultat>() {
+    private val vilkaarsvurdering = mockk<VilkaarResultat> {
         every { resultat } returns VurderingsResultat.OPPFYLT
     }
     private val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
+
+    private val kilde = Grunnlagsopplysning.Pdl("PDL", Instant.now(), null, "opplysningsId1")
+    private val soekerFoedselsdato = LocalDate.of(2013, 10, 12)
+    private val foreldrer = listOf(Foedselsnummer.of("22128202440"), Foedselsnummer.of("03108718357"))
+    private val familieRelasjon = FamilieRelasjon(
+        ansvarligeForeldre = foreldrer,
+        foreldre = foreldrer,
+        barn = listOf()
+    )
+    private val bostedsadresse = listOf(
+        Adresse(
+            type = AdresseType.VEGADRESSE,
+            aktiv = true,
+            coAdresseNavn = null,
+            adresseLinje1 = "Bøveien 937",
+            adresseLinje2 = null,
+            adresseLinje3 = null,
+            postnr = "8475",
+            poststed = null,
+            land = null,
+            kilde = "FREG",
+            gyldigFraOgMed = LocalDateTime.parse("1999-01-01T00:00:00"),
+            gyldigTilOgMed = null
+        )
+    )
+    private val avdoedesBarn = listOf(
+        personTestData(
+            fornavn = "soesken",
+            bostedsadresse = bostedsadresse,
+            familieRelasjon = familieRelasjon,
+            foedselsdato = LocalDate.of(2003, 12, 12)
+        ),
+        personTestData(
+            fornavn = "søker",
+            bostedsadresse = bostedsadresse,
+            familieRelasjon = familieRelasjon
+        )
+    )
+    private val opplysningsgrunnlag = Opplysningsgrunnlag
+        .empty()
+        .copy(
+            søker = Grunnlagsdata(
+                mapOf(
+                    Opplysningstyper.BOSTEDSADRESSE to Opplysning.Konstant(
+                        kilde,
+                        objectMapper.readTree(bostedsadresse.toJson())
+                    ),
+                    Opplysningstyper.FOEDSELSDATO to Opplysning.Konstant(
+                        kilde,
+                        objectMapper.readTree(soekerFoedselsdato.toJson())
+                    ),
+                    Opplysningstyper.FAMILIERELASJON to Opplysning.Konstant(
+                        kilde,
+                        objectMapper.readTree(familieRelasjon.toJson())
+                    )
+                )
+            ),
+            familie = listOf(
+                Grunnlagsdata(
+                    mapOf(
+                        Opplysningstyper.PERSONROLLE to Opplysning.Konstant(
+                            kilde,
+                            objectMapper.readTree(PersonRolle.AVDOED.toJson())
+                        ),
+                        Opplysningstyper.AVDOEDESBARN to Opplysning.Konstant(
+                            kilde,
+                            objectMapper.readTree(avdoedesBarn.toJson())
+                        )
+                    )
+                ),
+                Grunnlagsdata(
+                    mapOf(
+                        Opplysningstyper.PERSONROLLE to Opplysning.Konstant(
+                            kilde,
+                            objectMapper.readTree(PersonRolle.GJENLEVENDE.toJson())
+                        )
+                    )
+                )
+            )
+        )
+
     private val beregningsperioder = BeregningService().beregnResultat(
-        readmelding("/Nyere.json"),
+        opplysningsgrunnlag, // readmelding("/Nyere.json"),
         YearMonth.of(2021, 2),
         YearMonth.of(2021, 9),
         vilkaarsvurdering,
@@ -70,11 +164,7 @@ internal class BeregningServiceTest {
         val virkFOM = YearMonth.of(2022, 5)
         val virkTOM = YearMonth.of(2022, 10)
         val resultat = BeregningService().beregnResultat(
-            grunnlag = Grunnlag(
-                saksId = 1,
-                grunnlag = listOf(),
-                versjon = 1
-            ),
+            grunnlag = Opplysningsgrunnlag.empty(),
             virkFOM = virkFOM,
             virkTOM = virkTOM,
             vilkaarsvurdering = VilkaarResultat(
@@ -115,7 +205,7 @@ internal class BeregningServiceTest {
     }
 
     @Nested
-    class beregnSisteTom {
+    inner class BeregnSisteTom {
         @Test
         fun `skal returnere foedselsdato om soeker blir 18 i loepet av perioden`() {
             val foedselsdato = LocalDate.of(2004, 3, 23)

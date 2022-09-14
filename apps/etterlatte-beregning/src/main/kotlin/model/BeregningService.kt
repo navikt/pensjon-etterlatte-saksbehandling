@@ -1,9 +1,7 @@
 package no.nav.etterlatte.model
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import model.Grunnbeloep
-import model.finnSoeskenperiodeStrategy.FinnSoeskenPeriodeStrategy
+import model.finnSoeskenperiode.FinnSoeskenPeriode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
@@ -12,12 +10,9 @@ import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.beregning.erInklusiv
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import java.time.LocalDate
@@ -28,7 +23,7 @@ import java.util.*
 // TODO hvordan håndtere vedtakstidspunkt?
 class BeregningService {
     fun beregnResultat(
-        grunnlag: Grunnlag,
+        grunnlag: Opplysningsgrunnlag,
         virkFOM: YearMonth,
         virkTOM: YearMonth,
         vilkaarsvurdering: VilkaarResultat,
@@ -44,9 +39,10 @@ class BeregningService {
                     resultat = BeregningsResultatType.BEREGNET,
                     beregningsperioder = beregningsperioder,
                     beregnetDato = LocalDateTime.now(),
-                    grunnlagVersjon = grunnlag.versjon
+                    grunnlagVersjon = grunnlag.hentVersjon()
                 )
             }
+
             BehandlingType.REVURDERING -> {
                 when (vilkaarsvurdering.resultat) {
                     VurderingsResultat.IKKE_OPPFYLT -> {
@@ -68,9 +64,10 @@ class BeregningService {
                                 )
                             ),
                             beregnetDato = LocalDateTime.now(),
-                            grunnlagVersjon = grunnlag.versjon
+                            grunnlagVersjon = grunnlag.hentVersjon()
                         )
                     }
+
                     else -> {
                         val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)
                         BeregningsResultat(
@@ -80,13 +77,15 @@ class BeregningService {
                             resultat = BeregningsResultatType.BEREGNET,
                             beregningsperioder = beregningsperioder,
                             beregnetDato = LocalDateTime.now(),
-                            grunnlagVersjon = grunnlag.versjon
+                            grunnlagVersjon = grunnlag.hentVersjon()
                         )
                     }
                 }
             }
             BehandlingType.MANUELT_OPPHOER -> {
-                val datoFom = foersteVirkFraDoedsdato(grunnlag.grunnlag)
+                val datoFom = foersteVirkFraDoedsdato(
+                    grunnlag.hentAvdoed().hentKonstantOpplysning<LocalDate>(Opplysningstyper.DOEDSDATO)!!.verdi
+                )
                 return BeregningsResultat(
                     id = UUID.randomUUID(),
                     type = Beregningstyper.GP,
@@ -105,19 +104,19 @@ class BeregningService {
                         )
                     ),
                     beregnetDato = LocalDateTime.now(),
-                    grunnlagVersjon = grunnlag.versjon
+                    grunnlagVersjon = grunnlag.hentVersjon()
                 )
             }
         }
     }
 
     private fun finnBeregningsperioder(
-        grunnlag: Grunnlag,
+        grunnlag: Opplysningsgrunnlag,
         virkFOM: YearMonth,
         virkTOM: YearMonth
     ): List<Beregningsperiode> {
         val grunnbeloep = Grunnbeloep.hentGforPeriode(virkFOM)
-        val soeskenPerioder = FinnSoeskenPeriodeStrategy.create(grunnlag, virkFOM).soeskenperioder
+        val soeskenPerioder = FinnSoeskenPeriode(grunnlag, virkFOM).hentSoeskenperioder()
         val alleFOM = (grunnbeloep.map { it.dato } + soeskenPerioder.map { it.datoFOM } + virkTOM).map {
             beregnFoersteFom(it, virkFOM)
         }.distinct().sorted().zipWithNext()
@@ -127,33 +126,30 @@ class BeregningService {
             val gjeldendeG = Grunnbeloep.hentGjeldendeG(fom)
             val flokkForPeriode = hentFlokkforPeriode(fom, tom, soeskenPerioder)
             val utbetaltBeloep = Soeskenjustering(flokkForPeriode.size, gjeldendeG.grunnbeløp).beloep
-            val søkersFødselsdato =
-                finnOpplysning<Person>(grunnlag.grunnlag, Opplysningstyper.SOEKER_PDL_V1)?.opplysning?.foedselsdato
+            val søkersFødselsdato = grunnlag.søker.hentKonstantOpplysning<LocalDate>(Opplysningstyper.FOEDSELSDATO)
 
             val datoTom = if (index == alleFOM.lastIndex && søkersFødselsdato != null) {
-                beregnSisteTom(søkersFødselsdato, tom)
+                beregnSisteTom(søkersFødselsdato.verdi, tom)
             } else {
                 tom
             }
 
-            (
-                Beregningsperiode(
-                    delytelsesId = "BP",
-                    type = Beregningstyper.GP,
-                    datoFOM = fom,
-                    datoTOM = datoTom,
-                    grunnbelopMnd = gjeldendeG.grunnbeløpPerMåned,
-                    grunnbelop = gjeldendeG.grunnbeløp,
-                    soeskenFlokk = flokkForPeriode,
-                    utbetaltBeloep = utbetaltBeloep
-                )
-                )
+            Beregningsperiode(
+                delytelsesId = "BP",
+                type = Beregningstyper.GP,
+                datoFOM = fom,
+                datoTOM = datoTom,
+                grunnbelopMnd = gjeldendeG.grunnbeløpPerMåned,
+                grunnbelop = gjeldendeG.grunnbeløp,
+                soeskenFlokk = flokkForPeriode,
+                utbetaltBeloep = utbetaltBeloep
+            )
         }
 
         return beregningsperioder
     }
 
-    fun hentFlokkforPeriode(
+    private fun hentFlokkforPeriode(
         datoFOM: YearMonth,
         datoTOM: YearMonth,
         soeskenPeriode: List<SoeskenPeriode>
@@ -162,33 +158,7 @@ class BeregningService {
     private fun beregnFoersteFom(fom: YearMonth, virkFOM: YearMonth): YearMonth =
         if (fom.isBefore(virkFOM)) virkFOM else fom
 
-    private fun foersteVirkFraDoedsdato(grlag: List<Grunnlagsopplysning<JsonNode>>): YearMonth =
-        finnOpplysning<Person>(
-            grlag,
-            Opplysningstyper.AVDOED_PDL_V1
-        )?.opplysning?.doedsdato.let {
-            YearMonth.from(it).plusMonths(1)
-        }
-
-    companion object {
-        inline fun <reified T> setOpplysningType(opplysning: Grunnlagsopplysning<JsonNode>?): VilkaarOpplysning<T>? {
-            return opplysning?.let {
-                VilkaarOpplysning(
-                    opplysning.id,
-                    opplysning.opplysningType,
-                    opplysning.kilde,
-                    objectMapper.readValue(opplysning.opplysning.toString())
-                )
-            }
-        }
-
-        inline fun <reified T> finnOpplysning(
-            opplysninger: List<Grunnlagsopplysning<JsonNode>>,
-            type: Opplysningstyper
-        ): VilkaarOpplysning<T>? {
-            return setOpplysningType(opplysninger.find { it.opplysningType == type })
-        }
-    }
+    private fun foersteVirkFraDoedsdato(dødsdato: LocalDate): YearMonth = YearMonth.from(dødsdato).plusMonths(1)
 }
 
 fun beregnSisteTom(fødselsdato: LocalDate, tom: YearMonth): YearMonth? {

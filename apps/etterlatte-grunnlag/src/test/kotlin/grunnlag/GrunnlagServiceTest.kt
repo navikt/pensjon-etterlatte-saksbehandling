@@ -56,8 +56,8 @@ internal class GrunnlagServiceTest {
         val service = RealGrunnlagService(opplysningerMock)
 
         val expected = Opplysningsgrunnlag(
-            grunnlagsdata = Grunnlagsdata(
-                søker = mapOf(
+            søker = Grunnlagsdata(
+                mapOf(
                     Opplysningstyper.NAVN to Opplysning.Konstant(
                         kilde = kilde1,
                         verdi = objectMapper.valueToTree(Navn(søker.fornavn, søker.etternavn))
@@ -68,7 +68,12 @@ internal class GrunnlagServiceTest {
                     )
                 )
             ),
-            metadata = Metadata(1, 2)
+            familie = emptyList(),
+            sak = Grunnlagsdata(emptyMap()),
+            metadata = Metadata(
+                1,
+                2
+            )
         )
 
         assertEquals(expected.toJson(), service.hentOpplysningsgrunnlag(1).toJson())

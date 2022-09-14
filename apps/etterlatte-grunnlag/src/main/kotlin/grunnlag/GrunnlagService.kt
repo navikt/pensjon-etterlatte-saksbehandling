@@ -38,8 +38,10 @@ class RealGrunnlagService(private val opplysninger: OpplysningDao) : GrunnlagSer
         val map = opplysninger.associateBy({ it.opplysning.opplysningType }, { it.opplysning.toOpplysning() })
 
         return Opplysningsgrunnlag(
-            Grunnlagsdata(søker = map),
-            Metadata(sak, versjon)
+            søker = Grunnlagsdata(verdi = map),
+            familie = emptyList(), // TODO sj: Fiks etter uthenting av DB er good
+            sak = Grunnlagsdata(emptyMap()),
+            metadata = Metadata(sak, versjon)
         )
     }
 

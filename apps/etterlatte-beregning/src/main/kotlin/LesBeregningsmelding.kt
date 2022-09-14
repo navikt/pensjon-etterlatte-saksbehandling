@@ -20,23 +20,24 @@ internal class LesBeregningsmelding(
     init {
         River(rapidsConnection).apply {
             eventName("BEHANDLING:GRUNNLAGENDRET")
-            validate { it.requireKey("grunnlag") }
             validate { it.requireKey("vilkaarsvurdering") }
             validate { it.requireKey("virkningstidspunkt") }
             validate { it.requireKey("behandling.type") }
             validate { it.rejectKey("beregning") }
+            validate { it.interestedIn("grunnlagV2") }
             correlationId()
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val grunnlag = packet["grunnlag"].toString()
+            val grunnlagV2 = packet["grunnlagV2"].toString()
+
             try {
                 // TODO fremtidig funksjonalitet for å støtte periodisering av vilkaar
                 val tom = YearMonth.now().plusMonths(3)
                 val beregningsResultat = beregning.beregnResultat(
-                    grunnlag = objectMapper.readValue(grunnlag),
+                    grunnlag = objectMapper.readValue(grunnlagV2),
                     virkFOM = YearMonth.parse(packet["virkningstidspunkt"].asText()),
                     virkTOM = tom,
                     vilkaarsvurdering = objectMapper.readValue(packet["vilkaarsvurdering"].toString()),

@@ -53,8 +53,8 @@ fun lagOpplysninger(
         person.statsborgerskap?.let { lagPersonOpplysning(Opplysningstyper.STATSBORGERSKAP, it, fnr) },
         person.utland?.let { lagPersonOpplysning(Opplysningstyper.UTLAND, it, fnr) },
         person.familieRelasjon?.let { lagPersonOpplysning(Opplysningstyper.FAMILIERELASJON, it, fnr) },
-        lagPersonOpplysning(Opplysningstyper.PERSONROLLE, OpplysningDTO(personRolle, null), fnr)
-        // person.avdoedesBarn?.let { lagOpplysning(Opplysningstyper.AVDOEDESBARN, personRolle, it) },
+        lagPersonOpplysning(Opplysningstyper.PERSONROLLE, OpplysningDTO(personRolle, null), fnr),
+        person.avdoedesBarn?.let { lagPersonOpplysning(Opplysningstyper.AVDOEDESBARN, OpplysningDTO(it, null), fnr) }
     )
 
     return periodiserteOpplysninger + statiskeOpplysninger

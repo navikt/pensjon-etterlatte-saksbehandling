@@ -8,4 +8,5 @@ dependencies {
     implementation(project(":libs:common"))
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)
+    testImplementation(project(":libs:testdata"))
 }

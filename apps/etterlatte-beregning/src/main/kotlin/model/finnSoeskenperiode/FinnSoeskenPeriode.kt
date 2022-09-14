@@ -1,34 +1,40 @@
-package model.finnSoeskenperiodeStrategy
+package model.finnSoeskenperiode
 
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
+import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Person
 import java.time.YearMonth
 
 // Adressesjekk på halvsøsken på dødsfallstidspunkt i første omgang
-data class FinnSoeskenPeriodeStrategyAutomatisk(
-    val avdoedesBarn: List<Person>?,
-    val bruker: Person?,
+data class FinnSoeskenPeriode(
+    private val grunnlag: Opplysningsgrunnlag,
     private val virkFOM: YearMonth
-) : FinnSoeskenPeriodeStrategy() {
-    override val soeskenperioder: List<SoeskenPeriode>
-        get() = finnSoeskenperioder(avdoedesBarn, bruker, virkFOM)
+) {
+    fun hentSoeskenperioder(): List<SoeskenPeriode> {
+        val avdoedesBarn =
+            grunnlag.hentAvdoed().hentKonstantOpplysning<List<Person>>(Opplysningstyper.AVDOEDESBARN)
+                ?: return emptyList()
+        val brukersFamilierelasjon =
+            grunnlag.søker.hentKonstantOpplysning<FamilieRelasjon>(Opplysningstyper.FAMILIERELASJON)
+                ?: return emptyList()
+        val brukersBostedsadresse =
+            grunnlag.søker.hentKonstantOpplysning<List<Adresse>>(Opplysningstyper.BOSTEDSADRESSE) ?: return emptyList()
 
-    private fun finnSoeskenperioder(
-        avdoedesBarn: List<Person>?,
-        bruker: Person?,
-        virkFOM: YearMonth
-    ): List<SoeskenPeriode> {
         // List compare?
-        val helsoesken = avdoedesBarn?.filter { it.familieRelasjon?.foreldre == bruker?.familieRelasjon?.foreldre }
-        val halvsoesken = avdoedesBarn?.filter { avdoedbarn ->
-            avdoedbarn.foedselsnummer !in (helsoesken?.map { helsoesken -> helsoesken.foedselsnummer } ?: emptyList())
+        val helsoesken =
+            avdoedesBarn.verdi.filter { it.familieRelasjon?.foreldre == brukersFamilierelasjon.verdi.foreldre }
+        val halvsoesken = avdoedesBarn.verdi.filter { avdoedbarn ->
+            avdoedbarn.foedselsnummer !in (helsoesken.map { helsoesken -> helsoesken.foedselsnummer } ?: emptyList())
         }
         // first skal være ok, siden PPS allerede har sortert
         val halvsoeskenOppdrattSammen =
-            halvsoesken?.filter { it.bostedsadresse?.first() == bruker?.bostedsadresse?.first() }
+            halvsoesken.filter { it.bostedsadresse?.first() == brukersBostedsadresse.verdi.first() }
         val kull: MutableList<Person> = ArrayList()
-        helsoesken?.let { kull.addAll(it) }
-        halvsoeskenOppdrattSammen?.let { kull.addAll(it) }
+        helsoesken.let { kull.addAll(it) }
+        halvsoeskenOppdrattSammen.let { kull.addAll(it) }
 
         val perioder = beregnSoeskenperioder(kull, virkFOM)
         // TODO håndtere doedsfall

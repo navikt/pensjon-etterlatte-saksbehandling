@@ -6,7 +6,7 @@ import { InformationIcon } from '../../../../../shared/icons/informationIcon'
 import { useRef, useState } from 'react'
 import { Popover } from '@navikt/ds-react'
 import { formaterEnumTilLesbarString, formaterStringDato } from '../../../../../utils/formattering'
-import { hentKildenavn } from '../tekstUtils'
+import { hentKildenavn, norskeBostaver } from '../tekstUtils'
 import { CloseIcon } from '../../../../../shared/icons/closeIcon'
 import '../../../../../index.css'
 import {
@@ -36,15 +36,40 @@ export const Tidsperiode = ({
   const innholdAdresse = periode.innhold as IAdresseTidslinjePeriodeInnhold
   const innholdYtelse = periode.innhold as IVurdertPeriode
   const isGap = periode.type === TidslinjePeriodeType.GAP
-  const periodeType = formaterEnumTilLesbarString(isAdresseInnhold ? periode.type : innholdYtelse.periodeType)
   const isSaksbehandlerPeriode = isYtelseInnhold ? innholdYtelse.kilde.type === KildeType.saksbehandler : false
+  const trengerAvklaring = isAdresseInnhold ? !innholdAdresse.adresseINorge : false
+
+  function hentTittel() {
+    if (isYtelseInnhold) {
+      return innholdYtelse.periodeType === IReturnertPeriodeType.offentlig_ytelse
+        ? formaterEnumTilLesbarString(innholdYtelse.beskrivelse ? innholdYtelse.beskrivelse : '')
+        : formaterEnumTilLesbarString(norskeBostaver(innholdYtelse.periodeType))
+    } else {
+      return innholdAdresse.adresseINorge ? innholdAdresse.typeAdresse : innholdAdresse.typeAdresse + ' utland'
+    }
+  }
+
+  function getColor() {
+    if (
+      isGap ||
+      (isAdresseInnhold && innholdAdresse.typeAdresse === 'Bostedsadresse' && !innholdAdresse.adresseINorge)
+    ) {
+      return '#E180714C'
+    } else if (isSaksbehandlerPeriode) {
+      return '#E0D8E9'
+    } else if (trengerAvklaring) {
+      return '#FFECCC'
+    } else {
+      return '#CCE2F0'
+    }
+  }
 
   return (
-    <Rad style={{ left: startOffset, width: lengde }} isGap={isGap}>
+    <Rad style={{ left: startOffset, width: lengde }} periodeColor={getColor()} isGap={isGap}>
       {!isGap && (
         <InnholdWrapper>
           <Ikon>{periode.type !== TidslinjePeriodeType.ADRESSE ? <OfficeIcon /> : <HomeIcon />}</Ikon>
-          <PeriodeType>{periodeType}</PeriodeType>
+          <PeriodeType>{hentTittel()}</PeriodeType>
         </InnholdWrapper>
       )}
       <InfoIkonWrapper ref={buttonRef} onClick={() => setOpen(true)}>
@@ -62,65 +87,84 @@ export const Tidsperiode = ({
           <Close onClick={() => setOpen(false)}>
             <CloseIcon />
           </Close>
-          <InnholdTittel>Detaljer</InnholdTittel>
 
           {isAdresseInnhold && !isGap && (
             <>
+              <InnholdTittel>{hentTittel()}</InnholdTittel>
               <InnholdKilde>
                 Kilde: {hentKildenavn(periode.kilde.type)}{' '}
                 {periode.kilde.tidspunktForInnhenting && formaterStringDato(periode.kilde.tidspunktForInnhenting)}
               </InnholdKilde>
               <div>
-                {periodeType} {innholdAdresse.beskrivelse}
+                <BoldTekst>Adresse: </BoldTekst>
+                <span>{innholdAdresse.beskrivelse}</span>
               </div>
               <div>{innholdAdresse?.land}</div>
             </>
           )}
 
-          {isAdresseInnhold && isGap && <div>Bostedsgap</div>}
+          {isAdresseInnhold && isGap && <InnholdTittel>Gap i bostedsadresse i Norge</InnholdTittel>}
 
           {isYtelseInnhold && isSaksbehandlerPeriode && (
             <>
+              <InnholdTittel>{hentTittel()}</InnholdTittel>
               <InnholdKilde>
                 Kilde: {hentKildenavn(innholdYtelse.kilde.type)}{' '}
                 {innholdYtelse.kilde.tidspunkt && formaterStringDato(innholdYtelse.kilde.tidspunkt)}
                 <div>Lagt inn av {(innholdYtelse.kilde as ISaksbehandlerKilde).ident}</div>
               </InnholdKilde>
-              <div>{periodeType}</div>
               {innholdYtelse.periodeType === IReturnertPeriodeType.arbeidsperiode && (
                 <>
-                  <div>Arbeidsgiver: {innholdYtelse.arbeidsgiver} </div>
-                  <div>Stillingsprosent: {innholdYtelse.stillingsprosent} </div>
+                  <div>
+                    <BoldTekst>Arbeidsgiver: </BoldTekst> <span>{innholdYtelse.arbeidsgiver}</span>
+                  </div>
+                  <div>
+                    <BoldTekst>Stillingsprosent: </BoldTekst>
+                    <span>{innholdYtelse.stillingsprosent}</span>
+                  </div>
                 </>
               )}
-              <div>Begrunnelse: {innholdYtelse.begrunnelse}</div>
-              <div>Oppgitt kilde: {innholdYtelse.oppgittKilde}</div>
-              <div>Perioden teller for medlemskap: {innholdYtelse.godkjentPeriode ? 'Ja' : 'Nei'}</div>
+              <div>
+                <BoldTekst>Begrunnelse: </BoldTekst> <span>{innholdYtelse.begrunnelse}</span>
+              </div>
+              <div>
+                <BoldTekst>Oppgitt kilde: </BoldTekst> <span>{innholdYtelse.oppgittKilde}</span>
+              </div>
+              <div>
+                <BoldTekst>Perioden teller for medlemskap: </BoldTekst>
+                <span>{innholdYtelse.godkjentPeriode ? 'Ja' : 'Nei'}</span>
+              </div>
             </>
           )}
 
           {isYtelseInnhold && !isSaksbehandlerPeriode && (
             <>
+              <InnholdTittel>{hentTittel()}</InnholdTittel>
               <InnholdKilde>
                 Kilde: {hentKildenavn(innholdYtelse.kilde.type)}{' '}
                 {innholdYtelse.kilde.tidspunkt && formaterStringDato(innholdYtelse.kilde.tidspunkt)}
               </InnholdKilde>
-              <div>{periodeType}</div>
               {innholdYtelse.periodeType === IReturnertPeriodeType.arbeidsperiode && (
                 <>
-                  <div>Arbeidsgiver: {innholdYtelse.arbeidsgiver} </div>
-                  <div>Stillingsprosent: {innholdYtelse.stillingsprosent} </div>
+                  <div>
+                    <BoldTekst>Arbeidsgiver: </BoldTekst> <span>{innholdYtelse.arbeidsgiver}</span>
+                  </div>
+                  <div>
+                    <BoldTekst>Stillingsprosent: </BoldTekst>
+                    <span>{innholdYtelse.stillingsprosent} </span>
+                  </div>
                 </>
               )}
-              {innholdYtelse.periodeType === IReturnertPeriodeType.offentlig_ytelse && (
-                <div>Type ytelse: {innholdYtelse.beskrivelse}</div>
-              )}
-              <div>Perioden teller for medlemskap: {innholdYtelse.godkjentPeriode ? 'Ja' : 'Nei'}</div>
+              <div>
+                <BoldTekst>Perioden teller for medlemskap: </BoldTekst>
+                <span>{innholdYtelse.godkjentPeriode ? 'Ja' : 'Nei'}</span>
+              </div>
             </>
           )}
 
           <div>
-            Periode: {formaterStringDato(periode.innhold.fraDato)} -{' '}
+            <BoldTekst>Periode: </BoldTekst>
+            <span> {formaterStringDato(periode.innhold.fraDato)} - </span>
             {periode.innhold.tilDato ? formaterStringDato(periode.innhold.tilDato) : ''}
           </div>
         </Popover.Content>
@@ -129,8 +173,8 @@ export const Tidsperiode = ({
   )
 }
 
-const Rad = styled.div<{ isGap: boolean }>`
-  background-color: ${(props) => (props.isGap ? '#E180714C' : '#CCE2F0')};
+const Rad = styled.div<{ periodeColor: string; isGap: boolean }>`
+  background-color: ${(props) => props.periodeColor};
   position: relative;
   margin-bottom: 10px;
   margin-right: 1px;
@@ -195,4 +239,8 @@ const InnholdTittel = styled.div`
 const InnholdKilde = styled.div`
   color: #676363;
   margin-bottom: 10px;
+`
+
+const BoldTekst = styled.span`
+  font-weight: bold;
 `

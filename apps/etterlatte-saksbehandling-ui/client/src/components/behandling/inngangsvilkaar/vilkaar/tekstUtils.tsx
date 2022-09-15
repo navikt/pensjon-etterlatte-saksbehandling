@@ -1,4 +1,5 @@
 import { IKriterie, KildeType, Kriterietype, VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { IReturnertPeriodeType } from '../types'
 
 export function vilkaarErOppfylt(resultat: VurderingsResultat) {
   switch (resultat) {
@@ -79,4 +80,16 @@ export function hentKildenavn(type?: KildeType): string {
 export const capitalize = (s?: string) => {
   if (!s) return ''
   return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
+}
+
+export function norskeBostaver(s: string) {
+  if (s === IReturnertPeriodeType.loennsinntekt) {
+    return 'Lønnsinntekt'
+  } else if (s === IReturnertPeriodeType.naerings_inntekt) {
+    return 'Næringsinntekt'
+  } else if (s === IReturnertPeriodeType.uføretrygd) {
+    return 'Uføretrygd'
+  } else {
+    return s
+  }
 }

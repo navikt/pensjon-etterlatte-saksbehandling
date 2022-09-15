@@ -21,6 +21,7 @@ export function mapAdresseTilPerioderSeksAarFoerDoedsdato(
     return {
       type: TidslinjePeriodeType.ADRESSE,
       innhold: {
+        typeAdresse: periodetype,
         fraDato: adresse.gyldigFraOgMed,
         tilDato: adresse.gyldigTilOgMed,
         beskrivelse: adresse.adresseLinje1 + ', ' + adresse.postnr + ' ' + (adresse.poststed ? adresse.poststed : ''),
@@ -73,6 +74,7 @@ export function mapGapsTilPerioder(gaps: IGap[], kilde: any): ITidslinjePeriode[
     return {
       type: TidslinjePeriodeType.GAP,
       innhold: {
+        typeAdresse: '',
         fraDato: gap.gyldigFra,
         tilDato: gap.gyldigTil,
         beskrivelse: '',

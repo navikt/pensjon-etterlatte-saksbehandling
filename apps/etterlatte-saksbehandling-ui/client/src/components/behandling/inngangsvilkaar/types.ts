@@ -19,6 +19,7 @@ export enum TidslinjePeriodeType {
 }
 
 export interface IAdresseTidslinjePeriodeInnhold {
+  typeAdresse: string
   fraDato: string
   tilDato?: string
   beskrivelse: string
@@ -96,6 +97,6 @@ export enum IReturnertPeriodeType {
   dagpenger = 'DAGPENGER',
   arbeidsavklaringspenger = 'ARBEIDSAVKLARINGSPENGER',
   offentlig_ytelse = 'OFFENTLIG_YTELSE',
-  naerlings_inntekst = 'NAERINGSINNTEKT',
+  naerings_inntekt = 'NAERINGSINNTEKT',
   loennsinntekt = 'LOENNSINNTEKT',
 }

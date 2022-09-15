@@ -45,6 +45,7 @@ KAFKA_CONSUMER_GROUP_ID=0;
 NAIS_APP_NAME=etterlatte-brev-api;
 HTTP_PORT=8085;
 ETTERLATTE_PDFGEN_URL=http://localhost:8081/api/v1/genpdf/brev;
+NORG2_URL=https://norg2.dev-fss-pub.nais.io/norg2/api/v1;
 HENT_DOKUMENT_URL=https://saf-q1.dev.intern.nav.no/rest/hentdokument;
 SAF_GRAPHQL_URL=https://saf-q1.dev.intern.nav.no/graphql;
 ```

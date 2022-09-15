@@ -33,6 +33,8 @@ spec:
     max: 1
     min: 1
   env:
+    - name: NORG2_URL
+      value: "https://norg2.dev-fss-pub.nais.io/norg2/api/v1"
     - name: ETTERLATTE_PDFGEN_URL
       value: "http://ey-pdfgen/api/v1/genpdf/brev"
     - name: HENT_DOKUMENT_URL

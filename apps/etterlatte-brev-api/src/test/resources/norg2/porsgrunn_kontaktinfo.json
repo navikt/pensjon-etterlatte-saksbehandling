@@ -1,0 +1,89 @@
+{
+  "id": 100000788,
+  "enhetNr": "0805",
+  "telefonnummer": "55553333",
+  "telefonnummerKommentar": null,
+  "faksnummer": null,
+  "epost": null,
+  "postadresse": {
+    "type": "stedsadresse",
+    "postnummer": "3915",
+    "poststed": "PORSGRUNN",
+    "gatenavn": "Kammerherreløkka",
+    "husnummer": "2",
+    "husbokstav": null,
+    "adresseTilleggsnavn": null
+  },
+  "besoeksadresse": {
+    "type": "stedsadresse",
+    "postnummer": "3915",
+    "poststed": "PORSGRUNN",
+    "gatenavn": "Kammerherreløkka",
+    "husnummer": "2",
+    "husbokstav": null,
+    "adresseTilleggsnavn": null
+  },
+  "spesielleOpplysninger": null,
+  "publikumsmottak": [
+    {
+      "id": 100000623,
+      "besoeksadresse": {
+        "type": "stedsadresse",
+        "postnummer": "3915",
+        "poststed": "Porsgrunn",
+        "gatenavn": "Kammerherreløkka",
+        "husnummer": "2",
+        "husbokstav": null,
+        "adresseTilleggsnavn": null
+      },
+      "aapningstider": [
+        {
+          "id": 100002123,
+          "dag": "Mandag",
+          "dato": null,
+          "fra": "10:00",
+          "til": "14:00",
+          "kommentar": "Åpent fra kl. 09.00–10.00 og 14.00 - 15.00 for selvbetjening og timeavtaler.",
+          "stengt": false
+        },
+        {
+          "id": 100002124,
+          "dag": "Tirsdag",
+          "dato": null,
+          "fra": "10:00",
+          "til": "14:00",
+          "kommentar": "Åpent fra kl. 09.00–10.00 og 14.00 - 15.00 for selvbetjening og timeavtaler.",
+          "stengt": false
+        },
+        {
+          "id": 100002127,
+          "dag": "Fredag",
+          "dato": null,
+          "fra": "10:00",
+          "til": "14:00",
+          "kommentar": "Åpent fra kl. 09.00–10.00 og 14.00 - 15.00 for selvbetjening og timeavtaler.",
+          "stengt": false
+        },
+        {
+          "id": 100002125,
+          "dag": "Onsdag",
+          "dato": null,
+          "fra": "10:00",
+          "til": "14:00",
+          "kommentar": "Åpent fra kl. 09.00–10.00 og 14.00 - 15.00 for selvbetjening og timeavtaler.",
+          "stengt": false
+        },
+        {
+          "id": 100002126,
+          "dag": "Torsdag",
+          "dato": null,
+          "fra": "10:00",
+          "til": "14:00",
+          "kommentar": "Åpent fra kl. 09.00–10.00 og 14.00 - 15.00 for selvbetjening og timeavtaler.",
+          "stengt": false
+        }
+      ],
+      "stedsbeskrivelse": null
+    }
+  ]
+}

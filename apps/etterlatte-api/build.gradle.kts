@@ -40,6 +40,6 @@ dependencies {
     testImplementation(Ktor2.ServerTests)
     testImplementation(Kotlinx.CoroutinesCore)
     testImplementation(NavFelles.MockOauth2Server)
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
+    testImplementation(Kotlinx.CoroutinesTest)
     testImplementation("org.skyscreamer:jsonassert:1.5.1")
 }

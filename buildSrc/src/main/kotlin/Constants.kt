@@ -5,8 +5,13 @@ object NavFelles {
     const val MockOauth2Server = "no.nav.security:mock-oauth2-server:0.3.1"
 }
 
+object Cache {
+    const val Caffeine = "com.github.ben-manes.caffeine:caffeine:3.1.1"
+}
+
 object Kotlinx {
     const val CoroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+    const val CoroutinesTest = "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4"
 }
 
 object Ktor2 {

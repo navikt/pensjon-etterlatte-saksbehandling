@@ -102,7 +102,8 @@ fun Application.module(beanFactory: BeanFactory) {
             behandlingRoutes(
                 beanFactory.generellBehandlingService(),
                 beanFactory.foerstegangsbehandlingService(),
-                beanFactory.revurderingService()
+                beanFactory.revurderingService(),
+                beanFactory.manueltOpphoerService()
             )
             oppgaveRoutes(OppgaveDao(ds.dataSource))
             grunnlagsendringshendelseRoute(beanFactory.grunnlagsendringshendelseService())

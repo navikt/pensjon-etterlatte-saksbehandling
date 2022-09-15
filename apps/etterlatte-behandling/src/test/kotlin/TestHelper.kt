@@ -1,12 +1,15 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.behandling.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.ManueltOpphoer
 import no.nav.etterlatte.behandling.Revurdering
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringStatus
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsType
 import no.nav.etterlatte.grunnlagsendring.Grunnlagsendringshendelse
 import no.nav.etterlatte.grunnlagsendring.Grunnlagsinformasjon
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -57,6 +60,28 @@ fun revurdering(
     oppgaveStatus = oppgaveStatus,
     persongalleri = persongalleri,
     revurderingsaarsak = revurderingAarsak
+)
+
+fun manueltOpphoer(
+    sak: Long = 1,
+    behandlingId: UUID = UUID.randomUUID(),
+    persongalleri: Persongalleri = persongalleri(),
+    opphoerAarsaker: List<ManueltOpphoerAarsak> = listOf(
+        ManueltOpphoerAarsak.SOESKEN_DOED,
+        ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
+    ),
+    fritekstAarsak: String? = "Umulig å revurdere i nytt saksbehandlingssystem"
+) = ManueltOpphoer(
+    id = behandlingId,
+    sak = sak,
+    behandlingOpprettet = LocalDateTime.now(),
+    sistEndret = LocalDateTime.now(),
+    status = BehandlingStatus.OPPRETTET,
+    oppgaveStatus = OppgaveStatus.NY,
+    type = BehandlingType.MANUELT_OPPHOER,
+    persongalleri = persongalleri,
+    opphoerAarsaker = opphoerAarsaker,
+    fritekstAarsak = fritekstAarsak
 )
 
 fun persongalleri(

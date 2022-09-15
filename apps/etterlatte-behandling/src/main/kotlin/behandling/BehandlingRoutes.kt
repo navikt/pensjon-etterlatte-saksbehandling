@@ -15,11 +15,13 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.*
@@ -27,27 +29,25 @@ import java.util.*
 fun Route.behandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
     foerstegangsbehandlingService: FoerstegangsbehandlingService,
-    revurderingService: RevurderingService
-
+    revurderingService: RevurderingService,
+    manueltOpphoerService: ManueltOpphoerService
 ) {
     val logger = application.log
 
     route("/behandlinger") {
         get {
             call.respond(
-                generellBehandlingService.hentBehandlinger()
-                    .map {
-                        BehandlingSammendrag(
-                            it.id,
-                            it.sak,
-                            it.status,
-                            if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
-                            it.behandlingOpprettet,
-                            it.type,
-                            if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD"
-                        )
-                    }
-                    .let { BehandlingListe(it) }
+                generellBehandlingService.hentBehandlinger().map {
+                    BehandlingSammendrag(
+                        it.id,
+                        it.sak,
+                        it.status,
+                        if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
+                        it.behandlingOpprettet,
+                        it.type,
+                        if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD"
+                    )
+                }.let { BehandlingListe(it) }
             )
         }
 
@@ -93,10 +93,29 @@ fun Route.behandlingRoutes(
                                 )
                             }
                         }
+                        BehandlingType.MANUELT_OPPHOER -> {
+                            with(manueltOpphoerService.hentManueltOpphoer(behandlingsId)!!) {
+                                DetaljertBehandling(
+                                    id = id,
+                                    sak = sak,
+                                    behandlingOpprettet = behandlingOpprettet,
+                                    sistEndret = sistEndret,
+                                    soeknadMottattDato = behandlingOpprettet,
+                                    innsender = persongalleri.innsender,
+                                    soeker = persongalleri.soeker,
+                                    gjenlevende = persongalleri.gjenlevende,
+                                    avdoed = persongalleri.avdoed,
+                                    soesken = persongalleri.soesken,
+                                    gyldighetsproeving = null,
+                                    status = status,
+                                    behandlingType = type
+                                )
+                            }
+                        }
                     }
-                }?.let { it1 ->
-                    call.respond(it1)
-                    logger.info("Henter detaljert for behandling: $behandlingsId: $it1")
+                }?.let { detaljertBehandling ->
+                    call.respond(detaljertBehandling)
+                    logger.info("Henter detaljert for behandling: $behandlingsId: $detaljertBehandling")
                 } ?: HttpStatusCode.NotFound
             }
 
@@ -114,7 +133,7 @@ fun Route.behandlingRoutes(
                         generellBehandlingService.registrerVedtakHendelse(
                             behandlingsId,
                             body.vedtakId,
-                            requireNotNull(call.parameters["hendelse"]),
+                            requireNotNull(call.parameters["hendelse"]).let { HendelseType.valueOf(it) },
                             body.inntruffet,
                             body.saksbehandler,
                             body.kommentar,
@@ -140,19 +159,26 @@ fun Route.behandlingRoutes(
         route("/sak") {
             get("/{sakid}") {
                 call.respond(
-                    generellBehandlingService.hentBehandlingerISak(sakId)
-                        .map {
-                            BehandlingSammendrag(
-                                it.id,
-                                it.sak,
-                                it.status,
-                                if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
-                                it.behandlingOpprettet,
-                                it.type,
-                                if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD"
-                            )
-                        }
-                        .let { BehandlingListe(it) }
+                    generellBehandlingService.hentBehandlingerISak(sakId).map {
+                        BehandlingSammendrag(
+                            id = it.id,
+                            sak = it.sak,
+                            status = it.status,
+                            soeknadMottattDato = if (it is Foerstegangsbehandling) {
+                                it.soeknadMottattDato
+                            } else {
+                                it.behandlingOpprettet
+                            },
+                            behandlingOpprettet = it.behandlingOpprettet,
+                            behandlingType = it.type,
+                            aarsak = when (it) {
+                                is Foerstegangsbehandling -> "SOEKNAD"
+                                is Revurdering -> it.revurderingsaarsak.name
+                                is ManueltOpphoer -> "MANUELT OPPHOER"
+                                else -> "UKJENT"
+                            }
+                        )
+                    }.let { BehandlingListe(it) }
                 )
             }
 
@@ -170,8 +196,7 @@ fun Route.behandlingRoutes(
                 behandlingsBehov.sak,
                 behandlingsBehov.persongalleri,
                 behandlingsBehov.mottattDato
-            )
-                .also { call.respondText(it.id.toString()) }
+            ).also { call.respondText(it.id.toString()) }
         }
 
         route("/foerstegangsbehandling") {
@@ -204,8 +229,7 @@ fun Route.behandlingRoutes(
                     behandlingsBehov.sak,
                     behandlingsBehov.persongalleri,
                     behandlingsBehov.mottattDato
-                )
-                    .also { call.respondText(it.id.toString()) }
+                ).also { call.respondText(it.id.toString()) }
             }
         }
 
@@ -240,6 +264,36 @@ fun Route.behandlingRoutes(
                 }
             }
         }
+
+        route("/manueltopphoer") {
+            get {
+                call.respond(
+                    manueltOpphoerService.hentManueltOpphoerInTransaction(behandlingsId)?.let {
+                        DetaljertBehandling(
+                            it.id,
+                            it.sak,
+                            it.behandlingOpprettet,
+                            it.sistEndret,
+                            it.behandlingOpprettet,
+                            it.persongalleri.innsender,
+                            it.persongalleri.soeker,
+                            it.persongalleri.gjenlevende,
+                            it.persongalleri.avdoed,
+                            it.persongalleri.soesken,
+                            null,
+                            it.status,
+                            BehandlingType.MANUELT_OPPHOER
+                        )
+                    } ?: HttpStatusCode.NotFound
+                )
+            }
+            post {
+                val manueltOpphoerRequest = call.receive<ManueltOpphoerRequest>()
+                call.respond(
+                    manueltOpphoerService.opprettManueltOpphoer(manueltOpphoerRequest) ?: HttpStatusCode.BadRequest
+                )
+            }
+        }
     }
 
 // TODO: fases ut -> nytt endepunkt: /behandlinger/foerstegangsbehandling
@@ -250,27 +304,33 @@ fun Route.behandlingRoutes(
             behandlingsBehov.sak,
             behandlingsBehov.persongalleri,
             behandlingsBehov.mottattDato
-        )
-            .also { call.respondText(it.id.toString()) }
+        ).also { call.respondText(it.id.toString()) }
     }
 
 // TODO: fases ut -> nytt endepunkt: /behandlinger/sak/{sakid}
     route("/sak") {
         get("/{sakid}/behandlinger") {
             call.respond(
-                generellBehandlingService.hentBehandlingerISak(sakId)
-                    .map {
-                        BehandlingSammendrag(
-                            it.id,
-                            it.sak,
-                            it.status,
-                            if (it is Foerstegangsbehandling) it.soeknadMottattDato else it.behandlingOpprettet,
-                            it.behandlingOpprettet,
-                            it.type,
-                            if (it is Revurdering) it.revurderingsaarsak.name else "SOEKNAD"
-                        )
-                    }
-                    .let { BehandlingListe(it) }
+                generellBehandlingService.hentBehandlingerISak(sakId).map {
+                    BehandlingSammendrag(
+                        id = it.id,
+                        sak = it.sak,
+                        status = it.status,
+                        soeknadMottattDato = if (it is Foerstegangsbehandling) {
+                            it.soeknadMottattDato
+                        } else {
+                            it.behandlingOpprettet
+                        },
+                        behandlingOpprettet = it.behandlingOpprettet,
+                        behandlingType = it.type,
+                        aarsak = when (it) {
+                            is Foerstegangsbehandling -> "SOEKNAD"
+                            is Revurdering -> it.revurderingsaarsak.name
+                            is ManueltOpphoer -> "MANUELT OPPHOER"
+                            else -> "UKJENT"
+                        }
+                    )
+                }.let { BehandlingListe(it) }
             )
         }
 
@@ -318,3 +378,7 @@ data class VedtakHendelse(
 data class LagretHendelser(
     val hendelser: List<LagretHendelse>
 )
+
+enum class HendelseType {
+    FATTET, ATTESTERT, UNDERKJENT, VILKAARSVURDERT, BEREGNET, AVKORTET, IVERKSATT
+}

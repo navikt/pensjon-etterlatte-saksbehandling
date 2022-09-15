@@ -23,6 +23,7 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.CommonFactory
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.behandling.HendelseDao
+import no.nav.etterlatte.behandling.ManueltOpphoer
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.objectMapper
@@ -30,7 +31,11 @@ import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
+import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
@@ -48,6 +53,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
+import java.lang.Thread.sleep
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -205,17 +211,86 @@ class ApplicationTest {
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
+
+            val manueltOpphoer = client.post("/behandlinger/manueltopphoer") {
+                addAuthSaksbehandler()
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    ManueltOpphoerRequest(
+                        sak = sak.id,
+                        opphoerAarsaker = listOf(
+                            ManueltOpphoerAarsak.SOESKEN_DOED,
+                            ManueltOpphoerAarsak.UTFLYTTING_FRA_NORGE
+                        ),
+                        fritekstAarsak = "kunne ikke behandles manuelt"
+                    )
+                )
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }.let {
+                it.body<ManueltOpphoer>()
+            }
+
+            client.get("/behandlinger/manueltopphoer?behandlingsid=${manueltOpphoer.id}") {
+                addAuthSaksbehandler()
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+                val result = it.body<DetaljertBehandling>()
+                assertEquals(sak.id, result.sak)
+                assertEquals(BehandlingType.MANUELT_OPPHOER, result.behandlingType)
+            }
+
+            client.post("/behandlinger/${manueltOpphoer.id}/hendelser/vedtak/FATTET") {
+                addAuthSaksbehandler()
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    VedtakHendelse(
+                        13L,
+                        "Saksbehandler",
+                        Tidspunkt.now(),
+                        null,
+                        null
+                    )
+                )
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
+            client.post("/behandlinger/${manueltOpphoer.id}/avbrytbehandling") {
+                addAuthSaksbehandler()
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
+            client.get("/behandlinger/manueltopphoer?behandlingsid=${manueltOpphoer.id}") {
+                addAuthSaksbehandler()
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+                val result = it.body<DetaljertBehandling>()
+                assertEquals(BehandlingStatus.AVBRUTT, result.status)
+            }
         }
 
         beans.behandlingHendelser().nyHendelse.close()
 
+        sleep(2000)
         assertNotNull(behandlingOpprettet)
         val rapid = beans.rapidSingleton
-        assertEquals(1, rapid.publiserteMeldinger.size)
+        assertEquals(3, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue()
         )
+        assertEquals(
+            "BEHANDLING:OPPRETTET",
+            objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue()
+        )
+        assertEquals(
+            "BEHANDLING:AVBRUTT",
+            objectMapper.readTree(rapid.publiserteMeldinger.last().verdi)["@event_name"].textValue()
+        )
+
         beans.datasourceBuilder().dataSource.connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }
         }

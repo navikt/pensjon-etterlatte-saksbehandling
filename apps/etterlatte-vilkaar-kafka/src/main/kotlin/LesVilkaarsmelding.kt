@@ -88,6 +88,7 @@ internal class LesVilkaarsmelding(
                         packet["vilkaarsvurdering"] = vilkaarsVurdering
                         packet["virkningstidspunkt"] = virkningstidspunkt
                     }
+                    BehandlingType.MANUELT_OPPHOER -> {} // TODO  implementer
                 }
 
                 packet["vilkaarsvurderingGrunnlagRef"] = grunnlag.versjon

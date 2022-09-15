@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import java.sql.Connection
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.*
 
 class RealRevurderingServiceTest {
@@ -69,8 +68,7 @@ class RealRevurderingServiceTest {
         val revurdering = sut.hentRevurdering(id)
         assertAll(
             "skal hente revurdering",
-            { assertEquals(id, revurdering.id) },
-            { assertTrue(revurdering is Revurdering) }
+            { assertEquals(id, revurdering.id) }
         )
     }
 
@@ -103,7 +101,6 @@ class RealRevurderingServiceTest {
 
     @Test
     fun `skal starte revurdering`() {
-        val mottattDato = LocalDateTime.now()
         val behandlingOpprettes = slot<Revurdering>()
         val behandlingHentes = slot<UUID>()
         val forrigeBehandling = foerstegangsbehandling(sak = 1)

@@ -86,6 +86,18 @@ class BeregningService {
                     }
                 }
             }
+            BehandlingType.MANUELT_OPPHOER -> {
+                val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)
+                return BeregningsResultat(
+                    id = UUID.randomUUID(),
+                    type = Beregningstyper.GP,
+                    endringskode = Endringskode.NY,
+                    resultat = BeregningsResultatType.BEREGNET,
+                    beregningsperioder = beregningsperioder, // TODO: endre beregningsperiode tilbake til foerste virk
+                    beregnetDato = LocalDateTime.now(),
+                    grunnlagVersjon = grunnlag.versjon
+                )
+            }
         }
     }
 

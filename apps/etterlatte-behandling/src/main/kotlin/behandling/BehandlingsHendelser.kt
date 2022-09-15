@@ -11,20 +11,16 @@ import kotlinx.coroutines.withContext
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
-import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
-import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.database.DatabaseContext
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
 import javax.sql.DataSource
-import kotlin.Exception
 
 enum class BehandlingHendelseType {
     OPPRETTET, GRUNNLAGENDRET, AVBRUTT
@@ -33,8 +29,6 @@ enum class BehandlingHendelseType {
 class BehandlingsHendelser(
     private val rapid: KafkaProdusent<String, String>,
     private val behandlingDao: BehandlingDao,
-    private val foerstegangsbehandlingFactory: FoerstegangsbehandlingFactory,
-    private val revurderingFactory: RevurderingFactory,
     private val datasource: DataSource,
     private val sakService: SakService
 ) {
@@ -68,22 +62,10 @@ class BehandlingsHendelser(
             }
         }
     }
+
     private fun handleEnHendelse(hendelse: Pair<UUID, BehandlingHendelseType>) {
         inTransaction {
-            val behandling: Behandling = when (behandlingDao.hentBehandlingType(hendelse.first)) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    foerstegangsbehandlingFactory.hentFoerstegangsbehandling(hendelse.first).serialiserbarUtgave()
-                }
-                BehandlingType.REVURDERING -> {
-                    revurderingFactory.hentRevurdering(hendelse.first)
-                        .serialiserbarUtgave()
-                }
-                else -> {
-                    throw IllegalArgumentException(
-                        "kan ikke poste melding om at grunnlag er endret for behandling ${hendelse.first}"
-                    )
-                }
-            }
+            val behandling = requireNotNull(behandlingDao.hentBehandling(hendelse.first))
             val sak = requireNotNull(sakService.finnSak(behandling.sak))
 
             rapid.publiser(
@@ -108,6 +90,14 @@ class BehandlingsHendelser(
                             it[BehandlingGrunnlagEndret.persongalleriKey] = behandling.persongalleri
                             it[BehandlingGrunnlagEndret.revurderingAarsakKey] = behandling.revurderingsaarsak
                         }
+                        is ManueltOpphoer -> {
+                            it[BehandlingGrunnlagEndret.fnrSoekerKey] = behandling.persongalleri.soeker
+                            it[BehandlingGrunnlagEndret.persongalleriKey] = behandling.persongalleri
+                            it[BehandlingGrunnlagEndret.manueltOpphoerAarsakKey] = behandling.opphoerAarsaker
+                            it[BehandlingGrunnlagEndret.manueltOpphoerfritekstAarsakKey] =
+                                behandling.fritekstAarsak ?: ""
+                        }
+                        else -> {}
                     }
                 }.toJson()
             ).also {

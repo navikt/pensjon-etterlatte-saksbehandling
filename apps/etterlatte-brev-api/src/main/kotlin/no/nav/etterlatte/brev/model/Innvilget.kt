@@ -23,17 +23,18 @@ data class InnvilgetBrevRequest(
     override fun templateName(): String = "innvilget"
 
     companion object {
-        fun fraVedtak(vedtak: Vedtak, avsender: Avsender, grunnbeloep: Grunnbeloep): InnvilgetBrevRequest = InnvilgetBrevRequest(
-            saksnummer = vedtak.sak.id.toString(),
-            utbetalingsinfo = vedtak.finnUtbetalingsinfo(),
-            grunnbeloep = grunnbeloep.grunnbeloep,
-            barn = vedtak.finnBarn(),
-            avdoed = vedtak.finnAvdoed(),
-            aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår? Nødvendig?
-            spraak = Spraak.NB, // todo, må hentes.
-            mottaker = vedtak.finnMottaker(),
-            avsender = avsender
-        )
+        fun fraVedtak(vedtak: Vedtak, avsender: Avsender, grunnbeloep: Grunnbeloep): InnvilgetBrevRequest =
+            InnvilgetBrevRequest(
+                saksnummer = vedtak.sak.id.toString(),
+                utbetalingsinfo = vedtak.finnUtbetalingsinfo(),
+                grunnbeloep = grunnbeloep.grunnbeloep,
+                barn = vedtak.finnBarn(),
+                avdoed = vedtak.finnAvdoed(),
+                aktuelleParagrafer = emptyList(), // todo: Gå igjennom oppfylte vilkår? Nødvendig?
+                spraak = Spraak.NB, // todo, må hentes.
+                mottaker = vedtak.finnMottaker(),
+                avsender = avsender
+            )
     }
 }
 

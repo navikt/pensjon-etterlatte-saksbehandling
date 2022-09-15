@@ -3,8 +3,10 @@ package no.nav.etterlatte.behandling.revurdering
 import no.nav.etterlatte.behandling.Behandling
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.HendelseDao
+import no.nav.etterlatte.behandling.HendelseType
 import no.nav.etterlatte.behandling.Revurdering
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingAggregat
+import no.nav.etterlatte.behandling.registrerVedtakHendelseFelles
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
@@ -19,7 +21,6 @@ class RevurderingAggregat(
     id: UUID,
     private val behandlinger: BehandlingDao,
     private val hendelser: HendelseDao
-
 ) {
     companion object {
         private val logger = LoggerFactory.getLogger(FoerstegangsbehandlingAggregat::class.java)
@@ -68,72 +69,33 @@ class RevurderingAggregat(
         requireNotNull(behandlinger.hentBehandling(id, BehandlingType.REVURDERING) as Revurdering)
 
     fun avbrytBehandling() {
-        lagretBehandling = lagretBehandling.copy(
-            status = BehandlingStatus.AVBRUTT,
-            sistEndret = LocalDateTime.now(),
-            oppgaveStatus = OppgaveStatus.LUKKET
-        )
-
-        behandlinger.lagreStatus(lagretBehandling)
-        behandlinger.lagreOppgaveStatus(lagretBehandling)
+        lagretBehandling = behandlinger.lagreStatusOgOppgaveStatus(
+            lagretBehandling.id,
+            BehandlingStatus.AVBRUTT,
+            OppgaveStatus.LUKKET,
+            LocalDateTime.now()
+        ) as Revurdering
     }
 
     fun registrerVedtakHendelse(
         vedtakId: Long,
-        hendelse: String,
+        hendelse: HendelseType,
         inntruffet: Tidspunkt,
         saksbehandler: String?,
         kommentar: String?,
         begrunnelse: String?
     ) {
-        val ikkeSettUnderBehandling = lagretBehandling.status == BehandlingStatus.FATTET_VEDTAK ||
-            lagretBehandling.status == BehandlingStatus.RETURNERT ||
-            lagretBehandling.status == BehandlingStatus.ATTESTERT
-
-        if (hendelse in listOf("FATTET", "ATTESTERT", "UNDERKJENT")) {
-            requireNotNull(saksbehandler)
-        }
-
-        if (hendelse == "UNDERKJENT") {
-            requireNotNull(kommentar)
-            requireNotNull(begrunnelse)
-        }
-
-        lagretBehandling = lagretBehandling.copy(
-            status = when (hendelse) {
-                "FATTET" -> BehandlingStatus.FATTET_VEDTAK
-                "ATTESTERT" -> BehandlingStatus.ATTESTERT
-                "UNDERKJENT" -> BehandlingStatus.RETURNERT
-                "VILKAARSVURDERT" ->
-                    if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
-                "BEREGNET" ->
-                    if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
-                "AVKORTET" ->
-                    if (ikkeSettUnderBehandling) lagretBehandling.status else BehandlingStatus.UNDER_BEHANDLING
-                "IVERKSATT" -> BehandlingStatus.IVERKSATT
-                else -> throw IllegalStateException(
-                    "Behandling ${lagretBehandling.id} forstår ikke vedtakhendelse $hendelse"
-                )
-            },
-            oppgaveStatus = when (hendelse) {
-                "FATTET" -> OppgaveStatus.TIL_ATTESTERING
-                "UNDERKJENT" -> OppgaveStatus.RETURNERT
-                "ATTESTERT" -> OppgaveStatus.LUKKET
-                else -> lagretBehandling.oppgaveStatus
-            },
-            sistEndret = LocalDateTime.now()
-        )
-        behandlinger.lagreStatus(lagretBehandling)
-        behandlinger.lagreOppgaveStatus(lagretBehandling)
-        hendelser.vedtakHendelse(
-            lagretBehandling,
-            vedtakId,
-            hendelse,
-            inntruffet,
-            saksbehandler,
-            kommentar,
-            begrunnelse
-        )
+        lagretBehandling = registrerVedtakHendelseFelles(
+            vedtakId = vedtakId,
+            hendelse = hendelse,
+            inntruffet = inntruffet,
+            saksbehandler = saksbehandler,
+            kommentar = kommentar,
+            begrunnelse = begrunnelse,
+            lagretBehandling = lagretBehandling,
+            behandlinger = behandlinger,
+            hendelser = hendelser
+        ) as Revurdering
     }
 
     fun serialiserbarUtgave() = lagretBehandling.copy()

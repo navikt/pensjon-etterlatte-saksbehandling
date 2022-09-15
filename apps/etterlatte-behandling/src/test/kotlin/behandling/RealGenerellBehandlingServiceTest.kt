@@ -7,6 +7,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
+import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -50,12 +51,14 @@ class RealGenerellBehandlingServiceTest {
             )
         }
         val hendelserMock = mockk<HendelseDao>()
+        val manueltOpphoerMock = mockk<ManueltOpphoerService>()
         val sut = RealGenerellBehandlingService(
             behandlingerMock,
             hendleseskanal,
             FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
             RevurderingFactory(behandlingerMock, hendelserMock),
-            hendelserMock
+            hendelserMock,
+            manueltOpphoerMock
         )
 
         val behandlinger = sut.hentBehandlinger()
@@ -76,12 +79,14 @@ class RealGenerellBehandlingServiceTest {
             every { hentBehandlingType(id) } returns BehandlingType.REVURDERING
         }
         val hendelserMock = mockk<HendelseDao>()
+        val manueltOpphoerMock = mockk<ManueltOpphoerService>()
         val sut = RealGenerellBehandlingService(
             behandlingerMock,
             hendleseskanal,
             FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
             RevurderingFactory(behandlingerMock, hendelserMock),
-            hendelserMock
+            hendelserMock,
+            manueltOpphoerMock
         )
         val behandlingtype = sut.hentBehandlingstype(id)
         assertEquals(BehandlingType.REVURDERING, behandlingtype)
@@ -97,12 +102,14 @@ class RealGenerellBehandlingServiceTest {
             )
         }
         val hendelserMock = mockk<HendelseDao>()
+        val manueltOpphoerMock = mockk<ManueltOpphoerService>()
         val sut = RealGenerellBehandlingService(
             behandlingerMock,
             hendleseskanal,
             FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
             RevurderingFactory(behandlingerMock, hendelserMock),
-            hendelserMock
+            hendelserMock,
+            manueltOpphoerMock
         )
 
         val behandlinger = sut.hentBehandlingerISak(1)

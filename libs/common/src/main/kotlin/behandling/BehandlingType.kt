@@ -1,5 +1,5 @@
 package no.nav.etterlatte.libs.common.behandling
 
 enum class BehandlingType {
-    FØRSTEGANGSBEHANDLING, REVURDERING // ktlint-disable
+    FØRSTEGANGSBEHANDLING, REVURDERING, MANUELT_OPPHOER // ktlint-disable
 }

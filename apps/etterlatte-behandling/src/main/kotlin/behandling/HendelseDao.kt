@@ -11,7 +11,7 @@ import java.sql.ResultSet
 import java.sql.Timestamp
 import java.sql.Types
 import java.time.ZoneId
-import java.util.UUID
+import java.util.*
 
 class HendelseDao(private val connection: () -> Connection) {
     companion object {
@@ -35,14 +35,14 @@ class HendelseDao(private val connection: () -> Connection) {
     fun vedtakHendelse(
         behandling: Behandling,
         vedtakId: Long,
-        hendelse: String,
+        hendelse: HendelseType,
         inntruffet: Tidspunkt,
         saksbehandler: String?,
         kommentar: String?,
         begrunnelse: String?
     ) = lagreHendelse(
         UlagretHendelse(
-            "VEDTAK:$hendelse",
+            "VEDTAK:${hendelse.name}",
             inntruffet,
             vedtakId,
             behandling.id,

@@ -2,17 +2,20 @@ package no.nav.etterlatte.itest
 
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.ManueltOpphoer
 import no.nav.etterlatte.behandling.Revurdering
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.manueltOpphoer
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakDao
@@ -132,6 +135,26 @@ internal class BehandlingDaoIntegrationTest {
     }
 
     @Test
+    fun `skal opprette manuelt opphoer`() {
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
+        val behandling = ManueltOpphoer(
+            sak = sak1,
+            persongalleri = persongalleri(),
+            opphoerAarsaker = listOf(
+                ManueltOpphoerAarsak.SOESKEN_DOED,
+                ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
+            ),
+            fritekstAarsak = "Umulig å revurdere i nytt saksbehandlingssystem"
+        )
+        val lagretBehandling = behandlingRepo.opprettManueltOpphoer(behandling)
+        assertEquals(sak1, lagretBehandling.sak)
+        assertEquals(persongalleri(), lagretBehandling.persongalleri)
+        assertTrue(ManueltOpphoerAarsak.SOESKEN_DOED in lagretBehandling.opphoerAarsaker)
+        assertTrue(ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED in lagretBehandling.opphoerAarsaker)
+        assertEquals("Umulig å revurdere i nytt saksbehandlingssystem", lagretBehandling.fritekstAarsak)
+    }
+
+    @Test
     fun `Skal legge til gyldighetsprøving til en opprettet behandling`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
 
@@ -248,11 +271,9 @@ internal class BehandlingDaoIntegrationTest {
     @Test
     fun `skal returnere behandlingtype Foerstegangsbehandling`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
-
         val foerstegangsbehandling = foerstegangsbehandling(sak = sak1).also {
             behandlingRepo.opprettFoerstegangsbehandling(it)
         }
-
         val type = behandlingRepo.hentBehandlingType(foerstegangsbehandling.id)
         assertEquals(BehandlingType.FØRSTEGANGSBEHANDLING, type)
     }
@@ -260,13 +281,29 @@ internal class BehandlingDaoIntegrationTest {
     @Test
     fun `skal returnere behandlingtype Revurdering`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
-
         val revurdering = revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD).also {
             behandlingRepo.opprettRevurdering(it)
         }
-
         val type = behandlingRepo.hentBehandlingType(revurdering.id)
         assertEquals(BehandlingType.REVURDERING, type)
+    }
+
+    @Test
+    fun `skal returnere behandlingtype ManueltOpphoer`() {
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
+        val behandling = ManueltOpphoer(
+            sak = sak1,
+            persongalleri = persongalleri(),
+            opphoerAarsaker = listOf(
+                ManueltOpphoerAarsak.SOESKEN_DOED,
+                ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
+            ),
+            fritekstAarsak = "Umulig å revurdere i nytt saksbehandlingssystem"
+        ).also {
+            behandlingRepo.opprettManueltOpphoer(it)
+        }
+        val type = behandlingRepo.hentBehandlingType(behandling.id)
+        assertEquals(BehandlingType.MANUELT_OPPHOER, type)
     }
 
     @Test
@@ -294,6 +331,17 @@ internal class BehandlingDaoIntegrationTest {
 
         val behandling = behandlingRepo.hentBehandling(id = revurdering.id, type = BehandlingType.REVURDERING)
         assertTrue(behandling is Revurdering)
+    }
+
+    @Test
+    fun `skal returnere behandling av type ManueltOpphoer`() {
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
+        val manueltOpphoer = manueltOpphoer(sak1)
+            .also {
+                behandlingRepo.opprettManueltOpphoer(it)
+            }
+        val behandling = behandlingRepo.hentBehandling(manueltOpphoer.id, BehandlingType.MANUELT_OPPHOER)
+        assertTrue(behandling is ManueltOpphoer)
     }
 
     @Test

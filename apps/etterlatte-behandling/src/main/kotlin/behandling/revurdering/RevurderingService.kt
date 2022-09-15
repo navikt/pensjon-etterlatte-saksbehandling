@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.Behandling
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.ManueltOpphoer
 import no.nav.etterlatte.behandling.Revurdering
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -21,6 +22,7 @@ interface RevurderingService {
         pdlHendelse: PdlHendelse,
         revurderingAarsak: RevurderingAarsak
     ): Revurdering
+
     fun slettRevurderingISak(sakId: Long)
 }
 
@@ -65,6 +67,15 @@ class RealRevurderingService(
                     forrigeBehandling.sak,
                     forrigeBehandling.persongalleri,
                     revurderingAarsak
+                )
+                is ManueltOpphoer -> revurderingFactory.opprettRevurdering(
+                    forrigeBehandling.sak,
+                    forrigeBehandling.persongalleri,
+                    revurderingAarsak
+                )
+                else -> throw Exception(
+                    "Forrige behandling er av en type som gjoer at revurdering ikke kan" +
+                        "opprettes: ${forrigeBehandling.javaClass.kotlin}"
                 )
             }
         }

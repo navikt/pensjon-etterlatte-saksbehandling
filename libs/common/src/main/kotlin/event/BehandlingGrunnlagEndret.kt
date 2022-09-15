@@ -10,7 +10,10 @@ interface IBehandlingGrunnlagEndret {
     val behandlingOpprettetKey get() = "behandlingOpprettet"
     val persongalleriKey get() = "persongalleri"
     val revurderingAarsakKey get() = "revurderingsaarsak"
+    val manueltOpphoerAarsakKey get() = "manueltOpphoerAarsak"
+    val manueltOpphoerfritekstAarsakKey get() = "manueltOpphoerFritekstAarsak"
 }
+
 interface IMedGrunnlag {
     val grunnlagKey get() = "grunnlag"
 }

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import no.nav.etterlatte.behandling.Behandling
 import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.inTransaction
@@ -78,9 +79,7 @@ class GrunnlagsendringshendelseService(
                                 "med doedsdato: $doedsdato"
                         )
                         generellBehandlingService.hentBehandlingerISak(endringsHendelse.sakId)
-                            .sortedByDescending { it.behandlingOpprettet }
-                            // TODO: naar vi faar med komplekse saker i saksbehandlingssystemet: vurder hvilken behandling som skal brukes videre
-                            .first { it.status in BehandlingStatus.ikkeAvbrutt() }
+                            .`siste ikke-avbrutte behandling`()
                             .also { behandling ->
                                 when (behandling.status) {
                                     in BehandlingStatus.underBehandling() -> {
@@ -149,4 +148,8 @@ class GrunnlagsendringshendelseService(
             }
         }
     }
+
+    fun List<Behandling>.`siste ikke-avbrutte behandling`() =
+        this.sortedByDescending { it.behandlingOpprettet }
+            .first { it.status in BehandlingStatus.ikkeAvbrutt() }
 }

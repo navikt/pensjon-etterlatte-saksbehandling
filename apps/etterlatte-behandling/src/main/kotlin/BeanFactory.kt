@@ -16,6 +16,8 @@ import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingFactory
 import no.nav.etterlatte.behandling.foerstegangsbehandling.FoerstegangsbehandlingService
 import no.nav.etterlatte.behandling.foerstegangsbehandling.RealFoerstegangsbehandlingService
+import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
+import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RealRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
@@ -44,6 +46,7 @@ interface BeanFactory {
     fun revurderingService(): RevurderingService
     fun generellBehandlingService(): GenerellBehandlingService
     fun grunnlagsendringshendelseService(): GrunnlagsendringshendelseService
+    fun manueltOpphoerService(): ManueltOpphoerService
     fun sakDao(): SakDao
     fun behandlingDao(): BehandlingDao
     fun hendelseDao(): HendelseDao
@@ -63,8 +66,6 @@ abstract class CommonFactory : BeanFactory {
         BehandlingsHendelser(
             rapid(),
             behandlingDao(),
-            foerstegangsbehandlingFactory(),
-            revurderingFactory(),
             datasourceBuilder().dataSource,
             sakService()
         )
@@ -94,18 +95,25 @@ abstract class CommonFactory : BeanFactory {
 
     override fun sakService(): SakService = RealSakService(sakDao())
 
-    override fun foerstegangsbehandlingService(): RealFoerstegangsbehandlingService =
+    override fun foerstegangsbehandlingService(): FoerstegangsbehandlingService =
         RealFoerstegangsbehandlingService(
             behandlingDao(),
             foerstegangsbehandlingFactory(),
             behandlingHendelser().nyHendelse
         )
 
-    override fun revurderingService(): RealRevurderingService =
+    override fun revurderingService(): RevurderingService =
         RealRevurderingService(
             behandlingDao(),
             revurderingFactory(),
             behandlingHendelser().nyHendelse
+        )
+
+    override fun manueltOpphoerService(): ManueltOpphoerService =
+        RealManueltOpphoerService(
+            behandlingDao(),
+            behandlingHendelser().nyHendelse,
+            hendelseDao()
         )
 
     override fun generellBehandlingService(): GenerellBehandlingService =
@@ -114,7 +122,8 @@ abstract class CommonFactory : BeanFactory {
             behandlingHendelser().nyHendelse,
             foerstegangsbehandlingFactory(),
             revurderingFactory(),
-            hendelseDao()
+            hendelseDao(),
+            manueltOpphoerService()
         )
 
     override fun sakDao(): SakDao = SakDao { databaseContext().activeTx() }

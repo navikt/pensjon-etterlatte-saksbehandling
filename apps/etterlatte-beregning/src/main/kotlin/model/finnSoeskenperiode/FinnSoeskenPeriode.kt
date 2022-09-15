@@ -2,6 +2,7 @@ package model.finnSoeskenperiode
 
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon

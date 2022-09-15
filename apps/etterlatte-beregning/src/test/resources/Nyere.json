@@ -111,6 +111,15 @@
     }
   ],
   "@event_name": "BEHANDLING:GRUNNLAGENDRET",
+  "grunnlagV2": {
+    "søker": {},
+    "familie": [],
+    "sak": {},
+    "metadata": {
+      "sakId": 2,
+      "versjon": 1
+    }
+  },
   "grunnlag": {
     "saksId": 3,
     "grunnlag": [

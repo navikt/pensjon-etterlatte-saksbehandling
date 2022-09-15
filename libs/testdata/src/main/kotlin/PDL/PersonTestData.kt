@@ -1,51 +1,54 @@
-import no.nav.etterlatte.libs.common.person.Adresse
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.ADRESSEBESKYTTELSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOEDESBARN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.DELTBOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.DOEDSDATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FAMILIERELASJON
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDELAND
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSDATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSNUMMER
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.KONTAKTADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.NAVN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.OPPHOLDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SIVILSTATUS
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.STATSBORGERSKAP
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTLAND
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.VERGEMAALELLERFREMTIDSFULLMAKT
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.Sivilstatus
-import no.nav.etterlatte.libs.common.person.Utland
-import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import java.time.LocalDate
 
-fun personTestData(
-    fornavn: String = "Per",
-    etternavn: String = "Persson",
-    foedselsnummer: Foedselsnummer = Foedselsnummer.of("02071064479"),
-    foedselsdato: LocalDate? = LocalDate.of(2010, 7, 2),
-    foedselsaar: Int = 2010,
-    foedeland: String? = "Norge",
-    doedsdato: LocalDate? = null,
-    adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.UGRADERT,
-    bostedsadresse: List<Adresse>? = null,
-    deltBostedsadresse: List<Adresse>? = null,
-    kontaktadresse: List<Adresse>? = null,
-    oppholdsadresse: List<Adresse>? = null,
-    sivilstatus: Sivilstatus? = Sivilstatus.UGIFT,
-    statsborgerskap: String? = "Norsk",
-    utland: Utland? = null,
-    familieRelasjon: FamilieRelasjon? = null,
-    avdoedesBarn: List<Person>? = null,
-    vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>? = null
-): Person {
-    return Person(
-        fornavn = fornavn,
-        etternavn = etternavn,
-        foedselsnummer = foedselsnummer,
-        foedselsdato = foedselsdato,
-        foedselsaar = foedselsaar,
-        foedeland = foedeland,
-        doedsdato = doedsdato,
-        adressebeskyttelse = adressebeskyttelse,
-        bostedsadresse = bostedsadresse,
-        deltBostedsadresse = deltBostedsadresse,
-        kontaktadresse = kontaktadresse,
-        oppholdsadresse = oppholdsadresse,
-        sivilstatus = sivilstatus,
-        statsborgerskap = statsborgerskap,
-        utland = utland,
-        familieRelasjon = familieRelasjon,
-        avdoedesBarn = avdoedesBarn,
-        vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt
-    )
+private inline fun <reified T>Map<Opplysningstyper, Opplysning<JsonNode>>.hentOpplysning(
+    opplysningstype: Opplysningstyper
+): T? {
+    val opplysning = this[opplysningstype] as Opplysning.Konstant<T>? ?: return null
+    return objectMapper.readValue(opplysning.verdi.toString(), object : TypeReference<T>() {})
 }
+
+fun personTestData(
+    opplysningsmap: Map<Opplysningstyper, Opplysning<JsonNode>>
+): Person = Person(
+    fornavn = opplysningsmap.hentOpplysning<Navn>(NAVN)!!.fornavn,
+    etternavn = opplysningsmap.hentOpplysning<Navn>(NAVN)!!.etternavn,
+    foedselsnummer = opplysningsmap.hentOpplysning(FOEDSELSNUMMER)!!,
+    foedselsdato = opplysningsmap.hentOpplysning(FOEDSELSDATO),
+    foedselsaar = opplysningsmap.hentOpplysning<LocalDate>(FOEDSELSDATO)!!.year,
+    foedeland = opplysningsmap.hentOpplysning(FOEDELAND),
+    doedsdato = opplysningsmap.hentOpplysning(DOEDSDATO),
+    adressebeskyttelse = opplysningsmap.hentOpplysning(ADRESSEBESKYTTELSE),
+    bostedsadresse = opplysningsmap.hentOpplysning(BOSTEDSADRESSE),
+    deltBostedsadresse = opplysningsmap.hentOpplysning(DELTBOSTEDSADRESSE),
+    kontaktadresse = opplysningsmap.hentOpplysning(KONTAKTADRESSE),
+    oppholdsadresse = opplysningsmap.hentOpplysning(OPPHOLDSADRESSE),
+    sivilstatus = opplysningsmap.hentOpplysning(SIVILSTATUS),
+    statsborgerskap = opplysningsmap.hentOpplysning(STATSBORGERSKAP),
+    utland = opplysningsmap.hentOpplysning(UTLAND),
+    familieRelasjon = opplysningsmap.hentOpplysning(FAMILIERELASJON),
+    avdoedesBarn = opplysningsmap.hentOpplysning(AVDOEDESBARN),
+    vergemaalEllerFremtidsfullmakt = opplysningsmap.hentOpplysning(VERGEMAALELLERFREMTIDSFULLMAKT)
+)

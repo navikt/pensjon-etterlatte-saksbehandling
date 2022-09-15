@@ -1,5 +1,7 @@
 package grunnlag
 
+import GrunnlagTestData
+import GrunnlagTestData.Companion.søker
 import io.mockk.every
 import io.mockk.mockk
 import lagGrunnlagsopplysning
@@ -12,11 +14,11 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import soeknad.soekerBarnSoeknad
 import java.time.Instant
 
 class GrunnlagHendelserTest {
@@ -39,7 +41,7 @@ class GrunnlagHendelserTest {
                     NAVN,
                     Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
                     fnr = Foedselsnummer.of("11057523044"),
-                    verdi = objectMapper.valueToTree(soekerBarnSoeknad().fornavn)
+                    verdi = GrunnlagTestData().søker().fornavn.toJsonNode()
                 ),
                 1,
                 1

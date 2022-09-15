@@ -22,7 +22,6 @@ enum class Opplysningstyper {
     AVDOED_INNTEKT_V1, // Brukes ikke til å lage opplysning?
 
     SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1,
-    SAKSBEHANDLER_SOESKEN_I_BEREGNINGEN, // Kun for soeskenjustering
     SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
 
     /* Grunnlag v2 */
@@ -43,6 +42,7 @@ enum class Opplysningstyper {
     FAMILIERELASJON,
     AVDOEDESBARN,
     VERGEMAALELLERFREMTIDSFULLMAKT,
+    PERSONROLLE,
 
-    PERSONROLLE
+    SOESKEN_I_BEREGNINGEN // Kun for soeskenjustering
 }

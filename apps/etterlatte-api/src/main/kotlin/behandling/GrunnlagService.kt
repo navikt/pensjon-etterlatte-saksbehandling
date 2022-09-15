@@ -127,7 +127,7 @@ class GrunnlagService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, token)
         val opplysning: List<Grunnlagsopplysning<Beregningsgrunnlag>> = listOf(
             lagOpplysning(
-                opplysningsType = Opplysningstyper.SAKSBEHANDLER_SOESKEN_I_BEREGNINGEN,
+                opplysningsType = Opplysningstyper.SOESKEN_I_BEREGNINGEN,
                 kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
                 opplysning = Beregningsgrunnlag(soeskenMedIBeregning)
             )

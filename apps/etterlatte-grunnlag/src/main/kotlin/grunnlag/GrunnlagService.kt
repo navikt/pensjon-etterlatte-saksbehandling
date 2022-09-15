@@ -2,7 +2,6 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
@@ -38,9 +37,9 @@ class RealGrunnlagService(private val opplysninger: OpplysningDao) : GrunnlagSer
         val map = opplysninger.associateBy({ it.opplysning.opplysningType }, { it.opplysning.toOpplysning() })
 
         return Opplysningsgrunnlag(
-            søker = Grunnlagsdata(verdi = map),
+            søker = map,
             familie = emptyList(), // TODO sj: Fiks etter uthenting av DB er good
-            sak = Grunnlagsdata(emptyMap()),
+            sak = emptyMap(),
             metadata = Metadata(sak, versjon)
         )
     }

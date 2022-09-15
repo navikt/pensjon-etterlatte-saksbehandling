@@ -1,5 +1,7 @@
 package no.nav.etterlatte.person
 
+import GrunnlagTestData
+import GrunnlagTestData.Companion.søker
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -26,7 +28,6 @@ import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import personTestData
 
 class PersonRouteTest {
 
@@ -40,7 +41,7 @@ class PersonRouteTest {
             rolle = PersonRolle.BARN
         )
 
-        coEvery { personService.hentPerson(hentPersonRequest) } returns personTestData()
+        coEvery { personService.hentPerson(hentPersonRequest) } returns GrunnlagTestData().søker()
 
         withTestApplication({ module(securityContextMediator, personService) }) {
             handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT) {

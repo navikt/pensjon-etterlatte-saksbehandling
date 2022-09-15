@@ -48,7 +48,7 @@ internal class GrunnlagServiceTest {
                         "tidspunkt":"2022-08-08T11:51:34.346022Z",
                         "type":"saksbehandler"
                     },
-                    "opplysningType":"SAKSBEHANDLER_SOESKEN_I_BEREGNINGEN",
+                    "opplysningType":"SOESKEN_I_BEREGNINGEN",
                     "meta":{},
                     "opplysning": {"beregningsgrunnlag" : [
                         {

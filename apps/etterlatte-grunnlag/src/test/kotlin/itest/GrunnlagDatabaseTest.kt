@@ -7,9 +7,9 @@ import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOED_PDL_V1
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SAKSBEHANDLER_SOESKEN_I_BEREGNINGEN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOEKNAD_MOTTATT_DATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOESKEN_I_BEREGNINGEN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -142,7 +142,7 @@ internal class GrunnlagDaoIntegrationTest {
     @Test
     fun `Det er mulig å slette alle opplysninger i en sak`() {
         lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
-        lagGrunnlagsopplysning(SAKSBEHANDLER_SOESKEN_I_BEREGNINGEN).also {
+        lagGrunnlagsopplysning(SOESKEN_I_BEREGNINGEN).also {
             opplysningRepo.leggOpplysningTilGrunnlag(
                 2,
                 it

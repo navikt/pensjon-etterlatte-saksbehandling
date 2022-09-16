@@ -1,9 +1,9 @@
 import { Saksliste } from './saksliste'
 import styled from 'styled-components'
-import { Next } from '@navikt/ds-icons'
 import { IBehandlingsammendrag } from './typer'
 import { useNavigate } from 'react-router-dom'
-import { formaterEnumTilLesbarString } from '../../utils/formattering'
+import { INasjonalitetsType, NasjonalitetsType } from '../behandling/fargetags/nasjonalitetsType'
+import { Heading } from '@navikt/ds-react'
 
 export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandlingsammendrag[] | undefined }) => {
   const navigate = useNavigate()
@@ -12,7 +12,6 @@ export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandling
   const sortertListe = behandlinger.sort((a, b) =>
     new Date(b.behandlingOpprettet!) > new Date(a.behandlingOpprettet!) ? 1 : -1
   )
-  const sisteBehandling = sortertListe[0]
 
   const goToBehandling = (behandlingsId: string) => {
     navigate(`/behandling/${behandlingsId}/soeknadsoversikt`)
@@ -21,32 +20,17 @@ export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandling
   return (
     <>
       <SaksoversiktWrapper>
-        <h1>Barnepensjon</h1>
-
-        <InfoWrapper>
-          <div>
-            <Col>Sakstype</Col>
-            <Value>Nasjonal</Value>
+        <HeadingWrapper>
+          <Heading spacing size="xlarge" level="5">
+            Barnepensjon
+          </Heading>
+          <div className="details">
+            <NasjonalitetsType type={INasjonalitetsType.NASJONAL} />
           </div>
-
-          <div>
-            <Col>Gjelder</Col>
-            <Value>{formaterEnumTilLesbarString(sisteBehandling?.behandlingType)}</Value>
-          </div>
-
-          <div>
-            <Col>Status</Col>
-            <Value>{formaterEnumTilLesbarString(sisteBehandling.status)}</Value>
-          </div>
-
-          <IconButton onClick={() => goToBehandling(sisteBehandling.id.toString())}>
-            <Next fontSize={30} />
-          </IconButton>
-        </InfoWrapper>
-
+        </HeadingWrapper>
         <div className="behandlinger">
           <h2>Behandlinger</h2>
-          <Saksliste behandlinger={behandlinger} goToBehandling={goToBehandling} />
+          <Saksliste behandlinger={sortertListe} goToBehandling={goToBehandling} />
         </div>
       </SaksoversiktWrapper>
     </>
@@ -79,6 +63,15 @@ export const SaksoversiktWrapper = styled.div`
     margin-top: 4em;
     padding-left: 2em;
     padding-right: 2em;
+  }
+`
+
+export const HeadingWrapper = styled.div`
+  display: inline-flex;
+  margin-top: 3em;
+
+  .details {
+    padding: 0.6em;
   }
 `
 

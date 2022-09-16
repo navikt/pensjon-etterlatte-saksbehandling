@@ -2,6 +2,7 @@ import { Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { AarsaksTyper, IBehandlingsammendrag } from './typer'
 import { formaterStringDato, formaterEnumTilLesbarString } from '../../utils/formattering'
+import { IBehandlingStatus } from '../../store/reducers/BehandlingReducer'
 
 const colonner = ['Opprettet', 'Type', 'Årsak', 'Status', 'Vedtaksdato', 'Resultat']
 
@@ -32,11 +33,14 @@ export const Saksliste = ({
               <Table.DataCell key={`data${behandling.behandlingType}`}>
                 {formaterEnumTilLesbarString(behandling.behandlingType)}
               </Table.DataCell>
-              <Table.DataCell key={`data${behandling.aarsak}`}>{mapAarrsak(behandling.aarsak)}</Table.DataCell>
+              <Table.DataCell key={`data${behandling.aarsak}`}>{mapAarsak(behandling.aarsak)}</Table.DataCell>
               <Table.DataCell key={`data${behandling.status}`}>
-                {formaterEnumTilLesbarString(behandling.status)}
+                {formaterEnumTilLesbarString(endringStatusNavn(behandling.status))}
               </Table.DataCell>
-              <Table.DataCell key={'vedtaksdato'}>Vedtaksdato her</Table.DataCell>
+              {
+                //todo: legg inn vedtaksdato/iversettelsesdato og resultat når det er klart
+              }
+              <Table.DataCell key={'vedtaksdato'}></Table.DataCell>
               <Table.DataCell key={i}>
                 <Link onClick={() => goToBehandling(behandling.id.toString())}>Gå til behandling</Link>
               </Table.DataCell>
@@ -48,7 +52,7 @@ export const Saksliste = ({
   )
 }
 
-function mapAarrsak(aarsak: AarsaksTyper) {
+function mapAarsak(aarsak: AarsaksTyper) {
   switch (aarsak) {
     case AarsaksTyper.MANUELT_OPPHOER:
       return 'Manuelt opphør'
@@ -56,6 +60,17 @@ function mapAarrsak(aarsak: AarsaksTyper) {
       return 'Søker er død'
     case AarsaksTyper.SOEKNAD:
       return 'Søknad'
+  }
+}
+
+function endringStatusNavn(status: IBehandlingStatus) {
+  switch (status) {
+    case IBehandlingStatus.FATTET_VEDTAK:
+      return 'Til attestering'
+    case IBehandlingStatus.ATTESTERT:
+      return 'Iverksatt'
+    default:
+      return status
   }
 }
 

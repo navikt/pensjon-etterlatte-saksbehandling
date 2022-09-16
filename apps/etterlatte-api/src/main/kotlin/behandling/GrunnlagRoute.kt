@@ -99,7 +99,7 @@ fun Route.grunnlagRoute(service: GrunnlagService) {
 data class MedlemskapsPeriodeClientRequest(val periode: AvdoedesMedlemskapsperiodeClientRequest) {
     fun toDomain(saksbehandlerId: String) = SaksbehandlerMedlemskapsperiode(
         periodeType = renameEnum(this.periode.periodeType.uppercase()).let { PeriodeType.valueOf(it) },
-        id = periode.id ?: UUID.randomUUID().toString(),
+        id = if (periode.id.isNullOrEmpty()) UUID.randomUUID().toString() else periode.id,
         kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
         arbeidsgiver = periode.arbeidsgiver,
         stillingsprosent = periode.stillingsprosent?.replace("%", ""),

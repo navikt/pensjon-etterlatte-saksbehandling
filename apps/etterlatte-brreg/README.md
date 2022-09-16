@@ -1,10 +1,24 @@
 # etterlatte-brreg
 
-App med API for å hente data fra enhetsregisteret.
+Enkelt API for å hente data fra enhetsregisteret. Bygget med Kotlin / [Ktor](https://ktor.io/). 
 
 # Kom i gang
 
+## Kjøre lokalt
+
+1. Legg til `BRREG_URL=https://data.brreg.no` som environment variable. 
+2. Kjør `Application.kt`
+
+
+
 ## Endepunkter
+
+| Miljø | URL |
+| --- | --- |
+| **Prod** | https://etterlatte-brreg.intern.nav.no |
+| **Dev** | https://etterlatte-brreg.dev.intern.nav.no |
+
+
 
 #### Søke på navn
 
@@ -46,14 +60,6 @@ Eksempelrespons:
     }
 }
 ```
-
-## Miljøer
-
-**Prod:**\
-https://etterlatte-brreg.intern.nav.no
-
-**Dev:**\
-https://etterlatte-brreg.dev.intern.nav.no
 
 
 

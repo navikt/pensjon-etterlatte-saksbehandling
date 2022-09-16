@@ -5,15 +5,15 @@ import BrevModal from './brev-modal'
 import { Information, Success } from '@navikt/ds-icons'
 import NyttBrev from './nytt-brev/nytt-brev'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
-import { BehandlingsType } from '../behandlingsType'
-import { SaksType, ISaksType } from '../saksType'
+import { BehandlingsType } from '../fargetags/behandlingsType'
+import { SaksType, ISaksType } from '../fargetags/saksType'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import {
-    ferdigstillBrev,
-    hentBrevForBehandling,
-    hentInnkommendeBrev,
-    Mottaker,
-    slettBrev
+  ferdigstillBrev,
+  hentBrevForBehandling,
+  hentInnkommendeBrev,
+  Mottaker,
+  slettBrev,
 } from '../../../shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
@@ -23,7 +23,7 @@ import { formaterDato } from '../../../utils/formattering'
 import InnkommendeBrevModal from './innkommende-brev-modal'
 import styled from 'styled-components'
 import Spinner from '../../../shared/Spinner'
-import LastOppBrev from "./nytt-brev/last-opp";
+import LastOppBrev from './nytt-brev/last-opp'
 
 const IngenInnkommendeBrevRad = styled.td`
   text-align: center;
@@ -32,12 +32,12 @@ const IngenInnkommendeBrevRad = styled.td`
 `
 
 export interface IBrev {
-    id: number
-    behandlingId: string
-    tittel: string
-    status: string
-    mottaker: Mottaker
-    erVedtaksbrev: boolean
+  id: number
+  behandlingId: string
+  tittel: string
+  status: string
+  mottaker: Mottaker
+  erVedtaksbrev: boolean
 }
 
 export const Brev = () => {
@@ -158,8 +158,7 @@ export const Brev = () => {
                 <Table.DataCell>{brev.id}</Table.DataCell>
                 <Table.DataCell>{brev.tittel}</Table.DataCell>
                 <Table.DataCell>
-                    {/*{brev.mottaker.fornavn} {brev.mottaker.etternavn}*/}
-                    - Kommer navn her -
+                  {/*{brev.mottaker.fornavn} {brev.mottaker.etternavn}*/}- Kommer navn her -
                 </Table.DataCell>
                 <Table.DataCell>{hentStatusTag(brev.status)}</Table.DataCell>
                 <Table.DataCell>

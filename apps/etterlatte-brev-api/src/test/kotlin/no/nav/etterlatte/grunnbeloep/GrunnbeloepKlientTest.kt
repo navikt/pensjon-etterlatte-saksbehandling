@@ -55,7 +55,6 @@ internal class GrunnbeloepKlientTest {
 
         return GrunnbeloepKlient(httpClient)
     }
-
 }
 
 private val grunnbeloepJson = """

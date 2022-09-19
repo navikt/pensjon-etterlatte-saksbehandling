@@ -1,11 +1,21 @@
 # etterlatte-brev-distribusjon
 
-Rapid app for å distribuere brev. Håndterer journalføring og distribusjon. 
+Rapid app for å distribuere brev. Håndterer journalføring og distribusjon.
+
+Applikasjonen lytter på events av typen `BREV:FERDIGSTILT` som blir utstedt av `etterlatte-brev-api` når saksbehandler
+velger å sende et brev til distribusjon. Applikasjonen svarer tilbake i to steg med status og response/id når den har 
+gjennomført hhv. journalføring (`BREV:JOURNALFOERT`) og distribusjon (`BREV:DISTRIBUERT`).
+
+Applikasjonen av avhengig av rest-endepunkt i `etterlatte-brev-api` for å hente ut PDF som skal journalføres, ettersom
+den kan være større en konfiguert max-størrelse på kafka-meldinger. `etterlatte-brev-api` lagrer svarene fra disse 
+meldingene ned i egen postgres-database for å kunne vise rett status i frontend.
 
 ## Lokal utvikling
 
 ### Krav for å kjøre lokalt
 - **Kafka** må kjøres lokalt. Docker er anbefalt.
+- Hvis `BREV_LOCAL_DEV=true` er satt som environment property blir kallene til journalføring/distribusjon mocket ut, og
+authentisering blir skrudd av så man kan teste flyten lokalt. Se forøvrig README-filen til `etterlatte-brev-api`.
 
 ### Hvordan kjøre brev-distribusjon
 

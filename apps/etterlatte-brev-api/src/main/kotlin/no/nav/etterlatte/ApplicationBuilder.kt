@@ -29,6 +29,7 @@ import no.nav.etterlatte.vedtak.VedtakServiceMock
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import org.slf4j.LoggerFactory
 
 class ApplicationBuilder {
     private val env = System.getenv().toMutableMap().apply {
@@ -44,9 +45,14 @@ class ApplicationBuilder {
     private val db = BrevRepository.using(datasourceBuilder.dataSource)
     private val mottakerService = MottakerService(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
 
+    private val logger = LoggerFactory.getLogger(ApplicationBuilder::class.java)
+
+
     private val adresseService = if (localDevelopment) {
         AdresseServiceMock()
     } else {
+        logger.error(config.getConfig("no.nav.etterlatte.brev.api.aad").toString())
+        logger.error(config.getConfig("azure.app.jwt").toString())
         AdresseKlient(regHttpclient(config.getConfig("no.nav.etterlatte.brev.api.aad")), env["REGOPPSLAG_URL"]!!)
     }
 
@@ -103,6 +109,8 @@ class ApplicationBuilder {
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 
     private fun regHttpclient(aad: Config) = HttpClient(OkHttp) {
+
+        logger.info(aad.getString("client_jwk"))
         expectSuccess = true
         val env = mutableMapOf(
             "AZURE_APP_CLIENT_ID" to aad.getString("client_id"),

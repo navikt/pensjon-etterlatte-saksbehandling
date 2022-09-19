@@ -5,7 +5,7 @@ type Error = { status: 'error'; statusCode: number }
 
 export type ApiResponse<T> = Success<T> | Error
 
-type Method = 'GET' | 'POST' | 'PUT' | 'PATCH'
+type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 interface Options {
   url: string
@@ -41,4 +41,5 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
 export const apiClient = {
   get: <T>(url: string) => apiFetcher<T>({ url, method: 'GET' }),
   post: <T>(url: string, body: Record<string, unknown>) => apiFetcher<T>({ url: url, body: body, method: 'POST' }),
+  delete: <T>(url: string) => apiFetcher<T>({ url, method: 'DELETE' }),
 } as const

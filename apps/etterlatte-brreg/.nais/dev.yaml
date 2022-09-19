@@ -27,6 +27,9 @@ spec:
     - name: BRREG_URL
       value: https://data.brreg.no
   accessPolicy:
+    inbound:
+      rules:
+        - application: etterlatte-brev-api
     outbound:
       external:
         - host: data.brreg.no

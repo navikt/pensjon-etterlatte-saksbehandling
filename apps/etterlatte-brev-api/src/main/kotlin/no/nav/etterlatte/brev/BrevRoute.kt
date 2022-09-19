@@ -26,7 +26,7 @@ import no.nav.etterlatte.libs.common.journalpost.BrukerIdType
 import no.nav.etterlatte.libs.common.objectMapper
 import org.slf4j.LoggerFactory
 
-fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService) {
+fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, journalpostService: JournalpostService) {
     val logger = LoggerFactory.getLogger(BrevService::class.java)
 
     route("brev") {
@@ -41,14 +41,16 @@ fun Route.brevRoute(service: BrevService, journalpostService: JournalpostService
         }
 
         get("mottakere") {
-            val mottakere = listOf(
-                AvsenderMottaker("974761319", idType = "ORGNR", navn = "Statsforvalteren i Oslo og Viken"),
-                AvsenderMottaker("974762501", idType = "ORGNR", navn = "Statsforvalteren i Vestfold og Telemark"),
+            val statsforvaltere = mottakerService.hentStatsforvalterListe().map {
+                AvsenderMottaker(it.organisasjonsnummer, idType = "ORGNR", it.navn)
+            }
+
+            val personer = listOf(
                 AvsenderMottaker("11057523044", idType = "FNR", navn = "Stor Snerk"),
                 AvsenderMottaker("24116324268", idType = "FNR", navn = "Nobel Tøffeldyr")
             )
 
-            call.respond(mottakere)
+            call.respond(statsforvaltere + personer)
         }
 
         get("behandling/{behandlingId}") {

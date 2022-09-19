@@ -45,6 +45,26 @@ class EnhetsregKlient(
             throw re
         }
     }
+
+    suspend fun hentAlleStatsforvaltere(): List<Enhet> {
+        try {
+            val wrapper = httpClient.get("$host/enhetsregisteret/api/enheter") {
+                url {
+                    parameters.append("navn", "statsforvalteren")
+                    // kode 6100 = "Statsforvaltningen"
+                    parameters.append("institusjonellSektorkode", "6100")
+                }
+            }.body<ResponseWrapper>()
+
+            return wrapper._embedded?.enheter ?: emptyList()
+        } catch (re: ResponseException) {
+            val feilmelding = re.response.body<Feilmelding>()
+
+            logger.warn("Feilmelding fra brreg: $feilmelding")
+
+            throw re
+        }
+    }
 }
 
 class ResponseWrapper(val _embedded: Embedded?) {

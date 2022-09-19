@@ -23,4 +23,10 @@ class EnhetsregService(private val klient: EnhetsregKlient) {
 
         return enhet
     }
+
+    suspend fun hentStatsforvalterListe(): List<Enhet> {
+        return klient.hentAlleStatsforvaltere().also {
+            logger.info("Fant ${it.size} enheter som matcher 'statsforvalteren' i BRREG!")
+        }
+    }
 }

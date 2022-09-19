@@ -28,5 +28,9 @@ fun Route.enhetsregApi(service: EnhetsregService) {
 
             call.respond(enhet ?: HttpStatusCode.NotFound)
         }
+
+        get("statsforvalter") {
+            call.respond(service.hentStatsforvalterListe())
+        }
     }
 }

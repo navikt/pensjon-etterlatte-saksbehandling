@@ -13,10 +13,10 @@ Enkelt API for å hente data fra enhetsregisteret. Bygget med Kotlin / [Ktor](ht
 
 ## Endepunkter
 
-| Miljø | URL |
-| --- | --- |
-| **Prod** | https://etterlatte-brreg.intern.nav.no |
-| **Dev** | https://etterlatte-brreg.dev.intern.nav.no |
+| Miljø    | URL                                        |
+|----------|--------------------------------------------|
+| **Prod** | https://etterlatte-brreg.intern.nav.no     |
+| **Dev**  | https://etterlatte-brreg.dev.intern.nav.no |
 
 
 

@@ -7,6 +7,7 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.MottakerService
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepKlient
@@ -32,6 +33,7 @@ class ApplicationBuilder {
     private val norg2Klient = Norg2Klient(env["NORG2_URL"]!!, httpClient())
     private val datasourceBuilder = DataSourceBuilder(env)
     private val db = BrevRepository.using(datasourceBuilder.dataSource)
+    private val mottakerService = MottakerService(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
     private val brevService = BrevService(
         db,
         pdfGenerator,
@@ -54,7 +56,7 @@ class ApplicationBuilder {
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
                 apiModule(localDevelopment) {
-                    brevRoute(brevService, journalpostService)
+                    brevRoute(brevService, mottakerService, journalpostService)
                 }
             }
             .build()

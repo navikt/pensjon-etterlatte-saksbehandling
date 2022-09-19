@@ -45,6 +45,8 @@ spec:
       value: "https://saf.dev-fss-pub.nais.io/graphql"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
+    - name: REGOPPSLAG_OUTBOUND_SCOPE
+      value: "api://dev-fss.teamdokumenthandtering.regoppslag/.default"
   accessPolicy:
     outbound:
       rules:

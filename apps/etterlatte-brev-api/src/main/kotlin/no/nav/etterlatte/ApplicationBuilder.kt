@@ -1,7 +1,12 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.adresse.AdresseKlient
+import no.nav.etterlatte.adresse.AdresseServiceMock
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
@@ -9,6 +14,8 @@ import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.MottakerService
 import no.nav.etterlatte.brev.brevRoute
+import io.ktor.http.ContentType
+import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepKlient
 import no.nav.etterlatte.journalpost.JournalpostClient
@@ -19,6 +26,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.norg2.Norg2Klient
 import no.nav.etterlatte.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.vedtak.VedtakServiceMock
+import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 
@@ -26,6 +34,7 @@ class ApplicationBuilder {
     private val env = System.getenv().toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }
+    val config: Config = ConfigFactory.load()
     private val localDevelopment: Boolean = env["BREV_LOCAL_DEV"].toBoolean()
     private val pdfGenerator = PdfGeneratorKlient(httpClient(), env["ETTERLATTE_PDFGEN_URL"]!!)
     private val vedtakService = VedtakServiceMock()
@@ -34,14 +43,24 @@ class ApplicationBuilder {
     private val datasourceBuilder = DataSourceBuilder(env)
     private val db = BrevRepository.using(datasourceBuilder.dataSource)
     private val mottakerService = MottakerService(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
+
+    private val adresseService = if (localDevelopment) {
+        AdresseServiceMock()
+    } else {
+        AdresseKlient(regHttpclient(config.getConfig("no.nav.etterlatte.brev.api.aad")), env["REGOPPSLAG_URL"]!!)
+    }
+
     private val brevService = BrevService(
         db,
         pdfGenerator,
         vedtakService,
         norg2Klient,
         grunnbeloepKlient,
+        adresseService,
         ::sendToRapid
     )
+
+
     private val journalpostService = if (localDevelopment) {
         JournalpostServiceMock()
     } else {
@@ -80,6 +99,22 @@ class ApplicationBuilder {
         }
         defaultRequest {
             header(X_CORRELATION_ID, getCorrelationId())
+        }
+    }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
+
+    private fun regHttpclient(aad: Config) = HttpClient(OkHttp) {
+        expectSuccess = true
+        val env = mutableMapOf(
+            "AZURE_APP_CLIENT_ID" to aad.getString("client_id"),
+            "AZURE_APP_WELL_KNOWN_URL" to aad.getString("well_known_url"),
+            "AZURE_APP_OUTBOUND_SCOPE" to aad.getString("outbound"),
+            "AZURE_APP_JWK" to aad.getString("client_jwk")
+        )
+        install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+        install(Auth) {
+            clientCredential {
+                config = env
+            }
         }
     }.also { Runtime.getRuntime().addShutdownHook(Thread { it.close() }) }
 }

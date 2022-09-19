@@ -48,6 +48,7 @@ ETTERLATTE_PDFGEN_URL=http://localhost:8081/api/v1/genpdf/brev;
 NORG2_URL=https://norg2.dev-fss-pub.nais.io/norg2/api/v1;
 HENT_DOKUMENT_URL=https://saf-q1.dev.intern.nav.no/rest/hentdokument;
 SAF_GRAPHQL_URL=https://saf-q1.dev.intern.nav.no/graphql;
+REGOPPSLAG_URL=https://regoppslag.dev.intern.nav.no/rest;
 ```
 
 ##### 3. Kjør din nye run config (ApplicationKt)

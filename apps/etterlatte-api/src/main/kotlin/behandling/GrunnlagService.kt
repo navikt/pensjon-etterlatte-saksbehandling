@@ -67,7 +67,7 @@ class GrunnlagService(
         )
 
         val grunnlagUtenPeriode =
-            grunnlag?.opplysning?.perioder?.filter { it.id == saksbehandlerPeriodeId } ?: emptyList()
+            grunnlag?.opplysning?.perioder?.filter { it.id != saksbehandlerPeriodeId } ?: emptyList()
         val opplysning = lagAvdoedOpplysning(saksbehandlerId, grunnlagUtenPeriode)
 
         rapid.publiser(

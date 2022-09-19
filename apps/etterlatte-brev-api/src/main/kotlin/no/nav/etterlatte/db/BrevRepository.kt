@@ -194,7 +194,7 @@ class BrevRepository private constructor(private val ds: DataSource) {
                 Adresse(
                     fornavn = it,
                     etternavn = getString("etternavn"),
-                    adresse = getString("no/nav/etterlatte/adresse"),
+                    adresse = getString("adresse"),
                     postnummer = getString("postnummer"),
                     poststed = getString("poststed")
                 )

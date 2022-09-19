@@ -52,7 +52,6 @@ class ApplicationBuilder {
         AdresseServiceMock()
     } else {
         logger.error(config.getConfig("no.nav.etterlatte.brev.api.aad").toString())
-        logger.error(config.getConfig("azure.app.jwt").toString())
         AdresseKlient(regHttpclient(config.getConfig("no.nav.etterlatte.brev.api.aad")), env["REGOPPSLAG_URL"]!!)
     }
 

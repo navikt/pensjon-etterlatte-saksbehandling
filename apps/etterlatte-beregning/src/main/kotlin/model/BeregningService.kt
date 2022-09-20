@@ -65,7 +65,6 @@ class BeregningService {
                                     soeskenFlokk = listOf(),
                                     grunnbelopMnd = Grunnbeloep.hentGjeldendeG(virkFOM).grunnbeløpPerMåned,
                                     grunnbelop = Grunnbeloep.hentGjeldendeG(virkFOM).grunnbeløp
-
                                 )
                             ),
                             beregnetDato = LocalDateTime.now(),
@@ -77,7 +76,7 @@ class BeregningService {
                         BeregningsResultat(
                             id = UUID.randomUUID(),
                             type = Beregningstyper.GP,
-                            endringskode = Endringskode.NY,
+                            endringskode = Endringskode.REVURDERING,
                             resultat = BeregningsResultatType.BEREGNET,
                             beregningsperioder = beregningsperioder,
                             beregnetDato = LocalDateTime.now(),
@@ -87,13 +86,24 @@ class BeregningService {
                 }
             }
             BehandlingType.MANUELT_OPPHOER -> {
-                val beregningsperioder = finnBeregningsperioder(grunnlag, virkFOM, virkTOM)
+                val datoFom = foersteVirkFraDoedsdato(grunnlag.grunnlag)
                 return BeregningsResultat(
                     id = UUID.randomUUID(),
                     type = Beregningstyper.GP,
-                    endringskode = Endringskode.NY,
+                    endringskode = Endringskode.REVURDERING,
                     resultat = BeregningsResultatType.BEREGNET,
-                    beregningsperioder = beregningsperioder, // TODO: endre beregningsperiode tilbake til foerste virk
+                    beregningsperioder = listOf(
+                        Beregningsperiode(
+                            delytelsesId = "BP",
+                            type = Beregningstyper.GP,
+                            datoFOM = datoFom,
+                            datoTOM = null,
+                            utbetaltBeloep = 0,
+                            soeskenFlokk = listOf(),
+                            grunnbelopMnd = Grunnbeloep.hentGjeldendeG(datoFom).grunnbeløpPerMåned,
+                            grunnbelop = Grunnbeloep.hentGjeldendeG(datoFom).grunnbeløp
+                        )
+                    ),
                     beregnetDato = LocalDateTime.now(),
                     grunnlagVersjon = grunnlag.versjon
                 )
@@ -151,6 +161,14 @@ class BeregningService {
 
     private fun beregnFoersteFom(fom: YearMonth, virkFOM: YearMonth): YearMonth =
         if (fom.isBefore(virkFOM)) virkFOM else fom
+
+    private fun foersteVirkFraDoedsdato(grlag: List<Grunnlagsopplysning<JsonNode>>): YearMonth =
+        finnOpplysning<Person>(
+            grlag,
+            Opplysningstyper.AVDOED_PDL_V1
+        )?.opplysning?.doedsdato.let {
+            YearMonth.from(it).plusMonths(1)
+        }
 
     companion object {
         inline fun <reified T> setOpplysningType(opplysning: Grunnlagsopplysning<JsonNode>?): VilkaarOpplysning<T>? {

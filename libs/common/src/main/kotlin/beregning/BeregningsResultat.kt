@@ -1,4 +1,5 @@
 package no.nav.etterlatte.libs.common.beregning
+
 import no.nav.etterlatte.libs.common.person.Person
 import java.time.LocalDateTime
 import java.time.YearMonth

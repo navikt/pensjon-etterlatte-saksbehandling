@@ -3,6 +3,7 @@ package model
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
@@ -87,6 +88,22 @@ internal class BeregningServiceTest {
         assertEquals(null, resultat.beregningsperioder.first().datoTOM)
         assertEquals(0, resultat.beregningsperioder.first().utbetaltBeloep)
         assertEquals(Endringskode.REVURDERING, resultat.endringskode)
+    }
+
+    @Test
+    fun `ved manuelt opphoer skal virkFOM settes til foerste i maaneden etter doedsdato`() {
+        val grunnlag = readmelding("/grunnlag_manuelt_opphoer.json")
+        val resultat = BeregningService().beregnResultat(
+            grunnlag = grunnlag,
+            virkFOM = mockk(),
+            virkTOM = mockk(),
+            vilkaarsvurdering = mockk(),
+            behandlingType = BehandlingType.MANUELT_OPPHOER
+        )
+
+        assertEquals(BeregningsResultatType.BEREGNET, resultat.resultat)
+        assertEquals(1, resultat.beregningsperioder.size)
+        assertEquals(YearMonth.of(2022, 3), resultat.beregningsperioder.first().datoFOM)
     }
 
     @Test

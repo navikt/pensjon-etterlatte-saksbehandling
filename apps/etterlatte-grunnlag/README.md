@@ -2,8 +2,8 @@
 
 Grunnlag er både en kafka-app og en REST-app.
 
-Tjenesten har som ansvar for henting og lagring av opplysninger, og sammenstellning av opplysningene til ett "grunnlag" for videre bruk.
-REST-api:et finnes for å kunne få innsikt i grunnlaget for en sak.
+Tjenesten har ansvar for henting og lagring av opplysninger, og sammenstillning av opplysningene til ett "grunnlag" for videre bruk.
+REST-api'et tilbyr tjenester for å hente ut enkeltopplysninger fra et grunnlag i en sak.
 
 ## Konsepter
 
@@ -11,17 +11,17 @@ REST-api:et finnes for å kunne få innsikt i grunnlaget for en sak.
 Per nå er all informasjon som inngår i en behandling en opplysning. En opplysning er av en type og den har en kilde.
 
 ### Grunnlag
-Grunnlag er summen av alle opplysninger. Målet med grunnlag er å samle å enkelt strukturere alle opplysninger sån at
+Grunnlag er summen av alle opplysninger i en sak. Målet med grunnlag er å samle, og enkelt strukturere alle opplysninger sånn at
 det blir enklere å bruke gjeldende informasjon i andre apper.
 
 ## Flyt
 
 ### Opplysningsbehov
-Grunnlag lytter på når nye behandlinger blir opprettet. Då skal grunnlagsappen sende ut opplysningsbehov om personene i familien fra søknaden.
+Grunnlag lytter på når nye behandlinger blir opprettet. Da skal grunnlagsappen sende ut opplysningsbehov om personene i familien fra søknaden.
 
 ### Lagring av opplysninger
-Når nye opplysninger kommer in av noen grunn, f.eks som ett svar på opplysningsbehoven, så skal grunnlagsappen lagre de nye opplysningene og
-og sende ett event om at nye opplysninger finnes på saken.
+Når nye opplysninger kommer inn, f.eks som ett svar på opplysningsbehoven, så skal grunnlagsappen lagre de nye opplysningene og
+og sende en event om at nye opplysninger finnes på saken.
 
 ### Legg på grunnlag på meldinger
 Når grunnlag leser en melding uten grunnlag så skal den hente det gjeldende grunnlaget for saken og legge på det på meldingene for videre bruk i andre apper.

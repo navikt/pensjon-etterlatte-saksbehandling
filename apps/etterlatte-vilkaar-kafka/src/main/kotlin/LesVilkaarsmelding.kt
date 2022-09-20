@@ -1,7 +1,8 @@
+import barnepensjon.domain.Aarsak
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.barnepensjon.model.VilkaarService
 import no.nav.etterlatte.domene.vedtak.Behandling
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -32,6 +33,8 @@ internal class LesVilkaarsmelding(
             validate { it.requireKey("behandling") }
             validate { it.requireKey("fnrSoeker") }
             validate { it.interestedIn(BehandlingGrunnlagEndret.revurderingAarsakKey) }
+            validate { it.interestedIn(BehandlingGrunnlagEndret.manueltOpphoerAarsakKey) }
+            validate { it.interestedIn(BehandlingGrunnlagEndret.manueltOpphoerfritekstAarsakKey) }
             validate { it.rejectKey("vilkaarsvurdering") }
             validate { it.rejectKey("kommerSoekerTilGode") }
             validate { it.rejectKey("gyldighetsvurdering") }
@@ -53,47 +56,30 @@ internal class LesVilkaarsmelding(
                 }
                 val behandling = objectMapper.treeToValue<Behandling>(packet["behandling"])
                 val behandlingopprettet = packet["behandlingOpprettet"].asLocalDateTime().toLocalDate()
-
-                when (behandling.type) {
-                    BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                        // TODO behandlingopprettet er feil dato å basere seg på, vi bør bruke søknad mottatt
-                        val virkningstidspunkt = vilkaar.beregnVirkningstidspunktFoerstegangsbehandling(
-                            grunnlagForVilkaar,
-                            behandlingopprettet
-                        )
-                        val vilkaarsVurdering =
-                            vilkaar.mapVilkaarForstegangsbehandling(grunnlagForVilkaar, virkningstidspunkt.atDay(1))
-                        val kommerSoekerTilGodeVurdering = vilkaar.mapKommerSoekerTilGode(grunnlagForVilkaar)
-                        packet["vilkaarsvurdering"] = vilkaarsVurdering
-                        packet["virkningstidspunkt"] = virkningstidspunkt
-                        packet["kommerSoekerTilGode"] = kommerSoekerTilGodeVurdering
-                    }
-                    BehandlingType.REVURDERING -> {
-                        val revurderingAarsak: RevurderingAarsak = try {
-                            RevurderingAarsak.valueOf(packet[BehandlingGrunnlagEndret.revurderingAarsakKey].asText())
-                        } catch (e: Exception) {
-                            logger.error(
-                                "Fikk inn en revurderingsbehandling uten en gyldig behandlingsårsak: ${behandling.id}",
-                                e
-                            )
-                            throw IllegalStateException(e)
-                        }
-                        val virkningstidspunkt =
-                            vilkaar.beregnVirkningstidspunktRevurdering(
-                                grunnlagForVilkaar,
-                                revurderingAarsak,
-                                behandlingopprettet
-                            )
-                        val vilkaarsVurdering = vilkaar.mapVilkaarRevurdering(
-                            grunnlagForVilkaar,
-                            virkningstidspunkt.atDay(1),
-                            revurderingAarsak
-                        )
-                        packet["vilkaarsvurdering"] = vilkaarsVurdering
-                        packet["virkningstidspunkt"] = virkningstidspunkt
-                    }
-                    BehandlingType.MANUELT_OPPHOER -> {} // TODO  implementer
-                }
+                val revurderingAarsak: RevurderingAarsak? = kotlin.runCatching {
+                    RevurderingAarsak.valueOf(packet[BehandlingGrunnlagEndret.revurderingAarsakKey].asText())
+                }.getOrNull()
+                val (fritekst, liste) = kotlin.runCatching {
+                    val fritekstAarsak = packet[BehandlingGrunnlagEndret.manueltOpphoerfritekstAarsakKey].asText()
+                    val listeAarsak: List<ManueltOpphoerAarsak> =
+                        objectMapper.treeToValue(packet[BehandlingGrunnlagEndret.manueltOpphoerAarsakKey])
+                    fritekstAarsak to listeAarsak
+                }.getOrNull() ?: null to emptyList()
+                val aarsak = Aarsak(
+                    manueltOpphoerFritekst = fritekst,
+                    manueltOpphoerListe = liste,
+                    revurderingAarsak = revurderingAarsak
+                )
+                val (virkningstidspunkt, vilkaarsvurdering, kommerSoekerTilGode) =
+                    vilkaar.finnVirkningstidspunktOgVilkaarForBehandling(
+                        behandling,
+                        grunnlagForVilkaar,
+                        behandlingopprettet,
+                        aarsak
+                    )
+                packet["vilkaarsvurdering"] = vilkaarsvurdering
+                packet["virkningstidspunkt"] = virkningstidspunkt
+                kommerSoekerTilGode?.let { packet["kommerSoekerTilGode"] = it }
 
                 packet["vilkaarsvurderingGrunnlagRef"] = grunnlag.versjon
                 context.publish(packet.toJson())
@@ -103,7 +89,10 @@ internal class LesVilkaarsmelding(
                 )
             } catch (e: Exception) {
                 logger.error(
-                    "Vilkår kunne ikke vurderes på grunn av feil. Dette betyr at det ikke blir fylt ut en vilkårsvurdering for behandlingen for korrelasjonsid'en ${packet.correlationId}", // ktlint-disable max-line-length
+                    """Vilkår kunne ikke vurderes på grunn av feil. Dette betyr at det ikke blir fylt ut en 
+                        |vilkårsvurdering for behandlingen for korrelasjonsid'en 
+                        |${packet.correlationId}
+                    """.trimMargin(),
                     e
                 )
             }

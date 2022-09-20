@@ -22,7 +22,6 @@ internal class LesVilkaarsmeldingTest {
     @Test
     fun `skal lese og lage melding`() {
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
-
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
         Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
         Assertions.assertEquals(2, inspector.message(0).get("kommerSoekerTilGode").size())

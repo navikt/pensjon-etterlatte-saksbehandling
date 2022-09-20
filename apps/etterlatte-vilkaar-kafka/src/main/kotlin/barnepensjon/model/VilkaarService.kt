@@ -1,5 +1,6 @@
 package no.nav.etterlatte.barnepensjon.model
 
+import barnepensjon.domain.Aarsak
 import barnepensjon.kommerbarnettilgode.mapFamiliemedlemmer
 import barnepensjon.kommerbarnettilgode.saksbehandlerResultat
 import barnepensjon.vilkaar.avdoedesmedlemskap.vilkaarAvdoedesMedlemskap
@@ -13,7 +14,9 @@ import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraVilkaar
 import no.nav.etterlatte.barnepensjon.setVurderingFraKommerBarnetTilGode
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
+import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
@@ -93,11 +96,12 @@ class VilkaarService {
                 "med årsak $revurderingAarsak"
         )
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
-
         val vilkaar = when (revurderingAarsak) {
             RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarFormaalForYtelsen(soekerPdl, virkningstidspunkt))
             // TODO: få inn opphørsgrunner her
-            RevurderingAarsak.MANUELT_OPPHOER -> listOf(vilkaarKanBehandleSakenISystemet(listOf("MANUELT_OPPHOER")))
+            RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
+                "Du kan et manuelt opphør på en revurdering"
+            )
         }
 
         val vilkaarResultat = setVilkaarVurderingFraVilkaar(vilkaar)
@@ -124,10 +128,9 @@ class VilkaarService {
                 val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
                 hentVirkningstidspunktRevurderingSoekerDoedsfall(soekerPdl?.opplysning?.doedsdato)
             }
-            RevurderingAarsak.MANUELT_OPPHOER -> {
-                val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
-                hentVirkningstidspunktFoerstegangssoeknad(avdoedPdl?.opplysning?.doedsdato, soeknadMottattDato)
-            }
+            RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
+                "Kan ikke ha en revurdering på grunn av manuelt opphør!"
+            )
         }
     }
 
@@ -192,6 +195,73 @@ class VilkaarService {
         val familieforhold = mapFamiliemedlemmer(soekerPdl, soekerSoeknad, gjenlevendePdl, avdoedPdl)
 
         return KommerSoekerTilgode(vurdering, familieforhold)
+    }
+
+    fun finnVirkningstidspunktOgVilkaarForBehandling(
+        behandling: Behandling,
+        grunnlagForVilkaar: List<VilkaarOpplysning<JsonNode>>,
+        behandlingopprettet: LocalDate,
+        aarsak: Aarsak
+    ): Triple<YearMonth, VilkaarResultat, KommerSoekerTilgode?> {
+        val virkningstidspunkt = when (behandling.type) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> beregnVirkningstidspunktFoerstegangsbehandling(
+                grunnlagForVilkaar,
+                behandlingopprettet
+            )
+
+            BehandlingType.REVURDERING -> beregnVirkningstidspunktRevurdering(
+                grunnlagForVilkaar,
+                requireNotNull(aarsak.revurderingAarsak) { "Må ha en revurderingAarsak på en revurdering" },
+                behandlingopprettet
+            )
+
+            BehandlingType.MANUELT_OPPHOER -> beregnVirkningstidspunktManueltOpphoer(
+                grunnlagForVilkaar,
+                behandlingopprettet
+            )
+        }
+        val vilkaarResultat = when (behandling.type) {
+            BehandlingType.REVURDERING -> mapVilkaarRevurdering(
+                grunnlagForVilkaar,
+                virkningstidspunkt.atDay(1),
+                requireNotNull(aarsak.revurderingAarsak) { "Må ha en revurderingAarsak på en revurdering" }
+            )
+
+            BehandlingType.FØRSTEGANGSBEHANDLING -> mapVilkaarForstegangsbehandling(
+                grunnlagForVilkaar,
+                virkningstidspunkt.atDay(1)
+            )
+
+            BehandlingType.MANUELT_OPPHOER -> mapVilkaarManueltOpphoer(virkningstidspunkt, aarsak)
+        }
+        val kommerSoekerTilgode = when (behandling.type) {
+            BehandlingType.FØRSTEGANGSBEHANDLING -> mapKommerSoekerTilGode(grunnlagForVilkaar)
+            else -> null
+        }
+        return Triple(virkningstidspunkt, vilkaarResultat, kommerSoekerTilgode)
+    }
+
+    private fun mapVilkaarManueltOpphoer(virkningstidspunkt: YearMonth, aarsak: Aarsak): VilkaarResultat {
+        logger.info(
+            "Mapper vilkaar fra grunnlagsdata for virkningstidspunkt $virkningstidspunkt for manuelt opphør av sak"
+        )
+
+        val vilkaar = listOf(
+            vilkaarKanBehandleSakenISystemet(aarsak.manueltOpphoerListe, aarsak.manueltOpphoerFritekst)
+        )
+
+        val vilkaarResultat = setVilkaarVurderingFraVilkaar(vilkaar)
+        val vurdertDato = hentSisteVurderteDato(vilkaar)
+
+        return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
+    }
+
+    private fun beregnVirkningstidspunktManueltOpphoer(
+        opplysninger: List<VilkaarOpplysning<JsonNode>>,
+        soeknadMottattDato: LocalDate
+    ): YearMonth {
+        val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
+        return hentVirkningstidspunktFoerstegangssoeknad(avdoedPdl?.opplysning?.doedsdato, soeknadMottattDato)
     }
 
     companion object {

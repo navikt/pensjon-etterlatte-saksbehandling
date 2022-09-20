@@ -4,9 +4,10 @@
   "fnrSoeker": "03108718357",
   "behandling": {
     "id": "dbbd9a01-3e5d-4ec1-819c-1781d1f6a440",
-    "type": "REVURDERING"
+    "type": "MANUELT_OPPHOER"
   },
-  "revurderingsaarsak": "MANUELT_OPPHOER",
+  "manueltOpphoerFritekstAarsak": "Fordi jeg vil",
+  "manueltOpphoerAarsak": ["SOESKEN_DOED"],
   "grunnlag": {
     "versjon": 8,
     "saksId": 6,

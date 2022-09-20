@@ -1,7 +1,6 @@
 package no.nav.etterlatte.libs.common.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import java.time.YearMonth
 
@@ -11,7 +10,7 @@ data class Grunnlag(
     val versjon: Long
 )
 
-data class Opplysningsgrunnlag(
+class Opplysningsgrunnlag(
     val søker: Grunnlagsdata<JsonNode>,
     val familie: List<Grunnlagsdata<JsonNode>>,
     val sak: Grunnlagsdata<JsonNode>,
@@ -26,10 +25,11 @@ data class Opplysningsgrunnlag(
         )
     }
 
-    fun hentAvdoed(): Grunnlagsdata<JsonNode> =
-        familie.find {
-            it.hentKonstantOpplysning<PersonRolle>(Opplysningstyper.PERSONROLLE)?.verdi == PersonRolle.AVDOED
-        }!!
+    fun hentAvdoed(): Grunnlagsdata<JsonNode> = hentFamiliemedlem(PersonRolle.AVDOED)
+    fun hentGjenlevende(): Grunnlagsdata<JsonNode> = hentFamiliemedlem(PersonRolle.GJENLEVENDE)
+
+    private fun hentFamiliemedlem(personRolle: PersonRolle) =
+        familie.find { it.hentPersonrolle()?.verdi == personRolle }!!
 
     fun hentVersjon() = metadata.versjon
 }

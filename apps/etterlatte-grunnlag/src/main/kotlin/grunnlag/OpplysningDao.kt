@@ -41,6 +41,19 @@ class OpplysningDao(private val datasource: DataSource) {
         )
     }
 
+    fun hentAlleGrunnlagForSak(sakId: Long): List<GrunnlagHendelse> = connection.use {
+        it.prepareStatement(
+            """
+            SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr
+            FROM grunnlagshendelse hendelse 
+            WHERE hendelse.sak_id = ?
+            """.trimIndent()
+        )
+            .apply {
+                setLong(1, sakId)
+            }.executeQuery().toList { asGrunnlagshendelse() }
+    }
+
     fun finnHendelserIGrunnlag(sakId: Long): List<GrunnlagHendelse> = connection.use {
         it.prepareStatement(
             """

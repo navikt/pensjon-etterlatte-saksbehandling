@@ -41,16 +41,17 @@ class GrunnlagHendelser(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val opplysningsTyper = Opplysningstyper.values().map { it.name }
 
-        if ((packet[eventNameKey].asText() == "OPPLYSNING:NY") ||
-            (opplysningsTyper.contains(packet[behovNameKey].asText()))
+        if ((packet[eventNameKey].asText() == "OPPLYSNING:NY") || (
+            opplysningsTyper.contains(
+                    packet[behovNameKey].asText()
+                )
+            )
         ) {
             withLogContext(packet.correlationId) {
                 try {
                     val sakId = packet["sakId"].asLong()
-                    val opplysninger: List<Grunnlagsopplysning<JsonNode>> = objectMapper.readValue(
-                        packet["opplysning"].toJson()
-                    )!!
-
+                    val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
+                        objectMapper.readValue(packet["opplysning"].toJson())!!
                     // Send melding om behov som er avhengig av en annen opplysning
                     opplysninger.forEach {
                         if (it.opplysningType === Opplysningstyper.AVDOED_PDL_V1) {
@@ -64,12 +65,9 @@ class GrunnlagHendelser(
                         opplysninger
                     )
 
-                    val grunnlag = grunnlagService.hentGrunnlag(sakId)
-                    val grunnlagv2 = grunnlagService.hentOpplysningsgrunnlag(sakId)
-
                     JsonMessage.newMessage(
                         eventName = "GRUNNLAG:GRUNNLAGENDRET",
-                        map = lagGrunnlagsmeldingMap(grunnlag, grunnlagv2, packet[correlationIdKey], sakId)
+                        map = mapOf(correlationIdKey to packet[correlationIdKey], "sakId" to sakId)
                     ).also {
                         context.publish(it.toJson())
                         logger.info("Lagt ut melding om grunnlagsendring")
@@ -80,13 +78,6 @@ class GrunnlagHendelser(
             }
         }
     }
-
-    private fun lagGrunnlagsmeldingMap(grunnlag: Any, grunnlagv2: Any, correlationId: JsonNode, sakId: Long) = mapOf(
-        "grunnlag" to grunnlag,
-        "grunnlagV2" to grunnlagv2,
-        correlationIdKey to correlationId,
-        "sakId" to sakId
-    )
 
     private fun sendAvdoedInntektBehov(
         grunnlagsopplysning: Grunnlagsopplysning<JsonNode>,

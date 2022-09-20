@@ -11,8 +11,8 @@ import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.beregning.erInklusiv
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
@@ -84,9 +84,7 @@ class BeregningService {
                 }
             }
             BehandlingType.MANUELT_OPPHOER -> {
-                val datoFom = foersteVirkFraDoedsdato(
-                    grunnlag.hentAvdoed().hentKonstantOpplysning<LocalDate>(Opplysningstyper.DOEDSDATO)!!.verdi
-                )
+                val datoFom = foersteVirkFraDoedsdato(grunnlag.hentAvdoed().hentDoedsdato()?.verdi!!)
                 return BeregningsResultat(
                     id = UUID.randomUUID(),
                     type = Beregningstyper.GP,
@@ -127,10 +125,10 @@ class BeregningService {
             val gjeldendeG = Grunnbeloep.hentGjeldendeG(fom)
             val flokkForPeriode = hentFlokkforPeriode(fom, tom, soeskenPerioder)
             val utbetaltBeloep = Soeskenjustering(flokkForPeriode.size, gjeldendeG.grunnbeløp).beloep
-            val søkersFødselsdato = grunnlag.søker.hentKonstantOpplysning<LocalDate>(Opplysningstyper.FOEDSELSDATO)
+            val søkersFødselsdato = grunnlag.søker.hentFoedselsdato()?.verdi
 
             val datoTom = if (index == alleFOM.lastIndex && søkersFødselsdato != null) {
-                beregnSisteTom(søkersFødselsdato.verdi, tom)
+                beregnSisteTom(søkersFødselsdato, tom)
             } else {
                 tom
             }

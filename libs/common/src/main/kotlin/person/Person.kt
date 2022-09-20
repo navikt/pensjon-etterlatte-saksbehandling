@@ -47,16 +47,16 @@ enum class AdresseType {
 data class Adresse(
     val type: AdresseType,
     val aktiv: Boolean,
-    val coAdresseNavn: String?,
-    val adresseLinje1: String?,
-    val adresseLinje2: String?,
-    val adresseLinje3: String?,
-    val postnr: String?,
-    val poststed: String?,
-    val land: String?,
+    val coAdresseNavn: String? = null,
+    val adresseLinje1: String? = null,
+    val adresseLinje2: String? = null,
+    val adresseLinje3: String? = null,
+    val postnr: String? = null,
+    val poststed: String? = null,
+    val land: String? = null,
     val kilde: String,
-    val gyldigFraOgMed: LocalDateTime?,
-    val gyldigTilOgMed: LocalDateTime?
+    val gyldigFraOgMed: LocalDateTime? = null,
+    val gyldigTilOgMed: LocalDateTime? = null
 )
 
 enum class Sivilstatus {

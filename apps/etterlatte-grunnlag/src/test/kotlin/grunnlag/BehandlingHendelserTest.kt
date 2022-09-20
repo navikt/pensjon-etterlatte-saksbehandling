@@ -25,6 +25,14 @@ class BehandlingHendelserTest {
             Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1.name,
             inspector.message(1).get("@behov").asText()
         )
+        Assertions.assertEquals(
+            Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1.name,
+            inspector.message(2).get("@behov").asText()
+        )
+        Assertions.assertEquals(
+            Opplysningstyper.AVDOED_PDL_V1.name,
+            inspector.message(3).get("@behov").asText()
+        )
         Assertions.assertEquals(4, inspector.size)
     }
 }

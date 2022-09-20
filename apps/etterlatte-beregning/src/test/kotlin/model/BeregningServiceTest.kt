@@ -1,7 +1,6 @@
 package model
 
 import GrunnlagTestData
-import GrunnlagTestData.Companion.opplysningsgrunnlag
 import grunnlag.kilde
 import io.mockk.every
 import io.mockk.mockk
@@ -35,7 +34,7 @@ internal class BeregningServiceTest {
             FOEDSELSDATO to Opplysning.Konstant(kilde, LocalDate.of(2003, 12, 12).toJsonNode())
         )
     )
-    private val opplysningsgrunnlag = testData.opplysningsgrunnlag()
+    private val opplysningsgrunnlag = testData.hentOpplysningsgrunnlag()
 
     private val beregningsperioder = BeregningService().beregnResultat(
         opplysningsgrunnlag,
@@ -58,10 +57,10 @@ internal class BeregningServiceTest {
         }
         beregningsperioder[2].also {
             assertEquals(YearMonth.of(2021, 9), it.datoFOM)
-            assertEquals(YearMonth.of(2021, 11), it.datoTOM)
+            assertEquals(YearMonth.of(2021, 12), it.datoTOM)
         }
         beregningsperioder[3].also {
-            assertEquals(YearMonth.of(2021, 12), it.datoFOM)
+            assertEquals(YearMonth.of(2022, 1), it.datoFOM)
             assertEquals(null, it.datoTOM)
         }
     }
@@ -89,7 +88,7 @@ internal class BeregningServiceTest {
 
     @Test
     fun `ved manuelt opphoer skal virkFOM settes til foerste i maaneden etter doedsdato`() {
-        val grunnlag = readmelding("/grunnlag_manuelt_opphoer.json")
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val resultat = BeregningService().beregnResultat(
             grunnlag = grunnlag,
             virkFOM = mockk(),
@@ -100,15 +99,15 @@ internal class BeregningServiceTest {
 
         assertEquals(BeregningsResultatType.BEREGNET, resultat.resultat)
         assertEquals(1, resultat.beregningsperioder.size)
-        assertEquals(YearMonth.of(2022, 3), resultat.beregningsperioder.first().datoFOM)
+        assertEquals(YearMonth.of(2022, 9), resultat.beregningsperioder.first().datoFOM)
     }
 
     @Test
     fun `beregningsperiodene får riktig beloep`() {
-        assertEquals(2745, beregningsperioder[0].utbetaltBeloep)
-        assertEquals(2882, beregningsperioder[1].utbetaltBeloep)
-        assertEquals(2882, beregningsperioder[2].utbetaltBeloep)
-        assertEquals(3547, beregningsperioder[3].utbetaltBeloep)
+        assertEquals(2534, beregningsperioder[0].utbetaltBeloep)
+        assertEquals(2660, beregningsperioder[1].utbetaltBeloep)
+        assertEquals(2660, beregningsperioder[2].utbetaltBeloep)
+        assertEquals(2882, beregningsperioder[3].utbetaltBeloep)
     }
 
     @Nested

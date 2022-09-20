@@ -2,12 +2,66 @@ package no.nav.etterlatte.libs.common.grunnlag
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.ADRESSEBESKYTTELSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOEDESBARN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.DELTBOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.DOEDSDATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FAMILIERELASJON
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDELAND
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSAAR
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSDATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSNUMMER
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.KONTAKTADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.NAVN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.OPPHOLDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.PERSONROLLE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SIVILSTATUS
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOESKEN_I_BEREGNINGEN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.STATSBORGERSKAP
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTLAND
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.VERGEMAALELLERFREMTIDSFULLMAKT
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.person.AvdoedesBarn
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.common.person.Utland
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory.getLogger
+import java.time.LocalDate
 
 typealias Grunnlagsdata<T> = Map<Opplysningstyper, Opplysning<T>>
+
+fun Grunnlagsdata<JsonNode>.hentNavn() = this.hentKonstantOpplysning<Navn>(NAVN)
+fun Grunnlagsdata<JsonNode>.hentFoedselsnummer() = this.hentKonstantOpplysning<Foedselsnummer>(FOEDSELSNUMMER)
+fun Grunnlagsdata<JsonNode>.hentFoedselsdato() = this.hentKonstantOpplysning<LocalDate>(FOEDSELSDATO)
+fun Grunnlagsdata<JsonNode>.hentFoedselsaar() = this.hentKonstantOpplysning<Int>(FOEDSELSAAR)
+fun Grunnlagsdata<JsonNode>.hentFoedeland() = this.hentKonstantOpplysning<String>(FOEDELAND)
+fun Grunnlagsdata<JsonNode>.hentDoedsdato() = this.hentKonstantOpplysning<LocalDate?>(DOEDSDATO)
+fun Grunnlagsdata<JsonNode>.hentAdressebeskyttelse() =
+    this.hentKonstantOpplysning<Adressebeskyttelse>(ADRESSEBESKYTTELSE)
+fun Grunnlagsdata<JsonNode>.hentBostedsadresse() = this.hentKonstantOpplysning<List<Adresse>>(BOSTEDSADRESSE)
+fun Grunnlagsdata<JsonNode>.hentDeltbostedsadresse() = this.hentKonstantOpplysning<List<Adresse>>(DELTBOSTEDSADRESSE)
+fun Grunnlagsdata<JsonNode>.hentKontaktadresse() = this.hentKonstantOpplysning<List<Adresse>>(KONTAKTADRESSE)
+fun Grunnlagsdata<JsonNode>.hentOppholdsadresse() = this.hentKonstantOpplysning<List<Adresse>>(OPPHOLDSADRESSE)
+fun Grunnlagsdata<JsonNode>.hentSivilstatus() = this.hentKonstantOpplysning<Sivilstatus>(SIVILSTATUS)
+fun Grunnlagsdata<JsonNode>.hentStatsborgerskap() = this.hentKonstantOpplysning<String>(STATSBORGERSKAP)
+fun Grunnlagsdata<JsonNode>.hentUtland() = this.hentKonstantOpplysning<Utland>(UTLAND)
+fun Grunnlagsdata<JsonNode>.hentFamilierelasjon() = this.hentKonstantOpplysning<FamilieRelasjon>(FAMILIERELASJON)
+fun Grunnlagsdata<JsonNode>.hentAvdoedesbarn() = this.hentKonstantOpplysning<AvdoedesBarn>(AVDOEDESBARN)
+fun Grunnlagsdata<JsonNode>.hentVergemaalellerfremtidsfullmakt() =
+    this.hentKonstantOpplysning<VergemaalEllerFremtidsfullmakt>(VERGEMAALELLERFREMTIDSFULLMAKT)
+fun Grunnlagsdata<JsonNode>.hentPersonrolle() = this.hentKonstantOpplysning<PersonRolle>(PERSONROLLE)
+fun Grunnlagsdata<JsonNode>.hentSøskenjustering() =
+    this.hentKonstantOpplysning<Beregningsgrunnlag>(SOESKEN_I_BEREGNINGEN)
 
 inline fun <reified T> Grunnlagsdata<JsonNode>.hentKonstantOpplysning(
     opplysningstype: Opplysningstyper

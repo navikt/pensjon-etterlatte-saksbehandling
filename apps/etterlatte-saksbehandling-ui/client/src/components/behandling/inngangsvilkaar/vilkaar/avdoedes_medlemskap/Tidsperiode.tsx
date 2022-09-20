@@ -104,7 +104,11 @@ export const Tidsperiode = ({
       <Popover
         className={'breddepopover'}
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={() => {
+          if (!sletter) {
+            setOpen(false)
+          }
+        }}
         anchorEl={buttonRef.current}
         placement="top"
       >

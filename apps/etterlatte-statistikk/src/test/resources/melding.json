@@ -1,0 +1,756 @@
+{
+  "@event_name": "VEDTAK:ATTESTERT",
+  "behandlingId": "989d8e2d-633c-4a10-942c-36c0ca2cc17a",
+  "saksbehandler": "Z994985",
+  "@id": "75bb1b63-e012-4e29-b16b-bbb027c33f74",
+  "@opprettet": "2022-09-20T13:43:19.050270859",
+  "system_read_count": 1,
+  "system_participating_services": [
+    {
+      "id": "e162d8d5-981c-430a-a8ac-e13210321a96",
+      "time": "2022-09-20T13:43:18.971780666",
+      "service": "etterlatte-api",
+      "instance": "etterlatte-api-69b6955cfd-mql52",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-api:b14d4ca5827af4db2ca7dd226df9202b7ced33dd"
+    },
+    {
+      "id": "e162d8d5-981c-430a-a8ac-e13210321a96",
+      "time": "2022-09-20T13:43:18.978181323",
+      "service": "etterlatte-vedtaksvurdering",
+      "instance": "etterlatte-vedtaksvurdering-7c9f6ff55c-f9nk9",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-vedtaksvurdering:b14d4ca5827af4db2ca7dd226df9202b7ced33dd"
+    },
+    {
+      "id": "75bb1b63-e012-4e29-b16b-bbb027c33f74",
+      "time": "2022-09-20T13:43:19.050270859",
+      "service": "etterlatte-vedtaksvurdering",
+      "instance": "etterlatte-vedtaksvurdering-7c9f6ff55c-f9nk9",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-vedtaksvurdering:b14d4ca5827af4db2ca7dd226df9202b7ced33dd"
+    }
+  ],
+  "vedtak": {
+    "vedtakId": 217,
+    "virk": {
+      "fom": "2022-09",
+      "tom": null
+    },
+    "sak": {
+      "ident": "18111159498",
+      "sakType": "BARNEPENSJON",
+      "id": 45
+    },
+    "behandling": {
+      "type": "FØRSTEGANGSBEHANDLING",
+      "id": "989d8e2d-633c-4a10-942c-36c0ca2cc17a"
+    },
+    "type": "INNVILGELSE",
+    "grunnlag": [],
+    "vilkaarsvurdering": {
+      "resultat": "OPPFYLT",
+      "vilkaar": [
+        {
+          "navn": "FORMAAL_FOR_YTELSEN",
+          "resultat": "OPPFYLT",
+          "utfall": null,
+          "kriterier": [
+            {
+              "navn": "SOEKER_ER_I_LIVE",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "2d82ce0c-4bfc-4d35-9b09-b819f3cfaff1",
+                  "kriterieOpplysningsType": "DOEDSDATO",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:06.292062301Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "doedsdato": null,
+                    "foedselsnummer": "18111159498"
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-09-19T16:30:09.451655976"
+        },
+        {
+          "navn": "SOEKER_ER_UNDER_20",
+          "resultat": "OPPFYLT",
+          "utfall": null,
+          "kriterier": [
+            {
+              "navn": "SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "2d82ce0c-4bfc-4d35-9b09-b819f3cfaff1",
+                  "kriterieOpplysningsType": "FOEDSELSDATO",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:06.292062301Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "foedselsdato": "2011-11-18",
+                    "foedselsnummer": "18111159498"
+                  }
+                },
+                {
+                  "id": "6ccf2205-e3f6-4ff4-bb69-77d4f92159dc",
+                  "kriterieOpplysningsType": "DOEDSDATO",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:07.553008359Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "doedsdato": "2022-08-17",
+                    "foedselsnummer": "27438228751"
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-09-19T16:30:09.451674308"
+        },
+        {
+          "navn": "DOEDSFALL_ER_REGISTRERT",
+          "resultat": "OPPFYLT",
+          "utfall": null,
+          "kriterier": [
+            {
+              "navn": "DOEDSFALL_ER_REGISTRERT_I_PDL",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "6ccf2205-e3f6-4ff4-bb69-77d4f92159dc",
+                  "kriterieOpplysningsType": "DOEDSDATO",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:07.553008359Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "doedsdato": "2022-08-17",
+                    "foedselsnummer": "27438228751"
+                  }
+                }
+              ]
+            },
+            {
+              "navn": "AVDOED_ER_FORELDER",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "2d82ce0c-4bfc-4d35-9b09-b819f3cfaff1",
+                  "kriterieOpplysningsType": "FORELDRE",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:06.292062301Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "foreldre": [
+                      "27438228751",
+                      "24117424479"
+                    ]
+                  }
+                },
+                {
+                  "id": "6ccf2205-e3f6-4ff4-bb69-77d4f92159dc",
+                  "kriterieOpplysningsType": "DOEDSDATO",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:07.553008359Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "doedsdato": "2022-08-17",
+                    "foedselsnummer": "27438228751"
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-09-19T16:30:09.451694731"
+        },
+        {
+          "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
+          "resultat": "IKKE_OPPFYLT",
+          "utfall": "TRENGER_AVKLARING",
+          "kriterier": [
+            {
+              "navn": "AVDOED_NORSK_STATSBORGER",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "6ccf2205-e3f6-4ff4-bb69-77d4f92159dc",
+                  "kriterieOpplysningsType": "STATSBORGERSKAP",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:07.553008359Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": "NOR"
+                }
+              ]
+            },
+            {
+              "navn": "AVDOED_INGEN_INN_ELLER_UTVANDRING",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "6ccf2205-e3f6-4ff4-bb69-77d4f92159dc",
+                  "kriterieOpplysningsType": "UTLAND",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:07.553008359Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "innflyttingTilNorge": [],
+                    "utflyttingFraNorge": []
+                  }
+                }
+              ]
+            },
+            {
+              "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "e724347e-5758-437c-8a28-07382b4d53a1",
+                  "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
+                  "kilde": {
+                    "fnr": "24117424479",
+                    "mottatDato": "2022-02-10T10:51:12.298943803Z",
+                    "type": "privatperson"
+                  },
+                  "opplysning": {
+                    "harHattUtenlandsopphold": "NEI",
+                    "opphold": []
+                  }
+                }
+              ]
+            },
+            {
+              "navn": "AVDOED_KUN_NORSKE_BOSTEDSADRESSER",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "6ccf2205-e3f6-4ff4-bb69-77d4f92159dc",
+                  "kriterieOpplysningsType": "ADRESSELISTE",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:07.553008359Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "adresser": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": false,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Seterlivegen 29",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "6490",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "2011-11-18T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "navn": "AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR",
+              "resultat": "IKKE_OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "6ccf2205-e3f6-4ff4-bb69-77d4f92159dc",
+                  "kriterieOpplysningsType": "ADRESSELISTE",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:07.553008359Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "adresser": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": false,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Seterlivegen 29",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "6490",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "2011-11-18T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "6ccf2205-e3f6-4ff4-bb69-77d4f92159dc",
+                  "kriterieOpplysningsType": "DOEDSDATO",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:07.553008359Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "doedsdato": "2022-08-17",
+                    "foedselsnummer": "27438228751"
+                  }
+                },
+                {
+                  "id": "76d3ce47-1de6-4c87-8e40-bde22740fb92",
+                  "kriterieOpplysningsType": "ADRESSE_GAPS",
+                  "kilde": {
+                    "navn": "vilkaarskomponenten",
+                    "type": "vilkaarskomponenten"
+                  },
+                  "opplysning": [
+                    {
+                      "gyldigFra": "2017-08-17",
+                      "gyldigTil": "2022-08-17"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "navn": "AVDOED_KUN_NORSKE_OPPHOLDSSADRESSER",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "6ccf2205-e3f6-4ff4-bb69-77d4f92159dc",
+                  "kriterieOpplysningsType": "ADRESSELISTE",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:07.553008359Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "adresser": []
+                  }
+                }
+              ]
+            },
+            {
+              "navn": "AVDOED_KUN_NORSKE_KONTAKTADRESSER",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "6ccf2205-e3f6-4ff4-bb69-77d4f92159dc",
+                  "kriterieOpplysningsType": "ADRESSELISTE",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:07.553008359Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "adresser": []
+                  }
+                }
+              ]
+            },
+            {
+              "navn": "AVDOED_OPPFYLLER_MEDLEMSKAP",
+              "resultat": "IKKE_OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "05764d67-d277-4157-b6e9-fb1e3759bb93",
+                  "kriterieOpplysningsType": "AVDOED_MEDLEMSKAP",
+                  "kilde": {
+                    "navn": "vilkaarskomponenten",
+                    "type": "vilkaarskomponenten"
+                  },
+                  "opplysning": {
+                    "grunnlag": {
+                      "inntektsOpplysning": {
+                        "id": "3e828574-6449-41c6-8ae3-480ca559bb52",
+                        "opplysningType": "AVDOED_INNTEKT_V1",
+                        "kilde": {
+                          "tidspunkt": "2022-09-19T14:30:08.569587938Z",
+                          "type": "a-ordningen"
+                        },
+                        "opplysning": {
+                          "pensjonEllerTrygd": [],
+                          "ytelseFraOffentlig": [],
+                          "loennsinntekt": [],
+                          "naeringsinntekt": []
+                        }
+                      },
+                      "arbeidsforholdOpplysning": {
+                        "id": "1b6d9f40-167f-4ca7-9118-bf4817cba5fb",
+                        "opplysningType": "ARBEIDSFORHOLD_V1",
+                        "kilde": {
+                          "tidspunkt": "2022-09-19T14:30:08.569615956Z",
+                          "type": "aa-registeret"
+                        },
+                        "opplysning": {
+                          "arbeidsforhold": []
+                        }
+                      },
+                      "saksbehandlerMedlemsPerioder": null,
+                      "doedsdato": "2022-08-17"
+                    },
+                    "perioder": [],
+                    "gaps": [
+                      {
+                        "fraDato": "2017-08-17",
+                        "tilDato": "2022-08-17"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-09-19T16:30:09.451816492"
+        },
+        {
+          "navn": "BARNETS_MEDLEMSKAP",
+          "resultat": "OPPFYLT",
+          "utfall": null,
+          "kriterier": [
+            {
+              "navn": "SOEKER_IKKE_ADRESSE_I_UTLANDET",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "2d82ce0c-4bfc-4d35-9b09-b819f3cfaff1",
+                  "kriterieOpplysningsType": "ADRESSER",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:06.292062301Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": true,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Seterlivegen 29",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "6490",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "2011-11-18T00:00:00",
+                        "gyldigTilOgMed": null
+                      },
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": false,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Seterlivegen 29",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "6490",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "2011-11-18T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ],
+                    "oppholdadresse": [],
+                    "kontaktadresse": []
+                  }
+                },
+                {
+                  "id": "b68c4479-0dd2-4e95-8661-37f51e8fc7a8",
+                  "kriterieOpplysningsType": "SOEKER_UTENLANDSOPPHOLD",
+                  "kilde": {
+                    "fnr": "24117424479",
+                    "mottatDato": "2022-02-10T10:51:12.298943803Z",
+                    "type": "privatperson"
+                  },
+                  "opplysning": {
+                    "adresseIUtlandet": "NEI",
+                    "land": null,
+                    "adresse": null
+                  }
+                },
+                {
+                  "id": "6ccf2205-e3f6-4ff4-bb69-77d4f92159dc",
+                  "kriterieOpplysningsType": "DOEDSDATO",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:07.553008359Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "doedsdato": "2022-08-17",
+                    "foedselsnummer": "27438228751"
+                  }
+                }
+              ]
+            },
+            {
+              "navn": "GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "a60d9692-e8c8-4d98-a569-b6290896d970",
+                  "kriterieOpplysningsType": "ADRESSER",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:06.658095690Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": true,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Seterlivegen 29",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "6490",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "2015-08-12T00:00:00",
+                        "gyldigTilOgMed": null
+                      },
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": false,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Markveien 59",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "9510",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "1974-11-24T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ],
+                    "oppholdadresse": [],
+                    "kontaktadresse": null
+                  }
+                },
+                {
+                  "id": "6ccf2205-e3f6-4ff4-bb69-77d4f92159dc",
+                  "kriterieOpplysningsType": "DOEDSDATO",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-19T14:30:07.553008359Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "doedsdato": "2022-08-17",
+                    "foedselsnummer": "27438228751"
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-09-19T16:30:09.451833182"
+        }
+      ],
+      "vurdertDato": "2022-09-19T16:30:09.451833182"
+    },
+    "beregning": {
+      "bilag": {
+        "id": "4e6966b6-223a-4164-be86-7d4259885f4d",
+        "type": "GP",
+        "endringskode": "NY",
+        "resultat": "BEREGNET",
+        "beregningsperioder": [
+          {
+            "delytelsesId": "BP",
+            "type": "GP",
+            "datoFOM": "2022-09",
+            "datoTOM": null,
+            "utbetaltBeloep": 3716,
+            "soeskenFlokk": [
+              {
+                "fornavn": "Engasjert",
+                "etternavn": "Bry",
+                "foedselsnummer": "18111159498",
+                "foedselsdato": "2011-11-18",
+                "foedselsaar": 2011,
+                "foedeland": "NOR",
+                "doedsdato": null,
+                "adressebeskyttelse": "UGRADERT",
+                "bostedsadresse": [
+                  {
+                    "type": "VEGADRESSE",
+                    "aktiv": true,
+                    "coAdresseNavn": null,
+                    "adresseLinje1": "Seterlivegen 29",
+                    "adresseLinje2": null,
+                    "adresseLinje3": null,
+                    "postnr": "6490",
+                    "poststed": null,
+                    "land": null,
+                    "kilde": "FREG",
+                    "gyldigFraOgMed": "2011-11-18T00:00:00",
+                    "gyldigTilOgMed": null
+                  },
+                  {
+                    "type": "VEGADRESSE",
+                    "aktiv": false,
+                    "coAdresseNavn": null,
+                    "adresseLinje1": "Seterlivegen 29",
+                    "adresseLinje2": null,
+                    "adresseLinje3": null,
+                    "postnr": "6490",
+                    "poststed": null,
+                    "land": null,
+                    "kilde": "FREG",
+                    "gyldigFraOgMed": "2011-11-18T00:00:00",
+                    "gyldigTilOgMed": null
+                  }
+                ],
+                "deltBostedsadresse": null,
+                "kontaktadresse": [],
+                "oppholdsadresse": [],
+                "sivilstatus": "UOPPGITT",
+                "statsborgerskap": "NOR",
+                "utland": {
+                  "innflyttingTilNorge": [],
+                  "utflyttingFraNorge": []
+                },
+                "familieRelasjon": {
+                  "ansvarligeForeldre": [
+                    "24117424479",
+                    "27438228751"
+                  ],
+                  "foreldre": [
+                    "27438228751",
+                    "24117424479"
+                  ],
+                  "barn": null
+                },
+                "avdoedesBarn": null,
+                "vergemaalEllerFremtidsfullmakt": []
+              }
+            ],
+            "grunnbelopMnd": 9290,
+            "grunnbelop": 111477
+          }
+        ],
+        "beregnetDato": "2022-09-19T16:30:09.46767114",
+        "grunnlagVersjon": 98
+      },
+      "sammendrag": [
+        {
+          "periode": {
+            "fom": "2022-09",
+            "tom": null
+          },
+          "beloep": 9290
+        }
+      ]
+    },
+    "avkorting": {
+      "bilag": {
+        "id": "4029d057-2c1b-46b2-b75f-2a79ab4547ec",
+        "type": "GP",
+        "endringskode": "NY",
+        "resultat": "BEREGNET",
+        "beregningsperioder": [
+          {
+            "avkortingsId": "1",
+            "type": "INNTEKT",
+            "datoFOM": "2022-09",
+            "datoTOM": null,
+            "belop": 9290
+          }
+        ],
+        "beregnetDato": "2022-09-19T16:30:09.52722902"
+      },
+      "sammendrag": [
+        {
+          "periode": {
+            "fom": "2022-09",
+            "tom": null
+          },
+          "beloep": 9290
+        }
+      ]
+    },
+    "pensjonTilUtbetaling": [
+      {
+        "id": 49,
+        "periode": {
+          "fom": "2022-09",
+          "tom": null
+        },
+        "beloep": 9290,
+        "type": "UTBETALING"
+      }
+    ],
+    "vedtakFattet": {
+      "ansvarligSaksbehandler": "Z994985",
+      "ansvarligEnhet": "0000",
+      "tidspunkt": "2022-09-20T11:43:08.234568Z"
+    },
+    "attestasjon": {
+      "attestant": "Z994985",
+      "attesterendeEnhet": "0000",
+      "tidspunkt": "2022-09-20T11:43:19.002997Z"
+    }
+  },
+  "vedtakId": 217,
+  "sakId": 45,
+  "eventtimestamp": "2022-09-20T11:43:19.002997Z",
+  "@forårsaket_av": {
+    "id": "e162d8d5-981c-430a-a8ac-e13210321a96",
+    "opprettet": "2022-09-20T13:43:18.971780666",
+    "event_name": "SAKSBEHANDLER:ATTESTER_VEDTAK"
+  }
+}

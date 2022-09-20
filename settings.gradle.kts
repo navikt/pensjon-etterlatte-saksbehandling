@@ -26,6 +26,7 @@ include(
     "apps:etterlatte-avkorting",
     "apps:etterlatte-tilbakekreving",
     "apps:etterlatte-hendelser-pdl",
+    "apps:etterlatte-statistikk",
     "libs:ktor2client-auth-clientcredentials",
     "libs:common",
     "libs:ktor2client-onbehalfof",

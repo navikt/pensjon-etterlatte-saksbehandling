@@ -274,7 +274,7 @@ class ApplicationTest {
 
         beans.behandlingHendelser().nyHendelse.close()
 
-        sleep(2000)
+        kotlin.runCatching { sleep(2000) }
         assertNotNull(behandlingOpprettet)
         val rapid = beans.rapidSingleton
         assertEquals(3, rapid.publiserteMeldinger.size)

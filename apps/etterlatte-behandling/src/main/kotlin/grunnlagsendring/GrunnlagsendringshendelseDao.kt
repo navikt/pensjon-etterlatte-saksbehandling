@@ -134,6 +134,25 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         }
     }
 
+    fun hentGyldigeGrunnlagsendringshendelserISak(
+        sakId: Long
+    ): List<Grunnlagsendringshendelse> {
+        with(connection()) {
+            prepareStatement(
+                """
+                   SELECT id, sak_id, type, opprettet, data, status, behandling_id
+                   FROM grunnlagsendringshendelse
+                   WHERE sak_id = ?
+                   AND status = ?
+                """.trimIndent()
+            ).use {
+                it.setLong(1, sakId)
+                it.setString(2, GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING.name)
+                return it.executeQuery().toList { asGrunnlagsendringshendelse() }
+            }
+        }
+    }
+
     private fun ResultSet.asGrunnlagsendringshendelse(): Grunnlagsendringshendelse {
         return when (val type = GrunnlagsendringsType.valueOf(getString("type"))) {
             GrunnlagsendringsType.SOEKER_DOED -> {

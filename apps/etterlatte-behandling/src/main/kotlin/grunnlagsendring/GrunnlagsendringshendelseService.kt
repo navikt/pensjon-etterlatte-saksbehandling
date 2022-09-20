@@ -27,6 +27,12 @@ class GrunnlagsendringshendelseService(
             grunnlagsendringshendelseDao.hentGrunnlagsendringshendelse(id)
         }
 
+    /*Henter grunnlagsendringshendelser med status GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING*/
+    fun hentGyldigeHendelserForSak(sakId: Long) =
+        inTransaction {
+            grunnlagsendringshendelseDao.hentGyldigeGrunnlagsendringshendelserISak(sakId)
+        }
+
     fun opprettSoekerDoedHendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> =
         // finner saker med loepende utbetalinger
         generellBehandlingService.alleBehandlingerForSoekerMedFnr(doedshendelse.avdoedFnr).run {

@@ -192,4 +192,38 @@ internal class GrunnlagsendringshendelseDaoTest {
         val lagretHendelse = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(hendelseId)
         assertEquals(revurderingId, lagretHendelse?.behandlingId)
     }
+
+    @Test
+    fun `hentGyldigeGrunnlagsendringshendelserISak skal hente alle grunnlagsendringshendelser med status GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING`() { // ktlint-disable max-line-length
+        val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON).id
+        val sak2 = sakRepo.opprettSak("4321", SakType.BARNEPENSJON).id
+
+        listOf(
+            grunnlagsendringshendelse(
+                sakId = sak1,
+                data = grunnlagsinformasjonDoedshendelse()
+            ),
+            grunnlagsendringshendelse(
+                sakId = sak1,
+                data = grunnlagsinformasjonDoedshendelse()
+            ),
+            grunnlagsendringshendelse(
+                sakId = sak2,
+                data = grunnlagsinformasjonDoedshendelse()
+            )
+        ).forEach {
+            grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
+        }
+        grunnlagsendringshendelsesRepo.oppdaterGrunnlagsendringStatusForType(
+            saker = listOf(sak1, sak2),
+            foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
+            etterStatus = GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING,
+            type = GrunnlagsendringsType.SOEKER_DOED
+        )
+
+        val resultat = grunnlagsendringshendelsesRepo.hentGyldigeGrunnlagsendringshendelserISak(sak1)
+
+        assertEquals(2, resultat.size)
+        assertTrue(resultat.all { it.status == GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING })
+    }
 }

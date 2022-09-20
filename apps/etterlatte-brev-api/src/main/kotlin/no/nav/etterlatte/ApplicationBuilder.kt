@@ -51,6 +51,7 @@ class ApplicationBuilder {
     private val adresseService = if (localDevelopment) {
         AdresseServiceMock()
     } else {
+        logger.info("------------- Oppslagsurl: ${env["REGOPPSLAG_URL"]} ---------------")
         AdresseKlient(regHttpclient(config.getConfig("no.nav.etterlatte.brev.api.aad")), env["REGOPPSLAG_URL"]!!)
     }
 

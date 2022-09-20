@@ -16,6 +16,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
@@ -70,23 +71,53 @@ internal class RapidTest {
         fnr = fnr
     )
 
-    private val melding = JsonMessage.newMessage(
-        mapOf(
-            "@event_name" to "OPPLYSNING:NY",
-            "opplysning" to listOf(nyOpplysning),
-            "fnr" to fnr,
-            "sakId" to 1
-        )
-    ).toJson()
+    @Nested
+    inner class NyOpplysning {
+        private val melding = JsonMessage.newMessage(
+            mapOf(
+                "@event_name" to "OPPLYSNING:NY",
+                "opplysning" to listOf(nyOpplysning),
+                "fnr" to fnr,
+                "sakId" to 1
+            )
+        ).toJson()
 
-    @Test
-    fun `ny enkeltopplysning sender ut melding om at grunnlaget er endret`() {
-        inspector.sendTestMessage(melding)
-        Assertions.assertEquals("GRUNNLAG:GRUNNLAGENDRET", inspector.inspektør.message(0)[eventNameKey].textValue())
+        @Test
+        fun `ny enkeltopplysning sender ut melding om at grunnlaget er endret`() {
+            inspector.sendTestMessage(melding)
+            Assertions.assertEquals("GRUNNLAG:GRUNNLAGENDRET", inspector.inspektør.message(0)[eventNameKey].textValue())
+        }
+
+        @Test
+        fun `ny enkeltopplysning lagres i databasen med riktige verdier`() {
+            assertOpplysningBlirLagret(melding = melding, expectedOpplysning = nyOpplysning)
+        }
     }
 
-    @Test
-    fun `ny enkeltopplysning lagres i databasen med riktige verdier`() {
+    @Nested
+    inner class Opplysningsbehov {
+        private val melding = JsonMessage.newMessage(
+            mapOf(
+                "@behov" to Opplysningstyper.SOEKER_PDL_V1,
+                "opplysning" to listOf(nyOpplysning),
+                "fnr" to fnr,
+                "sakId" to 1
+            )
+        ).toJson()
+
+        @Test
+        fun `svar på opplysningsbehov sender ut melding om at grunnlaget er endret`() {
+            inspector.sendTestMessage(melding)
+            Assertions.assertEquals("GRUNNLAG:GRUNNLAGENDRET", inspector.inspektør.message(0)[eventNameKey].textValue())
+        }
+
+        @Test
+        fun `ny enkeltopplysning lagres i databasen med riktige verdier`() {
+            assertOpplysningBlirLagret(melding = melding, expectedOpplysning = nyOpplysning)
+        }
+    }
+
+    private fun assertOpplysningBlirLagret(melding: String, expectedOpplysning: Grunnlagsopplysning<String>) {
         inspector.sendTestMessage(melding)
         val grunnlagshendelse = opplysningRepo.finnHendelserIGrunnlag(1).first()
 
@@ -94,21 +125,14 @@ internal class RapidTest {
         Assertions.assertEquals(grunnlagshendelse.hendelseNummer, 1)
 
         with(grunnlagshendelse.opplysning) {
-            Assertions.assertEquals(this.id, nyOpplysning.id)
-            Assertions.assertEquals(this.kilde, nyOpplysning.kilde)
-            Assertions.assertEquals(this.opplysningType, nyOpplysning.opplysningType)
-            Assertions.assertEquals(this.meta, nyOpplysning.meta)
-            Assertions.assertEquals(this.kilde, nyOpplysning.kilde)
-            Assertions.assertEquals(this.attestering, nyOpplysning.attestering)
-            Assertions.assertEquals(this.fnr!!.value, nyOpplysning.fnr!!.value)
-            Assertions.assertEquals(this.opplysning.textValue(), nyOpplysning.opplysning)
+            Assertions.assertEquals(this.id, expectedOpplysning.id)
+            Assertions.assertEquals(this.kilde, expectedOpplysning.kilde)
+            Assertions.assertEquals(this.opplysningType, expectedOpplysning.opplysningType)
+            Assertions.assertEquals(this.meta, expectedOpplysning.meta)
+            Assertions.assertEquals(this.kilde, expectedOpplysning.kilde)
+            Assertions.assertEquals(this.attestering, expectedOpplysning.attestering)
+            Assertions.assertEquals(this.fnr!!.value, expectedOpplysning.fnr!!.value)
+            Assertions.assertEquals(this.opplysning.textValue(), expectedOpplysning.opplysning)
         }
-    }
-
-    @Test
-    fun `ny enkeltopplysning gir grunnlag v2`() {
-        inspector.sendTestMessage(melding)
-
-        Assertions.assertTrue(inspector.inspektør.message(0).has("grunnlagV2"))
     }
 }

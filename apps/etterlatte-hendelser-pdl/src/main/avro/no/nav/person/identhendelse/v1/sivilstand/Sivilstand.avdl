@@ -14,7 +14,7 @@ protocol SivilstandV1 {
     union { null, string } sted = null;
     union { null, string } utland = null;
 
-    // PDL
+    // pdl
     union { null, date } bekreftelsesdato = null;
   }
 }

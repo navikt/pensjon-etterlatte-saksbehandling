@@ -31,13 +31,13 @@ internal class LesBeregningsmelding(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val grunnlagV2 = packet["grunnlagV2"].toString()
+            val grunnlag = packet["grunnlagV2"].toString()
 
             try {
                 // TODO fremtidig funksjonalitet for å støtte periodisering av vilkaar
                 val tom = YearMonth.now().plusMonths(3)
                 val beregningsResultat = beregning.beregnResultat(
-                    grunnlag = objectMapper.readValue(grunnlagV2),
+                    grunnlag = objectMapper.readValue(grunnlag),
                     virkFOM = YearMonth.parse(packet["virkningstidspunkt"].asText()),
                     virkTOM = tom,
                     vilkaarsvurdering = objectMapper.readValue(packet["vilkaarsvurdering"].toString()),

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.person
 
 import GrunnlagTestData
-import GrunnlagTestData.Companion.søker
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -41,7 +40,7 @@ class PersonRouteTest {
             rolle = PersonRolle.BARN
         )
 
-        coEvery { personService.hentPerson(hentPersonRequest) } returns GrunnlagTestData().søker()
+        coEvery { personService.hentPerson(hentPersonRequest) } returns GrunnlagTestData().søker
 
         withTestApplication({ module(securityContextMediator, personService) }) {
             handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT) {

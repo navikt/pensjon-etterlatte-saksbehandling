@@ -108,7 +108,7 @@ class ApplicationBuilder {
 
     private fun regHttpclient(aad: Config) = HttpClient(OkHttp) {
 
-        logger.info(aad.getString("client_jwk"))
+        logger.info(aad.toString())
         expectSuccess = true
         val env = mutableMapOf(
             "AZURE_APP_CLIENT_ID" to aad.getString("client_id"),

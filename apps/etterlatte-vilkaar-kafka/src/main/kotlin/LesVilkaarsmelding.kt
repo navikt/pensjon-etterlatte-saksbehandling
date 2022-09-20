@@ -60,14 +60,15 @@ internal class LesVilkaarsmelding(
                     RevurderingAarsak.valueOf(packet[BehandlingGrunnlagEndret.revurderingAarsakKey].asText())
                 }.getOrNull()
                 val (fritekst, liste) = kotlin.runCatching {
-                    val fritekstAarsak = packet[BehandlingGrunnlagEndret.manueltOpphoerfritekstAarsakKey].asText()
-                    val listeAarsak: List<ManueltOpphoerAarsak> =
+                    val fritekstAarsakManueltOpphoer =
+                        packet[BehandlingGrunnlagEndret.manueltOpphoerfritekstAarsakKey].asText()
+                    val kjenteAarsakerManueltOpphoer: List<ManueltOpphoerAarsak> =
                         objectMapper.treeToValue(packet[BehandlingGrunnlagEndret.manueltOpphoerAarsakKey])
-                    fritekstAarsak to listeAarsak
-                }.getOrNull() ?: null to emptyList()
+                    fritekstAarsakManueltOpphoer to kjenteAarsakerManueltOpphoer
+                }.getOrNull() ?: (null to emptyList())
                 val aarsak = Aarsak(
-                    manueltOpphoerFritekst = fritekst,
-                    manueltOpphoerListe = liste,
+                    manueltOpphoerFritekstgrunn = fritekst,
+                    manueltOpphoerKjenteGrunner = liste,
                     revurderingAarsak = revurderingAarsak
                 )
                 val (virkningstidspunkt, vilkaarsvurdering, kommerSoekerTilGode) =

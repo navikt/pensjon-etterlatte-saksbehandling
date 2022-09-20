@@ -98,9 +98,8 @@ class VilkaarService {
         val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
         val vilkaar = when (revurderingAarsak) {
             RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarFormaalForYtelsen(soekerPdl, virkningstidspunkt))
-            // TODO: få inn opphørsgrunner her
             RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
-                "Du kan et manuelt opphør på en revurdering"
+                "Du kan ikke ha et manuelt opphør på en revurdering"
             )
         }
 
@@ -118,10 +117,9 @@ class VilkaarService {
         return hentVirkningstidspunktFoerstegangssoeknad(avdoedPdl?.opplysning?.doedsdato, soeknadMottattDato)
     }
 
-    fun beregnVirkningstidspunktRevurdering(
+    private fun beregnVirkningstidspunktRevurdering(
         opplysninger: List<VilkaarOpplysning<JsonNode>>,
-        revurderingAarsak: RevurderingAarsak,
-        soeknadMottattDato: LocalDate
+        revurderingAarsak: RevurderingAarsak
     ): YearMonth {
         return when (revurderingAarsak) {
             RevurderingAarsak.SOEKER_DOD -> {
@@ -211,8 +209,7 @@ class VilkaarService {
 
             BehandlingType.REVURDERING -> beregnVirkningstidspunktRevurdering(
                 grunnlagForVilkaar,
-                requireNotNull(aarsak.revurderingAarsak) { "Må ha en revurderingAarsak på en revurdering" },
-                behandlingopprettet
+                requireNotNull(aarsak.revurderingAarsak) { "Må ha en revurderingAarsak på en revurdering" }
             )
 
             BehandlingType.MANUELT_OPPHOER -> beregnVirkningstidspunktManueltOpphoer(
@@ -247,7 +244,7 @@ class VilkaarService {
         )
 
         val vilkaar = listOf(
-            vilkaarKanBehandleSakenISystemet(aarsak.manueltOpphoerListe, aarsak.manueltOpphoerFritekst)
+            vilkaarKanBehandleSakenISystemet(aarsak.manueltOpphoerKjenteGrunner, aarsak.manueltOpphoerFritekstgrunn)
         )
 
         val vilkaarResultat = setVilkaarVurderingFraVilkaar(vilkaar)

@@ -47,6 +47,8 @@ spec:
       value: etterlatte.dodsmelding
     - name: REGOPPSLAG_OUTBOUND_SCOPE
       value: "api://dev-fss.teamdokumenthandtering.regoppslag/.default"
+    - name: REGOPPSLAG_URL
+      value: "https://regoppslag.dev.intern.nav.no"
   accessPolicy:
     outbound:
       rules:

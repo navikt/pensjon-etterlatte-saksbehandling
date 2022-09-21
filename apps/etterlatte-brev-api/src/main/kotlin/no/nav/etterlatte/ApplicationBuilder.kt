@@ -41,7 +41,7 @@ class ApplicationBuilder {
     private val db = BrevRepository.using(datasourceBuilder.dataSource)
     private val mottakerService = MottakerService(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
     val stsConfig = Sts(
-        url = config.getString("sts"),
+        url = config.getConfig("sts").getString("url"),
         serviceuser = Sts.ServiceUser(
             name = config.getConfig("serviceuser").getString("name"),
             password = config.getConfig("serviceuser").getString("password")

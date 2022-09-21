@@ -63,14 +63,7 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
             val behandlingId = call.parameters["behandlingId"]!!
             val request = call.receive<OpprettBrevRequest>()
 
-            val accessToken = try {
-                getAccessToken(call)
-            } catch (ex: Exception) {
-                logger.error("Bearer not found", ex)
-                throw ex
-            }
-
-            val brevInnhold = service.opprett(request.mottaker, request.mal, request.enhet, accessToken)
+            val brevInnhold = service.opprett(request.mottaker, request.mal, request.enhet)
             val brev = service.lagreAnnetBrev(behandlingId, request.mottaker, brevInnhold)
 
             call.respond(brev)
@@ -86,14 +79,8 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
 
         post("forhaandsvisning") {
             val request = call.receive<OpprettBrevRequest>()
-            val accessToken = try {
-                getAccessToken(call)
-            } catch (ex: Exception) {
-                logger.error("Bearer not found", ex)
-                throw ex
-            }
 
-            val brev = service.opprett(request.mottaker, request.mal, request.enhet, accessToken)
+            val brev = service.opprett(request.mottaker, request.mal, request.enhet)
 
             call.respond(brev.data)
         }

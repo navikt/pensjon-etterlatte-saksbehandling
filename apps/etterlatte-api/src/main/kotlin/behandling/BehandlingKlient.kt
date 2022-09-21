@@ -240,7 +240,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                 downstreamResourceClient.post(
                     Resource(
                         clientId,
-                        "$resourceUrl/behandlinger/${manueltOpphoerRequest.sak}/manueltopphoer"
+                        "$resourceUrl/behandlinger/manueltopphoer"
                     ),
                     accessToken,
                     manueltOpphoerRequest

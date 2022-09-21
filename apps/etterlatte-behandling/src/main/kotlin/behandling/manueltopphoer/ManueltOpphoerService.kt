@@ -92,6 +92,7 @@ class RealManueltOpphoerService(
                     runBlocking {
                         behandlingHendelser.send(lagretManueltOpphoer.id to BehandlingHendelseType.OPPRETTET)
                     }
+                    logger.info("Manuelt opphoer er opprettet.")
                 }
             }
         }

@@ -10,6 +10,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import io.ktor.serialization.jackson.jackson
+import no.nav.etterlatte.adresse.AdresseService
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.MottakerService
 import no.nav.etterlatte.brev.brevRoute
@@ -47,9 +48,11 @@ class ApplicationBuilder {
             password = config.getConfig("serviceuser").getString("password")
         )
     )
+    private val logger = LoggerFactory.getLogger(ApplicationBuilder::class.java)
+
+
     val stsClient = StsClient(stsConfig)
 
-    private val logger = LoggerFactory.getLogger(ApplicationBuilder::class.java)
 
 
     private val adresseService = if (localDevelopment) {
@@ -57,6 +60,7 @@ class ApplicationBuilder {
     } else {
         logger.info("------------- Oppslagsurl: ${env["REGOPPSLAG_URL"]} ---------------")
         AdresseKlient(httpClient(), env["REGOPPSLAG_URL"]!!, stsClient)
+        logger.info("------- STS config ----------: ${stsConfig.toString()}")
     }
 
     private val brevService = BrevService(

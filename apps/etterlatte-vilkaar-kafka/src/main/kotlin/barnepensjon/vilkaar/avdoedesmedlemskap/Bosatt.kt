@@ -73,17 +73,13 @@ fun metakriterieBosattNorge(
         kunNorskeKontaktadresserSisteFemAar
     )
 
-    val utfallPsys = behandlesIPsys.any { it.resultat === VurderingsResultat.IKKE_OPPFYLT }
-    val utfallTrengerAvklaring = trengerAvklaring.any { it.resultat === VurderingsResultat.IKKE_OPPFYLT }
-    val utfall = if (utfallPsys) {
-        Utfall.BEHANDLE_I_PSYS
-    } else if (utfallTrengerAvklaring) {
-        Utfall.TRENGER_AVKLARING
-    } else {
-        Utfall.OPPFYLT
+    val utfall = when {
+        behandlesIPsys.any { it.resultat === VurderingsResultat.IKKE_OPPFYLT } -> Utfall.BEHANDLE_I_PSYS
+        trengerAvklaring.any { it.resultat === VurderingsResultat.IKKE_OPPFYLT } -> Utfall.TRENGER_AVKLARING
+        else -> Utfall.OPPFYLT
     }
 
-    val kriterieliste = listOf<Kriterie>(
+    val kriterieliste = listOf(
         norskStatsborger,
         ingenInnUtvandring,
         ingenUtenlandsoppholdOppgittISoeknad,
@@ -117,12 +113,10 @@ fun kriterieNorskStatsborger(avdoedPdl: VilkaarOpplysning<Person>?, kriterietype
 
     if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
 
-    val resultat = if (avdoedPdl.opplysning.statsborgerskap == null) {
-        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-    } else if (avdoedPdl.opplysning.statsborgerskap == "NOR") {
-        VurderingsResultat.OPPFYLT
-    } else {
-        VurderingsResultat.IKKE_OPPFYLT
+    val resultat = when (avdoedPdl.opplysning.statsborgerskap) {
+        null -> VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        "NOR" -> VurderingsResultat.OPPFYLT
+        else -> VurderingsResultat.IKKE_OPPFYLT
     }
 
     return Kriterie(kriterietype, resultat, opplysningsGrunnlag)
@@ -174,14 +168,11 @@ fun kriterieIngenUtenlandsoppholdFraSoeknad(
 
     val utenlandsoppholdSoeknad = avdoedSoeknad.opplysning.utenlandsopphold
 
-    val ingenOppholdUtlandetFraSoeknad =
-        if (utenlandsoppholdSoeknad.harHattUtenlandsopphold == JaNeiVetIkke.NEI) {
-            VurderingsResultat.OPPFYLT
-        } else if (utenlandsoppholdSoeknad.harHattUtenlandsopphold == JaNeiVetIkke.VET_IKKE) {
-            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-        } else {
-            VurderingsResultat.IKKE_OPPFYLT
-        }
+    val ingenOppholdUtlandetFraSoeknad = when (utenlandsoppholdSoeknad.harHattUtenlandsopphold) {
+        JaNeiVetIkke.NEI -> VurderingsResultat.OPPFYLT
+        JaNeiVetIkke.VET_IKKE -> VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        else -> VurderingsResultat.IKKE_OPPFYLT
+    }
 
     return Kriterie(
         kriterietype,
@@ -235,14 +226,14 @@ fun kriterieKunNorskeOppholdsadresserSisteFemAar(
 
     if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
 
-    try {
+    return try {
         val adresser = hentOppholdsAdresser(avdoedPdl)
         val femAarFoerDoedsdato = hentDoedsdato(avdoedPdl).minusYears(5)
         val vurderingKunNorskeOppholdsadresser = harKunNorskeAdresserEtterDato(adresser, femAarFoerDoedsdato)
 
-        return Kriterie(kriterietype, vurderingKunNorskeOppholdsadresser, opplysningsGrunnlag)
+        Kriterie(kriterietype, vurderingKunNorskeOppholdsadresser, opplysningsGrunnlag)
     } catch (ex: OpplysningKanIkkeHentesUt) {
-        return Kriterie(kriterietype, VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, opplysningsGrunnlag)
+        Kriterie(kriterietype, VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, opplysningsGrunnlag)
     }
 }
 
@@ -263,14 +254,14 @@ fun kriterieKunNorskeKontaktadresserSisteFemAar(
 
     if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
 
-    try {
+    return try {
         val adresser = hentKontaktAdresser(avdoedPdl)
         val femAarFoerDoedsdato = hentDoedsdato(avdoedPdl).minusYears(5)
         val vurderingKunNorskeKontaktadresser = harKunNorskeAdresserEtterDato(adresser, femAarFoerDoedsdato)
 
-        return Kriterie(kriterietype, vurderingKunNorskeKontaktadresser, opplysningsGrunnlag)
+        Kriterie(kriterietype, vurderingKunNorskeKontaktadresser, opplysningsGrunnlag)
     } catch (ex: OpplysningKanIkkeHentesUt) {
-        return Kriterie(kriterietype, VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, opplysningsGrunnlag)
+        Kriterie(kriterietype, VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, opplysningsGrunnlag)
     }
 }
 
@@ -314,14 +305,13 @@ fun kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
             VurderingsResultat.IKKE_OPPFYLT
         }
 
-        val gapGrunnlag = Kriteriegrunnlag(
-            UUID.randomUUID(),
-            KriterieOpplysningsType.ADRESSE_GAPS,
-            Grunnlagsopplysning.Vilkaarskomponenten("vilkaarskomponenten"),
-            periodeGaps
-        )
-
         val oppdatertGrunnlag = if (periodeGaps.isNotEmpty()) {
+            val gapGrunnlag = Kriteriegrunnlag(
+                UUID.randomUUID(),
+                KriterieOpplysningsType.ADRESSE_GAPS,
+                Grunnlagsopplysning.Vilkaarskomponenten("vilkaarskomponenten"),
+                periodeGaps
+            )
             opplysningsGrunnlag + gapGrunnlag
         } else {
             opplysningsGrunnlag

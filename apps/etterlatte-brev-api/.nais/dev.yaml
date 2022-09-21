@@ -22,6 +22,11 @@ spec:
         databases:
           - name: etterlatte-brev
             envVarPrefix: DB
+  vault:
+    enabled: true
+    paths:
+      - kvPath: "serviceuser/data/dev/srvbarnepensjon"
+        mountPath: "/secrets/srvbarnepensjon"
   azure:
     application:
       enabled: true

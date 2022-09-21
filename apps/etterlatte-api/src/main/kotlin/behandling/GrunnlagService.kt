@@ -1,7 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -22,7 +20,11 @@ class GrunnlagService(
     private val grunnlagKlient: EtterlatteGrunnlag
 ) {
 
-    suspend fun lagreAvdoedMedlemskapPeriode(
+    /**
+     * Legger til en ny periode i listen over saksbehandlerperioder. Dersom det finnes en periode med samme id fra før av,
+     * vil den bli erstattet med den nye perioden.
+     */
+    suspend fun upsertAvdoedMedlemskapPeriode(
         behandlingId: String,
         periode: SaksbehandlerMedlemskapsperiode,
         saksbehandlerId: String,
@@ -35,16 +37,10 @@ class GrunnlagService(
             token
         )
 
-        val grunnlagMedNyPeriode: List<SaksbehandlerMedlemskapsperiode> =
-            grunnlag?.opplysning?.perioder?.plus(periode) ?: listOf(periode)
-
-        val opplysning: List<Grunnlagsopplysning<out Any>> = listOf(
-            lagOpplysning(
-                Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
-                Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
-                SaksbehandlerMedlemskapsperioder(perioder = grunnlagMedNyPeriode)
-            )
-        )
+        val grunnlagMedNyPeriode = grunnlag?.opplysning?.perioder
+            ?.filter { it.id != periode.id }
+            ?.plus(periode) ?: listOf(periode)
+        val opplysning = lagAvdoedOpplysning(saksbehandlerId, grunnlagMedNyPeriode)
 
         rapid.publiser(
             behandlingId,
@@ -56,6 +52,42 @@ class GrunnlagService(
 
         return GrunnlagResult("Lagret")
     }
+
+    suspend fun slettAvdoedMedlemskapPeriode(
+        behandlingId: String,
+        saksbehandlerPeriodeId: String,
+        saksbehandlerId: String,
+        token: String
+    ): GrunnlagResult {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, token)
+        val grunnlag: Grunnlagsopplysning<SaksbehandlerMedlemskapsperioder>? = grunnlagKlient.finnPerioder(
+            behandling.sak,
+            Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
+            token
+        )
+
+        val grunnlagUtenPeriode =
+            grunnlag?.opplysning?.perioder?.filter { it.id != saksbehandlerPeriodeId } ?: emptyList()
+        val opplysning = lagAvdoedOpplysning(saksbehandlerId, grunnlagUtenPeriode)
+
+        rapid.publiser(
+            behandlingId,
+            JsonMessage.newMessage(
+                eventName = "OPPLYSNING:NY",
+                map = mapOf("opplysning" to opplysning, "sakId" to behandling.sak)
+            ).toJson()
+        )
+
+        return GrunnlagResult("Slettet")
+    }
+
+    private fun lagAvdoedOpplysning(saksbehandlerId: String, perioder: List<SaksbehandlerMedlemskapsperiode>) = listOf(
+        lagOpplysning(
+            Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
+            Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
+            SaksbehandlerMedlemskapsperioder(perioder)
+        )
+    )
 
     suspend fun lagreResultatKommerBarnetTilgode(
         behandlingId: String,
@@ -113,22 +145,6 @@ class GrunnlagService(
         )
 
         return GrunnlagResult("Lagret")
-    }
-
-    companion object {
-        inline fun <reified T> setOpplysningType(
-            opplysning: Grunnlagsopplysning<ObjectNode>?
-        ): Grunnlagsopplysning<T>? {
-            return opplysning?.let {
-                Grunnlagsopplysning(
-                    opplysning.id,
-                    opplysning.kilde,
-                    opplysning.opplysningType,
-                    opplysning.meta,
-                    objectMapper.readValue(opplysning.opplysning.toString())
-                )
-            }
-        }
     }
 }
 

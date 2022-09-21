@@ -3,8 +3,8 @@ import { HomeIcon } from '../../../../../shared/icons/homeIcon'
 import styled from 'styled-components'
 import { InformationIcon } from '../../../../../shared/icons/informationIcon'
 
-import { useRef, useState } from 'react'
-import { Popover } from '@navikt/ds-react'
+import { useContext, useRef, useState } from 'react'
+import { Button, Popover } from '@navikt/ds-react'
 import { formaterEnumTilLesbarString, formaterStringDato } from '../../../../../utils/formattering'
 import { hentKildenavn, norskeBostaver } from '../tekstUtils'
 import { CloseIcon } from '../../../../../shared/icons/closeIcon'
@@ -18,6 +18,11 @@ import {
   TidslinjePeriodeType,
 } from '../../types'
 import { KildeType } from '../../../../../store/reducers/BehandlingReducer'
+import { Delete } from '@navikt/ds-icons'
+import { hentBehandling, slettPeriodeForAvdoedesMedlemskap } from '../../../../../shared/api/behandling'
+import { AppContext } from '../../../../../store/AppContext'
+import Spinner from '../../../../../shared/Spinner'
+import { ErrorResponse } from '../../../felles/ErrorResponse'
 
 export const Tidsperiode = ({
   periode,
@@ -29,7 +34,10 @@ export const Tidsperiode = ({
   startOffset: string
 }) => {
   const buttonRef = useRef(null)
+  const behandlingId = useContext(AppContext).state.behandlingReducer.id
   const [open, setOpen] = useState(false)
+  const [sletter, setSletter] = useState<boolean>(false)
+  const [sletteError, setSletteError] = useState<boolean>(false)
 
   const isAdresseInnhold = 'land' in periode.innhold
   const isYtelseInnhold = 'godkjentPeriode' in periode.innhold
@@ -64,6 +72,23 @@ export const Tidsperiode = ({
     }
   }
 
+  function slettPeriodeTrykket(saksbehandlerPeriodeId: string) {
+    if (!behandlingId) throw new Error('Mangler behandlingsid')
+    setSletter(true)
+    slettPeriodeForAvdoedesMedlemskap(behandlingId, saksbehandlerPeriodeId).then((response) => {
+      if (response.status === 'ok') {
+        hentBehandling(behandlingId).then((response) => {
+          if (response.status === 200) {
+            window.location.reload()
+          }
+        })
+      } else {
+        setSletteError(true)
+        setSletter(false)
+      }
+    })
+  }
+
   return (
     <Rad style={{ left: startOffset, width: lengde }} periodeColor={getColor()} isGap={isGap}>
       {!isGap && (
@@ -79,94 +104,119 @@ export const Tidsperiode = ({
       <Popover
         className={'breddepopover'}
         open={open}
-        onClose={() => setOpen(false)}
+        onClose={() => {
+          if (!sletter) {
+            setOpen(false)
+          }
+        }}
         anchorEl={buttonRef.current}
         placement="top"
       >
         <Popover.Content>
-          <Close onClick={() => setOpen(false)}>
-            <CloseIcon />
-          </Close>
-
-          {isAdresseInnhold && !isGap && (
+          <Spinner visible={sletter} label={'Sletter periode'} />
+          {sletteError && <ErrorResponse />}
+          {!sletter && (
             <>
-              <InnholdTittel>{hentTittel()}</InnholdTittel>
-              <InnholdKilde>
-                Kilde: {hentKildenavn(periode.kilde.type)}{' '}
-                {periode.kilde.tidspunktForInnhenting && formaterStringDato(periode.kilde.tidspunktForInnhenting)}
-              </InnholdKilde>
-              <div>
-                <BoldTekst>Adresse: </BoldTekst>
-                <span>{innholdAdresse.beskrivelse}</span>
-              </div>
-              <div>{innholdAdresse?.land}</div>
-            </>
-          )}
+              <Close onClick={() => setOpen(false)}>
+                <CloseIcon />
+              </Close>
 
-          {isAdresseInnhold && isGap && <InnholdTittel>Gap i bostedsadresse i Norge</InnholdTittel>}
-
-          {isYtelseInnhold && isSaksbehandlerPeriode && (
-            <>
-              <InnholdTittel>{hentTittel()}</InnholdTittel>
-              <InnholdKilde>
-                Kilde: {hentKildenavn(innholdYtelse.kilde.type)}{' '}
-                {innholdYtelse.kilde.tidspunkt && formaterStringDato(innholdYtelse.kilde.tidspunkt)}
-                <div>Lagt inn av {(innholdYtelse.kilde as ISaksbehandlerKilde).ident}</div>
-              </InnholdKilde>
-              {innholdYtelse.periodeType === IReturnertPeriodeType.arbeidsperiode && (
+              {isAdresseInnhold && !isGap && (
                 <>
+                  <InnholdTittel>{hentTittel()}</InnholdTittel>
+                  <InnholdKilde>
+                    Kilde: {hentKildenavn(periode.kilde.type)}{' '}
+                    {periode.kilde.tidspunktForInnhenting && formaterStringDato(periode.kilde.tidspunktForInnhenting)}
+                  </InnholdKilde>
                   <div>
-                    <BoldTekst>Arbeidsgiver: </BoldTekst> <span>{innholdYtelse.arbeidsgiver}</span>
+                    <BoldTekst>Adresse: </BoldTekst>
+                    <span>{innholdAdresse.beskrivelse}</span>
+                  </div>
+                  <div>{innholdAdresse?.land}</div>
+                </>
+              )}
+
+              {isAdresseInnhold && isGap && <InnholdTittel>Gap i bostedsadresse i Norge</InnholdTittel>}
+
+              {isYtelseInnhold && isSaksbehandlerPeriode && (
+                <>
+                  <InnholdTittel>{hentTittel()}</InnholdTittel>
+                  <InnholdKilde>
+                    Kilde: {hentKildenavn(innholdYtelse.kilde.type)}{' '}
+                    {innholdYtelse.kilde.tidspunkt && formaterStringDato(innholdYtelse.kilde.tidspunkt)}
+                    <div>Lagt inn av {(innholdYtelse.kilde as ISaksbehandlerKilde).ident}</div>
+                  </InnholdKilde>
+                  {innholdYtelse.periodeType === IReturnertPeriodeType.arbeidsperiode && (
+                    <>
+                      <div>
+                        <BoldTekst>Arbeidsgiver: </BoldTekst>
+                        <span>{innholdYtelse.arbeidsgiver}</span>
+                      </div>
+                      <div>
+                        <BoldTekst>Stillingsprosent: </BoldTekst>
+                        <span>{innholdYtelse.stillingsprosent}</span>
+                      </div>
+                    </>
+                  )}
+                  <div>
+                    <BoldTekst>Begrunnelse: </BoldTekst> <span>{innholdYtelse.begrunnelse}</span>
                   </div>
                   <div>
-                    <BoldTekst>Stillingsprosent: </BoldTekst>
-                    <span>{innholdYtelse.stillingsprosent}</span>
+                    <BoldTekst>Oppgitt kilde: </BoldTekst> <span>{innholdYtelse.oppgittKilde}</span>
+                  </div>
+                  <div>
+                    <BoldTekst>Perioden teller for medlemskap: </BoldTekst>
+                    <span>{innholdYtelse.godkjentPeriode ? 'Ja' : 'Nei'}</span>
                   </div>
                 </>
               )}
-              <div>
-                <BoldTekst>Begrunnelse: </BoldTekst> <span>{innholdYtelse.begrunnelse}</span>
-              </div>
-              <div>
-                <BoldTekst>Oppgitt kilde: </BoldTekst> <span>{innholdYtelse.oppgittKilde}</span>
-              </div>
-              <div>
-                <BoldTekst>Perioden teller for medlemskap: </BoldTekst>
-                <span>{innholdYtelse.godkjentPeriode ? 'Ja' : 'Nei'}</span>
-              </div>
-            </>
-          )}
 
-          {isYtelseInnhold && !isSaksbehandlerPeriode && (
-            <>
-              <InnholdTittel>{hentTittel()}</InnholdTittel>
-              <InnholdKilde>
-                Kilde: {hentKildenavn(innholdYtelse.kilde.type)}{' '}
-                {innholdYtelse.kilde.tidspunkt && formaterStringDato(innholdYtelse.kilde.tidspunkt)}
-              </InnholdKilde>
-              {innholdYtelse.periodeType === IReturnertPeriodeType.arbeidsperiode && (
+              {isYtelseInnhold && !isSaksbehandlerPeriode && (
                 <>
+                  <InnholdTittel>{hentTittel()}</InnholdTittel>
+                  <InnholdKilde>
+                    Kilde: {hentKildenavn(innholdYtelse.kilde.type)}{' '}
+                    {innholdYtelse.kilde.tidspunkt && formaterStringDato(innholdYtelse.kilde.tidspunkt)}
+                  </InnholdKilde>
+                  {innholdYtelse.periodeType === IReturnertPeriodeType.arbeidsperiode && (
+                    <>
+                      <div>
+                        <BoldTekst>Arbeidsgiver: </BoldTekst>
+                        <span>{innholdYtelse.arbeidsgiver}</span>
+                      </div>
+                      <div>
+                        <BoldTekst>Stillingsprosent: </BoldTekst>
+                        <span>{innholdYtelse.stillingsprosent} </span>
+                      </div>
+                    </>
+                  )}
                   <div>
-                    <BoldTekst>Arbeidsgiver: </BoldTekst> <span>{innholdYtelse.arbeidsgiver}</span>
-                  </div>
-                  <div>
-                    <BoldTekst>Stillingsprosent: </BoldTekst>
-                    <span>{innholdYtelse.stillingsprosent} </span>
+                    <BoldTekst>Perioden teller for medlemskap: </BoldTekst>
+                    <span>{innholdYtelse.godkjentPeriode ? 'Ja' : 'Nei'}</span>
                   </div>
                 </>
               )}
+
               <div>
-                <BoldTekst>Perioden teller for medlemskap: </BoldTekst>
-                <span>{innholdYtelse.godkjentPeriode ? 'Ja' : 'Nei'}</span>
+                <BoldTekst>Periode: </BoldTekst>
+                <span> {formaterStringDato(periode.innhold.fraDato)} - </span>
+                {periode.innhold.tilDato ? formaterStringDato(periode.innhold.tilDato) : ''}
               </div>
+
+              {isYtelseInnhold && isSaksbehandlerPeriode && (
+                <div>
+                  <Button
+                    variant={'danger'}
+                    size={'small'}
+                    disabled={sletter}
+                    onClick={() => slettPeriodeTrykket(innholdYtelse.id)}
+                  >
+                    <Delete />
+                  </Button>
+                </div>
+              )}
             </>
           )}
-
-          <div>
-            <BoldTekst>Periode: </BoldTekst>
-            <span> {formaterStringDato(periode.innhold.fraDato)} - </span>
-            {periode.innhold.tilDato ? formaterStringDato(periode.innhold.tilDato) : ''}
-          </div>
         </Popover.Content>
       </Popover>
     </Rad>

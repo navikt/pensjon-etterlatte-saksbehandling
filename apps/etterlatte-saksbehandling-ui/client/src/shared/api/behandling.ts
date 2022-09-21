@@ -142,3 +142,9 @@ export const lagrePeriodeForAvdoedesMedlemskap = async (
   periode: IPeriodeInput
 ): Promise<ApiResponse<GrunnlagResponse>> =>
   apiClient.post<GrunnlagResponse>(`/grunnlag/saksbehandler/periode/${behandlingsId}`, { periode: periode })
+
+export const slettPeriodeForAvdoedesMedlemskap = async (
+  behandlingsId: string,
+  saksbehandlerPeriodeId: string
+): Promise<ApiResponse<GrunnlagResponse>> =>
+  apiClient.delete<GrunnlagResponse>(`/grunnlag/saksbehandler/periode/${behandlingsId}/${saksbehandlerPeriodeId}`)

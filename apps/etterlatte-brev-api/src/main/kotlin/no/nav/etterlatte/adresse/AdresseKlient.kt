@@ -31,6 +31,7 @@ class AdresseKlient(
 
     override suspend fun hentMottakerAdresse(id: String): Mottaker = try {
         logger.info("Henter mottakere fra regoppslag")
+        logger.info("Bearer token: ${stsClient.getToken()}")
         client.post("$url/rest/postadresse") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)

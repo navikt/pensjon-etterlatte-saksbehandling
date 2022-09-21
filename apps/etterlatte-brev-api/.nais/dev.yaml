@@ -54,6 +54,8 @@ spec:
       value: "api://dev-fss.teamdokumenthandtering.regoppslag/.default"
     - name: REGOPPSLAG_URL
       value: "https://regoppslag.dev.intern.nav.no"
+    - name: STS_URL
+      value: http://security-token-service.default.svc.nais.local/rest/v1/sts/token
   accessPolicy:
     outbound:
       rules:

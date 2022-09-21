@@ -16,18 +16,26 @@ import kotlinx.coroutines.sync.withLock
 import no.nav.etterlatte.libs.common.objectMapper
 import java.time.Instant
 
-data class StsTokenConfig(
-    val name: String,
-    val password: String,
-    val url: String
-)
+data class Sts(
+    val url: String,
+    val serviceuser: ServiceUser,
+) {
+    data class ServiceUser(
+        val name: String,
+        val password: String,
+    ) {
+        override fun toString(): String {
+            return "name=$name, password=<REDACTED>"
+        }
+    }
+}
 
-class StsClient(private val config: StsTokenConfig) {
+class StsClient(private val config: Sts) {
     private val httpClient = HttpClient(OkHttp) {
         install(Auth) {
             basic {
                 credentials {
-                    BasicAuthCredentials(config.name, config.password)
+                    BasicAuthCredentials(config.serviceuser.name, config.serviceuser.password)
                 }
 
                 sendWithoutRequest { true }

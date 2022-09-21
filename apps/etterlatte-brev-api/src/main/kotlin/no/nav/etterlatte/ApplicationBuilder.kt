@@ -40,6 +40,14 @@ class ApplicationBuilder {
     private val datasourceBuilder = DataSourceBuilder(env)
     private val db = BrevRepository.using(datasourceBuilder.dataSource)
     private val mottakerService = MottakerService(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
+    val stsConfig = Sts(
+        url = config.getString("sts"),
+        serviceuser = Sts.ServiceUser(
+            name = config.getString("serviceuser.name"),
+            password = config.getString("serviceuser.password")
+        )
+    )
+    val stsClient = StsClient(stsConfig)
 
     private val logger = LoggerFactory.getLogger(ApplicationBuilder::class.java)
 
@@ -48,7 +56,7 @@ class ApplicationBuilder {
         AdresseServiceMock()
     } else {
         logger.info("------------- Oppslagsurl: ${env["REGOPPSLAG_URL"]} ---------------")
-        AdresseKlient(httpClient(), env["REGOPPSLAG_URL"]!!)
+        AdresseKlient(httpClient(), env["REGOPPSLAG_URL"]!!, stsClient)
     }
 
     private val brevService = BrevService(

@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
+import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
@@ -104,5 +105,13 @@ class BehandlingService(
     suspend fun avbrytBehanding(behandlingId: String, accessToken: String): Boolean {
         logger.error("Avbryter behandling med behandingsId $behandlingId")
         return behandlingKlient.avbrytBehandling(behandlingId, accessToken)
+    }
+
+    suspend fun opprettManueltOpphoer(
+        manueltOpphoerRequest: ManueltOpphoerRequest,
+        accessToken: String
+    ): Boolean {
+        logger.info("Oppretter manuelt opphoer for sak ${manueltOpphoerRequest.sak}")
+        return behandlingKlient.opprettManueltOpphoer(manueltOpphoerRequest, accessToken)
     }
 }

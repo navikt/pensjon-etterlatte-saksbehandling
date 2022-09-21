@@ -14,6 +14,8 @@ import no.nav.etterlatte.behandling.Vedtak
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.BehandlingSammendrag
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
+import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
@@ -34,6 +36,7 @@ import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -81,7 +84,7 @@ internal class BehandlingServiceTest {
 
     @Test
     fun hentSaker() {
-        val saker = Saker(listOf(no.nav.etterlatte.typer.Sak(fnr, SoeknadType.BARNEPENSJON.name, 43)))
+        val saker = Saker(listOf(Sak(fnr, SoeknadType.BARNEPENSJON.name, 43)))
         coEvery { behandlingKlient.hentSaker(accessToken) } returns saker
 
         val respons = runBlocking { service.hentSaker(accessToken) }
@@ -205,6 +208,24 @@ internal class BehandlingServiceTest {
         assertEquals("TestOla", respons.familieforhold?.avdoede?.opplysning?.avdoedesBarn?.get(1)!!.fornavn)
         assertEquals(1, respons.familieforhold?.gjenlevende?.opplysning?.avdoedesBarn?.size)
         assertEquals("TestKari", respons.familieforhold?.gjenlevende?.opplysning?.avdoedesBarn?.get(0)!!.fornavn)
+    }
+
+    @Test
+    fun opprettManueltOpphoer() {
+        coEvery {
+            behandlingKlient.opprettManueltOpphoer(any(), any())
+        } returns true
+        val respons = runBlocking {
+            service.opprettManueltOpphoer(
+                manueltOpphoerRequest = ManueltOpphoerRequest(
+                    sak = 0,
+                    opphoerAarsaker = listOf(ManueltOpphoerAarsak.UTFLYTTING_FRA_NORGE),
+                    fritekstAarsak = "annen aarsak"
+                ),
+                accessToken = accessToken
+            )
+        }
+        assertTrue(respons)
     }
 
     private fun mockPerson(

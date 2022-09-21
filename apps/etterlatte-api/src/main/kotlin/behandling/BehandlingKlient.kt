@@ -5,6 +5,7 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
@@ -24,6 +25,7 @@ interface EtterlatteBehandling {
     suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean
     suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretHendelser
     suspend fun slettRevurderinger(sakId: Int, accessToken: String): Boolean
+    suspend fun opprettManueltOpphoer(manueltOpphoerRequest: ManueltOpphoerRequest, accessToken: String): Boolean
 }
 
 class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehandling {
@@ -203,7 +205,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
     }
 
     override suspend fun slettRevurderinger(sakId: Int, accessToken: String): Boolean {
-        logger.info("sletter revurderinger for en sakId")
+        logger.info("sletter revurderinger for en sak")
         return try {
             val json =
                 downstreamResourceClient.delete(
@@ -224,6 +226,38 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
             json
         } catch (e: Exception) {
             logger.error("Sletting av revurderinger for sak med id $sakId feilet.", e)
+            false
+        }
+    }
+
+    override suspend fun opprettManueltOpphoer(
+        manueltOpphoerRequest: ManueltOpphoerRequest,
+        accessToken: String
+    ): Boolean {
+        logger.info("oppretter manuelt opphoer for sak")
+        return try {
+            val json =
+                downstreamResourceClient.post(
+                    Resource(
+                        clientId,
+                        "$resourceUrl/behandlinger/${manueltOpphoerRequest.sak}/manueltopphoer"
+                    ),
+                    accessToken,
+                    manueltOpphoerRequest
+                )
+                    .mapBoth(
+                        success = { true },
+                        failure = { throwableErrorMessage ->
+                            throw Error(
+                                throwableErrorMessage.message,
+                                throwableErrorMessage.throwable
+                            )
+                        }
+                    )
+            logger.info("Manuelt opphoer av sak med id ${manueltOpphoerRequest.sak} vellykket")
+            json
+        } catch (e: Exception) {
+            logger.error("Manuelt opphoer av sak med id ${manueltOpphoerRequest.sak} feilet. ", e)
             false
         }
     }

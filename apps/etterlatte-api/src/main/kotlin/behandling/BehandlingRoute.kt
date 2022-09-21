@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
@@ -10,6 +11,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.logger
+import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import org.slf4j.LoggerFactory
 
@@ -65,12 +67,29 @@ fun Route.behandlingRoute(service: BehandlingService) {
                     }
                 }
             }
+
+            post("manueltopphoer") {
+                try {
+                    call.receive<ManueltOpphoerRequest>().also { req ->
+                        service.opprettManueltOpphoer(req, getAccessToken(call)).also { opprettet ->
+                            if (opprettet) {
+                                call.respond(HttpStatusCode.OK)
+                            } else {
+                                call.respond(HttpStatusCode.InternalServerError)
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    logger.error("Kunne ikke opprette manuelt opphoer", e)
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
+            }
         }
     }
 
     route("behandling/{behandlingId}") {
         get {
-            val behandlingId = call.parameters["behandlingId"]?.toString()
+            val behandlingId = call.parameters["behandlingId"]
             if (behandlingId == null) {
                 call.response.status(HttpStatusCode(400, "Bad request"))
                 call.respond("BehandlingsId mangler")

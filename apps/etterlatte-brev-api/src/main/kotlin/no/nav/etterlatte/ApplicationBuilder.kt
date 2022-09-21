@@ -59,8 +59,8 @@ class ApplicationBuilder {
         AdresseServiceMock()
     } else {
         logger.info("------------- Oppslagsurl: ${env["REGOPPSLAG_URL"]} ---------------")
-        AdresseKlient(httpClient(), env["REGOPPSLAG_URL"]!!, stsClient)
         logger.info("------- STS config ----------: ${stsConfig.toString()}")
+        AdresseKlient(httpClient(), env["REGOPPSLAG_URL"]!!, stsClient)
     }
 
     private val brevService = BrevService(

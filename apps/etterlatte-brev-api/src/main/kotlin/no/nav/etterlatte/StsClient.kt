@@ -13,7 +13,9 @@ import io.ktor.client.request.forms.submitForm
 import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import no.nav.etterlatte.adresse.AdresseException
 import no.nav.etterlatte.libs.common.objectMapper
+import org.slf4j.LoggerFactory
 import java.time.Instant
 
 data class Sts(
@@ -31,6 +33,9 @@ data class Sts(
 }
 
 class StsClient(private val config: Sts) {
+
+    private val logger = LoggerFactory.getLogger(StsClient::class.java)
+
     private val httpClient = HttpClient(OkHttp) {
         install(Auth) {
             basic {
@@ -53,13 +58,23 @@ class StsClient(private val config: Sts) {
     private var cachedTokenExpiery: Instant = Instant.MIN
     private val mutex = Mutex()
 
-    private suspend fun fetchToken(): StsToken = httpClient.submitForm(
-        formParameters = Parameters.build {
-            append("grant_type", "client_credentials")
-            append("scope", "openid")
-        },
-        url = config.url,
-    ).body()
+    private suspend fun fetchToken(): StsToken {
+
+        logger.info("---- Fetching token ----")
+
+        try {
+            return httpClient.submitForm(
+                formParameters = Parameters.build {
+                    append("grant_type", "client_credentials")
+                    append("scope", "openid")
+                },
+                url = config.url,
+            ).body()
+        } catch (error:Exception){
+            logger.error("Feil med uthenting av stsToken: $error")
+            throw AdresseException("Feil i kall mot Regoppslag", error)
+        }
+    }
 
     private suspend fun refreshIfNeeded() {
         Instant.now().also { start ->
@@ -76,6 +91,7 @@ class StsClient(private val config: Sts) {
     }
 
     suspend fun getToken(): StsToken {
+        logger.info("---- Henter StsToken ----")
         refreshIfNeeded()
         return cachedToken
     }

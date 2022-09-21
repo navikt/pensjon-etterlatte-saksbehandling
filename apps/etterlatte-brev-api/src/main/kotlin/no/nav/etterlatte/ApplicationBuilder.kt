@@ -10,7 +10,6 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import io.ktor.serialization.jackson.jackson
-import no.nav.etterlatte.adresse.AdresseService
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.MottakerService
 import no.nav.etterlatte.brev.brevRoute
@@ -26,7 +25,6 @@ import no.nav.etterlatte.pdf.PdfGeneratorKlient
 import no.nav.etterlatte.vedtak.VedtakServiceMock
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.slf4j.LoggerFactory
 
 class ApplicationBuilder {
     private val env = System.getenv().toMutableMap().apply {
@@ -48,18 +46,12 @@ class ApplicationBuilder {
             password = config.getConfig("serviceuser").getString("password")
         )
     )
-    private val logger = LoggerFactory.getLogger(ApplicationBuilder::class.java)
-
 
     val stsClient = StsClient(stsConfig)
-
-
 
     private val adresseService = if (localDevelopment) {
         AdresseServiceMock()
     } else {
-        logger.info("------------- Oppslagsurl: ${env["REGOPPSLAG_URL"]} ---------------")
-        logger.info("------- STS config ----------: ${stsConfig.toString()}")
         AdresseKlient(httpClient(), env["REGOPPSLAG_URL"]!!, stsClient)
     }
 

@@ -144,62 +144,6 @@ internal class RealFoerstegangsbehandlingServiceTest {
         assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
         assertEquals(resultat.id, hendelse.captured.first)
         assertEquals(BehandlingHendelseType.OPPRETTET, hendelse.captured.second)
-
-        @Test
-        fun `avbrutt behandling kan ikke endres`() {
-            val behandlingerMock = mockk<BehandlingDao>()
-            val hendelserMock = mockk<HendelseDao>()
-            val behandlingOpprettes = slot<Foerstegangsbehandling>()
-            val behandlingHentes = slot<UUID>()
-            val behandlingAvbrytes = slot<Foerstegangsbehandling>()
-
-            val persongalleri = Persongalleri(
-                "Soeker",
-                "Innsender",
-                emptyList(),
-                listOf("Avdoed"),
-                listOf("Gjenlevende")
-            )
-
-            val opprettetBehandling = Foerstegangsbehandling(
-                id = UUID.randomUUID(),
-                sak = 1,
-                behandlingOpprettet = LocalDateTime.now(),
-                sistEndret = LocalDateTime.now(),
-                status = BehandlingStatus.OPPRETTET,
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                soeknadMottattDato = LocalDateTime.now(),
-                persongalleri = persongalleri,
-                gyldighetsproeving = null,
-                oppgaveStatus = OppgaveStatus.NY
-            )
-
-            val sut = RealFoerstegangsbehandlingService(
-                behandlingerMock,
-                FoerstegangsbehandlingFactory(behandlingerMock, hendelserMock),
-                mockChannel()
-            )
-
-            every { behandlingerMock.opprettFoerstegangsbehandling(capture(behandlingOpprettes)) } returns Unit
-            every {
-                behandlingerMock.hentBehandling(
-                    capture(behandlingHentes),
-                    BehandlingType.FØRSTEGANGSBEHANDLING
-                )
-            } returns opprettetBehandling
-            every { behandlingerMock.lagreGyldighetsproving(any()) } returns Unit
-
-            val resultat = sut.startFoerstegangsbehandling(1, persongalleri, LocalDateTime.now().toString())
-
-            // behandlingen avbrytes
-            assertEquals(false, resultat.status === BehandlingStatus.AVBRUTT)
-
-            // val behandlingEtterAvbrutt = sut.avbrytBehandling(resultat.id)
-            //     Assertions.assertEquals(BehandlingStatus.AVBRUTT, behandlingEtterAvbrutt)
-
-            // val behandlingEtterVilkårsvurdering = slot<UUID>()
-            // every { behandlingerMock.hentBehandling(capture(behandlingEtterVilkårsvurdering)) } returns behandlingEtterAvbrutt
-        }
     }
 
     fun mockChannel() =

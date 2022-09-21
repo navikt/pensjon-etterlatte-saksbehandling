@@ -55,7 +55,7 @@ spec:
     - name: REGOPPSLAG_URL
       value: "https://regoppslag.dev.intern.nav.no"
     - name: STS_URL
-      value: https://security-token-service.nais.preprod.local/rest/v1/sts/token
+      value: http://security-token-service.default.svc.nais.local/rest/v1/sts/token
   accessPolicy:
     outbound:
       rules:

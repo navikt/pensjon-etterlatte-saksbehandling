@@ -1,0 +1,22 @@
+name: Deploy alerts to NAIS
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'alerts.yaml'
+      - '.github/workflows/alerts.yaml'
+jobs:
+  apply-alerts:
+    name: Apply alerts to cluster
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: deploy to dev
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: alerts.yaml
+          VAR: SLACK_ALERTS_CHANNEL=#team-etterlatte-alerts-dev,LOGS_URL=https://logs.adeo.no/goto/8582a140-39e8-11ed-b3e8-d969437dd878

@@ -1,0 +1,22 @@
+apiVersion: nais.io/v1
+kind: Alert
+metadata:
+  name: etterlatte-saksbehandling-alerts
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  receivers:
+    slack:
+      channel: '{{SLACK_ALERTS_CHANNEL}}'
+      icon_emoji: ':scream_cat:'
+      icon_url: http://lorempixel.com/48/48
+  alerts:
+    - alert: etterlatte-saksbehandling-error-logg
+      expr: 'sum by (log_app) (max_over_time(logd_messages_total{log_app=~"etterlatte-.*",log_level="Error"}[15m])
+              or vector(0)) -
+             sum by (log_app) (max_over_time(logd_messages_total{log_app=~"etterlatte-.*",log_level="Error"}[15m]
+             offset 15m) or vector(0)) > 0'
+      for: 1s
+      description: "etterlatte-saksbehandling har logget en eller flere feilmeldinger siste 15 min ({{ $labels.log_app }})"
+      action: "Sjekk logger her: `{{LOGS_URL}}`"

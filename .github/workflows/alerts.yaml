@@ -19,4 +19,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: alerts.yaml
-          VAR: SLACK_ALERTS_CHANNEL=#team-etterlatte-alerts-dev,LOGS_URL=https://logs.adeo.no/goto/8582a140-39e8-11ed-b3e8-d969437dd878
+          VAR: SLACK_ALERTS_CHANNEL=#team-etterlatte-alerts-dev,LOGS_URL=https://logs.adeo.no/goto/e3cd5dc0-39ee-11ed-b3e8-d969437dd878

@@ -43,8 +43,8 @@ class ApplicationBuilder {
     val stsConfig = Sts(
         url = config.getString("sts"),
         serviceuser = Sts.ServiceUser(
-            name = config.getString("serviceuser.name"),
-            password = config.getString("serviceuser.password")
+            name = config.getConfig("serviceuser").getString("name"),
+            password = config.getConfig("serviceuser").getString("password")
         )
     )
     val stsClient = StsClient(stsConfig)

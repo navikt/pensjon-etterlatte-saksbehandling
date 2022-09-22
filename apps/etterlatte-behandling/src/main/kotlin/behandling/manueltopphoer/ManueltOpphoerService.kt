@@ -89,12 +89,13 @@ class RealManueltOpphoerService(
             }?.let {
                 behandlinger.opprettManueltOpphoer(it).also { lagretManueltOpphoer ->
                     hendelser.behandlingOpprettet(lagretManueltOpphoer)
-                    runBlocking {
-                        behandlingHendelser.send(lagretManueltOpphoer.id to BehandlingHendelseType.OPPRETTET)
-                    }
-                    logger.info("Manuelt opphoer er opprettet.")
                 }
             }
+        }?.also { lagretManueltOpphoer ->
+            runBlocking {
+                behandlingHendelser.send(lagretManueltOpphoer.id to BehandlingHendelseType.OPPRETTET)
+            }
+            logger.info("Manuelt opphoer er opprettet.")
         }
     }
 

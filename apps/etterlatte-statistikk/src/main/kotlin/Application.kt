@@ -9,8 +9,10 @@ import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 
 fun main() {
     System.getenv()
-        .apply {
-            put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
+        .let { env ->
+            env.toMutableMap().also {
+                it["KAFKA_CONSUMER_GROUP_ID"] = it["NAIS_APP_NAME"]!!.replace("-", "")
+            }
         }
         .also { env ->
             DataSourceBuilder(env).apply {

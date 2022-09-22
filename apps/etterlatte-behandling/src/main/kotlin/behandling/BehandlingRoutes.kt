@@ -94,7 +94,7 @@ fun Route.behandlingRoutes(
                             }
                         }
                         BehandlingType.MANUELT_OPPHOER -> {
-                            with(manueltOpphoerService.hentManueltOpphoer(behandlingsId)!!) {
+                            with(manueltOpphoerService.hentManueltOpphoerInTransaction(behandlingsId)!!) {
                                 DetaljertBehandling(
                                     id = id,
                                     sak = sak,

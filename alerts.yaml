@@ -20,3 +20,8 @@ spec:
       for: 1s
       description: "*\{{ $labels.log_app }}* har logget en eller flere feilmeldinger siste 15 min"
       action: "Sjekk logger her: `{{LOGS_URL}}`"
+    - alert: etterlatte-saksbehandling-applikasjon-nede
+      expr: sum by(deployment) (kube_deployment_status_replicas_available{deployment=~"etterlatte-.*"} == 0)
+      for: 2m
+      description: "App *\{{ $labels.deployment }}* er nede i namespace *\{{ $labels.kubernetes_namespace }}*"
+      action: "`kubectl describe pod -l app=\{{ $labels.deployment }} -n \{{ $labels.namespace }}` for events, og `kubectl logs -l app=\{{ $labels.deployment }} -n \{{ $labels.namespace }}` for logger"

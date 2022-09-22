@@ -1,21 +1,33 @@
 # Etterlatte-saksbehandling-ui
 
 
-Appen består av en statisk frontend og en backend-for-frontends i NodeJS.
+Appen består av en React frontend skrevet i Typescript og en backend-for-frontend med Express.
 
+Når appen kjøres opp lokalt settes det også opp en mock-router som server statiske JSON for forskjellige behandlinger 
+for testing.
 
 ## Kjøring lokalt
+
+### Installering av avhengigheter
+Kjør `yarn` i denne mappen.
+
 ### Client
+Kjøres fra mappen `client`. Frontendend startes med kommandoen
 
 **`yarn start`**
 
-Starter frontend-appen på localhost:3000
+Frontend-appen kjører på `localhost:3000`
 
 ### Server
+Kjøres fra mappen `server` med kommandoen
+
 **`yarn dev`**
 
-Kjører opp app serveren på port 8080 eller den porten som er angitt via `process.env.PORT`
+Serveren på port `8080` eller den porten som er angitt via `process.env.PORT`
 
+
+## Miljøvariabler for lokal kjøring
+`BREV_DEV` kan settes til `true` hvis man vil gå mot en lokal instans av `etterlatte-brev-api`.
 
 
 ## Bygg og deploy

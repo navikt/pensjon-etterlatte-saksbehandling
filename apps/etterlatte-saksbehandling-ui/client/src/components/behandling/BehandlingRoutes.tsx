@@ -44,7 +44,8 @@ export const useBehandlingRoutes = () => {
   const soekerHarSoesken = (state.behandlingReducer?.familieforhold?.avdoede?.opplysning.avdoedesBarn?.length ?? 0) > 1
 
   const aktuelleRoutes =
-    state.behandlingReducer?.behandlingType === IBehandlingsType.REVURDERING
+    state.behandlingReducer?.behandlingType === IBehandlingsType.REVURDERING ||
+    state.behandlingReducer?.behandlingType === IBehandlingsType.MANUELT_OPPHOER
       ? revurderingBehandlingRoutes()
       : foerstegangBehandlingRoutes(soekerHarSoesken)
 

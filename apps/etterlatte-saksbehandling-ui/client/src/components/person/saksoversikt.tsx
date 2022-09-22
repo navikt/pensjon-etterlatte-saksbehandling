@@ -4,10 +4,12 @@ import { IBehandlingsammendrag } from './typer'
 import { useNavigate } from 'react-router-dom'
 import { INasjonalitetsType, NasjonalitetsType } from '../behandling/fargetags/nasjonalitetsType'
 import { Heading } from '@navikt/ds-react'
+import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 
 export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandlingsammendrag[] | undefined }) => {
   const navigate = useNavigate()
   const behandlinger = behandlingliste ? behandlingliste : []
+  const sakId = behandlinger[0]?.sak
 
   const sortertListe = behandlinger.sort((a, b) =>
     new Date(b.behandlingOpprettet!) > new Date(a.behandlingOpprettet!) ? 1 : -1
@@ -28,6 +30,8 @@ export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandling
             <NasjonalitetsType type={INasjonalitetsType.NASJONAL} />
           </div>
         </HeadingWrapper>
+
+        <ManueltOpphoerModal sakId={sakId} />
         <div className="behandlinger">
           <h2>Behandlinger</h2>
           <Saksliste behandlinger={sortertListe} goToBehandling={goToBehandling} />

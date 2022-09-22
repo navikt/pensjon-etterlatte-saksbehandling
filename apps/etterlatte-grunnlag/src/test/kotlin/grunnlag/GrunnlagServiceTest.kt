@@ -8,27 +8,30 @@ import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDELAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSDATO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.NAVN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.PERSONROLLE
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.*
 
 internal class GrunnlagServiceTest {
     private val opplysningerMock = mockk<OpplysningDao>()
     private val grunnlagService = RealGrunnlagService(opplysningerMock)
 
+    private val testData = GrunnlagTestData()
+
     @Nested
-    inner class MapperTilRiktigKategori {
+    inner class MapperTilRiktigKategoriTest {
         private val nyttNavn = Navn("Mohammed", "Ali")
         private val nyFødselsdag = LocalDate.of(2013, 12, 24)
-
-        private val testData = GrunnlagTestData()
 
         private fun lagGrunnlagForPerson(fnr: Foedselsnummer, personRolle: PersonRolle) = listOf(
             lagGrunnlagHendelse(
@@ -122,6 +125,55 @@ internal class GrunnlagServiceTest {
 
             Assertions.assertEquals(expected[NAVN], actual.familie.single()[NAVN])
             Assertions.assertEquals(expected[FOEDSELSDATO], actual.familie.single()[FOEDSELSDATO])
+        }
+    }
+
+    @Nested
+    inner class DuplikaterTest {
+        private val grunnlagshendelser = listOf(
+            lagGrunnlagHendelse(
+                sakId = 1,
+                hendelseNummer = 1,
+                opplysningType = FOEDELAND,
+                id = UUID.randomUUID(),
+                fnr = testData.søker.foedselsnummer,
+                verdi = "Norge".toJsonNode(),
+                kilde = kilde
+            ),
+            lagGrunnlagHendelse(
+                sakId = 1,
+                hendelseNummer = 2,
+                opplysningType = FOEDELAND,
+                id = UUID.randomUUID(),
+                fnr = testData.søker.foedselsnummer,
+                verdi = "Sverige".toJsonNode(),
+                kilde = kilde
+            )
+        )
+
+        @Test
+        fun `fjerner duplikater av samme opplysning`() {
+            every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+
+            Assertions.assertEquals(
+                1,
+                grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri()).søker.values.size
+            )
+        }
+
+        @Test
+        fun `tar alltid seneste versjon av samme opplysning`() {
+            every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri())
+
+            Assertions.assertEquals(
+                2,
+                opplysningsgrunnlag.hentVersjon()
+            )
+            Assertions.assertEquals(
+                grunnlagshendelser[1].opplysning.toOpplysning().toJson(),
+                opplysningsgrunnlag.søker[FOEDELAND]!!.toJson()
+            )
         }
     }
 }

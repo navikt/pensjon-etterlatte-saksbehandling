@@ -18,5 +18,5 @@ spec:
              sum by (log_app) (max_over_time(logd_messages_total{log_app=~"etterlatte-.*",log_level="Error"}[15m]
              offset 15m) or vector(0)) > 0'
       for: 1s
-      description: "\{{ $labels.log_app }} har logget en eller flere feilmeldinger siste 15 min"
+      description: "*\{{ $labels.log_app }}* har logget en eller flere feilmeldinger siste 15 min"
       action: "Sjekk logger her: `{{LOGS_URL}}`"

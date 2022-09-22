@@ -152,7 +152,7 @@ internal class PersonServiceTest {
         coEvery { pdlKlient.hentPerson(any(), any()) } returns mockResponse("/pdl/person_ikke_funnet.json")
 
         runBlocking {
-            assertThrows<PdlForesporselFeilet> {
+            assertThrows<PdlFantIkkePerson> {
                 personService.hentPerson(HentPersonRequest(STOR_SNERK, rolle = PersonRolle.BARN))
             }
         }
@@ -170,7 +170,7 @@ internal class PersonServiceTest {
     fun `finner ikke folkeregisterident`() {
         coEvery { pdlKlient.hentFolkeregisterIdent(any()) } returns mockResponse("/pdl/ident_ikke_funnet.json")
         runBlocking {
-            assertThrows<PdlForesporselFeilet> {
+            assertThrows<PdlFantIkkePerson> {
                 personService.hentFolkeregisterIdent(HentFolkeregisterIdentRequest("1234"))
             }
         }

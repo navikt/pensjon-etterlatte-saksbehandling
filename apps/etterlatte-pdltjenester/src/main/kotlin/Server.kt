@@ -25,6 +25,7 @@ import no.nav.etterlatte.ktortokenexchange.secureRoutUsing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.person.PdlFantIkkePerson
 import no.nav.etterlatte.person.PersonService
 import no.nav.etterlatte.person.personApi
 import org.slf4j.event.Level
@@ -69,6 +70,16 @@ fun io.ktor.server.application.Application.module(
                     "En feil oppstod: ${cause.message}",
                     ContentType.Text.Plain,
                     HttpStatusCode.InternalServerError
+                )
+            )
+        }
+        exception<PdlFantIkkePerson> { call, cause ->
+            call.application.log.info("Fant ikke person: ${cause.message}")
+            call.respond(
+                TextContent(
+                    "Fant ikke person",
+                    ContentType.Text.Plain,
+                    HttpStatusCode.NotFound
                 )
             )
         }

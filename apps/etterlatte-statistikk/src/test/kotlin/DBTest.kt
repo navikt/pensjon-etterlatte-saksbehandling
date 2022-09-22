@@ -69,7 +69,6 @@ internal class DBTest {
         repo.datapakke().also {
             Assertions.assertEquals(1, it.size)
             val stoenadRad = it.first()
-            Assertions.assertEquals(stoenadRad, rad)
             Assertions.assertEquals(5, stoenadRad.sakId)
             Assertions.assertEquals(
                 stoenadRad.fnrForeldre,

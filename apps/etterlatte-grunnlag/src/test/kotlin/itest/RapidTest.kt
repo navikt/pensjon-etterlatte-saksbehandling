@@ -1,16 +1,26 @@
 package itest
 
+import com.fasterxml.jackson.databind.JsonNode
+import lagGrunnlagsopplysning
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.grunnlag.BehandlingEndretHendlese
 import no.nav.etterlatte.grunnlag.BehandlingHendelser
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Metadata
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
+import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterAll
@@ -61,12 +71,13 @@ internal class RapidTest {
     private val opplysningsid = UUID.randomUUID()
     private val fnr = Foedselsnummer.of("18057404783")
     private val tidspunkt = Instant.now()
+    private val kilde = Grunnlagsopplysning.Pdl("pdl", tidspunkt, null, null)
     private val nyOpplysning = Grunnlagsopplysning(
         id = opplysningsid,
-        kilde = Grunnlagsopplysning.Pdl("pdl", tidspunkt, null, null),
+        kilde = kilde,
         opplysningType = Opplysningstyper.NAVN,
         meta = objectMapper.createObjectNode(),
-        opplysning = """ "Ola" """,
+        opplysning = "Ola".toJsonNode(),
         attestering = null,
         fnr = fnr
     )
@@ -117,7 +128,86 @@ internal class RapidTest {
         }
     }
 
-    private fun assertOpplysningBlirLagret(melding: String, expectedOpplysning: Grunnlagsopplysning<String>) {
+    @Test
+    fun `lagrer og sender ut nytt grunnlag`() {
+        val personRolleOpplysning = lagGrunnlagsopplysning(
+            opplysningstyper = Opplysningstyper.PERSONROLLE,
+            kilde = kilde,
+            uuid = UUID.randomUUID(),
+            verdi = PersonRolle.BARN.toJsonNode(),
+            fnr = fnr
+        )
+        val nyOpplysningMelding = JsonMessage.newMessage(
+            mapOf(
+                "@event_name" to "OPPLYSNING:NY",
+                "opplysning" to listOf(
+                    nyOpplysning,
+                    personRolleOpplysning
+                ),
+                "fnr" to fnr,
+                "sakId" to 1
+            )
+        ).toJson()
+        val behandlingEndretMelding = JsonMessage.newMessage(
+            mapOf(
+                "@event_name" to "BEHANDLING:GRUNNLAGENDRET",
+                "opplysning" to listOf(
+                    nyOpplysningMelding,
+                    lagGrunnlagsopplysning(
+                        opplysningstyper = Opplysningstyper.PERSONROLLE,
+                        kilde = kilde,
+                        uuid = UUID.randomUUID(),
+                        verdi = PersonRolle.BARN.toJsonNode(),
+                        fnr = fnr
+                    )
+                ),
+                "persongalleri" to Persongalleri(
+                    soeker = fnr.value,
+                    innsender = null,
+                    soesken = listOf(),
+                    avdoed = listOf(),
+                    gjenlevende = listOf()
+                ).toJsonNode(),
+                "fnr" to fnr,
+                "sakId" to 1
+            )
+        ).toJson()
+
+        inspector.sendTestMessage(nyOpplysningMelding)
+        inspector.sendTestMessage(behandlingEndretMelding)
+
+        val packet = inspector.inspektør.message(1)
+
+        Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET".toJson(), packet[eventNameKey].toJson())
+        Assertions.assertEquals(
+            Grunnlag(
+                saksId = 1,
+                grunnlag = listOf(nyOpplysning, personRolleOpplysning),
+                versjon = 2
+            ).toJson(),
+            packet["grunnlag"].toJson()
+        )
+        Assertions.assertEquals(
+            Opplysningsgrunnlag(
+                søker = mapOf(
+                    Opplysningstyper.NAVN to Opplysning.Konstant(nyOpplysning.kilde, nyOpplysning.opplysning),
+                    Opplysningstyper.PERSONROLLE to Opplysning.Konstant(
+                        personRolleOpplysning.kilde,
+                        personRolleOpplysning.opplysning
+                    )
+                ),
+                familie = listOf(),
+                sak = mapOf(),
+                metadata = Metadata(
+                    sakId = 1,
+                    versjon = 2
+                )
+            ).toJson(),
+            packet["grunnlagV2"].toJson()
+        )
+    }
+
+    private fun assertOpplysningBlirLagret(melding: String, expectedOpplysning: Grunnlagsopplysning<JsonNode>) {
         inspector.sendTestMessage(melding)
         val grunnlagshendelse = opplysningRepo.finnHendelserIGrunnlag(1).first()
 
@@ -132,7 +222,7 @@ internal class RapidTest {
             Assertions.assertEquals(this.kilde, expectedOpplysning.kilde)
             Assertions.assertEquals(this.attestering, expectedOpplysning.attestering)
             Assertions.assertEquals(this.fnr!!.value, expectedOpplysning.fnr!!.value)
-            Assertions.assertEquals(this.opplysning.textValue(), expectedOpplysning.opplysning)
+            Assertions.assertEquals(this.opplysning, expectedOpplysning.opplysning)
         }
     }
 }

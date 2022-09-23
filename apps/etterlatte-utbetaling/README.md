@@ -41,8 +41,4 @@ Testene fungerer med Colima som alternativ til docker desktop på mac, men vi ha
 "borte" (typisk sier testen av det ikke finnes det docker-miljø, mens docker-kommandoer på cli går bra). Følgende 
 kommando oppretter ny symlink til colima sin docker.sock.
 
-    sudo ln -s /Users/$(whoami)/.colima/docker.sock /var/run/docker.sock 
-
-
-## Varsling
-Det legges ut varsler på Slack i kanalen `#team-etterlatte-utbetaling-alerts`
+    sudo ln -s /Users/$(whoami)/.colima/docker.sock /var/run/docker.sock

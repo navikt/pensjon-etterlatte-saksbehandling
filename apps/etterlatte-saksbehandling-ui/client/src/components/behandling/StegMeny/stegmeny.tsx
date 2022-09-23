@@ -3,46 +3,49 @@ import { NavLink } from 'react-router-dom'
 import { useContext } from 'react'
 import { AppContext } from '../../../store/AppContext'
 import { IBehandlingsType, VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
+import classNames from 'classnames'
 
 export const StegMeny = () => {
   const ctx = useContext(AppContext)
+  const {
+    state: { behandlingReducer },
+  } = ctx
+
   const gyldighet =
-    ctx.state.behandlingReducer.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING ||
-    ctx.state.behandlingReducer.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
+    behandlingReducer.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING ||
+    behandlingReducer.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
   const vilkaar =
-    ctx.state.behandlingReducer.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING ||
-    ctx.state.behandlingReducer.vilkårsprøving?.resultat === VurderingsResultat.OPPFYLT
+    behandlingReducer.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING ||
+    behandlingReducer.vilkårsprøving?.resultat === VurderingsResultat.OPPFYLT
+
+  const avdoedesBarn = behandlingReducer.familieforhold?.avdoede.opplysning.avdoedesBarn
+  const soekerHarSoesken = avdoedesBarn ? avdoedesBarn.length > 1 : false
 
   return (
     <StegMenyWrapper>
-      {ctx.state.behandlingReducer.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING ? (
+      {behandlingReducer.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING ? (
         <li>
           <NavLink to="soeknadsoversikt">Søknadsoversikt</NavLink>
         </li>
       ) : null}
-      <li className={!gyldighet ? 'disabled' : ''}>
+      <li className={classNames({ disabled: !gyldighet })}>
         <NavLink to="inngangsvilkaar">Vilkårsvurdering</NavLink>
       </li>
-      {ctx.state.behandlingReducer.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING ? (
-        <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
+      {behandlingReducer.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && soekerHarSoesken ? (
+        <li className={classNames({ disabled: !gyldighet || !vilkaar })}>
           <NavLink to="beregningsgrunnlag">Beregningsgrunnlag</NavLink>
         </li>
       ) : null}
-      <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
+      <li className={classNames({ disabled: !gyldighet || !vilkaar })}>
         <NavLink to="beregne">Beregning</NavLink>
       </li>
       <li>
         <NavLink to="brev">Brev</NavLink>
       </li>
-      {/*
-      <li className={!gyldighet || !vilkaar ? 'disabled' : ''}>
-        <NavLink to="utbetalingsoversikt">Simulering til oppdrag</NavLink>
-      </li>
-
-      */}
     </StegMenyWrapper>
   )
 }
+
 const StegMenyWrapper = styled.ul`
   height: 100px;
   list-style: none;

@@ -7,21 +7,18 @@ import { Brev } from './brev'
 import Beregningsgrunnlag from './beregningsgrunnlag'
 import { IBehandlingsType } from '../../store/reducers/BehandlingReducer'
 import { AppContext } from '../../store/AppContext'
-// import { Utbetalingsoversikt } from './utbetalingsoversikt'
-// import { Vedtak } from './vedtak'
 
 const behandlingRoutes = [
   { path: 'soeknadsoversikt', element: <Soeknadsoversikt />, erRevurderingRoute: false },
   { path: 'inngangsvilkaar', element: <Inngangsvilkaar />, erRevurderingRoute: true },
   { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag />, erRevurderingRoute: false },
   { path: 'beregne', element: <Beregne />, erRevurderingRoute: true },
-  // { path: 'vedtak', element: <Vedtak /> },
-  // { path: 'utbetalingsoversikt', element: <Utbetalingsoversikt /> },
   { path: 'brev', element: <Brev />, erRevurderingRoute: true },
 ] as const
 
-const revurderingBehandlingRoutes = behandlingRoutes.filter((route) => route.erRevurderingRoute)
-const foerstegangBehandlingRoutes = behandlingRoutes
+const revurderingBehandlingRoutes = () => behandlingRoutes.filter((route) => route.erRevurderingRoute)
+const foerstegangBehandlingRoutes = (soekerHarSoesken: boolean) =>
+  soekerHarSoesken ? behandlingRoutes : behandlingRoutes.filter((route) => route.path !== 'beregningsgrunnlag')
 
 function useRouteNavigation() {
   const [currentRoute, setCurrentRoute] = useState<string | undefined>()
@@ -44,10 +41,12 @@ function useRouteNavigation() {
 export const useBehandlingRoutes = () => {
   const { currentRoute, goto } = useRouteNavigation()
   const { state } = useContext(AppContext)
+  const soekerHarSoesken = (state.behandlingReducer?.familieforhold?.avdoede?.opplysning.avdoedesBarn?.length ?? 0) > 1
+
   const aktuelleRoutes =
     state.behandlingReducer?.behandlingType === IBehandlingsType.REVURDERING
-      ? revurderingBehandlingRoutes
-      : foerstegangBehandlingRoutes
+      ? revurderingBehandlingRoutes()
+      : foerstegangBehandlingRoutes(soekerHarSoesken)
 
   const firstPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === 0
   const lastPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === aktuelleRoutes.length - 1

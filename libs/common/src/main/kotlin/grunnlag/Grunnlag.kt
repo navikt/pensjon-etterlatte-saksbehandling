@@ -16,7 +16,7 @@ class Opplysningsgrunnlag(
     val søker: Grunnlagsdata<JsonNode>,
     val familie: List<Grunnlagsdata<JsonNode>>,
     val sak: Grunnlagsdata<JsonNode>,
-    private val metadata: Metadata
+    val metadata: Metadata
 ) {
     companion object {
         fun empty() = Opplysningsgrunnlag(

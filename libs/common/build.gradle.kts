@@ -24,6 +24,7 @@ dependencies {
     testImplementation(Jupiter.Params)
     testRuntimeOnly(Jupiter.Engine)
     testImplementation(Kotest.AssertionsCore)
+    testImplementation(project(":libs:testdata"))
 }
 
 tasks {

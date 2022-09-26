@@ -1,5 +1,7 @@
 package no.nav.etterlatte.libs.common.grunnlag
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import java.time.YearMonth
@@ -43,13 +45,22 @@ data class PeriodisertOpplysning<T>(
     val tom: YearMonth?
 )
 
-sealed class Opplysning<T> {
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.EXISTING_PROPERTY,
+    property = "type"
+)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = Opplysning.Periodisert::class, name = "periodisert"),
+    JsonSubTypes.Type(value = Opplysning.Konstant::class, name = "konstant")
+)
+sealed class Opplysning<T>(val type: String) {
     data class Periodisert<T>(
         val perioder: List<PeriodisertOpplysning<T>>
-    ) : Opplysning<T>()
+    ) : Opplysning<T>("periodisert")
 
     data class Konstant<T>(
         val kilde: Grunnlagsopplysning.Kilde,
         val verdi: T
-    ) : Opplysning<T>()
+    ) : Opplysning<T>("konstant")
 }

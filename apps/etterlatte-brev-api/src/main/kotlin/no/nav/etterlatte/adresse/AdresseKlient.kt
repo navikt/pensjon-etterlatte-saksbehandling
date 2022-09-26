@@ -22,8 +22,6 @@ class AdresseKlient(
     override suspend fun hentMottakerAdresse(id: String): Mottaker = try {
         logger.info("Henter mottakere fra regoppslag")
         client.get("$url/regoppslag/$id") {
-            accept(ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
             header("x_correlation_id", getXCorrelationId())
         }.body()
 

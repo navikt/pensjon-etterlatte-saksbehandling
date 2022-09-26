@@ -11,13 +11,13 @@ on:
         description: 'Deploy til produksjon'
         required: false
         default: 'false'
-  push:
-    branches:
-      - main
-      - feature/**
-    paths:
-      - apps/etterlatte-statistikk/**
-      - libs/common/**
+#  push:
+#    branches:
+#      - main
+#      - feature/**
+#    paths:
+#      - apps/etterlatte-statistikk/**
+#      - libs/common/**
 
 jobs:
   build-and-publish:

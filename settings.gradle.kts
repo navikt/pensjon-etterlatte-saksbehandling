@@ -27,6 +27,7 @@ include(
     "apps:etterlatte-tilbakekreving",
     "apps:etterlatte-hendelser-pdl",
     "apps:etterlatte-statistikk",
+    "apps:etterlatte-vilkaarsvurdering",
     "libs:ktor2client-auth-clientcredentials",
     "libs:common",
     "libs:ktor2client-onbehalfof",

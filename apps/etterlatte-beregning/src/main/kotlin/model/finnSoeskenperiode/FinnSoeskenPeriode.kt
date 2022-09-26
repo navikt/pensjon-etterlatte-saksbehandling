@@ -72,8 +72,8 @@ data class Søsken(
 fun finnHelOgHalvsøsken(søker: Grunnlagsdata<JsonNode>, avdoedesBarn: List<Person>): Søsken {
     val søkersForeldre = søker.hentFamilierelasjon()?.verdi?.ansvarligeForeldre
         ?: return Søsken(emptyList(), emptyList())
-    val søskenPair = avdoedesBarn
+    val (helsøsken, halvsøsken) = avdoedesBarn
         .filter { it.foedselsnummer != søker.hentFoedselsnummer()?.verdi }
         .partition { it.familieRelasjon?.foreldre == søkersForeldre }
-    return Søsken(helsøsken = søskenPair.first, halvsøsken = søskenPair.second)
+    return Søsken(helsøsken = helsøsken, halvsøsken = halvsøsken)
 }

@@ -24,7 +24,7 @@ class AdresseKlient(
         logger.info("Henter mottakere fra regoppslag")
         client.get("$url/regoppslag/$id") {
             header("x_correlation_id", getXCorrelationId())
-            setBody(TextContent(AdresseRequest(id, "PEN").toJson(), ContentType.Application.Json))
+            setBody(TextContent(AdresseRequest(id).toJson(), ContentType.Application.Json))
         }.body()
 
     } catch (exception: Exception) {
@@ -38,5 +38,6 @@ open class AdresseException(msg: String, cause: Throwable) : Exception(msg, caus
 
 data class AdresseRequest(
     val ident: String,
-    val tema: String
+    val tema: String = "PEN"
 )
+

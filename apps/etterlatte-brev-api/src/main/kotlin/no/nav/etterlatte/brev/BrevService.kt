@@ -62,7 +62,7 @@ class BrevService(
 
     suspend fun opprett(mottaker: Mottaker, mal: Mal, enhet: String): BrevInnhold {
         val brevMottaker = when {
-            mottaker.foedselsnummer != null -> adresseService.hentMottakerAdresse(mottaker.foedselsnummer.toString())
+            mottaker.foedselsnummer != null -> adresseService.hentMottakerAdresse(mottaker.foedselsnummer!!)
             // todo: hent adresse fra pdl og skriv om mottaker for brev til å støtte organisasjoner.
             mottaker.orgnummer != null -> BrevMottaker("Fornavn", "Organisasjon", "Veien 22", "0000", "Oslo")
             mottaker.adresse != null -> BrevMottaker.fraAdresse(adresse = mottaker.adresse!!)

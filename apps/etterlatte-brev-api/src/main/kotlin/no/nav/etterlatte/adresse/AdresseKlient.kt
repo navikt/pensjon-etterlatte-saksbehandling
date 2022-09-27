@@ -9,6 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.content.TextContent
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
 
@@ -20,9 +21,9 @@ class AdresseKlient(
 
     // api://dev-fss.teamdokumenthandtering.regoppslag/.default
 
-    override suspend fun hentMottakerAdresse(id: String): Mottaker = try {
-        logger.info("Henter mottakere fra regoppslag")
-        client.get("$url/regoppslag/$id") {
+    override suspend fun hentMottakerAdresse(id: Foedselsnummer): Mottaker = try {
+        logger.info("Henter mottakere fra regoppslag: ${id.toString()}")
+        client.get("$url/regoppslag/${id.value}") {
             header("x_correlation_id", getXCorrelationId())
             // setBody(TextContent(AdresseRequest(id).toJson(), ContentType.Application.Json))
         }.body()

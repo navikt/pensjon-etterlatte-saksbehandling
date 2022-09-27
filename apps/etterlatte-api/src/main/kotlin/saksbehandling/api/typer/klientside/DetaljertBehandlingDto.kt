@@ -33,7 +33,8 @@ data class DetaljertBehandlingDto(
     val status: BehandlingStatus?,
     val hendelser: List<LagretHendelse>?,
     val familieforhold: Familieforhold?,
-    val behandlingType: BehandlingType?
+    val behandlingType: BehandlingType?,
+    val søker: Person?
 )
 
 data class Familieforhold(

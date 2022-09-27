@@ -165,6 +165,7 @@ internal class BehandlingServiceTest {
                 mockPerson().copy(fornavn = "TestKari")
             )
         )
+
         val avdoedOpplysning = Grunnlagsopplysning(
             UUID.randomUUID(),
             Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
@@ -178,6 +179,13 @@ internal class BehandlingServiceTest {
             Opplysningstyper.AVDOED_PDL_V1,
             objectMapper.createObjectNode(),
             gjenlevende
+        )
+        val søkerOpplysning = Grunnlagsopplysning(
+            UUID.randomUUID(),
+            Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
+            Opplysningstyper.SOEKER_PDL_V1,
+            objectMapper.createObjectNode(),
+            mockPerson()
         )
 
         coEvery { behandlingKlient.hentBehandling(behandlingid.toString(), accessToken) } returns detaljertBehandling
@@ -197,6 +205,13 @@ internal class BehandlingServiceTest {
                 accessToken
             )
         } returns gjenlevendeOpplysning
+        coEvery {
+            grunnlagKlient.finnPersonOpplysning(
+                4L,
+                Opplysningstyper.SOEKER_PDL_V1,
+                accessToken
+            )
+        } returns søkerOpplysning
 
         val respons = runBlocking { service.hentBehandling(behandlingid.toString(), accessToken) }
 

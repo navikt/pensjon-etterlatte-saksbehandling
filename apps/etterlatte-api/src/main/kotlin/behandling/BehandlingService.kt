@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.saksbehandling.api.typer.klientside.DetaljertBehandlingDto
@@ -65,6 +66,7 @@ class BehandlingService(
         val sakId = behandling.await().sak
         val avdoed = async { grunnlagKlient.finnPersonOpplysning(sakId, AVDOED_PDL_V1, accessToken) }
         val gjenlevende = async { grunnlagKlient.finnPersonOpplysning(sakId, GJENLEVENDE_FORELDER_PDL_V1, accessToken) }
+        val søker = async { grunnlagKlient.finnPersonOpplysning(sakId, SOEKER_PDL_V1, accessToken) }
 
         DetaljertBehandlingDto(
             id = behandling.await().id,
@@ -84,7 +86,8 @@ class BehandlingService(
             status = behandling.await().status,
             hendelser = hendelser.await().hendelser,
             familieforhold = Familieforhold(avdoed.await(), gjenlevende.await()),
-            behandlingType = behandling.await().behandlingType
+            behandlingType = behandling.await().behandlingType,
+            søker = søker.await()?.opplysning
         )
     }
 

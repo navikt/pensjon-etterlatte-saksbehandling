@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.EtterlatteGrunnlag
 import no.nav.etterlatte.behandling.EtterlatteVedtak
+import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.PdltjenesterKlient
 import no.nav.etterlatte.behandling.Vedtak
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
@@ -36,7 +37,6 @@ import no.nav.etterlatte.typer.Sak
 import no.nav.etterlatte.typer.Saker
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertSame
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -214,7 +214,7 @@ internal class BehandlingServiceTest {
     fun opprettManueltOpphoer() {
         coEvery {
             behandlingKlient.opprettManueltOpphoer(any(), any())
-        } returns true
+        } returns Result.success(ManueltOpphoerResponse("123"))
         val respons = runBlocking {
             service.opprettManueltOpphoer(
                 manueltOpphoerRequest = ManueltOpphoerRequest(
@@ -225,7 +225,7 @@ internal class BehandlingServiceTest {
                 accessToken = accessToken
             )
         }
-        assertTrue(respons)
+        assertEquals(respons.behandlingId, "123")
     }
 
     private fun mockPerson(

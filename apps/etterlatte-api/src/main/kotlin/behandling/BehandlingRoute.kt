@@ -72,11 +72,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
                 try {
                     call.receive<ManueltOpphoerRequest>().also { req ->
                         service.opprettManueltOpphoer(req, getAccessToken(call)).also { opprettet ->
-                            if (opprettet) {
-                                call.respond(HttpStatusCode.OK)
-                            } else {
-                                call.respond(HttpStatusCode.InternalServerError)
-                            }
+                            call.respond(opprettet)
                         }
                     }
                 } catch (e: Exception) {

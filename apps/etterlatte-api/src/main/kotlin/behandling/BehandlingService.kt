@@ -110,8 +110,9 @@ class BehandlingService(
     suspend fun opprettManueltOpphoer(
         manueltOpphoerRequest: ManueltOpphoerRequest,
         accessToken: String
-    ): Boolean {
-        logger.info("Oppretter manuelt opphoer for sak ${manueltOpphoerRequest.sak}")
+    ): ManueltOpphoerResponse {
+        logger.info("Oppretter manuelt opphør for sak ${manueltOpphoerRequest.sak}")
         return behandlingKlient.opprettManueltOpphoer(manueltOpphoerRequest, accessToken)
+            .getOrThrow()
     }
 }

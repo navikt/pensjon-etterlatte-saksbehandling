@@ -23,7 +23,7 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.CommonFactory
 import no.nav.etterlatte.behandling.BehandlingsBehov
 import no.nav.etterlatte.behandling.HendelseDao
-import no.nav.etterlatte.behandling.ManueltOpphoer
+import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.VedtakHendelse
 import no.nav.etterlatte.behandling.common.LeaderElection
 import no.nav.etterlatte.behandling.objectMapper
@@ -228,10 +228,10 @@ class ApplicationTest {
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }.let {
-                it.body<ManueltOpphoer>()
+                it.body<ManueltOpphoerResponse>()
             }
 
-            client.get("/behandlinger/manueltopphoer?behandlingsid=${manueltOpphoer.id}") {
+            client.get("/behandlinger/manueltopphoer?behandlingsid=${manueltOpphoer.behandlingId}") {
                 addAuthSaksbehandler()
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
@@ -240,7 +240,7 @@ class ApplicationTest {
                 assertEquals(BehandlingType.MANUELT_OPPHOER, result.behandlingType)
             }
 
-            client.post("/behandlinger/${manueltOpphoer.id}/hendelser/vedtak/FATTET") {
+            client.post("/behandlinger/${manueltOpphoer.behandlingId}/hendelser/vedtak/FATTET") {
                 addAuthSaksbehandler()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
@@ -257,13 +257,13 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.post("/behandlinger/${manueltOpphoer.id}/avbrytbehandling") {
+            client.post("/behandlinger/${manueltOpphoer.behandlingId}/avbrytbehandling") {
                 addAuthSaksbehandler()
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.get("/behandlinger/manueltopphoer?behandlingsid=${manueltOpphoer.id}") {
+            client.get("/behandlinger/manueltopphoer?behandlingsid=${manueltOpphoer.behandlingId}") {
                 addAuthSaksbehandler()
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)

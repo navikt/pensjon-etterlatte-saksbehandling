@@ -25,7 +25,8 @@ interface EtterlatteBehandling {
     suspend fun slettBehandlinger(sakId: Int, accessToken: String): Boolean
     suspend fun hentHendelserForBehandling(behandlingId: String, accessToken: String): LagretHendelser
     suspend fun slettRevurderinger(sakId: Int, accessToken: String): Boolean
-    suspend fun opprettManueltOpphoer(manueltOpphoerRequest: ManueltOpphoerRequest, accessToken: String): Boolean
+    suspend fun opprettManueltOpphoer(manueltOpphoerRequest: ManueltOpphoerRequest, accessToken: String):
+        Result<ManueltOpphoerResponse>
 }
 
 class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehandling {
@@ -233,7 +234,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
     override suspend fun opprettManueltOpphoer(
         manueltOpphoerRequest: ManueltOpphoerRequest,
         accessToken: String
-    ): Boolean {
+    ): Result<ManueltOpphoerResponse> {
         logger.info("oppretter manuelt opphoer for sak")
         return try {
             val json =
@@ -246,7 +247,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                     manueltOpphoerRequest
                 )
                     .mapBoth(
-                        success = { true },
+                        success = { json -> json },
                         failure = { throwableErrorMessage ->
                             throw Error(
                                 throwableErrorMessage.message,
@@ -255,10 +256,13 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                         }
                     )
             logger.info("Manuelt opphoer av sak med id ${manueltOpphoerRequest.sak} vellykket")
-            json
+            val response = objectMapper.readValue(json.toString(), ManueltOpphoerResponse::class.java)
+            Result.success(response)
         } catch (e: Exception) {
             logger.error("Manuelt opphoer av sak med id ${manueltOpphoerRequest.sak} feilet. ", e)
-            false
+            Result.failure(e)
         }
     }
 }
+
+data class ManueltOpphoerResponse(val behandlingId: String)

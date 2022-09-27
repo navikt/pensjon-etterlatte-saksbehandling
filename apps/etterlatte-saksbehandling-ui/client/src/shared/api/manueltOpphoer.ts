@@ -10,7 +10,7 @@ export async function sendInnManueltOpphoer(
   opphoerAarsaker: Opphoersgrunn[],
   fritekstAarsak: string
 ): Promise<ApiResponse<ManueltOpphoerResponse>> {
-  return await apiClient.post<ManueltOpphoerResponse>(`/api/saker/${sakId}/manueltopphoer`, {
+  return await apiClient.post<ManueltOpphoerResponse>(`/saker/${sakId}/manueltopphoer`, {
     sak: sakId,
     fritekstAarsak,
     opphoerAarsaker,

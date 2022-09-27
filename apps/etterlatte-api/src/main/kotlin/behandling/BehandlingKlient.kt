@@ -255,7 +255,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                             )
                         }
                     )
-            logger.info("Manuelt opphoer av sak med id ${manueltOpphoerRequest.sak} vellykket")
+            logger.info("Manuelt opphoer av sak med id ${manueltOpphoerRequest.sak} vellykket: $json")
             val response = objectMapper.readValue(json.toString(), ManueltOpphoerResponse::class.java)
             Result.success(response)
         } catch (e: Exception) {

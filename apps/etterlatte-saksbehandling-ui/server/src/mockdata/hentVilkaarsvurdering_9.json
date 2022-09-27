@@ -1,0 +1,24 @@
+{
+  "vilkaar": [
+    {
+      "type": "ALDER_BARN",
+      "paragraf": "§ 18-4: Alder barn",
+      "lovtekst": "Barnet er under 18 år"
+    },
+    {
+      "type": "DOEDSFALL_FORELDER",
+      "paragraf": "§ 18-4: Dødsfall forelder",
+      "lovtekst": "En eller begge foreldrene døde"
+    },
+    {
+      "type": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
+      "paragraf": "§ 18-2: Avdødes forutgående medlemskap",
+      "lovtekst": "Den avdøde var medlem av trygden eller mottok pensjon/uføretrygd de siste 5 årene før dødsfallet"
+    },
+    {
+      "type": "BARNETS_MEDLEMSKAP",
+      "paragraf": "§ 18-3: Barnets medlemskap",
+      "lovtekst": "Barnet er medlem av trygden/bosatt i Norge fra dødsfalltidspunktet til i dag"
+    }
+  ]
+}

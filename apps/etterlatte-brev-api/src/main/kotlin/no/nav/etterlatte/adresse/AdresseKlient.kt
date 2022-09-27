@@ -4,13 +4,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.content.TextContent
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
-import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory
 
 class AdresseKlient(
@@ -21,7 +17,7 @@ class AdresseKlient(
 
     // api://dev-fss.teamdokumenthandtering.regoppslag/.default
 
-    override suspend fun hentMottakerAdresse(id: Foedselsnummer): Mottaker = try {
+    override suspend fun hentMottakerAdresse(id: Foedselsnummer): RegoppslagResponseDTO = try {
         logger.info("Henter mottakere fra regoppslag: ${id.toString()}")
         client.get("$url/regoppslag/${id.value}") {
             header("x_correlation_id", getXCorrelationId())
@@ -36,9 +32,3 @@ class AdresseKlient(
 }
 
 open class AdresseException(msg: String, cause: Throwable) : Exception(msg, cause)
-
-data class AdresseRequest(
-    val ident: String,
-    val tema: String = "PEN"
-)
-

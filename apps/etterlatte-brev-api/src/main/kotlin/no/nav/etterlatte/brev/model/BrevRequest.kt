@@ -30,6 +30,15 @@ data class Mottaker(
             poststed = adresse.poststed,
             land = adresse.land
         )
+
+        fun fraRegoppslag(regoppslag: RegoppslagResponseDTO) = Mottaker(
+            fornavn = regoppslag.navn,
+            etternavn = regoppslag.navn,
+            adresse = regoppslag.adresse.adresselinje1,
+            postnummer = regoppslag.adresse.postnummer,
+            poststed = regoppslag.adresse.poststed,
+            land = regoppslag.adresse.land
+        )
     }
 }
 
@@ -39,3 +48,23 @@ data class Avsender(
     val postnummer: String,
     val telefon: String
 )
+
+data class RegoppslagResponseDTO(
+    val navn: String,
+    val adresse: Adresse
+) {
+    data class Adresse(
+        val type: AdresseType,
+        val adresselinje1: String,
+        val adresselinje2: String?,
+        val adresselinje3: String?,
+        val postnummer: String?,
+        val poststed: String?,
+        val landkode: String,
+        val land: String
+    )
+
+    enum class AdresseType {
+        NORSKPOSTADRESSE, UTENLANDSKPOSTADRESSE
+    }
+}

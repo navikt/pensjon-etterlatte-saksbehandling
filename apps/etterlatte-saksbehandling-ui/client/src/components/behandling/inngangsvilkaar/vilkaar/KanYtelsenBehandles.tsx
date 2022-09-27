@@ -16,6 +16,11 @@ import { vilkaarErOppfylt } from './tekstUtils'
 import { KildeDatoVilkaar } from './KildeDatoOpplysning'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import React from 'react'
+import { Opphoersgrunn, OPPHOERSGRUNNER, OVERSETTELSER_OPPHOERSGRUNNER } from '../../../person/ManueltOpphoerModal'
+
+function erOversettelseGrunn(tekst: string): tekst is Opphoersgrunn {
+  return (OPPHOERSGRUNNER as readonly string[]).includes(tekst)
+}
 
 export const KanYtelsenBehandles = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
@@ -35,7 +40,11 @@ export const KanYtelsenBehandles = (props: VilkaarProps) => {
               <ul>
                 {vilkaar?.kriterier?.flatMap((kriterie) =>
                   kriterie.basertPaaOpplysninger.map((opplysning) => (
-                    <li key={opplysning.opplysning}>{opplysning.opplysning}</li>
+                    <li key={opplysning.opplysning}>
+                      {erOversettelseGrunn(opplysning.opplysning)
+                        ? OVERSETTELSER_OPPHOERSGRUNNER[opplysning.opplysning]
+                        : opplysning.opplysning}
+                    </li>
                   ))
                 )}
               </ul>

@@ -30,10 +30,11 @@ export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandling
             <NasjonalitetsType type={INasjonalitetsType.NASJONAL} />
           </div>
         </HeadingWrapper>
-
-        <EkstraHandlinger>
-          <ManueltOpphoerModal sakId={sakId} />
-        </EkstraHandlinger>
+        {sakId !== undefined ? (
+          <EkstraHandlinger>
+            <ManueltOpphoerModal sakId={sakId} />
+          </EkstraHandlinger>
+        ) : null}
         <div className="behandlinger">
           <h2>Behandlinger</h2>
           <Saksliste behandlinger={sortertListe} goToBehandling={goToBehandling} />

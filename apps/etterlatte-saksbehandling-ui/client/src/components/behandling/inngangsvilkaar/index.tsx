@@ -46,15 +46,13 @@ export const Inngangsvilkaar = () => {
   return (
     <Content>
       {erManueltOpphoer ? (
-        <>
-          <Header>
-            <h1>Manuelt opphør</h1>
-            <TekstMedMaksbredde>
-              Det har kommet inn nye endringer på saken som gjør at den ikke kan behandles her. Saken må opprettes
-              manuelt i Pesys, og deretter opphøres i nytt system. Se rutiner for å opprette sak i Pesys.{' '}
-            </TekstMedMaksbredde>
-          </Header>
-        </>
+        <Header>
+          <h1>Manuelt opphør</h1>
+          <TekstMedMaksbredde>
+            Det har kommet inn nye endringer på saken som gjør at den ikke kan behandles her. Saken må opprettes manuelt
+            i Pesys, og deretter opphøres i nytt system. Se rutiner for å opprette sak i Pesys.
+          </TekstMedMaksbredde>
+        </Header>
       ) : (
         <>
           <Header>

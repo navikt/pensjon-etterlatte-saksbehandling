@@ -1,62 +1,41 @@
-import React, { FormEvent, useState } from 'react'
+import React, { FormEvent, useEffect, useState } from 'react'
 
 import { Button, Checkbox, CheckboxGroup, Heading, Modal, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { apiClient } from '../../shared/api/apiClient'
 import { useNavigate } from 'react-router-dom'
+import { sendInnManueltOpphoer } from '../../shared/api/manueltOpphoer'
 
-const OPPHOERSGRUNNER = ['UTFLYTTING_FRA_NORGE', 'SOESKEN_DOED', 'GJENLEVENDE_FORELDER_DOED', 'ANNET'] as const
+export const OPPHOERSGRUNNER = ['UTFLYTTING_FRA_NORGE', 'SOESKEN_DOED', 'GJENLEVENDE_FORELDER_DOED', 'ANNET'] as const
 
-type Opphoersgrunn = typeof OPPHOERSGRUNNER[number]
+export type Opphoersgrunn = typeof OPPHOERSGRUNNER[number]
 
-const oversettelser: Record<Opphoersgrunn, string> = {
+export const OVERSETTELSER_OPPHOERSGRUNNER: Record<Opphoersgrunn, string> = {
   GJENLEVENDE_FORELDER_DOED: 'Dødsfall gjenlevende forelder',
   SOESKEN_DOED: 'Dødsfall søsken',
   UTFLYTTING_FRA_NORGE: 'Utflytting fra Norge',
   ANNET: 'Annet',
 }
 
-type ManueltOpphoerResponse = {
-  behandlingId: string
-}
-
-async function sendInnManueltOpphoer(
-  sakId: number,
-  opphoerAarsaker: Opphoersgrunn[],
-  fritekstAarsak: string
-): Promise<string> {
-  const res = await apiClient.post<ManueltOpphoerResponse>(`/api/saker/${sakId}/manueltopphoer`, {
-    sak: sakId,
-    fritekstAarsak,
-    opphoerAarsaker,
-  })
-  if (res.status !== 'ok') {
-    throw res
-  }
-  return res.data.behandlingId
-}
-
-export const ManueltOpphoerModal = ({ sakId }: { sakId?: number }) => {
+export const ManueltOpphoerModal = ({ sakId }: { sakId: number }) => {
   const [open, setOpen] = useState(false)
   const [fritekstgrunn, setFritekstgrunn] = useState<string>('')
   const [selectedGrunner, setSelectedGrunner] = useState<Opphoersgrunn[]>([])
   const [feilmelding, setFeilmelding] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  if (sakId === undefined) {
-    return null
-  }
 
-  const erAnnetValgt = !!selectedGrunner.find((grunn) => grunn === 'ANNET')
+  useEffect(() => setFeilmelding(''), [open])
+
+  const erAnnetValgt = selectedGrunner.includes('ANNET')
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
+
     setFeilmelding('')
     if (loading) {
       return
     }
     const grunn = fritekstgrunn.trim()
-
     if (erAnnetValgt && grunn.length === 0) {
       setFeilmelding('Du må beskrive hvorfor du opphører hvis du har valgt "Annet"')
       return
@@ -65,16 +44,16 @@ export const ManueltOpphoerModal = ({ sakId }: { sakId?: number }) => {
       setFeilmelding('Du må oppgi en grunn for det manuelle opphøret')
       return
     }
+
     setLoading(true)
     const kjenteAarsaker = selectedGrunner.filter((grunn) => grunn !== 'ANNET')
-    try {
-      const behandlingId = await sendInnManueltOpphoer(sakId!, kjenteAarsaker, grunn)
-      navigate(`/behandling/${behandlingId}/`)
-    } catch {
-      setFeilmelding('Kunne ikke annullere denne saken nå. Prøv igjen senere, eller meld det som feil i systemet')
-    } finally {
-      setLoading(false)
+    const res = await sendInnManueltOpphoer(sakId!, kjenteAarsaker, grunn)
+    if (res.status === 'ok') {
+      navigate(`/behandling/${res.data.behandlingId}/`)
+    } else {
+      setFeilmelding('Kunne ikke annullere denne saken nå. Prøv igjen senere, eller meld det som feil i systemet.')
     }
+    setLoading(false)
   }
 
   return (
@@ -86,7 +65,7 @@ export const ManueltOpphoerModal = ({ sakId }: { sakId?: number }) => {
         <Modal.Content>
           <ModalSpacing>
             <Heading size="large">Manuelt opphør</Heading>
-            <p>Hvis du annulerer vil utbetalinger fjernes fra oppdragssystemet og du må behandle saken i PeSys</p>
+            <p>Hvis du annullerer vil utbetalinger fjernes fra oppdragssystemet og du må behandle saken i PeSys</p>
             <p>Følgende utbetalinger annulleres:</p>
             <p>TODO</p>
             <form onSubmit={onSubmit}>
@@ -144,7 +123,7 @@ const GrunnerTilAnnuleringForm = ({
       <CheckboxGroup legend="Hvorfor må saken annulleres?" onChange={setSelectedGrunner}>
         {OPPHOERSGRUNNER.map((opphoersgrunn) => (
           <Checkbox value={opphoersgrunn} key={opphoersgrunn}>
-            {oversettelser[opphoersgrunn]}
+            {OVERSETTELSER_OPPHOERSGRUNNER[opphoersgrunn]}
           </Checkbox>
         ))}
       </CheckboxGroup>

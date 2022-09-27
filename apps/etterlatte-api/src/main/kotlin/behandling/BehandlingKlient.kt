@@ -247,7 +247,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
                     manueltOpphoerRequest
                 )
                     .mapBoth(
-                        success = { json -> json },
+                        success = { json -> json.response },
                         failure = { throwableErrorMessage ->
                             throw Error(
                                 throwableErrorMessage.message,

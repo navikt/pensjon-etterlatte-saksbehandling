@@ -4,16 +4,25 @@ import { Heading } from '@navikt/ds-react'
 import { useContext, useRef, useState } from 'react'
 import { AppContext } from '../../../store/AppContext'
 import { InformationColored } from '@navikt/ds-icons'
-import { IPerson } from '../../../store/reducers/BehandlingReducer'
 import { differenceInYears, lastDayOfMonth } from 'date-fns'
 import { formaterDato, formaterStringDato } from '../../../utils/formattering'
 
-export const Sammendrag = () => {
-  const beregningsperioder = useContext(AppContext).state.behandlingReducer.beregning?.beregningsperioder
+interface ToolTipPerson {
+  fornavn: string
+  etternavn: string
+  foedselsnummer: string
+  foedselsdato: string | Date
+}
 
-  const GjelderTooltip = ({ soeskenFlokk }: { soeskenFlokk: Array<IPerson> }) => {
+export const Sammendrag = () => {
+  const behandling = useContext(AppContext).state.behandlingReducer
+  const beregningsperioder = behandling.beregning?.beregningsperioder
+
+  const GjelderTooltip = ({ soesken, soeker }: { soesken: ToolTipPerson[]; soeker: ToolTipPerson }) => {
     const [isOpen, setIsOpen] = useState(false)
     const ref = useRef(null)
+
+    const soeskenFlokk = [...soesken, soeker]
 
     return (
       <>
@@ -32,16 +41,14 @@ export const Sammendrag = () => {
             </BodyShort>
             <Label>Beregningen gjelder:</Label>
             <ul>
-              {soeskenFlokk.map((soesken) => {
-                return (
-                  <ListWithoutBullet key={soesken.foedselsnummer}>
-                    {`${soesken.fornavn} ${soesken.etternavn} / ${soesken.foedselsnummer} / ${differenceInYears(
-                      new Date(),
-                      new Date(soesken.foedselsdato)
-                    )} år`}
-                  </ListWithoutBullet>
-                )
-              })}
+              {soeskenFlokk.map((soesken) => (
+                <ListWithoutBullet key={soesken.foedselsnummer}>
+                  {`${soesken.fornavn} ${soesken.etternavn} / ${soesken.foedselsnummer} / ${differenceInYears(
+                    new Date(),
+                    new Date(soesken.foedselsdato)
+                  )} år`}
+                </ListWithoutBullet>
+              ))}
             </ul>
           </PopoverContent>
         </Popover>
@@ -77,7 +84,11 @@ export const Sammendrag = () => {
               <Table.DataCell>Mangler</Table.DataCell>
               <Table.DataCell>{beregning.grunnbelop} kr</Table.DataCell>
               <Table.DataCell>
-                {beregning.soeskenFlokk?.length ? <GjelderTooltip soeskenFlokk={beregning.soeskenFlokk} /> : '-'}
+                {beregning.soeskenFlokk && behandling.søker ? (
+                  <GjelderTooltip soesken={beregning.soeskenFlokk} soeker={behandling.søker} />
+                ) : (
+                  '-'
+                )}
               </Table.DataCell>
               <Table.DataCell>{beregning.utbetaltBeloep} kr</Table.DataCell>
             </Table.Row>

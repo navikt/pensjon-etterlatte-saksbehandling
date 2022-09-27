@@ -19,6 +19,7 @@ export interface IDetaljertBehandling {
   hendelser: IHendelse[]
   familieforhold?: IFamilieforhold
   behandlingType: IBehandlingsType
+  søker?: IPdlPerson
 }
 
 export interface IHendelse {
@@ -356,6 +357,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   hendelser: [],
   familieforhold: undefined,
   behandlingType: IBehandlingsType.FØRSTEGANGSBEHANDLING,
+  søker: undefined,
 }
 
 export const addBehandlingAction = (data: IDetaljertBehandling) => ({ type: 'add_behandling', data })

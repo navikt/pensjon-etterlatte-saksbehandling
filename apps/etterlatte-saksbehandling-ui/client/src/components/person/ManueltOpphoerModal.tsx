@@ -79,17 +79,15 @@ export const ManueltOpphoerModal = ({ sakId }: { sakId?: number }) => {
 
   return (
     <>
-      <div>
-        <Button variant="primary" onClick={() => setOpen(true)}>
-          Annuler saken {sakId}
-        </Button>
-      </div>
+      <Button variant="primary" onClick={() => setOpen(true)}>
+        Annuller saken
+      </Button>
       <Modal open={open} onClose={() => setOpen(false)}>
         <Modal.Content>
           <ModalSpacing>
             <Heading size="large">Manuelt opphør</Heading>
             <p>Hvis du annulerer vil utbetalinger fjernes fra oppdragssystemet og du må behandle saken i PeSys</p>
-            <p>Følgende utbetalinger annuleres:</p>
+            <p>Følgende utbetalinger annulleres:</p>
             <p>TODO</p>
             <form onSubmit={onSubmit}>
               <GrunnerTilAnnuleringForm

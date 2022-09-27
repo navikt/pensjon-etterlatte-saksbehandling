@@ -31,7 +31,9 @@ export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandling
           </div>
         </HeadingWrapper>
 
-        <ManueltOpphoerModal sakId={sakId} />
+        <EkstraHandlinger>
+          <ManueltOpphoerModal sakId={sakId} />
+        </EkstraHandlinger>
         <div className="behandlinger">
           <h2>Behandlinger</h2>
           <Saksliste behandlinger={sortertListe} goToBehandling={goToBehandling} />
@@ -40,6 +42,11 @@ export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandling
     </>
   )
 }
+
+const EkstraHandlinger = styled.div`
+  display: flex;
+  flex-direction: row-reverse;
+`
 
 export const IconButton = styled.div`
   padding-top: 1em;

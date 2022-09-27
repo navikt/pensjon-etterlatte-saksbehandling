@@ -1,5 +1,7 @@
 package no.nav.etterlatte.libs.common.person
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
@@ -95,8 +97,15 @@ data class FamilieRelasjon(
 )
 
 data class AvdoedesBarn(
+    @JsonValue
     val avdoedesBarn: List<Person>?
-)
+) {
+    companion object {
+        @JvmStatic
+        @JsonCreator
+        fun create(barn: List<Person>?) = AvdoedesBarn(barn)
+    }
+}
 
 data class VergemaalEllerFremtidsfullmakt(
     val embete: String?,

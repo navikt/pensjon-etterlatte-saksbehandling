@@ -40,7 +40,7 @@ val HELSØSKEN_FØDSELSNUMMER = Foedselsnummer.of("06051250220")
 val HALVSØSKEN_FØDSELSNUMMER = Foedselsnummer.of("09011076618")
 val HALVSØSKEN_ANNEN_FORELDER = Foedselsnummer.of("20127905941")
 
-val ADRESSE_DEFAULT = listOf(
+val ADRESSE_DEFAULT =
     Adresse(
         type = AdresseType.VEGADRESSE,
         aktiv = true,
@@ -55,7 +55,6 @@ val ADRESSE_DEFAULT = listOf(
         gyldigFraOgMed = LocalDateTime.parse("2012-02-16T00:00"),
         gyldigTilOgMed = null
     )
-)
 
 internal val søkerTestopplysningerMap: Map<Opplysningstyper, Opplysning<JsonNode>> = mapOf(
     NAVN to Opplysning.Konstant(kilde, Navn("Søker", "Barn").toJsonNode()),

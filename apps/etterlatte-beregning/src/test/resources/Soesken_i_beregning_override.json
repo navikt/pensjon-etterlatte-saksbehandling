@@ -1,0 +1,3495 @@
+{
+  "@event_name": "BEHANDLING:GRUNNLAGENDRET",
+  "behandlingId": "dae0ede3-786e-477f-8b70-3df4070bb2c9",
+  "behandling": {
+    "id": "dae0ede3-786e-477f-8b70-3df4070bb2c9",
+    "sak": 48,
+    "behandlingOpprettet": "2022-09-26T15:27:39.725842",
+    "sistEndret": "2022-09-26T15:28:10.802128",
+    "status": "UNDER_BEHANDLING",
+    "oppgaveStatus": "NY",
+    "type": "FØRSTEGANGSBEHANDLING",
+    "soeknadMottattDato": "2022-09-26T15:27:37.152999",
+    "persongalleri": {
+      "soeker": "19021254846",
+      "innsender": "19118310597",
+      "soesken": [],
+      "avdoed": [
+        "05508119005"
+      ],
+      "gjenlevende": [
+        "19118310597"
+      ]
+    },
+    "gyldighetsproeving": {
+      "resultat": "OPPFYLT",
+      "vurderinger": [
+        {
+          "navn": "INNSENDER_ER_FORELDER",
+          "resultat": "OPPFYLT",
+          "basertPaaOpplysninger": {
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "05508119005",
+                "19118310597"
+              ],
+              "foreldre": [
+                "05508119005",
+                "19118310597"
+              ],
+              "barn": null
+            },
+            "innsender": {
+              "navn": "Morsk Kabin",
+              "fnr": "19118310597"
+            },
+            "gjenlevende": [
+              {
+                "navn": "Morsk Kabin",
+                "fnr": "19118310597"
+              }
+            ]
+          }
+        },
+        {
+          "navn": "HAR_FORELDREANSVAR_FOR_BARNET",
+          "resultat": "OPPFYLT",
+          "basertPaaOpplysninger": {
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "05508119005",
+                "19118310597"
+              ],
+              "foreldre": [
+                "05508119005",
+                "19118310597"
+              ],
+              "barn": null
+            },
+            "innsender": {
+              "navn": "Morsk Kabin",
+              "fnr": "19118310597"
+            }
+          }
+        },
+        {
+          "navn": "INGEN_ANNEN_VERGE_ENN_FORELDER",
+          "resultat": "OPPFYLT",
+          "basertPaaOpplysninger": {
+            "vergemaalEllerFremtidsfullmakt": []
+          }
+        }
+      ],
+      "vurdertDato": "2022-09-26T15:27:39.392731873"
+    }
+  },
+  "sakId": 48,
+  "sak": {
+    "ident": "19021254846",
+    "sakType": "BARNEPENSJON",
+    "id": 48
+  },
+  "behandlingOpprettet": "2022-09-26T15:27:39.725842",
+  "@id": "805bec3c-d44e-43bb-89b0-58f042d7bb1c",
+  "@opprettet": "2022-09-27T08:44:43.467559224",
+  "system_read_count": 2,
+  "system_participating_services": [
+    {
+      "id": "2012938a-50b5-45c4-aff0-367cbc343918",
+      "time": "2022-09-27T08:44:43.041424027",
+      "service": "etterlatte-behandling",
+      "instance": "etterlatte-behandling-5c57d8c48b-snhnc",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-behandling:591106f1bcd50d8ba0f8e7a8846f038e2f9cbe2e"
+    },
+    {
+      "id": "2012938a-50b5-45c4-aff0-367cbc343918",
+      "time": "2022-09-27T08:44:43.243052489",
+      "service": "etterlatte-grunnlag",
+      "instance": "etterlatte-grunnlag-f5fcb8b54-6ncmr",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-grunnlag:591106f1bcd50d8ba0f8e7a8846f038e2f9cbe2e"
+    },
+    {
+      "id": "776b8050-f50b-4019-a49d-6c83e92c4814",
+      "time": "2022-09-27T08:44:43.322294492",
+      "service": "etterlatte-grunnlag",
+      "instance": "etterlatte-grunnlag-f5fcb8b54-6ncmr",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-grunnlag:591106f1bcd50d8ba0f8e7a8846f038e2f9cbe2e"
+    },
+    {
+      "id": "776b8050-f50b-4019-a49d-6c83e92c4814",
+      "time": "2022-09-27T08:44:43.336190625",
+      "service": "etterlatte-vilkaar-kafka",
+      "instance": "etterlatte-vilkaar-kafka-66b9766684-gps74",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-vilkaar-kafka:591106f1bcd50d8ba0f8e7a8846f038e2f9cbe2e"
+    },
+    {
+      "id": "805bec3c-d44e-43bb-89b0-58f042d7bb1c",
+      "time": "2022-09-27T08:44:43.467559224",
+      "service": "etterlatte-vilkaar-kafka",
+      "instance": "etterlatte-vilkaar-kafka-66b9766684-gps74",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-vilkaar-kafka:591106f1bcd50d8ba0f8e7a8846f038e2f9cbe2e"
+    }
+  ],
+  "fnrSoeker": "19021254846",
+  "persongalleri": {
+    "soeker": "19021254846",
+    "innsender": "19118310597",
+    "soesken": [],
+    "avdoed": [
+      "05508119005"
+    ],
+    "gjenlevende": [
+      "19118310597"
+    ]
+  },
+  "grunnlag": {
+    "saksId": 48,
+    "grunnlag": [
+      {
+        "id": "b0fee498-d67c-4709-9e59-f2a3da89d198",
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "AVDOED_SOEKNAD_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "AVDOED",
+          "fornavn": "DØD",
+          "etternavn": "TESTPERSON",
+          "foedselsnummer": "05508119005",
+          "doedsdato": "2021-07-27",
+          "statsborgerskap": "Norsk",
+          "utenlandsopphold": {
+            "harHattUtenlandsopphold": "NEI",
+            "opphold": []
+          },
+          "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": "NEI"
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "942f5c8a-0bda-464c-aba0-09f6a1a25389",
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "SOEKER_SOEKNAD_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "BARN",
+          "fornavn": "TEST",
+          "etternavn": "SOEKER",
+          "foedselsnummer": "19021254846",
+          "statsborgerskap": "Norsk",
+          "utenlandsadresse": {
+            "adresseIUtlandet": "NEI",
+            "land": null,
+            "adresse": null
+          },
+          "foreldre": [
+            {
+              "type": "FORELDER",
+              "fornavn": "Levende",
+              "etternavn": "Testperson",
+              "foedselsnummer": "19118310597"
+            },
+            {
+              "type": "FORELDER",
+              "fornavn": "Død",
+              "etternavn": "Testperson",
+              "foedselsnummer": "05508119005"
+            }
+          ],
+          "verge": {
+            "barnHarVerge": "NEI",
+            "fornavn": null,
+            "etternavn": null,
+            "foedselsnummer": null
+          },
+          "omsorgPerson": null
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "4f2a07ac-aa91-4895-a217-748a016025a6",
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "GJENLEVENDE_FORELDER_SOEKNAD_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "GJENLEVENDE_FORELDER",
+          "fornavn": "LEVENDE",
+          "etternavn": "TESTPERSON",
+          "foedselsnummer": "19118310597",
+          "adresse": "TESTVEIEN 123, 0123 TEST",
+          "statsborgerskap": "Norge",
+          "telefonnummer": "11111111"
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "d62e6d0a-d536-41a0-9238-e5c28bf884ed",
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "INNSENDER_SOEKNAD_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "INNSENDER",
+          "fornavn": "DUMMY FORNAVN",
+          "etternavn": "DUMMY ETTERNAVN",
+          "foedselsnummer": "19118310597"
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "32add795-3dc2-4fba-bb7e-60aaddd69208",
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "UTBETALINGSINFORMASJON_V1",
+        "meta": {},
+        "opplysning": {
+          "bankkontoType": "NORSK",
+          "kontonummer": "1351.35.13513",
+          "utenlandskBankNavn": null,
+          "utenlandskBankAdresse": null,
+          "iban": null,
+          "swift": null,
+          "oenskerSkattetrekk": "JA",
+          "oensketSkattetrekkProsent": "21%"
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "37728ccf-8e6a-47ec-a486-1185126857ca",
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "SAMTYKKE",
+        "meta": {},
+        "opplysning": {
+          "harSamtykket": true
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "3fb7cef9-cb5d-43a5-a01e-8e0e1f3b86e9",
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "SOEKNAD_MOTTATT_DATO",
+        "meta": {},
+        "opplysning": {
+          "mottattDato": "2022-02-10T10:51:12.298943803"
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "0b24b56a-ef84-4939-8cd8-1f4fcb900688",
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "SOEKNADSTYPE_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "BARNEPENSJON"
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "aafa61e3-2548-4ba8-b351-bad688034869",
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "PERSONGALLERI_V1",
+        "meta": {},
+        "opplysning": {
+          "soeker": "19021254846",
+          "innsender": "19118310597",
+          "soesken": [],
+          "avdoed": [
+            "05508119005"
+          ],
+          "gjenlevende": [
+            "19118310597"
+          ]
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "28ce0b18-8085-45aa-a0c6-f0f3b20d1a23",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:41.668077620Z",
+          "registersReferanse": null,
+          "opplysningId": null,
+          "type": "pdl"
+        },
+        "opplysningType": "SOEKER_PDL_V1",
+        "meta": {},
+        "opplysning": {
+          "fornavn": "Sterk",
+          "etternavn": "Fusjon",
+          "foedselsnummer": "19021254846",
+          "foedselsdato": "2012-02-19",
+          "foedselsaar": 2012,
+          "foedeland": "NOR",
+          "doedsdato": null,
+          "adressebeskyttelse": "UGRADERT",
+          "bostedsadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Tørdalsveien 1338",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "3750",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "2012-03-04T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "deltBostedsadresse": null,
+          "kontaktadresse": [],
+          "oppholdsadresse": [],
+          "sivilstatus": "UOPPGITT",
+          "statsborgerskap": "NOR",
+          "utland": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "familieRelasjon": {
+            "ansvarligeForeldre": [
+              "05508119005",
+              "19118310597"
+            ],
+            "foreldre": [
+              "05508119005",
+              "19118310597"
+            ],
+            "barn": null
+          },
+          "avdoedesBarn": null,
+          "vergemaalEllerFremtidsfullmakt": []
+        },
+        "attestering": null,
+        "fnr": "19021254846"
+      },
+      {
+        "id": "c2c1757f-c5dd-40ef-bc97-6dccfaf9af67",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:42.192444558Z",
+          "registersReferanse": null,
+          "opplysningId": null,
+          "type": "pdl"
+        },
+        "opplysningType": "GJENLEVENDE_FORELDER_PDL_V1",
+        "meta": {},
+        "opplysning": {
+          "fornavn": "Morsk",
+          "etternavn": "Kabin",
+          "foedselsnummer": "19118310597",
+          "foedselsdato": "1983-11-19",
+          "foedselsaar": 1983,
+          "foedeland": "NOR",
+          "doedsdato": null,
+          "adressebeskyttelse": "UGRADERT",
+          "bostedsadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": false,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Hegneskottet 1",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "3681",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "1983-11-19T00:00:00",
+              "gyldigTilOgMed": null
+            },
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Tørdalsveien 1338",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "3750",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "2015-08-12T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "deltBostedsadresse": null,
+          "kontaktadresse": null,
+          "oppholdsadresse": [],
+          "sivilstatus": "GIFT",
+          "statsborgerskap": "NOR",
+          "utland": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "familieRelasjon": {
+            "ansvarligeForeldre": null,
+            "foreldre": null,
+            "barn": [
+              "04061271223",
+              "19021254846",
+              "04021269234"
+            ]
+          },
+          "avdoedesBarn": null,
+          "vergemaalEllerFremtidsfullmakt": null
+        },
+        "attestering": null,
+        "fnr": "19118310597"
+      },
+      {
+        "id": "885700e8-d252-4640-bac5-344a8a41b03f",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+          "registersReferanse": null,
+          "opplysningId": null,
+          "type": "pdl"
+        },
+        "opplysningType": "AVDOED_PDL_V1",
+        "meta": {},
+        "opplysning": {
+          "fornavn": "Tom",
+          "etternavn": "Apanasje",
+          "foedselsnummer": "05508119005",
+          "foedselsdato": "1981-10-05",
+          "foedselsaar": 1981,
+          "foedeland": "NOR",
+          "doedsdato": "2022-08-17",
+          "adressebeskyttelse": "UGRADERT",
+          "bostedsadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": false,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Tørdalsveien 1338",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "3750",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "2012-06-04T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "deltBostedsadresse": null,
+          "kontaktadresse": [],
+          "oppholdsadresse": [],
+          "sivilstatus": "GIFT",
+          "statsborgerskap": "NOR",
+          "utland": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "familieRelasjon": {
+            "ansvarligeForeldre": null,
+            "foreldre": null,
+            "barn": [
+              "19021254846",
+              "04021269234",
+              "04061271223",
+              "23021263214",
+              "04031274805"
+            ]
+          },
+          "avdoedesBarn": [
+            {
+              "fornavn": "Sterk",
+              "etternavn": "Fusjon",
+              "foedselsnummer": "19021254846",
+              "foedselsdato": "2012-02-19",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Tørdalsveien 1338",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "3750",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-03-04T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "05508119005",
+                  "19118310597"
+                ],
+                "foreldre": [
+                  "05508119005",
+                  "19118310597"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            },
+            {
+              "fornavn": "Virkelig",
+              "etternavn": "Årbok",
+              "foedselsnummer": "04021269234",
+              "foedselsdato": "2012-02-04",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Tørdalsveien 1338",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "3750",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-03-04T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "05508119005",
+                  "19118310597"
+                ],
+                "foreldre": [
+                  "05508119005",
+                  "19118310597"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            },
+            {
+              "fornavn": "Urokkelig",
+              "etternavn": "Engel",
+              "foedselsnummer": "04061271223",
+              "foedselsdato": "2012-06-04",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Tørdalsveien 1338",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "3750",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-06-04T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "05508119005",
+                  "19118310597"
+                ],
+                "foreldre": [
+                  "05508119005",
+                  "19118310597"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            },
+            {
+              "fornavn": "Blaut",
+              "etternavn": "Jordmor",
+              "foedselsnummer": "23021263214",
+              "foedselsdato": "2012-02-23",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Tørdalsveien 1338",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "3750",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-02-23T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "05508119005"
+                ],
+                "foreldre": [
+                  "05508119005"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            },
+            {
+              "fornavn": "Motløs",
+              "etternavn": "Karaffel",
+              "foedselsnummer": "04031274805",
+              "foedselsdato": "2012-03-04",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Tørdalsveien 1338",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "3750",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-03-04T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "05508119005"
+                ],
+                "foreldre": [
+                  "05508119005"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            }
+          ],
+          "vergemaalEllerFremtidsfullmakt": null
+        },
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "a83e1f6f-2a57-4e05-bbb2-5cb859ccd413",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:43.124752409Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "opplysningType": "BOSTEDSADRESSE",
+        "meta": {},
+        "opplysning": {
+          "type": "VEGADRESSE",
+          "aktiv": false,
+          "coAdresseNavn": null,
+          "adresseLinje1": "Tørdalsveien 1338",
+          "adresseLinje2": null,
+          "adresseLinje3": null,
+          "postnr": "3750",
+          "poststed": null,
+          "land": null,
+          "kilde": "FREG",
+          "gyldigFraOgMed": "2012-06-04T00:00:00",
+          "gyldigTilOgMed": null
+        },
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "b2b82724-e077-44dd-9149-124163d37b07",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:43.124964663Z",
+          "registersReferanse": null,
+          "opplysningId": "53b04cc9-63ab-49b0-af41-bb4a6f4976ca",
+          "type": "pdl"
+        },
+        "opplysningType": "NAVN",
+        "meta": {},
+        "opplysning": {
+          "fornavn": "Tom",
+          "etternavn": "Apanasje"
+        },
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "11a6f127-f9be-4608-87a0-15cf2ae73b99",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:43.125001389Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "opplysningType": "FOEDSELSNUMMER",
+        "meta": {},
+        "opplysning": "05508119005",
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "602786fa-633a-4208-aae7-169213bd880d",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:43.125016326Z",
+          "registersReferanse": null,
+          "opplysningId": "55ce4e1b-d39e-43b1-95e6-9ea1d6d37655",
+          "type": "pdl"
+        },
+        "opplysningType": "FOEDSELSAAR",
+        "meta": {},
+        "opplysning": 1981,
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "1fb5360c-c23a-4ee1-b0fa-277f426515ab",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:43.125025373Z",
+          "registersReferanse": null,
+          "opplysningId": "55ce4e1b-d39e-43b1-95e6-9ea1d6d37655",
+          "type": "pdl"
+        },
+        "opplysningType": "FOEDSELSDATO",
+        "meta": {},
+        "opplysning": "1981-10-05",
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "1a42fe36-cd26-4e45-a9a0-d8dc9b23567d",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:43.125036909Z",
+          "registersReferanse": null,
+          "opplysningId": "55ce4e1b-d39e-43b1-95e6-9ea1d6d37655",
+          "type": "pdl"
+        },
+        "opplysningType": "FOEDELAND",
+        "meta": {},
+        "opplysning": "NOR",
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "74700bb8-db4e-4000-a092-ac64a0e8c5ed",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:43.125041203Z",
+          "registersReferanse": null,
+          "opplysningId": "7549b930-4235-4c1d-9e2e-f3d560859d5b",
+          "type": "pdl"
+        },
+        "opplysningType": "DOEDSDATO",
+        "meta": {},
+        "opplysning": "2022-08-17",
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "bde07897-bdc3-49cf-9f0d-e35005835363",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:43.125047147Z",
+          "registersReferanse": null,
+          "opplysningId": "c12e08ee-0640-4594-a856-b844649902f1",
+          "type": "pdl"
+        },
+        "opplysningType": "SIVILSTATUS",
+        "meta": {},
+        "opplysning": "GIFT",
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "6e409f98-9767-46ed-b1c3-0e2a210bd9ab",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:43.125092661Z",
+          "registersReferanse": null,
+          "opplysningId": "9d139563-7c5c-4aca-b9d8-176d2b5b516c",
+          "type": "pdl"
+        },
+        "opplysningType": "STATSBORGERSKAP",
+        "meta": {},
+        "opplysning": "NOR",
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "bd2c7b5f-6b07-400d-bf6a-ba05de64bcf2",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:43.125100695Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "opplysningType": "UTLAND",
+        "meta": {},
+        "opplysning": {
+          "innflyttingTilNorge": [],
+          "utflyttingFraNorge": []
+        },
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "d52baa4a-33c3-4721-8d61-9cfb2cfbfe6d",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:43.125116435Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "opplysningType": "FAMILIERELASJON",
+        "meta": {},
+        "opplysning": {
+          "ansvarligeForeldre": null,
+          "foreldre": null,
+          "barn": [
+            "19021254846",
+            "04021269234",
+            "04061271223",
+            "23021263214",
+            "04031274805"
+          ]
+        },
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "2642ddad-469c-4355-811d-74e832a92f12",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:43.125133465Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "opplysningType": "PERSONROLLE",
+        "meta": {},
+        "opplysning": "AVDOED",
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "6b099e39-52f8-40f2-9812-35dc8c5da620",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:43.125143445Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "opplysningType": "AVDOEDESBARN",
+        "meta": {},
+        "opplysning": [
+          {
+            "fornavn": "Sterk",
+            "etternavn": "Fusjon",
+            "foedselsnummer": "19021254846",
+            "foedselsdato": "2012-02-19",
+            "foedselsaar": 2012,
+            "foedeland": "NOR",
+            "doedsdato": null,
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": true,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Tørdalsveien 1338",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "3750",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2012-03-04T00:00:00",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": [],
+            "oppholdsadresse": [],
+            "sivilstatus": "UOPPGITT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "05508119005",
+                "19118310597"
+              ],
+              "foreldre": [
+                "05508119005",
+                "19118310597"
+              ],
+              "barn": null
+            },
+            "avdoedesBarn": null,
+            "vergemaalEllerFremtidsfullmakt": []
+          },
+          {
+            "fornavn": "Virkelig",
+            "etternavn": "Årbok",
+            "foedselsnummer": "04021269234",
+            "foedselsdato": "2012-02-04",
+            "foedselsaar": 2012,
+            "foedeland": "NOR",
+            "doedsdato": null,
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": true,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Tørdalsveien 1338",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "3750",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2012-03-04T00:00:00",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": [],
+            "oppholdsadresse": [],
+            "sivilstatus": "UOPPGITT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "05508119005",
+                "19118310597"
+              ],
+              "foreldre": [
+                "05508119005",
+                "19118310597"
+              ],
+              "barn": null
+            },
+            "avdoedesBarn": null,
+            "vergemaalEllerFremtidsfullmakt": []
+          },
+          {
+            "fornavn": "Urokkelig",
+            "etternavn": "Engel",
+            "foedselsnummer": "04061271223",
+            "foedselsdato": "2012-06-04",
+            "foedselsaar": 2012,
+            "foedeland": "NOR",
+            "doedsdato": null,
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": true,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Tørdalsveien 1338",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "3750",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2012-06-04T00:00:00",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": [],
+            "oppholdsadresse": [],
+            "sivilstatus": "UOPPGITT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "05508119005",
+                "19118310597"
+              ],
+              "foreldre": [
+                "05508119005",
+                "19118310597"
+              ],
+              "barn": null
+            },
+            "avdoedesBarn": null,
+            "vergemaalEllerFremtidsfullmakt": []
+          },
+          {
+            "fornavn": "Blaut",
+            "etternavn": "Jordmor",
+            "foedselsnummer": "23021263214",
+            "foedselsdato": "2012-02-23",
+            "foedselsaar": 2012,
+            "foedeland": "NOR",
+            "doedsdato": null,
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": true,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Tørdalsveien 1338",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "3750",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2012-02-23T00:00:00",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": [],
+            "oppholdsadresse": [],
+            "sivilstatus": "UOPPGITT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "05508119005"
+              ],
+              "foreldre": [
+                "05508119005"
+              ],
+              "barn": null
+            },
+            "avdoedesBarn": null,
+            "vergemaalEllerFremtidsfullmakt": []
+          },
+          {
+            "fornavn": "Motløs",
+            "etternavn": "Karaffel",
+            "foedselsnummer": "04031274805",
+            "foedselsdato": "2012-03-04",
+            "foedselsaar": 2012,
+            "foedeland": "NOR",
+            "doedsdato": null,
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": true,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Tørdalsveien 1338",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "3750",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2012-03-04T00:00:00",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": [],
+            "oppholdsadresse": [],
+            "sivilstatus": "UOPPGITT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "05508119005"
+              ],
+              "foreldre": [
+                "05508119005"
+              ],
+              "barn": null
+            },
+            "avdoedesBarn": null,
+            "vergemaalEllerFremtidsfullmakt": []
+          }
+        ],
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "d6ae747c-50b8-4550-946f-867acaedf77b",
+        "kilde": {
+          "tidspunkt": "2022-09-26T13:27:44.880589972Z",
+          "type": "a-ordningen"
+        },
+        "opplysningType": "AVDOED_INNTEKT_V1",
+        "meta": {},
+        "opplysning": {
+          "pensjonEllerTrygd": [],
+          "ytelseFraOffentlig": [],
+          "loennsinntekt": [],
+          "naeringsinntekt": []
+        },
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "28eec8e3-9c83-4763-8ff2-ebeabe4f4fc2",
+        "kilde": {
+          "tidspunkt": "2022-09-26T13:27:44.880618524Z",
+          "type": "aa-registeret"
+        },
+        "opplysningType": "ARBEIDSFORHOLD_V1",
+        "meta": {},
+        "opplysning": {
+          "arbeidsforhold": []
+        },
+        "attestering": null,
+        "fnr": "05508119005"
+      },
+      {
+        "id": "46751a39-0062-4ea2-96ff-242c6a2ef447",
+        "kilde": {
+          "ident": "Z994227",
+          "tidspunkt": "2022-09-27T06:44:42.431956245Z",
+          "type": "saksbehandler"
+        },
+        "opplysningType": "SOESKEN_I_BEREGNINGEN",
+        "meta": {},
+        "opplysning": {
+          "beregningsgrunnlag": [
+            {
+              "foedselsnummer": "04021269234",
+              "skalBrukes": false
+            },
+            {
+              "foedselsnummer": "04061271223",
+              "skalBrukes": false
+            },
+            {
+              "foedselsnummer": "23021263214",
+              "skalBrukes": false
+            },
+            {
+              "foedselsnummer": "04031274805",
+              "skalBrukes": true
+            }
+          ]
+        },
+        "attestering": null,
+        "fnr": null
+      }
+    ],
+    "versjon": 51
+  },
+  "grunnlagV2": {
+    "søker": {
+      "SOEKER_PDL_V1": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:41.668077620Z",
+          "registersReferanse": null,
+          "opplysningId": null,
+          "type": "pdl"
+        },
+        "verdi": {
+          "fornavn": "Sterk",
+          "etternavn": "Fusjon",
+          "foedselsnummer": "19021254846",
+          "foedselsdato": "2012-02-19",
+          "foedselsaar": 2012,
+          "foedeland": "NOR",
+          "doedsdato": null,
+          "adressebeskyttelse": "UGRADERT",
+          "bostedsadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Tørdalsveien 1338",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "3750",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "2012-03-04T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "deltBostedsadresse": null,
+          "kontaktadresse": [],
+          "oppholdsadresse": [],
+          "sivilstatus": "UOPPGITT",
+          "statsborgerskap": "NOR",
+          "utland": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "familieRelasjon": {
+            "ansvarligeForeldre": [
+              "05508119005",
+              "19118310597"
+            ],
+            "foreldre": [
+              "05508119005",
+              "19118310597"
+            ],
+            "barn": null
+          },
+          "avdoedesBarn": null,
+          "vergemaalEllerFremtidsfullmakt": []
+        },
+        "type": "konstant"
+      },
+      "BOSTEDSADRESSE": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:41.668218937Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "verdi": {
+          "type": "VEGADRESSE",
+          "aktiv": true,
+          "coAdresseNavn": null,
+          "adresseLinje1": "Tørdalsveien 1338",
+          "adresseLinje2": null,
+          "adresseLinje3": null,
+          "postnr": "3750",
+          "poststed": null,
+          "land": null,
+          "kilde": "FREG",
+          "gyldigFraOgMed": "2012-03-04T00:00:00",
+          "gyldigTilOgMed": null
+        },
+        "type": "konstant"
+      },
+      "NAVN": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:41.669187689Z",
+          "registersReferanse": null,
+          "opplysningId": "1f004f5c-b04d-47dc-a45d-326614ad151a",
+          "type": "pdl"
+        },
+        "verdi": {
+          "fornavn": "Sterk",
+          "etternavn": "Fusjon"
+        },
+        "type": "konstant"
+      },
+      "FOEDSELSNUMMER": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:41.669215597Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "verdi": "19021254846",
+        "type": "konstant"
+      },
+      "FOEDSELSAAR": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:41.669251625Z",
+          "registersReferanse": null,
+          "opplysningId": "f69fcda8-58db-404c-9c6e-7c6fe5bc9bf7",
+          "type": "pdl"
+        },
+        "verdi": 2012,
+        "type": "konstant"
+      },
+      "FOEDSELSDATO": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:41.669376224Z",
+          "registersReferanse": null,
+          "opplysningId": "f69fcda8-58db-404c-9c6e-7c6fe5bc9bf7",
+          "type": "pdl"
+        },
+        "verdi": "2012-02-19",
+        "type": "konstant"
+      },
+      "FOEDELAND": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:41.669463943Z",
+          "registersReferanse": null,
+          "opplysningId": "f69fcda8-58db-404c-9c6e-7c6fe5bc9bf7",
+          "type": "pdl"
+        },
+        "verdi": "NOR",
+        "type": "konstant"
+      },
+      "STATSBORGERSKAP": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:41.669470647Z",
+          "registersReferanse": null,
+          "opplysningId": "5ec3c85d-2822-4e8e-aa32-a5859d18f88e",
+          "type": "pdl"
+        },
+        "verdi": "NOR",
+        "type": "konstant"
+      },
+      "UTLAND": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:41.669476404Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "verdi": {
+          "innflyttingTilNorge": [],
+          "utflyttingFraNorge": []
+        },
+        "type": "konstant"
+      },
+      "FAMILIERELASJON": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:41.669799148Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "verdi": {
+          "ansvarligeForeldre": [
+            "05508119005",
+            "19118310597"
+          ],
+          "foreldre": [
+            "05508119005",
+            "19118310597"
+          ],
+          "barn": null
+        },
+        "type": "konstant"
+      },
+      "PERSONROLLE": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-26T13:27:41.669911116Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "verdi": "BARN",
+        "type": "konstant"
+      }
+    },
+    "familie": [
+      {
+        "GJENLEVENDE_FORELDER_PDL_V1": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:42.192444558Z",
+            "registersReferanse": null,
+            "opplysningId": null,
+            "type": "pdl"
+          },
+          "verdi": {
+            "fornavn": "Morsk",
+            "etternavn": "Kabin",
+            "foedselsnummer": "19118310597",
+            "foedselsdato": "1983-11-19",
+            "foedselsaar": 1983,
+            "foedeland": "NOR",
+            "doedsdato": null,
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": false,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Hegneskottet 1",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "3681",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "1983-11-19T00:00:00",
+                "gyldigTilOgMed": null
+              },
+              {
+                "type": "VEGADRESSE",
+                "aktiv": true,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Tørdalsveien 1338",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "3750",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2015-08-12T00:00:00",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": null,
+            "oppholdsadresse": [],
+            "sivilstatus": "GIFT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": null,
+              "foreldre": null,
+              "barn": [
+                "04061271223",
+                "19021254846",
+                "04021269234"
+              ]
+            },
+            "avdoedesBarn": null,
+            "vergemaalEllerFremtidsfullmakt": null
+          },
+          "type": "konstant"
+        },
+        "BOSTEDSADRESSE": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:42.192657927Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "type": "VEGADRESSE",
+            "aktiv": true,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Tørdalsveien 1338",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "3750",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "2015-08-12T00:00:00",
+            "gyldigTilOgMed": null
+          },
+          "type": "konstant"
+        },
+        "NAVN": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:42.192697223Z",
+            "registersReferanse": null,
+            "opplysningId": "cce69d42-021d-4c5c-a1d3-6dcc9d2431b2",
+            "type": "pdl"
+          },
+          "verdi": {
+            "fornavn": "Morsk",
+            "etternavn": "Kabin"
+          },
+          "type": "konstant"
+        },
+        "FOEDSELSNUMMER": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:42.192715240Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": "19118310597",
+          "type": "konstant"
+        },
+        "FOEDSELSAAR": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:42.192727306Z",
+            "registersReferanse": null,
+            "opplysningId": "ebc78849-1fbf-4608-9422-67053c514331",
+            "type": "pdl"
+          },
+          "verdi": 1983,
+          "type": "konstant"
+        },
+        "FOEDSELSDATO": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:42.192741794Z",
+            "registersReferanse": null,
+            "opplysningId": "ebc78849-1fbf-4608-9422-67053c514331",
+            "type": "pdl"
+          },
+          "verdi": "1983-11-19",
+          "type": "konstant"
+        },
+        "FOEDELAND": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:42.192751268Z",
+            "registersReferanse": null,
+            "opplysningId": "ebc78849-1fbf-4608-9422-67053c514331",
+            "type": "pdl"
+          },
+          "verdi": "NOR",
+          "type": "konstant"
+        },
+        "SIVILSTATUS": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:42.192757278Z",
+            "registersReferanse": null,
+            "opplysningId": "48ed59a0-0a7c-43b4-8998-4738c5f83a5a",
+            "type": "pdl"
+          },
+          "verdi": "GIFT",
+          "type": "konstant"
+        },
+        "STATSBORGERSKAP": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:42.192783502Z",
+            "registersReferanse": null,
+            "opplysningId": "257b51ca-128d-4989-9d7b-4ad52b386ddf",
+            "type": "pdl"
+          },
+          "verdi": "NOR",
+          "type": "konstant"
+        },
+        "UTLAND": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:42.192788865Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "type": "konstant"
+        },
+        "FAMILIERELASJON": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:42.192804379Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "ansvarligeForeldre": null,
+            "foreldre": null,
+            "barn": [
+              "04061271223",
+              "19021254846",
+              "04021269234"
+            ]
+          },
+          "type": "konstant"
+        },
+        "PERSONROLLE": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:42.192818739Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": "GJENLEVENDE",
+          "type": "konstant"
+        }
+      },
+      {
+        "AVDOED_PDL_V1": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+            "registersReferanse": null,
+            "opplysningId": null,
+            "type": "pdl"
+          },
+          "verdi": {
+            "fornavn": "Tom",
+            "etternavn": "Apanasje",
+            "foedselsnummer": "05508119005",
+            "foedselsdato": "1981-10-05",
+            "foedselsaar": 1981,
+            "foedeland": "NOR",
+            "doedsdato": "2022-08-17",
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": false,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Tørdalsveien 1338",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "3750",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2012-06-04T00:00:00",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": [],
+            "oppholdsadresse": [],
+            "sivilstatus": "GIFT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": null,
+              "foreldre": null,
+              "barn": [
+                "19021254846",
+                "04021269234",
+                "04061271223",
+                "23021263214",
+                "04031274805"
+              ]
+            },
+            "avdoedesBarn": [
+              {
+                "fornavn": "Sterk",
+                "etternavn": "Fusjon",
+                "foedselsnummer": "19021254846",
+                "foedselsdato": "2012-02-19",
+                "foedselsaar": 2012,
+                "foedeland": "NOR",
+                "doedsdato": null,
+                "adressebeskyttelse": "UGRADERT",
+                "bostedsadresse": [
+                  {
+                    "type": "VEGADRESSE",
+                    "aktiv": true,
+                    "coAdresseNavn": null,
+                    "adresseLinje1": "Tørdalsveien 1338",
+                    "adresseLinje2": null,
+                    "adresseLinje3": null,
+                    "postnr": "3750",
+                    "poststed": null,
+                    "land": null,
+                    "kilde": "FREG",
+                    "gyldigFraOgMed": "2012-03-04T00:00:00",
+                    "gyldigTilOgMed": null
+                  }
+                ],
+                "deltBostedsadresse": null,
+                "kontaktadresse": [],
+                "oppholdsadresse": [],
+                "sivilstatus": "UOPPGITT",
+                "statsborgerskap": "NOR",
+                "utland": {
+                  "innflyttingTilNorge": [],
+                  "utflyttingFraNorge": []
+                },
+                "familieRelasjon": {
+                  "ansvarligeForeldre": [
+                    "05508119005",
+                    "19118310597"
+                  ],
+                  "foreldre": [
+                    "05508119005",
+                    "19118310597"
+                  ],
+                  "barn": null
+                },
+                "avdoedesBarn": null,
+                "vergemaalEllerFremtidsfullmakt": []
+              },
+              {
+                "fornavn": "Virkelig",
+                "etternavn": "Årbok",
+                "foedselsnummer": "04021269234",
+                "foedselsdato": "2012-02-04",
+                "foedselsaar": 2012,
+                "foedeland": "NOR",
+                "doedsdato": null,
+                "adressebeskyttelse": "UGRADERT",
+                "bostedsadresse": [
+                  {
+                    "type": "VEGADRESSE",
+                    "aktiv": true,
+                    "coAdresseNavn": null,
+                    "adresseLinje1": "Tørdalsveien 1338",
+                    "adresseLinje2": null,
+                    "adresseLinje3": null,
+                    "postnr": "3750",
+                    "poststed": null,
+                    "land": null,
+                    "kilde": "FREG",
+                    "gyldigFraOgMed": "2012-03-04T00:00:00",
+                    "gyldigTilOgMed": null
+                  }
+                ],
+                "deltBostedsadresse": null,
+                "kontaktadresse": [],
+                "oppholdsadresse": [],
+                "sivilstatus": "UOPPGITT",
+                "statsborgerskap": "NOR",
+                "utland": {
+                  "innflyttingTilNorge": [],
+                  "utflyttingFraNorge": []
+                },
+                "familieRelasjon": {
+                  "ansvarligeForeldre": [
+                    "05508119005",
+                    "19118310597"
+                  ],
+                  "foreldre": [
+                    "05508119005",
+                    "19118310597"
+                  ],
+                  "barn": null
+                },
+                "avdoedesBarn": null,
+                "vergemaalEllerFremtidsfullmakt": []
+              },
+              {
+                "fornavn": "Urokkelig",
+                "etternavn": "Engel",
+                "foedselsnummer": "04061271223",
+                "foedselsdato": "2012-06-04",
+                "foedselsaar": 2012,
+                "foedeland": "NOR",
+                "doedsdato": null,
+                "adressebeskyttelse": "UGRADERT",
+                "bostedsadresse": [
+                  {
+                    "type": "VEGADRESSE",
+                    "aktiv": true,
+                    "coAdresseNavn": null,
+                    "adresseLinje1": "Tørdalsveien 1338",
+                    "adresseLinje2": null,
+                    "adresseLinje3": null,
+                    "postnr": "3750",
+                    "poststed": null,
+                    "land": null,
+                    "kilde": "FREG",
+                    "gyldigFraOgMed": "2012-06-04T00:00:00",
+                    "gyldigTilOgMed": null
+                  }
+                ],
+                "deltBostedsadresse": null,
+                "kontaktadresse": [],
+                "oppholdsadresse": [],
+                "sivilstatus": "UOPPGITT",
+                "statsborgerskap": "NOR",
+                "utland": {
+                  "innflyttingTilNorge": [],
+                  "utflyttingFraNorge": []
+                },
+                "familieRelasjon": {
+                  "ansvarligeForeldre": [
+                    "05508119005",
+                    "19118310597"
+                  ],
+                  "foreldre": [
+                    "05508119005",
+                    "19118310597"
+                  ],
+                  "barn": null
+                },
+                "avdoedesBarn": null,
+                "vergemaalEllerFremtidsfullmakt": []
+              },
+              {
+                "fornavn": "Blaut",
+                "etternavn": "Jordmor",
+                "foedselsnummer": "23021263214",
+                "foedselsdato": "2012-02-23",
+                "foedselsaar": 2012,
+                "foedeland": "NOR",
+                "doedsdato": null,
+                "adressebeskyttelse": "UGRADERT",
+                "bostedsadresse": [
+                  {
+                    "type": "VEGADRESSE",
+                    "aktiv": true,
+                    "coAdresseNavn": null,
+                    "adresseLinje1": "Tørdalsveien 1338",
+                    "adresseLinje2": null,
+                    "adresseLinje3": null,
+                    "postnr": "3750",
+                    "poststed": null,
+                    "land": null,
+                    "kilde": "FREG",
+                    "gyldigFraOgMed": "2012-02-23T00:00:00",
+                    "gyldigTilOgMed": null
+                  }
+                ],
+                "deltBostedsadresse": null,
+                "kontaktadresse": [],
+                "oppholdsadresse": [],
+                "sivilstatus": "UOPPGITT",
+                "statsborgerskap": "NOR",
+                "utland": {
+                  "innflyttingTilNorge": [],
+                  "utflyttingFraNorge": []
+                },
+                "familieRelasjon": {
+                  "ansvarligeForeldre": [
+                    "05508119005"
+                  ],
+                  "foreldre": [
+                    "05508119005"
+                  ],
+                  "barn": null
+                },
+                "avdoedesBarn": null,
+                "vergemaalEllerFremtidsfullmakt": []
+              },
+              {
+                "fornavn": "Motløs",
+                "etternavn": "Karaffel",
+                "foedselsnummer": "04031274805",
+                "foedselsdato": "2012-03-04",
+                "foedselsaar": 2012,
+                "foedeland": "NOR",
+                "doedsdato": null,
+                "adressebeskyttelse": "UGRADERT",
+                "bostedsadresse": [
+                  {
+                    "type": "VEGADRESSE",
+                    "aktiv": true,
+                    "coAdresseNavn": null,
+                    "adresseLinje1": "Tørdalsveien 1338",
+                    "adresseLinje2": null,
+                    "adresseLinje3": null,
+                    "postnr": "3750",
+                    "poststed": null,
+                    "land": null,
+                    "kilde": "FREG",
+                    "gyldigFraOgMed": "2012-03-04T00:00:00",
+                    "gyldigTilOgMed": null
+                  }
+                ],
+                "deltBostedsadresse": null,
+                "kontaktadresse": [],
+                "oppholdsadresse": [],
+                "sivilstatus": "UOPPGITT",
+                "statsborgerskap": "NOR",
+                "utland": {
+                  "innflyttingTilNorge": [],
+                  "utflyttingFraNorge": []
+                },
+                "familieRelasjon": {
+                  "ansvarligeForeldre": [
+                    "05508119005"
+                  ],
+                  "foreldre": [
+                    "05508119005"
+                  ],
+                  "barn": null
+                },
+                "avdoedesBarn": null,
+                "vergemaalEllerFremtidsfullmakt": []
+              }
+            ],
+            "vergemaalEllerFremtidsfullmakt": null
+          },
+          "type": "konstant"
+        },
+        "BOSTEDSADRESSE": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:43.124752409Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "type": "VEGADRESSE",
+            "aktiv": false,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Tørdalsveien 1338",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "3750",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "2012-06-04T00:00:00",
+            "gyldigTilOgMed": null
+          },
+          "type": "konstant"
+        },
+        "NAVN": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:43.124964663Z",
+            "registersReferanse": null,
+            "opplysningId": "53b04cc9-63ab-49b0-af41-bb4a6f4976ca",
+            "type": "pdl"
+          },
+          "verdi": {
+            "fornavn": "Tom",
+            "etternavn": "Apanasje"
+          },
+          "type": "konstant"
+        },
+        "FOEDSELSNUMMER": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:43.125001389Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": "05508119005",
+          "type": "konstant"
+        },
+        "FOEDSELSAAR": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:43.125016326Z",
+            "registersReferanse": null,
+            "opplysningId": "55ce4e1b-d39e-43b1-95e6-9ea1d6d37655",
+            "type": "pdl"
+          },
+          "verdi": 1981,
+          "type": "konstant"
+        },
+        "FOEDSELSDATO": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:43.125025373Z",
+            "registersReferanse": null,
+            "opplysningId": "55ce4e1b-d39e-43b1-95e6-9ea1d6d37655",
+            "type": "pdl"
+          },
+          "verdi": "1981-10-05",
+          "type": "konstant"
+        },
+        "FOEDELAND": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:43.125036909Z",
+            "registersReferanse": null,
+            "opplysningId": "55ce4e1b-d39e-43b1-95e6-9ea1d6d37655",
+            "type": "pdl"
+          },
+          "verdi": "NOR",
+          "type": "konstant"
+        },
+        "DOEDSDATO": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:43.125041203Z",
+            "registersReferanse": null,
+            "opplysningId": "7549b930-4235-4c1d-9e2e-f3d560859d5b",
+            "type": "pdl"
+          },
+          "verdi": "2022-08-17",
+          "type": "konstant"
+        },
+        "SIVILSTATUS": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:43.125047147Z",
+            "registersReferanse": null,
+            "opplysningId": "c12e08ee-0640-4594-a856-b844649902f1",
+            "type": "pdl"
+          },
+          "verdi": "GIFT",
+          "type": "konstant"
+        },
+        "STATSBORGERSKAP": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:43.125092661Z",
+            "registersReferanse": null,
+            "opplysningId": "9d139563-7c5c-4aca-b9d8-176d2b5b516c",
+            "type": "pdl"
+          },
+          "verdi": "NOR",
+          "type": "konstant"
+        },
+        "UTLAND": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:43.125100695Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "type": "konstant"
+        },
+        "FAMILIERELASJON": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:43.125116435Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "ansvarligeForeldre": null,
+            "foreldre": null,
+            "barn": [
+              "19021254846",
+              "04021269234",
+              "04061271223",
+              "23021263214",
+              "04031274805"
+            ]
+          },
+          "type": "konstant"
+        },
+        "PERSONROLLE": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:43.125133465Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": "AVDOED",
+          "type": "konstant"
+        },
+        "AVDOEDESBARN": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-26T13:27:43.125143445Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": [
+            {
+              "fornavn": "Sterk",
+              "etternavn": "Fusjon",
+              "foedselsnummer": "19021254846",
+              "foedselsdato": "2012-02-19",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Tørdalsveien 1338",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "3750",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-03-04T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "05508119005",
+                  "19118310597"
+                ],
+                "foreldre": [
+                  "05508119005",
+                  "19118310597"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            },
+            {
+              "fornavn": "Virkelig",
+              "etternavn": "Årbok",
+              "foedselsnummer": "04021269234",
+              "foedselsdato": "2012-02-04",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Tørdalsveien 1338",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "3750",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-03-04T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "05508119005",
+                  "19118310597"
+                ],
+                "foreldre": [
+                  "05508119005",
+                  "19118310597"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            },
+            {
+              "fornavn": "Urokkelig",
+              "etternavn": "Engel",
+              "foedselsnummer": "04061271223",
+              "foedselsdato": "2012-06-04",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Tørdalsveien 1338",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "3750",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-06-04T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "05508119005",
+                  "19118310597"
+                ],
+                "foreldre": [
+                  "05508119005",
+                  "19118310597"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            },
+            {
+              "fornavn": "Blaut",
+              "etternavn": "Jordmor",
+              "foedselsnummer": "23021263214",
+              "foedselsdato": "2012-02-23",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Tørdalsveien 1338",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "3750",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-02-23T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "05508119005"
+                ],
+                "foreldre": [
+                  "05508119005"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            },
+            {
+              "fornavn": "Motløs",
+              "etternavn": "Karaffel",
+              "foedselsnummer": "04031274805",
+              "foedselsdato": "2012-03-04",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Tørdalsveien 1338",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "3750",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-03-04T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "05508119005"
+                ],
+                "foreldre": [
+                  "05508119005"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            }
+          ],
+          "type": "konstant"
+        },
+        "AVDOED_INNTEKT_V1": {
+          "kilde": {
+            "tidspunkt": "2022-09-26T13:27:44.880589972Z",
+            "type": "a-ordningen"
+          },
+          "verdi": {
+            "pensjonEllerTrygd": [],
+            "ytelseFraOffentlig": [],
+            "loennsinntekt": [],
+            "naeringsinntekt": []
+          },
+          "type": "konstant"
+        },
+        "ARBEIDSFORHOLD_V1": {
+          "kilde": {
+            "tidspunkt": "2022-09-26T13:27:44.880618524Z",
+            "type": "aa-registeret"
+          },
+          "verdi": {
+            "arbeidsforhold": []
+          },
+          "type": "konstant"
+        }
+      }
+    ],
+    "sak": {
+      "AVDOED_SOEKNAD_V1": {
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "AVDOED",
+          "fornavn": "DØD",
+          "etternavn": "TESTPERSON",
+          "foedselsnummer": "05508119005",
+          "doedsdato": "2021-07-27",
+          "statsborgerskap": "Norsk",
+          "utenlandsopphold": {
+            "harHattUtenlandsopphold": "NEI",
+            "opphold": []
+          },
+          "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": "NEI"
+        },
+        "type": "konstant"
+      },
+      "SOEKER_SOEKNAD_V1": {
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "BARN",
+          "fornavn": "TEST",
+          "etternavn": "SOEKER",
+          "foedselsnummer": "19021254846",
+          "statsborgerskap": "Norsk",
+          "utenlandsadresse": {
+            "adresseIUtlandet": "NEI",
+            "land": null,
+            "adresse": null
+          },
+          "foreldre": [
+            {
+              "type": "FORELDER",
+              "fornavn": "Levende",
+              "etternavn": "Testperson",
+              "foedselsnummer": "19118310597"
+            },
+            {
+              "type": "FORELDER",
+              "fornavn": "Død",
+              "etternavn": "Testperson",
+              "foedselsnummer": "05508119005"
+            }
+          ],
+          "verge": {
+            "barnHarVerge": "NEI",
+            "fornavn": null,
+            "etternavn": null,
+            "foedselsnummer": null
+          },
+          "omsorgPerson": null
+        },
+        "type": "konstant"
+      },
+      "GJENLEVENDE_FORELDER_SOEKNAD_V1": {
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "GJENLEVENDE_FORELDER",
+          "fornavn": "LEVENDE",
+          "etternavn": "TESTPERSON",
+          "foedselsnummer": "19118310597",
+          "adresse": "TESTVEIEN 123, 0123 TEST",
+          "statsborgerskap": "Norge",
+          "telefonnummer": "11111111"
+        },
+        "type": "konstant"
+      },
+      "INNSENDER_SOEKNAD_V1": {
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "INNSENDER",
+          "fornavn": "DUMMY FORNAVN",
+          "etternavn": "DUMMY ETTERNAVN",
+          "foedselsnummer": "19118310597"
+        },
+        "type": "konstant"
+      },
+      "UTBETALINGSINFORMASJON_V1": {
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "bankkontoType": "NORSK",
+          "kontonummer": "1351.35.13513",
+          "utenlandskBankNavn": null,
+          "utenlandskBankAdresse": null,
+          "iban": null,
+          "swift": null,
+          "oenskerSkattetrekk": "JA",
+          "oensketSkattetrekkProsent": "21%"
+        },
+        "type": "konstant"
+      },
+      "SAMTYKKE": {
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "harSamtykket": true
+        },
+        "type": "konstant"
+      },
+      "SOEKNAD_MOTTATT_DATO": {
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "mottattDato": "2022-02-10T10:51:12.298943803"
+        },
+        "type": "konstant"
+      },
+      "SOEKNADSTYPE_V1": {
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "BARNEPENSJON"
+        },
+        "type": "konstant"
+      },
+      "PERSONGALLERI_V1": {
+        "kilde": {
+          "fnr": "19118310597",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "soeker": "19021254846",
+          "innsender": "19118310597",
+          "soesken": [],
+          "avdoed": [
+            "05508119005"
+          ],
+          "gjenlevende": [
+            "19118310597"
+          ]
+        },
+        "type": "konstant"
+      },
+      "SOESKEN_I_BEREGNINGEN": {
+        "kilde": {
+          "ident": "Z994227",
+          "tidspunkt": "2022-09-27T06:44:42.431956245Z",
+          "type": "saksbehandler"
+        },
+        "verdi": {
+          "beregningsgrunnlag": [
+            {
+              "foedselsnummer": "04021269234",
+              "skalBrukes": false
+            },
+            {
+              "foedselsnummer": "04061271223",
+              "skalBrukes": false
+            },
+            {
+              "foedselsnummer": "23021263214",
+              "skalBrukes": false
+            },
+            {
+              "foedselsnummer": "04031274805",
+              "skalBrukes": true
+            }
+          ]
+        },
+        "type": "konstant"
+      }
+    },
+    "metadata": {
+      "sakId": 48,
+      "versjon": 51
+    }
+  },
+  "@forårsaket_av": {
+    "id": "776b8050-f50b-4019-a49d-6c83e92c4814",
+    "opprettet": "2022-09-27T08:44:43.322294492",
+    "event_name": "BEHANDLING:GRUNNLAGENDRET"
+  },
+  "vilkaarsvurdering": {
+    "resultat": "OPPFYLT",
+    "vilkaar": [
+      {
+        "navn": "FORMAAL_FOR_YTELSEN",
+        "resultat": "OPPFYLT",
+        "utfall": null,
+        "kriterier": [
+          {
+            "navn": "SOEKER_ER_I_LIVE",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "28ce0b18-8085-45aa-a0c6-f0f3b20d1a23",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:41.668077620Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": null,
+                  "foedselsnummer": "19021254846"
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-09-27T08:44:43.368108931"
+      },
+      {
+        "navn": "SOEKER_ER_UNDER_20",
+        "resultat": "OPPFYLT",
+        "utfall": null,
+        "kriterier": [
+          {
+            "navn": "SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "28ce0b18-8085-45aa-a0c6-f0f3b20d1a23",
+                "kriterieOpplysningsType": "FOEDSELSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:41.668077620Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "foedselsdato": "2012-02-19",
+                  "foedselsnummer": "19021254846"
+                }
+              },
+              {
+                "id": "885700e8-d252-4640-bac5-344a8a41b03f",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-08-17",
+                  "foedselsnummer": "05508119005"
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-09-27T08:44:43.3681735"
+      },
+      {
+        "navn": "DOEDSFALL_ER_REGISTRERT",
+        "resultat": "OPPFYLT",
+        "utfall": null,
+        "kriterier": [
+          {
+            "navn": "DOEDSFALL_ER_REGISTRERT_I_PDL",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "885700e8-d252-4640-bac5-344a8a41b03f",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-08-17",
+                  "foedselsnummer": "05508119005"
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_ER_FORELDER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "28ce0b18-8085-45aa-a0c6-f0f3b20d1a23",
+                "kriterieOpplysningsType": "FORELDRE",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:41.668077620Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "foreldre": [
+                    "05508119005",
+                    "19118310597"
+                  ]
+                }
+              },
+              {
+                "id": "885700e8-d252-4640-bac5-344a8a41b03f",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-08-17",
+                  "foedselsnummer": "05508119005"
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-09-27T08:44:43.368290003"
+      },
+      {
+        "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
+        "resultat": "IKKE_OPPFYLT",
+        "utfall": "TRENGER_AVKLARING",
+        "kriterier": [
+          {
+            "navn": "AVDOED_NORSK_STATSBORGER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "885700e8-d252-4640-bac5-344a8a41b03f",
+                "kriterieOpplysningsType": "STATSBORGERSKAP",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": "NOR"
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_INGEN_INN_ELLER_UTVANDRING",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "885700e8-d252-4640-bac5-344a8a41b03f",
+                "kriterieOpplysningsType": "UTLAND",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "innflyttingTilNorge": [],
+                  "utflyttingFraNorge": []
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "b0fee498-d67c-4709-9e59-f2a3da89d198",
+                "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
+                "kilde": {
+                  "fnr": "19118310597",
+                  "mottatDato": "2022-02-10T10:51:12.298943803Z",
+                  "type": "privatperson"
+                },
+                "opplysning": {
+                  "harHattUtenlandsopphold": "NEI",
+                  "opphold": []
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_KUN_NORSKE_BOSTEDSADRESSER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "885700e8-d252-4640-bac5-344a8a41b03f",
+                "kriterieOpplysningsType": "ADRESSELISTE",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "adresser": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Tørdalsveien 1338",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "3750",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2012-06-04T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR",
+            "resultat": "IKKE_OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "885700e8-d252-4640-bac5-344a8a41b03f",
+                "kriterieOpplysningsType": "ADRESSELISTE",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "adresser": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Tørdalsveien 1338",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "3750",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2012-06-04T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "885700e8-d252-4640-bac5-344a8a41b03f",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-08-17",
+                  "foedselsnummer": "05508119005"
+                }
+              },
+              {
+                "id": "30880243-5c7c-46df-b062-577bcebff0cf",
+                "kriterieOpplysningsType": "ADRESSE_GAPS",
+                "kilde": {
+                  "navn": "vilkaarskomponenten",
+                  "type": "vilkaarskomponenten"
+                },
+                "opplysning": [
+                  {
+                    "gyldigFra": "2017-08-17",
+                    "gyldigTil": "2022-08-17"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_KUN_NORSKE_OPPHOLDSSADRESSER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "885700e8-d252-4640-bac5-344a8a41b03f",
+                "kriterieOpplysningsType": "ADRESSELISTE",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "adresser": []
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_KUN_NORSKE_KONTAKTADRESSER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "885700e8-d252-4640-bac5-344a8a41b03f",
+                "kriterieOpplysningsType": "ADRESSELISTE",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "adresser": []
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_OPPFYLLER_MEDLEMSKAP",
+            "resultat": "IKKE_OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "81523c62-a524-45f6-a2bc-ed1cc72870f8",
+                "kriterieOpplysningsType": "AVDOED_MEDLEMSKAP",
+                "kilde": {
+                  "navn": "vilkaarskomponenten",
+                  "type": "vilkaarskomponenten"
+                },
+                "opplysning": {
+                  "grunnlag": {
+                    "inntektsOpplysning": {
+                      "id": "d6ae747c-50b8-4550-946f-867acaedf77b",
+                      "opplysningType": "AVDOED_INNTEKT_V1",
+                      "kilde": {
+                        "tidspunkt": "2022-09-26T13:27:44.880589972Z",
+                        "type": "a-ordningen"
+                      },
+                      "opplysning": {
+                        "pensjonEllerTrygd": [],
+                        "ytelseFraOffentlig": [],
+                        "loennsinntekt": [],
+                        "naeringsinntekt": []
+                      }
+                    },
+                    "arbeidsforholdOpplysning": {
+                      "id": "28eec8e3-9c83-4763-8ff2-ebeabe4f4fc2",
+                      "opplysningType": "ARBEIDSFORHOLD_V1",
+                      "kilde": {
+                        "tidspunkt": "2022-09-26T13:27:44.880618524Z",
+                        "type": "aa-registeret"
+                      },
+                      "opplysning": {
+                        "arbeidsforhold": []
+                      }
+                    },
+                    "saksbehandlerMedlemsPerioder": null,
+                    "doedsdato": "2022-08-17"
+                  },
+                  "perioder": [],
+                  "gaps": [
+                    {
+                      "fraDato": "2017-08-17",
+                      "tilDato": "2022-08-17"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-09-27T08:44:43.369437648"
+      },
+      {
+        "navn": "BARNETS_MEDLEMSKAP",
+        "resultat": "OPPFYLT",
+        "utfall": null,
+        "kriterier": [
+          {
+            "navn": "SOEKER_IKKE_ADRESSE_I_UTLANDET",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "28ce0b18-8085-45aa-a0c6-f0f3b20d1a23",
+                "kriterieOpplysningsType": "ADRESSER",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:41.668077620Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "bostedadresse": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Tørdalsveien 1338",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "3750",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2012-03-04T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ],
+                  "oppholdadresse": [],
+                  "kontaktadresse": []
+                }
+              },
+              {
+                "id": "942f5c8a-0bda-464c-aba0-09f6a1a25389",
+                "kriterieOpplysningsType": "SOEKER_UTENLANDSOPPHOLD",
+                "kilde": {
+                  "fnr": "19118310597",
+                  "mottatDato": "2022-02-10T10:51:12.298943803Z",
+                  "type": "privatperson"
+                },
+                "opplysning": {
+                  "adresseIUtlandet": "NEI",
+                  "land": null,
+                  "adresse": null
+                }
+              },
+              {
+                "id": "885700e8-d252-4640-bac5-344a8a41b03f",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-08-17",
+                  "foedselsnummer": "05508119005"
+                }
+              }
+            ]
+          },
+          {
+            "navn": "GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "c2c1757f-c5dd-40ef-bc97-6dccfaf9af67",
+                "kriterieOpplysningsType": "ADRESSER",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:42.192444558Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "bostedadresse": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Hegneskottet 1",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "3681",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "1983-11-19T00:00:00",
+                      "gyldigTilOgMed": null
+                    },
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Tørdalsveien 1338",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "3750",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2015-08-12T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ],
+                  "oppholdadresse": [],
+                  "kontaktadresse": null
+                }
+              },
+              {
+                "id": "885700e8-d252-4640-bac5-344a8a41b03f",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-08-17",
+                  "foedselsnummer": "05508119005"
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-09-27T08:44:43.369549649"
+      }
+    ],
+    "vurdertDato": "2022-09-27T08:44:43.369549649"
+  },
+  "virkningstidspunkt": "2022-09",
+  "kommerSoekerTilGode": {
+    "kommerSoekerTilgodeVurdering": {
+      "resultat": "OPPFYLT",
+      "vilkaar": [
+        {
+          "navn": "GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE",
+          "resultat": "OPPFYLT",
+          "utfall": null,
+          "kriterier": [
+            {
+              "navn": "SAMME_BOSTEDSADRESSE",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "28ce0b18-8085-45aa-a0c6-f0f3b20d1a23",
+                  "kriterieOpplysningsType": "BOSTEDADRESSE_SOEKER",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-26T13:27:41.668077620Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": true,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Tørdalsveien 1338",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "3750",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "2012-03-04T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "c2c1757f-c5dd-40ef-bc97-6dccfaf9af67",
+                  "kriterieOpplysningsType": "BOSTEDADRESSE_GJENLEVENDE",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-26T13:27:42.192444558Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": false,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Hegneskottet 1",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "3681",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "1983-11-19T00:00:00",
+                        "gyldigTilOgMed": null
+                      },
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": true,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Tørdalsveien 1338",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "3750",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "2015-08-12T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-09-27T08:44:43.455985622"
+        },
+        {
+          "navn": "BARN_INGEN_OPPGITT_UTLANDSADRESSE",
+          "resultat": "OPPFYLT",
+          "utfall": null,
+          "kriterier": [
+            {
+              "navn": "SOEKER_IKKE_ADRESSE_I_UTLANDET",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "942f5c8a-0bda-464c-aba0-09f6a1a25389",
+                  "kriterieOpplysningsType": "SOEKER_UTENLANDSOPPHOLD",
+                  "kilde": {
+                    "fnr": "19118310597",
+                    "mottatDato": "2022-02-10T10:51:12.298943803Z",
+                    "type": "privatperson"
+                  },
+                  "opplysning": {
+                    "adresseIUtlandet": "NEI",
+                    "land": null,
+                    "adresse": null
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-09-27T08:44:43.456003659"
+        },
+        {
+          "navn": "BARN_BOR_PAA_AVDOEDES_ADRESSE",
+          "resultat": "OPPFYLT",
+          "utfall": null,
+          "kriterier": [
+            {
+              "navn": "SAMME_BOSTEDSADRESSE",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "28ce0b18-8085-45aa-a0c6-f0f3b20d1a23",
+                  "kriterieOpplysningsType": "BOSTEDADRESSE_SOEKER",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-26T13:27:41.668077620Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": true,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Tørdalsveien 1338",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "3750",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "2012-03-04T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "885700e8-d252-4640-bac5-344a8a41b03f",
+                  "kriterieOpplysningsType": "BOSTEDADRESSE_AVDOED",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-26T13:27:43.124690961Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": false,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Tørdalsveien 1338",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "3750",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "2012-06-04T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-09-27T08:44:43.456194981"
+        }
+      ],
+      "vurdertDato": "2022-09-27T08:44:43.456194981"
+    },
+    "familieforhold": {
+      "avdoed": {
+        "navn": "Tom Apanasje",
+        "fnr": "05508119005",
+        "rolle": "AVDOED",
+        "bostedadresser": [
+          {
+            "type": "VEGADRESSE",
+            "aktiv": false,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Tørdalsveien 1338",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "3750",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "2012-06-04T00:00:00",
+            "gyldigTilOgMed": null
+          }
+        ],
+        "doedsdato": "2022-08-17",
+        "barn": [
+          "19021254846",
+          "04021269234",
+          "04061271223",
+          "23021263214",
+          "04031274805"
+        ]
+      },
+      "soeker": {
+        "navn": "Sterk Fusjon",
+        "fnr": "19021254846",
+        "rolle": "BARN",
+        "bostedadresser": [
+          {
+            "type": "VEGADRESSE",
+            "aktiv": true,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Tørdalsveien 1338",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "3750",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "2012-03-04T00:00:00",
+            "gyldigTilOgMed": null
+          }
+        ],
+        "soeknadAdresse": {
+          "adresseIUtlandet": "NEI",
+          "land": null,
+          "adresse": null
+        },
+        "foedselsdato": "2012-02-19"
+      },
+      "gjenlevendeForelder": {
+        "navn": "Morsk Kabin",
+        "fnr": "19118310597",
+        "rolle": "GJENLEVENDE",
+        "bostedadresser": [
+          {
+            "type": "VEGADRESSE",
+            "aktiv": false,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Hegneskottet 1",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "3681",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "1983-11-19T00:00:00",
+            "gyldigTilOgMed": null
+          },
+          {
+            "type": "VEGADRESSE",
+            "aktiv": true,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Tørdalsveien 1338",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "3750",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "2015-08-12T00:00:00",
+            "gyldigTilOgMed": null
+          }
+        ]
+      }
+    }
+  },
+  "vilkaarsvurderingGrunnlagRef": 51
+}

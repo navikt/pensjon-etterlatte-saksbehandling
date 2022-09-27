@@ -20,7 +20,7 @@ data class FinnSoeskenPeriode(
     fun hentSoeskenperioder(): List<SoeskenPeriode> {
         val avdoedesBarn = grunnlag.hentAvdoed().hentAvdoedesbarn()?.verdi?.avdoedesBarn ?: return emptyList()
         val søker = grunnlag.søker
-        val søkersBostedsadresse = søker.hentBostedsadresse()?.verdi?.first() ?: return emptyList()
+        val søkersBostedsadresse = søker.hentBostedsadresse()?.verdi ?: return emptyList()
 
         val skalBeregnesOverrides = grunnlag.sak.hentSøskenjustering()?.verdi?.beregningsgrunnlag
             ?.associateBy({ it.foedselsnummer.value }, { it.skalBrukes })

@@ -65,7 +65,7 @@ internal class FinnSoeskenPeriodeTest {
             opplysningsmapHalvsøskenOverrides = mapOf(
                 BOSTEDSADRESSE to Opplysning.Konstant(
                     kilde,
-                    ADRESSE_DEFAULT.map { it.copy(adresseLinje1 = "Andebygata 69") }.toJsonNode()
+                    ADRESSE_DEFAULT.copy(adresseLinje1 = "Andebygata 69").toJsonNode()
                 )
             )
         )
@@ -85,7 +85,7 @@ internal class FinnSoeskenPeriodeTest {
             opplysningsmapHalvsøskenOverrides = mapOf(
                 BOSTEDSADRESSE to Opplysning.Konstant(
                     kilde,
-                    ADRESSE_DEFAULT.map { it.copy(adresseLinje1 = "Andebygata 69") }.toJsonNode()
+                    ADRESSE_DEFAULT.copy(adresseLinje1 = "Andebygata 69").toJsonNode()
                 )
             ),
             opplysningsmapSakOverrides = mapOf(

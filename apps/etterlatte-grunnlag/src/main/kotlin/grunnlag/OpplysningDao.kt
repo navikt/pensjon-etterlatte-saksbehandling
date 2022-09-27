@@ -13,7 +13,6 @@ import java.util.*
 import javax.sql.DataSource
 
 class OpplysningDao(private val datasource: DataSource) {
-
     private val connection get() = datasource.connection
 
     data class GrunnlagHendelse(

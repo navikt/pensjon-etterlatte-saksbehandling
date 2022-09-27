@@ -1,0 +1,3046 @@
+{
+  "@event_name": "BEHANDLING:GRUNNLAGENDRET",
+  "behandlingId": "733bb9ba-b3e9-4969-af2a-a27373cc6753",
+  "behandling": {
+    "id": "733bb9ba-b3e9-4969-af2a-a27373cc6753",
+    "sak": 49,
+    "behandlingOpprettet": "2022-09-27T09:05:00.896935",
+    "sistEndret": "2022-09-27T09:05:03.754043",
+    "status": "UNDER_BEHANDLING",
+    "oppgaveStatus": "NY",
+    "type": "FØRSTEGANGSBEHANDLING",
+    "soeknadMottattDato": "2022-09-27T09:04:59.349728",
+    "persongalleri": {
+      "soeker": "25041257817",
+      "innsender": "30038607940",
+      "soesken": [],
+      "avdoed": [
+        "08428212410"
+      ],
+      "gjenlevende": [
+        "30038607940"
+      ]
+    },
+    "gyldighetsproeving": {
+      "resultat": "OPPFYLT",
+      "vurderinger": [
+        {
+          "navn": "INNSENDER_ER_FORELDER",
+          "resultat": "OPPFYLT",
+          "basertPaaOpplysninger": {
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "30038607940",
+                "08428212410"
+              ],
+              "foreldre": [
+                "30038607940",
+                "08428212410"
+              ],
+              "barn": null
+            },
+            "innsender": {
+              "navn": "Beskjeden Mandarin",
+              "fnr": "30038607940"
+            },
+            "gjenlevende": [
+              {
+                "navn": "Beskjeden Mandarin",
+                "fnr": "30038607940"
+              }
+            ]
+          }
+        },
+        {
+          "navn": "HAR_FORELDREANSVAR_FOR_BARNET",
+          "resultat": "OPPFYLT",
+          "basertPaaOpplysninger": {
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "30038607940",
+                "08428212410"
+              ],
+              "foreldre": [
+                "30038607940",
+                "08428212410"
+              ],
+              "barn": null
+            },
+            "innsender": {
+              "navn": "Beskjeden Mandarin",
+              "fnr": "30038607940"
+            }
+          }
+        },
+        {
+          "navn": "INGEN_ANNEN_VERGE_ENN_FORELDER",
+          "resultat": "OPPFYLT",
+          "basertPaaOpplysninger": {
+            "vergemaalEllerFremtidsfullmakt": []
+          }
+        }
+      ],
+      "vurdertDato": "2022-09-27T09:05:00.67628162"
+    }
+  },
+  "sakId": 49,
+  "sak": {
+    "ident": "25041257817",
+    "sakType": "BARNEPENSJON",
+    "id": 49
+  },
+  "behandlingOpprettet": "2022-09-27T09:05:00.896935",
+  "@id": "c9c5f1c3-2f27-43d7-93b7-69caaeb1a08b",
+  "@opprettet": "2022-09-27T09:05:05.052486958",
+  "system_read_count": 2,
+  "system_participating_services": [
+    {
+      "id": "b308a47b-d598-4eaa-9e62-63e364f470ad",
+      "time": "2022-09-27T09:05:04.961750674",
+      "service": "etterlatte-behandling",
+      "instance": "etterlatte-behandling-5c57d8c48b-snhnc",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-behandling:591106f1bcd50d8ba0f8e7a8846f038e2f9cbe2e"
+    },
+    {
+      "id": "b308a47b-d598-4eaa-9e62-63e364f470ad",
+      "time": "2022-09-27T09:05:04.980010446",
+      "service": "etterlatte-grunnlag",
+      "instance": "etterlatte-grunnlag-f5fcb8b54-6ncmr",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-grunnlag:591106f1bcd50d8ba0f8e7a8846f038e2f9cbe2e"
+    },
+    {
+      "id": "67969399-4813-4f92-abe8-6461b624d94b",
+      "time": "2022-09-27T09:05:04.994661864",
+      "service": "etterlatte-grunnlag",
+      "instance": "etterlatte-grunnlag-f5fcb8b54-6ncmr",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-grunnlag:591106f1bcd50d8ba0f8e7a8846f038e2f9cbe2e"
+    },
+    {
+      "id": "67969399-4813-4f92-abe8-6461b624d94b",
+      "time": "2022-09-27T09:05:05.038983455",
+      "service": "etterlatte-vilkaar-kafka",
+      "instance": "etterlatte-vilkaar-kafka-66b9766684-gps74",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-vilkaar-kafka:591106f1bcd50d8ba0f8e7a8846f038e2f9cbe2e"
+    },
+    {
+      "id": "c9c5f1c3-2f27-43d7-93b7-69caaeb1a08b",
+      "time": "2022-09-27T09:05:05.052486958",
+      "service": "etterlatte-vilkaar-kafka",
+      "instance": "etterlatte-vilkaar-kafka-66b9766684-gps74",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-vilkaar-kafka:591106f1bcd50d8ba0f8e7a8846f038e2f9cbe2e"
+    }
+  ],
+  "fnrSoeker": "25041257817",
+  "persongalleri": {
+    "soeker": "25041257817",
+    "innsender": "30038607940",
+    "soesken": [],
+    "avdoed": [
+      "08428212410"
+    ],
+    "gjenlevende": [
+      "30038607940"
+    ]
+  },
+  "grunnlag": {
+    "saksId": 49,
+    "grunnlag": [
+      {
+        "id": "da058d5c-5cb7-40ab-acab-8796614cc585",
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "AVDOED_SOEKNAD_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "AVDOED",
+          "fornavn": "DØD",
+          "etternavn": "TESTPERSON",
+          "foedselsnummer": "08428212410",
+          "doedsdato": "2021-07-27",
+          "statsborgerskap": "Norsk",
+          "utenlandsopphold": {
+            "harHattUtenlandsopphold": "NEI",
+            "opphold": []
+          },
+          "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": "NEI"
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "ff8a70ce-0ab1-419c-bb6e-8f574aaba64f",
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "SOEKER_SOEKNAD_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "BARN",
+          "fornavn": "TEST",
+          "etternavn": "SOEKER",
+          "foedselsnummer": "25041257817",
+          "statsborgerskap": "Norsk",
+          "utenlandsadresse": {
+            "adresseIUtlandet": "NEI",
+            "land": null,
+            "adresse": null
+          },
+          "foreldre": [
+            {
+              "type": "FORELDER",
+              "fornavn": "Levende",
+              "etternavn": "Testperson",
+              "foedselsnummer": "30038607940"
+            },
+            {
+              "type": "FORELDER",
+              "fornavn": "Død",
+              "etternavn": "Testperson",
+              "foedselsnummer": "08428212410"
+            }
+          ],
+          "verge": {
+            "barnHarVerge": "NEI",
+            "fornavn": null,
+            "etternavn": null,
+            "foedselsnummer": null
+          },
+          "omsorgPerson": null
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "8a96e8a6-406d-4e39-82ae-c701c190a4ad",
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "GJENLEVENDE_FORELDER_SOEKNAD_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "GJENLEVENDE_FORELDER",
+          "fornavn": "LEVENDE",
+          "etternavn": "TESTPERSON",
+          "foedselsnummer": "30038607940",
+          "adresse": "TESTVEIEN 123, 0123 TEST",
+          "statsborgerskap": "Norge",
+          "telefonnummer": "11111111"
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "bd6c70d1-b138-425f-963d-b32592b15e1c",
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "INNSENDER_SOEKNAD_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "INNSENDER",
+          "fornavn": "DUMMY FORNAVN",
+          "etternavn": "DUMMY ETTERNAVN",
+          "foedselsnummer": "30038607940"
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "c2ffce02-b7de-4209-96ea-68a71b5bc22d",
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "UTBETALINGSINFORMASJON_V1",
+        "meta": {},
+        "opplysning": {
+          "bankkontoType": "NORSK",
+          "kontonummer": "1351.35.13513",
+          "utenlandskBankNavn": null,
+          "utenlandskBankAdresse": null,
+          "iban": null,
+          "swift": null,
+          "oenskerSkattetrekk": "JA",
+          "oensketSkattetrekkProsent": "21%"
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "0d88f8d6-df19-48b7-a65f-e21b7d231d15",
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "SAMTYKKE",
+        "meta": {},
+        "opplysning": {
+          "harSamtykket": true
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "394d36d8-bbd2-4a96-b764-e2328aa70a04",
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "SOEKNAD_MOTTATT_DATO",
+        "meta": {},
+        "opplysning": {
+          "mottattDato": "2022-02-10T10:51:12.298943803"
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "7811d0b2-afb0-4ca7-bffb-dbf56d4341fa",
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "SOEKNADSTYPE_V1",
+        "meta": {},
+        "opplysning": {
+          "type": "BARNEPENSJON"
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "4e2ad8d6-0f39-4b03-9092-bf68e345953b",
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "opplysningType": "PERSONGALLERI_V1",
+        "meta": {},
+        "opplysning": {
+          "soeker": "25041257817",
+          "innsender": "30038607940",
+          "soesken": [],
+          "avdoed": [
+            "08428212410"
+          ],
+          "gjenlevende": [
+            "30038607940"
+          ]
+        },
+        "attestering": null,
+        "fnr": null
+      },
+      {
+        "id": "34242cbb-4a3c-46c6-b6b2-3fe5fd0b179a",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:02.096230469Z",
+          "registersReferanse": null,
+          "opplysningId": null,
+          "type": "pdl"
+        },
+        "opplysningType": "SOEKER_PDL_V1",
+        "meta": {},
+        "opplysning": {
+          "fornavn": "Opprett",
+          "etternavn": "August",
+          "foedselsnummer": "25041257817",
+          "foedselsdato": "2012-04-25",
+          "foedselsaar": 2012,
+          "foedeland": "NOR",
+          "doedsdato": null,
+          "adressebeskyttelse": "UGRADERT",
+          "bostedsadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Kleivtrøvegen 31",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "7519",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "2012-04-25T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "deltBostedsadresse": null,
+          "kontaktadresse": [],
+          "oppholdsadresse": [],
+          "sivilstatus": "UOPPGITT",
+          "statsborgerskap": "NOR",
+          "utland": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "familieRelasjon": {
+            "ansvarligeForeldre": [
+              "30038607940",
+              "08428212410"
+            ],
+            "foreldre": [
+              "30038607940",
+              "08428212410"
+            ],
+            "barn": null
+          },
+          "avdoedesBarn": null,
+          "vergemaalEllerFremtidsfullmakt": []
+        },
+        "attestering": null,
+        "fnr": "25041257817"
+      },
+      {
+        "id": "f6215124-ebfe-4ddc-b3e5-16fdaba22576",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:02.568040254Z",
+          "registersReferanse": null,
+          "opplysningId": null,
+          "type": "pdl"
+        },
+        "opplysningType": "GJENLEVENDE_FORELDER_PDL_V1",
+        "meta": {},
+        "opplysning": {
+          "fornavn": "Beskjeden",
+          "etternavn": "Mandarin",
+          "foedselsnummer": "30038607940",
+          "foedselsdato": "1986-03-30",
+          "foedselsaar": 1986,
+          "foedeland": "NOR",
+          "doedsdato": null,
+          "adressebeskyttelse": "UGRADERT",
+          "bostedsadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": false,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Landstads vei 25 B",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "7052",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "1986-03-30T00:00:00",
+              "gyldigTilOgMed": null
+            },
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Kleivtrøvegen 31",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "7519",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "2015-08-12T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "deltBostedsadresse": null,
+          "kontaktadresse": null,
+          "oppholdsadresse": [],
+          "sivilstatus": "GIFT",
+          "statsborgerskap": "NOR",
+          "utland": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "familieRelasjon": {
+            "ansvarligeForeldre": null,
+            "foreldre": null,
+            "barn": [
+              "26101176893",
+              "25041257817"
+            ]
+          },
+          "avdoedesBarn": null,
+          "vergemaalEllerFremtidsfullmakt": null
+        },
+        "attestering": null,
+        "fnr": "30038607940"
+      },
+      {
+        "id": "20947373-e1ed-4b24-b776-1a313a8b52f7",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+          "registersReferanse": null,
+          "opplysningId": null,
+          "type": "pdl"
+        },
+        "opplysningType": "AVDOED_PDL_V1",
+        "meta": {},
+        "opplysning": {
+          "fornavn": "Oppgitt",
+          "etternavn": "Edelstein",
+          "foedselsnummer": "08428212410",
+          "foedselsdato": "1982-02-08",
+          "foedselsaar": 1982,
+          "foedeland": "NOR",
+          "doedsdato": "2022-08-17",
+          "adressebeskyttelse": "UGRADERT",
+          "bostedsadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": false,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Kleivtrøvegen 31",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "7519",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "2012-04-25T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "deltBostedsadresse": null,
+          "kontaktadresse": [],
+          "oppholdsadresse": [],
+          "sivilstatus": "GIFT",
+          "statsborgerskap": "NOR",
+          "utland": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "familieRelasjon": {
+            "ansvarligeForeldre": null,
+            "foreldre": null,
+            "barn": [
+              "25041257817",
+              "26101176893",
+              "11031278467"
+            ]
+          },
+          "avdoedesBarn": [
+            {
+              "fornavn": "Opprett",
+              "etternavn": "August",
+              "foedselsnummer": "25041257817",
+              "foedselsdato": "2012-04-25",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Kleivtrøvegen 31",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "7519",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-04-25T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "30038607940",
+                  "08428212410"
+                ],
+                "foreldre": [
+                  "30038607940",
+                  "08428212410"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            },
+            {
+              "fornavn": "Nyttig",
+              "etternavn": "Balsam",
+              "foedselsnummer": "26101176893",
+              "foedselsdato": "2011-10-26",
+              "foedselsaar": 2011,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Kleivtrøvegen 31",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "7519",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-03-11T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "08428212410",
+                  "30038607940"
+                ],
+                "foreldre": [
+                  "08428212410",
+                  "30038607940"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            },
+            {
+              "fornavn": "Personlig",
+              "etternavn": "Løve",
+              "foedselsnummer": "11031278467",
+              "foedselsdato": "2012-03-11",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Kleivtrøvegen 31",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "7519",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-03-11T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "08428212410"
+                ],
+                "foreldre": [
+                  "08428212410"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            }
+          ],
+          "vergemaalEllerFremtidsfullmakt": null
+        },
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "771e8708-490e-48e6-bf2e-f48980056bad",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:03.405744757Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "opplysningType": "BOSTEDSADRESSE",
+        "meta": {},
+        "opplysning": {
+          "type": "VEGADRESSE",
+          "aktiv": false,
+          "coAdresseNavn": null,
+          "adresseLinje1": "Kleivtrøvegen 31",
+          "adresseLinje2": null,
+          "adresseLinje3": null,
+          "postnr": "7519",
+          "poststed": null,
+          "land": null,
+          "kilde": "FREG",
+          "gyldigFraOgMed": "2012-04-25T00:00:00",
+          "gyldigTilOgMed": null
+        },
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "acaabbf8-3dd5-4402-929e-bd056d24dcc6",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:03.405902353Z",
+          "registersReferanse": null,
+          "opplysningId": "46878c28-337b-4b39-9797-b73e56d670c1",
+          "type": "pdl"
+        },
+        "opplysningType": "NAVN",
+        "meta": {},
+        "opplysning": {
+          "fornavn": "Oppgitt",
+          "etternavn": "Edelstein"
+        },
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "fb5622f6-0a6f-4d2d-846a-cd764c3b9374",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:03.405921238Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "opplysningType": "FOEDSELSNUMMER",
+        "meta": {},
+        "opplysning": "08428212410",
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "18b1bdae-6761-49b6-9b4d-f6016d79628b",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:03.405959419Z",
+          "registersReferanse": null,
+          "opplysningId": "1f8fae30-e633-4cc5-ae00-c25b0979a302",
+          "type": "pdl"
+        },
+        "opplysningType": "FOEDSELSAAR",
+        "meta": {},
+        "opplysning": 1982,
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "585f11f5-e190-4b84-bc53-327f36ada44c",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:03.405974106Z",
+          "registersReferanse": null,
+          "opplysningId": "1f8fae30-e633-4cc5-ae00-c25b0979a302",
+          "type": "pdl"
+        },
+        "opplysningType": "FOEDSELSDATO",
+        "meta": {},
+        "opplysning": "1982-02-08",
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "a979fc22-40b2-4b67-86b8-41610788b16d",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:03.405991329Z",
+          "registersReferanse": null,
+          "opplysningId": "1f8fae30-e633-4cc5-ae00-c25b0979a302",
+          "type": "pdl"
+        },
+        "opplysningType": "FOEDELAND",
+        "meta": {},
+        "opplysning": "NOR",
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "b76e0603-4814-47e7-9ddc-fe551e79e2aa",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:03.405995533Z",
+          "registersReferanse": null,
+          "opplysningId": "2f7032d5-d5a1-4c86-9401-307cb84949eb",
+          "type": "pdl"
+        },
+        "opplysningType": "DOEDSDATO",
+        "meta": {},
+        "opplysning": "2022-08-17",
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "cb98a159-7cdd-428a-8750-92cc2bbe9529",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:03.406002720Z",
+          "registersReferanse": null,
+          "opplysningId": "14898526-80b9-47c3-8a29-4f9c251dd4d6",
+          "type": "pdl"
+        },
+        "opplysningType": "SIVILSTATUS",
+        "meta": {},
+        "opplysning": "GIFT",
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "b9337372-0387-4242-bd1c-1c692e4d2f13",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:03.406063467Z",
+          "registersReferanse": null,
+          "opplysningId": "8d9fa679-4a91-479d-97e1-159a4330d560",
+          "type": "pdl"
+        },
+        "opplysningType": "STATSBORGERSKAP",
+        "meta": {},
+        "opplysning": "NOR",
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "4abc760c-7999-40b0-ba48-e3587719f626",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:03.406069963Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "opplysningType": "UTLAND",
+        "meta": {},
+        "opplysning": {
+          "innflyttingTilNorge": [],
+          "utflyttingFraNorge": []
+        },
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "e6baf7ef-5c1b-4288-be4a-98854c2df7b9",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:03.406564434Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "opplysningType": "FAMILIERELASJON",
+        "meta": {},
+        "opplysning": {
+          "ansvarligeForeldre": null,
+          "foreldre": null,
+          "barn": [
+            "25041257817",
+            "26101176893",
+            "11031278467"
+          ]
+        },
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "f7b9919d-5aef-45c3-a9fb-9af9f9e33de8",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:03.406613392Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "opplysningType": "PERSONROLLE",
+        "meta": {},
+        "opplysning": "AVDOED",
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "967bc4c3-c708-4051-b5cf-03780eac1662",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:03.406649769Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "opplysningType": "AVDOEDESBARN",
+        "meta": {},
+        "opplysning": [
+          {
+            "fornavn": "Opprett",
+            "etternavn": "August",
+            "foedselsnummer": "25041257817",
+            "foedselsdato": "2012-04-25",
+            "foedselsaar": 2012,
+            "foedeland": "NOR",
+            "doedsdato": null,
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": true,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Kleivtrøvegen 31",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "7519",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2012-04-25T00:00:00",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": [],
+            "oppholdsadresse": [],
+            "sivilstatus": "UOPPGITT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "30038607940",
+                "08428212410"
+              ],
+              "foreldre": [
+                "30038607940",
+                "08428212410"
+              ],
+              "barn": null
+            },
+            "avdoedesBarn": null,
+            "vergemaalEllerFremtidsfullmakt": []
+          },
+          {
+            "fornavn": "Nyttig",
+            "etternavn": "Balsam",
+            "foedselsnummer": "26101176893",
+            "foedselsdato": "2011-10-26",
+            "foedselsaar": 2011,
+            "foedeland": "NOR",
+            "doedsdato": null,
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": true,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Kleivtrøvegen 31",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "7519",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2012-03-11T00:00:00",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": [],
+            "oppholdsadresse": [],
+            "sivilstatus": "UOPPGITT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "08428212410",
+                "30038607940"
+              ],
+              "foreldre": [
+                "08428212410",
+                "30038607940"
+              ],
+              "barn": null
+            },
+            "avdoedesBarn": null,
+            "vergemaalEllerFremtidsfullmakt": []
+          },
+          {
+            "fornavn": "Personlig",
+            "etternavn": "Løve",
+            "foedselsnummer": "11031278467",
+            "foedselsdato": "2012-03-11",
+            "foedselsaar": 2012,
+            "foedeland": "NOR",
+            "doedsdato": null,
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": true,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Kleivtrøvegen 31",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "7519",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2012-03-11T00:00:00",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": [],
+            "oppholdsadresse": [],
+            "sivilstatus": "UOPPGITT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "08428212410"
+              ],
+              "foreldre": [
+                "08428212410"
+              ],
+              "barn": null
+            },
+            "avdoedesBarn": null,
+            "vergemaalEllerFremtidsfullmakt": []
+          }
+        ],
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "fe21b1ce-dc0f-405f-9b8f-1a4643d9ade9",
+        "kilde": {
+          "tidspunkt": "2022-09-27T07:05:04.903942602Z",
+          "type": "a-ordningen"
+        },
+        "opplysningType": "AVDOED_INNTEKT_V1",
+        "meta": {},
+        "opplysning": {
+          "pensjonEllerTrygd": [],
+          "ytelseFraOffentlig": [],
+          "loennsinntekt": [],
+          "naeringsinntekt": []
+        },
+        "attestering": null,
+        "fnr": "08428212410"
+      },
+      {
+        "id": "01d4e916-c1e8-42ab-9a6d-8bc752a294ff",
+        "kilde": {
+          "tidspunkt": "2022-09-27T07:05:04.903978103Z",
+          "type": "aa-registeret"
+        },
+        "opplysningType": "ARBEIDSFORHOLD_V1",
+        "meta": {},
+        "opplysning": {
+          "arbeidsforhold": []
+        },
+        "attestering": null,
+        "fnr": "08428212410"
+      }
+    ],
+    "versjon": 49
+  },
+  "grunnlagV2": {
+    "søker": {
+      "SOEKER_PDL_V1": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:02.096230469Z",
+          "registersReferanse": null,
+          "opplysningId": null,
+          "type": "pdl"
+        },
+        "verdi": {
+          "fornavn": "Opprett",
+          "etternavn": "August",
+          "foedselsnummer": "25041257817",
+          "foedselsdato": "2012-04-25",
+          "foedselsaar": 2012,
+          "foedeland": "NOR",
+          "doedsdato": null,
+          "adressebeskyttelse": "UGRADERT",
+          "bostedsadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Kleivtrøvegen 31",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "7519",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "2012-04-25T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "deltBostedsadresse": null,
+          "kontaktadresse": [],
+          "oppholdsadresse": [],
+          "sivilstatus": "UOPPGITT",
+          "statsborgerskap": "NOR",
+          "utland": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "familieRelasjon": {
+            "ansvarligeForeldre": [
+              "30038607940",
+              "08428212410"
+            ],
+            "foreldre": [
+              "30038607940",
+              "08428212410"
+            ],
+            "barn": null
+          },
+          "avdoedesBarn": null,
+          "vergemaalEllerFremtidsfullmakt": []
+        },
+        "type": "konstant"
+      },
+      "BOSTEDSADRESSE": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:02.096401729Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "verdi": {
+          "type": "VEGADRESSE",
+          "aktiv": true,
+          "coAdresseNavn": null,
+          "adresseLinje1": "Kleivtrøvegen 31",
+          "adresseLinje2": null,
+          "adresseLinje3": null,
+          "postnr": "7519",
+          "poststed": null,
+          "land": null,
+          "kilde": "FREG",
+          "gyldigFraOgMed": "2012-04-25T00:00:00",
+          "gyldigTilOgMed": null
+        },
+        "type": "konstant"
+      },
+      "NAVN": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:02.097853849Z",
+          "registersReferanse": null,
+          "opplysningId": "ea3f1a02-f217-47b3-a6a0-bda318ccf245",
+          "type": "pdl"
+        },
+        "verdi": {
+          "fornavn": "Opprett",
+          "etternavn": "August"
+        },
+        "type": "konstant"
+      },
+      "FOEDSELSNUMMER": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:02.097934619Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "verdi": "25041257817",
+        "type": "konstant"
+      },
+      "FOEDSELSAAR": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:02.097981641Z",
+          "registersReferanse": null,
+          "opplysningId": "e9c93dcc-48c0-45c4-a083-450b2c914671",
+          "type": "pdl"
+        },
+        "verdi": 2012,
+        "type": "konstant"
+      },
+      "FOEDSELSDATO": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:02.097996463Z",
+          "registersReferanse": null,
+          "opplysningId": "e9c93dcc-48c0-45c4-a083-450b2c914671",
+          "type": "pdl"
+        },
+        "verdi": "2012-04-25",
+        "type": "konstant"
+      },
+      "FOEDELAND": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:02.098177233Z",
+          "registersReferanse": null,
+          "opplysningId": "e9c93dcc-48c0-45c4-a083-450b2c914671",
+          "type": "pdl"
+        },
+        "verdi": "NOR",
+        "type": "konstant"
+      },
+      "STATSBORGERSKAP": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:02.098655061Z",
+          "registersReferanse": null,
+          "opplysningId": "47d2ddbb-90fe-49f4-9b06-370b78bbb7b6",
+          "type": "pdl"
+        },
+        "verdi": "NOR",
+        "type": "konstant"
+      },
+      "UTLAND": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:02.098689816Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "verdi": {
+          "innflyttingTilNorge": [],
+          "utflyttingFraNorge": []
+        },
+        "type": "konstant"
+      },
+      "FAMILIERELASJON": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:02.099134346Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "verdi": {
+          "ansvarligeForeldre": [
+            "30038607940",
+            "08428212410"
+          ],
+          "foreldre": [
+            "30038607940",
+            "08428212410"
+          ],
+          "barn": null
+        },
+        "type": "konstant"
+      },
+      "PERSONROLLE": {
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-09-27T07:05:02.099323790Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "verdi": "BARN",
+        "type": "konstant"
+      }
+    },
+    "familie": [
+      {
+        "GJENLEVENDE_FORELDER_PDL_V1": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:02.568040254Z",
+            "registersReferanse": null,
+            "opplysningId": null,
+            "type": "pdl"
+          },
+          "verdi": {
+            "fornavn": "Beskjeden",
+            "etternavn": "Mandarin",
+            "foedselsnummer": "30038607940",
+            "foedselsdato": "1986-03-30",
+            "foedselsaar": 1986,
+            "foedeland": "NOR",
+            "doedsdato": null,
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": false,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Landstads vei 25 B",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "7052",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "1986-03-30T00:00:00",
+                "gyldigTilOgMed": null
+              },
+              {
+                "type": "VEGADRESSE",
+                "aktiv": true,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Kleivtrøvegen 31",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "7519",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2015-08-12T00:00:00",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": null,
+            "oppholdsadresse": [],
+            "sivilstatus": "GIFT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": null,
+              "foreldre": null,
+              "barn": [
+                "26101176893",
+                "25041257817"
+              ]
+            },
+            "avdoedesBarn": null,
+            "vergemaalEllerFremtidsfullmakt": null
+          },
+          "type": "konstant"
+        },
+        "BOSTEDSADRESSE": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:02.568358121Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "type": "VEGADRESSE",
+            "aktiv": true,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Kleivtrøvegen 31",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "7519",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "2015-08-12T00:00:00",
+            "gyldigTilOgMed": null
+          },
+          "type": "konstant"
+        },
+        "NAVN": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:02.568426859Z",
+            "registersReferanse": null,
+            "opplysningId": "af73f526-f335-44a7-a7fa-65ce3dd54113",
+            "type": "pdl"
+          },
+          "verdi": {
+            "fornavn": "Beskjeden",
+            "etternavn": "Mandarin"
+          },
+          "type": "konstant"
+        },
+        "FOEDSELSNUMMER": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:02.568447808Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": "30038607940",
+          "type": "konstant"
+        },
+        "FOEDSELSAAR": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:02.568461377Z",
+            "registersReferanse": null,
+            "opplysningId": "bb4019e2-ceb1-404e-baaa-7ec7a0450af6",
+            "type": "pdl"
+          },
+          "verdi": 1986,
+          "type": "konstant"
+        },
+        "FOEDSELSDATO": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:02.568477044Z",
+            "registersReferanse": null,
+            "opplysningId": "bb4019e2-ceb1-404e-baaa-7ec7a0450af6",
+            "type": "pdl"
+          },
+          "verdi": "1986-03-30",
+          "type": "konstant"
+        },
+        "FOEDELAND": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:02.568507901Z",
+            "registersReferanse": null,
+            "opplysningId": "bb4019e2-ceb1-404e-baaa-7ec7a0450af6",
+            "type": "pdl"
+          },
+          "verdi": "NOR",
+          "type": "konstant"
+        },
+        "SIVILSTATUS": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:02.568520145Z",
+            "registersReferanse": null,
+            "opplysningId": "9df2e995-eb3b-4ff5-9d38-eaf5a7023191",
+            "type": "pdl"
+          },
+          "verdi": "GIFT",
+          "type": "konstant"
+        },
+        "STATSBORGERSKAP": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:02.568561657Z",
+            "registersReferanse": null,
+            "opplysningId": "d4629f90-861f-4d00-a2fc-d087ca9db357",
+            "type": "pdl"
+          },
+          "verdi": "NOR",
+          "type": "konstant"
+        },
+        "UTLAND": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:02.568571242Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "type": "konstant"
+        },
+        "FAMILIERELASJON": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:02.568593901Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "ansvarligeForeldre": null,
+            "foreldre": null,
+            "barn": [
+              "26101176893",
+              "25041257817"
+            ]
+          },
+          "type": "konstant"
+        },
+        "PERSONROLLE": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:02.568613708Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": "GJENLEVENDE",
+          "type": "konstant"
+        }
+      },
+      {
+        "AVDOED_PDL_V1": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+            "registersReferanse": null,
+            "opplysningId": null,
+            "type": "pdl"
+          },
+          "verdi": {
+            "fornavn": "Oppgitt",
+            "etternavn": "Edelstein",
+            "foedselsnummer": "08428212410",
+            "foedselsdato": "1982-02-08",
+            "foedselsaar": 1982,
+            "foedeland": "NOR",
+            "doedsdato": "2022-08-17",
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": false,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Kleivtrøvegen 31",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "7519",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2012-04-25T00:00:00",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": [],
+            "oppholdsadresse": [],
+            "sivilstatus": "GIFT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": null,
+              "foreldre": null,
+              "barn": [
+                "25041257817",
+                "26101176893",
+                "11031278467"
+              ]
+            },
+            "avdoedesBarn": [
+              {
+                "fornavn": "Opprett",
+                "etternavn": "August",
+                "foedselsnummer": "25041257817",
+                "foedselsdato": "2012-04-25",
+                "foedselsaar": 2012,
+                "foedeland": "NOR",
+                "doedsdato": null,
+                "adressebeskyttelse": "UGRADERT",
+                "bostedsadresse": [
+                  {
+                    "type": "VEGADRESSE",
+                    "aktiv": true,
+                    "coAdresseNavn": null,
+                    "adresseLinje1": "Kleivtrøvegen 31",
+                    "adresseLinje2": null,
+                    "adresseLinje3": null,
+                    "postnr": "7519",
+                    "poststed": null,
+                    "land": null,
+                    "kilde": "FREG",
+                    "gyldigFraOgMed": "2012-04-25T00:00:00",
+                    "gyldigTilOgMed": null
+                  }
+                ],
+                "deltBostedsadresse": null,
+                "kontaktadresse": [],
+                "oppholdsadresse": [],
+                "sivilstatus": "UOPPGITT",
+                "statsborgerskap": "NOR",
+                "utland": {
+                  "innflyttingTilNorge": [],
+                  "utflyttingFraNorge": []
+                },
+                "familieRelasjon": {
+                  "ansvarligeForeldre": [
+                    "30038607940",
+                    "08428212410"
+                  ],
+                  "foreldre": [
+                    "30038607940",
+                    "08428212410"
+                  ],
+                  "barn": null
+                },
+                "avdoedesBarn": null,
+                "vergemaalEllerFremtidsfullmakt": []
+              },
+              {
+                "fornavn": "Nyttig",
+                "etternavn": "Balsam",
+                "foedselsnummer": "26101176893",
+                "foedselsdato": "2011-10-26",
+                "foedselsaar": 2011,
+                "foedeland": "NOR",
+                "doedsdato": null,
+                "adressebeskyttelse": "UGRADERT",
+                "bostedsadresse": [
+                  {
+                    "type": "VEGADRESSE",
+                    "aktiv": true,
+                    "coAdresseNavn": null,
+                    "adresseLinje1": "Kleivtrøvegen 31",
+                    "adresseLinje2": null,
+                    "adresseLinje3": null,
+                    "postnr": "7519",
+                    "poststed": null,
+                    "land": null,
+                    "kilde": "FREG",
+                    "gyldigFraOgMed": "2012-03-11T00:00:00",
+                    "gyldigTilOgMed": null
+                  }
+                ],
+                "deltBostedsadresse": null,
+                "kontaktadresse": [],
+                "oppholdsadresse": [],
+                "sivilstatus": "UOPPGITT",
+                "statsborgerskap": "NOR",
+                "utland": {
+                  "innflyttingTilNorge": [],
+                  "utflyttingFraNorge": []
+                },
+                "familieRelasjon": {
+                  "ansvarligeForeldre": [
+                    "08428212410",
+                    "30038607940"
+                  ],
+                  "foreldre": [
+                    "08428212410",
+                    "30038607940"
+                  ],
+                  "barn": null
+                },
+                "avdoedesBarn": null,
+                "vergemaalEllerFremtidsfullmakt": []
+              },
+              {
+                "fornavn": "Personlig",
+                "etternavn": "Løve",
+                "foedselsnummer": "11031278467",
+                "foedselsdato": "2012-03-11",
+                "foedselsaar": 2012,
+                "foedeland": "NOR",
+                "doedsdato": null,
+                "adressebeskyttelse": "UGRADERT",
+                "bostedsadresse": [
+                  {
+                    "type": "VEGADRESSE",
+                    "aktiv": true,
+                    "coAdresseNavn": null,
+                    "adresseLinje1": "Kleivtrøvegen 31",
+                    "adresseLinje2": null,
+                    "adresseLinje3": null,
+                    "postnr": "7519",
+                    "poststed": null,
+                    "land": null,
+                    "kilde": "FREG",
+                    "gyldigFraOgMed": "2012-03-11T00:00:00",
+                    "gyldigTilOgMed": null
+                  }
+                ],
+                "deltBostedsadresse": null,
+                "kontaktadresse": [],
+                "oppholdsadresse": [],
+                "sivilstatus": "UOPPGITT",
+                "statsborgerskap": "NOR",
+                "utland": {
+                  "innflyttingTilNorge": [],
+                  "utflyttingFraNorge": []
+                },
+                "familieRelasjon": {
+                  "ansvarligeForeldre": [
+                    "08428212410"
+                  ],
+                  "foreldre": [
+                    "08428212410"
+                  ],
+                  "barn": null
+                },
+                "avdoedesBarn": null,
+                "vergemaalEllerFremtidsfullmakt": []
+              }
+            ],
+            "vergemaalEllerFremtidsfullmakt": null
+          },
+          "type": "konstant"
+        },
+        "BOSTEDSADRESSE": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:03.405744757Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "type": "VEGADRESSE",
+            "aktiv": false,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Kleivtrøvegen 31",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "7519",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "2012-04-25T00:00:00",
+            "gyldigTilOgMed": null
+          },
+          "type": "konstant"
+        },
+        "NAVN": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:03.405902353Z",
+            "registersReferanse": null,
+            "opplysningId": "46878c28-337b-4b39-9797-b73e56d670c1",
+            "type": "pdl"
+          },
+          "verdi": {
+            "fornavn": "Oppgitt",
+            "etternavn": "Edelstein"
+          },
+          "type": "konstant"
+        },
+        "FOEDSELSNUMMER": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:03.405921238Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": "08428212410",
+          "type": "konstant"
+        },
+        "FOEDSELSAAR": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:03.405959419Z",
+            "registersReferanse": null,
+            "opplysningId": "1f8fae30-e633-4cc5-ae00-c25b0979a302",
+            "type": "pdl"
+          },
+          "verdi": 1982,
+          "type": "konstant"
+        },
+        "FOEDSELSDATO": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:03.405974106Z",
+            "registersReferanse": null,
+            "opplysningId": "1f8fae30-e633-4cc5-ae00-c25b0979a302",
+            "type": "pdl"
+          },
+          "verdi": "1982-02-08",
+          "type": "konstant"
+        },
+        "FOEDELAND": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:03.405991329Z",
+            "registersReferanse": null,
+            "opplysningId": "1f8fae30-e633-4cc5-ae00-c25b0979a302",
+            "type": "pdl"
+          },
+          "verdi": "NOR",
+          "type": "konstant"
+        },
+        "DOEDSDATO": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:03.405995533Z",
+            "registersReferanse": null,
+            "opplysningId": "2f7032d5-d5a1-4c86-9401-307cb84949eb",
+            "type": "pdl"
+          },
+          "verdi": "2022-08-17",
+          "type": "konstant"
+        },
+        "SIVILSTATUS": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:03.406002720Z",
+            "registersReferanse": null,
+            "opplysningId": "14898526-80b9-47c3-8a29-4f9c251dd4d6",
+            "type": "pdl"
+          },
+          "verdi": "GIFT",
+          "type": "konstant"
+        },
+        "STATSBORGERSKAP": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:03.406063467Z",
+            "registersReferanse": null,
+            "opplysningId": "8d9fa679-4a91-479d-97e1-159a4330d560",
+            "type": "pdl"
+          },
+          "verdi": "NOR",
+          "type": "konstant"
+        },
+        "UTLAND": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:03.406069963Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "type": "konstant"
+        },
+        "FAMILIERELASJON": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:03.406564434Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "ansvarligeForeldre": null,
+            "foreldre": null,
+            "barn": [
+              "25041257817",
+              "26101176893",
+              "11031278467"
+            ]
+          },
+          "type": "konstant"
+        },
+        "PERSONROLLE": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:03.406613392Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": "AVDOED",
+          "type": "konstant"
+        },
+        "AVDOEDESBARN": {
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-27T07:05:03.406649769Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": [
+            {
+              "fornavn": "Opprett",
+              "etternavn": "August",
+              "foedselsnummer": "25041257817",
+              "foedselsdato": "2012-04-25",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Kleivtrøvegen 31",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "7519",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-04-25T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "30038607940",
+                  "08428212410"
+                ],
+                "foreldre": [
+                  "30038607940",
+                  "08428212410"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            },
+            {
+              "fornavn": "Nyttig",
+              "etternavn": "Balsam",
+              "foedselsnummer": "26101176893",
+              "foedselsdato": "2011-10-26",
+              "foedselsaar": 2011,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Kleivtrøvegen 31",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "7519",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-03-11T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "08428212410",
+                  "30038607940"
+                ],
+                "foreldre": [
+                  "08428212410",
+                  "30038607940"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            },
+            {
+              "fornavn": "Personlig",
+              "etternavn": "Løve",
+              "foedselsnummer": "11031278467",
+              "foedselsdato": "2012-03-11",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Kleivtrøvegen 31",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "7519",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-03-11T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "08428212410"
+                ],
+                "foreldre": [
+                  "08428212410"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            }
+          ],
+          "type": "konstant"
+        },
+        "AVDOED_INNTEKT_V1": {
+          "kilde": {
+            "tidspunkt": "2022-09-27T07:05:04.903942602Z",
+            "type": "a-ordningen"
+          },
+          "verdi": {
+            "pensjonEllerTrygd": [],
+            "ytelseFraOffentlig": [],
+            "loennsinntekt": [],
+            "naeringsinntekt": []
+          },
+          "type": "konstant"
+        },
+        "ARBEIDSFORHOLD_V1": {
+          "kilde": {
+            "tidspunkt": "2022-09-27T07:05:04.903978103Z",
+            "type": "aa-registeret"
+          },
+          "verdi": {
+            "arbeidsforhold": []
+          },
+          "type": "konstant"
+        }
+      }
+    ],
+    "sak": {
+      "AVDOED_SOEKNAD_V1": {
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "AVDOED",
+          "fornavn": "DØD",
+          "etternavn": "TESTPERSON",
+          "foedselsnummer": "08428212410",
+          "doedsdato": "2021-07-27",
+          "statsborgerskap": "Norsk",
+          "utenlandsopphold": {
+            "harHattUtenlandsopphold": "NEI",
+            "opphold": []
+          },
+          "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": "NEI"
+        },
+        "type": "konstant"
+      },
+      "SOEKER_SOEKNAD_V1": {
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "BARN",
+          "fornavn": "TEST",
+          "etternavn": "SOEKER",
+          "foedselsnummer": "25041257817",
+          "statsborgerskap": "Norsk",
+          "utenlandsadresse": {
+            "adresseIUtlandet": "NEI",
+            "land": null,
+            "adresse": null
+          },
+          "foreldre": [
+            {
+              "type": "FORELDER",
+              "fornavn": "Levende",
+              "etternavn": "Testperson",
+              "foedselsnummer": "30038607940"
+            },
+            {
+              "type": "FORELDER",
+              "fornavn": "Død",
+              "etternavn": "Testperson",
+              "foedselsnummer": "08428212410"
+            }
+          ],
+          "verge": {
+            "barnHarVerge": "NEI",
+            "fornavn": null,
+            "etternavn": null,
+            "foedselsnummer": null
+          },
+          "omsorgPerson": null
+        },
+        "type": "konstant"
+      },
+      "GJENLEVENDE_FORELDER_SOEKNAD_V1": {
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "GJENLEVENDE_FORELDER",
+          "fornavn": "LEVENDE",
+          "etternavn": "TESTPERSON",
+          "foedselsnummer": "30038607940",
+          "adresse": "TESTVEIEN 123, 0123 TEST",
+          "statsborgerskap": "Norge",
+          "telefonnummer": "11111111"
+        },
+        "type": "konstant"
+      },
+      "INNSENDER_SOEKNAD_V1": {
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "INNSENDER",
+          "fornavn": "DUMMY FORNAVN",
+          "etternavn": "DUMMY ETTERNAVN",
+          "foedselsnummer": "30038607940"
+        },
+        "type": "konstant"
+      },
+      "UTBETALINGSINFORMASJON_V1": {
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "bankkontoType": "NORSK",
+          "kontonummer": "1351.35.13513",
+          "utenlandskBankNavn": null,
+          "utenlandskBankAdresse": null,
+          "iban": null,
+          "swift": null,
+          "oenskerSkattetrekk": "JA",
+          "oensketSkattetrekkProsent": "21%"
+        },
+        "type": "konstant"
+      },
+      "SAMTYKKE": {
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "harSamtykket": true
+        },
+        "type": "konstant"
+      },
+      "SOEKNAD_MOTTATT_DATO": {
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "mottattDato": "2022-02-10T10:51:12.298943803"
+        },
+        "type": "konstant"
+      },
+      "SOEKNADSTYPE_V1": {
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "BARNEPENSJON"
+        },
+        "type": "konstant"
+      },
+      "PERSONGALLERI_V1": {
+        "kilde": {
+          "fnr": "30038607940",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "soeker": "25041257817",
+          "innsender": "30038607940",
+          "soesken": [],
+          "avdoed": [
+            "08428212410"
+          ],
+          "gjenlevende": [
+            "30038607940"
+          ]
+        },
+        "type": "konstant"
+      }
+    },
+    "metadata": {
+      "sakId": 49,
+      "versjon": 49
+    }
+  },
+  "@forårsaket_av": {
+    "id": "67969399-4813-4f92-abe8-6461b624d94b",
+    "opprettet": "2022-09-27T09:05:04.994661864",
+    "event_name": "BEHANDLING:GRUNNLAGENDRET"
+  },
+  "vilkaarsvurdering": {
+    "resultat": "OPPFYLT",
+    "vilkaar": [
+      {
+        "navn": "FORMAAL_FOR_YTELSEN",
+        "resultat": "OPPFYLT",
+        "utfall": null,
+        "kriterier": [
+          {
+            "navn": "SOEKER_ER_I_LIVE",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "34242cbb-4a3c-46c6-b6b2-3fe5fd0b179a",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:02.096230469Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": null,
+                  "foedselsnummer": "25041257817"
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-09-27T09:05:05.045513741"
+      },
+      {
+        "navn": "SOEKER_ER_UNDER_20",
+        "resultat": "OPPFYLT",
+        "utfall": null,
+        "kriterier": [
+          {
+            "navn": "SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "34242cbb-4a3c-46c6-b6b2-3fe5fd0b179a",
+                "kriterieOpplysningsType": "FOEDSELSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:02.096230469Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "foedselsdato": "2012-04-25",
+                  "foedselsnummer": "25041257817"
+                }
+              },
+              {
+                "id": "20947373-e1ed-4b24-b776-1a313a8b52f7",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-08-17",
+                  "foedselsnummer": "08428212410"
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-09-27T09:05:05.045533581"
+      },
+      {
+        "navn": "DOEDSFALL_ER_REGISTRERT",
+        "resultat": "OPPFYLT",
+        "utfall": null,
+        "kriterier": [
+          {
+            "navn": "DOEDSFALL_ER_REGISTRERT_I_PDL",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "20947373-e1ed-4b24-b776-1a313a8b52f7",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-08-17",
+                  "foedselsnummer": "08428212410"
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_ER_FORELDER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "34242cbb-4a3c-46c6-b6b2-3fe5fd0b179a",
+                "kriterieOpplysningsType": "FORELDRE",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:02.096230469Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "foreldre": [
+                    "30038607940",
+                    "08428212410"
+                  ]
+                }
+              },
+              {
+                "id": "20947373-e1ed-4b24-b776-1a313a8b52f7",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-08-17",
+                  "foedselsnummer": "08428212410"
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-09-27T09:05:05.045553537"
+      },
+      {
+        "navn": "AVDOEDES_FORUTGAAENDE_MEDLEMSKAP",
+        "resultat": "IKKE_OPPFYLT",
+        "utfall": "TRENGER_AVKLARING",
+        "kriterier": [
+          {
+            "navn": "AVDOED_NORSK_STATSBORGER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "20947373-e1ed-4b24-b776-1a313a8b52f7",
+                "kriterieOpplysningsType": "STATSBORGERSKAP",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": "NOR"
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_INGEN_INN_ELLER_UTVANDRING",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "20947373-e1ed-4b24-b776-1a313a8b52f7",
+                "kriterieOpplysningsType": "UTLAND",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "innflyttingTilNorge": [],
+                  "utflyttingFraNorge": []
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "da058d5c-5cb7-40ab-acab-8796614cc585",
+                "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
+                "kilde": {
+                  "fnr": "30038607940",
+                  "mottatDato": "2022-02-10T10:51:12.298943803Z",
+                  "type": "privatperson"
+                },
+                "opplysning": {
+                  "harHattUtenlandsopphold": "NEI",
+                  "opphold": []
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_KUN_NORSKE_BOSTEDSADRESSER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "20947373-e1ed-4b24-b776-1a313a8b52f7",
+                "kriterieOpplysningsType": "ADRESSELISTE",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "adresser": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Kleivtrøvegen 31",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "7519",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2012-04-25T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR",
+            "resultat": "IKKE_OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "20947373-e1ed-4b24-b776-1a313a8b52f7",
+                "kriterieOpplysningsType": "ADRESSELISTE",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "adresser": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Kleivtrøvegen 31",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "7519",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2012-04-25T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "20947373-e1ed-4b24-b776-1a313a8b52f7",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-08-17",
+                  "foedselsnummer": "08428212410"
+                }
+              },
+              {
+                "id": "90c1e493-4328-4ecf-9105-fced87e6bdfb",
+                "kriterieOpplysningsType": "ADRESSE_GAPS",
+                "kilde": {
+                  "navn": "vilkaarskomponenten",
+                  "type": "vilkaarskomponenten"
+                },
+                "opplysning": [
+                  {
+                    "gyldigFra": "2017-08-17",
+                    "gyldigTil": "2022-08-17"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_KUN_NORSKE_OPPHOLDSSADRESSER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "20947373-e1ed-4b24-b776-1a313a8b52f7",
+                "kriterieOpplysningsType": "ADRESSELISTE",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "adresser": []
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_KUN_NORSKE_KONTAKTADRESSER",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "20947373-e1ed-4b24-b776-1a313a8b52f7",
+                "kriterieOpplysningsType": "ADRESSELISTE",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "adresser": []
+                }
+              }
+            ]
+          },
+          {
+            "navn": "AVDOED_OPPFYLLER_MEDLEMSKAP",
+            "resultat": "IKKE_OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "9984158b-558b-4d6b-9428-27104fd56e6e",
+                "kriterieOpplysningsType": "AVDOED_MEDLEMSKAP",
+                "kilde": {
+                  "navn": "vilkaarskomponenten",
+                  "type": "vilkaarskomponenten"
+                },
+                "opplysning": {
+                  "grunnlag": {
+                    "inntektsOpplysning": {
+                      "id": "fe21b1ce-dc0f-405f-9b8f-1a4643d9ade9",
+                      "opplysningType": "AVDOED_INNTEKT_V1",
+                      "kilde": {
+                        "tidspunkt": "2022-09-27T07:05:04.903942602Z",
+                        "type": "a-ordningen"
+                      },
+                      "opplysning": {
+                        "pensjonEllerTrygd": [],
+                        "ytelseFraOffentlig": [],
+                        "loennsinntekt": [],
+                        "naeringsinntekt": []
+                      }
+                    },
+                    "arbeidsforholdOpplysning": {
+                      "id": "01d4e916-c1e8-42ab-9a6d-8bc752a294ff",
+                      "opplysningType": "ARBEIDSFORHOLD_V1",
+                      "kilde": {
+                        "tidspunkt": "2022-09-27T07:05:04.903978103Z",
+                        "type": "aa-registeret"
+                      },
+                      "opplysning": {
+                        "arbeidsforhold": []
+                      }
+                    },
+                    "saksbehandlerMedlemsPerioder": null,
+                    "doedsdato": "2022-08-17"
+                  },
+                  "perioder": [],
+                  "gaps": [
+                    {
+                      "fraDato": "2017-08-17",
+                      "tilDato": "2022-08-17"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-09-27T09:05:05.045690221"
+      },
+      {
+        "navn": "BARNETS_MEDLEMSKAP",
+        "resultat": "OPPFYLT",
+        "utfall": null,
+        "kriterier": [
+          {
+            "navn": "SOEKER_IKKE_ADRESSE_I_UTLANDET",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "34242cbb-4a3c-46c6-b6b2-3fe5fd0b179a",
+                "kriterieOpplysningsType": "ADRESSER",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:02.096230469Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "bostedadresse": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Kleivtrøvegen 31",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "7519",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2012-04-25T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ],
+                  "oppholdadresse": [],
+                  "kontaktadresse": []
+                }
+              },
+              {
+                "id": "ff8a70ce-0ab1-419c-bb6e-8f574aaba64f",
+                "kriterieOpplysningsType": "SOEKER_UTENLANDSOPPHOLD",
+                "kilde": {
+                  "fnr": "30038607940",
+                  "mottatDato": "2022-02-10T10:51:12.298943803Z",
+                  "type": "privatperson"
+                },
+                "opplysning": {
+                  "adresseIUtlandet": "NEI",
+                  "land": null,
+                  "adresse": null
+                }
+              },
+              {
+                "id": "20947373-e1ed-4b24-b776-1a313a8b52f7",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-08-17",
+                  "foedselsnummer": "08428212410"
+                }
+              }
+            ]
+          },
+          {
+            "navn": "GJENLEVENDE_FORELDER_IKKE_ADRESSE_I_UTLANDET",
+            "resultat": "OPPFYLT",
+            "basertPaaOpplysninger": [
+              {
+                "id": "f6215124-ebfe-4ddc-b3e5-16fdaba22576",
+                "kriterieOpplysningsType": "ADRESSER",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:02.568040254Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "bostedadresse": [
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": false,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Landstads vei 25 B",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "7052",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "1986-03-30T00:00:00",
+                      "gyldigTilOgMed": null
+                    },
+                    {
+                      "type": "VEGADRESSE",
+                      "aktiv": true,
+                      "coAdresseNavn": null,
+                      "adresseLinje1": "Kleivtrøvegen 31",
+                      "adresseLinje2": null,
+                      "adresseLinje3": null,
+                      "postnr": "7519",
+                      "poststed": null,
+                      "land": null,
+                      "kilde": "FREG",
+                      "gyldigFraOgMed": "2015-08-12T00:00:00",
+                      "gyldigTilOgMed": null
+                    }
+                  ],
+                  "oppholdadresse": [],
+                  "kontaktadresse": null
+                }
+              },
+              {
+                "id": "20947373-e1ed-4b24-b776-1a313a8b52f7",
+                "kriterieOpplysningsType": "DOEDSDATO",
+                "kilde": {
+                  "navn": "pdl",
+                  "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+                  "registersReferanse": null,
+                  "opplysningId": null,
+                  "type": "pdl"
+                },
+                "opplysning": {
+                  "doedsdato": "2022-08-17",
+                  "foedselsnummer": "08428212410"
+                }
+              }
+            ]
+          }
+        ],
+        "vurdertDato": "2022-09-27T09:05:05.045718272"
+      }
+    ],
+    "vurdertDato": "2022-09-27T09:05:05.045718272"
+  },
+  "virkningstidspunkt": "2022-09",
+  "kommerSoekerTilGode": {
+    "kommerSoekerTilgodeVurdering": {
+      "resultat": "OPPFYLT",
+      "vilkaar": [
+        {
+          "navn": "GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE",
+          "resultat": "OPPFYLT",
+          "utfall": null,
+          "kriterier": [
+            {
+              "navn": "SAMME_BOSTEDSADRESSE",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "34242cbb-4a3c-46c6-b6b2-3fe5fd0b179a",
+                  "kriterieOpplysningsType": "BOSTEDADRESSE_SOEKER",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-27T07:05:02.096230469Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": true,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Kleivtrøvegen 31",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "7519",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "2012-04-25T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "f6215124-ebfe-4ddc-b3e5-16fdaba22576",
+                  "kriterieOpplysningsType": "BOSTEDADRESSE_GJENLEVENDE",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-27T07:05:02.568040254Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": false,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Landstads vei 25 B",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "7052",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "1986-03-30T00:00:00",
+                        "gyldigTilOgMed": null
+                      },
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": true,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Kleivtrøvegen 31",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "7519",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "2015-08-12T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-09-27T09:05:05.047305036"
+        },
+        {
+          "navn": "BARN_INGEN_OPPGITT_UTLANDSADRESSE",
+          "resultat": "OPPFYLT",
+          "utfall": null,
+          "kriterier": [
+            {
+              "navn": "SOEKER_IKKE_ADRESSE_I_UTLANDET",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "ff8a70ce-0ab1-419c-bb6e-8f574aaba64f",
+                  "kriterieOpplysningsType": "SOEKER_UTENLANDSOPPHOLD",
+                  "kilde": {
+                    "fnr": "30038607940",
+                    "mottatDato": "2022-02-10T10:51:12.298943803Z",
+                    "type": "privatperson"
+                  },
+                  "opplysning": {
+                    "adresseIUtlandet": "NEI",
+                    "land": null,
+                    "adresse": null
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-09-27T09:05:05.047315395"
+        },
+        {
+          "navn": "BARN_BOR_PAA_AVDOEDES_ADRESSE",
+          "resultat": "OPPFYLT",
+          "utfall": null,
+          "kriterier": [
+            {
+              "navn": "SAMME_BOSTEDSADRESSE",
+              "resultat": "OPPFYLT",
+              "basertPaaOpplysninger": [
+                {
+                  "id": "34242cbb-4a3c-46c6-b6b2-3fe5fd0b179a",
+                  "kriterieOpplysningsType": "BOSTEDADRESSE_SOEKER",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-27T07:05:02.096230469Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": true,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Kleivtrøvegen 31",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "7519",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "2012-04-25T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "20947373-e1ed-4b24-b776-1a313a8b52f7",
+                  "kriterieOpplysningsType": "BOSTEDADRESSE_AVDOED",
+                  "kilde": {
+                    "navn": "pdl",
+                    "tidspunktForInnhenting": "2022-09-27T07:05:03.405691295Z",
+                    "registersReferanse": null,
+                    "opplysningId": null,
+                    "type": "pdl"
+                  },
+                  "opplysning": {
+                    "bostedadresse": [
+                      {
+                        "type": "VEGADRESSE",
+                        "aktiv": false,
+                        "coAdresseNavn": null,
+                        "adresseLinje1": "Kleivtrøvegen 31",
+                        "adresseLinje2": null,
+                        "adresseLinje3": null,
+                        "postnr": "7519",
+                        "poststed": null,
+                        "land": null,
+                        "kilde": "FREG",
+                        "gyldigFraOgMed": "2012-04-25T00:00:00",
+                        "gyldigTilOgMed": null
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "vurdertDato": "2022-09-27T09:05:05.047330641"
+        }
+      ],
+      "vurdertDato": "2022-09-27T09:05:05.047330641"
+    },
+    "familieforhold": {
+      "avdoed": {
+        "navn": "Oppgitt Edelstein",
+        "fnr": "08428212410",
+        "rolle": "AVDOED",
+        "bostedadresser": [
+          {
+            "type": "VEGADRESSE",
+            "aktiv": false,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Kleivtrøvegen 31",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "7519",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "2012-04-25T00:00:00",
+            "gyldigTilOgMed": null
+          }
+        ],
+        "doedsdato": "2022-08-17",
+        "barn": [
+          "25041257817",
+          "26101176893",
+          "11031278467"
+        ]
+      },
+      "soeker": {
+        "navn": "Opprett August",
+        "fnr": "25041257817",
+        "rolle": "BARN",
+        "bostedadresser": [
+          {
+            "type": "VEGADRESSE",
+            "aktiv": true,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Kleivtrøvegen 31",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "7519",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "2012-04-25T00:00:00",
+            "gyldigTilOgMed": null
+          }
+        ],
+        "soeknadAdresse": {
+          "adresseIUtlandet": "NEI",
+          "land": null,
+          "adresse": null
+        },
+        "foedselsdato": "2012-04-25"
+      },
+      "gjenlevendeForelder": {
+        "navn": "Beskjeden Mandarin",
+        "fnr": "30038607940",
+        "rolle": "GJENLEVENDE",
+        "bostedadresser": [
+          {
+            "type": "VEGADRESSE",
+            "aktiv": false,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Landstads vei 25 B",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "7052",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "1986-03-30T00:00:00",
+            "gyldigTilOgMed": null
+          },
+          {
+            "type": "VEGADRESSE",
+            "aktiv": true,
+            "coAdresseNavn": null,
+            "adresseLinje1": "Kleivtrøvegen 31",
+            "adresseLinje2": null,
+            "adresseLinje3": null,
+            "postnr": "7519",
+            "poststed": null,
+            "land": null,
+            "kilde": "FREG",
+            "gyldigFraOgMed": "2015-08-12T00:00:00",
+            "gyldigTilOgMed": null
+          }
+        ]
+      }
+    }
+  },
+  "vilkaarsvurderingGrunnlagRef": 49
+}

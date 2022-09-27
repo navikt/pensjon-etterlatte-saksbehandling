@@ -141,7 +141,7 @@ const GrunnerTilAnnuleringForm = ({
 }) => {
   return (
     <FormWrapper>
-      <CheckboxGroup legend="Hvorfor må saken annuleres?" onChange={setSelectedGrunner}>
+      <CheckboxGroup legend="Hvorfor må saken annulleres?" onChange={setSelectedGrunner}>
         {OPPHOERSGRUNNER.map((opphoersgrunn) => (
           <Checkbox value={opphoersgrunn} key={opphoersgrunn}>
             {oversettelser[opphoersgrunn]}

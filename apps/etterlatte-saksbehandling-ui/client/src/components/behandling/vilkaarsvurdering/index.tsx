@@ -1,10 +1,10 @@
 import { Content, Header } from '../../../shared/styled'
 import React, { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import { VilkaarBorderTop } from './styled'
+import { VilkaarBorderTop } from '../inngangsvilkaar/styled'
 import { hentVilkaarsvurdering, Vilkaarsvurdering } from '../../../shared/api/vilkaarsvurdering'
-import { ManueltVilkaar } from './vilkaar/ManueltVilkaar'
-import { VilkaarResultat } from './vilkaar/VilkaarResultat'
+import { ManueltVilkaar } from './ManueltVilkaar'
+import { VilkaarResultat } from '../inngangsvilkaar/vilkaar/VilkaarResultat'
 
 export const Inngangsvilkaar = () => {
   const location = useLocation()

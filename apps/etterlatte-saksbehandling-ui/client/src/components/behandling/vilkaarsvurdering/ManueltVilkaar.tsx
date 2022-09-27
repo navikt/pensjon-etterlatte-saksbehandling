@@ -1,4 +1,4 @@
-import { VurderingsResultat } from '../../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 import {
   Innhold,
   Lovtekst,
@@ -10,11 +10,11 @@ import {
   VilkaarVurderingColumn,
   VilkaarVurderingContainer,
   VilkaarWrapper,
-} from '../styled'
-import { StatusIcon } from '../../../../shared/icons/statusIcon'
-import { vilkaarErOppfylt } from './tekstUtils'
+} from '../inngangsvilkaar/styled'
+import { StatusIcon } from '../../../shared/icons/statusIcon'
+import { vilkaarErOppfylt } from '../inngangsvilkaar/vilkaar/tekstUtils'
 import React, { ReactNode } from 'react'
-import { Vilkaar } from '../../../../shared/api/vilkaarsvurdering'
+import { Vilkaar } from '../../../shared/api/vilkaarsvurdering'
 
 export interface VilkaarProps {
   vilkaar: Vilkaar

@@ -6,6 +6,7 @@ plugins {
 dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
+    implementation(project(":libs:rapidsandrivers-extras"))
     implementation(Ktor2.OkHttp)
     implementation(Ktor2.ServerCore)
     implementation(Ktor2.ServerCio)

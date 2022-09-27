@@ -4,10 +4,12 @@ import { IBehandlingsammendrag } from './typer'
 import { useNavigate } from 'react-router-dom'
 import { INasjonalitetsType, NasjonalitetsType } from '../behandling/fargetags/nasjonalitetsType'
 import { Heading } from '@navikt/ds-react'
+import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 
 export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandlingsammendrag[] | undefined }) => {
   const navigate = useNavigate()
   const behandlinger = behandlingliste ? behandlingliste : []
+  const sakId = behandlinger[0]?.sak
 
   const sortertListe = behandlinger.sort((a, b) =>
     new Date(b.behandlingOpprettet!) > new Date(a.behandlingOpprettet!) ? 1 : -1
@@ -28,6 +30,11 @@ export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandling
             <NasjonalitetsType type={INasjonalitetsType.NASJONAL} />
           </div>
         </HeadingWrapper>
+        {sakId !== undefined ? (
+          <EkstraHandlinger>
+            <ManueltOpphoerModal sakId={sakId} />
+          </EkstraHandlinger>
+        ) : null}
         <div className="behandlinger">
           <h2>Behandlinger</h2>
           <Saksliste behandlinger={sortertListe} goToBehandling={goToBehandling} />
@@ -36,6 +43,11 @@ export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandling
     </>
   )
 }
+
+const EkstraHandlinger = styled.div`
+  display: flex;
+  flex-direction: row-reverse;
+`
 
 export const IconButton = styled.div`
   padding-top: 1em;

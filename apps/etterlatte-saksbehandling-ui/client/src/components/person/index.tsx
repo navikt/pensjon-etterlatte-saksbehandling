@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
+import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { getPerson } from '../../shared/api/person'

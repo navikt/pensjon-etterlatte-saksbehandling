@@ -37,6 +37,11 @@ const lovtekst: Record<IBehandlingsType, Record<'tittel' | 'tekst', string>> = {
     tekst:
       'Det følger av paragrafens sjette ledd at utbetalingen av en ytelse som gis pr. måned, stanses ved utgangen av den måneden retten til ytelsen faller bort.',
   },
+  [IBehandlingsType.MANUELT_OPPHOER]: {
+    tittel: 'Virkningstidspunkt manuelt opphør',
+    tekst:
+      'Virkningstidspunkt for opphøret blir satt til første virkningstidspunkt fra systemet, slik at alle utbetalingene annuleres',
+  },
 }
 
 export const Virkningstidspunkt = (props: Props) => {

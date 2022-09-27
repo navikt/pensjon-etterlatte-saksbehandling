@@ -43,7 +43,7 @@ fun rapidApplication(
     with(applicationContext) {
         rapidsConnection.register(object : RapidsConnection.StatusListener {
             override fun onStartup(rapidsConnection: RapidsConnection) {
-                dataSourceBuilder.migrate()
+                // dataSourceBuilder.migrate()
             }
 
             override fun onShutdown(rapidsConnection: RapidsConnection) {
@@ -81,7 +81,7 @@ fun io.ktor.server.application.Application.restModule(applicationContext: Applic
 
     routing {
         authenticate {
-            vilkaarsvurdering()
+            vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
         }
     }
 }

@@ -58,3 +58,9 @@ mockRouter.post(`/vilkaarsvurdering/:id/vurder`, (req: Request, res: Response) =
     res.json('Suksess')
   }, 1000)
 })
+
+mockRouter.delete(`/vilkaarsvurdering/:behandlingId/:type/slett`, (req: Request, res: Response) => {
+  setTimeout(() => {
+    res.json('Slettet')
+  }, 1000)
+})

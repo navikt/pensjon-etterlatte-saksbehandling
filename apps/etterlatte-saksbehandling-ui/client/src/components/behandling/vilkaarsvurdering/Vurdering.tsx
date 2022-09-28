@@ -4,7 +4,7 @@ import { RadioGroupWrapper } from '../soeknadsoversikt/soeknadoversikt/kommerBar
 import React, { useState } from 'react'
 import { ISvar, VurderingsResultat as VurderingsresultatOld } from '../../../store/reducers/BehandlingReducer'
 import { useParams } from 'react-router-dom'
-import { Vilkaar, VurderingsResultat, vurderVilkaar } from '../../../shared/api/vilkaarsvurdering'
+import { slettVurdering, Vilkaar, VurderingsResultat, vurderVilkaar } from '../../../shared/api/vilkaarsvurdering'
 import { StatusIcon } from '../../../shared/icons/statusIcon'
 import styled from 'styled-components'
 
@@ -34,9 +34,21 @@ export const Vurdering = ({ vilkaar, oppdaterVilkaar }: { vilkaar: Vilkaar; oppd
       })
     }
   }
+
+  const slettVurderingAvVilkaar = () => {
+    if (!behandlingId) throw new Error('Mangler behandlingsid')
+
+    slettVurdering(behandlingId!!, vilkaar.type).then((response) => {
+      if (response.status == 'ok') {
+        oppdaterVilkaar()
+      }
+    })
+  }
+
   const erVurdert = (): boolean => vilkaar.vurdering !== undefined
   const erOppfyllt = (): boolean => vilkaar.vurdering?.resultat == VurderingsResultat.OPPFYLT
   const avslag = (): boolean => !erOppfyllt()
+
   const reset = () => {
     setAktivVurdering(false)
     setSvar(undefined)
@@ -69,7 +81,7 @@ export const Vurdering = ({ vilkaar, oppdaterVilkaar }: { vilkaar: Vilkaar; oppd
             </p>
             <p>Sist endret {vilkaar.vurdering?.tidspunkt}</p>
           </KildeVilkaar>
-          <Button variant={'danger'} size={'small'} onClick={() => reset()}>
+          <Button variant={'danger'} size={'small'} onClick={slettVurderingAvVilkaar}>
             Slett vurdering
           </Button>
         </>

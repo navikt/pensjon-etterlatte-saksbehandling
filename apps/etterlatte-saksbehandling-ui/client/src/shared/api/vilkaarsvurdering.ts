@@ -8,6 +8,11 @@ export const vurderVilkaar = async (
   request: VurderVilkaarRequest
 ): Promise<ApiResponse<Vilkaarsvurdering>> => apiClient.post(`/vilkaarsvurdering/${behandlingId}/vurder`, { request })
 
+export const slettVurdering = async (
+  behandlingId: string,
+  type: VilkaarType
+): Promise<ApiResponse<Vilkaarsvurdering>> => apiClient.delete(`/vilkaarsvurdering/${behandlingId}/${type}/slett`)
+
 export interface Vilkaarsvurdering {
   vilkaar: Vilkaar[]
 }

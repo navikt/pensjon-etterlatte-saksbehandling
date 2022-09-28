@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -24,9 +25,11 @@ import org.junit.jupiter.api.Test
 
 internal class VilkaarsvurderingRoutesTest {
 
+    private val vilkaarsvurderingServiceImpl = VilkaarsvurderingService(VilkaarsvurderingRepositoryInMemory())
+
     private val applicationContext: ApplicationContext = mockk {
         every { tokenValidering } returns AuthenticationConfig::tokenTestSupportAcceptsAllTokens
-        every { vilkaarsvurderingService } returns VilkaarsvurderingService(VilkaarsvurderingRepositoryInMemory())
+        every { vilkaarsvurderingService } returns vilkaarsvurderingServiceImpl
     }
 
     @Test
@@ -57,7 +60,7 @@ internal class VilkaarsvurderingRoutesTest {
     }
 
     @Test
-    fun `skal oppdatere et vilkaar`() {
+    fun `skal oppdatere en vilkaarsvurdering med et vurdert vilkaar`() {
         testApplication {
             application { restModule(applicationContext) }
 
@@ -90,6 +93,47 @@ internal class VilkaarsvurderingRoutesTest {
             assertEquals(vurdertResultatDto.kommentar, oppdatertVilkaar?.vurdering?.kommentar)
             assertEquals("Saksbehandler01", oppdatertVilkaar?.vurdering?.saksbehandler)
             assertNotNull(oppdatertVilkaar?.vurdering?.tidspunkt)
+        }
+    }
+
+    @Test
+    fun `skal nullstille et vurdert vilkaar fra vilkaarsvurdering`() {
+        testApplication {
+            application { restModule(applicationContext) }
+
+            // Oppretter vilkaarsvurdering
+            client.get("/vilkaarsvurdering/$behandlingId") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+            }
+
+            val vurdertResultatDto = VurdertResultatDto(
+                type = VilkaarType.FORMAAL,
+                resultat = Utfall.OPPFYLT,
+                kommentar = "Søker oppfyller vilkåret"
+            )
+
+            client.post("/vilkaarsvurdering/$behandlingId") {
+                setBody(vurdertResultatDto.toJson())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+            }
+
+            val vurdertResultat = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId).vilkaar
+                .first { it.type == vurdertResultatDto.type }.vurdering
+
+            assertNotNull(vurdertResultat)
+
+            val response = client.delete("/vilkaarsvurdering/$behandlingId/${vurdertResultatDto.type}") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+            }
+
+            val vurdertResultatSlettet = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId).vilkaar
+                .first { it.type == vurdertResultatDto.type }.vurdering
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertNull(vurdertResultatSlettet)
         }
     }
 

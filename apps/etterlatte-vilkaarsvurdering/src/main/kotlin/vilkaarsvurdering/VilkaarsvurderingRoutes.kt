@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.log
@@ -8,6 +9,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -20,6 +22,8 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
 
         get("/{behandlingId}") {
             val behandlingId = requireNotNull(call.parameters["behandlingId"])
+
+            logger.info("Henter vilkårsvurdering for $behandlingId")
             val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
             call.respond(vilkaarsvurdering)
         }
@@ -28,12 +32,23 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             val behandlingId = requireNotNull(call.parameters["behandlingId"])
             val saksbehandler = requireNotNull(call.navIdent)
             val vurdertResultatDto = call.receive<VurdertResultatDto>()
+
+            logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
             val oppdatertVilkaarsvurdering =
-                vilkaarsvurderingService.oppdaterVilkaarsvurdering(
+                vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
                     behandlingId,
                     toVurdertVilkaar(vurdertResultatDto, saksbehandler)
                 )
             call.respond(oppdatertVilkaarsvurdering)
+        }
+
+        delete("/{behandlingId}/{vilkaarType}") {
+            val behandlingId = requireNotNull(call.parameters["behandlingId"])
+            val vilkaarType = VilkaarType.valueOf(requireNotNull(call.parameters["vilkaarType"]))
+
+            logger.info("Sletter vurdering på vilkår $vilkaarType for $behandlingId")
+            vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarType)
+            call.respond(HttpStatusCode.OK)
         }
     }
 }

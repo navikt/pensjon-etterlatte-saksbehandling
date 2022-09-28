@@ -12,8 +12,12 @@ class VilkaarsvurderingService(val vilkaarsvurderingRepository: Vilkaarsvurderin
         return nyVilkaarsvurdering
     }
 
-    fun oppdaterVilkaarsvurdering(behandlingId: String, vurdertVilkaar: VurdertVilkaar): Vilkaarsvurdering {
-        return vilkaarsvurderingRepository.oppdater(behandlingId, vurdertVilkaar)
+    fun oppdaterVurderingPaaVilkaar(behandlingId: String, vurdertVilkaar: VurdertVilkaar): Vilkaarsvurdering {
+        return vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(behandlingId, vurdertVilkaar)
+    }
+
+    fun slettVurderingPaaVilkaar(behandlingId: String, vilkaarType: VilkaarType): Vilkaarsvurdering {
+        return vilkaarsvurderingRepository.slettVurderingPaaVilkaar(behandlingId, vilkaarType)
     }
 }
 

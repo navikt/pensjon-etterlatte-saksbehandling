@@ -5,6 +5,7 @@ import no.nav.etterlatte.testsupport.TestRapid
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import javax.sql.DataSource
@@ -38,6 +39,7 @@ class ApplicationIntegrationTest {
     }
 
     @Test
+    @Disabled
     fun `en test`() {
     }
 

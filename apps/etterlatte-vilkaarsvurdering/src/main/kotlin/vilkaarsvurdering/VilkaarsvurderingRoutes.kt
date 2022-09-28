@@ -31,7 +31,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             val oppdatertVilkaarsvurdering =
                 vilkaarsvurderingService.oppdaterVilkaarsvurdering(
                     behandlingId,
-                    toVilkaar(vurdertResultatDto, saksbehandler)
+                    toVurdertVilkaar(vurdertResultatDto, saksbehandler)
                 )
             call.respond(oppdatertVilkaarsvurdering)
         }
@@ -42,10 +42,10 @@ val ApplicationCall.navIdent: String? get() = principal<TokenValidationContextPr
     ?.context?.getJwtToken("azure")
     ?.jwtTokenClaims?.getStringClaim("NAVident")
 
-private fun toVilkaar(vurdertResultatDto: VurdertResultatDto, saksbehandler: String) =
-    Vilkaar(
-        type = vurdertResultatDto.type,
-        vurdering = VurdertResultat(
+private fun toVurdertVilkaar(vurdertResultatDto: VurdertResultatDto, saksbehandler: String) =
+    VurdertVilkaar(
+        vilkaarType = vurdertResultatDto.type,
+        vurdertResultat = VurdertResultat(
             resultat = vurdertResultatDto.resultat,
             kommentar = vurdertResultatDto.kommentar,
             tidspunkt = LocalDateTime.now(),
@@ -58,13 +58,3 @@ data class VurdertResultatDto(
     val resultat: Utfall,
     val kommentar: String?
 )
-
-// get vilkaarsvurdering
-
-/*fun vilkaarsvurdering(behandlingId: String) = listOf<Vilkaar>()
-fun oppdaterResultat(behandlingId: String, type: Vilkaar, resultat: VurderingsResultatV2, kommentar: String) {}
-
-fun vilkaarsResultat(behandlingsId: String) {}
-*/
-// database
-// id - behandlingId - melding - vilkaarsvurdering

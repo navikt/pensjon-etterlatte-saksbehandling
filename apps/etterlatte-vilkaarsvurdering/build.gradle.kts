@@ -3,6 +3,7 @@ plugins {
     id("com.faire.gradle.analyze") version "1.0.9"
 }
 dependencies {
+    implementation(project(":libs:common"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
 
     implementation(Ktor2.ServerCore)
@@ -18,6 +19,7 @@ dependencies {
     implementation(Ktor2.StatusPages)
     implementation(Ktor2.ClientContentNegotiation)
     implementation(Ktor2.ServerContentNegotiation)
+
     implementation(Jackson.DatatypeJsr310)
     implementation(Jackson.DatatypeJdk8)
     implementation(Jackson.ModuleKotlin)
@@ -26,22 +28,16 @@ dependencies {
     implementation(NavFelles.TokenClientCore)
     implementation(NavFelles.TokenValidationKtor2)
 
-    implementation("org.jetbrains:annotations:13.0")
+    implementation(Database.HikariCP)
+    implementation(Database.FlywayDB)
+    implementation(Database.Postgresql)
+    implementation(Database.KotliQuery)
 
-     implementation(project(":libs:common"))
-
-    implementation("com.zaxxer:HikariCP:3.4.5")
-    implementation("org.flywaydb:flyway-core:8.5.11")
-    implementation("org.postgresql:postgresql:42.3.3")
-    implementation("com.github.seratch:kotliquery:1.7.0")
-
-    testImplementation(Ktor2.ClientMock)
-    testImplementation(Ktor2.ServerTests)
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)
+    testImplementation(Ktor2.ClientMock)
+    testImplementation(Ktor2.ServerTests)
 
-    testImplementation("org.testcontainers:testcontainers:1.16.3")
-    testImplementation("com.github.tomakehurst:wiremock:2.33.2")
-    testImplementation("org.testcontainers:junit-jupiter:1.16.3")
-    testImplementation("org.testcontainers:postgresql:1.16.0")
+    testImplementation(TestContainer.Jupiter)
+    testImplementation(TestContainer.Postgresql)
 }

@@ -1,7 +1,7 @@
 import {
   Innhold,
-  Lovtekst,
   Title,
+  Lovtekst,
   VilkaarBorder,
   VilkaarColumn,
   VilkaarInfobokser,
@@ -9,7 +9,7 @@ import {
   VilkaarVurderingColumn,
   VilkaarVurderingContainer,
   VilkaarWrapper,
-} from '../inngangsvilkaar/styled'
+} from './styled'
 import React, { ReactNode } from 'react'
 import { Vilkaar } from '../../../shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
@@ -33,8 +33,6 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
               <a href={vilkaar.paragrafLenke} target="_blank" rel="noopener noreferrer">
                 {vilkaar.paragraf}
               </a>
-              <br />
-              <br />
               <Lovtekst>{vilkaar.lovtekst}</Lovtekst>
             </VilkaarColumn>
             <VilkaarColumn>{props.children}</VilkaarColumn>

@@ -1,12 +1,11 @@
-import { VurderingsTitle } from '../soeknadsoversikt/styled'
 import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
-import { RadioGroupWrapper } from '../soeknadsoversikt/soeknadoversikt/kommerBarnetTilgode/KommerBarnetTilGodeVurdering'
 import React, { useState } from 'react'
 import { ISvar, VurderingsResultat as VurderingsresultatOld } from '../../../store/reducers/BehandlingReducer'
 import { useParams } from 'react-router-dom'
 import { slettVurdering, Vilkaar, VurderingsResultat, vurderVilkaar } from '../../../shared/api/vilkaarsvurdering'
 import { StatusIcon } from '../../../shared/icons/statusIcon'
 import styled from 'styled-components'
+import { format } from 'date-fns'
 
 export const Vurdering = ({ vilkaar, oppdaterVilkaar }: { vilkaar: Vilkaar; oppdaterVilkaar: () => void }) => {
   const { behandlingId } = useParams()
@@ -21,7 +20,7 @@ export const Vurdering = ({ vilkaar, oppdaterVilkaar }: { vilkaar: Vilkaar; oppd
     !svar ? setRadioError('Du må velge et svar') : setRadioError(undefined)
     kommentar.length < 11 ? setBegrunnelseError('Begrunnelsen må være minst 10 tegn') : setBegrunnelseError(undefined)
 
-    if (radioError === undefined && begrunnelseError === undefined && svar !== undefined) {
+    if (radioError === undefined && begrunnelseError === undefined && svar !== undefined && kommentar.length > 10) {
       vurderVilkaar(behandlingId!!, {
         type: vilkaar.type,
         kommentar: kommentar,
@@ -47,7 +46,6 @@ export const Vurdering = ({ vilkaar, oppdaterVilkaar }: { vilkaar: Vilkaar; oppd
 
   const erVurdert = (): boolean => vilkaar.vurdering !== undefined
   const erOppfyllt = (): boolean => vilkaar.vurdering?.resultat == VurderingsResultat.OPPFYLT
-  const avslag = (): boolean => !erOppfyllt()
 
   const reset = () => {
     setAktivVurdering(false)
@@ -62,24 +60,23 @@ export const Vurdering = ({ vilkaar, oppdaterVilkaar }: { vilkaar: Vilkaar; oppd
       {erVurdert() && (
         <>
           <KildeVilkaar>
-            {erOppfyllt() && (
-              <div className="svart">
+            {erOppfyllt() ? (
+              <KildeOverskrift>
                 <StatusIcon status={VurderingsresultatOld.OPPFYLT} />
                 Vilkår er oppfyllt
-              </div>
-            )}
-            {avslag() && (
-              <>
+              </KildeOverskrift>
+            ) : (
+              <KildeOverskrift>
                 <StatusIcon status={VurderingsresultatOld.IKKE_OPPFYLT} />
                 Vilkår er ikke oppfyllt
-              </>
+              </KildeOverskrift>
             )}
             <p>Manuelt av {vilkaar.vurdering?.saksbehandler}</p>
             <p>
               Kommentar: <br />
               {vilkaar.vurdering?.kommentar}
             </p>
-            <p>Sist endret {vilkaar.vurdering?.tidspunkt}</p>
+            <p>Sist endret {format(new Date(vilkaar.vurdering!!.tidspunkt), 'dd.MM.yyyy')}</p>
           </KildeVilkaar>
           <Button variant={'danger'} size={'small'} onClick={slettVurderingAvVilkaar}>
             Slett vurdering
@@ -137,8 +134,6 @@ export const Vurdering = ({ vilkaar, oppdaterVilkaar }: { vilkaar: Vilkaar; oppd
         <IkkeVurdert>
           <StatusIcon status={VurderingsresultatOld.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING} />
           Vilkåret er ikke vurdert
-          <br />
-          <br />
           <Button variant={'primary'} size={'small'} onClick={() => setAktivVurdering(true)}>
             Vurder vilkår
           </Button>
@@ -150,14 +145,34 @@ export const Vurdering = ({ vilkaar, oppdaterVilkaar }: { vilkaar: Vilkaar; oppd
 
 export const IkkeVurdert = styled.div`
   font-size: 0.8em;
+
+  button {
+    margin-top: 1em;
+  }
 `
 
 export const KildeVilkaar = styled.div`
   color: grey;
   font-size: 0.7em;
+`
 
-  .svart {
-    color: black;
-    font-size: 1.2em;
+export const KildeOverskrift = styled.div`
+  color: black;
+  font-size: 1.2em;
+`
+
+export const VurderingsTitle = styled.div`
+  display: flex;
+  font-size: 1em;
+  font-weight: bold;
+`
+
+export const RadioGroupWrapper = styled.div`
+  margin-top: 0.5em;
+  margin-bottom: 1em;
+
+  .flex {
+    display: flex;
+    gap: 20px;
   }
 `

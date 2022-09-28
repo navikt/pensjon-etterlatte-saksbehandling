@@ -32,7 +32,13 @@
       "paragraf": "§ 18-4 ledd 1",
       "paragrafTittel": "Stønadssituasjonen – barnets alder",
       "paragrafLenke": "https://lovdata.no/lov/1997-02-28-19/%C2%A718-4",
-      "lovtekst": "Pensjon ytes inntil barnet fyller 18 år."
+      "lovtekst": "Pensjon ytes inntil barnet fyller 18 år.",
+      "vurdering": {
+        "resultat": "IKKE_OPPFYLT",
+        "kommentar": "Barnet har fylt 22 år på dødstidspunktet.",
+        "tidspunkt": "2022-08-26",
+        "saksbehandler": "Z9991111"
+      }
     },
     {
       "type": "DOEDSFALL_FORELDER",

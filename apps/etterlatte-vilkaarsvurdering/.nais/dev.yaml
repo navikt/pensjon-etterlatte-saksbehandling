@@ -8,6 +8,8 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+  ingresses:
+    - "https://etterlatte-vilkaarsvurdering.dev.intern.nav.no"
   liveness:
     initialDelay: 5
     path: /isalive
@@ -32,6 +34,11 @@ spec:
   azure:
     application:
       enabled: true
+      tenant: trygdeetaten.no
+      claims:
+        extra:
+          - NAVident
+
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -42,3 +49,7 @@ spec:
     - name: KAFKA_RESET_POLICY
     #sette tilbake til none senere
       value: latest
+  accessPolicy:
+    inbound:
+      rules:
+        - application: etterlatte-saksbehandling-ui

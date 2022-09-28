@@ -52,3 +52,9 @@ mockRouter.get(`/vilkaarsvurdering/:id`, (req: Request, res: Response) => {
     res.json(vilkaarsproving)
   }, 1000)
 })
+
+mockRouter.post(`/vilkaarsvurdering/:id/vurder`, (req: Request, res: Response) => {
+  setTimeout(() => {
+    res.json('Suksess')
+  }, 1000)
+})

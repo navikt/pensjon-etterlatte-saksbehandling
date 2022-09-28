@@ -1,4 +1,3 @@
-import { VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 import {
   Innhold,
   Lovtekst,
@@ -11,13 +10,13 @@ import {
   VilkaarVurderingContainer,
   VilkaarWrapper,
 } from '../inngangsvilkaar/styled'
-import { StatusIcon } from '../../../shared/icons/statusIcon'
-import { vilkaarErOppfylt } from '../inngangsvilkaar/vilkaar/tekstUtils'
 import React, { ReactNode } from 'react'
 import { Vilkaar } from '../../../shared/api/vilkaarsvurdering'
+import { Vurdering } from './Vurdering'
 
 export interface VilkaarProps {
   vilkaar: Vilkaar
+  oppdaterVilkaar: () => void
   children: ReactNode
 }
 
@@ -30,7 +29,12 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
         <VilkaarWrapper>
           <VilkaarInfobokser>
             <VilkaarColumn>
-              <Title>{vilkaar.paragraf}</Title>
+              <Title>{vilkaar.paragrafTittel} &nbsp;</Title>
+              <a href={vilkaar.paragrafLenke} target="_blank" rel="noopener noreferrer">
+                {vilkaar.paragraf}
+              </a>
+              <br />
+              <br />
               <Lovtekst>{vilkaar.lovtekst}</Lovtekst>
             </VilkaarColumn>
             <VilkaarColumn>{props.children}</VilkaarColumn>
@@ -38,9 +42,8 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
           <VilkaarVurderingColumn>
             <VilkaarVurderingContainer>
               <VilkaarlisteTitle>
-                <StatusIcon status={VurderingsResultat.OPPFYLT} large /> {vilkaarErOppfylt(VurderingsResultat.OPPFYLT)}
+                <Vurdering vilkaar={vilkaar} oppdaterVilkaar={props.oppdaterVilkaar} />
               </VilkaarlisteTitle>
-              {/*<KildeDatoVilkaar isHelautomatisk={false} dato={Date.now().toString()} />*/}
             </VilkaarVurderingContainer>
           </VilkaarVurderingColumn>
         </VilkaarWrapper>

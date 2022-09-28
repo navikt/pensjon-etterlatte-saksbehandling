@@ -6,7 +6,6 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import no.nav.etterlatte.libs.common.logging.getXCorrelationId
 import no.nav.etterlatte.brev.model.RegoppslagResponseDTO
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.slf4j.LoggerFactory
 
 class AdresseKlient(
@@ -15,13 +14,10 @@ class AdresseKlient(
 ) : AdresseService {
     private val logger = LoggerFactory.getLogger(AdresseService::class.java)
 
-    // api://dev-fss.teamdokumenthandtering.regoppslag/.default
-
-    override suspend fun hentMottakerAdresse(id: Foedselsnummer): RegoppslagResponseDTO = try {
-        logger.info("Henter mottakere fra regoppslag: ${id.toString()}")
-        client.get("$url/regoppslag/${id.value}") {
+    override suspend fun hentMottakerAdresse(ident: String): RegoppslagResponseDTO = try {
+        logger.info("Henter mottakere fra regoppslag")
+        client.get("$url/regoppslag/${ident}") {
             header("x_correlation_id", getXCorrelationId())
-            // setBody(TextContent(AdresseRequest(id).toJson(), ContentType.Application.Json))
         }.body()
 
     } catch (exception: Exception) {

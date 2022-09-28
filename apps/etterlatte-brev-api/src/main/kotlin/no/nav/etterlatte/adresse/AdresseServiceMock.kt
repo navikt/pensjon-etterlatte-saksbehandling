@@ -1,10 +1,9 @@
 package no.nav.etterlatte.adresse
 
 import no.nav.etterlatte.brev.model.RegoppslagResponseDTO
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 
 class AdresseServiceMock : AdresseService {
-    override suspend fun hentMottakerAdresse(id: Foedselsnummer): RegoppslagResponseDTO {
+    override suspend fun hentMottakerAdresse(id: String): RegoppslagResponseDTO {
         return RegoppslagResponseDTO(
             navn = "Fornavnet",
             adresse = RegoppslagResponseDTO.Adresse(

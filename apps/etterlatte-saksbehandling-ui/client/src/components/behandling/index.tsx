@@ -19,9 +19,13 @@ export const Behandling = () => {
   const match = useMatch('/behandling/:behandlingId/*')
   const { behandlingRoutes } = useBehandlingRoutes()
   const [loaded, setLoaded] = useState<boolean>(false)
+  const behandlingId = ctx.state.behandlingReducer.id
 
   useEffect(() => {
     if (match?.params.behandlingId) {
+      if (match.params.behandlingId !== behandlingId) {
+        setLoaded(false)
+      }
       hentBehandling(match.params.behandlingId).then((response: IApiResponse<IDetaljertBehandling>) => {
         if (response.data) {
           ctx.dispatch(addBehandlingAction(response.data))
@@ -29,7 +33,7 @@ export const Behandling = () => {
         }
       })
     }
-  }, [match?.params.behandlingId])
+  }, [match?.params.behandlingId, behandlingId])
 
   const soeker = ctx.state.behandlingReducer?.kommerSoekerTilgode?.familieforhold?.soeker
   const soekerInfo = soeker ? { navn: soeker.navn, fnr: soeker.fnr, type: 'Etterlatt' } : null

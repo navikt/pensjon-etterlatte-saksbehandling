@@ -25,7 +25,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
 
             logger.info("Henter vilkårsvurdering for $behandlingId")
             val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
-            call.respond(vilkaarsvurdering)
+            vilkaarsvurdering?.let { call.respond(vilkaarsvurdering) } ?: call.respond(HttpStatusCode.NotFound)
         }
 
         post("/{behandlingId}") {

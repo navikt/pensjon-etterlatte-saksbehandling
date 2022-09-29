@@ -2,14 +2,20 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 class VilkaarsvurderingService(val vilkaarsvurderingRepository: VilkaarsvurderingRepository) {
 
-    fun hentVilkaarsvurdering(behandlingId: String): Vilkaarsvurdering {
-        return vilkaarsvurderingRepository.hent(behandlingId) ?: opprettVilkaarsvurdering(behandlingId)
+    fun hentVilkaarsvurdering(behandlingId: String): Vilkaarsvurdering? {
+        return vilkaarsvurderingRepository.hent(behandlingId)
     }
 
-    private fun opprettVilkaarsvurdering(behandlingId: String): Vilkaarsvurdering {
-        val nyVilkaarsvurdering = Vilkaarsvurdering(behandlingId, vilkaarBarnepensjon())
+    fun opprettVilkaarsvurdering(behandlingId: String, payload: String): Vilkaarsvurdering {
+        val nyVilkaarsvurdering = Vilkaarsvurdering(behandlingId, payload, vilkaarBarnepensjon())
         vilkaarsvurderingRepository.lagre(nyVilkaarsvurdering)
         return nyVilkaarsvurdering
+    }
+
+    fun oppdaterVilkaarsvurdering(behandlingId: String, payload: String): Vilkaarsvurdering {
+        return vilkaarsvurderingRepository.hent(behandlingId)?.let {
+            vilkaarsvurderingRepository.lagre(it.copy(payload = payload))
+        } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
     fun oppdaterVurderingPaaVilkaar(behandlingId: String, vurdertVilkaar: VurdertVilkaar): Vilkaarsvurdering {

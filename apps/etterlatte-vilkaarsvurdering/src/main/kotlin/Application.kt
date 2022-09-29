@@ -4,6 +4,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
@@ -24,6 +25,7 @@ import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import org.postgresql.gss.MakeGSS.authenticate
 import org.slf4j.event.Level
 import java.util.*
 
@@ -52,10 +54,9 @@ fun rapidApplication(
         rapidsConnection
     }
 
-fun io.ktor.server.application.Application.restModule(applicationContext: ApplicationContext) {
-    install(Authentication) {
-        applicationContext.tokenValidering(this)
-    }
+fun Application.restModule(applicationContext: ApplicationContext) {
+    val devMode = applicationContext.properties.devMode
+
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
@@ -79,9 +80,19 @@ fun io.ktor.server.application.Application.restModule(applicationContext: Applic
         }
     }
 
-    routing {
-        authenticate {
+    if (devMode) {
+        routing {
             vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
+        }
+    } else {
+        install(Authentication) {
+            applicationContext.tokenValidering(this)
+        }
+
+        routing {
+            authenticate {
+                vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
+            }
         }
     }
 }

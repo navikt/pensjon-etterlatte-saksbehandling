@@ -8,7 +8,7 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.security.token.support.v2.tokenValidationSupport
 
 class ApplicationContext(
-    // val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
 ) {
     /*var dataSourceBuilder = DataSourceBuilder(
         jdbcUrl = jdbcUrl(

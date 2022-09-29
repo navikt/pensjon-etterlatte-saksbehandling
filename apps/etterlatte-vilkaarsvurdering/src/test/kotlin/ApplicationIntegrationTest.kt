@@ -22,7 +22,6 @@ class ApplicationIntegrationTest {
     @BeforeAll
     fun beforeAll() {
         // postgreSQLContainer.start()
-
         /*
         val applicationProperties = ApplicationProperties(
             dbName = postgreSQLContainer.databaseName,

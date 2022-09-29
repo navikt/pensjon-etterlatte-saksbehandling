@@ -10,7 +10,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 
-internal class GrunnlagEndretRiver(
+class GrunnlagEndretRiver(
     rapidsConnection: RapidsConnection,
     private val vilkaarsvurderingService: VilkaarsvurderingService
 ) : River.PacketListener {

@@ -43,6 +43,8 @@ fun rapidApplication(
             .build()
 ): RapidsConnection =
     with(applicationContext) {
+        grunnlagEndretRiver(rapidsConnection)
+
         rapidsConnection.register(object : RapidsConnection.StatusListener {
             override fun onStartup(rapidsConnection: RapidsConnection) {
                 // dataSourceBuilder.migrate()

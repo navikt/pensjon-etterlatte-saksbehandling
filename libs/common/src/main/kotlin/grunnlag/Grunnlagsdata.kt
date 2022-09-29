@@ -48,10 +48,10 @@ fun Grunnlagsdata<JsonNode>.hentFoedeland() = this.hentKonstantOpplysning<String
 fun Grunnlagsdata<JsonNode>.hentDoedsdato() = this.hentKonstantOpplysning<LocalDate?>(DOEDSDATO)
 fun Grunnlagsdata<JsonNode>.hentAdressebeskyttelse() =
     this.hentKonstantOpplysning<Adressebeskyttelse>(ADRESSEBESKYTTELSE)
-fun Grunnlagsdata<JsonNode>.hentBostedsadresse() = this.hentKonstantOpplysning<Adresse>(BOSTEDSADRESSE)
-fun Grunnlagsdata<JsonNode>.hentDeltbostedsadresse() = this.hentKonstantOpplysning<Adresse>(DELTBOSTEDSADRESSE)
-fun Grunnlagsdata<JsonNode>.hentKontaktadresse() = this.hentKonstantOpplysning<Adresse>(KONTAKTADRESSE)
-fun Grunnlagsdata<JsonNode>.hentOppholdsadresse() = this.hentKonstantOpplysning<Adresse>(OPPHOLDSADRESSE)
+fun Grunnlagsdata<JsonNode>.hentBostedsadresse() = this.hentKonstantOpplysning<List<Adresse>>(BOSTEDSADRESSE)
+fun Grunnlagsdata<JsonNode>.hentDeltbostedsadresse() = this.hentKonstantOpplysning<List<Adresse>>(DELTBOSTEDSADRESSE)
+fun Grunnlagsdata<JsonNode>.hentKontaktadresse() = this.hentKonstantOpplysning<List<Adresse>>(KONTAKTADRESSE)
+fun Grunnlagsdata<JsonNode>.hentOppholdsadresse() = this.hentKonstantOpplysning<List<Adresse>>(OPPHOLDSADRESSE)
 fun Grunnlagsdata<JsonNode>.hentSivilstatus() = this.hentKonstantOpplysning<Sivilstatus>(SIVILSTATUS)
 fun Grunnlagsdata<JsonNode>.hentStatsborgerskap() = this.hentKonstantOpplysning<String>(STATSBORGERSKAP)
 fun Grunnlagsdata<JsonNode>.hentUtland() = this.hentKonstantOpplysning<Utland>(UTLAND)
@@ -70,6 +70,7 @@ inline fun <reified T> Grunnlagsdata<JsonNode>.hentKonstantOpplysning(
 
     return when (grunnlagsdata) {
         is Opplysning.Konstant -> Opplysning.Konstant(
+            grunnlagsdata.id,
             grunnlagsdata.kilde,
             objectMapper.readValue(grunnlagsdata.verdi.toJson(), object : TypeReference<T>() {})
         )
@@ -89,7 +90,8 @@ inline fun <reified T> Grunnlagsdata<JsonNode>.hentPeriodisertOpplysning(
     return when (grunnlagsdata) {
         is Opplysning.Periodisert -> {
             Opplysning.Periodisert(
-                grunnlagsdata.perioder.map {
+                id = grunnlagsdata.id,
+                perioder = grunnlagsdata.perioder.map {
                     PeriodisertOpplysning(
                         kilde = it.kilde,
                         verdi = objectMapper.readValue(it.verdi.toJson(), T::class.java),

@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOEDESBARN
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.toJsonNode
+import java.util.UUID.randomUUID
 
 data class GrunnlagTestData(
     val opplysningsmapSøkerOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
@@ -34,6 +35,7 @@ data class GrunnlagTestData(
     private val avdoedesBarnOverrides
         get() = mapOf(
             AVDOEDESBARN to Opplysning.Konstant(
+                randomUUID(),
                 kilde,
                 AvdoedesBarn(listOf(søker, søsken, halvsøsken)).toJsonNode()
             )

@@ -1,6 +1,7 @@
 package itest
 
 import com.fasterxml.jackson.databind.JsonNode
+import grunnlag.statiskUuid
 import lagGrunnlagsopplysning
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.grunnlag.BehandlingEndretHendlese
@@ -33,7 +34,6 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 import java.time.Instant
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RapidTest {
@@ -68,12 +68,11 @@ internal class RapidTest {
         postgreSQLContainer.stop()
     }
 
-    private val opplysningsid = UUID.randomUUID()
     private val fnr = Foedselsnummer.of("18057404783")
     private val tidspunkt = Instant.now()
     private val kilde = Grunnlagsopplysning.Pdl("pdl", tidspunkt, null, null)
     private val nyOpplysning = Grunnlagsopplysning(
-        id = opplysningsid,
+        id = statiskUuid,
         kilde = kilde,
         opplysningType = Opplysningstyper.NAVN,
         meta = objectMapper.createObjectNode(),
@@ -133,7 +132,7 @@ internal class RapidTest {
         val personRolleOpplysning = lagGrunnlagsopplysning(
             opplysningstyper = Opplysningstyper.PERSONROLLE,
             kilde = kilde,
-            uuid = UUID.randomUUID(),
+            uuid = statiskUuid,
             verdi = PersonRolle.BARN.toJsonNode(),
             fnr = fnr
         )
@@ -156,7 +155,7 @@ internal class RapidTest {
                     lagGrunnlagsopplysning(
                         opplysningstyper = Opplysningstyper.PERSONROLLE,
                         kilde = kilde,
-                        uuid = UUID.randomUUID(),
+                        uuid = statiskUuid,
                         verdi = PersonRolle.BARN.toJsonNode(),
                         fnr = fnr
                     )
@@ -190,8 +189,13 @@ internal class RapidTest {
         Assertions.assertEquals(
             Opplysningsgrunnlag(
                 søker = mapOf(
-                    Opplysningstyper.NAVN to Opplysning.Konstant(nyOpplysning.kilde, nyOpplysning.opplysning),
+                    Opplysningstyper.NAVN to Opplysning.Konstant(
+                        statiskUuid,
+                        nyOpplysning.kilde,
+                        nyOpplysning.opplysning
+                    ),
                     Opplysningstyper.PERSONROLLE to Opplysning.Konstant(
+                        statiskUuid,
                         personRolleOpplysning.kilde,
                         personRolleOpplysning.opplysning
                     )

@@ -8,11 +8,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Verge
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
-import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -20,15 +16,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-
-fun mapTilVilkaarstypePerson(person: Person): VilkaarOpplysning<Person> {
-    return VilkaarOpplysning(
-        UUID.randomUUID(),
-        Opplysningstyper.SOEKER_PDL_V1,
-        Grunnlagsopplysning.Pdl("pdl", Instant.now(), null, "opplysningId"),
-        person
-    )
-}
 
 fun mapTilVilkaarstypeAvdoedSoeknad(person: AvdoedSoeknad): VilkaarOpplysning<AvdoedSoeknad> {
     return VilkaarOpplysning(
@@ -74,35 +61,6 @@ fun lagMockPersonSoekerSoeknad(utland: UtenlandsadresseBarn): SoekerBarnSoeknad 
         null
     )
 }
-
-fun lagMockPersonPdl(
-    foedselsdato: LocalDate? = LocalDate.parse("2020-06-10"),
-    foedselsnummer: Foedselsnummer = Foedselsnummer.of("19078504903"),
-    doedsdato: LocalDate?,
-    adresse: List<Adresse>?,
-    foreldre: List<Foedselsnummer>?,
-    statsborgerskap: String? = null,
-    utland: Utland? = null
-) = Person(
-    fornavn = "Test",
-    etternavn = "Testulfsen",
-    foedselsnummer = foedselsnummer,
-    foedselsdato = foedselsdato,
-    foedselsaar = 1985,
-    foedeland = null,
-    doedsdato = doedsdato,
-    adressebeskyttelse = Adressebeskyttelse.UGRADERT,
-    bostedsadresse = adresse,
-    deltBostedsadresse = null,
-    kontaktadresse = adresse,
-    oppholdsadresse = adresse,
-    sivilstatus = null,
-    statsborgerskap = statsborgerskap,
-    utland = utland,
-    familieRelasjon = FamilieRelasjon(null, foreldre, null),
-    avdoedesBarn = null,
-    vergemaalEllerFremtidsfullmakt = null
-)
 
 fun adresserNorgePdl() =
     listOf(

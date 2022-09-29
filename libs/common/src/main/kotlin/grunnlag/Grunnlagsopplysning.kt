@@ -20,10 +20,10 @@ open class Grunnlagsopplysning<T>(
     val attestering: Kilde? = null,
     val fnr: Foedselsnummer? = null
 ) {
-    fun toOpplysning(): Opplysning<T> = Opplysning.Konstant(kilde = kilde, verdi = opplysning)
+    fun toOpplysning(): Opplysning<T> = Opplysning.Konstant(id = id, kilde = kilde, verdi = opplysning)
 
     override fun toString(): String {
-        return "Opplysning om ${opplysningType.name}: oppgitt av $kilde til å være: $opplysning"
+        return "Opplysning om ${opplysningType.name}: oppgitt av $kilde til å være: $opplysning. Id: $id"
     }
 
     @JsonTypeInfo(

@@ -1,12 +1,17 @@
 package barnepensjon.vilkaar.avdoedesmedlemskap
 
+import GrunnlagTestData
 import adresseDanmarkPdl
 import adresseUtlandFoerFemAar
 import adresserNorgePdl
+import grunnlag.kilde
 import lagMockPersonAvdoedSoeknad
-import lagMockPersonPdl
 import mapTilVilkaarstypeAvdoedSoeknad
-import mapTilVilkaarstypePerson
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.KONTAKTADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.OPPHOLDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -15,26 +20,31 @@ import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
+import no.nav.etterlatte.libs.common.vikaar.Kriterietyper.AVDOED_NORSK_STATSBORGER
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.util.*
 
 class BosattTest {
 
     @Test
     fun vurderNorskStatsborgerskap() {
-        val avdoedPdlNorsk = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, adresserNorgePdl(), null, "NOR")
-        val avdoedPdlDansk = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, adresserNorgePdl(), null, "DAN")
-        val avdoedPdlMangler = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, adresserNorgePdl(), null, null)
+        val testdataNorsk = GrunnlagTestData().hentOpplysningsgrunnlag().hentAvdoed()
+        val testdataDansk = testdataNorsk + mapOf(
+            Opplysningstyper.STATSBORGERSKAP to Opplysning.Konstant(UUID.randomUUID(), kilde, "DAN".toJsonNode())
+        )
+        val testdataIngenStatsborgerskap = testdataNorsk - Opplysningstyper.STATSBORGERSKAP
 
         val norsk =
-            kriterieNorskStatsborger(mapTilVilkaarstypePerson(avdoedPdlNorsk), Kriterietyper.AVDOED_NORSK_STATSBORGER)
+            kriterieNorskStatsborger(testdataNorsk, AVDOED_NORSK_STATSBORGER)
         val dansk =
-            kriterieNorskStatsborger(mapTilVilkaarstypePerson(avdoedPdlDansk), Kriterietyper.AVDOED_NORSK_STATSBORGER)
+            kriterieNorskStatsborger(testdataDansk, AVDOED_NORSK_STATSBORGER)
         val mangler =
-            kriterieNorskStatsborger(mapTilVilkaarstypePerson(avdoedPdlMangler), Kriterietyper.AVDOED_NORSK_STATSBORGER)
+            kriterieNorskStatsborger(testdataIngenStatsborgerskap, AVDOED_NORSK_STATSBORGER)
 
         assertEquals(VurderingsResultat.OPPFYLT, norsk.resultat)
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, dansk.resultat)
@@ -43,46 +53,36 @@ class BosattTest {
 
     @Test
     fun vurderInnOgUtvandring() {
-        val avdoedPdlIngenUtland = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, adresserNorgePdl(), null)
-        val avdoedPdlInnvandring = lagMockPersonPdl(
-            null,
-            fnrAvdoed,
-            doedsdatoPdl,
-            adresserNorgePdl(),
-            null,
-            utland = Utland(
-                innflyttingTilNorge = listOf(InnflyttingTilNorge("DAN", LocalDate.now())),
-                utflyttingFraNorge = listOf(UtflyttingFraNorge("USA", LocalDate.now()))
+        val avdødTestdata = GrunnlagTestData(
+            opplysningsmapAvdødOverrides = mapOf(
+                BOSTEDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresserNorgePdl().toJsonNode())
+            )
+        ).hentOpplysningsgrunnlag().hentAvdoed()
+        val avdødIngenUtland = avdødTestdata - Opplysningstyper.UTLAND
+        val avdødInnvandring = avdødTestdata + mapOf(
+            Opplysningstyper.UTLAND to Opplysning.Konstant(
+                UUID.randomUUID(),
+                kilde,
+                Utland(
+                    innflyttingTilNorge = listOf(InnflyttingTilNorge("DAN", LocalDate.now())),
+                    utflyttingFraNorge = listOf(UtflyttingFraNorge("USA", LocalDate.now()))
+                ).toJsonNode()
+            )
+        )
+        val avdødHarIkkeUtland = avdødTestdata + mapOf(
+            Opplysningstyper.UTLAND to Opplysning.Konstant(
+                UUID.randomUUID(),
+                kilde,
+                Utland(
+                    innflyttingTilNorge = emptyList(),
+                    utflyttingFraNorge = emptyList()
+                ).toJsonNode()
             )
         )
 
-        val avdoedPdlHarIkke = lagMockPersonPdl(
-            null,
-            fnrAvdoed,
-            doedsdatoPdl,
-            adresserNorgePdl(),
-            null,
-            utland = Utland(
-                innflyttingTilNorge = emptyList(),
-                utflyttingFraNorge = emptyList()
-            )
-        )
-
-        val ingenUtland =
-            kriterieIngenInnUtvandring(
-                mapTilVilkaarstypePerson(avdoedPdlIngenUtland),
-                Kriterietyper.AVDOED_NORSK_STATSBORGER
-            )
-        val ingenInnOgUtvandring =
-            kriterieIngenInnUtvandring(
-                mapTilVilkaarstypePerson(avdoedPdlHarIkke),
-                Kriterietyper.AVDOED_NORSK_STATSBORGER
-            )
-        val harInnOgUtvandring =
-            kriterieIngenInnUtvandring(
-                mapTilVilkaarstypePerson(avdoedPdlInnvandring),
-                Kriterietyper.AVDOED_NORSK_STATSBORGER
-            )
+        val ingenUtland = kriterieIngenInnUtvandring(avdødIngenUtland, AVDOED_NORSK_STATSBORGER)
+        val ingenInnOgUtvandring = kriterieIngenInnUtvandring(avdødHarIkkeUtland, AVDOED_NORSK_STATSBORGER)
+        val harInnOgUtvandring = kriterieIngenInnUtvandring(avdødInnvandring, AVDOED_NORSK_STATSBORGER)
 
         assertEquals(VurderingsResultat.OPPFYLT, ingenUtland.resultat)
         assertEquals(VurderingsResultat.OPPFYLT, ingenInnOgUtvandring.resultat)
@@ -112,55 +112,69 @@ class BosattTest {
 
     @Test
     fun kunNorskeAdresserSisteFemAar() {
-        val avdoedPdlUtenAdresse = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, null, null)
-        val avdoedPdlMedUtland = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, adresseDanmarkPdl(), null)
-        val avdoedPdlUtenUtland = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, adresserNorgePdl(), null)
-        val avdoedPdlUtlandFoerFemAar = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, adresseUtlandFoerFemAar(), null)
+        val avdødUtenUtlandsadresser = GrunnlagTestData(
+            opplysningsmapAvdødOverrides = mapOf(
+                BOSTEDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresserNorgePdl().toJsonNode()),
+                KONTAKTADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresserNorgePdl().toJsonNode()),
+                OPPHOLDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresserNorgePdl().toJsonNode())
+            )
+        ).hentOpplysningsgrunnlag().hentAvdoed()
+        val avdødUtenAdresse = avdødUtenUtlandsadresser - BOSTEDSADRESSE - KONTAKTADRESSE - OPPHOLDSADRESSE
+        val avdødMedUtlandsadresser = avdødUtenUtlandsadresser + mapOf(
+            BOSTEDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseDanmarkPdl().toJsonNode()),
+            KONTAKTADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseDanmarkPdl().toJsonNode()),
+            OPPHOLDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseDanmarkPdl().toJsonNode())
+        )
+        val avdødMedUtlandsadresserFørFemÅr = avdødUtenUtlandsadresser + mapOf(
+            BOSTEDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseUtlandFoerFemAar().toJsonNode()),
+            KONTAKTADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseUtlandFoerFemAar().toJsonNode()),
+            OPPHOLDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseUtlandFoerFemAar().toJsonNode())
+        )
 
         val utenlandsoppholdBosted =
             kriterieKunNorskeBostedsadresserSisteFemAar(
-                mapTilVilkaarstypePerson(avdoedPdlMedUtland),
+                avdødMedUtlandsadresser,
                 Kriterietyper.AVDOED_KUN_NORSKE_BOSTEDSADRESSER
             )
         val utenlandsoppholdOpphold =
             kriterieKunNorskeOppholdsadresserSisteFemAar(
-                mapTilVilkaarstypePerson(avdoedPdlMedUtland),
+                avdødMedUtlandsadresser,
                 Kriterietyper.AVDOED_KUN_NORSKE_OPPHOLDSSADRESSER
             )
 
         val utenlandsoppholdKontakt =
             kriterieKunNorskeKontaktadresserSisteFemAar(
-                mapTilVilkaarstypePerson(avdoedPdlMedUtland),
+                avdødMedUtlandsadresser,
                 Kriterietyper.AVDOED_KUN_NORSKE_KONTAKTADRESSER
             )
 
         val ingenUtenlandsoppholdBosted =
             kriterieKunNorskeBostedsadresserSisteFemAar(
-                mapTilVilkaarstypePerson(avdoedPdlUtenUtland),
+                avdødUtenUtlandsadresser,
                 Kriterietyper.AVDOED_KUN_NORSKE_BOSTEDSADRESSER
             )
 
         val ingenUtenlandsoppholdOpphold =
             kriterieKunNorskeOppholdsadresserSisteFemAar(
-                mapTilVilkaarstypePerson(avdoedPdlUtenUtland),
+                avdødUtenUtlandsadresser,
                 Kriterietyper.AVDOED_KUN_NORSKE_OPPHOLDSSADRESSER
             )
 
         val ingenUtenlandsoppholdKontakt =
             kriterieKunNorskeKontaktadresserSisteFemAar(
-                mapTilVilkaarstypePerson(avdoedPdlUtenUtland),
+                avdødUtenUtlandsadresser,
                 Kriterietyper.AVDOED_KUN_NORSKE_KONTAKTADRESSER
             )
 
         val utenlandsoppholdFoerFemAar =
             kriterieKunNorskeBostedsadresserSisteFemAar(
-                mapTilVilkaarstypePerson(avdoedPdlUtlandFoerFemAar),
+                avdødMedUtlandsadresserFørFemÅr,
                 Kriterietyper.AVDOED_KUN_NORSKE_BOSTEDSADRESSER
             )
 
         val ingenAdresser =
             kriterieKunNorskeBostedsadresserSisteFemAar(
-                mapTilVilkaarstypePerson(avdoedPdlUtenAdresse),
+                avdødUtenAdresse,
                 Kriterietyper.AVDOED_KUN_NORSKE_BOSTEDSADRESSER
             )
 
@@ -178,32 +192,40 @@ class BosattTest {
 
     @Test
     fun vurderSammenhengendeAdresserINorgeSisteFemAar() {
-        val avdoedPdlUtenAdresse = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, null, null)
-        val avdoedPdlMedUtland = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, adresseDanmarkPdl(), null)
-        val avdoedPdlUtenUtland = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, adresserNorgePdl(), null)
-        val avdoedPdlUtlandFoerFemAar = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, adresseUtlandFoerFemAar(), null)
+        val avdødUtenUtlandsadresser = GrunnlagTestData(
+            opplysningsmapAvdødOverrides = mapOf(
+                BOSTEDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresserNorgePdl().toJsonNode())
+            )
+        ).hentOpplysningsgrunnlag().hentAvdoed()
+        val avdødUtenAdresse = avdødUtenUtlandsadresser - BOSTEDSADRESSE
+        val avdødMedUtlandsadresser = avdødUtenUtlandsadresser + mapOf(
+            BOSTEDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseDanmarkPdl().toJsonNode())
+        )
+        val avdødMedUtlandsadresserFørFemÅr = avdødUtenUtlandsadresser + mapOf(
+            BOSTEDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseUtlandFoerFemAar().toJsonNode())
+        )
 
         val utenlandsopphold =
             kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
-                mapTilVilkaarstypePerson(avdoedPdlMedUtland),
+                avdødMedUtlandsadresser,
                 Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
             )
 
         val ingenUtenlandsopphold =
             kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
-                mapTilVilkaarstypePerson(avdoedPdlUtenUtland),
+                avdødUtenUtlandsadresser,
                 Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
             )
 
         val utenlandsoppholdFoerFemAar =
             kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
-                mapTilVilkaarstypePerson(avdoedPdlUtlandFoerFemAar),
+                avdødMedUtlandsadresserFørFemÅr,
                 Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
             )
 
         val ingenAdresser =
             kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
-                mapTilVilkaarstypePerson(avdoedPdlUtenAdresse),
+                avdødUtenAdresse,
                 Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
             )
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import java.time.YearMonth
+import java.util.UUID
 
 data class Grunnlag(
     val saksId: Long,
@@ -56,10 +57,12 @@ data class PeriodisertOpplysning<T>(
 )
 sealed class Opplysning<T>(val type: String) {
     data class Periodisert<T>(
+        val id: UUID,
         val perioder: List<PeriodisertOpplysning<T>>
     ) : Opplysning<T>("periodisert")
 
     data class Konstant<T>(
+        val id: UUID,
         val kilde: Grunnlagsopplysning.Kilde,
         val verdi: T
     ) : Opplysning<T>("konstant")

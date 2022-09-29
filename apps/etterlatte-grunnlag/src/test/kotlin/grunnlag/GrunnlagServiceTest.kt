@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.*
 
 internal class GrunnlagServiceTest {
     private val opplysningerMock = mockk<OpplysningDao>()
@@ -38,6 +37,7 @@ internal class GrunnlagServiceTest {
                 1,
                 1,
                 NAVN,
+                id = statiskUuid,
                 fnr = fnr,
                 verdi = nyttNavn.toJsonNode(),
                 kilde = kilde
@@ -46,6 +46,7 @@ internal class GrunnlagServiceTest {
                 1,
                 2,
                 FOEDSELSDATO,
+                id = statiskUuid,
                 fnr = fnr,
                 verdi = nyFødselsdag.toJsonNode(),
                 kilde = kilde
@@ -54,6 +55,7 @@ internal class GrunnlagServiceTest {
                 1,
                 3,
                 PERSONROLLE,
+                id = statiskUuid,
                 fnr = fnr,
                 verdi = personRolle.toJsonNode(),
                 kilde = kilde
@@ -68,8 +70,8 @@ internal class GrunnlagServiceTest {
 
             val actual = grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri())
             val expected = mapOf(
-                NAVN to Opplysning.Konstant(kilde, nyttNavn.toJsonNode()),
-                FOEDSELSDATO to Opplysning.Konstant(kilde, nyFødselsdag.toJsonNode())
+                NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
+                FOEDSELSDATO to Opplysning.Konstant(statiskUuid, kilde, nyFødselsdag.toJsonNode())
             )
 
             Assertions.assertEquals(expected[NAVN], actual.søker[NAVN])
@@ -84,9 +86,9 @@ internal class GrunnlagServiceTest {
 
             val actual = grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri())
             val expected = mapOf(
-                NAVN to Opplysning.Konstant(kilde, nyttNavn.toJsonNode()),
-                FOEDSELSDATO to Opplysning.Konstant(kilde, nyFødselsdag.toJsonNode()),
-                PERSONROLLE to Opplysning.Konstant(kilde, PersonRolle.AVDOED.toJsonNode())
+                NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
+                FOEDSELSDATO to Opplysning.Konstant(statiskUuid, kilde, nyFødselsdag.toJsonNode()),
+                PERSONROLLE to Opplysning.Konstant(statiskUuid, kilde, PersonRolle.AVDOED.toJsonNode())
             )
 
             Assertions.assertEquals(expected[NAVN], actual.hentAvdoed()[NAVN])
@@ -101,9 +103,9 @@ internal class GrunnlagServiceTest {
 
             val actual = grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri())
             val expected = mapOf(
-                NAVN to Opplysning.Konstant(kilde, nyttNavn.toJsonNode()),
-                FOEDSELSDATO to Opplysning.Konstant(kilde, nyFødselsdag.toJsonNode()),
-                PERSONROLLE to Opplysning.Konstant(kilde, PersonRolle.GJENLEVENDE.toJsonNode())
+                NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
+                FOEDSELSDATO to Opplysning.Konstant(statiskUuid, kilde, nyFødselsdag.toJsonNode()),
+                PERSONROLLE to Opplysning.Konstant(statiskUuid, kilde, PersonRolle.GJENLEVENDE.toJsonNode())
             )
 
             Assertions.assertEquals(expected[NAVN], actual.hentGjenlevende()[NAVN])
@@ -118,9 +120,9 @@ internal class GrunnlagServiceTest {
 
             val actual = grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri())
             val expected = mapOf(
-                NAVN to Opplysning.Konstant(kilde, nyttNavn.toJsonNode()),
-                FOEDSELSDATO to Opplysning.Konstant(kilde, nyFødselsdag.toJsonNode()),
-                PERSONROLLE to Opplysning.Konstant(kilde, PersonRolle.BARN.toJsonNode())
+                NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
+                FOEDSELSDATO to Opplysning.Konstant(statiskUuid, kilde, nyFødselsdag.toJsonNode()),
+                PERSONROLLE to Opplysning.Konstant(statiskUuid, kilde, PersonRolle.BARN.toJsonNode())
             )
 
             Assertions.assertEquals(expected[NAVN], actual.familie.single()[NAVN])
@@ -135,7 +137,7 @@ internal class GrunnlagServiceTest {
                 sakId = 1,
                 hendelseNummer = 1,
                 opplysningType = FOEDELAND,
-                id = UUID.randomUUID(),
+                id = statiskUuid,
                 fnr = testData.søker.foedselsnummer,
                 verdi = "Norge".toJsonNode(),
                 kilde = kilde
@@ -144,7 +146,7 @@ internal class GrunnlagServiceTest {
                 sakId = 1,
                 hendelseNummer = 2,
                 opplysningType = FOEDELAND,
-                id = UUID.randomUUID(),
+                id = statiskUuid,
                 fnr = testData.søker.foedselsnummer,
                 verdi = "Sverige".toJsonNode(),
                 kilde = kilde

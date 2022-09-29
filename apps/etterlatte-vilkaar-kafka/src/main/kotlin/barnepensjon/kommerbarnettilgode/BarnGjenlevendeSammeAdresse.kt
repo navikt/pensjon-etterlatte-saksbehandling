@@ -1,24 +1,24 @@
 package vilkaar.barnepensjon
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
-import no.nav.etterlatte.barnepensjon.hentBostedsAdresser
 import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraKriterier
 import no.nav.etterlatte.barnepensjon.vurderOpplysning
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Bostedadresser
-import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
+import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
 fun barnOgForelderSammeBostedsadresse(
-    soekerPdl: VilkaarOpplysning<Person>?,
-    gjenlevendePdl: VilkaarOpplysning<Person>?
+    soekerPdl: Grunnlagsdata<JsonNode>?,
+    gjenlevendePdl: Grunnlagsdata<JsonNode>?
 ): VurdertVilkaar {
     val sammeBostedsAdresse = kriterieSammeBostedsadresse(soekerPdl, gjenlevendePdl)
 
@@ -32,34 +32,37 @@ fun barnOgForelderSammeBostedsadresse(
 }
 
 fun kriterieSammeBostedsadresse(
-    soekerPdl: VilkaarOpplysning<Person>?,
-    gjenlevendePdl: VilkaarOpplysning<Person>?
+    soekerPdl: Grunnlagsdata<JsonNode>?,
+    gjenlevendePdl: Grunnlagsdata<JsonNode>?
 ): Kriterie {
+    val søkersAdresse = soekerPdl?.hentBostedsadresse()
+    val gjenlevendesAdresse = gjenlevendePdl?.hentBostedsadresse()
+
     val opplysningsGrunnlag = listOfNotNull(
-        soekerPdl?.let {
+        søkersAdresse?.let {
             Kriteriegrunnlag(
-                soekerPdl.id,
+                søkersAdresse.id,
                 KriterieOpplysningsType.BOSTEDADRESSE_SOEKER,
-                soekerPdl.kilde,
-                Bostedadresser(soekerPdl.opplysning.bostedsadresse)
+                søkersAdresse.kilde,
+                Bostedadresser(søkersAdresse.verdi)
             )
         },
-        gjenlevendePdl?.let {
+        gjenlevendesAdresse?.let {
             Kriteriegrunnlag(
-                gjenlevendePdl.id,
+                gjenlevendesAdresse.id,
                 KriterieOpplysningsType.BOSTEDADRESSE_GJENLEVENDE,
-                gjenlevendePdl.kilde,
-                Bostedadresser(gjenlevendePdl.opplysning.bostedsadresse)
+                gjenlevendesAdresse.kilde,
+                Bostedadresser(gjenlevendesAdresse.verdi)
             )
         }
     )
 
     val resultat = try {
-        if (gjenlevendePdl == null || soekerPdl == null) {
+        if (gjenlevendesAdresse == null || søkersAdresse == null) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
-            val adresseBarn = hentBostedsAdresser(soekerPdl).find { it.aktiv }
-            val adresseGjenlevende = hentBostedsAdresser(gjenlevendePdl).find { it.aktiv }
+            val adresseBarn = søkersAdresse.verdi.find { it.aktiv }
+            val adresseGjenlevende = gjenlevendesAdresse.verdi.find { it.aktiv }
 
             val adresse1 = adresseBarn?.adresseLinje1 == adresseGjenlevende?.adresseLinje1
             val postnr = adresseBarn?.postnr == adresseGjenlevende?.postnr

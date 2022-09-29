@@ -5,13 +5,16 @@ import barnepensjon.vilkaar.avdoedesmedlemskap.perioder.finnArbeidsinntektPeriod
 import barnepensjon.vilkaar.avdoedesmedlemskap.perioder.finnOffentligeYtelserPerioder
 import barnepensjon.vilkaar.avdoedesmedlemskap.perioder.finnPensjonEllerTrygdePerioder
 import barnepensjon.vilkaar.avdoedesmedlemskap.perioder.finnSaksbehandlerMedlemsPerioder
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.barnepensjon.Periode
-import no.nav.etterlatte.barnepensjon.hentDoedsdato
 import no.nav.etterlatte.barnepensjon.hentGaps
 import no.nav.etterlatte.barnepensjon.hentVurdering
 import no.nav.etterlatte.barnepensjon.kombinerPerioder
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapVurdering
@@ -20,7 +23,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsperiode
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
@@ -35,7 +37,7 @@ import java.util.*
 
 fun vilkaarAvdoedesMedlemskap(
     avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
-    avdoedPdl: VilkaarOpplysning<Person>?,
+    avdoedPdl: Grunnlagsdata<JsonNode>,
     inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>?,
     arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?,
     saksbehandlerMedlemskapsPerioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?
@@ -53,7 +55,7 @@ fun vilkaarAvdoedesMedlemskap(
     val bosattNorgeMetakriterie = metakriterieBosattNorge(avdoedSoeknad, avdoedPdl)
 
     val medlemskapOffentligOgInntektKriterie = kriterieMedlemskapOffentligOgInntekt(
-        avdoedPdl!!,
+        avdoedPdl,
         inntektsOpplysning!!,
         arbeidsforholdOpplysning!!,
         saksbehandlerMedlemskapsPerioder
@@ -72,12 +74,12 @@ fun vilkaarAvdoedesMedlemskap(
 }
 
 fun kriterieMedlemskapOffentligOgInntekt(
-    avdoedPdl: VilkaarOpplysning<Person>,
+    avdoedPdl: Grunnlagsdata<JsonNode>,
     inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>,
     arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>,
     saksbehandlerMedlemskapsperioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?
 ): Kriterie {
-    val doedsdato = hentDoedsdato(avdoedPdl)
+    val doedsdato = avdoedPdl.hentDoedsdato()?.verdi ?: throw OpplysningKanIkkeHentesUt()
 
     val avdoedesMedlemskapGrunnlag = AvdoedesMedlemskapGrunnlag(
         inntektsOpplysning = inntektsOpplysning,

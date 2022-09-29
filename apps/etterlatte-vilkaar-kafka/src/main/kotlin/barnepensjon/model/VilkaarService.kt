@@ -18,13 +18,15 @@ import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOEKER_SOEKNAD_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -41,6 +43,7 @@ class VilkaarService {
     private val logger = LoggerFactory.getLogger(VilkaarService::class.java)
 
     fun mapVilkaarForstegangsbehandling(
+        grunnlag: Opplysningsgrunnlag,
         opplysninger: List<VilkaarOpplysning<JsonNode>>,
         virkningstidspunkt: LocalDate
     ): VilkaarResultat {
@@ -49,10 +52,10 @@ class VilkaarService {
         )
 
         val avdoedSoeknad = finnOpplysning<AvdoedSoeknad>(opplysninger, Opplysningstyper.AVDOED_SOEKNAD_V1)
-        val soekerSoeknad = finnOpplysning<SoekerBarnSoeknad>(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1)
-        val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
-        val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
-        val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
+        val soekerSoeknad = finnOpplysning<SoekerBarnSoeknad>(opplysninger, SOEKER_SOEKNAD_V1)
+        val soekerPdl = grunnlag.søker
+        val avdoedPdl = grunnlag.hentAvdoed()
+        val gjenlevendePdl = grunnlag.hentGjenlevende()
         val avdoedeInntektsOpplysning =
             finnOpplysning<InntektsOpplysning>(opplysninger, Opplysningstyper.AVDOED_INNTEKT_V1)
         val arbeidsforhold = finnOpplysning<ArbeidsforholdOpplysning>(opplysninger, Opplysningstyper.ARBEIDSFORHOLD_V1)
@@ -87,7 +90,7 @@ class VilkaarService {
     }
 
     fun mapVilkaarRevurdering(
-        opplysninger: List<VilkaarOpplysning<JsonNode>>,
+        grunnlag: Opplysningsgrunnlag,
         virkningstidspunkt: LocalDate,
         revurderingAarsak: RevurderingAarsak
     ): VilkaarResultat {
@@ -95,7 +98,7 @@ class VilkaarService {
             "Mapper vilkaar fra grunnlagsdata for virkningstidspunkt $virkningstidspunkt for revurdering " +
                 "med årsak $revurderingAarsak"
         )
-        val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
+        val soekerPdl = grunnlag.søker
         val vilkaar = when (revurderingAarsak) {
             RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarFormaalForYtelsen(soekerPdl, virkningstidspunkt))
             RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
@@ -110,21 +113,21 @@ class VilkaarService {
     }
 
     fun beregnVirkningstidspunktFoerstegangsbehandling(
-        opplysninger: List<VilkaarOpplysning<JsonNode>>,
+        grunnlag: Opplysningsgrunnlag,
         soeknadMottattDato: LocalDate
     ): YearMonth {
-        val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
-        return hentVirkningstidspunktFoerstegangssoeknad(avdoedPdl?.opplysning?.doedsdato, soeknadMottattDato)
+        val avdødDødsdato = grunnlag.hentAvdoed().hentDoedsdato()
+        return hentVirkningstidspunktFoerstegangssoeknad(avdødDødsdato?.verdi, soeknadMottattDato)
     }
 
     private fun beregnVirkningstidspunktRevurdering(
-        opplysninger: List<VilkaarOpplysning<JsonNode>>,
+        grunnlag: Opplysningsgrunnlag,
         revurderingAarsak: RevurderingAarsak
     ): YearMonth {
         return when (revurderingAarsak) {
             RevurderingAarsak.SOEKER_DOD -> {
-                val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
-                hentVirkningstidspunktRevurderingSoekerDoedsfall(soekerPdl?.opplysning?.doedsdato)
+                val søkerDødsdato = grunnlag.søker.hentDoedsdato()
+                hentVirkningstidspunktRevurderingSoekerDoedsfall(søkerDødsdato?.verdi)
             }
             RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
                 "Kan ikke ha en revurdering på grunn av manuelt opphør!"
@@ -159,15 +162,17 @@ class VilkaarService {
         return YearMonth.from(doedsdato).plusMonths(1)
     }
 
-    fun mapKommerSoekerTilGode(opplysninger: List<VilkaarOpplysning<JsonNode>>): KommerSoekerTilgode {
+    fun mapKommerSoekerTilGode(
+        grunnlag: Opplysningsgrunnlag,
+        deprecatedVilkaarsopplysninger: List<VilkaarOpplysning<JsonNode>>
+    ): KommerSoekerTilgode {
         logger.info("Map opplysninger for å vurdere om penger kommer søker til gode")
-        val soekerPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.SOEKER_PDL_V1)
-        val gjenlevendePdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1)
-        val soekerSoeknad =
-            finnOpplysning<SoekerBarnSoeknad>(opplysninger, Opplysningstyper.SOEKER_SOEKNAD_V1)
-        val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
+        val soekerPdl = grunnlag.søker
+        val gjenlevendePdl = grunnlag.hentGjenlevende()
+        val soekerSoeknad = finnOpplysning<SoekerBarnSoeknad>(deprecatedVilkaarsopplysninger, SOEKER_SOEKNAD_V1)
+        val avdoedPdl = grunnlag.hentAvdoed()
         val saksbehandlerKommerBarnetTilgode = finnOpplysning<ResultatKommerBarnetTilgode>(
-            opplysninger,
+            deprecatedVilkaarsopplysninger,
             Opplysningstyper.SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1
         )
 
@@ -197,42 +202,44 @@ class VilkaarService {
 
     fun finnVirkningstidspunktOgVilkaarForBehandling(
         behandling: Behandling,
-        grunnlagForVilkaar: List<VilkaarOpplysning<JsonNode>>,
+        grunnlag: Opplysningsgrunnlag,
+        deprecatedVilkaarsopplysninger: List<VilkaarOpplysning<JsonNode>>,
         behandlingopprettet: LocalDate,
         aarsak: Aarsak
     ): Triple<YearMonth, VilkaarResultat, KommerSoekerTilgode?> {
         val virkningstidspunkt = when (behandling.type) {
             BehandlingType.FØRSTEGANGSBEHANDLING -> beregnVirkningstidspunktFoerstegangsbehandling(
-                grunnlagForVilkaar,
+                grunnlag,
                 behandlingopprettet
             )
 
             BehandlingType.REVURDERING -> beregnVirkningstidspunktRevurdering(
-                grunnlagForVilkaar,
+                grunnlag,
                 requireNotNull(aarsak.revurderingAarsak) { "Må ha en revurderingAarsak på en revurdering" }
             )
 
             BehandlingType.MANUELT_OPPHOER -> beregnVirkningstidspunktManueltOpphoer(
-                grunnlagForVilkaar,
+                grunnlag,
                 behandlingopprettet
             )
         }
         val vilkaarResultat = when (behandling.type) {
             BehandlingType.REVURDERING -> mapVilkaarRevurdering(
-                grunnlagForVilkaar,
+                grunnlag,
                 virkningstidspunkt.atDay(1),
                 requireNotNull(aarsak.revurderingAarsak) { "Må ha en revurderingAarsak på en revurdering" }
             )
 
             BehandlingType.FØRSTEGANGSBEHANDLING -> mapVilkaarForstegangsbehandling(
-                grunnlagForVilkaar,
+                grunnlag,
+                deprecatedVilkaarsopplysninger,
                 virkningstidspunkt.atDay(1)
             )
 
             BehandlingType.MANUELT_OPPHOER -> mapVilkaarManueltOpphoer(virkningstidspunkt, aarsak)
         }
         val kommerSoekerTilgode = when (behandling.type) {
-            BehandlingType.FØRSTEGANGSBEHANDLING -> mapKommerSoekerTilGode(grunnlagForVilkaar)
+            BehandlingType.FØRSTEGANGSBEHANDLING -> mapKommerSoekerTilGode(grunnlag, deprecatedVilkaarsopplysninger)
             else -> null
         }
         return Triple(virkningstidspunkt, vilkaarResultat, kommerSoekerTilgode)
@@ -254,11 +261,11 @@ class VilkaarService {
     }
 
     private fun beregnVirkningstidspunktManueltOpphoer(
-        opplysninger: List<VilkaarOpplysning<JsonNode>>,
+        grunnlag: Opplysningsgrunnlag,
         soeknadMottattDato: LocalDate
     ): YearMonth {
-        val avdoedPdl = finnOpplysning<Person>(opplysninger, Opplysningstyper.AVDOED_PDL_V1)
-        return hentVirkningstidspunktFoerstegangssoeknad(avdoedPdl?.opplysning?.doedsdato, soeknadMottattDato)
+        val avdødDødsdato = grunnlag.hentAvdoed().hentDoedsdato()
+        return hentVirkningstidspunktFoerstegangssoeknad(avdødDødsdato?.verdi, soeknadMottattDato)
     }
 
     companion object {

@@ -1,58 +1,59 @@
 package barnepensjon.vilkaar
 
-import adresserNorgePdl
-import lagMockPersonPdl
-import mapTilVilkaarstypePerson
+import GrunnlagTestData
+import grunnlag.kilde
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.*
 
 class AlderBarnTest {
-    private val personBarnOver20 = lagMockPersonPdl(
-        foedselsdatoBarnOver20,
-        fnrBarn,
-        null,
-        adresserNorgePdl(),
-        null
-    )
-    private val personBarnUnder20 = lagMockPersonPdl(
-        foedselsdatoBarnUnder20,
-        fnrBarn,
-        null,
-        adresserNorgePdl(),
-        null
-    )
-    private val personAvdoedMedDoedsdato =
-        lagMockPersonPdl(
-            foedselsdatoBarnUnder20,
-            fnrAvdoed,
-            doedsdatoPdl,
-            adresserNorgePdl(),
-            null
+    private val testDataOver20 = GrunnlagTestData(
+        opplysningsmapSøkerOverrides = mapOf(
+            Opplysningstyper.FOEDSELSDATO to Opplysning.Konstant(
+                UUID.randomUUID(),
+                kilde,
+                LocalDate.of(2000, 3, 23).toJsonNode()
+            )
         )
+    ).hentOpplysningsgrunnlag()
 
-    private val virkningsdataPersonAvdoed = YearMonth.from(personAvdoedMedDoedsdato.doedsdato).plusMonths(1)
+    private val testDataUnder20 = GrunnlagTestData(
+        opplysningsmapSøkerOverrides = mapOf(
+            Opplysningstyper.FOEDSELSDATO to Opplysning.Konstant(
+                UUID.randomUUID(),
+                kilde,
+                LocalDate.now().minusYears(15).toJsonNode()
+            )
+        )
+    ).hentOpplysningsgrunnlag()
+
+    private val virkningsdataPersonAvdoed =
+        YearMonth.from(testDataUnder20.hentAvdoed().hentDoedsdato()!!.verdi).plusMonths(1)
 
     @Test
     fun vurderAlderErUnder20() {
         val vurderingBarnOver20 = vilkaarBrukerErUnder20(
-            mapTilVilkaarstypePerson(personBarnOver20),
-            mapTilVilkaarstypePerson(personAvdoedMedDoedsdato),
+            testDataOver20.søker,
+            testDataOver20.hentAvdoed(),
             virkningstidspunkt = virkningsdataPersonAvdoed.atDay(1)
         )
         val vurderingBarnUnder20 = vilkaarBrukerErUnder20(
-            mapTilVilkaarstypePerson(personBarnUnder20),
-            mapTilVilkaarstypePerson(personAvdoedMedDoedsdato),
+            testDataUnder20.søker,
+            testDataUnder20.hentAvdoed(),
             virkningstidspunkt = virkningsdataPersonAvdoed.atDay(1)
         )
 
         val vurderingBarnUnder20UtenDoedsdato = vilkaarBrukerErUnder20(
-            mapTilVilkaarstypePerson(personBarnUnder20),
-            mapTilVilkaarstypePerson(personAvdoedMedDoedsdato),
+            testDataUnder20.søker,
+            testDataUnder20.hentAvdoed(),
             virkningstidspunkt = null
         )
 
@@ -62,13 +63,5 @@ class AlderBarnTest {
             vurderingBarnUnder20UtenDoedsdato.resultat,
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         )
-    }
-
-    companion object {
-        val foedselsdatoBarnOver20 = LocalDate.parse("2000-08-29")
-        val foedselsdatoBarnUnder20 = LocalDate.parse("2020-06-10")
-        val doedsdatoPdl = LocalDate.parse("2021-01-25")
-        val fnrBarn = Foedselsnummer.of("19040550081")
-        val fnrAvdoed = Foedselsnummer.of("19078504903")
     }
 }

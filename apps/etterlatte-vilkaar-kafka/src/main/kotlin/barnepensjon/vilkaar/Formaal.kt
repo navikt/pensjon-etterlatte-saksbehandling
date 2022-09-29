@@ -1,22 +1,25 @@
 package barnepensjon
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.barnepensjon.opplysningsGrunnlagNull
 import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraKriterier
 import no.nav.etterlatte.barnepensjon.vurderOpplysning
-import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-fun vilkaarFormaalForYtelsen(soekerPdl: VilkaarOpplysning<Person>?, virkningstidspunkt: LocalDate?): VurdertVilkaar {
-    val soekerErILive = kriterieSoekerErILive(soekerPdl, virkningstidspunkt)
+fun vilkaarFormaalForYtelsen(søker: Grunnlagsdata<JsonNode>?, virkningstidspunkt: LocalDate?): VurdertVilkaar {
+    val soekerErILive = kriterieSoekerErILive(søker, virkningstidspunkt)
 
     return VurdertVilkaar(
         Vilkaartyper.FORMAAL_FOR_YTELSEN,
@@ -27,25 +30,27 @@ fun vilkaarFormaalForYtelsen(soekerPdl: VilkaarOpplysning<Person>?, virkningstid
     )
 }
 
-fun kriterieSoekerErILive(soekerPdl: VilkaarOpplysning<Person>?, virkningstidspunkt: LocalDate?): Kriterie {
-    if (soekerPdl == null || virkningstidspunkt == null) {
+fun kriterieSoekerErILive(søker: Grunnlagsdata<JsonNode>?, virkningstidspunkt: LocalDate?): Kriterie {
+    val dødsdato = søker?.hentDoedsdato()
+    if (søker == null || virkningstidspunkt == null) {
         return opplysningsGrunnlagNull(Kriterietyper.SOEKER_ER_I_LIVE, emptyList())
+    }
+
+    if (dødsdato == null) {
+        return Kriterie(Kriterietyper.SOEKER_ER_I_LIVE, VurderingsResultat.OPPFYLT, emptyList())
     }
 
     val opplysningsGrunnlag = listOf(
         Kriteriegrunnlag(
-            soekerPdl.id,
+            dødsdato.id,
             KriterieOpplysningsType.DOEDSDATO,
-            soekerPdl.kilde,
-            Doedsdato(soekerPdl.opplysning.doedsdato, soekerPdl.opplysning.foedselsnummer)
+            dødsdato.kilde,
+            Doedsdato(dødsdato.verdi, søker.hentFoedselsnummer()?.verdi!!)
         )
     )
 
-    fun VilkaarOpplysning<Person>.lever() = opplysning.doedsdato == null
-    fun VilkaarOpplysning<Person>.doedeEtterVirk() = opplysning.doedsdato?.isAfter(virkningstidspunkt) ?: false
-    fun VilkaarOpplysning<Person>.levdePaaVirkningsdato() = lever() || doedeEtterVirk()
-
-    val resultat = vurderOpplysning { soekerPdl.levdePaaVirkningsdato() }
+    val levdePåVirkningsdato = dødsdato.verdi!!.isAfter(virkningstidspunkt)
+    val resultat = vurderOpplysning { levdePåVirkningsdato }
 
     return Kriterie(Kriterietyper.SOEKER_ER_I_LIVE, resultat, opplysningsGrunnlag)
 }

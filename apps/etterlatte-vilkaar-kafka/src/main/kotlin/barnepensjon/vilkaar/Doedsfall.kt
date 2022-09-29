@@ -1,21 +1,26 @@
 package no.nav.etterlatte.barnepensjon
 
-import no.nav.etterlatte.libs.common.person.Person
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFamilierelasjon
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
+import no.nav.etterlatte.libs.common.vikaar.Kriterietyper.DOEDSFALL_ER_REGISTRERT_I_PDL
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat.IKKE_OPPFYLT
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foreldre
 import java.time.LocalDateTime
 
 fun vilkaarDoedsfallErRegistrert(
-    avdoed: VilkaarOpplysning<Person>?,
-    soeker: VilkaarOpplysning<Person>?
+    avdoed: Grunnlagsdata<JsonNode>,
+    soeker: Grunnlagsdata<JsonNode>
 ): VurdertVilkaar {
     val doedsdatoRegistrertIPdl = kriterieDoedsdatoRegistrertIPdl(avdoed)
     val avdoedErForeldre = kriterieAvdoedErForelder(soeker, avdoed)
@@ -29,57 +34,69 @@ fun vilkaarDoedsfallErRegistrert(
     )
 }
 
-fun kriterieDoedsdatoRegistrertIPdl(avdoed: VilkaarOpplysning<Person>?): Kriterie {
-    return avdoed?.let {
+fun kriterieDoedsdatoRegistrertIPdl(avdoed: Grunnlagsdata<JsonNode>?): Kriterie =
+    avdoed?.hentDoedsdato()?.let {
         val resultat = try {
-            hentDoedsdato(avdoed)
+            it.verdi!!
             VurderingsResultat.OPPFYLT
         } catch (ex: OpplysningKanIkkeHentesUt) {
-            VurderingsResultat.IKKE_OPPFYLT
+            IKKE_OPPFYLT
         }
         Kriterie(
-            Kriterietyper.DOEDSFALL_ER_REGISTRERT_I_PDL,
+            DOEDSFALL_ER_REGISTRERT_I_PDL,
             resultat,
             listOf(
                 Kriteriegrunnlag(
-                    avdoed.id,
+                    it.id,
                     KriterieOpplysningsType.DOEDSDATO,
-                    avdoed.kilde,
-                    Doedsdato(avdoed.opplysning.doedsdato, avdoed.opplysning.foedselsnummer)
+                    it.kilde,
+                    Doedsdato(it.verdi, avdoed.hentFoedselsnummer()?.verdi!!)
                 )
             )
         )
-    } ?: opplysningsGrunnlagNull(Kriterietyper.DOEDSFALL_ER_REGISTRERT_I_PDL, emptyList())
-}
+    } ?: Kriterie(
+        DOEDSFALL_ER_REGISTRERT_I_PDL,
+        IKKE_OPPFYLT,
+        emptyList()
+    ) // TODO sj: Sjekke om dette faktisk blir riktig. Dersom dødsdato ikke finnes
 
 fun kriterieAvdoedErForelder(
-    soeker: VilkaarOpplysning<Person>?,
-    avdoed: VilkaarOpplysning<Person>?
+    soeker: Grunnlagsdata<JsonNode>,
+    avdoed: Grunnlagsdata<JsonNode>
 ): Kriterie {
+    val søkersFamilieRelasjon = soeker.hentFamilierelasjon()
+    val avdødDoedsdato = avdoed.hentDoedsdato()
+    val avdødFoedselsnummer = avdoed.hentFoedselsnummer()
+
     val opplsyningsGrunnlag = listOfNotNull(
-        soeker?.let {
+        søkersFamilieRelasjon?.verdi?.foreldre?.let {
             Kriteriegrunnlag(
-                soeker.id,
+                søkersFamilieRelasjon.id,
                 KriterieOpplysningsType.FORELDRE,
-                soeker.kilde,
-                Foreldre(soeker.opplysning.familieRelasjon?.foreldre)
+                søkersFamilieRelasjon.kilde,
+                Foreldre(søkersFamilieRelasjon.verdi.foreldre)
             )
         },
-        avdoed?.let {
+        avdødDoedsdato?.verdi?.let {
             Kriteriegrunnlag(
-                avdoed.id,
+                avdødDoedsdato.id,
                 KriterieOpplysningsType.DOEDSDATO,
-                avdoed.kilde,
-                Doedsdato(avdoed.opplysning.doedsdato, avdoed.opplysning.foedselsnummer)
+                avdødDoedsdato.kilde,
+                Doedsdato(avdødDoedsdato.verdi, avdødFoedselsnummer!!.verdi) // TODO sj: ikke !!
             )
         }
     )
 
-    val resultat = if (soeker == null || avdoed == null) {
-        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-    } else {
-        vurderOpplysning { hentFnrForeldre(soeker).contains(avdoed.opplysning.foedselsnummer) }
-    }
+    val resultat =
+        if (
+            søkersFamilieRelasjon?.verdi?.foreldre == null ||
+            avdødDoedsdato == null ||
+            avdødFoedselsnummer?.verdi == null
+        ) {
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        } else {
+            vurderOpplysning { søkersFamilieRelasjon.verdi.foreldre!!.contains(avdødFoedselsnummer.verdi) }
+        }
 
     return Kriterie(Kriterietyper.AVDOED_ER_FORELDER, resultat, opplsyningsGrunnlag)
 }

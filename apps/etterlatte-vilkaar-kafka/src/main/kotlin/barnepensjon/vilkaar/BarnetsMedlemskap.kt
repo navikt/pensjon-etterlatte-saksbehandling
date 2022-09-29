@@ -1,13 +1,16 @@
 package no.nav.etterlatte.vilkaar.barnepensjon
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.barnepensjon.harKunNorskePdlAdresserEtterDato
 import no.nav.etterlatte.barnepensjon.hentAdresser
-import no.nav.etterlatte.barnepensjon.hentDoedsdato
 import no.nav.etterlatte.barnepensjon.opplysningsGrunnlagNull
 import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraKriterier
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
+import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
@@ -21,10 +24,10 @@ import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import java.time.LocalDateTime
 
 fun vilkaarBarnetsMedlemskap(
-    soekerPdl: VilkaarOpplysning<Person>?,
+    soekerPdl: Grunnlagsdata<JsonNode>?,
     soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
-    gjenlevendePdl: VilkaarOpplysning<Person>?,
-    avdoedPdl: VilkaarOpplysning<Person>?
+    gjenlevendePdl: Grunnlagsdata<JsonNode>?,
+    avdoedPdl: Grunnlagsdata<JsonNode>?
 ): VurdertVilkaar {
     val barnHarIkkeAdresseIUtlandet =
         kriterieSoekerHarIkkeAdresseIUtlandet(
@@ -53,25 +56,28 @@ fun vilkaarBarnetsMedlemskap(
 }
 
 fun kriterieForeldreHarIkkeAdresseIUtlandet(
-    gjenlevendePdl: VilkaarOpplysning<Person>?,
-    avdoedPdl: VilkaarOpplysning<Person>?,
+    gjenlevendePdl: Grunnlagsdata<JsonNode>?,
+    avdoedPdl: Grunnlagsdata<JsonNode>?,
     kriterietype: Kriterietyper
 ): Kriterie {
+    val dødsdatoAvdød = avdoedPdl?.hentDoedsdato()
+    val adresseGjenlevende = gjenlevendePdl?.hentBostedsadresse()
+
     val opplysningsGrunnlag = listOfNotNull(
-        gjenlevendePdl?.let {
+        adresseGjenlevende?.let {
             Kriteriegrunnlag(
-                gjenlevendePdl.id,
+                it.id,
                 KriterieOpplysningsType.ADRESSER,
-                gjenlevendePdl.kilde,
+                it.kilde,
                 hentAdresser(gjenlevendePdl)
             )
         },
-        avdoedPdl?.let {
+        dødsdatoAvdød?.let {
             Kriteriegrunnlag(
-                avdoedPdl.id,
+                it.id,
                 KriterieOpplysningsType.DOEDSDATO,
-                avdoedPdl.kilde,
-                Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
+                it.kilde,
+                Doedsdato(it.verdi, avdoedPdl.hentFoedselsnummer()?.verdi!!)
             )
         }
     )
@@ -80,8 +86,7 @@ fun kriterieForeldreHarIkkeAdresseIUtlandet(
 
     val resultat = try {
         val gjenlevendeAdresser = hentAdresser(gjenlevendePdl)
-        val doedsdato = hentDoedsdato(avdoedPdl)
-        val adresserResult = harKunNorskePdlAdresserEtterDato(gjenlevendeAdresser, doedsdato)
+        val adresserResult = harKunNorskePdlAdresserEtterDato(gjenlevendeAdresser, dødsdatoAvdød?.verdi!!)
         if (adresserResult == VurderingsResultat.IKKE_OPPFYLT) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
@@ -95,17 +100,19 @@ fun kriterieForeldreHarIkkeAdresseIUtlandet(
 }
 
 fun kriterieSoekerHarIkkeAdresseIUtlandet(
-    soekerPdl: VilkaarOpplysning<Person>?,
+    soekerPdl: Grunnlagsdata<JsonNode>?,
     soekerSoknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
-    avdoedPdl: VilkaarOpplysning<Person>?,
+    avdoedPdl: Grunnlagsdata<JsonNode>?,
     kriterietype: Kriterietyper
 ): Kriterie {
+    val dødsdatoAvdød = avdoedPdl?.hentDoedsdato()
+
     val opplysningsGrunnlag = listOfNotNull(
-        soekerPdl?.let {
+        soekerPdl?.hentBostedsadresse()?.let {
             Kriteriegrunnlag(
-                soekerPdl.id,
+                it.id,
                 KriterieOpplysningsType.ADRESSER,
-                soekerPdl.kilde,
+                it.kilde,
                 hentAdresser(soekerPdl)
             )
         },
@@ -117,17 +124,17 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
                 soekerSoknad.opplysning.utenlandsadresse
             )
         },
-        avdoedPdl?.let {
+        dødsdatoAvdød?.let {
             Kriteriegrunnlag(
-                avdoedPdl.id,
+                dødsdatoAvdød.id,
                 KriterieOpplysningsType.DOEDSDATO,
-                avdoedPdl.kilde,
-                Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
+                dødsdatoAvdød.kilde,
+                Doedsdato(dødsdatoAvdød.verdi, avdoedPdl.hentFoedselsnummer()?.verdi!!)
             )
         }
     )
 
-    if (soekerPdl == null || avdoedPdl == null || soekerSoknad == null) {
+    if (soekerPdl == null || dødsdatoAvdød?.verdi == null || soekerSoknad == null) {
         return opplysningsGrunnlagNull(
             kriterietype,
             opplysningsGrunnlag
@@ -135,9 +142,8 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
     }
 
     val resultat = try {
-        val doedsdato = hentDoedsdato(avdoedPdl)
         val soekerAdresserPdl = hentAdresser(soekerPdl)
-        val pdlResultat = harKunNorskePdlAdresserEtterDato(soekerAdresserPdl, doedsdato)
+        val pdlResultat = harKunNorskePdlAdresserEtterDato(soekerAdresserPdl, dødsdatoAvdød.verdi!!)
         val soeknadResultat =
             if (soekerSoknad.opplysning.utenlandsadresse.adresseIUtlandet == JaNeiVetIkke.JA) {
                 VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING

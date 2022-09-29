@@ -15,8 +15,7 @@ fun Vedtak.finnMottaker(): Mottaker = this.grunnlag
         val adresse = requireNotNull(person.bostedsadresse?.find { adresse -> adresse.aktiv })
 
         Mottaker(
-            fornavn = person.fornavn,
-            etternavn = person.etternavn,
+            navn = "${person.fornavn} ${person.etternavn}",
             adresse = listOfNotNull(adresse.adresseLinje1, adresse.adresseLinje2, adresse.adresseLinje3)
                 .joinToString(" "),
             postnummer = requireNotNull(adresse.postnr),

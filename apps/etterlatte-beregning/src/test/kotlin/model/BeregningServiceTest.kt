@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.util.UUID.randomUUID
 
 internal class BeregningServiceTest {
 
@@ -31,7 +32,7 @@ internal class BeregningServiceTest {
 
     private val testData = GrunnlagTestData(
         opplysningsmapSøskenOverrides = mapOf(
-            FOEDSELSDATO to Opplysning.Konstant(kilde, LocalDate.of(2003, 12, 12).toJsonNode())
+            FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, LocalDate.of(2003, 12, 12).toJsonNode())
         )
     )
     private val opplysningsgrunnlag = testData.hentOpplysningsgrunnlag()

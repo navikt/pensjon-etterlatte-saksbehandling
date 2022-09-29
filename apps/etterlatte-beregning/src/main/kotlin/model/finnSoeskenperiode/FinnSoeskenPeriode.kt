@@ -32,7 +32,8 @@ data class FinnSoeskenPeriode(
         val søsken = finnHelOgHalvsøsken(søker, søskenDefault)
 
         // first skal være ok, siden PPS allerede har sortert
-        val halvsoeskenOppdrattSammen = søsken.halvsøsken.filter { it.bostedsadresse?.first() == søkersBostedsadresse }
+        val halvsoeskenOppdrattSammen =
+            søsken.halvsøsken.filter { it.bostedsadresse?.first() == søkersBostedsadresse.first() }
 
         val kull = søskenOverrides.filter { skalBeregnesOverrides[it.foedselsnummer.value] == true } +
             søsken.helsøsken +

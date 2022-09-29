@@ -1,11 +1,14 @@
 package no.nav.etterlatte.barnepensjon
 
-import no.nav.etterlatte.libs.common.person.Person
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
@@ -15,11 +18,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 fun vilkaarBrukerErUnder20(
-    soekerPdl: VilkaarOpplysning<Person>?,
-    avdoedPdl: VilkaarOpplysning<Person>?,
+    søker: Grunnlagsdata<JsonNode>?,
+    avdød: Grunnlagsdata<JsonNode>?,
     virkningstidspunkt: LocalDate?
 ): VurdertVilkaar {
-    val soekerErUnder20 = kriterieSoekerErUnder20(soekerPdl, avdoedPdl, virkningstidspunkt)
+    val soekerErUnder20 = kriterieSoekerErUnder20(søker, avdød, virkningstidspunkt)
 
     return VurdertVilkaar(
         Vilkaartyper.SOEKER_ER_UNDER_20,
@@ -30,38 +33,47 @@ fun vilkaarBrukerErUnder20(
     )
 }
 fun kriterieSoekerErUnder20(
-    soekerPdl: VilkaarOpplysning<Person>?,
-    avdoedPdl: VilkaarOpplysning<Person>?,
+    søker: Grunnlagsdata<JsonNode>?,
+    avdød: Grunnlagsdata<JsonNode>?,
     virkningstidspunkt: LocalDate?
 ): Kriterie {
-    val opplysningsGrunnlag = listOfNotNull(
-        soekerPdl?.let {
-            Kriteriegrunnlag(
-                soekerPdl.id,
-                KriterieOpplysningsType.FOEDSELSDATO,
-                soekerPdl.kilde,
-                Foedselsdato(soekerPdl.opplysning.foedselsdato, soekerPdl.opplysning.foedselsnummer)
-            )
-        },
-        avdoedPdl?.let {
-            Kriteriegrunnlag(
-                avdoedPdl.id,
-                KriterieOpplysningsType.DOEDSDATO,
-                avdoedPdl.kilde,
-                Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
-            )
-        }
-    )
+    val søkerFødselsdato = søker?.hentFoedselsdato()
+    val søkerFødselsnummer = søker?.hentFoedselsnummer()
+    val avdødDødsdato = avdød?.hentDoedsdato()
+    val avdødFødselsnummer = avdød?.hentFoedselsnummer()
 
-    val resultat = if (soekerPdl == null || virkningstidspunkt == null) {
-        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-    } else {
-        vurderOpplysning { hentFoedselsdato(soekerPdl).plusYears(18) > virkningstidspunkt }
+    if (
+        søkerFødselsdato == null ||
+        søkerFødselsnummer == null ||
+        virkningstidspunkt == null ||
+        avdødDødsdato == null ||
+        avdødFødselsnummer == null
+    ) {
+        return Kriterie(
+            Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+            emptyList()
+        )
     }
+
+    val opplysningsGrunnlag = listOf(
+        Kriteriegrunnlag(
+            søkerFødselsdato.id,
+            KriterieOpplysningsType.FOEDSELSDATO,
+            søkerFødselsdato.kilde,
+            Foedselsdato(søkerFødselsdato.verdi, søkerFødselsnummer.verdi)
+        ),
+        Kriteriegrunnlag(
+            avdødDødsdato.id,
+            KriterieOpplysningsType.DOEDSDATO,
+            avdødDødsdato.kilde,
+            Doedsdato(avdødDødsdato.verdi, avdødFødselsnummer.verdi)
+        )
+    )
 
     return Kriterie(
         Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
-        resultat,
+        vurderOpplysning { søkerFødselsdato.verdi.plusYears(18) > virkningstidspunkt },
         opplysningsGrunnlag
     )
 }

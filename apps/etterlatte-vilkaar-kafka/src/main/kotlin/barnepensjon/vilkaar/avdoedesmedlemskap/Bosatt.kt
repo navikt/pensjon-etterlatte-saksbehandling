@@ -1,21 +1,24 @@
 package barnepensjon.vilkaar.avdoedesmedlemskap
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.barnepensjon.harKunNorskeAdresserEtterDato
 import no.nav.etterlatte.barnepensjon.hentAdresseperioderINorge
-import no.nav.etterlatte.barnepensjon.hentAdresser
-import no.nav.etterlatte.barnepensjon.hentBostedsAdresser
-import no.nav.etterlatte.barnepensjon.hentDoedsdato
 import no.nav.etterlatte.barnepensjon.hentGaps
-import no.nav.etterlatte.barnepensjon.hentKontaktAdresser
-import no.nav.etterlatte.barnepensjon.hentOppholdsAdresser
 import no.nav.etterlatte.barnepensjon.kombinerPerioder
 import no.nav.etterlatte.barnepensjon.opplysningsGrunnlagNull
 import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraKriterier
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.AdresseListe
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.grunnlag.hentKontaktadresse
+import no.nav.etterlatte.libs.common.grunnlag.hentOppholdsadresse
+import no.nav.etterlatte.libs.common.grunnlag.hentStatsborgerskap
+import no.nav.etterlatte.libs.common.grunnlag.hentUtland
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
@@ -32,7 +35,7 @@ import java.util.*
 
 fun metakriterieBosattNorge(
     avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
-    avdoedPdl: VilkaarOpplysning<Person>?
+    avdoedPdl: Grunnlagsdata<JsonNode>?
 ): Metakriterie {
     // val ikkeRegistrertIMedl = kriterieIkkeRegistrertIMedl(avdoedPdl) //todo legg til når vi har kobla til register
     val norskStatsborger = kriterieNorskStatsborger(avdoedPdl, Kriterietyper.AVDOED_NORSK_STATSBORGER)
@@ -99,21 +102,22 @@ fun metakriterieBosattNorge(
     )
 }
 
-fun kriterieNorskStatsborger(avdoedPdl: VilkaarOpplysning<Person>?, kriterietype: Kriterietyper): Kriterie {
+fun kriterieNorskStatsborger(avdoedPdl: Grunnlagsdata<JsonNode>?, kriterietype: Kriterietyper): Kriterie {
+    val statsborgerskap = avdoedPdl?.hentStatsborgerskap()
     val opplysningsGrunnlag = listOfNotNull(
-        avdoedPdl?.let {
+        statsborgerskap?.let {
             Kriteriegrunnlag(
-                avdoedPdl.id,
+                statsborgerskap.id,
                 KriterieOpplysningsType.STATSBORGERSKAP,
-                avdoedPdl.kilde,
-                avdoedPdl.opplysning.statsborgerskap.toString()
+                statsborgerskap.kilde,
+                statsborgerskap.verdi
             )
         }
     )
 
     if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
 
-    val resultat = when (avdoedPdl.opplysning.statsborgerskap) {
+    val resultat = when (statsborgerskap?.verdi) {
         null -> VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         "NOR" -> VurderingsResultat.OPPFYLT
         else -> VurderingsResultat.IKKE_OPPFYLT
@@ -122,16 +126,17 @@ fun kriterieNorskStatsborger(avdoedPdl: VilkaarOpplysning<Person>?, kriterietype
     return Kriterie(kriterietype, resultat, opplysningsGrunnlag)
 }
 
-fun kriterieIngenInnUtvandring(avdoedPdl: VilkaarOpplysning<Person>?, kriterietype: Kriterietyper): Kriterie {
+fun kriterieIngenInnUtvandring(avdoedPdl: Grunnlagsdata<JsonNode>?, kriterietype: Kriterietyper): Kriterie {
+    val utland = avdoedPdl?.hentUtland()
     val opplysningsGrunnlag = listOfNotNull(
-        avdoedPdl?.let {
+        utland?.let {
             Kriteriegrunnlag(
-                avdoedPdl.id,
+                utland.id,
                 KriterieOpplysningsType.UTLAND,
-                avdoedPdl.kilde,
+                utland.kilde,
                 Utland(
-                    avdoedPdl.opplysning.utland?.innflyttingTilNorge,
-                    avdoedPdl.opplysning.utland?.utflyttingFraNorge
+                    utland.verdi.innflyttingTilNorge,
+                    utland.verdi.utflyttingFraNorge
                 )
             )
         }
@@ -139,8 +144,8 @@ fun kriterieIngenInnUtvandring(avdoedPdl: VilkaarOpplysning<Person>?, kriteriety
 
     if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
 
-    val ingenInnUtvandring = avdoedPdl.opplysning.utland?.innflyttingTilNorge.isNullOrEmpty() &&
-        avdoedPdl.opplysning.utland?.utflyttingFraNorge.isNullOrEmpty()
+    val ingenInnUtvandring = utland?.verdi?.innflyttingTilNorge.isNullOrEmpty() &&
+        utland?.verdi?.utflyttingFraNorge.isNullOrEmpty()
 
     return Kriterie(
         kriterietype,
@@ -182,26 +187,23 @@ fun kriterieIngenUtenlandsoppholdFraSoeknad(
 }
 
 fun kriterieKunNorskeBostedsadresserSisteFemAar(
-    avdoedPdl: VilkaarOpplysning<Person>?,
+    avdoedPdl: Grunnlagsdata<JsonNode>?,
     kriterietype: Kriterietyper
 ): Kriterie {
-    val opplysningsGrunnlag = listOfNotNull(
-        avdoedPdl?.let {
-            Kriteriegrunnlag(
-                avdoedPdl.id,
-                KriterieOpplysningsType.ADRESSELISTE,
-                avdoedPdl.kilde,
-                AdresseListe(it.opplysning.bostedsadresse)
-            )
-        }
+    val adresser = avdoedPdl?.hentBostedsadresse() ?: return opplysningsGrunnlagNull(kriterietype, emptyList())
+
+    val opplysningsGrunnlag = listOf(
+        Kriteriegrunnlag(
+            adresser.id,
+            KriterieOpplysningsType.ADRESSELISTE,
+            adresser.kilde,
+            AdresseListe(adresser.verdi)
+        )
     )
 
-    if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
-
     return try {
-        val adresser = hentBostedsAdresser(avdoedPdl)
-        val femAarFoerDoedsdato = hentDoedsdato(avdoedPdl).minusYears(5)
-        val vurderingKunNorskeBostedadresser = harKunNorskeAdresserEtterDato(adresser, femAarFoerDoedsdato)
+        val femAarFoerDoedsdato = avdoedPdl.hentDoedsdato()?.verdi!!.minusYears(5)
+        val vurderingKunNorskeBostedadresser = harKunNorskeAdresserEtterDato(adresser.verdi, femAarFoerDoedsdato)
 
         Kriterie(kriterietype, vurderingKunNorskeBostedadresser, opplysningsGrunnlag)
     } catch (ex: OpplysningKanIkkeHentesUt) {
@@ -210,26 +212,23 @@ fun kriterieKunNorskeBostedsadresserSisteFemAar(
 }
 
 fun kriterieKunNorskeOppholdsadresserSisteFemAar(
-    avdoedPdl: VilkaarOpplysning<Person>?,
+    avdoedPdl: Grunnlagsdata<JsonNode>?,
     kriterietype: Kriterietyper
 ): Kriterie {
-    val opplysningsGrunnlag = listOfNotNull(
-        avdoedPdl?.let {
-            Kriteriegrunnlag(
-                avdoedPdl.id,
-                KriterieOpplysningsType.ADRESSELISTE,
-                avdoedPdl.kilde,
-                AdresseListe(it.opplysning.oppholdsadresse)
-            )
-        }
+    val adresser = avdoedPdl?.hentOppholdsadresse() ?: return opplysningsGrunnlagNull(kriterietype, emptyList())
+
+    val opplysningsGrunnlag = listOf(
+        Kriteriegrunnlag(
+            adresser.id,
+            KriterieOpplysningsType.ADRESSELISTE,
+            adresser.kilde,
+            AdresseListe(adresser.verdi)
+        )
     )
 
-    if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
-
     return try {
-        val adresser = hentOppholdsAdresser(avdoedPdl)
-        val femAarFoerDoedsdato = hentDoedsdato(avdoedPdl).minusYears(5)
-        val vurderingKunNorskeOppholdsadresser = harKunNorskeAdresserEtterDato(adresser, femAarFoerDoedsdato)
+        val femAarFoerDoedsdato = avdoedPdl.hentDoedsdato()?.verdi!!.minusYears(5)
+        val vurderingKunNorskeOppholdsadresser = harKunNorskeAdresserEtterDato(adresser.verdi, femAarFoerDoedsdato)
 
         Kriterie(kriterietype, vurderingKunNorskeOppholdsadresser, opplysningsGrunnlag)
     } catch (ex: OpplysningKanIkkeHentesUt) {
@@ -238,26 +237,23 @@ fun kriterieKunNorskeOppholdsadresserSisteFemAar(
 }
 
 fun kriterieKunNorskeKontaktadresserSisteFemAar(
-    avdoedPdl: VilkaarOpplysning<Person>?,
+    avdoedPdl: Grunnlagsdata<JsonNode>?,
     kriterietype: Kriterietyper
 ): Kriterie {
-    val opplysningsGrunnlag = listOfNotNull(
-        avdoedPdl?.let {
-            Kriteriegrunnlag(
-                avdoedPdl.id,
-                KriterieOpplysningsType.ADRESSELISTE,
-                avdoedPdl.kilde,
-                AdresseListe(it.opplysning.kontaktadresse)
-            )
-        }
+    val adresser = avdoedPdl?.hentKontaktadresse() ?: return opplysningsGrunnlagNull(kriterietype, emptyList())
+
+    val opplysningsGrunnlag = listOf(
+        Kriteriegrunnlag(
+            adresser.id,
+            KriterieOpplysningsType.ADRESSELISTE,
+            adresser.kilde,
+            AdresseListe(adresser.verdi)
+        )
     )
 
-    if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
-
     return try {
-        val adresser = hentKontaktAdresser(avdoedPdl)
-        val femAarFoerDoedsdato = hentDoedsdato(avdoedPdl).minusYears(5)
-        val vurderingKunNorskeKontaktadresser = harKunNorskeAdresserEtterDato(adresser, femAarFoerDoedsdato)
+        val femAarFoerDoedsdato = avdoedPdl.hentDoedsdato()?.verdi!!.minusYears(5)
+        val vurderingKunNorskeKontaktadresser = harKunNorskeAdresserEtterDato(adresser.verdi, femAarFoerDoedsdato)
 
         Kriterie(kriterietype, vurderingKunNorskeKontaktadresser, opplysningsGrunnlag)
     } catch (ex: OpplysningKanIkkeHentesUt) {
@@ -266,38 +262,42 @@ fun kriterieKunNorskeKontaktadresserSisteFemAar(
 }
 
 fun kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
-    avdoedPdl: VilkaarOpplysning<Person>?,
+    avdoedPdl: Grunnlagsdata<JsonNode>?,
     kriterietype: Kriterietyper
 ): Kriterie {
+    val adresser = avdoedPdl?.hentBostedsadresse()
+    val dødsdato = avdoedPdl?.hentDoedsdato()
+    val fødselsnummer = avdoedPdl?.hentFoedselsnummer()
+
     val opplysningsGrunnlag = listOfNotNull(
-        avdoedPdl?.let {
+        adresser?.let {
             Kriteriegrunnlag(
-                avdoedPdl.id,
+                it.id,
                 KriterieOpplysningsType.ADRESSELISTE,
-                avdoedPdl.kilde,
-                AdresseListe(it.opplysning.bostedsadresse)
+                it.kilde,
+                AdresseListe(it.verdi)
             )
         },
-        avdoedPdl?.let {
+        dødsdato?.let {
             Kriteriegrunnlag(
-                avdoedPdl.id,
+                it.id,
                 KriterieOpplysningsType.DOEDSDATO,
-                avdoedPdl.kilde,
-                Doedsdato(avdoedPdl.opplysning.doedsdato, avdoedPdl.opplysning.foedselsnummer)
+                it.kilde,
+                Doedsdato(it.verdi, fødselsnummer!!.verdi)
             )
         }
     )
 
-    if (avdoedPdl == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
+    if (adresser?.verdi == null || dødsdato?.verdi == null) {
+        return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
+    }
 
     try {
-        val adresser = hentAdresser(avdoedPdl)
-        val doedsdato = hentDoedsdato(avdoedPdl)
-        val femAarFoerDoedsdato = hentDoedsdato(avdoedPdl).minusYears(5)
+        val femAarFoerDoedsdato = dødsdato.verdi!!.minusYears(5)
 
-        val bostedperiode = hentAdresseperioderINorge(adresser.bostedadresse, doedsdato)
+        val bostedperiode = hentAdresseperioderINorge(adresser.verdi, dødsdato.verdi!!)
         val kombinerteBostedsperioder = kombinerPerioder(bostedperiode)
-        val periodeGaps = hentGaps(kombinerteBostedsperioder, femAarFoerDoedsdato, doedsdato)
+        val periodeGaps = hentGaps(kombinerteBostedsperioder, femAarFoerDoedsdato, dødsdato.verdi!!)
 
         val vurderingBoddSammenhengendeINorge = if (periodeGaps.isEmpty()) {
             VurderingsResultat.OPPFYLT

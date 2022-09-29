@@ -1,51 +1,59 @@
 package barnepensjon.vilkaar
 
-import lagMockPersonPdl
-import mapTilVilkaarstypePerson
+import GrunnlagTestData
+import grunnlag.GJENLEVENDE_FØDSELSNUMMER
+import grunnlag.kilde
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
+import java.util.*
 
 class DoedfallTest {
 
     @Test
     fun vurderDoedsdatoErRegistrert() {
-        val avdoedIngenDoedsdato = lagMockPersonPdl(null, fnrAvdoed, null, null, null)
-        val avdoedRegistrertDoedsdato = lagMockPersonPdl(null, fnrAvdoed, doedsdatoPdl, null, null)
-        val barnAvdoedErForeldre = lagMockPersonPdl(null, fnrBarn, null, null, avdoedErForeldre)
-        val barnAvdoedErIkkeForeldre = lagMockPersonPdl(null, fnrBarn, null, null, avdoedErIkkeForeldre)
+        val testData = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val avdoedErIkkeForelder = GrunnlagTestData(
+            opplysningsmapSøkerOverrides = mapOf(
+                Opplysningstyper.FAMILIERELASJON to Opplysning.Konstant(
+                    UUID.randomUUID(),
+                    kilde,
+                    FamilieRelasjon(
+                        ansvarligeForeldre = listOf(GJENLEVENDE_FØDSELSNUMMER),
+                        foreldre = listOf(GJENLEVENDE_FØDSELSNUMMER),
+                        barn = null
+                    ).toJsonNode()
+                )
+            )
+        ).hentOpplysningsgrunnlag()
+
+        val avdoedIngenDoedsdato = testData.hentAvdoed() - Opplysningstyper.DOEDSDATO
 
         val doedsdatoIkkeIPdl =
             vilkaarDoedsfallErRegistrert(
-                mapTilVilkaarstypePerson(avdoedIngenDoedsdato),
-                mapTilVilkaarstypePerson(barnAvdoedErForeldre)
+                avdoedIngenDoedsdato,
+                testData.søker
             )
 
         val avdoedErForelder =
             vilkaarDoedsfallErRegistrert(
-                mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
-                mapTilVilkaarstypePerson(barnAvdoedErForeldre)
+                testData.hentAvdoed(),
+                testData.søker
             )
 
         val avdoedIkkeForelder =
             vilkaarDoedsfallErRegistrert(
-                mapTilVilkaarstypePerson(avdoedRegistrertDoedsdato),
-                mapTilVilkaarstypePerson(barnAvdoedErIkkeForeldre)
+                avdoedErIkkeForelder.hentAvdoed(),
+                avdoedErIkkeForelder.søker
             )
 
-        Assertions.assertEquals(doedsdatoIkkeIPdl.resultat, VurderingsResultat.IKKE_OPPFYLT)
-        Assertions.assertEquals(avdoedErForelder.resultat, VurderingsResultat.OPPFYLT)
-        Assertions.assertEquals(avdoedIkkeForelder.resultat, VurderingsResultat.IKKE_OPPFYLT)
-    }
-
-    companion object {
-        val fnrAvdoed = Foedselsnummer.of("19078504903")
-        val doedsdatoPdl = LocalDate.parse("2021-01-25")
-        val fnrBarn = Foedselsnummer.of("19040550081")
-        val avdoedErForeldre = listOf(Foedselsnummer.of("19078504903"))
-        val avdoedErIkkeForeldre = listOf(Foedselsnummer.of("11057523044"))
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, doedsdatoIkkeIPdl.resultat)
+        assertEquals(VurderingsResultat.OPPFYLT, avdoedErForelder.resultat)
+        assertEquals(VurderingsResultat.IKKE_OPPFYLT, avdoedIkkeForelder.resultat)
     }
 }

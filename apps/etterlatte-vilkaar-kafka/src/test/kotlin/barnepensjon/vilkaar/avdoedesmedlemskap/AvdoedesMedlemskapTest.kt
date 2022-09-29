@@ -1,13 +1,15 @@
 package barnepensjon.vilkaar.avdoedesmedlemskap
 
+import GrunnlagTestData
 import LesVilkaarsmeldingTest.Companion.readFile
 import adresserNorgePdl
 import barnepensjon.vilkaar.avdoedesmedlemskap.BosattTest.Companion.ingenUtenlandsoppholdAvdoedSoeknad
 import com.fasterxml.jackson.module.kotlin.readValue
+import grunnlag.kilde
 import lagMockPersonAvdoedSoeknad
-import lagMockPersonPdl
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapVurdering
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
@@ -15,6 +17,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedl
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.Utfall
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -28,11 +31,31 @@ import java.time.LocalDate
 import java.util.*
 
 class AvdoedesMedlemskapTest {
+    private val testdata = GrunnlagTestData(
+        opplysningsmapAvdødOverrides = mapOf(
+            Opplysningstyper.KONTAKTADRESSE to Opplysning.Konstant(
+                UUID.randomUUID(),
+                kilde,
+                adresserNorgePdl().toJsonNode()
+            ),
+            Opplysningstyper.BOSTEDSADRESSE to Opplysning.Konstant(
+                UUID.randomUUID(),
+                kilde,
+                adresserNorgePdl().toJsonNode()
+            ),
+            Opplysningstyper.OPPHOLDSADRESSE to Opplysning.Konstant(
+                UUID.randomUUID(),
+                kilde,
+                adresserNorgePdl().toJsonNode()
+            )
+        )
+    ).hentOpplysningsgrunnlag()
+
     @Test
     fun `Skal returnere med utfall oppfyllt dersom det ikke er gaps i de gyldige periodene`() {
         val vurdertVilkaar = vilkaarAvdoedesMedlemskap(
             avdoedPersonSoeknad,
-            avdoedPdl,
+            testdata.hentAvdoed(),
             inntekt("inntektsopplysning.json"),
             arbeidsforhold("arbeidsforhold100.json"),
             saksbehandlerOpplysninger
@@ -55,7 +78,7 @@ class AvdoedesMedlemskapTest {
     fun `Skal returnere med utfall ikke oppfyllt dersom det er gaps i de gyldige periodene`() {
         val vurdertVilkaar = vilkaarAvdoedesMedlemskap(
             avdoedPersonSoeknad,
-            avdoedPdl,
+            testdata.hentAvdoed(),
             inntekt("inntektsopplysningOpphold.json"),
             arbeidsforhold("arbeidsforhold75.json"),
             saksbehandlerOpplysninger
@@ -79,20 +102,6 @@ class AvdoedesMedlemskapTest {
             Opplysningstyper.AVDOED_SOEKNAD_V1,
             Grunnlagsopplysning.Privatperson("fnr", Instant.now()),
             lagMockPersonAvdoedSoeknad(ingenUtenlandsoppholdAvdoedSoeknad)
-        )
-
-        private val avdoedPdl = VilkaarOpplysning(
-            UUID.randomUUID(),
-            Opplysningstyper.AVDOED_PDL_V1,
-            Grunnlagsopplysning.Pdl("PDL", Instant.now(), null, "opplysningId"),
-            lagMockPersonPdl(
-                null,
-                BosattTest.fnrAvdoed,
-                BosattTest.doedsdatoPdl,
-                adresserNorgePdl(),
-                null,
-                "NOR"
-            )
         )
 
         private fun inntekt(file: String) =

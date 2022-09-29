@@ -1,7 +1,14 @@
 package barnepensjon.kommerbarnettilgode
 
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
+import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
+import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.vikaar.Familiemedlemmer
 import no.nav.etterlatte.libs.common.vikaar.PersoninfoAvdoed
@@ -10,39 +17,39 @@ import no.nav.etterlatte.libs.common.vikaar.PersoninfoSoeker
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 
 fun mapFamiliemedlemmer(
-    soeker: VilkaarOpplysning<Person>?,
+    soeker: Grunnlagsdata<JsonNode>?,
     soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
-    gjenlevende: VilkaarOpplysning<Person>?,
-    avdoed: VilkaarOpplysning<Person>?
+    gjenlevende: Grunnlagsdata<JsonNode>?,
+    avdoed: Grunnlagsdata<JsonNode>?
 ): Familiemedlemmer {
     return Familiemedlemmer(
-        avdoed = avdoed?.opplysning.let {
+        avdoed = avdoed?.let {
             PersoninfoAvdoed(
-                navn = it?.fornavn + " " + it?.etternavn,
-                fnr = it?.foedselsnummer,
+                navn = it.hentNavn()?.verdi.toString(),
+                fnr = it.hentFoedselsnummer()?.verdi,
                 rolle = PersonRolle.AVDOED,
-                bostedadresser = it?.bostedsadresse,
-                doedsdato = it?.doedsdato,
-                barn = it?.familieRelasjon?.barn
+                bostedadresser = it.hentBostedsadresse()?.verdi,
+                doedsdato = it.hentDoedsdato()?.verdi,
+                barn = it.hentAvdoedesbarn()?.verdi?.avdoedesBarn?.map { barn -> barn.foedselsnummer }
             )
-        },
-        soeker = soeker?.opplysning.let {
+        }!!,
+        soeker = soeker?.let {
             PersoninfoSoeker(
-                navn = it?.fornavn + " " + it?.etternavn,
-                fnr = it?.foedselsnummer,
+                navn = it.hentNavn()?.verdi.toString(),
+                fnr = it.hentFoedselsnummer()?.verdi,
                 rolle = PersonRolle.BARN,
-                bostedadresser = it?.bostedsadresse,
+                bostedadresser = it.hentBostedsadresse()?.verdi,
                 soeknadAdresse = soekerSoeknad?.opplysning?.utenlandsadresse,
-                foedselsdato = it?.foedselsdato
+                foedselsdato = it.hentFoedselsdato()?.verdi
             )
-        },
-        gjenlevendeForelder = gjenlevende?.opplysning.let {
+        }!!,
+        gjenlevendeForelder = gjenlevende?.let {
             PersoninfoGjenlevendeForelder(
-                navn = it?.fornavn + " " + it?.etternavn,
-                fnr = it?.foedselsnummer,
+                navn = it.hentNavn()?.verdi.toString(),
+                fnr = it.hentFoedselsnummer()?.verdi,
                 rolle = PersonRolle.GJENLEVENDE,
-                bostedadresser = it?.bostedsadresse
+                bostedadresser = it.hentBostedsadresse()?.verdi
             )
-        }
+        }!!
     )
 }

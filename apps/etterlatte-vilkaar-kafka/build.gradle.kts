@@ -9,4 +9,5 @@ dependencies {
     implementation(Jackson.DatatypeJdk8)
     implementation(Jackson.ModuleKotlin)
     testImplementation(MockK.MockK)
+    testImplementation(project(":libs:testdata"))
 }

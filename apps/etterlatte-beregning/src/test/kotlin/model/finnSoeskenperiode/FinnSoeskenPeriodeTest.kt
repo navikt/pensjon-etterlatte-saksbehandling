@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID.randomUUID
 
 internal class FinnSoeskenPeriodeTest {
 
@@ -45,7 +46,7 @@ internal class FinnSoeskenPeriodeTest {
         val `18årsdag` = YearMonth.of(fødselsdagSøsken.year + 18, fødselsdagSøsken.monthValue)
         val testData = GrunnlagTestData(
             opplysningsmapSøskenOverrides = mapOf(
-                FOEDSELSDATO to Opplysning.Konstant(kilde, fødselsdagSøsken.toJsonNode())
+                FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, fødselsdagSøsken.toJsonNode())
             )
         )
         val fom = YearMonth.of(2020, 2)
@@ -64,8 +65,9 @@ internal class FinnSoeskenPeriodeTest {
         val testData = GrunnlagTestData(
             opplysningsmapHalvsøskenOverrides = mapOf(
                 BOSTEDSADRESSE to Opplysning.Konstant(
+                    randomUUID(),
                     kilde,
-                    ADRESSE_DEFAULT.copy(adresseLinje1 = "Andebygata 69").toJsonNode()
+                    ADRESSE_DEFAULT.map { it.copy(adresseLinje1 = "Andebygata 69") }.toJsonNode()
                 )
             )
         )
@@ -84,12 +86,14 @@ internal class FinnSoeskenPeriodeTest {
         val testData = GrunnlagTestData(
             opplysningsmapHalvsøskenOverrides = mapOf(
                 BOSTEDSADRESSE to Opplysning.Konstant(
+                    randomUUID(),
                     kilde,
-                    ADRESSE_DEFAULT.copy(adresseLinje1 = "Andebygata 69").toJsonNode()
+                    ADRESSE_DEFAULT.map { it.copy(adresseLinje1 = "Andebygata 69") }.toJsonNode()
                 )
             ),
             opplysningsmapSakOverrides = mapOf(
                 Opplysningstyper.SOESKEN_I_BEREGNINGEN to Opplysning.Konstant(
+                    randomUUID(),
                     kilde,
                     Beregningsgrunnlag(
                         listOf(
@@ -115,7 +119,7 @@ internal class FinnSoeskenPeriodeTest {
         val søker = GrunnlagTestData().søker
         val testData = GrunnlagTestData(
             opplysningsmapAvdødOverrides = mapOf(
-                AVDOEDESBARN to Opplysning.Konstant(kilde, AvdoedesBarn(listOf(søker)).toJsonNode())
+                AVDOEDESBARN to Opplysning.Konstant(randomUUID(), kilde, AvdoedesBarn(listOf(søker)).toJsonNode())
             )
         )
         val fom = YearMonth.of(2020, 2)
@@ -149,7 +153,7 @@ internal class FinnSoeskenPeriodeTest {
 
         val testData = GrunnlagTestData(
             opplysningsmapAvdødOverrides = mapOf(
-                AVDOEDESBARN to Opplysning.Konstant(kilde, AvdoedesBarn(listOf(søker)).toJsonNode())
+                AVDOEDESBARN to Opplysning.Konstant(randomUUID(), kilde, AvdoedesBarn(listOf(søker)).toJsonNode())
             )
         )
 

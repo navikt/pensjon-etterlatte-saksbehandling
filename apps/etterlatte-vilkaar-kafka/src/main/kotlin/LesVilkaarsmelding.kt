@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -28,6 +29,7 @@ internal class LesVilkaarsmelding(
         River(rapidsConnection).apply {
             eventName("BEHANDLING:GRUNNLAGENDRET")
             validate { it.requireKey("grunnlag") }
+            validate { it.requireKey("grunnlagV2") }
             validate { it.requireKey("behandlingOpprettet") }
             validate { it.requireKey("behandlingId") }
             validate { it.requireKey("behandling") }
@@ -45,8 +47,10 @@ internal class LesVilkaarsmelding(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             try {
-                val grunnlag = requireNotNull(objectMapper.treeToValue<Grunnlag>(packet["grunnlag"]))
-                val grunnlagForVilkaar = grunnlag.grunnlag.map {
+                val grunnlag = requireNotNull(objectMapper.treeToValue<Opplysningsgrunnlag>(packet["grunnlagV2"]))
+                // TODO sj: Deprecated
+                val deprecatedGrunnlag = requireNotNull(objectMapper.treeToValue<Grunnlag>(packet["grunnlag"]))
+                val deprecatedVilkaarsopplysninger = deprecatedGrunnlag.grunnlag.map {
                     VilkaarOpplysning(
                         it.id,
                         it.opplysningType,
@@ -74,7 +78,8 @@ internal class LesVilkaarsmelding(
                 val (virkningstidspunkt, vilkaarsvurdering, kommerSoekerTilGode) =
                     vilkaar.finnVirkningstidspunktOgVilkaarForBehandling(
                         behandling,
-                        grunnlagForVilkaar,
+                        grunnlag,
+                        deprecatedVilkaarsopplysninger,
                         behandlingopprettet,
                         aarsak
                     )
@@ -82,7 +87,7 @@ internal class LesVilkaarsmelding(
                 packet["virkningstidspunkt"] = virkningstidspunkt
                 kommerSoekerTilGode?.let { packet["kommerSoekerTilGode"] = it }
 
-                packet["vilkaarsvurderingGrunnlagRef"] = grunnlag.versjon
+                packet["vilkaarsvurderingGrunnlagRef"] = grunnlag.hentVersjon()
                 context.publish(packet.toJson())
 
                 logger.info(

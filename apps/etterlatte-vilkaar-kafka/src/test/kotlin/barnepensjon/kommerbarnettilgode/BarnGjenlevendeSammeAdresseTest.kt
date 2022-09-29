@@ -1,46 +1,66 @@
 package barnepensjon.kommerbarnettilgode
 
+import GrunnlagTestData
 import adresseDanmarkPdl
 import adresserNorgePdl
-import lagMockPersonPdl
-import mapTilVilkaarstypePerson
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import grunnlag.kilde
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import vilkaar.barnepensjon.barnOgForelderSammeBostedsadresse
-import java.time.LocalDate
+import vilkaar.barnepensjon.barnOgAvdoedSammeBostedsadresse
+import java.util.*
 
 class BarnGjenlevendeSammeAdresseTest {
+
     @Test
     fun vuderBarnGjenlevndeSammeBostedsadresse() {
-        val barnPdlNorge = lagMockPersonPdl(
-            foedselsdatoBarnUnder20,
-            fnrBarn,
-            null,
-            adresserNorgePdl(),
-            avdoedErForeldre
+        val testDataUlikAdresse = GrunnlagTestData(
+            opplysningsmapGjenlevendeOverrides = mapOf(
+                Opplysningstyper.BOSTEDSADRESSE to Opplysning.Konstant(
+                    UUID.randomUUID(),
+                    kilde,
+                    adresseDanmarkPdl().toJsonNode()
+                )
+            ),
+            opplysningsmapSøkerOverrides = mapOf(
+                Opplysningstyper.BOSTEDSADRESSE to Opplysning.Konstant(
+                    UUID.randomUUID(),
+                    kilde,
+                    adresserNorgePdl().toJsonNode()
+                )
+            )
         )
-        val gjenlevendePdlNorge = lagMockPersonPdl(null, fnrGjenlevende, null, adresserNorgePdl(), null)
-        val gjenlevendePdlDanmark = lagMockPersonPdl(null, fnrGjenlevende, null, adresseDanmarkPdl(), null)
 
-        val sammeAdresse = barnOgForelderSammeBostedsadresse(
-            mapTilVilkaarstypePerson(barnPdlNorge),
-            mapTilVilkaarstypePerson(gjenlevendePdlNorge)
+        val testDataLikAdresse = GrunnlagTestData(
+            opplysningsmapGjenlevendeOverrides = mapOf(
+                Opplysningstyper.BOSTEDSADRESSE to Opplysning.Konstant(
+                    UUID.randomUUID(),
+                    kilde,
+                    adresserNorgePdl().toJsonNode()
+                )
+            ),
+            opplysningsmapSøkerOverrides = mapOf(
+                Opplysningstyper.BOSTEDSADRESSE to Opplysning.Konstant(
+                    UUID.randomUUID(),
+                    kilde,
+                    adresserNorgePdl().toJsonNode()
+                )
+            )
         )
 
-        val ulikeAdresse = barnOgForelderSammeBostedsadresse(
-            mapTilVilkaarstypePerson(barnPdlNorge),
-            mapTilVilkaarstypePerson(gjenlevendePdlDanmark)
+        val sammeAdresse = barnOgAvdoedSammeBostedsadresse(
+            testDataLikAdresse.hentOpplysningsgrunnlag().søker,
+            testDataLikAdresse.hentOpplysningsgrunnlag().hentGjenlevende()
+        )
+
+        val ulikeAdresse = barnOgAvdoedSammeBostedsadresse(
+            testDataUlikAdresse.hentOpplysningsgrunnlag().søker,
+            testDataUlikAdresse.hentOpplysningsgrunnlag().hentGjenlevende()
         )
         Assertions.assertEquals(VurderingsResultat.OPPFYLT, sammeAdresse.resultat)
         Assertions.assertEquals(VurderingsResultat.IKKE_OPPFYLT, ulikeAdresse.resultat)
-    }
-
-    companion object {
-        val foedselsdatoBarnUnder20 = LocalDate.parse("2020-06-10")
-        val fnrBarn = Foedselsnummer.of("19040550081")
-        val fnrGjenlevende = Foedselsnummer.of("07081177656")
-        val avdoedErForeldre = listOf(Foedselsnummer.of("19078504903"))
     }
 }

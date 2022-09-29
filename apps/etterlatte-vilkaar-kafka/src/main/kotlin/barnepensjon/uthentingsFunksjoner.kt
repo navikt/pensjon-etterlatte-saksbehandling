@@ -1,33 +1,18 @@
 package no.nav.etterlatte.barnepensjon
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.opplysningstyper.Adresser
-import no.nav.etterlatte.libs.common.person.Adresse
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
-import java.time.LocalDate
-
-fun hentFnrForeldre(soeker: VilkaarOpplysning<Person>): List<Foedselsnummer> {
-    return soeker.opplysning.familieRelasjon?.foreldre?.map { it }
-        ?: throw OpplysningKanIkkeHentesUt()
-}
-
-fun hentFoedselsdato(person: VilkaarOpplysning<Person>): LocalDate {
-    return person.opplysning.foedselsdato
-        ?: throw OpplysningKanIkkeHentesUt()
-}
-
-fun hentDoedsdato(person: VilkaarOpplysning<Person>): LocalDate {
-    return person.opplysning.doedsdato
-        ?: throw OpplysningKanIkkeHentesUt()
-}
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
+import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
+import no.nav.etterlatte.libs.common.grunnlag.hentKontaktadresse
+import no.nav.etterlatte.libs.common.grunnlag.hentOppholdsadresse
 
 fun hentAdresser(
-    person: VilkaarOpplysning<Person>
+    person: Grunnlagsdata<JsonNode>
 ): Adresser {
-    val bostedadresse = person.opplysning.bostedsadresse
-    val oppholdadresse = person.opplysning.oppholdsadresse
-    val kontaktadresse = person.opplysning.kontaktadresse
+    val bostedadresse = person.hentBostedsadresse()?.verdi
+    val oppholdadresse = person.hentOppholdsadresse()?.verdi
+    val kontaktadresse = person.hentKontaktadresse()?.verdi
 
     val adresser = Adresser(bostedadresse, oppholdadresse, kontaktadresse)
     val ingenAdresser = bostedadresse == null && oppholdadresse == null && kontaktadresse == null
@@ -37,25 +22,4 @@ fun hentAdresser(
     } else {
         adresser
     }
-}
-
-fun hentBostedsAdresser(
-    person: VilkaarOpplysning<Person>
-): List<Adresse> {
-    return person.opplysning.bostedsadresse
-        ?: throw OpplysningKanIkkeHentesUt()
-}
-
-fun hentOppholdsAdresser(
-    person: VilkaarOpplysning<Person>
-): List<Adresse> {
-    return person.opplysning.oppholdsadresse
-        ?: throw OpplysningKanIkkeHentesUt()
-}
-
-fun hentKontaktAdresser(
-    person: VilkaarOpplysning<Person>
-): List<Adresse> {
-    return person.opplysning.kontaktadresse
-        ?: throw OpplysningKanIkkeHentesUt()
 }

@@ -88,7 +88,7 @@ export const Vurdering = ({
               Kommentar: <br />
               {vilkaar.vurdering?.kommentar}
             </p>
-            <p>Sist endret {format(new Date(vilkaar.vurdering!!.tidspunkt), 'dd.MM.yyyy')}</p>
+            <p>Sist endret {format(new Date(vilkaar.vurdering!!.tidspunkt), 'dd.MM.yyyy HH:mm')}</p>
           </KildeVilkaar>
           <Button variant={'danger'} size={'small'} onClick={slettVurderingAvVilkaar}>
             Slett vurdering

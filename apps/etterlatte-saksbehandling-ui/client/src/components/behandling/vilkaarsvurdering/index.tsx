@@ -13,8 +13,6 @@ export const Inngangsvilkaar = () => {
   const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering>({ vilkaar: [] })
 
   const oppdaterVilkaarsvurdering = (oppdatertVilkaarsvurdering?: Vilkaarsvurdering) => {
-    console.log('Henter vilkårsvurdering')
-    console.log('input?' + oppdatertVilkaarsvurdering)
     if (oppdatertVilkaarsvurdering) {
       setVilkaarsvurdering(oppdatertVilkaarsvurdering)
     } else {

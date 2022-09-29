@@ -11,6 +11,7 @@ interface Options {
   url: string
   method: Method
   body?: Record<string, unknown>
+  noData?: boolean
 }
 
 async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
@@ -30,7 +31,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
     return {
       status: 'ok',
       statusCode: response.status,
-      data: await response.json(),
+      data: !props.noData ? await response.json() : null,
     }
   }
 
@@ -41,5 +42,5 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
 export const apiClient = {
   get: <T>(url: string) => apiFetcher<T>({ url, method: 'GET' }),
   post: <T>(url: string, body: Record<string, unknown>) => apiFetcher<T>({ url: url, body: body, method: 'POST' }),
-  delete: <T>(url: string) => apiFetcher<T>({ url, method: 'DELETE' }),
+  delete: <T>(url: string, noData?: boolean) => apiFetcher<T>({ url, method: 'DELETE', noData }),
 } as const

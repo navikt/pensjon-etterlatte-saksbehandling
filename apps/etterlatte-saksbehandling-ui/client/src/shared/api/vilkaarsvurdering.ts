@@ -14,7 +14,7 @@ export const vurderVilkaar = async (
   })
 
 export const slettVurdering = async (behandlingId: string, type: string): Promise<ApiResponse<Vilkaarsvurdering>> =>
-  apiClient.delete(`/vilkaarsvurdering/${behandlingId}/${type}`)
+  apiClient.delete(`/vilkaarsvurdering/${behandlingId}/${type}`, true)
 
 export interface Vilkaarsvurdering {
   vilkaar: Vilkaar[]

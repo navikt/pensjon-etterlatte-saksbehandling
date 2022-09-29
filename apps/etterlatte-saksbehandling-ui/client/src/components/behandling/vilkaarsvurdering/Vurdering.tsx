@@ -51,7 +51,6 @@ export const Vurdering = ({
 
     slettVurdering(behandlingId!!, vilkaar.type).then((response) => {
       if (response.status == 'ok') {
-        console.log('Vilkår er slettet.')
         oppdaterVilkaar()
       }
     })

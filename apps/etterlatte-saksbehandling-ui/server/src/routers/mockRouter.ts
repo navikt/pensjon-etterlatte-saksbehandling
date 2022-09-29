@@ -54,13 +54,15 @@ mockRouter.get(`/vilkaarsvurdering/:id`, (req: Request, res: Response) => {
 })
 
 mockRouter.post(`/vilkaarsvurdering/:id`, (req: Request, res: Response) => {
+  const id = req.params.id
+  const vilkaarsproving = require(`../mockdata/hentVilkaarsvurdering_${id}.json`)
   setTimeout(() => {
-    res.json('Suksess')
+    res.json(vilkaarsproving)
   }, 1000)
 })
 
 mockRouter.delete(`/vilkaarsvurdering/:behandlingId/:type`, (req: Request, res: Response) => {
   setTimeout(() => {
-    res.json('Slettet')
+    res.status(200).send()
   }, 1000)
 })

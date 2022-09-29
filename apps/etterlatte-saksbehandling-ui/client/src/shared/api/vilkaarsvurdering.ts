@@ -19,10 +19,7 @@ export interface Vilkaarsvurdering {
 
 export interface Vilkaar {
   type: VilkaarType
-  paragraf: string
-  paragrafTittel: string
-  paragrafLenke: string
-  lovtekst: string
+  paragraf: Paragraf
   vurdering?: VurdertResultat
 }
 
@@ -31,6 +28,13 @@ export interface VurdertResultat {
   kommentar?: string
   tidspunkt: Date
   saksbehandler: string
+}
+
+export interface Paragraf {
+  paragraf: string
+  tittel: string
+  lenke: string
+  lovtekst: string
 }
 
 export enum VilkaarType {

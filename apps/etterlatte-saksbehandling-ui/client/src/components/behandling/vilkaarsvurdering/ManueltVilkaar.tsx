@@ -29,11 +29,11 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
         <VilkaarWrapper>
           <VilkaarInfobokser>
             <VilkaarColumn>
-              <Title>{vilkaar.paragrafTittel} &nbsp;</Title>
-              <a href={vilkaar.paragrafLenke} target="_blank" rel="noopener noreferrer">
-                {vilkaar.paragraf}
+              <Title>{vilkaar.paragraf.tittel} &nbsp;</Title>
+              <a href={vilkaar.paragraf.lenke} target="_blank" rel="noopener noreferrer">
+                {vilkaar.paragraf.paragraf}
               </a>
-              <Lovtekst>{vilkaar.lovtekst}</Lovtekst>
+              <Lovtekst>{vilkaar.paragraf.lovtekst}</Lovtekst>
             </VilkaarColumn>
             <VilkaarColumn>{props.children}</VilkaarColumn>
           </VilkaarInfobokser>

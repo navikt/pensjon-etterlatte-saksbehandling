@@ -44,7 +44,7 @@ export const Vurdering = ({ vilkaar, oppdaterVilkaar }: { vilkaar: Vilkaar; oppd
     })
   }
 
-  const erVurdert = (): boolean => vilkaar.vurdering !== undefined
+  const erVurdert = (): boolean => !!vilkaar.vurdering
   const erOppfyllt = (): boolean => vilkaar.vurdering?.resultat == VurderingsResultat.OPPFYLT
 
   const reset = () => {

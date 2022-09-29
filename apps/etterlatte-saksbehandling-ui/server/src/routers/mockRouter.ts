@@ -53,13 +53,13 @@ mockRouter.get(`/vilkaarsvurdering/:id`, (req: Request, res: Response) => {
   }, 1000)
 })
 
-mockRouter.post(`/vilkaarsvurdering/:id/vurder`, (req: Request, res: Response) => {
+mockRouter.post(`/vilkaarsvurdering/:id`, (req: Request, res: Response) => {
   setTimeout(() => {
     res.json('Suksess')
   }, 1000)
 })
 
-mockRouter.delete(`/vilkaarsvurdering/:behandlingId/:type/slett`, (req: Request, res: Response) => {
+mockRouter.delete(`/vilkaarsvurdering/:behandlingId/:type`, (req: Request, res: Response) => {
   setTimeout(() => {
     res.json('Slettet')
   }, 1000)

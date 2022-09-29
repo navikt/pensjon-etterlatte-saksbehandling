@@ -6,19 +6,22 @@ export const hentVilkaarsvurdering = async (behandlingsId: string): Promise<ApiR
 export const vurderVilkaar = async (
   behandlingId: string,
   request: VurderVilkaarRequest
-): Promise<ApiResponse<Vilkaarsvurdering>> => apiClient.post(`/vilkaarsvurdering/${behandlingId}/vurder`, { request })
+): Promise<ApiResponse<Vilkaarsvurdering>> =>
+  apiClient.post(`/vilkaarsvurdering/${behandlingId}`, {
+    type: request.type,
+    resultat: request.resultat,
+    kommentar: request.kommentar,
+  })
 
-export const slettVurdering = async (
-  behandlingId: string,
-  type: VilkaarType
-): Promise<ApiResponse<Vilkaarsvurdering>> => apiClient.delete(`/vilkaarsvurdering/${behandlingId}/${type}/slett`)
+export const slettVurdering = async (behandlingId: string, type: string): Promise<ApiResponse<Vilkaarsvurdering>> =>
+  apiClient.delete(`/vilkaarsvurdering/${behandlingId}/${type}`)
 
 export interface Vilkaarsvurdering {
   vilkaar: Vilkaar[]
 }
 
 export interface Vilkaar {
-  type: VilkaarType
+  type: string
   paragraf: Paragraf
   vurdering?: VurdertResultat
 }
@@ -37,21 +40,13 @@ export interface Paragraf {
   lovtekst: string
 }
 
-export enum VilkaarType {
-  FORMAAL,
-  FORUTGAAENDE_MEDLEMSKAP,
-  ALDER_BARN,
-  FORTSATT_MEDLEMSKAP,
-  BARNETS_MEDLEMSKAP,
-}
-
 export enum VurderingsResultat {
   OPPFYLT = 'OPPFYLT',
   IKKE_OPPFYLT = 'IKKE_OPPFYLT',
 }
 
 export interface VurderVilkaarRequest {
-  type: VilkaarType
+  type: string
   resultat: VurderingsResultat
   kommentar?: string
 }

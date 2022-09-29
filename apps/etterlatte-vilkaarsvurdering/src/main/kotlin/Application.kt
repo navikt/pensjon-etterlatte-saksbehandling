@@ -16,6 +16,7 @@ import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.response.respond
 import io.ktor.server.routing.IgnoreTrailingSlash
+import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
@@ -81,7 +82,9 @@ fun io.ktor.server.application.Application.restModule(applicationContext: Applic
 
     routing {
         authenticate {
-            vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
+            route("api") {
+                vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
+            }
         }
     }
 }

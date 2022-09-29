@@ -28,13 +28,12 @@ export const VilkaarWrapper = styled.div`
 
 export const Title = styled.div`
   display: flex;
-  font-size: 1.2em;
+  font-size: 1em;
   font-weight: bold;
 `
 export const Lovtekst = styled.div`
   display: flex;
   max-width: 300px;
-  margin-top: 1.5em;
 `
 
 export const VilkaarInfobokser = styled.div`

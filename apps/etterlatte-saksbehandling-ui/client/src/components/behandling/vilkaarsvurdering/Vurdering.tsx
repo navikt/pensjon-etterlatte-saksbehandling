@@ -1,6 +1,6 @@
 import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { ISvar, VurderingsResultat as VurderingsresultatOld } from '../../../store/reducers/BehandlingReducer'
+import { ISvar } from '../../../store/reducers/BehandlingReducer'
 import { useParams } from 'react-router-dom'
 import {
   slettVurdering,
@@ -9,16 +9,21 @@ import {
   VurderingsResultat,
   vurderVilkaar,
 } from '../../../shared/api/vilkaarsvurdering'
-import { StatusIcon } from '../../../shared/icons/statusIcon'
 import styled from 'styled-components'
 import { format } from 'date-fns'
+import { DeleteIcon } from '../../../shared/icons/DeleteIcon'
+import { EditIcon } from '../../../shared/icons/EditIcon'
 
 export const Vurdering = ({
   vilkaar,
   oppdaterVilkaar,
+  erVurdert,
+  erOppfylt,
 }: {
   vilkaar: Vilkaar
   oppdaterVilkaar: (vilkaarsvurdering?: Vilkaarsvurdering) => void
+  erVurdert: boolean
+  erOppfylt: boolean
 }) => {
   const { behandlingId } = useParams()
   const [aktivVurdering, setAktivVurdering] = useState<boolean>(false)
@@ -40,7 +45,7 @@ export const Vurdering = ({
       }).then((response) => {
         if (response.status == 'ok') {
           oppdaterVilkaar(response.data)
-          setAktivVurdering(false)
+          reset()
         }
       })
     }
@@ -56,8 +61,10 @@ export const Vurdering = ({
     })
   }
 
-  const erVurdert = (): boolean => !!vilkaar.vurdering
-  const erOppfyllt = (): boolean => vilkaar.vurdering?.resultat == VurderingsResultat.OPPFYLT
+  const redigerVilkaar = () => {
+    setAktivVurdering(true)
+    setKommentar(vilkaar.vurdering?.kommentar || '')
+  }
 
   const reset = () => {
     setAktivVurdering(false)
@@ -67,22 +74,14 @@ export const Vurdering = ({
     setBegrunnelseError(undefined)
   }
 
+  const overskrift = () => (erOppfylt ? 'Vilkår oppfylt' : 'Vilkår er ikke oppfylt')
+
   return (
     <div>
-      {erVurdert() && (
+      {erVurdert && !aktivVurdering && (
         <>
           <KildeVilkaar>
-            {erOppfyllt() ? (
-              <KildeOverskrift>
-                <StatusIcon status={VurderingsresultatOld.OPPFYLT} />
-                Vilkår er oppfyllt
-              </KildeOverskrift>
-            ) : (
-              <KildeOverskrift>
-                <StatusIcon status={VurderingsresultatOld.IKKE_OPPFYLT} />
-                Vilkår er ikke oppfyllt
-              </KildeOverskrift>
-            )}
+            <KildeOverskrift>{overskrift()}</KildeOverskrift>
             <p>Manuelt av {vilkaar.vurdering?.saksbehandler}</p>
             <p>
               Kommentar: <br />
@@ -90,12 +89,18 @@ export const Vurdering = ({
             </p>
             <p>Sist endret {format(new Date(vilkaar.vurdering!!.tidspunkt), 'dd.MM.yyyy HH:mm')}</p>
           </KildeVilkaar>
-          <Button variant={'danger'} size={'small'} onClick={slettVurderingAvVilkaar}>
-            Slett vurdering
-          </Button>
+
+          <RedigerWrapper onClick={slettVurderingAvVilkaar} style={{ marginLeft: '-22px' }}>
+            <DeleteIcon />
+            <span className={'text'}> Slett</span>
+          </RedigerWrapper>
+          <RedigerWrapper onClick={redigerVilkaar}>
+            <EditIcon />
+            <span className={'text'}> Rediger</span>
+          </RedigerWrapper>
         </>
       )}
-      {!erVurdert() && aktivVurdering && (
+      {aktivVurdering && (
         <>
           <VurderingsTitle>Er vilkåret oppfylt?</VurderingsTitle>
           <RadioGroupWrapper>
@@ -142,11 +147,10 @@ export const Vurdering = ({
           </Button>
         </>
       )}
-      {!erVurdert() && !aktivVurdering && (
+      {!erVurdert && !aktivVurdering && (
         <IkkeVurdert>
-          <StatusIcon status={VurderingsresultatOld.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING} />
-          Vilkåret er ikke vurdert
-          <Button variant={'primary'} size={'small'} onClick={() => setAktivVurdering(true)}>
+          <p>Vilkåret er ikke vurdert</p>
+          <Button variant={'secondary'} size={'small'} onClick={() => setAktivVurdering(true)}>
             Vurder vilkår
           </Button>
         </IkkeVurdert>
@@ -154,6 +158,24 @@ export const Vurdering = ({
     </div>
   )
 }
+
+const RedigerWrapper = styled.div`
+  display: inline-flex;
+  float: left;
+  cursor: pointer;
+  color: #0067c5;
+  margin-left: 10px;
+
+  .text {
+    margin-left: 0.3em;
+    font-size: 0.7em;
+    font-weight: normal;
+  }
+
+  &:hover {
+    text-decoration-line: underline;
+  }
+`
 
 export const IkkeVurdert = styled.div`
   font-size: 0.8em;

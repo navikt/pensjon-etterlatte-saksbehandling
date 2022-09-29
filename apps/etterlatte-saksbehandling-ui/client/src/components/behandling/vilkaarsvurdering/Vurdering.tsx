@@ -2,12 +2,24 @@ import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { ISvar, VurderingsResultat as VurderingsresultatOld } from '../../../store/reducers/BehandlingReducer'
 import { useParams } from 'react-router-dom'
-import { slettVurdering, Vilkaar, VurderingsResultat, vurderVilkaar } from '../../../shared/api/vilkaarsvurdering'
+import {
+  slettVurdering,
+  Vilkaar,
+  Vilkaarsvurdering,
+  VurderingsResultat,
+  vurderVilkaar,
+} from '../../../shared/api/vilkaarsvurdering'
 import { StatusIcon } from '../../../shared/icons/statusIcon'
 import styled from 'styled-components'
 import { format } from 'date-fns'
 
-export const Vurdering = ({ vilkaar, oppdaterVilkaar }: { vilkaar: Vilkaar; oppdaterVilkaar: () => void }) => {
+export const Vurdering = ({
+  vilkaar,
+  oppdaterVilkaar,
+}: {
+  vilkaar: Vilkaar
+  oppdaterVilkaar: (vilkaarsvurdering?: Vilkaarsvurdering) => void
+}) => {
   const { behandlingId } = useParams()
   const [aktivVurdering, setAktivVurdering] = useState<boolean>(false)
   const [svar, setSvar] = useState<ISvar>()
@@ -27,8 +39,8 @@ export const Vurdering = ({ vilkaar, oppdaterVilkaar }: { vilkaar: Vilkaar; oppd
         resultat: svar === ISvar.JA ? VurderingsResultat.OPPFYLT : VurderingsResultat.IKKE_OPPFYLT,
       }).then((response) => {
         if (response.status == 'ok') {
+          oppdaterVilkaar(response.data)
           setAktivVurdering(false)
-          oppdaterVilkaar()
         }
       })
     }
@@ -39,6 +51,7 @@ export const Vurdering = ({ vilkaar, oppdaterVilkaar }: { vilkaar: Vilkaar; oppd
 
     slettVurdering(behandlingId!!, vilkaar.type).then((response) => {
       if (response.status == 'ok') {
+        console.log('Vilkår er slettet.')
         oppdaterVilkaar()
       }
     })

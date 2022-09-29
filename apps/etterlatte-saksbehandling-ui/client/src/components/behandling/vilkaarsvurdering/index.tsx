@@ -12,12 +12,18 @@ export const Inngangsvilkaar = () => {
 
   const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering>({ vilkaar: [] })
 
-  const hentVilkaarsvurderingForBehandling = () => {
-    hentVilkaarsvurdering(behandlingId!!).then((response) => {
-      if (response.status == 'ok') {
-        setVilkaarsvurdering(response.data)
-      }
-    })
+  const oppdaterVilkaarsvurdering = (oppdatertVilkaarsvurdering?: Vilkaarsvurdering) => {
+    console.log('Henter vilkårsvurdering')
+    console.log('input?' + oppdatertVilkaarsvurdering)
+    if (oppdatertVilkaarsvurdering) {
+      setVilkaarsvurdering(oppdatertVilkaarsvurdering)
+    } else {
+      hentVilkaarsvurdering(behandlingId!!).then((response) => {
+        if (response.status == 'ok') {
+          setVilkaarsvurdering(response.data)
+        }
+      })
+    }
   }
 
   useEffect(() => {
@@ -26,7 +32,7 @@ export const Inngangsvilkaar = () => {
   }, [location.hash])
 
   useEffect(() => {
-    hentVilkaarsvurderingForBehandling()
+    oppdaterVilkaarsvurdering()
   }, [behandlingId])
 
   return (
@@ -36,7 +42,7 @@ export const Inngangsvilkaar = () => {
       </Header>
       <VilkaarBorderTop />
       {vilkaarsvurdering.vilkaar.map((value, index) => (
-        <ManueltVilkaar key={index} vilkaar={value} oppdaterVilkaar={hentVilkaarsvurderingForBehandling}>
+        <ManueltVilkaar key={index} vilkaar={value} oppdaterVilkaar={oppdaterVilkaarsvurdering}>
           <></>
         </ManueltVilkaar>
       ))}

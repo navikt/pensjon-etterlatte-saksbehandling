@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 class OpplysningKanIkkeHentesUt constructor(override val message: String? = null) : IllegalStateException(message)
@@ -214,3 +215,5 @@ fun hentGaps(stack: Stack<Periode>?, femAarFoerDoedsdato: LocalDate, doedsdato: 
     }
     return gaps.sortedBy { it.gyldigFra }
 }
+
+fun LocalDateTime?.toYearMonth() = this?.let { YearMonth.of(it.year, it.month) }

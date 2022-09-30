@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSDATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
@@ -32,7 +32,11 @@ internal class BeregningServiceTest {
 
     private val testData = GrunnlagTestData(
         opplysningsmapSøskenOverrides = mapOf(
-            FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, LocalDate.of(2003, 12, 12).toJsonNode())
+            Opplysningstyper.FOEDSELSDATO to Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                LocalDate.of(2003, 12, 12).toJsonNode()
+            )
         )
     )
     private val opplysningsgrunnlag = testData.hentOpplysningsgrunnlag()

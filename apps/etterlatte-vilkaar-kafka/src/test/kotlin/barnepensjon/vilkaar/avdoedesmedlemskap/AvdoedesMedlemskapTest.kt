@@ -10,6 +10,7 @@ import lagMockPersonAvdoedSoeknad
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapVurdering
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.Instant
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 class AvdoedesMedlemskapTest {
@@ -38,10 +40,16 @@ class AvdoedesMedlemskapTest {
                 kilde,
                 adresserNorgePdl().toJsonNode()
             ),
-            Opplysningstyper.BOSTEDSADRESSE to Opplysning.Konstant(
-                UUID.randomUUID(),
-                kilde,
-                adresserNorgePdl().toJsonNode()
+            Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
+                adresserNorgePdl().map {
+                    PeriodisertOpplysning(
+                        UUID.randomUUID(),
+                        kilde,
+                        it.toJsonNode(),
+                        it.gyldigFraOgMed!!.let { YearMonth.of(it.year, it.month) },
+                        it.gyldigTilOgMed?.let { YearMonth.of(it.year, it.month) }
+                    )
+                }
             ),
             Opplysningstyper.OPPHOLDSADRESSE to Opplysning.Konstant(
                 UUID.randomUUID(),

@@ -66,9 +66,9 @@ fun kriterieForeldreHarIkkeAdresseIUtlandet(
     val opplysningsGrunnlag = listOfNotNull(
         adresseGjenlevende?.let {
             Kriteriegrunnlag(
-                it.id,
+                it.hentSiste().id,
                 KriterieOpplysningsType.ADRESSER,
-                it.kilde,
+                it.hentSiste().kilde,
                 hentAdresser(gjenlevendePdl)
             )
         },
@@ -110,9 +110,9 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
     val opplysningsGrunnlag = listOfNotNull(
         soekerPdl?.hentBostedsadresse()?.let {
             Kriteriegrunnlag(
-                it.id,
+                it.hentSiste().id,
                 KriterieOpplysningsType.ADRESSER,
-                it.kilde,
+                it.hentSiste().kilde,
                 hentAdresser(soekerPdl)
             )
         },

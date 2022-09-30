@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentOppholdsadresse
 fun hentAdresser(
     person: Grunnlagsdata<JsonNode>
 ): Adresser {
-    val bostedadresse = person.hentBostedsadresse()?.verdi
+    val bostedadresse = person.hentBostedsadresse()?.perioder?.map { it.verdi }
     val oppholdadresse = person.hentOppholdsadresse()?.verdi
     val kontaktadresse = person.hentKontaktadresse()?.verdi
 

@@ -41,7 +41,7 @@ internal class VilkaarsvurderingRoutesTest {
 
             opprettVilkaarsvurdering()
 
-            val response = client.get("/vilkaarsvurdering/$behandlingId") {
+            val response = client.get("/api/vilkaarsvurdering/$behandlingId") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
             }
@@ -76,7 +76,7 @@ internal class VilkaarsvurderingRoutesTest {
                 kommentar = "Søker oppfyller vilkåret"
             )
 
-            val oppdatertVilkaarsvurderingResponse = client.post("/vilkaarsvurdering/$behandlingId") {
+            val oppdatertVilkaarsvurderingResponse = client.post("/api/vilkaarsvurdering/$behandlingId") {
                 setBody(vurdertResultatDto.toJson())
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
@@ -109,7 +109,7 @@ internal class VilkaarsvurderingRoutesTest {
                 kommentar = "Søker oppfyller vilkåret"
             )
 
-            client.post("/vilkaarsvurdering/$behandlingId") {
+            client.post("/api/vilkaarsvurdering/$behandlingId") {
                 setBody(vurdertResultatDto.toJson())
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
@@ -120,7 +120,7 @@ internal class VilkaarsvurderingRoutesTest {
 
             assertNotNull(vurdertResultat)
 
-            val response = client.delete("/vilkaarsvurdering/$behandlingId/${vurdertResultatDto.type}") {
+            val response = client.delete("/api/vilkaarsvurdering/$behandlingId/${vurdertResultatDto.type}") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
             }

@@ -17,6 +17,7 @@ import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.response.respond
 import io.ktor.server.routing.IgnoreTrailingSlash
+import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
@@ -25,7 +26,6 @@ import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import org.postgresql.gss.MakeGSS.authenticate
 import org.slf4j.event.Level
 import java.util.*
 
@@ -93,13 +93,15 @@ fun Application.restModule(applicationContext: ApplicationContext) {
 
         routing {
             authenticate {
-                vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
+                route("api") {
+                    vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
+                }
             }
         }
     }
 }
 
-private fun Map<String, String>.withConsumerGroupId() =
+fun Map<String, String>.withConsumerGroupId() =
     this.toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }

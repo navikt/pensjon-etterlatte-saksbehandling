@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { VurderingsResultat } from '../../store/reducers/BehandlingReducer'
 
-export const StatusIcon = (props: { status: VurderingsResultat; large?: boolean }) => {
+export const StatusIcon = (props: { status: VurderingsResultat; large?: boolean; noLeftPadding?: boolean }) => {
   const symbol = hentSymbol()
 
   function hentSymbol() {
@@ -71,7 +71,7 @@ export const StatusIcon = (props: { status: VurderingsResultat; large?: boolean 
   }
 
   return (
-    <SvgWrapper status={props.status} large={props.large}>
+    <SvgWrapper status={props.status} large={props.large} noLeftPadding={props.noLeftPadding}>
       {symbol}
     </SvgWrapper>
   )
@@ -83,10 +83,10 @@ const colors = {
   [VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING]: '#FF9100',
 }
 
-const SvgWrapper = styled.div<{ status: VurderingsResultat; large?: boolean }>`
+const SvgWrapper = styled.div<{ status: VurderingsResultat; large?: boolean; noLeftPadding?: boolean }>`
   display: inline-flex;
   justify-content: center;
   align-items: center;
   margin-right: 15px;
-  padding-left: ${(props) => (props.large ? 0 : '16px')};
+  padding-left: ${(props) => (props.large || props.noLeftPadding ? 0 : '16px')};
 `

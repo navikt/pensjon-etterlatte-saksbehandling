@@ -40,6 +40,7 @@ class Opplysningsgrunnlag(
 data class Metadata(val sakId: Long, val versjon: Long)
 
 data class PeriodisertOpplysning<T>(
+    val id: UUID,
     val kilde: Grunnlagsopplysning.Kilde,
     val verdi: T,
     val fom: YearMonth,
@@ -57,9 +58,12 @@ data class PeriodisertOpplysning<T>(
 )
 sealed class Opplysning<T>(val type: String) {
     data class Periodisert<T>(
-        val id: UUID,
         val perioder: List<PeriodisertOpplysning<T>>
-    ) : Opplysning<T>("periodisert")
+    ) : Opplysning<T>("periodisert") {
+        /* TODO ai: Midlertidig funksjon for å hente ut data. Skal erstattes av periodisering senere */
+        fun hentFoerste() = perioder.first()
+        fun hentSiste() = perioder.last()
+    }
 
     data class Konstant<T>(
         val id: UUID,

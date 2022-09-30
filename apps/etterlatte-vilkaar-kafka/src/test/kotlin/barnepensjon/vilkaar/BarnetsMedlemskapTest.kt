@@ -5,7 +5,9 @@ import adresseDanmarkPdl
 import grunnlag.kilde
 import lagMockPersonSoekerSoeknad
 import mapTilVilkaarstypeSoekerSoeknad
+import no.nav.etterlatte.barnepensjon.toYearMonth
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
@@ -25,19 +27,35 @@ class BarnetsMedlemskapTest {
         val testdataNorskAdresse = GrunnlagTestData().hentOpplysningsgrunnlag()
         val testdataDanskAdresse = GrunnlagTestData(
             opplysningsmapSøkerOverrides = mapOf(
-                Opplysningstyper.BOSTEDSADRESSE to Opplysning.Konstant(
-                    UUID.randomUUID(),
-                    kilde,
-                    adresseDanmarkPdl().toJsonNode()
+                Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
+                    adresseDanmarkPdl().map {
+                        PeriodisertOpplysning(
+                            id = UUID.randomUUID(),
+                            kilde = kilde,
+                            verdi = it.toJsonNode(),
+                            fom = it.gyldigFraOgMed.toYearMonth()!!,
+                            tom = it.gyldigTilOgMed.toYearMonth()
+                        )
+                    }
                 )
             ),
             opplysningsmapGjenlevendeOverrides = mapOf(
-                Opplysningstyper.BOSTEDSADRESSE to Opplysning.Konstant(
-                    UUID.randomUUID(),
-                    kilde,
-                    adresseDanmarkPdl().toJsonNode()
+                Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
+                    adresseDanmarkPdl().map {
+                        PeriodisertOpplysning(
+                            id = UUID.randomUUID(),
+                            kilde = kilde,
+                            verdi = it.toJsonNode(),
+                            fom = it.gyldigFraOgMed.toYearMonth()!!,
+                            tom = it.gyldigTilOgMed.toYearMonth()
+                        )
+                    }
                 )
-            )
+            ),
+            opplysningsmapSøskenOverrides = mapOf(),
+            opplysningsmapAvdødOverrides = mapOf(),
+            opplysningsmapHalvsøskenOverrides = mapOf(),
+            opplysningsmapSakOverrides = mapOf()
         ).hentOpplysningsgrunnlag()
 
         val ingenUtenlandsAdresser = vilkaarBarnetsMedlemskap(

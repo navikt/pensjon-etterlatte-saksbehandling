@@ -28,7 +28,7 @@ fun mapFamiliemedlemmer(
                 navn = it.hentNavn()?.verdi.toString(),
                 fnr = it.hentFoedselsnummer()?.verdi,
                 rolle = PersonRolle.AVDOED,
-                bostedadresser = it.hentBostedsadresse()?.verdi,
+                bostedadresser = it.hentBostedsadresse()?.perioder?.map { it.verdi },
                 doedsdato = it.hentDoedsdato()?.verdi,
                 barn = it.hentAvdoedesbarn()?.verdi?.avdoedesBarn?.map { barn -> barn.foedselsnummer }
             )
@@ -38,7 +38,7 @@ fun mapFamiliemedlemmer(
                 navn = it.hentNavn()?.verdi.toString(),
                 fnr = it.hentFoedselsnummer()?.verdi,
                 rolle = PersonRolle.BARN,
-                bostedadresser = it.hentBostedsadresse()?.verdi,
+                bostedadresser = it.hentBostedsadresse()?.perioder?.map { it.verdi },
                 soeknadAdresse = soekerSoeknad?.opplysning?.utenlandsadresse,
                 foedselsdato = it.hentFoedselsdato()?.verdi
             )
@@ -48,7 +48,7 @@ fun mapFamiliemedlemmer(
                 navn = it.hentNavn()?.verdi.toString(),
                 fnr = it.hentFoedselsnummer()?.verdi,
                 rolle = PersonRolle.GJENLEVENDE,
-                bostedadresser = it.hentBostedsadresse()?.verdi
+                bostedadresser = it.hentBostedsadresse()?.perioder?.map { it.verdi }
             )
         }!!
     )

@@ -7,7 +7,9 @@ import adresserNorgePdl
 import grunnlag.kilde
 import lagMockPersonAvdoedSoeknad
 import mapTilVilkaarstypeAvdoedSoeknad
+import no.nav.etterlatte.barnepensjon.toYearMonth
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.KONTAKTADRESSE
@@ -55,7 +57,17 @@ class BosattTest {
     fun vurderInnOgUtvandring() {
         val avdødTestdata = GrunnlagTestData(
             opplysningsmapAvdødOverrides = mapOf(
-                BOSTEDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresserNorgePdl().toJsonNode())
+                BOSTEDSADRESSE to Opplysning.Periodisert(
+                    adresseUtlandFoerFemAar().map {
+                        PeriodisertOpplysning(
+                            id = UUID.randomUUID(),
+                            kilde = kilde,
+                            verdi = it.toJsonNode(),
+                            fom = it.gyldigFraOgMed.toYearMonth()!!,
+                            tom = it.gyldigTilOgMed.toYearMonth()
+                        )
+                    }
+                )
             )
         ).hentOpplysningsgrunnlag().hentAvdoed()
         val avdødIngenUtland = avdødTestdata - Opplysningstyper.UTLAND
@@ -114,19 +126,49 @@ class BosattTest {
     fun kunNorskeAdresserSisteFemAar() {
         val avdødUtenUtlandsadresser = GrunnlagTestData(
             opplysningsmapAvdødOverrides = mapOf(
-                BOSTEDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresserNorgePdl().toJsonNode()),
+                BOSTEDSADRESSE to Opplysning.Periodisert(
+                    adresserNorgePdl().map {
+                        PeriodisertOpplysning(
+                            id = UUID.randomUUID(),
+                            kilde = kilde,
+                            verdi = it.toJsonNode(),
+                            fom = it.gyldigFraOgMed.toYearMonth()!!,
+                            tom = it.gyldigTilOgMed.toYearMonth()
+                        )
+                    }
+                ),
                 KONTAKTADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresserNorgePdl().toJsonNode()),
                 OPPHOLDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresserNorgePdl().toJsonNode())
             )
         ).hentOpplysningsgrunnlag().hentAvdoed()
         val avdødUtenAdresse = avdødUtenUtlandsadresser - BOSTEDSADRESSE - KONTAKTADRESSE - OPPHOLDSADRESSE
         val avdødMedUtlandsadresser = avdødUtenUtlandsadresser + mapOf(
-            BOSTEDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseDanmarkPdl().toJsonNode()),
+            BOSTEDSADRESSE to Opplysning.Periodisert(
+                adresseDanmarkPdl().map {
+                    PeriodisertOpplysning(
+                        id = UUID.randomUUID(),
+                        kilde = kilde,
+                        verdi = it.toJsonNode(),
+                        fom = it.gyldigFraOgMed.toYearMonth()!!,
+                        tom = it.gyldigTilOgMed.toYearMonth()
+                    )
+                }
+            ),
             KONTAKTADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseDanmarkPdl().toJsonNode()),
             OPPHOLDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseDanmarkPdl().toJsonNode())
         )
         val avdødMedUtlandsadresserFørFemÅr = avdødUtenUtlandsadresser + mapOf(
-            BOSTEDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseUtlandFoerFemAar().toJsonNode()),
+            BOSTEDSADRESSE to Opplysning.Periodisert(
+                adresseUtlandFoerFemAar().map {
+                    PeriodisertOpplysning(
+                        id = UUID.randomUUID(),
+                        kilde = kilde,
+                        verdi = it.toJsonNode(),
+                        fom = it.gyldigFraOgMed.toYearMonth()!!,
+                        tom = it.gyldigTilOgMed.toYearMonth()
+                    )
+                }
+            ),
             KONTAKTADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseUtlandFoerFemAar().toJsonNode()),
             OPPHOLDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseUtlandFoerFemAar().toJsonNode())
         )
@@ -194,15 +236,45 @@ class BosattTest {
     fun vurderSammenhengendeAdresserINorgeSisteFemAar() {
         val avdødUtenUtlandsadresser = GrunnlagTestData(
             opplysningsmapAvdødOverrides = mapOf(
-                BOSTEDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresserNorgePdl().toJsonNode())
+                BOSTEDSADRESSE to Opplysning.Periodisert(
+                    adresserNorgePdl().map {
+                        PeriodisertOpplysning(
+                            id = UUID.randomUUID(),
+                            kilde = kilde,
+                            verdi = it.toJsonNode(),
+                            fom = it.gyldigFraOgMed.toYearMonth()!!,
+                            tom = it.gyldigTilOgMed.toYearMonth()
+                        )
+                    }
+                )
             )
         ).hentOpplysningsgrunnlag().hentAvdoed()
         val avdødUtenAdresse = avdødUtenUtlandsadresser - BOSTEDSADRESSE
         val avdødMedUtlandsadresser = avdødUtenUtlandsadresser + mapOf(
-            BOSTEDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseDanmarkPdl().toJsonNode())
+            BOSTEDSADRESSE to Opplysning.Periodisert(
+                adresseDanmarkPdl().map {
+                    PeriodisertOpplysning(
+                        id = UUID.randomUUID(),
+                        kilde = kilde,
+                        verdi = it.toJsonNode(),
+                        fom = it.gyldigFraOgMed.toYearMonth()!!,
+                        tom = it.gyldigTilOgMed.toYearMonth()
+                    )
+                }
+            )
         )
         val avdødMedUtlandsadresserFørFemÅr = avdødUtenUtlandsadresser + mapOf(
-            BOSTEDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseUtlandFoerFemAar().toJsonNode())
+            BOSTEDSADRESSE to Opplysning.Periodisert(
+                adresseUtlandFoerFemAar().map {
+                    PeriodisertOpplysning(
+                        id = UUID.randomUUID(),
+                        kilde = kilde,
+                        verdi = it.toJsonNode(),
+                        fom = it.gyldigFraOgMed.toYearMonth()!!,
+                        tom = it.gyldigTilOgMed.toYearMonth()
+                    )
+                }
+            )
         )
 
         val utenlandsopphold =

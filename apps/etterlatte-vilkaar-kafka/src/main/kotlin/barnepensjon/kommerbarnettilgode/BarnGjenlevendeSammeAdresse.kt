@@ -38,21 +38,22 @@ fun kriterieSammeBostedsadresse(
     val søkersAdresse = soekerPdl?.hentBostedsadresse()
     val gjenlevendesAdresse = gjenlevendePdl?.hentBostedsadresse()
 
+    /* TODO ai: Fiks periodisering */
     val opplysningsGrunnlag = listOfNotNull(
         søkersAdresse?.let {
             Kriteriegrunnlag(
-                søkersAdresse.id,
+                søkersAdresse.hentSiste().id,
                 KriterieOpplysningsType.BOSTEDADRESSE_SOEKER,
-                søkersAdresse.kilde,
-                Bostedadresser(søkersAdresse.verdi)
+                søkersAdresse.hentSiste().kilde,
+                Bostedadresser(søkersAdresse.perioder.map { it.verdi })
             )
         },
         gjenlevendesAdresse?.let {
             Kriteriegrunnlag(
-                gjenlevendesAdresse.id,
+                gjenlevendesAdresse.hentSiste().id,
                 KriterieOpplysningsType.BOSTEDADRESSE_GJENLEVENDE,
-                gjenlevendesAdresse.kilde,
-                Bostedadresser(gjenlevendesAdresse.verdi)
+                gjenlevendesAdresse.hentSiste().kilde,
+                Bostedadresser(gjenlevendesAdresse.perioder.map { it.verdi })
             )
         }
     )
@@ -61,8 +62,8 @@ fun kriterieSammeBostedsadresse(
         if (gjenlevendesAdresse == null || søkersAdresse == null) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
-            val adresseBarn = søkersAdresse.verdi.find { it.aktiv }
-            val adresseGjenlevende = gjenlevendesAdresse.verdi.find { it.aktiv }
+            val adresseBarn = søkersAdresse.perioder.find { it.verdi.aktiv }?.verdi
+            val adresseGjenlevende = gjenlevendesAdresse.perioder.find { it.verdi.aktiv }?.verdi
 
             val adresse1 = adresseBarn?.adresseLinje1 == adresseGjenlevende?.adresseLinje1
             val postnr = adresseBarn?.postnr == adresseGjenlevende?.postnr

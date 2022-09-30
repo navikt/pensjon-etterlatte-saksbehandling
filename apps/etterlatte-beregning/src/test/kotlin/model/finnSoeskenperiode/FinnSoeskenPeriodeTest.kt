@@ -7,6 +7,7 @@ import grunnlag.HELSØSKEN_FØDSELSNUMMER
 import grunnlag.kilde
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.*
 import java.util.UUID.randomUUID
 
 internal class FinnSoeskenPeriodeTest {
@@ -64,10 +66,16 @@ internal class FinnSoeskenPeriodeTest {
     fun `hentSoeskenperioder skal ikke regne med halvsøsken som bor på en annen adresse`() {
         val testData = GrunnlagTestData(
             opplysningsmapHalvsøskenOverrides = mapOf(
-                BOSTEDSADRESSE to Opplysning.Konstant(
-                    randomUUID(),
-                    kilde,
-                    ADRESSE_DEFAULT.map { it.copy(adresseLinje1 = "Andebygata 69") }.toJsonNode()
+                BOSTEDSADRESSE to Opplysning.Periodisert(
+                    ADRESSE_DEFAULT.map {
+                        PeriodisertOpplysning(
+                            randomUUID(),
+                            kilde,
+                            it.copy(adresseLinje1 = "Andebygata 69").toJsonNode(),
+                            fom = it.gyldigFraOgMed!!.let { YearMonth.of(it.year, it.month) },
+                            tom = it.gyldigFraOgMed?.let { YearMonth.of(it.year, it.month) }
+                        )
+                    }
                 )
             )
         )
@@ -85,10 +93,16 @@ internal class FinnSoeskenPeriodeTest {
     fun `hentSoeskenperioder saksoverrides skal overstyre alt`() {
         val testData = GrunnlagTestData(
             opplysningsmapHalvsøskenOverrides = mapOf(
-                BOSTEDSADRESSE to Opplysning.Konstant(
-                    randomUUID(),
-                    kilde,
-                    ADRESSE_DEFAULT.map { it.copy(adresseLinje1 = "Andebygata 69") }.toJsonNode()
+                BOSTEDSADRESSE to Opplysning.Periodisert(
+                    ADRESSE_DEFAULT.map {
+                        PeriodisertOpplysning(
+                            randomUUID(),
+                            kilde,
+                            it.toJsonNode(),
+                            fom = it.gyldigFraOgMed!!.let { YearMonth.of(it.year, it.month) },
+                            tom = it.gyldigFraOgMed?.let { YearMonth.of(it.year, it.month) }
+                        )
+                    }
                 )
             ),
             opplysningsmapSakOverrides = mapOf(

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -31,37 +30,10 @@ class RealGrunnlagService(private val opplysningDao: OpplysningDao) : GrunnlagSe
         }
     }
 
-    private fun List<OpplysningDao.GrunnlagHendelse>.groupByFnrAndOpplysningstype() =
-        this.groupBy { Pair(it.opplysning.fnr, it.opplysning.opplysningType) }.values
-
-    private fun Collection<List<OpplysningDao.GrunnlagHendelse>>.hentSenesteOpplysningerPerGruppe() =
-        this.map { it.maxBy { hendelse -> hendelse.hendelseNummer } }
-
     override fun hentOpplysningsgrunnlag(sak: Long, persongalleri: Persongalleri): Opplysningsgrunnlag {
-        val opplysninger = opplysningDao
-            .hentAlleGrunnlagForSak(sak)
-            .groupByFnrAndOpplysningstype()
-            .hentSenesteOpplysningerPerGruppe()
+        val grunnlag = opplysningDao.hentAlleGrunnlagForSak(sak)
 
-        val versjon = opplysninger.maxOfOrNull { it.hendelseNummer } ?: 0
-        val (personopplysninger, saksopplysninger) = opplysninger.partition { it.opplysning.fnr !== null }
-
-        val (søker, familie) = personopplysninger.partition { it.opplysning.fnr!!.value == persongalleri.soeker }
-
-        val søkerMap = søker.associateBy({ it.opplysning.opplysningType }, { it.opplysning.toOpplysning() })
-        val familieMap = familie
-            .groupBy { it.opplysning.fnr }.values
-            .map { familiemedlem ->
-                familiemedlem.associateBy({ it.opplysning.opplysningType }, { it.opplysning.toOpplysning() })
-            }
-        val sakMap = saksopplysninger.associateBy({ it.opplysning.opplysningType }, { it.opplysning.toOpplysning() })
-
-        return Opplysningsgrunnlag(
-            søker = søkerMap,
-            familie = familieMap,
-            sak = sakMap,
-            metadata = Metadata(sak, versjon)
-        )
+        return OpplysningsgrunnlagMapper(grunnlag, sak, persongalleri).hentOpplysningsgrunnlag()
     }
 
     override fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstyper): Grunnlagsopplysning<JsonNode>? {

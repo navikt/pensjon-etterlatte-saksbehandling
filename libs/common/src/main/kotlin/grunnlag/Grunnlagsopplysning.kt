@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import java.time.Instant
 import java.util.*
@@ -18,9 +19,27 @@ open class Grunnlagsopplysning<T>(
     val meta: ObjectNode,
     val opplysning: T,
     val attestering: Kilde? = null,
-    val fnr: Foedselsnummer? = null
+    val fnr: Foedselsnummer? = null,
+    val periode: Periode? = null
 ) {
-    fun toOpplysning(): Opplysning<T> = Opplysning.Konstant(id = id, kilde = kilde, verdi = opplysning)
+    fun toOpplysning(): Opplysning<T> {
+        if (periode != null) {
+            /* TODO ai : fiks */
+            return Opplysning.Periodisert(
+                perioder = listOf(
+                    PeriodisertOpplysning(
+                        id = id,
+                        kilde = kilde,
+                        verdi = opplysning,
+                        fom = periode.fom,
+                        tom = periode.tom
+                    )
+                )
+            )
+        }
+
+        return Opplysning.Konstant(id = id, kilde = kilde, verdi = opplysning)
+    }
 
     override fun toString(): String {
         return "Opplysning om ${opplysningType.name}: oppgitt av $kilde til å være: $opplysning. Id: $id"

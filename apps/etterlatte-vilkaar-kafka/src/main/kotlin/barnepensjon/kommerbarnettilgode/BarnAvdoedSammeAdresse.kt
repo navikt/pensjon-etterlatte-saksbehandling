@@ -38,21 +38,21 @@ fun kriterieSammeBostedsadresseSomAvdoed(
 ): Kriterie {
     val soekerAdresse = soekerPdl?.hentBostedsadresse()
     val avdoedAdresse = avdoedPdl?.hentBostedsadresse()
-    val opplysningsGrunnlag = listOfNotNull(
+    val opplysningsGrunnlag = listOfNotNull( // TODO ai: fiks
         soekerAdresse?.let {
             Kriteriegrunnlag(
-                it.id,
+                it.perioder.last().id,
                 KriterieOpplysningsType.BOSTEDADRESSE_SOEKER,
-                it.kilde,
-                Bostedadresser(it.verdi)
+                it.perioder.last().kilde,
+                Bostedadresser(soekerAdresse.perioder.map { it.verdi }) // TODO ai: periodisering
             )
         },
         avdoedAdresse?.let {
             Kriteriegrunnlag(
-                it.id,
+                it.perioder.last().id,
                 KriterieOpplysningsType.BOSTEDADRESSE_AVDOED,
-                it.kilde,
-                Bostedadresser(it.verdi)
+                it.perioder.last().kilde,
+                Bostedadresser(avdoedAdresse.perioder.map { it.verdi }) // TODO ai: periodisering
             )
         }
     )
@@ -61,21 +61,19 @@ fun kriterieSammeBostedsadresseSomAvdoed(
         if (soekerAdresse == null || avdoedAdresse == null) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
-            val adresseBarn = soekerAdresse.verdi.find { it.aktiv }
+            val adresseBarn = soekerAdresse.perioder.find { it.verdi.aktiv }
 
             fun hentAktivEllerSisteAdresse(): Adresse? {
-                if (avdoedAdresse.verdi.find { it.aktiv } != null) {
-                    return avdoedAdresse.verdi.find { it.aktiv }
-                } else {
-                    return avdoedAdresse.verdi.sortedByDescending { it.gyldigFraOgMed?.toLocalDate() }.first()
-                }
+                val aktivAdresse = avdoedAdresse.perioder.find { it.verdi.aktiv }?.verdi
+                return aktivAdresse ?: avdoedAdresse.perioder
+                    .sortedByDescending { it.verdi.gyldigFraOgMed?.toLocalDate() }.first().verdi
             }
 
             val sisteAdresseAvdoed = hentAktivEllerSisteAdresse()
 
-            val adresse1 = adresseBarn?.adresseLinje1 == sisteAdresseAvdoed?.adresseLinje1
-            val postnr = adresseBarn?.postnr == sisteAdresseAvdoed?.postnr
-            val poststed = adresseBarn?.poststed == sisteAdresseAvdoed?.poststed
+            val adresse1 = adresseBarn?.verdi?.adresseLinje1 == sisteAdresseAvdoed?.adresseLinje1
+            val postnr = adresseBarn?.verdi?.postnr == sisteAdresseAvdoed?.postnr
+            val poststed = adresseBarn?.verdi?.poststed == sisteAdresseAvdoed?.poststed
             vurderOpplysning { adresse1 && postnr && poststed }
         }
     } catch (ex: OpplysningKanIkkeHentesUt) {

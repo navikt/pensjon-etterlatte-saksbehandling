@@ -194,16 +194,17 @@ fun kriterieKunNorskeBostedsadresserSisteFemAar(
 
     val opplysningsGrunnlag = listOf(
         Kriteriegrunnlag(
-            adresser.id,
+            adresser.hentSiste().id,
             KriterieOpplysningsType.ADRESSELISTE,
-            adresser.kilde,
-            AdresseListe(adresser.verdi)
+            adresser.hentSiste().kilde,
+            AdresseListe(adresser.perioder.map { it.verdi })
         )
     )
 
     return try {
         val femAarFoerDoedsdato = avdoedPdl.hentDoedsdato()?.verdi!!.minusYears(5)
-        val vurderingKunNorskeBostedadresser = harKunNorskeAdresserEtterDato(adresser.verdi, femAarFoerDoedsdato)
+        val vurderingKunNorskeBostedadresser =
+            harKunNorskeAdresserEtterDato(adresser.perioder.map { it.verdi }, femAarFoerDoedsdato)
 
         Kriterie(kriterietype, vurderingKunNorskeBostedadresser, opplysningsGrunnlag)
     } catch (ex: OpplysningKanIkkeHentesUt) {
@@ -272,10 +273,10 @@ fun kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
     val opplysningsGrunnlag = listOfNotNull(
         adresser?.let {
             Kriteriegrunnlag(
-                it.id,
+                it.hentSiste().id,
                 KriterieOpplysningsType.ADRESSELISTE,
-                it.kilde,
-                AdresseListe(it.verdi)
+                it.hentSiste().kilde,
+                AdresseListe(it.perioder.map { it.verdi })
             )
         },
         dødsdato?.let {
@@ -288,14 +289,14 @@ fun kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
         }
     )
 
-    if (adresser?.verdi == null || dødsdato?.verdi == null) {
+    if (adresser == null || dødsdato?.verdi == null) {
         return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
     }
 
     try {
         val femAarFoerDoedsdato = dødsdato.verdi!!.minusYears(5)
 
-        val bostedperiode = hentAdresseperioderINorge(adresser.verdi, dødsdato.verdi!!)
+        val bostedperiode = hentAdresseperioderINorge(adresser.perioder.map { it.verdi }, dødsdato.verdi!!)
         val kombinerteBostedsperioder = kombinerPerioder(bostedperiode)
         val periodeGaps = hentGaps(kombinerteBostedsperioder, femAarFoerDoedsdato, dødsdato.verdi!!)
 

@@ -48,7 +48,7 @@ fun Grunnlagsdata<JsonNode>.hentFoedeland() = this.hentKonstantOpplysning<String
 fun Grunnlagsdata<JsonNode>.hentDoedsdato() = this.hentKonstantOpplysning<LocalDate?>(DOEDSDATO)
 fun Grunnlagsdata<JsonNode>.hentAdressebeskyttelse() =
     this.hentKonstantOpplysning<Adressebeskyttelse>(ADRESSEBESKYTTELSE)
-fun Grunnlagsdata<JsonNode>.hentBostedsadresse() = this.hentKonstantOpplysning<List<Adresse>>(BOSTEDSADRESSE)
+fun Grunnlagsdata<JsonNode>.hentBostedsadresse() = this.hentPeriodisertOpplysning<Adresse>(BOSTEDSADRESSE)
 fun Grunnlagsdata<JsonNode>.hentDeltbostedsadresse() = this.hentKonstantOpplysning<List<Adresse>>(DELTBOSTEDSADRESSE)
 fun Grunnlagsdata<JsonNode>.hentKontaktadresse() = this.hentKonstantOpplysning<List<Adresse>>(KONTAKTADRESSE)
 fun Grunnlagsdata<JsonNode>.hentOppholdsadresse() = this.hentKonstantOpplysning<List<Adresse>>(OPPHOLDSADRESSE)
@@ -90,9 +90,9 @@ inline fun <reified T> Grunnlagsdata<JsonNode>.hentPeriodisertOpplysning(
     return when (grunnlagsdata) {
         is Opplysning.Periodisert -> {
             Opplysning.Periodisert(
-                id = grunnlagsdata.id,
                 perioder = grunnlagsdata.perioder.map {
                     PeriodisertOpplysning(
+                        id = it.id,
                         kilde = it.kilde,
                         verdi = objectMapper.readValue(it.verdi.toJson(), T::class.java),
                         fom = it.fom,

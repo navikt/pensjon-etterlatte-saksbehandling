@@ -2,22 +2,27 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 cd ./apps/etterlatte-saksbehandling-ui && yarn lint-staged
+changedKotlinFiles=$(git diff --name-only --cached | grep '\.kt[s"]\?$' || true)
 
-echo "Running ktlint..."
+if [ -n "${changedKotlinFiles-unset}" ]; then
+    echo "🛠 Running ktlint"
 
-#store the result of the commit in a variable and split into array items with newline
-cd ../../
-committedFiles=$(git diff --name-only --cached)
-files=$(echo $committedFiles | tr ";" "\\n")
+    #store the result of the commit in a variable and split into array items with newline
+    cd ../../
+    committedFiles=$(git diff --name-only --cached --diff-filter=d)
+    files=$(echo $committedFiles | tr ";" "\\n")
 
-ktlint -F '**/*.kt' '!/**/build/*'
+    # https://github.com/pinterest/ktlint pre-commit hook
+    git diff --name-only --cached | grep '\.kt[s"]\?$' | xargs ktlint -F
+    echo "✍️ Formatted kotlin files"
 
-#replay items in the commits array and add only those files
-for file in $files
-do
-    git add $file
-done
+    #replay items in the commits array and add only those files
+    for file in $files
+    do
+        git add $file
+    done
+fi
+
+echo "🏆 Files staged"
 
 exit 0
-
-echo "Running ktlint check..."

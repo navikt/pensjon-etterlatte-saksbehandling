@@ -83,10 +83,12 @@ export const Vurdering = ({
           <KildeVilkaar>
             <KildeOverskrift>{overskrift()}</KildeOverskrift>
             <p>Manuelt av {vilkaar.vurdering?.saksbehandler}</p>
-            <p>
-              Kommentar: <br />
-              {vilkaar.vurdering?.kommentar}
-            </p>
+            {vilkaar.vurdering?.kommentar && (
+              <p>
+                Kommentar: <br />
+                {vilkaar.vurdering?.kommentar}
+              </p>
+            )}
             <p>Sist endret {format(new Date(vilkaar.vurdering!!.tidspunkt), 'dd.MM.yyyy HH:mm')}</p>
           </KildeVilkaar>
 
@@ -121,7 +123,7 @@ export const Vurdering = ({
             </RadioGroup>
           </RadioGroupWrapper>
           <Textarea
-            style={{ padding: '10px', marginBottom: '10px' }}
+            style={{ padding: '10px', marginBottom: '10px', width: '250px' }}
             label="Begrunnelse"
             hideLabel={false}
             placeholder="Gi en begrunnelse for vurderingen"
@@ -188,6 +190,10 @@ export const IkkeVurdert = styled.div`
 export const KildeVilkaar = styled.div`
   color: grey;
   font-size: 0.7em;
+
+  p {
+    font-weight: normal;
+  }
 `
 
 export const KildeOverskrift = styled.div`

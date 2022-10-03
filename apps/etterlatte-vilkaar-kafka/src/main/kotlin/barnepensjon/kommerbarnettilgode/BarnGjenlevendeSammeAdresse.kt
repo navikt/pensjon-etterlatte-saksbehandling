@@ -17,10 +17,10 @@ import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
 fun barnOgForelderSammeBostedsadresse(
-    soekerPdl: Grunnlagsdata<JsonNode>?,
-    gjenlevendePdl: Grunnlagsdata<JsonNode>?
+    søker: Grunnlagsdata<JsonNode>?,
+    gjenlevende: Grunnlagsdata<JsonNode>?
 ): VurdertVilkaar {
-    val sammeBostedsAdresse = kriterieSammeBostedsadresse(soekerPdl, gjenlevendePdl)
+    val sammeBostedsAdresse = kriterieSammeBostedsadresse(søker, gjenlevende)
 
     return VurdertVilkaar(
         Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
@@ -32,27 +32,27 @@ fun barnOgForelderSammeBostedsadresse(
 }
 
 fun kriterieSammeBostedsadresse(
-    soekerPdl: Grunnlagsdata<JsonNode>?,
-    gjenlevendePdl: Grunnlagsdata<JsonNode>?
+    søker: Grunnlagsdata<JsonNode>?,
+    gjenlevende: Grunnlagsdata<JsonNode>?
 ): Kriterie {
-    val søkersAdresse = soekerPdl?.hentBostedsadresse()
-    val gjenlevendesAdresse = gjenlevendePdl?.hentBostedsadresse()
-
     /* TODO ai: Fiks periodisering */
+    val søkersAdresse = søker?.hentBostedsadresse()
+    val gjenlevendesAdresse = gjenlevende?.hentBostedsadresse()
+
     val opplysningsGrunnlag = listOfNotNull(
         søkersAdresse?.let {
             Kriteriegrunnlag(
-                søkersAdresse.hentSiste().id,
+                søkersAdresse.hentSenest().id,
                 KriterieOpplysningsType.BOSTEDADRESSE_SOEKER,
-                søkersAdresse.hentSiste().kilde,
+                søkersAdresse.hentSenest().kilde,
                 Bostedadresser(søkersAdresse.perioder.map { it.verdi })
             )
         },
         gjenlevendesAdresse?.let {
             Kriteriegrunnlag(
-                gjenlevendesAdresse.hentSiste().id,
+                gjenlevendesAdresse.hentSenest().id,
                 KriterieOpplysningsType.BOSTEDADRESSE_GJENLEVENDE,
-                gjenlevendesAdresse.hentSiste().kilde,
+                gjenlevendesAdresse.hentSenest().kilde,
                 Bostedadresser(gjenlevendesAdresse.perioder.map { it.verdi })
             )
         }

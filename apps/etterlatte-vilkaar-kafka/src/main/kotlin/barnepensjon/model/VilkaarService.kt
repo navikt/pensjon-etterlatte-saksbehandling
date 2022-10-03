@@ -53,9 +53,9 @@ class VilkaarService {
 
         val avdoedSoeknad = finnOpplysning<AvdoedSoeknad>(opplysninger, Opplysningstyper.AVDOED_SOEKNAD_V1)
         val soekerSoeknad = finnOpplysning<SoekerBarnSoeknad>(opplysninger, SOEKER_SOEKNAD_V1)
-        val soekerPdl = grunnlag.søker
-        val avdoedPdl = grunnlag.hentAvdoed()
-        val gjenlevendePdl = grunnlag.hentGjenlevende()
+        val søker = grunnlag.søker
+        val avdød = grunnlag.hentAvdoed()
+        val gjenlevende = grunnlag.hentGjenlevende()
         val avdoedeInntektsOpplysning =
             finnOpplysning<InntektsOpplysning>(opplysninger, Opplysningstyper.AVDOED_INNTEKT_V1)
         val arbeidsforhold = finnOpplysning<ArbeidsforholdOpplysning>(opplysninger, Opplysningstyper.ARBEIDSFORHOLD_V1)
@@ -65,21 +65,21 @@ class VilkaarService {
         )
 
         val vilkaar = listOf(
-            vilkaarFormaalForYtelsen(soekerPdl, virkningstidspunkt),
-            vilkaarBrukerErUnder20(soekerPdl, avdoedPdl, virkningstidspunkt),
-            vilkaarDoedsfallErRegistrert(avdoedPdl, soekerPdl),
+            vilkaarFormaalForYtelsen(søker, virkningstidspunkt),
+            vilkaarBrukerErUnder20(søker, avdød, virkningstidspunkt),
+            vilkaarDoedsfallErRegistrert(avdød, søker),
             vilkaarAvdoedesMedlemskap(
                 avdoedSoeknad,
-                avdoedPdl,
+                avdød,
                 avdoedeInntektsOpplysning,
                 arbeidsforhold,
                 saksbehandlerPerioder
             ),
             vilkaarBarnetsMedlemskap(
-                soekerPdl,
+                søker,
                 soekerSoeknad,
-                gjenlevendePdl,
-                avdoedPdl
+                gjenlevende,
+                avdød
             )
         )
 
@@ -98,9 +98,9 @@ class VilkaarService {
             "Mapper vilkaar fra grunnlagsdata for virkningstidspunkt $virkningstidspunkt for revurdering " +
                 "med årsak $revurderingAarsak"
         )
-        val soekerPdl = grunnlag.søker
+        val søker = grunnlag.søker
         val vilkaar = when (revurderingAarsak) {
-            RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarFormaalForYtelsen(soekerPdl, virkningstidspunkt))
+            RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarFormaalForYtelsen(søker, virkningstidspunkt))
             RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
                 "Du kan ikke ha et manuelt opphør på en revurdering"
             )
@@ -167,10 +167,10 @@ class VilkaarService {
         deprecatedVilkaarsopplysninger: List<VilkaarOpplysning<JsonNode>>
     ): KommerSoekerTilgode {
         logger.info("Map opplysninger for å vurdere om penger kommer søker til gode")
-        val soekerPdl = grunnlag.søker
-        val gjenlevendePdl = grunnlag.hentGjenlevende()
+        val søker = grunnlag.søker
+        val gjenlevende = grunnlag.hentGjenlevende()
         val soekerSoeknad = finnOpplysning<SoekerBarnSoeknad>(deprecatedVilkaarsopplysninger, SOEKER_SOEKNAD_V1)
-        val avdoedPdl = grunnlag.hentAvdoed()
+        val avdød = grunnlag.hentAvdoed()
         val saksbehandlerKommerBarnetTilgode = finnOpplysning<ResultatKommerBarnetTilgode>(
             deprecatedVilkaarsopplysninger,
             Opplysningstyper.SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1
@@ -178,13 +178,13 @@ class VilkaarService {
 
         val kommerBarnetTilGode = listOf(
             barnOgForelderSammeBostedsadresse(
-                soekerPdl,
-                gjenlevendePdl
+                søker,
+                gjenlevende
             ),
             barnIngenOppgittUtlandsadresse(soekerSoeknad),
             barnOgAvdoedSammeBostedsadresse(
-                soekerPdl,
-                avdoedPdl
+                søker,
+                avdød
             ),
             saksbehandlerResultat(
                 saksbehandlerKommerBarnetTilgode
@@ -195,7 +195,7 @@ class VilkaarService {
         val vurdertDato = hentSisteVurderteDato(kommerBarnetTilGode.filterNotNull())
         val vurdering = VilkaarResultat(vilkaarResultat, kommerBarnetTilGode.filterNotNull(), vurdertDato)
 
-        val familieforhold = mapFamiliemedlemmer(soekerPdl, soekerSoeknad, gjenlevendePdl, avdoedPdl)
+        val familieforhold = mapFamiliemedlemmer(søker, soekerSoeknad, gjenlevende, avdød)
 
         return KommerSoekerTilgode(vurdering, familieforhold)
     }

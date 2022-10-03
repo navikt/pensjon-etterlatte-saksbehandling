@@ -1,11 +1,7 @@
 package no.nav.etterlatte.libs.common.grunnlag
 
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import java.time.YearMonth
-import java.util.UUID
 
 data class Grunnlag(
     val saksId: Long,
@@ -38,36 +34,3 @@ class Opplysningsgrunnlag(
 }
 
 data class Metadata(val sakId: Long, val versjon: Long)
-
-data class PeriodisertOpplysning<T>(
-    val id: UUID,
-    val kilde: Grunnlagsopplysning.Kilde,
-    val verdi: T,
-    val fom: YearMonth,
-    val tom: YearMonth?
-)
-
-@JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.EXISTING_PROPERTY,
-    property = "type"
-)
-@JsonSubTypes(
-    JsonSubTypes.Type(value = Opplysning.Periodisert::class, name = "periodisert"),
-    JsonSubTypes.Type(value = Opplysning.Konstant::class, name = "konstant")
-)
-sealed class Opplysning<T>(val type: String) {
-    data class Periodisert<T>(
-        val perioder: List<PeriodisertOpplysning<T>>
-    ) : Opplysning<T>("periodisert") {
-        /* TODO ai: Midlertidig funksjon for å hente ut data. Skal erstattes av periodisering senere */
-        fun hentFoerste() = perioder.first()
-        fun hentSiste() = perioder.last()
-    }
-
-    data class Konstant<T>(
-        val id: UUID,
-        val kilde: Grunnlagsopplysning.Kilde,
-        val verdi: T
-    ) : Opplysning<T>("konstant")
-}

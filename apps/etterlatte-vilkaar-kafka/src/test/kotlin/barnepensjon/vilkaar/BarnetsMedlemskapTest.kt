@@ -51,11 +51,7 @@ class BarnetsMedlemskapTest {
                         )
                     }
                 )
-            ),
-            opplysningsmapSøskenOverrides = mapOf(),
-            opplysningsmapAvdødOverrides = mapOf(),
-            opplysningsmapHalvsøskenOverrides = mapOf(),
-            opplysningsmapSakOverrides = mapOf()
+            )
         ).hentOpplysningsgrunnlag()
 
         val ingenUtenlandsAdresser = vilkaarBarnetsMedlemskap(

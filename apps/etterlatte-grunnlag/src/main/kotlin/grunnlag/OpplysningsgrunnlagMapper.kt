@@ -2,10 +2,10 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 
@@ -18,28 +18,15 @@ class OpplysningsgrunnlagMapper(
         val hendelser: List<OpplysningDao.GrunnlagHendelse>
     ) {
         init {
-            assert(alleOpplysingerHarSammeType(opplysninger))
+            assert(alleOpplysningerErAvSammeType(hendelser.map { it.opplysning }))
         }
 
-        private val opplysninger
-            get() = hendelser.map { it.opplysning.toOpplysning() }
-
         val opplysning: Opplysning<JsonNode> = hendelser.first().let {
-            when (it.opplysning.toOpplysning()) {
-                is Opplysning.Konstant -> hendelser.maxBy { hendelse -> hendelse.hendelseNummer }
-                    .opplysning.toOpplysning()
-
-                is Opplysning.Periodisert -> Opplysning.Periodisert(
-                    hendelser.map { hendelse ->
-                        PeriodisertOpplysning(
-                            hendelse.opplysning.id,
-                            kilde = hendelse.opplysning.kilde,
-                            verdi = hendelse.opplysning.opplysning,
-                            fom = hendelse.opplysning.periode!!.fom,
-                            tom = hendelse.opplysning.periode!!.tom
-                        )
-                    }
-                )
+            if (it.opplysning.erPeriodisert()) {
+                Opplysning.Periodisert.create(hendelser.map { it.opplysning })
+            } else {
+                hendelser.maxBy { hendelse -> hendelse.hendelseNummer }
+                    .let { Opplysning.Konstant.create(it.opplysning) }
             }
         }
 
@@ -48,10 +35,13 @@ class OpplysningsgrunnlagMapper(
         val fnr: Foedselsnummer?
             get() = hendelser.first().opplysning.fnr
 
-        private fun alleOpplysingerHarSammeType(opplysninger: List<Opplysning<*>>): Boolean {
-            return (opplysninger.size == opplysninger.filterIsInstance<Opplysning.Konstant<*>>().size) ||
-                (opplysninger.size == opplysninger.filterIsInstance<Opplysning.Periodisert<*>>().size)
+        private fun alleOpplysningerErAvSammeType(opplysninger: List<Grunnlagsopplysning<*>>): Boolean {
+            return (opplysninger.size == opplysninger.filter { erPeriodisertOpplysning(it) }.size) ||
+                (opplysninger.size == opplysninger.filterNot { erPeriodisertOpplysning(it) }.size)
         }
+
+        private fun erPeriodisertOpplysning(grunnlagsopplysning: Grunnlagsopplysning<*>) =
+            grunnlagsopplysning.periode != null
     }
 
     fun hentOpplysningsgrunnlag(): Opplysningsgrunnlag {
@@ -62,7 +52,6 @@ class OpplysningsgrunnlagMapper(
         val (personopplysninger, saksopplysninger) = opplysninger.partition { it.fnr !== null }
         val (søker, familie) = personopplysninger.partition { it.fnr!!.value == persongalleri.soeker }
 
-        /* TODO ai: håndter periodisert vs konstant */
         val søkerMap = søker.associateBy({ it.opplysningstype }, { it.opplysning })
         val familieMap = familie
             .groupBy { it.fnr }.values

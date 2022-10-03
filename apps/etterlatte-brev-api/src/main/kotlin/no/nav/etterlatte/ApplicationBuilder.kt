@@ -12,6 +12,8 @@ import io.ktor.client.request.header
 import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.MottakerService
+import no.nav.etterlatte.brev.MottakerServiceImpl
+import no.nav.etterlatte.brev.MottakerServiceMock
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepKlient
@@ -40,7 +42,12 @@ class ApplicationBuilder {
     private val norg2Klient = Norg2Klient(env["NORG2_URL"]!!, httpClient())
     private val datasourceBuilder = DataSourceBuilder(env)
     private val db = BrevRepository.using(datasourceBuilder.dataSource)
-    private val mottakerService = MottakerService(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
+    private val mottakerService = if (localDevelopment) {
+        MottakerServiceMock()
+    } else {
+        MottakerServiceImpl(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
+    }
+
 
     private val adresseService = if (localDevelopment) {
         AdresseServiceMock()

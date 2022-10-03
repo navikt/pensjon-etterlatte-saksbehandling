@@ -45,6 +45,7 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
                 AvsenderMottaker(it.organisasjonsnummer, idType = "ORGNR", it.navn)
             }
 
+            // todo: Hent personer fra saksbehandlingen
             val personer = listOf(
                 AvsenderMottaker("11057523044", idType = "FNR", navn = "Stor Snerk"),
                 AvsenderMottaker("24116324268", idType = "FNR", navn = "Nobel Tøffeldyr")

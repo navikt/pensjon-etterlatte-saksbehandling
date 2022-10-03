@@ -61,6 +61,11 @@
         "tittel": "Dødsfall forelder",
         "lenke": "https://lovdata.no/lov/1997-02-28-19/%C2%A718-4",
         "lovtekst": "En eller begge foreldrene døde"
+      },
+      "vurdering": {
+        "resultat": "IKKE_VURDERT",
+        "tidspunkt": "2022-09-29T13:09:49.94689449",
+        "saksbehandler": "Z9991111"
       }
     }
   ]

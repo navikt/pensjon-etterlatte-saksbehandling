@@ -13,17 +13,14 @@ import styled from 'styled-components'
 import { format } from 'date-fns'
 import { DeleteIcon } from '../../../shared/icons/DeleteIcon'
 import { EditIcon } from '../../../shared/icons/EditIcon'
+import { svarTilResultat } from './utils'
 
 export const Vurdering = ({
   vilkaar,
   oppdaterVilkaar,
-  erVurdert,
-  erOppfylt,
 }: {
   vilkaar: Vilkaar
   oppdaterVilkaar: (vilkaarsvurdering?: Vilkaarsvurdering) => void
-  erVurdert: boolean
-  erOppfylt: boolean
 }) => {
   const { behandlingId } = useParams()
   const [aktivVurdering, setAktivVurdering] = useState<boolean>(false)
@@ -41,7 +38,7 @@ export const Vurdering = ({
       vurderVilkaar(behandlingId!!, {
         type: vilkaar.type,
         kommentar: kommentar,
-        resultat: svar === ISvar.JA ? VurderingsResultat.OPPFYLT : VurderingsResultat.IKKE_OPPFYLT,
+        resultat: svarTilResultat(svar),
       }).then((response) => {
         if (response.status == 'ok') {
           oppdaterVilkaar(response.data)
@@ -74,11 +71,19 @@ export const Vurdering = ({
     setBegrunnelseError(undefined)
   }
 
-  const overskrift = () => (erOppfylt ? 'Vilkår oppfylt' : 'Vilkår er ikke oppfylt')
+  const overskrift = () => {
+    if (vilkaar.vurdering?.resultat == VurderingsResultat.OPPFYLT) {
+      return 'Vilkår oppfylt'
+    } else if (vilkaar.vurdering?.resultat == VurderingsResultat.IKKE_OPPFYLT) {
+      return 'Vilkår er ikke oppfylt'
+    } else {
+      return 'Vilkåret er ikke vurdert'
+    }
+  }
 
   return (
     <div>
-      {erVurdert && !aktivVurdering && (
+      {vilkaar.vurdering && !aktivVurdering && (
         <>
           <KildeVilkaar>
             <KildeOverskrift>{overskrift()}</KildeOverskrift>
@@ -104,7 +109,7 @@ export const Vurdering = ({
       )}
       {aktivVurdering && (
         <>
-          <VurderingsTitle>Er vilkåret oppfylt?</VurderingsTitle>
+          <VurderingsTitle>{overskrift()}</VurderingsTitle>
           <RadioGroupWrapper>
             <RadioGroup
               legend=""
@@ -119,6 +124,7 @@ export const Vurdering = ({
               <div className="flex">
                 <Radio value={ISvar.JA.toString()}>Ja</Radio>
                 <Radio value={ISvar.NEI.toString()}>Nei</Radio>
+                <Radio value={ISvar.IKKE_VURDERT.toString()}>Ikke vurdert</Radio>
               </div>
             </RadioGroup>
           </RadioGroupWrapper>
@@ -149,7 +155,7 @@ export const Vurdering = ({
           </Button>
         </>
       )}
-      {!erVurdert && !aktivVurdering && (
+      {!vilkaar.vurdering && !aktivVurdering && (
         <IkkeVurdert>
           <p>Vilkåret er ikke vurdert</p>
           <Button variant={'secondary'} size={'small'} onClick={() => setAktivVurdering(true)}>

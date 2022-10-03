@@ -11,12 +11,9 @@ import {
   VilkaarWrapper,
 } from './styled'
 import React, { ReactNode } from 'react'
-import { Vilkaar } from '../../../shared/api/vilkaarsvurdering'
+import { Vilkaar, VurderingsResultat } from '../../../shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
-import {
-  VurderingsResultat,
-  VurderingsResultat as VurderingsresultatOld,
-} from '../../../store/reducers/BehandlingReducer'
+import { VurderingsResultat as VurderingsresultatOld } from '../../../store/reducers/BehandlingReducer'
 import { StatusIcon } from '../../../shared/icons/statusIcon'
 
 export interface VilkaarProps {
@@ -27,15 +24,17 @@ export interface VilkaarProps {
 
 export const ManueltVilkaar = (props: VilkaarProps) => {
   const vilkaar = props.vilkaar
-  const erVurdert = !!vilkaar.vurdering
-  const erOppfyllt = vilkaar.vurdering?.resultat == VurderingsResultat.OPPFYLT
 
   const status = (): VurderingsresultatOld => {
-    if (erVurdert) {
-      return erOppfyllt ? VurderingsresultatOld.OPPFYLT : VurderingsresultatOld.IKKE_OPPFYLT
-    } else {
-      return VurderingsresultatOld.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+    if (vilkaar.vurdering) {
+      if (vilkaar.vurdering.resultat == VurderingsResultat.OPPFYLT) {
+        return VurderingsresultatOld.OPPFYLT
+      } else if (vilkaar.vurdering.resultat == VurderingsResultat.IKKE_OPPFYLT) {
+        return VurderingsresultatOld.IKKE_OPPFYLT
+      }
     }
+
+    return VurderingsresultatOld.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
   }
 
   return (
@@ -63,12 +62,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
           <VilkaarVurderingColumn>
             <VilkaarVurderingContainer>
               <VilkaarlisteTitle>
-                <Vurdering
-                  vilkaar={vilkaar}
-                  oppdaterVilkaar={props.oppdaterVilkaar}
-                  erOppfylt={erOppfyllt}
-                  erVurdert={erVurdert}
-                />
+                <Vurdering vilkaar={vilkaar} oppdaterVilkaar={props.oppdaterVilkaar} />
               </VilkaarlisteTitle>
             </VilkaarVurderingContainer>
           </VilkaarVurderingColumn>

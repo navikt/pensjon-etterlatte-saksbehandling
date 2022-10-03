@@ -341,6 +341,7 @@ export enum PersonRolle {
 export enum ISvar {
   JA = 'JA',
   NEI = 'NEI',
+  IKKE_VURDERT = 'IKKE_VURDERT',
 }
 
 export const detaljertBehandlingInitialState: IDetaljertBehandling = {

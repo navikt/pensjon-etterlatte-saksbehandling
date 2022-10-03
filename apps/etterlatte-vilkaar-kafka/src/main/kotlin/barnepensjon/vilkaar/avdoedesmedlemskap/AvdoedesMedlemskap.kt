@@ -37,12 +37,12 @@ import java.util.*
 
 fun vilkaarAvdoedesMedlemskap(
     avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
-    avdoedPdl: Grunnlagsdata<JsonNode>,
+    avdød: Grunnlagsdata<JsonNode>,
     inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>?,
     arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?,
     saksbehandlerMedlemskapsPerioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?
 ): VurdertVilkaar {
-    if (listOf(avdoedSoeknad, avdoedPdl, inntektsOpplysning, arbeidsforholdOpplysning).any { it == null }) {
+    if (listOf(avdoedSoeknad, avdød, inntektsOpplysning, arbeidsforholdOpplysning).any { it == null }) {
         return VurdertVilkaar(
             Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
@@ -52,10 +52,10 @@ fun vilkaarAvdoedesMedlemskap(
         )
     }
 
-    val bosattNorgeMetakriterie = metakriterieBosattNorge(avdoedSoeknad, avdoedPdl)
+    val bosattNorgeMetakriterie = metakriterieBosattNorge(avdoedSoeknad, avdød)
 
     val medlemskapOffentligOgInntektKriterie = kriterieMedlemskapOffentligOgInntekt(
-        avdoedPdl,
+        avdød,
         inntektsOpplysning!!,
         arbeidsforholdOpplysning!!,
         saksbehandlerMedlemskapsPerioder
@@ -74,12 +74,12 @@ fun vilkaarAvdoedesMedlemskap(
 }
 
 fun kriterieMedlemskapOffentligOgInntekt(
-    avdoedPdl: Grunnlagsdata<JsonNode>,
+    avdød: Grunnlagsdata<JsonNode>,
     inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>,
     arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>,
     saksbehandlerMedlemskapsperioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?
 ): Kriterie {
-    val doedsdato = avdoedPdl.hentDoedsdato()?.verdi ?: throw OpplysningKanIkkeHentesUt()
+    val doedsdato = avdød.hentDoedsdato()?.verdi ?: throw OpplysningKanIkkeHentesUt()
 
     val avdoedesMedlemskapGrunnlag = AvdoedesMedlemskapGrunnlag(
         inntektsOpplysning = inntektsOpplysning,

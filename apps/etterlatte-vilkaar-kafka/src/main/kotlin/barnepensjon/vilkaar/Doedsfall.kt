@@ -37,7 +37,7 @@ fun vilkaarDoedsfallErRegistrert(
 fun kriterieDoedsdatoRegistrertIPdl(avdoed: Grunnlagsdata<JsonNode>?): Kriterie =
     avdoed?.hentDoedsdato()?.let {
         val resultat = try {
-            it.verdi!!
+            it.verdi
             VurderingsResultat.OPPFYLT
         } catch (ex: OpplysningKanIkkeHentesUt) {
             IKKE_OPPFYLT

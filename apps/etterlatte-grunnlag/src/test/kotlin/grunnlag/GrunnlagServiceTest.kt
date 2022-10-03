@@ -183,7 +183,7 @@ internal class GrunnlagServiceTest {
                 opplysningsgrunnlag.hentVersjon()
             )
             Assertions.assertEquals(
-                grunnlagshendelser[1].opplysning.toOpplysning().toJson(),
+                Opplysning.Konstant.create(grunnlagshendelser[1].opplysning).toJson(),
                 opplysningsgrunnlag.søker[FOEDELAND]!!.toJson()
             )
         }

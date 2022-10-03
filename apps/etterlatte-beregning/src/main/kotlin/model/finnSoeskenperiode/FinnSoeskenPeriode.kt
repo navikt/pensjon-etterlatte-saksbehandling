@@ -20,8 +20,7 @@ data class FinnSoeskenPeriode(
     fun hentSoeskenperioder(): List<SoeskenPeriode> {
         val avdoedesBarn = grunnlag.hentAvdoed().hentAvdoedesbarn()?.verdi?.avdoedesBarn ?: return emptyList()
         val søker = grunnlag.søker
-        /* TODO ai: Periodisering */
-        val søkersBostedsadresse = søker.hentBostedsadresse()?.perioder?.lastOrNull()?.verdi ?: return emptyList()
+        val søkersBostedsadresse = søker.hentBostedsadresse()?.hentSenest()?.verdi ?: return emptyList()
 
         val skalBeregnesOverrides = grunnlag.sak.hentSøskenjustering()?.verdi?.beregningsgrunnlag
             ?.associateBy({ it.foedselsnummer.value }, { it.skalBrukes })
@@ -34,7 +33,7 @@ data class FinnSoeskenPeriode(
 
         // first skal være ok, siden PPS allerede har sortert
         val halvsoeskenOppdrattSammen =
-            søsken.halvsøsken.filter { it.bostedsadresse?.first() == søkersBostedsadresse } // TODO ai: periodisering
+            søsken.halvsøsken.filter { it.bostedsadresse?.first() == søkersBostedsadresse }
 
         val kull = søskenOverrides.filter { skalBeregnesOverrides[it.foedselsnummer.value] == true } +
             søsken.helsøsken +

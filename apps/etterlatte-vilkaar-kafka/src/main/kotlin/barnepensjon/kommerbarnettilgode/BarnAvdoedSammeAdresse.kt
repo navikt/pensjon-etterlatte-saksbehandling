@@ -18,10 +18,10 @@ import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
 fun barnOgAvdoedSammeBostedsadresse(
-    soekerPdl: Grunnlagsdata<JsonNode>?,
-    avdoedPdl: Grunnlagsdata<JsonNode>?
+    søker: Grunnlagsdata<JsonNode>?,
+    avdød: Grunnlagsdata<JsonNode>?
 ): VurdertVilkaar {
-    val sammeBostedsAdresse = kriterieSammeBostedsadresseSomAvdoed(soekerPdl, avdoedPdl)
+    val sammeBostedsAdresse = kriterieSammeBostedsadresseSomAvdoed(søker, avdød)
 
     return VurdertVilkaar(
         Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
@@ -33,25 +33,25 @@ fun barnOgAvdoedSammeBostedsadresse(
 }
 
 fun kriterieSammeBostedsadresseSomAvdoed(
-    soekerPdl: Grunnlagsdata<JsonNode>?,
-    avdoedPdl: Grunnlagsdata<JsonNode>?
+    søker: Grunnlagsdata<JsonNode>?,
+    avdød: Grunnlagsdata<JsonNode>?
 ): Kriterie {
-    val soekerAdresse = soekerPdl?.hentBostedsadresse()
-    val avdoedAdresse = avdoedPdl?.hentBostedsadresse()
-    val opplysningsGrunnlag = listOfNotNull( // TODO ai: fiks
+    val soekerAdresse = søker?.hentBostedsadresse()
+    val avdoedAdresse = avdød?.hentBostedsadresse()
+    val opplysningsGrunnlag = listOfNotNull(
         soekerAdresse?.let {
             Kriteriegrunnlag(
-                it.perioder.last().id,
+                it.hentSenest().id,
                 KriterieOpplysningsType.BOSTEDADRESSE_SOEKER,
-                it.perioder.last().kilde,
+                it.hentSenest().kilde,
                 Bostedadresser(soekerAdresse.perioder.map { it.verdi }) // TODO ai: periodisering
             )
         },
         avdoedAdresse?.let {
             Kriteriegrunnlag(
-                it.perioder.last().id,
+                it.hentSenest().id,
                 KriterieOpplysningsType.BOSTEDADRESSE_AVDOED,
-                it.perioder.last().kilde,
+                it.hentSenest().kilde,
                 Bostedadresser(avdoedAdresse.perioder.map { it.verdi }) // TODO ai: periodisering
             )
         }
@@ -61,19 +61,19 @@ fun kriterieSammeBostedsadresseSomAvdoed(
         if (soekerAdresse == null || avdoedAdresse == null) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
-            val adresseBarn = soekerAdresse.perioder.find { it.verdi.aktiv }
+            val adresseBarn = soekerAdresse.takeIf { it.perioder.isNotEmpty() }?.hentSenest()
 
-            fun hentAktivEllerSisteAdresse(): Adresse? {
-                val aktivAdresse = avdoedAdresse.perioder.find { it.verdi.aktiv }?.verdi
+            fun hentAktivEllerSisteAdresse(): Adresse {
+                val aktivAdresse = avdoedAdresse.takeIf { it.perioder.isNotEmpty() }?.hentSenest()?.verdi
                 return aktivAdresse ?: avdoedAdresse.perioder
                     .sortedByDescending { it.verdi.gyldigFraOgMed?.toLocalDate() }.first().verdi
             }
 
             val sisteAdresseAvdoed = hentAktivEllerSisteAdresse()
 
-            val adresse1 = adresseBarn?.verdi?.adresseLinje1 == sisteAdresseAvdoed?.adresseLinje1
-            val postnr = adresseBarn?.verdi?.postnr == sisteAdresseAvdoed?.postnr
-            val poststed = adresseBarn?.verdi?.poststed == sisteAdresseAvdoed?.poststed
+            val adresse1 = adresseBarn?.verdi?.adresseLinje1 == sisteAdresseAvdoed.adresseLinje1
+            val postnr = adresseBarn?.verdi?.postnr == sisteAdresseAvdoed.postnr
+            val poststed = adresseBarn?.verdi?.poststed == sisteAdresseAvdoed.poststed
             vurderOpplysning { adresse1 && postnr && poststed }
         }
     } catch (ex: OpplysningKanIkkeHentesUt) {

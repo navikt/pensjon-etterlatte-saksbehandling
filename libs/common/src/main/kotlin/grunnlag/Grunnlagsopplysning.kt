@@ -22,28 +22,11 @@ open class Grunnlagsopplysning<T>(
     val fnr: Foedselsnummer? = null,
     val periode: Periode? = null
 ) {
-    fun toOpplysning(): Opplysning<T> {
-        if (periode != null) {
-            /* TODO ai : fiks */
-            return Opplysning.Periodisert(
-                perioder = listOf(
-                    PeriodisertOpplysning(
-                        id = id,
-                        kilde = kilde,
-                        verdi = opplysning,
-                        fom = periode.fom,
-                        tom = periode.tom
-                    )
-                )
-            )
-        }
-
-        return Opplysning.Konstant(id = id, kilde = kilde, verdi = opplysning)
-    }
-
     override fun toString(): String {
         return "Opplysning om ${opplysningType.name}: oppgitt av $kilde til å være: $opplysning. Id: $id"
     }
+
+    fun erPeriodisert() = periode != null
 
     @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,

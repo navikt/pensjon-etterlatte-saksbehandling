@@ -16,9 +16,7 @@ fun lagOpplysninger(
     personRolle: PersonRolle,
     fnr: Foedselsnummer
 ): List<Grunnlagsopplysning<out Any>> {
-    val bostedsadresse = person.bostedsadresse?.map {
-        lagPersonOpplysning(Opplysningstyper.BOSTEDSADRESSE, it, fnr)
-    } ?: emptyList()
+    val bostedsadresse = person.bostedsadresse?.map { lagBostedsadresse(it, fnr) } ?: emptyList()
     val deltBostedsadresse = person.deltBostedsadresse?.map {
         lagPersonOpplysning(Opplysningstyper.DELTBOSTEDSADRESSE, it, fnr)
     } ?: emptyList()
@@ -58,26 +56,6 @@ fun lagOpplysninger(
     )
 
     return periodiserteOpplysninger + statiskeOpplysninger
-}
-
-fun <T> lagPersonOpplysning(
-    opplysningsType: Opplysningstyper,
-    opplysning: OpplysningDTO<T>,
-    fnr: Foedselsnummer
-): Grunnlagsopplysning<T> {
-    return Grunnlagsopplysning(
-        id = UUID.randomUUID(),
-        kilde = Grunnlagsopplysning.Pdl(
-            navn = "pdl",
-            tidspunktForInnhenting = Instant.now(),
-            registersReferanse = null,
-            opplysningId = opplysning.opplysningsid.toString()
-        ),
-        opplysningType = opplysningsType,
-        meta = objectMapper.valueToTree(opplysning), // TODO ai: sjekk at denne er riktig
-        opplysning = opplysning.verdi,
-        fnr = fnr
-    )
 }
 
 fun <T> lagOpplysning(opplysningsType: Opplysningstyper, opplysning: T): Grunnlagsopplysning<T> {

@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.restModule
 import no.nav.etterlatte.testsupport.tokenTestSupportAcceptsAllTokens
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
+import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationProperties
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -28,6 +29,7 @@ internal class VilkaarsvurderingRoutesTest {
     private val vilkaarsvurderingServiceImpl = VilkaarsvurderingService(VilkaarsvurderingRepositoryInMemory())
 
     private val applicationContext: ApplicationContext = mockk {
+        every { properties } returns ApplicationProperties(devMode = false)
         every { tokenValidering } returns AuthenticationConfig::tokenTestSupportAcceptsAllTokens
         every { vilkaarsvurderingService } returns vilkaarsvurderingServiceImpl
     }
@@ -36,6 +38,8 @@ internal class VilkaarsvurderingRoutesTest {
     fun `skal hente vilkaarsvurdering`() {
         testApplication {
             application { restModule(applicationContext) }
+
+            opprettVilkaarsvurdering()
 
             val response = client.get("/api/vilkaarsvurdering/$behandlingId") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -64,11 +68,7 @@ internal class VilkaarsvurderingRoutesTest {
         testApplication {
             application { restModule(applicationContext) }
 
-            // Oppretter vilkaarsvurdering
-            client.get("/api/vilkaarsvurdering/$behandlingId") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
-            }
+            opprettVilkaarsvurdering()
 
             val vurdertResultatDto = VurdertResultatDto(
                 type = VilkaarType.FORMAAL,
@@ -101,11 +101,7 @@ internal class VilkaarsvurderingRoutesTest {
         testApplication {
             application { restModule(applicationContext) }
 
-            // Oppretter vilkaarsvurdering
-            client.get("/api/vilkaarsvurdering/$behandlingId") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
-            }
+            opprettVilkaarsvurdering()
 
             val vurdertResultatDto = VurdertResultatDto(
                 type = VilkaarType.FORMAAL,
@@ -119,8 +115,8 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
             }
 
-            val vurdertResultat = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId).vilkaar
-                .first { it.type == vurdertResultatDto.type }.vurdering
+            val vurdertResultat = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)?.vilkaar
+                ?.first { it.type == vurdertResultatDto.type }?.vurdering
 
             assertNotNull(vurdertResultat)
 
@@ -129,12 +125,16 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
             }
 
-            val vurdertResultatSlettet = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId).vilkaar
-                .first { it.type == vurdertResultatDto.type }.vurdering
+            val vurdertResultatSlettet = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)?.vilkaar
+                ?.first { it.type == vurdertResultatDto.type }?.vurdering
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertNull(vurdertResultatSlettet)
         }
+    }
+
+    private fun opprettVilkaarsvurdering() {
+        vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, "some payload")
     }
 
     private companion object {

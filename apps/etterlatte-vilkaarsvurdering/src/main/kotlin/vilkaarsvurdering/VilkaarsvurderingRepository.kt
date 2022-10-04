@@ -8,7 +8,12 @@ interface VilkaarsvurderingRepository {
 }
 
 class VilkaarsvurderingRepositoryInMemory(
-    val db: MutableMap<String, Vilkaarsvurdering> = mutableMapOf()
+    val db: MutableMap<String, Vilkaarsvurdering> = mutableMapOf<String, Vilkaarsvurdering>().apply {
+        put(
+            "1",
+            Vilkaarsvurdering("1", "json", vilkaarBarnepensjon())
+        )
+    }
 ) : VilkaarsvurderingRepository {
 
     override fun hent(behandlingId: String): Vilkaarsvurdering? {

@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 
 data class Vilkaarsvurdering(
     val behandlingId: String,
+    val payload: String,
     val vilkaar: List<Vilkaar>
 )
 

@@ -4,6 +4,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
@@ -42,6 +43,8 @@ fun rapidApplication(
             .build()
 ): RapidsConnection =
     with(applicationContext) {
+        grunnlagEndretRiver(rapidsConnection)
+
         rapidsConnection.register(object : RapidsConnection.StatusListener {
             override fun onStartup(rapidsConnection: RapidsConnection) {
                 // dataSourceBuilder.migrate()
@@ -53,10 +56,9 @@ fun rapidApplication(
         rapidsConnection
     }
 
-fun io.ktor.server.application.Application.restModule(applicationContext: ApplicationContext) {
-    install(Authentication) {
-        applicationContext.tokenValidering(this)
-    }
+fun Application.restModule(applicationContext: ApplicationContext) {
+    val devMode = applicationContext.properties.devMode
+
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
@@ -80,16 +82,26 @@ fun io.ktor.server.application.Application.restModule(applicationContext: Applic
         }
     }
 
-    routing {
-        authenticate {
-            route("api") {
-                vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
+    if (devMode) {
+        routing {
+            vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
+        }
+    } else {
+        install(Authentication) {
+            applicationContext.tokenValidering(this)
+        }
+
+        routing {
+            authenticate {
+                route("api") {
+                    vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
+                }
             }
         }
     }
 }
 
-private fun Map<String, String>.withConsumerGroupId() =
+fun Map<String, String>.withConsumerGroupId() =
     this.toMutableMap().apply {
         put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
     }

@@ -89,7 +89,7 @@ fun Route.behandlingRoute(service: BehandlingService) {
     route("behandling/{behandlingId}") {
         get {
             if (call.parameters["behandlingId"] == null) {
-                call.respond("BehandlingsId mangler")
+                call.respond(HttpStatusCode.BadRequest, "BehandlingsId mangler")
             } else {
                 call.respond(service.hentBehandling(behandlingId, getAccessToken(call)))
             }

@@ -2,17 +2,25 @@ package no.nav.etterlatte.itest
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import grunnlag.ADRESSE_DEFAULT
+import grunnlag.SØKER_FØDSELSNUMMER
+import grunnlag.kilde
 import lagGrunnlagsopplysning
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.grunnlag.OpplysningDao
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOED_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOEKNAD_MOTTATT_DATO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOESKEN_I_BEREGNINGEN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.toJsonNode
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -23,6 +31,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
 import java.time.Month
+import java.time.YearMonth
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -153,5 +162,28 @@ internal class GrunnlagDaoIntegrationTest {
         opplysningRepo.finnHendelserIGrunnlag(2).also {
             assertEquals(0, it.size)
         }
+    }
+
+    @Test
+    fun `kan lage og hente periodiserte opplysninger`() {
+        val opplysning = Grunnlagsopplysning(
+            id = UUID.randomUUID(),
+            kilde = kilde,
+            opplysningType = BOSTEDSADRESSE,
+            meta = objectMapper.createObjectNode(),
+            opplysning = ADRESSE_DEFAULT.first().toJsonNode(),
+            attestering = null,
+            fnr = SØKER_FØDSELSNUMMER,
+            periode = Periode(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2022, 12)
+            )
+        )
+
+        opplysningRepo.leggOpplysningTilGrunnlag(1, opplysning, SØKER_FØDSELSNUMMER)
+        val expected = OpplysningDao.GrunnlagHendelse(opplysning, 1, 1).toJson()
+        val actual = opplysningRepo.hentAlleGrunnlagForSak(1).first().toJson()
+
+        assertEquals(expected, actual)
     }
 }

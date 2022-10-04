@@ -19,7 +19,7 @@ private fun lagPeriodisertAdresse(type: Opplysningstyper, opplysning: Opplysning
         fnr = fnr,
         periode = Periode(
             fom = opplysning.verdi.gyldigFraOgMed.toYearMonth()!!,
-            tom = opplysning.verdi.gyldigFraOgMed.toYearMonth()
+            tom = opplysning.verdi.gyldigTilOgMed.toYearMonth()
         )
     )
 

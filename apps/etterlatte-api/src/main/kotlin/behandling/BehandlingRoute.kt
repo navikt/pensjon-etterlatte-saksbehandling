@@ -16,7 +16,6 @@ import no.nav.etterlatte.behandling.logger
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.util.*
 
 val logger = LoggerFactory.getLogger("no.nav.etterlatte.behandling.BehandlingRoute")
@@ -88,30 +87,30 @@ fun Route.behandlingRoute(service: BehandlingService) {
     }
 
     route("behandling/{behandlingId}") {
-            get {
-                if (call.parameters["behandlingId"] == null) {
-                    call.respond("BehandlingsId mangler")
-                } else {
-                    call.respond(service.hentBehandling(behandlingId, getAccessToken(call)))
-                }
+        get {
+            if (call.parameters["behandlingId"] == null) {
+                call.respond("BehandlingsId mangler")
+            } else {
+                call.respond(service.hentBehandling(behandlingId, getAccessToken(call)))
             }
+        }
 
-            get("hendelser") {
-                if (call.parameters["behandlingId"] == null) {
-                    call.respond(HttpStatusCode.BadRequest, "BehandlingsId mangler")
-                } else {
-                    call.respond(service.hentHendelserForBehandling(behandlingId, getAccessToken(call)))
-                }
+        get("hendelser") {
+            if (call.parameters["behandlingId"] == null) {
+                call.respond(HttpStatusCode.BadRequest, "BehandlingsId mangler")
+            } else {
+                call.respond(service.hentHendelserForBehandling(behandlingId, getAccessToken(call)))
             }
+        }
 
-            post("avbryt") {
-                val behandlingId = call.parameters["behandlingId"]
-                if (behandlingId == null) {
-                    call.respond(HttpStatusCode.BadRequest, "BehandlingsId mangler")
-                } else {
-                    call.respond(service.avbrytBehanding(behandlingId, getAccessToken(call)))
-                }
+        post("avbryt") {
+            val behandlingId = call.parameters["behandlingId"]
+            if (behandlingId == null) {
+                call.respond(HttpStatusCode.BadRequest, "BehandlingsId mangler")
+            } else {
+                call.respond(service.avbrytBehanding(behandlingId, getAccessToken(call)))
             }
+        }
     }
 
     route("personer") {

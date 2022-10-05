@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -9,11 +10,13 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.logger
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummer
 import org.slf4j.LoggerFactory
+import java.util.*
 
 val logger = LoggerFactory.getLogger("no.nav.etterlatte.behandling.BehandlingRoute")
 fun Route.behandlingRoute(service: BehandlingService) {
@@ -85,18 +88,15 @@ fun Route.behandlingRoute(service: BehandlingService) {
 
     route("behandling/{behandlingId}") {
         get {
-            val behandlingId = call.parameters["behandlingId"]
-            if (behandlingId == null) {
-                call.response.status(HttpStatusCode(400, "Bad request"))
-                call.respond("BehandlingsId mangler")
+            if (call.parameters["behandlingId"] == null) {
+                call.respond(HttpStatusCode.BadRequest, "BehandlingsId mangler")
             } else {
                 call.respond(service.hentBehandling(behandlingId, getAccessToken(call)))
             }
         }
 
         get("hendelser") {
-            val behandlingId = call.parameters["behandlingId"]
-            if (behandlingId == null) {
+            if (call.parameters["behandlingId"] == null) {
                 call.respond(HttpStatusCode.BadRequest, "BehandlingsId mangler")
             } else {
                 call.respond(service.hentHendelserForBehandling(behandlingId, getAccessToken(call)))
@@ -130,3 +130,10 @@ fun Route.behandlingRoute(service: BehandlingService) {
         }
     }
 }
+
+inline val PipelineContext<*, ApplicationCall>.behandlingId
+    get() = requireNotNull(call.parameters["behandlingId"]).let {
+        UUID.fromString(
+            it
+        ).toString()
+    }

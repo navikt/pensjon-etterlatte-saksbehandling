@@ -68,7 +68,7 @@ class BrevService(
             else -> throw Exception("Ingen brevmottaker spesifisert")
         }
 
-        val avsender = hentAvsender(enhet) // PORSGRUNN // TODO: fikse dynamisk
+        val avsender = hentAvsender(enhet)
 
         val request = AnnetBrevRequest(mal, Spraak.NB, avsender, brevMottaker)
 

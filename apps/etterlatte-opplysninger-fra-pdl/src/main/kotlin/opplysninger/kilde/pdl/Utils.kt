@@ -1,26 +1,47 @@
 package no.nav.etterlatte.opplysninger.kilde.pdl
 
+import no.nav.etterlatte.common.objectMapper
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import java.time.LocalDateTime
-import java.time.YearMonth
+import java.time.Instant
+import java.util.*
 
-fun lagBostedsadresse(opplysning: OpplysningDTO<Adresse>, fnr: Foedselsnummer) =
-    lagPeriodisertAdresse(BOSTEDSADRESSE, opplysning, fnr)
-
-private fun lagPeriodisertAdresse(type: Opplysningstyper, opplysning: OpplysningDTO<Adresse>, fnr: Foedselsnummer) =
-    lagPersonOpplysning(
-        opplysningsType = type,
-        opplysning = opplysning,
-        fnr = fnr,
-        periode = Periode(
-            fom = opplysning.verdi.gyldigFraOgMed.toYearMonth()!!,
-            tom = opplysning.verdi.gyldigTilOgMed.toYearMonth()
-        )
+fun <T> lagOpplysning(
+    opplysningsType: Opplysningstyper,
+    opplysning: T,
+    tidspunktForInnhenting: Instant
+): Grunnlagsopplysning<T> { // ktlint-disable max-line-length
+    return Grunnlagsopplysning(
+        UUID.randomUUID(),
+        Grunnlagsopplysning.Pdl("pdl", tidspunktForInnhenting, null, null),
+        opplysningsType,
+        objectMapper.createObjectNode(),
+        opplysning
     )
+}
 
-private fun LocalDateTime?.toYearMonth() = this?.let { YearMonth.of(it.year, it.month) }
+fun <T> lagPersonOpplysning(
+    tidspunktForInnhenting: Instant,
+    opplysningsType: Opplysningstyper,
+    opplysning: OpplysningDTO<T>,
+    fnr: Foedselsnummer,
+    periode: Periode? = null
+): Grunnlagsopplysning<T> {
+    return Grunnlagsopplysning(
+        id = UUID.randomUUID(),
+        kilde = Grunnlagsopplysning.Pdl(
+            navn = "pdl",
+            tidspunktForInnhenting = tidspunktForInnhenting,
+            registersReferanse = null,
+            opplysningId = opplysning.opplysningsid.toString()
+        ),
+        opplysningType = opplysningsType,
+        meta = objectMapper.valueToTree(opplysning),
+        opplysning = opplysning.verdi,
+        fnr = fnr,
+        periode = periode
+    )
+}

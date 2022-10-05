@@ -85,4 +85,17 @@ class BesvarOpplysningsbehovTest {
         )
         Assertions.assertEquals(1, inspector.size)
     }
+
+    @Test
+    fun `alle opplysninger har samme tidspunkt for innhenting`() {
+        every { pdlMock.hentPerson(any(), any()) } answers { mockPerson(fnr = firstArg()).tilPerson() }
+        every { pdlMock.hentOpplysningsperson(any(), any()) } answers { mockPerson(fnr = firstArg()) }
+        val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
+
+        val opplysninger = inspector.message(0).get("opplysning")
+        val expectedTidspunkt = opplysninger.first().get("kilde").get("tidspunktForInnhenting")
+
+        Assertions.assertTrue(expectedTidspunkt != null)
+        Assertions.assertTrue(opplysninger.all { it.get("kilde").get("tidspunktForInnhenting") == expectedTidspunkt })
+    }
 }

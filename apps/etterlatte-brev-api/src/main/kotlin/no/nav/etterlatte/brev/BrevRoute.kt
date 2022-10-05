@@ -63,7 +63,7 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
             val behandlingId = call.parameters["behandlingId"]!!
             val request = call.receive<OpprettBrevRequest>()
 
-            val brevInnhold = service.opprett(request.mottaker, request.mal, "0890")
+            val brevInnhold = service.opprett(request.mottaker, request.mal, request.enhet)
             val brev = service.lagreAnnetBrev(behandlingId, request.mottaker, brevInnhold)
 
             call.respond(brev)

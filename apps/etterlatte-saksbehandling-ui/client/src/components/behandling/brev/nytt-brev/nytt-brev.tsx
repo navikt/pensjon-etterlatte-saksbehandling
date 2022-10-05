@@ -45,6 +45,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
   const [laster, setLaster] = useState(false)
   const [error, setError] = useState<string>()
   const [fileURL, setFileURL] = useState<string>()
+  const [enhet, setEnhet] = useState<string>('')
 
   const saksbehandlerEnheter = useContext(AppContext).state.saksbehandlerReducer.enheter
 
@@ -54,7 +55,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
   }, [])
 
   const forhaandsvis = () => {
-    if (!mal) return
+    if (!mal || !enhet) return
 
     setLaster(true)
 
@@ -64,14 +65,12 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
       adresse: isEmptyAddressObject(adresse) ? undefined : adresse,
     }
 
-    console.log(saksbehandlerEnheter)
-
     hentForhaandsvisning(brevMottaker,
         {
           tittel: maler.find((m: Mal) => m.navn === mal)?.tittel,
           navn: mal
         },
-        saksbehandlerEnheter[0].enhetId
+        enhet
       )
       .then((file) => URL.createObjectURL(file))
       .then((url) => {
@@ -89,7 +88,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
   }
 
   const opprett = () => {
-    if (!mal) return
+    if (!mal || !enhet) return
 
     setLaster(true)
 
@@ -103,7 +102,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
       tittel: maler.find((m: Mal) => m.navn === mal)?.tittel,
       navn: mal,
     },
-      saksbehandlerEnheter[0].enhetId
+      enhet
     )
       .then((brev) => leggTilNytt(brev))
       .finally(() => {
@@ -178,6 +177,27 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
               <br />
               <Border />
 
+                <h3>Enhet</h3>
+                <Select
+                  label={'Velg hvilken enhet du tilhører'}
+                  value={enhet}
+                  onChange={(e) => {
+                      if (e.target.value !== enhet && enhet) setKlarforLagring(false)
+                      setEnhet(e.target.value)
+                  }}
+                >
+                    <option value={''}>Velg en enhet</option>
+                    {saksbehandlerEnheter
+                      .map((m, i) => (
+                        <option key={i} value={m.enhetId}>
+                            {m.navn} ({m.enhetId})
+                        </option>
+                      ))}
+                </Select>
+
+                <br />
+                <Border />
+
               <br />
               <br />
 
@@ -198,7 +218,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
               <PdfVisning fileUrl={fileURL} error={error} />
               {!fileURL && (
                 <p>
-                  Vennligst velg mal og mottaker. <br /> Deretter trykk forhåndsvis for å se dokumentet.
+                  Vennligst velg mal, mottaker og enhet. <br /> Deretter trykk forhåndsvis for å se dokumentet.
                 </p>
               )}
             </Column>

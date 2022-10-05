@@ -20,11 +20,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOEKER_SOEKNAD_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
@@ -51,8 +48,6 @@ class VilkaarService {
             "Mapper vilkaar fra grunnlagsdata for virkningstidspunkt $virkningstidspunkt for førstegangsbehandling"
         )
 
-        val avdoedSoeknad = finnOpplysning<AvdoedSoeknad>(opplysninger, Opplysningstyper.AVDOED_SOEKNAD_V1)
-        val soekerSoeknad = finnOpplysning<SoekerBarnSoeknad>(opplysninger, SOEKER_SOEKNAD_V1)
         val søker = grunnlag.søker
         val avdød = grunnlag.hentAvdoed()
         val gjenlevende = grunnlag.hentGjenlevende()
@@ -69,7 +64,6 @@ class VilkaarService {
             vilkaarBrukerErUnder20(søker, avdød, virkningstidspunkt),
             vilkaarDoedsfallErRegistrert(avdød, søker),
             vilkaarAvdoedesMedlemskap(
-                avdoedSoeknad,
                 avdød,
                 avdoedeInntektsOpplysning,
                 arbeidsforhold,
@@ -77,7 +71,6 @@ class VilkaarService {
             ),
             vilkaarBarnetsMedlemskap(
                 søker,
-                soekerSoeknad,
                 gjenlevende,
                 avdød
             )
@@ -169,7 +162,6 @@ class VilkaarService {
         logger.info("Map opplysninger for å vurdere om penger kommer søker til gode")
         val søker = grunnlag.søker
         val gjenlevende = grunnlag.hentGjenlevende()
-        val soekerSoeknad = finnOpplysning<SoekerBarnSoeknad>(deprecatedVilkaarsopplysninger, SOEKER_SOEKNAD_V1)
         val avdød = grunnlag.hentAvdoed()
         val saksbehandlerKommerBarnetTilgode = finnOpplysning<ResultatKommerBarnetTilgode>(
             deprecatedVilkaarsopplysninger,
@@ -181,7 +173,7 @@ class VilkaarService {
                 søker,
                 gjenlevende
             ),
-            barnIngenOppgittUtlandsadresse(soekerSoeknad),
+            barnIngenOppgittUtlandsadresse(søker),
             barnOgAvdoedSammeBostedsadresse(
                 søker,
                 avdød
@@ -195,7 +187,7 @@ class VilkaarService {
         val vurdertDato = hentSisteVurderteDato(kommerBarnetTilGode.filterNotNull())
         val vurdering = VilkaarResultat(vilkaarResultat, kommerBarnetTilGode.filterNotNull(), vurdertDato)
 
-        val familieforhold = mapFamiliemedlemmer(søker, soekerSoeknad, gjenlevende, avdød)
+        val familieforhold = mapFamiliemedlemmer(søker, gjenlevende, avdød)
 
         return KommerSoekerTilgode(vurdering, familieforhold)
     }

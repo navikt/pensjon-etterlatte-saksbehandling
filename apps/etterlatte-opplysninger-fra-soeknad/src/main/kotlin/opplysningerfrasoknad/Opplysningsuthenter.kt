@@ -10,28 +10,60 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Forelder
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.GjenlevendeForelderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTENLANDSOPPHOLD
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Samtykke
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadstypeOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utbetalingsinformasjon
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Verge
+import no.nav.etterlatte.libs.common.person.Utenlandsopphold
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.GjenlevendeForelder
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import java.time.ZoneOffset
 import java.util.UUID
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold as UtenlandsoppholdOpplysningstype
 
 class Opplysningsuthenter {
 
     fun lagOpplysningsListe(jsonNode: JsonNode): List<Grunnlagsopplysning<out Any>> {
-        val barnepensjonssoknad = objectMapper.treeToValue<Barnepensjon>(jsonNode)!!
+        val barnepensjonssoknad = objectMapper.treeToValue<Barnepensjon>(jsonNode)
+        val kilde = Grunnlagsopplysning.Privatperson(
+            barnepensjonssoknad.innsender.foedselsnummer.svar.value,
+            barnepensjonssoknad.mottattDato.toInstant(ZoneOffset.UTC)
+        )
+
+        val utenlandsoppholdSøker = barnepensjonssoknad.soeker.utenlandsAdresse
+
+        val søkerUtenlandsopphold = utenlandsoppholdSøker?.svar?.verdi?.let {
+            lagOpplysning(
+                UTENLANDSOPPHOLD,
+                kilde,
+                Utenlandsopphold(
+                    it,
+                    utenlandsoppholdSøker.opplysning?.land?.svar?.innhold,
+                    utenlandsoppholdSøker.opplysning?.adresse?.svar?.innhold
+                )
+            )
+        }
+
+        val avdød = hentAvdoedForelder(barnepensjonssoknad)
+
+        val avdødUtenlandsopphold = avdød?.let {
+            lagOpplysning(
+                UTENLANDSOPPHOLD,
+                kilde,
+                Utenlandsopphold(it.utenlandsopphold.svar.verdi, null, null)
+            )
+        }
 
         return listOfNotNull(
+            søkerUtenlandsopphold,
+            avdødUtenlandsopphold,
             avdoed(barnepensjonssoknad, Opplysningstyper.AVDOED_SOEKNAD_V1),
             soeker(barnepensjonssoknad, Opplysningstyper.SOEKER_SOEKNAD_V1),
             gjenlevendeForelder(barnepensjonssoknad, Opplysningstyper.GJENLEVENDE_FORELDER_SOEKNAD_V1),
@@ -85,7 +117,7 @@ class Opplysningsuthenter {
                     foedselsnummer = avdoed.foedselsnummer.svar,
                     doedsdato = avdoed.datoForDoedsfallet.svar.innhold,
                     statsborgerskap = avdoed.statsborgerskap.svar.innhold,
-                    utenlandsopphold = Utenlandsopphold(
+                    utenlandsopphold = UtenlandsoppholdOpplysningstype(
                         avdoed.utenlandsopphold.svar.verdi,
                         avdoed.utenlandsopphold.opplysning?.map { opphold ->
                             UtenlandsoppholdOpplysninger(
@@ -244,4 +276,18 @@ class Opplysningsuthenter {
             )
         )
     }
+}
+
+private fun <T> lagOpplysning(
+    opplysningsType: Opplysningstyper,
+    kilde: Grunnlagsopplysning.Kilde,
+    opplysning: T
+): Grunnlagsopplysning<T> {
+    return Grunnlagsopplysning(
+        UUID.randomUUID(),
+        kilde,
+        opplysningsType,
+        objectMapper.createObjectNode(),
+        opplysning
+    )
 }

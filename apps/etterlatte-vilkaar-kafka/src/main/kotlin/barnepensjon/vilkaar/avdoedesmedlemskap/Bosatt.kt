@@ -17,8 +17,8 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKontaktadresse
 import no.nav.etterlatte.libs.common.grunnlag.hentOppholdsadresse
 import no.nav.etterlatte.libs.common.grunnlag.hentStatsborgerskap
+import no.nav.etterlatte.libs.common.grunnlag.hentUtenlandsopphold
 import no.nav.etterlatte.libs.common.grunnlag.hentUtland
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
@@ -28,20 +28,18 @@ import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.Metakriterie
 import no.nav.etterlatte.libs.common.vikaar.Metakriterietyper
 import no.nav.etterlatte.libs.common.vikaar.Utfall
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import java.util.*
 
 fun metakriterieBosattNorge(
-    avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
     avdød: Grunnlagsdata<JsonNode>?
 ): Metakriterie {
     // val ikkeRegistrertIMedl = kriterieIkkeRegistrertIMedl(avdød) //todo legg til når vi har kobla til register
     val norskStatsborger = kriterieNorskStatsborger(avdød, Kriterietyper.AVDOED_NORSK_STATSBORGER)
     val ingenInnUtvandring = kriterieIngenInnUtvandring(avdød, Kriterietyper.AVDOED_INGEN_INN_ELLER_UTVANDRING)
     val ingenUtenlandsoppholdOppgittISoeknad = kriterieIngenUtenlandsoppholdFraSoeknad(
-        avdoedSoeknad,
+        avdød,
         Kriterietyper.AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD
     )
     val kunNorskeBostedsadresserSisteFemAar =
@@ -155,25 +153,21 @@ fun kriterieIngenInnUtvandring(avdød: Grunnlagsdata<JsonNode>?, kriterietype: K
 }
 
 fun kriterieIngenUtenlandsoppholdFraSoeknad(
-    avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
+    avdød: Grunnlagsdata<JsonNode>?,
     kriterietype: Kriterietyper
 ): Kriterie {
-    val opplysningsGrunnlag = listOfNotNull(
-        avdoedSoeknad?.let {
-            Kriteriegrunnlag(
-                avdoedSoeknad.id,
-                KriterieOpplysningsType.AVDOED_UTENLANDSOPPHOLD,
-                avdoedSoeknad.kilde,
-                avdoedSoeknad.opplysning.utenlandsopphold
-            )
-        }
+    val utenlandsopphold = avdød?.hentUtenlandsopphold() ?: return opplysningsGrunnlagNull(kriterietype, emptyList())
+
+    val opplysningsGrunnlag = listOf(
+        Kriteriegrunnlag(
+            utenlandsopphold.id,
+            KriterieOpplysningsType.AVDOED_UTENLANDSOPPHOLD,
+            utenlandsopphold.kilde,
+            utenlandsopphold.verdi
+        )
     )
 
-    if (avdoedSoeknad == null) return opplysningsGrunnlagNull(kriterietype, opplysningsGrunnlag)
-
-    val utenlandsoppholdSoeknad = avdoedSoeknad.opplysning.utenlandsopphold
-
-    val ingenOppholdUtlandetFraSoeknad = when (utenlandsoppholdSoeknad.harHattUtenlandsopphold) {
+    val ingenOppholdUtlandetFraSoeknad = when (utenlandsopphold.verdi.harHattUtenlandsopphold) {
         JaNeiVetIkke.NEI -> VurderingsResultat.OPPFYLT
         JaNeiVetIkke.VET_IKKE -> VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         else -> VurderingsResultat.IKKE_OPPFYLT

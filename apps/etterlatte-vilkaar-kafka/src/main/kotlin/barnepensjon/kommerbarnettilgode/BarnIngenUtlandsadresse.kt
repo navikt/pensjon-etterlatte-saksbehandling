@@ -1,39 +1,41 @@
 package vilkaar.barnepensjon
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraKriterier
 import no.nav.etterlatte.barnepensjon.vurderOpplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
+import no.nav.etterlatte.libs.common.grunnlag.hentUtenlandsopphold
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
 fun barnIngenOppgittUtlandsadresse(
-    soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?
+    søker: Grunnlagsdata<JsonNode>?
 ): VurdertVilkaar {
+    val utenlandsopphold = søker?.hentUtenlandsopphold()
     val opplysningsGrunnlag = listOfNotNull(
-        soekerSoeknad?.let {
+        utenlandsopphold?.let {
             Kriteriegrunnlag(
-                soekerSoeknad.id,
+                it.id,
                 KriterieOpplysningsType.SOEKER_UTENLANDSOPPHOLD,
-                soekerSoeknad.kilde,
-                soekerSoeknad.opplysning.utenlandsadresse
+                it.kilde,
+                it.verdi
             )
         }
     )
 
     val resultat = try {
-        if (soekerSoeknad == null) {
+        if (utenlandsopphold == null) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
-            val ikkeAdresseIUtland = soekerSoeknad.opplysning.utenlandsadresse.adresseIUtlandet == JaNeiVetIkke.NEI
+            val ikkeAdresseIUtland = utenlandsopphold.verdi.harHattUtenlandsopphold == JaNeiVetIkke.NEI
             vurderOpplysning { ikkeAdresseIUtland }
         }
     } catch (ex: OpplysningKanIkkeHentesUt) {

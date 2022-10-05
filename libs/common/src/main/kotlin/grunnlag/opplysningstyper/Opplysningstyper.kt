@@ -43,6 +43,7 @@ enum class Opplysningstyper {
     AVDOEDESBARN,
     VERGEMAALELLERFREMTIDSFULLMAKT,
     PERSONROLLE,
+    UTENLANDSOPPHOLD,
 
     SOESKEN_I_BEREGNINGEN // Kun for soeskenjustering
 }

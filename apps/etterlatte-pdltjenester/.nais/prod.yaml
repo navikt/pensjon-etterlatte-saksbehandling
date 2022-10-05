@@ -46,8 +46,6 @@ spec:
       value: "srvbarnepensjon"
   accessPolicy:
     outbound:
-      rules:
-        - application: etterlatte-pdl-proxy
       external:
         - host: pdl-api.prod-fss-pub.nais.io
     inbound:

@@ -9,14 +9,12 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.auth.AuthenticationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.restModule
-import no.nav.etterlatte.testsupport.tokenTestSupportAcceptsAllTokens
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationProperties
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,8 +27,7 @@ internal class VilkaarsvurderingRoutesTest {
     private val vilkaarsvurderingServiceImpl = VilkaarsvurderingService(VilkaarsvurderingRepositoryInMemory())
 
     private val applicationContext: ApplicationContext = mockk {
-        every { properties } returns ApplicationProperties(devMode = false)
-        every { tokenValidering } returns AuthenticationConfig::tokenTestSupportAcceptsAllTokens
+        every { properties } returns ApplicationProperties()
         every { vilkaarsvurderingService } returns vilkaarsvurderingServiceImpl
     }
 

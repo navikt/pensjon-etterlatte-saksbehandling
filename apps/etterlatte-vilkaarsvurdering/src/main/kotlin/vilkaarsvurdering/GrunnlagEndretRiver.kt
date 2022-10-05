@@ -54,7 +54,7 @@ class GrunnlagEndretRiver(
                     vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, grunnlagEndretPayload)
                 }
             } catch (e: Exception) {
-                logger.error("Uhåndtert feilsituasjon: ${e.message}", e)
+                logger.error("En feil oppstod: ${e.message}", e)
             }
         }
 }

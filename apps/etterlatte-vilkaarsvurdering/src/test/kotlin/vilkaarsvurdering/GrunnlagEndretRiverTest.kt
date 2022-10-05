@@ -16,8 +16,11 @@ internal class GrunnlagEndretRiverTest {
     @Test
     fun `skal motta grunnlagsendring og opprette ny vilkaarsvurdering med innholdet i meldingen`() {
         every { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns null
+        every {
+            vilkaarsvurderingService.opprettVilkaarsvurdering(any(), any())
+        } returns eksisterendeVilkaarsvurdering()
 
-        val inspector = inspector.apply { sendTestMessage(grunnlagEndretMelding) }.inspektør
+        inspector.apply { sendTestMessage(grunnlagEndretMelding) }.inspektør
 
         verify(exactly = 1) { vilkaarsvurderingService.hentVilkaarsvurdering(any()) }
         verify(exactly = 1) { vilkaarsvurderingService.opprettVilkaarsvurdering(any(), any()) }
@@ -27,8 +30,11 @@ internal class GrunnlagEndretRiverTest {
     @Test
     fun `skal motta grunnlagsendring og oppdatere eksisterende vilkaarsvurdering med innholdet i meldingen`() {
         every { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns eksisterendeVilkaarsvurdering()
+        every {
+            vilkaarsvurderingService.oppdaterVilkaarsvurdering(any(), any())
+        } returns eksisterendeVilkaarsvurdering()
 
-        val inspector = inspector.apply { sendTestMessage(grunnlagEndretMelding) }.inspektør
+        inspector.apply { sendTestMessage(grunnlagEndretMelding) }.inspektør
 
         verify(exactly = 1) { vilkaarsvurderingService.hentVilkaarsvurdering(any()) }
         verify(exactly = 1) { vilkaarsvurderingService.oppdaterVilkaarsvurdering(any(), any()) }

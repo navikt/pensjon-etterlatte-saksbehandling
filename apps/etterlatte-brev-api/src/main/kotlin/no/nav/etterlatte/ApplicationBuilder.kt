@@ -48,7 +48,6 @@ class ApplicationBuilder {
         MottakerServiceImpl(httpClient(), env["ETTERLATTE_BRREG_URL"]!!)
     }
 
-
     private val adresseService = if (localDevelopment) {
         AdresseServiceMock()
     } else {
@@ -64,7 +63,6 @@ class ApplicationBuilder {
         adresseService,
         ::sendToRapid
     )
-
 
     private val journalpostService = if (localDevelopment) {
         JournalpostServiceMock()

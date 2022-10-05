@@ -14,7 +14,8 @@ import java.time.LocalDate
 interface MottakerService {
     suspend fun hentStatsforvalterListe(): List<Enhet>
 }
-class MottakerServiceImpl(private val httpClient: HttpClient, private val url: String):MottakerService {
+
+class MottakerServiceImpl(private val httpClient: HttpClient, private val url: String) : MottakerService {
     private val logger = LoggerFactory.getLogger(MottakerService::class.java)
 
     private val cache = Caffeine.newBuilder()

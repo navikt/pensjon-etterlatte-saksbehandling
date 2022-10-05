@@ -33,11 +33,11 @@ spec:
     pool: nav-dev
   env:
     - name: PDL_URL
-      value: http://etterlatte-pdl-proxy/pdl
+      value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: PDL_AUDIENCE
-      value: "dev-gcp:etterlatte:etterlatte-pdl-proxy"
+      value: "dev-fss:pdl:pdl-api"
     - name: PDL_OUTBOUND_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-pdl-proxy/.default
+      value: api://dev-fss.pdl.pdl-api/.default
     - name: PPS_URL
       value: https://pensjon-parallelle-sannheter.dev.intern.nav.no
     - name: ROOT_LOGLEVEL
@@ -48,6 +48,8 @@ spec:
     outbound:
       rules:
         - application: etterlatte-pdl-proxy
+      external:
+        - host: pdl-api.dev-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-fordeler

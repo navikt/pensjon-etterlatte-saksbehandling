@@ -12,6 +12,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.restModule
@@ -131,7 +132,12 @@ internal class VilkaarsvurderingRoutesTest {
     }
 
     private fun opprettVilkaarsvurdering() {
-        vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, "some payload")
+        vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(
+            behandlingId,
+            SakType.BARNEPENSJON,
+            BehandlingType.FØRSTEGANGSBEHANDLING,
+            "some payload"
+        )
     }
 
     private companion object {

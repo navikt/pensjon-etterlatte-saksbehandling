@@ -1,15 +1,28 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+
 class VilkaarsvurderingService(val vilkaarsvurderingRepository: VilkaarsvurderingRepository) {
 
     fun hentVilkaarsvurdering(behandlingId: String): Vilkaarsvurdering? {
         return vilkaarsvurderingRepository.hent(behandlingId)
     }
 
-    fun opprettVilkaarsvurdering(behandlingId: String, payload: String): Vilkaarsvurdering {
-        val nyVilkaarsvurdering = Vilkaarsvurdering(behandlingId, payload, vilkaarBarnepensjon())
-        vilkaarsvurderingRepository.lagre(nyVilkaarsvurdering)
-        return nyVilkaarsvurdering
+    fun opprettVilkaarsvurdering(
+        behandlingId: String,
+        sakType: SakType,
+        behandlingType: BehandlingType,
+        payload: String
+    ): Vilkaarsvurdering {
+        return when (sakType) {
+            SakType.BARNEPENSJON -> when (behandlingType) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> vilkaarsvurderingRepository.lagre(
+                    Vilkaarsvurdering(behandlingId, payload, vilkaarBarnepensjon())
+                )
+                else -> throw RuntimeException("Støtter ikke vilkårsvurdering for behandlingType=$behandlingType")
+            }
+            else -> throw RuntimeException("Støtter ikke vilkårsvurdering for saktype=$sakType")
+        }
     }
 
     fun oppdaterVilkaarsvurdering(behandlingId: String, payload: String): Vilkaarsvurdering {

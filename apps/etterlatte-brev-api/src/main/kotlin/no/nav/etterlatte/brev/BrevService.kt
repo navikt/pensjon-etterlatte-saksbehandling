@@ -58,7 +58,7 @@ class BrevService(
         return db.slett(id)
     }
 
-    suspend fun opprett(mottaker: Mottaker, mal: Mal): BrevInnhold {
+    suspend fun opprett(mottaker: Mottaker, mal: Mal, enhet: String): BrevInnhold {
         val brevMottaker = when {
             // todo: hent adresse fra pdl
             mottaker.foedselsnummer != null -> BrevMottaker("Fornavn", "Fødselsnummer", "Veien 22", "0000", "Oslo")
@@ -68,7 +68,7 @@ class BrevService(
             else -> throw Exception("Ingen brevmottaker spesifisert")
         }
 
-        val avsender = hentAvsender("0805") // PORSGRUNN // TODO: fikse dynamisk
+        val avsender = hentAvsender(enhet)
 
         val request = AnnetBrevRequest(mal, Spraak.NB, avsender, brevMottaker)
 

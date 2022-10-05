@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -25,6 +26,8 @@ class GrunnlagEndretRiver(
             validate { it.requireKey("behandlingOpprettet") }
             validate { it.requireKey("behandlingId") }
             validate { it.requireKey("behandling") }
+            validate { it.requireKey("behandling.type") }
+            validate { it.requireKey("sak.sakType") }
             validate { it.requireKey("fnrSoeker") }
             validate { it.interestedIn(BehandlingGrunnlagEndret.revurderingAarsakKey) }
             validate { it.interestedIn(BehandlingGrunnlagEndret.manueltOpphoerAarsakKey) }
@@ -42,6 +45,9 @@ class GrunnlagEndretRiver(
                 val grunnlagEndretPayload = packet.toJson()
                 val behandlingId = packet["behandlingId"].asText()
 
+                val behandlingType = BehandlingType.valueOf(packet["behandling.type"].asText())
+                val sakType = SakType.valueOf(packet["sak.sakType"].asText())
+
                 // Må få kopiert over alle disse tingene med virkningsdato osv
                 val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
 
@@ -51,10 +57,17 @@ class GrunnlagEndretRiver(
                     vilkaarsvurderingService.oppdaterVilkaarsvurdering(behandlingId, grunnlagEndretPayload)
                 } else {
                     logger.info("Oppretter ny vilkårsvurdering for behandlingId=$behandlingId")
-                    vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, grunnlagEndretPayload)
+                    vilkaarsvurderingService.opprettVilkaarsvurdering(
+                        behandlingId,
+                        sakType,
+                        behandlingType,
+                        grunnlagEndretPayload
+                    )
                 }
             } catch (e: Exception) {
                 logger.error("En feil oppstod: ${e.message}", e)
             }
         }
 }
+
+enum class SakType { BARNEPENSJON, OMSTILLINGSSTOENAD }

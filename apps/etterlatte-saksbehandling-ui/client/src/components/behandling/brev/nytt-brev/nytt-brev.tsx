@@ -1,5 +1,5 @@
 import { Button, Loader, Modal, Select } from '@navikt/ds-react'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Add } from '@navikt/ds-icons'
 import styled from 'styled-components'
 import {
@@ -18,6 +18,7 @@ import { PdfVisning } from '../pdf-visning'
 import { MottakerComponent } from './mottaker'
 import { isEmptyAddressObject } from './last-opp'
 import { IBrev } from '../index'
+import { AppContext } from '../../../../store/AppContext'
 
 const CustomModal = styled(Modal)`
   min-width: 540px;
@@ -44,6 +45,9 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
   const [laster, setLaster] = useState(false)
   const [error, setError] = useState<string>()
   const [fileURL, setFileURL] = useState<string>()
+  const [enhet, setEnhet] = useState<string>('')
+
+  const saksbehandlerEnheter = useContext(AppContext).state.saksbehandlerReducer.enheter
 
   useEffect(() => {
     hentMaler().then((res) => setMaler(res))
@@ -51,7 +55,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
   }, [])
 
   const forhaandsvis = () => {
-    if (!mal) return
+    if (!mal || !enhet) return
 
     setLaster(true)
 
@@ -61,10 +65,13 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
       adresse: isEmptyAddressObject(adresse) ? undefined : adresse,
     }
 
-    hentForhaandsvisning(brevMottaker, {
-      tittel: maler.find((m: Mal) => m.navn === mal)?.tittel,
-      navn: mal,
-    })
+    hentForhaandsvisning(brevMottaker,
+        {
+          tittel: maler.find((m: Mal) => m.navn === mal)?.tittel,
+          navn: mal
+        },
+        enhet
+      )
       .then((file) => URL.createObjectURL(file))
       .then((url) => {
         setFileURL(url)
@@ -81,7 +88,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
   }
 
   const opprett = () => {
-    if (!mal) return
+    if (!mal || !enhet) return
 
     setLaster(true)
 
@@ -94,7 +101,9 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
     nyttBrevForBehandling(behandlingId!!, brevMottaker, {
       tittel: maler.find((m: Mal) => m.navn === mal)?.tittel,
       navn: mal,
-    })
+    },
+      enhet
+    )
       .then((brev) => leggTilNytt(brev))
       .finally(() => {
         setAdresse(undefined)
@@ -168,6 +177,27 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
               <br />
               <Border />
 
+                <h3>Enhet</h3>
+                <Select
+                  label={'Velg hvilken enhet du tilhører'}
+                  value={enhet}
+                  onChange={(e) => {
+                      if (e.target.value !== enhet && enhet) setKlarforLagring(false)
+                      setEnhet(e.target.value)
+                  }}
+                >
+                    <option value={''}>Velg en enhet</option>
+                    {saksbehandlerEnheter
+                      .map((m, i) => (
+                        <option key={i} value={m.enhetId}>
+                            {m.navn} ({m.enhetId})
+                        </option>
+                      ))}
+                </Select>
+
+                <br />
+                <Border />
+
               <br />
               <br />
 
@@ -188,7 +218,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
               <PdfVisning fileUrl={fileURL} error={error} />
               {!fileURL && (
                 <p>
-                  Vennligst velg mal og mottaker. <br /> Deretter trykk forhåndsvis for å se dokumentet.
+                  Vennligst velg mal, mottaker og enhet. <br /> Deretter trykk forhåndsvis for å se dokumentet.
                 </p>
               )}
             </Column>

@@ -63,7 +63,7 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
             val behandlingId = call.parameters["behandlingId"]!!
             val request = call.receive<OpprettBrevRequest>()
 
-            val brevInnhold = service.opprett(request.mottaker, request.mal)
+            val brevInnhold = service.opprett(request.mottaker, request.mal, request.enhet)
             val brev = service.lagreAnnetBrev(behandlingId, request.mottaker, brevInnhold)
 
             call.respond(brev)
@@ -80,7 +80,7 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
         post("forhaandsvisning") {
             val request = call.receive<OpprettBrevRequest>()
 
-            val brev = service.opprett(request.mottaker, request.mal)
+            val brev = service.opprett(request.mottaker, request.mal, request.enhet)
 
             call.respond(brev.data)
         }
@@ -175,7 +175,8 @@ data class Mal(
 
 data class OpprettBrevRequest(
     val mal: Mal,
-    val mottaker: Mottaker
+    val mottaker: Mottaker,
+    val enhet: String
 )
 
 data class FilData(

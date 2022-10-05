@@ -6,6 +6,11 @@
     "id": "dbbd9a01-3e5d-4ec1-819c-1781d1f6a440",
     "type": "FØRSTEGANGSBEHANDLING"
   },
+  "sak": {
+    "ident": "03108718357",
+    "sakType": "BARNEPENSJON",
+    "id": 6
+  },
   "grunnlag": {
     "versjon": 8,
     "saksId": 6,

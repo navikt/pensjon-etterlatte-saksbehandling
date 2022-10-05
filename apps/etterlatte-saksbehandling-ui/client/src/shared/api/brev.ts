@@ -23,10 +23,10 @@ export const hentInnkommendeBrevInnhold = async (journalpostId: string, dokument
     })
     .then((buffer) => new Blob([buffer], { type: 'application/pdf' }))
 
-export const nyttBrevForBehandling = async (behandlingId: string, mottaker: Mottaker, mal: any): Promise<any> =>
+export const nyttBrevForBehandling = async (behandlingId: string, mottaker: Mottaker, mal: any, enhet: string): Promise<any> =>
   await fetch(`${path}/brev/behandling/${behandlingId}`, {
     method: 'POST',
-    body: JSON.stringify({ mottaker, mal }),
+    body: JSON.stringify({ mottaker, mal, enhet }),
     headers: {
       'Content-Type': 'application/json',
     },
@@ -74,10 +74,10 @@ export const genererPdf = async (brevId: string): Promise<Blob> =>
     })
     .then((buffer) => new Blob([buffer], { type: 'application/pdf' }))
 
-export const hentForhaandsvisning = async (mottaker: Mottaker, mal: any): Promise<Blob> =>
+export const hentForhaandsvisning = async (mottaker: Mottaker, mal: any, enhet: string): Promise<Blob> =>
   await fetch(`${path}/brev/forhaandsvisning`, {
     method: 'POST',
-    body: JSON.stringify({ mottaker, mal }),
+    body: JSON.stringify({ mottaker, mal, enhet }),
     headers: {
       'Content-Type': 'application/json',
     },

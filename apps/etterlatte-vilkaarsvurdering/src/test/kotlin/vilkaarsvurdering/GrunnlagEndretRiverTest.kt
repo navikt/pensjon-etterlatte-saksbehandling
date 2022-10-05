@@ -4,6 +4,7 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
@@ -23,7 +24,14 @@ internal class GrunnlagEndretRiverTest {
         inspector.apply { sendTestMessage(grunnlagEndretMelding) }.inspektør
 
         verify(exactly = 1) { vilkaarsvurderingService.hentVilkaarsvurdering(any()) }
-        verify(exactly = 1) { vilkaarsvurderingService.opprettVilkaarsvurdering(any(), any()) }
+        verify(exactly = 1) {
+            vilkaarsvurderingService.opprettVilkaarsvurdering(
+                any(),
+                SakType.BARNEPENSJON,
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+                any()
+            )
+        }
         confirmVerified(vilkaarsvurderingService)
     }
 

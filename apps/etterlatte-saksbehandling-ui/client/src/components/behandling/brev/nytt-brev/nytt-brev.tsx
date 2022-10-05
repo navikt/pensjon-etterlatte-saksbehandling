@@ -1,5 +1,5 @@
 import { Button, Loader, Modal, Select } from '@navikt/ds-react'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Add } from '@navikt/ds-icons'
 import styled from 'styled-components'
 import {
@@ -18,6 +18,7 @@ import { PdfVisning } from '../pdf-visning'
 import { MottakerComponent } from './mottaker'
 import { isEmptyAddressObject } from './last-opp'
 import { IBrev } from '../index'
+import { AppContext } from '../../../../store/AppContext'
 
 const CustomModal = styled(Modal)`
   min-width: 540px;
@@ -45,6 +46,8 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
   const [error, setError] = useState<string>()
   const [fileURL, setFileURL] = useState<string>()
 
+  const saksbehandlerEnheter = useContext(AppContext).state.saksbehandlerReducer.enheter
+
   useEffect(() => {
     hentMaler().then((res) => setMaler(res))
     hentMottakere().then((res) => setMottakere(res))
@@ -61,10 +64,15 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
       adresse: isEmptyAddressObject(adresse) ? undefined : adresse,
     }
 
-    hentForhaandsvisning(brevMottaker, {
-      tittel: maler.find((m: Mal) => m.navn === mal)?.tittel,
-      navn: mal,
-    })
+    console.log(saksbehandlerEnheter)
+
+    hentForhaandsvisning(brevMottaker,
+        {
+          tittel: maler.find((m: Mal) => m.navn === mal)?.tittel,
+          navn: mal
+        },
+        saksbehandlerEnheter[0].enhetId
+      )
       .then((file) => URL.createObjectURL(file))
       .then((url) => {
         setFileURL(url)
@@ -94,7 +102,9 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
     nyttBrevForBehandling(behandlingId!!, brevMottaker, {
       tittel: maler.find((m: Mal) => m.navn === mal)?.tittel,
       navn: mal,
-    })
+    },
+      saksbehandlerEnheter[0].enhetId
+    )
       .then((brev) => leggTilNytt(brev))
       .finally(() => {
         setAdresse(undefined)

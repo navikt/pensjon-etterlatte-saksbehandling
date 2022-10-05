@@ -42,26 +42,23 @@ internal class BesvarOpplysningsbehov(
             ) {
                 val fnr = packet["fnr"].textValue()
                 val personRolle = objectMapper.treeToValue(packet["rolle"], PersonRolle::class.java)!!
-                val behandling = objectMapper.treeToValue(packet[behovNameKey], Opplysningstyper::class.java)!!
+                val opplysningstype = objectMapper.treeToValue(packet[behovNameKey], Opplysningstyper::class.java)!!
                 val person = pdl.hentPerson(fnr, personRolle)
                 val opplysningsperson = pdl.hentOpplysningsperson(fnr, personRolle)
 
-                packet["opplysning"] = listOf(lagOpplysning(behandling, person)) +
-                    lagOpplysninger(opplysningsperson, behovNameTilPersonRolle(behandling), Foedselsnummer.of(fnr))
+                packet["opplysning"] = lagOpplysninger(
+                    person = person,
+                    personDTO = opplysningsperson,
+                    opplysningsbehov = opplysningstype,
+                    fnr = Foedselsnummer.of(fnr)
+                )
                 context.publish(packet.toJson())
 
-                logger.info("Svarte på et behov av type: " + behandling.name)
+                logger.info("Svarte på et behov av type: " + opplysningstype.name)
             } else {
                 logger.info("Så et behov jeg ikke kunne svare på")
             }
         }
-}
-
-private fun behovNameTilPersonRolle(opplysningstyper: Opplysningstyper): PersonRolle = when (opplysningstyper) {
-    Opplysningstyper.AVDOED_PDL_V1 -> PersonRolle.AVDOED
-    Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1 -> PersonRolle.GJENLEVENDE
-    Opplysningstyper.SOEKER_PDL_V1 -> PersonRolle.BARN
-    else -> throw Exception("Ugyldig opplysningsbehov")
 }
 
 interface Pdl {

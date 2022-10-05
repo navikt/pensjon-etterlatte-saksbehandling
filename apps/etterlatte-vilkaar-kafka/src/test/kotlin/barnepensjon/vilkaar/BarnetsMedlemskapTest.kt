@@ -3,13 +3,11 @@ package barnepensjon.vilkaar
 import GrunnlagTestData
 import adresseDanmarkPdl
 import grunnlag.kilde
-import lagMockPersonSoekerSoeknad
-import mapTilVilkaarstypeSoekerSoeknad
 import no.nav.etterlatte.barnepensjon.toYearMonth
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
+import no.nav.etterlatte.libs.common.person.Utenlandsopphold
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
@@ -21,10 +19,15 @@ import java.util.*
 class BarnetsMedlemskapTest {
     @Test
     fun vuderBarnetsMedlemskap() {
-        val barnSoeknadNorge = lagMockPersonSoekerSoeknad(UtenlandsadresseBarn(JaNeiVetIkke.NEI, null, null))
-        val barnSoeknadDanmark = lagMockPersonSoekerSoeknad(UtenlandsadresseBarn(JaNeiVetIkke.JA, null, null))
-
-        val testdataNorskAdresse = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val testdataNorskAdresse = GrunnlagTestData(
+            opplysningsmapSøkerOverrides = mapOf(
+                Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Konstant(
+                    UUID.randomUUID(),
+                    kilde,
+                    Utenlandsopphold(JaNeiVetIkke.NEI, null, null).toJsonNode()
+                )
+            )
+        ).hentOpplysningsgrunnlag()
         val testdataDanskAdresse = GrunnlagTestData(
             opplysningsmapSøkerOverrides = mapOf(
                 Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
@@ -37,6 +40,11 @@ class BarnetsMedlemskapTest {
                             tom = it.gyldigTilOgMed.toYearMonth()
                         )
                     }
+                ),
+                Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Konstant(
+                    UUID.randomUUID(),
+                    kilde,
+                    Utenlandsopphold(JaNeiVetIkke.JA, null, null).toJsonNode()
                 )
             ),
             opplysningsmapGjenlevendeOverrides = mapOf(
@@ -56,28 +64,30 @@ class BarnetsMedlemskapTest {
 
         val ingenUtenlandsAdresser = vilkaarBarnetsMedlemskap(
             testdataNorskAdresse.søker,
-            mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge),
             testdataNorskAdresse.hentGjenlevende(),
             testdataNorskAdresse.hentAvdoed()
         )
 
         val barnUtenlandsAdresserPdl = vilkaarBarnetsMedlemskap(
             testdataDanskAdresse.søker,
-            mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge),
             testdataNorskAdresse.hentGjenlevende(),
             testdataNorskAdresse.hentAvdoed()
         )
 
         val barnUtenlandsAdresserSoeknad = vilkaarBarnetsMedlemskap(
-            testdataNorskAdresse.søker,
-            mapTilVilkaarstypeSoekerSoeknad(barnSoeknadDanmark),
+            testdataNorskAdresse.søker + mapOf(
+                Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Konstant(
+                    UUID.randomUUID(),
+                    kilde,
+                    Utenlandsopphold(JaNeiVetIkke.JA, null, null).toJsonNode()
+                )
+            ),
             testdataNorskAdresse.hentGjenlevende(),
             testdataNorskAdresse.hentAvdoed()
         )
 
         val gjenlevendeUtenlandsAdresserPdl = vilkaarBarnetsMedlemskap(
             testdataNorskAdresse.søker,
-            mapTilVilkaarstypeSoekerSoeknad(barnSoeknadNorge),
             testdataDanskAdresse.hentGjenlevende(),
             testdataNorskAdresse.hentAvdoed()
         )

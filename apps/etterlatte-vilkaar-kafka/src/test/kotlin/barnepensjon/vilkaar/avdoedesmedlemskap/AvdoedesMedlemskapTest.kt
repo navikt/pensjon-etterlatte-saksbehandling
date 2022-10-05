@@ -3,10 +3,8 @@ package barnepensjon.vilkaar.avdoedesmedlemskap
 import GrunnlagTestData
 import LesVilkaarsmeldingTest.Companion.readFile
 import adresserNorgePdl
-import barnepensjon.vilkaar.avdoedesmedlemskap.BosattTest.Companion.ingenUtenlandsoppholdAvdoedSoeknad
 import com.fasterxml.jackson.module.kotlin.readValue
 import grunnlag.kilde
-import lagMockPersonAvdoedSoeknad
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -18,6 +16,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedl
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Utenlandsopphold
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.Utfall
@@ -55,6 +55,11 @@ class AvdoedesMedlemskapTest {
                 UUID.randomUUID(),
                 kilde,
                 adresserNorgePdl().toJsonNode()
+            ),
+            Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Konstant(
+                UUID.randomUUID(),
+                kilde,
+                Utenlandsopphold(JaNeiVetIkke.NEI, null, null).toJsonNode()
             )
         )
     ).hentOpplysningsgrunnlag()
@@ -62,7 +67,6 @@ class AvdoedesMedlemskapTest {
     @Test
     fun `Skal returnere med utfall oppfyllt dersom det ikke er gaps i de gyldige periodene`() {
         val vurdertVilkaar = vilkaarAvdoedesMedlemskap(
-            avdoedPersonSoeknad,
             testdata.hentAvdoed(),
             inntekt("inntektsopplysning.json"),
             arbeidsforhold("arbeidsforhold100.json"),
@@ -85,7 +89,6 @@ class AvdoedesMedlemskapTest {
     @Disabled("Kommentert ut for å komme videre i saksbehandling uten rett testbrukere.")
     fun `Skal returnere med utfall ikke oppfyllt dersom det er gaps i de gyldige periodene`() {
         val vurdertVilkaar = vilkaarAvdoedesMedlemskap(
-            avdoedPersonSoeknad,
             testdata.hentAvdoed(),
             inntekt("inntektsopplysningOpphold.json"),
             arbeidsforhold("arbeidsforhold75.json"),
@@ -105,13 +108,6 @@ class AvdoedesMedlemskapTest {
     }
 
     companion object {
-        private val avdoedPersonSoeknad = VilkaarOpplysning(
-            UUID.randomUUID(),
-            Opplysningstyper.AVDOED_SOEKNAD_V1,
-            Grunnlagsopplysning.Privatperson("fnr", Instant.now()),
-            lagMockPersonAvdoedSoeknad(ingenUtenlandsoppholdAvdoedSoeknad)
-        )
-
         private fun inntekt(file: String) =
             objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(readFile(file))
 

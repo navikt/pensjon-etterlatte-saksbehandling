@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapVurdering
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Gap
@@ -36,13 +35,12 @@ import java.time.LocalDateTime
 import java.util.*
 
 fun vilkaarAvdoedesMedlemskap(
-    avdoedSoeknad: VilkaarOpplysning<AvdoedSoeknad>?,
     avdød: Grunnlagsdata<JsonNode>,
     inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>?,
     arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?,
     saksbehandlerMedlemskapsPerioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?
 ): VurdertVilkaar {
-    if (listOf(avdoedSoeknad, avdød, inntektsOpplysning, arbeidsforholdOpplysning).any { it == null }) {
+    if (listOf(avdød, inntektsOpplysning, arbeidsforholdOpplysning).any { it == null }) {
         return VurdertVilkaar(
             Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
@@ -52,7 +50,7 @@ fun vilkaarAvdoedesMedlemskap(
         )
     }
 
-    val bosattNorgeMetakriterie = metakriterieBosattNorge(avdoedSoeknad, avdød)
+    val bosattNorgeMetakriterie = metakriterieBosattNorge(avdød)
 
     val medlemskapOffentligOgInntektKriterie = kriterieMedlemskapOffentligOgInntekt(
         avdød,

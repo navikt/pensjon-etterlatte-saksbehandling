@@ -5,8 +5,6 @@ import adresseDanmarkPdl
 import adresseUtlandFoerFemAar
 import adresserNorgePdl
 import grunnlag.kilde
-import lagMockPersonAvdoedSoeknad
-import mapTilVilkaarstypeAvdoedSoeknad
 import no.nav.etterlatte.barnepensjon.toYearMonth
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
@@ -16,7 +14,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.OPPHOLDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
@@ -102,19 +99,36 @@ class BosattTest {
     }
 
     @Test
-    fun vurderIngenUtelandsoppholdISoeknad() {
-        val avdoedSoknadMedUtland = lagMockPersonAvdoedSoeknad(utenlandsoppholdAvdoedSoeknad)
-        val avdoedSoeknadUtenUtland = lagMockPersonAvdoedSoeknad(ingenUtenlandsoppholdAvdoedSoeknad)
+    fun vurderIngenUtelandsopphold() {
+        val avdødMedUtlandsopphold = GrunnlagTestData(
+            opplysningsmapAvdødOverrides = mapOf(
+                Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Konstant(
+                    UUID.randomUUID(),
+                    kilde,
+                    no.nav.etterlatte.libs.common.person.Utenlandsopphold(JaNeiVetIkke.JA, null, null).toJsonNode()
+                )
+            )
+        ).hentOpplysningsgrunnlag().hentAvdoed()
+
+        val avdødUtenUtlandsopphold = GrunnlagTestData(
+            opplysningsmapAvdødOverrides = mapOf(
+                Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Konstant(
+                    UUID.randomUUID(),
+                    kilde,
+                    no.nav.etterlatte.libs.common.person.Utenlandsopphold(JaNeiVetIkke.NEI, null, null).toJsonNode()
+                )
+            )
+        ).hentOpplysningsgrunnlag().hentAvdoed()
 
         val utenlandsopphold =
             kriterieIngenUtenlandsoppholdFraSoeknad(
-                mapTilVilkaarstypeAvdoedSoeknad(avdoedSoknadMedUtland),
+                avdødMedUtlandsopphold,
                 Kriterietyper.AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD
             )
 
         val ingenUtenlandsopphold =
             kriterieIngenUtenlandsoppholdFraSoeknad(
-                mapTilVilkaarstypeAvdoedSoeknad(avdoedSoeknadUtenUtland),
+                avdødUtenUtlandsopphold,
                 Kriterietyper.AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD
             )
 
@@ -308,9 +322,6 @@ class BosattTest {
     }
 
     companion object {
-        val fnrAvdoed = Foedselsnummer.of("19078504903")
-        val doedsdatoPdl: LocalDate = LocalDate.parse("2022-03-25")
-
         val utenlandsoppholdAvdoedSoeknad = Utenlandsopphold(
             JaNeiVetIkke.JA,
             listOf(

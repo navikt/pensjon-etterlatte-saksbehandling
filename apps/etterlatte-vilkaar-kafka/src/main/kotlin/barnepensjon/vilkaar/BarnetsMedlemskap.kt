@@ -10,13 +10,12 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.hentUtenlandsopphold
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
@@ -25,14 +24,12 @@ import java.time.LocalDateTime
 
 fun vilkaarBarnetsMedlemskap(
     søker: Grunnlagsdata<JsonNode>?,
-    soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
     gjenlevende: Grunnlagsdata<JsonNode>?,
     avdød: Grunnlagsdata<JsonNode>?
 ): VurdertVilkaar {
     val barnHarIkkeAdresseIUtlandet =
         kriterieSoekerHarIkkeAdresseIUtlandet(
             søker,
-            soekerSoeknad,
             avdød,
             Kriterietyper.SOEKER_IKKE_ADRESSE_I_UTLANDET
         )
@@ -101,7 +98,6 @@ fun kriterieForeldreHarIkkeAdresseIUtlandet(
 
 fun kriterieSoekerHarIkkeAdresseIUtlandet(
     søker: Grunnlagsdata<JsonNode>?,
-    soekerSoknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
     avdød: Grunnlagsdata<JsonNode>?,
     kriterietype: Kriterietyper
 ): Kriterie {
@@ -116,12 +112,12 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
                 hentAdresser(søker)
             )
         },
-        soekerSoknad?.let {
+        søker?.hentUtenlandsopphold()?.let {
             Kriteriegrunnlag(
-                soekerSoknad.id,
+                it.id,
                 KriterieOpplysningsType.SOEKER_UTENLANDSOPPHOLD,
-                soekerSoknad.kilde,
-                soekerSoknad.opplysning.utenlandsadresse
+                it.kilde,
+                it.verdi
             )
         },
         dødsdatoAvdød?.let {
@@ -134,7 +130,7 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
         }
     )
 
-    if (søker == null || dødsdatoAvdød?.verdi == null || soekerSoknad == null) {
+    if (søker == null || dødsdatoAvdød?.verdi == null) {
         return opplysningsGrunnlagNull(
             kriterietype,
             opplysningsGrunnlag
@@ -145,7 +141,7 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
         val soekerAdresserPdl = hentAdresser(søker)
         val pdlResultat = harKunNorskePdlAdresserEtterDato(soekerAdresserPdl, dødsdatoAvdød.verdi!!)
         val soeknadResultat =
-            if (soekerSoknad.opplysning.utenlandsadresse.adresseIUtlandet == JaNeiVetIkke.JA) {
+            if (søker.hentUtenlandsopphold()?.verdi?.harHattUtenlandsopphold == JaNeiVetIkke.JA) {
                 VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
             } else {
                 VurderingsResultat.OPPFYLT

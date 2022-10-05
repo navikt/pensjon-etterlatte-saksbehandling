@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.common.person
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
@@ -122,6 +123,12 @@ data class VergeEllerFullmektig(
 
 data class FolkeregisterIdent(
     val folkeregisterident: Foedselsnummer
+)
+
+data class Utenlandsopphold(
+    val harHattUtenlandsopphold: JaNeiVetIkke,
+    val land: String?,
+    val adresse: String?
 )
 
 fun Person.alder(): Int? {

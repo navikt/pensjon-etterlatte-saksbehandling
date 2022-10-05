@@ -8,17 +8,16 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
+import no.nav.etterlatte.libs.common.grunnlag.hentUtenlandsopphold
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.vikaar.Familiemedlemmer
 import no.nav.etterlatte.libs.common.vikaar.PersoninfoAvdoed
 import no.nav.etterlatte.libs.common.vikaar.PersoninfoGjenlevendeForelder
 import no.nav.etterlatte.libs.common.vikaar.PersoninfoSoeker
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 
 fun mapFamiliemedlemmer(
     soeker: Grunnlagsdata<JsonNode>?,
-    soekerSoeknad: VilkaarOpplysning<SoekerBarnSoeknad>?,
     gjenlevende: Grunnlagsdata<JsonNode>?,
     avdoed: Grunnlagsdata<JsonNode>?
 ): Familiemedlemmer {
@@ -39,7 +38,11 @@ fun mapFamiliemedlemmer(
                 fnr = it.hentFoedselsnummer()?.verdi,
                 rolle = PersonRolle.BARN,
                 bostedadresser = it.hentBostedsadresse()?.perioder?.map { it.verdi },
-                soeknadAdresse = soekerSoeknad?.opplysning?.utenlandsadresse,
+                soeknadAdresse = UtenlandsadresseBarn(
+                    adresseIUtlandet = it.hentUtenlandsopphold()?.verdi?.harHattUtenlandsopphold,
+                    land = it.hentUtenlandsopphold()?.verdi?.land,
+                    adresse = it.hentUtenlandsopphold()?.verdi?.adresse
+                ),
                 foedselsdato = it.hentFoedselsdato()?.verdi
             )
         }!!,

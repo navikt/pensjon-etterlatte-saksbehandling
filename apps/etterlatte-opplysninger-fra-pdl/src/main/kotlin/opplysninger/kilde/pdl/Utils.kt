@@ -9,11 +9,11 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import java.time.Instant
 import java.util.*
 
-fun <T> lagOpplysning(
+fun <T> lagPdlOpplysning(
     opplysningsType: Opplysningstyper,
     opplysning: T,
     tidspunktForInnhenting: Instant
-): Grunnlagsopplysning<T> { // ktlint-disable max-line-length
+): Grunnlagsopplysning<T> {
     return Grunnlagsopplysning(
         UUID.randomUUID(),
         Grunnlagsopplysning.Pdl("pdl", tidspunktForInnhenting, null, null),
@@ -23,7 +23,7 @@ fun <T> lagOpplysning(
     )
 }
 
-fun <T> lagPersonOpplysning(
+fun <T> lagPdlPersonopplysning(
     tidspunktForInnhenting: Instant,
     opplysningsType: Opplysningstyper,
     opplysning: OpplysningDTO<T>,

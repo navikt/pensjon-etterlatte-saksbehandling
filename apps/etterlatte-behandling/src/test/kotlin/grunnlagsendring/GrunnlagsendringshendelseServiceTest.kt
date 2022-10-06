@@ -14,6 +14,10 @@ import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendringshendelse
 import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
+import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
+import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -95,7 +99,6 @@ internal class GrunnlagsendringshendelseServiceTest {
         assertAll(
             "oppretter grunnlagshendringer i databasen for doedshendelser",
             { assertEquals(1, lagredeGrunnlagsendringshendelser.size) },
-            { assertTrue(opprettGrunnlagsendringshendelse.captured.id is UUID) },
             { assertEquals(sakId, opprettGrunnlagsendringshendelse.captured.sakId) },
             { assertEquals(GrunnlagsendringsType.SOEKER_DOED, opprettGrunnlagsendringshendelse.captured.type) },
             { assertTrue(opprettGrunnlagsendringshendelse.captured.data is Grunnlagsinformasjon.SoekerDoed) },

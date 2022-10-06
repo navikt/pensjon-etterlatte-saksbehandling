@@ -12,6 +12,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 
 fun Route.grunnlagsendringshendelseRoute(
@@ -27,10 +28,17 @@ fun Route.grunnlagsendringshendelseRoute(
             call.respond(HttpStatusCode.OK)
         }
 
-        get("/{sakid}/gyldigehendelser") {
-            call.respond(grunnlagsendringshendelseService.hentGyldigeHendelserForSak(sakId))
+        route("/{sakid}") {
+            get {
+                call.respond(GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sakId)))
+            }
+
+            get("/gyldigehendelser") {
+                call.respond(grunnlagsendringshendelseService.hentGyldigeHendelserForSak(sakId))
+            }
         }
     }
 }
 
+data class GrunnlagsendringsListe(val hendelser: List<Grunnlagsendringshendelse>)
 inline val PipelineContext<*, ApplicationCall>.sakId get() = requireNotNull(call.parameters["sakid"]).toLong()

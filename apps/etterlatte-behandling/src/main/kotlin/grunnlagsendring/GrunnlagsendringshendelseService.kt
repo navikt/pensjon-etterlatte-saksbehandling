@@ -5,6 +5,10 @@ import no.nav.etterlatte.behandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
+import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
+import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -14,24 +18,26 @@ import java.time.LocalDateTime
 import java.util.*
 
 class GrunnlagsendringshendelseService(
-    val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
-    val generellBehandlingService: GenerellBehandlingService,
-    val revurderingService: RevurderingService,
-    val pdlService: PdlService
+    private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
+    private val generellBehandlingService: GenerellBehandlingService,
+    private val revurderingService: RevurderingService,
+    private val pdlService: PdlService
 ) {
 
-    val logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentGrunnlagsendringshendelse(id: UUID) =
-        inTransaction {
-            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelse(id)
-        }
-
-    /*Henter grunnlagsendringshendelser med status GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING*/
+    /* Henter grunnlagsendringshendelser med status GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING */
     fun hentGyldigeHendelserForSak(sakId: Long) =
         inTransaction {
             grunnlagsendringshendelseDao.hentGyldigeGrunnlagsendringshendelserISak(sakId)
         }
+
+    fun hentAlleHendelserForSak(sakId: Long) = inTransaction {
+        grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
+            sakId,
+            GrunnlagsendringStatus.values().toList()
+        )
+    }
 
     fun opprettSoekerDoedHendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> =
         // finner saker med loepende utbetalinger
@@ -74,14 +80,14 @@ class GrunnlagsendringshendelseService(
                 type = GrunnlagsendringsType.SOEKER_DOED
             )
         }.forEach { endringsHendelse ->
-            when (endringsHendelse.data) {
+            when (val endringsdata = endringsHendelse.data) {
                 is Grunnlagsinformasjon.SoekerDoed -> {
                     pdlService.hentPdlModell(
-                        foedselsnummer = endringsHendelse.data.hendelse.avdoedFnr,
+                        foedselsnummer = endringsdata.hendelse.avdoedFnr,
                         rolle = PersonRolle.BARN
                     ).doedsdato?.let { doedsdato ->
                         logger.info(
-                            "Person med fnr ${endringsHendelse.data.hendelse.avdoedFnr} er doed i pdl " +
+                            "Person med fnr ${endringsdata.hendelse.avdoedFnr} er doed i pdl " +
                                 "med doedsdato: $doedsdato"
                         )
                         generellBehandlingService.hentBehandlingerISak(endringsHendelse.sakId)
@@ -109,7 +115,7 @@ class GrunnlagsendringshendelseService(
                                         )
                                         revurderingService.startRevurdering(
                                             forrigeBehandling = behandling,
-                                            pdlHendelse = endringsHendelse.data.hendelse,
+                                            pdlHendelse = endringsdata.hendelse,
                                             revurderingAarsak = RevurderingAarsak.SOEKER_DOD
                                         ).also {
                                             inTransaction {
@@ -136,7 +142,7 @@ class GrunnlagsendringshendelseService(
                     aa ta hensyn til grunnlagsendringer hvor endringstype er annullert, som eventuelt kan trigge en revurdering
                      */
                         ?: logger.info(
-                            "Person med fnr ${endringsHendelse.data.hendelse.avdoedFnr} er ikke doed i Pdl. " +
+                            "Person med fnr ${endringsdata.hendelse.avdoedFnr} er ikke doed i Pdl. " +
                                 "Forkaster hendelse"
                         )
                             .also {
@@ -155,7 +161,7 @@ class GrunnlagsendringshendelseService(
         }
     }
 
-    fun List<Behandling>.`siste ikke-avbrutte behandling`() =
+    private fun List<Behandling>.`siste ikke-avbrutte behandling`() =
         this.sortedByDescending { it.behandlingOpprettet }
             .first { it.status in BehandlingStatus.ikkeAvbrutt() }
 }

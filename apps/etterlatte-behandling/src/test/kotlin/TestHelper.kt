@@ -3,12 +3,12 @@ package no.nav.etterlatte
 import no.nav.etterlatte.behandling.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.ManueltOpphoer
 import no.nav.etterlatte.behandling.Revurdering
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringStatus
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsType
-import no.nav.etterlatte.grunnlagsendring.Grunnlagsendringshendelse
-import no.nav.etterlatte.grunnlagsendring.Grunnlagsinformasjon
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
+import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
+import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri

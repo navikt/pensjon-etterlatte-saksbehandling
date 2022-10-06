@@ -31,6 +31,7 @@ fun Route.behandlingRoutes(
     foerstegangsbehandlingService: FoerstegangsbehandlingService,
     revurderingService: RevurderingService,
     manueltOpphoerService: ManueltOpphoerService
+
 ) {
     val logger = application.log
 
@@ -123,8 +124,7 @@ fun Route.behandlingRoutes(
                 route("/vedtak") {
                     get {
                         call.respond(
-                            generellBehandlingService.hentHendelserIBehandling(behandlingsId)
-                                .let { LagretHendelser(it) }
+                            LagretHendelser(generellBehandlingService.hentHendelserIBehandling(behandlingsId))
                         )
                     }
 
@@ -175,7 +175,6 @@ fun Route.behandlingRoutes(
                                 is Foerstegangsbehandling -> "SOEKNAD"
                                 is Revurdering -> it.revurderingsaarsak.name
                                 is ManueltOpphoer -> "MANUELT OPPHOER"
-                                else -> "UKJENT"
                             }
                         )
                     }.let { BehandlingListe(it) }
@@ -346,7 +345,6 @@ fun Route.behandlingRoutes(
                             is Foerstegangsbehandling -> "SOEKNAD"
                             is Revurdering -> it.revurderingsaarsak.name
                             is ManueltOpphoer -> "MANUELT OPPHOER"
-                            else -> "UKJENT"
                         }
                     )
                 }.let { BehandlingListe(it) }
@@ -378,7 +376,7 @@ fun Route.behandlingRoutes(
     }
 }
 
-inline val PipelineContext<*, ApplicationCall>.behandlingsId
+inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
     get() = requireNotNull(call.parameters["behandlingsid"]).let {
         UUID.fromString(
             it

@@ -4,6 +4,8 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.grunnlagsendringshendelse
 import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakDao
@@ -30,9 +32,9 @@ internal class GrunnlagsendringshendelseDaoTest {
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:12")
 
     private lateinit var dataSource: DataSource
-    lateinit var sakRepo: SakDao
-    lateinit var grunnlagsendringshendelsesRepo: GrunnlagsendringshendelseDao
-    lateinit var behandlingRepo: BehandlingDao
+    private lateinit var sakRepo: SakDao
+    private lateinit var grunnlagsendringshendelsesRepo: GrunnlagsendringshendelseDao
+    private lateinit var behandlingRepo: BehandlingDao
 
     @BeforeAll
     fun beforeAll() {
@@ -128,6 +130,60 @@ internal class GrunnlagsendringshendelseDaoTest {
             { assertEquals(3, hendelserEldreEnn1Time.size) },
             { assertTrue { hendelserEldreEnn1Time.all { it.opprettet <= LocalDateTime.now().minusHours(1) } } }
         )
+    }
+
+    @Test
+    fun `hentGrunnlagsendringshendelserMedStatuserISak henter kun statuser som er angitt`() {
+        val sakid = sakRepo.opprettSak("1234", SakType.BARNEPENSJON).id
+        listOf(
+            grunnlagsendringshendelse(
+                sakId = sakid,
+                opprettet = LocalDateTime.now(),
+                data = grunnlagsinformasjonDoedshendelse()
+            ).copy(status = GrunnlagsendringStatus.FORKASTET),
+            grunnlagsendringshendelse(
+                sakId = sakid,
+                opprettet = LocalDateTime.now().minusMinutes(30),
+                data = grunnlagsinformasjonDoedshendelse()
+            ).copy(
+                status = GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING
+            ),
+            grunnlagsendringshendelse(
+                sakId = sakid,
+                opprettet = LocalDateTime.now().minusDays(4),
+                data = grunnlagsinformasjonDoedshendelse()
+            ).copy(
+                status = GrunnlagsendringStatus.IKKE_VURDERT
+            ),
+            grunnlagsendringshendelse(
+                sakId = sakid,
+                opprettet = LocalDateTime.now().minusYears(1),
+                data = grunnlagsinformasjonDoedshendelse()
+            ).copy(
+                status = GrunnlagsendringStatus.TATT_MED_I_BEHANDLING
+            )
+        ).forEach {
+            grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
+        }
+        val alleHendelser = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelserMedStatuserISak(
+            sakid,
+            GrunnlagsendringStatus.values().toList()
+        )
+        assertEquals(alleHendelser.size, 4)
+        assertEquals(
+            alleHendelser.map { it.status }.toSet(),
+            setOf(
+                GrunnlagsendringStatus.IKKE_VURDERT,
+                GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
+                GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING,
+                GrunnlagsendringStatus.FORKASTET
+            )
+        )
+        val uhaandterteHendelser = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelserMedStatuserISak(
+            sakid,
+            listOf(GrunnlagsendringStatus.IKKE_VURDERT, GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING)
+        )
+        assertEquals(uhaandterteHendelser.size, 2)
     }
 
     @Test

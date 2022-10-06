@@ -15,7 +15,11 @@ import no.nav.etterlatte.typer.LagretHendelser
 import no.nav.etterlatte.typer.Saker
 import org.slf4j.LoggerFactory
 
-data class PersonSakerResult(val person: Person, val behandlingListe: BehandlingListe)
+data class PersonSakerResult(
+    val person: Person,
+    val behandlingListe: BehandlingListe,
+    val grunnlagsendringshendelser: GrunnlagsendringshendelseListe = GrunnlagsendringshendelseListe(emptyList())
+)
 
 class BehandlingService(
     private val behandlingKlient: BehandlingKlient,
@@ -37,14 +41,34 @@ class BehandlingService(
                 .flatMap { it.behandlinger }
 
             val behandlingsListe = BehandlingListe(behandlinger)
+            val grunnlagsendringshendelser = hentGrunnlagsendrinshendelser(sakIder, accessToken)
 
-            return PersonSakerResult(person, behandlingsListe)
+            return PersonSakerResult(person, behandlingsListe, grunnlagsendringshendelser)
         } catch (e: InvalidFoedselsnummer) {
             logger.error("Henting av person fra pdl feilet pga ugyldig fødselsnummer", e)
             throw e
         } catch (e: Exception) {
             logger.error("Henting av person med tilhørende behandlinger feilet", e)
             throw e
+        }
+    }
+
+    private suspend fun hentGrunnlagsendrinshendelser(
+        sakIder: List<Long>,
+        accessToken: String
+    ): GrunnlagsendringshendelseListe {
+        return try {
+            val grunnlagsendringshendelser = sakIder.flatMap {
+                behandlingKlient.hentGrunnlagsendringshendelserForSak(it.toInt(), accessToken).hendelser
+            }
+            GrunnlagsendringshendelseListe(hendelser = grunnlagsendringshendelser)
+        } catch (e: Exception) {
+            logger.error(
+                "Fikk ikke hentet grunnlagsendringshendelser for saker med " +
+                    "ider ${sakIder.joinToString { it.toString() }}",
+                e
+            )
+            GrunnlagsendringshendelseListe(emptyList())
         }
     }
 
@@ -66,7 +90,7 @@ class BehandlingService(
         val sakId = behandling.await().sak
         val avdoed = async { grunnlagKlient.finnPersonOpplysning(sakId, AVDOED_PDL_V1, accessToken) }
         val gjenlevende = async { grunnlagKlient.finnPersonOpplysning(sakId, GJENLEVENDE_FORELDER_PDL_V1, accessToken) }
-        val søker = async { grunnlagKlient.finnPersonOpplysning(sakId, SOEKER_PDL_V1, accessToken) }
+        val soeker = async { grunnlagKlient.finnPersonOpplysning(sakId, SOEKER_PDL_V1, accessToken) }
 
         DetaljertBehandlingDto(
             id = behandling.await().id,
@@ -87,7 +111,7 @@ class BehandlingService(
             hendelser = hendelser.await().hendelser,
             familieforhold = Familieforhold(avdoed.await(), gjenlevende.await()),
             behandlingType = behandling.await().behandlingType,
-            søker = søker.await()?.opplysning
+            søker = soeker.await()?.opplysning
         )
     }
 

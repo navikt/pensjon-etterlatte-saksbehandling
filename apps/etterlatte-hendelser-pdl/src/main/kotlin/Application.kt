@@ -58,7 +58,7 @@ fun main() {
                         }
                     }
                 } catch (e: Exception) {
-                    logger.error("App avsluttet med en feil: ", e.message)
+                    logger.error("App avsluttet med en feil", e)
                     exitProcess(1)
                 }
             }

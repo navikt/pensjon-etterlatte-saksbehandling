@@ -7,11 +7,14 @@ import io.ktor.server.auth.AuthenticationProvider
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.stream.Collectors
 
 class TokenSupportAcceptAllProvider : AuthenticationProvider(ProviderConfiguration()) {
     class ProviderConfiguration : Config(null)
+
+    private val logger = LoggerFactory.getLogger(this.javaClass)
 
     private fun getTokensFromHeader(request: Headers): List<JwtToken> {
         try {
@@ -27,8 +30,9 @@ class TokenSupportAcceptAllProvider : AuthenticationProvider(ProviderConfigurati
                     }
                     .collect(Collectors.toList())
             }
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             // Ingen sikkerhet
+            logger.warn("getTokensFromHeader feilet med en exception", e)
         }
         return emptyList()
     }

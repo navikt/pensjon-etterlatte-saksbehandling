@@ -65,8 +65,7 @@ internal class HendelserOmVedtak(
                     valgtBegrunnelse = valgtBegrunnelse
                 )
             } catch (e: Exception) {
-                // TODO endre denne
-                println("spiser en melding fordi: $e")
+                logger.error("Spiser en melding på grunn av feil", e)
             }
         }
 }

@@ -62,7 +62,7 @@ internal class FordeltSoeknadRiver(
 
                 logger.info("Vurdert gyldighet av søknad er fullført")
             } catch (e: Exception) {
-                logger.error("Gyldighetsvurdering av søknad om barnepensjon feilet: ${e.message}", e)
+                logger.error("Gyldighetsvurdering av søknad om barnepensjon feilet", e)
             }
         }
 

@@ -43,7 +43,8 @@ class StatistikkRiver(
                     """Kunne ikke mappe ut statistikk for vedtaket i pakken med korrelasjonsid ${packet.correlationId}. 
                         |Dette betyr at vi ikke får oppdatert statistikken for ytelsen i denne saken, og stopper videre 
                         |prosessering av statistikk. Må sees på snarest!
-                    """.trimMargin()
+                    """.trimMargin(),
+                    e
                 )
                 throw e
             }

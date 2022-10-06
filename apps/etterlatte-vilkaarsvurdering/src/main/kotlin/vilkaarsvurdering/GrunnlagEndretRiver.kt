@@ -65,7 +65,7 @@ class GrunnlagEndretRiver(
                     )
                 }
             } catch (e: Exception) {
-                logger.error("En feil oppstod: ${e.message}", e)
+                logger.error("En feil oppstod", e)
             }
         }
 }

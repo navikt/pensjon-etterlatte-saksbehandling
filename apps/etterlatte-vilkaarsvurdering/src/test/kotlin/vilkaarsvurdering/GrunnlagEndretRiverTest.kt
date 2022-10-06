@@ -18,7 +18,12 @@ internal class GrunnlagEndretRiverTest {
     fun `skal motta grunnlagsendring og opprette ny vilkaarsvurdering med innholdet i meldingen`() {
         every { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns null
         every {
-            vilkaarsvurderingService.opprettVilkaarsvurdering(any(), any())
+            vilkaarsvurderingService.opprettVilkaarsvurdering(
+                any(),
+                SakType.BARNEPENSJON,
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+                any()
+            )
         } returns eksisterendeVilkaarsvurdering()
 
         inspector.apply { sendTestMessage(grunnlagEndretMelding) }.inspektør

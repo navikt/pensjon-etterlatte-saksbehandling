@@ -17,7 +17,7 @@ import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.LocalDateTime
 
 fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) {
-    route("vilkaarsvurdering") {
+    route("/api/vilkaarsvurdering") {
         val logger = application.log
 
         get("/{behandlingId}") {

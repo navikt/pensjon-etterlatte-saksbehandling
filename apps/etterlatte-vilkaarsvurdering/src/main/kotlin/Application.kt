@@ -1,14 +1,15 @@
 package no.nav.etterlatte
 
+import com.typesafe.config.ConfigFactory
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.TextContent
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
@@ -17,15 +18,16 @@ import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.response.respond
 import io.ktor.server.routing.IgnoreTrailingSlash
-import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
+import no.nav.etterlatte.vilkaarsvurdering.config.tokenAcceptAllTokensSupport
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
 import java.util.*
 
@@ -46,57 +48,46 @@ fun rapidApplication(
         grunnlagEndretRiver(rapidsConnection)
 
         rapidsConnection.register(object : RapidsConnection.StatusListener {
-            override fun onStartup(rapidsConnection: RapidsConnection) {
-                // dataSourceBuilder.migrate()
-            }
-
-            override fun onShutdown(rapidsConnection: RapidsConnection) {
-            }
+            override fun onStartup(rapidsConnection: RapidsConnection) {}
+            override fun onShutdown(rapidsConnection: RapidsConnection) {}
         })
         rapidsConnection
     }
 
 fun Application.restModule(applicationContext: ApplicationContext) {
-    val devMode = applicationContext.properties.devMode
-
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
+
     install(IgnoreTrailingSlash)
+
     install(CallLogging) {
         level = Level.INFO
-        filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive")) }
+        filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive|.*/metrics")) }
         format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
         mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
     }
+
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             call.application.log.error("En feil oppstod: ${cause.message}", cause)
-            call.respond(
-                TextContent(
-                    "En feil oppstod: ${cause.message}",
-                    ContentType.Text.Plain,
-                    HttpStatusCode.InternalServerError
-                )
-            )
+            call.respond(HttpStatusCode.InternalServerError, "En intern feil har oppstått")
         }
     }
 
-    if (devMode) {
-        routing {
-            vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
+    if (developmentMode) {
+        install(Authentication) {
+            tokenAcceptAllTokensSupport()
         }
     } else {
         install(Authentication) {
-            applicationContext.tokenValidering(this)
+            tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
         }
+    }
 
-        routing {
-            authenticate {
-                route("api") {
-                    vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
-                }
-            }
+    routing {
+        authenticate {
+            vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
         }
     }
 }

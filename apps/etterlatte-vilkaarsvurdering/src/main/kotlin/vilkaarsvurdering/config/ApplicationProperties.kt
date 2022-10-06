@@ -1,7 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering.config
 
-data class ApplicationProperties(
-    val devMode: Boolean
+class ApplicationProperties(
     /*
     val dbName: String,
     val dbHost: String,
@@ -14,7 +13,6 @@ data class ApplicationProperties(
     companion object {
         fun fromEnv(env: Map<String, String>) = env.run {
             ApplicationProperties(
-                devMode = this["DEV_MODE"]?.let { it.toBoolean() } ?: false
                 /*
                 dbName = value("DB_DATABASE"),
                 dbHost = value("DB_HOST"),

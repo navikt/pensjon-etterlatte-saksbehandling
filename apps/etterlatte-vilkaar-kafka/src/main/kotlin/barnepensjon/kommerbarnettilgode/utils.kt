@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
-import no.nav.etterlatte.libs.common.grunnlag.hentUtenlandsopphold
+import no.nav.etterlatte.libs.common.grunnlag.hentUtenlandsadresse
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.vikaar.Familiemedlemmer
@@ -39,9 +39,9 @@ fun mapFamiliemedlemmer(
                 rolle = PersonRolle.BARN,
                 bostedadresser = it.hentBostedsadresse()?.perioder?.map { it.verdi },
                 soeknadAdresse = UtenlandsadresseBarn(
-                    adresseIUtlandet = it.hentUtenlandsopphold()?.verdi?.harHattUtenlandsopphold,
-                    land = it.hentUtenlandsopphold()?.verdi?.land,
-                    adresse = it.hentUtenlandsopphold()?.verdi?.adresse
+                    adresseIUtlandet = it.hentUtenlandsadresse()?.verdi?.harHattUtenlandsopphold,
+                    land = it.hentUtenlandsadresse()?.verdi?.land,
+                    adresse = it.hentUtenlandsadresse()?.verdi?.adresse
                 ),
                 foedselsdato = it.hentFoedselsdato()?.verdi
             )

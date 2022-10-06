@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Forelder
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.GjenlevendeForelderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTENLANDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTENLANDSOPPHOLD
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Samtykke
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
@@ -17,16 +18,19 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDat
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadstypeOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utbetalingsinformasjon
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Verge
-import no.nav.etterlatte.libs.common.person.Utenlandsopphold
+import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.person.Utenlandsadresse
+import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.GjenlevendeForelder
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
+import java.time.YearMonth
 import java.time.ZoneOffset
 import java.util.UUID
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold as UtenlandsoppholdOpplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger as UtenlandsoppholdOpplysningerOld
 
 class Opplysningsuthenter {
 
@@ -37,33 +41,38 @@ class Opplysningsuthenter {
             barnepensjonssoknad.mottattDato.toInstant(ZoneOffset.UTC)
         )
 
-        val utenlandsoppholdSøker = barnepensjonssoknad.soeker.utenlandsAdresse
-
-        val søkerUtenlandsopphold = utenlandsoppholdSøker?.svar?.verdi?.let {
+        val søkerUtenlandsopphold = barnepensjonssoknad.soeker.utenlandsAdresse?.let {
             lagOpplysning(
-                UTENLANDSOPPHOLD,
-                kilde,
-                Utenlandsopphold(
-                    it,
-                    utenlandsoppholdSøker.opplysning?.land?.svar?.innhold,
-                    utenlandsoppholdSøker.opplysning?.adresse?.svar?.innhold
-                )
+                opplysningsType = UTENLANDSADRESSE,
+                kilde = kilde,
+                opplysning = Utenlandsadresse(
+                    it.svar.verdi,
+                    it.opplysning?.land?.svar?.innhold,
+                    it.opplysning?.adresse?.svar?.innhold
+                ),
+                periode = null
             )
         }
-
-        val avdød = hentAvdoedForelder(barnepensjonssoknad)
-
-        val avdødUtenlandsopphold = avdød?.let {
+        val utenlandsopphold = hentAvdoedForelder(barnepensjonssoknad)?.utenlandsopphold
+        val utenlandsoppholdAvdød = utenlandsopphold?.opplysning?.map {
             lagOpplysning(
-                UTENLANDSOPPHOLD,
-                kilde,
-                Utenlandsopphold(it.utenlandsopphold.svar.verdi, null, null)
+                opplysningsType = UTENLANDSOPPHOLD,
+                kilde = kilde,
+                opplysning = UtenlandsoppholdOpplysninger(
+                    utenlandsopphold.svar.verdi, // TODO sj: Ikke helt riktig å mappe denne til alle?
+                    it.land.svar.innhold,
+                    it.oppholdsType.svar.map { utlandsopphold -> utlandsopphold.verdi },
+                    it.medlemFolketrygd.svar.verdi, // TODO sj: Splittes opp?
+                    it.pensjonsutbetaling?.svar?.innhold
+                ),
+                periode = it.fraDato?.svar?.innhold?.let { fom ->
+                    Periode(YearMonth.from(fom), it.tilDato?.svar?.innhold?.let { tom -> YearMonth.from(tom) })
+                }
             )
-        }
+        } ?: emptyList()
 
-        return listOfNotNull(
+        return utenlandsoppholdAvdød + listOfNotNull(
             søkerUtenlandsopphold,
-            avdødUtenlandsopphold,
             avdoed(barnepensjonssoknad, Opplysningstyper.AVDOED_SOEKNAD_V1),
             soeker(barnepensjonssoknad, Opplysningstyper.SOEKER_SOEKNAD_V1),
             gjenlevendeForelder(barnepensjonssoknad, Opplysningstyper.GJENLEVENDE_FORELDER_SOEKNAD_V1),
@@ -120,7 +129,7 @@ class Opplysningsuthenter {
                     utenlandsopphold = UtenlandsoppholdOpplysningstype(
                         avdoed.utenlandsopphold.svar.verdi,
                         avdoed.utenlandsopphold.opplysning?.map { opphold ->
-                            UtenlandsoppholdOpplysninger(
+                            UtenlandsoppholdOpplysningerOld(
                                 opphold.land.svar.innhold,
                                 opphold.fraDato?.svar?.innhold,
                                 opphold.tilDato?.svar?.innhold,
@@ -281,13 +290,15 @@ class Opplysningsuthenter {
 private fun <T> lagOpplysning(
     opplysningsType: Opplysningstyper,
     kilde: Grunnlagsopplysning.Kilde,
-    opplysning: T
+    opplysning: T,
+    periode: Periode?
 ): Grunnlagsopplysning<T> {
     return Grunnlagsopplysning(
-        UUID.randomUUID(),
-        kilde,
-        opplysningsType,
-        objectMapper.createObjectNode(),
-        opplysning
+        id = UUID.randomUUID(),
+        kilde = kilde,
+        opplysningType = opplysningsType,
+        meta = objectMapper.createObjectNode(),
+        opplysning = opplysning,
+        periode = periode
     )
 }

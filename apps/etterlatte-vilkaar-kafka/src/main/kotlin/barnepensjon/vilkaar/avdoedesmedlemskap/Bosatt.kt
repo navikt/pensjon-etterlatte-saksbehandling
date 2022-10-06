@@ -156,41 +156,49 @@ fun kriterieIngenUtenlandsoppholdFraSoeknad(
     avdød: Grunnlagsdata<JsonNode>?,
     kriterietype: Kriterietyper
 ): Kriterie {
-    val utenlandsopphold = avdød?.hentUtenlandsopphold() ?: return opplysningsGrunnlagNull(kriterietype, emptyList())
+    val utenlandsopphold = avdød?.hentUtenlandsopphold()
 
-    val opplysningsGrunnlag = listOf(
-        Kriteriegrunnlag(
-            utenlandsopphold.id,
-            KriterieOpplysningsType.AVDOED_UTENLANDSOPPHOLD,
-            utenlandsopphold.kilde,
-            utenlandsopphold.verdi
-        )
-    )
+    return when {
+        utenlandsopphold == null -> opplysningsGrunnlagNull(kriterietype, emptyList())
+        utenlandsopphold.perioder.isEmpty() -> Kriterie(kriterietype, VurderingsResultat.OPPFYLT, emptyList())
+        else -> {
+            val seneste = utenlandsopphold.hentSenest()!!
+            val opplysningsGrunnlag = listOf(
+                Kriteriegrunnlag(
+                    seneste.id,
+                    KriterieOpplysningsType.AVDOED_UTENLANDSOPPHOLD,
+                    seneste.kilde,
+                    seneste.verdi
+                )
+            )
 
-    val ingenOppholdUtlandetFraSoeknad = when (utenlandsopphold.verdi.harHattUtenlandsopphold) {
-        JaNeiVetIkke.NEI -> VurderingsResultat.OPPFYLT
-        JaNeiVetIkke.VET_IKKE -> VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-        else -> VurderingsResultat.IKKE_OPPFYLT
+            val ingenOppholdUtlandetFraSoeknad = when (seneste.verdi.harHattUtenlandsopphold) {
+                JaNeiVetIkke.NEI -> VurderingsResultat.OPPFYLT
+                JaNeiVetIkke.VET_IKKE -> VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+                else -> VurderingsResultat.IKKE_OPPFYLT
+            }
+
+            Kriterie(
+                kriterietype,
+                ingenOppholdUtlandetFraSoeknad,
+                opplysningsGrunnlag
+            )
+        }
     }
-
-    return Kriterie(
-        kriterietype,
-        ingenOppholdUtlandetFraSoeknad,
-        opplysningsGrunnlag
-    )
 }
 
 fun kriterieKunNorskeBostedsadresserSisteFemAar(
     avdød: Grunnlagsdata<JsonNode>?,
     kriterietype: Kriterietyper
 ): Kriterie {
-    val adresser = avdød?.hentBostedsadresse() ?: return opplysningsGrunnlagNull(kriterietype, emptyList())
+    val adresser = avdød?.hentBostedsadresse()
+    val siste = adresser?.hentSenest() ?: return opplysningsGrunnlagNull(kriterietype, emptyList())
 
     val opplysningsGrunnlag = listOf(
         Kriteriegrunnlag(
-            adresser.hentSenest().id,
+            siste.id,
             KriterieOpplysningsType.ADRESSELISTE,
-            adresser.hentSenest().kilde,
+            siste.kilde,
             AdresseListe(adresser.perioder.map { it.verdi })
         )
     )
@@ -265,12 +273,12 @@ fun kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
     val fødselsnummer = avdød?.hentFoedselsnummer()
 
     val opplysningsGrunnlag = listOfNotNull(
-        adresser?.let {
+        adresser?.hentSenest()?.let {
             Kriteriegrunnlag(
-                it.hentSenest().id,
+                it.id,
                 KriterieOpplysningsType.ADRESSELISTE,
-                it.hentSenest().kilde,
-                AdresseListe(it.perioder.map { it.verdi })
+                it.kilde,
+                AdresseListe(adresser.perioder.map { it.verdi })
             )
         },
         dødsdato?.let {

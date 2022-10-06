@@ -5,6 +5,7 @@ import adresseDanmarkPdl
 import adresseUtlandFoerFemAar
 import adresserNorgePdl
 import grunnlag.kilde
+import grunnlag.utenlandsopphold
 import no.nav.etterlatte.barnepensjon.toYearMonth
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
@@ -12,13 +13,9 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.KONTAKTADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.OPPHOLDSADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper.AVDOED_NORSK_STATSBORGER
@@ -38,12 +35,9 @@ class BosattTest {
         )
         val testdataIngenStatsborgerskap = testdataNorsk - Opplysningstyper.STATSBORGERSKAP
 
-        val norsk =
-            kriterieNorskStatsborger(testdataNorsk, AVDOED_NORSK_STATSBORGER)
-        val dansk =
-            kriterieNorskStatsborger(testdataDansk, AVDOED_NORSK_STATSBORGER)
-        val mangler =
-            kriterieNorskStatsborger(testdataIngenStatsborgerskap, AVDOED_NORSK_STATSBORGER)
+        val norsk = kriterieNorskStatsborger(testdataNorsk, AVDOED_NORSK_STATSBORGER)
+        val dansk = kriterieNorskStatsborger(testdataDansk, AVDOED_NORSK_STATSBORGER)
+        val mangler = kriterieNorskStatsborger(testdataIngenStatsborgerskap, AVDOED_NORSK_STATSBORGER)
 
         assertEquals(VurderingsResultat.OPPFYLT, norsk.resultat)
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, dansk.resultat)
@@ -102,20 +96,14 @@ class BosattTest {
     fun vurderIngenUtelandsopphold() {
         val avdødMedUtlandsopphold = GrunnlagTestData(
             opplysningsmapAvdødOverrides = mapOf(
-                Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Konstant(
-                    UUID.randomUUID(),
-                    kilde,
-                    no.nav.etterlatte.libs.common.person.Utenlandsopphold(JaNeiVetIkke.JA, null, null).toJsonNode()
-                )
+                Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Periodisert(utenlandsopphold)
             )
         ).hentOpplysningsgrunnlag().hentAvdoed()
 
         val avdødUtenUtlandsopphold = GrunnlagTestData(
             opplysningsmapAvdødOverrides = mapOf(
-                Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Konstant(
-                    UUID.randomUUID(),
-                    kilde,
-                    no.nav.etterlatte.libs.common.person.Utenlandsopphold(JaNeiVetIkke.NEI, null, null).toJsonNode()
+                Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Periodisert(
+                    emptyList()
                 )
             )
         ).hentOpplysningsgrunnlag().hentAvdoed()
@@ -319,34 +307,5 @@ class BosattTest {
         assertEquals(VurderingsResultat.OPPFYLT, ingenUtenlandsopphold.resultat)
         assertEquals(VurderingsResultat.OPPFYLT, utenlandsoppholdFoerFemAar.resultat)
         assertEquals(VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING, ingenAdresser.resultat)
-    }
-
-    companion object {
-        val utenlandsoppholdAvdoedSoeknad = Utenlandsopphold(
-            JaNeiVetIkke.JA,
-            listOf(
-                UtenlandsoppholdOpplysninger(
-                    "Danmark",
-                    LocalDate.parse("2010-01-25"),
-                    LocalDate.parse("2022-01-25"),
-                    listOf(OppholdUtlandType.ARBEIDET),
-                    JaNeiVetIkke.JA,
-                    null
-                ),
-                UtenlandsoppholdOpplysninger(
-                    "Costa Rica",
-                    LocalDate.parse("2000-01-25"),
-                    LocalDate.parse("2007-01-25"),
-                    listOf(OppholdUtlandType.ARBEIDET),
-                    JaNeiVetIkke.NEI,
-                    null
-                )
-            )
-        )
-
-        val ingenUtenlandsoppholdAvdoedSoeknad = Utenlandsopphold(
-            JaNeiVetIkke.NEI,
-            listOf()
-        )
     }
 }

@@ -44,6 +44,7 @@ enum class Opplysningstyper {
     VERGEMAALELLERFREMTIDSFULLMAKT,
     PERSONROLLE,
     UTENLANDSOPPHOLD,
+    UTENLANDSADRESSE,
 
     SOESKEN_I_BEREGNINGEN // Kun for soeskenjustering
 }

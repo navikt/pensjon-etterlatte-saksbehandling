@@ -39,19 +39,19 @@ fun kriterieSammeBostedsadresseSomAvdoed(
     val soekerAdresse = søker?.hentBostedsadresse()
     val avdoedAdresse = avdød?.hentBostedsadresse()
     val opplysningsGrunnlag = listOfNotNull(
-        soekerAdresse?.let {
+        soekerAdresse?.hentSenest()?.let {
             Kriteriegrunnlag(
-                it.hentSenest().id,
+                it.id,
                 KriterieOpplysningsType.BOSTEDADRESSE_SOEKER,
-                it.hentSenest().kilde,
+                it.kilde,
                 Bostedadresser(soekerAdresse.perioder.map { it.verdi }) // TODO ai: periodisering
             )
         },
-        avdoedAdresse?.let {
+        avdoedAdresse?.hentSenest()?.let {
             Kriteriegrunnlag(
-                it.hentSenest().id,
+                it.id,
                 KriterieOpplysningsType.BOSTEDADRESSE_AVDOED,
-                it.hentSenest().kilde,
+                it.kilde,
                 Bostedadresser(avdoedAdresse.perioder.map { it.verdi }) // TODO ai: periodisering
             )
         }

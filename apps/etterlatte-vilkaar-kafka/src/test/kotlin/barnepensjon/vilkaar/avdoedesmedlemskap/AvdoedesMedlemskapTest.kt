@@ -16,8 +16,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedl
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Utenlandsopphold
-import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.Utfall
@@ -56,10 +54,8 @@ class AvdoedesMedlemskapTest {
                 kilde,
                 adresserNorgePdl().toJsonNode()
             ),
-            Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Konstant(
-                UUID.randomUUID(),
-                kilde,
-                Utenlandsopphold(JaNeiVetIkke.NEI, null, null).toJsonNode()
+            Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Periodisert(
+                emptyList()
             )
         )
     ).hentOpplysningsgrunnlag()

@@ -34,7 +34,7 @@ sealed class Opplysning<T>(val type: String) {
         }
 
         /* TODO ai: Midlertidig funksjon for å hente ut data. Skal erstattes av periodisering senere */
-        fun hentSenest() = perioder.last()
+        fun hentSenest() = perioder.lastOrNull()
     }
 
     data class Konstant<T>(

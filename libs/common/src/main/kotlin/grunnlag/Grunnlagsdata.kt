@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SIVILSTATUS
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOESKEN_I_BEREGNINGEN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.STATSBORGERSKAP
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTENLANDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTENLANDSOPPHOLD
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTLAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.VERGEMAALELLERFREMTIDSFULLMAKT
@@ -33,7 +34,8 @@ import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
-import no.nav.etterlatte.libs.common.person.Utenlandsopphold
+import no.nav.etterlatte.libs.common.person.Utenlandsadresse
+import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.toJson
@@ -50,6 +52,7 @@ fun Grunnlagsdata<JsonNode>.hentFoedeland() = this.hentKonstantOpplysning<String
 fun Grunnlagsdata<JsonNode>.hentDoedsdato() = this.hentKonstantOpplysning<LocalDate?>(DOEDSDATO)
 fun Grunnlagsdata<JsonNode>.hentAdressebeskyttelse() =
     this.hentKonstantOpplysning<Adressebeskyttelse>(ADRESSEBESKYTTELSE)
+
 fun Grunnlagsdata<JsonNode>.hentBostedsadresse() = this.hentPeriodisertOpplysning<Adresse>(BOSTEDSADRESSE)
 fun Grunnlagsdata<JsonNode>.hentDeltbostedsadresse() = this.hentKonstantOpplysning<List<Adresse>>(DELTBOSTEDSADRESSE)
 fun Grunnlagsdata<JsonNode>.hentKontaktadresse() = this.hentKonstantOpplysning<List<Adresse>>(KONTAKTADRESSE)
@@ -61,8 +64,12 @@ fun Grunnlagsdata<JsonNode>.hentFamilierelasjon() = this.hentKonstantOpplysning<
 fun Grunnlagsdata<JsonNode>.hentAvdoedesbarn() = this.hentKonstantOpplysning<AvdoedesBarn>(AVDOEDESBARN)
 fun Grunnlagsdata<JsonNode>.hentVergemaalellerfremtidsfullmakt() =
     this.hentKonstantOpplysning<VergemaalEllerFremtidsfullmakt>(VERGEMAALELLERFREMTIDSFULLMAKT)
+
 fun Grunnlagsdata<JsonNode>.hentPersonrolle() = this.hentKonstantOpplysning<PersonRolle>(PERSONROLLE)
-fun Grunnlagsdata<JsonNode>.hentUtenlandsopphold() = this.hentKonstantOpplysning<Utenlandsopphold>(UTENLANDSOPPHOLD)
+fun Grunnlagsdata<JsonNode>.hentUtenlandsopphold() =
+    this.hentPeriodisertOpplysning<UtenlandsoppholdOpplysninger>(UTENLANDSOPPHOLD)
+fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() =
+    this.hentKonstantOpplysning<Utenlandsadresse>(UTENLANDSADRESSE)
 fun Grunnlagsdata<JsonNode>.hentSøskenjustering() =
     this.hentKonstantOpplysning<Beregningsgrunnlag>(SOESKEN_I_BEREGNINGEN)
 
@@ -106,8 +113,9 @@ inline fun <reified T> Grunnlagsdata<JsonNode>.hentPeriodisertOpplysning(
         }
 
         else -> {
-            getLogger(this::class.java).error("Feil skjedde under henting av opplysning: Opplysningen er Konstant")
-            throw RuntimeException("Feil skjedde under henting av opplysning: Opplysningen er Konstant")
+            val err = "Feil skjedde under henting av opplysning $opplysningstype: Opplysningen er Konstant"
+            getLogger(this::class.java).error(err)
+            throw RuntimeException(err)
         }
     }
 }

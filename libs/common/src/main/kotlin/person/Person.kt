@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.person
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.OppholdUtlandType
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
@@ -125,10 +126,18 @@ data class FolkeregisterIdent(
     val folkeregisterident: Foedselsnummer
 )
 
-data class Utenlandsopphold(
+data class Utenlandsadresse(
     val harHattUtenlandsopphold: JaNeiVetIkke,
     val land: String?,
     val adresse: String?
+)
+
+data class UtenlandsoppholdOpplysninger(
+    val harHattUtenlandsopphold: JaNeiVetIkke,
+    val land: String,
+    val oppholdsType: List<OppholdUtlandType>,
+    val medlemFolketrygd: JaNeiVetIkke,
+    val pensjonsutbetaling: String?
 )
 
 fun Person.alder(): Int? {

@@ -6,8 +6,9 @@ import grunnlag.kilde
 import no.nav.etterlatte.barnepensjon.toYearMonth
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.person.Utenlandsopphold
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTENLANDSADRESSE
+import no.nav.etterlatte.libs.common.person.Utenlandsadresse
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
@@ -21,16 +22,16 @@ class BarnetsMedlemskapTest {
     fun vuderBarnetsMedlemskap() {
         val testdataNorskAdresse = GrunnlagTestData(
             opplysningsmapSøkerOverrides = mapOf(
-                Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Konstant(
+                UTENLANDSADRESSE to Opplysning.Konstant(
                     UUID.randomUUID(),
                     kilde,
-                    Utenlandsopphold(JaNeiVetIkke.NEI, null, null).toJsonNode()
+                    Utenlandsadresse(JaNeiVetIkke.NEI, null, null).toJsonNode()
                 )
             )
         ).hentOpplysningsgrunnlag()
         val testdataDanskAdresse = GrunnlagTestData(
             opplysningsmapSøkerOverrides = mapOf(
-                Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
+                BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresseDanmarkPdl().map {
                         PeriodisertOpplysning(
                             id = UUID.randomUUID(),
@@ -41,14 +42,14 @@ class BarnetsMedlemskapTest {
                         )
                     }
                 ),
-                Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Konstant(
+                UTENLANDSADRESSE to Opplysning.Konstant(
                     UUID.randomUUID(),
                     kilde,
-                    Utenlandsopphold(JaNeiVetIkke.JA, null, null).toJsonNode()
+                    Utenlandsadresse(JaNeiVetIkke.JA, null, null).toJsonNode()
                 )
             ),
             opplysningsmapGjenlevendeOverrides = mapOf(
-                Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
+                BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresseDanmarkPdl().map {
                         PeriodisertOpplysning(
                             id = UUID.randomUUID(),
@@ -76,10 +77,10 @@ class BarnetsMedlemskapTest {
 
         val barnUtenlandsAdresserSoeknad = vilkaarBarnetsMedlemskap(
             testdataNorskAdresse.søker + mapOf(
-                Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Konstant(
+                UTENLANDSADRESSE to Opplysning.Konstant(
                     UUID.randomUUID(),
                     kilde,
-                    Utenlandsopphold(JaNeiVetIkke.JA, null, null).toJsonNode()
+                    Utenlandsadresse(JaNeiVetIkke.JA, null, null).toJsonNode()
                 )
             ),
             testdataNorskAdresse.hentGjenlevende(),

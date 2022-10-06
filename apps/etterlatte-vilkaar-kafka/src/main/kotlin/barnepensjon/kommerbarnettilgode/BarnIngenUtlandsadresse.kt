@@ -5,7 +5,7 @@ import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraKriterier
 import no.nav.etterlatte.barnepensjon.vurderOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
-import no.nav.etterlatte.libs.common.grunnlag.hentUtenlandsopphold
+import no.nav.etterlatte.libs.common.grunnlag.hentUtenlandsadresse
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 fun barnIngenOppgittUtlandsadresse(
     søker: Grunnlagsdata<JsonNode>?
 ): VurdertVilkaar {
-    val utenlandsopphold = søker?.hentUtenlandsopphold()
+    val utenlandsopphold = søker?.hentUtenlandsadresse()
     val opplysningsGrunnlag = listOfNotNull(
         utenlandsopphold?.let {
             Kriteriegrunnlag(

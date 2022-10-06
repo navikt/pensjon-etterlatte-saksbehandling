@@ -3,8 +3,8 @@ package barnepensjon.kommerbarnettilgode
 import GrunnlagTestData
 import grunnlag.kilde
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning.Konstant
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTENLANDSOPPHOLD
-import no.nav.etterlatte.libs.common.person.Utenlandsopphold
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTENLANDSADRESSE
+import no.nav.etterlatte.libs.common.person.Utenlandsadresse
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke.JA
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke.NEI
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -20,13 +20,13 @@ class BarnIngenUtlandsadresseTest {
     fun vurderBarnIngenUtlandsadresse() {
         val barnINorge = GrunnlagTestData(
             opplysningsmapSøkerOverrides = mapOf(
-                UTENLANDSOPPHOLD to Konstant(randomUUID(), kilde, Utenlandsopphold(NEI, null, null).toJsonNode())
+                UTENLANDSADRESSE to Konstant(randomUUID(), kilde, Utenlandsadresse(NEI, null, null).toJsonNode())
             )
         ).hentOpplysningsgrunnlag().søker
 
         val barnIDanmark = GrunnlagTestData(
             opplysningsmapSøkerOverrides = mapOf(
-                UTENLANDSOPPHOLD to Konstant(randomUUID(), kilde, Utenlandsopphold(JA, null, null).toJsonNode())
+                UTENLANDSADRESSE to Konstant(randomUUID(), kilde, Utenlandsadresse(JA, null, null).toJsonNode())
             )
         ).hentOpplysningsgrunnlag().søker
 

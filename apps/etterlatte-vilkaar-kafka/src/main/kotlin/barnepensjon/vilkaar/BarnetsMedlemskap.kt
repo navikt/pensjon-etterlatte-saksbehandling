@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
-import no.nav.etterlatte.libs.common.grunnlag.hentUtenlandsopphold
+import no.nav.etterlatte.libs.common.grunnlag.hentUtenlandsadresse
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
@@ -61,11 +61,11 @@ fun kriterieForeldreHarIkkeAdresseIUtlandet(
     val adresseGjenlevende = gjenlevende?.hentBostedsadresse()
 
     val opplysningsGrunnlag = listOfNotNull(
-        adresseGjenlevende?.let {
+        adresseGjenlevende?.hentSenest()?.let {
             Kriteriegrunnlag(
-                it.hentSenest().id,
+                it.id,
                 KriterieOpplysningsType.ADRESSER,
-                it.hentSenest().kilde,
+                it.kilde,
                 hentAdresser(gjenlevende)
             )
         },
@@ -104,15 +104,15 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
     val dødsdatoAvdød = avdød?.hentDoedsdato()
 
     val opplysningsGrunnlag = listOfNotNull(
-        søker?.hentBostedsadresse()?.let {
+        søker?.hentBostedsadresse()?.hentSenest()?.let {
             Kriteriegrunnlag(
-                it.hentSenest().id,
+                it.id,
                 KriterieOpplysningsType.ADRESSER,
-                it.hentSenest().kilde,
+                it.kilde,
                 hentAdresser(søker)
             )
         },
-        søker?.hentUtenlandsopphold()?.let {
+        søker?.hentUtenlandsadresse()?.let {
             Kriteriegrunnlag(
                 it.id,
                 KriterieOpplysningsType.SOEKER_UTENLANDSOPPHOLD,
@@ -141,7 +141,7 @@ fun kriterieSoekerHarIkkeAdresseIUtlandet(
         val soekerAdresserPdl = hentAdresser(søker)
         val pdlResultat = harKunNorskePdlAdresserEtterDato(soekerAdresserPdl, dødsdatoAvdød.verdi!!)
         val soeknadResultat =
-            if (søker.hentUtenlandsopphold()?.verdi?.harHattUtenlandsopphold == JaNeiVetIkke.JA) {
+            if (søker.hentUtenlandsadresse()?.verdi?.harHattUtenlandsopphold == JaNeiVetIkke.JA) {
                 VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
             } else {
                 VurderingsResultat.OPPFYLT

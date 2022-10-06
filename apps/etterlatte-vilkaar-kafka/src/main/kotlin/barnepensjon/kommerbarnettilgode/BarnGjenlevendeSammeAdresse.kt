@@ -40,19 +40,19 @@ fun kriterieSammeBostedsadresse(
     val gjenlevendesAdresse = gjenlevende?.hentBostedsadresse()
 
     val opplysningsGrunnlag = listOfNotNull(
-        søkersAdresse?.let {
+        søkersAdresse?.hentSenest()?.let {
             Kriteriegrunnlag(
-                søkersAdresse.hentSenest().id,
+                it.id,
                 KriterieOpplysningsType.BOSTEDADRESSE_SOEKER,
-                søkersAdresse.hentSenest().kilde,
+                it.kilde,
                 Bostedadresser(søkersAdresse.perioder.map { it.verdi })
             )
         },
-        gjenlevendesAdresse?.let {
+        gjenlevendesAdresse?.hentSenest()?.let {
             Kriteriegrunnlag(
-                gjenlevendesAdresse.hentSenest().id,
+                it.id,
                 KriterieOpplysningsType.BOSTEDADRESSE_GJENLEVENDE,
-                gjenlevendesAdresse.hentSenest().kilde,
+                it.kilde,
                 Bostedadresser(gjenlevendesAdresse.perioder.map { it.verdi })
             )
         }

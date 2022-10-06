@@ -19,7 +19,7 @@ enum class Opplysningstyper {
     PENSJON_UFORE_V1, // Todo: brukes ikke lenger?
     ARBEIDSFORHOLD_V1,
 
-    AVDOED_INNTEKT_V1, // Brukes ikke til å lage opplysning?
+    AVDOED_INNTEKT_V1,
 
     SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1,
     SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
@@ -45,6 +45,7 @@ enum class Opplysningstyper {
     PERSONROLLE,
     UTENLANDSOPPHOLD,
     UTENLANDSADRESSE,
+    INNTEKT,
 
     SOESKEN_I_BEREGNINGEN // Kun for soeskenjustering
 }

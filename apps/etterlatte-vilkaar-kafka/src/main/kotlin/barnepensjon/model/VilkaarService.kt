@@ -22,7 +22,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
-import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
@@ -51,8 +50,6 @@ class VilkaarService {
         val søker = grunnlag.søker
         val avdød = grunnlag.hentAvdoed()
         val gjenlevende = grunnlag.hentGjenlevende()
-        val avdoedeInntektsOpplysning =
-            finnOpplysning<InntektsOpplysning>(opplysninger, Opplysningstyper.AVDOED_INNTEKT_V1)
         val arbeidsforhold = finnOpplysning<ArbeidsforholdOpplysning>(opplysninger, Opplysningstyper.ARBEIDSFORHOLD_V1)
         val saksbehandlerPerioder = finnOpplysning<SaksbehandlerMedlemskapsperioder>(
             opplysninger,
@@ -65,7 +62,6 @@ class VilkaarService {
             vilkaarDoedsfallErRegistrert(avdød, søker),
             vilkaarAvdoedesMedlemskap(
                 avdød,
-                avdoedeInntektsOpplysning,
                 arbeidsforhold,
                 saksbehandlerPerioder
             ),

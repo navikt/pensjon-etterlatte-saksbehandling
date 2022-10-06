@@ -1,12 +1,4 @@
 {
-  "id": "a34fc29a-5692-4cd2-8284-02b2690d944e",
-  "kilde": {
-    "navn": "Inntektskomponenten",
-    "type": "inntektskomponenten"
-  },
-  "opplysningType": "AVDOED_INNTEKT_V1",
-  "meta": {},
-  "opplysning": {
     "pensjonEllerTrygd": [
       {
         "inntektType": "PENSJON_ELLER_TRYGD",
@@ -6845,6 +6837,4 @@
       }
     ],
     "naeringsinntekt": []
-  },
-  "attestering": null
 }

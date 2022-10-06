@@ -88,7 +88,7 @@ class GrunnlagHendelser(
         if (pdlopplysninger.doedsdato != null) {
             val behov = JsonMessage.newMessage(
                 mapOf(
-                    behovNameKey to Opplysningstyper.AVDOED_INNTEKT_V1,
+                    behovNameKey to Opplysningstyper.INNTEKT,
                     "fnr" to pdlopplysninger.foedselsnummer.value,
                     "sakId" to packet["sakId"],
                     "doedsdato" to pdlopplysninger.doedsdato.toString(),

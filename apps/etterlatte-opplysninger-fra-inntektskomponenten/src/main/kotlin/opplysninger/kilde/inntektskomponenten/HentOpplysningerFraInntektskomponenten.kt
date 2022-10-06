@@ -37,13 +37,13 @@ internal class HentOpplysningerFraInntektskomponenten(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            if (packet["@behov"].asText() in listOf(Opplysningstyper.AVDOED_INNTEKT_V1.name)) {
+            if (packet["@behov"].asText() in listOf(Opplysningstyper.INNTEKT.name)) {
                 try {
                     val fnr = Foedselsnummer.of(packet["fnr"].asText())
                     val doedsdato = LocalDate.parse(packet["doedsdato"].asText())
                     val arbeidsforhold = aaregService.hentArbeidsforhold(fnr)
                     val inntektliste = inntektsKomponentenService.hentInntektListe(fnr, doedsdato)
-                    val opplysninger = opplysningsBygger.byggOpplysninger(inntektliste, arbeidsforhold)
+                    val opplysninger = opplysningsBygger.byggOpplysninger(inntektliste, arbeidsforhold, fnr)
                     packet["opplysning"] = opplysninger
                     context.publish(packet.toJson())
                 } catch (e: Exception) {

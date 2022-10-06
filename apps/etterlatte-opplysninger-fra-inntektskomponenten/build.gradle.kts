@@ -17,4 +17,5 @@ dependencies {
     testImplementation(Ktor2.ClientMock)
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)
+    testImplementation(project(":libs:testdata"))
 }

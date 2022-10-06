@@ -51,7 +51,7 @@ const getSaksbehandler = (req: Request): ISaksbehandler | null => {
     fornavn: parsedToken.name.split(', ')[1],
     etternavn: parsedToken.name.split(', ')[0],
     rolle: 'attestant',
-    enheter: [
+    enheter: [ // Todo: Hent ut enheter basert på saksbehandler
       {
         enhetId: '0315',
         navn: 'NAV Grünerløkka',

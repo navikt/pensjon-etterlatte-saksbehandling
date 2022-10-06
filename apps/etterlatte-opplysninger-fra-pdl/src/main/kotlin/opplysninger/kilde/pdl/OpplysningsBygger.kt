@@ -30,17 +30,15 @@ import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.YearMonth
 
 class Opplysningsbolk(private val fnr: Foedselsnummer, private val innhentetTidspunkt: Instant) {
-    private var opplysninger = mutableListOf<Grunnlagsopplysning<out Any>>()
+    private val opplysninger = mutableListOf<Grunnlagsopplysning<out Any>>()
     fun leggTilOpplysninger(
         opplysningstyper: Opplysningstyper,
-        grunnlagsopplysning: List<OpplysningDTO<out Any>>?,
-        periode: Periode? = null
+        grunnlagsopplysning: List<OpplysningDTO<out Any>>?
     ) {
-        grunnlagsopplysning?.forEach { leggTilOpplysning(opplysningstyper, it, periode) }
+        grunnlagsopplysning?.forEach { leggTilOpplysning(opplysningstyper, it) }
     }
 
     fun leggTilOpplysning(
@@ -50,7 +48,7 @@ class Opplysningsbolk(private val fnr: Foedselsnummer, private val innhentetTids
     ) {
         opplysningDTO?.let {
             opplysninger.add(
-                lagPersonOpplysning(
+                lagPdlPersonopplysning(
                     tidspunktForInnhenting = innhentetTidspunkt,
                     opplysningsType = opplysningstyper,
                     opplysning = opplysningDTO,
@@ -64,7 +62,7 @@ class Opplysningsbolk(private val fnr: Foedselsnummer, private val innhentetTids
     fun hentOpplysninger() = opplysninger.toList()
 }
 
-fun lagOpplysninger(
+fun lagEnkelopplysningerFraPDL(
     person: Person,
     personDTO: PersonDTO,
     opplysningsbehov: Opplysningstyper, // AVDOED_PDL_V1 || SOEKER_PDL_V1 || GJENLEVENDE_PDL_V1
@@ -98,17 +96,17 @@ fun lagOpplysninger(
             leggTilOpplysning(
                 BOSTEDSADRESSE,
                 it,
-                it.verdi.gyldigFraOgMed.toYearMonth()?.let { fom ->
+                it.verdi.gyldigFraOgMed?.let { fom ->
                     Periode(
-                        fom = fom,
-                        tom = it.verdi.gyldigTilOgMed.toYearMonth()
+                        fom = YearMonth.from(fom),
+                        tom = it.verdi.gyldigTilOgMed?.let { tom -> YearMonth.from(tom) }
                     )
                 }
             )
         }
     }
 
-    val gammalGrunnlagsopplysning = lagOpplysning(opplysningsbehov, person, tidspunktForInnhenting)
+    val gammalGrunnlagsopplysning = lagPdlOpplysning(opplysningsbehov, person, tidspunktForInnhenting)
 
     return opplysningsbolk.hentOpplysninger() + gammalGrunnlagsopplysning
 }
@@ -119,5 +117,3 @@ private fun behovNameTilPersonRolle(opplysningstyper: Opplysningstyper): PersonR
     SOEKER_PDL_V1 -> PersonRolle.BARN
     else -> throw Exception("Ugyldig opplysningsbehov")
 }
-
-private fun LocalDateTime?.toYearMonth() = this?.let { YearMonth.of(it.year, it.month) }

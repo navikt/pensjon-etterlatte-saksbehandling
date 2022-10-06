@@ -46,7 +46,7 @@ internal class BesvarOpplysningsbehov(
                 val person = pdl.hentPerson(fnr, personRolle)
                 val opplysningsperson = pdl.hentOpplysningsperson(fnr, personRolle)
 
-                packet["opplysning"] = lagOpplysninger(
+                packet["opplysning"] = lagEnkelopplysningerFraPDL(
                     person = person,
                     personDTO = opplysningsperson,
                     opplysningsbehov = opplysningstype,

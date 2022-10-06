@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.inntekt.ArbeidsInntektMaaned
 import no.nav.etterlatte.libs.common.inntekt.InntektType
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import java.time.Instant
 import java.util.*
 
@@ -16,7 +17,8 @@ class OpplysningsByggerService : OpplysningsBygger {
 
     override fun byggOpplysninger(
         inntektsKomponentenResponse: InntektsKomponentenResponse,
-        arbeidsforholdListe: List<AaregResponse>
+        arbeidsforholdListe: List<AaregResponse>,
+        fnr: Foedselsnummer
     ): List<Grunnlagsopplysning<out Any>> {
         val inntekter = inntektsKomponentenResponse.arbeidsInntektMaaned?.let { inntekter ->
             val pensjonEllerTrygd = inntekter.filtrertPaaInntektsType(InntektType.PENSJON_ELLER_TRYGD)
@@ -28,15 +30,17 @@ class OpplysningsByggerService : OpplysningsBygger {
         } ?: InntektsOpplysning(emptyList(), emptyList(), emptyList(), emptyList())
 
         val inntektsOpplysning = lagOpplysning(
-            opplysningsType = Opplysningstyper.AVDOED_INNTEKT_V1,
+            opplysningsType = Opplysningstyper.INNTEKT,
             kilde = Grunnlagsopplysning.Aordningen(Instant.now()),
-            opplysning = inntekter
+            opplysning = inntekter,
+            fnr = fnr
         )
 
         val arbeidsforholdOpplysning = lagOpplysning(
             Opplysningstyper.ARBEIDSFORHOLD_V1,
             Grunnlagsopplysning.AAregisteret(Instant.now()),
-            ArbeidsforholdOpplysning(arbeidsforholdListe)
+            ArbeidsforholdOpplysning(arbeidsforholdListe),
+            fnr
         )
         return listOf(inntektsOpplysning, arbeidsforholdOpplysning)
     }
@@ -49,13 +53,16 @@ fun List<ArbeidsInntektMaaned>.filtrertPaaInntektsType(inntektType: InntektType)
 fun <T> lagOpplysning(
     opplysningsType: Opplysningstyper,
     kilde: Grunnlagsopplysning.Kilde,
-    opplysning: T
+    opplysning: T,
+    fnr: Foedselsnummer?
 ): Grunnlagsopplysning<T> {
     return Grunnlagsopplysning(
         UUID.randomUUID(),
         kilde,
         opplysningsType,
         objectMapper.createObjectNode(),
-        opplysning
+        opplysning,
+        null,
+        fnr
     )
 }

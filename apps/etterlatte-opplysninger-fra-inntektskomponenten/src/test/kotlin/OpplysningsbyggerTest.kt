@@ -1,4 +1,5 @@
 import com.fasterxml.jackson.module.kotlin.readValue
+import grunnlag.AVDØD_FØDSELSNUMMER
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
@@ -20,10 +21,10 @@ class OpplysningsbyggerTest {
             readFile("inntektskomponenten_eksempelrespons.json")
         )
 
-        val opplysninger = service.byggOpplysninger(inntektsKomponentenResponse, emptyList())
+        val opplysninger = service.byggOpplysninger(inntektsKomponentenResponse, emptyList(), AVDØD_FØDSELSNUMMER)
 
         assertEquals(opplysninger.size, 2)
-        assertEquals(opplysninger[0].opplysningType, Opplysningstyper.AVDOED_INNTEKT_V1)
+        assertEquals(opplysninger[0].opplysningType, Opplysningstyper.INNTEKT)
         val inntektsOpplysning = (opplysninger[0].opplysning) as InntektsOpplysning
         assertEquals(inntektsOpplysning.pensjonEllerTrygd.size, 177)
         assertEquals(inntektsOpplysning.ytelseFraOffentlig.size, 27)
@@ -38,7 +39,11 @@ class OpplysningsbyggerTest {
             readFile("aareg_eksempelresponse.json")
         )
 
-        val opplysninger = service.byggOpplysninger(InntektsKomponentenResponse(null, Ident("", "NA")), aaregResponse)
+        val opplysninger = service.byggOpplysninger(
+            InntektsKomponentenResponse(null, Ident("", "NA")),
+            aaregResponse,
+            AVDØD_FØDSELSNUMMER
+        )
 
         assertEquals(opplysninger.size, 2)
         assertEquals(opplysninger[1].opplysningType, Opplysningstyper.ARBEIDSFORHOLD_V1)

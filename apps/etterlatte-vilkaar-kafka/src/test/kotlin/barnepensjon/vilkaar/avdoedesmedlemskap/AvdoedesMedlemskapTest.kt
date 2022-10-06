@@ -56,6 +56,11 @@ class AvdoedesMedlemskapTest {
             ),
             Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Periodisert(
                 emptyList()
+            ),
+            Opplysningstyper.INNTEKT to Opplysning.Konstant(
+                UUID.randomUUID(),
+                kilde,
+                inntekt("inntektsopplysning.json").toJsonNode()
             )
         )
     ).hentOpplysningsgrunnlag()
@@ -64,7 +69,6 @@ class AvdoedesMedlemskapTest {
     fun `Skal returnere med utfall oppfyllt dersom det ikke er gaps i de gyldige periodene`() {
         val vurdertVilkaar = vilkaarAvdoedesMedlemskap(
             testdata.hentAvdoed(),
-            inntekt("inntektsopplysning.json"),
             arbeidsforhold("arbeidsforhold100.json"),
             saksbehandlerOpplysninger
         )
@@ -85,8 +89,13 @@ class AvdoedesMedlemskapTest {
     @Disabled("Kommentert ut for å komme videre i saksbehandling uten rett testbrukere.")
     fun `Skal returnere med utfall ikke oppfyllt dersom det er gaps i de gyldige periodene`() {
         val vurdertVilkaar = vilkaarAvdoedesMedlemskap(
-            testdata.hentAvdoed(),
-            inntekt("inntektsopplysningOpphold.json"),
+            testdata.hentAvdoed() + mapOf(
+                Opplysningstyper.INNTEKT to Opplysning.Konstant(
+                    UUID.randomUUID(),
+                    kilde,
+                    inntekt("inntektsopplysningOpphold.json").toJsonNode()
+                )
+            ),
             arbeidsforhold("arbeidsforhold75.json"),
             saksbehandlerOpplysninger
         )
@@ -105,7 +114,7 @@ class AvdoedesMedlemskapTest {
 
     companion object {
         private fun inntekt(file: String) =
-            objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(readFile(file))
+            objectMapper.readValue<InntektsOpplysning>(readFile(file))
 
         private fun arbeidsforhold(file: String) =
             objectMapper.readValue<VilkaarOpplysning<ArbeidsforholdOpplysning>>(readFile(file))

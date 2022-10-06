@@ -38,6 +38,7 @@ interface Aareg {
 interface OpplysningsBygger {
     fun byggOpplysninger(
         inntektsKomponentenResponse: InntektsKomponentenResponse,
-        arbeidsforholdListe: List<AaregResponse>
+        arbeidsforholdListe: List<AaregResponse>,
+        fnr: Foedselsnummer
     ): List<Grunnlagsopplysning<out Any>>
 }

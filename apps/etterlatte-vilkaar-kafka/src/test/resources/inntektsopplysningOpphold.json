@@ -1,12 +1,4 @@
 {
-  "id": "a34fc29a-5692-4cd2-8284-02b2690d944e",
-  "kilde": {
-    "navn": "Inntektskomponenten",
-    "type": "inntektskomponenten"
-  },
-  "opplysningType": "AVDOED_INNTEKT_V1",
-  "meta": {},
-  "opplysning": {
     "pensjonEllerTrygd": [
       {
         "inntektType": "PENSJON_ELLER_TRYGD",
@@ -2659,8 +2651,8 @@
         "beloep": 27000,
         "fordel": "kontantytelse",
         "inntektskilde": "A-ordningen",
-        "inntektsperiodetype": "Maaned",
         "inntektsstatus": "LoependeInnrapportert",
+        "inntektsperiodetype": "Maaned",
         "leveringstidspunkt": "2022-08",
         "utbetaltIMaaned": "2020-09",
         "opplysningspliktig": {
@@ -6710,6 +6702,4 @@
       }
     ],
     "naeringsinntekt": []
-  },
-  "attestering": null
 }

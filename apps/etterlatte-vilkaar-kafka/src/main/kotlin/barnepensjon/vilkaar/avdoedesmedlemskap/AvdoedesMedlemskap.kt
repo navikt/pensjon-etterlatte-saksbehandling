@@ -15,13 +15,14 @@ import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentInntekt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapVurdering
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Gap
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsperiode
-import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
@@ -36,11 +37,10 @@ import java.util.*
 
 fun vilkaarAvdoedesMedlemskap(
     avdød: Grunnlagsdata<JsonNode>,
-    inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>?,
     arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?,
     saksbehandlerMedlemskapsPerioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?
 ): VurdertVilkaar {
-    if (listOf(avdød, inntektsOpplysning, arbeidsforholdOpplysning).any { it == null }) {
+    if (listOf(avdød, arbeidsforholdOpplysning).any { it == null }) {
         return VurdertVilkaar(
             Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
@@ -54,7 +54,6 @@ fun vilkaarAvdoedesMedlemskap(
 
     val medlemskapOffentligOgInntektKriterie = kriterieMedlemskapOffentligOgInntekt(
         avdød,
-        inntektsOpplysning!!,
         arbeidsforholdOpplysning!!,
         saksbehandlerMedlemskapsPerioder
     )
@@ -73,11 +72,18 @@ fun vilkaarAvdoedesMedlemskap(
 
 fun kriterieMedlemskapOffentligOgInntekt(
     avdød: Grunnlagsdata<JsonNode>,
-    inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>,
     arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>,
     saksbehandlerMedlemskapsperioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?
 ): Kriterie {
     val doedsdato = avdød.hentDoedsdato()?.verdi ?: throw OpplysningKanIkkeHentesUt()
+    val inntektsOpplysning = avdød.hentInntekt()?.let {
+        VilkaarOpplysning(
+            id = it.id,
+            kilde = it.kilde,
+            opplysningType = Opplysningstyper.INNTEKT,
+            opplysning = it.verdi
+        )
+    } ?: throw OpplysningKanIkkeHentesUt("INNTEKT kan ikke hentes på avdoed")
 
     val avdoedesMedlemskapGrunnlag = AvdoedesMedlemskapGrunnlag(
         inntektsOpplysning = inntektsOpplysning,

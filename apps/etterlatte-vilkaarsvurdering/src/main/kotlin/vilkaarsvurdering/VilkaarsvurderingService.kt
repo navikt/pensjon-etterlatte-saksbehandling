@@ -1,103 +1,102 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
+import java.util.*
+
+class VilkaarsvurderingFinnesIkkeException(override val message: String) : RuntimeException(message)
+class UgyldigSakTypeException(override val message: String) : RuntimeException(message)
 
 class VilkaarsvurderingService(private val vilkaarsvurderingRepository: VilkaarsvurderingRepository) {
 
-    fun hentVilkaarsvurdering(behandlingId: String): Vilkaarsvurdering? {
+    fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? {
         return vilkaarsvurderingRepository.hent(behandlingId)
     }
 
     fun opprettVilkaarsvurdering(
-        behandlingId: String,
+        behandlingId: UUID,
         sakType: SakType,
         behandlingType: BehandlingType,
         payload: String
     ): Vilkaarsvurdering {
         return when (sakType) {
-            SakType.BARNEPENSJON -> when (behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> vilkaarsvurderingRepository.lagre(
-                    Vilkaarsvurdering(behandlingId, payload, vilkaarBarnepensjon())
-                )
-                else -> throw RuntimeException("Støtter ikke vilkårsvurdering for behandlingType=$behandlingType")
-            }
-            else -> throw RuntimeException("Støtter ikke vilkårsvurdering for saktype=$sakType")
+            SakType.BARNEPENSJON ->
+                when (behandlingType) {
+                    BehandlingType.FØRSTEGANGSBEHANDLING ->
+                        vilkaarsvurderingRepository.lagre(
+                            Vilkaarsvurdering(behandlingId, payload, barnepensjonVilkaar())
+                        )
+                    else ->
+                        throw VilkaarsvurderingFinnesIkkeException(
+                            "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType"
+                        )
+                }
+            SakType.OMSTILLINGSSTOENAD ->
+                throw UgyldigSakTypeException("Støtter ikke vilkårsvurdering for sakType=$sakType")
         }
     }
 
-    fun oppdaterVilkaarsvurdering(behandlingId: String, payload: String): Vilkaarsvurdering {
+    fun oppdaterVilkaarsvurderingPayload(behandlingId: UUID, payload: String): Vilkaarsvurdering {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let {
             vilkaarsvurderingRepository.lagre(it.copy(payload = payload))
-        } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
+        } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun oppdaterTotalVurdering(behandlingId: String, resultat: VilkaarsvurderingResultat): Vilkaarsvurdering {
+    fun oppdaterTotalVurdering(behandlingId: UUID, resultat: VilkaarsvurderingResultat): Vilkaarsvurdering {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = resultat))
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun slettTotalVurdering(behandlingId: String): Vilkaarsvurdering {
+    fun slettTotalVurdering(behandlingId: UUID): Vilkaarsvurdering {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = null))
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun oppdaterVurderingPaaVilkaar(behandlingId: String, vurdertVilkaar: VurdertVilkaar): Vilkaarsvurdering {
-        return vilkaarsvurderingRepository.oppdaterVurderingPaaVilkaar(behandlingId, vurdertVilkaar)
+    fun oppdaterVurderingPaaVilkaar(behandlingId: UUID, vurdertVilkaar: VurdertVilkaar): Vilkaarsvurdering {
+        return hentVilkaarsvurdering(behandlingId)?.let { vilkaarsvurdering ->
+            val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
+                vilkaar = vilkaarsvurdering.vilkaar.map {
+                    val oppdatertVilkaar = oppdaterVurdering(it, vurdertVilkaar)
+                    oppdatertVilkaar.copy(
+                        unntaksvilkaar = it.unntaksvilkaar?.map { unntaksvilkaar ->
+                            oppdaterVurdering(unntaksvilkaar, vurdertVilkaar)
+                        }
+                    )
+                }
+            )
+            vilkaarsvurderingRepository.oppdater(oppdatertVilkaarsvurdering)
+        } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun slettVurderingPaaVilkaar(behandlingId: String, vilkaarType: VilkaarType): Vilkaarsvurdering {
-        return vilkaarsvurderingRepository.slettVurderingPaaVilkaar(behandlingId, vilkaarType)
+    fun slettVurderingPaaVilkaar(behandlingId: UUID, vilkaarType: VilkaarType): Vilkaarsvurdering {
+        return hentVilkaarsvurdering(behandlingId)?.let { vilkaarsvurdering ->
+            val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
+                vilkaar = vilkaarsvurdering.vilkaar.map {
+                    val oppdatertVilkaar = slettVurdering(it, vilkaarType)
+                    oppdatertVilkaar.copy(
+                        unntaksvilkaar = it.unntaksvilkaar?.map { unntaksvilkaar ->
+                            slettVurdering(unntaksvilkaar, vilkaarType)
+                        }
+                    )
+                }
+            )
+            vilkaarsvurderingRepository.oppdater(oppdatertVilkaarsvurdering)
+        } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
     }
+
+    private fun oppdaterVurdering(vilkaar: Vilkaar, vurdertVilkaar: VurdertVilkaar) =
+        if (vilkaar.type == vurdertVilkaar.vilkaarType) {
+            vilkaar.copy(vurdering = vurdertVilkaar.vurdertResultat)
+        } else {
+            vilkaar
+        }
+
+    private fun slettVurdering(vilkaar: Vilkaar, vilkaarType: VilkaarType) =
+        if (vilkaar.type == vilkaarType) {
+            vilkaar.copy(vurdering = null)
+        } else {
+            vilkaar
+        }
 }
-
-fun vilkaarBarnepensjon() = listOf(
-    Vilkaar(
-        type = VilkaarType.FORMAAL,
-        paragraf = Paragraf(
-            paragraf = "§ 18-1",
-            tittel = "Formål",
-            lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-1",
-            lovtekst = "Formålet med barnepensjon er å sikre inntekt for barn når en av foreldrene eller begge er døde."
-        )
-    ),
-    Vilkaar(
-        type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP,
-        paragraf = Paragraf(
-            paragraf = "§ 18-2",
-            tittel = "Avdødes forutgående medlemskap",
-            lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-2",
-            lovtekst = "Det er et vilkår for rett til barnepensjon at a) den avdøde faren eller moren var medlem i " +
-                "trygden de siste fem årene fram til dødsfallet, eller b) at den avdøde faren eller moren mottok " +
-                "pensjon eller uføretrygd fra folketrygden de siste fem årene fram til dødsfallet."
-        )
-    ),
-    Vilkaar(
-        type = VilkaarType.FORTSATT_MEDLEMSKAP,
-        paragraf = Paragraf(
-            paragraf = "§ 18-3",
-            tittel = "Fortsatt medlemskap",
-            lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-3",
-            lovtekst = "Det er et vilkår for at et barn skal ha rett til pensjon, at det fortsatt er medlem i trygden."
-        )
-    ),
-    Vilkaar(
-        type = VilkaarType.ALDER_BARN,
-        paragraf = Paragraf(
-            paragraf = "§ 18-4 ledd 1",
-            tittel = "Stønadssituasjonen – barnets alder",
-            lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-4",
-            lovtekst = "Pensjon ytes inntil barnet fyller 18 år."
-        )
-    ),
-    Vilkaar(
-        type = VilkaarType.DOEDSFALL_FORELDER,
-        paragraf = Paragraf(
-            paragraf = "§ 18-4 ledd 2",
-            tittel = "Dødsfall forelder",
-            lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-4",
-            lovtekst = "En eller begge foreldrene døde."
-        )
-    )
-)

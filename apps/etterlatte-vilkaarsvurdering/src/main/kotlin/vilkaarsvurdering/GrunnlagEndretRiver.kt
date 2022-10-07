@@ -10,6 +10,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 
 class GrunnlagEndretRiver(
@@ -44,18 +45,18 @@ class GrunnlagEndretRiver(
         withLogContext(packet.correlationId) {
             try {
                 val grunnlagEndretPayload = packet.toJson()
-                val behandlingId = packet["behandlingId"].asText()
-
+                val behandlingId = packet["behandlingId"].asText().toUUID()
                 val behandlingType = BehandlingType.valueOf(packet["behandling.type"].asText())
                 val sakType = SakType.valueOf(packet["sak.sakType"].asText())
 
                 // Må få kopiert over alle disse tingene med virkningsdato osv
                 val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
 
-                // Inntil videre oppretter / oppdateres vilkårsvurdering med nyeste payload fra grunnlag
+                // Inntil videre oppretter / oppdateres vilkårsvurdering med nyeste payload fra grunnlag for å
+                // kunne sende dette videre sendere.
                 if (vilkaarsvurdering != null) {
                     logger.info("Oppdaterer eksisterende vilkårsvurdering for behandlingId=$behandlingId")
-                    vilkaarsvurderingService.oppdaterVilkaarsvurdering(behandlingId, grunnlagEndretPayload)
+                    vilkaarsvurderingService.oppdaterVilkaarsvurderingPayload(behandlingId, grunnlagEndretPayload)
                 } else {
                     logger.info("Oppretter ny vilkårsvurdering for behandlingId=$behandlingId")
                     vilkaarsvurderingService.opprettVilkaarsvurdering(
@@ -71,4 +72,5 @@ class GrunnlagEndretRiver(
         }
 }
 
+// Denne bør vel flyttes?
 enum class SakType { BARNEPENSJON, OMSTILLINGSSTOENAD }

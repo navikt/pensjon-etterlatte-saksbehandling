@@ -1,22 +1,18 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import java.util.*
+
 interface VilkaarsvurderingRepository {
-    fun hent(behandlingId: String): Vilkaarsvurdering?
+    fun hent(behandlingId: UUID): Vilkaarsvurdering?
     fun lagre(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering
-    fun oppdaterVurderingPaaVilkaar(behandlingId: String, vurdertVilkaar: VurdertVilkaar): Vilkaarsvurdering
-    fun slettVurderingPaaVilkaar(behandlingId: String, vilkaarType: VilkaarType): Vilkaarsvurdering
+    fun oppdater(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering
 }
 
 class VilkaarsvurderingRepositoryInMemory(
-    val db: MutableMap<String, Vilkaarsvurdering> = mutableMapOf<String, Vilkaarsvurdering>().apply {
-        put(
-            "1",
-            Vilkaarsvurdering("1", "json", vilkaarBarnepensjon())
-        )
-    }
+    private val db: MutableMap<UUID, Vilkaarsvurdering> = mutableMapOf()
 ) : VilkaarsvurderingRepository {
 
-    override fun hent(behandlingId: String): Vilkaarsvurdering? {
+    override fun hent(behandlingId: UUID): Vilkaarsvurdering? {
         return db[behandlingId]
     }
 
@@ -25,35 +21,7 @@ class VilkaarsvurderingRepositoryInMemory(
         return vilkaarsvurdering
     }
 
-    override fun oppdaterVurderingPaaVilkaar(behandlingId: String, vurdertVilkaar: VurdertVilkaar): Vilkaarsvurdering {
-        hent(behandlingId)?.let { vilkaarsvurdering ->
-            val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
-                vilkaar = vilkaarsvurdering.vilkaar.map {
-                    if (it.type == vurdertVilkaar.vilkaarType) {
-                        it.copy(vurdering = vurdertVilkaar.vurdertResultat)
-                    } else {
-                        it
-                    }
-                }
-            )
-            db[behandlingId] = oppdatertVilkaarsvurdering
-            return oppdatertVilkaarsvurdering
-        } ?: throw NullPointerException("Fant ingen vilkårsvurdering for behandlingId $behandlingId")
-    }
-
-    override fun slettVurderingPaaVilkaar(behandlingId: String, vilkaarType: VilkaarType): Vilkaarsvurdering {
-        hent(behandlingId)?.let { vilkaarsvurdering ->
-            val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
-                vilkaar = vilkaarsvurdering.vilkaar.map {
-                    if (it.type == vilkaarType) {
-                        it.copy(vurdering = null)
-                    } else {
-                        it
-                    }
-                }
-            )
-            db[behandlingId] = oppdatertVilkaarsvurdering
-            return oppdatertVilkaarsvurdering
-        } ?: throw NullPointerException("Fant ingen vilkårsvurdering for behandlingId $behandlingId")
+    override fun oppdater(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering {
+        return lagre(vilkaarsvurdering)
     }
 }

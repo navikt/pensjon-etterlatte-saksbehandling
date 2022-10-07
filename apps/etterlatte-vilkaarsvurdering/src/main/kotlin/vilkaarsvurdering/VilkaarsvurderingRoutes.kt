@@ -15,13 +15,14 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.LocalDateTime
+import java.util.*
 
 fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) {
     route("/api/vilkaarsvurdering") {
         val logger = application.log
 
         get("/{behandlingId}") {
-            val behandlingId = requireNotNull(call.parameters["behandlingId"])
+            val behandlingId = requireNotNull(call.parameters["behandlingId"]).toUUID()
 
             logger.info("Henter vilkårsvurdering for $behandlingId")
             val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
@@ -29,7 +30,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
         }
 
         post("/{behandlingId}") {
-            val behandlingId = requireNotNull(call.parameters["behandlingId"])
+            val behandlingId = requireNotNull(call.parameters["behandlingId"]).toUUID()
             val saksbehandler = requireNotNull(call.navIdent)
             val vurdertResultatDto = call.receive<VurdertResultatDto>()
 
@@ -43,7 +44,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
         }
 
         delete("/{behandlingId}/{vilkaarType}") {
-            val behandlingId = requireNotNull(call.parameters["behandlingId"])
+            val behandlingId = requireNotNull(call.parameters["behandlingId"]).toUUID()
             val vilkaarType = VilkaarType.valueOf(requireNotNull(call.parameters["vilkaarType"]))
 
             logger.info("Sletter vurdering på vilkår $vilkaarType for $behandlingId")
@@ -53,7 +54,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
 
         route("/resultat") {
             post("/{behandlingId}") {
-                val behandlingId = requireNotNull(call.parameters["behandlingId"])
+                val behandlingId = requireNotNull(call.parameters["behandlingId"]).toUUID()
                 val saksbehandler = requireNotNull(call.navIdent)
                 val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
 
@@ -72,7 +73,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             }
 
             delete("/{behandlingId}") {
-                val behandlingId = requireNotNull(call.parameters["behandlingId"])
+                val behandlingId = requireNotNull(call.parameters["behandlingId"]).toUUID()
 
                 logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
                 val oppdatertVilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId)
@@ -82,7 +83,9 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
     }
 }
 
-val ApplicationCall.navIdent: String?
+private fun String.toUUID() = UUID.fromString(this)
+
+private val ApplicationCall.navIdent: String?
     get() = principal<TokenValidationContextPrincipal>()
         ?.context?.getJwtToken("azure")
         ?.jwtTokenClaims?.getStringClaim("NAVident")

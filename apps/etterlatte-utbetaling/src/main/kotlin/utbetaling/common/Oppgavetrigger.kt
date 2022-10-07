@@ -15,7 +15,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 
 class Oppgavetrigger(
-    private val rapidsConnection: RapidsConnection,
+    rapidsConnection: RapidsConnection,
     private val utbetalingService: UtbetalingService,
     private val grensesnittsavstemmingService: GrensesnittsavstemmingService
 ) : River.PacketListener {
@@ -48,7 +48,7 @@ class Oppgavetrigger(
                     }
                 }
             } catch (e: Exception) {
-                logger.info("Kunne ikke utfoere oppgave ${oppgave.oppgavetype.name}: ${e.message}", e)
+                logger.info("Kunne ikke utfoere oppgave ${oppgave.oppgavetype.name}", e)
             }
         }
 

@@ -33,7 +33,7 @@ class PdlService(
                     setBody(HentFolkeregisterIdentRequest(ident))
                 }.body()
             } catch (e: Exception) {
-                logger.info("Kunne ikke hente folkeregisteridentifikator: ${e.message}")
+                logger.info("Kunne ikke hente folkeregisteridentifikator", e)
                 throw e
             }
         }

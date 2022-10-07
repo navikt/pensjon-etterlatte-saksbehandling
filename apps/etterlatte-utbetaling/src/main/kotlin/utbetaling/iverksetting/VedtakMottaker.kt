@@ -88,7 +88,7 @@ class VedtakMottaker(
                     }
                 }
             } catch (e: Exception) {
-                val feilmelding = "En feil oppstod under prosessering av vedtak med vedtakId=$vedtakId: ${e.message}"
+                val feilmelding = "En feil oppstod under prosessering av vedtak med vedtakId=$vedtakId"
                 logger.error(feilmelding, e)
                 sendUtbetalingFeiletEvent(context, vedtakId, null, feilmelding)
 

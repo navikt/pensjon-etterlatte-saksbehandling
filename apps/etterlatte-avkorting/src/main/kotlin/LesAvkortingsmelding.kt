@@ -38,8 +38,7 @@ internal class LesAvkortingsmelding(
                 context.publish(packet.toJson())
                 logger.info("Publisert en beregning")
             } catch (e: Exception) {
-                // TODO endre denne
-                println("spiser en melding fordi: " + e)
+                logger.error("spiser en melding på grunn av feil", e)
             }
         }
 }

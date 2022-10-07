@@ -66,7 +66,7 @@ internal class Fordeler(
                     }
                 }
             } catch (e: Exception) {
-                logger.error("Uhåndtert feilsituasjon: ${e.message}", e)
+                logger.error("Uhåndtert feilsituasjon", e)
             }
         }
 

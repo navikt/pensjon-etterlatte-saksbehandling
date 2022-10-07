@@ -73,7 +73,7 @@ class GrunnlagHendelser(
                         logger.info("Lagt ut melding om grunnlagsendring")
                     }
                 } catch (e: Exception) {
-                    logger.error("Spiser en melding fordi: " + e.message)
+                    logger.error("Spiser en melding på grunn av feil", e)
                 }
             }
         }

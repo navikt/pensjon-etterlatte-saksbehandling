@@ -53,8 +53,7 @@ internal class UnderkjennVedtak(
                     ).toJson()
                 )
             } catch (e: Exception) {
-                // TODO endre denne
-                logger.warn("spiser en melding fordi ${e.message}", e)
+                logger.error("spiser en melding på grunn av feil", e)
             }
         }
 }

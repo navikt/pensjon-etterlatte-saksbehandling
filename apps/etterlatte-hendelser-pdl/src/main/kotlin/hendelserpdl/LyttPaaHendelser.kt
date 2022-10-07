@@ -60,7 +60,8 @@ class LyttPaaHendelser(
             )
         } catch (e: Exception) {
             log.error(
-                "kunne ikke haandtere doedshendelse for ${personhendelse.personidenter.first()}. ${e.message}"
+                "kunne ikke haandtere doedshendelse for ${personhendelse.personidenter.first()}.",
+                e
             )
         }
         dodsmeldinger++
@@ -85,7 +86,8 @@ class LyttPaaHendelser(
         } catch (e: Exception) {
             log.error(
                 "kunne ikke haandtere utflytting fra Norge-hendelse " +
-                    "for ${personhendelse.personidenter.first()}. ${e.message}"
+                    "for ${personhendelse.personidenter.first()}",
+                e
             )
         }
     }

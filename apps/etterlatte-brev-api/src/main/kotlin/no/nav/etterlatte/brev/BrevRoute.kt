@@ -103,7 +103,7 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
 
                 call.respond(brev)
             } catch (e: Exception) {
-                logger.error("Getting multipart error $e")
+                logger.error("Getting multipart error", e)
                 call.respond(HttpStatusCode.BadRequest)
             }
         }

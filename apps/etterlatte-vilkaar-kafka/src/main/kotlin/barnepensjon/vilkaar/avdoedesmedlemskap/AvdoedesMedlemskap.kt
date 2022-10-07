@@ -17,12 +17,13 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentArbeidsforhold
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentInntekt
+import no.nav.etterlatte.libs.common.grunnlag.hentMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapVurdering
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Gap
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsperiode
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
@@ -37,15 +38,13 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-fun vilkaarAvdoedesMedlemskap(
-    avdød: Grunnlagsdata<JsonNode>,
-    saksbehandlerMedlemskapsPerioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?
-): VurdertVilkaar {
+fun vilkaarAvdoedesMedlemskap(avdød: Grunnlagsdata<JsonNode>): VurdertVilkaar {
     val vilkaarstype = Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP
 
     val arbeidsforholdOpplysning = avdød.hentArbeidsforhold() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
     val inntektsOpplysning = avdød.hentInntekt() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
     val doedsdato = avdød.hentDoedsdato()?.verdi ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
+    val medlemskapsperioder = avdød.hentMedlemskapsperiode() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
 
     val bosattNorgeMetakriterie = metakriterieBosattNorge(avdød)
 
@@ -53,7 +52,7 @@ fun vilkaarAvdoedesMedlemskap(
         arbeidsforholdOpplysning,
         inntektsOpplysning,
         doedsdato,
-        saksbehandlerMedlemskapsPerioder
+        medlemskapsperioder
     )
 
     val vurderingsResultat =
@@ -72,7 +71,7 @@ private fun kriterieMedlemskapOffentligOgInntekt(
     arbeidsforholdOpplysning: Opplysning.Periodisert<AaregResponse?>,
     inntekt: Opplysning.Konstant<InntektsOpplysning>,
     doedsdato: LocalDate,
-    saksbehandlerMedlemskapsperioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?
+    medlemskapsperioder: Opplysning.Periodisert<SaksbehandlerMedlemskapsperiode?>
 ): Kriterie {
     val inntektsOpplysning = inntekt.let {
         VilkaarOpplysning(
@@ -86,14 +85,13 @@ private fun kriterieMedlemskapOffentligOgInntekt(
     val avdoedesMedlemskapGrunnlag = AvdoedesMedlemskapGrunnlag(
         inntektsOpplysning = inntektsOpplysning,
         arbeidsforholdOpplysning = arbeidsforholdOpplysning,
-        saksbehandlerMedlemsPerioder = saksbehandlerMedlemskapsperioder,
         doedsdato = doedsdato
     )
 
     val ufoere = finnPensjonEllerTrygdePerioder(avdoedesMedlemskapGrunnlag, PeriodeType.UFOERETRYGD, "ufoeretrygd")
     val alder = finnPensjonEllerTrygdePerioder(avdoedesMedlemskapGrunnlag, PeriodeType.ALDERSPENSJON, "alderspensjon")
     val arbeidsforhold = finnArbeidsforholdPerioder(avdoedesMedlemskapGrunnlag)
-    val saksbehandlerPerioder = finnSaksbehandlerMedlemsPerioder(avdoedesMedlemskapGrunnlag)
+    val saksbehandlerPerioder = finnSaksbehandlerMedlemsPerioder(medlemskapsperioder)
     val inntektsperioder = finnArbeidsinntektPerioder(avdoedesMedlemskapGrunnlag)
     val offentligYtelserPerioder = finnOffentligeYtelserPerioder(avdoedesMedlemskapGrunnlag)
 

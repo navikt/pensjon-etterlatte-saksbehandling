@@ -46,6 +46,7 @@ enum class Opplysningstyper {
     UTENLANDSOPPHOLD,
     UTENLANDSADRESSE,
     INNTEKT,
+    MEDLEMSKAPSPERIODE,
 
     SOESKEN_I_BEREGNINGEN // Kun for soeskenjustering
 }

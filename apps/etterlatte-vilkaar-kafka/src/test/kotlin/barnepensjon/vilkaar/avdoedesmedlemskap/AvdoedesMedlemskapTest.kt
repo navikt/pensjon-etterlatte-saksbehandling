@@ -6,27 +6,21 @@ import adresserNorgePdl
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import grunnlag.kilde
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import grunnlag.medlemskap
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapVurdering
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.Utfall
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.time.Instant
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
@@ -60,22 +54,18 @@ class AvdoedesMedlemskapTest {
             UUID.randomUUID(),
             kilde,
             inntekt("inntektsopplysning.json").toJsonNode()
-        )
+        ),
+        Opplysningstyper.MEDLEMSKAPSPERIODE to Opplysning.Periodisert(medlemskap),
+        Opplysningstyper.ARBEIDSFORHOLD_V1 to arbeidsforhold("arbeidsforhold100.json")
     )
 
-    private val testdata = GrunnlagTestData(
+    private val avdoedTestdata = GrunnlagTestData(
         opplysningsmapAvdødOverrides = avdoedOpplysninger
-    )
+    ).hentOpplysningsgrunnlag().hentAvdoed()
 
     @Test
     fun `Skal returnere med utfall oppfyllt dersom det ikke er gaps i de gyldige periodene`() {
-        val arbeidsforhold = arbeidsforhold("arbeidsforhold100.json")
-        avdoedOpplysninger[Opplysningstyper.ARBEIDSFORHOLD_V1] = arbeidsforhold
-
-        val vurdertVilkaar = vilkaarAvdoedesMedlemskap(
-            testdata.hentOpplysningsgrunnlag().hentAvdoed(),
-            saksbehandlerOpplysninger
-        )
+        val vurdertVilkaar = vilkaarAvdoedesMedlemskap(avdoedTestdata)
 
         assertEquals(VurderingsResultat.OPPFYLT, vurdertVilkaar.resultat)
         assertEquals(Utfall.OPPFYLT, vurdertVilkaar.utfall)
@@ -93,14 +83,13 @@ class AvdoedesMedlemskapTest {
     @Disabled("Kommentert ut for å komme videre i saksbehandling uten rett testbrukere.")
     fun `Skal returnere med utfall ikke oppfyllt dersom det er gaps i de gyldige periodene`() {
         val vurdertVilkaar = vilkaarAvdoedesMedlemskap(
-            testdata.hentOpplysningsgrunnlag().hentAvdoed() + mapOf(
+            avdoedTestdata + mapOf(
                 Opplysningstyper.INNTEKT to Opplysning.Konstant(
                     UUID.randomUUID(),
                     kilde,
                     inntekt("inntektsopplysningOpphold.json").toJsonNode()
                 )
-            ),
-            saksbehandlerOpplysninger
+            )
         )
 
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, vurdertVilkaar.resultat)
@@ -121,37 +110,5 @@ class AvdoedesMedlemskapTest {
 
         private fun arbeidsforhold(file: String) =
             objectMapper.readValue<Opplysning.Periodisert<JsonNode>>(readFile(file))
-
-        private val saksbehandlerOpplysninger = VilkaarOpplysning(
-            id = UUID.randomUUID(),
-            kilde = Grunnlagsopplysning.Vilkaarskomponenten("vilkaar"),
-            opplysningType = Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
-            opplysning = SaksbehandlerMedlemskapsperioder(
-                listOf(
-                    SaksbehandlerMedlemskapsperiode(
-                        periodeType = PeriodeType.DAGPENGER,
-                        id = UUID.randomUUID().toString(),
-                        kilde = Grunnlagsopplysning.Saksbehandler("zid122", Instant.now()),
-                        fraDato = LocalDate.of(2021, 1, 1),
-                        tilDato = LocalDate.of(2022, 1, 1),
-                        stillingsprosent = null,
-                        arbeidsgiver = null,
-                        begrunnelse = "Sykdom",
-                        oppgittKilde = "NAV"
-                    ),
-                    SaksbehandlerMedlemskapsperiode(
-                        periodeType = PeriodeType.ARBEIDSPERIODE,
-                        id = UUID.randomUUID().toString(),
-                        kilde = Grunnlagsopplysning.Saksbehandler("zid122", Instant.now()),
-                        fraDato = LocalDate.of(2021, 1, 1),
-                        tilDato = LocalDate.of(2022, 1, 1),
-                        stillingsprosent = "70.0",
-                        arbeidsgiver = null,
-                        begrunnelse = "Annen jobb",
-                        oppgittKilde = "NAV"
-                    )
-                )
-            )
-        )
     }
 }

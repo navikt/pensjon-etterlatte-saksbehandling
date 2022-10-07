@@ -73,7 +73,6 @@ data class AvdoedesMedlemskapVurdering(
 data class AvdoedesMedlemskapGrunnlag(
     val inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>,
     val arbeidsforholdOpplysning: Opplysning.Periodisert<AaregResponse?>,
-    val saksbehandlerMedlemsPerioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?,
     val doedsdato: LocalDate
 )
 

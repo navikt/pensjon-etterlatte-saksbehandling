@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSNUMMER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.INNTEKT
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.KONTAKTADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.MEDLEMSKAPSPERIODE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.NAVN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.OPPHOLDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.PERSONROLLE
@@ -29,6 +30,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTENLANDSOPPHOLD
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTLAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.VERGEMAALELLERFREMTIDSFULLMAKT
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse
@@ -78,6 +80,8 @@ fun Grunnlagsdata<JsonNode>.hentSøskenjustering() =
     this.hentKonstantOpplysning<Beregningsgrunnlag>(SOESKEN_I_BEREGNINGEN)
 fun Grunnlagsdata<JsonNode>.hentInntekt() =
     this.hentKonstantOpplysning<InntektsOpplysning>(INNTEKT)
+fun Grunnlagsdata<JsonNode>.hentMedlemskapsperiode() =
+    this.hentPeriodisertOpplysning<SaksbehandlerMedlemskapsperiode?>(MEDLEMSKAPSPERIODE)
 
 fun Grunnlagsdata<JsonNode>.hentArbeidsforhold() = // Kun avdød som har denne opplysningen
     this.hentPeriodisertOpplysning<AaregResponse?>(ARBEIDSFORHOLD_V1)

@@ -116,7 +116,7 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
 
       <VilkaarBorder />
       <BehandlingHandlingKnapper>
-        <VilkaarsVurderingKnapper />
+        {vilkaarsvurdering.resultat && <VilkaarsVurderingKnapper />}
       </BehandlingHandlingKnapper>
     </>
   )

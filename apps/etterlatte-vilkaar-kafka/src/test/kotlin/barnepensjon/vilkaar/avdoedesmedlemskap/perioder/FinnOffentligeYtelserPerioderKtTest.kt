@@ -3,7 +3,8 @@ package barnepensjon.vilkaar.avdoedesmedlemskap.perioder
 import LesVilkaarsmeldingTest.Companion.readFile
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.mockk
-import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
+import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
@@ -17,11 +18,12 @@ internal class FinnOffentligeYtelserPerioderKtTest {
     private fun grunnlag(arbeidOpplysning: String): AvdoedesMedlemskapGrunnlag {
         val inntekter =
             objectMapper.readValue<VilkaarOpplysning<InntektsOpplysning>>(readFile(arbeidOpplysning))
-        val arbeidsforhold = mockk<VilkaarOpplysning<ArbeidsforholdOpplysning>>()
+        val arbeidsforhold = mockk<Opplysning.Periodisert<AaregResponse>>()
 
+        @Suppress("UNCHECKED_CAST")
         return AvdoedesMedlemskapGrunnlag(
             inntekter,
-            arbeidsforhold,
+            arbeidsforhold as Opplysning.Periodisert<AaregResponse?>,
             null,
             LocalDate.parse("2022-07-01")
         )

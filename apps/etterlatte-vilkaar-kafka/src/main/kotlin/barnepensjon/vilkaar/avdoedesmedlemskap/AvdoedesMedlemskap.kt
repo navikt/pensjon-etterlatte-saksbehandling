@@ -6,14 +6,15 @@ import barnepensjon.vilkaar.avdoedesmedlemskap.perioder.finnOffentligeYtelserPer
 import barnepensjon.vilkaar.avdoedesmedlemskap.perioder.finnPensjonEllerTrygdePerioder
 import barnepensjon.vilkaar.avdoedesmedlemskap.perioder.finnSaksbehandlerMedlemsPerioder
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.barnepensjon.Periode
 import no.nav.etterlatte.barnepensjon.hentGaps
 import no.nav.etterlatte.barnepensjon.hentVurdering
 import no.nav.etterlatte.barnepensjon.kombinerPerioder
-import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
+import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.hentArbeidsforhold
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentInntekt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
@@ -23,6 +24,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsperiode
+import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
 import no.nav.etterlatte.libs.common.vikaar.Kriteriegrunnlag
@@ -37,24 +39,20 @@ import java.util.*
 
 fun vilkaarAvdoedesMedlemskap(
     avdød: Grunnlagsdata<JsonNode>,
-    arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>?,
     saksbehandlerMedlemskapsPerioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?
 ): VurdertVilkaar {
-    if (listOf(avdød, arbeidsforholdOpplysning).any { it == null }) {
-        return VurdertVilkaar(
-            Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP,
-            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
-            null,
-            emptyList(),
-            LocalDateTime.now()
-        )
-    }
+    val vilkaarstype = Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP
+
+    val arbeidsforholdOpplysning = avdød.hentArbeidsforhold() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
+    val inntektsOpplysning = avdød.hentInntekt() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
+    val doedsdato = avdød.hentDoedsdato()?.verdi ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
 
     val bosattNorgeMetakriterie = metakriterieBosattNorge(avdød)
 
     val medlemskapOffentligOgInntektKriterie = kriterieMedlemskapOffentligOgInntekt(
-        avdød,
-        arbeidsforholdOpplysning!!,
+        arbeidsforholdOpplysning,
+        inntektsOpplysning,
+        doedsdato,
         saksbehandlerMedlemskapsPerioder
     )
 
@@ -70,20 +68,20 @@ fun vilkaarAvdoedesMedlemskap(
     )
 }
 
-fun kriterieMedlemskapOffentligOgInntekt(
-    avdød: Grunnlagsdata<JsonNode>,
-    arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>,
+private fun kriterieMedlemskapOffentligOgInntekt(
+    arbeidsforholdOpplysning: Opplysning.Periodisert<AaregResponse?>,
+    inntekt: Opplysning.Konstant<InntektsOpplysning>,
+    doedsdato: LocalDate,
     saksbehandlerMedlemskapsperioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?
 ): Kriterie {
-    val doedsdato = avdød.hentDoedsdato()?.verdi ?: throw OpplysningKanIkkeHentesUt()
-    val inntektsOpplysning = avdød.hentInntekt()?.let {
+    val inntektsOpplysning = inntekt.let {
         VilkaarOpplysning(
             id = it.id,
             kilde = it.kilde,
             opplysningType = Opplysningstyper.INNTEKT,
             opplysning = it.verdi
         )
-    } ?: throw OpplysningKanIkkeHentesUt("INNTEKT kan ikke hentes på avdoed")
+    }
 
     val avdoedesMedlemskapGrunnlag = AvdoedesMedlemskapGrunnlag(
         inntektsOpplysning = inntektsOpplysning,
@@ -113,13 +111,12 @@ fun kriterieMedlemskapOffentligOgInntekt(
         kilde = Grunnlagsopplysning.Vilkaarskomponenten("vilkaarskomponenten"),
         opplysning = opplysning
     )
-    val kriterie = Kriterie(
+
+    return Kriterie(
         navn = Kriterietyper.AVDOED_OPPFYLLER_MEDLEMSKAP,
         resultat = if (opplysning.gaps.isEmpty()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT,
         basertPaaOpplysninger = listOf(grunnlag)
     )
-
-    return kriterie
 }
 
 fun finnGapsIGodkjentePerioder(

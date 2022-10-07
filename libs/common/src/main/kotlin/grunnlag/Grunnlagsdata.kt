@@ -2,10 +2,12 @@ package no.nav.etterlatte.libs.common.grunnlag
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.ADRESSEBESKYTTELSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.ARBEIDSFORHOLD_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOEDESBARN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.DELTBOSTEDSADRESSE
@@ -76,6 +78,9 @@ fun Grunnlagsdata<JsonNode>.hentSøskenjustering() =
     this.hentKonstantOpplysning<Beregningsgrunnlag>(SOESKEN_I_BEREGNINGEN)
 fun Grunnlagsdata<JsonNode>.hentInntekt() =
     this.hentKonstantOpplysning<InntektsOpplysning>(INNTEKT)
+
+fun Grunnlagsdata<JsonNode>.hentArbeidsforhold() = // Kun avdød som har denne opplysningen
+    this.hentPeriodisertOpplysning<AaregResponse?>(ARBEIDSFORHOLD_V1)
 
 inline fun <reified T> Grunnlagsdata<JsonNode>.hentKonstantOpplysning(
     opplysningstype: Opplysningstyper

@@ -4,7 +4,8 @@ import LesVilkaarsmeldingTest.Companion.readFile
 import com.fasterxml.jackson.module.kotlin.readValue
 import grunnlag.kilde
 import io.mockk.mockk
-import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
+import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
@@ -20,8 +21,9 @@ import java.util.*
 internal class FinnPensjonEllerTrygdePerioderKtTest {
     private fun grunnlag(arbeidOpplysning: String): AvdoedesMedlemskapGrunnlag {
         val inntekter = objectMapper.readValue<InntektsOpplysning>(readFile(arbeidOpplysning))
-        val arbeidsforhold = mockk<VilkaarOpplysning<ArbeidsforholdOpplysning>>()
+        val arbeidsforhold = mockk<Opplysning.Periodisert<AaregResponse>>()
 
+        @Suppress("UNCHECKED_CAST")
         return AvdoedesMedlemskapGrunnlag(
             VilkaarOpplysning(
                 id = UUID.randomUUID(),
@@ -29,7 +31,7 @@ internal class FinnPensjonEllerTrygdePerioderKtTest {
                 kilde = kilde,
                 opplysning = inntekter
             ),
-            arbeidsforhold,
+            arbeidsforhold as Opplysning.Periodisert<AaregResponse?>,
             null,
             LocalDate.parse("2022-07-01")
         )

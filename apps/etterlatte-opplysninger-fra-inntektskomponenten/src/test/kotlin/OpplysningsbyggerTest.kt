@@ -1,16 +1,17 @@
 import com.fasterxml.jackson.module.kotlin.readValue
 import grunnlag.AVDØD_FØDSELSNUMMER
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
-import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.inntekt.Ident
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.InntektsKomponentenResponse
 import no.nav.etterlatte.opplysninger.kilde.inntektskomponenten.OpplysningsByggerService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
+import java.time.YearMonth
 
 class OpplysningsbyggerTest {
 
@@ -47,9 +48,28 @@ class OpplysningsbyggerTest {
 
         assertEquals(opplysninger.size, 2)
         assertEquals(opplysninger[1].opplysningType, Opplysningstyper.ARBEIDSFORHOLD_V1)
-        val arbeidsforholdOpplysning = (opplysninger[1].opplysning) as ArbeidsforholdOpplysning
-        assertEquals(arbeidsforholdOpplysning.arbeidsforhold.size, 1)
-        assertEquals(arbeidsforholdOpplysning.arbeidsforhold[0].type.beskrivelse, "Ordinært arbeidsforhold")
+        val arbeidsforholdOpplysning = (opplysninger[1].opplysning) as AaregResponse
+        assertEquals(arbeidsforholdOpplysning.type.beskrivelse, "Ordinært arbeidsforhold")
+    }
+
+    @Test
+    fun `hvis bruker ikke har noe arbeidsforhold så lager vi en tom periodisert opplysning`() {
+        val service = OpplysningsByggerService()
+        val aaregResponse = emptyList<AaregResponse>()
+        val avdødFnr = Foedselsnummer.of("06087748063")
+
+        val opplysninger = service.byggOpplysninger(
+            InntektsKomponentenResponse(null, Ident("", "NA")),
+            aaregResponse,
+            avdødFnr
+        )
+
+        val arbeidsforholdOpplysning = opplysninger[1]
+
+        assertEquals(null, arbeidsforholdOpplysning.opplysning)
+        assertEquals("06087748063", arbeidsforholdOpplysning.fnr!!.value)
+        assertEquals(YearMonth.of(1977, 8), arbeidsforholdOpplysning.periode!!.fom)
+        assertEquals(null, arbeidsforholdOpplysning.periode?.tom)
     }
 
     private fun readFile(file: String): String {

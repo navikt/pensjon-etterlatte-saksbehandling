@@ -45,11 +45,18 @@ spec:
       value: "https://saf.dev-fss-pub.nais.io/graphql"
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
+    - name: ETTERLATTE_PROXY_URL
+      value: https://etterlatte-proxy.dev-fss-pub.nais.io/aad
+    - name: ETTERLATTE_PROXY_AUDIENCE
+      value: "dev-fss:etterlatte:etterlatte-proxy"
+    - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
+      value: api://dev-fss.etterlatte.etterlatte-proxy/.default
   accessPolicy:
     outbound:
       rules:
         - application: ey-pdfgen
         - application: etterlatte-brreg
+        - application: etterlatte-pdl-proxy
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui

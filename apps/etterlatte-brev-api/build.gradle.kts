@@ -13,6 +13,7 @@ dependencies {
 
     implementation(Ktor2.ServerCore)
     implementation(Ktor2.ClientCore)
+    implementation(Ktor2.ClientAuth)
     implementation(Ktor2.ClientContentNegotiation)
     implementation(Ktor2.ServerContentNegotiation)
     implementation(Ktor2.CallLogging)
@@ -21,6 +22,7 @@ dependencies {
     implementation(Ktor2.ClientLogging)
     implementation(Ktor2.Jackson)
     implementation(Ktor2.Auth)
+    implementation(Ktor2.AuthJwt)
     implementation(Cache.Caffeine)
 
     implementation(Micrometer.Prometheus)

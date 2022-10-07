@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.AvslagBrevRequest
 import no.nav.etterlatte.brev.model.InnvilgetBrevRequest
 import no.nav.etterlatte.brev.model.mapper.finnBarn
+import no.nav.etterlatte.adresse.AdresseService
 import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.domene.vedtak.VedtakType
@@ -38,6 +39,7 @@ class BrevService(
     private val vedtakService: VedtakService,
     private val norg2Klient: Norg2Klient,
     private val grunnbeloepKlient: GrunnbeloepKlient,
+    private val adresseService: AdresseService,
     private val sendToRapid: (String) -> Unit
 ) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
@@ -60,10 +62,8 @@ class BrevService(
 
     suspend fun opprett(mottaker: Mottaker, mal: Mal, enhet: String): BrevInnhold {
         val brevMottaker = when {
-            // todo: hent adresse fra pdl
-            mottaker.foedselsnummer != null -> BrevMottaker("Fornavn", "Fødselsnummer", "Veien 22", "0000", "Oslo")
-            // todo: hent adresse fra pdl og skriv om mottaker for brev til å støtte organisasjoner.
-            mottaker.orgnummer != null -> BrevMottaker("Fornavn", "Organisasjon", "Veien 22", "0000", "Oslo")
+            mottaker.foedselsnummer != null -> BrevMottaker.fraRegoppslag(adresseService.hentMottakerAdresse(mottaker.foedselsnummer!!.value))
+            mottaker.orgnummer != null -> BrevMottaker.fraRegoppslag(adresseService.hentMottakerAdresse(mottaker.orgnummer!!))
             mottaker.adresse != null -> BrevMottaker.fraAdresse(adresse = mottaker.adresse!!)
             else -> throw Exception("Ingen brevmottaker spesifisert")
         }

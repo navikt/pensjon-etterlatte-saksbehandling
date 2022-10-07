@@ -14,8 +14,7 @@ abstract class BrevRequest {
 
 // TODO: Sikre non-nullable
 data class Mottaker(
-    val fornavn: String? = null,
-    val etternavn: String? = null,
+    val navn: String? = null,
     val adresse: String? = null,
     val postnummer: String? = null,
     val poststed: String? = null,
@@ -23,12 +22,20 @@ data class Mottaker(
 ) {
     companion object {
         fun fraAdresse(adresse: Adresse) = Mottaker(
-            fornavn = adresse.fornavn,
-            etternavn = adresse.etternavn,
+            navn = "${adresse.fornavn} ${adresse.etternavn}",
             adresse = adresse.adresse,
             postnummer = adresse.postnummer,
             poststed = adresse.poststed,
             land = adresse.land
+        )
+
+        // todo: Må legge til støtte for utenlandske adresser. Er kun adresselinje 1 hvis innland. linje 2 og 3 hvis utland
+        fun fraRegoppslag(regoppslag: RegoppslagResponseDTO) = Mottaker(
+            navn = regoppslag.navn,
+            adresse = regoppslag.adresse.adresselinje1,
+            postnummer = regoppslag.adresse.postnummer,
+            poststed = regoppslag.adresse.poststed,
+            land = regoppslag.adresse.land
         )
     }
 }
@@ -39,3 +46,23 @@ data class Avsender(
     val postnummer: String,
     val telefon: String
 )
+
+data class RegoppslagResponseDTO(
+    val navn: String,
+    val adresse: Adresse
+) {
+    data class Adresse(
+        val type: AdresseType,
+        val adresselinje1: String,
+        val adresselinje2: String?,
+        val adresselinje3: String?,
+        val postnummer: String?,
+        val poststed: String?,
+        val landkode: String,
+        val land: String
+    )
+
+    enum class AdresseType {
+        NORSKPOSTADRESSE, UTENLANDSKPOSTADRESSE
+    }
+}

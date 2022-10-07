@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.adresse.AdresseKlient
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.db.BrevRepository
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepKlient
@@ -22,6 +23,7 @@ internal class BrevServiceTest {
 
     private val mockkDb = mockk<BrevRepository>()
     private val mockPdfGen = mockk<PdfGeneratorKlient>()
+    private val adresseService = mockk<AdresseKlient>()
     private val norg2Klient = mockk<Norg2Klient>()
     private val grunnbeloepKlientMock = mockk<GrunnbeloepKlient>()
     private val sendToRapid = mockk<(String) -> Unit>()
@@ -32,6 +34,7 @@ internal class BrevServiceTest {
         VedtakServiceMock(),
         norg2Klient,
         grunnbeloepKlientMock,
+        adresseService,
         sendToRapid
     )
 

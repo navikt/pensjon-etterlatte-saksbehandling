@@ -119,6 +119,7 @@ export default function NyttBrev({ leggTilNytt }: { leggTilNytt: (brev: IBrev) =
   }
 
   const oppdaterMottaker = (value: string, id: string, section?: string) => {
+    setKlarforLagring(false)
     setFnrMottaker(id === 'FNR' ? value : '')
     setOrgMottaker(id === 'ORGNR' ? value : '')
 

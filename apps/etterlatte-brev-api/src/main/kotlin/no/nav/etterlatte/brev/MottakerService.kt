@@ -5,18 +5,24 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import no.nav.etterlatte.brev.model.RegoppslagResponseDTO
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate
 
-class MottakerService(private val httpClient: HttpClient, private val url: String) {
+
+interface MottakerService {
+    suspend fun hentStatsforvalterListe(): List<Enhet>
+}
+
+class MottakerServiceImpl(private val httpClient: HttpClient, private val url: String) : MottakerService {
     private val logger = LoggerFactory.getLogger(MottakerService::class.java)
 
     private val cache = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofDays(1))
         .build<LocalDate, List<Enhet>>()
 
-    suspend fun hentStatsforvalterListe(): List<Enhet> {
+    override suspend fun hentStatsforvalterListe(): List<Enhet> {
         val enheter = cache.getIfPresent(LocalDate.now())
 
         return if (!enheter.isNullOrEmpty()) {

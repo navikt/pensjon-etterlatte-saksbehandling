@@ -35,8 +35,7 @@ internal class MappersTest {
     fun `Skal finne barnets adresse som mottaker`() {
         val mottaker = vedtak.finnMottaker()
 
-        mottaker.fornavn shouldBe "TALENTFULL"
-        mottaker.etternavn shouldBe "BLYANT"
+        mottaker.navn shouldBe "TALENTFULL BLYANT"
         mottaker.adresse shouldBe "Bøveien 937"
         mottaker.postnummer shouldBe "8475"
         mottaker.poststed shouldBe "Oslo"

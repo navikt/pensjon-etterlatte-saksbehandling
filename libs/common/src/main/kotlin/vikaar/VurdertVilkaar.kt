@@ -18,7 +18,19 @@ data class VurdertVilkaar(
     val utfall: Utfall?,
     val kriterier: List<Kriterie>,
     val vurdertDato: LocalDateTime
-)
+) {
+    companion object {
+        fun kanIkkeVurdere(type: Vilkaartyper): VurdertVilkaar {
+            return VurdertVilkaar(
+                type,
+                VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+                null,
+                emptyList(),
+                LocalDateTime.now()
+            )
+        }
+    }
+}
 
 data class VilkaarResultat(
     val resultat: VurderingsResultat?,

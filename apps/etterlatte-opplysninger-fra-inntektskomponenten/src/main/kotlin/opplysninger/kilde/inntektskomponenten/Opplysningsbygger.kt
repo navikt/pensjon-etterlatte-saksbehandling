@@ -2,15 +2,16 @@ package no.nav.etterlatte.opplysninger.kilde.inntektskomponenten
 
 import no.nav.etterlatte.OpplysningsBygger
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
-import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.inntekt.ArbeidsInntektMaaned
 import no.nav.etterlatte.libs.common.inntekt.InntektType
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import java.time.Instant
+import java.time.YearMonth
 import java.util.*
 
 class OpplysningsByggerService : OpplysningsBygger {
@@ -19,7 +20,7 @@ class OpplysningsByggerService : OpplysningsBygger {
         inntektsKomponentenResponse: InntektsKomponentenResponse,
         arbeidsforholdListe: List<AaregResponse>,
         fnr: Foedselsnummer
-    ): List<Grunnlagsopplysning<out Any>> {
+    ): List<Grunnlagsopplysning<out Any?>> {
         val inntekter = inntektsKomponentenResponse.arbeidsInntektMaaned?.let { inntekter ->
             val pensjonEllerTrygd = inntekter.filtrertPaaInntektsType(InntektType.PENSJON_ELLER_TRYGD)
             val ytelseFraOffentlig = inntekter.filtrertPaaInntektsType(InntektType.YTELSE_FRA_OFFENTLIGE)
@@ -29,20 +30,39 @@ class OpplysningsByggerService : OpplysningsBygger {
             InntektsOpplysning(pensjonEllerTrygd, ytelseFraOffentlig, loennsinntekt, naeringsinntekt)
         } ?: InntektsOpplysning(emptyList(), emptyList(), emptyList(), emptyList())
 
+        val innhentetTidspunkt = Instant.now()
         val inntektsOpplysning = lagOpplysning(
             opplysningsType = Opplysningstyper.INNTEKT,
-            kilde = Grunnlagsopplysning.Aordningen(Instant.now()),
+            kilde = Grunnlagsopplysning.Aordningen(innhentetTidspunkt),
             opplysning = inntekter,
             fnr = fnr
         )
 
-        val arbeidsforholdOpplysning = lagOpplysning(
-            Opplysningstyper.ARBEIDSFORHOLD_V1,
-            Grunnlagsopplysning.AAregisteret(Instant.now()),
-            ArbeidsforholdOpplysning(arbeidsforholdListe),
-            fnr
+        val arbeidsforholdOpplysning = arbeidsforholdListe.takeIf { it.isNotEmpty() }?.map {
+            lagOpplysning(
+                opplysningsType = Opplysningstyper.ARBEIDSFORHOLD_V1,
+                kilde = Grunnlagsopplysning.Aordningen(innhentetTidspunkt),
+                opplysning = it,
+                periode = Periode(
+                    fom = YearMonth.from(it.ansettelsesperiode.startdato),
+                    tom = it.ansettelsesperiode.sluttdato?.let { tom -> YearMonth.from(tom) }
+                ),
+                fnr = fnr
+            )
+        } ?: listOf(
+            lagOpplysning(
+                opplysningsType = Opplysningstyper.ARBEIDSFORHOLD_V1,
+                kilde = Grunnlagsopplysning.Aordningen(innhentetTidspunkt),
+                opplysning = null,
+                periode = Periode(
+                    fom = YearMonth.from(fnr.getBirthDate()),
+                    tom = null
+                ),
+                fnr = fnr
+            )
         )
-        return listOf(inntektsOpplysning, arbeidsforholdOpplysning)
+
+        return listOf(inntektsOpplysning) + arbeidsforholdOpplysning
     }
 }
 
@@ -54,15 +74,16 @@ fun <T> lagOpplysning(
     opplysningsType: Opplysningstyper,
     kilde: Grunnlagsopplysning.Kilde,
     opplysning: T,
-    fnr: Foedselsnummer?
+    fnr: Foedselsnummer?,
+    periode: Periode? = null
 ): Grunnlagsopplysning<T> {
     return Grunnlagsopplysning(
-        UUID.randomUUID(),
-        kilde,
-        opplysningsType,
-        objectMapper.createObjectNode(),
-        opplysning,
-        null,
-        fnr
+        id = UUID.randomUUID(),
+        kilde = kilde,
+        opplysningType = opplysningsType,
+        meta = objectMapper.createObjectNode(),
+        opplysning = opplysning,
+        periode = periode,
+        fnr = fnr
     )
 }

@@ -15,7 +15,6 @@ import no.nav.etterlatte.barnepensjon.setVurderingFraKommerBarnetTilGode
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.domene.vedtak.Behandling
-import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
@@ -38,7 +37,7 @@ import java.time.YearMonth
 class VilkaarService {
     private val logger = LoggerFactory.getLogger(VilkaarService::class.java)
 
-    fun mapVilkaarForstegangsbehandling(
+    private fun mapVilkaarForstegangsbehandling(
         grunnlag: Opplysningsgrunnlag,
         opplysninger: List<VilkaarOpplysning<JsonNode>>,
         virkningstidspunkt: LocalDate
@@ -50,7 +49,6 @@ class VilkaarService {
         val søker = grunnlag.søker
         val avdød = grunnlag.hentAvdoed()
         val gjenlevende = grunnlag.hentGjenlevende()
-        val arbeidsforhold = finnOpplysning<ArbeidsforholdOpplysning>(opplysninger, Opplysningstyper.ARBEIDSFORHOLD_V1)
         val saksbehandlerPerioder = finnOpplysning<SaksbehandlerMedlemskapsperioder>(
             opplysninger,
             Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE
@@ -62,7 +60,6 @@ class VilkaarService {
             vilkaarDoedsfallErRegistrert(avdød, søker),
             vilkaarAvdoedesMedlemskap(
                 avdød,
-                arbeidsforhold,
                 saksbehandlerPerioder
             ),
             vilkaarBarnetsMedlemskap(
@@ -78,7 +75,7 @@ class VilkaarService {
         return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
     }
 
-    fun mapVilkaarRevurdering(
+    private fun mapVilkaarRevurdering(
         grunnlag: Opplysningsgrunnlag,
         virkningstidspunkt: LocalDate,
         revurderingAarsak: RevurderingAarsak
@@ -101,7 +98,7 @@ class VilkaarService {
         return VilkaarResultat(vilkaarResultat, vilkaar, vurdertDato)
     }
 
-    fun beregnVirkningstidspunktFoerstegangsbehandling(
+    private fun beregnVirkningstidspunktFoerstegangsbehandling(
         grunnlag: Opplysningsgrunnlag,
         soeknadMottattDato: LocalDate
     ): YearMonth {
@@ -118,6 +115,7 @@ class VilkaarService {
                 val søkerDødsdato = grunnlag.søker.hentDoedsdato()
                 hentVirkningstidspunktRevurderingSoekerDoedsfall(søkerDødsdato?.verdi)
             }
+
             RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
                 "Kan ikke ha en revurdering på grunn av manuelt opphør!"
             )
@@ -151,7 +149,7 @@ class VilkaarService {
         return YearMonth.from(doedsdato).plusMonths(1)
     }
 
-    fun mapKommerSoekerTilGode(
+    private fun mapKommerSoekerTilGode(
         grunnlag: Opplysningsgrunnlag,
         deprecatedVilkaarsopplysninger: List<VilkaarOpplysning<JsonNode>>
     ): KommerSoekerTilgode {

@@ -1,7 +1,8 @@
 package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
 
-import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
+import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import java.time.LocalDate
@@ -71,7 +72,7 @@ data class AvdoedesMedlemskapVurdering(
 
 data class AvdoedesMedlemskapGrunnlag(
     val inntektsOpplysning: VilkaarOpplysning<InntektsOpplysning>,
-    val arbeidsforholdOpplysning: VilkaarOpplysning<ArbeidsforholdOpplysning>,
+    val arbeidsforholdOpplysning: Opplysning.Periodisert<AaregResponse?>,
     val saksbehandlerMedlemsPerioder: VilkaarOpplysning<SaksbehandlerMedlemskapsperioder>?,
     val doedsdato: LocalDate
 )

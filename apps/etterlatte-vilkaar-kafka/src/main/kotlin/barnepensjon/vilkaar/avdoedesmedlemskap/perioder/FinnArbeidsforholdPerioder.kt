@@ -4,16 +4,18 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemska
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsperiode
 
-fun finnArbeidsforholdPerioder(grunnlag: AvdoedesMedlemskapGrunnlag): List<VurdertMedlemskapsperiode> =
-    grunnlag.arbeidsforholdOpplysning.opplysning.arbeidsforhold
+fun finnArbeidsforholdPerioder(grunnlag: AvdoedesMedlemskapGrunnlag): List<VurdertMedlemskapsperiode> {
+    return grunnlag.arbeidsforholdOpplysning.perioder
+        .filter { it.verdi != null }
         .map { arbeidsforhold ->
             VurdertMedlemskapsperiode(
                 periodeType = PeriodeType.ARBEIDSPERIODE,
-                kilde = grunnlag.arbeidsforholdOpplysning.kilde,
-                arbeidsgiver = arbeidsforhold.arbeidssted.identer.firstOrNull()?.ident,
-                stillingsprosent = "${arbeidsforhold.ansettelsesdetaljer.map { it.avtaltStillingsprosent }}",
-                fraDato = arbeidsforhold.ansettelsesperiode.startdato,
-                tilDato = arbeidsforhold.ansettelsesperiode.sluttdato ?: grunnlag.doedsdato,
-                godkjentPeriode = arbeidsforhold.ansettelsesdetaljer.all { it.avtaltStillingsprosent >= 80 }
+                kilde = arbeidsforhold.kilde,
+                arbeidsgiver = arbeidsforhold.verdi!!.arbeidssted.identer.firstOrNull()?.ident,
+                stillingsprosent = "${arbeidsforhold.verdi!!.ansettelsesdetaljer.map { it.avtaltStillingsprosent }}",
+                fraDato = arbeidsforhold.verdi!!.ansettelsesperiode.startdato,
+                tilDato = arbeidsforhold.verdi!!.ansettelsesperiode.sluttdato ?: grunnlag.doedsdato,
+                godkjentPeriode = arbeidsforhold.verdi!!.ansettelsesdetaljer.all { it.avtaltStillingsprosent >= 80 }
             )
         }
+}

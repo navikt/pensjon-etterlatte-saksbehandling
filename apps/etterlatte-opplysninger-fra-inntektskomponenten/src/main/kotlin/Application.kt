@@ -40,5 +40,5 @@ interface OpplysningsBygger {
         inntektsKomponentenResponse: InntektsKomponentenResponse,
         arbeidsforholdListe: List<AaregResponse>,
         fnr: Foedselsnummer
-    ): List<Grunnlagsopplysning<out Any>>
+    ): List<Grunnlagsopplysning<out Any?>>
 }

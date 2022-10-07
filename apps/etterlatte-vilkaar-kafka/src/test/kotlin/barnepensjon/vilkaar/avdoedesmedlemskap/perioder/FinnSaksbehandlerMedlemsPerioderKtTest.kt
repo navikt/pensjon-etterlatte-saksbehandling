@@ -1,8 +1,9 @@
 package barnepensjon.vilkaar.avdoedesmedlemskap.perioder
 
 import io.mockk.mockk
-import no.nav.etterlatte.libs.common.arbeidsforhold.ArbeidsforholdOpplysning
+import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
@@ -20,12 +21,13 @@ import java.util.*
 
 internal class FinnSaksbehandlerMedlemsPerioderKtTest {
     private fun grunnlag(): AvdoedesMedlemskapGrunnlag {
-        val arbeidsforhold = mockk<VilkaarOpplysning<ArbeidsforholdOpplysning>>()
+        val arbeidsforhold = mockk<Opplysning.Periodisert<AaregResponse>>()
         val inntekt = mockk<VilkaarOpplysning<InntektsOpplysning>>()
 
+        @Suppress("UNCHECKED_CAST")
         return AvdoedesMedlemskapGrunnlag(
             inntekt,
-            arbeidsforhold,
+            arbeidsforhold as Opplysning.Periodisert<AaregResponse?>,
             VilkaarOpplysning(
                 id = UUID.randomUUID(),
                 kilde = Grunnlagsopplysning.Vilkaarskomponenten("vilkaar"),

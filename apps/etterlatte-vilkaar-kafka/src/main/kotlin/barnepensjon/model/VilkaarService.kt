@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
@@ -49,19 +48,12 @@ class VilkaarService {
         val søker = grunnlag.søker
         val avdød = grunnlag.hentAvdoed()
         val gjenlevende = grunnlag.hentGjenlevende()
-        val saksbehandlerPerioder = finnOpplysning<SaksbehandlerMedlemskapsperioder>(
-            opplysninger,
-            Opplysningstyper.SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE
-        )
 
         val vilkaar = listOf(
             vilkaarFormaalForYtelsen(søker, virkningstidspunkt),
             vilkaarBrukerErUnder20(søker, avdød, virkningstidspunkt),
             vilkaarDoedsfallErRegistrert(avdød, søker),
-            vilkaarAvdoedesMedlemskap(
-                avdød,
-                saksbehandlerPerioder
-            ),
+            vilkaarAvdoedesMedlemskap(avdød),
             vilkaarBarnetsMedlemskap(
                 søker,
                 gjenlevende,

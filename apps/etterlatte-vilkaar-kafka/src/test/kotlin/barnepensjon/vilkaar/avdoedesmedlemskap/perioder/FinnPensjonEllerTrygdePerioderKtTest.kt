@@ -32,7 +32,6 @@ internal class FinnPensjonEllerTrygdePerioderKtTest {
                 opplysning = inntekter
             ),
             arbeidsforhold as Opplysning.Periodisert<AaregResponse?>,
-            null,
             LocalDate.parse("2022-07-01")
         )
     }

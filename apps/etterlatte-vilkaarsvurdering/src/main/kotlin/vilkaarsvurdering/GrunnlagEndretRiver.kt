@@ -47,7 +47,7 @@ class GrunnlagEndretRiver(
 
                 val behandlingType = BehandlingType.valueOf(packet["behandling.type"].asText())
                 val sakType = SakType.valueOf(packet["sak.sakType"].asText())
-                val sak = packet["sak"]
+
                 // Må få kopiert over alle disse tingene med virkningsdato osv
                 val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
 

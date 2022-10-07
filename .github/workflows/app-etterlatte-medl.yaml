@@ -20,6 +20,9 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - apps/etterlatte-medl-proxy/**
+      - libs/common/**
 
 jobs:
   test:

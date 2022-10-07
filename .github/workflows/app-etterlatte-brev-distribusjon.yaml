@@ -21,6 +21,9 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - apps/etterlatte-brev-distribusjon/**
+      - libs/common/**
 
 jobs:
   test:

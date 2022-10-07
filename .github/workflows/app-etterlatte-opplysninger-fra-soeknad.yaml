@@ -19,6 +19,8 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - apps/etterlatte-opplysninger-fra-soeknad/**
 
 jobs:
   test:

@@ -14,6 +14,10 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - apps/etterlatte-api/**
+      - libs/common/**
+      - libs/ktor2client-onbehalfof/**
   push:
     branches:
       - main

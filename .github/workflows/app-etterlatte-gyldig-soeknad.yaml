@@ -20,6 +20,9 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - apps/etterlatte-gyldig-soeknad/**
+      - libs/common/**
 
 jobs:
   test:

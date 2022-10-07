@@ -22,7 +22,6 @@ class AdresseKlient(
         }.body()
 
     } catch (exception: Exception) {
-        logger.error("Feil i kall mot Regoppslag: ", exception)
         throw AdresseException("Feil i kall mot Regoppslag", exception)
     }
 

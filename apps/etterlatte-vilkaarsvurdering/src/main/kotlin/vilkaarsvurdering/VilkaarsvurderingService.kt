@@ -2,7 +2,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 
-class VilkaarsvurderingService(val vilkaarsvurderingRepository: VilkaarsvurderingRepository) {
+class VilkaarsvurderingService(private val vilkaarsvurderingRepository: VilkaarsvurderingRepository) {
 
     fun hentVilkaarsvurdering(behandlingId: String): Vilkaarsvurdering? {
         return vilkaarsvurderingRepository.hent(behandlingId)
@@ -28,6 +28,18 @@ class VilkaarsvurderingService(val vilkaarsvurderingRepository: Vilkaarsvurderin
     fun oppdaterVilkaarsvurdering(behandlingId: String, payload: String): Vilkaarsvurdering {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let {
             vilkaarsvurderingRepository.lagre(it.copy(payload = payload))
+        } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
+    }
+
+    fun oppdaterTotalVurdering(behandlingId: String, resultat: VilkaarsvurderingResultat): Vilkaarsvurdering {
+        return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
+            vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = resultat))
+        } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
+    }
+
+    fun slettTotalVurdering(behandlingId: String): Vilkaarsvurdering {
+        return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
+            vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = null))
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 

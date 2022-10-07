@@ -50,12 +50,42 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
             vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarType)
             call.respond(HttpStatusCode.OK)
         }
+
+        route("/resultat") {
+            post("/{behandlingId}") {
+                val behandlingId = requireNotNull(call.parameters["behandlingId"])
+                val saksbehandler = requireNotNull(call.navIdent)
+                val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
+
+                logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
+                val oppdatertVilkaarsvurdering =
+                    vilkaarsvurderingService.oppdaterTotalVurdering(
+                        behandlingId,
+                        VilkaarsvurderingResultat(
+                            vurdertResultatDto.resultat,
+                            vurdertResultatDto.kommentar,
+                            LocalDateTime.now(),
+                            saksbehandler
+                        )
+                    )
+                call.respond(oppdatertVilkaarsvurdering)
+            }
+
+            delete("/{behandlingId}") {
+                val behandlingId = requireNotNull(call.parameters["behandlingId"])
+
+                logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
+                val oppdatertVilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId)
+                call.respond(oppdatertVilkaarsvurdering)
+            }
+        }
     }
 }
 
-val ApplicationCall.navIdent: String? get() = principal<TokenValidationContextPrincipal>()
-    ?.context?.getJwtToken("azure")
-    ?.jwtTokenClaims?.getStringClaim("NAVident")
+val ApplicationCall.navIdent: String?
+    get() = principal<TokenValidationContextPrincipal>()
+        ?.context?.getJwtToken("azure")
+        ?.jwtTokenClaims?.getStringClaim("NAVident")
 
 private fun toVurdertVilkaar(vurdertResultatDto: VurdertResultatDto, saksbehandler: String) =
     VurdertVilkaar(
@@ -71,5 +101,10 @@ private fun toVurdertVilkaar(vurdertResultatDto: VurdertResultatDto, saksbehandl
 data class VurdertResultatDto(
     val type: VilkaarType,
     val resultat: Utfall,
+    val kommentar: String?
+)
+
+data class VurdertVilkaarsvurderingResultatDto(
+    val resultat: VilkaarsvurderingUtfall,
     val kommentar: String?
 )

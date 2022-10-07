@@ -3,7 +3,12 @@ import styled from 'styled-components'
 import { format } from 'date-fns'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { VilkaarsVurderingKnapper } from '../handlinger/vilkaarsvurderingKnapper'
-import { setTotalVurdering, slettTotalVurdering, Vilkaarsvurdering } from '../../../shared/api/vilkaarsvurdering'
+import {
+  setTotalVurdering,
+  slettTotalVurdering,
+  Vilkaarsvurdering,
+  VilkaarsvurderingResultat,
+} from '../../../shared/api/vilkaarsvurdering'
 import { VilkaarBorder } from './styled'
 import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { ISvar } from '../../../store/reducers/BehandlingReducer'
@@ -31,7 +36,8 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
 
     slettTotalVurdering(behandlingId!!).then((response) => {
       if (response.status == 'ok') {
-        oppdaterVilkaar()
+        oppdaterVilkaar(response.data)
+        reset()
       }
     })
   }
@@ -45,9 +51,17 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
       setTotalVurdering(behandlingId!!, svarTilTotalResultat(svar), kommentar).then((response) => {
         if (response.status == 'ok') {
           oppdaterVilkaar(response.data)
+          reset()
         }
       })
     }
+  }
+
+  const reset = () => {
+    setSvar(undefined)
+    setRadioError(undefined)
+    setKommentar('')
+    setKommentarError(undefined)
   }
 
   return (
@@ -57,7 +71,8 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
           <>
             <TekstWrapper>
               <b>Vilkårsresultat: &nbsp;</b>
-              Innvilget fra {format(new Date(dato), 'dd.MM.yyyy')}
+              {vilkaarsvurdering.resultat.utfall == VilkaarsvurderingResultat.OPPFYLT ? 'Innvilget' : 'Avslag'}
+              &nbsp; fra {format(new Date(dato), 'dd.MM.yyyy')}
             </TekstWrapper>
             <p>
               Manuelt av {vilkaarsvurdering.resultat.saksbehandler} (

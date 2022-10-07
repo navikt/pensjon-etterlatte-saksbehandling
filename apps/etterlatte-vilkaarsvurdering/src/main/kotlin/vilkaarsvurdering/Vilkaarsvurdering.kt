@@ -5,7 +5,8 @@ import java.time.LocalDateTime
 data class Vilkaarsvurdering(
     val behandlingId: String,
     val payload: String,
-    val vilkaar: List<Vilkaar>
+    val vilkaar: List<Vilkaar>,
+    val resultat: VilkaarsvurderingResultat? = null
 )
 
 data class Vilkaar(
@@ -36,10 +37,22 @@ data class VurdertResultat(
     val saksbehandler: String
 )
 
+data class VilkaarsvurderingResultat(
+    val utfall: VilkaarsvurderingUtfall,
+    val kommentar: String?,
+    val tidspunkt: LocalDateTime,
+    val saksbehandler: String
+)
+
 enum class Utfall {
     OPPFYLT,
     IKKE_OPPFYLT,
     IKKE_VURDERT
+}
+
+enum class VilkaarsvurderingUtfall {
+    OPPFYLT,
+    IKKE_OPPFYLT
 }
 
 data class VurdertVilkaar(

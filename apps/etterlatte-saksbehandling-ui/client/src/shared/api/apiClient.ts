@@ -1,7 +1,7 @@
 const path = process.env.REACT_APP_VEDTAK_URL
 
 type Success<T> = { status: 'ok'; data: T; statusCode: number }
-type Error = { status: 'error'; statusCode: number }
+type Error = { status: 'error'; statusCode: number; error?: unknown }
 
 export type ApiResponse<T> = Success<T> | Error
 
@@ -18,25 +18,28 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
   const { url, method, body } = props
 
   const trimmedUrl = url.startsWith('/') ? url.slice(1) : url
+  try {
+    const response = await fetch(`${path}/api/${trimmedUrl}`, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    })
 
-  const response = await fetch(`${path}/api/${trimmedUrl}`, {
-    method: method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  })
-
-  if (response.ok) {
-    return {
-      status: 'ok',
-      statusCode: response.status,
-      data: !props.noData ? await response.json() : null,
+    if (response.ok) {
+      return {
+        status: 'ok',
+        statusCode: response.status,
+        data: !props.noData ? await response.json() : null,
+      }
     }
+    console.error(response)
+    return { status: 'error', statusCode: response.status }
+  } catch (e) {
+    console.error('Rejection i fetch / utlesing av data', e)
+    return { status: 'error', statusCode: 500, error: e }
   }
-
-  console.error(response)
-  return { status: 'error', statusCode: response.status }
 }
 
 export const apiClient = {

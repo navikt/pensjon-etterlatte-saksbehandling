@@ -66,3 +66,17 @@ mockRouter.delete(`/vilkaarsvurdering/:behandlingId/:type`, (req: Request, res: 
     res.status(200).send()
   }, 1000)
 })
+
+mockRouter.delete(`/vilkaarsvurdering/resultat/:behandlingId`, (req: Request, res: Response) => {
+  setTimeout(() => {
+    res.status(200).send()
+  }, 1000)
+})
+
+mockRouter.post(`/vilkaarsvurdering/resultat/:id`, (req: Request, res: Response) => {
+  const id = req.params.id
+  const vilkaarsproving = require(`../mockdata/hentVilkaarsvurdering_${id}.json`)
+  setTimeout(() => {
+    res.json(vilkaarsproving)
+  }, 1000)
+})

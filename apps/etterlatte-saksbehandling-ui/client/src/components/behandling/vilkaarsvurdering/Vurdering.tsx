@@ -109,7 +109,7 @@ export const Vurdering = ({
       )}
       {aktivVurdering && (
         <>
-          <VurderingsTitle>{overskrift()}</VurderingsTitle>
+          <VurderingsTitle>Er vilkåret oppfylt?</VurderingsTitle>
           <RadioGroupWrapper>
             <RadioGroup
               legend=""
@@ -209,7 +209,7 @@ export const KildeOverskrift = styled.div`
 
 export const VurderingsTitle = styled.div`
   display: flex;
-  font-size: 1em;
+  font-size: 0.8em;
   font-weight: bold;
 `
 

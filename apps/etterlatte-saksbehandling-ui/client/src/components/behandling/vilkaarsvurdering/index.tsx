@@ -3,13 +3,13 @@ import React, { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { hentVilkaarsvurdering, Vilkaarsvurdering } from '../../../shared/api/vilkaarsvurdering'
 import { ManueltVilkaar } from './ManueltVilkaar'
-import { VilkaarResultat } from '../inngangsvilkaar/vilkaar/VilkaarResultat'
 import { VilkaarBorderTop } from './styled'
+import { Resultat } from './Resultat'
 
 export const Inngangsvilkaar = () => {
   const location = useLocation()
   const { behandlingId } = useParams()
-
+  const virk = Date() // todo: Skal virk komme fra tjenesten eller hentes fra behandling?
   const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering>({ vilkaar: [] })
 
   const oppdaterVilkaarsvurdering = (oppdatertVilkaarsvurdering?: Vilkaarsvurdering) => {
@@ -38,6 +38,7 @@ export const Inngangsvilkaar = () => {
       <Header>
         <h1>Vilkårsvurdering</h1>
       </Header>
+
       <VilkaarBorderTop />
       {vilkaarsvurdering.vilkaar.map((value, index) => (
         <ManueltVilkaar key={index} vilkaar={value} oppdaterVilkaar={oppdaterVilkaarsvurdering}>
@@ -45,8 +46,7 @@ export const Inngangsvilkaar = () => {
         </ManueltVilkaar>
       ))}
 
-      {/* todo: resultat skal ikke lengre hentes fra behandlingscontext */}
-      <VilkaarResultat id="vilkaarResultat" dato={'2020-01-01'} behandles={false} />
+      <Resultat dato={virk} vilkaarsvurdering={vilkaarsvurdering} oppdaterVilkaar={oppdaterVilkaarsvurdering} />
     </Content>
   )
 }

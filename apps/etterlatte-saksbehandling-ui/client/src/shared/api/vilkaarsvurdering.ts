@@ -16,8 +16,22 @@ export const vurderVilkaar = async (
 export const slettVurdering = async (behandlingId: string, type: string): Promise<ApiResponse<Vilkaarsvurdering>> =>
   apiClient.delete(`/vilkaarsvurdering/${behandlingId}/${type}`, true)
 
+export const slettTotalVurdering = async (behandlingId: string): Promise<ApiResponse<Vilkaarsvurdering>> =>
+  apiClient.delete(`/vilkaarsvurdering/resultat/${behandlingId}`, true)
+
+export const setTotalVurdering = async (
+  behandlingId: string,
+  resultat: VilkaarsvurderingResultat,
+  kommentar: string
+): Promise<ApiResponse<Vilkaarsvurdering>> =>
+  apiClient.post(`/vilkaarsvurdering/resultat/${behandlingId}`, {
+    resultat: resultat,
+    kommentar: kommentar,
+  })
+
 export interface Vilkaarsvurdering {
   vilkaar: Vilkaar[]
+  resultat?: VilkaarsvurderingVurdertResultat
 }
 
 export interface Vilkaar {
@@ -46,8 +60,20 @@ export enum VurderingsResultat {
   IKKE_VURDERT = 'IKKE_VURDERT',
 }
 
+export enum VilkaarsvurderingResultat {
+  OPPFYLT = 'OPPFYLT',
+  IKKE_OPPFYLT = 'IKKE_OPPFYLT',
+}
+
 export interface VurderVilkaarRequest {
   type: string
   resultat: VurderingsResultat
   kommentar?: string
+}
+
+export interface VilkaarsvurderingVurdertResultat {
+  resultat: VilkaarsvurderingResultat
+  kommentar?: string
+  tidspunkt: Date
+  saksbehandler: string
 }

@@ -18,6 +18,7 @@ class AdresseKlient(
         logger.info("Henter mottakere fra regoppslag")
         client.get("$url/regoppslag/${ident}") {
             header("x_correlation_id", getXCorrelationId())
+            header("Nav_Call_Id", getXCorrelationId())
         }.body()
 
     } catch (exception: Exception) {

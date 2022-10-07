@@ -111,7 +111,7 @@ internal class VedtakMottakerTest {
             assertEquals(UtbetalingStatusDto.FEILET, event.utbetalingResponse.status)
             assertEquals(1, event.utbetalingResponse.vedtakId)
             assertEquals(
-                "En feil oppstod under prosessering av vedtak med vedtakId=1: Noe feilet",
+                "En feil oppstod under prosessering av vedtak med vedtakId=1",
                 event.utbetalingResponse.feilmelding
             )
         }

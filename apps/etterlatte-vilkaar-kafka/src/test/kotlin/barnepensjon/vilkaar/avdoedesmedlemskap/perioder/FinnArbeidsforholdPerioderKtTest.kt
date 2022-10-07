@@ -25,7 +25,6 @@ internal class FinnArbeidsforholdPerioderKtTest {
         return AvdoedesMedlemskapGrunnlag(
             inntekt,
             arbeidsforhold as Opplysning.Periodisert<AaregResponse?>,
-            null,
             LocalDate.parse("2022-07-01")
         )
     }

@@ -31,7 +31,7 @@ internal class BeregningServiceTest {
     private val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 
     private val testData = GrunnlagTestData(
-        opplysningsmapSøskenOverrides = mapOf(
+        opplysningsmapSoeskenOverrides = mapOf(
             Opplysningstyper.FOEDSELSDATO to Opplysning.Konstant(
                 randomUUID(),
                 kilde,

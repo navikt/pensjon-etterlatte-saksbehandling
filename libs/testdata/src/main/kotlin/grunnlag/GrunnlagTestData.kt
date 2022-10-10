@@ -1,10 +1,10 @@
 import com.fasterxml.jackson.databind.JsonNode
-import grunnlag.avdødTestopplysningerMap
+import grunnlag.avdoedTestopplysningerMap
 import grunnlag.gjenlevendeTestopplysningerMap
-import grunnlag.halvsøskenTestopplysningerMap
+import grunnlag.halvsoeskenTestopplysningerMap
 import grunnlag.kilde
-import grunnlag.søkerTestopplysningerMap
-import grunnlag.søskenTestopplysningerMap
+import grunnlag.soekerTestopplysningerMap
+import grunnlag.soeskenTestopplysningerMap
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -16,19 +16,19 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import java.util.UUID.randomUUID
 
 data class GrunnlagTestData(
-    val opplysningsmapSøkerOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
-    val opplysningsmapSøskenOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
-    val opplysningsmapAvdødOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
+    val opplysningsmapSoekerOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
+    val opplysningsmapSoeskenOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
+    val opplysningsmapAvdoedOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
     val opplysningsmapGjenlevendeOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
-    val opplysningsmapHalvsøskenOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
+    val opplysningsmapHalvsoeskenOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
     val opplysningsmapSakOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap()
 ) {
-    val søker
-        get() = personTestData(søkerTestopplysningerMap + opplysningsmapSøkerOverrides)
-    val søsken
-        get() = personTestData(søskenTestopplysningerMap + opplysningsmapSøskenOverrides)
-    val halvsøsken
-        get() = personTestData(halvsøskenTestopplysningerMap + opplysningsmapHalvsøskenOverrides)
+    val soeker
+        get() = personTestData(soekerTestopplysningerMap + opplysningsmapSoekerOverrides)
+    val soesken
+        get() = personTestData(soeskenTestopplysningerMap + opplysningsmapSoeskenOverrides)
+    val halvsoesken
+        get() = personTestData(halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides)
     val gjenlevende
         get() = personTestData(gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides)
 
@@ -37,29 +37,29 @@ data class GrunnlagTestData(
             AVDOEDESBARN to Opplysning.Konstant(
                 randomUUID(),
                 kilde,
-                AvdoedesBarn(listOf(søker, søsken, halvsøsken)).toJsonNode()
+                AvdoedesBarn(listOf(soeker, soesken, halvsoesken)).toJsonNode()
             )
         )
-    val avdød
-        get() = personTestData(avdødTestopplysningerMap + avdoedesBarnOverrides + opplysningsmapAvdødOverrides)
+    val avdoed
+        get() = personTestData(avdoedTestopplysningerMap + avdoedesBarnOverrides + opplysningsmapAvdoedOverrides)
 
     fun hentOpplysningsgrunnlag(): Opplysningsgrunnlag = Opplysningsgrunnlag(
-        søker = søkerTestopplysningerMap + opplysningsmapSøkerOverrides,
+        soeker = soekerTestopplysningerMap + opplysningsmapSoekerOverrides,
         familie = listOf(
-            søskenTestopplysningerMap + opplysningsmapSøskenOverrides,
-            avdødTestopplysningerMap + avdoedesBarnOverrides + opplysningsmapAvdødOverrides,
+            soeskenTestopplysningerMap + opplysningsmapSoeskenOverrides,
+            avdoedTestopplysningerMap + avdoedesBarnOverrides + opplysningsmapAvdoedOverrides,
             gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
-            halvsøskenTestopplysningerMap + opplysningsmapHalvsøskenOverrides
+            halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides
         ),
         sak = opplysningsmapSakOverrides,
         metadata = Metadata(1, 15)
     )
 
     fun hentPersonGalleri(): Persongalleri = Persongalleri(
-        soeker = søker.foedselsnummer.value,
+        soeker = soeker.foedselsnummer.value,
         innsender = gjenlevende.foedselsnummer.value,
-        soesken = listOf(søsken.foedselsnummer.value, halvsøsken.foedselsnummer.value),
-        avdoed = listOf(avdød.foedselsnummer.value),
+        soesken = listOf(soesken.foedselsnummer.value, halvsoesken.foedselsnummer.value),
+        avdoed = listOf(avdoed.foedselsnummer.value),
         gjenlevende = listOf(gjenlevende.foedselsnummer.value)
     )
 }

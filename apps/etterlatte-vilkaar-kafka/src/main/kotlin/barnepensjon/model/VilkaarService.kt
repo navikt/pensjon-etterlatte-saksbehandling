@@ -44,19 +44,19 @@ class VilkaarService {
             "Mapper vilkaar fra grunnlagsdata for virkningstidspunkt $virkningstidspunkt for førstegangsbehandling"
         )
 
-        val søker = grunnlag.søker
-        val avdød = grunnlag.hentAvdoed()
+        val soeker = grunnlag.soeker
+        val avdoed = grunnlag.hentAvdoed()
         val gjenlevende = grunnlag.hentGjenlevende()
 
         val vilkaar = listOf(
-            vilkaarFormaalForYtelsen(søker, virkningstidspunkt),
-            vilkaarBrukerErUnder20(søker, avdød, virkningstidspunkt),
-            vilkaarDoedsfallErRegistrert(avdød, søker),
-            vilkaarAvdoedesMedlemskap(avdød),
+            vilkaarFormaalForYtelsen(soeker, virkningstidspunkt),
+            vilkaarBrukerErUnder20(soeker, avdoed, virkningstidspunkt),
+            vilkaarDoedsfallErRegistrert(avdoed, soeker),
+            vilkaarAvdoedesMedlemskap(avdoed),
             vilkaarBarnetsMedlemskap(
-                søker,
+                soeker,
                 gjenlevende,
-                avdød
+                avdoed
             )
         )
 
@@ -75,9 +75,9 @@ class VilkaarService {
             "Mapper vilkaar fra grunnlagsdata for virkningstidspunkt $virkningstidspunkt for revurdering " +
                 "med årsak $revurderingAarsak"
         )
-        val søker = grunnlag.søker
+        val soeker = grunnlag.soeker
         val vilkaar = when (revurderingAarsak) {
-            RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarFormaalForYtelsen(søker, virkningstidspunkt))
+            RevurderingAarsak.SOEKER_DOD -> listOf(vilkaarFormaalForYtelsen(soeker, virkningstidspunkt))
             RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
                 "Du kan ikke ha et manuelt opphør på en revurdering"
             )
@@ -93,8 +93,8 @@ class VilkaarService {
         grunnlag: Opplysningsgrunnlag,
         soeknadMottattDato: LocalDate
     ): YearMonth {
-        val avdødDødsdato = grunnlag.hentAvdoed().hentDoedsdato()
-        return hentVirkningstidspunktFoerstegangssoeknad(avdødDødsdato?.verdi, soeknadMottattDato)
+        val avdoedDoedsdato = grunnlag.hentAvdoed().hentDoedsdato()
+        return hentVirkningstidspunktFoerstegangssoeknad(avdoedDoedsdato?.verdi, soeknadMottattDato)
     }
 
     private fun beregnVirkningstidspunktRevurdering(
@@ -103,8 +103,8 @@ class VilkaarService {
     ): YearMonth {
         return when (revurderingAarsak) {
             RevurderingAarsak.SOEKER_DOD -> {
-                val søkerDødsdato = grunnlag.søker.hentDoedsdato()
-                hentVirkningstidspunktRevurderingSoekerDoedsfall(søkerDødsdato?.verdi)
+                val soekerDoedsdato = grunnlag.soeker.hentDoedsdato()
+                hentVirkningstidspunktRevurderingSoekerDoedsfall(soekerDoedsdato?.verdi)
             }
 
             RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
@@ -145,9 +145,9 @@ class VilkaarService {
         deprecatedVilkaarsopplysninger: List<VilkaarOpplysning<JsonNode>>
     ): KommerSoekerTilgode {
         logger.info("Map opplysninger for å vurdere om penger kommer søker til gode")
-        val søker = grunnlag.søker
+        val soeker = grunnlag.soeker
         val gjenlevende = grunnlag.hentGjenlevende()
-        val avdød = grunnlag.hentAvdoed()
+        val avdoed = grunnlag.hentAvdoed()
         val saksbehandlerKommerBarnetTilgode = finnOpplysning<ResultatKommerBarnetTilgode>(
             deprecatedVilkaarsopplysninger,
             Opplysningstyper.SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1
@@ -155,13 +155,13 @@ class VilkaarService {
 
         val kommerBarnetTilGode = listOf(
             barnOgForelderSammeBostedsadresse(
-                søker,
+                soeker,
                 gjenlevende
             ),
-            barnIngenOppgittUtlandsadresse(søker),
+            barnIngenOppgittUtlandsadresse(soeker),
             barnOgAvdoedSammeBostedsadresse(
-                søker,
-                avdød
+                soeker,
+                avdoed
             ),
             saksbehandlerResultat(
                 saksbehandlerKommerBarnetTilgode
@@ -172,7 +172,7 @@ class VilkaarService {
         val vurdertDato = hentSisteVurderteDato(kommerBarnetTilGode.filterNotNull())
         val vurdering = VilkaarResultat(vilkaarResultat, kommerBarnetTilGode.filterNotNull(), vurdertDato)
 
-        val familieforhold = mapFamiliemedlemmer(søker, gjenlevende, avdød)
+        val familieforhold = mapFamiliemedlemmer(soeker, gjenlevende, avdoed)
 
         return KommerSoekerTilgode(vurdering, familieforhold)
     }
@@ -240,8 +240,8 @@ class VilkaarService {
         grunnlag: Opplysningsgrunnlag,
         soeknadMottattDato: LocalDate
     ): YearMonth {
-        val avdødDødsdato = grunnlag.hentAvdoed().hentDoedsdato()
-        return hentVirkningstidspunktFoerstegangssoeknad(avdødDødsdato?.verdi, soeknadMottattDato)
+        val avdoedDoedsdato = grunnlag.hentAvdoed().hentDoedsdato()
+        return hentVirkningstidspunktFoerstegangssoeknad(avdoedDoedsdato?.verdi, soeknadMottattDato)
     }
 
     companion object {

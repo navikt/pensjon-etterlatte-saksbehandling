@@ -60,7 +60,7 @@ class AvdoedesMedlemskapTest {
     )
 
     private val avdoedTestdata = GrunnlagTestData(
-        opplysningsmapAvdødOverrides = avdoedOpplysninger
+        opplysningsmapAvdoedOverrides = avdoedOpplysninger
     ).hentOpplysningsgrunnlag().hentAvdoed()
 
     @Test

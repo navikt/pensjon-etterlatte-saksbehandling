@@ -14,7 +14,7 @@ internal class BeregningsResultatKtTest {
     )
 
     @Test
-    fun `SoeskenPeriode-erInklusiv skal returnere true når to datoer er innenfor SoeskenPerioden`() {
+    fun `SoeskenPeriode-erInklusiv skal returnere true naar to datoer er innenfor SoeskenPerioden`() {
         assertEquals(true, periode.erInklusiv(YearMonth.of(2022, 1), YearMonth.of(2022, 11)))
         assertEquals(true, periode.erInklusiv(YearMonth.of(2022, 2), YearMonth.of(2022, 11)))
         assertEquals(true, periode.erInklusiv(YearMonth.of(2022, 1), YearMonth.of(2022, 10)))

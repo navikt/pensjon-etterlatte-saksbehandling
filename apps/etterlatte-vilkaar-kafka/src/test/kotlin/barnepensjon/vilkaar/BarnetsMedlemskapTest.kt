@@ -21,7 +21,7 @@ class BarnetsMedlemskapTest {
     @Test
     fun vuderBarnetsMedlemskap() {
         val testdataNorskAdresse = GrunnlagTestData(
-            opplysningsmapSøkerOverrides = mapOf(
+            opplysningsmapSoekerOverrides = mapOf(
                 UTENLANDSADRESSE to Opplysning.Konstant(
                     UUID.randomUUID(),
                     kilde,
@@ -30,7 +30,7 @@ class BarnetsMedlemskapTest {
             )
         ).hentOpplysningsgrunnlag()
         val testdataDanskAdresse = GrunnlagTestData(
-            opplysningsmapSøkerOverrides = mapOf(
+            opplysningsmapSoekerOverrides = mapOf(
                 BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresseDanmarkPdl().map {
                         PeriodisertOpplysning(
@@ -64,19 +64,19 @@ class BarnetsMedlemskapTest {
         ).hentOpplysningsgrunnlag()
 
         val ingenUtenlandsAdresser = vilkaarBarnetsMedlemskap(
-            testdataNorskAdresse.søker,
+            testdataNorskAdresse.soeker,
             testdataNorskAdresse.hentGjenlevende(),
             testdataNorskAdresse.hentAvdoed()
         )
 
         val barnUtenlandsAdresserPdl = vilkaarBarnetsMedlemskap(
-            testdataDanskAdresse.søker,
+            testdataDanskAdresse.soeker,
             testdataNorskAdresse.hentGjenlevende(),
             testdataNorskAdresse.hentAvdoed()
         )
 
         val barnUtenlandsAdresserSoeknad = vilkaarBarnetsMedlemskap(
-            testdataNorskAdresse.søker + mapOf(
+            testdataNorskAdresse.soeker + mapOf(
                 UTENLANDSADRESSE to Opplysning.Konstant(
                     UUID.randomUUID(),
                     kilde,
@@ -88,7 +88,7 @@ class BarnetsMedlemskapTest {
         )
 
         val gjenlevendeUtenlandsAdresserPdl = vilkaarBarnetsMedlemskap(
-            testdataNorskAdresse.søker,
+            testdataNorskAdresse.soeker,
             testdataDanskAdresse.hentGjenlevende(),
             testdataNorskAdresse.hentAvdoed()
         )

@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
 import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
 import no.nav.etterlatte.libs.common.grunnlag.hentFamilierelasjon
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
-import no.nav.etterlatte.libs.common.grunnlag.hentSøskenjustering
+import no.nav.etterlatte.libs.common.grunnlag.hentSoeskenjustering
 import no.nav.etterlatte.libs.common.person.Person
 import java.time.YearMonth
 
@@ -19,24 +19,24 @@ data class FinnSoeskenPeriode(
 ) {
     fun hentSoeskenperioder(): List<SoeskenPeriode> {
         val avdoedesBarn = grunnlag.hentAvdoed().hentAvdoedesbarn()?.verdi?.avdoedesBarn ?: return emptyList()
-        val søker = grunnlag.søker
-        val søkersBostedsadresse = søker.hentBostedsadresse()?.hentSenest()?.verdi ?: return emptyList()
+        val soeker = grunnlag.soeker
+        val soekersBostedsadresse = soeker.hentBostedsadresse()?.hentSenest()?.verdi ?: return emptyList()
 
-        val skalBeregnesOverrides = grunnlag.sak.hentSøskenjustering()?.verdi?.beregningsgrunnlag
+        val skalBeregnesOverrides = grunnlag.sak.hentSoeskenjustering()?.verdi?.beregningsgrunnlag
             ?.associateBy({ it.foedselsnummer.value }, { it.skalBrukes })
             ?: emptyMap()
 
-        val (søskenOverrides, søskenDefault) = avdoedesBarn.partition {
+        val (soeskenOverrides, soeskenDefault) = avdoedesBarn.partition {
             skalBeregnesOverrides.containsKey(it.foedselsnummer.value)
         }
-        val søsken = finnHelOgHalvsøsken(søker, søskenDefault)
+        val soesken = finnHelOgHalvsoesken(soeker, soeskenDefault)
 
         // first skal være ok, siden PPS allerede har sortert
         val halvsoeskenOppdrattSammen =
-            søsken.halvsøsken.filter { it.bostedsadresse?.first() == søkersBostedsadresse }
+            soesken.halvsoesken.filter { it.bostedsadresse?.first() == soekersBostedsadresse }
 
-        val kull = søskenOverrides.filter { skalBeregnesOverrides[it.foedselsnummer.value] == true } +
-            søsken.helsøsken +
+        val kull = soeskenOverrides.filter { skalBeregnesOverrides[it.foedselsnummer.value] == true } +
+            soesken.helsoesken +
             halvsoeskenOppdrattSammen
 
         val perioder = beregnSoeskenperioder(kull, virkFOM)
@@ -65,16 +65,16 @@ data class FinnSoeskenPeriode(
     }
 }
 
-data class Søsken(
-    val helsøsken: List<Person>,
-    val halvsøsken: List<Person>
+data class Soesken(
+    val helsoesken: List<Person>,
+    val halvsoesken: List<Person>
 )
 
-fun finnHelOgHalvsøsken(søker: Grunnlagsdata<JsonNode>, avdoedesBarn: List<Person>): Søsken {
-    val søkersForeldre = søker.hentFamilierelasjon()?.verdi?.ansvarligeForeldre
-        ?: return Søsken(emptyList(), emptyList())
-    val (helsøsken, halvsøsken) = avdoedesBarn
-        .filter { it.foedselsnummer != søker.hentFoedselsnummer()?.verdi }
-        .partition { it.familieRelasjon?.foreldre == søkersForeldre }
-    return Søsken(helsøsken = helsøsken, halvsøsken = halvsøsken)
+fun finnHelOgHalvsoesken(soeker: Grunnlagsdata<JsonNode>, avdoedesBarn: List<Person>): Soesken {
+    val soekersForeldre = soeker.hentFamilierelasjon()?.verdi?.ansvarligeForeldre
+        ?: return Soesken(emptyList(), emptyList())
+    val (helsoesken, halvsoesken) = avdoedesBarn
+        .filter { it.foedselsnummer != soeker.hentFoedselsnummer()?.verdi }
+        .partition { it.familieRelasjon?.foreldre == soekersForeldre }
+    return Soesken(helsoesken = helsoesken, halvsoesken = halvsoesken)
 }

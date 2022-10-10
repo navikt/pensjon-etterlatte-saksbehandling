@@ -16,7 +16,7 @@ internal class FinnSaksbehandlerMedlemsPerioderKtTest {
     @Test
     fun `Skal returnere to vurderte perioder, ett godkjent og ett ikke godkjent pga stillingsprosent`() {
         val medlemskap = GrunnlagTestData(
-            opplysningsmapAvdødOverrides = mapOf(
+            opplysningsmapAvdoedOverrides = mapOf(
                 Opplysningstyper.MEDLEMSKAPSPERIODE to Opplysning.Periodisert(medlemskap)
             )
         ).hentOpplysningsgrunnlag().hentAvdoed().hentMedlemskapsperiode()!!

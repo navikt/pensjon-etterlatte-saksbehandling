@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 internal class ManueltOpphoerTest {
 
     @Test
-    fun `en eller flere opphørsgrunner gir vilkår ikke oppfylt`() {
+    fun `en eller flere opphoersgrunner gir vilkaar ikke oppfylt`() {
         val vurderingOpphoerFlereGrunner = vilkaarKanBehandleSakenISystemet(
             listOf(ManueltOpphoerAarsak.SOESKEN_DOED, ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED),
             null
@@ -27,7 +27,7 @@ internal class ManueltOpphoerTest {
     }
 
     @Test
-    fun `ingen opphørsgrunn gir vilkår oppfylt`() {
+    fun `ingen opphoersgrunn gir vilkaar oppfylt`() {
         val vurderingOpphoerIngenOpphoersgrunn = vilkaarKanBehandleSakenISystemet(listOf(), null)
         Assertions.assertEquals(vurderingOpphoerIngenOpphoersgrunn.resultat, VurderingsResultat.OPPFYLT)
     }

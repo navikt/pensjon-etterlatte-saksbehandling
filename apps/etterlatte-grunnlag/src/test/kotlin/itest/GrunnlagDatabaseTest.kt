@@ -3,7 +3,7 @@ package no.nav.etterlatte.itest
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import grunnlag.ADRESSE_DEFAULT
-import grunnlag.SØKER_FØDSELSNUMMER
+import grunnlag.SOEKER_FOEDSELSNUMMER
 import grunnlag.kilde
 import lagGrunnlagsopplysning
 import no.nav.etterlatte.DataSourceBuilder
@@ -173,14 +173,14 @@ internal class GrunnlagDaoIntegrationTest {
             meta = objectMapper.createObjectNode(),
             opplysning = ADRESSE_DEFAULT.first().toJsonNode(),
             attestering = null,
-            fnr = SØKER_FØDSELSNUMMER,
+            fnr = SOEKER_FOEDSELSNUMMER,
             periode = Periode(
                 fom = YearMonth.of(2022, 1),
                 tom = YearMonth.of(2022, 12)
             )
         )
 
-        opplysningRepo.leggOpplysningTilGrunnlag(1, opplysning, SØKER_FØDSELSNUMMER)
+        opplysningRepo.leggOpplysningTilGrunnlag(1, opplysning, SOEKER_FOEDSELSNUMMER)
         val expected = OpplysningDao.GrunnlagHendelse(opplysning, 1, 1).toJson()
         val actual = opplysningRepo.hentAlleGrunnlagForSak(1).first().toJson()
 

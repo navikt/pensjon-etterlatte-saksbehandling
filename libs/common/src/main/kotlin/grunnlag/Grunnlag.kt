@@ -10,14 +10,14 @@ data class Grunnlag(
 )
 
 class Opplysningsgrunnlag(
-    val søker: Grunnlagsdata<JsonNode>,
+    val soeker: Grunnlagsdata<JsonNode>,
     val familie: List<Grunnlagsdata<JsonNode>>,
     val sak: Grunnlagsdata<JsonNode>,
     val metadata: Metadata
 ) {
     companion object {
         fun empty() = Opplysningsgrunnlag(
-            søker = emptyMap(),
+            soeker = emptyMap(),
             familie = listOf(),
             sak = mapOf(),
             metadata = Metadata(0, 0)

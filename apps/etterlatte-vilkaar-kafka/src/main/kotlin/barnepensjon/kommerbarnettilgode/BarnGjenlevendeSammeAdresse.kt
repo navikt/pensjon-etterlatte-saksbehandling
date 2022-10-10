@@ -17,10 +17,10 @@ import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
 fun barnOgForelderSammeBostedsadresse(
-    søker: Grunnlagsdata<JsonNode>?,
+    soeker: Grunnlagsdata<JsonNode>?,
     gjenlevende: Grunnlagsdata<JsonNode>?
 ): VurdertVilkaar {
-    val sammeBostedsAdresse = kriterieSammeBostedsadresse(søker, gjenlevende)
+    val sammeBostedsAdresse = kriterieSammeBostedsadresse(soeker, gjenlevende)
 
     return VurdertVilkaar(
         Vilkaartyper.GJENLEVENDE_OG_BARN_SAMME_BOSTEDADRESSE,
@@ -32,20 +32,20 @@ fun barnOgForelderSammeBostedsadresse(
 }
 
 fun kriterieSammeBostedsadresse(
-    søker: Grunnlagsdata<JsonNode>?,
+    soeker: Grunnlagsdata<JsonNode>?,
     gjenlevende: Grunnlagsdata<JsonNode>?
 ): Kriterie {
     /* TODO ai: Fiks periodisering */
-    val søkersAdresse = søker?.hentBostedsadresse()
+    val soekersAdresse = soeker?.hentBostedsadresse()
     val gjenlevendesAdresse = gjenlevende?.hentBostedsadresse()
 
     val opplysningsGrunnlag = listOfNotNull(
-        søkersAdresse?.hentSenest()?.let {
+        soekersAdresse?.hentSenest()?.let {
             Kriteriegrunnlag(
                 it.id,
                 KriterieOpplysningsType.BOSTEDADRESSE_SOEKER,
                 it.kilde,
-                Bostedadresser(søkersAdresse.perioder.map { it.verdi })
+                Bostedadresser(soekersAdresse.perioder.map { it.verdi })
             )
         },
         gjenlevendesAdresse?.hentSenest()?.let {
@@ -59,10 +59,10 @@ fun kriterieSammeBostedsadresse(
     )
 
     val resultat = try {
-        if (gjenlevendesAdresse == null || søkersAdresse == null) {
+        if (gjenlevendesAdresse == null || soekersAdresse == null) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
-            val adresseBarn = søkersAdresse.perioder.find { it.verdi.aktiv }?.verdi
+            val adresseBarn = soekersAdresse.perioder.find { it.verdi.aktiv }?.verdi
             val adresseGjenlevende = gjenlevendesAdresse.perioder.find { it.verdi.aktiv }?.verdi
 
             val adresse1 = adresseBarn?.adresseLinje1 == adresseGjenlevende?.adresseLinje1

@@ -54,7 +54,7 @@ jobs:
           distribution: temurin
           java-version: 17.x
           cache: gradle
-      - name: Gradle test and build
+      - name: Gradle test
         run: |
           chmod +x ./gradlew
           ./gradlew :apps:${APP_NAME}:test :apps:${APP_NAME}:build

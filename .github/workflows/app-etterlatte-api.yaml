@@ -29,7 +29,7 @@ on:
 jobs:
   test:
     if: github.event_name == 'pull_request'
-    name: Build, test, and publish
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

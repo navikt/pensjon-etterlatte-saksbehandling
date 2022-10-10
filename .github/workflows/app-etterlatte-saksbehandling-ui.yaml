@@ -34,7 +34,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '16.x'
-      - name: Install and build
+      - name: Install
         working-directory: apps/${{ env.APP_NAME }}
         run: |
           yarn --cwd client install --frozen-lockfile && yarn --cwd client build

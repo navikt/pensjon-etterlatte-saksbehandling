@@ -26,7 +26,6 @@ internal class LesVilkaarsmelding(
     init {
         River(rapidsConnection).apply {
             eventName("BEHANDLING:GRUNNLAGENDRET")
-            validate { it.requireKey("grunnlag") }
             validate { it.requireKey("grunnlagV2") }
             validate { it.requireKey("behandlingOpprettet") }
             validate { it.requireKey("behandlingId") }

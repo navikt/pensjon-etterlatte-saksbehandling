@@ -80,6 +80,7 @@ class DownstreamResourceClient(
         runCatching {
             httpClient.get(resource.url) {
                 header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             }.body<JsonNode>()
         }.fold(
             onSuccess = { result ->

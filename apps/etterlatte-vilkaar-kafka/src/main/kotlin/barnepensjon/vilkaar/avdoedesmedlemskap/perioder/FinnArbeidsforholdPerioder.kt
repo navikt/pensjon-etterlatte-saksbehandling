@@ -6,16 +6,17 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskap
 
 fun finnArbeidsforholdPerioder(grunnlag: AvdoedesMedlemskapGrunnlag): List<VurdertMedlemskapsperiode> {
     return grunnlag.arbeidsforholdOpplysning.perioder
-        .filter { it.verdi != null }
-        .map { arbeidsforhold ->
-            VurdertMedlemskapsperiode(
-                periodeType = PeriodeType.ARBEIDSPERIODE,
-                kilde = arbeidsforhold.kilde,
-                arbeidsgiver = arbeidsforhold.verdi!!.arbeidssted.identer.firstOrNull()?.ident,
-                stillingsprosent = "${arbeidsforhold.verdi!!.ansettelsesdetaljer.map { it.avtaltStillingsprosent }}",
-                fraDato = arbeidsforhold.verdi!!.ansettelsesperiode.startdato,
-                tilDato = arbeidsforhold.verdi!!.ansettelsesperiode.sluttdato ?: grunnlag.doedsdato,
-                godkjentPeriode = arbeidsforhold.verdi!!.ansettelsesdetaljer.all { it.avtaltStillingsprosent >= 80 }
-            )
+        .mapNotNull { opplysning ->
+            opplysning.verdi?.let { aaregResponse ->
+                VurdertMedlemskapsperiode(
+                    periodeType = PeriodeType.ARBEIDSPERIODE,
+                    kilde = opplysning.kilde,
+                    arbeidsgiver = aaregResponse.arbeidssted.identer.firstOrNull()?.ident,
+                    stillingsprosent = "${aaregResponse.ansettelsesdetaljer.map { it.avtaltStillingsprosent }}",
+                    fraDato = aaregResponse.ansettelsesperiode.startdato,
+                    tilDato = aaregResponse.ansettelsesperiode.sluttdato ?: grunnlag.doedsdato,
+                    godkjentPeriode = aaregResponse.ansettelsesdetaljer.all { it.avtaltStillingsprosent >= 80 }
+                )
+            }
         }
 }

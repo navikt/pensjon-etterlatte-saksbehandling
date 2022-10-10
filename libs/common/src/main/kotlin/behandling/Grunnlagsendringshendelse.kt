@@ -1,4 +1,4 @@
-package no.nav.etterlatte.grunnlagsendring
+package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import java.time.LocalDateTime
@@ -15,10 +15,13 @@ data class Grunnlagsendringshendelse(
 )
 
 sealed class Grunnlagsinformasjon {
+    abstract val type: String
 
     data class SoekerDoed(
         val hendelse: Doedshendelse
-    ) : Grunnlagsinformasjon()
+    ) : Grunnlagsinformasjon() {
+        override val type: String = "SOEKER_DOED"
+    }
 }
 
 enum class GrunnlagsendringsType {

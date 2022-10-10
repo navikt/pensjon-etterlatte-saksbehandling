@@ -5,6 +5,7 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.behandling.BehandlingListe
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -27,7 +28,11 @@ interface EtterlatteBehandling {
     suspend fun slettRevurderinger(sakId: Int, accessToken: String): Boolean
     suspend fun opprettManueltOpphoer(manueltOpphoerRequest: ManueltOpphoerRequest, accessToken: String):
         Result<ManueltOpphoerResponse>
+
+    suspend fun hentGrunnlagsendringshendelserForSak(sakId: Int, accessToken: String): GrunnlagsendringshendelseListe
 }
+
+data class GrunnlagsendringshendelseListe(val hendelser: List<Grunnlagsendringshendelse>)
 
 class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehandling {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
@@ -38,7 +43,6 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
 
-    @Suppress("UNCHECKED_CAST")
     override suspend fun hentSakerForPerson(fnr: String, accessToken: String): Saker {
         try {
             logger.info("Henter saker for en person fra behandling")
@@ -235,7 +239,6 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         manueltOpphoerRequest: ManueltOpphoerRequest,
         accessToken: String
     ): Result<ManueltOpphoerResponse> {
-        logger.info("oppretter manuelt opphoer for sak")
         return try {
             val json =
                 downstreamResourceClient.post(
@@ -261,6 +264,28 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : EtterlatteBehan
         } catch (e: Exception) {
             logger.error("Manuelt opphoer av sak med id ${manueltOpphoerRequest.sak} feilet. ", e)
             Result.failure(e)
+        }
+    }
+
+    override suspend fun hentGrunnlagsendringshendelserForSak(
+        sakId: Int,
+        accessToken: String
+    ): GrunnlagsendringshendelseListe {
+        return try {
+            val json = downstreamResourceClient.get(
+                Resource(clientId, "$resourceUrl/grunnlagsendringshendelse/$sakId"),
+                accessToken
+            )
+                .mapBoth(
+                    success = { json -> json.response },
+                    failure = { throwableErrorMessage ->
+                        throw Error(throwableErrorMessage.message, throwableErrorMessage.throwable)
+                    }
+                )
+            objectMapper.readValue(json.toString(), GrunnlagsendringshendelseListe::class.java)
+        } catch (e: Exception) {
+            logger.error("Kunne ikke hente grunnlagsendringshendelser for sak med id $sakId på grunn av feil", e)
+            throw e
         }
     }
 }

@@ -3,7 +3,10 @@ package no.nav.etterlatte.grunnlagsendring
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.database.singleOrNull
 import no.nav.etterlatte.database.toList
-import no.nav.etterlatte.grunnlagsendring.Grunnlagsinformasjon.SoekerDoed
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
+import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
+import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
+import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon
 import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Timestamp
@@ -134,24 +137,33 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         }
     }
 
-    fun hentGyldigeGrunnlagsendringshendelserISak(
-        sakId: Long
+    fun hentGrunnlagsendringshendelserMedStatuserISak(
+        sakId: Long,
+        statuser: List<GrunnlagsendringStatus>
     ): List<Grunnlagsendringshendelse> {
         with(connection()) {
             prepareStatement(
                 """
-                   SELECT id, sak_id, type, opprettet, data, status, behandling_id
-                   FROM grunnlagsendringshendelse
-                   WHERE sak_id = ?
-                   AND status = ?
+                    SELECT id, sak_id, type, opprettet, data, status, behandling_id
+                    FROM grunnlagsendringshendelse
+                    WHERE sak_id = ?
+                    AND status = ANY(?)
                 """.trimIndent()
             ).use {
                 it.setLong(1, sakId)
-                it.setString(2, GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING.name)
+                val statusArray = this.createArrayOf("text", statuser.toTypedArray())
+                it.setArray(2, statusArray)
                 return it.executeQuery().toList { asGrunnlagsendringshendelse() }
             }
         }
     }
+
+    fun hentGyldigeGrunnlagsendringshendelserISak(
+        sakId: Long
+    ): List<Grunnlagsendringshendelse> = hentGrunnlagsendringshendelserMedStatuserISak(
+        sakId,
+        listOf(GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING)
+    )
 
     private fun ResultSet.asGrunnlagsendringshendelse(): Grunnlagsendringshendelse {
         return when (val type = GrunnlagsendringsType.valueOf(getString("type"))) {
@@ -161,7 +173,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                     getLong("sak_id"),
                     type,
                     getTimestamp("opprettet").toLocalDateTime(),
-                    objectMapper.readValue(getString("data"), SoekerDoed::class.java),
+                    objectMapper.readValue(getString("data"), Grunnlagsinformasjon.SoekerDoed::class.java),
                     GrunnlagsendringStatus.valueOf(getString("status")),
                     getObject("behandling_id")?.let { it as UUID }
                 )

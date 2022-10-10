@@ -9,14 +9,16 @@ fun barnepensjonVilkaar() = listOf(
     forutgaaendeMedlemskap(),
     fortsattMedlemskap(),
     alderBarn(),
-    doedsfallForelder()
+    doedsfallForelder(),
+    yrkesskadeAvdoed()
 )
 
 enum class Kapittel18(val paragraf: String, val lenke: String) {
     PARAGRAF_18_1("§ 18-1", "https://lovdata.no/lov/1997-02-28-19/%C2%A718-1"),
     PARAGRAF_18_2("§ 18-2", "https://lovdata.no/lov/1997-02-28-19/%C2%A718-2"),
     PARAGRAF_18_3("§ 18-3", "https://lovdata.no/lov/1997-02-28-19/%C2%A718-3"),
-    PARAGRAF_18_4("§ 18-4", "https://lovdata.no/lov/1997-02-28-19/%C2%A718-4");
+    PARAGRAF_18_4("§ 18-4", "https://lovdata.no/lov/1997-02-28-19/%C2%A718-4"),
+    PARAGRAF_18_11("§ 18-11", "https://lovdata.no/lov/1997-02-28-19/%C2%A718-11");
 }
 
 private fun formaal() = Vilkaar(
@@ -189,5 +191,16 @@ private fun alderBarnBeggeForeldreDoedeUtdanning() = Vilkaar(
             "fylte 20 år dersom begge foreldrene er døde og arbeidsinntekten etter fradrag for skatt er " +
             "mindre enn grunnbeløpet pluss særtillegg for enslige. Bestemmelsene i dette leddet gjelder " +
             "også når moren er død og farskapet ikke er fastslått."
+    )
+)
+
+private fun yrkesskadeAvdoed() = Vilkaar(
+    type = VilkaarType.YRKESSKADE_AVDOED,
+    paragraf = Paragraf(
+        paragraf = "§ 18-11",
+        ledd = 1,
+        lenke = Kapittel18.PARAGRAF_18_11.lenke,
+        tittel = "Dødsfall som skyldes yrkesskade",
+        lovtekst = ""
     )
 )

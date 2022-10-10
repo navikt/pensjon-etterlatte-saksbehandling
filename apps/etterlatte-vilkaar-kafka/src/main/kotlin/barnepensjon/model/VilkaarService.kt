@@ -6,8 +6,6 @@ import barnepensjon.kommerbarnettilgode.saksbehandlerResultat
 import barnepensjon.vilkaar.avdoedesmedlemskap.vilkaarAvdoedesMedlemskap
 import barnepensjon.vilkaar.vilkaarKanBehandleSakenISystemet
 import barnepensjon.vilkaarFormaalForYtelsen
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.barnepensjon.hentSisteVurderteDato
 import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraVilkaar
@@ -20,10 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentKommerBarnetTilgode
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.vilkaar.barnepensjon.vilkaarBarnetsMedlemskap
 import org.slf4j.LoggerFactory
@@ -235,25 +230,5 @@ class VilkaarService {
     ): YearMonth {
         val avdoedDoedsdato = grunnlag.hentAvdoed().hentDoedsdato()
         return hentVirkningstidspunktFoerstegangssoeknad(avdoedDoedsdato?.verdi, soeknadMottattDato)
-    }
-
-    companion object {
-        inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<JsonNode>?): VilkaarOpplysning<T>? {
-            return opplysning?.let {
-                VilkaarOpplysning(
-                    opplysning.id,
-                    opplysning.opplysningType,
-                    opplysning.kilde,
-                    objectMapper.readValue(opplysning.opplysning.toString())
-                )
-            }
-        }
-
-        inline fun <reified T> finnOpplysning(
-            opplysninger: List<VilkaarOpplysning<JsonNode>>,
-            type: Opplysningstyper
-        ): VilkaarOpplysning<T>? {
-            return setOpplysningType(opplysninger.find { it.opplysningType == type })
-        }
     }
 }

@@ -16,9 +16,33 @@ on:
       - main
     paths:
       - apps/etterlatte-utbetaling/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - apps/etterlatte-utbetaling/**
 
 jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup Java v17.x
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17.x
+          cache: gradle
+      - name: Gradle test
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :apps:${APP_NAME}:test
+
   build-and-publish:
+    if: github.event_name != 'pull_request'
     name: Build, test, and publish
     runs-on: ubuntu-latest
     steps:

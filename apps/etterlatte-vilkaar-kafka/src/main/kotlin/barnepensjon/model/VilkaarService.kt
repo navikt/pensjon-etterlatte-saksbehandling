@@ -19,9 +19,9 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentKommerBarnetTilgode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.saksbehandleropplysninger.ResultatKommerBarnetTilgode
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
@@ -141,17 +141,13 @@ class VilkaarService {
     }
 
     private fun mapKommerSoekerTilGode(
-        grunnlag: Opplysningsgrunnlag,
-        deprecatedVilkaarsopplysninger: List<VilkaarOpplysning<JsonNode>>
+        grunnlag: Opplysningsgrunnlag
     ): KommerSoekerTilgode {
         logger.info("Map opplysninger for å vurdere om penger kommer søker til gode")
         val soeker = grunnlag.soeker
         val gjenlevende = grunnlag.hentGjenlevende()
         val avdoed = grunnlag.hentAvdoed()
-        val saksbehandlerKommerBarnetTilgode = finnOpplysning<ResultatKommerBarnetTilgode>(
-            deprecatedVilkaarsopplysninger,
-            Opplysningstyper.SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1
-        )
+        val saksbehandlerKommerBarnetTilgode = avdoed.hentKommerBarnetTilgode()
 
         val kommerBarnetTilGode = listOf(
             barnOgForelderSammeBostedsadresse(
@@ -163,9 +159,7 @@ class VilkaarService {
                 soeker,
                 avdoed
             ),
-            saksbehandlerResultat(
-                saksbehandlerKommerBarnetTilgode
-            )
+            saksbehandlerResultat(saksbehandlerKommerBarnetTilgode)
         )
 
         val vilkaarResultat = setVurderingFraKommerBarnetTilGode(kommerBarnetTilGode.filterNotNull())
@@ -180,7 +174,6 @@ class VilkaarService {
     fun finnVirkningstidspunktOgVilkaarForBehandling(
         behandling: Behandling,
         grunnlag: Opplysningsgrunnlag,
-        deprecatedVilkaarsopplysninger: List<VilkaarOpplysning<JsonNode>>,
         behandlingopprettet: LocalDate,
         aarsak: Aarsak
     ): Triple<YearMonth, VilkaarResultat, KommerSoekerTilgode?> {
@@ -215,7 +208,7 @@ class VilkaarService {
             BehandlingType.MANUELT_OPPHOER -> mapVilkaarManueltOpphoer(virkningstidspunkt, aarsak)
         }
         val kommerSoekerTilgode = when (behandling.type) {
-            BehandlingType.FØRSTEGANGSBEHANDLING -> mapKommerSoekerTilGode(grunnlag, deprecatedVilkaarsopplysninger)
+            BehandlingType.FØRSTEGANGSBEHANDLING -> mapKommerSoekerTilGode(grunnlag)
             else -> null
         }
         return Triple(virkningstidspunkt, vilkaarResultat, kommerSoekerTilgode)

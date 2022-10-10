@@ -18,8 +18,8 @@ import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-fun vilkaarFormaalForYtelsen(søker: Grunnlagsdata<JsonNode>?, virkningstidspunkt: LocalDate?): VurdertVilkaar {
-    val soekerErILive = kriterieSoekerErILive(søker, virkningstidspunkt)
+fun vilkaarFormaalForYtelsen(soeker: Grunnlagsdata<JsonNode>?, virkningstidspunkt: LocalDate?): VurdertVilkaar {
+    val soekerErILive = kriterieSoekerErILive(soeker, virkningstidspunkt)
 
     return VurdertVilkaar(
         Vilkaartyper.FORMAAL_FOR_YTELSEN,
@@ -30,27 +30,27 @@ fun vilkaarFormaalForYtelsen(søker: Grunnlagsdata<JsonNode>?, virkningstidspunk
     )
 }
 
-fun kriterieSoekerErILive(søker: Grunnlagsdata<JsonNode>?, virkningstidspunkt: LocalDate?): Kriterie {
-    val dødsdato = søker?.hentDoedsdato()
-    if (søker == null || virkningstidspunkt == null) {
+fun kriterieSoekerErILive(soeker: Grunnlagsdata<JsonNode>?, virkningstidspunkt: LocalDate?): Kriterie {
+    val doedsdato = soeker?.hentDoedsdato()
+    if (soeker == null || virkningstidspunkt == null) {
         return opplysningsGrunnlagNull(Kriterietyper.SOEKER_ER_I_LIVE, emptyList())
     }
 
-    if (dødsdato == null) {
+    if (doedsdato == null) {
         return Kriterie(Kriterietyper.SOEKER_ER_I_LIVE, VurderingsResultat.OPPFYLT, emptyList())
     }
 
     val opplysningsGrunnlag = listOf(
         Kriteriegrunnlag(
-            dødsdato.id,
+            doedsdato.id,
             KriterieOpplysningsType.DOEDSDATO,
-            dødsdato.kilde,
-            Doedsdato(dødsdato.verdi, søker.hentFoedselsnummer()?.verdi!!)
+            doedsdato.kilde,
+            Doedsdato(doedsdato.verdi, soeker.hentFoedselsnummer()?.verdi!!)
         )
     )
 
-    val levdePåVirkningsdato = dødsdato.verdi!!.isAfter(virkningstidspunkt)
-    val resultat = vurderOpplysning { levdePåVirkningsdato }
+    val levdePaaVirkningsdato = doedsdato.verdi!!.isAfter(virkningstidspunkt)
+    val resultat = vurderOpplysning { levdePaaVirkningsdato }
 
     return Kriterie(Kriterietyper.SOEKER_ER_I_LIVE, resultat, opplysningsGrunnlag)
 }

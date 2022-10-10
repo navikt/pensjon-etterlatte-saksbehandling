@@ -76,7 +76,7 @@ fun Grunnlagsdata<JsonNode>.hentUtenlandsopphold() =
     this.hentPeriodisertOpplysning<UtenlandsoppholdOpplysninger>(UTENLANDSOPPHOLD)
 fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() =
     this.hentKonstantOpplysning<Utenlandsadresse>(UTENLANDSADRESSE)
-fun Grunnlagsdata<JsonNode>.hentSøskenjustering() =
+fun Grunnlagsdata<JsonNode>.hentSoeskenjustering() =
     this.hentKonstantOpplysning<Beregningsgrunnlag>(SOESKEN_I_BEREGNINGEN)
 fun Grunnlagsdata<JsonNode>.hentInntekt() =
     this.hentKonstantOpplysning<InntektsOpplysning>(INNTEKT)

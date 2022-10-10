@@ -19,7 +19,7 @@ class BarnAvdoedSammeAdresseTest {
     @Test
     fun vurderBarnOgAvdoedSammeAdresse() {
         val testDataUlikAdresse = GrunnlagTestData(
-            opplysningsmapAvdødOverrides = mapOf(
+            opplysningsmapAvdoedOverrides = mapOf(
                 Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresseDanmarkPdl().map {
                         PeriodisertOpplysning(
@@ -32,7 +32,7 @@ class BarnAvdoedSammeAdresseTest {
                     }
                 )
             ),
-            opplysningsmapSøkerOverrides = mapOf(
+            opplysningsmapSoekerOverrides = mapOf(
                 Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresserNorgePdl().map {
                         PeriodisertOpplysning(
@@ -48,7 +48,7 @@ class BarnAvdoedSammeAdresseTest {
         )
 
         val testDataLikAdresse = GrunnlagTestData(
-            opplysningsmapAvdødOverrides = mapOf(
+            opplysningsmapAvdoedOverrides = mapOf(
                 Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresserNorgePdl().map {
                         PeriodisertOpplysning(
@@ -61,7 +61,7 @@ class BarnAvdoedSammeAdresseTest {
                     }
                 )
             ),
-            opplysningsmapSøkerOverrides = mapOf(
+            opplysningsmapSoekerOverrides = mapOf(
                 Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresserNorgePdl().map {
                         PeriodisertOpplysning(
@@ -77,12 +77,12 @@ class BarnAvdoedSammeAdresseTest {
         )
 
         val sammeAdresse = barnOgAvdoedSammeBostedsadresse(
-            testDataLikAdresse.hentOpplysningsgrunnlag().søker,
+            testDataLikAdresse.hentOpplysningsgrunnlag().soeker,
             testDataLikAdresse.hentOpplysningsgrunnlag().hentAvdoed()
         )
 
         val ulikeAdresse = barnOgAvdoedSammeBostedsadresse(
-            testDataUlikAdresse.hentOpplysningsgrunnlag().søker,
+            testDataUlikAdresse.hentOpplysningsgrunnlag().soeker,
             testDataUlikAdresse.hentOpplysningsgrunnlag().hentAvdoed()
         )
         Assertions.assertEquals(VurderingsResultat.OPPFYLT, sammeAdresse.resultat)

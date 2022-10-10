@@ -18,11 +18,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 fun vilkaarBrukerErUnder20(
-    søker: Grunnlagsdata<JsonNode>?,
-    avdød: Grunnlagsdata<JsonNode>?,
+    soeker: Grunnlagsdata<JsonNode>?,
+    avdoed: Grunnlagsdata<JsonNode>?,
     virkningstidspunkt: LocalDate?
 ): VurdertVilkaar {
-    val soekerErUnder20 = kriterieSoekerErUnder20(søker, avdød, virkningstidspunkt)
+    val soekerErUnder20 = kriterieSoekerErUnder20(soeker, avdoed, virkningstidspunkt)
 
     return VurdertVilkaar(
         Vilkaartyper.SOEKER_ER_UNDER_20,
@@ -33,21 +33,21 @@ fun vilkaarBrukerErUnder20(
     )
 }
 fun kriterieSoekerErUnder20(
-    søker: Grunnlagsdata<JsonNode>?,
-    avdød: Grunnlagsdata<JsonNode>?,
+    soeker: Grunnlagsdata<JsonNode>?,
+    avdoed: Grunnlagsdata<JsonNode>?,
     virkningstidspunkt: LocalDate?
 ): Kriterie {
-    val søkerFødselsdato = søker?.hentFoedselsdato()
-    val søkerFødselsnummer = søker?.hentFoedselsnummer()
-    val avdødDødsdato = avdød?.hentDoedsdato()
-    val avdødFødselsnummer = avdød?.hentFoedselsnummer()
+    val soekerFoedselsdato = soeker?.hentFoedselsdato()
+    val soekerFoedselsnummer = soeker?.hentFoedselsnummer()
+    val avdoedDoedsdato = avdoed?.hentDoedsdato()
+    val avdoedFoedselsnummer = avdoed?.hentFoedselsnummer()
 
     if (
-        søkerFødselsdato == null ||
-        søkerFødselsnummer == null ||
+        soekerFoedselsdato == null ||
+        soekerFoedselsnummer == null ||
         virkningstidspunkt == null ||
-        avdødDødsdato == null ||
-        avdødFødselsnummer == null
+        avdoedDoedsdato == null ||
+        avdoedFoedselsnummer == null
     ) {
         return Kriterie(
             Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
@@ -58,22 +58,22 @@ fun kriterieSoekerErUnder20(
 
     val opplysningsGrunnlag = listOf(
         Kriteriegrunnlag(
-            søkerFødselsdato.id,
+            soekerFoedselsdato.id,
             KriterieOpplysningsType.FOEDSELSDATO,
-            søkerFødselsdato.kilde,
-            Foedselsdato(søkerFødselsdato.verdi, søkerFødselsnummer.verdi)
+            soekerFoedselsdato.kilde,
+            Foedselsdato(soekerFoedselsdato.verdi, soekerFoedselsnummer.verdi)
         ),
         Kriteriegrunnlag(
-            avdødDødsdato.id,
+            avdoedDoedsdato.id,
             KriterieOpplysningsType.DOEDSDATO,
-            avdødDødsdato.kilde,
-            Doedsdato(avdødDødsdato.verdi, avdødFødselsnummer.verdi)
+            avdoedDoedsdato.kilde,
+            Doedsdato(avdoedDoedsdato.verdi, avdoedFoedselsnummer.verdi)
         )
     )
 
     return Kriterie(
         Kriterietyper.SOEKER_ER_UNDER_20_PAA_VIRKNINGSDATO,
-        vurderOpplysning { søkerFødselsdato.verdi.plusYears(18) > virkningstidspunkt },
+        vurderOpplysning { soekerFoedselsdato.verdi.plusYears(18) > virkningstidspunkt },
         opplysningsGrunnlag
     )
 }

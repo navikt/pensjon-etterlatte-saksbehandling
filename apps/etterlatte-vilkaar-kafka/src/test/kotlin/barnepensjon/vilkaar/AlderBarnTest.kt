@@ -16,7 +16,7 @@ import java.util.*
 
 class AlderBarnTest {
     private val testDataOver20 = GrunnlagTestData(
-        opplysningsmapSøkerOverrides = mapOf(
+        opplysningsmapSoekerOverrides = mapOf(
             Opplysningstyper.FOEDSELSDATO to Opplysning.Konstant(
                 UUID.randomUUID(),
                 kilde,
@@ -26,7 +26,7 @@ class AlderBarnTest {
     ).hentOpplysningsgrunnlag()
 
     private val testDataUnder20 = GrunnlagTestData(
-        opplysningsmapSøkerOverrides = mapOf(
+        opplysningsmapSoekerOverrides = mapOf(
             Opplysningstyper.FOEDSELSDATO to Opplysning.Konstant(
                 UUID.randomUUID(),
                 kilde,
@@ -41,18 +41,18 @@ class AlderBarnTest {
     @Test
     fun vurderAlderErUnder20() {
         val vurderingBarnOver20 = vilkaarBrukerErUnder20(
-            testDataOver20.søker,
+            testDataOver20.soeker,
             testDataOver20.hentAvdoed(),
             virkningstidspunkt = virkningsdataPersonAvdoed.atDay(1)
         )
         val vurderingBarnUnder20 = vilkaarBrukerErUnder20(
-            testDataUnder20.søker,
+            testDataUnder20.soeker,
             testDataUnder20.hentAvdoed(),
             virkningstidspunkt = virkningsdataPersonAvdoed.atDay(1)
         )
 
         val vurderingBarnUnder20UtenDoedsdato = vilkaarBrukerErUnder20(
-            testDataUnder20.søker,
+            testDataUnder20.soeker,
             testDataUnder20.hentAvdoed(),
             virkningstidspunkt = null
         )

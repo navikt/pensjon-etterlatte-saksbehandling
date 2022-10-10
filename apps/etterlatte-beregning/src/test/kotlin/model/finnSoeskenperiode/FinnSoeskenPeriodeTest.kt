@@ -2,8 +2,8 @@ package model.finnSoeskenperiode
 
 import GrunnlagTestData
 import grunnlag.ADRESSE_DEFAULT
-import grunnlag.HALVSØSKEN_FØDSELSNUMMER
-import grunnlag.HELSØSKEN_FØDSELSNUMMER
+import grunnlag.HALVSOESKEN_FOEDSELSNUMMER
+import grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import grunnlag.kilde
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
 import java.util.UUID.randomUUID
 
 internal class FinnSoeskenPeriodeTest {
@@ -35,7 +34,7 @@ internal class FinnSoeskenPeriodeTest {
             SoeskenPeriode(
                 fom,
                 YearMonth.now().plusMonths(3),
-                listOf(testData.søsken, testData.halvsøsken)
+                listOf(testData.soesken, testData.halvsoesken)
             )
         )
 
@@ -44,28 +43,28 @@ internal class FinnSoeskenPeriodeTest {
 
     @Test
     fun `hentSoeskenperioder skal splitte når søsken blir 18`() {
-        val fødselsdagSøsken = LocalDate.of(2003, 2, 10)
-        val `18årsdag` = YearMonth.of(fødselsdagSøsken.year + 18, fødselsdagSøsken.monthValue)
+        val foedselsdagSoesken = LocalDate.of(2003, 2, 10)
+        val `18aarsdag` = YearMonth.of(foedselsdagSoesken.year + 18, foedselsdagSoesken.monthValue)
         val testData = GrunnlagTestData(
-            opplysningsmapSøskenOverrides = mapOf(
-                FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, fødselsdagSøsken.toJsonNode())
+            opplysningsmapSoeskenOverrides = mapOf(
+                FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, foedselsdagSoesken.toJsonNode())
             )
         )
         val fom = YearMonth.of(2020, 2)
         val tom = YearMonth.now().plusMonths(3)
-        val søskenperiode = FinnSoeskenPeriode(testData.hentOpplysningsgrunnlag(), fom).hentSoeskenperioder()
+        val soeskenperiode = FinnSoeskenPeriode(testData.hentOpplysningsgrunnlag(), fom).hentSoeskenperioder()
         val expected = listOf(
-            SoeskenPeriode(fom, `18årsdag`, listOf(testData.søsken, testData.halvsøsken)),
-            SoeskenPeriode(`18årsdag`.plusMonths(1), tom, listOf(testData.halvsøsken))
+            SoeskenPeriode(fom, `18aarsdag`, listOf(testData.soesken, testData.halvsoesken)),
+            SoeskenPeriode(`18aarsdag`.plusMonths(1), tom, listOf(testData.halvsoesken))
         )
 
-        assertEquals(expected, søskenperiode)
+        assertEquals(expected, soeskenperiode)
     }
 
     @Test
     fun `hentSoeskenperioder skal ikke regne med halvsøsken som bor på en annen adresse`() {
         val testData = GrunnlagTestData(
-            opplysningsmapHalvsøskenOverrides = mapOf(
+            opplysningsmapHalvsoeskenOverrides = mapOf(
                 BOSTEDSADRESSE to Opplysning.Periodisert(
                     ADRESSE_DEFAULT.map {
                         PeriodisertOpplysning(
@@ -81,18 +80,18 @@ internal class FinnSoeskenPeriodeTest {
         )
         val fom = YearMonth.of(2020, 2)
         val tom = YearMonth.now().plusMonths(3)
-        val søskenperiode = FinnSoeskenPeriode(testData.hentOpplysningsgrunnlag(), fom).hentSoeskenperioder()
+        val soeskenperiode = FinnSoeskenPeriode(testData.hentOpplysningsgrunnlag(), fom).hentSoeskenperioder()
         val expected = listOf(
-            SoeskenPeriode(fom, tom, listOf(testData.søsken))
+            SoeskenPeriode(fom, tom, listOf(testData.soesken))
         )
 
-        assertEquals(expected, søskenperiode)
+        assertEquals(expected, soeskenperiode)
     }
 
     @Test
     fun `hentSoeskenperioder saksoverrides skal overstyre alt`() {
         val testData = GrunnlagTestData(
-            opplysningsmapHalvsøskenOverrides = mapOf(
+            opplysningsmapHalvsoeskenOverrides = mapOf(
                 BOSTEDSADRESSE to Opplysning.Periodisert(
                     ADRESSE_DEFAULT.map {
                         PeriodisertOpplysning(
@@ -111,8 +110,8 @@ internal class FinnSoeskenPeriodeTest {
                     kilde,
                     Beregningsgrunnlag(
                         listOf(
-                            SoeskenMedIBeregning(HALVSØSKEN_FØDSELSNUMMER, true),
-                            SoeskenMedIBeregning(HELSØSKEN_FØDSELSNUMMER, false)
+                            SoeskenMedIBeregning(HALVSOESKEN_FOEDSELSNUMMER, true),
+                            SoeskenMedIBeregning(HELSOESKEN_FOEDSELSNUMMER, false)
                         )
                     ).toJsonNode()
                 )
@@ -120,42 +119,42 @@ internal class FinnSoeskenPeriodeTest {
         )
         val fom = YearMonth.of(2020, 2)
         val tom = YearMonth.now().plusMonths(3)
-        val søskenperiode = FinnSoeskenPeriode(testData.hentOpplysningsgrunnlag(), fom).hentSoeskenperioder()
+        val soeskenperiode = FinnSoeskenPeriode(testData.hentOpplysningsgrunnlag(), fom).hentSoeskenperioder()
         val expected = listOf(
-            SoeskenPeriode(fom, tom, listOf(testData.halvsøsken))
+            SoeskenPeriode(fom, tom, listOf(testData.halvsoesken))
         )
 
-        assertEquals(expected, søskenperiode)
+        assertEquals(expected, soeskenperiode)
     }
 
     @Test
     fun `hentSoeskenperioder skal returnere tom liste ved ingen søsken`() {
-        val søker = GrunnlagTestData().søker
+        val soeker = GrunnlagTestData().soeker
         val testData = GrunnlagTestData(
-            opplysningsmapAvdødOverrides = mapOf(
-                AVDOEDESBARN to Opplysning.Konstant(randomUUID(), kilde, AvdoedesBarn(listOf(søker)).toJsonNode())
+            opplysningsmapAvdoedOverrides = mapOf(
+                AVDOEDESBARN to Opplysning.Konstant(randomUUID(), kilde, AvdoedesBarn(listOf(soeker)).toJsonNode())
             )
         )
         val fom = YearMonth.of(2020, 2)
         val tom = YearMonth.now().plusMonths(3)
-        val søskenperiode = FinnSoeskenPeriode(testData.hentOpplysningsgrunnlag(), fom).hentSoeskenperioder()
+        val soeskenperiode = FinnSoeskenPeriode(testData.hentOpplysningsgrunnlag(), fom).hentSoeskenperioder()
         val expected = listOf(
             SoeskenPeriode(fom, tom, emptyList())
         )
 
-        assertEquals(expected, søskenperiode)
+        assertEquals(expected, soeskenperiode)
     }
 
     @Test
     fun `finnHelOgHalvsøsken skal splitte søsken basert på felles foreldre`() {
         val testData = GrunnlagTestData()
-        val helsøsken = testData.søsken
-        val halvsøsken = testData.halvsøsken
+        val helsoesken = testData.soesken
+        val halvsoesken = testData.halvsoesken
 
         assertEquals(
-            Søsken(helsøsken = listOf(helsøsken), halvsøsken = listOf(halvsøsken)),
-            finnHelOgHalvsøsken(
-                søker = testData.hentOpplysningsgrunnlag().søker,
+            Soesken(helsoesken = listOf(helsoesken), halvsoesken = listOf(halvsoesken)),
+            finnHelOgHalvsoesken(
+                soeker = testData.hentOpplysningsgrunnlag().soeker,
                 avdoedesBarn = testData.hentOpplysningsgrunnlag().hentAvdoed().hentAvdoedesbarn()?.verdi?.avdoedesBarn!!
             )
         )
@@ -163,18 +162,18 @@ internal class FinnSoeskenPeriodeTest {
 
     @Test
     fun `finnHelOgHalvsøsken skal returnere tomme lister om avdøde kun har søker som barn`() {
-        val søker = GrunnlagTestData().søker
+        val soeker = GrunnlagTestData().soeker
 
         val testData = GrunnlagTestData(
-            opplysningsmapAvdødOverrides = mapOf(
-                AVDOEDESBARN to Opplysning.Konstant(randomUUID(), kilde, AvdoedesBarn(listOf(søker)).toJsonNode())
+            opplysningsmapAvdoedOverrides = mapOf(
+                AVDOEDESBARN to Opplysning.Konstant(randomUUID(), kilde, AvdoedesBarn(listOf(soeker)).toJsonNode())
             )
         )
 
         assertEquals(
-            Søsken(helsøsken = emptyList(), halvsøsken = emptyList()),
-            finnHelOgHalvsøsken(
-                søker = testData.hentOpplysningsgrunnlag().søker,
+            Soesken(helsoesken = emptyList(), halvsoesken = emptyList()),
+            finnHelOgHalvsoesken(
+                soeker = testData.hentOpplysningsgrunnlag().soeker,
                 avdoedesBarn = testData.hentOpplysningsgrunnlag().hentAvdoed().hentAvdoedesbarn()?.verdi?.avdoedesBarn!!
             )
         )

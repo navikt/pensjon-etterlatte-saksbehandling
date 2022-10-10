@@ -17,9 +17,9 @@ import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
 fun barnIngenOppgittUtlandsadresse(
-    søker: Grunnlagsdata<JsonNode>?
+    soeker: Grunnlagsdata<JsonNode>?
 ): VurdertVilkaar {
-    val utenlandsopphold = søker?.hentUtenlandsadresse()
+    val utenlandsopphold = soeker?.hentUtenlandsadresse()
     val opplysningsGrunnlag = listOfNotNull(
         utenlandsopphold?.let {
             Kriteriegrunnlag(

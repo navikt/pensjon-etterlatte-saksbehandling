@@ -46,8 +46,8 @@ class BosattTest {
 
     @Test
     fun vurderInnOgUtvandring() {
-        val avdødTestdata = GrunnlagTestData(
-            opplysningsmapAvdødOverrides = mapOf(
+        val avdoedTestdata = GrunnlagTestData(
+            opplysningsmapAvdoedOverrides = mapOf(
                 BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresseUtlandFoerFemAar().map {
                         PeriodisertOpplysning(
@@ -61,8 +61,8 @@ class BosattTest {
                 )
             )
         ).hentOpplysningsgrunnlag().hentAvdoed()
-        val avdødIngenUtland = avdødTestdata - Opplysningstyper.UTLAND
-        val avdødInnvandring = avdødTestdata + mapOf(
+        val avdoedIngenUtland = avdoedTestdata - Opplysningstyper.UTLAND
+        val avdoedInnvandring = avdoedTestdata + mapOf(
             Opplysningstyper.UTLAND to Opplysning.Konstant(
                 UUID.randomUUID(),
                 kilde,
@@ -72,7 +72,7 @@ class BosattTest {
                 ).toJsonNode()
             )
         )
-        val avdødHarIkkeUtland = avdødTestdata + mapOf(
+        val avdoedHarIkkeUtland = avdoedTestdata + mapOf(
             Opplysningstyper.UTLAND to Opplysning.Konstant(
                 UUID.randomUUID(),
                 kilde,
@@ -83,9 +83,9 @@ class BosattTest {
             )
         )
 
-        val ingenUtland = kriterieIngenInnUtvandring(avdødIngenUtland, AVDOED_NORSK_STATSBORGER)
-        val ingenInnOgUtvandring = kriterieIngenInnUtvandring(avdødHarIkkeUtland, AVDOED_NORSK_STATSBORGER)
-        val harInnOgUtvandring = kriterieIngenInnUtvandring(avdødInnvandring, AVDOED_NORSK_STATSBORGER)
+        val ingenUtland = kriterieIngenInnUtvandring(avdoedIngenUtland, AVDOED_NORSK_STATSBORGER)
+        val ingenInnOgUtvandring = kriterieIngenInnUtvandring(avdoedHarIkkeUtland, AVDOED_NORSK_STATSBORGER)
+        val harInnOgUtvandring = kriterieIngenInnUtvandring(avdoedInnvandring, AVDOED_NORSK_STATSBORGER)
 
         assertEquals(VurderingsResultat.OPPFYLT, ingenUtland.resultat)
         assertEquals(VurderingsResultat.OPPFYLT, ingenInnOgUtvandring.resultat)
@@ -94,14 +94,14 @@ class BosattTest {
 
     @Test
     fun vurderIngenUtelandsopphold() {
-        val avdødMedUtlandsopphold = GrunnlagTestData(
-            opplysningsmapAvdødOverrides = mapOf(
+        val avdoedMedUtlandsopphold = GrunnlagTestData(
+            opplysningsmapAvdoedOverrides = mapOf(
                 Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Periodisert(utenlandsopphold)
             )
         ).hentOpplysningsgrunnlag().hentAvdoed()
 
-        val avdødUtenUtlandsopphold = GrunnlagTestData(
-            opplysningsmapAvdødOverrides = mapOf(
+        val avdoedUtenUtlandsopphold = GrunnlagTestData(
+            opplysningsmapAvdoedOverrides = mapOf(
                 Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Periodisert(
                     emptyList()
                 )
@@ -110,13 +110,13 @@ class BosattTest {
 
         val utenlandsopphold =
             kriterieIngenUtenlandsoppholdFraSoeknad(
-                avdødMedUtlandsopphold,
+                avdoedMedUtlandsopphold,
                 Kriterietyper.AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD
             )
 
         val ingenUtenlandsopphold =
             kriterieIngenUtenlandsoppholdFraSoeknad(
-                avdødUtenUtlandsopphold,
+                avdoedUtenUtlandsopphold,
                 Kriterietyper.AVDOED_IKKE_OPPHOLD_UTLAND_FRA_SOEKNAD
             )
 
@@ -126,8 +126,8 @@ class BosattTest {
 
     @Test
     fun kunNorskeAdresserSisteFemAar() {
-        val avdødUtenUtlandsadresser = GrunnlagTestData(
-            opplysningsmapAvdødOverrides = mapOf(
+        val avdoedUtenUtlandsadresser = GrunnlagTestData(
+            opplysningsmapAvdoedOverrides = mapOf(
                 BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresserNorgePdl().map {
                         PeriodisertOpplysning(
@@ -143,8 +143,8 @@ class BosattTest {
                 OPPHOLDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresserNorgePdl().toJsonNode())
             )
         ).hentOpplysningsgrunnlag().hentAvdoed()
-        val avdødUtenAdresse = avdødUtenUtlandsadresser - BOSTEDSADRESSE - KONTAKTADRESSE - OPPHOLDSADRESSE
-        val avdødMedUtlandsadresser = avdødUtenUtlandsadresser + mapOf(
+        val avdoedUtenAdresse = avdoedUtenUtlandsadresser - BOSTEDSADRESSE - KONTAKTADRESSE - OPPHOLDSADRESSE
+        val avdoedMedUtlandsadresser = avdoedUtenUtlandsadresser + mapOf(
             BOSTEDSADRESSE to Opplysning.Periodisert(
                 adresseDanmarkPdl().map {
                     PeriodisertOpplysning(
@@ -159,7 +159,7 @@ class BosattTest {
             KONTAKTADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseDanmarkPdl().toJsonNode()),
             OPPHOLDSADRESSE to Opplysning.Konstant(UUID.randomUUID(), kilde, adresseDanmarkPdl().toJsonNode())
         )
-        val avdødMedUtlandsadresserFørFemÅr = avdødUtenUtlandsadresser + mapOf(
+        val avdoedMedUtlandsadresserFoerFemAar = avdoedUtenUtlandsadresser + mapOf(
             BOSTEDSADRESSE to Opplysning.Periodisert(
                 adresseUtlandFoerFemAar().map {
                     PeriodisertOpplysning(
@@ -177,48 +177,48 @@ class BosattTest {
 
         val utenlandsoppholdBosted =
             kriterieKunNorskeBostedsadresserSisteFemAar(
-                avdødMedUtlandsadresser,
+                avdoedMedUtlandsadresser,
                 Kriterietyper.AVDOED_KUN_NORSKE_BOSTEDSADRESSER
             )
         val utenlandsoppholdOpphold =
             kriterieKunNorskeOppholdsadresserSisteFemAar(
-                avdødMedUtlandsadresser,
+                avdoedMedUtlandsadresser,
                 Kriterietyper.AVDOED_KUN_NORSKE_OPPHOLDSSADRESSER
             )
 
         val utenlandsoppholdKontakt =
             kriterieKunNorskeKontaktadresserSisteFemAar(
-                avdødMedUtlandsadresser,
+                avdoedMedUtlandsadresser,
                 Kriterietyper.AVDOED_KUN_NORSKE_KONTAKTADRESSER
             )
 
         val ingenUtenlandsoppholdBosted =
             kriterieKunNorskeBostedsadresserSisteFemAar(
-                avdødUtenUtlandsadresser,
+                avdoedUtenUtlandsadresser,
                 Kriterietyper.AVDOED_KUN_NORSKE_BOSTEDSADRESSER
             )
 
         val ingenUtenlandsoppholdOpphold =
             kriterieKunNorskeOppholdsadresserSisteFemAar(
-                avdødUtenUtlandsadresser,
+                avdoedUtenUtlandsadresser,
                 Kriterietyper.AVDOED_KUN_NORSKE_OPPHOLDSSADRESSER
             )
 
         val ingenUtenlandsoppholdKontakt =
             kriterieKunNorskeKontaktadresserSisteFemAar(
-                avdødUtenUtlandsadresser,
+                avdoedUtenUtlandsadresser,
                 Kriterietyper.AVDOED_KUN_NORSKE_KONTAKTADRESSER
             )
 
         val utenlandsoppholdFoerFemAar =
             kriterieKunNorskeBostedsadresserSisteFemAar(
-                avdødMedUtlandsadresserFørFemÅr,
+                avdoedMedUtlandsadresserFoerFemAar,
                 Kriterietyper.AVDOED_KUN_NORSKE_BOSTEDSADRESSER
             )
 
         val ingenAdresser =
             kriterieKunNorskeBostedsadresserSisteFemAar(
-                avdødUtenAdresse,
+                avdoedUtenAdresse,
                 Kriterietyper.AVDOED_KUN_NORSKE_BOSTEDSADRESSER
             )
 
@@ -236,8 +236,8 @@ class BosattTest {
 
     @Test
     fun vurderSammenhengendeAdresserINorgeSisteFemAar() {
-        val avdødUtenUtlandsadresser = GrunnlagTestData(
-            opplysningsmapAvdødOverrides = mapOf(
+        val avdoedUtenUtlandsadresser = GrunnlagTestData(
+            opplysningsmapAvdoedOverrides = mapOf(
                 BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresserNorgePdl().map {
                         PeriodisertOpplysning(
@@ -251,8 +251,8 @@ class BosattTest {
                 )
             )
         ).hentOpplysningsgrunnlag().hentAvdoed()
-        val avdødUtenAdresse = avdødUtenUtlandsadresser - BOSTEDSADRESSE
-        val avdødMedUtlandsadresser = avdødUtenUtlandsadresser + mapOf(
+        val avdoedUtenAdresse = avdoedUtenUtlandsadresser - BOSTEDSADRESSE
+        val avdoedMedUtlandsadresser = avdoedUtenUtlandsadresser + mapOf(
             BOSTEDSADRESSE to Opplysning.Periodisert(
                 adresseDanmarkPdl().map {
                     PeriodisertOpplysning(
@@ -265,7 +265,7 @@ class BosattTest {
                 }
             )
         )
-        val avdødMedUtlandsadresserFørFemÅr = avdødUtenUtlandsadresser + mapOf(
+        val avdoedMedUtlandsadresserFoerFemAar = avdoedUtenUtlandsadresser + mapOf(
             BOSTEDSADRESSE to Opplysning.Periodisert(
                 adresseUtlandFoerFemAar().map {
                     PeriodisertOpplysning(
@@ -281,25 +281,25 @@ class BosattTest {
 
         val utenlandsopphold =
             kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
-                avdødMedUtlandsadresser,
+                avdoedMedUtlandsadresser,
                 Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
             )
 
         val ingenUtenlandsopphold =
             kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
-                avdødUtenUtlandsadresser,
+                avdoedUtenUtlandsadresser,
                 Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
             )
 
         val utenlandsoppholdFoerFemAar =
             kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
-                avdødMedUtlandsadresserFørFemÅr,
+                avdoedMedUtlandsadresserFoerFemAar,
                 Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
             )
 
         val ingenAdresser =
             kriterieSammenhengendeBostedsadresserINorgeSisteFemAar(
-                avdødUtenAdresse,
+                avdoedUtenAdresse,
                 Kriterietyper.AVDOED_SAMMENHENGENDE_BOSTEDSADRESSE_NORGE_SISTE_FEM_AAR
             )
 

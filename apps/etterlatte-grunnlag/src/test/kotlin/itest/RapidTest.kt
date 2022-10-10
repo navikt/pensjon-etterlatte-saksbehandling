@@ -188,7 +188,7 @@ internal class RapidTest {
         )
         Assertions.assertEquals(
             Opplysningsgrunnlag(
-                søker = mapOf(
+                soeker = mapOf(
                     Opplysningstyper.NAVN to Opplysning.Konstant(
                         statiskUuid,
                         nyOpplysning.kilde,

@@ -14,30 +14,30 @@ import java.time.YearMonth
 import java.util.*
 
 internal class FormaalTest {
-    private val dødsdato = LocalDate.of(2012, 10, 5)
-    private val søkerILive = GrunnlagTestData().hentOpplysningsgrunnlag().søker
-    private val søkerDød = GrunnlagTestData(
-        opplysningsmapSøkerOverrides = mapOf(
-            Opplysningstyper.DOEDSDATO to Opplysning.Konstant(UUID.randomUUID(), kilde, dødsdato.toJsonNode())
+    private val doedsdato = LocalDate.of(2012, 10, 5)
+    private val soekerILive = GrunnlagTestData().hentOpplysningsgrunnlag().soeker
+    private val soekerDoed = GrunnlagTestData(
+        opplysningsmapSoekerOverrides = mapOf(
+            Opplysningstyper.DOEDSDATO to Opplysning.Konstant(UUID.randomUUID(), kilde, doedsdato.toJsonNode())
         )
-    ).hentOpplysningsgrunnlag().søker
+    ).hentOpplysningsgrunnlag().soeker
 
     @Test
-    fun `søker som er i live på virkningstidspunkt oppfyller vilkaar`() {
-        val virkningstidspunkt = YearMonth.from(dødsdato).plusMonths(1).atDay(1)
-        val søkerILivePåVirkningstidspunkt = søkerDød + mapOf(
+    fun `soeker som er i live paa virkningstidspunkt oppfyller vilkaar`() {
+        val virkningstidspunkt = YearMonth.from(doedsdato).plusMonths(1).atDay(1)
+        val soekerILivePaaVirkningstidspunkt = soekerDoed + mapOf(
             Opplysningstyper.DOEDSDATO to Opplysning.Konstant(
                 UUID.randomUUID(),
                 kilde,
-                dødsdato.plusMonths(2).toJsonNode()
+                doedsdato.plusMonths(2).toJsonNode()
             )
         )
         val vurderingMedDoedsdato = vilkaarFormaalForYtelsen(
-            søkerILivePåVirkningstidspunkt,
+            soekerILivePaaVirkningstidspunkt,
             virkningstidspunkt
         )
         val vurderingUtenDoedsdato = vilkaarFormaalForYtelsen(
-            søkerILive,
+            soekerILive,
             virkningstidspunkt
         )
 
@@ -46,11 +46,11 @@ internal class FormaalTest {
     }
 
     @Test
-    fun `ukjent data for søker gir må avklares for vilkår`() {
-        val vurderingUkjentVirk = vilkaarFormaalForYtelsen(søkerILive, null)
+    fun `ukjent data for soeker gir maa avklares for vilkaar`() {
+        val vurderingUkjentVirk = vilkaarFormaalForYtelsen(soekerILive, null)
         val vurderingUkjentSoeker = vilkaarFormaalForYtelsen(
             null,
-            YearMonth.from(dødsdato).plusMonths(1).atDay(1)
+            YearMonth.from(doedsdato).plusMonths(1).atDay(1)
         )
         val vurderingUkjentBegge = vilkaarFormaalForYtelsen(null, null)
 
@@ -69,10 +69,10 @@ internal class FormaalTest {
     }
 
     @Test
-    fun `søker med dødsdato tidligere enn virkningsdato oppfyller ikke vurdering`() {
+    fun `soeker med doedsdato tidligere enn virkningsdato oppfyller ikke vurdering`() {
         val vurdering = vilkaarFormaalForYtelsen(
-            søkerDød,
-            virkningstidspunkt = YearMonth.from(dødsdato).plusMonths(1).atDay(1)
+            soekerDoed,
+            virkningstidspunkt = YearMonth.from(doedsdato).plusMonths(1).atDay(1)
         )
 
         Assertions.assertEquals(VurderingsResultat.IKKE_OPPFYLT, vurdering.resultat)

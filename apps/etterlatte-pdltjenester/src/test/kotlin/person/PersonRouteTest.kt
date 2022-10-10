@@ -40,7 +40,7 @@ class PersonRouteTest {
             rolle = PersonRolle.BARN
         )
 
-        coEvery { personService.hentPerson(hentPersonRequest) } returns GrunnlagTestData().søker
+        coEvery { personService.hentPerson(hentPersonRequest) } returns GrunnlagTestData().soeker
 
         withTestApplication({ module(securityContextMediator, personService) }) {
             handleRequest(HttpMethod.Post, PERSON_ENDEPUNKT) {

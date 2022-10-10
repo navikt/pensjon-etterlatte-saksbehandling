@@ -64,38 +64,38 @@ fun kriterieAvdoedErForelder(
     soeker: Grunnlagsdata<JsonNode>,
     avdoed: Grunnlagsdata<JsonNode>
 ): Kriterie {
-    val søkersFamilieRelasjon = soeker.hentFamilierelasjon()
-    val avdødDoedsdato = avdoed.hentDoedsdato()
-    val avdødFoedselsnummer = avdoed.hentFoedselsnummer()
+    val soekersFamilieRelasjon = soeker.hentFamilierelasjon()
+    val avdoedDoedsdato = avdoed.hentDoedsdato()
+    val avdoedFoedselsnummer = avdoed.hentFoedselsnummer()
 
     val opplsyningsGrunnlag = listOfNotNull(
-        søkersFamilieRelasjon?.verdi?.foreldre?.let {
+        soekersFamilieRelasjon?.verdi?.foreldre?.let {
             Kriteriegrunnlag(
-                søkersFamilieRelasjon.id,
+                soekersFamilieRelasjon.id,
                 KriterieOpplysningsType.FORELDRE,
-                søkersFamilieRelasjon.kilde,
-                Foreldre(søkersFamilieRelasjon.verdi.foreldre)
+                soekersFamilieRelasjon.kilde,
+                Foreldre(soekersFamilieRelasjon.verdi.foreldre)
             )
         },
-        avdødDoedsdato?.verdi?.let {
+        avdoedDoedsdato?.verdi?.let {
             Kriteriegrunnlag(
-                avdødDoedsdato.id,
+                avdoedDoedsdato.id,
                 KriterieOpplysningsType.DOEDSDATO,
-                avdødDoedsdato.kilde,
-                Doedsdato(avdødDoedsdato.verdi, avdødFoedselsnummer!!.verdi) // TODO sj: ikke !!
+                avdoedDoedsdato.kilde,
+                Doedsdato(avdoedDoedsdato.verdi, avdoedFoedselsnummer!!.verdi) // TODO sj: ikke !!
             )
         }
     )
 
     val resultat =
         if (
-            søkersFamilieRelasjon?.verdi?.foreldre == null ||
-            avdødDoedsdato == null ||
-            avdødFoedselsnummer?.verdi == null
+            soekersFamilieRelasjon?.verdi?.foreldre == null ||
+            avdoedDoedsdato == null ||
+            avdoedFoedselsnummer?.verdi == null
         ) {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         } else {
-            vurderOpplysning { søkersFamilieRelasjon.verdi.foreldre!!.contains(avdødFoedselsnummer.verdi) }
+            vurderOpplysning { soekersFamilieRelasjon.verdi.foreldre!!.contains(avdoedFoedselsnummer.verdi) }
         }
 
     return Kriterie(Kriterietyper.AVDOED_ER_FORELDER, resultat, opplsyningsGrunnlag)

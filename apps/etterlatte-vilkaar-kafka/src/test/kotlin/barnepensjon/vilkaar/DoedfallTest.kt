@@ -1,7 +1,7 @@
 package barnepensjon.vilkaar
 
 import GrunnlagTestData
-import grunnlag.GJENLEVENDE_FØDSELSNUMMER
+import grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import grunnlag.kilde
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -19,13 +19,13 @@ class DoedfallTest {
     fun vurderDoedsdatoErRegistrert() {
         val testData = GrunnlagTestData().hentOpplysningsgrunnlag()
         val avdoedErIkkeForelder = GrunnlagTestData(
-            opplysningsmapSøkerOverrides = mapOf(
+            opplysningsmapSoekerOverrides = mapOf(
                 Opplysningstyper.FAMILIERELASJON to Opplysning.Konstant(
                     UUID.randomUUID(),
                     kilde,
                     FamilieRelasjon(
-                        ansvarligeForeldre = listOf(GJENLEVENDE_FØDSELSNUMMER),
-                        foreldre = listOf(GJENLEVENDE_FØDSELSNUMMER),
+                        ansvarligeForeldre = listOf(GJENLEVENDE_FOEDSELSNUMMER),
+                        foreldre = listOf(GJENLEVENDE_FOEDSELSNUMMER),
                         barn = null
                     ).toJsonNode()
                 )
@@ -37,19 +37,19 @@ class DoedfallTest {
         val doedsdatoIkkeIPdl =
             vilkaarDoedsfallErRegistrert(
                 avdoedIngenDoedsdato,
-                testData.søker
+                testData.soeker
             )
 
         val avdoedErForelder =
             vilkaarDoedsfallErRegistrert(
                 testData.hentAvdoed(),
-                testData.søker
+                testData.soeker
             )
 
         val avdoedIkkeForelder =
             vilkaarDoedsfallErRegistrert(
                 avdoedErIkkeForelder.hentAvdoed(),
-                avdoedErIkkeForelder.søker
+                avdoedErIkkeForelder.soeker
             )
 
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, doedsdatoIkkeIPdl.resultat)

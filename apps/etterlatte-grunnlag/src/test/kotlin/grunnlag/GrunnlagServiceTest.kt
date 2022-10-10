@@ -74,7 +74,7 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `hentOpplysningsgrunnlag skal mappe om dataen fra DB til søker`() {
-            val grunnlagshendelser = lagGrunnlagForPerson(testData.søker.foedselsnummer, PersonRolle.BARN)
+            val grunnlagshendelser = lagGrunnlagForPerson(testData.soeker.foedselsnummer, PersonRolle.BARN)
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
@@ -84,13 +84,13 @@ internal class GrunnlagServiceTest {
                 FOEDSELSDATO to Opplysning.Konstant(statiskUuid, kilde, nyFødselsdag.toJsonNode())
             )
 
-            Assertions.assertEquals(expected[NAVN], actual.søker[NAVN])
-            Assertions.assertEquals(expected[FOEDSELSDATO], actual.søker[FOEDSELSDATO])
+            Assertions.assertEquals(expected[NAVN], actual.soeker[NAVN])
+            Assertions.assertEquals(expected[FOEDSELSDATO], actual.soeker[FOEDSELSDATO])
         }
 
         @Test
         fun `hentOpplysningsgrunnlag skal mappe om dataen fra DB til avdød`() {
-            val grunnlagshendelser = lagGrunnlagForPerson(testData.avdød.foedselsnummer, PersonRolle.AVDOED)
+            val grunnlagshendelser = lagGrunnlagForPerson(testData.avdoed.foedselsnummer, PersonRolle.AVDOED)
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
@@ -124,7 +124,7 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `hentOpplysningsgrunnlag skal mappe om dataen fra DB til søsken`() {
-            val grunnlagshendelser = lagGrunnlagForPerson(testData.søsken.foedselsnummer, PersonRolle.BARN)
+            val grunnlagshendelser = lagGrunnlagForPerson(testData.soesken.foedselsnummer, PersonRolle.BARN)
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
@@ -148,7 +148,7 @@ internal class GrunnlagServiceTest {
                 hendelseNummer = 1,
                 opplysningType = FOEDELAND,
                 id = statiskUuid,
-                fnr = testData.søker.foedselsnummer,
+                fnr = testData.soeker.foedselsnummer,
                 verdi = "Norge".toJsonNode(),
                 kilde = kilde
             ),
@@ -157,7 +157,7 @@ internal class GrunnlagServiceTest {
                 hendelseNummer = 2,
                 opplysningType = FOEDELAND,
                 id = statiskUuid,
-                fnr = testData.søker.foedselsnummer,
+                fnr = testData.soeker.foedselsnummer,
                 verdi = "Sverige".toJsonNode(),
                 kilde = kilde
             )
@@ -169,7 +169,7 @@ internal class GrunnlagServiceTest {
 
             Assertions.assertEquals(
                 1,
-                grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri()).søker.values.size
+                grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri()).soeker.values.size
             )
         }
 
@@ -184,7 +184,7 @@ internal class GrunnlagServiceTest {
             )
             Assertions.assertEquals(
                 Opplysning.Konstant.create(grunnlagshendelser[1].opplysning).toJson(),
-                opplysningsgrunnlag.søker[FOEDELAND]!!.toJson()
+                opplysningsgrunnlag.soeker[FOEDELAND]!!.toJson()
             )
         }
     }
@@ -212,7 +212,7 @@ internal class GrunnlagServiceTest {
                     meta = objectMapper.createObjectNode(),
                     opplysning = bostedsadresse1.toJsonNode(),
                     attestering = null,
-                    fnr = testData.søker.foedselsnummer,
+                    fnr = testData.soeker.foedselsnummer,
                     periode = Periode(
                         fom = bostedsadresse1.gyldigFraOgMed!!.let { YearMonth.of(it.year, it.month) },
                         tom = bostedsadresse1.gyldigTilOgMed?.let { YearMonth.of(it.year, it.month) }
@@ -229,7 +229,7 @@ internal class GrunnlagServiceTest {
                     meta = objectMapper.createObjectNode(),
                     opplysning = bostedsadresse2.toJsonNode(),
                     attestering = null,
-                    fnr = testData.søker.foedselsnummer,
+                    fnr = testData.soeker.foedselsnummer,
                     periode = Periode(
                         fom = bostedsadresse2.gyldigFraOgMed!!.let { YearMonth.of(it.year, it.month) },
                         tom = bostedsadresse2.gyldigTilOgMed?.let { YearMonth.of(it.year, it.month) }
@@ -262,6 +262,6 @@ internal class GrunnlagServiceTest {
             )
         )
 
-        Assertions.assertEquals(expected, actual.søker.hentBostedsadresse())
+        Assertions.assertEquals(expected, actual.soeker.hentBostedsadresse())
     }
 }

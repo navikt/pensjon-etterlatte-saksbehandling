@@ -30,7 +30,7 @@ internal class LesVilkaarsmeldingTest {
     }
 
     @Test
-    fun `skal lese og lage en melding for revurdering dødsfall`() {
+    fun `skal lese og lage en melding for revurdering doedsfall`() {
         val inspector = inspector.apply { sendTestMessage(meldingRevurderingDoedsfall) }.inspektør
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
         Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
@@ -39,7 +39,7 @@ internal class LesVilkaarsmeldingTest {
     }
 
     @Test
-    fun `skal lese og lage en melding for revurdering manuelt opphør`() {
+    fun `skal lese og lage en melding for revurdering manuelt opphoer`() {
         val inspector = inspector.apply { sendTestMessage(meldingRevurderingManueltOpphoer) }.inspektør
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
         Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())

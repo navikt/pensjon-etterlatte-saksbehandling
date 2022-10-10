@@ -125,7 +125,7 @@ class BeregningService {
             val gjeldendeG = Grunnbeloep.hentGjeldendeG(fom)
             val flokkForPeriode = hentFlokkforPeriode(fom, tom, soeskenPerioder)
             val utbetaltBeloep = Soeskenjustering(flokkForPeriode.size, gjeldendeG.grunnbeløp).beloep
-            val søkersFødselsdato = grunnlag.søker.hentFoedselsdato()?.verdi
+            val søkersFødselsdato = grunnlag.soeker.hentFoedselsdato()?.verdi
 
             val datoTom = if (index == alleFOM.lastIndex && søkersFødselsdato != null) {
                 beregnSisteTom(søkersFødselsdato, tom)

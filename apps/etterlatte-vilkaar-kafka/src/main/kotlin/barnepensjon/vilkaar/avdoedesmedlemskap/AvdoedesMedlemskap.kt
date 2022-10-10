@@ -38,15 +38,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
-fun vilkaarAvdoedesMedlemskap(avdød: Grunnlagsdata<JsonNode>): VurdertVilkaar {
+fun vilkaarAvdoedesMedlemskap(avdoed: Grunnlagsdata<JsonNode>): VurdertVilkaar {
     val vilkaarstype = Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP
 
-    val arbeidsforholdOpplysning = avdød.hentArbeidsforhold() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
-    val inntektsOpplysning = avdød.hentInntekt() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
-    val doedsdato = avdød.hentDoedsdato()?.verdi ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
-    val medlemskapsperioder = avdød.hentMedlemskapsperiode() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
+    val arbeidsforholdOpplysning = avdoed.hentArbeidsforhold() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
+    val inntektsOpplysning = avdoed.hentInntekt() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
+    val doedsdato = avdoed.hentDoedsdato()?.verdi ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
+    val medlemskapsperioder = avdoed.hentMedlemskapsperiode() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
 
-    val bosattNorgeMetakriterie = metakriterieBosattNorge(avdød)
+    val bosattNorgeMetakriterie = metakriterieBosattNorge(avdoed)
 
     val medlemskapOffentligOgInntektKriterie = kriterieMedlemskapOffentligOgInntekt(
         arbeidsforholdOpplysning,

@@ -24,7 +24,7 @@ internal class VilkaarServiceTest {
     }
 
     @Test
-    fun `hentVirkningstidspunktRevurderingSoekerDoedsfall er måneden etter dødsfallet`() {
+    fun `hentVirkningstidspunktRevurderingSoekerDoedsfall er maaneden etter doedsfallet`() {
         assertEquals(
             service.hentVirkningstidspunktRevurderingSoekerDoedsfall(LocalDate.of(2022, 3, 31)),
             YearMonth.of(2022, 4)

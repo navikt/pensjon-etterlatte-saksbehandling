@@ -33,7 +33,7 @@ class BarnGjenlevendeSammeAdresseTest {
                     }
                 )
             ),
-            opplysningsmapSøkerOverrides = mapOf(
+            opplysningsmapSoekerOverrides = mapOf(
                 Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresserNorgePdl().map {
                         PeriodisertOpplysning(
@@ -62,7 +62,7 @@ class BarnGjenlevendeSammeAdresseTest {
                     }
                 )
             ),
-            opplysningsmapSøkerOverrides = mapOf(
+            opplysningsmapSoekerOverrides = mapOf(
                 Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresserNorgePdl().map {
                         PeriodisertOpplysning(
@@ -78,12 +78,12 @@ class BarnGjenlevendeSammeAdresseTest {
         )
 
         val sammeAdresse = barnOgAvdoedSammeBostedsadresse(
-            testDataLikAdresse.hentOpplysningsgrunnlag().søker,
+            testDataLikAdresse.hentOpplysningsgrunnlag().soeker,
             testDataLikAdresse.hentOpplysningsgrunnlag().hentGjenlevende()
         )
 
         val ulikeAdresse = barnOgAvdoedSammeBostedsadresse(
-            testDataUlikAdresse.hentOpplysningsgrunnlag().søker,
+            testDataUlikAdresse.hentOpplysningsgrunnlag().soeker,
             testDataUlikAdresse.hentOpplysningsgrunnlag().hentGjenlevende()
         )
         Assertions.assertEquals(VurderingsResultat.OPPFYLT, sammeAdresse.resultat)

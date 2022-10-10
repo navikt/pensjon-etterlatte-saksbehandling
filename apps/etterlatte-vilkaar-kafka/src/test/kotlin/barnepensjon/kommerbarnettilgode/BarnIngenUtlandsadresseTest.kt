@@ -19,16 +19,16 @@ class BarnIngenUtlandsadresseTest {
     @Test
     fun vurderBarnIngenUtlandsadresse() {
         val barnINorge = GrunnlagTestData(
-            opplysningsmapSøkerOverrides = mapOf(
+            opplysningsmapSoekerOverrides = mapOf(
                 UTENLANDSADRESSE to Konstant(randomUUID(), kilde, Utenlandsadresse(NEI, null, null).toJsonNode())
             )
-        ).hentOpplysningsgrunnlag().søker
+        ).hentOpplysningsgrunnlag().soeker
 
         val barnIDanmark = GrunnlagTestData(
-            opplysningsmapSøkerOverrides = mapOf(
+            opplysningsmapSoekerOverrides = mapOf(
                 UTENLANDSADRESSE to Konstant(randomUUID(), kilde, Utenlandsadresse(JA, null, null).toJsonNode())
             )
-        ).hentOpplysningsgrunnlag().søker
+        ).hentOpplysningsgrunnlag().soeker
 
         val ikkeUtland = barnIngenOppgittUtlandsadresse(barnINorge)
 

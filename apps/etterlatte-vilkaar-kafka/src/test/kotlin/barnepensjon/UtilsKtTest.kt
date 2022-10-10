@@ -142,7 +142,7 @@ internal class UtilsKtTest {
     }
 
     @Test
-    fun vilkarsvurderingOppfyltOmAlleVilkårOppfylt() {
+    fun vilkarsvurderingOppfyltOmAlleVilkaarOppfylt() {
         assertEquals(
             VurderingsResultat.OPPFYLT,
             setVilkaarVurderingFraVilkaar(
@@ -156,7 +156,7 @@ internal class UtilsKtTest {
     }
 
     @Test
-    fun vilkarsvurderingIkkeOppfyltOmMinstEtVilkårIkkeOppfylt() {
+    fun vilkarsvurderingIkkeOppfyltOmMinstEtVilkaarIkkeOppfylt() {
         assertEquals(
             VurderingsResultat.IKKE_OPPFYLT,
             setVilkaarVurderingFraVilkaar(
@@ -170,7 +170,7 @@ internal class UtilsKtTest {
     }
 
     @Test
-    fun vilkarsvurderingKanIkkeVurderesOmMinstEtVilkårIkkeKanVurderes() {
+    fun vilkarsvurderingKanIkkeVurderesOmMinstEtVilkaarIkkeKanVurderes() {
         assertEquals(
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
             setVilkaarVurderingFraVilkaar(

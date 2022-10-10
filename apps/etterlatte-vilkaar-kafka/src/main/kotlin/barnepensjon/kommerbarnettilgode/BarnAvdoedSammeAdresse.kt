@@ -18,10 +18,10 @@ import no.nav.etterlatte.libs.common.vikaar.VurdertVilkaar
 import java.time.LocalDateTime
 
 fun barnOgAvdoedSammeBostedsadresse(
-    søker: Grunnlagsdata<JsonNode>?,
-    avdød: Grunnlagsdata<JsonNode>?
+    soeker: Grunnlagsdata<JsonNode>?,
+    avdoed: Grunnlagsdata<JsonNode>?
 ): VurdertVilkaar {
-    val sammeBostedsAdresse = kriterieSammeBostedsadresseSomAvdoed(søker, avdød)
+    val sammeBostedsAdresse = kriterieSammeBostedsadresseSomAvdoed(soeker, avdoed)
 
     return VurdertVilkaar(
         Vilkaartyper.BARN_BOR_PAA_AVDOEDES_ADRESSE,
@@ -33,11 +33,11 @@ fun barnOgAvdoedSammeBostedsadresse(
 }
 
 fun kriterieSammeBostedsadresseSomAvdoed(
-    søker: Grunnlagsdata<JsonNode>?,
-    avdød: Grunnlagsdata<JsonNode>?
+    soeker: Grunnlagsdata<JsonNode>?,
+    avdoed: Grunnlagsdata<JsonNode>?
 ): Kriterie {
-    val soekerAdresse = søker?.hentBostedsadresse()
-    val avdoedAdresse = avdød?.hentBostedsadresse()
+    val soekerAdresse = soeker?.hentBostedsadresse()
+    val avdoedAdresse = avdoed?.hentBostedsadresse()
     val opplysningsGrunnlag = listOfNotNull(
         soekerAdresse?.hentSenest()?.let {
             Kriteriegrunnlag(

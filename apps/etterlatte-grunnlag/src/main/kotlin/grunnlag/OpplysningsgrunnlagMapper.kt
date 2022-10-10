@@ -61,7 +61,7 @@ class OpplysningsgrunnlagMapper(
         val sakMap = saksopplysninger.associateBy({ it.opplysningstype }, { it.opplysning })
 
         return Opplysningsgrunnlag(
-            søker = søkerMap,
+            soeker = søkerMap,
             familie = familieMap,
             sak = sakMap,
             metadata = Metadata(sakId, senestVersjon)

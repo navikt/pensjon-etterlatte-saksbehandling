@@ -78,7 +78,9 @@ internal class GrunnlagsendringshendelseServiceTest {
             } returns grunnlagsendringshendelse
         }
         val generellBehandlingService = mockk<GenerellBehandlingService> {
+            every { hentBehandlingerISak(1L) } returns foerstegangsbehandlinger
             every { alleBehandlingerForSoekerMedFnr("Soeker") } returns foerstegangsbehandlinger
+            every { alleSakIderForSoekerMedFnr("Soeker") } returns listOf(1L)
         }
         val revurderingService = mockk<RevurderingService>()
         val pdlService = mockk<PdlService>()
@@ -140,6 +142,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
         val generellBehandlingService = mockk<GenerellBehandlingService> {
             every { alleBehandlingerForSoekerMedFnr("Soeker") } returns foerstegangsbehandlinger
+            every { alleSakIderForSoekerMedFnr("Soeker") } returns listOf(sakId1, sakId2)
         }
         val revurderingService = mockk<RevurderingService>()
         val pdlService = mockk<PdlService>()

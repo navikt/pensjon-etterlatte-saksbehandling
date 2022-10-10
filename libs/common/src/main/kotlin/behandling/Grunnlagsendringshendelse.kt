@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import java.time.LocalDateTime
 import java.util.*
 
@@ -17,6 +18,11 @@ data class Grunnlagsendringshendelse(
 sealed class Grunnlagsinformasjon {
     abstract val type: String
 
+    data class Utflytting(
+        val hendelse: UtflyttingsHendelse
+    ) : Grunnlagsinformasjon() {
+        override val type: String = "UTFLYTTING"
+    }
     data class SoekerDoed(
         val hendelse: Doedshendelse
     ) : Grunnlagsinformasjon() {

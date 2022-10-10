@@ -1,8 +1,10 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -10,6 +12,8 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
+
+val hendelseTyper = listOf("DOEDSFALL_V1", "UTFLYTTING_FRA_NORGE_V1")
 
 internal class PdlHendelser(
     rapidsConnection: RapidsConnection,
@@ -24,7 +28,7 @@ internal class PdlHendelser(
             eventName("PDL:PERSONHENDELSE")
 
             correlationId()
-            validate { it.requireKey("hendelse") }
+            validate { it.requireAny("hendelse", hendelseTyper) }
             validate { it.interestedIn("hendelse_data") }
         }.register(this)
     }
@@ -33,15 +37,23 @@ internal class PdlHendelser(
         withLogContext(packet.correlationId) {
             logger.info("Mottatt hendelse fra pdl: ${packet["hendelse"]}")
             try {
-                if (packet["hendelse"].asText() == "DOEDSFALL_V1") {
-                    logger.info("Doedshendelse mottatt")
-                    val doedshendelse = objectMapper.treeToValue(packet["hendelse_data"], Doedshendelse::class.java)
-                    behandlinger.sendDoedshendelse(doedshendelse)
-                } else {
-                    logger.info("Pdl-hendelsestypen mottatt håndteres ikke av applikasjonen")
+                when (packet["hendelse"].asText()) {
+                    "DOEDSFALL_V1" -> {
+                        logger.info("Doedshendelse mottatt")
+                        val doedshendelse: Doedshendelse = objectMapper.treeToValue(packet["hendelse_data"])
+                        behandlinger.sendDoedshendelse(doedshendelse)
+                    }
+                    "UTFLYTTING_FRA_NORGE_V1" -> {
+                        logger.info("Utflyttingshendelse mottatt")
+                        val utflyttingsHendelse: UtflyttingsHendelse = objectMapper.treeToValue(packet["hendelse_data"])
+                        behandlinger.sendUtflyttingshendelse(utflyttingsHendelse)
+                    }
+                    else -> {
+                        logger.info("Pdl-hendelsestypen mottatt håndteres ikke av applikasjonen")
+                    }
                 }
             } catch (e: Exception) {
-                logger.error("kunne ikke deserialisere pdl-hendelse: ", e)
+                logger.error("Feil oppstod under lesing / sending av hendelse til behandling ", e)
             }
         }
 }

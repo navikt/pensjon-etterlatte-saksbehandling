@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -81,6 +82,27 @@ class BehandlingDao(private val connection: () -> Connection) {
         }
     }
 
+    fun alleBehandlingerISakAvType(sakId: Long, type: BehandlingType): List<Behandling> {
+        return connection().prepareStatement(
+            """
+                SELECT * 
+                FROM behandling
+                WHERE sak_id = ?
+                    AND behandlingstype = ?
+            """.trimIndent()
+        ).let {
+            it.setLong(1, sakId)
+            it.setString(2, type.name)
+            it.executeQuery()
+        }.toList {
+            when (type) {
+                BehandlingType.FØRSTEGANGSBEHANDLING -> asFoerstegangsbehandling(this)
+                BehandlingType.REVURDERING -> asRevurdering(this)
+                BehandlingType.MANUELT_OPPHOER -> asManueltOpphoer(this)
+            }
+        }
+    }
+
     fun alleBehandlinger(): List<Behandling> {
         val stmt =
             connection().prepareStatement(
@@ -143,17 +165,19 @@ class BehandlingDao(private val connection: () -> Connection) {
             .toLocalDateTime(),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
         soeknadMottattDato = rs.getTimestamp("soekand_mottatt_dato").toLocalDateTime(),
-        persongalleri = Persongalleri(
-            innsender = rs.getString("innsender"),
-            soeker = rs.getString("soeker"),
-            gjenlevende = rs.getString("gjenlevende").let { objectMapper.readValue(it) },
-            avdoed = rs.getString("avdoed").let { objectMapper.readValue(it) },
-            soesken = rs.getString("soesken").let { objectMapper.readValue(it) }
-        ),
+        persongalleri = hentPersongalleri(rs),
         gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         type = rs.getString("behandlingstype").let { BehandlingType.valueOf(it) },
         oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) }
+    )
+
+    private fun hentPersongalleri(rs: ResultSet): Persongalleri = Persongalleri(
+        innsender = rs.getString("innsender"),
+        soeker = rs.getString("soeker"),
+        gjenlevende = rs.getString("gjenlevende").let { objectMapper.readValue(it) },
+        avdoed = rs.getString("avdoed").let { objectMapper.readValue(it) },
+        soesken = rs.getString("soesken").let { objectMapper.readValue(it) }
     )
 
     private fun asRevurdering(rs: ResultSet) = Revurdering(
@@ -162,13 +186,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toInstant().atZone(ZoneId.systemDefault())
             .toLocalDateTime(),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
-        persongalleri = Persongalleri(
-            innsender = rs.getString("innsender"),
-            soeker = rs.getString("soeker"),
-            gjenlevende = rs.getString("gjenlevende").let { objectMapper.readValue(it) },
-            avdoed = rs.getString("avdoed").let { objectMapper.readValue(it) },
-            soesken = rs.getString("soesken").let { objectMapper.readValue(it) }
-        ),
+        persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         type = rs.getString("behandlingstype").let { BehandlingType.valueOf(it) },
         oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) },
@@ -181,19 +199,28 @@ class BehandlingDao(private val connection: () -> Connection) {
         behandlingOpprettet = rs.getTimestamp("behandling_opprettet").toInstant().atZone(ZoneId.systemDefault())
             .toLocalDateTime(),
         sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
-        persongalleri = Persongalleri(
-            innsender = rs.getString("innsender"),
-            soeker = rs.getString("soeker"),
-            gjenlevende = rs.getString("gjenlevende").let { objectMapper.readValue(it) },
-            avdoed = rs.getString("avdoed").let { objectMapper.readValue(it) },
-            soesken = rs.getString("soesken").let { objectMapper.readValue(it) }
-        ),
+        persongalleri = hentPersongalleri(rs),
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         type = rs.getString("behandlingstype").let { BehandlingType.valueOf(it) },
         oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) },
         opphoerAarsaker = rs.getString("opphoer_aarsaker").let { objectMapper.readValue(it) },
         fritekstAarsak = rs.getString("fritekst_aarsak")
     )
+
+    fun alleSakIderMedUavbruttBehandlingForSoekerMedFnr(fnr: String): List<Long> {
+        return connection().prepareStatement(
+            """
+                SELECT DISTINCT sak_id FROM behandling
+                    WHERE soeker = ? 
+                    AND  status != 'AVBRUTT'
+            """.trimIndent()
+        ).let {
+            it.setString(1, fnr)
+            it.executeQuery()
+        }.toList {
+            getLong(1)
+        }
+    }
 
     fun opprettFoerstegangsbehandling(foerstegangsbehandling: Foerstegangsbehandling) {
         val stmt =
@@ -336,7 +363,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         lagreStatus(lagretBehandling.id, lagretBehandling.status, lagretBehandling.sistEndret)
     }
 
-    fun lagreStatus(behandling: UUID, status: BehandlingStatus, sistEndret: LocalDateTime): Behandling {
+    private fun lagreStatus(behandling: UUID, status: BehandlingStatus, sistEndret: LocalDateTime): Behandling {
         val stmt =
             connection().prepareStatement("UPDATE behandling SET status = ?, sist_endret = ? WHERE id = ? RETURNING *")
         stmt.setString(1, status.name)
@@ -398,7 +425,7 @@ class BehandlingDao(private val connection: () -> Connection) {
             }
         }.filterNotNull()
 
-    fun ResultSet.behandlingAvRettType() =
+    private fun ResultSet.behandlingAvRettType() =
         when (getString("behandlingstype")) {
             BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
             BehandlingType.REVURDERING.name -> asRevurdering(this)
@@ -414,7 +441,7 @@ class BehandlingDao(private val connection: () -> Connection) {
     }
 }
 
-val objectMapper =
+val objectMapper: ObjectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 class BehandlingNotFoundException(override val message: String) : RuntimeException(message)

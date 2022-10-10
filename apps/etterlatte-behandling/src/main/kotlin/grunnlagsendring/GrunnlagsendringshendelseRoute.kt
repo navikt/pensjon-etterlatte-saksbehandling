@@ -14,6 +14,7 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 
 fun Route.grunnlagsendringshendelseRoute(
     grunnlagsendringshendelseService: GrunnlagsendringshendelseService
@@ -23,8 +24,15 @@ fun Route.grunnlagsendringshendelseRoute(
     route("/grunnlagsendringshendelse") {
         post("/doedshendelse") {
             val doedshendelse = call.receive<Doedshendelse>()
-            logger.info("Mottar doedshendelse: $doedshendelse")
+            logger.info("Mottar en doedshendelse fra PDL")
             grunnlagsendringshendelseService.opprettSoekerDoedHendelse(doedshendelse)
+            call.respond(HttpStatusCode.OK)
+        }
+
+        post("/utflyttingshendelse") {
+            val utflyttingsHendelse = call.receive<UtflyttingsHendelse>()
+            logger.info("Mottar en utflyttingshendelse fra PDL")
+            grunnlagsendringshendelseService.opprettUtflyttingshendelse(utflyttingsHendelse)
             call.respond(HttpStatusCode.OK)
         }
 

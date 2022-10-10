@@ -24,6 +24,7 @@ interface RevurderingService {
     ): Revurdering
 
     fun slettRevurderingISak(sakId: Long)
+    fun hentRevurderingerISak(sakId: Long): List<Revurdering>
 }
 
 class RealRevurderingService(
@@ -36,6 +37,11 @@ class RealRevurderingService(
         return inTransaction {
             behandlinger.slettRevurderingerISak(sakId)
         }
+    }
+
+    override fun hentRevurderingerISak(sakId: Long): List<Revurdering> {
+        return behandlinger.alleBehandlingerISakAvType(sakId, BehandlingType.REVURDERING)
+            .map { it as Revurdering }
     }
 
     override fun hentRevurdering(behandling: UUID): Revurdering {

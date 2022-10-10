@@ -8,6 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.util.*
@@ -25,6 +26,7 @@ interface Behandling : VedlikeholdService {
     )
 
     fun sendDoedshendelse(doedshendelse: Doedshendelse)
+    fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse)
 }
 
 class BehandlingsService(
@@ -66,6 +68,15 @@ class BehandlingsService(
             behandling_app.post("$url/grunnlagsendringshendelse/doedshendelse") {
                 contentType(ContentType.Application.Json)
                 setBody(doedshendelse)
+            }
+        }
+    }
+
+    override fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse) {
+        runBlocking {
+            behandling_app.post("$url/grunnlagsendringshendelse/utflyttingshendelse") {
+                contentType(ContentType.Application.Json)
+                setBody(utflyttingsHendelse)
             }
         }
     }

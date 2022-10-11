@@ -40,7 +40,7 @@ class OpplysningsByggerService : OpplysningsBygger {
 
         val arbeidsforholdOpplysning = arbeidsforholdListe.takeIf { it.isNotEmpty() }?.map {
             lagOpplysning(
-                opplysningsType = Opplysningstyper.ARBEIDSFORHOLD_V1,
+                opplysningsType = Opplysningstyper.ARBEIDSFORHOLD,
                 kilde = Grunnlagsopplysning.Aordningen(innhentetTidspunkt),
                 opplysning = it,
                 periode = Periode(
@@ -51,7 +51,7 @@ class OpplysningsByggerService : OpplysningsBygger {
             )
         } ?: listOf(
             lagOpplysning(
-                opplysningsType = Opplysningstyper.ARBEIDSFORHOLD_V1,
+                opplysningsType = Opplysningstyper.ARBEIDSFORHOLD,
                 kilde = Grunnlagsopplysning.Aordningen(innhentetTidspunkt),
                 opplysning = null,
                 periode = Periode(

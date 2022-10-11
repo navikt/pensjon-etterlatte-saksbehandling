@@ -17,7 +17,6 @@ enum class Opplysningstyper {
     SOEKNADSTYPE_V1,
 
     PENSJON_UFORE_V1, // Todo: brukes ikke lenger?
-    ARBEIDSFORHOLD_V1,
 
     AVDOED_INNTEKT_V1,
     SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
@@ -46,6 +45,7 @@ enum class Opplysningstyper {
     INNTEKT,
     MEDLEMSKAPSPERIODE,
     KOMMER_BARNET_TILGODE,
+    ARBEIDSFORHOLD,
 
     SOESKEN_I_BEREGNINGEN // Kun for soeskenjustering
 }

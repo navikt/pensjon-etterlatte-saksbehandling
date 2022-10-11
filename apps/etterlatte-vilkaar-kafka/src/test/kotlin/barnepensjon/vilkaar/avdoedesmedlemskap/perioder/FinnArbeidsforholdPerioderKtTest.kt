@@ -1,11 +1,15 @@
 package barnepensjon.vilkaar.avdoedesmedlemskap.perioder
 
+import GrunnlagTestData
 import LesVilkaarsmeldingTest.Companion.readFile
 import com.fasterxml.jackson.module.kotlin.readValue
+import grunnlag.arbeidsforholdTestData
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.hentArbeidsforhold
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -16,22 +20,25 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class FinnArbeidsforholdPerioderKtTest {
-    private fun grunnlag(arbeidOpplysning: String): AvdoedesMedlemskapGrunnlag {
-        val arbeidsforhold =
-            objectMapper.readValue<Opplysning.Periodisert<AaregResponse>>(readFile(arbeidOpplysning))
+    private fun grunnlag(arbeidOpplysning: Opplysning.Periodisert<AaregResponse?>): AvdoedesMedlemskapGrunnlag {
         val inntekt = mockk<VilkaarOpplysning<InntektsOpplysning>>()
 
-        @Suppress("UNCHECKED_CAST")
         return AvdoedesMedlemskapGrunnlag(
             inntekt,
-            arbeidsforhold as Opplysning.Periodisert<AaregResponse?>,
+            arbeidOpplysning,
             LocalDate.parse("2022-07-01")
         )
     }
 
     @Test
     fun `Skal returnere en oppfyllt periode naar personen har arbeidet hele perioden`() {
-        val grunnlag = grunnlag("/arbeidsforhold100.json")
+        val arbeidsforhold = GrunnlagTestData(
+            opplysningsmapAvdoedOverrides = mapOf(
+                Opplysningstyper.ARBEIDSFORHOLD to Opplysning.Periodisert(arbeidsforholdTestData(100.0))
+            )
+        ).hentOpplysningsgrunnlag().hentAvdoed().hentArbeidsforhold()!!
+
+        val grunnlag = grunnlag(arbeidsforhold)
 
         val vurdertePerioder = finnArbeidsforholdPerioder(grunnlag)
 
@@ -41,7 +48,13 @@ internal class FinnArbeidsforholdPerioderKtTest {
 
     @Test
     fun `Skal returnere en ikke-oppfyllt periode naar personen har arbeidet hele perioden under 80 prosent stilling`() {
-        val grunnlag = grunnlag("/arbeidsforhold75.json")
+        val arbeidsforhold = GrunnlagTestData(
+            opplysningsmapAvdoedOverrides = mapOf(
+                Opplysningstyper.ARBEIDSFORHOLD to Opplysning.Periodisert(arbeidsforholdTestData(75.0))
+            )
+        ).hentOpplysningsgrunnlag().hentAvdoed().hentArbeidsforhold()!!
+
+        val grunnlag = grunnlag(arbeidsforhold)
 
         val vurdertePerioder = finnArbeidsforholdPerioder(grunnlag)
 
@@ -51,7 +64,10 @@ internal class FinnArbeidsforholdPerioderKtTest {
 
     @Test
     fun `Skal returnere to oppfyllte periode naar personen har gap i arbeidsforhold`() {
-        val grunnlag = grunnlag("/arbeidsforholdMedOpphold.json")
+        val arbeidsforhold = objectMapper.readValue<Opplysning.Periodisert<AaregResponse?>>(
+            readFile("/arbeidsforholdMedOpphold.json")
+        )
+        val grunnlag = grunnlag(arbeidsforhold)
 
         val vurdertePerioder = finnArbeidsforholdPerioder(grunnlag)
 
@@ -61,7 +77,10 @@ internal class FinnArbeidsforholdPerioderKtTest {
 
     @Test
     fun `Skal returnere en oppfyllt og en ikke oppfylt periode naar et av arbeidsforholdene er under 80 prosent`() {
-        val grunnlag = grunnlag("/arbeidsforholdOverUnder80.json")
+        val arbeidsforhold = objectMapper.readValue<Opplysning.Periodisert<AaregResponse?>>(
+            readFile("/arbeidsforholdOverUnder80.json")
+        )
+        val grunnlag = grunnlag(arbeidsforhold)
 
         val vurdertePerioder = finnArbeidsforholdPerioder(grunnlag)
 

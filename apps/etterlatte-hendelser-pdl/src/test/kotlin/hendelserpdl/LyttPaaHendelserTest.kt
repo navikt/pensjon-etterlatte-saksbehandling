@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.FolkeregisterIdent
 import no.nav.person.pdl.leesah.Personhendelse
+import no.nav.person.pdl.leesah.forelderbarnrelasjon.ForelderBarnRelasjon
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
@@ -35,6 +36,9 @@ internal class LyttPaaHendelserTest {
             coEvery { hentFolkeregisterIdentifikator("321") } returns FolkeregisterIdent(
                 Foedselsnummer.of("12345678911")
             )
+            coEvery { hentFolkeregisterIdentifikator("123") } returns FolkeregisterIdent(
+                Foedselsnummer.of("70078749472")
+            )
         }
         val hendelser = mutableListOf<Pair<String, String>>()
         val subject = LyttPaaHendelser(
@@ -49,6 +53,20 @@ internal class LyttPaaHendelserTest {
                         put("opplysningstype", "UTFLYTTING_FRA_NORGE")
                         put("personidenter", listOf("321"))
                         put("endringstype", no.nav.person.pdl.leesah.Endringstype.valueOf("OPPRETTET"))
+                    },
+                    Personhendelse().apply {
+                        put("opplysningstype", "FORELDERBARNRELASJON_V1")
+                        put("personidenter", listOf("123"))
+                        put(
+                            "forelderBarnRelasjon",
+                            ForelderBarnRelasjon(
+                                /* relatertPersonsIdent = */ "12345678911",
+                                /* relatertPersonsRolle = */ "FAR",
+                                /* minRolleForPerson = */ "BARN",
+                                /* relatertPersonUtenFolkeregisteridentifikator = */ null
+                            )
+                        )
+                        put("endringstype", no.nav.person.pdl.leesah.Endringstype.valueOf("OPPRETTET"))
                     }
                 )
             ),
@@ -56,11 +74,13 @@ internal class LyttPaaHendelserTest {
             pdlMock
         )
         subject.stream()
-        assertEquals(2, hendelser.size)
+        assertEquals(3, hendelser.size)
         assertEquals("70078749472", hendelser[0].first)
         assertEquals("person er doed", hendelser[0].second)
         assertEquals("12345678911", hendelser[1].first)
         assertEquals("person flyttet ut", hendelser[1].second)
+        assertEquals("70078749472", hendelser[2].first)
+        assertEquals("ny forelder-barn-relasjon", hendelser[2].second)
     }
 }
 
@@ -86,5 +106,16 @@ class DodsMock(val c: (Pair<String, String>) -> Unit) : ILivsHendelser {
         endringstype: Endringstype
     ) {
         c(Pair(fnr, "person flyttet ut"))
+    }
+
+    override fun forelderBarnRelasjon(
+        fnr: String,
+        relatertPersonsIdent: String?,
+        relatertPersonsRolle: String,
+        minRolleForPerson: String,
+        relatertPersonUtenFolkeregisteridentifikator: String?,
+        endringstype: Endringstype
+    ) {
+        c(Pair(fnr, "ny forelder-barn-relasjon"))
     }
 }

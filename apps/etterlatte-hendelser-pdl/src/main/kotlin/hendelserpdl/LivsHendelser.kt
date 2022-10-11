@@ -3,6 +3,7 @@ package no.nav.etterlatte.hendelserpdl
 import no.nav.etterlatte.JsonMessage
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -14,12 +15,26 @@ import java.time.LocalDate
 import java.util.*
 
 interface ILivsHendelser {
-    fun personErDod(fnr: String, doedsdato: String?, endringstype: Endringstype)
+    fun personErDod(
+        fnr: String,
+        doedsdato: String?,
+        endringstype: Endringstype
+    )
+
     fun personUtflyttingFraNorge(
         fnr: String,
         tilflyttingsLand: String?,
         tilflyttingsstedIUtlandet: String?,
         utflyttingsdato: String?,
+        endringstype: Endringstype
+    )
+
+    fun forelderBarnRelasjon(
+        fnr: String,
+        relatertPersonsIdent: String?,
+        relatertPersonsRolle: String,
+        minRolleForPerson: String,
+        relatertPersonUtenFolkeregisteridentifikator: String?,
         endringstype: Endringstype
     )
 }
@@ -86,7 +101,37 @@ class LivsHendelser(config: AppConfig) : ILivsHendelser {
                         set("hendelse", "UTFLYTTING_FRA_NORGE")
                         set("hendelse_data", utflyttingsHendelse)
                     }.toJson()
+            )
+        )
+    }
 
+    override fun forelderBarnRelasjon(
+        fnr: String,
+        relatertPersonsIdent: String?,
+        relatertPersonsRolle: String,
+        minRolleForPerson: String,
+        relatertPersonUtenFolkeregisteridentifikator: String?,
+        endringstype: Endringstype
+    ) {
+        logger.info("Poster at person $fnr har endret forelder-barn-relasjon")
+        val forelderBarnRelasjonHendelse = ForelderBarnRelasjonHendelse(
+            fnr = fnr,
+            relatertPersonsIdent = relatertPersonsIdent,
+            relatertPersonsRolle = relatertPersonsRolle,
+            minRolleForPerson = minRolleForPerson,
+            relatertPersonUtenFolkeregisteridentifikator = relatertPersonUtenFolkeregisteridentifikator,
+            endringstype = endringstype
+        )
+        producer.send(
+            ProducerRecord(
+                topic,
+                UUID.randomUUID().toString(),
+                JsonMessage("{}", MessageProblems("{}"))
+                    .apply {
+                        set(eventNameKey, "PDL:PERSONHENDELSE")
+                        set("hendelse", "FORELDER-BARN-RELASJON")
+                        set("hendelse_data", forelderBarnRelasjonHendelse)
+                    }.toJson()
             )
         )
     }
@@ -144,6 +189,34 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
                     set("hendelse_data", utflyttingsHendelse)
                 }.toJson()
 
+        )
+    }
+
+    override fun forelderBarnRelasjon(
+        fnr: String,
+        relatertPersonsIdent: String?,
+        relatertPersonsRolle: String,
+        minRolleForPerson: String,
+        relatertPersonUtenFolkeregisteridentifikator: String?,
+        endringstype: Endringstype
+    ) {
+        logger.info("Poster at person $fnr har endret forelder-barn-relasjon")
+        val forelderBarnRelasjonHendelse = ForelderBarnRelasjonHendelse(
+            fnr = fnr,
+            relatertPersonsIdent = relatertPersonsIdent,
+            relatertPersonsRolle = relatertPersonsRolle,
+            minRolleForPerson = minRolleForPerson,
+            relatertPersonUtenFolkeregisteridentifikator = relatertPersonUtenFolkeregisteridentifikator,
+            endringstype = endringstype
+        )
+        context.publish(
+            UUID.randomUUID().toString(),
+            JsonMessage("{}", MessageProblems("{}"))
+                .apply {
+                    set(eventNameKey, "PDL:PERSONHENDELSE")
+                    set("hendelse", "FORELDER-BARN-RELASJON")
+                    set("hendelse_data", forelderBarnRelasjonHendelse)
+                }.toJson()
         )
     }
 }

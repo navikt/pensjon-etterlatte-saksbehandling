@@ -30,6 +30,7 @@ class LyttPaaHendelser(
             when (it.opplysningstype) {
                 "DOEDSFALL_V1" -> haandterDoedsendelse(it)
                 "UTFLYTTING_FRA_NORGE" -> haandterUtflyttingFraNorge(it)
+                "FORELDERBARNRELASJON_V1" -> haandterForelderBarnRelasjon(it)
                 else -> {
                     log.info(
                         "Så opplysning om ${it.opplysningstype} opprettet ${it.opprettet} " +
@@ -44,52 +45,93 @@ class LyttPaaHendelser(
         }
     }
 
-    private fun haandterDoedsendelse(personhendelse: Personhendelse) {
-        log.info(
-            "Doedshendelse mottatt for : ${personhendelse.personidenter} med endringstype " +
-                "${personhendelse.endringstype}. Hendelse: $personhendelse"
-        )
+    private fun haandterForelderBarnRelasjon(personhendelse: Personhendelse) {
+        val hendelseType = "Forelder-barn-relasjon-hendelse"
+        personhendelse.loggHendelse(hendelseType)
         try {
-            val personnummer =
-                runBlocking { pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first()) }
+            val personnummer = runBlocking {
+                pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+            }
+            val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
+            with(personhendelse.forelderBarnRelasjon) {
+                postHendelser.forelderBarnRelasjon(
+                    fnr = personnummer.folkeregisterident.value,
+                    relatertPersonsIdent = relatertPersonsIdent ?: null,
+                    relatertPersonsRolle = relatertPersonsRolle,
+                    minRolleForPerson = minRolleForPerson,
+                    relatertPersonUtenFolkeregisteridentifikator = relatertPersonUtenFolkeregisteridentifikator?.toString(), // ktlint-disable max-line-length
+                    endringstype = endringstype
+                )
+            }
+        } catch (e: Exception) {
+            personhendelse.loggFeilVedHaandtering(hendelseType, e)
+        }
+    }
+
+    private fun haandterDoedsendelse(personhendelse: Personhendelse) {
+        val hendelseType = "Doedshendelse"
+        personhendelse.loggHendelse(hendelseType)
+        try {
+            val personnummer = runBlocking {
+                pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+            }
             val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
             postHendelser.personErDod(
                 fnr = personnummer.folkeregisterident.value,
-                doedsdato = personhendelse.doedsfall?.doedsdato?.format(DateTimeFormatter.ISO_DATE),
+                doedsdato = try {
+                    personhendelse.doedsfall?.doedsdato?.format(DateTimeFormatter.ISO_DATE)
+                } catch (e: Exception) {
+                    log.info("Kunne ikke String-formatere dato")
+                    null
+                },
                 endringstype = endringstype
             )
         } catch (e: Exception) {
-            log.error(
-                "kunne ikke haandtere doedshendelse for ${personhendelse.personidenter.first()}.",
-                e
-            )
+            personhendelse.loggFeilVedHaandtering(hendelseType, e)
         }
         dodsmeldinger++
     }
 
     fun haandterUtflyttingFraNorge(personhendelse: Personhendelse) {
-        log.info(
-            "Utflytting fra Norge-henddelse mottatt for : ${personhendelse.personidenter} med endringstype " +
-                "${personhendelse.endringstype}. Hendelse: $personhendelse"
-        )
+        val hendelseType = "Utflytting fra Norge-hendelse"
+        personhendelse.loggHendelse(hendelseType)
         try {
-            val personnummer =
-                runBlocking { pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first()) }
+            val personnummer = runBlocking {
+                pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
+            }
             val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
             postHendelser.personUtflyttingFraNorge(
                 fnr = personnummer.folkeregisterident.value,
                 tilflyttingsLand = personhendelse.utflyttingFraNorge?.tilflyttingsland,
                 tilflyttingsstedIUtlandet = personhendelse.utflyttingFraNorge?.tilflyttingsstedIUtlandet,
-                utflyttingsdato = personhendelse.utflyttingFraNorge?.utflyttingsdato?.format(DateTimeFormatter.ISO_DATE), // ktlint-disable max-line-length
+                utflyttingsdato = try {
+                    personhendelse.utflyttingFraNorge?.utflyttingsdato?.format(DateTimeFormatter.ISO_DATE)
+                } catch (e: Exception) {
+                    log.info("Kunne ikke String-formatere dato")
+                    null
+                },
                 endringstype = endringstype
             )
         } catch (e: Exception) {
-            log.error(
-                "kunne ikke haandtere utflytting fra Norge-hendelse " +
-                    "for ${personhendelse.personidenter.first()}",
-                e
-            )
+            personhendelse.loggFeilVedHaandtering(hendelseType, e)
         }
+    }
+
+    private fun Personhendelse.loggHendelse(hendelseType: String) {
+        log.info(
+            "$hendelseType mottatt for : $personidenter med endringstype " +
+                "$endringstype. Hendelse: $this"
+        )
+    }
+
+    private fun Personhendelse.loggFeilVedHaandtering(hendelseType: String, e: Exception) {
+        log.error(
+            "kunne ikke haandtere $hendelseType" +
+                "for ${personidenter.first()}" +
+                "Dette har sannsynligvis med aa gjoere at personhendelsen ser annerledes ut enn forventet, " +
+                "eller at det var problem med henting av folkeregisteridentifikatoren fra PDL",
+            e
+        )
     }
 
     fun fraStart() {

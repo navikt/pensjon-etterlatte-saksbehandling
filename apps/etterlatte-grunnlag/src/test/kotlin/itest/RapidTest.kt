@@ -10,6 +10,7 @@ import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
@@ -184,7 +185,7 @@ internal class RapidTest {
                 grunnlag = listOf(nyOpplysning, personRolleOpplysning),
                 versjon = 2
             ).toJson(),
-            packet["grunnlag"].toJson()
+            packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey].toJson()
         )
         Assertions.assertEquals(
             Opplysningsgrunnlag(
@@ -207,7 +208,7 @@ internal class RapidTest {
                     versjon = 2
                 )
             ).toJson(),
-            packet["grunnlagV2"].toJson()
+            packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key].toJson()
         )
     }
 

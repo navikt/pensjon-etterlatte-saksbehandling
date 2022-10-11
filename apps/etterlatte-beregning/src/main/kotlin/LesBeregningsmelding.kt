@@ -1,4 +1,5 @@
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -24,14 +25,14 @@ internal class LesBeregningsmelding(
             validate { it.requireKey("virkningstidspunkt") }
             validate { it.requireKey("behandling.type") }
             validate { it.rejectKey("beregning") }
-            validate { it.interestedIn("grunnlagV2") }
+            validate { it.interestedIn(BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key) }
             correlationId()
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val grunnlag = packet["grunnlagV2"].toString()
+            val grunnlag = packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key].toString()
 
             try {
                 // TODO fremtidig funksjonalitet for å støtte periodisering av vilkaar

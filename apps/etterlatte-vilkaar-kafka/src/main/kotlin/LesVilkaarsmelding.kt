@@ -5,6 +5,7 @@ import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
+import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
@@ -26,7 +27,7 @@ internal class LesVilkaarsmelding(
     init {
         River(rapidsConnection).apply {
             eventName("BEHANDLING:GRUNNLAGENDRET")
-            validate { it.requireKey("grunnlagV2") }
+            validate { it.requireKey(grunnlagV2Key) }
             validate { it.requireKey("behandlingOpprettet") }
             validate { it.requireKey("behandlingId") }
             validate { it.requireKey("behandling") }
@@ -44,7 +45,7 @@ internal class LesVilkaarsmelding(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             try {
-                val grunnlag = requireNotNull(objectMapper.treeToValue<Opplysningsgrunnlag>(packet["grunnlagV2"]))
+                val grunnlag = requireNotNull(objectMapper.treeToValue<Opplysningsgrunnlag>(packet[grunnlagV2Key]))
                 val behandling = objectMapper.treeToValue<Behandling>(packet["behandling"])
                 val behandlingopprettet = packet["behandlingOpprettet"].asLocalDateTime().toLocalDate()
                 val revurderingAarsak: RevurderingAarsak? = kotlin.runCatching {

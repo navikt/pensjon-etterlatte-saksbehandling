@@ -1,4 +1,5 @@
 import no.nav.etterlatte.barnepensjon.model.VilkaarService
+import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
@@ -26,7 +27,7 @@ internal class LesVilkaarsmeldingTest {
         Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
         Assertions.assertEquals(2, inspector.message(0).get("kommerSoekerTilGode").size())
         Assertions.assertEquals(8, inspector.message(0).get("vilkaarsvurderingGrunnlagRef").intValue())
-        Assertions.assertEquals(4, inspector.message(0).get("grunnlagV2").size())
+        Assertions.assertEquals(4, inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key).size())
     }
 
     @Test
@@ -35,7 +36,7 @@ internal class LesVilkaarsmeldingTest {
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
         Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
         Assertions.assertEquals(8, inspector.message(0).get("vilkaarsvurderingGrunnlagRef").intValue())
-        Assertions.assertEquals(4, inspector.message(0).get("grunnlagV2").size())
+        Assertions.assertEquals(4, inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key).size())
     }
 
     @Test
@@ -44,6 +45,6 @@ internal class LesVilkaarsmeldingTest {
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
         Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
         Assertions.assertEquals(8, inspector.message(0).get("vilkaarsvurderingGrunnlagRef").intValue())
-        Assertions.assertEquals(4, inspector.message(0).get("grunnlagV2").size())
+        Assertions.assertEquals(4, inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key).size())
     }
 }

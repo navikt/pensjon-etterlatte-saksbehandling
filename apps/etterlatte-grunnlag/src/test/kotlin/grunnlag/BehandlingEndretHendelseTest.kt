@@ -6,6 +6,7 @@ import lagGrunnlagHendelse
 import no.nav.etterlatte.grunnlag.BehandlingEndretHendlese
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
+import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOED_SOEKNAD_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOEKER_SOEKNAD_V1
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -42,7 +43,10 @@ internal class BehandlingEndretHendleseTest {
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         assertEquals(1, inspector.size)
-        assertEquals(2, inspector.message(0).get("grunnlag").get("grunnlag").size())
+        assertEquals(
+            2,
+            inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey).get("grunnlag").size()
+        )
     }
 
     @Test
@@ -50,6 +54,6 @@ internal class BehandlingEndretHendleseTest {
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         assertEquals(1, inspector.size)
-        assertNotNull(inspector.message(0).get("grunnlagV2"))
+        assertNotNull(inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key))
     }
 }

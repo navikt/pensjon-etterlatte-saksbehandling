@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express'
-import { parseJwt, Token } from '../utils/parsejwt'
+import { logger } from '../utils/logger'
+import { parseJwt } from '../utils/parsejwt'
 
 export const modiaRouter = express.Router() // for å støtte dekoratør for innloggede flater
 
@@ -51,7 +52,8 @@ const getSaksbehandler = (req: Request): ISaksbehandler | null => {
     fornavn: parsedToken.name.split(', ')[1],
     etternavn: parsedToken.name.split(', ')[0],
     rolle: 'attestant',
-    enheter: [ // Todo: Hent ut enheter basert på saksbehandler
+    enheter: [
+      // Todo: Hent ut enheter basert på saksbehandler
       {
         enhetId: '0315',
         navn: 'NAV Grünerløkka',
@@ -66,6 +68,11 @@ const getSaksbehandler = (req: Request): ISaksbehandler | null => {
 
 // TODO: endre navn på router og endepunkt
 modiaRouter.get('/decorator', (req: Request, res: Response) => {
-  const saksbehandler = getSaksbehandler(req)
-  return res.json(saksbehandler)
+  try {
+    const saksbehandler = getSaksbehandler(req)
+    return res.json(saksbehandler)
+  } catch (e) {
+    logger.info('feil i modiarouter', e)
+    res.sendStatus(500)
+  }
 })

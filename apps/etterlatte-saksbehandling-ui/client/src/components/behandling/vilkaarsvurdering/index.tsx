@@ -9,7 +9,7 @@ import { Resultat } from './Resultat'
 export const Inngangsvilkaar = () => {
   const location = useLocation()
   const { behandlingId } = useParams()
-  const virk = Date() // todo: Skal virk komme fra tjenesten eller hentes fra behandling?
+  const virk = Date() // todo: Hente korrekt virkningsdato. Se EY-946.
   const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering>({ vilkaar: [] })
 
   const oppdaterVilkaarsvurdering = (oppdatertVilkaarsvurdering?: Vilkaarsvurdering) => {

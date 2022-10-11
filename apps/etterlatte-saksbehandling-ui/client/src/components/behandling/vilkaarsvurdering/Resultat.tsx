@@ -57,7 +57,6 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
       lagreTotalVurdering(behandlingId, svarTilTotalResultat(svar), kommentar).then((response) => {
         if (response.status == 'ok') {
           oppdaterVilkaar(response.data)
-          reset()
         }
       })
     }
@@ -127,8 +126,9 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
               placeholder="Gi en begrunnelse for vurderingen"
               value={kommentar}
               onChange={(e) => {
-                setKommentar(e.target.value)
-                kommentar.length >= MIN_KOMMENTAR_LENGDE && setKommentarError(undefined)
+                const kommentarLocal = e.target.value
+                setKommentar(kommentarLocal)
+                kommentarLocal.length >= MIN_KOMMENTAR_LENGDE && setKommentarError(undefined)
               }}
               minRows={3}
               size="medium"

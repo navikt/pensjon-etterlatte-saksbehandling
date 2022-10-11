@@ -336,10 +336,9 @@ internal class BehandlingDaoIntegrationTest {
     @Test
     fun `skal returnere behandling av type ManueltOpphoer`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
-        val manueltOpphoer = manueltOpphoer(sak1)
-            .also {
-                behandlingRepo.opprettManueltOpphoer(it)
-            }
+        val manueltOpphoer = manueltOpphoer(sak1).also {
+            behandlingRepo.opprettManueltOpphoer(it)
+        }
         val behandling = behandlingRepo.hentBehandling(manueltOpphoer.id, BehandlingType.MANUELT_OPPHOER)
         assertTrue(behandling is ManueltOpphoer)
     }
@@ -441,6 +440,110 @@ internal class BehandlingDaoIntegrationTest {
         assertEquals(OppgaveStatus.NY, behandlingFoerStatusendring!!.oppgaveStatus)
         assertEquals(OppgaveStatus.LUKKET, behandlingEtterStatusendring!!.oppgaveStatus)
         assertEquals(endretTidspunkt, behandlingEtterStatusendring!!.sistEndret)
+    }
+
+    @Test
+    fun `alleSakIderMedUavbruttBehandlingForSoekerMedFnr henter flere saker hvis bruker har flere`() {
+        val brukerFnr = "123"
+        val annenBrukerFnr = "456"
+        val sakBarnepensjon = sakRepo.opprettSak(brukerFnr, SakType.BARNEPENSJON)
+        val sakOmstillingstoenad = sakRepo.opprettSak(brukerFnr, SakType.OMSTILLINGSSTOENAD)
+
+        val sakBarnepensjonAnnenBruker = sakRepo.opprettSak(annenBrukerFnr, SakType.BARNEPENSJON)
+        behandlingRepo.opprettFoerstegangsbehandling(
+            foerstegangsbehandling(
+                sak = sakBarnepensjonAnnenBruker.id,
+                persongalleri = persongalleri(soeker = annenBrukerFnr)
+            )
+        )
+
+        behandlingRepo.opprettFoerstegangsbehandling(
+            foerstegangsbehandling(
+                sak = sakBarnepensjon.id,
+                persongalleri = persongalleri(soeker = brukerFnr)
+            )
+        )
+
+        behandlingRepo.opprettRevurdering(
+            revurdering(
+                sak = sakBarnepensjon.id,
+                persongalleri = persongalleri(soeker = brukerFnr),
+                revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+            )
+        )
+        behandlingRepo.opprettFoerstegangsbehandling(
+            foerstegangsbehandling(
+                sak = sakOmstillingstoenad.id,
+                persongalleri = persongalleri(soeker = brukerFnr)
+            )
+        )
+
+        assertEquals(
+            behandlingRepo.alleSakIderMedUavbruttBehandlingForSoekerMedFnr(brukerFnr).toSet(),
+            setOf(sakBarnepensjon.id, sakOmstillingstoenad.id)
+        )
+    }
+
+    @Test
+    fun `alleSakIderMedUavbruttBehandlingForSoekerMedFnr ignorerer saker med ingen uavbrutte behandlinger`() {
+        val brukerFnr = "123"
+        val sakBarnepensjon = sakRepo.opprettSak(brukerFnr, SakType.BARNEPENSJON)
+        sakRepo.opprettSak(brukerFnr, SakType.OMSTILLINGSSTOENAD)
+
+        behandlingRepo.opprettFoerstegangsbehandling(
+            foerstegangsbehandling(
+                sak = sakBarnepensjon.id,
+                persongalleri = persongalleri(soeker = brukerFnr),
+                status = BehandlingStatus.AVBRUTT
+            )
+        )
+        assertEquals(
+            behandlingRepo.alleSakIderMedUavbruttBehandlingForSoekerMedFnr(brukerFnr).toSet(),
+            emptySet<Long>()
+        )
+    }
+
+    @Test
+    fun `hent alle behandlinger av type for sak henter tilbake spesifiserte saker`() {
+        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
+        val revurderinger = listOf(
+            revurdering(sak = sak, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+            revurdering(sak = sak, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+            revurdering(sak = sak, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+            revurdering(sak = sak, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
+        )
+        revurderinger.forEach {
+            behandlingRepo.opprettRevurdering(it)
+        }
+
+        val foerstegangsbehandlinger = listOf(
+            foerstegangsbehandling(sak = sak),
+            foerstegangsbehandling(sak = sak),
+            foerstegangsbehandling(sak = sak)
+        )
+        foerstegangsbehandlinger.forEach {
+            behandlingRepo.opprettFoerstegangsbehandling(it)
+        }
+
+        val manueltOpphoer = listOf(
+            manueltOpphoer(sak = sak)
+        )
+        manueltOpphoer.forEach {
+            behandlingRepo.opprettManueltOpphoer(it)
+        }
+
+        assertEquals(
+            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.REVURDERING).size,
+            revurderinger.size
+        )
+        assertEquals(
+            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.FØRSTEGANGSBEHANDLING).size,
+            foerstegangsbehandlinger.size
+        )
+        assertEquals(
+            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.MANUELT_OPPHOER).size,
+            manueltOpphoer.size
+        )
     }
 
     @Test

@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.pdl.PdlService
 import org.slf4j.LoggerFactory
@@ -27,10 +28,9 @@ class GrunnlagsendringshendelseService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     /* Henter grunnlagsendringshendelser med status GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING */
-    fun hentGyldigeHendelserForSak(sakId: Long) =
-        inTransaction {
-            grunnlagsendringshendelseDao.hentGyldigeGrunnlagsendringshendelserISak(sakId)
-        }
+    fun hentGyldigeHendelserForSak(sakId: Long) = inTransaction {
+        grunnlagsendringshendelseDao.hentGyldigeGrunnlagsendringshendelserISak(sakId)
+    }
 
     fun hentAlleHendelserForSak(sakId: Long) = inTransaction {
         grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
@@ -41,31 +41,26 @@ class GrunnlagsendringshendelseService(
 
     fun opprettSoekerDoedHendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> =
         // finner saker med loepende utbetalinger
-        generellBehandlingService.alleBehandlingerForSoekerMedFnr(doedshendelse.avdoedFnr).run {
+        generellBehandlingService.alleSakIderForSoekerMedFnr(doedshendelse.avdoedFnr).let { saker ->
             inTransaction {
-                filter { it.status in BehandlingStatus.ikkeAvbrutt() }
-                    .map { it.sak }
-                    .distinct()
-                    .also {
-                        // Forkast Ikke-vurderte doedshendelser i samme sak - ny hendelse erstatter tidligere ikke-vurderte
-                        grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
-                            saker = it,
-                            foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
-                            etterStatus = GrunnlagsendringStatus.FORKASTET,
-                            type = GrunnlagsendringsType.SOEKER_DOED
+                // Forkast Ikke-vurderte doedshendelser i samme sak - ny hendelse erstatter tidligere ikke-vurderte
+                grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
+                    saker = saker,
+                    foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
+                    etterStatus = GrunnlagsendringStatus.FORKASTET,
+                    type = GrunnlagsendringsType.SOEKER_DOED
+                )
+                saker.map { sakId ->
+                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                        Grunnlagsendringshendelse(
+                            id = UUID.randomUUID(),
+                            sakId = sakId,
+                            type = GrunnlagsendringsType.SOEKER_DOED,
+                            opprettet = LocalDateTime.now(),
+                            data = Grunnlagsinformasjon.SoekerDoed(hendelse = doedshendelse)
                         )
-                    }
-                    .map { sakId ->
-                        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-                            Grunnlagsendringshendelse(
-                                id = UUID.randomUUID(),
-                                sakId = sakId,
-                                type = GrunnlagsendringsType.SOEKER_DOED,
-                                opprettet = LocalDateTime.now(),
-                                data = Grunnlagsinformasjon.SoekerDoed(hendelse = doedshendelse)
-                            )
-                        )
-                    }
+                    )
+                }
             }
         }
 
@@ -91,8 +86,7 @@ class GrunnlagsendringshendelseService(
                                 "med doedsdato: $doedsdato"
                         )
                         generellBehandlingService.hentBehandlingerISak(endringsHendelse.sakId)
-                            .`siste ikke-avbrutte behandling`()
-                            .also { behandling ->
+                            .`siste ikke-avbrutte behandling`()?.let { behandling ->
                                 when (behandling.status) {
                                     in BehandlingStatus.underBehandling() -> {
                                         logger.info(
@@ -108,11 +102,8 @@ class GrunnlagsendringshendelseService(
                                             )
                                         }
                                     }
+
                                     in BehandlingStatus.iverksattEllerAttestert() -> {
-                                        logger.info(
-                                            "Behandling ${behandling.id} med status ${behandling.status} er " +
-                                                "iverksatt eller attestert -> Starter revurdering."
-                                        )
                                         revurderingService.startRevurdering(
                                             forrigeBehandling = behandling,
                                             pdlHendelse = endringsdata.hendelse,
@@ -133,35 +124,50 @@ class GrunnlagsendringshendelseService(
                                             }
                                         }
                                     }
+
                                     else -> {}
                                 }
                             }
                     }
-                    /*
-                    TODO: naa forkastes alle grunnlagsendringer hvor bruker ikke er doed. Vurder etterhvert om det er aktuelt
-                    aa ta hensyn til grunnlagsendringer hvor endringstype er annullert, som eventuelt kan trigge en revurdering
-                     */
+                        // TODO: Vurder om det er riktig å forkaste hvis dødsfall er annulert f.eks.
                         ?: logger.info(
                             "Person med fnr ${endringsdata.hendelse.avdoedFnr} er ikke doed i Pdl. " +
                                 "Forkaster hendelse"
-                        )
-                            .also {
-                                inTransaction {
-                                    grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
-                                        saker = listOf(endringsHendelse.sakId),
-                                        foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
-                                        etterStatus = GrunnlagsendringStatus.FORKASTET,
-                                        type = GrunnlagsendringsType.SOEKER_DOED
-                                    )
-                                }
+                        ).also {
+                            inTransaction {
+                                grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
+                                    saker = listOf(endringsHendelse.sakId),
+                                    foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
+                                    etterStatus = GrunnlagsendringStatus.FORKASTET,
+                                    type = GrunnlagsendringsType.SOEKER_DOED
+                                )
                             }
+                        }
                 }
+
                 else -> {} // ikke haandtert
             }
         }
     }
 
     private fun List<Behandling>.`siste ikke-avbrutte behandling`() =
-        this.sortedByDescending { it.behandlingOpprettet }
-            .first { it.status in BehandlingStatus.ikkeAvbrutt() }
+        this.sortedByDescending { it.behandlingOpprettet }.firstOrNull { it.status in BehandlingStatus.ikkeAvbrutt() }
+
+    fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse) {
+        val tidspunktForMottakAvHendelse = LocalDateTime.now()
+
+        inTransaction {
+            generellBehandlingService.alleSakIderForSoekerMedFnr(utflyttingsHendelse.fnr).forEach { sakId ->
+                grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                    Grunnlagsendringshendelse(
+                        id = UUID.randomUUID(),
+                        sakId = sakId,
+                        type = GrunnlagsendringsType.SOEKER_DOED,
+                        opprettet = tidspunktForMottakAvHendelse,
+                        data = Grunnlagsinformasjon.Utflytting(hendelse = utflyttingsHendelse)
+                    )
+                )
+            }
+        }
+    }
 }

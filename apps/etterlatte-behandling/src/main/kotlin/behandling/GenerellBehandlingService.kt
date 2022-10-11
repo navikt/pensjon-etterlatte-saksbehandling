@@ -31,6 +31,8 @@ interface GenerellBehandlingService {
 
     fun hentHendelserIBehandling(behandling: UUID): List<LagretHendelse>
     fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling>
+
+    fun alleSakIderForSoekerMedFnr(fnr: String): List<Long>
 }
 
 class RealGenerellBehandlingService(
@@ -160,6 +162,12 @@ class RealGenerellBehandlingService(
     override fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling> {
         return inTransaction {
             behandlinger.alleBehandlingerForSoekerMedFnr(fnr)
+        }
+    }
+
+    override fun alleSakIderForSoekerMedFnr(fnr: String): List<Long> {
+        return inTransaction {
+            behandlinger.alleSakIderMedUavbruttBehandlingForSoekerMedFnr(fnr)
         }
     }
 }

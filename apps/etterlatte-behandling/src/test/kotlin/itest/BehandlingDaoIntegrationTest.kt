@@ -509,6 +509,7 @@ internal class BehandlingDaoIntegrationTest {
         val revurderinger = listOf(
             revurdering(sak = sak, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
             revurdering(sak = sak, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
+            revurdering(sak = sak, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
             revurdering(sak = sak, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
         )
         revurderinger.forEach {
@@ -532,16 +533,16 @@ internal class BehandlingDaoIntegrationTest {
         }
 
         assertEquals(
-            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.REVURDERING).toSet(),
-            revurderinger.toSet()
+            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.REVURDERING).size,
+            revurderinger.size
         )
         assertEquals(
-            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.FØRSTEGANGSBEHANDLING).toSet(),
-            foerstegangsbehandlinger.toSet()
+            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.FØRSTEGANGSBEHANDLING).size,
+            foerstegangsbehandlinger.size
         )
         assertEquals(
-            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.MANUELT_OPPHOER).toSet(),
-            manueltOpphoer.toSet()
+            behandlingRepo.alleBehandlingerISakAvType(sak, BehandlingType.MANUELT_OPPHOER).size,
+            manueltOpphoer.size
         )
     }
 

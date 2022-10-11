@@ -16,7 +16,8 @@ export const Inngangsvilkaar = () => {
     if (oppdatertVilkaarsvurdering) {
       setVilkaarsvurdering(oppdatertVilkaarsvurdering)
     } else {
-      hentVilkaarsvurdering(behandlingId!!).then((response) => {
+      if (!behandlingId) throw new Error('Mangler behandlingsid')
+      hentVilkaarsvurdering(behandlingId).then((response) => {
         if (response.status == 'ok') {
           setVilkaarsvurdering(response.data)
         }
@@ -39,14 +40,28 @@ export const Inngangsvilkaar = () => {
         <h1>Vilkårsvurdering</h1>
       </Header>
 
-      <VilkaarBorderTop />
-      {vilkaarsvurdering.vilkaar.map((value, index) => (
-        <ManueltVilkaar key={index} vilkaar={value} oppdaterVilkaar={oppdaterVilkaarsvurdering}>
-          <></>
-        </ManueltVilkaar>
-      ))}
+      {behandlingId && (
+        <>
+          <VilkaarBorderTop />
+          {vilkaarsvurdering.vilkaar.map((value, index) => (
+            <ManueltVilkaar
+              key={index}
+              vilkaar={value}
+              oppdaterVilkaar={oppdaterVilkaarsvurdering}
+              behandlingId={behandlingId}
+            >
+              <></>
+            </ManueltVilkaar>
+          ))}
 
-      <Resultat dato={virk} vilkaarsvurdering={vilkaarsvurdering} oppdaterVilkaar={oppdaterVilkaarsvurdering} />
+          <Resultat
+            dato={virk}
+            vilkaarsvurdering={vilkaarsvurdering}
+            oppdaterVilkaar={oppdaterVilkaarsvurdering}
+            behandlingId={behandlingId}
+          />
+        </>
+      )}
     </Content>
   )
 }

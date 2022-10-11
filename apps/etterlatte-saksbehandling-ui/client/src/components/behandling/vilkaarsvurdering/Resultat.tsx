@@ -4,7 +4,7 @@ import { format } from 'date-fns'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { VilkaarsVurderingKnapper } from '../handlinger/vilkaarsvurderingKnapper'
 import {
-  setTotalVurdering,
+  lagreTotalVurdering,
   slettTotalVurdering,
   Vilkaarsvurdering,
   VilkaarsvurderingResultat,
@@ -12,18 +12,18 @@ import {
 import { VilkaarBorder } from './styled'
 import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { ISvar } from '../../../store/reducers/BehandlingReducer'
-import { useParams } from 'react-router-dom'
 import { svarTilTotalResultat } from './utils'
-import { DeleteIcon } from '../../../shared/icons/DeleteIcon'
+import { Delete } from '@navikt/ds-icons'
 
 type Props = {
   dato: string
   vilkaarsvurdering: Vilkaarsvurdering
   oppdaterVilkaar: (vilkaarsvurdering?: Vilkaarsvurdering) => void
+  behandlingId: string
 }
+const MIN_KOMMENTAR_LENGDE = 10
 
-export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVilkaar }) => {
-  const { behandlingId } = useParams()
+export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVilkaar, behandlingId }) => {
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
   const [kommentar, setKommentar] = useState<string>('')
@@ -32,9 +32,7 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
   const alleVilkaarErVurdert = !vilkaarsvurdering.vilkaar.some((vilkaar) => !vilkaar.vurdering)
 
   const slettVilkaarsvurderingResultat = () => {
-    if (!behandlingId) throw new Error('Mangler behandlingsid')
-
-    slettTotalVurdering(behandlingId!!).then((response) => {
+    slettTotalVurdering(behandlingId).then((response) => {
       if (response.status == 'ok') {
         oppdaterVilkaar(response.data)
         reset()
@@ -42,13 +40,21 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
     })
   }
 
-  const setVilkaarsvurderingResultat = () => {
-    if (!behandlingId) throw new Error('Mangler behandlingsid')
-    !svar ? setRadioError('Du må velge et svar') : setRadioError(undefined)
-    kommentar.length < 11 ? setKommentarError('Begrunnelsen må være minst 10 tegn') : setKommentarError(undefined)
+  const lagreVilkaarsvurderingResultat = () => {
+    !(svar && [ISvar.JA, ISvar.NEI].includes(svar))
+      ? setRadioError('Du må svare på om vilkårsvurderingen er oppfylt')
+      : setRadioError(undefined)
+    !(kommentar.length >= MIN_KOMMENTAR_LENGDE)
+      ? setKommentarError('Begrunnelsen må være minst 10 tegn')
+      : setKommentarError(undefined)
 
-    if (radioError === undefined && kommentarError === undefined && svar !== undefined && kommentar.length > 10) {
-      setTotalVurdering(behandlingId!!, svarTilTotalResultat(svar), kommentar).then((response) => {
+    if (
+      radioError === undefined &&
+      kommentarError === undefined &&
+      svar !== undefined &&
+      kommentar.length >= MIN_KOMMENTAR_LENGDE
+    ) {
+      lagreTotalVurdering(behandlingId, svarTilTotalResultat(svar), kommentar).then((response) => {
         if (response.status == 'ok') {
           oppdaterVilkaar(response.data)
           reset()
@@ -56,6 +62,9 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
       })
     }
   }
+
+  const resultatTekst = () =>
+    vilkaarsvurdering.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT ? 'Innvilget' : 'Avslag'
 
   const reset = () => {
     setSvar(undefined)
@@ -70,16 +79,17 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
         {vilkaarsvurdering.resultat && (
           <>
             <TekstWrapper>
-              <b>Vilkårsresultat: &nbsp;</b>
-              {vilkaarsvurdering.resultat.utfall == VilkaarsvurderingResultat.OPPFYLT ? 'Innvilget' : 'Avslag'}
-              &nbsp; fra {format(new Date(dato), 'dd.MM.yyyy')}
+              <span>
+                <b>Vilkårsresultat: </b>
+                {`${resultatTekst()} fra ${format(new Date(dato), 'dd.MM.yyyy')}`}
+              </span>
             </TekstWrapper>
             <p>
               Manuelt av {vilkaarsvurdering.resultat.saksbehandler} (
               <i>{format(new Date(vilkaarsvurdering.resultat.tidspunkt), 'dd.MM.yyyy HH:ss')})</i>
             </p>
-            <SlettWrapper onClick={slettVilkaarsvurderingResultat} style={{ marginLeft: '-22px' }}>
-              <DeleteIcon />
+            <SlettWrapper onClick={slettVilkaarsvurderingResultat}>
+              <Delete />
               <span className={'text'}>Slett vurdering</span>
             </SlettWrapper>
           </>
@@ -91,7 +101,9 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
 
         {!vilkaarsvurdering.resultat && alleVilkaarErVurdert && (
           <>
-            <TekstWrapper style={{ fontWeight: 'bold' }}>Er vilkårsvurderingen oppfylt?</TekstWrapper>
+            <TekstWrapper>
+              <b>Er vilkårsvurderingen oppfylt?</b>
+            </TekstWrapper>
             <RadioGroupWrapper>
               <RadioGroup
                 legend=""
@@ -104,8 +116,8 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
                 error={radioError ? radioError : false}
               >
                 <div className="flex">
-                  <Radio value={ISvar.JA.toString()}>Ja</Radio>
-                  <Radio value={ISvar.NEI.toString()}>Nei</Radio>
+                  <Radio value={ISvar.JA}>Ja</Radio>
+                  <Radio value={ISvar.NEI}>Nei</Radio>
                 </div>
               </RadioGroup>
             </RadioGroupWrapper>
@@ -116,13 +128,13 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
               value={kommentar}
               onChange={(e) => {
                 setKommentar(e.target.value)
-                kommentar.length > 10 && setKommentarError(undefined)
+                kommentar.length >= MIN_KOMMENTAR_LENGDE && setKommentarError(undefined)
               }}
               minRows={3}
               size="medium"
               error={kommentarError ? kommentarError : false}
             />
-            <Button variant={'primary'} size={'small'} onClick={setVilkaarsvurderingResultat}>
+            <Button variant={'primary'} size={'small'} onClick={lagreVilkaarsvurderingResultat}>
               Lagre
             </Button>
           </>
@@ -150,13 +162,10 @@ export const RadioGroupWrapper = styled.div`
 
 const VilkaarsvurderingContent = styled.div`
   padding-left: 36px;
+  padding-right: 36px;
 
   button {
     margin-top: 10px;
-  }
-
-  .navds-textarea__wrapper {
-    width: 500px;
   }
 `
 
@@ -168,7 +177,6 @@ const TekstWrapper = styled.div`
 
 const SlettWrapper = styled.div`
   display: inline-flex;
-  float: left;
   cursor: pointer;
   color: #0067c5;
 

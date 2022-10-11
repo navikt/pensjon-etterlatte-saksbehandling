@@ -1,7 +1,6 @@
 import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { ISvar } from '../../../store/reducers/BehandlingReducer'
-import { useParams } from 'react-router-dom'
 import {
   slettVurdering,
   Vilkaar,
@@ -11,18 +10,18 @@ import {
 } from '../../../shared/api/vilkaarsvurdering'
 import styled from 'styled-components'
 import { format } from 'date-fns'
-import { DeleteIcon } from '../../../shared/icons/DeleteIcon'
-import { EditIcon } from '../../../shared/icons/EditIcon'
 import { svarTilResultat } from './utils'
+import { Delete, Edit } from '@navikt/ds-icons'
 
 export const Vurdering = ({
   vilkaar,
   oppdaterVilkaar,
+  behandlingId,
 }: {
   vilkaar: Vilkaar
   oppdaterVilkaar: (vilkaarsvurdering?: Vilkaarsvurdering) => void
+  behandlingId: string
 }) => {
-  const { behandlingId } = useParams()
   const [aktivVurdering, setAktivVurdering] = useState<boolean>(false)
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
@@ -30,12 +29,11 @@ export const Vurdering = ({
   const [begrunnelseError, setBegrunnelseError] = useState<string>()
 
   const vilkaarVurdert = () => {
-    if (!behandlingId) throw new Error('Mangler behandlingsid')
     !svar ? setRadioError('Du må velge et svar') : setRadioError(undefined)
     kommentar.length < 11 ? setBegrunnelseError('Begrunnelsen må være minst 10 tegn') : setBegrunnelseError(undefined)
 
     if (radioError === undefined && begrunnelseError === undefined && svar !== undefined && kommentar.length > 10) {
-      vurderVilkaar(behandlingId!!, {
+      vurderVilkaar(behandlingId, {
         type: vilkaar.type,
         kommentar: kommentar,
         resultat: svarTilResultat(svar),
@@ -49,9 +47,7 @@ export const Vurdering = ({
   }
 
   const slettVurderingAvVilkaar = () => {
-    if (!behandlingId) throw new Error('Mangler behandlingsid')
-
-    slettVurdering(behandlingId!!, vilkaar.type).then((response) => {
+    slettVurdering(behandlingId, vilkaar.type).then((response) => {
       if (response.status == 'ok') {
         oppdaterVilkaar()
       }
@@ -97,12 +93,12 @@ export const Vurdering = ({
             <p>Sist endret {format(new Date(vilkaar.vurdering!!.tidspunkt), 'dd.MM.yyyy HH:mm')}</p>
           </KildeVilkaar>
 
-          <RedigerWrapper onClick={slettVurderingAvVilkaar} style={{ marginLeft: '-22px' }}>
-            <DeleteIcon />
+          <RedigerWrapper onClick={slettVurderingAvVilkaar}>
+            <Delete />
             <span className={'text'}> Slett</span>
           </RedigerWrapper>
           <RedigerWrapper onClick={redigerVilkaar}>
-            <EditIcon />
+            <Edit />
             <span className={'text'}> Rediger</span>
           </RedigerWrapper>
         </>
@@ -172,7 +168,7 @@ const RedigerWrapper = styled.div`
   float: left;
   cursor: pointer;
   color: #0067c5;
-  margin-left: 10px;
+  margin-right: 10px;
 
   .text {
     margin-left: 0.3em;

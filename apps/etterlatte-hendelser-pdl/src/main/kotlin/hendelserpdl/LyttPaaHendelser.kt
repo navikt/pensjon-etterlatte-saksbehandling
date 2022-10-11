@@ -126,8 +126,8 @@ class LyttPaaHendelser(
 
     private fun Personhendelse.loggFeilVedHaandtering(hendelseType: String, e: Exception) {
         log.error(
-            "kunne ikke haandtere $hendelseType" +
-                "for ${personidenter.first()}" +
+            "kunne ikke haandtere $hendelseType " +
+                "for ${personidenter.first()}. " +
                 "Dette har sannsynligvis med aa gjoere at personhendelsen ser annerledes ut enn forventet, " +
                 "eller at det var problem med henting av folkeregisteridentifikatoren fra PDL",
             e

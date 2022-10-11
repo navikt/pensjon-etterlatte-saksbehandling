@@ -2,6 +2,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
+import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
@@ -22,7 +23,7 @@ class GrunnlagEndretRiver(
         // Kopi av river for eksisterende app
         River(rapidsConnection).apply {
             eventName("BEHANDLING:GRUNNLAGENDRET")
-            validate { it.requireKey("grunnlag") }
+            validate { it.requireKey(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey) }
             validate { it.requireKey("behandlingOpprettet") }
             validate { it.requireKey("behandlingId") }
             validate { it.requireKey("behandling") }

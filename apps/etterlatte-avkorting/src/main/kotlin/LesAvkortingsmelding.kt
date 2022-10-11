@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.module.kotlin.readValue
 import model.AvkortingService
+import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -19,7 +20,7 @@ internal class LesAvkortingsmelding(
     init {
         River(rapidsConnection).apply {
             eventName("BEHANDLING:GRUNNLAGENDRET")
-            validate { it.requireKey("grunnlag") }
+            validate { it.requireKey(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey) }
             validate { it.requireKey("vilkaarsvurdering") }
             validate { it.requireKey("beregning") }
             validate { it.rejectKey("avkorting") }

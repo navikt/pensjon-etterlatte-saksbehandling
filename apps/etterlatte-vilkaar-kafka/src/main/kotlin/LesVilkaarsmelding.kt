@@ -5,13 +5,11 @@ import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -28,7 +26,6 @@ internal class LesVilkaarsmelding(
     init {
         River(rapidsConnection).apply {
             eventName("BEHANDLING:GRUNNLAGENDRET")
-            validate { it.requireKey("grunnlag") }
             validate { it.requireKey("grunnlagV2") }
             validate { it.requireKey("behandlingOpprettet") }
             validate { it.requireKey("behandlingId") }
@@ -48,16 +45,6 @@ internal class LesVilkaarsmelding(
         withLogContext(packet.correlationId) {
             try {
                 val grunnlag = requireNotNull(objectMapper.treeToValue<Opplysningsgrunnlag>(packet["grunnlagV2"]))
-                // TODO sj: Deprecated
-                val deprecatedGrunnlag = requireNotNull(objectMapper.treeToValue<Grunnlag>(packet["grunnlag"]))
-                val deprecatedVilkaarsopplysninger = deprecatedGrunnlag.grunnlag.map {
-                    VilkaarOpplysning(
-                        it.id,
-                        it.opplysningType,
-                        it.kilde,
-                        it.opplysning
-                    )
-                }
                 val behandling = objectMapper.treeToValue<Behandling>(packet["behandling"])
                 val behandlingopprettet = packet["behandlingOpprettet"].asLocalDateTime().toLocalDate()
                 val revurderingAarsak: RevurderingAarsak? = kotlin.runCatching {
@@ -79,7 +66,6 @@ internal class LesVilkaarsmelding(
                     vilkaar.finnVirkningstidspunktOgVilkaarForBehandling(
                         behandling,
                         grunnlag,
-                        deprecatedVilkaarsopplysninger,
                         behandlingopprettet,
                         aarsak
                     )

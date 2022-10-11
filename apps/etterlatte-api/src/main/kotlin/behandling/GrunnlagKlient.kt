@@ -67,7 +67,7 @@ class GrunnlagKlient(config: Config, private val httpClient: HttpClient) : Etter
 
             return objectMapper.readValue(json.toString())
         } catch (e: Exception) {
-            logger.error("Henting av opplysning ($opplysningsType) fra grunnlag for sak med id $sakId feilet.")
+            logger.error("Henting av opplysning ($opplysningsType) fra grunnlag for sak med id $sakId feilet.", e)
             throw e
         }
     }
@@ -78,7 +78,7 @@ class GrunnlagKlient(config: Config, private val httpClient: HttpClient) : Etter
         accessToken: String
     ): Grunnlagsopplysning<SaksbehandlerMedlemskapsperioder>? {
         try {
-            logger.info("Henter opplysning ($opplysningsType) fra grunnlag for sak med id $sakId.")
+            logger.info("Finner perioder på ($opplysningsType) fra grunnlag for sak med id $sakId.")
 
             val token = azureAdClient.getOnBehalfOfAccessTokenForResource(
                 listOf("api://$clientId/.default"),
@@ -98,7 +98,10 @@ class GrunnlagKlient(config: Config, private val httpClient: HttpClient) : Etter
                 else -> throw Exception("Feil i kall mot grunnlag. Status: ${response.status}")
             }
         } catch (e: Exception) {
-            logger.error("Henting av opplysning ($opplysningsType) fra grunnlag for sak med id $sakId feilet.")
+            logger.error(
+                "Henting av perioder på opplysning ($opplysningsType) fra grunnlag for sak med id $sakId feilet.",
+                e
+            )
             throw e
         }
     }

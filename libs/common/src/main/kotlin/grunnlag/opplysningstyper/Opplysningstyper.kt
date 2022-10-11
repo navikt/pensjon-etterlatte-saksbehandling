@@ -20,8 +20,6 @@ enum class Opplysningstyper {
     ARBEIDSFORHOLD_V1,
 
     AVDOED_INNTEKT_V1,
-
-    SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1,
     SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
 
     /* Grunnlag v2 */
@@ -47,6 +45,7 @@ enum class Opplysningstyper {
     UTENLANDSADRESSE,
     INNTEKT,
     MEDLEMSKAPSPERIODE,
+    KOMMER_BARNET_TILGODE,
 
     SOESKEN_I_BEREGNINGEN // Kun for soeskenjustering
 }

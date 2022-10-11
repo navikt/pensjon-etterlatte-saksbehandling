@@ -105,7 +105,7 @@ class GrunnlagService(
 
         val opplysning: List<Grunnlagsopplysning<out Any>> = listOf(
             lagOpplysning(
-                Opplysningstyper.SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1,
+                Opplysningstyper.KOMMER_BARNET_TILGODE,
                 Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
                 ResultatKommerBarnetTilgode(svar, begrunnelse)
             )

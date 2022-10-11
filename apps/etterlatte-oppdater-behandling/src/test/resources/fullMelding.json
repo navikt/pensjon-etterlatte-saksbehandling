@@ -247,7 +247,7 @@
           "tidspunkt": "2022-07-21T08:36:44.908159144Z",
           "type": "saksbehandler"
         },
-        "opplysningType": "SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1",
+        "opplysningType": "KOMMER_BARNET_TILGODE",
         "meta": {},
         "opplysning": {
           "svar": "JA",
@@ -693,7 +693,7 @@
           "tidspunkt": "2022-07-21T08:36:44.908159144Z",
           "type": "saksbehandler"
         },
-        "opplysningType": "SAKSBEHANDLER_KOMMER_BARNET_TILGODE_V1",
+        "opplysningType": "KOMMER_BARNET_TILGODE",
         "meta": {},
         "opplysning": {
           "svar": "JA",

@@ -1,7 +1,5 @@
 package model
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
 import no.nav.etterlatte.libs.common.avkorting.Avkortingsperiode
@@ -9,9 +7,6 @@ import no.nav.etterlatte.libs.common.avkorting.Avkortingstyper
 import no.nav.etterlatte.libs.common.avkorting.Endringskode
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.*
@@ -50,25 +45,5 @@ class AvkortingService {
             )
         }
         return avkortingsperioder
-    }
-
-    companion object {
-        inline fun <reified T> setOpplysningType(opplysning: VilkaarOpplysning<JsonNode>?): VilkaarOpplysning<T>? {
-            return opplysning?.let {
-                VilkaarOpplysning(
-                    opplysning.id,
-                    opplysning.opplysningType,
-                    opplysning.kilde,
-                    objectMapper.readValue(opplysning.opplysning.toString())
-                )
-            }
-        }
-
-        inline fun <reified T> finnOpplysning(
-            opplysninger: List<VilkaarOpplysning<JsonNode>>,
-            type: Opplysningstyper
-        ): VilkaarOpplysning<T>? {
-            return setOpplysningType(opplysninger.find { it.opplysningType == type })
-        }
     }
 }

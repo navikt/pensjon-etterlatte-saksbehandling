@@ -52,11 +52,14 @@ spec:
       value: http://etterlatte-brev-api
     - name: VILKAARSVURDERING_API_URL
       value: http://etterlatte-vilkaarsvurdering
+    - name: GRAPH_API
+      value: https://graph.microsoft.com/v1.0/me
   accessPolicy:
     outbound:
       external:
         - host: navikt.github.io
         - host: https://login.microsoftonline.com
+        - host: graph.microsoft.com
       rules:
         - application: etterlatte-api
         - application: etterlatte-brev-api

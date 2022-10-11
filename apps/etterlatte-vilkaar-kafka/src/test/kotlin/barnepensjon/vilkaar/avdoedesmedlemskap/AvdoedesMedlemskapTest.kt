@@ -5,6 +5,7 @@ import LesVilkaarsmeldingTest.Companion.readFile
 import adresserNorgePdl
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import grunnlag.arbeidsforholdTestData
 import grunnlag.kilde
 import grunnlag.medlemskap
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -56,7 +57,7 @@ class AvdoedesMedlemskapTest {
             inntekt("inntektsopplysning.json").toJsonNode()
         ),
         Opplysningstyper.MEDLEMSKAPSPERIODE to Opplysning.Periodisert(medlemskap),
-        Opplysningstyper.ARBEIDSFORHOLD_V1 to arbeidsforhold("arbeidsforhold100.json")
+        Opplysningstyper.ARBEIDSFORHOLD to Opplysning.Periodisert(arbeidsforholdTestData(100.0))
     )
 
     private val avdoedTestdata = GrunnlagTestData(

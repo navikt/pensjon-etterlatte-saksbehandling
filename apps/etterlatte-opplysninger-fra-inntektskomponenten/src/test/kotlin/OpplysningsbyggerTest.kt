@@ -47,7 +47,7 @@ class OpplysningsbyggerTest {
         )
 
         assertEquals(opplysninger.size, 2)
-        assertEquals(opplysninger[1].opplysningType, Opplysningstyper.ARBEIDSFORHOLD_V1)
+        assertEquals(opplysninger[1].opplysningType, Opplysningstyper.ARBEIDSFORHOLD)
         val arbeidsforholdOpplysning = (opplysninger[1].opplysning) as AaregResponse
         assertEquals(arbeidsforholdOpplysning.type.beskrivelse, "Ordinært arbeidsforhold")
     }

@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnla
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.ADRESSEBESKYTTELSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.ARBEIDSFORHOLD_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.ARBEIDSFORHOLD
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOEDESBARN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.DELTBOSTEDSADRESSE
@@ -88,7 +88,7 @@ fun Grunnlagsdata<JsonNode>.hentMedlemskapsperiode() =
     this.hentPeriodisertOpplysning<SaksbehandlerMedlemskapsperiode?>(MEDLEMSKAPSPERIODE)
 
 fun Grunnlagsdata<JsonNode>.hentArbeidsforhold() = // Kun avdød som har denne opplysningen
-    this.hentPeriodisertOpplysning<AaregResponse?>(ARBEIDSFORHOLD_V1)
+    this.hentPeriodisertOpplysning<AaregResponse?>(ARBEIDSFORHOLD)
 
 inline fun <reified T> Grunnlagsdata<JsonNode>.hentKonstantOpplysning(
     opplysningstype: Opplysningstyper

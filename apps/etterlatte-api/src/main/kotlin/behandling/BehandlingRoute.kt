@@ -10,7 +10,6 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.logger
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
@@ -88,27 +87,20 @@ fun Route.behandlingRoute(service: BehandlingService) {
 
     route("behandling/{behandlingId}") {
         get {
-            if (call.parameters["behandlingId"] == null) {
-                call.respond(HttpStatusCode.BadRequest, "BehandlingsId mangler")
-            } else {
-                call.respond(service.hentBehandling(behandlingId, getAccessToken(call)))
+            call.withUUID("behandlingId") {
+                call.respond(service.hentBehandling(it.toString(), getAccessToken(call)))
             }
         }
 
         get("hendelser") {
-            if (call.parameters["behandlingId"] == null) {
-                call.respond(HttpStatusCode.BadRequest, "BehandlingsId mangler")
-            } else {
-                call.respond(service.hentHendelserForBehandling(behandlingId, getAccessToken(call)))
+            call.withUUID("behandlingId") {
+                call.respond(service.hentHendelserForBehandling(it.toString(), getAccessToken(call)))
             }
         }
 
         post("avbryt") {
-            val behandlingId = call.parameters["behandlingId"]
-            if (behandlingId == null) {
-                call.respond(HttpStatusCode.BadRequest, "BehandlingsId mangler")
-            } else {
-                call.respond(service.avbrytBehanding(behandlingId, getAccessToken(call)))
+            call.withUUID("behandlingId") {
+                call.respond(service.avbrytBehanding(it.toString(), getAccessToken(call)))
             }
         }
     }
@@ -131,9 +123,15 @@ fun Route.behandlingRoute(service: BehandlingService) {
     }
 }
 
-inline val PipelineContext<*, ApplicationCall>.behandlingId
-    get() = requireNotNull(call.parameters["behandlingId"]).let {
-        UUID.fromString(
-            it
-        ).toString()
+suspend fun ApplicationCall.withUUID(parameter: String, onSuccess: (suspend (id: UUID) -> Unit)) {
+    val id = this.parameters[parameter]
+    if (id == null) {
+        this.respond(HttpStatusCode.BadRequest, "Fant ikke følgende parameter: $parameter")
     }
+
+    try {
+        onSuccess(UUID.fromString(id))
+    } catch (e: IllegalArgumentException) {
+        this.respond(HttpStatusCode.BadRequest, "Ikke ett gyldigt UUID-format")
+    }
+}

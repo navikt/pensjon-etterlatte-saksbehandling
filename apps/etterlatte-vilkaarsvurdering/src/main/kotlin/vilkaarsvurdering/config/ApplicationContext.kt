@@ -6,7 +6,7 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryInMemory
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
 import no.nav.helse.rapids_rivers.RapidsConnection
-import java.util.*
+import java.util.UUID
 
 class ApplicationContext(
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())

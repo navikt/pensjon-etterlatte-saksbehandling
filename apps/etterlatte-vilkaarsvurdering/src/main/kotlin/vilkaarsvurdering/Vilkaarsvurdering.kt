@@ -1,7 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class Vilkaarsvurdering(
     val behandlingId: UUID,

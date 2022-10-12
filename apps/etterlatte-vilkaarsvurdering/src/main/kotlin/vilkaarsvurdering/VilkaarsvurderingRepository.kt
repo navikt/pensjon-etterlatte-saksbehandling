@@ -1,6 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import java.util.*
+import java.util.UUID
 
 interface VilkaarsvurderingRepository {
     fun hent(behandlingId: UUID): Vilkaarsvurdering?

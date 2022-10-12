@@ -15,7 +15,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) {
     route("/api/vilkaarsvurdering") {

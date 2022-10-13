@@ -13,6 +13,8 @@ import { format } from 'date-fns'
 import { svarTilResultat } from './utils'
 import { Delete, Edit } from '@navikt/ds-icons'
 
+const MIN_KOMMENTAR_LENGDE = 10
+
 export const Vurdering = ({
   vilkaar,
   oppdaterVilkaar,
@@ -26,13 +28,20 @@ export const Vurdering = ({
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
   const [kommentar, setKommentar] = useState<string>('')
-  const [begrunnelseError, setBegrunnelseError] = useState<string>()
+  const [kommentarError, setKommentarError] = useState<string>()
 
   const vilkaarVurdert = () => {
     !svar ? setRadioError('Du må velge et svar') : setRadioError(undefined)
-    kommentar.length < 11 ? setBegrunnelseError('Begrunnelsen må være minst 10 tegn') : setBegrunnelseError(undefined)
+    !(kommentar.length >= MIN_KOMMENTAR_LENGDE)
+      ? setKommentarError('Begrunnelsen må være minst 10 tegn')
+      : setKommentarError(undefined)
 
-    if (radioError === undefined && begrunnelseError === undefined && svar !== undefined && kommentar.length > 10) {
+    if (
+      radioError === undefined &&
+      kommentarError === undefined &&
+      svar !== undefined &&
+      kommentar.length >= MIN_KOMMENTAR_LENGDE
+    ) {
       vurderVilkaar(behandlingId, {
         type: vilkaar.type,
         kommentar: kommentar,
@@ -64,7 +73,7 @@ export const Vurdering = ({
     setSvar(undefined)
     setRadioError(undefined)
     setKommentar('')
-    setBegrunnelseError(undefined)
+    setKommentarError(undefined)
   }
 
   const overskrift = () => {
@@ -118,37 +127,34 @@ export const Vurdering = ({
               error={radioError ? radioError : false}
             >
               <div className="flex">
-                <Radio value={ISvar.JA.toString()}>Ja</Radio>
-                <Radio value={ISvar.NEI.toString()}>Nei</Radio>
-                <Radio value={ISvar.IKKE_VURDERT.toString()}>Ikke vurdert</Radio>
+                <Radio value={ISvar.JA}>Ja</Radio>
+                <Radio value={ISvar.NEI}>Nei</Radio>
+                <Radio value={ISvar.IKKE_VURDERT}>Ikke vurdert</Radio>
               </div>
             </RadioGroup>
           </RadioGroupWrapper>
           <Textarea
-            style={{ padding: '10px', marginBottom: '10px', width: '250px' }}
             label="Begrunnelse"
             hideLabel={false}
             placeholder="Gi en begrunnelse for vurderingen"
             value={kommentar}
             onChange={(e) => {
-              setKommentar(e.target.value)
-              kommentar.length > 10 && setBegrunnelseError(undefined)
+              const kommentarLocal = e.target.value
+              setKommentar(kommentarLocal)
+              kommentarLocal.length >= MIN_KOMMENTAR_LENGDE && setKommentarError(undefined)
             }}
             minRows={3}
             size="small"
-            error={begrunnelseError ? begrunnelseError : false}
+            error={kommentarError ? kommentarError : false}
           />
-          <Button style={{ marginTop: '10px' }} variant={'primary'} size={'small'} onClick={vilkaarVurdert}>
-            Lagre
-          </Button>
-          <Button
-            style={{ marginTop: '10px', marginLeft: '10px' }}
-            variant={'secondary'}
-            size={'small'}
-            onClick={reset}
-          >
-            Avbryt
-          </Button>
+          <VurderingKnapper>
+            <Button variant={'primary'} size={'small'} onClick={vilkaarVurdert}>
+              Lagre
+            </Button>
+            <Button variant={'secondary'} size={'small'} onClick={reset}>
+              Avbryt
+            </Button>
+          </VurderingKnapper>
         </>
       )}
       {!vilkaar.vurdering && !aktivVurdering && (
@@ -216,5 +222,12 @@ export const RadioGroupWrapper = styled.div`
   .flex {
     display: flex;
     gap: 20px;
+  }
+`
+
+export const VurderingKnapper = styled.div`
+  button {
+    margin-top: 10px;
+    margin-right: 10px;
   }
 `

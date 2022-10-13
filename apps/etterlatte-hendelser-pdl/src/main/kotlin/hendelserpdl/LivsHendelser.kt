@@ -129,7 +129,7 @@ class LivsHendelser(config: AppConfig) : ILivsHendelser {
                 JsonMessage("{}", MessageProblems("{}"))
                     .apply {
                         set(eventNameKey, "PDL:PERSONHENDELSE")
-                        set("hendelse", "FORELDER-BARN-RELASJON")
+                        set("hendelse", "FORELDERBARNRELASJON_V1")
                         set("hendelse_data", forelderBarnRelasjonHendelse)
                     }.toJson()
             )
@@ -185,7 +185,7 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
             JsonMessage("{}", MessageProblems("{}"))
                 .apply {
                     set(eventNameKey, "PDL:PERSONHENDELSE")
-                    set("hendelse", "UTFLYTTING_FRA_NORGE_V1")
+                    set("hendelse", "UTFLYTTING_FRA_NORGE")
                     set("hendelse_data", utflyttingsHendelse)
                 }.toJson()
 
@@ -214,7 +214,7 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
             JsonMessage("{}", MessageProblems("{}"))
                 .apply {
                     set(eventNameKey, "PDL:PERSONHENDELSE")
-                    set("hendelse", "FORELDER-BARN-RELASJON")
+                    set("hendelse", "FORELDERBARNRELASJON_V1")
                     set("hendelse_data", forelderBarnRelasjonHendelse)
                 }.toJson()
         )

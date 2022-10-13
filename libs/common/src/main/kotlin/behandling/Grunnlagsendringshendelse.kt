@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import java.time.LocalDateTime
 import java.util.*
@@ -23,15 +24,22 @@ sealed class Grunnlagsinformasjon {
     ) : Grunnlagsinformasjon() {
         override val type: String = "UTFLYTTING"
     }
+
     data class SoekerDoed(
         val hendelse: Doedshendelse
     ) : Grunnlagsinformasjon() {
         override val type: String = "SOEKER_DOED"
     }
+
+    data class ForelderBarnRelasjon(
+        val hendelse: ForelderBarnRelasjonHendelse
+    ) : Grunnlagsinformasjon() {
+        override val type: String = "FORELDER_BARN_RELASJON"
+    }
 }
 
 enum class GrunnlagsendringsType {
-    SOEKER_DOED
+    SOEKER_DOED, UTFLYTTING, FORELDER_BARN_RELASJON
 }
 
 enum class GrunnlagsendringStatus {

@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.pdl.PdlService
@@ -156,17 +157,39 @@ class GrunnlagsendringshendelseService(
     fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse) {
         val tidspunktForMottakAvHendelse = LocalDateTime.now()
 
-        inTransaction {
-            generellBehandlingService.alleSakIderForSoekerMedFnr(utflyttingsHendelse.fnr).forEach { sakId ->
-                grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
-                    Grunnlagsendringshendelse(
-                        id = UUID.randomUUID(),
-                        sakId = sakId,
-                        type = GrunnlagsendringsType.SOEKER_DOED,
-                        opprettet = tidspunktForMottakAvHendelse,
-                        data = Grunnlagsinformasjon.Utflytting(hendelse = utflyttingsHendelse)
+        generellBehandlingService.alleSakIderForSoekerMedFnr(utflyttingsHendelse.fnr).also {
+            inTransaction {
+                it.forEach { sakId ->
+                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                        Grunnlagsendringshendelse(
+                            id = UUID.randomUUID(),
+                            sakId = sakId,
+                            type = GrunnlagsendringsType.UTFLYTTING,
+                            opprettet = tidspunktForMottakAvHendelse,
+                            data = Grunnlagsinformasjon.Utflytting(hendelse = utflyttingsHendelse)
+                        )
                     )
-                )
+                }
+            }
+        }
+    }
+
+    fun opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse: ForelderBarnRelasjonHendelse) {
+        val tidspunktForMottakAvHendelse = LocalDateTime.now()
+
+        generellBehandlingService.alleSakIderForSoekerMedFnr(forelderBarnRelasjonHendelse.fnr).also {
+            inTransaction {
+                it.forEach { sakId ->
+                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(
+                        Grunnlagsendringshendelse(
+                            id = UUID.randomUUID(),
+                            sakId = sakId,
+                            type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
+                            opprettet = tidspunktForMottakAvHendelse,
+                            data = Grunnlagsinformasjon.ForelderBarnRelasjon(hendelse = forelderBarnRelasjonHendelse)
+                        )
+                    )
+                }
             }
         }
     }

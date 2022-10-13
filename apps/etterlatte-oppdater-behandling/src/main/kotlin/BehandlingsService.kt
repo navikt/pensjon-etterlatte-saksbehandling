@@ -8,6 +8,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import rapidsandrivers.vedlikehold.VedlikeholdService
@@ -27,6 +28,7 @@ interface Behandling : VedlikeholdService {
 
     fun sendDoedshendelse(doedshendelse: Doedshendelse)
     fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse)
+    fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse)
 }
 
 class BehandlingsService(
@@ -80,6 +82,15 @@ class BehandlingsService(
             }
         }
     }
+
+    override fun sendForelderBarnRelasjonHendelse(forelderBarnRelasjon: ForelderBarnRelasjonHendelse) {
+        runBlocking {
+            behandling_app.post("$url/grunnlagsendringshendelse/forelderbarnrelasjonhendelse") {
+                contentType(ContentType.Application.Json)
+                setBody(forelderBarnRelasjon)
+            }
+        }
+    }
 }
 
 data class VedtakHendelse(
@@ -89,6 +100,3 @@ data class VedtakHendelse(
     val kommentar: String?,
     val valgtBegrunnelse: String?
 )
-
-data class Sak(val ident: String, val sakType: String, val id: Long)
-data class Saker(val saker: List<Sak>)

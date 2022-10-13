@@ -42,6 +42,8 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.module
@@ -212,6 +214,35 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
+            client.post("/grunnlagsendringshendelse/utflyttingshendelse") {
+                addAuthServiceBruker()
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    UtflyttingsHendelse(
+                        fnr = "søker",
+                        tilflyttingsLand = null,
+                        tilflyttingsstedIUtlandet = null,
+                        utflyttingsdato = null,
+                        endringstype = Endringstype.OPPRETTET
+                    )
+                )
+            }
+
+            client.post("/grunnlagsendringshendelse/forelderbarnrelasjonhendelse") {
+                addAuthServiceBruker()
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    ForelderBarnRelasjonHendelse(
+                        fnr = "søker",
+                        relatertPersonsIdent = null,
+                        relatertPersonsRolle = "",
+                        minRolleForPerson = "",
+                        relatertPersonUtenFolkeregisteridentifikator = null,
+                        endringstype = Endringstype.OPPRETTET
+                    )
+                )
+            }
+
             val manueltOpphoer = client.post("/behandlinger/manueltopphoer") {
                 addAuthSaksbehandler()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -227,9 +258,7 @@ class ApplicationTest {
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
-            }.let {
-                it.body<ManueltOpphoerResponse>()
-            }
+            }.body<ManueltOpphoerResponse>()
 
             client.get("/behandlinger/manueltopphoer?behandlingsid=${manueltOpphoer.behandlingId}") {
                 addAuthSaksbehandler()

@@ -4,8 +4,11 @@ import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.database.DataSourceBuilder
 import no.nav.etterlatte.grunnlagsendringshendelse
 import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
+import no.nav.etterlatte.grunnlagsinformasjonForelderBarnRelasjonHendelse
+import no.nav.etterlatte.grunnlagsinformasjonUtflyttingshendelse
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
+import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakDao
@@ -90,6 +93,50 @@ internal class GrunnlagsendringshendelseDaoTest {
     }
 
     @Test
+    fun `skal lagre og hente ut grunnlagsendringshendelse med rett type`() {
+        val uuidDoed = UUID.randomUUID()
+        val uuidUtflytting = UUID.randomUUID()
+        val uuidForelderBarn = UUID.randomUUID()
+        val sakid = sakRepo.opprettSak("1234", SakType.BARNEPENSJON).id
+        val grunnlagsinfoDoed = grunnlagsinformasjonDoedshendelse()
+        val grunnlagsinfoUtflytting = grunnlagsinformasjonUtflyttingshendelse()
+        val grunnlagsinfoForelderBarn = grunnlagsinformasjonForelderBarnRelasjonHendelse()
+        val doedshendelse = grunnlagsendringshendelse(
+            id = uuidDoed,
+            sakId = sakid,
+            type = GrunnlagsendringsType.SOEKER_DOED,
+            data = grunnlagsinfoDoed
+        )
+        val utflyttingsHendelse = grunnlagsendringshendelse(
+            id = uuidUtflytting,
+            sakId = sakid,
+            type = GrunnlagsendringsType.UTFLYTTING,
+            data = grunnlagsinfoUtflytting
+        )
+        val barnForeldreRelasjonHendelse = grunnlagsendringshendelse(
+            id = uuidForelderBarn,
+            sakId = sakid,
+            type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
+            data = grunnlagsinfoForelderBarn
+        )
+        grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(doedshendelse)
+        grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(utflyttingsHendelse)
+        grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(barnForeldreRelasjonHendelse)
+
+        val doedshendelseFraDatabase = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(uuidDoed)
+        val utflyttingHendelseFraDatabase = grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(uuidUtflytting)
+        val forelderBarnRelasjonHendelseFraDatabase =
+            grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(uuidForelderBarn)
+
+        assertTrue(doedshendelseFraDatabase!!.data!!.type == "SOEKER_DOED")
+        assertTrue(doedshendelseFraDatabase.data is Grunnlagsinformasjon.SoekerDoed)
+        assertTrue(utflyttingHendelseFraDatabase!!.data!!.type == "UTFLYTTING")
+        assertTrue(utflyttingHendelseFraDatabase.data is Grunnlagsinformasjon.Utflytting)
+        assertTrue(forelderBarnRelasjonHendelseFraDatabase!!.data!!.type == "FORELDER_BARN_RELASJON")
+        assertTrue(forelderBarnRelasjonHendelseFraDatabase.data is Grunnlagsinformasjon.ForelderBarnRelasjon)
+    }
+
+    @Test
     fun `skal hente grunnlagsendringshendelser som er eldre enn en time`() {
         val sakid = sakRepo.opprettSak("1234", SakType.BARNEPENSJON).id
         listOf(
@@ -105,17 +152,17 @@ internal class GrunnlagsendringshendelseDaoTest {
             ),
             grunnlagsendringshendelse(
                 sakId = sakid,
-                opprettet = LocalDateTime.now().minusHours(1),
+                opprettet = LocalDateTime.now().minusHours(1), // eldre enn en time
                 data = grunnlagsinformasjonDoedshendelse()
             ),
             grunnlagsendringshendelse(
                 sakId = sakid,
-                opprettet = LocalDateTime.now().minusDays(4),
+                opprettet = LocalDateTime.now().minusDays(4), // eldre enn en time
                 data = grunnlagsinformasjonDoedshendelse()
             ),
             grunnlagsendringshendelse(
                 sakId = sakid,
-                opprettet = LocalDateTime.now().minusYears(1),
+                opprettet = LocalDateTime.now().minusYears(1), // eldre enn en time
                 data = grunnlagsinformasjonDoedshendelse()
             )
         ).forEach {

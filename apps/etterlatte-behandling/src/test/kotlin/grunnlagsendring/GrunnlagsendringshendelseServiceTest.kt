@@ -13,6 +13,8 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendringshendelse
 import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
+import no.nav.etterlatte.grunnlagsinformasjonForelderBarnRelasjonHendelse
+import no.nav.etterlatte.grunnlagsinformasjonUtflyttingshendelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
@@ -21,7 +23,9 @@ import no.nav.etterlatte.libs.common.behandling.Grunnlagsinformasjon
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.pdl.PdlService
@@ -116,7 +120,75 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
-    fun `sjekkKlareDoedshendelser skal oppdatere ikke-vurderte-grunnlagsendringshendelser til status forkastet på ikke-avbrutte saker`() { // ktlint-disable max-line-length
+    fun `skal opprette grunnlagsendringshendelser i databasen for utflytting og forelder-barn`() {
+        val sakId = 1L
+        val grlagEndringUtflytting =
+            grunnlagsendringshendelse(
+                id = UUID.randomUUID(),
+                sakId = sakId,
+                data = grunnlagsinformasjonUtflyttingshendelse("Soeker")
+            )
+        val grlagEndringForelderBarn =
+            grunnlagsendringshendelse(
+                id = UUID.randomUUID(),
+                sakId = sakId,
+                data = grunnlagsinformasjonForelderBarnRelasjonHendelse("Soeker")
+            )
+
+        val opprettGrlaghendelseUtflytting = slot<Grunnlagsendringshendelse>()
+
+        val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao> {
+            every {
+                opprettGrunnlagsendringshendelse(capture(opprettGrlaghendelseUtflytting))
+            } returns grlagEndringUtflytting
+        }
+        val generellBehandlingService = mockk<GenerellBehandlingService> {
+            every { alleSakIderForSoekerMedFnr("Soeker") } returns listOf(1L)
+        }
+        val revurderingService = mockk<RevurderingService>()
+        val pdlService = mockk<PdlService>()
+        val grunnlagsendringshendelseService = GrunnlagsendringshendelseService(
+            grunnlagshendelsesDao,
+            generellBehandlingService,
+            revurderingService,
+            pdlService
+        )
+
+        grunnlagsendringshendelseService.opprettUtflyttingshendelse(
+            utflyttingsHendelse = UtflyttingsHendelse(
+                fnr = "Soeker",
+                endringstype = Endringstype.OPPRETTET,
+                tilflyttingsLand = null,
+                tilflyttingsstedIUtlandet = null,
+                utflyttingsdato = null
+            )
+        )
+
+        val opprettGrlaghendelseForelderBarnRelasjon = slot<Grunnlagsendringshendelse>()
+        every {
+            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(capture(opprettGrlaghendelseForelderBarnRelasjon))
+        } returns grlagEndringForelderBarn
+
+        grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(
+            forelderBarnRelasjonHendelse = ForelderBarnRelasjonHendelse(
+                fnr = "Soeker",
+                relatertPersonsIdent = null,
+                relatertPersonsRolle = "",
+                minRolleForPerson = "",
+                relatertPersonUtenFolkeregisteridentifikator = null,
+                endringstype = Endringstype.OPPRETTET
+            )
+        )
+
+        assertEquals(
+            opprettGrlaghendelseForelderBarnRelasjon.captured.type,
+            GrunnlagsendringsType.FORELDER_BARN_RELASJON
+        )
+        assertEquals(opprettGrlaghendelseUtflytting.captured.type, GrunnlagsendringsType.UTFLYTTING)
+    }
+
+    @Test
+    fun `sjekkKlareDoedshendelser skal oppdatere ikke-vurderte-grunnlagsendringshendelser til status forkastet paa ikke-avbrutte saker`() { // ktlint-disable max-line-length
         val sakId1 = 1L
         val sakId2 = 2L
         val sakId3 = 3L
@@ -332,7 +404,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val behandlingId = UUID.randomUUID()
         val generellBehandlingService = mockk<GenerellBehandlingService>() {
             every { hentBehandlingerISak(sakId) } returns listOf(
-                mockk<Behandling>() {
+                mockk {
                     every { status } returns BehandlingStatus.UNDER_BEHANDLING
                     every { id } returns behandlingId
                 }

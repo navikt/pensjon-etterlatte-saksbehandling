@@ -16,6 +16,8 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -124,3 +126,34 @@ fun grunnlagsinformasjonDoedshendelse(
     Grunnlagsinformasjon.SoekerDoed(
         Doedshendelse(avdoedFnr = avdoedFnr, doedsdato = doedsdato, endringstype = endringstype)
     )
+
+fun grunnlagsinformasjonUtflyttingshendelse(
+    fnr: String = "12345678911",
+    tilflyttingsLand: String = "Sverige",
+    utflyttingsdato: LocalDate = LocalDate.of(2022, 8, 8)
+) = Grunnlagsinformasjon.Utflytting(
+    hendelse = UtflyttingsHendelse(
+        fnr = fnr,
+        tilflyttingsLand = tilflyttingsLand,
+        tilflyttingsstedIUtlandet = null,
+        utflyttingsdato = utflyttingsdato,
+        endringstype = Endringstype.OPPRETTET
+    )
+)
+
+fun grunnlagsinformasjonForelderBarnRelasjonHendelse(
+    fnr: String = "12345678911",
+    relatertPersonsIdent: String = "98765432198",
+    relatertPersonsRolle: String = "MOR",
+    minRolleForPerson: String = "BARN"
+) = Grunnlagsinformasjon.ForelderBarnRelasjon(
+    hendelse = ForelderBarnRelasjonHendelse(
+        fnr = fnr,
+        relatertPersonsIdent = relatertPersonsIdent,
+        relatertPersonsRolle = relatertPersonsRolle,
+        minRolleForPerson = minRolleForPerson,
+        relatertPersonUtenFolkeregisteridentifikator = null,
+        endringstype = Endringstype.OPPRETTET
+    )
+
+)

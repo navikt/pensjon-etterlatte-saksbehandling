@@ -30,7 +30,6 @@ import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -51,12 +50,6 @@ class IntegrationTest {
             autoStart = true,
             withSchemaRegistry = true
         )
-
-        @AfterAll
-        @JvmStatic
-        fun teardown() {
-            kafkaEnv.tearDown()
-        }
     }
 
     @Test
@@ -221,7 +214,7 @@ class IntegrationTest {
                 "FORELDERBARNRELASJON_V1" -> {
                     val forelderBarnRelasjonHendelse =
                         objectMapper.treeToValue<ForelderBarnRelasjonHendelse>(msg["hendelse_data"])
-                    assertEquals("FORELDER-BARN-RELASJON", msg["hendelse"].textValue())
+                    assertEquals("FORELDERBARNRELASJON_V1", msg["hendelse"].textValue())
                     assertEquals("70078749472", forelderBarnRelasjonHendelse.fnr)
                     assertEquals(
                         forelderBarnRelasjon.relatertPersonsIdent,

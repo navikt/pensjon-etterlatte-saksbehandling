@@ -178,6 +178,28 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                     getObject("behandling_id")?.let { it as UUID }
                 )
             }
+            GrunnlagsendringsType.UTFLYTTING -> {
+                Grunnlagsendringshendelse(
+                    getObject("id") as UUID,
+                    getLong("sak_id"),
+                    type,
+                    getTimestamp("opprettet").toLocalDateTime(),
+                    objectMapper.readValue(getString("data"), Grunnlagsinformasjon.Utflytting::class.java),
+                    GrunnlagsendringStatus.valueOf(getString("status")),
+                    getObject("behandling_id")?.let { it as UUID }
+                )
+            }
+            GrunnlagsendringsType.FORELDER_BARN_RELASJON -> {
+                Grunnlagsendringshendelse(
+                    getObject("id") as UUID,
+                    getLong("sak_id"),
+                    type,
+                    getTimestamp("opprettet").toLocalDateTime(),
+                    objectMapper.readValue(getString("data"), Grunnlagsinformasjon.ForelderBarnRelasjon::class.java),
+                    GrunnlagsendringStatus.valueOf(getString("status")),
+                    getObject("behandling_id")?.let { it as UUID }
+                )
+            }
         }
     }
 }

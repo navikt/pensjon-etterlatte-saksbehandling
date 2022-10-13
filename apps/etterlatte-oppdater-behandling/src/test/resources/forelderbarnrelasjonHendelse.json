@@ -1,0 +1,13 @@
+{
+  "system_read_count": 0,
+  "@event_name": "PDL:PERSONHENDELSE",
+  "hendelse": "FORELDERBARNRELASJON_V1",
+  "hendelse_data": {
+    "fnr": "22028605009",
+    "relatertPersonsIdent": "24091258702",
+    "relatertPersonsRolle": "BARN",
+    "minRolleForPerson": "MOR",
+    "relatertPersonUtenFolkeregisteridentifikator": null,
+    "endringstype": "OPPRETTET"
+  }
+}

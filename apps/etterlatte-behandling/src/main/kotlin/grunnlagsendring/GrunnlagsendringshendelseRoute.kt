@@ -14,6 +14,7 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 
 fun Route.grunnlagsendringshendelseRoute(
@@ -36,6 +37,12 @@ fun Route.grunnlagsendringshendelseRoute(
             call.respond(HttpStatusCode.OK)
         }
 
+        post("/forelderbarnrelasjonhendelse") {
+            val forelderBarnRelasjonHendelse = call.receive<ForelderBarnRelasjonHendelse>()
+            logger.info("Mottar en forelder-barn-relasjon-hendelse fra PDL")
+            grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse)
+        }
+
         route("/{sakid}") {
             get {
                 call.respond(GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sakId)))
@@ -49,4 +56,5 @@ fun Route.grunnlagsendringshendelseRoute(
 }
 
 data class GrunnlagsendringsListe(val hendelser: List<Grunnlagsendringshendelse>)
+
 inline val PipelineContext<*, ApplicationCall>.sakId get() = requireNotNull(call.parameters["sakid"]).toLong()

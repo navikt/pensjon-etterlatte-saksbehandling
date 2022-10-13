@@ -1,0 +1,37 @@
+name: .build.yaml
+
+on:
+  workflow_call:
+    outputs:
+      image:
+        description: "Docker image url"
+        value: ${{ jobs.build-and-publish.outputs.image }}
+
+jobs:
+  build-and-publish:
+    name: Build & publish
+    runs-on: ubuntu-latest
+    env:
+      image: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
+    outputs:
+      image: ${{ env.image }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup Java v17.x
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17.x
+          cache: gradle
+      - name: Gradle test and build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew :apps:${{ github.workflow }}:build
+      - name: Build and publish docker image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          docker build --tag ${{ env.image }} -f docker/Dockerfile apps/${{ github.workflow }}
+          docker push ${{ env.image }}

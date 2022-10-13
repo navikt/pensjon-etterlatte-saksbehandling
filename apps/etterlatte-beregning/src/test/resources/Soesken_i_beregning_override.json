@@ -1306,7 +1306,7 @@
     ],
     "versjon": 51
   },
-  "grunnlagV2": {
+  "grunnlag": {
     "søker": {
       "SOEKER_PDL_V1": {
         "kilde": {

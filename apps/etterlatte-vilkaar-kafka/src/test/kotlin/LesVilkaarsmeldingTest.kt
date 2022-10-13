@@ -27,7 +27,7 @@ internal class LesVilkaarsmeldingTest {
         Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
         Assertions.assertEquals(2, inspector.message(0).get("kommerSoekerTilGode").size())
         Assertions.assertEquals(8, inspector.message(0).get("vilkaarsvurderingGrunnlagRef").intValue())
-        Assertions.assertEquals(4, inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key).size())
+        Assertions.assertEquals(4, inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey).size())
     }
 
     @Test
@@ -36,7 +36,7 @@ internal class LesVilkaarsmeldingTest {
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
         Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
         Assertions.assertEquals(8, inspector.message(0).get("vilkaarsvurderingGrunnlagRef").intValue())
-        Assertions.assertEquals(4, inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key).size())
+        Assertions.assertEquals(4, inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey).size())
     }
 
     @Test
@@ -45,6 +45,6 @@ internal class LesVilkaarsmeldingTest {
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET", inspector.message(0).get(eventNameKey).asText())
         Assertions.assertEquals(3, inspector.message(0).get("vilkaarsvurdering").size())
         Assertions.assertEquals(8, inspector.message(0).get("vilkaarsvurderingGrunnlagRef").intValue())
-        Assertions.assertEquals(4, inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key).size())
+        Assertions.assertEquals(4, inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey).size())
     }
 }

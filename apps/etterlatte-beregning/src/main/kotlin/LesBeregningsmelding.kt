@@ -25,14 +25,14 @@ internal class LesBeregningsmelding(
             validate { it.requireKey("virkningstidspunkt") }
             validate { it.requireKey("behandling.type") }
             validate { it.rejectKey("beregning") }
-            validate { it.interestedIn(BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key) }
+            validate { it.interestedIn(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey) }
             correlationId()
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            val grunnlag = packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key].toString()
+            val grunnlag = packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey].toString()
 
             try {
                 // TODO fremtidig funksjonalitet for å støtte periodisering av vilkaar

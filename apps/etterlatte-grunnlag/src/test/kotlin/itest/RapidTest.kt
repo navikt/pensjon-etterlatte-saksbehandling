@@ -199,7 +199,7 @@ internal class RapidTest {
                     versjon = 2
                 )
             ).toJson(),
-            packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key].toJson()
+            packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey].toJson()
         )
     }
 

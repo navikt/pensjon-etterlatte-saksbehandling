@@ -5,9 +5,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
+import java.util.UUID
 
 internal class GrunnlagEndretRiverTest {
 
@@ -44,18 +46,22 @@ internal class GrunnlagEndretRiverTest {
     fun `skal motta grunnlagsendring og oppdatere eksisterende vilkaarsvurdering med innholdet i meldingen`() {
         every { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns eksisterendeVilkaarsvurdering()
         every {
-            vilkaarsvurderingService.oppdaterVilkaarsvurdering(any(), any())
+            vilkaarsvurderingService.oppdaterVilkaarsvurderingPayload(any(), any())
         } returns eksisterendeVilkaarsvurdering()
 
         inspector.apply { sendTestMessage(grunnlagEndretMelding) }.inspektør
 
         verify(exactly = 1) { vilkaarsvurderingService.hentVilkaarsvurdering(any()) }
-        verify(exactly = 1) { vilkaarsvurderingService.oppdaterVilkaarsvurdering(any(), any()) }
+        verify(exactly = 1) { vilkaarsvurderingService.oppdaterVilkaarsvurderingPayload(any(), any()) }
         confirmVerified(vilkaarsvurderingService)
     }
 
     private fun eksisterendeVilkaarsvurdering() =
-        Vilkaarsvurdering("dbbd9a01-3e5d-4ec1-819c-1781d1f6a440", grunnlagEndretMelding, vilkaarBarnepensjon())
+        Vilkaarsvurdering(
+            behandlingId = UUID.fromString("dbbd9a01-3e5d-4ec1-819c-1781d1f6a440"),
+            payload = grunnlagEndretMelding,
+            vilkaar = barnepensjonVilkaar()
+        )
 
     companion object {
         val grunnlagEndretMelding = readFile("/grunnlagEndret.json")

@@ -5,18 +5,8 @@ import { IPeriodeInput } from '../../components/behandling/inngangsvilkaar/types
 
 const path = process.env.REACT_APP_VEDTAK_URL
 
-export const hentBehandling = async (id: string): Promise<IApiResponse<IDetaljertBehandling>> => {
-  try {
-    const result: Response = await fetch(`${path}/api/behandling/${id}`)
-    const data: IDetaljertBehandling = await result.json()
-
-    return {
-      status: result.status,
-      data: data,
-    }
-  } catch (e) {
-    return { status: 500 }
-  }
+export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljertBehandling>> => {
+  return apiClient.get(`/behandling/${id}`)
 }
 
 export const avbrytBehandling = async (behandlingsid: string): Promise<IApiResponse<any>> => {

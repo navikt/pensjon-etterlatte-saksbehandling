@@ -364,6 +364,7 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
 }
 
 export const addBehandlingAction = (data: IDetaljertBehandling) => ({ type: 'add_behandling', data })
+export const resetBehandlingAction = () => ({ type: 'reset_behandling' })
 
 export const behandlingReducer = (state = detaljertBehandlingInitialState, action: IAction): any => {
   switch (action.type) {
@@ -372,6 +373,8 @@ export const behandlingReducer = (state = detaljertBehandlingInitialState, actio
         ...state,
         ...action.data,
       }
+    case 'reset_behandling':
+      return detaljertBehandlingInitialState
     default:
       state
   }

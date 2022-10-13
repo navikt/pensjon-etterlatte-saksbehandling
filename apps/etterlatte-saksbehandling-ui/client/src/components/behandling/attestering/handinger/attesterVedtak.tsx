@@ -12,7 +12,7 @@ export const AttesterVedtak = ({ behandlingId }: { behandlingId?: string }) => {
     attesterVedtak(behandlingId).then((response) => {
       if (response.status === 200) {
         hentBehandling(behandlingId).then((response) => {
-          if (response.status === 200) {
+          if (response.statusCode === 200) {
             window.location.reload()
           }
         })

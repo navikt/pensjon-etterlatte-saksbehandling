@@ -14,29 +14,34 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 
 fun main() {
-    val ds = DataSourceBuilder(System.getenv())
+    app()
+}
+
+fun app(env: Map<String, String> = System.getenv()) {
+    val localDev = env["LOCAL_DEV"].toBoolean()
+    val ds = DataSourceBuilder(env)
     ds.migrate()
 
     val vedtakRepo = VedtaksvurderingRepository.using(ds.dataSource)
-
     val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
 
-    System.getenv().toMutableMap().apply {
-        put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
-    }.also { env ->
-
-        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
-            module(vedtaksvurderingService)
-        }.build().apply {
-            LagreAvkorting(this, vedtaksvurderingService)
-            LagreVilkaarsresultat(this, vedtaksvurderingService)
-            LagreBeregningsresultat(this, vedtaksvurderingService)
-            LagreKommerSoekerTilgodeResultat(this, vedtaksvurderingService)
-            FattVedtak(this, vedtaksvurderingService)
-            AttesterVedtak(this, vedtaksvurderingService)
-            UnderkjennVedtak(this, vedtaksvurderingService)
-            LagreIverksattVedtak(this, vedtaksvurderingService)
-            registrerVedlikeholdsriver(vedtaksvurderingService)
-        }.start()
-    }
+    RapidApplication.Builder(
+        RapidApplication.RapidApplicationConfig.fromEnv(
+            env.toMutableMap().apply {
+                put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
+            }
+        )
+    ).withKtorModule {
+        module(vedtaksvurderingService, localDev)
+    }.build().apply {
+        LagreAvkorting(this, vedtaksvurderingService)
+        LagreVilkaarsresultat(this, vedtaksvurderingService)
+        LagreBeregningsresultat(this, vedtaksvurderingService)
+        LagreKommerSoekerTilgodeResultat(this, vedtaksvurderingService)
+        FattVedtak(this, vedtaksvurderingService)
+        AttesterVedtak(this, vedtaksvurderingService)
+        UnderkjennVedtak(this, vedtaksvurderingService)
+        LagreIverksattVedtak(this, vedtaksvurderingService)
+        registrerVedlikeholdsriver(vedtaksvurderingService)
+    }.start()
 }

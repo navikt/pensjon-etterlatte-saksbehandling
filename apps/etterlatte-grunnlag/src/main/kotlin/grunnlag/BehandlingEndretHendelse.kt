@@ -27,7 +27,7 @@ class BehandlingEndretHendlese(
             correlationId()
             validate { it.requireKey(BehandlingGrunnlagEndret.sakIdKey) }
             validate { it.requireKey(BehandlingGrunnlagEndret.persongalleriKey) }
-            validate { it.rejectKey(BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key) }
+            validate { it.rejectKey(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey) }
         }.register(this)
     }
 
@@ -42,7 +42,7 @@ class BehandlingEndretHendlese(
 
                 val grunnlag = grunnlagService.hentOpplysningsgrunnlag(sakId, persongalleri)
 
-                packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key] = grunnlag
+                packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey] = grunnlag
 
                 context.publish(packet.toJson())
             } catch (e: Exception) {

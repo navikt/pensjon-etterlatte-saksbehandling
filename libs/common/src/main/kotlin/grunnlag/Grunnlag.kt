@@ -3,12 +3,6 @@ package no.nav.etterlatte.libs.common.grunnlag
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.person.PersonRolle
 
-data class Grunnlag(
-    val saksId: Long,
-    val grunnlag: List<Grunnlagsopplysning<JsonNode>>,
-    val versjon: Long
-)
-
 class Opplysningsgrunnlag(
     val soeker: Grunnlagsdata<JsonNode>,
     val familie: List<Grunnlagsdata<JsonNode>>,

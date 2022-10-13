@@ -15,7 +15,6 @@ interface IBehandlingGrunnlagEndret {
 }
 
 interface IMedGrunnlag {
-    val grunnlagKey get() = "grunnlag"
     val grunnlagV2Key get() = "grunnlagV2"
 }
 

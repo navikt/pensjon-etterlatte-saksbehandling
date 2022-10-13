@@ -20,7 +20,7 @@ internal class LesAvkortingsmelding(
     init {
         River(rapidsConnection).apply {
             eventName("BEHANDLING:GRUNNLAGENDRET")
-            validate { it.requireKey(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey) }
+            validate { it.requireKey(BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key) }
             validate { it.requireKey("vilkaarsvurdering") }
             validate { it.requireKey("beregning") }
             validate { it.rejectKey("avkorting") }

@@ -20,6 +20,7 @@ export interface VilkaarProps {
   vilkaar: Vilkaar
   oppdaterVilkaar: () => void
   children: ReactNode
+  behandlingId: string
 }
 
 export const ManueltVilkaar = (props: VilkaarProps) => {
@@ -62,7 +63,11 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
           <VilkaarVurderingColumn>
             <VilkaarVurderingContainer>
               <VilkaarlisteTitle>
-                <Vurdering vilkaar={vilkaar} oppdaterVilkaar={props.oppdaterVilkaar} />
+                <Vurdering
+                  vilkaar={vilkaar}
+                  oppdaterVilkaar={props.oppdaterVilkaar}
+                  behandlingId={props.behandlingId}
+                />
               </VilkaarlisteTitle>
             </VilkaarVurderingContainer>
           </VilkaarVurderingColumn>

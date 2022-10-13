@@ -3,20 +3,21 @@ import React, { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { hentVilkaarsvurdering, Vilkaarsvurdering } from '../../../shared/api/vilkaarsvurdering'
 import { ManueltVilkaar } from './ManueltVilkaar'
-import { VilkaarResultat } from '../inngangsvilkaar/vilkaar/VilkaarResultat'
 import { VilkaarBorderTop } from './styled'
+import { Resultat } from './Resultat'
 
 export const Inngangsvilkaar = () => {
   const location = useLocation()
   const { behandlingId } = useParams()
-
+  const virk = Date() // todo: Hente korrekt virkningsdato. Se EY-946.
   const [vilkaarsvurdering, setVilkaarsvurdering] = useState<Vilkaarsvurdering>({ vilkaar: [] })
 
   const oppdaterVilkaarsvurdering = (oppdatertVilkaarsvurdering?: Vilkaarsvurdering) => {
     if (oppdatertVilkaarsvurdering) {
       setVilkaarsvurdering(oppdatertVilkaarsvurdering)
     } else {
-      hentVilkaarsvurdering(behandlingId!!).then((response) => {
+      if (!behandlingId) throw new Error('Mangler behandlingsid')
+      hentVilkaarsvurdering(behandlingId).then((response) => {
         if (response.status == 'ok') {
           setVilkaarsvurdering(response.data)
         }
@@ -38,15 +39,29 @@ export const Inngangsvilkaar = () => {
       <Header>
         <h1>Vilkårsvurdering</h1>
       </Header>
-      <VilkaarBorderTop />
-      {vilkaarsvurdering.vilkaar.map((value, index) => (
-        <ManueltVilkaar key={index} vilkaar={value} oppdaterVilkaar={oppdaterVilkaarsvurdering}>
-          <></>
-        </ManueltVilkaar>
-      ))}
 
-      {/* todo: resultat skal ikke lengre hentes fra behandlingscontext */}
-      <VilkaarResultat id="vilkaarResultat" dato={'2020-01-01'} behandles={false} />
+      {behandlingId && (
+        <>
+          <VilkaarBorderTop />
+          {vilkaarsvurdering.vilkaar.map((value, index) => (
+            <ManueltVilkaar
+              key={index}
+              vilkaar={value}
+              oppdaterVilkaar={oppdaterVilkaarsvurdering}
+              behandlingId={behandlingId}
+            >
+              <></>
+            </ManueltVilkaar>
+          ))}
+
+          <Resultat
+            dato={virk}
+            vilkaarsvurdering={vilkaarsvurdering}
+            oppdaterVilkaar={oppdaterVilkaarsvurdering}
+            behandlingId={behandlingId}
+          />
+        </>
+      )}
     </Content>
   )
 }

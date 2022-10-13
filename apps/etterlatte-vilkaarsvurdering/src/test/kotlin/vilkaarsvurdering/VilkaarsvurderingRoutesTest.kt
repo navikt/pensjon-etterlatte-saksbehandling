@@ -131,6 +131,46 @@ internal class VilkaarsvurderingRoutesTest {
         }
     }
 
+    @Test
+    fun `skal sette og nullstille totalresultat for en vilkaarsvurdering`() {
+        testApplication {
+            application { restModule(applicationContext) }
+
+            opprettVilkaarsvurdering()
+            val resultat = VurdertVilkaarsvurderingResultatDto(
+                resultat = VilkaarsvurderingUtfall.OPPFYLT,
+                kommentar = "Søker oppfyller vurderingen"
+            )
+            val oppdatertVilkaarsvurderingResponse = client.post("/api/vilkaarsvurdering/resultat/$behandlingId") {
+                setBody(resultat.toJson())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+            }
+
+            val oppdatertVilkaarsvurdering = objectMapper
+                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), Vilkaarsvurdering::class.java)
+
+            assertEquals(HttpStatusCode.OK, oppdatertVilkaarsvurderingResponse.status)
+            assertEquals(behandlingId, oppdatertVilkaarsvurdering.behandlingId)
+            assertEquals(resultat.resultat, oppdatertVilkaarsvurdering?.resultat?.utfall)
+            assertEquals(resultat.kommentar, oppdatertVilkaarsvurdering?.resultat?.kommentar)
+            assertEquals("Saksbehandler01", oppdatertVilkaarsvurdering?.resultat?.saksbehandler)
+            assertNotNull(oppdatertVilkaarsvurdering?.resultat?.tidspunkt)
+
+            val sletteResponse = client.delete("/api/vilkaarsvurdering/resultat/$behandlingId") {
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+            }
+
+            val slettetVilkaarsvurdering = objectMapper
+                .readValue(sletteResponse.bodyAsText(), Vilkaarsvurdering::class.java)
+
+            assertEquals(HttpStatusCode.OK, sletteResponse.status)
+            assertEquals(behandlingId, slettetVilkaarsvurdering.behandlingId)
+            assertEquals(null, slettetVilkaarsvurdering?.resultat)
+        }
+    }
+
     private fun opprettVilkaarsvurdering() {
         vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(
             behandlingId,

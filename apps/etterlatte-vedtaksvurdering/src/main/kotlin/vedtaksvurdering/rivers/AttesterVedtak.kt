@@ -1,7 +1,5 @@
-package no.nav.etterlatte.rivers
+package no.nav.etterlatte.vedtaksvurdering.rivers
 
-import no.nav.etterlatte.KanIkkeEndreFattetVedtak
-import no.nav.etterlatte.VedtakKanIkkeFattes
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -13,14 +11,14 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 
-internal class FattVedtak(
+internal class AttesterVedtak(
     rapidsConnection: RapidsConnection,
     val vedtaksvurderingService: VedtaksvurderingService
 ) : River.PacketListener {
 
     init {
         River(rapidsConnection).apply {
-            eventName("SAKSBEHANDLER:FATT_VEDTAK")
+            eventName("SAKSBEHANDLER:ATTESTER_VEDTAK")
             validate { it.requireKey("behandlingId") }
             validate { it.requireKey("saksbehandler") }
             validate { it.rejectKey("feil") }
@@ -33,30 +31,23 @@ internal class FattVedtak(
             val behandlingId = packet["behandlingId"].asUUID()
             val saksbehandler = packet["saksbehandler"].textValue()
             try {
-                val fattetVedtak = vedtaksvurderingService.fattVedtak(behandlingId, saksbehandler)
-
+                val attestertVedtak =
+                    vedtaksvurderingService.attesterVedtak(behandlingId, saksbehandler)
                 context.publish(
-                    JsonMessage.newMessage(
-                        mapOf(
-                            eventNameKey to "VEDTAK:FATTET",
-                            "vedtak" to fattetVedtak,
-                            "behandlingId" to behandlingId,
-                            "sakId" to fattetVedtak.sak.id,
-                            "vedtakId" to fattetVedtak.vedtakId,
-                            "eventtimestamp" to fattetVedtak.vedtakFattet?.tidspunkt?.toTidspunkt()!!,
-                            "saksbehandler" to fattetVedtak.vedtakFattet?.ansvarligSaksbehandler!!
-                        )
-                    ).toJson()
+                    packet.also {
+                        it[eventNameKey] = "VEDTAK:ATTESTERT"
+                        it["vedtak"] = attestertVedtak
+                        it["vedtakId"] = attestertVedtak.vedtakId
+                        it["sakId"] = attestertVedtak.sak.id
+                        it["eventtimestamp"] = attestertVedtak.attestasjon?.tidspunkt?.toTidspunkt()!!
+                    }.toJson()
                 )
             } catch (ex: Exception) {
-                when (ex) {
-                    is KanIkkeEndreFattetVedtak,
-                    is VedtakKanIkkeFattes -> {
-                        packet["feil"] = "Feil under fatting av vedtak"
-                        context.publish(packet.toJson())
-                    }
-                    else -> throw ex
-                }
+                context.publish(
+                    packet.also {
+                        it["feil"] = requireNotNull(ex.message)
+                    }.toJson()
+                )
             }
         }
 }

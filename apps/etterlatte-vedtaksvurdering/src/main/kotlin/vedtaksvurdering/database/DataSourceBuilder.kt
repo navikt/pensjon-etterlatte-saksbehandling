@@ -1,4 +1,4 @@
-package no.nav.etterlatte.database
+package no.nav.etterlatte.vedtaksvurdering.database
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource

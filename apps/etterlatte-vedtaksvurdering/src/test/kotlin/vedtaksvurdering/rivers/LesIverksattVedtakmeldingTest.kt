@@ -1,12 +1,14 @@
+package vedtaksvurdering.rivers
+
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.VedtaksvurderingService
-import no.nav.etterlatte.rivers.LagreIverksattVedtak
+import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
@@ -39,7 +41,7 @@ internal class LesIverksattVedtakmeldingTest {
         }
 
         inspector.apply { sendTestMessage(melding) }.inspektør
-        assertEquals(behandlingIdVal, behandlingIdSlot.captured)
+        Assertions.assertEquals(behandlingIdVal, behandlingIdSlot.captured)
 
         verify(timeout = 5000) {
             inspector.publish(

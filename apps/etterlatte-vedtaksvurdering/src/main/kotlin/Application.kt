@@ -1,15 +1,15 @@
 package no.nav.etterlatte // ktlint-disable filename
 
-import no.nav.etterlatte.database.DataSourceBuilder
-import no.nav.etterlatte.database.VedtaksvurderingRepository
-import no.nav.etterlatte.rivers.AttesterVedtak
-import no.nav.etterlatte.rivers.FattVedtak
-import no.nav.etterlatte.rivers.LagreAvkorting
-import no.nav.etterlatte.rivers.LagreBeregningsresultat
-import no.nav.etterlatte.rivers.LagreIverksattVedtak
-import no.nav.etterlatte.rivers.LagreKommerSoekerTilgodeResultat
-import no.nav.etterlatte.rivers.LagreVilkaarsresultat
-import no.nav.etterlatte.rivers.UnderkjennVedtak
+import no.nav.etterlatte.vedtaksvurdering.database.DataSourceBuilder
+import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
+import no.nav.etterlatte.vedtaksvurdering.rivers.AttesterVedtak
+import no.nav.etterlatte.vedtaksvurdering.rivers.FattVedtak
+import no.nav.etterlatte.vedtaksvurdering.rivers.LagreAvkorting
+import no.nav.etterlatte.vedtaksvurdering.rivers.LagreBeregningsresultat
+import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
+import no.nav.etterlatte.vedtaksvurdering.rivers.LagreKommerSoekerTilgodeResultat
+import no.nav.etterlatte.vedtaksvurdering.rivers.LagreVilkaarsresultat
+import no.nav.etterlatte.vedtaksvurdering.rivers.UnderkjennVedtak
 import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 

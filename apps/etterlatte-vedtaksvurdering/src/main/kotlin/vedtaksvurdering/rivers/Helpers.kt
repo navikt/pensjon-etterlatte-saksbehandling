@@ -1,4 +1,4 @@
-package no.nav.etterlatte.rivers
+package no.nav.etterlatte.vedtaksvurdering.rivers
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.rapids_rivers.JsonMessage

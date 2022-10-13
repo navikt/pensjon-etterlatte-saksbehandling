@@ -1,10 +1,11 @@
-package no.nav.etterlatte
+package vedtaksvurdering.rivers
 
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
-import no.nav.etterlatte.rivers.LagreAvkorting
+import no.nav.etterlatte.vedtaksvurdering.rivers.LagreAvkorting
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -28,6 +29,6 @@ internal class LesAvkortingsmeldingTest {
         // TODO her må vi kanskje endre til avkortingsresultat
         val avkortningsres = slot<AvkortingsResultat>()
         every { vedtaksvurderingServiceMock.lagreAvkorting(any(), any(), any(), capture(avkortningsres)) } returns Unit
-        val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
+        inspector.apply { sendTestMessage(melding) }
     }
 }

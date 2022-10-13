@@ -1,8 +1,6 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.etterlatte.database.Vedtak
-import no.nav.etterlatte.database.VedtaksvurderingRepository
 import no.nav.etterlatte.domene.vedtak.Attestasjon
 import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.domene.vedtak.Beregningsperiode
@@ -24,6 +22,8 @@ import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
+import no.nav.etterlatte.vedtaksvurdering.database.Vedtak
+import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import rapidsandrivers.vedlikehold.VedlikeholdService
 import java.math.BigDecimal
 import java.time.LocalDate

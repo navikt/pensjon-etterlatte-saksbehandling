@@ -1,11 +1,13 @@
+package vedtaksvurdering
+
 import io.mockk.mockk
 import no.nav.etterlatte.VedtaksvurderingService
-import no.nav.etterlatte.database.VedtaksvurderingRepository
 import no.nav.etterlatte.domene.vedtak.Beregningsperiode
 import no.nav.etterlatte.domene.vedtak.Periode
 import no.nav.etterlatte.domene.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.domene.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.domene.vedtak.VedtakType
+import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal

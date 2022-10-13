@@ -1,7 +1,6 @@
-package no.nav.etterlatte
+package vedtaksvurdering
 
-import no.nav.etterlatte.database.DataSourceBuilder
-import no.nav.etterlatte.database.VedtaksvurderingRepository
+import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultat
 import no.nav.etterlatte.libs.common.avkorting.AvkortingsResultatType
@@ -21,6 +20,8 @@ import no.nav.etterlatte.libs.common.vikaar.PersoninfoGjenlevendeForelder
 import no.nav.etterlatte.libs.common.vikaar.PersoninfoSoeker
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.vedtaksvurdering.database.DataSourceBuilder
+import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll

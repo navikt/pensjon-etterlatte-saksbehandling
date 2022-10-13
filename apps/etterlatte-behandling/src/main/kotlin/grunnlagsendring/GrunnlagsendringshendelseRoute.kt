@@ -41,6 +41,7 @@ fun Route.grunnlagsendringshendelseRoute(
             val forelderBarnRelasjonHendelse = call.receive<ForelderBarnRelasjonHendelse>()
             logger.info("Mottar en forelder-barn-relasjon-hendelse fra PDL")
             grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse)
+            call.respond(HttpStatusCode.OK)
         }
 
         route("/{sakid}") {

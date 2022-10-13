@@ -67,10 +67,11 @@ class GrunnlagEndretRiver(
                     )
                 }
             } catch (e: Exception) {
+                // TODO Se på flyten her - denn skal muligens kastes hele veien ut
                 logger.error("En feil oppstod", e)
             }
         }
 }
 
-// Denne bør vel flyttes?
+// TODO Denne bør vel flyttes?
 enum class SakType { BARNEPENSJON, OMSTILLINGSSTOENAD }

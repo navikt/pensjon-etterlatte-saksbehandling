@@ -2,7 +2,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
-import java.util.*
+import java.util.UUID
 
 class VilkaarsvurderingFinnesIkkeException(override val message: String) : RuntimeException(message)
 class UgyldigSakTypeException(override val message: String) : RuntimeException(message)

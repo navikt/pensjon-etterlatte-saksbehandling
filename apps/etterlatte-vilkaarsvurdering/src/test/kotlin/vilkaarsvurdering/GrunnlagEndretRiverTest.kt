@@ -9,7 +9,7 @@ import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
-import java.util.*
+import java.util.UUID
 
 internal class GrunnlagEndretRiverTest {
 

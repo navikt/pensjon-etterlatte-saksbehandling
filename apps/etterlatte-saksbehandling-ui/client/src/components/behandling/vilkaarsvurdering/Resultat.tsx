@@ -85,8 +85,11 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
             </TekstWrapper>
             <p>
               Manuelt av {vilkaarsvurdering.resultat.saksbehandler} (
-              <i>{format(new Date(vilkaarsvurdering.resultat.tidspunkt), 'dd.MM.yyyy HH:ss')})</i>
+              <i>{format(new Date(vilkaarsvurdering.resultat.tidspunkt), 'dd.MM.yyyy HH:ss')}):</i>
             </p>
+            <Kommentar>
+              <p>{vilkaarsvurdering.resultat.kommentar}</p>
+            </Kommentar>
             <SlettWrapper onClick={slettVilkaarsvurderingResultat}>
               <Delete />
               <span className={'text'}>Slett vurdering</span>
@@ -173,6 +176,10 @@ const TekstWrapper = styled.div`
   margin-top: 30px;
   display: flex;
   font-size: 1.2em;
+`
+
+const Kommentar = styled.div`
+  color: gray;
 `
 
 const SlettWrapper = styled.div`

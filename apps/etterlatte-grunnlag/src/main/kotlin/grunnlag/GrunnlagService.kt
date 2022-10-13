@@ -2,7 +2,6 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
@@ -11,7 +10,6 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.vedlikehold.VedlikeholdService
 
 interface GrunnlagService {
-    fun hentGrunnlag(sak: Long): Grunnlag
     fun hentGrunnlagAvType(sak: Long, opplysningstype: Opplysningstyper): Grunnlagsopplysning<JsonNode>?
     fun lagreNyeOpplysninger(sak: Long, fnr: Foedselsnummer?, nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>)
     fun hentOpplysningsgrunnlag(sak: Long, persongalleri: Persongalleri): Opplysningsgrunnlag
@@ -19,16 +17,6 @@ interface GrunnlagService {
 
 class RealGrunnlagService(private val opplysningDao: OpplysningDao) : GrunnlagService, VedlikeholdService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
-
-    override fun hentGrunnlag(sak: Long): Grunnlag {
-        return opplysningDao.finnHendelserIGrunnlag(sak).let { hendelser ->
-            Grunnlag(
-                saksId = sak,
-                grunnlag = hendelser.map { it.opplysning },
-                hendelser.maxOfOrNull { it.hendelseNummer } ?: 0
-            )
-        }
-    }
 
     override fun hentOpplysningsgrunnlag(sak: Long, persongalleri: Persongalleri): Opplysningsgrunnlag {
         val grunnlag = opplysningDao.hentAlleGrunnlagForSak(sak)

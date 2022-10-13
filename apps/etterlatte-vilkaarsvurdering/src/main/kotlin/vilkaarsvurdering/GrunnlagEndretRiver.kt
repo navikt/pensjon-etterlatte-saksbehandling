@@ -23,7 +23,7 @@ class GrunnlagEndretRiver(
         // Kopi av river for eksisterende app
         River(rapidsConnection).apply {
             eventName("BEHANDLING:GRUNNLAGENDRET")
-            validate { it.requireKey(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey) }
+            validate { it.requireKey(BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key) }
             validate { it.requireKey("behandlingOpprettet") }
             validate { it.requireKey("behandlingId") }
             validate { it.requireKey("behandling") }

@@ -11,7 +11,6 @@ import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -179,14 +178,6 @@ internal class RapidTest {
         val packet = inspector.inspektør.message(1)
 
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET".toJson(), packet[eventNameKey].toJson())
-        Assertions.assertEquals(
-            Grunnlag(
-                saksId = 1,
-                grunnlag = listOf(nyOpplysning, personRolleOpplysning),
-                versjon = 2
-            ).toJson(),
-            packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey].toJson()
-        )
         Assertions.assertEquals(
             Opplysningsgrunnlag(
                 soeker = mapOf(

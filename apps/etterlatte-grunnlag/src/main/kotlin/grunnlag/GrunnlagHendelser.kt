@@ -35,7 +35,7 @@ class GrunnlagHendelser(
             validate { it.interestedIn("fnr") }
             validate { it.requireKey("opplysning") }
             validate { it.requireKey("sakId") }
-            validate { it.rejectKey(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey) }
+            validate { it.rejectKey(BehandlingGrunnlagEndretMedGrunnlag.grunnlagV2Key) }
         }.register(this)
     }
 

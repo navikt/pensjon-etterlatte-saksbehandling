@@ -39,17 +39,6 @@ internal class BehandlingEndretHendleseTest {
     }
 
     @Test
-    fun `skal legge paa grunnlag naar behandling er endret`() {
-        val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
-
-        assertEquals(1, inspector.size)
-        assertEquals(
-            2,
-            inspector.message(0).get(BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey).get("grunnlag").size()
-        )
-    }
-
-    @Test
     fun `legger paa grunnlagV2 naar behandling er endret`() {
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 

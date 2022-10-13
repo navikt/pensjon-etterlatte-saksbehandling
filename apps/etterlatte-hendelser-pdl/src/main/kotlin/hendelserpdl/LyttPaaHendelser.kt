@@ -56,10 +56,19 @@ class LyttPaaHendelser(
             with(personhendelse.forelderBarnRelasjon) {
                 postHendelser.forelderBarnRelasjon(
                     fnr = personnummer.folkeregisterident.value,
-                    relatertPersonsIdent = relatertPersonsIdent ?: null,
+                    relatertPersonsIdent = try {
+                        relatertPersonsIdent
+                    } catch (e: Exception) {
+                        null
+                    },
                     relatertPersonsRolle = relatertPersonsRolle,
                     minRolleForPerson = minRolleForPerson,
-                    relatertPersonUtenFolkeregisteridentifikator = relatertPersonUtenFolkeregisteridentifikator?.toString(), // ktlint-disable max-line-length
+                    relatertPersonUtenFolkeregisteridentifikator =
+                    try {
+                        relatertPersonUtenFolkeregisteridentifikator.toString()
+                    } catch (e: Exception) {
+                        null
+                    },
                     endringstype = endringstype
                 )
             }

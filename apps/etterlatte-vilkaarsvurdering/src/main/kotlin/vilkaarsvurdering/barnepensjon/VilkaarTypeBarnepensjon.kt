@@ -8,6 +8,7 @@ fun barnepensjonVilkaar() = listOf(
     formaal(),
     forutgaaendeMedlemskap(),
     fortsattMedlemskap(),
+    fortsattMedlemskapUnntaksbestemmelsene(),
     alderBarn(),
     doedsfallForelder(),
     yrkesskadeAvdoed()
@@ -37,7 +38,6 @@ private fun forutgaaendeMedlemskap() = Vilkaar(
     paragraf = Paragraf(
         paragraf = "§ 18-2",
         ledd = 1,
-        bokstav = "a",
         tittel = "Avdødes forutgående medlemskap",
         lenke = Kapittel18.PARAGRAF_18_2.lenke,
         lovtekst = "Det er et vilkår for rett til barnepensjon at a) den avdøde faren eller moren var medlem i " +
@@ -45,22 +45,9 @@ private fun forutgaaendeMedlemskap() = Vilkaar(
             "pensjon eller uføretrygd fra folketrygden de siste fem årene fram til dødsfallet."
     ),
     unntaksvilkaar = listOf(
-        forutgaaendeMedlemskapAvdoedMottokPensjonEllerUfoeretrygd(),
         forutgaaendeMedlemskapAvdoedIkkeFylt26Aar(),
         forutgaaendeMedlemskapAvdoedMedlemEtter16AarMedUnntakAvMaksimum5Aar(),
         forutgaaendeMedlemskapAvdoedHalvMinstepensjon()
-    )
-)
-
-private fun forutgaaendeMedlemskapAvdoedMottokPensjonEllerUfoeretrygd() = Vilkaar(
-    type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MOTTOK_PENSJON_ELLER_UFOERETRYGD,
-    paragraf = Paragraf(
-        paragraf = "§ 18-2",
-        ledd = 1,
-        bokstav = "b",
-        tittel = "Avdødemottok pensjon eller uføretrygd fra folketrygden de siste fem årene fram til dødsfallet",
-        lovtekst = "b) at den avdøde faren eller moren mottok pensjon eller uføretrygd fra folketrygden de siste fem " +
-            "årene fram til dødsfallet."
     )
 )
 
@@ -154,6 +141,18 @@ private fun fortsattMedlemskapMinst20AarBotid() = Vilkaar(
     )
 )
 
+private fun fortsattMedlemskapUnntaksbestemmelsene() = Vilkaar(
+    type = VilkaarType.FORTSATT_MEDLEMSKAP_UNNTAKSBESTEMMELSENE,
+    paragraf = Paragraf(
+        paragraf = "§ 18-3",
+        ledd = 3,
+        tittel = "Barnepensjon etter unntaksbestemmelsene i § 18-2 tredje, femte og sjette ledd beholdes bare så " +
+            "lenge barnet er medlem i trygden",
+        lovtekst = "Barnepensjon etter unntaksbestemmelsene i § 18-2 tredje, femte og sjette ledd beholdes bare så " +
+            "lenge barnet er medlem i trygden"
+    )
+)
+
 private fun alderBarn() = Vilkaar(
     type = VilkaarType.ALDER_BARN,
     paragraf = Paragraf(
@@ -201,6 +200,15 @@ private fun yrkesskadeAvdoed() = Vilkaar(
         ledd = 1,
         lenke = Kapittel18.PARAGRAF_18_11.lenke,
         tittel = "Dødsfall som skyldes yrkesskade",
-        lovtekst = ""
+        lovtekst = "Ved dødsfall som skyldes en skade eller sykdom som går inn under kapittel 13, ytes det " +
+            "barnepensjon etter følgende særbestemmelser:\n" +
+            "\n" +
+            "a.\tVilkåret i § 18-2 om forutgående medlemskap gjelder ikke.\n" +
+            "b.\tVilkåret i § 18-3 om fortsatt medlemskap gjelder ikke.\n" +
+            "c.\tBestemmelsene i § 18-5 om reduksjon på grunn av manglende trygdetid gjelder ikke.\n" +
+            "d.\tDersom barnet har utdanning som hovedbeskjeftigelse, ytes det pensjon inntil barnet fyller " +
+            "21 år.\n" +
+            "e.\tTil praktikanter og lærlinger ytes det barnepensjon inntil barnet fyller 21 år, dersom " +
+            "arbeidsinntekten etter fradrag for skatt er mindre enn grunnbeløpet pluss særtillegg for enslige"
     )
 )

@@ -1,16 +1,5 @@
 import { ISvar } from '../../../store/reducers/BehandlingReducer'
-import { VilkaarsvurderingResultat, VurderingsResultat } from '../../../shared/api/vilkaarsvurdering'
-
-export const svarTilResultat = (svar: ISvar) => {
-  switch (svar) {
-    case ISvar.JA:
-      return VurderingsResultat.OPPFYLT
-    case ISvar.NEI:
-      return VurderingsResultat.IKKE_OPPFYLT
-    case ISvar.IKKE_VURDERT:
-      return VurderingsResultat.IKKE_VURDERT
-  }
-}
+import { VilkaarsvurderingResultat } from '../../../shared/api/vilkaarsvurdering'
 
 export const svarTilTotalResultat = (svar: ISvar) => {
   switch (svar) {

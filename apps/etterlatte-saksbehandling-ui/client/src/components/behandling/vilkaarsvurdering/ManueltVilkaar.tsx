@@ -28,9 +28,12 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
 
   const status = (): VurderingsresultatOld => {
     if (vilkaar.vurdering) {
-      if (vilkaar.vurdering.resultat == VurderingsResultat.OPPFYLT) {
+      if (
+        vilkaar.hovedvilkaar.resultat == VurderingsResultat.OPPFYLT ||
+        vilkaar.unntaksvilkaar?.find((unntaksvilkaar) => unntaksvilkaar.resultat)
+      ) {
         return VurderingsresultatOld.OPPFYLT
-      } else if (vilkaar.vurdering.resultat == VurderingsResultat.IKKE_OPPFYLT) {
+      } else if (vilkaar.hovedvilkaar.resultat == VurderingsResultat.IKKE_OPPFYLT) {
         return VurderingsresultatOld.IKKE_OPPFYLT
       }
     }
@@ -39,22 +42,22 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
   }
 
   return (
-    <VilkaarBorder id={vilkaar.type.toString()}>
+    <VilkaarBorder id={vilkaar.hovedvilkaar.type}>
       <Innhold>
         <VilkaarWrapper>
           <VilkaarInfobokser>
             <VilkaarColumn>
               <Title>
                 <StatusIcon status={status()} noLeftPadding />
-                {vilkaar.paragraf.tittel}
+                {vilkaar.hovedvilkaar.paragraf.tittel}
               </Title>
 
               <Lovtekst>
                 <p>
-                  <a href={vilkaar.paragraf.lenke} target="_blank" rel="noopener noreferrer">
-                    {vilkaar.paragraf.paragraf}
+                  <a href={vilkaar.hovedvilkaar.paragraf.lenke} target="_blank" rel="noopener noreferrer">
+                    {vilkaar.hovedvilkaar.paragraf.paragraf}
                   </a>
-                  : {vilkaar.paragraf.lovtekst}
+                  : {vilkaar.hovedvilkaar.paragraf.lovtekst}
                 </p>
               </Lovtekst>
             </VilkaarColumn>

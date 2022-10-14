@@ -15,7 +15,7 @@ const teksterForGrunnlagshendelser: Record<GrunnlagsendringsType, string> = {
   UTFLYTTING: 'Utflytting',
 }
 
-function VisUtflytting({ utflytting }: { utflytting: Utflyttingshendelse }) {
+const VisUtflytting = ({ utflytting }: { utflytting: Utflyttingshendelse }) => {
   return (
     <p>
       {`${utflytting.fnr} har flyttet ut til ${utflytting.tilflyttingsLand}
@@ -25,22 +25,15 @@ function VisUtflytting({ utflytting }: { utflytting: Utflyttingshendelse }) {
   )
 }
 
-function formaterKanskjeStringDato(dato?: string): string {
-  if (dato) {
-    return formaterStringDato(dato)
-  }
-  return 'Ukjent dato'
-}
+const formaterKanskjeStringDato = (dato?: string): string => (dato ? formaterStringDato(dato) : 'Ukjent dato')
 
-function VisDoedshendelse({ doedshendelse }: { doedshendelse: Doedshendelse }) {
-  return (
-    <p>
-      {doedshendelse.avdoedFnr} døde {formaterKanskjeStringDato(doedshendelse.doedsdato)}
-    </p>
-  )
-}
+const VisDoedshendelse = ({ doedshendelse }: { doedshendelse: Doedshendelse }) => (
+  <p>
+    {doedshendelse.avdoedFnr} døde {formaterKanskjeStringDato(doedshendelse.doedsdato)}
+  </p>
+)
 
-function FormaterHendelseData(props: { data?: Grunnlagsinformasjon }) {
+const FormaterHendelseData = (props: { data?: Grunnlagsinformasjon }) => {
   switch (props.data?.type) {
     case 'UTFLYTTING':
       return <VisUtflytting utflytting={props.data.hendelse} />
@@ -53,32 +46,30 @@ function FormaterHendelseData(props: { data?: Grunnlagsinformasjon }) {
   }
 }
 
-function TabellForHendelser({ hendelser }: { hendelser: Grunnlagsendringshendelse[] }) {
-  return (
-    <Table>
-      <Table.Header>
-        <Table.Row>
-          <Table.HeaderCell>Type</Table.HeaderCell>
-          <Table.HeaderCell>Dato</Table.HeaderCell>
-          <Table.HeaderCell>Ekstra data</Table.HeaderCell>
+const TabellForHendelser = ({ hendelser }: { hendelser: Grunnlagsendringshendelse[] }) => (
+  <Table>
+    <Table.Header>
+      <Table.Row>
+        <Table.HeaderCell>Type</Table.HeaderCell>
+        <Table.HeaderCell>Dato</Table.HeaderCell>
+        <Table.HeaderCell>Ekstra data</Table.HeaderCell>
+      </Table.Row>
+    </Table.Header>
+    <Table.Body>
+      {hendelser.map((hendelse) => (
+        <Table.Row key={hendelse.id}>
+          <Table.DataCell>{teksterForGrunnlagshendelser[hendelse.type]}</Table.DataCell>
+          <Table.DataCell>{formaterStringDato(hendelse.opprettet)}</Table.DataCell>
+          <Table.DataCell>
+            <FormaterHendelseData data={hendelse.data} />
+          </Table.DataCell>
         </Table.Row>
-      </Table.Header>
-      <Table.Body>
-        {hendelser.map((hendelse) => (
-          <Table.Row key={hendelse.id}>
-            <Table.DataCell>{teksterForGrunnlagshendelser[hendelse.type]}</Table.DataCell>
-            <Table.DataCell>{formaterStringDato(hendelse.opprettet)}</Table.DataCell>
-            <Table.DataCell>
-              <FormaterHendelseData data={hendelse.data} />
-            </Table.DataCell>
-          </Table.Row>
-        ))}
-      </Table.Body>
-    </Table>
-  )
-}
+      ))}
+    </Table.Body>
+  </Table>
+)
 
-export function Grunnlagshendelser({ hendelser }: { hendelser: Grunnlagsendringshendelse[] }) {
+export const Grunnlagshendelser = ({ hendelser }: { hendelser: Grunnlagsendringshendelse[] }) => {
   const uhaandterteHendelser = hendelser.filter((hendelse) =>
     ['IKKE_VURDERT', 'GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING'].includes(hendelse.status)
   )

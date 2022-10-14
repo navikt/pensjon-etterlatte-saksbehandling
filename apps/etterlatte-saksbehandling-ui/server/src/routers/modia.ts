@@ -65,15 +65,12 @@ const hentEnhet = async (req: Request, bearerToken: string): Promise<IEnhet[]> =
     if (bearerToken) {
         try {
             const oboToken = await getOboToken( req.headers.authorization, 'https://graph.microsoft.com/.default');
-            // hent bruker fra graph.microsoft.com
             const query = "officeLocation";
 
             const data = await fetch(`https://graph.microsoft.com/v1.0/me?$select=${query}`, { headers: {"Authorization" : `Bearer ${oboToken}`} })
               .then(response => response.json())
 
             const enhet = lagEnhetFraString(data.officeLocation)
-
-            logger.info("-------- Enhet --------", enhet)
 
             return [enhet]
         } catch (error) {

@@ -43,8 +43,8 @@ export interface IBrev {
 export const Brev = () => {
   const { behandlingId } = useParams()
   const { soeknadMottattDato, kommerSoekerTilgode, behandlingType } = useAppSelector(
-    (state) => state.behandlingReducer.behandling!!
-  ) // TODO ai: fjern !!
+    (state) => state.behandlingReducer.behandling
+  )
   const fnr = kommerSoekerTilgode?.familieforhold?.soeker?.fnr || ''
 
   const [brevListe, setBrevListe] = useState<IBrev[]>([])
@@ -134,7 +134,7 @@ export const Brev = () => {
             Brev-oversikt
           </Heading>
           <div className="details">
-            {<BehandlingsType type={behandlingType} />}
+            <BehandlingsType type={behandlingType} />
             <SaksType type={ISaksType.BARNEPENSJON} />
           </div>
         </HeadingWrapper>

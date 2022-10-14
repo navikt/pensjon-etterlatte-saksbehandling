@@ -23,7 +23,7 @@ interface SoeskenMedIBeregning {
 const Beregningsgrunnlag = () => {
   const { next } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)!! // TODO ai: fjern !!
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const [isLoading, setIsLoading] = useState(false)
 

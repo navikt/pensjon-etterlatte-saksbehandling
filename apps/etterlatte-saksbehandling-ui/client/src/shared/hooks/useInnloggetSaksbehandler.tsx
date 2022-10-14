@@ -11,7 +11,9 @@ const useInnloggetSaksbehandler = () => {
 
   useEffect(() => {
     hentInnloggetSaksbehandler().then((response: IApiResponse<ISaksbehandler>) => {
-      dispatch(setSaksbehandler(response.data!!)) // TODO ai: fjern !!
+      if (response.data) {
+        dispatch(setSaksbehandler(response.data))
+      }
       setLoaded(true)
     })
   }, [])

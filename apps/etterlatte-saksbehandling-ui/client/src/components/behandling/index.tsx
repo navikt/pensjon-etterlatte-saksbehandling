@@ -16,7 +16,6 @@ import { addBehandling } from '../../store/reducers/BehandlingReducer'
 
 export const Behandling = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
-  console.log(behandling)
   const dispatch = useAppDispatch()
   const match = useMatch('/behandling/:behandlingId/*')
   const { behandlingRoutes } = useBehandlingRoutes()

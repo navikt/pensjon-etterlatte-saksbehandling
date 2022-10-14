@@ -13,7 +13,7 @@ import { IBehandlingsType } from '../../../store/reducers/BehandlingReducer'
 import { useAppSelector } from '../../../store/Store'
 
 export const Beregne = () => {
-  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)!! // todo ai: fjern !!
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
 
   const virkningstidspunkt = formaterStringDato(behandling.virkningstidspunkt)
   const behandles = hentBehandlesFraStatus(behandling?.status)

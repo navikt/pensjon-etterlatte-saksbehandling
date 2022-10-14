@@ -53,22 +53,14 @@ class LyttPaaHendelser(
                 pdlService.hentFolkeregisterIdentifikator(personhendelse.personidenter.first())
             }
             val endringstype = Endringstype.valueOf(personhendelse.endringstype.name)
-            with(personhendelse.forelderBarnRelasjon) {
+            personhendelse.forelderBarnRelasjon.let {
                 postHendelser.forelderBarnRelasjon(
                     fnr = personnummer.folkeregisterident.value,
-                    relatertPersonsIdent = try {
-                        relatertPersonsIdent
-                    } catch (e: Exception) {
-                        null
-                    },
-                    relatertPersonsRolle = relatertPersonsRolle,
-                    minRolleForPerson = minRolleForPerson,
+                    relatertPersonsIdent = it?.relatertPersonsIdent,
+                    relatertPersonsRolle = it?.relatertPersonsRolle,
+                    minRolleForPerson = it?.minRolleForPerson,
                     relatertPersonUtenFolkeregisteridentifikator =
-                    try {
-                        relatertPersonUtenFolkeregisteridentifikator.toString()
-                    } catch (e: Exception) {
-                        null
-                    },
+                    it?.relatertPersonUtenFolkeregisteridentifikator?.toString(),
                     endringstype = endringstype
                 )
             }
@@ -128,17 +120,15 @@ class LyttPaaHendelser(
 
     private fun Personhendelse.loggHendelse(hendelseType: String) {
         log.info(
-            "$hendelseType mottatt for : $personidenter med endringstype " +
-                "$endringstype. Hendelse: $this"
+            "$hendelseType mottatt for : $personidenter med endringstype $endringstype. Hendelse: $this"
         )
     }
 
     private fun Personhendelse.loggFeilVedHaandtering(hendelseType: String, e: Exception) {
         log.error(
-            "kunne ikke haandtere $hendelseType " +
-                "for ${personidenter.first()}. " +
-                "Dette har sannsynligvis med aa gjoere at personhendelsen ser annerledes ut enn forventet, " +
-                "eller at det var problem med henting av folkeregisteridentifikatoren fra PDL",
+            "kunne ikke haandtere $hendelseType " + "for ${personidenter.first()}. Dette skyldes sannsynligvis" +
+                "at personhendelsen ser annerledes ut enn forventet, eller at det var problem med henting av " +
+                "folkeregisteridentifikatoren fra PDL",
             e
         )
     }

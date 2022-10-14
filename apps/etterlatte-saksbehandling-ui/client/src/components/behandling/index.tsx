@@ -17,8 +17,8 @@ export const Behandling = () => {
   const ctx = useContext(AppContext)
   const match = useMatch('/behandling/:behandlingId/*')
   const { behandlingRoutes } = useBehandlingRoutes()
-  const [isLoading, setIsLoading] = useState<boolean>(true)
   const behandlingId = ctx.state.behandlingReducer?.id
+  const [isLoading, setIsLoading] = useState<boolean>(behandlingId === undefined)
 
   useEffect(() => {
     const behandlingIdFraURL = match?.params.behandlingId
@@ -37,7 +37,6 @@ export const Behandling = () => {
       } else {
         ctx.dispatch(resetBehandlingAction())
       }
-
       setIsLoading(false)
     }
   }, [match?.params.behandlingId, behandlingId])

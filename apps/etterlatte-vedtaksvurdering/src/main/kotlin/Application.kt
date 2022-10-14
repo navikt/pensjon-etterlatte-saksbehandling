@@ -1,42 +1,47 @@
 package no.nav.etterlatte // ktlint-disable filename
 
-import no.nav.etterlatte.database.DataSourceBuilder
-import no.nav.etterlatte.database.VedtaksvurderingRepository
-import no.nav.etterlatte.rivers.AttesterVedtak
-import no.nav.etterlatte.rivers.FattVedtak
-import no.nav.etterlatte.rivers.LagreAvkorting
-import no.nav.etterlatte.rivers.LagreBeregningsresultat
-import no.nav.etterlatte.rivers.LagreIverksattVedtak
-import no.nav.etterlatte.rivers.LagreKommerSoekerTilgodeResultat
-import no.nav.etterlatte.rivers.LagreVilkaarsresultat
-import no.nav.etterlatte.rivers.UnderkjennVedtak
+import no.nav.etterlatte.vedtaksvurdering.database.DataSourceBuilder
+import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
+import no.nav.etterlatte.vedtaksvurdering.rivers.AttesterVedtak
+import no.nav.etterlatte.vedtaksvurdering.rivers.FattVedtak
+import no.nav.etterlatte.vedtaksvurdering.rivers.LagreAvkorting
+import no.nav.etterlatte.vedtaksvurdering.rivers.LagreBeregningsresultat
+import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtak
+import no.nav.etterlatte.vedtaksvurdering.rivers.LagreKommerSoekerTilgodeResultat
+import no.nav.etterlatte.vedtaksvurdering.rivers.LagreVilkaarsresultat
+import no.nav.etterlatte.vedtaksvurdering.rivers.UnderkjennVedtak
 import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 
 fun main() {
-    val ds = DataSourceBuilder(System.getenv())
+    app()
+}
+
+fun app(env: Map<String, String> = System.getenv()) {
+    val localDev = env["LOCAL_DEV"].toBoolean()
+    val ds = DataSourceBuilder(env)
     ds.migrate()
 
     val vedtakRepo = VedtaksvurderingRepository.using(ds.dataSource)
-
     val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
 
-    System.getenv().toMutableMap().apply {
-        put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
-    }.also { env ->
-
-        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env)).withKtorModule {
-            module(vedtaksvurderingService)
-        }.build().apply {
-            LagreAvkorting(this, vedtaksvurderingService)
-            LagreVilkaarsresultat(this, vedtaksvurderingService)
-            LagreBeregningsresultat(this, vedtaksvurderingService)
-            LagreKommerSoekerTilgodeResultat(this, vedtaksvurderingService)
-            FattVedtak(this, vedtaksvurderingService)
-            AttesterVedtak(this, vedtaksvurderingService)
-            UnderkjennVedtak(this, vedtaksvurderingService)
-            LagreIverksattVedtak(this, vedtaksvurderingService)
-            registrerVedlikeholdsriver(vedtaksvurderingService)
-        }.start()
-    }
+    RapidApplication.Builder(
+        RapidApplication.RapidApplicationConfig.fromEnv(
+            env.toMutableMap().apply {
+                put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
+            }
+        )
+    ).withKtorModule {
+        module(vedtaksvurderingService, localDev)
+    }.build().apply {
+        LagreAvkorting(this, vedtaksvurderingService)
+        LagreVilkaarsresultat(this, vedtaksvurderingService)
+        LagreBeregningsresultat(this, vedtaksvurderingService)
+        LagreKommerSoekerTilgodeResultat(this, vedtaksvurderingService)
+        FattVedtak(this, vedtaksvurderingService)
+        AttesterVedtak(this, vedtaksvurderingService)
+        UnderkjennVedtak(this, vedtaksvurderingService)
+        LagreIverksattVedtak(this, vedtaksvurderingService)
+        registrerVedlikeholdsriver(vedtaksvurderingService)
+    }.start()
 }

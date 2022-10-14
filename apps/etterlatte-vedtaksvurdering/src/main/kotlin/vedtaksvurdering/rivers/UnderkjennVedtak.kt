@@ -1,4 +1,4 @@
-package no.nav.etterlatte.rivers
+package no.nav.etterlatte.vedtaksvurdering.rivers
 
 import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.logging.withLogContext

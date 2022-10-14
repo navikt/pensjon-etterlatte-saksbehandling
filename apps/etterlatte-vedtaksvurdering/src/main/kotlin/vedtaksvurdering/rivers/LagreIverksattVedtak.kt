@@ -1,4 +1,4 @@
-package no.nav.etterlatte.rivers
+package no.nav.etterlatte.vedtaksvurdering.rivers
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.VedtaksvurderingService

@@ -1,11 +1,12 @@
-package no.nav.etterlatte
+package vedtaksvurdering.rivers
 
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.etterlatte.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-import no.nav.etterlatte.rivers.LagreKommerSoekerTilgodeResultat
+import no.nav.etterlatte.vedtaksvurdering.rivers.LagreKommerSoekerTilgodeResultat
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

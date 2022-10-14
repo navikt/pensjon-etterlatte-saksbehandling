@@ -1,4 +1,4 @@
-package no.nav.etterlatte.database
+package no.nav.etterlatte.vedtaksvurdering.database
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.domene.vedtak.Behandling
@@ -112,7 +112,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) {
     ) {
         logger.info("Lagrer iverksatt vedtak")
         connection.use {
-            val statement = it.prepareStatement(Queries.lagreIverksattVedtak).run {
+            it.prepareStatement(Queries.lagreIverksattVedtak).run {
                 setString(1, VedtakStatus.IVERKSATT.name)
                 setObject(2, behandlingsId)
                 require(executeUpdate() == 1)

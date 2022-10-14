@@ -27,7 +27,7 @@ import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
 import java.util.*
 
-fun Application.module(vedtaksvurderingService: VedtaksvurderingService) {
+fun Application.module(vedtaksvurderingService: VedtaksvurderingService, localDev: Boolean = false) {
     install(ContentNegotiation) {
         jackson {
             registerModule(JavaTimeModule())
@@ -50,13 +50,26 @@ fun Application.module(vedtaksvurderingService: VedtaksvurderingService) {
         }
     }
 
+    if (localDev) {
+        routingWithouthTokenValidation(vedtaksvurderingService)
+    } else {
+        routingWithTokenValidation(vedtaksvurderingService)
+    }
+}
+fun Application.routingWithouthTokenValidation(vedtaksvurderingService: VedtaksvurderingService) {
+    routing {
+        route("api") {
+            Api(vedtaksvurderingService)
+        }
+    }
+}
+fun Application.routingWithTokenValidation(vedtaksvurderingService: VedtaksvurderingService) {
     install(Authentication) {
         tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
     }
-
     routing {
-        authenticate {
-            route("api") {
+        route("api") {
+            authenticate {
                 Api(vedtaksvurderingService)
             }
         }

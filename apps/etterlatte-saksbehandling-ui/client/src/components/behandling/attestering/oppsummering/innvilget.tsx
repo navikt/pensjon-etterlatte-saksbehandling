@@ -1,9 +1,8 @@
 import { IBehandlingInfo } from '../../SideMeny/types'
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
-import { useContext } from 'react'
-import { AppContext } from '../../../../store/AppContext'
 import { formaterDato, formaterEnumTilLesbarString, formaterStringDato } from '../../../../utils/formattering'
 import { useVedtaksResultat, VedtakResultat } from '../../useVedtaksResultat'
+import { useAppSelector } from '../../../../store/Store'
 
 function innvilgelsestekst(vedtaksresultat: VedtakResultat): string {
   switch (vedtaksresultat) {
@@ -27,7 +26,7 @@ function Resultat({ vedtaksresultat }: { vedtaksresultat: VedtakResultat }) {
 }
 
 export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
-  const innloggetId = useContext(AppContext).state.saksbehandlerReducer.ident
+  const innloggetId = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler?.ident)
   const virkningsdato = behandlingsInfo.virkningsdato ? formaterStringDato(behandlingsInfo.virkningsdato) : '-'
   const vedtaksResultat = useVedtaksResultat()
   const attestertDato = behandlingsInfo.datoAttestert

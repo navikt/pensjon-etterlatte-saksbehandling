@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { useAppSelector } from '../../../../store/Store'
 import { IBehandlingStatus } from '../../../../store/reducers/BehandlingReducer'
 import {
   formaterEnumTilLesbarString,
@@ -6,11 +7,9 @@ import {
   formaterStringTidspunkt,
 } from '../../../../utils/formattering'
 import { IBehandlingInfo } from '../../SideMeny/types'
-import { useContext } from 'react'
-import { AppContext } from '../../../../store/AppContext'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
-  const innloggetSaksbehandler = useContext(AppContext).state.saksbehandlerReducer.ident
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.ident)
 
   const hentStatus = () => {
     switch (behandlingsInfo.status) {

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { Button, Heading } from '@navikt/ds-react'
 import { initialOppgaveFelter, IOppgaveFelter } from './typer/oppgavefelter'
 import '../../App.css'
@@ -7,7 +7,7 @@ import 'react-datepicker/dist/react-datepicker.css'
 import '../../index.css'
 import { GlobalFilter } from './filtere/GlobalFilter'
 import ColumnFilters from './filtere/ColumnFilters'
-import { AppContext, IAppContext } from '../../store/AppContext'
+import { useAppSelector } from '../../store/Store'
 
 type Props = {
   oppgaveFelter: IOppgaveFelter
@@ -18,7 +18,7 @@ type Props = {
 
 const OppgaveHeader: React.FC<Props> = ({ oppgaveFelter, setOppgaveFelter, setGlobalFilter, henterOppgaver }) => {
   const [resetGlobalInput, setResetGlobalInput] = useState<boolean>(false)
-  const saksbehandlerNavn = useContext<IAppContext>(AppContext).state.saksbehandlerReducer.navn
+  const saksbehandlerNavn = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.navn)
 
   return (
     <>

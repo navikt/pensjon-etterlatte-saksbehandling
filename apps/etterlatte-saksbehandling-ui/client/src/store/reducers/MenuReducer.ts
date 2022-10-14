@@ -1,21 +1,14 @@
-import { IAction } from '../AppContext'
+import { createReducer, createAction } from '@reduxjs/toolkit'
+
+export const toggle = createAction('menu/toggle')
 
 export interface IMenuReducer {
   open: boolean
 }
+const initialState: IMenuReducer = { open: false }
 
-export const menuReducerInitialState: IMenuReducer = {
-  open: false,
-}
-
-export const menuReducer = (state: IMenuReducer, action: IAction) => {
-  switch (action.type) {
-    case 'toggle':
-      return {
-        ...state,
-        open: !state.open,
-      }
-    default:
-      return state
-  }
-}
+export const menuReducer = createReducer(initialState, (builder) => {
+  builder.addCase(toggle, (state) => {
+    state.open = !state.open
+  })
+})

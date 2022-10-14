@@ -4,17 +4,17 @@ import { Sammendrag } from './sammendrag'
 import styled from 'styled-components'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { BeregningModal } from '../handlinger/sendTilAttesteringModal'
-import { useContext } from 'react'
-import { AppContext } from '../../../store/AppContext'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import BrevModal from './brev-modal'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { formaterStringDato } from '../../../utils/formattering'
 import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResultat'
 import { IBehandlingsType } from '../../../store/reducers/BehandlingReducer'
+import { useAppSelector } from '../../../store/Store'
 
 export const Beregne = () => {
-  const behandling = useContext(AppContext).state.behandlingReducer
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+
   const virkningstidspunkt = formaterStringDato(behandling.virkningstidspunkt)
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const vedtaksresultat = useVedtaksResultat()

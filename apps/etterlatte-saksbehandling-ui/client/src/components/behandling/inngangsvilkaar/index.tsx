@@ -1,6 +1,5 @@
 import { Content, Header } from '../../../shared/styled'
-import React, { useContext, useEffect } from 'react'
-import { AppContext } from '../../../store/AppContext'
+import { useEffect } from 'react'
 import { AlderBarn } from './vilkaar/AlderBarn'
 import { DoedsFallForelder } from './vilkaar/DoedsfallForelder'
 import { IBehandlingsType, VilkaarsType } from '../../../store/reducers/BehandlingReducer'
@@ -14,23 +13,24 @@ import { hentBehandlesFraStatus } from '../felles/utils'
 import { Formaal } from './vilkaar/Formaal'
 import styled from 'styled-components'
 import { KanYtelsenBehandles } from './vilkaar/KanYtelsenBehandles'
+import { useAppSelector } from '../../../store/Store'
 
 const TekstMedMaksbredde = styled.p`
   max-width: 400px;
 `
 
 export const Inngangsvilkaar = () => {
-  const ctx = useContext(AppContext)
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const location = useLocation()
 
-  const behandlingstype = ctx.state.behandlingReducer.behandlingType
+  const behandlingstype = behandling.behandlingType
   const erFoerstegangsbehandling = behandlingstype === IBehandlingsType.FØRSTEGANGSBEHANDLING
   const erManueltOpphoer = behandlingstype === IBehandlingsType.MANUELT_OPPHOER
 
   const erRevurdering = behandlingstype === IBehandlingsType.REVURDERING
-  const virkningstidspunkt = ctx.state.behandlingReducer.virkningstidspunkt
-  const vilkaarsproving = ctx.state.behandlingReducer.vilkårsprøving
-  const behandles = hentBehandlesFraStatus(ctx.state.behandlingReducer?.status)
+  const virkningstidspunkt = behandling.virkningstidspunkt
+  const vilkaarsproving = behandling.vilkårsprøving
+  const behandles = hentBehandlesFraStatus(behandling?.status)
 
   useEffect(() => {
     const hash = location.hash.slice(1)
@@ -95,11 +95,11 @@ export const Inngangsvilkaar = () => {
         />
       ) : (
         <Virkningstidspunkt
-          behandlingType={ctx.state.behandlingReducer.behandlingType}
+          behandlingType={behandling.behandlingType}
           id="virkningstidspunkt"
           vilkaar={vilkaar.find((vilkaar) => vilkaar.navn === VilkaarsType.SOEKER_ER_UNDER_20)}
           virkningsdato={virkningstidspunkt}
-          mottattdato={ctx.state.behandlingReducer.soeknadMottattDato}
+          mottattdato={behandling.soeknadMottattDato}
         />
       )}
       <VilkaarResultat id="vilkaarResultat" dato={virkningstidspunkt} behandles={behandles} />

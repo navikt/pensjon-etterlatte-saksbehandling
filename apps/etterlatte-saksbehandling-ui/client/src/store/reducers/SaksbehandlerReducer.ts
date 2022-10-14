@@ -1,12 +1,14 @@
-import { IAction } from '../AppContext'
+import { createAction, createReducer } from '@reduxjs/toolkit'
 
-export const saksbehandlerReducerInitialState: ISaksbehandler = {
-  ident: '',
-  navn: '',
-  fornavn: '',
-  etternavn: '',
-  enheter: [],
-  rolle: '', //test
+export const initialState: SaksbehandlerReducer = {
+  saksbehandler: {
+    ident: '',
+    navn: '',
+    fornavn: '',
+    etternavn: '',
+    enheter: [],
+    rolle: '', //test
+  },
 }
 
 interface IEnhet {
@@ -28,19 +30,12 @@ export interface ISaksbehandler {
   rolle: string //test
 }
 
-export const saksbehandlerReducer = (state: ISaksbehandler, action: IAction): ISaksbehandler => {
-  switch (action.type) {
-    case 'setSaksbehandler':
-      return {
-        ...state,
-        ident: action.data.ident,
-        navn: action.data.navn,
-        fornavn: action.data.fornavn,
-        etternavn: action.data.etternavn,
-        enheter: action.data.enheter,
-        rolle: action.data.rolle, //test
-      }
-    default:
-      return state
-  }
+export const setSaksbehandler = createAction<ISaksbehandler>('saksbehandler/set')
+export interface SaksbehandlerReducer {
+  saksbehandler: ISaksbehandler
 }
+export const saksbehandlerReducer = createReducer(initialState, (builder) => {
+  builder.addCase(setSaksbehandler, (state, action) => {
+    state.saksbehandler = action.payload
+  })
+})

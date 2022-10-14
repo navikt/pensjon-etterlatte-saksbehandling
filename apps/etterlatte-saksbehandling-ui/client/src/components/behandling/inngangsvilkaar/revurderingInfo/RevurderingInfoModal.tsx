@@ -1,6 +1,5 @@
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AppContext } from '../../../../store/AppContext'
 import {
   IBehandlingStatus,
   IBehandlingsType,
@@ -16,16 +15,17 @@ import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import { KildeDatoOpplysning } from '../vilkaar/KildeDatoOpplysning'
 import styled from 'styled-components'
 import { formaterStringDato } from '../../../../utils/formattering'
+import { useAppSelector } from '../../../../store/Store'
 
 const useGrunnlagForRevurdering = (): RevurderingOpplysningType[] => {
   // Enn så lenge er dette hardkodet til å hente mottaker av ytelsens dødsdato fra vilkåret formaal.
   // Dette bør heller være basert på revurderingsårsak fra behandling
-  const { state } = useContext(AppContext)
-  const vilkaar = state.behandlingReducer?.vilkårsprøving?.vilkaar?.find(
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+  const vilkaar = behandling.vilkårsprøving?.vilkaar?.find(
     (vilkaar) => vilkaar.navn === VilkaarsType.FORMAAL_FOR_YTELSEN
   )
 
-  if (state.behandlingReducer.behandlingType !== IBehandlingsType.REVURDERING) {
+  if (behandling.behandlingType !== IBehandlingsType.REVURDERING) {
     return []
   }
   const soekerDoedsdato = hentKriterierMedOpplysning(

@@ -18,11 +18,10 @@ import { VilkaarProps } from '../types'
 import { vilkaarErOppfylt } from './tekstUtils'
 import { VilkaarVurderingsliste } from './VilkaarVurderingsliste'
 import { KildeDatoOpplysning, KildeDatoVilkaar } from './KildeDatoOpplysning'
-import { useContext } from 'react'
-import { AppContext } from '../../../../store/AppContext'
+import { useAppSelector } from '../../../../store/Store'
 
 export const DoedsFallForelder = (props: VilkaarProps) => {
-  const ctx = useContext(AppContext)
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const vilkaar = props.vilkaar
 
   const avdoedDoedsdato: any = hentKriterierMedOpplysning(
@@ -40,7 +39,7 @@ export const DoedsFallForelder = (props: VilkaarProps) => {
     (forelder: IPerson) => forelder === avdoedDoedsdato?.opplysning.foedselsnummer
   )
 
-  const avdoedPersoninfo = ctx.state.behandlingReducer.kommerSoekerTilgode?.familieforhold.avdoed
+  const avdoedPersoninfo = behandling.kommerSoekerTilgode?.familieforhold.avdoed
 
   const avdoedNavn = avdoedForelderFnr ? (
     <div>{avdoedPersoninfo?.navn}</div>

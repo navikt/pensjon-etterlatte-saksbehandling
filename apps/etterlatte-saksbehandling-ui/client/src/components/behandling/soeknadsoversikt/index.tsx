@@ -1,5 +1,3 @@
-import { useContext } from 'react'
-import { AppContext } from '../../../store/AppContext'
 import { Content, ContentHeader } from '../../../shared/styled'
 import { SoeknadOversikt } from './soeknadoversikt/Soeknadsoversikt'
 import { Familieforhold } from './familieforhold/Familieforhold'
@@ -13,10 +11,11 @@ import { Start } from '../handlinger/start'
 import { Soeknadsdato } from './soeknadoversikt/Soeknadsdato'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { hentBehandlesFraStatus } from '../felles/utils'
+import { useAppSelector } from '../../../store/Store'
 
 export const Soeknadsoversikt = () => {
-  const behandling = useContext(AppContext).state.behandlingReducer
-  const behandles = hentBehandlesFraStatus(behandling?.status)
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+  const behandles = hentBehandlesFraStatus(behandling.status)
 
   return (
     <Content>

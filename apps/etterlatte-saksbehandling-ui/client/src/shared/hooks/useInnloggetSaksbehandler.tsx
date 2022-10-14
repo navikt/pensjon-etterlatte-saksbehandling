@@ -1,17 +1,19 @@
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ISaksbehandler } from '../../store/reducers/SaksbehandlerReducer'
-import { AppContext } from '../../store/AppContext'
 import { hentInnloggetSaksbehandler } from '../api/user'
 import { IApiResponse } from '../api/types'
+import { useAppDispatch } from '../../store/Store'
+import { setSaksbehandler } from '../../store/reducers/SaksbehandlerReducer'
 
 const useInnloggetSaksbehandler = () => {
-  const { dispatch } = useContext(AppContext)
-
+  const dispatch = useAppDispatch()
   const [loaded, setLoaded] = useState<boolean>(false)
 
   useEffect(() => {
     hentInnloggetSaksbehandler().then((response: IApiResponse<ISaksbehandler>) => {
-      dispatch({ type: 'setSaksbehandler', data: response.data })
+      if (response.data) {
+        dispatch(setSaksbehandler(response.data))
+      }
       setLoaded(true)
     })
   }, [])

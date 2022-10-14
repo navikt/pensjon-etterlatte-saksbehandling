@@ -9,8 +9,7 @@ export const vurderVilkaar = async (
   request: VurderVilkaarRequest
 ): Promise<ApiResponse<Vilkaarsvurdering>> =>
   apiClient.post(`/vilkaarsvurdering/${behandlingId}`, {
-    type: request.type,
-    resultat: request.resultat,
+    ...request,
     kommentar: request.kommentar,
   })
 
@@ -36,8 +35,8 @@ export interface Vilkaarsvurdering {
 }
 
 export interface Vilkaar {
-  type: string
-  paragraf: Paragraf
+  hovedvilkaar: Hovedvilkaar
+  unntaksvilkaar?: Unntaksvilkaar[]
   vurdering?: VurdertResultat
   grunnlag: Vilkaarsgrunnlag<any>[]
 }
@@ -57,8 +56,19 @@ export interface Kilde {
   type: KildeType
 }
 
+export interface Hovedvilkaar {
+  type: string
+  paragraf: Paragraf
+  resultat?: VurderingsResultat
+}
+
+export interface Unntaksvilkaar {
+  type: string
+  paragraf: Paragraf
+  resultat?: VurderingsResultat
+}
+
 export interface VurdertResultat {
-  resultat: VurderingsResultat
   kommentar?: string
   tidspunkt: Date
   saksbehandler: string
@@ -83,8 +93,14 @@ export enum VilkaarsvurderingResultat {
 }
 
 export interface VurderVilkaarRequest {
-  type: string
-  resultat: VurderingsResultat
+  hovedvilkaar: {
+    type: string
+    resultat: VurderingsResultat
+  }
+  unntaksvilkaar?: {
+    type: string
+    resultat: VurderingsResultat
+  }
   kommentar?: string
 }
 

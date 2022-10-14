@@ -82,85 +82,163 @@ internal class VilkaarsvurderingRoutesTest {
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(behandlingId, vilkaarsvurdering.behandlingId)
-            assertEquals(VilkaarType.FORMAAL, vilkaar.type)
-            assertEquals("§ 18-1", vilkaar.paragraf.paragraf)
-            assertEquals("Formål", vilkaar.paragraf.tittel)
+            assertEquals(VilkaarType.FORMAAL, vilkaar.hovedvilkaar.type)
+            assertEquals("§ 18-1", vilkaar.hovedvilkaar.paragraf.paragraf)
+            assertEquals("Formål", vilkaar.hovedvilkaar.paragraf.tittel)
             assertEquals(
                 "Formålet med barnepensjon er å sikre inntekt for barn når en av foreldrene eller begge er døde.",
-                vilkaar.paragraf.lovtekst
+                vilkaar.hovedvilkaar.paragraf.lovtekst
             )
-            assertEquals("https://lovdata.no/lov/1997-02-28-19/%C2%A718-1", vilkaar.paragraf.lenke)
+            assertEquals("https://lovdata.no/lov/1997-02-28-19/%C2%A718-1", vilkaar.hovedvilkaar.paragraf.lenke)
             assertNull(vilkaar.vurdering)
         }
     }
 
     @Test
-    fun `skal oppdatere en vilkaarsvurdering med et vurdert vilkaar`() {
+    fun `skal oppdatere en vilkaarsvurdering med et vurdert hovedvilkaar`() {
         testApplication {
             application { restModule(applicationContext) }
 
             opprettVilkaarsvurdering()
 
-            val vurdertResultatDto = VurdertResultatDto(
-                type = VilkaarType.FORMAAL,
-                resultat = Utfall.OPPFYLT,
+            val vurdertVilkaarDto = VurdertVilkaarDto(
+                hovedvilkaar = VilkaarTypeOgUtfall(
+                    VilkaarType.FORMAAL,
+                    Utfall.OPPFYLT
+                ),
+                unntaksvilkaar = null,
                 kommentar = "Søker oppfyller vilkåret"
             )
 
             val oppdatertVilkaarsvurderingResponse = client.post("/api/vilkaarsvurdering/$behandlingId") {
-                setBody(vurdertResultatDto.toJson())
+                setBody(vurdertVilkaarDto.toJson())
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
             val oppdatertVilkaarsvurdering = objectMapper
                 .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), Vilkaarsvurdering::class.java)
-            val oppdatertVilkaar = oppdatertVilkaarsvurdering.vilkaar.find { it.type == vurdertResultatDto.type }
+            val oppdatertVilkaar = oppdatertVilkaarsvurdering.vilkaar.find {
+                it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type
+            }
 
             assertEquals(HttpStatusCode.OK, oppdatertVilkaarsvurderingResponse.status)
             assertEquals(behandlingId, oppdatertVilkaarsvurdering.behandlingId)
-            assertEquals(vurdertResultatDto.type, oppdatertVilkaar?.type)
-            assertEquals(vurdertResultatDto.resultat, oppdatertVilkaar?.vurdering?.resultat)
-            assertEquals(vurdertResultatDto.kommentar, oppdatertVilkaar?.vurdering?.kommentar)
+            assertEquals(vurdertVilkaarDto.hovedvilkaar.type, oppdatertVilkaar?.hovedvilkaar?.type)
+            assertEquals(vurdertVilkaarDto.hovedvilkaar.resultat, oppdatertVilkaar?.hovedvilkaar?.resultat)
+            assertEquals(vurdertVilkaarDto.kommentar, oppdatertVilkaar?.vurdering?.kommentar)
             assertEquals("Saksbehandler01", oppdatertVilkaar?.vurdering?.saksbehandler)
             assertNotNull(oppdatertVilkaar?.vurdering?.tidspunkt)
         }
     }
 
     @Test
-    fun `skal nullstille et vurdert vilkaar fra vilkaarsvurdering`() {
+    fun `skal opprette vurdering på hovedvilkår og endre til vurdering på unntaksvilkår`() {
         testApplication {
             application { restModule(applicationContext) }
 
             opprettVilkaarsvurdering()
 
-            val vurdertResultatDto = VurdertResultatDto(
-                type = VilkaarType.FORMAAL,
-                resultat = Utfall.OPPFYLT,
+            val vurdertVilkaarDto = VurdertVilkaarDto(
+                hovedvilkaar = VilkaarTypeOgUtfall(
+                    type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP,
+                    resultat = Utfall.OPPFYLT
+                ),
+                kommentar = "Søker oppfyller hovedvilkåret ${VilkaarType.FORUTGAAENDE_MEDLEMSKAP}"
+            )
+
+            client.post("/api/vilkaarsvurdering/$behandlingId") {
+                setBody(vurdertVilkaarDto.toJson())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+
+            val vurdertVilkaar = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)?.vilkaar
+                ?.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+
+            assertNotNull(vurdertVilkaar)
+            assertNotNull(vurdertVilkaar?.vurdering)
+            assertNotNull(vurdertVilkaar?.hovedvilkaar?.resultat)
+            assertEquals(Utfall.OPPFYLT, vurdertVilkaar?.hovedvilkaar?.resultat)
+
+            val vurdertVilkaarMedUnntakDto = VurdertVilkaarDto(
+                hovedvilkaar = VilkaarTypeOgUtfall(
+                    type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP,
+                    resultat = Utfall.IKKE_OPPFYLT
+                ),
+                unntaksvilkaar = VilkaarTypeOgUtfall(
+                    type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR,
+                    resultat = Utfall.OPPFYLT
+                ),
+                kommentar = "Søker oppfyller unntaksvilkåret " +
+                    "${VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR}"
+            )
+
+            client.post("/api/vilkaarsvurdering/$behandlingId") {
+                setBody(vurdertVilkaarMedUnntakDto.toJson())
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+
+            val vurdertVilkaarPaaUnntak = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)?.vilkaar
+                ?.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
+
+            assertEquals(Utfall.IKKE_OPPFYLT, vurdertVilkaarPaaUnntak?.hovedvilkaar?.resultat)
+            assertNotNull(vurdertVilkaarPaaUnntak?.vurdering)
+            assertNotNull(vurdertVilkaarPaaUnntak?.unntaksvilkaar)
+            vurdertVilkaarPaaUnntak?.unntaksvilkaar?.forEach {
+                if (it.type === VilkaarType.FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR) {
+                    assertEquals(Utfall.OPPFYLT, it.resultat)
+                } else {
+                    assertNull(it.resultat)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `skal nullstille et vurdert hovedvilkaar fra vilkaarsvurdering`() {
+        testApplication {
+            application { restModule(applicationContext) }
+
+            opprettVilkaarsvurdering()
+
+            val vurdertVilkaarDto = VurdertVilkaarDto(
+                hovedvilkaar = VilkaarTypeOgUtfall(
+                    type = VilkaarType.FORMAAL,
+                    resultat = Utfall.OPPFYLT
+                ),
                 kommentar = "Søker oppfyller vilkåret"
             )
 
             client.post("/api/vilkaarsvurdering/$behandlingId") {
-                setBody(vurdertResultatDto.toJson())
+                setBody(vurdertVilkaarDto.toJson())
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val vurdertResultat = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)?.vilkaar
-                ?.first { it.type == vurdertResultatDto.type }?.vurdering
+            val vurdertVilkaar = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)?.vilkaar
+                ?.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
-            assertNotNull(vurdertResultat)
+            assertNotNull(vurdertVilkaar)
+            assertNotNull(vurdertVilkaar?.vurdering)
+            assertNotNull(vurdertVilkaar?.hovedvilkaar?.resultat)
 
-            val response = client.delete("/api/vilkaarsvurdering/$behandlingId/${vurdertResultatDto.type}") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response = client
+                .delete("/api/vilkaarsvurdering/$behandlingId/${vurdertVilkaarDto.hovedvilkaar.type}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
-            val vurdertResultatSlettet = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)?.vilkaar
-                ?.first { it.type == vurdertResultatDto.type }?.vurdering
+            val vurdertVilkaarSlettet = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)?.vilkaar
+                ?.first { it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type }
 
             assertEquals(HttpStatusCode.OK, response.status)
-            assertNull(vurdertResultatSlettet)
+            assertNull(vurdertVilkaarSlettet?.vurdering)
+            assertNull(vurdertVilkaarSlettet?.hovedvilkaar?.resultat)
+            vurdertVilkaarSlettet?.unntaksvilkaar?.forEach {
+                assertNull(it.resultat)
+            }
         }
     }
 

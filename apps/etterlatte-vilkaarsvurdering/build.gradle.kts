@@ -37,6 +37,7 @@ dependencies {
     testImplementation(Kotlinx.CoroutinesCore)
     testImplementation(Ktor2.ClientMock)
     testImplementation(Ktor2.ServerTests)
+    testImplementation("no.nav.security:mock-oauth2-server:0.5.4")
 
     testImplementation(TestContainer.Jupiter)
     testImplementation(TestContainer.Postgresql)

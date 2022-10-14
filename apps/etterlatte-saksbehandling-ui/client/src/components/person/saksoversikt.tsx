@@ -1,12 +1,20 @@
 import { Saksliste } from './saksliste'
 import styled from 'styled-components'
-import { IBehandlingsammendrag } from './typer'
+import { Grunnlagsendringshendelse, IBehandlingsammendrag } from './typer'
 import { useNavigate } from 'react-router-dom'
 import { INasjonalitetsType, NasjonalitetsType } from '../behandling/fargetags/nasjonalitetsType'
 import { Heading } from '@navikt/ds-react'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
+import { ToKolonner } from '../toKolonner/ToKolonner'
+import { Grunnlagshendelser } from './grunnlagshendelser/Grunnlagsendringshendelser'
 
-export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandlingsammendrag[] | undefined }) => {
+export const Saksoversikt = ({
+  behandlingliste,
+  grunnlagshendelser,
+}: {
+  behandlingliste: IBehandlingsammendrag[] | undefined
+  grunnlagshendelser: Grunnlagsendringshendelse[] | undefined
+}) => {
   const navigate = useNavigate()
   const behandlinger = behandlingliste ? behandlingliste : []
   const sakId = behandlinger[0]?.sak
@@ -30,19 +38,38 @@ export const Saksoversikt = ({ behandlingliste }: { behandlingliste: IBehandling
             <NasjonalitetsType type={INasjonalitetsType.NASJONAL} />
           </div>
         </HeadingWrapper>
-        {sakId !== undefined ? (
-          <EkstraHandlinger>
-            <ManueltOpphoerModal sakId={sakId} />
-          </EkstraHandlinger>
-        ) : null}
-        <div className="behandlinger">
-          <h2>Behandlinger</h2>
-          <Saksliste behandlinger={sortertListe} goToBehandling={goToBehandling} />
-        </div>
+        <ToKolonner>
+          {{
+            left: (
+              <>
+                {sakId !== undefined ? (
+                  <EkstraHandlinger>
+                    <ManueltOpphoerModal sakId={sakId} />
+                  </EkstraHandlinger>
+                ) : null}
+                <div className="behandlinger">
+                  <h2>Behandlinger</h2>
+                  <Saksliste behandlinger={sortertListe} goToBehandling={goToBehandling} />
+                </div>
+              </>
+            ),
+            right: grunnlagshendelser?.length ? (
+              <HendelseBorder>
+                <Grunnlagshendelser hendelser={grunnlagshendelser} />
+              </HendelseBorder>
+            ) : null,
+          }}
+        </ToKolonner>
       </SaksoversiktWrapper>
     </>
   )
 }
+
+const HendelseBorder = styled.div`
+  height: 100%;
+  border-left: 2px solid lightgray;
+  padding-left: 2rem;
+`
 
 const EkstraHandlinger = styled.div`
   display: flex;
@@ -59,7 +86,7 @@ export const IconButton = styled.div`
 
 export const SaksoversiktWrapper = styled.div`
   min-width: 40em;
-  max-width: 70%;
+  max-width: 100%;
 
   margin: 3em 1em;
   .behandlinger {

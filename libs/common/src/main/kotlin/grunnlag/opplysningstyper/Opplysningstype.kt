@@ -1,6 +1,6 @@
 package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
 
-enum class Opplysningstyper {
+enum class Opplysningstype {
     PERSONGALLERI_V1,
     AVDOED_PDL_V1,
     GJENLEVENDE_FORELDER_PDL_V1,

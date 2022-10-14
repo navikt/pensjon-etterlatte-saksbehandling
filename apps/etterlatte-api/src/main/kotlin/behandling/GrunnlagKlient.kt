@@ -12,7 +12,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Person
@@ -24,13 +24,13 @@ import org.slf4j.LoggerFactory
 interface EtterlatteGrunnlag {
     suspend fun finnPersonOpplysning(
         sakId: Long,
-        opplysningsType: Opplysningstyper,
+        opplysningsType: Opplysningstype,
         accessToken: String
     ): Grunnlagsopplysning<Person>?
 
     suspend fun finnPerioder(
         sakId: Long,
-        opplysningsType: Opplysningstyper,
+        opplysningsType: Opplysningstype,
         accessToken: String
     ): Grunnlagsopplysning<SaksbehandlerMedlemskapsperioder>?
 }
@@ -46,7 +46,7 @@ class GrunnlagKlient(config: Config, private val httpClient: HttpClient) : Etter
 
     override suspend fun finnPersonOpplysning(
         sakId: Long,
-        opplysningsType: Opplysningstyper,
+        opplysningsType: Opplysningstype,
         accessToken: String
     ): Grunnlagsopplysning<Person>? {
         try {
@@ -74,7 +74,7 @@ class GrunnlagKlient(config: Config, private val httpClient: HttpClient) : Etter
 
     override suspend fun finnPerioder(
         sakId: Long,
-        opplysningsType: Opplysningstyper,
+        opplysningsType: Opplysningstype,
         accessToken: String
     ): Grunnlagsopplysning<SaksbehandlerMedlemskapsperioder>? {
         try {

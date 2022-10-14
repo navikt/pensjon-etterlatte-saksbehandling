@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.GjenlevendeForelderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Samtykke
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
@@ -55,7 +55,7 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysning om avdoede`() {
-        consumeSingle<AvdoedSoeknad>(Opplysningstyper.AVDOED_SOEKNAD_V1)
+        consumeSingle<AvdoedSoeknad>(Opplysningstype.AVDOED_SOEKNAD_V1)
             .apply {
                 assertEquals("fn", fornavn)
                 assertEquals("en", etternavn)
@@ -70,7 +70,7 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysning om soeker`() {
-        consumeSingle<SoekerBarnSoeknad>(Opplysningstyper.SOEKER_SOEKNAD_V1)
+        consumeSingle<SoekerBarnSoeknad>(Opplysningstype.SOEKER_SOEKNAD_V1)
             .apply {
                 assertEquals(PersonType.BARN, type)
                 assertEquals("kirsten", fornavn)
@@ -87,7 +87,7 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysninger om gjenlevende forelder`() {
-        consumeSingle<GjenlevendeForelderSoeknad>(Opplysningstyper.GJENLEVENDE_FORELDER_SOEKNAD_V1)
+        consumeSingle<GjenlevendeForelderSoeknad>(Opplysningstype.GJENLEVENDE_FORELDER_SOEKNAD_V1)
             .apply {
                 assertEquals("GØYAL", fornavn)
                 assertEquals("HØYSTAKK", etternavn)
@@ -101,7 +101,7 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysning om innsender`() {
-        consumeSingle<InnsenderSoeknad>(Opplysningstyper.INNSENDER_SOEKNAD_V1)
+        consumeSingle<InnsenderSoeknad>(Opplysningstype.INNSENDER_SOEKNAD_V1)
             .apply {
                 assertEquals(PersonType.INNSENDER, type)
                 assertEquals("GØYAL", fornavn)
@@ -112,7 +112,7 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysning om utbetalingsinformasjon`() {
-        consumeSingle<Utbetalingsinformasjon>(Opplysningstyper.UTBETALINGSINFORMASJON_V1)
+        consumeSingle<Utbetalingsinformasjon>(Opplysningstype.UTBETALINGSINFORMASJON_V1)
             .apply {
                 assertEquals(BankkontoType.NORSK, bankkontoType)
                 assertEquals("6848.64.44444", kontonummer)
@@ -127,7 +127,7 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysning om samtykke`() {
-        consumeSingle<Samtykke>(Opplysningstyper.SAMTYKKE)
+        consumeSingle<Samtykke>(Opplysningstype.SAMTYKKE)
             .apply {
                 assertEquals(true, harSamtykket)
             }
@@ -135,7 +135,7 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysning om mottatt dato`() {
-        consumeSingle<SoeknadMottattDato>(Opplysningstyper.SOEKNAD_MOTTATT_DATO)
+        consumeSingle<SoeknadMottattDato>(Opplysningstype.SOEKNAD_MOTTATT_DATO)
             .apply {
                 assertEquals(LocalDateTime.parse("2022-02-14T14:37:24.573612786"), mottattDato)
             }
@@ -143,12 +143,12 @@ internal class OpplysningsuthenterTest {
 
     @Test
     fun `skal hente opplysning om soeknadstype`() {
-        consumeSingle<SoeknadstypeOpplysning>(Opplysningstyper.SOEKNADSTYPE_V1).apply {
+        consumeSingle<SoeknadstypeOpplysning>(Opplysningstype.SOEKNADSTYPE_V1).apply {
             assertEquals(SoeknadType.BARNEPENSJON, this.type)
         }
     }
 
-    inline fun <reified T> consumeSingle(opplysningType: Opplysningstyper) =
+    inline fun <reified T> consumeSingle(opplysningType: Opplysningstype) =
         opplysninger.filter { it.opplysningType == opplysningType }
             .also { assertEquals(1, it.size) }
             .first()

@@ -17,11 +17,11 @@ import no.nav.etterlatte.libs.common.grunnlag.hentSivilstatus
 import no.nav.etterlatte.libs.common.grunnlag.hentStatsborgerskap
 import no.nav.etterlatte.libs.common.grunnlag.hentUtland
 import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Person
 
 fun personTestData(
-    opplysningsmap: Map<Opplysningstyper, Opplysning<JsonNode>>
+    opplysningsmap: Map<Opplysningstype, Opplysning<JsonNode>>
 ): Person = Person(
     fornavn = opplysningsmap.hentNavn()!!.verdi.fornavn,
     etternavn = opplysningsmap.hentNavn()!!.verdi.etternavn,

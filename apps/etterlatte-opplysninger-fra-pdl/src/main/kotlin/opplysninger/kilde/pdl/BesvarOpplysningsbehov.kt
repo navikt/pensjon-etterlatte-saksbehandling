@@ -1,7 +1,7 @@
 package no.nav.etterlatte.opplysninger.kilde.pdl
 
 import no.nav.etterlatte.common.objectMapper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -35,14 +35,14 @@ internal class BesvarOpplysningsbehov(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             if (packet[behovNameKey].asText() in listOf(
-                    Opplysningstyper.AVDOED_PDL_V1.name,
-                    Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1.name,
-                    Opplysningstyper.SOEKER_PDL_V1.name
+                    Opplysningstype.AVDOED_PDL_V1.name,
+                    Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1.name,
+                    Opplysningstype.SOEKER_PDL_V1.name
                 )
             ) {
                 val fnr = packet["fnr"].textValue()
                 val personRolle = objectMapper.treeToValue(packet["rolle"], PersonRolle::class.java)!!
-                val opplysningstype = objectMapper.treeToValue(packet[behovNameKey], Opplysningstyper::class.java)!!
+                val opplysningstype = objectMapper.treeToValue(packet[behovNameKey], Opplysningstype::class.java)!!
                 val person = pdl.hentPerson(fnr, personRolle)
                 val opplysningsperson = pdl.hentOpplysningsperson(fnr, personRolle)
 

@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningstyper
 import no.nav.etterlatte.libs.common.beregning.Endringskode
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
 import no.nav.etterlatte.libs.common.beregning.erInklusiv
-import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.person.Person
@@ -24,7 +24,7 @@ import java.util.*
 // TODO hvordan håndtere vedtakstidspunkt?
 class BeregningService {
     fun beregnResultat(
-        grunnlag: Opplysningsgrunnlag,
+        grunnlag: Grunnlag,
         virkFOM: YearMonth,
         virkTOM: YearMonth,
         vilkaarsvurdering: VilkaarResultat,
@@ -110,7 +110,7 @@ class BeregningService {
     }
 
     private fun finnBeregningsperioder(
-        grunnlag: Opplysningsgrunnlag,
+        grunnlag: Grunnlag,
         virkFOM: YearMonth,
         virkTOM: YearMonth
     ): List<Beregningsperiode> {

@@ -6,22 +6,22 @@ import grunnlag.kilde
 import grunnlag.soekerTestopplysningerMap
 import grunnlag.soeskenTestopplysningerMap
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOEDESBARN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOEDESBARN
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.toJsonNode
 import java.util.UUID.randomUUID
 
 data class GrunnlagTestData(
-    val opplysningsmapSoekerOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
-    val opplysningsmapSoeskenOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
-    val opplysningsmapAvdoedOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
-    val opplysningsmapGjenlevendeOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
-    val opplysningsmapHalvsoeskenOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap(),
-    val opplysningsmapSakOverrides: Map<Opplysningstyper, Opplysning<JsonNode>> = emptyMap()
+    val opplysningsmapSoekerOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
+    val opplysningsmapSoeskenOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
+    val opplysningsmapAvdoedOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
+    val opplysningsmapGjenlevendeOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
+    val opplysningsmapHalvsoeskenOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
+    val opplysningsmapSakOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap()
 ) {
     val soeker
         get() = personTestData(soekerTestopplysningerMap + opplysningsmapSoekerOverrides)
@@ -43,7 +43,7 @@ data class GrunnlagTestData(
     val avdoed
         get() = personTestData(avdoedTestopplysningerMap + avdoedesBarnOverrides + opplysningsmapAvdoedOverrides)
 
-    fun hentOpplysningsgrunnlag(): Opplysningsgrunnlag = Opplysningsgrunnlag(
+    fun hentOpplysningsgrunnlag(): Grunnlag = Grunnlag(
         soeker = soekerTestopplysningerMap + opplysningsmapSoekerOverrides,
         familie = listOf(
             soeskenTestopplysningerMap + opplysningsmapSoeskenOverrides,

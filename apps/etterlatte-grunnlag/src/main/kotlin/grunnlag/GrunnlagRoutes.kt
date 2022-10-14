@@ -6,14 +6,14 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 
 fun Route.grunnlagRoute(service: GrunnlagService) {
     route("grunnlag") {
         get("{sakId}/{opplysningType}") {
             val grunnlag = service.hentGrunnlagAvType(
                 call.parameters["sakId"]!!.toLong(),
-                Opplysningstyper.valueOf(call.parameters["opplysningType"].toString())
+                Opplysningstype.valueOf(call.parameters["opplysningType"].toString())
             )
 
             if (grunnlag != null) {

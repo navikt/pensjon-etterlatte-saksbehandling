@@ -7,7 +7,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -27,7 +27,7 @@ internal class FinnPensjonEllerTrygdePerioderKtTest {
         return AvdoedesMedlemskapGrunnlag(
             VilkaarOpplysning(
                 id = UUID.randomUUID(),
-                opplysningType = Opplysningstyper.INNTEKT,
+                opplysningType = Opplysningstype.INNTEKT,
                 kilde = kilde,
                 opplysning = inntekter
             ),

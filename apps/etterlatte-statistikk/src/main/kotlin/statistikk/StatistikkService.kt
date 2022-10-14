@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
@@ -29,7 +29,7 @@ class StatistikkService(
     private fun hentSoesken(vedtak: Vedtak): List<Foedselsnummer> {
         val grunnlag = vedtak.grunnlag
         val soekerFnr = vedtak.sak.ident
-        val avdoedPdl = grunnlag.finnOpplysning<Person>(Opplysningstyper.AVDOED_PDL_V1)
+        val avdoedPdl = grunnlag.finnOpplysning<Person>(Opplysningstype.AVDOED_PDL_V1)
         val avdoedesBarn = avdoedPdl?.opplysning?.avdoedesBarn ?: emptyList()
         return avdoedesBarn
             .filter { it.foedselsnummer.value != soekerFnr }
@@ -38,7 +38,7 @@ class StatistikkService(
 
     private fun hentForeldre(vedtak: Vedtak): List<Foedselsnummer> {
         val grunnlag = vedtak.grunnlag
-        val soekerPdl = grunnlag.finnOpplysning<Person>(Opplysningstyper.SOEKER_PDL_V1)
+        val soekerPdl = grunnlag.finnOpplysning<Person>(Opplysningstype.SOEKER_PDL_V1)
         return soekerPdl?.opplysning?.familieRelasjon?.foreldre ?: emptyList()
     }
 
@@ -70,9 +70,9 @@ class StatistikkService(
 }
 
 inline fun <reified T> List<Grunnlagsopplysning<ObjectNode>>.finnOpplysning(
-    opplysningstyper: Opplysningstyper
+    opplysningstype: Opplysningstype
 ): VilkaarOpplysning<T>? {
-    return this.find { it.opplysningType == opplysningstyper }
+    return this.find { it.opplysningType == opplysningstype }
         ?.let {
             VilkaarOpplysning(
                 it.id,

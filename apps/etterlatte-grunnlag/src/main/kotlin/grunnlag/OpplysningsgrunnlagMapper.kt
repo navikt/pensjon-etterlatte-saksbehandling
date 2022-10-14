@@ -2,11 +2,11 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 
 class OpplysningsgrunnlagMapper(
@@ -30,7 +30,7 @@ class OpplysningsgrunnlagMapper(
             }
         }
 
-        val opplysningstype: Opplysningstyper
+        val opplysningstype: Opplysningstype
             get() = hendelser.first().opplysning.opplysningType
         val fnr: Foedselsnummer?
             get() = hendelser.first().opplysning.fnr
@@ -44,7 +44,7 @@ class OpplysningsgrunnlagMapper(
             grunnlagsopplysning.periode != null
     }
 
-    fun hentOpplysningsgrunnlag(): Opplysningsgrunnlag {
+    fun hentOpplysningsgrunnlag(): Grunnlag {
         val grupper = grunnlaghendelser.groupByFnrAndOpplysningstype()
         val senestVersjon = grupper.hentSenesteHendelserPerGruppe().maxOfOrNull { it.hendelseNummer } ?: 0
         val opplysninger = grupper.map { GruppertHendelser(it) }
@@ -60,7 +60,7 @@ class OpplysningsgrunnlagMapper(
             }
         val sakMap = saksopplysninger.associateBy({ it.opplysningstype }, { it.opplysning })
 
-        return Opplysningsgrunnlag(
+        return Grunnlag(
             soeker = søkerMap,
             familie = familieMap,
             sak = sakMap,

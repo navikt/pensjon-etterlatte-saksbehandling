@@ -5,32 +5,32 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.ADRESSEBESKYTTELSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.ARBEIDSFORHOLD
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOEDESBARN
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.DELTBOSTEDSADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.DOEDSDATO
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FAMILIERELASJON
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDELAND
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSAAR
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSDATO
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSNUMMER
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.INNTEKT
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.KOMMER_BARNET_TILGODE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.KONTAKTADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.MEDLEMSKAPSPERIODE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.NAVN
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.OPPHOLDSADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.PERSONROLLE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SIVILSTATUS
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOESKEN_I_BEREGNINGEN
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.STATSBORGERSKAP
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTENLANDSADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTENLANDSOPPHOLD
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTLAND
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.VERGEMAALELLERFREMTIDSFULLMAKT
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.ADRESSEBESKYTTELSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.ARBEIDSFORHOLD
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOEDESBARN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.DELTBOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.DOEDSDATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FAMILIERELASJON
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDELAND
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSAAR
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSDATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSNUMMER
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNTEKT
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.KOMMER_BARNET_TILGODE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.KONTAKTADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.MEDLEMSKAPSPERIODE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.NAVN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.OPPHOLDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONROLLE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SIVILSTATUS
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOESKEN_I_BEREGNINGEN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.STATSBORGERSKAP
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSOPPHOLD
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTLAND
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -50,7 +50,7 @@ import no.nav.etterlatte.libs.common.toJson
 import org.slf4j.LoggerFactory.getLogger
 import java.time.LocalDate
 
-typealias Grunnlagsdata<T> = Map<Opplysningstyper, Opplysning<T>>
+typealias Grunnlagsdata<T> = Map<Opplysningstype, Opplysning<T>>
 
 fun Grunnlagsdata<JsonNode>.hentNavn() = this.hentKonstantOpplysning<Navn>(NAVN)
 fun Grunnlagsdata<JsonNode>.hentFoedselsnummer() = this.hentKonstantOpplysning<Foedselsnummer>(FOEDSELSNUMMER)
@@ -91,7 +91,7 @@ fun Grunnlagsdata<JsonNode>.hentArbeidsforhold() = // Kun avdød som har denne o
     this.hentPeriodisertOpplysning<AaregResponse?>(ARBEIDSFORHOLD)
 
 inline fun <reified T> Grunnlagsdata<JsonNode>.hentKonstantOpplysning(
-    opplysningstype: Opplysningstyper
+    opplysningstype: Opplysningstype
 ): Opplysning.Konstant<T>? {
     val grunnlagsdata = this[opplysningstype] ?: return null
 
@@ -110,7 +110,7 @@ inline fun <reified T> Grunnlagsdata<JsonNode>.hentKonstantOpplysning(
 }
 
 inline fun <reified T> Grunnlagsdata<JsonNode>.hentPeriodisertOpplysning(
-    opplysningstype: Opplysningstyper
+    opplysningstype: Opplysningstype
 ): Opplysning.Periodisert<T>? {
     val grunnlagsdata = this[opplysningstype] ?: return null
 

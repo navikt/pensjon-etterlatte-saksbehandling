@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.database.singleOrNull
 import no.nav.etterlatte.database.toList
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -28,7 +28,7 @@ class OpplysningDao(private val datasource: DataSource) {
         return Grunnlagsopplysning(
             id = getObject("opplysning_id") as UUID,
             kilde = objectMapper.readValue(getString("kilde")),
-            opplysningType = Opplysningstyper.valueOf(getString("opplysning_type")),
+            opplysningType = Opplysningstype.valueOf(getString("opplysning_type")),
             meta = objectMapper.createObjectNode(),
             opplysning = getString("opplysning").deSerialize()!!,
             fnr = getString("fnr")?.let { Foedselsnummer.of(it) },
@@ -75,7 +75,7 @@ class OpplysningDao(private val datasource: DataSource) {
             }.executeQuery().toList { asGrunnlagshendelse() }
     }
 
-    fun finnNyesteGrunnlag(sakId: Long, opplysningType: Opplysningstyper): GrunnlagHendelse? =
+    fun finnNyesteGrunnlag(sakId: Long, opplysningType: Opplysningstype): GrunnlagHendelse? =
         connection.use {
             it.prepareStatement(
                 """

@@ -1,7 +1,7 @@
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Forelder
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsadresseBarn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold
@@ -20,7 +20,7 @@ import java.util.*
 fun mapTilVilkaarstypeAvdoedSoeknad(person: AvdoedSoeknad): VilkaarOpplysning<AvdoedSoeknad> {
     return VilkaarOpplysning(
         UUID.randomUUID(),
-        Opplysningstyper.AVDOED_SOEKNAD_V1,
+        Opplysningstype.AVDOED_SOEKNAD_V1,
         Grunnlagsopplysning.Privatperson("", Instant.now()),
         person
     )
@@ -29,7 +29,7 @@ fun mapTilVilkaarstypeAvdoedSoeknad(person: AvdoedSoeknad): VilkaarOpplysning<Av
 fun mapTilVilkaarstypeSoekerSoeknad(person: SoekerBarnSoeknad): VilkaarOpplysning<SoekerBarnSoeknad> {
     return VilkaarOpplysning(
         UUID.randomUUID(),
-        Opplysningstyper.SOEKER_PDL_V1,
+        Opplysningstype.SOEKER_PDL_V1,
         Grunnlagsopplysning.Privatperson("", Instant.now()),
         person
     )

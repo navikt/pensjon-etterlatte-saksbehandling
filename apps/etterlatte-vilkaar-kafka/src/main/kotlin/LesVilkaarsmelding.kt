@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey
-import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -45,7 +45,7 @@ internal class LesVilkaarsmelding(
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
             try {
-                val grunnlag = requireNotNull(objectMapper.treeToValue<Opplysningsgrunnlag>(packet[grunnlagKey]))
+                val grunnlag = requireNotNull(objectMapper.treeToValue<Grunnlag>(packet[grunnlagKey]))
                 val behandling = objectMapper.treeToValue<Behandling>(packet["behandling"])
                 val behandlingopprettet = packet["behandlingOpprettet"].asLocalDateTime().toLocalDate()
                 val revurderingAarsak: RevurderingAarsak? = kotlin.runCatching {

@@ -5,7 +5,7 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperioder
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -35,7 +35,7 @@ class GrunnlagService(
             ?: throw RuntimeException("Flere avdøde oppdaget på sak ${behandling.sak} ved upserting av opplysning") // TODO sj: Håndterer ikke flere avdøde
         val periodisertOpplysning =
             lagOpplysning(
-                opplysningsType = Opplysningstyper.MEDLEMSKAPSPERIODE,
+                opplysningsType = Opplysningstype.MEDLEMSKAPSPERIODE,
                 kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
                 opplysning = periode,
                 fnr = Foedselsnummer.of(avdoedFnr),
@@ -64,7 +64,7 @@ class GrunnlagService(
             ?: throw RuntimeException("Flere avdøde oppdaget på sak ${behandling.sak} ved sletting av opplysning") // TODO sj: Håndterer ikke flere avdøde
         val grunnlag: Grunnlagsopplysning<SaksbehandlerMedlemskapsperioder>? = grunnlagKlient.finnPerioder(
             behandling.sak,
-            Opplysningstyper.MEDLEMSKAPSPERIODE,
+            Opplysningstype.MEDLEMSKAPSPERIODE,
             token
         )
 
@@ -73,7 +73,7 @@ class GrunnlagService(
 
         val periodisertOpplysning =
             lagOpplysning(
-                opplysningsType = Opplysningstyper.MEDLEMSKAPSPERIODE,
+                opplysningsType = Opplysningstype.MEDLEMSKAPSPERIODE,
                 kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
                 opplysning = null,
                 fnr = Foedselsnummer.of(avdoedFnr),
@@ -105,7 +105,7 @@ class GrunnlagService(
 
         val opplysning: List<Grunnlagsopplysning<out Any>> = listOf(
             lagOpplysning(
-                Opplysningstyper.KOMMER_BARNET_TILGODE,
+                Opplysningstype.KOMMER_BARNET_TILGODE,
                 Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
                 ResultatKommerBarnetTilgode(svar, begrunnelse)
             )
@@ -130,7 +130,7 @@ class GrunnlagService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, token)
         val opplysning: List<Grunnlagsopplysning<Beregningsgrunnlag>> = listOf(
             lagOpplysning(
-                opplysningsType = Opplysningstyper.SOESKEN_I_BEREGNINGEN,
+                opplysningsType = Opplysningstype.SOESKEN_I_BEREGNINGEN,
                 kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
                 opplysning = Beregningsgrunnlag(soeskenMedIBeregning)
             )
@@ -152,7 +152,7 @@ class GrunnlagService(
 }
 
 fun <T> lagOpplysning(
-    opplysningsType: Opplysningstyper,
+    opplysningsType: Opplysningstype,
     kilde: Grunnlagsopplysning.Kilde,
     opplysning: T,
     fnr: Foedselsnummer? = null,

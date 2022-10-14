@@ -15,7 +15,7 @@ import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentKommerBarnetTilgode
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
@@ -32,7 +32,7 @@ class VilkaarService {
     private val logger = LoggerFactory.getLogger(VilkaarService::class.java)
 
     private fun mapVilkaarForstegangsbehandling(
-        grunnlag: Opplysningsgrunnlag,
+        grunnlag: Grunnlag,
         virkningstidspunkt: LocalDate
     ): VilkaarResultat {
         logger.info(
@@ -62,7 +62,7 @@ class VilkaarService {
     }
 
     private fun mapVilkaarRevurdering(
-        grunnlag: Opplysningsgrunnlag,
+        grunnlag: Grunnlag,
         virkningstidspunkt: LocalDate,
         revurderingAarsak: RevurderingAarsak
     ): VilkaarResultat {
@@ -85,7 +85,7 @@ class VilkaarService {
     }
 
     private fun beregnVirkningstidspunktFoerstegangsbehandling(
-        grunnlag: Opplysningsgrunnlag,
+        grunnlag: Grunnlag,
         soeknadMottattDato: LocalDate
     ): YearMonth {
         val avdoedDoedsdato = grunnlag.hentAvdoed().hentDoedsdato()
@@ -93,7 +93,7 @@ class VilkaarService {
     }
 
     private fun beregnVirkningstidspunktRevurdering(
-        grunnlag: Opplysningsgrunnlag,
+        grunnlag: Grunnlag,
         revurderingAarsak: RevurderingAarsak
     ): YearMonth {
         return when (revurderingAarsak) {
@@ -136,7 +136,7 @@ class VilkaarService {
     }
 
     private fun mapKommerSoekerTilGode(
-        grunnlag: Opplysningsgrunnlag
+        grunnlag: Grunnlag
     ): KommerSoekerTilgode {
         logger.info("Map opplysninger for å vurdere om penger kommer søker til gode")
         val soeker = grunnlag.soeker
@@ -168,7 +168,7 @@ class VilkaarService {
 
     fun finnVirkningstidspunktOgVilkaarForBehandling(
         behandling: Behandling,
-        grunnlag: Opplysningsgrunnlag,
+        grunnlag: Grunnlag,
         behandlingopprettet: LocalDate,
         aarsak: Aarsak
     ): Triple<YearMonth, VilkaarResultat, KommerSoekerTilgode?> {
@@ -225,7 +225,7 @@ class VilkaarService {
     }
 
     private fun beregnVirkningstidspunktManueltOpphoer(
-        grunnlag: Opplysningsgrunnlag,
+        grunnlag: Grunnlag,
         soeknadMottattDato: LocalDate
     ): YearMonth {
         val avdoedDoedsdato = grunnlag.hentAvdoed().hentDoedsdato()

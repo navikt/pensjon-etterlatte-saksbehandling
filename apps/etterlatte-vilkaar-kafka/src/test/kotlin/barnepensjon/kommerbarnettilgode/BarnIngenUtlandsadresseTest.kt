@@ -3,7 +3,7 @@ package barnepensjon.kommerbarnettilgode
 import GrunnlagTestData
 import grunnlag.kilde
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning.Konstant
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTENLANDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSADRESSE
 import no.nav.etterlatte.libs.common.person.Utenlandsadresse
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke.JA
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke.NEI

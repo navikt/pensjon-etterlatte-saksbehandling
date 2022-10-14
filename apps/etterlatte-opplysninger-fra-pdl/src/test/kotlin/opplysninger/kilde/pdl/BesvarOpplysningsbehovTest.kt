@@ -2,7 +2,7 @@ package opplysninger.kilde.pdl
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Adresse
@@ -77,7 +77,7 @@ class BesvarOpplysningsbehovTest {
         every { pdlMock.hentOpplysningsperson(any(), any()) } answers { mockPerson(fnr = firstArg()) }
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-        Assertions.assertEquals(Opplysningstyper.SOEKER_PDL_V1.name, inspector.message(0).get(behovNameKey).asText())
+        Assertions.assertEquals(Opplysningstype.SOEKER_PDL_V1.name, inspector.message(0).get(behovNameKey).asText())
         // TODO fikse litt på denne
         Assertions.assertEquals(
             "Ola",

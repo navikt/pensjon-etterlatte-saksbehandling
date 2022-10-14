@@ -3,14 +3,14 @@ package no.nav.etterlatte.libs.common.grunnlag
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.person.PersonRolle
 
-class Opplysningsgrunnlag(
+class Grunnlag(
     val soeker: Grunnlagsdata<JsonNode>,
     val familie: List<Grunnlagsdata<JsonNode>>,
     val sak: Grunnlagsdata<JsonNode>,
     val metadata: Metadata
 ) {
     companion object {
-        fun empty() = Opplysningsgrunnlag(
+        fun empty() = Grunnlag(
             soeker = emptyMap(),
             familie = listOf(),
             sak = mapOf(),

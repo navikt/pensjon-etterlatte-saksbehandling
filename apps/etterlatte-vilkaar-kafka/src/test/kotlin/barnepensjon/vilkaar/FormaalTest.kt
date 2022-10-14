@@ -4,7 +4,7 @@ import GrunnlagTestData
 import barnepensjon.vilkaarFormaalForYtelsen
 import grunnlag.kilde
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions
@@ -18,7 +18,7 @@ internal class FormaalTest {
     private val soekerILive = GrunnlagTestData().hentOpplysningsgrunnlag().soeker
     private val soekerDoed = GrunnlagTestData(
         opplysningsmapSoekerOverrides = mapOf(
-            Opplysningstyper.DOEDSDATO to Opplysning.Konstant(UUID.randomUUID(), kilde, doedsdato.toJsonNode())
+            Opplysningstype.DOEDSDATO to Opplysning.Konstant(UUID.randomUUID(), kilde, doedsdato.toJsonNode())
         )
     ).hentOpplysningsgrunnlag().soeker
 
@@ -26,7 +26,7 @@ internal class FormaalTest {
     fun `soeker som er i live paa virkningstidspunkt oppfyller vilkaar`() {
         val virkningstidspunkt = YearMonth.from(doedsdato).plusMonths(1).atDay(1)
         val soekerILivePaaVirkningstidspunkt = soekerDoed + mapOf(
-            Opplysningstyper.DOEDSDATO to Opplysning.Konstant(
+            Opplysningstype.DOEDSDATO to Opplysning.Konstant(
                 UUID.randomUUID(),
                 kilde,
                 doedsdato.plusMonths(2).toJsonNode()

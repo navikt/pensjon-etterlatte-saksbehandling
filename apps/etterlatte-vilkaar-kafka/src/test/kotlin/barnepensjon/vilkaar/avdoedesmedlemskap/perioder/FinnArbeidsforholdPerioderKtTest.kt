@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentArbeidsforhold
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.VilkaarOpplysning
@@ -34,7 +34,7 @@ internal class FinnArbeidsforholdPerioderKtTest {
     fun `Skal returnere en oppfyllt periode naar personen har arbeidet hele perioden`() {
         val arbeidsforhold = GrunnlagTestData(
             opplysningsmapAvdoedOverrides = mapOf(
-                Opplysningstyper.ARBEIDSFORHOLD to Opplysning.Periodisert(arbeidsforholdTestData(100.0))
+                Opplysningstype.ARBEIDSFORHOLD to Opplysning.Periodisert(arbeidsforholdTestData(100.0))
             )
         ).hentOpplysningsgrunnlag().hentAvdoed().hentArbeidsforhold()!!
 
@@ -50,7 +50,7 @@ internal class FinnArbeidsforholdPerioderKtTest {
     fun `Skal returnere en ikke-oppfyllt periode naar personen har arbeidet hele perioden under 80 prosent stilling`() {
         val arbeidsforhold = GrunnlagTestData(
             opplysningsmapAvdoedOverrides = mapOf(
-                Opplysningstyper.ARBEIDSFORHOLD to Opplysning.Periodisert(arbeidsforholdTestData(75.0))
+                Opplysningstype.ARBEIDSFORHOLD to Opplysning.Periodisert(arbeidsforholdTestData(75.0))
             )
         ).hentOpplysningsgrunnlag().hentAvdoed().hentArbeidsforhold()!!
 

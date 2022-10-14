@@ -1,7 +1,7 @@
 import com.fasterxml.jackson.module.kotlin.readValue
 import grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.inntekt.Ident
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -25,7 +25,7 @@ class OpplysningsbyggerTest {
         val opplysninger = service.byggOpplysninger(inntektsKomponentenResponse, emptyList(), AVDOED_FOEDSELSNUMMER)
 
         assertEquals(opplysninger.size, 2)
-        assertEquals(opplysninger[0].opplysningType, Opplysningstyper.INNTEKT)
+        assertEquals(opplysninger[0].opplysningType, Opplysningstype.INNTEKT)
         val inntektsOpplysning = (opplysninger[0].opplysning) as InntektsOpplysning
         assertEquals(inntektsOpplysning.pensjonEllerTrygd.size, 177)
         assertEquals(inntektsOpplysning.ytelseFraOffentlig.size, 27)
@@ -47,7 +47,7 @@ class OpplysningsbyggerTest {
         )
 
         assertEquals(opplysninger.size, 2)
-        assertEquals(opplysninger[1].opplysningType, Opplysningstyper.ARBEIDSFORHOLD)
+        assertEquals(opplysninger[1].opplysningType, Opplysningstype.ARBEIDSFORHOLD)
         val arbeidsforholdOpplysning = (opplysninger[1].opplysning) as AaregResponse
         assertEquals(arbeidsforholdOpplysning.type.beskrivelse, "Ordinært arbeidsforhold")
     }

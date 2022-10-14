@@ -5,20 +5,20 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.ADRESSEBESKYTTELSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOEDESBARN
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.DOEDSDATO
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FAMILIERELASJON
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDELAND
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSAAR
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSDATO
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSNUMMER
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.NAVN
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.PERSONROLLE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SIVILSTATUS
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.STATSBORGERSKAP
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.ADRESSEBESKYTTELSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOEDESBARN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.DOEDSDATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FAMILIERELASJON
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDELAND
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSAAR
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSDATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSNUMMER
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.NAVN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONROLLE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SIVILSTATUS
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.STATSBORGERSKAP
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
@@ -62,7 +62,7 @@ val ADRESSE_DEFAULT =
         )
     )
 
-internal val soekerTestopplysningerMap: Map<Opplysningstyper, Opplysning<JsonNode>> = mapOf(
+internal val soekerTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
     NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Søker", "Barn").toJsonNode()),
     FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
@@ -93,7 +93,7 @@ internal val soekerTestopplysningerMap: Map<Opplysningstyper, Opplysning<JsonNod
     )
 )
 
-internal val soeskenTestopplysningerMap: Map<Opplysningstyper, Opplysning<JsonNode>> = mapOf(
+internal val soeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
     NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Hel", "Søsken").toJsonNode()),
     FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
@@ -124,7 +124,7 @@ internal val soeskenTestopplysningerMap: Map<Opplysningstyper, Opplysning<JsonNo
     )
 )
 
-internal val halvsoeskenTestopplysningerMap: Map<Opplysningstyper, Opplysning<JsonNode>> = mapOf(
+internal val halvsoeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
     NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Halv", "Søsken").toJsonNode()),
     FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, HALVSOESKEN_FOEDSELSNUMMER.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, HALVSOESKEN_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
@@ -159,7 +159,7 @@ internal val halvsoeskenTestopplysningerMap: Map<Opplysningstyper, Opplysning<Js
     )
 )
 
-internal val avdoedTestopplysningerMap: Map<Opplysningstyper, Opplysning<JsonNode>> = mapOf(
+internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
     NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Død", "Far").toJsonNode()),
     FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
@@ -198,7 +198,7 @@ internal val avdoedTestopplysningerMap: Map<Opplysningstyper, Opplysning<JsonNod
     )
 )
 
-internal val gjenlevendeTestopplysningerMap: Map<Opplysningstyper, Opplysning<JsonNode>> = mapOf(
+internal val gjenlevendeTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
     NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Levende", "Mor").toJsonNode()),
     FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, GJENLEVENDE_FOEDSELSNUMMER.toJsonNode()),
     FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, GJENLEVENDE_FOEDSELSNUMMER.getBirthDate().toJsonNode()),

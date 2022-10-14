@@ -3,7 +3,7 @@ import { parseJwt } from '../utils/parsejwt'
 import { getOboToken } from "../middleware/getOboToken"
 import fetch from 'node-fetch'
 import { logger } from '../utils/logger'
-import { lagEnhet } from "../utils/enhet";
+import { lagEnhetFraString } from "../utils/enhet";
 
 export const modiaRouter = express.Router() // for å støtte dekoratør for innloggede flater
 
@@ -71,7 +71,7 @@ const hentEnhet = async (req: Request, bearerToken: string): Promise<IEnhet[]> =
             const data = await fetch(`https://graph.microsoft.com/v1.0/me?$select=${query}`, { headers: {"Authorization" : `Bearer ${oboToken}`} })
               .then(response => response.json())
 
-            const enhet = lagEnhet(data.officeLocation)
+            const enhet = lagEnhetFraString(data.officeLocation)
 
             logger.info("-------- Enhet --------", enhet)
 

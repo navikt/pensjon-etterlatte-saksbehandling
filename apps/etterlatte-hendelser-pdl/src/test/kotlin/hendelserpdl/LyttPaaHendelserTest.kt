@@ -111,8 +111,8 @@ class DodsMock(val c: (Pair<String, String>) -> Unit) : ILivsHendelser {
     override fun forelderBarnRelasjon(
         fnr: String,
         relatertPersonsIdent: String?,
-        relatertPersonsRolle: String,
-        minRolleForPerson: String,
+        relatertPersonsRolle: String?,
+        minRolleForPerson: String?,
         relatertPersonUtenFolkeregisteridentifikator: String?,
         endringstype: Endringstype
     ) {

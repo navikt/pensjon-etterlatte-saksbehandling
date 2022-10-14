@@ -32,8 +32,8 @@ interface ILivsHendelser {
     fun forelderBarnRelasjon(
         fnr: String,
         relatertPersonsIdent: String?,
-        relatertPersonsRolle: String,
-        minRolleForPerson: String,
+        relatertPersonsRolle: String?,
+        minRolleForPerson: String?,
         relatertPersonUtenFolkeregisteridentifikator: String?,
         endringstype: Endringstype
     )
@@ -108,8 +108,8 @@ class LivsHendelser(config: AppConfig) : ILivsHendelser {
     override fun forelderBarnRelasjon(
         fnr: String,
         relatertPersonsIdent: String?,
-        relatertPersonsRolle: String,
-        minRolleForPerson: String,
+        relatertPersonsRolle: String?,
+        minRolleForPerson: String?,
         relatertPersonUtenFolkeregisteridentifikator: String?,
         endringstype: Endringstype
     ) {
@@ -195,8 +195,8 @@ class LivsHendelserRapid(private val context: RapidsConnection) : ILivsHendelser
     override fun forelderBarnRelasjon(
         fnr: String,
         relatertPersonsIdent: String?,
-        relatertPersonsRolle: String,
-        minRolleForPerson: String,
+        relatertPersonsRolle: String?,
+        minRolleForPerson: String?,
         relatertPersonUtenFolkeregisteridentifikator: String?,
         endringstype: Endringstype
     ) {

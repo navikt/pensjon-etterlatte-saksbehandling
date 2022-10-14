@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import styled from 'styled-components'
 import { hentBehandling } from '../../shared/api/behandling'
 import { Column, GridContainer } from '../../shared/styled'
 import { AppContext } from '../../store/AppContext'
-import { IApiResponse } from '../../shared/api/types'
-import { addBehandlingAction, IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
+import { addBehandlingAction, resetBehandlingAction } from '../../store/reducers/BehandlingReducer'
 import Spinner from '../../shared/Spinner'
 import { StatusBar, StatusBarTheme } from '../../shared/statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
@@ -18,20 +17,27 @@ export const Behandling = () => {
   const ctx = useContext(AppContext)
   const match = useMatch('/behandling/:behandlingId/*')
   const { behandlingRoutes } = useBehandlingRoutes()
-  const [loaded, setLoaded] = useState<boolean>(false)
   const behandlingId = ctx.state.behandlingReducer?.id
+  const [isLoading, setIsLoading] = useState<boolean>(behandlingId === undefined)
 
   useEffect(() => {
-    if (match?.params.behandlingId) {
-      if (match.params.behandlingId !== behandlingId) {
-        setLoaded(false)
+    const behandlingIdFraURL = match?.params.behandlingId
+    if (!behandlingIdFraURL) return
+
+    if (behandlingIdFraURL !== behandlingId) {
+      fetchBehandling(behandlingIdFraURL)
+    }
+
+    async function fetchBehandling(behandlingId: string) {
+      setIsLoading(true)
+      const response = await hentBehandling(behandlingId)
+
+      if (response.status === 'ok') {
+        ctx.dispatch(addBehandlingAction(response.data))
+      } else {
+        ctx.dispatch(resetBehandlingAction())
       }
-      hentBehandling(match.params.behandlingId).then((response: IApiResponse<IDetaljertBehandling>) => {
-        if (response.data) {
-          ctx.dispatch(addBehandlingAction(response.data))
-          setLoaded(true)
-        }
-      })
+      setIsLoading(false)
     }
   }, [match?.params.behandlingId, behandlingId])
 
@@ -43,8 +49,8 @@ export const Behandling = () => {
     <>
       {soekerInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={soekerInfo} />}
 
-      <Spinner visible={!loaded} label="Laster" />
-      {loaded && (
+      <Spinner visible={isLoading} label="Laster" />
+      {!isLoading && (
         <GridContainer>
           <Column>
             <MenuHead>

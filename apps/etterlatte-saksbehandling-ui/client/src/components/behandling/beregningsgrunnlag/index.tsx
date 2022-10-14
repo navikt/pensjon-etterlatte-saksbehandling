@@ -70,7 +70,7 @@ const Beregningsgrunnlag = () => {
           }
           await hentBehandling(behandling.id).then((response) => {
             setIsLoading(false)
-            if (response.status === 200 && response.data) {
+            if (response.status === 'ok' && response.data) {
               ctx.dispatch(addBehandlingAction(response.data))
               next()
             } else {

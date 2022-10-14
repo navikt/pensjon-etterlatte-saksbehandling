@@ -78,7 +78,7 @@ export const Tidsperiode = ({
     slettPeriodeForAvdoedesMedlemskap(behandlingId, saksbehandlerPeriodeId).then((response) => {
       if (response.status === 'ok') {
         hentBehandling(behandlingId).then((response) => {
-          if (response.status === 200) {
+          if (response.statusCode === 200) {
             window.location.reload()
           }
         })

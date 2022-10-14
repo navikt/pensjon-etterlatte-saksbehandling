@@ -81,7 +81,7 @@ export const PeriodeModal = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen
       lagrePeriodeForAvdoedesMedlemskap(behandlingId, periode).then((response) => {
         if (response.status === 'ok') {
           hentBehandling(behandlingId).then((response) => {
-            if (response.status === 200) {
+            if (response.statusCode === 200) {
               window.location.reload()
             }
           })

@@ -1,4 +1,4 @@
-import React, { ReactNode, Reducer, createContext, useReducer } from 'react'
+import { ReactNode, Reducer, createContext, useReducer } from 'react'
 import { combineReducers } from './combineReducers'
 import { behandlingReducer, detaljertBehandlingInitialState, IDetaljertBehandling } from './reducers/BehandlingReducer'
 import { IMenuReducer, menuReducer, menuReducerInitialState } from './reducers/MenuReducer'

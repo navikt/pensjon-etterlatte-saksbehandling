@@ -2,7 +2,7 @@ package no.nav.etterlatte.opplysninger.kilde.pdl
 
 import no.nav.etterlatte.common.objectMapper
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -10,7 +10,7 @@ import java.time.Instant
 import java.util.*
 
 fun <T> lagPdlOpplysning(
-    opplysningsType: Opplysningstyper,
+    opplysningsType: Opplysningstype,
     opplysning: T,
     tidspunktForInnhenting: Instant
 ): Grunnlagsopplysning<T> {
@@ -25,7 +25,7 @@ fun <T> lagPdlOpplysning(
 
 fun <T> lagPdlPersonopplysning(
     tidspunktForInnhenting: Instant,
-    opplysningsType: Opplysningstyper,
+    opplysningsType: Opplysningstype,
     opplysning: OpplysningDTO<T>,
     fnr: Foedselsnummer,
     periode: Periode? = null

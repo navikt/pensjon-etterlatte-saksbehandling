@@ -6,7 +6,7 @@ import adresserNorgePdl
 import grunnlag.kilde
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions
@@ -21,7 +21,7 @@ class BarnGjenlevendeSammeAdresseTest {
     fun vuderBarnGjenlevndeSammeBostedsadresse() {
         val testDataUlikAdresse = GrunnlagTestData(
             opplysningsmapGjenlevendeOverrides = mapOf(
-                Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
+                Opplysningstype.BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresseDanmarkPdl().map {
                         PeriodisertOpplysning(
                             UUID.randomUUID(),
@@ -34,7 +34,7 @@ class BarnGjenlevendeSammeAdresseTest {
                 )
             ),
             opplysningsmapSoekerOverrides = mapOf(
-                Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
+                Opplysningstype.BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresserNorgePdl().map {
                         PeriodisertOpplysning(
                             UUID.randomUUID(),
@@ -50,7 +50,7 @@ class BarnGjenlevendeSammeAdresseTest {
 
         val testDataLikAdresse = GrunnlagTestData(
             opplysningsmapGjenlevendeOverrides = mapOf(
-                Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
+                Opplysningstype.BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresserNorgePdl().map {
                         PeriodisertOpplysning(
                             UUID.randomUUID(),
@@ -63,7 +63,7 @@ class BarnGjenlevendeSammeAdresseTest {
                 )
             ),
             opplysningsmapSoekerOverrides = mapOf(
-                Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
+                Opplysningstype.BOSTEDSADRESSE to Opplysning.Periodisert(
                     adresserNorgePdl().map {
                         PeriodisertOpplysning(
                             UUID.randomUUID(),

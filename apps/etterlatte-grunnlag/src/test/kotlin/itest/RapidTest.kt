@@ -11,11 +11,11 @@ import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -74,7 +74,7 @@ internal class RapidTest {
     private val nyOpplysning = Grunnlagsopplysning(
         id = statiskUuid,
         kilde = kilde,
-        opplysningType = Opplysningstyper.NAVN,
+        opplysningType = Opplysningstype.NAVN,
         meta = objectMapper.createObjectNode(),
         opplysning = "Ola".toJsonNode(),
         attestering = null,
@@ -108,7 +108,7 @@ internal class RapidTest {
     inner class Opplysningsbehov {
         private val melding = JsonMessage.newMessage(
             mapOf(
-                "@behov" to Opplysningstyper.SOEKER_PDL_V1,
+                "@behov" to Opplysningstype.SOEKER_PDL_V1,
                 "opplysning" to listOf(nyOpplysning),
                 "fnr" to fnr,
                 "sakId" to 1
@@ -130,7 +130,7 @@ internal class RapidTest {
     @Test
     fun `lagrer og sender ut nytt grunnlag`() {
         val personRolleOpplysning = lagGrunnlagsopplysning(
-            opplysningstyper = Opplysningstyper.PERSONROLLE,
+            opplysningstype = Opplysningstype.PERSONROLLE,
             kilde = kilde,
             uuid = statiskUuid,
             verdi = PersonRolle.BARN.toJsonNode(),
@@ -153,7 +153,7 @@ internal class RapidTest {
                 "opplysning" to listOf(
                     nyOpplysningMelding,
                     lagGrunnlagsopplysning(
-                        opplysningstyper = Opplysningstyper.PERSONROLLE,
+                        opplysningstype = Opplysningstype.PERSONROLLE,
                         kilde = kilde,
                         uuid = statiskUuid,
                         verdi = PersonRolle.BARN.toJsonNode(),
@@ -179,14 +179,14 @@ internal class RapidTest {
 
         Assertions.assertEquals("BEHANDLING:GRUNNLAGENDRET".toJson(), packet[eventNameKey].toJson())
         Assertions.assertEquals(
-            Opplysningsgrunnlag(
+            Grunnlag(
                 soeker = mapOf(
-                    Opplysningstyper.NAVN to Opplysning.Konstant(
+                    Opplysningstype.NAVN to Opplysning.Konstant(
                         statiskUuid,
                         nyOpplysning.kilde,
                         nyOpplysning.opplysning
                     ),
-                    Opplysningstyper.PERSONROLLE to Opplysning.Konstant(
+                    Opplysningstype.PERSONROLLE to Opplysning.Konstant(
                         statiskUuid,
                         personRolleOpplysning.kilde,
                         personRolleOpplysning.opplysning

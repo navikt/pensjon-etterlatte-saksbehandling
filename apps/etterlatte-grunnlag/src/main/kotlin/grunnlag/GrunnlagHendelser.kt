@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -40,7 +40,7 @@ class GrunnlagHendelser(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val opplysningsTyper = Opplysningstyper.values().map { it.name }
+        val opplysningsTyper = Opplysningstype.values().map { it.name }
 
         if ((packet[eventNameKey].asText() == "OPPLYSNING:NY") || (
             opplysningsTyper.contains(
@@ -55,7 +55,7 @@ class GrunnlagHendelser(
                         objectMapper.readValue(packet["opplysning"].toJson())!!
                     // Send melding om behov som er avhengig av en annen opplysning
                     opplysninger.forEach {
-                        if (it.opplysningType === Opplysningstyper.AVDOED_PDL_V1) {
+                        if (it.opplysningType === Opplysningstype.AVDOED_PDL_V1) {
                             sendAvdoedInntektBehov(it, context, packet)
                         }
                     }
@@ -89,7 +89,7 @@ class GrunnlagHendelser(
         if (pdlopplysninger.doedsdato != null) {
             val behov = JsonMessage.newMessage(
                 mapOf(
-                    behovNameKey to Opplysningstyper.INNTEKT,
+                    behovNameKey to Opplysningstype.INNTEKT,
                     "fnr" to pdlopplysninger.foedselsnummer.value,
                     "sakId" to packet["sakId"],
                     "doedsdato" to pdlopplysninger.doedsdato.toString(),

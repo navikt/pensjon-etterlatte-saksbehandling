@@ -11,7 +11,7 @@ import grunnlag.medlemskap
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapVurdering
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -27,12 +27,12 @@ import java.util.*
 
 class AvdoedesMedlemskapTest {
     private val avdoedOpplysninger = mutableMapOf(
-        Opplysningstyper.KONTAKTADRESSE to Opplysning.Konstant(
+        Opplysningstype.KONTAKTADRESSE to Opplysning.Konstant(
             UUID.randomUUID(),
             kilde,
             adresserNorgePdl().toJsonNode()
         ),
-        Opplysningstyper.BOSTEDSADRESSE to Opplysning.Periodisert(
+        Opplysningstype.BOSTEDSADRESSE to Opplysning.Periodisert(
             adresserNorgePdl().map {
                 PeriodisertOpplysning(
                     UUID.randomUUID(),
@@ -43,21 +43,21 @@ class AvdoedesMedlemskapTest {
                 )
             }
         ),
-        Opplysningstyper.OPPHOLDSADRESSE to Opplysning.Konstant(
+        Opplysningstype.OPPHOLDSADRESSE to Opplysning.Konstant(
             UUID.randomUUID(),
             kilde,
             adresserNorgePdl().toJsonNode()
         ),
-        Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Periodisert(
+        Opplysningstype.UTENLANDSOPPHOLD to Opplysning.Periodisert(
             emptyList()
         ),
-        Opplysningstyper.INNTEKT to Opplysning.Konstant(
+        Opplysningstype.INNTEKT to Opplysning.Konstant(
             UUID.randomUUID(),
             kilde,
             inntekt("inntektsopplysning.json").toJsonNode()
         ),
-        Opplysningstyper.MEDLEMSKAPSPERIODE to Opplysning.Periodisert(medlemskap),
-        Opplysningstyper.ARBEIDSFORHOLD to Opplysning.Periodisert(arbeidsforholdTestData(100.0))
+        Opplysningstype.MEDLEMSKAPSPERIODE to Opplysning.Periodisert(medlemskap),
+        Opplysningstype.ARBEIDSFORHOLD to Opplysning.Periodisert(arbeidsforholdTestData(100.0))
     )
 
     private val avdoedTestdata = GrunnlagTestData(
@@ -85,7 +85,7 @@ class AvdoedesMedlemskapTest {
     fun `Skal returnere med utfall ikke oppfyllt dersom det er gaps i de gyldige periodene`() {
         val vurdertVilkaar = vilkaarAvdoedesMedlemskap(
             avdoedTestdata + mapOf(
-                Opplysningstyper.INNTEKT to Opplysning.Konstant(
+                Opplysningstype.INNTEKT to Opplysning.Konstant(
                     UUID.randomUUID(),
                     kilde,
                     inntekt("inntektsopplysningOpphold.json").toJsonNode()

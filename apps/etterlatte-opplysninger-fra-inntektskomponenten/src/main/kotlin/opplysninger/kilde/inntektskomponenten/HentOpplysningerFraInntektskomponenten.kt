@@ -3,7 +3,7 @@ package no.nav.etterlatte.opplysninger.kilde.inntektskomponenten
 import no.nav.etterlatte.Aareg
 import no.nav.etterlatte.InntektsKomponenten
 import no.nav.etterlatte.OpplysningsBygger
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
@@ -37,7 +37,7 @@ internal class HentOpplysningerFraInntektskomponenten(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
-            if (packet["@behov"].asText() in listOf(Opplysningstyper.INNTEKT.name)) {
+            if (packet["@behov"].asText() in listOf(Opplysningstype.INNTEKT.name)) {
                 try {
                     val fnr = Foedselsnummer.of(packet["fnr"].asText())
                     val doedsdato = LocalDate.parse(packet["doedsdato"].asText())

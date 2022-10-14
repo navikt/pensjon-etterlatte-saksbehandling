@@ -2,27 +2,27 @@ package no.nav.etterlatte.opplysninger.kilde.pdl
 
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOEDESBARN
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOED_PDL_V1
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.DELTBOSTEDSADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.DOEDSDATO
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FAMILIERELASJON
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDELAND
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSAAR
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSDATO
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.FOEDSELSNUMMER
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.KONTAKTADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.NAVN
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.OPPHOLDSADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.PERSONROLLE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SIVILSTATUS
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOEKER_PDL_V1
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.STATSBORGERSKAP
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTLAND
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.VERGEMAALELLERFREMTIDSFULLMAKT
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOEDESBARN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.DELTBOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.DOEDSDATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FAMILIERELASJON
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDELAND
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSAAR
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSDATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSNUMMER
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.KONTAKTADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.NAVN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.OPPHOLDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONROLLE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SIVILSTATUS
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.STATSBORGERSKAP
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTLAND
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -35,14 +35,14 @@ import java.time.YearMonth
 class Opplysningsbolk(private val fnr: Foedselsnummer, private val innhentetTidspunkt: Instant) {
     private val opplysninger = mutableListOf<Grunnlagsopplysning<out Any>>()
     fun leggTilOpplysninger(
-        opplysningstyper: Opplysningstyper,
+        opplysningstype: Opplysningstype,
         grunnlagsopplysning: List<OpplysningDTO<out Any>>?
     ) {
-        grunnlagsopplysning?.forEach { leggTilOpplysning(opplysningstyper, it) }
+        grunnlagsopplysning?.forEach { leggTilOpplysning(opplysningstype, it) }
     }
 
     fun leggTilOpplysning(
-        opplysningstyper: Opplysningstyper,
+        opplysningstype: Opplysningstype,
         opplysningDTO: OpplysningDTO<out Any>?,
         periode: Periode? = null
     ) {
@@ -50,7 +50,7 @@ class Opplysningsbolk(private val fnr: Foedselsnummer, private val innhentetTids
             opplysninger.add(
                 lagPdlPersonopplysning(
                     tidspunktForInnhenting = innhentetTidspunkt,
-                    opplysningsType = opplysningstyper,
+                    opplysningsType = opplysningstype,
                     opplysning = opplysningDTO,
                     fnr = fnr,
                     periode = periode
@@ -65,7 +65,7 @@ class Opplysningsbolk(private val fnr: Foedselsnummer, private val innhentetTids
 fun lagEnkelopplysningerFraPDL(
     person: Person,
     personDTO: PersonDTO,
-    opplysningsbehov: Opplysningstyper, // AVDOED_PDL_V1 || SOEKER_PDL_V1 || GJENLEVENDE_PDL_V1
+    opplysningsbehov: Opplysningstype, // AVDOED_PDL_V1 || SOEKER_PDL_V1 || GJENLEVENDE_PDL_V1
     fnr: Foedselsnummer
 ): List<Grunnlagsopplysning<*>> {
     val tidspunktForInnhenting = Instant.now()
@@ -111,7 +111,7 @@ fun lagEnkelopplysningerFraPDL(
     return opplysningsbolk.hentOpplysninger() + gammalGrunnlagsopplysning
 }
 
-private fun behovNameTilPersonRolle(opplysningstyper: Opplysningstyper): PersonRolle = when (opplysningstyper) {
+private fun behovNameTilPersonRolle(opplysningstype: Opplysningstype): PersonRolle = when (opplysningstype) {
     AVDOED_PDL_V1 -> PersonRolle.AVDOED
     GJENLEVENDE_FORELDER_PDL_V1 -> PersonRolle.GJENLEVENDE
     SOEKER_PDL_V1 -> PersonRolle.BARN

@@ -7,9 +7,9 @@ import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
 import no.nav.etterlatte.libs.common.beregning.Endringskode
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
@@ -32,7 +32,7 @@ internal class BeregningServiceTest {
 
     private val testData = GrunnlagTestData(
         opplysningsmapSoeskenOverrides = mapOf(
-            Opplysningstyper.FOEDSELSDATO to Opplysning.Konstant(
+            Opplysningstype.FOEDSELSDATO to Opplysning.Konstant(
                 randomUUID(),
                 kilde,
                 LocalDate.of(2003, 12, 12).toJsonNode()
@@ -75,7 +75,7 @@ internal class BeregningServiceTest {
         val virkFOM = YearMonth.of(2022, 5)
         val virkTOM = YearMonth.of(2022, 10)
         val resultat = BeregningService().beregnResultat(
-            grunnlag = Opplysningsgrunnlag.empty(),
+            grunnlag = Grunnlag.empty(),
             virkFOM = virkFOM,
             virkTOM = virkTOM,
             vilkaarsvurdering = VilkaarResultat(

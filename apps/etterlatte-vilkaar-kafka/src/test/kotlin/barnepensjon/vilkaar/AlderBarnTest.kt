@@ -5,7 +5,7 @@ import grunnlag.kilde
 import no.nav.etterlatte.barnepensjon.vilkaarBrukerErUnder20
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import org.junit.jupiter.api.Assertions
@@ -17,7 +17,7 @@ import java.util.*
 class AlderBarnTest {
     private val testDataOver20 = GrunnlagTestData(
         opplysningsmapSoekerOverrides = mapOf(
-            Opplysningstyper.FOEDSELSDATO to Opplysning.Konstant(
+            Opplysningstype.FOEDSELSDATO to Opplysning.Konstant(
                 UUID.randomUUID(),
                 kilde,
                 LocalDate.of(2000, 3, 23).toJsonNode()
@@ -27,7 +27,7 @@ class AlderBarnTest {
 
     private val testDataUnder20 = GrunnlagTestData(
         opplysningsmapSoekerOverrides = mapOf(
-            Opplysningstyper.FOEDSELSDATO to Opplysning.Konstant(
+            Opplysningstype.FOEDSELSDATO to Opplysning.Konstant(
                 UUID.randomUUID(),
                 kilde,
                 LocalDate.now().minusYears(15).toJsonNode()

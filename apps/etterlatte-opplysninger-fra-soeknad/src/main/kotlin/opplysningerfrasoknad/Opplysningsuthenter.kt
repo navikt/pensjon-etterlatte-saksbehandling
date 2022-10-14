@@ -9,9 +9,9 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Forelder
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.GjenlevendeForelderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTENLANDSADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.UTENLANDSOPPHOLD
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSOPPHOLD
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Samtykke
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoekerBarnSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
@@ -73,21 +73,21 @@ class Opplysningsuthenter {
 
         return utenlandsoppholdAvdød + listOfNotNull(
             søkerUtenlandsopphold,
-            avdoed(barnepensjonssoknad, Opplysningstyper.AVDOED_SOEKNAD_V1),
-            soeker(barnepensjonssoknad, Opplysningstyper.SOEKER_SOEKNAD_V1),
-            gjenlevendeForelder(barnepensjonssoknad, Opplysningstyper.GJENLEVENDE_FORELDER_SOEKNAD_V1),
-            innsender(barnepensjonssoknad, Opplysningstyper.INNSENDER_SOEKNAD_V1),
-            utbetalingsinformasjon(barnepensjonssoknad, Opplysningstyper.UTBETALINGSINFORMASJON_V1),
-            samtykke(barnepensjonssoknad, Opplysningstyper.SAMTYKKE),
-            soeknadMottattDato(barnepensjonssoknad, Opplysningstyper.SOEKNAD_MOTTATT_DATO),
-            soeknadsType(barnepensjonssoknad, Opplysningstyper.SOEKNADSTYPE_V1),
+            avdoed(barnepensjonssoknad, Opplysningstype.AVDOED_SOEKNAD_V1),
+            soeker(barnepensjonssoknad, Opplysningstype.SOEKER_SOEKNAD_V1),
+            gjenlevendeForelder(barnepensjonssoknad, Opplysningstype.GJENLEVENDE_FORELDER_SOEKNAD_V1),
+            innsender(barnepensjonssoknad, Opplysningstype.INNSENDER_SOEKNAD_V1),
+            utbetalingsinformasjon(barnepensjonssoknad, Opplysningstype.UTBETALINGSINFORMASJON_V1),
+            samtykke(barnepensjonssoknad, Opplysningstype.SAMTYKKE),
+            soeknadMottattDato(barnepensjonssoknad, Opplysningstype.SOEKNAD_MOTTATT_DATO),
+            soeknadsType(barnepensjonssoknad, Opplysningstype.SOEKNADSTYPE_V1),
             personGalleri(barnepensjonssoknad)
         )
     }
 
     private fun <T> setBehandlingsopplysninger(
         barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper,
+        opplysningsType: Opplysningstype,
         data: T
     ): Grunnlagsopplysning<T> {
         return Grunnlagsopplysning(
@@ -113,7 +113,7 @@ class Opplysningsuthenter {
 
     private fun avdoed(
         barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
+        opplysningsType: Opplysningstype
     ): Grunnlagsopplysning<out AvdoedSoeknad>? {
         return hentAvdoedForelder(barnepensjon)?.let { avdoed ->
             setBehandlingsopplysninger(
@@ -148,7 +148,7 @@ class Opplysningsuthenter {
 
     fun soeker(
         barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
+        opplysningsType: Opplysningstype
     ): Grunnlagsopplysning<out SoekerBarnSoeknad> {
         val adresse = barnepensjon.soeker.utenlandsAdresse
 
@@ -187,7 +187,7 @@ class Opplysningsuthenter {
 
     fun gjenlevendeForelder(
         barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
+        opplysningsType: Opplysningstype
     ): Grunnlagsopplysning<out GjenlevendeForelderSoeknad>? {
         return hentGjenlevendeForelder(barnepensjon)?.let { forelder ->
             setBehandlingsopplysninger(
@@ -208,7 +208,7 @@ class Opplysningsuthenter {
 
     fun innsender(
         barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
+        opplysningsType: Opplysningstype
     ): Grunnlagsopplysning<out InnsenderSoeknad> {
         return setBehandlingsopplysninger(
             barnepensjon,
@@ -222,13 +222,13 @@ class Opplysningsuthenter {
         )
     }
 
-    fun samtykke(barnepensjon: Barnepensjon, opplysningsType: Opplysningstyper): Grunnlagsopplysning<out Samtykke> {
+    fun samtykke(barnepensjon: Barnepensjon, opplysningsType: Opplysningstype): Grunnlagsopplysning<out Samtykke> {
         return setBehandlingsopplysninger(barnepensjon, opplysningsType, Samtykke(barnepensjon.harSamtykket.svar))
     }
 
     fun utbetalingsinformasjon(
         barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
+        opplysningsType: Opplysningstype
     ): Grunnlagsopplysning<out Utbetalingsinformasjon>? {
         return barnepensjon.utbetalingsInformasjon?.let {
             setBehandlingsopplysninger(
@@ -250,7 +250,7 @@ class Opplysningsuthenter {
 
     private fun soeknadMottattDato(
         barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
+        opplysningsType: Opplysningstype
     ): Grunnlagsopplysning<out SoeknadMottattDato> {
         return setBehandlingsopplysninger(
             barnepensjon,
@@ -261,7 +261,7 @@ class Opplysningsuthenter {
 
     private fun soeknadsType(
         barnepensjon: Barnepensjon,
-        opplysningsType: Opplysningstyper
+        opplysningsType: Opplysningstype
     ): Grunnlagsopplysning<out SoeknadstypeOpplysning> {
         return setBehandlingsopplysninger(barnepensjon, opplysningsType, SoeknadstypeOpplysning(barnepensjon.type))
     }
@@ -271,7 +271,7 @@ class Opplysningsuthenter {
     ): Grunnlagsopplysning<out Persongalleri> {
         return setBehandlingsopplysninger(
             barnepensjon,
-            Opplysningstyper.PERSONGALLERI_V1,
+            Opplysningstype.PERSONGALLERI_V1,
             Persongalleri(
                 soeker = barnepensjon.soeker.foedselsnummer.svar.value,
                 innsender = barnepensjon.innsender.foedselsnummer.svar.value,
@@ -288,7 +288,7 @@ class Opplysningsuthenter {
 }
 
 private fun <T> lagOpplysning(
-    opplysningsType: Opplysningstyper,
+    opplysningsType: Opplysningstype,
     kilde: Grunnlagsopplysning.Kilde,
     opplysning: T,
     periode: Periode?

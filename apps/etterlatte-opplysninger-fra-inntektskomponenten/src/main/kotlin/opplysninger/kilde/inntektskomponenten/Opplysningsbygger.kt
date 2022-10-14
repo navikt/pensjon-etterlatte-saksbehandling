@@ -3,7 +3,7 @@ package no.nav.etterlatte.opplysninger.kilde.inntektskomponenten
 import no.nav.etterlatte.OpplysningsBygger
 import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.inntekt.ArbeidsInntektMaaned
 import no.nav.etterlatte.libs.common.inntekt.InntektType
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
@@ -32,7 +32,7 @@ class OpplysningsByggerService : OpplysningsBygger {
 
         val innhentetTidspunkt = Instant.now()
         val inntektsOpplysning = lagOpplysning(
-            opplysningsType = Opplysningstyper.INNTEKT,
+            opplysningsType = Opplysningstype.INNTEKT,
             kilde = Grunnlagsopplysning.Aordningen(innhentetTidspunkt),
             opplysning = inntekter,
             fnr = fnr
@@ -40,7 +40,7 @@ class OpplysningsByggerService : OpplysningsBygger {
 
         val arbeidsforholdOpplysning = arbeidsforholdListe.takeIf { it.isNotEmpty() }?.map {
             lagOpplysning(
-                opplysningsType = Opplysningstyper.ARBEIDSFORHOLD,
+                opplysningsType = Opplysningstype.ARBEIDSFORHOLD,
                 kilde = Grunnlagsopplysning.Aordningen(innhentetTidspunkt),
                 opplysning = it,
                 periode = Periode(
@@ -51,7 +51,7 @@ class OpplysningsByggerService : OpplysningsBygger {
             )
         } ?: listOf(
             lagOpplysning(
-                opplysningsType = Opplysningstyper.ARBEIDSFORHOLD,
+                opplysningsType = Opplysningstype.ARBEIDSFORHOLD,
                 kilde = Grunnlagsopplysning.Aordningen(innhentetTidspunkt),
                 opplysning = null,
                 periode = Periode(
@@ -71,7 +71,7 @@ fun List<ArbeidsInntektMaaned>.filtrertPaaInntektsType(inntektType: InntektType)
 }.flatten()
 
 fun <T> lagOpplysning(
-    opplysningsType: Opplysningstyper,
+    opplysningsType: Opplysningstype,
     kilde: Grunnlagsopplysning.Kilde,
     opplysning: T,
     fnr: Foedselsnummer?,

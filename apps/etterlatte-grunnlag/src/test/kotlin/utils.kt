@@ -1,14 +1,14 @@
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import java.time.Instant
 import java.util.*
 
 internal fun lagGrunnlagsopplysning(
-    opplysningstyper: Opplysningstyper,
+    opplysningstype: Opplysningstype,
     kilde: Grunnlagsopplysning.Kilde = Grunnlagsopplysning.Pdl(
         navn = "pdl",
         tidspunktForInnhenting = Instant.now(),
@@ -21,7 +21,7 @@ internal fun lagGrunnlagsopplysning(
 ) = Grunnlagsopplysning(
     uuid,
     kilde,
-    opplysningstyper,
+    opplysningstype,
     objectMapper.createObjectNode(),
     verdi,
     null,
@@ -31,7 +31,7 @@ internal fun lagGrunnlagsopplysning(
 internal fun lagGrunnlagHendelse(
     sakId: Long,
     hendelseNummer: Long,
-    opplysningType: Opplysningstyper,
+    opplysningType: Opplysningstype,
     id: UUID = UUID.randomUUID(),
     fnr: Foedselsnummer? = null,
     verdi: JsonNode = objectMapper.createObjectNode(),
@@ -43,7 +43,7 @@ internal fun lagGrunnlagHendelse(
     )
 ) = OpplysningDao.GrunnlagHendelse(
     opplysning = lagGrunnlagsopplysning(
-        opplysningstyper = opplysningType,
+        opplysningstype = opplysningType,
         kilde = kilde,
         uuid = id,
         fnr = fnr,

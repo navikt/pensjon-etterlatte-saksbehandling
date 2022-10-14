@@ -5,7 +5,7 @@ import grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import grunnlag.kilde
 import no.nav.etterlatte.barnepensjon.vilkaarDoedsfallErRegistrert
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
@@ -20,7 +20,7 @@ class DoedfallTest {
         val testData = GrunnlagTestData().hentOpplysningsgrunnlag()
         val avdoedErIkkeForelder = GrunnlagTestData(
             opplysningsmapSoekerOverrides = mapOf(
-                Opplysningstyper.FAMILIERELASJON to Opplysning.Konstant(
+                Opplysningstype.FAMILIERELASJON to Opplysning.Konstant(
                     UUID.randomUUID(),
                     kilde,
                     FamilieRelasjon(
@@ -32,7 +32,7 @@ class DoedfallTest {
             )
         ).hentOpplysningsgrunnlag()
 
-        val avdoedIngenDoedsdato = testData.hentAvdoed() - Opplysningstyper.DOEDSDATO
+        val avdoedIngenDoedsdato = testData.hentAvdoed() - Opplysningstype.DOEDSDATO
 
         val doedsdatoIkkeIPdl =
             vilkaarDoedsfallErRegistrert(

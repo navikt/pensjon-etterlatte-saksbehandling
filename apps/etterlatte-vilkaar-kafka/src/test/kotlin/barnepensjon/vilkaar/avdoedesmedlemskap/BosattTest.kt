@@ -9,10 +9,10 @@ import grunnlag.utenlandsopphold
 import no.nav.etterlatte.barnepensjon.toYearMonth
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.KONTAKTADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.OPPHOLDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.KONTAKTADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.OPPHOLDSADRESSE
 import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
@@ -31,9 +31,9 @@ class BosattTest {
     fun vurderNorskStatsborgerskap() {
         val testdataNorsk = GrunnlagTestData().hentOpplysningsgrunnlag().hentAvdoed()
         val testdataDansk = testdataNorsk + mapOf(
-            Opplysningstyper.STATSBORGERSKAP to Opplysning.Konstant(UUID.randomUUID(), kilde, "DAN".toJsonNode())
+            Opplysningstype.STATSBORGERSKAP to Opplysning.Konstant(UUID.randomUUID(), kilde, "DAN".toJsonNode())
         )
-        val testdataIngenStatsborgerskap = testdataNorsk - Opplysningstyper.STATSBORGERSKAP
+        val testdataIngenStatsborgerskap = testdataNorsk - Opplysningstype.STATSBORGERSKAP
 
         val norsk = kriterieNorskStatsborger(testdataNorsk, AVDOED_NORSK_STATSBORGER)
         val dansk = kriterieNorskStatsborger(testdataDansk, AVDOED_NORSK_STATSBORGER)
@@ -61,9 +61,9 @@ class BosattTest {
                 )
             )
         ).hentOpplysningsgrunnlag().hentAvdoed()
-        val avdoedIngenUtland = avdoedTestdata - Opplysningstyper.UTLAND
+        val avdoedIngenUtland = avdoedTestdata - Opplysningstype.UTLAND
         val avdoedInnvandring = avdoedTestdata + mapOf(
-            Opplysningstyper.UTLAND to Opplysning.Konstant(
+            Opplysningstype.UTLAND to Opplysning.Konstant(
                 UUID.randomUUID(),
                 kilde,
                 Utland(
@@ -73,7 +73,7 @@ class BosattTest {
             )
         )
         val avdoedHarIkkeUtland = avdoedTestdata + mapOf(
-            Opplysningstyper.UTLAND to Opplysning.Konstant(
+            Opplysningstype.UTLAND to Opplysning.Konstant(
                 UUID.randomUUID(),
                 kilde,
                 Utland(
@@ -96,13 +96,13 @@ class BosattTest {
     fun vurderIngenUtelandsopphold() {
         val avdoedMedUtlandsopphold = GrunnlagTestData(
             opplysningsmapAvdoedOverrides = mapOf(
-                Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Periodisert(utenlandsopphold)
+                Opplysningstype.UTENLANDSOPPHOLD to Opplysning.Periodisert(utenlandsopphold)
             )
         ).hentOpplysningsgrunnlag().hentAvdoed()
 
         val avdoedUtenUtlandsopphold = GrunnlagTestData(
             opplysningsmapAvdoedOverrides = mapOf(
-                Opplysningstyper.UTENLANDSOPPHOLD to Opplysning.Periodisert(
+                Opplysningstype.UTENLANDSOPPHOLD to Opplysning.Periodisert(
                     emptyList()
                 )
             )

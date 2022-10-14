@@ -2,8 +2,8 @@ package model.finnSoeskenperiode
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.beregning.SoeskenPeriode
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
-import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
 import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
 import no.nav.etterlatte.libs.common.grunnlag.hentFamilierelasjon
@@ -14,7 +14,7 @@ import java.time.YearMonth
 
 // Adressesjekk på halvsøsken på dødsfallstidspunkt i første omgang
 data class FinnSoeskenPeriode(
-    private val grunnlag: Opplysningsgrunnlag,
+    private val grunnlag: Grunnlag,
     private val virkFOM: YearMonth
 ) {
     fun hentSoeskenperioder(): List<SoeskenPeriode> {

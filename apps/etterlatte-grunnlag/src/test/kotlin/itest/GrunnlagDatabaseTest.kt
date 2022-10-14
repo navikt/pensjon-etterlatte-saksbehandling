@@ -9,12 +9,12 @@ import lagGrunnlagsopplysning
 import no.nav.etterlatte.DataSourceBuilder
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.AVDOED_PDL_V1
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.BOSTEDSADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOEKER_PDL_V1
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOEKNAD_MOTTATT_DATO
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper.SOESKEN_I_BEREGNINGEN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNAD_MOTTATT_DATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOESKEN_I_BEREGNINGEN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -69,12 +69,12 @@ internal class GrunnlagDaoIntegrationTest {
         val uuid = UUID.randomUUID()
 
         lagGrunnlagsopplysning(
-            opplysningstyper = SOEKNAD_MOTTATT_DATO,
+            opplysningstype = SOEKNAD_MOTTATT_DATO,
             verdi = objectMapper.valueToTree(SoeknadMottattDato(datoMottat)) as ObjectNode
         ).also { opplysningRepo.leggOpplysningTilGrunnlag(1, it) }
         lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
         lagGrunnlagsopplysning(
-            opplysningstyper = SOEKNAD_MOTTATT_DATO,
+            opplysningstype = SOEKNAD_MOTTATT_DATO,
             uuid = uuid
         ).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
 
@@ -95,7 +95,7 @@ internal class GrunnlagDaoIntegrationTest {
 
         lagGrunnlagsopplysning(
             uuid = uuid,
-            opplysningstyper = Opplysningstyper.NAVN,
+            opplysningstype = Opplysningstype.NAVN,
             verdi = objectMapper.valueToTree("Per"),
             fnr = fnr
         ).also { opplysningRepo.leggOpplysningTilGrunnlag(1, it, fnr) }
@@ -125,9 +125,9 @@ internal class GrunnlagDaoIntegrationTest {
         lagGrunnlagsopplysning(AVDOED_PDL_V1).also { opplysningRepo.leggOpplysningTilGrunnlag(33, it) }
         lagGrunnlagsopplysning(AVDOED_PDL_V1, uuid = uuid).also { opplysningRepo.leggOpplysningTilGrunnlag(33, it) }
 
-        assertEquals(uuid, opplysningRepo.finnNyesteGrunnlag(33, Opplysningstyper.AVDOED_PDL_V1)?.opplysning?.id)
+        assertEquals(uuid, opplysningRepo.finnNyesteGrunnlag(33, Opplysningstype.AVDOED_PDL_V1)?.opplysning?.id)
         // Skal håndtere at opplysning ikke finnes
-        assertEquals(null, opplysningRepo.finnNyesteGrunnlag(0L, Opplysningstyper.AVDOED_PDL_V1))
+        assertEquals(null, opplysningRepo.finnNyesteGrunnlag(0L, Opplysningstype.AVDOED_PDL_V1))
     }
 
     @Test

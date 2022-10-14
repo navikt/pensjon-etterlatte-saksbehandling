@@ -21,7 +21,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapVurdering
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Gap
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsperiode
@@ -77,7 +77,7 @@ private fun kriterieMedlemskapOffentligOgInntekt(
         VilkaarOpplysning(
             id = it.id,
             kilde = it.kilde,
-            opplysningType = Opplysningstyper.INNTEKT,
+            opplysningType = Opplysningstype.INNTEKT,
             opplysning = it.verdi
         )
     }

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.grunnlag
 
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.behovNameKey
@@ -30,10 +30,10 @@ class BehandlingHendelser(
             context.publish(
                 JsonMessage.newMessage(
                     mapOf(
-                        behovNameKey to Opplysningstyper.SOEKER_PDL_V1,
+                        behovNameKey to Opplysningstype.SOEKER_PDL_V1,
                         "sakId" to packet["sakId"],
                         "fnr" to packet["persongalleri"]["soeker"],
-                        "rolle" to Opplysningstyper.SOEKER_PDL_V1.personRolle!!,
+                        "rolle" to Opplysningstype.SOEKER_PDL_V1.personRolle!!,
                         correlationIdKey to packet[correlationIdKey]
                     )
                 ).toJson()
@@ -43,10 +43,10 @@ class BehandlingHendelser(
                 context.publish(
                     JsonMessage.newMessage(
                         mapOf(
-                            behovNameKey to Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1,
+                            behovNameKey to Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
                             "sakId" to packet["sakId"],
                             "fnr" to fnr.asText(),
-                            "rolle" to Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1.personRolle!!,
+                            "rolle" to Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1.personRolle!!,
                             correlationIdKey to packet[correlationIdKey]
                         )
                     ).toJson()
@@ -57,10 +57,10 @@ class BehandlingHendelser(
                 context.publish(
                     JsonMessage.newMessage(
                         mapOf(
-                            behovNameKey to Opplysningstyper.AVDOED_PDL_V1,
+                            behovNameKey to Opplysningstype.AVDOED_PDL_V1,
                             "sakId" to packet["sakId"],
                             "fnr" to fnr.asText(),
-                            "rolle" to Opplysningstyper.AVDOED_PDL_V1.personRolle!!,
+                            "rolle" to Opplysningstype.AVDOED_PDL_V1.personRolle!!,
                             correlationIdKey to packet[correlationIdKey]
                         )
                     ).toJson()
@@ -69,10 +69,10 @@ class BehandlingHendelser(
         }
 }
 
-private val Opplysningstyper.personRolle: PersonRolle?
+private val Opplysningstype.personRolle: PersonRolle?
     get() = when (this) {
-        Opplysningstyper.AVDOED_SOEKNAD_V1, Opplysningstyper.AVDOED_PDL_V1 -> PersonRolle.AVDOED
-        Opplysningstyper.SOEKER_SOEKNAD_V1, Opplysningstyper.SOEKER_PDL_V1 -> PersonRolle.BARN
-        Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1 -> PersonRolle.GJENLEVENDE
+        Opplysningstype.AVDOED_SOEKNAD_V1, Opplysningstype.AVDOED_PDL_V1 -> PersonRolle.AVDOED
+        Opplysningstype.SOEKER_SOEKNAD_V1, Opplysningstype.SOEKER_PDL_V1 -> PersonRolle.BARN
+        Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1 -> PersonRolle.GJENLEVENDE
         else -> null
     }

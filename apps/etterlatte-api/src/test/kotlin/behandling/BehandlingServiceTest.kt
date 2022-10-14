@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
@@ -169,21 +169,21 @@ internal class BehandlingServiceTest {
         val avdoedOpplysning = Grunnlagsopplysning(
             UUID.randomUUID(),
             Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
-            Opplysningstyper.AVDOED_PDL_V1,
+            Opplysningstype.AVDOED_PDL_V1,
             objectMapper.createObjectNode(),
             avdoed
         )
         val gjenlevendeOpplysning = Grunnlagsopplysning(
             UUID.randomUUID(),
             Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
-            Opplysningstyper.AVDOED_PDL_V1,
+            Opplysningstype.AVDOED_PDL_V1,
             objectMapper.createObjectNode(),
             gjenlevende
         )
         val søkerOpplysning = Grunnlagsopplysning(
             UUID.randomUUID(),
             Grunnlagsopplysning.Saksbehandler("S01", Instant.now()),
-            Opplysningstyper.SOEKER_PDL_V1,
+            Opplysningstype.SOEKER_PDL_V1,
             objectMapper.createObjectNode(),
             mockPerson()
         )
@@ -194,21 +194,21 @@ internal class BehandlingServiceTest {
         coEvery {
             grunnlagKlient.finnPersonOpplysning(
                 4L,
-                Opplysningstyper.AVDOED_PDL_V1,
+                Opplysningstype.AVDOED_PDL_V1,
                 accessToken
             )
         } returns avdoedOpplysning
         coEvery {
             grunnlagKlient.finnPersonOpplysning(
                 4L,
-                Opplysningstyper.GJENLEVENDE_FORELDER_PDL_V1,
+                Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
                 accessToken
             )
         } returns gjenlevendeOpplysning
         coEvery {
             grunnlagKlient.finnPersonOpplysning(
                 4L,
-                Opplysningstyper.SOEKER_PDL_V1,
+                Opplysningstype.SOEKER_PDL_V1,
                 accessToken
             )
         } returns søkerOpplysning

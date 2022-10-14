@@ -4,7 +4,7 @@ import GrunnlagTestData
 import grunnlag.medlemskap
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentMedlemskapsperiode
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstyper
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -17,7 +17,7 @@ internal class FinnSaksbehandlerMedlemsPerioderKtTest {
     fun `Skal returnere to vurderte perioder, ett godkjent og ett ikke godkjent pga stillingsprosent`() {
         val medlemskap = GrunnlagTestData(
             opplysningsmapAvdoedOverrides = mapOf(
-                Opplysningstyper.MEDLEMSKAPSPERIODE to Opplysning.Periodisert(medlemskap)
+                Opplysningstype.MEDLEMSKAPSPERIODE to Opplysning.Periodisert(medlemskap)
             )
         ).hentOpplysningsgrunnlag().hentAvdoed().hentMedlemskapsperiode()!!
 

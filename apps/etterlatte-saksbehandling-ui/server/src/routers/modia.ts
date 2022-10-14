@@ -56,11 +56,11 @@ const getSaksbehandler = async (req: Request): Promise<ISaksbehandler | null> =>
     fornavn: parsedToken.name.split(', ')[1],
     etternavn: parsedToken.name.split(', ')[0],
     rolle: 'attestant',
-    enheter: await hentEnhet(req, bearerToken),
+    enheter: await hentEnheter(req, bearerToken),
   }
 }
 
-const hentEnhet = async (req: Request, bearerToken: string): Promise<IEnhet[]> => {
+const hentEnheter = async (req: Request, bearerToken: string): Promise<IEnhet[]> => {
 
     if (bearerToken) {
         try {

@@ -10,7 +10,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 
 fun Route.tilbakekreving(tilbakekrevingService: TilbakekrevingService) {
-    route("tilbakekreving") {
+    route("api/tilbakekreving") {
         val logger = application.log
 
         get("/{kravgrunnlagid}") {

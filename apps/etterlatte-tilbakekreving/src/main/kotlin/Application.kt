@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.typesafe.config.ConfigFactory
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
@@ -8,6 +9,7 @@ import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
+import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
@@ -21,9 +23,11 @@ import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
+import no.nav.etterlatte.tilbakekreving.config.tokenAcceptAllTokensSupport
 import no.nav.etterlatte.tilbakekreving.tilbakekreving
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
 import java.util.*
 
@@ -55,19 +59,19 @@ fun rapidApplication(
     }
 
 fun io.ktor.server.application.Application.restModule(applicationContext: ApplicationContext) {
-    install(Authentication) {
-        applicationContext.tokenValidering(this)
-    }
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
+
     install(IgnoreTrailingSlash)
+
     install(CallLogging) {
         level = Level.INFO
         filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive")) }
         format { call -> "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}" }
         mdc(CORRELATION_ID) { call -> call.request.header(X_CORRELATION_ID) ?: UUID.randomUUID().toString() }
     }
+
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             call.application.log.error("En feil oppstod: ${cause.message}", cause)
@@ -78,6 +82,16 @@ fun io.ktor.server.application.Application.restModule(applicationContext: Applic
                     HttpStatusCode.InternalServerError
                 )
             )
+        }
+    }
+
+    if (developmentMode) {
+        install(Authentication) {
+            tokenAcceptAllTokensSupport()
+        }
+    } else {
+        install(Authentication) {
+            tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
         }
     }
 

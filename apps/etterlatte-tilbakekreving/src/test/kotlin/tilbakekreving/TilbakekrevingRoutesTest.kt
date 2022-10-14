@@ -4,7 +4,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.auth.AuthenticationConfig
 import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.withTestApplication
 import io.mockk.every
@@ -12,7 +11,6 @@ import io.mockk.mockk
 import no.nav.etterlatte.restModule
 import no.nav.etterlatte.testsupport.kravgrunnlagId
 import no.nav.etterlatte.testsupport.mottattKravgrunnlag
-import no.nav.etterlatte.testsupport.tokenTestSupportAcceptsAllTokens
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -20,7 +18,6 @@ import org.junit.jupiter.api.Test
 internal class TilbakekrevingRoutesTest {
 
     private val applicationContext: ApplicationContext = mockk {
-        every { tokenValidering } returns AuthenticationConfig::tokenTestSupportAcceptsAllTokens
         every { tilbakekrevingService } returns mockk {
             every { hentTilbakekreving(1) } returns mottattKravgrunnlag()
             every { hentTilbakekreving(2) } returns null
@@ -31,7 +28,7 @@ internal class TilbakekrevingRoutesTest {
     fun `skal hente kravgrunnlag`() {
         withTestApplication({ restModule(applicationContext) }) {
             with(
-                handleRequest(HttpMethod.Get, "/tilbakekreving/${kravgrunnlagId.value}") {
+                handleRequest(HttpMethod.Get, "/api/tilbakekreving/${kravgrunnlagId.value}") {
                     addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     addHeader(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                 }
@@ -46,7 +43,7 @@ internal class TilbakekrevingRoutesTest {
     fun `skal returnere 404 hvis kravgrunnlag mangler`() {
         withTestApplication({ restModule(applicationContext) }) {
             with(
-                handleRequest(HttpMethod.Get, "/tilbakekreving/2") {
+                handleRequest(HttpMethod.Get, "/api/tilbakekreving/2") {
                     addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     addHeader(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                 }
@@ -60,7 +57,7 @@ internal class TilbakekrevingRoutesTest {
     fun `skal feile med 500 dersom id ikke er gyldig`() {
         withTestApplication({ restModule(applicationContext) }) {
             with(
-                handleRequest(HttpMethod.Get, "/tilbakekreving/ugyldig") {
+                handleRequest(HttpMethod.Get, "/api/tilbakekreving/ugyldig") {
                     addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     addHeader(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
                 }

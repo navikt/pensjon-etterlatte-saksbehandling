@@ -39,13 +39,15 @@ export const KanYtelsenBehandles = (props: VilkaarProps) => {
               </div>
               <ul>
                 {vilkaar?.kriterier?.flatMap((kriterie) =>
-                  kriterie.basertPaaOpplysninger.map((opplysning) => (
-                    <li key={opplysning.opplysning}>
-                      {erOversettelseGrunn(opplysning.opplysning)
-                        ? OVERSETTELSER_OPPHOERSGRUNNER[opplysning.opplysning]
-                        : opplysning.opplysning}
-                    </li>
-                  ))
+                  kriterie.basertPaaOpplysninger
+                    .filter((opplysning) => opplysning.opplysning?.length > 0)
+                    .map((opplysning) => (
+                      <li key={opplysning.opplysning}>
+                        {erOversettelseGrunn(opplysning.opplysning)
+                          ? OVERSETTELSER_OPPHOERSGRUNNER[opplysning.opplysning]
+                          : opplysning.opplysning}
+                      </li>
+                    ))
                 )}
               </ul>
             </VilkaarColumn>

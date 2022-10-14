@@ -38,7 +38,6 @@ internal class GrunnlagsendringshendelseJobTest {
     @Test
     fun `skal utfoere jobb siden pod er leader`() {
         every { leaderElection.isLeader() } returns true
-        every { grunnlagsendringshendelseService.sjekkKlareDoedshendelser(any()) } returns Unit
 
         runBlocking { grunnlagsendringshendelseJob.run() }
 

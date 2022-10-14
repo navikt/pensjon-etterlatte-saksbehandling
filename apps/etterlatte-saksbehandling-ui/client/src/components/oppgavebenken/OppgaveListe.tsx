@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-key */
-import React, { useContext, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import 'react-table'
 import {
   Column,
@@ -18,7 +18,7 @@ import { CollapseFilled, ExpandFilled } from '@navikt/ds-icons'
 import styled from 'styled-components'
 import { Heading } from '@navikt/ds-react'
 import { globalFilterFunction, tildeltFilterFunction } from './filtere/oppgaveListeFiltere'
-import { AppContext } from '../../store/AppContext'
+import { useAppSelector } from '../../store/Store'
 
 type Props = {
   columns: ReadonlyArray<Column<IOppgave>>
@@ -28,7 +28,7 @@ type Props = {
 }
 
 const OppgaveListe: React.FC<Props> = ({ columns, data, globalFilterValue, filterPar }) => {
-  const saksbehandlerNavn = useContext(AppContext).state.saksbehandlerReducer.navn
+  const saksbehandlerNavn = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.navn)
 
   const filterTypes = React.useMemo(
     () => ({

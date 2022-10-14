@@ -1,5 +1,5 @@
 import { Content, ContentHeader } from '../../../shared/styled'
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Alert, Button, ContentContainer, Heading, Table, Tag } from '@navikt/ds-react'
 import BrevModal from './brev-modal'
 import { Information, Success } from '@navikt/ds-icons'
@@ -17,13 +17,13 @@ import {
 } from '../../../shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
-import { AppContext } from '../../../store/AppContext'
 import { Journalpost } from '../types'
 import { formaterDato } from '../../../utils/formattering'
 import InnkommendeBrevModal from './innkommende-brev-modal'
 import styled from 'styled-components'
 import Spinner from '../../../shared/Spinner'
 import LastOppBrev from './nytt-brev/last-opp'
+import { useAppSelector } from '../../../store/Store'
 
 const IngenInnkommendeBrevRad = styled.td`
   text-align: center;
@@ -42,7 +42,9 @@ export interface IBrev {
 
 export const Brev = () => {
   const { behandlingId } = useParams()
-  const { soeknadMottattDato, kommerSoekerTilgode, behandlingType } = useContext(AppContext).state.behandlingReducer
+  const { soeknadMottattDato, kommerSoekerTilgode, behandlingType } = useAppSelector(
+    (state) => state.behandlingReducer.behandling!!
+  ) // TODO ai: fjern !!
   const fnr = kommerSoekerTilgode?.familieforhold?.soeker?.fnr || ''
 
   const [brevListe, setBrevListe] = useState<IBrev[]>([])
@@ -132,7 +134,7 @@ export const Brev = () => {
             Brev-oversikt
           </Heading>
           <div className="details">
-            <BehandlingsType type={behandlingType} />
+            {<BehandlingsType type={behandlingType} />}
             <SaksType type={ISaksType.BARNEPENSJON} />
           </div>
         </HeadingWrapper>

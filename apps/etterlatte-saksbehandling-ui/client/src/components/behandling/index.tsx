@@ -1,10 +1,9 @@
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import styled from 'styled-components'
 import { hentBehandling } from '../../shared/api/behandling'
 import { Column, GridContainer } from '../../shared/styled'
-import { AppContext } from '../../store/AppContext'
-import { addBehandlingAction, resetBehandlingAction } from '../../store/reducers/BehandlingReducer'
+import { resetBehandling } from '../../store/reducers/BehandlingReducer'
 import Spinner from '../../shared/Spinner'
 import { StatusBar, StatusBarTheme } from '../../shared/statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
@@ -12,12 +11,16 @@ import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny'
 import { formaterEnumTilLesbarString } from '../../utils/formattering'
 import { RevurderingsAarsakModal } from './inngangsvilkaar/revurderingInfo/RevurderingInfoModal'
+import { useAppDispatch, useAppSelector } from '../../store/Store'
+import { addBehandling } from '../../store/reducers/BehandlingReducer'
 
 export const Behandling = () => {
-  const ctx = useContext(AppContext)
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+  console.log(behandling)
+  const dispatch = useAppDispatch()
   const match = useMatch('/behandling/:behandlingId/*')
   const { behandlingRoutes } = useBehandlingRoutes()
-  const behandlingId = ctx.state.behandlingReducer?.id
+  const behandlingId = behandling.id
   const [isLoading, setIsLoading] = useState<boolean>(behandlingId === undefined)
 
   useEffect(() => {
@@ -33,17 +36,17 @@ export const Behandling = () => {
       const response = await hentBehandling(behandlingId)
 
       if (response.status === 'ok') {
-        ctx.dispatch(addBehandlingAction(response.data))
+        dispatch(addBehandling(response.data))
       } else {
-        ctx.dispatch(resetBehandlingAction())
+        dispatch(resetBehandling())
       }
       setIsLoading(false)
     }
   }, [match?.params.behandlingId, behandlingId])
 
-  const soeker = ctx.state.behandlingReducer?.kommerSoekerTilgode?.familieforhold?.soeker
+  const soeker = behandling?.kommerSoekerTilgode?.familieforhold?.soeker
   const soekerInfo = soeker ? { navn: soeker.navn, fnr: soeker.fnr, type: 'Etterlatt' } : null
-  const behandlingStatus = ctx.state.behandlingReducer?.status
+  const behandlingStatus = behandling?.status
 
   return (
     <>
@@ -54,7 +57,7 @@ export const Behandling = () => {
         <GridContainer>
           <Column>
             <MenuHead>
-              <Title>{formaterEnumTilLesbarString(ctx.state.behandlingReducer.behandlingType)}</Title>
+              <Title>{formaterEnumTilLesbarString(behandling.behandlingType)}</Title>
             </MenuHead>
             <StegMeny />
           </Column>

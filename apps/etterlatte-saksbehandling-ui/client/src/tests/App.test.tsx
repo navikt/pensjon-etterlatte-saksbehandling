@@ -1,9 +1,9 @@
-import React from 'react'
 import { render } from '@testing-library/react'
 import App from '../App'
-import { ContextProvider } from '../store/AppContext'
+import { Provider } from 'react-redux'
+import { store } from '../store/Store'
 
-const TestEnv = (props: { children: any }) => <ContextProvider>{props.children}</ContextProvider>
+const TestEnv = (props: { children: any }) => <Provider store={store}>{props.children}</Provider>
 
 /*
 const TestEnv2 = (props: {children: any}) => {

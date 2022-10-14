@@ -1,16 +1,15 @@
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { IBehandlingInfo } from './types'
-import { AppContext } from '../../../store/AppContext'
 import { BehandlingInfo } from '../attestering'
 import { IHendelseType } from '../../../store/reducers/BehandlingReducer'
+import { useAppSelector } from '../../../store/Store'
 
 export const SideMeny = () => {
-  const ctx = useContext(AppContext)
+  const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const [behandlingsInfo, setBehandlingsinfo] = useState<IBehandlingInfo>()
 
   useEffect(() => {
-    const behandling = ctx.state.behandlingReducer
-    const innlogget = ctx.state.saksbehandlerReducer
     const underkjentHendelser = behandling.hendelser.filter(
       (hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_UNDERKJENT
     )
@@ -27,9 +26,9 @@ export const SideMeny = () => {
         datoAttestert: behandling.datoAttestert,
         underkjentLogg: underkjentHendelser,
         fattetLogg: fattetHendelser,
-        rolle: innlogget.rolle,
+        rolle: saksbehandler.rolle,
       })
-  }, [ctx.state])
+  }, [saksbehandler, behandling])
 
   return <div>{behandlingsInfo && <BehandlingInfo behandlingsInfo={behandlingsInfo} />}</div>
 }

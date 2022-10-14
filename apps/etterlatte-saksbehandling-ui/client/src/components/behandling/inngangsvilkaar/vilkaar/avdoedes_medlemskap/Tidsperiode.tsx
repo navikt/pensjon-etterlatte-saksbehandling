@@ -3,7 +3,7 @@ import { HomeIcon } from '../../../../../shared/icons/homeIcon'
 import styled from 'styled-components'
 import { InformationIcon } from '../../../../../shared/icons/informationIcon'
 
-import { useContext, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Button, Popover } from '@navikt/ds-react'
 import { formaterEnumTilLesbarString, formaterStringDato } from '../../../../../utils/formattering'
 import { hentKildenavn, norskeBostaver } from '../tekstUtils'
@@ -20,9 +20,9 @@ import {
 import { KildeType } from '../../../../../store/reducers/BehandlingReducer'
 import { Delete } from '@navikt/ds-icons'
 import { hentBehandling, slettPeriodeForAvdoedesMedlemskap } from '../../../../../shared/api/behandling'
-import { AppContext } from '../../../../../store/AppContext'
 import Spinner from '../../../../../shared/Spinner'
 import { ErrorResponse } from '../../../felles/ErrorResponse'
+import { useAppSelector } from '../../../../../store/Store'
 
 export const Tidsperiode = ({
   periode,
@@ -34,7 +34,7 @@ export const Tidsperiode = ({
   startOffset: string
 }) => {
   const buttonRef = useRef(null)
-  const behandlingId = useContext(AppContext).state.behandlingReducer.id
+  const behandlingId = useAppSelector((state) => state.behandlingReducer.behandling.id)
   const [open, setOpen] = useState(false)
   const [sletter, setSletter] = useState<boolean>(false)
   const [sletteError, setSletteError] = useState<boolean>(false)

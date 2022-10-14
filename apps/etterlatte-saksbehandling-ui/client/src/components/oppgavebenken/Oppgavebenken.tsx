@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import OppgaveHeader from './OppgaveHeader'
 import OppgaveListe from './OppgaveListe'
 import styled from 'styled-components'
@@ -15,7 +15,7 @@ import { kolonner } from './OppgaveKolonner'
 import { initialOppgaveFelter, IOppgaveFelter } from './typer/oppgavefelter'
 import { hentOppgaver, OppgaveDTO } from '../../shared/api/oppgaver'
 import Spinner from '../../shared/Spinner'
-import { AppContext, IAppContext } from '../../store/AppContext'
+import { useAppSelector } from '../../store/Store'
 
 const OppgavebenkContainer = styled.div`
   max-width: 60em;
@@ -23,7 +23,7 @@ const OppgavebenkContainer = styled.div`
 `
 
 const Oppgavebenken = () => {
-  const saksbehandlerNavn = useContext<IAppContext>(AppContext).state.saksbehandlerReducer.navn
+  const saksbehandlerNavn = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.navn)
   const [lasterOppgaver, setLasterOppgaver] = useState(true)
   const [toggleHentOppgaver, setToggleHentOppgaver] = useState(false)
   const [oppgaver, setOppgaver] = useState<ReadonlyArray<IOppgave>>([])

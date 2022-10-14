@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMatch, useNavigate } from 'react-router'
 import { Beregne } from './beregne'
 import { Inngangsvilkaar } from './inngangsvilkaar'
@@ -7,7 +7,7 @@ import { Soeknadsoversikt } from './soeknadsoversikt'
 import { Brev } from './brev'
 import Beregningsgrunnlag from './beregningsgrunnlag'
 import { IBehandlingsType } from '../../store/reducers/BehandlingReducer'
-import { AppContext } from '../../store/AppContext'
+import { useAppSelector } from '../../store/Store'
 
 const behandlingRoutes = [
   { path: 'soeknadsoversikt', element: <Soeknadsoversikt />, erRevurderingRoute: false },
@@ -42,12 +42,12 @@ function useRouteNavigation() {
 
 export const useBehandlingRoutes = () => {
   const { currentRoute, goto } = useRouteNavigation()
-  const { state } = useContext(AppContext)
-  const soekerHarSoesken = (state.behandlingReducer?.familieforhold?.avdoede?.opplysning.avdoedesBarn?.length ?? 0) > 1
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+  const soekerHarSoesken = (behandling?.familieforhold?.avdoede?.opplysning.avdoedesBarn?.length ?? 0) > 1
 
   const aktuelleRoutes =
-    state.behandlingReducer?.behandlingType === IBehandlingsType.REVURDERING ||
-    state.behandlingReducer?.behandlingType === IBehandlingsType.MANUELT_OPPHOER
+    behandling?.behandlingType === IBehandlingsType.REVURDERING ||
+    behandling?.behandlingType === IBehandlingsType.MANUELT_OPPHOER
       ? revurderingBehandlingRoutes()
       : foerstegangBehandlingRoutes(soekerHarSoesken)
 

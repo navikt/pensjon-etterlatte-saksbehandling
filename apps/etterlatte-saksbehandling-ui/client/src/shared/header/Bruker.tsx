@@ -1,13 +1,12 @@
-import { useContext } from 'react'
 import styled from 'styled-components'
-import { AppContext, IAppContext } from '../../store/AppContext'
+import { useAppSelector } from '../../store/Store'
 
 export const Bruker = () => {
-  const user = useContext<IAppContext>(AppContext).state.saksbehandlerReducer
+  const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
 
   return (
     <BrukerWrap>
-      {user?.fornavn} {user?.etternavn} <Ident>({user?.ident})</Ident>
+      {user.fornavn} {user.etternavn} <Ident>({user.ident})</Ident>
     </BrukerWrap>
   )
 }

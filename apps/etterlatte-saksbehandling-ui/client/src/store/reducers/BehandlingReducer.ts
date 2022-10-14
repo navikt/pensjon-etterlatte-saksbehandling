@@ -1,4 +1,4 @@
-import { IAction } from '../AppContext'
+import { createAction, createReducer } from '@reduxjs/toolkit'
 
 export interface IDetaljertBehandling {
   id: string
@@ -363,19 +363,20 @@ export const detaljertBehandlingInitialState: IDetaljertBehandling = {
   søker: undefined,
 }
 
-export const addBehandlingAction = (data: IDetaljertBehandling) => ({ type: 'add_behandling', data })
-export const resetBehandlingAction = () => ({ type: 'reset_behandling' })
+export const addBehandling = createAction<IDetaljertBehandling>('behandling/add')
+export const resetBehandling = createAction('behandling/reset')
 
-export const behandlingReducer = (state = detaljertBehandlingInitialState, action: IAction): any => {
-  switch (action.type) {
-    case 'add_behandling':
-      return {
-        ...state,
-        ...action.data,
-      }
-    case 'reset_behandling':
-      return detaljertBehandlingInitialState
-    default:
-      state
-  }
+export interface IBehandlingReducer {
+  behandling: IDetaljertBehandling
 }
+const initialState: IBehandlingReducer = { behandling: detaljertBehandlingInitialState }
+
+export const behandlingReducer = createReducer(initialState, (builder) => {
+  builder.addCase(addBehandling, (state, action) => {
+    state.behandling = action.payload
+    state.behandling.behandlingType = action.payload.behandlingType ?? IBehandlingsType.FØRSTEGANGSBEHANDLING // Default til behandlingstype hvis null
+  })
+  builder.addCase(resetBehandling, (state) => {
+    state.behandling = detaljertBehandlingInitialState
+  })
+})

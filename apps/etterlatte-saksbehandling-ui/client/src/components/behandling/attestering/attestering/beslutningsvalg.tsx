@@ -1,10 +1,9 @@
 import { RadioGroup, Radio } from '@navikt/ds-react'
-import { useContext } from 'react'
 import { Underkjenn } from './underkjenn'
 import { RadioGroupWrapper } from '../styled'
 import { Godkjenn } from './godkjenn'
-import { AppContext } from '../../../../store/AppContext'
 import { IBeslutning } from '../types'
+import { useAppSelector } from '../../../../store/Store'
 
 type Props = {
   beslutning: IBeslutning | undefined
@@ -12,7 +11,7 @@ type Props = {
 }
 
 export const Beslutningsvalg: React.FC<Props> = ({ beslutning, setBeslutning }) => {
-  const behandlingId = useContext(AppContext).state.behandlingReducer.id
+  const behandlingId = useAppSelector((state) => state.behandlingReducer.behandling.id)
 
   return (
     <>

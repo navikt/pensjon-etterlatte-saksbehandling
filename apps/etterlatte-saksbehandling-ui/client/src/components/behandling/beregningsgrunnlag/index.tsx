@@ -1,19 +1,19 @@
 import { BodyShort, Button, Heading, Loader, Radio, RadioGroup } from '@navikt/ds-react'
 import { Content, Header } from '../../../shared/styled'
-import React, { useContext, useState } from 'react'
+import { useState } from 'react'
 import { Border } from '../soeknadsoversikt/styled'
 import { Barn } from '../soeknadsoversikt/familieforhold/personer/Barn'
 import { Soesken } from '../soeknadsoversikt/familieforhold/personer/Soesken'
-import { AppContext } from '../../../store/AppContext'
 import styled from 'styled-components'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentBehandling, lagreSoeskenMedIBeregning } from '../../../shared/api/behandling'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { Controller, useForm } from 'react-hook-form'
 import { formaterStringDato } from '../../../utils/formattering'
-import { addBehandlingAction } from '../../../store/reducers/BehandlingReducer'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
+import { useAppDispatch, useAppSelector } from '../../../store/Store'
+import { addBehandling } from '../../../store/reducers/BehandlingReducer'
 
 interface SoeskenMedIBeregning {
   foedselsnummer: string
@@ -22,9 +22,9 @@ interface SoeskenMedIBeregning {
 
 const Beregningsgrunnlag = () => {
   const { next } = useBehandlingRoutes()
-  const ctx = useContext(AppContext)
-  const behandling = ctx.state.behandlingReducer
-  const behandles = hentBehandlesFraStatus(ctx.state.behandlingReducer?.status)
+  const dispatch = useAppDispatch()
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)!! // TODO ai: fjern !!
+  const behandles = hentBehandlesFraStatus(behandling?.status)
   const [isLoading, setIsLoading] = useState(false)
 
   if (behandling.kommerSoekerTilgode == null || behandling.familieforhold?.avdoede == null) {
@@ -71,7 +71,7 @@ const Beregningsgrunnlag = () => {
           await hentBehandling(behandling.id).then((response) => {
             setIsLoading(false)
             if (response.status === 'ok' && response.data) {
-              ctx.dispatch(addBehandlingAction(response.data))
+              dispatch(addBehandling(response.data))
               next()
             } else {
               console.error({ response })

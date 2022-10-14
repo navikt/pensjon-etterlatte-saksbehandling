@@ -1,5 +1,4 @@
-import { useContext } from 'react'
-import { AppContext } from '../../store/AppContext'
+import { useAppSelector } from '../../store/Store'
 import { IBehandlingsType, VurderingsResultat } from '../../store/reducers/BehandlingReducer'
 
 // Dette er en midlertidig workaround i frontend fram til vi får noe mer rimelig rundt hva er vedtaksresultat i backend
@@ -9,10 +8,10 @@ import { IBehandlingsType, VurderingsResultat } from '../../store/reducers/Behan
 export type VedtakResultat = 'opphoer' | 'innvilget' | 'avslag' | 'endring' | 'uavklart'
 
 export function useVedtaksResultat(): VedtakResultat {
-  const { state } = useContext(AppContext)
-  const behandlingType = state.behandlingReducer?.behandlingType
+  const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
+  const behandlingType = behandling?.behandlingType
   const vilkaarsresultat =
-    state.behandlingReducer?.vilkårsprøving?.resultat ?? VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+    behandling?.vilkårsprøving?.resultat ?? VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
 
   switch (vilkaarsresultat) {
     case VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING:

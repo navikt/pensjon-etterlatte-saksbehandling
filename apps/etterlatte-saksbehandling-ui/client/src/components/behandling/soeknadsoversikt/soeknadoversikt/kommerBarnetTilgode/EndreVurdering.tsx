@@ -2,12 +2,12 @@ import { Undertekst, VurderingsTitle } from '../../styled'
 import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { RadioGroupWrapper } from './KommerBarnetTilGodeVurdering'
 import { hentBehandling, lagreBegrunnelseKommerBarnetTilgode } from '../../../../../shared/api/behandling'
-import { useContext, useState } from 'react'
-import { AppContext } from '../../../../../store/AppContext'
+import { useState } from 'react'
 import { ISvar } from '../../../../../store/reducers/BehandlingReducer'
+import { useAppSelector } from '../../../../../store/Store'
 
 export const EndreVurdering = ({ setRedigeringsModusFalse }: { setRedigeringsModusFalse: () => void }) => {
-  const behandlingId = useContext(AppContext).state.behandlingReducer.id
+  const behandlingId = useAppSelector((state) => state.behandlingReducer.behandling.id)
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
   const [kommentar, setKommentar] = useState<string>('')

@@ -1,0 +1,53 @@
+name: .deploy.yaml
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: 'Lenke til docker image'
+        required: true
+        type: string
+      labs:
+        description: 'Om appen skal deployes til labs-gcp (default er false)'
+        required: false
+        type: boolean
+
+jobs:
+  deploy-to-labs-gcp:
+    name: labs-gcp
+    if: ${{ inputs.labs == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: labs-gcp
+          RESOURCE: apps/${{ github.workflow }}/.nais/labs.yaml
+          VAR: image=${{ inputs.image }}
+
+  deploy-to-dev-gcp:
+    name: dev-gcp
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: apps/${{ github.workflow }}/.nais/dev.yaml
+          VAR: image=${{ inputs.image }}
+
+  deploy-to-prod-gcp:
+    name: prod-gcp
+    if: ${{ github.event.inputs.deploy-prod == 'true' }} # Tvinge manuell prod deploy inntil videre
+    needs: deploy-to-dev-gcp
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: apps/${{ github.workflow }}/.nais/prod.yaml
+          VAR: image=${{ inputs.image }}

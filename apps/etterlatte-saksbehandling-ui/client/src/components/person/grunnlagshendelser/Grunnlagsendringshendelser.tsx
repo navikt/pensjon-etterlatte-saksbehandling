@@ -33,7 +33,7 @@ const VisDoedshendelse = ({ doedshendelse }: { doedshendelse: Doedshendelse }) =
   </p>
 )
 
-const FormaterHendelseData = (props: { data?: Grunnlagsinformasjon }) => {
+const HendelseVisning = (props: { data?: Grunnlagsinformasjon }) => {
   switch (props.data?.type) {
     case 'UTFLYTTING':
       return <VisUtflytting utflytting={props.data.hendelse} />
@@ -61,7 +61,7 @@ const TabellForHendelser = ({ hendelser }: { hendelser: Grunnlagsendringshendels
           <Table.DataCell>{teksterForGrunnlagshendelser[hendelse.type]}</Table.DataCell>
           <Table.DataCell>{formaterStringDato(hendelse.opprettet)}</Table.DataCell>
           <Table.DataCell>
-            <FormaterHendelseData data={hendelse.data} />
+            <HendelseVisning data={hendelse.data} />
           </Table.DataCell>
         </Table.Row>
       ))}

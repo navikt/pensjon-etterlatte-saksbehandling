@@ -45,17 +45,6 @@ export enum AarsaksTyper {
   SOEKNAD = 'SOEKNAD',
 }
 
-export type GrunnlagsendringsType = Grunnlagsinformasjon['type']
-
-export interface Doedshendelse {
-  avdoedFnr: string
-  doedsdato?: string
-  endringstype: 'OPPRETTET' | 'KORRIGERT' | 'ANNULERT' | 'OPPHOERT'
-}
-
-export const ENDRINGSTYPER = ['OPPRETTET', 'KORRIGERT', 'ANNULERT', 'OPPHOERT'] as const
-export type Endringstype = typeof ENDRINGSTYPER[number]
-
 export interface Utflyttingshendelse {
   fnr: string
   tilflyttingsLand?: string
@@ -64,11 +53,22 @@ export interface Utflyttingshendelse {
   endringstype: Endringstype
 }
 
+export interface Doedshendelse {
+  avdoedFnr: string
+  doedsdato?: string
+  endringstype: Endringstype
+}
+
 export type Grunnlagsinformasjon =
   | { type: 'SOEKER_DOED'; hendelse: Doedshendelse }
   | { type: 'SOESKEN_DOED'; hendelse: Doedshendelse }
   | { type: 'GJENLEVENDE_FORELDER_DOED'; hendelse: Doedshendelse }
   | { type: 'UTFLYTTING'; hendelse: Utflyttingshendelse }
+
+export type GrunnlagsendringsType = Grunnlagsinformasjon['type']
+
+export const ENDRINGSTYPER = ['OPPRETTET', 'KORRIGERT', 'ANNULERT', 'OPPHOERT'] as const
+export type Endringstype = typeof ENDRINGSTYPER[number]
 
 const GRUNNLAGSENDRING_STATUS = [
   'IKKE_VURDERT',

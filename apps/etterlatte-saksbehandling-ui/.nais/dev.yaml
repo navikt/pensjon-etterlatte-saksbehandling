@@ -57,6 +57,7 @@ spec:
       external:
         - host: navikt.github.io
         - host: https://login.microsoftonline.com
+        - host: graph.microsoft.com
       rules:
         - application: etterlatte-api
         - application: etterlatte-brev-api

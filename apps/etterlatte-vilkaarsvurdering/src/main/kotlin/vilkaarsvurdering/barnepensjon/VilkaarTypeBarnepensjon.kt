@@ -3,8 +3,11 @@ package no.nav.etterlatte.vilkaarsvurdering.barnepensjon
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.safeLet
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
 import no.nav.etterlatte.vilkaarsvurdering.Paragraf
 import no.nav.etterlatte.vilkaarsvurdering.Vilkaar
@@ -17,7 +20,7 @@ fun barnepensjonVilkaar(grunnlag: Opplysningsgrunnlag) = listOf(
     forutgaaendeMedlemskap(),
     fortsattMedlemskap(),
     fortsattMedlemskapUnntaksbestemmelsene(),
-    alderBarn(grunnlag.soeker),
+    alderBarn(grunnlag.soeker, grunnlag.hentAvdoed()),
     doedsfallForelder(),
     yrkesskadeAvdoed()
 )
@@ -161,21 +164,22 @@ private fun fortsattMedlemskapUnntaksbestemmelsene() = Vilkaar(
     )
 )
 
-private fun alderBarn(soeker: Grunnlagsdata<JsonNode>?): Vilkaar {
-    val soekerFoedselsdato = soeker?.hentFoedselsdato()
-    val soekerFoedselsnummer = soeker?.hentFoedselsnummer()
-
-    val barnGrunnlag = if (soekerFoedselsdato != null && soekerFoedselsnummer != null) {
-        listOf(
-            Vilkaarsgrunnlag(
-                id = soekerFoedselsdato.id,
-                opplysningsType = VilkaarOpplysningsType.FOEDSELSDATO,
-                kilde = soekerFoedselsdato.kilde,
-                opplysning = Foedselsdato(soekerFoedselsdato.verdi, soekerFoedselsnummer.verdi)
-            )
+private fun alderBarn(soeker: Grunnlagsdata<JsonNode>?, avdoed: Grunnlagsdata<JsonNode>?): Vilkaar {
+    val barnGrunnlag = safeLet(soeker?.hentFoedselsdato(), soeker?.hentFoedselsnummer()) { foedselsdato, fnr ->
+        Vilkaarsgrunnlag(
+            id = foedselsdato.id,
+            opplysningsType = VilkaarOpplysningsType.FOEDSELSDATO,
+            kilde = foedselsdato.kilde,
+            opplysning = Foedselsdato(foedselsdato.verdi, fnr.verdi)
         )
-    } else {
-        emptyList()
+    }
+    val avdoedGrunnlag = safeLet(avdoed?.hentDoedsdato(), avdoed?.hentFoedselsnummer()) { doedsdato, fnr ->
+        Vilkaarsgrunnlag(
+            id = doedsdato.id,
+            opplysningsType = VilkaarOpplysningsType.DOEDSDATO,
+            kilde = doedsdato.kilde,
+            opplysning = Doedsdato(doedsdato.verdi, fnr.verdi)
+        )
     }
 
     return Vilkaar(
@@ -190,7 +194,7 @@ private fun alderBarn(soeker: Grunnlagsdata<JsonNode>?): Vilkaar {
         unntaksvilkaar = listOf(
             alderBarnBeggeForeldreDoedeUtdanning()
         ),
-        grunnlag = barnGrunnlag
+        grunnlag = listOfNotNull(barnGrunnlag, avdoedGrunnlag)
     )
 }
 

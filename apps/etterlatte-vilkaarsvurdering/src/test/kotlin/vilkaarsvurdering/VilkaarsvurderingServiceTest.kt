@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
 import no.nav.etterlatte.vilkaarsvurdering.SakType
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarOpplysningsType
@@ -38,19 +38,28 @@ internal class VilkaarsvurderingServiceTest {
         vilkaarsvurdering.behandlingId shouldBe uuid
         vilkaarsvurdering.vilkaar shouldHaveSize 7
         vilkaarsvurdering.vilkaar.first { it.type == VilkaarType.ALDER_BARN }.let { vilkaar ->
-            val grunnlag = requireNotNull(vilkaar.grunnlag?.get(0))
-            grunnlag.opplysningsType shouldBe VilkaarOpplysningsType.FOEDSELSDATO
-            val opplysning = grunnlag.opplysning as Foedselsdato
-            opplysning.foedselsdato shouldBe LocalDate.of(2012, 2, 16)
-            opplysning.foedselsnummer shouldBe Foedselsnummer.of("16021254243")
-        }
+            vilkaar.grunnlag shouldNotBe null
+            vilkaar.grunnlag!! shouldHaveSize 2
 
-        println(vilkaarsvurdering.toJson())
+            requireNotNull(vilkaar.grunnlag?.get(0)).let {
+                it.opplysningsType shouldBe VilkaarOpplysningsType.FOEDSELSDATO
+                val opplysning = it.opplysning as Foedselsdato
+                opplysning.foedselsdato shouldBe LocalDate.of(2012, 2, 16)
+                opplysning.foedselsnummer shouldBe Foedselsnummer.of("16021254243")
+            }
+            requireNotNull(vilkaar.grunnlag?.get(1)).let {
+                it.opplysningsType shouldBe VilkaarOpplysningsType.DOEDSDATO
+                val opplysning = it.opplysning as Doedsdato
+                opplysning.doedsdato shouldBe LocalDate.of(2022, 8, 17)
+                opplysning.foedselsnummer shouldBe Foedselsnummer.of("01448203510")
+            }
+        }
     }
 
     companion object {
         val grunnlag: Opplysningsgrunnlag = objectMapper.readValue(readFile("/grunnlag.json"))
 
+        @Suppress("SameParameterValue")
         private fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")
     }

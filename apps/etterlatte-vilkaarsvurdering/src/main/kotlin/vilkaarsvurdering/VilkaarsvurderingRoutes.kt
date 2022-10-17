@@ -13,25 +13,23 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import io.ktor.util.pipeline.PipelineContext
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) {
     route("/api/vilkaarsvurdering") {
         val logger = application.log
 
         get("/{behandlingId}") {
-            val behandlingId = requireNotNull(call.parameters["behandlingId"]).toUUID()
-
             logger.info("Henter vilkårsvurdering for $behandlingId")
             val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
-            vilkaarsvurdering?.let { call.respond(vilkaarsvurdering) } ?: call.respond(HttpStatusCode.NotFound)
+
+            call.respond(vilkaarsvurdering ?: HttpStatusCode.NotFound)
         }
 
         post("/{behandlingId}") {
-            val behandlingId = requireNotNull(call.parameters["behandlingId"]).toUUID()
-            val saksbehandler = requireNotNull(call.navIdent)
             val vurdertResultatDto = call.receive<VurdertResultatDto>()
 
             logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
@@ -40,22 +38,21 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                     behandlingId,
                     toVurdertVilkaar(vurdertResultatDto, saksbehandler)
                 )
+
             call.respond(oppdatertVilkaarsvurdering)
         }
 
         delete("/{behandlingId}/{vilkaarType}") {
-            val behandlingId = requireNotNull(call.parameters["behandlingId"]).toUUID()
             val vilkaarType = VilkaarType.valueOf(requireNotNull(call.parameters["vilkaarType"]))
 
             logger.info("Sletter vurdering på vilkår $vilkaarType for $behandlingId")
             vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarType)
+
             call.respond(HttpStatusCode.OK)
         }
 
         route("/resultat") {
             post("/{behandlingId}") {
-                val behandlingId = requireNotNull(call.parameters["behandlingId"]).toUUID()
-                val saksbehandler = requireNotNull(call.navIdent)
                 val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
 
                 logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
@@ -69,26 +66,29 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                             saksbehandler
                         )
                     )
+
                 call.respond(oppdatertVilkaarsvurdering)
             }
 
             delete("/{behandlingId}") {
-                val behandlingId = requireNotNull(call.parameters["behandlingId"]).toUUID()
-
                 logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
                 val oppdatertVilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId)
+
                 call.respond(oppdatertVilkaarsvurdering)
             }
         }
     }
 }
 
-private fun String.toUUID() = UUID.fromString(this)
+inline val PipelineContext<*, ApplicationCall>.behandlingId: UUID
+    get() = requireNotNull(call.parameters["behandlingId"]).let { UUID.fromString(it) }
 
-private val ApplicationCall.navIdent: String?
-    get() = principal<TokenValidationContextPrincipal>()
-        ?.context?.getJwtToken("azure")
-        ?.jwtTokenClaims?.getStringClaim("NAVident")
+inline val PipelineContext<*, ApplicationCall>.saksbehandler: String
+    get() = requireNotNull(
+        call.principal<TokenValidationContextPrincipal>()
+            ?.context?.getJwtToken("azure")
+            ?.jwtTokenClaims?.getStringClaim("NAVident")
+    )
 
 private fun toVurdertVilkaar(vurdertResultatDto: VurdertResultatDto, saksbehandler: String) =
     VurdertVilkaar(

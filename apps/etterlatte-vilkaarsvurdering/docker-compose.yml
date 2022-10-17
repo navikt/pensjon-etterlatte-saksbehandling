@@ -21,4 +21,28 @@ services:
     hostname: localhost
     environment:
       SERVER_PORT: 8082
-
+      JSON_CONFIG: >
+        {
+          "interactiveLogin": false,
+          "httpServer": "NettyWrapper",
+          "tokenCallbacks": [
+            {
+              "issuerId": "azure",
+              "tokenExpiry": 3600,
+              "requestMappings": [
+                {
+                  "requestParam": "scope",
+                  "match": "*",
+                  "claims": {
+                    "sub": "clientId",
+                    "aud": [
+                        "clientId"
+                    ],
+                    "NAVident": "Saksbehandler01",
+                    "name": "John Doe"
+                  }
+                }
+              ]
+            }
+          ]
+        }

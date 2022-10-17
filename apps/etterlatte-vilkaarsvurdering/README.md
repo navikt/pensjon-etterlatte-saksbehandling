@@ -21,5 +21,17 @@ Kjør følgende for å poste innholdet i en fil til kafka:
 `jq -c . src/test/resources/grunnlagEndret.json | docker exec -i etterlatte-vilkaarsvurdering-kafka-1 kafka-console-producer.sh --bootstrap-server localhost:9092 --topic etterlatte 'jq'`
 
 ### Teste mot REST-endepunkter
-- Gjør requester mot endepunkter under `http://localhost:8080/api/vilkaarsvurdering`
-- Sett header `Authorization` med verdien `Bearer eyJraWQiOiJhenVyZSIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJhenVyZS1pZCBmb3Igc2Frc2JlaGFuZGxlciIsIk5BVmlkZW50IjoiU2Frc2JlaGFuZGxlcjAxIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgyL2F6dXJlIiwibm9uY2UiOiI1Njc4IiwidGlkIjoiYXp1cmUiLCJhdWQiOiJjbGllbnRJZCIsIm5iZiI6MTY2NTc1ODE0NCwiYXpwIjoiY2xpZW50SWQiLCJuYW1lIjoiSm9obiBEb2UiLCJleHAiOjE2NjU3NjE3NDQsImlhdCI6MTY2NTc1ODE0NCwianRpIjoiOWYxOTc0NDUtZDc3ZC00YmU4LWE0OTUtN2FiZGJhMTVhYWU3In0.cnghBhSI_LTKQw1vzPss-OuH-QWH2KxbaAVYRxXSaOEGy2JHtHIL7AOUzghwAMpYaqVbHhjsOP4rGEYnHxYYGbvxrLI9hEXb3UFPX11xZFSk8WzUa5th6SwKnbBdm2xu7V11KoWFFCi6KHlCHzlCkwnAXNw-CsWGdmvdMo0NnbbJV6FdYY0FUGdJeFzV38ExVN0QakYkYqIQn5xfRh101mGv0cjEYA49RRGZjqXl8tz-SlwspdtqNpW9p0hZTQ8q2VywU_jiBlEv1uIqgU2FmE59oVLxOXIkjJa8XSVBdV-ZOShbHpLv__l9gV_kUaGu31-BkeEX2i8IF7zLJjiVMQ`
+
+#### Hente token
+```
+curl --location --request POST 'http://localhost:8082/azure/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'grant_type=client_credentials' \
+--data-urlencode 'client_id=clientId' \
+--data-urlencode 'client_secret=not_so_secret' \
+--data-urlencode 'scope=clientId'
+```
+
+#### Kjøre request
+- Url: `http://localhost:8080/api/vilkaarsvurdering`
+- Header: `Authorization: Bearer $token`

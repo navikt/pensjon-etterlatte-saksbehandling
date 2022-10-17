@@ -1,5 +1,6 @@
 import barnepensjon.domain.Aarsak
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.barnepensjon.GrunnlagForAvdoedMangler
 import no.nav.etterlatte.barnepensjon.model.VilkaarService
 import no.nav.etterlatte.domene.vedtak.Behandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
@@ -17,6 +18,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class LesVilkaarsmelding(
     rapidsConnection: RapidsConnection,
@@ -44,9 +46,11 @@ internal class LesVilkaarsmelding(
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) =
         withLogContext(packet.correlationId) {
+            var behandlingsId: UUID? = null
             try {
                 val grunnlag = requireNotNull(objectMapper.treeToValue<Grunnlag>(packet[grunnlagKey]))
                 val behandling = objectMapper.treeToValue<Behandling>(packet["behandling"])
+                behandlingsId = behandling.id
                 val behandlingopprettet = packet["behandlingOpprettet"].asLocalDateTime().toLocalDate()
                 val revurderingAarsak: RevurderingAarsak? = kotlin.runCatching {
                     RevurderingAarsak.valueOf(packet[BehandlingGrunnlagEndret.revurderingAarsakKey].asText())
@@ -80,10 +84,19 @@ internal class LesVilkaarsmelding(
                 logger.info(
                     "Vurdert vilkår for behandling med id=${behandling.id} og korrelasjonsid=${packet.correlationId}"
                 )
+            } catch (e: GrunnlagForAvdoedMangler) {
+                logger.warn(
+                    """
+                    |Kunne ikke hente ut grunnlag for avdød for behandlingen med id=$behandlingsId,
+                    |i pakken med korrelasjonsid=${packet.correlationId}. Dette skyldes sannsynligvis at grunnlaget 
+                    |ikke er innhentet for avdød enda. Behandlingen blir ikke vilkårsvurdert før grunnlaget for avdød
+                    |sendes i ny melding.
+                    """.trimMargin()
+                )
             } catch (e: Exception) {
                 logger.error(
                     """Vilkår kunne ikke vurderes på grunn av feil. Dette betyr at det ikke blir fylt ut en 
-                        |vilkårsvurdering for behandlingen for korrelasjonsid'en 
+                        |vilkårsvurdering for behandlingen med id=$behandlingsId for korrelasjonsid'en 
                         |${packet.correlationId}
                     """.trimMargin(),
                     e

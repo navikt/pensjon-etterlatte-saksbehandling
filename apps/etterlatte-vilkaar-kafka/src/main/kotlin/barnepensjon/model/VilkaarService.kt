@@ -6,6 +6,7 @@ import barnepensjon.kommerbarnettilgode.saksbehandlerResultat
 import barnepensjon.vilkaar.avdoedesmedlemskap.vilkaarAvdoedesMedlemskap
 import barnepensjon.vilkaar.vilkaarKanBehandleSakenISystemet
 import barnepensjon.vilkaarFormaalForYtelsen
+import no.nav.etterlatte.barnepensjon.GrunnlagForAvdoedMangler
 import no.nav.etterlatte.barnepensjon.OpplysningKanIkkeHentesUt
 import no.nav.etterlatte.barnepensjon.hentSisteVurderteDato
 import no.nav.etterlatte.barnepensjon.setVilkaarVurderingFraVilkaar
@@ -122,12 +123,7 @@ class VilkaarService {
 
     fun hentVirkningstidspunktFoerstegangssoeknad(doedsdato: LocalDate?, mottattDato: LocalDate): YearMonth {
         if (doedsdato == null) {
-            throw OpplysningKanIkkeHentesUt(
-                """
-                Vi har en førstegangssøknad der vi ikke kan hente ut avdød sin dødsdato. 
-                Vi kan dermed heller ikke beslutte virkningstidspunkt og vilkårsvurdere
-                """.trimIndent()
-            )
+            throw GrunnlagForAvdoedMangler
         }
         if (mottattDato.year - doedsdato.year > 3) {
             return YearMonth.of(mottattDato.year - 3, mottattDato.month)

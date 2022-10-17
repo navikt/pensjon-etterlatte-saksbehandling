@@ -16,6 +16,8 @@ import java.util.*
 
 class OpplysningKanIkkeHentesUt constructor(override val message: String? = null) : IllegalStateException(message)
 
+object GrunnlagForAvdoedMangler : IllegalStateException("Kunne ikke hente ut grunnlagsinformasjon om avdød")
+
 fun setVilkaarVurderingFraKriterier(kriterie: List<Kriterie>): VurderingsResultat {
     val resultat = kriterie.map { it.resultat }
     return hentVurdering(resultat)

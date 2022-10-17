@@ -39,7 +39,7 @@ internal class PersonServiceTest {
         val hentPerson: PdlHentPerson = personResponse.data?.hentPerson!!
 
         coEvery { pdlKlient.hentPerson(any(), any()) } returns personResponse
-        coEvery { pdlKlient.hentPersonBolk(any(), any()) } returns personBolkResponse
+        coEvery { pdlKlient.hentPersonBolk(any()) } returns personBolkResponse
         coEvery { pdlKlient.hentFolkeregisterIdent(any()) } returns personIdentResponse
         coEvery { ppsKlient.avklarNavn(any()) } returns hentPerson.navn.first()
         coEvery { ppsKlient.avklarAdressebeskyttelse(any()) } returns null

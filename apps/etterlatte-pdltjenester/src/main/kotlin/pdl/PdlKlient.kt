@@ -38,7 +38,7 @@ class PdlKlient(private val httpClient: HttpClient) {
     }
 
     // TODO utvide til rolleliste?
-    suspend fun hentPersonBolk(fnr: List<Foedselsnummer>, rolle: PersonRolle): PdlPersonResponseBolk {
+    suspend fun hentPersonBolk(fnr: List<Foedselsnummer>): PdlPersonResponseBolk {
         val request = PdlGraphqlBolkRequest(
             query = getQuery("/pdl/hentPersonBolk.graphql"),
             variables = PdlBolkVariables(

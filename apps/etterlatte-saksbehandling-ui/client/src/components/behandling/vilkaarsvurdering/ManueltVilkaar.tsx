@@ -10,7 +10,7 @@ import {
   VilkaarVurderingContainer,
   VilkaarWrapper,
 } from './styled'
-import React, { ReactNode } from 'react'
+import React from 'react'
 import { Vilkaar, VurderingsResultat } from '../../../shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
 import { VurderingsResultat as VurderingsresultatOld } from '../../../store/reducers/BehandlingReducer'
@@ -20,7 +20,6 @@ import { VilkaarGrunnlagsStoette } from './vilkaar/VilkaarGrunnlagsStoette'
 export interface VilkaarProps {
   vilkaar: Vilkaar
   oppdaterVilkaar: () => void
-  children: ReactNode
   behandlingId: string
 }
 

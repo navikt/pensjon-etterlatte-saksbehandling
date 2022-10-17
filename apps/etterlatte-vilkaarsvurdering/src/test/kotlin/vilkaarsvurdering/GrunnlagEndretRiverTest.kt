@@ -70,7 +70,7 @@ internal class GrunnlagEndretRiverTest {
 
     companion object {
         val grunnlagEndretMelding = readFile("/grunnlagEndret.json")
-        val grunnlag: Grunnlag = objectMapper.readValue(readFile("grunnlag"))
+        val grunnlag: Grunnlag = objectMapper.readValue(readFile("/grunnlag.json"))
 
         private fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")

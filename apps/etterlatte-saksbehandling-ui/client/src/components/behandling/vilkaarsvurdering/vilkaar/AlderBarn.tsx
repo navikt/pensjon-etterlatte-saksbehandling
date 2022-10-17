@@ -4,26 +4,48 @@ import { Vilkaarsgrunnlag } from '../../../../shared/api/vilkaarsvurdering'
 import { KildeType } from '../../../../store/reducers/BehandlingReducer'
 import { hentKildenavn } from '../../inngangsvilkaar/vilkaar/tekstUtils'
 import styled from 'styled-components'
+import { VilkaarColumn } from '../styled'
 
 export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) => {
   const foedselsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'FOEDSELSDATO')
+  const doedsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'DOEDSDATO')
 
-  const kilde = foedselsdatoGrunnlag?.kilde
+  const foedselsdatoKilde = foedselsdatoGrunnlag?.kilde
   const foedselsdato = foedselsdatoGrunnlag?.opplysning.foedselsdato
   const barnetsAlder = !!foedselsdato ? differenceInYears(new Date(), new Date(foedselsdato)) : undefined
-
-  if (!foedselsdatoGrunnlag || !kilde) return <div />
+  const doedsdato = doedsdatoGrunnlag?.opplysning.doedsdato
+  const doedsdatoKilde = doedsdatoGrunnlag?.kilde
+  const barnetsAlderVedDoedsfall = differenceInYears(new Date(doedsdato), new Date(foedselsdato))
 
   return (
     <>
-      <div>
-        <strong>Barnets fødselsdato</strong>
-      </div>
-      <span>
-        {format(new Date(foedselsdato), 'dd.MM.yyyy')}
-        {barnetsAlder && <span> ({barnetsAlder} år)</span>}
-      </span>
-      <KildeDatoOpplysning type={kilde.type} dato={kilde.tidspunktForInnhenting} />
+      {foedselsdato && foedselsdatoKilde && (
+        <VilkaarColumn>
+          <Center>
+            <div>
+              <strong>Barnets fødselsdato</strong>
+            </div>
+            <span>
+              {format(new Date(foedselsdato), 'dd.MM.yyyy')}
+              {barnetsAlder && <span> ({barnetsAlder} år)</span>}
+            </span>
+            <KildeDatoOpplysning type={foedselsdatoKilde.type} dato={foedselsdatoKilde.tidspunktForInnhenting} />
+          </Center>
+        </VilkaarColumn>
+      )}
+      {doedsdato && doedsdatoKilde && (
+        <VilkaarColumn>
+          <Center>
+            <div>
+              <strong>Alder ved dødsfall</strong>
+            </div>
+            <span>
+              {barnetsAlderVedDoedsfall} år ({format(new Date(doedsdato), 'dd.MM.yyyy')})
+            </span>
+            <KildeDatoOpplysning type={doedsdatoKilde.type} dato={doedsdatoKilde.tidspunktForInnhenting} />
+          </Center>
+        </VilkaarColumn>
+      )}
     </>
   )
 }
@@ -46,4 +68,8 @@ export const KildeOppysning = styled.div`
   color: grey;
   font-size: 0.9em;
   margin-top: 5px;
+`
+
+export const Center = styled.div`
+  text-align: center;
 `

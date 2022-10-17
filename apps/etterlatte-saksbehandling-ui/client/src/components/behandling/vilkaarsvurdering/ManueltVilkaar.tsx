@@ -59,9 +59,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
                 </p>
               </Lovtekst>
             </VilkaarColumn>
-            <VilkaarColumn>
-              <VilkaarGrunnlagsStoette vilkaar={vilkaar} />
-            </VilkaarColumn>
+            <VilkaarGrunnlagsStoette vilkaar={vilkaar} />
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
             <VilkaarVurderingContainer>

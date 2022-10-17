@@ -216,7 +216,7 @@ internal class VilkaarsvurderingRoutesTest {
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
-        val grunnlag: Grunnlag = objectMapper.readValue(readFile("grunnlag"))
+        val grunnlag: Grunnlag = objectMapper.readValue(readFile("/grunnlag.json"))
         val ISSUER_ID = "azure"
         val CLIENT_ID = "azure-id for saksbehandler"
 

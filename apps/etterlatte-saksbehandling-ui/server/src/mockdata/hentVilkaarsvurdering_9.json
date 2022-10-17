@@ -186,6 +186,21 @@
             "foedselsdato": "2012-02-16",
             "foedselsnummer": "16021254243"
           }
+        },
+        {
+          "id": "621ad8e6-4c26-4cee-94c9-67b6ff136ed0",
+          "opplysningsType": "DOEDSDATO",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-09-29T10:17:39.839547Z",
+            "registersReferanse": null,
+            "opplysningId": "opplysningsId1",
+            "type": "pdl"
+          },
+          "opplysning": {
+            "doedsdato": "2022-08-17",
+            "foedselsnummer": "01448203510"
+          }
         }
       ]
     },

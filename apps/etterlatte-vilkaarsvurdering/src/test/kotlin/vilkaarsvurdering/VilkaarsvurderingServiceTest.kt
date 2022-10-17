@@ -5,7 +5,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
@@ -57,7 +57,7 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     companion object {
-        val grunnlag: Opplysningsgrunnlag = objectMapper.readValue(readFile("/grunnlag.json"))
+        val grunnlag: Grunnlag = objectMapper.readValue(readFile("/grunnlag.json"))
 
         @Suppress("SameParameterValue")
         private fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()

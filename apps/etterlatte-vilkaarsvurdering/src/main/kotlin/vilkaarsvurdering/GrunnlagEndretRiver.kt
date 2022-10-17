@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -53,7 +53,7 @@ class GrunnlagEndretRiver(
                 val sakType = SakType.valueOf(packet["sak.sakType"].asText())
                 val grunnlag =
                     requireNotNull(
-                        objectMapper.treeToValue<Opplysningsgrunnlag>(
+                        objectMapper.treeToValue<Grunnlag>(
                             packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey]
                         )
                     )

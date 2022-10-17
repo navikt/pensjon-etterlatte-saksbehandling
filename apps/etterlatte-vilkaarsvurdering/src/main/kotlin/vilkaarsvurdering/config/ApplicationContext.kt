@@ -1,6 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering.config
 
-import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.vilkaarsvurdering.GrunnlagEndretRiver
 import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryInMemory
@@ -31,7 +31,7 @@ class ApplicationContext(
             Vilkaarsvurdering(
                 behandlingId = UUID.fromString("9a95a795-7f16-4380-b73a-32d4b41445ef"),
                 payload = "json",
-                vilkaar = barnepensjonVilkaar(Opplysningsgrunnlag.empty())
+                vilkaar = barnepensjonVilkaar(Grunnlag.empty())
             )
         )
     }

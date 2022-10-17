@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -13,7 +14,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.restModule
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import java.io.FileNotFoundException
 import org.junit.jupiter.api.TestInstance
 import java.util.*
 
@@ -208,13 +210,18 @@ internal class VilkaarsvurderingRoutesTest {
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
             "some payload",
-            Opplysningsgrunnlag.empty()
+            grunnlag
         )
     }
 
     private companion object {
-        val behandlingId = UUID.randomUUID()
+        val behandlingId: UUID = UUID.randomUUID()
+        val grunnlag: Grunnlag = objectMapper.readValue(readFile("grunnlag"))
         val ISSUER_ID = "azure"
         val CLIENT_ID = "azure-id for saksbehandler"
+
+        @Suppress("SameParameterValue")
+        private fun readFile(file: String) = GrunnlagEndretRiverTest::class.java.getResource(file)?.readText()
+            ?: throw FileNotFoundException("Fant ikke filen $file")
     }
 }

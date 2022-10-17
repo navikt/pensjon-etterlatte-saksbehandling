@@ -1,7 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
 import java.util.*
 
@@ -19,7 +19,7 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
         sakType: SakType,
         behandlingType: BehandlingType,
         payload: String,
-        grunnlag: Opplysningsgrunnlag
+        grunnlag: Grunnlag
     ): Vilkaarsvurdering {
         return when (sakType) {
             SakType.BARNEPENSJON ->

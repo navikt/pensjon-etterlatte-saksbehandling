@@ -1,8 +1,8 @@
 package no.nav.etterlatte.vilkaarsvurdering.barnepensjon
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
-import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
@@ -15,7 +15,7 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarOpplysningsType
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsgrunnlag
 
-fun barnepensjonVilkaar(grunnlag: Opplysningsgrunnlag) = listOf(
+fun barnepensjonVilkaar(grunnlag: Grunnlag) = listOf(
     formaal(),
     forutgaaendeMedlemskap(),
     fortsattMedlemskap(),

@@ -35,7 +35,6 @@ fun kriterieSammeBostedsadresse(
     soeker: Grunnlagsdata<JsonNode>?,
     gjenlevende: Grunnlagsdata<JsonNode>?
 ): Kriterie {
-    /* TODO ai: Fiks periodisering */
     val soekersAdresse = soeker?.hentBostedsadresse()
     val gjenlevendesAdresse = gjenlevende?.hentBostedsadresse()
 

@@ -58,7 +58,7 @@ fun kriterieDoedsdatoRegistrertIPdl(avdoed: Grunnlagsdata<JsonNode>?): Kriterie 
         DOEDSFALL_ER_REGISTRERT_I_PDL,
         IKKE_OPPFYLT,
         emptyList()
-    ) // TODO sj: Sjekke om dette faktisk blir riktig. Dersom dødsdato ikke finnes
+    )
 
 fun kriterieAvdoedErForelder(
     soeker: Grunnlagsdata<JsonNode>,
@@ -82,7 +82,7 @@ fun kriterieAvdoedErForelder(
                 avdoedDoedsdato.id,
                 KriterieOpplysningsType.DOEDSDATO,
                 avdoedDoedsdato.kilde,
-                Doedsdato(avdoedDoedsdato.verdi, avdoedFoedselsnummer!!.verdi) // TODO sj: ikke !!
+                Doedsdato(avdoedDoedsdato.verdi, avdoedFoedselsnummer!!.verdi)
             )
         }
     )

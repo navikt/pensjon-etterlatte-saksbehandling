@@ -44,7 +44,7 @@ fun kriterieSammeBostedsadresseSomAvdoed(
                 it.id,
                 KriterieOpplysningsType.BOSTEDADRESSE_SOEKER,
                 it.kilde,
-                Bostedadresser(soekerAdresse.perioder.map { it.verdi }) // TODO ai: periodisering
+                Bostedadresser(soekerAdresse.perioder.map { it.verdi })
             )
         },
         avdoedAdresse?.hentSenest()?.let {
@@ -52,7 +52,7 @@ fun kriterieSammeBostedsadresseSomAvdoed(
                 it.id,
                 KriterieOpplysningsType.BOSTEDADRESSE_AVDOED,
                 it.kilde,
-                Bostedadresser(avdoedAdresse.perioder.map { it.verdi }) // TODO ai: periodisering
+                Bostedadresser(avdoedAdresse.perioder.map { it.verdi })
             )
         }
     )

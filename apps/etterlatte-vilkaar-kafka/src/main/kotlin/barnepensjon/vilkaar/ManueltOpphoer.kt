@@ -35,7 +35,7 @@ fun kjenteGrunnerTilManueltOpphoer(opphoersgrunner: List<ManueltOpphoerAarsak>, 
         navn = Kriterietyper.INGEN_GRUNN_TIL_ANNULERING,
         resultat = vurderOpplysning { harIngenGrunnerTilAnnulering },
         basertPaaOpplysninger = opphoersgrunner.map { it.tilKriteriegrunnlagManueltOpphoer() } + listOfNotNull(
-            fritekstGrunn?.let { it.tilKriterieGrunnlagManueltOpphoer() }
+            fritekstGrunn.let { it.tilKriterieGrunnlagManueltOpphoer() }
         )
     )
 }
@@ -52,7 +52,10 @@ fun ManueltOpphoerAarsak.tilKriteriegrunnlagManueltOpphoer(): Kriteriegrunnlag<M
     )
 }
 
-fun String.tilKriterieGrunnlagManueltOpphoer(): Kriteriegrunnlag<String> {
+fun String?.tilKriterieGrunnlagManueltOpphoer(): Kriteriegrunnlag<String>? {
+    if (this.isNullOrEmpty()) {
+        return null
+    }
     return Kriteriegrunnlag(
         id = UUID.randomUUID(),
         kriterieOpplysningsType = KriterieOpplysningsType.SAKSBEHANDLER_RESULTAT,

@@ -7,9 +7,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import java.time.Instant
+import java.time.YearMonth
 import java.util.*
 
 open class Grunnlagsopplysning<T>(
@@ -22,6 +24,26 @@ open class Grunnlagsopplysning<T>(
     val fnr: Foedselsnummer? = null,
     val periode: Periode? = null
 ) {
+    companion object {
+        fun empty(
+            opplysningType: Opplysningstype,
+            kilde: Kilde,
+            fnr: Foedselsnummer,
+            fom: YearMonth?
+        ): Grunnlagsopplysning<out Any?> {
+            return Grunnlagsopplysning(
+                id = UUID.randomUUID(),
+                kilde = kilde,
+                opplysningType = opplysningType,
+                meta = objectMapper.createObjectNode(),
+                opplysning = null,
+                attestering = null,
+                fnr = fnr,
+                periode = fom?.let { Periode(it, null) }
+            )
+        }
+    }
+
     override fun toString(): String {
         return "Opplysning om ${opplysningType.name}: oppgitt av $kilde til å være: $opplysning. Id: $id"
     }

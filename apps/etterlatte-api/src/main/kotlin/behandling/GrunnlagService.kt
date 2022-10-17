@@ -72,6 +72,7 @@ class GrunnlagService(
             ?: throw RuntimeException("Fant ikke opplysning med id $saksbehandlerPeriodeId på sak ${behandling.sak}")
 
         val periodisertOpplysning =
+            // TODO ai: vurder å implementere "sletting"
             lagOpplysning(
                 opplysningsType = Opplysningstype.MEDLEMSKAPSPERIODE,
                 kilde = Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),

@@ -50,15 +50,11 @@ class OpplysningsByggerService : OpplysningsBygger {
                 fnr = fnr
             )
         } ?: listOf(
-            lagOpplysning(
-                opplysningsType = Opplysningstype.ARBEIDSFORHOLD,
-                kilde = Grunnlagsopplysning.Aordningen(innhentetTidspunkt),
-                opplysning = null,
-                periode = Periode(
-                    fom = YearMonth.from(fnr.getBirthDate()),
-                    tom = null
-                ),
-                fnr = fnr
+            Grunnlagsopplysning.empty(
+                Opplysningstype.ARBEIDSFORHOLD,
+                Grunnlagsopplysning.Aordningen(innhentetTidspunkt),
+                fnr,
+                YearMonth.from(fnr.getBirthDate())
             )
         )
 
@@ -70,7 +66,7 @@ fun List<ArbeidsInntektMaaned>.filtrertPaaInntektsType(inntektType: InntektType)
     arbeidsinntekt.arbeidsInntektInformasjon.inntektListe?.filter { it.inntektType == inntektType }
 }.flatten()
 
-fun <T> lagOpplysning(
+fun <T : Any> lagOpplysning(
     opplysningsType: Opplysningstype,
     kilde: Grunnlagsopplysning.Kilde,
     opplysning: T,

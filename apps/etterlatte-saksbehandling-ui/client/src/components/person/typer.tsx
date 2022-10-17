@@ -26,6 +26,7 @@ export interface IPersonResult {
   behandlingListe: {
     behandlinger: IBehandlingsammendrag[]
   }
+  grunnlagsendringer?: Grunnlagsendringshendelse[]
 }
 
 export interface IBehandlingsammendrag {
@@ -42,4 +43,48 @@ export enum AarsaksTyper {
   SOEKER_DOD = 'SOEKER_DOD',
   MANUELT_OPPHOER = 'MANUELT_OPPHOER',
   SOEKNAD = 'SOEKNAD',
+}
+
+export interface Utflyttingshendelse {
+  fnr: string
+  tilflyttingsLand?: string
+  tilflyttingsstedIUtlandet?: string
+  utflyttingsdato: string
+  endringstype: Endringstype
+}
+
+export interface Doedshendelse {
+  avdoedFnr: string
+  doedsdato?: string
+  endringstype: Endringstype
+}
+
+export type Grunnlagsinformasjon =
+  | { type: 'SOEKER_DOED'; hendelse: Doedshendelse }
+  | { type: 'SOESKEN_DOED'; hendelse: Doedshendelse }
+  | { type: 'GJENLEVENDE_FORELDER_DOED'; hendelse: Doedshendelse }
+  | { type: 'UTFLYTTING'; hendelse: Utflyttingshendelse }
+
+export type GrunnlagsendringsType = Grunnlagsinformasjon['type']
+
+export const ENDRINGSTYPER = ['OPPRETTET', 'KORRIGERT', 'ANNULERT', 'OPPHOERT'] as const
+export type Endringstype = typeof ENDRINGSTYPER[number]
+
+const GRUNNLAGSENDRING_STATUS = [
+  'IKKE_VURDERT',
+  'TATT_MED_I_BEHANDLING',
+  'GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING',
+  'FORKASTET',
+] as const
+
+export type GrunnlagsendringStatus = typeof GRUNNLAGSENDRING_STATUS[number]
+
+export interface Grunnlagsendringshendelse {
+  id: string
+  sakId: number
+  type: GrunnlagsendringsType
+  data?: Grunnlagsinformasjon
+  status: GrunnlagsendringStatus
+  behandlingId?: string
+  opprettet: string
 }

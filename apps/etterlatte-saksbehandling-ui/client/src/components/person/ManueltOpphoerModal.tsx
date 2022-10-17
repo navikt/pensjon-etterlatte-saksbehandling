@@ -58,7 +58,7 @@ export const ManueltOpphoerModal = ({ sakId }: { sakId: number }) => {
 
   return (
     <>
-      <Button variant="primary" onClick={() => setOpen(true)}>
+      <Button variant="secondary" onClick={() => setOpen(true)}>
         Annuller saken
       </Button>
       <Modal open={open} onClose={() => setOpen(false)}>

@@ -1,10 +1,12 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class Grunnlagsendringshendelse(
     val id: UUID,
@@ -16,26 +18,23 @@ data class Grunnlagsendringshendelse(
     val behandlingId: UUID? = null
 )
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class Grunnlagsinformasjon {
-    abstract val type: String
 
+    @JsonTypeName("UTFLYTTING")
     data class Utflytting(
         val hendelse: UtflyttingsHendelse
-    ) : Grunnlagsinformasjon() {
-        override val type: String = "UTFLYTTING"
-    }
+    ) : Grunnlagsinformasjon()
 
+    @JsonTypeName("SOEKER_DOED")
     data class SoekerDoed(
         val hendelse: Doedshendelse
-    ) : Grunnlagsinformasjon() {
-        override val type: String = "SOEKER_DOED"
-    }
+    ) : Grunnlagsinformasjon()
 
+    @JsonTypeName("FORELDER_BARN_RELASJON")
     data class ForelderBarnRelasjon(
         val hendelse: ForelderBarnRelasjonHendelse
-    ) : Grunnlagsinformasjon() {
-        override val type: String = "FORELDER_BARN_RELASJON"
-    }
+    ) : Grunnlagsinformasjon()
 }
 
 enum class GrunnlagsendringsType {

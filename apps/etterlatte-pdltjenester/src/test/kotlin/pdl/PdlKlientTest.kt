@@ -40,7 +40,7 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/personBolk.json")
 
         runBlocking {
-            val personResponse = pdlKlient.hentPersonBolk(listOf(STOR_SNERK), PersonRolle.BARN)
+            val personResponse = pdlKlient.hentPersonBolk(listOf(STOR_SNERK))
             val hentPerson = personResponse.data?.hentPersonBolk
 
             assertEquals("TRIVIELL", hentPerson?.first()?.person?.navn?.first()?.fornavn)

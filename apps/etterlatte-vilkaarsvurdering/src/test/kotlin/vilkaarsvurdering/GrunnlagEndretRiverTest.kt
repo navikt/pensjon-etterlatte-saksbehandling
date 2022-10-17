@@ -5,11 +5,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
-import java.util.UUID
+import java.util.*
 
 internal class GrunnlagEndretRiverTest {
 
@@ -24,6 +25,7 @@ internal class GrunnlagEndretRiverTest {
                 any(),
                 SakType.BARNEPENSJON,
                 BehandlingType.FØRSTEGANGSBEHANDLING,
+                any(),
                 any()
             )
         } returns eksisterendeVilkaarsvurdering()
@@ -36,6 +38,7 @@ internal class GrunnlagEndretRiverTest {
                 any(),
                 SakType.BARNEPENSJON,
                 BehandlingType.FØRSTEGANGSBEHANDLING,
+                any(),
                 any()
             )
         }
@@ -60,7 +63,7 @@ internal class GrunnlagEndretRiverTest {
         Vilkaarsvurdering(
             behandlingId = UUID.fromString("dbbd9a01-3e5d-4ec1-819c-1781d1f6a440"),
             payload = grunnlagEndretMelding,
-            vilkaar = barnepensjonVilkaar()
+            vilkaar = barnepensjonVilkaar(Opplysningsgrunnlag.empty())
         )
 
     companion object {

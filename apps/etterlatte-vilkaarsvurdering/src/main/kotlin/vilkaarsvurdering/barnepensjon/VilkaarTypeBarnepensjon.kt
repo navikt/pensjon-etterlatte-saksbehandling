@@ -1,15 +1,23 @@
 package no.nav.etterlatte.vilkaarsvurdering.barnepensjon
 
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
+import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
 import no.nav.etterlatte.vilkaarsvurdering.Paragraf
 import no.nav.etterlatte.vilkaarsvurdering.Vilkaar
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarOpplysningsType
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsgrunnlag
 
-fun barnepensjonVilkaar() = listOf(
+fun barnepensjonVilkaar(grunnlag: Opplysningsgrunnlag) = listOf(
     formaal(),
     forutgaaendeMedlemskap(),
     fortsattMedlemskap(),
     fortsattMedlemskapUnntaksbestemmelsene(),
-    alderBarn(),
+    alderBarn(grunnlag.soeker),
     doedsfallForelder(),
     yrkesskadeAvdoed()
 )
@@ -153,19 +161,38 @@ private fun fortsattMedlemskapUnntaksbestemmelsene() = Vilkaar(
     )
 )
 
-private fun alderBarn() = Vilkaar(
-    type = VilkaarType.ALDER_BARN,
-    paragraf = Paragraf(
-        paragraf = "§ 18-4",
-        ledd = 1,
-        tittel = "Stønadssituasjonen – barnets alder",
-        lenke = Kapittel18.PARAGRAF_18_4.lenke,
-        lovtekst = "Pensjon ytes inntil barnet fyller 18 år."
-    ),
-    unntaksvilkaar = listOf(
-        alderBarnBeggeForeldreDoedeUtdanning()
+private fun alderBarn(soeker: Grunnlagsdata<JsonNode>?): Vilkaar {
+    val soekerFoedselsdato = soeker?.hentFoedselsdato()
+    val soekerFoedselsnummer = soeker?.hentFoedselsnummer()
+
+    val barnGrunnlag = if (soekerFoedselsdato != null && soekerFoedselsnummer != null) {
+        listOf(
+            Vilkaarsgrunnlag(
+                id = soekerFoedselsdato.id,
+                opplysningsType = VilkaarOpplysningsType.FOEDSELSDATO,
+                kilde = soekerFoedselsdato.kilde,
+                opplysning = Foedselsdato(soekerFoedselsdato.verdi, soekerFoedselsnummer.verdi)
+            )
+        )
+    } else {
+        emptyList()
+    }
+
+    return Vilkaar(
+        type = VilkaarType.ALDER_BARN,
+        paragraf = Paragraf(
+            paragraf = "§ 18-4",
+            ledd = 1,
+            tittel = "Stønadssituasjonen – barnets alder",
+            lenke = Kapittel18.PARAGRAF_18_4.lenke,
+            lovtekst = "Pensjon ytes inntil barnet fyller 18 år."
+        ),
+        unntaksvilkaar = listOf(
+            alderBarnBeggeForeldreDoedeUtdanning()
+        ),
+        grunnlag = barnGrunnlag
     )
-)
+}
 
 private fun doedsfallForelder() = Vilkaar(
     type = VilkaarType.DOEDSFALL_FORELDER,

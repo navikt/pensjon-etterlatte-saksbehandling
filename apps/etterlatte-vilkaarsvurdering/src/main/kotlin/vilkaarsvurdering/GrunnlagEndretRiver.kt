@@ -1,9 +1,12 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Opplysningsgrunnlag
 import no.nav.etterlatte.libs.common.logging.withLogContext
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -48,6 +51,12 @@ class GrunnlagEndretRiver(
                 val behandlingId = packet["behandlingId"].asText().toUUID()
                 val behandlingType = BehandlingType.valueOf(packet["behandling.type"].asText())
                 val sakType = SakType.valueOf(packet["sak.sakType"].asText())
+                val grunnlag =
+                    requireNotNull(
+                        objectMapper.treeToValue<Opplysningsgrunnlag>(
+                            packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey]
+                        )
+                    )
 
                 // Må få kopiert over alle disse tingene med virkningsdato osv
                 val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
@@ -63,7 +72,8 @@ class GrunnlagEndretRiver(
                         behandlingId,
                         sakType,
                         behandlingType,
-                        grunnlagEndretPayload
+                        grunnlagEndretPayload,
+                        grunnlag
                     )
                 }
             } catch (e: Exception) {

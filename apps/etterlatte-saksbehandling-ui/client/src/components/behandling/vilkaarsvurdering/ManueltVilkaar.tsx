@@ -15,6 +15,7 @@ import { Vilkaar, VurderingsResultat } from '../../../shared/api/vilkaarsvurderi
 import { Vurdering } from './Vurdering'
 import { VurderingsResultat as VurderingsresultatOld } from '../../../store/reducers/BehandlingReducer'
 import { StatusIcon } from '../../../shared/icons/statusIcon'
+import { VilkaarGrunnlagsStoette } from './vilkaar/VilkaarGrunnlagsStoette'
 
 export interface VilkaarProps {
   vilkaar: Vilkaar
@@ -58,7 +59,9 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
                 </p>
               </Lovtekst>
             </VilkaarColumn>
-            <VilkaarColumn>{props.children}</VilkaarColumn>
+            <VilkaarColumn>
+              <VilkaarGrunnlagsStoette vilkaar={vilkaar} />
+            </VilkaarColumn>
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
             <VilkaarVurderingContainer>

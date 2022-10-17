@@ -1,7 +1,8 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 data class Vilkaarsvurdering(
     val behandlingId: UUID,
@@ -14,7 +15,8 @@ data class Vilkaar(
     val type: VilkaarType,
     val paragraf: Paragraf,
     val vurdering: VurdertResultat? = null,
-    val unntaksvilkaar: List<Vilkaar>? = null
+    val unntaksvilkaar: List<Vilkaar>? = null,
+    val grunnlag: List<Vilkaarsgrunnlag<out Any>>? = null
 )
 
 enum class VilkaarType {
@@ -72,3 +74,15 @@ data class VurdertVilkaar(
     val vilkaarType: VilkaarType,
     val vurdertResultat: VurdertResultat
 )
+
+data class Vilkaarsgrunnlag<T>(
+    val id: UUID,
+    val opplysningsType: VilkaarOpplysningsType,
+    val kilde: Grunnlagsopplysning.Kilde,
+    val opplysning: T
+)
+
+enum class VilkaarOpplysningsType {
+    FOEDSELSDATO,
+    DOEDSDATO
+}

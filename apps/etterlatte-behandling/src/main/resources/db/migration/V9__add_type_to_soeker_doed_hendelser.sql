@@ -1,0 +1,1 @@
+UPDATE grunnlagsendringshendelse SET data = (data || jsonb_build_object('type', 'SOEKER_DOED')) WHERE type = 'SOEKER_DOED'

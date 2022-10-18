@@ -26,7 +26,9 @@ export interface IPersonResult {
   behandlingListe: {
     behandlinger: IBehandlingsammendrag[]
   }
-  grunnlagsendringer?: Grunnlagsendringshendelse[]
+  grunnlagsendringshendelser?: {
+    hendelser: Grunnlagsendringshendelse[]
+  }
 }
 
 export interface IBehandlingsammendrag {

@@ -77,7 +77,7 @@ export const Person = () => {
             <TabPanel>
               <Saksoversikt
                 behandlingliste={personData?.behandlingListe.behandlinger}
-                grunnlagshendelser={personData?.grunnlagsendringer}
+                grunnlagshendelser={personData?.grunnlagsendringshendelser?.hendelser}
               />
             </TabPanel>
             <TabPanel>

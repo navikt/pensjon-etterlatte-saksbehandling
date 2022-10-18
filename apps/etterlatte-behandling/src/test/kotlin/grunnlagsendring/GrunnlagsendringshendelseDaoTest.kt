@@ -128,12 +128,9 @@ internal class GrunnlagsendringshendelseDaoTest {
         val forelderBarnRelasjonHendelseFraDatabase =
             grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelse(uuidForelderBarn)
 
-        assertTrue(doedshendelseFraDatabase!!.data!!.type == "SOEKER_DOED")
-        assertTrue(doedshendelseFraDatabase.data is Grunnlagsinformasjon.SoekerDoed)
-        assertTrue(utflyttingHendelseFraDatabase!!.data!!.type == "UTFLYTTING")
-        assertTrue(utflyttingHendelseFraDatabase.data is Grunnlagsinformasjon.Utflytting)
-        assertTrue(forelderBarnRelasjonHendelseFraDatabase!!.data!!.type == "FORELDER_BARN_RELASJON")
-        assertTrue(forelderBarnRelasjonHendelseFraDatabase.data is Grunnlagsinformasjon.ForelderBarnRelasjon)
+        assertTrue(doedshendelseFraDatabase?.data is Grunnlagsinformasjon.SoekerDoed)
+        assertTrue(utflyttingHendelseFraDatabase?.data is Grunnlagsinformasjon.Utflytting)
+        assertTrue(forelderBarnRelasjonHendelseFraDatabase?.data is Grunnlagsinformasjon.ForelderBarnRelasjon)
     }
 
     @Test

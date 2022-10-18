@@ -1,15 +1,26 @@
 package no.nav.etterlatte.vilkaarsvurdering.barnepensjon
 
+import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
+import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.safeLet
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
+import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
 import no.nav.etterlatte.vilkaarsvurdering.Paragraf
 import no.nav.etterlatte.vilkaarsvurdering.Vilkaar
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarOpplysningsType
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsgrunnlag
 
-fun barnepensjonVilkaar() = listOf(
+fun barnepensjonVilkaar(grunnlag: Grunnlag) = listOf(
     formaal(),
     forutgaaendeMedlemskap(),
     fortsattMedlemskap(),
     fortsattMedlemskapUnntaksbestemmelsene(),
-    alderBarn(),
+    alderBarn(grunnlag.soeker, grunnlag.hentAvdoed()),
     doedsfallForelder(),
     yrkesskadeAvdoed()
 )
@@ -153,19 +164,39 @@ private fun fortsattMedlemskapUnntaksbestemmelsene() = Vilkaar(
     )
 )
 
-private fun alderBarn() = Vilkaar(
-    type = VilkaarType.ALDER_BARN,
-    paragraf = Paragraf(
-        paragraf = "§ 18-4",
-        ledd = 1,
-        tittel = "Stønadssituasjonen – barnets alder",
-        lenke = Kapittel18.PARAGRAF_18_4.lenke,
-        lovtekst = "Pensjon ytes inntil barnet fyller 18 år."
-    ),
-    unntaksvilkaar = listOf(
-        alderBarnBeggeForeldreDoedeUtdanning()
+private fun alderBarn(soeker: Grunnlagsdata<JsonNode>?, avdoed: Grunnlagsdata<JsonNode>?): Vilkaar {
+    val barnGrunnlag = safeLet(soeker?.hentFoedselsdato(), soeker?.hentFoedselsnummer()) { foedselsdato, fnr ->
+        Vilkaarsgrunnlag(
+            id = foedselsdato.id,
+            opplysningsType = VilkaarOpplysningsType.FOEDSELSDATO,
+            kilde = foedselsdato.kilde,
+            opplysning = Foedselsdato(foedselsdato.verdi, fnr.verdi)
+        )
+    }
+    val avdoedGrunnlag = safeLet(avdoed?.hentDoedsdato(), avdoed?.hentFoedselsnummer()) { doedsdato, fnr ->
+        Vilkaarsgrunnlag(
+            id = doedsdato.id,
+            opplysningsType = VilkaarOpplysningsType.DOEDSDATO,
+            kilde = doedsdato.kilde,
+            opplysning = Doedsdato(doedsdato.verdi, fnr.verdi)
+        )
+    }
+
+    return Vilkaar(
+        type = VilkaarType.ALDER_BARN,
+        paragraf = Paragraf(
+            paragraf = "§ 18-4",
+            ledd = 1,
+            tittel = "Stønadssituasjonen – barnets alder",
+            lenke = Kapittel18.PARAGRAF_18_4.lenke,
+            lovtekst = "Pensjon ytes inntil barnet fyller 18 år."
+        ),
+        unntaksvilkaar = listOf(
+            alderBarnBeggeForeldreDoedeUtdanning()
+        ),
+        grunnlag = listOfNotNull(barnGrunnlag, avdoedGrunnlag)
     )
-)
+}
 
 private fun doedsfallForelder() = Vilkaar(
     type = VilkaarType.DOEDSFALL_FORELDER,

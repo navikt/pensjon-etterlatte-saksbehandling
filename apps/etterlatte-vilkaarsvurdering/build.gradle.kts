@@ -41,4 +41,5 @@ dependencies {
 
     testImplementation(TestContainer.Jupiter)
     testImplementation(TestContainer.Postgresql)
+    testImplementation(Kotest.AssertionsCore)
 }

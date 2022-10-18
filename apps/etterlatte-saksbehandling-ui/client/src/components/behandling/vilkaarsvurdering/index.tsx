@@ -49,9 +49,7 @@ export const Inngangsvilkaar = () => {
               vilkaar={value}
               oppdaterVilkaar={oppdaterVilkaarsvurdering}
               behandlingId={behandlingId}
-            >
-              <></>
-            </ManueltVilkaar>
+            />
           ))}
 
           <Resultat

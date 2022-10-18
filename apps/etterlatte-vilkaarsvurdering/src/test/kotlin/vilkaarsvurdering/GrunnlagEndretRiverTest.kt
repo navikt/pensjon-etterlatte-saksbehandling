@@ -1,15 +1,18 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
-import java.util.UUID
+import java.util.*
 
 internal class GrunnlagEndretRiverTest {
 
@@ -24,6 +27,7 @@ internal class GrunnlagEndretRiverTest {
                 any(),
                 SakType.BARNEPENSJON,
                 BehandlingType.FØRSTEGANGSBEHANDLING,
+                any(),
                 any()
             )
         } returns eksisterendeVilkaarsvurdering()
@@ -36,6 +40,7 @@ internal class GrunnlagEndretRiverTest {
                 any(),
                 SakType.BARNEPENSJON,
                 BehandlingType.FØRSTEGANGSBEHANDLING,
+                any(),
                 any()
             )
         }
@@ -60,13 +65,14 @@ internal class GrunnlagEndretRiverTest {
         Vilkaarsvurdering(
             behandlingId = UUID.fromString("dbbd9a01-3e5d-4ec1-819c-1781d1f6a440"),
             payload = grunnlagEndretMelding,
-            vilkaar = barnepensjonVilkaar()
+            vilkaar = barnepensjonVilkaar(grunnlag)
         )
 
     companion object {
         val grunnlagEndretMelding = readFile("/grunnlagEndret.json")
+        val grunnlag: Grunnlag = objectMapper.readValue(readFile("/grunnlag.json"))
 
-        fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
+        private fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")
     }
 }

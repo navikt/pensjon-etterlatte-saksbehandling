@@ -10,16 +10,16 @@ import {
   VilkaarVurderingContainer,
   VilkaarWrapper,
 } from './styled'
-import React, { ReactNode } from 'react'
+import React from 'react'
 import { Vilkaar, VurderingsResultat } from '../../../shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
 import { VurderingsResultat as VurderingsresultatOld } from '../../../store/reducers/BehandlingReducer'
 import { StatusIcon } from '../../../shared/icons/statusIcon'
+import { VilkaarGrunnlagsStoette } from './vilkaar/VilkaarGrunnlagsStoette'
 
 export interface VilkaarProps {
   vilkaar: Vilkaar
   oppdaterVilkaar: () => void
-  children: ReactNode
   behandlingId: string
 }
 
@@ -58,7 +58,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
                 </p>
               </Lovtekst>
             </VilkaarColumn>
-            <VilkaarColumn>{props.children}</VilkaarColumn>
+            <VilkaarGrunnlagsStoette vilkaar={vilkaar} />
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
             <VilkaarVurderingContainer>

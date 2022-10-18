@@ -1,8 +1,9 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
-import java.util.UUID
+import java.util.*
 
 class VilkaarsvurderingFinnesIkkeException(override val message: String) : RuntimeException(message)
 class UgyldigSakTypeException(override val message: String) : RuntimeException(message)
@@ -17,14 +18,15 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
         behandlingId: UUID,
         sakType: SakType,
         behandlingType: BehandlingType,
-        payload: String
+        payload: String,
+        grunnlag: Grunnlag
     ): Vilkaarsvurdering {
         return when (sakType) {
             SakType.BARNEPENSJON ->
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
                         vilkaarsvurderingRepository.lagre(
-                            Vilkaarsvurdering(behandlingId, payload, barnepensjonVilkaar())
+                            Vilkaarsvurdering(behandlingId, payload, barnepensjonVilkaar(grunnlag))
                         )
                     else ->
                         throw VilkaarsvurderingFinnesIkkeException(

@@ -1,13 +1,11 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import com.fasterxml.jackson.module.kotlin.readValue
+import GrunnlagTestData
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
@@ -70,8 +68,9 @@ internal class GrunnlagEndretRiverTest {
 
     companion object {
         val grunnlagEndretMelding = readFile("/grunnlagEndret.json")
-        val grunnlag: Grunnlag = objectMapper.readValue(readFile("/grunnlag.json"))
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
+        @Suppress("SameParameterValue")
         private fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")
     }

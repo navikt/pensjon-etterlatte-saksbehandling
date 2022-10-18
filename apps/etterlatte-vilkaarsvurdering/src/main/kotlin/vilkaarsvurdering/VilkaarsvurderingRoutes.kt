@@ -23,65 +23,85 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
         val logger = application.log
 
         get("/{behandlingId}") {
-            logger.info("Henter vilkårsvurdering for $behandlingId")
-            val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
+            withBehandlingId { behandlingId ->
+                logger.info("Henter vilkårsvurdering for $behandlingId")
+                val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
 
-            call.respond(vilkaarsvurdering ?: HttpStatusCode.NotFound)
+                call.respond(vilkaarsvurdering ?: HttpStatusCode.NotFound)
+            }
         }
 
         post("/{behandlingId}") {
-            val vurdertResultatDto = call.receive<VurdertResultatDto>()
+            withBehandlingId { behandlingId ->
+                val vurdertResultatDto = call.receive<VurdertResultatDto>()
 
-            logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
-            val oppdatertVilkaarsvurdering =
-                vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
-                    behandlingId,
-                    toVurdertVilkaar(vurdertResultatDto, saksbehandler)
-                )
-
-            call.respond(oppdatertVilkaarsvurdering)
-        }
-
-        delete("/{behandlingId}/{vilkaarType}") {
-            val vilkaarType = VilkaarType.valueOf(requireNotNull(call.parameters["vilkaarType"]))
-
-            logger.info("Sletter vurdering på vilkår $vilkaarType for $behandlingId")
-            vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarType)
-
-            call.respond(HttpStatusCode.OK)
-        }
-
-        route("/resultat") {
-            post("/{behandlingId}") {
-                val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
-
-                logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
+                logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
                 val oppdatertVilkaarsvurdering =
-                    vilkaarsvurderingService.oppdaterTotalVurdering(
+                    vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
                         behandlingId,
-                        VilkaarsvurderingResultat(
-                            vurdertResultatDto.resultat,
-                            vurdertResultatDto.kommentar,
-                            LocalDateTime.now(),
-                            saksbehandler
-                        )
+                        toVurdertVilkaar(vurdertResultatDto, saksbehandler)
                     )
 
                 call.respond(oppdatertVilkaarsvurdering)
             }
+        }
+
+        delete("/{behandlingId}/{vilkaarType}") {
+            withBehandlingId { behandlingId ->
+                val vilkaarType = VilkaarType.valueOf(requireNotNull(call.parameters["vilkaarType"]))
+
+                logger.info("Sletter vurdering på vilkår $vilkaarType for $behandlingId")
+                vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarType)
+
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        route("/resultat") {
+            post("/{behandlingId}") {
+                withBehandlingId { behandlingId ->
+                    val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
+
+                    logger.info("Oppdaterer vilkårsvurderingsresultat for $behandlingId")
+                    val oppdatertVilkaarsvurdering =
+                        vilkaarsvurderingService.oppdaterTotalVurdering(
+                            behandlingId,
+                            VilkaarsvurderingResultat(
+                                vurdertResultatDto.resultat,
+                                vurdertResultatDto.kommentar,
+                                LocalDateTime.now(),
+                                saksbehandler
+                            )
+                        )
+
+                    call.respond(oppdatertVilkaarsvurdering)
+                }
+            }
 
             delete("/{behandlingId}") {
-                logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
-                val oppdatertVilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId)
+                withBehandlingId { behandlingId ->
+                    logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
+                    val oppdatertVilkaarsvurdering = vilkaarsvurderingService.slettTotalVurdering(behandlingId)
 
-                call.respond(oppdatertVilkaarsvurdering)
+                    call.respond(oppdatertVilkaarsvurdering)
+                }
             }
         }
     }
 }
 
-inline val PipelineContext<*, ApplicationCall>.behandlingId: UUID
-    get() = requireNotNull(call.parameters["behandlingId"]).let { UUID.fromString(it) }
+suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(onSuccess: (id: UUID) -> Unit) {
+    val id = call.parameters["behandlingId"]
+    if (id == null) {
+        call.respond(HttpStatusCode.BadRequest, "Fant ikke behandlingId")
+    }
+
+    try {
+        onSuccess(UUID.fromString(id))
+    } catch (e: IllegalArgumentException) {
+        call.respond(HttpStatusCode.BadRequest, "behandlingId må være en UUID")
+    }
+}
 
 inline val PipelineContext<*, ApplicationCall>.saksbehandler: String
     get() = requireNotNull(

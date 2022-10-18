@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
-import no.nav.etterlatte.vilkaarsvurdering.config.tokenAcceptAllTokensSupport
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -75,14 +74,8 @@ fun Application.restModule(applicationContext: ApplicationContext) {
         }
     }
 
-    if (developmentMode) {
-        install(Authentication) {
-            tokenAcceptAllTokensSupport()
-        }
-    } else {
-        install(Authentication) {
-            tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
-        }
+    install(Authentication) {
+        tokenValidationSupport(config = HoconApplicationConfig(ConfigFactory.load()))
     }
 
     routing {

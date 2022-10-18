@@ -18,19 +18,48 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.restModule
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationProperties
+import no.nav.security.mock.oauth2.MockOAuth2Server
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import org.junit.jupiter.api.TestInstance
+import java.util.*
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VilkaarsvurderingRoutesTest {
 
     private val vilkaarsvurderingServiceImpl = VilkaarsvurderingService(VilkaarsvurderingRepositoryInMemory())
+    private val server = MockOAuth2Server()
 
     private val applicationContext: ApplicationContext = mockk {
         every { properties } returns ApplicationProperties()
         every { vilkaarsvurderingService } returns vilkaarsvurderingServiceImpl
+    }
+
+    @BeforeAll
+    fun before() {
+        server.start()
+        System.setProperty("AZURE_APP_WELL_KNOWN_URL", server.wellKnownUrl(ISSUER_ID).toString())
+        System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
+    }
+
+    @AfterAll
+    fun after() {
+        server.shutdown()
+    }
+
+    private val token: String by lazy {
+        server.issueToken(
+            issuerId = ISSUER_ID,
+            audience = CLIENT_ID,
+            claims = mapOf(
+                "navn" to "John Doe",
+                "NAVident" to "Saksbehandler01"
+            )
+        ).serialize()
     }
 
     @Test
@@ -42,7 +71,7 @@ internal class VilkaarsvurderingRoutesTest {
 
             val response = client.get("/api/vilkaarsvurdering/$behandlingId") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+                header(HttpHeaders.Authorization, "Bearer $token")
             }
 
             val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), Vilkaarsvurdering::class.java)
@@ -78,7 +107,7 @@ internal class VilkaarsvurderingRoutesTest {
             val oppdatertVilkaarsvurderingResponse = client.post("/api/vilkaarsvurdering/$behandlingId") {
                 setBody(vurdertResultatDto.toJson())
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+                header(HttpHeaders.Authorization, "Bearer $token")
             }
 
             val oppdatertVilkaarsvurdering = objectMapper
@@ -111,7 +140,7 @@ internal class VilkaarsvurderingRoutesTest {
             client.post("/api/vilkaarsvurdering/$behandlingId") {
                 setBody(vurdertResultatDto.toJson())
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+                header(HttpHeaders.Authorization, "Bearer $token")
             }
 
             val vurdertResultat = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)?.vilkaar
@@ -121,7 +150,7 @@ internal class VilkaarsvurderingRoutesTest {
 
             val response = client.delete("/api/vilkaarsvurdering/$behandlingId/${vurdertResultatDto.type}") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+                header(HttpHeaders.Authorization, "Bearer $token")
             }
 
             val vurdertResultatSlettet = vilkaarsvurderingServiceImpl.hentVilkaarsvurdering(behandlingId)?.vilkaar
@@ -145,7 +174,7 @@ internal class VilkaarsvurderingRoutesTest {
             val oppdatertVilkaarsvurderingResponse = client.post("/api/vilkaarsvurdering/resultat/$behandlingId") {
                 setBody(resultat.toJson())
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+                header(HttpHeaders.Authorization, "Bearer $token")
             }
 
             val oppdatertVilkaarsvurdering = objectMapper
@@ -160,7 +189,7 @@ internal class VilkaarsvurderingRoutesTest {
 
             val sletteResponse = client.delete("/api/vilkaarsvurdering/resultat/$behandlingId") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+                header(HttpHeaders.Authorization, "Bearer $token")
             }
 
             val slettetVilkaarsvurdering = objectMapper
@@ -183,8 +212,7 @@ internal class VilkaarsvurderingRoutesTest {
 
     private companion object {
         val behandlingId = UUID.randomUUID()
-        val saksbehandlerToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhenVyZSIsInN1YiI6ImF6dXJlLWlkIG" +
-            "ZvciBzYWtzYmVoYW5kbGVyIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJOQVZpZGVudCI6IlNha3NiZW" +
-            "hhbmRsZXIwMSJ9.271mDij4YsO4Kk8w8AvX5BXxlEA8U-UAOtdG1Ix_kQY"
+        val ISSUER_ID = "azure"
+        val CLIENT_ID = "azure-id for saksbehandler"
     }
 }

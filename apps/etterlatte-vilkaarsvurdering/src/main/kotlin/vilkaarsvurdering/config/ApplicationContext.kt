@@ -1,13 +1,9 @@
 package no.nav.etterlatte.vilkaarsvurdering.config
 
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.vilkaarsvurdering.GrunnlagEndretRiver
-import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryInMemory
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
-import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
 import no.nav.helse.rapids_rivers.RapidsConnection
-import java.util.*
 
 class ApplicationContext(
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
@@ -25,16 +21,17 @@ class ApplicationContext(
     var dataSource = dataSourceBuilder.dataSource()
     */
 
-    var vilkaarsvurderingRepository = VilkaarsvurderingRepositoryInMemory().apply {
-        // legger inn mockdata
-        lagre(
-            Vilkaarsvurdering(
-                behandlingId = UUID.fromString("9a95a795-7f16-4380-b73a-32d4b41445ef"),
-                payload = "json",
-                vilkaar = barnepensjonVilkaar(Grunnlag.empty())
-            )
-        )
-    }
+    var vilkaarsvurderingRepository = VilkaarsvurderingRepositoryInMemory()
+//        .apply {
+//        // legger inn mockdata
+//        lagre(
+//            Vilkaarsvurdering(
+//                behandlingId = UUID.fromString("9a95a795-7f16-4380-b73a-32d4b41445ef"),
+//                payload = "json",
+//                vilkaar = barnepensjonVilkaar(Grunnlag.empty())
+//            )
+//        )
+//    }
 
     var vilkaarsvurderingService = VilkaarsvurderingService(vilkaarsvurderingRepository)
 

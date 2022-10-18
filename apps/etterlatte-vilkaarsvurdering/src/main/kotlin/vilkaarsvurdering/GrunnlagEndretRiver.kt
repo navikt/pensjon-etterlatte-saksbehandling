@@ -58,6 +58,10 @@ class GrunnlagEndretRiver(
                         )
                     )
 
+                // todo: Midlertidig fiks for å unngå at behandling forsøkes å opprettes
+                // Vil kaste NPE dersom grunnlag ikke eksisterer for avdød.
+                grunnlag.hentAvdoed()
+
                 // Må få kopiert over alle disse tingene med virkningsdato osv
                 val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
 

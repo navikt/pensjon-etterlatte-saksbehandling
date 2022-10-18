@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import java.io.FileNotFoundException
 import org.junit.jupiter.api.TestInstance
+import java.io.FileNotFoundException
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -217,8 +217,8 @@ internal class VilkaarsvurderingRoutesTest {
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
         val grunnlag: Grunnlag = objectMapper.readValue(readFile("/grunnlag.json"))
-        val ISSUER_ID = "azure"
-        val CLIENT_ID = "azure-id for saksbehandler"
+        const val ISSUER_ID = "azure"
+        const val CLIENT_ID = "azure-id for saksbehandler"
 
         @Suppress("SameParameterValue")
         private fun readFile(file: String) = GrunnlagEndretRiverTest::class.java.getResource(file)?.readText()

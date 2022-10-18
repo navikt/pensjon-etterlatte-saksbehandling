@@ -20,7 +20,7 @@ export const Behandling = () => {
   const match = useMatch('/behandling/:behandlingId/*')
   const { behandlingRoutes } = useBehandlingRoutes()
   const behandlingId = behandling.id
-  const [isLoading, setIsLoading] = useState<boolean>(behandlingId === undefined)
+  const [isLoading, setIsLoading] = useState<boolean>(behandlingId === '')
 
   useEffect(() => {
     const behandlingIdFraURL = match?.params.behandlingId

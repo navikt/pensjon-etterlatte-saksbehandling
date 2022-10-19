@@ -1,6 +1,5 @@
 import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { ISvar } from '../../../store/reducers/BehandlingReducer'
 import {
   slettVurdering,
   Vilkaar,
@@ -10,7 +9,6 @@ import {
 } from '../../../shared/api/vilkaarsvurdering'
 import styled from 'styled-components'
 import { format } from 'date-fns'
-import { svarTilResultat } from './utils'
 import { Delete, Edit } from '@navikt/ds-icons'
 
 const MIN_KOMMENTAR_LENGDE = 10
@@ -25,13 +23,14 @@ export const Vurdering = ({
   behandlingId: string
 }) => {
   const [aktivVurdering, setAktivVurdering] = useState<boolean>(false)
-  const [svar, setSvar] = useState<ISvar>()
+  const [resultat, setResultat] = useState<VurderingsResultat>()
   const [radioError, setRadioError] = useState<string>()
   const [kommentar, setKommentar] = useState<string>('')
   const [kommentarError, setKommentarError] = useState<string>()
+  const [vilkaarsUnntakType, setVilkaarsUnntakType] = useState<string>()
 
   const vilkaarVurdert = () => {
-    !svar ? setRadioError('Du må velge et svar') : setRadioError(undefined)
+    !resultat ? setRadioError('Du må velge et svar') : setRadioError(undefined)
     !(kommentar.length >= MIN_KOMMENTAR_LENGDE)
       ? setKommentarError('Begrunnelsen må være minst 10 tegn')
       : setKommentarError(undefined)
@@ -39,13 +38,21 @@ export const Vurdering = ({
     if (
       radioError === undefined &&
       kommentarError === undefined &&
-      svar !== undefined &&
+      resultat !== undefined &&
       kommentar.length >= MIN_KOMMENTAR_LENGDE
     ) {
       vurderVilkaar(behandlingId, {
-        type: vilkaar.type,
+        hovedvilkaar: {
+          type: vilkaar.hovedvilkaar.type,
+          resultat,
+        },
+        ...(vilkaarsUnntakType && {
+          unntaksvilkaar: {
+            type: vilkaarsUnntakType,
+            resultat: VurderingsResultat.OPPFYLT,
+          },
+        }),
         kommentar: kommentar,
-        resultat: svarTilResultat(svar),
       }).then((response) => {
         if (response.status == 'ok') {
           oppdaterVilkaar(response.data)
@@ -56,7 +63,7 @@ export const Vurdering = ({
   }
 
   const slettVurderingAvVilkaar = () => {
-    slettVurdering(behandlingId, vilkaar.type).then((response) => {
+    slettVurdering(behandlingId, vilkaar.hovedvilkaar.type).then((response) => {
       if (response.status == 'ok') {
         oppdaterVilkaar()
       }
@@ -65,21 +72,33 @@ export const Vurdering = ({
 
   const redigerVilkaar = () => {
     setAktivVurdering(true)
+    setResultat(vilkaar.hovedvilkaar?.resultat || undefined)
+    vilkaar.unntaksvilkaar?.forEach((unntaksvilkaar) => {
+      if (unntaksvilkaar.resultat) {
+        setVilkaarsUnntakType(unntaksvilkaar.type)
+      }
+    })
     setKommentar(vilkaar.vurdering?.kommentar || '')
   }
 
   const reset = () => {
     setAktivVurdering(false)
-    setSvar(undefined)
+    setResultat(undefined)
     setRadioError(undefined)
     setKommentar('')
     setKommentarError(undefined)
   }
 
   const overskrift = () => {
-    if (vilkaar.vurdering?.resultat == VurderingsResultat.OPPFYLT) {
+    if (
+      vilkaar.hovedvilkaar?.resultat == VurderingsResultat.OPPFYLT ||
+      vilkaar.unntaksvilkaar?.some((unntaksvilkaar) => VurderingsResultat.OPPFYLT === unntaksvilkaar.resultat)
+    ) {
       return 'Vilkår oppfylt'
-    } else if (vilkaar.vurdering?.resultat == VurderingsResultat.IKKE_OPPFYLT) {
+    } else if (
+      vilkaar.hovedvilkaar?.resultat == VurderingsResultat.IKKE_OPPFYLT &&
+      !vilkaar.unntaksvilkaar?.some((unntaksvilkaar) => VurderingsResultat.OPPFYLT === unntaksvilkaar.resultat)
+    ) {
       return 'Vilkår er ikke oppfylt'
     } else {
       return 'Vilkåret er ikke vurdert'
@@ -121,18 +140,42 @@ export const Vurdering = ({
               size="small"
               className="radioGroup"
               onChange={(event) => {
-                setSvar(ISvar[event as ISvar])
+                setResultat(VurderingsResultat[event as VurderingsResultat])
                 setRadioError(undefined)
               }}
+              value={resultat}
               error={radioError ? radioError : false}
             >
               <div className="flex">
-                <Radio value={ISvar.JA}>Ja</Radio>
-                <Radio value={ISvar.NEI}>Nei</Radio>
-                <Radio value={ISvar.IKKE_VURDERT}>Ikke vurdert</Radio>
+                <Radio value={VurderingsResultat.OPPFYLT}>Oppfylt</Radio>
+                <Radio value={VurderingsResultat.IKKE_OPPFYLT}>Ikke oppfylt</Radio>
+                <Radio value={VurderingsResultat.IKKE_VURDERT}>Ikke vurdert</Radio>
               </div>
             </RadioGroup>
           </RadioGroupWrapper>
+
+          {VurderingsResultat.IKKE_OPPFYLT === resultat && vilkaar.unntaksvilkaar && vilkaar.unntaksvilkaar.length > 0 && (
+            <>
+              <VurderingsTitle>Er unntak fra hovedregelen oppfylt?</VurderingsTitle>
+              <RadioGroup
+                legend=""
+                size="small"
+                className="radioGroup"
+                onChange={(event) => setVilkaarsUnntakType(event)}
+                value={vilkaarsUnntakType}
+              >
+                <div className="flex">
+                  {vilkaar.unntaksvilkaar.map((unntakvilkaar) => {
+                    return (
+                      <Radio key={unntakvilkaar.type} value={unntakvilkaar.type}>
+                        {unntakvilkaar.paragraf.tittel}
+                      </Radio>
+                    )
+                  })}
+                </div>
+              </RadioGroup>
+            </>
+          )}
           <Textarea
             label="Begrunnelse"
             hideLabel={false}

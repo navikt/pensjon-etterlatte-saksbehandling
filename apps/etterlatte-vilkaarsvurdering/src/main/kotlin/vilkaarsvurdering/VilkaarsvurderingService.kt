@@ -60,44 +60,50 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
         return hentVilkaarsvurdering(behandlingId)?.let { vilkaarsvurdering ->
             val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
                 vilkaar = vilkaarsvurdering.vilkaar.map {
-                    val oppdatertVilkaar = oppdaterVurdering(it, vurdertVilkaar)
-                    oppdatertVilkaar.copy(
-                        unntaksvilkaar = it.unntaksvilkaar?.map { unntaksvilkaar ->
-                            oppdaterVurdering(unntaksvilkaar, vurdertVilkaar)
-                        }
-                    )
+                    oppdaterVurdering(it, vurdertVilkaar)
                 }
             )
             vilkaarsvurderingRepository.oppdater(oppdatertVilkaarsvurdering)
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun slettVurderingPaaVilkaar(behandlingId: UUID, vilkaarType: VilkaarType): Vilkaarsvurdering {
+    fun slettVurderingPaaVilkaar(behandlingId: UUID, hovedVilkaarType: VilkaarType): Vilkaarsvurdering {
         return hentVilkaarsvurdering(behandlingId)?.let { vilkaarsvurdering ->
             val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
                 vilkaar = vilkaarsvurdering.vilkaar.map {
-                    val oppdatertVilkaar = slettVurdering(it, vilkaarType)
-                    oppdatertVilkaar.copy(
-                        unntaksvilkaar = it.unntaksvilkaar?.map { unntaksvilkaar ->
-                            slettVurdering(unntaksvilkaar, vilkaarType)
-                        }
-                    )
+                    slettVurdering(it, hovedVilkaarType)
                 }
             )
             vilkaarsvurderingRepository.oppdater(oppdatertVilkaarsvurdering)
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    private fun oppdaterVurdering(vilkaar: Vilkaar, vurdertVilkaar: VurdertVilkaar) =
-        if (vilkaar.type == vurdertVilkaar.vilkaarType) {
-            vilkaar.copy(vurdering = vurdertVilkaar.vurdertResultat)
+    private fun oppdaterVurdering(vilkaar: Vilkaar, vurdertVilkaar: VurdertVilkaar): Vilkaar =
+        if (vilkaar.hovedvilkaar.type == vurdertVilkaar.hovedvilkaar.type) {
+            vilkaar.copy(
+                vurdering = vurdertVilkaar.vilkaarVurderingData,
+                hovedvilkaar = vilkaar.hovedvilkaar.copy(resultat = vurdertVilkaar.hovedvilkaar.resultat),
+                unntaksvilkaar = vilkaar.unntaksvilkaar?.map {
+                    if (vurdertVilkaar.unntaksvilkaar?.type === it.type) {
+                        it.copy(resultat = vurdertVilkaar.unntaksvilkaar.resultat)
+                    } else {
+                        it.copy(resultat = null)
+                    }
+                }
+            )
         } else {
             vilkaar
         }
 
-    private fun slettVurdering(vilkaar: Vilkaar, vilkaarType: VilkaarType) =
-        if (vilkaar.type == vilkaarType) {
-            vilkaar.copy(vurdering = null)
+    private fun slettVurdering(vilkaar: Vilkaar, hovedVilkaarType: VilkaarType) =
+        if (vilkaar.hovedvilkaar.type === hovedVilkaarType) {
+            vilkaar.copy(
+                vurdering = null,
+                hovedvilkaar = vilkaar.hovedvilkaar.copy(resultat = null),
+                unntaksvilkaar = vilkaar.unntaksvilkaar?.map {
+                    it.copy(resultat = null)
+                }
+            )
         } else {
             vilkaar
         }

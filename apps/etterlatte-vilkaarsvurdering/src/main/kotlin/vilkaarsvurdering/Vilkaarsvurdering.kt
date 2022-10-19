@@ -12,11 +12,22 @@ data class Vilkaarsvurdering(
 )
 
 data class Vilkaar(
+    val hovedvilkaar: Hovedvilkaar,
+    val unntaksvilkaar: List<Unntaksvilkaar>? = null,
+    val vurdering: VilkaarVurderingData? = null,
+    val grunnlag: List<Vilkaarsgrunnlag<out Any>>? = null
+)
+
+data class Hovedvilkaar(
     val type: VilkaarType,
     val paragraf: Paragraf,
-    val vurdering: VurdertResultat? = null,
-    val unntaksvilkaar: List<Vilkaar>? = null,
-    val grunnlag: List<Vilkaarsgrunnlag<out Any>>? = null
+    val resultat: Utfall? = null
+)
+
+data class Unntaksvilkaar(
+    val type: VilkaarType,
+    val paragraf: Paragraf,
+    val resultat: Utfall? = null
 )
 
 enum class VilkaarType {
@@ -45,8 +56,7 @@ data class Paragraf(
     val lovtekst: String
 )
 
-data class VurdertResultat(
-    val resultat: Utfall,
+data class VilkaarVurderingData(
     val kommentar: String?,
     val tidspunkt: LocalDateTime,
     val saksbehandler: String
@@ -71,8 +81,9 @@ enum class VilkaarsvurderingUtfall {
 }
 
 data class VurdertVilkaar(
-    val vilkaarType: VilkaarType,
-    val vurdertResultat: VurdertResultat
+    val hovedvilkaar: VilkaarTypeOgUtfall,
+    val unntaksvilkaar: VilkaarTypeOgUtfall?,
+    val vilkaarVurderingData: VilkaarVurderingData
 )
 
 data class Vilkaarsgrunnlag<T>(

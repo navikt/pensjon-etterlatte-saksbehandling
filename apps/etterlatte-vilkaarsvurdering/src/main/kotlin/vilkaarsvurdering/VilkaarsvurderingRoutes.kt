@@ -33,13 +33,13 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
 
         post("/{behandlingId}") {
             withBehandlingId { behandlingId ->
-                val vurdertResultatDto = call.receive<VurdertResultatDto>()
+                val vurdertVilkaarDto = call.receive<VurdertVilkaarDto>()
 
                 logger.info("Oppdaterer vilkårsvurdering for $behandlingId")
                 val oppdatertVilkaarsvurdering =
                     vilkaarsvurderingService.oppdaterVurderingPaaVilkaar(
                         behandlingId,
-                        toVurdertVilkaar(vurdertResultatDto, saksbehandler)
+                        toVurdertVilkaar(vurdertVilkaarDto, saksbehandler)
                     )
 
                 call.respond(oppdatertVilkaarsvurdering)
@@ -110,21 +110,26 @@ inline val PipelineContext<*, ApplicationCall>.saksbehandler: String
             ?.jwtTokenClaims?.getStringClaim("NAVident")
     )
 
-private fun toVurdertVilkaar(vurdertResultatDto: VurdertResultatDto, saksbehandler: String) =
+private fun toVurdertVilkaar(vurdertVilkaarDto: VurdertVilkaarDto, saksbehandler: String) =
     VurdertVilkaar(
-        vilkaarType = vurdertResultatDto.type,
-        vurdertResultat = VurdertResultat(
-            resultat = vurdertResultatDto.resultat,
-            kommentar = vurdertResultatDto.kommentar,
+        vurdertVilkaarDto.hovedvilkaar,
+        vurdertVilkaarDto.unntaksvilkaar,
+        vilkaarVurderingData = VilkaarVurderingData(
+            kommentar = vurdertVilkaarDto.kommentar,
             tidspunkt = LocalDateTime.now(),
             saksbehandler = saksbehandler
         )
     )
 
-data class VurdertResultatDto(
-    val type: VilkaarType,
-    val resultat: Utfall,
+data class VurdertVilkaarDto(
+    val hovedvilkaar: VilkaarTypeOgUtfall,
+    val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
     val kommentar: String?
+)
+
+data class VilkaarTypeOgUtfall(
+    val type: VilkaarType,
+    val resultat: Utfall
 )
 
 data class VurdertVilkaarsvurderingResultatDto(

@@ -3,10 +3,12 @@ package no.nav.etterlatte.vilkaarsvurdering
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
+import java.time.YearMonth
 import java.util.*
 
 class VilkaarsvurderingFinnesIkkeException(override val message: String) : RuntimeException(message)
 class UgyldigSakTypeException(override val message: String) : RuntimeException(message)
+class UgyldigBehandlingTypeException(override val message: String) : RuntimeException(message)
 
 class VilkaarsvurderingService(private val vilkaarsvurderingRepository: VilkaarsvurderingRepository) {
 
@@ -18,18 +20,24 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
         behandlingId: UUID,
         sakType: SakType,
         behandlingType: BehandlingType,
-        payload: String,
-        grunnlag: Grunnlag
+        virkningstidspunkt: YearMonth,
+        grunnlag: Grunnlag,
+        kafkaPayload: String
     ): Vilkaarsvurdering {
         return when (sakType) {
             SakType.BARNEPENSJON ->
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
                         vilkaarsvurderingRepository.lagre(
-                            Vilkaarsvurdering(behandlingId, payload, barnepensjonVilkaar(grunnlag))
+                            Vilkaarsvurdering(
+                                behandlingId = behandlingId,
+                                kafkaPayload = kafkaPayload,
+                                virkningstidspunkt = virkningstidspunkt,
+                                vilkaar = barnepensjonVilkaar(grunnlag)
+                            )
                         )
                     else ->
-                        throw VilkaarsvurderingFinnesIkkeException(
+                        throw UgyldigBehandlingTypeException(
                             "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType"
                         )
                 }
@@ -40,7 +48,7 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
 
     fun oppdaterVilkaarsvurderingPayload(behandlingId: UUID, payload: String): Vilkaarsvurdering {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let {
-            vilkaarsvurderingRepository.lagre(it.copy(payload = payload))
+            vilkaarsvurderingRepository.lagre(it.copy(kafkaPayload = payload))
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 

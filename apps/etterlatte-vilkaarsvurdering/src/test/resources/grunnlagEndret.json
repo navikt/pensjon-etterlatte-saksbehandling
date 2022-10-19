@@ -1,39 +1,1219 @@
 {
-  "behandlingId": "dbbd9a01-3e5d-4ec1-819c-1781d1f6a440",
-  "sakId": 6,
-  "fnrSoeker": "03108718357",
+  "@event_name": "BEHANDLING:GRUNNLAGENDRET",
+  "behandlingId": "02706c57-9a81-4e88-a0c6-dfe99f91cc67",
+  "@correlation_id": "6d90f382-4822-4b3a-93d7-f9302ae40d2b",
   "behandling": {
-    "id": "dbbd9a01-3e5d-4ec1-819c-1781d1f6a440",
-    "type": "FØRSTEGANGSBEHANDLING"
-  },
-  "sak": {
-    "ident": "03108718357",
-    "sakType": "BARNEPENSJON",
-    "id": 6
-  },
-  "grunnlag": {
-    "soeker": {"NAVN":{"id":"6d4cfff6-d9a3-4031-b3c5-731d34689200","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":{"fornavn":"Søker","etternavn":"Barn"},"type":"konstant"},"FOEDSELSNUMMER":{"id":"d671e51a-daa4-4839-a161-b8be35c564da","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"16021254243","type":"konstant"},"FOEDSELSDATO":{"id":"21948918-f0d3-4754-a7f1-758e6ce7de8e","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"2012-02-16","type":"konstant"},"FOEDSELSAAR":{"id":"e23e9bee-a124-4d55-905a-96392ddedb80","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":2012,"type":"konstant"},"FOEDELAND":{"id":"c1214f94-8c00-4053-8468-c22e72c4604e","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"NOR","type":"konstant"},"ADRESSEBESKYTTELSE":{"id":"da2268fb-b31e-4617-98a7-59f54a26a39f","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"UGRADERT","type":"konstant"},"BOSTEDSADRESSE":{"perioder":[{"id":"e92e98fc-857b-4b47-b268-376ebe29013b","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-30T13:09:28.395311Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":{"type":"VEGADRESSE","aktiv":true,"coAdresseNavn":null,"adresseLinje1":"Ulsetløkkja","adresseLinje2":null,"adresseLinje3":null,"postnr":"2512","poststed":"KVIKNE","land":null,"kilde":"pdl","gyldigFraOgMed":"2012-02-16T00:00:00","gyldigTilOgMed":null},"fom":"2012-02","tom":null}],"type":"periodisert"},"STATSBORGERSKAP":{"id":"e2634fe2-cfd6-48ff-96fe-e1853b1329d0","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"NOR","type":"konstant"},"PERSONROLLE":{"id":"1c63a121-4b30-4686-b9b4-a74640c8b1cc","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"BARN","type":"konstant"},"FAMILIERELASJON":{"id":"46684993-db65-4b93-b7ab-860bac9496c6","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":{"ansvarligeForeldre":["01448203510","29106323621"],"foreldre":["01448203510","29106323621"],"barn":null},"type":"konstant"}},
-    "familie": [
-      {"NAVN":{"id":"318dab43-3425-4686-9183-81183520db92","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:17:39.839547Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":{"fornavn":"Død","etternavn":"Far"},"type":"konstant"},"FOEDSELSNUMMER":{"id":"e8668253-c6ba-44ef-8ecd-8deacc2bc06c","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:17:39.839547Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"01448203510","type":"konstant"},"FOEDSELSDATO":{"id":"01c47e1d-77bf-4252-b00c-549fb08ae62c","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:17:39.839547Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"1982-04-01","type":"konstant"},"FOEDSELSAAR":{"id":"817f09f5-f032-4bd8-bf14-3b493e402f98","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:17:39.839547Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":1982,"type":"konstant"},"FOEDELAND":{"id":"dcf95a42-95ec-428c-8bcb-ff18ac7cbebc","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:17:39.839547Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"NOR","type":"konstant"},"DOEDSDATO":{"id":"621ad8e6-4c26-4cee-94c9-67b6ff136ed0","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:17:39.839547Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"2022-08-17T00:00:00","type":"konstant"},"ADRESSEBESKYTTELSE":{"id":"bcf85423-8f9c-40f9-ac57-a1859c6ddd94","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:17:39.839547Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"UGRADERT","type":"konstant"},"BOSTEDSADRESSE":{"perioder":[{"id":"e92e98fc-857b-4b47-b268-376ebe29013b","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-30T13:09:28.395311Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":{"type":"VEGADRESSE","aktiv":true,"coAdresseNavn":null,"adresseLinje1":"Ulsetløkkja","adresseLinje2":null,"adresseLinje3":null,"postnr":"2512","poststed":"KVIKNE","land":null,"kilde":"pdl","gyldigFraOgMed":"2012-02-16T00:00:00","gyldigTilOgMed":null},"fom":"2012-02","tom":null}],"type":"periodisert"},"SIVILSTATUS":{"id":"fd296165-fe6e-4227-9e31-4168ecadc896","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:17:39.839547Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"GIFT","type":"konstant"},"STATSBORGERSKAP":{"id":"03737fd3-c837-4bda-9407-67d5f43919d6","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:17:39.839547Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"NOR","type":"konstant"},"PERSONROLLE":{"id":"d3a8d8d0-b3d3-4d38-98a4-c90616fe813a","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:17:39.839547Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"AVDOED","type":"konstant"},"FAMILIERELASJON":{"id":"bd83aaa2-22e9-4f78-b584-64c4cdbf5298","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:17:39.839547Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":{"ansvarligeForeldre":[],"foreldre":[],"barn":["16021254243","06051250220"]},"type":"konstant"}},
-      {"NAVN":{"id":"0f8ddcd4-f6b8-4cc4-b541-c2c3d020e4eb","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":{"fornavn":"Levende","etternavn":"Mor"},"type":"konstant"},"FOEDSELSNUMMER":{"id":"f936b55f-ba51-4343-8dbf-bb7088634d17","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"29106323621","type":"konstant"},"FOEDSELSDATO":{"id":"94a36a6e-7a2d-4dac-bd61-15f9532c3b8b","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"1963-10-29","type":"konstant"},"FOEDSELSAAR":{"id":"5a1512f2-9c70-4bd7-a2aa-bf8238e10f97","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":1963,"type":"konstant"},"FOEDELAND":{"id":"1ebe7e60-598c-4bfd-92e9-e2fda796af38","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"NOR","type":"konstant"},"ADRESSEBESKYTTELSE":{"id":"7edfd7c4-83a6-451e-b2e1-0a8fad1b3262","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"UGRADERT","type":"konstant"},"BOSTEDSADRESSE":{"perioder":[{"id":"e92e98fc-857b-4b47-b268-376ebe29013b","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-30T13:09:28.395311Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":{"type":"VEGADRESSE","aktiv":true,"coAdresseNavn":null,"adresseLinje1":"Ulsetløkkja","adresseLinje2":null,"adresseLinje3":null,"postnr":"2512","poststed":"KVIKNE","land":null,"kilde":"pdl","gyldigFraOgMed":"2012-02-16T00:00:00","gyldigTilOgMed":null},"fom":"2012-02","tom":null}],"type":"periodisert"},"SIVILSTATUS":{"id":"1be3d83f-7231-41dd-b7c8-4f02d6e82b79","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"GIFT","type":"konstant"},"STATSBORGERSKAP":{"id":"591e0426-5414-4dae-b38c-2da3b5ddb311","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"NOR","type":"konstant"},"PERSONROLLE":{"id":"39d92a41-6c31-4b98-8732-29923cdf4a49","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":"GJENLEVENDE","type":"konstant"},"FAMILIERELASJON":{"id":"a6c26ff0-2f28-4400-8b70-06ea31ae75c2","kilde":{"navn":"pdl","tidspunktForInnhenting":"2022-09-29T10:20:28.666598Z","registersReferanse":null,"opplysningId":"opplysningsId1","type":"pdl"},"verdi":{"ansvarligeForeldre":[],"foreldre":[],"barn":["16021254243","06051250220"]},"type":"konstant"}}
-    ],
-    "sak": {},
-    "metadata": {
-      "versjon": 8,
-      "sakId": 6
+    "id": "02706c57-9a81-4e88-a0c6-dfe99f91cc67",
+    "sak": 73,
+    "behandlingOpprettet": "2022-10-18T14:57:50.243924",
+    "sistEndret": "2022-10-18T14:57:50.606561",
+    "status": "GYLDIG_SOEKNAD",
+    "oppgaveStatus": "NY",
+    "type": "FØRSTEGANGSBEHANDLING",
+    "soeknadMottattDato": "2022-10-18T14:57:47.939581",
+    "persongalleri": {
+      "soeker": "08071276660",
+      "innsender": "20037908283",
+      "soesken": [],
+      "avdoed": [
+        "28528129783"
+      ],
+      "gjenlevende": [
+        "20037908283"
+      ]
+    },
+    "gyldighetsproeving": {
+      "resultat": "OPPFYLT",
+      "vurderinger": [
+        {
+          "navn": "INNSENDER_ER_FORELDER",
+          "resultat": "OPPFYLT",
+          "basertPaaOpplysninger": {
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "20037908283",
+                "28528129783"
+              ],
+              "foreldre": [
+                "28528129783",
+                "20037908283"
+              ],
+              "barn": null
+            },
+            "innsender": {
+              "navn": "Oppstemt Oldemor",
+              "fnr": "20037908283"
+            },
+            "gjenlevende": [
+              {
+                "navn": "Oppstemt Oldemor",
+                "fnr": "20037908283"
+              }
+            ]
+          }
+        },
+        {
+          "navn": "HAR_FORELDREANSVAR_FOR_BARNET",
+          "resultat": "OPPFYLT",
+          "basertPaaOpplysninger": {
+            "familieRelasjon": {
+              "ansvarligeForeldre": [
+                "20037908283",
+                "28528129783"
+              ],
+              "foreldre": [
+                "28528129783",
+                "20037908283"
+              ],
+              "barn": null
+            },
+            "innsender": {
+              "navn": "Oppstemt Oldemor",
+              "fnr": "20037908283"
+            }
+          }
+        },
+        {
+          "navn": "INGEN_ANNEN_VERGE_ENN_FORELDER",
+          "resultat": "OPPFYLT",
+          "basertPaaOpplysninger": {
+            "vergemaalEllerFremtidsfullmakt": []
+          }
+        }
+      ],
+      "vurdertDato": "2022-10-18T14:57:49.934319642"
     }
   },
-  "fastsatt": false,
-  "avbrutt": false,
-  "system_read_count": 0,
+  "sakId": 73,
+  "sak": {
+    "ident": "08071276660",
+    "sakType": "BARNEPENSJON",
+    "id": 73
+  },
+  "behandlingOpprettet": "2022-10-18T14:57:50.243924",
+  "@id": "c9057732-0224-4779-a66a-f69381182a5e",
+  "@opprettet": "2022-10-18T14:57:52.785818817",
+  "system_read_count": 1,
   "system_participating_services": [
     {
+      "id": "dabdbab0-4e39-45f8-9a79-89a270b1e4e4",
+      "time": "2022-10-18T14:57:52.767814331",
       "service": "etterlatte-behandling",
-      "instance": "etterlatte-behandling-f6849948c-t4qhv",
-      "time": "2022-03-21T15:26:22.994195102"
+      "instance": "etterlatte-behandling-69df75d9d4-62xsn",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-behandling:bc39a9512ca22b88702be308133be1a0f27e55b3"
+    },
+    {
+      "id": "dabdbab0-4e39-45f8-9a79-89a270b1e4e4",
+      "time": "2022-10-18T14:57:52.772201374",
+      "service": "etterlatte-grunnlag",
+      "instance": "etterlatte-grunnlag-6b4d8fb944-v57nh",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-grunnlag:bc39a9512ca22b88702be308133be1a0f27e55b3"
+    },
+    {
+      "id": "c9057732-0224-4779-a66a-f69381182a5e",
+      "time": "2022-10-18T14:57:52.785818817",
+      "service": "etterlatte-grunnlag",
+      "instance": "etterlatte-grunnlag-6b4d8fb944-v57nh",
+      "image": "ghcr.io/navikt/pensjon-etterlatte-saksbehandling/etterlatte-grunnlag:bc39a9512ca22b88702be308133be1a0f27e55b3"
     }
   ],
-  "@event_name": "BEHANDLING:GRUNNLAGENDRET",
-  "behandlingOpprettet": "2022-05-23T16:09:19.717707"
+  "fnrSoeker": "08071276660",
+  "persongalleri": {
+    "soeker": "08071276660",
+    "innsender": "20037908283",
+    "soesken": [],
+    "avdoed": [
+      "28528129783"
+    ],
+    "gjenlevende": [
+      "20037908283"
+    ]
+  },
+  "grunnlag": {
+    "soeker": {
+      "NAVN": {
+        "id": "f280d761-e076-4dee-9a3d-ed3a532758ce",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-10-18T12:57:51.336826608Z",
+          "registersReferanse": null,
+          "opplysningId": "dfdb4333-9859-48d3-9d7d-f65bfa037724",
+          "type": "pdl"
+        },
+        "verdi": {
+          "fornavn": "Vidsynt",
+          "etternavn": "Flygefisk"
+        },
+        "type": "konstant"
+      },
+      "FOEDSELSDATO": {
+        "id": "4b4dde31-ed8c-4b93-91aa-08dc07b4236e",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-10-18T12:57:51.336826608Z",
+          "registersReferanse": null,
+          "opplysningId": "b5c5d44a-37a8-4a29-ab79-a242ee409aee",
+          "type": "pdl"
+        },
+        "verdi": "2012-07-08",
+        "type": "konstant"
+      },
+      "FOEDELAND": {
+        "id": "7687944c-ff03-4399-9cc7-dacfd08f30f8",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-10-18T12:57:51.336826608Z",
+          "registersReferanse": null,
+          "opplysningId": "b5c5d44a-37a8-4a29-ab79-a242ee409aee",
+          "type": "pdl"
+        },
+        "verdi": "NOR",
+        "type": "konstant"
+      },
+      "STATSBORGERSKAP": {
+        "id": "cb358185-a01f-4e00-b7d6-177056e8356e",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-10-18T12:57:51.336826608Z",
+          "registersReferanse": null,
+          "opplysningId": "4b712a8e-b525-4545-a083-d2bcb66f496b",
+          "type": "pdl"
+        },
+        "verdi": "NOR",
+        "type": "konstant"
+      },
+      "UTLAND": {
+        "id": "aef00c73-9b27-474e-b560-a634e6b6d3d2",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-10-18T12:57:51.336826608Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "verdi": {
+          "innflyttingTilNorge": [],
+          "utflyttingFraNorge": []
+        },
+        "type": "konstant"
+      },
+      "FAMILIERELASJON": {
+        "id": "adbb6c14-dd60-4a35-b121-4cd64a2f162b",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-10-18T12:57:51.336826608Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "verdi": {
+          "ansvarligeForeldre": [
+            "20037908283",
+            "28528129783"
+          ],
+          "foreldre": [
+            "28528129783",
+            "20037908283"
+          ],
+          "barn": null
+        },
+        "type": "konstant"
+      },
+      "FOEDSELSNUMMER": {
+        "id": "f2a9d549-12aa-482d-8f27-fbd1ebec9ee1",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-10-18T12:57:51.336826608Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "verdi": "08071276660",
+        "type": "konstant"
+      },
+      "FOEDSELSAAR": {
+        "id": "077dc1d3-54a8-460f-8e29-ed6de362cf8f",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-10-18T12:57:51.336826608Z",
+          "registersReferanse": null,
+          "opplysningId": "b5c5d44a-37a8-4a29-ab79-a242ee409aee",
+          "type": "pdl"
+        },
+        "verdi": 2012,
+        "type": "konstant"
+      },
+      "PERSONROLLE": {
+        "id": "e9caa44d-6d37-4d39-8e88-a7a6d0072670",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-10-18T12:57:51.336826608Z",
+          "registersReferanse": null,
+          "opplysningId": "null",
+          "type": "pdl"
+        },
+        "verdi": "BARN",
+        "type": "konstant"
+      },
+      "BOSTEDSADRESSE": {
+        "perioder": [
+          {
+            "id": "0a8838a3-4f18-4b21-8c37-21eac53bb85a",
+            "kilde": {
+              "navn": "pdl",
+              "tidspunktForInnhenting": "2022-10-18T12:57:51.336826608Z",
+              "registersReferanse": null,
+              "opplysningId": "null",
+              "type": "pdl"
+            },
+            "verdi": {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Kuholmsveien 78 C",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "4632",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "2012-07-08T00:00:00",
+              "gyldigTilOgMed": null
+            },
+            "fom": "2012-07",
+            "tom": null
+          },
+          {
+            "id": "3795e463-ecec-4fb1-94b4-23a25765fbd8",
+            "kilde": {
+              "navn": "pdl",
+              "tidspunktForInnhenting": "2022-10-18T12:57:51.336826608Z",
+              "registersReferanse": null,
+              "opplysningId": "null",
+              "type": "pdl"
+            },
+            "verdi": {
+              "type": "VEGADRESSE",
+              "aktiv": false,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Kuholmsveien 78 C",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "4632",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "2012-07-08T00:00:00",
+              "gyldigTilOgMed": null
+            },
+            "fom": "2012-07",
+            "tom": null
+          }
+        ],
+        "type": "periodisert"
+      },
+      "SOEKER_PDL_V1": {
+        "id": "e627489a-0a3f-4d04-8907-872b5ccb8b70",
+        "kilde": {
+          "navn": "pdl",
+          "tidspunktForInnhenting": "2022-10-18T12:57:51.336826608Z",
+          "registersReferanse": null,
+          "opplysningId": null,
+          "type": "pdl"
+        },
+        "verdi": {
+          "fornavn": "Vidsynt",
+          "etternavn": "Flygefisk",
+          "foedselsnummer": "08071276660",
+          "foedselsdato": "2012-07-08",
+          "foedselsaar": 2012,
+          "foedeland": "NOR",
+          "doedsdato": null,
+          "adressebeskyttelse": "UGRADERT",
+          "bostedsadresse": [
+            {
+              "type": "VEGADRESSE",
+              "aktiv": true,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Kuholmsveien 78 C",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "4632",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "2012-07-08T00:00:00",
+              "gyldigTilOgMed": null
+            },
+            {
+              "type": "VEGADRESSE",
+              "aktiv": false,
+              "coAdresseNavn": null,
+              "adresseLinje1": "Kuholmsveien 78 C",
+              "adresseLinje2": null,
+              "adresseLinje3": null,
+              "postnr": "4632",
+              "poststed": null,
+              "land": null,
+              "kilde": "FREG",
+              "gyldigFraOgMed": "2012-07-08T00:00:00",
+              "gyldigTilOgMed": null
+            }
+          ],
+          "deltBostedsadresse": null,
+          "kontaktadresse": [],
+          "oppholdsadresse": [],
+          "sivilstatus": "UOPPGITT",
+          "statsborgerskap": "NOR",
+          "utland": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "familieRelasjon": {
+            "ansvarligeForeldre": [
+              "20037908283",
+              "28528129783"
+            ],
+            "foreldre": [
+              "28528129783",
+              "20037908283"
+            ],
+            "barn": null
+          },
+          "avdoedesBarn": null,
+          "vergemaalEllerFremtidsfullmakt": []
+        },
+        "type": "konstant"
+      }
+    },
+    "familie": [
+      {
+        "NAVN": {
+          "id": "5a5282e2-d9dc-46a2-9e9d-696d669d6f24",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:51.519873551Z",
+            "registersReferanse": null,
+            "opplysningId": "04733a65-02c3-41fe-94f1-81887e21d6ad",
+            "type": "pdl"
+          },
+          "verdi": {
+            "fornavn": "Oppstemt",
+            "etternavn": "Oldemor"
+          },
+          "type": "konstant"
+        },
+        "FOEDSELSDATO": {
+          "id": "15653609-9a49-45ca-a3cf-01a7f2caff12",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:51.519873551Z",
+            "registersReferanse": null,
+            "opplysningId": "a7941731-367e-4fb2-8bba-7a56e2bcf962",
+            "type": "pdl"
+          },
+          "verdi": "1979-03-20",
+          "type": "konstant"
+        },
+        "FOEDELAND": {
+          "id": "a285d367-903f-44b5-834d-b5c21d366c17",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:51.519873551Z",
+            "registersReferanse": null,
+            "opplysningId": "a7941731-367e-4fb2-8bba-7a56e2bcf962",
+            "type": "pdl"
+          },
+          "verdi": "NOR",
+          "type": "konstant"
+        },
+        "SIVILSTATUS": {
+          "id": "48e79ab4-0228-4631-bea9-271920579159",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:51.519873551Z",
+            "registersReferanse": null,
+            "opplysningId": "94ecaedc-b544-4c9f-8374-dee5206d8513",
+            "type": "pdl"
+          },
+          "verdi": "GIFT",
+          "type": "konstant"
+        },
+        "STATSBORGERSKAP": {
+          "id": "335ea9bd-7b00-44da-a6f5-7e3e712f377a",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:51.519873551Z",
+            "registersReferanse": null,
+            "opplysningId": "ac5a7e73-3dcb-44d0-bc9c-cbd2e45fcc4b",
+            "type": "pdl"
+          },
+          "verdi": "NOR",
+          "type": "konstant"
+        },
+        "UTLAND": {
+          "id": "487e4b52-71be-458a-8ddd-16eabbe9644b",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:51.519873551Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "type": "konstant"
+        },
+        "FAMILIERELASJON": {
+          "id": "b25ab2d2-75a2-4cde-8207-97b703469143",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:51.519873551Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "ansvarligeForeldre": null,
+            "foreldre": null,
+            "barn": [
+              "08071276660"
+            ]
+          },
+          "type": "konstant"
+        },
+        "FOEDSELSNUMMER": {
+          "id": "a71aac7a-1320-4b45-9fa7-0de51b854b4f",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:51.519873551Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": "20037908283",
+          "type": "konstant"
+        },
+        "FOEDSELSAAR": {
+          "id": "57dc154e-021c-4e37-95bc-9fdbb2457258",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:51.519873551Z",
+            "registersReferanse": null,
+            "opplysningId": "a7941731-367e-4fb2-8bba-7a56e2bcf962",
+            "type": "pdl"
+          },
+          "verdi": 1979,
+          "type": "konstant"
+        },
+        "PERSONROLLE": {
+          "id": "c6c4a9c9-3915-45b7-b836-3376de7aaafa",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:51.519873551Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": "GJENLEVENDE",
+          "type": "konstant"
+        },
+        "BOSTEDSADRESSE": {
+          "perioder": [
+            {
+              "id": "7be6a3a5-f842-4d93-bf84-b4cfa26eb769",
+              "kilde": {
+                "navn": "pdl",
+                "tidspunktForInnhenting": "2022-10-18T12:57:51.519873551Z",
+                "registersReferanse": null,
+                "opplysningId": "null",
+                "type": "pdl"
+              },
+              "verdi": {
+                "type": "VEGADRESSE",
+                "aktiv": false,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Rundhaugvegen 3",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "7300",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "1979-03-20T00:00:00",
+                "gyldigTilOgMed": null
+              },
+              "fom": "1979-03",
+              "tom": null
+            },
+            {
+              "id": "100fa5dc-9032-4b37-a18f-f524f19da22c",
+              "kilde": {
+                "navn": "pdl",
+                "tidspunktForInnhenting": "2022-10-18T12:57:51.519873551Z",
+                "registersReferanse": null,
+                "opplysningId": "null",
+                "type": "pdl"
+              },
+              "verdi": {
+                "type": "VEGADRESSE",
+                "aktiv": true,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Kuholmsveien 78 C",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "4632",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2015-08-12T00:00:00",
+                "gyldigTilOgMed": null
+              },
+              "fom": "2015-08",
+              "tom": null
+            }
+          ],
+          "type": "periodisert"
+        },
+        "GJENLEVENDE_FORELDER_PDL_V1": {
+          "id": "f82de95c-21f8-4594-bf8d-e89a5b6d4658",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:51.519873551Z",
+            "registersReferanse": null,
+            "opplysningId": null,
+            "type": "pdl"
+          },
+          "verdi": {
+            "fornavn": "Oppstemt",
+            "etternavn": "Oldemor",
+            "foedselsnummer": "20037908283",
+            "foedselsdato": "1979-03-20",
+            "foedselsaar": 1979,
+            "foedeland": "NOR",
+            "doedsdato": null,
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": false,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Rundhaugvegen 3",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "7300",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "1979-03-20T00:00:00",
+                "gyldigTilOgMed": null
+              },
+              {
+                "type": "VEGADRESSE",
+                "aktiv": true,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Kuholmsveien 78 C",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "4632",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2015-08-12T00:00:00",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": null,
+            "oppholdsadresse": [],
+            "sivilstatus": "GIFT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": null,
+              "foreldre": null,
+              "barn": [
+                "08071276660"
+              ]
+            },
+            "avdoedesBarn": null,
+            "vergemaalEllerFremtidsfullmakt": null
+          },
+          "type": "konstant"
+        }
+      },
+      {
+        "NAVN": {
+          "id": "b43cd85c-ffcd-40fa-bcef-71b92bcd84c1",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:52.018470628Z",
+            "registersReferanse": null,
+            "opplysningId": "4f72df89-624c-4fe2-8160-61860035d9b5",
+            "type": "pdl"
+          },
+          "verdi": {
+            "fornavn": "Umotivert",
+            "etternavn": "Hinne"
+          },
+          "type": "konstant"
+        },
+        "FOEDSELSDATO": {
+          "id": "82182f28-5aab-4053-b139-17717d6fb033",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:52.018470628Z",
+            "registersReferanse": null,
+            "opplysningId": "60335f95-57fe-4050-8624-28a3771ea258",
+            "type": "pdl"
+          },
+          "verdi": "1981-12-28",
+          "type": "konstant"
+        },
+        "FOEDELAND": {
+          "id": "b2760fd1-c46b-4fca-8878-dc4d132f4f52",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:52.018470628Z",
+            "registersReferanse": null,
+            "opplysningId": "60335f95-57fe-4050-8624-28a3771ea258",
+            "type": "pdl"
+          },
+          "verdi": "NOR",
+          "type": "konstant"
+        },
+        "DOEDSDATO": {
+          "id": "c032ac3f-ea47-4d83-95fc-f9614c34713d",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:52.018470628Z",
+            "registersReferanse": null,
+            "opplysningId": "aa908b38-fd86-4bce-bb6b-f80858943dfe",
+            "type": "pdl"
+          },
+          "verdi": "2022-08-17",
+          "type": "konstant"
+        },
+        "SIVILSTATUS": {
+          "id": "582395af-243f-494d-8671-84b09f6102ac",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:52.018470628Z",
+            "registersReferanse": null,
+            "opplysningId": "54fb6def-545f-46ee-80cb-48980b9391a3",
+            "type": "pdl"
+          },
+          "verdi": "GIFT",
+          "type": "konstant"
+        },
+        "STATSBORGERSKAP": {
+          "id": "96272b30-9071-43dc-b356-a9269a6421d9",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:52.018470628Z",
+            "registersReferanse": null,
+            "opplysningId": "f33865b3-17ba-4250-9c4a-2da19408aba1",
+            "type": "pdl"
+          },
+          "verdi": "NOR",
+          "type": "konstant"
+        },
+        "UTLAND": {
+          "id": "2bcddd21-8822-451d-8224-e8a74baed732",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:52.018470628Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "innflyttingTilNorge": [],
+            "utflyttingFraNorge": []
+          },
+          "type": "konstant"
+        },
+        "FAMILIERELASJON": {
+          "id": "260d957d-8b97-484f-b113-6e6970e105dc",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:52.018470628Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": {
+            "ansvarligeForeldre": null,
+            "foreldre": null,
+            "barn": [
+              "08071276660"
+            ]
+          },
+          "type": "konstant"
+        },
+        "FOEDSELSNUMMER": {
+          "id": "d6a99670-c428-400d-8c37-c3bbb153514d",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:52.018470628Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": "28528129783",
+          "type": "konstant"
+        },
+        "FOEDSELSAAR": {
+          "id": "12ddd334-38c6-40b7-a235-7e124f293c78",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:52.018470628Z",
+            "registersReferanse": null,
+            "opplysningId": "60335f95-57fe-4050-8624-28a3771ea258",
+            "type": "pdl"
+          },
+          "verdi": 1981,
+          "type": "konstant"
+        },
+        "PERSONROLLE": {
+          "id": "28ffebbe-9d35-4763-89aa-c1d6ee141fd9",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:52.018470628Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": "AVDOED",
+          "type": "konstant"
+        },
+        "AVDOEDESBARN": {
+          "id": "5efc0887-131b-4a2f-88c9-0f725f0df5a2",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:52.018470628Z",
+            "registersReferanse": null,
+            "opplysningId": "null",
+            "type": "pdl"
+          },
+          "verdi": [
+            {
+              "fornavn": "Vidsynt",
+              "etternavn": "Flygefisk",
+              "foedselsnummer": "08071276660",
+              "foedselsdato": "2012-07-08",
+              "foedselsaar": 2012,
+              "foedeland": "NOR",
+              "doedsdato": null,
+              "adressebeskyttelse": "UGRADERT",
+              "bostedsadresse": [
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": true,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Kuholmsveien 78 C",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "4632",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-07-08T00:00:00",
+                  "gyldigTilOgMed": null
+                },
+                {
+                  "type": "VEGADRESSE",
+                  "aktiv": false,
+                  "coAdresseNavn": null,
+                  "adresseLinje1": "Kuholmsveien 78 C",
+                  "adresseLinje2": null,
+                  "adresseLinje3": null,
+                  "postnr": "4632",
+                  "poststed": null,
+                  "land": null,
+                  "kilde": "FREG",
+                  "gyldigFraOgMed": "2012-07-08T00:00:00",
+                  "gyldigTilOgMed": null
+                }
+              ],
+              "deltBostedsadresse": null,
+              "kontaktadresse": [],
+              "oppholdsadresse": [],
+              "sivilstatus": "UOPPGITT",
+              "statsborgerskap": "NOR",
+              "utland": {
+                "innflyttingTilNorge": [],
+                "utflyttingFraNorge": []
+              },
+              "familieRelasjon": {
+                "ansvarligeForeldre": [
+                  "20037908283",
+                  "28528129783"
+                ],
+                "foreldre": [
+                  "28528129783",
+                  "20037908283"
+                ],
+                "barn": null
+              },
+              "avdoedesBarn": null,
+              "vergemaalEllerFremtidsfullmakt": []
+            }
+          ],
+          "type": "konstant"
+        },
+        "BOSTEDSADRESSE": {
+          "perioder": [
+            {
+              "id": "618a576f-459c-44b4-83aa-3464044fb7ff",
+              "kilde": {
+                "navn": "pdl",
+                "tidspunktForInnhenting": "2022-10-18T12:57:52.018470628Z",
+                "registersReferanse": null,
+                "opplysningId": "null",
+                "type": "pdl"
+              },
+              "verdi": {
+                "type": "VEGADRESSE",
+                "aktiv": false,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Kuholmsveien 78 C",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "4632",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2012-07-08T00:00:00",
+                "gyldigTilOgMed": null
+              },
+              "fom": "2012-07",
+              "tom": null
+            }
+          ],
+          "type": "periodisert"
+        },
+        "AVDOED_PDL_V1": {
+          "id": "9628fe1b-fff0-45ff-a9f3-79e55698f0e0",
+          "kilde": {
+            "navn": "pdl",
+            "tidspunktForInnhenting": "2022-10-18T12:57:52.018470628Z",
+            "registersReferanse": null,
+            "opplysningId": null,
+            "type": "pdl"
+          },
+          "verdi": {
+            "fornavn": "Umotivert",
+            "etternavn": "Hinne",
+            "foedselsnummer": "28528129783",
+            "foedselsdato": "1981-12-28",
+            "foedselsaar": 1981,
+            "foedeland": "NOR",
+            "doedsdato": "2022-08-17",
+            "adressebeskyttelse": "UGRADERT",
+            "bostedsadresse": [
+              {
+                "type": "VEGADRESSE",
+                "aktiv": false,
+                "coAdresseNavn": null,
+                "adresseLinje1": "Kuholmsveien 78 C",
+                "adresseLinje2": null,
+                "adresseLinje3": null,
+                "postnr": "4632",
+                "poststed": null,
+                "land": null,
+                "kilde": "FREG",
+                "gyldigFraOgMed": "2012-07-08T00:00:00",
+                "gyldigTilOgMed": null
+              }
+            ],
+            "deltBostedsadresse": null,
+            "kontaktadresse": [],
+            "oppholdsadresse": [],
+            "sivilstatus": "GIFT",
+            "statsborgerskap": "NOR",
+            "utland": {
+              "innflyttingTilNorge": [],
+              "utflyttingFraNorge": []
+            },
+            "familieRelasjon": {
+              "ansvarligeForeldre": null,
+              "foreldre": null,
+              "barn": [
+                "08071276660"
+              ]
+            },
+            "avdoedesBarn": [
+              {
+                "fornavn": "Vidsynt",
+                "etternavn": "Flygefisk",
+                "foedselsnummer": "08071276660",
+                "foedselsdato": "2012-07-08",
+                "foedselsaar": 2012,
+                "foedeland": "NOR",
+                "doedsdato": null,
+                "adressebeskyttelse": "UGRADERT",
+                "bostedsadresse": [
+                  {
+                    "type": "VEGADRESSE",
+                    "aktiv": true,
+                    "coAdresseNavn": null,
+                    "adresseLinje1": "Kuholmsveien 78 C",
+                    "adresseLinje2": null,
+                    "adresseLinje3": null,
+                    "postnr": "4632",
+                    "poststed": null,
+                    "land": null,
+                    "kilde": "FREG",
+                    "gyldigFraOgMed": "2012-07-08T00:00:00",
+                    "gyldigTilOgMed": null
+                  },
+                  {
+                    "type": "VEGADRESSE",
+                    "aktiv": false,
+                    "coAdresseNavn": null,
+                    "adresseLinje1": "Kuholmsveien 78 C",
+                    "adresseLinje2": null,
+                    "adresseLinje3": null,
+                    "postnr": "4632",
+                    "poststed": null,
+                    "land": null,
+                    "kilde": "FREG",
+                    "gyldigFraOgMed": "2012-07-08T00:00:00",
+                    "gyldigTilOgMed": null
+                  }
+                ],
+                "deltBostedsadresse": null,
+                "kontaktadresse": [],
+                "oppholdsadresse": [],
+                "sivilstatus": "UOPPGITT",
+                "statsborgerskap": "NOR",
+                "utland": {
+                  "innflyttingTilNorge": [],
+                  "utflyttingFraNorge": []
+                },
+                "familieRelasjon": {
+                  "ansvarligeForeldre": [
+                    "20037908283",
+                    "28528129783"
+                  ],
+                  "foreldre": [
+                    "28528129783",
+                    "20037908283"
+                  ],
+                  "barn": null
+                },
+                "avdoedesBarn": null,
+                "vergemaalEllerFremtidsfullmakt": []
+              }
+            ],
+            "vergemaalEllerFremtidsfullmakt": null
+          },
+          "type": "konstant"
+        }
+      }
+    ],
+    "sak": {
+      "UTENLANDSADRESSE": {
+        "id": "895cdf87-9ea8-4400-8868-b95b5c0ea873",
+        "kilde": {
+          "fnr": "20037908283",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "harHattUtenlandsopphold": "NEI",
+          "land": null,
+          "adresse": null
+        },
+        "type": "konstant"
+      },
+      "AVDOED_SOEKNAD_V1": {
+        "id": "375d9678-deb3-4ebe-b14d-9f9b5d321840",
+        "kilde": {
+          "fnr": "20037908283",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "AVDOED",
+          "fornavn": "DØD",
+          "etternavn": "TESTPERSON",
+          "foedselsnummer": "28528129783",
+          "doedsdato": "2021-07-27",
+          "statsborgerskap": "Norsk",
+          "utenlandsopphold": {
+            "harHattUtenlandsopphold": "NEI",
+            "opphold": []
+          },
+          "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": "NEI"
+        },
+        "type": "konstant"
+      },
+      "SOEKER_SOEKNAD_V1": {
+        "id": "d636e388-85c6-47e0-826d-fb6b49101008",
+        "kilde": {
+          "fnr": "20037908283",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "BARN",
+          "fornavn": "TEST",
+          "etternavn": "SOEKER",
+          "foedselsnummer": "08071276660",
+          "statsborgerskap": "Norsk",
+          "utenlandsadresse": {
+            "adresseIUtlandet": "NEI",
+            "land": null,
+            "adresse": null
+          },
+          "foreldre": [
+            {
+              "type": "FORELDER",
+              "fornavn": "Levende",
+              "etternavn": "Testperson",
+              "foedselsnummer": "20037908283"
+            },
+            {
+              "type": "FORELDER",
+              "fornavn": "Død",
+              "etternavn": "Testperson",
+              "foedselsnummer": "28528129783"
+            }
+          ],
+          "verge": {
+            "barnHarVerge": "NEI",
+            "fornavn": null,
+            "etternavn": null,
+            "foedselsnummer": null
+          },
+          "omsorgPerson": null
+        },
+        "type": "konstant"
+      },
+      "GJENLEVENDE_FORELDER_SOEKNAD_V1": {
+        "id": "dcbd2f05-7ace-4a30-90ff-e2ae9fc157a2",
+        "kilde": {
+          "fnr": "20037908283",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "GJENLEVENDE_FORELDER",
+          "fornavn": "LEVENDE",
+          "etternavn": "TESTPERSON",
+          "foedselsnummer": "20037908283",
+          "adresse": "TESTVEIEN 123, 0123 TEST",
+          "statsborgerskap": "Norge",
+          "telefonnummer": "11111111"
+        },
+        "type": "konstant"
+      },
+      "INNSENDER_SOEKNAD_V1": {
+        "id": "f25e2dc6-9f03-4b44-a61c-56bd3b02760b",
+        "kilde": {
+          "fnr": "20037908283",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "INNSENDER",
+          "fornavn": "DUMMY FORNAVN",
+          "etternavn": "DUMMY ETTERNAVN",
+          "foedselsnummer": "20037908283"
+        },
+        "type": "konstant"
+      },
+      "UTBETALINGSINFORMASJON_V1": {
+        "id": "da8d334d-d019-4c50-a329-63e74eab5cfa",
+        "kilde": {
+          "fnr": "20037908283",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "bankkontoType": "NORSK",
+          "kontonummer": "1351.35.13513",
+          "utenlandskBankNavn": null,
+          "utenlandskBankAdresse": null,
+          "iban": null,
+          "swift": null,
+          "oenskerSkattetrekk": "JA",
+          "oensketSkattetrekkProsent": "21%"
+        },
+        "type": "konstant"
+      },
+      "SAMTYKKE": {
+        "id": "c8dcf8eb-45d9-4175-a812-4159b3eff966",
+        "kilde": {
+          "fnr": "20037908283",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "harSamtykket": true
+        },
+        "type": "konstant"
+      },
+      "SOEKNAD_MOTTATT_DATO": {
+        "id": "8c90943b-bd6d-4b18-9e3a-8ebd7e9a27fc",
+        "kilde": {
+          "fnr": "20037908283",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "mottattDato": "2022-02-10T10:51:12.298943803"
+        },
+        "type": "konstant"
+      },
+      "SOEKNADSTYPE_V1": {
+        "id": "fa1c6364-e675-437a-8725-5fdfc483dbd8",
+        "kilde": {
+          "fnr": "20037908283",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "type": "BARNEPENSJON"
+        },
+        "type": "konstant"
+      },
+      "PERSONGALLERI_V1": {
+        "id": "2667d075-7eaf-47ec-87a0-aa638ebc43f6",
+        "kilde": {
+          "fnr": "20037908283",
+          "mottatDato": "2022-02-10T10:51:12.298943803Z",
+          "type": "privatperson"
+        },
+        "verdi": {
+          "soeker": "08071276660",
+          "innsender": "20037908283",
+          "soesken": [],
+          "avdoed": [
+            "28528129783"
+          ],
+          "gjenlevende": [
+            "20037908283"
+          ]
+        },
+        "type": "konstant"
+      }
+    },
+    "metadata": {
+      "sakId": 73,
+      "versjon": 49
+    }
+  },
+  "@forårsaket_av": {
+    "id": "dabdbab0-4e39-45f8-9a79-89a270b1e4e4",
+    "opprettet": "2022-10-18T14:57:52.767814331",
+    "event_name": "BEHANDLING:GRUNNLAGENDRET"
+  }
 }
-

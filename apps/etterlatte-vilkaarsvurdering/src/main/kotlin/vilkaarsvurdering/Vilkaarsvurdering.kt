@@ -2,11 +2,13 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 data class Vilkaarsvurdering(
     val behandlingId: UUID,
-    val payload: String,
+    val kafkaPayload: String,
+    val virkningstidspunkt: YearMonth,
     val vilkaar: List<Vilkaar>,
     val resultat: VilkaarsvurderingResultat? = null
 )

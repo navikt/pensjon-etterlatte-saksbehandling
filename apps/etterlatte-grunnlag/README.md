@@ -10,6 +10,13 @@ REST-api'et tilbyr tjenester for å hente ut enkeltopplysninger fra et grunnlag 
 ### Opplysning
 Per nå er all informasjon som inngår i en behandling en opplysning. En opplysning er av en type og den har en kilde.
 
+En opplysning kan være `Konstant` eller `Periodisert`.
+En `Periodisert` opplysning har en fom- og en tom-dato den gjelder for mens en konstant opplysning er alltid gjeldende.
+En opplysning som har fnr er en opplysning på tilhørende person, mens en opplysning som har fnr lik null, er en opplysning på saksnivå.
+
+Eksempel på en konstant opplysning: Fødselsdato\
+Eksempel på en periodisert opplysning: Adresse
+
 ### Grunnlag
 Grunnlag er summen av alle opplysninger i en sak. Målet med grunnlag er å samle, og enkelt strukturere alle opplysninger sånn at
 det blir enklere å bruke gjeldende informasjon i andre apper.

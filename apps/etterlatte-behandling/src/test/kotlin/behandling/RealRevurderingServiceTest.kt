@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.revurdering
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
@@ -94,8 +93,7 @@ class RealRevurderingServiceTest {
         val revurderinger = sut.hentRevurderinger()
         assertAll(
             "skal hente revurderinger",
-            { assertEquals(5, revurderinger.size) },
-            { assertTrue(revurderinger.all { it is Revurdering }) }
+            { assertEquals(5, revurderinger.size) }
         )
     }
 

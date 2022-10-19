@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.revurdering
 
-import no.nav.etterlatte.behandling.Behandling
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.HendelseDao
 import no.nav.etterlatte.behandling.HendelseType
@@ -53,29 +52,8 @@ class RevurderingAggregat(
         }
     }
 
-    private object TilgangDao {
-        fun sjekkOmBehandlingTillatesEndret(behandling: Behandling): Boolean {
-            return behandling.status in listOf(
-                BehandlingStatus.OPPRETTET,
-                BehandlingStatus.GYLDIG_SOEKNAD,
-                BehandlingStatus.IKKE_GYLDIG_SOEKNAD,
-                BehandlingStatus.UNDER_BEHANDLING,
-                BehandlingStatus.RETURNERT
-            )
-        }
-    }
-
     var lagretBehandling: Revurdering =
         requireNotNull(behandlinger.hentBehandling(id, BehandlingType.REVURDERING) as Revurdering)
-
-    fun avbrytBehandling() {
-        lagretBehandling = behandlinger.lagreStatusOgOppgaveStatus(
-            lagretBehandling.id,
-            BehandlingStatus.AVBRUTT,
-            OppgaveStatus.LUKKET,
-            LocalDateTime.now()
-        ) as Revurdering
-    }
 
     fun registrerVedtakHendelse(
         vedtakId: Long,

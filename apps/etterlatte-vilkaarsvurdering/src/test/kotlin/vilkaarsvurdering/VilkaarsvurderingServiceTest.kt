@@ -18,6 +18,8 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
 import java.time.LocalDate
+import java.time.Month
+import java.time.YearMonth
 import java.util.*
 
 internal class VilkaarsvurderingServiceTest {
@@ -30,8 +32,9 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            "",
-            grunnlag
+            YearMonth.of(2021, Month.SEPTEMBER),
+            grunnlag,
+            ""
         )
 
         vilkaarsvurdering shouldNotBe null

@@ -29,6 +29,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
+import java.time.Month
+import java.time.YearMonth
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -284,11 +286,12 @@ internal class VilkaarsvurderingRoutesTest {
 
     private fun opprettVilkaarsvurdering() {
         vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(
-            behandlingId,
-            SakType.BARNEPENSJON,
-            BehandlingType.FØRSTEGANGSBEHANDLING,
-            "some payload",
-            grunnlag
+            behandlingId = behandlingId,
+            sakType = SakType.BARNEPENSJON,
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            virkningstidspunkt = YearMonth.of(2021, Month.SEPTEMBER),
+            grunnlag = grunnlag,
+            kafkaPayload = "some payload"
         )
     }
 

@@ -12,6 +12,8 @@ import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
+import java.time.Month
+import java.time.YearMonth
 import java.util.*
 
 internal class GrunnlagEndretRiverTest {
@@ -24,11 +26,12 @@ internal class GrunnlagEndretRiverTest {
         every { vilkaarsvurderingService.hentVilkaarsvurdering(any()) } returns null
         every {
             vilkaarsvurderingService.opprettVilkaarsvurdering(
-                any(),
-                SakType.BARNEPENSJON,
-                BehandlingType.FØRSTEGANGSBEHANDLING,
-                any(),
-                any()
+                behandlingId = any(),
+                sakType = SakType.BARNEPENSJON,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                virkningstidspunkt = any(),
+                grunnlag = any(),
+                kafkaPayload = any()
             )
         } returns eksisterendeVilkaarsvurdering()
 
@@ -37,11 +40,12 @@ internal class GrunnlagEndretRiverTest {
         verify(exactly = 1) { vilkaarsvurderingService.hentVilkaarsvurdering(any()) }
         verify(exactly = 1) {
             vilkaarsvurderingService.opprettVilkaarsvurdering(
-                any(),
-                SakType.BARNEPENSJON,
-                BehandlingType.FØRSTEGANGSBEHANDLING,
-                any(),
-                any()
+                behandlingId = any(),
+                sakType = SakType.BARNEPENSJON,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                virkningstidspunkt = any(),
+                grunnlag = any(),
+                kafkaPayload = any()
             )
         }
         confirmVerified(vilkaarsvurderingService)
@@ -65,6 +69,7 @@ internal class GrunnlagEndretRiverTest {
         Vilkaarsvurdering(
             behandlingId = UUID.fromString("dbbd9a01-3e5d-4ec1-819c-1781d1f6a440"),
             kafkaPayload = grunnlagEndretMelding,
+            virkningstidspunkt = YearMonth.of(2021, Month.SEPTEMBER),
             vilkaar = barnepensjonVilkaar(grunnlag)
         )
 

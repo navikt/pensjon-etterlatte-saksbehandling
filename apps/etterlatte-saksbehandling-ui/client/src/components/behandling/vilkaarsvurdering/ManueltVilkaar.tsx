@@ -30,10 +30,13 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
     if (vilkaar.vurdering) {
       if (
         vilkaar.hovedvilkaar.resultat == VurderingsResultat.OPPFYLT ||
-        vilkaar.unntaksvilkaar?.find((unntaksvilkaar) => unntaksvilkaar.resultat)
+        vilkaar.unntaksvilkaar?.some((unntaksvilkaar) => VurderingsResultat.OPPFYLT === unntaksvilkaar.resultat)
       ) {
         return VurderingsresultatOld.OPPFYLT
-      } else if (vilkaar.hovedvilkaar.resultat == VurderingsResultat.IKKE_OPPFYLT) {
+      } else if (
+        vilkaar.hovedvilkaar.resultat == VurderingsResultat.IKKE_OPPFYLT &&
+        !vilkaar.unntaksvilkaar?.some((unntaksvilkaar) => VurderingsResultat.OPPFYLT === unntaksvilkaar.resultat)
+      ) {
         return VurderingsresultatOld.IKKE_OPPFYLT
       }
     }

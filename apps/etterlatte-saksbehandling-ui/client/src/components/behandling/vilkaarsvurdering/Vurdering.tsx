@@ -90,13 +90,16 @@ export const Vurdering = ({
   }
 
   const overskrift = () => {
-    if (vilkaar.hovedvilkaar?.resultat == VurderingsResultat.OPPFYLT) {
+    if (
+      vilkaar.hovedvilkaar?.resultat == VurderingsResultat.OPPFYLT ||
+      vilkaar.unntaksvilkaar?.some((unntaksvilkaar) => VurderingsResultat.OPPFYLT === unntaksvilkaar.resultat)
+    ) {
       return 'Vilkår oppfylt'
-    } else if (vilkaar.hovedvilkaar?.resultat == VurderingsResultat.IKKE_OPPFYLT) {
+    } else if (
+      vilkaar.hovedvilkaar?.resultat == VurderingsResultat.IKKE_OPPFYLT &&
+      !vilkaar.unntaksvilkaar?.some((unntaksvilkaar) => VurderingsResultat.OPPFYLT === unntaksvilkaar.resultat)
+    ) {
       return 'Vilkår er ikke oppfylt'
-    } else if (vilkaar.unntaksvilkaar) {
-      const find = vilkaar.unntaksvilkaar?.find((unntaksvilkaar) => unntaksvilkaar.resultat)
-      return `Unntaksvilkår ${find?.type} er oppfylt`
     } else {
       return 'Vilkåret er ikke vurdert'
     }
@@ -140,6 +143,7 @@ export const Vurdering = ({
                 setResultat(VurderingsResultat[event as VurderingsResultat])
                 setRadioError(undefined)
               }}
+              value={resultat}
               error={radioError ? radioError : false}
             >
               <div className="flex">
@@ -158,6 +162,7 @@ export const Vurdering = ({
                 size="small"
                 className="radioGroup"
                 onChange={(event) => setVilkaarsUnntakType(event)}
+                value={vilkaarsUnntakType}
               >
                 <div className="flex">
                   {vilkaar.unntaksvilkaar.map((unntakvilkaar) => {

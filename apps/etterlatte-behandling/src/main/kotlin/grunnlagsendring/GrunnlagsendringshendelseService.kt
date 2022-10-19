@@ -2,9 +2,11 @@ package no.nav.etterlatte.grunnlagsendring
 
 import no.nav.etterlatte.behandling.Behandling
 import no.nav.etterlatte.behandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.Revurdering
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
@@ -27,7 +29,6 @@ class GrunnlagsendringshendelseService(
     private val revurderingService: RevurderingService,
     private val pdlService: PdlService
 ) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     /* Henter grunnlagsendringshendelser med status GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING */
@@ -42,11 +43,10 @@ class GrunnlagsendringshendelseService(
         )
     }
 
-    /*
-    TODO: erstatt denne med en metode som sjekker hele persongalleriet for saker og oppretter
-    ulike typer grunnlagsendringshendelser utifra om det er soeker, gjenlevende forelder eller soesken
-    som er doed
-     */
+    fun opprettDoedshendelser(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
+        return opprettSoekerDoedHendelse(doedshendelse)
+    }
+
     fun opprettSoekerDoedHendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> =
         // finner saker med loepende utbetalinger
         generellBehandlingService.alleSakIderForSoekerMedFnr(doedshendelse.avdoedFnr).let { saker ->
@@ -85,7 +85,7 @@ class GrunnlagsendringshendelseService(
                     is SoekerDoed -> verifiserOgHaandterSoekerErDoed(data, hendelse.sakId)
                     is Utflytting -> verifiserOgHaandterSoekerErUtflyttet(data, hendelse.sakId)
                     is ForelderBarnRelasjon -> verifiserOgHaandterForelderBarnRelasjon(data, hendelse.sakId)
-                    else -> {}
+                    null -> Unit
                 }
             }
     }
@@ -102,7 +102,7 @@ class GrunnlagsendringshendelseService(
 
     private fun verifiserOgHaandterSoekerErUtflyttet(data: Utflytting, sakId: Long) {
         val fnr = data.hendelse.fnr
-        if (soekerErUtflyttet(fnr)) {
+        if (soekerHarUtflytting(fnr)) {
             haandterSoekerErUtflyttet(sakId)
         } else {
             logger.info("Person med fnr $fnr er ikke utflyttet i PDL. Forkaster hendelse")
@@ -138,23 +138,16 @@ class GrunnlagsendringshendelseService(
         } ?: false
     }
 
-    private fun soekerErUtflyttet(fnr: String): Boolean {
-        return pdlService.hentPdlModell(
+    private fun soekerHarUtflytting(fnr: String): Boolean {
+        return !pdlService.hentPdlModell(
             foedselsnummer = fnr,
             rolle = PersonRolle.BARN
-        ).utland?.utflyttingFraNorge?.let {
-            // TODO: sjekk at utflyttingFraNorge er korrekt aa sjekke for aa verifisere utflytting
-            // TODO: sjekk om siste utflytting er foerste eller siste element i listen
-            logger.info(
-                "Person med fnr $fnr er utflyttet i pdl med siste utflyttingsdato: foerste: ${it.first()}, " +
-                    "siste: ${it.last()} "
-            )
-            true
-        } ?: false
+        ).utland?.utflyttingFraNorge.isNullOrEmpty()
     }
 
     private fun forelderBarnRelasjonErGyldig(fnr: String): Boolean {
-        // TODO: implementer.
+        // TODO("I første omgang sier vi at alle hendelesene her er 'gyldige', dvs vi oppretter en hendelse
+        //  for de og viser de fram i frontend").
         return true
     }
 
@@ -188,50 +181,62 @@ class GrunnlagsendringshendelseService(
     - Dette boer kanskje fanges opp?
      */
     private fun haandterSoekerDoed(sakId: Long, data: SoekerDoed) {
-        generellBehandlingService.hentBehandlingerISak(sakId)
-            /*TODO: korrekt med siste ikke-avbrutte behandling?*/
-            .`siste ikke-avbrutte behandling`()?.let { behandling ->
-                when (behandling.status) {
-                    in BehandlingStatus.underBehandling() -> {
-                        logger.info(
-                            "Behandling ${behandling.id} med status ${behandling.status} er under " +
-                                "behandling -> setter status til GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING."
-                        )
-                        inTransaction {
-                            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
-                                saker = listOf(sakId),
-                                foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
-                                etterStatus = GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING,
-                                type = GrunnlagsendringsType.SOEKER_DOED
-                            )
-                        }
-                    }
+        val behandlingerISak = generellBehandlingService.hentBehandlingerISak(sakId)
 
-                    in BehandlingStatus.iverksattEllerAttestert() -> {
-                        revurderingService.startRevurdering(
-                            forrigeBehandling = behandling,
-                            pdlHendelse = data.hendelse,
-                            revurderingAarsak = RevurderingAarsak.SOEKER_DOD
-                        ).also {
-                            inTransaction {
-                                grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
-                                    saker = listOf(sakId),
-                                    foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
-                                    etterStatus = GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
-                                    type = GrunnlagsendringsType.SOEKER_DOED
-                                )
-                                grunnlagsendringshendelseDao.settBehandlingIdForTattMedIBehandling(
-                                    sak = sakId,
-                                    behandlingId = it.id,
-                                    type = GrunnlagsendringsType.SOEKER_DOED
-                                )
-                            }
-                        }
-                    }
+        // Har vi en eksisterende behandling som ikke er avbrutt?
+        val sisteBehandling = behandlingerISak
+            .`siste ikke-avbrutte behandling`() ?: return // TODO("Se på ekstra håndtering her, kanskje slette data") øh 19.10.2022
 
-                    else -> {}
+        val harAlleredeEtManueltOpphoer = behandlingerISak.any { it.type == BehandlingType.MANUELT_OPPHOER }
+        val harAlleredeOpphoerDoedsfall =
+            behandlingerISak.any {
+                it.type == BehandlingType.REVURDERING &&
+                    (it as? Revurdering)?.revurderingsaarsak == RevurderingAarsak.SOEKER_DOD
+            }
+        if (harAlleredeEtManueltOpphoer || harAlleredeOpphoerDoedsfall) {
+            return // TODO("Oppdatere grunnlagsendringshendelsen til å være vurdert?") øh 19.10.2022
+        }
+
+        when (sisteBehandling.status) {
+            in BehandlingStatus.underBehandling() -> {
+                logger.info(
+                    "Behandling ${sisteBehandling.id} med status ${sisteBehandling.status} er under " +
+                        "behandling -> setter status til GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING."
+                )
+                inTransaction {
+                    grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
+                        saker = listOf(sakId),
+                        foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
+                        etterStatus = GrunnlagsendringStatus.GYLDIG_OG_KAN_TAS_MED_I_BEHANDLING,
+                        type = GrunnlagsendringsType.SOEKER_DOED
+                    )
                 }
             }
+
+            in BehandlingStatus.iverksattEllerAttestert() -> {
+                revurderingService.startRevurdering(
+                    forrigeBehandling = sisteBehandling,
+                    pdlHendelse = data.hendelse,
+                    revurderingAarsak = RevurderingAarsak.SOEKER_DOD
+                ).also {
+                    inTransaction {
+                        grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusForType(
+                            saker = listOf(sakId),
+                            foerStatus = GrunnlagsendringStatus.IKKE_VURDERT,
+                            etterStatus = GrunnlagsendringStatus.TATT_MED_I_BEHANDLING,
+                            type = GrunnlagsendringsType.SOEKER_DOED
+                        )
+                        grunnlagsendringshendelseDao.settBehandlingIdForTattMedIBehandling(
+                            sak = sakId,
+                            behandlingId = it.id,
+                            type = GrunnlagsendringsType.SOEKER_DOED
+                        )
+                    }
+                }
+            }
+
+            else -> {}
+        }
     }
 
     private fun forkastHendelse(sakId: Long, type: GrunnlagsendringsType) =

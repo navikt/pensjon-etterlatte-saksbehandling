@@ -439,6 +439,15 @@ class BehandlingDao(private val connection: () -> Connection) {
         statement.setLong(1, sakId)
         statement.executeUpdate()
     }
+
+    fun avbrytBehandling(behandlingId: UUID): Behandling {
+        return this.lagreStatusOgOppgaveStatus(
+            behandling = behandlingId,
+            behandlingStatus = BehandlingStatus.AVBRUTT,
+            oppgaveStatus = OppgaveStatus.LUKKET,
+            sistEndret = LocalDateTime.now()
+        )
+    }
 }
 
 val objectMapper: ObjectMapper =

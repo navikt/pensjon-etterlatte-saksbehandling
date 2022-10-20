@@ -11,6 +11,10 @@ enum class BehandlingStatus {
     IVERKSATT,
     AVBRUTT;
 
+    fun kanAvbrytes(): Boolean {
+        return this !in iverksattEllerAttestert() && this != AVBRUTT
+    }
+
     companion object {
         fun underBehandling() = listOf(
             OPPRETTET,

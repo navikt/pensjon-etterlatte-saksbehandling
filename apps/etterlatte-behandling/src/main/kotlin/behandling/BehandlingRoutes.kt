@@ -54,70 +54,11 @@ fun Route.behandlingRoutes(
 
         route("/{behandlingsid}") {
             get {
-                generellBehandlingService.hentBehandlingstype(behandlingsId)?.let { type ->
-                    when (type) {
-                        BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                            with(foerstegangsbehandlingService.hentBehandling(behandlingsId)!!) {
-                                DetaljertBehandling(
-                                    id = id,
-                                    sak = sak,
-                                    behandlingOpprettet = behandlingOpprettet,
-                                    sistEndret = sistEndret,
-                                    soeknadMottattDato = soeknadMottattDato,
-                                    innsender = persongalleri.innsender,
-                                    soeker = persongalleri.soeker,
-                                    gjenlevende = persongalleri.gjenlevende,
-                                    avdoed = persongalleri.avdoed,
-                                    soesken = persongalleri.soesken,
-                                    gyldighetsproeving = gyldighetsproeving,
-                                    status = status,
-                                    behandlingType = type
-                                )
-                            }
-                        }
-                        BehandlingType.REVURDERING -> {
-                            with(revurderingService.hentRevurdering(behandlingsId)!!) {
-                                DetaljertBehandling(
-                                    id = id,
-                                    sak = sak,
-                                    behandlingOpprettet = behandlingOpprettet,
-                                    sistEndret = sistEndret,
-                                    soeknadMottattDato = behandlingOpprettet,
-                                    innsender = persongalleri.innsender,
-                                    soeker = persongalleri.soeker,
-                                    gjenlevende = persongalleri.gjenlevende,
-                                    avdoed = persongalleri.avdoed,
-                                    soesken = persongalleri.soesken,
-                                    gyldighetsproeving = null,
-                                    status = status,
-                                    behandlingType = type
-                                )
-                            }
-                        }
-                        BehandlingType.MANUELT_OPPHOER -> {
-                            with(manueltOpphoerService.hentManueltOpphoerInTransaction(behandlingsId)!!) {
-                                DetaljertBehandling(
-                                    id = id,
-                                    sak = sak,
-                                    behandlingOpprettet = behandlingOpprettet,
-                                    sistEndret = sistEndret,
-                                    soeknadMottattDato = behandlingOpprettet,
-                                    innsender = persongalleri.innsender,
-                                    soeker = persongalleri.soeker,
-                                    gjenlevende = persongalleri.gjenlevende,
-                                    avdoed = persongalleri.avdoed,
-                                    soesken = persongalleri.soesken,
-                                    gyldighetsproeving = null,
-                                    status = status,
-                                    behandlingType = type
-                                )
-                            }
-                        }
-                    }
-                }?.let { detaljertBehandling ->
-                    call.respond(detaljertBehandling)
-                    logger.info("Henter detaljert for behandling: $behandlingsId: $detaljertBehandling")
-                } ?: HttpStatusCode.NotFound
+                generellBehandlingService.hentBehandling(behandlingsId)?.toDetaljertBehandling()
+                    ?.let { detaljertBehandling ->
+                        call.respond(detaljertBehandling)
+                        logger.info("Henter detaljert for behandling: $behandlingsId: $detaljertBehandling")
+                    } ?: HttpStatusCode.NotFound
             }
 
             route("/hendelser") {

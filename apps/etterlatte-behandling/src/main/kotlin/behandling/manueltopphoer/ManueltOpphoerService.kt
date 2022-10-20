@@ -15,10 +15,8 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
-import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.util.*
 
 interface ManueltOpphoerService {
@@ -36,8 +34,6 @@ interface ManueltOpphoerService {
         kommentar: String?,
         begrunnelse: String?
     )
-
-    fun avbrytBehandling(id: UUID)
     fun hentManueltOpphoerInTransaction(behandling: UUID): ManueltOpphoer?
 }
 
@@ -96,23 +92,6 @@ class RealManueltOpphoerService(
                 behandlingHendelser.send(lagretManueltOpphoer.id to BehandlingHendelseType.OPPRETTET)
             }
             logger.info("Manuelt opphoer er opprettet.")
-        }
-    }
-
-    override fun avbrytBehandling(id: UUID) {
-        hentManueltOpphoer(id)?.let {
-            it.copy(
-                status = BehandlingStatus.AVBRUTT,
-                sistEndret = LocalDateTime.now(),
-                oppgaveStatus = OppgaveStatus.LUKKET
-            ).let { avbruttBehandling ->
-                behandlinger.lagreStatusOgOppgaveStatus(
-                    avbruttBehandling.id,
-                    avbruttBehandling.status,
-                    avbruttBehandling.oppgaveStatus,
-                    avbruttBehandling.sistEndret
-                )
-            }
         }
     }
 

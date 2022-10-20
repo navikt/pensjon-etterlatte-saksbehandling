@@ -231,7 +231,7 @@ internal class BehandlingDaoIntegrationTest {
             behandlingRepo.opprettFoerstegangsbehandling(b)
         }
 
-        val rev = listOf(
+        listOf(
             revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
             revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
             revurdering(sak = sak2, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
@@ -373,13 +373,13 @@ internal class BehandlingDaoIntegrationTest {
     fun `Skal bare hente behandlinger av en gitt type`() {
         val sak1 = sakRepo.opprettSak("1234", SakType.BARNEPENSJON).id
 
-        val rev = listOf(
+        listOf(
             revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD),
             revurdering(sak = sak1, revurderingAarsak = RevurderingAarsak.SOEKER_DOD)
         ).forEach {
             behandlingRepo.opprettRevurdering(it)
         }
-        val foer = listOf(
+        listOf(
             foerstegangsbehandling(sak = sak1),
             foerstegangsbehandling(sak = sak1)
         ).forEach {
@@ -418,7 +418,7 @@ internal class BehandlingDaoIntegrationTest {
 
         assertEquals(BehandlingStatus.OPPRETTET, behandlingFoerStatusendring!!.status)
         assertEquals(BehandlingStatus.UNDER_BEHANDLING, behandlingEtterStatusendring!!.status)
-        assertEquals(endretTidspunkt, behandlingEtterStatusendring!!.sistEndret)
+        assertEquals(endretTidspunkt, behandlingEtterStatusendring.sistEndret)
     }
 
     @Test
@@ -439,7 +439,7 @@ internal class BehandlingDaoIntegrationTest {
 
         assertEquals(OppgaveStatus.NY, behandlingFoerStatusendring!!.oppgaveStatus)
         assertEquals(OppgaveStatus.LUKKET, behandlingEtterStatusendring!!.oppgaveStatus)
-        assertEquals(endretTidspunkt, behandlingEtterStatusendring!!.sistEndret)
+        assertEquals(endretTidspunkt, behandlingEtterStatusendring.sistEndret)
     }
 
     @Test

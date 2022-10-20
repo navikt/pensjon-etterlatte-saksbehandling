@@ -18,6 +18,25 @@ class HendelseDao(private val connection: () -> Connection) {
         val logger: Logger = LoggerFactory.getLogger(HendelseDao::class.java)
     }
 
+    fun behandlingAvbrutt(
+        behandling: Behandling,
+        saksbehandler: String,
+        kommentar: String? = null,
+        valgtBegrunnelse: String? = null
+    ) = lagreHendelse(
+        UlagretHendelse(
+            hendelse = "BEHANDLING:AVBRUTT",
+            inntruffet = Tidspunkt.now(),
+            vedtakId = null,
+            behandlingId = behandling.id,
+            sakId = behandling.sak,
+            ident = saksbehandler,
+            identType = "SAKSBEHANDLER",
+            kommentar = kommentar,
+            valgtBegrunnelse = valgtBegrunnelse
+        )
+    )
+
     fun behandlingOpprettet(behandling: Behandling) = lagreHendelse(
         UlagretHendelse(
             "BEHANDLING:OPPRETTET",

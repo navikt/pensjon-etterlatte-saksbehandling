@@ -286,13 +286,29 @@ class ApplicationTest {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.post("/behandlinger/${manueltOpphoer.behandlingId}/avbrytbehandling") {
+            val behandlingIdNyFoerstegangsbehandling = client.post("/behandlinger") {
+                addAuthServiceBruker()
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    BehandlingsBehov(
+                        1,
+                        Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
+                        LocalDateTime.now().toString()
+                    )
+
+                )
+            }.let {
+                assertEquals(HttpStatusCode.OK, it.status)
+                UUID.fromString(it.body())
+            }
+
+            client.post("/behandlinger/$behandlingIdNyFoerstegangsbehandling/avbrytbehandling") {
                 addAuthSaksbehandler()
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.get("/behandlinger/manueltopphoer?behandlingsid=${manueltOpphoer.behandlingId}") {
+            client.get("/behandlinger/foerstegangsbehandling?behandlingsid=$behandlingIdNyFoerstegangsbehandling") {
                 addAuthSaksbehandler()
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
@@ -306,7 +322,7 @@ class ApplicationTest {
         kotlin.runCatching { sleep(2000) }
         assertNotNull(behandlingOpprettet)
         val rapid = beans.rapidSingleton
-        assertEquals(3, rapid.publiserteMeldinger.size)
+        assertEquals(4, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue()
@@ -314,6 +330,11 @@ class ApplicationTest {
         assertEquals(
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue()
+        )
+        assertEquals(
+            "BEHANDLING:OPPRETTET",
+            objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue()
+
         )
         assertEquals(
             "BEHANDLING:AVBRUTT",

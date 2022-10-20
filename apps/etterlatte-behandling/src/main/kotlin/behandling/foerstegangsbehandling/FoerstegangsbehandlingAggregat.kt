@@ -95,15 +95,6 @@ class FoerstegangsbehandlingAggregat(
         logger.info("behandling ${lagretBehandling.id} i sak ${lagretBehandling.sak} er gyldighetsprøvd")
     }
 
-    fun avbrytBehandling() {
-        lagretBehandling = behandlinger.lagreStatusOgOppgaveStatus(
-            lagretBehandling.id,
-            BehandlingStatus.AVBRUTT,
-            OppgaveStatus.LUKKET,
-            LocalDateTime.now()
-        ) as Foerstegangsbehandling
-    }
-
     fun serialiserbarUtgave() = lagretBehandling.copy()
 
     fun registrerVedtakHendelse(

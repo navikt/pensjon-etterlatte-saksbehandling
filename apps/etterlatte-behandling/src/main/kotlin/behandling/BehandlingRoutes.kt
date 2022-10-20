@@ -4,6 +4,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.log
+import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
@@ -24,7 +25,8 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerRequest
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.util.*
+import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import java.util.UUID
 
 fun Route.behandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
@@ -86,7 +88,11 @@ fun Route.behandlingRoutes(
             }
 
             post("/avbrytbehandling") {
-                generellBehandlingService.avbrytBehandling(behandlingsId)
+                val navIdent = navIdentFraToken() ?: return@post call.respond(
+                    HttpStatusCode.Unauthorized,
+                    "Kunne ikke hente ut navident for den som vil avbryte"
+                )
+                generellBehandlingService.avbrytBehandling(behandlingsId, navIdent)
                 call.respond(HttpStatusCode.OK)
             }
 
@@ -302,19 +308,6 @@ fun Route.behandlingRoutes(
         generellBehandlingService.grunnlagISakEndret(sakId)
         call.respond(HttpStatusCode.OK)
     }
-
-// TODO: fases ut -> nytt endepunkt: /foerstegangsbehandling/gyldigfremsatt
-    post("gyldigfremsatt") {
-        val body = call.receive<GyldighetsResultat>()
-        foerstegangsbehandlingService.lagreGyldighetsprøving(behandlingsId, body)
-        call.respond(HttpStatusCode.OK)
-    }
-
-// TODO: fases ut -> nytt endepunkt: /behandlinger/{behandlingsid}/avbrytbehandling/
-    post("avbrytBehandling/{behandlingsid}") {
-        generellBehandlingService.avbrytBehandling(behandlingsId)
-        call.respond(HttpStatusCode.OK)
-    }
 }
 
 inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
@@ -324,6 +317,8 @@ inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
         )
     }
 inline val PipelineContext<*, ApplicationCall>.sakId get() = requireNotNull(call.parameters["sakid"]).toLong()
+fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.principal<TokenValidationContextPrincipal>()
+    ?.context?.firstValidToken?.get()?.jwtTokenClaims?.get("NAVident")?.toString()
 
 data class VedtakHendelse(
     val vedtakId: Long,

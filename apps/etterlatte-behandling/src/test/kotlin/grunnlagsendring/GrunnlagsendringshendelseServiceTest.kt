@@ -16,6 +16,7 @@ import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
 import no.nav.etterlatte.grunnlagsinformasjonForelderBarnRelasjonHendelse
 import no.nav.etterlatte.grunnlagsinformasjonUtflyttingshendelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringStatus
 import no.nav.etterlatte.libs.common.behandling.GrunnlagsendringsType
 import no.nav.etterlatte.libs.common.behandling.Grunnlagsendringshendelse
@@ -330,9 +331,10 @@ internal class GrunnlagsendringshendelseServiceTest {
         val behandlingId = UUID.randomUUID()
         val generellBehandlingService = mockk<GenerellBehandlingService>() {
             every { hentBehandlingerISak(sakId) } returns listOf(
-                mockk<Behandling>() {
+                mockk {
                     every { status } returns BehandlingStatus.IVERKSATT
                     every { id } returns behandlingId
+                    every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 }
             )
         }
@@ -399,11 +401,12 @@ internal class GrunnlagsendringshendelseServiceTest {
             }
         }
         val behandlingId = UUID.randomUUID()
-        val generellBehandlingService = mockk<GenerellBehandlingService>() {
+        val generellBehandlingService = mockk<GenerellBehandlingService> {
             every { hentBehandlingerISak(sakId) } returns listOf(
                 mockk {
                     every { status } returns BehandlingStatus.UNDER_BEHANDLING
                     every { id } returns behandlingId
+                    every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 }
             )
         }

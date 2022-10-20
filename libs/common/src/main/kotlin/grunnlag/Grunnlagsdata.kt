@@ -32,7 +32,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.U
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTLAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
-import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
+import no.nav.etterlatte.libs.common.inntekt.ArbeidsInntektInformasjon
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Adressebeskyttelse
@@ -83,7 +83,7 @@ fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() =
 fun Grunnlagsdata<JsonNode>.hentSoeskenjustering() =
     this.hentKonstantOpplysning<Beregningsgrunnlag>(SOESKEN_I_BEREGNINGEN)
 fun Grunnlagsdata<JsonNode>.hentInntekt() =
-    this.hentKonstantOpplysning<InntektsOpplysning>(INNTEKT)
+    this.hentPeriodisertOpplysning<ArbeidsInntektInformasjon>(INNTEKT)
 fun Grunnlagsdata<JsonNode>.hentMedlemskapsperiode() =
     this.hentPeriodisertOpplysning<SaksbehandlerMedlemskapsperiode?>(MEDLEMSKAPSPERIODE)
 

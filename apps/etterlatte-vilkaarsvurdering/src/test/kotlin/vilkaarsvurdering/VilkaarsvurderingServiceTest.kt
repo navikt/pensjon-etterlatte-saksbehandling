@@ -17,6 +17,7 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryInMemory
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.*
 
 internal class VilkaarsvurderingServiceTest {
@@ -31,6 +32,7 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
+            virkningstidspunkt = LocalDate.of(2022, 1, 1),
             "",
             grunnlag
         )

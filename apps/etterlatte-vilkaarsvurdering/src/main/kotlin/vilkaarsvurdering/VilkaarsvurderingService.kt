@@ -3,6 +3,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
+import java.time.LocalDate
 import java.util.*
 
 class VilkaarsvurderingFinnesIkkeException(override val message: String) : RuntimeException(message)
@@ -18,6 +19,7 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
         behandlingId: UUID,
         sakType: SakType,
         behandlingType: BehandlingType,
+        virkningstidspunkt: LocalDate,
         payload: String,
         grunnlag: Grunnlag
     ): Vilkaarsvurdering {
@@ -26,7 +28,7 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
                         vilkaarsvurderingRepository.lagre(
-                            Vilkaarsvurdering(behandlingId, payload, barnepensjonVilkaar(grunnlag))
+                            Vilkaarsvurdering(behandlingId, payload, barnepensjonVilkaar(grunnlag), virkningstidspunkt)
                         )
                     else ->
                         throw VilkaarsvurderingFinnesIkkeException(
@@ -38,9 +40,13 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
         }
     }
 
-    fun oppdaterVilkaarsvurderingPayload(behandlingId: UUID, payload: String): Vilkaarsvurdering {
+    fun oppdaterVilkaarsvurderingPayload(
+        behandlingId: UUID,
+        payload: String,
+        virkningstidspunkt: LocalDate
+    ): Vilkaarsvurdering {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let {
-            vilkaarsvurderingRepository.lagre(it.copy(payload = payload))
+            vilkaarsvurderingRepository.lagre(it.copy(payload = payload, virkningstidspunkt = virkningstidspunkt))
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 

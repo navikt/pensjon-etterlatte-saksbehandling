@@ -13,6 +13,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asYearMonth
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 
@@ -34,11 +35,11 @@ class GrunnlagEndretRiver(
             validate { it.requireKey("behandling.type") }
             validate { it.requireKey("sak.sakType") }
             validate { it.requireKey("fnrSoeker") }
+            validate { it.requireKey("virkningstidspunkt") }
             validate { it.interestedIn(BehandlingGrunnlagEndret.revurderingAarsakKey) }
             validate { it.interestedIn(BehandlingGrunnlagEndret.manueltOpphoerAarsakKey) }
             validate { it.interestedIn(BehandlingGrunnlagEndret.manueltOpphoerfritekstAarsakKey) }
             validate { it.rejectKey("vilkaarsvurdering") }
-            validate { it.rejectKey("kommerSoekerTilGode") }
             validate { it.rejectKey("gyldighetsvurdering") }
             correlationId()
         }.register(this)
@@ -51,6 +52,7 @@ class GrunnlagEndretRiver(
                 val behandlingId = packet["behandlingId"].asText().toUUID()
                 val behandlingType = BehandlingType.valueOf(packet["behandling.type"].asText())
                 val sakType = SakType.valueOf(packet["sak.sakType"].asText())
+                val virkningstidspunkt = packet["virkningstidspunkt"].asYearMonth().atDay(1)
                 val grunnlag =
                     requireNotNull(
                         objectMapper.treeToValue<Grunnlag>(
@@ -69,15 +71,20 @@ class GrunnlagEndretRiver(
                 // kunne sende dette videre sendere.
                 if (vilkaarsvurdering != null) {
                     logger.info("Oppdaterer eksisterende vilkårsvurdering for behandlingId=$behandlingId")
-                    vilkaarsvurderingService.oppdaterVilkaarsvurderingPayload(behandlingId, grunnlagEndretPayload)
+                    vilkaarsvurderingService.oppdaterVilkaarsvurderingPayload(
+                        behandlingId = behandlingId,
+                        payload = grunnlagEndretPayload,
+                        virkningstidspunkt = virkningstidspunkt
+                    )
                 } else {
                     logger.info("Oppretter ny vilkårsvurdering for behandlingId=$behandlingId")
                     vilkaarsvurderingService.opprettVilkaarsvurdering(
-                        behandlingId,
-                        sakType,
-                        behandlingType,
-                        grunnlagEndretPayload,
-                        grunnlag
+                        behandlingId = behandlingId,
+                        sakType = sakType,
+                        behandlingType = behandlingType,
+                        virkningstidspunkt = virkningstidspunkt,
+                        payload = grunnlagEndretPayload,
+                        grunnlag = grunnlag
                     )
                 }
             } catch (e: Exception) {

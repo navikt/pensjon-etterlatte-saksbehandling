@@ -42,4 +42,5 @@ dependencies {
     testImplementation(TestContainer.Jupiter)
     testImplementation(TestContainer.Postgresql)
     testImplementation(Kotest.AssertionsCore)
+    testImplementation(project(":libs:testdata"))
 }

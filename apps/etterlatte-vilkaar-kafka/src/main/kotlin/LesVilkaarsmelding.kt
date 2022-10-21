@@ -1,3 +1,4 @@
+
 import barnepensjon.domain.Aarsak
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.barnepensjon.GrunnlagForAvdoedMangler
@@ -18,7 +19,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.asLocalDateTime
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 internal class LesVilkaarsmelding(
     rapidsConnection: RapidsConnection,
@@ -74,11 +75,11 @@ internal class LesVilkaarsmelding(
                         behandlingopprettet,
                         aarsak
                     )
-                packet["vilkaarsvurdering"] = vilkaarsvurdering
+                packet["vilkaarsvurderingGammel"] = vilkaarsvurdering
                 packet["virkningstidspunkt"] = virkningstidspunkt
                 kommerSoekerTilGode?.let { packet["kommerSoekerTilGode"] = it }
 
-                packet["vilkaarsvurderingGrunnlagRef"] = grunnlag.hentVersjon()
+                packet["kommerSoekerTilGodeGrunnlagRef"] = grunnlag.hentVersjon()
                 context.publish(packet.toJson())
 
                 logger.info(

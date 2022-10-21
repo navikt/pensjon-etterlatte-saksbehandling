@@ -1097,7 +1097,7 @@
     ],
     "vurdertDato": "2022-07-13T14:50:52.528852359"
   },
-  "vilkaarsvurderingGrunnlagRef": 48,
+  "kommerSoekerTilGodeGrunnlagRef": 48,
   "kommerSoekerTilGode": {
     "kommerSoekerTilgodeVurdering": {
       "resultat": "OPPFYLT",

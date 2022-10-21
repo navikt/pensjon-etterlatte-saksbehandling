@@ -26,7 +26,8 @@ internal class GrunnlagEndretRiverTest {
                 SakType.BARNEPENSJON,
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 any(),
-                any()
+                any(),
+                null
             )
         } returns eksisterendeVilkaarsvurdering()
 
@@ -39,7 +40,8 @@ internal class GrunnlagEndretRiverTest {
                 SakType.BARNEPENSJON,
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 any(),
-                any()
+                any(),
+                null
             )
         }
         confirmVerified(vilkaarsvurderingService)

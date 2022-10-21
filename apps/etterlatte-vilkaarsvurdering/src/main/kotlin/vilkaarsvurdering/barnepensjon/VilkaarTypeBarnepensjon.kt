@@ -35,7 +35,7 @@ enum class Kapittel18(val paragraf: String, val lenke: String) {
     PARAGRAF_18_11("§ 18-11", "https://lovdata.no/lov/1997-02-28-19/%C2%A718-11");
 }
 
-private fun formaal() = Vilkaar(
+fun formaal() = Vilkaar(
     Hovedvilkaar(
         type = VilkaarType.FORMAAL,
         paragraf = Paragraf(

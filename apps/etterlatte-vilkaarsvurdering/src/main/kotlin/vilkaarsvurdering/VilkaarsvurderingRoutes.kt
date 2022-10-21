@@ -14,6 +14,12 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import java.time.LocalDateTime
 import java.util.*
@@ -74,6 +80,8 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                             )
                         )
 
+//                    vilkaarsvurderingService.publiserVilkaarsvurdering(oppdatertVilkaarsvurdering)
+
                     call.respond(oppdatertVilkaarsvurdering)
                 }
             }
@@ -125,11 +133,6 @@ data class VurdertVilkaarDto(
     val hovedvilkaar: VilkaarTypeOgUtfall,
     val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
     val kommentar: String?
-)
-
-data class VilkaarTypeOgUtfall(
-    val type: VilkaarType,
-    val resultat: Utfall
 )
 
 data class VurdertVilkaarsvurderingResultatDto(

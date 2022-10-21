@@ -16,6 +16,10 @@ import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.restModule
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
 import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationProperties
@@ -76,7 +80,7 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), Vilkaarsvurdering::class.java)
+            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingIntern::class.java)
             val vilkaar = vilkaarsvurdering.vilkaar.first()
 
             assertEquals(HttpStatusCode.OK, response.status)
@@ -116,7 +120,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val oppdatertVilkaarsvurdering = objectMapper
-                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), Vilkaarsvurdering::class.java)
+                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
             val oppdatertVilkaar = oppdatertVilkaarsvurdering.vilkaar.find {
                 it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type
             }
@@ -258,7 +262,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val oppdatertVilkaarsvurdering = objectMapper
-                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), Vilkaarsvurdering::class.java)
+                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
 
             assertEquals(HttpStatusCode.OK, oppdatertVilkaarsvurderingResponse.status)
             assertEquals(behandlingId, oppdatertVilkaarsvurdering.behandlingId)
@@ -273,7 +277,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val slettetVilkaarsvurdering = objectMapper
-                .readValue(sletteResponse.bodyAsText(), Vilkaarsvurdering::class.java)
+                .readValue(sletteResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
 
             assertEquals(HttpStatusCode.OK, sletteResponse.status)
             assertEquals(behandlingId, slettetVilkaarsvurdering.behandlingId)

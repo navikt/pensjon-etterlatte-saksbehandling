@@ -2,6 +2,10 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
 import java.time.LocalDate
 import java.util.*
@@ -11,7 +15,7 @@ class UgyldigSakTypeException(override val message: String) : RuntimeException(m
 
 class VilkaarsvurderingService(private val vilkaarsvurderingRepository: VilkaarsvurderingRepository) {
 
-    fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? {
+    fun hentVilkaarsvurdering(behandlingId: UUID): VilkaarsvurderingIntern? {
         return vilkaarsvurderingRepository.hent(behandlingId)
     }
 
@@ -22,13 +26,18 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
         virkningstidspunkt: LocalDate,
         payload: String,
         grunnlag: Grunnlag
-    ): Vilkaarsvurdering {
+    ): VilkaarsvurderingIntern {
         return when (sakType) {
             SakType.BARNEPENSJON ->
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
                         vilkaarsvurderingRepository.lagre(
-                            Vilkaarsvurdering(behandlingId, payload, barnepensjonVilkaar(grunnlag), virkningstidspunkt)
+                            VilkaarsvurderingIntern(
+                                behandlingId,
+                                payload,
+                                barnepensjonVilkaar(grunnlag),
+                                virkningstidspunkt
+                            )
                         )
                     else ->
                         throw VilkaarsvurderingFinnesIkkeException(
@@ -44,25 +53,25 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
         behandlingId: UUID,
         payload: String,
         virkningstidspunkt: LocalDate
-    ): Vilkaarsvurdering {
+    ): VilkaarsvurderingIntern {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let {
             vilkaarsvurderingRepository.lagre(it.copy(payload = payload, virkningstidspunkt = virkningstidspunkt))
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun oppdaterTotalVurdering(behandlingId: UUID, resultat: VilkaarsvurderingResultat): Vilkaarsvurdering {
+    fun oppdaterTotalVurdering(behandlingId: UUID, resultat: VilkaarsvurderingResultat): VilkaarsvurderingIntern {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = resultat))
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun slettTotalVurdering(behandlingId: UUID): Vilkaarsvurdering {
+    fun slettTotalVurdering(behandlingId: UUID): VilkaarsvurderingIntern {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = null))
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun oppdaterVurderingPaaVilkaar(behandlingId: UUID, vurdertVilkaar: VurdertVilkaar): Vilkaarsvurdering {
+    fun oppdaterVurderingPaaVilkaar(behandlingId: UUID, vurdertVilkaar: VurdertVilkaar): VilkaarsvurderingIntern {
         return hentVilkaarsvurdering(behandlingId)?.let { vilkaarsvurdering ->
             val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
                 vilkaar = vilkaarsvurdering.vilkaar.map {
@@ -73,7 +82,7 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun slettVurderingPaaVilkaar(behandlingId: UUID, hovedVilkaarType: VilkaarType): Vilkaarsvurdering {
+    fun slettVurderingPaaVilkaar(behandlingId: UUID, hovedVilkaarType: VilkaarType): VilkaarsvurderingIntern {
         return hentVilkaarsvurdering(behandlingId)?.let { vilkaarsvurdering ->
             val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
                 vilkaar = vilkaarsvurdering.vilkaar.map {
@@ -91,7 +100,7 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
                 hovedvilkaar = vilkaar.hovedvilkaar.copy(resultat = vurdertVilkaar.hovedvilkaar.resultat),
                 unntaksvilkaar = vilkaar.unntaksvilkaar?.map {
                     if (vurdertVilkaar.unntaksvilkaar?.type === it.type) {
-                        it.copy(resultat = vurdertVilkaar.unntaksvilkaar.resultat)
+                        it.copy(resultat = vurdertVilkaar.unntaksvilkaar!!.resultat)
                     } else {
                         it.copy(resultat = null)
                     }

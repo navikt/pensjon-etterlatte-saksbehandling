@@ -11,9 +11,9 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningsType
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.vilkaarsvurdering.SakType
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarOpplysningsType
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryInMemory
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import org.junit.jupiter.api.Test

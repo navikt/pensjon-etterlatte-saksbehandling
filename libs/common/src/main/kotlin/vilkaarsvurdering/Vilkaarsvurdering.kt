@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vilkaarsvurdering
+package no.nav.etterlatte.libs.common.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.LocalDate
@@ -7,7 +7,6 @@ import java.util.*
 
 data class Vilkaarsvurdering(
     val behandlingId: UUID,
-    val payload: String,
     val vilkaar: List<Vilkaar>,
     val virkningstidspunkt: LocalDate,
     val resultat: VilkaarsvurderingResultat? = null
@@ -81,6 +80,11 @@ enum class VilkaarsvurderingUtfall {
     OPPFYLT,
     IKKE_OPPFYLT
 }
+
+data class VilkaarTypeOgUtfall(
+    val type: VilkaarType,
+    val resultat: Utfall
+)
 
 data class VurdertVilkaar(
     val hovedvilkaar: VilkaarTypeOgUtfall,

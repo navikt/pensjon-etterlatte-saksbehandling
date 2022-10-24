@@ -1,4 +1,4 @@
-package no.nav.etterlatte.statistikk.client
+package no.nav.etterlatte.statistikk.clients
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

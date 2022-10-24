@@ -8,7 +8,8 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.util.*
+import java.util.UUID
+import kotlin.IllegalStateException
 
 interface GenerellBehandlingService {
 
@@ -17,7 +18,7 @@ interface GenerellBehandlingService {
     fun hentBehandlingstype(behandling: UUID): BehandlingType?
     fun hentBehandlingerISak(sakid: Long): List<Behandling>
     fun slettBehandlingerISak(sak: Long)
-    fun avbrytBehandling(behandling: UUID)
+    fun avbrytBehandling(behandling: UUID, saksbehandler: String)
     fun grunnlagISakEndret(sak: Long)
     fun registrerVedtakHendelse(
         behandling: UUID,
@@ -71,25 +72,20 @@ class RealGenerellBehandlingService(
         }
     }
 
-    override fun avbrytBehandling(behandling: UUID) {
+    override fun avbrytBehandling(behandlingId: UUID, saksbehandler: String) {
         inTransaction {
-            behandlinger.hentBehandlingType(behandling)?.let {
-                when (it) {
-                    BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                        foerstegangsbehandlingFactory.hentFoerstegangsbehandling(behandling).avbrytBehandling()
-                    }
-                    BehandlingType.REVURDERING -> {
-                        revurderingFactory.hentRevurdering(behandling).avbrytBehandling()
-                    }
-                    BehandlingType.MANUELT_OPPHOER -> {
-                        manueltOpphoerService.avbrytBehandling(behandling)
-                    }
-                }.also {
+            val behandling = behandlinger.hentBehandling(behandlingId)
+                ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId som skulle avbrytes")
+            if (!behandling.status.kanAvbrytes()) {
+                throw IllegalStateException("Kan ikke avbryte en behandling med status ${behandling.status}")
+            }
+            behandlinger.avbrytBehandling(behandlingId)
+                .also {
+                    hendelser.behandlingAvbrutt(behandling, saksbehandler)
                     runBlocking {
-                        behandlingHendelser.send(behandling to BehandlingHendelseType.AVBRUTT)
+                        behandlingHendelser.send(behandlingId to BehandlingHendelseType.AVBRUTT)
                     }
                 }
-            }
         }
     }
 

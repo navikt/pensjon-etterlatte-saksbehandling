@@ -29,7 +29,8 @@ open class Grunnlagsopplysning<T>(
             opplysningType: Opplysningstype,
             kilde: Kilde,
             fnr: Foedselsnummer,
-            fom: YearMonth?
+            fom: YearMonth?,
+            tom: YearMonth? = null
         ): Grunnlagsopplysning<out Any?> {
             return Grunnlagsopplysning(
                 id = UUID.randomUUID(),
@@ -39,7 +40,7 @@ open class Grunnlagsopplysning<T>(
                 opplysning = null,
                 attestering = null,
                 fnr = fnr,
-                periode = fom?.let { Periode(it, null) }
+                periode = fom?.let { Periode(it, tom) }
             )
         }
     }

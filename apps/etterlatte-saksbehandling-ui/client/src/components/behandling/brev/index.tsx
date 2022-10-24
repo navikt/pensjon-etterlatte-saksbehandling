@@ -1,6 +1,6 @@
 import { Content, ContentHeader } from '../../../shared/styled'
 import { useEffect, useState } from 'react'
-import { Alert, Button, ContentContainer, Heading, Table, Tag } from '@navikt/ds-react'
+import { Alert, ContentContainer, Heading, Table, Tag } from '@navikt/ds-react'
 import BrevModal from './brev-modal'
 import { Information, Success } from '@navikt/ds-icons'
 import NyttBrev from './nytt-brev/nytt-brev'
@@ -24,6 +24,7 @@ import styled from 'styled-components'
 import Spinner from '../../../shared/Spinner'
 import LastOppBrev from './nytt-brev/last-opp'
 import { useAppSelector } from '../../../store/Store'
+import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
 
 const IngenInnkommendeBrevRad = styled.td`
   text-align: center;
@@ -248,9 +249,7 @@ export const Brev = () => {
       </ContentContainer>
       <Border />
       <BehandlingHandlingKnapper>
-        <Button variant={'primary'} disabled={true}>
-          Fullfør behandling
-        </Button>
+        <SendTilAttesteringModal />
       </BehandlingHandlingKnapper>
     </Content>
   )

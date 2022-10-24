@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.arbeidsforhold.AaregResponse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentArbeidsforhold
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentInntekt
@@ -25,6 +26,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.PeriodeType
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SaksbehandlerMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.VurdertMedlemskapsperiode
+import no.nav.etterlatte.libs.common.inntekt.InntektType
 import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
 import no.nav.etterlatte.libs.common.vikaar.Kriterie
 import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
@@ -42,15 +44,34 @@ fun vilkaarAvdoedesMedlemskap(avdoed: Grunnlagsdata<JsonNode>): VurdertVilkaar {
     val vilkaarstype = Vilkaartyper.AVDOEDES_FORUTGAAENDE_MEDLEMSKAP
 
     val arbeidsforholdOpplysning = avdoed.hentArbeidsforhold() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
-    val inntektsOpplysning = avdoed.hentInntekt() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
+    val inntektsOpplysning = avdoed.hentInntekt()?.hentSenest() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
     val doedsdato = avdoed.hentDoedsdato()?.verdi ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
     val medlemskapsperioder = avdoed.hentMedlemskapsperiode() ?: return VurdertVilkaar.kanIkkeVurdere(vilkaarstype)
+
+    val inntektsliste = inntektsOpplysning.verdi.inntektListe
+    val pensjonEllerTrygd = inntektsliste?.filter { it.inntektType == InntektType.PENSJON_ELLER_TRYGD }
+    val ytelseFraOffentlig = inntektsliste?.filter { it.inntektType == InntektType.YTELSE_FRA_OFFENTLIGE }
+    val loennsinntekt = inntektsliste?.filter { it.inntektType == InntektType.LOENNSINNTEKT }
+    val naeringsinntekt = inntektsliste?.filter { it.inntektType == InntektType.NAERINGSINNTEKT }
+
+    val mappedInntektsopplysning: PeriodisertOpplysning<InntektsOpplysning> = PeriodisertOpplysning(
+        id = inntektsOpplysning.id,
+        fom = inntektsOpplysning.fom,
+        tom = inntektsOpplysning.tom,
+        kilde = inntektsOpplysning.kilde,
+        verdi = InntektsOpplysning(
+            pensjonEllerTrygd ?: emptyList(),
+            ytelseFraOffentlig ?: emptyList(),
+            loennsinntekt ?: emptyList(),
+            naeringsinntekt ?: emptyList()
+        )
+    )
 
     val bosattNorgeMetakriterie = metakriterieBosattNorge(avdoed)
 
     val medlemskapOffentligOgInntektKriterie = kriterieMedlemskapOffentligOgInntekt(
         arbeidsforholdOpplysning,
-        inntektsOpplysning,
+        mappedInntektsopplysning,
         doedsdato,
         medlemskapsperioder
     )
@@ -69,7 +90,7 @@ fun vilkaarAvdoedesMedlemskap(avdoed: Grunnlagsdata<JsonNode>): VurdertVilkaar {
 
 private fun kriterieMedlemskapOffentligOgInntekt(
     arbeidsforholdOpplysning: Opplysning.Periodisert<AaregResponse?>,
-    inntekt: Opplysning.Konstant<InntektsOpplysning>,
+    inntekt: PeriodisertOpplysning<InntektsOpplysning>,
     doedsdato: LocalDate,
     medlemskapsperioder: Opplysning.Periodisert<SaksbehandlerMedlemskapsperiode?>
 ): Kriterie {

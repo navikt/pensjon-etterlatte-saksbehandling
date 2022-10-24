@@ -3,22 +3,21 @@ import { TypeStatusWrap } from '../soeknadsoversikt/styled'
 import { Sammendrag } from './sammendrag'
 import styled from 'styled-components'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { BeregningModal } from '../handlinger/sendTilAttesteringModal'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import BrevModal from './brev-modal'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { formaterStringDato } from '../../../utils/formattering'
 import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResultat'
-import { IBehandlingsType } from '../../../store/reducers/BehandlingReducer'
 import { useAppSelector } from '../../../store/Store'
+import { Button } from '@navikt/ds-react'
+import { useBehandlingRoutes } from '../BehandlingRoutes'
 
 export const Beregne = () => {
+  const { next } = useBehandlingRoutes()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
 
   const virkningstidspunkt = formaterStringDato(behandling.virkningstidspunkt)
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const vedtaksresultat = useVedtaksResultat()
-  const harVedtaksbrev = behandling.behandlingType !== IBehandlingsType.REVURDERING
 
   return (
     <Content>
@@ -35,11 +34,12 @@ export const Beregne = () => {
           </div>
         </InfoWrapper>
         <Sammendrag />
-        {harVedtaksbrev ? <BrevModal /> : null}
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>
-          <BeregningModal />
+          <Button variant="primary" size="medium" onClick={next}>
+            Gå videre til brev
+          </Button>
         </BehandlingHandlingKnapper>
       ) : (
         <NesteOgTilbake />

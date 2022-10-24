@@ -5,13 +5,17 @@ import styled from 'styled-components'
 import { handlinger } from './typer'
 import { fattVedtak } from '../../../shared/api/behandling'
 import { useMatch } from 'react-router'
-import { useBehandlingRoutes } from '../BehandlingRoutes'
+import { useNavigate } from 'react-router-dom'
 
-export const BeregningModal: React.FC = () => {
-  const { next } = useBehandlingRoutes()
+export const SendTilAttesteringModal: React.FC = () => {
+  const navigate = useNavigate()
 
   const [beregneModalisOpen, setBeregneModalisOpen] = useState(false)
   const match = useMatch('/behandling/:behandlingId/*')
+
+  const goToOppgavebenken = () => {
+    navigate('/')
+  }
 
   const send = () => {
     if (!match?.params.behandlingId) throw new Error('Mangler behandlingsid')
@@ -19,8 +23,7 @@ export const BeregningModal: React.FC = () => {
     fattVedtak(match.params.behandlingId).then((response) => {
       if (response.status === 200) {
         setBeregneModalisOpen(false)
-        next()
-        window.location.reload()
+        goToOppgavebenken()
       }
     })
   }

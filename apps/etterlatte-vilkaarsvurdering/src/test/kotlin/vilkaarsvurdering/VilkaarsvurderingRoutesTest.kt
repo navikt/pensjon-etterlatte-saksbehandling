@@ -11,8 +11,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -27,29 +25,41 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VilkaarsvurderingRoutesTest {
 
-    private val vilkaarsvurderingServiceImpl = VilkaarsvurderingService(VilkaarsvurderingRepositoryInMemory())
+    @Container
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
     private val server = MockOAuth2Server()
 
-    private val applicationContext: ApplicationContext = mockk {
-        every { properties } returns ApplicationProperties()
-        every { vilkaarsvurderingService } returns vilkaarsvurderingServiceImpl
-    }
+    private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
+    private lateinit var applicationContext: ApplicationContext
 
     @BeforeAll
     fun before() {
         server.start()
         System.setProperty("AZURE_APP_WELL_KNOWN_URL", server.wellKnownUrl(ISSUER_ID).toString())
         System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
+        postgreSQLContainer.start()
+
+        applicationContext = ApplicationContext(
+            ApplicationProperties(
+                postgreSQLContainer.jdbcUrl,
+                postgreSQLContainer.username,
+                postgreSQLContainer.password
+            )
+        )
+        vilkaarsvurderingServiceImpl = applicationContext.vilkaarsvurderingService
     }
 
     @AfterAll
     fun after() {
         server.shutdown()
+        postgreSQLContainer.stop()
     }
 
     private val token: String by lazy {
@@ -285,7 +295,7 @@ internal class VilkaarsvurderingRoutesTest {
             behandlingId,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            "some payload",
+            """{"json": 123}""",
             grunnlag
         )
     }

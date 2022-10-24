@@ -1,26 +1,21 @@
 package no.nav.etterlatte.vilkaarsvurdering.config
 
 class ApplicationProperties(
-    /*
-    val dbName: String,
-    val dbHost: String,
-    val dbPort: Int,
+    val jdbcUrl: String,
     val dbUsername: String,
     val dbPassword: String
 
-     */
 ) {
     companion object {
         fun fromEnv(env: Map<String, String>) = env.run {
             ApplicationProperties(
-                /*
-                dbName = value("DB_DATABASE"),
-                dbHost = value("DB_HOST"),
-                dbPort = value("DB_PORT").toInt(),
+                jdbcUrl = env["DB_JDBC_URL"] ?: jdbcUrl(
+                    value("DB_HOST"),
+                    value("DB_PORT").toInt(),
+                    value("DB_DATABASE")
+                ),
                 dbUsername = value("DB_USERNAME"),
                 dbPassword = value("DB_PASSWORD")
-
-                 */
             )
         }
 
@@ -28,3 +23,6 @@ class ApplicationProperties(
             requireNotNull(this[property]) { "Property $property was null" }
     }
 }
+
+private fun jdbcUrl(host: String, port: Int, databaseName: String) =
+    "jdbc:postgresql://$host:$port/$databaseName"

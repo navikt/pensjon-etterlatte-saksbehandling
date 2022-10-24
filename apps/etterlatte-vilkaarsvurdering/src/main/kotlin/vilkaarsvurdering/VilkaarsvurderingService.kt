@@ -63,7 +63,7 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
                     oppdaterVurdering(it, vurdertVilkaar)
                 }
             )
-            vilkaarsvurderingRepository.oppdater(oppdatertVilkaarsvurdering)
+            vilkaarsvurderingRepository.lagre(oppdatertVilkaarsvurdering)
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
     }
 
@@ -74,7 +74,7 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
                     slettVurdering(it, hovedVilkaarType)
                 }
             )
-            vilkaarsvurderingRepository.oppdater(oppdatertVilkaarsvurdering)
+            vilkaarsvurderingRepository.lagre(oppdatertVilkaarsvurdering)
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
     }
 

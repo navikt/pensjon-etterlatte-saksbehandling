@@ -1,18 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
-import styled from 'styled-components'
 import { hentBehandling } from '../../shared/api/behandling'
-import { Column, GridContainer } from '../../shared/styled'
-import { resetBehandling } from '../../store/reducers/BehandlingReducer'
+import { Column, GridContainer, MainContent, Sidebar } from '../../shared/styled'
+import { addBehandling, resetBehandling } from '../../store/reducers/BehandlingReducer'
 import Spinner from '../../shared/Spinner'
 import { StatusBar, StatusBarTheme } from '../../shared/statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { SideMeny } from './SideMeny'
-import { formaterEnumTilLesbarString } from '../../utils/formattering'
 import { RevurderingsAarsakModal } from './inngangsvilkaar/revurderingInfo/RevurderingInfoModal'
 import { useAppDispatch, useAppSelector } from '../../store/Store'
-import { addBehandling } from '../../store/reducers/BehandlingReducer'
 
 export const Behandling = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
@@ -50,39 +47,25 @@ export const Behandling = () => {
   return (
     <>
       {soekerInfo && <StatusBar theme={StatusBarTheme.gray} personInfo={soekerInfo} />}
+      {!isLoading && <StegMeny />}
 
       <Spinner visible={isLoading} label="Laster" />
       {!isLoading && (
         <GridContainer>
-          <Column>
-            <MenuHead>
-              <Title>{formaterEnumTilLesbarString(behandling.behandlingType)}</Title>
-            </MenuHead>
-            <StegMeny />
-          </Column>
           <RevurderingsAarsakModal behandlingStatus={behandlingStatus} />
-          <Column>
+          <MainContent>
             <Routes>
               {behandlingRoutes.map((route) => {
                 return <Route key={route.path} path={route.path} element={route.element} />
               })}
               <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
             </Routes>
-          </Column>
-          <Column>
+          </MainContent>
+          <Sidebar>
             <SideMeny />
-          </Column>
+          </Sidebar>
         </GridContainer>
       )}
     </>
   )
 }
-
-const MenuHead = styled.div`
-  padding: 2em 1em;
-  height: 100px;
-`
-const Title = styled.div`
-  font-weight: 600;
-  font-size: 24px;
-`

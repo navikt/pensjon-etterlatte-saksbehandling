@@ -40,7 +40,7 @@ enum class Opplysningstype {
     AVDOEDESBARN,
     VERGEMAALELLERFREMTIDSFULLMAKT,
     PERSONROLLE,
-    UTENLANDSOPPHOLD,
+    UTENLANDSOPPHOLD, // Bruks kun idag for informasjon fra søknaden
     UTENLANDSADRESSE,
     INNTEKT,
     MEDLEMSKAPSPERIODE,

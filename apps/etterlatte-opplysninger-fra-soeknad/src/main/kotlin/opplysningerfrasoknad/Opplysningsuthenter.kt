@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.Avdoed
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.GjenlevendeForelder
+import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.common.PersonType
 import java.time.YearMonth
 import java.time.ZoneOffset
@@ -34,7 +35,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdO
 
 class Opplysningsuthenter {
 
-    fun lagOpplysningsListe(jsonNode: JsonNode): List<Grunnlagsopplysning<out Any>> {
+    fun lagOpplysningsListe(jsonNode: JsonNode): List<Grunnlagsopplysning<out Any?>> {
         val barnepensjonssoknad = objectMapper.treeToValue<Barnepensjon>(jsonNode)
         val kilde = Grunnlagsopplysning.Privatperson(
             barnepensjonssoknad.innsender.foedselsnummer.svar.value,
@@ -54,21 +55,38 @@ class Opplysningsuthenter {
             )
         }
         val utenlandsopphold = hentAvdoedForelder(barnepensjonssoknad)?.utenlandsopphold
-        val utenlandsoppholdAvdød = utenlandsopphold?.opplysning?.map {
-            lagOpplysning(
-                opplysningsType = UTENLANDSOPPHOLD,
-                kilde = kilde,
-                opplysning = UtenlandsoppholdOpplysninger(
-                    utenlandsopphold.svar.verdi, // TODO sj: Ikke helt riktig å mappe denne til alle?
-                    it.land.svar.innhold,
-                    it.oppholdsType.svar.map { utlandsopphold -> utlandsopphold.verdi },
-                    it.medlemFolketrygd.svar.verdi, // TODO sj: Splittes opp?
-                    it.pensjonsutbetaling?.svar?.innhold
-                ),
-                periode = it.fraDato?.svar?.innhold?.let { fom ->
-                    Periode(YearMonth.from(fom), it.tilDato?.svar?.innhold?.let { tom -> YearMonth.from(tom) })
+        val utenlandsoppholdAvdød: List<Grunnlagsopplysning<out Any?>> = utenlandsopphold?.svar?.verdi?.let { svar ->
+            when (svar) {
+                JaNeiVetIkke.JA -> utenlandsopphold.opplysning?.map {
+                    lagOpplysning(
+                        opplysningsType = UTENLANDSOPPHOLD,
+                        kilde = kilde,
+                        opplysning = UtenlandsoppholdOpplysninger(
+                            utenlandsopphold.svar.verdi,
+                            it.land.svar.innhold,
+                            it.oppholdsType.svar.map { utlandsopphold -> utlandsopphold.verdi },
+                            it.medlemFolketrygd.svar.verdi,
+                            it.pensjonsutbetaling?.svar?.innhold
+                        ),
+                        periode = it.fraDato?.svar?.innhold?.let { fom ->
+                            Periode(YearMonth.from(fom), it.tilDato?.svar?.innhold?.let { tom -> YearMonth.from(tom) })
+                        }
+                    )
                 }
-            )
+
+                JaNeiVetIkke.NEI -> hentAvdoedForelder(barnepensjonssoknad)?.foedselsnummer?.svar?.let { avdoedFnr ->
+                    listOf(
+                        Grunnlagsopplysning.empty(
+                            UTENLANDSOPPHOLD,
+                            kilde,
+                            avdoedFnr,
+                            YearMonth.from(avdoedFnr.getBirthDate())
+                        )
+                    )
+                }
+
+                JaNeiVetIkke.VET_IKKE -> emptyList()
+            }
         } ?: emptyList()
 
         return utenlandsoppholdAvdød + listOfNotNull(
@@ -287,7 +305,7 @@ class Opplysningsuthenter {
     }
 }
 
-private fun <T> lagOpplysning(
+private fun <T : Any> lagOpplysning(
     opplysningsType: Opplysningstype,
     kilde: Grunnlagsopplysning.Kilde,
     opplysning: T,

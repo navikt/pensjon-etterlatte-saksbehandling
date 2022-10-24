@@ -11,8 +11,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -21,8 +19,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.restModule
-import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
-import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationProperties
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,13 +33,11 @@ import java.util.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VilkaarsvurderingRoutesTest {
 
-    private val vilkaarsvurderingServiceImpl = VilkaarsvurderingService(VilkaarsvurderingRepositoryInMemory())
+    // todo: test at vilkårsvurderingen blir lagt på kafka korrekt!
+    private fun sendToRapid(message: String) {}
+    private val vilkaarsvurderingServiceImpl =
+        VilkaarsvurderingService(VilkaarsvurderingRepositoryInMemory(), ::sendToRapid)
     private val server = MockOAuth2Server()
-
-    private val applicationContext: ApplicationContext = mockk {
-        every { properties } returns ApplicationProperties()
-        every { vilkaarsvurderingService } returns vilkaarsvurderingServiceImpl
-    }
 
     @BeforeAll
     fun before() {
@@ -71,7 +65,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal hente vilkaarsvurdering`() {
         testApplication {
-            application { restModule(applicationContext) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
 
@@ -100,7 +94,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal oppdatere en vilkaarsvurdering med et vurdert hovedvilkaar`() {
         testApplication {
-            application { restModule(applicationContext) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
 
@@ -138,7 +132,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal opprette vurdering paa hovedvilkaar og endre til vurdering paa unntaksvilkaar`() {
         testApplication {
-            application { restModule(applicationContext) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
 
@@ -202,7 +196,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal nullstille et vurdert hovedvilkaar fra vilkaarsvurdering`() {
         testApplication {
-            application { restModule(applicationContext) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
 
@@ -248,7 +242,7 @@ internal class VilkaarsvurderingRoutesTest {
     @Test
     fun `skal sette og nullstille totalresultat for en vilkaarsvurdering`() {
         testApplication {
-            application { restModule(applicationContext) }
+            application { restModule(vilkaarsvurderingServiceImpl) }
 
             opprettVilkaarsvurdering()
             val resultat = VurdertVilkaarsvurderingResultatDto(
@@ -261,6 +255,7 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
+            println(oppdatertVilkaarsvurderingResponse.bodyAsText())
             val oppdatertVilkaarsvurdering = objectMapper
                 .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
 

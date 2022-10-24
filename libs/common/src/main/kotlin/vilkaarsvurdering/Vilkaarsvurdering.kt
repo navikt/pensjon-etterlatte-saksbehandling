@@ -9,7 +9,7 @@ data class Vilkaarsvurdering(
     val behandlingId: UUID,
     val vilkaar: List<Vilkaar>,
     val virkningstidspunkt: LocalDate,
-    val resultat: VilkaarsvurderingResultat? = null
+    val resultat: VilkaarsvurderingResultat
 )
 
 data class Vilkaar(

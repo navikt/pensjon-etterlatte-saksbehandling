@@ -80,7 +80,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                             )
                         )
 
-//                    vilkaarsvurderingService.publiserVilkaarsvurdering(oppdatertVilkaarsvurdering)
+                    vilkaarsvurderingService.publiserVilkaarsvurdering(oppdatertVilkaarsvurdering)
 
                     call.respond(oppdatertVilkaarsvurdering)
                 }

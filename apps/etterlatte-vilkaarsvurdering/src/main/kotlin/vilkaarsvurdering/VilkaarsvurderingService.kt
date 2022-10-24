@@ -7,13 +7,17 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
+import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDate
 import java.util.*
 
 class VilkaarsvurderingFinnesIkkeException(override val message: String) : RuntimeException(message)
 class UgyldigSakTypeException(override val message: String) : RuntimeException(message)
 
-class VilkaarsvurderingService(private val vilkaarsvurderingRepository: VilkaarsvurderingRepository) {
+class VilkaarsvurderingService(
+    private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
+    private val sendToRapid: (String) -> Unit
+) {
 
     fun hentVilkaarsvurdering(behandlingId: UUID): VilkaarsvurderingIntern? {
         return vilkaarsvurderingRepository.hent(behandlingId)
@@ -91,6 +95,13 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
             )
             vilkaarsvurderingRepository.oppdater(oppdatertVilkaarsvurdering)
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
+    }
+
+    fun publiserVilkaarsvurdering(vilkaarsvurdering: VilkaarsvurderingIntern) {
+        val oppdatertPayload = JsonMessage.newMessage(vilkaarsvurdering.payload)
+            .apply { this["vilkaarsvurdering"] = vilkaarsvurdering.toDomain() }
+
+        sendToRapid(oppdatertPayload.toJson())
     }
 
     private fun oppdaterVurdering(vilkaar: Vilkaar, vurdertVilkaar: VurdertVilkaar): Vilkaar =

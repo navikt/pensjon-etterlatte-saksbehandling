@@ -4,6 +4,7 @@ import GrunnlagTestData
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -21,7 +22,8 @@ import java.time.LocalDate
 import java.util.*
 
 internal class VilkaarsvurderingServiceTest {
-    private val service = VilkaarsvurderingService(VilkaarsvurderingRepositoryInMemory())
+    private val sendToRapid = mockk<(String) -> Unit>()
+    private val service = VilkaarsvurderingService(VilkaarsvurderingRepositoryInMemory(), sendToRapid)
     private val uuid: UUID = UUID.randomUUID()
 
     @Test

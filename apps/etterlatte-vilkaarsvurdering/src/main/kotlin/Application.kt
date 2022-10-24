@@ -22,38 +22,19 @@ import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.X_CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
+import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationBuilder
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
-import no.nav.helse.rapids_rivers.RapidApplication
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.event.Level
 import java.util.*
 
 fun main() {
-    ApplicationContext().also {
-        rapidApplication(it).start()
-    }
+    val application = ApplicationBuilder()
+    application.start()
 }
 
-fun rapidApplication(
-    applicationContext: ApplicationContext,
-    rapidsConnection: RapidsConnection =
-        RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(System.getenv().withConsumerGroupId()))
-            .withKtorModule { restModule(applicationContext) }
-            .build()
-): RapidsConnection =
-    with(applicationContext) {
-        grunnlagEndretRiver(rapidsConnection)
-
-        rapidsConnection.register(object : RapidsConnection.StatusListener {
-            override fun onStartup(rapidsConnection: RapidsConnection) {}
-            override fun onShutdown(rapidsConnection: RapidsConnection) {}
-        })
-        rapidsConnection
-    }
-
-fun Application.restModule(applicationContext: ApplicationContext) {
+fun Application.restModule(vilkaarsvurderingService: VilkaarsvurderingService) {
     install(ContentNegotiation) {
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
     }
@@ -80,12 +61,7 @@ fun Application.restModule(applicationContext: ApplicationContext) {
 
     routing {
         authenticate {
-            vilkaarsvurdering(applicationContext.vilkaarsvurderingService)
+            vilkaarsvurdering(vilkaarsvurderingService)
         }
     }
 }
-
-fun Map<String, String>.withConsumerGroupId() =
-    this.toMutableMap().apply {
-        put("KAFKA_CONSUMER_GROUP_ID", get("NAIS_APP_NAME")!!.replace("-", ""))
-    }

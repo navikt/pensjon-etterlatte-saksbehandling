@@ -56,10 +56,10 @@ fun Route.behandlingRoutes(
 
         route("/{behandlingsid}") {
             get {
-                generellBehandlingService.hentBehandling(behandlingsId)?.toDetaljertBehandling()
+                generellBehandlingService.hentDetaljertBehandling(behandlingsId)
                     ?.let { detaljertBehandling ->
                         call.respond(detaljertBehandling)
-                        logger.info("Henter detaljert for behandling: $behandlingsId: $detaljertBehandling")
+                        logger.info("Henter detaljert for behandling: $behandlingsId")
                     } ?: call.respond(HttpStatusCode.NotFound)
             }
 

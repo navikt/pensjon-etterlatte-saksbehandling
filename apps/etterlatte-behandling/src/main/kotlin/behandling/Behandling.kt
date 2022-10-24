@@ -12,21 +12,29 @@ import java.time.LocalDateTime
 import java.util.*
 
 sealed interface Behandling {
-    fun toDetaljertBehandling(): DetaljertBehandling = DetaljertBehandling(
-        id = id,
-        sak = sak,
-        behandlingOpprettet = behandlingOpprettet,
-        sistEndret = sistEndret,
-        soeknadMottattDato = (this as? Foerstegangsbehandling)?.soeknadMottattDato,
-        innsender = persongalleri.innsender,
-        soeker = persongalleri.soeker,
-        gjenlevende = persongalleri.gjenlevende,
-        avdoed = persongalleri.avdoed,
-        soesken = persongalleri.soesken,
-        gyldighetsproeving = (this as? Foerstegangsbehandling)?.gyldighetsproeving,
-        status = status,
-        behandlingType = type
-    )
+    fun toDetaljertBehandling(): DetaljertBehandling {
+        val (soeknadMottatDato, gyldighetsproeving) = when (this) {
+            is Foerstegangsbehandling -> this.soeknadMottattDato to this.gyldighetsproeving
+            // TODO øh 24.10.2022 er det riktig at søknadMottatDato er behandlingOpprettet der vi ikke har søknad?
+            else -> this.behandlingOpprettet to null
+        }
+
+        return DetaljertBehandling(
+            id = id,
+            sak = sak,
+            behandlingOpprettet = behandlingOpprettet,
+            sistEndret = sistEndret,
+            soeknadMottattDato = soeknadMottatDato,
+            innsender = persongalleri.innsender,
+            soeker = persongalleri.soeker,
+            gjenlevende = persongalleri.gjenlevende,
+            avdoed = persongalleri.avdoed,
+            soesken = persongalleri.soesken,
+            gyldighetsproeving = gyldighetsproeving,
+            status = status,
+            behandlingType = type
+        )
+    }
 
     val id: UUID
     val sak: Long

@@ -25,6 +25,21 @@ export const Column = styled.div`
   }
 `
 
+// TODO: Dette er litt hacky og burde fikses.
+//       Tas i sammenheng med utvikling av brevdesigneren.
+export const MainContent = styled.div`
+  width: 100%;
+  min-width: 280px;
+  border-left: 1px solid #c6c2bf;
+  border-right: 1px solid #c6c2bf;
+`
+
+export const Sidebar = styled.div`
+  width: 20%;
+  min-width: 20%;
+  max-width: 20%;
+`
+
 export const Content = styled.div`
   min-height: 70vh;
   margin: 0;

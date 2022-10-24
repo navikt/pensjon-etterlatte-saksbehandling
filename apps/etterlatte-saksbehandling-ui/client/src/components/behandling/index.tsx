@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import { hentBehandling } from '../../shared/api/behandling'
-import { Column, GridContainer, MainContent, Sidebar } from '../../shared/styled'
+import { GridContainer, MainContent, Sidebar } from '../../shared/styled'
 import { addBehandling, resetBehandling } from '../../store/reducers/BehandlingReducer'
 import Spinner from '../../shared/Spinner'
 import { StatusBar, StatusBarTheme } from '../../shared/statusbar'

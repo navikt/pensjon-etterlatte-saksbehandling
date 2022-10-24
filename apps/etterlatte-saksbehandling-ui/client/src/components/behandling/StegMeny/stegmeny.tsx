@@ -2,6 +2,7 @@ import styled from 'styled-components'
 import { NavLink } from 'react-router-dom'
 import { IBehandlingsType, VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 import classNames from 'classnames'
+import { Next } from '@navikt/ds-icons'
 import { useAppSelector } from '../../../store/Store'
 
 export const StegMeny = () => {
@@ -20,27 +21,29 @@ export const StegMeny = () => {
   return (
     <StegMenyWrapper>
       {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && (
-        <li>
-          <NavLink to="soeknadsoversikt">Søknadsoversikt</NavLink>
-        </li>
+        <>
+          <li>
+            <NavLink to="soeknadsoversikt">Søknadsoversikt</NavLink>
+          </li>
+          <Separator />
+        </>
       )}
-      &#10095;
       <li className={classNames({ disabled: !gyldighet })}>
         <NavLink to="inngangsvilkaar">Vilkårsvurdering</NavLink>
       </li>
-      &#10095;
+      <Separator />
       {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING && soekerHarSoesken && (
         <>
           <li className={classNames({ disabled: !gyldighet || !vilkaar })}>
             <NavLink to="beregningsgrunnlag">Beregningsgrunnlag</NavLink>
           </li>
-          &#10095;
+          <Separator />
         </>
       )}
       <li className={classNames({ disabled: !gyldighet || !vilkaar })}>
         <NavLink to="beregne">Beregning</NavLink>
       </li>
-      &#10095;
+      <Separator />
       <li>
         <NavLink to="brev">Brev</NavLink>
       </li>
@@ -87,4 +90,8 @@ const StegMenyWrapper = styled.ul`
       pointer-events: none;
     }
   }
+`
+
+const Separator = styled(Next)`
+  vertical-align: middle;
 `

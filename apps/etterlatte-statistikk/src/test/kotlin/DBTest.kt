@@ -1,9 +1,8 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.database.DataSourceBuilder
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
-import no.nav.etterlatte.statistikk.StatistikkRepository
-import no.nav.etterlatte.statistikk.StoenadRad
+import no.nav.etterlatte.statistikk.database.DataSourceBuilder
+import no.nav.etterlatte.statistikk.database.StatistikkRepository
+import no.nav.etterlatte.statistikk.database.StoenadRad
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -44,11 +43,11 @@ internal class DBTest {
     @Test
     fun testDB() {
         val repo = StatistikkRepository.using(dataSource)
-        val rad = repo.lagreStoenadsrad(
+        repo.lagreStoenadsrad(
             StoenadRad(
                 -1,
                 "123",
-                listOf(Foedselsnummer.of("23427249697"), Foedselsnummer.of("18458822782")),
+                listOf("23427249697", "18458822782"),
                 listOf(),
                 "40",
                 "1000",
@@ -72,7 +71,7 @@ internal class DBTest {
             Assertions.assertEquals(5, stoenadRad.sakId)
             Assertions.assertEquals(
                 stoenadRad.fnrForeldre,
-                listOf(Foedselsnummer.of("23427249697"), Foedselsnummer.of("18458822782"))
+                listOf("23427249697", "18458822782")
             )
         }
     }

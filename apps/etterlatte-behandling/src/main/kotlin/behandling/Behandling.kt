@@ -17,7 +17,7 @@ sealed interface Behandling {
         sak = sak,
         behandlingOpprettet = behandlingOpprettet,
         sistEndret = sistEndret,
-        soeknadMottattDato = null,
+        soeknadMottattDato = (this as? Foerstegangsbehandling)?.soeknadMottattDato,
         innsender = persongalleri.innsender,
         soeker = persongalleri.soeker,
         gjenlevende = persongalleri.gjenlevende,

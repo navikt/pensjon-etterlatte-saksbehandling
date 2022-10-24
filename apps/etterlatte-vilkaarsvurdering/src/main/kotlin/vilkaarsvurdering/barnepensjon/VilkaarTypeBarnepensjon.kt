@@ -17,7 +17,7 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarOpplysningsType
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsgrunnlag
 
-fun barnepensjonVilkaar(grunnlag: Grunnlag) = listOf(
+fun barnepensjonFoerstegangsbehandlingVilkaar(grunnlag: Grunnlag) = listOf(
     formaal(),
     forutgaaendeMedlemskap(),
     fortsattMedlemskap(),
@@ -25,6 +25,10 @@ fun barnepensjonVilkaar(grunnlag: Grunnlag) = listOf(
     alderBarn(grunnlag.soeker, grunnlag.hentAvdoed()),
     doedsfallForelder(),
     yrkesskadeAvdoed()
+)
+
+fun barnepensjonRevurderingSoekerDoedVilkaar() = listOf(
+    formaal()
 )
 
 enum class Kapittel18(val paragraf: String, val lenke: String) {
@@ -35,7 +39,7 @@ enum class Kapittel18(val paragraf: String, val lenke: String) {
     PARAGRAF_18_11("§ 18-11", "https://lovdata.no/lov/1997-02-28-19/%C2%A718-11");
 }
 
-fun formaal() = Vilkaar(
+private fun formaal() = Vilkaar(
     Hovedvilkaar(
         type = VilkaarType.FORMAAL,
         paragraf = Paragraf(

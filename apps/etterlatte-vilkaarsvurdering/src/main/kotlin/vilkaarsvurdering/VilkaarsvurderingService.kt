@@ -3,8 +3,8 @@ package no.nav.etterlatte.vilkaarsvurdering
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
-import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.formaal
+import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonFoerstegangsbehandlingVilkaar
+import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonRevurderingSoekerDoedVilkaar
 import java.util.*
 
 class VilkaarsvurderingFinnesIkkeException(override val message: String) : RuntimeException(message)
@@ -20,7 +20,7 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
         revurderingAarsak: RevurderingAarsak
     ): List<Vilkaar> {
         return when (revurderingAarsak) {
-            RevurderingAarsak.SOEKER_DOD -> listOf(formaal())
+            RevurderingAarsak.SOEKER_DOD -> barnepensjonRevurderingSoekerDoedVilkaar()
             RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
                 "Du kan ikke ha et manuelt opphør på en revurdering"
             )
@@ -40,7 +40,11 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
                         vilkaarsvurderingRepository.lagre(
-                            Vilkaarsvurdering(behandlingId, payload, barnepensjonVilkaar(grunnlag))
+                            Vilkaarsvurdering(
+                                behandlingId,
+                                payload,
+                                barnepensjonFoerstegangsbehandlingVilkaar(grunnlag)
+                            )
                         )
 
                     BehandlingType.REVURDERING ->
@@ -50,11 +54,6 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
                                 payload,
                                 mapVilkaarRevurdering(requireNotNull(revurderingAarsak))
                             )
-                        )
-
-                    BehandlingType.MANUELT_OPPHOER ->
-                        throw VilkaarsvurderingFinnesIkkeException(
-                            "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType"
                         )
 
                     else ->

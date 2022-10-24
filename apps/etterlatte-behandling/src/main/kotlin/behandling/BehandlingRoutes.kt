@@ -60,7 +60,7 @@ fun Route.behandlingRoutes(
                     ?.let { detaljertBehandling ->
                         call.respond(detaljertBehandling)
                         logger.info("Henter detaljert for behandling: $behandlingsId: $detaljertBehandling")
-                    } ?: HttpStatusCode.NotFound
+                    } ?: call.respond(HttpStatusCode.NotFound)
             }
 
             route("/hendelser") {

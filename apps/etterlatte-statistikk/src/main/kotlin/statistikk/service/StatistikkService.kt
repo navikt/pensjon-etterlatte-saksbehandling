@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.domene.vedtak.Vedtak
 import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.statistikk.client.BehandlingClient
+import no.nav.etterlatte.statistikk.clients.BehandlingClient
 import no.nav.etterlatte.statistikk.database.StatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRad
 import rapidsandrivers.vedlikehold.VedlikeholdService

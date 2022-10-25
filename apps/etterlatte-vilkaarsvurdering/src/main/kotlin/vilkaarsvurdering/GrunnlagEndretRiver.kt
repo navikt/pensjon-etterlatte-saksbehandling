@@ -38,7 +38,6 @@ class GrunnlagEndretRiver(
             validate { it.interestedIn(BehandlingGrunnlagEndret.revurderingAarsakKey) }
             validate { it.interestedIn(BehandlingGrunnlagEndret.manueltOpphoerAarsakKey) }
             validate { it.interestedIn(BehandlingGrunnlagEndret.manueltOpphoerfritekstAarsakKey) }
-            validate { it.interestedIn(BehandlingGrunnlagEndret.revurderingAarsakKey) }
             validate { it.rejectKey("vilkaarsvurdering") }
             validate { it.rejectKey("kommerSoekerTilGode") }
             validate { it.rejectKey("gyldighetsvurdering") }

@@ -422,7 +422,7 @@
                   "grunnlag": {
                     "inntektsOpplysning": {
                       "id": "7b45afd5-7724-41e9-8411-79813d7b442b",
-                      "opplysningType": "AVDOED_INNTEKT_V1",
+                      "opplysningType": "INNTEKT",
                       "kilde": {
                         "tidspunkt": "2022-09-09T08:14:45.259402121Z",
                         "type": "inntektskomponenten"

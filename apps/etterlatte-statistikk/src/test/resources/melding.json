@@ -405,7 +405,7 @@
                     "grunnlag": {
                       "inntektsOpplysning": {
                         "id": "3e828574-6449-41c6-8ae3-480ca559bb52",
-                        "opplysningType": "AVDOED_INNTEKT_V1",
+                        "opplysningType": "INNTEKT",
                         "kilde": {
                           "tidspunkt": "2022-09-19T14:30:08.569587938Z",
                           "type": "a-ordningen"

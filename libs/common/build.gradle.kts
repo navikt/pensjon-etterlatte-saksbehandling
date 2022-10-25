@@ -6,8 +6,6 @@ plugins {
 
 repositories {
     mavenCentral()
-//    maven("https://kotlin.bintray.com/ktor")
-//    maven("https://packages.confluent.io/maven/")
 }
 
 dependencies {
@@ -24,7 +22,6 @@ dependencies {
     testImplementation(Jupiter.Params)
     testRuntimeOnly(Jupiter.Engine)
     testImplementation(Kotest.AssertionsCore)
-    testImplementation(project(":libs:testdata"))
 }
 
 tasks {

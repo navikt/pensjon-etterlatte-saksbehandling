@@ -33,7 +33,7 @@ class BehandlingHendelser(
                         behovNameKey to Opplysningstype.SOEKER_PDL_V1,
                         "sakId" to packet["sakId"],
                         "fnr" to packet["persongalleri"]["soeker"],
-                        "rolle" to Opplysningstype.SOEKER_PDL_V1.personRolle!!,
+                        "rolle" to PersonRolle.BARN,
                         correlationIdKey to packet[correlationIdKey]
                     )
                 ).toJson()
@@ -46,7 +46,7 @@ class BehandlingHendelser(
                             behovNameKey to Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
                             "sakId" to packet["sakId"],
                             "fnr" to fnr.asText(),
-                            "rolle" to Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1.personRolle!!,
+                            "rolle" to PersonRolle.GJENLEVENDE,
                             correlationIdKey to packet[correlationIdKey]
                         )
                     ).toJson()
@@ -60,7 +60,7 @@ class BehandlingHendelser(
                             behovNameKey to Opplysningstype.AVDOED_PDL_V1,
                             "sakId" to packet["sakId"],
                             "fnr" to fnr.asText(),
-                            "rolle" to Opplysningstype.AVDOED_PDL_V1.personRolle!!,
+                            "rolle" to PersonRolle.AVDOED,
                             correlationIdKey to packet[correlationIdKey]
                         )
                     ).toJson()
@@ -68,11 +68,3 @@ class BehandlingHendelser(
             }
         }
 }
-
-private val Opplysningstype.personRolle: PersonRolle?
-    get() = when (this) {
-        Opplysningstype.AVDOED_SOEKNAD_V1, Opplysningstype.AVDOED_PDL_V1 -> PersonRolle.AVDOED
-        Opplysningstype.SOEKER_SOEKNAD_V1, Opplysningstype.SOEKER_PDL_V1 -> PersonRolle.BARN
-        Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1 -> PersonRolle.GJENLEVENDE
-        else -> null
-    }

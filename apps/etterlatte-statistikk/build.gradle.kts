@@ -6,6 +6,9 @@ plugins {
 
 dependencies {
     implementation(project(":libs:common"))
+    implementation(project(":libs:ktor2client-auth-clientcredentials"))
+
+    implementation(Ktor2.ClientCore)
 
     implementation(Jackson.DatatypeJsr310)
     implementation(Jackson.DatatypeJdk8)

@@ -30,3 +30,7 @@ spec:
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-behandling

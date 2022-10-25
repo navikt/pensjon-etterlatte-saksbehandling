@@ -146,8 +146,8 @@ class GrunnlagsendringshendelseService(
     }
 
     private fun forelderBarnRelasjonErGyldig(fnr: String): Boolean {
-        // TODO("I første omgang sier vi at alle hendelesene her er 'gyldige', dvs vi oppretter en hendelse
-        //  for de og viser de fram i frontend").
+        // I første omgang sier vi at alle hendelesene her er 'gyldige', dvs vi oppretter en hendelse
+        //  for de og viser de fram i frontend
         return true
     }
 
@@ -175,10 +175,11 @@ class GrunnlagsendringshendelseService(
 
     /*
     TODO: Vurder om ulike endringstyper boer haandteres forskjellig.
-    Eksempel:
-    - En tidligere hendelse sier at en person er doed.
-    - Det kommer en ny hendelse fra pdl med korreksjon: bruker er ikke doed
-    - Dette boer kanskje fanges opp?
+        Eksempel:
+        - En tidligere hendelse sier at en person er doed.
+        - Det kommer en ny hendelse fra pdl med korreksjon: bruker er ikke doed
+        - Dette boer kanskje fanges opp?
+        Se EY-976
      */
     private fun haandterSoekerDoed(sakId: Long, data: SoekerDoed) {
         val behandlingerISak = generellBehandlingService.hentBehandlingerISak(sakId)
@@ -194,7 +195,7 @@ class GrunnlagsendringshendelseService(
                     (it as? Revurdering)?.revurderingsaarsak == RevurderingAarsak.SOEKER_DOD
             }
         if (harAlleredeEtManueltOpphoer || harAlleredeOpphoerDoedsfall) {
-            return // TODO("Oppdatere grunnlagsendringshendelsen til å være vurdert?") øh 19.10.2022
+            return // TODO("Oppdatere grunnlagsendringshendelsen til å være vurdert?") øh 19.10.2022 se EY-975
         }
 
         when (sisteBehandling.status) {

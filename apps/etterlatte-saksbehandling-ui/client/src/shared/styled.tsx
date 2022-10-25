@@ -34,10 +34,23 @@ export const MainContent = styled.div`
   border-right: 1px solid #c6c2bf;
 `
 
-export const Sidebar = styled.div`
-  width: 20%;
-  min-width: 20%;
-  max-width: 20%;
+export const CollapsibleSidebar = styled.div<{ collapsed: boolean }>`
+  position: relative;
+  max-height: fit-content;
+  min-width: ${(props) => (props.collapsed ? '50px' : '20%')};
+`
+
+export const SidebarContent = styled.div<{ collapsed: boolean }>`
+  display: ${(props) => (props.collapsed ? 'none' : 'block')};
+`
+
+export const SidebarTools = styled.div`
+  border-top: 1px solid #c6c2bf;
+  background-color: #f8f8f8;
+
+  position: fixed;
+  bottom: 0;
+  width: 100%;
 `
 
 export const Content = styled.div`

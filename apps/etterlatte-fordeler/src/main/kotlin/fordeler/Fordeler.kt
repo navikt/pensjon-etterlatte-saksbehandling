@@ -1,5 +1,6 @@
 package no.nav.etterlatte.fordeler
 
+import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.fordeler.FordelerResultat.GyldigForBehandling
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
@@ -11,6 +12,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.soeknad.dataklasser.Barnepensjon
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.sikkerLogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -22,6 +24,7 @@ data class FordelerEvent(
     val soeknad: Barnepensjon,
     val hendelseGyldigTil: OffsetDateTime
 )
+
 internal class Fordeler(
     rapidsConnection: RapidsConnection,
     private val fordelerService: FordelerService,
@@ -57,14 +60,18 @@ internal class Fordeler(
                         context.publish(packet.leggPaaFordeltStatus().toJson())
                         fordelerMetricLogger.logMetricFordelt()
                     }
+
                     is FordelerResultat.IkkeGyldigForBehandling -> {
                         logger.info("Avbrutt fordeling: ${resultat.ikkeOppfylteKriterier}")
                         fordelerMetricLogger.logMetricIkkeFordelt(resultat)
                     }
+
                     is FordelerResultat.UgyldigHendelse -> {
                         logger.error("Avbrutt fordeling: ${resultat.message}")
                     }
                 }
+            } catch (e: JsonMappingException) {
+                sikkerLogg.error("Feil under deserialisering", e)
             } catch (e: Exception) {
                 logger.error("Uhåndtert feilsituasjon", e)
             }

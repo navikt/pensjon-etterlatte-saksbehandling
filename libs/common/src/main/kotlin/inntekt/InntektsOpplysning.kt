@@ -1,5 +1,7 @@
 package no.nav.etterlatte.libs.common.inntekt
 
+import java.time.YearMonth
+
 data class InntektsOpplysning(
     val pensjonEllerTrygd: List<Inntekt>,
     val ytelseFraOffentlig: List<Inntekt>,
@@ -55,6 +57,6 @@ data class Virksomhet(
 )
 
 data class ArbeidsInntektMaaned(
-    val aarMaaned: String,
+    val aarMaaned: YearMonth,
     val arbeidsInntektInformasjon: ArbeidsInntektInformasjon
 )

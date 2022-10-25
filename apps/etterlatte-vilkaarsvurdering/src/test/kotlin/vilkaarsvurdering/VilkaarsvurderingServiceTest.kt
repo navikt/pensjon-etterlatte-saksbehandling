@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
@@ -36,7 +37,8 @@ internal class VilkaarsvurderingServiceTest {
             BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = LocalDate.of(2022, 1, 1),
             "",
-            grunnlag
+            grunnlag,
+            null
         )
 
         vilkaarsvurdering shouldNotBe null
@@ -58,6 +60,29 @@ internal class VilkaarsvurderingServiceTest {
                 opplysning.foedselsnummer shouldBe grunnlag.hentAvdoed().hentFoedselsnummer()?.verdi
                 opplysning.doedsdato shouldBe grunnlag.hentAvdoed().hentDoedsdato()?.verdi
             }
+        }
+    }
+
+    @Test
+    fun `Skal opprette en vilkaarsvurdering for revurdering for død søker`() {
+        val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        val vilkaarsvurdering = service.opprettVilkaarsvurdering(
+            uuid,
+            SakType.BARNEPENSJON,
+            BehandlingType.REVURDERING,
+            LocalDate.now(),
+            "",
+            grunnlag,
+            RevurderingAarsak.SOEKER_DOD
+        )
+
+        vilkaarsvurdering shouldNotBe null
+        vilkaarsvurdering.behandlingId shouldBe uuid
+        vilkaarsvurdering.vilkaar shouldHaveSize 1
+        vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.FORMAAL }.let { vilkaar ->
+            vilkaar.grunnlag shouldBe null
+            vilkaar.hovedvilkaar.type shouldBe VilkaarType.FORMAAL
         }
     }
 }

@@ -17,6 +17,9 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
+import org.slf4j.LoggerFactory
+
+val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
 
 fun main() {
     val env = System.getenv().toMutableMap().apply {

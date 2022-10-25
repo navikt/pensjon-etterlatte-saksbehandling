@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningsType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 
-fun barnepensjonVilkaar(grunnlag: Grunnlag) = listOf(
+fun barnepensjonFoerstegangsbehandlingVilkaar(grunnlag: Grunnlag) = listOf(
     formaal(),
     forutgaaendeMedlemskap(),
     fortsattMedlemskap(),
@@ -25,6 +25,10 @@ fun barnepensjonVilkaar(grunnlag: Grunnlag) = listOf(
     alderBarn(grunnlag.soeker, grunnlag.hentAvdoed()),
     doedsfallForelder(),
     yrkesskadeAvdoed()
+)
+
+fun barnepensjonRevurderingSoekerDoedVilkaar() = listOf(
+    formaal()
 )
 
 enum class Kapittel18(val paragraf: String, val lenke: String) {

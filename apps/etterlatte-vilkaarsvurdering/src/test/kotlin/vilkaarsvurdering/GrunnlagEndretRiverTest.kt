@@ -6,7 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
+import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonFoerstegangsbehandlingVilkaar
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
@@ -28,7 +28,8 @@ internal class GrunnlagEndretRiverTest {
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 any(),
                 any(),
-                any()
+                any(),
+                null
             )
         } returns eksisterendeVilkaarsvurdering()
 
@@ -42,7 +43,8 @@ internal class GrunnlagEndretRiverTest {
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 any(),
                 any(),
-                any()
+                any(),
+                null
             )
         }
         confirmVerified(vilkaarsvurderingService)
@@ -66,7 +68,7 @@ internal class GrunnlagEndretRiverTest {
         VilkaarsvurderingIntern(
             behandlingId = UUID.fromString("dbbd9a01-3e5d-4ec1-819c-1781d1f6a440"),
             payload = grunnlagEndretMelding,
-            vilkaar = barnepensjonVilkaar(grunnlag),
+            vilkaar = barnepensjonFoerstegangsbehandlingVilkaar(grunnlag),
             virkningstidspunkt = LocalDate.of(2022, 1, 1)
         )
 

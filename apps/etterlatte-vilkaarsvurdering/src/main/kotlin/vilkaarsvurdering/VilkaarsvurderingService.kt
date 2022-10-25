@@ -1,12 +1,14 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VurdertVilkaar
-import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
+import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonFoerstegangsbehandlingVilkaar
+import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonRevurderingSoekerDoedVilkaar
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.time.LocalDate
 import java.util.*
@@ -23,13 +25,25 @@ class VilkaarsvurderingService(
         return vilkaarsvurderingRepository.hent(behandlingId)
     }
 
+    private fun mapVilkaarRevurdering(
+        revurderingAarsak: RevurderingAarsak
+    ): List<Vilkaar> {
+        return when (revurderingAarsak) {
+            RevurderingAarsak.SOEKER_DOD -> barnepensjonRevurderingSoekerDoedVilkaar()
+            RevurderingAarsak.MANUELT_OPPHOER -> throw IllegalArgumentException(
+                "Du kan ikke ha et manuelt opphør på en revurdering"
+            )
+        }
+    }
+
     fun opprettVilkaarsvurdering(
         behandlingId: UUID,
         sakType: SakType,
         behandlingType: BehandlingType,
         virkningstidspunkt: LocalDate,
         payload: String,
-        grunnlag: Grunnlag
+        grunnlag: Grunnlag,
+        revurderingAarsak: RevurderingAarsak?
     ): VilkaarsvurderingIntern {
         return when (sakType) {
             SakType.BARNEPENSJON ->
@@ -39,10 +53,21 @@ class VilkaarsvurderingService(
                             VilkaarsvurderingIntern(
                                 behandlingId,
                                 payload,
-                                barnepensjonVilkaar(grunnlag),
+                                barnepensjonFoerstegangsbehandlingVilkaar(grunnlag),
                                 virkningstidspunkt
                             )
                         )
+
+                    BehandlingType.REVURDERING ->
+                        vilkaarsvurderingRepository.lagre(
+                            VilkaarsvurderingIntern(
+                                behandlingId,
+                                payload,
+                                mapVilkaarRevurdering(requireNotNull(revurderingAarsak)),
+                                virkningstidspunkt
+                            )
+                        )
+
                     else ->
                         throw VilkaarsvurderingFinnesIkkeException(
                             "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType"

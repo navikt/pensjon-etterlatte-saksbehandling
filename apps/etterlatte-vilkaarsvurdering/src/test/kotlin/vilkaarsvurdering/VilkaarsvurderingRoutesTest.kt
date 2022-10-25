@@ -287,7 +287,8 @@ internal class VilkaarsvurderingRoutesTest {
             BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = LocalDate.of(2022, 1, 1),
             "some payload",
-            grunnlag
+            grunnlag,
+            null
         )
     }
 

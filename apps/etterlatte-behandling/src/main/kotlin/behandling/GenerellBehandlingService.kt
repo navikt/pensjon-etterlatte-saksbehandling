@@ -7,6 +7,7 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.behandling.revurdering.RevurderingFactory
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
 import kotlin.IllegalStateException
@@ -32,8 +33,8 @@ interface GenerellBehandlingService {
 
     fun hentHendelserIBehandling(behandling: UUID): List<LagretHendelse>
     fun alleBehandlingerForSoekerMedFnr(fnr: String): List<Behandling>
-
     fun alleSakIderForSoekerMedFnr(fnr: String): List<Long>
+    fun hentDetaljertBehandling(behandlingsId: UUID): DetaljertBehandling?
 }
 
 class RealGenerellBehandlingService(
@@ -99,6 +100,10 @@ class RealGenerellBehandlingService(
                 }
             }
         }
+    }
+
+    override fun hentDetaljertBehandling(behandlingsId: UUID): DetaljertBehandling? {
+        return hentBehandling(behandlingsId)?.toDetaljertBehandling()
     }
 
     override fun registrerVedtakHendelse(

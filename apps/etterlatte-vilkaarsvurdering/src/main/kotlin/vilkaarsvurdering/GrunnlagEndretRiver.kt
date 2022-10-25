@@ -2,6 +2,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndret
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -57,6 +58,9 @@ class GrunnlagEndretRiver(
                             packet[BehandlingGrunnlagEndretMedGrunnlag.grunnlagKey]
                         )
                     )
+                val revurderingAarsak: RevurderingAarsak? = kotlin.runCatching {
+                    RevurderingAarsak.valueOf(packet[BehandlingGrunnlagEndret.revurderingAarsakKey].asText())
+                }.getOrNull()
 
                 // todo: Midlertidig fiks for å unngå at behandling forsøkes å opprettes
                 // Vil kaste NPE dersom grunnlag ikke eksisterer for avdød.
@@ -77,7 +81,8 @@ class GrunnlagEndretRiver(
                         sakType,
                         behandlingType,
                         grunnlagEndretPayload,
-                        grunnlag
+                        grunnlag,
+                        revurderingAarsak
                     )
                 }
             } catch (e: Exception) {

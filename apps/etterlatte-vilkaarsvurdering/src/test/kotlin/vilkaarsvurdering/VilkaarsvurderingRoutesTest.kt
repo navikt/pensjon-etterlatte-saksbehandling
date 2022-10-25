@@ -286,7 +286,8 @@ internal class VilkaarsvurderingRoutesTest {
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
             "some payload",
-            grunnlag
+            grunnlag,
+            null
         )
     }
 

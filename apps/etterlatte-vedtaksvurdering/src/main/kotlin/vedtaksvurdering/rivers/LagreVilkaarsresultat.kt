@@ -9,13 +9,12 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import java.time.YearMonth
 
 internal class LagreVilkaarsresultat(
     rapidsConnection: RapidsConnection,
@@ -43,26 +42,17 @@ internal class LagreVilkaarsresultat(
 
             val sakId = packet["sak.id"].toString()
             val sakType = packet["sak.sakType"].textValue()
-            val vilkaarsResultat = objectMapper.readValue(
-                packet["vilkaarsvurdering"].toString(),
-                VilkaarResultat::class.java
+            val vilkaarsvurdering: Vilkaarsvurdering = objectMapper.readValue(
+                packet["vilkaarsvurdering"].toString()
             )
             try {
-                val virkningstidspunktFraMelding = packet["virkningstidspunkt"].textValue()
-                val virkningstidspunkt = if (virkningstidspunktFraMelding != null) {
-                    YearMonth.parse(
-                        virkningstidspunktFraMelding
-                    ).atDay(1)
-                } else {
-                    null
-                }
                 vedtaksvurderingService.lagreVilkaarsresultat(
                     sakId,
                     sakType,
                     behandling,
                     packet["fnrSoeker"].textValue(),
-                    vilkaarsResultat,
-                    virkningstidspunkt
+                    vilkaarsvurdering,
+                    vilkaarsvurdering.virkningstidspunkt // todo: kan vi komme i usync?
                 )
                 requireNotNull(vedtaksvurderingService.hentVedtak(sakId, behandling.id)).also {
                     context.publish(

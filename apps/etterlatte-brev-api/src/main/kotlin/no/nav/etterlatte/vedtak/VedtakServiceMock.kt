@@ -14,9 +14,11 @@ import no.nav.etterlatte.domene.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.ZonedDateTime
@@ -36,10 +38,11 @@ class VedtakServiceMock : VedtakService {
         behandling = Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, id = UUID.randomUUID()),
         type = VedtakType.INNVILGELSE,
         grunnlag = grunnlag(),
-        vilkaarsvurdering = VilkaarResultat(
-            resultat = VurderingsResultat.OPPFYLT,
-            vilkaar = null,
-            vurdertDato = LocalDateTime.now()
+        vilkaarsvurdering = Vilkaarsvurdering(
+            UUID.randomUUID(),
+            emptyList(),
+            LocalDate.now(),
+            VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, null, LocalDateTime.now(), "ABCDEF")
         ),
         beregning = null,
         avkorting = null,

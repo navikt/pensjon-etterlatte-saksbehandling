@@ -1,11 +1,12 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
+import { Vilkaarsvurdering } from '../../shared/api/vilkaarsvurdering'
 
 export interface IDetaljertBehandling {
   id: string
   sak: number
   gyldighetsprøving?: IGyldighetResultat
   kommerSoekerTilgode?: IKommerSoekerTilgode
-  vilkårsprøving?: IVilkaarResultat
+  vilkårsprøving?: Vilkaarsvurdering
   beregning?: IBeregning
   avkortning?: any //todo legg med type når denne er klar
   saksbehandlerId?: string

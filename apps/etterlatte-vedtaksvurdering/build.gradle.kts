@@ -24,4 +24,5 @@ dependencies {
 
     testImplementation(MockK.MockK)
     testImplementation(Kotlinx.CoroutinesCore)
+    testImplementation(project(":libs:testdata"))
 }

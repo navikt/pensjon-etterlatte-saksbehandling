@@ -14,8 +14,8 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -27,7 +27,7 @@ class BeregningService {
         grunnlag: Grunnlag,
         virkFOM: YearMonth,
         virkTOM: YearMonth,
-        vilkaarsvurdering: VilkaarResultat,
+        vilkaarsvurdering: Vilkaarsvurdering,
         behandlingType: BehandlingType
     ): BeregningsResultat {
         return when (behandlingType) {
@@ -45,8 +45,8 @@ class BeregningService {
             }
 
             BehandlingType.REVURDERING -> {
-                when (vilkaarsvurdering.resultat) {
-                    VurderingsResultat.IKKE_OPPFYLT -> {
+                when (vilkaarsvurdering.resultat.utfall) {
+                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
                         BeregningsResultat(
                             id = UUID.randomUUID(),
                             type = Beregningstyper.GP,

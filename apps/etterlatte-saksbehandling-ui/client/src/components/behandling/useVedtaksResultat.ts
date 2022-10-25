@@ -1,5 +1,6 @@
 import { useAppSelector } from '../../store/Store'
-import { IBehandlingsType, VurderingsResultat } from '../../store/reducers/BehandlingReducer'
+import { IBehandlingsType } from '../../store/reducers/BehandlingReducer'
+import { VilkaarsvurderingResultat } from '../../shared/api/vilkaarsvurdering'
 
 // Dette er en midlertidig workaround i frontend fram til vi får noe mer rimelig rundt hva er vedtaksresultat i backend
 // Laget som en felles greie slik at
@@ -10,16 +11,15 @@ export type VedtakResultat = 'opphoer' | 'innvilget' | 'avslag' | 'endring' | 'u
 export function useVedtaksResultat(): VedtakResultat {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
   const behandlingType = behandling?.behandlingType
-  const vilkaarsresultat =
-    behandling?.vilkårsprøving?.resultat ?? VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+  const vilkaarsresultat = behandling?.vilkårsprøving?.resultat?.utfall
 
   switch (vilkaarsresultat) {
-    case VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING:
-      return 'uavklart'
-    case VurderingsResultat.OPPFYLT:
+    case VilkaarsvurderingResultat.OPPFYLT:
       return behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING ? 'innvilget' : 'endring'
-    case VurderingsResultat.IKKE_OPPFYLT:
+    case VilkaarsvurderingResultat.IKKE_OPPFYLT:
       return behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING ? 'avslag' : 'opphoer'
+    default:
+      return 'uavklart'
   }
 }
 

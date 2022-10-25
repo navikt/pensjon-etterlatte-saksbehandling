@@ -4,12 +4,9 @@ import {
   IBehandlingStatus,
   IBehandlingsType,
   KildeType,
-  KriterieOpplysningsType,
-  Kriterietype,
-  VilkaarsType,
   VurderingsResultat,
 } from '../../../../store/reducers/BehandlingReducer'
-import { hentBehandlesFraStatus, hentKriterierMedOpplysning } from '../../felles/utils'
+import { hentBehandlesFraStatus } from '../../felles/utils'
 import { BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { StatusIcon } from '../../../../shared/icons/statusIcon'
 import { KildeDatoOpplysning } from '../vilkaar/KildeDatoOpplysning'
@@ -21,18 +18,14 @@ const useGrunnlagForRevurdering = (): RevurderingOpplysningType[] => {
   // Enn så lenge er dette hardkodet til å hente mottaker av ytelsens dødsdato fra vilkåret formaal.
   // Dette bør heller være basert på revurderingsårsak fra behandling
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
-  const vilkaar = behandling.vilkårsprøving?.vilkaar?.find(
-    (vilkaar) => vilkaar.navn === VilkaarsType.FORMAAL_FOR_YTELSEN
-  )
+  const vilkaar = behandling.vilkårsprøving?.vilkaar?.find((vilkaar) => vilkaar.hovedvilkaar.type === 'ALDER_BARN')
 
   if (behandling.behandlingType !== IBehandlingsType.REVURDERING) {
     return []
   }
-  const soekerDoedsdato = hentKriterierMedOpplysning(
-    vilkaar,
-    Kriterietype.SOEKER_ER_I_LIVE,
-    KriterieOpplysningsType.DOEDSDATO
-  )
+
+  const doedsdatoGrunnlag = vilkaar?.grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'DOEDSDATO')
+  const soekerDoedsdato = doedsdatoGrunnlag?.opplysning.doedsdato
 
   return [
     {

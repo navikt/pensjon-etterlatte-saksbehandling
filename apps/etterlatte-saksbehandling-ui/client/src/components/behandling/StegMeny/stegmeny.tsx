@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { IBehandlingsType, VurderingsResultat } from '../../../store/reducers/BehandlingReducer'
 import classNames from 'classnames'
 import { useAppSelector } from '../../../store/Store'
+import { VilkaarsvurderingResultat } from '../../../shared/api/vilkaarsvurdering'
 
 export const StegMeny = () => {
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
@@ -12,7 +13,7 @@ export const StegMeny = () => {
     behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
   const vilkaar =
     behandling.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING ||
-    behandling.vilkårsprøving?.resultat === VurderingsResultat.OPPFYLT
+    behandling.vilkårsprøving?.resultat?.utfall === VilkaarsvurderingResultat.OPPFYLT
 
   const avdoedesBarn = behandling.familieforhold?.avdoede.opplysning.avdoedesBarn
   const soekerHarSoesken = avdoedesBarn ? avdoedesBarn.length > 1 : false

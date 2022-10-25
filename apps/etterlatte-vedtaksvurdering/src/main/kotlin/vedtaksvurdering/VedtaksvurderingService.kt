@@ -16,12 +16,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultat
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.KommerSoekerTilgode
-import no.nav.etterlatte.libs.common.vikaar.KriterieOpplysningsType
-import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
-import no.nav.etterlatte.libs.common.vikaar.Vilkaartyper
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
-import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsvurdering
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.vedtaksvurdering.database.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.database.VedtaksvurderingRepository
 import rapidsandrivers.vedlikehold.VedlikeholdService
@@ -30,7 +26,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.ZoneOffset
-import java.time.temporal.TemporalAdjusters
 import java.util.*
 
 class KanIkkeEndreFattetVedtak(vedtak: Vedtak) :
@@ -83,18 +78,18 @@ class VedtaksvurderingService(
         sakType: String,
         behandling: Behandling,
         fnr: String,
-        vilkaarResultat: VilkaarResultat,
+        vilkaarsvurdering: Vilkaarsvurdering,
         virkningsDato: LocalDate?
     ) {
         val vedtak = repository.hentVedtak(sakId, behandling.id)
         if (vedtak == null) {
-            repository.lagreVilkaarsresultat(sakId, sakType, behandling, fnr, vilkaarResultat, virkningsDato)
+            repository.lagreVilkaarsresultat(sakId, sakType, behandling, fnr, vilkaarsvurdering, virkningsDato)
         } else {
             if (vedtak.vedtakFattet == true) {
                 throw KanIkkeEndreFattetVedtak(vedtak)
             }
             migrer(vedtak, fnr, virkningsDato)
-            repository.oppdaterVilkaarsresultat(sakId, sakType, behandling.id, vilkaarResultat)
+            repository.oppdaterVilkaarsresultat(sakId, sakType, behandling.id, vilkaarsvurdering)
         }
     }
 
@@ -167,20 +162,13 @@ class VedtaksvurderingService(
                 vedtakId = vedtak.id,
                 virk = Periode(
                     vedtak.virkningsDato?.let(YearMonth::from)
-                        ?: (
-                            vedtak.vilkaarsResultat?.vilkaar
-                                ?.find { it.navn == Vilkaartyper.DOEDSFALL_ER_REGISTRERT }?.kriterier
-                                ?.find { it.navn == Kriterietyper.DOEDSFALL_ER_REGISTRERT_I_PDL }?.basertPaaOpplysninger
-                                ?.find { it.kriterieOpplysningsType == KriterieOpplysningsType.DOEDSDATO }?.opplysning
-                                ?.let { it as Doedsdato }?.doedsdato?.with(
-                                    TemporalAdjusters.firstDayOfNextMonth()
-                                )?.let { YearMonth.of(it.year, it.month) }
-                            ) ?: YearMonth.now(),
+                        ?: vedtak.vilkaarsResultat?.virkningstidspunkt?.let(YearMonth::from)
+                        ?: YearMonth.now(),
                     null
                 ), // må få inn dette på toppnivå?
                 sak = Sak(vedtak.fnr!!, vedtak.sakType!!, vedtak.sakId.toLong()),
                 behandling = Behandling(vedtak.behandlingType, behandlingId),
-                type = if (vedtak.vilkaarsResultat?.resultat == VurderingsResultat.OPPFYLT) {
+                type = if (vedtak.vilkaarsResultat?.resultat?.utfall == VilkaarsvurderingUtfall.OPPFYLT) {
                     VedtakType.INNVILGELSE
                 } else if (vedtak.behandlingType == BehandlingType.REVURDERING) {
                     VedtakType.OPPHOER

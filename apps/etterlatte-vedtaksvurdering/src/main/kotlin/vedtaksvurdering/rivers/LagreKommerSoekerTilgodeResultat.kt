@@ -30,6 +30,7 @@ internal class LagreKommerSoekerTilgodeResultat(
             validate { it.requireKey("kommerSoekerTilGode") }
             correlationId()
             validate { it.rejectKey("beregning") }
+            validate { it.rejectKey("vilkaarsvurdering") }
         }.register(this)
     }
 

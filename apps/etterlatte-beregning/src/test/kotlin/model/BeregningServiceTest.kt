@@ -2,7 +2,6 @@ package model
 
 import GrunnlagTestData
 import grunnlag.kilde
-import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.beregning.BeregningsResultatType
@@ -11,23 +10,19 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.libs.common.vikaar.VilkaarResultat
-import no.nav.etterlatte.libs.common.vikaar.VurderingsResultat
 import no.nav.etterlatte.model.BeregningService
 import no.nav.etterlatte.model.beregnSisteTom
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import vilkaarsvurdering.VilkaarsvurderingTestData
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID.randomUUID
 
 internal class BeregningServiceTest {
 
-    private val vilkaarsvurdering = mockk<VilkaarResultat> {
-        every { resultat } returns VurderingsResultat.OPPFYLT
-    }
+    private val vilkaarsvurdering = VilkaarsvurderingTestData.oppfylt
     private val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 
     private val testData = GrunnlagTestData(
@@ -78,11 +73,7 @@ internal class BeregningServiceTest {
             grunnlag = Grunnlag.empty(),
             virkFOM = virkFOM,
             virkTOM = virkTOM,
-            vilkaarsvurdering = VilkaarResultat(
-                resultat = VurderingsResultat.IKKE_OPPFYLT,
-                vilkaar = listOf(),
-                vurdertDato = LocalDateTime.now()
-            ),
+            vilkaarsvurdering = VilkaarsvurderingTestData.ikkeOppfylt,
             behandlingType = BehandlingType.REVURDERING
         )
         assertEquals(virkFOM, resultat.beregningsperioder.first().datoFOM)

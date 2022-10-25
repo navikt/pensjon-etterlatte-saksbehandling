@@ -66,12 +66,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                     val oppdatertVilkaarsvurdering =
                         vilkaarsvurderingService.oppdaterTotalVurdering(
                             behandlingId,
-                            VilkaarsvurderingResultat(
-                                vurdertResultatDto.resultat,
-                                vurdertResultatDto.kommentar,
-                                LocalDateTime.now(),
-                                saksbehandler
-                            )
+                            toVilkaarsvurderingResultat(vurdertResultatDto, saksbehandler)
                         )
 
                     call.respond(oppdatertVilkaarsvurdering)
@@ -90,7 +85,7 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(onSuccess: (id: UUID) -> Unit) {
+private suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(onSuccess: (id: UUID) -> Unit) {
     val id = call.parameters["behandlingId"]
     if (id == null) {
         call.respond(HttpStatusCode.BadRequest, "Fant ikke behandlingId")
@@ -103,7 +98,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(onSucces
     }
 }
 
-inline val PipelineContext<*, ApplicationCall>.saksbehandler: String
+private inline val PipelineContext<*, ApplicationCall>.saksbehandler: String
     get() = requireNotNull(
         call.principal<TokenValidationContextPrincipal>()
             ?.context?.getJwtToken("azure")
@@ -112,24 +107,29 @@ inline val PipelineContext<*, ApplicationCall>.saksbehandler: String
 
 private fun toVurdertVilkaar(vurdertVilkaarDto: VurdertVilkaarDto, saksbehandler: String) =
     VurdertVilkaar(
-        vurdertVilkaarDto.hovedvilkaar,
-        vurdertVilkaarDto.unntaksvilkaar,
-        vilkaarVurderingData = VilkaarVurderingData(
+        hovedvilkaar = vurdertVilkaarDto.hovedvilkaar,
+        unntaksvilkaar = vurdertVilkaarDto.unntaksvilkaar,
+        vurdering = VilkaarVurderingData(
             kommentar = vurdertVilkaarDto.kommentar,
             tidspunkt = LocalDateTime.now(),
             saksbehandler = saksbehandler
         )
     )
 
+private fun toVilkaarsvurderingResultat(
+    vurdertResultatDto: VurdertVilkaarsvurderingResultatDto,
+    saksbehandler: String
+) = VilkaarsvurderingResultat(
+    vurdertResultatDto.resultat,
+    vurdertResultatDto.kommentar,
+    LocalDateTime.now(),
+    saksbehandler
+)
+
 data class VurdertVilkaarDto(
     val hovedvilkaar: VilkaarTypeOgUtfall,
     val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
     val kommentar: String?
-)
-
-data class VilkaarTypeOgUtfall(
-    val type: VilkaarType,
-    val resultat: Utfall
 )
 
 data class VurdertVilkaarsvurderingResultatDto(

@@ -17,7 +17,6 @@ class StatistikkService(
 ) : VedlikeholdService {
 
     fun registrerStatistikkForVedtak(vedtak: Vedtak): StoenadRad? {
-        kotlin.run { }
         return when (vedtak.type) {
             VedtakType.INNVILGELSE -> repository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak))
             VedtakType.AVSLAG -> null
@@ -30,21 +29,13 @@ class StatistikkService(
         behandlingClient.hentPersongalleri(behandlingId)
     }
 
-    private fun hentSoesken(persongalleri: Persongalleri): List<String> {
-        return persongalleri.soesken
-    }
-
-    private fun hentForeldre(persongalleri: Persongalleri): List<String> {
-        return persongalleri.avdoed
-    }
-
     private fun vedtakTilStoenadsrad(vedtak: Vedtak): StoenadRad {
         val persongalleri = hentPersongalleri(behandlingId = vedtak.behandling.id)
         return StoenadRad(
             -1,
             vedtak.sak.ident,
-            hentForeldre(persongalleri),
-            hentSoesken(persongalleri),
+            persongalleri.avdoed,
+            persongalleri.soesken,
             "40",
             vedtak.beregning?.sammendrag?.firstOrNull()?.beloep.toString(),
             "FOLKETRYGD",

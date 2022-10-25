@@ -30,6 +30,8 @@ spec:
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
+    - name: BEHANDLING_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
   accessPolicy:
     outbound:
       rules:

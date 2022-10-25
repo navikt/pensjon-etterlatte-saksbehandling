@@ -1,7 +1,6 @@
-package no.nav.etterlatte.statistikk
+package no.nav.etterlatte.statistikk.database
 
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import org.postgresql.util.PGobject
 import java.sql.Date
 import java.sql.PreparedStatement
@@ -28,8 +27,8 @@ class StatistikkRepository(private val datasource: DataSource) {
                 StoenadRad(
                     getLong("id"),
                     getString("fnrSoeker"),
-                    objectMapper.readValue(getString("fnrForeldre"), Array<Foedselsnummer>::class.java).toList(),
-                    objectMapper.readValue(getString("fnrSoesken"), Array<Foedselsnummer>::class.java).toList(),
+                    objectMapper.readValue(getString("fnrForeldre"), Array<String>::class.java).toList(),
+                    objectMapper.readValue(getString("fnrSoesken"), Array<String>::class.java).toList(),
                     getString("anvendtTrygdetid"),
                     getString("nettoYtelse"),
                     getString("beregningType"),
@@ -126,8 +125,8 @@ private object Queries {
 data class StoenadRad(
     val id: Long,
     val fnrSoeker: String,
-    val fnrForeldre: List<Foedselsnummer>,
-    val fnrSoesken: List<Foedselsnummer>,
+    val fnrForeldre: List<String>,
+    val fnrSoesken: List<String>,
     val anvendtTrygdetid: String,
     val nettoYtelse: String,
     val beregningType: String,

@@ -1,19 +1,15 @@
 package barnepensjon.vilkaar.avdoedesmedlemskap
 
 import GrunnlagTestData
-import LesVilkaarsmeldingTest.Companion.readFile
 import adresserNorgePdl
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import grunnlag.arbeidsforholdTestData
+import grunnlag.inntektsopplysning
 import grunnlag.kilde
 import grunnlag.medlemskap
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.PeriodisertOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapVurdering
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.inntekt.InntektsOpplysning
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vikaar.Kriterietyper
 import no.nav.etterlatte.libs.common.vikaar.Utfall
@@ -51,11 +47,7 @@ class AvdoedesMedlemskapTest {
         Opplysningstype.UTENLANDSOPPHOLD to Opplysning.Periodisert(
             emptyList()
         ),
-        Opplysningstype.INNTEKT to Opplysning.Konstant(
-            UUID.randomUUID(),
-            kilde,
-            inntekt("inntektsopplysning.json").toJsonNode()
-        ),
+        Opplysningstype.INNTEKT to Opplysning.Periodisert(inntektsopplysning),
         Opplysningstype.MEDLEMSKAPSPERIODE to Opplysning.Periodisert(medlemskap),
         Opplysningstype.ARBEIDSFORHOLD to Opplysning.Periodisert(arbeidsforholdTestData(100.0))
     )
@@ -85,11 +77,7 @@ class AvdoedesMedlemskapTest {
     fun `Skal returnere med utfall ikke oppfyllt dersom det er gaps i de gyldige periodene`() {
         val vurdertVilkaar = vilkaarAvdoedesMedlemskap(
             avdoedTestdata + mapOf(
-                Opplysningstype.INNTEKT to Opplysning.Konstant(
-                    UUID.randomUUID(),
-                    kilde,
-                    inntekt("inntektsopplysningOpphold.json").toJsonNode()
-                )
+                Opplysningstype.INNTEKT to Opplysning.Periodisert(inntektsopplysning)
             )
         )
 
@@ -103,13 +91,5 @@ class AvdoedesMedlemskapTest {
             assertEquals(2, opplysning.gaps.size)
             assertTrue(opplysning.perioder.isNotEmpty())
         }
-    }
-
-    companion object {
-        private fun inntekt(file: String) =
-            objectMapper.readValue<InntektsOpplysning>(readFile(file))
-
-        private fun arbeidsforhold(file: String) =
-            objectMapper.readValue<Opplysning.Periodisert<JsonNode>>(readFile(file))
     }
 }

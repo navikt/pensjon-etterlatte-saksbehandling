@@ -4,9 +4,9 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
-import no.nav.etterlatte.statistikk.StatistikkRiver
-import no.nav.etterlatte.statistikk.StatistikkService
-import no.nav.etterlatte.statistikk.StoenadRad
+import no.nav.etterlatte.statistikk.database.StoenadRad
+import no.nav.etterlatte.statistikk.river.StatistikkRiver
+import no.nav.etterlatte.statistikk.statistikk.StatistikkService
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

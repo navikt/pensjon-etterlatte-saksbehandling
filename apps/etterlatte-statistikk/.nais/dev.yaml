@@ -27,6 +27,15 @@ spec:
     cpuThresholdPercentage: 90
     max: 1
     min: 1
+  azure:
+    application:
+      enabled: true
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
+    - name: BEHANDLING_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-behandling

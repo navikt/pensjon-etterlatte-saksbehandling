@@ -1,6 +1,9 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import java.sql.ResultSet
@@ -13,37 +16,48 @@ interface VilkaarsvurderingRepository {
 }
 
 class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : VilkaarsvurderingRepository {
-    private val connection get() = ds.connection
 
-    override fun hent(behandlingId: UUID): Vilkaarsvurdering? = connection.use {
-        it.prepareStatement(Queries.hentVilkaarsvurdering)
-            .apply { setObject(1, behandlingId) }
-            .executeQuery()
-            .singleOrNull {
-                Vilkaarsvurdering(
-                    behandlingId = getObject("behandlingId") as UUID,
-                    payload = getString("payload"),
-                    vilkaar = getString("vilkaar").let { vilkaar ->
-                        objectMapper.readValue(vilkaar)
-                    },
-                    resultat = getString("resultat")?.let { resultat ->
-                        objectMapper.readValue(resultat)
-                    }
-                )
-            }
-    }
+    override fun hent(behandlingId: UUID): Vilkaarsvurdering? =
+        using(sessionOf(ds)) { session ->
+            queryOf(
+                statement = Queries.hentVilkaarsvurdering,
+                paramMap = mapOf("behandlingId" to behandlingId)
+            )
+                .let { query ->
+                    session.run(
+                        query.map { row ->
+                            Vilkaarsvurdering(
+                                behandlingId = row.uuid("behandlingId"),
+                                payload = row.string("payload"),
+                                vilkaar = row.string("vilkaar").let { vilkaar ->
+                                    objectMapper.readValue(vilkaar)
+                                },
+                                resultat = row.string("resultat")?.let { resultat ->
+                                    objectMapper.readValue(resultat)
+                                }
+                            )
+                        }.asSingle
+                    )
+                }
+        }
 
     override fun lagre(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering {
-        connection.use {
-            it.prepareStatement(Queries.lagreVilkaarsvurdering)
-                .apply {
-                    setObject(1, vilkaarsvurdering.behandlingId)
-                    setObject(2, vilkaarsvurdering.payload.toJson())
-                    setObject(3, vilkaarsvurdering.vilkaar.toJson())
-                    setObject(4, vilkaarsvurdering.resultat?.toJson())
-                }
-                .execute()
+        using(sessionOf(ds)) {
+            it.transaction { tx ->
+                tx.run(
+                    queryOf(
+                        statement = Queries.lagreVilkaarsvurdering,
+                        paramMap = mapOf(
+                            "behandlingId" to vilkaarsvurdering.behandlingId,
+                            "payload" to vilkaarsvurdering.payload.toJson(),
+                            "vilkaar" to vilkaarsvurdering.vilkaar.toJson(),
+                            "resultat" to vilkaarsvurdering.resultat?.toJson()
+                        )
+                    ).asExecute
+                )
+            }
         }
+
         return vilkaarsvurdering
     }
 
@@ -59,8 +73,8 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
 }
 
 private object Queries {
-    val hentVilkaarsvurdering = "SELECT behandlingId, payload, vilkaar, resultat FROM vilkaarsvurdering WHERE behandlingId = ?" // ktlint-disable max-line-length
+    val hentVilkaarsvurdering = "SELECT behandlingId, payload, vilkaar, resultat FROM vilkaarsvurdering WHERE behandlingId = :behandlingId::UUID" // ktlint-disable max-line-length
     val lagreVilkaarsvurdering = "INSERT INTO vilkaarsvurdering(behandlingId, payload, vilkaar, resultat) " +
-        "VALUES(?::UUID, ?::JSON, ?::JSONB, ?::JSONB) ON CONFLICT (behandlingId) DO " +
+        "VALUES(:behandlingId::UUID, :payload::JSON, :vilkaar::JSONB, :resultat::JSONB) ON CONFLICT (behandlingId) DO " + // ktlint-disable max-line-length
         "UPDATE SET payload = EXCLUDED.payload, vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat"
 }

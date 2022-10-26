@@ -80,14 +80,21 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
 
     private fun oppdaterVurdering(vilkaar: Vilkaar, vurdertVilkaar: VurdertVilkaar): Vilkaar =
         if (vilkaar.hovedvilkaar.type == vurdertVilkaar.hovedvilkaar.type) {
+            val hovedvilkaarOgUnntaksvilkaarIkkeOppfylt =
+                vurdertVilkaar.hovedvilkaar.resultat == Utfall.IKKE_OPPFYLT && vurdertVilkaar.unntaksvilkaar == null
+
             vilkaar.copy(
-                vurdering = vurdertVilkaar.vilkaarVurderingData,
+                vurdering = vurdertVilkaar.vurdering,
                 hovedvilkaar = vilkaar.hovedvilkaar.copy(resultat = vurdertVilkaar.hovedvilkaar.resultat),
                 unntaksvilkaar = vilkaar.unntaksvilkaar?.map {
-                    if (vurdertVilkaar.unntaksvilkaar?.type === it.type) {
-                        it.copy(resultat = vurdertVilkaar.unntaksvilkaar.resultat)
+                    if (hovedvilkaarOgUnntaksvilkaarIkkeOppfylt) {
+                        it.copy(resultat = Utfall.IKKE_OPPFYLT)
                     } else {
-                        it.copy(resultat = null)
+                        if (vurdertVilkaar.unntaksvilkaar?.type === it.type) {
+                            it.copy(resultat = vurdertVilkaar.unntaksvilkaar.resultat)
+                        } else {
+                            it.copy(resultat = null)
+                        }
                     }
                 }
             )

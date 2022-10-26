@@ -82,8 +82,13 @@ enum class VilkaarsvurderingUtfall {
 
 data class VurdertVilkaar(
     val hovedvilkaar: VilkaarTypeOgUtfall,
-    val unntaksvilkaar: VilkaarTypeOgUtfall?,
-    val vilkaarVurderingData: VilkaarVurderingData
+    val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
+    val vurdering: VilkaarVurderingData
+)
+
+data class VilkaarTypeOgUtfall(
+    val type: VilkaarType,
+    val resultat: Utfall
 )
 
 data class Vilkaarsgrunnlag<T>(

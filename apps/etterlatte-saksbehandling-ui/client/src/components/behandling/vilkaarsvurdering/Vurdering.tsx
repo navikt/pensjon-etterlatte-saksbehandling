@@ -41,12 +41,15 @@ export const Vurdering = ({
       resultat !== undefined &&
       kommentar.length >= MIN_KOMMENTAR_LENGDE
     ) {
+      const inkluderUnntaksvilkaar =
+        resultat == VurderingsResultat.IKKE_OPPFYLT && vilkaarsUnntakType && vilkaarsUnntakType != ''
+
       vurderVilkaar(behandlingId, {
         hovedvilkaar: {
           type: vilkaar.hovedvilkaar.type,
           resultat,
         },
-        ...(vilkaarsUnntakType && {
+        ...(inkluderUnntaksvilkaar && {
           unntaksvilkaar: {
             type: vilkaarsUnntakType,
             resultat: VurderingsResultat.OPPFYLT,
@@ -72,12 +75,18 @@ export const Vurdering = ({
 
   const redigerVilkaar = () => {
     setAktivVurdering(true)
-    setResultat(vilkaar.hovedvilkaar?.resultat || undefined)
-    vilkaar.unntaksvilkaar?.forEach((unntaksvilkaar) => {
-      if (unntaksvilkaar.resultat) {
-        setVilkaarsUnntakType(unntaksvilkaar.type)
-      }
-    })
+    setResultat(vilkaar.hovedvilkaar?.resultat)
+
+    const unntaksvilkaarOppfylt = vilkaar.unntaksvilkaar?.find(
+      (unntaksvilkaar) => VurderingsResultat.OPPFYLT === unntaksvilkaar.resultat
+    )
+
+    if (unntaksvilkaarOppfylt) {
+      setVilkaarsUnntakType(unntaksvilkaarOppfylt.type)
+    } else {
+      setVilkaarsUnntakType('')
+    }
+
     setKommentar(vilkaar.vurdering?.kommentar || '')
   }
 
@@ -143,7 +152,7 @@ export const Vurdering = ({
                 setResultat(VurderingsResultat[event as VurderingsResultat])
                 setRadioError(undefined)
               }}
-              value={resultat}
+              value={resultat || ''}
               error={radioError ? radioError : false}
             >
               <div className="flex">
@@ -157,23 +166,28 @@ export const Vurdering = ({
           {VurderingsResultat.IKKE_OPPFYLT === resultat && vilkaar.unntaksvilkaar && vilkaar.unntaksvilkaar.length > 0 && (
             <>
               <VurderingsTitle>Er unntak fra hovedregelen oppfylt?</VurderingsTitle>
-              <RadioGroup
-                legend=""
-                size="small"
-                className="radioGroup"
-                onChange={(event) => setVilkaarsUnntakType(event)}
-                value={vilkaarsUnntakType}
-              >
-                <div className="flex">
-                  {vilkaar.unntaksvilkaar.map((unntakvilkaar) => {
-                    return (
-                      <Radio key={unntakvilkaar.type} value={unntakvilkaar.type}>
-                        {unntakvilkaar.paragraf.tittel}
-                      </Radio>
-                    )
-                  })}
-                </div>
-              </RadioGroup>
+              <Unntaksvilkaar>
+                <RadioGroup
+                  legend=""
+                  size="small"
+                  className="radioGroup"
+                  onChange={(event) => setVilkaarsUnntakType(event)}
+                  value={vilkaarsUnntakType || ''}
+                >
+                  <div className="flex">
+                    {vilkaar.unntaksvilkaar.map((unntakvilkaar) => {
+                      return (
+                        <Radio key={unntakvilkaar.type} value={unntakvilkaar.type}>
+                          {unntakvilkaar.paragraf.tittel}
+                        </Radio>
+                      )
+                    })}
+                    <Radio key="Nei" value="">
+                      Nei, ingen av unntakene er oppfylt
+                    </Radio>
+                  </div>
+                </RadioGroup>
+              </Unntaksvilkaar>
             </>
           )}
           <Textarea
@@ -266,6 +280,10 @@ export const RadioGroupWrapper = styled.div`
     display: flex;
     gap: 20px;
   }
+`
+
+export const Unntaksvilkaar = styled.div`
+  margin-bottom: 1em;
 `
 
 export const VurderingKnapper = styled.div`

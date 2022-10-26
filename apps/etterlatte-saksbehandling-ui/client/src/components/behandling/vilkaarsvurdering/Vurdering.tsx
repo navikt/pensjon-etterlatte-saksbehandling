@@ -76,11 +76,17 @@ export const Vurdering = ({
   const redigerVilkaar = () => {
     setAktivVurdering(true)
     setResultat(vilkaar.hovedvilkaar?.resultat)
-    vilkaar.unntaksvilkaar?.forEach((unntaksvilkaar) => {
-      if (unntaksvilkaar.resultat) {
-        setVilkaarsUnntakType(unntaksvilkaar.type)
-      }
-    })
+
+    const unntaksvilkaarOppfylt = vilkaar.unntaksvilkaar?.find(
+      (unntaksvilkaar) => VurderingsResultat.OPPFYLT === unntaksvilkaar.resultat
+    )
+
+    if (unntaksvilkaarOppfylt) {
+      setVilkaarsUnntakType(unntaksvilkaarOppfylt.type)
+    } else {
+      setVilkaarsUnntakType('')
+    }
+
     setKommentar(vilkaar.vurdering?.kommentar || '')
   }
 

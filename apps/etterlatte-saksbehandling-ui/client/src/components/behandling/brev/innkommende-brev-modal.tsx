@@ -1,6 +1,6 @@
 import { Button, Modal } from '@navikt/ds-react'
 import { useState } from 'react'
-import { hentInnkommendeBrevInnhold } from '../../../shared/api/brev'
+import { hentDokumentPDF } from '../../../shared/api/brev'
 import styled from 'styled-components'
 import { Findout } from '@navikt/ds-icons'
 import { PdfVisning } from './pdf-visning'
@@ -30,7 +30,7 @@ export default function InnkommendeBrevModal({
   const open = (journalpostId: string, dokumentInfoId: string) => {
     setIsOpen(true)
 
-    hentInnkommendeBrevInnhold(journalpostId, dokumentInfoId)
+      hentDokumentPDF(journalpostId, dokumentInfoId)
       .then((file) => URL.createObjectURL(file))
       .then((url) => setFileURL(url))
       .catch((e) => setError(e.message))

@@ -11,7 +11,7 @@ import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapp
 import {
   ferdigstillBrev,
   hentBrevForBehandling,
-  hentInnkommendeBrev,
+  hentDokumenter,
   Mottaker,
   slettBrev,
 } from '../../../shared/api/brev'
@@ -59,7 +59,7 @@ export const Brev = () => {
       .then((res) => setBrevListe(res))
       .catch(() => setError(true))
 
-    hentInnkommendeBrev(fnr)
+    hentDokumenter(fnr)
       .then((res) => setInnkommendeBrevListe(res.data.dokumentoversiktBruker.journalposter))
       .catch(() => setInnkommendeError(true))
       .finally(() => setInnkommendeHentet(true))

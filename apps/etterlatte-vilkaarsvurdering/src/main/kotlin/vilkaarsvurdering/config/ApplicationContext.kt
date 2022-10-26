@@ -1,43 +1,25 @@
 package no.nav.etterlatte.vilkaarsvurdering.config
 
 import no.nav.etterlatte.vilkaarsvurdering.GrunnlagEndretRiver
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryInMemory
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryImpl
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.RapidsConnection
 
 class ApplicationContext(
-    val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
+    properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
 ) {
-    /*var dataSourceBuilder = DataSourceBuilder(
-        jdbcUrl = jdbcUrl(
-            host = properties.dbHost,
-            port = properties.dbPort,
-            databaseName = properties.dbName
-        ),
+    val dataSourceBuilder = DataSourceBuilder(
+        jdbcUrl = properties.jdbcUrl,
         username = properties.dbUsername,
         password = properties.dbPassword
-    )
+    ).apply { migrate() }
 
-    var dataSource = dataSourceBuilder.dataSource()
-    */
+    val dataSource = dataSourceBuilder.dataSource()
 
-    var vilkaarsvurderingRepository = VilkaarsvurderingRepositoryInMemory()
-//        .apply {
-//        // legger inn mockdata
-//        lagre(
-//            Vilkaarsvurdering(
-//                behandlingId = UUID.fromString("9a95a795-7f16-4380-b73a-32d4b41445ef"),
-//                payload = "json",
-//                vilkaar = barnepensjonVilkaar(Grunnlag.empty())
-//            )
-//        )
-//    }
+    val vilkaarsvurderingRepository = VilkaarsvurderingRepositoryImpl(dataSource)
 
-    var vilkaarsvurderingService = VilkaarsvurderingService(vilkaarsvurderingRepository)
+    val vilkaarsvurderingService = VilkaarsvurderingService(vilkaarsvurderingRepository)
 
     fun grunnlagEndretRiver(rapidsConnection: RapidsConnection): GrunnlagEndretRiver =
         GrunnlagEndretRiver(rapidsConnection, vilkaarsvurderingService)
 }
-
-private fun jdbcUrl(host: String, port: Int, databaseName: String) =
-    "jdbc:postgresql://$host:$port/$databaseName"

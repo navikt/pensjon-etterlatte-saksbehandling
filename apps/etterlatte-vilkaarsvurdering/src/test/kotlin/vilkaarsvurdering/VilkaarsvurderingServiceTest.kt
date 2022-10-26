@@ -14,14 +14,41 @@ import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
 import no.nav.etterlatte.vilkaarsvurdering.SakType
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarOpplysningsType
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryInMemory
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryImpl
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
+import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
 import java.util.*
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VilkaarsvurderingServiceTest {
-    private val service = VilkaarsvurderingService(VilkaarsvurderingRepositoryInMemory())
+
+    @Container
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
+
+    private lateinit var service: VilkaarsvurderingService
     private val uuid: UUID = UUID.randomUUID()
+
+    @BeforeAll
+    fun beforeAll() {
+        postgreSQLContainer.start()
+        val ds = DataSourceBuilder(
+            postgreSQLContainer.jdbcUrl,
+            postgreSQLContainer.username,
+            postgreSQLContainer.password
+        ).apply { migrate() }
+        service = VilkaarsvurderingService((VilkaarsvurderingRepositoryImpl(ds.dataSource())))
+    }
+
+    @AfterAll
+    fun afterAll() {
+        postgreSQLContainer.stop()
+    }
 
     @Test
     fun `Skal opprette en vilkaarsvurdering for foerstegangsbehandling av barnepensjon med grunnlagsopplysninger`() {

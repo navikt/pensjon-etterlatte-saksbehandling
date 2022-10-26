@@ -116,8 +116,7 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
     }
 
     fun hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
-        minutter: Long,
-        type: GrunnlagsendringsType
+        minutter: Long
     ): List<Grunnlagsendringshendelse> {
         with(connection()) {
             prepareStatement(
@@ -126,12 +125,10 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
                    FROM grunnlagsendringshendelse
                    WHERE opprettet <= ?
                    AND status = ?
-                   AND type = ?
                 """.trimIndent()
             ).use {
                 it.setTimestamp(1, Timestamp.from(Instant.now().minus(minutter, ChronoUnit.MINUTES)))
                 it.setString(2, GrunnlagsendringStatus.IKKE_VURDERT.name)
-                it.setString(3, type.name)
                 return it.executeQuery().toList { asGrunnlagsendringshendelse() }
             }
         }

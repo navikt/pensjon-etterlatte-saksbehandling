@@ -166,8 +166,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
         }
         val hendelserEldreEnn1Time = grunnlagsendringshendelsesRepo.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
-            60,
-            GrunnlagsendringsType.SOEKER_DOED
+            60
         )
         assertAll(
             "henter kun grunnlagsendringshendelser som er eldre enn 1 time",

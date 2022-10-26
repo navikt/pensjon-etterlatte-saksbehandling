@@ -4,7 +4,6 @@ import GrunnlagTestData
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -16,16 +15,43 @@ import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningsType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.vilkaarsvurdering.SakType
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryInMemory
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepositoryImpl
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
+import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
 import java.util.*
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VilkaarsvurderingServiceTest {
-    private val sendToRapid = mockk<(String) -> Unit>()
-    private val service = VilkaarsvurderingService(VilkaarsvurderingRepositoryInMemory(), sendToRapid)
+
+    @Container
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
+
+    private lateinit var service: VilkaarsvurderingService
     private val uuid: UUID = UUID.randomUUID()
+    private fun sendToRapid(message: String) {}
+
+    @BeforeAll
+    fun beforeAll() {
+        postgreSQLContainer.start()
+        val ds = DataSourceBuilder(
+            postgreSQLContainer.jdbcUrl,
+            postgreSQLContainer.username,
+            postgreSQLContainer.password
+        ).apply { migrate() }
+        service = VilkaarsvurderingService(VilkaarsvurderingRepositoryImpl(ds.dataSource()), ::sendToRapid)
+    }
+
+    @AfterAll
+    fun afterAll() {
+        postgreSQLContainer.stop()
+    }
 
     @Test
     fun `Skal opprette en vilkaarsvurdering for foerstegangsbehandling av barnepensjon med grunnlagsopplysninger`() {
@@ -35,7 +61,7 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            virkningstidspunkt = LocalDate.of(2022, 1, 1),
+            LocalDate.of(2022, 1, 1),
             "",
             grunnlag,
             null
@@ -64,7 +90,7 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     @Test
-    fun `Skal opprette en vilkaarsvurdering for revurdering for død søker`() {
+    fun `Skal opprette en vilkaarsvurdering for revurdering for doed soeker`() {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         val vilkaarsvurdering = service.opprettVilkaarsvurdering(

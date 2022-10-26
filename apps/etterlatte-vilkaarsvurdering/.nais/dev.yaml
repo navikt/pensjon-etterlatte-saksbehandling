@@ -21,14 +21,13 @@ spec:
     path: /metrics
   strategy:
     type: Recreate
-#  gcp:
-#    sqlInstances:
-#      - type: POSTGRES_14
-#        name: etterlatte-vilkaarsvurdering
-#        cascadingDelete: true
-#        databases:
-#          - name: vilkaarsvurdering
-#            envVarPrefix: DB
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        name: etterlatte-vilkaarsvurdering
+        databases:
+          - name: vilkaarsvurdering
+            envVarPrefix: DB
   kafka:
     pool: nav-dev
   azure:

@@ -2,6 +2,11 @@ plugins {
     id("etterlatte.common")
 }
 
+repositories {
+    mavenCentral()
+    maven("https://jitpack.io")
+}
+
 dependencies {
     implementation(project(":libs:common"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))

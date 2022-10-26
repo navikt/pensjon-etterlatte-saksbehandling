@@ -18,7 +18,6 @@ enum class Opplysningstype {
 
     PENSJON_UFORE_V1, // Todo: brukes ikke lenger?
 
-    AVDOED_INNTEKT_V1,
     SAKSBEHANDLER_AVDOED_MEDLEMSKAPS_PERIODE,
 
     /* Grunnlag v2 */

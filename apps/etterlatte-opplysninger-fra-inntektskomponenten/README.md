@@ -1,6 +1,6 @@
 # etterlatte-opplysninger-fra-inntektskomponenten
 
-Enkel Rapids&River-app som svarer på behov om opplysning `AVDOED_INNTEKT_V1`. 
+Enkel Rapids&River-app som svarer på behov om opplysning `INNTEKT`. 
 
 Appen gjør kall til A-inntekt for å hente inntekter, samt AA-registeret for å hente arbeidsforhold. Følgende blir 
 responsene fra disse tjenestene transformert til to separate grunnlagsopplysninger, som postes tilbake til kafka for 

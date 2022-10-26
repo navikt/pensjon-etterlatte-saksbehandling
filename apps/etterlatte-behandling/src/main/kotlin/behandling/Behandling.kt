@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -11,6 +12,30 @@ import java.time.LocalDateTime
 import java.util.*
 
 sealed interface Behandling {
+    fun toDetaljertBehandling(): DetaljertBehandling {
+        val (soeknadMottatDato, gyldighetsproeving) = when (this) {
+            is Foerstegangsbehandling -> this.soeknadMottattDato to this.gyldighetsproeving
+            // TODO øh 24.10.2022 er det riktig at søknadMottatDato er behandlingOpprettet der vi ikke har søknad?
+            else -> this.behandlingOpprettet to null
+        }
+
+        return DetaljertBehandling(
+            id = id,
+            sak = sak,
+            behandlingOpprettet = behandlingOpprettet,
+            sistEndret = sistEndret,
+            soeknadMottattDato = soeknadMottatDato,
+            innsender = persongalleri.innsender,
+            soeker = persongalleri.soeker,
+            gjenlevende = persongalleri.gjenlevende,
+            avdoed = persongalleri.avdoed,
+            soesken = persongalleri.soesken,
+            gyldighetsproeving = gyldighetsproeving,
+            status = status,
+            behandlingType = type
+        )
+    }
+
     val id: UUID
     val sak: Long
     val behandlingOpprettet: LocalDateTime
@@ -18,6 +43,7 @@ sealed interface Behandling {
     val status: BehandlingStatus
     val oppgaveStatus: OppgaveStatus?
     val type: BehandlingType
+    val persongalleri: Persongalleri
 }
 
 data class Foerstegangsbehandling(
@@ -29,7 +55,7 @@ data class Foerstegangsbehandling(
     override val oppgaveStatus: OppgaveStatus?,
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     val soeknadMottattDato: LocalDateTime,
-    val persongalleri: Persongalleri,
+    override val persongalleri: Persongalleri,
     val gyldighetsproeving: GyldighetsResultat?
 ) : Behandling
 
@@ -41,7 +67,7 @@ data class Revurdering(
     override val status: BehandlingStatus,
     override val oppgaveStatus: OppgaveStatus?,
     override val type: BehandlingType = BehandlingType.REVURDERING,
-    val persongalleri: Persongalleri,
+    override val persongalleri: Persongalleri,
     val revurderingsaarsak: RevurderingAarsak
 ) : Behandling
 
@@ -53,7 +79,7 @@ data class ManueltOpphoer(
     override val status: BehandlingStatus,
     override val oppgaveStatus: OppgaveStatus?,
     override val type: BehandlingType = BehandlingType.MANUELT_OPPHOER,
-    val persongalleri: Persongalleri,
+    override val persongalleri: Persongalleri,
     val opphoerAarsaker: List<ManueltOpphoerAarsak>,
     val fritekstAarsak: String?
 ) : Behandling {

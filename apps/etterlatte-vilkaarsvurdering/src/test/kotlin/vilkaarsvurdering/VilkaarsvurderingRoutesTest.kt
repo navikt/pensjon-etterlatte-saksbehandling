@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.restModule
+import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,28 +28,42 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VilkaarsvurderingRoutesTest {
 
+    @Container
+    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:14")
+    private val server = MockOAuth2Server()
+
     // todo: test at vilkårsvurderingen blir lagt på kafka korrekt!
     private fun sendToRapid(message: String) {}
-    private val vilkaarsvurderingServiceImpl =
-        VilkaarsvurderingService(VilkaarsvurderingRepositoryInMemory(), ::sendToRapid)
-    private val server = MockOAuth2Server()
+    private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
 
     @BeforeAll
     fun before() {
         server.start()
         System.setProperty("AZURE_APP_WELL_KNOWN_URL", server.wellKnownUrl(ISSUER_ID).toString())
         System.setProperty("AZURE_APP_CLIENT_ID", CLIENT_ID)
+        postgreSQLContainer.start()
+
+        val ds = DataSourceBuilder(
+            postgreSQLContainer.jdbcUrl,
+            postgreSQLContainer.username,
+            postgreSQLContainer.password
+        ).apply { migrate() }
+        vilkaarsvurderingServiceImpl =
+            VilkaarsvurderingService(VilkaarsvurderingRepositoryImpl(ds.dataSource()), ::sendToRapid)
     }
 
     @AfterAll
     fun after() {
         server.shutdown()
+        postgreSQLContainer.stop()
     }
 
     private val token: String by lazy {
@@ -286,7 +301,7 @@ internal class VilkaarsvurderingRoutesTest {
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = LocalDate.of(2022, 1, 1),
-            "some payload",
+            """{"json": 123}""",
             grunnlag,
             null
         )

@@ -107,7 +107,7 @@ class VilkaarsvurderingService(
                     oppdaterVurdering(it, vurdertVilkaar)
                 }
             )
-            vilkaarsvurderingRepository.oppdater(oppdatertVilkaarsvurdering)
+            vilkaarsvurderingRepository.lagre(oppdatertVilkaarsvurdering)
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
     }
 
@@ -118,7 +118,7 @@ class VilkaarsvurderingService(
                     slettVurdering(it, hovedVilkaarType)
                 }
             )
-            vilkaarsvurderingRepository.oppdater(oppdatertVilkaarsvurdering)
+            vilkaarsvurderingRepository.lagre(oppdatertVilkaarsvurdering)
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
     }
 

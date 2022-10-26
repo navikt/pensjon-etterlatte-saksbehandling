@@ -2,7 +2,7 @@ import { Alert, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { Journalpost } from '../behandling/types'
 import { formaterDato } from '../../utils/formattering'
-import InnkommendeBrevModal from '../behandling/brev/innkommende-brev-modal'
+import DokumentModal from './dokumentModal'
 import Spinner from '../../shared/Spinner'
 
 const colonner = ['Journalpost id', 'Tittel', 'Avsender', 'Dato', 'Status', 'Type', '']
@@ -40,7 +40,7 @@ export const Dokumentliste = ({
                 {brev.journalposttype === 'I' ? 'Inngående' : 'Utgående'}
               </Table.DataCell>
               <Table.DataCell>
-                <InnkommendeBrevModal
+                <DokumentModal
                   tittel={brev.tittel}
                   journalpostId={brev.journalpostId}
                   dokumentInfoId={brev.dokumenter[0].dokumentInfoId}
@@ -52,13 +52,13 @@ export const Dokumentliste = ({
         {dokumenter.length === 0 && !error && (
           <Table.Body>
             <Table.Row>
-              <IngenInnkommendeBrevRad colSpan={6}>
+              <IngenDokumenterRad colSpan={6}>
                 {dokumenterHentet ? (
                   'Ingen dokumenter ble funnet'
                 ) : (
-                  <Spinner margin={'0'} visible={!dokumenterHentet} label="Henter innkommende brev" />
+                  <Spinner margin={'0'} visible={!dokumenterHentet} label="Henter dokumenter" />
                 )}
-              </IngenInnkommendeBrevRad>
+              </IngenDokumenterRad>
             </Table.Row>
           </Table.Body>
         )}
@@ -78,7 +78,7 @@ export const TableWrapper = styled.div`
   }
 `
 
-const IngenInnkommendeBrevRad = styled.td`
+const IngenDokumenterRad = styled.td`
   text-align: center;
   padding-top: 16px;
   font-style: italic;

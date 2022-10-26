@@ -21,7 +21,7 @@ class VilkaarsvurderingService(
     private val sendToRapid: (String) -> Unit
 ) {
 
-    fun hentVilkaarsvurdering(behandlingId: UUID): VilkaarsvurderingIntern? {
+    fun hentVilkaarsvurdering(behandlingId: UUID): VilkaarsvurderingDao? {
         return vilkaarsvurderingRepository.hent(behandlingId)
     }
 
@@ -44,13 +44,13 @@ class VilkaarsvurderingService(
         payload: String,
         grunnlag: Grunnlag,
         revurderingAarsak: RevurderingAarsak?
-    ): VilkaarsvurderingIntern {
+    ): VilkaarsvurderingDao {
         return when (sakType) {
             SakType.BARNEPENSJON ->
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
                         vilkaarsvurderingRepository.lagre(
-                            VilkaarsvurderingIntern(
+                            VilkaarsvurderingDao(
                                 behandlingId,
                                 payload,
                                 barnepensjonFoerstegangsbehandlingVilkaar(grunnlag),
@@ -60,7 +60,7 @@ class VilkaarsvurderingService(
 
                     BehandlingType.REVURDERING ->
                         vilkaarsvurderingRepository.lagre(
-                            VilkaarsvurderingIntern(
+                            VilkaarsvurderingDao(
                                 behandlingId,
                                 payload,
                                 mapVilkaarRevurdering(requireNotNull(revurderingAarsak)),
@@ -82,25 +82,25 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         payload: String,
         virkningstidspunkt: LocalDate
-    ): VilkaarsvurderingIntern {
+    ): VilkaarsvurderingDao {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let {
             vilkaarsvurderingRepository.lagre(it.copy(payload = payload, virkningstidspunkt = virkningstidspunkt))
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun oppdaterTotalVurdering(behandlingId: UUID, resultat: VilkaarsvurderingResultat): VilkaarsvurderingIntern {
+    fun oppdaterTotalVurdering(behandlingId: UUID, resultat: VilkaarsvurderingResultat): VilkaarsvurderingDao {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = resultat))
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun slettTotalVurdering(behandlingId: UUID): VilkaarsvurderingIntern {
+    fun slettTotalVurdering(behandlingId: UUID): VilkaarsvurderingDao {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let { vilkaarsvurdering ->
             vilkaarsvurderingRepository.lagre(vilkaarsvurdering.copy(resultat = null))
         } ?: throw RuntimeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun oppdaterVurderingPaaVilkaar(behandlingId: UUID, vurdertVilkaar: VurdertVilkaar): VilkaarsvurderingIntern {
+    fun oppdaterVurderingPaaVilkaar(behandlingId: UUID, vurdertVilkaar: VurdertVilkaar): VilkaarsvurderingDao {
         return hentVilkaarsvurdering(behandlingId)?.let { vilkaarsvurdering ->
             val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
                 vilkaar = vilkaarsvurdering.vilkaar.map {
@@ -111,7 +111,7 @@ class VilkaarsvurderingService(
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun slettVurderingPaaVilkaar(behandlingId: UUID, hovedVilkaarType: VilkaarType): VilkaarsvurderingIntern {
+    fun slettVurderingPaaVilkaar(behandlingId: UUID, hovedVilkaarType: VilkaarType): VilkaarsvurderingDao {
         return hentVilkaarsvurdering(behandlingId)?.let { vilkaarsvurdering ->
             val oppdatertVilkaarsvurdering = vilkaarsvurdering.copy(
                 vilkaar = vilkaarsvurdering.vilkaar.map {
@@ -122,7 +122,7 @@ class VilkaarsvurderingService(
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ingen vilkårsvurdering for behandlingId=$behandlingId")
     }
 
-    fun publiserVilkaarsvurdering(vilkaarsvurdering: VilkaarsvurderingIntern) {
+    fun publiserVilkaarsvurdering(vilkaarsvurdering: VilkaarsvurderingDao) {
         val oppdatertPayload = JsonMessage.newMessage(vilkaarsvurdering.payload)
             .apply { this["vilkaarsvurdering"] = vilkaarsvurdering.toDomain() }
 

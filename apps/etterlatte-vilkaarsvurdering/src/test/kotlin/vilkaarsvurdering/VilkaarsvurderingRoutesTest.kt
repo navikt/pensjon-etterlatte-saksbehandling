@@ -74,7 +74,7 @@ internal class VilkaarsvurderingRoutesTest {
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
 
-            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingIntern::class.java)
+            val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingDto::class.java)
             val vilkaar = vilkaarsvurdering.vilkaar.first()
 
             assertEquals(HttpStatusCode.OK, response.status)
@@ -114,7 +114,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val oppdatertVilkaarsvurdering = objectMapper
-                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
+                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingDao::class.java)
             val oppdatertVilkaar = oppdatertVilkaarsvurdering.vilkaar.find {
                 it.hovedvilkaar.type == vurdertVilkaarDto.hovedvilkaar.type
             }
@@ -257,7 +257,7 @@ internal class VilkaarsvurderingRoutesTest {
 
             println(oppdatertVilkaarsvurderingResponse.bodyAsText())
             val oppdatertVilkaarsvurdering = objectMapper
-                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
+                .readValue(oppdatertVilkaarsvurderingResponse.bodyAsText(), VilkaarsvurderingDao::class.java)
 
             assertEquals(HttpStatusCode.OK, oppdatertVilkaarsvurderingResponse.status)
             assertEquals(behandlingId, oppdatertVilkaarsvurdering.behandlingId)
@@ -272,7 +272,7 @@ internal class VilkaarsvurderingRoutesTest {
             }
 
             val slettetVilkaarsvurdering = objectMapper
-                .readValue(sletteResponse.bodyAsText(), VilkaarsvurderingIntern::class.java)
+                .readValue(sletteResponse.bodyAsText(), VilkaarsvurderingDao::class.java)
 
             assertEquals(HttpStatusCode.OK, sletteResponse.status)
             assertEquals(behandlingId, slettetVilkaarsvurdering.behandlingId)

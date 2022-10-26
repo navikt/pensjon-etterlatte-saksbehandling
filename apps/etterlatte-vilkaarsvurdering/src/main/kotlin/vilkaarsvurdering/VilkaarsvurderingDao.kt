@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import java.time.LocalDate
 import java.util.*
 
-data class VilkaarsvurderingIntern(
+data class VilkaarsvurderingDao(
     val behandlingId: UUID,
     val payload: String,
     val vilkaar: List<Vilkaar>,
@@ -19,4 +19,18 @@ data class VilkaarsvurderingIntern(
         virkningstidspunkt = this.virkningstidspunkt,
         resultat = requireNotNull(this.resultat) { "En vilkårsvurdering må ha et resultat" }
     )
+
+    fun toDto() = VilkaarsvurderingDto(
+        behandlingId = this.behandlingId,
+        vilkaar = this.vilkaar,
+        virkningstidspunkt = this.virkningstidspunkt,
+        resultat = this.resultat
+    )
 }
+
+data class VilkaarsvurderingDto(
+    val behandlingId: UUID,
+    val vilkaar: List<Vilkaar>,
+    val virkningstidspunkt: LocalDate,
+    val resultat: VilkaarsvurderingResultat? = null
+)

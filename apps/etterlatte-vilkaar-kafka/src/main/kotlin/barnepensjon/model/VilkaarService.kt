@@ -138,7 +138,7 @@ class VilkaarService {
         val soeker = grunnlag.soeker
         val gjenlevende = grunnlag.hentGjenlevende()
         val avdoed = grunnlag.hentAvdoed()
-        val saksbehandlerKommerBarnetTilgode = avdoed.hentKommerBarnetTilgode()
+        val saksbehandlerKommerBarnetTilgode = grunnlag.sak.hentKommerBarnetTilgode()
 
         val kommerBarnetTilGode = listOf(
             barnOgForelderSammeBostedsadresse(

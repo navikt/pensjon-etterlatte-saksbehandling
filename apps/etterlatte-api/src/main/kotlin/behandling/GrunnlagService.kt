@@ -2,6 +2,8 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.kafka.TypedMessage
+import no.nav.etterlatte.libs.common.event.PackageMessageName
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedesMedlemskapsperiode
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Beregningsgrunnlag
@@ -44,9 +46,12 @@ class GrunnlagService(
 
         rapid.publiser(
             behandlingId,
-            JsonMessage.newMessage(
-                eventName = "OPPLYSNING:NY",
-                map = mapOf("opplysning" to periodisertOpplysning, "sakId" to behandling.sak)
+            JsonMessage.newTypedMessage(
+                TypedMessage(
+                    eventName = PackageMessageName.nyOpplysning,
+                    opplysning = listOf(periodisertOpplysning),
+                    sakId = behandling.sak
+                )
             ).toJson()
         )
 
@@ -86,9 +91,12 @@ class GrunnlagService(
 
         rapid.publiser(
             behandlingId,
-            JsonMessage.newMessage(
-                eventName = "OPPLYSNING:NY",
-                map = mapOf("opplysning" to periodisertOpplysning, "sakId" to behandling.sak)
+            JsonMessage.newTypedMessage(
+                TypedMessage(
+                    eventName = PackageMessageName.nyOpplysning,
+                    opplysning = listOf(periodisertOpplysning),
+                    sakId = behandling.sak
+                )
             ).toJson()
         )
 
@@ -104,19 +112,20 @@ class GrunnlagService(
     ): GrunnlagResult {
         val behandling = behandlingKlient.hentBehandling(behandlingId, token)
 
-        val opplysning: List<Grunnlagsopplysning<out Any>> = listOf(
-            lagOpplysning(
-                Opplysningstype.KOMMER_BARNET_TILGODE,
-                Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
-                ResultatKommerBarnetTilgode(svar, begrunnelse)
-            )
+        val opplysning = lagOpplysning(
+            Opplysningstype.KOMMER_BARNET_TILGODE,
+            Grunnlagsopplysning.Saksbehandler(saksbehandlerId, Instant.now()),
+            ResultatKommerBarnetTilgode(svar, begrunnelse)
         )
 
         rapid.publiser(
             behandlingId,
-            JsonMessage.newMessage(
-                eventName = "OPPLYSNING:NY",
-                map = mapOf("opplysning" to opplysning, "sakId" to behandling.sak)
+            JsonMessage.newTypedMessage(
+                TypedMessage(
+                    eventName = PackageMessageName.nyOpplysning,
+                    opplysning = listOf(opplysning),
+                    sakId = behandling.sak
+                )
             ).toJson()
         )
         return GrunnlagResult("Lagret")
@@ -139,11 +148,11 @@ class GrunnlagService(
 
         rapid.publiser(
             behandlingId,
-            JsonMessage.newMessage(
-                eventName = "OPPLYSNING:NY",
-                map = mapOf(
-                    "opplysning" to opplysning,
-                    "sakId" to behandling.sak
+            JsonMessage.newTypedMessage(
+                TypedMessage(
+                    eventName = PackageMessageName.nyOpplysning,
+                    opplysning = opplysning,
+                    sakId = behandling.sak
                 )
             ).toJson()
         )

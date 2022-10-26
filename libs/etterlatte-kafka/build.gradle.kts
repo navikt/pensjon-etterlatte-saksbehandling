@@ -20,6 +20,7 @@ dependencies {
 
     compileOnly(Slf4jApi)
 
+    implementation(project(":libs:common"))
     testImplementation(Jupiter.Api)
     testImplementation(Jupiter.Params)
     testRuntimeOnly(Jupiter.Engine)

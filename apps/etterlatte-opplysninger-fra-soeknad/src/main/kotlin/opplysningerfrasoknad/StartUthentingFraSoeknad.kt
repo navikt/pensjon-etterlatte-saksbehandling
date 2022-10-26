@@ -1,6 +1,7 @@
 package no.nav.etterlatte.opplysningerfrasoknad
 
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
+import no.nav.etterlatte.libs.common.event.PackageMessageName
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationIdKey
@@ -35,7 +36,7 @@ internal class StartUthentingFraSoeknad(
             val opplysninger = opplysningsuthenter.lagOpplysningsListe(packet[GyldigSoeknadVurdert.skjemaInfoKey])
 
             JsonMessage.newMessage(
-                "OPPLYSNING:NY",
+                PackageMessageName.nyOpplysning,
                 mapOf(
                     "sakId" to packet[GyldigSoeknadVurdert.sakIdKey],
                     "behandlingId" to packet[GyldigSoeknadVurdert.behandlingIdKey],

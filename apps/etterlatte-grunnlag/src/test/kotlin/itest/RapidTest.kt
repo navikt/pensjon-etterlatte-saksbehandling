@@ -9,12 +9,15 @@ import no.nav.etterlatte.grunnlag.BehandlingHendelser
 import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
+import no.nav.etterlatte.kafka.TypedMessage
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
+import no.nav.etterlatte.libs.common.event.PackageMessageName
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
@@ -22,7 +25,6 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
@@ -34,6 +36,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import rapidsandrivers.vedlikehold.registrerVedlikeholdsriver
 import java.time.Instant
+import no.nav.etterlatte.kafka.JsonMessage as EtterlatteJsonMessage
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RapidTest {
@@ -76,19 +79,19 @@ internal class RapidTest {
         kilde = kilde,
         opplysningType = Opplysningstype.NAVN,
         meta = objectMapper.createObjectNode(),
-        opplysning = "Ola".toJsonNode(),
+        opplysning = Navn("Ola", "Olsen").toJsonNode(),
         attestering = null,
         fnr = fnr
     )
 
     @Nested
     inner class NyOpplysning {
-        private val melding = JsonMessage.newMessage(
-            mapOf(
-                "@event_name" to "OPPLYSNING:NY",
-                "opplysning" to listOf(nyOpplysning),
-                "fnr" to fnr,
-                "sakId" to 1
+        private val melding = EtterlatteJsonMessage.newTypedMessage(
+            TypedMessage(
+                eventName = PackageMessageName.nyOpplysning,
+                opplysning = listOf(nyOpplysning),
+                fnr = fnr.value,
+                sakId = 1
             )
         ).toJson()
 
@@ -106,12 +109,12 @@ internal class RapidTest {
 
     @Nested
     inner class Opplysningsbehov {
-        private val melding = JsonMessage.newMessage(
-            mapOf(
-                "@behov" to Opplysningstype.SOEKER_PDL_V1,
-                "opplysning" to listOf(nyOpplysning),
-                "fnr" to fnr,
-                "sakId" to 1
+        private val melding = EtterlatteJsonMessage.newTypedMessage(
+            TypedMessage(
+                behovNameKey = Opplysningstype.SOEKER_PDL_V1,
+                opplysning = listOf(nyOpplysning),
+                fnr = fnr.value,
+                sakId = 1
             )
         ).toJson()
 
@@ -136,22 +139,22 @@ internal class RapidTest {
             verdi = PersonRolle.BARN.toJsonNode(),
             fnr = fnr
         )
-        val nyOpplysningMelding = JsonMessage.newMessage(
-            mapOf(
-                "@event_name" to "OPPLYSNING:NY",
-                "opplysning" to listOf(
+        val nyOpplysningMelding = EtterlatteJsonMessage.newTypedMessage(
+            TypedMessage(
+                eventName = PackageMessageName.nyOpplysning,
+                opplysning = listOf(
                     nyOpplysning,
                     personRolleOpplysning
                 ),
-                "fnr" to fnr,
-                "sakId" to 1
+                fnr = fnr.value,
+                sakId = 1
             )
         ).toJson()
-        val behandlingEndretMelding = JsonMessage.newMessage(
-            mapOf(
-                "@event_name" to "BEHANDLING:GRUNNLAGENDRET",
-                "opplysning" to listOf(
-                    nyOpplysningMelding,
+
+        val behandlingEndretMelding = EtterlatteJsonMessage.newTypedMessage(
+            TypedMessage(
+                eventName = "BEHANDLING:GRUNNLAGENDRET",
+                opplysning = listOf(
                     lagGrunnlagsopplysning(
                         opplysningstype = Opplysningstype.PERSONROLLE,
                         kilde = kilde,
@@ -160,15 +163,15 @@ internal class RapidTest {
                         fnr = fnr
                     )
                 ),
-                "persongalleri" to Persongalleri(
+                persongalleri = Persongalleri(
                     soeker = fnr.value,
                     innsender = null,
                     soesken = listOf(),
                     avdoed = listOf(),
                     gjenlevende = listOf()
-                ).toJsonNode(),
-                "fnr" to fnr,
-                "sakId" to 1
+                ),
+                fnr = fnr.value,
+                sakId = 1
             )
         ).toJson()
 

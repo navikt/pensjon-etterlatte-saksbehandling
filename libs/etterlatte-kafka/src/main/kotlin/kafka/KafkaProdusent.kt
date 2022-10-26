@@ -1,6 +1,5 @@
 package no.nav.etterlatte.kafka
 
-import kafka.JsonMessageSerializer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
@@ -12,10 +11,6 @@ interface KafkaProdusent<K, V> {
 
 fun KafkaConfig.standardProducer(topic: String): KafkaProdusent<String, String> = KafkaProdusentImpl(
     KafkaProducer(producerConfig(), StringSerializer(), StringSerializer()),
-    topic
-)
-fun KafkaConfig.rapidsAndRiversProducer(topic: String): KafkaProdusent<String, JsonMessage> = KafkaProdusentImpl(
-    KafkaProducer(producerConfig(), StringSerializer(), JsonMessageSerializer()),
     topic
 )
 

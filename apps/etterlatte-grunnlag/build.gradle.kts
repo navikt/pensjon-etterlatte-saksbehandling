@@ -2,6 +2,7 @@
 plugins {
     id("etterlatte.rapids-and-rivers-ktor2")
     id("etterlatte.postgres")
+    id("etterlatte.kafka")
 }
 
 dependencies {

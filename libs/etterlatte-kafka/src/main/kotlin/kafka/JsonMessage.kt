@@ -7,6 +7,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import java.net.InetAddress
 import java.time.LocalDateTime
 import java.util.*
@@ -17,6 +20,17 @@ fun interface RandomIdGenerator {
     }
     fun generateId(): String
 }
+
+data class TypedMessage(
+    val eventName: String? = null,
+    val behovNameKey: Opplysningstype? = null,
+    val fnr: String? = null,
+    val sakId: Long? = null,
+    val opplysning: List<Grunnlagsopplysning<*>>? = null,
+    val persongalleri: Persongalleri? = null,
+    val randomIdGenerator: RandomIdGenerator? = null,
+    val rest: Map<String, Any> = emptyMap()
+)
 
 // Stripped down version of JsonMessage from rapids and rivers
 open class JsonMessage(
@@ -54,18 +68,27 @@ open class JsonMessage(
             mapOf(EventNameKey to eventName) + map,
             randomIdGenerator
         )
-        fun newNeed(
-            behov: Collection<String>,
-            map: Map<String, Any> = emptyMap(),
+
+        private fun <K, V> Map<K, V?>.filterValuesNotNull() = filterValues { it != null } as Map<K, V>
+
+        fun newTypedMessage(
+            typedMessage: TypedMessage,
             randomIdGenerator: RandomIdGenerator? = null
-        ) = newMessage(
-            "behov",
-            mapOf(
-                "@behovId" to UUID.randomUUID(),
-                NeedKey to behov
-            ) + map,
-            randomIdGenerator
-        )
+        ): JsonMessage {
+            val map = mapOf(
+                NeedKey to typedMessage.behovNameKey,
+                EventNameKey to typedMessage.eventName,
+                "fnr" to typedMessage.fnr,
+                "sakId" to typedMessage.sakId,
+                "opplysning" to typedMessage.opplysning,
+                "persongalleri" to typedMessage.persongalleri
+            ).filterValuesNotNull()
+
+            return JsonMessage(
+                objectMapper.writeValueAsString(map + typedMessage.rest),
+                randomIdGenerator
+            )
+        }
 
         private fun initializeOrSetParticipatingServices(node: JsonNode, id: String, opprettet: LocalDateTime) {
             val entry = mutableMapOf(
@@ -101,13 +124,6 @@ open class JsonMessage(
         initializeOrSetParticipatingServices(json, id, opprettet)
     }
 
-    private fun node(path: String): JsonNode {
-        if (!path.contains(nestedKeySeparator)) return json.path(path)
-        return path.split(nestedKeySeparator).fold(json) { result, key ->
-            result.path(key)
-        }
-    }
-
     operator fun get(key: String): JsonNode =
         requireNotNull(recognizedKeys[key]) {
             "$key is unknown; keys must be declared as required, forbidden, or interesting"
@@ -124,7 +140,5 @@ open class JsonMessage(
 
     fun toJson(): String = objectMapper.writeValueAsString(json)
 }
-
-fun String.toUUID(): UUID = UUID.fromString(this)
 
 fun JsonNode.isMissingOrNull() = isMissingNode || isNull

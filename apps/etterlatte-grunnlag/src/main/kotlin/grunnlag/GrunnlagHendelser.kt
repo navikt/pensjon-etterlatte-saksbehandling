@@ -2,7 +2,9 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.kafka.TypedMessage
 import no.nav.etterlatte.libs.common.event.BehandlingGrunnlagEndretMedGrunnlag
+import no.nav.etterlatte.libs.common.event.PackageMessageName
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -20,6 +22,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import no.nav.etterlatte.kafka.JsonMessage as EtterlatteJsonMessage
 
 class GrunnlagHendelser(
     rapidsConnection: RapidsConnection,
@@ -42,7 +45,7 @@ class GrunnlagHendelser(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val opplysningsTyper = Opplysningstype.values().map { it.name }
 
-        if ((packet[eventNameKey].asText() == "OPPLYSNING:NY") || (
+        if ((packet[eventNameKey].asText() == PackageMessageName.nyOpplysning) || (
             opplysningsTyper.contains(
                     packet[behovNameKey].asText()
                 )
@@ -87,13 +90,15 @@ class GrunnlagHendelser(
     ) {
         val pdlopplysninger = objectMapper.readValue<Person>(grunnlagsopplysning.opplysning.toString())
         if (pdlopplysninger.doedsdato != null) {
-            val behov = JsonMessage.newMessage(
-                mapOf(
-                    behovNameKey to Opplysningstype.INNTEKT,
-                    "fnr" to pdlopplysninger.foedselsnummer.value,
-                    "sakId" to packet["sakId"],
-                    "doedsdato" to pdlopplysninger.doedsdato.toString(),
-                    correlationIdKey to packet[correlationIdKey]
+            val behov = EtterlatteJsonMessage.newTypedMessage(
+                TypedMessage(
+                    behovNameKey = Opplysningstype.INNTEKT,
+                    fnr = pdlopplysninger.foedselsnummer.value,
+                    sakId = packet["sakId"].asLong(),
+                    rest = mapOf(
+                        "doedsdato" to pdlopplysninger.doedsdato.toString(),
+                        "correlationIdKey" to packet[correlationIdKey]
+                    )
                 )
             )
             context.publish(behov.toJson())

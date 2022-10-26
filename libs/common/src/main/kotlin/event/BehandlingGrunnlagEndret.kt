@@ -1,5 +1,9 @@
 package no.nav.etterlatte.libs.common.event
 
+object PackageMessageName {
+    val nyOpplysning get() = "OPPLYSNING:NY"
+}
+
 interface IBehandlingGrunnlagEndret {
     val eventName get() = "BEHANDLING:GRUNNLAGENDRET"
     val behandlingObjectKey get() = "behandling"

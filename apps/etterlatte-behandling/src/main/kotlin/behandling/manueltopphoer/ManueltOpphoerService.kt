@@ -34,6 +34,7 @@ interface ManueltOpphoerService {
         kommentar: String?,
         begrunnelse: String?
     )
+
     fun hentManueltOpphoerInTransaction(behandling: UUID): ManueltOpphoer?
 }
 
@@ -64,16 +65,19 @@ class RealManueltOpphoerService(
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,
                     fritekstAarsak = opphoerRequest.fritekstAarsak
                 )
+
                 is Revurdering -> ManueltOpphoer(
                     sak = forrigeBehandling.sak,
                     persongalleri = forrigeBehandling.persongalleri,
                     opphoerAarsaker = opphoerRequest.opphoerAarsaker,
                     fritekstAarsak = opphoerRequest.fritekstAarsak
                 )
+
                 is ManueltOpphoer -> {
                     logger.error("Kan ikke manuelt opphoere et manuelt opphoer.")
                     null
                 }
+
                 else -> {
                     logger.error(
                         "En forrige ikke-avbrutt behandling for sak ${opphoerRequest.sak} eksisterer ikke eller " +

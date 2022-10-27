@@ -69,19 +69,17 @@ class RealRevurderingService(
                     forrigeBehandling.persongalleri,
                     revurderingAarsak
                 )
+
                 is Revurdering -> revurderingFactory.opprettRevurdering(
                     forrigeBehandling.sak,
                     forrigeBehandling.persongalleri,
                     revurderingAarsak
                 )
+
                 is ManueltOpphoer -> revurderingFactory.opprettRevurdering(
                     forrigeBehandling.sak,
                     forrigeBehandling.persongalleri,
                     revurderingAarsak
-                )
-                else -> throw Exception(
-                    "Forrige behandling er av en type som gjoer at revurdering ikke kan" +
-                        "opprettes: ${forrigeBehandling.javaClass.kotlin}"
                 )
             }
         }

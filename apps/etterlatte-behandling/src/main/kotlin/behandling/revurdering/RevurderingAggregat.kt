@@ -46,7 +46,7 @@ class RevurderingAggregat(
                 .also {
                     behandlinger.opprettRevurdering(it)
                     hendelser.behandlingOpprettet(it)
-                    logger.info("Opprettet behandling ${it.id} i sak ${it.sak}")
+                    logger.info("Opprettet revurdering ${it.id} i sak ${it.sak}")
                 }
                 .let { RevurderingAggregat(it.id, behandlinger, hendelser) }
         }

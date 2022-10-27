@@ -58,7 +58,11 @@ class RealFoerstegangsbehandlingService(
     ): Foerstegangsbehandling {
         logger.info("Starter en behandling")
         return inTransaction {
-            foerstegangsbehandlingFactory.opprettFoerstegangsbehandling(sak, mottattDato, persongalleri)
+            foerstegangsbehandlingFactory.opprettFoerstegangsbehandling(
+                sak,
+                mottattDato,
+                persongalleri
+            )
         }.also {
             runBlocking {
                 behandlingHendelser.send(it.lagretBehandling.id to BehandlingHendelseType.OPPRETTET)

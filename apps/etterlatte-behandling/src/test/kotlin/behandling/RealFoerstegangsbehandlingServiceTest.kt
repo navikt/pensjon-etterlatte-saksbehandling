@@ -14,11 +14,13 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.*
 
 internal class RealFoerstegangsbehandlingServiceTest {
@@ -73,7 +75,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 emptyList()
             ),
             gyldighetsproeving = null,
-            oppgaveStatus = OppgaveStatus.NY
+            oppgaveStatus = OppgaveStatus.NY,
+            virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2022, 1))
         )
 
         assertEquals("Soeker", sut.hentFoerstegangsbehandling(id).persongalleri.innsender)
@@ -105,7 +108,8 @@ internal class RealFoerstegangsbehandlingServiceTest {
                 emptyList()
             ),
             gyldighetsproeving = null,
-            oppgaveStatus = OppgaveStatus.NY
+            oppgaveStatus = OppgaveStatus.NY,
+            virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2022, 1))
         )
 
         val persongalleri = Persongalleri(
@@ -133,7 +137,11 @@ internal class RealFoerstegangsbehandlingServiceTest {
         every { behandlingerMock.lagreGyldighetsproving(any()) } returns Unit
         coEvery { hendleseskanal.send(capture(hendelse)) } returns Unit
 
-        val resultat = sut.startFoerstegangsbehandling(1, persongalleri, datoNaa.toString())
+        val resultat = sut.startFoerstegangsbehandling(
+            1,
+            persongalleri,
+            datoNaa.toString()
+        )
 
         assertEquals(opprettetBehandling.persongalleri.avdoed, resultat.persongalleri.avdoed)
         assertEquals(opprettetBehandling.sak, resultat.sak)
@@ -145,7 +153,4 @@ internal class RealFoerstegangsbehandlingServiceTest {
         assertEquals(resultat.id, hendelse.captured.first)
         assertEquals(BehandlingHendelseType.OPPRETTET, hendelse.captured.second)
     }
-
-    fun mockChannel() =
-        mockk<SendChannel<Pair<UUID, BehandlingHendelseType>>>().apply { coEvery { send(any()) } returns Unit }
 }

@@ -33,7 +33,6 @@ fun Route.behandlingRoutes(
     foerstegangsbehandlingService: FoerstegangsbehandlingService,
     revurderingService: RevurderingService,
     manueltOpphoerService: ManueltOpphoerService
-
 ) {
     val logger = application.log
 

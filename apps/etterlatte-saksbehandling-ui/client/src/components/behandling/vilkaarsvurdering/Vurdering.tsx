@@ -125,9 +125,8 @@ export const Vurdering = ({
           <KildeVilkaar>
             <Heading size="small">{overskrift()}</Heading>
             <VilkaarVurdertInformasjon>
+              <Detail size="medium">Manuelt av {vilkaar.vurdering?.saksbehandler}</Detail>
               <Detail size="medium">
-                Manuelt av {vilkaar.vurdering?.saksbehandler}
-                <br />
                 Sist endret {format(new Date(vilkaar.vurdering!!.tidspunkt), 'dd.MM.yyyy HH:mm')}
               </Detail>
             </VilkaarVurdertInformasjon>

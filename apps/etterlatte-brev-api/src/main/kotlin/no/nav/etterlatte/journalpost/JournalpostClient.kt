@@ -30,7 +30,7 @@ class JournalpostClient(
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
     val azureAdClient = AzureAdClient(config, httpClient)
 
-    override suspend fun hentInnkommendeBrevInnhold(
+    override suspend fun hentDokumentPDF(
         journalpostId: String,
         dokumentInfoId: String,
         accessToken: String
@@ -44,7 +44,7 @@ class JournalpostClient(
         throw JournalpostException("Feil ved kall til hentdokument", ex)
     }
 
-    override suspend fun hentInnkommendeBrev(
+    override suspend fun hentDokumenter(
         fnr: String,
         idType: BrukerIdType,
         accessToken: String

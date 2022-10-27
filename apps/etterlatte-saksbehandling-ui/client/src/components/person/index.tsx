@@ -81,7 +81,7 @@ export const Person = () => {
               />
             </TabPanel>
             <TabPanel>
-              <Dokumentoversikt {...testDokumenter} />
+              <Dokumentoversikt {...testDokumenter} fnr={match.fnr}/>
             </TabPanel>
           </Tabs>
         </Container>

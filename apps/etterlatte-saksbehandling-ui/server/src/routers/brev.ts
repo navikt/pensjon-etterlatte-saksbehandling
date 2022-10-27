@@ -18,34 +18,6 @@ router.get('/behandling/:behandlingId', async (req: Request, res: Response, next
   }
 })
 
-router.get('/innkommende/:fnr', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const path = `${apiUrl}/brev/innkommende/${req.params.fnr}`
-    const response = await fetch(path)
-    const json = await response.json()
-    res.send(json)
-  } catch (e) {
-    next(e)
-  }
-})
-
-router.post('/innkommende/:journalpostId/:dokumentInfoId', async (req: Request, res: Response, next) => {
-  try {
-    const path = `${apiUrl}/brev/innkommende/${req.params.journalpostId}/${req.params.dokumentInfoId}`
-    const response = await fetch(path, { method: 'POST' })
-    const data = await response.buffer()
-
-    if (response.status == 200) {
-      res.contentType('application/pdf')
-      res.send(data)
-    } else {
-      res.sendStatus(response.status)
-    }
-  } catch (e) {
-    next(e)
-  }
-})
-
 router.delete('/:brevId', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const path = `${apiUrl}/brev/${req.params.brevId}`
@@ -177,6 +149,34 @@ router.post('/forhaandsvisning', async (req: Request, res: Response, next: NextF
   } catch (e) {
     next(e)
   }
+})
+
+router.get('/dokumenter/:fnr', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const path = `${apiUrl}/dokumenter/${req.params.fnr}`
+        const response = await fetch(path)
+        const json = await response.json()
+        res.send(json)
+    } catch (e) {
+        next(e)
+    }
+})
+
+router.post('/dokumenter/:journalpostId/:dokumentInfoId', async (req: Request, res: Response, next) => {
+    try {
+        const path = `${apiUrl}/dokumenter/${req.params.journalpostId}/${req.params.dokumentInfoId}`
+        const response = await fetch(path, { method: 'POST' })
+        const data = await response.buffer()
+
+        if (response.status == 200) {
+            res.contentType('application/pdf')
+            res.send(data)
+        } else {
+            res.sendStatus(response.status)
+        }
+    } catch (e) {
+        next(e)
+    }
 })
 
 export default router

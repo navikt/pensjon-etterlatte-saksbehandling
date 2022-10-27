@@ -98,7 +98,7 @@ class VedtaksvurderingService(
             repository.lagreFnr(vedtak.sakId, vedtak.behandlingId, fnr)
         }
         if (vedtak.virkningsDato == null) { // Migrere v3 til v4
-            repository.lagreDatoVirk(vedtak.sakId, vedtak.behandlingId, virkningsDato)
+            lagreVirkningstidspunkt(vedtak.sakId, vedtak.behandlingId, virkningsDato)
         }
     }
 
@@ -330,6 +330,9 @@ class VedtaksvurderingService(
             .filterNotNull()
             .sortedBy { it.periode.fom }
     }
+
+    fun lagreVirkningstidspunkt(sakId: String, behandlingId: UUID, virkningsDato: LocalDate?) =
+        repository.lagreDatoVirk(sakId, behandlingId, virkningsDato)
 
     override fun slettSak(sakId: Long) {
         repository.slettSak(sakId)

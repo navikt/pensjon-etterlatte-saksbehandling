@@ -232,6 +232,23 @@ internal class DBTest {
         Assertions.assertEquals(3, vedtaksvurderingService.hentVedtakBolk(listOf(uuid1, uuid2, uuid3)).size)
     }
 
+    @Test
+    fun `Skal lagre eller oppdatere virkningstidspunkt`() {
+        val vedtakRepo = VedtaksvurderingRepository(dataSource)
+        val vedtaksvurderingService = VedtaksvurderingService(vedtakRepo)
+        val sakId = "99999999999"
+        val behandlingId = UUID.randomUUID()
+        val virk = LocalDate.now()
+
+        vedtaksvurderingService.lagreVirkningstidspunkt(sakId, behandlingId, virk)
+        val vedtak = vedtaksvurderingService.hentVedtak(sakId, behandlingId)
+        Assertions.assertEquals(virk, vedtak?.virkningsDato)
+
+        vedtaksvurderingService.lagreVirkningstidspunkt(sakId, behandlingId, virk.plusDays(1))
+        val vedtakOppdatertVirk = vedtaksvurderingService.hentVedtak(sakId, behandlingId)
+        Assertions.assertEquals(virk.plusDays(1), vedtakOppdatertVirk?.virkningsDato)
+    }
+
     private fun lagreNyttVilkaarsresultat(service: VedtaksvurderingService, sakId: String, behandlingId: UUID) {
         service.lagreVilkaarsresultat(
             sakId,

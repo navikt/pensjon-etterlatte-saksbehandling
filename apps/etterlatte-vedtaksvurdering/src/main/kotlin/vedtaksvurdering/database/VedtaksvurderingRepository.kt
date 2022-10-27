@@ -421,7 +421,9 @@ private object Queries {
         "SELECT sakId, behandlingId, saksbehandlerId, avkortingsresultat, beregningsresultat, vilkaarsresultat, kommersoekertilgoderesultat, vedtakfattet, id, fnr, datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype FROM vedtak WHERE behandlingId = ?" // ktlint-disable max-line-length
 
     val lagreFnr = "UPDATE vedtak SET fnr = ? WHERE sakId = ? AND behandlingId = ?"
-    val lagreDatoVirkFom = "UPDATE vedtak SET datoVirkFom = ? WHERE sakId = ? AND behandlingId = ?"
+    val lagreDatoVirkFom =
+        "INSERT INTO VEDTAK as v (datoVirkFom, sakId, behandlingId) VALUES (?, ?, ?) ON CONFLICT (sakId, behandlingId) DO " + // ktlint-disable max-line-length
+            "UPDATE SET datoVirkFom = EXCLUDED.datoVirkFom WHERE v.sakId = EXCLUDED.sakId AND v.behandlingId = EXCLUDED.behandlingId" // ktlint-disable max-line-length
 
     val lagreUtbetalingsperiode =
         "INSERT INTO utbetalingsperiode(vedtakid, datofom, datotom, type, beloep) VALUES (?, ?, ?, ?, ?)"

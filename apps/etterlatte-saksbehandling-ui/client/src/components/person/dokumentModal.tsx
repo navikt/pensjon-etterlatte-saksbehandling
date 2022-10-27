@@ -8,7 +8,6 @@ import Spinner from '../../shared/Spinner'
 
 const ButtonRow = styled.div`
   background: white;
-  //overflow: hidden;
   width: 100%;
   text-align: right;
 `

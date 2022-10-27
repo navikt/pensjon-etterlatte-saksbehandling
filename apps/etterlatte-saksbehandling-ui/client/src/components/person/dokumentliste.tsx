@@ -1,7 +1,7 @@
 import { Alert, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { Journalpost } from '../behandling/types'
-import { formaterDato } from '../../utils/formattering'
+import { formaterStringDato } from '../../utils/formattering'
 import DokumentModal from './dokumentModal'
 import Spinner from '../../shared/Spinner'
 
@@ -33,7 +33,7 @@ export const Dokumentliste = ({
               <Table.DataCell key={`data${brev.tittel}`}>{brev.tittel}</Table.DataCell>
               <Table.DataCell key={`data${brev.avsenderMottaker.navn}`}>{brev.avsenderMottaker.navn}</Table.DataCell>
               <Table.DataCell key={`data${brev.datoOpprettet}`}>
-                {formaterDato(new Date(brev.datoOpprettet))}
+                {formaterStringDato(brev.datoOpprettet)}
               </Table.DataCell>
               <Table.DataCell key={`data${brev.journalstatus}`}>{brev.journalstatus}</Table.DataCell>
               <Table.DataCell key={`data${brev.journalposttype}`}>

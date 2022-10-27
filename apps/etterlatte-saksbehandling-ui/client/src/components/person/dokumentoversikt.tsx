@@ -10,11 +10,12 @@ export const Dokumentoversikt = (props: any) => {
   const [dokumenterHentet, setDokumenterHentet] = useState(false)
 
   useEffect(() => {
+    setDokumenterHentet(false)
     hentDokumenter(props.fnr)
       .then((res) => setDokumenter(res.data.dokumentoversiktBruker.journalposter))
       .catch(() => setError(true))
       .finally(() => setDokumenterHentet(true))
-  }, [])
+  }, [props.fnr])
 
   return (
     <OversiktWrapper>

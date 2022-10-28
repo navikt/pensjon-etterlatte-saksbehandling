@@ -19,7 +19,7 @@ export const Vurdering = ({
   behandlingId,
 }: {
   vilkaar: Vilkaar
-  oppdaterVilkaar: (vilkaarsvurdering?: Vilkaarsvurdering) => void
+  oppdaterVilkaar: (vilkaarsvurdering: Vilkaarsvurdering) => void
   behandlingId: string
 }) => {
   const [aktivVurdering, setAktivVurdering] = useState<boolean>(false)
@@ -68,7 +68,7 @@ export const Vurdering = ({
   const slettVurderingAvVilkaar = () => {
     slettVurdering(behandlingId, vilkaar.hovedvilkaar.type).then((response) => {
       if (response.status == 'ok') {
-        oppdaterVilkaar()
+        oppdaterVilkaar(response.data)
       }
     })
   }

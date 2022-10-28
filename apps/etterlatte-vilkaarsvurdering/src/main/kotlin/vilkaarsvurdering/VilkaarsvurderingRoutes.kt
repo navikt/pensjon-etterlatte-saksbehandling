@@ -57,9 +57,10 @@ fun Route.vilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService) 
                 val vilkaarType = VilkaarType.valueOf(requireNotNull(call.parameters["vilkaarType"]))
 
                 logger.info("Sletter vurdering på vilkår $vilkaarType for $behandlingId")
-                vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarType)
+                val oppdatertVilkaarsvurdering =
+                    vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, vilkaarType)
 
-                call.respond(HttpStatusCode.OK)
+                call.respond(oppdatertVilkaarsvurdering)
             }
         }
 

@@ -19,7 +19,7 @@ import { formaterStringDato } from '../../../utils/formattering'
 type Props = {
   dato: string
   vilkaarsvurdering: Vilkaarsvurdering
-  oppdaterVilkaar: (vilkaarsvurdering?: Vilkaarsvurdering) => void
+  oppdaterVilkaar: (vilkaarsvurdering: Vilkaarsvurdering) => void
   behandlingId: string
 }
 const MIN_KOMMENTAR_LENGDE = 1

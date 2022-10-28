@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import java.sql.ResultSet
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 interface VilkaarsvurderingRepository {
@@ -22,7 +22,9 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
             .singleOrNull {
                 Vilkaarsvurdering(
                     behandlingId = getObject("behandlingId") as UUID,
-                    payload = getString("payload"),
+                    payload = getString("payload").let { payload ->
+                        objectMapper.readValue(payload)
+                    },
                     vilkaar = getString("vilkaar").let { vilkaar ->
                         objectMapper.readValue(vilkaar)
                     },
@@ -59,8 +61,10 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
 }
 
 private object Queries {
-    val hentVilkaarsvurdering = "SELECT behandlingId, payload, vilkaar, resultat FROM vilkaarsvurdering WHERE behandlingId = ?" // ktlint-disable max-line-length
-    val lagreVilkaarsvurdering = "INSERT INTO vilkaarsvurdering(behandlingId, payload, vilkaar, resultat) " +
-        "VALUES(?::UUID, ?::JSON, ?::JSONB, ?::JSONB) ON CONFLICT (behandlingId) DO " +
-        "UPDATE SET payload = EXCLUDED.payload, vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat"
+    val hentVilkaarsvurdering =
+        "SELECT behandlingId, payload, vilkaar, resultat FROM vilkaarsvurdering WHERE behandlingId = ?"
+    val lagreVilkaarsvurdering =
+        "INSERT INTO vilkaarsvurdering(behandlingId, payload, vilkaar, resultat) " +
+            "VALUES(?::UUID, ?::JSON, ?::JSONB, ?::JSONB) ON CONFLICT (behandlingId) DO " +
+            "UPDATE SET payload = EXCLUDED.payload, vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat"
 }

@@ -141,7 +141,7 @@ internal class VilkaarsvurderingRoutesTest {
     }
 
     @Test
-    fun `skal opprette vurdering på hovedvilkår og endre til vurdering på unntaksvilkår`() {
+    fun `skal opprette vurdering paa hovedvilkaar og endre til vurdering paa unntaksvilkaar`() {
         testApplication {
             application { restModule(applicationContext) }
 
@@ -295,7 +295,7 @@ internal class VilkaarsvurderingRoutesTest {
             behandlingId,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            """{"json": 123}""",
+            objectMapper.createObjectNode(),
             grunnlag
         )
     }

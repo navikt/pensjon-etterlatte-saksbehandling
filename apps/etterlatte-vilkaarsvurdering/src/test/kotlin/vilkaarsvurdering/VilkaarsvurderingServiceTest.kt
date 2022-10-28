@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Doedsdato
 import no.nav.etterlatte.libs.common.vikaar.kriteriegrunnlagTyper.Foedselsdato
 import no.nav.etterlatte.vilkaarsvurdering.SakType
@@ -24,10 +25,10 @@ import no.nav.etterlatte.vilkaarsvurdering.config.DataSourceBuilder
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.time.LocalDateTime
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -63,7 +64,7 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            "",
+            objectMapper.createObjectNode(),
             grunnlag
         )
 
@@ -182,7 +183,7 @@ internal class VilkaarsvurderingServiceTest {
             uuid,
             SakType.BARNEPENSJON,
             BehandlingType.FØRSTEGANGSBEHANDLING,
-            "",
+            objectMapper.createObjectNode(),
             GrunnlagTestData().hentOpplysningsgrunnlag()
         )
     }

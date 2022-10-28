@@ -1,4 +1,4 @@
-import { Button, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { BodyShort, Button, Detail, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import {
   slettVurdering,
@@ -11,7 +11,7 @@ import styled from 'styled-components'
 import { format } from 'date-fns'
 import { Delete, Edit } from '@navikt/ds-icons'
 
-const MIN_KOMMENTAR_LENGDE = 10
+const MIN_KOMMENTAR_LENGDE = 1
 
 export const Vurdering = ({
   vilkaar,
@@ -32,7 +32,7 @@ export const Vurdering = ({
   const vilkaarVurdert = () => {
     !resultat ? setRadioError('Du må velge et svar') : setRadioError(undefined)
     !(kommentar.length >= MIN_KOMMENTAR_LENGDE)
-      ? setKommentarError('Begrunnelsen må være minst 10 tegn')
+      ? setKommentarError('Begrunnelse er påkrevet')
       : setKommentarError(undefined)
 
     if (
@@ -114,29 +114,43 @@ export const Vurdering = ({
     }
   }
 
+  const oppfyltUnntaksvilkaar = vilkaar.unntaksvilkaar?.find(
+    (unntaksvilkaar) => VurderingsResultat.OPPFYLT === unntaksvilkaar.resultat
+  )
+
   return (
     <div>
       {vilkaar.vurdering && !aktivVurdering && (
         <>
           <KildeVilkaar>
-            <KildeOverskrift>{overskrift()}</KildeOverskrift>
-            <p>Manuelt av {vilkaar.vurdering?.saksbehandler}</p>
-            {vilkaar.vurdering?.kommentar && (
-              <p>
-                Kommentar: <br />
-                {vilkaar.vurdering?.kommentar}
-              </p>
+            <Heading size="small">{overskrift()}</Heading>
+            <VilkaarVurdertInformasjon>
+              <Detail size="medium">Manuelt av {vilkaar.vurdering?.saksbehandler}</Detail>
+              <Detail size="medium">
+                Sist endret {format(new Date(vilkaar.vurdering!!.tidspunkt), 'dd.MM.yyyy HH:mm')}
+              </Detail>
+            </VilkaarVurdertInformasjon>
+            {oppfyltUnntaksvilkaar && (
+              <VilkaarVurdertInformasjon>
+                <Heading size="xsmall">Unntak er oppfylt</Heading>
+                <BodyShort size="small">{oppfyltUnntaksvilkaar?.paragraf.tittel}</BodyShort>
+              </VilkaarVurdertInformasjon>
             )}
-            <p>Sist endret {format(new Date(vilkaar.vurdering!!.tidspunkt), 'dd.MM.yyyy HH:mm')}</p>
+            {vilkaar.vurdering?.kommentar && (
+              <VilkaarVurdertInformasjon>
+                <Heading size="xsmall">Begrunnelse</Heading>
+                <BodyShort size="small">{vilkaar.vurdering?.kommentar}</BodyShort>
+              </VilkaarVurdertInformasjon>
+            )}
           </KildeVilkaar>
 
-          <RedigerWrapper onClick={slettVurderingAvVilkaar}>
-            <Delete />
-            <span className={'text'}> Slett</span>
-          </RedigerWrapper>
           <RedigerWrapper onClick={redigerVilkaar}>
             <Edit />
             <span className={'text'}> Rediger</span>
+          </RedigerWrapper>
+          <RedigerWrapper onClick={slettVurderingAvVilkaar}>
+            <Delete />
+            <span className={'text'}> Slett</span>
           </RedigerWrapper>
         </>
       )}
@@ -191,7 +205,7 @@ export const Vurdering = ({
             </>
           )}
           <Textarea
-            label="Begrunnelse"
+            label="Begrunnelse (obligatorisk)"
             hideLabel={false}
             placeholder="Gi en begrunnelse for vurderingen"
             value={kommentar}
@@ -216,7 +230,7 @@ export const Vurdering = ({
       )}
       {!vilkaar.vurdering && !aktivVurdering && (
         <IkkeVurdert>
-          <p>Vilkåret er ikke vurdert</p>
+          <Heading size="small">Vilkåret er ikke vurdert</Heading>
           <Button variant={'secondary'} size={'small'} onClick={() => setAktivVurdering(true)}>
             Vurder vilkår
           </Button>
@@ -253,7 +267,6 @@ export const IkkeVurdert = styled.div`
 `
 
 export const KildeVilkaar = styled.div`
-  color: grey;
   font-size: 0.7em;
 
   p {
@@ -291,4 +304,9 @@ export const VurderingKnapper = styled.div`
     margin-top: 10px;
     margin-right: 10px;
   }
+`
+
+export const VilkaarVurdertInformasjon = styled.div`
+  margin-bottom: 1.5em;
+  color: var(--navds-global-color-gray-700);
 `

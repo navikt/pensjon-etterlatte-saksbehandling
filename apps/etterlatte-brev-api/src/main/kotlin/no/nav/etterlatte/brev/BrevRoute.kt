@@ -28,37 +28,6 @@ import org.slf4j.LoggerFactory
 fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, journalpostService: JournalpostService) {
     val logger = LoggerFactory.getLogger(BrevService::class.java)
 
-    route("dokumenter") {
-        get("{fnr}") {
-            val accessToken = try {
-                getAccessToken(call)
-            } catch (ex: Exception) {
-                logger.error("Bearer not found", ex)
-                throw ex
-            }
-
-            val fnr = call.parameters["fnr"]!!
-            val innhold = journalpostService.hentDokumenter(fnr, BrukerIdType.FNR, accessToken)
-
-            call.respond(innhold)
-        }
-
-        post("{journalpostId}/{dokumentInfoId}") {
-            val accessToken = try {
-                getAccessToken(call)
-            } catch (ex: Exception) {
-                logger.error("Bearer not found", ex)
-                throw ex
-            }
-
-            val journalpostId = call.parameters["journalpostId"]!!
-            val dokumentInfoId = call.parameters["dokumentInfoId"]!!
-            val innhold = journalpostService.hentDokumentPDF(journalpostId, dokumentInfoId, accessToken)
-
-            call.respond(innhold)
-        }
-    }
-
     route("brev") {
         get("maler") {
             val maler = listOf(
@@ -164,6 +133,35 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
             val brev = service.ferdigstillBrev(brevId.toLong())
 
             call.respond(brev)
+        }
+
+        get("dokumenter/{fnr}") {
+            val accessToken = try {
+                getAccessToken(call)
+            } catch (ex: Exception) {
+                logger.error("Bearer not found", ex)
+                throw ex
+            }
+
+            val fnr = call.parameters["fnr"]!!
+            val innhold = journalpostService.hentDokumenter(fnr, BrukerIdType.FNR, accessToken)
+
+            call.respond(innhold)
+        }
+
+        post("dokumenter/{journalpostId}/{dokumentInfoId}") {
+            val accessToken = try {
+                getAccessToken(call)
+            } catch (ex: Exception) {
+                logger.error("Bearer not found", ex)
+                throw ex
+            }
+
+            val journalpostId = call.parameters["journalpostId"]!!
+            val dokumentInfoId = call.parameters["dokumentInfoId"]!!
+            val innhold = journalpostService.hentDokumentPDF(journalpostId, dokumentInfoId, accessToken)
+
+            call.respond(innhold)
         }
     }
 }

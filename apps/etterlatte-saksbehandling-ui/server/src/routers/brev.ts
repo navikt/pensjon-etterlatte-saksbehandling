@@ -153,7 +153,7 @@ router.post('/forhaandsvisning', async (req: Request, res: Response, next: NextF
 
 router.get('/dokumenter/:fnr', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const path = `${apiUrl}/dokumenter/${req.params.fnr}`
+        const path = `${apiUrl}/brev/dokumenter/${req.params.fnr}`
         const response = await fetch(path)
         const json = await response.json()
         res.send(json)
@@ -162,9 +162,9 @@ router.get('/dokumenter/:fnr', async (req: Request, res: Response, next: NextFun
     }
 })
 
-router.post('/dokumenter/:journalpostId/:dokumentInfoId', async (req: Request, res: Response, next) => {
+router.post('/brev/dokumenter/:journalpostId/:dokumentInfoId', async (req: Request, res: Response, next) => {
     try {
-        const path = `${apiUrl}/dokumenter/${req.params.journalpostId}/${req.params.dokumentInfoId}`
+        const path = `${apiUrl}/brev/dokumenter/${req.params.journalpostId}/${req.params.dokumentInfoId}`
         const response = await fetch(path, { method: 'POST' })
         const data = await response.buffer()
 

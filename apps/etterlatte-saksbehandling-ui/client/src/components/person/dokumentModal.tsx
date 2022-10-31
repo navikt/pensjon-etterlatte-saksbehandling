@@ -1,19 +1,18 @@
 import { Button, Modal } from '@navikt/ds-react'
 import { useState } from 'react'
-import { hentDokumentPDF } from '../../../shared/api/brev'
+import { hentDokumentPDF } from '../../shared/api/brev'
 import styled from 'styled-components'
 import { Findout } from '@navikt/ds-icons'
-import { PdfVisning } from './pdf-visning'
-import Spinner from '../../../shared/Spinner'
+import { PdfVisning } from '../behandling/brev/pdf-visning'
+import Spinner from '../../shared/Spinner'
 
 const ButtonRow = styled.div`
   background: white;
-  //overflow: hidden;
   width: 100%;
   text-align: right;
 `
 
-export default function InnkommendeBrevModal({
+export default function DokumentModal({
   tittel,
   journalpostId,
   dokumentInfoId,

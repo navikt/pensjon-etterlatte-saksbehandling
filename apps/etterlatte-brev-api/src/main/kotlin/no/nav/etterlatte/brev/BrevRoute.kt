@@ -9,7 +9,6 @@ import io.ktor.http.content.streamProvider
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.auth.parseAuthorizationHeader
-import io.ktor.server.request.authorization
 import io.ktor.server.request.receive
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.respond
@@ -136,23 +135,21 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
             call.respond(brev)
         }
 
-        get("innkommende/{fnr}") {
-            logger.info(call.request.authorization())
-
+        get("dokumenter/{fnr}") {
             val accessToken = try {
                 getAccessToken(call)
             } catch (ex: Exception) {
                 logger.error("Bearer not found", ex)
                 throw ex
             }
-            val fnr = call.parameters["fnr"]!!
 
-            val innhold = journalpostService.hentInnkommendeBrev(fnr, BrukerIdType.FNR, accessToken)
+            val fnr = call.parameters["fnr"]!!
+            val innhold = journalpostService.hentDokumenter(fnr, BrukerIdType.FNR, accessToken)
 
             call.respond(innhold)
         }
 
-        post("innkommende/{journalpostId}/{dokumentInfoId}") {
+        post("dokumenter/{journalpostId}/{dokumentInfoId}") {
             val accessToken = try {
                 getAccessToken(call)
             } catch (ex: Exception) {
@@ -162,7 +159,7 @@ fun Route.brevRoute(service: BrevService, mottakerService: MottakerService, jour
 
             val journalpostId = call.parameters["journalpostId"]!!
             val dokumentInfoId = call.parameters["dokumentInfoId"]!!
-            val innhold = journalpostService.hentInnkommendeBrevInnhold(journalpostId, dokumentInfoId, accessToken)
+            val innhold = journalpostService.hentDokumentPDF(journalpostId, dokumentInfoId, accessToken)
 
             call.respond(innhold)
         }

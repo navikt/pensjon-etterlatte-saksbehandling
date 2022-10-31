@@ -6,8 +6,7 @@ import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import java.sql.ResultSet
-import java.util.UUID
+import java.util.*
 import javax.sql.DataSource
 
 interface VilkaarsvurderingRepository {
@@ -28,7 +27,9 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                         query.map { row ->
                             Vilkaarsvurdering(
                                 behandlingId = row.uuid("behandlingId"),
-                                payload = row.string("payload"),
+                                payload = row.string("payload").let { payload ->
+                                    objectMapper.readValue(payload)
+                                },
                                 vilkaar = row.string("vilkaar").let { vilkaar ->
                                     objectMapper.readValue(vilkaar)
                                 },
@@ -55,24 +56,14 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                 ).let { tx.run(it.asExecute) }
             }
         }
-
         return vilkaarsvurdering
-    }
-
-    private fun <T> ResultSet.singleOrNull(block: ResultSet.() -> T): T? {
-        return if (next()) {
-            block().also {
-                require(!next()) { "Skal være unik" }
-            }
-        } else {
-            null
-        }
     }
 }
 
 private object Queries {
-    val hentVilkaarsvurdering = "SELECT behandlingId, payload, vilkaar, resultat FROM vilkaarsvurdering WHERE behandlingId = :behandlingId::UUID" // ktlint-disable max-line-length
+    val hentVilkaarsvurdering = "SELECT behandlingId, payload, vilkaar, resultat " +
+        "FROM vilkaarsvurdering WHERE behandlingId = :behandlingId::UUID"
     val lagreVilkaarsvurdering = "INSERT INTO vilkaarsvurdering(behandlingId, payload, vilkaar, resultat) " +
-        "VALUES(:behandlingId::UUID, :payload::JSON, :vilkaar::JSONB, :resultat::JSONB) ON CONFLICT (behandlingId) DO " + // ktlint-disable max-line-length
-        "UPDATE SET payload = EXCLUDED.payload, vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat"
+        "VALUES(:behandlingId::UUID, :payload::JSON, :vilkaar::JSONB, :resultat::JSONB) ON CONFLICT (behandlingId) " +
+        "DO UPDATE SET payload = EXCLUDED.payload, vilkaar = EXCLUDED.vilkaar, resultat = EXCLUDED.resultat"
 }

@@ -94,8 +94,7 @@ internal class VilkaarsvurderingRoutesTest {
             assertEquals("§ 18-4", vilkaar.hovedvilkaar.paragraf.paragraf)
             assertEquals("Dødsfall forelder", vilkaar.hovedvilkaar.paragraf.tittel)
             assertEquals(
-                "Barnepensjon ytes dersom en av foreldrene eller begge er døde. Bestemmelsen i § 17-2 andre " +
-                    "ledd om forsvunnet ektefelle gjelder tilsvarende.",
+                "En eller begge foreldrene er registrert død",
                 vilkaar.hovedvilkaar.paragraf.lovtekst
             )
             assertEquals("https://lovdata.no/lov/1997-02-28-19/%C2%A718-4", vilkaar.hovedvilkaar.paragraf.lenke)

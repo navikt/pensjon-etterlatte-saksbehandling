@@ -32,8 +32,8 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                                 vilkaar = row.string("vilkaar").let { vilkaar ->
                                     objectMapper.readValue(vilkaar)
                                 },
-                                resultat = row.string("resultat")?.let { resultat ->
-                                    objectMapper.readValue(resultat)
+                                resultat = row.stringOrNull("resultat").let { resultat ->
+                                    resultat?.let { objectMapper.readValue(it) }
                                 }
                             )
                         }.asSingle
@@ -44,17 +44,15 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
     override fun lagre(vilkaarsvurdering: Vilkaarsvurdering): Vilkaarsvurdering {
         using(sessionOf(ds)) {
             it.transaction { tx ->
-                tx.run(
-                    queryOf(
-                        statement = Queries.lagreVilkaarsvurdering,
-                        paramMap = mapOf(
-                            "behandlingId" to vilkaarsvurdering.behandlingId,
-                            "payload" to vilkaarsvurdering.payload.toJson(),
-                            "vilkaar" to vilkaarsvurdering.vilkaar.toJson(),
-                            "resultat" to vilkaarsvurdering.resultat?.toJson()
-                        )
-                    ).asExecute
-                )
+                queryOf(
+                    statement = Queries.lagreVilkaarsvurdering,
+                    paramMap = mapOf(
+                        "behandlingId" to vilkaarsvurdering.behandlingId,
+                        "payload" to vilkaarsvurdering.payload.toJson(),
+                        "vilkaar" to vilkaarsvurdering.vilkaar.toJson(),
+                        "resultat" to vilkaarsvurdering.resultat?.toJson()
+                    )
+                ).let { tx.run(it.asExecute) }
             }
         }
 

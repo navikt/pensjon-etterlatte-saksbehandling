@@ -70,7 +70,7 @@ internal class VilkaarsvurderingServiceTest {
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
-        vilkaarsvurdering.vilkaar shouldHaveSize 7
+        vilkaarsvurdering.vilkaar shouldHaveSize 5
         vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.ALDER_BARN }.let { vilkaar ->
             vilkaar.grunnlag shouldNotBe null
             vilkaar.grunnlag!! shouldHaveSize 2

@@ -2,9 +2,9 @@ import differenceInYears from 'date-fns/differenceInYears'
 import format from 'date-fns/format'
 import { Vilkaarsgrunnlag } from '../../../../shared/api/vilkaarsvurdering'
 import { KildeType } from '../../../../store/reducers/BehandlingReducer'
-import { hentKildenavn } from '../../inngangsvilkaar/vilkaar/tekstUtils'
 import styled from 'styled-components'
 import { VilkaarColumn } from '../styled'
+import { hentKildenavn } from '../utils'
 
 export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) => {
   const foedselsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'FOEDSELSDATO')

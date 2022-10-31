@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.vilkaarsvurdering.barnepensjon.barnepensjonVilkaar
@@ -18,7 +19,7 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
         behandlingId: UUID,
         sakType: SakType,
         behandlingType: BehandlingType,
-        payload: String,
+        payload: JsonNode,
         grunnlag: Grunnlag
     ): Vilkaarsvurdering {
         return when (sakType) {
@@ -38,7 +39,7 @@ class VilkaarsvurderingService(private val vilkaarsvurderingRepository: Vilkaars
         }
     }
 
-    fun oppdaterVilkaarsvurderingPayload(behandlingId: UUID, payload: String): Vilkaarsvurdering {
+    fun oppdaterVilkaarsvurderingPayload(behandlingId: UUID, payload: JsonNode): Vilkaarsvurdering {
         return vilkaarsvurderingRepository.hent(behandlingId)?.let {
             vilkaarsvurderingRepository.lagre(it.copy(payload = payload))
         } ?: throw VilkaarsvurderingFinnesIkkeException("Fant ikke vilkårsvurdering for behandlingId=$behandlingId")

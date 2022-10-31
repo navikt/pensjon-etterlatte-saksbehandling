@@ -18,12 +18,10 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsgrunnlag
 
 fun barnepensjonVilkaar(grunnlag: Grunnlag) = listOf(
-    formaal(),
-    forutgaaendeMedlemskap(),
-    fortsattMedlemskap(),
-    fortsattMedlemskapUnntaksbestemmelsene(),
-    alderBarn(grunnlag.soeker, grunnlag.hentAvdoed()),
     doedsfallForelder(),
+    alderBarn(grunnlag.soeker, grunnlag.hentAvdoed()),
+    barnetsMedlemskap(),
+    avdoedesForutgaaendeMedlemskap(),
     yrkesskadeAvdoed()
 )
 
@@ -48,7 +46,7 @@ private fun formaal() = Vilkaar(
     )
 )
 
-private fun forutgaaendeMedlemskap() = Vilkaar(
+private fun avdoedesForutgaaendeMedlemskap() = Vilkaar(
     hovedvilkaar = Hovedvilkaar(
         type = VilkaarType.FORUTGAAENDE_MEDLEMSKAP,
         paragraf = Paragraf(
@@ -56,9 +54,8 @@ private fun forutgaaendeMedlemskap() = Vilkaar(
             ledd = 1,
             tittel = "Avdødes forutgående medlemskap",
             lenke = Kapittel18.PARAGRAF_18_2.lenke,
-            lovtekst = "Det er et vilkår for rett til barnepensjon at a) den avdøde faren eller moren var medlem i " +
-                "trygden de siste fem årene fram til dødsfallet, eller b) at den avdøde faren eller moren mottok " +
-                "pensjon eller uføretrygd fra folketrygden de siste fem årene fram til dødsfallet."
+            lovtekst = "Avdød har vært medlem eller mottatt pensjon/uføretrygd fra folketrygden de siste fem årene " +
+                "fram til dødsfallet"
         )
     ),
     unntaksvilkaar = listOf(
@@ -108,15 +105,15 @@ private fun forutgaaendeMedlemskapAvdoedHalvMinstepensjon() = Unntaksvilkaar(
     )
 )
 
-private fun fortsattMedlemskap() = Vilkaar(
+private fun barnetsMedlemskap() = Vilkaar(
     hovedvilkaar = Hovedvilkaar(
         type = VilkaarType.FORTSATT_MEDLEMSKAP,
         paragraf = Paragraf(
             paragraf = "§ 18-3",
             ledd = 1,
-            tittel = "Fortsatt medlemskap",
+            tittel = "Barnets medlemskap",
             lenke = Kapittel18.PARAGRAF_18_3.lenke,
-            lovtekst = "Det er et vilkår for at et barn skal ha rett til pensjon, at det fortsatt er medlem i trygden."
+            lovtekst = "Barnet er medlem i trygden (fra virkningstidspunkt)"
         )
     ),
     unntaksvilkaar = listOf(
@@ -198,9 +195,9 @@ private fun alderBarn(soeker: Grunnlagsdata<JsonNode>?, avdoed: Grunnlagsdata<Js
             paragraf = Paragraf(
                 paragraf = "§ 18-4",
                 ledd = 1,
-                tittel = "Stønadssituasjonen – barnets alder",
+                tittel = "Barnets alder",
                 lenke = Kapittel18.PARAGRAF_18_4.lenke,
-                lovtekst = "Pensjon ytes inntil barnet fyller 18 år."
+                lovtekst = "Barnet er under 18 år (på virkningstidspunkt)"
             )
         ),
         unntaksvilkaar = listOf(
@@ -218,8 +215,7 @@ private fun doedsfallForelder() = Vilkaar(
             ledd = 2,
             tittel = "Dødsfall forelder",
             lenke = Kapittel18.PARAGRAF_18_4.lenke,
-            lovtekst = "Barnepensjon ytes dersom en av foreldrene eller begge er døde. " +
-                "Bestemmelsen i § 17-2 andre ledd om forsvunnet ektefelle gjelder tilsvarende."
+            lovtekst = "En eller begge foreldrene er registrert død"
         )
     )
 )
@@ -245,17 +241,8 @@ private fun yrkesskadeAvdoed() = Vilkaar(
             paragraf = "§ 18-11",
             ledd = 1,
             lenke = Kapittel18.PARAGRAF_18_11.lenke,
-            tittel = "Dødsfall som skyldes yrkesskade",
-            lovtekst = "Ved dødsfall som skyldes en skade eller sykdom som går inn under kapittel 13, ytes det " +
-                "barnepensjon etter følgende særbestemmelser:\n" +
-                "\n" +
-                "a.\tVilkåret i § 18-2 om forutgående medlemskap gjelder ikke.\n" +
-                "b.\tVilkåret i § 18-3 om fortsatt medlemskap gjelder ikke.\n" +
-                "c.\tBestemmelsene i § 18-5 om reduksjon på grunn av manglende trygdetid gjelder ikke.\n" +
-                "d.\tDersom barnet har utdanning som hovedbeskjeftigelse, ytes det pensjon inntil barnet fyller " +
-                "21 år.\n" +
-                "e.\tTil praktikanter og lærlinger ytes det barnepensjon inntil barnet fyller 21 år, dersom " +
-                "arbeidsinntekten etter fradrag for skatt er mindre enn grunnbeløpet pluss særtillegg for enslige"
+            tittel = "Yrkesskade",
+            lovtekst = "Dødsfallet skyldes en godkjent yrkes-skade/sykdom"
         )
     )
 )

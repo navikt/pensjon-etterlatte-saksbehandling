@@ -16,6 +16,7 @@ import { Vurdering } from './Vurdering'
 import { VurderingsResultat as VurderingsresultatOld } from '../../../store/reducers/BehandlingReducer'
 import { StatusIcon } from '../../../shared/icons/statusIcon'
 import { VilkaarGrunnlagsStoette } from './vilkaar/VilkaarGrunnlagsStoette'
+import { Link } from '@navikt/ds-react'
 
 export interface VilkaarProps {
   vilkaar: Vilkaar
@@ -52,16 +53,13 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
             <VilkaarColumn>
               <Title>
                 <StatusIcon status={status()} noLeftPadding />
-                {vilkaar.hovedvilkaar.paragraf.tittel}
+                <Link href={vilkaar.hovedvilkaar.paragraf.lenke} target="_blank" rel="noopener noreferrer">
+                  {vilkaar.hovedvilkaar.paragraf.paragraf} {vilkaar.hovedvilkaar.paragraf.tittel}
+                </Link>
               </Title>
 
               <Lovtekst>
-                <p>
-                  <a href={vilkaar.hovedvilkaar.paragraf.lenke} target="_blank" rel="noopener noreferrer">
-                    {vilkaar.hovedvilkaar.paragraf.paragraf}
-                  </a>
-                  : {vilkaar.hovedvilkaar.paragraf.lovtekst}
-                </p>
+                <p>{vilkaar.hovedvilkaar.paragraf.lovtekst}</p>
               </Lovtekst>
             </VilkaarColumn>
             <VilkaarGrunnlagsStoette vilkaar={vilkaar} />

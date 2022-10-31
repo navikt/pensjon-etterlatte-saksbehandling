@@ -90,14 +90,14 @@ internal class VilkaarsvurderingRoutesTest {
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(behandlingId, vilkaarsvurdering.behandlingId)
-            assertEquals(VilkaarType.FORMAAL, vilkaar.hovedvilkaar.type)
-            assertEquals("§ 18-1", vilkaar.hovedvilkaar.paragraf.paragraf)
-            assertEquals("Formål", vilkaar.hovedvilkaar.paragraf.tittel)
+            assertEquals(VilkaarType.DOEDSFALL_FORELDER, vilkaar.hovedvilkaar.type)
+            assertEquals("§ 18-4", vilkaar.hovedvilkaar.paragraf.paragraf)
+            assertEquals("Dødsfall forelder", vilkaar.hovedvilkaar.paragraf.tittel)
             assertEquals(
-                "Formålet med barnepensjon er å sikre inntekt for barn når en av foreldrene eller begge er døde.",
+                "En eller begge foreldrene er registrert død",
                 vilkaar.hovedvilkaar.paragraf.lovtekst
             )
-            assertEquals("https://lovdata.no/lov/1997-02-28-19/%C2%A718-1", vilkaar.hovedvilkaar.paragraf.lenke)
+            assertEquals("https://lovdata.no/lov/1997-02-28-19/%C2%A718-4", vilkaar.hovedvilkaar.paragraf.lenke)
             assertNull(vilkaar.vurdering)
         }
     }
@@ -111,7 +111,7 @@ internal class VilkaarsvurderingRoutesTest {
 
             val vurdertVilkaarDto = VurdertVilkaarDto(
                 hovedvilkaar = VilkaarTypeOgUtfall(
-                    VilkaarType.FORMAAL,
+                    VilkaarType.DOEDSFALL_FORELDER,
                     Utfall.OPPFYLT
                 ),
                 unntaksvilkaar = null,
@@ -213,7 +213,7 @@ internal class VilkaarsvurderingRoutesTest {
 
             val vurdertVilkaarDto = VurdertVilkaarDto(
                 hovedvilkaar = VilkaarTypeOgUtfall(
-                    type = VilkaarType.FORMAAL,
+                    type = VilkaarType.DOEDSFALL_FORELDER,
                     resultat = Utfall.OPPFYLT
                 ),
                 kommentar = "Søker oppfyller vilkåret"

@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { format } from 'date-fns'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { VilkaarsVurderingKnapper } from '../handlinger/vilkaarsvurderingKnapper'
 import {
@@ -15,6 +14,7 @@ import { ISvar, VurderingsResultat } from '../../../store/reducers/BehandlingRed
 import { svarTilTotalResultat } from './utils'
 import { Delete } from '@navikt/ds-icons'
 import { StatusIcon } from '../../../shared/icons/statusIcon'
+import { formaterStringDato } from '../../../utils/formattering'
 
 type Props = {
   dato: string
@@ -22,7 +22,7 @@ type Props = {
   oppdaterVilkaar: (vilkaarsvurdering?: Vilkaarsvurdering) => void
   behandlingId: string
 }
-const MIN_KOMMENTAR_LENGDE = 10
+const MIN_KOMMENTAR_LENGDE = 1
 
 export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVilkaar, behandlingId }) => {
   const [svar, setSvar] = useState<ISvar>()
@@ -46,7 +46,7 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
       ? setRadioError('Du må svare på om vilkårsvurderingen er oppfylt')
       : setRadioError(undefined)
     !(kommentar.length >= MIN_KOMMENTAR_LENGDE)
-      ? setKommentarError('Begrunnelsen må være minst 10 tegn')
+      ? setKommentarError('Begrunnelse er påkrevet')
       : setKommentarError(undefined)
 
     if (
@@ -91,7 +91,9 @@ export const Resultat: React.FC<Props> = ({ dato, vilkaarsvurdering, oppdaterVil
             <TekstWrapper>
               <StatusIcon status={status} noLeftPadding /> {`${resultatTekst()}`}
             </TekstWrapper>
-            <BodyShort>Barnepensjon er innvilget f.o.m {format(new Date(dato), 'dd.MM.yyyy')}</BodyShort>
+            {vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT && (
+              <BodyShort>Barnepensjon er innvilget f.o.m {formaterStringDato(dato)}</BodyShort>
+            )}
             <Kommentar>
               <Heading size="xsmall">Begrunnelse</Heading>
               <BodyShort size="small">{vilkaarsvurdering.resultat.kommentar}</BodyShort>

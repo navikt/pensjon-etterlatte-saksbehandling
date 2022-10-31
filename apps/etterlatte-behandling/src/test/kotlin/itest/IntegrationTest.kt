@@ -22,6 +22,7 @@ import io.ktor.server.auth.Authentication
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.CommonFactory
 import no.nav.etterlatte.behandling.BehandlingsBehov
+import no.nav.etterlatte.behandling.FastsettVirkningstidspunktJson
 import no.nav.etterlatte.behandling.HendelseDao
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.VedtakHendelse
@@ -161,6 +162,20 @@ class ApplicationTest {
                 assertEquals("innsender", behandling.innsender)
                 assertEquals(VurderingsResultat.OPPFYLT, behandling.gyldighetsproeving?.resultat)
             }
+
+            client.post("/behandlinger/$behandlingId/virkningstidspunkt") {
+                addAuthSaksbehandler()
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    FastsettVirkningstidspunktJson(
+                        behandlingId,
+                        LocalDate.parse("2022-01-01")
+                    )
+                )
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
             client.post("/behandlinger/$behandlingId/hendelser/vedtak/FATTET") {
                 addAuthSaksbehandler()
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())

@@ -15,10 +15,12 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
@@ -76,7 +78,10 @@ internal class RealFoerstegangsbehandlingServiceTest {
             ),
             gyldighetsproeving = null,
             oppgaveStatus = OppgaveStatus.NY,
-            virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2022, 1))
+            virkningstidspunkt = Virkningstidspunkt(
+                YearMonth.of(2022, 1),
+                Grunnlagsopplysning.Saksbehandler("ident", Instant.now())
+            )
         )
 
         assertEquals("Soeker", sut.hentFoerstegangsbehandling(id).persongalleri.innsender)
@@ -109,7 +114,10 @@ internal class RealFoerstegangsbehandlingServiceTest {
             ),
             gyldighetsproeving = null,
             oppgaveStatus = OppgaveStatus.NY,
-            virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2022, 1))
+            virkningstidspunkt = Virkningstidspunkt(
+                YearMonth.of(2022, 1),
+                Grunnlagsopplysning.Saksbehandler("ident", Instant.now())
+            )
         )
 
         val persongalleri = Persongalleri(

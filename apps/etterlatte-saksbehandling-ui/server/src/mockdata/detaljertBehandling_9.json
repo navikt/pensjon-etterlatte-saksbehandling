@@ -9,14 +9,8 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": [
-              "22128202440",
-              "03108718357"
-            ],
-            "foreldre": [
-              "22128202440",
-              "03108718357"
-            ],
+            "ansvarligeForeldre": ["22128202440", "03108718357"],
+            "foreldre": ["22128202440", "03108718357"],
             "barn": null
           },
           "innsender": {
@@ -36,14 +30,8 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": [
-              "22128202440",
-              "03108718357"
-            ],
-            "foreldre": [
-              "22128202440",
-              "03108718357"
-            ],
+            "ansvarligeForeldre": ["22128202440", "03108718357"],
+            "foreldre": ["22128202440", "03108718357"],
             "barn": null
           },
           "innsender": {
@@ -395,14 +383,8 @@
               "utflyttingFraNorge": []
             },
             "familieRelasjon": {
-              "ansvarligeForeldre": [
-                "22128202440",
-                "03108718357"
-              ],
-              "foreldre": [
-                "22128202440",
-                "03108718357"
-              ],
+              "ansvarligeForeldre": ["22128202440", "03108718357"],
+              "foreldre": ["22128202440", "03108718357"],
               "barn": null
             },
             "avdoedesBarn": null,
@@ -429,7 +411,10 @@
   "datoattestert": null,
   "attestant": null,
   "soeknadMottattDato": "2022-04-14T14:37:24.573613",
-  "virkningstidspunkt": "2022-03-01",
+  "virkningstidspunkt": {
+    "dato": "2022-03-01",
+    "kilde": { "ident": "Z994641", "tidspunkt": "2022-09-01T08:14:45.259402121Z" }
+  },
   "status": "UNDER_BEHANDLING",
   "hendelser": [
     {
@@ -669,10 +654,7 @@
         "familieRelasjon": {
           "ansvarligeForeldre": null,
           "foreldre": null,
-          "barn": [
-            "12101376212",
-            "03108718357"
-          ]
+          "barn": ["12101376212", "03108718357"]
         }
       }
     }

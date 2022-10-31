@@ -18,7 +18,6 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Timestamp
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.time.ZoneId
 import java.util.*
 
@@ -172,7 +171,7 @@ class BehandlingDao(private val connection: () -> Connection) {
         status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
         type = rs.getString("behandlingstype").let { BehandlingType.valueOf(it) },
         oppgaveStatus = rs.getString("oppgave_status")?.let { OppgaveStatus.valueOf(it) },
-        virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { Virkningstidspunkt(YearMonth.parse(it)) }
+        virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) }
     )
 
     private fun hentPersongalleri(rs: ResultSet): Persongalleri = Persongalleri(
@@ -259,7 +258,10 @@ class BehandlingDao(private val connection: () -> Connection) {
                 stmt.setString(12, soesken.toJson())
             }
             stmt.setString(13, oppgaveStatus?.name)
-            stmt.setString(14, virkningstidspunkt?.dato?.toString())
+            stmt.setString(
+                14,
+                foerstegangsbehandling.hentVirkningstidspunkt()?.let { objectMapper.writeValueAsString(it) }
+            )
         }
         stmt.executeUpdate()
     }
@@ -451,6 +453,12 @@ class BehandlingDao(private val connection: () -> Connection) {
             oppgaveStatus = OppgaveStatus.LUKKET,
             sistEndret = LocalDateTime.now()
         )
+    }
+
+    fun lagreNyttVirkningstidspunkt(behandlingId: UUID, virkningstidspunkt: Virkningstidspunkt) {
+        val statement = connection().prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
+        statement.setString(1, objectMapper.writeValueAsString(virkningstidspunkt))
+        statement.setObject(2, behandlingId)
     }
 }
 

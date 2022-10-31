@@ -24,7 +24,7 @@ export const SideMeny = () => {
         status: behandling.status,
         saksbehandler: behandling.saksbehandlerId,
         attestant: behandling.attestant,
-        virkningsdato: behandling.virkningstidspunkt,
+        virkningsdato: behandling.virkningstidspunkt?.dato,
         datoFattet: behandling.datoFattet,
         datoAttestert: behandling.datoAttestert,
         underkjentLogg: underkjentHendelser,

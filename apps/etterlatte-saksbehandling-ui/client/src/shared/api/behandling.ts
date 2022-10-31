@@ -1,5 +1,5 @@
 import { IApiResponse } from './types'
-import { IDetaljertBehandling } from '../../store/reducers/BehandlingReducer'
+import { IDetaljertBehandling, Virkningstidspunkt } from '../../store/reducers/BehandlingReducer'
 import { apiClient, ApiResponse } from './apiClient'
 
 const path = process.env.REACT_APP_VEDTAK_URL
@@ -21,6 +21,10 @@ export const avbrytBehandling = async (behandlingsid: string): Promise<IApiRespo
     console.log(e)
     return { status: 500 }
   }
+}
+
+export const fastsettVirkningstidspunkt = async (id: string, dato: Date): Promise<ApiResponse<Virkningstidspunkt>> => {
+  return apiClient.post(`/behandling/${id}/virkningstidspunkt`, { dato })
 }
 
 export const fattVedtak = async (behandlingsId: string): Promise<IApiResponse<any>> => {

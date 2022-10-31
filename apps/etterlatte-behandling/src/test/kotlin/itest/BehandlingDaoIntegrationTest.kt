@@ -11,6 +11,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.OppgaveStatus
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
@@ -30,7 +32,10 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertAll
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
@@ -563,5 +568,22 @@ internal class BehandlingDaoIntegrationTest {
         val alleLoependeBehandlinger = behandlingRepo.alleAktiveBehandlingerISak(sak1)
         assertEquals(4, lagredeBehandlinger.size)
         assertEquals(2, alleLoependeBehandlinger.size)
+    }
+
+    @Test
+    fun `skal lagre virkningstidspunkt for en behandling`() {
+        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON).id
+        val behandling = foerstegangsbehandling(sak = sak, status = BehandlingStatus.OPPRETTET)
+
+        val saksbehandler = Grunnlagsopplysning.Saksbehandler("saksbehandler", Instant.now())
+        behandling.oppdaterVirkningstidspunkt(LocalDate.parse("2022-01-01"), saksbehandler)
+
+        behandlingRepo.opprettFoerstegangsbehandling(behandling)
+
+        val expected = Virkningstidspunkt(YearMonth.of(2022, 1), saksbehandler)
+        with(behandlingRepo.hentBehandling(behandling.id)) {
+            val actual = (this as Foerstegangsbehandling).hentVirkningstidspunkt()
+            assertEquals(expected, actual)
+        }
     }
 }

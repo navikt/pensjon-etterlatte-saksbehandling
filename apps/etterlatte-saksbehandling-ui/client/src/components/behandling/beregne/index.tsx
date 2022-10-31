@@ -15,7 +15,9 @@ export const Beregne = () => {
   const { next } = useBehandlingRoutes()
   const behandling = useAppSelector((state) => state.behandlingReducer.behandling)
 
-  const virkningstidspunkt = formaterStringDato(behandling.virkningstidspunkt)
+  const virkningstidspunkt = behandling.virkningstidspunkt?.dato
+    ? formaterStringDato(behandling.virkningstidspunkt.dato)
+    : undefined
   const behandles = hentBehandlesFraStatus(behandling?.status)
   const vedtaksresultat = useVedtaksResultat()
 

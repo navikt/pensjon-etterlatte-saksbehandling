@@ -197,7 +197,7 @@ private fun alderBarn(soeker: Grunnlagsdata<JsonNode>?, avdoed: Grunnlagsdata<Js
                 ledd = 1,
                 tittel = "Barnets alder",
                 lenke = Kapittel18.PARAGRAF_18_4.lenke,
-                lovtekst = "Pensjon ytes inntil barnet fyller 18 år."
+                lovtekst = "Barnet er under 18 år (på virkningstidspunkt)"
             )
         ),
         unntaksvilkaar = listOf(
@@ -215,8 +215,7 @@ private fun doedsfallForelder() = Vilkaar(
             ledd = 2,
             tittel = "Dødsfall forelder",
             lenke = Kapittel18.PARAGRAF_18_4.lenke,
-            lovtekst = "Barnepensjon ytes dersom en av foreldrene eller begge er døde. " +
-                "Bestemmelsen i § 17-2 andre ledd om forsvunnet ektefelle gjelder tilsvarende."
+            lovtekst = "En eller begge foreldrene er registrert død"
         )
     )
 )

@@ -8,13 +8,7 @@ import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingsType } from '../fargetags/behandlingsType'
 import { SaksType, ISaksType } from '../fargetags/saksType'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import {
-  ferdigstillBrev,
-  hentBrevForBehandling,
-  hentDokumenter,
-  Mottaker,
-  slettBrev,
-} from '../../../shared/api/brev'
+import { ferdigstillBrev, hentBrevForBehandling, hentDokumenter, Mottaker, slettBrev } from '../../../shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 import { Journalpost } from '../types'

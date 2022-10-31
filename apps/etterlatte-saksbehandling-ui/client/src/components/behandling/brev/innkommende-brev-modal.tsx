@@ -30,7 +30,7 @@ export default function InnkommendeBrevModal({
   const open = (journalpostId: string, dokumentInfoId: string) => {
     setIsOpen(true)
 
-      hentDokumentPDF(journalpostId, dokumentInfoId)
+    hentDokumentPDF(journalpostId, dokumentInfoId)
       .then((file) => URL.createObjectURL(file))
       .then((url) => setFileURL(url))
       .catch((e) => setError(e.message))

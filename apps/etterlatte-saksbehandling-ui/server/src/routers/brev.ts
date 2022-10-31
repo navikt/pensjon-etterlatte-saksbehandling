@@ -152,31 +152,31 @@ router.post('/forhaandsvisning', async (req: Request, res: Response, next: NextF
 })
 
 router.get('/dokumenter/:fnr', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const path = `${apiUrl}/brev/dokumenter/${req.params.fnr}`
-        const response = await fetch(path)
-        const json = await response.json()
-        res.send(json)
-    } catch (e) {
-        next(e)
-    }
+  try {
+    const path = `${apiUrl}/brev/dokumenter/${req.params.fnr}`
+    const response = await fetch(path)
+    const json = await response.json()
+    res.send(json)
+  } catch (e) {
+    next(e)
+  }
 })
 
 router.post('/brev/dokumenter/:journalpostId/:dokumentInfoId', async (req: Request, res: Response, next) => {
-    try {
-        const path = `${apiUrl}/brev/dokumenter/${req.params.journalpostId}/${req.params.dokumentInfoId}`
-        const response = await fetch(path, { method: 'POST' })
-        const data = await response.buffer()
+  try {
+    const path = `${apiUrl}/brev/dokumenter/${req.params.journalpostId}/${req.params.dokumentInfoId}`
+    const response = await fetch(path, { method: 'POST' })
+    const data = await response.buffer()
 
-        if (response.status == 200) {
-            res.contentType('application/pdf')
-            res.send(data)
-        } else {
-            res.sendStatus(response.status)
-        }
-    } catch (e) {
-        next(e)
+    if (response.status == 200) {
+      res.contentType('application/pdf')
+      res.send(data)
+    } else {
+      res.sendStatus(response.status)
     }
+  } catch (e) {
+    next(e)
+  }
 })
 
 export default router

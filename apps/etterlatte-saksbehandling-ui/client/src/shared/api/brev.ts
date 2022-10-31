@@ -9,7 +9,12 @@ export const hentMottakere = async (): Promise<any> => await fetch(`${path}/brev
 export const hentBrevForBehandling = async (behandlingId: string): Promise<any> =>
   await fetch(`${path}/brev/behandling/${behandlingId}`).then((res) => res.json())
 
-export const nyttBrevForBehandling = async (behandlingId: string, mottaker: Mottaker, mal: any, enhet: string): Promise<any> =>
+export const nyttBrevForBehandling = async (
+  behandlingId: string,
+  mottaker: Mottaker,
+  mal: any,
+  enhet: string
+): Promise<any> =>
   await fetch(`${path}/brev/behandling/${behandlingId}`, {
     method: 'POST',
     body: JSON.stringify({ mottaker, mal, enhet }),
@@ -83,14 +88,13 @@ export const hentDokumenter = async (fnr: string): Promise<JournalpostResponse> 
 export const hentDokumentPDF = async (journalpostId: string, dokumentInfoId: string): Promise<Blob> =>
   await fetch(`${path}/brev/dokumenter/${journalpostId}/${dokumentInfoId}`, { method: 'POST' })
     .then((res) => {
-        if (res.status == 200) {
-            return res.arrayBuffer()
-        } else {
-            throw Error(res.statusText)
-        }
+      if (res.status == 200) {
+        return res.arrayBuffer()
+      } else {
+        throw Error(res.statusText)
+      }
     })
     .then((buffer) => new Blob([buffer], { type: 'application/pdf' }))
-
 
 export interface Mottaker {
   foedselsnummer?: string
@@ -107,6 +111,6 @@ export interface Adresse {
 }
 
 export interface Mal {
-    tittel: string
-    navn: string
+  tittel: string
+  navn: string
 }

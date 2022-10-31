@@ -53,7 +53,7 @@ class VilkaarsvurderingRepositoryImpl(private val ds: DataSource) : Vilkaarsvurd
                         "vilkaar" to vilkaarsvurdering.vilkaar.toJson(),
                         "resultat" to vilkaarsvurdering.resultat?.toJson()
                     )
-                ).let { tx.run(it.asExecute) }
+                ).let { tx.run(it.asUpdate) }
             }
         }
         return vilkaarsvurdering
